@@ -14,7 +14,9 @@ const STARTERS = [
 /** Ask GetRentos for property managers: the firm's owners, occupancy, rent, arrears, maintenance and queries. */
 export const ManagerAssistant = () => (
   <AssistantChat
-    ask={(question, history) => unwrap(agencyAssistantService.ask(question, history))}
+    ask={(question, history, language) =>
+      unwrap(agencyAssistantService.ask(question, history, language))
+    }
     starters={STARTERS}
     scope="Questions about your firm's owners, occupancy, rent collection, arrears, maintenance and owner queries."
     placeholder="Ask about rent, arrears or owner queries"

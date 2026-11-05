@@ -14,7 +14,9 @@ const STARTERS = [
 /** Ask GetRentos for field agents: tasks, inspections, verifications, work orders and clients. */
 export const AgentAssistant = () => (
   <AssistantChat
-    ask={(question, history) => unwrap(agentService.askAssistant(question, history))}
+    ask={(question, history, language) =>
+      unwrap(agentService.askAssistant(question, history, language))
+    }
     starters={STARTERS}
     scope="Questions about your tasks, inspections, verifications, work orders and clients."
     placeholder="Ask about tasks, inspections or work orders"

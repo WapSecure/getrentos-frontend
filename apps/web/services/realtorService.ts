@@ -1,3 +1,4 @@
+import type { ReplyLanguage } from '@/lib/replyLanguage';
 import { authFetch, safeCall, toQuery } from '@/lib/apiHelpers';
 import type { ApiResponse, Paginated } from '@/lib/apiHelpers';
 import type { AssistantReply, AssistantTurn } from '@/types/assistant';
@@ -359,12 +360,13 @@ export function mapRealtorOffer(offer: RealtorOfferApi): RealtorOffer {
 export const realtorService = {
   askAssistant: (
     question: string,
-    history: AssistantTurn[]
+    history: AssistantTurn[],
+    language?: ReplyLanguage
   ): Promise<ApiResponse<AssistantReply>> =>
     safeCall(() =>
       authFetch('/realtor/assistant/ask', {
         method: 'POST',
-        body: JSON.stringify({ question, history }),
+        body: JSON.stringify({ question, history, language }),
       })
     ),
   getDashboard: (): Promise<ApiResponse<RealtorDashboardStats>> =>

@@ -1,3 +1,5 @@
+import type { ReplyLanguage } from '@/lib/replyLanguage';
+
 export interface AssistantTurn {
   role: 'user' | 'assistant';
   content: string;
@@ -14,6 +16,10 @@ export interface AssistantReply {
   suggestions: string[];
   source: 'ai' | 'heuristic';
   model: string | null;
+  /** The language the answer is in; rule-based answers are English. */
+  language?: ReplyLanguage;
+  /** The language that was asked for. */
+  requestedLanguage?: ReplyLanguage;
 }
 
 /** Kept for existing imports. */

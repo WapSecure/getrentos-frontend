@@ -14,7 +14,9 @@ const STARTERS = [
 /** Ask GetRentos for realtors: listings, offers, leads, viewings, clients and commissions. */
 export const RealtorAssistant = () => (
   <AssistantChat
-    ask={(question, history) => unwrap(realtorService.askAssistant(question, history))}
+    ask={(question, history, language) =>
+      unwrap(realtorService.askAssistant(question, history, language))
+    }
     starters={STARTERS}
     scope="Questions about your listings, offers, leads, viewings, clients and commissions."
     placeholder="Ask about offers, leads or commissions"

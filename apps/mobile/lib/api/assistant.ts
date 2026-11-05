@@ -1,4 +1,5 @@
 import { apiFetch } from './client';
+import type { ReplyLanguage } from '../replyLanguage';
 
 export interface AssistantTurn {
   role: 'user' | 'assistant';
@@ -16,6 +17,9 @@ export interface RenterAssistantReply {
   suggestions: string[];
   source: 'ai' | 'heuristic';
   model: string | null;
+  /** The language the answer is in; rule-based answers are English. */
+  language?: ReplyLanguage;
+  requestedLanguage?: ReplyLanguage;
 }
 
 export type AssistantPersona =
@@ -36,13 +40,14 @@ export const assistantApi = {
     question: string,
     history: AssistantTurn[],
     persona: AssistantPersona = 'renter',
-    estateId?: string
+    estateId?: string,
+    language: ReplyLanguage = 'en'
   ) =>
     apiFetch<RenterAssistantReply>(
       persona === 'estate' ? `/estate/${estateId}/assistant/ask` : `/${persona}/assistant/ask`,
       {
         method: 'POST',
-        body: { question, history },
+        body: { question, history, language },
       }
     ),
 };

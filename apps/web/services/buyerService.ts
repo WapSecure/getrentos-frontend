@@ -1,3 +1,4 @@
+import type { ReplyLanguage } from '@/lib/replyLanguage';
 import { authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
 import type {
   BuyerPropertyListing,
@@ -176,11 +177,11 @@ const VIEWING_STATUS_QUERY: Record<ViewingRequest['status'], string> = {
 };
 
 export const buyerService = {
-  askAssistant: (question: string, history: AssistantTurn[]) =>
+  askAssistant: (question: string, history: AssistantTurn[], language?: ReplyLanguage) =>
     safeCall<AssistantReply>(() =>
       authFetch('/buyer/assistant/ask', {
         method: 'POST',
-        body: JSON.stringify({ question, history }),
+        body: JSON.stringify({ question, history, language }),
       })
     ),
   // Dashboard

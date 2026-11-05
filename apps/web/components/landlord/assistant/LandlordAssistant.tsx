@@ -14,7 +14,9 @@ const STARTERS = [
 /** Ask GetRentos for landlords: arrears, leases, repairs, applications and occupancy. */
 export const LandlordAssistant = () => (
   <AssistantChat
-    ask={(question, history) => unwrap(landlordService.askAssistant(question, history))}
+    ask={(question, history, language) =>
+      unwrap(landlordService.askAssistant(question, history, language))
+    }
     starters={STARTERS}
     scope="Questions about your rent and arrears, leases, repairs, applications, viewings and occupancy."
     placeholder="Ask about rent, leases or repairs"
