@@ -36,9 +36,12 @@ export function AttentionFeed({
     staleTime: 60_000,
   });
 
+  // The feed sits between a page header and the first content section on
+  // dashboards that space sections with their own margins, so it carries its
+  // own; under a space-y parent the class margin wins and nothing doubles.
   if (isLoading) {
     return (
-      <Card className="p-4 space-y-2">
+      <Card className="mb-6 p-4 space-y-2">
         <Skeleton className="h-4 w-40" />
         <Skeleton className="h-10 w-full" />
       </Card>
@@ -47,7 +50,7 @@ export function AttentionFeed({
   if (!data?.items.length) return null;
 
   return (
-    <Card className="p-4" aria-labelledby="attention-title">
+    <Card className="mb-6 p-4" aria-labelledby="attention-title">
       <h2 id="attention-title" className="text-sm font-semibold text-foreground mb-2">
         Needs your attention
       </h2>
