@@ -170,6 +170,15 @@ export interface Unit {
 
 export type WorkOrderView = 'open' | 'resolved' | 'cancelled';
 
+/** Worked out by GetRentos before approving a vendor's invoice. */
+export interface InvoiceCheck {
+  invoiceId: string;
+  checks: { level: 'ok' | 'watch' | 'concern'; text: string }[];
+  summary: string;
+  questions: string[];
+  disclaimer: string;
+}
+
 export const homeCareApi = {
   dashboard: () => apiFetch<HomeCareDashboard>('/home-management/dashboard'),
 
@@ -255,6 +264,9 @@ export const homeCareApi = {
     }),
   submitInvoice: (invoiceId: string) =>
     apiFetch<Invoice>(`/home-management/invoices/${invoiceId}/submit`, { method: 'POST' }),
+  /** Checks on an invoice before approving it. Read-only. */
+  checkInvoice: (invoiceId: string) =>
+    apiFetch<InvoiceCheck>(`/home-management/invoices/${invoiceId}/check`),
   approveInvoice: (invoiceId: string) =>
     apiFetch<Invoice>(`/home-management/invoices/${invoiceId}/approve`, { method: 'POST' }),
   rejectInvoice: (invoiceId: string, reason: string) =>
