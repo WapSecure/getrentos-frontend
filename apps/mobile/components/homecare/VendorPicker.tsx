@@ -15,7 +15,7 @@ import {
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { qk } from '@/lib/query/keys';
 import { homeCareApi } from '@/lib/api/homeCare';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { Sheet } from '@/components/Sheet';
 
 /** Choose one of your vendors, or add one without leaving the form. */
@@ -120,11 +120,7 @@ function AddVendor({ onAdded }: { onAdded: (id: string) => void }) {
           keyboardType="phone-pad"
         />
         {add.error ? (
-          <FormAlert
-            message={
-              add.error instanceof ApiError ? add.error.message : 'Could not add the vendor.'
-            }
-          />
+          <FormAlert message={errorMessage(add.error, 'Could not add the vendor.')} />
         ) : null}
         <Button
           label="Add vendor"

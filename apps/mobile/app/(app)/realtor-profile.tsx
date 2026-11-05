@@ -19,7 +19,7 @@ import {
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { realtorApi, type RealtorProfile } from '@/lib/api/realtor';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { pickImage } from '@/lib/filePicker';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
@@ -87,8 +87,7 @@ function ProfileForm({ initial }: { initial: RealtorProfile }) {
       qc.invalidateQueries({ queryKey: qk.security });
       toast.show('Profile saved.', 'success');
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not save your profile.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not save your profile.'), 'error'),
   });
 
   const avatar = useMutation({
@@ -101,8 +100,7 @@ function ProfileForm({ initial }: { initial: RealtorProfile }) {
       qc.setQueryData(qk.realtor.profile, saved);
       toast.show('Photo updated.', 'success');
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not update your photo.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not update your photo.'), 'error'),
   });
   const photo = initial.avatarUrl;
 

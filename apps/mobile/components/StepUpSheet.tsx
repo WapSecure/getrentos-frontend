@@ -4,7 +4,7 @@ import { ShieldCheck } from 'lucide-react-native';
 import { Button, FormAlert, OtpInput, PasswordField, Text, useTheme } from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { securityApi, type StepUpMethod } from '@/lib/api/security';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { authenticatePasskey } from '@/lib/passkey';
 import { registerStepUpPrompt, rememberStepUpToken } from '@/lib/stepUp';
 
@@ -57,7 +57,7 @@ export function StepUpSheet() {
     try {
       await fn();
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : 'That didn’t work. Try again.');
+      setError(errorMessage(e, 'That didn’t work. Try again.'));
     } finally {
       setBusy(false);
     }

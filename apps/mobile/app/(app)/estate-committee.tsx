@@ -20,7 +20,6 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
-import { errorText } from '@/components/estate/EstateUI';
 import { HouseholdPicker } from '@/components/estate/HouseholdPicker';
 import { Sheet } from '@/components/Sheet';
 import { useEstate } from '@/hooks/useEstate';
@@ -37,6 +36,7 @@ import {
 import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { goBack } from '@/lib/goBack';
+import { errorMessage } from '@/lib/api/client';
 
 type Panel = { kind: 'appoint' } | { kind: 'edit'; member: CommitteeMember } | null;
 
@@ -249,7 +249,7 @@ function AppointForm({
         />
       ) : null}
       {appoint.error ? (
-        <FormAlert message={errorText(appoint.error, 'Could not appoint this household.')} />
+        <FormAlert message={errorMessage(appoint.error, 'Could not appoint this household.')} />
       ) : null}
       <Button
         label={sitting ? 'Change title' : 'Appoint'}
@@ -308,7 +308,7 @@ function EditForm({
       <TitlePicker value={title} onChange={setTitle} />
       {retitle.error || remove.error ? (
         <FormAlert
-          message={errorText(retitle.error ?? remove.error, 'Could not update the committee.')}
+          message={errorMessage(retitle.error ?? remove.error, 'Could not update the committee.')}
         />
       ) : null}
       <Button

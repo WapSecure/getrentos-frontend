@@ -14,7 +14,7 @@ import {
 import { Sheet } from '@/components/Sheet';
 import { qk } from '@/lib/query/keys';
 import { messagesApi } from '@/lib/api/messages';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 
 interface Props {
   open: boolean;
@@ -45,8 +45,7 @@ function MessageReminderForm({ onClose }: { onClose: () => void }) {
       toast.show('Reminder set.', 'success');
       onClose();
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not set that reminder.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not set that reminder.'), 'error'),
   });
 
   return (

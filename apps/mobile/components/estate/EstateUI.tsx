@@ -28,13 +28,10 @@ import {
   type Household,
   type ManagedEstate,
 } from '@/lib/api/estateManager';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { haptics } from '@/lib/haptics';
 import { Sheet } from '@/components/Sheet';
 import { StatusPill, isUpgradeError } from '@/components/host/HostUI';
-
-export const errorText = (e: unknown, fallback: string) =>
-  e instanceof ApiError ? e.message : fallback;
 
 const naira = (n: number) => `₦${Math.round(n).toLocaleString('en-NG')}`;
 
@@ -371,10 +368,10 @@ function HouseholdForm({
           <FormAlert
             tone="warning"
             title="Household limit reached"
-            message={errorText(save.error, 'Upgrade to add more households.')}
+            message={errorMessage(save.error, 'Upgrade to add more households.')}
           />
         ) : (
-          <FormAlert message={errorText(save.error, 'Could not save this household.')} />
+          <FormAlert message={errorMessage(save.error, 'Could not save this household.')} />
         )
       ) : null}
       <Button
@@ -455,7 +452,7 @@ function LinkResidentForm({
         autoFocus
       />
       {link.error ? (
-        <FormAlert message={errorText(link.error, 'Could not link that account.')} />
+        <FormAlert message={errorMessage(link.error, 'Could not link that account.')} />
       ) : null}
       <Button
         label="Link account"
@@ -593,7 +590,7 @@ function AnnouncementForm({
         </Text>
       )}
       {save.error ? (
-        <FormAlert message={errorText(save.error, 'Could not send this announcement.')} />
+        <FormAlert message={errorMessage(save.error, 'Could not send this announcement.')} />
       ) : null}
       <Button
         label={

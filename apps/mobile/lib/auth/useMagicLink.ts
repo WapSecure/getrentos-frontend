@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import * as Linking from 'expo-linking';
 import { router } from 'expo-router';
 import { useToast } from '@getrentos/ui-native';
-import { ApiError } from '../api/client';
+import { errorMessage } from '../api/client';
 import { useAuth } from './AuthProvider';
 
 /**
@@ -39,7 +39,7 @@ export function useMagicLink() {
         else deps.current.toast.show('Signed in.', 'success');
       } catch (err) {
         deps.current.toast.show(
-          err instanceof ApiError ? err.message : 'That sign-in link is invalid or expired.',
+          errorMessage(err, 'That sign-in link is invalid or expired.'),
           'error'
         );
       }

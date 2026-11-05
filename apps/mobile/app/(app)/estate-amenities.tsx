@@ -19,7 +19,6 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
-import { errorText } from '@/components/estate/EstateUI';
 import { StatusPill } from '@/components/host/HostUI';
 import { Sheet } from '@/components/Sheet';
 import { useEstate } from '@/hooks/useEstate';
@@ -33,6 +32,7 @@ import { formatDate, formatTime } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { qk } from '@/lib/query/keys';
 import { goBack } from '@/lib/goBack';
+import { errorMessage } from '@/lib/api/client';
 
 type View_ = 'bookings' | 'amenities';
 
@@ -76,7 +76,7 @@ export default function EstateAmenities() {
     },
     onError: (e) => {
       refreshAll();
-      toast.show(errorText(e, 'Could not cancel this booking.'), 'error');
+      toast.show(errorMessage(e, 'Could not cancel this booking.'), 'error');
     },
   });
   const remove = useMutation({
@@ -88,7 +88,7 @@ export default function EstateAmenities() {
     },
     onError: (e) => {
       void haptics.error();
-      toast.show(errorText(e, 'Could not remove this amenity.'), 'error');
+      toast.show(errorMessage(e, 'Could not remove this amenity.'), 'error');
     },
   });
 
@@ -356,7 +356,7 @@ function AddForm({ estateId, onDone }: { estateId: string; onDone: () => void })
         hint="Opening hours, rules, how many people. Residents see this when booking."
       />
       {add.error ? (
-        <FormAlert message={errorText(add.error, 'Could not add this amenity.')} />
+        <FormAlert message={errorMessage(add.error, 'Could not add this amenity.')} />
       ) : null}
       <Button
         label="Add amenity"

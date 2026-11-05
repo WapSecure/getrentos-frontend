@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button, Chip, Text, TextField, useTheme, useToast } from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { landlordApi } from '@/lib/api/landlord';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 
 interface Props {
   open: boolean;
@@ -64,8 +64,7 @@ function AddVendorForm({
       toast.show('Vendor added.', 'success');
       onClose();
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not add that vendor.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not add that vendor.'), 'error'),
     onSettled: () => onSubmittingChange(false),
   });
 

@@ -15,7 +15,7 @@ import {
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { hostShortletsApi, type BlockedRange, type HostBooking } from '@/lib/api/hostShortlets';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import {
@@ -97,7 +97,7 @@ export default function HostCalendar() {
     },
     onError: (err) => {
       void haptics.error();
-      toast.show(err instanceof ApiError ? err.message : 'Could not block those dates.', 'error');
+      toast.show(errorMessage(err, 'Could not block those dates.'), 'error');
     },
   });
 
@@ -107,8 +107,7 @@ export default function HostCalendar() {
       toast.show('Dates reopened.', 'success');
       qc.invalidateQueries({ queryKey: qk.host.blocked(id) });
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not reopen those dates.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not reopen those dates.'), 'error'),
   });
 
   const onDay = useCallback(

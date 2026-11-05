@@ -27,7 +27,7 @@ import {
   type AuthorityStatus,
   type ManagedProperty,
 } from '@/lib/api/propertyAuthority';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
@@ -242,11 +242,7 @@ function ClaimForm() {
         multiline
       />
       {file.error ? (
-        <FormAlert
-          message={
-            file.error instanceof ApiError ? file.error.message : 'Could not file the claim.'
-          }
-        />
+        <FormAlert message={errorMessage(file.error, 'Could not file the claim.')} />
       ) : result ? (
         <FormAlert tone="success" message={result} />
       ) : null}

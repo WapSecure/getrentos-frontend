@@ -34,7 +34,7 @@ import {
   type RealtorViewing,
   type ViewingStatus,
 } from '@/lib/api/realtor';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { haptics } from '@/lib/haptics';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import {
@@ -230,7 +230,7 @@ function Viewings({ onAdd }: { onAdd: () => void }) {
         'success'
       );
     },
-    onError: (e) => toast.show(e instanceof ApiError ? e.message : 'Could not update it.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not update it.'), 'error'),
   });
 
   const act = (v: RealtorViewing) => {

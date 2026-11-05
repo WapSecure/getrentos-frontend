@@ -16,7 +16,7 @@ import { Sheet } from '@/components/Sheet';
 import { qk } from '@/lib/query/keys';
 import { buyerViewingsApi } from '@/lib/api/buyerViewings';
 import type { BuyerListingTarget } from '@/lib/api/buyer';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { localInstant } from '@/lib/api/realtor';
 import { viewingsApi } from '@/lib/api/viewings';
 
@@ -70,11 +70,7 @@ function RequestForm({ onClose, listing }: { onClose: () => void; listing: Buyer
       toast.show('Viewing requested.', 'success');
       onClose();
     },
-    onError: (err) =>
-      toast.show(
-        err instanceof ApiError ? err.message : 'Could not request this viewing.',
-        'error'
-      ),
+    onError: (err) => toast.show(errorMessage(err, 'Could not request this viewing.'), 'error'),
   });
 
   const canSubmit = !!scheduledAt;

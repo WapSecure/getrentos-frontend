@@ -5,7 +5,7 @@ import { Button, Text, useTheme, useToast } from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { SignaturePad } from '@/components/SignaturePad';
 import { landlordApi, type LandlordLease } from '@/lib/api/landlord';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate, formatNaira } from '@/lib/format';
 
 interface Props {
@@ -53,8 +53,7 @@ function SignForm({
       toast.show('Lease signed.', 'success');
       onClose();
     },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not sign that lease.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not sign that lease.'), 'error'),
     onSettled: () => onSubmittingChange(false),
   });
 

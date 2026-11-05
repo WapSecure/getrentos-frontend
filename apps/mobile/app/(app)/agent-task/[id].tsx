@@ -21,7 +21,7 @@ import {
   AGENT_TASK_TYPE_LABEL,
   type AgentTaskStatus,
 } from '@/lib/api/agent';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { goBack } from '@/lib/goBack';
 
@@ -41,8 +41,7 @@ export default function AgentTaskDetail() {
       qc.invalidateQueries({ queryKey: ['agent', 'tasks'] });
       qc.invalidateQueries({ queryKey: qk.agent.dashboard });
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not update this task.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not update this task.'), 'error'),
   });
 
   const confirmCancel = () => {

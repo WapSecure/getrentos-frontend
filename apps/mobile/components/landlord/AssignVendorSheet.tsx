@@ -15,7 +15,7 @@ import {
 import { Sheet } from '@/components/Sheet';
 import { qk } from '@/lib/query/keys';
 import { landlordApi, type LandlordMaintenance } from '@/lib/api/landlord';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 
 interface Props {
   open: boolean;
@@ -60,8 +60,7 @@ function AssignVendorBody({
       toast.show('Vendor assigned.', 'success');
       onClose();
     },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not assign that vendor.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not assign that vendor.'), 'error'),
     onSettled: () => onSubmittingChange(false),
   });
 

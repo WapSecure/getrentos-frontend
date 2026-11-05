@@ -20,7 +20,7 @@ import {
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { agentApi, type AgentWorkOrder, type AgentWorkOrderStatus } from '@/lib/api/agent';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { capturePhoto, pickPhoto } from '@/lib/filePicker';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
@@ -55,7 +55,7 @@ export default function AgentWorkOrders() {
       invalidate();
       toast.show('Work started.', 'success');
     },
-    onError: (e) => toast.show(e instanceof ApiError ? e.message : 'Unable to start.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Unable to start.'), 'error'),
   });
 
   const complete = useMutation({
@@ -67,7 +67,7 @@ export default function AgentWorkOrders() {
       setReport('');
       toast.show('Reported done — the owner can review it.', 'success');
     },
-    onError: (e) => toast.show(e instanceof ApiError ? e.message : 'Unable to complete.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Unable to complete.'), 'error'),
   });
 
   const addPhoto = async (id: string) => {
@@ -86,7 +86,7 @@ export default function AgentWorkOrders() {
       await agentApi.addWorkOrderPhoto(id, file);
       invalidate();
     } catch (e) {
-      toast.show(e instanceof ApiError ? e.message : 'Upload failed.', 'error');
+      toast.show(errorMessage(e, 'Upload failed.'), 'error');
     } finally {
       setUploadingId(null);
     }

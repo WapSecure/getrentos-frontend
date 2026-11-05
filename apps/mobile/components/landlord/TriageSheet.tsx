@@ -3,7 +3,7 @@ import { Switch, View } from 'react-native';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Badge, Button, Skeleton, Text, TextField, useTheme, useToast } from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
-import { ApiError } from '@/lib/api/client';
+import { ApiError, errorMessage } from '@/lib/api/client';
 import { landlordApi, type LandlordMaintenance } from '@/lib/api/landlord';
 import { triageApi } from '@/lib/api/triage';
 
@@ -84,8 +84,7 @@ function TriageBody({ request, onClose, onApplied }: Props & { request: Landlord
       }
       onClose();
     },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not save your decision.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not save your decision.'), 'error'),
   });
 
   if (triage.isLoading) {

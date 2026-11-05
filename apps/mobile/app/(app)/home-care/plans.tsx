@@ -35,7 +35,7 @@ import {
   type Category,
   type Plan,
 } from '@/lib/api/homeCare';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { daysUntil } from '@/lib/api/hostShortlets';
@@ -73,7 +73,7 @@ export default function Plans() {
       qc.invalidateQueries({ queryKey: ['home-care'] });
       toast.show(`Done. Next due ${formatDate(next.nextDueAt, 'medium')}.`, 'success');
     },
-    onError: (e) => toast.show(e instanceof ApiError ? e.message : 'Could not record it.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not record it.'), 'error'),
   });
 
   return (
@@ -286,9 +286,7 @@ function AddPlan({ onDone }: { onDone: () => void }) {
         />
         <VendorPicker value={vendorId} onChange={setVendorId} optional />
         {add.error ? (
-          <FormAlert
-            message={add.error instanceof ApiError ? add.error.message : 'Could not add the plan.'}
-          />
+          <FormAlert message={errorMessage(add.error, 'Could not add the plan.')} />
         ) : null}
         <Button
           label="Add plan"

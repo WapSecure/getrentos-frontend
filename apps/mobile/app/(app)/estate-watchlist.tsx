@@ -28,7 +28,6 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
-import { errorText } from '@/components/estate/EstateUI';
 import { ReasonSheet } from '@/components/homecare/ReasonSheet';
 import { StatusPill } from '@/components/host/HostUI';
 import { Sheet } from '@/components/Sheet';
@@ -47,6 +46,7 @@ import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { qk } from '@/lib/query/keys';
 import { goBack } from '@/lib/goBack';
+import { errorMessage } from '@/lib/api/client';
 
 type View_ = 'ACTIVE' | 'LIFTED' | 'ALL';
 
@@ -87,7 +87,7 @@ export default function EstateWatchlist() {
       toast.show(`${v.entry.label} is off the list.`, 'success');
       setLifting(null);
     },
-    onError: (e) => toast.show(errorText(e, 'Could not lift this entry.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not lift this entry.'), 'error'),
   });
 
   const refresh = (
@@ -410,7 +410,7 @@ function AddForm({ estateId, onDone }: { estateId: string; onDone: () => void })
         message="This affects a real person at your gate. Add someone only on something you can stand behind, and say why plainly."
       />
       {save.error ? (
-        <FormAlert message={errorText(save.error, 'Could not add this entry.')} />
+        <FormAlert message={errorMessage(save.error, 'Could not add this entry.')} />
       ) : null}
       <Button
         label="Add to the watch list"

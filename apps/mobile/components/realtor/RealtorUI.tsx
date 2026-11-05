@@ -40,7 +40,7 @@ import {
   type RealtorOffer,
   type RealtorViewing,
 } from '@/lib/api/realtor';
-import { ApiError } from '@/lib/api/client';
+import { ApiError, errorMessage } from '@/lib/api/client';
 import { formatDate, formatTime, relativeTime } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { Sheet } from '@/components/Sheet';
@@ -49,8 +49,6 @@ import { ProUpsell } from '@/components/estate/governance/ProUpsell';
 import { VerificationGateNotice } from '@/components/VerificationGateNotice';
 import { readGate } from '@/lib/verificationGate';
 import { kycApi } from '@/lib/api/kyc';
-
-const errorText = (e: unknown, fallback: string) => (e instanceof ApiError ? e.message : fallback);
 
 /* ---------------------------------- cards --------------------------------- */
 
@@ -380,7 +378,7 @@ function AddLeadForm({
         hint="Budget, timing, what they’re looking for"
       />
       {save.error ? (
-        <FormAlert message={errorText(save.error, 'Could not add this lead.')} />
+        <FormAlert message={errorMessage(save.error, 'Could not add this lead.')} />
       ) : null}
       <Button
         label="Add lead"
@@ -531,7 +529,7 @@ function ScheduleViewingForm({
       />
       {inPast ? <FormAlert tone="warning" message="That time has already passed." /> : null}
       {save.error ? (
-        <FormAlert message={errorText(save.error, 'Could not book this viewing.')} />
+        <FormAlert message={errorMessage(save.error, 'Could not book this viewing.')} />
       ) : null}
       <Button
         label="Book viewing"
@@ -650,7 +648,9 @@ function InviteClientForm({
         )
       ) : null}
       {check.error || invite.error ? (
-        <FormAlert message={errorText(invite.error ?? check.error, 'Could not send the invite.')} />
+        <FormAlert
+          message={errorMessage(invite.error ?? check.error, 'Could not send the invite.')}
+        />
       ) : null}
       {c?.isEligible ? (
         <Button

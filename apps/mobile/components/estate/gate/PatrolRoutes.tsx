@@ -17,7 +17,6 @@ import {
   useTheme,
   useToast,
 } from '@getrentos/ui-native';
-import { errorText } from '@/components/estate/EstateUI';
 import { StatusPill } from '@/components/host/HostUI';
 import { Sheet } from '@/components/Sheet';
 import {
@@ -35,6 +34,7 @@ import {
   type PatrolRouteInput,
 } from '@/lib/api/estateGate';
 import { haptics } from '@/lib/haptics';
+import { errorMessage } from '@/lib/api/client';
 
 /**
  * The rounds an estate walks: when they start, how long they may take, and
@@ -70,7 +70,7 @@ export function PatrolRoutes({ estateId }: { estateId: string }) {
       qc.invalidateQueries({ queryKey: gateKeys.routes(estateId) });
       toast.show(r.active ? `${r.name} resumed.` : `${r.name} paused.`, 'success');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not update this round.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not update this round.'), 'error'),
   });
 
   return (
@@ -354,7 +354,7 @@ function RouteForm({
       </View>
 
       {save.error ? (
-        <FormAlert message={errorText(save.error, 'Could not save this round.')} />
+        <FormAlert message={errorMessage(save.error, 'Could not save this round.')} />
       ) : null}
       <Button
         label={route ? 'Save round' : 'Add round'}

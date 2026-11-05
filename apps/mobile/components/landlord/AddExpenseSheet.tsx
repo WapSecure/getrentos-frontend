@@ -20,7 +20,7 @@ import {
   EXPENSE_CATEGORY_LABEL,
   type ExpenseCategory,
 } from '@/lib/api/landlord';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 
 interface Props {
   open: boolean;
@@ -79,8 +79,7 @@ function AddExpenseForm({
       toast.show('Expense logged.', 'success');
       onClose();
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not log that expense.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not log that expense.'), 'error'),
     onSettled: () => onSubmittingChange(false),
   });
 

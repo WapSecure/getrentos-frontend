@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useToast } from '@getrentos/ui-native';
 import { buyerMessagesApi } from '@/lib/api/buyerMessages';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { qk } from '@/lib/query/keys';
 
 /**
@@ -18,7 +18,6 @@ export function useAskSeller() {
       qc.invalidateQueries({ queryKey: qk.buyer.conversations });
       router.push(`/(app)/buyer-conversation/${conversation.id}`);
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not reach the seller.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not reach the seller.'), 'error'),
   });
 }

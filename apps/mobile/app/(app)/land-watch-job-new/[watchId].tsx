@@ -12,7 +12,7 @@ import {
 } from '@getrentos/shared';
 import { qk } from '@/lib/query/keys';
 import { landWatchApi } from '@/lib/api/landWatch';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { haptics } from '@/lib/haptics';
 import { goBack } from '@/lib/goBack';
@@ -54,10 +54,7 @@ export default function LandWatchJobNew() {
     },
     onError: (e) => {
       void haptics.error();
-      toast.show(
-        e instanceof ApiError ? e.message : 'Not sent. Check your connection and try again.',
-        'error'
-      );
+      toast.show(errorMessage(e, 'Not sent. Check your connection and try again.'), 'error');
     },
   });
 

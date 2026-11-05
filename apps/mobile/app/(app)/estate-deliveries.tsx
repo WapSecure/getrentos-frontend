@@ -28,7 +28,6 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
-import { errorText } from '@/components/estate/EstateUI';
 import { GateChoice, PhotoField } from '@/components/estate/gate/GateUI';
 import { GatesSheet } from '@/components/estate/gate/GatesSheet';
 import { HouseholdPicker } from '@/components/estate/HouseholdPicker';
@@ -48,6 +47,7 @@ import type { Household } from '@/lib/api/estateManager';
 import { formatDate, formatTime } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { goBack } from '@/lib/goBack';
+import { errorMessage } from '@/lib/api/client';
 
 type Filter = DeliveryLogStatus | 'all';
 const FILTERS: { value: Filter; label: string }[] = [
@@ -100,7 +100,7 @@ export default function EstateDeliveries() {
     },
     onError: (e) => {
       qc.invalidateQueries({ queryKey: ['estate-manager', estateId, 'gate', 'deliveries'] });
-      toast.show(errorText(e, 'Could not mark this parcel as collected.'), 'error');
+      toast.show(errorMessage(e, 'Could not mark this parcel as collected.'), 'error');
     },
   });
 
@@ -395,7 +395,7 @@ function LogDeliveryForm({ estateId, onDone }: { estateId: string; onDone: () =>
       ) : screen ? (
         <FormAlert tone="warning" message={`${screen.message} ${screen.instruction}`} />
       ) : check.error ? (
-        <FormAlert message={errorText(check.error, 'Could not check that code just now.')} />
+        <FormAlert message={errorMessage(check.error, 'Could not check that code just now.')} />
       ) : (
         <Text variant="caption" color="mutedForeground">
           Checking a code doesn’t use it up. Only logging the parcel does.
@@ -427,7 +427,7 @@ function LogDeliveryForm({ estateId, onDone }: { estateId: string; onDone: () =>
       <GateChoice gates={gates.data} value={gateId} onChange={setGateId} />
       <PhotoField value={photo} onChange={setPhoto} />
       {save.error ? (
-        <FormAlert message={errorText(save.error, 'Could not log this delivery.')} />
+        <FormAlert message={errorMessage(save.error, 'Could not log this delivery.')} />
       ) : null}
       <Button
         label="Log delivery"

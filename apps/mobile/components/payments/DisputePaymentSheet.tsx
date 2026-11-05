@@ -5,7 +5,7 @@ import { Button, Text, TextField, useTheme, useToast } from '@getrentos/ui-nativ
 import { Sheet } from '@/components/Sheet';
 import { qk } from '@/lib/query/keys';
 import { paymentsApi, type Payment } from '@/lib/api/payments';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 
 interface Props {
   open: boolean;
@@ -60,8 +60,7 @@ function DisputePaymentForm({
       toast.show('Dispute submitted: we’ll review it within 2 business days.', 'success');
       onClose();
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not submit the dispute.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not submit the dispute.'), 'error'),
     onSettled: () => onSubmittingChange(false),
   });
 

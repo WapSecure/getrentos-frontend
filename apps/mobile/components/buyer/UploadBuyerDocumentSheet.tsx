@@ -12,7 +12,7 @@ import {
 } from '@/lib/api/buyerDocuments';
 import { pickDocument } from '@/lib/filePicker';
 import type { PickedFile } from '@/lib/api/documents';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 
 interface Props {
   open: boolean;
@@ -52,11 +52,7 @@ function UploadForm({
       toast.show('Document uploaded.', 'success');
       onClose();
     },
-    onError: (err) =>
-      toast.show(
-        err instanceof ApiError ? err.message : 'Could not upload this document.',
-        'error'
-      ),
+    onError: (err) => toast.show(errorMessage(err, 'Could not upload this document.'), 'error'),
     onSettled: () => onSubmittingChange(false),
   });
 

@@ -16,7 +16,6 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
-import { errorText } from '@/components/estate/EstateUI';
 import { AddGatemanSheet, StaffRow } from '@/components/estate/staff-setup/StaffUI';
 import { useEstate } from '@/hooks/useEstate';
 import {
@@ -27,6 +26,7 @@ import {
 } from '@/lib/api/estateStaffSetup';
 import { haptics } from '@/lib/haptics';
 import { goBack } from '@/lib/goBack';
+import { errorMessage } from '@/lib/api/client';
 
 /** The estate's gatemen: who can check visitors in, add one, or take one off the gate. */
 export default function EstateStaff() {
@@ -59,7 +59,7 @@ export default function EstateStaff() {
     },
     onError: (e) => {
       qc.invalidateQueries({ queryKey: staffSetupKeys.staff(estateId) });
-      toast.show(errorText(e, 'Could not remove this gateman.'), 'error');
+      toast.show(errorMessage(e, 'Could not remove this gateman.'), 'error');
     },
   });
 

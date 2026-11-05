@@ -17,7 +17,7 @@ import {
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { buyerApi, type BuyerProfile as BuyerProfileData } from '@/lib/api/buyer';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
@@ -63,8 +63,7 @@ function ProfileForm({ data }: { data: BuyerProfileData }) {
       qc.setQueryData(qk.buyer.profile, updated);
       toast.show('Profile saved.', 'success');
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not save your profile.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not save your profile.'), 'error'),
   });
 
   return (

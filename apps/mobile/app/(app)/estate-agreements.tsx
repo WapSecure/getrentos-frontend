@@ -18,7 +18,7 @@ import {
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { estateAgreementsApi, MIN_REASON, type EstateAgreement } from '@/lib/api/estateAgreements';
-import { ApiError } from '@/lib/api/client';
+import { ApiError, errorMessage } from '@/lib/api/client';
 import { Sheet } from '@/components/Sheet';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
@@ -154,8 +154,7 @@ function AgreementCard({
         'success'
       );
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not approve this.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not approve this.'), 'error'),
   });
 
   return (

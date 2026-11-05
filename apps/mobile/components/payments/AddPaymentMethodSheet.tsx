@@ -13,7 +13,7 @@ import {
 import { Sheet } from '@/components/Sheet';
 import { qk } from '@/lib/query/keys';
 import { paymentsApi, type SavedPaymentMethod } from '@/lib/api/payments';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 
 interface Props {
   open: boolean;
@@ -66,8 +66,7 @@ function AddPaymentMethodForm({ onClose }: { onClose: () => void }) {
       toast.show('Payment method added.', 'success');
       onClose();
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not add that method.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not add that method.'), 'error'),
   });
 
   return (

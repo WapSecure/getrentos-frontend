@@ -12,7 +12,7 @@ import {
 } from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { landlordApi, type LandlordLease, type RenewalCheck } from '@/lib/api/landlord';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatNaira } from '@/lib/format';
 
 interface Props {
@@ -76,8 +76,7 @@ function RenewForm({
       toast.show('Renewal offer sent.', 'success');
       onClose();
     },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not send that renewal.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not send that renewal.'), 'error'),
     onSettled: () => onSubmittingChange(false),
   });
 

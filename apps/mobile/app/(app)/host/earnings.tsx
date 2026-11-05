@@ -29,7 +29,7 @@ import {
 import { qk } from '@/lib/query/keys';
 import { hostShortletsApi, type PayoutSummary } from '@/lib/api/hostShortlets';
 import { COMMON_BANKS } from '@/lib/api/sellerPayout';
-import { ApiError } from '@/lib/api/client';
+import { ApiError, errorMessage } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
@@ -278,7 +278,7 @@ function Withdraw({
     },
     onError: (e) => {
       void haptics.error();
-      toast.show(e instanceof ApiError ? e.message : 'Could not withdraw.', 'error');
+      toast.show(errorMessage(e, 'Could not withdraw.'), 'error');
     },
   });
   const blocked = !s.accountSet

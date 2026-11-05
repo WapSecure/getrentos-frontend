@@ -60,7 +60,7 @@ import {
   type ApplicationDocument,
   type RenterApplication,
 } from '@/lib/api/applications';
-import { ApiError } from '@/lib/api/client';
+import { ApiError, errorMessage } from '@/lib/api/client';
 import { track } from '@/lib/analytics';
 import { formatDate } from '@/lib/format';
 
@@ -212,9 +212,7 @@ export default function ApplyToRent() {
     },
     onError: (err) => {
       haptics.error();
-      setDocError(
-        err instanceof ApiError ? err.message : 'Could not upload the file. Please try again.'
-      );
+      setDocError(errorMessage(err, 'Could not upload the file. Please try again.'));
     },
   });
 

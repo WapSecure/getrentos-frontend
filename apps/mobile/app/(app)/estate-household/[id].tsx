@@ -23,13 +23,12 @@ import {
   HouseholdSheet,
   LinkResidentSheet,
   confirmPaid,
-  errorText,
 } from '@/components/estate/EstateUI';
 import { StatusPill } from '@/components/host/HostUI';
 import { ContactActions } from '@/components/realtor/RealtorUI';
 import { useEstate } from '@/hooks/useEstate';
 import { estateManagerApi, owed, type Due } from '@/lib/api/estateManager';
-import { ApiError } from '@/lib/api/client';
+import { ApiError, errorMessage } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { qk } from '@/lib/query/keys';
@@ -69,7 +68,7 @@ export default function EstateHousehold() {
   };
   const failed = (fallback: string) => (e: unknown) => {
     void haptics.error();
-    toast.show(errorText(e, fallback), 'error');
+    toast.show(errorMessage(e, fallback), 'error');
   };
 
   const pay = useMutation({

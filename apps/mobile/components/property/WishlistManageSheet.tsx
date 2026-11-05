@@ -16,7 +16,7 @@ import {
 import { Sheet } from '@/components/Sheet';
 import { qk } from '@/lib/query/keys';
 import { wishlistsApi, type Wishlist } from '@/lib/api/wishlists';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { useOptimisticMutation } from '@/lib/query/optimistic';
 
 interface Props {
@@ -51,11 +51,7 @@ function WishlistManageBody() {
       setNewName('');
       invalidate();
     },
-    onError: (err) =>
-      toast.show(
-        err instanceof ApiError ? err.message : 'Could not create that wishlist.',
-        'error'
-      ),
+    onError: (err) => toast.show(errorMessage(err, 'Could not create that wishlist.'), 'error'),
   });
 
   // A rename shows at once; a refusal puts the old name back.
@@ -76,11 +72,7 @@ function WishlistManageBody() {
       invalidate();
       qc.invalidateQueries({ queryKey: qk.listings.saved });
     },
-    onError: (err) =>
-      toast.show(
-        err instanceof ApiError ? err.message : 'Could not delete that wishlist.',
-        'error'
-      ),
+    onError: (err) => toast.show(errorMessage(err, 'Could not delete that wishlist.'), 'error'),
   });
 
   return (

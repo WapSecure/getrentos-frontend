@@ -24,7 +24,7 @@ import {
   WHATSAPP_TOPIC_LABEL,
   type WhatsAppPreferences,
 } from '@/lib/api/preferences';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
@@ -80,8 +80,7 @@ function WhatsAppForm({ initial }: { initial: WhatsAppPreferences }) {
       qc.invalidateQueries({ queryKey: qk.renter.preferences });
       toast.show(next.connected ? 'WhatsApp updates on.' : 'WhatsApp updates off.', 'success');
     },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not save those settings.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not save those settings.'), 'error'),
   });
 
   return (

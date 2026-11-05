@@ -22,7 +22,7 @@ import {
   useReducedMotion,
   useTheme,
 } from '@getrentos/ui-native';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { useSignup } from '@/lib/auth/SignupContext';
 import { haptics } from '@/lib/haptics';
 import { SIGNUP_ROLES, VERIFICATION_LABEL, type SignupRoleId } from '@/lib/roles';
@@ -60,7 +60,7 @@ export default function SignUpRoles() {
       // AuthProvider flips to authenticated → (auth) layout redirects into the app.
     } catch (err) {
       await haptics.error();
-      setError(err instanceof ApiError ? err.message : 'Could not create your account. Try again.');
+      setError(errorMessage(err, 'Could not create your account. Try again.'));
       setBusy(false);
     }
   };

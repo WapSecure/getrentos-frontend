@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { router } from 'expo-router';
 import { ShieldCheck } from 'lucide-react-native';
 import { AuthScaffold, Button, FormAlert, OtpInput, useTheme } from '@getrentos/ui-native';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { haptics } from '@/lib/haptics';
 
@@ -30,7 +30,7 @@ export default function TwoFactor() {
     } catch (err) {
       await haptics.error();
       setCode('');
-      setError(err instanceof ApiError ? err.message : 'That code didn’t work. Try again.');
+      setError(errorMessage(err, 'That code didn’t work. Try again.'));
     } finally {
       setSubmitting(false);
     }

@@ -17,7 +17,7 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
-import { AnnouncementSheet, errorText } from '@/components/estate/EstateUI';
+import { AnnouncementSheet } from '@/components/estate/EstateUI';
 import { StatusPill } from '@/components/host/HostUI';
 import { useEstate } from '@/hooks/useEstate';
 import { estateManagerApi, type Announcement } from '@/lib/api/estateManager';
@@ -25,6 +25,7 @@ import { formatDate, relativeTime } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { qk } from '@/lib/query/keys';
 import { goBack } from '@/lib/goBack';
+import { errorMessage } from '@/lib/api/client';
 
 /** Everything the office has told residents, newest first, with edit and delete. */
 export default function EstateAnnouncements() {
@@ -55,7 +56,7 @@ export default function EstateAnnouncements() {
       qc.invalidateQueries({ queryKey: qk.estateManager.announcements(estateId) });
       toast.show('Announcement deleted.', 'success');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not delete it.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not delete it.'), 'error'),
   });
 
   const refresh = (

@@ -28,7 +28,6 @@ import {
 } from '@getrentos/ui-native';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { RevenueTrendChart } from '@/components/landlord/RevenueTrendChart';
-import { errorText } from '@/components/estate/EstateUI';
 import { isUpgradeError } from '@/components/host/HostUI';
 import { ProUpsell } from '@/components/estate/governance/ProUpsell';
 import {
@@ -48,6 +47,7 @@ import {
 } from '@/lib/api/estateGovernance';
 import { CSV_MIME, shareDownloadedFile } from '@/lib/shareFile';
 import { goBack } from '@/lib/goBack';
+import { errorMessage } from '@/lib/api/client';
 
 /**
  * The estate's money. Reports (what came in, what's outstanding, the trend and
@@ -111,7 +111,7 @@ export default function EstateFinancials() {
       const { bytes } = await estateGovernanceApi.financialsExport(estateId);
       await shareDownloadedFile(bytes, 'getrentos-estate-dues.csv', CSV_MIME, 'Estate dues');
     } catch (e) {
-      toast.show(errorText(e, 'Could not export the dues.'), 'error');
+      toast.show(errorMessage(e, 'Could not export the dues.'), 'error');
     } finally {
       setExporting(false);
     }

@@ -5,7 +5,7 @@ import * as Sharing from 'expo-sharing';
 import { Download } from 'lucide-react-native';
 import { Button, useTheme, useToast } from '@getrentos/ui-native';
 import { leaseApi } from '@/lib/api/lease';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 
 /**
  * Downloads the signed lease PDF and hands it to the OS share sheet, which is
@@ -47,7 +47,7 @@ export function DownloadLeaseButton({
         onOpened?.();
       }
     } catch (err) {
-      toast.show(err instanceof ApiError ? err.message : 'Could not download the lease.', 'error');
+      toast.show(errorMessage(err, 'Could not download the lease.'), 'error');
     } finally {
       setBusy(false);
     }

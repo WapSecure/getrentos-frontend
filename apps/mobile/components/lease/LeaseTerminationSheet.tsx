@@ -12,7 +12,7 @@ import {
 } from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { leaseApi } from '@/lib/api/lease';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 
 interface Props {
   open: boolean;
@@ -53,8 +53,7 @@ function LeaseTerminationForm({
       toast.show('Termination request sent to your landlord.', 'success');
       onClose();
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not send the request.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not send the request.'), 'error'),
     onSettled: () => onSubmittingChange(false),
   });
 

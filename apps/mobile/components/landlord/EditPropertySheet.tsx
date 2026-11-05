@@ -11,7 +11,7 @@ import {
   type LandlordProperty,
   type PropertyType,
 } from '@/lib/api/landlord';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { LocationFields } from '@/components/forms/LocationFields';
 import { LocationPicker } from '@/components/property/LocationPicker';
 import type { MapPoint } from '@/lib/api/geocode';
@@ -90,8 +90,7 @@ function EditForm({
       toast.show('Property updated.', 'success');
       onClose();
     },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not update that property.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not update that property.'), 'error'),
     onSettled: () => onSubmittingChange(false),
   });
 

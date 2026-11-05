@@ -28,7 +28,7 @@ import {
   type HostListing,
   type ShortletSeason,
 } from '@/lib/api/hostShortlets';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { Sheet } from '@/components/Sheet';
@@ -113,8 +113,7 @@ function Rules({ listing: l }: { listing: HostListing }) {
       qc.invalidateQueries({ queryKey: qk.host.listings });
       toast.show('Pricing rules saved.', 'success');
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not save.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not save.'), 'error'),
   });
 
   return (
@@ -233,8 +232,7 @@ function Seasons({ listing: l }: { listing: HostListing }) {
       qc.invalidateQueries({ queryKey: qk.host.listings });
       toast.show('Season removed.', 'success');
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not remove it.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not remove it.'), 'error'),
   });
   const hasDetty = seasons.data?.some((s) => /detty/i.test(s.name));
   const fmt = (iso: string) =>
@@ -407,11 +405,7 @@ function SeasonForm({
           suffix=" n"
           onChange={setMinNights}
         />
-        {add.error ? (
-          <FormAlert
-            message={add.error instanceof ApiError ? add.error.message : 'Could not add it.'}
-          />
-        ) : null}
+        {add.error ? <FormAlert message={errorMessage(add.error, 'Could not add it.')} /> : null}
         <Button
           label="Add season"
           disabled={!name.trim() || !start || !end || end < start}

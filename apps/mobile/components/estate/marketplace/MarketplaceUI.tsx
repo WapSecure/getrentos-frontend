@@ -3,9 +3,9 @@ import { router } from 'expo-router';
 import type { InfiniteData, QueryClient } from '@tanstack/react-query';
 import { Sparkles } from 'lucide-react-native';
 import { Button, FormAlert, Text, useTheme, type useToast } from '@getrentos/ui-native';
-import { errorText } from '@/components/estate/EstateUI';
 import { marketplaceKeys, planGate, type EstateListing } from '@/lib/api/estateMarketplace';
 import type { Paginated } from '@/lib/api/properties';
+import { errorMessage } from '@/lib/api/client';
 
 type Toast = ReturnType<typeof useToast>;
 
@@ -18,7 +18,7 @@ export function reportError(e: unknown, fallback: string, toast: Toast) {
   if (gate) {
     Alert.alert(
       gate === 'limit' ? 'You’ve reached your plan’s limit' : 'Not on your plan',
-      errorText(e, 'Upgrade your plan to do this.'),
+      errorMessage(e, 'Upgrade your plan to do this.'),
       [
         { text: 'Not now', style: 'cancel' },
         { text: 'See plans', onPress: () => router.push('/(app)/billing') },
@@ -26,7 +26,7 @@ export function reportError(e: unknown, fallback: string, toast: Toast) {
     );
     return;
   }
-  toast.show(errorText(e, fallback), 'error');
+  toast.show(errorMessage(e, fallback), 'error');
 }
 
 /** A form's error, with a way to the plans when the plan is what refused it. */
@@ -34,13 +34,13 @@ export function MarketplaceFormError({ error, fallback }: { error: unknown; fall
   const { spacing } = useTheme();
   if (!error) return null;
   const gate = planGate(error);
-  if (!gate) return <FormAlert message={errorText(error, fallback)} />;
+  if (!gate) return <FormAlert message={errorMessage(error, fallback)} />;
   return (
     <View style={{ gap: spacing.sm }}>
       <FormAlert
         tone="warning"
         title={gate === 'limit' ? 'Plan limit reached' : 'Not on your plan'}
-        message={errorText(error, 'Upgrade your plan to do this.')}
+        message={errorMessage(error, 'Upgrade your plan to do this.')}
       />
       <Button label="See plans" variant="secondary" onPress={() => router.push('/(app)/billing')} />
     </View>

@@ -26,7 +26,7 @@ import {
   ROOM_CONDITION_TONE,
   type Inspection,
 } from '@/lib/api/inspections';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
@@ -136,11 +136,7 @@ function InspectionDetailSheet({
       toast.show('Marked as reviewed.', 'success');
       onClose();
     },
-    onError: (err) =>
-      toast.show(
-        err instanceof ApiError ? err.message : 'Could not acknowledge this report.',
-        'error'
-      ),
+    onError: (err) => toast.show(errorMessage(err, 'Could not acknowledge this report.'), 'error'),
   });
 
   return (

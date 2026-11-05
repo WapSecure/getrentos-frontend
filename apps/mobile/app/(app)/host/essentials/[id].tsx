@@ -26,7 +26,7 @@ import {
   hostShortletsApi,
   type HostListing,
 } from '@/lib/api/hostShortlets';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { Stepper } from '@/components/host/HostUI';
@@ -253,11 +253,7 @@ function Form({ listing: l }: { listing: HostListing }) {
           />
         </Section>
 
-        {save.error ? (
-          <FormAlert
-            message={save.error instanceof ApiError ? save.error.message : 'Could not save.'}
-          />
-        ) : null}
+        {save.error ? <FormAlert message={errorMessage(save.error, 'Could not save.')} /> : null}
       </ScrollView>
       <View
         style={{

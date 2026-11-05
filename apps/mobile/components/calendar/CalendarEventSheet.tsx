@@ -23,7 +23,7 @@ import {
   type CalendarEventType,
   type CalendarRecurrence,
 } from '@/lib/api/calendar';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 
 const RECURRENCE_LABEL: Record<CalendarRecurrence, string> = {
   none: 'Does not repeat',
@@ -86,8 +86,7 @@ function CalendarEventForm({ onClose, event }: Omit<Props, 'open'>) {
       toast.show('Event added.', 'success');
       onClose();
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not save this event.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not save this event.'), 'error'),
   });
 
   const updateMutation = useMutation({
@@ -108,8 +107,7 @@ function CalendarEventForm({ onClose, event }: Omit<Props, 'open'>) {
       toast.show('Event updated.', 'success');
       onClose();
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not update this event.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not update this event.'), 'error'),
   });
 
   const removeMutation = useMutation({
@@ -118,8 +116,7 @@ function CalendarEventForm({ onClose, event }: Omit<Props, 'open'>) {
       invalidate();
       onClose();
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not delete this event.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not delete this event.'), 'error'),
   });
 
   const mutation = event ? updateMutation : createMutation;

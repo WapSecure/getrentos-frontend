@@ -42,7 +42,7 @@ import { MessageHostSheet } from '@/components/shortlet/MessageHostSheet';
 import { OpenDisputeSheet } from '@/components/shortlet/OpenDisputeSheet';
 import { ReviewStaySheet } from '@/components/shortlet/ReviewStaySheet';
 import { shortletsApi, type ShortletBooking } from '@/lib/api/shortlets';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { isoDay } from '@/lib/hostDates';
 import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
@@ -86,8 +86,7 @@ export default function StayDetail() {
       }
       refresh();
     },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not start payment.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not start payment.'), 'error'),
   });
 
   const cancel = useMutation({
@@ -97,7 +96,7 @@ export default function StayDetail() {
       toast.show('Stay cancelled.', 'success');
       refresh();
     },
-    onError: (e) => toast.show(e instanceof ApiError ? e.message : 'Could not cancel.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not cancel.'), 'error'),
   });
 
   const confirmCancel = (s: ShortletBooking) => {

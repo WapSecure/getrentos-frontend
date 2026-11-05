@@ -28,7 +28,7 @@ import {
   type SupportMessage,
   type SupportThread,
 } from '@/lib/api/support';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { relativeTime } from '@/lib/format';
 
 const POLL_MS = 8000;
@@ -77,8 +77,7 @@ export default function SupportThreadScreen() {
       setText('');
       requestAnimationFrame(() => scrollRef.current?.scrollToEnd({ animated: true }));
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not send this message.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not send this message.'), 'error'),
   });
 
   const resolveMutation = useMutation({
@@ -89,8 +88,7 @@ export default function SupportThreadScreen() {
       );
       toast.show('Marked as resolved.', 'success');
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not resolve this thread.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not resolve this thread.'), 'error'),
   });
 
   const resolved = thread?.status === 'RESOLVED';

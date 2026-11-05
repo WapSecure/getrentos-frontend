@@ -14,7 +14,7 @@ import {
   type AgentInspectionType,
   type RoomCondition,
 } from '@/lib/api/agent';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { capturePhoto, pickPhoto } from '@/lib/filePicker';
 import { goBack } from '@/lib/goBack';
 import { InspectionDraftPanel } from '@/components/agent/InspectionDraftPanel';
@@ -95,7 +95,7 @@ export default function SubmitInspection() {
       const photo = await agentApi.addInspectionPhoto(taskId, file, room.room.trim());
       setPhotos((prev) => [...prev, photo]);
     } catch (err) {
-      toast.show(err instanceof ApiError ? err.message : 'Could not upload that photo.', 'error');
+      toast.show(errorMessage(err, 'Could not upload that photo.'), 'error');
     } finally {
       setUploadingKey(null);
     }
@@ -164,11 +164,7 @@ export default function SubmitInspection() {
       toast.show('Inspection submitted.', 'success');
       goBack();
     },
-    onError: (err) =>
-      toast.show(
-        err instanceof ApiError ? err.message : 'Could not submit this inspection.',
-        'error'
-      ),
+    onError: (err) => toast.show(errorMessage(err, 'Could not submit this inspection.'), 'error'),
   });
 
   const canSubmit = rooms.length > 0 && rooms.every((r) => r.room.trim().length > 0);

@@ -16,7 +16,7 @@ import {
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { ownerApi, type OwnerProfile } from '@/lib/api/owner';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
 
@@ -83,8 +83,7 @@ function ProfileForm({ initial }: { initial: OwnerProfile }) {
       qc.invalidateQueries({ queryKey: qk.security });
       toast.show('Profile saved.', 'success');
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not save your profile.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not save your profile.'), 'error'),
   });
 
   return (

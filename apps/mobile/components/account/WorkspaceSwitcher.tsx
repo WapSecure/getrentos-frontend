@@ -12,7 +12,7 @@ import {
   type SignupRoleId,
 } from '@/lib/roles';
 import { accountRolesApi } from '@/lib/api/accountRoles';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { Sheet } from '@/components/Sheet';
 import { SettingsGroup } from './SettingsList';
 
@@ -73,7 +73,7 @@ function AddRoleList({ onDone }: { onDone: () => void }) {
       );
       onDone();
     } catch (e) {
-      toast.show(e instanceof ApiError ? e.message : 'Could not add that role.', 'error');
+      toast.show(errorMessage(e, 'Could not add that role.'), 'error');
     } finally {
       setBusy(null);
     }

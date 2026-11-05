@@ -16,7 +16,6 @@ import { Sheet } from '@/components/Sheet';
 import type { PickedFile } from '@/lib/api/documents';
 import { gatemanApi, type IncidentCategory, type IncidentPriority } from '@/lib/api/gateman';
 import { capturePhoto, pickPhoto } from '@/lib/filePicker';
-import { errorText } from '@/components/estate/EstateUI';
 import { CloseSheet, QueueCard, QueueScreen, type QueueView } from '@/components/estate/Triage';
 import { useEstate } from '@/hooks/useEstate';
 import {
@@ -29,6 +28,7 @@ import {
 } from '@/lib/api/estateManager';
 import { haptics } from '@/lib/haptics';
 import { qk } from '@/lib/query/keys';
+import { errorMessage } from '@/lib/api/client';
 
 /** What residents and the gate have reported, most urgent first. */
 export default function EstateIncidents() {
@@ -67,7 +67,7 @@ export default function EstateIncidents() {
     },
     onError: (e) => {
       qc.invalidateQueries({ queryKey: qk.estateManager.incidents(estateId) });
-      toast.show(errorText(e, 'Could not close this incident.'), 'error');
+      toast.show(errorMessage(e, 'Could not close this incident.'), 'error');
     },
   });
 
@@ -273,7 +273,7 @@ function ReportForm({ estateId, onDone }: { estateId: string; onDone: () => void
         </View>
       )}
       {report.error ? (
-        <FormAlert message={errorText(report.error, 'Could not report the incident.')} />
+        <FormAlert message={errorMessage(report.error, 'Could not report the incident.')} />
       ) : null}
       <Button
         label="Report incident"

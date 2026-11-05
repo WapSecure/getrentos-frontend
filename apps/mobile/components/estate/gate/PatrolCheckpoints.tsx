@@ -14,7 +14,6 @@ import {
   useTheme,
   useToast,
 } from '@getrentos/ui-native';
-import { errorText } from '@/components/estate/EstateUI';
 import { OneTimeCode } from '@/components/estate/gate/GateUI';
 import { StatusPill } from '@/components/host/HostUI';
 import { Sheet } from '@/components/Sheet';
@@ -26,6 +25,7 @@ import {
   type PatrolCheckpoint,
 } from '@/lib/api/estateGate';
 import { haptics } from '@/lib/haptics';
+import { errorMessage } from '@/lib/api/client';
 
 const plural = (n: number, one: string) => `${n} ${one}${n === 1 ? '' : 's'}`;
 
@@ -61,7 +61,8 @@ export function PatrolCheckpoints({ estateId }: { estateId: string }) {
       invalidate();
       setIssued(c);
     },
-    onError: (e) => toast.show(errorText(e, 'Could not give this checkpoint a new code.'), 'error'),
+    onError: (e) =>
+      toast.show(errorMessage(e, 'Could not give this checkpoint a new code.'), 'error'),
   });
 
   const toggle = useMutation({
@@ -72,7 +73,7 @@ export function PatrolCheckpoints({ estateId }: { estateId: string }) {
       invalidate();
       toast.show(c.active ? `${c.name} is back in use.` : `${c.name} is retired.`, 'success');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not update this checkpoint.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not update this checkpoint.'), 'error'),
   });
 
   const confirmReissue = (c: PatrolCheckpoint) =>
@@ -258,7 +259,7 @@ function AddCheckpointForm({
         hint="In your own words, so a guard knows they’re in the right place"
       />
       {add.error ? (
-        <FormAlert message={errorText(add.error, 'Could not add the checkpoint.')} />
+        <FormAlert message={errorMessage(add.error, 'Could not add the checkpoint.')} />
       ) : null}
       <Button
         label="Add checkpoint"

@@ -20,7 +20,7 @@ import {
   useReducedMotion,
   useTheme,
 } from '@getrentos/ui-native';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { useSignup } from '@/lib/auth/SignupContext';
 import { haptics } from '@/lib/haptics';
 import { openLegal } from '@/lib/links';
@@ -260,7 +260,7 @@ function EmailForm(props: Shared) {
       router.push('/(auth)/sign-up/verify');
     } catch (err) {
       await haptics.error();
-      setFormError(err instanceof ApiError ? err.message : 'Could not start signup. Try again.');
+      setFormError(errorMessage(err, 'Could not start signup. Try again.'));
     }
   });
 
@@ -421,7 +421,7 @@ function PhoneForm(props: Shared) {
       router.push('/(auth)/sign-up/verify');
     } catch (err) {
       await haptics.error();
-      setFormError(err instanceof ApiError ? err.message : 'Could not start signup. Try again.');
+      setFormError(errorMessage(err, 'Could not start signup. Try again.'));
     }
   });
 

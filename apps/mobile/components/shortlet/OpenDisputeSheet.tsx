@@ -7,7 +7,7 @@ import { Sheet } from '@/components/Sheet';
 import { qk } from '@/lib/query/keys';
 import { shortletsApi, type ShortletBooking } from '@/lib/api/shortlets';
 import type { DisputeCategory } from '@/lib/api/hostShortlets';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { GUEST_DISPUTE_CATEGORIES } from '@/lib/stays';
 import { haptics } from '@/lib/haptics';
 
@@ -57,7 +57,7 @@ function Inner({
       onClose();
       router.push({ pathname: '/(app)/shortlet-dispute/[id]', params: { id: d.id } });
     },
-    onError: (e) => toast.show(e instanceof ApiError ? e.message : 'Not sent.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Not sent.'), 'error'),
   });
 
   return (

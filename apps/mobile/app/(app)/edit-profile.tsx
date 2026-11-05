@@ -19,7 +19,7 @@ import { Image } from 'expo-image';
 import { qk } from '@/lib/query/keys';
 import { profileApi, type RenterProfile } from '@/lib/api/profile';
 import { pickImage } from '@/lib/filePicker';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { ChangeEmailSheet } from '@/components/account/ChangeEmailSheet';
 import { goBack } from '@/lib/goBack';
@@ -94,8 +94,7 @@ function ProfileForm({ profile }: { profile: RenterProfile }) {
       toast.show('Profile updated.', 'success');
       router.back();
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not update your profile.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not update your profile.'), 'error'),
   });
 
   const avatarMutation = useMutation({
@@ -107,8 +106,7 @@ function ProfileForm({ profile }: { profile: RenterProfile }) {
     onSuccess: (updated) => {
       if (updated) qc.setQueryData(qk.renter.profile, updated);
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not update your photo.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not update your photo.'), 'error'),
   });
 
   return (

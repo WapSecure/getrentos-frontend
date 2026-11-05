@@ -29,7 +29,6 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
-import { errorText } from '@/components/estate/EstateUI';
 import { EnterpriseUpsell, OneTimeCode } from '@/components/estate/gate/GateUI';
 import { HouseholdPicker } from '@/components/estate/HouseholdPicker';
 import { ReasonSheet } from '@/components/homecare/ReasonSheet';
@@ -54,6 +53,7 @@ import {
 import type { Household } from '@/lib/api/estateManager';
 import { haptics } from '@/lib/haptics';
 import { goBack } from '@/lib/goBack';
+import { errorMessage } from '@/lib/api/client';
 
 type Filter = ContractorPassStatus | 'all';
 const FILTERS: { value: Filter; label: string }[] = [
@@ -113,7 +113,7 @@ export default function EstateContractors() {
       toast.show(`${v.pass.name} will be refused at the gate from now on.`, 'success');
       setWithdrawing(null);
     },
-    onError: (e) => toast.show(errorText(e, 'Could not withdraw this authorisation.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not withdraw this authorisation.'), 'error'),
   });
 
   const refresh = (
@@ -476,7 +476,7 @@ function AuthoriseForm({
         </View>
       ) : null}
       {create.error ? (
-        <FormAlert message={errorText(create.error, 'Could not create the authorisation.')} />
+        <FormAlert message={errorMessage(create.error, 'Could not create the authorisation.')} />
       ) : problem && name.trim() && household ? (
         <FormAlert tone="warning" message={problem} />
       ) : null}

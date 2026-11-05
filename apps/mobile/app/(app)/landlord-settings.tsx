@@ -28,7 +28,7 @@ import {
   type LandlordNotificationPreference,
   type LandlordProfile,
 } from '@/lib/api/landlord';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { pickImage } from '@/lib/filePicker';
 import { Image } from 'expo-image';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
@@ -194,8 +194,7 @@ function ProfileForm({ initial }: { initial: LandlordProfile }) {
       qc.invalidateQueries({ queryKey: qk.landlord.profile });
       toast.show('Photo updated.', 'success');
     },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not upload that photo.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not upload that photo.'), 'error'),
   });
 
   const [fullName, setFullName] = useState(initial.fullName);
@@ -213,8 +212,7 @@ function ProfileForm({ initial }: { initial: LandlordProfile }) {
       qc.invalidateQueries({ queryKey: qk.landlord.profile });
       toast.show('Profile saved.', 'success');
     },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not save your profile.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not save your profile.'), 'error'),
   });
 
   return (
@@ -298,7 +296,7 @@ function AutomationCard({ initial }: { initial: AutomationSettings }) {
     onSuccess: () => qc.invalidateQueries({ queryKey: qk.landlord.automation }),
     onError: (e, { previous }) => {
       setState(previous);
-      toast.show(e instanceof ApiError ? e.message : 'Could not save that setting.', 'error');
+      toast.show(errorMessage(e, 'Could not save that setting.'), 'error');
     },
   });
 
@@ -342,7 +340,7 @@ function PreferencesCard({ initial }: { initial: LandlordNotificationPreference[
     onSuccess: () => qc.invalidateQueries({ queryKey: qk.landlord.notificationPreferences }),
     onError: (e, { previous }) => {
       setPrefs(previous);
-      toast.show(e instanceof ApiError ? e.message : 'Could not save that preference.', 'error');
+      toast.show(errorMessage(e, 'Could not save that preference.'), 'error');
     },
   });
 

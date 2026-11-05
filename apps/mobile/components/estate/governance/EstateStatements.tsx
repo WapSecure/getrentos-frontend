@@ -19,7 +19,6 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
-import { errorText } from '@/components/estate/EstateUI';
 import { StatusPill } from '@/components/host/HostUI';
 import {
   canRetryPayout,
@@ -37,6 +36,7 @@ import {
 import { COMMON_BANKS } from '@/lib/api/sellerPayout';
 import { formatDate, formatNaira } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
+import { errorMessage } from '@/lib/api/client';
 
 const period = (s: Pick<EstateStatement, 'periodStart' | 'periodEnd'>) =>
   `${formatDate(s.periodStart, 'medium')} – ${formatDate(s.periodEnd, 'medium')}`;
@@ -216,7 +216,9 @@ function PayoutAccountForm({
         You’ll be asked to confirm it’s you: this decides where the estate’s money goes.
       </Text>
       {save.error ? (
-        <FormAlert message={errorText(save.error, 'We couldn’t check that account. Try again.')} />
+        <FormAlert
+          message={errorMessage(save.error, 'We couldn’t check that account. Try again.')}
+        />
       ) : null}
       <Button
         label={account?.accountNumber ? 'Update payout account' : 'Save payout account'}
@@ -326,7 +328,7 @@ function GenerateForm({ estateId, onDone }: { estateId: string; onDone: () => vo
         </View>
       </View>
       {generate.error ? (
-        <FormAlert message={errorText(generate.error, 'Could not generate that statement.')} />
+        <FormAlert message={errorMessage(generate.error, 'Could not generate that statement.')} />
       ) : null}
       <Button
         label="Generate draft"
@@ -394,12 +396,12 @@ function StatementDetail({
   const issue = useMutation({
     mutationFn: () => estateGovernanceApi.issueStatement(estateId, statementId),
     onSuccess: (r) => settle(r, 'issue'),
-    onError: (e) => toast.show(errorText(e, 'Could not issue this statement.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not issue this statement.'), 'error'),
   });
   const retry = useMutation({
     mutationFn: () => estateGovernanceApi.retryPayout(estateId, statementId),
     onSuccess: (r) => settle(r, 'retry'),
-    onError: (e) => toast.show(errorText(e, 'Could not retry this payout.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not retry this payout.'), 'error'),
   });
 
   if (query.isError && !query.data) return <ErrorState onRetry={() => query.refetch()} />;

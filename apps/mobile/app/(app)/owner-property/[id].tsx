@@ -28,7 +28,7 @@ import {
   OWNER_VERIFICATION_TONE,
   type OwnerProperty,
 } from '@/lib/api/owner';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { readGate } from '@/lib/verificationGate';
 import { formatDate, formatNaira } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
@@ -70,8 +70,7 @@ export default function OwnerPropertyDetail() {
         ]
       );
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not set this up.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not set this up.'), 'error'),
   });
   const confirmRentOut = () =>
     Alert.alert(
@@ -134,8 +133,7 @@ export default function OwnerPropertyDetail() {
         'success'
       );
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not update the listing.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not update the listing.'), 'error'),
   });
 
   const p = property.data;
@@ -441,11 +439,7 @@ function ListForm({ property, onDone }: { property: OwnerProperty; onDone: () =>
       onDone();
     },
     onError: (err) => {
-      if (!readGate(err))
-        toast.show(
-          err instanceof ApiError ? err.message : 'Could not create the listing.',
-          'error'
-        );
+      if (!readGate(err)) toast.show(errorMessage(err, 'Could not create the listing.'), 'error');
     },
   });
 

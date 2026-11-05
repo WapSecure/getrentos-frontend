@@ -26,7 +26,7 @@ import {
   type ApplicationStatus,
   type LandlordApplication,
 } from '@/lib/api/landlord';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { TenancyStandingPanel } from '@/components/landlord/TenancyStandingPanel';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
@@ -64,8 +64,7 @@ export default function LandlordApplications() {
         'success'
       );
     },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not update that application.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not update that application.'), 'error'),
   });
 
   const confirm = (a: LandlordApplication, status: ApplicationStatus) =>

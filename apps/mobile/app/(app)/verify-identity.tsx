@@ -31,7 +31,7 @@ import {
   type IdentityDocumentType,
   type KycStatus,
 } from '@/lib/api/kyc';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { purposeFor } from '@/lib/api/trust';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { VerificationChecklist } from '@/components/trust/VerificationChecklist';
@@ -93,10 +93,7 @@ export default function VerifyIdentity() {
       toast.show('Submitted for review. We’ll notify you once it’s decided.', 'success');
     },
     onError: (err) => {
-      toast.show(
-        err instanceof ApiError ? err.message : 'Could not submit your documents.',
-        'error'
-      );
+      toast.show(errorMessage(err, 'Could not submit your documents.'), 'error');
     },
   });
 

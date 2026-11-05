@@ -27,7 +27,6 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
-import { errorText } from '@/components/estate/EstateUI';
 import { StatusPill, isUpgradeError } from '@/components/host/HostUI';
 import { ProUpsell } from '@/components/estate/governance/ProUpsell';
 import { useEstate } from '@/hooks/useEstate';
@@ -46,6 +45,7 @@ import {
 import { pickPhoto } from '@/lib/filePicker';
 import { haptics } from '@/lib/haptics';
 import { goBack } from '@/lib/goBack';
+import { errorMessage } from '@/lib/api/client';
 
 /**
  * The estate's public page on the website: one link to share with residents
@@ -155,7 +155,7 @@ function MicrositeForm({ estateId, initial }: { estateId: string; initial: Micro
       keep(next);
       toast.show('Banner updated.', 'success');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not upload that banner.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not upload that banner.'), 'error'),
   });
 
   const publish = useMutation({
@@ -167,7 +167,7 @@ function MicrositeForm({ estateId, initial }: { estateId: string; initial: Micro
     },
     onError: (e, next) => {
       setEnabled(!next);
-      toast.show(errorText(e, 'Could not change that.'), 'error');
+      toast.show(errorMessage(e, 'Could not change that.'), 'error');
     },
   });
 
@@ -312,7 +312,7 @@ function MicrositeForm({ estateId, initial }: { estateId: string; initial: Micro
         showCount
       />
       {save.error ? (
-        <FormAlert message={errorText(save.error, 'Could not save these changes.')} />
+        <FormAlert message={errorMessage(save.error, 'Could not save these changes.')} />
       ) : null}
       <Button
         label="Save changes"

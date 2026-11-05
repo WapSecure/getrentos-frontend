@@ -7,7 +7,7 @@ import { Sheet } from '@/components/Sheet';
 import { qk } from '@/lib/query/keys';
 import { documentsApi, type PickedFile, type RenterDocument } from '@/lib/api/documents';
 import { pickDocument } from '@/lib/filePicker';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 
 const TYPES: { value: RenterDocument['type']; label: string }[] = [
   { value: 'lease', label: 'Lease' },
@@ -57,11 +57,7 @@ function UploadDocumentForm({
       toast.show('Document uploaded.', 'success');
       onClose();
     },
-    onError: (err) =>
-      toast.show(
-        err instanceof ApiError ? err.message : 'Could not upload this document.',
-        'error'
-      ),
+    onError: (err) => toast.show(errorMessage(err, 'Could not upload this document.'), 'error'),
     onSettled: () => onSubmittingChange(false),
   });
 

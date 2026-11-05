@@ -23,7 +23,7 @@ import {
   useTheme,
   useToast,
 } from '@getrentos/ui-native';
-import { DueRow, confirmPaid, errorText } from '@/components/estate/EstateUI';
+import { DueRow, confirmPaid } from '@/components/estate/EstateUI';
 import { Stepper } from '@/components/host/HostUI';
 import { Sheet } from '@/components/Sheet';
 import { useEstate } from '@/hooks/useEstate';
@@ -31,6 +31,7 @@ import { CollectionPlanCard } from '@/components/collections/CollectionPlanCard'
 import { estateManagerApi, type Due, type ManagedEstate } from '@/lib/api/estateManager';
 import { haptics } from '@/lib/haptics';
 import { qk } from '@/lib/query/keys';
+import { errorMessage } from '@/lib/api/client';
 
 type View_ = 'OVERDUE' | 'PENDING' | 'PROCESSING' | 'PAID' | 'all';
 const VIEWS: { value: View_; label: string }[] = [
@@ -80,7 +81,7 @@ export default function EstateDues() {
     onError: (e) => {
       void haptics.error();
       qc.invalidateQueries({ queryKey: qk.estateManager.estate(estateId) });
-      toast.show(errorText(e, 'Could not record that payment.'), 'error');
+      toast.show(errorMessage(e, 'Could not record that payment.'), 'error');
     },
   });
 
@@ -275,7 +276,7 @@ function LateFeeForm({ estate, onDone }: { estate: ManagedEstate; onDone: () => 
             : 'With no late fee, an unpaid due is still marked overdue, with nothing added.'
         }
       />
-      {save.error ? <FormAlert message={errorText(save.error, 'Could not save.')} /> : null}
+      {save.error ? <FormAlert message={errorMessage(save.error, 'Could not save.')} /> : null}
       <Button label="Save rules" loading={save.isPending} onPress={() => save.mutate()} />
     </View>
   );

@@ -27,7 +27,7 @@ import {
   type FinancingPlan,
   type FinancingPlanLength,
 } from '@/lib/api/financing';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
@@ -197,8 +197,7 @@ function ApplyPanel({ rentAmount, onClose }: { rentAmount: number; onClose: () =
       );
       onClose();
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not apply for Flex.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not apply for Flex.'), 'error'),
   });
 
   return (
@@ -270,11 +269,7 @@ function ActivePlanCard({ overview }: { overview: { plan: FinancingPlan } }) {
       }
       qc.invalidateQueries({ queryKey: qk.renter.financing });
     },
-    onError: (err) =>
-      toast.show(
-        err instanceof ApiError ? err.message : 'Could not process this payment.',
-        'error'
-      ),
+    onError: (err) => toast.show(errorMessage(err, 'Could not process this payment.'), 'error'),
   });
 
   const confirmPay = (installment: FinancingInstallment) => {

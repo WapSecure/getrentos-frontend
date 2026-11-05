@@ -25,7 +25,7 @@ import {
 } from '@/lib/api/buyerOffers';
 import { CounterOfferSheet } from '@/components/buyer/CounterOfferSheet';
 import { formatDate } from '@/lib/format';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 
 export default function BuyerOfferDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -57,8 +57,7 @@ export default function BuyerOfferDetail() {
       invalidate();
       toast.show('Offer withdrawn.', 'success');
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not withdraw this offer.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not withdraw this offer.'), 'error'),
   });
 
   const acceptMutation = useMutation({
@@ -67,8 +66,7 @@ export default function BuyerOfferDetail() {
       invalidate();
       toast.show('Offer accepted.', 'success');
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not accept this offer.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not accept this offer.'), 'error'),
   });
 
   const confirmWithdraw = () => {

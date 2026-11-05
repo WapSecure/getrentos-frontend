@@ -7,7 +7,7 @@ import { Button, Text, TextField, useTheme, useToast } from '@getrentos/ui-nativ
 import { Sheet } from '@/components/Sheet';
 import { qk } from '@/lib/query/keys';
 import { shortletsApi, type ShortletListing } from '@/lib/api/shortlets';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { haptics } from '@/lib/haptics';
 
 type HostOf = Pick<ShortletListing, 'id' | 'title' | 'hostName'>;
@@ -40,7 +40,7 @@ function Inner({
       onClose();
       router.push({ pathname: '/(app)/shortlet-conversation/[id]', params: { id: c.id } });
     },
-    onError: (e) => toast.show(e instanceof ApiError ? e.message : 'Message not sent.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Message not sent.'), 'error'),
   });
 
   return (

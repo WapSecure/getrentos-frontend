@@ -16,7 +16,7 @@ import { Sheet } from '@/components/Sheet';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
 import { qk } from '@/lib/query/keys';
 import { landlordApi } from '@/lib/api/landlord';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 
 interface Props {
   open: boolean;
@@ -90,8 +90,7 @@ function CreateLeaseForm({
       toast.show(sendNow ? 'Lease sent to the tenant.' : 'Lease saved as a draft.', 'success');
       onClose();
     },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not create that lease.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not create that lease.'), 'error'),
     onSettled: () => onSubmittingChange(false),
   });
 

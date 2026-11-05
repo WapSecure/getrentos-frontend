@@ -22,7 +22,7 @@ import { qk } from '@/lib/query/keys';
 import { offerGap, OWNER_OFFER_LABEL, OWNER_OFFER_TONE, type OwnerOffer } from '@/lib/api/owner';
 import { asOfferSide, sellerOffers, type OfferSide } from '@/lib/api/sellerOffers';
 import { formatDate } from '@/lib/format';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { readGate } from '@/lib/verificationGate';
 import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
@@ -78,7 +78,7 @@ export default function OwnerOfferDetail() {
       haptics.error();
       // A trust-tier block is explained inline, with the way forward.
       if (!readGate(err)) {
-        toast.show(err instanceof ApiError ? err.message : 'Could not accept this offer.', 'error');
+        toast.show(errorMessage(err, 'Could not accept this offer.'), 'error');
       }
     },
   });
@@ -89,8 +89,7 @@ export default function OwnerOfferDetail() {
       refresh();
       toast.show('Offer declined.', 'success');
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not decline this offer.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not decline this offer.'), 'error'),
   });
 
   const open = offer?.status === 'submitted' || offer?.status === 'countered';
@@ -346,11 +345,7 @@ function CounterForm({
       toast.show('Counter-offer sent.', 'success');
       onDone();
     },
-    onError: (err) =>
-      toast.show(
-        err instanceof ApiError ? err.message : 'Could not send the counter-offer.',
-        'error'
-      ),
+    onError: (err) => toast.show(errorMessage(err, 'Could not send the counter-offer.'), 'error'),
   });
 
   return (

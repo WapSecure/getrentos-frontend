@@ -26,7 +26,7 @@ import {
   PAYMENT_STATUS_TONE,
   type Payment,
 } from '@/lib/api/payments';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { DisputePaymentSheet } from '@/components/payments/DisputePaymentSheet';
 import { PayAmountSheet } from '@/components/payments/PayAmountSheet';
@@ -60,8 +60,7 @@ export default function Payments() {
       qc.invalidateQueries({ queryKey: qk.renter.lease });
       qc.invalidateQueries({ queryKey: qk.renter.dashboardStats });
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not process the payment.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not process the payment.'), 'error'),
   });
 
   const confirmMoveInMutation = useMutation({
@@ -72,11 +71,7 @@ export default function Payments() {
       qc.invalidateQueries({ queryKey: qk.renter.lease });
       qc.invalidateQueries({ queryKey: qk.renter.dashboardStats });
     },
-    onError: (err) =>
-      toast.show(
-        err instanceof ApiError ? err.message : 'Could not release this payment.',
-        'error'
-      ),
+    onError: (err) => toast.show(errorMessage(err, 'Could not release this payment.'), 'error'),
   });
 
   const confirmMoveIn = (payment: Payment) => {

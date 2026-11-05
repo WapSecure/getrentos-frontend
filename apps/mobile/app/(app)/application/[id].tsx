@@ -30,7 +30,7 @@ import {
   APPLICATION_STATUS_LABEL,
   APPLICATION_STATUS_TONE,
 } from '@/lib/api/applications';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { track } from '@/lib/analytics';
 import { formatDate } from '@/lib/format';
 import { ApplicationNotesSection } from '@/components/applications/ApplicationNotesSection';
@@ -59,7 +59,7 @@ export default function ApplicationDetail() {
       toast.show('Application withdrawn.', 'success');
     },
     onError: (err) => {
-      toast.show(err instanceof ApiError ? err.message : 'Could not withdraw. Try again.', 'error');
+      toast.show(errorMessage(err, 'Could not withdraw. Try again.'), 'error');
     },
     onSettled: () => setWithdrawing(false),
   });

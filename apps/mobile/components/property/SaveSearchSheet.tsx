@@ -6,7 +6,7 @@ import { Sheet } from '@/components/Sheet';
 import { qk } from '@/lib/query/keys';
 import { savedSearchesApi } from '@/lib/api/savedSearches';
 import type { ListingFilters } from '@/lib/api/properties';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 
 interface Props {
   open: boolean;
@@ -46,8 +46,7 @@ function SaveSearchForm({ onClose, filters }: Omit<Props, 'open'>) {
       toast.show('Search saved: we’ll alert you to new matches.', 'success');
       onClose();
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not save this search.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not save this search.'), 'error'),
   });
 
   return (

@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button, Text, TextField, useTheme, useToast } from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { agentClientsApi } from '@/lib/api/agentClients';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 
 interface Props {
   open: boolean;
@@ -42,8 +42,7 @@ function InviteClientForm({
       toast.show('Invitation sent.', 'success');
       onClose();
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not send this invite.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not send this invite.'), 'error'),
     onSettled: () => onSubmittingChange(false),
   });
 

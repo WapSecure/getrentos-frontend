@@ -5,7 +5,7 @@ import { Button, NumberField, Text, TextField, useTheme, useToast } from '@getre
 import { Sheet } from '@/components/Sheet';
 import { qk } from '@/lib/query/keys';
 import { buyerOffersApi, type BuyerOffer } from '@/lib/api/buyerOffers';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 
 interface Props {
   open: boolean;
@@ -54,11 +54,7 @@ function CounterForm({
       toast.show('Counter offer sent.', 'success');
       onClose();
     },
-    onError: (err) =>
-      toast.show(
-        err instanceof ApiError ? err.message : 'Could not send this counter offer.',
-        'error'
-      ),
+    onError: (err) => toast.show(errorMessage(err, 'Could not send this counter offer.'), 'error'),
     onSettled: () => onSubmittingChange(false),
   });
 

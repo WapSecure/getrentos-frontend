@@ -16,7 +16,7 @@ import {
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { hostShortletsApi, type HostListing } from '@/lib/api/hostShortlets';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { pickPhotos, type PickedVideo } from '@/lib/filePicker';
 import { VideoTourField } from '@/components/video/VideoTourField';
 import type { VideoOnSiteReport } from '@/lib/filmedOnSite';
@@ -310,11 +310,7 @@ function Gallery({ listing: l }: { listing: HostListing }) {
             onExpired={() => void refresh()}
           />
         </View>
-        {save.error ? (
-          <FormAlert
-            message={save.error instanceof ApiError ? save.error.message : 'Could not save.'}
-          />
-        ) : null}
+        {save.error ? <FormAlert message={errorMessage(save.error, 'Could not save.')} /> : null}
       </ScrollView>
       <View
         style={{

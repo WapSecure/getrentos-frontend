@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button, NumberField, TextField, useTheme, useToast } from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { landlordApi } from '@/lib/api/landlord';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 
 interface Props {
   open: boolean;
@@ -62,8 +62,7 @@ function AddUnitForm({
       toast.show('Unit added.', 'success');
       onClose();
     },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not add that unit.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not add that unit.'), 'error'),
     onSettled: () => onSubmittingChange(false),
   });
 

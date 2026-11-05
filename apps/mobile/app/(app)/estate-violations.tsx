@@ -12,7 +12,6 @@ import {
   useTheme,
   useToast,
 } from '@getrentos/ui-native';
-import { errorText } from '@/components/estate/EstateUI';
 import { HouseholdPicker } from '@/components/estate/HouseholdPicker';
 import { CloseSheet, QueueCard, QueueScreen, type QueueView } from '@/components/estate/Triage';
 import { Sheet } from '@/components/Sheet';
@@ -28,6 +27,7 @@ import {
 } from '@/lib/api/estateManager';
 import { haptics } from '@/lib/haptics';
 import { qk } from '@/lib/query/keys';
+import { errorMessage } from '@/lib/api/client';
 
 /** Rule breaches by household: record one, warn the resident, then close it. */
 export default function EstateViolations() {
@@ -63,7 +63,7 @@ export default function EstateViolations() {
     },
     onError: (e) => {
       refreshQueue();
-      toast.show(errorText(e, 'Could not send the warning.'), 'error');
+      toast.show(errorMessage(e, 'Could not send the warning.'), 'error');
     },
   });
   const close = useMutation({
@@ -77,7 +77,7 @@ export default function EstateViolations() {
     },
     onError: (e) => {
       refreshQueue();
-      toast.show(errorText(e, 'Could not close this violation.'), 'error');
+      toast.show(errorMessage(e, 'Could not close this violation.'), 'error');
     },
   });
 
@@ -220,7 +220,7 @@ function RecordForm({ estateId, onDone }: { estateId: string; onDone: () => void
         maxLength={2000}
         hint="The resident reads this if you send a warning, so say it as you would to them."
       />
-      {save.error ? <FormAlert message={errorText(save.error, 'Could not record it.')} /> : null}
+      {save.error ? <FormAlert message={errorMessage(save.error, 'Could not record it.')} /> : null}
       <Button
         label="Record violation"
         disabled={!household || description.trim().length < 5}

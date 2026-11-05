@@ -18,7 +18,7 @@ import {
 import { LAND_WATCH_TIER_LABELS, type LandWatchTier } from '@getrentos/shared';
 import { qk } from '@/lib/query/keys';
 import { landWatchApi } from '@/lib/api/landWatch';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { haptics } from '@/lib/haptics';
 import { goBack } from '@/lib/goBack';
@@ -57,10 +57,7 @@ export default function LandWatchNew() {
     },
     onError: (e) => {
       void haptics.error();
-      toast.show(
-        e instanceof ApiError ? e.message : 'Not started. Check your connection and try again.',
-        'error'
-      );
+      toast.show(errorMessage(e, 'Not started. Check your connection and try again.'), 'error');
     },
   });
 

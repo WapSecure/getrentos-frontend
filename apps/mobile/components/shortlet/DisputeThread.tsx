@@ -18,7 +18,7 @@ import {
 } from '@getrentos/ui-native';
 import type { DisputeMessage, ShortletDispute } from '@/lib/api/hostShortlets';
 import type { Paginated } from '@/lib/api/properties';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate, relativeTime } from '@/lib/format';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
@@ -67,7 +67,7 @@ export function DisputeThread({
       setText('');
       qc.invalidateQueries({ queryKey: messagesKey });
     },
-    onError: (e) => toast.show(e instanceof ApiError ? e.message : 'Not sent.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Not sent.'), 'error'),
   });
   const resolved = d?.status === 'RESOLVED';
 

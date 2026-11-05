@@ -3,7 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 import { Sparkles } from 'lucide-react-native';
 import { Badge, Button, Card, Text, useTheme, type BadgeTone } from '@getrentos/ui-native';
 import type { AgentInspectionType, RoomCondition } from '@/lib/api/agent';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import {
   CHANGE_LABEL,
   inspectionDraftApi,
@@ -78,7 +78,7 @@ export function InspectionDraftPanel({
         />
         {draft.isError ? (
           <Text variant="caption" color="destructive" accessibilityRole="alert">
-            {draft.error instanceof ApiError ? draft.error.message : 'Could not draft the report.'}
+            {errorMessage(draft.error, 'Could not draft the report.')}
           </Text>
         ) : null}
 

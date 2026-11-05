@@ -40,7 +40,7 @@ import { useAuth } from '@/lib/auth/AuthProvider';
 import { accountRolesApi } from '@/lib/api/accountRoles';
 import { RequestInspection, RequestTour } from '@/components/land/LandRequests';
 import { Sheet } from '@/components/Sheet';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { useAskSeller } from '@/hooks/useAskSeller';
 import { MakeOfferSheet } from '@/components/buyer/MakeOfferSheet';
 import { RequestViewingSheet } from '@/components/buyer/RequestViewingSheet';
@@ -90,8 +90,7 @@ export default function LandListingDetail() {
       await refreshProfile();
       toast.show('Buyer account added. You can now ask, view and offer.', 'success');
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not add a buyer account.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not add a buyer account.'), 'error'),
   });
   const target = listing
     ? { id: listing.id, title: listing.title, askingPrice: listing.price }

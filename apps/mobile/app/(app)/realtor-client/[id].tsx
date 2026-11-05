@@ -18,7 +18,7 @@ import {
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { clientName, clientRole, realtorApi } from '@/lib/api/realtor';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { ContactActions } from '@/components/realtor/RealtorUI';
@@ -49,8 +49,7 @@ export default function RealtorClientDetail() {
         pathname: '/(app)/realtor-conversation/[id]',
         params: { id: conversation.id },
       }),
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not open the chat.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not open the chat.'), 'error'),
   });
 
   const listedIds = new Set(

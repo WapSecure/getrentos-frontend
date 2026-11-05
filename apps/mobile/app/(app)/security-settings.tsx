@@ -35,7 +35,7 @@ import {
   type SecurityOverview,
   type TwoFactorEnrollment,
 } from '@/lib/api/security';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { isPasskeySupported, registerPasskey } from '@/lib/passkey';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import {
@@ -183,11 +183,7 @@ function PhoneVerificationSection({ overview }: { overview: SecurityOverview }) 
       setReference(res.reference);
       toast.show('Verification code sent.', 'success');
     },
-    onError: (err) =>
-      toast.show(
-        err instanceof ApiError ? err.message : 'Could not send a code right now.',
-        'error'
-      ),
+    onError: (err) => toast.show(errorMessage(err, 'Could not send a code right now.'), 'error'),
   });
 
   const confirmMutation = useMutation({
@@ -200,8 +196,7 @@ function PhoneVerificationSection({ overview }: { overview: SecurityOverview }) 
       setOtp('');
       toast.show('Phone number verified.', 'success');
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'That code is incorrect.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'That code is incorrect.'), 'error'),
   });
 
   if (!overview.phone) return null;
@@ -263,11 +258,7 @@ function TwoFactorSection({ overview }: { overview: SecurityOverview }) {
   const enrollMutation = useMutation({
     mutationFn: securityApi.enrollTwoFactor,
     onSuccess: setEnrollment,
-    onError: (err) =>
-      toast.show(
-        err instanceof ApiError ? err.message : 'Could not start 2FA enrollment.',
-        'error'
-      ),
+    onError: (err) => toast.show(errorMessage(err, 'Could not start 2FA enrollment.'), 'error'),
   });
 
   const enableMutation = useMutation({
@@ -278,8 +269,7 @@ function TwoFactorSection({ overview }: { overview: SecurityOverview }) {
       setToken('');
       toast.show('Two-factor authentication enabled.', 'success');
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'That code is incorrect.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'That code is incorrect.'), 'error'),
   });
 
   const disableMutation = useMutation({
@@ -290,8 +280,7 @@ function TwoFactorSection({ overview }: { overview: SecurityOverview }) {
       setDisableToken('');
       toast.show('Two-factor authentication disabled.', 'success');
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'That code is incorrect.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'That code is incorrect.'), 'error'),
   });
 
   return (
@@ -426,8 +415,7 @@ function TransactionPinSection({ overview }: { overview: SecurityOverview }) {
       reset();
       toast.show('Transaction PIN saved.', 'success');
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not save your PIN.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not save your PIN.'), 'error'),
   });
 
   const mismatch = confirm.length === 4 && pin !== confirm;
@@ -460,7 +448,13 @@ function TransactionPinSection({ overview }: { overview: SecurityOverview }) {
       ) : (
         <View style={{ gap: spacing.sm }}>
           <PasswordField label="Current password" value={password} onChangeText={setPassword} />
-          <NumberField code label="New 4-digit PIN" value={pin} onValueChange={setPin} maxLength={4} />
+          <NumberField
+            code
+            label="New 4-digit PIN"
+            value={pin}
+            onValueChange={setPin}
+            maxLength={4}
+          />
           <NumberField
             code
             label="Confirm PIN"
@@ -499,7 +493,11 @@ function PasskeySection() {
   const toast = useToast();
   const qc = useQueryClient();
   const supported = isPasskeySupported();
-  const list = useQuery({ queryKey: qk.passkeys, queryFn: securityApi.listPasskeys, enabled: supported });
+  const list = useQuery({
+    queryKey: qk.passkeys,
+    queryFn: securityApi.listPasskeys,
+    enabled: supported,
+  });
 
   const addMutation = useMutation({
     mutationFn: async () => {
@@ -515,7 +513,7 @@ function PasskeySection() {
     onError: (err) => {
       // Cancelling the OS prompt is not an error worth shouting about.
       if (err instanceof Error && /cancel|NotAllowed|UserCancelled/i.test(err.message)) return;
-      toast.show(err instanceof ApiError ? err.message : 'Could not add that passkey.', 'error');
+      toast.show(errorMessage(err, 'Could not add that passkey.'), 'error');
     },
   });
 
@@ -526,8 +524,7 @@ function PasskeySection() {
       qc.invalidateQueries({ queryKey: qk.security });
       toast.show('Passkey removed.', 'success');
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not remove that passkey.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not remove that passkey.'), 'error'),
   });
 
   if (!supported) return null;
@@ -595,11 +592,7 @@ function PasswordSection() {
       setNewPassword('');
       toast.show('Password updated.', 'success');
     },
-    onError: (err) =>
-      toast.show(
-        err instanceof ApiError ? err.message : 'Could not change your password.',
-        'error'
-      ),
+    onError: (err) => toast.show(errorMessage(err, 'Could not change your password.'), 'error'),
   });
 
   return (
@@ -677,11 +670,7 @@ function DangerSection() {
       toast.show('Your account has been deactivated.', 'success');
       await signOut();
     },
-    onError: (err) =>
-      toast.show(
-        err instanceof ApiError ? err.message : 'Could not deactivate your account.',
-        'error'
-      ),
+    onError: (err) => toast.show(errorMessage(err, 'Could not deactivate your account.'), 'error'),
   });
 
   const onPress = () => {
