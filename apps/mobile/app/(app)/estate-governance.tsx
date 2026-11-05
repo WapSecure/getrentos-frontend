@@ -30,7 +30,6 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
-import { errorText } from '@/components/estate/EstateUI';
 import { StatusPill } from '@/components/host/HostUI';
 import { Sheet } from '@/components/Sheet';
 import { GovernanceUploadSheet } from '@/components/estate/governance/GovernanceUploadSheet';
@@ -52,6 +51,7 @@ import {
 import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { goBack } from '@/lib/goBack';
+import { errorMessage } from '@/lib/api/client';
 
 type Panel =
   | { kind: 'upload'; newVersionOf?: GovernanceRecord }
@@ -87,7 +87,7 @@ export default function EstateGovernance() {
       qc.invalidateQueries({ queryKey: governanceKeys.all(estateId) });
       toast.show('Record removed.', 'success');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not remove this record.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not remove this record.'), 'error'),
   });
 
   const confirmRemove = (r: GovernanceRecord) =>

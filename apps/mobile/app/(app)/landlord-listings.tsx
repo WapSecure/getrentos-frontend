@@ -26,7 +26,7 @@ import {
   LISTING_STATUS_TONE,
   type LandlordListing,
 } from '@/lib/api/landlord';
-import { ApiError } from '@/lib/api/client';
+import { ApiError, errorMessage } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
@@ -65,7 +65,7 @@ export default function LandlordListings() {
         toast.show('Verify your identity to put a listing back online.', 'error');
         return;
       }
-      toast.show(e instanceof ApiError ? e.message : 'Could not update that listing.', 'error');
+      toast.show(errorMessage(e, 'Could not update that listing.'), 'error');
     },
   });
 

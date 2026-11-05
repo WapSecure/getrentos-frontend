@@ -12,7 +12,7 @@ import {
 } from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { landlordApi, type LandlordUnit } from '@/lib/api/landlord';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 
 interface Props {
   open: boolean;
@@ -94,8 +94,7 @@ function RecordForm({
       toast.show('Tenancy recorded.', 'success');
       onClose();
     },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not record that occupier.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not record that occupier.'), 'error'),
     onSettled: () => onSubmittingChange(false),
   });
 

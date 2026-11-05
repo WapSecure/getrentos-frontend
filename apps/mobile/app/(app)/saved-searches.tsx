@@ -17,7 +17,7 @@ import {
 import { qk } from '@/lib/query/keys';
 import { savedSearchesApi, type SavedSearch } from '@/lib/api/savedSearches';
 import { PROPERTY_TYPE_LABEL } from '@/lib/api/properties';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { useOptimisticMutation } from '@/lib/query/optimistic';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
@@ -62,8 +62,7 @@ export default function SavedSearches() {
         old?.filter((s) => s.id !== id)
       );
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not delete this search.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not delete this search.'), 'error'),
   });
 
   const runSearch = (s: SavedSearch) => {

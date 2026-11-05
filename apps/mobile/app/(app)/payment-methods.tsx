@@ -28,7 +28,7 @@ import {
   PAYMENT_METHOD_TYPE_LABEL,
   type SavedPaymentMethod,
 } from '@/lib/api/payments';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { AddPaymentMethodSheet } from '@/components/payments/AddPaymentMethodSheet';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
@@ -59,8 +59,7 @@ export default function PaymentMethods() {
       qc.invalidateQueries({ queryKey: qk.renter.paymentMethods });
       toast.show('Default payment method updated.', 'success');
     },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not set that default.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not set that default.'), 'error'),
   });
 
   const remove = useMutation({
@@ -69,8 +68,7 @@ export default function PaymentMethods() {
       qc.invalidateQueries({ queryKey: qk.renter.paymentMethods });
       toast.show('Payment method removed.', 'success');
     },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not remove that method.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not remove that method.'), 'error'),
   });
 
   const confirmRemove = (m: SavedPaymentMethod) => {

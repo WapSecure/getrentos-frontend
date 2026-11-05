@@ -6,7 +6,7 @@ import { Sheet } from '@/components/Sheet';
 import { StarRating } from '@/components/reviews/StarRating';
 import { qk } from '@/lib/query/keys';
 import { reviewsApi, type PendingReview } from '@/lib/api/reviews';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 
 interface Props {
   open: boolean;
@@ -78,8 +78,7 @@ function SubmitReviewForm({
       toast.show('Thanks: your review is live.', 'success');
       onClose();
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not submit that review.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not submit that review.'), 'error'),
     onSettled: () => onSubmittingChange(false),
   });
 

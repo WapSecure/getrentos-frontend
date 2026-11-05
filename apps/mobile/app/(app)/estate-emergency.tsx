@@ -17,7 +17,6 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
-import { errorText } from '@/components/estate/EstateUI';
 import { StatusPill } from '@/components/host/HostUI';
 import { Sheet } from '@/components/Sheet';
 import { useEstate } from '@/hooks/useEstate';
@@ -37,6 +36,7 @@ import { formatDate, formatTime, relativeTime } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { qk } from '@/lib/query/keys';
 import { goBack } from '@/lib/goBack';
+import { errorMessage } from '@/lib/api/client';
 
 const POLL_MS = 8000;
 
@@ -176,7 +176,7 @@ function DeclareForm({ estateId, households }: { estateId: string; households: n
         hint="Where residents should go"
       />
       {declare.error ? (
-        <FormAlert message={errorText(declare.error, 'Could not declare the emergency.')} />
+        <FormAlert message={errorMessage(declare.error, 'Could not declare the emergency.')} />
       ) : null}
       <Button
         label="Alert every resident"
@@ -253,7 +253,7 @@ function Roll({ estateId, muster }: { estateId: string; muster: EmergencyMuster 
   const fail = (fallback: string) => (e: unknown) => {
     void haptics.error();
     qc.invalidateQueries({ queryKey: qk.estateManager.activeMuster(estateId) });
-    toast.show(errorText(e, fallback), 'error');
+    toast.show(errorMessage(e, fallback), 'error');
   };
 
   const mark = useMutation({

@@ -17,7 +17,7 @@ import {
   BUYER_NOTIFICATION_CATEGORY_LABEL,
   type BuyerNotificationPreference,
 } from '@/lib/api/buyerSettings';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { categorySendsEmail } from '@getrentos/shared';
 import { goBack } from '@/lib/goBack';
@@ -46,10 +46,7 @@ export default function BuyerNotificationSettings() {
     },
     onError: (err, _vars, ctx) => {
       if (ctx?.previous) qc.setQueryData(qk.buyer.notificationPreferences, ctx.previous);
-      toast.show(
-        err instanceof ApiError ? err.message : 'Could not update that preference.',
-        'error'
-      );
+      toast.show(errorMessage(err, 'Could not update that preference.'), 'error');
     },
     onSuccess: (updated) => qc.setQueryData(qk.buyer.notificationPreferences, updated),
   });

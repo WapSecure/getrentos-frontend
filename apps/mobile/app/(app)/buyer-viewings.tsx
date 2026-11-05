@@ -23,7 +23,7 @@ import {
 } from '@/lib/api/buyerViewings';
 import { formatDate, formatTime } from '@/lib/format';
 import { VideoCallAction } from '@/components/viewings/VideoCallAction';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
 
@@ -45,8 +45,7 @@ export default function BuyerViewings() {
       qc.invalidateQueries({ queryKey: ['buyer', 'viewings'] });
       toast.show('Viewing cancelled.', 'success');
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not cancel this viewing.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not cancel this viewing.'), 'error'),
   });
 
   const confirmCancel = (item: BuyerViewing) => {

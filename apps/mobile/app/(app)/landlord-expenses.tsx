@@ -19,7 +19,7 @@ import {
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { landlordApi, EXPENSE_CATEGORY_LABEL, type LandlordExpense } from '@/lib/api/landlord';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { AddExpenseSheet } from '@/components/landlord/AddExpenseSheet';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
@@ -44,8 +44,7 @@ export default function LandlordExpenses() {
       qc.invalidateQueries({ queryKey: ['landlord', 'financials'] });
       toast.show('Expense removed.', 'success');
     },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not remove that expense.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not remove that expense.'), 'error'),
   });
 
   const items = query.data?.items ?? [];

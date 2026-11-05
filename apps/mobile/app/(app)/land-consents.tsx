@@ -26,7 +26,7 @@ import {
 } from '@getrentos/shared';
 import { qk } from '@/lib/query/keys';
 import { landConsentsApi, MIN_OBJECTION } from '@/lib/api/landConsents';
-import { ApiError } from '@/lib/api/client';
+import { ApiError, errorMessage } from '@/lib/api/client';
 import { Sheet } from '@/components/Sheet';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
@@ -117,8 +117,7 @@ function ConsentCard({ item, onObject }: { item: LandConsentRequest; onObject: (
       qc.invalidateQueries({ queryKey: qk.landConsents });
       toast.show('Thank you. Your consent is recorded.', 'success');
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not record that.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not record that.'), 'error'),
   });
 
   return (

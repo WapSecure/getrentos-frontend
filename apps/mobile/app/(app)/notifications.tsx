@@ -31,7 +31,7 @@ import { qk } from '@/lib/query/keys';
 import { useOptimisticMutation } from '@/lib/query/optimistic';
 import { notificationsApi, type RenterNotification } from '@/lib/api/notifications';
 import type { NotificationCategory } from '@/lib/api/notificationPreferences';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { relativeTime } from '@/lib/format';
 
 const PAGE_SIZE = 30;
@@ -120,8 +120,7 @@ export default function Notifications() {
       invalidate();
       toast.show('Notifications cleared.', 'success');
     },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not clear those.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not clear those.'), 'error'),
   });
 
   const confirmClearAll = () => {

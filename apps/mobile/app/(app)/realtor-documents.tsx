@@ -29,7 +29,7 @@ import {
   type RealtorDocument,
 } from '@/lib/api/realtor';
 import type { PickedFile } from '@/lib/api/documents';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { pickDocument } from '@/lib/filePicker';
 import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
@@ -278,9 +278,7 @@ function UploadForm({
         </View>
       </View>
       {upload.error ? (
-        <FormAlert
-          message={upload.error instanceof ApiError ? upload.error.message : 'Could not upload it.'}
-        />
+        <FormAlert message={errorMessage(upload.error, 'Could not upload it.')} />
       ) : null}
       <Button
         label="Upload"

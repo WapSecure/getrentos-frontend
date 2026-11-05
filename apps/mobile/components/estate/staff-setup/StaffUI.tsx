@@ -12,7 +12,6 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
-import { errorText } from '@/components/estate/EstateUI';
 import {
   estateStaffSetupApi,
   isEmail,
@@ -22,6 +21,7 @@ import {
 } from '@/lib/api/estateStaffSetup';
 import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
+import { errorMessage } from '@/lib/api/client';
 
 /** One gateman: who they are, since when, and a way to take them off the gate. */
 export function StaffRow({
@@ -138,7 +138,7 @@ function AddGatemanForm({
         hint="They need a GetRentos account first. If they don’t have one, ask them to sign up."
       />
       {add.error ? (
-        <FormAlert message={errorText(add.error, 'Could not add this gateman. Try again.')} />
+        <FormAlert message={errorMessage(add.error, 'Could not add this gateman. Try again.')} />
       ) : null}
       <Button
         label="Add gateman"

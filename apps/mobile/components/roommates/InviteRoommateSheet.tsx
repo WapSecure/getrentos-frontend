@@ -5,7 +5,7 @@ import { Button, Text, TextField, useTheme, useToast } from '@getrentos/ui-nativ
 import { Sheet } from '@/components/Sheet';
 import { qk } from '@/lib/query/keys';
 import { roommatesApi } from '@/lib/api/roommates';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 
 interface Props {
   open: boolean;
@@ -44,8 +44,7 @@ function InviteRoommateForm({
       toast.show('Invite sent.', 'success');
       onClose();
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not send this invite.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not send this invite.'), 'error'),
     onSettled: () => onSubmittingChange(false),
   });
 

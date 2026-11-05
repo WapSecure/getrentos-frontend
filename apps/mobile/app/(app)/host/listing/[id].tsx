@@ -34,7 +34,7 @@ import {
   rulesSummary,
   type HostListing,
 } from '@/lib/api/hostShortlets';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { PropertyGallery } from '@/components/property/PropertyGallery';
@@ -84,7 +84,7 @@ export default function HostListingDetail() {
     },
     onError: (err, _s, ctx) => {
       if (ctx?.previous) qc.setQueryData(qk.host.listings, ctx.previous);
-      toast.show(err instanceof ApiError ? err.message : 'Could not change the status.', 'error');
+      toast.show(errorMessage(err, 'Could not change the status.'), 'error');
     },
     onSettled: () => qc.invalidateQueries({ queryKey: qk.host.listings }),
   });

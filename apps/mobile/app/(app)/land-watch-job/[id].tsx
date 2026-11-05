@@ -37,7 +37,7 @@ import {
 } from '@getrentos/shared';
 import { qk } from '@/lib/query/keys';
 import { landWatchApi } from '@/lib/api/landWatch';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate, formatNaira } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { haptics } from '@/lib/haptics';
@@ -113,10 +113,7 @@ export default function LandWatchJobScreen() {
     },
     onError: (e) => {
       void haptics.error();
-      toast.show(
-        e instanceof ApiError ? e.message : 'That didn’t go through. Check your connection.',
-        'error'
-      );
+      toast.show(errorMessage(e, 'That didn’t go through. Check your connection.'), 'error');
     },
   });
   const pending = (type: Action['type'], quoteId?: string) =>

@@ -8,7 +8,7 @@ import { qk } from '@/lib/query/keys';
 import { ownerApi, OWNERSHIP_DOCUMENTS, type OwnershipDocumentType } from '@/lib/api/owner';
 import { pickDocument } from '@/lib/filePicker';
 import type { PickedFile } from '@/lib/api/documents';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 
 interface Props {
   propertyId: string;
@@ -86,11 +86,7 @@ function ProofForm({ propertyId, onClose }: Omit<Props, 'open'>) {
         </Text>
       </Pressable>
       {send.error ? (
-        <FormAlert
-          message={
-            send.error instanceof ApiError ? send.error.message : 'Could not send the document.'
-          }
-        />
+        <FormAlert message={errorMessage(send.error, 'Could not send the document.')} />
       ) : null}
       <Button
         label="Send for review"

@@ -22,7 +22,7 @@ import {
   type BillingCycle,
   type ChargeCategory,
 } from '@/lib/api/landlord';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 
 interface Props {
   open: boolean;
@@ -95,8 +95,7 @@ function ChargeForm({
       toast.show(`Raised ${r.created} charge${r.created === 1 ? '' : 's'}.`, 'success');
       onClose();
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not raise that charge.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not raise that charge.'), 'error'),
     onSettled: () => onSubmittingChange(false),
   });
 

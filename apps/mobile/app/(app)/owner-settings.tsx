@@ -16,7 +16,7 @@ import {
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { ownerApi, type OwnerPreferences } from '@/lib/api/owner';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
 
@@ -67,11 +67,7 @@ function Form({ initial }: { initial: OwnerPreferences }) {
       qc.setQueryData(qk.owner.preferences, saved);
       toast.show('Preferences saved.', 'success');
     },
-    onError: (err) =>
-      toast.show(
-        err instanceof ApiError ? err.message : 'Could not save your preferences.',
-        'error'
-      ),
+    onError: (err) => toast.show(errorMessage(err, 'Could not save your preferences.'), 'error'),
   });
 
   return (

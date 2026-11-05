@@ -12,10 +12,10 @@ import {
   useTheme,
   useToast,
 } from '@getrentos/ui-native';
-import { errorText } from '@/components/estate/EstateUI';
 import { Sheet } from '@/components/Sheet';
 import { estateGateApi, gateKeys, type Gate } from '@/lib/api/estateGate';
 import { haptics } from '@/lib/haptics';
+import { errorMessage } from '@/lib/api/client';
 
 /**
  * The estate's gates: add one, or remove one it no longer uses. Small enough to
@@ -72,7 +72,7 @@ function GatesBody({ estateId }: { estateId: string }) {
       qc.invalidateQueries({ queryKey: gateKeys.gates(estateId) });
       toast.show(`${g.name} removed.`, 'success');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not remove this gate.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not remove this gate.'), 'error'),
   });
 
   return (
@@ -136,7 +136,9 @@ function GatesBody({ estateId }: { estateId: string }) {
         maxLength={120}
         placeholder="e.g. Admiralty Way entrance"
       />
-      {add.error ? <FormAlert message={errorText(add.error, 'Could not add the gate.')} /> : null}
+      {add.error ? (
+        <FormAlert message={errorMessage(add.error, 'Could not add the gate.')} />
+      ) : null}
       <Button
         label="Add gate"
         variant="secondary"

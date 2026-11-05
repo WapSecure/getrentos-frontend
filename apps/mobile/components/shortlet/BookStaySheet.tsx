@@ -8,7 +8,7 @@ import { Sheet } from '@/components/Sheet';
 import { Stepper } from '@/components/host/HostUI';
 import { qk } from '@/lib/query/keys';
 import { shortletsApi, type ShortletListing } from '@/lib/api/shortlets';
-import { ApiError } from '@/lib/api/client';
+import { ApiError, errorMessage } from '@/lib/api/client';
 import { nightsLabel, seasonRange } from '@/lib/stays';
 import { haptics } from '@/lib/haptics';
 import { PriceBreakdown } from './StayUI';
@@ -88,7 +88,7 @@ function BookForm({
         setBlocked({ code: err.code, message: err.message });
         return;
       }
-      toast.show(err instanceof ApiError ? err.message : 'Could not book this stay.', 'error');
+      toast.show(errorMessage(err, 'Could not book this stay.'), 'error');
     },
     onSettled: () => onSubmittingChange(false),
   });

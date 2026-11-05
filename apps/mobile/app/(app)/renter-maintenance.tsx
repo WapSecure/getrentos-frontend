@@ -24,7 +24,7 @@ import {
   MAINTENANCE_STATUS_TONE,
   type MaintenanceRequest,
 } from '@/lib/api/maintenance';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
@@ -45,8 +45,7 @@ export default function Maintenance() {
   const cancelMutation = useMutation({
     mutationFn: (id: string) => maintenanceApi.cancel(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: qk.renter.maintenance }),
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not cancel this request.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not cancel this request.'), 'error'),
   });
 
   const rateMutation = useMutation({
@@ -57,8 +56,7 @@ export default function Maintenance() {
       setRatingFor(null);
       toast.show('Thanks for the feedback.', 'success');
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not submit your rating.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not submit your rating.'), 'error'),
   });
 
   const confirmCancel = (id: string) => {

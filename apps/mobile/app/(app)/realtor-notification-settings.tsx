@@ -14,7 +14,7 @@ import {
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { realtorApi, type RealtorNotificationPreference } from '@/lib/api/realtor';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { categorySendsEmail } from '@getrentos/shared';
@@ -53,7 +53,7 @@ export default function RealtorNotificationSettings() {
     },
     onError: (err, _next, ctx) => {
       if (ctx?.previous) qc.setQueryData(key, ctx.previous);
-      toast.show(err instanceof ApiError ? err.message : 'Could not save that.', 'error');
+      toast.show(errorMessage(err, 'Could not save that.'), 'error');
     },
     onSuccess: (saved) => qc.setQueryData(key, saved),
   });

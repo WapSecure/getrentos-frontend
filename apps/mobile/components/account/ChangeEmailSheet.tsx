@@ -12,7 +12,7 @@ import {
 } from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { securityApi } from '@/lib/api/security';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
 interface Props {
@@ -84,11 +84,7 @@ function Form({ onClose }: { onClose: () => void }) {
           </>
         )}
         {error ? (
-          <FormAlert
-            message={
-              error instanceof ApiError ? error.message : 'That didn’t go through. Try again.'
-            }
-          />
+          <FormAlert message={errorMessage(error, 'That didn’t go through. Try again.')} />
         ) : null}
         <Button
           label={sent ? 'Confirm' : 'Send code'}

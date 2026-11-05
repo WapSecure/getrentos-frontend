@@ -29,7 +29,7 @@ import {
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { homeCareApi, type Asset, type AssetStatus } from '@/lib/api/homeCare';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { useMyHomes } from '@/hooks/useMyHomes';
@@ -234,7 +234,7 @@ function AssetActions({ a, onDone }: { a: Asset; onDone: () => void }) {
       toast.show(`Marked ${STATUS[status].label.toLowerCase()}.`, 'success');
       onDone();
     },
-    onError: (e) => toast.show(e instanceof ApiError ? e.message : 'Could not update it.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not update it.'), 'error'),
   });
   const facts = [
     ['Make', [a.manufacturer, a.modelNumber].filter(Boolean).join(' ')],
@@ -360,11 +360,7 @@ function AddAsset({ defaultHome, onDone }: { defaultHome: string; onDone: () => 
             <DateField label="Warranty to" value={warrantyTo} onChange={setWarrantyTo} />
           </View>
         </View>
-        {add.error ? (
-          <FormAlert
-            message={add.error instanceof ApiError ? add.error.message : 'Could not add it.'}
-          />
-        ) : null}
+        {add.error ? <FormAlert message={errorMessage(add.error, 'Could not add it.')} /> : null}
         <Button
           label="Add asset"
           disabled={!propertyId}

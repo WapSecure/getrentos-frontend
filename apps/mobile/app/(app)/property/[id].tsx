@@ -36,7 +36,7 @@ import { useSavedListings } from '@/hooks/useSavedListings';
 import { qk } from '@/lib/query/keys';
 import { propertiesApi } from '@/lib/api/properties';
 import { messagesApi } from '@/lib/api/messages';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { track } from '@/lib/analytics';
 import { recentlyViewedApi } from '@/lib/api/recentlyViewed';
 import { formatDate } from '@/lib/format';
@@ -74,11 +74,7 @@ export default function PropertyDetail() {
       return messagesApi.start(landlordId, query.data!.propertyId);
     },
     onSuccess: (conversation) => router.push(`/(app)/conversation/${conversation.id}`),
-    onError: (err) =>
-      toast.show(
-        err instanceof ApiError ? err.message : 'Could not start the conversation.',
-        'error'
-      ),
+    onError: (err) => toast.show(errorMessage(err, 'Could not start the conversation.'), 'error'),
   });
 
   useEffect(() => {

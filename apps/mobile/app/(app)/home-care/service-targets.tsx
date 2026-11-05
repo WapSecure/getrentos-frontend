@@ -26,7 +26,7 @@ import {
   type Priority,
   type SlaPolicy,
 } from '@/lib/api/homeCare';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { haptics } from '@/lib/haptics';
 import { useMyHomes } from '@/hooks/useMyHomes';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
@@ -318,11 +318,7 @@ function TargetForm({
       {resolve * 60 < respond * 60 ? (
         <FormAlert tone="warning" message="The fix time is shorter than the response time." />
       ) : null}
-      {save.error ? (
-        <FormAlert
-          message={save.error instanceof ApiError ? save.error.message : 'Could not save.'}
-        />
-      ) : null}
+      {save.error ? <FormAlert message={errorMessage(save.error, 'Could not save.')} /> : null}
       <Button label="Save targets" loading={save.isPending} onPress={() => save.mutate()} />
     </View>
   );

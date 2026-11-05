@@ -11,12 +11,12 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
-import { errorText } from '@/components/estate/EstateUI';
 import { landlordApi, type PayoutAccount } from '@/lib/api/landlord';
 import { payoutAccountValid } from '@/lib/api/estateGovernance';
 import { COMMON_BANKS } from '@/lib/api/sellerPayout';
 import { qk } from '@/lib/query/keys';
 import { haptics } from '@/lib/haptics';
+import { errorMessage } from '@/lib/api/client';
 
 /** Add or change the bank account a landlord's rent is paid out to. */
 export function PayoutAccountSheet({
@@ -122,7 +122,9 @@ function PayoutAccountForm({ account, onDone }: { account?: PayoutAccount; onDon
         You’ll be asked to confirm it’s you: this decides where your rent goes.
       </Text>
       {save.error ? (
-        <FormAlert message={errorText(save.error, 'We couldn’t check that account. Try again.')} />
+        <FormAlert
+          message={errorMessage(save.error, 'We couldn’t check that account. Try again.')}
+        />
       ) : null}
       <Button
         label={account?.accountNumber ? 'Update payout account' : 'Save payout account'}

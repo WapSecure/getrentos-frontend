@@ -27,7 +27,7 @@ import {
 import { qk } from '@/lib/query/keys';
 import { landlordApi } from '@/lib/api/landlord';
 import { IncomeExpenseChart } from '@/components/landlord/IncomeExpenseChart';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { CSV_MIME, shareDownloadedFile } from '@/lib/shareFile';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
@@ -46,7 +46,7 @@ export default function LandlordFinancials() {
       const { bytes } = await landlordApi.financialsExport();
       await shareDownloadedFile(bytes, 'getrentos-financials.csv', CSV_MIME, 'Financials');
     } catch (e) {
-      toast.show(e instanceof ApiError ? e.message : 'Could not export that.', 'error');
+      toast.show(errorMessage(e, 'Could not export that.'), 'error');
     } finally {
       setExporting(false);
     }

@@ -35,7 +35,7 @@ import {
 } from '@getrentos/shared';
 import { qk } from '@/lib/query/keys';
 import { landWatchApi } from '@/lib/api/landWatch';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { capturePhoto } from '@/lib/filePicker';
 import { locateRecording } from '@/lib/filmedOnSite';
 import {
@@ -291,11 +291,7 @@ function ReportForm({
       toast.show('Report filed. GetRentos reviews it before the owner sees it.', 'success');
       onFiled();
     },
-    onError: (err) =>
-      toast.show(
-        err instanceof ApiError ? err.message : 'That didn’t go through. Try again.',
-        'error'
-      ),
+    onError: (err) => toast.show(errorMessage(err, 'That didn’t go through. Try again.'), 'error'),
   });
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>

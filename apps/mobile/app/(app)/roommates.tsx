@@ -32,7 +32,7 @@ import {
 import { AssignTaskSheet } from '@/components/roommates/AssignTaskSheet';
 import { InviteRoommateSheet } from '@/components/roommates/InviteRoommateSheet';
 import { AddExpenseSheet } from '@/components/roommates/AddExpenseSheet';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { formatDate } from '@/lib/format';
 
@@ -68,32 +68,25 @@ export default function Roommates() {
       qc.invalidateQueries({ queryKey: qk.renter.roommateInvites });
       qc.invalidateQueries({ queryKey: qk.renter.roommates });
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not accept this invite.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not accept this invite.'), 'error'),
   });
 
   const declineMutation = useMutation({
     mutationFn: (id: string) => roommatesApi.declineInvite(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: qk.renter.roommateInvites }),
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not decline this invite.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not decline this invite.'), 'error'),
   });
 
   const removeMutation = useMutation({
     mutationFn: (id: string) => roommatesApi.remove(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: qk.renter.roommates }),
-    onError: (err) =>
-      toast.show(
-        err instanceof ApiError ? err.message : 'Could not remove this roommate.',
-        'error'
-      ),
+    onError: (err) => toast.show(errorMessage(err, 'Could not remove this roommate.'), 'error'),
   });
 
   const addTaskMutation = useMutation({
     mutationFn: ({ id, task }: { id: string; task: string }) => roommatesApi.addTask(id, task),
     onSuccess: () => qc.invalidateQueries({ queryKey: qk.renter.roommates }),
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not add that task.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not add that task.'), 'error'),
   });
 
   // Ticking a task off removes it at once; it comes back if the server says no.

@@ -29,7 +29,7 @@ import {
 } from '@/lib/api/landlord';
 import { VIEWING_STATUS_LABEL, VIEWING_STATUS_TONE } from '@/lib/api/viewings';
 import { localInstant } from '@/lib/api/realtor';
-import { ApiError } from '@/lib/api/client';
+import { ApiError, errorMessage } from '@/lib/api/client';
 import { formatDate, formatTime } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { Sheet } from '@/components/Sheet';
@@ -320,11 +320,7 @@ function ConfirmForm({ viewing, onDone }: { viewing: LandlordViewingRequest; onD
       ) : null}
       {inPast ? <FormAlert tone="warning" message="That time has already passed." /> : null}
       {save.error ? (
-        <FormAlert
-          message={
-            save.error instanceof ApiError ? save.error.message : 'Could not confirm the viewing.'
-          }
-        />
+        <FormAlert message={errorMessage(save.error, 'Could not confirm the viewing.')} />
       ) : null}
       <Button
         label="Confirm viewing"

@@ -25,7 +25,7 @@ import { qk } from '@/lib/query/keys';
 import { ownerApi, type OwnerViewing } from '@/lib/api/owner';
 import { BUYER_VIEWING_STATUS_LABEL, BUYER_VIEWING_STATUS_TONE } from '@/lib/api/buyerViewings';
 import { localInstant } from '@/lib/api/realtor';
-import { ApiError } from '@/lib/api/client';
+import { ApiError, errorMessage } from '@/lib/api/client';
 import { formatDate, formatTime } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { Sheet } from '@/components/Sheet';
@@ -340,11 +340,7 @@ function RescheduleForm({ viewing, onDone }: { viewing: OwnerViewing; onDone: ()
       </View>
       {inPast ? <FormAlert tone="warning" message="That time has already passed." /> : null}
       {save.error ? (
-        <FormAlert
-          message={
-            save.error instanceof ApiError ? save.error.message : 'Could not confirm the viewing.'
-          }
-        />
+        <FormAlert message={errorMessage(save.error, 'Could not confirm the viewing.')} />
       ) : null}
       <Button
         label="Confirm new time"

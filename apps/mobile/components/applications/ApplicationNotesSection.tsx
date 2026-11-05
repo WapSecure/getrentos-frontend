@@ -16,7 +16,7 @@ import {
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { applicationsApi, type ApplicationNote } from '@/lib/api/applications';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 
 interface Props {
@@ -47,8 +47,7 @@ export function ApplicationNotesSection({ applicationId }: Props) {
       setDraft('');
       setComposing(false);
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not save this note.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not save this note.'), 'error'),
   });
 
   const updateMutation = useMutation({
@@ -58,15 +57,13 @@ export function ApplicationNotesSection({ applicationId }: Props) {
       invalidate();
       setEditingId(null);
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not update this note.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not update this note.'), 'error'),
   });
 
   const removeMutation = useMutation({
     mutationFn: (id: string) => applicationsApi.deleteNote(applicationId, id),
     onSuccess: invalidate,
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not delete this note.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not delete this note.'), 'error'),
   });
 
   return (

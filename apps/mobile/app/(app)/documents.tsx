@@ -23,7 +23,7 @@ import { useOptimisticMutation } from '@/lib/query/optimistic';
 import { documentsApi, type RenterDocument } from '@/lib/api/documents';
 import { UploadDocumentSheet } from '@/components/documents/UploadDocumentSheet';
 import { Sheet } from '@/components/Sheet';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
@@ -79,8 +79,7 @@ export default function Documents() {
       setShareEmail('');
       toast.show('Document shared.', 'success');
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not share this document.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not share this document.'), 'error'),
   });
 
   const removeMutation = useMutation({
@@ -89,11 +88,7 @@ export default function Documents() {
       qc.invalidateQueries({ queryKey: qk.renter.documents });
       qc.invalidateQueries({ queryKey: qk.renter.documentSummary });
     },
-    onError: (err) =>
-      toast.show(
-        err instanceof ApiError ? err.message : 'Could not delete this document.',
-        'error'
-      ),
+    onError: (err) => toast.show(errorMessage(err, 'Could not delete this document.'), 'error'),
   });
 
   const confirmDelete = (id: string) => {

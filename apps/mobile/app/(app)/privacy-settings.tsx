@@ -22,7 +22,7 @@ import {
   type PrivacyPreferences,
   type ProfileVisibility,
 } from '@/lib/api/preferences';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
@@ -94,8 +94,7 @@ function PrivacyForm({
       qc.invalidateQueries({ queryKey: qk.renter.preferences });
       toast.show('Privacy settings saved.', 'success');
     },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not save those settings.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not save those settings.'), 'error'),
   });
 
   const saveTenancyStanding = useMutation({
@@ -103,7 +102,7 @@ function PrivacyForm({
     onSuccess: () => qc.invalidateQueries({ queryKey: qk.renter.preferences }),
     onError: (e, value) => {
       setShareTenancyStanding(!value); // put the switch back where it was
-      toast.show(e instanceof ApiError ? e.message : 'Could not update that.', 'error');
+      toast.show(errorMessage(e, 'Could not update that.'), 'error');
     },
   });
 

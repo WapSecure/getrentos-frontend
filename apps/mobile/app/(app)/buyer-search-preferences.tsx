@@ -21,7 +21,7 @@ import {
   buyerSettingsApi,
   type BuyerSearchPreferences as BuyerSearchPreferencesData,
 } from '@/lib/api/buyerSettings';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
@@ -82,11 +82,7 @@ function SearchPreferencesForm({ data }: { data: BuyerSearchPreferencesData }) {
       qc.setQueryData(qk.buyer.searchPreferences, updated);
       toast.show('Search preferences saved.', 'success');
     },
-    onError: (err) =>
-      toast.show(
-        err instanceof ApiError ? err.message : 'Could not save these preferences.',
-        'error'
-      ),
+    onError: (err) => toast.show(errorMessage(err, 'Could not save these preferences.'), 'error'),
   });
 
   const toggleType = (t: string) => {

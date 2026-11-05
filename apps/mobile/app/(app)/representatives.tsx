@@ -30,7 +30,7 @@ import {
   type RepKind,
   type Representative,
 } from '@/lib/api/representatives';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { Sheet } from '@/components/Sheet';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
@@ -40,9 +40,6 @@ const STATUS = {
   ACTIVE: { label: 'Approved', tone: 'success' },
   REVOKED: { label: 'Revoked', tone: 'neutral' },
 } as const;
-
-const errorText = (err: unknown, fallback: string) =>
-  err instanceof ApiError ? err.message : fallback;
 
 /**
  * Realtors and field agents who want to work on your properties. Nothing
@@ -158,7 +155,7 @@ function RepCard({
       refresh();
       toast.show(`${rep.person.name} is approved. Now choose their properties.`, 'success');
     },
-    onError: (err) => toast.show(errorText(err, 'Could not approve them.'), 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not approve them.'), 'error'),
   });
   const revoke = useMutation({
     mutationFn: () => representativesApi.revoke(kind, rep.id),
@@ -166,7 +163,7 @@ function RepCard({
       refresh();
       toast.show(`${rep.person.name} no longer has access.`, 'success');
     },
-    onError: (err) => toast.show(errorText(err, 'Could not revoke access.'), 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not revoke access.'), 'error'),
   });
 
   const confirmRevoke = () =>
@@ -242,7 +239,7 @@ function AssignProperties({ kind, rep }: { kind: RepKind; rep: Representative })
       const title = query.data?.items.find((p) => p.id === propertyId)?.title;
       toast.show(title ? `${rep.person.name} can now work on ${title}.` : 'Assigned.', 'success');
     },
-    onError: (err) => toast.show(errorText(err, 'Could not assign that property.'), 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not assign that property.'), 'error'),
   });
 
   return (
@@ -393,7 +390,7 @@ function AgentTaskForm({ rep, onDone }: { rep: Representative; onDone: () => voi
       <TimeField label="Due time" value={dueTime} onChange={setDueTime} />
       {create.error ? (
         <Text variant="caption" color="destructive">
-          {errorText(create.error, 'Could not create the task.')}
+          {errorMessage(create.error, 'Could not create the task.')}
         </Text>
       ) : null}
       <Button

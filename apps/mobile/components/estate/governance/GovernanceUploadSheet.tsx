@@ -17,7 +17,6 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
-import { errorText } from '@/components/estate/EstateUI';
 import { isUpgradeError } from '@/components/host/HostUI';
 import type { PickedFile } from '@/lib/api/documents';
 import {
@@ -30,6 +29,7 @@ import {
   type GovernanceRecordType,
 } from '@/lib/api/estateGovernance';
 import { haptics } from '@/lib/haptics';
+import { errorMessage } from '@/lib/api/client';
 
 const MIME: Record<string, string> = {
   pdf: 'application/pdf',
@@ -242,7 +242,7 @@ function UploadForm({
             message="Plain uploads stay free. Untick signatures to upload it now, or upgrade."
           />
         ) : (
-          <FormAlert message={errorText(upload.error, 'Could not upload this record.')} />
+          <FormAlert message={errorMessage(upload.error, 'Could not upload this record.')} />
         )
       ) : null}
       <Button

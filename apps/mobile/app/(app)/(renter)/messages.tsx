@@ -32,7 +32,7 @@ import {
 import { qk } from '@/lib/query/keys';
 import { messagesApi, type Conversation } from '@/lib/api/messages';
 import { relativeTime } from '@/lib/format';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import {
   patchConversation,
@@ -273,10 +273,7 @@ function useConversationToggle(
     },
     onError: (err, _id, ctx) => {
       if (ctx?.previous) qc.setQueryData(qk.renter.conversations, ctx.previous);
-      toast.show(
-        err instanceof ApiError ? err.message : 'Could not update that conversation.',
-        'error'
-      );
+      toast.show(errorMessage(err, 'Could not update that conversation.'), 'error');
     },
     onSuccess: (updated) => patchConversation(qc, updated),
   });

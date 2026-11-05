@@ -26,7 +26,7 @@ import {
   type DocumentCategory,
   type LandlordDocument,
 } from '@/lib/api/landlord';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
@@ -51,7 +51,7 @@ export default function LandlordDocuments() {
       const { url } = await landlordApi.documentDownloadUrl(doc.id);
       await Linking.openURL(url);
     } catch (e) {
-      toast.show(e instanceof ApiError ? e.message : 'Could not open that document.', 'error');
+      toast.show(errorMessage(e, 'Could not open that document.'), 'error');
     }
   };
 

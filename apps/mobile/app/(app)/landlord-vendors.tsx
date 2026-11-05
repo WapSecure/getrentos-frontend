@@ -18,7 +18,7 @@ import {
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { landlordApi, type LandlordVendor } from '@/lib/api/landlord';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { AddVendorSheet } from '@/components/landlord/AddVendorSheet';
 import { StarRating } from '@/components/reviews/StarRating';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
@@ -42,8 +42,7 @@ export default function LandlordVendors() {
       qc.invalidateQueries({ queryKey: ['landlord', 'vendors'] });
       toast.show('Vendor removed.', 'success');
     },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not remove that vendor.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not remove that vendor.'), 'error'),
   });
 
   const items = query.data?.items ?? [];

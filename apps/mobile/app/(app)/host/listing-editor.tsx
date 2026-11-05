@@ -32,7 +32,7 @@ import {
   type PricingMode,
 } from '@/lib/api/hostShortlets';
 import type { ShortletCancellationPolicy } from '@/lib/api/shortlets';
-import { ApiError } from '@/lib/api/client';
+import { ApiError, errorMessage } from '@/lib/api/client';
 import { useMyHomes } from '@/hooks/useMyHomes';
 import { readGate } from '@/lib/verificationGate';
 import { haptics } from '@/lib/haptics';
@@ -596,11 +596,7 @@ function EditForm({ listing }: { listing: HostListing }) {
         <PriceStep d={d} patch={patch} />
         <StayStep d={d} patch={patch} />
         {save.error ? (
-          <FormAlert
-            message={
-              save.error instanceof ApiError ? save.error.message : 'Could not save. Try again.'
-            }
-          />
+          <FormAlert message={errorMessage(save.error, 'Could not save. Try again.')} />
         ) : null}
       </ScrollView>
       <View

@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Wrench } from 'lucide-react-native';
 import { Button, useTheme, useToast } from '@getrentos/ui-native';
-import { errorText } from '@/components/estate/EstateUI';
 import { CloseSheet, QueueCard, QueueScreen, type QueueView } from '@/components/estate/Triage';
 import { useEstate } from '@/hooks/useEstate';
 import {
@@ -15,6 +14,7 @@ import {
 } from '@/lib/api/estateManager';
 import { haptics } from '@/lib/haptics';
 import { qk } from '@/lib/query/keys';
+import { errorMessage } from '@/lib/api/client';
 
 /** Repairs residents asked for: pick one up, then close it with what was done. */
 export default function EstateMaintenance() {
@@ -53,7 +53,7 @@ export default function EstateMaintenance() {
     },
     onError: (e) => {
       refreshQueue();
-      toast.show(errorText(e, 'Could not start this ticket.'), 'error');
+      toast.show(errorMessage(e, 'Could not start this ticket.'), 'error');
     },
   });
   const close = useMutation({
@@ -72,7 +72,7 @@ export default function EstateMaintenance() {
     },
     onError: (e) => {
       refreshQueue();
-      toast.show(errorText(e, 'Could not close this ticket.'), 'error');
+      toast.show(errorMessage(e, 'Could not close this ticket.'), 'error');
     },
   });
 

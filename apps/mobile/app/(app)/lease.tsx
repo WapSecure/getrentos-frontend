@@ -21,7 +21,7 @@ import {
 import { formatPercent } from '@getrentos/shared';
 import { qk } from '@/lib/query/keys';
 import { leaseApi } from '@/lib/api/lease';
-import { ApiError } from '@/lib/api/client';
+import { ApiError, errorMessage } from '@/lib/api/client';
 import { SignaturePad } from '@/components/lease/SignaturePad';
 import { DownloadLeaseButton } from '@/components/lease/DownloadLeaseButton';
 import { LeaseTerminationSheet } from '@/components/lease/LeaseTerminationSheet';
@@ -389,11 +389,7 @@ function RenewalOfferCard({
       qc.invalidateQueries({ queryKey: qk.renter.lease });
       toast.show(action === 'accept' ? 'Renewal accepted.' : 'Renewal declined.', 'success');
     },
-    onError: (err) =>
-      toast.show(
-        err instanceof ApiError ? err.message : 'Could not respond to the offer.',
-        'error'
-      ),
+    onError: (err) => toast.show(errorMessage(err, 'Could not respond to the offer.'), 'error'),
   });
 
   return (
@@ -469,8 +465,7 @@ function PendingLeaseView({ pending }: { pending: import('@/lib/api/lease').Pend
       qc.invalidateQueries({ queryKey: qk.renter.lease });
       toast.show('Lease signed.', 'success');
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not sign the lease.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not sign the lease.'), 'error'),
   });
 
   return (

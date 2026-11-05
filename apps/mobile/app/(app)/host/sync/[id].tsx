@@ -20,7 +20,7 @@ import {
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { hostShortletsApi, type CalendarFeed } from '@/lib/api/hostShortlets';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { relativeTime } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
@@ -55,8 +55,7 @@ export default function HostCalendarSync() {
       refresh();
       toast.show('New link made. Paste it into the other sites again.', 'success');
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not reset it.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not reset it.'), 'error'),
   });
   const syncNow = useMutation({
     mutationFn: (feedId: string) => hostShortletsApi.syncFeed(feedId),
@@ -69,7 +68,7 @@ export default function HostCalendarSync() {
         feed.lastError ? 'error' : 'success'
       );
     },
-    onError: (err) => toast.show(err instanceof ApiError ? err.message : 'Sync failed.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Sync failed.'), 'error'),
   });
   const removeFeed = useMutation({
     mutationFn: (feedId: string) => hostShortletsApi.removeFeed(feedId),
@@ -319,11 +318,7 @@ function AddFeed({ listingId, onDone }: { listingId: string; onDone: () => void 
           keyboardType="url"
           hint={`In ${source === 'Other' ? 'the site' : source}, look for “Export calendar”.`}
         />
-        {add.error ? (
-          <FormAlert
-            message={add.error instanceof ApiError ? add.error.message : 'Could not add it.'}
-          />
-        ) : null}
+        {add.error ? <FormAlert message={errorMessage(add.error, 'Could not add it.')} /> : null}
         <Button
           label="Add calendar"
           disabled={!label || !valid}

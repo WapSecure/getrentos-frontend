@@ -29,7 +29,7 @@ import {
 } from '@getrentos/shared';
 import { qk } from '@/lib/query/keys';
 import { landWatchApi } from '@/lib/api/landWatch';
-import { ApiError } from '@/lib/api/client';
+import { ApiError, errorMessage } from '@/lib/api/client';
 import { Sheet } from '@/components/Sheet';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
@@ -61,8 +61,7 @@ export default function LandWatchDetail() {
       qc.setQueryData(qk.landWatch(id), d);
       toast.show('Marked paid.', 'success');
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not update that.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not update that.'), 'error'),
   });
   const w = query.data;
 

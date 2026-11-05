@@ -20,7 +20,7 @@ import {
 import { qk } from '@/lib/query/keys';
 import { ownerApi, type OwnerDocument } from '@/lib/api/owner';
 import type { Paginated } from '@/lib/api/properties';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { UploadOwnerDocumentSheet } from '@/components/owner/UploadOwnerDocumentSheet';
@@ -42,11 +42,7 @@ export default function OwnerDocuments() {
       );
       toast.show('Document deleted.', 'success');
     },
-    onError: (err) =>
-      toast.show(
-        err instanceof ApiError ? err.message : 'Could not delete this document.',
-        'error'
-      ),
+    onError: (err) => toast.show(errorMessage(err, 'Could not delete this document.'), 'error'),
   });
 
   const confirmRemove = (d: OwnerDocument) =>
@@ -80,10 +76,7 @@ export default function OwnerDocuments() {
     },
     onError: (err, _v, ctx) => {
       if (ctx?.previous) qc.setQueryData(qk.owner.documents, ctx.previous);
-      toast.show(
-        err instanceof ApiError ? err.message : 'Could not change who can see this.',
-        'error'
-      );
+      toast.show(errorMessage(err, 'Could not change who can see this.'), 'error');
     },
   });
 

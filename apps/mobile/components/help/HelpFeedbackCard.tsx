@@ -5,7 +5,7 @@ import { Star } from 'lucide-react-native';
 import { Button, Card, Text, TextField, useTheme, useToast } from '@getrentos/ui-native';
 import { StarRating } from '@/components/reviews/StarRating';
 import { feedbackApi } from '@/lib/api/feedback';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 
 /** "Was this helpful?": the help centre's rating-plus-note widget. */
 export function HelpFeedbackCard() {
@@ -22,8 +22,7 @@ export function HelpFeedbackCard() {
         message: message.trim() || 'No additional feedback',
       }),
     onSuccess: () => setSubmitted(true),
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not send that feedback.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not send that feedback.'), 'error'),
   });
 
   if (submitted) {

@@ -22,7 +22,6 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
-import { errorText } from '@/components/estate/EstateUI';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { useEstate } from '@/hooks/useEstate';
 import {
@@ -35,6 +34,7 @@ import {
 import { haptics } from '@/lib/haptics';
 import { qk } from '@/lib/query/keys';
 import { goBack } from '@/lib/goBack';
+import { errorMessage } from '@/lib/api/client';
 
 const naira = (n: number) => `₦${Math.round(n).toLocaleString('en-NG')}`;
 
@@ -304,7 +304,7 @@ export default function EstateCharge() {
         </Card>
 
         {create.error ? (
-          <FormAlert message={errorText(create.error, 'Could not raise this charge.')} />
+          <FormAlert message={errorMessage(create.error, 'Could not raise this charge.')} />
         ) : null}
         <Button
           label={

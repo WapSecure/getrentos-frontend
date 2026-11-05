@@ -28,7 +28,7 @@ import {
 import { qk } from '@/lib/query/keys';
 import { realtorApi, type RealtorPayout, type RealtorPayoutSummary } from '@/lib/api/realtor';
 import { COMMON_BANKS } from '@/lib/api/sellerPayout';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { withdrawBlocker } from '@/lib/withdrawal';
@@ -255,7 +255,7 @@ function Withdraw({ s, onSetAccount }: { s: RealtorPayoutSummary; onSetAccount: 
     },
     onError: (e) => {
       void haptics.error();
-      toast.show(e instanceof ApiError ? e.message : 'Could not withdraw.', 'error');
+      toast.show(errorMessage(e, 'Could not withdraw.'), 'error');
     },
   });
   const blocked = withdrawBlocker(s);
@@ -451,11 +451,7 @@ function AccountForm({ onDone }: { onDone: () => void }) {
         hint="We check the name on the account with your bank"
       />
       {save.error ? (
-        <FormAlert
-          message={
-            save.error instanceof ApiError ? save.error.message : 'We couldn’t check that account.'
-          }
-        />
+        <FormAlert message={errorMessage(save.error, 'We couldn’t check that account.')} />
       ) : null}
       <Button
         label="Save payout account"

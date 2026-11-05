@@ -27,7 +27,6 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
-import { errorText } from '@/components/estate/EstateUI';
 import { HouseholdPicker } from '@/components/estate/HouseholdPicker';
 import { StatusPill } from '@/components/host/HostUI';
 import { Sheet } from '@/components/Sheet';
@@ -44,6 +43,7 @@ import { formatDate, formatTime, relativeTime } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { qk } from '@/lib/query/keys';
 import { goBack } from '@/lib/goBack';
+import { errorMessage } from '@/lib/api/client';
 
 type View_ =
   | 'CHECKED_IN'
@@ -130,7 +130,7 @@ export default function EstateVisitors() {
     },
     onError: (e) => {
       qc.invalidateQueries({ queryKey: ['estate-manager', estateId, 'visitor-passes'] });
-      toast.show(errorText(e, 'Could not revoke this pass.'), 'error');
+      toast.show(errorMessage(e, 'Could not revoke this pass.'), 'error');
     },
   });
 
@@ -432,7 +432,7 @@ function IssueForm({ estateId, onDone }: { estateId: string; onDone: () => void 
         </View>
       </View>
       {issue.error ? (
-        <FormAlert message={errorText(issue.error, 'Could not issue the pass.')} />
+        <FormAlert message={errorMessage(issue.error, 'Could not issue the pass.')} />
       ) : null}
       <Button
         label="Issue pass"
@@ -454,7 +454,9 @@ function IdCheckView({ estateId, pass }: { estateId: string; pass: VisitorPass }
 
   if (check.isPending) return <Skeleton height={220} radius={radius.lg} />;
   if (check.isError && check.data === undefined) {
-    return <FormAlert message={errorText(check.error, 'Could not load the ID for this visit.')} />;
+    return (
+      <FormAlert message={errorMessage(check.error, 'Could not load the ID for this visit.')} />
+    );
   }
   const doc = check.data;
   if (!doc) {

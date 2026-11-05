@@ -27,7 +27,7 @@ import {
   type LeaseStatus,
 } from '@/lib/api/landlord';
 import { formatDate } from '@/lib/format';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { RenewLeaseSheet } from '@/components/landlord/RenewLeaseSheet';
 import { SignLeaseSheet } from '@/components/landlord/SignLeaseSheet';
 import { PDF_MIME, shareDownloadedFile } from '@/lib/shareFile';
@@ -56,8 +56,7 @@ export default function LandlordLeases() {
     },
     onMutate: (lease) => setBusyId(lease.id),
     onSettled: () => setBusyId(null),
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not download that lease.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not download that lease.'), 'error'),
   });
 
   const send = useMutation({
@@ -68,8 +67,7 @@ export default function LandlordLeases() {
       qc.invalidateQueries({ queryKey: ['landlord', 'leases'] });
       toast.show('Lease sent to the tenant.', 'success');
     },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not send that lease.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not send that lease.'), 'error'),
   });
 
   const query = useQuery({

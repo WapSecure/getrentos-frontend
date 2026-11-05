@@ -28,7 +28,7 @@ import {
   type RealtorClient,
   type RealtorConversation,
 } from '@/lib/api/realtor';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { relativeTime } from '@/lib/format';
 
 /** Conversations with active clients. A client who revokes you drops out of this list. */
@@ -269,11 +269,7 @@ function ClientPicker({ onDone }: { onDone: () => void }) {
         </Pressable>
       ))}
       {start.error ? (
-        <FormAlert
-          message={
-            start.error instanceof ApiError ? start.error.message : 'Could not open that chat.'
-          }
-        />
+        <FormAlert message={errorMessage(start.error, 'Could not open that chat.')} />
       ) : null}
     </View>
   );

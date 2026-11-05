@@ -28,7 +28,7 @@ import {
   type PlanPersona,
   type SubscriptionInvoice,
 } from '@/lib/api/billing';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { formatDate } from '@/lib/format';
 import {
@@ -158,8 +158,7 @@ function PlanCard({ billing: b }: { billing: MyBilling }) {
       qc.setQueryData(qk.billing.mine, next);
       toast.show('Your plan won’t renew.', 'success');
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not cancel your plan.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not cancel your plan.'), 'error'),
   });
 
   const reactivate = useMutation({
@@ -168,8 +167,7 @@ function PlanCard({ billing: b }: { billing: MyBilling }) {
       qc.setQueryData(qk.billing.mine, next);
       toast.show('Your plan will renew as normal.', 'success');
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not keep your plan.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not keep your plan.'), 'error'),
   });
 
   const accessEnds = trialing ? b.trialEndsAt : b.currentPeriodEnd;

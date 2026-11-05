@@ -15,7 +15,7 @@ import { Sheet } from '@/components/Sheet';
 import { qk } from '@/lib/query/keys';
 import { buyerOffersApi, type BuyerFinancingType } from '@/lib/api/buyerOffers';
 import type { BuyerListingTarget } from '@/lib/api/buyer';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { VerificationGateNotice } from '@/components/VerificationGateNotice';
 import { readGate } from '@/lib/verificationGate';
 
@@ -85,7 +85,7 @@ function OfferForm({
     onError: (err) => {
       // A verification gate is explained inline, with the way forward: not as a toast.
       if (readGate(err)) return;
-      toast.show(err instanceof ApiError ? err.message : 'Could not submit this offer.', 'error');
+      toast.show(errorMessage(err, 'Could not submit this offer.'), 'error');
     },
     onSettled: () => onSubmittingChange(false),
   });

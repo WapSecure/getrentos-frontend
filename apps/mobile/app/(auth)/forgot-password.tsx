@@ -19,7 +19,7 @@ import {
   useTheme,
   useToast,
 } from '@getrentos/ui-native';
-import { ApiError } from '@/lib/api/client';
+import { ApiError, errorMessage } from '@/lib/api/client';
 import { authApi, type OtpMethod } from '@/lib/api/auth';
 import { haptics } from '@/lib/haptics';
 import { useCountdown } from '@/hooks/useCountdown';
@@ -76,7 +76,7 @@ export default function ForgotPassword() {
       cooldown.start(RESEND_SECONDS);
       toast.show(`Code sent to your ${channelLabel}.`, 'success');
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Could not send a reset code.');
+      setError(errorMessage(err, 'Could not send a reset code.'));
     } finally {
       setBusy(false);
     }
@@ -94,7 +94,7 @@ export default function ForgotPassword() {
     } catch (err) {
       await haptics.error();
       setCode('');
-      setError(err instanceof ApiError ? err.message : 'That code is invalid or has expired.');
+      setError(errorMessage(err, 'That code is invalid or has expired.'));
     } finally {
       setBusy(false);
     }
@@ -122,7 +122,7 @@ export default function ForgotPassword() {
       toast.show('Password updated. Sign in with your new password.', 'success');
       router.replace('/(auth)/sign-in');
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Could not reset your password.');
+      setError(errorMessage(err, 'Could not reset your password.'));
     } finally {
       setBusy(false);
     }

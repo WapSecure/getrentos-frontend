@@ -14,7 +14,7 @@ import {
   PROPERTY_TYPE_LABEL,
   type PropertyType,
 } from '@/lib/api/landlord';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { pickImage } from '@/lib/filePicker';
 import { LocationFields } from '@/components/forms/LocationFields';
 
@@ -70,8 +70,7 @@ function CreatePropertyForm({
     onSuccess: (result) => {
       if (result) setCover(result);
     },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not upload that photo.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not upload that photo.'), 'error'),
     onSettled: () => onBusyChange(false),
   });
 
@@ -95,8 +94,7 @@ function CreatePropertyForm({
       toast.show('Property added.', 'success');
       onClose();
     },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not add that property.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not add that property.'), 'error'),
     onSettled: () => onBusyChange(false),
   });
 

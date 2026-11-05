@@ -28,7 +28,6 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
-import { errorText } from '@/components/estate/EstateUI';
 import { GateChoice, PhotoField } from '@/components/estate/gate/GateUI';
 import { GatesSheet } from '@/components/estate/gate/GatesSheet';
 import { StatusPill } from '@/components/host/HostUI';
@@ -46,6 +45,7 @@ import {
 import { formatDate, formatTime } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { goBack } from '@/lib/goBack';
+import { errorMessage } from '@/lib/api/client';
 
 type View_ = 'inside' | 'all';
 
@@ -90,7 +90,7 @@ export default function EstateVehicles() {
     },
     onError: (e) => {
       qc.invalidateQueries({ queryKey: ['estate-manager', estateId, 'gate', 'vehicles'] });
-      toast.show(errorText(e, 'Could not mark this vehicle as left.'), 'error');
+      toast.show(errorMessage(e, 'Could not mark this vehicle as left.'), 'error');
     },
   });
 
@@ -358,7 +358,7 @@ function LogVehicleForm({ estateId, onDone }: { estateId: string; onDone: () => 
       <GateChoice gates={gates.data} value={gateId} onChange={setGateId} />
       <PhotoField value={photo} onChange={setPhoto} />
       {save.error ? (
-        <FormAlert message={errorText(save.error, 'Could not log this vehicle.')} />
+        <FormAlert message={errorMessage(save.error, 'Could not log this vehicle.')} />
       ) : null}
       <Button
         label="Log vehicle"

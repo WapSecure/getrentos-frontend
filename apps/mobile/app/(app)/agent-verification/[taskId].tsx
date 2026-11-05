@@ -16,7 +16,7 @@ import {
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { agentApi, type AgentVerificationSubjectType } from '@/lib/api/agent';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { goBack } from '@/lib/goBack';
 
 const SUBJECT_TYPES: { value: AgentVerificationSubjectType; label: string }[] = [
@@ -56,11 +56,7 @@ export default function SubmitVerification() {
       toast.show('Verification submitted.', 'success');
       goBack();
     },
-    onError: (err) =>
-      toast.show(
-        err instanceof ApiError ? err.message : 'Could not submit this verification.',
-        'error'
-      ),
+    onError: (err) => toast.show(errorMessage(err, 'Could not submit this verification.'), 'error'),
   });
 
   return (

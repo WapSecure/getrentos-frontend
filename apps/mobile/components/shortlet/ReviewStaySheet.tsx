@@ -5,7 +5,7 @@ import { Star } from 'lucide-react-native';
 import { Button, Text, TextField, useTheme, useToast } from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { shortletsApi, type ShortletBooking } from '@/lib/api/shortlets';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 
 interface Props {
   open: boolean;
@@ -54,8 +54,7 @@ function ReviewForm({
       toast.show('Thanks for the review.', 'success');
       onClose();
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not submit this review.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not submit this review.'), 'error'),
     onSettled: () => onSubmittingChange(false),
   });
 

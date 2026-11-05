@@ -20,7 +20,6 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
-import { errorText } from '@/components/estate/EstateUI';
 import { StatusPill } from '@/components/host/HostUI';
 import { Sheet } from '@/components/Sheet';
 import { useEstate } from '@/hooks/useEstate';
@@ -36,6 +35,7 @@ import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { qk } from '@/lib/query/keys';
 import { goBack } from '@/lib/goBack';
+import { errorMessage } from '@/lib/api/client';
 
 const MAX_OPTIONS = 10;
 
@@ -69,7 +69,7 @@ export default function EstatePolls() {
     },
     onError: (e) => {
       qc.invalidateQueries({ queryKey: qk.estateManager.polls(estateId) });
-      toast.show(errorText(e, 'Could not close the poll.'), 'error');
+      toast.show(errorMessage(e, 'Could not close the poll.'), 'error');
     },
   });
 
@@ -315,7 +315,7 @@ function CreateForm({
         and residents with the app are notified. Choices can’t be changed once it’s open.
       </Text>
       {create.error ? (
-        <FormAlert message={errorText(create.error, 'Could not open the poll.')} />
+        <FormAlert message={errorMessage(create.error, 'Could not open the poll.')} />
       ) : null}
       <Button
         label="Open poll"

@@ -3,7 +3,7 @@ import { ActivityIndicator, Alert, Pressable, ScrollView, View } from 'react-nat
 import { Image } from 'expo-image';
 import { ImagePlus, Star, X } from 'lucide-react-native';
 import { Text, useTheme, useToast } from '@getrentos/ui-native';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { ownerApi, type OwnerProperty } from '@/lib/api/owner';
 import { pickPhotos } from '@/lib/filePicker';
 
@@ -35,7 +35,7 @@ export function OwnerPhotosField({
       onChanged();
       toast.show(success, 'success');
     } catch (e) {
-      toast.show(e instanceof ApiError ? e.message : 'Could not update the photos.', 'error');
+      toast.show(errorMessage(e, 'Could not update the photos.'), 'error');
     } finally {
       setBusy(false);
     }
@@ -61,7 +61,7 @@ export function OwnerPhotosField({
         'success'
       );
     } catch (e) {
-      toast.show(e instanceof ApiError ? e.message : 'Could not add those photos.', 'error');
+      toast.show(errorMessage(e, 'Could not add those photos.'), 'error');
     } finally {
       setBusy(false);
     }

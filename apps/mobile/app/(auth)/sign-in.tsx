@@ -18,7 +18,7 @@ import {
   useTheme,
   useToast,
 } from '@getrentos/ui-native';
-import { ApiError } from '@/lib/api/client';
+import { ApiError, errorMessage } from '@/lib/api/client';
 import { authApi } from '@/lib/api/auth';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { OAuthCancelled } from '@/lib/auth/oauth';
@@ -57,9 +57,7 @@ export default function SignIn() {
     } catch (err) {
       if (err instanceof AppleSignInCancelled) return;
       await haptics.error();
-      setFormError(
-        err instanceof ApiError ? err.message : 'Could not sign in with Apple. Try again.'
-      );
+      setFormError(errorMessage(err, 'Could not sign in with Apple. Try again.'));
     }
   };
   const { colors, spacing, scheme } = useTheme();
@@ -193,7 +191,7 @@ export default function SignIn() {
       setMagicSent(true);
       toast.show('Check your inbox for a sign-in link.', 'success');
     } catch (err) {
-      setFormError(err instanceof ApiError ? err.message : 'Could not send the link.');
+      setFormError(errorMessage(err, 'Could not send the link.'));
     } finally {
       setMagicBusy(false);
     }

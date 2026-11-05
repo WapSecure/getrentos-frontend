@@ -15,7 +15,7 @@ import {
 import { Sheet } from '@/components/Sheet';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
 import { landlordApi } from '@/lib/api/landlord';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { readGate } from '@/lib/verificationGate';
 import { VerificationGateNotice } from '@/components/VerificationGateNotice';
 
@@ -103,7 +103,7 @@ function CreateListingForm({
     // A verification gate is shown inline with the way forward; anything else is a toast.
     onError: (e) => {
       if (readGate(e)) return;
-      toast.show(e instanceof ApiError ? e.message : 'Could not create that listing.', 'error');
+      toast.show(errorMessage(e, 'Could not create that listing.'), 'error');
     },
     onSettled: () => onSubmittingChange(false),
   });

@@ -14,7 +14,7 @@ import {
   useTheme,
   useToast,
 } from '@getrentos/ui-native';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { useSignup } from '@/lib/auth/SignupContext';
 import { haptics } from '@/lib/haptics';
 import { useCountdown } from '@/hooks/useCountdown';
@@ -53,7 +53,7 @@ export default function SignUpVerify() {
     } catch (err) {
       await haptics.error();
       setCode('');
-      setError(err instanceof ApiError ? err.message : 'That code is invalid or has expired.');
+      setError(errorMessage(err, 'That code is invalid or has expired.'));
     } finally {
       setBusy(false);
     }

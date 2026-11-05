@@ -5,7 +5,7 @@ import { Button, Chip, Text, TextField, useTheme, useToast } from '@getrentos/ui
 import { Sheet } from '@/components/Sheet';
 import { qk } from '@/lib/query/keys';
 import { viewingsApi } from '@/lib/api/viewings';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { track } from '@/lib/analytics';
 
 interface Props {
@@ -53,8 +53,7 @@ function ViewingRequestForm({ onClose, propertyId, propertyTitle }: Omit<Props, 
       toast.show('Viewing requested: the landlord will confirm a time.', 'success');
       onClose();
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not request a viewing.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not request a viewing.'), 'error'),
   });
 
   return (

@@ -20,7 +20,7 @@ import {
   buyerSettingsApi,
   type BuyerPaymentMethod as BuyerPaymentMethodData,
 } from '@/lib/api/buyerSettings';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
@@ -74,8 +74,7 @@ function PaymentMethodForm({ data }: { data: BuyerPaymentMethodData }) {
       qc.setQueryData(qk.buyer.paymentMethod, updated);
       toast.show('Payment method saved.', 'success');
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not save these details.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not save these details.'), 'error'),
   });
 
   const canSave =

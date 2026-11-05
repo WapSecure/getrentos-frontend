@@ -19,7 +19,7 @@ import {
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { landlordApi, type MicrositeSettings } from '@/lib/api/landlord';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { pickImage } from '@/lib/filePicker';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
@@ -102,8 +102,7 @@ function MicrositeForm({ initial }: { initial: MicrositeSettings }) {
       qc.invalidateQueries({ queryKey: qk.landlord.microsite });
       toast.show('Banner updated.', 'success');
     },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not upload that banner.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not upload that banner.'), 'error'),
   });
 
   const save = useMutation({
@@ -116,7 +115,7 @@ function MicrositeForm({ initial }: { initial: MicrositeSettings }) {
     onError: (e, patch) => {
       // Put the switch back if it was the thing that failed.
       if (patch.enabled !== undefined) setEnabled(!patch.enabled);
-      toast.show(e instanceof ApiError ? e.message : 'Could not update the microsite.', 'error');
+      toast.show(errorMessage(e, 'Could not update the microsite.'), 'error');
     },
   });
 

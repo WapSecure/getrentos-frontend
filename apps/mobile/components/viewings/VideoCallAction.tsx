@@ -4,7 +4,7 @@ import * as WebBrowser from 'expo-web-browser';
 import { Video } from 'lucide-react-native';
 import { Button, Text, useTheme, useToast } from '@getrentos/ui-native';
 import { videoCallState, type VideoCallJoin } from '@getrentos/shared';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate, formatTime } from '@/lib/format';
 
 /**
@@ -53,7 +53,7 @@ export function VideoCallAction({
       if (Platform.OS === 'web') window.open(joinUrl, '_blank', 'noopener');
       else await WebBrowser.openBrowserAsync(joinUrl);
     } catch (e) {
-      toast.show(e instanceof ApiError ? e.message : 'Could not open the video call.', 'error');
+      toast.show(errorMessage(e, 'Could not open the video call.'), 'error');
     } finally {
       setJoining(false);
     }

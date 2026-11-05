@@ -5,7 +5,7 @@ import { Button, Text, TextField, useTheme, useToast } from '@getrentos/ui-nativ
 import { Sheet } from '@/components/Sheet';
 import { qk } from '@/lib/query/keys';
 import { messagesApi } from '@/lib/api/messages';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 
 interface Props {
   open: boolean;
@@ -41,8 +41,7 @@ function MessageTemplateForm({ onClose }: { onClose: () => void }) {
       toast.show('Template saved.', 'success');
       onClose();
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not save that template.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not save that template.'), 'error'),
   });
 
   return (

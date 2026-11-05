@@ -22,7 +22,7 @@ import {
 import { Sheet } from '@/components/Sheet';
 import { qk } from '@/lib/query/keys';
 import { supportApi, SUPPORT_CATEGORIES, type SupportThread } from '@/lib/api/support';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { relativeTime } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
@@ -167,8 +167,7 @@ function ComposeForm({
       onClose();
       router.push(`/(app)/support-thread/${thread.id}`);
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not send this message.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not send this message.'), 'error'),
     onSettled: () => onSubmittingChange(false),
   });
 

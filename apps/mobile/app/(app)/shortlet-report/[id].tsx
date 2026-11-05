@@ -22,7 +22,7 @@ import { useMyStays } from '@/components/shortlet/useMyStays';
 import { qk } from '@/lib/query/keys';
 import { shortletsApi, type GuestPromiseProblem } from '@/lib/api/shortlets';
 import type { PickedFile } from '@/lib/api/documents';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { capturePhoto, pickPhotos } from '@/lib/filePicker';
 import { PROBLEM_OPTIONS, formatDeadline, promiseState } from '@/lib/stays';
 import { haptics } from '@/lib/haptics';
@@ -76,10 +76,7 @@ export default function GuestPromiseReport() {
     },
     onError: (e) => {
       void haptics.error();
-      toast.show(
-        e instanceof ApiError ? e.message : 'Not sent. Check your connection and try again.',
-        'error'
-      );
+      toast.show(errorMessage(e, 'Not sent. Check your connection and try again.'), 'error');
     },
     onSettled: () => setProgress(null),
   });

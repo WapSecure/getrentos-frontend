@@ -16,7 +16,6 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
-import { errorText } from '@/components/estate/EstateUI';
 import { SelectField } from '@/components/forms/SelectField';
 import { useEstate } from '@/hooks/useEstate';
 import { isFreeEstate } from '@/lib/api/estateManager';
@@ -32,6 +31,7 @@ import { getCitiesFor, NIGERIA_STATE_CITIES } from '@/lib/locationCities';
 import { haptics } from '@/lib/haptics';
 import { qk } from '@/lib/query/keys';
 import { goBack } from '@/lib/goBack';
+import { errorMessage } from '@/lib/api/client';
 
 const STATE_OPTIONS = Object.keys(NIGERIA_STATE_CITIES).map((s) => ({ value: s, label: s }));
 
@@ -211,11 +211,14 @@ export default function EstateSetup() {
             <FormAlert
               tone="warning"
               title="Your plan’s estate limit is reached"
-              message={errorText(create.error, 'Upgrade to Pro to manage more than one estate.')}
+              message={errorMessage(create.error, 'Upgrade to Pro to manage more than one estate.')}
             />
           ) : (
             <FormAlert
-              message={errorText(create.error, 'We couldn’t create your estate. Please try again.')}
+              message={errorMessage(
+                create.error,
+                'We couldn’t create your estate. Please try again.'
+              )}
             />
           )
         ) : null}
