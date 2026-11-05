@@ -3,9 +3,10 @@
 import { useState } from 'react';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FileText } from 'lucide-react';
-import { Pagination, EmptyState, ToggleChip } from '@getrentos/ui';
+import { Pagination, EmptyState, ToggleChip, useToast } from '@getrentos/ui';
 import { ApplicationCard } from '@/components/landlord/applications/ApplicationCard';
 import { ApplicationDetailsModal } from '@/components/landlord/applications/ApplicationDetailsModal';
+import { RequestInfoDialog } from '@/components/landlord/applications/RequestInfoDialog';
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import { ListState } from '@/components/shared/ListState';
@@ -27,6 +28,8 @@ export default function LandlordApplicationsPage() {
   const [page, setPage] = useState(1);
   const [filter, setFilter] = useState<'all' | ApplicationStatus>('all');
   const [selectedApplication, setSelectedApplication] = useState<RentalApplication | null>(null);
+  const [requestingInfo, setRequestingInfo] = useState<RentalApplication | null>(null);
+  const toast = useToast();
 
   const { data, isPending, isError, refetch } = useQuery({
     queryKey: [
@@ -65,13 +68,27 @@ export default function LandlordApplicationsPage() {
     onSuccess: (updated) => {
       queryClient.invalidateQueries({ queryKey: ['landlord', 'applications'] });
       setSelectedApplication((prev) => (prev && prev.id === updated.id ? updated : prev));
+      toast.success(
+        updated.status === 'approved'
+          ? `${updated.applicantName}'s application approved.`
+          : `${updated.applicantName}'s application rejected.`
+      );
     },
+    // A refused change (say, the unit is already let) must say why, not fail silently.
+    onError: (error: Error) => toast.error(error.message || 'That change was not saved.'),
   });
 
   const handleApprove = (id: string) => updateStatusMutation.mutate({ id, status: 'approved' });
   const handleReject = (id: string) => updateStatusMutation.mutate({ id, status: 'rejected' });
-  const handleRequestInfo = (id: string) =>
-    updateStatusMutation.mutate({ id, status: 'under_review' });
+  // Opens the message to the applicant; sending it moves a pending application to under review.
+  const handleRequestInfo = (id: string) => {
+    setRequestingInfo(
+      applications.find((a) => a.id === id) ??
+        (selectedApplication?.id === id ? selectedApplication : null)
+    );
+    // One dialog at a time: the details close while the message is written.
+    setSelectedApplication(null);
+  };
 
   return (
     <>
@@ -140,6 +157,12 @@ export default function LandlordApplicationsPage() {
         onApprove={handleApprove}
         onReject={handleReject}
         onRequestInfo={handleRequestInfo}
+      />
+
+      <RequestInfoDialog
+        key={requestingInfo?.id ?? 'none'}
+        application={requestingInfo}
+        onClose={() => setRequestingInfo(null)}
       />
     </>
   );
