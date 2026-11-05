@@ -7,6 +7,7 @@ export const qk = {
     me: ['auth', 'me'] as const,
   },
   security: ['me', 'security'] as const,
+  messagingConsent: ['me', 'messaging-consent'] as const,
   passkeys: ['me', 'security', 'passkeys'] as const,
   representatives: {
     list: (kind: 'realtor' | 'agent') => ['representatives', kind] as const,
