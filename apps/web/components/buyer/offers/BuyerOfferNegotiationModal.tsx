@@ -44,6 +44,9 @@ export const BuyerOfferNegotiationModal = ({
   const isDecided =
     offer.status === 'accepted' || offer.status === 'rejected' || offer.status === 'closed';
   const isCountered = offer.status === 'countered';
+  // Only the owner's counter can be accepted; after the buyer's own counter they wait.
+  const lastCounter = [...messages].reverse().find((msg) => msg.type === 'counter');
+  const canAcceptCounter = isCountered && lastCounter?.senderId !== 'buyer';
 
   const handleClose = () => {
     setIsCountering(false);
@@ -122,9 +125,7 @@ export const BuyerOfferNegotiationModal = ({
               <div key={msg.id} className={`flex ${isBuyer ? 'justify-end' : 'justify-start'}`}>
                 <div
                   className={`max-w-[75%] rounded-2xl p-3 ${
-                    isBuyer
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-secondary text-foreground'
+                    isBuyer ? 'bg-primary text-primary-foreground' : 'bg-secondary text-foreground'
                   }`}
                 >
                   <p className="text-sm whitespace-pre-wrap break-words">{msg.text}</p>
@@ -200,7 +201,7 @@ export const BuyerOfferNegotiationModal = ({
                 >
                   Counter
                 </Button>
-                {isCountered && (
+                {canAcceptCounter && (
                   <Button
                     variant="primary"
                     className="flex-1"
@@ -219,6 +220,11 @@ export const BuyerOfferNegotiationModal = ({
                   </Button>
                 )}
               </div>
+            )}
+            {isCountered && !canAcceptCounter && (
+              <p className="text-sm text-muted-foreground">
+                Waiting for the owner to respond to your counter.
+              </p>
             )}
             {errorMessage && (
               <p role="alert" className="text-sm text-destructive">
