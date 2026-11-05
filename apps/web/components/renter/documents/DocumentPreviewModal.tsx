@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Download, Share2, FileText, Star, StarOff } from 'lucide-react';
+import { X, Download, FileText, Star, StarOff } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -124,9 +124,6 @@ export const DocumentPreviewModal = ({ isOpen, onClose, document }: DocumentPrev
               onClick={() => window.open(document.url, '_blank', 'noopener,noreferrer')}
             >
               Download
-            </Button>
-            <Button variant="outline" className="flex-1" icon={<Share2 className="w-4 h-4" />}>
-              Share
             </Button>
           </div>
         </div>

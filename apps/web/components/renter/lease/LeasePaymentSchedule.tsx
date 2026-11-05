@@ -97,7 +97,7 @@ export const LeasePaymentSchedule = ({ payments }: LeasePaymentScheduleProps) =>
         </div>
 
         <div className="p-3 border-t border-border">
-          <Button variant="ghost" size="sm" fullWidth className="gap-1">
+          <Button variant="ghost" size="sm" fullWidth className="gap-1" href="/renter/payments">
             View all payments
           </Button>
         </div>

@@ -21,16 +21,26 @@ interface RoommatesListProps {
   roommates: Roommate[];
   onRemove: (id: string) => void;
   onUpdateShare: (id: string, percentage: number) => void;
+  onInvite: () => void;
 }
 
-export const RoommatesList = ({ roommates, onRemove, onUpdateShare }: RoommatesListProps) => {
+export const RoommatesList = ({
+  roommates,
+  onRemove,
+  onUpdateShare,
+  onInvite,
+}: RoommatesListProps) => {
   if (roommates.length === 0) {
     return (
       <EmptyState
         icon={Users}
         title="No roommates yet"
         description="Invite your first roommate to start sharing your space"
-        action={<Button variant="primary">Invite roommate</Button>}
+        action={
+          <Button variant="primary" onClick={onInvite}>
+            Invite roommate
+          </Button>
+        }
       />
     );
   }
@@ -47,7 +57,12 @@ export const RoommatesList = ({ roommates, onRemove, onUpdateShare }: RoommatesL
           </p>
         </div>
         <div className="flex gap-1">
-          <Button size="sm" variant="ghost" icon={<UserPlus className="w-3 h-3" />}>
+          <Button
+            size="sm"
+            variant="ghost"
+            icon={<UserPlus className="w-3 h-3" />}
+            onClick={onInvite}
+          >
             Add
           </Button>
         </div>

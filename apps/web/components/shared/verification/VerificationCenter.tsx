@@ -22,6 +22,7 @@ import {
   Field,
   Input,
   NumberInput,
+  PageHeader,
   Progress,
   Select,
   Skeleton,
@@ -748,6 +749,12 @@ export const VerificationCenter = ({
 
   return (
     <div className="space-y-5">
+      <PageHeader
+        title="Verification"
+        description={
+          description ?? 'Verify your identity to unlock renting, payments and higher trust limits.'
+        }
+      />
       <div className="rounded-2xl border border-border bg-card p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -759,10 +766,9 @@ export const VerificationCenter = ({
               )}
             </div>
             <div>
-              <h2 className="text-lg font-bold text-foreground">Verification center</h2>
+              <h2 className="text-lg font-bold text-foreground">Your verification</h2>
               <p className="text-sm text-muted-foreground">
-                {description ??
-                  'Verify your identity to unlock renting, payments and higher trust limits.'}
+                Each check below adds to what you can do on GetRentos.
               </p>
             </div>
           </div>

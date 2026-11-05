@@ -107,12 +107,22 @@ export const UpcomingPaymentReminders = ({ reminders }: UpcomingPaymentReminders
                   </div>
                 </div>
                 {reminder.status === 'overdue' && (
-                  <Button variant="danger" size="sm" className="mt-2 w-full">
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    className="mt-2 w-full"
+                    href="/renter/payments"
+                  >
                     Pay now
                   </Button>
                 )}
                 {reminder.status !== 'overdue' && reminder.daysRemaining <= 5 && (
-                  <Button variant="primary" size="sm" className="mt-2 w-full">
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    className="mt-2 w-full"
+                    href="/renter/payments"
+                  >
                     Pay now
                   </Button>
                 )}
@@ -122,7 +132,7 @@ export const UpcomingPaymentReminders = ({ reminders }: UpcomingPaymentReminders
         </div>
 
         <div className="p-3 border-t border-border">
-          <Button variant="ghost" size="sm" fullWidth className="gap-1">
+          <Button variant="ghost" size="sm" fullWidth className="gap-1" href="/renter/payments">
             View all payments
           </Button>
         </div>
