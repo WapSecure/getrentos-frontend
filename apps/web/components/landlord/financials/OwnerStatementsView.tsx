@@ -25,6 +25,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import { landlordService, type OwnerStatement } from '@/services/landlordService';
 import { StatementBreakdown } from '@/components/shared/financials/StatementBreakdown';
+import { StatementExplainer } from './StatementExplainer';
 import { PayoutHeldNotice } from '@/components/shared/financials/PayoutHeldNotice';
 import { StatementDisputeSection } from '@/components/shared/financials/StatementDisputeSection';
 import { usePlanTier } from '@/hooks/usePlanTier';
@@ -406,6 +407,8 @@ export function OwnerStatementsView() {
               </div>
 
               <StatementBreakdown className="mt-5" lineItems={detail.lineItems} totals={detail} />
+
+              <StatementExplainer statementId={detail.id} />
 
               <PayoutHeldNotice
                 payoutStatus={detail.payoutStatus}
