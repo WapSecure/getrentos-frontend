@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { RefreshCcw, TriangleAlert } from 'lucide-react';
 import {
   Alert,
@@ -12,16 +13,27 @@ import {
   DialogDescription,
   DialogTitle,
   Field,
+  Textarea,
 } from '@getrentos/ui';
+import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency } from '@/lib/format';
+import { landlordKeys } from '@/lib/queryKeys';
+import type { ReplyLanguage } from '@/lib/replyLanguage';
 import { leaseRentLabel } from '@/lib/leaseTerm';
 import { landlordService } from '@/services/landlordService';
 import type { Lease, RentIncreaseCheck } from '@/types/landlord';
+import type { RenewalAdvice } from '@/types/renewalAdvice';
+import { RenewalAdvicePanel } from './RenewalAdvicePanel';
 
 interface RenewalOfferModalProps {
   lease: Lease | null;
   onClose: () => void;
-  onSend: (leaseId: string, newRent: number, newEndDate: string) => Promise<boolean>;
+  onSend: (
+    leaseId: string,
+    newRent: number,
+    newEndDate: string,
+    message: string
+  ) => Promise<boolean>;
 }
 
 const addOneYear = (dateString: string) => {
@@ -38,8 +50,38 @@ export const RenewalOfferModal = ({ lease, onClose, onSend }: RenewalOfferModalP
   const [check, setCheck] = useState<{ rentAmount: string; result: RentIncreaseCheck } | null>(
     null
   );
+  const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Renew or re-let: fills the offer once, without overwriting anything typed.
+  const [language, setLanguage] = useState<ReplyLanguage>('en');
+  const canAdvise = !!lease && (lease.status === 'signed' || lease.status === 'expired');
+  const advice = useQuery({
+    queryKey: landlordKeys.renewalAdvice(lease?.id ?? '', language),
+    queryFn: () => unwrap(landlordService.getRenewalAdvice(lease!.id, language)),
+    enabled: canAdvise,
+    staleTime: 5 * 60_000,
+    retry: false,
+  });
+  const [touched, setTouched] = useState({ rent: false, end: false, message: false });
+  const [appliedFrom, setAppliedFrom] = useState<RenewalAdvice | null>(null);
+  if (advice.data && advice.data !== appliedFrom) {
+    setAppliedFrom(advice.data);
+    if (!touched.rent) setNewRent(String(advice.data.draft.rentAmount));
+    if (!touched.end) setNewEndDate(advice.data.draft.leaseEnd);
+    if (!touched.message) setMessage(advice.data.draft.message);
+  }
+  const applyAdvice = (a: RenewalAdvice) => {
+    setNewRent(String(a.draft.rentAmount));
+    setNewEndDate(a.draft.leaseEnd);
+    setMessage(a.draft.message);
+    setTouched({ rent: false, end: false, message: false });
+  };
+  const englishCopy =
+    advice.data?.draft.messageInEnglish && message === advice.data.draft.message
+      ? advice.data.draft.messageInEnglish
+      : null;
 
   useEffect(() => {
     if (!lease || !newRent) return;
@@ -64,7 +106,7 @@ export const RenewalOfferModal = ({ lease, onClose, onSend }: RenewalOfferModalP
     if (isSubmitting) return;
     setIsSubmitting(true);
     setErrorMessage(null);
-    const succeeded = await onSend(lease.id, Number(newRent), newEndDate);
+    const succeeded = await onSend(lease.id, Number(newRent), newEndDate, message);
     setIsSubmitting(false);
     if (!succeeded) {
       setErrorMessage('The renewal offer could not be sent. Your changes are unchanged.');
@@ -83,7 +125,18 @@ export const RenewalOfferModal = ({ lease, onClose, onSend }: RenewalOfferModalP
           </div>
         </div>
 
-        <div className="p-4 space-y-4">
+        <div className="p-4 space-y-4 max-h-[70vh] overflow-y-auto">
+          {canAdvise && (
+            <RenewalAdvicePanel
+              advice={advice.data}
+              isLoading={advice.isLoading}
+              isFetching={advice.isFetching && !advice.isLoading}
+              language={language}
+              onLanguageChange={setLanguage}
+              onUse={applyAdvice}
+            />
+          )}
+
           <div className="p-3 rounded-lg bg-secondary text-sm text-muted-foreground">
             Current rent:{' '}
             <span className="font-medium text-foreground">{formatCurrency(lease.rentAmount)}</span>
@@ -97,7 +150,10 @@ export const RenewalOfferModal = ({ lease, onClose, onSend }: RenewalOfferModalP
             <CurrencyInput
               prefix="₦"
               value={newRent}
-              onValueChange={(v) => setNewRent(v === 0 ? '' : String(v))}
+              onValueChange={(v) => {
+                setNewRent(v === 0 ? '' : String(v));
+                setTouched((t) => ({ ...t, rent: true }));
+              }}
             />
           </Field>
 
@@ -111,8 +167,35 @@ export const RenewalOfferModal = ({ lease, onClose, onSend }: RenewalOfferModalP
           )}
 
           <Field label="New lease end date" required>
-            <DatePicker value={newEndDate} onChange={setNewEndDate} />
+            <DatePicker
+              value={newEndDate}
+              onChange={(v) => {
+                setNewEndDate(v);
+                setTouched((t) => ({ ...t, end: true }));
+              }}
+            />
           </Field>
+
+          <Field
+            label={`Note to ${lease.tenantName || 'the tenant'}`}
+            hint="Sent to them as a message with the offer. Leave empty to send the offer alone."
+          >
+            <Textarea
+              rows={4}
+              maxLength={1000}
+              value={message}
+              onChange={(e) => {
+                setMessage(e.target.value);
+                setTouched((t) => ({ ...t, message: true }));
+              }}
+            />
+          </Field>
+          {englishCopy && (
+            <p className="text-xs text-muted-foreground">
+              <span className="font-medium">In English: </span>
+              {englishCopy}
+            </p>
+          )}
         </div>
 
         <div className="p-4 border-t border-border flex gap-3">

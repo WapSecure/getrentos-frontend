@@ -1116,10 +1116,11 @@ export const landlordApi = {
       body: { signatureData },
     }),
 
-  renewLease: (id: string, rentAmount: number, leaseEnd: string) =>
+  /** A note, when given, goes to the tenant as a message with the offer. */
+  renewLease: (id: string, rentAmount: number, leaseEnd: string, message?: string) =>
     apiFetch<LandlordLease>(`/landlord/leases/${id}/renew`, {
       method: 'PATCH',
-      body: { rentAmount, leaseEnd },
+      body: { rentAmount, leaseEnd, ...(message?.trim() ? { message } : {}) },
     }),
 
   renewalCheck: (id: string, rentAmount: number) =>
