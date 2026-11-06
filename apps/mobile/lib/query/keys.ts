@@ -201,6 +201,7 @@ export const qk = {
       ['estate-manager', estateId, 'watchlist', status] as const,
   },
   renter: {
+    lastApplicationDetails: ['renter', 'applications', 'last-details'] as const,
     leaseGuide: ['renter', 'lease', 'guide'] as const,
     listingCheck: (listingId: string) => ['renter', 'listing', listingId, 'check'] as const,
     deposits: ['renter', 'deposits'] as const,

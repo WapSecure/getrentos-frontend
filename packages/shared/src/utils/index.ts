@@ -15,3 +15,4 @@ export * from './landTrust';
 export * from './deposit';
 export * from './trend';
 export * from './gateVoice';
+export * from './lastApplication';

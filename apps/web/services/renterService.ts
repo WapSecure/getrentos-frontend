@@ -35,6 +35,7 @@ import type { RentalSearchParse } from '@/types/searchParse';
 import type { FinancingOverview, FinancingPlan, FinancingPlanLength } from '@/types/financing';
 import type { LeaseGuide } from '@/types/leaseGuide';
 import type { Affordability, AffordabilityInput, ShortlistComparison } from '@/types/rentDecision';
+import type { LastApplicationDetails } from '@getrentos/shared';
 
 export interface ViewingRequest {
   id: string;
@@ -724,6 +725,10 @@ export const renterService = {
       authFetch(`/renter/applications/${applicationId}/notes/${noteId}`, { method: 'DELETE' })
     );
   },
+
+  /** The renter's own details from their latest application (null if none). */
+  getLastApplicationDetails: () =>
+    safeCall(() => authFetch<LastApplicationDetails | null>('/renter/applications/last-details')),
 
   async submitApplication(
     listingId: string,
