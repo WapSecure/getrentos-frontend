@@ -10,6 +10,7 @@ import {
   SegmentedControl,
   Skeleton,
   PageHeader,
+  useToast,
 } from '@getrentos/ui';
 import { BuyerEscrowTransactionCard } from '@/components/buyer/transactions/BuyerEscrowTransactionCard';
 import { BuyerEscrowTransactionDetailModal } from '@/components/buyer/transactions/BuyerEscrowTransactionDetailModal';
@@ -22,6 +23,7 @@ type StatusFilter = 'all' | BuyerEscrowStatus;
 
 export default function BuyerTransactionsPage() {
   const queryClient = useQueryClient();
+  const toast = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<StatusFilter>('all');
   const [activeTransactionId, setActiveTransactionId] = useState<string | null>(null);
@@ -52,7 +54,17 @@ export default function BuyerTransactionsPage() {
 
   const depositMutation = useMutation({
     mutationFn: (id: string) => unwrap(buyerService.depositTransaction(id)),
-    onSuccess: invalidate,
+    onSuccess: (result) => {
+      // The deposit is paid on Paystack's page. The API reuses an open checkout,
+      // so a second click lands on the same one rather than a second charge.
+      if (result.authorizationUrl) {
+        window.location.assign(result.authorizationUrl);
+        return;
+      }
+      // No gateway configured (development): the API recorded it already.
+      invalidate();
+    },
+    onError: (reason: Error) => toast.show(reason.message, 'error'),
   });
   const releaseMutation = useMutation({
     mutationFn: (id: string) => unwrap(buyerService.releaseTransaction(id)),

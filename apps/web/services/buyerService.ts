@@ -116,6 +116,10 @@ export type BuyerListingApi = BuyerPropertyListing;
 export type BuyerViewingApi = ViewingRequest;
 export type BuyerOfferApi = BuyerOffer;
 export type BuyerTransactionApi = BuyerEscrowTransaction;
+/** The deposit call answers with the transaction plus the Paystack checkout to send the buyer to. */
+export type BuyerEscrowDepositResult = BuyerEscrowTransaction & {
+  authorizationUrl?: string | null;
+};
 export type BuyerDocumentApi = BuyerDocument;
 
 const mapBuyerListing = (listing: BuyerListingApi): BuyerListingApi => ({
@@ -308,7 +312,9 @@ export const buyerService = {
       )
     ),
   depositTransaction: (id: string) =>
-    safeCall(() => authFetch(`/buyer/transactions/${id}/deposit`, { method: 'POST' })),
+    safeCall(() =>
+      authFetch<BuyerEscrowDepositResult>(`/buyer/transactions/${id}/deposit`, { method: 'POST' })
+    ),
   releaseTransaction: (id: string) =>
     safeCall(() => authFetch(`/buyer/transactions/${id}/release`, { method: 'POST' })),
   refundTransaction: (id: string) =>
