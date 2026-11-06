@@ -168,6 +168,12 @@ const navItems: NavItem[] = [
     permission: 'rentfinance.view',
   },
   {
+    label: 'Payment Corrections',
+    href: '/admin/payment-corrections',
+    icon: ClipboardCheck,
+    permission: 'rentfinance.view',
+  },
+  {
     label: 'Credit Refunds',
     href: '/admin/credit-refunds',
     icon: RotateCcw,
