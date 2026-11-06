@@ -2,11 +2,17 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ShieldCheck, ShieldOff } from 'lucide-react';
 import {
+  Alert,
   Badge,
   Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
   CardSkeleton,
+  CardTitle,
+  DescriptionList,
   Field,
   NumberInput,
   QueryState,
@@ -159,29 +165,10 @@ export function TwoFactorSetup({ gate = false }: { gate?: boolean }) {
       errorTitle="We could not check your two-factor status"
       loading={<CardSkeleton lines={3} />}
     >
-      <div className="rounded-lg border border-border p-4 sm:p-5">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="flex min-w-0 items-start gap-3">
-            <div className="rounded-lg bg-info-subtle p-2">
-              {enabled ? (
-                <ShieldCheck className="h-5 w-5 text-info" aria-hidden="true" />
-              ) : (
-                <ShieldOff className="h-5 w-5 text-info" aria-hidden="true" />
-              )}
-            </div>
-            <div className="min-w-0">
-              <h3 className="flex flex-wrap items-center gap-2 font-medium text-foreground">
-                Authenticator app
-                <Badge variant={enabled ? 'success' : 'warning'}>{enabled ? 'On' : 'Off'}</Badge>
-              </h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {enabled
-                  ? 'Signing in asks for a code from your authenticator app.'
-                  : 'Use an app such as Google Authenticator, Microsoft Authenticator, Authy or 1Password.'}
-              </p>
-            </div>
-          </div>
-          {step === 'idle' &&
+      <Card static>
+        <CardHeader
+          action={
+            step === 'idle' &&
             (enabled ? (
               !gate && (
                 <Button
@@ -198,61 +185,69 @@ export function TwoFactorSetup({ gate = false }: { gate?: boolean }) {
               <Button onClick={() => enroll.mutate()} isLoading={enroll.isPending}>
                 Set up two-factor
               </Button>
-            ))}
-        </div>
+            ))
+          }
+        >
+          <CardTitle className="flex flex-wrap items-center gap-2">
+            Authenticator app
+            <Badge variant={enabled ? 'success' : 'warning'}>{enabled ? 'On' : 'Off'}</Badge>
+          </CardTitle>
+          <CardDescription>
+            {enabled
+              ? 'Signing in asks for a code from your authenticator app.'
+              : 'Use an app such as Google Authenticator, Microsoft Authenticator, Authy or 1Password.'}
+          </CardDescription>
+        </CardHeader>
 
-        {step === 'setup' && enrollment && (
-          <div className="mt-4 space-y-4 rounded-lg border border-border bg-muted/50 p-4">
-            <ol className="list-decimal space-y-1 pl-5 text-sm text-muted-foreground">
-              <li>Open your authenticator app and add a new account.</li>
-              <li>Scan this QR code, or type the set-up key instead.</li>
-              <li>Enter the 6-digit code the app shows.</li>
-            </ol>
-            <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-start">
+        <CardContent className="space-y-4">
+          {step === 'setup' && enrollment && (
+            <>
+              <Alert variant="neutral" title="Add GetRentos to your authenticator app">
+                <ol className="list-decimal space-y-1 pl-5">
+                  <li>Open your authenticator app and add a new account.</li>
+                  <li>Scan this QR code, or type the set-up key instead.</li>
+                  <li>Enter the 6-digit code the app shows.</li>
+                </ol>
+              </Alert>
               {/* eslint-disable-next-line @next/next/no-img-element -- a data URL from the API */}
               <img
                 src={enrollment.qrDataUrl}
                 alt="QR code to add this account to your authenticator app"
-                className="h-44 w-44 shrink-0 rounded-lg border border-border bg-white"
+                className="h-44 w-44 bg-white"
               />
-              <div className="min-w-0 text-sm">
-                <p className="text-muted-foreground">Set-up key</p>
-                <p className="mt-1 break-all font-mono font-medium text-foreground select-all">
-                  {enrollment.secret}
-                </p>
-              </div>
-            </div>
-            <CodeForm
-              label="Code from your app"
-              submitLabel="Turn on two-factor"
-              isPending={enable.isPending}
-              error={codeError}
-              onSubmit={(code) => enable.mutate(code)}
-              onCodeChange={() => setCodeError(null)}
-              onCancel={gate ? undefined : reset}
-            />
-          </div>
-        )}
+              <DescriptionList items={[{ label: 'Set-up key', value: enrollment.secret }]} />
+              <CodeForm
+                label="Code from your app"
+                submitLabel="Turn on two-factor"
+                isPending={enable.isPending}
+                error={codeError}
+                onSubmit={(code) => enable.mutate(code)}
+                onCodeChange={() => setCodeError(null)}
+                onCancel={gate ? undefined : reset}
+              />
+            </>
+          )}
 
-        {step === 'disable' && (
-          <div className="mt-4 space-y-3 rounded-lg border border-border bg-muted/50 p-4">
-            <p className="text-sm text-muted-foreground">
-              Enter a current code from your authenticator app to turn two-factor off. Staff
-              accounts can&apos;t use the admin tools until it is back on.
-            </p>
-            <CodeForm
-              label="Code from your app"
-              submitLabel="Turn off two-factor"
-              variant="danger"
-              isPending={disable.isPending}
-              error={codeError}
-              onSubmit={(code) => disable.mutate(code)}
-              onCodeChange={() => setCodeError(null)}
-              onCancel={reset}
-            />
-          </div>
-        )}
-      </div>
+          {step === 'disable' && (
+            <>
+              <Alert variant="warning">
+                Enter a current code from your authenticator app to turn two-factor off. Staff
+                accounts can&apos;t use the admin tools until it is back on.
+              </Alert>
+              <CodeForm
+                label="Code from your app"
+                submitLabel="Turn off two-factor"
+                variant="danger"
+                isPending={disable.isPending}
+                error={codeError}
+                onSubmit={(code) => disable.mutate(code)}
+                onCodeChange={() => setCodeError(null)}
+                onCancel={reset}
+              />
+            </>
+          )}
+        </CardContent>
+      </Card>
     </QueryState>
   );
 }

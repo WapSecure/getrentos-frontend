@@ -2,7 +2,7 @@
 
 import { useEffect, type ReactNode } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { PageLoadingState } from '@getrentos/ui';
+import { PageHeader, PageLoadingState } from '@getrentos/ui';
 import { onStaffMfaRequired } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
 import {
@@ -42,15 +42,10 @@ export function StaffTwoFactorGate({ children }: { children: ReactNode }) {
   return (
     <main className="p-6 lg:p-8">
       <div className="mx-auto max-w-2xl space-y-4">
-        <div>
-          <h1 className="text-2xl font-semibold text-foreground">
-            Turn on two-factor authentication to continue
-          </h1>
-          <p className="mt-2 text-sm text-muted-foreground">{STAFF_TWO_FACTOR_EXPLAINER}</p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            It takes about a minute. We&apos;ll ask you to confirm it&apos;s you first.
-          </p>
-        </div>
+        <PageHeader
+          title="Turn on two-factor authentication to continue"
+          description={`${STAFF_TWO_FACTOR_EXPLAINER} It takes about a minute. We'll ask you to confirm it's you first.`}
+        />
         <TwoFactorSetup gate />
       </div>
     </main>

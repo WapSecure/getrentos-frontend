@@ -1,12 +1,23 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Fingerprint, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import {
   startRegistration,
   type PublicKeyCredentialCreationOptionsJSON,
 } from '@simplewebauthn/browser';
-import { Button, IconButton, QueryState, useToast } from '@getrentos/ui';
+import {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  DescriptionList,
+  IconButton,
+  QueryState,
+  useToast,
+} from '@getrentos/ui';
 import { formatDate, unwrap } from '@getrentos/shared';
 import { accountSecurityService } from '@/services/accountSecurityService';
 import { adminKeys } from '@/lib/queryKeys';
@@ -61,60 +72,52 @@ export function PasskeySettings() {
   });
 
   return (
-    <div className="rounded-lg border border-border p-4 sm:p-5">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex min-w-0 items-start gap-3">
-          <div className="rounded-lg bg-info-subtle p-2">
-            <Fingerprint className="h-5 w-5 text-info" aria-hidden="true" />
-          </div>
-          <div className="min-w-0">
-            <h3 className="font-medium text-foreground">Passkeys</h3>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Confirm sensitive actions with Face ID, a fingerprint or a security key. Optional, and
-              used alongside your authenticator app.
-            </p>
-          </div>
-        </div>
-        <Button variant="outline" onClick={() => add.mutate()} isLoading={add.isPending}>
-          Add passkey
-        </Button>
-      </div>
-
-      <QueryState
-        isLoading={list.isLoading}
-        isError={list.isError && !list.data}
-        onRetry={() => void list.refetch()}
-        isRetrying={list.isFetching}
-        errorTitle="We could not load your passkeys"
+    <Card static>
+      <CardHeader
+        action={
+          <Button variant="outline" onClick={() => add.mutate()} isLoading={add.isPending}>
+            Add passkey
+          </Button>
+        }
       >
-        {passkeys.length > 0 && (
-          <ul className="mt-4 space-y-2">
-            {passkeys.map((passkey) => (
-              <li
-                key={passkey.id}
-                className="flex items-center justify-between gap-3 rounded-lg border border-border bg-muted/50 p-2"
-              >
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-foreground">
-                    {passkey.deviceName || 'Passkey'}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Added {formatDate(passkey.createdAt)}
-                    {passkey.lastUsedAt ? ` · last used ${formatDate(passkey.lastUsedAt)}` : ''}
-                  </p>
-                </div>
-                <IconButton
-                  size="sm"
-                  label="Remove passkey"
-                  icon={<Trash2 />}
-                  disabled={remove.isPending}
-                  onClick={() => remove.mutate(passkey.id)}
-                />
-              </li>
-            ))}
-          </ul>
-        )}
-      </QueryState>
-    </div>
+        <CardTitle>Passkeys</CardTitle>
+        <CardDescription>
+          Confirm sensitive actions with Face ID, a fingerprint or a security key. Optional, and
+          used alongside your authenticator app.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <QueryState
+          isLoading={list.isLoading}
+          isError={list.isError && !list.data}
+          onRetry={() => void list.refetch()}
+          isRetrying={list.isFetching}
+          errorTitle="We could not load your passkeys"
+        >
+          {passkeys.length > 0 && (
+            <DescriptionList
+              items={passkeys.map((passkey) => ({
+                label: passkey.deviceName || 'Passkey',
+                value: (
+                  <span className="flex items-center justify-between gap-3">
+                    <span>
+                      Added {formatDate(passkey.createdAt)}
+                      {passkey.lastUsedAt ? ` · last used ${formatDate(passkey.lastUsedAt)}` : ''}
+                    </span>
+                    <IconButton
+                      size="sm"
+                      label="Remove passkey"
+                      icon={<Trash2 />}
+                      disabled={remove.isPending}
+                      onClick={() => remove.mutate(passkey.id)}
+                    />
+                  </span>
+                ),
+              }))}
+            />
+          )}
+        </QueryState>
+      </CardContent>
+    </Card>
   );
 }
