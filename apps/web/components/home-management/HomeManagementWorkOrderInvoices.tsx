@@ -355,12 +355,18 @@ export function HomeManagementWorkOrderInvoices({
   });
 
   const payInvoice = useMutation<
-    { invoiceId: string; payoutStatus: string },
+    { invoiceId: string; payoutStatus: string; topUp?: { authorizationUrl: string } },
     Error,
     { invoiceId: string }
   >({
     mutationFn: ({ invoiceId }) => unwrap(homeManagementService.payWorkOrderInvoice(invoiceId)),
     onSuccess: async (result) => {
+      // The owner's held rent doesn't cover it: the shortfall is paid on
+      // Paystack, and the vendor is paid once it lands.
+      if (result.topUp) {
+        window.location.assign(result.topUp.authorizationUrl);
+        return;
+      }
       await invalidateInvoiceViews();
       if (result.payoutStatus === 'FAILED') {
         toast.error('The transfer to the vendor failed. Check their payout account and try again.');

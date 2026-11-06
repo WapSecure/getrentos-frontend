@@ -1,5 +1,12 @@
 /** What a payer's payment is for. */
-export type PaymentKind = 'RENT' | 'ESCROW' | 'SHORTLET' | 'LAND' | 'FLEX' | 'DUE';
+export type PaymentKind =
+  | 'RENT'
+  | 'ESCROW'
+  | 'SHORTLET'
+  | 'LAND'
+  | 'FLEX'
+  | 'DUE'
+  | 'VENDOR_TOP_UP';
 
 /** PENDING means not confirmed yet, never failed. */
 export type PaymentState = 'PENDING' | 'PAID' | 'FAILED';

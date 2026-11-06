@@ -23,6 +23,7 @@ const WHAT: Record<PaymentKind, string> = {
   LAND: 'land payment',
   FLEX: 'installment',
   DUE: 'dues payment',
+  VENDOR_TOP_UP: 'top-up for the vendor invoice',
 };
 
 /** Sign-in state does not change while this page is open. */
