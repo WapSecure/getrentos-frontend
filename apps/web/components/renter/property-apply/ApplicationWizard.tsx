@@ -17,6 +17,7 @@ import {
   Textarea,
   useSessionExpiryDraft,
 } from '@getrentos/ui';
+import { EMPLOYMENT_STATUSES } from '@getrentos/shared';
 import type { Property, Document as ApplicationDocument } from '@/types/renter';
 import { nameOnly } from '@/lib/validations/input';
 import { renterService, type RenterDocument } from '@/services/renterService';
@@ -95,9 +96,7 @@ interface ApplicationDraft {
   stepIndex: number;
 }
 
-const EMPLOYMENT_OPTIONS = ['Employed', 'Self-employed', 'Business owner', 'Student'].map(
-  (value) => ({ value, label: value })
-);
+const EMPLOYMENT_OPTIONS = EMPLOYMENT_STATUSES.map((value) => ({ value, label: value }));
 
 const LEASE_TERM_OPTIONS = ['6 months', '12 months', '24 months'].map((value) => ({
   value,

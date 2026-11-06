@@ -63,7 +63,7 @@ import {
 import { ApiError, errorMessage } from '@/lib/api/client';
 import { track } from '@/lib/analytics';
 import { formatDate } from '@/lib/format';
-import { applyLastApplication } from '@getrentos/shared';
+import { applyLastApplication, EMPLOYMENT_STATUSES } from '@getrentos/shared';
 
 interface FormState {
   fullName: string;
@@ -112,7 +112,7 @@ const STEPS = [
   },
 ] as const;
 
-const EMPLOYMENT_OPTIONS = ['Employed', 'Self-employed', 'Business owner', 'Student'];
+const EMPLOYMENT_OPTIONS = EMPLOYMENT_STATUSES;
 const LEASE_TERM_OPTIONS = ['6 months', '12 months', '24 months'];
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
