@@ -1,5 +1,6 @@
+import { usePaystackCheckout } from '@/hooks/usePaystackCheckout';
 import { useMemo, useState } from 'react';
-import { Alert, Linking, Pressable, RefreshControl, ScrollView, View } from 'react-native';
+import { Alert, Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
@@ -86,6 +87,7 @@ export default function BuyerTransactions() {
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();
   const toast = useToast();
+  const checkout = usePaystackCheckout();
   const [filter, setFilter] = useState<Filter>('all');
 
   const query = useQuery({
@@ -102,10 +104,10 @@ export default function BuyerTransactions() {
 
   const depositMutation = useMutation({
     mutationFn: (id: string) => buyerTransactionsApi.deposit(id),
-    onSuccess: (tx) => {
-      invalidate();
-      if (tx.authorizationUrl) Linking.openURL(tx.authorizationUrl);
+    onSuccess: async (tx) => {
+      if (tx.authorizationUrl) await checkout(tx.authorizationUrl, tx.reference);
       else toast.show('Deposit initiated.', 'success');
+      invalidate();
     },
     onError: fail('Could not start this deposit.'),
   });
