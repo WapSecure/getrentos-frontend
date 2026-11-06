@@ -8,6 +8,8 @@ export const qk = {
   },
   security: ['me', 'security'] as const,
   messagingConsent: ['me', 'messaging-consent'] as const,
+  /** The card or bank fee added to a payment of this many naira. */
+  checkoutFee: (amount: number) => ['payments', 'checkout-fee', amount] as const,
   passkeys: ['me', 'security', 'passkeys'] as const,
   representatives: {
     list: (kind: 'realtor' | 'agent') => ['representatives', kind] as const,

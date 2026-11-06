@@ -1,3 +1,5 @@
+import { useCheckoutFee } from '@/hooks/useCheckoutFee';
+import { formatNaira } from '@/lib/format';
 import { useState } from 'react';
 import { View } from 'react-native';
 import { Button, CurrencyField, SegmentedControl, Text, useTheme } from '@getrentos/ui-native';
@@ -40,6 +42,9 @@ function PayAmountForm({
   const min = Math.min(MIN_PART_PAYMENT, owed);
   const part = amount ?? 0;
   const partValid = part >= min && part < owed;
+  const paying = mode === 'part' ? (partValid ? part : 0) : owed;
+  // The payer covers the card or bank fee, so the landlord gets the full amount.
+  const { fee, total } = useCheckoutFee(paying);
 
   return (
     <View style={{ gap: spacing.lg }}>
@@ -65,8 +70,13 @@ function PayAmountForm({
           </Text>
         </View>
       ) : null}
+      {fee != null && total != null && fee > 0 ? (
+        <Text variant="caption" color="mutedForeground">
+          Card or bank fee {formatNaira(fee)} · You pay {formatNaira(total)}
+        </Text>
+      ) : null}
       <Button
-        label={`Pay ₦${(mode === 'part' && partValid ? part : owed).toLocaleString()}`}
+        label={`Pay ${formatNaira(total ?? (mode === 'part' && partValid ? part : owed))}`}
         disabled={mode === 'part' && !partValid}
         onPress={() => onPay(mode === 'part' ? part : undefined)}
       />

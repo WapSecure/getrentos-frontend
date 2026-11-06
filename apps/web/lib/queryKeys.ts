@@ -555,4 +555,5 @@ export const sellerOfferKeys = {
 /** One payment's confirmation state, polled by the return page. */
 export const paymentKeys = {
   status: (reference: string) => ['payments', 'status', reference] as const,
+  checkoutFee: (amount: number) => ['payments', 'checkout-fee', amount] as const,
 };

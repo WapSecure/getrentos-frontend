@@ -1,5 +1,7 @@
 'use client';
 
+import { CheckoutFeeLine } from '@/components/shared/payments/CheckoutFeeLine';
+import { useCheckoutFee } from '@/hooks/useCheckoutFee';
 import { useState } from 'react';
 import {
   Button,
@@ -50,12 +52,13 @@ export const PayAmountDialog = ({ payment, onClose, onPay }: PayAmountDialogProp
         : part >= owed
           ? `You owe ${formatCurrency(owed)} on this charge. To pay all of it, choose Pay in full.`
           : undefined;
+  const paying = mode === 'full' ? owed : partValid ? part : 0;
+  // The payer covers the card or bank fee, so the landlord gets the full amount.
+  const { fee, total } = useCheckoutFee(paying);
   const buttonLabel =
-    mode === 'full'
-      ? `Pay ${formatCurrency(owed)}`
-      : amount
-        ? `Pay ${formatCurrency(part)}`
-        : 'Enter an amount to pay';
+    mode === 'full' || amount
+      ? `Pay ${formatCurrency(total ?? (mode === 'full' ? owed : part))}`
+      : 'Enter an amount to pay';
 
   return (
     <Dialog open={!!payment} onOpenChange={(open) => !open && close()}>
@@ -93,6 +96,8 @@ export const PayAmountDialog = ({ payment, onClose, onPay }: PayAmountDialogProp
               />
             </Field>
           )}
+
+          <CheckoutFeeLine fee={fee} total={total} />
 
           <Button
             variant="primary"
