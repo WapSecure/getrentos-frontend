@@ -99,6 +99,7 @@ export default function AgencyPayouts() {
           <FirmPayout
             account={firmAccount.data ?? null}
             available={firmSummary.data.available}
+            awaiting={firmSummary.data.awaitingOwnerFunds ?? 0}
             accountSet={firmSummary.data.accountSet}
             history={firmPayouts.data ?? []}
             onChanged={refresh}
@@ -157,12 +158,15 @@ export default function AgencyPayouts() {
 function FirmPayout({
   account,
   available,
+  awaiting,
   accountSet,
   history,
   onChanged,
 }: {
   account: PayoutAccount | null;
   available: number;
+  /** Earned, waiting for the owners' rent to cover it. */
+  awaiting: number;
   accountSet: boolean;
   history: PayoutRecord[];
   onChanged: () => void;
@@ -194,6 +198,11 @@ function FirmPayout({
           Available to withdraw
         </Text>
         <Price amount={available} variant="display" />
+        {awaiting > 0 ? (
+          <Text variant="caption" color="mutedForeground">
+            {formatNaira(awaiting)} more is waiting for owners’ rent to arrive.
+          </Text>
+        ) : null}
       </View>
       <AccountForm
         key={account?.accountNumber ?? 'none'}

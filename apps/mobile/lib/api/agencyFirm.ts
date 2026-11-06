@@ -443,7 +443,9 @@ export const agencyFirmApi = {
   setFirmPayoutAccount: (bankCode: string, accountNumber: string) =>
     post<PayoutAccount>('/agency/commissions/payout-account', { bankCode, accountNumber }),
   firmPayoutSummary: () =>
-    apiFetch<{ available: number; accountSet: boolean }>('/agency/commissions/payouts/summary'),
+    apiFetch<{ available: number; awaitingOwnerFunds: number; accountSet: boolean }>(
+      '/agency/commissions/payouts/summary'
+    ),
   firmPayouts: () => apiFetch<PayoutRecord[]>('/agency/commissions/payouts'),
   requestFirmPayout: () => post<unknown>('/agency/commissions/payouts/request'),
   payableAgents: () => apiFetch<PayableAgent[]>('/agency/commissions/agent-payouts/payable'),

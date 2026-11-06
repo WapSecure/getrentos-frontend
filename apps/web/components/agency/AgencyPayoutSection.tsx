@@ -175,7 +175,15 @@ export function AgencyPayoutSection({
               {summary ? formatCurrency(summary.available) : '—'}
             </p>
           )}
-          <p className="mt-1 text-xs text-muted-foreground">Earned commissions not yet paid out.</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Commission the owners&apos; rent has covered, not yet paid out.
+          </p>
+          {summary && summary.awaitingOwnerFunds > 0 ? (
+            <p className="mt-1 text-xs text-muted-foreground">
+              {formatCurrency(summary.awaitingOwnerFunds)} more is waiting for owners&apos; rent to
+              arrive.
+            </p>
+          ) : null}
           <Button
             className="mt-3"
             onClick={() => withdraw.mutate()}
