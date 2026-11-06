@@ -4,24 +4,28 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Building2 } from 'lucide-react';
-import { Alert, Button, Card, Field, Input, NumberInput, Select } from '@getrentos/ui';
+import { Alert, Button, Card, Field, Input, NumberInput } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
-import { NIGERIA_STATES } from '@/lib/constants/locations';
 import { useSelectedEstate } from '../layout';
 import { usePlanGateModal } from '@/hooks/usePlanGateModal';
 import { UpgradeToProModal } from '@/components/shared/subscription/UpgradeToProModal';
+import { AddressFields, type AddressFieldsValue } from '@/components/shared/location/AddressFields';
 
 export default function EstateSetupPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { selectEstate } = useSelectedEstate();
   const [name, setName] = useState('');
-  const [address, setAddress] = useState('');
-  const [city, setCity] = useState('');
-  const [state, setState] = useState('');
+  const [location, setLocation] = useState<AddressFieldsValue>({
+    address: '',
+    city: '',
+    state: '',
+    country: 'Nigeria',
+  });
+  const { address, city, state } = location;
   const [gateCount, setGateCount] = useState('1');
   const [createError, setCreateError] = useState<string | null>(null);
   const planGate = usePlanGateModal();
@@ -34,6 +38,7 @@ export default function EstateSetupPage() {
           address,
           city,
           state,
+          placeId: location.placeId,
           gateCount: gateCount ? Number(gateCount) : undefined,
         })
       ),
@@ -73,28 +78,11 @@ export default function EstateSetupPage() {
           />
         </Field>
 
-        <Field label="Address" required>
-          <Input
-            type="text"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            placeholder="e.g. 1 Garden Close"
-          />
-        </Field>
-
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <Field label="State" required>
-            <Select
-              value={state}
-              onValueChange={setState}
-              placeholder="Choose a state"
-              options={NIGERIA_STATES.map((s) => ({ value: s, label: s }))}
-            />
-          </Field>
-          <Field label="City" required>
-            <Input type="text" value={city} onChange={(e) => setCity(e.target.value)} />
-          </Field>
-        </div>
+        <AddressFields
+          required
+          value={location}
+          onChange={(patch) => setLocation((prev) => ({ ...prev, ...patch }))}
+        />
 
         <Field label="Number of gates" optionalLabel="(optional)">
           <NumberInput value={gateCount} onValueChange={setGateCount} min={1} max={50} />
