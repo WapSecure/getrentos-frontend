@@ -25,7 +25,19 @@ export interface SecurityOverview {
   stepUpMethod: StepUpMethod;
 }
 
-export type StepUpMethod = 'passkey' | 'totp' | 'transaction_pin' | 'password' | 'email_code';
+/**
+ * A password alone never confirms anything: an account with no factor gets
+ * `setup_required` and must add a PIN or a passkey first.
+ */
+export type StepUpMethod = 'passkey' | 'totp' | 'transaction_pin' | 'setup_required';
+
+export interface SetTransactionPinInput {
+  currentPassword?: string;
+  pin: string;
+  currentPin?: string;
+  reference?: string;
+  code?: string;
+}
 
 export interface PasskeySummary {
   id: string;
@@ -93,11 +105,16 @@ export const securityApi = {
       body: input,
     }),
 
-  /** Set or change the transaction PIN, confirmed with the current password. */
-  setTransactionPin: (currentPassword: string, pin: string) =>
+  /**
+   * Set, change or reset the 6-digit transaction PIN. Changing one takes the
+   * current password and PIN; a first PIN or a forgotten one takes the
+   * password and an emailed code (`sendStepUpCode`). Accounts with no password
+   * leave it out.
+   */
+  setTransactionPin: (input: SetTransactionPinInput) =>
     apiFetch<{ hasTransactionPin: true }>('/users/me/security/transaction-pin', {
       method: 'POST',
-      body: { currentPassword, pin },
+      body: input,
     }),
 
   // ---- Passkeys (WebAuthn) ----

@@ -19,6 +19,7 @@ import {
   Button,
   Card,
   Divider,
+  LinkButton,
   QueryState,
   NumberField,
   PasswordField,
@@ -38,6 +39,14 @@ import {
 import { errorMessage } from '@/lib/api/client';
 import { isPasskeySupported, registerPasskey } from '@/lib/passkey';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import {
+  PIN_LENGTH,
+  emailedProofReady,
+  isCurrentPin,
+  newPinReady,
+  pinsMismatch,
+  transactionPinBody,
+} from '@/lib/stepUpSetup';
 import {
   biometricSupport,
   unlockWithBiometrics,
@@ -80,9 +89,7 @@ export default function SecuritySettings() {
               <PhoneVerificationSection overview={overview.data} />
               <PasskeySection />
               <TwoFactorSection overview={overview.data} />
-              {overview.data.hasPassword ? (
-                <TransactionPinSection overview={overview.data} />
-              ) : null}
+              <TransactionPinSection overview={overview.data} />
               {overview.data.hasPassword ? <PasswordSection /> : <SocialOnlyNote />}
               {isRenter ? <DataExportSection /> : null}
               {overview.data.hasPassword ? <DangerSection /> : null}
@@ -386,40 +393,74 @@ function TwoFactorSection({ overview }: { overview: SecurityOverview }) {
 }
 
 /**
- * A transaction PIN: a separate secret from the login password, required to
- * step up money actions. Shown only for accounts that have a password, since
- * setting the PIN is confirmed with it.
+ * A transaction PIN: a separate secret from the login password, used to
+ * confirm money actions. Changing one takes the password and the current PIN;
+ * a first PIN, or a forgotten one, takes the password and an emailed code.
+ * Accounts with no password (Google / Apple only) use the emailed code alone.
  */
 function TransactionPinSection({ overview }: { overview: SecurityOverview }) {
   const { colors, spacing } = useTheme();
   const toast = useToast();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [forgot, setForgot] = useState(false);
   const [password, setPassword] = useState('');
+  const [currentPin, setCurrentPin] = useState('');
+  const [reference, setReference] = useState<string | null>(null);
+  const [sentTo, setSentTo] = useState<string | null>(null);
+  const [code, setCode] = useState('');
   const [pin, setPin] = useState('');
   const [confirm, setConfirm] = useState('');
 
   const reset = () => {
     setOpen(false);
+    setForgot(false);
     setPassword('');
+    setCurrentPin('');
+    setReference(null);
+    setSentTo(null);
+    setCode('');
     setPin('');
     setConfirm('');
   };
 
+  // With a PIN already set the current one proves it, unless it's forgotten.
+  const useCurrentPin = overview.hasTransactionPin && !forgot;
+
+  const sendCode = useMutation({
+    mutationFn: securityApi.sendStepUpCode,
+    onSuccess: (res) => {
+      setReference(res.reference);
+      setSentTo(res.sentTo);
+    },
+    onError: (err) => toast.show(errorMessage(err, 'Could not send a code right now.'), 'error'),
+  });
+
   const mutation = useMutation({
-    mutationFn: () => securityApi.setTransactionPin(password, pin),
+    mutationFn: () =>
+      securityApi.setTransactionPin(
+        transactionPinBody({
+          password: overview.hasPassword ? password : undefined,
+          pin,
+          ...(useCurrentPin ? { currentPin } : { reference, code }),
+        })
+      ),
     onSuccess: () => {
       qc.setQueryData<SecurityOverview>(qk.security, (old) =>
         old ? { ...old, hasTransactionPin: true } : old
       );
+      qc.invalidateQueries({ queryKey: qk.security });
       reset();
       toast.show('Transaction PIN saved.', 'success');
     },
     onError: (err) => toast.show(errorMessage(err, 'Could not save your PIN.'), 'error'),
   });
 
-  const mismatch = confirm.length === 4 && pin !== confirm;
-  const ready = password.length > 0 && pin.length === 4 && pin === confirm;
+  const mismatch = pinsMismatch(pin, confirm);
+  const proofReady = useCurrentPin
+    ? (!overview.hasPassword || password.length > 0) && isCurrentPin(currentPin)
+    : emailedProofReady({ needsPassword: overview.hasPassword, password, reference, code });
+  const ready = proofReady && newPinReady(pin, confirm);
 
   return (
     <Card elevated>
@@ -436,7 +477,7 @@ function TransactionPinSection({ overview }: { overview: SecurityOverview }) {
           <Text variant="callout" color="mutedForeground" style={{ flex: 1 }}>
             {overview.hasTransactionPin
               ? 'Required to release or refund money — a separate secret from your password.'
-              : 'Set a 4-digit PIN to confirm money actions, so your password alone isn’t enough.'}
+              : 'Set a 6-digit PIN to confirm money actions, so your password alone isn’t enough.'}
           </Text>
           <Button
             label={overview.hasTransactionPin ? 'Change' : 'Set PIN'}
@@ -447,26 +488,64 @@ function TransactionPinSection({ overview }: { overview: SecurityOverview }) {
         </View>
       ) : (
         <View style={{ gap: spacing.sm }}>
-          <PasswordField label="Current password" value={password} onChangeText={setPassword} />
+          {overview.hasPassword ? (
+            <PasswordField label="Current password" value={password} onChangeText={setPassword} />
+          ) : null}
+          {useCurrentPin ? (
+            <>
+              <NumberField
+                code
+                label="Current PIN"
+                value={currentPin}
+                onValueChange={setCurrentPin}
+                maxLength={PIN_LENGTH}
+                secureTextEntry
+              />
+              <LinkButton label="Forgot your PIN?" onPress={() => setForgot(true)} />
+            </>
+          ) : reference ? (
+            <NumberField
+              code
+              label="6-digit code"
+              hint={sentTo ? `We sent a code to ${sentTo}.` : undefined}
+              value={code}
+              onValueChange={setCode}
+              maxLength={6}
+              textContentType="oneTimeCode"
+            />
+          ) : (
+            <View style={{ gap: spacing.xs }}>
+              <Text variant="caption" color="mutedForeground">
+                {forgot
+                  ? 'We’ll email you a code so you can choose a new PIN.'
+                  : 'We’ll email you a code to confirm it’s you.'}
+              </Text>
+              <Button
+                label="Email me a code"
+                size="sm"
+                variant="secondary"
+                loading={sendCode.isPending}
+                onPress={() => sendCode.mutate()}
+              />
+            </View>
+          )}
           <NumberField
             code
-            label="New 4-digit PIN"
+            label="New 6-digit PIN"
             value={pin}
             onValueChange={setPin}
-            maxLength={4}
+            maxLength={PIN_LENGTH}
+            secureTextEntry
           />
           <NumberField
             code
             label="Confirm PIN"
             value={confirm}
             onValueChange={setConfirm}
-            maxLength={4}
+            maxLength={PIN_LENGTH}
+            secureTextEntry
+            error={mismatch ? 'Those PINs don’t match.' : null}
           />
-          {mismatch ? (
-            <Text variant="caption" color="destructive">
-              Those PINs don’t match.
-            </Text>
-          ) : null}
           <View style={{ flexDirection: 'row', gap: spacing.sm }}>
             <Button label="Cancel" variant="ghost" style={{ flex: 1 }} onPress={reset} />
             <Button

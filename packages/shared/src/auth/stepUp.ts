@@ -15,8 +15,19 @@ export const STEP_UP_REQUIRED = 'STEP_UP_REQUIRED';
  */
 export const STAFF_MFA_REQUIRED = 'STAFF_MFA_REQUIRED';
 
-/** How the account proves it's the holder: its strongest factor wins. */
-export type StepUpMethod = 'passkey' | 'totp' | 'transaction_pin' | 'password' | 'email_code';
+/**
+ * How the account proves it's the holder: its strongest factor wins. A
+ * password alone never confirms anything, so an account with no factor gets
+ * `setup_required`: its password and an emailed code earn a set-up-only token
+ * that opens just the routes that add a factor.
+ */
+export type StepUpMethod = 'passkey' | 'totp' | 'transaction_pin' | 'setup_required';
+
+/** A refusal from a route handed the set-up-only token: add a factor first. */
+export const FACTOR_SETUP_REQUIRED = 'FACTOR_SETUP_REQUIRED';
+
+/** A new transaction PIN is six digits; older accounts may still confirm with four. */
+export const TRANSACTION_PIN_LENGTH = 6;
 
 /** What the confirm dialog is asked for: the challenge the API raised, when there was one. */
 export interface StepUpRequest {

@@ -6,13 +6,18 @@ import {
   authFetch,
   registerStepUpHandler,
   rememberStepUpToken,
+  TRANSACTION_PIN_LENGTH,
   type StepUpMethod,
 } from '@getrentos/shared';
+import { Alert } from './Alert';
 import { Button } from './Button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from './Dialog';
+import { Field } from './Field';
 import { Input } from './Input';
+import { NumberInput } from './NumberInput';
 
 type Pending = { resolve: (token: string | null) => void; challengeId?: string };
+type StepUpToken = { stepUpToken: string; expiresIn: number };
 
 /**
  * Runs the browser passkey ceremony for the given request options and returns
@@ -25,32 +30,50 @@ export interface StepUpDialogProps {
   authenticateWithPasskey?: PasskeyAuthenticator;
   /** Overrides the sentence under the title. */
   description?: string;
+  /**
+   * Whether an account with no factor sets a transaction PIN here (members).
+   * Staff can't use a PIN: for them the password and an emailed code earn a
+   * set-up-only token, so they can turn on two-factor next.
+   */
+  canSetPin?: boolean;
 }
 
-const COPY: Record<StepUpMethod, { label: string; hint: string }> = {
+const COPY: Record<Exclude<StepUpMethod, 'setup_required'>, { label: string; hint: string }> = {
   passkey: {
     label: 'Passkey',
     hint: 'Use your device passkey — Face ID, fingerprint, or a security key.',
   },
   totp: { label: 'Two-factor code', hint: 'Enter the 6-digit code from your authenticator app.' },
-  transaction_pin: { label: 'Transaction PIN', hint: 'Enter your 4-digit transaction PIN.' },
-  password: { label: 'Password', hint: 'Enter your GetRentos password.' },
-  email_code: { label: 'Code from your email', hint: 'We’ll email you a 6-digit code.' },
+  transaction_pin: { label: 'Transaction PIN', hint: 'Enter your transaction PIN.' },
 };
+
+const isCode = (v: string) => /^\d{6}$/.test(v);
+const isNewPin = (v: string) => /^\d{6}$/.test(v);
+/** Older accounts may still have a 4-digit PIN. */
+const isCurrentPin = (v: string) => /^(\d{4}|\d{6})$/.test(v);
 
 /**
  * Mounted once at the root. When the API asks for confirmation before a
  * sensitive change, this asks the account holder for their strongest factor
  * and hands the resulting token back to authFetch, which retries the request.
+ *
+ * A password alone confirms nothing, so an account with no factor first sets
+ * one up here (`setup_required`): a member sets a transaction PIN and confirms
+ * with it; a staff account earns a set-up-only token for two-factor enrolment.
  */
 export function StepUpDialog({
   authenticateWithPasskey,
   description = 'This change affects where your money goes or how you sign in, so we check it’s really you.',
+  canSetPin = true,
 }: StepUpDialogProps = {}) {
   const pending = useRef<Pending | null>(null);
   const [open, setOpen] = useState(false);
   const [method, setMethod] = useState<StepUpMethod | null>(null);
+  const [hasPassword, setHasPassword] = useState(true);
   const [value, setValue] = useState('');
+  const [password, setPassword] = useState('');
+  const [pin, setPin] = useState('');
+  const [pinConfirm, setPinConfirm] = useState('');
   const [reference, setReference] = useState<string | null>(null);
   const [sentTo, setSentTo] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -62,14 +85,26 @@ export function StepUpDialog({
         new Promise<string | null>((resolve) => {
           pending.current = { resolve, challengeId };
           setValue('');
+          setPassword('');
+          setPin('');
+          setPinConfirm('');
           setReference(null);
           setSentTo(null);
           setError(null);
           setMethod(null);
           setOpen(true);
-          authFetch<{ stepUpMethod: StepUpMethod }>('/users/me/security')
-            .then((o) => setMethod(o.stepUpMethod))
-            .catch(() => setMethod('password'));
+          authFetch<{ stepUpMethod: StepUpMethod; hasPassword?: boolean }>('/users/me/security')
+            .then((o) => {
+              setHasPassword(o.hasPassword !== false);
+              setMethod(o.stepUpMethod);
+            })
+            .catch((e) =>
+              setError(
+                e instanceof Error && e.message
+                  ? e.message
+                  : 'We couldn’t check how to confirm it’s you. Try again.'
+              )
+            );
         })
     );
     return () => registerStepUpHandler(null);
@@ -77,7 +112,7 @@ export function StepUpDialog({
 
   // A token bound to a challenge approves one request only, so it isn't kept
   // for later ones (security gap AU-02).
-  const remember = (res: { stepUpToken: string; expiresIn: number }) => {
+  const remember = (res: StepUpToken) => {
     if (!pending.current?.challengeId) rememberStepUpToken(res.stepUpToken, res.expiresIn);
   };
 
@@ -87,27 +122,36 @@ export function StepUpDialog({
     setOpen(false);
   };
 
-  const sendCode = async () => {
+  const run = async (fn: () => Promise<void>, fallback = 'That didn’t work. Try again.') => {
     setBusy(true);
     setError(null);
     try {
+      await fn();
+    } catch (e) {
+      setError(e instanceof Error && e.message ? e.message : fallback);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const stepUp = (body: Record<string, unknown>) =>
+    authFetch<StepUpToken>('/users/me/security/step-up', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+
+  const sendCode = () =>
+    run(async () => {
       const res = await authFetch<{ reference: string; sentTo: string }>(
         '/users/me/security/step-up/code',
         { method: 'POST' }
       );
       setReference(res.reference);
       setSentTo(res.sentTo);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Could not send the code.');
-    } finally {
-      setBusy(false);
-    }
-  };
+    }, 'Could not send the code.');
 
-  const confirmWithPasskey = async () => {
-    setBusy(true);
-    setError(null);
-    try {
+  const confirmWithPasskey = () =>
+    run(async () => {
       if (!authenticateWithPasskey) {
         throw new Error('Passkeys are not available here. Use the main GetRentos app to confirm.');
       }
@@ -115,114 +159,174 @@ export function StepUpDialog({
         method: 'POST',
       });
       const assertion = await authenticateWithPasskey(options);
-      const res = await authFetch<{ stepUpToken: string; expiresIn: number }>(
-        '/users/me/security/step-up',
-        {
-          method: 'POST',
-          body: JSON.stringify({
-            passkeyResponse: assertion,
-            challengeId: pending.current?.challengeId,
-          }),
-        }
-      );
+      const res = await stepUp({
+        passkeyResponse: assertion,
+        challengeId: pending.current?.challengeId,
+      });
       remember(res);
       finish(res.stepUpToken);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'That passkey check did not pass. Try again.');
-    } finally {
-      setBusy(false);
-    }
+    }, 'That passkey check did not pass. Try again.');
+
+  const confirmWith = async (body: { pin?: string; code?: string }) => {
+    const res = await stepUp({ ...body, challengeId: pending.current?.challengeId });
+    remember(res);
+    finish(res.stepUpToken);
   };
 
-  const confirm = async () => {
-    if (!method) return;
-    setBusy(true);
-    setError(null);
-    try {
-      const body =
-        method === 'password'
-          ? { password: value }
-          : method === 'transaction_pin'
-            ? { pin: value }
-            : method === 'totp'
-              ? { code: value }
-              : { code: value, reference };
-      const res = await authFetch<{ stepUpToken: string; expiresIn: number }>(
-        '/users/me/security/step-up',
-        {
-          method: 'POST',
-          body: JSON.stringify({ ...body, challengeId: pending.current?.challengeId }),
-        }
-      );
-      remember(res);
+  const confirm = () =>
+    run(() => confirmWith(method === 'transaction_pin' ? { pin: value } : { code: value }));
+
+  /** A member with no factor: set the PIN with the emailed code, then confirm with it. */
+  const setPinAndConfirm = () =>
+    run(async () => {
+      await authFetch('/users/me/security/transaction-pin', {
+        method: 'POST',
+        body: JSON.stringify({
+          ...(hasPassword ? { currentPassword: password } : {}),
+          pin,
+          reference: reference ?? undefined,
+          code: value,
+        }),
+      });
+      // From here the account has a PIN, so a retry confirms with it.
+      setMethod('transaction_pin');
+      setValue(pin);
+      await confirmWith({ pin });
+    });
+
+  /**
+   * Staff with no factor: the password and the emailed code earn a token that
+   * only opens two-factor (and passkey) set-up. It isn't bound to a challenge,
+   * so it is kept for the enrol and enable calls that follow.
+   */
+  const confirmForSetup = () =>
+    run(async () => {
+      const res = await stepUp({
+        ...(hasPassword ? { password } : {}),
+        reference: reference ?? undefined,
+        code: value,
+      });
+      rememberStepUpToken(res.stepUpToken, res.expiresIn);
       finish(res.stepUpToken);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'That didn’t work. Try again.');
-    } finally {
-      setBusy(false);
-    }
-  };
+    });
 
-  const needsCode = method === 'email_code' && !reference;
   const isPasskey = method === 'passkey';
-  const copy = method ? COPY[method] : null;
+  const isSetup = method === 'setup_required';
+  const needsCode = isSetup && !reference;
+  const pinMismatch = pinConfirm.length === TRANSACTION_PIN_LENGTH && pin !== pinConfirm;
+  const setupReady =
+    (!hasPassword || password.length > 0) &&
+    isCode(value) &&
+    (!canSetPin || (isNewPin(pin) && pin === pinConfirm));
+  const ready = isSetup
+    ? setupReady
+    : method === 'transaction_pin'
+      ? isCurrentPin(value)
+      : isCode(value);
+
+  const title = isSetup && canSetPin ? 'Set a transaction PIN' : 'Confirm it’s you';
+  const intro = !isSetup
+    ? description
+    : canSetPin
+      ? 'Set a transaction PIN to continue — you’ll use it to confirm payments and other sensitive changes.'
+      : 'Confirm with your password and a code we email you, then set up two-factor authentication to continue.';
+
+  const submit = () => {
+    if (isPasskey) void confirmWithPasskey();
+    else if (needsCode) void sendCode();
+    else if (isSetup) void (canSetPin ? setPinAndConfirm() : confirmForSetup());
+    else void confirm();
+  };
 
   return (
     <Dialog open={open} onOpenChange={(next) => !next && finish(null)}>
       <DialogContent className="max-w-md p-6">
         <div className="flex items-center gap-2">
           <ShieldCheck className="h-5 w-5 text-primary" aria-hidden />
-          <DialogTitle className="text-lg font-semibold">Confirm it’s you</DialogTitle>
+          <DialogTitle className="text-lg font-semibold">{title}</DialogTitle>
         </div>
         <DialogDescription className="mt-1 text-sm text-muted-foreground">
-          {description}
+          {intro}
         </DialogDescription>
 
         <form
           className="mt-4 space-y-3"
           onSubmit={(e) => {
             e.preventDefault();
-            if (isPasskey) void confirmWithPasskey();
-            else if (needsCode) void sendCode();
-            else void confirm();
+            submit();
           }}
         >
-          {!copy ? (
-            <p className="text-sm text-muted-foreground">Loading…</p>
-          ) : isPasskey || needsCode ? (
-            <p className="text-sm text-muted-foreground">{copy.hint}</p>
+          {!method ? (
+            error ? null : (
+              <p className="text-sm text-muted-foreground">Loading…</p>
+            )
+          ) : isPasskey ? (
+            <p className="text-sm text-muted-foreground">{COPY.passkey.hint}</p>
+          ) : needsCode ? (
+            <p className="text-sm text-muted-foreground">
+              {hasPassword
+                ? 'We’ll email you a 6-digit code to enter with your password.'
+                : 'We’ll email you a 6-digit code.'}
+            </p>
+          ) : isSetup ? (
+            <>
+              {hasPassword ? (
+                <Field label="Your password">
+                  <Input
+                    autoFocus
+                    type="password"
+                    autoComplete="current-password"
+                    maxLength={200}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </Field>
+              ) : null}
+              <Field label="Code from your email" hint={`We sent a code to ${sentTo}.`}>
+                <NumberInput
+                  autoFocus={!hasPassword}
+                  autoComplete="one-time-code"
+                  maxLength={6}
+                  value={value}
+                  onValueChange={setValue}
+                />
+              </Field>
+              {canSetPin ? (
+                <>
+                  <Field label="New 6-digit PIN">
+                    <NumberInput
+                      maxLength={TRANSACTION_PIN_LENGTH}
+                      value={pin}
+                      onValueChange={setPin}
+                    />
+                  </Field>
+                  <Field
+                    label="Confirm PIN"
+                    error={pinMismatch ? 'Those PINs don’t match.' : undefined}
+                  >
+                    <NumberInput
+                      maxLength={TRANSACTION_PIN_LENGTH}
+                      value={pinConfirm}
+                      onValueChange={setPinConfirm}
+                    />
+                  </Field>
+                </>
+              ) : null}
+            </>
           ) : (
-            <label className="block space-y-1">
-              <span className="text-sm font-medium">{copy.label}</span>
+            <Field label={COPY[method].label} hint={COPY[method].hint}>
               <Input
                 autoFocus
-                type={method === 'password' || method === 'transaction_pin' ? 'password' : 'text'}
-                inputMode={method === 'password' ? undefined : 'numeric'}
-                autoComplete={
-                  method === 'password'
-                    ? 'current-password'
-                    : method === 'transaction_pin'
-                      ? 'off'
-                      : 'one-time-code'
-                }
-                maxLength={method === 'password' ? 200 : method === 'transaction_pin' ? 4 : 6}
+                type={method === 'transaction_pin' ? 'password' : 'text'}
+                inputMode="numeric"
+                autoComplete={method === 'transaction_pin' ? 'off' : 'one-time-code'}
+                maxLength={method === 'transaction_pin' ? TRANSACTION_PIN_LENGTH : 6}
                 value={value}
-                onChange={(e) =>
-                  setValue(
-                    method === 'password' ? e.target.value : e.target.value.replace(/\D/g, '')
-                  )
-                }
+                onChange={(e) => setValue(e.target.value.replace(/\D/g, ''))}
               />
-              <span className="block text-xs text-muted-foreground">
-                {sentTo ? `We sent a code to ${sentTo}.` : copy.hint}
-              </span>
-            </label>
+            </Field>
           )}
-          {error ? (
-            <p role="alert" className="text-sm text-destructive">
-              {error}
-            </p>
-          ) : null}
+          {error ? <Alert variant="danger">{error}</Alert> : null}
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="ghost" onClick={() => finish(null)}>
               Cancel
@@ -231,19 +335,15 @@ export function StepUpDialog({
               type="submit"
               variant="primary"
               isLoading={busy}
-              disabled={
-                busy ||
-                !method ||
-                (!isPasskey &&
-                  !needsCode &&
-                  (method === 'password'
-                    ? !value
-                    : method === 'transaction_pin'
-                      ? value.length !== 4
-                      : value.length !== 6))
-              }
+              disabled={busy || !method || (!isPasskey && !needsCode && !ready)}
             >
-              {isPasskey ? 'Use passkey' : needsCode ? 'Email me a code' : 'Confirm'}
+              {isPasskey
+                ? 'Use passkey'
+                : needsCode
+                  ? 'Email me a code'
+                  : isSetup && canSetPin
+                    ? 'Set PIN and confirm'
+                    : 'Confirm'}
             </Button>
           </div>
         </form>

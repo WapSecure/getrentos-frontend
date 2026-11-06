@@ -3,7 +3,7 @@ import type { ReplyLanguage } from '@/lib/replyLanguage';
 import type { ChargeCategory } from '@/lib/chargeCategory';
 import { authDownload, authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
 import type { ApiResponse } from '@/lib/apiHelpers';
-import type { VideoCallJoin } from '@getrentos/shared';
+import type { StepUpMethod, VideoCallJoin } from '@getrentos/shared';
 import type {
   Application,
   ApplicationStatus,
@@ -1628,23 +1628,36 @@ export const renterService = {
       hasPassword: boolean;
       hasTransactionPin: boolean;
       hasPasskey: boolean;
-      stepUpMethod: string;
+      stepUpMethod: StepUpMethod;
     }>
   > {
     return safeCall(() => authFetch('/users/me/security'));
   },
 
-  /** Set or change the transaction PIN, confirmed with the current password. */
-  async setTransactionPin(
-    currentPassword: string,
-    pin: string
-  ): Promise<ApiResponse<{ hasTransactionPin: true }>> {
+  /**
+   * Set, change or reset the 6-digit transaction PIN. Changing one takes the
+   * current password and PIN; a first PIN, or a forgotten one, takes the
+   * password and an emailed code (`sendSecurityCode`). Accounts with no
+   * password leave it out.
+   */
+  async setTransactionPin(input: {
+    currentPassword?: string;
+    pin: string;
+    currentPin?: string;
+    reference?: string;
+    code?: string;
+  }): Promise<ApiResponse<{ hasTransactionPin: true }>> {
     return safeCall(() =>
       authFetch('/users/me/security/transaction-pin', {
         method: 'POST',
-        body: JSON.stringify({ currentPassword, pin }),
+        body: JSON.stringify(input),
       })
     );
+  },
+
+  /** Emails a 6-digit code that proves it's the account holder (e.g. to reset a PIN). */
+  async sendSecurityCode(): Promise<ApiResponse<{ reference: string; sentTo: string }>> {
+    return safeCall(() => authFetch('/users/me/security/step-up/code', { method: 'POST' }));
   },
 
   // ---- Passkeys (WebAuthn) ----
