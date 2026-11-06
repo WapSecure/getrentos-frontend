@@ -27,7 +27,8 @@ import {
   Trash2,
 } from 'lucide-react';
 import { Button } from '@getrentos/ui';
-import { LocationFields } from '@/components/shared/location/LocationFields';
+import { AddressFields } from '@/components/shared/location/AddressFields';
+import type { VerifiedAddress } from '@getrentos/shared';
 import type { Property, PropertyType } from '@/types/landlord';
 import type { LandOwnershipProofInput } from '@/types/land';
 import { LocationPicker } from '@/components/maps/LocationPicker';
@@ -48,6 +49,7 @@ export interface LandlordPropertySubmission {
     | 'totalUnits'
     | 'latitude'
     | 'longitude'
+    | 'placeId'
   >;
   coverImage: File;
   galleryImages: File[];
@@ -79,7 +81,17 @@ export const ADD_PROPERTY_DRAFT_KEY = 'landlord-add-property';
 /** What survives a session ending: the typed details. Files cannot be kept. */
 type PropertyDraft = Pick<
   FormState,
-  'name' | 'type' | 'address' | 'city' | 'state' | 'country' | 'description' | 'totalUnits' | 'pin'
+  | 'name'
+  | 'type'
+  | 'address'
+  | 'city'
+  | 'state'
+  | 'country'
+  | 'placeId'
+  | 'checked'
+  | 'description'
+  | 'totalUnits'
+  | 'pin'
 >;
 
 interface FormState {
@@ -89,6 +101,9 @@ interface FormState {
   city: string;
   state: string;
   country: string;
+  /** Set when the address was picked from Google. */
+  placeId?: string;
+  checked?: VerifiedAddress;
   description: string;
   totalUnits: string;
   coverImage: File | null;
@@ -141,6 +156,8 @@ export const AddPropertyModal = ({
             city: form.city,
             state: form.state,
             country: form.country,
+            placeId: form.placeId,
+            checked: form.checked,
             description: form.description,
             totalUnits: form.totalUnits,
             pin: form.pin,
@@ -198,6 +215,7 @@ export const AddPropertyModal = ({
           city: form.city,
           state: form.state,
           country: form.country,
+          placeId: form.placeId,
           description: form.description || undefined,
           totalUnits: Number(form.totalUnits) || 1,
           ...(form.pin ? { latitude: form.pin.latitude, longitude: form.pin.longitude } : {}),
@@ -269,23 +287,11 @@ export const AddPropertyModal = ({
                 />
               </Field>
 
-              <Field label="Address" required>
-                <Input
-                  type="text"
-                  value={form.address}
-                  onChange={(e) => update('address', e.target.value)}
-                  placeholder="Street address"
-                />
-              </Field>
-
-              <LocationFields
-                country={form.country}
-                state={form.state}
-                city={form.city}
-                onCountryChange={(c) => update('country', c)}
-                onStateChange={(s) => update('state', s)}
-                onCityChange={(c) => update('city', c)}
+              <AddressFields
                 required
+                value={form}
+                onChange={(patch) => setForm((prev) => ({ ...prev, ...patch }))}
+                onPin={(pin) => update('pin', pin)}
               />
 
               <LocationPicker
@@ -418,7 +424,11 @@ export const AddPropertyModal = ({
                 />
                 <SummaryRow
                   label="Address"
-                  value={`${form.address}, ${form.city}, ${form.state}`}
+                  value={
+                    form.checked
+                      ? form.checked.formatted
+                      : `${form.address}, ${form.city}, ${form.state}`
+                  }
                 />
                 <SummaryRow label="Units" value={form.totalUnits} />
                 <SummaryRow label="Cover image" value={form.coverImage?.name || 'Not selected'} />

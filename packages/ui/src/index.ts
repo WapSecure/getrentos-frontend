@@ -37,6 +37,7 @@ export * from './hooks/useSessionActivity';
 export * from './hooks/useSessionExpiryDraft';
 export * from './SaveButton';
 export * from './SuggestedDraft';
+export * from './AddressSearch';
 export * from './SectionHeader';
 export * from './Select';
 export * from './SessionExpiredNotice';
