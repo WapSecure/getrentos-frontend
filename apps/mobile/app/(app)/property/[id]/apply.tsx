@@ -888,7 +888,7 @@ function DocumentsStep({
                           : colors.mutedForeground,
                     }}
                   >
-                    {doc.uploaded ? 'Uploaded' : doc.required ? 'Required' : 'Optional'}
+                    {doc.uploaded ? 'Attached' : doc.required ? 'Required' : 'Optional'}
                   </Text>
                 </View>
 
@@ -900,7 +900,7 @@ function DocumentsStep({
                         hitSlop={8}
                         style={{ padding: 6 }}
                         accessibilityRole="button"
-                        accessibilityLabel="View uploaded file"
+                        accessibilityLabel="View attached file"
                       >
                         <Eye size={16} color={colors.mutedForeground} />
                       </Pressable>

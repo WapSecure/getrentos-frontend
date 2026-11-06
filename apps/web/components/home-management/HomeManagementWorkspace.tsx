@@ -5,17 +5,14 @@ import { useState } from 'react';
 import { CircleAlert } from 'lucide-react';
 import { HomeAssetRegistry } from '@/components/home-management/HomeAssetRegistry';
 import { HomeManagementDashboard } from '@/components/home-management/HomeManagementDashboard';
-import { HomeManagementEscalationQueue } from '@/components/home-management/HomeManagementEscalationQueue';
 import { HomeManagementInspectionFeed } from '@/components/home-management/HomeManagementInspectionFeed';
 import { HomeManagementOperationsCommandCenter } from '@/components/home-management/HomeManagementOperationsCommandCenter';
 import { HomeManagementPortfolioAnalytics } from '@/components/home-management/HomeManagementPortfolioAnalytics';
 import { HomeManagementRecordsPanel } from '@/components/home-management/HomeManagementRecordsPanel';
-import { HomeManagementSlaPolicies } from '@/components/home-management/HomeManagementSlaPolicies';
 import { HomeManagementTimeline } from '@/components/home-management/HomeManagementTimeline';
 import { HomeManagementVendorPerformance } from '@/components/home-management/HomeManagementVendorPerformance';
-import { HomeManagementWorkOrderQueue } from '@/components/home-management/HomeManagementWorkOrderQueue';
-import { PreventiveMaintenancePlans } from '@/components/home-management/PreventiveMaintenancePlans';
-import { EmptyState } from '@getrentos/ui';
+import { EmptyState, Skeleton } from '@getrentos/ui';
+import dynamic from 'next/dynamic';
 import { unwrap } from '@/lib/apiHelpers';
 import { homeManagementKeys } from '@/lib/queryKeys';
 import { landlordService } from '@/services/landlordService';
@@ -26,6 +23,38 @@ import {
 } from '@/services/homeManagementService';
 import { ownerService } from '@/services/ownerService';
 import { propertyAuthorityService } from '@/services/propertyAuthorityService';
+
+// Care plans, SLA policies, escalations and work orders sit below the fold:
+// load them after the first screen.
+const sectionFallback = () => <Skeleton className="h-48 w-full rounded-xl" />;
+const HomeManagementSlaPolicies = dynamic(
+  () =>
+    import('@/components/home-management/HomeManagementSlaPolicies').then(
+      (m) => m.HomeManagementSlaPolicies
+    ),
+  { loading: sectionFallback }
+);
+const PreventiveMaintenancePlans = dynamic(
+  () =>
+    import('@/components/home-management/PreventiveMaintenancePlans').then(
+      (m) => m.PreventiveMaintenancePlans
+    ),
+  { loading: sectionFallback }
+);
+const HomeManagementWorkOrderQueue = dynamic(
+  () =>
+    import('@/components/home-management/HomeManagementWorkOrderQueue').then(
+      (m) => m.HomeManagementWorkOrderQueue
+    ),
+  { loading: sectionFallback }
+);
+const HomeManagementEscalationQueue = dynamic(
+  () =>
+    import('@/components/home-management/HomeManagementEscalationQueue').then(
+      (m) => m.HomeManagementEscalationQueue
+    ),
+  { loading: sectionFallback }
+);
 
 export type HomeManagementWorkspaceRole = 'owner' | 'landlord' | 'manager';
 
