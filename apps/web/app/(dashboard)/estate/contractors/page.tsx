@@ -1,7 +1,7 @@
 'use client';
 
+import { RedirectToEstateSetup } from '@/components/estate/shared/RedirectToEstateSetup';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Copy, KeyRound, Plus, UserCheck } from 'lucide-react';
@@ -27,7 +27,6 @@ import {
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
-import { ROUTES } from '@/lib/constants/auth';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import {
   AddContractorPassModal,
@@ -68,7 +67,6 @@ const statusTone: Record<ContractorPassStatus, BadgeVariant> = {
  * pass, which is why the visit count here is the number worth looking at.
  */
 export default function EstateContractorPassesPage() {
-  const router = useRouter();
   const queryClient = useQueryClient();
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [issued, setIssued] = useState<IssuedContractorPass | null>(null);
@@ -125,10 +123,7 @@ export default function EstateContractorPassesPage() {
     return <CardSkeleton />;
   }
 
-  if (!estate) {
-    router.replace(ROUTES.ESTATE_SETUP);
-    return null;
-  }
+  if (!estate) return <RedirectToEstateSetup />;
 
   return (
     <>

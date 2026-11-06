@@ -1,14 +1,13 @@
 'use client';
 
+import { RedirectToEstateSetup } from '@/components/estate/shared/RedirectToEstateSetup';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Button, CardSkeleton, Select, PageHeader } from '@getrentos/ui';
 import { tierAtLeast } from '@getrentos/shared';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
-import { ROUTES } from '@/lib/constants/auth';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { EstateFeatureGate } from '@/components/estate/shared/EstateFeatureGate';
 import { OnSiteBoard } from '@/components/estate/dwell/OnSiteBoard';
@@ -53,7 +52,6 @@ const windowStart = (days: string) => new Date(Date.now() - Number(days) * DAY_M
  * about. A manager never needs one without being one click from the other.
  */
 export default function EstateDwellPage() {
-  const router = useRouter();
   const { estate, isLoading: isEstateLoading } = useSelectedEstate();
   const [rangeDays, setRangeDays] = useState('30');
   const [sort, setSort] = useState<'dwell' | 'visits'>('dwell');
@@ -104,10 +102,7 @@ export default function EstateDwellPage() {
     return <CardSkeleton />;
   }
 
-  if (!estate) {
-    router.replace(ROUTES.ESTATE_SETUP);
-    return null;
-  }
+  if (!estate) return <RedirectToEstateSetup />;
 
   // Either query can carry the refusal, because the gate fails open on an unknown
   // tier and lets the API be the authority.

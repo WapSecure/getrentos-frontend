@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Package, Plus } from 'lucide-react';
+import { NotAssignedToEstate } from '@/components/gateman/NotAssignedToEstate';
 import { Button, CardSkeleton, ListSkeleton } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -84,11 +85,7 @@ export default function GatemanDeliveriesPage() {
   }
 
   if (!estate) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-muted-foreground">You&apos;re not assigned to an estate yet.</p>
-      </div>
-    );
+    return <NotAssignedToEstate icon={Package} />;
   }
 
   return (

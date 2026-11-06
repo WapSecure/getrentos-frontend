@@ -1,14 +1,13 @@
 'use client';
 
+import { RedirectToEstateSetup } from '@/components/estate/shared/RedirectToEstateSetup';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Hammer } from 'lucide-react';
 import { CardSkeleton, EmptyState, ListSkeleton, ToggleChip, PageHeader } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
-import { ROUTES } from '@/lib/constants/auth';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { CloseMaintenanceTicketModal } from '@/components/estate/maintenance/CloseMaintenanceTicketModal';
 import { MaintenanceTicketCard } from '@/components/estate/maintenance/MaintenanceTicketCard';
@@ -23,7 +22,6 @@ const statusFilters: { value: MaintenanceTicketStatus | 'all'; label: string }[]
 ];
 
 export default function EstateMaintenancePage() {
-  const router = useRouter();
   const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState<MaintenanceTicketStatus | 'all'>('all');
   const [closeTarget, setCloseTarget] = useState<{
@@ -86,10 +84,7 @@ export default function EstateMaintenancePage() {
     return <CardSkeleton />;
   }
 
-  if (!estate) {
-    router.replace(ROUTES.ESTATE_SETUP);
-    return null;
-  }
+  if (!estate) return <RedirectToEstateSetup />;
 
   return (
     <>

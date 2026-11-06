@@ -1,7 +1,7 @@
 'use client';
 
+import { RedirectToEstateSetup } from '@/components/estate/shared/RedirectToEstateSetup';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ReceiptText, Plus, Settings } from 'lucide-react';
 import {
@@ -17,7 +17,6 @@ import {
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
-import { ROUTES } from '@/lib/constants/auth';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { CreateDuesModal } from '@/components/estate/dues/CreateDuesModal';
 import { DueRow } from '@/components/estate/dues/DueRow';
@@ -37,7 +36,6 @@ const PAGE_SIZE = 10;
 const HOUSEHOLD_OPTIONS_PAGE_SIZE = 20;
 
 export default function EstateDuesPage() {
-  const router = useRouter();
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -132,10 +130,7 @@ export default function EstateDuesPage() {
     return <CardSkeleton />;
   }
 
-  if (!estate) {
-    router.replace(ROUTES.ESTATE_SETUP);
-    return null;
-  }
+  if (!estate) return <RedirectToEstateSetup />;
 
   return (
     <>

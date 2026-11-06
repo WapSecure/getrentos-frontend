@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Car, LogOut as ExitIcon } from 'lucide-react';
+import { NotAssignedToEstate } from '@/components/gateman/NotAssignedToEstate';
 import {
   Alert,
   Button,
@@ -139,11 +140,7 @@ export default function GatemanVehiclesPage() {
   }
 
   if (!estate) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-muted-foreground">You&apos;re not assigned to an estate yet.</p>
-      </div>
-    );
+    return <NotAssignedToEstate icon={Car} />;
   }
 
   return (

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ShieldCheck, Siren, TriangleAlert } from 'lucide-react';
+import { NotAssignedToEstate } from '@/components/gateman/NotAssignedToEstate';
 import {
   Alert,
   Button,
@@ -92,7 +93,7 @@ export default function GatemanIncidentsPage() {
   }
 
   if (!estate) {
-    return <EmptyState icon={Siren} title="You're not assigned to an estate yet." />;
+    return <NotAssignedToEstate icon={Siren} />;
   }
 
   return (

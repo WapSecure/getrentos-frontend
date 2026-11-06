@@ -1,7 +1,7 @@
 'use client';
 
+import { RedirectToEstateSetup } from '@/components/estate/shared/RedirectToEstateSetup';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Car, Plus, Settings2 } from 'lucide-react';
 import {
@@ -16,7 +16,6 @@ import {
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
-import { ROUTES } from '@/lib/constants/auth';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { LogVehicleModal } from '@/components/estate/vehicles/LogVehicleModal';
 import { VehicleLogRow } from '@/components/estate/vehicles/VehicleLogRow';
@@ -33,7 +32,6 @@ const statusFilters: { value: StatusFilter; label: string }[] = [
 const PAGE_SIZE = 10;
 
 export default function EstateVehiclesPage() {
-  const router = useRouter();
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isGatesModalOpen, setIsGatesModalOpen] = useState(false);
@@ -94,10 +92,7 @@ export default function EstateVehiclesPage() {
     return <CardSkeleton />;
   }
 
-  if (!estate) {
-    router.replace(ROUTES.ESTATE_SETUP);
-    return null;
-  }
+  if (!estate) return <RedirectToEstateSetup />;
 
   return (
     <>

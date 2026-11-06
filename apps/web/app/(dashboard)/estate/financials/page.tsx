@@ -1,8 +1,8 @@
 'use client';
 
+import { RedirectToEstateSetup } from '@/components/estate/shared/RedirectToEstateSetup';
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
 import { FileSpreadsheet, Check } from 'lucide-react';
 import { Button, CardSkeleton, SegmentedControl, PageHeader, Skeleton } from '@getrentos/ui';
@@ -14,7 +14,6 @@ import {
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
-import { ROUTES } from '@/lib/constants/auth';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { useEstatePlan } from '@/hooks/useEstatePlan';
 import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
@@ -48,7 +47,6 @@ const EMPTY_STATS: EstateFinancialStatsData = {
 };
 
 export default function EstateFinancialsPage() {
-  const router = useRouter();
   const [period, setPeriod] = useState<ReportPeriod>('monthly');
   const [exported, setExported] = useState(false);
   const { estate, isLoading: isEstateLoading } = useSelectedEstate();
@@ -73,10 +71,7 @@ export default function EstateFinancialsPage() {
     return <CardSkeleton />;
   }
 
-  if (!estate) {
-    router.replace(ROUTES.ESTATE_SETUP);
-    return null;
-  }
+  if (!estate) return <RedirectToEstateSetup />;
 
   return (
     <>
