@@ -13,7 +13,7 @@ import {
   Gavel,
   Landmark,
 } from 'lucide-react';
-import { PageErrorState, PageLoadingState, StatCard, PageHeader } from '@getrentos/ui';
+import { Card, PageErrorState, PageHeader, PageLoadingState, StatCard } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
 import { adminRentalService } from '@/services/adminRentalService';
@@ -99,53 +99,52 @@ export const AdminRentalsOverview = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Rentals"
-        title="Long-term rental oversight"
-        description="Platform-wide listings, applications, viewings, leases and lifecycle cases."
+        title="Long-term rental operations"
+        description="Listings, applications, viewings, leases, renewals, terminations, and eviction cases."
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
         <StatCard
           icon={Building2}
           label="Total listings"
           value={stats.totalListings}
           accent="blue"
-          delay={0}
+          compact
         />
         <StatCard
           icon={Landmark}
           label="Published"
           value={stats.publishedListings}
           accent="green"
-          delay={0.05}
+          compact
         />
         <StatCard
           icon={ClipboardList}
           label="Pending verification"
           value={stats.pendingVerification}
           accent="orange"
-          delay={0.1}
+          compact
         />
         <StatCard
           icon={Scroll}
           label="Paused / closed"
           value={stats.pausedListings + stats.closedListings}
           accent="red"
-          delay={0.15}
+          compact
         />
         <StatCard
           icon={FileX2}
           label="Open applications"
           value={stats.openApplications}
           accent="purple"
-          delay={0.2}
+          compact
         />
         <StatCard
           icon={Gavel}
           label="Active leases"
           value={stats.activeLeases}
           accent="primary"
-          delay={0.25}
+          compact
         />
       </div>
 
@@ -160,24 +159,22 @@ export const AdminRentalsOverview = () => {
         </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {modules.map((module) => (
-            <Link
-              key={module.href}
-              href={module.href}
-              className="group flex items-center gap-3 rounded-xl border border-border/90 bg-card p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
-            >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent text-primary transition-transform duration-300 group-hover:scale-105">
-                <module.icon className="h-4 w-4" />
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-medium text-foreground">
-                  {module.label}
+            <Card key={module.href} interactive>
+              <Link href={module.href} className="group flex items-center gap-3 p-4">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary text-muted-foreground">
+                  <module.icon className="h-4 w-4" />
                 </span>
-                <span className="block truncate text-xs text-muted-foreground">
-                  {module.description}
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-medium text-foreground">
+                    {module.label}
+                  </span>
+                  <span className="block truncate text-xs text-muted-foreground">
+                    {module.description}
+                  </span>
                 </span>
-              </span>
-              <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-300 group-hover:translate-x-0.5" />
-            </Link>
+                <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-150 group-hover:translate-x-0.5" />
+              </Link>
+            </Card>
           ))}
         </div>
       </section>

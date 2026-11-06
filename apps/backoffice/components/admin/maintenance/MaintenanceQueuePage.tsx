@@ -7,12 +7,12 @@ import {
   Button,
   DataTable,
   EmptyState,
+  PageHeader,
   PageErrorState,
   Pagination,
   SearchInput,
   Select,
   type Column,
-  PageHeader,
 } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import type { ApiResponse } from '@getrentos/shared';
@@ -51,7 +51,6 @@ export function MaintenanceQueuePage<T>({ config }: { config: MaintenanceQueueCo
   const [filters, setFilters] = useState<Record<string, string>>(() =>
     Object.fromEntries((config.filters ?? []).map((filter) => [filter.key, 'all']))
   );
-
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebounced(search);
@@ -122,35 +121,34 @@ export function MaintenanceQueuePage<T>({ config }: { config: MaintenanceQueueCo
         eyebrow={config.eyebrow}
         title={config.title}
         description={config.description}
-        actions={
-          <>
-            {config.headerAction}
-            <SearchInput
-              value={search}
-              onValueChange={setSearch}
-              placeholder="Search…"
-              label={`Search ${config.eyebrow.toLowerCase()}`}
-              className="w-full sm:w-56"
-            />
-            {config.filters?.map((filter) => (
-              <div key={filter.key} className="w-full sm:w-44">
-                <Select
-                  value={filters[filter.key]}
-                  onValueChange={(value) => {
-                    setFilters((prev) => ({ ...prev, [filter.key]: value }));
-                    setPage(1);
-                  }}
-                  options={[
-                    { value: 'all', label: `All ${filter.label.toLowerCase()}` },
-                    ...filter.options,
-                  ]}
-                  ariaLabel={filter.label}
-                />
-              </div>
-            ))}
-          </>
-        }
+        actions={config.headerAction}
       />
+
+      <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-xs sm:flex-row sm:flex-wrap sm:items-center">
+        <SearchInput
+          value={search}
+          onValueChange={setSearch}
+          placeholder="Search…"
+          label={`Search ${config.eyebrow.toLowerCase()}`}
+          className="w-full sm:max-w-xs"
+        />
+        {config.filters?.map((filter) => (
+          <div key={filter.key} className="w-full sm:w-44">
+            <Select
+              value={filters[filter.key]}
+              onValueChange={(value) => {
+                setFilters((prev) => ({ ...prev, [filter.key]: value }));
+                setPage(1);
+              }}
+              options={[
+                { value: 'all', label: `All ${filter.label.toLowerCase()}` },
+                ...filter.options,
+              ]}
+              ariaLabel={filter.label}
+            />
+          </div>
+        ))}
+      </div>
 
       <DataTable<T>
         columns={columns}

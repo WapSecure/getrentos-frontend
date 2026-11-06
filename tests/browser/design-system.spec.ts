@@ -444,6 +444,28 @@ test.beforeEach(async ({ page }, testInfo) => {
       },
       '/admin/client-money/releases': [],
       '/admin/client-money/disputes': [],
+      '/admin/maintenance/overview': {
+        totalWorkOrders: 146,
+        openWorkOrders: 28,
+        inProgressWorkOrders: 14,
+        resolvedWorkOrders: 97,
+        cancelledWorkOrders: 7,
+        urgentOpenWorkOrders: 3,
+        pendingApprovalWorkOrders: 6,
+        slaAtRiskWorkOrders: 5,
+      },
+      '/admin/maintenance/work-orders': empty,
+      '/admin/rentals/overview': {
+        totalListings: 428,
+        publishedListings: 361,
+        pendingVerification: 19,
+        pausedListings: 24,
+        closedListings: 24,
+        openApplications: 87,
+        activeLeases: 216,
+      },
+      '/admin/rentals/listings': empty,
+      '/admin/land/diligence': empty,
     };
     const response = Object.prototype.hasOwnProperty.call(data, path)
       ? data[path]
@@ -547,6 +569,43 @@ test('backoffice client-money workspace', async ({ page }, testInfo) => {
   await expect(page.getByRole('heading', { name: 'Client money' })).toBeVisible();
   await expect(page.getByText('Nothing has been reconciled yet', { exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Record bank balance' })).toBeVisible();
+});
+
+test('backoffice maintenance operations', async ({ page }, testInfo) => {
+  await reviewPage(page, `${adminURL}/admin/maintenance`, testInfo);
+  await expect(page.getByRole('heading', { name: 'Maintenance operations' })).toBeVisible();
+  await expect(page.getByText('SLA at risk', { exact: true })).toBeVisible();
+  await expect(page.getByText('Maintenance queues', { exact: true })).toBeVisible();
+});
+
+test('backoffice maintenance queue', async ({ page }, testInfo) => {
+  await reviewPage(page, `${adminURL}/admin/maintenance/work-orders`, testInfo);
+  await expect(page.getByRole('heading', { name: 'Maintenance work orders' })).toBeVisible();
+  await expect(page.getByLabel('Search work orders')).toBeVisible();
+  await expect(page.getByText('No work orders found', { exact: true })).toBeVisible();
+});
+
+test('backoffice rental operations', async ({ page }, testInfo) => {
+  await reviewPage(page, `${adminURL}/admin/rentals`, testInfo);
+  await expect(page.getByRole('heading', { name: 'Long-term rental operations' })).toBeVisible();
+  await expect(page.getByText('Open applications', { exact: true })).toBeVisible();
+  await expect(page.getByText('Management queues', { exact: true })).toBeVisible();
+});
+
+test('backoffice rental listings queue', async ({ page }, testInfo) => {
+  await reviewPage(page, `${adminURL}/admin/rentals/listings`, testInfo);
+  await expect(page.getByRole('heading', { name: 'Long-term listings' })).toBeVisible();
+  await expect(page.getByLabel('Search rental listings')).toBeVisible();
+  await expect(page.getByText('No rental listings found', { exact: true })).toBeVisible();
+});
+
+test('backoffice land diligence queue', async ({ page }, testInfo) => {
+  await reviewPage(page, `${adminURL}/admin/land/diligence`, testInfo);
+  await expect(page.getByRole('heading', { name: 'Land diligence' })).toBeVisible();
+  await expect(page.getByLabel('Search land diligence records')).toBeVisible();
+  await expect(
+    page.getByText('No land diligence cases match these filters', { exact: true })
+  ).toBeVisible();
 });
 
 test('public rental search and refinements', async ({ page }, testInfo) => {
