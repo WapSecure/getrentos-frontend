@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { Field } from '@getrentos/ui';
-import type { AddressValue, VerifiedAddress } from '@getrentos/shared';
+import type { AddressValue, PlaceKind, VerifiedAddress } from '@getrentos/shared';
 import { AddressInput } from './AddressInput';
 import { LocationFields } from './LocationFields';
 
@@ -34,6 +34,8 @@ interface AddressFieldsProps {
   /** Show the city picker for a typed address (default true). */
   showCity?: boolean;
   placeholder?: string;
+  /** What to search for: a full address (default), an area, or either (land, landmarks). */
+  kind?: PlaceKind;
 }
 
 /**
@@ -52,6 +54,7 @@ export function AddressFields({
   allowManual = true,
   showCity = true,
   placeholder,
+  kind,
 }: AddressFieldsProps) {
   const current: AddressValue | null = value.address
     ? { text: value.address, placeId: value.placeId, verified: value.checked }
@@ -96,6 +99,7 @@ export function AddressFields({
           onChange={onAddress}
           allowManual={allowManual}
           placeholder={placeholder}
+          kind={kind}
         />
       </Field>
       {typed && allowManual && (

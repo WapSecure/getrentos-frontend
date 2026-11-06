@@ -1,4 +1,4 @@
-import type { AddressValue, VerifiedAddress } from '@getrentos/shared';
+import type { AddressValue, PlaceKind, VerifiedAddress } from '@getrentos/shared';
 import { AddressInput } from './AddressInput';
 import { LocationFields } from './LocationFields';
 
@@ -25,6 +25,8 @@ interface AddressFieldsProps {
   /** Let the person keep an address Google does not know; saved unchecked, with state and city asked. */
   allowManual?: boolean;
   placeholder?: string;
+  /** What to search for: a full address (default), an area, or either (land, landmarks). */
+  kind?: PlaceKind;
   errors?: { country?: string; state?: string; city?: string };
 }
 
@@ -44,6 +46,7 @@ export function AddressFields({
   allowManual = true,
   placeholder,
   errors,
+  kind,
 }: AddressFieldsProps) {
   const current: AddressValue | null = value.address
     ? { text: value.address, placeId: value.placeId, verified: value.checked }
@@ -76,6 +79,7 @@ export function AddressFields({
         onChange={onAddress}
         allowManual={allowManual}
         placeholder={placeholder}
+        kind={kind}
         hint={
           hint ??
           (allowManual
