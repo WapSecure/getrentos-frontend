@@ -10,10 +10,10 @@ import {
   DialogContent,
   DialogTitle,
   Field,
-  Input,
   RadioGroup,
 } from '@getrentos/ui';
 import { renterService } from '@/services/renterService';
+import { AddressInput } from '@/components/shared/location/AddressInput';
 
 type CommuteMode = 'driving' | 'transit' | 'walking';
 
@@ -84,10 +84,11 @@ export const CommuteCalculator = ({ listingId, propertyLocation }: CommuteCalcul
             </div>
 
             <Field label="To (work/school)">
-              <Input
-                type="text"
-                value={destination}
-                onChange={(e) => setDestination(e.target.value)}
+              <AddressInput
+                kind="any"
+                allowManual
+                value={destination ? { text: destination } : null}
+                onChange={(next) => setDestination(next?.text ?? '')}
                 placeholder="Enter address"
               />
             </Field>
