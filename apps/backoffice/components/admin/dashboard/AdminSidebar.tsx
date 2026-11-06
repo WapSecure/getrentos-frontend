@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   Webhook,
   HandCoins,
+  Scale,
   Eye,
   UserCheck,
   Users,
@@ -178,6 +179,12 @@ const navItems: NavItem[] = [
     label: 'Payouts Needing Attention',
     href: '/admin/payout-issues',
     icon: HandCoins,
+    permission: 'rentfinance.view',
+  },
+  {
+    label: 'Collections Reconciliation',
+    href: '/admin/collections-reconciliation',
+    icon: Scale,
     permission: 'rentfinance.view',
   },
   {
