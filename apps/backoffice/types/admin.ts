@@ -472,6 +472,24 @@ export interface AiCapabilityUsage {
   failed: number;
   /** Calls refused before the model (kill switch, budget, no key). */
   blocked: number;
+  /** Calls where the rules answered instead of the model (failed + blocked). */
+  fellBack: number;
+  /** Parts of model answers a safety check threw away, and why. */
+  dropped: number;
+  dropReasons: Record<string, number>;
+  /** Response time of successful calls, in milliseconds. */
+  medianLatencyMs: number | null;
+  p95LatencyMs: number | null;
+}
+
+/** One Lagos day of AI use. */
+export interface AiUsageDay {
+  /** YYYY-MM-DD, Lagos. */
+  day: string;
+  calls: number;
+  costUsd: number;
+  fellBack: number;
+  dropped: number;
 }
 
 export interface AiBudgetStatus {
@@ -511,8 +529,12 @@ export interface AiUsageSummary {
   globallyEnabled: boolean;
   disabledCapabilities: string[];
   budget: AiBudgetStatus;
-  totalCallsToday: number;
-  totalCostTodayUsd: number;
+  /** The period in Lagos days (1 = today) and when it started. */
+  days: number;
+  since: string;
+  totalCalls: number;
+  totalCostUsd: number;
+  daily: AiUsageDay[];
   capabilities: AiCapabilityUsage[];
   /** Whether an ANTHROPIC_API_KEY is configured (live calls possible). */
   keyConfigured: boolean;

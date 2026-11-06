@@ -1,50 +1,103 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import {
   Activity,
   Ban,
   Coins,
   Cpu,
   Power,
+  Scissors,
   ShieldAlert,
   ShieldCheck,
+  Undo2,
   UserCheck,
 } from 'lucide-react';
-import { PageErrorState, StatGridSkeleton, Skeleton, PageHeader } from '@getrentos/ui';
+import {
+  PageErrorState,
+  StatGridSkeleton,
+  Skeleton,
+  PageHeader,
+  SegmentedControl,
+} from '@getrentos/ui';
 import { StatCard, type StatCardAccent } from '@getrentos/ui';
+import { AiDailyChart, usd } from '@/components/admin/ai/AiDailyChart';
 import { unwrap } from '@getrentos/shared';
 import { adminService } from '@/services/adminService';
 import { adminKeys } from '@/lib/queryKeys';
 import type { AiReviewCapabilitySummary } from '@/types/admin';
 
 /**
- * AI governance dashboard: today's AI spend, volume and per-capability breakdown,
- * plus the live control state (global kill switch, per-capability switches, daily
- * budget). Read-only — the controls are env-driven (ops flips them without a
- * redeploy). Costs are the Anthropic vendor spend, denominated in USD.
+ * AI governance dashboard over today, 7 or 30 Lagos days: spend per day, and per
+ * feature the calls, spend, response times, how often the rules answered instead
+ * of the model, and how often a safety check dropped part of an answer. Plus the
+ * live control state (kill switches, daily budget). Read-only: the controls are
+ * env-driven. Costs are the Anthropic vendor spend, in USD.
  */
-
-// USD vendor spend — rendered without a "$" glyph (the product is Naira-only;
-// this is an internal API cost, labelled explicitly as USD instead).
-function usd(amount: number): string {
-  return `USD ${amount.toFixed(amount < 1 ? 4 : 2)}`;
-}
 
 const CAPABILITY_LABELS: Record<string, string> = {
   'listing-fraud': 'Listing fraud scan',
+  'ownership-doc-check': 'Ownership document check',
   'maintenance-triage': 'Maintenance triage',
   'trust-explanation': 'Trust-score explanation',
+  'portfolio-briefing': 'Portfolio briefing',
+  'application-tip': 'Application tip',
+  'neighbourhood-insight': 'Neighbourhood insight',
+  'listing-check': 'Listing check',
+  'search-parse': 'Plain-language search',
+  'lease-guide': 'Lease guide',
+  'listing-draft': 'Listing creator',
+  'inspection-draft': 'Inspection report from photos',
+  'statement-explainer': 'Owner statement explainer',
+  'collection-plan': 'Collection plans',
+  'shortlist-compare': 'Shortlist comparison',
+  'renewal-advice': 'Renew or re-let',
+  'lead-followups': 'Lead follow-ups',
+  'owner-query-draft': 'Owner question replies',
+  'estate-report-digest': 'Estate report digest',
+  'estate-announcement-draft': 'Estate announcements',
+  'estate-poll-draft': 'Estate polls',
+  'invoice-check': 'Vendor invoice check',
+  'deposit-plan': 'Deposit-back plan',
+  'repair-photo-draft': 'Repairs by photo',
+  'buyer-diligence': 'Buyer due diligence',
+  'dispute-summary': 'Dispute summary',
+  'offer-comparison': 'Offer comparison',
+  'applicant-summary': 'Applicant summary',
+  'renter-assistant': 'Ask GetRentos (renter)',
+  'landlord-assistant': 'Ask GetRentos (landlord)',
+  'manager-assistant': 'Ask GetRentos (manager)',
+  'owner-assistant': 'Ask GetRentos (owner)',
+  'estate-assistant': 'Ask GetRentos (estate)',
+  'resident-assistant': 'Ask GetRentos (resident)',
+  'agent-assistant': 'Ask GetRentos (agent)',
+  'realtor-assistant': 'Ask GetRentos (realtor)',
+  'buyer-assistant': 'Ask GetRentos (buyer)',
 };
+
+const PERIODS = [
+  { value: '1', label: 'Today' },
+  { value: '7', label: '7 days' },
+  { value: '30', label: '30 days' },
+] as const;
+type Period = (typeof PERIODS)[number]['value'];
+
+const share = (part: number, whole: number) =>
+  whole ? `${Math.round((part / whole) * 100)}%` : '—';
+const seconds = (ms: number | null) => (ms === null ? '—' : `${(ms / 1000).toFixed(1)} s`);
 
 function labelFor(capability: string): string {
   return CAPABILITY_LABELS[capability] ?? capability;
 }
 
 export default function AdminAiUsagePage() {
+  const [period, setPeriod] = useState<Period>('1');
+  const days = Number(period);
   const { data, isLoading, isError, refetch, isFetching } = useQuery({
-    queryKey: adminKeys.aiUsage,
-    queryFn: () => unwrap(adminService.getAiUsage()),
+    queryKey: adminKeys.aiUsage(days),
+    queryFn: () => unwrap(adminService.getAiUsage(days)),
+    placeholderData: keepPreviousData,
   });
 
   if (isLoading) {
@@ -62,6 +115,9 @@ export default function AdminAiUsagePage() {
   }
 
   const capped = data.budget.dailyBudgetUsd > 0;
+  const fellBack = data.capabilities.reduce((sum, c) => sum + c.fellBack, 0);
+  const dropped = data.capabilities.reduce((sum, c) => sum + c.dropped, 0);
+  const periodLabel = PERIODS.find((p) => p.value === period)?.label.toLowerCase() ?? 'today';
   const spendAccent: StatCardAccent = data.budget.exceeded
     ? 'red'
     : capped && data.budget.remainingUsd < data.budget.dailyBudgetUsd * 0.2
@@ -72,7 +128,15 @@ export default function AdminAiUsagePage() {
     <div className="space-y-6">
       <PageHeader
         title="Automation usage & controls"
-        description="Today's automated-check spend, volume and per-capability breakdown, with the live kill-switch and budget controls. All figures reset at 00:00 UTC."
+        description="AI spend, volume and quality per feature, with the live kill-switch and budget controls. Periods are Lagos days; the daily budget resets at 00:00 UTC."
+      />
+
+      <SegmentedControl
+        value={period}
+        onValueChange={setPeriod}
+        segments={PERIODS}
+        aria-label="Period"
+        size="sm"
       />
 
       {/* Control state */}
@@ -112,53 +176,59 @@ export default function AdminAiUsagePage() {
 
       {/* Headline stats */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard
-          icon={Activity}
-          label="Calls today"
-          value={`${data.totalCallsToday}`}
-          accent="primary"
-        />
+        <StatCard icon={Activity} label="Calls" value={`${data.totalCalls}`} accent="primary" />
         <StatCard
           icon={Coins}
-          label="Spend today"
-          value={usd(data.totalCostTodayUsd)}
+          label="Spend"
+          value={usd(data.totalCostUsd)}
+          subtitle={
+            capped
+              ? `Today ${usd(data.budget.spentTodayUsd)} of ${usd(data.budget.dailyBudgetUsd)}`
+              : `Today ${usd(data.budget.spentTodayUsd)}`
+          }
           accent={spendAccent}
         />
         <StatCard
-          icon={Coins}
-          label="Budget remaining"
-          value={capped ? usd(data.budget.remainingUsd) : '—'}
-          accent={capped ? (data.budget.exceeded ? 'red' : 'blue') : 'blue'}
-        />
-        <StatCard
-          icon={Ban}
-          label="Blocked today"
-          value={`${data.capabilities.reduce((sum, c) => sum + c.blocked, 0)}`}
+          icon={Undo2}
+          label="Answered by the rules"
+          value={share(fellBack, data.totalCalls)}
+          subtitle={`${fellBack} call${fellBack === 1 ? '' : 's'}: model off, over budget or failed`}
           accent="orange"
         />
+        <StatCard
+          icon={Scissors}
+          label="Parts dropped"
+          value={`${dropped}`}
+          subtitle="Wording a safety check threw away"
+          accent="blue"
+        />
       </div>
+
+      {data.days > 1 && <AiDailyChart daily={data.daily} />}
 
       {/* Per-capability breakdown */}
       <div className="overflow-hidden rounded-xl border border-border/70 bg-card">
         <div className="flex items-center gap-2 border-b border-border/70 px-5 py-4">
           <Cpu className="h-4 w-4 text-primary" aria-hidden="true" />
-          <h2 className="font-semibold text-foreground">By capability (today)</h2>
+          <h2 className="font-semibold text-foreground">By feature ({periodLabel})</h2>
         </div>
         {data.capabilities.length === 0 ? (
           <p className="px-5 py-8 text-center text-sm text-muted-foreground">
-            No automated checks recorded today.
+            No AI calls recorded {period === '1' ? 'today' : 'in this period'}.
           </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border/70 text-left text-xs uppercase tracking-wide text-muted-foreground">
-                  <th className="px-5 py-3 font-medium">Capability</th>
+                  <th className="px-5 py-3 font-medium">Feature</th>
                   <th className="px-5 py-3 text-right font-medium">Calls</th>
-                  <th className="px-5 py-3 text-right font-medium">Succeeded</th>
-                  <th className="px-5 py-3 text-right font-medium">Failed</th>
-                  <th className="px-5 py-3 text-right font-medium">Blocked</th>
                   <th className="px-5 py-3 text-right font-medium">Spend</th>
+                  <th className="px-5 py-3 text-right font-medium">Per call</th>
+                  <th className="px-5 py-3 text-right font-medium">Typical time</th>
+                  <th className="px-5 py-3 text-right font-medium">Slowest 5%</th>
+                  <th className="px-5 py-3 text-right font-medium">Rules answered</th>
+                  <th className="px-5 py-3 text-right font-medium">Parts dropped</th>
                 </tr>
               </thead>
               <tbody>
@@ -168,15 +238,34 @@ export default function AdminAiUsagePage() {
                       {labelFor(c.capability)}
                     </td>
                     <td className="px-5 py-3 text-right tabular-nums text-foreground">{c.calls}</td>
-                    <td className="px-5 py-3 text-right tabular-nums text-green-600">
-                      {c.succeeded}
-                    </td>
-                    <td className="px-5 py-3 text-right tabular-nums text-red-600">{c.failed}</td>
-                    <td className="px-5 py-3 text-right tabular-nums text-orange-600">
-                      {c.blocked}
-                    </td>
                     <td className="px-5 py-3 text-right tabular-nums text-foreground">
                       {usd(c.costUsd)}
+                    </td>
+                    <td className="px-5 py-3 text-right tabular-nums text-muted-foreground">
+                      {c.succeeded ? usd(c.costUsd / c.succeeded) : '—'}
+                    </td>
+                    <td className="px-5 py-3 text-right tabular-nums text-foreground">
+                      {seconds(c.medianLatencyMs)}
+                    </td>
+                    <td className="px-5 py-3 text-right tabular-nums text-muted-foreground">
+                      {seconds(c.p95LatencyMs)}
+                    </td>
+                    <td
+                      className="px-5 py-3 text-right tabular-nums text-foreground"
+                      title={`${c.failed} failed, ${c.blocked} blocked before the model`}
+                    >
+                      {c.fellBack ? `${c.fellBack} (${share(c.fellBack, c.calls)})` : '0'}
+                    </td>
+                    <td className="px-5 py-3 text-right tabular-nums text-foreground">
+                      {c.dropped}
+                      {c.dropped > 0 && (
+                        <span className="block text-xs text-muted-foreground">
+                          {Object.entries(c.dropReasons)
+                            .sort((a, b) => b[1] - a[1])
+                            .map(([reason, n]) => `${reason} ${n}`)
+                            .join(', ')}
+                        </span>
+                      )}
                     </td>
                   </tr>
                 ))}

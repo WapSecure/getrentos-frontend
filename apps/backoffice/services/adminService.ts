@@ -766,8 +766,8 @@ export const adminService = {
     return safeCall(() => authFetch('/admin/settings/platform-config'));
   },
 
-  async getAiUsage(): Promise<ApiResponse<AiUsageSummary>> {
-    return safeCall(() => authFetch('/admin/ai/usage'));
+  async getAiUsage(days = 1): Promise<ApiResponse<AiUsageSummary>> {
+    return safeCall(() => authFetch(`/admin/ai/usage?days=${days}`));
   },
 
   /** Gate evidence: how reviewers decided on AI fraud signals and triage proposals. */
