@@ -34,6 +34,7 @@ import {
   Star,
   Users,
   Wrench,
+  MessageCircle,
 } from 'lucide-react-native';
 import { Avatar, Button, Divider, Screen, Text, ThemeToggle, useTheme } from '@getrentos/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -263,6 +264,13 @@ export default function LandlordAccount() {
       description: 'What’s included and your receipts',
       icon: BadgeCheck,
       onPress: go('/(app)/billing'),
+    },
+    {
+      key: 'text-messages',
+      label: 'Text messages',
+      description: 'SMS or WhatsApp for urgent alerts',
+      icon: MessageCircle,
+      onPress: go('/(app)/whatsapp-settings'),
     },
     {
       key: 'security',

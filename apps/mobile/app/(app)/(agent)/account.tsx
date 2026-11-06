@@ -16,6 +16,7 @@ import {
   BellRing,
   Landmark,
   Wallet,
+  MessageCircle,
 } from 'lucide-react-native';
 import { Screen } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
@@ -149,6 +150,13 @@ export default function AgentAccount() {
           },
         ]
       : []),
+    {
+      key: 'text-messages',
+      label: 'Text messages',
+      description: 'SMS or WhatsApp for urgent alerts',
+      icon: MessageCircle,
+      onPress: go('/(app)/whatsapp-settings'),
+    },
     {
       key: 'security',
       label: 'Security',

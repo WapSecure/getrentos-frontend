@@ -1,7 +1,7 @@
-import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MessageCircle } from 'lucide-react-native';
 import {
@@ -9,38 +9,38 @@ import {
   Button,
   Card,
   Divider,
+  FormAlert,
   QueryState,
   Skeleton,
   SwitchRow,
   Text,
-  TextField,
   useTheme,
   useToast,
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
-import {
-  preferencesApi,
-  DEFAULT_WHATSAPP_TOPICS,
-  WHATSAPP_TOPIC_LABEL,
-  type WhatsAppPreferences,
-} from '@/lib/api/preferences';
+import { messagingConsentApi, type MessagingConsent } from '@/lib/api/messagingConsent';
 import { errorMessage } from '@/lib/api/client';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
-export default function WhatsAppSettings() {
+/**
+ * Consent to be texted (SMS and/or WhatsApp) for the few urgent things, to the
+ * verified number on the profile. The same consent the web settings card and
+ * Ask GetRentos on WhatsApp read.
+ */
+export default function TextMessageSettings() {
   const { colors, spacing, radius } = useTheme();
-  const query = useQuery({ queryKey: qk.renter.preferences, queryFn: preferencesApi.get });
-  const saved = query.data?.whatsapp;
+  const query = useQuery({ queryKey: qk.messagingConsent, queryFn: messagingConsentApi.get });
+  const on = query.data && (query.data.sms || query.data.whatsapp);
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <DetailScreenHeader
         eyebrow="Communication"
-        title="WhatsApp"
-        subtitle="Manage important updates outside the app"
+        title="Text messages"
+        subtitle="SMS or WhatsApp for what you should not miss"
         onBack={() => goBack()}
-        accessory={saved?.connected ? <Badge label="Connected" tone="success" /> : null}
+        accessory={on ? <Badge label="On" tone="success" /> : null}
       />
 
       <QueryState
@@ -53,38 +53,30 @@ export default function WhatsAppSettings() {
           </View>
         }
       >
-        {query.data ? (
-          /* Mounted only once the stored bag has arrived, so the form can seed its
-             own state from props instead of syncing it in an effect. */
-          <WhatsAppForm
-            initial={{
-              connected: saved?.connected === true,
-              phone: saved?.phone ?? '',
-              preferences: { ...DEFAULT_WHATSAPP_TOPICS, ...(saved?.preferences ?? {}) },
-            }}
-          />
-        ) : null}
+        {query.data ? <ConsentForm consent={query.data} /> : null}
       </QueryState>
     </View>
   );
 }
 
-function WhatsAppForm({ initial }: { initial: WhatsAppPreferences }) {
+function ConsentForm({ consent: c }: { consent: MessagingConsent }) {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();
   const toast = useToast();
 
-  const [state, setState] = useState<WhatsAppPreferences>(initial);
-
   const save = useMutation({
-    mutationFn: (next: WhatsAppPreferences) => preferencesApi.update({ whatsapp: next }),
-    onSuccess: (_data, next) => {
-      qc.invalidateQueries({ queryKey: qk.renter.preferences });
-      toast.show(next.connected ? 'WhatsApp updates on.' : 'WhatsApp updates off.', 'success');
+    mutationFn: messagingConsentApi.set,
+    onSuccess: (data) => {
+      qc.setQueryData(qk.messagingConsent, data);
+      toast.show('Saved.', 'success');
     },
-    onError: (e) => toast.show(errorMessage(e, 'Could not save those settings.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not save that.'), 'error'),
   });
+
+  const canOptIn = Boolean(c.phoneEnding && c.phoneVerified);
+  const set = (key: 'sms' | 'whatsapp', value: boolean) =>
+    save.mutate({ sms: c.sms, whatsapp: c.whatsapp, [key]: value });
 
   return (
     <ScrollView
@@ -108,68 +100,79 @@ function WhatsAppForm({ initial }: { initial: WhatsAppPreferences }) {
           >
             <MessageCircle size={19} color={colors.success} />
           </View>
-          <View style={{ flex: 1 }}>
-            <Text variant="bodyStrong">Get updates on WhatsApp</Text>
+          <View style={{ flex: 1, gap: spacing.xs }}>
+            <Text variant="bodyStrong">For the few things you should not miss</Text>
             <Text variant="caption" color="mutedForeground">
-              Rent reminders and landlord messages reach you without opening the app: useful when
-              data is tight.
+              Rent due or overdue, deposit decisions, emergencies, a change to your payout account,
+              or someone posing as your landlord. Off unless you turn it on. Quiet from 9pm to 7am
+              except emergencies.
             </Text>
           </View>
         </View>
       </Card>
 
-      <TextField
-        label="WhatsApp number"
-        placeholder="+234 801 234 5678"
-        keyboardType="phone-pad"
-        required
-        value={state.phone}
-        onChangeText={(text) => {
-          // Digits and a leading '+' only.
-          const phone = text.replace(/[^\d+]/g, '').replace(/(?!^)\+/g, '');
-          setState((s) => ({ ...s, phone }));
-        }}
-      />
-
-      <View style={{ gap: spacing.sm }}>
-        <Text variant="label" color="mutedForeground" uppercase>
-          Send me
+      {c.phoneEnding ? (
+        <Text variant="caption" color="mutedForeground">
+          To your number ending {c.phoneEnding}
+          {c.phoneVerified ? '.' : ': verify it first.'}
         </Text>
-        <Card padding="none">
-          {WHATSAPP_TOPIC_LABEL.map((topic, i) => (
-            <View key={topic.id}>
-              {i > 0 ? <Divider /> : null}
-              <SwitchRow
-                label={topic.label}
-                value={state.preferences[topic.id] === true}
-                onValueChange={(value) =>
-                  setState((s) => ({
-                    ...s,
-                    preferences: { ...s.preferences, [topic.id]: value },
-                  }))
-                }
-                style={{ paddingHorizontal: spacing.lg, paddingVertical: spacing.md }}
-              />
-            </View>
-          ))}
-        </Card>
-      </View>
+      ) : (
+        <Text variant="caption" color="mutedForeground">
+          Add and verify a phone number first.
+        </Text>
+      )}
 
-      <Button
-        label={state.connected ? 'Save changes' : 'Turn on WhatsApp updates'}
-        loading={save.isPending}
-        disabled={!state.phone.trim()}
-        onPress={() => save.mutate({ ...state, connected: true })}
-      />
-
-      {state.connected ? (
+      {!canOptIn ? (
         <Button
-          label="Turn off WhatsApp updates"
-          variant="ghost"
-          loading={save.isPending}
-          onPress={() => save.mutate({ ...state, connected: false })}
+          label="Verify your phone number"
+          variant="secondary"
+          onPress={() => router.push('/(app)/security-settings')}
         />
       ) : null}
+
+      <FormAlert
+        tone="warning"
+        message={
+          c.numberChanged
+            ? 'Your number changed since you agreed, so texts have stopped. Turn them on again for this number.'
+            : null
+        }
+      />
+
+      <Card padding="none">
+        <SwitchRow
+          label="SMS"
+          description="Plain text messages."
+          value={c.sms}
+          disabled={save.isPending || (!canOptIn && !c.sms)}
+          onValueChange={(v) => set('sms', v)}
+          style={{ paddingHorizontal: spacing.lg, paddingVertical: spacing.md }}
+        />
+        <Divider />
+        <SwitchRow
+          label="WhatsApp"
+          description="Sent on WhatsApp instead of SMS when both are on."
+          value={c.whatsapp}
+          disabled={save.isPending || (!canOptIn && !c.whatsapp)}
+          onValueChange={(v) => set('whatsapp', v)}
+          style={{ paddingHorizontal: spacing.lg, paddingVertical: spacing.md }}
+        />
+      </Card>
+
+      <FormAlert
+        tone="info"
+        title="Ask GetRentos on WhatsApp"
+        message={
+          c.whatsapp && c.whatsappChatNumber
+            ? `Message ${c.whatsappChatNumber} on WhatsApp from this number and say "hi". Ask about your rent, lease, repairs or listings in English, Pidgin, Yoruba, Hausa or Igbo. Answers come from your account; nothing is changed or paid on WhatsApp.`
+            : null
+        }
+      />
+
+      <Text variant="caption" color="mutedForeground">
+        Our texts never contain links or bank details. If a text asks you to pay somewhere, it is
+        not from us.
+      </Text>
     </ScrollView>
   );
 }

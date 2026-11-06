@@ -20,28 +20,6 @@ export const DEFAULT_PRIVACY: PrivacyPreferences = {
   shareData: false,
 };
 
-export interface WhatsAppPreferences {
-  connected: boolean;
-  phone: string;
-  preferences: Record<string, boolean>;
-}
-
-export const DEFAULT_WHATSAPP_TOPICS: Record<string, boolean> = {
-  payments: true,
-  maintenance: true,
-  messages: true,
-  lease: true,
-  credit: false,
-};
-
-export const WHATSAPP_TOPIC_LABEL: { id: string; label: string }[] = [
-  { id: 'payments', label: 'Rent and payment reminders' },
-  { id: 'maintenance', label: 'Maintenance updates' },
-  { id: 'messages', label: 'New messages from your landlord' },
-  { id: 'lease', label: 'Lease renewal alerts' },
-  { id: 'credit', label: 'Credit reporting confirmations' },
-];
-
 /**
  * The renter's preference bag. The API stores free-form JSON and merges partial
  * updates, so each screen reads and writes only the key it owns — matching how
@@ -50,7 +28,6 @@ export const WHATSAPP_TOPIC_LABEL: { id: string; label: string }[] = [
 export interface RenterPreferences {
   hideMonetaryValues?: boolean;
   privacy?: Partial<PrivacyPreferences>;
-  whatsapp?: Partial<WhatsAppPreferences>;
   security?: { biometricEnabled?: boolean };
   shareTenancyStanding?: boolean;
   [key: string]: unknown;
