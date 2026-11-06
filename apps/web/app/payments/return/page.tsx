@@ -4,7 +4,7 @@ import { Suspense, useEffect, useState, useSyncExternalStore } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { CheckCircle2, Clock, Loader2, XCircle } from 'lucide-react';
-import { Button, Skeleton } from '@getrentos/ui';
+import { Button, EmptyState, PageLoadingState } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency } from '@/lib/format';
 import { paymentKeys } from '@/lib/queryKeys';
@@ -66,81 +66,55 @@ function PaymentReturnContent() {
   const what = payment ? WHAT[payment.kind] : 'payment';
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center px-6 text-center">
+    <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-4">
       {!signedIn ? (
-        <>
-          <CheckCircle2 className="h-12 w-12 text-primary" aria-hidden />
-          <h1 className="mt-4 text-xl font-semibold text-foreground">You&apos;re done here</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Close this page and go back to GetRentos. Your payment shows there as soon as it&apos;s
-            confirmed: you don&apos;t need to pay again.
-          </p>
-        </>
+        <EmptyState
+          icon={CheckCircle2}
+          title="You're done here"
+          description="Close this page and go back to GetRentos. Your payment shows there as soon as it's confirmed: you don't need to pay again."
+        />
       ) : !reference || status.isError ? (
-        <>
-          <XCircle className="h-12 w-12 text-destructive" aria-hidden />
-          <h1 className="mt-4 text-xl font-semibold text-foreground">
-            We couldn&apos;t find that payment
-          </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            If you were charged, it will show on your account once it&apos;s confirmed: you
-            don&apos;t need to pay again.
-          </p>
-          <Button href="/" variant="outline" className="mt-6">
-            Back to GetRentos
-          </Button>
-        </>
+        <EmptyState
+          icon={XCircle}
+          title="We couldn't find that payment"
+          description="If you were charged, it will show on your account once it's confirmed: you don't need to pay again."
+          action={
+            <Button href="/" variant="outline">
+              Back to GetRentos
+            </Button>
+          }
+        />
       ) : !payment || (payment.status === 'PENDING' && !gaveUp) ? (
-        <div role="status" aria-live="polite" className="flex flex-col items-center">
-          <Loader2
-            className="h-10 w-10 animate-spin text-primary motion-reduce:animate-none"
-            aria-hidden
-          />
-          <h1 className="mt-4 text-xl font-semibold text-foreground">Confirming your {what}…</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            This usually takes a few seconds. You can leave this page; it won&apos;t affect the
-            payment.
-          </p>
-        </div>
+        <EmptyState
+          icon={Loader2}
+          title={`Confirming your ${what}…`}
+          description="This usually takes a few seconds. You can leave this page; it won't affect the payment."
+        />
       ) : payment.status === 'PAID' ? (
-        <>
-          <CheckCircle2 className="h-12 w-12 text-success" aria-hidden />
-          <h1 className="mt-4 text-xl font-semibold text-foreground">
-            {formatCurrency(payment.amount)} paid
-          </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Your {what} is confirmed. Reference{' '}
-            <span className="font-mono text-foreground">{payment.reference}</span>
-          </p>
-          <Button href={back} className="mt-6">
-            Done
-          </Button>
-        </>
+        <EmptyState
+          icon={CheckCircle2}
+          title={`${formatCurrency(payment.amount)} paid`}
+          description={`Your ${what} is confirmed. Reference ${payment.reference}.`}
+          action={<Button href={back}>Done</Button>}
+        />
       ) : payment.status === 'FAILED' ? (
-        <>
-          <XCircle className="h-12 w-12 text-destructive" aria-hidden />
-          <h1 className="mt-4 text-xl font-semibold text-foreground">
-            This payment didn&apos;t go through
-          </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Nothing was taken for this attempt. You can try again from where you started.
-          </p>
-          <Button href={back} className="mt-6">
-            Try again
-          </Button>
-        </>
+        <EmptyState
+          icon={XCircle}
+          title="This payment didn't go through"
+          description="Nothing was taken for this attempt. You can try again from where you started."
+          action={<Button href={back}>Try again</Button>}
+        />
       ) : (
-        <>
-          <Clock className="h-12 w-12 text-warning" aria-hidden />
-          <h1 className="mt-4 text-xl font-semibold text-foreground">Still confirming</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Your bank hasn&apos;t confirmed this {what} yet. If you were charged, it will show as
-            paid automatically and we&apos;ll let you know: you don&apos;t need to pay again.
-          </p>
-          <Button href={back} variant="outline" className="mt-6">
-            Back to GetRentos
-          </Button>
-        </>
+        <EmptyState
+          icon={Clock}
+          title="Still confirming"
+          description={`Your bank hasn't confirmed this ${what} yet. If you were charged, it will show as paid automatically and we'll let you know: you don't need to pay again.`}
+          action={
+            <Button href={back} variant="outline">
+              Back to GetRentos
+            </Button>
+          }
+        />
       )}
     </div>
   );
@@ -148,19 +122,7 @@ function PaymentReturnContent() {
 
 export default function PaymentReturnPage() {
   return (
-    <Suspense
-      fallback={
-        <div
-          role="status"
-          aria-label="Loading"
-          className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center px-6"
-        >
-          <Skeleton className="h-10 w-10 rounded-full" />
-          <Skeleton className="mt-4 h-6 w-2/3" />
-          <Skeleton className="mt-3 h-4 w-full" />
-        </div>
-      }
-    >
+    <Suspense fallback={<PageLoadingState />}>
       <PaymentReturnContent />
     </Suspense>
   );
