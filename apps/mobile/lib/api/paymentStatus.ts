@@ -13,7 +13,16 @@ export interface PaymentStatus {
   returnPath: string | null;
 }
 
+/** The card or bank fee the payer covers on a payment. All kobo. */
+export interface CheckoutFee {
+  amountKobo: number;
+  feeKobo: number;
+  totalKobo: number;
+}
+
 export const paymentStatusApi = {
   get: (reference: string) =>
     apiFetch<PaymentStatus>(`/payments/${encodeURIComponent(reference)}/status`),
+  checkoutFee: (amount: number) =>
+    apiFetch<CheckoutFee>(`/payments/checkout-fee?amount=${Math.round(amount)}`),
 };
