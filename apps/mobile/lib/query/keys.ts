@@ -10,6 +10,10 @@ export const qk = {
   messagingConsent: ['me', 'messaging-consent'] as const,
   /** The card or bank fee added to a payment of this many naira. */
   checkoutFee: (amount: number) => ['payments', 'checkout-fee', amount] as const,
+  /** Banks a payout can go to, and the name on one account (lib/api/paymentStatus). */
+  banks: ['payments', 'banks'] as const,
+  accountName: (bankCode: string, accountNumber: string) =>
+    ['payments', 'account-name', bankCode, accountNumber] as const,
   passkeys: ['me', 'security', 'passkeys'] as const,
   representatives: {
     list: (kind: 'realtor' | 'agent') => ['representatives', kind] as const,
