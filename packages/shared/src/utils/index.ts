@@ -16,3 +16,4 @@ export * from './deposit';
 export * from './trend';
 export * from './gateVoice';
 export * from './lastApplication';
+export * from './address';
