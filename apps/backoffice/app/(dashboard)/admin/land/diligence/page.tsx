@@ -8,13 +8,13 @@ import {
   Alert,
   Button,
   EmptyState,
+  PageHeader,
   Pagination,
   SearchInput,
   Select,
   Tabs,
   TabsList,
   TabsTrigger,
-  PageHeader,
 } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../../layout';
@@ -99,18 +99,17 @@ export default function AdminLandDiligencePage() {
     error instanceof Error ? error.message : 'Unable to load the diligence queue.';
 
   return (
-    <>
+    <div className="space-y-6">
       <PageHeader
         title="Land diligence"
-        description="The work queue for land titles, surveys and the evidence behind them. Cases are ordered by when their review is owed; open one to record checks, cite documents and decide."
+        description="Review land titles, surveys, supporting evidence, conflicts, risk, and approval deadlines."
         actions={
           <Button
             variant="outline"
-            size="sm"
             onClick={() => refetch()}
             disabled={isFetching}
             isLoading={isFetching && !isLoading}
-            icon={<RefreshCw className="h-4 w-4" />}
+            icon={<RefreshCw />}
           >
             Refresh
           </Button>
@@ -118,7 +117,7 @@ export default function AdminLandDiligencePage() {
       />
 
       {!canApprove && (
-        <Alert variant="warning" icon={ShieldCheck} className="mb-6">
+        <Alert variant="warning" icon={ShieldCheck}>
           You can review cases, record checks and request clarification. A staff member with
           verification approval permission must make the final approve or reject decision.
         </Alert>
@@ -130,7 +129,7 @@ export default function AdminLandDiligencePage() {
           setTab(value as QueueTab);
           setPage(1);
         }}
-        className="mb-4"
+        className=""
       >
         <TabsList aria-label="Queue view">
           <TabsTrigger value="all">All cases</TabsTrigger>
@@ -140,7 +139,7 @@ export default function AdminLandDiligencePage() {
         </TabsList>
       </Tabs>
 
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row">
+      <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-xs sm:flex-row">
         <div className="w-full max-w-lg">
           <SearchInput
             value={search}
@@ -217,6 +216,6 @@ export default function AdminLandDiligencePage() {
           className="mt-7"
         />
       )}
-    </>
+    </div>
   );
 }

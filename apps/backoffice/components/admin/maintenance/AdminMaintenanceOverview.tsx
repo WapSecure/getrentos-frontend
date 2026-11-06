@@ -19,12 +19,13 @@ import {
 } from 'lucide-react';
 import {
   Button,
+  Card,
   ConfirmDialog,
   PageErrorState,
   PageLoadingState,
+  PageHeader,
   StatCard,
   useToast,
-  PageHeader,
 } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
@@ -124,15 +125,13 @@ export const AdminMaintenanceOverview = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Maintenance"
-        title="Work orders, SLA & vendors"
-        description="Platform-wide maintenance requests, service-level targets, vendors and invoices."
+        title="Maintenance operations"
+        description="Work orders, service-level targets, preventive plans, vendors, quotes, and invoices."
         actions={
-          canScan && (
+          canScan ? (
             <Button
               type="button"
               variant="outline"
-              size="sm"
               onClick={() => setShowScanConfirm(true)}
               isLoading={scan.isPending}
               loadingText="Scanning…"
@@ -140,59 +139,53 @@ export const AdminMaintenanceOverview = () => {
             >
               Run SLA scan
             </Button>
-          )
+          ) : undefined
         }
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatCard
           icon={ClipboardList}
           label="Total work orders"
           value={stats.totalWorkOrders}
           accent="blue"
-          delay={0}
+          compact
         />
-        <StatCard
-          icon={Wrench}
-          label="Open"
-          value={stats.openWorkOrders}
-          accent="orange"
-          delay={0.05}
-        />
+        <StatCard icon={Wrench} label="Open" value={stats.openWorkOrders} accent="orange" compact />
         <StatCard
           icon={RefreshCw}
           label="In progress"
           value={stats.inProgressWorkOrders}
           accent="primary"
-          delay={0.1}
+          compact
         />
         <StatCard
           icon={BadgeCheck}
           label="Resolved"
           value={stats.resolvedWorkOrders}
           accent="green"
-          delay={0.15}
+          compact
         />
         <StatCard
           icon={AlertTriangle}
           label="SLA at risk"
           value={stats.slaAtRiskWorkOrders}
           accent="red"
-          delay={0.2}
+          compact
         />
         <StatCard
           icon={ShieldAlert}
           label="Urgent open"
           value={stats.urgentOpenWorkOrders}
           accent="red"
-          delay={0.25}
+          compact
         />
         <StatCard
           icon={Clock3}
           label="Pending approval"
           value={stats.pendingApprovalWorkOrders}
           accent="purple"
-          delay={0.3}
+          compact
         />
       </div>
 
@@ -207,24 +200,22 @@ export const AdminMaintenanceOverview = () => {
         </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {modules.map((module) => (
-            <Link
-              key={module.href}
-              href={module.href}
-              className="group flex items-center gap-3 rounded-xl border border-border/90 bg-card p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
-            >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent text-primary transition-transform duration-300 group-hover:scale-105">
-                <module.icon className="h-4 w-4" />
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-medium text-foreground">
-                  {module.label}
+            <Card key={module.href} interactive>
+              <Link href={module.href} className="group flex items-center gap-3 p-4">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary text-muted-foreground">
+                  <module.icon className="h-4 w-4" />
                 </span>
-                <span className="block truncate text-xs text-muted-foreground">
-                  {module.description}
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-medium text-foreground">
+                    {module.label}
+                  </span>
+                  <span className="block truncate text-xs text-muted-foreground">
+                    {module.description}
+                  </span>
                 </span>
-              </span>
-              <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-300 group-hover:translate-x-0.5" />
-            </Link>
+                <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-150 group-hover:translate-x-0.5" />
+              </Link>
+            </Card>
           ))}
         </div>
       </section>

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import type { LucideIcon } from 'lucide-react';
-import { DataTable, type Column, PageHeader } from '@getrentos/ui';
+import { DataTable, PageHeader, type Column } from '@getrentos/ui';
 import { EmptyState, PageErrorState, Pagination, SearchInput, Select } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import type { ApiResponse } from '@getrentos/shared';
@@ -33,7 +33,6 @@ export function RentalQueuePage<T>({ config }: { config: RentalQueueConfig<T> })
   const [debounced, setDebounced] = useState('');
   const [status, setStatus] = useState('all');
   const [page, setPage] = useState(1);
-
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebounced(search);
@@ -95,33 +94,28 @@ export function RentalQueuePage<T>({ config }: { config: RentalQueueConfig<T> })
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        eyebrow={config.eyebrow}
-        title={config.title}
-        description={config.description}
-        actions={
-          <>
-            <SearchInput
-              value={search}
-              onValueChange={setSearch}
-              placeholder="Search…"
-              label={`Search ${config.eyebrow.toLowerCase()}`}
-              className="w-full sm:w-56"
-            />
-            <div className="w-full sm:w-44">
-              <Select
-                value={status}
-                onValueChange={(value) => {
-                  setStatus(value);
-                  setPage(1);
-                }}
-                options={filterOptions}
-                ariaLabel="Filter by status"
-              />
-            </div>
-          </>
-        }
-      />
+      <PageHeader eyebrow={config.eyebrow} title={config.title} description={config.description} />
+
+      <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-xs sm:flex-row sm:items-center">
+        <SearchInput
+          value={search}
+          onValueChange={setSearch}
+          placeholder="Search…"
+          label={`Search ${config.eyebrow.toLowerCase()}`}
+          className="w-full sm:max-w-xs"
+        />
+        <div className="w-full sm:w-44">
+          <Select
+            value={status}
+            onValueChange={(value) => {
+              setStatus(value);
+              setPage(1);
+            }}
+            options={filterOptions}
+            ariaLabel="Filter by status"
+          />
+        </div>
+      </div>
 
       <DataTable<T>
         columns={columns}
