@@ -1,7 +1,7 @@
 'use client';
 
+import { RedirectToEstateSetup } from '@/components/estate/shared/RedirectToEstateSetup';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Users, Plus, Upload, Lock } from 'lucide-react';
 import {
@@ -16,7 +16,6 @@ import {
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
-import { ROUTES } from '@/lib/constants/auth';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { HouseholdCard } from '@/components/estate/households/HouseholdCard';
 import { HouseholdModal } from '@/components/estate/households/HouseholdModal';
@@ -30,7 +29,6 @@ import { useEstatePlan } from '@/hooks/useEstatePlan';
 const PAGE_SIZE = 10;
 
 export default function EstateHouseholdsPage() {
-  const router = useRouter();
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingHousehold, setEditingHousehold] = useState<Household | null>(null);
@@ -141,10 +139,7 @@ export default function EstateHouseholdsPage() {
     return <CardSkeleton />;
   }
 
-  if (!estate) {
-    router.replace(ROUTES.ESTATE_SETUP);
-    return null;
-  }
+  if (!estate) return <RedirectToEstateSetup />;
 
   const handleSubmit = (data: {
     unitLabel: string;

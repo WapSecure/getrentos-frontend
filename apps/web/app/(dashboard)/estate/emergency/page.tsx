@@ -1,7 +1,7 @@
 'use client';
 
+import { RedirectToEstateSetup } from '@/components/estate/shared/RedirectToEstateSetup';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, RefreshCw, Siren, ShieldCheck } from 'lucide-react';
 import {
@@ -17,7 +17,6 @@ import {
 import { estateService } from '@/services/estateService';
 import { unwrap, unwrapOptional } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
-import { ROUTES } from '@/lib/constants/auth';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import {
   DeclareMusterModal,
@@ -58,7 +57,6 @@ const rollFilters: { value: RollFilter; label: string }[] = [
  * single tap. A marshal working through a roll in a stairwell has one hand free.
  */
 export default function EstateEmergencyPage() {
-  const router = useRouter();
   const queryClient = useQueryClient();
   const [isDeclareOpen, setIsDeclareOpen] = useState(false);
   const [isCloseOpen, setIsCloseOpen] = useState(false);
@@ -149,10 +147,7 @@ export default function EstateEmergencyPage() {
     return <CardSkeleton />;
   }
 
-  if (!estate) {
-    router.replace(ROUTES.ESTATE_SETUP);
-    return null;
-  }
+  if (!estate) return <RedirectToEstateSetup />;
 
   const muster: EmergencyMuster | null = active ?? pastQuery.data ?? null;
   const isLive = Boolean(active) && muster?.rollOpen === true;

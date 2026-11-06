@@ -1,7 +1,7 @@
 'use client';
 
+import { RedirectToEstateSetup } from '@/components/estate/shared/RedirectToEstateSetup';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, ShieldAlert } from 'lucide-react';
 import {
@@ -17,7 +17,6 @@ import {
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
-import { ROUTES } from '@/lib/constants/auth';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import {
   AddWatchlistEntryModal,
@@ -42,7 +41,6 @@ const toApiStatus = (filter: StatusFilter): WatchlistStatus | undefined =>
   filter === 'active' ? 'ACTIVE' : filter === 'lifted' ? 'LIFTED' : undefined;
 
 export default function EstateWatchlistPage() {
-  const router = useRouter();
   const queryClient = useQueryClient();
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [lifting, setLifting] = useState<WatchlistEntry | null>(null);
@@ -93,10 +91,7 @@ export default function EstateWatchlistPage() {
     return <CardSkeleton />;
   }
 
-  if (!estate) {
-    router.replace(ROUTES.ESTATE_SETUP);
-    return null;
-  }
+  if (!estate) return <RedirectToEstateSetup />;
 
   return (
     <>

@@ -20,6 +20,7 @@ import {
   Wallet,
 } from 'lucide-react';
 import {
+  Alert,
   Button,
   Card,
   CardSkeleton,
@@ -33,7 +34,7 @@ import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
-import { formatCurrency } from '@/lib/format';
+import { formatCurrency, pluralize } from '@/lib/format';
 import { useEstatePlan } from '@/hooks/useEstatePlan';
 import { AttentionFeed } from '@/components/shared/attention/AttentionFeed';
 import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
@@ -146,8 +147,21 @@ export default function EstateDashboardPage() {
       <PageHeader
         title={estate.name}
         description={`${estate.address}, ${estate.city}, ${estate.state}`}
-        meta={`${estate.householdCount} households · ${estate.gateCount ?? 0} active gates`}
+        meta={`${pluralize(estate.householdCount, 'household')} · ${pluralize(estate.gateCount ?? 0, 'active gate')}`}
       />
+
+      {estate.householdCount === 0 && (
+        <Alert
+          title="Next, add your households"
+          action={
+            <Button href={ROUTES.ESTATE_HOUSEHOLDS} size="sm">
+              Add households
+            </Button>
+          }
+        >
+          Residents get visitor passes and dues bills once their household is on the estate.
+        </Alert>
+      )}
 
       <AttentionFeed persona="estate" estateId={estate.id} />
 

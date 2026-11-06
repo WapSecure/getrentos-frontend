@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CheckCircle2, CloudOff, LogOut, Mic, QrCode, UserPlus, XCircle } from 'lucide-react';
+import { NotAssignedToEstate } from '@/components/gateman/NotAssignedToEstate';
 import {
   Alert,
   Button,
@@ -455,11 +456,7 @@ export default function GatemanVerifyPage() {
   }
 
   if (!estate) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-muted-foreground">You&apos;re not assigned to an estate yet.</p>
-      </div>
-    );
+    return <NotAssignedToEstate icon={QrCode} />;
   }
 
   // Null for every ordinary arrival, so the card below is untouched for them.

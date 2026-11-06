@@ -1,7 +1,7 @@
 'use client';
 
+import { RedirectToEstateSetup } from '@/components/estate/shared/RedirectToEstateSetup';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Megaphone, Plus } from 'lucide-react';
 import {
@@ -15,7 +15,6 @@ import {
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
-import { ROUTES } from '@/lib/constants/auth';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { AnnouncementModal } from '@/components/estate/announcements/AnnouncementModal';
 import { AnnouncementCard } from '@/components/estate/announcements/AnnouncementCard';
@@ -24,7 +23,6 @@ import type { Announcement } from '@/types/estate';
 const PAGE_SIZE = 10;
 
 export default function EstateAnnouncementsPage() {
-  const router = useRouter();
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
@@ -84,10 +82,7 @@ export default function EstateAnnouncementsPage() {
     return <CardSkeleton />;
   }
 
-  if (!estate) {
-    router.replace(ROUTES.ESTATE_SETUP);
-    return null;
-  }
+  if (!estate) return <RedirectToEstateSetup />;
 
   const handleSubmit = (data: {
     title: string;

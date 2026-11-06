@@ -1,7 +1,7 @@
 'use client';
 
+import { RedirectToEstateSetup } from '@/components/estate/shared/RedirectToEstateSetup';
 import { useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { SafeImage } from '@/components/shared/media/SafeImage';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Copy, Check, Globe, ExternalLink } from 'lucide-react';
@@ -19,7 +19,6 @@ import {
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
-import { ROUTES } from '@/lib/constants/auth';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import type { EstateMicrositeSettings } from '@/types/estate';
 import { useEstatePlan } from '@/hooks/useEstatePlan';
@@ -221,7 +220,6 @@ function MicrositeForm({ estateId, estateName, settings }: MicrositeFormProps) {
 }
 
 export default function EstateMicrositePage() {
-  const router = useRouter();
   const { estate, isLoading: isEstateLoading } = useSelectedEstate();
   const { isPro, isLoading: isPlanLoading } = useEstatePlan();
 
@@ -235,10 +233,7 @@ export default function EstateMicrositePage() {
     return <CardSkeleton />;
   }
 
-  if (!estate) {
-    router.replace(ROUTES.ESTATE_SETUP);
-    return null;
-  }
+  if (!estate) return <RedirectToEstateSetup />;
 
   if (!isPro) {
     return (

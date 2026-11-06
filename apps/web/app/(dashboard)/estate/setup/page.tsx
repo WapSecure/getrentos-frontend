@@ -4,11 +4,12 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Building2 } from 'lucide-react';
-import { Alert, Button, Card, Field, Input, NumberInput } from '@getrentos/ui';
+import { Alert, Button, Card, Field, Input, NumberInput, Select } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
+import { NIGERIA_STATES } from '@/lib/constants/locations';
 import { useSelectedEstate } from '../layout';
 import { usePlanGateModal } from '@/hooks/usePlanGateModal';
 import { UpgradeToProModal } from '@/components/shared/subscription/UpgradeToProModal';
@@ -22,7 +23,7 @@ export default function EstateSetupPage() {
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
   const [gateCount, setGateCount] = useState('1');
-  const [genericError, setGenericError] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
   const planGate = usePlanGateModal();
 
   const createEstate = useMutation({
@@ -44,7 +45,7 @@ export default function EstateSetupPage() {
     },
     onError: (error: Error) => {
       if (planGate.handleError(error)) return;
-      setGenericError(true);
+      setCreateError(error.message || 'Unable to create your estate. Please try again.');
     },
   });
 
@@ -82,11 +83,16 @@ export default function EstateSetupPage() {
         </Field>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <Field label="State" required>
+            <Select
+              value={state}
+              onValueChange={setState}
+              placeholder="Choose a state"
+              options={NIGERIA_STATES.map((s) => ({ value: s, label: s }))}
+            />
+          </Field>
           <Field label="City" required>
             <Input type="text" value={city} onChange={(e) => setCity(e.target.value)} />
-          </Field>
-          <Field label="State" required>
-            <Input type="text" value={state} onChange={(e) => setState(e.target.value)} />
           </Field>
         </div>
 
@@ -94,9 +100,7 @@ export default function EstateSetupPage() {
           <NumberInput value={gateCount} onValueChange={setGateCount} min={1} max={50} />
         </Field>
 
-        {genericError && (
-          <Alert variant="danger">Unable to create your estate. Please try again.</Alert>
-        )}
+        {createError && <Alert variant="danger">{createError}</Alert>}
 
         <Button
           variant="primary"
@@ -104,7 +108,10 @@ export default function EstateSetupPage() {
           disabled={!canSubmit}
           isLoading={createEstate.isPending}
           loadingText="Creating…"
-          onClick={() => createEstate.mutate()}
+          onClick={() => {
+            setCreateError(null);
+            createEstate.mutate();
+          }}
         >
           Create estate
         </Button>

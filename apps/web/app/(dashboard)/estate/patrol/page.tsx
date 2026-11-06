@@ -1,13 +1,12 @@
 'use client';
 
+import { RedirectToEstateSetup } from '@/components/estate/shared/RedirectToEstateSetup';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { tierAtLeast } from '@getrentos/shared';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
-import { ROUTES } from '@/lib/constants/auth';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { EstateFeatureGate } from '@/components/estate/shared/EstateFeatureGate';
 import { CheckpointRegister } from '@/components/estate/patrol/CheckpointRegister';
@@ -40,7 +39,6 @@ type Tab = (typeof TABS)[number]['value'];
  * the one anybody opens without being asked to.
  */
 export default function EstatePatrolPage() {
-  const router = useRouter();
   const { estate, isLoading: isEstateLoading } = useSelectedEstate();
   const [tab, setTab] = useState<Tab>('report');
 
@@ -69,10 +67,7 @@ export default function EstatePatrolPage() {
     return <CardSkeleton />;
   }
 
-  if (!estate) {
-    router.replace(ROUTES.ESTATE_SETUP);
-    return null;
-  }
+  if (!estate) return <RedirectToEstateSetup />;
 
   return (
     <EstateFeatureGate feature="Patrols" error={reportQuery.error}>

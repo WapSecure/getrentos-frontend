@@ -1,7 +1,7 @@
 'use client';
 
+import { RedirectToEstateSetup } from '@/components/estate/shared/RedirectToEstateSetup';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Landmark, Trash2 } from 'lucide-react';
 import {
@@ -17,7 +17,6 @@ import {
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
-import { ROUTES } from '@/lib/constants/auth';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import type { CommitteeTitle } from '@/types/estate';
 
@@ -46,7 +45,6 @@ const titleVariant: Record<CommitteeTitle, 'info' | 'warning' | 'neutral'> = {
 };
 
 export default function EstateCommitteePage() {
-  const router = useRouter();
   const queryClient = useQueryClient();
   const [householdId, setHouseholdId] = useState('');
   const [title, setTitle] = useState<CommitteeTitle>('member');
@@ -94,10 +92,7 @@ export default function EstateCommitteePage() {
     return <CardSkeleton />;
   }
 
-  if (!estate) {
-    router.replace(ROUTES.ESTATE_SETUP);
-    return null;
-  }
+  if (!estate) return <RedirectToEstateSetup />;
 
   return (
     <>
