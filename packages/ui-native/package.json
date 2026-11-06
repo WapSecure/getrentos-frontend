@@ -16,6 +16,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@getrentos/shared": "workspace:*",
     "@getrentos/tokens": "workspace:*"
   },
   "peerDependencies": {

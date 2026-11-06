@@ -18,6 +18,10 @@
       "import": "./src/constants/index.ts",
       "types": "./src/constants/index.ts"
     },
+    "./address": {
+      "import": "./src/utils/address.ts",
+      "types": "./src/utils/address.ts"
+    },
     "./utils": {
       "import": "./src/utils/index.ts",
       "types": "./src/utils/index.ts"

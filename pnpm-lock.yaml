@@ -546,6 +546,9 @@ importers:
 
   packages/ui-native:
     dependencies:
+      '@getrentos/shared':
+        specifier: workspace:*
+        version: link:../shared
       '@getrentos/tokens':
         specifier: workspace:*
         version: link:../tokens
