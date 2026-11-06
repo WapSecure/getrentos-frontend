@@ -198,7 +198,9 @@ export const ERROR_MESSAGES = {
 
 export const STORAGE_KEYS = {
   SIGNUP_DATA: 'getrentos_signup_data',
+  /** Legacy: tokens are no longer stored (AU-16); kept so old entries can be removed. */
   AUTH_TOKEN: 'getrentos_auth_token',
+  /** Legacy: the refresh token is an httpOnly cookie; kept so old entries can be removed. */
   REFRESH_TOKEN: 'getrentos_refresh_token',
   USER: 'getrentos_user',
   SELECTED_ROLES: 'getrentos_selected_roles',
@@ -574,10 +576,4 @@ export const getUserRole = (): string | null => {
   return null;
 };
 
-// Helper function to check if user is authenticated
-export const isAuthenticated = (): boolean => {
-  if (typeof window === 'undefined') return false;
-  return !!(
-    localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN) || sessionStorage.getItem(STORAGE_KEYS.AUTH_TOKEN)
-  );
-};
+// `isAuthenticated` lives in authStorage, next to the in-memory access token.

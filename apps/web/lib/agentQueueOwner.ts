@@ -1,9 +1,9 @@
 import { ApiError } from '@/lib/apiHelpers';
-import { getAuthToken, getStoredUser } from '@/lib/authStorage';
+import { getStoredUser, isAuthenticated } from '@/lib/authStorage';
 
 export function currentAgentQueueOwner(): string | null {
   const user = getStoredUser<{ id?: string; roles?: string[] }>();
-  return getAuthToken() && user?.id && user.roles?.includes('AGENT') ? user.id : null;
+  return isAuthenticated() && user?.id && user.roles?.includes('AGENT') ? user.id : null;
 }
 
 export function requireAgentQueueOwner(expectedOwner?: string): string {

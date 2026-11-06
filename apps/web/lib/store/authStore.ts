@@ -1,13 +1,13 @@
 import { create } from 'zustand';
-import { getAuthToken, logoutSession } from '@getrentos/shared';
+import { isAuthenticated, logoutSession } from '@getrentos/shared';
 import { disconnectRealtime } from '@/lib/realtime/socket';
 
 /**
  * Reactive auth state. Components that need to react to sign-in/sign-out
  * (e.g. the marketing Navigation) subscribe to `isAuthenticated` instead of
  * reading storage ad hoc — which also removes the need for a hard reload on
- * logout. `getAuthToken`/storage remain the single source of truth; this
- * store mirrors that truth into React state.
+ * logout. `isAuthenticated()` (in-memory token or saved profile) remains the
+ * single source of truth; this store mirrors it into React state.
  */
 interface AuthState {
   isAuthenticated: boolean;
@@ -21,7 +21,7 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>((set) => ({
   isAuthenticated: false,
-  init: () => set({ isAuthenticated: Boolean(getAuthToken()) }),
+  init: () => set({ isAuthenticated: isAuthenticated() }),
   setAuthenticated: (value) => set({ isAuthenticated: value }),
   logout: async () => {
     // Drop the realtime socket first so no further events fire post-logout.

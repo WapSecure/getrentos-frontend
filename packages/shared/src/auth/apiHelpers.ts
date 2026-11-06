@@ -1,4 +1,4 @@
-import { apiDownload, apiFetch, ApiError, refreshSession } from './apiClient';
+import { apiDownload, apiFetch, ApiError, currentAccessToken, refreshSession } from './apiClient';
 import {
   clearStepUpToken,
   currentStepUpToken,
@@ -9,7 +9,7 @@ import {
   STEP_UP_HEADER,
   stepUpChallengeId,
 } from './stepUp';
-import { getAuthToken, getStoredUser } from './authStorage';
+import { getAuthToken, getStoredUser, hasStoredSession } from './authStorage';
 
 /**
  * Machine-readable codes the backend attaches to a 403 when an action is gated
@@ -260,8 +260,11 @@ export async function authFetch<T>(
     );
   };
 
+  // After a page load the token is restored from the refresh cookie before the
+  // first request; that refresh then stands in for the one a 401 would trigger.
+  const restoredFirst = !getAuthToken() && hasStoredSession();
   try {
-    return await doFetch(getAuthToken());
+    return await doFetch(await currentAccessToken());
   } catch (err) {
     assertAccount();
     // A sensitive change: confirm it's the account holder, then replay once.
@@ -286,6 +289,7 @@ export async function authFetch<T>(
     if (
       err instanceof ApiError &&
       err.status === 401 &&
+      !restoredFirst &&
       path !== '/auth/refresh' &&
       path !== '/auth/login'
     ) {
@@ -307,10 +311,11 @@ export async function authDownload(path: string, options: RequestInit = {}): Pro
       },
     });
 
+  const restoredFirst = !getAuthToken() && hasStoredSession();
   try {
-    return await doDownload(getAuthToken());
+    return await doDownload(await currentAccessToken());
   } catch (error) {
-    if (error instanceof ApiError && error.status === 401) {
+    if (error instanceof ApiError && error.status === 401 && !restoredFirst) {
       const refreshed = await refreshSession();
       if (refreshed) return doDownload(getAuthToken());
     }

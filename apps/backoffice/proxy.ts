@@ -27,7 +27,7 @@ const DEV = process.env.NODE_ENV !== 'production';
  * would be blocked, which is why the root layout reads `x-nonce`.
  *
  * It does NOT gate auth. The session lives in two places the proxy cannot see:
- * the access token is in web storage (JS-only, by design), and the refresh
+ * the access token is held in page memory only (never in web storage), and the refresh
  * token is an httpOnly cookie (`gr_refresh`) set by the API on a different
  * origin (localhost:4000 in dev) and scoped `Path=/auth` — so it is never
  * attached to a request for a page route on this origin. Auth is enforced
