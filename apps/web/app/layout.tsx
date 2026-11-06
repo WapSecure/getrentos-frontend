@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import { headers } from 'next/headers';
 import { Manrope } from 'next/font/google';
 import { ThemeProvider } from '@getrentos/ui/providers/ThemeProvider';
 import { QueryProvider } from '@getrentos/ui/providers/QueryProvider';
@@ -75,16 +76,19 @@ export const viewport: Viewport = {
 };
 
 /**
- * This layout must not read request data (cookies, headers). Doing so makes every
- * page in the app dynamic: rendered per visitor, sent `no-store`, and impossible
- * to serve from a CDN: including the public marketing and marketplace pages.
- * The saved language is therefore restored in the browser by LanguageProvider.
+ * This layout reads one request header: the Content-Security-Policy nonce the
+ * proxy (proxy.ts) generates per request, for the theme script. That makes
+ * every page render dynamically, per visitor: unavoidable with a nonce-based
+ * CSP, since a prerendered page would carry no nonce and its scripts would be
+ * blocked. Keep it to that one header; the saved language is still restored in
+ * the browser by LanguageProvider.
  */
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const nonce = (await headers()).get('x-nonce') ?? undefined;
   return (
     <html lang="en" className={manrope.variable} suppressHydrationWarning>
       <body className="bg-background antialiased">
-        <ThemeProvider>
+        <ThemeProvider nonce={nonce}>
           <QueryProvider>
             <LanguageProvider>
               {children}

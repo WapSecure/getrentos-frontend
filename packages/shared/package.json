@@ -26,6 +26,10 @@
       "import": "./src/utils/index.ts",
       "types": "./src/utils/index.ts"
     },
+    "./csp": {
+      "import": "./src/utils/csp.ts",
+      "types": "./src/utils/csp.ts"
+    },
     "./auth": {
       "import": "./src/auth/index.ts",
       "types": "./src/auth/index.ts"
