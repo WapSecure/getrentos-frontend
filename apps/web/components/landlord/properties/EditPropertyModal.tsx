@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@getrentos/ui';
 import { Alert, Button, Field, Input, NumberInput, Select } from '@getrentos/ui';
 import { ImagePlus, Play, Star, Video, X } from 'lucide-react';
-import { LocationFields } from '@/components/shared/location/LocationFields';
+import { AddressFields, type AddressFieldsValue } from '@/components/shared/location/AddressFields';
 import { LocationPicker } from '@/components/maps/LocationPicker';
 import type { MapPoint } from '@/services/geocodeService';
 import {
@@ -75,10 +75,14 @@ const EditPropertyForm = ({
 }) => {
   const [name, setName] = useState(property.name);
   const [type, setType] = useState<PropertyType>(property.type);
-  const [address, setAddress] = useState(property.address);
-  const [city, setCity] = useState(property.city);
-  const [state, setState] = useState(property.state);
-  const [country, setCountry] = useState(property.country ?? 'Nigeria');
+  const [location, setLocation] = useState<AddressFieldsValue>({
+    address: property.address,
+    city: property.city,
+    state: property.state,
+    country: property.country ?? 'Nigeria',
+    placeId: property.placeId,
+  });
+  const { address, city, state, country } = location;
   const [pin, setPin] = useState<MapPoint | null>(
     property.latitude != null && property.longitude != null
       ? { latitude: property.latitude, longitude: property.longitude }
@@ -181,6 +185,7 @@ const EditPropertyForm = ({
         city,
         state,
         country,
+        ...(location.placeId ? { placeId: location.placeId } : {}),
         ...(pinMoved && pin ? { latitude: pin.latitude, longitude: pin.longitude } : {}),
         totalUnits: Number(totalUnits) || property.totalUnits,
         estimatedValue: toOptionalAmount(estimatedValue),
@@ -229,18 +234,14 @@ const EditPropertyForm = ({
           />
         </Field>
 
-        <Field label="Address" required>
-          <Input type="text" value={address} onChange={(e) => setAddress(e.target.value)} />
-        </Field>
-
-        <LocationFields
-          country={country}
-          state={state}
-          city={city}
-          onCountryChange={setCountry}
-          onStateChange={setState}
-          onCityChange={setCity}
+        <AddressFields
           required
+          value={location}
+          onChange={(patch) => setLocation((prev) => ({ ...prev, ...patch }))}
+          onPin={(next) => {
+            setPin(next);
+            setPinMoved(true);
+          }}
         />
 
         <LocationPicker

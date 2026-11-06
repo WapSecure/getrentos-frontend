@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@getrento
 import { Alert, Button, CurrencyInput, Field, Input, Select } from '@getrentos/ui';
 import { Camera, Trash2, Video } from 'lucide-react';
 import type { OwnerProperty } from '@/types/owner';
-import { LocationFields } from '@/components/shared/location/LocationFields';
+import { AddressFields, type AddressFieldsValue } from '@/components/shared/location/AddressFields';
 import { LocationPicker } from '@/components/maps/LocationPicker';
 import type { MapPoint } from '@/services/geocodeService';
 import { PROPERTY_TYPE_OPTIONS } from '@/lib/propertyTypes';
@@ -21,6 +21,7 @@ type OwnerPropertyUpdates = Pick<
   | 'city'
   | 'state'
   | 'country'
+  | 'placeId'
   | 'estimatedValue'
   | 'coverImageKey'
   | 'videoTourKey'
@@ -66,10 +67,14 @@ const EditOwnerPropertyForm = ({
 }) => {
   const [name, setName] = useState(property.name);
   const [propertyType, setPropertyType] = useState(property.propertyType);
-  const [address, setAddress] = useState(property.address);
-  const [city, setCity] = useState(property.city);
-  const [state, setState] = useState(property.state);
-  const [country, setCountry] = useState(property.country ?? 'Nigeria');
+  const [location, setLocation] = useState<AddressFieldsValue>({
+    address: property.address,
+    city: property.city,
+    state: property.state,
+    country: property.country ?? 'Nigeria',
+    placeId: property.placeId,
+  });
+  const { address, city, state, country } = location;
   const [pin, setPin] = useState<MapPoint | null>(
     property.latitude != null && property.longitude != null
       ? { latitude: property.latitude, longitude: property.longitude }
@@ -148,6 +153,7 @@ const EditOwnerPropertyForm = ({
       city,
       state,
       country,
+      ...(location.placeId ? { placeId: location.placeId } : {}),
       estimatedValue: Number(estimatedValue) || property.estimatedValue,
       // Only send the cover when it changed; an unconditional write would
       // push a stale key back over a photo edited elsewhere.
@@ -190,18 +196,14 @@ const EditOwnerPropertyForm = ({
           />
         </Field>
 
-        <Field label="Address" required>
-          <Input value={address} onChange={(e) => setAddress(e.target.value)} />
-        </Field>
-
-        <LocationFields
-          country={country}
-          state={state}
-          city={city}
-          onCountryChange={setCountry}
-          onStateChange={setState}
-          onCityChange={setCity}
+        <AddressFields
           required
+          value={location}
+          onChange={(patch) => setLocation((prev) => ({ ...prev, ...patch }))}
+          onPin={(next) => {
+            setPin(next);
+            setPinMoved(true);
+          }}
         />
 
         <LocationPicker
