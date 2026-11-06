@@ -1,0 +1,13 @@
+# Secret scanning (security gap CI-01). This repository is PUBLIC: anything
+# committed here is readable by anyone, forever. Uses gitleaks' default rules
+# plus an allowlist for reviewed false positives only. Never allowlist a real
+# credential: rotate it and remove it from history instead.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Reviewed false positives (2026-11-06)"
+paths = [
+  # A 19-character dummy Mapbox public token used to test URL building.
+  '''apps/mobile/__tests__/map-tiles\.test\.ts''',
+]
