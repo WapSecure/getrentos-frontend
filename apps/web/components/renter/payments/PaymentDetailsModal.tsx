@@ -69,7 +69,7 @@ export const PaymentDetailsModal = ({
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString('en-GB', {
       month: 'long',
       day: 'numeric',
       year: 'numeric',
@@ -167,7 +167,7 @@ export const PaymentDetailsModal = ({
                 {payment.releaseDate ? (
                   <>
                     It releases to your landlord on{' '}
-                    {new Date(payment.releaseDate).toLocaleDateString('en-US', {
+                    {new Date(payment.releaseDate).toLocaleDateString('en-GB', {
                       month: 'short',
                       day: 'numeric',
                       year: 'numeric',

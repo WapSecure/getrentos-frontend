@@ -37,7 +37,7 @@ const DURATIONS = [
 function dayLabel(d: LagosDay, i: number): string {
   if (i === 0) return 'Today';
   if (i === 1) return 'Tomorrow';
-  return dayNoon(d).toLocaleDateString('en-US', {
+  return dayNoon(d).toLocaleDateString('en-GB', {
     weekday: 'short',
     day: 'numeric',
     month: 'short',

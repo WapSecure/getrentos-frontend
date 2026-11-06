@@ -39,7 +39,7 @@ export const LeaseMoveOutChecklist = () => {
   const totalCount = items.length;
 
   const handleDocumentCondition = () => {
-    const date = new Date().toLocaleDateString('en-US', {
+    const date = new Date().toLocaleDateString('en-GB', {
       month: 'long',
       day: 'numeric',
       year: 'numeric',

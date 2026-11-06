@@ -54,7 +54,7 @@ export const RenterMoveInChecklist = () => {
   };
 
   const handleGenerateReport = () => {
-    const date = new Date().toLocaleDateString('en-US', {
+    const date = new Date().toLocaleDateString('en-GB', {
       month: 'long',
       day: 'numeric',
       year: 'numeric',

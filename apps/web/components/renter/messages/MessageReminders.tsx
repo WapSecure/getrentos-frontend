@@ -43,7 +43,7 @@ export const MessageReminders = ({
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString('en-GB', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',

@@ -9,7 +9,7 @@ describe('Lagos-time formatting', () => {
 
   it('dates an instant by its Lagos calendar day', () => {
     // 23:30 UTC on the 30th is already the 31st in Lagos.
-    expect(formatDate('2026-10-30T23:30:00Z', 'short')).toBe('Oct 31, 2026');
+    expect(formatDate('2026-10-30T23:30:00Z', 'short')).toBe('31 Oct 2026');
   });
 });
 

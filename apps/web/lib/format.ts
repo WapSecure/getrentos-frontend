@@ -24,17 +24,17 @@ export const formatDate = (
 ): string => {
   const date = new Date(dateString);
   if (style === 'long') {
-    return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    return date.toLocaleDateString('en-GB', { month: 'long', day: 'numeric', year: 'numeric' });
   }
   if (style === 'full') {
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleDateString('en-GB', {
       weekday: 'long',
       month: 'long',
       day: 'numeric',
       year: 'numeric',
     });
   }
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return date.toLocaleDateString('en-GB', { month: 'short', day: 'numeric', year: 'numeric' });
 };
 
 export const formatRelativeTime = (dateString: string): string => {

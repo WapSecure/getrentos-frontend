@@ -116,7 +116,7 @@ export const RenterStatsCards = () => {
   });
   const leaseStatus = lease ? lease.status.charAt(0).toUpperCase() + lease.status.slice(1) : '—';
   const leaseEndLabel = lease?.endDate
-    ? `Ends ${new Date(lease.endDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}`
+    ? `Ends ${new Date(lease.endDate).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}`
     : t('dashboard.stats.current_lease_subtitle');
 
   const { data: paymentsData } = useQuery({

@@ -64,7 +64,7 @@ export const LeaseHeader = ({ lease, renewalOffer }: LeaseHeaderProps) => {
   const StatusIcon = statusConfig.icon;
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString('en-GB', {
       month: 'long',
       day: 'numeric',
       year: 'numeric',

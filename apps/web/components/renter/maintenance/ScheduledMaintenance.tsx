@@ -39,7 +39,7 @@ const statusConfig: Record<
 };
 
 const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('en-US', {
+  return new Date(dateString).toLocaleDateString('en-GB', {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
