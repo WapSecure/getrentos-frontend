@@ -1,9 +1,9 @@
+import { usePaystackCheckout } from '@/hooks/usePaystackCheckout';
 import { useState } from 'react';
 import { Alert, RefreshControl, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import * as WebBrowser from 'expo-web-browser';
 import {
   CalendarDays,
   ChevronRight,
@@ -69,6 +69,7 @@ export default function StayDetail() {
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();
   const toast = useToast();
+  const checkout = usePaystackCheckout();
   const [sheet, setSheet] = useState<SheetName>(null);
 
   const stays = useMyStays();
@@ -79,7 +80,7 @@ export default function StayDetail() {
     mutationFn: () => shortletsApi.payBooking(id),
     onSuccess: async (res) => {
       if (res.authorizationUrl) {
-        await WebBrowser.openBrowserAsync(res.authorizationUrl);
+        await checkout(res.authorizationUrl, res.reference);
       } else {
         toast.show('Payment started.', 'success');
       }

@@ -1,7 +1,7 @@
+import { usePaystackCheckout } from '@/hooks/usePaystackCheckout';
 import { useState } from 'react';
 import { Alert, Linking, Pressable, RefreshControl, View } from 'react-native';
 import { router } from 'expo-router';
-import * as WebBrowser from 'expo-web-browser';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { AlertTriangle, FileStack, ReceiptText as ReceiptIcon, Wallet } from 'lucide-react-native';
@@ -36,6 +36,7 @@ export default function Payments() {
   const { colors, spacing, radius } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
+  const checkout = usePaystackCheckout();
   const [disputePayment, setDisputePayment] = useState<Payment | null>(null);
   const [payPayment, setPayPayment] = useState<Payment | null>(null);
 
@@ -51,7 +52,7 @@ export default function Payments() {
       paymentsApi.payNow(id, 'card', amount),
     onSuccess: async (payment) => {
       if (payment.authorizationUrl) {
-        await WebBrowser.openBrowserAsync(payment.authorizationUrl);
+        await checkout(payment.authorizationUrl, payment.reference);
       } else {
         toast.show('Payment successful.', 'success');
       }

@@ -1,7 +1,7 @@
+import { usePaystackCheckout } from '@/hooks/usePaystackCheckout';
 import { useState } from 'react';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
 
-import * as WebBrowser from 'expo-web-browser';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Lock, BadgeCheck, Clock, Wallet } from 'lucide-react-native';
 import {
@@ -256,6 +256,7 @@ function ActivePlanCard({ overview }: { overview: { plan: FinancingPlan } }) {
   const { colors, spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
+  const checkout = usePaystackCheckout();
   const plan = overview.plan;
   const paidCount = plan.installments.filter((i) => i.status === 'paid').length;
   const nextDue = plan.installments.find((i) => i.status === 'due' || i.status === 'overdue');
@@ -264,7 +265,7 @@ function ActivePlanCard({ overview }: { overview: { plan: FinancingPlan } }) {
     mutationFn: (id: string) => financingApi.payInstallment(id),
     onSuccess: async (updated) => {
       if (updated.authorizationUrl) {
-        await WebBrowser.openBrowserAsync(updated.authorizationUrl);
+        await checkout(updated.authorizationUrl, updated.reference);
       } else {
         toast.show('Installment paid.', 'success');
       }

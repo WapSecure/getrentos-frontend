@@ -1,6 +1,6 @@
+import { usePaystackCheckout } from '@/hooks/usePaystackCheckout';
 import { View } from 'react-native';
 
-import * as WebBrowser from 'expo-web-browser';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ReceiptText, Repeat } from 'lucide-react-native';
 import {
@@ -48,6 +48,7 @@ export default function ResidentDues() {
   const { colors } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
+  const checkout = usePaystackCheckout();
 
   const query = useQuery({
     queryKey: qk.resident.dues,
@@ -61,7 +62,7 @@ export default function ResidentDues() {
       // The webhook confirms payment server-side once the resident finishes
       // there; refetch once they close the browser to pick up the new status.
       if (updated.authorizationUrl) {
-        await WebBrowser.openBrowserAsync(updated.authorizationUrl);
+        await checkout(updated.authorizationUrl, updated.reference);
       } else if (updated.status === 'paid') {
         // An earlier checkout had already gone through: it was credited instead
         // of charging again.

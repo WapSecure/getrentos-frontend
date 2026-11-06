@@ -551,3 +551,8 @@ export const attentionKeys = {
 export const sellerOfferKeys = {
   comparison: ['seller', 'offers', 'compare'] as const,
 };
+
+/** One payment's confirmation state, polled by the return page. */
+export const paymentKeys = {
+  status: (reference: string) => ['payments', 'status', reference] as const,
+};
