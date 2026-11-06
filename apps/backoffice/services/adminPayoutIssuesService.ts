@@ -12,11 +12,26 @@ export interface PayoutIssue {
   createdAt: string;
 }
 
+/** Every way money leaves, including those retried elsewhere. */
+export type PayoutKind = PayoutRail | 'statement' | 'disbursement' | 'vendor' | 'land';
+
+/** Sent to the bank more than a day ago and not settled yet. */
+export interface WaitingPayout {
+  kind: PayoutKind;
+  id: string;
+  amount: number;
+  beneficiary: string;
+  reference: string;
+  since: string;
+}
+
 export interface PayoutIssues {
   /** Refused or reversed by the bank: can be retried. */
   failed: PayoutIssue[];
   /** Stopped before a transfer reference was saved: no money was sent. */
   stuck: PayoutIssue[];
+  /** Sent more than a day ago, still unsettled: check it with Paystack before doing anything. */
+  waiting: WaitingPayout[];
 }
 
 export const adminPayoutIssuesService = {
