@@ -35,6 +35,8 @@ export type {
 export type { AuthScaffoldProps } from './primitives/AuthScaffold';
 export { Card } from './primitives/Card';
 export { SuggestedDraft } from './primitives/SuggestedDraft';
+export { AddressSearch } from './primitives/AddressSearch';
+export type { AddressSearchProps } from './primitives/AddressSearch';
 export type { SuggestedDraftProps } from './primitives/SuggestedDraft';
 export type { CardProps } from './primitives/Card';
 export { Screen } from './primitives/Screen';
