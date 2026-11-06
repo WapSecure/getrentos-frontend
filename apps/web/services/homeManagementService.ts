@@ -787,6 +787,8 @@ export const homeManagementService = {
         totalAmount: number;
         payoutStatus: HomeManagementInvoicePayoutStatus;
         paidOutAt?: string;
+        /** Set when the owner's held rent doesn't cover it: pay the shortfall on Paystack first. */
+        topUp?: { amount: number; authorizationUrl: string; reference: string };
       }>(`/home-management/invoices/${invoiceId}/pay`, { method: 'POST' })
     ),
 

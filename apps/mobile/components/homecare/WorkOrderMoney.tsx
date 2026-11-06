@@ -1,3 +1,4 @@
+import { usePaystackCheckout } from '@/hooks/usePaystackCheckout';
 import { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -252,6 +253,7 @@ export function InvoicesSection({ w }: { w: WorkOrder }) {
   const { colors, spacing, radius } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
+  const checkout = usePaystackCheckout();
   const [adding, setAdding] = useState(false);
   const [payoutFor, setPayoutFor] = useState<string | null>(null);
   const [reasonFor, setReasonFor] = useState<{ kind: 'reject' | 'void'; id: string } | null>(null);
@@ -276,7 +278,19 @@ export function InvoicesSection({ w }: { w: WorkOrder }) {
       if (kind === 'void') return homeCareApi.voidInvoice(id, reason!);
       return homeCareApi.payInvoice(id);
     },
-    onSuccess: (_r, v) => {
+    onSuccess: async (result, v) => {
+      // The owner's held rent doesn't cover it: pay the shortfall on Paystack,
+      // and the vendor is paid once it lands.
+      const topUp =
+        v.kind === 'pay' && result && typeof result === 'object' && 'topUp' in result
+          ? (result as { topUp?: { authorizationUrl: string; reference: string } }).topUp
+          : undefined;
+      if (topUp) {
+        setReasonFor(null);
+        await checkout(topUp.authorizationUrl, topUp.reference);
+        refresh();
+        return;
+      }
       void haptics.success();
       refresh();
       setReasonFor(null);

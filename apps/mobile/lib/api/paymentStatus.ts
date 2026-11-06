@@ -6,7 +6,7 @@ export type PaymentState = 'PENDING' | 'PAID' | 'FAILED';
 /** GET /payments/:reference/status — answered from GetRentos records; while pending, Paystack is asked too. */
 export interface PaymentStatus {
   reference: string;
-  kind: 'RENT' | 'ESCROW' | 'SHORTLET' | 'LAND' | 'FLEX' | 'DUE';
+  kind: 'RENT' | 'ESCROW' | 'SHORTLET' | 'LAND' | 'FLEX' | 'DUE' | 'VENDOR_TOP_UP';
   status: PaymentState;
   /** Whole naira. */
   amount: number;

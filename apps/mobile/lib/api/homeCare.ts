@@ -279,8 +279,16 @@ export const homeCareApi = {
       method: 'POST',
       body: { reason },
     }),
+  /**
+   * Pays the vendor out of the owner's held rent. When that doesn't cover it,
+   * nothing is sent yet: `topUp` is a Paystack checkout for the shortfall, and
+   * the vendor is paid once it lands.
+   */
   payInvoice: (invoiceId: string) =>
-    apiFetch<unknown>(`/home-management/invoices/${invoiceId}/pay`, { method: 'POST' }),
+    apiFetch<{
+      payoutStatus: string;
+      topUp?: { amount: number; authorizationUrl: string; reference: string };
+    }>(`/home-management/invoices/${invoiceId}/pay`, { method: 'POST' }),
 
   // ---- vendors (scoped to the signed-in user) ----
   vendors: () =>
