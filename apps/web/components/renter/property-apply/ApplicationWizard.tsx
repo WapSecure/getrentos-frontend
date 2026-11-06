@@ -605,8 +605,8 @@ export const ApplicationWizard = ({
                             href={doc.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            title="View uploaded file"
-                            aria-label={`View uploaded ${doc.name}`}
+                            title="View attached file"
+                            aria-label={`View attached ${doc.name}`}
                             className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-medium text-muted-foreground hover:text-primary hover:bg-card transition-colors"
                           >
                             <Eye className="w-3.5 h-3.5" />

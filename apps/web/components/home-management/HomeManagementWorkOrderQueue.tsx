@@ -26,8 +26,8 @@ import { Select } from '@getrentos/ui';
 import { Switch } from '@getrentos/ui';
 import { Textarea } from '@getrentos/ui';
 import { useToast } from '@getrentos/ui';
-import { HomeManagementWorkOrderInvoices } from '@/components/home-management/HomeManagementWorkOrderInvoices';
-import { HomeManagementWorkOrderQuotes } from '@/components/home-management/HomeManagementWorkOrderQuotes';
+import dynamic from 'next/dynamic';
+import { Skeleton } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { homeManagementKeys } from '@/lib/queryKeys';
@@ -42,6 +42,24 @@ import {
   type HomeManagementVendor,
   type HomeManagementWorkOrder,
 } from '@/services/homeManagementService';
+
+// Quotes and invoices only show once a work order exists, so they load after
+// the queue instead of with the page.
+const panelFallback = () => <Skeleton className="h-40 w-full rounded-lg" />;
+const HomeManagementWorkOrderQuotes = dynamic(
+  () =>
+    import('@/components/home-management/HomeManagementWorkOrderQuotes').then(
+      (m) => m.HomeManagementWorkOrderQuotes
+    ),
+  { loading: panelFallback }
+);
+const HomeManagementWorkOrderInvoices = dynamic(
+  () =>
+    import('@/components/home-management/HomeManagementWorkOrderInvoices').then(
+      (m) => m.HomeManagementWorkOrderInvoices
+    ),
+  { loading: panelFallback }
+);
 
 const statusMeta: Record<
   HomeManagementWorkOrder['status'],

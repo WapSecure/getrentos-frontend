@@ -147,7 +147,7 @@ export const CreateLeaseModal = ({
             <EmptyState
               icon={DoorOpen}
               title="No vacant units available"
-              description="Mark a unit vacant or add a property first."
+              description="Every unit already has a tenant or a draft lease. Check your draft leases, or add a property."
               size="compact"
               bare
             />

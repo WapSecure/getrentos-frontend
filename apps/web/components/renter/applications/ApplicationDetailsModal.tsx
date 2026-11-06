@@ -121,7 +121,7 @@ export const ApplicationDetailsModal = ({
 
   const getDocumentStatus = (uploaded: boolean) => {
     return uploaded
-      ? { label: 'Uploaded', color: 'text-success' }
+      ? { label: 'Attached', color: 'text-success' }
       : { label: 'Missing', color: 'text-destructive' };
   };
 
