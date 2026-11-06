@@ -295,6 +295,7 @@ export function StepUpDialog({
                 <>
                   <Field label="New 6-digit PIN">
                     <NumberInput
+                      masked
                       maxLength={TRANSACTION_PIN_LENGTH}
                       value={pin}
                       onValueChange={setPin}
@@ -305,6 +306,7 @@ export function StepUpDialog({
                     error={pinMismatch ? 'Those PINs don’t match.' : undefined}
                   >
                     <NumberInput
+                      masked
                       maxLength={TRANSACTION_PIN_LENGTH}
                       value={pinConfirm}
                       onValueChange={setPinConfirm}

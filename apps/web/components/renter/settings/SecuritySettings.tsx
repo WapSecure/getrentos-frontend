@@ -504,6 +504,7 @@ export const SecuritySettings = () => {
                   }
                 >
                   <NumberInput
+                    masked
                     value={currentPin}
                     onValueChange={setCurrentPin}
                     placeholder="Your current PIN"
@@ -543,6 +544,7 @@ export const SecuritySettings = () => {
               )}
               <Field label="New 6-digit PIN">
                 <NumberInput
+                  masked
                   value={pin}
                   onValueChange={setPin}
                   placeholder="6-digit PIN"
@@ -555,6 +557,7 @@ export const SecuritySettings = () => {
                 error={pinMismatch ? 'Those PINs don’t match.' : undefined}
               >
                 <NumberInput
+                  masked
                   value={pinConfirm}
                   onValueChange={setPinConfirm}
                   placeholder="Re-enter PIN"

@@ -21,6 +21,11 @@ export interface NumberInputProps extends Omit<
   inputClassName?: string;
   /** Marks the control invalid. Inside a Field, its `error` does this for you. */
   invalid?: boolean;
+  /**
+   * Hides the digits as they are typed (PINs), keeping the numeric keypad and
+   * digit-only filtering. Not for one-time codes, which people copy from email.
+   */
+  masked?: boolean;
 }
 
 /**
@@ -54,6 +59,7 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
       disabled,
       readOnly,
       invalid,
+      masked = false,
       id,
       required,
       'aria-describedby': describedBy,
@@ -98,7 +104,7 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
         {leadingIcon && <span className="shrink-0 text-muted-foreground">{leadingIcon}</span>}
         <input
           ref={ref}
-          type="text"
+          type={masked ? 'password' : 'text'}
           id={field.id}
           inputMode={integer ? 'numeric' : 'decimal'}
           autoComplete="off"
