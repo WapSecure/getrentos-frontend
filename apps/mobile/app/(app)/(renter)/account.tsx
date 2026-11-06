@@ -240,8 +240,8 @@ export default function Account() {
     },
     {
       key: 'whatsapp',
-      label: 'WhatsApp updates',
-      description: 'Rent alerts without the app',
+      label: 'Text messages',
+      description: 'SMS or WhatsApp for urgent alerts',
       icon: MessageCircle,
       onPress: go('/(app)/whatsapp-settings'),
     },
