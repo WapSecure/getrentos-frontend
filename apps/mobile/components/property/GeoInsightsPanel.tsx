@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { View } from 'react-native';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Car, Footprints, MapPinned, TrainFront } from 'lucide-react-native';
-import { Button, Card, Chip, Skeleton, Text, TextField, useTheme } from '@getrentos/ui-native';
+import type { AddressValue } from '@getrentos/shared';
+import { Button, Card, Chip, Skeleton, Text, useTheme } from '@getrentos/ui-native';
+import { AddressInput } from '@/components/forms/AddressInput';
 import { qk } from '@/lib/query/keys';
 import {
   geoInsightsApi,
@@ -23,7 +25,9 @@ interface Props {
 
 export function GeoInsightsPanel({ listingId }: Props) {
   const { colors, spacing } = useTheme();
-  const [destinationInput, setDestinationInput] = useState('');
+  // A picked place is looked up at once; a typed one waits for "Go".
+  const [destinationPlace, setDestinationPlace] = useState<AddressValue | null>(null);
+  const destinationInput = destinationPlace?.text ?? '';
   const [destination, setDestination] = useState<string | undefined>(undefined);
   const [activeCategory, setActiveCategory] = useState<NeighborhoodCategory | null>(null);
 
@@ -145,19 +149,22 @@ export function GeoInsightsPanel({ listingId }: Props) {
         <Text variant="bodyStrong" style={{ marginBottom: spacing.sm }}>
           Commute time
         </Text>
-        <View style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'flex-end' }}>
-          <View style={{ flex: 1 }}>
-            <TextField
-              placeholder="e.g. Victoria Island, Lagos"
-              value={destinationInput}
-              onChangeText={setDestinationInput}
-              returnKeyType="done"
-              onSubmitEditing={() => setDestination(destinationInput.trim() || undefined)}
-            />
-          </View>
+        <View style={{ gap: spacing.sm }}>
+          <AddressInput
+            kind="any"
+            allowManual
+            placeholder="e.g. Victoria Island, Lagos"
+            hint="Where you travel to, such as work or school."
+            value={destinationPlace}
+            onChange={(next) => {
+              setDestinationPlace(next);
+              if (next?.verified) setDestination(next.text.trim() || undefined);
+            }}
+          />
           <Button
             label="Go"
             size="md"
+            fullWidth={false}
             loading={query.isFetching && !!destination}
             disabled={!destinationInput.trim()}
             onPress={() => setDestination(destinationInput.trim() || undefined)}
