@@ -23,6 +23,7 @@ import type { OwnerProperty } from '@/types/owner';
 import { PROPERTY_TYPE_OPTIONS } from '@/lib/propertyTypes';
 import type { LandOwnershipProofInput } from '@/types/land';
 import { ROUTES } from '@/lib/constants/auth';
+import { pluralize } from '@/lib/format';
 import { LocationPicker } from '@/components/maps/LocationPicker';
 import type { MapPoint } from '@/services/geocodeService';
 
@@ -165,11 +166,13 @@ export const AddOwnerPropertyModal = ({
     form.state.trim() &&
     form.ownerName.trim();
 
-  const hasAnyDocument =
-    form.titleDeed ||
-    form.certificateOfOccupancy ||
-    form.deedOfAssignment ||
-    form.govtRegistryExtract;
+  const documentCount = [
+    form.titleDeed,
+    form.certificateOfOccupancy,
+    form.deedOfAssignment,
+    form.govtRegistryExtract,
+  ].filter(Boolean).length;
+  const hasAnyDocument = documentCount > 0;
 
   const handleSubmitForVerification = async () => {
     const ownershipProofs: LandOwnershipProofInput[] = [
@@ -200,9 +203,13 @@ export const AddOwnerPropertyModal = ({
           state: form.state,
           country: form.country,
           ownerName: form.ownerName,
-          estimatedValue: Number(form.estimatedValue) || 0,
-          purchasePrice: Number(form.purchasePrice) || 0,
-          purchaseDate: form.purchaseDate || new Date().toISOString(),
+          // Blank stays absent: a 0 value showed as "₦0" on the card and a
+          // made-up purchase date of today skewed the investment figures.
+          ...(Number(form.estimatedValue) > 0
+            ? { estimatedValue: Number(form.estimatedValue) }
+            : {}),
+          ...(Number(form.purchasePrice) > 0 ? { purchasePrice: Number(form.purchasePrice) } : {}),
+          ...(form.purchaseDate ? { purchaseDate: form.purchaseDate } : {}),
           ...(form.pin ? { latitude: form.pin.latitude, longitude: form.pin.longitude } : {}),
         },
         ownershipProofs
@@ -384,7 +391,11 @@ export const AddOwnerPropertyModal = ({
                 />
                 <SummaryRow
                   label="Documents"
-                  value={hasAnyDocument ? 'Submitted' : 'None uploaded'}
+                  value={
+                    hasAnyDocument
+                      ? `${pluralize(documentCount, 'document')} attached`
+                      : 'None attached'
+                  }
                 />
               </div>
               <div className="rounded-lg border border-border p-3">
