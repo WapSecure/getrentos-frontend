@@ -86,7 +86,7 @@ export function AddressFields({
         required={required}
         error={error}
         hint={
-          value.placeId
+          value.placeId || value.address
             ? undefined
             : (hint ??
               (allowManual
