@@ -76,7 +76,7 @@ export const LeaseSummaryCard = ({ lease }: LeaseSummaryCardProps) => {
               <div>
                 <p className="text-xs text-muted-foreground">Lease start</p>
                 <p className="text-sm font-medium text-foreground">
-                  {new Date(lease.startDate).toLocaleDateString('en-US', {
+                  {new Date(lease.startDate).toLocaleDateString('en-GB', {
                     month: 'short',
                     day: 'numeric',
                     year: 'numeric',
@@ -86,7 +86,7 @@ export const LeaseSummaryCard = ({ lease }: LeaseSummaryCardProps) => {
               <div>
                 <p className="text-xs text-muted-foreground">Lease end</p>
                 <p className="text-sm font-medium text-foreground">
-                  {new Date(lease.endDate).toLocaleDateString('en-US', {
+                  {new Date(lease.endDate).toLocaleDateString('en-GB', {
                     month: 'short',
                     day: 'numeric',
                     year: 'numeric',

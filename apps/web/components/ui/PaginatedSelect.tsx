@@ -64,17 +64,24 @@ export function PaginatedSelect<T>({
     ...items.map((item) => ({ value: getItemValue(item), label: getItemLabel(item) })),
   ];
 
+  // Everything fits on one page and nothing is being searched: the search box
+  // and pager would only stack controls around a short list, so show the
+  // dropdown alone. They come back once there is more than a page of options.
+  const compact = !search.trim() && page <= 1 && total <= pageSize;
+
   return (
     <div className="space-y-2">
-      <Input
-        type="search"
-        value={search}
-        onChange={(event) => onSearchChange(event.target.value)}
-        placeholder={searchPlaceholder}
-        leadingIcon={<Search className="h-4 w-4" />}
-        aria-label={`Search ${ariaLabel ?? placeholder}`}
-        disabled={disabled}
-      />
+      {!compact && (
+        <Input
+          type="search"
+          value={search}
+          onChange={(event) => onSearchChange(event.target.value)}
+          placeholder={searchPlaceholder}
+          leadingIcon={<Search className="h-4 w-4" />}
+          aria-label={`Search ${ariaLabel ?? placeholder}`}
+          disabled={disabled}
+        />
+      )}
       <Select
         value={value}
         onValueChange={onValueChange}
@@ -87,7 +94,7 @@ export function PaginatedSelect<T>({
         <p className="px-1 text-xs text-muted-foreground">Loading options…</p>
       ) : total === 0 ? (
         <p className="px-1 text-xs text-muted-foreground">{emptyMessage}</p>
-      ) : (
+      ) : compact ? null : (
         <Pagination
           page={page}
           pageSize={pageSize}

@@ -8,7 +8,7 @@ import type { LandTitleTypeBreakdown, NairaDistribution } from '@/types/landMark
 export const monthLabel = (month: string) => {
   const [y, m] = month.split('-').map(Number);
   if (!y || !m) return month;
-  return new Date(Date.UTC(y, m - 1, 1)).toLocaleDateString('en-US', {
+  return new Date(Date.UTC(y, m - 1, 1)).toLocaleDateString('en-GB', {
     month: 'short',
     year: 'numeric',
     timeZone: 'UTC',

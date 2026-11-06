@@ -55,7 +55,7 @@ const formatDate = (dateString: string) => {
   if (diffDays === 0) return 'Today';
   if (diffDays === 1) return 'Yesterday';
   if (diffDays < 7) return `${diffDays} days ago`;
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return date.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' });
 };
 
 const formatPrice = (price: number, period: PeriodType) => {

@@ -93,7 +93,7 @@ const formatDate = (dateString: string) => {
   if (diff === 0) return 'Today';
   if (diff === 1) return 'Yesterday';
   if (diff < 7) return `${diff} days ago`;
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return date.toLocaleDateString('en-GB', { month: 'short', day: 'numeric', year: 'numeric' });
 };
 
 const formatDeadline = (value?: string | null) => {

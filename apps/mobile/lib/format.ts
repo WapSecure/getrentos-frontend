@@ -25,7 +25,7 @@ export const APP_TIME_ZONE = 'Africa/Lagos';
 export function formatDate(value: string | Date, style: 'short' | 'medium' = 'medium'): string {
   const d = typeof value === 'string' ? new Date(value) : value;
   if (Number.isNaN(d.getTime())) return '—';
-  return d.toLocaleDateString('en-US', {
+  return d.toLocaleDateString('en-GB', {
     month: style === 'short' ? 'short' : 'long',
     day: 'numeric',
     year: 'numeric',

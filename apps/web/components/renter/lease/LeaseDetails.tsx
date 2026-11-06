@@ -13,7 +13,7 @@ interface LeaseDetailsProps {
 
 export const LeaseDetails = ({ lease }: LeaseDetailsProps) => {
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString('en-GB', {
       month: 'long',
       day: 'numeric',
       year: 'numeric',

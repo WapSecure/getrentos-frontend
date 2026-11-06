@@ -42,7 +42,7 @@ const formatDate = (dateString: string) => {
   if (diff < 1) return 'Just now';
   if (diff < 60) return `${diff} min ago`;
   if (diff < 1440) return `${Math.floor(diff / 60)} hours ago`;
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return date.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' });
 };
 
 export const MaintenanceAlerts = ({ alerts, onMarkAsRead, onClearAll }: MaintenanceAlertsProps) => {

@@ -38,7 +38,7 @@ export const LeaseRenewalOffer = ({ renewalOffer, lease, onRespond }: LeaseRenew
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString('en-GB', {
       month: 'long',
       day: 'numeric',
       year: 'numeric',

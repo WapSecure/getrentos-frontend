@@ -21,7 +21,7 @@ export const VerificationTimeline = ({ verifications }: VerificationTimelineProp
 
   const formatDate = (dateString: string) => {
     if (dateString === 'Pending') return 'Awaiting action';
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString('en-GB', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
