@@ -22,11 +22,6 @@ import { renterKeys } from '@/lib/queryKeys';
 import { ConfirmDialog, PageErrorState, PageLoadingState, Pagination } from '@getrentos/ui';
 import { FinancingView } from '@/components/renter/financing/FinancingView';
 import { HubTabs, useHubTab, type HubTab } from '@/components/shared/navigation/HubTabs';
-import {
-  PaystackCheckoutSimulator,
-  shouldSimulatePaystack,
-} from '@/components/renter/payments/PaystackCheckoutSimulator';
-import { useRenterUser } from '../layout';
 
 const TABS: HubTab[] = [
   { id: 'payments', label: 'Payments', icon: CreditCard },
@@ -58,9 +53,7 @@ export default function PaymentsPage() {
   const [disputingPaymentId, setDisputingPaymentId] = useState<string | null>(null);
   const [confirmingMoveInId, setConfirmingMoveInId] = useState<string | null>(null);
   const [showPayAllConfirm, setShowPayAllConfirm] = useState(false);
-  const [simCheckout, setSimCheckout] = useState<{ amount: number; run: () => void } | null>(null);
   const [payingPaymentId, setPayingPaymentId] = useState<string | null>(null);
-  const renterUser = useRenterUser();
   const [bulkPayingIds, setBulkPayingIds] = useState<string[]>([]);
 
   const PAGE_SIZE = 10;
@@ -153,11 +146,9 @@ export default function PaymentsPage() {
   const payChosen = (paymentId: string, amount: number | undefined) => {
     const payment = payments.find((p) => p.id === paymentId);
     if (!payment) return;
-    const run = () => payNowMutation.mutate({ paymentId, method: payment.method, amount });
-    // Dev: show a simulated Paystack checkout before settling. In production (or
-    // with real keys) this is off, so the backend's real gateway redirect runs.
-    if (shouldSimulatePaystack()) setSimCheckout({ amount: amount ?? owedOn(payment), run });
-    else run();
+    // The API decides: with a gateway it returns a checkout to redirect to;
+    // when payments are simulated it settles the charge itself and returns none.
+    payNowMutation.mutate({ paymentId, method: payment.method, amount });
   };
   const payingPayment = payments.find((p) => p.id === payingPaymentId) ?? null;
 
@@ -446,14 +437,7 @@ export default function PaymentsPage() {
         title="Confirm all payments"
         description={`You are about to pay ${payablePayments.length} item${payablePayments.length === 1 ? '' : 's'} totalling ₦${payableTotal.toLocaleString()}. Payments will be processed one at a time and cannot be undone here.`}
         confirmLabel={`Pay ₦${payableTotal.toLocaleString()}`}
-        onConfirm={() => {
-          if (shouldSimulatePaystack()) {
-            setShowPayAllConfirm(false);
-            setSimCheckout({ amount: payableTotal, run: () => void handlePayAll() });
-          } else {
-            void handlePayAll();
-          }
-        }}
+        onConfirm={() => void handlePayAll()}
       />
 
       <PayAmountDialog
@@ -464,18 +448,6 @@ export default function PaymentsPage() {
         }
         onClose={() => setPayingPaymentId(null)}
         onPay={(amount) => payingPaymentId && payChosen(payingPaymentId, amount)}
-      />
-
-      <PaystackCheckoutSimulator
-        open={!!simCheckout}
-        amount={simCheckout?.amount ?? 0}
-        email={renterUser?.email ?? 'you@example.com'}
-        onConfirm={() => {
-          const run = simCheckout?.run;
-          setSimCheckout(null);
-          run?.();
-        }}
-        onClose={() => setSimCheckout(null)}
       />
 
       {total > 0 && (
