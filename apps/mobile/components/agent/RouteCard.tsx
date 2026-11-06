@@ -98,8 +98,10 @@ export function RouteCard() {
             </Text>
             <Text variant="caption" color={s.late ? 'destructive' : 'mutedForeground'}>
               Arrive about {s.arrive}
-              {s.fixedAt ? ` (booked for ${s.fixedAt})` : ''} · {s.driveMinutes} min, {s.distanceKm}{' '}
-              km
+              {s.fixedAt ? ` (booked for ${s.fixedAt})` : ''} ·{' '}
+              {i === 0 && s.distanceKm === 0
+                ? 'first stop'
+                : `${s.driveMinutes} min, ${s.distanceKm} km`}
               {s.late ? ' · likely late: tell the client' : ''}
             </Text>
           </View>

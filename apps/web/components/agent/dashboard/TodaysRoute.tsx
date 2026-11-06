@@ -120,8 +120,10 @@ export function TodaysRoute() {
                 <p className="flex items-center gap-1 text-xs text-muted-foreground">
                   <Clock className="h-3 w-3" aria-hidden />
                   Arrive about {s.arrive}
-                  {s.fixedAt && ` (booked for ${s.fixedAt})`} · {s.driveMinutes} min, {s.distanceKm}{' '}
-                  km
+                  {s.fixedAt && ` (booked for ${s.fixedAt})`} ·{' '}
+                  {i === 0 && s.distanceKm === 0
+                    ? 'first stop'
+                    : `${s.driveMinutes} min, ${s.distanceKm} km`}
                   {s.late && (
                     <span className="text-destructive"> · likely late: tell the client</span>
                   )}
