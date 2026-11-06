@@ -1,5 +1,6 @@
 'use client';
 
+import { CheckoutFeeNote } from '@/components/shared/payments/CheckoutFeeLine';
 import { CheckCircle2, Clock, AlertCircle, ShieldCheck, Zap } from 'lucide-react';
 import { Badge, Button, type BadgeVariant } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
@@ -101,6 +102,7 @@ export const ActiveFinancingPlanCard = ({
               </Button>
             </div>
           )}
+          {nextDue && <CheckoutFeeNote amount={nextDue.amount} className="mt-2 text-right" />}
 
           <div>
             <p className="text-sm font-medium text-foreground mb-3">Installment schedule</p>

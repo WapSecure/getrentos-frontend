@@ -1,5 +1,6 @@
 'use client';
 
+import { CheckoutFeeNote } from '@/components/shared/payments/CheckoutFeeLine';
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ReceiptText, Repeat } from 'lucide-react';
@@ -129,6 +130,7 @@ export default function ResidentDuesPage() {
                     )}
                   </div>
                 </div>
+                {canPay && <CheckoutFeeNote amount={due.amount} className="mt-2 text-right" />}
                 {payError?.dueId === due.id && (
                   <p className="text-xs text-destructive mt-2">{payError.message}</p>
                 )}

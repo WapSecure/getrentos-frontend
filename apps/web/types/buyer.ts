@@ -114,6 +114,8 @@ export interface BuyerEscrowTransaction {
   propertyType?: string;
   ownerName: string;
   purchasePrice: number;
+  /** What the buyer pays in for this sale: the agreed deposit, else the price. */
+  depositAmount?: number;
   escrowStatus: BuyerEscrowStatus;
   milestones: EscrowMilestone[];
   activityLog: EscrowActivityLogEntry[];

@@ -1,5 +1,6 @@
 'use client';
 
+import { CheckoutFeeNote } from '@/components/shared/payments/CheckoutFeeLine';
 import { useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -390,6 +391,12 @@ export const GuestBookingsWorkspace = () => {
                     >
                       {`Pay ${formatCurrency((b.total ?? 0) + (b.taxAmount ?? 0) + (b.deposit ?? 0))}`}
                     </Button>
+                  )}
+                  {b.paymentRequired && (
+                    <CheckoutFeeNote
+                      amount={(b.total ?? 0) + (b.taxAmount ?? 0) + (b.deposit ?? 0)}
+                      className="w-full text-right"
+                    />
                   )}
                   {(b.status === 'CONFIRMED' || b.status === 'COMPLETED') && (
                     <Button

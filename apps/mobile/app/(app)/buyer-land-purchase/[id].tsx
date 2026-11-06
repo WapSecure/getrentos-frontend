@@ -1,3 +1,4 @@
+import { CheckoutFeeNote } from '@/components/payments/CheckoutFeeNote';
 import { useState } from 'react';
 import { Alert, RefreshControl, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -303,6 +304,7 @@ function PayNext({ p, onPaid }: { p: BuyerPurchaseDetail; onPaid: () => void }) 
             disabled={pay.isPending}
             onPress={() => pay.mutate()}
           />
+          <CheckoutFeeNote amount={p.nextDue.amount} />
           <Text variant="caption" color="mutedForeground">
             You will be taken to our payment partner to pay securely. GetRentos holds it until you
             confirm each conveyance step.
