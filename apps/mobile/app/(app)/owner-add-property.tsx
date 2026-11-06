@@ -34,7 +34,7 @@ import { pickDocument } from '@/lib/filePicker';
 import type { PickedFile } from '@/lib/api/documents';
 import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
-import { LocationFields } from '@/components/forms/LocationFields';
+import { AddressFields, type AddressFieldsValue } from '@/components/forms/AddressFields';
 import { LocationPicker } from '@/components/property/LocationPicker';
 import type { MapPoint } from '@/lib/api/geocode';
 import { goBack } from '@/lib/goBack';
@@ -63,10 +63,13 @@ export default function OwnerAddProperty() {
   const [propertyType, setPropertyType] = useState<CreateOwnerPropertyInput['propertyType']>(
     params.type === 'LAND' ? 'LAND' : 'APARTMENT'
   );
-  const [address, setAddress] = useState('');
-  const [country, setCountry] = useState('Nigeria');
-  const [city, setCity] = useState('');
-  const [state, setState] = useState('');
+  const [location, setLocation] = useState<AddressFieldsValue>({
+    address: '',
+    city: '',
+    state: '',
+    country: 'Nigeria',
+  });
+  const { address, city, state, country } = location;
   const [pin, setPin] = useState<MapPoint | null>(null);
   const [estimatedValue, setEstimatedValue] = useState('');
   const [purchasePrice, setPurchasePrice] = useState('');
@@ -77,8 +80,9 @@ export default function OwnerAddProperty() {
   const missing = {
     name: !name.trim() ? 'Give the property a name' : undefined,
     address: !address.trim() ? 'Enter the street address' : undefined,
-    city: !city.trim() ? 'Enter the city' : undefined,
-    state: !state.trim() ? 'Enter the state' : undefined,
+    // A picked address is checked by the API, which fills in its city and state.
+    city: !location.placeId && !city.trim() ? 'Enter the city' : undefined,
+    state: !location.placeId && !state.trim() ? 'Enter the state' : undefined,
     file: !file ? 'Add at least one ownership document' : undefined,
   };
   const valid = !Object.values(missing).some(Boolean);
@@ -92,6 +96,7 @@ export default function OwnerAddProperty() {
         city: city.trim(),
         state: state.trim(),
         country,
+        placeId: location.placeId,
         estimatedValue: digits(estimatedValue),
         purchasePrice: digits(purchasePrice),
         ...(pin ? { latitude: pin.latitude, longitude: pin.longitude } : {}),
@@ -182,21 +187,14 @@ export default function OwnerAddProperty() {
           </View>
         </View>
 
-        <TextField
+        <AddressFields
           label="Street address"
-          value={address}
-          onChangeText={setAddress}
-          autoComplete="street-address"
-          error={err('address')}
           required
-        />
-        <LocationFields
-          country={country}
-          state={state}
-          city={city}
-          onCountryChange={setCountry}
-          onStateChange={setState}
-          onCityChange={setCity}
+          value={location}
+          onChange={(patch) => setLocation((prev) => ({ ...prev, ...patch }))}
+          onPin={setPin}
+          kind={propertyType === 'LAND' ? 'any' : 'address'}
+          error={err('address')}
           errors={{ state: err('state'), city: err('city') }}
         />
         <LocationPicker address={address} city={city} state={state} value={pin} onChange={setPin} />

@@ -16,7 +16,7 @@ import {
 } from '@/lib/api/landlord';
 import { errorMessage } from '@/lib/api/client';
 import { pickImage } from '@/lib/filePicker';
-import { LocationFields } from '@/components/forms/LocationFields';
+import { AddressFields, type AddressFieldsValue } from '@/components/forms/AddressFields';
 
 interface Props {
   open: boolean;
@@ -46,10 +46,13 @@ function CreatePropertyForm({
 
   const [name, setName] = useState('');
   const [type, setType] = useState<PropertyType>('apartment');
-  const [address, setAddress] = useState('');
-  const [country, setCountry] = useState('Nigeria');
-  const [city, setCity] = useState('');
-  const [state, setState] = useState('');
+  const [location, setLocation] = useState<AddressFieldsValue>({
+    address: '',
+    city: '',
+    state: '',
+    country: 'Nigeria',
+  });
+  const { address, city, state, country } = location;
   const [description, setDescription] = useState('');
   const [pin, setPin] = useState<MapPoint | null>(null);
   const [cover, setCover] = useState<{ uri: string; key: string } | null>(null);
@@ -83,6 +86,7 @@ function CreatePropertyForm({
         city: city.trim(),
         state: state.trim(),
         country,
+        placeId: location.placeId,
         description: description.trim() || undefined,
         coverImageKey: cover?.key,
         ...(pin ? { latitude: pin.latitude, longitude: pin.longitude } : {}),
@@ -98,7 +102,9 @@ function CreatePropertyForm({
     onSettled: () => onBusyChange(false),
   });
 
-  const valid = name.trim() && address.trim() && city.trim() && state.trim();
+  // A picked address is checked by the API, which fills in its city and state.
+  const valid =
+    name.trim() && address.trim() && (location.placeId || (city.trim() && state.trim()));
 
   return (
     <View style={{ gap: spacing.lg }}>
@@ -177,22 +183,11 @@ function CreatePropertyForm({
         disabled={create.isPending}
       />
 
-      <TextField
-        label="Address"
-        placeholder="e.g. 22 Herbert Macaulay Way"
-        value={address}
-        onChangeText={setAddress}
-        editable={!create.isPending}
+      <AddressFields
         required
-      />
-
-      <LocationFields
-        country={country}
-        state={state}
-        city={city}
-        onCountryChange={setCountry}
-        onStateChange={setState}
-        onCityChange={setCity}
+        value={location}
+        onChange={(patch) => setLocation((prev) => ({ ...prev, ...patch }))}
+        onPin={setPin}
       />
 
       <LocationPicker address={address} city={city} state={state} value={pin} onChange={setPin} />
