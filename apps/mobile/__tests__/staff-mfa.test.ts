@@ -65,4 +65,20 @@ describe('staff two-factor refusal', () => {
     expect(currentStepUpToken()).toBe('full');
     stop();
   });
+
+  it('passes the challenge to the dialog and replays with a token it does not keep (security gap AU-02)', async () => {
+    globalThis.fetch = jest
+      .fn()
+      .mockResolvedValueOnce(
+        reply(403, { message: 'Confirm', error: 'STEP_UP_REQUIRED', challengeId: 'ch-9' })
+      )
+      .mockResolvedValueOnce(reply(200, { ok: true })) as unknown as typeof fetch;
+    const handler = jest.fn().mockResolvedValue('bound-tok');
+    registerStepUpHandler(handler);
+
+    await authFetch('/admin/escrow/tx-1/release', { method: 'POST', body: '{}' });
+
+    expect(handler).toHaveBeenCalledWith({ challengeId: 'ch-9' });
+    expect(currentStepUpToken()).toBeNull();
+  });
 });

@@ -17,6 +17,7 @@ import { registerStepUpPrompt, rememberStepUpToken } from '@/lib/stepUp';
 export function StepUpSheet() {
   const { colors, spacing } = useTheme();
   const pending = useRef<((token: string | null) => void) | null>(null);
+  const challenge = useRef<string | undefined>(undefined);
   const [open, setOpen] = useState(false);
   const [method, setMethod] = useState<StepUpMethod | null>(null);
   const [value, setValue] = useState('');
@@ -27,9 +28,10 @@ export function StepUpSheet() {
 
   useEffect(() => {
     registerStepUpPrompt(
-      () =>
+      ({ challengeId }) =>
         new Promise<string | null>((resolve) => {
           pending.current = resolve;
+          challenge.current = challengeId;
           setValue('');
           setReference(null);
           setSentTo(null);
@@ -44,6 +46,12 @@ export function StepUpSheet() {
     );
     return () => registerStepUpPrompt(null);
   }, []);
+
+  // A token bound to a challenge approves one request only, so it isn't kept
+  // for later ones (security gap AU-02).
+  const remember = (res: { stepUpToken: string; expiresIn: number }) => {
+    if (!challenge.current) rememberStepUpToken(res.stepUpToken, res.expiresIn);
+  };
 
   const finish = (token: string | null) => {
     pending.current?.(token);
@@ -72,16 +80,17 @@ export function StepUpSheet() {
 
   const confirm = () =>
     run(async () => {
-      const res = await securityApi.confirmStepUp(
-        method === 'password'
+      const res = await securityApi.confirmStepUp({
+        ...(method === 'password'
           ? { password: value }
           : method === 'transaction_pin'
             ? { pin: value }
             : method === 'totp'
               ? { code: value }
-              : { code: value, reference: reference ?? undefined }
-      );
-      rememberStepUpToken(res.stepUpToken, res.expiresIn);
+              : { code: value, reference: reference ?? undefined }),
+        challengeId: challenge.current,
+      });
+      remember(res);
       finish(res.stepUpToken);
     });
 
@@ -89,8 +98,11 @@ export function StepUpSheet() {
     run(async () => {
       const options = await securityApi.startPasskeyStepUp();
       const assertion = await authenticatePasskey(options); // OS biometric / security-key prompt
-      const res = await securityApi.confirmStepUp({ passkeyResponse: assertion });
-      rememberStepUpToken(res.stepUpToken, res.expiresIn);
+      const res = await securityApi.confirmStepUp({
+        passkeyResponse: assertion,
+        challengeId: challenge.current,
+      });
+      remember(res);
       finish(res.stepUpToken);
     });
 

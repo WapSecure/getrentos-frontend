@@ -18,7 +18,12 @@ export const STAFF_MFA_REQUIRED = 'STAFF_MFA_REQUIRED';
 /** How the account proves it's the holder: its strongest factor wins. */
 export type StepUpMethod = 'passkey' | 'totp' | 'transaction_pin' | 'password' | 'email_code';
 
-type Handler = () => Promise<string | null>;
+/** What the confirm dialog is asked for: the challenge the API raised, when there was one. */
+export interface StepUpRequest {
+  challengeId?: string;
+}
+
+type Handler = (request: StepUpRequest) => Promise<string | null>;
 
 let handler: Handler | null = null;
 let cached: { token: string; expiresAt: number } | null = null;
@@ -45,15 +50,38 @@ export function clearStepUpToken() {
   cached = null;
 }
 
-/** Prompts once even if several requests hit the wall together. */
-export async function obtainStepUpToken(): Promise<string | null> {
+/**
+ * Gets a confirmation for a refused request. With a `challengeId` (the API
+ * now always sends one, security gap AU-02) the token approves exactly that
+ * request, once, so it is never cached and never shared: prompts for
+ * different requests queue one after another. Without one (an older API, or
+ * the staff enrolment flow) it falls back to the cached, shared token.
+ */
+export async function obtainStepUpToken(challengeId?: string): Promise<string | null> {
+  if (!handler) return null;
+  if (challengeId) {
+    const ask = handler;
+    const turn = (inFlight ?? Promise.resolve(null))
+      .catch(() => null)
+      .then(() => ask({ challengeId }));
+    inFlight = turn.finally(() => {
+      if (inFlight === turn) inFlight = null;
+    });
+    return turn;
+  }
   const existing = currentStepUpToken();
   if (existing) return existing;
-  if (!handler) return null;
-  inFlight ??= handler().finally(() => {
+  const ask = handler;
+  inFlight ??= ask({}).finally(() => {
     inFlight = null;
   });
   return inFlight;
+}
+
+/** The challenge id a STEP_UP_REQUIRED refusal carries (in the API error's details). */
+export function stepUpChallengeId(err: unknown): string | undefined {
+  const details = (err as { details?: { challengeId?: unknown } } | null)?.details;
+  return typeof details?.challengeId === 'string' ? details.challengeId : undefined;
 }
 
 export function isStepUpRequired(err: unknown): boolean {

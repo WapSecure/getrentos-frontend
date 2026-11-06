@@ -85,6 +85,8 @@ export const securityApi = {
     code?: string;
     reference?: string;
     passkeyResponse?: unknown;
+    /** Binds the token to the request that asked for it (security gap AU-02). */
+    challengeId?: string;
   }) =>
     apiFetch<{ stepUpToken: string; expiresIn: number }>('/users/me/security/step-up', {
       method: 'POST',

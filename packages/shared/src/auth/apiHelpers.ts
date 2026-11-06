@@ -7,6 +7,7 @@ import {
   notifyStaffMfaRequired,
   obtainStepUpToken,
   STEP_UP_HEADER,
+  stepUpChallengeId,
 } from './stepUp';
 import { getAuthToken, getStoredUser } from './authStorage';
 
@@ -266,7 +267,8 @@ export async function authFetch<T>(
     // A sensitive change: confirm it's the account holder, then replay once.
     if (isStepUpRequired(err)) {
       clearStepUpToken();
-      const stepUp = await obtainStepUpToken();
+      // The token approves this exact request, once (security gap AU-02).
+      const stepUp = await obtainStepUpToken(stepUpChallengeId(err));
       if (stepUp) {
         try {
           return await doFetch(getAuthToken(), stepUp);

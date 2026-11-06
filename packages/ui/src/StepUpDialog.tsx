@@ -12,7 +12,7 @@ import { Button } from './Button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from './Dialog';
 import { Input } from './Input';
 
-type Pending = { resolve: (token: string | null) => void };
+type Pending = { resolve: (token: string | null) => void; challengeId?: string };
 
 /**
  * Runs the browser passkey ceremony for the given request options and returns
@@ -58,9 +58,9 @@ export function StepUpDialog({
 
   useEffect(() => {
     registerStepUpHandler(
-      () =>
+      ({ challengeId }) =>
         new Promise<string | null>((resolve) => {
-          pending.current = { resolve };
+          pending.current = { resolve, challengeId };
           setValue('');
           setReference(null);
           setSentTo(null);
@@ -74,6 +74,12 @@ export function StepUpDialog({
     );
     return () => registerStepUpHandler(null);
   }, []);
+
+  // A token bound to a challenge approves one request only, so it isn't kept
+  // for later ones (security gap AU-02).
+  const remember = (res: { stepUpToken: string; expiresIn: number }) => {
+    if (!pending.current?.challengeId) rememberStepUpToken(res.stepUpToken, res.expiresIn);
+  };
 
   const finish = (token: string | null) => {
     pending.current?.resolve(token);
@@ -111,9 +117,15 @@ export function StepUpDialog({
       const assertion = await authenticateWithPasskey(options);
       const res = await authFetch<{ stepUpToken: string; expiresIn: number }>(
         '/users/me/security/step-up',
-        { method: 'POST', body: JSON.stringify({ passkeyResponse: assertion }) }
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            passkeyResponse: assertion,
+            challengeId: pending.current?.challengeId,
+          }),
+        }
       );
-      rememberStepUpToken(res.stepUpToken, res.expiresIn);
+      remember(res);
       finish(res.stepUpToken);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'That passkey check did not pass. Try again.');
@@ -137,9 +149,12 @@ export function StepUpDialog({
               : { code: value, reference };
       const res = await authFetch<{ stepUpToken: string; expiresIn: number }>(
         '/users/me/security/step-up',
-        { method: 'POST', body: JSON.stringify(body) }
+        {
+          method: 'POST',
+          body: JSON.stringify({ ...body, challengeId: pending.current?.challengeId }),
+        }
       );
-      rememberStepUpToken(res.stepUpToken, res.expiresIn);
+      remember(res);
       finish(res.stepUpToken);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'That didn’t work. Try again.');
