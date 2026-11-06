@@ -63,6 +63,7 @@ import {
 import { ApiError, errorMessage } from '@/lib/api/client';
 import { track } from '@/lib/analytics';
 import { formatDate } from '@/lib/format';
+import { applyLastApplication } from '@getrentos/shared';
 
 interface FormState {
   fullName: string;
@@ -206,6 +207,19 @@ export default function ApplyToRent() {
     documents: DEFAULT_APPLICATION_DOCUMENTS.map((d) => ({ ...d })),
   });
   const [submitted, setSubmitted] = useState<RenterApplication | null>(null);
+
+  // Start from what the renter told us last time: their own details, filled
+  // only into fields that are still empty, once, when the answer arrives.
+  const lastDetails = useQuery({
+    queryKey: qk.renter.lastApplicationDetails,
+    queryFn: applicationsApi.lastDetails,
+    staleTime: 5 * 60_000,
+  });
+  const [prefilled, setPrefilled] = useState(false);
+  if (!prefilled && lastDetails.isFetched) {
+    setPrefilled(true);
+    if (lastDetails.data) setData((d) => applyLastApplication(d, lastDetails.data));
+  }
 
   // Until the renter picks their own date, fall back to the listing's availability.
   const moveInDate = data.moveInDate || property?.availableFrom || '';

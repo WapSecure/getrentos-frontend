@@ -22,7 +22,8 @@ import { ROUTES, buildRoute } from '@/lib/constants/auth';
 import type { Property } from '@/types/renter';
 import { renterService } from '@/services/renterService';
 import { kycService } from '@/services/kycService';
-import { unwrap, ApiError } from '@/lib/apiHelpers';
+import { unwrap, unwrapOptional, ApiError } from '@/lib/apiHelpers';
+import { applyLastApplication } from '@getrentos/shared';
 import { renterKeys } from '@/lib/queryKeys';
 import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
 
@@ -111,6 +112,14 @@ export default function PropertyApplyPage() {
     queryKey: ['kyc-status'],
     queryFn: () => unwrap(kycService.getStatus()),
   });
+  // What the renter told us last time, so this form starts filled in. A
+  // failure (or an API without the endpoint yet) just means an empty form.
+  const lastDetailsQuery = useQuery({
+    queryKey: renterKeys.lastApplicationDetails,
+    queryFn: () => unwrapOptional(renterService.getLastApplicationDetails(), null),
+    staleTime: 5 * 60_000,
+    retry: false,
+  });
   // The server's own answer (review or NIN); the old review row only as a fallback.
   const identityApproved =
     kycQuery.data?.identityVerified ?? kycQuery.data?.identity?.status === 'APPROVED';
@@ -135,7 +144,8 @@ export default function PropertyApplyPage() {
     await submitMutation.mutateAsync(data);
   };
 
-  if (propertyQuery.isLoading || kycQuery.isLoading) return <PageLoadingState />;
+  if (propertyQuery.isLoading || kycQuery.isLoading || lastDetailsQuery.isLoading)
+    return <PageLoadingState />;
 
   if (propertyQuery.isError && !propertyQuery.data) {
     return (
@@ -232,7 +242,10 @@ export default function PropertyApplyPage() {
             <ApplicationWizard
               submitError={submitError}
               property={property}
-              initialData={buildInitialData(property, user)}
+              initialData={applyLastApplication(
+                buildInitialData(property, user),
+                lastDetailsQuery.data
+              )}
               onSubmit={handleSubmit}
               isSubmitting={submitMutation.isPending}
             />

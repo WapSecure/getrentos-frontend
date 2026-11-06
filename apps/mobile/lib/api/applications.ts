@@ -1,5 +1,6 @@
 import { apiFetch } from './client';
 import type { Paginated } from './properties';
+import type { LastApplicationDetails } from '@getrentos/shared';
 
 /** Mirrors the backend's `RentalApplicationStatus` enum, lowercased. */
 export const APPLICATION_STATUSES = ['pending', 'under_review', 'approved', 'rejected'] as const;
@@ -116,6 +117,10 @@ export interface ApplicationNote {
 }
 
 export const applicationsApi = {
+  /** The renter's own details from their latest application; null if none (or not supported yet). */
+  lastDetails: () =>
+    apiFetch<LastApplicationDetails | null>('/renter/applications/last-details').catch(() => null),
+
   list: (page = 1, pageSize = 50) =>
     apiFetch<Paginated<RenterApplication>>(
       `/renter/applications?page=${page}&pageSize=${pageSize}`
