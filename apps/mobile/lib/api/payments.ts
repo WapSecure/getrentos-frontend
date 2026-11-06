@@ -33,6 +33,8 @@ export interface Payment {
   escrowStatus: 'held' | 'released' | 'pending';
   /** Present when a real payment gateway is configured — open in a browser to complete checkout. */
   authorizationUrl?: string;
+  /** A checkout the tenant opened and closed, which they can go back to until `expiresAt`. */
+  resumeCheckout?: { url: string; reference: string; expiresAt: string };
   reference?: string;
   /** Present once this payment has been disputed and is under review. */
   disputeReason?: string;

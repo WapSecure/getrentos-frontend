@@ -141,6 +141,11 @@ export default function Payments() {
                   confirmMoveInMutation.isPending && confirmMoveInMutation.variables === item.id
                 }
                 onPay={() => setPayPayment(item)}
+                onResume={async () => {
+                  if (!item.resumeCheckout) return;
+                  await checkout(item.resumeCheckout.url, item.resumeCheckout.reference);
+                  qc.invalidateQueries({ queryKey: qk.renter.payments(1, 50) });
+                }}
                 onDispute={() => setDisputePayment(item)}
                 onConfirmMoveIn={() => confirmMoveIn(item)}
               />
@@ -180,6 +185,7 @@ function PaymentRow({
   paying,
   releasing,
   onPay,
+  onResume,
   onDispute,
   onConfirmMoveIn,
 }: {
@@ -187,6 +193,8 @@ function PaymentRow({
   paying: boolean;
   releasing: boolean;
   onPay: () => void;
+  /** Back to the checkout the tenant closed. */
+  onResume: () => void;
   onDispute: () => void;
   onConfirmMoveIn: () => void;
 }) {
@@ -236,6 +244,8 @@ function PaymentRow({
             loadingLabel="Paying…"
             onPress={onPay}
           />
+        ) : p.status === 'processing' && p.resumeCheckout ? (
+          <Button label="Resume payment" size="sm" fullWidth={false} onPress={onResume} />
         ) : releasable ? (
           <Button
             label="Confirm move-in"
