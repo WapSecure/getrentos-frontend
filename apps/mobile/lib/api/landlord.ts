@@ -55,6 +55,12 @@ export interface LandlordProperty {
   latitude?: number;
   longitude?: number;
   locationConfirmedAt?: string;
+  /** The Google place the address was checked against, when it was picked from the search. */
+  placeId?: string | null;
+  /** When the API last checked the address against Google; absent for a typed address. */
+  addressVerifiedAt?: string | null;
+  /** Local government area, from Google, for a checked address. */
+  lga?: string | null;
   description?: string;
   coverImage?: string;
   galleryImages?: string[];
@@ -794,6 +800,8 @@ export interface UpdatePropertyInput {
   city?: string;
   state?: string;
   country?: string;
+  /** The Google place the address was picked from; a changed address without one is saved unchecked. */
+  placeId?: string;
   description?: string;
   /** Storage keys from uploadPropertyMedia; null clears the cover. */
   coverImageKey?: string | null;
@@ -834,6 +842,8 @@ export interface CreatePropertyInput {
   city: string;
   state: string;
   country: string;
+  /** The Google place the address was picked from; the API checks it and stores Google's details. */
+  placeId?: string;
   description?: string;
   totalUnits?: number;
   /** Storage keys returned by uploadPropertyMedia. */

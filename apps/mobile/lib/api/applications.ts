@@ -95,6 +95,8 @@ export interface SubmitApplicationInput {
   email: string;
   phone: string;
   currentAddress?: string;
+  /** The Google place the current address was picked from; the API checks it. */
+  currentAddressPlaceId?: string;
   employer?: string;
   employmentStatus: string;
   monthlyIncome: number;

@@ -12,7 +12,7 @@ import {
   type PropertyType,
 } from '@/lib/api/landlord';
 import { errorMessage } from '@/lib/api/client';
-import { LocationFields } from '@/components/forms/LocationFields';
+import { AddressFields, type AddressFieldsValue } from '@/components/forms/AddressFields';
 import { LocationPicker } from '@/components/property/LocationPicker';
 import type { MapPoint } from '@/lib/api/geocode';
 
@@ -58,10 +58,14 @@ function EditForm({
       ? (property.type as PropertyType)
       : 'apartment'
   );
-  const [address, setAddress] = useState(property.address);
-  const [country, setCountry] = useState(property.country || 'Nigeria');
-  const [city, setCity] = useState(property.city);
-  const [state, setState] = useState(property.state);
+  const [location, setLocation] = useState<AddressFieldsValue>({
+    address: property.address,
+    city: property.city,
+    state: property.state,
+    country: property.country || 'Nigeria',
+    placeId: property.placeId ?? undefined,
+  });
+  const { address, city, state, country } = location;
   const [description, setDescription] = useState(property.description ?? '');
   const [pin, setPin] = useState<MapPoint | null>(
     property.latitude != null && property.longitude != null
@@ -81,6 +85,8 @@ function EditForm({
         country,
         city: city.trim(),
         state: state.trim(),
+        // Without a place id a changed address is saved unchecked.
+        ...(location.placeId ? { placeId: location.placeId } : {}),
         description: description.trim() || undefined,
         ...(pinMoved && pin ? { latitude: pin.latitude, longitude: pin.longitude } : {}),
       }),
@@ -112,21 +118,12 @@ function EditForm({
         disabled={save.isPending}
       />
 
-      <TextField
-        label="Address"
-        value={address}
-        onChangeText={setAddress}
-        editable={!save.isPending}
+      <AddressFields
         required
-      />
-
-      <LocationFields
-        country={country}
-        state={state}
-        city={city}
-        onCountryChange={setCountry}
-        onStateChange={setState}
-        onCityChange={setCity}
+        value={location}
+        onChange={(patch) => setLocation((prev) => ({ ...prev, ...patch }))}
+        // Google's point for a picked address; the landlord confirms it by dragging.
+        onPin={setPin}
       />
 
       <LocationPicker

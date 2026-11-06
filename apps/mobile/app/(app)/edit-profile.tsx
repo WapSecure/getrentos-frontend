@@ -16,6 +16,8 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { Image } from 'expo-image';
+import { storedAddressValue, type AddressValue } from '@getrentos/shared';
+import { AddressInput } from '@/components/forms/AddressInput';
 import { qk } from '@/lib/query/keys';
 import { profileApi, type RenterProfile } from '@/lib/api/profile';
 import { pickImage } from '@/lib/filePicker';
@@ -75,12 +77,15 @@ function ProfileForm({ profile }: { profile: RenterProfile }) {
   const [fullName, setFullName] = useState(profile.fullName);
   const email = profile.email;
   const [phone, setPhone] = useState(profile.phone ?? '');
-  const [location, setLocation] = useState(profile.location ?? '');
+  // Saved as text; a picked area keeps its place id here only so the field shows it as checked.
+  const [place, setPlace] = useState<AddressValue | null>(() =>
+    storedAddressValue(profile.location)
+  );
+  const location = place?.text ?? '';
   const [bio, setBio] = useState(profile.bio ?? '');
 
   const [emailOpen, setEmailOpen] = useState(false);
   const phoneRef = useRef<TextInput>(null);
-  const locationRef = useRef<TextInput>(null);
 
   const saveMutation = useMutation({
     mutationFn: () =>
@@ -185,15 +190,15 @@ function ProfileForm({ profile }: { profile: RenterProfile }) {
         // Digits and a leading '+' only.
         onChangeText={(t) => setPhone(t.replace(/[^\d+]/g, '').replace(/(?!^)\+/g, ''))}
         keyboardType="phone-pad"
-        returnKeyType="next"
-        onSubmitEditing={() => locationRef.current?.focus()}
+        returnKeyType="done"
       />
-      <TextField
-        ref={locationRef}
+      <AddressInput
         label="Location"
+        kind="area"
+        allowManual
         placeholder="e.g. Lagos, Nigeria"
-        value={location}
-        onChangeText={setLocation}
+        value={place}
+        onChange={setPlace}
       />
       <TextField
         label="Bio"

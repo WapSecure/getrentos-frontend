@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { MapPin } from 'lucide-react-native';
 import { Button, Text, useTheme } from '@getrentos/ui-native';
@@ -29,6 +29,16 @@ export function LocationPicker({
   const [recenter, setRecenter] = useState(0);
   const [finding, setFinding] = useState(false);
   const [note, setNote] = useState<string | null>(null);
+  // A pin set from outside (an address picked from Google) recentres the map;
+  // one the owner dragged there does not.
+  const dragged = useRef<MapPoint | null>(null);
+  useEffect(() => {
+    if (value && value !== dragged.current) setRecenter((n) => n + 1);
+  }, [value]);
+  const onPinMove = (point: MapPoint) => {
+    dragged.current = point;
+    onChange(point);
+  };
   const canSearch =
     address.trim().length >= 3 && city.trim().length >= 2 && state.trim().length >= 2;
 
@@ -88,7 +98,7 @@ export function LocationPicker({
           recenter={recenter}
           zoom={17}
           height={240}
-          onPinMove={onChange}
+          onPinMove={onPinMove}
         />
       ) : null}
       {note ? (

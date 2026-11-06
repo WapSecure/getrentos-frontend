@@ -63,13 +63,20 @@ import {
 import { ApiError, errorMessage } from '@/lib/api/client';
 import { track } from '@/lib/analytics';
 import { formatDate } from '@/lib/format';
-import { applyLastApplication, EMPLOYMENT_STATUSES } from '@getrentos/shared';
+import {
+  applyLastApplication,
+  EMPLOYMENT_STATUSES,
+  type LastApplicationDetails,
+} from '@getrentos/shared';
+import { AddressInput } from '@/components/forms/AddressInput';
 
 interface FormState {
   fullName: string;
   email: string;
   phone: string;
   currentAddress: string;
+  /** Set when the current address was picked from Google; the API checks it. */
+  currentAddressPlaceId?: string;
   employer: string;
   employmentStatus: string;
   monthlyIncome: string;
@@ -148,7 +155,7 @@ function validateStep(step: number, data: FormState): FieldErrors {
     // by the API (a reference needs a phone number), and that refusal used to
     // land on the review step with nothing to point at.
     type TextKey = {
-      [K in keyof FormState]: FormState[K] extends string ? K : never;
+      [K in keyof FormState]-?: FormState[K] extends string ? K : never;
     }[keyof FormState];
     const contact = (who: string, name: TextKey, phone: TextKey) => {
       if (!data[name].trim() && !data[phone].trim()) return;
@@ -218,7 +225,19 @@ export default function ApplyToRent() {
   const [prefilled, setPrefilled] = useState(false);
   if (!prefilled && lastDetails.isFetched) {
     setPrefilled(true);
-    if (lastDetails.data) setData((d) => applyLastApplication(d, lastDetails.data));
+    const last = lastDetails.data as
+      | (LastApplicationDetails & { currentAddressPlaceId?: string | null })
+      | null
+      | undefined;
+    if (last) {
+      setData((d) => {
+        const next = applyLastApplication(d, last);
+        // Last time's checked address stays checked when it is the one filled in.
+        return last.currentAddressPlaceId && !d.currentAddress.trim() && next.currentAddress
+          ? { ...next, currentAddressPlaceId: last.currentAddressPlaceId }
+          : next;
+      });
+    }
   }
 
   // Until the renter picks their own date, fall back to the listing's availability.
@@ -299,6 +318,7 @@ export default function ApplyToRent() {
         email: data.email.trim(),
         phone: data.phone.trim(),
         currentAddress: data.currentAddress.trim() || undefined,
+        currentAddressPlaceId: data.currentAddressPlaceId,
         employer: data.employer.trim() || undefined,
         employmentStatus: data.employmentStatus,
         monthlyIncome: Number(data.monthlyIncome.replace(/[^\d]/g, '')) || 0,
@@ -635,12 +655,18 @@ function MoveStep({
 
   return (
     <View style={{ gap: spacing.lg }}>
-      <TextField
+      <AddressInput
         label="Current address"
-        placeholder="Street, area, city"
-        returnKeyType="done"
-        value={data.currentAddress}
-        onChangeText={(v) => update('currentAddress', v)}
+        value={
+          data.currentAddress
+            ? { text: data.currentAddress, placeId: data.currentAddressPlaceId }
+            : null
+        }
+        onChange={(next) => {
+          update('currentAddress', next?.text ?? '');
+          update('currentAddressPlaceId', next?.placeId);
+        }}
+        allowManual
         error={errors.currentAddress}
         required
       />

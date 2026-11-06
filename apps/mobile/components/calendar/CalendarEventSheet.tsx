@@ -12,7 +12,9 @@ import {
   useTheme,
   useToast,
 } from '@getrentos/ui-native';
+import { storedAddressValue, type AddressValue } from '@getrentos/shared';
 import { Sheet } from '@/components/Sheet';
+import { AddressInput } from '@/components/forms/AddressInput';
 import { qk } from '@/lib/query/keys';
 import {
   calendarApi,
@@ -61,7 +63,11 @@ function CalendarEventForm({ onClose, event }: Omit<Props, 'open'>) {
   const [startTime, setStartTime] = useState(event?.startTime ?? '09:00');
   const [endTime, setEndTime] = useState(event?.endTime ?? '10:00');
   const [type, setType] = useState<CalendarEventType>(event?.type ?? 'personal');
-  const [location, setLocation] = useState(event?.location ?? '');
+  // Saved as text; a picked place keeps its id here only so the field shows it as checked.
+  const [place, setPlace] = useState<AddressValue | null>(() =>
+    storedAddressValue(event?.location)
+  );
+  const location = place?.text ?? '';
   const [notes, setNotes] = useState(event?.notes ?? '');
   const [reminder, setReminder] = useState(event?.reminder ?? true);
   const [recurrence, setRecurrence] = useState<CalendarRecurrence>(event?.recurrence ?? 'none');
@@ -162,7 +168,13 @@ function CalendarEventForm({ onClose, event }: Omit<Props, 'open'>) {
         </View>
       </View>
 
-      <TextField label="Location (optional)" value={location} onChangeText={setLocation} />
+      <AddressInput
+        label="Location (optional)"
+        kind="any"
+        allowManual
+        value={place}
+        onChange={setPlace}
+      />
       <TextField
         label="Notes (optional)"
         multiline

@@ -321,6 +321,8 @@ export interface Onboarding {
     businessType: BusinessType | null;
     registrationNumber: string | null;
     registeredAddress: string | null;
+    /** The Google place the registered address was checked against; null for a typed one. */
+    registeredPlaceId?: string | null;
     state: string | null;
     contactEmail: string | null;
     contactPhone: string | null;
@@ -337,6 +339,11 @@ export interface SetupForm {
   businessType: BusinessType;
   registrationNumber: string;
   registeredAddress: string;
+  /**
+   * The Google place the registered address was picked from. The API stores an
+   * address saved without it as unchecked, so an edit re-sends the stored one.
+   */
+  registeredPlaceId?: string;
   state: string;
   contactEmail: string;
   contactPhone: string;
@@ -348,6 +355,7 @@ export const setupToForm = (o: Onboarding | null): SetupForm => ({
   businessType: o?.profile.businessType ?? 'LIMITED_COMPANY',
   registrationNumber: o?.profile.registrationNumber ?? '',
   registeredAddress: o?.profile.registeredAddress ?? '',
+  registeredPlaceId: o?.profile.registeredPlaceId ?? undefined,
   state: o?.profile.state ?? 'Lagos',
   contactEmail: o?.profile.contactEmail ?? '',
   contactPhone: o?.profile.contactPhone ?? '',
