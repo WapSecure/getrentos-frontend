@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { adminManagedService } from '@/services/adminManagedService';
 import {
   LayoutDashboard,
+  Webhook,
   Eye,
   UserCheck,
   Users,
@@ -158,6 +159,12 @@ const navItems: NavItem[] = [
     label: 'Unmatched Payments',
     href: '/admin/unmatched-payments',
     icon: CircleAlert,
+    permission: 'rentfinance.view',
+  },
+  {
+    label: 'Payment Events',
+    href: '/admin/payment-events',
+    icon: Webhook,
     permission: 'rentfinance.view',
   },
   {

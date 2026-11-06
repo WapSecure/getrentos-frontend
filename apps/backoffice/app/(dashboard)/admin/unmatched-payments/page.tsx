@@ -37,6 +37,9 @@ const KIND_LABEL: Record<string, string> = {
   FLEX: 'Flex installment',
   DUE: 'Estate due',
   SUBSCRIPTION: 'Subscription',
+  LAND_UNAPPLIED: 'Land (contract could not take it: refund)',
+  VENDOR_TOP_UP: 'Vendor invoice top-up',
+  UNKNOWN: 'Unknown reference',
 };
 
 /**
