@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from 'react';
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Check, Loader2, Upload, Image as ImageIcon, Video } from 'lucide-react';
+import { Check, FileCheck2, Loader2, Upload, Image as ImageIcon, Video } from 'lucide-react';
 import {
   Alert,
   Button,
@@ -12,6 +12,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
+  EmptyState,
   Field,
   Input,
   NumberInput,
@@ -23,6 +24,7 @@ import { PaginatedSelect } from '@/components/ui/PaginatedSelect';
 import { unwrap } from '@/lib/apiHelpers';
 import { ownerKeys } from '@/lib/queryKeys';
 import { ownerService } from '@/services/ownerService';
+import { ROUTES } from '@/lib/constants/auth';
 import { videoFileProblem } from '@/lib/videoFile';
 
 interface CreateSaleListingModalProps {
@@ -133,6 +135,10 @@ export const CreateSaleListingModal = ({
   });
   const verifiedProperties = propertiesPage?.items ?? [];
   const propertyTotal = propertiesPage?.total ?? 0;
+  // Nothing verified yet (not just a search with no hits): say why and where to
+  // go, instead of a form whose property picker can never be filled.
+  const hasNoVerifiedProperties =
+    !isPropertiesLoading && !propertySearch.trim() && propertiesPage != null && propertyTotal === 0;
   const propertyForForm =
     selectedProperty?.id === form.propertyId
       ? selectedProperty
@@ -287,7 +293,21 @@ export const CreateSaleListingModal = ({
         </div>
 
         <div className="flex-1 space-y-4 overflow-y-auto p-4">
-          {step === 0 && (
+          {step === 0 && hasNoVerifiedProperties && (
+            <EmptyState
+              icon={FileCheck2}
+              title="No verified properties yet"
+              description="You can list a property once our compliance team has verified its ownership documents, usually within 24–48 hours."
+              action={
+                <Button href={ROUTES.OWNER_PROPERTIES} variant="outline">
+                  Go to your properties
+                </Button>
+              }
+              size="compact"
+              bare
+            />
+          )}
+          {step === 0 && !hasNoVerifiedProperties && (
             <>
               <Field label="Property" required>
                 <PaginatedSelect
