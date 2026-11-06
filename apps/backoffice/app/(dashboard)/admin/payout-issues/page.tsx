@@ -23,18 +23,22 @@ import { hasAdminPermission } from '@/lib/adminAccess';
 import {
   adminPayoutIssuesService,
   type PayoutIssue,
-  type PayoutRail,
+  type PayoutKind,
 } from '@/services/adminPayoutIssuesService';
 
-type View = 'failed' | 'stuck';
+type View = 'failed' | 'stuck' | 'waiting';
 
-const RAIL: Record<PayoutRail, string> = {
+const RAIL: Record<PayoutKind, string> = {
   shortlet: 'Short-let host',
   realtor: 'Realtor commission',
   agency: 'Agency commission',
   agent: 'Agent share',
   partner: 'Delivery partner share',
   sale: 'Sale proceeds',
+  statement: 'Owner statement',
+  disbursement: 'Scheduled owner payout',
+  vendor: 'Vendor invoice',
+  land: 'Land sale release',
 };
 
 /**
@@ -73,13 +77,14 @@ export default function PayoutIssuesPage() {
     onError: (e: Error) => toast.error(e.message || 'Could not retry this payout.'),
   });
 
-  const items = (view === 'failed' ? query.data?.failed : query.data?.stuck) ?? [];
+  const items =
+    (view === 'failed' ? query.data?.failed : view === 'stuck' ? query.data?.stuck : []) ?? [];
 
   return (
     <>
       <PageHeader
         title="Payouts needing attention"
-        description="Payouts the bank refused, and payouts that stopped before any money was sent, on every rail in one place. Retry a failed one once its account is right; sort a stuck one out by hand."
+        description="Payouts the bank refused, payouts that stopped before any money was sent, and transfers the bank has held for over a day, on every rail in one place. Retry a failed one once its account is right; sort a stuck one out by hand; check a waiting one on Paystack first."
       />
 
       <Tabs value={view} onValueChange={(v) => setView(v as View)}>
@@ -87,6 +92,9 @@ export default function PayoutIssuesPage() {
           <TabsTrigger value="failed">Failed ({query.data?.failed.length ?? 0})</TabsTrigger>
           <TabsTrigger value="stuck">
             Stuck before sending ({query.data?.stuck.length ?? 0})
+          </TabsTrigger>
+          <TabsTrigger value="waiting">
+            Waiting on the bank ({query.data?.waiting.length ?? 0})
           </TabsTrigger>
         </TabsList>
       </Tabs>
@@ -99,6 +107,38 @@ export default function PayoutIssuesPage() {
           description={(query.error as Error).message}
           onRetry={() => query.refetch()}
         />
+      ) : view === 'waiting' ? (
+        (query.data?.waiting.length ?? 0) === 0 ? (
+          <EmptyState
+            icon={HandCoins}
+            title="Nothing waiting on the bank"
+            description="Every transfer sent in the last day has settled or is still within a day."
+          />
+        ) : (
+          <div className="space-y-3">
+            {query.data?.waiting.map((w) => (
+              <Card key={`${w.kind}-${w.id}`} className="p-5">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-medium text-foreground">
+                      {formatCurrency(w.amount)} · {w.beneficiary}
+                    </p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {RAIL[w.kind]} · with the bank since {formatDate(w.since)} · reference{' '}
+                      {w.reference}
+                    </p>
+                  </div>
+                  <Badge variant="info">Waiting</Badge>
+                </div>
+                <p className="mt-3 text-xs text-muted-foreground">
+                  Look this reference up on Paystack before doing anything: it may still land, so
+                  sending it again could pay twice. If Paystack is asking for an OTP, approve it
+                  there.
+                </p>
+              </Card>
+            ))}
+          </div>
+        )
       ) : items.length === 0 ? (
         <EmptyState
           icon={HandCoins}
