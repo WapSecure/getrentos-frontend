@@ -25,6 +25,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { ownerKeys } from '@/lib/queryKeys';
 import { ownerService } from '@/services/ownerService';
 import { ROUTES } from '@/lib/constants/auth';
+import { formatCurrency } from '@/lib/format';
 import { videoFileProblem } from '@/lib/videoFile';
 
 interface CreateSaleListingModalProps {
@@ -504,7 +505,7 @@ export const CreateSaleListingModal = ({
                 <SummaryRow label="Title" value={form.listingTitle || '—'} />
                 <SummaryRow
                   label="Asking price"
-                  value={form.askingPrice ? `₦${form.askingPrice}` : '—'}
+                  value={form.askingPrice ? formatCurrency(Number(form.askingPrice)) : '—'}
                 />
                 <SummaryRow
                   label="Cover image"
