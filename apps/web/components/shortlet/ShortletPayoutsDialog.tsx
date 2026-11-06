@@ -11,8 +11,6 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
-  Field,
-  NumberInput,
   useToast,
   type BadgeVariant,
 } from '@getrentos/ui';
@@ -23,6 +21,7 @@ import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';
 import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
 import { formatCurrency, formatDate } from '@/lib/format';
+import { BankAccountFields } from '@/components/shared/payouts/BankAccountFields';
 
 const PAYOUT_STATUS_VARIANT: Record<string, BadgeVariant> = {
   SUCCESS: 'success',
@@ -233,23 +232,14 @@ export function ShortletPayoutsDialog({
               <p className="mb-3 mt-1 text-xs text-muted-foreground">
                 Your earnings are paid to this NUBAN bank account.
               </p>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <Field label="Bank code" hint="e.g. 058 for GTBank">
-                  <NumberInput
-                    value={bankCode}
-                    onValueChange={setBankCode}
-                    placeholder="058"
-                    maxLength={6}
-                  />
-                </Field>
-                <Field label="Account number">
-                  <NumberInput
-                    value={accountNumber}
-                    onValueChange={setAccountNumber}
-                    placeholder="0123456789"
-                    maxLength={10}
-                  />
-                </Field>
+              <div>
+                <BankAccountFields
+                  idPrefix="shortlet-payout"
+                  bankCode={bankCode}
+                  onBankCode={setBankCode}
+                  accountNumber={accountNumber}
+                  onAccountNumber={setAccountNumber}
+                />
               </div>
               <Button
                 className="mt-3 w-full"

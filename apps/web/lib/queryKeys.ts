@@ -556,4 +556,7 @@ export const sellerOfferKeys = {
 export const paymentKeys = {
   status: (reference: string) => ['payments', 'status', reference] as const,
   checkoutFee: (amount: number) => ['payments', 'checkout-fee', amount] as const,
+  banks: ['payments', 'banks'] as const,
+  accountName: (bankCode: string, accountNumber: string) =>
+    ['payments', 'account-name', bankCode, accountNumber] as const,
 };

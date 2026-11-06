@@ -8,8 +8,6 @@ import {
   Button,
   Card,
   EmptyState,
-  Field,
-  NumberInput,
   Skeleton,
   TableSkeleton,
   type BadgeVariant,
@@ -22,6 +20,7 @@ import {
   PAYOUT_CHANGE_COOLDOWN_HINT,
   PayoutHoldNotice,
 } from '@/components/shared/payouts/PayoutHoldNotice';
+import { BankAccountFields } from '@/components/shared/payouts/BankAccountFields';
 
 const PAYOUT_STATUS: Record<string, { label: string; variant: BadgeVariant }> = {
   PENDING: { label: 'Processing', variant: 'info' },
@@ -126,20 +125,13 @@ export function AgencyPayoutSection({
             </div>
           ) : (
             <div className="mt-3 space-y-3">
-              <Field label="Bank code">
-                <NumberInput
-                  value={bankCode}
-                  onValueChange={(v) => setBankCode(v.slice(0, 6))}
-                  placeholder="e.g. 058 for GTBank"
-                />
-              </Field>
-              <Field label="Account number">
-                <NumberInput
-                  value={accountNumber}
-                  onValueChange={(v) => setAccountNumber(v.slice(0, 10))}
-                  placeholder="10-digit NUBAN"
-                />
-              </Field>
+              <BankAccountFields
+                idPrefix="agency-payout"
+                bankCode={bankCode}
+                onBankCode={setBankCode}
+                accountNumber={accountNumber}
+                onAccountNumber={setAccountNumber}
+              />
               <div className="flex gap-2">
                 <Button
                   onClick={() => saveAccount.mutate()}

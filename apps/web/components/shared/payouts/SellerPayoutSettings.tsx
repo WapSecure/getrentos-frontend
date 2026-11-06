@@ -2,21 +2,11 @@
 
 import { useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CheckCircle2, Landmark } from 'lucide-react';
-import {
-  Alert,
-  Badge,
-  Button,
-  Field,
-  ListSkeleton,
-  NumberInput,
-  Pagination,
-  Select,
-  type BadgeVariant,
-} from '@getrentos/ui';
+import { CheckCircle2 } from 'lucide-react';
+import { Alert, Badge, Button, ListSkeleton, Pagination, type BadgeVariant } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
-import { NIGERIAN_BANKS } from '@/lib/banks';
+import { BankAccountFields } from './BankAccountFields';
 import { sellerPayoutKeys } from '@/lib/queryKeys';
 import {
   sellerPayoutService,
@@ -25,12 +15,6 @@ import {
 } from '@/services/sellerPayoutService';
 
 const PAGE_SIZE = 5;
-
-const OTHER_BANK = 'other';
-const BANK_OPTIONS = [
-  ...NIGERIAN_BANKS.map((b) => ({ value: b.code, label: b.name })),
-  { value: OTHER_BANK, label: 'Other bank (enter its code)' },
-];
 
 const STATUS_META: Record<SellerPayoutStatus, { label: string; variant: BadgeVariant }> = {
   PENDING: { label: 'Waiting for payout account', variant: 'warning' },
@@ -52,8 +36,7 @@ interface SellerPayoutSettingsProps {
  */
 export const SellerPayoutSettings = ({ description }: SellerPayoutSettingsProps) => {
   const queryClient = useQueryClient();
-  const [bank, setBank] = useState('');
-  const [otherBankCode, setOtherBankCode] = useState('');
+  const [bankCode, setBankCode] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
@@ -69,12 +52,7 @@ export const SellerPayoutSettings = ({ description }: SellerPayoutSettingsProps)
     placeholderData: keepPreviousData,
   });
 
-  const bankCode = bank === OTHER_BANK ? otherBankCode.trim() : bank;
   const canSave = bankCode.length >= 3 && accountNumber.trim().length === 10;
-  const accountNumberError =
-    accountNumber.length > 0 && accountNumber.length < 10
-      ? 'Account numbers are 10 digits (NUBAN).'
-      : undefined;
   // PENDING only waits on the seller when there is no verified account yet;
   // otherwise it is queued for the next payout run.
   const pendingMeta = account?.verified
@@ -85,8 +63,7 @@ export const SellerPayoutSettings = ({ description }: SellerPayoutSettingsProps)
     mutationFn: () => unwrap(sellerPayoutService.updateAccount({ bankCode, accountNumber })),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: sellerPayoutKeys.account });
-      setBank('');
-      setOtherBankCode('');
+      setBankCode('');
       setAccountNumber('');
       setError(null);
     },
@@ -127,42 +104,14 @@ export const SellerPayoutSettings = ({ description }: SellerPayoutSettingsProps)
         </p>
       )}
 
-      <div className="space-y-4">
-        <Field label="Bank" htmlFor="seller-payout-bank">
-          <Select
-            id="seller-payout-bank"
-            value={bank}
-            onValueChange={setBank}
-            options={BANK_OPTIONS}
-            placeholder="Choose your bank"
-            searchable
-            searchPlaceholder="Search banks"
-          />
-        </Field>
-        {bank === OTHER_BANK && (
-          <Field label="Bank code" htmlFor="seller-payout-bank-code">
-            <NumberInput
-              value={otherBankCode}
-              onValueChange={setOtherBankCode}
-              placeholder="Your bank's code"
-              maxLength={6}
-              leadingIcon={<Landmark className="w-4 h-4" />}
-            />
-          </Field>
-        )}
-        <Field
-          label="Account number"
-          htmlFor="seller-payout-account-number"
-          hint="Your 10-digit NUBAN account number."
-          error={accountNumberError}
-        >
-          <NumberInput
-            value={accountNumber}
-            onValueChange={setAccountNumber}
-            placeholder="0123456789"
-            maxLength={10}
-          />
-        </Field>
+      <div>
+        <BankAccountFields
+          idPrefix="seller-payout"
+          bankCode={bankCode}
+          onBankCode={setBankCode}
+          accountNumber={accountNumber}
+          onAccountNumber={setAccountNumber}
+        />
       </div>
 
       <div className="mt-6 space-y-3">

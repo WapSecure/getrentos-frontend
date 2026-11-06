@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Landmark, CheckCircle2 } from 'lucide-react';
-import { Card, Field, NumberInput, SaveButton } from '@getrentos/ui';
+import { CheckCircle2 } from 'lucide-react';
+import { Card, SaveButton } from '@getrentos/ui';
 import { landlordService } from '@/services/landlordService';
 import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
 import { ROUTES } from '@/lib/constants/auth';
@@ -10,6 +10,7 @@ import {
   PAYOUT_CHANGE_COOLDOWN_HINT,
   PayoutHoldNotice,
 } from '@/components/shared/payouts/PayoutHoldNotice';
+import { BankAccountFields } from '@/components/shared/payouts/BankAccountFields';
 
 export const PayoutSettings = () => {
   const [bankCode, setBankCode] = useState('');
@@ -89,23 +90,13 @@ export const PayoutSettings = () => {
       )}
 
       <div className="space-y-4">
-        <Field label="Bank code">
-          <NumberInput
-            value={bankCode}
-            onValueChange={setBankCode}
-            placeholder="e.g. 058 for GTBank"
-            maxLength={6}
-            leadingIcon={<Landmark className="w-4 h-4" />}
-          />
-        </Field>
-        <Field label="Account number">
-          <NumberInput
-            value={accountNumber}
-            onValueChange={setAccountNumber}
-            placeholder="0123456789"
-            maxLength={10}
-          />
-        </Field>
+        <BankAccountFields
+          idPrefix="landlord-payout"
+          bankCode={bankCode}
+          onBankCode={setBankCode}
+          accountNumber={accountNumber}
+          onAccountNumber={setAccountNumber}
+        />
       </div>
 
       <div className="mt-6 space-y-3">

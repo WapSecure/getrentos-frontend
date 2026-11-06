@@ -20,3 +20,30 @@ export function getCheckoutFee(amount: number): Promise<ApiResponse<CheckoutFee>
     authFetch<CheckoutFee>(`/payments/checkout-fee?amount=${Math.round(amount)}`)
   );
 }
+
+export interface Bank {
+  code: string;
+  name: string;
+}
+
+/** Banks a payout can be sent to, by name and Paystack code. */
+export function getBanks(): Promise<
+  ApiResponse<{ banks: Bank[]; source: 'paystack' | 'fallback' }>
+> {
+  return safeCall(() =>
+    authFetch<{ banks: Bank[]; source: 'paystack' | 'fallback' }>('/payments/banks')
+  );
+}
+
+/** The name on a bank account, shown before a payout account is saved. */
+export function resolveBankAccount(data: {
+  bankCode: string;
+  accountNumber: string;
+}): Promise<ApiResponse<{ accountName: string }>> {
+  return safeCall(() =>
+    authFetch<{ accountName: string }>('/payments/bank-accounts/resolve', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  );
+}

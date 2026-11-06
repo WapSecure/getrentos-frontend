@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { FileBarChart, Landmark, Plus, RotateCcw, Send } from 'lucide-react';
+import { FileBarChart, Plus, RotateCcw, Send } from 'lucide-react';
 import {
   Alert,
   Badge,
@@ -18,7 +18,6 @@ import {
   Field,
   Input,
   ListSkeleton,
-  NumberInput,
   Pagination,
   Select,
   useToast,
@@ -32,6 +31,7 @@ import { StatementBreakdown } from '@/components/shared/financials/StatementBrea
 import { PayoutHeldNotice } from '@/components/shared/financials/PayoutHeldNotice';
 import { StatementDisputeSection } from '@/components/shared/financials/StatementDisputeSection';
 import type { EstateStatement } from '@/types/estate';
+import { BankAccountFields } from '@/components/shared/payouts/BankAccountFields';
 
 type GenerateForm = { periodStart: string; periodEnd: string };
 const initialForm: GenerateForm = { periodStart: '', periodEnd: '' };
@@ -461,23 +461,13 @@ export function EstatePayoutAccountCard({ estateId }: { estateId: string }) {
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Field label="Bank code">
-          <NumberInput
-            leadingIcon={<Landmark className="w-4 h-4" />}
-            value={bankCode}
-            onValueChange={setBankCode}
-            placeholder="e.g. 058 for GTBank"
-            maxLength={6}
-          />
-        </Field>
-        <Field label="Account number">
-          <NumberInput
-            value={accountNumber}
-            onValueChange={setAccountNumber}
-            placeholder="0123456789"
-            maxLength={10}
-          />
-        </Field>
+        <BankAccountFields
+          idPrefix="estate-payout"
+          bankCode={bankCode}
+          onBankCode={setBankCode}
+          accountNumber={accountNumber}
+          onAccountNumber={setAccountNumber}
+        />
         <Field
           label="CAC number"
           optionalLabel="(optional)"
