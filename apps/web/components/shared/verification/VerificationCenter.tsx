@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { usePathname } from 'next/navigation';
+import { NIGERIAN_BANKS } from '@/lib/banks';
 import {
   BadgeCheck,
   Camera,
@@ -68,6 +70,7 @@ export const VerificationCenter = ({
   trustScoreHref,
 }: VerificationCenterProps) => {
   const queryClient = useQueryClient();
+  const portal = usePathname().split('/')[1] || 'renter';
   const [verificationId, setVerificationId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [idType, setIdType] = useState<TrustIdType>('NIN');
@@ -134,7 +137,10 @@ export const VerificationCenter = ({
     if (
       subjectId &&
       kyc &&
-      kyc.verificationStatus !== 'APPROVED' &&
+      // Same rule as isVerified below. An account whose status reads APPROVED
+      // while identityVerified is false (seeded, or approved before the checks
+      // existed) got no verification started and no "complete" line: stuck.
+      !(kyc.identityVerified ?? kyc.verificationStatus === 'APPROVED') &&
       !autoStarted.current &&
       !startMutation.isPending
     ) {
@@ -142,7 +148,7 @@ export const VerificationCenter = ({
       startMutation.mutate();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [subjectId, kyc?.verificationStatus]);
+  }, [subjectId, kyc?.verificationStatus, kyc?.identityVerified]);
 
   const grantIdMutation = useMutation({
     mutationFn: () =>
@@ -613,11 +619,14 @@ export const VerificationCenter = ({
                           maxLength={10}
                         />
                       </Field>
-                      <Field label="Bank code (optional)">
-                        <NumberInput
+                      <Field label="Bank" optionalLabel="(optional)">
+                        <Select
                           value={bankCode}
                           onValueChange={setBankCode}
-                          placeholder="e.g. 058"
+                          options={NIGERIAN_BANKS.map((b) => ({ value: b.code, label: b.name }))}
+                          placeholder="Choose your bank"
+                          searchable
+                          searchPlaceholder="Search banks"
                         />
                       </Field>
                       <Field
@@ -797,7 +806,9 @@ export const VerificationCenter = ({
             <p className="mt-1.5 text-xs text-muted-foreground">
               {doneCount === stages.length
                 ? 'All steps done. We are finishing the review.'
-                : `${stages.length - doneCount} ${stages.length - doneCount === 1 ? 'step' : 'steps'} to go, each takes a minute or two.`}
+                : stages.length - doneCount === 1
+                  ? '1 step to go. It takes a minute or two.'
+                  : `${stages.length - doneCount} steps to go, each takes a minute or two.`}
             </p>
           </div>
         )}
@@ -809,7 +820,19 @@ export const VerificationCenter = ({
       </div>
 
       {error && (
-        <Alert variant="danger" icon={ShieldAlert}>
+        <Alert
+          variant="danger"
+          icon={ShieldAlert}
+          action={
+            // The phone check needs a number on the profile: send the person
+            // to their own portal's settings rather than leave them guessing.
+            /phone number/i.test(error) ? (
+              <Button size="sm" variant="outline" href={`/${portal}/settings?tab=profile`}>
+                Add your phone number
+              </Button>
+            ) : undefined
+          }
+        >
           {error}
         </Alert>
       )}
@@ -824,9 +847,14 @@ export const VerificationCenter = ({
             <Skeleton key={index} className="h-16 w-full rounded-2xl" />
           ))}
           {!verificationLoading && !startMutation.isPending && (
-            <p className="text-center text-xs text-muted-foreground">
-              Your verification is ready to start. Reload if it does not appear.
-            </p>
+            <div className="flex flex-col items-center gap-2 pt-1">
+              <p className="text-center text-xs text-muted-foreground">
+                Your verification is ready to start.
+              </p>
+              <Button size="sm" variant="outline" onClick={() => startMutation.mutate()}>
+                Start verification
+              </Button>
+            </div>
           )}
         </div>
       ) : (
