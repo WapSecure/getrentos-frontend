@@ -47,6 +47,18 @@ describe('validateEstateDraft', () => {
     expect(Object.keys(r.errors).sort()).toEqual(['address', 'city', 'name', 'state']);
   });
 
+  it('sends the place id of a picked address and lets the API fill city and state', () => {
+    const r = validateEstateDraft(draft({ placeId: 'ChIJ123', city: '', state: '' }));
+    expect(r.ok && r.body).toEqual({
+      name: 'Sunrise Gardens',
+      address: '1 Garden Close',
+      city: '',
+      state: '',
+      placeId: 'ChIJ123',
+      gateCount: 1,
+    });
+  });
+
   it.each(['0', '51', '2.5', '-1', 'abc'])('refuses %s gates', (gateCount) => {
     const r = validateEstateDraft(draft({ gateCount }));
     expect(r.ok).toBe(false);

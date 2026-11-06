@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
+import type { VerifiedAddress } from '@getrentos/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FileText, Send } from 'lucide-react-native';
@@ -31,6 +32,7 @@ import { ApiError, errorMessage } from '@/lib/api/client';
 import { pickDocument } from '@/lib/filePicker';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
+import { AddressInput } from '@/components/forms/AddressInput';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
@@ -143,6 +145,8 @@ function Details({ firm }: { firm: Onboarding | null }) {
   const toast = useToast();
   const { refreshProfile, switchWorkspace } = useAuth();
   const [f, setF] = useState<SetupForm>(() => setupToForm(firm));
+  // The checked details of an address picked in this visit, for the field's LGA and state line.
+  const [picked, setPicked] = useState<VerifiedAddress | undefined>();
   const editable = setupEditable(firm);
   const set = (k: keyof SetupForm) => (v: string) => setF((x) => ({ ...x, [k]: v }));
   const problem = setupProblem(f);
@@ -197,11 +201,24 @@ function Details({ firm }: { firm: Onboarding | null }) {
         editable={editable}
         required
       />
-      <TextField
+      <AddressInput
         label="Registered address"
-        value={f.registeredAddress}
-        onChangeText={set('registeredAddress')}
-        multiline
+        value={
+          f.registeredAddress
+            ? { text: f.registeredAddress, placeId: f.registeredPlaceId, verified: picked }
+            : null
+        }
+        onChange={(next) => {
+          setPicked(next?.verified);
+          setF((x) => ({
+            ...x,
+            registeredAddress: next?.text ?? '',
+            // Typing over a checked address clears the check.
+            registeredPlaceId: next?.placeId,
+            ...(next?.verified ? { state: next.verified.state } : {}),
+          }));
+        }}
+        allowManual
         editable={editable}
         required
       />
