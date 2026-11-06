@@ -28,6 +28,8 @@ interface Payment {
   escrowStatus: 'not_funded' | 'held' | 'pending_review' | 'released' | 'frozen';
   releaseDate?: string;
   heldReason?: string;
+  /** A checkout the tenant opened and closed, which they can go back to. */
+  resumeCheckout?: { url: string; reference: string; expiresAt: string };
 }
 
 interface PaymentCardProps {
@@ -120,6 +122,9 @@ export const PaymentCard = ({
   const MethodIcon = methodIcons[payment.method] ?? CreditCard;
 
   const isPayable = payment.status === 'pending' || payment.status === 'overdue';
+  // The tenant closed Paystack's page: they go back to the same checkout rather
+  // than wait for it to lapse (or risk opening a second one).
+  const resume = payment.status === 'processing' ? payment.resumeCheckout : undefined;
 
   return (
     <article className="group p-4 transition-colors hover:bg-secondary/50 sm:p-5">
@@ -184,6 +189,19 @@ export const PaymentCard = ({
                 className="whitespace-nowrap"
               >
                 Pay now
+              </Button>
+            )}
+            {resume && (
+              <Button
+                size="sm"
+                variant="primary"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.location.assign(resume.url);
+                }}
+                className="whitespace-nowrap"
+              >
+                Resume payment
               </Button>
             )}
             {payment.status === 'paid' && payment.escrowStatus === 'held' && (

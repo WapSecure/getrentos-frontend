@@ -223,6 +223,8 @@ export interface Payment {
   authorizationUrl?: string;
   /** Gateway reference for the payment currently being processed. */
   reference?: string;
+  /** A checkout the tenant opened and closed, which they can go back to until `expiresAt`. */
+  resumeCheckout?: { url: string; reference: string; expiresAt: string };
   /** Naira paid against this charge so far (part-payments and credit). */
   amountPaid?: number;
   /** Naira still owed on this charge. */
