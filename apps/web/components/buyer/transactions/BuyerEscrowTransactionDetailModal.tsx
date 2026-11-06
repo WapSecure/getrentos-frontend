@@ -1,5 +1,6 @@
 'use client';
 
+import { CheckoutFeeNote } from '@/components/shared/payments/CheckoutFeeLine';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
@@ -172,6 +173,12 @@ export const BuyerEscrowTransactionDetailModal = ({
                           >
                             Make deposit payment
                           </Button>
+                        )}
+                        {isActive && step.key === 'deposit_pending' && canDeposit && (
+                          <CheckoutFeeNote
+                            amount={transaction.depositAmount ?? transaction.purchasePrice}
+                            className="mt-1"
+                          />
                         )}
                         {isActive &&
                           step.key === 'funds_held' &&

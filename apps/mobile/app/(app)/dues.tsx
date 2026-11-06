@@ -1,3 +1,4 @@
+import { CheckoutFeeNote } from '@/components/payments/CheckoutFeeNote';
 import { usePaystackCheckout } from '@/hooks/usePaystackCheckout';
 import { View } from 'react-native';
 
@@ -161,6 +162,7 @@ function DueCard({
           style={{ marginTop: spacing.md, alignSelf: 'flex-start' }}
         />
       ) : null}
+      {canPay ? <CheckoutFeeNote amount={due.amount} /> : null}
     </Card>
   );
 }

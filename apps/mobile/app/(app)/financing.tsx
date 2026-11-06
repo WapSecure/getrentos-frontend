@@ -1,3 +1,4 @@
+import { CheckoutFeeNote } from '@/components/payments/CheckoutFeeNote';
 import { usePaystackCheckout } from '@/hooks/usePaystackCheckout';
 import { useState } from 'react';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
@@ -332,6 +333,7 @@ function ActivePlanCard({ overview }: { overview: { plan: FinancingPlan } }) {
             loading={payMutation.isPending}
             onPress={() => confirmPay(nextDue)}
           />
+          <CheckoutFeeNote amount={nextDue.amount} />
         </Card>
       ) : null}
 

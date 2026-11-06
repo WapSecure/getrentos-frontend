@@ -40,6 +40,8 @@ export interface BuyerTransaction {
   propertyType?: string;
   ownerName: string;
   purchasePrice: number;
+  /** What the buyer pays in for this sale: the agreed deposit, else the price. */
+  depositAmount?: number;
   escrowStatus: BuyerEscrowStatus;
   milestones?: { label: string; completed: boolean }[];
   activityLog?: { id: string; actor: string; action: string; timestamp: string }[];

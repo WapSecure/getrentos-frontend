@@ -1,3 +1,4 @@
+import { CheckoutFeeNote } from '@/components/payments/CheckoutFeeNote';
 import { usePaystackCheckout } from '@/hooks/usePaystackCheckout';
 import { useMemo, useState } from 'react';
 import { Alert, Pressable, RefreshControl, ScrollView, View } from 'react-native';
@@ -328,7 +329,10 @@ function TransactionCard({
       {tx.escrowStatus === 'deposit_pending' || tx.escrowStatus === 'funds_held' ? (
         <View style={{ gap: spacing.sm }}>
           {tx.escrowStatus === 'deposit_pending' ? (
-            <Button label="Pay deposit" loading={depositing} onPress={onDeposit} />
+            <>
+              <Button label="Pay deposit" loading={depositing} onPress={onDeposit} />
+              <CheckoutFeeNote amount={tx.depositAmount ?? tx.purchasePrice} />
+            </>
           ) : null}
           {tx.escrowStatus === 'funds_held' ? (
             <>

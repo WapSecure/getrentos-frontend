@@ -1,3 +1,4 @@
+import { CheckoutFeeNote } from '@/components/payments/CheckoutFeeNote';
 import { usePaystackCheckout } from '@/hooks/usePaystackCheckout';
 import { useState } from 'react';
 import { Alert, RefreshControl, ScrollView, View } from 'react-native';
@@ -202,6 +203,9 @@ export default function StayDetail() {
               loading={pay.isPending}
               onPress={() => pay.mutate()}
             />
+          ) : null}
+          {h.action === 'pay' ? (
+            <CheckoutFeeNote amount={guestTotal(b) + (b.deposit ?? 0)} />
           ) : h.action === 'review' ? (
             <Button label="Review your stay" onPress={() => setSheet('review')} />
           ) : h.action === 'report' ? (

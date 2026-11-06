@@ -1,5 +1,6 @@
 'use client';
 
+import { CheckoutFeeNote } from '@/components/shared/payments/CheckoutFeeLine';
 import { useState } from 'react';
 import { Button, ConfirmDialog } from '@getrentos/ui';
 import { CreditCard, Download, FileText, XCircle } from 'lucide-react';
@@ -64,6 +65,7 @@ export const PayNextCard = ({
           >
             Pay {formatCurrency(purchase.nextDue.amount)}
           </Button>
+          <CheckoutFeeNote amount={purchase.nextDue.amount} className="mt-2" />
           <p className="mt-2 text-xs text-muted-foreground">
             You will be taken to our payment partner to pay securely. GetRentos holds it until you
             confirm each conveyance step.
