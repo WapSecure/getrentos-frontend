@@ -743,6 +743,7 @@ export const renterService = {
           email: data.email,
           phone: data.phone,
           currentAddress: data.currentAddress,
+          currentAddressPlaceId: data.currentAddressPlaceId || undefined,
           employer: data.employer,
           employmentStatus: data.employmentStatus,
           monthlyIncome: Number(data.monthlyIncome) || 0,

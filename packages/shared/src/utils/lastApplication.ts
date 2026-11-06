@@ -13,6 +13,8 @@ export const EMPLOYMENT_STATUSES = [
 export interface LastApplicationDetails {
   phone?: string;
   currentAddress?: string;
+  /** The Google place the current address was picked from; absent for a typed one. */
+  currentAddressPlaceId?: string | null;
   monthlyIncome?: number;
   employmentStatus?: string;
   employer?: string;
@@ -35,6 +37,8 @@ export interface PrefillableApplicationFields {
   referenceName: string;
   referencePhone: string;
   referenceRelationship: string;
+  /** Set when the form keeps the place a picked current address came from. */
+  currentAddressPlaceId?: string;
 }
 
 /**
@@ -50,10 +54,13 @@ export function applyLastApplication<T extends PrefillableApplicationFields>(
   if (!last) return form;
   const keep = (current: string, next?: string | null) =>
     current.trim() ? current : (next ?? current);
+  // The place id travels with the address it belongs to, never on its own.
+  const fillsAddress = !form.currentAddress.trim() && !!last.currentAddress;
   return {
     ...form,
     phone: keep(form.phone, last.phone),
     currentAddress: keep(form.currentAddress, last.currentAddress),
+    ...(fillsAddress ? { currentAddressPlaceId: last.currentAddressPlaceId ?? undefined } : {}),
     monthlyIncome: keep(
       form.monthlyIncome,
       last.monthlyIncome ? String(last.monthlyIncome) : undefined
