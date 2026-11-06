@@ -469,6 +469,12 @@ export interface TwoFactorStatus {
   enrolled: boolean;
   /** Confirmed with a code: sign-in asks for it, and admin routes open. */
   enabled: boolean;
+  /**
+   * Whether the API refuses this account's admin tools until two-factor is on.
+   * False for a local backend run with STAFF_MFA_REQUIRED=false. Treated as
+   * true when an older API leaves it out.
+   */
+  requiredForAdminTools?: boolean;
 }
 
 /** A fresh authenticator secret to scan or type in (POST /users/me/security/2fa/enroll). */

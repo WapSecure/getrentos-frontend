@@ -34,7 +34,10 @@ export function StaffTwoFactorGate({ children }: { children: ReactNode }) {
   if (status.isLoading) return <PageLoadingState />;
   // A failed status check leaves the pages up: the API still enforces the rule,
   // and its refusal re-runs this check.
-  if (!status.data || status.data.enabled) return <>{children}</>;
+  // Only block when the API itself would refuse: a local demo backend can run
+  // with staff two-factor switched off, and the gate must match it.
+  if (!status.data || status.data.enabled || status.data.requiredForAdminTools === false)
+    return <>{children}</>;
 
   return (
     <main className="p-6 lg:p-8">
