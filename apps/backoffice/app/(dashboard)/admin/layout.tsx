@@ -14,9 +14,16 @@ import {
   ensureValidSession,
 } from '@getrentos/shared';
 import { hasStaffAccess } from '@/lib/adminAccess';
+import { StaffTwoFactorGate } from '@/components/security/StaffTwoFactorGate';
 import { usePathname } from 'next/navigation';
 
-export type AdminUser = { fullName: string; email: string; role?: string; roles?: string[] };
+export type AdminUser = {
+  id?: string;
+  fullName: string;
+  email: string;
+  role?: string;
+  roles?: string[];
+};
 
 const AdminUserContext = createContext<AdminUser | null>(null);
 
@@ -89,24 +96,28 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     <AdminUserContext.Provider value={user}>
       <div className="min-h-screen bg-background">
         <AdminNavbar user={user} />
-        <div className="flex">
-          <AdminSidebar roles={user?.roles} />
-          {/* min-w-0: without it this flex item grows to its widest child (e.g. a
+        {/* Without two-factor every admin route is refused, so the set-up screen
+            stands in for the sidebar and page until it is on. */}
+        <StaffTwoFactorGate>
+          <div className="flex">
+            <AdminSidebar roles={user?.roles} />
+            {/* min-w-0: without it this flex item grows to its widest child (e.g. a
               tab strip) and the whole page scrolls sideways instead of that child. */}
-          <main className="min-w-0 flex-1 lg:ml-64 p-6 lg:p-8">
-            <div className="max-w-7xl mx-auto">
-              {hasRouteAccess(user?.roles, pathname) ? (
-                children
-              ) : (
-                <EmptyState
-                  icon={Lock}
-                  title="You do not have access to this area"
-                  description="Your staff role does not include this part of the back office. Ask an administrator if you need it."
-                />
-              )}
-            </div>
-          </main>
-        </div>
+            <main className="min-w-0 flex-1 lg:ml-64 p-6 lg:p-8">
+              <div className="max-w-7xl mx-auto">
+                {hasRouteAccess(user?.roles, pathname) ? (
+                  children
+                ) : (
+                  <EmptyState
+                    icon={Lock}
+                    title="You do not have access to this area"
+                    description="Your staff role does not include this part of the back office. Ask an administrator if you need it."
+                  />
+                )}
+              </div>
+            </main>
+          </div>
+        </StaffTwoFactorGate>
       </div>
     </AdminUserContext.Provider>
   );

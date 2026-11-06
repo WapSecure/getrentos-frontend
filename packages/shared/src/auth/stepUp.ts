@@ -8,6 +8,12 @@
 
 export const STEP_UP_HEADER = 'x-step-up-token';
 export const STEP_UP_REQUIRED = 'STEP_UP_REQUIRED';
+/**
+ * A staff account without an authenticator app. Every admin route answers this
+ * until two-factor is on, and so does any other route handed the narrow
+ * enrolment-only step-up token such an account gets from its password.
+ */
+export const STAFF_MFA_REQUIRED = 'STAFF_MFA_REQUIRED';
 
 /** How the account proves it's the holder: its strongest factor wins. */
 export type StepUpMethod = 'passkey' | 'totp' | 'transaction_pin' | 'password' | 'email_code';
@@ -57,4 +63,45 @@ export function isStepUpRequired(err: unknown): boolean {
     (err as { status?: number }).status === 403 &&
     (err as { code?: string }).code === STEP_UP_REQUIRED
   );
+}
+
+export function isStaffMfaRequired(err: unknown): boolean {
+  return (
+    typeof err === 'object' &&
+    err !== null &&
+    (err as { status?: number }).status === 403 &&
+    (err as { code?: string }).code === STAFF_MFA_REQUIRED
+  );
+}
+
+type StaffMfaListener = () => void;
+const staffMfaListeners = new Set<StaffMfaListener>();
+
+/**
+ * Subscribes to "the API refused this because staff two-factor is off". The
+ * back office uses it to swap the page for the two-factor set-up screen
+ * instead of leaving a wall of failing requests. Returns an unsubscribe.
+ */
+export function onStaffMfaRequired(listener: StaffMfaListener): () => void {
+  staffMfaListeners.add(listener);
+  return () => {
+    staffMfaListeners.delete(listener);
+  };
+}
+
+/**
+ * Called by authFetch on a STAFF_MFA_REQUIRED refusal. The cached step-up
+ * token goes first: it is the enrolment-only kind, and replaying it would only
+ * earn the same refusal.
+ */
+export function notifyStaffMfaRequired() {
+  clearStepUpToken();
+  // One listener throwing must not stop the others hearing about it.
+  for (const listener of staffMfaListeners) {
+    try {
+      listener();
+    } catch {
+      // ignored on purpose
+    }
+  }
 }

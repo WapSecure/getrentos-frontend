@@ -2,7 +2,9 @@ import { apiDownload, apiFetch, ApiError, refreshSession } from './apiClient';
 import {
   clearStepUpToken,
   currentStepUpToken,
+  isStaffMfaRequired,
   isStepUpRequired,
+  notifyStaffMfaRequired,
   obtainStepUpToken,
   STEP_UP_HEADER,
 } from './stepUp';
@@ -265,8 +267,17 @@ export async function authFetch<T>(
     if (isStepUpRequired(err)) {
       clearStepUpToken();
       const stepUp = await obtainStepUpToken();
-      if (stepUp) return doFetch(getAuthToken(), stepUp);
+      if (stepUp) {
+        try {
+          return await doFetch(getAuthToken(), stepUp);
+        } catch (replayErr) {
+          if (isStaffMfaRequired(replayErr)) notifyStaffMfaRequired();
+          throw replayErr;
+        }
+      }
     }
+    // A staff account with two-factor off: let the app show the set-up screen.
+    if (isStaffMfaRequired(err)) notifyStaffMfaRequired();
     // The access token expired — exchange the refresh token for a fresh pair
     // and retry the request once. Single-flight refresh prevents the rotation
     // race when many requests 401 at the same moment.

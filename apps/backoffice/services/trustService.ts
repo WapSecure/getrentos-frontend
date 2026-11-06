@@ -13,9 +13,10 @@ import type {
 
 /**
  * Trust review-case queue API (backend /admin/trust/review-cases).
- * Four-eyes note: REJECT/RESTRICT resolutions require a second officer
- * distinct from the assigned reviewer — enforced server-side; the UI surfaces
- * the resulting error message.
+ * Four-eyes note: every final resolution (PASS, REJECT, RESTRICT) requires a
+ * second officer distinct from the assigned reviewer, and nobody may resolve a
+ * case about their own account — enforced server-side. ReviewCaseModal hides
+ * the decision for the assigned reviewer and surfaces any refusal message.
  */
 export const trustService = {
   async listReviewCases(params: {

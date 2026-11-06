@@ -463,6 +463,29 @@ export interface AdminProfile {
   avatarUrl?: string;
 }
 
+/** Whether the signed-in account has an authenticator app (GET /users/me/security/2fa). */
+export interface TwoFactorStatus {
+  /** A secret is stored but may not be confirmed yet. */
+  enrolled: boolean;
+  /** Confirmed with a code: sign-in asks for it, and admin routes open. */
+  enabled: boolean;
+}
+
+/** A fresh authenticator secret to scan or type in (POST /users/me/security/2fa/enroll). */
+export interface TwoFactorEnrollment {
+  secret: string;
+  otpauthUrl: string;
+  /** The QR code as a data URL. */
+  qrDataUrl: string;
+}
+
+export interface StaffPasskey {
+  id: string;
+  deviceName: string | null;
+  createdAt: string;
+  lastUsedAt: string | null;
+}
+
 /** AI governance — today's spend/volume + live control state (GET /admin/ai/usage). */
 export interface AiCapabilityUsage {
   capability: string;
