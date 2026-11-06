@@ -4,7 +4,7 @@ import { SafeImage } from '@/components/shared/media/SafeImage';
 
 import { useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Camera, User, Mail, Phone, MapPin, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { Camera, User, Mail, Phone, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { Badge, Button, Field, IconButton, Input, SaveButton, Textarea } from '@getrentos/ui';
 import { OTPModal } from '@/components/auth/OTPModal';
 import { renterService } from '@/services/renterService';
@@ -12,6 +12,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { nameOnly } from '@/lib/validations/input';
 import { ChangeEmailButton } from '@/components/shared/security/ChangeEmailButton';
+import { AddressInput } from '@/components/shared/location/AddressInput';
 
 interface ProfileSettingsProps {
   user: { fullName: string; email: string; role?: string } | null;
@@ -243,11 +244,11 @@ const ProfileSettingsForm = ({
         </Field>
 
         <Field label="Location">
-          <Input
-            leadingIcon={<MapPin className="w-4 h-4" />}
-            type="text"
-            value={formData.location}
-            onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+          <AddressInput
+            kind="area"
+            allowManual
+            value={formData.location ? { text: formData.location } : null}
+            onChange={(next) => setFormData({ ...formData, location: next?.text ?? '' })}
           />
         </Field>
 

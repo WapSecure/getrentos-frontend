@@ -18,7 +18,8 @@ import {
   clearSessionDraft,
   useSessionExpiryDraft,
 } from '@getrentos/ui';
-import { LocationFields } from '@/components/shared/location/LocationFields';
+import { AddressFields } from '@/components/shared/location/AddressFields';
+import type { VerifiedAddress } from '@getrentos/shared';
 import type { OwnerProperty } from '@/types/owner';
 import { PROPERTY_TYPE_OPTIONS } from '@/lib/propertyTypes';
 import type { LandOwnershipProofInput } from '@/types/land';
@@ -58,6 +59,9 @@ interface FormState {
   city: string;
   state: string;
   country: string;
+  /** Set when the address was picked from Google. */
+  placeId?: string;
+  checked?: VerifiedAddress;
   ownerName: string;
   estimatedValue: string;
   purchasePrice: string;
@@ -79,6 +83,8 @@ type OwnerPropertyDraft = Pick<
   | 'city'
   | 'state'
   | 'country'
+  | 'placeId'
+  | 'checked'
   | 'ownerName'
   | 'estimatedValue'
   | 'purchasePrice'
@@ -130,6 +136,8 @@ export const AddOwnerPropertyModal = ({
             city: form.city,
             state: form.state,
             country: form.country,
+            placeId: form.placeId,
+            checked: form.checked,
             ownerName: form.ownerName,
             estimatedValue: form.estimatedValue,
             purchasePrice: form.purchasePrice,
@@ -202,6 +210,7 @@ export const AddOwnerPropertyModal = ({
           city: form.city,
           state: form.state,
           country: form.country,
+          placeId: form.placeId,
           ownerName: form.ownerName,
           // Blank stays absent: a 0 value showed as "₦0" on the card and a
           // made-up purchase date of today skewed the investment figures.
@@ -289,23 +298,11 @@ export const AddOwnerPropertyModal = ({
                 />
               </Field>
 
-              <Field label="Address" required>
-                <Input
-                  type="text"
-                  value={form.address}
-                  onChange={(e) => update('address', e.target.value)}
-                  placeholder="Street address"
-                />
-              </Field>
-
-              <LocationFields
-                country={form.country}
-                state={form.state}
-                city={form.city}
-                onCountryChange={(c) => update('country', c)}
-                onStateChange={(s) => update('state', s)}
-                onCityChange={(c) => update('city', c)}
+              <AddressFields
                 required
+                value={form}
+                onChange={(patch) => setForm((prev) => ({ ...prev, ...patch }))}
+                onPin={(pin) => update('pin', pin)}
               />
 
               <LocationPicker
@@ -387,7 +384,11 @@ export const AddOwnerPropertyModal = ({
                 <SummaryRow label="Owner" value={form.ownerName || '—'} />
                 <SummaryRow
                   label="Address"
-                  value={`${form.address}, ${form.city}, ${form.state}`}
+                  value={
+                    form.checked
+                      ? form.checked.formatted
+                      : `${form.address}, ${form.city}, ${form.state}`
+                  }
                 />
                 <SummaryRow
                   label="Documents"

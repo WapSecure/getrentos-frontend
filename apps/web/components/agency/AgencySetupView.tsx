@@ -15,7 +15,9 @@ import {
   Select,
   useToast,
 } from '@getrentos/ui';
+import type { AddressValue } from '@getrentos/shared';
 import { NIGERIA_STATES } from '@/lib/constants/locations';
+import { AddressInput } from '@/components/shared/location/AddressInput';
 import { getStoredUser, updateStoredUser } from '@/lib/authStorage';
 import { formatDate } from '@/lib/format';
 import {
@@ -100,6 +102,7 @@ const fromFirm = (firm: AgencyOnboarding): AgencyProfileInput => ({
   businessType: firm.profile?.businessType ?? 'LIMITED_COMPANY',
   registrationNumber: firm.profile?.registrationNumber ?? '',
   registeredAddress: firm.profile?.registeredAddress ?? '',
+  registeredPlaceId: firm.profile?.registeredPlaceId ?? undefined,
   state: firm.profile?.state ?? 'Lagos',
   contactEmail: firm.profile?.contactEmail ?? '',
   contactPhone: firm.profile?.contactPhone ?? '',
@@ -139,6 +142,23 @@ export function AgencySetupView() {
         for (const key of touched) delete next[key];
         return next;
       });
+    }
+  };
+
+  const registeredAddress: AddressValue | null = form.registeredAddress
+    ? { text: form.registeredAddress, placeId: form.registeredPlaceId }
+    : null;
+  // A pick fills the address and its state; typing over it drops the check.
+  const onRegisteredAddress = (next: AddressValue | null) => {
+    const v = next?.verified;
+    if (v) {
+      set({
+        registeredAddress: v.formatted,
+        registeredPlaceId: v.placeId,
+        ...((NIGERIA_STATES as readonly string[]).includes(v.state) ? { state: v.state } : {}),
+      });
+    } else {
+      set({ registeredAddress: next?.text ?? '', registeredPlaceId: undefined });
     }
   };
 
@@ -304,9 +324,10 @@ export function AgencySetupView() {
                 error={errors.registeredAddress}
                 required
               >
-                <Input
-                  value={form.registeredAddress}
-                  onChange={(e) => set({ registeredAddress: e.target.value })}
+                <AddressInput
+                  allowManual
+                  value={registeredAddress}
+                  onChange={onRegisteredAddress}
                   placeholder="Street, area, city"
                 />
               </Field>

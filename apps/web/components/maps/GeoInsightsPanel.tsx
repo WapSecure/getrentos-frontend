@@ -23,9 +23,9 @@ import { PropertyMap, type MapMarker } from '@/components/maps/PropertyMap';
 import { Badge } from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
 import { Field } from '@getrentos/ui';
-import { Input } from '@getrentos/ui';
 import { Skeleton } from '@getrentos/ui';
 import { renterService } from '@/services/renterService';
+import { AddressInput } from '@/components/shared/location/AddressInput';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { pluralize } from '@/lib/format';
@@ -209,9 +209,11 @@ export const GeoInsightsPanel = ({
             <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-end">
               <div className="flex-1">
                 <Field label="Destination" hint="e.g. an office area or address">
-                  <Input
-                    value={destinationDraft}
-                    onChange={(e) => setDestinationDraft(e.target.value)}
+                  <AddressInput
+                    kind="any"
+                    allowManual
+                    value={destinationDraft ? { text: destinationDraft } : null}
+                    onChange={(next) => setDestinationDraft(next?.text ?? '')}
                     placeholder="e.g. Lagos Island, Ikeja, or an address"
                   />
                 </Field>

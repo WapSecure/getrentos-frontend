@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Button, CurrencyInput, Field, Input, Switch, ToggleChip, useToast } from '@getrentos/ui';
+import { Plus, X } from 'lucide-react';
+import { Button, CurrencyInput, Field, Switch, ToggleChip, useToast } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { buyerKeys } from '@/lib/queryKeys';
 import { buyerService } from '@/services/buyerService';
+import { AddressInput } from '@/components/shared/location/AddressInput';
 
 const propertyTypeOptions = ['Apartment', 'Duplex', 'Bungalow', 'Terrace', 'Land', 'Commercial'];
 
@@ -14,7 +16,9 @@ export const SearchPreferencesSettings = () => {
   const [minBudget, setMinBudget] = useState('');
   const [maxBudget, setMaxBudget] = useState('');
   const [preferredTypes, setPreferredTypes] = useState<string[]>([]);
+  // Stored as one comma-separated line ("Lekki, Victoria Island"), shown as chips.
   const [preferredLocations, setPreferredLocations] = useState('');
+  const [newLocation, setNewLocation] = useState('');
   const [notifyOnMatch, setNotifyOnMatch] = useState(true);
   const toast = useToast();
 
@@ -42,6 +46,22 @@ export const SearchPreferencesSettings = () => {
       prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
     );
   };
+
+  const locations = preferredLocations
+    .split(',')
+    .map((l) => l.trim())
+    .filter(Boolean);
+  /** Adds a typed area, or the area picked from the suggestions, then clears the box. */
+  const addLocation = (name = newLocation) => {
+    const area = name.trim();
+    if (area.length < 2) return;
+    if (!locations.some((l) => l.toLowerCase() === area.toLowerCase())) {
+      setPreferredLocations([...locations, area].join(', '));
+    }
+    setNewLocation('');
+  };
+  const removeLocation = (area: string) =>
+    setPreferredLocations(locations.filter((l) => l !== area).join(', '));
 
   const save = useMutation({
     mutationFn: () =>
@@ -105,13 +125,53 @@ export const SearchPreferencesSettings = () => {
           </div>
         </div>
 
-        <Field label="Preferred locations">
-          <Input
-            value={preferredLocations}
-            onChange={(e) => setPreferredLocations(e.target.value)}
-            placeholder="e.g. Lekki, Victoria Island"
-          />
-        </Field>
+        <div>
+          <form
+            className="flex items-end gap-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              addLocation();
+            }}
+          >
+            <Field label="Preferred locations" className="flex-1">
+              <AddressInput
+                kind="area"
+                allowManual
+                value={newLocation ? { text: newLocation } : null}
+                placeholder="e.g. Lekki"
+                onChange={(next) =>
+                  next?.verified
+                    ? addLocation(next.verified.line1)
+                    : setNewLocation(next?.text ?? '')
+                }
+              />
+            </Field>
+            <Button type="submit" variant="outline" disabled={newLocation.trim().length < 2}>
+              <Plus className="h-4 w-4" aria-hidden="true" />
+              Add
+            </Button>
+          </form>
+          {locations.length > 0 && (
+            <div
+              role="group"
+              aria-label="Preferred locations"
+              className="mt-2 flex flex-wrap gap-2"
+            >
+              {locations.map((area) => (
+                <ToggleChip
+                  key={area}
+                  pressed
+                  size="sm"
+                  aria-label={`Remove ${area}`}
+                  onPressedChange={() => removeLocation(area)}
+                >
+                  {area}
+                  <X className="h-3.5 w-3.5" aria-hidden="true" />
+                </ToggleChip>
+              ))}
+            </div>
+          )}
+        </div>
 
         <div className="rounded-lg border border-border p-3">
           <Switch

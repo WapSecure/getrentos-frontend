@@ -17,6 +17,7 @@ import {
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
+import { AddressInput } from '@/components/shared/location/AddressInput';
 
 interface ManageGatesModalProps {
   isOpen: boolean;
@@ -118,10 +119,11 @@ export const ManageGatesModal = ({ isOpen, estateId, onClose }: ManageGatesModal
               />
             </Field>
             <Field label="Location" optionalLabel="(optional)">
-              <Input
-                type="text"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
+              <AddressInput
+                kind="any"
+                allowManual
+                value={location ? { text: location } : null}
+                onChange={(next) => setLocation(next?.text ?? '')}
                 placeholder="e.g. Admiralty Way"
               />
             </Field>

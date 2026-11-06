@@ -22,7 +22,7 @@ import {
   type LandOwnershipProofInput,
   type LandParcelInput,
 } from '@/types/land';
-import { LocationFields } from '@/components/shared/location/LocationFields';
+import { AddressFields, type AddressFieldsValue } from '@/components/shared/location/AddressFields';
 import { alphanumericOnly } from '@/lib/validations/input';
 
 export interface LandRegistrationInput {
@@ -33,6 +33,7 @@ export interface LandRegistrationInput {
     | 'city'
     | 'state'
     | 'country'
+    | 'placeId'
     | 'estimatedValue'
     | 'purchasePrice'
     | 'purchaseDate'
@@ -61,16 +62,16 @@ const ownershipProofOptions: { value: LandOwnershipProofInput['documentType']; l
   { value: 'OTHER', label: 'Other evidence' },
 ];
 
+const emptyLocation: AddressFieldsValue = { address: '', city: '', state: '', country: 'Nigeria' };
+
 export const LandRegistrationDialog = ({
   open,
   onOpenChange,
   onCreate,
 }: LandRegistrationDialogProps) => {
   const [name, setName] = useState('');
-  const [address, setAddress] = useState('');
-  const [city, setCity] = useState('');
-  const [state, setState] = useState('');
-  const [country, setCountry] = useState('Nigeria');
+  const [location, setLocation] = useState<AddressFieldsValue>(emptyLocation);
+  const { address, city, state, country } = location;
   const [estimatedValue, setEstimatedValue] = useState('');
   const [purchasePrice, setPurchasePrice] = useState('');
   const [plotNumber, setPlotNumber] = useState('');
@@ -85,10 +86,7 @@ export const LandRegistrationDialog = ({
 
   const reset = () => {
     setName('');
-    setAddress('');
-    setCity('');
-    setState('');
-    setCountry('Nigeria');
+    setLocation(emptyLocation);
     setEstimatedValue('');
     setPurchasePrice('');
     setPlotNumber('');
@@ -133,6 +131,7 @@ export const LandRegistrationDialog = ({
           city: city.trim(),
           state: state.trim(),
           country: country.trim() || 'Nigeria',
+          placeId: location.placeId,
           estimatedValue: Number(estimatedValue) || 0,
           purchasePrice: Number(purchasePrice) || undefined,
           purchaseDate: undefined,
@@ -189,23 +188,16 @@ export const LandRegistrationDialog = ({
                 placeholder="e.g. 600 sqm plot in Ibeju-Lekki"
               />
             </Field>
-            <Field label="Address / layout" required className="sm:col-span-2">
-              <Input
-                value={address}
-                onChange={(event) => setAddress(event.target.value)}
+            <div className="space-y-4 sm:col-span-2">
+              <AddressFields
+                required
+                kind="any"
+                label="Address / layout"
                 placeholder="Street, layout, or nearest landmark"
+                value={location}
+                onChange={(patch) => setLocation((prev) => ({ ...prev, ...patch }))}
               />
-            </Field>
-            <LocationFields
-              country={country}
-              state={state}
-              city={city}
-              onCountryChange={setCountry}
-              onStateChange={setState}
-              onCityChange={setCity}
-              className="sm:col-span-2"
-              required
-            />
+            </div>
             <Field label="Plot number">
               <Input
                 value={plotNumber}

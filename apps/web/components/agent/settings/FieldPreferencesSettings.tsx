@@ -3,9 +3,10 @@
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
-import { Button, Field, Input, NumberInput, Skeleton, ToggleChip, useToast } from '@getrentos/ui';
+import { Button, Field, NumberInput, Skeleton, ToggleChip, useToast } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { agentKeys } from '@/lib/queryKeys';
+import { AddressInput } from '@/components/shared/location/AddressInput';
 import {
   AGENT_WORKING_DAYS,
   agentService,
@@ -64,12 +65,12 @@ export const FieldPreferencesSettings = () => {
     setDays((prev) => (prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]));
 
   const trimmedArea = newArea.trim();
-  const addArea = () => {
-    if (trimmedArea.length < 2) return;
-    const existing = areaOptions.find((a) => a.toLowerCase() === trimmedArea.toLowerCase());
-    setAreas((prev) =>
-      prev.includes(existing ?? trimmedArea) ? prev : [...prev, existing ?? trimmedArea]
-    );
+  /** Adds a typed area, or the area picked from the suggestions, then clears the box. */
+  const addArea = (name = trimmedArea) => {
+    const area = name.trim().slice(0, 60);
+    if (area.length < 2) return;
+    const existing = areaOptions.find((a) => a.toLowerCase() === area.toLowerCase());
+    setAreas((prev) => (prev.includes(existing ?? area) ? prev : [...prev, existing ?? area]));
     setNewArea('');
   };
 
@@ -136,11 +137,14 @@ export const FieldPreferencesSettings = () => {
                 }}
               >
                 <Field label="Add an area" className="flex-1">
-                  <Input
-                    value={newArea}
-                    maxLength={60}
+                  <AddressInput
+                    kind="area"
+                    allowManual
+                    value={newArea ? { text: newArea } : null}
                     placeholder="For example: Gbagada"
-                    onChange={(e) => setNewArea(e.target.value)}
+                    onChange={(next) =>
+                      next?.verified ? addArea(next.verified.line1) : setNewArea(next?.text ?? '')
+                    }
                   />
                 </Field>
                 <Button type="submit" variant="outline" disabled={trimmedArea.length < 2}>
