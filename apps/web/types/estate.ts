@@ -6,6 +6,11 @@ export interface Estate {
   address: string;
   city: string;
   state: string;
+  /** The Google place the address was checked against; absent for a typed address. */
+  placeId?: string | null;
+  addressVerifiedAt?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   gateCount: number | null;
   lateFeeAmount: number;
   /** Days a due may run past its due date before it is treated as late. */

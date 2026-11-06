@@ -124,6 +124,8 @@ export const estateService = {
     address: string;
     city: string;
     state: string;
+    /** The Google place the address was picked from; the API checks it and stores Google's address. */
+    placeId?: string;
     gateCount?: number;
   }): Promise<ApiResponse<Estate>> {
     return safeCall(() => authFetch('/estate', { method: 'POST', body: JSON.stringify(data) }));

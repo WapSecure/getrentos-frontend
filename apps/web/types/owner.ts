@@ -49,6 +49,11 @@ export interface OwnerProperty {
   latitude?: number;
   longitude?: number;
   locationConfirmedAt?: string;
+  /** The Google place the address was checked against; absent for a typed address. */
+  placeId?: string;
+  addressVerifiedAt?: string;
+  /** Local government area, from the checked address. */
+  lga?: string;
   ownerName: string;
   verificationStatus: OwnershipVerificationStatus;
   rejectionReason?: string;

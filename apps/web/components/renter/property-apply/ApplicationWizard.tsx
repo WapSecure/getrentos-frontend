@@ -17,13 +17,14 @@ import {
   Textarea,
   useSessionExpiryDraft,
 } from '@getrentos/ui';
-import { EMPLOYMENT_STATUSES } from '@getrentos/shared';
+import { EMPLOYMENT_STATUSES, type AddressValue } from '@getrentos/shared';
 import type { Property, Document as ApplicationDocument } from '@/types/renter';
 import { nameOnly } from '@/lib/validations/input';
 import { renterService, type RenterDocument } from '@/services/renterService';
 import { renterKeys } from '@/lib/queryKeys';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
+import { AddressInput } from '@/components/shared/location/AddressInput';
 
 /** A line of help under a document, where the name alone doesn't say what to bring. */
 const DOCUMENT_HINTS: Record<string, string> = {
@@ -36,6 +37,8 @@ export interface ApplicationFormData {
   email: string;
   phone: string;
   currentAddress: string;
+  /** The Google place the current address was picked from; absent for a typed one. */
+  currentAddressPlaceId?: string;
   employer: string;
   employmentStatus: string;
   monthlyIncome: string;
@@ -413,9 +416,20 @@ export const ApplicationWizard = ({
               error={errorFor(FIELD_IDS.currentAddress)}
               required
             >
-              <Input
-                value={data.currentAddress}
-                onChange={(e) => update('currentAddress', e.target.value)}
+              <AddressInput
+                allowManual
+                value={
+                  data.currentAddress
+                    ? { text: data.currentAddress, placeId: data.currentAddressPlaceId }
+                    : null
+                }
+                onChange={(next: AddressValue | null) =>
+                  setData((prev) => ({
+                    ...prev,
+                    currentAddress: next?.text ?? '',
+                    currentAddressPlaceId: next?.placeId,
+                  }))
+                }
                 placeholder="Street, area, city"
               />
             </Field>

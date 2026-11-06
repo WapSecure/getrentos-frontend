@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { MapPin, Navigation } from 'lucide-react';
+import { MapPin, Navigation, Plus, X } from 'lucide-react';
 import {
   Alert,
   Badge,
@@ -22,6 +22,7 @@ import {
   TabsTrigger,
   Textarea,
   TimePicker,
+  ToggleChip,
 } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 
@@ -33,6 +34,7 @@ import {
 } from '@/services/adminManagedService';
 import { adminService } from '@/services/adminService';
 import { FieldAssigneeSelect } from '@/components/admin/managed/FieldAssigneeSelect';
+import { AddressInput } from '@/components/shared/AddressInput';
 import { useAdminUser } from '../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
 
@@ -353,6 +355,7 @@ const AgentRow = ({ agent, canOperate }: { agent: FieldAgent; canOperate: boolea
   const invalidate = useInvalidate();
   const [states, setStates] = useState(agent.states.join(', '));
   const [areas, setAreas] = useState(agent.areas.join(', '));
+  const [newArea, setNewArea] = useState('');
   const [limit, setLimit] = useState(String(agent.maxOpenVisits));
   const [active, setActive] = useState(agent.active ? 'yes' : 'no');
   const [error, setError] = useState<string | null>(null);
@@ -361,6 +364,17 @@ const AgentRow = ({ agent, canOperate }: { agent: FieldAgent; canOperate: boolea
       .split(',')
       .map((s) => s.trim())
       .filter(Boolean);
+  const areaList = split(areas);
+  /** Adds a typed area, or the area picked from the suggestions, then clears the box. */
+  const addArea = (name = newArea) => {
+    const area = name.trim();
+    if (area.length < 2) return;
+    if (!areaList.some((a) => a.toLowerCase() === area.toLowerCase())) {
+      setAreas([...areaList, area].join(', '));
+    }
+    setNewArea('');
+  };
+  const removeArea = (area: string) => setAreas(areaList.filter((a) => a !== area).join(', '));
   const save = useMutation({
     mutationFn: () =>
       unwrap(
@@ -398,14 +412,48 @@ const AgentRow = ({ agent, canOperate }: { agent: FieldAgent; canOperate: boolea
             <Field label="States" className="sm:col-span-1">
               <Input value={states} onChange={(e) => setStates(e.target.value)} className="mt-1" />
             </Field>
-            <Field label="Areas (blank = whole state)" className="sm:col-span-2">
-              <Input
-                value={areas}
-                onChange={(e) => setAreas(e.target.value)}
-                placeholder="Lekki, Ikoyi, Ikate"
-                className="mt-1"
-              />
-            </Field>
+            <div className="sm:col-span-2">
+              <form
+                className="flex items-end gap-2"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  addArea();
+                }}
+              >
+                <Field label="Areas (blank = whole state)" className="flex-1">
+                  <AddressInput
+                    kind="area"
+                    allowManual
+                    value={newArea ? { text: newArea } : null}
+                    placeholder="e.g. Lekki"
+                    className="mt-1"
+                    onChange={(next) =>
+                      next?.verified ? addArea(next.verified.line1) : setNewArea(next?.text ?? '')
+                    }
+                  />
+                </Field>
+                <Button type="submit" variant="outline" disabled={newArea.trim().length < 2}>
+                  <Plus className="h-4 w-4" aria-hidden="true" />
+                  Add
+                </Button>
+              </form>
+              {areaList.length > 0 && (
+                <div role="group" aria-label="Areas" className="mt-2 flex flex-wrap gap-2">
+                  {areaList.map((area) => (
+                    <ToggleChip
+                      key={area}
+                      pressed
+                      size="sm"
+                      aria-label={`Remove ${area}`}
+                      onPressedChange={() => removeArea(area)}
+                    >
+                      {area}
+                      <X className="h-3.5 w-3.5" aria-hidden="true" />
+                    </ToggleChip>
+                  ))}
+                </div>
+              )}
+            </div>
             <Field label="Open visit limit">
               <Input
                 inputMode="numeric"

@@ -16,6 +16,12 @@ export interface AgencyProfileInput {
   businessType: AgencyBusinessType;
   registrationNumber: string;
   registeredAddress: string;
+  /**
+   * The Google place the registered address was picked from. Re-send it on an
+   * edit when the address is unchanged: a save without it stores the address
+   * as unchecked.
+   */
+  registeredPlaceId?: string;
   state: string;
   contactEmail: string;
   contactPhone: string;
@@ -27,7 +33,8 @@ export interface AgencyOnboarding {
   status: AgencyStatus;
   isOwner: boolean;
   profile:
-    | (Omit<AgencyProfileInput, 'name'> & {
+    | (Omit<AgencyProfileInput, 'name' | 'registeredPlaceId'> & {
+        registeredPlaceId?: string | null;
         certificateFileName: string | null;
         kybStatus: AgencyKybStatus;
         kybSubmittedAt: string | null;

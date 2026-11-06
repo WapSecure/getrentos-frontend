@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { MapPin, Bell, Repeat } from 'lucide-react';
+import { Bell, Repeat } from 'lucide-react';
 import {
   Alert,
   Button,
@@ -23,6 +23,7 @@ import type {
   CalendarEventType,
   CalendarRecurrence,
 } from '@/types/calendar';
+import { AddressInput } from '@/components/shared/location/AddressInput';
 
 interface CalendarEventModalProps {
   isOpen: boolean;
@@ -150,12 +151,12 @@ export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarE
           </Field>
 
           <Field label="Location">
-            <Input
-              type="text"
-              value={formData.location}
-              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+            <AddressInput
+              kind="any"
+              allowManual
+              value={formData.location ? { text: formData.location } : null}
+              onChange={(next) => setFormData({ ...formData, location: next?.text ?? '' })}
               placeholder="Event location"
-              leadingIcon={<MapPin className="h-4 w-4" />}
             />
           </Field>
 
