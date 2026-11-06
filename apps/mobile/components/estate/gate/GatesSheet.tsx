@@ -12,7 +12,9 @@ import {
   useTheme,
   useToast,
 } from '@getrentos/ui-native';
+import type { AddressValue } from '@getrentos/shared';
 import { Sheet } from '@/components/Sheet';
+import { AddressInput } from '@/components/forms/AddressInput';
 import { estateGateApi, gateKeys, type Gate } from '@/lib/api/estateGate';
 import { haptics } from '@/lib/haptics';
 import { errorMessage } from '@/lib/api/client';
@@ -42,7 +44,10 @@ function GatesBody({ estateId }: { estateId: string }) {
   const qc = useQueryClient();
   const toast = useToast();
   const [name, setName] = useState('');
-  const [location, setLocation] = useState('');
+  // Saved as text; a picked place keeps its id here only so the field shows it as checked.
+  const [place, setPlace] = useState<AddressValue | null>(null);
+  // The API keeps up to 120 characters, as the typed field allowed.
+  const location = (place?.text ?? '').trim().slice(0, 120);
 
   const gates = useQuery({
     queryKey: gateKeys.gates(estateId),
@@ -54,14 +59,14 @@ function GatesBody({ estateId }: { estateId: string }) {
     mutationFn: () =>
       estateGateApi.addGate(estateId, {
         name: name.trim(),
-        ...(location.trim() ? { location: location.trim() } : {}),
+        ...(location ? { location } : {}),
       }),
     onSuccess: (g) => {
       void haptics.success();
       qc.invalidateQueries({ queryKey: gateKeys.gates(estateId) });
       toast.show(`${g.name} added.`, 'success');
       setName('');
-      setLocation('');
+      setPlace(null);
     },
   });
 
@@ -129,11 +134,12 @@ function GatesBody({ estateId }: { estateId: string }) {
         maxLength={80}
         placeholder="e.g. Main gate"
       />
-      <TextField
+      <AddressInput
         label="Where it is (optional)"
-        value={location}
-        onChangeText={setLocation}
-        maxLength={120}
+        kind="any"
+        allowManual
+        value={place}
+        onChange={setPlace}
         placeholder="e.g. Admiralty Way entrance"
       />
       {add.error ? (

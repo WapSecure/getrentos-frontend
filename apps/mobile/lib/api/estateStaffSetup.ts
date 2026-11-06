@@ -25,6 +25,8 @@ export interface NewEstate {
   address: string;
   city: string;
   state: string;
+  /** The Google place the address was picked from; the API checks it and stores Google's details and pin. */
+  placeId?: string;
   /** 1 to 50; omit when unknown. */
   gateCount?: number;
 }
@@ -35,6 +37,8 @@ export interface EstateDraft {
   address: string;
   city: string;
   state: string;
+  /** Set when the address was picked from Google. */
+  placeId?: string;
   gateCount: string;
 }
 
@@ -105,8 +109,10 @@ export function validateEstateDraft(
 
   if (!name) errors.name = 'Give the estate a name.';
   if (!address) errors.address = 'Add the estate’s street address.';
-  if (!city) errors.city = 'Add the city or town.';
-  if (!state) errors.state = 'Choose the state.';
+  // A picked address is checked by the API, which fills in its city and state.
+  const placeId = draft.placeId || undefined;
+  if (!city && !placeId) errors.city = 'Add the city or town.';
+  if (!state && !placeId) errors.state = 'Choose the state.';
 
   let gateCount: number | undefined;
   if (gatesText) {
@@ -121,7 +127,14 @@ export function validateEstateDraft(
   if (Object.keys(errors).length) return { ok: false, errors };
   return {
     ok: true,
-    body: { name, address, city, state, ...(gateCount ? { gateCount } : {}) },
+    body: {
+      name,
+      address,
+      city,
+      state,
+      ...(placeId ? { placeId } : {}),
+      ...(gateCount ? { gateCount } : {}),
+    },
   };
 }
 

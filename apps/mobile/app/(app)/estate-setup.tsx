@@ -7,7 +7,6 @@ import { Building2 } from 'lucide-react-native';
 import {
   Button,
   Card,
-  Chip,
   FormAlert,
   NumberField,
   Text,
@@ -16,7 +15,7 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
-import { SelectField } from '@/components/forms/SelectField';
+import { AddressFields, type AddressFieldsValue } from '@/components/forms/AddressFields';
 import { useEstate } from '@/hooks/useEstate';
 import { isFreeEstate } from '@/lib/api/estateManager';
 import {
@@ -27,13 +26,10 @@ import {
   type EstateDraft,
   type EstateDraftErrors,
 } from '@/lib/api/estateStaffSetup';
-import { getCitiesFor, NIGERIA_STATE_CITIES } from '@/lib/locationCities';
 import { haptics } from '@/lib/haptics';
 import { qk } from '@/lib/query/keys';
 import { goBack } from '@/lib/goBack';
 import { errorMessage } from '@/lib/api/client';
-
-const STATE_OPTIONS = Object.keys(NIGERIA_STATE_CITIES).map((s) => ({ value: s, label: s }));
 
 /**
  * Set up an estate: its name, where it is and how many gates it has. The first
@@ -45,19 +41,22 @@ export default function EstateSetup() {
   const qc = useQueryClient();
   const toast = useToast();
   const { estates, select } = useEstate();
-  const [draft, setDraft] = useState<EstateDraft>({
+  const [draft, setDraft] = useState<Pick<EstateDraft, 'name' | 'gateCount'>>({
     name: '',
+    gateCount: '1',
+  });
+  // The country is only asked for a typed address; the estate is saved without one.
+  const [location, setLocation] = useState<AddressFieldsValue>({
     address: '',
     city: '',
     state: '',
-    gateCount: '1',
+    country: 'Nigeria',
   });
   const [errors, setErrors] = useState<EstateDraftErrors>({});
   const another = estates.length > 0;
   const onFree = another && estates.some((e) => isFreeEstate(e));
-  const cities = getCitiesFor('Nigeria', draft.state);
 
-  const set = (field: keyof EstateDraft) => (value: string) => {
+  const set = (field: keyof typeof draft) => (value: string) => {
     setDraft((d) => ({ ...d, [field]: value }));
     if (errors[field]) setErrors((e) => ({ ...e, [field]: undefined }));
   };
@@ -76,7 +75,13 @@ export default function EstateSetup() {
   });
 
   const submit = () => {
-    const checked = validateEstateDraft(draft);
+    const checked = validateEstateDraft({
+      ...draft,
+      address: location.address,
+      city: location.city,
+      state: location.state,
+      placeId: location.placeId,
+    });
     if (!checked.ok) {
       setErrors(checked.errors);
       void haptics.error();
@@ -87,7 +92,9 @@ export default function EstateSetup() {
   };
 
   const filled =
-    !!draft.name.trim() && !!draft.address.trim() && !!draft.city.trim() && !!draft.state;
+    !!draft.name.trim() &&
+    !!location.address.trim() &&
+    (!!location.placeId || (!!location.city.trim() && !!location.state));
   const planBlocked = create.error && isPlanLimitError(create.error);
 
   return (
@@ -153,49 +160,16 @@ export default function EstateSetup() {
             maxLength={120}
             error={errors.name}
           />
-          <TextField
-            label="Address"
+          <AddressFields
             required
-            value={draft.address}
-            onChangeText={set('address')}
-            placeholder="e.g. 1 Garden Close"
-            autoCapitalize="words"
-            maxLength={200}
+            value={location}
+            onChange={(patch) => {
+              setLocation((l) => ({ ...l, ...patch }));
+              setErrors((e) => ({ ...e, address: undefined, city: undefined, state: undefined }));
+            }}
             error={errors.address}
+            errors={{ state: errors.state, city: errors.city }}
           />
-          <SelectField
-            label="State"
-            value={draft.state}
-            options={STATE_OPTIONS}
-            onChange={set('state')}
-            placeholder="Select state"
-            error={errors.state}
-          />
-          <View style={{ gap: spacing.sm }}>
-            <TextField
-              label="City or town"
-              required
-              value={draft.city}
-              onChangeText={set('city')}
-              placeholder={cities[0] ? `e.g. ${cities[0]}` : 'e.g. Lekki'}
-              autoCapitalize="words"
-              maxLength={80}
-              error={errors.city}
-            />
-            {cities.length ? (
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }}>
-                {cities.slice(0, 8).map((c) => (
-                  <Chip
-                    key={c}
-                    label={c}
-                    size="sm"
-                    selected={draft.city.trim() === c}
-                    onPress={() => set('city')(c)}
-                  />
-                ))}
-              </View>
-            ) : null}
-          </View>
           <NumberField
             label="Number of gates (optional)"
             value={draft.gateCount}

@@ -55,6 +55,12 @@ export interface OwnerProperty {
   city: string;
   state: string;
   country: string;
+  /** The Google place the address was checked against, when it was picked from the search. */
+  placeId?: string | null;
+  /** When the API last checked the address against Google; absent for a typed address. */
+  addressVerifiedAt?: string | null;
+  /** Local government area, from Google, for a checked address. */
+  lga?: string | null;
   ownerName: string;
   verificationStatus: OwnerVerificationStatus;
   rejectionReason?: string;
@@ -85,6 +91,8 @@ export interface CreateOwnerPropertyInput {
   city: string;
   state: string;
   country: string;
+  /** The Google place the address was picked from; the API checks it and stores Google's details. */
+  placeId?: string;
   bedrooms?: number;
   bathrooms?: number;
   size?: number;

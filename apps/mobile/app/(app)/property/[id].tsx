@@ -103,6 +103,8 @@ export default function PropertyDetail() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <ScrollView
+        // A tap on a commute-destination suggestion must not just close the keyboard.
+        keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: insets.bottom + 120 }}
       >
