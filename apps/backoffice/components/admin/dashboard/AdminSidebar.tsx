@@ -7,6 +7,7 @@ import { adminManagedService } from '@/services/adminManagedService';
 import {
   LayoutDashboard,
   Webhook,
+  HandCoins,
   Eye,
   UserCheck,
   Users,
@@ -171,6 +172,12 @@ const navItems: NavItem[] = [
     label: 'Payment Corrections',
     href: '/admin/payment-corrections',
     icon: ClipboardCheck,
+    permission: 'rentfinance.view',
+  },
+  {
+    label: 'Payouts Needing Attention',
+    href: '/admin/payout-issues',
+    icon: HandCoins,
     permission: 'rentfinance.view',
   },
   {
