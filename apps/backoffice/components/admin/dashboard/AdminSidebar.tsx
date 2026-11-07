@@ -188,6 +188,12 @@ const navItems: NavItem[] = [
     permission: 'rentfinance.view',
   },
   {
+    label: 'Chargebacks',
+    href: '/admin/chargebacks',
+    icon: ShieldAlert,
+    permission: 'rentfinance.view',
+  },
+  {
     label: 'Collections Reconciliation',
     href: '/admin/collections-reconciliation',
     icon: Scale,
