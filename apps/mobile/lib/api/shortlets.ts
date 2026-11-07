@@ -10,6 +10,7 @@ import type {
   ShortletSeason,
 } from './hostShortlets';
 import type { VideoStream } from '@getrentos/shared';
+import { providerQuery, type PaymentProvider } from './paymentStatus';
 
 export type { DisputeMessage, ShortletDispute, ShortletSeason };
 
@@ -405,9 +406,9 @@ export const shortletsApi = {
   cancelBooking: (bookingId: string) =>
     apiFetch<ShortletBooking>(`/shortlets/bookings/${bookingId}/cancel`, { method: 'POST' }),
 
-  payBooking: (bookingId: string) =>
+  payBooking: (bookingId: string, provider?: PaymentProvider) =>
     apiFetch<{ authorizationUrl?: string; reference?: string }>(
-      `/shortlets/bookings/${bookingId}/pay`,
+      `/shortlets/bookings/${bookingId}/pay${providerQuery(provider)}`,
       { method: 'POST' }
     ),
 

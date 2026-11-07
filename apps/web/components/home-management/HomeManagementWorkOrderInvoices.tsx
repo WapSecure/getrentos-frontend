@@ -40,6 +40,9 @@ import {
   type HomeManagementWorkOrderInvoiceStatus,
 } from '@/services/homeManagementService';
 import { InvoiceCheckPanel } from './InvoiceCheckPanel';
+import { PaymentProviderPicker } from '@/components/shared/payments/PaymentProviderPicker';
+import { usePaymentProviders } from '@/hooks/usePaymentProviders';
+import type { PaymentProvider } from '@/types/payments';
 
 type InvoiceLineItemForm = {
   id: string;
@@ -354,12 +357,15 @@ export function HomeManagementWorkOrderInvoices({
     },
   });
 
+  // Which company takes a top-up when held rent falls short (Paystack or Monnify).
+  const providers = usePaymentProviders();
   const payInvoice = useMutation<
     { invoiceId: string; payoutStatus: string; topUp?: { authorizationUrl: string } },
     Error,
-    { invoiceId: string }
+    { invoiceId: string; provider?: PaymentProvider }
   >({
-    mutationFn: ({ invoiceId }) => unwrap(homeManagementService.payWorkOrderInvoice(invoiceId)),
+    mutationFn: ({ invoiceId, provider }) =>
+      unwrap(homeManagementService.payWorkOrderInvoice(invoiceId, provider)),
     onSuccess: async (result) => {
       // The owner's held rent doesn't cover it: the shortfall is paid on
       // Paystack, and the vendor is paid once it lands.
@@ -378,8 +384,11 @@ export function HomeManagementWorkOrderInvoices({
         );
       }
     },
-    onError: (error) => {
-      toast.error(error.message || 'Unable to pay this invoice.');
+    onError: (error, { provider }) => {
+      // That company cannot take the top-up right now: the choice moves to the other one.
+      toast.error(
+        providers.recover(error, provider) ?? (error.message || 'Unable to pay this invoice.')
+      );
     },
   });
 
@@ -778,6 +787,9 @@ export function HomeManagementWorkOrderInvoices({
                         )}
 
                         {canPayInvoice(invoice) && (
+                          <PaymentProviderPicker choice={providers} disabled={pendingForInvoice} />
+                        )}
+                        {canPayInvoice(invoice) && (
                           <Button
                             size="sm"
                             rounded="md"
@@ -787,7 +799,12 @@ export function HomeManagementWorkOrderInvoices({
                               payInvoice.isPending && payInvoice.variables?.invoiceId === invoice.id
                             }
                             disabled={pendingForInvoice}
-                            onClick={() => payInvoice.mutate({ invoiceId: invoice.id })}
+                            onClick={() =>
+                              payInvoice.mutate({
+                                invoiceId: invoice.id,
+                                provider: providers.provider,
+                              })
+                            }
                           >
                             {invoice.payoutStatus === 'FAILED' ? 'Retry payment' : 'Pay vendor'}
                           </Button>

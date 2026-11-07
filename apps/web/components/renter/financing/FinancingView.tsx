@@ -11,11 +11,16 @@ import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import type { FinancingPlanLength } from '@/types/financing';
+import { usePaymentProviders } from '@/hooks/usePaymentProviders';
+import type { PaymentProvider } from '@/types/payments';
 
 export const FinancingView = () => {
   const queryClient = useQueryClient();
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
   const toast = useToast();
+  // Which company takes the instalment, and why the last one could not.
+  const providers = usePaymentProviders();
+  const [providerError, setProviderError] = useState<string | null>(null);
 
   const {
     data: overview,
@@ -39,8 +44,15 @@ export const FinancingView = () => {
   });
 
   const payInstallmentMutation = useMutation({
-    mutationFn: (installmentId: string) =>
-      unwrap(renterService.payFinancingInstallment(installmentId)),
+    mutationFn: ({
+      installmentId,
+      provider,
+    }: {
+      installmentId: string;
+      provider?: PaymentProvider;
+    }) => unwrap(renterService.payFinancingInstallment(installmentId, provider)),
+    onMutate: () => setProviderError(null),
+    onError: (error, variables) => setProviderError(providers.recover(error, variables.provider)),
     onSuccess: (updated) => {
       if (updated.authorizationUrl) {
         // Real gateway flow: the installment is PROCESSING until the
@@ -58,7 +70,7 @@ export const FinancingView = () => {
   };
 
   const handlePayInstallment = (installmentId: string) => {
-    payInstallmentMutation.mutate(installmentId);
+    payInstallmentMutation.mutate({ installmentId, provider: providers.provider });
   };
 
   if (isLoading) {
@@ -93,6 +105,8 @@ export const FinancingView = () => {
           plan={plan}
           onPayInstallment={handlePayInstallment}
           isPaying={payInstallmentMutation.isPending}
+          providers={providers}
+          providerError={providerError}
         />
       ) : !newPlansOpen ? (
         <FlexPausedCard />

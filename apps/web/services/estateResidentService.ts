@@ -22,6 +22,8 @@ import type {
   Violation,
   VisitorPass,
 } from '@/types/estate';
+import { providerQuery } from '@/services/paymentStatusService';
+import type { PaymentProvider } from '@/types/payments';
 
 type PageQuery = { page?: number; pageSize?: number };
 
@@ -115,8 +117,11 @@ export const estateResidentService = {
     return safeCall(() => authFetch(`/estate/resident/dues${toQuery(query)}`));
   },
 
-  async payMyDue(dueId: string): Promise<ApiResponse<Due>> {
-    return safeCall(() => authFetch(`/estate/resident/dues/${dueId}/pay`, { method: 'POST' }));
+  /** `provider` names the company that takes it (Paystack or Monnify); omitted, the default one. */
+  async payMyDue(dueId: string, provider?: PaymentProvider): Promise<ApiResponse<Due>> {
+    return safeCall(() =>
+      authFetch(`/estate/resident/dues/${dueId}/pay${providerQuery(provider)}`, { method: 'POST' })
+    );
   },
 
   async listMyAnnouncements(query: PageQuery = {}): Promise<ApiResponse<Paginated<Announcement>>> {

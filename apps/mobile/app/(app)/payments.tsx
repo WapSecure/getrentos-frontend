@@ -29,6 +29,8 @@ import { errorMessage } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { DisputePaymentSheet } from '@/components/payments/DisputePaymentSheet';
 import { PayAmountSheet } from '@/components/payments/PayAmountSheet';
+import { usePaymentProviders } from '@/hooks/usePaymentProviders';
+import type { PaymentProvider } from '@/lib/api/paymentStatus';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
@@ -39,6 +41,9 @@ export default function Payments() {
   const checkout = usePaystackCheckout();
   const [disputePayment, setDisputePayment] = useState<Payment | null>(null);
   const [payPayment, setPayPayment] = useState<Payment | null>(null);
+  // Which company takes the payment, and why the last one could not.
+  const providers = usePaymentProviders();
+  const [providerError, setProviderError] = useState<string | null>(null);
 
   const query = useQuery({
     queryKey: qk.renter.payments(1, 50),
@@ -48,8 +53,16 @@ export default function Payments() {
   const items = query.data?.items ?? [];
 
   const payMutation = useMutation({
-    mutationFn: ({ id, amount }: { id: string; amount?: number }) =>
-      paymentsApi.payNow(id, 'card', amount),
+    mutationFn: ({
+      id,
+      amount,
+      provider,
+    }: {
+      id: string;
+      amount?: number;
+      provider?: PaymentProvider;
+      payment: Payment;
+    }) => paymentsApi.payNow(id, 'card', amount, provider),
     onSuccess: async (payment) => {
       if (payment.authorizationUrl) {
         await checkout(payment.authorizationUrl, payment.reference);
@@ -60,7 +73,16 @@ export default function Payments() {
       qc.invalidateQueries({ queryKey: qk.renter.lease });
       qc.invalidateQueries({ queryKey: qk.renter.dashboardStats });
     },
-    onError: (err) => toast.show(errorMessage(err, 'Could not process the payment.'), 'error'),
+    onError: (err, variables) => {
+      // That company cannot take it right now: reopen the sheet with the other one picked.
+      const unavailable = providers.recover(err, variables.provider);
+      if (unavailable) {
+        setProviderError(unavailable);
+        setPayPayment(variables.payment);
+        return;
+      }
+      toast.show(errorMessage(err, 'Could not process the payment.'), 'error');
+    },
   });
 
   const confirmMoveInMutation = useMutation({
@@ -164,11 +186,23 @@ export default function Payments() {
 
       <PayAmountSheet
         payment={payPayment}
-        onClose={() => setPayPayment(null)}
-        onPay={(amount) => {
-          if (payPayment) payMutation.mutate({ id: payPayment.id, amount });
+        onClose={() => {
           setPayPayment(null);
+          setProviderError(null);
         }}
+        onPay={(amount) => {
+          if (payPayment)
+            payMutation.mutate({
+              id: payPayment.id,
+              amount,
+              provider: providers.provider,
+              payment: payPayment,
+            });
+          setPayPayment(null);
+          setProviderError(null);
+        }}
+        providers={providers}
+        providerError={providerError}
       />
 
       <DisputePaymentSheet

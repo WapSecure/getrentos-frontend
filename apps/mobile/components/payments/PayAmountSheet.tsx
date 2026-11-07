@@ -1,8 +1,17 @@
 import { useCheckoutFee } from '@/hooks/useCheckoutFee';
+import type { PaymentProviderChoice } from '@/hooks/usePaymentProviders';
+import { PaymentProviderPicker } from '@/components/payments/PaymentProviderPicker';
 import { formatNaira } from '@/lib/format';
 import { useState } from 'react';
 import { View } from 'react-native';
-import { Button, CurrencyField, SegmentedControl, Text, useTheme } from '@getrentos/ui-native';
+import {
+  Button,
+  CurrencyField,
+  FormAlert,
+  SegmentedControl,
+  Text,
+  useTheme,
+} from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
 import type { Payment } from '@/lib/api/payments';
 
@@ -13,17 +22,29 @@ interface Props {
   payment: Payment | null;
   onClose: () => void;
   onPay: (amount: number | undefined) => void;
+  /** Which company takes the payment (Paystack or Monnify). */
+  providers: PaymentProviderChoice;
+  /** Why the last try failed when the chosen company could not take it: choose another. */
+  providerError?: string | null;
 }
 
 /**
  * Pay what a charge owes, or part of it (same rules as web). Anything paid
  * goes to this charge first.
  */
-export function PayAmountSheet({ payment, onClose, onPay }: Props) {
+export function PayAmountSheet({ payment, onClose, onPay, providers, providerError }: Props) {
   return (
     <Sheet open={!!payment} onClose={onClose} title="Make a payment">
       {/* Remount per charge so the amount always starts blank. */}
-      {payment ? <PayAmountForm key={payment.id} payment={payment} onPay={onPay} /> : null}
+      {payment ? (
+        <PayAmountForm
+          key={payment.id}
+          payment={payment}
+          onPay={onPay}
+          providers={providers}
+          providerError={providerError}
+        />
+      ) : null}
     </Sheet>
   );
 }
@@ -31,9 +52,13 @@ export function PayAmountSheet({ payment, onClose, onPay }: Props) {
 function PayAmountForm({
   payment,
   onPay,
+  providers,
+  providerError,
 }: {
   payment: Payment;
   onPay: (amount: number | undefined) => void;
+  providers: PaymentProviderChoice;
+  providerError?: string | null;
 }) {
   const { spacing } = useTheme();
   const [mode, setMode] = useState<'full' | 'part'>('full');
@@ -44,7 +69,7 @@ function PayAmountForm({
   const partValid = part >= min && part < owed;
   const paying = mode === 'part' ? (partValid ? part : 0) : owed;
   // The payer covers the card or bank fee, so the landlord gets the full amount.
-  const { fee, total } = useCheckoutFee(paying);
+  const { fee, total } = useCheckoutFee(paying, providers.provider);
 
   return (
     <View style={{ gap: spacing.lg }}>
@@ -70,6 +95,8 @@ function PayAmountForm({
           </Text>
         </View>
       ) : null}
+      {providerError ? <FormAlert tone="warning" message={providerError} /> : null}
+      <PaymentProviderPicker choice={providers} />
       {fee != null && total != null && fee > 0 ? (
         <Text variant="caption" color="mutedForeground">
           Card or bank fee {formatNaira(fee)} · You pay {formatNaira(total)}

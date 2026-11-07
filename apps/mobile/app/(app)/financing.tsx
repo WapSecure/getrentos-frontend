@@ -10,6 +10,7 @@ import {
   Button,
   Card,
   Divider,
+  FormAlert,
   Price,
   QueryState,
   Screen,
@@ -32,6 +33,9 @@ import { errorMessage } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
+import { PaymentProviderPicker } from '@/components/payments/PaymentProviderPicker';
+import { usePaymentProviders } from '@/hooks/usePaymentProviders';
+import type { PaymentProvider } from '@/lib/api/paymentStatus';
 
 const PLAN_LENGTHS: FinancingPlanLength[] = [3, 6, 12];
 const INSTALLMENT_STATUS_TONE: Record<
@@ -261,9 +265,14 @@ function ActivePlanCard({ overview }: { overview: { plan: FinancingPlan } }) {
   const plan = overview.plan;
   const paidCount = plan.installments.filter((i) => i.status === 'paid').length;
   const nextDue = plan.installments.find((i) => i.status === 'due' || i.status === 'overdue');
+  // Which company takes the instalment, and why the last one could not.
+  const providers = usePaymentProviders();
+  const [providerError, setProviderError] = useState<string | null>(null);
 
   const payMutation = useMutation({
-    mutationFn: (id: string) => financingApi.payInstallment(id),
+    mutationFn: ({ id, provider }: { id: string; provider?: PaymentProvider }) =>
+      financingApi.payInstallment(id, provider),
+    onMutate: () => setProviderError(null),
     onSuccess: async (updated) => {
       if (updated.authorizationUrl) {
         await checkout(updated.authorizationUrl, updated.reference);
@@ -272,7 +281,12 @@ function ActivePlanCard({ overview }: { overview: { plan: FinancingPlan } }) {
       }
       qc.invalidateQueries({ queryKey: qk.renter.financing });
     },
-    onError: (err) => toast.show(errorMessage(err, 'Could not process this payment.'), 'error'),
+    onError: (err, { provider }) => {
+      // That company cannot take it right now: say so by the button, with the other one picked.
+      const unavailable = providers.recover(err, provider);
+      if (unavailable) setProviderError(unavailable);
+      else toast.show(errorMessage(err, 'Could not process this payment.'), 'error');
+    },
   });
 
   const confirmPay = (installment: FinancingInstallment) => {
@@ -281,7 +295,10 @@ function ActivePlanCard({ overview }: { overview: { plan: FinancingPlan } }) {
       `You're about to pay ₦${installment.amount.toLocaleString()}.`,
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Pay now', onPress: () => payMutation.mutate(installment.id) },
+        {
+          text: 'Pay now',
+          onPress: () => payMutation.mutate({ id: installment.id, provider: providers.provider }),
+        },
       ]
     );
   };
@@ -327,13 +344,17 @@ function ActivePlanCard({ overview }: { overview: { plan: FinancingPlan } }) {
           <Text variant="bodyStrong" color="warning">
             Next payment due {formatDate(nextDue.dueDate, 'short')}
           </Text>
+          <View style={{ marginTop: spacing.md, gap: spacing.md }}>
+            {providerError ? <FormAlert tone="warning" message={providerError} /> : null}
+            <PaymentProviderPicker choice={providers} />
+          </View>
           <Button
             label={`Pay ₦${nextDue.amount.toLocaleString()}`}
             style={{ marginTop: spacing.md }}
             loading={payMutation.isPending}
             onPress={() => confirmPay(nextDue)}
           />
-          <CheckoutFeeNote amount={nextDue.amount} />
+          <CheckoutFeeNote amount={nextDue.amount} provider={providers.provider} />
         </Card>
       ) : null}
 

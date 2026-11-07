@@ -23,6 +23,9 @@ import { shortletKeys } from '@/lib/queryKeys';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
 import { guestStayRoutes } from '@/lib/shortlet/guestRoutes';
+import { CheckoutFeeNote } from '@/components/shared/payments/CheckoutFeeLine';
+import { PaymentProviderPicker } from '@/components/shared/payments/PaymentProviderPicker';
+import type { PaymentProviderChoice } from '@/hooks/usePaymentProviders';
 import type { ShortletBooking, ShortletDiscountType, ShortletListing } from '@/types/shortlet';
 
 const TODAY = new Date().toISOString().slice(0, 10);
@@ -55,6 +58,8 @@ export function ShortletBookingDialog({
   createdBooking,
   paying,
   onPay,
+  providers,
+  providerError,
   bookError,
 }: {
   listing: ShortletListing;
@@ -64,6 +69,10 @@ export function ShortletBookingDialog({
   createdBooking: ShortletBooking | null;
   paying: boolean;
   onPay: (bookingId: string) => void;
+  /** Which company takes the payment (Paystack or Monnify). */
+  providers: PaymentProviderChoice;
+  /** Why the last try failed when the chosen company could not take it. */
+  providerError?: string | null;
   /** The last failed booking attempt, so an identity gate can offer the way forward. */
   bookError?: unknown;
 }) {
@@ -286,6 +295,12 @@ export function ShortletBookingDialog({
                   </p>
                 )}
               </div>
+              {createdBooking.paymentRequired && providerError && (
+                <Alert variant="warning">{providerError}</Alert>
+              )}
+              {createdBooking.paymentRequired && (
+                <PaymentProviderPicker choice={providers} disabled={paying} />
+              )}
               {createdBooking.paymentRequired && (
                 <Button
                   className="w-full"
@@ -300,6 +315,17 @@ export function ShortletBookingDialog({
                       (createdBooking.deposit ?? 0)
                   )}`}
                 </Button>
+              )}
+              {createdBooking.paymentRequired && (
+                <CheckoutFeeNote
+                  amount={
+                    (createdBooking.total ?? 0) +
+                    (createdBooking.taxAmount ?? 0) +
+                    (createdBooking.deposit ?? 0)
+                  }
+                  provider={providers.provider}
+                  className="text-center"
+                />
               )}
               <Button
                 variant="outline"

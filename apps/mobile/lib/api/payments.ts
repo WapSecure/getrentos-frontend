@@ -1,5 +1,6 @@
 import { apiFetch } from './client';
 import type { Paginated } from './properties';
+import { providerQuery, type PaymentProvider } from './paymentStatus';
 
 export type PaymentStatus = 'paid' | 'pending' | 'overdue' | 'processing';
 export type PaymentMethod = 'card' | 'bank_transfer' | 'wallet';
@@ -84,8 +85,9 @@ export const paymentsApi = {
   listReceipts: (page = 1, pageSize = 20) =>
     apiFetch<Paginated<Receipt>>(`/renter/payments/receipts?page=${page}&pageSize=${pageSize}`),
 
-  payNow: (id: string, method?: PaymentMethod, amount?: number) =>
-    apiFetch<Payment>(`/renter/payments/${id}/pay`, {
+  /** `provider` names the company that takes it (Paystack or Monnify); omitted, the default one. */
+  payNow: (id: string, method?: PaymentMethod, amount?: number, provider?: PaymentProvider) =>
+    apiFetch<Payment>(`/renter/payments/${id}/pay${providerQuery(provider)}`, {
       method: 'POST',
       body: amount ? { method, amount } : { method },
     }),

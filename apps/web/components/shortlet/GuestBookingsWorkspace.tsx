@@ -1,6 +1,9 @@
 'use client';
 
 import { CheckoutFeeNote } from '@/components/shared/payments/CheckoutFeeLine';
+import { PaymentProviderPicker } from '@/components/shared/payments/PaymentProviderPicker';
+import { usePaymentProviders } from '@/hooks/usePaymentProviders';
+import type { PaymentProvider } from '@/types/payments';
 import { useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -201,18 +204,23 @@ export const GuestBookingsWorkspace = () => {
     onError: (reason: Error) => toast.error(reason.message),
   });
 
+  // Which company takes the payment (Paystack or Monnify): one choice for every booking here.
+  const providers = usePaymentProviders();
   const pay = useMutation({
-    mutationFn: (bookingId: string) => unwrap(shortletService.payBooking(bookingId)),
+    mutationFn: ({ bookingId, provider }: { bookingId: string; provider?: PaymentProvider }) =>
+      unwrap(shortletService.payBooking(bookingId, provider)),
     onSuccess: (res) => {
       if (res.authorizationUrl) {
-        // Real gateway flow: redirect to Paystack checkout.
+        // Real gateway flow: redirect to the payment company's checkout.
         window.location.href = res.authorizationUrl;
         return;
       }
       queryClient.invalidateQueries({ queryKey: shortletKeys.guestBookings });
       toast.success('Payment received: your stay is confirmed.');
     },
-    onError: (reason: Error) => toast.error(reason.message),
+    // That company cannot take it right now: the choice moves to the other one.
+    onError: (reason: Error, { provider }) =>
+      toast.error(providers.recover(reason, provider) ?? reason.message),
   });
 
   return (
@@ -380,12 +388,19 @@ export const GuestBookingsWorkspace = () => {
               {(canCancel(b) || b.paymentRequired || (b.status === 'COMPLETED' && !b.reviewed)) && (
                 <div className="mt-3 flex flex-wrap items-center justify-end gap-2 border-t border-border pt-3">
                   {b.paymentRequired && (
+                    <PaymentProviderPicker
+                      choice={providers}
+                      disabled={pay.isPending}
+                      className="w-full"
+                    />
+                  )}
+                  {b.paymentRequired && (
                     <Button
                       variant="primary"
                       size="sm"
                       icon={<CreditCard className="h-4 w-4" />}
-                      onClick={() => pay.mutate(b.id)}
-                      isLoading={pay.isPending && pay.variables === b.id}
+                      onClick={() => pay.mutate({ bookingId: b.id, provider: providers.provider })}
+                      isLoading={pay.isPending && pay.variables?.bookingId === b.id}
                       loadingText="Processing…"
                       disabled={pay.isPending}
                     >
@@ -395,6 +410,7 @@ export const GuestBookingsWorkspace = () => {
                   {b.paymentRequired && (
                     <CheckoutFeeNote
                       amount={(b.total ?? 0) + (b.taxAmount ?? 0) + (b.deposit ?? 0)}
+                      provider={providers.provider}
                       className="w-full text-right"
                     />
                   )}

@@ -30,17 +30,21 @@ const WHAT: Record<PaymentKind, string> = {
 const noSubscription = () => () => {};
 
 /**
- * Where Paystack sends every payer back to (rent, deposits, bookings, land,
+ * Where Paystack or Monnify sends every payer back to (rent, deposits, bookings, land,
  * Flex, dues; Pro has its own page).
  *
  * The outcome comes from GetRentos's records via the status endpoint, which
- * also asks Paystack directly while a payment is pending. The query string is
+ * also asks the payment company directly while a payment is pending. The query string is
  * only used to find the reference, never as proof of payment.
  */
 function PaymentReturnContent() {
   const searchParams = useSearchParams();
-  // Paystack appends both; older integrations only send trxref.
-  const reference = searchParams.get('reference') ?? searchParams.get('trxref');
+  // Paystack appends both reference and trxref (older integrations only trxref);
+  // Monnify sends paymentReference.
+  const reference =
+    searchParams.get('reference') ??
+    searchParams.get('trxref') ??
+    searchParams.get('paymentReference');
   // After a minute the page stops asking and says so, rather than spinning on.
   const [gaveUp, setGaveUp] = useState(false);
   useEffect(() => {

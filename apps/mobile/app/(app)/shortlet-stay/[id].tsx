@@ -25,6 +25,7 @@ import {
   Card,
   DetailSkeleton,
   Divider,
+  FormAlert,
   PressableScale,
   Price,
   QueryState,
@@ -60,6 +61,9 @@ import {
   tripDay,
 } from '@/lib/stays';
 import { goBack } from '@/lib/goBack';
+import { PaymentProviderPicker } from '@/components/payments/PaymentProviderPicker';
+import { usePaymentProviders } from '@/hooks/usePaymentProviders';
+import type { PaymentProvider } from '@/lib/api/paymentStatus';
 
 type SheetName = 'message' | 'dispute' | 'review' | null;
 
@@ -72,13 +76,17 @@ export default function StayDetail() {
   const toast = useToast();
   const checkout = usePaystackCheckout();
   const [sheet, setSheet] = useState<SheetName>(null);
+  // Which company takes the payment, and why the last one could not.
+  const providers = usePaymentProviders();
+  const [providerError, setProviderError] = useState<string | null>(null);
 
   const stays = useMyStays();
   const b = stays.data?.find((x) => x.id === id);
   const refresh = () => qc.invalidateQueries({ queryKey: ['shortlets', 'bookings'] });
 
   const pay = useMutation({
-    mutationFn: () => shortletsApi.payBooking(id),
+    mutationFn: (provider?: PaymentProvider) => shortletsApi.payBooking(id, provider),
+    onMutate: () => setProviderError(null),
     onSuccess: async (res) => {
       if (res.authorizationUrl) {
         await checkout(res.authorizationUrl, res.reference);
@@ -87,7 +95,12 @@ export default function StayDetail() {
       }
       refresh();
     },
-    onError: (e) => toast.show(errorMessage(e, 'Could not start payment.'), 'error'),
+    onError: (e, provider) => {
+      // That company cannot take it right now: say so by the button, with the other one picked.
+      const unavailable = providers.recover(e, provider);
+      if (unavailable) setProviderError(unavailable);
+      else toast.show(errorMessage(e, 'Could not start payment.'), 'error');
+    },
   });
 
   const cancel = useMutation({
@@ -196,16 +209,23 @@ export default function StayDetail() {
               The host said: “{b.cancellationReason}”
             </Text>
           ) : null}
+          {h.action === 'pay' && providerError ? (
+            <FormAlert tone="warning" message={providerError} />
+          ) : null}
+          {h.action === 'pay' ? <PaymentProviderPicker choice={providers} /> : null}
           {h.action === 'pay' ? (
             <Button
               label={`Pay ₦${(guestTotal(b) + (b.deposit ?? 0)).toLocaleString('en-NG')}`}
               size="lg"
               loading={pay.isPending}
-              onPress={() => pay.mutate()}
+              onPress={() => pay.mutate(providers.provider)}
             />
           ) : null}
           {h.action === 'pay' ? (
-            <CheckoutFeeNote amount={guestTotal(b) + (b.deposit ?? 0)} />
+            <CheckoutFeeNote
+              amount={guestTotal(b) + (b.deposit ?? 0)}
+              provider={providers.provider}
+            />
           ) : h.action === 'review' ? (
             <Button label="Review your stay" onPress={() => setSheet('review')} />
           ) : h.action === 'report' ? (

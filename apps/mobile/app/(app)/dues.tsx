@@ -21,6 +21,10 @@ import { qk } from '@/lib/query/keys';
 import { formatDate, formatNaira } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
+import { PaymentProviderPicker } from '@/components/payments/PaymentProviderPicker';
+import { usePaymentProviders } from '@/hooks/usePaymentProviders';
+import type { PaymentProvider } from '@/lib/api/paymentStatus';
+import { errorMessage } from '@/lib/api/client';
 
 const STATUS_LABEL: Record<DueStatus, string> = {
   pending: 'Pending',
@@ -50,6 +54,8 @@ export default function ResidentDues() {
   const qc = useQueryClient();
   const toast = useToast();
   const checkout = usePaystackCheckout();
+  // Which company takes the payment (Paystack or Monnify): one choice for every due here.
+  const providers = usePaymentProviders();
 
   const query = useQuery({
     queryKey: qk.resident.dues,
@@ -57,7 +63,8 @@ export default function ResidentDues() {
   });
 
   const pay = useMutation({
-    mutationFn: (dueId: string) => residentApi.payDue(dueId),
+    mutationFn: ({ dueId, provider }: { dueId: string; provider?: PaymentProvider }) =>
+      residentApi.payDue(dueId, provider),
     onSuccess: async (updated) => {
       // A real gateway checkout was started: open it in an in-app browser.
       // The webhook confirms payment server-side once the resident finishes
@@ -71,7 +78,13 @@ export default function ResidentDues() {
       }
       qc.invalidateQueries({ queryKey: qk.resident.dues });
     },
-    onError: () => toast.show('Unable to start payment. Please try again.', 'error'),
+    // That company cannot take it right now: say so, and the choice moves to the other one.
+    onError: (err, { provider }) =>
+      toast.show(
+        providers.recover(err, provider) ??
+          errorMessage(err, 'Unable to start payment. Please try again.'),
+        'error'
+      ),
   });
 
   const dues = query.data?.items ?? [];
@@ -95,12 +108,16 @@ export default function ResidentDues() {
             description: "Your estate manager hasn't charged any dues to your household.",
           }}
         >
+          {dues.some((due) => ['pending', 'overdue', 'processing'].includes(due.status)) ? (
+            <PaymentProviderPicker choice={providers} />
+          ) : null}
           {dues.map((due) => (
             <DueCard
               key={due.id}
               due={due}
-              onPay={pay.mutate}
-              paying={pay.isPending && pay.variables === due.id}
+              onPay={(dueId) => pay.mutate({ dueId, provider: providers.provider })}
+              paying={pay.isPending && pay.variables?.dueId === due.id}
+              provider={providers.provider}
             />
           ))}
         </QueryState>
@@ -113,10 +130,13 @@ function DueCard({
   due,
   onPay,
   paying,
+  provider,
 }: {
   due: Due;
   onPay: (id: string) => void;
   paying: boolean;
+  /** The company the payer chose: fees differ per company. */
+  provider?: PaymentProvider;
 }) {
   const { spacing, colors } = useTheme();
   // A checkout that was opened and left can be picked up again: the API checks
@@ -162,7 +182,7 @@ function DueCard({
           style={{ marginTop: spacing.md, alignSelf: 'flex-start' }}
         />
       ) : null}
-      {canPay ? <CheckoutFeeNote amount={due.amount} /> : null}
+      {canPay ? <CheckoutFeeNote amount={due.amount} provider={provider} /> : null}
     </Card>
   );
 }

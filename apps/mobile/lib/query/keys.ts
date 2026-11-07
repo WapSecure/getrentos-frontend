@@ -10,6 +10,11 @@ export const qk = {
   messagingConsent: ['me', 'messaging-consent'] as const,
   /** The card or bank fee added to a payment of this many naira. */
   checkoutFee: (amount: number) => ['payments', 'checkout-fee', amount] as const,
+  /** Which companies can take a payment right now (Paystack, Monnify). */
+  paymentProviders: ['payments', 'providers'] as const,
+  /** The fee on this many naira when `provider` takes it: fees differ per provider. */
+  providerFee: (amount: number, provider: string) =>
+    ['payments', 'provider-fee', amount, provider] as const,
   /** Banks a payout can go to, and the name on one account (lib/api/paymentStatus). */
   banks: ['payments', 'banks'] as const,
   accountName: (bankCode: string, accountNumber: string) =>

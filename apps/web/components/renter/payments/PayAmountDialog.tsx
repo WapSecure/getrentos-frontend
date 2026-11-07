@@ -1,9 +1,12 @@
 'use client';
 
 import { CheckoutFeeLine } from '@/components/shared/payments/CheckoutFeeLine';
+import { PaymentProviderPicker } from '@/components/shared/payments/PaymentProviderPicker';
 import { useCheckoutFee } from '@/hooks/useCheckoutFee';
+import type { PaymentProviderChoice } from '@/hooks/usePaymentProviders';
 import { useState } from 'react';
 import {
+  Alert,
   Button,
   CurrencyInput,
   Dialog,
@@ -23,13 +26,23 @@ interface PayAmountDialogProps {
   payment: { propertyName: string; owed: number } | null;
   onClose: () => void;
   onPay: (amount: number | undefined) => void;
+  /** Which company takes the payment (Paystack or Monnify). */
+  providers: PaymentProviderChoice;
+  /** Why the last try failed when the chosen company could not take it: choose another. */
+  providerError?: string | null;
 }
 
 /**
  * Pay what a charge owes, or part of it. Anything paid goes to this charge
  * first; the landlord sees it straight away.
  */
-export const PayAmountDialog = ({ payment, onClose, onPay }: PayAmountDialogProps) => {
+export const PayAmountDialog = ({
+  payment,
+  onClose,
+  onPay,
+  providers,
+  providerError,
+}: PayAmountDialogProps) => {
   const [mode, setMode] = useState<'full' | 'part'>('full');
   const [amount, setAmount] = useState('');
 
@@ -54,7 +67,7 @@ export const PayAmountDialog = ({ payment, onClose, onPay }: PayAmountDialogProp
           : undefined;
   const paying = mode === 'full' ? owed : partValid ? part : 0;
   // The payer covers the card or bank fee, so the landlord gets the full amount.
-  const { fee, total } = useCheckoutFee(paying);
+  const { fee, total } = useCheckoutFee(paying, providers.provider);
   const buttonLabel =
     mode === 'full' || amount
       ? `Pay ${formatCurrency(total ?? (mode === 'full' ? owed : part))}`
@@ -97,6 +110,8 @@ export const PayAmountDialog = ({ payment, onClose, onPay }: PayAmountDialogProp
             </Field>
           )}
 
+          {providerError && <Alert variant="warning">{providerError}</Alert>}
+          <PaymentProviderPicker choice={providers} />
           <CheckoutFeeLine fee={fee} total={total} />
 
           <Button

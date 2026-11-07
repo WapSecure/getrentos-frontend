@@ -21,6 +21,8 @@ import { formatCurrency, formatDate } from '@/lib/format';
 import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';
 import { buyerLandKeys, landLayoutKeys } from '@/lib/landSalesQueryKeys';
 import { landBuyerService } from '@/services/landBuyerService';
+import { usePaymentProviders } from '@/hooks/usePaymentProviders';
+import type { PaymentProvider } from '@/types/payments';
 import type { LandPurchaseDetail } from '@/types/landBuyer';
 import { PurchaseStatusBadge } from './LandSaleBadges';
 import { MilestoneTimeline } from './MilestoneTimeline';
@@ -96,8 +98,13 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
     queryClient.invalidateQueries({ queryKey: buyerLandKeys.statement(purchaseId) });
   };
 
+  // Which company takes the payment, and why the last one could not.
+  const providers = usePaymentProviders();
+  const [providerError, setProviderError] = useState<string | null>(null);
   const pay = useMutation({
-    mutationFn: () => unwrap(landBuyerService.pay(purchaseId)),
+    mutationFn: (provider?: PaymentProvider) =>
+      unwrap(landBuyerService.pay(purchaseId, undefined, provider)),
+    onMutate: () => setProviderError(null),
     onSuccess: (init) => {
       if (init.authorizationUrl) {
         window.location.assign(init.authorizationUrl);
@@ -107,7 +114,12 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
       notify(`Payment of ${formatCurrency(init.amount)} confirmed.`, 'success');
       queryClient.invalidateQueries({ queryKey: buyerLandKeys.all });
     },
-    onError: (reason: Error) => notify(reason.message, 'error'),
+    onError: (reason: Error, provider) => {
+      // That company cannot take it right now: say so by the button, with the other one picked.
+      const unavailable = providers.recover(reason, provider);
+      if (unavailable) setProviderError(unavailable);
+      else notify(reason.message, 'error');
+    },
   });
 
   const [milestoneKey, setMilestoneKey] = useState<string | null>(null);
@@ -378,7 +390,13 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
         </div>
 
         <aside className="space-y-4">
-          <PayNextCard purchase={purchase} onPay={() => pay.mutate()} isPaying={pay.isPending} />
+          <PayNextCard
+            purchase={purchase}
+            onPay={() => pay.mutate(providers.provider)}
+            isPaying={pay.isPending}
+            providers={providers}
+            providerError={providerError}
+          />
           <PurchaseDocuments purchase={purchase} notify={notify} />
           <CancelPurchaseCard
             purchase={purchase}

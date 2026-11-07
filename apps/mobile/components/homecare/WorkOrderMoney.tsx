@@ -38,6 +38,9 @@ import { StatusPill, type Tone } from '@/components/host/HostUI';
 import { VendorPicker } from './VendorPicker';
 import { ReasonSheet } from './ReasonSheet';
 import { InvoiceCheckCard } from './InvoiceCheckCard';
+import { PaymentProviderPicker } from '@/components/payments/PaymentProviderPicker';
+import { usePaymentProviders } from '@/hooks/usePaymentProviders';
+import type { PaymentProvider } from '@/lib/api/paymentStatus';
 
 const naira = (n: number) => `₦${Math.round(n).toLocaleString('en-NG')}`;
 
@@ -257,6 +260,8 @@ export function InvoicesSection({ w }: { w: WorkOrder }) {
   const [adding, setAdding] = useState(false);
   const [payoutFor, setPayoutFor] = useState<string | null>(null);
   const [reasonFor, setReasonFor] = useState<{ kind: 'reject' | 'void'; id: string } | null>(null);
+  // Which company takes a top-up when held rent falls short (Paystack or Monnify).
+  const providers = usePaymentProviders();
   const invoices = useQuery({
     queryKey: qk.homeCare.invoices(w.id),
     queryFn: () => homeCareApi.invoices(w.id),
@@ -267,16 +272,18 @@ export function InvoicesSection({ w }: { w: WorkOrder }) {
       kind,
       id,
       reason,
+      provider,
     }: {
       kind: 'submit' | 'approve' | 'reject' | 'void' | 'pay';
       id: string;
       reason?: string;
+      provider?: PaymentProvider;
     }) => {
       if (kind === 'submit') return homeCareApi.submitInvoice(id);
       if (kind === 'approve') return homeCareApi.approveInvoice(id);
       if (kind === 'reject') return homeCareApi.rejectInvoice(id, reason!);
       if (kind === 'void') return homeCareApi.voidInvoice(id, reason!);
-      return homeCareApi.payInvoice(id);
+      return homeCareApi.payInvoice(id, provider);
     },
     onSuccess: async (result, v) => {
       // The owner's held rent doesn't cover it: pay the shortfall on Paystack,
@@ -307,6 +314,12 @@ export function InvoicesSection({ w }: { w: WorkOrder }) {
     },
     onError: (e, v) => {
       void haptics.error();
+      // That company cannot take the top-up right now: the choice moves to the other one.
+      const unavailable = v.kind === 'pay' ? providers.recover(e, v.provider) : null;
+      if (unavailable) {
+        toast.show(unavailable, 'error');
+        return;
+      }
       const message = errorMessage(e, 'That didn’t go through.');
       // The API names the missing payout account; offer to add it right here.
       if (v.kind === 'pay' && /payout account/i.test(message)) {
@@ -431,20 +444,27 @@ export function InvoicesSection({ w }: { w: WorkOrder }) {
                 </View>
               ) : inv.status === 'APPROVED' &&
                 (inv.payoutStatus === 'PENDING' || inv.payoutStatus === 'FAILED') ? (
-                <Button
-                  label={`${inv.payoutStatus === 'FAILED' ? 'Retry payment' : 'Pay'} ${naira(inv.totalAmount)}`}
-                  loading={busy}
-                  onPress={() =>
-                    Alert.alert(
-                      `Pay ${inv.vendor?.name ?? 'the vendor'} ${naira(inv.totalAmount)}?`,
-                      'Sent to their bank account on file.',
-                      [
-                        { text: 'Not now', style: 'cancel' },
-                        { text: 'Pay', onPress: () => act.mutate({ kind: 'pay', id: inv.id }) },
-                      ]
-                    )
-                  }
-                />
+                <View style={{ gap: spacing.sm }}>
+                  <PaymentProviderPicker choice={providers} />
+                  <Button
+                    label={`${inv.payoutStatus === 'FAILED' ? 'Retry payment' : 'Pay'} ${naira(inv.totalAmount)}`}
+                    loading={busy}
+                    onPress={() =>
+                      Alert.alert(
+                        `Pay ${inv.vendor?.name ?? 'the vendor'} ${naira(inv.totalAmount)}?`,
+                        'Sent to their bank account on file.',
+                        [
+                          { text: 'Not now', style: 'cancel' },
+                          {
+                            text: 'Pay',
+                            onPress: () =>
+                              act.mutate({ kind: 'pay', id: inv.id, provider: providers.provider }),
+                          },
+                        ]
+                      )
+                    }
+                  />
+                </View>
               ) : null}
             </Card>
           );

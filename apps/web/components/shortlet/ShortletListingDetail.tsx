@@ -53,6 +53,8 @@ import {
   WATER_SUPPLY_LABEL,
 } from '@/lib/shortlet/essentials';
 import { ShortletBookingDialog } from './ShortletBookingDialog';
+import { usePaymentProviders } from '@/hooks/usePaymentProviders';
+import type { PaymentProvider } from '@/types/payments';
 import { ShortletMessageHostDialog } from './ShortletMessageHostDialog';
 import type {
   ShortletBooking,
@@ -108,6 +110,9 @@ export function ShortletListingDetail({
   const wishlist = useShortletWishlist();
   const [bookingOpen, setBookingOpen] = useState(false);
   const [createdBooking, setCreatedBooking] = useState<ShortletBooking | null>(null);
+  // Which company takes the payment, and why the last one could not.
+  const providers = usePaymentProviders();
+  const [providerError, setProviderError] = useState<string | null>(null);
   const [messageOpen, setMessageOpen] = useState(false);
   const toast = useToast();
   const [activeImage, setActiveImage] = useState(0);
@@ -163,7 +168,9 @@ export function ShortletListingDetail({
   });
 
   const pay = useMutation({
-    mutationFn: (bookingId: string) => unwrap(shortletService.payBooking(bookingId)),
+    mutationFn: ({ bookingId, provider }: { bookingId: string; provider?: PaymentProvider }) =>
+      unwrap(shortletService.payBooking(bookingId, provider)),
+    onMutate: () => setProviderError(null),
     onSuccess: (res) => {
       if (res.authorizationUrl) {
         window.location.href = res.authorizationUrl;
@@ -174,7 +181,12 @@ export function ShortletListingDetail({
       queryClient.invalidateQueries({ queryKey: shortletKeys.guestBookings });
       toast.success('Payment received: your stay is confirmed.');
     },
-    onError: (reason: Error) => toast.error(reason.message),
+    onError: (reason: Error, { provider }) => {
+      // That company cannot take it right now: say so by the button, with the other one picked.
+      const unavailable = providers.recover(reason, provider);
+      if (unavailable) setProviderError(unavailable);
+      else toast.error(reason.message);
+    },
   });
 
   const openBooking = () => {
@@ -764,10 +776,13 @@ export function ShortletListingDetail({
           onClose={() => {
             setBookingOpen(false);
             setCreatedBooking(null);
+            setProviderError(null);
           }}
           createdBooking={createdBooking}
           paying={pay.isPending}
-          onPay={(id) => pay.mutate(id)}
+          onPay={(id) => pay.mutate({ bookingId: id, provider: providers.provider })}
+          providers={providers}
+          providerError={providerError}
           onBook={(input) => book.mutate(input)}
           busy={book.isPending}
           bookError={book.error}

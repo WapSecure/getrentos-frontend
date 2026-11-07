@@ -1,6 +1,8 @@
 'use client';
 
 import { CheckoutFeeNote } from '@/components/shared/payments/CheckoutFeeLine';
+import { PaymentProviderPicker } from '@/components/shared/payments/PaymentProviderPicker';
+import type { PaymentProviderChoice } from '@/hooks/usePaymentProviders';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
@@ -38,6 +40,10 @@ interface BuyerEscrowTransactionDetailModalProps {
   onMakePayment: (transactionId: string, stage: 'deposit' | 'release') => void;
   /** A deposit, or a release of the held funds, is on its way to the server. */
   isPaying?: boolean;
+  /** Which company takes the deposit (Paystack or Monnify). */
+  providers: PaymentProviderChoice;
+  /** Why the last try failed when the chosen company could not take it. */
+  providerError?: string | null;
 }
 
 const actorConfig: Record<
@@ -74,6 +80,8 @@ export const BuyerEscrowTransactionDetailModal = ({
   onClose,
   onMakePayment,
   isPaying = false,
+  providers,
+  providerError,
 }: BuyerEscrowTransactionDetailModalProps) => {
   const router = useRouter();
   const [showActivityLog, setShowActivityLog] = useState(false);
@@ -163,6 +171,12 @@ export const BuyerEscrowTransactionDetailModal = ({
                         </p>
                         <p className="text-xs text-muted-foreground mt-0.5">{step.description}</p>
                         {isActive && step.key === 'deposit_pending' && canDeposit && (
+                          <div className="mt-2 space-y-2">
+                            {providerError && <Alert variant="warning">{providerError}</Alert>}
+                            <PaymentProviderPicker choice={providers} disabled={isPaying} />
+                          </div>
+                        )}
+                        {isActive && step.key === 'deposit_pending' && canDeposit && (
                           <Button
                             variant="primary"
                             size="sm"
@@ -177,6 +191,7 @@ export const BuyerEscrowTransactionDetailModal = ({
                         {isActive && step.key === 'deposit_pending' && canDeposit && (
                           <CheckoutFeeNote
                             amount={transaction.depositAmount ?? transaction.purchasePrice}
+                            provider={providers.provider}
                             className="mt-1"
                           />
                         )}

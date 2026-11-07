@@ -1,8 +1,10 @@
 'use client';
 
 import { CheckoutFeeNote } from '@/components/shared/payments/CheckoutFeeLine';
+import { PaymentProviderPicker } from '@/components/shared/payments/PaymentProviderPicker';
+import type { PaymentProviderChoice } from '@/hooks/usePaymentProviders';
 import { CheckCircle2, Clock, AlertCircle, ShieldCheck, Zap } from 'lucide-react';
-import { Badge, Button, type BadgeVariant } from '@getrentos/ui';
+import { Alert, Badge, Button, type BadgeVariant } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type { FinancingInstallment, FinancingPlan, InstallmentStatus } from '@/types/financing';
 
@@ -10,6 +12,10 @@ interface ActiveFinancingPlanCardProps {
   plan: FinancingPlan;
   onPayInstallment: (installmentId: string) => void;
   isPaying?: boolean;
+  /** Which company takes the instalment (Paystack or Monnify). */
+  providers: PaymentProviderChoice;
+  /** Why the last try failed when the chosen company could not take it. */
+  providerError?: string | null;
 }
 
 const statusConfig: Record<
@@ -26,6 +32,8 @@ export const ActiveFinancingPlanCard = ({
   plan,
   onPayInstallment,
   isPaying = false,
+  providers,
+  providerError,
 }: ActiveFinancingPlanCardProps) => {
   const paidCount = plan.installments.filter((i) => i.status === 'paid').length;
   const progressPct = Math.round((paidCount / plan.installments.length) * 100);
@@ -102,7 +110,17 @@ export const ActiveFinancingPlanCard = ({
               </Button>
             </div>
           )}
-          {nextDue && <CheckoutFeeNote amount={nextDue.amount} className="mt-2 text-right" />}
+          {nextDue && (
+            <div className="-mt-3 mb-6 space-y-3">
+              {providerError && <Alert variant="warning">{providerError}</Alert>}
+              <PaymentProviderPicker choice={providers} disabled={isPaying} />
+              <CheckoutFeeNote
+                amount={nextDue.amount}
+                provider={providers.provider}
+                className="text-right"
+              />
+            </div>
+          )}
 
           <div>
             <p className="text-sm font-medium text-foreground mb-3">Installment schedule</p>

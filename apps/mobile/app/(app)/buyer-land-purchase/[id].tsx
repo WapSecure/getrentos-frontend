@@ -47,6 +47,9 @@ import { BuyerConditions, BuyerMilestones, HeldNote } from '@/components/land/Bu
 import { CoApprovalCard } from '@/components/land/LandRequests';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
+import { PaymentProviderPicker } from '@/components/payments/PaymentProviderPicker';
+import { usePaymentProviders } from '@/hooks/usePaymentProviders';
+import type { PaymentProvider } from '@/lib/api/paymentStatus';
 
 type Tab = 'schedule' | 'conditions' | 'conveyance' | 'title' | 'statement';
 
@@ -271,8 +274,12 @@ function Banners({ p }: { p: BuyerPurchaseDetail }) {
 function PayNext({ p, onPaid }: { p: BuyerPurchaseDetail; onPaid: () => void }) {
   const { spacing } = useTheme();
   const toast = useToast();
+  // Which company takes the payment, and why the last one could not.
+  const providers = usePaymentProviders();
+  const [providerError, setProviderError] = useState<string | null>(null);
   const pay = useMutation({
-    mutationFn: () => landBuyerApi.pay(p.id),
+    mutationFn: (provider?: PaymentProvider) => landBuyerApi.pay(p.id, provider),
+    onMutate: () => setProviderError(null),
     onSuccess: async (init) => {
       if (init.authorizationUrl) {
         // The gateway confirms by webhook; refetch once the browser closes.
@@ -282,7 +289,12 @@ function PayNext({ p, onPaid }: { p: BuyerPurchaseDetail; onPaid: () => void }) 
       }
       onPaid();
     },
-    onError: (e) => toast.show(errorMessage(e, 'Could not start the payment.'), 'error'),
+    onError: (e, provider) => {
+      // That company cannot take it right now: say so by the button, with the other one picked.
+      const unavailable = providers.recover(e, provider);
+      if (unavailable) setProviderError(unavailable);
+      else toast.show(errorMessage(e, 'Could not start the payment.'), 'error');
+    },
   });
   const payable = PAYABLE.has(p.status) && !!p.nextDue;
   return (
@@ -298,13 +310,15 @@ function PayNext({ p, onPaid }: { p: BuyerPurchaseDetail; onPaid: () => void }) 
             {formatDate(p.nextDue.dueDate)}
             {p.nextDue.overdue ? ' (late fee included)' : ''}
           </Text>
+          {providerError ? <FormAlert tone="warning" message={providerError} /> : null}
+          <PaymentProviderPicker choice={providers} />
           <Button
             label={`Pay ${formatNaira(p.nextDue.amount)}`}
             loading={pay.isPending}
             disabled={pay.isPending}
-            onPress={() => pay.mutate()}
+            onPress={() => pay.mutate(providers.provider)}
           />
-          <CheckoutFeeNote amount={p.nextDue.amount} />
+          <CheckoutFeeNote amount={p.nextDue.amount} provider={providers.provider} />
           <Text variant="caption" color="mutedForeground">
             You will be taken to our payment partner to pay securely. GetRentos holds it until you
             confirm each conveyance step.

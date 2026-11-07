@@ -21,6 +21,8 @@ import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { ConfirmDialog, PageErrorState, PageLoadingState, Pagination } from '@getrentos/ui';
 import { FinancingView } from '@/components/renter/financing/FinancingView';
+import { usePaymentProviders } from '@/hooks/usePaymentProviders';
+import type { PaymentProvider } from '@/types/payments';
 import { HubTabs, useHubTab, type HubTab } from '@/components/shared/navigation/HubTabs';
 
 const TABS: HubTab[] = [
@@ -55,6 +57,9 @@ export default function PaymentsPage() {
   const [showPayAllConfirm, setShowPayAllConfirm] = useState(false);
   const [payingPaymentId, setPayingPaymentId] = useState<string | null>(null);
   const [bulkPayingIds, setBulkPayingIds] = useState<string[]>([]);
+  // Which company takes the payment, and why the last one could not.
+  const providers = usePaymentProviders();
+  const [providerError, setProviderError] = useState<string | null>(null);
 
   const PAGE_SIZE = 10;
   const [page, setPage] = useState(1);
@@ -90,11 +95,13 @@ export default function PaymentsPage() {
       paymentId,
       method,
       amount,
+      provider,
     }: {
       paymentId: string;
       method?: string;
       amount?: number;
-    }) => unwrap(renterService.payNow(paymentId, method, amount)),
+      provider?: PaymentProvider;
+    }) => unwrap(renterService.payNow(paymentId, method, amount, provider)),
     onSuccess: (updated) => {
       if (updated.authorizationUrl) {
         // Real gateway flow: the payment is PROCESSING until checkout
@@ -115,7 +122,14 @@ export default function PaymentsPage() {
             : `Rent for ${updated.propertyName} is paid in full.`,
       });
     },
-    onError: (error: Error) => {
+    onError: (error: Error, variables) => {
+      // That company cannot take it right now: reopen the choice with the other one picked.
+      const unavailable = providers.recover(error, variables.provider);
+      if (unavailable) {
+        setProviderError(unavailable);
+        setPayingPaymentId(variables.paymentId);
+        return;
+      }
       pushNotification({
         type: 'error',
         title: 'Payment unsuccessful',
@@ -148,7 +162,12 @@ export default function PaymentsPage() {
     if (!payment) return;
     // The API decides: with a gateway it returns a checkout to redirect to;
     // when payments are simulated it settles the charge itself and returns none.
-    payNowMutation.mutate({ paymentId, method: payment.method, amount });
+    payNowMutation.mutate({
+      paymentId,
+      method: payment.method,
+      amount,
+      provider: providers.provider,
+    });
   };
   const payingPayment = payments.find((p) => p.id === payingPaymentId) ?? null;
 
@@ -164,7 +183,9 @@ export default function PaymentsPage() {
     let completedCount = 0;
     try {
       for (const payment of payablePayments) {
-        const updated = await unwrap(renterService.payNow(payment.id, payment.method));
+        const updated = await unwrap(
+          renterService.payNow(payment.id, payment.method, undefined, providers.provider)
+        );
         if (updated.authorizationUrl) {
           // Real gateway flow: only one checkout can be completed at a
           // time, so redirect to this one now; the rest stay payable.
@@ -178,14 +199,16 @@ export default function PaymentsPage() {
         title: 'Payments successful',
         message: `${completedCount} payment${completedCount === 1 ? '' : 's'} totalling ₦${payableTotal.toLocaleString()} completed successfully.`,
       });
-    } catch {
+    } catch (error) {
+      // That company cannot take it right now; the next try uses another one.
+      const unavailable = providers.recover(error, providers.provider);
       pushNotification({
         type: 'error',
         title: 'Payment batch stopped',
         message:
           completedCount > 0
             ? `${completedCount} payment${completedCount === 1 ? '' : 's'} completed before an error occurred. Review the refreshed payment list before trying again.`
-            : 'No payment was completed. Check your payment method and try again.',
+            : (unavailable ?? 'No payment was completed. Check your payment method and try again.'),
       });
     } finally {
       setBulkPayingIds([]);
@@ -446,8 +469,13 @@ export default function PaymentsPage() {
             ? { propertyName: payingPayment.propertyName, owed: owedOn(payingPayment) }
             : null
         }
-        onClose={() => setPayingPaymentId(null)}
+        onClose={() => {
+          setPayingPaymentId(null);
+          setProviderError(null);
+        }}
         onPay={(amount) => payingPaymentId && payChosen(payingPaymentId, amount)}
+        providers={providers}
+        providerError={providerError}
       />
 
       {total > 0 && (

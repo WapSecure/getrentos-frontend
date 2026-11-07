@@ -21,3 +21,16 @@ export interface PaymentStatus {
   /** Where this payment lives in the app, or null when there is no one page for it. */
   returnPath: string | null;
 }
+
+/** A company that can take a payment. The payer chooses, so they can switch when one is down. */
+export type PaymentProvider = 'PAYSTACK' | 'MONNIFY';
+
+/** GET /payments/providers — one row per provider, in the order to offer them. */
+export interface PaymentProviderOption {
+  provider: PaymentProvider;
+  /** "Paystack", "Monnify". */
+  label: string;
+  available: boolean;
+  /** Why not, as a fragment that follows the label: "is switched off for now". */
+  reason?: string;
+}

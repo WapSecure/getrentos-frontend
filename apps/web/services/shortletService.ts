@@ -38,6 +38,8 @@ import type {
   UpdateShortletListingInput,
   UpsertPayoutAccountInput,
 } from '@/types/shortlet';
+import { providerQuery } from '@/services/paymentStatusService';
+import type { PaymentProvider } from '@/types/payments';
 
 export interface ShortletListParams {
   /** Only stays with all of these amenities. */
@@ -157,9 +159,13 @@ export const shortletService = {
       authFetch<ShortletBooking>(`/shortlets/bookings/${bookingId}/cancel`, { method: 'POST' })
     ),
 
-  payBooking: (bookingId: string) =>
+  /** `provider` names the company that takes it (Paystack or Monnify); omitted, the default one. */
+  payBooking: (bookingId: string, provider?: PaymentProvider) =>
     safeCall(() =>
-      authFetch<ShortletPayResponse>(`/shortlets/bookings/${bookingId}/pay`, { method: 'POST' })
+      authFetch<ShortletPayResponse>(
+        `/shortlets/bookings/${bookingId}/pay${providerQuery(provider)}`,
+        { method: 'POST' }
+      )
     ),
 
   createReview: (bookingId: string, input: CreateShortletReviewInput) =>

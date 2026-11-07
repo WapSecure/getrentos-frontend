@@ -1,6 +1,7 @@
 import { apiFetch } from './client';
 import { toQuery } from './query';
 import type { Paginated } from './properties';
+import { providerQuery, type PaymentProvider } from './paymentStatus';
 
 /**
  * Home Management ("Home care" in the app): work orders from report to paid
@@ -284,11 +285,11 @@ export const homeCareApi = {
    * nothing is sent yet: `topUp` is a Paystack checkout for the shortfall, and
    * the vendor is paid once it lands.
    */
-  payInvoice: (invoiceId: string) =>
+  payInvoice: (invoiceId: string, provider?: PaymentProvider) =>
     apiFetch<{
       payoutStatus: string;
       topUp?: { amount: number; authorizationUrl: string; reference: string };
-    }>(`/home-management/invoices/${invoiceId}/pay`, { method: 'POST' }),
+    }>(`/home-management/invoices/${invoiceId}/pay${providerQuery(provider)}`, { method: 'POST' }),
 
   // ---- vendors (scoped to the signed-in user) ----
   vendors: () =>

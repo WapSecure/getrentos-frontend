@@ -34,6 +34,9 @@ import { formatDate } from '@/lib/format';
 import { errorMessage } from '@/lib/api/client';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
+import { PaymentProviderPicker } from '@/components/payments/PaymentProviderPicker';
+import { usePaymentProviders, type PaymentProviderChoice } from '@/hooks/usePaymentProviders';
+import type { PaymentProvider } from '@/lib/api/paymentStatus';
 
 /**
  * The happy path, in order — the live stages the backend actually drives:
@@ -103,14 +106,22 @@ export default function BuyerTransactions() {
   const fail = (fallback: string) => (err: unknown) =>
     toast.show(errorMessage(err, fallback), 'error');
 
+  // Which company takes the deposit (Paystack or Monnify).
+  const providers = usePaymentProviders();
   const depositMutation = useMutation({
-    mutationFn: (id: string) => buyerTransactionsApi.deposit(id),
+    mutationFn: ({ id, provider }: { id: string; provider?: PaymentProvider }) =>
+      buyerTransactionsApi.deposit(id, provider),
     onSuccess: async (tx) => {
       if (tx.authorizationUrl) await checkout(tx.authorizationUrl, tx.reference);
       else toast.show('Deposit initiated.', 'success');
       invalidate();
     },
-    onError: fail('Could not start this deposit.'),
+    // That company cannot take it right now: say so, and the choice moves to the other one.
+    onError: (err, { provider }) =>
+      toast.show(
+        providers.recover(err, provider) ?? errorMessage(err, 'Could not start this deposit.'),
+        'error'
+      ),
   });
 
   const releaseMutation = useMutation({
@@ -215,10 +226,15 @@ export default function BuyerTransactions() {
               <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
                 <TransactionCard
                   tx={item}
-                  depositing={busy(depositMutation, item.id)}
+                  depositing={
+                    depositMutation.isPending && depositMutation.variables?.id === item.id
+                  }
+                  providers={providers}
                   releasing={busy(releaseMutation, item.id)}
                   refunding={busy(refundMutation, item.id)}
-                  onDeposit={() => depositMutation.mutate(item.id)}
+                  onDeposit={() =>
+                    depositMutation.mutate({ id: item.id, provider: providers.provider })
+                  }
                   onRelease={() => confirmRelease(item)}
                   onRefund={() => confirmRefund(item)}
                 />
@@ -262,9 +278,12 @@ function TransactionCard({
   onDeposit,
   onRelease,
   onRefund,
+  providers,
 }: {
   tx: BuyerTransaction;
   depositing: boolean;
+  /** Which company takes the deposit (Paystack or Monnify). */
+  providers: PaymentProviderChoice;
   releasing: boolean;
   refunding: boolean;
   onDeposit: () => void;
@@ -330,8 +349,12 @@ function TransactionCard({
         <View style={{ gap: spacing.sm }}>
           {tx.escrowStatus === 'deposit_pending' ? (
             <>
+              <PaymentProviderPicker choice={providers} />
               <Button label="Pay deposit" loading={depositing} onPress={onDeposit} />
-              <CheckoutFeeNote amount={tx.depositAmount ?? tx.purchasePrice} />
+              <CheckoutFeeNote
+                amount={tx.depositAmount ?? tx.purchasePrice}
+                provider={providers.provider}
+              />
             </>
           ) : null}
           {tx.escrowStatus === 'funds_held' ? (
