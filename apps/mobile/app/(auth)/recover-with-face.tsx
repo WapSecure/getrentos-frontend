@@ -25,6 +25,7 @@ import {
   resetPasswordSchema,
   type ResetPasswordValues,
 } from '@/lib/validation';
+import { AUTH_CONSTANTS } from '@getrentos/shared';
 
 type Step = 'identify' | 'reset' | 'done';
 const STEP_INDEX: Record<Step, number> = { identify: 0, reset: 1, done: 2 };
@@ -155,7 +156,7 @@ export default function RecoverWithFace() {
             render={({ field: { onChange, onBlur, value } }) => (
               <PasswordField
                 label="New password"
-                placeholder="At least 8 characters"
+                placeholder={`At least ${AUTH_CONSTANTS.PASSWORD_MIN_LENGTH} characters`}
                 showStrength
                 autoComplete="new-password"
                 textContentType="newPassword"

@@ -2,8 +2,9 @@ export const AUTH_CONSTANTS = {
   OTP_LENGTH: 6,
   OTP_EXPIRY_MINUTES: 5,
   RESEND_OTP_DELAY_SECONDS: 30,
-  PASSWORD_MIN_LENGTH: 8,
-  PASSWORD_MAX_LENGTH: 50,
+  /** Matches the API's rule (security gap AU-15): 12 to 128, not in a known breach. */
+  PASSWORD_MIN_LENGTH: 12,
+  PASSWORD_MAX_LENGTH: 128,
 } as const;
 
 /** Shared client-side validation patterns. Keep these centralized so every
@@ -184,7 +185,8 @@ export const ERROR_MESSAGES = {
   REQUIRED_FIELD: 'This field is required',
   INVALID_EMAIL: 'Please enter a valid email address',
   INVALID_PHONE: 'Please enter a valid phone number',
-  PASSWORD_TOO_SHORT: `Password must be at least ${AUTH_CONSTANTS.PASSWORD_MIN_LENGTH} characters`,
+  PASSWORD_TOO_SHORT: `Use at least ${AUTH_CONSTANTS.PASSWORD_MIN_LENGTH} characters. A short phrase is easier to remember.`,
+  PASSWORD_TOO_LONG: `Use at most ${AUTH_CONSTANTS.PASSWORD_MAX_LENGTH} characters.`,
   PASSWORD_MISMATCH: 'Passwords do not match',
   INVALID_OTP: 'Invalid verification code',
   OTP_EXPIRED: 'Verification code has expired. Please request a new one',

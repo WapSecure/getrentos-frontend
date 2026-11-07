@@ -58,6 +58,7 @@ import {
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { ChangeEmailSheet } from '@/components/account/ChangeEmailSheet';
 import { goBack } from '@/lib/goBack';
+import { AUTH_CONSTANTS } from '@getrentos/shared';
 
 export default function SecuritySettings() {
   const { colors, spacing } = useTheme();
@@ -706,11 +707,16 @@ function PasswordSection() {
           value={currentPassword}
           onChangeText={setCurrentPassword}
         />
-        <PasswordField label="New password" value={newPassword} onChangeText={setNewPassword} />
+        <PasswordField
+          label="New password"
+          placeholder={`At least ${AUTH_CONSTANTS.PASSWORD_MIN_LENGTH} characters`}
+          value={newPassword}
+          onChangeText={setNewPassword}
+        />
         <Button
           label="Update password"
           loading={mutation.isPending}
-          disabled={!currentPassword || newPassword.length < 8}
+          disabled={!currentPassword || newPassword.length < AUTH_CONSTANTS.PASSWORD_MIN_LENGTH}
           onPress={() => mutation.mutate()}
         />
       </View>

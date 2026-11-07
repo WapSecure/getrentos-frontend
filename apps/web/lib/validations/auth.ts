@@ -8,7 +8,7 @@ export const emailSchema = z
     password: z
       .string()
       .min(AUTH_CONSTANTS.PASSWORD_MIN_LENGTH, ERROR_MESSAGES.PASSWORD_TOO_SHORT)
-      .max(AUTH_CONSTANTS.PASSWORD_MAX_LENGTH),
+      .max(AUTH_CONSTANTS.PASSWORD_MAX_LENGTH, ERROR_MESSAGES.PASSWORD_TOO_LONG),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -21,15 +21,12 @@ export const phoneSchema = z
     phone: z
       .string()
       .min(10, ERROR_MESSAGES.INVALID_PHONE)
-      .regex(
-        VALIDATION_PATTERNS.PHONE,
-        ERROR_MESSAGES.INVALID_PHONE
-      ),
+      .regex(VALIDATION_PATTERNS.PHONE, ERROR_MESSAGES.INVALID_PHONE),
     fullName: z.string().min(1, ERROR_MESSAGES.REQUIRED_FIELD),
     password: z
       .string()
       .min(AUTH_CONSTANTS.PASSWORD_MIN_LENGTH, ERROR_MESSAGES.PASSWORD_TOO_SHORT)
-      .max(AUTH_CONSTANTS.PASSWORD_MAX_LENGTH),
+      .max(AUTH_CONSTANTS.PASSWORD_MAX_LENGTH, ERROR_MESSAGES.PASSWORD_TOO_LONG),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {

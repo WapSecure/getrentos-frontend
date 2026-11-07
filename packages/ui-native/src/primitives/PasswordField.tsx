@@ -2,11 +2,12 @@ import { forwardRef, useMemo } from 'react';
 import { StyleSheet, View, type TextInput } from 'react-native';
 import { useTheme } from '../theme';
 import { Text } from './Text';
+import { AUTH_CONSTANTS } from '@getrentos/shared';
 import { TextField, type TextFieldProps } from './TextField';
 
 export function passwordStrength(pw: string): 0 | 1 | 2 | 3 | 4 {
   let score = 0;
-  if (pw.length >= 8) score++;
+  if (pw.length >= AUTH_CONSTANTS.PASSWORD_MIN_LENGTH) score++;
   if (/[a-z]/.test(pw) && /[A-Z]/.test(pw)) score++;
   if (/\d/.test(pw)) score++;
   if (/[^A-Za-z0-9]/.test(pw)) score++;

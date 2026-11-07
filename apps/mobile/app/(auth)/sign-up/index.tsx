@@ -30,6 +30,7 @@ import {
   type EmailSignupValues,
   type PhoneSignupValues,
 } from '@/lib/validation';
+import { AUTH_CONSTANTS } from '@getrentos/shared';
 
 type Method = 'email' | 'phone' | 'whatsapp';
 
@@ -332,7 +333,7 @@ function EmailForm(props: Shared) {
               <PasswordField
                 ref={pwRef}
                 label="Password"
-                placeholder="At least 8 characters"
+                placeholder={`At least ${AUTH_CONSTANTS.PASSWORD_MIN_LENGTH} characters`}
                 showStrength
                 autoComplete="new-password"
                 textContentType="newPassword"
@@ -492,7 +493,7 @@ function PhoneForm(props: Shared) {
               <PasswordField
                 ref={pwRef}
                 label="Password"
-                placeholder="At least 8 characters"
+                placeholder={`At least ${AUTH_CONSTANTS.PASSWORD_MIN_LENGTH} characters`}
                 showStrength
                 autoComplete="new-password"
                 textContentType="newPassword"

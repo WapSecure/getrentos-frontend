@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { AUTH_CONSTANTS, ERROR_MESSAGES } from '@getrentos/shared';
 
 export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export const PHONE_RE = /^[+]?[0-9][0-9\s-]{6,16}$/;
@@ -17,8 +18,8 @@ export type SignInValues = z.infer<typeof signInSchema>;
 
 const passwordRules = z
   .string()
-  .min(8, 'Use at least 8 characters')
-  .max(50, 'That password is too long');
+  .min(AUTH_CONSTANTS.PASSWORD_MIN_LENGTH, ERROR_MESSAGES.PASSWORD_TOO_SHORT)
+  .max(AUTH_CONSTANTS.PASSWORD_MAX_LENGTH, ERROR_MESSAGES.PASSWORD_TOO_LONG);
 
 export const emailSignupSchema = z
   .object({

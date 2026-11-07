@@ -11,6 +11,7 @@ import { ResetStep } from './steps/ResetStep';
 import { authService } from '@/services/authService';
 import { Logo } from '@/components/ui/Logo';
 import { useMutation } from '@tanstack/react-query';
+import { AUTH_CONSTANTS, ERROR_MESSAGES } from '@getrentos/shared';
 
 interface ForgotPasswordFormProps {
   onSuccess: () => void;
@@ -102,8 +103,12 @@ export const ForgotPasswordForm = ({ onSuccess, showToast }: ForgotPasswordFormP
   };
 
   const handleResetPassword = async () => {
-    if (newPassword.length < 8) {
-      showToast('Password must be at least 8 characters', 'error');
+    if (newPassword.length < AUTH_CONSTANTS.PASSWORD_MIN_LENGTH) {
+      showToast(ERROR_MESSAGES.PASSWORD_TOO_SHORT, 'error');
+      return;
+    }
+    if (newPassword.length > AUTH_CONSTANTS.PASSWORD_MAX_LENGTH) {
+      showToast(ERROR_MESSAGES.PASSWORD_TOO_LONG, 'error');
       return;
     }
     if (newPassword !== confirmPassword) {
