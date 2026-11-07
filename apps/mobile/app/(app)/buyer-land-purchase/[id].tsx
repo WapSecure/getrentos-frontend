@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Alert, RefreshControl, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import * as WebBrowser from 'expo-web-browser';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AlertTriangle, CheckCircle2, CircleDashed, FileDown } from 'lucide-react-native';
@@ -48,6 +47,7 @@ import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 import { PaySheet } from '@/components/payments/PaySheet';
 import { usePaymentProviders } from '@/hooks/usePaymentProviders';
+import { usePaystackCheckout } from '@/hooks/usePaystackCheckout';
 import type { PaymentProvider } from '@/lib/api/paymentStatus';
 
 type Tab = 'schedule' | 'conditions' | 'conveyance' | 'title' | 'statement';
@@ -277,6 +277,8 @@ function PayNext({ p, onPaid }: { p: BuyerPurchaseDetail; onPaid: () => void }) 
   const providers = usePaymentProviders();
   const [providerError, setProviderError] = useState<string | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
+  // Opens the payment page, then confirms the result and keeps it on screen.
+  const checkout = usePaystackCheckout();
   const closeSheet = () => {
     setSheetOpen(false);
     setProviderError(null);
@@ -287,8 +289,8 @@ function PayNext({ p, onPaid }: { p: BuyerPurchaseDetail; onPaid: () => void }) 
     onSuccess: async (init) => {
       closeSheet();
       if (init.authorizationUrl) {
-        // The gateway confirms by webhook; refetch once the browser closes.
-        await WebBrowser.openBrowserAsync(init.authorizationUrl);
+        // Wait for GetRentos to confirm it, then show how it went (amount, reference).
+        await checkout(init.authorizationUrl, init.reference);
       } else {
         toast.show(`Payment of ${formatNaira(init.amount)} confirmed.`, 'success');
       }

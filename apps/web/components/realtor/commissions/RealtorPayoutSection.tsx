@@ -3,13 +3,25 @@
 import { useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Banknote, CheckCircle2, Landmark } from 'lucide-react';
-import { Alert, Badge, Button, Card, Pagination, type BadgeVariant } from '@getrentos/ui';
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  ConfirmDialog,
+  Pagination,
+  type BadgeVariant,
+} from '@getrentos/ui';
 import { ROUTES } from '@/lib/constants/auth';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap, unwrapOptional } from '@/lib/apiHelpers';
 import { realtorService } from '@/services/realtorService';
 import { realtorKeys } from '@/lib/queryKeys';
-import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
+import {
+  VerificationRequiredNotice,
+  isVerificationGateError,
+} from '@/components/shared/verification/VerificationRequiredNotice';
+import { payoutDestination } from '@/lib/payoutDestination';
 import type { RealtorPayoutStatus } from '@/types/realtor';
 import { BankAccountFields } from '@/components/shared/payouts/BankAccountFields';
 
@@ -36,6 +48,8 @@ export const RealtorPayoutSection = () => {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [justPaid, setJustPaid] = useState<number | null>(null);
+  // Money moves only after the amount and the account it goes to are confirmed.
+  const [confirmingWithdraw, setConfirmingWithdraw] = useState(false);
 
   const { data: account } = useQuery({
     queryKey: realtorKeys.payoutAccount,
@@ -174,7 +188,7 @@ export const RealtorPayoutSection = () => {
           </div>
           <Button
             icon={<Banknote className="h-4 w-4" />}
-            onClick={() => withdraw.mutate()}
+            onClick={() => setConfirmingWithdraw(true)}
             isLoading={withdraw.isPending}
             loadingText="Withdrawing…"
             disabled={withdrawDisabled}
@@ -212,6 +226,12 @@ export const RealtorPayoutSection = () => {
             />
           </div>
         )}
+        {/* Anything other than a verification gate: say what went wrong. */}
+        {withdraw.error && !isVerificationGateError(withdraw.error) && (
+          <Alert variant="danger" className="mt-3">
+            {withdraw.error.message || 'Your withdrawal didn’t go through. Please try again.'}
+          </Alert>
+        )}
         <div className="mt-3 empty:mt-0">
           <VerificationRequiredNotice
             error={withdraw.error}
@@ -221,6 +241,18 @@ export const RealtorPayoutSection = () => {
           />
         </div>
       </Card>
+
+      <ConfirmDialog
+        open={confirmingWithdraw}
+        onOpenChange={setConfirmingWithdraw}
+        tone="primary"
+        title={`Withdraw ${formatCurrency(summary?.available ?? 0)}?`}
+        description={`${formatCurrency(summary?.available ?? 0)} will be sent to ${
+          account ? payoutDestination(account) : 'your payout account'
+        }. Check this is your account before you continue.`}
+        confirmLabel={`Withdraw ${formatCurrency(summary?.available ?? 0)}`}
+        onConfirm={() => withdraw.mutate()}
+      />
 
       {/* Payout history */}
       <Card>

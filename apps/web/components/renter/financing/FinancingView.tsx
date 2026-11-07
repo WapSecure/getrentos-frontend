@@ -23,6 +23,8 @@ export const FinancingView = () => {
   // Which company takes the instalment, and why the last one could not.
   const providers = usePaymentProviders();
   const [providerError, setProviderError] = useState<string | null>(null);
+  // Why the last try failed for any other reason (network, a check, the plan).
+  const [payError, setPayError] = useState<string | null>(null);
   // The instalment open in the pay dialog.
   const [payingInstallmentId, setPayingInstallmentId] = useState<string | null>(null);
 
@@ -55,8 +57,19 @@ export const FinancingView = () => {
       installmentId: string;
       provider?: PaymentProvider;
     }) => unwrap(renterService.payFinancingInstallment(installmentId, provider)),
-    onMutate: () => setProviderError(null),
-    onError: (error, variables) => setProviderError(providers.recover(error, variables.provider)),
+    onMutate: () => {
+      setProviderError(null);
+      setPayError(null);
+    },
+    onError: (error, variables) => {
+      // That company cannot take it right now: the choice reopens with another picked.
+      const unavailable = providers.recover(error, variables.provider);
+      if (unavailable) {
+        setProviderError(unavailable);
+        return;
+      }
+      setPayError(error.message || 'We couldn’t start this payment. Please try again.');
+    },
     onSuccess: (updated) => {
       if (updated.authorizationUrl) {
         // Real gateway flow: the installment is PROCESSING until the
@@ -81,6 +94,7 @@ export const FinancingView = () => {
   const closePayDialog = () => {
     setPayingInstallmentId(null);
     setProviderError(null);
+    setPayError(null);
   };
 
   if (isLoading) {
@@ -146,6 +160,7 @@ export const FinancingView = () => {
         protection="This payment is applied to your Flex plan."
         providers={providers}
         providerError={providerError}
+        error={payError}
         busy={payInstallmentMutation.isPending}
         onPay={() => payingInstallment && handlePayInstallment(payingInstallment.id)}
       />

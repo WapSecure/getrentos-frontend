@@ -108,7 +108,7 @@ const ProfileSettingsForm = ({
           />
         </Field>
 
-        <SaveButton type="submit" label="Save changes" />
+        <SaveButton type="submit" label="Save changes" isLoading={updateMutation.isPending} />
       </form>
     </div>
   );

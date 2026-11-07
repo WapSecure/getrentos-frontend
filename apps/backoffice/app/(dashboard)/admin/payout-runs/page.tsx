@@ -7,6 +7,7 @@ import {
   Badge,
   Button,
   Card,
+  ConfirmDialog,
   EmptyState,
   Field,
   Input,
@@ -50,6 +51,13 @@ export default function PayoutRunsPage() {
   const canAct = hasAdminPermission(user?.roles, 'rentfinance.approve');
   const [period, setPeriod] = useState(lastEndedMonth());
   const [openRun, setOpenRun] = useState<string | null>(null);
+  // Money moves only after the amount and who receives it are confirmed.
+  const [confirmingIssue, setConfirmingIssue] = useState(false);
+  const [confirmingRetry, setConfirmingRetry] = useState<{
+    itemId: string;
+    ownerName: string;
+    amount: number | null;
+  } | null>(null);
   const toast = useToast();
 
   const runs = useQuery({
@@ -99,6 +107,9 @@ export default function PayoutRunsPage() {
   });
 
   const r = run.data;
+  // What issuing pays: every drafted owner statement in the open run.
+  const toIssue = r?.items.filter((i) => i.status === 'DRAFTED') ?? [];
+  const issueTotal = toIssue.reduce((sum, i) => sum + (i.netPayout ?? 0), 0);
 
   return (
     <>
@@ -228,7 +239,13 @@ export default function PayoutRunsPage() {
                                   variant="ghost"
                                   disabled={retry.isPending}
                                   isLoading={retry.isPending && retry.variables?.itemId === i.id}
-                                  onClick={() => retry.mutate({ id: r.id, itemId: i.id })}
+                                  onClick={() =>
+                                    setConfirmingRetry({
+                                      itemId: i.id,
+                                      ownerName: i.ownerName,
+                                      amount: i.netPayout,
+                                    })
+                                  }
                                 >
                                   Retry
                                 </Button>
@@ -245,7 +262,7 @@ export default function PayoutRunsPage() {
                         variant="primary"
                         isLoading={issue.isPending}
                         loadingText="Issuing…"
-                        onClick={() => issue.mutate(r.id)}
+                        onClick={() => setConfirmingIssue(true)}
                       >
                         Issue run
                       </Button>
@@ -260,6 +277,36 @@ export default function PayoutRunsPage() {
           ))}
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirmingIssue && !!r}
+        onOpenChange={setConfirmingIssue}
+        title={`Pay ${toIssue.length} owner${toIssue.length === 1 ? '' : 's'} ${formatCurrency(issueTotal)} for ${r?.period ?? ''}?`}
+        description={`Each owner's statement pays out to that owner's current payout account (${toIssue
+          .map((i) => `${i.ownerName} ${i.netPayout != null ? formatCurrency(i.netPayout) : '—'}`)
+          .join(
+            ', '
+          )}). Payouts above the release threshold wait for approval. Money that has been sent can't be called back from here.`}
+        confirmLabel={`Issue and pay ${formatCurrency(issueTotal)}`}
+        isLoading={issue.isPending}
+        onConfirm={() => r && issue.mutate(r.id)}
+      />
+      <ConfirmDialog
+        open={!!confirmingRetry && !!r}
+        onOpenChange={(open) => !open && setConfirmingRetry(null)}
+        title={`Send ${
+          confirmingRetry?.amount != null ? formatCurrency(confirmingRetry.amount) : 'this payout'
+        } to ${confirmingRetry?.ownerName ?? 'this owner'}?`}
+        description={`This sends the failed payout again, under a new reference, to ${
+          confirmingRetry?.ownerName ?? 'the owner'
+        }'s current payout account. If they changed their account after it failed, check the change was really theirs before you retry.`}
+        confirmLabel={`Send ${
+          confirmingRetry?.amount != null ? formatCurrency(confirmingRetry.amount) : 'payout'
+        }`}
+        onConfirm={() => {
+          if (r && confirmingRetry) retry.mutate({ id: r.id, itemId: confirmingRetry.itemId });
+        }}
+      />
     </>
   );
 }

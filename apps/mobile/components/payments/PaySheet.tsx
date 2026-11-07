@@ -135,16 +135,27 @@ export function PaySheet({
 }: PaySheetProps) {
   const { colors, spacing, radius } = useTheme();
   // The payer covers the card or bank fee, so the receiver gets the full amount.
-  const { fee, total } = useCheckoutFee(breakdown && open ? amount : 0, providers.provider);
+  const {
+    fee,
+    total,
+    state: feeState,
+    retry: retryFee,
+    retrying: retryingFee,
+  } = useCheckoutFee(breakdown && open ? amount : 0, providers.provider);
   const chosen = providers.options.find((o) => o.provider === providers.provider);
   const choose = providers.canChoose;
-  const pays = total ?? amount;
   const company = chosen?.label ?? 'the payment company';
+  // Never promise a total that leaves the fee out: wait for it, or say it comes next.
+  const withFee = breakdown && ready && amount > 0;
+  const feeLoading = withFee && feeState === 'loading';
+  const feeUnknown = withFee && feeState === 'unknown';
 
   const button = !ready
     ? notReadyLabel
     : (payLabel ??
-      `Pay ${formatNaira(breakdown ? pays : amount)}${chosen && choose ? ` with ${chosen.label}` : ''}`);
+      (feeUnknown
+        ? `Continue to ${company}`
+        : `Pay ${formatNaira(breakdown && total != null ? total : amount)}${chosen && choose ? ` with ${chosen.label}` : ''}`));
 
   return (
     <Sheet
@@ -156,9 +167,9 @@ export function PaySheet({
             label={button}
             size="lg"
             icon={<Lock size={16} color={colors.primaryForeground} />}
-            disabled={!ready}
-            loading={busy}
-            loadingLabel="Starting payment…"
+            disabled={!ready || feeLoading}
+            loading={busy || feeLoading}
+            loadingLabel={busy ? 'Starting payment…' : 'Working out the fee…'}
             onPress={onPay}
           />
           <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm }}>
@@ -232,7 +243,7 @@ export function PaySheet({
 
         {note}
 
-        {breakdown && ready && amount > 0 ? (
+        {withFee ? (
           <View
             style={{
               borderWidth: 1,
@@ -246,9 +257,21 @@ export function PaySheet({
             <Line label={itemLabel} value={formatNaira(amount)} />
             <Line
               label="Card or bank fee"
-              value={fee == null ? '…' : fee > 0 ? formatNaira(fee) : 'None'}
+              value={
+                feeUnknown
+                  ? 'Shown on the next page'
+                  : fee == null
+                    ? 'Working it out…'
+                    : fee > 0
+                      ? formatNaira(fee)
+                      : 'None'
+              }
             />
-            <Line label="You pay" value={formatNaira(pays)} strong />
+            <Line
+              label="You pay"
+              value={total != null ? formatNaira(total) : `${formatNaira(amount)} + fee`}
+              strong
+            />
             {fee && receiverLine ? (
               <Text
                 variant="caption"
@@ -261,6 +284,26 @@ export function PaySheet({
               >
                 {receiverLine}
               </Text>
+            ) : null}
+          </View>
+        ) : null}
+
+        {feeUnknown ? (
+          <View style={{ gap: spacing.sm }}>
+            <FormAlert
+              tone="warning"
+              message={`We couldn’t work out the card or bank fee here. You’ll see it on ${company}’s page before you pay.`}
+            />
+            {retryFee ? (
+              <Button
+                label="Try again"
+                variant="outline"
+                size="sm"
+                fullWidth={false}
+                loading={retryingFee}
+                onPress={retryFee}
+                style={{ alignSelf: 'flex-start' }}
+              />
             ) : null}
           </View>
         ) : null}

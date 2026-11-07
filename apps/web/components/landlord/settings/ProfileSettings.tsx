@@ -36,9 +36,11 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
     fetchProfile();
   }, []);
 
-  const handleSave = () => {
-    landlordService.updateProfile({ fullName, phone, companyName });
-  };
+  // Resolves true only when it saved, so the button says "Saved" only then.
+  const handleSave = () =>
+    landlordService
+      .updateProfile({ fullName, phone, companyName })
+      .then((response) => response.success);
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

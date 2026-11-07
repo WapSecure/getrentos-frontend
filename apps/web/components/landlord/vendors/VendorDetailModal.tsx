@@ -257,9 +257,8 @@ export const VendorDetailModal = ({ vendor, onClose }: VendorDetailModalProps) =
                 {payoutError && <Alert variant="danger">{payoutError}</Alert>}
                 <SaveButton
                   label="Save payout account"
-                  onClick={() => {
-                    if (canSavePayoutAccount) savePayoutAccount.mutate();
-                  }}
+                  disabled={!canSavePayoutAccount}
+                  onClick={() => (canSavePayoutAccount ? savePayoutAccount.mutateAsync() : false)}
                 />
               </div>
             </section>

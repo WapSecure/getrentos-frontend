@@ -139,7 +139,7 @@ export default function Account() {
     {
       key: 'methods',
       label: 'Payment methods',
-      description: 'Cards and accounts for rent',
+      description: 'How paying works',
       icon: CreditCard,
       onPress: go('/(app)/payment-methods'),
     },

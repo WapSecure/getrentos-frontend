@@ -6,10 +6,11 @@ import { RenterPageHeader } from '../shared/RenterPageHeader';
 
 interface PaymentsHeaderProps {
   onExport: () => void;
-  onPayOutstanding?: () => void;
+  /** Open the pay dialog for the oldest open charge. Absent when nothing is owed. */
+  onPayOldest?: () => void;
 }
 
-export const PaymentsHeader = ({ onExport, onPayOutstanding }: PaymentsHeaderProps) => {
+export const PaymentsHeader = ({ onExport, onPayOldest }: PaymentsHeaderProps) => {
   return (
     <div>
       <RenterPageHeader
@@ -23,10 +24,10 @@ export const PaymentsHeader = ({ onExport, onPayOutstanding }: PaymentsHeaderPro
               <Download className="h-4 w-4" aria-hidden="true" />
               Export
             </Button>
-            {onPayOutstanding && (
-              <Button variant="primary" className="gap-2" size="sm" onClick={onPayOutstanding}>
+            {onPayOldest && (
+              <Button variant="primary" className="gap-2" size="sm" onClick={onPayOldest}>
                 <Plus className="h-4 w-4" aria-hidden="true" />
-                Pay outstanding
+                Pay oldest charge
               </Button>
             )}
           </>

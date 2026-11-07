@@ -56,11 +56,13 @@ export const NotificationSettings = () => {
     setPreferences((prev) => prev.map((p) => (p.id === id ? { ...p, [channel]: !p[channel] } : p)));
   };
 
-  const handleSave = () => {
-    landlordService.updateNotificationPreferences(
-      preferences.map(({ id, email, push }) => ({ id, email, push }))
-    );
-  };
+  // Resolves true only when it saved, so the button says "Saved" only then.
+  const handleSave = () =>
+    landlordService
+      .updateNotificationPreferences(
+        preferences.map(({ id, email, push }) => ({ id, email, push }))
+      )
+      .then((response) => response.success);
 
   return (
     <div>

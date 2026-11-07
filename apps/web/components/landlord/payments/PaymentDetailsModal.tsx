@@ -14,7 +14,7 @@ interface PaymentDetailsModalProps {
 const escrowSteps: { key: EscrowStatus; label: string }[] = [
   { key: 'held', label: 'Funds held' },
   { key: 'pending_review', label: 'Verification' },
-  { key: 'released', label: 'Released' },
+  { key: 'released', label: 'Released from escrow' },
 ];
 
 const stepOrder: EscrowStatus[] = ['held', 'pending_review', 'released'];
@@ -103,11 +103,21 @@ export const PaymentDetailsModal = ({ payment, onClose }: PaymentDetailsModalPro
             resolved. Landlords cannot pay it out early or skip this step.
           </Alert>
 
-          {payment.releaseDate && (
+          {/* `releaseDate` is the scheduled release while the rent is held. Leaving
+              escrow is not the bank transfer itself, which follows separately. */}
+          {payment.escrowStatus === 'released' ? (
             <p className="text-xs text-muted-foreground text-center">
-              Released to your account on {formatDate(payment.releaseDate)}
+              Released from escrow
+              {payment.releaseDate && new Date(payment.releaseDate) <= new Date()
+                ? ` on ${formatDate(payment.releaseDate)}`
+                : ''}
+              . The transfer to your bank is a separate step that follows.
             </p>
-          )}
+          ) : payment.releaseDate && payment.escrowStatus !== 'frozen' ? (
+            <p className="text-xs text-muted-foreground text-center">
+              Due to be released from escrow on {formatDate(payment.releaseDate)}
+            </p>
+          ) : null}
         </div>
       </DialogContent>
     </Dialog>
