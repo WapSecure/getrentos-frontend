@@ -182,6 +182,12 @@ const navItems: NavItem[] = [
     permission: 'rentfinance.view',
   },
   {
+    label: 'Payment Providers',
+    href: '/admin/payment-providers',
+    icon: CreditCard,
+    permission: 'rentfinance.view',
+  },
+  {
     label: 'Collections Reconciliation',
     href: '/admin/collections-reconciliation',
     icon: Scale,
