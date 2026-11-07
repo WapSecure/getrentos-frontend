@@ -51,11 +51,19 @@ describe('assessPhotoQuality', () => {
 });
 
 describe('base64ToBytes (the phone check decodes its 640 px copy with it)', () => {
-  it('matches Node for every padding length', () => {
+  // Known vectors (RFC 4648) for every padding length; no Node Buffer, which
+  // the app's test type-check does not include.
+  it.each([
+    ['', []],
+    ['AA==', [0]],
+    ['AAE=', [0, 1]],
+    ['AAEC', [0, 1, 2]],
+    ['AAECAw==', [0, 1, 2, 3]],
+    ['AAECAwQ=', [0, 1, 2, 3, 4]],
+    ['/+8=', [255, 239]],
+    ['Zm9vYmFy', [102, 111, 111, 98, 97, 114]],
+  ])('decodes %j', (b64, bytes) => {
     const { base64ToBytes } = require('@/lib/photoQuality');
-    for (const n of [0, 1, 2, 3, 4, 5, 255, 1000]) {
-      const bytes = Buffer.from(Array.from({ length: n }, (_, i) => (i * 37 + 11) % 256));
-      expect(Buffer.from(base64ToBytes(bytes.toString('base64')))).toEqual(bytes);
-    }
+    expect(Array.from(base64ToBytes(b64) as Uint8Array)).toEqual(bytes);
   });
 });
