@@ -10,6 +10,10 @@ export interface PayoutIssue {
   beneficiary: string;
   failureReason: string | null;
   createdAt: string;
+  /** A payout limit stopped it before anything was sent; approval releases NEEDS_APPROVAL ones. */
+  held?: { code: string; message: string; needsApproval: boolean };
+  /** The reference it was last tried under. */
+  transferRef?: string | null;
 }
 
 /** Every way money leaves, including those retried elsewhere. */
@@ -37,6 +41,18 @@ export interface PayoutIssues {
 export const adminPayoutIssuesService = {
   list(): Promise<ApiResponse<PayoutIssues>> {
     return safeCall(() => authFetch<PayoutIssues>('/admin/payout-retries'));
+  },
+  /** A second officer approves a held payout of ₦5m or more; then Retry sends it. Needs step-up. */
+  approve(
+    reference: string,
+    note?: string
+  ): Promise<ApiResponse<{ subject: string; amount: number }>> {
+    return safeCall(() =>
+      authFetch<{ subject: string; amount: number }>('/admin/payout-approvals', {
+        method: 'POST',
+        body: JSON.stringify({ reference, ...(note ? { note } : {}) }),
+      })
+    );
   },
   /** Needs step-up; the shared dialog asks for it. */
   retry(rail: PayoutRail, id: string): Promise<ApiResponse<{ id: string; status: string }>> {

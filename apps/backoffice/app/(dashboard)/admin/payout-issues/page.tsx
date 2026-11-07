@@ -57,6 +57,7 @@ export default function PayoutIssuesPage() {
   const toast = useToast();
   const [view, setView] = useState<View>('failed');
   const [confirming, setConfirming] = useState<PayoutIssue | null>(null);
+  const [approving, setApproving] = useState<PayoutIssue | null>(null);
 
   const query = useQuery({
     queryKey: ['admin', 'payout-issues'],
@@ -75,6 +76,17 @@ export default function PayoutIssuesPage() {
       );
     },
     onError: (e: Error) => toast.error(e.message || 'Could not retry this payout.'),
+  });
+
+  const approve = useMutation({
+    mutationFn: (p: PayoutIssue) =>
+      unwrap(adminPayoutIssuesService.approve(p.transferRef as string)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'payout-issues'] });
+      setApproving(null);
+      toast.success('Approved. Retry it to send it.');
+    },
+    onError: (e: Error) => toast.error(e.message || 'Could not approve this payout.'),
   });
 
   const items =
@@ -162,12 +174,25 @@ export default function PayoutIssuesPage() {
                     {RAIL[p.rail]} · started {formatDate(p.createdAt)} · {p.id}
                   </p>
                 </div>
-                <Badge variant={view === 'failed' ? 'danger' : 'warning'}>
-                  {view === 'failed' ? 'Failed' : 'Not sent'}
+                <Badge variant={p.held ? 'warning' : view === 'failed' ? 'danger' : 'warning'}>
+                  {p.held
+                    ? p.held.needsApproval
+                      ? 'Needs approval'
+                      : 'Held by a limit'
+                    : view === 'failed'
+                      ? 'Failed'
+                      : 'Not sent'}
                 </Badge>
               </div>
 
-              {p.failureReason ? (
+              {p.held ? (
+                <p className="mt-3 text-sm text-foreground">
+                  {p.held.message}{' '}
+                  <span className="text-muted-foreground">
+                    Nothing was sent, so it is safe to send later.
+                  </span>
+                </p>
+              ) : p.failureReason ? (
                 <p className="mt-3 text-sm text-destructive">{p.failureReason}</p>
               ) : null}
 
@@ -175,6 +200,15 @@ export default function PayoutIssuesPage() {
                 <p className="mt-3 text-xs text-muted-foreground">
                   No money was sent. Release what it claimed, or send it again by hand.
                 </p>
+              ) : canRetry && p.held?.needsApproval && p.transferRef ? (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <Button variant="primary" onClick={() => setApproving(p)}>
+                    Approve
+                  </Button>
+                  <Button variant="outline" onClick={() => setConfirming(p)}>
+                    Retry
+                  </Button>
+                </div>
               ) : canRetry ? (
                 <Button className="mt-4" variant="outline" onClick={() => setConfirming(p)}>
                   Retry
@@ -188,6 +222,21 @@ export default function PayoutIssuesPage() {
           ))}
         </div>
       )}
+
+      <ConfirmDialog
+        open={approving !== null}
+        onOpenChange={(open) => !open && setApproving(null)}
+        title="Approve this payout?"
+        description={
+          approving
+            ? `${formatCurrency(approving.amount)} to ${approving.beneficiary} (${RAIL[approving.rail]}). Payouts of ₦5,000,000 or more need a second officer. Approving does not send it: retry it afterwards.`
+            : ''
+        }
+        tone="primary"
+        confirmLabel="Approve"
+        isLoading={approve.isPending}
+        onConfirm={() => approving && approve.mutate(approving)}
+      />
 
       <ConfirmDialog
         open={confirming !== null}
