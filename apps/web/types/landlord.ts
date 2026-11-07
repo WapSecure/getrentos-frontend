@@ -314,7 +314,14 @@ export interface RentPayment {
   periodEnd?: string;
   /** Invoice breakdown: rent plus recurring extras. */
   lines?: { category: string; label: string; amount: number }[];
+  /**
+   * The bank transfer to the owner for this rent, from the owner statement that
+   * pays it out. Null while it is on no statement.
+   */
+  payoutStatus?: RentPayoutStatus | null;
 }
+
+export type RentPayoutStatus = 'QUEUED' | 'SENT' | 'PAID' | 'FAILED';
 
 /** CAC registration class — mirrors the backend AgencyBusinessType enum. */
 export type BusinessRegistrationType =

@@ -274,6 +274,8 @@ export interface HostPayoutAccount {
   bankName: string;
   accountNumber: string;
   accountName: string;
+  /** Set while payouts wait after a change of bank details (ISO); null when none is held. */
+  payoutHoldUntil?: string | null;
 }
 
 export interface HostPayout {

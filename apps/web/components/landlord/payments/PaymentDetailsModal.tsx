@@ -1,9 +1,10 @@
 'use client';
 
 import { ShieldCheck } from 'lucide-react';
-import { Alert, Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrentos/ui';
+import { Alert, Badge, Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrentos/ui';
+import { rentPayoutStatusBadges } from '@/lib/statusBadge';
 import { formatCurrency, formatDate } from '@/lib/format';
-import type { RentPayment, EscrowStatus } from '@/types/landlord';
+import type { RentPayment, EscrowStatus, RentPayoutStatus } from '@/types/landlord';
 import { InvoiceLines } from '@/components/shared/InvoiceLines';
 
 interface PaymentDetailsModalProps {
@@ -18,6 +19,15 @@ const escrowSteps: { key: EscrowStatus; label: string }[] = [
 ];
 
 const stepOrder: EscrowStatus[] = ['held', 'pending_review', 'released'];
+
+/** What each payout state means for the landlord, under its badge. */
+const payoutNote: Record<RentPayoutStatus, string> = {
+  QUEUED: 'This rent is on an owner statement and waits to be sent to your bank.',
+  SENT: 'The transfer is with the bank. It usually lands within a working day.',
+  PAID: 'This rent has been paid to your bank account.',
+  FAILED:
+    'The transfer did not go through. Check your payout account details; GetRentos support can help send it again.',
+};
 
 export const PaymentDetailsModal = ({ payment, onClose }: PaymentDetailsModalProps) => {
   if (!payment) return null;
@@ -105,7 +115,14 @@ export const PaymentDetailsModal = ({ payment, onClose }: PaymentDetailsModalPro
 
           {/* `releaseDate` is the scheduled release while the rent is held. Leaving
               escrow is not the bank transfer itself, which follows separately. */}
-          {payment.escrowStatus === 'released' ? (
+          {payment.escrowStatus === 'released' && payment.payoutStatus ? (
+            <div className="flex flex-col items-center gap-1.5 text-center">
+              <Badge variant={rentPayoutStatusBadges[payment.payoutStatus].variant}>
+                {rentPayoutStatusBadges[payment.payoutStatus].label}
+              </Badge>
+              <p className="text-xs text-muted-foreground">{payoutNote[payment.payoutStatus]}</p>
+            </div>
+          ) : payment.escrowStatus === 'released' ? (
             <p className="text-xs text-muted-foreground text-center">
               Released from escrow
               {payment.releaseDate && new Date(payment.releaseDate) <= new Date()

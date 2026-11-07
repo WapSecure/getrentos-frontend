@@ -1,4 +1,5 @@
 import { authFetch, safeCall, type ApiResponse } from '@getrentos/shared';
+import type { PayoutDestination } from './adminPayoutIssuesService';
 
 export interface PayoutRunSummary {
   id: string;
@@ -32,6 +33,8 @@ export interface PayoutRun {
     netPayout: number | null;
     statementStatus: string | null;
     payoutStatus: string | null;
+    /** The account this owner's statement pays into; null when none is on file. */
+    destination?: PayoutDestination | null;
   }[];
 }
 

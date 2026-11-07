@@ -23,7 +23,10 @@ import { shortletKeys } from '@/lib/queryKeys';
 import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { BankAccountFields } from '@/components/shared/payouts/BankAccountFields';
-import { PAYOUT_CHANGE_COOLDOWN_HINT } from '@/components/shared/payouts/PayoutHoldNotice';
+import {
+  PAYOUT_CHANGE_COOLDOWN_HINT,
+  PayoutHoldNotice,
+} from '@/components/shared/payouts/PayoutHoldNotice';
 import { payoutDestination } from '@/lib/payoutDestination';
 
 const PAYOUT_STATUS_VARIANT: Record<string, BadgeVariant> = {
@@ -230,6 +233,7 @@ export function ShortletPayoutsDialog({
               <p className="mt-1 text-sm text-muted-foreground">
                 {account.bankName} · {account.accountNumber} · {account.accountName}
               </p>
+              <PayoutHoldNotice holdUntil={account.payoutHoldUntil} />
               <p className="mt-2 text-xs text-muted-foreground">{PAYOUT_CHANGE_COOLDOWN_HINT}</p>
               <Button
                 className="mt-3"

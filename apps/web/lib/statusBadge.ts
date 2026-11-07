@@ -16,6 +16,7 @@ import {
 import type { BadgeVariant } from '@getrentos/ui';
 import type {
   RentPaymentStatus,
+  RentPayoutStatus,
   EscrowStatus,
   LeaseStatus,
   ViewingRequestStatus,
@@ -55,6 +56,14 @@ export const escrowStatusBadges: Record<EscrowStatus, StatusBadgeEntry> = {
   // Released from escrow is not yet money in the landlord's bank: the transfer is a separate step.
   released: { label: 'Released to landlord', variant: 'success', icon: CheckCircle2 },
   frozen: { label: 'On hold: dispute open', variant: 'danger', icon: Ban },
+};
+
+/** The bank transfer that follows release from escrow (UX-33). */
+export const rentPayoutStatusBadges: Record<RentPayoutStatus, StatusBadgeEntry> = {
+  QUEUED: { label: 'Queued for payout', variant: 'neutral', icon: Clock },
+  SENT: { label: 'Sent to bank', variant: 'info' },
+  PAID: { label: 'Paid to bank', variant: 'success', icon: CheckCircle2 },
+  FAILED: { label: 'Payout failed', variant: 'danger', icon: XCircle },
 };
 
 export const leaseStatusBadges: Record<LeaseStatus, StatusBadgeEntry> = {

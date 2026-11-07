@@ -3,7 +3,7 @@
 import { ReceiptText } from 'lucide-react';
 import { Badge, Button, EmptyState } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
-import { escrowStatusBadges, paymentStatusBadges } from '@/lib/statusBadge';
+import { escrowStatusBadges, paymentStatusBadges, rentPayoutStatusBadges } from '@/lib/statusBadge';
 import type { RentPayment } from '@/types/landlord';
 
 interface PaymentsTableProps {
@@ -28,6 +28,7 @@ export const PaymentsTable = ({ payments, onViewDetails }: PaymentsTableProps) =
               <th className="px-4 py-3 font-medium text-muted-foreground">Due date</th>
               <th className="px-4 py-3 font-medium text-muted-foreground">Payment status</th>
               <th className="px-4 py-3 font-medium text-muted-foreground">Escrow</th>
+              <th className="px-4 py-3 font-medium text-muted-foreground">Payout</th>
               <th className="px-4 py-3" />
             </tr>
           </thead>
@@ -35,6 +36,9 @@ export const PaymentsTable = ({ payments, onViewDetails }: PaymentsTableProps) =
             {payments.map((payment) => {
               const escrow = escrowStatusBadges[payment.escrowStatus];
               const status = paymentStatusBadges[payment.status];
+              const payout = payment.payoutStatus
+                ? rentPayoutStatusBadges[payment.payoutStatus]
+                : null;
               return (
                 <tr key={payment.id} className="hover:bg-secondary transition-colors">
                   <td className="px-4 py-3 font-medium text-foreground whitespace-nowrap">
@@ -64,6 +68,18 @@ export const PaymentsTable = ({ payments, onViewDetails }: PaymentsTableProps) =
                     >
                       {escrow.label}
                     </Badge>
+                  </td>
+                  <td className="px-4 py-3">
+                    {payout ? (
+                      <Badge
+                        variant={payout.variant}
+                        icon={payout.icon && <payout.icon className="w-3 h-3" />}
+                      >
+                        {payout.label}
+                      </Badge>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
                   </td>
                   <td className="px-4 py-3">
                     <Button
