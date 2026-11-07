@@ -88,7 +88,14 @@
         {
           "locationWhenInUsePermission": "GetRentos checks you are at the property when you film its video tour, so buyers and renters see it was filmed on site."
         }
-      ]
+      ],
+      [
+        "@smileid/usesmileid_mlkit_face",
+        {
+          "kspVersion": "2.3.6"
+        }
+      ],
+      "@smileid/usesmileid_vision_face"
     ],
     "experiments": {
       "typedRoutes": true
@@ -106,6 +113,7 @@
         "projectId": "6cc26d00-7ec0-4251-8c6e-ce49aae8510a"
       }
     },
-    "owner": "wapsecure"
+    "owner": "wapsecure",
+    "newArchEnabled": true
   }
 }

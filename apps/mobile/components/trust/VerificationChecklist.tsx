@@ -34,9 +34,12 @@ import {
   type TrustConsent,
   type TrustIdType,
   type TrustPurpose,
+  type SmileLivenessSession,
 } from '@/lib/api/trust';
+import { liveSelfieSupported } from '@/lib/smileid/liveSelfie';
+import { LiveSelfieCheck } from './LiveSelfieCheck';
 import type { PickedFile } from '@/lib/api/documents';
-import { errorMessage } from '@/lib/api/client';
+import { ApiError, errorMessage } from '@/lib/api/client';
 import { captureSelfie } from '@/lib/filePicker';
 import { formatDate } from '@/lib/format';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
@@ -76,6 +79,9 @@ export function VerificationChecklist({
     queryKey: qk.trust.verification(verificationId ?? ''),
     queryFn: () => trustApi.verification(verificationId!),
     enabled: !!verificationId,
+    // A live selfie is decided by Smile on the server a little later; look again until it lands.
+    refetchInterval: (q) =>
+      q.state.data?.steps?.some((st) => st.status === 'WAITING_FOR_PROVIDER') ? 5000 : false,
   });
   const consents = useQuery({ queryKey: qk.trust.consents, queryFn: trustApi.consents });
   const refresh = () => {
@@ -450,21 +456,63 @@ function PhoneForm({ verificationId, onDone }: FormProps) {
 function SelfieForm({ verificationId, onDone }: FormProps) {
   const { spacing } = useTheme();
   const toast = useToast();
+  // Smile ID's live check needs its native code (a development or store build);
+  // Expo Go and web fall back to a photo, which a person reviews.
+  const [live, setLive] = useState(liveSelfieSupported);
+  const [session, setSession] = useState<SmileLivenessSession | null>(null);
   const [selfie, setSelfie] = useState<PickedFile | null>(null);
+  const startLive = useMutation({
+    mutationFn: () => trustApi.livenessSession(verificationId),
+    onSuccess: setSession,
+    onError: (e) => {
+      if (e instanceof ApiError && e.code === 'LIVENESS_UNAVAILABLE') setLive(false);
+      toast.show(errorMessage(e, 'Could not start the live selfie check.'), 'error');
+    },
+  });
   const run = useMutation({
     mutationFn: () => trustApi.biometrics(verificationId, selfie!),
     onSuccess: () => {
-      toast.show('Selfie checked.', 'success');
+      toast.show('Selfie sent. A person will review it.', 'info');
       setSelfie(null);
       onDone();
     },
     onError: (e) => toast.show(errorMessage(e, 'Could not check your selfie.'), 'error'),
   });
+
+  if (live) {
+    return (
+      <View style={{ gap: spacing.sm }}>
+        <Text variant="caption" color="mutedForeground">
+          A short live selfie: face the camera in good light and turn your head when asked. It
+          confirms you are really there and matches your face to your ID.
+        </Text>
+        <Button
+          label="Start live selfie"
+          size="sm"
+          icon={<Camera size={16} />}
+          loading={startLive.isPending}
+          onPress={() => startLive.mutate()}
+          style={{ alignSelf: 'flex-start' }}
+        />
+        {session ? (
+          <LiveSelfieCheck
+            session={session}
+            onClose={(outcome) => {
+              setSession(null);
+              if (outcome) toast.show(outcome.text, outcome.tone);
+              if (outcome?.submitted) onDone();
+            }}
+          />
+        ) : null}
+      </View>
+    );
+  }
+
   return (
     <View style={{ gap: spacing.sm }}>
       <Text variant="caption" color="mutedForeground">
-        Face the camera in good light, without glasses or a hat. One photo runs the selfie, liveness
-        and face-match checks.
+        Face the camera in good light, without glasses or a hat. A person checks this photo, which
+        can take a little longer.
       </Text>
       <View style={{ flexDirection: 'row', gap: spacing.sm, flexWrap: 'wrap' }}>
         <Button
@@ -479,7 +527,7 @@ function SelfieForm({ verificationId, onDone }: FormProps) {
         />
         {selfie ? (
           <Button
-            label="Check my selfie"
+            label="Send my selfie"
             size="sm"
             loading={run.isPending}
             onPress={() => run.mutate()}

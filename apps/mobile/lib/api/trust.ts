@@ -180,6 +180,21 @@ export function checkKinds(steps: TrustStep[]): CheckKind[] {
   return out;
 }
 
+/** What the app needs to run Smile ID's live selfie capture (see trustApi.livenessSession). */
+export interface SmileLivenessSession {
+  token: string;
+  partnerId: string;
+  userId: string;
+  useSandbox: boolean;
+  consent: {
+    granted: true;
+    grantedAt: string;
+    noticeLanguage: string;
+    noticePrivacyPolicyUrl: string;
+  };
+  userDetails: { givenNames: string; lastName: string };
+}
+
 export type CheckState = 'done' | 'todo' | 'failed' | 'review' | 'waiting';
 
 /**
@@ -261,6 +276,15 @@ export const trustApi = {
     apiFetch<TrustVerification>(`/trust/verifications/${id}/phone-otp/verify`, {
       method: 'POST',
       body: { reference, code },
+    }),
+  /**
+   * A Smile ID live selfie session for the liveness step. The token is bound on
+   * the server to this user, our webhook and the recorded consent; the result
+   * reaches the server from Smile, never from the app.
+   */
+  livenessSession: (id: string) =>
+    apiFetch<SmileLivenessSession>(`/trust/verifications/${id}/liveness/session`, {
+      method: 'POST',
     }),
   biometrics: (id: string, selfie: PickedFile) => {
     const form = new FormData();
