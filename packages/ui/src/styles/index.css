@@ -362,6 +362,12 @@
     color: var(--foreground);
   }
 
+  .sidebar-group-toggle:focus-visible,
+  .sidebar-item:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
   .sidebar-item {
     display: flex;
     min-height: 2.75rem;
@@ -385,6 +391,8 @@
   .sidebar-item[aria-current='page'] {
     background-color: var(--accent);
     color: var(--accent-foreground);
+    font-weight: 600;
+    box-shadow: inset 2px 0 0 var(--primary);
   }
 
   .page-title {

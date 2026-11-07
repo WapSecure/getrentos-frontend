@@ -133,6 +133,7 @@ export const LandlordNavbar = ({ user }: LandlordNavbarProps) => {
           >
             <GroupedMobileNavigation
               ariaLabel="Landlord navigation"
+              workspaceLabel="Property management"
               dashboardHref={ROUTES.LANDLORD_DASHBOARD}
               onNavigate={() => setIsMobileMenuOpen(false)}
               groups={navGroups.map((group) => ({

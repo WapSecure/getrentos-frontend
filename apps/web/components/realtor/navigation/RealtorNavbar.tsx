@@ -142,6 +142,7 @@ export const RealtorNavbar = ({ user }: RealtorNavbarProps) => {
           >
             <GroupedMobileNavigation
               ariaLabel="Realtor navigation"
+              workspaceLabel="Realtor"
               dashboardHref={ROUTES.REALTOR_DASHBOARD}
               onNavigate={() => setIsMobileMenuOpen(false)}
               groups={navGroups.map((group) => ({

@@ -33,7 +33,7 @@ import { ROUTES } from '@/lib/constants/auth';
 import { ESTATE_MARKETPLACE_ROUTES } from '@/lib/constants/auth';
 import { OWNER_LAND_SALES_ROUTE } from '@/lib/constants/landDeveloperRoutes';
 import { useLandAvailability } from '@/hooks/useLandAvailability';
-import { GroupedSidebar } from '@/components/shared/dashboard/GroupedSidebar';
+import { createRoleNavigation, GroupedSidebar } from '@/components/shared/dashboard/GroupedSidebar';
 import { usePlanTier } from '@/hooks/usePlanTier';
 
 interface NavItem {
@@ -93,13 +93,26 @@ export const navItems: NavItem[] = [
   { label: 'Verification', href: '/owner/verification', icon: ShieldCheck },
 ];
 
-export const navGroups = [
+const baseNavGroups = [
   { label: 'Overview', items: navItems.slice(0, 1) },
   { label: 'Portfolio and listings', items: navItems.slice(1, 7) },
   { label: 'Sales and investment', items: navItems.slice(7, 16) },
   { label: 'Communication', items: navItems.slice(16, 19) },
   { label: 'Trust and account', items: navItems.slice(19) },
 ];
+
+export const navGroups = createRoleNavigation(
+  baseNavGroups,
+  [
+    ROUTES.OWNER_DASHBOARD,
+    ROUTES.OWNER_PROPERTIES,
+    ROUTES.OWNER_LISTINGS,
+    ROUTES.OWNER_OFFERS,
+    ROUTES.OWNER_TRANSACTIONS,
+    ROUTES.OWNER_MESSAGES,
+  ],
+  [ROUTES.OWNER_SETTINGS, ROUTES.OWNER_BILLING, '/owner/verification']
+);
 
 export const OwnerSidebar = () => {
   const land = useLandAvailability();
@@ -108,6 +121,7 @@ export const OwnerSidebar = () => {
   return (
     <GroupedSidebar
       ariaLabel="Property owner navigation"
+      workspaceLabel="Property owner"
       dashboardHref={ROUTES.OWNER_DASHBOARD}
       groups={navGroups.map((group) => ({
         ...group,
