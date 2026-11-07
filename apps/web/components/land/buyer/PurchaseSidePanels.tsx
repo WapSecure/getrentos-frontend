@@ -1,10 +1,7 @@
 'use client';
 
-import { CheckoutFeeNote } from '@/components/shared/payments/CheckoutFeeLine';
-import { PaymentProviderPicker } from '@/components/shared/payments/PaymentProviderPicker';
-import type { PaymentProviderChoice } from '@/hooks/usePaymentProviders';
 import { useState } from 'react';
-import { Alert, Button, ConfirmDialog } from '@getrentos/ui';
+import { Button, ConfirmDialog } from '@getrentos/ui';
 import { CreditCard, Download, FileText, XCircle } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { landBuyerService } from '@/services/landBuyerService';
@@ -22,21 +19,15 @@ import {
 
 type Notify = (message: string, variant: 'success' | 'error') => void;
 
-/** What is due now and the button that pays it. */
+/** What is due now and the button that opens the pay dialog. */
 export const PayNextCard = ({
   purchase,
   onPay,
   isPaying,
-  providers,
-  providerError,
 }: {
   purchase: LandPurchaseDetail;
   onPay: () => void;
   isPaying: boolean;
-  /** Which company takes the payment (Paystack or Monnify). */
-  providers: PaymentProviderChoice;
-  /** Why the last try failed when the chosen company could not take it. */
-  providerError?: string | null;
 }) => {
   const payable = PAYABLE_PURCHASE_STATUSES.includes(purchase.status) && purchase.nextDue;
   return (
@@ -63,12 +54,6 @@ export const PayNextCard = ({
             {formatDate(purchase.nextDue.dueDate)}
             {purchase.nextDue.overdue ? ' (late fee included)' : ''}
           </p>
-          {providerError && (
-            <Alert variant="warning" className="mt-4">
-              {providerError}
-            </Alert>
-          )}
-          <PaymentProviderPicker choice={providers} disabled={isPaying} className="mt-4" />
           <Button
             className="mt-4"
             fullWidth
@@ -79,15 +64,6 @@ export const PayNextCard = ({
           >
             Pay {formatCurrency(purchase.nextDue.amount)}
           </Button>
-          <CheckoutFeeNote
-            amount={purchase.nextDue.amount}
-            provider={providers.provider}
-            className="mt-2"
-          />
-          <p className="mt-2 text-xs text-muted-foreground">
-            You will be taken to our payment partner to pay securely. GetRentos holds it until you
-            confirm each conveyance step.
-          </p>
         </>
       ) : (
         <p className="mt-2 text-sm text-muted-foreground">

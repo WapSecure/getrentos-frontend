@@ -40,7 +40,7 @@ import {
   type HomeManagementWorkOrderInvoiceStatus,
 } from '@/services/homeManagementService';
 import { InvoiceCheckPanel } from './InvoiceCheckPanel';
-import { PaymentProviderPicker } from '@/components/shared/payments/PaymentProviderPicker';
+import { PayDialog } from '@/components/shared/payments/PayDialog';
 import { usePaymentProviders } from '@/hooks/usePaymentProviders';
 import type { PaymentProvider } from '@/types/payments';
 
@@ -359,6 +359,9 @@ export function HomeManagementWorkOrderInvoices({
 
   // Which company takes a top-up when held rent falls short (Paystack or Monnify).
   const providers = usePaymentProviders();
+  // The invoice open in the pay dialog, and why its chosen company could not take a top-up.
+  const [payTarget, setPayTarget] = useState<HomeManagementWorkOrderInvoice | null>(null);
+  const [providerError, setProviderError] = useState<string | null>(null);
   const payInvoice = useMutation<
     { invoiceId: string; payoutStatus: string; topUp?: { authorizationUrl: string } },
     Error,
@@ -366,6 +369,7 @@ export function HomeManagementWorkOrderInvoices({
   >({
     mutationFn: ({ invoiceId, provider }) =>
       unwrap(homeManagementService.payWorkOrderInvoice(invoiceId, provider)),
+    onMutate: () => setProviderError(null),
     onSuccess: async (result) => {
       // The owner's held rent doesn't cover it: the shortfall is paid on
       // Paystack, and the vendor is paid once it lands.
@@ -373,6 +377,7 @@ export function HomeManagementWorkOrderInvoices({
         window.location.assign(result.topUp.authorizationUrl);
         return;
       }
+      setPayTarget(null);
       await invalidateInvoiceViews();
       if (result.payoutStatus === 'FAILED') {
         toast.error('The transfer to the vendor failed. Check their payout account and try again.');
@@ -385,10 +390,10 @@ export function HomeManagementWorkOrderInvoices({
       }
     },
     onError: (error, { provider }) => {
-      // That company cannot take the top-up right now: the choice moves to the other one.
-      toast.error(
-        providers.recover(error, provider) ?? (error.message || 'Unable to pay this invoice.')
-      );
+      // That company cannot take the top-up right now: say so in the dialog, with the other one picked.
+      const unavailable = providers.recover(error, provider);
+      if (unavailable) setProviderError(unavailable);
+      else toast.error(error.message || 'Unable to pay this invoice.');
     },
   });
 
@@ -787,9 +792,6 @@ export function HomeManagementWorkOrderInvoices({
                         )}
 
                         {canPayInvoice(invoice) && (
-                          <PaymentProviderPicker choice={providers} disabled={pendingForInvoice} />
-                        )}
-                        {canPayInvoice(invoice) && (
                           <Button
                             size="sm"
                             rounded="md"
@@ -799,12 +801,7 @@ export function HomeManagementWorkOrderInvoices({
                               payInvoice.isPending && payInvoice.variables?.invoiceId === invoice.id
                             }
                             disabled={pendingForInvoice}
-                            onClick={() =>
-                              payInvoice.mutate({
-                                invoiceId: invoice.id,
-                                provider: providers.provider,
-                              })
-                            }
+                            onClick={() => setPayTarget(invoice)}
                           >
                             {invoice.payoutStatus === 'FAILED' ? 'Retry payment' : 'Pay vendor'}
                           </Button>
@@ -1195,6 +1192,35 @@ export function HomeManagementWorkOrderInvoices({
           )}
         </DialogContent>
       </Dialog>
+
+      <PayDialog
+        open={!!payTarget}
+        onClose={() => {
+          setPayTarget(null);
+          setProviderError(null);
+        }}
+        title="Pay vendor"
+        context={
+          payTarget
+            ? `${invoiceVendorLabel(payTarget)} · ${invoiceNumberLabel(payTarget)}`
+            : undefined
+        }
+        owed={payTarget?.totalAmount ?? 0}
+        owedLabel="invoice"
+        itemLabel="Invoice"
+        receiverLine={null}
+        topUpOnly={{
+          note: 'We pay the vendor from the rent GetRentos holds for the owner first. A card top-up, with its card or bank fee, is only taken if that does not cover the invoice.',
+          buttonLabel: payTarget?.payoutStatus === 'FAILED' ? 'Retry payment' : 'Pay vendor',
+        }}
+        protection="The vendor is paid once the top-up lands."
+        providers={providers}
+        providerError={providerError}
+        busy={payInvoice.isPending}
+        onPay={() =>
+          payTarget && payInvoice.mutate({ invoiceId: payTarget.id, provider: providers.provider })
+        }
+      />
     </div>
   );
 }

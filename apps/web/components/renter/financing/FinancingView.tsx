@@ -5,10 +5,12 @@ import { FinancingEligibilityCard } from '@/components/renter/financing/Financin
 import { ApplyFinancingModal } from '@/components/renter/financing/ApplyFinancingModal';
 import { ActiveFinancingPlanCard } from '@/components/renter/financing/ActiveFinancingPlanCard';
 import { FlexPausedCard } from '@/components/renter/financing/FlexPausedCard';
+import { PayDialog } from '@/components/shared/payments/PayDialog';
 import { CardSkeleton, PageErrorState, Skeleton, useToast } from '@getrentos/ui';
 import { useState } from 'react';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
+import { formatCurrency } from '@/lib/format';
 import { renterKeys } from '@/lib/queryKeys';
 import type { FinancingPlanLength } from '@/types/financing';
 import { usePaymentProviders } from '@/hooks/usePaymentProviders';
@@ -21,6 +23,8 @@ export const FinancingView = () => {
   // Which company takes the instalment, and why the last one could not.
   const providers = usePaymentProviders();
   const [providerError, setProviderError] = useState<string | null>(null);
+  // The instalment open in the pay dialog.
+  const [payingInstallmentId, setPayingInstallmentId] = useState<string | null>(null);
 
   const {
     data: overview,
@@ -60,6 +64,7 @@ export const FinancingView = () => {
         window.location.href = updated.authorizationUrl;
         return;
       }
+      setPayingInstallmentId(null);
       queryClient.invalidateQueries({ queryKey: renterKeys.financing });
       toast.success('Installment paid.');
     },
@@ -71,6 +76,11 @@ export const FinancingView = () => {
 
   const handlePayInstallment = (installmentId: string) => {
     payInstallmentMutation.mutate({ installmentId, provider: providers.provider });
+  };
+
+  const closePayDialog = () => {
+    setPayingInstallmentId(null);
+    setProviderError(null);
   };
 
   if (isLoading) {
@@ -97,16 +107,16 @@ export const FinancingView = () => {
   const trustScore = overview?.trustScore ?? 0;
   const plan = overview?.plan ?? null;
   const newPlansOpen = overview?.newPlansOpen === true;
+  const payingInstallment =
+    plan?.installments.find((installment) => installment.id === payingInstallmentId) ?? null;
 
   return (
     <>
       {plan ? (
         <ActiveFinancingPlanCard
           plan={plan}
-          onPayInstallment={handlePayInstallment}
+          onPayInstallment={setPayingInstallmentId}
           isPaying={payInstallmentMutation.isPending}
-          providers={providers}
-          providerError={providerError}
         />
       ) : !newPlansOpen ? (
         <FlexPausedCard />
@@ -118,6 +128,27 @@ export const FinancingView = () => {
           onApply={() => setIsApplyModalOpen(true)}
         />
       )}
+
+      <PayDialog
+        open={!!plan && !!payingInstallment}
+        onClose={closePayDialog}
+        title="Pay instalment"
+        context={
+          payingInstallment && plan
+            ? `${plan.propertyName} · instalment ${payingInstallment.installmentNumber} of ${plan.installments.length}`
+            : undefined
+        }
+        dueDate={payingInstallment?.dueDate}
+        overdue={payingInstallment?.status === 'overdue'}
+        owed={payingInstallment?.amount ?? 0}
+        itemLabel="Instalment"
+        receiverLine={`The fee goes to the payment company, so the full ${formatCurrency(payingInstallment?.amount ?? 0)} is applied to your Flex plan.`}
+        protection="This payment is applied to your Flex plan."
+        providers={providers}
+        providerError={providerError}
+        busy={payInstallmentMutation.isPending}
+        onPay={() => payingInstallment && handlePayInstallment(payingInstallment.id)}
+      />
 
       <ApplyFinancingModal
         open={newPlansOpen && isApplyModalOpen}

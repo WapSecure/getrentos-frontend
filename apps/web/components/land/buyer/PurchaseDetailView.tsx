@@ -22,6 +22,7 @@ import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';
 import { buyerLandKeys, landLayoutKeys } from '@/lib/landSalesQueryKeys';
 import { landBuyerService } from '@/services/landBuyerService';
 import { usePaymentProviders } from '@/hooks/usePaymentProviders';
+import { PayDialog } from '@/components/shared/payments/PayDialog';
 import type { PaymentProvider } from '@/types/payments';
 import type { LandPurchaseDetail } from '@/types/landBuyer';
 import { PurchaseStatusBadge } from './LandSaleBadges';
@@ -101,6 +102,7 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
   // Which company takes the payment, and why the last one could not.
   const providers = usePaymentProviders();
   const [providerError, setProviderError] = useState<string | null>(null);
+  const [payOpen, setPayOpen] = useState(false);
   const pay = useMutation({
     mutationFn: (provider?: PaymentProvider) =>
       unwrap(landBuyerService.pay(purchaseId, undefined, provider)),
@@ -111,6 +113,7 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
         return;
       }
       // No gateway configured (development): the API confirmed it already.
+      setPayOpen(false);
       notify(`Payment of ${formatCurrency(init.amount)} confirmed.`, 'success');
       queryClient.invalidateQueries({ queryKey: buyerLandKeys.all });
     },
@@ -392,10 +395,8 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
         <aside className="space-y-4">
           <PayNextCard
             purchase={purchase}
-            onPay={() => pay.mutate(providers.provider)}
+            onPay={() => setPayOpen(true)}
             isPaying={pay.isPending}
-            providers={providers}
-            providerError={providerError}
           />
           <PurchaseDocuments purchase={purchase} notify={notify} />
           <CancelPurchaseCard
@@ -405,6 +406,26 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
           />
         </aside>
       </div>
+
+      <PayDialog
+        open={payOpen && !!purchase.nextDue}
+        onClose={() => {
+          setPayOpen(false);
+          setProviderError(null);
+        }}
+        title={purchase.status === 'PENDING_DEPOSIT' ? 'Pay your deposit' : 'Pay for your land'}
+        context={`${plotLabel(purchase)} · ${purchase.layoutName}${purchase.nextDue ? ` · ${purchase.nextDue.label}` : ''}`}
+        dueDate={purchase.nextDue?.dueDate}
+        overdue={purchase.nextDue?.overdue}
+        owed={purchase.nextDue?.amount ?? 0}
+        itemLabel={purchase.nextDue?.overdue ? 'Land payment (late fee included)' : 'Land payment'}
+        receiverLine={`The fee goes to the payment company, so the full ${formatCurrency(purchase.nextDue?.amount ?? 0)} is recorded against your purchase.`}
+        protection="GetRentos holds it until you confirm each conveyance step."
+        providers={providers}
+        providerError={providerError}
+        busy={pay.isPending}
+        onPay={() => pay.mutate(providers.provider)}
+      />
     </div>
   );
 };

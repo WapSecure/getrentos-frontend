@@ -1,7 +1,6 @@
 'use client';
 
-import { CheckoutFeeNote } from '@/components/shared/payments/CheckoutFeeLine';
-import { PaymentProviderPicker } from '@/components/shared/payments/PaymentProviderPicker';
+import { PayDialog } from '@/components/shared/payments/PayDialog';
 import { usePaymentProviders } from '@/hooks/usePaymentProviders';
 import type { PaymentProvider } from '@/types/payments';
 import { useState } from 'react';
@@ -206,22 +205,33 @@ export const GuestBookingsWorkspace = () => {
 
   // Which company takes the payment (Paystack or Monnify): one choice for every booking here.
   const providers = usePaymentProviders();
+  // The booking open in the pay dialog, and why its chosen company could not take it.
+  const [payTarget, setPayTarget] = useState<ShortletBooking | null>(null);
+  const [providerError, setProviderError] = useState<string | null>(null);
   const pay = useMutation({
     mutationFn: ({ bookingId, provider }: { bookingId: string; provider?: PaymentProvider }) =>
       unwrap(shortletService.payBooking(bookingId, provider)),
+    onMutate: () => setProviderError(null),
     onSuccess: (res) => {
       if (res.authorizationUrl) {
         // Real gateway flow: redirect to the payment company's checkout.
         window.location.href = res.authorizationUrl;
         return;
       }
+      setPayTarget(null);
       queryClient.invalidateQueries({ queryKey: shortletKeys.guestBookings });
       toast.success('Payment received: your stay is confirmed.');
     },
-    // That company cannot take it right now: the choice moves to the other one.
-    onError: (reason: Error, { provider }) =>
-      toast.error(providers.recover(reason, provider) ?? reason.message),
+    onError: (reason: Error, { provider }) => {
+      // That company cannot take it right now: say so in the dialog, with the other one picked.
+      const unavailable = providers.recover(reason, provider);
+      if (unavailable) setProviderError(unavailable);
+      else toast.error(reason.message);
+    },
   });
+  const payAmount = payTarget
+    ? (payTarget.total ?? 0) + (payTarget.taxAmount ?? 0) + (payTarget.deposit ?? 0)
+    : 0;
 
   return (
     <div className="mx-auto max-w-[90rem]">
@@ -388,31 +398,17 @@ export const GuestBookingsWorkspace = () => {
               {(canCancel(b) || b.paymentRequired || (b.status === 'COMPLETED' && !b.reviewed)) && (
                 <div className="mt-3 flex flex-wrap items-center justify-end gap-2 border-t border-border pt-3">
                   {b.paymentRequired && (
-                    <PaymentProviderPicker
-                      choice={providers}
-                      disabled={pay.isPending}
-                      className="w-full"
-                    />
-                  )}
-                  {b.paymentRequired && (
                     <Button
                       variant="primary"
                       size="sm"
                       icon={<CreditCard className="h-4 w-4" />}
-                      onClick={() => pay.mutate({ bookingId: b.id, provider: providers.provider })}
+                      onClick={() => setPayTarget(b)}
                       isLoading={pay.isPending && pay.variables?.bookingId === b.id}
                       loadingText="Processing…"
                       disabled={pay.isPending}
                     >
                       {`Pay ${formatCurrency((b.total ?? 0) + (b.taxAmount ?? 0) + (b.deposit ?? 0))}`}
                     </Button>
-                  )}
-                  {b.paymentRequired && (
-                    <CheckoutFeeNote
-                      amount={(b.total ?? 0) + (b.taxAmount ?? 0) + (b.deposit ?? 0)}
-                      provider={providers.provider}
-                      className="w-full text-right"
-                    />
                   )}
                   {(b.status === 'CONFIRMED' || b.status === 'COMPLETED') && (
                     <Button
@@ -494,6 +490,36 @@ export const GuestBookingsWorkspace = () => {
           <ShortletDepositClaimsInbox role="guest" />
         </DialogContent>
       </Dialog>
+      <PayDialog
+        open={!!payTarget}
+        onClose={() => {
+          setPayTarget(null);
+          setProviderError(null);
+        }}
+        title="Pay for your stay"
+        context={
+          payTarget
+            ? `${payTarget.propertyTitle} · ${formatDate(payTarget.checkIn, 'long')} to ${formatDate(payTarget.checkOut, 'long')}`
+            : undefined
+        }
+        owed={payAmount}
+        owedLabel="to pay"
+        itemLabel={
+          payTarget?.deposit
+            ? `Stay and ${formatCurrency(payTarget.deposit)} refundable deposit`
+            : 'Stay'
+        }
+        receiverLine={`The fee goes to the payment company, so the full ${formatCurrency(payAmount)} goes to your booking.`}
+        protection={`GetRentos holds your payment and only pays the host after check-in.${
+          payTarget?.deposit ? ' Your refundable deposit is returned after check-out.' : ''
+        }`}
+        providers={providers}
+        providerError={providerError}
+        busy={pay.isPending}
+        onPay={() =>
+          payTarget && pay.mutate({ bookingId: payTarget.id, provider: providers.provider })
+        }
+      />
       {wishlistOpen && <ShortletWishlistDialog onClose={() => setWishlistOpen(false)} />}
       {promiseTarget && (
         <GuestPromiseReportDialog

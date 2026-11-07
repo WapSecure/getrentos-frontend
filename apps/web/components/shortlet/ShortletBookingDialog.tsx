@@ -23,8 +23,7 @@ import { shortletKeys } from '@/lib/queryKeys';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
 import { guestStayRoutes } from '@/lib/shortlet/guestRoutes';
-import { CheckoutFeeNote } from '@/components/shared/payments/CheckoutFeeLine';
-import { PaymentProviderPicker } from '@/components/shared/payments/PaymentProviderPicker';
+import { PayDialog } from '@/components/shared/payments/PayDialog';
 import type { PaymentProviderChoice } from '@/hooks/usePaymentProviders';
 import type { ShortletBooking, ShortletDiscountType, ShortletListing } from '@/types/shortlet';
 
@@ -83,6 +82,11 @@ export function ShortletBookingDialog({
   const [checkOut, setCheckOut] = useState('');
   const [guestCount, setGuestCount] = useState('1');
   const [error, setError] = useState<string | null>(null);
+  // The pay dialog for the booking just made.
+  const [payOpen, setPayOpen] = useState(false);
+  const payAmount = createdBooking
+    ? (createdBooking.total ?? 0) + (createdBooking.taxAmount ?? 0) + (createdBooking.deposit ?? 0)
+    : 0;
 
   const { data: availability } = useQuery({
     queryKey: [...shortletKeys.availability(listing.id), { checkIn, checkOut }],
@@ -295,36 +299,40 @@ export function ShortletBookingDialog({
                   </p>
                 )}
               </div>
-              {createdBooking.paymentRequired && providerError && (
-                <Alert variant="warning">{providerError}</Alert>
-              )}
-              {createdBooking.paymentRequired && (
-                <PaymentProviderPicker choice={providers} disabled={paying} />
-              )}
               {createdBooking.paymentRequired && (
                 <Button
                   className="w-full"
                   icon={<CreditCard className="h-4 w-4" />}
-                  onClick={() => onPay(createdBooking.id)}
+                  onClick={() => setPayOpen(true)}
                   isLoading={paying}
                   loadingText="Opening checkout…"
                 >
-                  {`Pay ${formatCurrency(
-                    (createdBooking.total ?? 0) +
-                      (createdBooking.taxAmount ?? 0) +
-                      (createdBooking.deposit ?? 0)
-                  )}`}
+                  {`Pay ${formatCurrency(payAmount)}`}
                 </Button>
               )}
               {createdBooking.paymentRequired && (
-                <CheckoutFeeNote
-                  amount={
-                    (createdBooking.total ?? 0) +
-                    (createdBooking.taxAmount ?? 0) +
-                    (createdBooking.deposit ?? 0)
+                <PayDialog
+                  open={payOpen}
+                  onClose={() => setPayOpen(false)}
+                  title="Pay for your stay"
+                  context={`${listing.title} · ${formatDate(createdBooking.checkIn, 'long')} to ${formatDate(createdBooking.checkOut, 'long')}`}
+                  owed={payAmount}
+                  owedLabel="to pay"
+                  itemLabel={
+                    createdBooking.deposit
+                      ? `Stay and ${formatCurrency(createdBooking.deposit)} refundable deposit`
+                      : 'Stay'
                   }
-                  provider={providers.provider}
-                  className="text-center"
+                  receiverLine={`The fee goes to the payment company, so the full ${formatCurrency(payAmount)} goes to your booking.`}
+                  protection={`GetRentos holds your payment and only pays the host after check-in.${
+                    createdBooking.deposit
+                      ? ' Your refundable deposit is returned after check-out.'
+                      : ''
+                  }`}
+                  providers={providers}
+                  providerError={providerError}
+                  busy={paying}
+                  onPay={() => onPay(createdBooking.id)}
                 />
               )}
               <Button

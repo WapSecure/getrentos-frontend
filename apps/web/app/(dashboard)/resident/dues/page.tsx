@@ -1,7 +1,6 @@
 'use client';
 
-import { CheckoutFeeNote } from '@/components/shared/payments/CheckoutFeeLine';
-import { PaymentProviderPicker } from '@/components/shared/payments/PaymentProviderPicker';
+import { PayDialog } from '@/components/shared/payments/PayDialog';
 import { usePaymentProviders } from '@/hooks/usePaymentProviders';
 import type { PaymentProvider } from '@/types/payments';
 import { useState } from 'react';
@@ -45,6 +44,9 @@ export default function ResidentDuesPage() {
   const [payError, setPayError] = useState<{ dueId: string; message: string } | null>(null);
   // Which company takes the payment (Paystack or Monnify): one choice for every due here.
   const providers = usePaymentProviders();
+  // The due open in the pay dialog, and why its chosen company could not take it.
+  const [payingDueId, setPayingDueId] = useState<string | null>(null);
+  const [providerError, setProviderError] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: estateResidentKeys.dues(),
@@ -55,6 +57,7 @@ export default function ResidentDuesPage() {
   const payMutation = useMutation({
     mutationFn: ({ dueId, provider }: { dueId: string; provider?: PaymentProvider }) =>
       unwrap(estateResidentService.payMyDue(dueId, provider)),
+    onMutate: () => setProviderError(null),
     onSuccess: (updated) => {
       setPayError(null);
       // A real gateway checkout was started: send the resident to Paystack to complete it.
@@ -63,18 +66,28 @@ export default function ResidentDuesPage() {
         window.location.href = updated.authorizationUrl;
         return;
       }
+      setPayingDueId(null);
       queryClient.invalidateQueries({ queryKey: estateResidentKeys.dues() });
     },
     onError: (err, { dueId, provider }) => {
+      // That company cannot take it right now: say so in the dialog, with the other one picked.
+      const unavailable = providers.recover(err, provider);
+      if (unavailable) {
+        setProviderError(unavailable);
+        return;
+      }
+      setPayingDueId(null);
       setPayError({
         dueId,
-        // That company cannot take it right now: the choice moves to the other one.
-        message:
-          providers.recover(err, provider) ??
-          (err instanceof Error ? err.message : 'Unable to start payment. Please try again.'),
+        message: err instanceof Error ? err.message : 'Unable to start payment. Please try again.',
       });
     },
   });
+  const payingDue = dues.find((due) => due.id === payingDueId) ?? null;
+  const closePayDialog = () => {
+    setPayingDueId(null);
+    setProviderError(null);
+  };
 
   return (
     <>
@@ -90,13 +103,6 @@ export default function ResidentDuesPage() {
         />
       ) : (
         <>
-          {dues.some((due) => ['pending', 'overdue', 'processing'].includes(due.status)) && (
-            <PaymentProviderPicker
-              choice={providers}
-              disabled={payMutation.isPending}
-              className="mb-4"
-            />
-          )}
           <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
             {dues.map((due) => {
               const isPaying = payMutation.isPending && payMutation.variables?.dueId === due.id;
@@ -139,7 +145,7 @@ export default function ResidentDuesPage() {
                           loadingText="Processing…"
                           onClick={() => {
                             setPayError(null);
-                            payMutation.mutate({ dueId: due.id, provider: providers.provider });
+                            setPayingDueId(due.id);
                           }}
                         >
                           {due.status === 'processing' ? 'Finish paying' : 'Pay Now'}
@@ -147,13 +153,6 @@ export default function ResidentDuesPage() {
                       )}
                     </div>
                   </div>
-                  {canPay && (
-                    <CheckoutFeeNote
-                      amount={due.amount}
-                      provider={providers.provider}
-                      className="mt-2 text-right"
-                    />
-                  )}
                   {payError?.dueId === due.id && (
                     <p className="text-xs text-destructive mt-2">{payError.message}</p>
                   )}
@@ -163,6 +162,29 @@ export default function ResidentDuesPage() {
           </div>
         </>
       )}
+
+      <PayDialog
+        open={!!payingDue}
+        onClose={closePayDialog}
+        title="Pay dues"
+        context={
+          payingDue
+            ? `${categoryLabels[payingDue.category]}${payingDue.description ? ` · ${payingDue.description}` : ''}`
+            : undefined
+        }
+        dueDate={payingDue?.dueDate}
+        overdue={payingDue?.status === 'overdue'}
+        owed={payingDue?.amount ?? 0}
+        itemLabel={payingDue ? categoryLabels[payingDue.category] : 'Dues'}
+        receiverLine={`The fee goes to the payment company, so your estate receives the full ${formatCurrency(payingDue?.amount ?? 0)}.`}
+        protection="Your payment goes to your estate."
+        providers={providers}
+        providerError={providerError}
+        busy={payMutation.isPending}
+        onPay={() =>
+          payingDue && payMutation.mutate({ dueId: payingDue.id, provider: providers.provider })
+        }
+      />
     </>
   );
 }

@@ -1,7 +1,6 @@
 'use client';
 
-import { CheckoutFeeNote } from '@/components/shared/payments/CheckoutFeeLine';
-import { PaymentProviderPicker } from '@/components/shared/payments/PaymentProviderPicker';
+import { PayDialog } from '@/components/shared/payments/PayDialog';
 import type { PaymentProviderChoice } from '@/hooks/usePaymentProviders';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -86,9 +85,12 @@ export const BuyerEscrowTransactionDetailModal = ({
   const router = useRouter();
   const [showActivityLog, setShowActivityLog] = useState(false);
   const [confirmingRelease, setConfirmingRelease] = useState(false);
+  // The deposit's pay dialog, opened from the "Make deposit payment" step.
+  const [payOpen, setPayOpen] = useState(false);
 
   const handleClose = () => {
     setConfirmingRelease(false);
+    setPayOpen(false);
     onClose();
   };
 
@@ -99,6 +101,7 @@ export const BuyerEscrowTransactionDetailModal = ({
   const activeIndex = escrowSteps.findIndex((s) => s.key === transaction.escrowStatus);
   const canDeposit = transaction.escrowStatus === 'deposit_pending';
   const canRelease = transaction.escrowStatus === 'funds_held';
+  const depositAmount = transaction.depositAmount ?? transaction.purchasePrice;
 
   return (
     <Dialog open onOpenChange={(next) => !next && handleClose()}>
@@ -171,29 +174,16 @@ export const BuyerEscrowTransactionDetailModal = ({
                         </p>
                         <p className="text-xs text-muted-foreground mt-0.5">{step.description}</p>
                         {isActive && step.key === 'deposit_pending' && canDeposit && (
-                          <div className="mt-2 space-y-2">
-                            {providerError && <Alert variant="warning">{providerError}</Alert>}
-                            <PaymentProviderPicker choice={providers} disabled={isPaying} />
-                          </div>
-                        )}
-                        {isActive && step.key === 'deposit_pending' && canDeposit && (
                           <Button
                             variant="primary"
                             size="sm"
                             className="mt-2"
                             icon={<Wallet className="w-3.5 h-3.5" />}
                             isLoading={isPaying}
-                            onClick={() => onMakePayment(transaction.id, 'deposit')}
+                            onClick={() => setPayOpen(true)}
                           >
                             Make deposit payment
                           </Button>
-                        )}
-                        {isActive && step.key === 'deposit_pending' && canDeposit && (
-                          <CheckoutFeeNote
-                            amount={transaction.depositAmount ?? transaction.purchasePrice}
-                            provider={providers.provider}
-                            className="mt-1"
-                          />
                         )}
                         {isActive &&
                           step.key === 'funds_held' &&
@@ -316,6 +306,22 @@ export const BuyerEscrowTransactionDetailModal = ({
             Contact support
           </Button>
         </div>
+        {/* Nested inside the content so Radix treats it as a layer of this dialog. */}
+        <PayDialog
+          open={payOpen && canDeposit}
+          onClose={() => setPayOpen(false)}
+          title="Pay deposit"
+          context={`${transaction.propertyTitle} · ${transaction.ownerName}`}
+          owed={depositAmount}
+          owedLabel="deposit"
+          itemLabel="Deposit"
+          receiverLine={`The fee goes to the payment company, so the full ${formatCurrency(depositAmount)} is held for this purchase.`}
+          protection="Your deposit is held by GetRentos and only released to the seller once you confirm receipt."
+          providers={providers}
+          providerError={providerError}
+          busy={isPaying}
+          onPay={() => onMakePayment(transaction.id, 'deposit')}
+        />
       </DialogContent>
     </Dialog>
   );
