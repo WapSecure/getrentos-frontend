@@ -466,7 +466,12 @@ export default function PaymentsPage() {
       <PayAmountDialog
         payment={
           payingPayment
-            ? { propertyName: payingPayment.propertyName, owed: owedOn(payingPayment) }
+            ? {
+                propertyName: payingPayment.propertyName,
+                owed: owedOn(payingPayment),
+                dueDate: payingPayment.dueDate ?? null,
+                overdue: payingPayment.status === 'overdue',
+              }
             : null
         }
         onClose={() => {

@@ -168,7 +168,18 @@ function Shell({ children }: { children: ReactNode }) {
   );
 }
 
-function Heading({ eyebrow, title, body }: { eyebrow?: string; title: string; body?: ReactNode }) {
+function Heading({
+  eyebrow,
+  title,
+  body,
+  large,
+}: {
+  eyebrow?: string;
+  title: string;
+  body?: ReactNode;
+  /** The amount, shown big; a sentence stays smaller so it does not wrap. */
+  large?: boolean;
+}) {
   return (
     <div className="text-center">
       {eyebrow && (
@@ -176,7 +187,9 @@ function Heading({ eyebrow, title, body }: { eyebrow?: string; title: string; bo
           {eyebrow}
         </p>
       )}
-      <h1 className="mt-1 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+      <h1
+        className={`mt-1 font-semibold tracking-tight text-foreground ${large ? 'text-4xl' : 'text-2xl'}`}
+      >
         {title}
       </h1>
       {body && <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">{body}</p>}
@@ -219,6 +232,7 @@ export function PaymentSuccess({ payment, back }: { payment: PaymentStatus; back
         <StatusMark icon={CheckCircle2} tone="success" />
         <Heading
           eyebrow="Payment successful"
+          large
           title={formatCurrency(payment.amount)}
           body={`Your ${WHAT[payment.kind]} is confirmed. A receipt is in your payment history.`}
         />
@@ -249,6 +263,22 @@ export function PaymentSuccess({ payment, back }: { payment: PaymentStatus; back
   );
 }
 
+/** What the attempt was for, so a payer who is worried has something concrete. */
+function AttemptSummary({ payment }: { payment: PaymentStatus }) {
+  return (
+    <Card className="px-5 py-1">
+      <DescriptionList
+        layout="rows"
+        items={[
+          { label: 'For', value: payment.title || FALLBACK_TITLE[payment.kind] },
+          { label: 'Amount', value: formatCurrency(payment.amount) },
+          { label: 'Reference', value: <Reference value={payment.reference} /> },
+        ]}
+      />
+    </Card>
+  );
+}
+
 export function PaymentConfirming({ kind }: { kind?: PaymentKind }) {
   return (
     <Shell>
@@ -264,7 +294,8 @@ export function PaymentConfirming({ kind }: { kind?: PaymentKind }) {
   );
 }
 
-export function PaymentStillPending({ kind, back }: { kind: PaymentKind; back: string }) {
+export function PaymentStillPending({ payment, back }: { payment: PaymentStatus; back: string }) {
+  const kind = payment.kind;
   return (
     <Shell>
       <div className="space-y-4">
@@ -275,6 +306,7 @@ export function PaymentStillPending({ kind, back }: { kind: PaymentKind; back: s
           body={`If you were charged, your ${WHAT[kind]} will show as paid automatically and we'll let you know. Please don't pay again.`}
         />
       </div>
+      <AttemptSummary payment={payment} />
       <Button href={back} variant="outline" className="w-full">
         Back to GetRentos
       </Button>
@@ -282,7 +314,7 @@ export function PaymentStillPending({ kind, back }: { kind: PaymentKind; back: s
   );
 }
 
-export function PaymentFailed({ back }: { back: string }) {
+export function PaymentFailed({ payment, back }: { payment: PaymentStatus; back: string }) {
   return (
     <Shell>
       <div className="space-y-4">
@@ -293,6 +325,7 @@ export function PaymentFailed({ back }: { back: string }) {
           body="Nothing was taken for this attempt. You can try again, or choose another way to pay."
         />
       </div>
+      <AttemptSummary payment={payment} />
       <Button href={back} className="w-full">
         Try again
       </Button>

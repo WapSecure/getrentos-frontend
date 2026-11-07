@@ -70,8 +70,8 @@ function PaymentReturnContent() {
     return <PaymentConfirming kind={payment?.kind} />;
   }
   if (payment.status === 'PAID') return <PaymentSuccess payment={payment} back={back} />;
-  if (payment.status === 'FAILED') return <PaymentFailed back={back} />;
-  return <PaymentStillPending kind={payment.kind} back={back} />;
+  if (payment.status === 'FAILED') return <PaymentFailed payment={payment} back={back} />;
+  return <PaymentStillPending payment={payment} back={back} />;
 }
 
 export default function PaymentReturnPage() {
