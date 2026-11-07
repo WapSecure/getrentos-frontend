@@ -34,7 +34,7 @@ export default function RenterStandingPage() {
         />
       )}
       {activeTab === 'credit' && <CreditReportingView />}
-      {activeTab === 'trust' && <TrustScoreView />}
+      {activeTab === 'trust' && <TrustScoreView onVerify={() => setTab('verification')} />}
     </>
   );
 }

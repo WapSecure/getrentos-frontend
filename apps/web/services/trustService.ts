@@ -1,5 +1,5 @@
 import { authFetch, safeCall, type ApiResponse } from '@/lib/apiHelpers';
-import type { TrustExplanation } from '@/types/trust-score';
+import type { TrustExplanation, TrustOverview, TrustPortal } from '@/types/trust-score';
 
 /** What the browser needs to run Smile ID's live selfie capture and submit it. */
 export interface SmileLivenessSession {
@@ -133,6 +133,11 @@ export const trustService = {
 
   async getVerification(id: string): Promise<ApiResponse<TrustVerificationDetailDto>> {
     return safeCall(() => authFetch<TrustVerificationDetailDto>(`/trust/verifications/${id}`));
+  },
+
+  /** Identity status, the portal's requirements, tier and score (self-only). */
+  async getOverview(portal: TrustPortal): Promise<ApiResponse<TrustOverview>> {
+    return safeCall(() => authFetch<TrustOverview>(`/trust/overview?portal=${portal}`));
   },
 
   /** Plain-language explanation of the caller's own trust score (self-only). */

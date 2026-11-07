@@ -61,7 +61,8 @@ export interface TrustScoreBreakdown {
 /** Role-appropriate trust profile returned by /<role>/trust-profile. */
 export interface TrustProfile {
   trustScore: number;
-  averageScore: number;
+  /** No longer sent: an all-account average is not a fair comparison. */
+  averageScore?: number;
   verifications: VerificationItem[];
   history: TrustScoreHistoryItem[];
   badges: Badge[];
@@ -83,4 +84,64 @@ export interface TrustExplanation {
   source: 'ai' | 'heuristic';
   model: string | null;
   generatedAt: string;
+}
+
+/** One status vocabulary for identity and every requirement (GET /trust/overview). */
+export type TrustStatus =
+  | 'NOT_STARTED'
+  | 'ACTION_REQUIRED'
+  | 'IN_PROGRESS'
+  | 'PENDING_PROVIDER'
+  | 'PENDING_REVIEW'
+  | 'VERIFIED'
+  | 'FAILED'
+  | 'REJECTED'
+  | 'EXPIRED'
+  | 'REVERIFICATION_REQUIRED'
+  | 'UNAVAILABLE';
+
+export type TrustRequirementKey =
+  | 'EMAIL'
+  | 'PHONE'
+  | 'ID_NUMBER'
+  | 'LIVE_SELFIE'
+  | 'BANK_ACCOUNT'
+  | 'PROFESSIONAL_LICENCE'
+  | 'BUSINESS_REGISTRATION'
+  | 'PROPERTY_OWNERSHIP';
+
+export interface TrustRequirement {
+  key: TrustRequirementKey;
+  label: string;
+  status: TrustStatus;
+  detail: string;
+  why: string;
+  updatedAt?: string;
+  dueBy?: string;
+}
+
+export type TrustPortal =
+  | 'renter'
+  | 'buyer'
+  | 'landlord'
+  | 'owner'
+  | 'agent'
+  | 'realtor'
+  | 'manager';
+
+/** The signed-in person's trust page, from stored records only. */
+export interface TrustOverview {
+  portal: TrustPortal;
+  identity: {
+    status: TrustStatus;
+    method?: 'INSTANT_CHECKS' | 'DOCUMENT_AND_LIVE_SELFIE' | 'DOCUMENT_GRACE';
+    detail: string;
+    dueBy?: string;
+  };
+  requirements: TrustRequirement[];
+  tier: { level: number; label: string };
+  /** Null while scoring is switched off: no number is shown in its place. */
+  score: TrustScoreBreakdown | null;
+  nextAction: { key: TrustRequirementKey; label: string } | null;
+  lastUpdatedAt?: string;
 }

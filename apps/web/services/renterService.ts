@@ -416,7 +416,8 @@ export interface RoommateExpense {
 
 export interface TrustScoreOverview {
   trustScore: number;
-  averageScore: number;
+  /** No longer sent: an all-account average is not a fair comparison. */
+  averageScore?: number;
   verifications: VerificationItem[];
   history: TrustScoreHistoryItem[];
   badges: Badge[];

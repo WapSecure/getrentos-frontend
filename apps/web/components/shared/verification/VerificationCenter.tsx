@@ -1,5 +1,6 @@
 'use client';
 
+import { trustKeys } from '@/lib/queryKeys';
 import { useEffect, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { usePathname } from 'next/navigation';
@@ -100,14 +101,18 @@ export const VerificationCenter = ({
   // Which stage the person opened; null follows the first stage that needs them.
   const [openStage, setOpenStage] = useState<string | null>(null);
 
-  const invalidateVerification = () =>
+  // Every step changes the trust page too (identity status and requirements).
+  const invalidateVerification = () => {
     queryClient.invalidateQueries({ queryKey: ['trust-verification', verificationId] });
+    queryClient.invalidateQueries({ queryKey: trustKeys.all });
+  };
 
   // Live update: when the orchestrator decides (auto or reviewer), refresh the
   // status chip + tier without a manual reload.
   useRealtimeEvent('verification:decided', () => {
     queryClient.invalidateQueries({ queryKey: ['kyc-status'] });
     queryClient.invalidateQueries({ queryKey: ['trust-verification'] });
+    queryClient.invalidateQueries({ queryKey: trustKeys.all });
   });
 
   const { data: kyc } = useQuery({

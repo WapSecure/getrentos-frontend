@@ -551,3 +551,10 @@ export const attentionKeys = {
 export const sellerOfferKeys = {
   comparison: ['seller', 'offers', 'compare'] as const,
 };
+
+/** The signed-in person's own trust records, shared by every portal. */
+export const trustKeys = {
+  all: ['trust'] as const,
+  overview: (portal: string) => ['trust', 'overview', portal] as const,
+  explanation: ['trust', 'explanation'] as const,
+};
