@@ -27,7 +27,7 @@ export const PaymentsTable = ({ payments, onViewDetails }: PaymentsTableProps) =
               <th className="px-4 py-3 font-medium text-muted-foreground">Amount</th>
               <th className="px-4 py-3 font-medium text-muted-foreground">Due date</th>
               <th className="px-4 py-3 font-medium text-muted-foreground">Payment status</th>
-              <th className="px-4 py-3 font-medium text-muted-foreground">Payout</th>
+              <th className="px-4 py-3 font-medium text-muted-foreground">Escrow</th>
               <th className="px-4 py-3" />
             </tr>
           </thead>

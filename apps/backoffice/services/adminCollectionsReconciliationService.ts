@@ -16,7 +16,10 @@ export type CollectionLineKind =
   | 'AMOUNT_MISMATCH'
   | 'NOT_APPLIED'
   | 'UNKNOWN_REFERENCE'
-  | 'MISSING_AT_GATEWAY';
+  | 'MISSING_AT_GATEWAY'
+  | 'TRANSFER_UNKNOWN'
+  | 'TRANSFER_MISSING_AT_GATEWAY'
+  | 'DUPLICATE_PAYOUT';
 
 /** One payment that does not line up. Amounts are whole naira. */
 export type PaymentProvider = 'PAYSTACK' | 'MONNIFY';
@@ -39,6 +42,7 @@ export interface CollectionsReport {
     gatewayIn: number;
     gatewayFees: number;
     refundsOut: number;
+    transfersOut?: number;
     matched: number;
     exceptions: number;
   };
@@ -57,6 +61,8 @@ export interface CollectionsReport {
   }[];
   exceptions: CollectionLine[];
   refunds: { reference: string; product: CollectionProduct | null; amount: number }[];
+  /** Payouts sent through Paystack in the window, and the Paystack balance now (naira). */
+  transfersOut?: { count: number; amount: number; failed: number; balance: number | null };
 }
 
 export const adminCollectionsReconciliationService = {

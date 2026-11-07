@@ -23,6 +23,7 @@ import { AppLockGate } from '@/components/AppLockGate';
 import { ConnectivityBanner } from '@/components/ConnectivityBanner';
 import { Sentry } from '@/lib/monitoring';
 import { StepUpSheet } from '@/components/StepUpSheet';
+import { PaymentResultSheet } from '@/components/payments/PaymentResultSheet';
 import { WebAlertHost } from '@/components/WebAlertHost';
 import { installWebAlert } from '@/lib/installWebAlert';
 
@@ -150,6 +151,7 @@ function Gate() {
       </Stack>
       <AppLockGate />
       <StepUpSheet />
+      <PaymentResultSheet />
       <SplashReveal />
       <ConnectivityBanner />
     </>

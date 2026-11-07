@@ -11,6 +11,14 @@ export interface PaymentStatus {
   /** Whole naira. */
   amount: number;
   returnPath: string | null;
+  /** What it paid for ("Rent for 2-Bed Apartment · Lekki Phase 1"), when known. */
+  title?: string | null;
+  /** When it was recorded as paid (ISO). */
+  paidAt?: string | null;
+  /** Card or bank fee the payer covered, whole naira. */
+  fee?: number | null;
+  /** Amount plus fee, whole naira. */
+  totalCharged?: number | null;
 }
 
 /** The card or bank fee the payer covers on a payment. All kobo. */

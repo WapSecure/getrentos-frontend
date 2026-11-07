@@ -7,6 +7,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Badge,
   Button,
+  ConfirmDialog,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -22,6 +23,8 @@ import { shortletKeys } from '@/lib/queryKeys';
 import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { BankAccountFields } from '@/components/shared/payouts/BankAccountFields';
+import { PAYOUT_CHANGE_COOLDOWN_HINT } from '@/components/shared/payouts/PayoutHoldNotice';
+import { payoutDestination } from '@/lib/payoutDestination';
 
 const PAYOUT_STATUS_VARIANT: Record<string, BadgeVariant> = {
   SUCCESS: 'success',
@@ -47,6 +50,10 @@ export function ShortletPayoutsDialog({
   const queryClient = useQueryClient();
   const [bankCode, setBankCode] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
+  // Changing the saved account opens the same form as setting one up.
+  const [editingAccount, setEditingAccount] = useState(false);
+  // Money moves only after the amount and the account it goes to are confirmed.
+  const [confirmingWithdraw, setConfirmingWithdraw] = useState(false);
   const toast = useToast();
 
   const { data: summary } = useQuery({
@@ -75,6 +82,7 @@ export function ShortletPayoutsDialog({
       invalidate();
       setBankCode('');
       setAccountNumber('');
+      setEditingAccount(false);
       toast.success('Payout account saved.');
     },
     onError: (reason: Error) => toast.error(reason.message),
@@ -135,7 +143,7 @@ export function ShortletPayoutsDialog({
               </div>
             </div>
             <Button
-              onClick={() => withdraw.mutate()}
+              onClick={() => setConfirmingWithdraw(true)}
               disabled={
                 !summary?.accountSet || !summary.available || summary?.canWithdraw === false
               }
@@ -216,21 +224,30 @@ export function ShortletPayoutsDialog({
           )}
 
           {/* Payout account */}
-          {account ? (
+          {account && !editingAccount ? (
             <div className="rounded-lg border border-border p-4">
               <p className="text-sm font-medium">Payout account</p>
               <p className="mt-1 text-sm text-muted-foreground">
                 {account.bankName} · {account.accountNumber} · {account.accountName}
               </p>
-              <p className="mt-2 text-xs text-muted-foreground">
-                To change it, enter new details below and save.
-              </p>
+              <p className="mt-2 text-xs text-muted-foreground">{PAYOUT_CHANGE_COOLDOWN_HINT}</p>
+              <Button
+                className="mt-3"
+                variant="outline"
+                size="sm"
+                onClick={() => setEditingAccount(true)}
+              >
+                Change account
+              </Button>
             </div>
           ) : (
             <div className="rounded-lg border border-dashed border-border p-4">
-              <p className="text-sm font-medium">Set up your payout account</p>
+              <p className="text-sm font-medium">
+                {account ? 'Change your payout account' : 'Set up your payout account'}
+              </p>
               <p className="mb-3 mt-1 text-xs text-muted-foreground">
                 Your earnings are paid to this NUBAN bank account.
+                {account ? ` ${PAYOUT_CHANGE_COOLDOWN_HINT}` : ''}
               </p>
               <div>
                 <BankAccountFields
@@ -241,16 +258,31 @@ export function ShortletPayoutsDialog({
                   onAccountNumber={setAccountNumber}
                 />
               </div>
-              <Button
-                className="mt-3 w-full"
-                variant="outline"
-                onClick={() => saveAccount.mutate()}
-                isLoading={saveAccount.isPending}
-                loadingText="Saving…"
-                disabled={bankCode.length < 3 || accountNumber.length !== 10}
-              >
-                Save account
-              </Button>
+              <div className="mt-3 flex gap-2">
+                <Button
+                  className="flex-1"
+                  variant="outline"
+                  onClick={() => saveAccount.mutate()}
+                  isLoading={saveAccount.isPending}
+                  loadingText="Saving…"
+                  disabled={bankCode.length < 3 || accountNumber.length !== 10}
+                >
+                  Save account
+                </Button>
+                {account && (
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      setEditingAccount(false);
+                      setBankCode('');
+                      setAccountNumber('');
+                    }}
+                    disabled={saveAccount.isPending}
+                  >
+                    Cancel
+                  </Button>
+                )}
+              </div>
             </div>
           )}
 
@@ -287,6 +319,21 @@ export function ShortletPayoutsDialog({
             <NairaSign className="h-3.5 w-3.5" /> Payouts transfer to your bank via Paystack.
           </p>
         </div>
+        <ConfirmDialog
+          open={confirmingWithdraw}
+          onOpenChange={setConfirmingWithdraw}
+          tone="primary"
+          title={`Withdraw ${formatCurrency(summary?.available ?? 0)}?`}
+          description={`${formatCurrency(summary?.available ?? 0)} will be sent to ${
+            account ? payoutDestination(account) : 'your payout account'
+          }.${
+            (summary?.penaltiesOutstanding ?? 0) > 0
+              ? ` ${formatCurrency(summary?.penaltiesOutstanding ?? 0)} in cancellation fees you owe is taken out first.`
+              : ''
+          } Check this is your account before you continue.`}
+          confirmLabel={`Withdraw ${formatCurrency(summary?.available ?? 0)}`}
+          onConfirm={() => withdraw.mutate()}
+        />
       </DialogContent>
     </Dialog>
   );

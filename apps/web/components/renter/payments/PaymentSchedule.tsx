@@ -17,14 +17,18 @@ interface Payment {
 
 interface PaymentScheduleProps {
   payments: Payment[];
-  onPayAll?: () => void;
-  isPayingAll?: boolean;
+  /** Open the pay dialog for the oldest open charge (across every page). */
+  onPayOldest?: () => void;
+  /** How many charges are open across every page. */
+  openCount?: number;
+  isPaying?: boolean;
 }
 
 export const PaymentSchedule = ({
   payments,
-  onPayAll,
-  isPayingAll = false,
+  onPayOldest,
+  openCount = 0,
+  isPaying = false,
 }: PaymentScheduleProps) => {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-NG', {
@@ -95,7 +99,9 @@ export const PaymentSchedule = ({
           <h2 className="font-semibold text-foreground">Upcoming payments</h2>
         </div>
         <p className="text-xs text-muted-foreground mt-0.5">
-          {upcomingPayments.length} payments pending
+          {upcomingPayments.length === 1
+            ? '1 payment due'
+            : `${upcomingPayments.length} payments due`}
         </p>
       </div>
 
@@ -134,18 +140,26 @@ export const PaymentSchedule = ({
         })}
       </div>
 
-      <div className="p-3 border-t border-border">
-        <Button
-          variant="primary"
-          size="sm"
-          fullWidth
-          onClick={onPayAll}
-          disabled={isPayingAll}
-          isLoading={isPayingAll}
-        >
-          Pay all now
-        </Button>
-      </div>
+      {onPayOldest && (
+        <div className="space-y-2 p-3 border-t border-border">
+          <Button
+            variant="primary"
+            size="sm"
+            fullWidth
+            onClick={onPayOldest}
+            disabled={isPaying}
+            isLoading={isPaying}
+          >
+            Pay oldest charge
+          </Button>
+          {openCount > 1 && (
+            <p className="text-xs text-muted-foreground">
+              You have {openCount} charges to pay. Each is paid on its own, oldest first, and you
+              see its fee before you pay.
+            </p>
+          )}
+        </div>
+      )}
     </Card>
   );
 };

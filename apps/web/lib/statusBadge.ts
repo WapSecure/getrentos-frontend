@@ -52,7 +52,8 @@ export const escrowStatusBadges: Record<EscrowStatus, StatusBadgeEntry> = {
   not_funded: { label: 'Not paid yet', variant: 'neutral' },
   held: { label: 'Held by GetRentos', variant: 'info', icon: Lock },
   pending_review: { label: 'Under review', variant: 'warning', icon: Clock },
-  released: { label: 'Paid to landlord', variant: 'success', icon: CheckCircle2 },
+  // Released from escrow is not yet money in the landlord's bank: the transfer is a separate step.
+  released: { label: 'Released to landlord', variant: 'success', icon: CheckCircle2 },
   frozen: { label: 'On hold: dispute open', variant: 'danger', icon: Ban },
 };
 

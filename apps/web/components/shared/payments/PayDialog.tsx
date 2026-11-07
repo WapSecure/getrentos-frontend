@@ -44,6 +44,8 @@ export interface PayDialogProps {
   providers: PaymentProviderChoice;
   /** Why the last try failed when the chosen company could not take it: choose another. */
   providerError?: string | null;
+  /** Why the last try failed for any other reason, shown above the button. */
+  error?: string | null;
   onPay: () => void;
   busy?: boolean;
   /** The button when `amount` is 0. */
@@ -99,6 +101,7 @@ export const PayDialog = ({
   amountStep,
   providers,
   providerError,
+  error,
   onPay,
   busy,
   notReadyLabel = 'Enter an amount to pay',
@@ -107,10 +110,19 @@ export const PayDialog = ({
   const paying = amount ?? owed;
   const ready = paying > 0;
   // The payer covers the card or bank fee, so whoever is paid gets the full amount.
-  const { fee, total } = useCheckoutFee(topUpOnly ? 0 : paying, providers.provider);
+  const {
+    fee,
+    total,
+    state: feeState,
+    retry: retryFee,
+    retrying: retryingFee,
+  } = useCheckoutFee(topUpOnly ? 0 : paying, providers.provider);
   const chosen = providers.options.find((o) => o.provider === providers.provider);
   const steps = providers.canChoose;
   const company = chosen?.label ?? 'the payment company';
+  // Never promise a total that leaves the fee out: wait for it, or say it comes next.
+  const feeLoading = !topUpOnly && ready && feeState === 'loading';
+  const feeUnknown = !topUpOnly && ready && feeState === 'unknown';
 
   return (
     <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
@@ -158,12 +170,22 @@ export const PayDialog = ({
                         { label: itemLabel, value: formatCurrency(paying) },
                         {
                           label: 'Card or bank fee',
-                          value: fee == null ? '…' : fee > 0 ? formatCurrency(fee) : 'None',
+                          value: feeUnknown
+                            ? 'Shown on the next page'
+                            : fee == null
+                              ? 'Working it out…'
+                              : fee > 0
+                                ? formatCurrency(fee)
+                                : 'None',
                         },
                         {
                           label: <span className="font-medium text-foreground">You pay</span>,
                           value: (
-                            <span className="text-base">{formatCurrency(total ?? paying)}</span>
+                            <span className="text-base">
+                              {total != null
+                                ? formatCurrency(total)
+                                : `${formatCurrency(paying)} + fee`}
+                            </span>
                           ),
                         },
                       ]
@@ -181,13 +203,32 @@ export const PayDialog = ({
             </div>
           )}
 
+          {feeUnknown && (
+            <Alert
+              variant="warning"
+              action={
+                retryFee ? (
+                  <Button variant="outline" size="sm" onClick={retryFee} isLoading={retryingFee}>
+                    Try again
+                  </Button>
+                ) : undefined
+              }
+            >
+              We couldn’t work out the card or bank fee here. You’ll see it on {company}’s page
+              before you pay.
+            </Alert>
+          )}
+
+          {error && <Alert variant="danger">{error}</Alert>}
+
           <div className="space-y-3">
             <Button
               variant="primary"
               fullWidth
               size="lg"
-              disabled={!ready}
-              isLoading={busy}
+              disabled={!ready || feeLoading}
+              isLoading={busy || feeLoading}
+              loadingText={!busy && feeLoading ? 'Working out the fee…' : undefined}
               onClick={onPay}
             >
               <Lock className="h-4 w-4" />
@@ -195,7 +236,9 @@ export const PayDialog = ({
                 ? notReadyLabel
                 : topUpOnly
                   ? topUpOnly.buttonLabel
-                  : `Pay ${formatCurrency(total ?? paying)}${chosen && steps ? ` with ${chosen.label}` : ''}`}
+                  : feeUnknown
+                    ? `Continue to ${company}`
+                    : `Pay ${formatCurrency(total ?? paying)}${chosen && steps ? ` with ${chosen.label}` : ''}`}
             </Button>
             <p className="flex items-start gap-2 text-xs text-muted-foreground">
               <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-success" />

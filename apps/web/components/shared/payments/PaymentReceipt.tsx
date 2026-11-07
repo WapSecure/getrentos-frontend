@@ -9,11 +9,14 @@ import {
   Home,
   Loader2,
   ShieldCheck,
+  Smartphone,
   XCircle,
   type LucideIcon,
 } from 'lucide-react';
 import { Button, Card, DescriptionList, IconButton, type DescriptionItem } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
+import { ROUTES } from '@/lib/constants/auth';
+import { currentPath, withNext } from '@/lib/nextPath';
 import type { PaymentKind, PaymentProvider, PaymentStatus } from '@/types/payments';
 
 const WHAT: Record<PaymentKind, string> = {
@@ -350,16 +353,24 @@ export function PaymentNotFound() {
   );
 }
 
+/**
+ * Not signed in here, so the outcome can't be looked up: most often the payer
+ * paid from the mobile app's in-app browser, sometimes a web session expired
+ * during checkout. Neutral on purpose: nothing here says the payment worked.
+ */
 export function PaymentDoneElsewhere() {
   return (
     <Shell>
       <div className="space-y-4">
-        <StatusMark icon={CheckCircle2} tone="success" />
+        <StatusMark icon={Smartphone} tone="muted" />
         <Heading
-          title="You're done here"
-          body="Close this page and go back to the GetRentos app. Your payment shows there as soon as it's confirmed: you don't need to pay again."
+          title="Go back to the app to see how it went"
+          body="Close this page and return to the GetRentos app. Your payment shows there once it's confirmed. If you were charged, please don't pay again."
         />
       </div>
+      <Button href={withNext(ROUTES.LOGIN, currentPath())} variant="outline" className="w-full">
+        Paid on the website? Sign in to check
+      </Button>
     </Shell>
   );
 }

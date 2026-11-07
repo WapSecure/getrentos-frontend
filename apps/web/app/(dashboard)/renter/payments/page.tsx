@@ -54,9 +54,7 @@ export default function PaymentsPage() {
   const [showExportModal, setShowExportModal] = useState(false);
   const [disputingPaymentId, setDisputingPaymentId] = useState<string | null>(null);
   const [confirmingMoveInId, setConfirmingMoveInId] = useState<string | null>(null);
-  const [showPayAllConfirm, setShowPayAllConfirm] = useState(false);
   const [payingPaymentId, setPayingPaymentId] = useState<string | null>(null);
-  const [bulkPayingIds, setBulkPayingIds] = useState<string[]>([]);
   // Which company takes the payment, and why the last one could not.
   const providers = usePaymentProviders();
   const [providerError, setProviderError] = useState<string | null>(null);
@@ -67,6 +65,13 @@ export default function PaymentsPage() {
     queryKey: [...renterKeys.payments, { page, pageSize: PAGE_SIZE }],
     queryFn: () => unwrap(renterService.listPayments({ page, pageSize: PAGE_SIZE })),
     placeholderData: keepPreviousData,
+  });
+  // The oldest open charge across every page (the API sorts open charges by due
+  // date), and how many are open. Checkout takes one charge at a time, so the
+  // renter pays the oldest first through the pay dialog, never a combined total.
+  const nextChargeQuery = useQuery({
+    queryKey: [...renterKeys.payments, { page: 1, pageSize: 1, open: true }],
+    queryFn: () => unwrap(renterService.listPayments({ page: 1, pageSize: 1, open: true })),
   });
   const receiptsQuery = useQuery({
     queryKey: [...renterKeys.receipts, { page: 1, pageSize: 12 }],
@@ -140,10 +145,7 @@ export default function PaymentsPage() {
 
   const payments: DisplayPayment[] = rawPayments.map((p) => {
     const method = p.method ?? 'card';
-    if (
-      bulkPayingIds.includes(p.id) ||
-      (payNowMutation.isPending && payNowMutation.variables?.paymentId === p.id)
-    ) {
+    if (payNowMutation.isPending && payNowMutation.variables?.paymentId === p.id) {
       return { ...p, method, status: 'processing' };
     }
     return { ...p, method };
@@ -151,14 +153,26 @@ export default function PaymentsPage() {
 
   const owedOn = (p: { amount: number; amountPaid?: number }) => p.amount - (p.amountPaid ?? 0);
 
-  // Paying opens a choice of paying in full or in part.
-  const handlePayNow = (paymentId: string) => {
-    if (bulkPayingIds.length > 0) return;
-    setPayingPaymentId(paymentId);
+  const nextCharge = nextChargeQuery.data?.items[0] ?? null;
+  const openCount = nextChargeQuery.data?.total ?? 0;
+  // A charge on this page, or the oldest open one (which may be on another page).
+  const findPayment = (paymentId: string | null): DisplayPayment | null => {
+    const onPage = payments.find((p) => p.id === paymentId);
+    if (onPage) return onPage;
+    return nextCharge && nextCharge.id === paymentId
+      ? { ...nextCharge, method: nextCharge.method ?? 'card' }
+      : null;
   };
 
+  // Paying opens a choice of paying in full or in part.
+  const handlePayNow = (paymentId: string) => {
+    setPayingPaymentId(paymentId);
+  };
+  // Open charges are paid one at a time, oldest first.
+  const handlePayOldest = nextCharge ? () => setPayingPaymentId(nextCharge.id) : undefined;
+
   const payChosen = (paymentId: string, amount: number | undefined) => {
-    const payment = payments.find((p) => p.id === paymentId);
+    const payment = findPayment(paymentId);
     if (!payment) return;
     // The API decides: with a gateway it returns a checkout to redirect to;
     // when payments are simulated it settles the charge itself and returns none.
@@ -169,53 +183,7 @@ export default function PaymentsPage() {
       provider: providers.provider,
     });
   };
-  const payingPayment = payments.find((p) => p.id === payingPaymentId) ?? null;
-
-  const payablePayments = payments.filter(
-    (payment) => payment.status === 'pending' || payment.status === 'overdue'
-  );
-  const payableTotal = payablePayments.reduce((sum, payment) => sum + owedOn(payment), 0);
-
-  const handlePayAll = async () => {
-    const paymentIds = payablePayments.map((payment) => payment.id);
-    if (paymentIds.length === 0) return;
-    setBulkPayingIds(paymentIds);
-    let completedCount = 0;
-    try {
-      for (const payment of payablePayments) {
-        const updated = await unwrap(
-          renterService.payNow(payment.id, payment.method, undefined, providers.provider)
-        );
-        if (updated.authorizationUrl) {
-          // Real gateway flow: only one checkout can be completed at a
-          // time, so redirect to this one now; the rest stay payable.
-          redirectToCheckout(updated.authorizationUrl);
-          return;
-        }
-        completedCount += 1;
-      }
-      pushNotification({
-        type: 'success',
-        title: 'Payments successful',
-        message: `${completedCount} payment${completedCount === 1 ? '' : 's'} totalling ₦${payableTotal.toLocaleString()} completed successfully.`,
-      });
-    } catch (error) {
-      // That company cannot take it right now; the next try uses another one.
-      const unavailable = providers.recover(error, providers.provider);
-      pushNotification({
-        type: 'error',
-        title: 'Payment batch stopped',
-        message:
-          completedCount > 0
-            ? `${completedCount} payment${completedCount === 1 ? '' : 's'} completed before an error occurred. Review the refreshed payment list before trying again.`
-            : (unavailable ?? 'No payment was completed. Check your payment method and try again.'),
-      });
-    } finally {
-      setBulkPayingIds([]);
-      void queryClient.invalidateQueries({ queryKey: renterKeys.payments });
-      void queryClient.invalidateQueries({ queryKey: renterKeys.receipts });
-    }
-  };
+  const payingPayment = findPayment(payingPaymentId);
 
   const handleDownloadReceipt = (receiptId: string) => {
     const receipt = receipts.find((r) => r.id === receiptId || r.paymentId === receiptId);
@@ -305,15 +273,6 @@ export default function PaymentsPage() {
   const notifyPaymentMethodError = (title: string, fallback: string) => (error: Error) =>
     pushNotification({ type: 'error', title, message: error.message || fallback });
 
-  const setDefaultPaymentMethodMutation = useMutation({
-    mutationFn: (id: string) => unwrap(renterService.setDefaultPaymentMethod(id)),
-    onSuccess: invalidatePaymentMethods,
-    onError: notifyPaymentMethodError(
-      'Default payment method not updated',
-      'We could not update your default payment method. Please try again.'
-    ),
-  });
-
   const removePaymentMethodMutation = useMutation({
     mutationFn: (id: string) => unwrap(renterService.removePaymentMethod(id)),
     onSuccess: invalidatePaymentMethods,
@@ -323,31 +282,8 @@ export default function PaymentsPage() {
     ),
   });
 
-  const addPaymentMethodMutation = useMutation({
-    mutationFn: (data: { last4: string; expiry: string }) =>
-      unwrap(
-        renterService.addPaymentMethod({
-          type: 'card',
-          name: `Card ending ${data.last4}`,
-          last4: data.last4,
-          expiry: data.expiry,
-        })
-      ),
-    onSuccess: invalidatePaymentMethods,
-    onError: notifyPaymentMethodError(
-      'Payment method not added',
-      'We could not add this payment method. Please try again.'
-    ),
-  });
-
-  const handleSetDefaultPaymentMethod = async (id: string) => {
-    await setDefaultPaymentMethodMutation.mutateAsync(id);
-  };
   const handleRemovePaymentMethod = async (id: string) => {
-    await removePaymentMethodMutation.mutateAsync(id);
-  };
-  const handleAddPaymentMethod = async (data: { last4: string; expiry: string }) => {
-    await addPaymentMethodMutation.mutateAsync(data);
+    removePaymentMethodMutation.mutate(id);
   };
 
   const tabNav = <HubTabs tabs={TABS} activeTab={activeTab} onChange={setTab} />;
@@ -390,7 +326,14 @@ export default function PaymentsPage() {
       {tabNav}
       <PaymentsHeader
         onExport={() => setShowExportModal(true)}
-        onPayOutstanding={payablePayments.length > 0 ? () => setShowPayAllConfirm(true) : undefined}
+        onPayOldest={handlePayOldest}
+        notifications={
+          <PaymentNotifications
+            notifications={notifications}
+            onMarkAsRead={handleMarkNotificationAsRead}
+            onClearAll={handleClearAllNotifications}
+          />
+        }
       />
       <PaymentsStats payments={payments} />
 
@@ -406,22 +349,13 @@ export default function PaymentsPage() {
           <PaymentReceiptsGallery receipts={receipts} onDownload={handleDownloadReceipt} />
         </div>
         <div className="min-w-0 space-y-6 xl:col-span-4">
-          <PaymentNotifications
-            notifications={notifications}
-            onMarkAsRead={handleMarkNotificationAsRead}
-            onClearAll={handleClearAllNotifications}
-          />
           <PaymentSchedule
             payments={payments}
-            onPayAll={() => payablePayments.length > 0 && setShowPayAllConfirm(true)}
-            isPayingAll={bulkPayingIds.length > 0 || payNowMutation.isPending}
+            onPayOldest={handlePayOldest}
+            openCount={openCount}
+            isPaying={payNowMutation.isPending}
           />
-          <PaymentMethods
-            methods={paymentMethods}
-            onSetDefault={handleSetDefaultPaymentMethod}
-            onRemove={handleRemovePaymentMethod}
-            onAdd={handleAddPaymentMethod}
-          />
+          <PaymentMethods methods={paymentMethods} onRemove={handleRemovePaymentMethod} />
           <RentAccountCard />
           <AutoPaySetup />
           <PaymentAnalytics payments={payments} />
@@ -454,15 +388,6 @@ export default function PaymentsPage() {
           setConfirmingMoveInId(null);
         }}
       />
-      <ConfirmDialog
-        open={showPayAllConfirm}
-        onOpenChange={setShowPayAllConfirm}
-        title="Confirm all payments"
-        description={`You are about to pay ${payablePayments.length} item${payablePayments.length === 1 ? '' : 's'} totalling ₦${payableTotal.toLocaleString()}. Payments will be processed one at a time and cannot be undone here.`}
-        confirmLabel={`Pay ₦${payableTotal.toLocaleString()}`}
-        onConfirm={() => void handlePayAll()}
-      />
-
       <PayAmountDialog
         payment={
           payingPayment

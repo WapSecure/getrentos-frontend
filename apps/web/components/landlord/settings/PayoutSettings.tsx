@@ -2,9 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { CheckCircle2 } from 'lucide-react';
-import { Card, SaveButton } from '@getrentos/ui';
+import { Alert, Button, Card, SaveButton, useToast } from '@getrentos/ui';
 import { landlordService } from '@/services/landlordService';
-import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
+import {
+  VerificationRequiredNotice,
+  isVerificationGateError,
+} from '@/components/shared/verification/VerificationRequiredNotice';
 import { ROUTES } from '@/lib/constants/auth';
 import {
   PAYOUT_CHANGE_COOLDOWN_HINT,
@@ -21,10 +24,15 @@ export const PayoutSettings = () => {
   const [verified, setVerified] = useState(false);
   const [holdUntil, setHoldUntil] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<unknown>(null);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [reloads, setReloads] = useState(0);
+  const toast = useToast();
 
   useEffect(() => {
     const fetchPayoutAccount = async () => {
       const response = await landlordService.getPayoutAccount();
+      // No account yet comes back as success without data: only a failed call is a load error.
+      setLoadFailed(!response.success);
       if (response.success && response.data) {
         setSavedBankName(response.data.bankName);
         setSavedAccountNumber(response.data.accountNumber);
@@ -35,12 +43,13 @@ export const PayoutSettings = () => {
     };
 
     fetchPayoutAccount();
-  }, []);
+  }, [reloads]);
 
   const canSave = bankCode.trim().length >= 3 && accountNumber.trim().length === 10;
 
-  const handleSave = async () => {
-    if (!canSave) return;
+  // Resolves true only when the account was saved, so the button says "Saved" only then.
+  const handleSave = async (): Promise<boolean> => {
+    if (!canSave) return false;
     setSubmitError(null);
     const response = await landlordService.updatePayoutAccount({ bankCode, accountNumber });
     if (response.success && response.data) {
@@ -51,10 +60,18 @@ export const PayoutSettings = () => {
       setHoldUntil(response.data.payoutHoldUntil ?? null);
       setBankCode('');
       setAccountNumber('');
-    } else {
-      setSubmitError(response);
+      toast.success(`Rent now pays out to ${response.data.accountName || 'your new account'}.`);
+      return true;
     }
+    setSubmitError(response);
+    return false;
   };
+  // Verification gates have their own notice; anything else is said plainly here.
+  const saveFailedMessage =
+    submitError && !isVerificationGateError(submitError)
+      ? ((submitError as { error?: string }).error ??
+        'Your payout account wasn’t saved. Please try again.')
+      : null;
 
   return (
     <div>
@@ -62,6 +79,20 @@ export const PayoutSettings = () => {
       <p className="text-sm text-muted-foreground mb-6">
         Where rent released by GetRentos Payment Protection is sent: transfers run through Paystack.
       </p>
+
+      {loadFailed && (
+        <Alert
+          variant="danger"
+          className="mb-6"
+          action={
+            <Button variant="outline" size="sm" onClick={() => setReloads((n) => n + 1)}>
+              Try again
+            </Button>
+          }
+        >
+          We couldn’t load your payout account, so we can’t show where rent is paid out to.
+        </Alert>
+      )}
 
       {savedAccountNumber && (
         <Card className="p-3 mb-6">
@@ -105,7 +136,8 @@ export const PayoutSettings = () => {
           href={ROUTES.LANDLORD_SETTINGS}
           verificationHref={ROUTES.LANDLORD_VERIFICATION}
         />
-        <SaveButton label="Update payout account" onClick={handleSave} />
+        {saveFailedMessage && <Alert variant="danger">{saveFailedMessage}</Alert>}
+        <SaveButton label="Update payout account" onClick={handleSave} disabled={!canSave} />
       </div>
     </div>
   );

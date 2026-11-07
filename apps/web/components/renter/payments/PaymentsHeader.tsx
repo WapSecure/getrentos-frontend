@@ -1,15 +1,19 @@
 'use client';
 
-import { CreditCard, Plus, Download, Shield } from 'lucide-react';
+import type { ReactNode } from 'react';
+import { CreditCard, Download, Shield, Wallet } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { RenterPageHeader } from '../shared/RenterPageHeader';
 
 interface PaymentsHeaderProps {
   onExport: () => void;
-  onPayOutstanding?: () => void;
+  /** Open the pay dialog for the oldest open charge. Absent when nothing is owed. */
+  onPayOldest?: () => void;
+  /** The payment notifications button, shown first among the actions. */
+  notifications?: ReactNode;
 }
 
-export const PaymentsHeader = ({ onExport, onPayOutstanding }: PaymentsHeaderProps) => {
+export const PaymentsHeader = ({ onExport, onPayOldest, notifications }: PaymentsHeaderProps) => {
   return (
     <div>
       <RenterPageHeader
@@ -19,14 +23,15 @@ export const PaymentsHeader = ({ onExport, onPayOutstanding }: PaymentsHeaderPro
         description="Manage rent, payment methods, receipts, and your complete payment history."
         actions={
           <>
+            {notifications}
             <Button variant="outline" className="gap-2" size="sm" onClick={onExport}>
               <Download className="h-4 w-4" aria-hidden="true" />
               Export
             </Button>
-            {onPayOutstanding && (
-              <Button variant="primary" className="gap-2" size="sm" onClick={onPayOutstanding}>
-                <Plus className="h-4 w-4" aria-hidden="true" />
-                Pay outstanding
+            {onPayOldest && (
+              <Button variant="primary" className="gap-2" size="sm" onClick={onPayOldest}>
+                <Wallet className="h-4 w-4" aria-hidden="true" />
+                Pay oldest charge
               </Button>
             )}
           </>

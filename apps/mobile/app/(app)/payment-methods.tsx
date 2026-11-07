@@ -1,20 +1,11 @@
-import { useState } from 'react';
 import { Alert, Pressable, RefreshControl, ScrollView, View } from 'react-native';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Building2, CreditCard, Trash2, Wallet as WalletIcon } from 'lucide-react-native';
 import {
-  Building2,
-  Check,
-  CreditCard,
-  Plus,
-  Trash2,
-  Wallet as WalletIcon,
-} from 'lucide-react-native';
-import {
-  Badge,
-  Button,
   Card,
+  FormAlert,
   QueryState,
   Skeleton,
   Text,
@@ -28,7 +19,6 @@ import {
   type SavedPaymentMethod,
 } from '@/lib/api/payments';
 import { errorMessage } from '@/lib/api/client';
-import { AddPaymentMethodSheet } from '@/components/payments/AddPaymentMethodSheet';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
@@ -43,7 +33,6 @@ export default function PaymentMethods() {
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();
   const toast = useToast();
-  const [adding, setAdding] = useState(false);
 
   const query = useQuery({
     queryKey: qk.renter.paymentMethods,
@@ -51,15 +40,6 @@ export default function PaymentMethods() {
   });
 
   const methods = query.data ?? [];
-
-  const setDefault = useMutation({
-    mutationFn: (id: string) => paymentsApi.setDefaultMethod(id),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: qk.renter.paymentMethods });
-      toast.show('Default payment method updated.', 'success');
-    },
-    onError: (e) => toast.show(errorMessage(e, 'Could not set that default.'), 'error'),
-  });
 
   const remove = useMutation({
     mutationFn: (id: string) => paymentsApi.removeMethod(id),
@@ -71,7 +51,7 @@ export default function PaymentMethods() {
   });
 
   const confirmRemove = (m: SavedPaymentMethod) => {
-    Alert.alert('Remove payment method?', `${m.name} will no longer be available at checkout.`, [
+    Alert.alert('Remove these details?', `${m.name} isn't used to pay. This only removes it.`, [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Remove', style: 'destructive', onPress: () => remove.mutate(m.id) },
     ]);
@@ -80,9 +60,9 @@ export default function PaymentMethods() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <DetailScreenHeader
-        eyebrow="Wallet"
+        eyebrow="Payments"
         title="Payment methods"
-        subtitle="Cards, bank accounts and preferred checkout"
+        subtitle="How paying works on GetRentos"
         onBack={() => goBack()}
       />
 
@@ -100,6 +80,17 @@ export default function PaymentMethods() {
           />
         }
       >
+        <FormAlert
+          tone="info"
+          message="You choose how to pay (card, bank transfer or USSD) on Paystack’s or Monnify’s secure page each time you pay. GetRentos never sees or keeps your card details, so there is nothing to add here."
+        />
+
+        {methods.length > 0 ? (
+          <Text variant="caption" color="mutedForeground" style={{ marginTop: spacing.md }}>
+            Details you saved here before. They aren’t used to pay, so you can remove them.
+          </Text>
+        ) : null}
+
         <QueryState
           query={query}
           skeleton={
@@ -109,14 +100,6 @@ export default function PaymentMethods() {
               ))}
             </View>
           }
-          isEmpty={methods.length === 0}
-          empty={{
-            icon: <CreditCard size={30} color={colors.mutedForeground} />,
-            title: 'No payment methods',
-            description:
-              'Add a card, bank account or wallet to pay rent without re-entering details.',
-            action: <Button label="Add a method" onPress={() => setAdding(true)} />,
-          }}
         >
           {methods.map((m) => {
             const Icon = TYPE_ICON[m.type] ?? CreditCard;
@@ -139,12 +122,10 @@ export default function PaymentMethods() {
                   <View style={{ flex: 1, gap: 2 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
                       <Text variant="bodyStrong">{m.name}</Text>
-                      {m.isDefault ? <Badge label="Default" tone="success" /> : null}
                     </View>
                     <Text variant="caption" color="mutedForeground">
                       {PAYMENT_METHOD_TYPE_LABEL[m.type]}
                       {m.last4 ? ` ···· ${m.last4}` : ''}
-                      {m.expiry ? ` · expires ${m.expiry}` : ''}
                     </Text>
                   </View>
 
@@ -157,53 +138,11 @@ export default function PaymentMethods() {
                     <Trash2 size={17} color={colors.mutedForeground} />
                   </Pressable>
                 </View>
-
-                {m.isDefault ? null : (
-                  <Button
-                    label="Set as default"
-                    variant="ghost"
-                    size="sm"
-                    fullWidth={false}
-                    icon={<Check size={15} color={colors.primary} />}
-                    accessibilityLabel={`Set ${m.name} as default`}
-                    loading={setDefault.isPending && setDefault.variables === m.id}
-                    disabled={setDefault.isPending}
-                    onPress={() => setDefault.mutate(m.id)}
-                    style={{ alignSelf: 'flex-start', marginTop: spacing.sm, paddingHorizontal: 0 }}
-                  />
-                )}
               </Card>
             );
           })}
         </QueryState>
-
-        {methods.length > 0 ? (
-          <Pressable
-            onPress={() => setAdding(true)}
-            accessibilityRole="button"
-            accessibilityLabel="Add another method"
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: spacing.sm,
-              paddingVertical: spacing.lg,
-              borderRadius: radius.lg,
-              borderWidth: 1,
-              borderStyle: 'dashed',
-              borderColor: colors.border,
-              marginTop: spacing.sm,
-            }}
-          >
-            <Plus size={17} color={colors.primary} />
-            <Text variant="callout" color="primary" style={{ fontWeight: '600' }}>
-              Add another method
-            </Text>
-          </Pressable>
-        ) : null}
       </ScrollView>
-
-      <AddPaymentMethodSheet open={adding} onClose={() => setAdding(false)} />
     </View>
   );
 }

@@ -7,6 +7,7 @@ import {
   Badge,
   Button,
   Card,
+  ConfirmDialog,
   EmptyState,
   Skeleton,
   TableSkeleton,
@@ -21,6 +22,7 @@ import {
   PayoutHoldNotice,
 } from '@/components/shared/payouts/PayoutHoldNotice';
 import { BankAccountFields } from '@/components/shared/payouts/BankAccountFields';
+import { payoutDestination } from '@/lib/payoutDestination';
 
 const PAYOUT_STATUS: Record<string, { label: string; variant: BadgeVariant }> = {
   PENDING: { label: 'Processing', variant: 'info' },
@@ -42,6 +44,8 @@ export function AgencyPayoutSection({
   const [editingAccount, setEditingAccount] = useState(false);
   const [bankCode, setBankCode] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
+  // Money moves only after the amount and the account it goes to are confirmed.
+  const [confirmingWithdraw, setConfirmingWithdraw] = useState(false);
 
   const accountQuery = useQuery({
     queryKey: ['agency', 'payoutAccount'],
@@ -178,7 +182,7 @@ export function AgencyPayoutSection({
           ) : null}
           <Button
             className="mt-3"
-            onClick={() => withdraw.mutate()}
+            onClick={() => setConfirmingWithdraw(true)}
             disabled={!canWithdraw}
             isLoading={withdraw.isPending}
             loadingText="Requesting…"
@@ -190,6 +194,18 @@ export function AgencyPayoutSection({
           )}
         </Card>
       </div>
+
+      <ConfirmDialog
+        open={confirmingWithdraw}
+        onOpenChange={setConfirmingWithdraw}
+        tone="primary"
+        title={`Withdraw ${formatCurrency(summary?.available ?? 0)}?`}
+        description={`${formatCurrency(summary?.available ?? 0)} will be sent to ${
+          account ? payoutDestination(account) : 'your payout account'
+        }. Check this is your account before you continue.`}
+        confirmLabel={`Withdraw ${formatCurrency(summary?.available ?? 0)}`}
+        onConfirm={() => withdraw.mutate()}
+      />
 
       {/* Payout history */}
       <div className="mt-4">

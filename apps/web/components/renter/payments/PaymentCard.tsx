@@ -128,14 +128,14 @@ export const PaymentCard = ({
 
   return (
     <article className="group p-4 transition-colors hover:bg-secondary/50 sm:p-5">
-      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center">
         {/* Status Icon */}
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
           <StatusIcon className="h-5 w-5" aria-hidden="true" />
         </div>
 
         {/* Payment Info */}
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 sm:min-w-[16rem]">
           <div className="flex flex-wrap items-center gap-2">
             <h4 className="font-semibold text-foreground">{payment.propertyName}</h4>
             <Badge variant={statusConfig.variant} icon={<StatusIcon className="h-3 w-3" />}>
@@ -152,19 +152,21 @@ export const PaymentCard = ({
               <span>Due {formatDate(payment.dueDate)}</span>
             </div>
             {payment.status === 'paid' && (
-              <div className="flex items-center gap-1">
-                <Shield className="w-3 h-3" />
-                <span>Your money: {escrowLabel(payment.escrowStatus)}</span>
-                {payment.escrowStatus === 'held' && payment.releaseDate && (
-                  <span>· releases to your landlord on {formatDate(payment.releaseDate)}</span>
-                )}
+              <div className="flex items-start gap-1">
+                <Shield className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
+                <span>
+                  Your money: {escrowLabel(payment.escrowStatus)}
+                  {payment.escrowStatus === 'held' && payment.releaseDate
+                    ? ` · releases to your landlord on ${formatDate(payment.releaseDate)}`
+                    : ''}
+                </span>
               </div>
             )}
           </div>
         </div>
 
         {/* Amount & Actions */}
-        <div className="flex flex-wrap items-center gap-4">
+        <div className="flex flex-wrap items-center gap-4 sm:ml-auto">
           <div className="text-right">
             <p className="text-lg font-bold text-primary">{formatCurrency(payment.amount)}</p>
             {payment.status !== 'paid' && (payment.amountPaid ?? 0) > 0 ? (

@@ -241,13 +241,17 @@ export default function PayoutIssuesPage() {
       <ConfirmDialog
         open={confirming !== null}
         onOpenChange={(open) => !open && setConfirming(null)}
-        title="Send this payout again?"
+        title={
+          confirming
+            ? `Send ${formatCurrency(confirming.amount)} to ${confirming.beneficiary} again?`
+            : 'Send this payout again?'
+        }
         description={
           confirming
-            ? `${formatCurrency(confirming.amount)} to ${confirming.beneficiary} (${RAIL[confirming.rail]}). It goes to their current payout account under a new reference.`
+            ? `${formatCurrency(confirming.amount)} to ${confirming.beneficiary} (${RAIL[confirming.rail]}), under a new reference, to their current payout account. That account isn't shown here, so if it changed after this payout failed, check the change was really theirs before you send.`
             : ''
         }
-        confirmLabel="Retry"
+        confirmLabel={confirming ? `Send ${formatCurrency(confirming.amount)}` : 'Send'}
         isLoading={retry.isPending}
         onConfirm={() => confirming && retry.mutate(confirming)}
       />
