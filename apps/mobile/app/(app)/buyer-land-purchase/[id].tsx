@@ -1,4 +1,3 @@
-import { CheckoutFeeNote } from '@/components/payments/CheckoutFeeNote';
 import { useState } from 'react';
 import { Alert, RefreshControl, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -47,7 +46,7 @@ import { BuyerConditions, BuyerMilestones, HeldNote } from '@/components/land/Bu
 import { CoApprovalCard } from '@/components/land/LandRequests';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
-import { PaymentProviderPicker } from '@/components/payments/PaymentProviderPicker';
+import { PaySheet } from '@/components/payments/PaySheet';
 import { usePaymentProviders } from '@/hooks/usePaymentProviders';
 import type { PaymentProvider } from '@/lib/api/paymentStatus';
 
@@ -277,10 +276,16 @@ function PayNext({ p, onPaid }: { p: BuyerPurchaseDetail; onPaid: () => void }) 
   // Which company takes the payment, and why the last one could not.
   const providers = usePaymentProviders();
   const [providerError, setProviderError] = useState<string | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const closeSheet = () => {
+    setSheetOpen(false);
+    setProviderError(null);
+  };
   const pay = useMutation({
     mutationFn: (provider?: PaymentProvider) => landBuyerApi.pay(p.id, provider),
     onMutate: () => setProviderError(null),
     onSuccess: async (init) => {
+      closeSheet();
       if (init.authorizationUrl) {
         // The gateway confirms by webhook; refetch once the browser closes.
         await WebBrowser.openBrowserAsync(init.authorizationUrl);
@@ -290,10 +295,13 @@ function PayNext({ p, onPaid }: { p: BuyerPurchaseDetail; onPaid: () => void }) 
       onPaid();
     },
     onError: (e, provider) => {
-      // That company cannot take it right now: say so by the button, with the other one picked.
+      // That company cannot take it right now: say so in the sheet, with the other one picked.
       const unavailable = providers.recover(e, provider);
       if (unavailable) setProviderError(unavailable);
-      else toast.show(errorMessage(e, 'Could not start the payment.'), 'error');
+      else {
+        closeSheet();
+        toast.show(errorMessage(e, 'Could not start the payment.'), 'error');
+      }
     },
   });
   const payable = PAYABLE.has(p.status) && !!p.nextDue;
@@ -310,19 +318,32 @@ function PayNext({ p, onPaid }: { p: BuyerPurchaseDetail; onPaid: () => void }) 
             {formatDate(p.nextDue.dueDate)}
             {p.nextDue.overdue ? ' (late fee included)' : ''}
           </Text>
-          {providerError ? <FormAlert tone="warning" message={providerError} /> : null}
-          <PaymentProviderPicker choice={providers} />
           <Button
             label={`Pay ${formatNaira(p.nextDue.amount)}`}
             loading={pay.isPending}
             disabled={pay.isPending}
-            onPress={() => pay.mutate(providers.provider)}
+            onPress={() => {
+              setProviderError(null);
+              setSheetOpen(true);
+            }}
           />
-          <CheckoutFeeNote amount={p.nextDue.amount} provider={providers.provider} />
-          <Text variant="caption" color="mutedForeground">
-            You will be taken to our payment partner to pay securely. GetRentos holds it until you
-            confirm each conveyance step.
-          </Text>
+          <PaySheet
+            open={sheetOpen}
+            onClose={closeSheet}
+            title={p.status === 'PENDING_DEPOSIT' ? 'Pay your deposit' : 'Pay installment'}
+            context={`${p.layoutName}, plot ${p.plotNumber} · ${p.nextDue.label}`}
+            dueDate={p.nextDue.dueDate}
+            overdue={p.nextDue.overdue}
+            owed={p.nextDue.amount}
+            amount={p.nextDue.amount}
+            itemLabel={p.nextDue.overdue ? 'Land payment (late fee included)' : 'Land payment'}
+            receiverLine={`The fee goes to the payment company, so the full ${formatNaira(p.nextDue.amount)} is recorded against your purchase.`}
+            protection="GetRentos holds it until you confirm each conveyance step."
+            providers={providers}
+            providerError={providerError}
+            busy={pay.isPending}
+            onPay={() => pay.mutate(providers.provider)}
+          />
         </>
       ) : (
         <Text variant="callout" color="mutedForeground">

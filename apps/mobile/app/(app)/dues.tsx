@@ -1,5 +1,5 @@
-import { CheckoutFeeNote } from '@/components/payments/CheckoutFeeNote';
 import { usePaystackCheckout } from '@/hooks/usePaystackCheckout';
+import { useState } from 'react';
 import { View } from 'react-native';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -21,7 +21,7 @@ import { qk } from '@/lib/query/keys';
 import { formatDate, formatNaira } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
-import { PaymentProviderPicker } from '@/components/payments/PaymentProviderPicker';
+import { PaySheet } from '@/components/payments/PaySheet';
 import { usePaymentProviders } from '@/hooks/usePaymentProviders';
 import type { PaymentProvider } from '@/lib/api/paymentStatus';
 import { errorMessage } from '@/lib/api/client';
@@ -56,6 +56,14 @@ export default function ResidentDues() {
   const checkout = usePaystackCheckout();
   // Which company takes the payment (Paystack or Monnify): one choice for every due here.
   const providers = usePaymentProviders();
+  // The due in the pay sheet; kept while the sheet slides away.
+  const [payDue, setPayDue] = useState<Due | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [providerError, setProviderError] = useState<string | null>(null);
+  const closeSheet = () => {
+    setSheetOpen(false);
+    setProviderError(null);
+  };
 
   const query = useQuery({
     queryKey: qk.resident.dues,
@@ -65,7 +73,9 @@ export default function ResidentDues() {
   const pay = useMutation({
     mutationFn: ({ dueId, provider }: { dueId: string; provider?: PaymentProvider }) =>
       residentApi.payDue(dueId, provider),
+    onMutate: () => setProviderError(null),
     onSuccess: async (updated) => {
+      closeSheet();
       // A real gateway checkout was started: open it in an in-app browser.
       // The webhook confirms payment server-side once the resident finishes
       // there; refetch once they close the browser to pick up the new status.
@@ -78,13 +88,16 @@ export default function ResidentDues() {
       }
       qc.invalidateQueries({ queryKey: qk.resident.dues });
     },
-    // That company cannot take it right now: say so, and the choice moves to the other one.
-    onError: (err, { provider }) =>
-      toast.show(
-        providers.recover(err, provider) ??
-          errorMessage(err, 'Unable to start payment. Please try again.'),
-        'error'
-      ),
+    onError: (err, { provider }) => {
+      // That company cannot take it right now: say so in the sheet, with the other one picked.
+      const unavailable = providers.recover(err, provider);
+      if (unavailable) {
+        setProviderError(unavailable);
+        return;
+      }
+      closeSheet();
+      toast.show(errorMessage(err, 'Unable to start payment. Please try again.'), 'error');
+    },
   });
 
   const dues = query.data?.items ?? [];
@@ -108,36 +121,46 @@ export default function ResidentDues() {
             description: "Your estate manager hasn't charged any dues to your household.",
           }}
         >
-          {dues.some((due) => ['pending', 'overdue', 'processing'].includes(due.status)) ? (
-            <PaymentProviderPicker choice={providers} />
-          ) : null}
           {dues.map((due) => (
             <DueCard
               key={due.id}
               due={due}
-              onPay={(dueId) => pay.mutate({ dueId, provider: providers.provider })}
+              onPay={() => {
+                setPayDue(due);
+                setProviderError(null);
+                setSheetOpen(true);
+              }}
               paying={pay.isPending && pay.variables?.dueId === due.id}
-              provider={providers.provider}
             />
           ))}
         </QueryState>
       </Screen>
+      <PaySheet
+        open={sheetOpen && !!payDue}
+        onClose={closeSheet}
+        title="Pay dues"
+        context={
+          payDue
+            ? `${CATEGORY_LABEL[payDue.category]}${payDue.description ? ` · ${payDue.description}` : ''}`
+            : null
+        }
+        dueDate={payDue?.dueDate}
+        overdue={payDue?.status === 'overdue'}
+        owed={payDue?.amount ?? 0}
+        amount={payDue?.amount ?? 0}
+        itemLabel={payDue ? CATEGORY_LABEL[payDue.category] : 'Dues'}
+        receiverLine={`The fee goes to the payment company, so your estate receives the full ${formatNaira(payDue?.amount ?? 0)}.`}
+        protection="Your payment goes to your estate."
+        providers={providers}
+        providerError={providerError}
+        busy={pay.isPending}
+        onPay={() => payDue && pay.mutate({ dueId: payDue.id, provider: providers.provider })}
+      />
     </View>
   );
 }
 
-function DueCard({
-  due,
-  onPay,
-  paying,
-  provider,
-}: {
-  due: Due;
-  onPay: (id: string) => void;
-  paying: boolean;
-  /** The company the payer chose: fees differ per company. */
-  provider?: PaymentProvider;
-}) {
+function DueCard({ due, onPay, paying }: { due: Due; onPay: () => void; paying: boolean }) {
   const { spacing, colors } = useTheme();
   // A checkout that was opened and left can be picked up again: the API checks
   // whether the earlier one went through before starting another.
@@ -174,15 +197,14 @@ function DueCard({
       </View>
       {canPay ? (
         <Button
-          label={due.status === 'processing' ? 'Finish paying' : 'Pay Now'}
+          label={due.status === 'processing' ? 'Finish paying' : 'Pay now'}
           size="sm"
           fullWidth={false}
           loading={paying}
-          onPress={() => onPay(due.id)}
+          onPress={onPay}
           style={{ marginTop: spacing.md, alignSelf: 'flex-start' }}
         />
       ) : null}
-      {canPay ? <CheckoutFeeNote amount={due.amount} provider={provider} /> : null}
     </Card>
   );
 }

@@ -1,7 +1,6 @@
-import { CheckoutFeeNote } from '@/components/payments/CheckoutFeeNote';
 import { usePaystackCheckout } from '@/hooks/usePaystackCheckout';
 import { useState } from 'react';
-import { Alert, Pressable, ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Lock, BadgeCheck, Clock, Wallet } from 'lucide-react-native';
@@ -10,7 +9,6 @@ import {
   Button,
   Card,
   Divider,
-  FormAlert,
   Price,
   QueryState,
   Screen,
@@ -30,10 +28,10 @@ import {
   type FinancingPlanLength,
 } from '@/lib/api/financing';
 import { errorMessage } from '@/lib/api/client';
-import { formatDate } from '@/lib/format';
+import { formatDate, formatNaira } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
-import { PaymentProviderPicker } from '@/components/payments/PaymentProviderPicker';
+import { PaySheet } from '@/components/payments/PaySheet';
 import { usePaymentProviders } from '@/hooks/usePaymentProviders';
 import type { PaymentProvider } from '@/lib/api/paymentStatus';
 
@@ -268,12 +266,18 @@ function ActivePlanCard({ overview }: { overview: { plan: FinancingPlan } }) {
   // Which company takes the instalment, and why the last one could not.
   const providers = usePaymentProviders();
   const [providerError, setProviderError] = useState<string | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const closeSheet = () => {
+    setSheetOpen(false);
+    setProviderError(null);
+  };
 
   const payMutation = useMutation({
     mutationFn: ({ id, provider }: { id: string; provider?: PaymentProvider }) =>
       financingApi.payInstallment(id, provider),
     onMutate: () => setProviderError(null),
     onSuccess: async (updated) => {
+      closeSheet();
       if (updated.authorizationUrl) {
         await checkout(updated.authorizationUrl, updated.reference);
       } else {
@@ -282,26 +286,15 @@ function ActivePlanCard({ overview }: { overview: { plan: FinancingPlan } }) {
       qc.invalidateQueries({ queryKey: qk.renter.financing });
     },
     onError: (err, { provider }) => {
-      // That company cannot take it right now: say so by the button, with the other one picked.
+      // That company cannot take it right now: say so in the sheet, with the other one picked.
       const unavailable = providers.recover(err, provider);
       if (unavailable) setProviderError(unavailable);
-      else toast.show(errorMessage(err, 'Could not process this payment.'), 'error');
+      else {
+        closeSheet();
+        toast.show(errorMessage(err, 'Could not process this payment.'), 'error');
+      }
     },
   });
-
-  const confirmPay = (installment: FinancingInstallment) => {
-    Alert.alert(
-      'Pay installment?',
-      `You're about to pay ₦${installment.amount.toLocaleString()}.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Pay now',
-          onPress: () => payMutation.mutate({ id: installment.id, provider: providers.provider }),
-        },
-      ]
-    );
-  };
 
   return (
     <ScrollView contentContainerStyle={{ gap: spacing.lg }}>
@@ -344,18 +337,35 @@ function ActivePlanCard({ overview }: { overview: { plan: FinancingPlan } }) {
           <Text variant="bodyStrong" color="warning">
             Next payment due {formatDate(nextDue.dueDate, 'short')}
           </Text>
-          <View style={{ marginTop: spacing.md, gap: spacing.md }}>
-            {providerError ? <FormAlert tone="warning" message={providerError} /> : null}
-            <PaymentProviderPicker choice={providers} />
-          </View>
           <Button
-            label={`Pay ₦${nextDue.amount.toLocaleString()}`}
+            label={`Pay ${formatNaira(nextDue.amount)}`}
             style={{ marginTop: spacing.md }}
             loading={payMutation.isPending}
-            onPress={() => confirmPay(nextDue)}
+            onPress={() => {
+              setProviderError(null);
+              setSheetOpen(true);
+            }}
           />
-          <CheckoutFeeNote amount={nextDue.amount} provider={providers.provider} />
         </Card>
+      ) : null}
+      {nextDue ? (
+        <PaySheet
+          open={sheetOpen}
+          onClose={closeSheet}
+          title="Pay installment"
+          context={`Installment ${nextDue.installmentNumber} of ${plan.installments.length}`}
+          dueDate={nextDue.dueDate}
+          overdue={nextDue.status === 'overdue'}
+          owed={nextDue.amount}
+          amount={nextDue.amount}
+          itemLabel="Installment"
+          receiverLine={`The fee goes to the payment company, so the full ${formatNaira(nextDue.amount)} goes to your Flex plan.`}
+          protection="This payment is applied to your Flex plan."
+          providers={providers}
+          providerError={providerError}
+          busy={payMutation.isPending}
+          onPay={() => payMutation.mutate({ id: nextDue.id, provider: providers.provider })}
+        />
       ) : null}
 
       <View style={{ gap: spacing.sm }}>

@@ -1,4 +1,3 @@
-import { CheckoutFeeNote } from '@/components/payments/CheckoutFeeNote';
 import { usePaystackCheckout } from '@/hooks/usePaystackCheckout';
 import { useMemo, useState } from 'react';
 import { Alert, Pressable, RefreshControl, ScrollView, View } from 'react-native';
@@ -30,12 +29,12 @@ import {
   type BuyerEscrowStatus,
   type BuyerTransaction,
 } from '@/lib/api/buyerTransactions';
-import { formatDate } from '@/lib/format';
+import { formatDate, formatNaira } from '@/lib/format';
 import { errorMessage } from '@/lib/api/client';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
-import { PaymentProviderPicker } from '@/components/payments/PaymentProviderPicker';
-import { usePaymentProviders, type PaymentProviderChoice } from '@/hooks/usePaymentProviders';
+import { PaySheet } from '@/components/payments/PaySheet';
+import { usePaymentProviders } from '@/hooks/usePaymentProviders';
 import type { PaymentProvider } from '@/lib/api/paymentStatus';
 
 /**
@@ -108,20 +107,34 @@ export default function BuyerTransactions() {
 
   // Which company takes the deposit (Paystack or Monnify).
   const providers = usePaymentProviders();
+  // The purchase in the pay sheet; kept while the sheet slides away.
+  const [payTx, setPayTx] = useState<BuyerTransaction | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [providerError, setProviderError] = useState<string | null>(null);
+  const closeSheet = () => {
+    setSheetOpen(false);
+    setProviderError(null);
+  };
   const depositMutation = useMutation({
     mutationFn: ({ id, provider }: { id: string; provider?: PaymentProvider }) =>
       buyerTransactionsApi.deposit(id, provider),
+    onMutate: () => setProviderError(null),
     onSuccess: async (tx) => {
+      closeSheet();
       if (tx.authorizationUrl) await checkout(tx.authorizationUrl, tx.reference);
       else toast.show('Deposit initiated.', 'success');
       invalidate();
     },
-    // That company cannot take it right now: say so, and the choice moves to the other one.
-    onError: (err, { provider }) =>
-      toast.show(
-        providers.recover(err, provider) ?? errorMessage(err, 'Could not start this deposit.'),
-        'error'
-      ),
+    onError: (err, { provider }) => {
+      // That company cannot take it right now: say so in the sheet, with the other one picked.
+      const unavailable = providers.recover(err, provider);
+      if (unavailable) {
+        setProviderError(unavailable);
+        return;
+      }
+      closeSheet();
+      toast.show(errorMessage(err, 'Could not start this deposit.'), 'error');
+    },
   });
 
   const releaseMutation = useMutation({
@@ -229,12 +242,13 @@ export default function BuyerTransactions() {
                   depositing={
                     depositMutation.isPending && depositMutation.variables?.id === item.id
                   }
-                  providers={providers}
                   releasing={busy(releaseMutation, item.id)}
                   refunding={busy(refundMutation, item.id)}
-                  onDeposit={() =>
-                    depositMutation.mutate({ id: item.id, provider: providers.provider })
-                  }
+                  onDeposit={() => {
+                    setPayTx(item);
+                    setProviderError(null);
+                    setSheetOpen(true);
+                  }}
                   onRelease={() => confirmRelease(item)}
                   onRefund={() => confirmRefund(item)}
                 />
@@ -264,6 +278,24 @@ export default function BuyerTransactions() {
           />
         </QueryState>
       </View>
+      <PaySheet
+        open={sheetOpen && !!payTx}
+        onClose={closeSheet}
+        title="Pay deposit"
+        context={payTx ? `${payTx.propertyTitle} · Seller: ${payTx.ownerName}` : null}
+        owed={payTx ? (payTx.depositAmount ?? payTx.purchasePrice) : 0}
+        owedLabel="to pay"
+        amount={payTx ? (payTx.depositAmount ?? payTx.purchasePrice) : 0}
+        itemLabel="Deposit"
+        receiverLine={`The fee goes to the payment company, so the full ${formatNaira(payTx ? (payTx.depositAmount ?? payTx.purchasePrice) : 0)} is held for the seller.`}
+        protection="Your deposit is held by GetRentos and only released to the seller once you confirm receipt."
+        providers={providers}
+        providerError={providerError}
+        busy={depositMutation.isPending}
+        onPay={() =>
+          payTx && depositMutation.mutate({ id: payTx.id, provider: providers.provider })
+        }
+      />
     </View>
   );
 }
@@ -278,12 +310,9 @@ function TransactionCard({
   onDeposit,
   onRelease,
   onRefund,
-  providers,
 }: {
   tx: BuyerTransaction;
   depositing: boolean;
-  /** Which company takes the deposit (Paystack or Monnify). */
-  providers: PaymentProviderChoice;
   releasing: boolean;
   refunding: boolean;
   onDeposit: () => void;
@@ -349,12 +378,7 @@ function TransactionCard({
         <View style={{ gap: spacing.sm }}>
           {tx.escrowStatus === 'deposit_pending' ? (
             <>
-              <PaymentProviderPicker choice={providers} />
               <Button label="Pay deposit" loading={depositing} onPress={onDeposit} />
-              <CheckoutFeeNote
-                amount={tx.depositAmount ?? tx.purchasePrice}
-                provider={providers.provider}
-              />
             </>
           ) : null}
           {tx.escrowStatus === 'funds_held' ? (

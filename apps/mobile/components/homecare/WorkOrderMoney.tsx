@@ -1,6 +1,6 @@
 import { usePaystackCheckout } from '@/hooks/usePaystackCheckout';
 import { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Trash2 } from 'lucide-react-native';
 import {
@@ -38,7 +38,7 @@ import { StatusPill, type Tone } from '@/components/host/HostUI';
 import { VendorPicker } from './VendorPicker';
 import { ReasonSheet } from './ReasonSheet';
 import { InvoiceCheckCard } from './InvoiceCheckCard';
-import { PaymentProviderPicker } from '@/components/payments/PaymentProviderPicker';
+import { PaySheet } from '@/components/payments/PaySheet';
 import { usePaymentProviders } from '@/hooks/usePaymentProviders';
 import type { PaymentProvider } from '@/lib/api/paymentStatus';
 
@@ -262,6 +262,14 @@ export function InvoicesSection({ w }: { w: WorkOrder }) {
   const [reasonFor, setReasonFor] = useState<{ kind: 'reject' | 'void'; id: string } | null>(null);
   // Which company takes a top-up when held rent falls short (Paystack or Monnify).
   const providers = usePaymentProviders();
+  // The invoice in the pay sheet; kept while the sheet slides away.
+  const [payInv, setPayInv] = useState<Invoice | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [providerError, setProviderError] = useState<string | null>(null);
+  const closeSheet = () => {
+    setSheetOpen(false);
+    setProviderError(null);
+  };
   const invoices = useQuery({
     queryKey: qk.homeCare.invoices(w.id),
     queryFn: () => homeCareApi.invoices(w.id),
@@ -285,7 +293,11 @@ export function InvoicesSection({ w }: { w: WorkOrder }) {
       if (kind === 'void') return homeCareApi.voidInvoice(id, reason!);
       return homeCareApi.payInvoice(id, provider);
     },
+    onMutate: (v) => {
+      if (v.kind === 'pay') setProviderError(null);
+    },
     onSuccess: async (result, v) => {
+      if (v.kind === 'pay') closeSheet();
       // The owner's held rent doesn't cover it: pay the shortfall on Paystack,
       // and the vendor is paid once it lands.
       const topUp =
@@ -317,9 +329,10 @@ export function InvoicesSection({ w }: { w: WorkOrder }) {
       // That company cannot take the top-up right now: the choice moves to the other one.
       const unavailable = v.kind === 'pay' ? providers.recover(e, v.provider) : null;
       if (unavailable) {
-        toast.show(unavailable, 'error');
+        setProviderError(unavailable);
         return;
       }
+      if (v.kind === 'pay') closeSheet();
       const message = errorMessage(e, 'That didn’t go through.');
       // The API names the missing payout account; offer to add it right here.
       if (v.kind === 'pay' && /payout account/i.test(message)) {
@@ -445,24 +458,14 @@ export function InvoicesSection({ w }: { w: WorkOrder }) {
               ) : inv.status === 'APPROVED' &&
                 (inv.payoutStatus === 'PENDING' || inv.payoutStatus === 'FAILED') ? (
                 <View style={{ gap: spacing.sm }}>
-                  <PaymentProviderPicker choice={providers} />
                   <Button
                     label={`${inv.payoutStatus === 'FAILED' ? 'Retry payment' : 'Pay'} ${naira(inv.totalAmount)}`}
                     loading={busy}
-                    onPress={() =>
-                      Alert.alert(
-                        `Pay ${inv.vendor?.name ?? 'the vendor'} ${naira(inv.totalAmount)}?`,
-                        'Sent to their bank account on file.',
-                        [
-                          { text: 'Not now', style: 'cancel' },
-                          {
-                            text: 'Pay',
-                            onPress: () =>
-                              act.mutate({ kind: 'pay', id: inv.id, provider: providers.provider }),
-                          },
-                        ]
-                      )
-                    }
+                    onPress={() => {
+                      setPayInv(inv);
+                      setProviderError(null);
+                      setSheetOpen(true);
+                    }}
                   />
                 </View>
               ) : null}
@@ -494,6 +497,39 @@ export function InvoicesSection({ w }: { w: WorkOrder }) {
           />
         ) : null}
       </Sheet>
+      <PaySheet
+        open={sheetOpen && !!payInv}
+        onClose={closeSheet}
+        title="Pay vendor"
+        context={
+          payInv
+            ? `${payInv.vendor?.name ?? 'Vendor'}${payInv.invoiceNumber ? ` · #${payInv.invoiceNumber}` : ''}`
+            : null
+        }
+        owed={payInv?.totalAmount ?? 0}
+        owedLabel="invoice"
+        amount={payInv?.totalAmount ?? 0}
+        itemLabel="Invoice"
+        breakdown={false}
+        payLabel={payInv?.payoutStatus === 'FAILED' ? 'Retry payment' : 'Pay vendor'}
+        note={
+          <Text variant="callout" color="mutedForeground">
+            We pay the vendor from the rent GetRentos holds for the owner first. A card top-up, with
+            its card or bank fee, is only taken if that does not cover the invoice.
+          </Text>
+        }
+        secureLine={`If a top-up is needed, you finish on ${
+          providers.options.find((o) => o.provider === providers.provider)?.label ??
+          'the payment company'
+        }’s secure page: GetRentos never sees your card details.`}
+        protection="The vendor is paid once the top-up lands."
+        providers={providers}
+        providerError={providerError}
+        busy={act.isPending && act.variables?.kind === 'pay'}
+        onPay={() =>
+          payInv && act.mutate({ kind: 'pay', id: payInv.id, provider: providers.provider })
+        }
+      />
       <Sheet open={!!payoutFor} onClose={() => setPayoutFor(null)} title="Vendor’s bank account">
         {payoutFor ? (
           <VendorPayoutForm vendorId={payoutFor} onDone={() => setPayoutFor(null)} />
