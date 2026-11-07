@@ -1,3 +1,4 @@
+import type { FaceCheckStatus, SmileLivenessSession } from './trust';
 import { apiFetch } from './client';
 
 export interface TwoFactorStatus {
@@ -37,6 +38,8 @@ export interface SetTransactionPinInput {
   currentPin?: string;
   reference?: string;
   code?: string;
+  /** An approved face check, instead of the emailed code. */
+  faceCheckId?: string;
 }
 
 export interface PasskeySummary {
@@ -111,6 +114,17 @@ export const securityApi = {
    * password and an emailed code (`sendStepUpCode`). Accounts with no password
    * leave it out.
    */
+  /** A face check to reset a forgotten PIN, instead of the emailed code (mobile). */
+  startPinFaceCheck: () =>
+    apiFetch<{ faceCheckId: string; session: SmileLivenessSession }>(
+      '/users/me/security/transaction-pin/face',
+      { method: 'POST' }
+    ),
+  pinFaceCheckStatus: (faceCheckId: string) =>
+    apiFetch<{ status: FaceCheckStatus }>('/users/me/security/transaction-pin/face/status', {
+      method: 'POST',
+      body: { faceCheckId },
+    }),
   setTransactionPin: (input: SetTransactionPinInput) =>
     apiFetch<{ hasTransactionPin: true }>('/users/me/security/transaction-pin', {
       method: 'POST',

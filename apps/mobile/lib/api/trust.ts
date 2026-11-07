@@ -180,6 +180,9 @@ export function checkKinds(steps: TrustStep[]): CheckKind[] {
   return out;
 }
 
+/** Where a face check (recovery or PIN reset) stands; the server decides. */
+export type FaceCheckStatus = 'PENDING' | 'APPROVED' | 'FAILED';
+
 /** What the app needs to run Smile ID's live selfie capture (see trustApi.livenessSession). */
 export interface SmileLivenessSession {
   token: string;

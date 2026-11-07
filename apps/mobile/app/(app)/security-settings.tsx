@@ -1,4 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { FaceCheckButton } from '@/components/trust/FaceCheckButton';
+import { liveSelfieSupported } from '@/lib/smileid/liveSelfie';
 import { Alert, Image, Pressable, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -409,8 +411,11 @@ function TransactionPinSection({ overview }: { overview: SecurityOverview }) {
   const [reference, setReference] = useState<string | null>(null);
   const [sentTo, setSentTo] = useState<string | null>(null);
   const [code, setCode] = useState('');
+  const [faceCheckId, setFaceCheckId] = useState<string | null>(null);
   const [pin, setPin] = useState('');
   const [confirm, setConfirm] = useState('');
+  // A face check can stand in for the emailed code where Smile's capture is built in.
+  const faceCheckAvailable = useMemo(() => liveSelfieSupported(), []);
 
   const reset = () => {
     setOpen(false);
@@ -420,6 +425,7 @@ function TransactionPinSection({ overview }: { overview: SecurityOverview }) {
     setReference(null);
     setSentTo(null);
     setCode('');
+    setFaceCheckId(null);
     setPin('');
     setConfirm('');
   };
@@ -442,7 +448,7 @@ function TransactionPinSection({ overview }: { overview: SecurityOverview }) {
         transactionPinBody({
           password: overview.hasPassword ? password : undefined,
           pin,
-          ...(useCurrentPin ? { currentPin } : { reference, code }),
+          ...(useCurrentPin ? { currentPin } : faceCheckId ? { faceCheckId } : { reference, code }),
         })
       ),
     onSuccess: () => {
@@ -459,7 +465,9 @@ function TransactionPinSection({ overview }: { overview: SecurityOverview }) {
   const mismatch = pinsMismatch(pin, confirm);
   const proofReady = useCurrentPin
     ? (!overview.hasPassword || password.length > 0) && isCurrentPin(currentPin)
-    : emailedProofReady({ needsPassword: overview.hasPassword, password, reference, code });
+    : faceCheckId
+      ? !overview.hasPassword || password.length > 0
+      : emailedProofReady({ needsPassword: overview.hasPassword, password, reference, code });
   const ready = proofReady && newPinReady(pin, confirm);
 
   return (
@@ -503,6 +511,10 @@ function TransactionPinSection({ overview }: { overview: SecurityOverview }) {
               />
               <LinkButton label="Forgot your PIN?" onPress={() => setForgot(true)} />
             </>
+          ) : faceCheckId ? (
+            <Text variant="caption" color="mutedForeground">
+              Face confirmed. Choose your new PIN.
+            </Text>
           ) : reference ? (
             <NumberField
               code
@@ -527,6 +539,17 @@ function TransactionPinSection({ overview }: { overview: SecurityOverview }) {
                 loading={sendCode.isPending}
                 onPress={() => sendCode.mutate()}
               />
+              {forgot && faceCheckAvailable ? (
+                <FaceCheckButton
+                  label="Use a face check instead"
+                  start={async () => {
+                    const r = await securityApi.startPinFaceCheck();
+                    return { id: r.faceCheckId, session: r.session };
+                  }}
+                  status={securityApi.pinFaceCheckStatus}
+                  onApproved={setFaceCheckId}
+                />
+              ) : null}
             </View>
           )}
           <NumberField

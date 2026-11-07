@@ -14,9 +14,12 @@ import { liveSelfieOutcome, loadSmileSdk, type LiveSelfieOutcome } from '@/lib/s
 export function LiveSelfieCheck({
   session,
   onClose,
+  mode = 'enrol',
 }: {
   session: SmileLivenessSession;
   onClose: (outcome: LiveSelfieOutcome | null) => void;
+  /** enrol: the verification live selfie. match: a face matched against it (recovery, PIN reset). */
+  mode?: 'enrol' | 'match';
 }) {
   const sdk = useMemo(() => loadSmileSdk(), []);
   const analyzer = useMemo(() => loadFaceAnalyzer(), []);
@@ -35,7 +38,10 @@ export function LiveSelfieCheck({
         builder={(b) => {
           b.network((n) =>
             n.config((c) => {
-              c.jobType = JobType.smartSelfieEnrollment;
+              c.jobType =
+                mode === 'match'
+                  ? JobType.smartSelfieAuthentication
+                  : JobType.smartSelfieEnrollment;
               c.token = session.token;
               c.partnerConfig((p) => {
                 p.partnerId = session.partnerId;
@@ -49,6 +55,8 @@ export function LiveSelfieCheck({
           // The person already agreed in our own consent step; the same record is bound into the token.
           b.consentInformation = session.consent;
           b.userDetails = session.userDetails;
+          // A match names the enrolment it is checked against (server-issued).
+          if (mode === 'match') b.userId = session.userId;
           b.theme((t) => {
             t.primaryColor = t.color(lightColors.primary, darkColors.primary);
             t.primaryForeground = t.color(

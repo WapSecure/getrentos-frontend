@@ -232,6 +232,10 @@ export default function ForgotPassword() {
             onSubmitEditing={sendCode}
           />
           <FormAlert message={error} />
+          <LinkButton
+            label="Lost access to your email or phone? Recover with your face"
+            onPress={() => router.push('/(auth)/recover-with-face')}
+          />
         </Animated.View>
       ) : step === 'otp' ? (
         <Animated.View

@@ -1,3 +1,4 @@
+import type { SmileLivenessSession } from './trust';
 import { apiFetch } from './client';
 import { getInstallId } from '../auth/installId';
 import { env } from '../env';
@@ -117,6 +118,25 @@ export const authApi = {
     ),
 
   // ---- password reset -------------------------------------------------
+  /** Recovery with a face check, for someone who lost the email or phone the code goes to. */
+  startFaceRecovery: (identifier: string) =>
+    apiFetch<{ recoveryId: string; secret: string; session: SmileLivenessSession }>(
+      '/auth/recovery/face/start',
+      { method: 'POST', anonymous: true, body: { identifier } }
+    ),
+  faceRecoveryStatus: (recoveryId: string, secret: string) =>
+    apiFetch<{ status: 'PENDING' | 'APPROVED' | 'FAILED' }>('/auth/recovery/face/status', {
+      method: 'POST',
+      anonymous: true,
+      body: { recoveryId, secret },
+    }),
+  completeFaceRecovery: (recoveryId: string, secret: string, newPassword: string) =>
+    apiFetch<{ payoutsHeldUntil: string }>('/auth/recovery/face/complete', {
+      method: 'POST',
+      anonymous: true,
+      body: { recoveryId, secret, newPassword },
+    }),
+
   resetPassword: (reference: string, newPassword: string) =>
     apiFetch<{ message: string }>('/auth/password/reset', {
       method: 'POST',
