@@ -138,6 +138,7 @@ export const IdentityVerificationSettings = ({
           <div>
             <label className="block text-sm font-medium text-foreground mb-1">Document photo</label>
             <DocumentUpload
+              checkPhotoQuality
               value={document ? [{ id: 'document', file: document }] : []}
               onChange={(items) => setDocument(items[0]?.file ?? null)}
               accept=".pdf,.jpg,.jpeg,.png,.webp"
@@ -155,6 +156,7 @@ export const IdentityVerificationSettings = ({
               </span>
             </label>
             <DocumentUpload
+              checkPhotoQuality
               value={selfie ? [{ id: 'selfie', file: selfie }] : []}
               onChange={(items) => setSelfie(items[0]?.file ?? null)}
               accept=".jpg,.jpeg,.png,.webp"

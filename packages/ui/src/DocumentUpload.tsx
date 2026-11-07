@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useId, useRef, useState } from 'react';
-import { FileText, ImageIcon, Upload, X, Eye } from 'lucide-react';
+import { AlertTriangle, FileText, ImageIcon, Upload, X, Eye } from 'lucide-react';
 import { cn } from '@getrentos/shared';
 import { FilePreviewDialog } from './FilePreviewDialog';
 import { useFieldControl } from './fieldContext';
+import { checkPhotoQuality } from './photoQuality';
 
 export interface PendingUpload {
   id: string;
@@ -44,6 +45,12 @@ interface DocumentUploadProps {
   disabled?: boolean;
   /** Opens the camera straight away on phones, e.g. `environment` for a photo of a fault. */
   capture?: 'user' | 'environment';
+  /**
+   * For photos of documents (IDs, titles, certificates): check each picked image
+   * for blur, darkness, glare and size, and say how to retake it. Advice only:
+   * the file can still be sent.
+   */
+  checkPhotoQuality?: boolean;
   id?: string;
   className?: string;
 }
@@ -55,6 +62,7 @@ const formatBytes = (bytes: number): string => {
 };
 
 const isImageFile = (file: File) => file.type.startsWith('image/');
+const fileKey = (file: File) => `${file.name}:${file.size}:${file.lastModified}`;
 const isPdfFile = (file: File) => file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
 const isVideoFile = (file: File) =>
   file.type.startsWith('video/') || /\.(mp4|webm|mov)$/i.test(file.name);
@@ -74,6 +82,7 @@ export function DocumentUpload({
   hint,
   disabled,
   capture,
+  checkPhotoQuality: checkQuality = false,
   id,
   className,
 }: DocumentUploadProps) {
@@ -87,6 +96,9 @@ export function DocumentUpload({
   const [previewItem, setPreviewItem] = useState<PendingUpload | null>(null);
   // Live object URLs so preview/thumbnail work before any upload happens.
   const [objectUrls, setObjectUrls] = useState<Record<string, string>>({});
+  // Retake advice per picked photo, keyed by the file itself: callers may
+  // rebuild their items with their own ids.
+  const [advice, setAdvice] = useState<Record<string, string[]>>({});
 
   useEffect(() => {
     const urls: Record<string, string> = {};
@@ -120,10 +132,19 @@ export function DocumentUpload({
     }
     setError(null);
     const next = multiple ? [...value] : [];
-    for (const file of incoming) {
-      next.push({ id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, file });
-    }
+    const added: PendingUpload[] = incoming.map((file) => ({
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      file,
+    }));
+    next.push(...added);
     onChange(next);
+    if (checkQuality) {
+      for (const item of added) {
+        void checkPhotoQuality(item.file).then((problems) => {
+          if (problems.length) setAdvice((a) => ({ ...a, [fileKey(item.file)]: problems }));
+        });
+      }
+    }
   };
 
   const remove = (id: string) => onChange(value.filter((item) => item.id !== id));
@@ -219,6 +240,12 @@ export function DocumentUpload({
                 {formatBytes(item.file.size)}
                 {isVideo ? ' · video' : ''}
               </p>
+              {advice[fileKey(item.file)]?.map((text) => (
+                <p key={text} className="mt-1 flex items-start gap-1 text-xs text-warning">
+                  <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
+                  {text}
+                </p>
+              ))}
             </div>
             <div className="flex shrink-0 items-center gap-1">
               {previewable && url ? (

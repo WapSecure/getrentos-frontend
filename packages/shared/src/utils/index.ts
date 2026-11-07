@@ -18,3 +18,4 @@ export * from './gateVoice';
 export * from './lastApplication';
 export * from './address';
 export * from './csp';
+export * from './photoQuality';

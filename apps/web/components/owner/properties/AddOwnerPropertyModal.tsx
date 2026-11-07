@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, FileText, ShieldAlert, ShieldCheck, Clock } from 'lucide-react';
+import { Check, FileText, ShieldAlert, ShieldCheck, Clock, AlertTriangle } from 'lucide-react';
 import {
   Alert,
   Button,
@@ -23,6 +23,7 @@ import type { VerifiedAddress } from '@getrentos/shared';
 import type { OwnerProperty } from '@/types/owner';
 import { PROPERTY_TYPE_OPTIONS } from '@/lib/propertyTypes';
 import type { LandOwnershipProofInput } from '@/types/land';
+import { usePhotoAdvice } from '@/hooks/usePhotoAdvice';
 import { ROUTES } from '@/lib/constants/auth';
 import { pluralize } from '@/lib/format';
 import { LocationPicker } from '@/components/maps/LocationPicker';
@@ -494,6 +495,8 @@ const UploadField = ({
   file: File | null;
   onSelect: (file: File | null) => void;
 }) => {
+  // Every field here is an ownership document: advise a retake of a poor photo.
+  const advice = usePhotoAdvice(file);
   return (
     <div className="space-y-1.5">
       <p className="text-sm font-medium text-foreground">{label}</p>
@@ -511,6 +514,12 @@ const UploadField = ({
         </span>
         {file && <Check className="ml-auto h-4 w-4 shrink-0 text-success" />}
       </label>
+      {advice.map((text) => (
+        <p key={text} className="flex items-start gap-1.5 text-xs text-warning">
+          <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
+          {text}
+        </p>
+      ))}
     </div>
   );
 };

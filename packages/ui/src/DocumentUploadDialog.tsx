@@ -1,12 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Upload as UploadIcon, FileText } from 'lucide-react';
+import { AlertTriangle, Upload as UploadIcon, FileText } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from './Dialog';
 import { Button } from './Button';
 import { Field } from './Field';
 import { Select } from './Select';
 import { FilePreviewDialog } from './FilePreviewDialog';
+import { checkPhotoQuality } from './photoQuality';
 import { cn } from '@getrentos/shared';
 
 export interface UploadedDocumentData {
@@ -41,6 +42,20 @@ export const DocumentUploadDialog = ({
   const [error, setError] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
+  // Retake advice for a picked photo of a document (blur, dark, glare, too small).
+  const [advice, setAdvice] = useState<{ file: File; problems: string[] } | null>(null);
+
+  useEffect(() => {
+    if (!file) return;
+    let current = true;
+    void checkPhotoQuality(file).then((problems) => {
+      if (current) setAdvice({ file, problems });
+    });
+    return () => {
+      current = false;
+    };
+  }, [file]);
+  const photoAdvice = advice && advice.file === file ? advice.problems : [];
 
   // Object URL for a live preview of the selected file (images / PDFs).
   useEffect(() => {
@@ -181,6 +196,13 @@ export const DocumentUploadDialog = ({
                 </>
               )}
             </div>
+
+            {photoAdvice.map((text) => (
+              <p key={text} className="flex items-start gap-1.5 text-xs text-warning">
+                <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
+                {text}
+              </p>
+            ))}
 
             {error && (
               <p className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">

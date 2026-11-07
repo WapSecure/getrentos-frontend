@@ -25,12 +25,14 @@ import {
   Video,
   ShieldCheck,
   Trash2,
+  AlertTriangle,
 } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { AddressFields } from '@/components/shared/location/AddressFields';
 import type { VerifiedAddress } from '@getrentos/shared';
 import type { Property, PropertyType } from '@/types/landlord';
 import type { LandOwnershipProofInput } from '@/types/land';
+import { usePhotoAdvice } from '@/hooks/usePhotoAdvice';
 import { LocationPicker } from '@/components/maps/LocationPicker';
 import type { MapPoint } from '@/services/geocodeService';
 import { videoFileProblem } from '@/lib/videoFile';
@@ -391,6 +393,7 @@ export const AddPropertyModal = ({
                 document; without one it shows as unverified to renters and buyers.
               </Alert>
               <UploadField
+                checkPhotoQuality
                 label="Title deed"
                 icon={FileText}
                 file={form.titleDeed}
@@ -398,6 +401,7 @@ export const AddPropertyModal = ({
                 onSelect={(file) => update('titleDeed', file)}
               />
               <UploadField
+                checkPhotoQuality
                 label="Certificate of Occupancy"
                 icon={FileText}
                 file={form.certificateOfOccupancy}
@@ -405,6 +409,7 @@ export const AddPropertyModal = ({
                 onSelect={(file) => update('certificateOfOccupancy', file)}
               />
               <UploadField
+                checkPhotoQuality
                 label="Management authorisation"
                 icon={FileText}
                 file={form.managementAuthorization}
@@ -508,6 +513,7 @@ export const AddPropertyModal = ({
 };
 
 const UploadField = ({
+  checkPhotoQuality: checkQuality = false,
   label,
   icon: Icon,
   file,
@@ -515,6 +521,8 @@ const UploadField = ({
   required,
   accept,
 }: {
+  /** A photo of a document: advise a retake if it is blurry, dark, glared or too small. */
+  checkPhotoQuality?: boolean;
   label: string;
   icon: React.ElementType;
   file: File | null;
@@ -522,6 +530,7 @@ const UploadField = ({
   required?: boolean;
   accept: string;
 }) => {
+  const advice = usePhotoAdvice(checkQuality ? file : null);
   return (
     <div>
       <p className="block text-sm font-medium text-foreground mb-1">
@@ -541,6 +550,12 @@ const UploadField = ({
         </span>
         {file && <Check className="w-4 h-4 text-success shrink-0 ml-auto" />}
       </label>
+      {advice.map((text) => (
+        <p key={text} className="mt-1 flex items-start gap-1.5 text-xs text-warning">
+          <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
+          {text}
+        </p>
+      ))}
       {file && (file.type.startsWith('image/') || file.type.startsWith('video/')) && (
         <MediaPreview key={`${file.name}-${file.lastModified}`} file={file} />
       )}

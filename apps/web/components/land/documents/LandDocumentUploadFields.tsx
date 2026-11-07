@@ -50,6 +50,7 @@ export const LandDocumentUploadFields = ({
       </Field>
       <Field label="File" required error={problem ?? undefined}>
         <DocumentUpload
+          checkPhotoQuality
           value={file ? [{ id: `${id}-file`, file }] : []}
           onChange={(next) => onFileChange(next[0]?.file ?? null)}
           accept={LAND_DOCUMENT_ACCEPT}
