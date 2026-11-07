@@ -1,17 +1,8 @@
 import { Platform } from 'react-native';
 import { loadFaceAnalyzer } from './faceAnalyzer';
+import { loadSmileSdk } from './sdk';
 
-/** Smile ID's React Native SDK, or null where its native code isn't in the build (Expo Go, web). */
-export function loadSmileSdk(): typeof import('@smileid/usesmileid') | null {
-  if (Platform.OS === 'web') return null;
-  try {
-    // Loaded lazily: a static import throws where the native module is missing.
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    return require('@smileid/usesmileid');
-  } catch {
-    return null;
-  }
-}
+export { loadSmileSdk };
 
 /** Whether this build can run the live selfie check; otherwise the photo upload is offered. */
 export function liveSelfieSupported(): boolean {
