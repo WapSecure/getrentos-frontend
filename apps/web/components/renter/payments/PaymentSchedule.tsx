@@ -99,7 +99,9 @@ export const PaymentSchedule = ({
           <h2 className="font-semibold text-foreground">Upcoming payments</h2>
         </div>
         <p className="text-xs text-muted-foreground mt-0.5">
-          {upcomingPayments.length} payments pending
+          {upcomingPayments.length === 1
+            ? '1 payment due'
+            : `${upcomingPayments.length} payments due`}
         </p>
       </div>
 
