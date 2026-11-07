@@ -7,10 +7,12 @@ import { agentKeys } from '@/lib/queryKeys';
 export default function AgentTrustProfilePage() {
   return (
     <TrustProfileView
+      portal="agent"
+      audience="clients and admins"
       queryKey={agentKeys.trustProfile}
       queryFn={() => agentService.getTrustProfile()}
       title="Trust & Verification Profile"
-      subtitle="What clients and admins see about your credibility on GetRentos"
+      subtitle="Your identity, what you need here, and your trust score."
     />
   );
 }

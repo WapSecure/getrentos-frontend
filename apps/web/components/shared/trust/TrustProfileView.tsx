@@ -1,107 +1,81 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { MessageCircle, Clock, ShieldCheck, Star } from 'lucide-react';
-import {
-  Card,
-  CardSkeleton,
-  PageErrorState,
-  Skeleton,
-  StatGridSkeleton,
-  PageHeader,
-} from '@getrentos/ui';
-import { TrustScoreRing } from '@/components/shared/trust/TrustScoreRing';
-import { TrustScoreBreakdownCard } from '@/components/shared/trust/TrustScoreBreakdownCard';
-import { TrustExplanationCard } from '@/components/shared/trust/TrustExplanationCard';
-import { TrustStageBanner } from '@/components/shared/trust/TrustStageBanner';
+import { useRouter } from 'next/navigation';
+import { PageHeader } from '@getrentos/ui';
+import { TrustOverviewView } from '@/components/shared/trust/TrustOverviewView';
 import { VerificationList } from '@/components/shared/trust/VerificationList';
 import { TrustBadges } from '@/components/shared/trust/TrustBadges';
 import { unwrap, type ApiResponse } from '@/lib/apiHelpers';
-import type { TrustProfile } from '@/types/trust-score';
+import type { TrustPortal, TrustProfile, TrustRequirementKey } from '@/types/trust-score';
+
+type ProfilePortal = Extract<TrustPortal, 'owner' | 'agent' | 'realtor' | 'buyer'>;
 
 interface TrustProfileViewProps {
+  portal: ProfilePortal;
   /** TanStack query key for this role's trust profile. */
   queryKey: readonly unknown[];
-  /** Fetches the role trust profile from the backend. */
+  /** Fetches the role trust profile (what others see) from the backend. */
   queryFn: () => Promise<ApiResponse<TrustProfile>>;
   title: string;
   subtitle: string;
+  /** Who sees the profile, e.g. "buyers and realtors". */
+  audience: string;
+}
+
+/** Where each requirement is done, per portal. */
+function hrefFor(portal: ProfilePortal, key: TrustRequirementKey): string {
+  switch (key) {
+    case 'EMAIL':
+      return `/${portal}/settings?tab=profile`;
+    case 'PROFESSIONAL_LICENCE':
+      return `/${portal}/settings?tab=verification`;
+    case 'PROPERTY_OWNERSHIP':
+      return `/${portal}/properties`;
+    default:
+      // Phone, NIN, live selfie and the bank check all live on the Verification page.
+      return `/${portal}/verification`;
+  }
 }
 
 /**
- * Renders a role trust & verification profile entirely from real backend data
- * (score, headline stats, verifications and badges): no fabricated values.
+ * Trust & Verification for owners, agents, realtors and buyers: the shared
+ * overview (identity apart from score, this portal's requirements, one next
+ * step), then what others see on the profile, folded away. Every value comes
+ * from the backend.
  */
-export const TrustProfileView = ({ queryKey, queryFn, title, subtitle }: TrustProfileViewProps) => {
-  const { data, isLoading, isError, refetch, isFetching } = useQuery({
-    queryKey,
-    queryFn: () => unwrap(queryFn()),
-  });
-
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <Skeleton className="h-8 w-1/3" />
-        <StatGridSkeleton />
-        <CardSkeleton lines={4} />
-      </div>
-    );
-  }
-
-  if (isError && !data) {
-    return <PageErrorState onRetry={() => void refetch()} isRetrying={isFetching} />;
-  }
-
-  const trustScore = data?.trustScore ?? 0;
-  const stats = data?.stats ?? [];
-  const breakdown = data?.scoreBreakdown;
-  const statIcons = [MessageCircle, Clock, ShieldCheck, Star];
+export const TrustProfileView = ({
+  portal,
+  queryKey,
+  queryFn,
+  title,
+  subtitle,
+  audience,
+}: TrustProfileViewProps) => {
+  const router = useRouter();
+  const profile = useQuery({ queryKey, queryFn: () => unwrap(queryFn()) });
 
   return (
     <>
       <PageHeader title={title} description={subtitle} />
-
-      {breakdown?.stage && (
-        <div className="mb-6">
-          <TrustStageBanner stage={breakdown.stage} total={trustScore} />
-        </div>
-      )}
-
-      <div className="grid lg:grid-cols-3 gap-6 mb-6">
-        <Card className="p-6 flex items-center justify-center">
-          <TrustScoreRing score={trustScore} />
-        </Card>
-
-        <div className="lg:col-span-2 grid grid-cols-2 gap-4">
-          {stats.slice(0, 4).map((stat, index) => {
-            const Icon = statIcons[index % statIcons.length];
-            return (
-              <Card key={stat.label} className="p-4">
-                <div className="inline-flex p-2.5 rounded-xl bg-accent mb-3">
-                  <Icon className="w-5 h-5 text-primary" />
-                </div>
-                <p className="text-sm text-muted-foreground mb-1">{stat.label}</p>
-                <p className="text-xl font-bold text-foreground tracking-tight">{stat.value}</p>
-              </Card>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="mb-6">
-        <TrustExplanationCard />
-      </div>
-
-      <div className="grid lg:grid-cols-2 gap-6">
-        <VerificationList verifications={data?.verifications ?? []} />
-        <TrustBadges badges={data?.badges ?? []} />
-      </div>
-
-      {breakdown && (
-        <div className="mt-6">
-          <TrustScoreBreakdownCard breakdown={breakdown} />
-        </div>
-      )}
+      <TrustOverviewView
+        portal={portal}
+        onAction={(key) => router.push(hrefFor(portal, key))}
+        moreDetails={
+          profile.data ? (
+            <div className="space-y-4">
+              <p>
+                <span className="font-medium text-foreground">What {audience} see.</span> Your
+                profile shows these checks and badges.
+              </p>
+              <div className="grid gap-4 lg:grid-cols-2">
+                <VerificationList verifications={profile.data.verifications ?? []} />
+                <TrustBadges badges={profile.data.badges ?? []} />
+              </div>
+            </div>
+          ) : null
+        }
+      />
     </>
   );
 };
