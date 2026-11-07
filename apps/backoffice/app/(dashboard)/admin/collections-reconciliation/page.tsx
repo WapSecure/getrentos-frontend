@@ -54,6 +54,21 @@ const KIND: Record<
     variant: 'warning',
     help: 'No record in any product has this reference. Look it up with the payment company shown to see who paid and what for.',
   },
+  DUPLICATE_PAYOUT: {
+    label: 'Paid out twice',
+    variant: 'danger',
+    help: 'Two transfers for the same payout both succeeded at Paystack. Recover the duplicate from the receiver and record what was done.',
+  },
+  TRANSFER_UNKNOWN: {
+    label: 'Transfer we did not send',
+    variant: 'danger',
+    help: 'Paystack paid out a transfer GetRentos has no record of sending. Check who started it in the Paystack dashboard straight away.',
+  },
+  TRANSFER_MISSING_AT_GATEWAY: {
+    label: 'Payout not at Paystack',
+    variant: 'warning',
+    help: 'GetRentos sent this payout over an hour ago and Paystack has no transfer for it. Check the payout before anyone retries it.',
+  },
   MISSING_AT_GATEWAY: {
     label: 'Not at the payment company',
     variant: 'danger',
@@ -241,6 +256,36 @@ export default function CollectionsReconciliationPage() {
               </Card>
             )}
           </section>
+
+          {report.transfersOut && (
+            <section>
+              <h2 className="mb-1 text-base font-semibold text-foreground">Paid out</h2>
+              <p className="mb-3 text-xs text-muted-foreground">
+                Payouts to landlords, hosts, sellers and others through Paystack, matched to what
+                GetRentos sent.
+              </p>
+              <Card className="divide-y divide-border">
+                <div className="flex items-center justify-between gap-3 px-5 py-3">
+                  <p className="text-sm text-foreground">Transfers that succeeded</p>
+                  <p className="text-sm text-muted-foreground">
+                    {report.transfersOut.count} · {formatCurrency(report.transfersOut.amount)}
+                  </p>
+                </div>
+                <div className="flex items-center justify-between gap-3 px-5 py-3">
+                  <p className="text-sm text-foreground">Failed or reversed</p>
+                  <p className="text-sm text-muted-foreground">{report.transfersOut.failed}</p>
+                </div>
+                {report.transfersOut.balance !== null && (
+                  <div className="flex items-center justify-between gap-3 px-5 py-3">
+                    <p className="text-sm text-foreground">Paystack balance now</p>
+                    <p className="text-sm font-medium text-foreground">
+                      {formatCurrency(report.transfersOut.balance)}
+                    </p>
+                  </div>
+                )}
+              </Card>
+            </section>
+          )}
 
           <section>
             <h2 className="mb-1 text-base font-semibold text-foreground">Paid into the bank</h2>
