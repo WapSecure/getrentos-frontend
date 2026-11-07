@@ -49,3 +49,13 @@ describe('assessPhotoQuality', () => {
     expect(assessPhotoQuality(image(printed, { w: 480, h: 360 }))).toContain('TOO_SMALL');
   });
 });
+
+describe('base64ToBytes (the phone check decodes its 640 px copy with it)', () => {
+  it('matches Node for every padding length', () => {
+    const { base64ToBytes } = require('@/lib/photoQuality');
+    for (const n of [0, 1, 2, 3, 4, 5, 255, 1000]) {
+      const bytes = Buffer.from(Array.from({ length: n }, (_, i) => (i * 37 + 11) % 256));
+      expect(Buffer.from(base64ToBytes(bytes.toString('base64')))).toEqual(bytes);
+    }
+  });
+});

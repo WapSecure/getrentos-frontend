@@ -57,6 +57,7 @@ function ProofForm({ propertyId, onClose }: Omit<Props, 'open'>) {
         ))}
       </View>
       <FilePickRow
+        checkPhotoQuality
         label="Document"
         file={file}
         emptyText="Choose a PDF or photo of the document"

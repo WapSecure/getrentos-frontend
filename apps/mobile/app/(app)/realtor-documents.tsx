@@ -230,6 +230,7 @@ function UploadForm({
   return (
     <View style={{ gap: spacing.md }}>
       <FilePickRow
+        checkPhotoQuality
         label="File"
         file={file}
         onPick={() => {

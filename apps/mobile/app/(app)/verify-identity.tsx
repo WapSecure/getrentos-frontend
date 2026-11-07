@@ -193,6 +193,7 @@ export default function VerifyIdentity() {
             </View>
 
             <FilePickRow
+              checkPhotoQuality
               label="Document photo"
               file={document}
               icon={FileText}
@@ -201,6 +202,7 @@ export default function VerifyIdentity() {
             />
 
             <FilePickRow
+              checkPhotoQuality
               label="Selfie (speeds up automatic approval)"
               file={selfie}
               icon={Camera}
