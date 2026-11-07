@@ -19,9 +19,13 @@ export type CollectionLineKind =
   | 'MISSING_AT_GATEWAY';
 
 /** One payment that does not line up. Amounts are whole naira. */
+export type PaymentProvider = 'PAYSTACK' | 'MONNIFY';
+
 export interface CollectionLine {
   kind: CollectionLineKind;
   product: CollectionProduct | null;
+  /** The company that took it. */
+  provider?: PaymentProvider;
   reference: string;
   gatewayAmount: number | null;
   bookAmount: number | null;
@@ -40,6 +44,8 @@ export interface CollectionsReport {
   };
   /** Keyed by product, or UNKNOWN for a reference no product knows. */
   byProduct: Record<string, { count: number; amount: number }>;
+  /** Collections and the company's fees, per payment company. */
+  byProvider?: Partial<Record<PaymentProvider, { count: number; amount: number; fees: number }>>;
   exceptions: CollectionLine[];
   refunds: { reference: string; product: CollectionProduct | null; amount: number }[];
 }

@@ -19,6 +19,7 @@ import {
   adminCollectionsReconciliationService,
   type CollectionLineKind,
   type CollectionProduct,
+  type PaymentProvider,
 } from '@/services/adminCollectionsReconciliationService';
 
 const PRODUCT: Record<CollectionProduct | 'UNKNOWN', string> = {
@@ -41,22 +42,22 @@ const KIND: Record<
   NOT_APPLIED: {
     label: 'Paid, not applied',
     variant: 'danger',
-    help: 'Paystack took the money but the record is not marked paid. The recovery sweep normally fixes this within the hour; if it is still here, check the payment on Paystack and apply it.',
+    help: 'The payment company took the money but the record is not marked paid. The recovery sweep normally fixes this within the hour; if it is still here, check the payment with that company and apply it.',
   },
   AMOUNT_MISMATCH: {
     label: 'Amount differs',
     variant: 'warning',
-    help: 'Paystack and the record disagree on the amount. Check the unmatched payments queue: the difference is refunded or applied there.',
+    help: 'The payment company and the record disagree on the amount. Check the unmatched payments queue: the difference is refunded or applied there.',
   },
   UNKNOWN_REFERENCE: {
     label: 'Not recognised',
     variant: 'warning',
-    help: 'No record in any product has this reference. Look it up on Paystack to see who paid and what for.',
+    help: 'No record in any product has this reference. Look it up with the payment company shown to see who paid and what for.',
   },
   MISSING_AT_GATEWAY: {
-    label: 'Not at Paystack',
+    label: 'Not at the payment company',
     variant: 'danger',
-    help: 'Marked paid by card or transfer, but Paystack has no successful charge for it. Find out who marked it paid before any of it is paid out.',
+    help: 'Marked paid by card or transfer, but no payment company has a successful charge for it. Find out who marked it paid before any of it is paid out.',
   },
 };
 
@@ -66,10 +67,12 @@ function lagosDay(daysAgo: number): string {
   return new Date(lagosNow.getTime() - daysAgo * 86_400_000).toISOString().slice(0, 10);
 }
 
+const PROVIDER: Record<PaymentProvider, string> = { PAYSTACK: 'Paystack', MONNIFY: 'Monnify' };
+
 const amountOrDash = (n: number | null) => (n === null ? '—' : formatCurrency(n));
 
 /**
- * Every Paystack collection checked against the record it paid for, on every
+ * Every Paystack and Monnify collection checked against the record it paid for, on every
  * product: rent, sale deposits, short-lets, land, Flex, estate dues, vendor
  * top-ups and subscriptions. The same check runs every night for the day
  * before and flags new problems in the audit log; this page runs it for any
@@ -97,7 +100,7 @@ export default function CollectionsReconciliationPage() {
     <>
       <PageHeader
         title="Collections reconciliation"
-        description="Every payment Paystack collected, checked against the rent, deposit, booking, dues or other record it paid for, and every record marked paid by card checked against Paystack. Runs nightly for the day before; choose any range up to 31 days here."
+        description="Every payment Paystack or Monnify collected, checked against the rent, deposit, booking, dues or other record it paid for, and every record marked paid by card checked against the company that took it. Runs nightly for the day before; choose any range up to 31 days here."
       />
 
       <div className="mb-6 flex flex-wrap items-center gap-2">
@@ -141,10 +144,10 @@ export default function CollectionsReconciliationPage() {
             />
             <StatCard
               icon={ReceiptText}
-              label="Paystack fees"
+              label="Payment company fees"
               value={report.totals.gatewayFees}
               isCurrency
-              subtitle="Kept by Paystack, paid by GetRentos"
+              subtitle="Kept by Paystack and Monnify, paid by GetRentos"
             />
             <StatCard
               icon={ArrowUpRight}
@@ -167,7 +170,7 @@ export default function CollectionsReconciliationPage() {
               <EmptyState
                 icon={CheckCircle2}
                 title="Everything lines up"
-                description="Every collection matches its record, and every card payment on record is at Paystack."
+                description="Every collection matches its record, and every card payment on record is at its payment company."
               />
             ) : (
               <div className="space-y-3">
@@ -181,7 +184,8 @@ export default function CollectionsReconciliationPage() {
                             {PRODUCT[line.product ?? 'UNKNOWN']} · {line.reference}
                           </p>
                           <p className="mt-0.5 text-xs text-muted-foreground">
-                            Paystack {amountOrDash(line.gatewayAmount)} · our record{' '}
+                            {line.provider ? PROVIDER[line.provider] : 'Payment company'}{' '}
+                            {amountOrDash(line.gatewayAmount)} · our record{' '}
                             {amountOrDash(line.bookAmount)}
                             {line.inUnmatchedQueue ? ' · already in unmatched payments' : ''}
                           </p>
@@ -195,6 +199,28 @@ export default function CollectionsReconciliationPage() {
               </div>
             )}
           </section>
+
+          {report.byProvider && Object.keys(report.byProvider).length > 0 && (
+            <section>
+              <h2 className="mb-3 text-base font-semibold text-foreground">By payment company</h2>
+              <Card className="divide-y divide-border">
+                {(
+                  Object.entries(report.byProvider) as [
+                    PaymentProvider,
+                    { count: number; amount: number; fees: number },
+                  ][]
+                ).map(([provider, bucket]) => (
+                  <div key={provider} className="flex items-center justify-between gap-3 px-5 py-3">
+                    <p className="text-sm text-foreground">{PROVIDER[provider]}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {bucket.count} · {formatCurrency(bucket.amount)} · fees{' '}
+                      {formatCurrency(bucket.fees)}
+                    </p>
+                  </div>
+                ))}
+              </Card>
+            </section>
+          )}
 
           <section>
             <h2 className="mb-3 text-base font-semibold text-foreground">By product</h2>
@@ -237,8 +263,8 @@ export default function CollectionsReconciliationPage() {
 
           <p className="text-xs text-muted-foreground">
             Checked {formatDate(report.from)} to{' '}
-            {formatDate(new Date(new Date(report.to).getTime() - 1).toISOString())}. Paystack
-            settlements to the bank account are not checked here yet.
+            {formatDate(new Date(new Date(report.to).getTime() - 1).toISOString())}. Settlements to
+            the bank account and Monnify refunds are not checked here yet.
           </p>
         </div>
       ) : null}
