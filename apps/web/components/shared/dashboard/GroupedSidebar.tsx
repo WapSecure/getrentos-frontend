@@ -302,6 +302,38 @@ function SidebarGroups({
   );
 }
 
+function MobilePrimaryNavigation({ ariaLabel, dashboardHref, groups }: GroupedSidebarProps) {
+  const pathname = usePathname();
+  const primaryItems = groups.find((group) => group.kind === 'primary')?.items.slice(0, 5) ?? [];
+  const activeHref = activeSidebarHref(pathname, groups, dashboardHref);
+
+  if (primaryItems.length === 0) return null;
+
+  return (
+    <nav
+      className="mobile-primary-nav fixed inset-x-0 bottom-0 z-50 grid border-t border-border bg-card sm:hidden"
+      style={{ gridTemplateColumns: `repeat(${primaryItems.length}, minmax(0, 1fr))` }}
+      aria-label={`${ariaLabel} primary`}
+    >
+      {primaryItems.map((item) => {
+        const Icon = item.icon;
+        const active = item.href === activeHref;
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            aria-current={active ? 'page' : undefined}
+            className="mobile-primary-nav-item"
+          >
+            <Icon className="h-5 w-5" aria-hidden="true" />
+            <span className="max-w-full truncate">{item.label}</span>
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
 export function GroupedSidebar({
   ariaLabel,
   dashboardHref,
@@ -312,24 +344,33 @@ export function GroupedSidebar({
   const activeHref = activeSidebarHref(pathname, groups, dashboardHref);
 
   return (
-    <aside className="workspace-sidebar fixed bottom-0 left-0 top-16 z-30 hidden w-64 overflow-y-auto border-r border-border lg:block">
-      <nav className="space-y-5 px-3 py-4" aria-label={ariaLabel}>
-        {workspaceLabel && (
-          <div className="px-3 pb-1">
-            <p className="text-[0.6875rem] font-medium uppercase tracking-[0.08em] text-muted-foreground">
-              Workspace
-            </p>
-            <p className="mt-1 truncate text-sm font-semibold text-foreground">{workspaceLabel}</p>
-          </div>
-        )}
-        <SidebarGroups
-          scope={ariaLabel}
-          idPrefix="sidebar"
-          groups={groups}
-          activeHref={activeHref}
-        />
-      </nav>
-    </aside>
+    <>
+      <aside className="workspace-sidebar fixed bottom-0 left-0 top-16 z-30 hidden w-64 overflow-y-auto border-r border-border lg:block">
+        <nav className="space-y-5 px-3 py-4" aria-label={ariaLabel}>
+          {workspaceLabel && (
+            <div className="px-3 pb-1">
+              <p className="text-[0.6875rem] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+                Workspace
+              </p>
+              <p className="mt-1 truncate text-sm font-semibold text-foreground">
+                {workspaceLabel}
+              </p>
+            </div>
+          )}
+          <SidebarGroups
+            scope={ariaLabel}
+            idPrefix="sidebar"
+            groups={groups}
+            activeHref={activeHref}
+          />
+        </nav>
+      </aside>
+      <MobilePrimaryNavigation
+        ariaLabel={ariaLabel}
+        dashboardHref={dashboardHref}
+        groups={groups}
+      />
+    </>
   );
 }
 

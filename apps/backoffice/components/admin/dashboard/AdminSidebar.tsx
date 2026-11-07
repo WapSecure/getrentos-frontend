@@ -62,6 +62,7 @@ import type { AdminPermission } from '@/types/admin';
 
 interface NavItem {
   label: string;
+  mobileLabel?: string;
   href: string;
   icon: React.ElementType;
   permission: AdminPermission;
@@ -161,6 +162,7 @@ const navItems: NavItem[] = [
   },
   {
     label: 'Unmatched Payments',
+    mobileLabel: 'Payments',
     href: '/admin/unmatched-payments',
     icon: CircleAlert,
     permission: 'rentfinance.view',
@@ -635,32 +637,61 @@ export const AdminSidebar = ({ roles }: { roles?: string[] }) => {
   });
   const managedWaiting =
     (queueCounts.data?.awaitingActivation ?? 0) + (queueCounts.data?.terminationRequests ?? 0);
+  const mobilePrimaryItems = navGroups[0].items
+    .filter((item) => hasAccess(roles, item))
+    .slice(0, 5);
 
   return (
-    <aside className="workspace-sidebar fixed bottom-0 left-0 top-16 z-30 hidden w-64 overflow-y-auto border-r border-border lg:block">
-      <nav className="space-y-5 px-3 py-4" aria-label="Administration navigation">
-        <div className="px-3 pb-1">
-          <p className="text-[0.6875rem] font-medium uppercase tracking-[0.08em] text-muted-foreground">
-            Workspace
-          </p>
-          <p className="mt-1 truncate text-sm font-semibold text-foreground">Operations</p>
-        </div>
-        {navGroups.map((group) => {
-          const visibleItems = group.items.filter((item) => hasAccess(roles, item));
-          if (visibleItems.length === 0) return null;
-          return (
-            <AdminNavigationGroup
-              key={group.label}
-              label={group.label}
-              kind={group.kind}
-              items={visibleItems}
-              pathname={pathname}
-              managedWaiting={managedWaiting}
-            />
-          );
-        })}
-      </nav>
-    </aside>
+    <>
+      <aside className="workspace-sidebar fixed bottom-0 left-0 top-16 z-30 hidden w-64 overflow-y-auto border-r border-border lg:block">
+        <nav className="space-y-5 px-3 py-4" aria-label="Administration navigation">
+          <div className="px-3 pb-1">
+            <p className="text-[0.6875rem] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+              Workspace
+            </p>
+            <p className="mt-1 truncate text-sm font-semibold text-foreground">Operations</p>
+          </div>
+          {navGroups.map((group) => {
+            const visibleItems = group.items.filter((item) => hasAccess(roles, item));
+            if (visibleItems.length === 0) return null;
+            return (
+              <AdminNavigationGroup
+                key={group.label}
+                label={group.label}
+                kind={group.kind}
+                items={visibleItems}
+                pathname={pathname}
+                managedWaiting={managedWaiting}
+              />
+            );
+          })}
+        </nav>
+      </aside>
+      {mobilePrimaryItems.length > 0 && (
+        <nav
+          className="mobile-primary-nav fixed inset-x-0 bottom-0 z-50 grid border-t border-border bg-card sm:hidden"
+          style={{ gridTemplateColumns: `repeat(${mobilePrimaryItems.length}, minmax(0, 1fr))` }}
+          aria-label="Administration primary navigation"
+        >
+          {mobilePrimaryItems.map((item) => {
+            const active =
+              pathname === item.href ||
+              (item.href !== ROUTES.ADMIN_DASHBOARD && pathname.startsWith(`${item.href}/`));
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={active ? 'page' : undefined}
+                className="mobile-primary-nav-item"
+              >
+                <item.icon className="h-5 w-5" aria-hidden="true" />
+                <span className="max-w-full truncate">{item.mobileLabel ?? item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+      )}
+    </>
   );
 };
 

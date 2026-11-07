@@ -496,6 +496,14 @@ test('role-aware navigation progressively reveals landlord workflows', async ({
 }, testInfo) => {
   await page.goto(`${webURL}/landlord/dashboard`);
   if (testInfo.project.name.startsWith('phone')) {
+    const primaryNavigation = page.getByRole('navigation', {
+      name: 'Landlord navigation primary',
+    });
+    await expect(primaryNavigation.getByRole('link')).toHaveCount(5);
+    await expect(primaryNavigation.getByRole('link', { name: 'Dashboard' })).toHaveAttribute(
+      'aria-current',
+      'page'
+    );
     await page.getByRole('button', { name: 'Open menu' }).click();
   }
 
@@ -534,6 +542,14 @@ test('backoffice navigation keeps operations focused and permissions intact', as
 }, testInfo) => {
   await page.goto(`${adminURL}/admin/dashboard`);
   if (testInfo.project.name.startsWith('phone')) {
+    const primaryNavigation = page.getByRole('navigation', {
+      name: 'Administration primary navigation',
+    });
+    await expect(primaryNavigation.getByRole('link')).toHaveCount(5);
+    await expect(primaryNavigation.getByRole('link', { name: 'Dashboard' })).toHaveAttribute(
+      'aria-current',
+      'page'
+    );
     await page.getByRole('button', { name: 'Open navigation menu' }).click();
   }
   const navigation = page.getByRole('navigation', {
