@@ -41,7 +41,10 @@ export default function BuyerSettingsPage() {
         return <ProfileSettings user={user} />;
       case 'verification':
         return (
-          <IdentityVerificationSettings description="Verify your identity to unlock making offers on for-sale listings." />
+          <IdentityVerificationSettings
+            description="Verify your identity to unlock making offers on for-sale listings."
+            verificationHref="/buyer/verification"
+          />
         );
       case 'notifications':
         return <NotificationSettings />;

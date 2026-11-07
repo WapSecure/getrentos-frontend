@@ -12,7 +12,6 @@ export default function RealtorVerificationPage() {
       subjectId={subjectId}
       purpose="AGENT_ONBOARDING"
       description="Verify your identity to list and manage properties on behalf of clients."
-      documentsHref={ROUTES.REALTOR_DOCUMENTS}
       trustScoreHref={ROUTES.REALTOR_TRUST_PROFILE}
     />
   );

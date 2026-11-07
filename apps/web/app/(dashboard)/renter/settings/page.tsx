@@ -70,7 +70,10 @@ export default function SettingsPage() {
         return <AccountSettings user={user} />;
       case 'verification':
         return (
-          <IdentityVerificationSettings description="Verify your identity to unlock submitting rental applications." />
+          <IdentityVerificationSettings
+            description="Verify your identity to unlock submitting rental applications."
+            verificationHref="/renter/trust-score?tab=verification"
+          />
         );
       case 'notifications':
         return <NotificationSettings />;

@@ -1,6 +1,7 @@
 'use client';
 
 import { trustKeys } from '@/lib/queryKeys';
+import { IdentityDocumentFallback } from './IdentityDocumentFallback';
 import { useEffect, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { usePathname } from 'next/navigation';
@@ -41,12 +42,7 @@ import { cn, unwrap } from '@/lib/apiHelpers';
 import { useRealtimeEvent } from '@/hooks/useRealtime';
 import { AppealControl } from '@/components/shared/trust/AppealControl';
 import { kycService } from '@/services/kycService';
-import {
-  trustService,
-  TRUST_ID_TYPES,
-  type TrustIdType,
-  type TrustPurpose,
-} from '@/services/trustService';
+import { trustService, type TrustIdType, type TrustPurpose } from '@/services/trustService';
 
 const ACTIONABLE = ['NOT_STARTED', 'FAILED', 'REVIEW_REQUIRED'];
 const IDENTITY_STEP_TYPES = ['NIN_CHECK', 'BVN_CHECK'];
@@ -63,8 +59,6 @@ interface VerificationCenterProps {
   subjectId: string;
   purpose: TrustPurpose;
   description?: string;
-  /** Persona's identity-document route for the footer tile (renter default if omitted). */
-  documentsHref?: string;
   /** Persona's trust-score route for the footer tile (omitted to hide the tile). */
   trustScoreHref?: string;
 }
@@ -73,14 +67,13 @@ export const VerificationCenter = ({
   subjectId,
   purpose,
   description,
-  documentsHref,
   trustScoreHref,
 }: VerificationCenterProps) => {
   const queryClient = useQueryClient();
   const portal = usePathname().split('/')[1] || 'renter';
   const [verificationId, setVerificationId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [idType, setIdType] = useState<TrustIdType>('NIN');
+  const [chosenIdType, setIdType] = useState<TrustIdType>('NIN');
   const [idNumber, setIdNumber] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -384,6 +377,14 @@ export const VerificationCenter = ({
     kyc?.identityVerified ??
     (kyc?.identity?.status === 'APPROVED' || kyc?.verificationStatus === 'APPROVED');
   const steps = verification?.steps ?? [];
+  // Only the ID numbers this verification has a check for (onboarding asks for
+  // a NIN; BVN only where a policy includes it). Offering others would fail.
+  const idTypeOptions = (['NIN', 'BVN'] as const).filter((t) =>
+    steps.some((s) => s.stepType === `${t}_CHECK`)
+  );
+  const idType: TrustIdType = idTypeOptions.includes(chosenIdType as 'NIN' | 'BVN')
+    ? chosenIdType
+    : (idTypeOptions[0] ?? 'NIN');
   const actionable = (status: string) => ACTIONABLE.includes(status);
   const runnableIdentity = steps.find(
     (s) => IDENTITY_STEP_TYPES.includes(s.stepType) && actionable(s.status)
@@ -504,7 +505,9 @@ export const VerificationCenter = ({
       ) : (
         <>
           <p className="text-xs text-muted-foreground">
-            Enter the 6-digit code we sent. In development it is printed to the backend log.
+            Enter the 6-digit code we sent.
+            {process.env.NODE_ENV === 'development' &&
+              ' In development it is printed to the backend log.'}
           </p>
           <div className="flex flex-wrap gap-2">
             <div className="w-40">
@@ -548,14 +551,16 @@ export const VerificationCenter = ({
           {consentActive(idCheckConsent) && (
             <>
               <div className="grid gap-3 sm:grid-cols-2">
-                <Field label="ID type" className="sm:col-span-2">
-                  <Select
-                    value={idType}
-                    onValueChange={(value) => setIdType(value as TrustIdType)}
-                    options={TRUST_ID_TYPES.map((type) => ({ value: type, label: type }))}
-                    className="w-full"
-                  />
-                </Field>
+                {idTypeOptions.length > 1 && (
+                  <Field label="ID type" className="sm:col-span-2">
+                    <Select
+                      value={idType}
+                      onValueChange={(value) => setIdType(value as TrustIdType)}
+                      options={idTypeOptions.map((type) => ({ value: type, label: type }))}
+                      className="w-full"
+                    />
+                  </Field>
+                )}
                 <Field
                   label={
                     idType === 'NIN' ? 'NIN number' : idType === 'BVN' ? 'BVN number' : 'ID number'
@@ -1006,29 +1011,15 @@ export const VerificationCenter = ({
         </div>
       )}
 
-      {/* Document path + trust score links: role-aware per mounting page */}
-      {(documentsHref || trustScoreHref) && (
+      {/* The manual route, inline, so it is the same in every portal. */}
+      {!isVerified &&
+        !steps.some((s) => IDENTITY_STEP_TYPES.includes(s.stepType) && s.status === 'PASSED') && (
+          <IdentityDocumentFallback />
+        )}
+
+      {trustScoreHref && (
         <div className="grid gap-4 sm:grid-cols-2">
-          {documentsHref && (
-            <Link
-              href={documentsHref}
-              className="group flex items-center gap-3 rounded-2xl border border-border bg-card p-4 transition-colors hover:border-primary/40"
-            >
-              <FileCheck2 className="h-5 w-5 text-primary" />
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-foreground">
-                  Or upload an identity document
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Scan your national ID or passport for a human-reviewed verification.
-                </p>
-              </div>
-              <span className="text-primary transition-transform group-hover:translate-x-0.5">
-                →
-              </span>
-            </Link>
-          )}
-          {trustScoreHref && (
+          {
             <Link
               href={trustScoreHref}
               className="group flex items-center gap-3 rounded-2xl border border-border bg-card p-4 transition-colors hover:border-primary/40"
@@ -1042,7 +1033,7 @@ export const VerificationCenter = ({
                 →
               </span>
             </Link>
-          )}
+          }
         </div>
       )}
 

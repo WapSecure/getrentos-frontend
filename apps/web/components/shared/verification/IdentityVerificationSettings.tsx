@@ -1,24 +1,11 @@
 'use client';
 
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ShieldCheck, ShieldAlert, ShieldX, HelpCircle } from 'lucide-react';
-import { Alert, Button, CardSkeleton, DocumentUpload, Field, Select } from '@getrentos/ui';
-import {
-  kycService,
-  IDENTITY_DOCUMENT_TYPES,
-  type IdentityDocumentType,
-} from '@/services/kycService';
+import { useQuery } from '@tanstack/react-query';
+import { ArrowRight, ShieldCheck, ShieldAlert, ShieldX, HelpCircle } from 'lucide-react';
+import { Button, CardSkeleton } from '@getrentos/ui';
+import { kycService } from '@/services/kycService';
 import { unwrap } from '@/lib/apiHelpers';
-
-const DOCUMENT_TYPE_LABELS: Record<IdentityDocumentType, string> = {
-  NATIONAL_ID: 'National ID',
-  PASSPORT: 'International passport',
-  DRIVERS_LICENSE: "Driver's Licence",
-  VOTERS_CARD: "Voter's Card",
-  NIN: 'NIN slip',
-  BVN: 'BVN',
-};
+import { IdentityDocumentFallback } from './IdentityDocumentFallback';
 
 const statusConfig: Record<
   string,
@@ -53,39 +40,25 @@ const statusConfig: Record<
 interface IdentityVerificationSettingsProps {
   /** Why this matters for the current persona, shown above the form. */
   description?: string;
+  /** The one Verification page for this portal (NIN and live selfie). */
+  verificationHref: string;
 }
 
+/**
+ * Settings → Verification. Identity is verified in one place, the
+ * Verification page (NIN and a live selfie); this tab shows the status and
+ * points there. The ID-document upload is kept only as a fallback for people
+ * who cannot use their NIN: it is checked by our team, and it never verifies
+ * on its own, because a live selfie is still required (security gap ID-16).
+ * There is no photo "selfie" here: an uploaded photo is not a liveness check.
+ */
 export const IdentityVerificationSettings = ({
   description = 'Verify your identity to unlock actions like submitting applications and offers.',
+  verificationHref,
 }: IdentityVerificationSettingsProps) => {
-  const queryClient = useQueryClient();
-  const [documentType, setDocumentType] = useState<IdentityDocumentType>('NATIONAL_ID');
-  const [document, setDocument] = useState<File | null>(null);
-  const [selfie, setSelfie] = useState<File | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
   const { data: status, isLoading } = useQuery({
     queryKey: ['kyc-status'],
     queryFn: () => unwrap(kycService.getStatus()),
-  });
-
-  const submitMutation = useMutation({
-    mutationFn: () =>
-      unwrap(
-        kycService.submitIdentity({
-          documentType,
-          document: document!,
-          selfie: selfie ?? undefined,
-        })
-      ),
-    onSuccess: () => {
-      setDocument(null);
-      setSelfie(null);
-      setError(null);
-      queryClient.invalidateQueries({ queryKey: ['kyc-status'] });
-    },
-    onError: (reason) =>
-      setError(reason instanceof Error ? reason.message : 'Unable to submit your documents.'),
   });
 
   const identity = status?.identity;
@@ -94,9 +67,6 @@ export const IdentityVerificationSettings = ({
   const verified = status?.identityVerified ?? identity?.status === 'APPROVED';
   const shownStatus = verified ? 'APPROVED' : identity?.status;
   const config = shownStatus ? statusConfig[shownStatus] : undefined;
-  const canSubmit =
-    !verified &&
-    (!identity || identity.status === 'REJECTED' || identity.status === 'NEEDS_CLARIFICATION');
 
   if (isLoading) {
     return <CardSkeleton lines={3} />;
@@ -121,64 +91,22 @@ export const IdentityVerificationSettings = ({
         </div>
       )}
 
-      {canSubmit && (
-        <div className="space-y-4">
-          <Field label="Document type">
-            <Select
-              value={documentType}
-              onValueChange={(value) => setDocumentType(value as IdentityDocumentType)}
-              options={IDENTITY_DOCUMENT_TYPES.map((type) => ({
-                value: type,
-                label: DOCUMENT_TYPE_LABELS[type],
-              }))}
-              ariaLabel="Identity document type"
-            />
-          </Field>
-
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Document photo</label>
-            <DocumentUpload
-              checkPhotoQuality
-              value={document ? [{ id: 'document', file: document }] : []}
-              onChange={(items) => setDocument(items[0]?.file ?? null)}
-              accept=".pdf,.jpg,.jpeg,.png,.webp"
-              multiple={false}
-              label=""
-              hint="PDF or image: preview before submitting"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">
-              Selfie{' '}
-              <span className="text-muted-foreground font-normal">
-                (speeds up automatic approval)
-              </span>
-            </label>
-            <DocumentUpload
-              checkPhotoQuality
-              value={selfie ? [{ id: 'selfie', file: selfie }] : []}
-              onChange={(items) => setSelfie(items[0]?.file ?? null)}
-              accept=".jpg,.jpeg,.png,.webp"
-              multiple={false}
-              label=""
-              hint="A clear photo of your face: preview before submitting"
-            />
-          </div>
-
-          {error && <Alert variant="danger">{error}</Alert>}
-
+      {!verified && (
+        <div className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            Verify with your NIN and a live selfie. It usually takes a few minutes.
+          </p>
           <Button
-            variant="primary"
-            onClick={() => submitMutation.mutate()}
-            disabled={!document}
-            isLoading={submitMutation.isPending}
-            loadingText="Submitting…"
+            href={verificationHref}
+            icon={<ArrowRight className="h-4 w-4" />}
+            iconPosition="right"
           >
-            Submit for verification
+            Go to verification
           </Button>
         </div>
       )}
+
+      <IdentityDocumentFallback />
     </div>
   );
 };
