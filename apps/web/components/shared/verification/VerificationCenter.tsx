@@ -110,6 +110,10 @@ export const VerificationCenter = ({
     queryKey: ['trust-verification', verificationId],
     queryFn: () => (verificationId ? unwrap(trustService.getVerification(verificationId)) : null),
     enabled: Boolean(verificationId),
+    // A check decided by a provider (Smile ID's live selfie) lands a little
+    // later; look again until it does, as the mobile app does.
+    refetchInterval: (q) =>
+      q.state.data?.steps?.some((st) => st.status === 'WAITING_FOR_PROVIDER') ? 5000 : false,
   });
 
   const { data: consents } = useQuery({
@@ -741,11 +745,13 @@ export const VerificationCenter = ({
     ? { label: 'Verified', cls: 'bg-success-subtle text-success' }
     : kyc?.verificationStatus === 'REJECTED' || verification?.decision === 'REJECT'
       ? { label: 'Rejected', cls: 'bg-destructive-subtle text-destructive' }
-      : stages.some((s) => s.status === 'review' || s.status === 'waiting')
+      : stages.some((s) => s.status === 'review')
         ? { label: 'In review', cls: 'bg-warning-subtle text-warning' }
-        : doneCount === 0
-          ? { label: 'Not started', cls: 'bg-secondary text-muted-foreground' }
-          : { label: `${doneCount} of ${stages.length} done`, cls: 'bg-accent text-primary' };
+        : stages.some((s) => s.status === 'waiting')
+          ? { label: 'Checking…', cls: 'bg-info-subtle text-info' }
+          : doneCount === 0
+            ? { label: 'Not started', cls: 'bg-secondary text-muted-foreground' }
+            : { label: `${doneCount} of ${stages.length} done`, cls: 'bg-accent text-primary' };
 
   const STAGE_CHIP: Record<StageStatus, { label: string; cls: string }> = {
     done: { label: 'Done', cls: 'bg-success-subtle text-success' },
