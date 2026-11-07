@@ -98,7 +98,7 @@ export const ActiveFinancingPlanCard = ({
                 onClick={() => onPayInstallment(nextDue.id)}
                 isLoading={isPaying}
               >
-                Pay installment
+                Pay instalment
               </Button>
             </div>
           )}

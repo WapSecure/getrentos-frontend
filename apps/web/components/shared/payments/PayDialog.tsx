@@ -64,13 +64,15 @@ const lagosDate = (iso: string) =>
     year: 'numeric',
   });
 
-/** A small numbered heading for each step of the dialog. */
-function Step({ n, children }: { n: number; children: ReactNode }) {
+/** A small heading for each step of the dialog, numbered only when there is more than one. */
+function Step({ n, children }: { n?: number; children: ReactNode }) {
   return (
     <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-muted text-[11px] text-foreground">
-        {n}
-      </span>
+      {n !== undefined && (
+        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-muted text-[11px] text-foreground">
+          {n}
+        </span>
+      )}
       {children}
     </p>
   );
@@ -138,7 +140,7 @@ export const PayDialog = ({
 
           {steps && (
             <div className="space-y-2.5">
-              <Step n={amountStep ? 2 : 1}>Pay with</Step>
+              <Step n={amountStep ? 2 : undefined}>Pay with</Step>
               {providerError && <Alert variant="warning">{providerError}</Alert>}
               <PaymentProviderPicker choice={providers} variant="card" hideLabel disabled={busy} />
             </div>
