@@ -7,7 +7,7 @@ import { useCallback, useSyncExternalStore, type ElementType, type ReactNode } f
 import { PLAN_TIER_LABELS, type PlanTier } from '@getrentos/shared';
 
 export interface GroupedSidebarItem {
-  label: ReactNode;
+  label?: ReactNode;
   href: string;
   icon: ElementType;
   /** Shows a small lock badge: the page itself still opens, and prompts to upgrade. */
@@ -20,17 +20,67 @@ export interface GroupedSidebarItem {
    * wrong plan to a screen reader.
    */
   lockedPlan?: PlanTier;
+  /** Optional operational count, kept textual so callers control its accessible name. */
+  badge?: ReactNode;
 }
 
 export interface GroupedSidebarGroup {
   label: string;
   items: GroupedSidebarItem[];
+  /** Primary links stay visible; contextual and utility groups use progressive disclosure. */
+  kind?: 'primary' | 'contextual' | 'utility';
+  defaultExpanded?: boolean;
+}
+
+/**
+ * Builds a consistent role-aware hierarchy without duplicating route metadata.
+ * Every item remains available exactly once: frequent destinations become the
+ * primary layer, account destinations become utilities, and the rest retain
+ * their existing workflow grouping as contextual navigation.
+ */
+export function createRoleNavigation<TGroup extends GroupedSidebarGroup>(
+  groups: TGroup[],
+  primaryHrefs: readonly string[],
+  utilityHrefs: readonly string[] = []
+): TGroup[] {
+  const allItems = groups.flatMap((group) => group.items);
+  const findItems = (hrefs: readonly string[]) =>
+    hrefs.flatMap((href) => {
+      const match = allItems.find((item) => item.href === href);
+      return match ? [match] : [];
+    });
+  const promoted = new Set([...primaryHrefs, ...utilityHrefs]);
+  const contextual = groups
+    .map((group) => ({
+      ...group,
+      kind: 'contextual' as const,
+      defaultExpanded: false,
+      items: group.items.filter((item) => !promoted.has(item.href)),
+    }))
+    .filter((group) => group.items.length > 0);
+  const utilities = findItems(utilityHrefs);
+
+  return [
+    { label: 'Primary', kind: 'primary', items: findItems(primaryHrefs) },
+    ...contextual,
+    ...(utilities.length
+      ? [
+          {
+            label: 'Account and preferences',
+            kind: 'utility' as const,
+            defaultExpanded: false,
+            items: utilities,
+          },
+        ]
+      : []),
+  ] as TGroup[];
 }
 
 interface GroupedSidebarProps {
   ariaLabel: string;
   dashboardHref: string;
   groups: GroupedSidebarGroup[];
+  workspaceLabel?: string;
 }
 
 interface GroupedMobileNavigationProps extends GroupedSidebarProps {
@@ -62,17 +112,18 @@ const slug = (label: string) => label.toLowerCase().replace(/[^a-z0-9]+/g, '-');
  * browser. Everything starts open, so nothing is hidden until they choose to
  * hide it; the group holding the current page always shows.
  */
-const storageKey = (scope: string) => `getrentos.sidebar.collapsed:${slug(scope)}`;
+const storageKey = (scope: string) => `getrentos.sidebar.collapsed-v2:${slug(scope)}`;
 const NONE: readonly string[] = [];
 const cache = new Map<string, readonly string[]>();
 const listeners = new Set<() => void>();
 
-const readCollapsed = (scope: string): readonly string[] => {
+const readCollapsed = (scope: string, defaults: readonly string[]): readonly string[] => {
   const cached = cache.get(scope);
   if (cached) return cached;
-  let value: readonly string[] = NONE;
+  let value: readonly string[] = defaults;
   try {
-    const parsed: unknown = JSON.parse(window.localStorage.getItem(storageKey(scope)) ?? '[]');
+    const stored = window.localStorage.getItem(storageKey(scope));
+    const parsed: unknown = stored === null ? defaults : JSON.parse(stored);
     if (Array.isArray(parsed)) value = parsed.filter((v): v is string => typeof v === 'string');
   } catch {
     // Unreadable or absent: start open.
@@ -107,15 +158,15 @@ const subscribe = (onChange: () => void) => {
   };
 };
 
-function useCollapsedGroups(scope: string) {
+function useCollapsedGroups(scope: string, defaults: readonly string[]) {
   const collapsed = useSyncExternalStore(
     subscribe,
-    () => readCollapsed(scope),
+    () => readCollapsed(scope, defaults),
     () => NONE
   );
   const setFolded = useCallback(
     (label: string, folded: boolean) => {
-      const current = readCollapsed(scope);
+      const current = readCollapsed(scope, defaults);
       const next = folded
         ? current.includes(label)
           ? current
@@ -123,7 +174,7 @@ function useCollapsedGroups(scope: string) {
         : current.filter((l) => l !== label);
       if (next !== current) writeCollapsed(scope, next);
     },
-    [scope]
+    [defaults, scope]
   );
   return { collapsed, setFolded };
 }
@@ -153,6 +204,7 @@ function SidebarLink({
           aria-label={`${PLAN_TIER_LABELS[item.lockedPlan ?? 'PRO']} plan feature`}
         />
       )}
+      {item.badge}
     </Link>
   );
 }
@@ -175,12 +227,30 @@ function SidebarGroups({
   activeHref?: string;
   onNavigate?: () => void;
 }) {
-  const { collapsed, setFolded } = useCollapsedGroups(scope);
+  const defaultCollapsed = groups
+    .filter((group) => group.kind !== 'primary' && group.defaultExpanded === false)
+    .map((group) => group.label);
+  const { collapsed, setFolded } = useCollapsedGroups(scope, defaultCollapsed);
 
   return (
     <>
       {groups.map((group) => {
-        if (group.items.length === 1) {
+        if (group.items.length === 0) return null;
+        if (group.kind === 'primary') {
+          return (
+            <section key={group.label} aria-label={group.label} className="space-y-1">
+              {group.items.map((item) => (
+                <SidebarLink
+                  key={item.href}
+                  item={item}
+                  active={item.href === activeHref}
+                  onNavigate={onNavigate}
+                />
+              ))}
+            </section>
+          );
+        }
+        if (group.items.length === 1 && group.kind !== 'utility') {
           const [only] = group.items;
           return (
             <div key={group.label}>
@@ -194,7 +264,11 @@ function SidebarGroups({
         const holdsPage = group.items.some((i) => i.href === activeHref);
         const open = holdsPage || !collapsed.includes(group.label);
         return (
-          <section key={group.label} aria-labelledby={`${id}-label`}>
+          <section
+            key={group.label}
+            aria-labelledby={`${id}-label`}
+            className={group.kind === 'utility' ? 'border-t border-border pt-4' : undefined}
+          >
             <h2 className="sidebar-label">
               <button
                 type="button"
@@ -228,21 +302,75 @@ function SidebarGroups({
   );
 }
 
-export function GroupedSidebar({ ariaLabel, dashboardHref, groups }: GroupedSidebarProps) {
+function MobilePrimaryNavigation({ ariaLabel, dashboardHref, groups }: GroupedSidebarProps) {
+  const pathname = usePathname();
+  const primaryItems = groups.find((group) => group.kind === 'primary')?.items.slice(0, 5) ?? [];
+  const activeHref = activeSidebarHref(pathname, groups, dashboardHref);
+
+  if (primaryItems.length === 0) return null;
+
+  return (
+    <nav
+      className="mobile-primary-nav fixed inset-x-0 bottom-0 z-50 grid border-t border-border bg-card sm:hidden"
+      style={{ gridTemplateColumns: `repeat(${primaryItems.length}, minmax(0, 1fr))` }}
+      aria-label={`${ariaLabel} primary`}
+    >
+      {primaryItems.map((item) => {
+        const Icon = item.icon;
+        const active = item.href === activeHref;
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            aria-current={active ? 'page' : undefined}
+            className="mobile-primary-nav-item"
+          >
+            <Icon className="h-5 w-5" aria-hidden="true" />
+            <span className="max-w-full truncate">{item.label}</span>
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
+export function GroupedSidebar({
+  ariaLabel,
+  dashboardHref,
+  groups,
+  workspaceLabel,
+}: GroupedSidebarProps) {
   const pathname = usePathname();
   const activeHref = activeSidebarHref(pathname, groups, dashboardHref);
 
   return (
-    <aside className="workspace-sidebar fixed bottom-0 left-0 top-16 z-30 hidden w-64 overflow-y-auto border-r border-border lg:block">
-      <nav className="space-y-5 px-3 py-5" aria-label={ariaLabel}>
-        <SidebarGroups
-          scope={ariaLabel}
-          idPrefix="sidebar"
-          groups={groups}
-          activeHref={activeHref}
-        />
-      </nav>
-    </aside>
+    <>
+      <aside className="workspace-sidebar fixed bottom-0 left-0 top-16 z-30 hidden w-64 overflow-y-auto border-r border-border lg:block">
+        <nav className="space-y-5 px-3 py-4" aria-label={ariaLabel}>
+          {workspaceLabel && (
+            <div className="px-3 pb-1">
+              <p className="text-[0.6875rem] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+                Workspace
+              </p>
+              <p className="mt-1 truncate text-sm font-semibold text-foreground">
+                {workspaceLabel}
+              </p>
+            </div>
+          )}
+          <SidebarGroups
+            scope={ariaLabel}
+            idPrefix="sidebar"
+            groups={groups}
+            activeHref={activeHref}
+          />
+        </nav>
+      </aside>
+      <MobilePrimaryNavigation
+        ariaLabel={ariaLabel}
+        dashboardHref={dashboardHref}
+        groups={groups}
+      />
+    </>
   );
 }
 
@@ -251,11 +379,18 @@ export function GroupedMobileNavigation({
   dashboardHref,
   groups,
   onNavigate,
+  workspaceLabel,
 }: GroupedMobileNavigationProps) {
   const pathname = usePathname();
   const activeHref = activeSidebarHref(pathname, groups, dashboardHref);
   return (
     <nav className="space-y-4 p-4" aria-label={`${ariaLabel} mobile`}>
+      {workspaceLabel && (
+        <div className="border-b border-border px-3 pb-4">
+          <p className="text-xs font-medium text-muted-foreground">Current workspace</p>
+          <p className="mt-1 font-semibold text-foreground">{workspaceLabel}</p>
+        </div>
+      )}
       <SidebarGroups
         scope={ariaLabel}
         idPrefix="mobile-nav"

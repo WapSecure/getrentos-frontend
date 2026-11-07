@@ -481,7 +481,7 @@ test('portfolio overview and navigation', async ({ page }, testInfo) => {
   await expect(
     page.getByRole('heading', { name: /Good (morning|afternoon|evening), Joseph/ })
   ).toBeVisible();
-  await expect(page.getByText('Annual Rent Roll', { exact: true })).toBeVisible();
+  await expect(page.getByText('Annual rent roll', { exact: true })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Manage properties' })).toHaveAttribute(
     'href',
     '/landlord/properties'
@@ -489,6 +489,81 @@ test('portfolio overview and navigation', async ({ page }, testInfo) => {
   if (testInfo.project.name.startsWith('desktop')) {
     await expect(page.locator('aside [aria-current=page]')).toHaveCount(1);
   }
+});
+
+test('role-aware navigation progressively reveals landlord workflows', async ({
+  page,
+}, testInfo) => {
+  await page.goto(`${webURL}/landlord/dashboard`);
+  if (testInfo.project.name.startsWith('phone')) {
+    const primaryNavigation = page.getByRole('navigation', {
+      name: 'Landlord navigation primary',
+    });
+    await expect(primaryNavigation.getByRole('link')).toHaveCount(5);
+    await expect(primaryNavigation.getByRole('link', { name: 'Dashboard' })).toHaveAttribute(
+      'aria-current',
+      'page'
+    );
+    await page.getByRole('button', { name: 'Open menu' }).click();
+  }
+
+  const navigation = page.getByRole('navigation', {
+    name: testInfo.project.name.startsWith('phone')
+      ? 'Landlord navigation mobile'
+      : 'Landlord navigation',
+  });
+  await expect(navigation.getByText('Property management', { exact: true })).toBeVisible();
+  await expect(navigation.getByRole('link', { name: 'Dashboard' })).toBeVisible();
+  await expect(navigation.getByRole('link', { name: 'Properties' })).toBeVisible();
+  await expect(navigation.getByRole('link', { name: 'Listings' })).toBeHidden();
+
+  const portfolio = navigation.getByRole('button', { name: 'Portfolio and marketing' });
+  await expect(portfolio).toHaveAttribute('aria-expanded', 'false');
+  await portfolio.click();
+  await expect(portfolio).toHaveAttribute('aria-expanded', 'true');
+  await expect(navigation.getByRole('link', { name: 'Listings' })).toBeVisible();
+
+  await page.reload();
+  if (testInfo.project.name.startsWith('phone')) {
+    await page.getByRole('button', { name: 'Open menu' }).click();
+  }
+  const restoredNavigation = page.getByRole('navigation', {
+    name: testInfo.project.name.startsWith('phone')
+      ? 'Landlord navigation mobile'
+      : 'Landlord navigation',
+  });
+  await expect(
+    restoredNavigation.getByRole('button', { name: 'Portfolio and marketing' })
+  ).toHaveAttribute('aria-expanded', 'true');
+});
+
+test('backoffice navigation keeps operations focused and permissions intact', async ({
+  page,
+}, testInfo) => {
+  await page.goto(`${adminURL}/admin/dashboard`);
+  if (testInfo.project.name.startsWith('phone')) {
+    const primaryNavigation = page.getByRole('navigation', {
+      name: 'Administration primary navigation',
+    });
+    await expect(primaryNavigation.getByRole('link')).toHaveCount(5);
+    await expect(primaryNavigation.getByRole('link', { name: 'Dashboard' })).toHaveAttribute(
+      'aria-current',
+      'page'
+    );
+    await page.getByRole('button', { name: 'Open navigation menu' }).click();
+  }
+  const navigation = page.getByRole('navigation', {
+    name: testInfo.project.name.startsWith('phone')
+      ? 'Administration mobile navigation'
+      : 'Administration navigation',
+  });
+  await expect(navigation.getByText('Operations', { exact: true })).toBeVisible();
+  await expect(navigation.getByRole('link', { name: 'Dashboard' })).toBeVisible();
+  await expect(navigation.getByRole('link', { name: 'Users' })).toBeVisible();
+  const marketplace = navigation.getByRole('button', { name: 'Marketplace operations' });
+  await expect(marketplace).toHaveAttribute('aria-expanded', 'false');
+  await marketplace.click();
+  await expect(navigation.getByRole('link', { name: 'Property Authorities' })).toBeVisible();
 });
 
 test('property card, menu and add-property sheet', async ({ page }, testInfo) => {

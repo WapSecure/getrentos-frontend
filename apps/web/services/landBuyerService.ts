@@ -13,6 +13,8 @@ import type {
   PublicLandLayoutListParams,
   PublicLandLayoutSummary,
 } from '@/types/landBuyer';
+import { providerQuery } from '@/services/paymentStatusService';
+import type { PaymentProvider } from '@/types/payments';
 
 const post = <T>(path: string, body?: unknown) =>
   authFetch<T>(path, {
@@ -102,10 +104,10 @@ export const landBuyerService = {
     safeCall(() => authFetch<LandStatement>(`/buyer/land/purchases/${purchaseId}/statement`)),
 
   /** Pays the earliest unpaid installment unless one is named. */
-  pay: (purchaseId: string, installmentId?: string) =>
+  pay: (purchaseId: string, installmentId?: string, provider?: PaymentProvider) =>
     safeCall(() =>
       post<LandPaymentInit>(
-        `/buyer/land/purchases/${purchaseId}/pay`,
+        `/buyer/land/purchases/${purchaseId}/pay${providerQuery(provider)}`,
         installmentId ? { installmentId } : {}
       )
     ),

@@ -1,5 +1,8 @@
 'use client';
 
+import { PayDialog } from '@/components/shared/payments/PayDialog';
+import { usePaymentProviders } from '@/hooks/usePaymentProviders';
+import type { PaymentProvider } from '@/types/payments';
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ReceiptText, Repeat } from 'lucide-react';
@@ -39,6 +42,11 @@ const formatDate = (value: string) =>
 export default function ResidentDuesPage() {
   const queryClient = useQueryClient();
   const [payError, setPayError] = useState<{ dueId: string; message: string } | null>(null);
+  // Which company takes the payment (Paystack or Monnify): one choice for every due here.
+  const providers = usePaymentProviders();
+  // The due open in the pay dialog, and why its chosen company could not take it.
+  const [payingDueId, setPayingDueId] = useState<string | null>(null);
+  const [providerError, setProviderError] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: estateResidentKeys.dues(),
@@ -47,7 +55,9 @@ export default function ResidentDuesPage() {
   const dues = data?.items ?? [];
 
   const payMutation = useMutation({
-    mutationFn: (dueId: string) => unwrap(estateResidentService.payMyDue(dueId)),
+    mutationFn: ({ dueId, provider }: { dueId: string; provider?: PaymentProvider }) =>
+      unwrap(estateResidentService.payMyDue(dueId, provider)),
+    onMutate: () => setProviderError(null),
     onSuccess: (updated) => {
       setPayError(null);
       // A real gateway checkout was started: send the resident to Paystack to complete it.
@@ -56,15 +66,28 @@ export default function ResidentDuesPage() {
         window.location.href = updated.authorizationUrl;
         return;
       }
+      setPayingDueId(null);
       queryClient.invalidateQueries({ queryKey: estateResidentKeys.dues() });
     },
-    onError: (err, dueId) => {
+    onError: (err, { dueId, provider }) => {
+      // That company cannot take it right now: say so in the dialog, with the other one picked.
+      const unavailable = providers.recover(err, provider);
+      if (unavailable) {
+        setProviderError(unavailable);
+        return;
+      }
+      setPayingDueId(null);
       setPayError({
         dueId,
         message: err instanceof Error ? err.message : 'Unable to start payment. Please try again.',
       });
     },
   });
+  const payingDue = dues.find((due) => due.id === payingDueId) ?? null;
+  const closePayDialog = () => {
+    setPayingDueId(null);
+    setProviderError(null);
+  };
 
   return (
     <>
@@ -79,64 +102,89 @@ export default function ResidentDuesPage() {
           description="Your estate manager hasn't charged any dues to your household."
         />
       ) : (
-        <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
-          {dues.map((due) => {
-            const isPaying = payMutation.isPending && payMutation.variables === due.id;
-            // A checkout that was opened and left can be picked up again: the API checks
-            // whether the earlier one went through before starting another.
-            const canPay =
-              due.status === 'pending' || due.status === 'overdue' || due.status === 'processing';
-            return (
-              <div key={due.id} className="p-4">
-                <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate flex items-center gap-1.5">
-                      {categoryLabels[due.category]}
-                      {due.isRecurring && (
-                        <span title="Repeats automatically">
-                          <Repeat
-                            className="w-3 h-3 text-muted-foreground shrink-0"
-                            aria-label="Repeats automatically"
-                          />
-                        </span>
+        <>
+          <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
+            {dues.map((due) => {
+              const isPaying = payMutation.isPending && payMutation.variables?.dueId === due.id;
+              // A checkout that was opened and left can be picked up again: the API checks
+              // whether the earlier one went through before starting another.
+              const canPay =
+                due.status === 'pending' || due.status === 'overdue' || due.status === 'processing';
+              return (
+                <div key={due.id} className="p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate flex items-center gap-1.5">
+                        {categoryLabels[due.category]}
+                        {due.isRecurring && (
+                          <span title="Repeats automatically">
+                            <Repeat
+                              className="w-3 h-3 text-muted-foreground shrink-0"
+                              aria-label="Repeats automatically"
+                            />
+                          </span>
+                        )}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Due {formatDate(due.dueDate)}
+                        {due.description ? ` · ${due.description}` : ''}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span className="text-sm font-semibold text-foreground">
+                        {formatCurrency(due.amount)}
+                      </span>
+                      <Badge variant={statusVariant[due.status]}>
+                        {due.status.charAt(0).toUpperCase() + due.status.slice(1)}
+                      </Badge>
+                      {canPay && (
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          isLoading={isPaying}
+                          loadingText="Processing…"
+                          onClick={() => {
+                            setPayError(null);
+                            setPayingDueId(due.id);
+                          }}
+                        >
+                          {due.status === 'processing' ? 'Finish paying' : 'Pay Now'}
+                        </Button>
                       )}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Due {formatDate(due.dueDate)}
-                      {due.description ? ` · ${due.description}` : ''}
-                    </p>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3 shrink-0">
-                    <span className="text-sm font-semibold text-foreground">
-                      {formatCurrency(due.amount)}
-                    </span>
-                    <Badge variant={statusVariant[due.status]}>
-                      {due.status.charAt(0).toUpperCase() + due.status.slice(1)}
-                    </Badge>
-                    {canPay && (
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        isLoading={isPaying}
-                        loadingText="Processing…"
-                        onClick={() => {
-                          setPayError(null);
-                          payMutation.mutate(due.id);
-                        }}
-                      >
-                        {due.status === 'processing' ? 'Finish paying' : 'Pay Now'}
-                      </Button>
-                    )}
-                  </div>
+                  {payError?.dueId === due.id && (
+                    <p className="text-xs text-destructive mt-2">{payError.message}</p>
+                  )}
                 </div>
-                {payError?.dueId === due.id && (
-                  <p className="text-xs text-destructive mt-2">{payError.message}</p>
-                )}
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        </>
       )}
+
+      <PayDialog
+        open={!!payingDue}
+        onClose={closePayDialog}
+        title="Pay dues"
+        context={
+          payingDue
+            ? `${categoryLabels[payingDue.category]}${payingDue.description ? ` · ${payingDue.description}` : ''}`
+            : undefined
+        }
+        dueDate={payingDue?.dueDate}
+        overdue={payingDue?.status === 'overdue'}
+        owed={payingDue?.amount ?? 0}
+        itemLabel={payingDue ? categoryLabels[payingDue.category] : 'Dues'}
+        receiverLine={`The fee goes to the payment company, so your estate receives the full ${formatCurrency(payingDue?.amount ?? 0)}.`}
+        protection="Your payment goes to your estate."
+        providers={providers}
+        providerError={providerError}
+        busy={payMutation.isPending}
+        onPay={() =>
+          payingDue && payMutation.mutate({ dueId: payingDue.id, provider: providers.provider })
+        }
+      />
     </>
   );
 }

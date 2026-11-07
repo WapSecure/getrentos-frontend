@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CalendarClock, CheckCircle2, Landmark, Phone } from 'lucide-react';
+import { CalendarClock, CheckCircle2, Phone } from 'lucide-react';
 import {
   Alert,
   Card,
@@ -10,9 +10,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
-  Field,
   ListSkeleton,
-  NumberInput,
   SaveButton,
 } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
@@ -25,6 +23,7 @@ import { UpgradeToProModal } from '@/components/shared/subscription/UpgradeToPro
 import { StarRating } from '@/components/landlord/vendors/StarRating';
 import { formatVisit } from '@/components/landlord/vendors/VendorCard';
 import type { Vendor, VendorJob } from '@/types/landlord';
+import { BankAccountFields } from '@/components/shared/payouts/BankAccountFields';
 
 interface VendorDetailModalProps {
   vendor: Vendor | null;
@@ -245,23 +244,13 @@ export const VendorDetailModal = ({ vendor, onClose }: VendorDetailModalProps) =
               )}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <Field label="Bank code">
-                  <NumberInput
-                    value={bankCode}
-                    onValueChange={setBankCode}
-                    placeholder="e.g. 058 for GTBank"
-                    maxLength={6}
-                    leadingIcon={<Landmark className="w-4 h-4" />}
-                  />
-                </Field>
-                <Field label="Account number">
-                  <NumberInput
-                    value={accountNumber}
-                    onValueChange={setAccountNumber}
-                    placeholder="0123456789"
-                    maxLength={10}
-                  />
-                </Field>
+                <BankAccountFields
+                  idPrefix="vendor-payout"
+                  bankCode={bankCode}
+                  onBankCode={setBankCode}
+                  accountNumber={accountNumber}
+                  onAccountNumber={setAccountNumber}
+                />
               </div>
 
               <div className="mt-3 space-y-2">

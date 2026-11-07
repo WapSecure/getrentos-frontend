@@ -8,8 +8,6 @@ import {
   Button,
   Card,
   EmptyState,
-  Field,
-  NumberInput,
   Skeleton,
   TableSkeleton,
   type BadgeVariant,
@@ -22,6 +20,7 @@ import {
   PAYOUT_CHANGE_COOLDOWN_HINT,
   PayoutHoldNotice,
 } from '@/components/shared/payouts/PayoutHoldNotice';
+import { BankAccountFields } from '@/components/shared/payouts/BankAccountFields';
 
 const PAYOUT_STATUS: Record<string, { label: string; variant: BadgeVariant }> = {
   PENDING: { label: 'Processing', variant: 'info' },
@@ -126,20 +125,13 @@ export function AgencyPayoutSection({
             </div>
           ) : (
             <div className="mt-3 space-y-3">
-              <Field label="Bank code">
-                <NumberInput
-                  value={bankCode}
-                  onValueChange={(v) => setBankCode(v.slice(0, 6))}
-                  placeholder="e.g. 058 for GTBank"
-                />
-              </Field>
-              <Field label="Account number">
-                <NumberInput
-                  value={accountNumber}
-                  onValueChange={(v) => setAccountNumber(v.slice(0, 10))}
-                  placeholder="10-digit NUBAN"
-                />
-              </Field>
+              <BankAccountFields
+                idPrefix="agency-payout"
+                bankCode={bankCode}
+                onBankCode={setBankCode}
+                accountNumber={accountNumber}
+                onAccountNumber={setAccountNumber}
+              />
               <div className="flex gap-2">
                 <Button
                   onClick={() => saveAccount.mutate()}
@@ -175,7 +167,15 @@ export function AgencyPayoutSection({
               {summary ? formatCurrency(summary.available) : '—'}
             </p>
           )}
-          <p className="mt-1 text-xs text-muted-foreground">Earned commissions not yet paid out.</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Commission the owners&apos; rent has covered, not yet paid out.
+          </p>
+          {summary && summary.awaitingOwnerFunds > 0 ? (
+            <p className="mt-1 text-xs text-muted-foreground">
+              {formatCurrency(summary.awaitingOwnerFunds)} more is waiting for owners&apos; rent to
+              arrive.
+            </p>
+          ) : null}
           <Button
             className="mt-3"
             onClick={() => withdraw.mutate()}

@@ -19,7 +19,7 @@ import {
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n/translations';
 import { ROUTES } from '@/lib/constants/auth';
-import { GroupedSidebar } from '@/components/shared/dashboard/GroupedSidebar';
+import { createRoleNavigation, GroupedSidebar } from '@/components/shared/dashboard/GroupedSidebar';
 import { usePlanTier } from '@/hooks/usePlanTier';
 
 interface NavItem {
@@ -51,7 +51,7 @@ export const navItems: NavItem[] = [
   { label: 'Verification', href: ROUTES.REALTOR_VERIFICATION, icon: BadgeCheck },
 ];
 
-export const navGroups = [
+const baseNavGroups = [
   { label: 'Overview', items: navItems.slice(0, 1) },
   { label: 'Business development', items: navItems.slice(1, 4) },
   { label: 'Transactions', items: navItems.slice(4, 7) },
@@ -59,12 +59,26 @@ export const navGroups = [
   { label: 'Trust and account', items: navItems.slice(9) },
 ];
 
+export const navGroups = createRoleNavigation(
+  baseNavGroups,
+  [
+    ROUTES.REALTOR_DASHBOARD,
+    ROUTES.REALTOR_CLIENTS,
+    ROUTES.REALTOR_LISTINGS,
+    ROUTES.REALTOR_LEADS,
+    ROUTES.REALTOR_VIEWINGS,
+    ROUTES.REALTOR_OFFERS,
+  ],
+  [ROUTES.REALTOR_SETTINGS, ROUTES.REALTOR_BILLING, ROUTES.REALTOR_VERIFICATION]
+);
+
 export const RealtorSidebar = () => {
   const { t } = useLanguage();
   const { isPro } = usePlanTier();
   return (
     <GroupedSidebar
       ariaLabel="Realtor navigation"
+      workspaceLabel="Realtor"
       dashboardHref={ROUTES.REALTOR_DASHBOARD}
       groups={navGroups.map((group) => ({
         ...group,

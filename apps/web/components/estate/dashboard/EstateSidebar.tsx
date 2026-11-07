@@ -29,7 +29,7 @@ import {
 } from 'lucide-react';
 import { ROUTES } from '@/lib/constants/auth';
 import { ESTATE_MARKETPLACE_ROUTES } from '@/lib/constants/auth';
-import { GroupedSidebar } from '@/components/shared/dashboard/GroupedSidebar';
+import { createRoleNavigation, GroupedSidebar } from '@/components/shared/dashboard/GroupedSidebar';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { tierAtLeast, type PlanTier } from '@getrentos/shared';
 
@@ -119,7 +119,7 @@ export const navItems: NavItem[] = [
 // The groups are positional slices of `navItems`, so inserting an item means
 // moving the boundaries below with it: otherwise every group after the
 // insertion point silently shifts by one.
-export const navGroups = [
+const baseNavGroups = [
   { label: 'Overview', items: navItems.slice(0, 3) },
   // The upper bound moved by one when Expected today was inserted after Visitor
   // Passes. Everything from here down is a slice of the list above, so an insert
@@ -132,6 +132,19 @@ export const navGroups = [
   { label: 'Community', items: navItems.slice(17, 21) },
   { label: 'Administration', items: navItems.slice(21) },
 ];
+
+export const navGroups = createRoleNavigation(
+  baseNavGroups,
+  [
+    ROUTES.ESTATE_DASHBOARD,
+    ROUTES.ESTATE_HOUSEHOLDS,
+    ROUTES.ESTATE_VISITOR_PASSES,
+    ROUTES.ESTATE_EXPECTED,
+    ROUTES.ESTATE_INCIDENTS,
+    ROUTES.ESTATE_EMERGENCY,
+  ],
+  [ROUTES.ESTATE_BILLING]
+);
 
 export const EstateSidebar = () => {
   const { estate } = useSelectedEstate();
@@ -151,6 +164,7 @@ export const EstateSidebar = () => {
   return (
     <GroupedSidebar
       ariaLabel="Estate administration navigation"
+      workspaceLabel={estate?.name ?? 'Estate administration'}
       dashboardHref={ROUTES.ESTATE_DASHBOARD}
       groups={navGroups.map((group) => ({
         ...group,

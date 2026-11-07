@@ -10,7 +10,8 @@ import { IconButton, Input, ThemeToggle } from '@getrentos/ui';
 import { LanguageToggle } from '@/components/ui/LanguageToggle';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { RenterProfileDropdown } from './RenterProfileDropdown';
-import { isRenterRouteActive, navGroups } from '../dashboard/RenterSidebar';
+import { navGroups } from '../dashboard/RenterSidebar';
+import { GroupedMobileNavigation } from '@/components/shared/dashboard/GroupedSidebar';
 import { ROUTES } from '@/lib/constants/auth';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -186,39 +187,27 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
             exit={{ opacity: 0, y: -20 }}
             className="fixed left-0 right-0 top-32 z-[60] max-h-[calc(100dvh-8rem)] overflow-y-auto border-b border-border bg-background md:top-16 md:max-h-[calc(100dvh-4rem)] lg:hidden"
           >
-            <div className="flex flex-col p-4 space-y-1">
+            <div className="px-4 pt-4">
               <div className="sm:hidden flex items-center justify-between px-4 py-2.5">
                 <span className="text-sm font-medium text-muted-foreground">
                   {t('language.switch_language')}
                 </span>
                 <LanguageToggle />
               </div>
-              {navGroups.map((group) => (
-                <div
-                  key={group.label}
-                  className="border-t border-border/70 pt-3 first:border-0 first:pt-0"
-                >
-                  <p className="px-4 pb-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                    {group.label}
-                  </p>
-                  {group.items.map((item) => {
-                    const isActive = isRenterRouteActive(pathname, item.href);
-                    return (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        aria-current={isActive ? 'page' : undefined}
-                        className={`flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${isActive ? 'bg-accent text-primary' : 'text-foreground hover:bg-secondary'}`}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        <item.icon className="w-4 h-4" aria-hidden="true" />
-                        {item.labelKey ? t(item.labelKey) : item.label}
-                      </Link>
-                    );
-                  })}
-                </div>
-              ))}
             </div>
+            <GroupedMobileNavigation
+              ariaLabel="Renter navigation"
+              workspaceLabel="Renter"
+              dashboardHref={ROUTES.RENTER_DASHBOARD}
+              onNavigate={() => setIsMobileMenuOpen(false)}
+              groups={navGroups.map((group) => ({
+                ...group,
+                items: group.items.map((item) => ({
+                  ...item,
+                  label: item.labelKey ? t(item.labelKey) : item.label,
+                })),
+              }))}
+            />
           </motion.div>
         )}
       </AnimatePresence>

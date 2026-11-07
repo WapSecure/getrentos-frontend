@@ -1,16 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import {
-  Button,
-  CurrencyInput,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-  Field,
-  RadioGroup,
-} from '@getrentos/ui';
+import { CurrencyInput, Field, RadioGroup } from '@getrentos/ui';
+import { PayDialog } from '@/components/shared/payments/PayDialog';
+import type { PaymentProviderChoice } from '@/hooks/usePaymentProviders';
 import { formatCurrency } from '@/lib/format';
 
 /** Matches the backend: the smallest part-payment accepted. */
@@ -18,16 +11,32 @@ const MIN_PART_PAYMENT = 1_000;
 
 interface PayAmountDialogProps {
   /** The charge being paid, or null when closed. */
-  payment: { propertyName: string; owed: number } | null;
+  payment: {
+    propertyName: string;
+    owed: number;
+    dueDate?: string | null;
+    overdue?: boolean;
+  } | null;
   onClose: () => void;
   onPay: (amount: number | undefined) => void;
+  /** Which company takes the payment (Paystack or Monnify). */
+  providers: PaymentProviderChoice;
+  /** Why the last try failed when the chosen company could not take it: choose another. */
+  providerError?: string | null;
 }
 
 /**
- * Pay what a charge owes, or part of it. Anything paid goes to this charge
- * first; the landlord sees it straight away.
+ * Pay what a charge owes, or part of it: choose how much, choose who takes
+ * the payment, see exactly what will be charged, then go to that company's
+ * secure page. Anything paid goes to this charge first.
  */
-export const PayAmountDialog = ({ payment, onClose, onPay }: PayAmountDialogProps) => {
+export const PayAmountDialog = ({
+  payment,
+  onClose,
+  onPay,
+  providers,
+  providerError,
+}: PayAmountDialogProps) => {
   const [mode, setMode] = useState<'full' | 'part'>('full');
   const [amount, setAmount] = useState('');
 
@@ -50,24 +59,29 @@ export const PayAmountDialog = ({ payment, onClose, onPay }: PayAmountDialogProp
         : part >= owed
           ? `You owe ${formatCurrency(owed)} on this charge. To pay all of it, choose Pay in full.`
           : undefined;
-  const buttonLabel =
-    mode === 'full'
-      ? `Pay ${formatCurrency(owed)}`
-      : amount
-        ? `Pay ${formatCurrency(part)}`
-        : 'Enter an amount to pay';
+  const paying = mode === 'full' ? owed : partValid ? part : 0;
 
   return (
-    <Dialog open={!!payment} onOpenChange={(open) => !open && close()}>
-      <DialogContent className="p-0 sm:p-0">
-        <div className="p-4 pr-12 border-b border-border">
-          <DialogTitle className="font-semibold text-foreground">Make a payment</DialogTitle>
-          <DialogDescription className="text-xs text-muted-foreground mt-0.5">
-            {payment?.propertyName}: {formatCurrency(owed)} owed on this charge.
-          </DialogDescription>
-        </div>
-
-        <div className="p-4 space-y-3">
+    <PayDialog
+      open={!!payment}
+      onClose={close}
+      title="Pay rent"
+      context={payment?.propertyName}
+      dueDate={payment?.dueDate}
+      overdue={payment?.overdue}
+      owed={owed}
+      amount={paying}
+      itemLabel={mode === 'full' ? 'Rent' : 'Part payment'}
+      receiverLine={`The fee goes to the payment company, so your landlord receives the full ${formatCurrency(paying)}.`}
+      protection="Your rent is held by GetRentos until you confirm move-in."
+      providers={providers}
+      providerError={providerError}
+      onPay={() => {
+        onPay(mode === 'part' ? part : undefined);
+        close();
+      }}
+      amountStep={
+        <>
           <RadioGroup
             aria-label="How much to pay"
             variant="card"
@@ -79,7 +93,6 @@ export const PayAmountDialog = ({ payment, onClose, onPay }: PayAmountDialogProp
               { value: 'part', label: 'Pay part', description: 'Choose an amount' },
             ]}
           />
-
           {mode === 'part' && (
             <Field
               label="Amount"
@@ -93,20 +106,8 @@ export const PayAmountDialog = ({ payment, onClose, onPay }: PayAmountDialogProp
               />
             </Field>
           )}
-
-          <Button
-            variant="primary"
-            fullWidth
-            disabled={mode === 'part' && !partValid}
-            onClick={() => {
-              onPay(mode === 'part' ? part : undefined);
-              close();
-            }}
-          >
-            {buttonLabel}
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+        </>
+      }
+    />
   );
 };

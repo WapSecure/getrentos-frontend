@@ -54,7 +54,10 @@ export interface AgencyPayoutAccount {
 }
 
 export interface AgencyPayoutSummary {
+  /** Commission taken from the owners' money: withdrawable now. */
   available: number;
+  /** Commission earned but waiting for the owners' rent to cover it. */
+  awaitingOwnerFunds: number;
   accountSet: boolean;
 }
 

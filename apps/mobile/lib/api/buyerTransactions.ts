@@ -1,5 +1,6 @@
 import { apiFetch } from './client';
 import type { Paginated } from './buyer';
+import { providerQuery, type PaymentProvider } from './paymentStatus';
 
 // deposit → held → released, with frozen (a dispute is open) and refunded as
 // terminal branches. The enum also has VERIFICATION_PENDING / SETTLEMENT_PENDING
@@ -40,6 +41,8 @@ export interface BuyerTransaction {
   propertyType?: string;
   ownerName: string;
   purchasePrice: number;
+  /** What the buyer pays in for this sale: the agreed deposit, else the price. */
+  depositAmount?: number;
   escrowStatus: BuyerEscrowStatus;
   milestones?: { label: string; completed: boolean }[];
   activityLog?: { id: string; actor: string; action: string; timestamp: string }[];
@@ -54,8 +57,10 @@ export const buyerTransactionsApi = {
   list: (page = 1, pageSize = 20) =>
     apiFetch<Paginated<BuyerTransaction>>(`/buyer/transactions?page=${page}&pageSize=${pageSize}`),
 
-  deposit: (id: string) =>
-    apiFetch<BuyerTransaction>(`/buyer/transactions/${id}/deposit`, { method: 'POST' }),
+  deposit: (id: string, provider?: PaymentProvider) =>
+    apiFetch<BuyerTransaction>(`/buyer/transactions/${id}/deposit${providerQuery(provider)}`, {
+      method: 'POST',
+    }),
 
   release: (id: string) =>
     apiFetch<BuyerTransaction>(`/buyer/transactions/${id}/release`, { method: 'POST' }),

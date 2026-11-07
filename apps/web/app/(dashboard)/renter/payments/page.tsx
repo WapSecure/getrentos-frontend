@@ -21,12 +21,9 @@ import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { ConfirmDialog, PageErrorState, PageLoadingState, Pagination } from '@getrentos/ui';
 import { FinancingView } from '@/components/renter/financing/FinancingView';
+import { usePaymentProviders } from '@/hooks/usePaymentProviders';
+import type { PaymentProvider } from '@/types/payments';
 import { HubTabs, useHubTab, type HubTab } from '@/components/shared/navigation/HubTabs';
-import {
-  PaystackCheckoutSimulator,
-  shouldSimulatePaystack,
-} from '@/components/renter/payments/PaystackCheckoutSimulator';
-import { useRenterUser } from '../layout';
 
 const TABS: HubTab[] = [
   { id: 'payments', label: 'Payments', icon: CreditCard },
@@ -58,10 +55,11 @@ export default function PaymentsPage() {
   const [disputingPaymentId, setDisputingPaymentId] = useState<string | null>(null);
   const [confirmingMoveInId, setConfirmingMoveInId] = useState<string | null>(null);
   const [showPayAllConfirm, setShowPayAllConfirm] = useState(false);
-  const [simCheckout, setSimCheckout] = useState<{ amount: number; run: () => void } | null>(null);
   const [payingPaymentId, setPayingPaymentId] = useState<string | null>(null);
-  const renterUser = useRenterUser();
   const [bulkPayingIds, setBulkPayingIds] = useState<string[]>([]);
+  // Which company takes the payment, and why the last one could not.
+  const providers = usePaymentProviders();
+  const [providerError, setProviderError] = useState<string | null>(null);
 
   const PAGE_SIZE = 10;
   const [page, setPage] = useState(1);
@@ -97,11 +95,13 @@ export default function PaymentsPage() {
       paymentId,
       method,
       amount,
+      provider,
     }: {
       paymentId: string;
       method?: string;
       amount?: number;
-    }) => unwrap(renterService.payNow(paymentId, method, amount)),
+      provider?: PaymentProvider;
+    }) => unwrap(renterService.payNow(paymentId, method, amount, provider)),
     onSuccess: (updated) => {
       if (updated.authorizationUrl) {
         // Real gateway flow: the payment is PROCESSING until checkout
@@ -122,7 +122,14 @@ export default function PaymentsPage() {
             : `Rent for ${updated.propertyName} is paid in full.`,
       });
     },
-    onError: (error: Error) => {
+    onError: (error: Error, variables) => {
+      // That company cannot take it right now: reopen the choice with the other one picked.
+      const unavailable = providers.recover(error, variables.provider);
+      if (unavailable) {
+        setProviderError(unavailable);
+        setPayingPaymentId(variables.paymentId);
+        return;
+      }
       pushNotification({
         type: 'error',
         title: 'Payment unsuccessful',
@@ -153,11 +160,14 @@ export default function PaymentsPage() {
   const payChosen = (paymentId: string, amount: number | undefined) => {
     const payment = payments.find((p) => p.id === paymentId);
     if (!payment) return;
-    const run = () => payNowMutation.mutate({ paymentId, method: payment.method, amount });
-    // Dev: show a simulated Paystack checkout before settling. In production (or
-    // with real keys) this is off, so the backend's real gateway redirect runs.
-    if (shouldSimulatePaystack()) setSimCheckout({ amount: amount ?? owedOn(payment), run });
-    else run();
+    // The API decides: with a gateway it returns a checkout to redirect to;
+    // when payments are simulated it settles the charge itself and returns none.
+    payNowMutation.mutate({
+      paymentId,
+      method: payment.method,
+      amount,
+      provider: providers.provider,
+    });
   };
   const payingPayment = payments.find((p) => p.id === payingPaymentId) ?? null;
 
@@ -173,7 +183,9 @@ export default function PaymentsPage() {
     let completedCount = 0;
     try {
       for (const payment of payablePayments) {
-        const updated = await unwrap(renterService.payNow(payment.id, payment.method));
+        const updated = await unwrap(
+          renterService.payNow(payment.id, payment.method, undefined, providers.provider)
+        );
         if (updated.authorizationUrl) {
           // Real gateway flow: only one checkout can be completed at a
           // time, so redirect to this one now; the rest stay payable.
@@ -187,14 +199,16 @@ export default function PaymentsPage() {
         title: 'Payments successful',
         message: `${completedCount} payment${completedCount === 1 ? '' : 's'} totalling ₦${payableTotal.toLocaleString()} completed successfully.`,
       });
-    } catch {
+    } catch (error) {
+      // That company cannot take it right now; the next try uses another one.
+      const unavailable = providers.recover(error, providers.provider);
       pushNotification({
         type: 'error',
         title: 'Payment batch stopped',
         message:
           completedCount > 0
             ? `${completedCount} payment${completedCount === 1 ? '' : 's'} completed before an error occurred. Review the refreshed payment list before trying again.`
-            : 'No payment was completed. Check your payment method and try again.',
+            : (unavailable ?? 'No payment was completed. Check your payment method and try again.'),
       });
     } finally {
       setBulkPayingIds([]);
@@ -446,36 +460,27 @@ export default function PaymentsPage() {
         title="Confirm all payments"
         description={`You are about to pay ${payablePayments.length} item${payablePayments.length === 1 ? '' : 's'} totalling ₦${payableTotal.toLocaleString()}. Payments will be processed one at a time and cannot be undone here.`}
         confirmLabel={`Pay ₦${payableTotal.toLocaleString()}`}
-        onConfirm={() => {
-          if (shouldSimulatePaystack()) {
-            setShowPayAllConfirm(false);
-            setSimCheckout({ amount: payableTotal, run: () => void handlePayAll() });
-          } else {
-            void handlePayAll();
-          }
-        }}
+        onConfirm={() => void handlePayAll()}
       />
 
       <PayAmountDialog
         payment={
           payingPayment
-            ? { propertyName: payingPayment.propertyName, owed: owedOn(payingPayment) }
+            ? {
+                propertyName: payingPayment.propertyName,
+                owed: owedOn(payingPayment),
+                dueDate: payingPayment.dueDate ?? null,
+                overdue: payingPayment.status === 'overdue',
+              }
             : null
         }
-        onClose={() => setPayingPaymentId(null)}
-        onPay={(amount) => payingPaymentId && payChosen(payingPaymentId, amount)}
-      />
-
-      <PaystackCheckoutSimulator
-        open={!!simCheckout}
-        amount={simCheckout?.amount ?? 0}
-        email={renterUser?.email ?? 'you@example.com'}
-        onConfirm={() => {
-          const run = simCheckout?.run;
-          setSimCheckout(null);
-          run?.();
+        onClose={() => {
+          setPayingPaymentId(null);
+          setProviderError(null);
         }}
-        onClose={() => setSimCheckout(null)}
+        onPay={(amount) => payingPaymentId && payChosen(payingPaymentId, amount)}
+        providers={providers}
+        providerError={providerError}
       />
 
       {total > 0 && (

@@ -8,6 +8,7 @@ import {
   type Milestone,
   type Perfection,
 } from './landSales';
+import { providerQuery, type PaymentProvider } from './paymentStatus';
 
 /**
  * The buyer's side of a land deal: plot purchases on developers' estates
@@ -481,7 +482,8 @@ export const landBuyerApi = {
   purchase: (id: string) => apiFetch<BuyerPurchaseDetail>(purchase(id)),
   statement: (id: string) => apiFetch<Statement>(`${purchase(id)}/statement`),
   /** Pays the earliest unpaid installment (the deposit first). */
-  pay: (id: string) => post<PaymentInit>(`${purchase(id)}/pay`, {}),
+  pay: (id: string, provider?: PaymentProvider) =>
+    post<PaymentInit>(`${purchase(id)}/pay${providerQuery(provider)}`, {}),
   cancel: (id: string, reason?: string) =>
     post<BuyerPurchaseDetail>(`${purchase(id)}/cancel`, reason ? { reason } : {}),
   document: (id: string, kind: SaleDocument) => apiDownload(`${purchase(id)}/documents/${kind}`),

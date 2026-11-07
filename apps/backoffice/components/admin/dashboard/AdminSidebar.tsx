@@ -3,9 +3,13 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
+import { useSyncExternalStore } from 'react';
 import { adminManagedService } from '@/services/adminManagedService';
 import {
   LayoutDashboard,
+  Webhook,
+  HandCoins,
+  Scale,
   Eye,
   UserCheck,
   Users,
@@ -50,6 +54,7 @@ import {
   GitCompareArrows,
   FileCheck2,
   MessageCircleQuestion,
+  ChevronDown,
 } from 'lucide-react';
 import { ROUTES, unwrap } from '@getrentos/shared';
 import { hasAdminPermission, hasStaffAccess } from '@/lib/adminAccess';
@@ -57,6 +62,7 @@ import type { AdminPermission } from '@/types/admin';
 
 interface NavItem {
   label: string;
+  mobileLabel?: string;
   href: string;
   icon: React.ElementType;
   permission: AdminPermission;
@@ -156,8 +162,45 @@ const navItems: NavItem[] = [
   },
   {
     label: 'Unmatched Payments',
+    mobileLabel: 'Payments',
     href: '/admin/unmatched-payments',
     icon: CircleAlert,
+    permission: 'rentfinance.view',
+  },
+  {
+    label: 'Payment Events',
+    href: '/admin/payment-events',
+    icon: Webhook,
+    permission: 'rentfinance.view',
+  },
+  {
+    label: 'Payment Corrections',
+    href: '/admin/payment-corrections',
+    icon: ClipboardCheck,
+    permission: 'rentfinance.view',
+  },
+  {
+    label: 'Payouts Needing Attention',
+    href: '/admin/payout-issues',
+    icon: HandCoins,
+    permission: 'rentfinance.view',
+  },
+  {
+    label: 'Payment Providers',
+    href: '/admin/payment-providers',
+    icon: CreditCard,
+    permission: 'rentfinance.view',
+  },
+  {
+    label: 'Chargebacks',
+    href: '/admin/chargebacks',
+    icon: ShieldAlert,
+    permission: 'rentfinance.view',
+  },
+  {
+    label: 'Collections Reconciliation',
+    href: '/admin/collections-reconciliation',
+    icon: Scale,
     permission: 'rentfinance.view',
   },
   {
@@ -407,13 +450,44 @@ const groupStarts: [group: string, firstItem: string][] = [
   ['Support and insights', 'Shortlets'],
   ['Platform administration', 'Rent Finance'],
 ];
-const navGroups = groupStarts.map(([label, first], index) => ({
+const baseNavGroups = groupStarts.map(([label, first], index) => ({
   label,
   items: navItems.slice(
     startOf(first),
     index + 1 < groupStarts.length ? startOf(groupStarts[index + 1][1]) : undefined
   ),
 }));
+
+const primaryLabels = [
+  'Dashboard',
+  'Users',
+  'Verifications',
+  'Unmatched Payments',
+  'Disputes',
+  'Fraud & Risk',
+];
+const utilityLabels = ['Settings', 'Access & Roles'];
+const promotedLabels = new Set([...primaryLabels, ...utilityLabels]);
+const itemsByLabel = (labels: string[]) =>
+  labels.flatMap((label) => {
+    const match = navItems.find((item) => item.label === label);
+    return match ? [match] : [];
+  });
+const navGroups = [
+  { label: 'Primary', kind: 'primary' as const, items: itemsByLabel(primaryLabels) },
+  ...baseNavGroups
+    .map((group) => ({
+      ...group,
+      kind: 'contextual' as const,
+      items: group.items.filter((item) => !promotedLabels.has(item.label)),
+    }))
+    .filter((group) => group.items.length > 0),
+  {
+    label: 'Account and platform',
+    kind: 'utility' as const,
+    items: itemsByLabel(utilityLabels),
+  },
+];
 
 const hasAccess = (roles: string[] | undefined, item: NavItem) =>
   item.href === ROUTES.ADMIN_ACCESS
@@ -438,6 +512,112 @@ export function hasRouteAccess(roles: string[] | undefined, pathname: string): b
 }
 
 const MANAGED_HREF = '/admin/managed-mandates';
+const adminNavPreferences = new Map<string, boolean>();
+const adminNavListeners = new Set<() => void>();
+const subscribeAdminNav = (listener: () => void) => {
+  adminNavListeners.add(listener);
+  return () => adminNavListeners.delete(listener);
+};
+const readAdminNavPreference = (key: string) => {
+  if (adminNavPreferences.has(key)) return adminNavPreferences.get(key) ?? false;
+  const value = window.localStorage.getItem(key) === 'true';
+  adminNavPreferences.set(key, value);
+  return value;
+};
+const writeAdminNavPreference = (key: string, value: boolean) => {
+  adminNavPreferences.set(key, value);
+  window.localStorage.setItem(key, String(value));
+  adminNavListeners.forEach((listener) => listener());
+};
+
+function AdminNavigationGroup({
+  label,
+  kind,
+  items,
+  pathname,
+  managedWaiting = 0,
+  onNavigate,
+}: {
+  label: string;
+  kind: 'primary' | 'contextual' | 'utility';
+  items: NavItem[];
+  pathname: string;
+  managedWaiting?: number;
+  onNavigate?: () => void;
+}) {
+  const containsCurrentPage = items.some(
+    (item) => pathname === item.href || pathname.startsWith(`${item.href}/`)
+  );
+  const preferenceKey = `getrentos.admin-nav.expanded:${label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+  const expandedPreference = useSyncExternalStore(
+    subscribeAdminNav,
+    () => readAdminNavPreference(preferenceKey),
+    () => false
+  );
+  const expanded = kind === 'primary' || containsCurrentPage || expandedPreference;
+
+  const links = (
+    <div className="space-y-1">
+      {items.map((item) => {
+        const isActive =
+          pathname === item.href ||
+          (item.href !== ROUTES.ADMIN_DASHBOARD && pathname.startsWith(`${item.href}/`));
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            aria-current={isActive ? 'page' : undefined}
+            onClick={onNavigate}
+            className="sidebar-item"
+          >
+            <item.icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+            <span className="min-w-0 truncate">{item.label}</span>
+            {item.href === MANAGED_HREF && managedWaiting > 0 && (
+              <span
+                className="ml-auto inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground"
+                aria-label={`${managedWaiting} waiting`}
+              >
+                {managedWaiting}
+              </span>
+            )}
+          </Link>
+        );
+      })}
+    </div>
+  );
+
+  if (kind === 'primary') return <section aria-label="Primary navigation">{links}</section>;
+
+  const headingId = `admin-sidebar-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+  return (
+    <section
+      aria-labelledby={headingId}
+      className={kind === 'utility' ? 'border-t border-border pt-4' : undefined}
+    >
+      <h2 className="sidebar-label">
+        <button
+          type="button"
+          id={headingId}
+          className="sidebar-group-toggle"
+          aria-expanded={expanded}
+          aria-controls={`${headingId}-items`}
+          onClick={() => {
+            writeAdminNavPreference(preferenceKey, !expanded);
+          }}
+        >
+          <span className="min-w-0 flex-1 truncate">{label}</span>
+          <ChevronDown
+            className={`h-3.5 w-3.5 shrink-0 transition-transform ${expanded ? '' : '-rotate-90'}`}
+            aria-hidden="true"
+          />
+        </button>
+      </h2>
+      <div id={`${headingId}-items`} hidden={!expanded}>
+        {links}
+      </div>
+    </section>
+  );
+}
 
 export const AdminSidebar = ({ roles }: { roles?: string[] }) => {
   const pathname = usePathname();
@@ -457,50 +637,61 @@ export const AdminSidebar = ({ roles }: { roles?: string[] }) => {
   });
   const managedWaiting =
     (queueCounts.data?.awaitingActivation ?? 0) + (queueCounts.data?.terminationRequests ?? 0);
+  const mobilePrimaryItems = navGroups[0].items
+    .filter((item) => hasAccess(roles, item))
+    .slice(0, 5);
 
   return (
-    <aside className="fixed bottom-0 left-0 top-16 z-30 hidden w-64 overflow-y-auto border-r border-border bg-background lg:block">
-      <nav className="space-y-6 px-3 py-5" aria-label="Administration navigation">
-        {navGroups.map((group) => {
-          const visibleItems = group.items.filter((item) => hasAccess(roles, item));
-          if (visibleItems.length === 0) return null;
-          const headingId = `admin-sidebar-${group.label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
-          return (
-            <section key={group.label} aria-labelledby={headingId}>
-              <h2 id={headingId} className="sidebar-label">
-                {group.label}
-              </h2>
-              <div className="space-y-1">
-                {visibleItems.map((item) => {
-                  const isActive =
-                    pathname === item.href ||
-                    (item.href !== ROUTES.ADMIN_DASHBOARD && pathname.startsWith(`${item.href}/`));
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      aria-current={isActive ? 'page' : undefined}
-                      className="sidebar-item"
-                    >
-                      <item.icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-                      <span className="min-w-0 truncate">{item.label}</span>
-                      {item.href === MANAGED_HREF && managedWaiting > 0 && (
-                        <span
-                          className="ml-auto inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground"
-                          aria-label={`${managedWaiting} waiting`}
-                        >
-                          {managedWaiting}
-                        </span>
-                      )}
-                    </Link>
-                  );
-                })}
-              </div>
-            </section>
-          );
-        })}
-      </nav>
-    </aside>
+    <>
+      <aside className="workspace-sidebar fixed bottom-0 left-0 top-16 z-30 hidden w-64 overflow-y-auto border-r border-border lg:block">
+        <nav className="space-y-5 px-3 py-4" aria-label="Administration navigation">
+          <div className="px-3 pb-1">
+            <p className="text-[0.6875rem] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+              Workspace
+            </p>
+            <p className="mt-1 truncate text-sm font-semibold text-foreground">Operations</p>
+          </div>
+          {navGroups.map((group) => {
+            const visibleItems = group.items.filter((item) => hasAccess(roles, item));
+            if (visibleItems.length === 0) return null;
+            return (
+              <AdminNavigationGroup
+                key={group.label}
+                label={group.label}
+                kind={group.kind}
+                items={visibleItems}
+                pathname={pathname}
+                managedWaiting={managedWaiting}
+              />
+            );
+          })}
+        </nav>
+      </aside>
+      {mobilePrimaryItems.length > 0 && (
+        <nav
+          className="mobile-primary-nav fixed inset-x-0 bottom-0 z-50 grid border-t border-border bg-card sm:hidden"
+          style={{ gridTemplateColumns: `repeat(${mobilePrimaryItems.length}, minmax(0, 1fr))` }}
+          aria-label="Administration primary navigation"
+        >
+          {mobilePrimaryItems.map((item) => {
+            const active =
+              pathname === item.href ||
+              (item.href !== ROUTES.ADMIN_DASHBOARD && pathname.startsWith(`${item.href}/`));
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={active ? 'page' : undefined}
+                className="mobile-primary-nav-item"
+              >
+                <item.icon className="h-5 w-5" aria-hidden="true" />
+                <span className="max-w-full truncate">{item.mobileLabel ?? item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+      )}
+    </>
   );
 };
 
@@ -514,32 +705,22 @@ export const AdminMobileNavigation = ({
   const pathname = usePathname();
   return (
     <nav className="space-y-5 p-4" aria-label="Administration mobile navigation">
+      <div className="border-b border-border px-3 pb-4">
+        <p className="text-xs font-medium text-muted-foreground">Current workspace</p>
+        <p className="mt-1 font-semibold text-foreground">Operations</p>
+      </div>
       {navGroups.map((group) => {
         const visibleItems = group.items.filter((item) => hasAccess(roles, item));
         if (visibleItems.length === 0) return null;
         return (
-          <div key={group.label}>
-            <h2 className="sidebar-label">{group.label}</h2>
-            <div className="space-y-1">
-              {visibleItems.map((item) => {
-                const isActive =
-                  pathname === item.href ||
-                  (item.href !== ROUTES.ADMIN_DASHBOARD && pathname.startsWith(`${item.href}/`));
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    aria-current={isActive ? 'page' : undefined}
-                    onClick={onNavigate}
-                    className="sidebar-item"
-                  >
-                    <item.icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-                    <span className="min-w-0 truncate">{item.label}</span>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
+          <AdminNavigationGroup
+            key={group.label}
+            label={group.label}
+            kind={group.kind}
+            items={visibleItems}
+            pathname={pathname}
+            onNavigate={onNavigate}
+          />
         );
       })}
     </nav>

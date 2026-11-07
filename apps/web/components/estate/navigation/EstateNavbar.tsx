@@ -74,6 +74,7 @@ export const EstateNavbar = ({ user }: EstateNavbarProps) => {
             </div>
             <GroupedMobileNavigation
               ariaLabel="Estate administration navigation"
+              workspaceLabel="Estate administration"
               dashboardHref={ROUTES.ESTATE_DASHBOARD}
               groups={navGroups}
               onNavigate={() => setIsMobileMenuOpen(false)}

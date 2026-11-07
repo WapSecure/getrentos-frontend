@@ -137,6 +137,7 @@ export const BuyerNavbar = ({ user }: BuyerNavbarProps) => {
           >
             <GroupedMobileNavigation
               ariaLabel="Buyer navigation"
+              workspaceLabel="Buyer"
               dashboardHref={ROUTES.BUYER_DASHBOARD}
               onNavigate={() => setIsMobileMenuOpen(false)}
               groups={navGroups.map((group) => ({

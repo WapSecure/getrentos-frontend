@@ -1,0 +1,38 @@
+import { authFetch, safeCall, type ApiResponse } from '@getrentos/shared';
+
+export type CorrectionCategory = 'K1' | 'K2' | 'K3' | 'K4';
+
+export interface CorrectionItem {
+  sourceId: string;
+  ownerId: string | null;
+  organizationId: string | null;
+  naira: number;
+  label: string;
+}
+
+/** What one correction category would write, record by record. */
+export interface CorrectionPreview {
+  category: CorrectionCategory;
+  treatment: string;
+  items: CorrectionItem[];
+  totalNaira: number;
+}
+
+export const adminPaymentCorrectionsService = {
+  preview(): Promise<ApiResponse<CorrectionPreview[]>> {
+    return safeCall(() => authFetch<CorrectionPreview[]>('/admin/payment-corrections'));
+  },
+  /** Needs step-up; the shared dialog asks for it. */
+  apply(
+    category: CorrectionCategory
+  ): Promise<ApiResponse<{ applied: number; totalNaira: number }>> {
+    return safeCall(() =>
+      authFetch<{ applied: number; totalNaira: number }>(
+        `/admin/payment-corrections/${category}/apply`,
+        {
+          method: 'POST',
+        }
+      )
+    );
+  },
+};

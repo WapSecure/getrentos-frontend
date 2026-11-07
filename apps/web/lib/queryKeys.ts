@@ -558,3 +558,17 @@ export const trustKeys = {
   overview: (portal: string) => ['trust', 'overview', portal] as const,
   explanation: ['trust', 'explanation'] as const,
 };
+
+/** One payment's confirmation state, polled by the return page. */
+export const paymentKeys = {
+  status: (reference: string) => ['payments', 'status', reference] as const,
+  checkoutFee: (amount: number) => ['payments', 'checkout-fee', amount] as const,
+  /** Which companies can take a payment right now (Paystack, Monnify). */
+  providers: ['payments', 'providers'] as const,
+  /** The fee on `amount` naira when `provider` takes it: fees differ per provider. */
+  providerFee: (amount: number, provider: string) =>
+    ['payments', 'provider-fee', amount, provider] as const,
+  banks: ['payments', 'banks'] as const,
+  accountName: (bankCode: string, accountNumber: string) =>
+    ['payments', 'account-name', bankCode, accountNumber] as const,
+};

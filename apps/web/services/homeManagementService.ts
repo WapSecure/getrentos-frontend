@@ -1,5 +1,7 @@
 import type { InvoiceCheck } from '@/types/invoiceCheck';
 import { authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
+import { providerQuery } from '@/services/paymentStatusService';
+import type { PaymentProvider } from '@/types/payments';
 
 export type HomeManagementDashboard = {
   assets: number;
@@ -780,14 +782,17 @@ export const homeManagementService = {
         body: JSON.stringify(data),
       })
     ),
-  payWorkOrderInvoice: (invoiceId: string) =>
+  /** `provider` takes any top-up (Paystack or Monnify); omitted, the default one. */
+  payWorkOrderInvoice: (invoiceId: string, provider?: PaymentProvider) =>
     safeCall(() =>
       authFetch<{
         invoiceId: string;
         totalAmount: number;
         payoutStatus: HomeManagementInvoicePayoutStatus;
         paidOutAt?: string;
-      }>(`/home-management/invoices/${invoiceId}/pay`, { method: 'POST' })
+        /** Set when the owner's held rent doesn't cover it: pay the shortfall on Paystack first. */
+        topUp?: { amount: number; authorizationUrl: string; reference: string };
+      }>(`/home-management/invoices/${invoiceId}/pay${providerQuery(provider)}`, { method: 'POST' })
     ),
 
   // ---- Vendor payout account ----

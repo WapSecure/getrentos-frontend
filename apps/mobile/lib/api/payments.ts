@@ -1,5 +1,6 @@
 import { apiFetch } from './client';
 import type { Paginated } from './properties';
+import { providerQuery, type PaymentProvider } from './paymentStatus';
 
 export type PaymentStatus = 'paid' | 'pending' | 'overdue' | 'processing';
 export type PaymentMethod = 'card' | 'bank_transfer' | 'wallet';
@@ -33,6 +34,8 @@ export interface Payment {
   escrowStatus: 'held' | 'released' | 'pending';
   /** Present when a real payment gateway is configured — open in a browser to complete checkout. */
   authorizationUrl?: string;
+  /** A checkout the tenant opened and closed, which they can go back to until `expiresAt`. */
+  resumeCheckout?: { url: string; reference: string; expiresAt: string };
   reference?: string;
   /** Present once this payment has been disputed and is under review. */
   disputeReason?: string;
@@ -82,8 +85,9 @@ export const paymentsApi = {
   listReceipts: (page = 1, pageSize = 20) =>
     apiFetch<Paginated<Receipt>>(`/renter/payments/receipts?page=${page}&pageSize=${pageSize}`),
 
-  payNow: (id: string, method?: PaymentMethod, amount?: number) =>
-    apiFetch<Payment>(`/renter/payments/${id}/pay`, {
+  /** `provider` names the company that takes it (Paystack or Monnify); omitted, the default one. */
+  payNow: (id: string, method?: PaymentMethod, amount?: number, provider?: PaymentProvider) =>
+    apiFetch<Payment>(`/renter/payments/${id}/pay${providerQuery(provider)}`, {
       method: 'POST',
       body: amount ? { method, amount } : { method },
     }),

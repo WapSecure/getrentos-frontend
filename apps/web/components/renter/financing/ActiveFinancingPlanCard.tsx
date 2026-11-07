@@ -7,6 +7,7 @@ import type { FinancingInstallment, FinancingPlan, InstallmentStatus } from '@/t
 
 interface ActiveFinancingPlanCardProps {
   plan: FinancingPlan;
+  /** Opens the pay dialog for this instalment. */
   onPayInstallment: (installmentId: string) => void;
   isPaying?: boolean;
 }
@@ -97,7 +98,7 @@ export const ActiveFinancingPlanCard = ({
                 onClick={() => onPayInstallment(nextDue.id)}
                 isLoading={isPaying}
               >
-                Pay installment
+                Pay instalment
               </Button>
             </div>
           )}

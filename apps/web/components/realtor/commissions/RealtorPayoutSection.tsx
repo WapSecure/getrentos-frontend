@@ -3,16 +3,7 @@
 import { useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Banknote, CheckCircle2, Landmark } from 'lucide-react';
-import {
-  Alert,
-  Badge,
-  Button,
-  Card,
-  Field,
-  NumberInput,
-  Pagination,
-  type BadgeVariant,
-} from '@getrentos/ui';
+import { Alert, Badge, Button, Card, Pagination, type BadgeVariant } from '@getrentos/ui';
 import { ROUTES } from '@/lib/constants/auth';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap, unwrapOptional } from '@/lib/apiHelpers';
@@ -20,6 +11,7 @@ import { realtorService } from '@/services/realtorService';
 import { realtorKeys } from '@/lib/queryKeys';
 import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
 import type { RealtorPayoutStatus } from '@/types/realtor';
+import { BankAccountFields } from '@/components/shared/payouts/BankAccountFields';
 
 const PAGE_SIZE = 5;
 
@@ -131,22 +123,14 @@ export const RealtorPayoutSection = () => {
               Replace it by entering a new account below.
             </p>
           )}
-          <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] sm:items-end gap-3">
-            <Field label="Bank code">
-              <NumberInput
-                placeholder="Bank code (e.g. 058)"
-                value={bankCode}
-                onValueChange={setBankCode}
-              />
-            </Field>
-            <Field label="Account number">
-              <NumberInput
-                placeholder="10-digit account number"
-                value={accountNumber}
-                maxLength={10}
-                onValueChange={setAccountNumber}
-              />
-            </Field>
+          <div className="space-y-3">
+            <BankAccountFields
+              idPrefix="realtor-payout"
+              bankCode={bankCode}
+              onBankCode={setBankCode}
+              accountNumber={accountNumber}
+              onAccountNumber={setAccountNumber}
+            />
             <Button
               onClick={() => save.mutate()}
               isLoading={save.isPending}

@@ -21,7 +21,11 @@ import {
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n/translations';
 import { ROUTES } from '@/lib/constants/auth';
-import { GroupedSidebar, isSidebarRouteActive } from '@/components/shared/dashboard/GroupedSidebar';
+import {
+  createRoleNavigation,
+  GroupedSidebar,
+  isSidebarRouteActive,
+} from '@/components/shared/dashboard/GroupedSidebar';
 
 interface NavItem {
   labelKey?: TranslationKey;
@@ -35,7 +39,7 @@ interface NavGroup {
   items: NavItem[];
 }
 
-export const navGroups: NavGroup[] = [
+const baseNavGroups: NavGroup[] = [
   {
     label: 'Overview',
     items: [
@@ -83,6 +87,19 @@ export const navGroups: NavGroup[] = [
   },
 ];
 
+export const navGroups = createRoleNavigation(
+  baseNavGroups,
+  [
+    ROUTES.RENTER_DASHBOARD,
+    ROUTES.RENTER_DISCOVER,
+    ROUTES.RENTER_HOME,
+    ROUTES.RENTER_PAYMENTS,
+    ROUTES.RENTER_MAINTENANCE,
+    ROUTES.RENTER_MESSAGES,
+  ],
+  [ROUTES.RENTER_SETTINGS, ROUTES.RENTER_HELP]
+);
+
 export const isRenterRouteActive = (pathname: string, href: string) =>
   isSidebarRouteActive(pathname, href, ROUTES.RENTER_DASHBOARD);
 
@@ -91,6 +108,7 @@ export const RenterSidebar = () => {
   return (
     <GroupedSidebar
       ariaLabel="Renter navigation"
+      workspaceLabel="Renter"
       dashboardHref={ROUTES.RENTER_DASHBOARD}
       groups={navGroups.map((group) => ({
         ...group,

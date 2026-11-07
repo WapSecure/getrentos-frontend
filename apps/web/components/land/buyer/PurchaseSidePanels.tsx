@@ -19,7 +19,7 @@ import {
 
 type Notify = (message: string, variant: 'success' | 'error') => void;
 
-/** What is due now and the button that pays it. */
+/** What is due now and the button that opens the pay dialog. */
 export const PayNextCard = ({
   purchase,
   onPay,
@@ -64,10 +64,6 @@ export const PayNextCard = ({
           >
             Pay {formatCurrency(purchase.nextDue.amount)}
           </Button>
-          <p className="mt-2 text-xs text-muted-foreground">
-            You will be taken to our payment partner to pay securely. GetRentos holds it until you
-            confirm each conveyance step.
-          </p>
         </>
       ) : (
         <p className="mt-2 text-sm text-muted-foreground">

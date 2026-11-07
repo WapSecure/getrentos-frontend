@@ -1,4 +1,5 @@
 import { apiFetch } from './client';
+import { providerQuery, type PaymentProvider } from './paymentStatus';
 
 /** Mirrors the backend's `MIN_TRUST_SCORE_FOR_FINANCING` — not returned by the API, so kept in sync here. */
 export const MIN_TRUST_SCORE_FOR_FINANCING = 65;
@@ -58,6 +59,8 @@ export const financingApi = {
   apply: (months: FinancingPlanLength) =>
     apiFetch<FinancingPlan>('/renter/financing/apply', { method: 'POST', body: { months } }),
 
-  payInstallment: (id: string) =>
-    apiFetch<FinancingPlan>(`/renter/financing/installments/${id}/pay`, { method: 'POST' }),
+  payInstallment: (id: string, provider?: PaymentProvider) =>
+    apiFetch<FinancingPlan>(`/renter/financing/installments/${id}/pay${providerQuery(provider)}`, {
+      method: 'POST',
+    }),
 };

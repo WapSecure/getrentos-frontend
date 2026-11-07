@@ -64,6 +64,7 @@ export const ResidentNavbar = ({ user }: ResidentNavbarProps) => {
           >
             <GroupedMobileNavigation
               ariaLabel="Resident navigation"
+              workspaceLabel="Resident"
               dashboardHref={ROUTES.RESIDENT_DASHBOARD}
               groups={residentNavGroups}
               onNavigate={() => setIsMobileMenuOpen(false)}

@@ -37,7 +37,7 @@ import {
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n/translations';
 import { ROUTES } from '@/lib/constants/auth';
-import { GroupedSidebar } from '@/components/shared/dashboard/GroupedSidebar';
+import { createRoleNavigation, GroupedSidebar } from '@/components/shared/dashboard/GroupedSidebar';
 import { usePlanTier } from '@/hooks/usePlanTier';
 
 /** Nav items whose destination page is gated behind the Pro plan (see Batch 7b). */
@@ -61,7 +61,7 @@ const item = (labelKey: TranslationKey, href: string, icon: React.ElementType): 
 
 // Payments (+ Arrears), Maintenance (+ Home Management) and Financials
 // (+ Owner Statements) are tabbed hubs, so those folded entries have no row of their own.
-export const navGroups = [
+const baseNavGroups = [
   {
     label: 'Overview',
     items: [item('sidebar.dashboard', ROUTES.LANDLORD_DASHBOARD, LayoutDashboard)],
@@ -122,12 +122,26 @@ export const navGroups = [
   },
 ];
 
+export const navGroups = createRoleNavigation(
+  baseNavGroups,
+  [
+    ROUTES.LANDLORD_DASHBOARD,
+    ROUTES.LANDLORD_PROPERTIES,
+    ROUTES.LANDLORD_TENANTS,
+    ROUTES.LANDLORD_PAYMENTS,
+    ROUTES.LANDLORD_MAINTENANCE,
+    ROUTES.LANDLORD_MESSAGES,
+  ],
+  [ROUTES.LANDLORD_SETTINGS, ROUTES.LANDLORD_BILLING, ROUTES.LANDLORD_VERIFICATION]
+);
+
 export const LandlordSidebar = () => {
   const { t } = useLanguage();
   const { isPro } = usePlanTier();
   return (
     <GroupedSidebar
       ariaLabel="Landlord navigation"
+      workspaceLabel="Property management"
       dashboardHref={ROUTES.LANDLORD_DASHBOARD}
       groups={navGroups.map((group) => ({
         ...group,

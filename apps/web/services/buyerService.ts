@@ -12,6 +12,8 @@ import type { TrustProfile } from '@/types/trust-score';
 import type { AssistantReply, AssistantTurn } from '@/types/assistant';
 import { toDisplayPropertyType } from '@/lib/propertyTypes';
 import type { VideoCallJoin } from '@getrentos/shared';
+import { providerQuery } from '@/services/paymentStatusService';
+import type { PaymentProvider } from '@/types/payments';
 
 export interface BuyerDashboard {
   savedListings: number;
@@ -116,6 +118,10 @@ export type BuyerListingApi = BuyerPropertyListing;
 export type BuyerViewingApi = ViewingRequest;
 export type BuyerOfferApi = BuyerOffer;
 export type BuyerTransactionApi = BuyerEscrowTransaction;
+/** The deposit call answers with the transaction plus the Paystack checkout to send the buyer to. */
+export type BuyerEscrowDepositResult = BuyerEscrowTransaction & {
+  authorizationUrl?: string | null;
+};
 export type BuyerDocumentApi = BuyerDocument;
 
 const mapBuyerListing = (listing: BuyerListingApi): BuyerListingApi => ({
@@ -307,8 +313,14 @@ export const buyerService = {
         })}`
       )
     ),
-  depositTransaction: (id: string) =>
-    safeCall(() => authFetch(`/buyer/transactions/${id}/deposit`, { method: 'POST' })),
+  /** `provider` names the company that takes it (Paystack or Monnify); omitted, the default one. */
+  depositTransaction: (id: string, provider?: PaymentProvider) =>
+    safeCall(() =>
+      authFetch<BuyerEscrowDepositResult>(
+        `/buyer/transactions/${id}/deposit${providerQuery(provider)}`,
+        { method: 'POST' }
+      )
+    ),
   releaseTransaction: (id: string) =>
     safeCall(() => authFetch(`/buyer/transactions/${id}/release`, { method: 'POST' })),
   refundTransaction: (id: string) =>

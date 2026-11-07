@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { View } from 'react-native';
-import { Button, CurrencyField, SegmentedControl, Text, useTheme } from '@getrentos/ui-native';
-import { Sheet } from '@/components/Sheet';
+import { CurrencyField, RadioGroup, Text, useTheme } from '@getrentos/ui-native';
+import { PaySheet } from '@/components/payments/PaySheet';
+import type { PaymentProviderChoice } from '@/hooks/usePaymentProviders';
 import type { Payment } from '@/lib/api/payments';
+import { formatNaira } from '@/lib/format';
 
 /** Matches the backend: the smallest part-payment accepted. */
 const MIN_PART_PAYMENT = 1_000;
@@ -11,65 +13,93 @@ interface Props {
   payment: Payment | null;
   onClose: () => void;
   onPay: (amount: number | undefined) => void;
+  /** Which company takes the payment (Paystack or Monnify). */
+  providers: PaymentProviderChoice;
+  /** Why the last try failed when the chosen company could not take it: choose another. */
+  providerError?: string | null;
 }
 
 /**
- * Pay what a charge owes, or part of it (same rules as web). Anything paid
- * goes to this charge first.
+ * Pay rent: what a charge owes, or part of it (same rules and layout as the
+ * web pay dialog). Anything paid goes to this charge first.
  */
-export function PayAmountSheet({ payment, onClose, onPay }: Props) {
-  return (
-    <Sheet open={!!payment} onClose={onClose} title="Make a payment">
-      {/* Remount per charge so the amount always starts blank. */}
-      {payment ? <PayAmountForm key={payment.id} payment={payment} onPay={onPay} /> : null}
-    </Sheet>
-  );
-}
-
-function PayAmountForm({
-  payment,
-  onPay,
-}: {
-  payment: Payment;
-  onPay: (amount: number | undefined) => void;
-}) {
+export function PayAmountSheet({ payment, onClose, onPay, providers, providerError }: Props) {
   const { spacing } = useTheme();
   const [mode, setMode] = useState<'full' | 'part'>('full');
   const [amount, setAmount] = useState<number | null>(null);
-  const owed = payment.outstanding ?? payment.amount;
+  // Start blank for each charge, without remounting the sheet (that would cut its animation).
+  const [forId, setForId] = useState<string | null>(null);
+  if (payment && payment.id !== forId) {
+    setForId(payment.id);
+    setMode('full');
+    setAmount(null);
+  }
+  if (!payment && forId) setForId(null);
+  // Keep the last charge on screen while the sheet slides away.
+  const [shown, setShown] = useState<Payment | null>(payment);
+  if (payment && payment !== shown) setShown(payment);
+  const p = payment ?? shown;
+
+  const owed = p ? (p.outstanding ?? p.amount) : 0;
   const min = Math.min(MIN_PART_PAYMENT, owed);
   const part = amount ?? 0;
   const partValid = part >= min && part < owed;
+  const paying = mode === 'part' ? (partValid ? part : 0) : owed;
+  // Only once something is typed: an empty box is not yet a mistake.
+  const partError =
+    mode !== 'part' || !amount
+      ? undefined
+      : part < min
+        ? `Enter at least ${formatNaira(min)}.`
+        : part >= owed
+          ? `You owe ${formatNaira(owed)} on this charge. To pay all of it, choose Pay in full.`
+          : undefined;
 
   return (
-    <View style={{ gap: spacing.lg }}>
-      <Text variant="body" color="mutedForeground">
-        {payment.propertyName}: ₦{owed.toLocaleString()} owed on this charge.
-      </Text>
-      <SegmentedControl
-        accessibilityLabel="How much to pay"
-        value={mode}
-        onChange={setMode}
-        options={[
-          { value: 'full', label: 'Pay in full' },
-          { value: 'part', label: 'Pay part' },
-        ]}
-      />
-      {mode === 'part' ? (
-        <View style={{ gap: spacing.xs }}>
-          <CurrencyField label="Amount" value={amount} onValueChange={setAmount} />
-          <Text variant="caption" color="mutedForeground">
-            At least ₦{min.toLocaleString()}, and you can pay up to ₦{(owed - 1).toLocaleString()}{' '}
-            as a part-payment. The rest stays owed on this charge. The first rent on a new lease has
-            to be paid in full.
-          </Text>
+    <PaySheet
+      open={!!payment}
+      onClose={onClose}
+      title="Pay rent"
+      context={p?.propertyName}
+      dueDate={p?.dueDate}
+      overdue={p?.status === 'overdue'}
+      owed={owed}
+      amount={paying}
+      itemLabel={mode === 'full' ? 'Rent' : 'Part payment'}
+      receiverLine={`The fee goes to the payment company, so your landlord receives the full ${formatNaira(paying)}.`}
+      protection="Your rent is held by GetRentos until you confirm move-in."
+      ready={mode === 'full' || partValid}
+      providers={providers}
+      providerError={providerError}
+      onPay={() => onPay(mode === 'part' ? part : undefined)}
+      howMuch={
+        <View style={{ gap: spacing.md }}>
+          <RadioGroup
+            accessibilityLabel="How much to pay"
+            variant="card"
+            value={mode}
+            onChange={setMode}
+            options={[
+              { value: 'full', label: 'Pay in full', description: formatNaira(owed) },
+              { value: 'part', label: 'Pay part', description: 'Choose an amount' },
+            ]}
+          />
+          {mode === 'part' ? (
+            <View style={{ gap: spacing.xs }}>
+              <CurrencyField
+                label="Amount"
+                value={amount}
+                onValueChange={setAmount}
+                error={partError}
+              />
+              <Text variant="caption" color="mutedForeground">
+                At least {formatNaira(min)}. The rest stays owed on this charge. The first rent on a
+                new lease has to be paid in full.
+              </Text>
+            </View>
+          ) : null}
         </View>
-      ) : null}
-      <Button
-        label={`Pay ₦${(mode === 'part' && partValid ? part : owed).toLocaleString()}`}
-        disabled={mode === 'part' && !partValid}
-        onPress={() => onPay(mode === 'part' ? part : undefined)}
-      />
-    </View>
+      }
+    />
   );
 }

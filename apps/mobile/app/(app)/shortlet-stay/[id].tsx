@@ -1,9 +1,9 @@
+import { usePaystackCheckout } from '@/hooks/usePaystackCheckout';
 import { useState } from 'react';
 import { Alert, RefreshControl, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import * as WebBrowser from 'expo-web-browser';
 import {
   CalendarDays,
   ChevronRight,
@@ -43,7 +43,7 @@ import { ReviewStaySheet } from '@/components/shortlet/ReviewStaySheet';
 import { shortletsApi, type ShortletBooking } from '@/lib/api/shortlets';
 import { errorMessage } from '@/lib/api/client';
 import { isoDay } from '@/lib/hostDates';
-import { formatDate } from '@/lib/format';
+import { formatDate, formatNaira } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import {
   OUTCOME_LABEL,
@@ -59,8 +59,11 @@ import {
   tripDay,
 } from '@/lib/stays';
 import { goBack } from '@/lib/goBack';
+import { PaySheet } from '@/components/payments/PaySheet';
+import { usePaymentProviders } from '@/hooks/usePaymentProviders';
+import type { PaymentProvider } from '@/lib/api/paymentStatus';
 
-type SheetName = 'message' | 'dispute' | 'review' | null;
+type SheetName = 'message' | 'dispute' | 'review' | 'pay' | null;
 
 /** One booked stay, from the guest's side: where it stands, how to get in, the money. */
 export default function StayDetail() {
@@ -69,23 +72,42 @@ export default function StayDetail() {
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();
   const toast = useToast();
+  const checkout = usePaystackCheckout();
   const [sheet, setSheet] = useState<SheetName>(null);
+  // Which company takes the payment, and why the last one could not.
+  const providers = usePaymentProviders();
+  const [providerError, setProviderError] = useState<string | null>(null);
+
+  const closePay = () => {
+    setSheet((current) => (current === 'pay' ? null : current));
+    setProviderError(null);
+  };
 
   const stays = useMyStays();
   const b = stays.data?.find((x) => x.id === id);
   const refresh = () => qc.invalidateQueries({ queryKey: ['shortlets', 'bookings'] });
 
   const pay = useMutation({
-    mutationFn: () => shortletsApi.payBooking(id),
+    mutationFn: (provider?: PaymentProvider) => shortletsApi.payBooking(id, provider),
+    onMutate: () => setProviderError(null),
     onSuccess: async (res) => {
+      closePay();
       if (res.authorizationUrl) {
-        await WebBrowser.openBrowserAsync(res.authorizationUrl);
+        await checkout(res.authorizationUrl, res.reference);
       } else {
         toast.show('Payment started.', 'success');
       }
       refresh();
     },
-    onError: (e) => toast.show(errorMessage(e, 'Could not start payment.'), 'error'),
+    onError: (e, provider) => {
+      // That company cannot take it right now: say so in the sheet, with the other one picked.
+      const unavailable = providers.recover(e, provider);
+      if (unavailable) setProviderError(unavailable);
+      else {
+        closePay();
+        toast.show(errorMessage(e, 'Could not start payment.'), 'error');
+      }
+    },
   });
 
   const cancel = useMutation({
@@ -150,6 +172,7 @@ export default function StayDetail() {
   const paid = b.paymentStatus === 'PAID' || b.paymentStatus === 'REFUNDED';
   const live = b.status === 'REQUESTED' || b.status === 'CONFIRMED';
   const nightsBefore = b.subtotal + (b.discountAmount ?? 0);
+  const toPay = guestTotal(b) + (b.deposit ?? 0);
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -196,10 +219,13 @@ export default function StayDetail() {
           ) : null}
           {h.action === 'pay' ? (
             <Button
-              label={`Pay ₦${(guestTotal(b) + (b.deposit ?? 0)).toLocaleString('en-NG')}`}
+              label={`Pay ${formatNaira(toPay)}`}
               size="lg"
               loading={pay.isPending}
-              onPress={() => pay.mutate()}
+              onPress={() => {
+                setProviderError(null);
+                setSheet('pay');
+              }}
             />
           ) : h.action === 'review' ? (
             <Button label="Review your stay" onPress={() => setSheet('review')} />
@@ -452,6 +478,22 @@ export default function StayDetail() {
         defaultCategory={b.depositClaimStatus === 'PENDING' ? 'DAMAGE' : undefined}
       />
       <ReviewStaySheet open={sheet === 'review'} onClose={() => setSheet(null)} booking={b} />
+      <PaySheet
+        open={sheet === 'pay' && h.action === 'pay'}
+        onClose={closePay}
+        title="Pay for your stay"
+        context={`${b.propertyTitle} · ${formatDate(b.checkIn)} to ${formatDate(b.checkOut)}`}
+        owed={toPay}
+        owedLabel="to pay"
+        amount={toPay}
+        itemLabel={b.deposit ? 'Stay and deposit' : 'Stay'}
+        receiverLine={`The fee goes to the payment company, so your host receives the full ${formatNaira(toPay)}.`}
+        protection="GetRentos holds your payment and only pays the host after check-in."
+        providers={providers}
+        providerError={providerError}
+        busy={pay.isPending}
+        onPay={() => pay.mutate(providers.provider)}
+      />
     </View>
   );
 }

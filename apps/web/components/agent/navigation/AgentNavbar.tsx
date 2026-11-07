@@ -153,6 +153,7 @@ export const AgentNavbar = ({ user }: AgentNavbarProps) => {
           >
             <GroupedMobileNavigation
               ariaLabel="Agent navigation"
+              workspaceLabel="Field operations"
               dashboardHref={ROUTES.AGENT_DASHBOARD}
               onNavigate={() => setIsMobileMenuOpen(false)}
               groups={navGroups.map((group) => ({

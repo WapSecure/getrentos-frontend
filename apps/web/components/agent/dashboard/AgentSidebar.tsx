@@ -18,7 +18,7 @@ import {
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n/translations';
 import { ROUTES } from '@/lib/constants/auth';
-import { GroupedSidebar } from '@/components/shared/dashboard/GroupedSidebar';
+import { createRoleNavigation, GroupedSidebar } from '@/components/shared/dashboard/GroupedSidebar';
 
 interface NavItem {
   labelKey?: TranslationKey;
@@ -44,18 +44,32 @@ export const navItems: NavItem[] = [
   { label: 'Verification', href: '/agent/verification', icon: BadgeCheck },
 ];
 
-export const navGroups = [
+const baseNavGroups = [
   { label: 'Overview', items: navItems.slice(0, 1) },
   { label: 'Field operations', items: navItems.slice(1, 6) },
   { label: 'Communication', items: navItems.slice(6, 8) },
   { label: 'Trust and account', items: navItems.slice(8) },
 ];
 
+export const navGroups = createRoleNavigation(
+  baseNavGroups,
+  [
+    ROUTES.AGENT_DASHBOARD,
+    ROUTES.AGENT_TASKS,
+    ROUTES.AGENT_INSPECTIONS,
+    ROUTES.AGENT_VERIFICATIONS,
+    ROUTES.AGENT_WORK_ORDERS,
+    ROUTES.AGENT_MESSAGES,
+  ],
+  [ROUTES.AGENT_SETTINGS, '/agent/verification']
+);
+
 export const AgentSidebar = () => {
   const { t } = useLanguage();
   return (
     <GroupedSidebar
       ariaLabel="Agent navigation"
+      workspaceLabel="Field operations"
       dashboardHref={ROUTES.AGENT_DASHBOARD}
       groups={navGroups.map((group) => ({
         ...group,

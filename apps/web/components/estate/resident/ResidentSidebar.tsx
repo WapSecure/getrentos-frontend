@@ -16,7 +16,7 @@ import {
   Siren,
 } from 'lucide-react';
 import { ROUTES } from '@/lib/constants/auth';
-import { GroupedSidebar } from '@/components/shared/dashboard/GroupedSidebar';
+import { createRoleNavigation, GroupedSidebar } from '@/components/shared/dashboard/GroupedSidebar';
 
 interface NavItem {
   label: string;
@@ -46,17 +46,27 @@ export const residentNavItems: NavItem[] = [
 // boundaries. The emergency screen gets a group of its own rather than a place in
 // "Community", because it is not a place a resident browses to: it is where the
 // banner sends them when the estate is calling the roll.
-export const residentNavGroups = [
+const baseResidentNavGroups = [
   { label: 'Overview', items: residentNavItems.slice(0, 2) },
   { label: 'Access and services', items: residentNavItems.slice(2, 8) },
   { label: 'Community', items: residentNavItems.slice(8, 12) },
   { label: 'Emergency', items: residentNavItems.slice(12) },
 ];
 
+export const residentNavGroups = createRoleNavigation(baseResidentNavGroups, [
+  ROUTES.RESIDENT_DASHBOARD,
+  ROUTES.RESIDENT_ANNOUNCEMENTS,
+  ROUTES.RESIDENT_DUES,
+  ROUTES.RESIDENT_VISITOR_PASSES,
+  ROUTES.RESIDENT_MAINTENANCE,
+  ROUTES.RESIDENT_AMENITIES,
+]);
+
 export const ResidentSidebar = () => {
   return (
     <GroupedSidebar
       ariaLabel="Resident navigation"
+      workspaceLabel="Resident"
       dashboardHref={ROUTES.RESIDENT_DASHBOARD}
       groups={residentNavGroups}
     />

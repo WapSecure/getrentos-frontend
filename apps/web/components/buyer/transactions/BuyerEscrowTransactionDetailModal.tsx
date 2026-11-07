@@ -1,5 +1,7 @@
 'use client';
 
+import { PayDialog } from '@/components/shared/payments/PayDialog';
+import type { PaymentProviderChoice } from '@/hooks/usePaymentProviders';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
@@ -37,6 +39,10 @@ interface BuyerEscrowTransactionDetailModalProps {
   onMakePayment: (transactionId: string, stage: 'deposit' | 'release') => void;
   /** A deposit, or a release of the held funds, is on its way to the server. */
   isPaying?: boolean;
+  /** Which company takes the deposit (Paystack or Monnify). */
+  providers: PaymentProviderChoice;
+  /** Why the last try failed when the chosen company could not take it. */
+  providerError?: string | null;
 }
 
 const actorConfig: Record<
@@ -73,13 +79,18 @@ export const BuyerEscrowTransactionDetailModal = ({
   onClose,
   onMakePayment,
   isPaying = false,
+  providers,
+  providerError,
 }: BuyerEscrowTransactionDetailModalProps) => {
   const router = useRouter();
   const [showActivityLog, setShowActivityLog] = useState(false);
   const [confirmingRelease, setConfirmingRelease] = useState(false);
+  // The deposit's pay dialog, opened from the "Make deposit payment" step.
+  const [payOpen, setPayOpen] = useState(false);
 
   const handleClose = () => {
     setConfirmingRelease(false);
+    setPayOpen(false);
     onClose();
   };
 
@@ -90,6 +101,7 @@ export const BuyerEscrowTransactionDetailModal = ({
   const activeIndex = escrowSteps.findIndex((s) => s.key === transaction.escrowStatus);
   const canDeposit = transaction.escrowStatus === 'deposit_pending';
   const canRelease = transaction.escrowStatus === 'funds_held';
+  const depositAmount = transaction.depositAmount ?? transaction.purchasePrice;
 
   return (
     <Dialog open onOpenChange={(next) => !next && handleClose()}>
@@ -168,7 +180,7 @@ export const BuyerEscrowTransactionDetailModal = ({
                             className="mt-2"
                             icon={<Wallet className="w-3.5 h-3.5" />}
                             isLoading={isPaying}
-                            onClick={() => onMakePayment(transaction.id, 'deposit')}
+                            onClick={() => setPayOpen(true)}
                           >
                             Make deposit payment
                           </Button>
@@ -294,6 +306,22 @@ export const BuyerEscrowTransactionDetailModal = ({
             Contact support
           </Button>
         </div>
+        {/* Nested inside the content so Radix treats it as a layer of this dialog. */}
+        <PayDialog
+          open={payOpen && canDeposit}
+          onClose={() => setPayOpen(false)}
+          title="Pay deposit"
+          context={`${transaction.propertyTitle} · ${transaction.ownerName}`}
+          owed={depositAmount}
+          owedLabel="deposit"
+          itemLabel="Deposit"
+          receiverLine={`The fee goes to the payment company, so the full ${formatCurrency(depositAmount)} is held for this purchase.`}
+          protection="Your deposit is held by GetRentos and only released to the seller once you confirm receipt."
+          providers={providers}
+          providerError={providerError}
+          busy={isPaying}
+          onPay={() => onMakePayment(transaction.id, 'deposit')}
+        />
       </DialogContent>
     </Dialog>
   );

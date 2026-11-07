@@ -2,6 +2,7 @@ import { apiFetch, apiUpload } from './client';
 import { toQuery } from './query';
 import { appendFile, type PickedFile } from './documents';
 import type { IssuedVisitorPass, VisitorPass } from './visitor-pass';
+import { providerQuery, type PaymentProvider } from './paymentStatus';
 
 export type HouseholdStatus = 'active' | 'inactive';
 
@@ -457,8 +458,10 @@ export const residentApi = {
   listDues: (page = 1, pageSize = 50) =>
     apiFetch<Paginated<Due>>(`/estate/resident/dues${toQuery({ page, pageSize })}`),
 
-  payDue: (dueId: string) =>
-    apiFetch<Due>(`/estate/resident/dues/${dueId}/pay`, { method: 'POST' }),
+  payDue: (dueId: string, provider?: PaymentProvider) =>
+    apiFetch<Due>(`/estate/resident/dues/${dueId}/pay${providerQuery(provider)}`, {
+      method: 'POST',
+    }),
 
   listGovernanceRecords: () => apiFetch<GovernanceRecord[]>('/estate/resident/governance'),
 

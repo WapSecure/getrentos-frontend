@@ -10,6 +10,7 @@ import {
   SegmentedControl,
   Skeleton,
   PageHeader,
+  useToast,
 } from '@getrentos/ui';
 import { BuyerEscrowTransactionCard } from '@/components/buyer/transactions/BuyerEscrowTransactionCard';
 import { BuyerEscrowTransactionDetailModal } from '@/components/buyer/transactions/BuyerEscrowTransactionDetailModal';
@@ -17,11 +18,14 @@ import { buyerService } from '@/services/buyerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { buyerKeys } from '@/lib/queryKeys';
 import type { BuyerEscrowStatus } from '@/types/buyer';
+import { usePaymentProviders } from '@/hooks/usePaymentProviders';
+import type { PaymentProvider } from '@/types/payments';
 
 type StatusFilter = 'all' | BuyerEscrowStatus;
 
 export default function BuyerTransactionsPage() {
   const queryClient = useQueryClient();
+  const toast = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<StatusFilter>('all');
   const [activeTransactionId, setActiveTransactionId] = useState<string | null>(null);
@@ -50,9 +54,29 @@ export default function BuyerTransactionsPage() {
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: buyerKeys.transactions });
 
+  // Which company takes the deposit, and why the last one could not.
+  const providers = usePaymentProviders();
+  const [providerError, setProviderError] = useState<string | null>(null);
   const depositMutation = useMutation({
-    mutationFn: (id: string) => unwrap(buyerService.depositTransaction(id)),
-    onSuccess: invalidate,
+    mutationFn: ({ id, provider }: { id: string; provider?: PaymentProvider }) =>
+      unwrap(buyerService.depositTransaction(id, provider)),
+    onMutate: () => setProviderError(null),
+    onSuccess: (result) => {
+      // The deposit is paid on Paystack's page. The API reuses an open checkout,
+      // so a second click lands on the same one rather than a second charge.
+      if (result.authorizationUrl) {
+        window.location.assign(result.authorizationUrl);
+        return;
+      }
+      // No gateway configured (development): the API recorded it already.
+      invalidate();
+    },
+    onError: (reason: Error, { provider }) => {
+      // That company cannot take it right now: say so by the button, with the other one picked.
+      const unavailable = providers.recover(reason, provider);
+      if (unavailable) setProviderError(unavailable);
+      else toast.show(reason.message, 'error');
+    },
   });
   const releaseMutation = useMutation({
     mutationFn: (id: string) => unwrap(buyerService.releaseTransaction(id)),
@@ -60,7 +84,8 @@ export default function BuyerTransactionsPage() {
   });
 
   const handleMakePayment = (transactionId: string, stage: 'deposit' | 'release') => {
-    if (stage === 'deposit') depositMutation.mutate(transactionId);
+    if (stage === 'deposit')
+      depositMutation.mutate({ id: transactionId, provider: providers.provider });
     else releaseMutation.mutate(transactionId);
   };
 
@@ -160,9 +185,14 @@ export default function BuyerTransactionsPage() {
 
       <BuyerEscrowTransactionDetailModal
         transaction={activeTransaction}
-        onClose={() => setActiveTransactionId(null)}
+        onClose={() => {
+          setActiveTransactionId(null);
+          setProviderError(null);
+        }}
         onMakePayment={handleMakePayment}
         isPaying={depositMutation.isPending || releaseMutation.isPending}
+        providers={providers}
+        providerError={providerError}
       />
     </>
   );

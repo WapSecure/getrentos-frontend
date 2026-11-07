@@ -21,7 +21,7 @@ import type { TranslationKey } from '@/lib/i18n/translations';
 import { ROUTES } from '@/lib/constants/auth';
 import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';
 import { useLandAvailability } from '@/hooks/useLandAvailability';
-import { GroupedSidebar } from '@/components/shared/dashboard/GroupedSidebar';
+import { createRoleNavigation, GroupedSidebar } from '@/components/shared/dashboard/GroupedSidebar';
 
 interface NavItem {
   labelKey?: TranslationKey;
@@ -48,13 +48,26 @@ export const navItems: NavItem[] = [
   { label: 'Verification', href: ROUTES.BUYER_VERIFICATION, icon: BadgeCheck },
 ];
 
-export const navGroups = [
+const baseNavGroups = [
   { label: 'Overview', items: navItems.slice(0, 1) },
   { label: 'Find property', items: navItems.slice(1, 5) },
   { label: 'Buying journey', items: navItems.slice(5, 9) },
   { label: 'Communication', items: navItems.slice(9, 11) },
   { label: 'Trust and account', items: navItems.slice(11) },
 ];
+
+export const navGroups = createRoleNavigation(
+  baseNavGroups,
+  [
+    ROUTES.BUYER_DASHBOARD,
+    ROUTES.BUYER_DISCOVER,
+    ROUTES.BUYER_SAVED,
+    ROUTES.BUYER_VIEWINGS,
+    ROUTES.BUYER_OFFERS,
+    ROUTES.BUYER_TRANSACTIONS,
+  ],
+  [ROUTES.BUYER_SETTINGS, ROUTES.BUYER_VERIFICATION]
+);
 
 const MARKETPLACE_ONLY = new Set<string>([ROUTES.BUYER_LAND, LAND_BUYER_ROUTES.HUB]);
 
@@ -64,6 +77,7 @@ export const BuyerSidebar = () => {
   return (
     <GroupedSidebar
       ariaLabel="Buyer navigation"
+      workspaceLabel="Buyer"
       dashboardHref={ROUTES.BUYER_DASHBOARD}
       groups={navGroups.map((group) => ({
         ...group,

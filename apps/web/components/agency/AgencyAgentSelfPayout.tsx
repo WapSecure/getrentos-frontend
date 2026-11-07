@@ -3,16 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Briefcase, Landmark, Wallet } from 'lucide-react';
-import {
-  Badge,
-  Button,
-  Card,
-  Field,
-  NumberInput,
-  Skeleton,
-  useToast,
-  type ToastVariant,
-} from '@getrentos/ui';
+import { Badge, Button, Card, Skeleton, useToast, type ToastVariant } from '@getrentos/ui';
 import { cn } from '@/lib/cn';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
@@ -21,6 +12,7 @@ import {
   PAYOUT_CHANGE_COOLDOWN_HINT,
   PayoutHoldNotice,
 } from '@/components/shared/payouts/PayoutHoldNotice';
+import { BankAccountFields } from '@/components/shared/payouts/BankAccountFields';
 
 /**
  * An agency agent's own side of per-agent payouts: what they've earned from the
@@ -178,20 +170,13 @@ export function AgencyAgentSelfPayout({
           </div>
         ) : (
           <div className="mt-3 space-y-3">
-            <Field label="Bank code">
-              <NumberInput
-                value={bankCode}
-                onValueChange={(v) => setBankCode(v.slice(0, 6))}
-                placeholder="e.g. 058 for GTBank"
-              />
-            </Field>
-            <Field label="Account number">
-              <NumberInput
-                value={accountNumber}
-                onValueChange={(v) => setAccountNumber(v.slice(0, 10))}
-                placeholder="10-digit NUBAN"
-              />
-            </Field>
+            <BankAccountFields
+              idPrefix="agent-payout"
+              bankCode={bankCode}
+              onBankCode={setBankCode}
+              accountNumber={accountNumber}
+              onAccountNumber={setAccountNumber}
+            />
             <div className="flex gap-2">
               <Button
                 onClick={() => saveAccount.mutate()}

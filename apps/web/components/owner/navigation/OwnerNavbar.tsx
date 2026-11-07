@@ -135,6 +135,7 @@ export const OwnerNavbar = ({ user }: OwnerNavbarProps) => {
           >
             <GroupedMobileNavigation
               ariaLabel="Property owner navigation"
+              workspaceLabel="Property owner"
               dashboardHref={ROUTES.OWNER_DASHBOARD}
               onNavigate={() => setIsMobileMenuOpen(false)}
               groups={navGroups.map((group) => ({

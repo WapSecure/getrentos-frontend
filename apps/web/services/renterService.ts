@@ -36,6 +36,8 @@ import type { FinancingOverview, FinancingPlan, FinancingPlanLength } from '@/ty
 import type { LeaseGuide } from '@/types/leaseGuide';
 import type { Affordability, AffordabilityInput, ShortlistComparison } from '@/types/rentDecision';
 import type { LastApplicationDetails } from '@getrentos/shared';
+import { providerQuery } from '@/services/paymentStatusService';
+import type { PaymentProvider } from '@/types/payments';
 
 export interface ViewingRequest {
   id: string;
@@ -223,6 +225,8 @@ export interface Payment {
   authorizationUrl?: string;
   /** Gateway reference for the payment currently being processed. */
   reference?: string;
+  /** A checkout the tenant opened and closed, which they can go back to until `expiresAt`. */
+  resumeCheckout?: { url: string; reference: string; expiresAt: string };
   /** Naira paid against this charge so far (part-payments and credit). */
   amountPaid?: number;
   /** Naira still owed on this charge. */
@@ -919,9 +923,14 @@ export const renterService = {
     );
   },
 
-  async payFinancingInstallment(installmentId: string): Promise<ApiResponse<FinancingPlan>> {
+  async payFinancingInstallment(
+    installmentId: string,
+    provider?: PaymentProvider
+  ): Promise<ApiResponse<FinancingPlan>> {
     return safeCall(() =>
-      authFetch(`/renter/financing/installments/${installmentId}/pay`, { method: 'POST' })
+      authFetch(`/renter/financing/installments/${installmentId}/pay${providerQuery(provider)}`, {
+        method: 'POST',
+      })
     );
   },
 
@@ -1271,10 +1280,18 @@ export const renterService = {
     );
   },
 
-  /** `amount` (naira) pays part of the charge, or ahead; omitted, it pays what is owed. */
-  async payNow(paymentId: string, method?: string, amount?: number): Promise<ApiResponse<Payment>> {
+  /**
+   * `amount` (naira) pays part of the charge, or ahead; omitted, it pays what is owed.
+   * `provider` names the company that takes it (Paystack or Monnify); omitted, the default one.
+   */
+  async payNow(
+    paymentId: string,
+    method?: string,
+    amount?: number,
+    provider?: PaymentProvider
+  ): Promise<ApiResponse<Payment>> {
     return safeCall(() =>
-      authFetch(`/renter/payments/${paymentId}/pay`, {
+      authFetch(`/renter/payments/${paymentId}/pay${providerQuery(provider)}`, {
         method: 'POST',
         body: JSON.stringify(amount ? { method, amount } : { method }),
       })
