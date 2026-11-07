@@ -46,6 +46,15 @@ export interface CollectionsReport {
   byProduct: Record<string, { count: number; amount: number }>;
   /** Collections and the company's fees, per payment company. */
   byProvider?: Partial<Record<PaymentProvider, { count: number; amount: number; fees: number }>>;
+  /** What the payment companies paid into the GetRentos bank account in the window. */
+  settlements?: {
+    provider: PaymentProvider;
+    id: string;
+    status: string;
+    amount: number;
+    fees: number;
+    settledAt: string | null;
+  }[];
   exceptions: CollectionLine[];
   refunds: { reference: string; product: CollectionProduct | null; amount: number }[];
 }

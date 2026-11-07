@@ -242,6 +242,56 @@ export default function CollectionsReconciliationPage() {
             )}
           </section>
 
+          <section>
+            <h2 className="mb-1 text-base font-semibold text-foreground">Paid into the bank</h2>
+            <p className="mb-3 text-xs text-muted-foreground">
+              Paystack settlements to the GetRentos account. They run a day or so behind
+              collections, so they will not equal what was collected in the same days.
+            </p>
+            {(report.settlements ?? []).length === 0 ? (
+              <p className="text-sm text-muted-foreground">No settlements in this range.</p>
+            ) : (
+              <Card className="divide-y divide-border">
+                {(report.settlements ?? []).map((st) => (
+                  <div
+                    key={`${st.provider}-${st.id}`}
+                    className="flex flex-wrap items-center justify-between gap-3 px-5 py-3"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-sm text-foreground">
+                        {PROVIDER[st.provider]} ·{' '}
+                        {st.settledAt ? formatDate(st.settledAt) : 'Date not given'}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Fees {formatCurrency(st.fees)}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        variant={
+                          st.status === 'success'
+                            ? 'success'
+                            : st.status === 'failed'
+                              ? 'danger'
+                              : 'info'
+                        }
+                      >
+                        {st.status === 'success'
+                          ? 'Paid in'
+                          : st.status === 'failed'
+                            ? 'Failed'
+                            : 'On its way'}
+                      </Badge>
+                      <p className="text-sm font-medium text-foreground">
+                        {formatCurrency(st.amount)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </Card>
+            )}
+          </section>
+
           {report.refunds.length > 0 && (
             <section>
               <h2 className="mb-3 text-base font-semibold text-foreground">Refunds</h2>
@@ -263,8 +313,8 @@ export default function CollectionsReconciliationPage() {
 
           <p className="text-xs text-muted-foreground">
             Checked {formatDate(report.from)} to{' '}
-            {formatDate(new Date(new Date(report.to).getTime() - 1).toISOString())}. Settlements to
-            the bank account and Monnify refunds are not checked here yet.
+            {formatDate(new Date(new Date(report.to).getTime() - 1).toISOString())}. Monnify wallet
+            settlements are not listed here yet.
           </p>
         </div>
       ) : null}
