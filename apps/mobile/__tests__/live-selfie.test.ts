@@ -33,6 +33,7 @@ describe('liveSelfieSupported', () => {
 
   const load = (os: string) => {
     jest.doMock('react-native', () => ({ Platform: { OS: os } }));
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     return require('@/lib/smileid/liveSelfie') as typeof import('@/lib/smileid/liveSelfie');
   };
 

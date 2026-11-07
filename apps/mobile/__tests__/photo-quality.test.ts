@@ -63,6 +63,7 @@ describe('base64ToBytes (the phone check decodes its 640 px copy with it)', () =
     ['/+8=', [255, 239]],
     ['Zm9vYmFy', [102, 111, 111, 98, 97, 114]],
   ])('decodes %j', (b64, bytes) => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { base64ToBytes } = require('@/lib/photoQuality');
     expect(Array.from(base64ToBytes(b64) as Uint8Array)).toEqual(bytes);
   });
