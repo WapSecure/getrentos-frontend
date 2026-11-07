@@ -18,6 +18,13 @@ export interface AdminAgency {
   createdAt: string;
   teamSize: number;
   activeEngagements: number;
+  /** Registry, name and director checks; anything not clean needs a reason and a second officer. */
+  kybChecks: {
+    registryConfirmed: boolean;
+    registryNameMatches: boolean | null;
+    directorCheck: 'DIRECTOR' | 'NOT_A_DIRECTOR' | 'NOT_CHECKED';
+    clean: boolean;
+  };
   profile: {
     registeredName: string;
     businessType: 'BUSINESS_NAME' | 'LIMITED_COMPANY' | 'INCORPORATED_TRUSTEES';

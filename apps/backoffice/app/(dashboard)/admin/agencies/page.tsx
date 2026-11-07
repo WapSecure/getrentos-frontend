@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Briefcase, FileText, BadgeCheck } from 'lucide-react';
 import {
+  Alert,
   Badge,
   Button,
   Card,
@@ -160,6 +161,20 @@ export default function AdminAgenciesPage() {
                   <Badge variant={badge.variant}>{badge.label}</Badge>
                 </div>
 
+                {reviewable && !a.kybChecks.clean ? (
+                  <Alert
+                    variant="warning"
+                    title="Needs a reason and a second officer to verify"
+                    className="mt-4"
+                  >
+                    <ul className="list-disc space-y-0.5 pl-4">
+                      {kybCheckProblems(a.kybChecks).map((problem) => (
+                        <li key={problem}>{problem}</li>
+                      ))}
+                    </ul>
+                  </Alert>
+                ) : null}
+
                 {p ? (
                   <dl className="mt-4 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
                     <Row label="Registered name" value={p.registeredName} />
@@ -223,7 +238,9 @@ export default function AdminAgenciesPage() {
                       }
                       placeholder={
                         reviewable
-                          ? 'Note to the firm (required to send back), e.g. RC number does not match the certificate'
+                          ? a.kybChecks.clean
+                            ? 'Note to the firm (required to send back), e.g. RC number does not match the certificate'
+                            : 'Why this firm can still be verified (required), e.g. board letter authorising the submitter'
                           : 'Reason (required)'
                       }
                       className="min-h-[64px]"
@@ -234,7 +251,9 @@ export default function AdminAgenciesPage() {
                         <>
                           <Button
                             onClick={() => setPendingAction({ agency: a, action: 'APPROVE' })}
-                            disabled={actionPending}
+                            disabled={
+                              actionPending || (!a.kybChecks.clean && note.trim().length < 10)
+                            }
                           >
                             Verify firm
                           </Button>
@@ -335,4 +354,20 @@ function Row({ label, value }: { label: string; value: string }) {
       <dd className="text-foreground">{value}</dd>
     </div>
   );
+}
+
+/** Plain-language reasons a firm's checks are not clean (security gap ID-14). */
+function kybCheckProblems(checks: AdminAgency['kybChecks']): string[] {
+  const problems: string[] = [];
+  if (!checks.registryConfirmed)
+    problems.push('The CAC registry did not confirm this registration number.');
+  if (checks.registryNameMatches === false)
+    problems.push('The registered name at CAC differs from the name the firm gave.');
+  if (checks.directorCheck === 'NOT_A_DIRECTOR')
+    problems.push('The person who applied is not a listed director of this company.');
+  if (checks.directorCheck === 'NOT_CHECKED' && checks.registryConfirmed)
+    problems.push(
+      'The applicant’s identity is not verified, so we could not match them to a director.'
+    );
+  return problems;
 }
