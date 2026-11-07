@@ -38,9 +38,7 @@ import {
 } from '@/lib/api/trust';
 import { liveSelfieSupported } from '@/lib/smileid/liveSelfie';
 import { LiveSelfieCheck } from './LiveSelfieCheck';
-import type { PickedFile } from '@/lib/api/documents';
 import { ApiError, errorMessage } from '@/lib/api/client';
-import { captureSelfie } from '@/lib/filePicker';
 import { formatDate } from '@/lib/format';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
 import { BankAccountFields, accountNumberOk } from '@/components/forms/BankAccountFields';
@@ -456,84 +454,60 @@ function PhoneForm({ verificationId, onDone }: FormProps) {
 function SelfieForm({ verificationId, onDone }: FormProps) {
   const { spacing } = useTheme();
   const toast = useToast();
-  // Smile ID's live check needs its native code (a development or store build);
-  // Expo Go and web fall back to a photo, which a person reviews.
-  const [live, setLive] = useState(liveSelfieSupported);
+  // Smile ID's live check needs its native code (a development or store build).
+  // There is no photo fallback: a photo cannot show someone is present (ID-08).
+  const supported = liveSelfieSupported;
+  const [unavailable, setUnavailable] = useState(false);
   const [session, setSession] = useState<SmileLivenessSession | null>(null);
-  const [selfie, setSelfie] = useState<PickedFile | null>(null);
   const startLive = useMutation({
     mutationFn: () => trustApi.livenessSession(verificationId),
     onSuccess: setSession,
     onError: (e) => {
-      if (e instanceof ApiError && e.code === 'LIVENESS_UNAVAILABLE') setLive(false);
+      if (e instanceof ApiError && e.code === 'LIVENESS_UNAVAILABLE') setUnavailable(true);
       toast.show(errorMessage(e, 'Could not start the live selfie check.'), 'error');
     },
   });
-  const run = useMutation({
-    mutationFn: () => trustApi.biometrics(verificationId, selfie!),
-    onSuccess: () => {
-      toast.show('Selfie sent. A person will review it.', 'info');
-      setSelfie(null);
-      onDone();
-    },
-    onError: (e) => toast.show(errorMessage(e, 'Could not check your selfie.'), 'error'),
-  });
 
-  if (live) {
+  if (!supported) {
     return (
-      <View style={{ gap: spacing.sm }}>
-        <Text variant="caption" color="mutedForeground">
-          A short live selfie: face the camera in good light and turn your head when asked. It
-          confirms you are really there and matches your face to your ID.
-        </Text>
-        <Button
-          label="Start live selfie"
-          size="sm"
-          icon={<Camera size={16} />}
-          loading={startLive.isPending}
-          onPress={() => startLive.mutate()}
-          style={{ alignSelf: 'flex-start' }}
-        />
-        {session ? (
-          <LiveSelfieCheck
-            session={session}
-            onClose={(outcome) => {
-              setSession(null);
-              if (outcome) toast.show(outcome.text, outcome.tone);
-              if (outcome?.submitted) onDone();
-            }}
-          />
-        ) : null}
-      </View>
+      <Text variant="caption" color="mutedForeground">
+        The live selfie needs the GetRentos app from the App Store or Google Play. It can&apos;t run
+        here.
+      </Text>
+    );
+  }
+  if (unavailable) {
+    return (
+      <Text variant="caption" color="mutedForeground">
+        Live selfie checks are temporarily unavailable. Please try again later.
+      </Text>
     );
   }
 
   return (
     <View style={{ gap: spacing.sm }}>
       <Text variant="caption" color="mutedForeground">
-        Face the camera in good light, without glasses or a hat. A person checks this photo, which
-        can take a little longer.
+        A short live selfie: face the camera in good light and turn your head when asked. It
+        confirms you are really there and matches your face to your ID.
       </Text>
-      <View style={{ flexDirection: 'row', gap: spacing.sm, flexWrap: 'wrap' }}>
-        <Button
-          label={selfie ? 'Retake' : 'Open the camera'}
-          size="sm"
-          variant="secondary"
-          icon={<Camera size={16} />}
-          onPress={async () => {
-            const shot = await captureSelfie();
-            if (shot) setSelfie(shot);
+      <Button
+        label="Start live selfie"
+        size="sm"
+        icon={<Camera size={16} />}
+        loading={startLive.isPending}
+        onPress={() => startLive.mutate()}
+        style={{ alignSelf: 'flex-start' }}
+      />
+      {session ? (
+        <LiveSelfieCheck
+          session={session}
+          onClose={(outcome) => {
+            setSession(null);
+            if (outcome) toast.show(outcome.text, outcome.tone);
+            if (outcome?.submitted) onDone();
           }}
         />
-        {selfie ? (
-          <Button
-            label="Send my selfie"
-            size="sm"
-            loading={run.isPending}
-            onPress={() => run.mutate()}
-          />
-        ) : null}
-      </View>
+      ) : null}
     </View>
   );
 }

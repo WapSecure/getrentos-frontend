@@ -1,6 +1,5 @@
 import type { BadgeTone } from '@getrentos/ui-native';
-import { apiFetch, apiUpload } from './client';
-import { appendFile, type PickedFile } from './documents';
+import { apiFetch } from './client';
 import type { Portal } from '../roles';
 
 /**
@@ -364,11 +363,6 @@ export const trustApi = {
     apiFetch<SmileLivenessSession>(`/trust/verifications/${id}/liveness/session`, {
       method: 'POST',
     }),
-  biometrics: (id: string, selfie: PickedFile) => {
-    const form = new FormData();
-    appendFile(form, 'selfie', selfie);
-    return apiUpload<TrustVerification>(`/trust/verifications/${id}/biometrics`, form);
-  },
   bank: (id: string, body: { accountNumber: string; accountName?: string; bankCode?: string }) =>
     apiFetch<{ status: string }>(`/trust/verifications/${id}/bank`, {
       method: 'POST',

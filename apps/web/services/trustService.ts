@@ -236,21 +236,6 @@ export const trustService = {
     );
   },
 
-  /** Submits a selfie (multipart) to run selfie/liveness/face-match steps. */
-  async submitBiometrics(
-    verificationId: string,
-    selfie: File
-  ): Promise<ApiResponse<TrustVerificationDto>> {
-    return safeCall(async () => {
-      const form = new FormData();
-      form.append('selfie', selfie);
-      return authFetch<TrustVerificationDto>(`/trust/verifications/${verificationId}/biometrics`, {
-        method: 'POST',
-        body: form,
-      });
-    });
-  },
-
   /** Runs a bank-account name-enquiry check (BANK_ACCOUNT_CHECK step). */
   async submitBankAccount(
     verificationId: string,
