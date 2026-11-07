@@ -157,6 +157,8 @@ export default function AdminEscrowPage() {
         const settling = SETTLEABLE_STATUSES.includes(t.status);
         const busy = actions.processingKey !== null;
         const amount = formatCurrency(t.amount, { compact: true });
+        // Release and refund move the deposit escrow holds, not the sale price (PM-09).
+        const held = formatCurrency(t.heldAmount, { compact: true });
         return (
           <div className="flex items-center justify-end gap-1">
             {canSettle && settling && (
@@ -170,9 +172,9 @@ export default function AdminEscrowPage() {
                     actions.request({
                       key: `release:${t.id}`,
                       title: 'Release these funds to the seller?',
-                      description: `${amount} held for ${t.propertyTitle} will be released to ${t.sellerName}. This settles the escrow and cannot be reversed from here.`,
+                      description: `${held} held for ${t.propertyTitle} (sale price ${amount}) will be released to ${t.sellerName}. This settles the escrow and cannot be reversed from here.`,
                       confirmLabel: 'Release funds',
-                      successMessage: `${amount} released to ${t.sellerName}.`,
+                      successMessage: `${held} released to ${t.sellerName}.`,
                       run: () => adminService.releaseEscrow(t.id),
                     });
                   }}
@@ -180,7 +182,7 @@ export default function AdminEscrowPage() {
                   isLoading={actions.processingKey === `release:${t.id}`}
                   label={`Release escrow funds for ${t.propertyTitle}`}
                   className="hover:text-success"
-                  title={`Release ${amount} to the seller`}
+                  title={`Release ${held} to the seller`}
                 />
                 <IconButton
                   size="sm"
@@ -191,9 +193,9 @@ export default function AdminEscrowPage() {
                     actions.request({
                       key: `refund:${t.id}`,
                       title: 'Refund these funds to the buyer?',
-                      description: `${amount} held for ${t.propertyTitle} will be returned to ${t.buyerName}. This settles the escrow and cannot be reversed from here.`,
+                      description: `${held} held for ${t.propertyTitle} (sale price ${amount}) will be returned to ${t.buyerName}. This settles the escrow and cannot be reversed from here.`,
                       confirmLabel: 'Refund buyer',
-                      successMessage: `${amount} refunded to ${t.buyerName}.`,
+                      successMessage: `${held} refunded to ${t.buyerName}.`,
                       run: () => adminService.refundEscrow(t.id),
                     });
                   }}
@@ -201,7 +203,7 @@ export default function AdminEscrowPage() {
                   isLoading={actions.processingKey === `refund:${t.id}`}
                   label={`Refund escrow funds for ${t.propertyTitle}`}
                   className="hover:text-warning"
-                  title={`Refund ${amount} to the buyer`}
+                  title={`Refund ${held} to the buyer`}
                 />
               </>
             )}

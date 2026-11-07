@@ -364,7 +364,10 @@ export interface PlatformEscrowTransaction {
   propertyTitle: string;
   buyerName: string;
   sellerName: string;
+  /** Sale price, naira. */
   amount: number;
+  /** What escrow holds (the buyer's deposit), naira: what a release or refund moves. */
+  heldAmount: number;
   status: PlatformEscrowStatus;
   createdAt: string;
   flagged: boolean;
