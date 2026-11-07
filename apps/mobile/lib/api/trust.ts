@@ -195,8 +195,81 @@ export interface SmileLivenessSession {
     noticeLanguage: string;
     noticePrivacyPolicyUrl: string;
   };
-  userDetails: { givenNames: string; lastName: string };
+  userDetails: { givenNames: string; lastName: string; email?: string; phoneNumber?: string };
+  /** Smile's v3 API for this environment. */
+  apiUrl: string;
+  callbackUrl?: string;
 }
+
+/** One status vocabulary for identity and every requirement (GET /trust/overview). */
+export type TrustStatus =
+  | 'NOT_STARTED'
+  | 'ACTION_REQUIRED'
+  | 'IN_PROGRESS'
+  | 'PENDING_PROVIDER'
+  | 'PENDING_REVIEW'
+  | 'VERIFIED'
+  | 'FAILED'
+  | 'REJECTED'
+  | 'EXPIRED'
+  | 'REVERIFICATION_REQUIRED'
+  | 'UNAVAILABLE';
+
+export type TrustRequirementKey =
+  | 'EMAIL'
+  | 'PHONE'
+  | 'ID_NUMBER'
+  | 'LIVE_SELFIE'
+  | 'BANK_ACCOUNT'
+  | 'PROFESSIONAL_LICENCE'
+  | 'BUSINESS_REGISTRATION'
+  | 'PROPERTY_OWNERSHIP';
+
+export type TrustPortal =
+  | 'renter'
+  | 'buyer'
+  | 'landlord'
+  | 'owner'
+  | 'agent'
+  | 'realtor'
+  | 'manager';
+
+export interface TrustOverview {
+  portal: TrustPortal;
+  identity: { status: TrustStatus; detail: string; dueBy?: string };
+  requirements: {
+    key: TrustRequirementKey;
+    label: string;
+    status: TrustStatus;
+    detail: string;
+    why: string;
+    updatedAt?: string;
+    dueBy?: string;
+  }[];
+  tier: { level: number; label: string };
+  /** Null while scoring is switched off: no number is shown in its place. */
+  score: {
+    total: number;
+    penalty: number;
+    stage?: { label: string };
+    dimensions: { id: string; label: string; earned: number; weight: number }[];
+  } | null;
+  nextAction: { key: TrustRequirementKey; label: string } | null;
+}
+
+export const TRUST_STATUS: Record<TrustStatus, { label: string; tone: BadgeTone }> = {
+  VERIFIED: { label: 'Verified', tone: 'success' },
+  IN_PROGRESS: { label: 'In progress', tone: 'info' },
+  PENDING_PROVIDER: { label: 'Checking', tone: 'info' },
+  PENDING_REVIEW: { label: 'In review', tone: 'info' },
+  ACTION_REQUIRED: { label: 'Action needed', tone: 'warning' },
+  REVERIFICATION_REQUIRED: { label: 'Action needed', tone: 'warning' },
+  NOT_STARTED: { label: 'Not started', tone: 'neutral' },
+  FAILED: { label: 'Did not pass', tone: 'danger' },
+  REJECTED: { label: 'Not approved', tone: 'danger' },
+  EXPIRED: { label: 'Expired', tone: 'warning' },
+  UNAVAILABLE: { label: 'Unavailable', tone: 'neutral' },
+};
 
 export type CheckState = 'done' | 'todo' | 'failed' | 'review' | 'waiting';
 
@@ -246,6 +319,8 @@ export function idNumberOk(type: TrustIdType, value: string): boolean {
 }
 
 export const trustApi = {
+  /** Identity status, this portal's requirements, tier and score (self-only). */
+  overview: (portal: TrustPortal) => apiFetch<TrustOverview>(`/trust/overview?portal=${portal}`),
   /** Starts or resumes the signed-in user's verification (idempotent). */
   start: (subjectId: string, purpose: TrustPurpose) =>
     apiFetch<TrustVerification>('/trust/verifications', {

@@ -1,5 +1,5 @@
 import { View } from 'react-native';
-import { router } from 'expo-router';
+import { router, type Href } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import {
   CheckCircle,
@@ -13,20 +13,12 @@ import {
   Award,
   ClipboardCheck,
 } from 'lucide-react-native';
-import {
-  Button,
-  Card,
-  Divider,
-  Progress,
-  QueryState,
-  Screen,
-  Skeleton,
-  Text,
-  useTheme,
-} from '@getrentos/ui-native';
+import { Text, useTheme } from '@getrentos/ui-native';
 import type { TrustBadge, TrustProfile, VerificationItem } from '@/lib/api/buyerTrustProfile';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
+import { TrustOverview } from '@/components/trust/TrustOverview';
+import type { TrustPortal, TrustRequirementKey } from '@/lib/api/trust';
 
 const ICONS: Record<string, typeof Shield> = {
   User,
@@ -46,180 +38,94 @@ function Icon({ name, size, color }: { name: string; size: number; color: string
   return <Comp size={size} color={color} />;
 }
 
+/** Where each requirement is done, per portal. */
+const PROFILE_ROUTE: Record<ProfilePortal, Href> = {
+  owner: '/(app)/owner-profile',
+  realtor: '/(app)/realtor-profile',
+  buyer: '/(app)/buyer-profile',
+  agent: '/(app)/edit-profile',
+};
+function routeFor(portal: ProfilePortal, key: TrustRequirementKey): Href {
+  switch (key) {
+    case 'EMAIL':
+      return PROFILE_ROUTE[portal];
+    case 'PROFESSIONAL_LICENCE':
+      return '/(app)/license-verification';
+    case 'PROPERTY_OWNERSHIP':
+      return '/(app)/(owner)/properties';
+    default:
+      // Phone, NIN, live selfie and the bank check live on the verification screen.
+      return '/(app)/verify-identity';
+  }
+}
+
+type ProfilePortal = Extract<TrustPortal, 'owner' | 'agent' | 'realtor' | 'buyer'>;
+
 /**
- * One trust profile screen for every role: the score, how it compares with
- * others in the same role, verifications, history and badges. Each portal's
- * route supplies its own endpoint and wording.
+ * Trust & Verification for owners, agents, realtors and buyers: the shared
+ * overview, then what others see on the profile, folded into the details.
  */
 export function TrustProfileView({
+  portal,
   queryKey,
   queryFn,
   eyebrow,
-  subtitle,
-  peers,
+  audience,
 }: {
+  portal: ProfilePortal;
   queryKey: readonly unknown[];
   queryFn: () => Promise<TrustProfile>;
   eyebrow: string;
-  subtitle: string;
-  /** Who the average is taken over, e.g. "buyer", "seller". */
-  peers: string;
+  /** Who sees the profile, e.g. "buyers and realtors". */
+  audience: string;
 }) {
   const { colors, spacing } = useTheme();
-  const query = useQuery({ queryKey, queryFn });
-  const d = query.data;
-  const missing = query.data?.verifications.filter((v) => !v.verified).length ?? 0;
+  const profile = useQuery({ queryKey, queryFn });
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <DetailScreenHeader
         eyebrow={eyebrow}
         title="Trust & verification"
-        subtitle={subtitle}
+        subtitle="Your identity, what you need here, and your trust score"
         onBack={() => goBack()}
       />
-
-      <QueryState
-        query={query}
-        style={{ paddingHorizontal: spacing.xl }}
-        skeleton={
-          <View style={{ gap: spacing.md }}>
-            <Skeleton height={120} radius={16} />
-            <Skeleton height={200} radius={16} />
-          </View>
-        }
-      >
-        {d ? (
-          <Screen padded>
-            <Card elevated>
-              <View style={{ alignItems: 'center', gap: spacing.xs }}>
-                <Text variant="display" style={{ fontSize: 44, fontWeight: '800' }}>
-                  {d.trustScore}
-                </Text>
-                <Text variant="caption" color="mutedForeground">
-                  out of 100
-                </Text>
-              </View>
-              <View style={{ marginTop: spacing.md }}>
-                <Progress value={Math.max(0, Math.min(1, d.trustScore / 100))} height={8} />
-              </View>
-              <Text
-                variant="caption"
-                color="mutedForeground"
-                style={{ marginTop: spacing.sm, textAlign: 'center' }}
-              >
-                {d.trustScore >= d.averageScore ? 'Above' : 'Below'} the average
-                {peers} score of {d.averageScore}
-              </Text>
-            </Card>
-
-            {d.stats.length > 0 ? (
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md }}>
-                {d.stats.map((s) => (
-                  <View key={s.label} style={{ flex: 1, minWidth: '45%' }}>
-                    <Card elevated>
-                      <Text variant="bodyStrong">{s.value}</Text>
-                      <Text variant="caption" color="mutedForeground">
-                        {s.label}
-                      </Text>
-                    </Card>
-                  </View>
-                ))}
-              </View>
-            ) : null}
-
+      <TrustOverview
+        portal={portal}
+        onAction={(key) => router.push(routeFor(portal, key))}
+        moreDetails={
+          profile.data ? (
             <View style={{ gap: spacing.sm }}>
-              <Text variant="heading">Verifications</Text>
-              <Card elevated padding="none">
-                {d.verifications.map((v: VerificationItem, i) => (
-                  <View key={v.id}>
-                    {i > 0 ? <Divider /> : null}
-                    <View
-                      accessible
-                      accessibilityLabel={`${v.label}, ${v.verified ? 'verified' : 'not verified yet'}. ${v.description}`}
-                      style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        gap: spacing.md,
-                        padding: spacing.lg,
-                      }}
-                    >
-                      <View
-                        style={{
-                          width: 34,
-                          height: 34,
-                          borderRadius: 17,
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          backgroundColor: v.verified ? colors.successSubtle : colors.secondary,
-                        }}
-                      >
-                        <Icon
-                          name={v.icon}
-                          size={16}
-                          color={v.verified ? colors.success : colors.mutedForeground}
-                        />
-                      </View>
-                      <View style={{ flex: 1 }}>
-                        <Text variant="bodyStrong">{v.label}</Text>
-                        <Text variant="caption" color="mutedForeground">
-                          {v.description}
-                        </Text>
-                      </View>
-                      {v.verified ? <CheckCircle size={18} color={colors.success} /> : null}
-                    </View>
-                  </View>
-                ))}
-              </Card>
-              {missing > 0 ? (
-                <Button
-                  label={missing === 1 ? 'Finish your last check' : `Finish ${missing} checks`}
-                  variant="secondary"
-                  onPress={() => router.push('/(app)/verify-identity')}
-                />
+              <Text variant="bodyStrong">What {audience} see</Text>
+              {profile.data.verifications.map((v: VerificationItem) => (
+                <View
+                  key={v.id}
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}
+                >
+                  <Icon
+                    name={v.icon}
+                    size={14}
+                    color={v.verified ? colors.success : colors.mutedForeground}
+                  />
+                  <Text variant="caption" style={{ flex: 1 }}>
+                    {v.label}
+                  </Text>
+                  {v.verified ? <CheckCircle size={14} color={colors.success} /> : null}
+                </View>
+              ))}
+              {profile.data.badges.some((b: TrustBadge) => b.earned) ? (
+                <Text variant="caption" color="mutedForeground">
+                  Badges:{' '}
+                  {profile.data.badges
+                    .filter((b: TrustBadge) => b.earned)
+                    .map((b: TrustBadge) => b.name)
+                    .join(', ')}
+                </Text>
               ) : null}
             </View>
-
-            {d.badges.length > 0 ? (
-              <View style={{ gap: spacing.sm }}>
-                <Text variant="heading">Badges</Text>
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
-                  {d.badges.map((b: TrustBadge) => (
-                    <View
-                      key={b.id}
-                      style={{
-                        width: '31%',
-                        alignItems: 'center',
-                        gap: 6,
-                        padding: spacing.md,
-                        borderRadius: 14,
-                        borderWidth: 1,
-                        borderColor: colors.border,
-                        backgroundColor: b.earned ? colors.accent : colors.card,
-                        opacity: b.earned ? 1 : 0.55,
-                      }}
-                    >
-                      <Icon
-                        name={b.icon}
-                        size={22}
-                        color={b.earned ? colors.accentForeground : colors.mutedForeground}
-                      />
-                      <Text
-                        variant="caption"
-                        center
-                        numberOfLines={2}
-                        style={{ fontWeight: '600' }}
-                      >
-                        {b.name}
-                      </Text>
-                    </View>
-                  ))}
-                </View>
-              </View>
-            ) : null}
-          </Screen>
-        ) : null}
-      </QueryState>
+          ) : null
+        }
+      />
     </View>
   );
 }

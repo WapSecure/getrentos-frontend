@@ -562,5 +562,6 @@ export const qk = {
     consents: ['trust', 'consents'] as const,
     verification: (id: string) => ['trust', 'verification', id] as const,
     appeals: ['trust', 'appeals', 'mine'] as const,
+    overview: (portal: string) => ['trust', 'overview', portal] as const,
   },
 } as const;

@@ -26,7 +26,8 @@ export interface TrustBadge {
 
 export interface TrustScoreOverview {
   trustScore: number;
-  averageScore: number;
+  /** No longer sent. */
+  averageScore?: number;
   verifications: VerificationItem[];
   history: TrustScoreHistoryItem[];
   badges: TrustBadge[];
