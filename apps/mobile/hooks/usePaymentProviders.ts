@@ -82,8 +82,13 @@ export function usePaymentProviders() {
     options,
     provider,
     choose: setChosen,
-    /** More than one company can take it: worth asking. */
-    canChoose: available.length > 1,
+    /**
+     * Show the choice when GetRentos works with more than one company, even if
+     * one is down right now: the payer sees it greyed out with why, rather than
+     * wondering where it went. Hidden only when there is a single company.
+     */
+    canChoose:
+      options.filter((option) => option.available || option.reason !== 'is not set up').length > 1,
     recover,
   };
 }

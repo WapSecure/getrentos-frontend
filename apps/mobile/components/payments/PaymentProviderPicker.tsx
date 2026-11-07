@@ -5,8 +5,8 @@ import type { PaymentProvider } from '@/lib/api/paymentStatus';
 /**
  * "Pay with: Paystack / Monnify", so a payer can switch when one company is
  * down. A company that cannot take payments right now is shown but cannot be
- * chosen, with why ("Monnify is switched off for now"). Renders nothing when
- * only one company can take it: there is nothing to choose.
+ * chosen, with why ("Monnify is switched off for now"). Renders nothing only
+ * when GetRentos works with a single company: there is nothing to choose.
  */
 export function PaymentProviderPicker({ choice }: { choice: PaymentProviderChoice }) {
   if (!choice.canChoose) return null;

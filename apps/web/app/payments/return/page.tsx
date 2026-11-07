@@ -3,28 +3,23 @@
 import { Suspense, useEffect, useState, useSyncExternalStore } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { CheckCircle2, Clock, Loader2, XCircle } from 'lucide-react';
-import { Button, EmptyState, PageLoadingState } from '@getrentos/ui';
+import { PageLoadingState } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
-import { formatCurrency } from '@/lib/format';
 import { paymentKeys } from '@/lib/queryKeys';
 import { viewerIsSignedIn } from '@/lib/viewer';
 import { getPaymentStatus } from '@/services/paymentStatusService';
-import type { PaymentKind } from '@/types/payments';
+import {
+  PaymentConfirming,
+  PaymentDoneElsewhere,
+  PaymentFailed,
+  PaymentNotFound,
+  PaymentStillPending,
+  PaymentSuccess,
+} from '@/components/shared/payments/PaymentReceipt';
 
 /** How often the page asks while a payment is unconfirmed, and for how long before it stops asking. */
 const POLL_MS = 2_500;
 const GIVE_UP_MS = 60_000;
-
-const WHAT: Record<PaymentKind, string> = {
-  RENT: 'rent payment',
-  ESCROW: 'deposit',
-  SHORTLET: 'booking payment',
-  LAND: 'land payment',
-  FLEX: 'installment',
-  DUE: 'dues payment',
-  VENDOR_TOP_UP: 'top-up for the vendor invoice',
-};
 
 /** Sign-in state does not change while this page is open. */
 const noSubscription = () => () => {};
@@ -68,61 +63,15 @@ function PaymentReturnContent() {
 
   const payment = status.data;
   const back = payment?.returnPath ?? '/';
-  const what = payment ? WHAT[payment.kind] : 'payment';
 
-  return (
-    <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-4">
-      {!signedIn ? (
-        <EmptyState
-          icon={CheckCircle2}
-          title="You're done here"
-          description="Close this page and go back to GetRentos. Your payment shows there as soon as it's confirmed: you don't need to pay again."
-        />
-      ) : !reference || status.isError ? (
-        <EmptyState
-          icon={XCircle}
-          title="We couldn't find that payment"
-          description="If you were charged, it will show on your account once it's confirmed: you don't need to pay again."
-          action={
-            <Button href="/" variant="outline">
-              Back to GetRentos
-            </Button>
-          }
-        />
-      ) : !payment || (payment.status === 'PENDING' && !gaveUp) ? (
-        <EmptyState
-          icon={Loader2}
-          title={`Confirming your ${what}…`}
-          description="This usually takes a few seconds. You can leave this page; it won't affect the payment."
-        />
-      ) : payment.status === 'PAID' ? (
-        <EmptyState
-          icon={CheckCircle2}
-          title={`${formatCurrency(payment.amount)} paid`}
-          description={`Your ${what} is confirmed. Reference ${payment.reference}.`}
-          action={<Button href={back}>Done</Button>}
-        />
-      ) : payment.status === 'FAILED' ? (
-        <EmptyState
-          icon={XCircle}
-          title="This payment didn't go through"
-          description="Nothing was taken for this attempt. You can try again from where you started."
-          action={<Button href={back}>Try again</Button>}
-        />
-      ) : (
-        <EmptyState
-          icon={Clock}
-          title="Still confirming"
-          description={`Your bank hasn't confirmed this ${what} yet. If you were charged, it will show as paid automatically and we'll let you know: you don't need to pay again.`}
-          action={
-            <Button href={back} variant="outline">
-              Back to GetRentos
-            </Button>
-          }
-        />
-      )}
-    </div>
-  );
+  if (!signedIn) return <PaymentDoneElsewhere />;
+  if (!reference || status.isError) return <PaymentNotFound />;
+  if (!payment || (payment.status === 'PENDING' && !gaveUp)) {
+    return <PaymentConfirming kind={payment?.kind} />;
+  }
+  if (payment.status === 'PAID') return <PaymentSuccess payment={payment} back={back} />;
+  if (payment.status === 'FAILED') return <PaymentFailed back={back} />;
+  return <PaymentStillPending kind={payment.kind} back={back} />;
 }
 
 export default function PaymentReturnPage() {

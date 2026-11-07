@@ -20,6 +20,20 @@ export interface PaymentStatus {
   amount: number;
   /** Where this payment lives in the app, or null when there is no one page for it. */
   returnPath: string | null;
+  /** What it paid for ("Rent for 2-Bed Apartment · Lekki Phase 1"), when known. */
+  title?: string | null;
+  /** When the charge it paid was due (ISO). */
+  dueDate?: string | null;
+  /** When it was recorded as paid (ISO). */
+  paidAt?: string | null;
+  /** Which company took it. */
+  provider?: PaymentProvider;
+  /** How it was paid: card, bank_transfer, ussd… */
+  channel?: string | null;
+  /** Card or bank fee the payer covered, whole naira. */
+  fee?: number | null;
+  /** Amount plus fee, whole naira. */
+  totalCharged?: number | null;
 }
 
 /** A company that can take a payment. The payer chooses, so they can switch when one is down. */
