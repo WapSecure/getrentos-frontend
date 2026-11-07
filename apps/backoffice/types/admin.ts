@@ -169,6 +169,8 @@ export interface VerificationRequest {
   media?: VerificationDocument[];
   /** Ownership proofs on a property request — each can be AI cross-checked. */
   ownershipProofs?: OwnershipProofRef[];
+  /** Property requests: why approving needs a second officer, if it does (security gap ID-15). */
+  approvalRisk?: { reasons: string[]; secondOfficerRequired: boolean };
 }
 
 export interface OwnershipProofRef {

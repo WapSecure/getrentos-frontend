@@ -209,6 +209,15 @@ export const ReviewVerificationModal = ({
                     )}
                   </div>
                 )}
+                {request.type === 'property' && detail?.approvalRisk?.secondOfficerRequired ? (
+                  <Alert variant="warning" title="A second officer must also approve this property">
+                    <ul className="list-disc space-y-0.5 pl-4">
+                      {detail.approvalRisk.reasons.map((reason) => (
+                        <li key={reason}>{reason}</li>
+                      ))}
+                    </ul>
+                  </Alert>
+                ) : null}
                 {request.type === 'property' && detail?.ownershipProofs?.length ? (
                   <OwnershipDocCheckPanel proofs={detail.ownershipProofs} />
                 ) : null}
