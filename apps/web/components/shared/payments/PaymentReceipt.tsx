@@ -12,14 +12,7 @@ import {
   XCircle,
   type LucideIcon,
 } from 'lucide-react';
-import {
-  Badge,
-  Button,
-  Card,
-  DescriptionList,
-  IconButton,
-  type DescriptionItem,
-} from '@getrentos/ui';
+import { Button, Card, DescriptionList, IconButton, type DescriptionItem } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
 import type { PaymentKind, PaymentProvider, PaymentStatus } from '@/types/payments';
 
