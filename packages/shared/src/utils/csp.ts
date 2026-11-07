@@ -36,7 +36,23 @@ export interface ContentSecurityPolicyOptions {
   upgradeInsecureRequests?: boolean;
   /** Where browsers POST violation reports (`report-uri`). */
   reportUri?: string | null;
+  /**
+   * Pages that run Smile ID's live selfie capture (@smileid/web-sdk): its face
+   * tracker is WebAssembly with models from Smile's model host, it may run in
+   * blob workers, its instruction animations fetch a player from jsDelivr or
+   * unpkg, and the capture is sent straight to Smile's API. Only those pages.
+   */
+  liveCapture?: boolean;
 }
+
+/** Everything Smile ID's browser capture contacts (see `liveCapture`). */
+export const SMILE_LIVE_CAPTURE_ORIGINS = [
+  'https://web-models.smileidentity.com',
+  'https://api.smileidentity.com',
+  'https://testapi.smileidentity.com',
+  'https://cdn.jsdelivr.net',
+  'https://unpkg.com',
+] as const;
 
 /** Sent only in production over HTTPS; never on localhost (it would pin the dev host to HTTPS). */
 export const STRICT_TRANSPORT_SECURITY = 'max-age=31536000; includeSubDomains';
@@ -132,7 +148,12 @@ export function buildContentSecurityPolicy(options: ContentSecurityPolicyOptions
     ['default-src', "'self'"],
     [
       'script-src',
-      sourceList(["'self'", `'nonce-${nonce}'`, "'strict-dynamic'"], dev ? ["'unsafe-eval'"] : []),
+      sourceList(
+        ["'self'", `'nonce-${nonce}'`, "'strict-dynamic'"],
+        dev ? ["'unsafe-eval'"] : [],
+        // WebAssembly only, not eval: Smile's face tracker on capture pages.
+        options.liveCapture ? ["'wasm-unsafe-eval'"] : []
+      ),
     ],
     // 'unsafe-inline' for styles: React `style={…}` props, Leaflet and the
     // animation libraries all write inline styles, and Next injects <style>
@@ -147,9 +168,11 @@ export function buildContentSecurityPolicy(options: ContentSecurityPolicyOptions
         ["'self'", api, apiSocket],
         local,
         dev ? DEV_LOCAL_SOCKETS : [],
-        options.connectSrc ?? []
+        options.connectSrc ?? [],
+        options.liveCapture ? SMILE_LIVE_CAPTURE_ORIGINS : []
       ),
     ],
+    ...(options.liveCapture ? ([['worker-src', "'self' blob:"]] as Array<[string, string]>) : []),
     ['media-src', sourceList(["'self'", 'blob:', api], media, local, options.mediaSrc ?? [])],
     // Uploaded PDFs/CSVs are previewed in an iframe straight from storage.
     ['frame-src', sourceList(["'self'", 'blob:', api], media, local, options.frameSrc ?? [])],

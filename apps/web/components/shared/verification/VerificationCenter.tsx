@@ -21,6 +21,10 @@ import Link from 'next/link';
 import {
   Alert,
   Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
   Field,
   Input,
   NumberInput,
@@ -30,6 +34,8 @@ import {
   Skeleton,
 } from '@getrentos/ui';
 import { TIER_LABELS } from './trustTiers';
+import { LiveSelfieCapture, liveCaptureBlocker } from './LiveSelfieCapture';
+import type { SmileLivenessSession } from '@/services/trustService';
 import { cn, unwrap } from '@/lib/apiHelpers';
 import { useRealtimeEvent } from '@/hooks/useRealtime';
 import { AppealControl } from '@/components/shared/trust/AppealControl';
@@ -79,14 +85,17 @@ export const VerificationCenter = ({
   const [lastName, setLastName] = useState('');
   const [phoneRef, setPhoneRef] = useState<string | null>(null);
   const [otpCode, setOtpCode] = useState('');
-  const [selfie, setSelfie] = useState<File | null>(null);
+  // Smile ID live selfie: the session while the capture is open, then the job
+  // it was sent as while Smile decides.
+  const [liveSession, setLiveSession] = useState<SmileLivenessSession | null>(null);
+  const [liveJob, setLiveJob] = useState<string | null>(null);
+  const [liveUnavailable, setLiveUnavailable] = useState<string | null>(null);
   const [accountNumber, setAccountNumber] = useState('');
   const [accountName, setAccountName] = useState('');
   const [bankCode, setBankCode] = useState('');
   const [documentType, setDocumentType] = useState('AGENT_LICENSE');
   const [documentNumber, setDocumentNumber] = useState('');
   const [documentHolder, setDocumentHolder] = useState('');
-  const selfieInputRef = useRef<HTMLInputElement>(null);
   const autoStarted = useRef(false);
   // Which stage the person opened; null follows the first stage that needs them.
   const [openStage, setOpenStage] = useState<string | null>(null);
@@ -277,16 +286,48 @@ export const VerificationCenter = ({
       setError(reason instanceof Error ? reason.message : 'Unable to verify the code.'),
   });
 
-  const bioMutation = useMutation({
-    mutationFn: () => unwrap(trustService.submitBiometrics(verificationId!, selfie!)),
-    onSuccess: () => {
-      setSelfie(null);
+  // Starts Smile ID's live selfie. A static photo is never accepted for this
+  // step: liveness is decided by Smile from the live capture, by webhook.
+  const liveStart = useMutation({
+    mutationFn: () => unwrap(trustService.startLivenessSession(verificationId!)),
+    onSuccess: (session) => {
       setError(null);
-      invalidateVerification();
+      setLiveSession(session);
     },
-    onError: (reason) =>
-      setError(reason instanceof Error ? reason.message : 'Unable to run the biometric check.'),
+    onError: (reason) => {
+      const message = reason instanceof Error ? reason.message : 'The live selfie could not start.';
+      if (/not available/i.test(message)) setLiveUnavailable(message);
+      else setError(message);
+    },
   });
+
+  // While Smile decides, ask the server to check with Smile too (the webhook
+  // can be slow, and can't reach a local API). The server only accepts Smile's
+  // answer for the job it issued.
+  useEffect(() => {
+    if (!liveJob || !verificationId) return;
+    let stopped = false;
+    let tries = 0;
+    const tick = async () => {
+      if (stopped) return;
+      tries += 1;
+      const res = await trustService.checkLiveness(verificationId, liveJob);
+      invalidateVerification();
+      if (stopped) return;
+      if ((res.success && res.data?.status !== 'pending') || tries >= 40) {
+        setLiveJob(null);
+        return;
+      }
+      setTimeout(tick, 4000);
+    };
+    const first = setTimeout(tick, 3000);
+    return () => {
+      stopped = true;
+      clearTimeout(first);
+    };
+    // invalidateVerification is stable for this verification.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [liveJob, verificationId]);
 
   const bankMutation = useMutation({
     mutationFn: () =>
@@ -371,7 +412,7 @@ export const VerificationCenter = ({
     !identityMutation.isPending;
   const otpVerifyEnabled =
     Boolean(phoneRef) && otpCode.length === 6 && !verifyOtpMutation.isPending;
-  const bioEnabled = Boolean(selfie) && Boolean(bioConsent) && !bioMutation.isPending;
+  const captureBlocker = liveCaptureBlocker();
   const bankEnabled =
     Boolean(runnableBank) &&
     Boolean(verificationId) &&
@@ -568,30 +609,37 @@ export const VerificationCenter = ({
             onGrant: () => grantBioMutation.mutate(),
             granting: grantBioMutation.isPending,
           })}
-          {consentActive(bioConsent) && (
-            <div className="flex flex-wrap items-center gap-2">
-              <input
-                ref={selfieInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => setSelfie(e.target.files?.[0] ?? null)}
-              />
-              <Button variant="outline" size="sm" onClick={() => selfieInputRef.current?.click()}>
-                <Camera className="mr-2 h-4 w-4" />
-                {selfie ? selfie.name.slice(0, 30) : 'Choose a selfie'}
-              </Button>
-              <Button
-                size="sm"
-                disabled={!bioEnabled || !runnableBio}
-                isLoading={bioMutation.isPending}
-                loadingText="Running…"
-                onClick={() => bioMutation.mutate()}
-              >
-                Run selfie check
-              </Button>
-            </div>
-          )}
+          {consentActive(bioConsent) &&
+            (liveUnavailable ? (
+              <Alert variant="neutral" title="Live selfie temporarily unavailable">
+                {liveUnavailable}
+              </Alert>
+            ) : captureBlocker ? (
+              <Alert variant="warning" title="This device can’t take the live selfie">
+                {captureBlocker}
+              </Alert>
+            ) : liveJob ? (
+              <p className="text-sm text-muted-foreground" role="status">
+                Selfie sent. Smile ID is checking it; this usually takes under a minute.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">
+                  You’ll look at your camera and follow a short prompt. It confirms you are really
+                  there, and a photo can’t be used instead.
+                </p>
+                <Button
+                  size="sm"
+                  disabled={!runnableBio}
+                  isLoading={liveStart.isPending}
+                  loadingText="Starting…"
+                  onClick={() => liveStart.mutate()}
+                >
+                  <Camera className="mr-2 h-4 w-4" />
+                  Start live selfie
+                </Button>
+              </div>
+            ))}
         </>
       ),
     },
@@ -992,6 +1040,27 @@ export const VerificationCenter = ({
           )}
         </div>
       )}
+
+      <Dialog open={Boolean(liveSession)} onOpenChange={(open) => !open && setLiveSession(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogTitle>Live selfie</DialogTitle>
+          <DialogDescription>
+            Powered by Smile ID. Your camera is used only for this check.
+          </DialogDescription>
+          {liveSession ? (
+            <LiveSelfieCapture
+              key={liveSession.userId}
+              session={liveSession}
+              onSubmitted={(jobId) => {
+                setLiveSession(null);
+                setLiveJob(jobId);
+                invalidateVerification();
+              }}
+              onCancel={() => setLiveSession(null)}
+            />
+          ) : null}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

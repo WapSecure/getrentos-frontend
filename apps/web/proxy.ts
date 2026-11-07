@@ -19,6 +19,8 @@ import {
  * NEXT_PUBLIC_CSP_ENFORCE=true to enforce it. Inlined at build time.
  */
 const ENFORCE_CSP = process.env.NEXT_PUBLIC_CSP_ENFORCE === 'true';
+/** Pages with the live selfie (identity verification): every role's verification and trust pages. */
+const LIVE_CAPTURE_PATH = /\/(verification|trust-score)(\/|$)/;
 const DEV = process.env.NODE_ENV !== 'production';
 
 /**
@@ -52,9 +54,13 @@ export default function proxy(request: NextRequest) {
   // host, so read the public host the request was addressed to.
   const host = request.headers.get('x-forwarded-host') ?? request.headers.get('host');
   const secure = !DEV && !isLocalHost(host);
+  // Only the verification pages run Smile ID's live selfie: camera, WebAssembly
+  // and Smile's hosts are allowed there and nowhere else.
+  const liveCapture = LIVE_CAPTURE_PATH.test(request.nextUrl.pathname);
   const policy = buildContentSecurityPolicy({
     nonce,
     dev: DEV,
+    liveCapture,
     apiUrl: process.env.NEXT_PUBLIC_API_URL,
     // Upload storage/CDN origins when they differ from the API (comma
     // separated; server-only, read at runtime).
@@ -80,7 +86,10 @@ export default function proxy(request: NextRequest) {
   headers.set('X-Frame-Options', 'DENY');
   headers.set('X-Content-Type-Options', 'nosniff');
   headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-  headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(self), payment=()');
+  headers.set(
+    'Permissions-Policy',
+    `camera=${liveCapture ? '(self)' : '()'}, microphone=(), geolocation=(self), payment=()`
+  );
   headers.set('X-DNS-Prefetch-Control', 'on');
   return response;
 }

@@ -1,6 +1,7 @@
 import {
   EMBED_FRAME_ORIGINS,
   MAP_TILE_ORIGINS,
+  SMILE_LIVE_CAPTURE_ORIGINS,
   buildContentSecurityPolicy,
   cspHeaderName,
   httpOrigin,
@@ -146,5 +147,25 @@ describe('csp helpers', () => {
   it('names the header for enforce vs report-only', () => {
     expect(cspHeaderName(true)).toBe('Content-Security-Policy');
     expect(cspHeaderName(false)).toBe('Content-Security-Policy-Report-Only');
+  });
+
+  describe('live selfie pages (Smile ID web capture)', () => {
+    const base = { nonce: 'abc', dev: false, apiUrl: 'https://api.getrentos.com' };
+    const directive = (policy: string, name: string) =>
+      policy.split('; ').find((d) => d.startsWith(`${name} `)) ?? '';
+
+    it('allows WebAssembly, blob workers and Smile hosts only where asked', () => {
+      const capture = buildContentSecurityPolicy({ ...base, liveCapture: true });
+      expect(directive(capture, 'script-src')).toContain("'wasm-unsafe-eval'");
+      expect(directive(capture, 'script-src')).not.toContain("'unsafe-eval'");
+      expect(directive(capture, 'worker-src')).toBe("worker-src 'self' blob:");
+      for (const origin of SMILE_LIVE_CAPTURE_ORIGINS)
+        expect(directive(capture, 'connect-src')).toContain(origin);
+
+      const plain = buildContentSecurityPolicy(base);
+      expect(plain).not.toContain('wasm-unsafe-eval');
+      expect(plain).not.toContain('smileidentity');
+      expect(plain).not.toContain('worker-src');
+    });
   });
 });
