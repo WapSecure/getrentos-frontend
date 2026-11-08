@@ -10,9 +10,9 @@ import {
   ConfirmDialog,
   EmptyState,
   Field,
-  Input,
   ListSkeleton,
   PageErrorState,
+  Select,
   Skeleton,
   useToast,
   PageHeader,
@@ -24,11 +24,36 @@ import { payoutAccountLabel, payoutDestinationSentence } from '@/lib/payoutDesti
 import { adminPayoutRunsService, type PayoutRun } from '@/services/adminPayoutRunsService';
 import type { PayoutDestination } from '@/services/adminPayoutIssuesService';
 
-/** The last month that has ended, as YYYY-MM (Lagos). */
-function lastEndedMonth(): string {
+const MONTH_NAMES = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
+
+/** "2026-10" as "October 2026"; anything else as given. */
+function monthLabel(period: string): string {
+  const m = /^(\d{4})-(\d{2})$/.exec(period);
+  const name = m ? MONTH_NAMES[Number(m[2]) - 1] : undefined;
+  return m && name ? `${name} ${m[1]}` : period;
+}
+
+/** The last 12 months that have ended (Lagos), newest first, as YYYY-MM (UX-48). */
+function endedMonths(count = 12): { value: string; label: string }[] {
   const lagos = new Date(Date.now() + 60 * 60_000);
-  const d = new Date(Date.UTC(lagos.getUTCFullYear(), lagos.getUTCMonth() - 1, 1));
-  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+  return Array.from({ length: count }, (_, i) => {
+    const d = new Date(Date.UTC(lagos.getUTCFullYear(), lagos.getUTCMonth() - 1 - i, 1));
+    const value = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+    return { value, label: monthLabel(value) };
+  });
 }
 
 const ITEM_BADGE: Record<
@@ -51,7 +76,8 @@ export default function PayoutRunsPage() {
   const queryClient = useQueryClient();
   const user = useAdminUser();
   const canAct = hasAdminPermission(user?.roles, 'rentfinance.approve');
-  const [period, setPeriod] = useState(lastEndedMonth());
+  const [monthOptions] = useState(() => endedMonths());
+  const [period, setPeriod] = useState(() => monthOptions[0]!.value);
   const [openRun, setOpenRun] = useState<string | null>(null);
   // Money moves only after the amount and who receives it are confirmed.
   const [confirmingIssue, setConfirmingIssue] = useState(false);
@@ -86,8 +112,8 @@ export default function PayoutRunsPage() {
       setOpenRun(r.id);
       toast.success(
         r.items.length
-          ? `${r.items.length} owner statement${r.items.length === 1 ? '' : 's'} drafted for ${r.period}.`
-          : `No owner has released rent left to pay for ${r.period}.`
+          ? `${r.items.length} owner statement${r.items.length === 1 ? '' : 's'} drafted for ${monthLabel(r.period)}.`
+          : `No owner has released rent left to pay for ${monthLabel(r.period)}.`
       );
     },
     onError: fail,
@@ -123,19 +149,17 @@ export default function PayoutRunsPage() {
 
       {canAct && (
         <Card className="mb-6 flex flex-wrap items-end gap-3 p-5">
-          <Field label="Month">
-            <Input
+          <Field label="Month that has ended">
+            <Select
               value={period}
-              onChange={(e) => setPeriod(e.target.value.trim())}
-              placeholder="YYYY-MM"
-              pattern="\d{4}-\d{2}"
-              inputMode="numeric"
-              className="w-32"
+              onValueChange={setPeriod}
+              options={monthOptions}
+              className="w-48"
             />
           </Field>
           <Button
             variant="primary"
-            disabled={!/^\d{4}-(0[1-9]|1[0-2])$/.test(period)}
+            disabled={!period}
             isLoading={draft.isPending}
             loadingText="Drafting…"
             onClick={() => draft.mutate()}
@@ -166,7 +190,7 @@ export default function PayoutRunsPage() {
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <p className="font-medium text-foreground">
-                    {s.period} · {s.owners} owner{s.owners === 1 ? '' : 's'} ·{' '}
+                    {monthLabel(s.period)} · {s.owners} owner{s.owners === 1 ? '' : 's'} ·{' '}
                     {formatCurrency(s.total)}
                   </p>
                   <p className="text-xs text-muted-foreground">
@@ -295,7 +319,7 @@ export default function PayoutRunsPage() {
       <ConfirmDialog
         open={confirmingIssue && !!r}
         onOpenChange={setConfirmingIssue}
-        title={`Pay ${toIssue.length} owner${toIssue.length === 1 ? '' : 's'} ${formatCurrency(issueTotal)} for ${r?.period ?? ''}?`}
+        title={`Pay ${toIssue.length} owner${toIssue.length === 1 ? '' : 's'} ${formatCurrency(issueTotal)} for ${r ? monthLabel(r.period) : ''}?`}
         description={`Each owner's statement pays out to that owner's current payout account (${toIssue
           .map((i) => {
             const account = payoutAccountLabel(i.destination);
