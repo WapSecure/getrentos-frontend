@@ -53,7 +53,7 @@ export const BuyerLandSummaryBanner = () => {
       body:
         purchaseCount !== undefined
           ? `${purchaseCount} purchase${purchaseCount === 1 ? '' : 's'}`
-          : 'Installments, statements and documents',
+          : 'Instalments, statements and documents',
     },
   ];
 

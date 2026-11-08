@@ -57,7 +57,7 @@ export const PlanPriceExample = ({
         <dl className="mt-3 space-y-1.5">
           <Row label="Plot price" value={formatCurrency(example.plotPrice)} />
           {example.priceUplift > 0 && (
-            <Row label="Installment premium" value={formatCurrency(example.priceUplift)} />
+            <Row label="Instalment premium" value={formatCurrency(example.priceUplift)} />
           )}
           {example.fees > 0 && <Row label="Fees" value={formatCurrency(example.fees)} />}
           <Row label="Total price" value={formatCurrency(example.totalPrice)} strong />

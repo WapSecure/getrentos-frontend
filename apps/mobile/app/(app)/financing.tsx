@@ -57,7 +57,7 @@ export default function Financing() {
       <DetailScreenHeader
         eyebrow="Flexible rent"
         title="GetRentos Flex"
-        subtitle="Eligibility, plans and installments"
+        subtitle="Eligibility, plans and instalments"
         onBack={() => goBack()}
       />
 
@@ -155,7 +155,7 @@ function EligibilityCard({ overview }: { overview: FinancingOverview }) {
         )}
 
         <Text variant="caption" color="mutedForeground" style={{ marginTop: spacing.md }}>
-          Missed installments affect your trust score.
+          Missed instalments affect your trust score.
         </Text>
       </Card>
 
@@ -281,7 +281,7 @@ function ActivePlanCard({ overview }: { overview: { plan: FinancingPlan } }) {
       if (updated.authorizationUrl) {
         await checkout(updated.authorizationUrl, updated.reference);
       } else {
-        toast.show('Installment paid.', 'success');
+        toast.show('Instalment paid.', 'success');
       }
       qc.invalidateQueries({ queryKey: qk.renter.financing });
     },
@@ -321,14 +321,14 @@ function ActivePlanCard({ overview }: { overview: { plan: FinancingPlan } }) {
             value={<Price amount={plan.rentAmount} variant="callout" />}
           />
           <Row
-            label="Monthly installment"
+            label="Monthly instalment"
             value={<Price amount={plan.monthlyInstallment} variant="callout" />}
           />
           <Row label="Term" value={<Text variant="callout">{plan.planLengthMonths} months</Text>} />
           <Row label="Service fee" value={<Text variant="callout">{plan.feePercent}%</Text>} />
         </View>
         <Text variant="caption" color="mutedForeground" style={{ marginTop: spacing.sm }}>
-          {paidCount}/{plan.installments.length} installments paid
+          {paidCount}/{plan.installments.length} instalments paid
         </Text>
       </Card>
 
@@ -352,13 +352,13 @@ function ActivePlanCard({ overview }: { overview: { plan: FinancingPlan } }) {
         <PaySheet
           open={sheetOpen}
           onClose={closeSheet}
-          title="Pay installment"
-          context={`Installment ${nextDue.installmentNumber} of ${plan.installments.length}`}
+          title="Pay instalment"
+          context={`Instalment ${nextDue.installmentNumber} of ${plan.installments.length}`}
           dueDate={nextDue.dueDate}
           overdue={nextDue.status === 'overdue'}
           owed={nextDue.amount}
           amount={nextDue.amount}
-          itemLabel="Installment"
+          itemLabel="Instalment"
           receiverLine={`The fee goes to the payment company, so the full ${formatNaira(nextDue.amount)} goes to your Flex plan.`}
           protection="This payment is applied to your Flex plan."
           providers={providers}
@@ -369,7 +369,7 @@ function ActivePlanCard({ overview }: { overview: { plan: FinancingPlan } }) {
       ) : null}
 
       <View style={{ gap: spacing.sm }}>
-        <Text variant="heading">Installment schedule</Text>
+        <Text variant="heading">Instalment schedule</Text>
         <Card elevated padding="none">
           {plan.installments.map((i, idx) => (
             <View key={i.id}>
@@ -383,7 +383,7 @@ function ActivePlanCard({ overview }: { overview: { plan: FinancingPlan } }) {
                 }}
               >
                 <View>
-                  <Text variant="callout">Installment {i.installmentNumber}</Text>
+                  <Text variant="callout">Instalment {i.installmentNumber}</Text>
                   <Text variant="caption" color="mutedForeground">
                     {i.status === 'paid' && i.paidDate
                       ? `Paid ${formatDate(i.paidDate, 'short')}`

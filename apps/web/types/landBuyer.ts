@@ -333,7 +333,7 @@ export interface BuyerLandPurchaseListParams {
 export const LAND_PLOT_STATUS_LABELS: Record<LandPlotStatus, string> = {
   AVAILABLE: 'Available',
   RESERVED: 'Reserved',
-  UNDER_INSTALLMENT: 'Under installment',
+  UNDER_INSTALLMENT: 'Under instalment',
   SOLD: 'Sold',
   ALLOCATED: 'Allocated',
   WITHHELD: 'Withheld',
@@ -348,7 +348,7 @@ export const LAND_RESERVATION_STATUS_LABELS: Record<LandReservationStatus, strin
 
 export const LAND_PURCHASE_STATUS_LABELS: Record<LandPurchaseStatus, string> = {
   PENDING_DEPOSIT: 'Awaiting deposit',
-  ACTIVE: 'Paying installments',
+  ACTIVE: 'Paying instalments',
   PAID_IN_FULL: 'Paid in full',
   COMPLETED: 'Completed',
   DEFAULTED: 'In default',

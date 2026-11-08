@@ -29,7 +29,7 @@ export const LAYOUT_STATUS: Record<LayoutStatus, { label: string; tone: BadgeTon
 export const PLOT_STATUS: Record<PlotStatus, { label: string; tone: BadgeTone }> = {
   AVAILABLE: { label: 'Available', tone: 'success' },
   RESERVED: { label: 'Reserved', tone: 'info' },
-  UNDER_INSTALLMENT: { label: 'Under installment', tone: 'warning' },
+  UNDER_INSTALLMENT: { label: 'Under instalment', tone: 'warning' },
   SOLD: { label: 'Sold', tone: 'neutral' },
   ALLOCATED: { label: 'Allocated', tone: 'neutral' },
   WITHHELD: { label: 'Withheld', tone: 'danger' },
@@ -304,7 +304,7 @@ export const PLAN_FIELDS: PlanField[] = [
   },
   {
     key: 'uplift',
-    label: 'Installment premium (%)',
+    label: 'Instalment premium (%)',
     hint: 'Added to the price for paying over time.',
     min: 0,
     max: 100,
@@ -321,7 +321,7 @@ export const PLAN_FIELDS: PlanField[] = [
   {
     key: 'lateFee',
     label: 'Late fee (%)',
-    hint: 'Charged once on a late installment.',
+    hint: 'Charged once on a late instalment.',
     min: 0,
     max: 20,
     integer: false,
@@ -384,7 +384,7 @@ export const planInput = (f: PlanForm) => ({
 export function planTermProblems(t: PlanTerms): string[] {
   const problems: string[] = [];
   if (t.durationMonths > 0 && t.initialDepositBps >= 10_000) {
-    problems.push('An installment plan needs a deposit below 100%. Use 0 months for outright.');
+    problems.push('An instalment plan needs a deposit below 100%. Use 0 months for outright.');
   }
   if (t.defaultAfterDays <= t.gracePeriodDays) {
     problems.push('Default must come later than the grace period ends.');

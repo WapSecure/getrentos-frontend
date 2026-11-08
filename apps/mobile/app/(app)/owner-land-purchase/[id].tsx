@@ -275,7 +275,7 @@ export default function OwnerLandPurchase() {
               </Section>
             ) : null}
 
-            <Section title="Installment schedule">
+            <Section title="Instalment schedule">
               {d.installments.map((i, n) => {
                 const s = INSTALLMENT_STATUS[i.status] ?? INSTALLMENT_STATUS.PENDING;
                 return (
@@ -452,7 +452,7 @@ function RevokeForm({
       </Text>
       <TextField
         label="Reason for revoking"
-        placeholder="Three installments unpaid despite reminders since March."
+        placeholder="Three instalments unpaid despite reminders since March."
         value={reason}
         onChangeText={setReason}
         multiline

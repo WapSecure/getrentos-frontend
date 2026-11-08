@@ -16,7 +16,7 @@ const financingIcons: Record<FinancingType, React.ElementType> = {
 const financingLabels: Record<FinancingType, string> = {
   cash: 'Cash',
   mortgage: 'Mortgage',
-  installment: 'Installment',
+  installment: 'Instalment',
 };
 
 interface OfferCardProps {

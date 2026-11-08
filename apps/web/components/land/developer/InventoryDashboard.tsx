@@ -80,7 +80,7 @@ export const InventoryDashboard = ({ propertyId }: { propertyId: string }) => {
         <Figure
           label="Value sold"
           value={formatCurrency(data.soldValue, { compact: true })}
-          note="Under installment, sold or allocated"
+          note="Under instalment, sold or allocated"
         />
       </div>
 

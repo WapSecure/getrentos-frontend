@@ -114,6 +114,7 @@ export default function PaymentsPage() {
         redirectToCheckout(updated.authorizationUrl);
         return;
       }
+      setPayingPaymentId(null);
       queryClient.invalidateQueries({ queryKey: renterKeys.payments });
       queryClient.invalidateQueries({ queryKey: renterKeys.receipts });
       queryClient.invalidateQueries({ queryKey: ['renter', 'rent-accounts'] });
@@ -132,14 +133,9 @@ export default function PaymentsPage() {
       const unavailable = providers.recover(error, variables.provider);
       if (unavailable) {
         setProviderError(unavailable);
-        setPayingPaymentId(variables.paymentId);
         return;
       }
-      pushNotification({
-        type: 'error',
-        title: 'Payment unsuccessful',
-        message: error.message || 'We could not process this payment. Please try again.',
-      });
+      // Anything else shows in the pay dialog, which stays open.
     },
   });
 
@@ -174,6 +170,7 @@ export default function PaymentsPage() {
   const payChosen = (paymentId: string, amount: number | undefined) => {
     const payment = findPayment(paymentId);
     if (!payment) return;
+    setProviderError(null);
     // The API decides: with a gateway it returns a checkout to redirect to;
     // when payments are simulated it settles the charge itself and returns none.
     payNowMutation.mutate({
@@ -402,10 +399,17 @@ export default function PaymentsPage() {
         onClose={() => {
           setPayingPaymentId(null);
           setProviderError(null);
+          payNowMutation.reset();
         }}
         onPay={(amount) => payingPaymentId && payChosen(payingPaymentId, amount)}
         providers={providers}
         providerError={providerError}
+        busy={payNowMutation.isPending}
+        error={
+          payNowMutation.isError && !providerError
+            ? payNowMutation.error.message || 'We could not start this payment. Please try again.'
+            : null
+        }
       />
 
       {total > 0 && (

@@ -99,7 +99,7 @@ export const refundPreview = (
 export const planTermProblems = (terms: LandPaymentPlanTerms): string[] => {
   const problems: string[] = [];
   if (terms.durationMonths > 0 && terms.initialDepositBps >= 10_000) {
-    problems.push('An installment plan needs a deposit below 100%. Use 0 months for outright.');
+    problems.push('An instalment plan needs a deposit below 100%. Use 0 months for outright.');
   }
   if (terms.defaultAfterDays <= terms.gracePeriodDays) {
     problems.push('Default must come later than the grace period ends.');

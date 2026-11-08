@@ -25,6 +25,7 @@ import {
   DialogTitle,
 } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
+import { SALE_DEPOSIT_PROTECTION } from '@/lib/paymentCopy';
 import type {
   BuyerEscrowTransaction,
   BuyerEscrowStatus,
@@ -49,7 +50,7 @@ const actorConfig: Record<
   EscrowActivityLogEntry['actor'],
   { label: string; icon: React.ElementType }
 > = {
-  owner: { label: 'Owner', icon: User },
+  owner: { label: 'Seller', icon: User },
   buyer: { label: 'You', icon: User },
   compliance: { label: 'Compliance', icon: ShieldCheck },
   system: { label: 'System', icon: Cog },
@@ -65,12 +66,12 @@ const escrowSteps: { key: BuyerEscrowStatus; label: string; description: string 
     key: 'funds_held',
     label: 'Funds held',
     description:
-      'Your payment is held safely by GetRentos. Once you have received the property and its documents, confirm receipt to release the funds to the owner.',
+      'Your payment is held by GetRentos. Once you have received the property and its documents, confirm receipt to release it to the seller.',
   },
   {
     key: 'released',
     label: 'Released',
-    description: 'Funds released to the owner and ownership transfer completed.',
+    description: 'Payment released to the seller and ownership transfer completed.',
   },
 ];
 
@@ -111,7 +112,7 @@ export const BuyerEscrowTransactionDetailModal = ({
             {transaction.propertyTitle}
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground mt-0.5">
-            Owner: {transaction.ownerName}
+            Seller: {transaction.ownerName}
           </DialogDescription>
         </div>
 
@@ -204,7 +205,7 @@ export const BuyerEscrowTransactionDetailModal = ({
                                   isLoading={isPaying}
                                   onClick={() => onMakePayment(transaction.id, 'release')}
                                 >
-                                  Yes, release to owner
+                                  Yes, release to seller
                                 </Button>
                                 <Button
                                   variant="ghost"
@@ -224,7 +225,7 @@ export const BuyerEscrowTransactionDetailModal = ({
                               icon={<ShieldCheck className="w-3.5 h-3.5" />}
                               onClick={() => setConfirmingRelease(true)}
                             >
-                              Confirm receipt &amp; release to owner
+                              Confirm receipt &amp; release to seller
                             </Button>
                           ))}
                       </div>
@@ -316,7 +317,7 @@ export const BuyerEscrowTransactionDetailModal = ({
           owedLabel="deposit"
           itemLabel="Deposit"
           receiverLine={`The fee goes to the payment company, so the full ${formatCurrency(depositAmount)} is held for this purchase.`}
-          protection="Your deposit is held by GetRentos and only released to the seller once you confirm receipt."
+          protection={SALE_DEPOSIT_PROTECTION}
           providers={providers}
           providerError={providerError}
           busy={isPaying}

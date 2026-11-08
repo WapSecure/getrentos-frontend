@@ -5,6 +5,7 @@ import { PaySheet } from '@/components/payments/PaySheet';
 import type { PaymentProviderChoice } from '@/hooks/usePaymentProviders';
 import type { Payment } from '@/lib/api/payments';
 import { formatNaira } from '@/lib/format';
+import { RENT_PART_PROTECTION, RENT_PROTECTION } from '@/lib/paymentCopy';
 
 /** Matches the backend: the smallest part-payment accepted. */
 const MIN_PART_PAYMENT = 1_000;
@@ -17,13 +18,15 @@ interface Props {
   providers: PaymentProviderChoice;
   /** Why the last try failed when the chosen company could not take it: choose another. */
   providerError?: string | null;
+  /** While the payment is being started: the sheet stays open and shows it. */
+  busy?: boolean;
 }
 
 /**
  * Pay rent: what a charge owes, or part of it (same rules and layout as the
  * web pay dialog). Anything paid goes to this charge first.
  */
-export function PayAmountSheet({ payment, onClose, onPay, providers, providerError }: Props) {
+export function PayAmountSheet({ payment, onClose, onPay, providers, providerError, busy }: Props) {
   const { spacing } = useTheme();
   const [mode, setMode] = useState<'full' | 'part'>('full');
   const [amount, setAmount] = useState<number | null>(null);
@@ -67,11 +70,12 @@ export function PayAmountSheet({ payment, onClose, onPay, providers, providerErr
       amount={paying}
       itemLabel={mode === 'full' ? 'Rent' : 'Part payment'}
       receiverLine={`The fee goes to the payment company, so your landlord receives the full ${formatNaira(paying)}.`}
-      protection="Your rent is held by GetRentos until you confirm move-in."
+      protection={mode === 'part' ? RENT_PART_PROTECTION : RENT_PROTECTION}
       ready={mode === 'full' || partValid}
       providers={providers}
       providerError={providerError}
       onPay={() => onPay(mode === 'part' ? part : undefined)}
+      busy={busy}
       howMuch={
         <View style={{ gap: spacing.md }}>
           <RadioGroup

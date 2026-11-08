@@ -12,6 +12,7 @@ import {
   PaymentConfirming,
   PaymentDoneElsewhere,
   PaymentFailed,
+  PaymentLookupFailed,
   PaymentNotFound,
   PaymentStillPending,
   PaymentSuccess,
@@ -41,11 +42,13 @@ function PaymentReturnContent() {
     searchParams.get('trxref') ??
     searchParams.get('paymentReference');
   // After a minute the page stops asking and says so, rather than spinning on.
+  // "Check again" starts another round.
   const [gaveUp, setGaveUp] = useState(false);
+  const [round, setRound] = useState(0);
   useEffect(() => {
     const timer = setTimeout(() => setGaveUp(true), GIVE_UP_MS);
     return () => clearTimeout(timer);
-  }, []);
+  }, [round]);
 
   // Paid from the mobile app, the payer lands here in an in-app browser with no
   // web session: there is nothing to look up, and the app shows the outcome.
@@ -65,13 +68,33 @@ function PaymentReturnContent() {
   const back = payment?.returnPath ?? '/';
 
   if (!signedIn) return <PaymentDoneElsewhere />;
-  if (!reference || status.isError) return <PaymentNotFound />;
+  if (!reference) return <PaymentNotFound />;
+  if (status.isError && !payment) {
+    return (
+      <PaymentLookupFailed
+        reference={reference}
+        onRetry={() => status.refetch()}
+        retrying={status.isFetching}
+      />
+    );
+  }
   if (!payment || (payment.status === 'PENDING' && !gaveUp)) {
     return <PaymentConfirming kind={payment?.kind} />;
   }
   if (payment.status === 'PAID') return <PaymentSuccess payment={payment} back={back} />;
   if (payment.status === 'FAILED') return <PaymentFailed payment={payment} back={back} />;
-  return <PaymentStillPending payment={payment} back={back} />;
+  return (
+    <PaymentStillPending
+      payment={payment}
+      back={back}
+      checking={status.isFetching}
+      onCheckAgain={() => {
+        setGaveUp(false);
+        setRound((n) => n + 1);
+        void status.refetch();
+      }}
+    />
+  );
 }
 
 export default function PaymentReturnPage() {

@@ -10,7 +10,7 @@ export const InstallmentSchedule = ({ installments }: { installments: LandInstal
   if (installments.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
-        No installments yet. The schedule is set when the deposit is paid.
+        No instalments yet. The schedule is set when the deposit is paid.
       </p>
     );
   }
@@ -20,7 +20,7 @@ export const InstallmentSchedule = ({ installments }: { installments: LandInstal
       <table className="w-full text-sm">
         <thead className="bg-muted/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
           <tr>
-            <th className="px-4 py-2.5">Installment</th>
+            <th className="px-4 py-2.5">Instalment</th>
             <th className="px-4 py-2.5">Due</th>
             <th className="px-4 py-2.5 text-right">Amount</th>
             <th className="px-4 py-2.5 text-right">Paid</th>
