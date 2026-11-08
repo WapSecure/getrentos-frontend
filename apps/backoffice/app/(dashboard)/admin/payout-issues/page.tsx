@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { HandCoins } from 'lucide-react';
 import {
@@ -25,6 +26,7 @@ import {
   adminPayoutIssuesService,
   type PayoutIssue,
   type PayoutKind,
+  type PayoutRail,
 } from '@/services/adminPayoutIssuesService';
 
 type View = 'failed' | 'stuck' | 'waiting';
@@ -40,6 +42,15 @@ const RAIL: Record<PayoutKind, string> = {
   disbursement: 'Scheduled owner payout',
   vendor: 'Vendor invoice',
   land: 'Land sale release',
+};
+
+/** Where staff find the record a stuck payout came from (UX-49). */
+const SOURCE: Partial<Record<PayoutRail, { href: string; label: string }>> = {
+  shortlet: { href: '/admin/shortlets', label: 'Open short-lets' },
+  realtor: { href: '/admin/realtors', label: 'Open realtors' },
+  agency: { href: '/admin/agencies', label: 'Open agencies' },
+  agent: { href: '/admin/agents', label: 'Open agents' },
+  partner: { href: '/admin/partner-commercials', label: 'Open partner commercials' },
 };
 
 /**
@@ -59,6 +70,8 @@ export default function PayoutIssuesPage() {
   const [view, setView] = useState<View>('failed');
   const [confirming, setConfirming] = useState<PayoutIssue | null>(null);
   const [approving, setApproving] = useState<PayoutIssue | null>(null);
+  // Held payouts approved on this page: they now need only Retry (UX-43).
+  const [approvedRefs, setApprovedRefs] = useState<ReadonlySet<string>>(() => new Set());
 
   const query = useQuery({
     queryKey: ['admin', 'payout-issues'],
@@ -70,11 +83,11 @@ export default function PayoutIssuesPage() {
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'payout-issues'] });
       setConfirming(null);
-      toast.success(
-        result.status === 'FAILED'
-          ? 'Sent, and refused again. Check the recipient’s account.'
-          : 'Sent. It shows as paid once the bank confirms.'
-      );
+      if (result.status === 'FAILED') {
+        toast.error('Sent, and refused again. Check the recipient’s account.');
+      } else {
+        toast.success('Sent. It shows as paid once the bank confirms.');
+      }
     },
     onError: (e: Error) => toast.error(e.message || 'Could not retry this payout.'),
   });
@@ -82,10 +95,14 @@ export default function PayoutIssuesPage() {
   const approve = useMutation({
     mutationFn: (p: PayoutIssue) =>
       unwrap(adminPayoutIssuesService.approve(p.transferRef as string)),
-    onSuccess: () => {
+    onSuccess: (_data, p) => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'payout-issues'] });
+      if (p.transferRef) {
+        const ref = p.transferRef;
+        setApprovedRefs((prev) => new Set(prev).add(ref));
+      }
       setApproving(null);
-      toast.success('Approved. Retry it to send it.');
+      toast.success('Approved. Now retry it to send it.');
     },
     onError: (e: Error) => toast.error(e.message || 'Could not approve this payout.'),
   });
@@ -97,7 +114,7 @@ export default function PayoutIssuesPage() {
     <>
       <PageHeader
         title="Payouts needing attention"
-        description="Payouts the bank refused, payouts that stopped before any money was sent, and transfers the bank has held for over a day, on every rail in one place. Retry a failed one once its account is right; sort a stuck one out by hand; check a waiting one on Paystack first."
+        description="Payouts the bank refused, payouts that stopped before any money was sent, and transfers the bank has held for over a day, on every rail in one place. Retry a failed one once its account is right; sort a stuck one out by hand; check a waiting one with the payment company first."
       />
 
       <Tabs value={view} onValueChange={(v) => setView(v as View)}>
@@ -144,9 +161,9 @@ export default function PayoutIssuesPage() {
                   <Badge variant="info">Waiting</Badge>
                 </div>
                 <p className="mt-3 text-xs text-muted-foreground">
-                  Look this reference up on Paystack before doing anything: it may still land, so
-                  sending it again could pay twice. If Paystack is asking for an OTP, approve it
-                  there.
+                  Look this reference up on the payment company’s dashboard before doing anything:
+                  it may still land, so sending it again could pay twice. If it is asking for an
+                  OTP, approve it there.
                 </p>
               </Card>
             ))}
@@ -208,18 +225,34 @@ export default function PayoutIssuesPage() {
               ) : null}
 
               {view === 'stuck' ? (
-                <p className="mt-3 text-xs text-muted-foreground">
-                  No money was sent. Release what it claimed, or send it again by hand.
-                </p>
-              ) : canRetry && p.held?.needsApproval && p.transferRef ? (
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <Button variant="primary" onClick={() => setApproving(p)}>
-                    Approve
-                  </Button>
-                  <Button variant="outline" onClick={() => setConfirming(p)}>
-                    Retry
-                  </Button>
+                <div className="mt-3 space-y-2 text-xs text-muted-foreground">
+                  <p>No money was sent, so nothing can be paid twice. To sort it out:</p>
+                  <ol className="list-decimal space-y-1 pl-5">
+                    <li>
+                      Find the record it came from using payout {p.id} and check the amount is still
+                      owed.
+                    </li>
+                    <li>
+                      If it is owed, pay it by hand and note the bank reference on the record. If it
+                      is not, release what it claimed so it can be paid again later.
+                    </li>
+                  </ol>
+                  {SOURCE[p.rail] && (
+                    <Link
+                      href={SOURCE[p.rail]!.href}
+                      className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+                    >
+                      {SOURCE[p.rail]!.label}
+                    </Link>
+                  )}
                 </div>
+              ) : canRetry &&
+                p.held?.needsApproval &&
+                p.transferRef &&
+                !approvedRefs.has(p.transferRef) ? (
+                <Button className="mt-4" variant="primary" onClick={() => setApproving(p)}>
+                  Approve
+                </Button>
               ) : canRetry ? (
                 <Button className="mt-4" variant="outline" onClick={() => setConfirming(p)}>
                   Retry

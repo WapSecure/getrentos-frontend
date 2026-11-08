@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ShieldAlert } from 'lucide-react';
 import {
   Badge,
+  Button,
   Card,
   EmptyState,
   ListSkeleton,
@@ -13,10 +14,18 @@ import {
   Tabs,
   TabsList,
   TabsTrigger,
+  useToast,
   type BadgeVariant,
 } from '@getrentos/ui';
 import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
+import { useAdminUser } from '../layout';
+import { hasAdminPermission } from '@/lib/adminAccess';
 import { adminChargebacksService, type Chargeback } from '@/services/adminChargebacksService';
+import {
+  DecideChargebackDialog,
+  canDecideByHand,
+} from '@/components/admin/chargebacks/DecideChargebackDialog';
+import { RecordMonnifyDisputeDialog } from '@/components/admin/chargebacks/RecordMonnifyDisputeDialog';
 
 type View = 'OPEN' | 'DECIDED';
 
@@ -66,6 +75,13 @@ function moneyLine(c: Chargeback): string {
  */
 export default function ChargebacksPage() {
   const [view, setView] = useState<View>('OPEN');
+  const queryClient = useQueryClient();
+  const user = useAdminUser();
+  const canAct = hasAdminPermission(user?.roles, 'rentfinance.approve');
+  const toast = useToast();
+  const [recording, setRecording] = useState(false);
+  const [deciding, setDeciding] = useState<Chargeback | null>(null);
+  const refresh = () => queryClient.invalidateQueries({ queryKey: ['admin', 'chargebacks'] });
   const query = useQuery({
     queryKey: ['admin', 'chargebacks', view],
     queryFn: () => unwrap(adminChargebacksService.list(view)),
@@ -77,7 +93,14 @@ export default function ChargebacksPage() {
     <>
       <PageHeader
         title="Chargebacks"
-        description="Card payments a payer has asked their bank to reverse. Answer each on the payment company's dashboard with evidence (receipt, move-in or check-in confirmation, messages) before its deadline. The money is held back until it is decided."
+        description="Card payments a payer has asked their bank to reverse. Answer each on the payment company's dashboard with evidence (receipt, move-in or check-in confirmation, messages) before its deadline. The money is held back until it is decided. Monnify does not tell GetRentos about disputes, so record each Monnify one here from its dashboard."
+        actions={
+          canAct ? (
+            <Button variant="primary" onClick={() => setRecording(true)}>
+              Record Monnify dispute
+            </Button>
+          ) : undefined
+        }
       />
 
       <Tabs value={view} onValueChange={(v) => setView(v as View)}>
@@ -139,10 +162,46 @@ export default function ChargebacksPage() {
                     Evidence due {formatDate(c.dueAt)} · {c.providerStatus.replace(/-/g, ' ')}
                   </p>
                 )}
+                {canDecideByHand(c) &&
+                  (canAct ? (
+                    <Button className="mt-4" variant="outline" onClick={() => setDeciding(c)}>
+                      Record outcome
+                    </Button>
+                  ) : (
+                    <p className="mt-3 text-xs text-muted-foreground">
+                      Recording the outcome needs the rent-finance approval permission.
+                    </p>
+                  ))}
               </Card>
             );
           })}
         </div>
+      )}
+
+      {recording && (
+        <RecordMonnifyDisputeDialog
+          onClose={() => setRecording(false)}
+          onRecorded={() => {
+            setRecording(false);
+            refresh();
+            toast.success('Dispute recorded. The money is held back until you record the outcome.');
+          }}
+        />
+      )}
+      {deciding && (
+        <DecideChargebackDialog
+          chargeback={deciding}
+          onClose={() => setDeciding(null)}
+          onDecided={(outcome) => {
+            setDeciding(null);
+            refresh();
+            toast.success(
+              outcome === 'WON'
+                ? 'Recorded as won. The money stays with the receiver.'
+                : 'Recorded as lost. It is taken back from the receiver’s balance.'
+            );
+          }}
+        />
       )}
     </>
   );
