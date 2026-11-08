@@ -25,6 +25,11 @@ export interface StepUpDialogProps {
   authenticateWithPasskey?: PasskeyAuthenticator;
   /** Overrides the sentence under the title. */
   description?: string;
+  /**
+   * What is being authorised, e.g. "Withdraw ₦250,000 to GTBank ••••1234" (UX-30).
+   * A summary the request itself carries (`withStepUpSummary`) wins over this one.
+   */
+  summary?: string;
 }
 
 const COPY: Record<StepUpMethod, { label: string; hint: string }> = {
@@ -46,9 +51,11 @@ const COPY: Record<StepUpMethod, { label: string; hint: string }> = {
 export function StepUpDialog({
   authenticateWithPasskey,
   description = 'This change affects where your money goes or how you sign in, so we check it’s really you.',
+  summary: summaryProp,
 }: StepUpDialogProps = {}) {
   const pending = useRef<Pending | null>(null);
   const [open, setOpen] = useState(false);
+  const [requestSummary, setRequestSummary] = useState<string | null>(null);
   const [method, setMethod] = useState<StepUpMethod | null>(null);
   const [value, setValue] = useState('');
   const [reference, setReference] = useState<string | null>(null);
@@ -58,9 +65,10 @@ export function StepUpDialog({
 
   useEffect(() => {
     registerStepUpHandler(
-      () =>
+      (requested) =>
         new Promise<string | null>((resolve) => {
           pending.current = { resolve };
+          setRequestSummary(requested);
           setValue('');
           setReference(null);
           setSentTo(null);
@@ -151,6 +159,7 @@ export function StepUpDialog({
   const needsCode = method === 'email_code' && !reference;
   const isPasskey = method === 'passkey';
   const copy = method ? COPY[method] : null;
+  const summary = requestSummary ?? summaryProp ?? null;
 
   return (
     <Dialog open={open} onOpenChange={(next) => !next && finish(null)}>
@@ -162,6 +171,12 @@ export function StepUpDialog({
         <DialogDescription className="mt-1 text-sm text-muted-foreground">
           {description}
         </DialogDescription>
+        {summary ? (
+          <div className="mt-3 rounded-lg border border-border bg-secondary/40 px-3 py-2">
+            <p className="text-xs text-muted-foreground">You’re confirming</p>
+            <p className="text-sm font-medium text-foreground">{summary}</p>
+          </div>
+        ) : null}
 
         <form
           className="mt-4 space-y-3"
