@@ -32,7 +32,7 @@ const EMPTY_STATS: RentCollectionStatsData = {
 const statusFilters: { value: 'all' | RentPaymentStatus; label: string }[] = [
   { value: 'all', label: 'All' },
   { value: 'paid', label: 'Paid' },
-  { value: 'pending', label: 'Pending' },
+  { value: 'pending', label: 'Due' },
   { value: 'overdue', label: 'Overdue' },
 ];
 
@@ -74,7 +74,8 @@ export function PaymentsView() {
 
   const { totalCollected, outstandingBalance, escrowPending, upcomingPayments } = stats;
 
-  // The server filters by status; search stays client-side (not supported by the API).
+  // The server filters by status; search stays client-side on this page (the API
+  // has no search parameter), and the view says so while a search is typed.
   const filteredPayments = useMemo(
     () =>
       payments.filter(
@@ -133,6 +134,13 @@ export function PaymentsView() {
           ))}
         </div>
       </div>
+
+      {searchQuery.trim() && total > payments.length && (
+        <p className="-mt-3 mb-4 text-xs text-muted-foreground" role="status">
+          Searching the {payments.length} payments on this page only, of {total}. Go to another page
+          to search the rest.
+        </p>
+      )}
 
       {paymentsQuery.isLoading ? (
         <TableSkeleton rows={5} columns={6} />

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Download, FileText, FileSpreadsheet, Check } from 'lucide-react';
 import {
+  Alert,
   Button,
   Dialog,
   DialogContent,
@@ -13,36 +14,45 @@ import {
   Select,
 } from '@getrentos/ui';
 import { downloadCsv, printHtml, escapeHtml } from '@/lib/export';
+import { formatCurrency, formatLagosDate } from '@/lib/format';
+import { paymentStatusBadges } from '@/lib/statusBadge';
 
 interface Payment {
   id: string;
   propertyName: string;
+  description?: string;
   amount: number;
   date: string;
-  status: string;
-  method: string;
+  dueDate?: string;
+  status: 'paid' | 'pending' | 'overdue' | 'processing';
 }
 
 interface PaymentExportProps {
   isOpen: boolean;
   onClose: () => void;
+  /** Every payment the renter has, not one page of the history. */
   payments: Payment[];
+  isLoading?: boolean;
+  /** Set when the full history could not be loaded, so nothing partial is exported. */
+  error?: string | null;
 }
 
-export const PaymentExport = ({ isOpen, onClose, payments }: PaymentExportProps) => {
+const statusLabel = (status: Payment['status']) => paymentStatusBadges[status]?.label ?? status;
+/** A paid charge is dated by when it was paid; an open one by when it is due. */
+const rowDate = (p: Payment) =>
+  formatLagosDate(p.status === 'paid' ? p.date : (p.dueDate ?? p.date));
+
+export const PaymentExport = ({
+  isOpen,
+  onClose,
+  payments,
+  isLoading = false,
+  error = null,
+}: PaymentExportProps) => {
   const [exporting, setExporting] = useState<'pdf' | 'csv' | null>(null);
   const [completed, setCompleted] = useState(false);
   const [dateRange, setDateRange] = useState<'all' | 'last3' | 'last6' | 'last12'>('all');
   const [format, setFormat] = useState<'pdf' | 'csv'>('pdf');
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-NG', {
-      style: 'currency',
-      currency: 'NGN',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
 
   const getFilteredPayments = () => {
     const now = new Date();
@@ -65,21 +75,12 @@ export const PaymentExport = ({ isOpen, onClose, payments }: PaymentExportProps)
     return payments.filter((p) => new Date(p.date) >= cutoffDate);
   };
 
-  const exportToCSV = () => {
-    setExporting('csv');
+  const filtered = getFilteredPayments();
+  const paidTotal = filtered
+    .filter((p) => p.status === 'paid')
+    .reduce((sum, p) => sum + p.amount, 0);
 
-    const filteredPayments = getFilteredPayments();
-    const headers = ['Property', 'Amount', 'Date', 'Status', 'Method'];
-    const rows = filteredPayments.map((p) => [
-      p.propertyName,
-      formatCurrency(p.amount),
-      new Date(p.date).toLocaleDateString(),
-      p.status,
-      p.method,
-    ]);
-
-    downloadCsv(`payments-${new Date().toISOString().split('T')[0]}.csv`, headers, rows);
-
+  const finish = () => {
     setCompleted(true);
     setTimeout(() => {
       setCompleted(false);
@@ -88,34 +89,40 @@ export const PaymentExport = ({ isOpen, onClose, payments }: PaymentExportProps)
     }, 1000);
   };
 
+  const exportToCSV = () => {
+    setExporting('csv');
+    const headers = ['Property', 'Charge', 'Amount', 'Date', 'Status'];
+    const rows = filtered.map((p) => [
+      p.propertyName,
+      p.description ?? '',
+      formatCurrency(p.amount),
+      rowDate(p),
+      statusLabel(p.status),
+    ]);
+    downloadCsv(`payments-${new Date().toISOString().split('T')[0]}.csv`, headers, rows);
+    finish();
+  };
+
   const exportToPDF = () => {
     setExporting('pdf');
-
-    const filteredPayments = getFilteredPayments();
-    const rows = filteredPayments
+    const rows = filtered
       .map(
         (p) =>
-          `<tr><td>${escapeHtml(p.propertyName)}</td><td>${escapeHtml(
+          `<tr><td>${escapeHtml(p.propertyName)}</td><td>${escapeHtml(p.description ?? '')}</td><td>${escapeHtml(
             formatCurrency(p.amount)
-          )}</td><td>${escapeHtml(new Date(p.date).toLocaleDateString())}</td><td>${escapeHtml(
-            p.status
-          )}</td><td>${escapeHtml(p.method)}</td></tr>`
+          )}</td><td>${escapeHtml(rowDate(p))}</td><td>${escapeHtml(statusLabel(p.status))}</td></tr>`
       )
       .join('');
 
     printHtml(
       'Payments export',
-      `<h1>Payments export</h1><p class="meta">Exported on ${new Date().toLocaleDateString()} · ${filteredPayments.length} payment${filteredPayments.length === 1 ? '' : 's'} · Total ${escapeHtml(
-        formatCurrency(filteredPayments.reduce((sum, p) => sum + p.amount, 0))
-      )}</p><table><thead><tr><th>Property</th><th>Amount</th><th>Date</th><th>Status</th><th>Method</th></tr></thead><tbody>${rows || '<tr><td colspan="5">No payments</td></tr>'}</tbody></table>`
+      `<h1>Payments export</h1><p class="meta">Exported on ${escapeHtml(
+        formatLagosDate(new Date().toISOString())
+      )} · ${filtered.length} payment${filtered.length === 1 ? '' : 's'} · Paid ${escapeHtml(
+        formatCurrency(paidTotal)
+      )}</p><table><thead><tr><th>Property</th><th>Charge</th><th>Amount</th><th>Date</th><th>Status</th></tr></thead><tbody>${rows || '<tr><td colspan="5">No payments</td></tr>'}</tbody></table>`
     );
-
-    setCompleted(true);
-    setTimeout(() => {
-      setCompleted(false);
-      onClose();
-      setExporting(null);
-    }, 1000);
+    finish();
   };
 
   return (
@@ -124,20 +131,27 @@ export const PaymentExport = ({ isOpen, onClose, payments }: PaymentExportProps)
         <div className="p-4 pr-12 border-b border-border">
           <DialogTitle className="font-semibold text-foreground">Export payments</DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground mt-0.5">
-            {payments.length} payments available to export
+            {isLoading
+              ? 'Loading your full payment history…'
+              : `${payments.length} payments in your history`}
           </DialogDescription>
         </div>
 
         <div className="p-4 space-y-4">
+          {error && (
+            <Alert variant="danger" title="Your history did not load">
+              {error}
+            </Alert>
+          )}
           <Field label="Date range">
             <Select
               value={dateRange}
               onValueChange={(value) => setDateRange(value as 'all' | 'last3' | 'last6' | 'last12')}
               options={[
                 { value: 'all', label: 'All time' },
-                { value: 'last3', label: 'Last 3 Months' },
-                { value: 'last6', label: 'Last 6 Months' },
-                { value: 'last12', label: 'Last 12 Months' },
+                { value: 'last3', label: 'Last 3 months' },
+                { value: 'last6', label: 'Last 6 months' },
+                { value: 'last12', label: 'Last 12 months' },
               ]}
             />
           </Field>
@@ -163,17 +177,14 @@ export const PaymentExport = ({ isOpen, onClose, payments }: PaymentExportProps)
             />
           </Field>
 
-          {/* Payment Summary */}
           <div className="p-3 rounded-lg bg-secondary">
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Total payments</span>
-              <span className="font-medium text-foreground">{getFilteredPayments().length}</span>
+              <span className="text-muted-foreground">Payments</span>
+              <span className="font-medium text-foreground">{filtered.length}</span>
             </div>
             <div className="flex justify-between text-sm mt-1">
-              <span className="text-muted-foreground">Total amount</span>
-              <span className="font-medium text-primary">
-                {formatCurrency(getFilteredPayments().reduce((sum, p) => sum + p.amount, 0))}
-              </span>
+              <span className="text-muted-foreground">Paid in this range</span>
+              <span className="font-medium text-primary">{formatCurrency(paidTotal)}</span>
             </div>
           </div>
 
@@ -181,9 +192,9 @@ export const PaymentExport = ({ isOpen, onClose, payments }: PaymentExportProps)
             variant="primary"
             fullWidth
             onClick={format === 'pdf' ? exportToPDF : exportToCSV}
-            disabled={exporting !== null}
-            isLoading={exporting !== null && !completed}
-            loadingText="Exporting..."
+            disabled={exporting !== null || isLoading || Boolean(error)}
+            isLoading={(exporting !== null && !completed) || isLoading}
+            loadingText={isLoading ? 'Loading…' : 'Exporting...'}
             icon={completed ? <Check className="w-4 h-4" /> : <Download className="w-4 h-4" />}
           >
             {completed ? 'Exported!' : 'Export payments'}

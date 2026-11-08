@@ -15,6 +15,7 @@ import {
   IconButton,
   SearchInput,
 } from '@getrentos/ui';
+import { formatCurrency, formatLagosDate } from '@/lib/format';
 
 interface Receipt {
   id: string;
@@ -29,35 +30,31 @@ interface Receipt {
 interface PaymentReceiptsGalleryProps {
   receipts: Receipt[];
   onDownload: (receiptId: string) => void;
+  /** Every receipt the renter has, across pages (the gallery holds one page). */
+  total?: number;
 }
 
-export const PaymentReceiptsGallery = ({ receipts, onDownload }: PaymentReceiptsGalleryProps) => {
+export const PaymentReceiptsGallery = ({
+  receipts,
+  onDownload,
+  total = receipts.length,
+}: PaymentReceiptsGalleryProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null);
   const [showPreview, setShowPreview] = useState(false);
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-NG', {
-      style: 'currency',
-      currency: 'NGN',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
+  const formatDate = (dateString: string) => formatLagosDate(dateString);
+  const pageOnly = total > receipts.length;
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-GB', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  };
-
-  const filteredReceipts = receipts.filter(
-    (receipt) =>
-      receipt.propertyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      receipt.fileName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // People look a receipt up by home, amount or date, not by its file name.
+  const filteredReceipts = receipts.filter((receipt) => {
+    const term = searchTerm.toLowerCase();
+    return (
+      receipt.propertyName.toLowerCase().includes(term) ||
+      formatDate(receipt.date).toLowerCase().includes(term) ||
+      formatCurrency(receipt.amount).toLowerCase().includes(term)
+    );
+  });
 
   const handleView = (receipt: Receipt) => {
     setSelectedReceipt(receipt);
@@ -70,17 +67,17 @@ export const PaymentReceiptsGallery = ({ receipts, onDownload }: PaymentReceipts
         <div className="p-4 border-b border-border">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h2 className="font-semibold text-foreground">Receipts gallery</h2>
+              <h2 className="font-semibold text-foreground">Receipts</h2>
               <p className="text-xs text-muted-foreground mt-0.5">
-                {receipts.length} receipts available
+                {total === 1 ? '1 receipt' : `${total} receipts`}
               </p>
             </div>
 
             <SearchInput
               value={searchTerm}
               onValueChange={setSearchTerm}
-              placeholder="Search receipts..."
-              label="Search receipts"
+              placeholder={pageOnly ? 'Search this page...' : 'Search by home, amount or date...'}
+              label={pageOnly ? 'Search receipts on this page' : 'Search receipts'}
               className="w-full sm:w-56"
             />
           </div>
@@ -106,21 +103,13 @@ export const PaymentReceiptsGallery = ({ receipts, onDownload }: PaymentReceipts
                   </span>
                   <span className="flex-1 min-w-0">
                     <span className="block text-sm font-medium text-foreground truncate">
-                      {receipt.fileName}
-                    </span>
-                    <span className="block text-xs text-muted-foreground">
                       {receipt.propertyName}
                     </span>
-                    <span className="flex items-center gap-2 mt-1">
-                      <span className="text-xs font-semibold text-primary">
-                        {formatCurrency(receipt.amount)}
-                      </span>
-                      <span className="text-xs text-muted-foreground" aria-hidden="true">
-                        •
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {formatDate(receipt.date)}
-                      </span>
+                    <span className="block text-xs text-muted-foreground">
+                      Paid {formatDate(receipt.date)}
+                    </span>
+                    <span className="mt-1 block text-xs font-semibold text-primary">
+                      {formatCurrency(receipt.amount)}
                     </span>
                   </span>
                 </button>
@@ -128,13 +117,13 @@ export const PaymentReceiptsGallery = ({ receipts, onDownload }: PaymentReceipts
                 <div className="absolute top-2 right-2 flex gap-1 transition-opacity sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
                   <IconButton
                     size="sm"
-                    label={`Download ${receipt.fileName}`}
+                    label={`Download receipt (${receipt.fileName})`}
                     icon={<Download aria-hidden="true" />}
                     onClick={() => onDownload(receipt.id)}
                   />
                   <IconButton
                     size="sm"
-                    label={`View ${receipt.fileName}`}
+                    label={`View receipt for ${receipt.propertyName}, paid ${formatDate(receipt.date)}`}
                     icon={<Eye aria-hidden="true" />}
                     onClick={() => handleView(receipt)}
                   />
@@ -157,9 +146,9 @@ export const PaymentReceiptsGallery = ({ receipts, onDownload }: PaymentReceipts
         {selectedReceipt && (
           <DialogContent className="p-0 sm:p-0">
             <div className="p-4 pr-12 border-b border-border">
-              <DialogTitle className="font-semibold text-foreground">Receipt preview</DialogTitle>
+              <DialogTitle className="font-semibold text-foreground">Receipt</DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground mt-0.5">
-                {selectedReceipt.fileName}
+                {selectedReceipt.propertyName} · paid {formatDate(selectedReceipt.date)}
               </DialogDescription>
             </div>
 

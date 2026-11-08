@@ -1,19 +1,16 @@
 'use client';
 
-import type { ReactNode } from 'react';
-import { CreditCard, Download, Shield, Wallet } from 'lucide-react';
+import { CreditCard, Download, Shield } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { RenterPageHeader } from '../shared/RenterPageHeader';
 
 interface PaymentsHeaderProps {
-  onExport: () => void;
-  /** Open the pay dialog for the oldest open charge. Absent when nothing is owed. */
-  onPayOldest?: () => void;
-  /** The payment notifications button, shown first among the actions. */
-  notifications?: ReactNode;
+  /** Export the payment history. Absent on tabs that are not the history. */
+  onExport?: () => void;
 }
 
-export const PaymentsHeader = ({ onExport, onPayOldest, notifications }: PaymentsHeaderProps) => {
+/** The pay action lives once, in the summary under the header, not here as well. */
+export const PaymentsHeader = ({ onExport }: PaymentsHeaderProps) => {
   return (
     <div>
       <RenterPageHeader
@@ -23,15 +20,10 @@ export const PaymentsHeader = ({ onExport, onPayOldest, notifications }: Payment
         description="Manage rent, payment methods, receipts, and your complete payment history."
         actions={
           <>
-            {notifications}
-            <Button variant="outline" className="gap-2" size="sm" onClick={onExport}>
-              <Download className="h-4 w-4" aria-hidden="true" />
-              Export
-            </Button>
-            {onPayOldest && (
-              <Button variant="primary" className="gap-2" size="sm" onClick={onPayOldest}>
-                <Wallet className="h-4 w-4" aria-hidden="true" />
-                Pay oldest charge
+            {onExport && (
+              <Button variant="outline" className="gap-2" size="sm" onClick={onExport}>
+                <Download className="h-4 w-4" aria-hidden="true" />
+                Export
               </Button>
             )}
           </>
@@ -40,8 +32,9 @@ export const PaymentsHeader = ({ onExport, onPayOldest, notifications }: Payment
         <div className="flex max-w-3xl items-start gap-2 text-sm text-muted-foreground">
           <Shield className="mt-0.5 h-4 w-4 shrink-0 text-success" aria-hidden="true" />
           <p>
-            Rent paid through GetRentos is held until you confirm move-in, then released according
-            to the payment-protection terms.
+            GetRentos Payment Protection: on a new lease, your first rent is held until you confirm
+            move-in. Other payments are released to your landlord on the release date shown with
+            each payment.
           </p>
         </div>
       </RenterPageHeader>
