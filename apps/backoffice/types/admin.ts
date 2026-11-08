@@ -490,6 +490,15 @@ export interface TwoFactorEnrollment {
   qrDataUrl: string;
 }
 
+/** One device the staff member is signed in on ("Where you're signed in"). */
+export interface StaffSession {
+  id: string;
+  device: string;
+  ipAddress?: string;
+  lastActiveAt: string;
+  current: boolean;
+}
+
 export interface StaffPasskey {
   id: string;
   deviceName: string | null;

@@ -3,7 +3,7 @@ import type { ReplyLanguage } from '@/lib/replyLanguage';
 import type { ChargeCategory } from '@/lib/chargeCategory';
 import { authDownload, authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
 import type { ApiResponse } from '@/lib/apiHelpers';
-import type { StepUpMethod, VideoCallJoin } from '@getrentos/shared';
+import type { VideoCallJoin } from '@getrentos/shared';
 import type {
   Application,
   ApplicationStatus,
@@ -1575,18 +1575,6 @@ export const renterService = {
     );
   },
 
-  async updatePassword(
-    currentPassword: string,
-    newPassword: string
-  ): Promise<ApiResponse<{ message: string }>> {
-    return safeCall(() =>
-      authFetch('/renter/settings/password', {
-        method: 'PUT',
-        body: JSON.stringify({ currentPassword, newPassword }),
-      })
-    );
-  },
-
   async getSettingsPreferences(): Promise<ApiResponse<Record<string, unknown>>> {
     return safeCall(() => authFetch('/renter/settings/preferences'));
   },
@@ -1602,34 +1590,6 @@ export const renterService = {
     );
   },
 
-  async getTwoFactorStatus(): Promise<ApiResponse<{ enrolled: boolean; enabled: boolean }>> {
-    return safeCall(() => authFetch('/renter/settings/2fa'));
-  },
-
-  async enrollTwoFactor(): Promise<
-    ApiResponse<{ secret: string; otpauthUrl: string; qrDataUrl: string }>
-  > {
-    return safeCall(() => authFetch('/renter/settings/2fa/enroll', { method: 'POST' }));
-  },
-
-  async enableTwoFactor(token: string): Promise<ApiResponse<{ enabled: boolean }>> {
-    return safeCall(() =>
-      authFetch('/renter/settings/2fa/enable', {
-        method: 'POST',
-        body: JSON.stringify({ token }),
-      })
-    );
-  },
-
-  async disableTwoFactor(token: string): Promise<ApiResponse<{ enabled: boolean }>> {
-    return safeCall(() =>
-      authFetch('/renter/settings/2fa/disable', {
-        method: 'POST',
-        body: JSON.stringify({ token }),
-      })
-    );
-  },
-
   async deleteAccount(password: string): Promise<ApiResponse<{ message: string }>> {
     return safeCall(() =>
       authFetch('/renter/settings/account', {
@@ -1637,84 +1597,6 @@ export const renterService = {
         body: JSON.stringify({ password }),
       })
     );
-  },
-
-  // ---- Transaction PIN (global account-security surface) ----
-  /** Whether a transaction PIN / passkey is set, and which factor step-up asks for. */
-  async getSecurityOverview(): Promise<
-    ApiResponse<{
-      hasPassword: boolean;
-      hasTransactionPin: boolean;
-      hasPasskey: boolean;
-      stepUpMethod: StepUpMethod;
-    }>
-  > {
-    return safeCall(() => authFetch('/users/me/security'));
-  },
-
-  /**
-   * Set, change or reset the 6-digit transaction PIN. Changing one takes the
-   * current password and PIN; a first PIN, or a forgotten one, takes the
-   * password and an emailed code (`sendSecurityCode`). Accounts with no
-   * password leave it out.
-   */
-  async setTransactionPin(input: {
-    currentPassword?: string;
-    pin: string;
-    currentPin?: string;
-    reference?: string;
-    code?: string;
-  }): Promise<ApiResponse<{ hasTransactionPin: true }>> {
-    return safeCall(() =>
-      authFetch('/users/me/security/transaction-pin', {
-        method: 'POST',
-        body: JSON.stringify(input),
-      })
-    );
-  },
-
-  /** Emails a 6-digit code that proves it's the account holder (e.g. to reset a PIN). */
-  async sendSecurityCode(): Promise<ApiResponse<{ reference: string; sentTo: string }>> {
-    return safeCall(() => authFetch('/users/me/security/step-up/code', { method: 'POST' }));
-  },
-
-  // ---- Passkeys (WebAuthn) ----
-  async listPasskeys(): Promise<
-    ApiResponse<{
-      hasPasskey: boolean;
-      passkeys: {
-        id: string;
-        deviceName: string | null;
-        createdAt: string;
-        lastUsedAt: string | null;
-      }[];
-    }>
-  > {
-    return safeCall(() => authFetch('/users/me/security/passkey'));
-  },
-
-  /** WebAuthn creation options to pass to the browser's startRegistration(). */
-  async startPasskeyRegistration(): Promise<ApiResponse<Record<string, unknown>>> {
-    return safeCall(() =>
-      authFetch('/users/me/security/passkey/register/options', { method: 'POST' })
-    );
-  },
-
-  /** Complete registration with the authenticator's attestation response. */
-  async finishPasskeyRegistration(
-    response: unknown,
-    deviceName?: string
-  ): Promise<ApiResponse<{ hasPasskey: true }>> {
-    return safeCall(() =>
-      authFetch('/users/me/security/passkey/register/verify', {
-        method: 'POST',
-        body: JSON.stringify({ response, deviceName }),
-      })
-    );
-  },
-
-  async removePasskey(id: string): Promise<ApiResponse<{ removed: true }>> {
-    return safeCall(() => authFetch(`/users/me/security/passkey/${id}`, { method: 'DELETE' }));
   },
 
   // ---- Saved searches ----

@@ -3,21 +3,23 @@
 import { useOwnerUser } from '../layout';
 import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { User, Bell, Landmark, SlidersHorizontal, Download } from 'lucide-react';
+import { User, Bell, Landmark, SlidersHorizontal, Lock, Download } from 'lucide-react';
 import { ProfileSettings } from '@/components/owner/settings/ProfileSettings';
 import { NotificationSettings } from '@/components/owner/settings/NotificationSettings';
 import { SellerPayoutSettings } from '@/components/shared/payouts/SellerPayoutSettings';
 import { PreferencesSettings } from '@/components/owner/settings/PreferencesSettings';
 import { DataExport } from '@/components/shared/settings/DataExport';
+import { SecuritySettings } from '@/components/shared/security/SecuritySettings';
 import { PageHeader } from '@getrentos/ui';
 
-type SettingsTab = 'profile' | 'notifications' | 'payouts' | 'preferences' | 'data';
+type SettingsTab = 'profile' | 'notifications' | 'payouts' | 'preferences' | 'security' | 'data';
 
 const tabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
   { id: 'profile', label: 'Profile', icon: User },
   { id: 'notifications', label: 'Notifications', icon: Bell },
   { id: 'payouts', label: 'Payout account', icon: Landmark },
   { id: 'preferences', label: 'Preferences', icon: SlidersHorizontal },
+  { id: 'security', label: 'Security', icon: Lock },
   { id: 'data', label: 'Your data', icon: Download },
 ];
 
@@ -41,6 +43,8 @@ export default function OwnerSettingsPage() {
         );
       case 'preferences':
         return <PreferencesSettings />;
+      case 'security':
+        return <SecuritySettings />;
       case 'data':
         return <DataExport />;
       default:

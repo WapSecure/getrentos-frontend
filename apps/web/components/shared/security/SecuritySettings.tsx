@@ -15,20 +15,22 @@ import {
   useToast,
 } from '@getrentos/ui';
 import { TRANSACTION_PIN_LENGTH } from '@getrentos/shared';
-import { renterService } from '@/services/renterService';
+import { accountSecurityService } from '@/services/accountSecurityService';
 import { unwrap } from '@/lib/apiHelpers';
-import { renterKeys } from '@/lib/queryKeys';
-
-interface TwoFactorEnroll {
-  secret: string;
-  otpauthUrl: string;
-  qrDataUrl: string;
-}
+import { accountSecurityKeys } from '@/lib/queryKeys';
+import type { TwoFactorEnrollment } from '@/types/accountSecurity';
+import { ChangePasswordCard } from './ChangePasswordCard';
+import { SignedInDevices } from './SignedInDevices';
 
 type TwoFactorStep = 'idle' | 'setup' | 'disable';
 
 const TWO_FACTOR_SWITCH_ID = 'two-factor-switch';
 
+/**
+ * Security settings for every role: password, passkeys, authenticator app,
+ * transaction PIN and where you're signed in. All of it is the person's, not
+ * a portal's, so it reads /users/me/security.
+ */
 export const SecuritySettings = () => {
   const queryClient = useQueryClient();
   const toast = useToast();
@@ -39,8 +41,8 @@ export const SecuritySettings = () => {
     isFetching: twoFactorFetching,
     refetch: refetchTwoFactor,
   } = useQuery({
-    queryKey: renterKeys.twoFactor,
-    queryFn: () => unwrap(renterService.getTwoFactorStatus()),
+    queryKey: accountSecurityKeys.twoFactor,
+    queryFn: () => unwrap(accountSecurityService.getTwoFactorStatus()),
     throwOnError: false,
   });
 
@@ -50,8 +52,8 @@ export const SecuritySettings = () => {
     isFetching: securityFetching,
     refetch: refetchSecurity,
   } = useQuery({
-    queryKey: renterKeys.securityOverview,
-    queryFn: () => unwrap(renterService.getSecurityOverview()),
+    queryKey: accountSecurityKeys.overview,
+    queryFn: () => unwrap(accountSecurityService.getOverview()),
     throwOnError: false,
   });
 
@@ -84,7 +86,7 @@ export const SecuritySettings = () => {
   const useCurrentPin = hasPin && !pinForgot;
 
   const sendPinCodeMutation = useMutation({
-    mutationFn: () => unwrap(renterService.sendSecurityCode()),
+    mutationFn: () => unwrap(accountSecurityService.sendSecurityCode()),
     onSuccess: (res) => {
       setPinReference(res.reference);
       setPinSentTo(res.sentTo);
@@ -95,7 +97,7 @@ export const SecuritySettings = () => {
   const setPinMutation = useMutation({
     mutationFn: () =>
       unwrap(
-        renterService.setTransactionPin({
+        accountSecurityService.setTransactionPin({
           ...(needsPassword ? { currentPassword: pinPassword } : {}),
           pin,
           ...(useCurrentPin
@@ -104,7 +106,7 @@ export const SecuritySettings = () => {
         })
       ),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: renterKeys.securityOverview });
+      queryClient.invalidateQueries({ queryKey: accountSecurityKeys.overview });
       resetPin();
       toast.success('Transaction PIN saved');
     },
@@ -121,25 +123,25 @@ export const SecuritySettings = () => {
 
   // ---- Passkeys ----
   const { data: passkeyData } = useQuery({
-    queryKey: renterKeys.passkeys,
-    queryFn: () => unwrap(renterService.listPasskeys()),
+    queryKey: accountSecurityKeys.passkeys,
+    queryFn: () => unwrap(accountSecurityService.listPasskeys()),
   });
   const passkeys = passkeyData?.passkeys ?? [];
 
   const addPasskeyMutation = useMutation({
     mutationFn: async () => {
-      const options = await unwrap(renterService.startPasskeyRegistration());
+      const options = await unwrap(accountSecurityService.startPasskeyRegistration());
       // Browser prompts for Face ID / fingerprint / security key here.
       const attestation = await startRegistration({ optionsJSON: options as never });
       const label =
         typeof navigator !== 'undefined' && /iPhone|iPad|Android/i.test(navigator.userAgent)
           ? 'This phone'
           : 'This device';
-      return unwrap(renterService.finishPasskeyRegistration(attestation, label));
+      return unwrap(accountSecurityService.finishPasskeyRegistration(attestation, label));
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: renterKeys.passkeys });
-      queryClient.invalidateQueries({ queryKey: renterKeys.securityOverview });
+      queryClient.invalidateQueries({ queryKey: accountSecurityKeys.passkeys });
+      queryClient.invalidateQueries({ queryKey: accountSecurityKeys.overview });
       toast.success('Passkey added');
     },
     onError: (err: Error) => {
@@ -150,17 +152,17 @@ export const SecuritySettings = () => {
   });
 
   const removePasskeyMutation = useMutation({
-    mutationFn: (id: string) => unwrap(renterService.removePasskey(id)),
+    mutationFn: (id: string) => unwrap(accountSecurityService.removePasskey(id)),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: renterKeys.passkeys });
-      queryClient.invalidateQueries({ queryKey: renterKeys.securityOverview });
+      queryClient.invalidateQueries({ queryKey: accountSecurityKeys.passkeys });
+      queryClient.invalidateQueries({ queryKey: accountSecurityKeys.overview });
       toast.success('Passkey removed');
     },
     onError: (err: Error) => toast.error(err.message || 'Could not remove that passkey'),
   });
 
   const [step, setStep] = useState<TwoFactorStep>('idle');
-  const [enroll, setEnroll] = useState<TwoFactorEnroll | null>(null);
+  const [enroll, setEnroll] = useState<TwoFactorEnrollment | null>(null);
   const [code, setCode] = useState('');
   const [codeError, setCodeError] = useState<string | null>(null);
 
@@ -178,7 +180,7 @@ export const SecuritySettings = () => {
   };
 
   const enrollMutation = useMutation({
-    mutationFn: () => unwrap(renterService.enrollTwoFactor()),
+    mutationFn: () => unwrap(accountSecurityService.enrollTwoFactor()),
     onSuccess: (data) => {
       setEnroll(data);
       setStep('setup');
@@ -196,9 +198,9 @@ export const SecuritySettings = () => {
   });
 
   const enableMutation = useMutation({
-    mutationFn: (token: string) => unwrap(renterService.enableTwoFactor(token)),
+    mutationFn: (token: string) => unwrap(accountSecurityService.enableTwoFactor(token)),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: renterKeys.twoFactor });
+      queryClient.invalidateQueries({ queryKey: accountSecurityKeys.twoFactor });
       resetSetup();
       toast.success('Two-factor authentication enabled');
     },
@@ -206,9 +208,9 @@ export const SecuritySettings = () => {
   });
 
   const disableMutation = useMutation({
-    mutationFn: (token: string) => unwrap(renterService.disableTwoFactor(token)),
+    mutationFn: (token: string) => unwrap(accountSecurityService.disableTwoFactor(token)),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: renterKeys.twoFactor });
+      queryClient.invalidateQueries({ queryKey: accountSecurityKeys.twoFactor });
       resetSetup();
       toast.success('Two-factor authentication disabled');
     },
@@ -225,10 +227,12 @@ export const SecuritySettings = () => {
     <div>
       <h2 className="text-xl font-semibold text-foreground mb-4">Security settings</h2>
       <p className="text-sm text-muted-foreground mb-6">
-        Manage your account security and authentication methods
+        How you sign in, how you confirm payments, and where you&apos;re signed in
       </p>
 
       <div className="space-y-6">
+        {security?.hasPassword && <ChangePasswordCard />}
+
         {/* Passkey — the strongest factor */}
         <div className="p-4 rounded-lg border border-border">
           <div className="flex items-center justify-between gap-3">
@@ -581,6 +585,8 @@ export const SecuritySettings = () => {
             </div>
           )}
         </div>
+
+        <SignedInDevices />
       </div>
     </div>
   );

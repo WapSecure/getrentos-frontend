@@ -1,6 +1,7 @@
 'use client';
 
 import { PasskeySettings } from '@/components/security/PasskeySettings';
+import { SignedInDevices } from '@/components/security/SignedInDevices';
 import { STAFF_TWO_FACTOR_EXPLAINER, TwoFactorSetup } from '@/components/security/TwoFactorSetup';
 
 export const SecuritySettings = () => (
@@ -10,6 +11,7 @@ export const SecuritySettings = () => (
     <div className="space-y-4">
       <TwoFactorSetup />
       <PasskeySettings />
+      <SignedInDevices />
     </div>
   </div>
 );

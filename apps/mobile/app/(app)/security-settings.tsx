@@ -11,6 +11,7 @@ import {
   Fingerprint,
   KeyRound,
   Mail,
+  MonitorSmartphone,
   Phone,
   ScanFace,
   ShieldCheck,
@@ -34,6 +35,7 @@ import {
 import { qk } from '@/lib/query/keys';
 import {
   securityApi,
+  type AccountSession,
   type PasskeySummary,
   type SecurityOverview,
   type TwoFactorEnrollment,
@@ -58,7 +60,7 @@ import {
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { ChangeEmailSheet } from '@/components/account/ChangeEmailSheet';
 import { goBack } from '@/lib/goBack';
-import { AUTH_CONSTANTS } from '@getrentos/shared';
+import { AUTH_CONSTANTS, formatRelativeTime } from '@getrentos/shared';
 
 export default function SecuritySettings() {
   const { colors, spacing } = useTheme();
@@ -94,6 +96,7 @@ export default function SecuritySettings() {
               <TwoFactorSection overview={overview.data} />
               <TransactionPinSection overview={overview.data} />
               {overview.data.hasPassword ? <PasswordSection /> : <SocialOnlyNote />}
+              <SignedInDevicesSection />
               {isRenter ? <DataExportSection /> : null}
               {overview.data.hasPassword ? <DangerSection /> : null}
             </>
@@ -678,6 +681,114 @@ function PasskeySection() {
           </Pressable>
         </View>
       ))}
+    </Card>
+  );
+}
+
+/**
+ * Where you're signed in: every device with a live session, this phone first.
+ * A signed-out device loses access at its next refresh, within 15 minutes.
+ */
+function SignedInDevicesSection() {
+  const { colors, spacing } = useTheme();
+  const toast = useToast();
+  const qc = useQueryClient();
+  const sessions = useQuery({ queryKey: qk.sessions, queryFn: securityApi.listSessions });
+
+  const signOutOne = useMutation({
+    mutationFn: (id: string) => securityApi.signOutSession(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: qk.sessions });
+      toast.show('Signed out. That device loses access within 15 minutes.', 'success');
+    },
+    onError: (err) => toast.show(errorMessage(err, 'Could not sign that device out.'), 'error'),
+  });
+
+  const signOutOthers = useMutation({
+    mutationFn: securityApi.signOutOtherSessions,
+    onSuccess: (res) => {
+      qc.invalidateQueries({ queryKey: qk.sessions });
+      toast.show(
+        res.revoked === 1
+          ? 'Signed out 1 other device.'
+          : `Signed out ${res.revoked} other devices.`,
+        'success'
+      );
+    },
+    onError: (err) =>
+      toast.show(errorMessage(err, 'Could not sign the other devices out.'), 'error'),
+  });
+
+  const others = sessions.data?.filter((s) => !s.current) ?? [];
+
+  const confirmSignOutOthers = () =>
+    Alert.alert(
+      'Sign out other devices?',
+      `This keeps you signed in here and signs out ${
+        others.length === 1 ? '1 other device' : `${others.length} other devices`
+      } within 15 minutes.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Sign out', style: 'destructive', onPress: () => signOutOthers.mutate() },
+      ]
+    );
+
+  return (
+    <Card elevated>
+      <SectionHeader
+        icon={<MonitorSmartphone size={16} color={colors.primary} />}
+        title="Where you’re signed in"
+      />
+      <Text variant="caption" color="mutedForeground">
+        If you don’t recognise a device, sign it out and change your password.
+      </Text>
+      <QueryState query={sessions} skeleton={<Skeleton height={96} />}>
+        <View style={{ gap: spacing.sm, marginTop: spacing.md }}>
+          {(sessions.data ?? []).map((session: AccountSession) => (
+            <View
+              key={session.id}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: spacing.sm,
+              }}
+            >
+              <View style={{ flex: 1, gap: spacing.xs }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                  <Text variant="callout" style={{ flexShrink: 1 }}>
+                    {session.device}
+                  </Text>
+                  {session.current ? <Badge label="This phone" tone="success" /> : null}
+                </View>
+                <Text variant="caption" color="mutedForeground">
+                  {session.current
+                    ? 'Active now'
+                    : `Last active ${formatRelativeTime(session.lastActiveAt).toLowerCase()}`}
+                  {session.ipAddress ? ` · ${session.ipAddress}` : ''}
+                </Text>
+              </View>
+              {session.current ? null : (
+                <LinkButton
+                  label="Sign out"
+                  onPress={() => signOutOne.mutate(session.id)}
+                  disabled={signOutOne.isPending}
+                />
+              )}
+            </View>
+          ))}
+        </View>
+      </QueryState>
+      {others.length > 0 ? (
+        <Button
+          label="Sign out other devices"
+          variant="outline"
+          size="sm"
+          style={{ marginTop: spacing.md }}
+          loading={signOutOthers.isPending}
+          onPress={confirmSignOutOthers}
+        />
+      ) : null}
     </Card>
   );
 }

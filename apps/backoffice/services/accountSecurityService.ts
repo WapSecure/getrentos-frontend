@@ -1,6 +1,11 @@
 import { authFetch, safeCall } from '@getrentos/shared';
 import type { ApiResponse } from '@getrentos/shared';
-import type { StaffPasskey, TwoFactorEnrollment, TwoFactorStatus } from '@/types/admin';
+import type {
+  StaffPasskey,
+  StaffSession,
+  TwoFactorEnrollment,
+  TwoFactorStatus,
+} from '@/types/admin';
 
 /**
  * The signed-in staff member's own sign-in factors (backend /users/me/security).
@@ -62,5 +67,21 @@ export const accountSecurityService = {
 
   async removePasskey(id: string): Promise<ApiResponse<{ removed: true }>> {
     return safeCall(() => authFetch(`/users/me/security/passkey/${id}`, { method: 'DELETE' }));
+  },
+
+  async listSessions(): Promise<ApiResponse<StaffSession[]>> {
+    return safeCall(() => authFetch<StaffSession[]>('/users/me/security/sessions'));
+  },
+
+  /** That device is signed out at its next refresh (within 15 minutes). */
+  async signOutSession(id: string): Promise<ApiResponse<{ revoked: true }>> {
+    return safeCall(() => authFetch(`/users/me/security/sessions/${id}`, { method: 'DELETE' }));
+  },
+
+  /** Keeps this device; needs the person to confirm it's them. */
+  async signOutOtherSessions(): Promise<ApiResponse<{ revoked: number }>> {
+    return safeCall(() =>
+      authFetch('/users/me/security/sessions/sign-out-others', { method: 'POST' })
+    );
   },
 };

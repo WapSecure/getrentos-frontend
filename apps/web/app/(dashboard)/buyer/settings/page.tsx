@@ -4,13 +4,14 @@ import { useBuyerUser } from '../layout';
 import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Card, PageHeader } from '@getrentos/ui';
-import { User, Bell, Landmark, SlidersHorizontal, ShieldCheck, Download } from 'lucide-react';
+import { User, Bell, Landmark, SlidersHorizontal, ShieldCheck, Lock, Download } from 'lucide-react';
 import { ProfileSettings } from '@/components/buyer/settings/ProfileSettings';
 import { NotificationSettings } from '@/components/buyer/settings/NotificationSettings';
 import { PaymentMethodSettings } from '@/components/buyer/settings/PaymentMethodSettings';
 import { SearchPreferencesSettings } from '@/components/buyer/settings/SearchPreferencesSettings';
 import { IdentityVerificationSettings } from '@/components/shared/verification/IdentityVerificationSettings';
 import { DataExport } from '@/components/shared/settings/DataExport';
+import { SecuritySettings } from '@/components/shared/security/SecuritySettings';
 
 type SettingsTab =
   | 'profile'
@@ -18,6 +19,7 @@ type SettingsTab =
   | 'notifications'
   | 'payment'
   | 'preferences'
+  | 'security'
   | 'data';
 
 const tabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
@@ -26,6 +28,7 @@ const tabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
   { id: 'notifications', label: 'Notifications', icon: Bell },
   { id: 'payment', label: 'Payment method', icon: Landmark },
   { id: 'preferences', label: 'Search preferences', icon: SlidersHorizontal },
+  { id: 'security', label: 'Security', icon: Lock },
   { id: 'data', label: 'Your data', icon: Download },
 ];
 
@@ -52,6 +55,8 @@ export default function BuyerSettingsPage() {
         return <PaymentMethodSettings />;
       case 'preferences':
         return <SearchPreferencesSettings />;
+      case 'security':
+        return <SecuritySettings />;
       case 'data':
         return <DataExport />;
       default:

@@ -49,6 +49,17 @@ export interface PasskeySummary {
   lastUsedAt: string | null;
 }
 
+/** One device the person is signed in on ("Where you're signed in"). */
+export interface AccountSession {
+  id: string;
+  /** Readable device, e.g. "GetRentos app on iPhone". */
+  device: string;
+  ipAddress?: string;
+  lastActiveAt: string;
+  /** The device making this request. */
+  current: boolean;
+}
+
 /** Account security for every role — the person's, not a portal's. */
 export const securityApi = {
   overview: () => apiFetch<SecurityOverview>('/users/me/security'),
@@ -149,6 +160,19 @@ export const securityApi = {
 
   removePasskey: (id: string) =>
     apiFetch<{ removed: true }>(`/users/me/security/passkey/${id}`, { method: 'DELETE' }),
+
+  // ---- Where you're signed in ----
+  listSessions: () => apiFetch<AccountSession[]>('/users/me/security/sessions'),
+
+  /** That device is signed out at its next refresh (within 15 minutes). */
+  signOutSession: (id: string) =>
+    apiFetch<{ revoked: true }>(`/users/me/security/sessions/${id}`, { method: 'DELETE' }),
+
+  /** Keeps this phone; behind step-up, which apiFetch prompts for. */
+  signOutOtherSessions: () =>
+    apiFetch<{ revoked: number }>('/users/me/security/sessions/sign-out-others', {
+      method: 'POST',
+    }),
 
   /** WebAuthn request options (the step-up challenge) to hand to Passkey.get(). */
   startPasskeyStepUp: () =>

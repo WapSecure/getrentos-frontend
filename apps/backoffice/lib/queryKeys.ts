@@ -136,6 +136,7 @@ export const adminKeys = {
   /** The signed-in staff member's own two-factor status; drives the set-up gate. */
   twoFactor: ['admin', 'security', 'twoFactor'] as const,
   passkeys: ['admin', 'security', 'passkeys'] as const,
+  sessions: ['admin', 'security', 'sessions'] as const,
   notificationPreferences: ['admin', 'notificationPreferences'] as const,
   platformConfig: ['admin', 'platformConfig'] as const,
   staff: ['admin', 'staff'] as const,

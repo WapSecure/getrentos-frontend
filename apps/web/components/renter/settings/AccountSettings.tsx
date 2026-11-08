@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Lock, Mail, Phone } from 'lucide-react';
+import { Mail, Phone } from 'lucide-react';
 import { Button, Field, Input } from '@getrentos/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -28,38 +28,8 @@ export const AccountSettings = ({ user }: AccountSettingsProps) => {
 
 const AccountSettingsForm = ({ initial }: { initial: { email: string; phone: string } }) => {
   const queryClient = useQueryClient();
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  // Errors sit on the field they are about, so assistive tech reads them with it.
-  const [currentPasswordError, setCurrentPasswordError] = useState<string | null>(null);
-  const [confirmPasswordError, setConfirmPasswordError] = useState<string | null>(null);
   const [email, setEmail] = useState(initial.email);
   const [phone, setPhone] = useState(initial.phone);
-
-  const updatePasswordMutation = useMutation({
-    mutationFn: () => renterService.updatePassword(currentPassword, newPassword),
-    onSuccess: (res) => {
-      if (res.success) {
-        setCurrentPassword('');
-        setNewPassword('');
-        setConfirmPassword('');
-      } else {
-        setCurrentPasswordError(res.message || 'Failed to update password');
-      }
-    },
-  });
-
-  const handlePasswordUpdate = (e: React.FormEvent) => {
-    e.preventDefault();
-    setCurrentPasswordError(null);
-    setConfirmPasswordError(null);
-    if (newPassword !== confirmPassword) {
-      setConfirmPasswordError('New passwords do not match');
-      return;
-    }
-    updatePasswordMutation.mutate();
-  };
 
   const updateProfileMutation = useMutation({
     mutationFn: () => unwrap(renterService.updateProfile({ email, phone })),
@@ -75,47 +45,10 @@ const AccountSettingsForm = ({ initial }: { initial: { email: string; phone: str
     <div>
       <h2 className="text-xl font-semibold text-foreground mb-4">Account settings</h2>
       <p className="text-sm text-muted-foreground mb-6">
-        Manage your account security and contact information
+        Your email address and phone number. Password and sign-in are under Security.
       </p>
 
-      {/* Change Password */}
-      <div className="mb-6">
-        <h3 className="text-lg font-medium text-foreground mb-3">Change password</h3>
-        <form method="post" onSubmit={handlePasswordUpdate} className="space-y-4">
-          <Field label="Current password" error={currentPasswordError || undefined}>
-            <Input
-              leadingIcon={<Lock className="w-4 h-4" />}
-              type="password"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              placeholder="Enter current password"
-            />
-          </Field>
-          <Field label="New password">
-            <Input
-              leadingIcon={<Lock className="w-4 h-4" />}
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="Enter new password"
-            />
-          </Field>
-          <Field label="Confirm new password" error={confirmPasswordError || undefined}>
-            <Input
-              leadingIcon={<Lock className="w-4 h-4" />}
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Confirm new password"
-            />
-          </Field>
-          <Button type="submit" variant="primary" isLoading={updatePasswordMutation.isPending}>
-            Update password
-          </Button>
-        </form>
-      </div>
-
-      <div className="border-t border-border pt-6">
+      <div>
         <h3 className="text-lg font-medium text-foreground mb-3">Contact information</h3>
         <form onSubmit={handleEmailUpdate} className="space-y-4">
           <Field label="Email address">

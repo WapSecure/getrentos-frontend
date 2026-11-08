@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Card, PageHeader } from '@getrentos/ui';
 import { useSearchParams } from 'next/navigation';
 import { useAgentUser } from '../layout';
-import { User, Bell, Landmark, MapPin, ShieldCheck, Download } from 'lucide-react';
+import { User, Bell, Landmark, MapPin, ShieldCheck, Lock, Download } from 'lucide-react';
 import { ProfileSettings } from '@/components/agent/settings/ProfileSettings';
 import { NotificationSettings } from '@/components/agent/settings/NotificationSettings';
 import { SellerPayoutSettings } from '@/components/shared/payouts/SellerPayoutSettings';
@@ -12,6 +12,7 @@ import { AgencyAgentSelfPayout } from '@/components/agency/AgencyAgentSelfPayout
 import { FieldPreferencesSettings } from '@/components/agent/settings/FieldPreferencesSettings';
 import { LicenseVerificationSettings } from '@/components/shared/verification/LicenseVerificationSettings';
 import { DataExport } from '@/components/shared/settings/DataExport';
+import { SecuritySettings } from '@/components/shared/security/SecuritySettings';
 
 type SettingsTab =
   | 'profile'
@@ -19,6 +20,7 @@ type SettingsTab =
   | 'notifications'
   | 'payouts'
   | 'preferences'
+  | 'security'
   | 'data';
 
 const tabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
@@ -27,6 +29,7 @@ const tabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
   { id: 'notifications', label: 'Notifications', icon: Bell },
   { id: 'payouts', label: 'Payout account', icon: Landmark },
   { id: 'preferences', label: 'Field preferences', icon: MapPin },
+  { id: 'security', label: 'Security', icon: Lock },
   { id: 'data', label: 'Your data', icon: Download },
 ];
 
@@ -53,6 +56,8 @@ export default function AgentSettingsPage() {
         );
       case 'preferences':
         return <FieldPreferencesSettings />;
+      case 'security':
+        return <SecuritySettings />;
       case 'data':
         return <DataExport />;
       default:
