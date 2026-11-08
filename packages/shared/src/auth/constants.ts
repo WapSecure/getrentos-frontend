@@ -579,3 +579,15 @@ export const getUserRole = (): string | null => {
 };
 
 // `isAuthenticated` lives in authStorage, next to the in-memory access token.
+
+/**
+ * Two-factor codes: a 6-digit authenticator code, or a one-time backup code
+ * like "k7m2p-x9q4t" for someone without their phone (security gap AU-07).
+ * Matches the API's rule.
+ */
+export const SECOND_FACTOR_CODE_MAX_LENGTH = 11;
+export const isSecondFactorCode = (value: string): boolean =>
+  /^(\d{6}|[A-Za-z0-9]{5}[- ]?[A-Za-z0-9]{5})$/.test(value.trim());
+/** Keeps only what a code can contain, so pasted text with spaces still works. */
+export const cleanSecondFactorInput = (value: string): string =>
+  value.replace(/[^A-Za-z0-9-]/g, '').slice(0, SECOND_FACTOR_CODE_MAX_LENGTH);

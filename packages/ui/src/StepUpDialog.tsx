@@ -4,7 +4,10 @@ import { useEffect, useRef, useState } from 'react';
 import { ShieldCheck } from 'lucide-react';
 import {
   authFetch,
+  cleanSecondFactorInput,
+  isSecondFactorCode,
   registerStepUpHandler,
+  SECOND_FACTOR_CODE_MAX_LENGTH,
   rememberStepUpToken,
   TRANSACTION_PIN_LENGTH,
   type StepUpMethod,
@@ -43,7 +46,10 @@ const COPY: Record<Exclude<StepUpMethod, 'setup_required'>, { label: string; hin
     label: 'Passkey',
     hint: 'Use your device passkey — Face ID, fingerprint, or a security key.',
   },
-  totp: { label: 'Two-factor code', hint: 'Enter the 6-digit code from your authenticator app.' },
+  totp: {
+    label: 'Two-factor code',
+    hint: 'Enter the 6-digit code from your authenticator app, or a backup code if you don’t have your phone.',
+  },
   transaction_pin: { label: 'Transaction PIN', hint: 'Enter your transaction PIN.' },
 };
 
@@ -222,7 +228,7 @@ export function StepUpDialog({
     ? setupReady
     : method === 'transaction_pin'
       ? isCurrentPin(value)
-      : isCode(value);
+      : isSecondFactorCode(value);
 
   const title = isSetup && canSetPin ? 'Set a transaction PIN' : 'Confirm it’s you';
   const intro = !isSetup
@@ -320,11 +326,25 @@ export function StepUpDialog({
               <Input
                 autoFocus
                 type={method === 'transaction_pin' ? 'password' : 'text'}
-                inputMode="numeric"
+                // A backup code has letters, so only the PIN gets the number pad.
+                inputMode={method === 'totp' ? 'text' : 'numeric'}
+                autoCapitalize="none"
                 autoComplete={method === 'transaction_pin' ? 'off' : 'one-time-code'}
-                maxLength={method === 'transaction_pin' ? TRANSACTION_PIN_LENGTH : 6}
+                maxLength={
+                  method === 'transaction_pin'
+                    ? TRANSACTION_PIN_LENGTH
+                    : method === 'totp'
+                      ? SECOND_FACTOR_CODE_MAX_LENGTH
+                      : 6
+                }
                 value={value}
-                onChange={(e) => setValue(e.target.value.replace(/\D/g, ''))}
+                onChange={(e) =>
+                  setValue(
+                    method === 'totp'
+                      ? cleanSecondFactorInput(e.target.value)
+                      : e.target.value.replace(/\D/g, '')
+                  )
+                }
               />
             </Field>
           )}

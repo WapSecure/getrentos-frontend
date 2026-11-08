@@ -39,7 +39,10 @@ export const accountSecurityService = {
     return safeCall(() => authFetch('/users/me/security/2fa/enroll', { method: 'POST' }));
   },
 
-  async enableTwoFactor(token: string): Promise<ApiResponse<{ enabled: boolean }>> {
+  /** Turns two-factor on and returns the backup codes, which are shown only this once. */
+  async enableTwoFactor(
+    token: string
+  ): Promise<ApiResponse<{ enabled: boolean; recoveryCodes: string[] }>> {
     return safeCall(() =>
       authFetch('/users/me/security/2fa/enable', {
         method: 'POST',
@@ -48,6 +51,7 @@ export const accountSecurityService = {
     );
   },
 
+  /** Takes an authenticator code or a backup code. */
   async disableTwoFactor(token: string): Promise<ApiResponse<{ enabled: boolean }>> {
     return safeCall(() =>
       authFetch('/users/me/security/2fa/disable', {
@@ -55,6 +59,11 @@ export const accountSecurityService = {
         body: JSON.stringify({ token }),
       })
     );
+  },
+
+  /** New backup codes; the old ones stop working. Needs the person to confirm it's them. */
+  async regenerateRecoveryCodes(): Promise<ApiResponse<{ recoveryCodes: string[] }>> {
+    return safeCall(() => authFetch('/users/me/security/2fa/recovery-codes', { method: 'POST' }));
   },
 
   // ---- Transaction PIN ----

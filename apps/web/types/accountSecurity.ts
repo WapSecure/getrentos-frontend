@@ -12,6 +12,8 @@ export interface SecurityOverview {
 export interface TwoFactorStatus {
   enrolled: boolean;
   enabled: boolean;
+  /** Unused one-time backup codes (0 while two-factor is off). */
+  recoveryCodesLeft?: number;
 }
 
 export interface TwoFactorEnrollment {

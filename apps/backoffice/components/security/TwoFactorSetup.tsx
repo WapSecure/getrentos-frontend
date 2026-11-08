@@ -8,17 +8,26 @@ import {
   Button,
   Card,
   CardContent,
+  ConfirmDialog,
   CardDescription,
   CardHeader,
   CardSkeleton,
   CardTitle,
   DescriptionList,
   Field,
+  Input,
   NumberInput,
   QueryState,
   useToast,
 } from '@getrentos/ui';
-import { clearStepUpToken, unwrap } from '@getrentos/shared';
+import {
+  cleanSecondFactorInput,
+  clearStepUpToken,
+  isSecondFactorCode,
+  SECOND_FACTOR_CODE_MAX_LENGTH,
+  unwrap,
+} from '@getrentos/shared';
+import { BackupCodes } from '@/components/security/BackupCodes';
 import { accountSecurityService } from '@/services/accountSecurityService';
 import { adminKeys } from '@/lib/queryKeys';
 import type { TwoFactorEnrollment } from '@/types/admin';
@@ -46,6 +55,7 @@ const errorText = (err: unknown, fallback: string) =>
 function CodeForm({
   label,
   submitLabel,
+  allowBackupCode = false,
   variant = 'primary',
   isPending,
   error,
@@ -62,9 +72,11 @@ function CodeForm({
   /** Clears a stale "that code did not work" once the person types again. */
   onCodeChange: () => void;
   onCancel?: () => void;
+  /** Also take a one-time backup code (turning two-factor off without the phone). */
+  allowBackupCode?: boolean;
 }) {
   const [code, setCode] = useState('');
-  const ready = code.length === CODE_LENGTH;
+  const ready = allowBackupCode ? isSecondFactorCode(code) : code.length === CODE_LENGTH;
 
   return (
     <form
@@ -75,16 +87,31 @@ function CodeForm({
       }}
     >
       <Field label={label} error={error ?? undefined}>
-        <NumberInput
-          value={code}
-          onValueChange={(value) => {
-            setCode(value.slice(0, CODE_LENGTH));
-            onCodeChange();
-          }}
-          placeholder="6-digit code"
-          maxLength={CODE_LENGTH}
-          autoComplete="one-time-code"
-        />
+        {allowBackupCode ? (
+          <Input
+            value={code}
+            onChange={(event) => {
+              setCode(cleanSecondFactorInput(event.target.value));
+              onCodeChange();
+            }}
+            placeholder="123456"
+            maxLength={SECOND_FACTOR_CODE_MAX_LENGTH}
+            autoComplete="one-time-code"
+            autoCapitalize="none"
+            spellCheck={false}
+          />
+        ) : (
+          <NumberInput
+            value={code}
+            onValueChange={(value) => {
+              setCode(value.slice(0, CODE_LENGTH));
+              onCodeChange();
+            }}
+            placeholder="6-digit code"
+            maxLength={CODE_LENGTH}
+            autoComplete="one-time-code"
+          />
+        )}
       </Field>
       <div className="flex flex-wrap gap-2">
         <Button type="submit" variant={variant} disabled={!ready} isLoading={isPending}>
@@ -112,6 +139,9 @@ export function TwoFactorSetup({ gate = false }: { gate?: boolean }) {
   const [step, setStep] = useState<Step>('idle');
   const [enrollment, setEnrollment] = useState<TwoFactorEnrollment | null>(null);
   const [codeError, setCodeError] = useState<string | null>(null);
+  // Shown once, right after they are made (AU-07).
+  const [freshCodes, setFreshCodes] = useState<string[] | null>(null);
+  const [confirmNewCodes, setConfirmNewCodes] = useState(false);
 
   const reset = () => {
     setStep('idle');
@@ -131,13 +161,14 @@ export function TwoFactorSetup({ gate = false }: { gate?: boolean }) {
 
   const enable = useMutation({
     mutationFn: (token: string) => unwrap(accountSecurityService.enableTwoFactor(token)),
-    onSuccess: () => {
+    onSuccess: (data) => {
       // The confirmation used to get here may be the set-up-only kind; drop it
       // so the next sensitive action asks again with the new factor.
       clearStepUpToken();
       reset();
-      // Everything refused while two-factor was off can load now.
-      void queryClient.invalidateQueries();
+      // Refresh only once the codes are saved: in the sign-in gate, refreshing
+      // the status would close the gate and hide them.
+      setFreshCodes(data.recoveryCodes);
       toast.success('Two-factor authentication is on');
     },
     onError: (err) => setCodeError(errorText(err, 'That code did not work. Try the latest one.')),
@@ -154,7 +185,23 @@ export function TwoFactorSetup({ gate = false }: { gate?: boolean }) {
     onError: (err) => setCodeError(errorText(err, 'That code did not work. Try the latest one.')),
   });
 
+  const newCodes = useMutation({
+    mutationFn: () => unwrap(accountSecurityService.regenerateRecoveryCodes()),
+    onSuccess: (data) => {
+      setConfirmNewCodes(false);
+      setFreshCodes(data.recoveryCodes);
+    },
+    onError: (err) => toast.error(errorText(err, 'We could not make new backup codes.')),
+  });
+
+  const codesSaved = () => {
+    setFreshCodes(null);
+    // Everything refused while two-factor was off can load now.
+    void queryClient.invalidateQueries();
+  };
+
   const enabled = !!status.data?.enabled;
+  const codesLeft = status.data?.recoveryCodesLeft ?? 0;
 
   return (
     <QueryState
@@ -231,11 +278,12 @@ export function TwoFactorSetup({ gate = false }: { gate?: boolean }) {
           {step === 'disable' && (
             <>
               <Alert variant="warning">
-                Enter a current code from your authenticator app to turn two-factor off. Staff
-                accounts can&apos;t use the admin tools until it is back on.
+                Enter a current code from your authenticator app, or a backup code, to turn
+                two-factor off. Staff accounts can&apos;t use the admin tools until it is back on.
               </Alert>
               <CodeForm
-                label="Code from your app"
+                allowBackupCode
+                label="Code from your app or a backup code"
                 submitLabel="Turn off two-factor"
                 variant="danger"
                 isPending={disable.isPending}
@@ -246,6 +294,39 @@ export function TwoFactorSetup({ gate = false }: { gate?: boolean }) {
               />
             </>
           )}
+
+          {freshCodes ? (
+            <BackupCodes codes={freshCodes} onDone={codesSaved} />
+          ) : (
+            enabled &&
+            step === 'idle' &&
+            !gate && (
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-sm text-muted-foreground">
+                  {codesLeft === 0
+                    ? 'No backup codes left. Get new ones so a lost phone can’t lock you out.'
+                    : `${codesLeft} backup code${codesLeft === 1 ? '' : 's'} left for when you don’t have your phone.`}
+                </p>
+                <Button
+                  variant={codesLeft <= 2 ? 'primary' : 'outline'}
+                  size="sm"
+                  onClick={() => setConfirmNewCodes(true)}
+                >
+                  Get new backup codes
+                </Button>
+              </div>
+            )
+          )}
+          <ConfirmDialog
+            open={confirmNewCodes}
+            onOpenChange={setConfirmNewCodes}
+            title="Get new backup codes?"
+            description="Your current backup codes will stop working. You'll be asked to confirm it's you."
+            confirmLabel="Get new codes"
+            tone="primary"
+            onConfirm={() => newCodes.mutate()}
+            isLoading={newCodes.isPending}
+          />
         </CardContent>
       </Card>
     </QueryState>

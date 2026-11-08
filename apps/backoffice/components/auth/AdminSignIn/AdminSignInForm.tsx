@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation } from '@tanstack/react-query';
 import { Eye, EyeOff, Lock, ShieldCheck } from 'lucide-react';
-import { Alert, Checkbox, Field, IconButton, Input, NumberInput } from '@getrentos/ui';
+import { Alert, Checkbox, Field, IconButton, Input } from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
 import { useToast } from '@getrentos/ui';
 import { SessionExpiredNotice } from '@getrentos/ui';
@@ -15,10 +15,12 @@ import { Logo } from '@getrentos/ui';
 import {
   BACKEND_ROLE_TO_ID,
   ROUTES,
-  VALIDATION_PATTERNS,
   type AuthResult,
   type LoginResult,
   type TwoFactorChallenge,
+  cleanSecondFactorInput,
+  isSecondFactorCode,
+  SECOND_FACTOR_CODE_MAX_LENGTH,
 } from '@getrentos/shared';
 import {
   saveAuthSession,
@@ -126,7 +128,7 @@ export const AdminSignInForm = () => {
   };
 
   const completeTwoFactorSignIn = async () => {
-    if (!pendingChallenge || twoFactorCode.length !== 6) return;
+    if (!pendingChallenge || !isSecondFactorCode(twoFactorCode)) return;
 
     const response = await twoFactorMutation.mutateAsync({
       challengeToken: pendingChallenge,
@@ -165,19 +167,20 @@ export const AdminSignInForm = () => {
         {pendingChallenge ? (
           <>
             <Alert variant="info" icon={ShieldCheck} title="Two-factor authentication">
-              Enter the 6-digit code from your authenticator app to finish signing in.
+              Enter the 6-digit code from your authenticator app, or one of your backup codes, to
+              finish signing in.
             </Alert>
 
-            <Field label="Authentication code">
-              <NumberInput
+            <Field label="Authentication code" hint="Lost your phone? Enter a backup code instead.">
+              <Input
                 autoComplete="one-time-code"
-                maxLength={6}
+                autoCapitalize="none"
+                spellCheck={false}
+                maxLength={SECOND_FACTOR_CODE_MAX_LENGTH}
                 value={twoFactorCode}
-                onValueChange={(value) =>
-                  setTwoFactorCode(value.replace(VALIDATION_PATTERNS.NON_DIGITS, '').slice(0, 6))
-                }
-                inputClassName="py-3 text-center font-mono tracking-[0.5em]"
-                placeholder="••••••"
+                onChange={(e) => setTwoFactorCode(cleanSecondFactorInput(e.target.value))}
+                className="py-3 text-center font-mono tracking-widest"
+                placeholder="123456"
               />
             </Field>
 
@@ -186,7 +189,7 @@ export const AdminSignInForm = () => {
               variant="primary"
               size="lg"
               fullWidth
-              disabled={twoFactorCode.length !== 6 || twoFactorMutation.isPending}
+              disabled={!isSecondFactorCode(twoFactorCode) || twoFactorMutation.isPending}
               isLoading={twoFactorMutation.isPending}
               icon={<ShieldCheck className="h-4 w-4" />}
               onClick={completeTwoFactorSignIn}

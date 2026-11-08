@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { FaceCheckButton } from '@/components/trust/FaceCheckButton';
 import { liveSelfieSupported } from '@/lib/smileid/liveSelfie';
-import { Alert, Image, Pressable, ScrollView, View } from 'react-native';
+import { Alert, Image, Pressable, ScrollView, Share, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -29,6 +29,7 @@ import {
   Skeleton,
   SwitchRow,
   Text,
+  TextField,
   useTheme,
   useToast,
 } from '@getrentos/ui-native';
@@ -60,7 +61,12 @@ import {
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { ChangeEmailSheet } from '@/components/account/ChangeEmailSheet';
 import { goBack } from '@/lib/goBack';
-import { AUTH_CONSTANTS, formatRelativeTime } from '@getrentos/shared';
+import {
+  AUTH_CONSTANTS,
+  cleanSecondFactorInput,
+  formatRelativeTime,
+  isSecondFactorCode,
+} from '@getrentos/shared';
 
 export default function SecuritySettings() {
   const { colors, spacing } = useTheme();
@@ -259,10 +265,13 @@ function TwoFactorSection({ overview }: { overview: SecurityOverview }) {
   const { colors, spacing } = useTheme();
   const toast = useToast();
   const qc = useQueryClient();
-  const setTwoFactor = (enabled: boolean) =>
+  const setTwoFactor = (enabled: boolean, recoveryCodesLeft = 0) =>
     qc.setQueryData<SecurityOverview>(qk.security, (old) =>
-      old ? { ...old, twoFactor: { enrolled: enabled, enabled } } : old
+      old ? { ...old, twoFactor: { enrolled: enabled, enabled, recoveryCodesLeft } } : old
     );
+  // Backup codes are shown once, right after they are made (AU-07).
+  const [freshCodes, setFreshCodes] = useState<string[] | null>(null);
+  const codesLeft = overview.twoFactor.recoveryCodesLeft ?? 0;
   const [enrollment, setEnrollment] = useState<TwoFactorEnrollment | null>(null);
   const [token, setToken] = useState('');
   const [disableToken, setDisableToken] = useState('');
@@ -276,10 +285,11 @@ function TwoFactorSection({ overview }: { overview: SecurityOverview }) {
 
   const enableMutation = useMutation({
     mutationFn: () => securityApi.enableTwoFactor(token),
-    onSuccess: () => {
-      setTwoFactor(true);
+    onSuccess: (data) => {
+      setTwoFactor(true, data.recoveryCodes.length);
       setEnrollment(null);
       setToken('');
+      setFreshCodes(data.recoveryCodes);
       toast.show('Two-factor authentication enabled.', 'success');
     },
     onError: (err) => toast.show(errorMessage(err, 'That code is incorrect.'), 'error'),
@@ -296,6 +306,69 @@ function TwoFactorSection({ overview }: { overview: SecurityOverview }) {
     onError: (err) => toast.show(errorMessage(err, 'That code is incorrect.'), 'error'),
   });
 
+  const newCodesMutation = useMutation({
+    mutationFn: securityApi.regenerateRecoveryCodes,
+    onSuccess: (data) => {
+      setTwoFactor(true, data.recoveryCodes.length);
+      setFreshCodes(data.recoveryCodes);
+    },
+    onError: (err) => toast.show(errorMessage(err, 'Could not make new backup codes.'), 'error'),
+  });
+
+  const confirmNewCodes = () =>
+    Alert.alert('Get new backup codes?', 'Your current backup codes will stop working.', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Get new codes', onPress: () => newCodesMutation.mutate() },
+    ]);
+
+  if (freshCodes) {
+    return (
+      <Card elevated>
+        <SectionHeader
+          icon={<ShieldCheck size={16} color={colors.primary} />}
+          title="Save your backup codes"
+        />
+        <Text variant="caption" color="mutedForeground">
+          If you lose your phone, each code lets you sign in once. Keep them somewhere safe. You
+          won’t see them again.
+        </Text>
+        <View
+          accessibilityLabel="Backup codes"
+          style={{
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            marginTop: spacing.md,
+            rowGap: spacing.xs,
+          }}
+        >
+          {freshCodes.map((code) => (
+            <Text
+              key={code}
+              variant="bodyStrong"
+              selectable
+              style={{ width: '50%', fontFamily: 'monospace' }}
+            >
+              {code}
+            </Text>
+          ))}
+        </View>
+        <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md }}>
+          <Button
+            label="Share or save"
+            variant="secondary"
+            style={{ flex: 1 }}
+            onPress={() =>
+              void Share.share({
+                message: `GetRentos two-factor backup codes. Each works once.\n\n${freshCodes.join('\n')}`,
+              })
+            }
+          />
+          <Button label="I’ve saved them" style={{ flex: 1 }} onPress={() => setFreshCodes(null)} />
+        </View>
+      </Card>
+    );
+  }
+
   return (
     <Card elevated>
       <SectionHeader
@@ -307,14 +380,15 @@ function TwoFactorSection({ overview }: { overview: SecurityOverview }) {
         showDisable ? (
           <View style={{ gap: spacing.sm }}>
             <Text variant="caption" color="mutedForeground">
-              Enter your current authenticator code to turn off 2FA.
+              Enter your current authenticator code, or a backup code if you no longer have your
+              phone, to turn off 2FA.
             </Text>
-            <NumberField
-              code
-              label="6-digit code"
+            <TextField
+              label="Authenticator or backup code"
               value={disableToken}
-              onValueChange={setDisableToken}
-              maxLength={6}
+              onChangeText={(v) => setDisableToken(cleanSecondFactorInput(v))}
+              autoCapitalize="none"
+              autoCorrect={false}
               textContentType="oneTimeCode"
             />
             <View style={{ flexDirection: 'row', gap: spacing.sm }}>
@@ -329,21 +403,37 @@ function TwoFactorSection({ overview }: { overview: SecurityOverview }) {
                 variant="destructive"
                 style={{ flex: 1 }}
                 loading={disableMutation.isPending}
-                disabled={disableToken.length !== 6}
+                disabled={!isSecondFactorCode(disableToken)}
                 onPress={() => disableMutation.mutate()}
               />
             </View>
           </View>
         ) : (
-          <View
-            style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
-          >
-            <Badge label="Enabled" tone="success" />
-            <Button
-              label="Turn off"
-              size="sm"
-              variant="secondary"
-              onPress={() => setShowDisable(true)}
+          <View style={{ gap: spacing.sm }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
+              <Badge label="Enabled" tone="success" />
+              <Button
+                label="Turn off"
+                size="sm"
+                variant="secondary"
+                onPress={() => setShowDisable(true)}
+              />
+            </View>
+            <Text variant="caption" color="mutedForeground">
+              {codesLeft === 0
+                ? 'No backup codes left. Get new ones so a lost phone can’t lock you out.'
+                : `${codesLeft} backup code${codesLeft === 1 ? '' : 's'} left for when you don’t have your phone.`}
+            </Text>
+            <LinkButton
+              label="Get new backup codes"
+              onPress={confirmNewCodes}
+              disabled={newCodesMutation.isPending}
             />
           </View>
         )

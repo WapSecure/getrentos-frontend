@@ -134,3 +134,23 @@ describe('addPasskeyWithEmailedCode', () => {
     expect(d.finishPasskeyRegistration).not.toHaveBeenCalled();
   });
 });
+
+/** Security gap AU-07: a one-time backup code stands in for the authenticator code. */
+describe('second-factor codes', () => {
+  const { cleanSecondFactorInput, isSecondFactorCode } =
+    jest.requireActual<typeof import('@getrentos/shared')>('@getrentos/shared');
+
+  it.each([
+    ['123456', true],
+    ['k7m2p-x9q4t', true],
+    ['K7M2PX9Q4T', true],
+    ['12345', false],
+    ['k7m2p-x9q4', false],
+    ['k7m2p_x9q4t', false],
+  ])('%s → %s', (code, ok) => expect(isSecondFactorCode(code)).toBe(ok));
+
+  it('keeps only what a code can contain, so a pasted code with spaces still works', () => {
+    expect(cleanSecondFactorInput(' k7m2p - x9q4t\n')).toBe('k7m2p-x9q4t');
+    expect(cleanSecondFactorInput('k7m2p-x9q4t-extra')).toBe('k7m2p-x9q4t');
+  });
+});

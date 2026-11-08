@@ -9,8 +9,10 @@ import {
   OtpInput,
   PasswordField,
   Text,
+  TextField,
   useTheme,
 } from '@getrentos/ui-native';
+import { cleanSecondFactorInput, isSecondFactorCode } from '@getrentos/shared';
 import { Sheet } from '@/components/Sheet';
 import { securityApi, type StepUpMethod } from '@/lib/api/security';
 import { errorMessage } from '@/lib/api/client';
@@ -48,6 +50,8 @@ export function StepUpSheet() {
   const [method, setMethod] = useState<StepUpMethod | null>(null);
   const [hasPassword, setHasPassword] = useState(true);
   const [value, setValue] = useState('');
+  // Without the phone, a one-time backup code stands in for the authenticator (AU-07).
+  const [useBackupCode, setUseBackupCode] = useState(false);
   const [password, setPassword] = useState('');
   const [pin, setPin] = useState('');
   const [pinConfirm, setPinConfirm] = useState('');
@@ -73,6 +77,7 @@ export function StepUpSheet() {
           pending.current = resolve;
           challenge.current = challengeId;
           setValue('');
+          setUseBackupCode(false);
           setPassword('');
           setPin('');
           setPinConfirm('');
@@ -203,7 +208,7 @@ export function StepUpSheet() {
     ? proofReady && (choice === 'passkey' || newPinReady(pin, pinConfirm))
     : method === 'transaction_pin'
       ? isCurrentPin(value)
-      : value.length === 6;
+      : isSecondFactorCode(value);
 
   const usePasskeySetup = isSetup && choice === 'passkey';
   const submitLabel = isPasskey
@@ -321,8 +326,29 @@ export function StepUpSheet() {
             />
           ) : (
             <View style={{ gap: spacing.xs }}>
-              <Text variant="callout">Enter the code from your authenticator app.</Text>
-              <OtpInput value={value} onChange={setValue} invalid={!!error} />
+              {useBackupCode ? (
+                <TextField
+                  label="Backup code"
+                  value={value}
+                  onChangeText={(v) => setValue(cleanSecondFactorInput(v))}
+                  placeholder="abcde-fghij"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  autoFocus
+                />
+              ) : (
+                <>
+                  <Text variant="callout">Enter the code from your authenticator app.</Text>
+                  <OtpInput value={value} onChange={setValue} invalid={!!error} />
+                </>
+              )}
+              <LinkButton
+                label={useBackupCode ? 'Use my authenticator app' : 'Use a backup code instead'}
+                onPress={() => {
+                  setUseBackupCode((on) => !on);
+                  setValue('');
+                }}
+              />
             </View>
           )}
 
