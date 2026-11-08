@@ -30,7 +30,15 @@ import {
   type WorkOrder,
 } from '@/lib/api/homeCare';
 import { apiFetch, errorMessage } from '@/lib/api/client';
-import { BankAccountFields, accountNumberOk } from '@/components/forms/BankAccountFields';
+import { BankAccountFields } from '@/components/forms/BankAccountFields';
+import { withStepUpSummary } from '@/lib/stepUp';
+import {
+  INCOMPLETE_ACCOUNT_LOOKUP,
+  lookupAllowsSave,
+  payoutAccountStepUpSummary,
+  saveAccountLabel,
+  type AccountLookup,
+} from '@getrentos/shared';
 import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { Sheet } from '@/components/Sheet';
@@ -662,13 +670,23 @@ function VendorPayoutForm({ vendorId, onDone }: { vendorId: string; onDone: () =
   const toast = useToast();
   const [bankCode, setBankCode] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
+  const [lookup, setLookup] = useState<AccountLookup>(INCOMPLETE_ACCOUNT_LOOKUP);
   // Behind "confirm it's you": apiFetch prompts for it automatically.
   const save = useMutation({
     mutationFn: () =>
-      apiFetch<{ accountName: string }>(`/home-management/vendors/${vendorId}/payout-account`, {
-        method: 'POST',
-        body: { bankCode, accountNumber },
-      }),
+      withStepUpSummary(
+        payoutAccountStepUpSummary({
+          bankName: lookup.bankName,
+          accountNumber,
+          accountName: lookup.accountName,
+          owner: 'this vendor’s',
+        }),
+        () =>
+          apiFetch<{ accountName: string }>(`/home-management/vendors/${vendorId}/payout-account`, {
+            method: 'POST',
+            body: { bankCode, accountNumber },
+          })
+      ),
     onSuccess: (a) => {
       void haptics.success();
       toast.show(`Saved: ${a.accountName}. Try the payment again.`, 'success');
@@ -686,13 +704,14 @@ function VendorPayoutForm({ vendorId, onDone }: { vendorId: string; onDone: () =
           onBankCode={setBankCode}
           accountNumber={accountNumber}
           onAccountNumber={setAccountNumber}
+          onLookup={setLookup}
         />
         {save.error ? (
           <FormAlert message={errorMessage(save.error, 'We couldn’t check that account.')} />
         ) : null}
         <Button
-          label="Save account"
-          disabled={!bankCode || !accountNumberOk(accountNumber)}
+          label={saveAccountLabel(lookup, 'Save account')}
+          disabled={!lookupAllowsSave(lookup)}
           loading={save.isPending}
           onPress={() => save.mutate()}
         />

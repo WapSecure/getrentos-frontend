@@ -32,9 +32,10 @@ import { errorMessage } from '@/lib/api/client';
 import { pickImage } from '@/lib/filePicker';
 import { Image } from 'expo-image';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
-import { categorySendsEmail } from '@getrentos/shared';
+import { categorySendsEmail, maskAccountNumber } from '@getrentos/shared';
 import { goBack } from '@/lib/goBack';
 import { PayoutAccountSheet } from '@/components/landlord/PayoutAccountSheet';
+import { PayoutHoldNotice } from '@/components/payouts/PayoutHoldNotice';
 
 export default function LandlordSettings() {
   const { colors, spacing, radius } = useTheme();
@@ -83,7 +84,7 @@ export default function LandlordSettings() {
               accessibilityRole="button"
               accessibilityLabel={
                 payout.data?.accountNumber
-                  ? `Payout account ${payout.data.bankName}, ${payout.data.accountNumber}, ${payout.data.verified ? 'verified' : 'not verified'}. Change it.`
+                  ? `Payout account ${payout.data.bankName}, account ending ${payout.data.accountNumber.replace(/\D/g, '').slice(-4)}, ${payout.data.verified ? 'verified' : 'not verified'}. Change it.`
                   : 'Add a payout account to receive rent'
               }
             >
@@ -115,9 +116,10 @@ export default function LandlordSettings() {
                           )}
                         </View>
                         <Text variant="caption" color="mutedForeground">
-                          {payout.data.accountNumber}
+                          {maskAccountNumber(payout.data.accountNumber)}
                           {payout.data.accountName ? ` · ${payout.data.accountName}` : ''}
                         </Text>
+                        <PayoutHoldNotice holdUntil={payout.data.payoutHoldUntil} />
                       </>
                     ) : (
                       <>

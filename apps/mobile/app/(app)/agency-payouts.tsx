@@ -25,6 +25,8 @@ import { formatNaira } from '@/lib/format';
 import { AccountForm, History, MyPayout } from '@/components/agency/AgentSelfPayout';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
+import { withStepUpSummary } from '@/lib/stepUp';
+import { PAYOUT_ARRIVAL_NOTE, payoutAccountLabel, withdrawStepUpSummary } from '@getrentos/shared';
 
 /**
  * Money out: the firm's own commission to its bank, agents' shares to theirs,
@@ -174,8 +176,16 @@ function FirmPayout({
   const { spacing } = useTheme();
   const toast = useToast();
   const save = useMutation({
-    mutationFn: ({ bankCode, accountNumber }: { bankCode: string; accountNumber: string }) =>
-      agencyFirmApi.setFirmPayoutAccount(bankCode, accountNumber),
+    mutationFn: ({
+      bankCode,
+      accountNumber,
+      summary,
+    }: {
+      bankCode: string;
+      accountNumber: string;
+      summary: string;
+    }) =>
+      withStepUpSummary(summary, () => agencyFirmApi.setFirmPayoutAccount(bankCode, accountNumber)),
     onSuccess: () => {
       onChanged();
       toast.show('Payout account saved.', 'success');
@@ -183,7 +193,10 @@ function FirmPayout({
     onError: (e) => toast.show(errorMessage(e, 'Could not save the account.'), 'error'),
   });
   const withdraw = useMutation({
-    mutationFn: agencyFirmApi.requestFirmPayout,
+    mutationFn: () =>
+      withStepUpSummary(withdrawStepUpSummary(formatNaira(available), account), () =>
+        agencyFirmApi.requestFirmPayout()
+      ),
     onSuccess: () => {
       onChanged();
       toast.show('Payout requested.', 'success');
@@ -208,7 +221,9 @@ function FirmPayout({
         key={account?.accountNumber ?? 'none'}
         account={hasAccount(account) ? account : null}
         saving={save.isPending}
-        onSave={(bankCode, accountNumber) => save.mutate({ bankCode, accountNumber })}
+        onSave={(bankCode, accountNumber, summary) =>
+          save.mutate({ bankCode, accountNumber, summary })
+        }
       />
       {!accountSet ? (
         <Text variant="caption" color="mutedForeground">
@@ -222,7 +237,7 @@ function FirmPayout({
         onPress={() =>
           Alert.alert(
             `Withdraw ${formatNaira(available)}?`,
-            'It is sent to the firm’s payout account.',
+            `It is sent to ${account ? payoutAccountLabel(account) || 'the firm’s payout account' : 'the firm’s payout account'}. ${PAYOUT_ARRIVAL_NOTE}`,
             [
               { text: 'Cancel', style: 'cancel' },
               { text: 'Withdraw', onPress: () => withdraw.mutate() },
