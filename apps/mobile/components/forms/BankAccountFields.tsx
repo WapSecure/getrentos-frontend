@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { CheckCircle2 } from 'lucide-react-native';
 import { Chip, NumberField, Text, useTheme } from '@getrentos/ui-native';
+import { toAccountLookup, type AccountLookup } from '@getrentos/shared';
 import { SelectField } from '@/components/forms/SelectField';
 import { errorMessage } from '@/lib/api/client';
 import { COMMON_BANKS } from '@/lib/api/sellerPayout';
@@ -23,6 +24,7 @@ export function BankAccountFields({
   accountNumber,
   onAccountNumber,
   onAccountName,
+  onLookup,
 }: {
   bankCode: string;
   onBankCode: (code: string) => void;
@@ -30,6 +32,11 @@ export function BankAccountFields({
   onAccountNumber: (n: string) => void;
   /** Told the account holder's name once it is found, and null while it is not. */
   onAccountName?: (name: string | null) => void;
+  /**
+   * Told where the name check stands. Callers keep save disabled until
+   * `lookupAllowsSave` (UX-28): the name is found, or honestly could not be checked.
+   */
+  onLookup?: (lookup: AccountLookup) => void;
 }) {
   const { colors, spacing } = useTheme();
   const bankList = useBanks();
@@ -65,17 +72,31 @@ export function BankAccountFields({
     onAccountName?.(accountName);
   }, [accountName, onAccountName]);
 
+  const bankName = banks.find((b) => b.code === bankCode)?.name ?? null;
+  const lookupErr = lookup.error as (Error & { status?: number }) | null;
+  const state = toAccountLookup({
+    ready: lookup.ready,
+    checking: lookup.checking,
+    accountName,
+    bankName,
+    error: lookupErr
+      ? { status: lookupErr.status, message: errorMessage(lookupErr, lookupErr.message) }
+      : null,
+  });
+  const { status: stateStatus, message: stateMessage } = state;
+  useEffect(() => {
+    onLookup?.({ status: stateStatus, accountName, bankName, message: stateMessage });
+  }, [stateStatus, accountName, bankName, stateMessage, onLookup]);
+
   const lengthError =
     accountNumber.length > 0 && accountNumber.length < 10
       ? 'Account numbers are 10 digits (NUBAN).'
       : undefined;
-  const lookupError = lookup.error
-    ? errorMessage(
-        lookup.error,
-        'We could not check the account name just now. You can still save.'
-      )
-    : undefined;
-  const showNameLine = !lengthError && !lookupError && (lookup.checking || !!accountName);
+  // Only "no such account" is an error; "couldn't check" is said plainly below.
+  const lookupError = state.status === 'not_found' ? (state.message ?? undefined) : undefined;
+  const unchecked = state.status === 'unchecked';
+  const showNameLine =
+    !lengthError && !lookupError && (lookup.checking || !!accountName || unchecked);
 
   return (
     <View style={{ gap: spacing.md }}>
@@ -132,13 +153,24 @@ export function BankAccountFields({
                   Checking the name on this account…
                 </Text>
               </>
+            ) : unchecked ? (
+              <Text variant="caption" color="warning" style={{ flex: 1 }}>
+                {state.message}
+              </Text>
             ) : (
-              <>
-                <CheckCircle2 size={14} color={colors.success} />
-                <Text variant="caption" color="success" style={{ fontWeight: '600' }}>
-                  {accountName}
+              <View style={{ flex: 1, gap: 2 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
+                  <CheckCircle2 size={14} color={colors.success} />
+                  <Text variant="caption" color="success" style={{ fontWeight: '600' }}>
+                    {accountName}
+                  </Text>
+                </View>
+                {/* The bank's name for the account, not a verification. */}
+                <Text variant="caption" color="mutedForeground">
+                  The name your bank has for this account. Check it’s the right person before you
+                  save.
                 </Text>
-              </>
+              </View>
             )}
           </View>
         ) : null}

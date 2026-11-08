@@ -29,6 +29,5 @@ export function PayoutHoldNotice({ holdUntil }: { holdUntil?: string | null }) {
   );
 }
 
-/** One line telling people, before they save, what a change does. */
-export const PAYOUT_CHANGE_COOLDOWN_HINT =
-  'Changing your bank details pauses payouts to the new account for 24 hours, and we’ll email you about it.';
+/** One line telling people, before they save, what a change does (same words on mobile). */
+export { PAYOUT_CHANGE_COOLDOWN_HINT } from '@getrentos/shared';

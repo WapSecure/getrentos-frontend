@@ -28,6 +28,18 @@ import {
   PayoutHoldNotice,
 } from '@/components/shared/payouts/PayoutHoldNotice';
 import { payoutDestination } from '@/lib/payoutDestination';
+import { PayoutRowDetails } from '@/components/shared/payouts/PayoutRowDetails';
+import {
+  INCOMPLETE_ACCOUNT_LOOKUP,
+  PAYOUT_ARRIVAL_NOTE,
+  lookupAllowsSave,
+  payoutAccountLabel,
+  payoutAccountStepUpSummary,
+  saveAccountLabel,
+  withdrawStepUpSummary,
+  withStepUpSummary,
+  type AccountLookup,
+} from '@getrentos/shared';
 
 const PAYOUT_STATUS_VARIANT: Record<string, BadgeVariant> = {
   SUCCESS: 'success',
@@ -53,6 +65,7 @@ export function ShortletPayoutsDialog({
   const queryClient = useQueryClient();
   const [bankCode, setBankCode] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
+  const [lookup, setLookup] = useState<AccountLookup>(INCOMPLETE_ACCOUNT_LOOKUP);
   // Changing the saved account opens the same form as setting one up.
   const [editingAccount, setEditingAccount] = useState(false);
   // Money moves only after the amount and the account it goes to are confirmed.
@@ -80,7 +93,15 @@ export function ShortletPayoutsDialog({
   };
 
   const saveAccount = useMutation({
-    mutationFn: () => unwrap(shortletService.savePayoutAccount({ bankCode, accountNumber })),
+    mutationFn: () =>
+      withStepUpSummary(
+        payoutAccountStepUpSummary({
+          bankName: lookup.bankName,
+          accountNumber,
+          accountName: lookup.accountName,
+        }),
+        () => unwrap(shortletService.savePayoutAccount({ bankCode, accountNumber }))
+      ),
     onSuccess: () => {
       invalidate();
       setBankCode('');
@@ -92,10 +113,16 @@ export function ShortletPayoutsDialog({
   });
 
   const withdraw = useMutation({
-    mutationFn: () => unwrap(shortletService.requestPayout()),
+    mutationFn: () =>
+      withStepUpSummary(
+        withdrawStepUpSummary(formatCurrency(summary?.available ?? 0), account),
+        () => unwrap(shortletService.requestPayout())
+      ),
     onSuccess: (p) => {
       invalidate();
-      toast.success(`Withdrawal of ${formatCurrency(p.amount)} is on its way.`);
+      toast.success(
+        `Withdrawal of ${formatCurrency(p.amount)} is on its way. ${PAYOUT_ARRIVAL_NOTE}`
+      );
     },
     onError: (reason: Error) => toast.error(reason.message),
   });
@@ -199,7 +226,7 @@ export function ShortletPayoutsDialog({
                 {summary.inFailedPayout > 0 && (
                   <li className="flex items-start justify-between gap-3">
                     <span className="text-muted-foreground">
-                      In a payout that failed: support will retry it
+                      In a payout that failed: support sends it again to your account
                     </span>
                     <span className="font-medium">{formatCurrency(summary.inFailedPayout)}</span>
                   </li>
@@ -231,7 +258,7 @@ export function ShortletPayoutsDialog({
             <div className="rounded-lg border border-border p-4">
               <p className="text-sm font-medium">Payout account</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                {account.bankName} · {account.accountNumber} · {account.accountName}
+                {payoutAccountLabel(account)} · {account.accountName}
               </p>
               <PayoutHoldNotice holdUntil={account.payoutHoldUntil} />
               <p className="mt-2 text-xs text-muted-foreground">{PAYOUT_CHANGE_COOLDOWN_HINT}</p>
@@ -260,6 +287,7 @@ export function ShortletPayoutsDialog({
                   onBankCode={setBankCode}
                   accountNumber={accountNumber}
                   onAccountNumber={setAccountNumber}
+                  onLookup={setLookup}
                 />
               </div>
               <div className="mt-3 flex gap-2">
@@ -269,9 +297,9 @@ export function ShortletPayoutsDialog({
                   onClick={() => saveAccount.mutate()}
                   isLoading={saveAccount.isPending}
                   loadingText="Saving…"
-                  disabled={bankCode.length < 3 || accountNumber.length !== 10}
+                  disabled={!lookupAllowsSave(lookup)}
                 >
-                  Save account
+                  {saveAccountLabel(lookup, 'Save account')}
                 </Button>
                 {account && (
                   <Button
@@ -300,17 +328,28 @@ export function ShortletPayoutsDialog({
             ) : (
               <div className="divide-y divide-border rounded-lg border border-border">
                 {(payouts?.items ?? []).map((p) => (
-                  <div key={p.id} className="flex items-center justify-between gap-3 p-3">
-                    <div>
+                  <div key={p.id} className="flex items-start justify-between gap-3 p-3">
+                    <div className="min-w-0">
                       <Badge variant={PAYOUT_STATUS_VARIANT[p.status]}>
                         {SHORTLET_PAYOUT_STATUS_LABEL[p.status] ?? p.status}
                       </Badge>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        {p.bookingCount} booking{p.bookingCount === 1 ? '' : 's'} ·{' '}
+                        {p.bookingCount} booking{p.bookingCount === 1 ? '' : 's'} · Requested{' '}
                         {formatDate(p.createdAt, 'short')}
                         {(p.penaltyDeducted ?? 0) > 0 &&
                           ` · ${formatCurrency(p.penaltyDeducted ?? 0)} cancellation fees taken out`}
                       </p>
+                      <PayoutRowDetails
+                        state={
+                          p.status === 'SUCCESS'
+                            ? 'paid'
+                            : p.status === 'FAILED'
+                              ? 'failed'
+                              : 'pending'
+                        }
+                        paidAt={p.paidAt}
+                        transferRef={p.transferRef}
+                      />
                     </div>
                     <p className="font-semibold">{formatCurrency(p.amount)}</p>
                   </div>

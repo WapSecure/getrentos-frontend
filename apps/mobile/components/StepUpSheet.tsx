@@ -14,10 +14,19 @@ import { registerStepUpPrompt, rememberStepUpToken } from '@/lib/stepUp';
  * token back to apiFetch, which replays the request. Cancelling resolves null,
  * so the original call fails with the API's own "confirm it's you" message.
  */
-export function StepUpSheet() {
-  const { colors, spacing } = useTheme();
+export function StepUpSheet({
+  summary: summaryProp,
+}: {
+  /**
+   * What is being authorised, e.g. "Withdraw ₦250,000 to GTBank ••••1234" (UX-30).
+   * A summary the request itself carries (`withStepUpSummary`) wins over this one.
+   */
+  summary?: string;
+} = {}) {
+  const { colors, spacing, radius } = useTheme();
   const pending = useRef<((token: string | null) => void) | null>(null);
   const [open, setOpen] = useState(false);
+  const [requestSummary, setRequestSummary] = useState<string | null>(null);
   const [method, setMethod] = useState<StepUpMethod | null>(null);
   const [value, setValue] = useState('');
   const [reference, setReference] = useState<string | null>(null);
@@ -27,9 +36,10 @@ export function StepUpSheet() {
 
   useEffect(() => {
     registerStepUpPrompt(
-      () =>
+      (requested) =>
         new Promise<string | null>((resolve) => {
           pending.current = resolve;
+          setRequestSummary(requested);
           setValue('');
           setReference(null);
           setSentTo(null);
@@ -94,6 +104,7 @@ export function StepUpSheet() {
       finish(res.stepUpToken);
     });
 
+  const summary = requestSummary ?? summaryProp ?? null;
   const isPasskey = method === 'passkey';
   const needsCode = method === 'email_code' && !reference;
   const ready =
@@ -114,6 +125,25 @@ export function StepUpSheet() {
               you.
             </Text>
           </View>
+          {summary ? (
+            <View
+              style={{
+                borderWidth: 1,
+                borderColor: colors.border,
+                borderRadius: radius.md,
+                padding: spacing.sm,
+                gap: 2,
+              }}
+              accessibilityLabel={`You’re confirming: ${summary}`}
+            >
+              <Text variant="caption" color="mutedForeground">
+                You’re confirming
+              </Text>
+              <Text variant="callout" style={{ fontWeight: '600' }}>
+                {summary}
+              </Text>
+            </View>
+          ) : null}
 
           {!method ? null : isPasskey ? (
             <Text variant="callout">

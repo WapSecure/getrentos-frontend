@@ -23,13 +23,24 @@ import {
   type SellerSalePayout,
 } from '@/lib/api/sellerPayout';
 import { errorMessage } from '@/lib/api/client';
-import { BankAccountFields, accountNumberOk } from '@/components/forms/BankAccountFields';
+import { BankAccountFields } from '@/components/forms/BankAccountFields';
+import { PayoutCooldownHint, PayoutHoldNotice } from '@/components/payouts/PayoutHoldNotice';
+import { withStepUpSummary } from '@/lib/stepUp';
+import {
+  INCOMPLETE_ACCOUNT_LOOKUP,
+  PAYOUT_FAILED_NEXT_STEP,
+  lookupAllowsSave,
+  maskAccountNumber,
+  payoutAccountStepUpSummary,
+  saveAccountLabel,
+  type AccountLookup,
+} from '@getrentos/shared';
 import { formatDate } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
 
 const STATUS: Record<SellerPayoutStatus, { label: string; tone: 'info' | 'success' | 'danger' }> = {
-  PENDING: { label: 'Queued', tone: 'info' },
+  PENDING: { label: 'Queued for the next hourly payout', tone: 'info' },
   PROCESSING: { label: 'On its way', tone: 'info' },
   PAID: { label: 'Paid', tone: 'success' },
   FAILED: { label: 'Failed', tone: 'danger' },
@@ -85,15 +96,16 @@ export default function SellerPayout() {
             <Card
               elevated
               accessible
-              accessibilityLabel={`${a.bankName}, account ${a.accountNumber}, ${a.accountName}. ${a.verified ? 'Verified' : 'Not verified yet'}`}
+              accessibilityLabel={`${a.bankName}, account ending ${maskAccountNumber(a.accountNumber).replace(/\D/g, '')}, ${a.accountName}. ${a.verified ? 'Verified' : 'Not verified yet'}`}
               style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}
             >
               <Landmark size={22} color={colors.primary} />
               <View style={{ flex: 1, gap: 2 }}>
                 <Text variant="bodyStrong">{a.bankName}</Text>
                 <Text variant="callout" color="mutedForeground">
-                  {a.accountNumber} · {a.accountName}
+                  {maskAccountNumber(a.accountNumber)} · {a.accountName}
                 </Text>
+                <PayoutHoldNotice holdUntil={a.payoutHoldUntil} />
               </View>
               {a.verified ? (
                 <BadgeCheck size={20} color={colors.success} />
@@ -113,6 +125,10 @@ export default function SellerPayout() {
         <View style={{ gap: spacing.sm }}>
           <Text variant="heading" headingLevel={2}>
             Sale payouts
+          </Text>
+          <Text variant="caption" color="mutedForeground">
+            Queued sales are sent in the hourly payout run; a newly changed account waits 24 hours
+            first.
           </Text>
           {payouts.isPending ? (
             <Skeleton height={72} radius={radius.lg} />
@@ -135,9 +151,18 @@ function AccountForm({ hasAccount }: { hasAccount: boolean }) {
   const toast = useToast();
   const [bankCode, setBankCode] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
+  const [lookup, setLookup] = useState<AccountLookup>(INCOMPLETE_ACCOUNT_LOOKUP);
 
   const save = useMutation({
-    mutationFn: () => sellerPayoutApi.updateAccount({ bankCode, accountNumber }),
+    mutationFn: () =>
+      withStepUpSummary(
+        payoutAccountStepUpSummary({
+          bankName: lookup.bankName,
+          accountNumber,
+          accountName: lookup.accountName,
+        }),
+        () => sellerPayoutApi.updateAccount({ bankCode, accountNumber })
+      ),
     onSuccess: (saved) => {
       qc.setQueryData(qk.seller.payoutAccount, saved);
       setAccountNumber('');
@@ -158,15 +183,20 @@ function AccountForm({ hasAccount }: { hasAccount: boolean }) {
         onBankCode={setBankCode}
         accountNumber={accountNumber}
         onAccountNumber={setAccountNumber}
+        onLookup={setLookup}
       />
+      {hasAccount ? <PayoutCooldownHint /> : null}
       {save.error ? (
         <FormAlert
           message={errorMessage(save.error, 'We couldn’t check that account. Try again.')}
         />
       ) : null}
       <Button
-        label={hasAccount ? 'Update payout account' : 'Save payout account'}
-        disabled={!bankCode || !accountNumberOk(accountNumber)}
+        label={saveAccountLabel(
+          lookup,
+          hasAccount ? 'Update payout account' : 'Save payout account'
+        )}
+        disabled={!lookupAllowsSave(lookup)}
         loading={save.isPending}
         onPress={() => save.mutate()}
       />
@@ -192,6 +222,11 @@ function PayoutRow({ p }: { p: SellerSalePayout }) {
         <Text variant="caption" color="mutedForeground">
           {when}
         </Text>
+        {p.payoutStatus === 'FAILED' ? (
+          <Text variant="caption" color="mutedForeground">
+            {PAYOUT_FAILED_NEXT_STEP}
+          </Text>
+        ) : null}
       </View>
       <View style={{ alignItems: 'flex-end', gap: 4 }}>
         <Price amount={p.amount} variant="callout" />

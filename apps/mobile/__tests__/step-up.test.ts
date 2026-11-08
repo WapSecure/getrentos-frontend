@@ -4,6 +4,8 @@ import {
   registerStepUpPrompt,
   rememberStepUpToken,
   currentStepUpToken,
+  currentStepUpSummary,
+  withStepUpSummary,
 } from '@/lib/stepUp';
 
 jest.mock('@/lib/env', () => ({ env: { apiUrl: 'https://api.test', clientApp: 'mobile' } }));
@@ -58,6 +60,19 @@ describe('step-up', () => {
     registerStepUpPrompt(prompt);
     await expect(apiFetch('/x')).rejects.toBeInstanceOf(ApiError);
     expect(prompt).not.toHaveBeenCalled();
+  });
+
+  it('tells the prompt what is being authorised, then forgets it', async () => {
+    fetchMock
+      .mockResolvedValueOnce(reply(403, { message: 'Confirm it’s you', error: 'STEP_UP_REQUIRED' }))
+      .mockResolvedValueOnce(reply(200, { ok: true }));
+    const prompt = jest.fn().mockResolvedValue('tok-2');
+    registerStepUpPrompt(prompt);
+    await withStepUpSummary('Withdraw ₦250,000 to GTBank ••••1234', () =>
+      apiFetch('/realtor/payouts/request', { method: 'POST' })
+    );
+    expect(prompt).toHaveBeenCalledWith('Withdraw ₦250,000 to GTBank ••••1234');
+    expect(currentStepUpSummary()).toBeNull();
   });
 
   it('forgets a token shortly before it expires', () => {

@@ -195,6 +195,8 @@ export interface EstatePayoutAccount {
   accountNumber: string;
   accountName: string;
   verified: boolean;
+  /** While a recent change is on hold; not sent by the API yet, shown once it is. */
+  payoutHoldUntil?: string | null;
 }
 
 /* ----------------------------------- api ---------------------------------- */
