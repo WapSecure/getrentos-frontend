@@ -8,6 +8,7 @@ import {
   Button,
   PageErrorState,
   PageHeader,
+  Breadcrumbs,
   Skeleton,
   Tabs,
   TabsContent,
@@ -15,7 +16,7 @@ import {
   TabsTrigger,
   useToast,
 } from '@getrentos/ui';
-import { ArrowLeft, Info } from 'lucide-react';
+import { Info } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';
@@ -207,12 +208,9 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
 
   return (
     <div className="space-y-6">
-      <Link
-        href={LAND_BUYER_ROUTES.HUB}
-        className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="h-4 w-4" aria-hidden /> My land
-      </Link>
+      <Breadcrumbs
+        items={[{ label: 'My land', href: LAND_BUYER_ROUTES.HUB }, { label: purchase.reference }]}
+      />
 
       <PageHeader
         title={

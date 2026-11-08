@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Alert,
@@ -11,9 +10,10 @@ import {
   ConfirmDialog,
   PageErrorState,
   PageHeader,
+  Breadcrumbs,
   Skeleton,
 } from '@getrentos/ui';
-import { AlertTriangle, ArrowLeft, Ban, FileDown } from 'lucide-react';
+import { AlertTriangle, Ban, FileDown } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { landDeveloperKeys } from '@/lib/landDeveloperQueryKeys';
@@ -195,16 +195,14 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
 
   return (
     <>
-      <Link
-        href={LAND_DEVELOPER_ROUTES.purchases()}
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-        Plot sales
-      </Link>
+      <Breadcrumbs
+        items={[
+          { label: 'Plot sales', href: LAND_DEVELOPER_ROUTES.purchases() },
+          { label: data.reference },
+        ]}
+      />
 
       <PageHeader
-        className="mt-2"
         title={data.reference}
         description={
           <>

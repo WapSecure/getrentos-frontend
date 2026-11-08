@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, CircleAlert, HandCoins, RefreshCw } from 'lucide-react';
@@ -12,6 +11,7 @@ import {
   Skeleton,
   useToast,
   PageHeader,
+  Breadcrumbs,
 } from '@getrentos/ui';
 import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../../../layout';
@@ -175,12 +175,12 @@ export default function AdminLandPurchaseDetailPage() {
 
   return (
     <>
-      <Link
-        href="/admin/land/purchases"
-        className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="h-4 w-4" /> Land purchases
-      </Link>
+      <Breadcrumbs
+        items={[
+          { label: 'Land purchases', href: '/admin/land/purchases' },
+          { label: purchase.reference },
+        ]}
+      />
 
       <PageHeader
         title={<span className="font-mono">{purchase.reference}</span>}

@@ -3,6 +3,7 @@
 import { useCallback } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import type { ElementType } from 'react';
+import { Tabs, TabsList, TabsTrigger } from '@getrentos/ui';
 
 export interface HubTab {
   id: string;
@@ -47,32 +48,22 @@ interface HubTabsProps {
 
 export function HubTabs({ tabs, activeTab, onChange, className }: HubTabsProps) {
   return (
-    <div
-      role="tablist"
-      aria-label="Section tabs"
-      className={`sticky top-[4.75rem] z-20 mb-7 flex gap-1 overflow-x-auto rounded-2xl border border-border/70 bg-background/85 p-1.5 shadow-sm backdrop-blur-xl supports-backdrop-filter:bg-background/75 ${className ?? ''}`}
-    >
-      {tabs.map((tab) => {
-        const Icon = tab.icon;
-        const isActive = tab.id === activeTab;
-        return (
-          <button
-            key={tab.id}
-            type="button"
-            role="tab"
-            aria-selected={isActive}
-            onClick={() => onChange(tab.id)}
-            className={`flex min-h-11 shrink-0 items-center gap-2 rounded-xl px-4 text-sm font-semibold transition-[background-color,color,box-shadow] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 ${
-              isActive
-                ? 'bg-accent text-accent-foreground shadow-sm ring-1 ring-primary/10'
-                : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
-            }`}
-          >
-            <Icon className="h-4 w-4" aria-hidden="true" />
-            {tab.label}
-          </button>
-        );
-      })}
-    </div>
+    <Tabs value={activeTab} onValueChange={onChange} className={className}>
+      <TabsList
+        variant="underline"
+        aria-label="Section tabs"
+        className="sticky top-[4.75rem] z-20 mb-7 bg-background/95 pt-1 backdrop-blur-xl supports-backdrop-filter:bg-background/85"
+      >
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
+          return (
+            <TabsTrigger key={tab.id} value={tab.id} className="flex min-h-11 items-center gap-2">
+              <Icon className="h-4 w-4" aria-hidden="true" />
+              {tab.label}
+            </TabsTrigger>
+          );
+        })}
+      </TabsList>
+    </Tabs>
   );
 }
