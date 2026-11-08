@@ -7,7 +7,6 @@ export function premiumTabBarOptions(colors: Palette, bottomInset: number) {
     headerShown: false,
     tabBarActiveTintColor: colors.primary,
     tabBarInactiveTintColor: colors.mutedForeground,
-    tabBarActiveBackgroundColor: colors.accent,
     tabBarStyle: {
       backgroundColor: colors.card,
       borderTopColor: colors.border,
@@ -23,9 +22,7 @@ export function premiumTabBarOptions(colors: Palette, bottomInset: number) {
       fontWeight: '600' as const,
     },
     tabBarItemStyle: {
-      marginHorizontal: 3,
-      marginVertical: 3,
-      borderRadius: 14,
+      paddingTop: 2,
     },
     tabBarHideOnKeyboard: Platform.OS === 'android',
   };
