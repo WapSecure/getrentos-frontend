@@ -47,9 +47,9 @@ export const RentAccountCard = () => {
 
   return (
     <Card className="p-4">
-      <h3 className="font-semibold text-foreground flex items-center gap-2">
-        <Wallet className="w-4 h-4 text-primary" /> Rent account
-      </h3>
+      <h2 className="font-semibold text-foreground flex items-center gap-2">
+        <Wallet className="w-4 h-4 text-primary" aria-hidden="true" /> Rent account
+      </h2>
       <div className="mt-3 space-y-4">
         {list.map((a) => (
           <div key={a.leaseId}>

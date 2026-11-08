@@ -1,42 +1,39 @@
 'use client';
 
-import {
-  CheckCircle,
-  Clock,
-  AlertCircle,
-  Shield,
-  Calendar,
-  CreditCard,
-  Building2,
-  Wallet,
-  Download,
-  MessageCircle,
-} from 'lucide-react';
-import { NairaSign } from '@getrentos/ui/NairaSign';
+import { CheckCircle, Shield, Download, MessageCircle } from 'lucide-react';
 import {
   Alert,
+  Badge,
   Button,
+  DescriptionList,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogTitle,
+  type DescriptionItem,
 } from '@getrentos/ui';
-import { escrowStatusBadges } from '@/lib/statusBadge';
+import { escrowStatusBadges, paymentStatusBadges } from '@/lib/statusBadge';
+import { formatCurrency, formatLagosDate } from '@/lib/format';
 import { InvoiceLines, type InvoiceLine } from '@/components/shared/InvoiceLines';
+import { leftToPay } from './PaymentCard';
 
 interface Payment {
   id: string;
   propertyName: string;
   amount: number;
+  amountPaid?: number;
+  outstanding?: number;
   date: string;
   status: 'paid' | 'pending' | 'overdue' | 'processing';
-  method: 'card' | 'bank_transfer' | 'wallet';
+  method?: 'card' | 'bank_transfer' | 'wallet';
   receiptUrl?: string;
   description: string;
   dueDate: string;
   escrowStatus: 'not_funded' | 'held' | 'pending_review' | 'released' | 'frozen';
   releaseDate?: string;
   heldReason?: string;
+  reference?: string;
+  resumeCheckout?: { url: string; reference: string; expiresAt: string };
   periodStart?: string;
   periodEnd?: string;
   lines?: InvoiceLine[];
@@ -51,6 +48,13 @@ interface PaymentDetailsModalProps {
   onConfirmMoveIn: (id: string) => void;
 }
 
+/** How the renter chose to pay. "Wallet" is not a GetRentos balance, so it is not called one. */
+const METHOD_LABEL: Record<NonNullable<Payment['method']>, string> = {
+  card: 'Card',
+  bank_transfer: 'Bank transfer',
+  wallet: 'Other payment method',
+};
+
 export const PaymentDetailsModal = ({
   isOpen,
   onClose,
@@ -59,40 +63,36 @@ export const PaymentDetailsModal = ({
   onDispute,
   onConfirmMoveIn,
 }: PaymentDetailsModalProps) => {
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-NG', {
-      style: 'currency',
-      currency: 'NGN',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
+  const status = paymentStatusBadges[payment.status];
+  const isPaid = payment.status === 'paid';
+  const isPayable = payment.status === 'pending' || payment.status === 'overdue';
+  const isHeld = isPaid && payment.escrowStatus === 'held';
+  const left = leftToPay(payment);
+  const paidSoFar = payment.amountPaid ?? 0;
+  const reference = payment.resumeCheckout?.reference ?? payment.reference;
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-GB', {
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  };
-
-  const getStatusConfig = () => {
-    switch (payment.status) {
-      case 'paid':
-        return { label: 'Paid', color: 'text-success', icon: CheckCircle };
-      case 'pending':
-        return { label: 'Pending', color: 'text-warning', icon: Clock };
-      case 'overdue':
-        return { label: 'Overdue', color: 'text-destructive', icon: AlertCircle };
-      case 'processing':
-        return { label: 'Processing', color: 'text-info', icon: Clock };
-      default:
-        return { label: 'Unknown', color: 'text-muted-foreground', icon: Clock };
-    }
-  };
-
-  const statusConfig = getStatusConfig();
-  const StatusIcon = statusConfig.icon;
+  const facts: DescriptionItem[] = [
+    { label: 'Charge', value: payment.description },
+    { label: 'Charge amount', value: formatCurrency(payment.amount) },
+    ...(!isPaid && paidSoFar > 0
+      ? [{ label: 'Paid so far', value: formatCurrency(paidSoFar) }]
+      : []),
+    ...(isPayable ? [{ label: 'Still to pay', value: formatCurrency(left) }] : []),
+    { label: 'Due date', value: formatLagosDate(payment.dueDate, 'long') },
+    ...(isPaid ? [{ label: 'Paid on', value: formatLagosDate(payment.date, 'long') }] : []),
+    ...(isPaid && payment.method
+      ? [{ label: 'Paid with', value: METHOD_LABEL[payment.method] ?? 'Other payment method' }]
+      : []),
+    ...(reference
+      ? [
+          {
+            label: 'Payment reference',
+            value: <span className="select-all font-mono text-xs">{reference}</span>,
+            hint: 'Quote this if you contact support.',
+          },
+        ]
+      : []),
+  ];
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -105,16 +105,16 @@ export const PaymentDetailsModal = ({
         </div>
 
         <div className="p-4 space-y-4">
-          {/* Amount & Status */}
-          <div className="flex items-center justify-between p-3 rounded-lg bg-secondary">
+          <div className="flex items-center justify-between gap-3 p-3 rounded-lg bg-secondary">
             <div>
-              <p className="text-xs text-muted-foreground">Amount</p>
-              <p className="text-2xl font-bold text-primary">{formatCurrency(payment.amount)}</p>
+              <p className="text-xs text-muted-foreground">
+                {isPayable ? 'Still to pay' : 'Amount'}
+              </p>
+              <p className="text-2xl font-bold text-primary">
+                {formatCurrency(isPayable ? left : payment.amount)}
+              </p>
             </div>
-            <div className={`flex items-center gap-1 text-sm font-medium ${statusConfig.color}`}>
-              <StatusIcon className="w-4 h-4" />
-              {statusConfig.label}
-            </div>
+            <Badge variant={status.variant}>{status.label}</Badge>
           </div>
 
           <InvoiceLines
@@ -123,103 +123,60 @@ export const PaymentDetailsModal = ({
             periodEnd={payment.periodEnd}
           />
 
-          {/* Details Grid */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="p-2 rounded-lg bg-secondary">
-              <div className="flex items-center gap-1">
-                <Calendar className="w-3 h-3 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">Due date</span>
-              </div>
-              <p className="text-sm font-medium text-foreground">{formatDate(payment.dueDate)}</p>
-            </div>
-            <div className="p-2 rounded-lg bg-secondary">
-              <div className="flex items-center gap-1">
-                <NairaSign className="w-3 h-3 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">Paid on</span>
-              </div>
-              <p className="text-sm font-medium text-foreground">{formatDate(payment.date)}</p>
-            </div>
-          </div>
+          <DescriptionList items={facts} layout="rows" />
 
-          {/* Payment Method */}
-          <div className="p-2 rounded-lg bg-secondary">
-            <div className="flex items-center gap-1">
-              {payment.method === 'card' && (
-                <CreditCard className="w-3 h-3 text-muted-foreground" />
+          {payment.escrowStatus !== 'not_funded' && (
+            <Alert variant="info" icon={Shield} title="Where your money is">
+              {escrowStatusBadges[payment.escrowStatus]?.label ?? payment.escrowStatus}
+              {payment.escrowStatus === 'held' && (
+                <p className="text-xs mt-1">
+                  Held under GetRentos Payment Protection so you have the home in hand first.{' '}
+                  {payment.releaseDate ? (
+                    <>
+                      It releases to your landlord on {formatLagosDate(payment.releaseDate)}, or
+                      sooner — the moment you confirm you&apos;ve moved in.
+                    </>
+                  ) : (
+                    <>It stays held until you confirm you&apos;ve moved in.</>
+                  )}
+                </p>
               )}
-              {payment.method === 'bank_transfer' && (
-                <Building2 className="w-3 h-3 text-muted-foreground" />
+            </Alert>
+          )}
+
+          {(isHeld || payment.receiptUrl) && (
+            <div className="flex flex-wrap gap-2 pt-2">
+              {isHeld && (
+                <Button
+                  variant="primary"
+                  className="flex-1"
+                  icon={<CheckCircle className="w-4 h-4" />}
+                  onClick={() => onConfirmMoveIn(payment.id)}
+                >
+                  Confirm move-in
+                </Button>
               )}
-              {payment.method === 'wallet' && <Wallet className="w-3 h-3 text-muted-foreground" />}
-              <span className="text-xs text-muted-foreground">Payment method</span>
+              {payment.receiptUrl && (
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  icon={<Download className="w-4 h-4" />}
+                  onClick={() => onDownloadReceipt(payment.id)}
+                >
+                  Download receipt
+                </Button>
+              )}
+              {isHeld && (
+                <Button
+                  variant="ghost"
+                  icon={<MessageCircle className="w-4 h-4" />}
+                  onClick={() => onDispute(payment.id)}
+                >
+                  Report a problem
+                </Button>
+              )}
             </div>
-            <p className="text-sm font-medium text-foreground capitalize">
-              {payment.method.replace('_', ' ')}
-            </p>
-          </div>
-
-          {/* Where the money is */}
-          <Alert variant="info" icon={Shield} title="Where your money is">
-            {escrowStatusBadges[payment.escrowStatus]?.label ?? payment.escrowStatus}
-            {payment.escrowStatus === 'held' && (
-              <p className="text-xs mt-1">
-                Held under GetRentos Payment Protection so you have the home in hand first.{' '}
-                {payment.releaseDate ? (
-                  <>
-                    It releases to your landlord on{' '}
-                    {new Date(payment.releaseDate).toLocaleDateString('en-GB', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                    })}
-                    , or sooner — the moment you confirm you&apos;ve moved in.
-                  </>
-                ) : (
-                  <>It stays held until you confirm you&apos;ve moved in.</>
-                )}
-              </p>
-            )}
-          </Alert>
-
-          {/* Description */}
-          <div className="p-2 rounded-lg bg-secondary">
-            <span className="text-xs text-muted-foreground">Description</span>
-            <p className="text-sm text-foreground mt-0.5">{payment.description}</p>
-          </div>
-
-          {/* Actions */}
-          <div className="flex flex-wrap gap-2 pt-2">
-            {payment.escrowStatus === 'held' && (
-              <Button
-                variant="primary"
-                className="flex-1"
-                icon={<CheckCircle className="w-4 h-4" />}
-                onClick={() => onConfirmMoveIn(payment.id)}
-              >
-                Confirm move-in &amp; release
-              </Button>
-            )}
-            {payment.receiptUrl && (
-              <Button
-                variant="primary"
-                className="flex-1"
-                icon={<Download className="w-4 h-4" />}
-                onClick={() => onDownloadReceipt(payment.id)}
-              >
-                Download receipt
-              </Button>
-            )}
-            {payment.status === 'paid' && payment.escrowStatus === 'held' && (
-              <Button
-                variant="danger"
-                className="flex-1"
-                icon={<MessageCircle className="w-4 h-4" />}
-                onClick={() => onDispute(payment.id)}
-              >
-                Dispute
-              </Button>
-            )}
-          </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>

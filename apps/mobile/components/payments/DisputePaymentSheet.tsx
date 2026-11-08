@@ -6,6 +6,7 @@ import { Sheet } from '@/components/Sheet';
 import { qk } from '@/lib/query/keys';
 import { paymentsApi, type Payment } from '@/lib/api/payments';
 import { errorMessage } from '@/lib/api/client';
+import { formatNaira } from '@/lib/format';
 
 interface Props {
   open: boolean;
@@ -16,11 +17,7 @@ interface Props {
 export function DisputePaymentSheet({ open, onClose, payment }: Props) {
   const [submitting, setSubmitting] = useState(false);
   return (
-    <Sheet
-      open={open}
-      onClose={submitting ? () => undefined : onClose}
-      title="Dispute this payment"
-    >
+    <Sheet open={open} onClose={submitting ? () => undefined : onClose} title="Report a problem">
       {/* Remount on each open so the reason field always starts blank. */}
       {payment ? (
         <DisputePaymentForm
@@ -51,25 +48,22 @@ function DisputePaymentForm({
   const mutation = useMutation({
     mutationFn: () => paymentsApi.dispute(payment.id, reason.trim()),
     onMutate: () => onSubmittingChange(true),
-    onSuccess: (updated) => {
-      qc.setQueryData(
-        qk.renter.payments(1, 50),
-        (old: Awaited<ReturnType<typeof paymentsApi.list>> | undefined) =>
-          old ? { ...old, items: old.items.map((p) => (p.id === updated.id ? updated : p)) } : old
-      );
-      toast.show('Dispute submitted: we’ll review it within 2 business days.', 'success');
+    onSuccess: () => {
+      // The history loads page by page, so refresh every payment list rather than patch one.
+      qc.invalidateQueries({ queryKey: qk.renter.paymentsAll });
+      toast.show('Report sent: we’ll review it within 2 business days.', 'success');
       onClose();
     },
-    onError: (err) => toast.show(errorMessage(err, 'Could not submit the dispute.'), 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not send your report.'), 'error'),
     onSettled: () => onSubmittingChange(false),
   });
 
   return (
     <View style={{ gap: spacing.lg }}>
       <Text variant="body" color="mutedForeground">
-        Tell us what&apos;s wrong with <Text variant="bodyStrong">{payment.description}</Text> (₦
-        {payment.amount.toLocaleString()}). We&apos;ll keep holding the money and won&apos;t pay it
-        out while it&apos;s reviewed.
+        Tell us what&apos;s wrong with <Text variant="bodyStrong">{payment.description}</Text> (
+        {formatNaira(payment.amount)}). We&apos;ll keep holding the money and won&apos;t pay it out
+        while it&apos;s reviewed.
       </Text>
       <TextField
         label="Reason"
@@ -82,7 +76,7 @@ function DisputePaymentForm({
         required
       />
       <Button
-        label="Submit dispute"
+        label="Send report"
         variant="destructive"
         loading={mutation.isPending}
         disabled={mutation.isPending || !reason.trim()}

@@ -1,5 +1,6 @@
 import type { LucideIcon } from 'lucide-react';
 import {
+  AlertCircle,
   Lock,
   Clock,
   CheckCircle2,
@@ -42,11 +43,16 @@ export interface StatusBadgeEntry {
  * is defined once instead of re-declared per card/table with hand-rolled
  * pill markup.
  */
+/**
+ * A rent charge's state. `pending` is a charge not paid yet and not late, so it
+ * reads "Due": "Pending" would suggest money already sent. "Processing" is the
+ * in-flight payment. Mobile uses the same words (`apps/mobile/lib/api/payments.ts`).
+ */
 export const paymentStatusBadges: Record<RentPaymentStatus, StatusBadgeEntry> = {
-  paid: { label: 'Paid', variant: 'success' },
-  pending: { label: 'Pending', variant: 'warning' },
-  overdue: { label: 'Overdue', variant: 'danger' },
-  processing: { label: 'Processing', variant: 'info' },
+  paid: { label: 'Paid', variant: 'success', icon: CheckCircle2 },
+  pending: { label: 'Due', variant: 'neutral', icon: Clock },
+  overdue: { label: 'Overdue', variant: 'danger', icon: AlertCircle },
+  processing: { label: 'Processing', variant: 'info', icon: RefreshCcw },
 };
 
 export const escrowStatusBadges: Record<EscrowStatus, StatusBadgeEntry> = {
