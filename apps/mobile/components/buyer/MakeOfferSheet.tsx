@@ -28,7 +28,7 @@ interface Props {
 const FINANCING_OPTIONS: { value: BuyerFinancingType; label: string }[] = [
   { value: 'cash', label: 'Cash' },
   { value: 'mortgage', label: 'Mortgage' },
-  { value: 'installment', label: 'Installment' },
+  { value: 'installment', label: 'Instalment' },
 ];
 
 export function MakeOfferSheet({ open, onClose, listing }: Props) {

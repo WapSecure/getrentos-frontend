@@ -159,7 +159,7 @@ export function PlanCard({
   const q = quotePlot(plotPrice, fees, plan);
   const rows: [string, number][] = [
     ['Plot price', q.plotPrice],
-    ...(q.priceUplift > 0 ? [['Installment uplift', q.priceUplift] as [string, number]] : []),
+    ...(q.priceUplift > 0 ? [['Instalment premium', q.priceUplift] as [string, number]] : []),
     ['Fees', q.fees],
     ['Total price', q.totalPrice],
     [q.durationMonths === 0 ? 'Due to start' : 'Deposit + fees to start', q.initialPayment],

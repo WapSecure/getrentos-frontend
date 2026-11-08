@@ -401,7 +401,7 @@ export default function PropertyDetailPage() {
                 <div className="flex items-start gap-2 text-sm">
                   <Zap className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
                   <p className="text-muted-foreground">
-                    This landlord accepts monthly installments via{' '}
+                    This landlord accepts monthly instalments via{' '}
                     <span className="text-foreground font-medium">GetRentos Flex</span>, but Flex
                     isn&apos;t taking new plans right now. Coming back soon.
                   </p>
@@ -411,7 +411,7 @@ export default function PropertyDetailPage() {
                   <div className="flex items-start gap-2 text-sm">
                     <Zap className="w-4 h-4 text-primary shrink-0 mt-0.5" />
                     <p className="text-muted-foreground">
-                      This landlord accepts monthly installments via{' '}
+                      This landlord accepts monthly instalments via{' '}
                       <span className="text-foreground font-medium">GetRentos Flex</span>: we pay
                       the full year upfront, you repay us monthly.
                     </p>
@@ -431,7 +431,7 @@ export default function PropertyDetailPage() {
                 <div className="flex items-start gap-2 text-sm">
                   <Lock className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
                   <p className="text-muted-foreground">
-                    This landlord requires the full year&apos;s rent upfront: monthly installments
+                    This landlord requires the full year&apos;s rent upfront: monthly instalments
                     aren&apos;t available for this property.
                   </p>
                 </div>

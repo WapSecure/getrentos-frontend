@@ -79,7 +79,7 @@ export const FinancingView = () => {
       }
       setPayingInstallmentId(null);
       queryClient.invalidateQueries({ queryKey: renterKeys.financing });
-      toast.success('Installment paid.');
+      toast.success('Instalment paid.');
     },
   });
 

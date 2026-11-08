@@ -407,10 +407,11 @@ export const shortletsApi = {
     apiFetch<ShortletBooking>(`/shortlets/bookings/${bookingId}/cancel`, { method: 'POST' }),
 
   payBooking: (bookingId: string, provider?: PaymentProvider) =>
-    apiFetch<{ authorizationUrl?: string; reference?: string }>(
-      `/shortlets/bookings/${bookingId}/pay${providerQuery(provider)}`,
-      { method: 'POST' }
-    ),
+    apiFetch<{
+      authorizationUrl?: string;
+      reference?: string;
+      paymentStatus?: 'UNPAID' | 'PROCESSING' | 'PAID' | 'REFUNDED';
+    }>(`/shortlets/bookings/${bookingId}/pay${providerQuery(provider)}`, { method: 'POST' }),
 
   reviewBooking: (bookingId: string, rating: number, comment?: string) =>
     apiFetch<ShortletReview>(`/shortlets/bookings/${bookingId}/review`, {

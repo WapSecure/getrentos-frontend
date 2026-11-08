@@ -101,7 +101,7 @@ export const PaymentPlans = ({ layout, notify }: PaymentPlansProps) => {
         <EmptyState
           icon={CalendarClock}
           title="No payment plans yet"
-          description="Offer at least one plan (outright or installments) before you publish the estate."
+          description="Offer at least one plan (outright or instalments) before you publish the estate."
         />
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">

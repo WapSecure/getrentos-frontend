@@ -29,6 +29,7 @@ import {
   cancelDescription,
   CONFIRMABLE,
   landBuyerApi,
+  nextDueParts,
   PAYABLE,
   plotLabel,
   refundSentence,
@@ -39,6 +40,7 @@ import {
 import { formatBps, PERFECTION_OWNER, PERFECTION_STEP, type Perfection } from '@/lib/api/landSales';
 import { errorMessage } from '@/lib/api/client';
 import { formatDate, formatNaira } from '@/lib/format';
+import { LAND_PROTECTION } from '@/lib/paymentCopy';
 import { PDF_MIME, shareDownloadedFile } from '@/lib/shareFile';
 import { Sheet } from '@/components/Sheet';
 import { BuyerConditions, BuyerMilestones, HeldNote } from '@/components/land/BuyerConveyance';
@@ -332,15 +334,16 @@ function PayNext({ p, onPaid }: { p: BuyerPurchaseDetail; onPaid: () => void }) 
           <PaySheet
             open={sheetOpen}
             onClose={closeSheet}
-            title={p.status === 'PENDING_DEPOSIT' ? 'Pay your deposit' : 'Pay installment'}
+            title={p.status === 'PENDING_DEPOSIT' ? 'Pay your deposit' : 'Pay instalment'}
             context={`${p.layoutName}, plot ${p.plotNumber} · ${p.nextDue.label}`}
             dueDate={p.nextDue.dueDate}
             overdue={p.nextDue.overdue}
             owed={p.nextDue.amount}
             amount={p.nextDue.amount}
             itemLabel={p.nextDue.overdue ? 'Land payment (late fee included)' : 'Land payment'}
+            itemParts={nextDueParts(p.nextDue, p.installments)}
             receiverLine={`The fee goes to the payment company, so the full ${formatNaira(p.nextDue.amount)} is recorded against your purchase.`}
-            protection="GetRentos holds it until you confirm each conveyance step."
+            protection={LAND_PROTECTION}
             providers={providers}
             providerError={providerError}
             busy={pay.isPending}
@@ -362,7 +365,7 @@ function PriceCard({ p }: { p: BuyerPurchaseDetail }) {
   const { spacing } = useTheme();
   const rows: [string, number, ('success' | 'destructive')?][] = [
     ['Plot price', p.plotPrice],
-    ...(p.priceUplift > 0 ? [['Installment uplift', p.priceUplift] as [string, number]] : []),
+    ...(p.priceUplift > 0 ? [['Instalment premium', p.priceUplift] as [string, number]] : []),
     ['Documentation fee', p.feeBreakdown.documentationFee],
     ['Survey fee', p.feeBreakdown.surveyFee],
     ['Development levy', p.feeBreakdown.developmentLevy],
@@ -412,7 +415,7 @@ function Schedule({ p }: { p: BuyerPurchaseDetail }) {
       {s.overdueCount > 0 ? (
         <FormAlert
           tone="error"
-          message={`${s.overdueCount} installment${s.overdueCount === 1 ? ' is' : 's are'} overdue: ${formatNaira(s.overdueAmount)} including late fees. Pay now to avoid default.`}
+          message={`${s.overdueCount} instalment${s.overdueCount === 1 ? ' is' : 's are'} overdue: ${formatNaira(s.overdueAmount)} including late fees. Pay now to avoid default.`}
         />
       ) : null}
       {s.rows.map((i, n) => {
@@ -438,12 +441,12 @@ function Schedule({ p }: { p: BuyerPurchaseDetail }) {
       })}
       {onlyDeposit ? (
         <Text variant="caption" color="mutedForeground">
-          The monthly schedule is built when the deposit is paid; the first installment falls a
-          month later.
+          The monthly schedule is built when the deposit is paid; the first instalment falls a month
+          later.
         </Text>
       ) : null}
       <Text variant="caption" color="mutedForeground">
-        {p.terms.gracePeriodDays} days’ grace on each installment, then a{' '}
+        {p.terms.gracePeriodDays} days’ grace on each instalment, then a{' '}
         {formatBps(p.terms.lateFeeBps)} late fee. Default after {p.terms.defaultAfterDays} days
         overdue.
       </Text>

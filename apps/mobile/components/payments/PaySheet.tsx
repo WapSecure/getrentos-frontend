@@ -7,6 +7,7 @@ import { PaymentProviderPicker } from '@/components/payments/PaymentProviderPick
 import { useCheckoutFee } from '@/hooks/useCheckoutFee';
 import type { PaymentProviderChoice } from '@/hooks/usePaymentProviders';
 import { formatDate, formatNaira } from '@/lib/format';
+import { transferNote } from '@/lib/paymentCopy';
 
 export interface PaySheetProps {
   open: boolean;
@@ -24,8 +25,13 @@ export interface PaySheetProps {
   owedLabel?: string;
   /** What this payment is, before the fee: the base of the breakdown. 0 while not yet chosen. */
   amount: number;
-  /** The breakdown's first line: "Rent", "Deposit", "Installment". */
+  /** The breakdown's first line: "Rent", "Deposit", "Instalment". */
   itemLabel: string;
+  /**
+   * When what is paid is made of separate amounts (a land payment and its late
+   * fee), the lines that add up to it, shown in place of the single item line.
+   */
+  itemParts?: { label: string; amount: number }[];
   /** Under the breakdown when there is a fee: who still gets the full amount. */
   receiverLine?: string | null;
   /** One sentence on what happens to the money: "Your rent is held by GetRentos until…". */
@@ -78,10 +84,28 @@ function Step({ n, children }: { n?: number; children: string }) {
   );
 }
 
-function Line({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
+function Line({
+  label,
+  value,
+  strong,
+  spokenValue,
+  live,
+}: {
+  label: string;
+  value: string;
+  strong?: boolean;
+  /** What a screen reader says for the value, when the text on screen reads badly aloud. */
+  spokenValue?: string;
+  /** Announce the line when it changes (the total, once the fee is known). */
+  live?: boolean;
+}) {
   const { spacing } = useTheme();
   return (
     <View
+      // One stop per line for a screen reader: "Card or bank fee, ₦1,500".
+      accessible
+      accessibilityLabel={`${label}, ${spokenValue ?? value}`}
+      accessibilityLiveRegion={live ? 'polite' : undefined}
       style={{
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -119,6 +143,7 @@ export function PaySheet({
   owedLabel = 'owed',
   amount,
   itemLabel,
+  itemParts,
   receiverLine,
   protection,
   howMuch,
@@ -149,6 +174,11 @@ export function PaySheet({
   const withFee = breakdown && ready && amount > 0;
   const feeLoading = withFee && feeState === 'loading';
   const feeUnknown = withFee && feeState === 'unknown';
+
+  const howTransfer = transferNote(
+    providers.provider,
+    breakdown && total != null ? formatNaira(total) : null
+  );
 
   const button = !ready
     ? notReadyLabel
@@ -236,10 +266,22 @@ export function PaySheet({
             <Step n={howMuch ? 2 : undefined}>Pay with</Step>
             {providerError ? <FormAlert tone="warning" message={providerError} /> : null}
             <PaymentProviderPicker choice={providers} variant="card" hideLabel />
+            {ready ? (
+              <Text variant="caption" color="mutedForeground">
+                {howTransfer}
+              </Text>
+            ) : null}
           </View>
-        ) : providerError ? (
-          <FormAlert tone="warning" message={providerError} />
-        ) : null}
+        ) : (
+          <>
+            {providerError ? <FormAlert tone="warning" message={providerError} /> : null}
+            {ready ? (
+              <Text variant="caption" color="mutedForeground">
+                {howTransfer}
+              </Text>
+            ) : null}
+          </>
+        )}
 
         {note}
 
@@ -254,7 +296,13 @@ export function PaySheet({
               paddingVertical: spacing.xs,
             }}
           >
-            <Line label={itemLabel} value={formatNaira(amount)} />
+            {itemParts && itemParts.length > 0 ? (
+              itemParts.map((part) => (
+                <Line key={part.label} label={part.label} value={formatNaira(part.amount)} />
+              ))
+            ) : (
+              <Line label={itemLabel} value={formatNaira(amount)} />
+            )}
             <Line
               label="Card or bank fee"
               value={
@@ -266,11 +314,14 @@ export function PaySheet({
                       ? formatNaira(fee)
                       : 'None'
               }
+              spokenValue={!feeUnknown && fee == null ? 'working it out' : undefined}
             />
             <Line
               label="You pay"
               value={total != null ? formatNaira(total) : `${formatNaira(amount)} + fee`}
+              spokenValue={total != null ? undefined : `${formatNaira(amount)} plus the fee`}
               strong
+              live
             />
             {fee && receiverLine ? (
               <Text

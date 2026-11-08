@@ -64,6 +64,9 @@ export default function Payments() {
       payment: Payment;
     }) => paymentsApi.payNow(id, 'card', amount, provider),
     onSuccess: async (payment) => {
+      // The sheet stayed open while the payment started; the checkout or result takes over.
+      setPayPayment(null);
+      setProviderError(null);
       if (payment.authorizationUrl) {
         await checkout(payment.authorizationUrl, payment.reference);
       } else {
@@ -78,9 +81,9 @@ export default function Payments() {
       const unavailable = providers.recover(err, variables.provider);
       if (unavailable) {
         setProviderError(unavailable);
-        setPayPayment(variables.payment);
         return;
       }
+      setPayPayment(null);
       toast.show(errorMessage(err, 'Could not process the payment.'), 'error');
     },
   });
@@ -187,20 +190,21 @@ export default function Payments() {
       <PayAmountSheet
         payment={payPayment}
         onClose={() => {
+          if (payMutation.isPending) return;
           setPayPayment(null);
           setProviderError(null);
         }}
         onPay={(amount) => {
-          if (payPayment)
-            payMutation.mutate({
-              id: payPayment.id,
-              amount,
-              provider: providers.provider,
-              payment: payPayment,
-            });
-          setPayPayment(null);
+          if (!payPayment) return;
           setProviderError(null);
+          payMutation.mutate({
+            id: payPayment.id,
+            amount,
+            provider: providers.provider,
+            payment: payPayment,
+          });
         }}
+        busy={payMutation.isPending}
         providers={providers}
         providerError={providerError}
       />

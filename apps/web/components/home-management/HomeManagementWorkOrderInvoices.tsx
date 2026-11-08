@@ -1213,7 +1213,7 @@ export function HomeManagementWorkOrderInvoices({
           note: 'We pay the vendor from the rent GetRentos holds for the owner first. A card top-up, with its card or bank fee, is only taken if that does not cover the invoice.',
           buttonLabel: payTarget?.payoutStatus === 'FAILED' ? 'Retry payment' : 'Pay vendor',
         }}
-        protection="The vendor is paid once the top-up lands."
+        protection="If a top-up is needed, we send the vendor’s payment once it is confirmed. You’ll see it on this invoice."
         providers={providers}
         providerError={providerError}
         busy={payInvoice.isPending}

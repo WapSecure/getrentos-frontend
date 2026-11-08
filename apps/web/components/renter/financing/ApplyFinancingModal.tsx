@@ -103,7 +103,7 @@ export const ApplyFinancingModal = ({
                 value={formatCurrency(selectedOption.totalRepayable, { compact: true })}
               />
               <SummaryRow
-                label="Monthly installment"
+                label="Monthly instalment"
                 value={formatCurrency(selectedOption.monthlyInstallment, { compact: true })}
                 emphasis
               />
@@ -124,7 +124,7 @@ export const ApplyFinancingModal = ({
                 <span className="text-xs text-muted-foreground">
                   I agree to repay{' '}
                   {formatCurrency(selectedOption.totalRepayable, { compact: true })} over{' '}
-                  {selectedOption.months} monthly installments of{' '}
+                  {selectedOption.months} monthly instalments of{' '}
                   {formatCurrency(selectedOption.monthlyInstallment, { compact: true })}.
                 </span>
               }

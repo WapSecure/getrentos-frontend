@@ -5,6 +5,7 @@ import { CurrencyInput, Field, RadioGroup } from '@getrentos/ui';
 import { PayDialog } from '@/components/shared/payments/PayDialog';
 import type { PaymentProviderChoice } from '@/hooks/usePaymentProviders';
 import { formatCurrency } from '@/lib/format';
+import { RENT_PART_PROTECTION, RENT_PROTECTION } from '@/lib/paymentCopy';
 
 /** Matches the backend: the smallest part-payment accepted. */
 const MIN_PART_PAYMENT = 1_000;
@@ -23,6 +24,10 @@ interface PayAmountDialogProps {
   providers: PaymentProviderChoice;
   /** Why the last try failed when the chosen company could not take it: choose another. */
   providerError?: string | null;
+  /** Why the last try failed for any other reason. */
+  error?: string | null;
+  /** While the payment is being started: the dialog stays open and shows it. */
+  busy?: boolean;
 }
 
 /**
@@ -36,14 +41,25 @@ export const PayAmountDialog = ({
   onPay,
   providers,
   providerError,
+  error,
+  busy,
 }: PayAmountDialogProps) => {
   const [mode, setMode] = useState<'full' | 'part'>('full');
   const [amount, setAmount] = useState('');
 
+  // Start blank each time it opens. The page closes it once the payment has started.
+  const [wasOpen, setWasOpen] = useState(false);
+  if (!!payment !== wasOpen) {
+    setWasOpen(!!payment);
+    if (!payment) {
+      setMode('full');
+      setAmount('');
+    }
+  }
+
+  // Not while the payment is starting: its result lands here.
   const close = () => {
-    setMode('full');
-    setAmount('');
-    onClose();
+    if (!busy) onClose();
   };
 
   const owed = payment?.owed ?? 0;
@@ -73,13 +89,12 @@ export const PayAmountDialog = ({
       amount={paying}
       itemLabel={mode === 'full' ? 'Rent' : 'Part payment'}
       receiverLine={`The fee goes to the payment company, so your landlord receives the full ${formatCurrency(paying)}.`}
-      protection="Your rent is held by GetRentos until you confirm move-in."
+      protection={mode === 'part' ? RENT_PART_PROTECTION : RENT_PROTECTION}
       providers={providers}
       providerError={providerError}
-      onPay={() => {
-        onPay(mode === 'part' ? part : undefined);
-        close();
-      }}
+      error={error}
+      busy={busy}
+      onPay={() => onPay(mode === 'part' ? part : undefined)}
       amountStep={
         <>
           <RadioGroup

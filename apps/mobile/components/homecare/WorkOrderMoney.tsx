@@ -522,7 +522,7 @@ export function InvoicesSection({ w }: { w: WorkOrder }) {
           providers.options.find((o) => o.provider === providers.provider)?.label ??
           'the payment company'
         }’s secure page: GetRentos never sees your card details.`}
-        protection="The vendor is paid once the top-up lands."
+        protection="If a top-up is needed, we send the vendor’s payment once it is confirmed. You’ll see it on this invoice."
         providers={providers}
         providerError={providerError}
         busy={act.isPending && act.variables?.kind === 'pay'}
