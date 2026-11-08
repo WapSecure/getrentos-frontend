@@ -1,6 +1,7 @@
-import { Linking, Pressable, RefreshControl, View } from 'react-native';
+import { useMemo } from 'react';
+import { ActivityIndicator, Linking, Pressable, RefreshControl, View } from 'react-native';
 
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ChevronRight, FileStack } from 'lucide-react-native';
@@ -15,11 +16,14 @@ export default function Receipts() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
 
-  const query = useQuery({
+  // Every receipt, a page at a time as the renter scrolls, not just the first 50.
+  const query = useInfiniteQuery({
     queryKey: qk.renter.receipts,
-    queryFn: () => paymentsApi.listReceipts(1, 50),
+    queryFn: ({ pageParam }) => paymentsApi.listReceipts(pageParam, 20),
+    initialPageParam: 1,
+    getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
   });
-  const items = query.data?.items ?? [];
+  const items = useMemo(() => query.data?.pages.flatMap((p) => p.items) ?? [], [query.data]);
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -66,7 +70,7 @@ export default function Receipts() {
               <Pressable
                 onPress={() => Linking.openURL(item.url)}
                 accessibilityRole="link"
-                accessibilityLabel={`Receipt for ${item.propertyName}, ${formatDate(item.date, 'short')}`}
+                accessibilityLabel={`Open receipt for ${item.propertyName}, paid ${formatDate(item.date, 'short')}`}
               >
                 <Card elevated>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
@@ -75,7 +79,7 @@ export default function Receipts() {
                         {item.propertyName}
                       </Text>
                       <Text variant="caption" color="mutedForeground">
-                        {formatDate(item.date, 'short')} · {item.fileName}
+                        Paid {formatDate(item.date, 'short')}
                       </Text>
                     </View>
                     <Price amount={item.amount} variant="callout" />
@@ -86,6 +90,19 @@ export default function Receipts() {
             </View>
           )}
           contentContainerStyle={{ paddingTop: spacing.sm, paddingBottom: spacing['3xl'] }}
+          onEndReached={() => {
+            if (query.hasNextPage && !query.isFetchingNextPage) void query.fetchNextPage();
+          }}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={
+            query.isFetchingNextPage ? (
+              <ActivityIndicator
+                color={colors.mutedForeground}
+                accessibilityLabel="Loading older receipts"
+                style={{ paddingVertical: spacing.md }}
+              />
+            ) : null
+          }
           refreshControl={
             <RefreshControl
               refreshing={query.isRefetching}

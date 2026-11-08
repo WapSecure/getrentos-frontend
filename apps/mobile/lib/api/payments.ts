@@ -5,6 +5,11 @@ import { providerQuery, type PaymentProvider } from './paymentStatus';
 export type PaymentStatus = 'paid' | 'pending' | 'overdue' | 'processing';
 export type PaymentMethod = 'card' | 'bank_transfer' | 'wallet';
 
+/**
+ * The same words and tones as web `paymentStatusBadges` (apps/web/lib/statusBadge.ts):
+ * an unpaid charge that is not late is "Due" (neutral), never "Pending", which
+ * would read as money already sent.
+ */
 export const PAYMENT_STATUS_LABEL: Record<PaymentStatus, string> = {
   paid: 'Paid',
   pending: 'Due',
@@ -12,10 +17,10 @@ export const PAYMENT_STATUS_LABEL: Record<PaymentStatus, string> = {
   processing: 'Processing',
 };
 
-export const PAYMENT_STATUS_TONE: Record<PaymentStatus, 'success' | 'warning' | 'danger' | 'info'> =
+export const PAYMENT_STATUS_TONE: Record<PaymentStatus, 'success' | 'neutral' | 'danger' | 'info'> =
   {
     paid: 'success',
-    pending: 'warning',
+    pending: 'neutral',
     overdue: 'danger',
     processing: 'info',
   };
@@ -31,7 +36,7 @@ export interface Payment {
   receiptUrl?: string;
   description: string;
   dueDate: string;
-  escrowStatus: 'held' | 'released' | 'pending';
+  escrowStatus: 'not_funded' | 'held' | 'pending_review' | 'released' | 'frozen';
   /** Present when a real payment gateway is configured — open in a browser to complete checkout. */
   authorizationUrl?: string;
   /** A checkout the tenant opened and closed, which they can go back to until `expiresAt`. */
@@ -43,6 +48,8 @@ export interface Payment {
   releaseDate?: string;
   /** What is still owed on this charge after any part-payments. */
   outstanding?: number;
+  /** Naira paid against this charge so far (part-payments and credit). */
+  amountPaid?: number;
 }
 
 export interface Receipt {
