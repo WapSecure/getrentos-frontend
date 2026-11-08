@@ -8,7 +8,16 @@ export function getPaymentStatus(reference: string): Promise<ApiResponse<Payment
   );
 }
 
-/** The card or bank fee added to a payment of `amount` whole naira. All figures in kobo. */
+/**
+ * The amount a fee lookup is for. Whole naira go as `amount`, which every
+ * version of the API takes; an amount with kobo goes as `amountKobo`.
+ */
+function feeAmountQuery(amount: number): string {
+  const kobo = Math.round(amount * 100);
+  return kobo % 100 === 0 ? `amount=${kobo / 100}` : `amountKobo=${kobo}`;
+}
+
+/** The card or bank fee added to a payment of `amount` naira (kobo allowed). All figures in kobo. */
 export interface CheckoutFee {
   amountKobo: number;
   feeKobo: number;
@@ -16,19 +25,17 @@ export interface CheckoutFee {
 }
 
 export function getCheckoutFee(amount: number): Promise<ApiResponse<CheckoutFee>> {
-  return safeCall(() =>
-    authFetch<CheckoutFee>(`/payments/checkout-fee?amount=${Math.round(amount)}`)
-  );
+  return safeCall(() => authFetch<CheckoutFee>(`/payments/checkout-fee?${feeAmountQuery(amount)}`));
 }
 
-/** The fee on a payment of `amount` whole naira when `provider` takes it. All figures in kobo. */
+/** The fee on a payment of `amount` naira (kobo allowed) when `provider` takes it. All figures in kobo. */
 export function getProviderFee(
   amount: number,
   provider: PaymentProvider
 ): Promise<ApiResponse<CheckoutFee & { provider: PaymentProvider }>> {
   return safeCall(() =>
     authFetch<CheckoutFee & { provider: PaymentProvider }>(
-      `/payments/provider-fee?amount=${Math.round(amount)}&provider=${provider}`
+      `/payments/provider-fee?${feeAmountQuery(amount)}&provider=${provider}`
     )
   );
 }

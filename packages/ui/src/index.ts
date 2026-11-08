@@ -48,6 +48,7 @@ export * from './StatCard';
 export * from './Switch';
 export * from './Table';
 export * from './Tabs';
+export * from './Breadcrumbs';
 export * from './Textarea';
 export * from './ThemeToggle';
 export * from './TimePicker';

@@ -20,7 +20,9 @@ import {
 import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
+import { payoutAccountLabel, payoutDestinationSentence } from '@/lib/payoutDestination';
 import { adminPayoutRunsService, type PayoutRun } from '@/services/adminPayoutRunsService';
+import type { PayoutDestination } from '@/services/adminPayoutIssuesService';
 
 /** The last month that has ended, as YYYY-MM (Lagos). */
 function lastEndedMonth(): string {
@@ -57,6 +59,7 @@ export default function PayoutRunsPage() {
     itemId: string;
     ownerName: string;
     amount: number | null;
+    destination?: PayoutDestination | null;
   } | null>(null);
   const toast = useToast();
 
@@ -220,6 +223,16 @@ export default function PayoutRunsPage() {
                                   {i.note}
                                 </span>
                               )}
+                              {i.destination !== undefined && i.status !== 'SKIPPED' && (
+                                <span className="block text-xs text-muted-foreground">
+                                  {payoutAccountLabel(i.destination) ?? 'No payout account on file'}
+                                  {i.destination?.accountChanged && (
+                                    <Badge variant="warning" className="ml-2">
+                                      Account changed
+                                    </Badge>
+                                  )}
+                                </span>
+                              )}
                             </td>
                             <td className="py-2 pr-4 text-right tabular-nums">
                               {i.grossIncome != null ? formatCurrency(i.grossIncome) : '—'}
@@ -244,6 +257,7 @@ export default function PayoutRunsPage() {
                                       itemId: i.id,
                                       ownerName: i.ownerName,
                                       amount: i.netPayout,
+                                      destination: i.destination,
                                     })
                                   }
                                 >
@@ -283,9 +297,15 @@ export default function PayoutRunsPage() {
         onOpenChange={setConfirmingIssue}
         title={`Pay ${toIssue.length} owner${toIssue.length === 1 ? '' : 's'} ${formatCurrency(issueTotal)} for ${r?.period ?? ''}?`}
         description={`Each owner's statement pays out to that owner's current payout account (${toIssue
-          .map((i) => `${i.ownerName} ${i.netPayout != null ? formatCurrency(i.netPayout) : '—'}`)
+          .map((i) => {
+            const account = payoutAccountLabel(i.destination);
+            const amount = i.netPayout != null ? formatCurrency(i.netPayout) : '—';
+            return `${i.ownerName} ${amount}${
+              i.destination === undefined ? '' : ` to ${account ?? 'no account on file'}`
+            }`;
+          })
           .join(
-            ', '
+            '; '
           )}). Payouts above the release threshold wait for approval. Money that has been sent can't be called back from here.`}
         confirmLabel={`Issue and pay ${formatCurrency(issueTotal)}`}
         isLoading={issue.isPending}
@@ -299,7 +319,11 @@ export default function PayoutRunsPage() {
         } to ${confirmingRetry?.ownerName ?? 'this owner'}?`}
         description={`This sends the failed payout again, under a new reference, to ${
           confirmingRetry?.ownerName ?? 'the owner'
-        }'s current payout account. If they changed their account after it failed, check the change was really theirs before you retry.`}
+        }'s current payout account. ${
+          confirmingRetry?.destination !== undefined
+            ? payoutDestinationSentence(confirmingRetry?.destination)
+            : 'If they changed their account after it failed, check the change was really theirs before you retry.'
+        }`}
         confirmLabel={`Send ${
           confirmingRetry?.amount != null ? formatCurrency(confirmingRetry.amount) : 'payout'
         }`}

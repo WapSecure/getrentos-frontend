@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 import { useState } from 'react';
 import { router } from 'expo-router';
-import { LogOut, MapPin, KeyRound, ShieldCheck } from 'lucide-react-native';
+import { Footprints, KeyRound, LogOut, MapPin, ShieldCheck, Siren } from 'lucide-react-native';
 import {
   Avatar,
   Button,
@@ -50,6 +50,26 @@ export default function GatemanAccount() {
         {/* Portals, not posts: for an account that is also a landlord or a buyer.
             Renders nothing for a single-workspace guard. */}
         <WorkspaceSwitcher />
+
+        <SettingsGroup
+          title="Operations"
+          items={[
+            {
+              key: 'patrol',
+              label: 'Patrol',
+              description: 'Checkpoints, schedules and patrol history',
+              icon: Footprints,
+              onPress: () => router.push('/(app)/(gateman)/gate-patrol'),
+            },
+            {
+              key: 'incidents',
+              label: 'Incidents',
+              description: 'Report and review gate incidents',
+              icon: Siren,
+              onPress: () => router.push('/(app)/(gateman)/incidents'),
+            },
+          ]}
+        />
 
         <Card elevated>
           <Text variant="bodyStrong">Your post</Text>

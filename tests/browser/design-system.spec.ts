@@ -586,6 +586,20 @@ test('property card, menu and add-property sheet', async ({ page }, testInfo) =>
   await expect(page.getByRole('dialog')).toHaveCount(0);
 });
 
+test('contextual hub tabs support keyboard navigation', async ({ page }) => {
+  await page.goto(`${webURL}/landlord/maintenance`);
+  const tabs = page.getByRole('tablist', { name: 'Section tabs' });
+  const requests = tabs.getByRole('tab', { name: 'Requests' });
+  const homeManagement = tabs.getByRole('tab', { name: 'Home Management' });
+
+  await expect(requests).toHaveAttribute('aria-selected', 'true');
+  await requests.focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(homeManagement).toBeFocused();
+  await expect(homeManagement).toHaveAttribute('aria-selected', 'true');
+  await expect(page).toHaveURL(/\?tab=home-management$/);
+});
+
 test('honest empty portfolio', async ({ page }, testInfo) => {
   await page.route('**/__qa_api/landlord/dashboard/stats', (route) =>
     route.fulfill({ json: { ...stats, totalProperties: 0 } })

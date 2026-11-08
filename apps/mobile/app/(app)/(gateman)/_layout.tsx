@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Car, Footprints, KeyRound, Package, Siren, User, UserCheck } from 'lucide-react-native';
+import { Car, KeyRound, Menu, Package, UserCheck } from 'lucide-react-native';
 import { useTheme } from '@getrentos/ui-native';
 import { GateQueueSync } from '@/components/gateman/GateQueueSync';
 import { GatemanPostProvider } from '@/lib/gateman/GatemanPostProvider';
@@ -67,22 +67,20 @@ export default function GatemanTabsLayout() {
         <Tabs.Screen
           name="gate-patrol"
           options={{
-            title: 'Patrol',
-            tabBarIcon: ({ color, size }) => <Footprints color={color} size={size} />,
+            href: null,
           }}
         />
         <Tabs.Screen
           name="incidents"
           options={{
-            title: 'Incidents',
-            tabBarIcon: ({ color, size }) => <Siren color={color} size={size} />,
+            href: null,
           }}
-        />{' '}
+        />
         <Tabs.Screen
           name="account"
           options={{
-            title: 'Account',
-            tabBarIcon: ({ color, size }) => <User color={color} size={size} />,
+            title: 'More',
+            tabBarIcon: ({ color, size }) => <Menu color={color} size={size} />,
           }}
         />
       </Tabs>

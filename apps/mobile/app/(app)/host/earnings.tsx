@@ -28,7 +28,7 @@ import { qk } from '@/lib/query/keys';
 import { hostShortletsApi, type PayoutSummary } from '@/lib/api/hostShortlets';
 import { errorMessage } from '@/lib/api/client';
 import { BankAccountFields, accountNumberOk } from '@/components/forms/BankAccountFields';
-import { formatDate } from '@/lib/format';
+import { formatDate, formatDateTime } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { Sheet } from '@/components/Sheet';
@@ -117,6 +117,13 @@ export default function HostEarnings() {
                       <Text variant="caption" color="mutedForeground">
                         {account.data.accountNumber} · {account.data.accountName}
                       </Text>
+                      {account.data.payoutHoldUntil ? (
+                        <Text variant="caption" color="warning">
+                          This account was changed recently. To protect you, payouts to it start{' '}
+                          {formatDateTime(account.data.payoutHoldUntil)}. If you didn’t make this
+                          change, contact GetRentos support now.
+                        </Text>
+                      ) : null}
                     </>
                   ) : account.isPending ? (
                     <View style={{ gap: 6 }}>

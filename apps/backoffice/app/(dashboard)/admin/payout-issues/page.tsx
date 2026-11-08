@@ -20,6 +20,7 @@ import {
 import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
+import { payoutAccountLabel, payoutDestinationSentence } from '@/lib/payoutDestination';
 import {
   adminPayoutIssuesService,
   type PayoutIssue,
@@ -173,6 +174,16 @@ export default function PayoutIssuesPage() {
                   <p className="mt-0.5 text-xs text-muted-foreground">
                     {RAIL[p.rail]} · started {formatDate(p.createdAt)} · {p.id}
                   </p>
+                  {p.destination !== undefined && (
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {payoutAccountLabel(p.destination) ?? 'No payout account on file'}
+                      {p.destination?.accountChanged && (
+                        <Badge variant="warning" className="ml-2">
+                          Account changed
+                        </Badge>
+                      )}
+                    </p>
+                  )}
                 </div>
                 <Badge variant={p.held ? 'warning' : view === 'failed' ? 'danger' : 'warning'}>
                   {p.held
@@ -248,7 +259,11 @@ export default function PayoutIssuesPage() {
         }
         description={
           confirming
-            ? `${formatCurrency(confirming.amount)} to ${confirming.beneficiary} (${RAIL[confirming.rail]}), under a new reference, to their current payout account. That account isn't shown here, so if it changed after this payout failed, check the change was really theirs before you send.`
+            ? `${formatCurrency(confirming.amount)} to ${confirming.beneficiary} (${RAIL[confirming.rail]}), under a new reference, to their current payout account. ${
+                confirming.destination !== undefined
+                  ? payoutDestinationSentence(confirming.destination)
+                  : 'If it changed after this payout failed, check the change was really theirs before you send.'
+              }`
             : ''
         }
         confirmLabel={confirming ? `Send ${formatCurrency(confirming.amount)}` : 'Send'}

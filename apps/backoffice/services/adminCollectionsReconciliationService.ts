@@ -19,7 +19,8 @@ export type CollectionLineKind =
   | 'MISSING_AT_GATEWAY'
   | 'TRANSFER_UNKNOWN'
   | 'TRANSFER_MISSING_AT_GATEWAY'
-  | 'DUPLICATE_PAYOUT';
+  | 'DUPLICATE_PAYOUT'
+  | 'REVERSED_AFTER_CONFIRMATION';
 
 /** One payment that does not line up. Amounts are whole naira. */
 export type PaymentProvider = 'PAYSTACK' | 'MONNIFY';

@@ -2,6 +2,18 @@ import { authFetch, safeCall, type ApiResponse } from '@getrentos/shared';
 
 export type PayoutRail = 'shortlet' | 'realtor' | 'agency' | 'agent' | 'partner' | 'sale';
 
+/**
+ * Where a payout goes: the holder's current account. Only the last four digits
+ * of the number are ever sent. `accountChanged` is true when that is not the
+ * account the payout was first sent to, null when the first attempt is unknown.
+ */
+export interface PayoutDestination {
+  bankName: string | null;
+  accountLast4: string | null;
+  accountName: string | null;
+  accountChanged: boolean | null;
+}
+
 /** One payout that needs a person. Amounts are whole naira. */
 export interface PayoutIssue {
   rail: PayoutRail;
@@ -14,6 +26,8 @@ export interface PayoutIssue {
   held?: { code: string; message: string; needsApproval: boolean };
   /** The reference it was last tried under. */
   transferRef?: string | null;
+  /** Where a retry would send it; null when the holder has no payout account. */
+  destination?: PayoutDestination | null;
 }
 
 /** Every way money leaves, including those retried elsewhere. */

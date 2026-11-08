@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useState } from 'react';
-import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, CircleAlert, MapPin, RefreshCw, UserRound } from 'lucide-react';
@@ -14,6 +13,7 @@ import {
   Skeleton,
   useToast,
   PageHeader,
+  Breadcrumbs,
 } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../../../layout';
@@ -131,12 +131,12 @@ export default function AdminLandDiligenceCasePage() {
 
   return (
     <>
-      <Link
-        href="/admin/land/diligence"
-        className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="h-4 w-4" /> Diligence queue
-      </Link>
+      <Breadcrumbs
+        items={[
+          { label: 'Land diligence', href: '/admin/land/diligence' },
+          { label: detail.propertyTitle },
+        ]}
+      />
 
       <PageHeader
         title={detail.propertyTitle}

@@ -54,6 +54,11 @@ const KIND: Record<
     variant: 'warning',
     help: 'No record in any product has this reference. Look it up with the payment company shown to see who paid and what for.',
   },
+  REVERSED_AFTER_CONFIRMATION: {
+    label: 'Reversed after we confirmed it',
+    variant: 'danger',
+    help: 'The payment company now reports this payment as reversed, but GetRentos had already applied it, so the money is still credited and could be paid out. Hold any payout from it, confirm the reversal with that company, and record how it is recovered.',
+  },
   DUPLICATE_PAYOUT: {
     label: 'Paid out twice',
     variant: 'danger',

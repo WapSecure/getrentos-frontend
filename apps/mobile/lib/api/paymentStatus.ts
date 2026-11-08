@@ -58,15 +58,24 @@ export interface BankList {
   source: 'paystack' | 'fallback';
 }
 
+/**
+ * The amount a fee lookup is for. Whole naira go as `amount`, which every
+ * version of the API takes; an amount with kobo goes as `amountKobo`.
+ */
+function feeAmountQuery(amount: number): string {
+  const kobo = Math.round(amount * 100);
+  return kobo % 100 === 0 ? `amount=${kobo / 100}` : `amountKobo=${kobo}`;
+}
+
 export const paymentStatusApi = {
   get: (reference: string) =>
     apiFetch<PaymentStatus>(`/payments/${encodeURIComponent(reference)}/status`),
   checkoutFee: (amount: number) =>
-    apiFetch<CheckoutFee>(`/payments/checkout-fee?amount=${Math.round(amount)}`),
+    apiFetch<CheckoutFee>(`/payments/checkout-fee?${feeAmountQuery(amount)}`),
   /** The fee when `provider` takes it: fees differ per company. */
   providerFee: (amount: number, provider: PaymentProvider) =>
     apiFetch<CheckoutFee & { provider: PaymentProvider }>(
-      `/payments/provider-fee?amount=${Math.round(amount)}&provider=${provider}`
+      `/payments/provider-fee?${feeAmountQuery(amount)}&provider=${provider}`
     ),
   /** The companies that can take a payment, and whether each can right now. */
   providers: () => apiFetch<PaymentProviderOption[]>('/payments/providers'),
