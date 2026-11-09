@@ -30,18 +30,29 @@ export default function OpengraphImage() {
             width: 56,
             height: 56,
             borderRadius: 16,
-            background: '#0071e3',
+            background: '#0057d9',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#ffffff',
-            fontSize: 30,
-            fontWeight: 800,
           }}
         >
-          G
+          {/* The Sureground mark: an open roof over a solid ground line. */}
+          <svg width="34" height="34" viewBox="0 0 128 128">
+            <g
+              fill="none"
+              stroke="#ffffff"
+              strokeWidth="16"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M28 82 64 22l36 60" />
+              <path d="M12 108h104" />
+            </g>
+          </svg>
         </div>
-        <div style={{ fontSize: 30, fontWeight: 800, color: '#1d1d1f' }}>{SITE_NAME}</div>
+        <div style={{ fontSize: 30, fontWeight: 800, color: '#1d1d1f', letterSpacing: -0.75 }}>
+          {SITE_NAME}
+        </div>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
@@ -61,7 +72,7 @@ export default function OpengraphImage() {
         <div
           style={{
             fontSize: 26,
-            color: '#6e6e73',
+            color: '#4f4f55',
             maxWidth: 860,
             lineHeight: 1.4,
             display: 'flex',
@@ -77,7 +88,7 @@ export default function OpengraphImage() {
           gap: 12,
           fontSize: 18,
           fontWeight: 700,
-          color: '#0071e3',
+          color: '#0057d9',
         }}
       >
         <span>VERIFIED IDENTITIES</span>

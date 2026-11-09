@@ -12,7 +12,7 @@
  * are reserved for state and must not double as series identity.
  */
 export const SERIES = {
-  income: { light: '#0071e3', dark: '#2f8cff' },
+  income: { light: '#0057d9', dark: '#7aa9ff' },
   /** Passes in both modes, so it needs no per-mode step. */
   expenses: { light: '#d97706', dark: '#d97706' },
 } as const;

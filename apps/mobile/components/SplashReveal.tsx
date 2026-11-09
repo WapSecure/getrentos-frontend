@@ -94,9 +94,16 @@ export function SplashReveal() {
         </Animated.View>
         <Animated.View style={[{ alignItems: 'center', gap: spacing.xs }, wordStyle]}>
           {/* wordmark only: the mark above already carries the brand */}
-          <Text style={{ fontSize: 26, lineHeight: 30, fontWeight: '800' }}>
-            <Text style={{ color: colors.foreground, fontSize: 26, fontWeight: '800' }}>Get</Text>
-            <Text style={{ color: colors.primary, fontSize: 26, fontWeight: '800' }}>Rentos</Text>
+          <Text
+            style={{
+              color: colors.foreground,
+              fontSize: 26,
+              lineHeight: 30,
+              fontWeight: '800',
+              letterSpacing: -0.65,
+            }}
+          >
+            Sureground
           </Text>
           <Text variant="caption" color="mutedForeground">
             Rent, buy and manage: safely

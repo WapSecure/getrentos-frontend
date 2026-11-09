@@ -14,7 +14,7 @@ export function SuregroundVerifiedBadge(props: SVGProps<SVGSVGElement>) {
         stroke="#D8E8FF"
         strokeWidth="2"
       />
-      <path d="M24 19 42 13 60 19V34C60 46 52 55 42 60 32 55 24 46 24 34Z" fill="#1478F2" />
+      <path d="M24 19 42 13 60 19V34C60 46 52 55 42 60 32 55 24 46 24 34Z" fill="#0057D9" />
       <path
         d="M34 35 40 41 51 28"
         fill="none"

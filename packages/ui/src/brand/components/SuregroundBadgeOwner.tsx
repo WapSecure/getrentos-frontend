@@ -5,7 +5,7 @@ export function SuregroundBadgeOwner(props: SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 250 52" {...props}>
       <rect x="1" y="1" width="248" height="50" rx="26" fill="#F5F9FF" stroke="#D8E8FF" />
-      <circle cx="27" cy="26" r="17" fill="#1478F2" />
+      <circle cx="27" cy="26" r="17" fill="#0057D9" />
       <text
         x="27"
         y="31"

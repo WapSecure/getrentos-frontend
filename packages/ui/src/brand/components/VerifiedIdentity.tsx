@@ -5,7 +5,7 @@ export function VerifiedIdentity(props: SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 260 52" role="img" aria-label="Verified Identity" {...props}>
       <rect x="1" y="1" width="258" height="50" rx="25" fill="white" stroke="#E2E8F0" />
-      <circle cx="27" cy="26" r="17" fill="#1478F2" />
+      <circle cx="27" cy="26" r="17" fill="#0057D9" />
       <text
         x="27"
         y="31"

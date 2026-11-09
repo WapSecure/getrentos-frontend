@@ -11,7 +11,7 @@ export function TrustScore68(props: SVGProps<SVGSVGElement>) {
         cy="46"
         r="29"
         fill="none"
-        stroke="#1478F2"
+        stroke="#0057D9"
         strokeWidth="7"
         strokeLinecap="round"
         strokeDasharray="123.76 182"
@@ -31,7 +31,7 @@ export function TrustScore68(props: SVGProps<SVGSVGElement>) {
       <text x="92" y="40" fontFamily="Inter,Arial" fontSize="16" fontWeight="750" fill="#0B1220">
         Sureground Trust
       </text>
-      <text x="92" y="62" fontFamily="Inter,Arial" fontSize="13" fontWeight="600" fill="#1478F2">
+      <text x="92" y="62" fontFamily="Inter,Arial" fontSize="13" fontWeight="600" fill="#0057D9">
         Established
       </text>
     </svg>
