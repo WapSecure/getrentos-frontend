@@ -7,10 +7,10 @@ import { Banknote, Camera, ChevronRight } from 'lucide-react-native';
 import {
   Avatar,
   Badge,
-  Button,
   Card,
   Divider,
   QueryState,
+  SaveButton,
   Skeleton,
   SwitchRow,
   Text,
@@ -207,7 +207,6 @@ function ProfileForm({ initial }: { initial: LandlordProfile }) {
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: qk.landlord.profile });
-      toast.show('Profile saved.', 'success');
     },
     onError: (e) => toast.show(errorMessage(e, 'Could not save your profile.'), 'error'),
   });
@@ -268,11 +267,11 @@ function ProfileForm({ initial }: { initial: LandlordProfile }) {
         value={companyName}
         onChangeText={setCompanyName}
       />
-      <Button
+      <SaveButton
         label="Save profile"
         loading={save.isPending}
         disabled={!fullName.trim()}
-        onPress={() => save.mutate()}
+        onPress={() => save.mutateAsync()}
       />
     </View>
   );

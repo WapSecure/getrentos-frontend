@@ -9,6 +9,7 @@ import {
   Button,
   Card,
   Checkbox,
+  EmptyState,
   FormAlert,
   ListSkeleton,
   NumberField,
@@ -161,9 +162,13 @@ export default function GetManaged() {
         {firms.isLoading ? (
           <ListSkeleton rows={2} variant="card" height={100} />
         ) : (firms.data ?? []).length === 0 ? (
-          <Text variant="callout" color="mutedForeground">
-            No vetted firms are listed yet.
-          </Text>
+          <Card padding={0}>
+            <EmptyState
+              size="compact"
+              title="No vetted firms yet"
+              description="Agencies our team has vetted are listed here, ready for you to appoint."
+            />
+          </Card>
         ) : (
           (firms.data ?? []).map((f) => (
             <FirmCard

@@ -11,6 +11,7 @@ import {
   Chip,
   NumberField,
   QueryState,
+  SaveButton,
   Skeleton,
   SwitchRow,
   Text,
@@ -102,7 +103,6 @@ function SearchPreferencesForm({ data }: { data: BuyerSearchPreferencesData }) {
       }),
     onSuccess: (updated) => {
       qc.setQueryData(qk.buyer.searchPreferences, updated);
-      toast.show('Search preferences saved.', 'success');
     },
     onError: (err) => toast.show(errorMessage(err, 'Could not save these preferences.'), 'error'),
   });
@@ -209,7 +209,7 @@ function SearchPreferencesForm({ data }: { data: BuyerSearchPreferencesData }) {
         />
       </Card>
 
-      <Button label="Save" loading={mutation.isPending} onPress={() => mutation.mutate()} />
+      <SaveButton label="Save" onPress={() => mutation.mutateAsync()} />
     </ScrollView>
   );
 }

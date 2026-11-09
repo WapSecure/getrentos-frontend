@@ -5,6 +5,7 @@ import { AlertTriangle, Building2, Info, MessageCircleQuestion } from 'lucide-re
 import {
   Button,
   Card,
+  EmptyState,
   FormAlert,
   IconButton,
   PressableScale,
@@ -137,11 +138,13 @@ function Workspace() {
       {props.isLoading ? (
         <Skeleton height={90} />
       ) : properties.length === 0 ? (
-        <Card style={{ gap: 4 }}>
-          <Text variant="bodyStrong">No property in this engagement yet</Text>
-          <Text variant="caption" color="mutedForeground">
-            For {selected.ownerName ?? 'the owner'} · {noticeSummary(selected)}
-          </Text>
+        <Card padding={0}>
+          <EmptyState
+            size="compact"
+            icon={<Building2 size={24} color={colors.mutedForeground} />}
+            title="No property in this engagement yet"
+            description={`The property shows here once it's added. For ${selected.ownerName ?? 'the owner'} · ${noticeSummary(selected)}`}
+          />
         </Card>
       ) : (
         properties.map((p) => (

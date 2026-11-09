@@ -4,10 +4,10 @@ import { ScrollView, View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
-  Button,
   Card,
   Chip,
   QueryState,
+  SaveButton,
   Skeleton,
   SwitchRow,
   Text,
@@ -61,7 +61,6 @@ function Form({ initial }: { initial: OwnerPreferences }) {
     mutationFn: () => ownerApi.updatePreferences(prefs),
     onSuccess: (saved) => {
       qc.setQueryData(qk.owner.preferences, saved);
-      toast.show('Preferences saved.', 'success');
     },
     onError: (err) => toast.show(errorMessage(err, 'Could not save your preferences.'), 'error'),
   });
@@ -102,11 +101,11 @@ function Form({ initial }: { initial: OwnerPreferences }) {
           onValueChange={(v) => setPrefs((p) => ({ ...p, allowRentalConversion: v }))}
         />
       </Card>
-      <Button
+      <SaveButton
         label="Save preferences"
         disabled={!changed}
         loading={save.isPending}
-        onPress={() => save.mutate()}
+        onPress={() => save.mutateAsync()}
       />
     </>
   );

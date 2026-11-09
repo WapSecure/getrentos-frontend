@@ -4,10 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import {
   AlertTriangle,
   BadgeCheck,
-  Building2,
   ClipboardCheck,
   ClipboardList,
-  Clock,
   MessageCircleQuestion,
   Users,
 } from 'lucide-react-native';
@@ -19,12 +17,14 @@ import {
   QueryState,
   Screen,
   SectionHeader,
+  SegmentedBar,
   Skeleton,
+  StatGroup,
+  StatGroupSkeleton,
   Text,
   useTheme,
 } from '@sureground/ui-native';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
-import { MetricGrid } from '@/components/dashboard/MetricGrid';
 import {
   AttentionCard,
   QuickActions,
@@ -67,34 +67,65 @@ export default function AgentHome() {
     />
   );
 
-  const metrics = dashboard.data
-    ? [
-        {
-          label: 'Properties',
-          value: dashboard.data.assignedProperties,
-          Icon: Building2,
-          onPress: () => router.push('/(app)/agent-properties'),
-        },
-        {
-          label: 'Assigned',
-          value: dashboard.data.assignedTasks,
-          Icon: ClipboardList,
-          onPress: toTasks,
-        },
-        {
-          label: 'In progress',
-          value: dashboard.data.inProgressTasks,
-          Icon: Clock,
-          onPress: toTasks,
-        },
-        {
-          label: 'Completed',
-          value: dashboard.data.completedTasks,
-          Icon: ClipboardCheck,
-          onPress: toTasks,
-        },
-      ]
-    : [];
+  const d = dashboard.data;
+  // Assigned, in progress and overdue are exclusive statuses, so together they are the open tasks.
+  const openTasks = d ? d.assignedTasks + d.inProgressTasks + d.overdueTasks : 0;
+  const statGroups = d ? (
+    <>
+      <StatGroup
+        title="Tasks"
+        items={[
+          {
+            label: 'Assigned',
+            value: d.assignedTasks,
+            subtitle: 'Not started, not yet due',
+            onPress: toTasks,
+          },
+          {
+            label: 'In progress',
+            value: d.inProgressTasks,
+            subtitle: 'Currently underway',
+            onPress: toTasks,
+          },
+          {
+            label: 'Overdue',
+            value: d.overdueTasks,
+            subtitle: 'Needs attention',
+            attention: d.overdueTasks > 0,
+            onPress: toTasks,
+          },
+          {
+            label: 'Completed',
+            value: d.completedTasks,
+            subtitle: 'All time',
+            onPress: toTasks,
+          },
+        ]}
+        footer={
+          openTasks > 0 ? (
+            <SegmentedBar
+              label="Open tasks by status"
+              segments={[
+                { label: 'Assigned', value: d.assignedTasks, tone: 'primary' },
+                { label: 'In progress', value: d.inProgressTasks, tone: 'warning' },
+                { label: 'Overdue', value: d.overdueTasks, tone: 'danger' },
+              ]}
+            />
+          ) : undefined
+        }
+      />
+      <StatGroup
+        title="Properties"
+        items={[
+          {
+            label: 'Assigned to you',
+            value: d.assignedProperties,
+            onPress: () => router.push('/(app)/agent-properties'),
+          },
+        ]}
+      />
+    </>
+  ) : null;
 
   const quickActions = (
     <QuickActions
@@ -123,7 +154,7 @@ export default function AgentHome() {
         query={dashboard}
         skeleton={
           <View style={{ gap: spacing.lg }}>
-            <MetricGrid metrics={[]} loading />
+            <StatGroupSkeleton groups={[4, 1]} />
             {quickActions}
             <View style={{ gap: spacing.sm }}>
               <Skeleton height={80} radius={16} />
@@ -145,7 +176,7 @@ export default function AgentHome() {
           />
         ) : null}
 
-        <MetricGrid metrics={metrics} loading={false} />
+        {statGroups}
 
         <RouteCard />
 

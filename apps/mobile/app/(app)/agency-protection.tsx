@@ -74,7 +74,7 @@ export default function AgencyProtection() {
           isEmpty={!list.data?.length}
           empty={{
             icon: <ShieldCheck size={32} color={colors.mutedForeground} />,
-            title: 'No protection attestations yet.',
+            title: 'No protection attestations yet',
             description: 'Record the client-money protection scheme your firm belongs to.',
             action: <Button label="Add attestation" onPress={() => setAdding(true)} />,
           }}

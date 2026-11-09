@@ -5,6 +5,7 @@ import {
   Badge,
   Button,
   Card,
+  EmptyState,
   FormAlert,
   PressableScale,
   Skeleton,
@@ -41,11 +42,12 @@ export function CustodyBar() {
   }
   if (mandates.length === 0) {
     return (
-      <Card style={{ gap: 4 }}>
-        <Text variant="bodyStrong">No client engagements yet.</Text>
-        <Text variant="caption" color="mutedForeground">
-          Engagements appear here once an owner appoints your firm.
-        </Text>
+      <Card padding={0}>
+        <EmptyState
+          size="compact"
+          title="No client engagements yet"
+          description="Engagements appear here once an owner appoints your firm."
+        />
       </Card>
     );
   }

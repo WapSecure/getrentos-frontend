@@ -5,20 +5,16 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Banknote,
   Bell,
-  CalendarClock,
   CheckSquare,
   ChevronRight,
   FileCheck2,
   FileSignature,
-  FileText,
   Heart,
   MapPin,
-  MessageCircle,
   MessageCircleQuestion,
   Search,
   ShieldCheck,
   Wrench,
-  type LucideIcon,
 } from 'lucide-react-native';
 import {
   Badge,
@@ -32,12 +28,13 @@ import {
   Screen,
   SectionHeader,
   Skeleton,
+  StatGroup,
+  StatGroupSkeleton,
   Text,
   useTheme,
 } from '@sureground/ui-native';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { RefreshFailedNotice } from '@/components/RefreshFailedNotice';
-import { MetricGrid } from '@/components/dashboard/MetricGrid';
 import { QuickActions, dashboardGreeting } from '@/components/dashboard/DashboardParts';
 import { qk } from '@/lib/query/keys';
 import { renterApi, type RenterDashboardStats } from '@/lib/api/renter';
@@ -58,8 +55,8 @@ import { trustChainLabel } from '@sureground/shared';
 interface Metric {
   key: keyof RenterDashboardStats;
   label: string;
-  Icon: LucideIcon;
-  onPress?: () => void;
+  subtitle: string;
+  onPress: () => void;
 }
 
 const CARD_WIDTH = 200;
@@ -106,27 +103,27 @@ export default function RenterHome() {
   const METRICS: Metric[] = [
     {
       key: 'savedPropertiesCount',
-      label: 'Saved',
-      Icon: Heart,
+      label: 'Saved properties',
+      subtitle: 'In your shortlist',
       onPress: () => router.push('/(app)/saved'),
     },
     {
       key: 'activeApplicationsCount',
-      label: 'Applications',
-      Icon: FileText,
+      label: 'Active applications',
+      subtitle: 'In your pipeline',
       onPress: () => router.push('/(app)/(renter)/applications'),
     },
     {
-      key: 'unreadMessagesCount',
-      label: 'Unread',
-      Icon: MessageCircle,
-      onPress: () => router.push('/(app)/(renter)/messages'),
+      key: 'upcomingViewingsCount',
+      label: 'Upcoming viewings',
+      subtitle: 'Scheduled tours',
+      onPress: () => router.push('/(app)/viewings'),
     },
     {
-      key: 'upcomingViewingsCount',
-      label: 'Viewings',
-      Icon: CalendarClock,
-      onPress: () => router.push('/(app)/viewings'),
+      key: 'unreadMessagesCount',
+      label: 'Unread messages',
+      subtitle: 'Across conversations',
+      onPress: () => router.push('/(app)/(renter)/messages'),
     },
   ];
 
@@ -256,15 +253,12 @@ export default function RenterHome() {
             onPress={() => stats.refetch()}
           />
         </Card>
+      ) : stats.isPending ? (
+        <StatGroupSkeleton groups={[4]} />
       ) : (
-        <MetricGrid
-          loading={stats.isPending}
-          metrics={METRICS.map(({ key, label, Icon, onPress }) => ({
-            label,
-            Icon,
-            onPress,
-            value: stats.data?.[key] ?? 0,
-          }))}
+        <StatGroup
+          title="Your search"
+          items={METRICS.map(({ key, ...item }) => ({ ...item, value: stats.data?.[key] ?? 0 }))}
         />
       )}
 

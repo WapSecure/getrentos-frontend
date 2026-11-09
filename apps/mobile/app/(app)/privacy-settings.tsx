@@ -5,10 +5,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Globe, Lock, Users } from 'lucide-react-native';
 import {
-  Button,
   Card,
   Divider,
   QueryState,
+  SaveButton,
   Skeleton,
   SwitchRow,
   Text,
@@ -94,7 +94,6 @@ function PrivacyForm({
     mutationFn: () => preferencesApi.update({ privacy }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: qk.renter.preferences });
-      toast.show('Privacy settings saved.', 'success');
     },
     onError: (e) => toast.show(errorMessage(e, 'Could not save those settings.'), 'error'),
   });
@@ -177,10 +176,10 @@ function PrivacyForm({
         </Card>
       </View>
 
-      <Button
+      <SaveButton
         label="Save privacy settings"
         loading={save.isPending}
-        onPress={() => save.mutate()}
+        onPress={() => save.mutateAsync()}
       />
 
       <View style={{ gap: spacing.sm }}>

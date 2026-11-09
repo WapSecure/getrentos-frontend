@@ -3,22 +3,25 @@ import { isUpgradeError } from '@/components/host/HostUI';
 import { View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import {
-  BadgeCheck,
   BarChart3,
   Bell,
-  Building2,
   DoorOpen,
   FileSignature,
-  Handshake,
   MessageCircleQuestion,
   Plus,
   Users,
   Wallet,
   type LucideIcon,
 } from 'lucide-react-native';
-import { IconButton, QueryState, Screen, useTheme } from '@sureground/ui-native';
+import {
+  IconButton,
+  QueryState,
+  Screen,
+  StatGroup,
+  StatGroupSkeleton,
+  useTheme,
+} from '@sureground/ui-native';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
-import { MetricGrid } from '@/components/dashboard/MetricGrid';
 import {
   ActivityFeed,
   AttentionCard,
@@ -82,34 +85,50 @@ export default function OwnerHome() {
     />
   );
 
-  const metrics = d
-    ? [
-        {
-          label: 'Properties',
-          value: d.totalProperties,
-          Icon: Building2,
-          onPress: () => router.push('/(app)/(owner)/properties'),
-        },
-        {
-          label: 'Verified',
-          value: d.verifiedProperties,
-          Icon: BadgeCheck,
-          onPress: () => router.push('/(app)/(owner)/properties'),
-        },
-        {
-          label: 'Live listings',
-          value: d.activeListings,
-          Icon: Handshake,
-          onPress: () => router.push('/(app)/(owner)/properties'),
-        },
-        {
-          label: 'Sold',
-          value: d.completedSales,
-          Icon: Wallet,
-          onPress: () => router.push('/(app)/owner-transactions'),
-        },
-      ]
-    : [];
+  const statGroups = d ? (
+    <>
+      <StatGroup
+        title="Portfolio"
+        items={[
+          {
+            label: 'Properties',
+            value: d.totalProperties,
+            subtitle: 'Across your portfolio',
+            onPress: () => router.push('/(app)/(owner)/properties'),
+          },
+          {
+            label: 'Verified',
+            value: d.verifiedProperties,
+            onPress: () => router.push('/(app)/(owner)/properties'),
+          },
+          {
+            label: 'Completed sales',
+            value: d.completedSales,
+            subtitle: 'Lifetime',
+            onPress: () => router.push('/(app)/owner-transactions'),
+          },
+        ]}
+      />
+      <StatGroup
+        title="Sales activity"
+        items={[
+          {
+            label: 'Live listings',
+            value: d.activeListings,
+            subtitle: 'Published for sale',
+            onPress: () => router.push('/(app)/(owner)/properties'),
+          },
+          {
+            label: 'Pending offers',
+            value: d.pendingOffers,
+            subtitle: 'Awaiting a response',
+            attention: d.pendingOffers > 0,
+            onPress: () => router.push('/(app)/(owner)/offers'),
+          },
+        ]}
+      />
+    </>
+  ) : null;
 
   const quickActions = (
     <QuickActions
@@ -151,7 +170,7 @@ export default function OwnerHome() {
               visible={showMoney}
               onToggle={toggleMoney}
             />
-            <MetricGrid metrics={[]} loading />
+            <StatGroupSkeleton groups={[3, 2]} />
             {quickActions}
           </View>
         }
@@ -180,7 +199,7 @@ export default function OwnerHome() {
           {(trend.data?.length ?? 0) > 1 ? <RevenueTrendChart points={trend.data!} /> : null}
         </PortfolioCard>
 
-        <MetricGrid metrics={metrics} loading={false} />
+        {statGroups}
 
         {quickActions}
 

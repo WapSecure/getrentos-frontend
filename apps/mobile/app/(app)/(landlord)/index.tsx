@@ -5,27 +5,33 @@ import { useQuery } from '@tanstack/react-query';
 import {
   Banknote,
   Bell,
-  Building2,
   DoorOpen,
   FileText,
-  KeyRound,
   MessageCircle,
   MessageCircleQuestion,
-  PieChart,
   Plus,
   TriangleAlert,
   Wrench,
   type LucideIcon,
 } from 'lucide-react-native';
-import { IconButton, Price, QueryState, Screen, Text, useTheme } from '@sureground/ui-native';
+import {
+  IconButton,
+  Price,
+  QueryState,
+  Screen,
+  SegmentedBar,
+  StatGroup,
+  StatGroupSkeleton,
+  Text,
+  useTheme,
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { landlordApi, type LandlordActivity } from '@/lib/api/landlord';
 import { useAuth } from '@/lib/auth/AuthProvider';
-import { firstName } from '@/lib/format';
+import { firstName, formatNaira } from '@/lib/format';
 import { RevenueTrendChart } from '@/components/landlord/RevenueTrendChart';
 import { CreatePropertySheet } from '@/components/landlord/CreatePropertySheet';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
-import { MetricGrid } from '@/components/dashboard/MetricGrid';
 import {
   ActivityFeed,
   AttentionCard,
@@ -100,34 +106,72 @@ export default function LandlordOverview() {
   const units = s ? s.occupiedUnits + s.vacantUnits + s.reservedUnits : 0;
   const occupancy = s && units > 0 ? Math.round((s.occupiedUnits / units) * 100) : 0;
 
-  const metrics = s
-    ? [
-        {
-          label: 'Properties',
-          value: s.totalProperties,
-          Icon: Building2,
-          onPress: () => router.push('/(app)/(landlord)/properties'),
-        },
-        {
-          label: 'Occupied',
-          value: `${occupancy}%`,
-          Icon: PieChart,
-          onPress: () => router.push('/(app)/(landlord)/tenants'),
-        },
-        {
-          label: 'Vacant units',
-          value: s.vacantUnits,
-          Icon: KeyRound,
-          onPress: () => router.push('/(app)/landlord-listings'),
-        },
-        {
-          label: 'Open repairs',
-          value: s.activeMaintenanceRequests,
-          Icon: Wrench,
-          onPress: () => router.push('/(app)/landlord-maintenance'),
-        },
-      ]
-    : [];
+  const statGroups = s ? (
+    <>
+      <StatGroup
+        title="Rent and operations"
+        items={[
+          {
+            label: 'Outstanding rent',
+            value: showMoney ? formatNaira(s.outstandingAmount, { compact: true }) : '••••••',
+            subtitle:
+              s.outstandingPayments === 1
+                ? 'Across 1 unpaid charge'
+                : `Across ${s.outstandingPayments} unpaid charges`,
+            attention: s.outstandingPayments > 0,
+            onPress: () => router.push('/(app)/landlord-payments'),
+          },
+          {
+            label: 'Open repairs',
+            value: s.activeMaintenanceRequests,
+            subtitle: s.activeMaintenanceRequests === 1 ? 'Open ticket' : 'Open tickets',
+            attention: s.activeMaintenanceRequests > 0,
+            onPress: () => router.push('/(app)/landlord-maintenance'),
+          },
+        ]}
+      />
+      <StatGroup
+        title="Portfolio"
+        items={[
+          {
+            label: 'Properties',
+            value: s.totalProperties,
+            subtitle: `${units} ${units === 1 ? 'unit' : 'units'} in total`,
+            onPress: () => router.push('/(app)/(landlord)/properties'),
+          },
+          {
+            label: 'Occupied',
+            value: s.occupiedUnits,
+            subtitle: `${occupancy}% of units`,
+            onPress: () => router.push('/(app)/(landlord)/tenants'),
+          },
+          {
+            label: 'Reserved',
+            value: s.reservedUnits,
+            subtitle: 'Awaiting signature or payment',
+          },
+          {
+            label: 'Vacant',
+            value: s.vacantUnits,
+            subtitle: 'Available now',
+            onPress: () => router.push('/(app)/landlord-units'),
+          },
+        ]}
+        footer={
+          units > 0 ? (
+            <SegmentedBar
+              label="Units by status"
+              segments={[
+                { label: 'Occupied', value: s.occupiedUnits, tone: 'success' },
+                { label: 'Reserved', value: s.reservedUnits, tone: 'warning' },
+                { label: 'Vacant', value: s.vacantUnits, tone: 'neutral' },
+              ]}
+            />
+          ) : undefined
+        }
+      />
+    </>
+  ) : null;
 
   const quickActions = (
     <QuickActions
@@ -170,7 +214,7 @@ export default function LandlordOverview() {
               visible={showMoney}
               onToggle={toggleMoney}
             />
-            <MetricGrid metrics={[]} loading />
+            <StatGroupSkeleton groups={[2, 4]} />
             {quickActions}
           </View>
         }
@@ -214,7 +258,7 @@ export default function LandlordOverview() {
           {(revenue.data?.length ?? 0) > 1 ? <RevenueTrendChart points={revenue.data!} /> : null}
         </PortfolioCard>
 
-        <MetricGrid metrics={metrics} loading={false} />
+        {statGroups}
 
         {quickActions}
       </QueryState>

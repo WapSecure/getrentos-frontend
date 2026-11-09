@@ -8,7 +8,6 @@ import {
   ChevronRight,
   FileSignature,
   Handshake,
-  Megaphone,
   MessageCircleQuestion,
   Plus,
   UserPlus,
@@ -26,11 +25,12 @@ import {
   Screen,
   SectionHeader,
   Skeleton,
+  StatGroup,
+  StatGroupSkeleton,
   Text,
   useTheme,
 } from '@sureground/ui-native';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
-import { MetricGrid } from '@/components/dashboard/MetricGrid';
 import {
   ActivityFeed,
   QuickActions,
@@ -134,35 +134,45 @@ export default function RealtorHome() {
     />
   );
 
-  const metrics = d
-    ? [
-        {
-          label: 'Active clients',
-          value: d.activeClients,
-          Icon: Handshake,
-          onPress: () => router.push('/(app)/realtor-clients'),
-        },
-        {
-          label: 'Live listings',
-          value: d.publishedListings,
-          Icon: Megaphone,
-          onPress: () => router.push('/(app)/(realtor)/listings'),
-        },
-        {
-          label: 'Open leads',
-          value: d.activeLeads,
-          Icon: Users,
-          onPress: () => router.push('/(app)/(realtor)/pipeline'),
-        },
-        {
-          label: 'Viewings ahead',
-          value: d.upcomingViewings,
-          Icon: CalendarClock,
-          onPress: () =>
-            router.push({ pathname: '/(app)/(realtor)/pipeline', params: { tab: 'viewings' } }),
-        },
-      ]
-    : [];
+  const statGroups = d ? (
+    <>
+      <StatGroup
+        title="Business"
+        items={[
+          {
+            label: 'Active clients',
+            value: d.activeClients,
+            subtitle: 'Owners and landlords',
+            onPress: () => router.push('/(app)/realtor-clients'),
+          },
+          {
+            label: 'Live listings',
+            value: d.publishedListings,
+            subtitle: 'Published on your behalf',
+            onPress: () => router.push('/(app)/(realtor)/listings'),
+          },
+        ]}
+      />
+      <StatGroup
+        title="Pipeline"
+        items={[
+          {
+            label: 'Open leads',
+            value: d.activeLeads,
+            subtitle: 'In your pipeline',
+            onPress: () => router.push('/(app)/(realtor)/pipeline'),
+          },
+          {
+            label: 'Upcoming viewings',
+            value: d.upcomingViewings,
+            subtitle: 'Scheduled tours',
+            onPress: () =>
+              router.push({ pathname: '/(app)/(realtor)/pipeline', params: { tab: 'viewings' } }),
+          },
+        ]}
+      />
+    </>
+  ) : null;
 
   type Nudge = { key: string; Icon: LucideIcon; title: string; body: string; go: () => void };
   const nudges = (
@@ -275,11 +285,11 @@ export default function RealtorHome() {
 
       <QueryState
         query={dashboard}
-        skeleton={<MetricGrid metrics={[]} loading />}
+        skeleton={<StatGroupSkeleton groups={[2, 2]} />}
         errorTitle="We couldn't load your dashboard"
         errorDescription="Check your connection and try again."
       >
-        <MetricGrid metrics={metrics} loading={false} />
+        {statGroups}
       </QueryState>
 
       <QuickActions

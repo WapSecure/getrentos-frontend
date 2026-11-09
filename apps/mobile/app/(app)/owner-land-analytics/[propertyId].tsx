@@ -7,6 +7,7 @@ import {
   Button,
   Card,
   DetailSkeleton,
+  EmptyState,
   QueryState,
   Text,
   useTheme,
@@ -61,17 +62,19 @@ export default function OwnerLandAnalytics() {
             }
           >
             {d.listings.length === 0 ? (
-              <Card style={{ gap: spacing.sm }}>
-                <Text variant="bodyStrong">No sale listing yet</Text>
-                <Text variant="callout" color="mutedForeground">
-                  Once this land is listed for sale, views, saves, viewings and offers show here.
-                </Text>
-                <Button
-                  label="Open the parcel"
-                  size="sm"
-                  variant="secondary"
-                  onPress={() => router.push(`/(app)/owner-land-parcel/${propertyId}`)}
-                  style={{ alignSelf: 'flex-start' }}
+              <Card padding={0}>
+                <EmptyState
+                  size="compact"
+                  title="No sale listing yet"
+                  description="Once this land is listed for sale, views, saves, viewings and offers show here."
+                  action={
+                    <Button
+                      label="Open the parcel"
+                      size="sm"
+                      variant="secondary"
+                      onPress={() => router.push(`/(app)/owner-land-parcel/${propertyId}`)}
+                    />
+                  }
                 />
               </Card>
             ) : (

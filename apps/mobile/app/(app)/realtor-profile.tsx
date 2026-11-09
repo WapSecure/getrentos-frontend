@@ -7,10 +7,10 @@ import { Image } from 'expo-image';
 import { Camera } from 'lucide-react-native';
 import {
   Avatar,
-  Button,
   Card,
   LinkButton,
   QueryState,
+  SaveButton,
   Skeleton,
   Text,
   TextField,
@@ -82,7 +82,6 @@ function ProfileForm({ initial }: { initial: RealtorProfile }) {
       qc.setQueryData(qk.realtor.profile, saved);
       qc.invalidateQueries({ queryKey: qk.auth.me });
       qc.invalidateQueries({ queryKey: qk.security });
-      toast.show('Profile saved.', 'success');
     },
     onError: (err) => toast.show(errorMessage(err, 'Could not save your profile.'), 'error'),
   });
@@ -180,11 +179,11 @@ function ProfileForm({ initial }: { initial: RealtorProfile }) {
           style={{ alignSelf: 'flex-start' }}
         />
       </Card>
-      <Button
+      <SaveButton
         label="Save profile"
         disabled={!changed || fullName.trim().length < 2}
         loading={save.isPending}
-        onPress={() => save.mutate()}
+        onPress={() => save.mutateAsync()}
       />
     </>
   );

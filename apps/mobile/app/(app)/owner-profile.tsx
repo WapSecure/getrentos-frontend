@@ -8,6 +8,7 @@ import {
   Button,
   Card,
   QueryState,
+  SaveButton,
   Skeleton,
   Text,
   TextField,
@@ -77,7 +78,6 @@ function ProfileForm({ initial }: { initial: OwnerProfile }) {
     onSuccess: (saved) => {
       qc.setQueryData(qk.owner.profile, saved);
       qc.invalidateQueries({ queryKey: qk.security });
-      toast.show('Profile saved.', 'success');
     },
     onError: (err) => toast.show(errorMessage(err, 'Could not save your profile.'), 'error'),
   });
@@ -123,11 +123,11 @@ function ProfileForm({ initial }: { initial: OwnerProfile }) {
         </Text>
       </Card>
 
-      <Button
+      <SaveButton
         label="Save profile"
         disabled={!changed || !legalName.trim()}
         loading={save.isPending}
-        onPress={() => save.mutate()}
+        onPress={() => save.mutateAsync()}
       />
       {initial.phone && !initial.phoneVerified ? (
         <Button

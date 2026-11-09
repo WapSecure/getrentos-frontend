@@ -3,10 +3,10 @@ import { ScrollView, View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
-  Button,
   Chip,
   NumberField,
   QueryState,
+  SaveButton,
   Skeleton,
   Text,
   useTheme,
@@ -76,7 +76,6 @@ function PreferencesForm({ initial }: { initial: RealtorBusinessPreferences }) {
     onSuccess: (saved) => {
       qc.setQueryData(qk.realtor.businessPreferences, saved);
       qc.invalidateQueries({ queryKey: qk.realtor.businessPreferences });
-      toast.show('Preferences saved.', 'success');
     },
     onError: (e) => toast.show(errorMessage(e, 'Could not save your preferences.'), 'error'),
   });
@@ -122,11 +121,11 @@ function PreferencesForm({ initial }: { initial: RealtorBusinessPreferences }) {
           ))}
         </View>
       </View>
-      <Button
+      <SaveButton
         label="Save preferences"
         loading={save.isPending}
         disabled={!commissionRateOk(rateNumber) || save.isPending}
-        onPress={() => save.mutate()}
+        onPress={() => save.mutateAsync()}
       />
     </View>
   );

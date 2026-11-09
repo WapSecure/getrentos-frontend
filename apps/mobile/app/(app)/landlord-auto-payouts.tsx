@@ -5,7 +5,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Repeat } from 'lucide-react-native';
 import {
   Badge,
-  Button,
   Card,
   DetailSkeleton,
   Divider,
@@ -13,6 +12,7 @@ import {
   NumberField,
   Price,
   QueryState,
+  SaveButton,
   SwitchRow,
   Text,
   useTheme,
@@ -99,7 +99,6 @@ function Settings({ data }: { data: PayoutSchedule }) {
     mutationFn: () => landlordFinanceApi.setPayouts({ frequency, reserveAmount, enabled }),
     onSuccess: (updated) => {
       qc.setQueryData(qk.landlord.payoutSchedule, updated);
-      toast.show('Automatic payouts updated.', 'success');
     },
     onError: (e) => toast.show(errorMessage(e, 'Could not save these settings.'), 'error'),
   });
@@ -151,11 +150,11 @@ function Settings({ data }: { data: PayoutSchedule }) {
           hint="Stays in your account as a float for upcoming costs."
           editable={enabled}
         />
-        <Button
+        <SaveButton
           label="Save settings"
           loading={save.isPending}
           disabled={save.isPending}
-          onPress={() => save.mutate()}
+          onPress={() => save.mutateAsync()}
         />
       </Card>
     </>

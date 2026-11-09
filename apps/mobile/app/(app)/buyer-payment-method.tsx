@@ -5,10 +5,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ShieldCheck } from 'lucide-react-native';
 import {
-  Button,
   Card,
   NumberField,
   QueryState,
+  SaveButton,
   Skeleton,
   Text,
   TextField,
@@ -73,7 +73,6 @@ function PaymentMethodForm({ data }: { data: BuyerPaymentMethodData }) {
       }),
     onSuccess: (updated) => {
       qc.setQueryData(qk.buyer.paymentMethod, updated);
-      toast.show('Payment method saved.', 'success');
     },
     onError: (err) => toast.show(errorMessage(err, 'Could not save these details.'), 'error'),
   });
@@ -128,11 +127,11 @@ function PaymentMethodForm({ data }: { data: BuyerPaymentMethodData }) {
         />
       </Card>
 
-      <Button
+      <SaveButton
         label="Save"
         loading={mutation.isPending}
         disabled={!canSave}
-        onPress={() => mutation.mutate()}
+        onPress={() => mutation.mutateAsync()}
       />
     </ScrollView>
   );

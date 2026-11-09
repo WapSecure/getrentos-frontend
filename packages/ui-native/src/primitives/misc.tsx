@@ -116,24 +116,38 @@ export function EmptyState({
   title,
   description,
   action,
+  size = 'default',
 }: {
   icon?: React.ReactNode;
   title: string;
   description?: string;
   action?: React.ReactNode;
+  /** `compact` sits inside a card or section; `default` fills a screen. */
+  size?: 'default' | 'compact';
 }) {
   const { spacing } = useTheme();
+  const compact = size === 'compact';
   return (
     <View
       accessibilityLiveRegion="polite"
-      style={{ alignItems: 'center', paddingVertical: spacing['4xl'], gap: spacing.sm }}
+      style={{
+        alignItems: 'center',
+        paddingVertical: compact ? spacing.xl : spacing['4xl'],
+        paddingHorizontal: compact ? spacing.lg : 0,
+        gap: compact ? spacing.xs : spacing.sm,
+      }}
     >
       {icon}
-      <Text variant="heading" headingLevel={2} center>
+      <Text variant={compact ? 'subheading' : 'heading'} headingLevel={compact ? 3 : 2} center>
         {title}
       </Text>
       {description ? (
-        <Text variant="body" color="mutedForeground" center style={{ maxWidth: 300 }}>
+        <Text
+          variant={compact ? 'callout' : 'body'}
+          color="mutedForeground"
+          center
+          style={{ maxWidth: 300 }}
+        >
           {description}
         </Text>
       ) : null}

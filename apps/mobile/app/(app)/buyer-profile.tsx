@@ -6,9 +6,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ShieldCheck } from 'lucide-react-native';
 import {
   Avatar,
-  Button,
   Card,
   QueryState,
+  SaveButton,
   Skeleton,
   Text,
   TextField,
@@ -63,7 +63,6 @@ function ProfileForm({ data }: { data: BuyerProfileData }) {
       buyerApi.updateProfile({ legalName: legalName.trim(), phone: phone.trim() || undefined }),
     onSuccess: (updated) => {
       qc.setQueryData(qk.buyer.profile, updated);
-      toast.show('Profile saved.', 'success');
     },
     onError: (err) => toast.show(errorMessage(err, 'Could not save your profile.'), 'error'),
   });
@@ -99,11 +98,11 @@ function ProfileForm({ data }: { data: BuyerProfileData }) {
         />
       </Card>
 
-      <Button
+      <SaveButton
         label="Save"
         loading={mutation.isPending}
         disabled={!legalName.trim()}
-        onPress={() => mutation.mutate()}
+        onPress={() => mutation.mutateAsync()}
       />
     </ScrollView>
   );

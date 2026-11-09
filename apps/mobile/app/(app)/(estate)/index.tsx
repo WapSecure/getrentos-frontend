@@ -27,6 +27,8 @@ import {
   Screen,
   SectionHeader,
   Skeleton,
+  StatGroup,
+  StatGroupSkeleton,
   Text,
   useTheme,
 } from '@sureground/ui-native';
@@ -262,6 +264,39 @@ export default function EstateHome() {
           ) : null}
         </Card>
       )}
+
+      {locked ? null : stats.isPending ? (
+        <StatGroupSkeleton groups={[4]} />
+      ) : stats.data ? (
+        <StatGroup
+          title="Estate"
+          items={[
+            {
+              label: 'Households',
+              value: stats.data.totalHouseholds,
+              onPress: () => router.push('/(app)/(estate)/households'),
+            },
+            {
+              label: 'Open incidents',
+              value: stats.data.openIncidents,
+              attention: stats.data.openIncidents > 0,
+              onPress: () => router.push('/(app)/estate-incidents'),
+            },
+            {
+              label: 'Open maintenance',
+              value: stats.data.openMaintenanceTickets,
+              attention: stats.data.openMaintenanceTickets > 0,
+              onPress: () => router.push('/(app)/estate-maintenance'),
+            },
+            {
+              label: 'Pending violations',
+              value: stats.data.pendingViolations,
+              attention: stats.data.pendingViolations > 0,
+              onPress: () => router.push('/(app)/estate-violations'),
+            },
+          ]}
+        />
+      ) : null}
 
       <View style={{ gap: spacing.md }}>
         <SectionHeader title="Quick actions" />

@@ -12,7 +12,6 @@ import {
   Home as HomeIcon,
   LandPlot,
   Search,
-  ShoppingBag,
   Wallet,
   type LucideIcon,
 } from 'lucide-react-native';
@@ -25,11 +24,12 @@ import {
   Screen,
   SectionHeader,
   Skeleton,
+  StatGroup,
+  StatGroupSkeleton,
   Text,
   useTheme,
 } from '@sureground/ui-native';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
-import { MetricGrid } from '@/components/dashboard/MetricGrid';
 import {
   ActivityFeed,
   AttentionCard,
@@ -88,34 +88,56 @@ export default function BuyerHome() {
     />
   );
 
-  const metrics = d
-    ? [
-        {
-          label: 'Saved',
-          value: d.savedListings,
-          Icon: Heart,
-          onPress: () => router.push('/(app)/buyer-saved'),
-        },
-        {
-          label: 'Offers',
-          value: d.activeOffers,
-          Icon: FileSignature,
-          onPress: () => router.push('/(app)/(buyer)/offers'),
-        },
-        {
-          label: 'Viewings',
-          value: d.upcomingViewings,
-          Icon: CalendarClock,
-          onPress: () => router.push('/(app)/buyer-viewings'),
-        },
-        {
-          label: 'Purchased',
-          value: d.completedPurchases,
-          Icon: ShoppingBag,
-          onPress: () => router.push('/(app)/buyer-transactions'),
-        },
-      ]
-    : [];
+  const statGroups = d ? (
+    <>
+      <StatGroup
+        title="Your search"
+        items={[
+          {
+            label: 'Saved properties',
+            value: d.savedListings,
+            subtitle: 'In your shortlist',
+            onPress: () => router.push('/(app)/buyer-saved'),
+          },
+          {
+            label: 'Upcoming viewings',
+            value: d.upcomingViewings,
+            subtitle: 'Scheduled tours',
+            onPress: () => router.push('/(app)/buyer-viewings'),
+          },
+        ]}
+      />
+      <StatGroup
+        title="Purchases"
+        items={[
+          {
+            label: 'Active offers',
+            value: d.activeOffers,
+            subtitle: 'Awaiting a response',
+            onPress: () => router.push('/(app)/(buyer)/offers'),
+          },
+          {
+            label: 'Active purchases',
+            value: d.activeTransactions,
+            subtitle: 'Protected transactions',
+            onPress: () => router.push('/(app)/buyer-transactions'),
+          },
+          {
+            label: 'Completed',
+            value: d.completedPurchases,
+            subtitle: 'Lifetime',
+            onPress: () => router.push('/(app)/buyer-transactions'),
+          },
+          {
+            label: 'Documents',
+            value: d.documentsUploaded,
+            subtitle: 'Uploaded to your vault',
+            onPress: () => router.push('/(app)/buyer-documents'),
+          },
+        ]}
+      />
+    </>
+  ) : null;
 
   const quickActions = (
     <QuickActions
@@ -144,7 +166,7 @@ export default function BuyerHome() {
         query={dashboard}
         skeleton={
           <View style={{ gap: spacing.lg }}>
-            <MetricGrid metrics={[]} loading />
+            <StatGroupSkeleton groups={[2, 4]} />
             {quickActions}
             <Skeleton height={140} radius={16} />
           </View>
@@ -161,7 +183,7 @@ export default function BuyerHome() {
           />
         ) : null}
 
-        <MetricGrid metrics={metrics} loading={false} />
+        {statGroups}
 
         {quickActions}
 
