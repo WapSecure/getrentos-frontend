@@ -26,6 +26,7 @@ import {
   sumLines,
   type Invoice,
   type InvoiceLine,
+  type InvoicePaymentPreview,
   type Quote,
   type WorkOrder,
 } from '@/lib/api/homeCare';
@@ -51,6 +52,84 @@ import { usePaymentProviders } from '@/hooks/usePaymentProviders';
 import type { PaymentProvider } from '@/lib/api/paymentStatus';
 
 const naira = (n: number) => `₦${Math.round(n).toLocaleString('en-NG')}`;
+
+/**
+ * What the pay sheet says about how an invoice is paid (audit UX-16), word for
+ * word with the web dialog: the split between held money and a card top-up,
+ * and a button that says exactly what pressing it does. Without a preview
+ * (still loading, or it failed) it describes the rule, not an amount it does
+ * not know.
+ */
+function vendorPayCopy(
+  invoice: Invoice,
+  preview: { data?: InvoicePaymentPreview; isLoading: boolean; isError: boolean },
+  company: string
+): {
+  parts?: { label: string; amount: number }[];
+  note: string;
+  buttonLabel?: string;
+  notReady?: string;
+  error?: string;
+  secureLine: string;
+  protection?: string;
+} {
+  const retry = invoice.payoutStatus === 'FAILED';
+  const fallbackSecure = `If a top-up is needed, you finish on ${company}’s secure page: GetRentos never sees your card details.`;
+  const fallbackProtection =
+    'If a top-up is needed, we send the vendor’s payment once it is confirmed. You’ll see it on this invoice.';
+  if (preview.isLoading) {
+    return {
+      note: 'Working out how much comes from the money GetRentos holds for you.',
+      notReady: 'Working out the split…',
+      secureLine: fallbackSecure,
+      protection: fallbackProtection,
+    };
+  }
+  const split = preview.data;
+  if (!split) {
+    return {
+      note: preview.isError
+        ? 'We couldn’t work out the split here. We pay the vendor from the money GetRentos holds for the owner first. If that doesn’t cover the invoice, you top up the rest by card, plus its card or bank fee, on the next page.'
+        : 'We pay the vendor from the money GetRentos holds for the owner first. A card top-up, with its card or bank fee, is only taken if that does not cover the invoice.',
+      buttonLabel: retry ? 'Retry payment' : 'Pay vendor',
+      secureLine: fallbackSecure,
+      protection: fallbackProtection,
+    };
+  }
+  if (!split.canPay) {
+    return {
+      note: 'Nothing has been paid.',
+      notReady: 'Can’t pay this invoice yet',
+      error: split.reason ?? 'This invoice can’t be paid right now.',
+      secureLine: 'No card is charged.',
+    };
+  }
+  const held = { label: 'From money GetRentos holds for you', amount: split.fromHeldFunds };
+  if (split.topUp <= 0) {
+    return {
+      parts: [held],
+      note: 'Paid in full from the money GetRentos holds for the owner. No card payment is needed. The amounts are checked again when you pay.',
+      buttonLabel: `${retry ? 'Retry: pay' : 'Pay'} vendor ${naira(split.invoiceTotal)}`,
+      secureLine: 'No card is charged.',
+      protection: 'You’ll see the payment on this invoice.',
+    };
+  }
+  const fee = split.topUpFee > 0 ? ` + ${naira(split.topUpFee)} fee` : '';
+  return {
+    parts: [
+      held,
+      {
+        label:
+          split.topUpFee > 0 ? `Card top-up (+ ${naira(split.topUpFee)} fee)` : 'Card top-up (no fee)',
+        amount: split.topUp,
+      },
+    ],
+    note: `Your card is charged ${naira(split.topUpCharge)}. The vendor is paid the full ${naira(split.invoiceTotal)} once the top-up is confirmed. The amounts are checked again when you pay.`,
+    buttonLabel: `Pay ${naira(split.topUp)}${fee} top-up and pay vendor`,
+    secureLine: `You finish the top-up on ${company}’s secure page: GetRentos never sees your card details.`,
+    protection: 'We send the vendor’s payment once the top-up is confirmed. You’ll see it on this invoice.',
+  };
+}
 
 /* --------------------------------- quotes --------------------------------- */
 
@@ -282,6 +361,21 @@ export function InvoicesSection({ w }: { w: WorkOrder }) {
     queryKey: qk.homeCare.invoices(w.id),
     queryFn: () => homeCareApi.invoices(w.id),
   });
+  // How paying splits between held money and a card top-up, shown before Pay.
+  const paymentPreview = useQuery({
+    queryKey: qk.homeCare.invoicePaymentPreview(payInv?.id ?? '', providers.provider),
+    queryFn: () => homeCareApi.invoicePaymentPreview(payInv!.id, providers.provider),
+    enabled: sheetOpen && !!payInv,
+    retry: false,
+  });
+  const payCopy = payInv
+    ? vendorPayCopy(
+        payInv,
+        paymentPreview,
+        providers.options.find((o) => o.provider === providers.provider)?.label ??
+          'the payment company'
+      )
+    : null;
   const refresh = () => qc.invalidateQueries({ queryKey: qk.homeCare.invoices(w.id) });
   const act = useMutation({
     mutationFn: async ({
@@ -518,19 +612,23 @@ export function InvoicesSection({ w }: { w: WorkOrder }) {
         owedLabel="invoice"
         amount={payInv?.totalAmount ?? 0}
         itemLabel="Invoice"
+        itemParts={payCopy?.parts}
         breakdown={false}
-        payLabel={payInv?.payoutStatus === 'FAILED' ? 'Retry payment' : 'Pay vendor'}
+        ready={!payCopy?.notReady}
+        notReadyLabel={payCopy?.notReady}
+        payLabel={payCopy?.buttonLabel}
         note={
-          <Text variant="callout" color="mutedForeground">
-            We pay the vendor from the rent GetRentos holds for the owner first. A card top-up, with
-            its card or bank fee, is only taken if that does not cover the invoice.
-          </Text>
+          payCopy ? (
+            <View style={{ gap: spacing.sm }}>
+              {payCopy.error ? <FormAlert tone="error" message={payCopy.error} /> : null}
+              <Text variant="callout" color="mutedForeground">
+                {payCopy.note}
+              </Text>
+            </View>
+          ) : null
         }
-        secureLine={`If a top-up is needed, you finish on ${
-          providers.options.find((o) => o.provider === providers.provider)?.label ??
-          'the payment company'
-        }’s secure page: GetRentos never sees your card details.`}
-        protection="If a top-up is needed, we send the vendor’s payment once it is confirmed. You’ll see it on this invoice."
+        secureLine={payCopy?.secureLine}
+        protection={payCopy?.protection}
         providers={providers}
         providerError={providerError}
         busy={act.isPending && act.variables?.kind === 'pay'}

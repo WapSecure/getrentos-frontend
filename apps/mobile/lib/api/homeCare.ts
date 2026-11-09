@@ -73,6 +73,24 @@ export interface InvoiceLine {
   totalAmount?: number;
 }
 
+/** How paying an invoice would split between held funds and a card top-up. Whole naira. */
+export interface InvoicePaymentPreview {
+  invoiceId: string;
+  invoiceTotal: number;
+  /** Paid from the money GetRentos holds for the owner. */
+  fromHeldFunds: number;
+  /** The shortfall paid by card. */
+  topUp: number;
+  /** The card or bank fee the payer covers on the top-up. */
+  topUpFee: number;
+  /** What the card is charged: topUp + topUpFee. */
+  topUpCharge: number;
+  heldAvailable: number;
+  canPay: boolean;
+  /** Why it cannot be paid, when `canPay` is false. */
+  reason?: string;
+}
+
 export interface Invoice {
   id: string;
   vendorId: string;
@@ -280,6 +298,15 @@ export const homeCareApi = {
       method: 'POST',
       body: { reason },
     }),
+  /**
+   * How paying would split, before anything is paid: what comes from the money
+   * GetRentos holds for the owner, and what a card top-up (with its fee, for
+   * `provider`) would cover. A preview: worked out again when the invoice is paid.
+   */
+  invoicePaymentPreview: (invoiceId: string, provider?: PaymentProvider) =>
+    apiFetch<InvoicePaymentPreview>(
+      `/home-management/invoices/${invoiceId}/payment-preview${providerQuery(provider)}`
+    ),
   /**
    * Pays the vendor out of the owner's held rent. When that doesn't cover it,
    * nothing is sent yet: `topUp` is a Paystack checkout for the shortfall, and

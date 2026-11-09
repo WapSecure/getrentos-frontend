@@ -250,6 +250,24 @@ export type HomeManagementWorkOrderInvoiceStatus =
  */
 export type HomeManagementInvoicePayoutStatus = 'PENDING' | 'PROCESSING' | 'PAID' | 'FAILED';
 
+/** How paying an invoice would split between held funds and a card top-up. Whole naira. */
+export interface HomeManagementInvoicePaymentPreview {
+  invoiceId: string;
+  invoiceTotal: number;
+  /** Paid from the money GetRentos holds for the owner. */
+  fromHeldFunds: number;
+  /** The shortfall paid by card. */
+  topUp: number;
+  /** The card or bank fee the payer covers on the top-up. */
+  topUpFee: number;
+  /** What the card is charged: topUp + topUpFee. */
+  topUpCharge: number;
+  heldAvailable: number;
+  canPay: boolean;
+  /** Why it cannot be paid, when `canPay` is false. */
+  reason?: string;
+}
+
 /**
  * Monetary values in Home Management are whole currency units. This mirrors
  * approved work-order spend and quote amounts, so the invoice UI never needs
@@ -781,6 +799,18 @@ export const homeManagementService = {
         method: 'POST',
         body: JSON.stringify(data),
       })
+    ),
+  /**
+   * How paying an approved invoice would split, before anything is paid: what
+   * comes from the money GetRentos holds for the owner, and what a card top-up
+   * (with its fee, for `provider`) would cover. Whole naira. A preview: the
+   * split is worked out again when the invoice is paid.
+   */
+  getWorkOrderInvoicePaymentPreview: (invoiceId: string, provider?: PaymentProvider) =>
+    safeCall(() =>
+      authFetch<HomeManagementInvoicePaymentPreview>(
+        `/home-management/invoices/${invoiceId}/payment-preview${providerQuery(provider)}`
+      )
     ),
   /** `provider` takes any top-up (Paystack or Monnify); omitted, the default one. */
   payWorkOrderInvoice: (invoiceId: string, provider?: PaymentProvider) =>

@@ -44,7 +44,10 @@ export interface PaySheetProps {
   ready?: boolean;
   /** The button while not ready. */
   notReadyLabel?: string;
-  /** Leave out the fee breakdown when the card amount is not known up front. */
+  /**
+   * Leave out the fee breakdown when the card amount is not known up front.
+   * `itemParts` are still listed, without a fee or total line.
+   */
   breakdown?: boolean;
   /** Replaces "Pay ₦X with <company>" when that would not be true. */
   payLabel?: string;
@@ -284,6 +287,24 @@ export function PaySheet({
         )}
 
         {note}
+
+        {!breakdown && itemParts && itemParts.length > 0 ? (
+          // No fee row of its own: the parts already say what the card covers.
+          <View
+            style={{
+              borderWidth: 1,
+              borderColor: colors.border,
+              borderRadius: radius.lg,
+              backgroundColor: colors.muted,
+              paddingHorizontal: spacing.lg,
+              paddingVertical: spacing.xs,
+            }}
+          >
+            {itemParts.map((part) => (
+              <Line key={part.label} label={part.label} value={formatNaira(part.amount)} />
+            ))}
+          </View>
+        ) : null}
 
         {withFee ? (
           <View
