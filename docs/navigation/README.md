@@ -213,6 +213,28 @@ which the table above covers.
 - `apps/backoffice/components/admin/dashboard/AdminSidebar.tsx` (Codex).
 - Pages: the ten pipeline pages; detail views using breadcrumbs; Automations, estate Microsite and renter Trust score headings.
 
+## 11. Efficiency and feature flags
+
+**Steps to reach a page (landlord, 1440×1000).** Before the redesign every group started open:
+34 links in a 1,924px sidebar, of which the first 15 were visible without scrolling.
+
+| Page                                                                                  | Before                                                                         | After                                                                |
+| ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------------------- |
+| The 6 primary pages (Dashboard, Properties, Tenants, Payments, Maintenance, Messages) | 1 click; Payments, Maintenance and Messages were below the fold (scroll first) | 1 click, no scroll                                                   |
+| The other 28 pages, first visit                                                       | 1 click for the 15 above the fold, scroll + click for the rest                 | 2 clicks (open the group, then the link)                             |
+| The other 28 pages, later visits                                                      | as above                                                                       | 1 click: the group stays open, and opens itself on any page it holds |
+| Next step in the lettings pipeline                                                    | back to the sidebar                                                            | 1 click on the tabs under the title                                  |
+
+This is a trade-off, not a uniform reduction: the redesign removes scrolling and puts every
+destination in view at a glance, at the cost of one extra click the first time a secondary page is
+opened. Counted from the code and the before/after screenshots, not from user sessions.
+
+**Feature-flagged links (land).** With land mode off:
+
+- The owner and buyer sidebars hide the land links.
+- Every hidden link sits under a layout wrapped in `LandAvailabilityGate` (`/owner/land/…`, `/buyer/land/…`, `/land/…`), so a typed land address shows "Land is not available yet" instead of a broken page.
+- Known flicker (code review): `useLandAvailability` treats land as on until the API answers, so with land off the land links show for a moment, then disappear.
+
 ## 10. Remaining issues and recommendations
 
 1. **Backoffice:**
