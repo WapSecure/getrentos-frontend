@@ -19,7 +19,6 @@ interface LandPropertyShellProps {
   children: (record: OwnerLandRecord) => ReactNode;
 }
 
-/** The header, back link and section navigation around one land property's pages. */
 export const LandPropertyShell = ({ propertyId, section, children }: LandPropertyShellProps) => {
   const { data, isLoading, error, refetch, isRefetching } = useQuery({
     queryKey: landKeys.ownerDetail(propertyId),

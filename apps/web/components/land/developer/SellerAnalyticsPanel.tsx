@@ -111,7 +111,6 @@ const MarketPosition = ({ market }: { market: NonNullable<LandSellerAnalytics['m
   </Card>
 );
 
-/** How the property's sale listings are doing, and how its price sits against the market. */
 export const SellerAnalyticsPanel = ({ propertyId }: { propertyId: string }) => {
   const { data, isLoading, error } = useQuery({
     queryKey: landDeveloperKeys.analytics(propertyId),

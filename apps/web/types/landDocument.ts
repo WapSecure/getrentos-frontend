@@ -1,12 +1,6 @@
-/**
- * A land property's documents as the owner API returns them
- * (src/modules/land/dto/land-document.dto.ts). Diligence checks, layout plans,
- * conveyance steps, encumbrances and the chain of title all cite these.
- */
+/** Mirrors src/modules/land/dto/land-document.dto.ts. */
 
-// ─── Property documents ──────────────────────────────────────────────────────
-
-/** What a land document claims to be (LAND_DOCUMENT_TYPES in land-document.dto.ts). */
+/** LAND_DOCUMENT_TYPES in land-document.dto.ts. */
 export const LAND_DOCUMENT_TYPES = [
   'CERTIFICATE_OF_OCCUPANCY',
   'GOVERNORS_CONSENT',
@@ -26,7 +20,6 @@ export const LAND_DOCUMENT_TYPES = [
   'RECEIPT',
   'PHOTO',
   'OTHER',
-  // What a seller's authority to sell rests on.
   'LETTERS_OF_ADMINISTRATION',
   'PROBATE',
   'COURT_ORDER',
@@ -39,19 +32,17 @@ export const LAND_DOCUMENT_TYPES = [
 ] as const;
 export type LandDocumentType = (typeof LAND_DOCUMENT_TYPES)[number];
 
-/** Where a document is relied on; a document in use cannot be deleted. */
+/** A document in use cannot be deleted. */
 export interface LandDocumentUsage {
-  /** Diligence checks citing it. */
   checklistKeys: string[];
   layoutPlan: boolean;
   milestones: number;
   encumbrances: number;
   titleEvents: number;
-  /** Management mandates (agreement or power of attorney) resting on it. */
   mandates: number;
 }
 
-/** A property document with a short-lived (15 minute) preview link. */
+/** Preview link lasts 15 minutes. */
 export interface LandDocument {
   id: string;
   kind: 'STORED' | 'EXTERNAL';

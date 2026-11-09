@@ -12,13 +12,12 @@ const STARTERS = [
   'How many visitors are on site?',
 ];
 
-/** Ask Sureground for estate managers, about the estate selected in the switcher. */
 export const EstateAssistant = () => {
   const { estate } = useSelectedEstate();
   if (!estate) return null;
   return (
     <AssistantChat
-      // Remount on switching estate, so one estate's conversation never carries into another's.
+      // Remount per estate so one estate's conversation never carries into another's.
       key={estate.id}
       ask={(question, history, language) =>
         unwrap(estateService.askAssistant(estate.id, question, history, language))

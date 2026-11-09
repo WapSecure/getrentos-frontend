@@ -27,11 +27,6 @@ import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate'
 
 const PAGE_SIZE = 10;
 
-/**
- * The ledger's own states. `available` is money earned and withdrawable today;
- * `paid` has reached the bank; `void` is a sale reversed before any payout
- * claimed it, so it keeps its reason rather than disappearing.
- */
 const statusConfig: Record<CommissionStatus, { label: string; variant: BadgeVariant }> = {
   available: { label: 'Available', variant: 'info' },
   paid: { label: 'Paid', variant: 'success' },
@@ -239,7 +234,6 @@ export default function RealtorCommissionsPage() {
                         </td>
                         <td className="p-4 whitespace-nowrap">
                           <Badge variant={status.variant}>{status.label}</Badge>
-                          {/* A reversed sale keeps its reason, rather than vanishing. */}
                           {c.status === 'void' && c.voidReason && (
                             <span className="block text-xs text-muted-foreground mt-1">
                               {c.voidReason}

@@ -84,7 +84,6 @@ export const DocumentPreviewModal = ({ isOpen, onClose, document }: DocumentPrev
         <div className="p-4 sm:p-6">
           <FilePreview url={document.url} name={document.name} mimeType={document.type} />
 
-          {/* Document Details */}
           <DescriptionList
             className="mt-6"
             columns={2}
@@ -103,7 +102,6 @@ export const DocumentPreviewModal = ({ isOpen, onClose, document }: DocumentPrev
             ]}
           />
 
-          {/* Tags */}
           {document.tags && document.tags.length > 0 && (
             <div className="mt-4">
               <p className="mb-2 text-xs text-muted-foreground">Tags</p>
@@ -115,7 +113,6 @@ export const DocumentPreviewModal = ({ isOpen, onClose, document }: DocumentPrev
             </div>
           )}
 
-          {/* Actions */}
           <div className="mt-6 flex flex-wrap gap-3 border-t border-border pt-4">
             <Button
               variant="primary"

@@ -69,7 +69,7 @@ const listingStatusBadge = (status: EstateListing['status']) => {
   }
 };
 
-/** Today as YYYY-MM-DD in the viewer's own calendar, not UTC's. */
+// In the viewer's own calendar, not UTC's.
 const localToday = () => {
   const now = new Date();
   const pad = (n: number) => String(n).padStart(2, '0');
@@ -79,12 +79,6 @@ const localToday = () => {
 const formatNaira = (amount: number) =>
   `₦${amount.toLocaleString('en-NG', { maximumFractionDigits: 0 })}`;
 
-/**
- * Ask to add a property to the estate.
- *
- * Sending the request changes nothing about the property: it joins the estate,
- * and can be listed by it, only once the owner approves.
- */
 const AddPropertyPanel = ({ estateId, onDone }: { estateId: string; onDone: () => void }) => {
   const [search, setSearch] = useState('');
   const [note, setNote] = useState('');
@@ -183,7 +177,6 @@ const AddPropertyPanel = ({ estateId, onDone }: { estateId: string; onDone: () =
   );
 };
 
-/** Publish a listing for a property the estate is already cleared to market. */
 const NewListingPanel = ({
   estateId,
   agreements,
@@ -342,7 +335,6 @@ const NewListingPanel = ({
   );
 };
 
-/** Change a listing's headline, price or start date without closing it. */
 const EditListingPanel = ({
   estateId,
   listing,
@@ -426,7 +418,6 @@ export default function EstateMarketplacePage() {
   const [showAdd, setShowAdd] = useState(false);
   const [showNewListing, setShowNewListing] = useState(false);
   const toast = useToast();
-  /** Which listing's photo panel is open. One at a time: the list is long. */
   const [mediaListingId, setMediaListingId] = useState<string | null>(null);
   const [editListingId, setEditListingId] = useState<string | null>(null);
 
@@ -612,7 +603,6 @@ export default function EstateMarketplacePage() {
                     ) : (
                       statusBadge(agreement.status)
                     )}
-                    {/* Only an approved property is in the estate, so only it can be removed. */}
                     {agreement.status === 'ACTIVE' && (
                       <IconButton
                         label={`Remove ${agreement.propertyTitle} from this estate`}
@@ -735,8 +725,7 @@ export default function EstateMarketplacePage() {
                           Pause
                         </Button>
                       ) : listing.status !== 'CLOSED' ? (
-                        // A CLOSED listing (e.g. a sold sale) can't be republished — the
-                        // backend refuses it — so don't offer a dead Publish button (DEF-234).
+                        // A CLOSED listing can't be republished (the backend refuses it), so offer no Publish button.
                         <Button
                           variant="outline"
                           onClick={() => setStatus.mutate({ id: listing.id, status: 'PUBLISHED' })}

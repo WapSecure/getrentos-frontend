@@ -6,24 +6,7 @@ import { Alert, Badge, EmptyState, type BadgeVariant } from '@sureground/ui';
 import { formatDate } from '@/lib/format';
 import type { LeaseLadder, NoticeKind, NoticeState, TenancyNotice } from '@/types/tenancy-notice';
 
-/**
- * Where a tenancy stands on the escalation ladder.
- *
- * Two deliberate choices, both about not letting this view imply more than it
- * knows:
- *
- * 1. **The state comes from the server.** `EXPIRED` is derived from the clock
- *    there, so it cannot disagree with the expiry date shown beside it. Nothing
- *    here recomputes a state from a date.
- * 2. **A block is stated in words, with its date.** A disabled button teaches
- *    nobody anything; the sentence and the date are what let a firm plan, and
- *    what stops the next step being served early — which is technically fatal.
- *
- * Everything else is left out rather than labelled. The first version printed
- * the same six labels under every step, so four steps of a ladder read as a
- * document rather than a history, and a step with no proof of service still got
- * a line saying so.
- */
+// State comes from the server (EXPIRED is clock-derived there); a block is stated with its date, since serving the next step early is fatal.
 
 const STATE: Record<NoticeState, { label: string; variant: BadgeVariant }> = {
   DRAFT: { label: 'Draft', variant: 'neutral' },
@@ -41,7 +24,6 @@ const KIND_LABEL: Record<NoticeKind, string> = {
   COURT_SUMMONS: 'Court summons',
 };
 
-/** Named only when the number did not come from the reference table. */
 const SOURCE_LABEL: Record<string, string> = {
   FIRM_OVERRIDE: 'your own recorded period',
   MANUAL: 'typed for this notice',
@@ -49,7 +31,6 @@ const SOURCE_LABEL: Record<string, string> = {
 
 export const noticeKindLabel = (kind: NoticeKind) => KIND_LABEL[kind];
 
-/** A step the firm took back is not evidence of anything, and should read that way. */
 const isSpent = (state: NoticeState) => state === 'WITHDRAWN' || state === 'SUPERSEDED';
 
 const naira = (amount: number) => `₦${amount.toLocaleString('en-NG')}`;
@@ -72,7 +53,6 @@ function NoticeStep({
   notice: TenancyNotice;
   actions?: (notice: TenancyNotice) => React.ReactNode;
 }) {
-  // The facts, in the order they get asked, and only the ones that are there.
   const facts: string[] = [];
   if (notice.serviceDate) facts.push(`Served ${formatDate(notice.serviceDate)}`);
   else if (notice.state === 'DRAFT') facts.push('Not served');
@@ -82,7 +62,6 @@ function NoticeStep({
       notice.state === 'SERVED' && notice.daysRemaining !== null
         ? ` · ${notice.daysRemaining} ${notice.daysRemaining === 1 ? 'day' : 'days'} left`
         : '';
-    // A step that ran out, or was taken back, no longer runs to anything.
     const over = notice.state === 'EXPIRED' || isSpent(notice.state);
     facts.push(`${over ? 'Ran to' : 'Runs to'} ${formatDate(notice.expiresAt)}${left}`);
   } else if (notice.periodDays !== null) {
@@ -94,11 +73,6 @@ function NoticeStep({
   const source = SOURCE_LABEL[notice.periodSource];
   if (source) facts.push(`Period is ${source}`);
 
-  /*
-    The basis is the firm's answer, not the platform's. When the number came
-    from the reference table there is nothing to explain, and when the step has
-    no period at all the sentence is just "this does not count down" said twice.
-  */
   const basis = notice.periodDays !== null && source ? notice.periodBasis : null;
 
   return (
@@ -128,11 +102,6 @@ function NoticeStep({
           )}
 
           <p className="mt-1 text-xs text-muted-foreground/90">{facts.join(' · ')}</p>
-          {/*
-            Proof of service is what a firm reaches for when a notice is
-            challenged, so it earns its line — but only on a step that was
-            actually served. On a draft there is nothing to prove.
-          */}
           {notice.evidenceNote && !isSpent(notice.state) && (
             <p className="mt-1 text-xs text-muted-foreground/90">
               Proof of service: {notice.evidenceNote}
@@ -153,14 +122,12 @@ export function NoticeLadderTimeline({
   actions,
 }: {
   ladder: LeaseLadder;
-  /** Rendered per notice: the serve / withdraw controls a caller supplies. */
   actions?: (notice: TenancyNotice) => React.ReactNode;
 }) {
   const { notices, next, nextBlockedReason } = ladder;
 
   return (
     <div className="space-y-3">
-      {/* The block, stated before the steps, because it decides what comes next. */}
       {next && nextBlockedReason && (
         <Alert
           variant="warning"

@@ -26,7 +26,6 @@ import {
   type RealtorClientApi,
 } from '@/services/realtorService';
 
-/** sessionStorage key for a listing being written when the session ran out. */
 export const REALTOR_CREATE_LISTING_DRAFT_KEY = 'realtor-create-listing';
 
 interface RealtorListingDraft {
@@ -50,7 +49,6 @@ interface CreateListingModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (listing: CreateRealtorListingInput) => void;
-  /** Caught error from the parent's create mutation: renders a trust upsell when it's a verification/tier gate. */
   error?: unknown;
   isSubmitting?: boolean;
 }
@@ -130,8 +128,6 @@ export const CreateListingModal = ({
     properties.find((property) => property.id === propertyId) ??
     null;
 
-  // If the session ends while the realtor is writing, keep the listing so it is
-  // waiting after they sign back in.
   const draftRestored = useSessionExpiryDraft<RealtorListingDraft>(
     REALTOR_CREATE_LISTING_DRAFT_KEY,
     () =>
@@ -182,8 +178,7 @@ export const CreateListingModal = ({
 
   const handleSubmit = () => {
     if (!selectedClient || !selectedProperty) return;
-    // Do NOT close here: keep the modal open on failure so a trust/tier gate can
-    // surface its upsell notice. The parent closes us on success (isOpen=false).
+    // Don't close here: on failure a trust/tier gate shows its upsell; the parent closes on success.
     onSubmit({
       propertyId,
       title,

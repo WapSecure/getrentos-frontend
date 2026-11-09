@@ -33,11 +33,6 @@ type TwoFactorStep = 'idle' | 'setup' | 'disable';
 
 const TWO_FACTOR_SWITCH_ID = 'two-factor-switch';
 
-/**
- * Security settings for every role: password, passkeys, authenticator app,
- * transaction PIN and where you're signed in. All of it is the person's, not
- * a portal's, so it reads /users/me/security.
- */
 export const SecuritySettings = () => {
   const queryClient = useQueryClient();
   const toast = useToast();
@@ -128,7 +123,6 @@ export const SecuritySettings = () => {
       : !!pinReference && /^\d{6}$/.test(pinCode));
   const pinReady = pinProofReady && /^\d{6}$/.test(pin) && pin === pinConfirm;
 
-  // ---- Passkeys ----
   const { data: passkeyData } = useQuery({
     queryKey: accountSecurityKeys.passkeys,
     queryFn: () => unwrap(accountSecurityService.listPasskeys()),
@@ -138,7 +132,6 @@ export const SecuritySettings = () => {
   const addPasskeyMutation = useMutation({
     mutationFn: async () => {
       const options = await unwrap(accountSecurityService.startPasskeyRegistration());
-      // Browser prompts for Face ID / fingerprint / security key here.
       const attestation = await startRegistration({ optionsJSON: options as never });
       const label =
         typeof navigator !== 'undefined' && /iPhone|iPad|Android/i.test(navigator.userAgent)
@@ -172,7 +165,7 @@ export const SecuritySettings = () => {
   const [enroll, setEnroll] = useState<TwoFactorEnrollment | null>(null);
   const [code, setCode] = useState('');
   const [codeError, setCodeError] = useState<string | null>(null);
-  // Backup codes are shown once, right after they are made (AU-07).
+  // Backup codes are shown once, right after they are made.
   const [freshCodes, setFreshCodes] = useState<string[] | null>(null);
   const [confirmNewCodes, setConfirmNewCodes] = useState(false);
 
@@ -240,8 +233,7 @@ export const SecuritySettings = () => {
 
   const enabled = !!twoFactor?.enabled;
   const codesLeft = twoFactor?.recoveryCodesLeft ?? 0;
-  // Until the real status is known the switch must not read as "off": a user
-  // who has 2FA would see it disabled, and flipping it would start enrolment.
+  // Until the real status is known the switch must not read "off": flipping it would start enrolment for someone who already has 2FA.
   const twoFactorKnown = twoFactor !== undefined;
   const pinKnown = security !== undefined;
 
@@ -255,7 +247,6 @@ export const SecuritySettings = () => {
       <div className="space-y-6">
         {security?.hasPassword && <ChangePasswordCard />}
 
-        {/* Passkey — the strongest factor */}
         <div className="p-4 rounded-lg border border-border">
           <div className="flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-3">
@@ -309,7 +300,6 @@ export const SecuritySettings = () => {
           )}
         </div>
 
-        {/* Two-Factor Authentication */}
         <div className="p-4 rounded-lg border border-border">
           <div className="flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-3">
@@ -495,7 +485,6 @@ export const SecuritySettings = () => {
             isLoading={newCodesMutation.isPending}
           />
         </div>
-        {/* Transaction PIN */}
         <div className="p-4 rounded-lg border border-border">
           <div className="flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-3">

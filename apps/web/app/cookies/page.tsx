@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
 import { LegalPage } from '@/components/layout/LegalPage';
 
-// Lists the cookies and browser storage the web app uses today. Update it when
-// analytics or anything else is added. Not yet reviewed by counsel.
+// Not yet reviewed by counsel; update when analytics or other storage is added.
 
 export const metadata: Metadata = {
   title: 'Cookie Policy',

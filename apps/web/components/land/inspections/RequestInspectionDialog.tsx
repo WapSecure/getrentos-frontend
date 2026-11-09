@@ -27,11 +27,6 @@ import {
 export const BUYER_INSPECTIONS_ROUTE = '/buyer/land/inspections';
 const FOCUS = Object.keys(INSPECTION_FOCUS_LABELS) as InspectionFocus[];
 
-/**
- * Commission an independent, accredited inspector to visit land before buying
- * it. Every photo is geotagged and timestamped; the report reaches the buyer
- * once Sureground has checked it.
- */
 export const RequestInspectionDialog = ({
   open,
   onClose,

@@ -53,12 +53,7 @@ const Line = ({ label, value, strong }: { label: string; value: string; strong?:
   </div>
 );
 
-/** One plot purchase: money, schedule, statement, conveyance and documents. */
-/**
- * The refund in the buyer's terms. It goes back automatically to the card or
- * account they paid with; only a share already paid to the developer, or one
- * the bank refused, is finished by Sureground finance by hand.
- */
+// Refunds go back automatically to the card or account; only a share already paid to the developer, or one the bank refused, is finished by finance by hand.
 const refundSentence = (purchase: {
   refundDue?: number;
   refundStatus?: string;
@@ -102,7 +97,6 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
     queryClient.invalidateQueries({ queryKey: buyerLandKeys.statement(purchaseId) });
   };
 
-  // Which company takes the payment, and why the last one could not.
   const providers = usePaymentProviders();
   const [providerError, setProviderError] = useState<string | null>(null);
   const [payOpen, setPayOpen] = useState(false);
@@ -115,13 +109,12 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
         window.location.assign(init.authorizationUrl);
         return;
       }
-      // No gateway configured (development): the API confirmed it already.
+      // No gateway configured (development): the API already confirmed it.
       setPayOpen(false);
       notify(`Payment of ${formatCurrency(init.amount)} confirmed.`, 'success');
       queryClient.invalidateQueries({ queryKey: buyerLandKeys.all });
     },
     onError: (reason: Error, provider) => {
-      // That company cannot take it right now: say so by the button, with the other one picked.
       const unavailable = providers.recover(reason, provider);
       if (unavailable) setProviderError(unavailable);
       else notify(reason.message, 'error');

@@ -94,10 +94,7 @@ interface HomeManagementEscalationQueueProps {
   isPropertiesLoading?: boolean;
 }
 
-/**
- * A deliberately PII-light escalation board. It concentrates on service
- * ownership, deadlines, and acknowledgement without exposing resident details.
- */
+// Deliberately PII-light: no resident details.
 export function HomeManagementEscalationQueue({
   properties,
   isPropertiesLoading = false,

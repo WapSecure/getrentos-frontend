@@ -25,7 +25,7 @@ export interface AgencyDashboard {
 export const agencyDashboardService = {
   get: (): Promise<ApiResponse<AgencyDashboard>> =>
     safeCall(() => authFetch<AgencyDashboard>('/agency/dashboard')),
-  /** The firm's KPI pack for a run of months (YYYY-MM, inclusive). */
+  /** Months are YYYY-MM, inclusive. */
   kpis: (from: string, to: string): Promise<ApiResponse<PmKpiReport>> =>
     safeCall(() => authFetch<PmKpiReport>(`/agency/kpis?from=${from}&to=${to}`)),
 };

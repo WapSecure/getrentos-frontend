@@ -13,17 +13,11 @@ interface PaymentMethod {
 }
 
 interface PaymentMethodsProps {
-  /** Details saved here before; they are never used to pay. */
   methods: PaymentMethod[];
   onRemove: (id: string) => Promise<void>;
 }
 
-/**
- * How paying works: the payer chooses card, bank transfer or USSD on Paystack's
- * or Monnify's secure page each time. Sureground never takes or keeps card
- * details, so there is nothing to add here. Details saved here before are
- * listed only so they can be removed.
- */
+// Sureground never takes or keeps card details; details saved before are listed only so they can be removed.
 export const PaymentMethods = ({ methods, onRemove }: PaymentMethodsProps) => {
   const getIcon = (type: string) => {
     switch (type) {

@@ -28,23 +28,6 @@ import type {
   LegalCaseStatus,
 } from '@/types/legal-case';
 
-/**
- * Legal cases: recovery, injunction, title dispute and eviction.
- *
- * Built on the same shapes as the rest of the app — a filter bar, a table,
- * `ListState` for the three async states — because a landlord moving between
- * Applications and Legal cases should not have to learn a second layout.
- *
- * The table is arranged around, in order:
- *
- * 1. **Stage**, as a position rather than a word, so the trajectory of twelve
- *    cases is visible without reading twelve statuses.
- * 2. **What is next on it** — a hearing date, or the fact that nothing is
- *    scheduled, which is the state that loses cases by default.
- * 3. **What is blocked** — a possession claim that cannot be filed is the thing
- *    most worth seeing before somebody attempts it.
- */
-
 const STAGES: { value: 'all' | LegalCaseStatus; label: string }[] = [
   { value: 'all', label: 'All' },
   { value: 'OPEN', label: 'Open' },
@@ -141,9 +124,7 @@ export default function LandlordLegalCasesPage() {
       };
     }) => {
       const { decision, ...hearing } = input;
-      // A sitting that decided the matter also decides the case, so both are
-      // written from the one action. Recording the sitting alone would leave the
-      // case parked in FILED with a decision nobody entered.
+      // Recording the sitting alone would leave the case in FILED with no decision.
       await unwrap(landlordService.recordHearing(id, hearing.hearingId, hearing));
       if (decision) {
         await unwrap(
@@ -215,11 +196,7 @@ export default function LandlordLegalCasesPage() {
 
   const cases = data?.cases ?? [];
 
-  /**
-   * "Needs attention" is derived from the same fields the server returns, not a
-   * stored flag, so the filter cannot disagree with what the detail view says
-   * about the row it just opened.
-   */
+  // Derived from server fields, not a stored flag, so the filter matches the detail view.
   const needsAttention = (row: LegalCase) =>
     row.outstanding.some((item) => item.action === 'Not ready to file') ||
     (row.status === 'FILED' && row.nextHearingAt === null) ||

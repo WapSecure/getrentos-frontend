@@ -19,7 +19,7 @@ interface NotificationPreference {
   push: boolean;
 }
 
-// Only what is actually sent to an agent; the server returns these categories.
+// Must match the categories the server sends an agent.
 const CATEGORY_META: Record<string, { label: string; icon: React.ElementType }> = {
   verification: { label: 'Verification results', icon: ShieldCheck },
   system: { label: 'Account & listing updates', icon: Bell },
@@ -132,7 +132,6 @@ export const NotificationSettings = () => {
   );
 };
 
-/** Shown where a category has no email: these updates are in-app and push only. */
 const NoEmail = () => (
   <span
     className="text-xs text-muted-foreground"

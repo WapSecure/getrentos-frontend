@@ -13,13 +13,7 @@ import { ManageSubscriptionCard } from '@/components/shared/subscription/ManageS
 import { BillingHistoryCard } from '@/components/shared/subscription/BillingHistoryCard';
 import type { BillingCycle, PlanPersona } from '@/services/subscriptionService';
 
-/**
- * Shared billing & plan page for every persona. Price and the Free-vs-Pro
- * matrix are read from the backend pricing catalog (single source of truth),
- * so the offer is described identically everywhere and always matches what we
- * charge. Checkout starts a real Pro trial; pass `onUpgrade` only to override
- * that (tests/storybook).
- */
+// Price and the Free-vs-Pro matrix come from the backend pricing catalog, so the offer always matches what is charged.
 export function BillingPage({
   persona,
   title = 'Billing & plan',
@@ -67,10 +61,7 @@ export function BillingPage({
           <ProPriceCard
             pricing={pricing}
             isPro={isPro}
-            // Until billing state arrives we cannot know whether they still
-            // have a trial. Showing the trial offer by default matches what a
-            // new customer sees; the backend refuses to grant a second one
-            // either way.
+            // Until billing state arrives, show the trial offer as a new customer sees it; the backend refuses a second trial anyway.
             trialAvailable={billing?.trialAvailable ?? true}
             onUpgrade={upgrade}
             upgrading={isUpgrading}

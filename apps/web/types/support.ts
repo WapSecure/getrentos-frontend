@@ -5,7 +5,6 @@ export interface SupportThread {
   category: string | null;
   lastMessage: string | null;
   lastMessageAt: string | null;
-  /** Platform replies not yet read by the customer. */
   unreadCount: number;
   createdAt: string;
 }

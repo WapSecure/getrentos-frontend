@@ -41,11 +41,6 @@ const PAYOUT_STATUS: Record<string, { label: string; variant: BadgeVariant }> = 
   FAILED: { label: 'Failed', variant: 'danger' },
 };
 
-/**
- * The firm's payout surface: where commission money goes, how much is ready, and
- * the history of batches. Withdrawing sweeps every earned commission into one
- * payout to the saved account.
- */
 export function AgencyPayoutSection({
   onToast,
 }: {
@@ -114,7 +109,6 @@ export function AgencyPayoutSection({
 
   const account = accountQuery.data;
   const summary = summaryQuery.data;
-  // The bank's name for the account comes back before saving (UX-28).
   const canSave = lookupAllowsSave(lookup);
   const canWithdraw = Boolean(summary?.accountSet) && (summary?.available ?? 0) > 0;
 
@@ -126,7 +120,6 @@ export function AgencyPayoutSection({
       </h2>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        {/* Payout account */}
         <Card className="rounded-2xl p-5">
           <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
             <Landmark className="h-4 w-4 text-muted-foreground" />
@@ -186,7 +179,6 @@ export function AgencyPayoutSection({
           )}
         </Card>
 
-        {/* Available to withdraw */}
         <Card className="rounded-2xl p-5">
           <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
             <Banknote className="h-4 w-4 text-muted-foreground" />
@@ -235,7 +227,6 @@ export function AgencyPayoutSection({
         onConfirm={() => withdraw.mutate()}
       />
 
-      {/* Payout history */}
       <div className="mt-4">
         <h3 className="mb-2 text-sm font-semibold text-foreground">Payout history</h3>
         {payoutsQuery.isLoading ? (

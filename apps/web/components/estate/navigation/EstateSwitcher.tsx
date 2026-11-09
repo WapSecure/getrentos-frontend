@@ -16,7 +16,6 @@ import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 export const EstateSwitcher = () => {
   const { estate, estates, selectEstate } = useSelectedEstate();
 
-  // A single-estate manager (the overwhelming majority) sees no switcher at all.
   if (estates.length <= 1) return null;
 
   return (

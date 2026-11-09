@@ -31,7 +31,6 @@ const categoryLabels: Record<OwnershipTransferDocument['category'], string> = {
   other: 'Other',
 };
 
-/** Owner doc category -> backend OwnerDocumentType enum. */
 const CATEGORY_TO_TYPE: Record<string, string> = {
   transfer_agreement: 'TRANSFER_AGREEMENT',
   payment_receipt: 'PAYMENT_RECEIPT',

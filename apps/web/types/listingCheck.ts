@@ -1,4 +1,3 @@
-/** The renter's listing check, as the API returns it. */
 export type ListingCheckLevel = 'looks_good' | 'check_carefully' | 'be_cautious';
 
 export interface ListingCheck {

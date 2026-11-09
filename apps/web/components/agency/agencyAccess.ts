@@ -1,10 +1,4 @@
-/**
- * A refusal's message, fit to show in the agency workspace.
- *
- * The API's role guard answers with the full list of account types that may
- * use an area. That list means nothing to a firm's staff, so it is replaced
- * with a plain sentence; every other message passes through unchanged.
- */
+// The role guard's refusal lists account types, which mean nothing to firm staff, so it is replaced; other messages pass through.
 export const NO_ACCESS_MESSAGE =
   'Your account does not have access to this part of the agency workspace.';
 

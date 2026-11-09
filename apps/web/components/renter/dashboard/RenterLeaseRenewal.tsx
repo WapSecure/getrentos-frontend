@@ -28,15 +28,12 @@ export const RenterLeaseRenewal = () => {
   });
   const { data: renewalOffer = null } = useQuery({
     queryKey: renterKeys.renewalOffer,
-    // The API answers "no offer" with an empty 200 body, which the shared
-    // client turns into `undefined`: and React Query rejects that. Coalescing
-    // to null matches the declared `RenewalOffer | null`.
+    // The API answers "no offer" with an empty body, which the client turns into undefined and React Query rejects.
     queryFn: async () => (await unwrap(renterService.getRenewalOffer())) ?? null,
     enabled: lease?.status === 'expiring',
   });
 
-  // Renewal is actionable only when the backend marks the current lease as
-  // expiring. Ordinary active and already-expired leases do not belong here.
+  // Only a lease the backend marks as expiring is actionable here.
   if (!lease || lease.status !== 'expiring') return null;
 
   const daysUntilEnd = Math.ceil(

@@ -13,7 +13,6 @@ const formatDay = (iso: string) =>
     timeZone: 'Africa/Lagos',
   });
 
-/** Tells hosts what Sureground takes from each stay, and until when a launch rate runs. */
 export function HostFeeNote() {
   const { data } = useQuery({
     queryKey: shortletKeys.hostFees,

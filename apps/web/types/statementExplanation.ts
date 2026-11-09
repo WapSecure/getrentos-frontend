@@ -1,4 +1,3 @@
-/** An owner statement in plain words, as the API returns it. */
 export interface StatementExplanation {
   headline: string;
   points: string[];

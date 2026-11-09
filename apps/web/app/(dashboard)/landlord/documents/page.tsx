@@ -52,7 +52,6 @@ export default function LandlordDocumentsPage() {
   const [filter, setFilter] = useState<'all' | DocumentCategory>('all');
   const [isUploadOpen, setIsUploadOpen] = useState(false);
 
-  // Debounce the search input; reset to page 1 inside the timer callback.
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchQuery);
@@ -109,8 +108,6 @@ export default function LandlordDocumentsPage() {
 
   return (
     <>
-      {/* Zero is a claim about the portfolio, so wait until it has been read
-          before making it. */}
       <PageHeader
         title="Documents"
         description={

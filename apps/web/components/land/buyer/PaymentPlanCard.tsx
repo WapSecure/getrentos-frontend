@@ -9,7 +9,6 @@ const Row = ({ label, value, strong }: { label: string; value: string; strong?: 
   </div>
 );
 
-/** The plan's terms in plain words. */
 export const planTermsLine = (plan: PublicLandPaymentPlan) =>
   plan.durationMonths === 0
     ? 'Pay in full to start. No instalment premium.'
@@ -19,11 +18,6 @@ export const planTermsLine = (plan: PublicLandPaymentPlan) =>
           : 'No instalment premium.'
       }`;
 
-/**
- * One payment plan with a worked price. `quote` is the selected plot's price
- * under this plan; without one the API's example (on the cheapest available
- * plot) is shown.
- */
 export const PaymentPlanCard = ({
   plan,
   quote,

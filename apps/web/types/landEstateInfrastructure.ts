@@ -1,4 +1,3 @@
-/** What a developer promised to build on an estate (roads, power, water...). */
 export const ESTATE_COMMITMENT_KINDS = [
   'ROADS',
   'DRAINAGE',

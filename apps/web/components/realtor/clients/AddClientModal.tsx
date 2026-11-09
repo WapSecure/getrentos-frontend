@@ -31,7 +31,6 @@ interface AddClientModalProps {
   onSubmit: (email: string) => void;
   isSubmitting?: boolean;
   error?: string | null;
-  /** The raw invite-mutation error, so a verification 403 can render an actionable link. */
   submitError?: unknown;
 }
 

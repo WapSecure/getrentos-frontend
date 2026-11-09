@@ -4,11 +4,6 @@ import type { ReactNode } from 'react';
 import { MapPinned } from 'lucide-react';
 import { useLandAvailability } from '@/hooks/useLandAvailability';
 
-/**
- * Shows land pages only when their audience is open: `marketplace` for public
- * and buyer pages, `owners` for owner setup and the outside reviewer's desk.
- * Otherwise a plain "not available yet" note instead of a page of API errors.
- */
 export const LandAvailabilityGate = ({
   audience,
   children,
@@ -16,12 +11,10 @@ export const LandAvailabilityGate = ({
 }: {
   audience: 'marketplace' | 'owners';
   children: ReactNode;
-  /** Wraps the notice on pages that bring their own navigation (public pages). */
   shell?: (notice: ReactNode) => ReactNode;
 }) => {
   const availability = useLandAvailability();
-  // Nothing until the answer is in: rendering the page first would fire its
-  // land requests (404s while closed) and flash content that then disappears.
+  // Nothing until the answer is in: the page's land requests 404 while closed.
   if (availability.isLoading) return null;
   if (availability[audience]) return <>{children}</>;
   const notice = (

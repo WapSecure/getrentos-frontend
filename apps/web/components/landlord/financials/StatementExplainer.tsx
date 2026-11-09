@@ -13,11 +13,7 @@ const TONE = {
   info: { icon: Bell, cls: 'text-muted-foreground' },
 } as const;
 
-/**
- * "This statement in plain words": what came in, where it went, what changed
- * since the last statement, and what is worth asking. The figures on the
- * statement remain the record.
- */
+// The figures on the statement remain the record.
 export function StatementExplainer({ statementId }: { statementId: string }) {
   const { data, isLoading, isError } = useQuery({
     queryKey: landlordKeys.statementExplanation(statementId),

@@ -1,21 +1,6 @@
-/**
- * Server-safe listing normalisation.
- *
- * Deliberately has NO imports: this module is used by BOTH the client market
- * service and the server components that pre-render `/rent` and `/buy`. If it
- * pulled in the api helpers (which reach for localStorage through the auth
- * storage) the server render would break — and if the mapping lived only in the
- * client service, the pages could not be server-rendered at all, which is the
- * whole point of separating it out.
- *
- * Rentals and sales come from different modules with different DTOs and even
- * different query parameter names (rentals call the filter `location`, sales call
- * it `city`). Normalising here means the browse UI is written once and cannot
- * drift into two subtly different pages.
- */
+// No runtime imports: server components pre-render `/rent` and `/buy` with it, and the api helpers reach for localStorage.
 
-// Type-only import: erased at build, so it adds no runtime code and keeps this
-// module server-safe (see the no-runtime-imports note above).
+// Type-only import, so the module stays server-safe.
 import type { PropertyTrustChain } from '@/types/renter';
 
 export const PUBLIC_MARKET_PAGE_SIZE = 12;
@@ -24,9 +9,7 @@ export interface PublicListingCard {
   id: string;
   title: string;
   price: number;
-  /** Rentals only — a sale price has no period. */
   priceUnit?: 'month' | 'year';
-  /** Rentals only — the four-link trust chain for the card badge. */
   trustChain?: PropertyTrustChain;
   location: string;
   propertyType?: string;
@@ -40,7 +23,6 @@ export interface PublicListingCard {
 export type PublicMarket = 'rent' | 'sale';
 
 export interface PublicMarketFilters {
-  /** Free text — title, address, city, state or estate name, on both markets. */
   search?: string;
   location?: string;
   estate?: string;
@@ -50,7 +32,6 @@ export interface PublicMarketFilters {
   bathrooms?: number;
   propertyType?: string;
   verifiedOnly?: boolean;
-  /** Rentals only. */
   furnished?: boolean;
   petsAllowed?: boolean;
   monthlyPayment?: boolean;
@@ -59,7 +40,7 @@ export interface PublicMarketFilters {
   pageSize?: number;
 }
 
-/** Only `true` goes on the wire: an unticked filter means "don't filter", not "only false". */
+// An unticked filter means "don't filter", not "only false".
 const onlyTrue = (value?: boolean) => (value ? true : undefined);
 
 export interface RentApiItem {
@@ -90,8 +71,7 @@ export interface SaleApiItem {
   coverImageUrl?: string;
 }
 
-/** The sort each market defaults to. Must match the browser's default, or the
- * server-rendered first page would describe a different query than the client's. */
+// Must match the browser's default, or the server-rendered first page describes a different query.
 export const DEFAULT_SORT: Record<PublicMarket, string> = {
   rent: 'recent',
   sale: 'newest',
@@ -129,7 +109,7 @@ export const saleToCard = (item: SaleApiItem): PublicListingCard => ({
   image: item.coverImageUrl || undefined,
 });
 
-/** Only the parameters each endpoint declares — extras are rejected by the global whitelist. */
+// Only the parameters each endpoint declares: the global whitelist rejects extras.
 export const rentalQuery = (filters: PublicMarketFilters) => ({
   search: filters.search || undefined,
   location: filters.location || undefined,
@@ -173,7 +153,6 @@ export const toQueryString = (params: Record<string, unknown>): string => {
   return qs ? `?${qs}` : '';
 };
 
-/** The path the server should fetch for a market's unfiltered first page. */
 export const firstPagePath = (market: PublicMarket): string => {
   const filters = { page: 1, pageSize: PUBLIC_MARKET_PAGE_SIZE, sort: DEFAULT_SORT[market] };
   return market === 'rent'

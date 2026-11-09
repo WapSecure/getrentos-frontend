@@ -63,7 +63,7 @@ export const ownerQueryService = {
   reply(id: string, body: string) {
     return post<QueryThread>(`/owner-queries/${id}/messages`, { body });
   },
-  /** A drafted reply from the property's records, for the manager side. Nothing is sent. */
+  /** Nothing is sent. */
   draftReply(id: string) {
     return post<OwnerQueryDraft>(`/owner-queries/${id}/draft-reply`);
   },

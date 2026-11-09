@@ -10,11 +10,6 @@ import { agencyDashboardService, type AgencyDashboard } from '@/services/agencyD
 
 const rate = (value: number | null) => (value === null ? '—' : `${value}%`);
 
-/**
- * The firm's book at a glance — every property it manages or delivers. Each
- * figure is worked out from the same leases, rent charges and work orders the
- * owner workspace reads, so a number here can always be traced there.
- */
 export function AgencyOverviewView() {
   const query = useQuery({
     queryKey: ['agency', 'dashboard'],

@@ -51,7 +51,7 @@ interface PaymentDetailsModalProps {
   onConfirmMoveIn: (id: string) => void;
 }
 
-/** How the renter chose to pay. "Wallet" is not a Sureground balance, so it is not called one. */
+// "Wallet" is not a Sureground balance, so it is not called one.
 const METHOD_LABEL: Record<NonNullable<Payment['method']>, string> = {
   card: 'Card',
   bank_transfer: 'Bank transfer',

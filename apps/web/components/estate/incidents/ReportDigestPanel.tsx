@@ -19,15 +19,9 @@ const PRIORITY: Record<string, BadgeVariant> = {
 
 interface ReportDigestPanelProps {
   estateId: string;
-  /** Opens the announcement dialog with these notes, for an update to residents. */
   onDraftUpdate: (notes: string) => void;
 }
 
-/**
- * "Shared problems": open incidents and repair tickets that describe the
- * same thing (one water outage, not five reports), with how many households
- * and how old, and a next step. Hidden when nothing groups, or if it fails.
- */
 export function ReportDigestPanel({ estateId, onDraftUpdate }: ReportDigestPanelProps) {
   const [open, setOpen] = useState<string | null>(null);
   const { data, isLoading } = useQuery({

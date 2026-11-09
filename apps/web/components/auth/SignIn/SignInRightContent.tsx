@@ -29,17 +29,14 @@ export const SignInRightContent = ({ method, setMethod }: SignInRightContentProp
   const [loginAttempts, setLoginAttempts] = useState(0);
   const [isLocked, setIsLocked] = useState(false);
   const [lockoutTimer, setLockoutTimer] = useState<number | null>(null);
-  // Internal post-login destination, e.g. `/shortlets/abc` when the proxy
-  // redirected here via `?next=`. Only same-origin paths are accepted.
-  // The server renders without the query string, so hydrate from an empty one
-  // and only then read the real URL; reading it during render made the two disagree.
+  // Post-login destination from `?next=`; only same-origin paths are accepted.
+  // The server renders without the query string, so hydrate from an empty one and only then read the real URL.
   const search = useSyncExternalStore(
     noSubscribe,
     () => window.location.search,
     () => ''
   );
   const nextPath = useMemo(() => safeNextPath(new URLSearchParams(search).get('next')), [search]);
-  // Sent here from an invitation link rather than from an expired session.
   const fromInvite = new URLSearchParams(search).get('reason') === 'invite';
 
   useEffect(() => {
@@ -117,7 +114,6 @@ export const SignInRightContent = ({ method, setMethod }: SignInRightContentProp
   return (
     <section className="relative z-10 flex w-full items-center justify-center px-4 py-20 sm:px-8 lg:w-1/2 lg:px-12 lg:py-16">
       <div className="w-full max-w-[30rem] rounded-[2rem] border border-border/70 bg-card/95 p-6 shadow-[0_24px_80px_-32px_rgba(15,23,42,0.28)] backdrop-blur-xl sm:p-9 dark:shadow-[0_24px_80px_-32px_rgba(0,0,0,0.7)]">
-        {/* Back Button */}
         <Button
           variant="outline"
           rounded="lg"
@@ -155,7 +151,6 @@ export const SignInRightContent = ({ method, setMethod }: SignInRightContentProp
           </div>
         )}
 
-        {/* Lockout Warning */}
         {isLocked && lockoutTimer && (
           <div className="mb-4 p-3 rounded-lg bg-warning-subtle border border-warning/20 text-warning text-sm flex items-center gap-2">
             <span>
@@ -165,7 +160,6 @@ export const SignInRightContent = ({ method, setMethod }: SignInRightContentProp
           </div>
         )}
 
-        {/* Method Selection */}
         <div className="mb-7">
           <AuthMethodTabs
             label="Choose a sign-in method"
@@ -179,15 +173,12 @@ export const SignInRightContent = ({ method, setMethod }: SignInRightContentProp
           />
         </div>
 
-        {/* Dynamic Form */}
         {renderMethodComponent()}
 
-        {/* OAuth (Google) */}
         <div className="mt-5">
           <OAuthSignIn />
         </div>
 
-        {/* Sign Up Link */}
         <div className="mt-6 text-center">
           <p className="text-sm text-muted-foreground">
             Don&apos;t have an account?{' '}

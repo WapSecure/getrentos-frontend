@@ -48,7 +48,6 @@ interface PhoneSignInProps {
   onLoginAttempt: () => void;
   isLocked: boolean;
   lockoutTimer: number | null;
-  /** Internal destination to return to after login (from ?next=). */
   nextPath?: string | null;
 }
 
@@ -87,8 +86,6 @@ export const PhoneSignIn = ({
     );
     if (rememberMe && identifier) saveRememberedIdentifier(identifier);
 
-    // Bounce the user back to their intended destination when present (e.g.
-    // deep links gated by the proxy), otherwise the role dashboard.
     router.push(nextPath || getDashboardRoute(primaryRoleId));
   };
 
@@ -132,10 +129,7 @@ export const PhoneSignIn = ({
     mode: 'onChange',
   });
 
-  // Prefill the identifier when the user previously signed in with "Remember me",
-  // and surface a notice when the previous session expired.
   useEffect(() => {
-    // Mount-time sync with persisted storage: intentional synchronous setState.
     /* eslint-disable react-hooks/set-state-in-effect */
     const remembered = getRememberedIdentifier();
     if (remembered) {
@@ -179,7 +173,6 @@ export const PhoneSignIn = ({
   return (
     <form method="post" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {pendingChallenge ? (
-        /* Two-factor authentication step */
         <div className="space-y-4">
           <Alert variant="info" icon={ShieldCheck} title="Two-factor authentication">
             Enter the 6-digit code from your authenticator app, or one of your backup codes, to

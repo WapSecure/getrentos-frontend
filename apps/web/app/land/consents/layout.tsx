@@ -8,10 +8,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-/**
- * Where a co-owner, family member or principal answers a seller's request for
- * consent. Any signed-in account: being listed by a seller is what grants it.
- */
+// Any signed-in account: being listed by a seller grants access.
 export default function LandConsentsLayout({ children }: { children: ReactNode }) {
   return (
     <main className="min-h-screen bg-background pt-16">

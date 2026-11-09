@@ -12,26 +12,18 @@ export interface SectionNavItem {
 }
 
 interface SectionNavProps {
-  /** Names the group of pages for screen readers, e.g. "Lettings". */
   ariaLabel: string;
   items: SectionNavItem[];
   className?: string;
 }
 
-/**
- * Links between the pages of one workflow (a lettings or sales pipeline), so a
- * person can step through it without going back to the sidebar. Looks like the
- * underline tabs in @sureground/ui, but each entry is a page, so it is a list of
- * links with `aria-current`, not a tab list. Scrolls sideways on narrow screens.
- */
+// Each entry is a page, so this is a list of links with `aria-current`, not a tab list.
 export function SectionNav({ ariaLabel, items, className }: SectionNavProps) {
   const pathname = usePathname();
   const active = items
     .map((item) => item.href)
     .filter((href) => pathname === href || pathname.startsWith(`${href}/`))
     .sort((a, b) => b.length - a.length)[0];
-  // On a narrow screen the strip scrolls sideways: bring the current page into
-  // view, so "Leads" is not hidden off the edge when you land on it.
   const currentRef = useRef<HTMLAnchorElement>(null);
   useEffect(() => {
     currentRef.current?.scrollIntoView({ block: 'nearest', inline: 'nearest' });

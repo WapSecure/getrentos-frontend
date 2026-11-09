@@ -56,11 +56,7 @@ const QUOTE_STATUS: Record<LandWatchJobQuoteStatus, { label: string; tone: Badge
 const isExpired = (q: LandWatchJobQuote) =>
   q.validUntil != null && new Date(q.validUntil).getTime() < Date.now();
 
-/**
- * Vendor work on a Managed watch: the owner asks for a job, Sureground posts
- * vendors' quotes, the owner accepts one and pays the vendor directly, and
- * the finished work comes back with proof.
- */
+// The owner pays the vendor directly.
 export const LandWatchJobsCard = ({
   watch,
   notify,

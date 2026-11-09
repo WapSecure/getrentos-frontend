@@ -2,7 +2,6 @@ import type { ReactNode } from 'react';
 import { Navigation } from '@/components/layout/Navigation';
 import { Footer } from '@/components/layout/Footer';
 
-/** Shared frame for the policy pages: site navigation, a readable column, the footer. */
 export const LegalPage = ({
   title,
   updated,

@@ -1,15 +1,5 @@
 import { authFetch, safeCall, type ApiResponse } from '@/lib/apiHelpers';
 
-/**
- * Property authority — the holder's side.
- *
- * A mandate is what lets someone act for a property they do not own: a manager
- * runs the listing, a co-owner owns half of it, an agent markets it under
- * authority. Claims are filed by the holder and decided by an officer, so this
- * service covers both halves of that conversation (`request`, `mine`) and the
- * read model that makes the mandate usable (`managed`).
- */
-
 /** Mirrors the backend's AUTHORITY_RELATIONSHIPS. */
 export const AUTHORITY_RELATIONSHIPS = [
   'LEGAL_OWNER',
@@ -46,7 +36,7 @@ export interface PropertyAuthorityDto {
   decisionNote?: string | null;
   expiresAt?: string | null;
   createdAt: string;
-  /** The property's shareable reference code (PR-AB7K-9Q), shown instead of the UUID. */
+  /** Shown instead of the UUID. */
   propertyReferenceCode?: string | null;
   /** On a `request()` response: true when this call filed/re-opened the claim, false when an identical one already existed. */
   justCreated?: boolean;
@@ -54,13 +44,11 @@ export interface PropertyAuthorityDto {
   effective: boolean;
   /** Officer-approved but held for co-owner quorum: not all co-owners have countersigned. */
   awaitingCountersign?: boolean;
-  /** How many of the required co-owner countersignatures are in. */
   countersignApproved?: number;
-  /** How many co-owner countersignatures this mandate needs (unanimous). */
+  /** Unanimous. */
   countersignRequired?: number;
 }
 
-/** The property behind a reference code, for confirming a claim before filing it. */
 export interface ResolvedPropertyRefDto {
   propertyId: string;
   referenceCode: string | null;
@@ -69,7 +57,6 @@ export interface ResolvedPropertyRefDto {
   city: string;
 }
 
-/** A property the caller may act for, with what the mandate permits. */
 export interface ManagedPropertyDto {
   mandateId: string;
   propertyId: string;
@@ -78,7 +65,6 @@ export interface ManagedPropertyDto {
   address: string;
   city: string;
   state: string;
-  /** The property's shareable reference code (PR-AB7K-9Q). */
   referenceCode?: string | null;
   ownerId: string;
   ownerName: string;
@@ -96,35 +82,28 @@ export interface ManagedPropertyDto {
 }
 
 export const propertyAuthorityService = {
-  /** Claims this signed-in user has filed. */
   async mine(): Promise<ApiResponse<PropertyAuthorityDto[]>> {
     return safeCall(() => authFetch<PropertyAuthorityDto[]>('/property-authorities/mine'));
   },
 
-  /** Properties the signed-in user may act for. */
   async managed(): Promise<ApiResponse<ManagedPropertyDto[]>> {
     return safeCall(() => authFetch<ManagedPropertyDto[]>('/property-authorities/managed'));
   },
 
-  /**
-   * Agent/manager mandates on the caller's co-owned properties that are
-   * officer-approved but still need this co-owner to countersign (co-owner
-   * quorum is unanimous).
-   */
+  /** Co-owner quorum is unanimous. */
   async awaitingCountersignature(): Promise<ApiResponse<PropertyAuthorityDto[]>> {
     return safeCall(() =>
       authFetch<PropertyAuthorityDto[]>('/property-authorities/awaiting-countersignature')
     );
   },
 
-  /** Countersign a pending mandate as a co-owner. */
   async countersign(id: string): Promise<ApiResponse<PropertyAuthorityDto>> {
     return safeCall(() =>
       authFetch<PropertyAuthorityDto>(`/property-authorities/${id}/countersign`, { method: 'POST' })
     );
   },
 
-  /** Decline to countersign — one decline rejects the whole mandate (unanimous). */
+  /** One decline rejects the whole mandate (unanimous). */
   async declineCountersign(
     id: string,
     reason?: string
@@ -137,10 +116,7 @@ export const propertyAuthorityService = {
     );
   },
 
-  /**
-   * Preview the property behind a reference code (or UUID) before filing, so the
-   * claim form can confirm the right property. 404 when nothing matches.
-   */
+  /** 404 when nothing matches. */
   async resolve(ref: string): Promise<ApiResponse<ResolvedPropertyRefDto>> {
     return safeCall(() =>
       authFetch<ResolvedPropertyRefDto>(
@@ -150,10 +126,8 @@ export const propertyAuthorityService = {
   },
 
   /**
-   * Files a claim. It confers nothing until an officer approves it — the copy in
-   * the UI says so, because a form that looks like it grants access would be a
-   * lie to the person filling it in. `propertyRef` is the shareable code the owner
-   * handed out (or a raw UUID); the backend resolves either.
+   * Confers nothing until an officer approves it. `propertyRef` is the shareable code or a raw
+   * UUID; the backend resolves either.
    */
   async request(input: {
     propertyRef: string;

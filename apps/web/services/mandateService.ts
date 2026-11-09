@@ -1,19 +1,8 @@
 import { authFetch, safeCall, type ApiResponse } from '@/lib/apiHelpers';
 
 /**
- * The management mandate — the firm's side.
- *
- * `propertyAuthorityService` covers the *holder's* view: a claim that someone may
- * act for a property. This covers the engagement itself — who appointed whom, for
- * what, for how long, and what it currently permits. The two are different
- * questions and an agency needs both: the authority says "I may touch this
- * building", the mandate says "on whose instruction, and until when".
- *
- * `managing()` is the client switcher. The backend's own summary for that route
- * is "the client switcher", because it returns every mandate the caller manages —
- * as a named operator, as a member of the appointed firm, or as Sureground staff on
- * a platform mandate — including the ones not yet live, so a manager can see the
- * engagement they are waiting on and the one that just ended.
+ * `managing()` is the client switcher: every mandate the caller manages, including ones not yet
+ * live or just ended.
  */
 
 /** Mirrors the backend's `MandateScope`. */
@@ -28,7 +17,7 @@ export const MANDATE_SCOPE_LABELS: Record<MandateScope, string> = {
   COMPLIANCE: 'Statutory notices and documents',
 };
 
-/** Short chip labels, in the same lowercase as the capability chips beside them. */
+/** Same lowercase as the capability chips beside them. */
 export const MANDATE_SCOPE_CHIP: Record<MandateScope, string> = {
   RENT: 'rent',
   MAINTENANCE: 'maintenance',
@@ -61,11 +50,7 @@ export const MANDATE_STATUS_LABELS: Record<MandateStatus, string> = {
   REJECTED: 'Refused',
 };
 
-/**
- * What the scope actually lets the API do today, rather than what it says on the
- * agreement. Surfaced so a screen can honestly say "this mandate grants nothing
- * yet" instead of showing an empty portfolio with no explanation.
- */
+/** What the scope lets the API do today, so a screen can say "this mandate grants nothing yet". */
 export interface MandateCapabilities {
   canList: boolean;
   canManage: boolean;
@@ -73,16 +58,8 @@ export interface MandateCapabilities {
 }
 
 /**
- * What *this caller* may do to this mandate right now.
- *
- * Computed by the API from the same rules its guards enforce, so a button shown
- * here is a button that will work. Distinct from `capabilities` above, which is
- * about the property: a manager with `canManage` on the property may still be
- * unable to pause their own engagement, and an owner with no capabilities at all
- * may be the only one who can.
- *
- * Never derive these client-side. A rule restated here drifts from the one the
- * API enforces, and the drift shows up as a button that answers 403.
+ * Computed by the API from its guard rules; never derive these client-side or they drift into 403s.
+ * Distinct from `capabilities`, which is about the property.
  */
 export interface MandateViewerPermissions {
   canSubmit: boolean;
@@ -100,7 +77,6 @@ export interface MandateViewerPermissions {
 
 export type ServicingTier = 'COLLECT_ONLY' | 'COLLECT_MAINTAIN' | 'FULL_MANAGEMENT';
 
-/** A published Sureground Managed tier, as returned by the fee-card endpoint. */
 export interface ManagedTierCard {
   tier: ServicingTier;
   name: string;
@@ -121,7 +97,6 @@ export interface ManagementMandateDto {
   managerOrganizationId: string | null;
   managerOrganizationName?: string | null;
   managerIsSureground: boolean;
-  /** A vetted firm delivering a Sureground-managed engagement locally, if any. */
   deliveryPartnerOrganizationId?: string | null;
   deliveryPartnerName?: string | null;
   servicingTier: ServicingTier | null;
@@ -153,7 +128,6 @@ export interface ManagementMandateDto {
   handoverAt: string | null;
   createdAt: string;
   updatedAt: string;
-  /** True when the mandate is operative right now. */
   effective: boolean;
 }
 
@@ -178,7 +152,6 @@ export interface CreateMandateInput {
   propertyId: string;
   /** A third-party firm. Mutually exclusive with `managerIsSureground`. */
   managerOrganizationId?: string | null;
-  /** Sureground itself as the manager of record. */
   managerIsSureground?: boolean;
   managerUserId?: string | null;
   scope: MandateScope[];
@@ -188,12 +161,10 @@ export interface CreateMandateInput {
   noticePeriodDays?: number;
 }
 
-/** Every mandate the caller manages — this is what feeds the client switcher. */
 export function managing(): Promise<ApiResponse<ManagementMandateDto[]>> {
   return safeCall(() => authFetch<ManagementMandateDto[]>('/management-mandates/managing'));
 }
 
-/** Every mandate on properties the caller owns — the other side of the same list. */
 export function mine(): Promise<ApiResponse<ManagementMandateDto[]>> {
   return safeCall(() => authFetch<ManagementMandateDto[]>('/management-mandates/mine'));
 }
@@ -202,7 +173,6 @@ export function managedFeeCard(): Promise<ApiResponse<ManagedTierCard[]>> {
   return safeCall(() => authFetch<ManagedTierCard[]>('/management-mandates/managed/fee-card'));
 }
 
-/** A row of Sureground Managed's published SLA, by maintenance priority. */
 export interface ManagedSlaTarget {
   priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
   responseTargetMinutes: number;
@@ -215,7 +185,7 @@ export function managedSla(): Promise<ApiResponse<ManagedSlaTarget[]>> {
   return safeCall(() => authFetch<ManagedSlaTarget[]>('/management-mandates/managed/sla'));
 }
 
-/** A firm's maintenance track record, worked out from its real jobs. Null = unmeasured. */
+/** Worked out from real jobs. Null = unmeasured. */
 export interface FirmMaintenance {
   resolvedJobs: number;
   openJobs: number;
@@ -223,7 +193,6 @@ export interface FirmMaintenance {
   slaOnTimeRate: number | null;
 }
 
-/** A vetted third-party management firm an owner can appoint, with a real track record. */
 export interface VettedFirm {
   id: string;
   name: string;
@@ -243,7 +212,7 @@ export function vettedFirms(): Promise<ApiResponse<VettedFirm[]>> {
   return safeCall(() => authFetch<VettedFirm[]>('/management-mandates/firms'));
 }
 
-/** What ending a managed engagement now would cost the owner (notice-in-lieu). */
+/** Notice-in-lieu. */
 export interface ManagedBreakFee {
   amount: number;
   waived: boolean;
@@ -273,17 +242,13 @@ export function create(input: CreateMandateInput): Promise<ApiResponse<Managemen
   );
 }
 
-/** Send a draft to the owner for signature. */
 export function submit(id: string): Promise<ApiResponse<ManagementMandateDto>> {
   return safeCall(() =>
     authFetch<ManagementMandateDto>(`/management-mandates/${id}/submit`, { method: 'POST' })
   );
 }
 
-/**
- * Sign. The second signature moves the mandate to `PENDING_OPS` on its own — the
- * backend decides that, so the UI never has to.
- */
+/** The second signature moves the mandate to `PENDING_OPS`; the backend decides that. */
 export function sign(
   id: string,
   input: { agreementDocumentId?: string | null; poaDocumentId?: string | null } = {}
@@ -297,11 +262,8 @@ export function sign(
 }
 
 /**
- * Serve notice. Takes no body: the backend records WHEN the notice clock started,
- * and the reason for ending an engagement is given at termination.
- *
- * Not a termination — the mandate keeps running until the notice period has run,
- * which is also what stops a manager back-dating notice by terminating directly.
+ * Takes no body: the backend records when the notice clock started. Not a termination, which stops
+ * a manager back-dating notice.
  */
 export function serveNotice(id: string): Promise<ApiResponse<ManagementMandateDto>> {
   return safeCall(() =>
@@ -331,7 +293,7 @@ export function suspend(id: string, reason: string): Promise<ApiResponse<Managem
   );
 }
 
-/** Resume a suspended mandate. No body — the agreement is unchanged, so there is nothing to state. */
+/** No body: the agreement is unchanged. */
 export function resume(id: string): Promise<ApiResponse<ManagementMandateDto>> {
   return safeCall(() =>
     authFetch<ManagementMandateDto>(`/management-mandates/${id}/resume`, { method: 'POST' })
@@ -339,9 +301,8 @@ export function resume(id: string): Promise<ApiResponse<ManagementMandateDto>> {
 }
 
 /**
- * Record that the handover pack was exchanged. Separate from terminating because
- * in practice the two are days apart, and that gap is where keys, balances and
- * open work orders go missing.
+ * Separate from terminating: the two are days apart, and that gap is where keys, balances and open
+ * work orders go missing.
  */
 export function recordHandover(id: string): Promise<ApiResponse<ManagementMandateDto>> {
   return safeCall(() =>
@@ -358,11 +319,8 @@ export function pendingTerminationRequests(
 }
 
 /**
- * Ask to end an engagement.
- *
- * Not a termination: when Sureground is the manager this needs a second staff
- * member to approve it, so the request is the whole point. Where the manager is a
- * third-party firm the backend decides whether to apply it directly.
+ * Not a termination: with Sureground as manager a second staff member must approve; for a
+ * third-party firm the backend may apply it directly.
  */
 export function requestTermination(
   id: string,
@@ -377,11 +335,8 @@ export function requestTermination(
 }
 
 /**
- * Approve a termination request — the checker half of maker/checker.
- *
- * Takes no request id: an open request is unambiguous. Must be a DIFFERENT staff
- * member from the one who raised it, and when Sureground is the manager the agreed
- * notice period binds us too, so skipping it needs `force` plus a note.
+ * The checker half of maker/checker: must be a different staff member, and skipping a Sureground
+ * notice period needs `force` plus a note.
  */
 export function approveTermination(
   id: string,
@@ -395,7 +350,7 @@ export function approveTermination(
   );
 }
 
-/** Withdraw a request. Its requester, or the owner, while it is still only a request. */
+/** Its requester, or the owner, while it is still only a request. */
 export function cancelTermination(
   id: string,
   input: { force?: boolean; decisionNote?: string } = {}
@@ -409,11 +364,8 @@ export function cancelTermination(
 }
 
 /**
- * Whether a mandate is operative right now.
- *
- * Both ends matter. A past `endAt` means the engagement is over regardless of the
- * stored status — the backend reads it that way, and a screen that trusted the
- * status alone would show a lapsed engagement as live.
+ * A past `endAt` means the engagement is over whatever the stored status says, as the backend reads
+ * it.
  */
 export function isLive(mandate: ManagementMandateDto): boolean {
   if (mandate.status !== 'ACTIVE') return false;
@@ -421,7 +373,7 @@ export function isLive(mandate: ManagementMandateDto): boolean {
   return true;
 }
 
-/** True once an engagement is over for good (ended, expired or past its end date). */
+/** Ended, expired or past its end date. */
 export function hasEnded(mandate: ManagementMandateDto): boolean {
   if (mandate.status === 'TERMINATED' || mandate.status === 'EXPIRED') return true;
   return (
@@ -431,23 +383,15 @@ export function hasEnded(mandate: ManagementMandateDto): boolean {
   );
 }
 
-/** When an engagement that is over ended, if the record says. */
 export function endedOn(mandate: ManagementMandateDto): string | null {
   return mandate.terminatedAt ?? mandate.endAt ?? null;
 }
 
-/** A scope that grants nothing yet, so a screen can explain the empty portfolio. */
 export function grantsNothing(mandate: ManagementMandateDto): boolean {
   const { canList, canManage, canTransact } = mandate.capabilities;
   return !canList && !canManage && !canTransact;
 }
 
-/**
- * How the engagement ends, in plain words.
- *
- * The notice period is a number on the agreement and a manager has to give that
- * many days, so it belongs on the screen rather than in a document nobody opens.
- */
 export function noticeSummary(mandate: ManagementMandateDto): string {
   if (mandate.status === 'TERMINATED')
     return mandate.terminatedAt ? `Ended ${formatDay(mandate.terminatedAt)}` : 'Ended';
@@ -464,8 +408,8 @@ export function noticeSummary(mandate: ManagementMandateDto): string {
 }
 
 /**
- * When a served notice runs out: the notice clock plus the agreed period, as the
- * API counts it. Null while no notice has been served.
+ * The notice clock plus the agreed period, as the API counts it. Null while no notice has been
+ * served.
  */
 export function noticeEndsAt(
   mandate: Pick<ManagementMandateDto, 'noticeServedAt' | 'noticePeriodDays'>
@@ -476,7 +420,6 @@ export function noticeEndsAt(
   return new Date(served + mandate.noticePeriodDays * 24 * 60 * 60 * 1000).toISOString();
 }
 
-/** A date as a person reads it, or a dash when there is nothing to read. */
 export function formatDay(value: string | null | undefined): string {
   if (!value) return '—';
   const date = new Date(value);

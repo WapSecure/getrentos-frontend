@@ -20,7 +20,7 @@ export interface OwnerLandListParams {
 export interface PublicLandListParams {
   page?: number;
   pageSize?: number;
-  /** Title, address, city, state, estate name or plot number. */
+  /** Matches title, address, city, state, estate name or plot number. */
   search?: string;
   city?: string;
   state?: string;
@@ -28,7 +28,6 @@ export interface PublicLandListParams {
   estate?: string;
   minPrice?: number;
   maxPrice?: number;
-  /** e.g. CERTIFICATE_OF_OCCUPANCY */
   titleType?: string;
   /** Parcel area bounds in square metres, whatever unit each parcel was recorded in. */
   minAreaSqm?: number;
@@ -109,12 +108,10 @@ export const landService = {
       )
     ),
 
-  /** Every outline the parcel has had, newest first, with each one's surveyor sign-off. */
   boundaryVersions: (propertyId: string) =>
     safeCall(() => authFetch<LandBoundaryVersion[]>(`/owner/land/${propertyId}/boundary/versions`)),
 
-  /** Puts the parcel into the diligence review queue (or back into it after changes). */
-  /** Evidence that a condition of a conditional approval is met, for Sureground to check. */
+  /** Also re-queues after changes. */
   attachConditionEvidence: (
     propertyId: string,
     conditionId: string,

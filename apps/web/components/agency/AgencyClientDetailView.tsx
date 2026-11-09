@@ -90,7 +90,6 @@ export function AgencyClientDetailView() {
         ]}
       />
 
-      {/* Contact card */}
       <Card className="rounded-2xl p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex items-center gap-2">
@@ -140,7 +139,6 @@ export function AgencyClientDetailView() {
         </div>
       </Card>
 
-      {/* Managed properties */}
       <div className="mt-6">
         <h2 className="mb-2 text-sm font-semibold text-foreground">
           Properties you manage ({client.properties.length})
@@ -160,10 +158,8 @@ export function AgencyClientDetailView() {
         </Card>
       </div>
 
-      {/* Client money held by the firm */}
       <AgencyOwnerTrustCard ownerId={ownerId} />
 
-      {/* Notes */}
       <div className="mt-6">
         <h2 className="mb-2 text-sm font-semibold text-foreground">Notes</h2>
         <Card className="rounded-2xl p-4">

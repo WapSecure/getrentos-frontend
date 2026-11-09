@@ -1,11 +1,4 @@
-/**
- * Estate marketplace: an estate marketing the properties inside it, and the
- * owner's consent for it to do so.
- *
- * The two halves are deliberately typed separately — the estate's view and the
- * owner's view are different jobs, and the same agreement looks different from
- * each side.
- */
+/** The estate's view and the owner's view are typed separately on purpose. */
 
 export type EstateAgreementStatus = 'PENDING' | 'ACTIVE' | 'DECLINED' | 'REVOKED';
 
@@ -26,20 +19,13 @@ export interface EstateAgreement {
   approvedAt?: string | null;
   expiresAt?: string | null;
   createdAt: string;
-  /** Whether the estate may publish right now. */
   effective: boolean;
-  /** Listings the estate currently has live or paused on this property. */
   estateListingCount: number;
 }
 
 export type EstateListingType = 'RENT' | 'SALE' | 'SHORTLET';
 
-/**
- * A photo the estate attached to its own listing.
- *
- * `key` is what removal takes — a signed `url` cannot be turned back into a key, so
- * displaying and acting on a photo need both.
- */
+/** Removal takes `key`; a signed `url` cannot be turned back into one. */
 export interface EstateListingMedia {
   key: string;
   url: string;
@@ -62,13 +48,9 @@ export interface EstateListing {
   status: 'DRAFT' | 'PENDING_VERIFICATION' | 'PUBLISHED' | 'PAUSED' | 'CLOSED';
   availableFrom?: string;
   coverImageUrl?: string;
-  /**
-   * Photos the estate supplied for this listing, cover first. Absent when it
-   * supplied none, in which case the card falls back to the property's own
-   * imagery — which belongs to the owner, not the estate.
-   */
+  /** Cover first. Absent when none, and the card falls back to the owner's own imagery. */
   media?: EstateListingMedia[];
-  /** Owner of record — never the estate. */
+  /** Never the estate. */
   ownerName?: string;
   viewCount: number;
   createdAt: string;
@@ -87,7 +69,6 @@ export interface EstateInventorySummary {
   shortLets: number;
 }
 
-/** A property inside an estate, for the storefront's "what's here". */
 export interface EstatePropertySummary {
   id: string;
   title: string;
@@ -97,14 +78,7 @@ export interface EstatePropertySummary {
   bathrooms?: number | null;
 }
 
-/**
- * An estate's public page.
- *
- * This is the canonical public estate profile. `/estate-microsites/:slug` used
- * to return a strict subset of it from a second service, which meant the same
- * visibility and entitlement rules had to be implemented twice — and the second
- * copy is the one that gets missed. That endpoint is gone.
- */
+/** The canonical public estate profile, so visibility rules live in one place. */
 export interface EstateStorefront {
   slug: string;
   estateId: string;
@@ -114,13 +88,12 @@ export interface EstateStorefront {
   state: string;
   bannerUrl?: string;
   bio?: string;
-  /** Published listings inside the estate, by market. */
+  /** By market. */
   listingCount: number;
   rentCount: number;
   saleCount: number;
   shortletCount: number;
   gates?: number | null;
-  /** Whether the estate's public page is switched on. */
   storefrontEnabled: boolean;
 }
 
@@ -170,12 +143,8 @@ export interface BulkPublishResult {
 export type EstateLeadMarket = 'RENT' | 'SALE' | 'SHORTLET';
 
 /**
- * One enquiry on a property this estate markets.
- *
- * `ownerName` is here because the estate is selling someone else's asset: when a
- * serious buyer appears its job is to bring the owner in. `listedByEstate` mirrors
- * the public storefront so the console and the public page agree on who is
- * marketing what.
+ * `ownerName` is here so the estate can bring the owner in; `listedByEstate` mirrors the public
+ * storefront.
  */
 export interface EstateLead {
   id: string;

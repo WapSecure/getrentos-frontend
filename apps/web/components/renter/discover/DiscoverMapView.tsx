@@ -19,7 +19,6 @@ interface DiscoverFilters {
   propertyType: string;
   verifiedOnly: boolean;
   search?: string;
-  /** Estate public slug: set when arriving from an estate microsite. */
   estate?: string;
 }
 
@@ -27,7 +26,6 @@ interface DiscoverMapViewProps {
   filters: DiscoverFilters;
 }
 
-/** Keyless OpenStreetMap view of the filtered rental listings. */
 export const DiscoverMapView = ({ filters }: DiscoverMapViewProps) => {
   const listingsFilters = {
     search: filters.search,

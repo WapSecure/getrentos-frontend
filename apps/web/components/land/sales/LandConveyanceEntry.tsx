@@ -13,12 +13,7 @@ interface LandConveyanceEntryProps {
   transaction: Pick<EscrowSaleTransaction, 'id' | 'propertyId' | 'propertyType'>;
 }
 
-/**
- * A link to the conveyance steps of a land sale, for the owner's transaction
- * detail. Only land sales have them: the transaction says what it sold, so
- * nothing is asked of the API for any other property. Reading the steps writes
- * nothing; before anyone acts they are the planned steps of the sale.
- */
+// Reading the steps writes nothing; until someone acts they are the sale's planned steps.
 export const LandConveyanceEntry = ({ transaction }: LandConveyanceEntryProps) => {
   const isLand = transaction.propertyType === 'LAND';
   const { data, isError } = useQuery({

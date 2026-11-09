@@ -24,17 +24,11 @@ export interface AccountMenuLink {
 
 interface AccountMenuProps {
   user: { fullName?: string; email?: string } | null;
-  /** The role's id, as RoleSwitcher knows it ("renter", "landlord" ...). */
   roleId: string;
-  /** Shown under the name ("Renter", "Property Manager" ...). */
   roleLabel: string;
   links?: AccountMenuLink[];
 }
 
-/**
- * The account menu at the right of every role's top bar: who is signed in,
- * switching or adding a role, the role's own shortcuts, and signing out.
- */
 export const AccountMenu = ({ user, roleId, roleLabel, links = [] }: AccountMenuProps) => {
   const router = useRouter();
   const fullName = user?.fullName || 'User';

@@ -134,7 +134,6 @@ export const ApplicationDetailsModal = ({
           showClose={false}
           className="flex flex-col overflow-hidden"
         >
-          {/* Header */}
           <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
             <div className="flex items-center gap-3 min-w-0">
               <div className="p-2 rounded-lg bg-accent">
@@ -167,7 +166,6 @@ export const ApplicationDetailsModal = ({
             </div>
           </div>
 
-          {/* Tabs */}
           <Tabs
             value={activeTab}
             onValueChange={(v) => setActiveTab(v as 'details' | 'timeline' | 'notes')}
@@ -186,11 +184,9 @@ export const ApplicationDetailsModal = ({
             </TabsList>
           </Tabs>
 
-          {/* Content */}
           <div className="min-h-0 flex-1 overflow-y-auto p-4 space-y-4">
             {activeTab === 'details' && (
               <div className="space-y-6">
-                {/* Property Info */}
                 <div>
                   <h4 className="text-sm font-medium text-foreground mb-3">Property details</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -234,7 +230,6 @@ export const ApplicationDetailsModal = ({
                   </div>
                 </div>
 
-                {/* Landlord Info */}
                 <div>
                   <h4 className="text-sm font-medium text-foreground mb-3">Landlord information</h4>
                   <div className="p-3 rounded-lg bg-secondary">
@@ -268,7 +263,6 @@ export const ApplicationDetailsModal = ({
                   </div>
                 </div>
 
-                {/* Documents */}
                 <div>
                   <h4 className="text-sm font-medium text-foreground mb-3">Documents</h4>
                   <div className="space-y-2">
@@ -301,7 +295,6 @@ export const ApplicationDetailsModal = ({
                                 </Button>
                               )
                             ) : (
-                              // Uploads live in the document library, where they can be reused.
                               <Button
                                 variant="link"
                                 href="/renter/home?tab=documents"
@@ -322,7 +315,6 @@ export const ApplicationDetailsModal = ({
                   <CreditCheckCard applicationId={application.id} />
                 )}
 
-                {/* Notes */}
                 {application.applicationNotes && (
                   <div>
                     <h4 className="text-sm font-medium text-foreground mb-2">Application notes</h4>
@@ -332,7 +324,6 @@ export const ApplicationDetailsModal = ({
                   </div>
                 )}
 
-                {/* Actions */}
                 {application.landlord.id && (
                   <div className="flex flex-col gap-3 pt-2 sm:flex-row">
                     <Button
@@ -373,7 +364,6 @@ export const ApplicationDetailsModal = ({
         </DialogContent>
       </Dialog>
 
-      {/* Withdraw Modal */}
       {showWithdrawModal && onWithdraw && (
         <ApplicationWithdrawModal
           isOpen={showWithdrawModal}

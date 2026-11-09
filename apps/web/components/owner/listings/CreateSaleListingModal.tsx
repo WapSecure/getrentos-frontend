@@ -31,7 +31,6 @@ import { videoFileProblem } from '@/lib/videoFile';
 interface CreateSaleListingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  /** Creates the listing; rejects (with the server's reason) if it is refused. */
   onCreate: (
     listing: Omit<SaleListing, 'id' | 'createdAt'>,
     publishNow: boolean
@@ -67,7 +66,6 @@ interface FormState {
   features: string[];
 }
 
-/** A file staged on the server, waiting to be attached to the property. */
 interface StagedFile {
   key: string;
   name: string;
@@ -81,7 +79,7 @@ interface StagedMedia {
 
 const NO_MEDIA: StagedMedia = { cover: null, gallery: [], video: null };
 
-/** The server's ceiling for a property photo (videos: see videoFileProblem). */
+/** Must match the server's ceiling for a property photo (videos: see videoFileProblem). */
 const MAX_IMAGE_BYTES = 15 * 1024 * 1024;
 
 const initialFormState: FormState = {
@@ -136,8 +134,6 @@ export const CreateSaleListingModal = ({
   });
   const verifiedProperties = propertiesPage?.items ?? [];
   const propertyTotal = propertiesPage?.total ?? 0;
-  // Nothing verified yet (not just a search with no hits): say why and where to
-  // go, instead of a form whose property picker can never be filled.
   const hasNoVerifiedProperties =
     !isPropertiesLoading && !propertySearch.trim() && propertiesPage != null && propertyTotal === 0;
   const propertyForForm =
@@ -235,8 +231,7 @@ export const CreateSaleListingModal = ({
     const { cover, gallery, video } = media;
     setCreating(true);
     setCreateError(null);
-    // The listing first: if it is refused (an unverified account, say), the
-    // property's photos and video must be left as they were.
+    // The listing first: if it is refused, the property's photos and video must be left as they were.
     try {
       await onCreate(buildListing(status), status === 'published');
     } catch (reason) {

@@ -19,13 +19,6 @@ const asDate = (iso: string | null | undefined) =>
       })
     : null;
 
-/**
- * Shows the live state of the customer's Pro plan and lets them stop or resume
- * the renewal.
- *
- * Cancelling never removes access early: the copy states the exact date and
- * amount so there is no ambiguity about what happens next.
- */
 export function ManageSubscriptionCard({ billing }: { billing?: MyBilling }) {
   const { cancel, reactivate, pending } = useManageSubscription();
   const cardUpdate = useCardUpdateLink();
@@ -41,16 +34,10 @@ export function ManageSubscriptionCard({ billing }: { billing?: MyBilling }) {
   const isPastDue = billing.status === 'PAST_DUE';
   const error = cancel.error ?? reactivate.error ?? cardUpdate.error;
 
-  /**
-   * A Pro plan can be active without ever going through checkout: a comped or
-   * simulated grant has no cycle, price or period end at all. The copy must not
-   * promise a charge or a date it does not have: and must never interpolate a
-   * raw `null` into a sentence.
-   */
+  /** A comped or simulated Pro grant has no cycle, price or period end: never promise a charge or date, or interpolate a raw `null`. */
   const isBilled = Boolean(price && periodEnd);
 
-  // A trial always shows its trial date; the cancelled state is carried by the
-  // detail line, which must stop promising a charge that will not happen.
+  // A trial always shows its trial date; when cancelled, the detail line must stop promising a charge.
   const headline = isTrialing
     ? trialEnd
       ? `Trial ends ${trialEnd}`
@@ -63,8 +50,7 @@ export function ManageSubscriptionCard({ billing }: { billing?: MyBilling }) {
         ? `Pro renews ${periodEnd}`
         : 'Pro is active on your account';
 
-  // Cancelling a trial always ends access at the trial end (the first charge is
-  // cancelled with it); otherwise access runs to the end of the paid period.
+  // Cancelling a trial ends access at the trial end (the first charge goes with it); otherwise access runs to the end of the paid period.
   const accessEnds = isTrialing ? trialEnd : periodEnd;
 
   const detail = isPastDue

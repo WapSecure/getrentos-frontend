@@ -14,16 +14,14 @@ export const TrustScoreRing = ({ score, size = 160, strokeWidth = 12 }: TrustSco
   const circumference = radius * 2 * Math.PI;
   const offset = circumference - (score / 100) * circumference;
 
-  // Label + colours follow the same trust STAGE ladder as the stage banner and
-  // the rest of the app, so a score never reads "Established" in one place and
-  // "Fair" in another.
+  // Same trust STAGE ladder as the stage banner, so a score never reads "Established" in one place and "Fair" in another.
   const bandLabel = trustBand(score).label;
 
   const getScoreColor = () => {
-    if (score >= 85) return '#10b981'; // Highly trusted
-    if (score >= 50) return '#3b82f6'; // Trusted / Established
-    if (score >= 25) return '#eab308'; // Building
-    return '#9ca3af'; // New
+    if (score >= 85) return '#10b981';
+    if (score >= 50) return '#3b82f6';
+    if (score >= 25) return '#eab308';
+    return '#9ca3af';
   };
 
   return (

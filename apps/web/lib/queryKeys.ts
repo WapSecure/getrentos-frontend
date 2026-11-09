@@ -59,11 +59,9 @@ export const landlordKeys = {
       params?.priority ?? 'all',
     ] as const,
   maintenanceSummary: ['landlord', 'maintenanceSummary'] as const,
-  /** Legal cases: recovery, injunction, title dispute, and eviction. */
   legalCases: ['landlord', 'legal-cases'] as const,
   legalCase: (id: string) => ['landlord', 'legal-cases', id] as const,
   outstandingLegalCases: ['landlord', 'legal-cases', 'outstanding'] as const,
-  /** The notice ladder for one tenancy, and the period register behind it. */
   leaseLadder: (leaseId: string) => ['landlord', 'tenancy-notices', 'ladder', leaseId] as const,
   notices: ['landlord', 'tenancy-notices'] as const,
   noticePeriods: ['landlord', 'tenancy-notices', 'periods'] as const,
@@ -123,10 +121,6 @@ export const renterKeys = {
     ['renter', 'applications', applicationId, 'notes'] as const,
   roommates: ['renter', 'roommates'] as const,
   roommateExpenses: ['renter', 'roommateExpenses'] as const,
-  /**
-   * The renter's pending roommate invitations. Restored here: the roommates page
-   * reads this key but dev no longer declared it, so the app did not typecheck.
-   */
   roommateInvites: ['renter', 'roommateInvites'] as const,
   calendarEvents: ['renter', 'calendarEvents'] as const,
   trustScore: ['renter', 'trustScore'] as const,
@@ -346,7 +340,6 @@ export const estateKeys = {
     ['estate', estateId, 'collection-plan', language] as const,
   myEstate: ['estate', 'me'] as const,
   myEstates: ['estate', 'mine'] as const,
-  // Estate marketplace
   inventory: (estateId: string) => ['estate', estateId, 'marketplace', 'inventory'] as const,
   agreements: (estateId: string, status?: string) =>
     ['estate', estateId, 'marketplace', 'agreements', status ?? 'all'] as const,
@@ -375,24 +368,13 @@ export const estateKeys = {
     ['estate', estateId, 'watchlist', filter ?? 'all'] as const,
   contractorPasses: (estateId: string, filter?: string) =>
     ['estate', estateId, 'contractor-passes', filter ?? 'all'] as const,
-  /**
-   * The roll call in progress, or null.
-   *
-   * Its own key rather than a filter on the list, because the console polls this
-   * one during an emergency and the history can be a hundred rows long.
-   */
+  // Its own key: polled during an emergency, while the history can run to a hundred rows.
   activeMuster: (estateId: string) => ['estate', estateId, 'emergency-musters', 'active'] as const,
   emergencyMusters: (estateId: string, filter?: string) =>
     ['estate', estateId, 'emergency-musters', 'list', filter ?? 'all'] as const,
   emergencyMuster: (estateId: string, musterId: string) =>
     ['estate', estateId, 'emergency-musters', musterId] as const,
-  /**
-   * Who is inside right now.
-   *
-   * One key, not one per read: the board is polled while somebody is watching
-   * it, and keying on the instant it was taken would grow the cache by an entry
-   * every refresh and never reuse one.
-   */
+  // One key, not one per read: keying on the instant would grow the cache on every poll.
   onSiteBoard: (estateId: string) => ['estate', estateId, 'dwell', 'on-site'] as const,
   authorisationDwell: (estateId: string, from?: string, to?: string, sort?: string) =>
     [
@@ -406,40 +388,14 @@ export const estateKeys = {
     ] as const,
   incidents: (estateId: string, status?: string) =>
     ['estate', estateId, 'incidents', status ?? 'all'] as const,
-  /**
-   * The checkpoint register, and the routes that walk it.
-   *
-   * Two keys rather than one, because the route planner's picker reads the
-   * register and a new checkpoint must show up there without the routes being
-   * refetched — they cannot change as a result of adding one.
-   */
-  /**
-   * Who is coming today.
-   *
-   * One key, and it takes no window: the board is "now" by definition, so a key
-   * that carried an instant would grow the cache an entry per render and reuse
-   * none of them.
-   */
+  // Takes no window: a key carrying an instant would grow the cache an entry per render.
   expectedToday: (estateId: string) => ['estate', estateId, 'expected-today'] as const,
-  /**
-   * The identity document recorded against ONE visitor's pass.
-   *
-   * Keyed by the pass, deliberately. An estate-wide key would have every pass in
-   * the office's list share a cache entry, and the value carries a signed URL to
-   * somebody's identity document — so the key is narrow enough that only the pass
-   * the office actually asked about is ever fetched.
-   */
+  // Keyed by the pass: the value carries a signed URL to an identity document, so only the pass asked about is fetched.
   visitorIdCheck: (estateId: string, passId: string) =>
     ['estate', estateId, 'visitor-passes', passId, 'id-check'] as const,
   patrolCheckpoints: (estateId: string) => ['estate', estateId, 'patrol-checkpoints'] as const,
   patrolRoutes: (estateId: string) => ['estate', estateId, 'patrol-routes'] as const,
-  /**
-   * Which rounds were due and which nobody walked.
-   *
-   * The window is in the key because the report is a period, and keying only on
-   * the estate would make switching period show the previous period's answer
-   * until the new one arrived.
-   */
+  // The window is in the key, or switching period shows the previous period's answer.
   patrolReport: (estateId: string, from?: string, to?: string, routeId?: string) =>
     [
       'estate',
@@ -487,72 +443,48 @@ export const estateResidentKeys = {
   amenityBookings: ['estate', 'resident', 'amenityBookings'] as const,
   committee: ['estate', 'resident', 'committee'] as const,
   governance: ['estate', 'resident', 'governance'] as const,
-  /**
-   * The roll call this household is being asked to answer, or null.
-   *
-   * Shared by the banner on the dashboard and the answer screen, so a resident
-   * who answers on one does not leave a stale banner on the other.
-   */
+  // Shared by the dashboard banner and the answer screen, so answering on one clears the other.
   emergency: ['estate', 'resident', 'emergency'] as const,
 };
 
-/** Not persona-scoped — every signed-in user has at most one subscription. */
 export const subscriptionKeys = {
   mine: ['subscription', 'mine'] as const,
   pricing: ['subscription', 'pricing'] as const,
 };
 
-/**
- * Property authority (not persona-scoped: a mandate is a fact about a property,
- * so the same cache entry serves the owner, agent and realtor portals).
- */
+// Not persona-scoped: a mandate is a fact about a property, shared by the owner, agent and realtor portals.
 export const authorityKeys = {
   managed: ['property-authorities', 'managed'] as const,
   mine: ['property-authorities', 'mine'] as const,
 };
 
-/** Billing lifecycle state (status, trial/period end, cancellation). */
 export const billingKeys = {
   mine: ['billing', 'mine'] as const,
-  /** Payment history — the customer's receipts. */
   invoices: (page: number) => ['billing', 'invoices', page] as const,
 };
 
-/** Marketplace seller payouts — shared by Owner, Realtor and Agent. */
 export const sellerPayoutKeys = {
   account: ['marketplace', 'seller', 'payout-account'] as const,
   payouts: ['marketplace', 'seller', 'payouts'] as const,
 };
 
-/**
- * Management mandates — the firm's side of the engagement.
- *
- * Separate from `authorityKeys` on purpose: the authority is "I may touch this
- * building", the mandate is "on whose instruction, and until when". A screen
- * needs both and they change for different reasons.
- */
+// Separate from `authorityKeys`: authority and mandate change for different reasons.
 export const mandateKeys = {
-  /** Every mandate the caller manages. This is what feeds the client switcher. */
   managing: ['management-mandates', 'managing'] as const,
-  /** Every mandate on properties the caller owns — the same engagement, other side. */
   mine: ['management-mandates', 'mine'] as const,
   one: (id: string) => ['management-mandates', id] as const,
   forProperty: (propertyId: string) => ['management-mandates', 'property', propertyId] as const,
   terminationRequests: (id: string) => ['management-mandates', id, 'termination-requests'] as const,
 };
 
-/** "Needs your attention" feeds, one per persona (and per estate). */
 export const attentionKeys = {
   feed: (persona: string, estateId?: string) => ['attention', persona, estateId ?? ''] as const,
 };
 
-/** Offers on a seller's listings, compared side by side (owners, landlords and managers). */
 export const sellerOfferKeys = {
   comparison: ['seller', 'offers', 'compare'] as const,
 };
 
-/** The signed-in person's own trust records, shared by every portal. */
-/** The person's own sign-in security, the same for every role. */
 export const accountSecurityKeys = {
   all: ['account-security'] as const,
   overview: ['account-security', 'overview'] as const,
@@ -567,13 +499,11 @@ export const trustKeys = {
   explanation: ['trust', 'explanation'] as const,
 };
 
-/** One payment's confirmation state, polled by the return page. */
 export const paymentKeys = {
   status: (reference: string) => ['payments', 'status', reference] as const,
   checkoutFee: (amount: number) => ['payments', 'checkout-fee', amount] as const,
-  /** Which companies can take a payment right now (Paystack, Monnify). */
   providers: ['payments', 'providers'] as const,
-  /** The fee on `amount` naira when `provider` takes it: fees differ per provider. */
+  /** Fees differ per provider. */
   providerFee: (amount: number, provider: string) =>
     ['payments', 'provider-fee', amount, provider] as const,
   banks: ['payments', 'banks'] as const,

@@ -79,7 +79,6 @@ export const MessageBubble = ({ message, isCurrentUser }: MessageBubbleProps) =>
         >
           <p className="text-sm whitespace-pre-wrap break-words">{message.text}</p>
 
-          {/* Attachments */}
           {message.attachments && message.attachments.length > 0 && (
             <div className="mt-2 space-y-2">
               {message.attachments.map((attachment, index) => (

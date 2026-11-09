@@ -5,7 +5,6 @@ import { useToast, type ToastVariant } from '@sureground/ui';
 
 export type Notify = (message: string, variant?: ToastVariant) => void;
 
-/** A screen's `notify`, shown through the app-wide toasts; hand it down to panels. */
 export const useNotify = (): { notify: Notify } => {
   const toast = useToast();
   const notify = useCallback<Notify>(
@@ -17,7 +16,6 @@ export const useNotify = (): { notify: Notify } => {
   return { notify };
 };
 
-/** The message of whatever a mutation threw; the API writes these for people. */
 export const errorMessage = (
   error: unknown,
   fallback = 'Something went wrong. Please try again.'

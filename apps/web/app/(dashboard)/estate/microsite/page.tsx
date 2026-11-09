@@ -32,10 +32,7 @@ interface MicrositeFormProps {
   settings: EstateMicrositeSettings;
 }
 
-// A separate component so its local draft state can be lazily initialized
-// straight from `settings` at mount: this component only mounts once the
-// settings query has resolved, so there is no async "sync into state" effect
-// to write (which react-hooks/set-state-in-effect would flag as a real error).
+// A separate component so draft state initialises from `settings` at mount, with no sync-into-state effect.
 function MicrositeForm({ estateId, estateName, settings }: MicrositeFormProps) {
   const queryClient = useQueryClient();
   const [slug, setSlug] = useState(settings.slug);
@@ -236,7 +233,6 @@ export default function EstateMicrositePage() {
   if (!estate) return <RedirectToEstateSetup />;
 
   if (!isPro) {
-    // Keep the page's heading on the upgrade screen, as the form has it.
     return (
       <div className="max-w-2xl">
         <PageHeader

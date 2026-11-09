@@ -16,7 +16,7 @@ export interface PropertyFee {
   amount: number;
 }
 
-/** The four links of the Sureground trust chain, in display order. */
+/** In display order. */
 export type PropertyTrustStepId = 'owner' | 'authority' | 'property' | 'payment';
 
 export interface PropertyTrustStep {
@@ -26,11 +26,7 @@ export interface PropertyTrustStep {
   detail: string;
 }
 
-/**
- * The consumer-facing trust chain for a property: verified owner → authorized
- * to list → property verified → payment protected. Only present on the
- * single-property detail payload; the browse list omits it.
- */
+/** Only present on the single-property detail payload; the browse list omits it. */
 export interface PropertyTrustChain {
   steps: PropertyTrustStep[];
   metCount: number;
@@ -55,11 +51,10 @@ export interface Property {
   size: number;
   rating: number;
   verified: boolean;
-  /** Signed cover photo URL (first entry of `images`). */
+  /** First entry of `images`. */
   image: string;
-  /** Signed photo URLs, cover first. */
+  /** Cover first. */
   images?: string[];
-  /** Signed URL of the landlord's uploaded walkthrough video, when present. */
   videoTourUrl?: string;
   /** The video tour was filmed in the Sureground app at the property. */
   videoTourFilmedOnSite?: boolean;
@@ -73,17 +68,14 @@ export interface Property {
   landlordId?: string;
   landlordName?: string;
   availableFrom?: string;
-  /** False when the unit is already let (signed lease / approved application) — not accepting new applications. */
+  /** False once the unit is let. */
   acceptingApplications?: boolean;
   additionalFees?: PropertyFee[];
   reviews?: PropertyReview[];
-  /** Whether the landlord allows paying this property's rent in monthly installments (Sureground Flex), instead of the standard upfront yearly payment. */
   allowsMonthlyPayment?: boolean;
-  /** The trust chain, present only on the property detail payload. */
+  /** Only on the property detail payload. */
   trustChain?: PropertyTrustChain;
 }
-
-// ---- Real map / neighborhood insights (OpenStreetMap + optional AI) ----
 
 export interface NearbyPlace {
   name: string;
@@ -142,14 +134,12 @@ export interface Document {
   name: string;
   uploaded: boolean;
   required: boolean;
-  /** Id of the file in the renter's document library, once uploaded. */
   documentId?: string;
-  /** Short-lived signed download URL for the uploaded file. */
+  /** Short-lived. */
   url?: string;
 }
 
 export interface LandlordInfo {
-  /** The landlord's user id, for starting a conversation. */
   id?: string;
   name: string;
   email: string;
@@ -173,9 +163,8 @@ export interface RenterInspectionRoom {
   condition: RenterRoomCondition;
   notes?: string;
   photoCount?: number;
-  /** Signed photo links, when the report carries them. */
   photos?: { url: string; name: string }[];
-  /** The landlord's estimate to put it right, in naira. */
+  /** In naira. */
   estimatedCost?: number;
 }
 
@@ -188,11 +177,7 @@ export interface RenterInspection {
   overallCondition?: RenterRoomCondition;
   rooms: RenterInspectionRoom[];
   acknowledgedAt?: string;
-  /**
-   * Where the record comes from: a visit by an agent ('agent'), or the
-   * landlord's condition report on the tenancy ('condition_report') — the one
-   * deposit deductions cite.
-   */
+  /** 'condition_report' is the one deposit deductions cite. */
   source: 'agent' | 'condition_report';
   summaryNotes?: string;
   tenantComment?: string;
@@ -235,7 +220,7 @@ export const formatPrice = (price: number, period: PeriodType): string => {
   return `${formatter.format(price)}${periodMap[period]}`;
 };
 
-/** For an annual (or weekly) price, what that works out to per month — helps renters used to thinking in monthly terms size up a yearly-quoted rent. Returns null for a price already quoted monthly. */
+/** Null for a price already quoted monthly. */
 export const monthlyEquivalent = (price: number, period: PeriodType): string | null => {
   if (period === 'month') return null;
   const monthsPerPeriod = period === 'year' ? 12 : 12 / 52;

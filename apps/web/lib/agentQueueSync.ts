@@ -75,8 +75,7 @@ async function upload(item: AgentQueuedRecord, ownerId: string) {
         'This device record could not be read for upload. It has been kept for review.'
       );
   }
-  // safeCall returns unsuccessful responses without throwing. Only unwrap's
-  // confirmed success permits deleting the device's durable copy.
+  // safeCall does not throw on failure: only unwrap's confirmed success may delete the device's durable copy.
   agentOfflineQueue.remove(item.id, ownerId);
 }
 
@@ -87,7 +86,7 @@ export interface AgentSyncResult {
 
 let pending: Promise<unknown> = Promise.resolve();
 
-/** Serialize automatic and manual retries so a successful item is sent once. */
+// Serialises automatic and manual retries so a successful item is sent once.
 export function syncAgentQueuedRecords(
   id?: string,
   expectedOwner?: string

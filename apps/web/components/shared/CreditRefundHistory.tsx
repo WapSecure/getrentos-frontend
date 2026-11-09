@@ -15,7 +15,6 @@ const WHO: Record<CreditRefundRow['requestedAs'], string> = {
   ADMIN: 'by Sureground',
 };
 
-/** Lease credit paid back: what went back, and what returned to credit if the gateway refused. */
 export function CreditRefundHistory({ refunds }: { refunds?: CreditRefundRow[] }) {
   if (!refunds?.length) return null;
   return (

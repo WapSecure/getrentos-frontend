@@ -53,7 +53,6 @@ export default function LandlordMessagesPage() {
   const conversations = conversationsData?.items ?? [];
   const total = conversationsData?.total ?? 0;
 
-  // Real-time: refresh the conversation list when either side sends a message.
   useRealtimeEvent('conversation:update', () => {
     void queryClient.invalidateQueries({ queryKey: landlordKeys.conversations });
   });
@@ -84,7 +83,6 @@ export default function LandlordMessagesPage() {
     });
   };
 
-  // Opened from a message notification.
   useOpenConversationFromUrl(conversationsData !== undefined, handleSelect);
 
   const handleSend = async (text: string) => {

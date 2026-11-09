@@ -21,7 +21,6 @@ const STATUS: Record<
   WAIVED: { label: 'Waived', variant: 'neutral' },
 };
 
-/** One condition: where it stands, and the owner's evidence for it while open. */
 const ConditionRow = ({
   propertyId,
   condition,
@@ -105,10 +104,6 @@ const ConditionRow = ({
   );
 };
 
-/**
- * What the owner needs to know about a conditional or suspended approval:
- * the conditions to meet (with evidence), or why the land is off the market.
- */
 export const OwnerDiligenceConditions = ({
   propertyId,
   diligence,

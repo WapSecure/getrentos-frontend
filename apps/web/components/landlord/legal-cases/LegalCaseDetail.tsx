@@ -40,20 +40,7 @@ import type {
   LegalCaseOutcome,
 } from '@/types/legal-case';
 
-/**
- * One case: where it is, what happened, and the single next thing to do.
- *
- * Reworked from a scrolling stack of five forms (file, schedule, record,
- * decide, enforce) which showed every moment of a case's life at once — so most
- * of it was always irrelevant, and the one action that mattered was buried among
- * four that did not apply.
- *
- * Now: the stage, a timeline of what has actually happened, and exactly one
- * primary action — the next thing. Secondary actions live in a menu. Explanatory
- * prose is kept in the one place it earns its space: when an action is about to
- * be *refused* because the notice ladder has not run out, because that refusal is
- * the whole point of the feature and a person needs to know why.
- */
+// One primary action per state; prose only where the notice ladder will refuse an action, since that refusal is the point.
 
 const OUTCOMES: { value: LegalCaseOutcome; label: string }[] = [
   { value: 'WON', label: 'Won' },
@@ -89,7 +76,6 @@ type TimelineEntry = {
   tone: 'neutral' | 'good' | 'warn';
 };
 
-/** What has actually happened, in order. Derived from the case, not stored twice. */
 function timelineFor(legalCase: LegalCase): TimelineEntry[] {
   const entries: TimelineEntry[] = [
     {
@@ -164,8 +150,7 @@ function timelineFor(legalCase: LegalCase): TimelineEntry[] {
     });
   }
 
-  // Newest last reads as a story; the scheduled hearing has a future date so it
-  // lands at the end, which is where "what is next" belongs.
+  // Oldest first, so the scheduled hearing (a future date) lands last as "what is next".
   return entries.sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime());
 }
 
@@ -193,7 +178,6 @@ export function LegalCaseDetail({
     outcome: HearingOutcome;
     notes?: string;
     adjournNextFor?: string;
-    /** Present when the sitting decided the matter. */
     decision?: { outcome: LegalCaseOutcome; notes?: string };
   }) => void;
   onEnforce: (input: { method: EnforcementMethod; notes?: string; enforcedAt?: string }) => void;
@@ -255,13 +239,7 @@ export function LegalCaseDetail({
     .filter((hearing) => hearing.heldAt === null)
     .sort((a, b) => new Date(a.scheduledFor).getTime() - new Date(b.scheduledFor).getTime())[0];
 
-  /**
-   * The one thing to do next.
-   *
-   * A single primary action, chosen by state, rather than five forms competing
-   * for attention. The `blocked` case is the important one: it is the refusal the
-   * whole notice ladder exists to produce, and it gets the words.
-   */
+  // The `blocked` case matters most: it is the refusal the notice ladder exists to produce, so it gets the words.
   const primary = (() => {
     if (isDone) return { kind: 'none' as const };
 
@@ -386,7 +364,6 @@ export function LegalCaseDetail({
           </div>
         )}
 
-        {/* --- The one next action ------------------------------------------- */}
         {primary.kind === 'blocked' && (
           <div className="mt-4 flex items-start gap-2.5 rounded-2xl border border-warning/30 bg-warning-subtle p-4 text-sm text-foreground">
             <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-warning" aria-hidden />
@@ -505,12 +482,7 @@ export function LegalCaseDetail({
               </>
             )}
 
-            {/*
-              A decision happens at a sitting, so it is captured here rather than
-              as its own step. Splitting them would mean recording the same event
-              twice and leaving a case sitting in FILED with a decision nobody
-              entered.
-            */}
+            {/* Recorded with its sitting: a separate step would record the event twice and leave a case in FILED. */}
             {hearingOutcome === 'DECIDED' && (
               <div className="mt-3">
                 <Field label="What the court decided" required>
@@ -735,7 +707,6 @@ export function LegalCaseDetail({
           </section>
         )}
 
-        {/* --- Timeline ------------------------------------------------------- */}
         <section className="mt-5">
           <h3 className="text-sm font-semibold text-foreground">What has happened</h3>
           <ol className="mt-3 space-y-0">

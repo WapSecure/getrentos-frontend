@@ -16,11 +16,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { landDisputeKeys, landDisputeService } from '@/services/landDisputeService';
 import { LAND_DISPUTE_KINDS, type LandDisputeKind } from '@/types/landDispute';
 
-/**
- * Report a problem with a parcel: fraud, a competing claim, a boundary or
- * title problem, non-delivery. Opens a case for our team; the owner is told
- * a case exists but not who raised it.
- */
+// The owner is told a case exists but not who raised it.
 export const ReportLandProblemDialog = ({
   open,
   onClose,

@@ -7,7 +7,6 @@ import { BUSINESS_TYPE_LABELS } from '@/services/agencyOnboardingService';
 
 interface VendorFormModalProps {
   isOpen: boolean;
-  /** Present when editing an existing vendor; absent when adding. */
   vendor?: Vendor | null;
   onClose: () => void;
   onSave: (vendor: VendorInput) => void;

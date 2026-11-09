@@ -116,8 +116,6 @@ export const OfferNegotiationModal = ({
               const isOwner = msg.senderId === 'owner';
               const isSystem = msg.type !== 'message';
               if (isSystem) {
-                // The thread's events come with no sentence of their own: a
-                // counter arrived as a bare "₦19.8M" pill.
                 const who = isOwner ? 'You' : msg.senderName || 'The buyer';
                 const label =
                   msg.text ||

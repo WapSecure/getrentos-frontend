@@ -25,7 +25,6 @@ const tabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
 
 export default function OwnerSettingsPage() {
   const user = useOwnerUser();
-  // Deep link (e.g. ?tab=payouts from a land sale awaiting a payout account).
   const requested = useSearchParams().get('tab');
   const [activeTab, setActiveTab] = useState<SettingsTab>(() =>
     tabs.some((tab) => tab.id === requested) ? (requested as SettingsTab) : 'profile'

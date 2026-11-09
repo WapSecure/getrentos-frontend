@@ -34,7 +34,6 @@ interface CreateListingModalProps {
   isSubmitting?: boolean;
 }
 
-/** sessionStorage key for a listing being written when the session ran out. */
 export const CREATE_LISTING_DRAFT_KEY = 'landlord-create-listing';
 
 interface ListingDraft {
@@ -74,8 +73,6 @@ export const CreateListingModal = ({
   const [furnished, setFurnished] = useState(false);
   const [shortLetEnabled, setShortLetEnabled] = useState(false);
 
-  // If the session ends while the landlord is writing, keep the listing so it
-  // is waiting after they sign back in.
   const draftRestored = useSessionExpiryDraft<ListingDraft>(
     CREATE_LISTING_DRAFT_KEY,
     () =>
@@ -118,8 +115,6 @@ export const CreateListingModal = ({
   const handleUnitChange = (id: string) => {
     setUnitId(id);
     const unit = vacantUnits.find((u) => u.id === id);
-    // The unit already carries its asking rent, so the advert starts from it
-    // rather than asking the landlord to type the same figure again.
     if (unit && !askingRent && unit.askingRent !== undefined) {
       setAskingRent(String(unit.askingRent));
     }

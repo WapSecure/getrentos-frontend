@@ -18,7 +18,6 @@ interface LogoProps {
   showText?: boolean;
 }
 
-/** Portal path prefix -> the role id whose dashboard is that portal's home. */
 const PORTAL_ROLE_BY_PREFIX: [string, string][] = [
   ['/landlord', 'landlord'],
   ['/agency', 'manager'],
@@ -32,7 +31,6 @@ const PORTAL_ROLE_BY_PREFIX: [string, string][] = [
   ['/renter', 'renter'],
 ];
 
-/** The signed-in user's own home, from the stored session. */
 function storedHomeRoleId(): string {
   try {
     const raw =
@@ -54,8 +52,7 @@ export const Logo = (props: LogoProps) => {
       setDashboardPath(ROUTES.HOME);
       return;
     }
-    // Inside a portal the logo goes to that portal's home — the shell already
-    // checked the user may be here. Elsewhere it goes to the user's own home.
+    // Inside a portal the logo goes to that portal's home (the shell already checked access); elsewhere to the user's own home.
     const portal = PORTAL_ROLE_BY_PREFIX.find(
       ([prefix]) => pathname === prefix || pathname?.startsWith(`${prefix}/`)
     );

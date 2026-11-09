@@ -26,7 +26,6 @@ import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
 import { AddressInput } from '@/components/shared/location/AddressInput';
 
-/** A line of help under a document, where the name alone doesn't say what to bring. */
 const DOCUMENT_HINTS: Record<string, string> = {
   'Credit Report':
     'Optional, and it can strengthen your application. You can get your own credit report free once a year from a licensed bureau such as CRC, FirstCentral or CreditRegistry.',
@@ -37,7 +36,6 @@ export interface ApplicationFormData {
   email: string;
   phone: string;
   currentAddress: string;
-  /** The Google place the current address was picked from; absent for a typed one. */
   currentAddressPlaceId?: string;
   employer: string;
   employmentStatus: string;
@@ -59,7 +57,6 @@ interface ApplicationWizardProps {
   initialData: ApplicationFormData;
   onSubmit: (data: ApplicationFormData) => void;
   isSubmitting?: boolean;
-  /** Why the last submission was refused, shown on the review step. */
   submitError?: string | null;
 }
 
@@ -91,7 +88,6 @@ const FIELD_IDS = {
 
 const documentUploadId = (index: number) => `apply-document-${index}`;
 
-/** sessionStorage key for an application being filled in when the session ran out. */
 export const applicationDraftKey = (propertyId: string) => `renter-apply:${propertyId}`;
 
 interface ApplicationDraft {
@@ -115,13 +111,10 @@ export const ApplicationWizard = ({
 }: ApplicationWizardProps) => {
   const [stepIndex, setStepIndex] = useState(0);
   const [data, setData] = useState<ApplicationFormData>(initialData);
-  // Errors stay quiet until the renter tries to continue, then show inline.
   const [showErrors, setShowErrors] = useState(false);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const isFirstRender = useRef(true);
 
-  // If the session ends part-way through, keep what was filled in so it is
-  // waiting on this step after signing back in.
   const draftRestored = useSessionExpiryDraft<ApplicationDraft>(
     applicationDraftKey(property.id),
     () =>
@@ -134,8 +127,7 @@ export const ApplicationWizard = ({
     }
   );
 
-  // A new step replaces the whole form, so move focus to its heading rather
-  // than leaving it on a button that no longer exists.
+  // A new step replaces the form, so focus moves to its heading.
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
@@ -174,9 +166,7 @@ export const ApplicationWizard = ({
   const removeDocument = (name: string) =>
     setDocument(name, { uploaded: false, documentId: undefined, url: undefined });
 
-  // Files already in the renter's document library can be attached instead of
-  // uploaded again: the server accepts any document the applicant owns. Newest
-  // first, so a same-named match is the most recent copy; expired ones are left out.
+  // The server accepts any document the applicant owns; newest first, so a same-named match is the latest copy.
   const library = useQuery({
     queryKey: [...renterKeys.documents, 'application-library'],
     queryFn: () =>
@@ -193,14 +183,12 @@ export const ApplicationWizard = ({
   const attachSavedMatches = () =>
     savedMatches.forEach(({ doc, file }) => attachLibraryDoc(doc.name, file));
 
-  // A usable phone number: allows +, spaces, dashes and parentheses, but must
-  // carry at least 10 actual digits so free text like "abc" cannot advance.
+  // At least 10 digits, so free text cannot advance.
   const isValidPhone = (value: string) => {
     if (!/^[+\d][\d\s()-]*$/.test(value.trim())) return false;
     return value.replace(/\D/g, '').length >= 10;
   };
 
-  // The rent expressed per month, so we can sanity-check stated income against it.
   const monthlyRent =
     property.period === 'year'
       ? property.price / 12
@@ -208,14 +196,12 @@ export const ApplicationWizard = ({
         ? (property.price * 52) / 12
         : property.price;
   const incomeValue = Number(data.monthlyIncome);
-  // Soft warning only: income that cannot cover a single month's rent is almost
-  // certainly a typo or a non-starter, but we don't hard-block the application.
+  // Soft warning only: income below one month's rent is almost certainly a typo, but it doesn't block.
   const incomeBelowRent =
     data.monthlyIncome.trim() !== '' && incomeValue > 0 && incomeValue < monthlyRent;
 
   const missingDocuments = data.documents.filter((d) => d.required && !d.uploaded);
 
-  /** What is missing on a step, keyed by the id of the control to fix, in screen order. */
   const stepErrors = (index: number): [string, string][] => {
     const errors: [string, string][] = [];
     if (index === 0) {
@@ -229,13 +215,10 @@ export const ApplicationWizard = ({
       if (!data.currentAddress.trim())
         errors.push([FIELD_IDS.currentAddress, 'Enter your current address.']);
     }
-    // Employer is `@IsOptional()` on the API's SubmitApplicationDto, and this
-    // same step offers "Student" as an employment status, so only income is required.
+    // Employer is optional on the API, and "Student" is offered here, so only income is required.
     if (index === 1 && !data.monthlyIncome.trim())
       errors.push([FIELD_IDS.monthlyIncome, 'Enter your monthly income.']);
-    // Next of kin and reference are optional as a whole, but a half-filled one
-    // is refused by the API (a reference must have a phone number), and that
-    // refusal used to surface on the review step with nothing highlighted.
+    // Optional as a whole, but the API refuses a half-filled one (a reference needs a phone number).
     if (index === 1) {
       const contact = (
         who: string,
@@ -313,7 +296,6 @@ export const ApplicationWizard = ({
           {steps[stepIndex].label}
         </h2>
       </div>
-      {/* Wraps to two rows on narrow screens instead of scrolling sideways. */}
       <ol
         aria-label="Application progress"
         className="grid grid-cols-2 border-b border-border sm:grid-cols-4"
@@ -459,7 +441,6 @@ export const ApplicationWizard = ({
               error={errorFor(FIELD_IDS.monthlyIncome)}
               required
             >
-              {/* Shown as 1,200,000 while typing; the form keeps the plain number. */}
               <CurrencyInput
                 prefix="₦"
                 value={data.monthlyIncome}

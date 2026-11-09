@@ -19,7 +19,7 @@ const bandLabel: Record<CreditScoreBand, { text: string; className: string }> = 
   },
 };
 
-/** A shared credit check, reduced to what a landlord needs. Sample data is always labelled as such. */
+/** Sample data is always labelled as such. */
 export const CreditSummaryView = ({ check }: { check: SharedCreditCheck }) => {
   const { summary } = check;
   return (

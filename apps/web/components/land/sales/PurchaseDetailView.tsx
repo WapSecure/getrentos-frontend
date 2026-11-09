@@ -38,7 +38,7 @@ import { PerfectionPanel } from '../closing/PerfectionPanel';
 
 const DELIVERABLE = new Set(['ACTIVE', 'PAID_IN_FULL', 'DEFAULTED']);
 
-/** Mirrors the server's rules, so a blocked step says why instead of failing on click. */
+/** Mirrors the server's rules. */
 const deliverabilityFor =
   (purchase: LandPurchaseDetail) =>
   (milestone: LandMilestone): MilestoneDeliverability => {
@@ -68,7 +68,6 @@ const Section = ({ title, children }: { title: string; children: React.ReactNode
   </Card>
 );
 
-/** One plot purchase, from the seller's side. */
 export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
   const queryClient = useQueryClient();
   const { notify } = useNotify();

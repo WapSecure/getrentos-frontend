@@ -18,21 +18,12 @@ import {
   PaymentSuccess,
 } from '@/components/shared/payments/PaymentReceipt';
 
-/** How often the page asks while a payment is unconfirmed, and for how long before it stops asking. */
 const POLL_MS = 2_500;
 const GIVE_UP_MS = 60_000;
 
-/** Sign-in state does not change while this page is open. */
 const noSubscription = () => () => {};
 
-/**
- * Where Paystack or Monnify sends every payer back to (rent, deposits, bookings, land,
- * Flex, dues; Pro has its own page).
- *
- * The outcome comes from Sureground's records via the status endpoint, which
- * also asks the payment company directly while a payment is pending. The query string is
- * only used to find the reference, never as proof of payment.
- */
+// The query string only finds the reference, never proves payment.
 function PaymentReturnContent() {
   const searchParams = useSearchParams();
   // Paystack appends both reference and trxref (older integrations only trxref);
@@ -41,8 +32,6 @@ function PaymentReturnContent() {
     searchParams.get('reference') ??
     searchParams.get('trxref') ??
     searchParams.get('paymentReference');
-  // After a minute the page stops asking and says so, rather than spinning on.
-  // "Check again" starts another round.
   const [gaveUp, setGaveUp] = useState(false);
   const [round, setRound] = useState(0);
   useEffect(() => {
@@ -50,9 +39,7 @@ function PaymentReturnContent() {
     return () => clearTimeout(timer);
   }, [round]);
 
-  // Paid from the mobile app, the payer lands here in an in-app browser with no
-  // web session: there is nothing to look up, and the app shows the outcome.
-  // Read on the client only; the server render assumes a session.
+  // Paid from the mobile app, the in-app browser has no web session. Read on the client only.
   const signedIn = useSyncExternalStore(noSubscription, viewerIsSignedIn, () => true);
 
   const status = useQuery({

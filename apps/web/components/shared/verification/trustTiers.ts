@@ -1,4 +1,3 @@
-/** What each trust tier means, for chips and guard copy. */
 export const TIER_LABELS: Record<number, string> = {
   0: 'Unverified',
   1: 'Contact verified',

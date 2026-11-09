@@ -29,7 +29,6 @@ export interface CaptureMeta {
   note?: string;
 }
 
-/** Land Watch for owners and buyers, and the inspector's desk. */
 export const landWatchService = {
   terms: () => safeCall(() => authFetch<LandWatchTerms>('/land/watch/terms')),
   options: () => safeCall(() => authFetch<LandWatchOption[]>('/land/watch/options')),
@@ -117,7 +116,7 @@ export const landWatchService = {
   ) => send<InspectorJob>(`${jobPath(id)}/submit`, 'POST', input),
 };
 
-/** The browser's position, or null when refused, unavailable or slow. */
+/** Null when refused, unavailable or slow. */
 export const currentPosition = (): Promise<{ lat: number; lng: number } | null> =>
   new Promise((resolve) => {
     if (typeof navigator === 'undefined' || !navigator.geolocation) return resolve(null);

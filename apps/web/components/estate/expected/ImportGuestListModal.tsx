@@ -21,19 +21,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
 import type { GuestListImportResult } from '@/types/estate';
 
-/**
- * Enter a household's guest list, once.
- *
- * One household and one deadline for the whole list because that is how a list
- * arrives — one resident is having the party — and the API insists on it, which
- * is why the two fields sit above the file rather than beside it.
- *
- * The list becomes real visitor passes through the same path a single
- * invitation takes, so every row is screened against the watchlist exactly as it
- * would be on its own. That is why this cannot be a bulk insert, and why the
- * result is per row: one blocked name must not refuse the other twenty-nine, and
- * one unreadable line must not either.
- */
+// Rows become passes through the single-invitation path so each is screened against the watchlist; results are per row.
 export const ImportGuestListModal = ({
   estateId,
   open,
@@ -63,8 +51,7 @@ export const ImportGuestListModal = ({
     },
     onSuccess: (data) => {
       setResult(data);
-      // The board is the point of doing this, so it is refreshed even when every
-      // row was refused: a refusal still means the list was read.
+      // Refreshed even when every row was refused: a refusal still means the list was read.
       queryClient.invalidateQueries({ queryKey: estateKeys.expectedToday(estateId) });
     },
   });
@@ -181,15 +168,6 @@ export const ImportGuestListModal = ({
   );
 };
 
-/**
- * What the list produced, row by row.
- *
- * The failures are listed rather than summarised, with the spreadsheet's own line
- * numbers, because the office has to go and fix them: "3 rows failed" sends
- * somebody hunting through a file they have already closed. A refusal is also not
- * always the office's fault — a name the estate itself has asked not to be
- * admitted comes back here too — so the reason is repeated verbatim.
- */
 const ImportResult = ({
   result,
   onDone,

@@ -1,11 +1,6 @@
 import { LAND_DOCUMENT_TYPES, type LandDocumentType } from '@/types/landDocument';
 
-/**
- * The API's rules for a land document upload (file-upload.policy.ts,
- * validateLandDocumentUpload), so a bad file is explained before it is sent.
- * The API still decides.
- */
-/** The same cap in MB, for the shared upload control. */
+// The API's rules (file-upload.policy.ts, validateLandDocumentUpload); the API still decides.
 export const LAND_DOCUMENT_MAX_MB = 20;
 export const LAND_DOCUMENT_MAX_BYTES = LAND_DOCUMENT_MAX_MB * 1024 * 1024;
 
@@ -18,7 +13,7 @@ export const LAND_DOCUMENT_MIME_TYPES = [
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 ];
 
-/** For the file input's `accept`: extensions as well, since some systems report no MIME type. */
+/** Extensions too: some systems report no MIME type. */
 export const LAND_DOCUMENT_ACCEPT = [
   '.pdf',
   '.jpg',
@@ -32,7 +27,6 @@ export const LAND_DOCUMENT_ACCEPT = [
 
 export const LAND_DOCUMENT_FILE_HINT = 'PDF, JPEG, PNG, WebP, DOC or DOCX, up to 20 MB.';
 
-/** Why this file would be refused, or null when it looks acceptable. */
 export const landDocumentFileProblem = (file: File): string | null => {
   if (file.size > LAND_DOCUMENT_MAX_BYTES) return 'This file is larger than 20 MB.';
   if (file.size === 0) return 'This file is empty.';
@@ -77,7 +71,7 @@ export const LAND_DOCUMENT_TYPE_OPTIONS = LAND_DOCUMENT_TYPES.map((value) => ({
   label: LAND_DOCUMENT_TYPE_LABELS[value],
 }));
 
-/** A readable label for a stored document type, including values older rows may carry. */
+/** Includes values older rows may carry. */
 export const landDocumentTypeLabel = (value: string) =>
   LAND_DOCUMENT_TYPE_LABELS[value as LandDocumentType] ??
   value.charAt(0) + value.slice(1).toLowerCase().replace(/_/g, ' ');

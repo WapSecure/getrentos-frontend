@@ -56,7 +56,6 @@ export const NotificationSettings = () => {
     setPreferences((prev) => prev.map((p) => (p.id === id ? { ...p, [channel]: !p[channel] } : p)));
   };
 
-  // Resolves true only when it saved, so the button says "Saved" only then.
   const handleSave = () =>
     landlordService
       .updateNotificationPreferences(
@@ -115,7 +114,6 @@ export const NotificationSettings = () => {
   );
 };
 
-/** Shown where a category has no email: these updates are in-app and push only. */
 const NoEmail = () => (
   <span
     className="text-xs text-muted-foreground"

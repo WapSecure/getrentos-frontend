@@ -15,18 +15,13 @@ import {
 
 export const BUYER_REPRESENTATIVES_ROUTE = '/buyer/land/representatives';
 
-/**
- * The two-person rule on one of the buyer's deals (§8.4): when on, a step that
- * releases money is confirmed only after the buyer and their representative
- * have both approved it. Switching it off takes effect after 48 hours.
- */
+// A money-releasing step is confirmed only after buyer and representative both approve; switching it off takes effect after 48 hours.
 export const CoApprovalCard = ({
   deal,
   labelFor,
   onChanged,
 }: {
   deal: LandDealRef;
-  /** The step's label, from the deal's milestones. */
   labelFor: (key: string) => string;
   onChanged?: (message: string, variant: 'success' | 'error') => void;
 }) => {

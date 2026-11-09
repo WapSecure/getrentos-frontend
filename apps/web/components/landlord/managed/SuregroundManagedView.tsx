@@ -60,15 +60,7 @@ import { ManagedIntakePanel } from './ManagedIntakePanel';
 import { formatCurrency } from '@/lib/format';
 import { formatMoment } from '@/components/agency/mandatePresentation';
 
-/**
- * "Let Sureground manage it": the owner-facing opt-in.
- *
- * Sureground as a manager is an ordinary mandate under the hood, so this screen
- * does not invent a new flow — it shows the published fee card and, for each of
- * the owner's properties, either where its managed engagement stands or a way to
- * start one. Starting one is an intake, not an opt-in: Sureground visits, sends
- * a proposal, and the owner's acceptance is what signs the mandate.
- */
+// Sureground Managed is an ordinary mandate; starting one is an intake, and the owner's acceptance of the proposal signs it.
 
 const MANDATE_STATUS_BADGE: Record<
   string,
@@ -99,13 +91,10 @@ const INTAKE_STAGE: Record<string, string> = {
   PROPOSED: 'Proposal ready',
 };
 
-/** Live = opted in, pending, or active — anything that is not an ended state. */
-/** The shortest reason the API accepts for ending or withdrawing an engagement. */
 const END_REASON_MIN = 10;
 
 const isLiveEngagement = (m: ManagementMandateDto) => !ENDED_STATUSES.includes(m.status);
 
-/** Terminated but the handover pack has not been exchanged yet — still winding down. */
 const isWindingDown = (m: ManagementMandateDto) => m.status === 'TERMINATED' && !m.handoverAt;
 
 const PRIORITY_LABEL: Record<ManagedSlaTarget['priority'], string> = {
@@ -115,7 +104,6 @@ const PRIORITY_LABEL: Record<ManagedSlaTarget['priority'], string> = {
   LOW: 'Low',
 };
 
-/** Minutes as the span an owner reads — "1 hour", "48 hours", "5 days". */
 const humanizeMinutes = (minutes: number): string => {
   if (minutes < 60) return `${minutes} min`;
   if (minutes < 1440) {
@@ -154,10 +142,6 @@ const FeeCardColumn = ({ card, highlight }: { card: ManagedTierCard; highlight: 
   </div>
 );
 
-/**
- * Picker labels that tell properties apart: the name, then the address when two
- * share a name, then a number when even that is the same.
- */
 function distinctLabels(
   list: { id: string; name: string; address?: string | null; city?: string | null }[]
 ) {
@@ -267,12 +251,11 @@ export const SuregroundManagedView = () => {
     onError: (err: Error) => setError(err.message || 'Could not record the handover.'),
   });
 
-  // The current engagement for a property is its newest mandate (mine() is newest-first).
+  // mine() is newest-first, so the first mandate per property is the current one.
   const currentByProperty = new Map<string, ManagementMandateDto>();
   for (const m of mandates.data ?? []) {
     if (!currentByProperty.has(m.propertyId)) currentByProperty.set(m.propertyId, m);
   }
-  /** A property is spoken for while a live mandate holds it, or a wind-down is mid-handover. */
   const committedProperties = new Set<string>();
   for (const [propertyId, m] of currentByProperty) {
     if (isLiveEngagement(m) || isWindingDown(m)) committedProperties.add(propertyId);
@@ -312,7 +295,6 @@ export const SuregroundManagedView = () => {
         }
       />
 
-      {/* Positioning: the two routes */}
       <div className="mb-8 grid gap-4 md:grid-cols-2">
         <div className="rounded-2xl border border-primary/40 bg-primary/5 p-5">
           <h2 className="flex items-center gap-2 font-semibold text-foreground">
@@ -337,7 +319,6 @@ export const SuregroundManagedView = () => {
         </Card>
       </div>
 
-      {/* The Sureground fee card */}
       {feeCard.isLoading ? (
         <div className="mb-8 grid gap-4 md:grid-cols-3">
           {[0, 1, 2].map((i) => (
@@ -356,8 +337,6 @@ export const SuregroundManagedView = () => {
         </div>
       )}
 
-      {/* The owner's properties */}
-      {/* The published service commitment */}
       {(sla.data ?? []).length > 0 && (
         <div className="mb-8 rounded-2xl border border-border bg-muted/30 p-5">
           <h2 className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
@@ -425,7 +404,6 @@ export const SuregroundManagedView = () => {
             const intake = intakeByProperty.get(property.id);
             const openIntake =
               intake && OPEN_INTAKE_STATUSES.includes(intake.status) ? intake : undefined;
-            // Accepted and signed, waiting on Sureground to set it up and go live.
             const settingUp =
               managed && managed.status !== 'ACTIVE' && intake?.status === 'ACCEPTED'
                 ? intake
@@ -653,7 +631,6 @@ export const SuregroundManagedView = () => {
         </div>
       )}
 
-      {/* Work with a vetted firm — the other route */}
       <div className="mt-10">
         <h2 className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
           <Briefcase className="h-4 w-4 text-muted-foreground" aria-hidden />

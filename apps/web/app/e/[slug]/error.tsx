@@ -3,7 +3,6 @@
 import { useEffect } from 'react';
 import { PageErrorState } from '@sureground/ui';
 
-/** Segment error boundary for estate microsite (e/[slug]) pages. */
 export default function EstateMicrositeError({
   error,
   reset,

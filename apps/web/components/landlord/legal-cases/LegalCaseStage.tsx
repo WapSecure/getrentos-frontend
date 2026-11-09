@@ -3,18 +3,7 @@
 import { cn } from '@/lib/cn';
 import type { LegalCaseStatus } from '@/types/legal-case';
 
-/**
- * Where a case is in its life, at a glance.
- *
- * The failure this fixes: the old list showed a status *word* per row, so
- * scanning twelve cases meant reading twelve words and holding the trajectory in
- * your head. A case is a thing that moves through stages, and the list should
- * show that shape rather than spell it.
- *
- * `WITHDRAWN` is deliberately not a stage — it is a way of leaving, not a place
- * on the way — so it renders as a single marked step rather than a position in
- * the sequence.
- */
+// WITHDRAWN is a way of leaving, not a stage, so it renders as a single marked step.
 
 const STAGES: { status: LegalCaseStatus; label: string }[] = [
   { status: 'OPEN', label: 'Opened' },

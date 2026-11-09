@@ -54,7 +54,6 @@ export const RenewalOfferModal = ({ lease, onClose, onSend }: RenewalOfferModalP
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Renew or re-let: fills the offer once, without overwriting anything typed.
   const [language, setLanguage] = useState<ReplyLanguage>('en');
   const canAdvise = !!lease && (lease.status === 'signed' || lease.status === 'expired');
   const advice = useQuery({

@@ -2,11 +2,6 @@ import { formatCurrency } from '@/lib/format';
 import { useCheckoutFee } from '@/hooks/useCheckoutFee';
 import type { PaymentProvider } from '@/types/payments';
 
-/**
- * "Card or bank fee ₦X · You pay ₦Y", shown before a payer leaves for
- * Paystack or Monnify, so the total they see there is no surprise. Renders nothing until
- * the fee is known, or when there is none (simulated payments).
- */
 export const CheckoutFeeLine = ({
   fee,
   total,
@@ -24,10 +19,7 @@ export const CheckoutFeeLine = ({
   );
 };
 
-/**
- * The same line for a payment of `amount` naira, fetching the fee itself: for a
- * pay button in a list. Pass the payer's chosen `provider`: fees differ per company.
- */
+/** Pass the payer's chosen `provider`: fees differ per company. */
 export const CheckoutFeeNote = ({
   amount,
   provider,

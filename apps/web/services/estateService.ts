@@ -67,27 +67,17 @@ type EstatePageQuery = {
   pageSize?: number;
 };
 
-/** Extra fields the gate sends alongside a visitor-pass write. */
 export type GateWriteOptions = {
   /** ISO time the guard acted, for a write queued offline. */
   occurredAt?: string;
-  /** The barrier the guard is standing at. */
   gateId?: string;
-  /**
-   * A guard's stated reason for admitting somebody the estate has blocked.
-   *
-   * Only ever set on a deliberate override, never on the first attempt: the
-   * reason is the whole point of the override, and it is what the estate office
-   * is told when they are woken by the notification.
-   */
+  /** Only set on a deliberate override; it is what the estate office is notified with. */
   overrideReason?: string;
 };
 
 /**
- * Drops absent fields so the gate never sends `gateId: ''` or `occurredAt: null`
- * — either would be rejected as an invalid id, and the write would be lost for a
- * reason the guard cannot see or fix. Returns undefined when nothing is set, so a
- * write with no extra fields is sent with no body at all.
+ * Drops absent fields: `gateId: ''` or `occurredAt: null` would be rejected and the write lost.
+ * Undefined when nothing is set, so no body is sent.
  */
 function buildGateWriteBody(extra: Record<string, unknown>): Record<string, unknown> | undefined {
   const body = Object.fromEntries(
@@ -97,8 +87,7 @@ function buildGateWriteBody(extra: Record<string, unknown>): Record<string, unkn
 }
 
 export const estateService = {
-  /** Read-only answers about one estate, for its managers. */
-  /** A step and a message per household behind on dues; messages in `language` when given. */
+  /** Messages are in `language` when given. */
   getCollectionPlan: (estateId: string, language: ReplyLanguage = 'en') =>
     safeCall<CollectionPlan>(() =>
       authFetch(
@@ -181,7 +170,6 @@ export const estateService = {
     });
   },
 
-  // ---- Dues statements ----
   async listStatements(
     estateId: string,
     params: EstatePageQuery = {}
@@ -220,11 +208,7 @@ export const estateService = {
   },
 
   /**
-   * The organisation's owner querying a line on one of its statements.
-   *
-   * The API refuses it for anybody else, including the estate office that
-   * maintains the statement — a manager who could query their own firm's figures
-   * would be adjudicating themselves.
+   * The API refuses it for anybody else, including the estate office that maintains the statement.
    */
   async disputeStatementLine(
     estateId: string,
@@ -240,12 +224,7 @@ export const estateService = {
     );
   },
 
-  /**
-   * The estate office's reply to a query about its own figures.
-   *
-   * A note, never a verdict: the platform decides these, so the office can
-   * explain and cannot close.
-   */
+  /** A note, never a verdict: the office can explain but not close. */
   async respondToStatementLineDispute(
     estateId: string,
     statementId: string,
@@ -273,7 +252,6 @@ export const estateService = {
     );
   },
 
-  // ---- Payout account ----
   async getPayoutAccount(estateId: string): Promise<ApiResponse<EstatePayoutAccount>> {
     return safeCall(() => authFetch(`/estate/${estateId}/payout-account`));
   },
@@ -419,13 +397,7 @@ export const estateService = {
     return safeCall(() => authFetch(`/estate/${estateId}/visitor-passes${toQuery(query)}`));
   },
 
-  /**
-   * Every walk-in the gate has raised, whatever its state.
-   *
-   * One read rather than one per state, so a request the household has just
-   * answered cannot slip between two queries: the console has to be able to tell
-   * "waiting", "approved" and "refused" apart from the same snapshot.
-   */
+  /** One read for every state, so an answer cannot slip between two queries. */
   async listWalkInVisitorPasses(
     estateId: string,
     query: EstatePageQuery = {}
@@ -442,13 +414,8 @@ export const estateService = {
   },
 
   /**
-   * `occurredAt` is only sent by the offline queue. Without it a check-in that
-   * waited in the queue is judged against the clock at replay, so a pass that
-   * expired while the connection was down is refused and the arrival is lost.
-   *
-   * `gateId` is the barrier the guard is standing at. It is optional on purpose:
-   * refusing an arrival because the console had not been told which gate it is
-   * at would put a real person behind a data-quality problem.
+   * `occurredAt` (offline queue only) stops a queued check-in being judged at replay time. `gateId`
+   * is optional on purpose: a missing gate must never refuse an arrival.
    */
   async verifyVisitorPass(
     estateId: string,
@@ -464,13 +431,8 @@ export const estateService = {
   },
 
   /**
-   * Logs a checked-in visitor off the estate. Until this existed a pass stayed
-   * checked in forever, so "who is inside?" was unanswerable for people.
-   *
-   * `occurredAt` carries the same meaning as on check-in: the time the guard
-   * actually let the visitor out, not the time the queue got to send it. The
-   * gate is recorded as an *exit* gate, because a visitor may well walk out of a
-   * different barrier than the one they came in by.
+   * `occurredAt` is when the guard let the visitor out, not when the queue sent it; the gate is
+   * recorded as an exit gate.
    */
   async checkOutVisitorPass(
     estateId: string,
@@ -486,13 +448,7 @@ export const estateService = {
     );
   },
 
-  /**
-   * Raises a walk-in: somebody is at the barrier with nothing arranged.
-   *
-   * Names the unit rather than quoting a code, because there is no code. This
-   * does not admit anyone — it asks the household, and the gate stays shut until
-   * they answer.
-   */
+  /** Admits nobody: it asks the household, and the gate stays shut until they answer. */
   async requestWalkInVisitorPass(
     estateId: string,
     data: {
@@ -512,12 +468,7 @@ export const estateService = {
     );
   },
 
-  /**
-   * Opens the barrier for a walk-in the household has already approved.
-   * `occurredAt` carries the same meaning as on the queued check-in: if the
-   * connection drops between the approval and the barrier, the admission is
-   * queued and must be recorded as happening when the guard acted.
-   */
+  /** `occurredAt` is when the guard acted, as on the queued check-in. */
   async admitWalkInVisitorPass(
     estateId: string,
     passId: string,
@@ -532,7 +483,6 @@ export const estateService = {
     );
   },
 
-  /** Withdraws a walk-in the gate raised — wrong unit, or the visitor left. */
   async cancelWalkInVisitorPass(
     estateId: string,
     passId: string
@@ -592,11 +542,7 @@ export const estateService = {
     estateId: string,
     data: {
       householdId?: string;
-      /**
-       * The code the household gave the courier. When present the server derives
-       * the household from it and ignores `householdId`, so a guard holding a code
-       * cannot redirect the parcel to somebody the code does not name.
-       */
+      /** When present the server derives the household from it and ignores `householdId`. */
       code?: string;
       courier?: string;
       recipientName?: string;
@@ -616,13 +562,7 @@ export const estateService = {
     );
   },
 
-  /**
-   * Ask whether a code names a delivery this estate is expecting, BEFORE the
-   * parcel is taken in.
-   *
-   * Writes nothing, so a code is not spent by being checked — a guard may check
-   * one code, find the van is carrying a different parcel, and check another.
-   */
+  /** Writes nothing, so checking a code does not spend it. */
   async verifyDeliveryCode(
     estateId: string,
     code: string
@@ -687,15 +627,7 @@ export const estateService = {
     return safeCall(() => authFetch(`/estate/${estateId}/gates/${gateId}`, { method: 'DELETE' }));
   },
 
-  // --- Watch list -----------------------------------------------------------
-
-  /**
-   * The estate's do-not-admit list.
-   *
-   * Managing a rule, not enforcing one: the screen itself runs server-side at
-   * every point somebody can enter, so nothing here has to be remembered at a
-   * barrier for the list to work.
-   */
+  /** Screening runs server-side at every entry point; this only manages the list. */
   async listWatchlist(
     estateId: string,
     query: EstatePageQuery & {
@@ -707,13 +639,7 @@ export const estateService = {
     return safeCall(() => authFetch(`/estate/${estateId}/watchlist${toQuery(query)}`));
   },
 
-  /**
-   * Adds somebody to the list.
-   *
-   * Multipart because a photo is the only thing here that helps a guard
-   * recognise a person, and an estate usually has one. The reason is required by
-   * the API — an entry nobody can explain is one nobody can review.
-   */
+  /** Multipart for the photo; the API requires a reason. */
   async addWatchlistEntry(
     estateId: string,
     data: {
@@ -742,7 +668,7 @@ export const estateService = {
     );
   },
 
-  /** Takes an entry off the list. The row stays, so the record of the decision survives. */
+  /** The row stays, so the decision is kept on record. */
   async liftWatchlistEntry(
     estateId: string,
     entryId: string,
@@ -756,15 +682,7 @@ export const estateService = {
     );
   },
 
-  // --- Contractor passes (Enterprise) --------------------------------------
-
-  /**
-   * The estate's standing authorisations.
-   *
-   * The status filter is translated server-side, so "active" means still in
-   * force rather than still ACTIVE in a column — a lapsed authorisation must not
-   * be able to hide in that list where nobody looks at it again.
-   */
+  /** "active" is translated server-side to still in force, not the ACTIVE column. */
   async listContractorPasses(
     estateId: string,
     query: EstatePageQuery & { status?: ContractorPassStatus } = {}
@@ -773,11 +691,8 @@ export const estateService = {
   },
 
   /**
-   * Authorises somebody to arrive repeatedly.
-   *
-   * Enterprise-only, so a 403 `PLAN_UPGRADE_REQUIRED` is an expected answer
-   * rather than a fault — it carries both the tier required and the one the
-   * estate is on, which is what the upsell needs to say what they are buying.
+   * Enterprise-only: a 403 `PLAN_UPGRADE_REQUIRED` is expected and carries the required and current
+   * tiers.
    */
   async createContractorPass(
     estateId: string,
@@ -803,7 +718,7 @@ export const estateService = {
     );
   },
 
-  /** Withdraws an authorisation. The row stays, so the decision survives it. */
+  /** The row stays, so the decision is kept on record. */
   async revokeContractorPass(
     estateId: string,
     passId: string,
@@ -817,13 +732,7 @@ export const estateService = {
     );
   },
 
-  /**
-   * Checks details against the list instead of attempting a write.
-   *
-   * For a guard who would rather find out before they have told a visitor they
-   * are asking the household. Answering "nobody matched" tells the asker who the
-   * estate is watching, so it is access-checked like everything else here.
-   */
+  /** Access-checked: a "nobody matched" answer reveals who the estate is watching. */
   async screenWatchlist(
     estateId: string,
     query: { name?: string; phone?: string; plateNumber?: string }
@@ -836,16 +745,9 @@ export const estateService = {
     );
   },
 
-  // --- Emergency mustering ---------------------------------------------------
-
   /**
-   * Raises the alarm and takes the roll.
-   *
-   * The roll is built server-side in the same transaction that records the
-   * muster: everybody the estate believes is inside at this moment, taken once.
-   * A client that assembled the list itself would be assembling it from however
-   * old its cache happened to be, and the whole value of a roll call is that it
-   * is a snapshot taken at a stated time.
+   * The roll is built server-side in the same transaction, so it is a snapshot taken at a stated
+   * time.
    */
   async declareMuster(
     estateId: string,
@@ -859,17 +761,12 @@ export const estateService = {
     );
   },
 
-  /** The roll call in progress, or null — which is the ordinary case. */
+  /** Null is the ordinary case. */
   async getActiveMuster(estateId: string): Promise<ApiResponse<EmergencyMuster | null>> {
     return safeCall(() => authFetch(`/estate/${estateId}/emergency-musters/active`));
   },
 
-  /**
-   * Every roll call the estate has raised, newest first.
-   *
-   * Summaries only: a roll holds a person per line, so a page of ten of them is
-   * not something to fetch to draw a list.
-   */
+  /** Summaries only; a roll holds a line per person. */
   async listMusters(
     estateId: string,
     query: EstatePageQuery & { status?: MusterStatus } = {}
@@ -877,19 +774,11 @@ export const estateService = {
     return safeCall(() => authFetch(`/estate/${estateId}/emergency-musters${toQuery(query)}`));
   },
 
-  /** One roll call with its roll, for the console that is answering it. */
   async getMuster(estateId: string, musterId: string): Promise<ApiResponse<EmergencyMuster>> {
     return safeCall(() => authFetch(`/estate/${estateId}/emergency-musters/${musterId}`));
   },
 
-  /**
-   * A marshal's answer about one person.
-   *
-   * Returns the whole muster, not just the line, so the tally on screen always
-   * matches the roll beneath it — the numbers are the reason a marshal trusts
-   * the screen, and a locally-adjusted count would be the one thing they cannot
-   * check.
-   */
+  /** Returns the whole muster so the on-screen tally always matches the roll. */
   async updateRollEntry(
     estateId: string,
     musterId: string,
@@ -904,13 +793,7 @@ export const estateService = {
     );
   },
 
-  /**
-   * Re-reads the gate and adds anybody who came in since the roll was taken.
-   *
-   * Only ever adds: the roll call that does not know about the courier admitted
-   * at 14:05 will report the building clear while he is still in it. Existing
-   * lines, answered or not, are left alone.
-   */
+  /** Only adds lines; existing lines are left alone. */
   async addMusterArrivals(
     estateId: string,
     musterId: string
@@ -922,15 +805,7 @@ export const estateService = {
     );
   },
 
-  /**
-   * Stands the roll down.
-   *
-   * A note is required by the API whenever somebody is still unaccounted for.
-   * The form asks for it up front for that case rather than letting the manager
-   * find out from a 400 — an estate that searched and did not find somebody has
-   * to be able to stop, and the refusal would otherwise arrive at the worst
-   * possible moment.
-   */
+  /** The API requires a note while anybody is unaccounted for. */
   async closeMuster(
     estateId: string,
     musterId: string,
@@ -944,32 +819,15 @@ export const estateService = {
     );
   },
 
-  // --- Dwell analytics (Enterprise) -----------------------------------------
-
   /**
-   * Who the estate believes is still inside, and for how long.
-   *
-   * Enterprise, so a 403 `PLAN_UPGRADE_REQUIRED` is an expected answer rather
-   * than a fault — it carries both the tier required and the one the estate is
-   * on, which is what the upsell needs in order to say what is being bought.
-   *
-   * Every number on the payload was counted server-side. Nothing here recomputes
-   * elapsed time from `admittedAt`: the console and the office's own notification
-   * have to agree about how late somebody is, and two clocks is two answers.
+   * Enterprise: a 403 `PLAN_UPGRADE_REQUIRED` is expected. Never recompute elapsed time from
+   * `admittedAt`; the server's numbers must match the office's notification.
    */
   async getOnSiteBoard(estateId: string): Promise<ApiResponse<OnSiteBoard>> {
     return safeCall(() => authFetch(`/estate/${estateId}/dwell/on-site`));
   },
 
-  /**
-   * How long each standing authorisation's visits actually ran.
-   *
-   * The window is exclusive at the end, so a manager comparing two months back to
-   * back is not shown a visit twice. `sort` is the estate's own choice of what
-   * matters: dwell alone hides a contractor who comes twice a week and never
-   * leaves, and visits alone flatters one who arrives constantly and stays all
-   * day.
-   */
+  /** The window is exclusive at the end, so back-to-back months never count a visit twice. */
   async getAuthorisationDwell(
     estateId: string,
     query: EstatePageQuery & { from?: string; to?: string; sort?: 'dwell' | 'visits' } = {}
@@ -977,18 +835,12 @@ export const estateService = {
     return safeCall(() => authFetch(`/estate/${estateId}/dwell/authorisations${toQuery(query)}`));
   },
 
-  /**
-   * The estate's patrol checkpoints. Never their codes — the API does not send
-   * them, so there is nothing here that could leak one into a list render.
-   */
+  /** The API never sends checkpoint codes. */
   async listPatrolCheckpoints(estateId: string): Promise<ApiResponse<PatrolCheckpoint[]>> {
     return safeCall(() => authFetch(`/estate/${estateId}/patrol-checkpoints`));
   },
 
-  /**
-   * Add a checkpoint. The reply is the only time the code is ever readable, so
-   * the caller has to show it; nothing can fetch it back afterwards.
-   */
+  /** The reply is the only time the code is readable; nothing can fetch it back. */
   async createPatrolCheckpoint(
     estateId: string,
     data: { name: string; location?: string }
@@ -1015,11 +867,8 @@ export const estateService = {
   },
 
   /**
-   * Mint a new code for a checkpoint, invalidating the one on the wall.
-   *
-   * The whole security story rests on this being one call: a code photographed
-   * off the wall and texted to a colleague defeats the checkpoint, so a missing
-   * label or a guard who has left has to be cheap to answer.
+   * Invalidates the code on the wall; one cheap call because a photographed code defeats the
+   * checkpoint.
    */
   async reissuePatrolCheckpointCode(
     estateId: string,
@@ -1075,11 +924,8 @@ export const estateService = {
   },
 
   /**
-   * Which rounds were due, and which of them nobody walked.
-   *
-   * Counted server-side against the roster frozen when each round opened, so the
-   * report cannot disagree with the notice the office was already sent about the
-   * same night.
+   * Counted server-side against the roster frozen when each round opened, so it matches the notice
+   * already sent.
    */
   async getPatrolReport(
     estateId: string,
@@ -1088,13 +934,7 @@ export const estateService = {
     return safeCall(() => authFetch(`/estate/${estateId}/patrols/rounds${toQuery(query)}`));
   },
 
-  /**
-   * Record reaching a checkpoint, by the code printed at it.
-   *
-   * Deliberately not plan-gated on the API side: a guard at a checkpoint at
-   * 02:00 is the wrong person to hear about a billing state, and refusing the
-   * scan would lose the patrol record over it.
-   */
+  /** Deliberately not plan-gated: refusing a scan would lose the patrol record. */
   async scanPatrolCheckpoint(
     estateId: string,
     code: string,
@@ -1296,12 +1136,12 @@ export const estateService = {
     );
   },
 
-  /** Open incidents and repair tickets grouped by shared problem. Managers only. */
+  /** Managers only. */
   async getReportDigest(estateId: string): Promise<ApiResponse<ReportDigest>> {
     return safeCall(() => authFetch(`/estate/${estateId}/reports/digest`));
   },
 
-  /** Draft an announcement from the manager's notes. Nothing is posted. */
+  /** Nothing is posted. */
   async draftAnnouncement(
     estateId: string,
     notes: string,
@@ -1315,7 +1155,7 @@ export const estateService = {
     );
   },
 
-  /** Draft a neutral poll question and options from a topic. Nothing is posted. */
+  /** Nothing is posted. */
   async draftPoll(estateId: string, topic: string): Promise<ApiResponse<PollDraft>> {
     return safeCall(() =>
       authFetch(`/estate/${estateId}/polls/draft`, {
@@ -1477,23 +1317,14 @@ export const estateService = {
     );
   },
 
-  /**
-   * Who is coming today: invitations, standing authorisations, and parcels.
-   *
-   * ENTERPRISE. Every row carries its own deadline, so the screen renders what
-   * the estate has been told rather than deciding for itself who is due.
-   */
+  /** Enterprise. Each row carries its own deadline; render it rather than deciding who is due. */
   async getExpectedToday(estateId: string): Promise<ApiResponse<ExpectedToday>> {
     return safeCall(() => authFetch(`/estate/${estateId}/expected-today`));
   },
 
   /**
-   * Enter a household's guest list, once.
-   *
-   * One household and one deadline for the whole list, because that is how a
-   * list arrives: one resident is having the party. Each row becomes a real
-   * visitor pass — screened exactly as a single invitation is — and the reply
-   * reports the outcome of every row, so one bad line does not hide the rest.
+   * One household and one deadline for the list; each row becomes a screened visitor pass and the
+   * reply reports every row's outcome.
    */
   async importGuestList(
     estateId: string,
@@ -1512,12 +1343,8 @@ export const estateService = {
   },
 
   /**
-   * The identity document recorded against one visitor's pass, or null.
-   *
-   * Fetched for ONE pass at a time and never as part of a list: the response
-   * carries a short-lived signed URL to somebody's identity document, so the
-   * office only ever receives one it deliberately asked about. Null is a normal
-   * outcome — it means the guard recorded nothing, which is allowed.
+   * Fetch one pass at a time, never in a list: it carries a short-lived signed URL to an identity
+   * document. Null means the guard recorded nothing.
    */
   async getVisitorIdCheck(
     estateId: string,

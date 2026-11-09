@@ -57,8 +57,7 @@ const steps = [
 ];
 
 export const HowItWorks = () => (
-  // The id the navbar and footer link to (#how-it-works). It used to be "flow",
-  // so those links never went anywhere.
+  // The id the navbar and footer link to (#how-it-works).
   <section id="how-it-works" className="relative overflow-hidden px-4 py-20">
     <div className="relative z-10 mx-auto max-w-7xl">
       <SectionHeading
@@ -69,8 +68,7 @@ export const HowItWorks = () => (
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {steps.map((step) => (
           <MarketingCard key={step.number} className="p-6">
-            {/* Ordinal is decorative (the cards are already in order), but it
-                still meets the 3:1 large-text minimum in both themes. */}
+            {/* Decorative, but still meets the 3:1 large-text contrast minimum in both themes. */}
             <div className="mb-3 text-4xl font-bold text-muted-foreground/75" aria-hidden="true">
               {step.number}
             </div>

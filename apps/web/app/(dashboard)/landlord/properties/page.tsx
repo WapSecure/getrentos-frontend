@@ -55,7 +55,6 @@ export default function LandlordPropertiesPage() {
     }
   }, [searchParams]);
 
-  // Debounce the search input; reset to page 1 inside the timer callback.
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchQuery);
@@ -65,7 +64,6 @@ export default function LandlordPropertiesPage() {
   }, [searchQuery]);
 
   const [filter, setFilter] = useState<VerificationFilter>('all');
-  // Reopen the form when the landlord comes back from signing in with a draft.
   const [isAddModalOpen, setIsAddModalOpen] = useState(() =>
     hasSessionDraft(ADD_PROPERTY_DRAFT_KEY)
   );

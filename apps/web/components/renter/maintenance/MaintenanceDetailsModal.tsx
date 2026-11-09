@@ -94,7 +94,6 @@ export const MaintenanceDetailsModal = ({
         </DialogDescription>
 
         <div className="mt-4 space-y-4">
-          {/* Title & Status */}
           <div className="flex flex-wrap items-start justify-between gap-2">
             <h4 className="text-lg font-semibold text-foreground">{request.title}</h4>
             <div className="flex flex-wrap gap-2">
@@ -147,7 +146,6 @@ export const MaintenanceDetailsModal = ({
             </Alert>
           )}
 
-          {/* Details Grid */}
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="p-2 rounded-lg bg-secondary">
               <div className="flex items-center gap-1">
@@ -165,13 +163,11 @@ export const MaintenanceDetailsModal = ({
             </div>
           </div>
 
-          {/* Description */}
           <div className="p-3 rounded-lg bg-secondary">
             <span className="text-xs text-muted-foreground">Description</span>
             <p className="text-sm text-foreground mt-1">{request.description}</p>
           </div>
 
-          {/* Vendor Info */}
           {request.assignedVendorName && (
             <div className="p-3 rounded-lg bg-purple-subtle border border-purple/20">
               <div className="flex items-center gap-2 mb-2">
@@ -211,7 +207,6 @@ export const MaintenanceDetailsModal = ({
             </div>
           )}
 
-          {/* SLA Info */}
           {request.slaResponseTime !== undefined && (
             <Alert variant="info" icon={Clock} title="SLA response time">
               {request.slaResponseTime} hours

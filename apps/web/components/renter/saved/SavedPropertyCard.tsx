@@ -203,7 +203,6 @@ export const SavedPropertyCard = ({
     </>
   );
 
-  // List View
   if (viewMode === 'list') {
     return (
       <>

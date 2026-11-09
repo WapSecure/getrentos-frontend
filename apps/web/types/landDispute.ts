@@ -44,7 +44,6 @@ export interface LandDisputeEvent {
   createdAt: string;
 }
 
-/** A land dispute as a party sees it: no reporter identity, own evidence plus staff evidence. */
 export interface LandDispute {
   id: string;
   reference: string;

@@ -10,18 +10,11 @@ import { addBaseTiles } from '@/lib/mapTiles';
 
 const PRIMARY = '#0b6e4f';
 
-/** An area for people: m² for a plot, hectares for a farm. */
 export const formatArea = (sqm: number) =>
   sqm >= 10_000
     ? `${(sqm / 10_000).toFixed(2)} ha`
     : `${Math.round(sqm).toLocaleString('en-NG')} m²`;
 
-/**
- * A land plot's outline on a map. Read-only for buyers; with `onChange` the
- * owner draws it: each click on the map adds a corner, corners drag, and the
- * last one can be undone. Shows the drawn area so it can be checked against
- * the surveyed size.
- */
 export const ParcelBoundaryMap = ({
   corners,
   onChange,
@@ -30,7 +23,6 @@ export const ParcelBoundaryMap = ({
 }: {
   corners: BoundaryCorner[];
   onChange?: (corners: BoundaryCorner[]) => void;
-  /** Where to start when there is no outline yet (the property's pin). */
   center?: BoundaryCorner | null;
   height?: number;
 }) => {
@@ -84,7 +76,6 @@ export const ParcelBoundaryMap = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Redraw the outline and its corner handles whenever the corners change.
   useEffect(() => {
     const L = leafletRef.current;
     const map = mapRef.current;

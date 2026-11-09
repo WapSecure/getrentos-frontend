@@ -41,10 +41,8 @@ export const ShortletMarketplaceBrowser = ({
   initialCheckOut = '',
   hideHeader = false,
 }: {
-  /** Pre-filled dates (YYYY-MM-DD), e.g. the Detty December peak. */
   initialCheckIn?: string;
   initialCheckOut?: string;
-  /** For pages that bring their own heading. */
   hideHeader?: boolean;
 } = {}) => {
   const router = useRouter();
@@ -71,7 +69,6 @@ export const ShortletMarketplaceBrowser = ({
   const [checkOut, setCheckOut] = useState(initialCheckOut);
   const [sort, setSort] = useState<Sort>('newest');
   const [page, setPage] = useState(1);
-  // Arriving from an estate microsite (`?estate=<slug>`). Public and shareable.
   const searchParams = useSearchParams();
   const estateFromUrl = searchParams.get('estate')?.trim() ?? '';
 
@@ -128,8 +125,6 @@ export const ShortletMarketplaceBrowser = ({
     setPage(1);
   };
 
-  // The listing page is public and server-rendered; booking is what needs an
-  // account, and the page itself asks for sign-in at that step.
   const openListing = (listing: ShortletListing) => {
     router.push(`/shortlets/${listing.id}`);
   };
@@ -164,7 +159,6 @@ export const ShortletMarketplaceBrowser = ({
         />
       </div>
 
-      {/* Filters */}
       <div className="mb-3 grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-7">
         <div className="col-span-2 md:col-span-2 xl:col-span-1">
           <Select

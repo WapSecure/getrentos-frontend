@@ -43,7 +43,6 @@ export default function NotificationsPage() {
   const invalidateNotifications = () =>
     queryClient.invalidateQueries({ queryKey: renterKeys.notifications });
 
-  // Real-time: refresh the list when the backend pushes a new notification.
   useRealtimeEvent('notification:new', () => {
     invalidateNotifications();
   });

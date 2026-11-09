@@ -39,15 +39,6 @@ const marketBadge = (market: EstateLeadMarket) => {
   }
 };
 
-/**
- * Turn a source status into something a manager would say out loud.
- *
- * The stages arrive from six different tables with six vocabularies
- * (`offer_made`, `viewing_scheduled`, `pending`, `requested`…), and showing those
- * raw would make the inbox read like a database dump. Unknown values fall back to
- * the de-underscored form rather than being hidden, so a new source status is
- * still legible before anyone maps it.
- */
 const stageLabel = (stage: string) => {
   const labels: Record<string, string> = {
     inquiry: 'Asked about it',
@@ -121,15 +112,6 @@ const LeadRow = ({ lead }: { lead: EstateLead }) => (
   </div>
 );
 
-/**
- * The estate's enquiry inbox.
- *
- * The server scopes this to properties the estate currently holds marketing
- * rights for, so there is no client-side "should I be seeing this" logic to get
- * wrong: and the page says so, because a manager who cannot find an enquiry for
- * a property that merely sits inside the estate deserves an explanation rather
- * than an empty list.
- */
 export default function EstateLeadsPage() {
   const { estate } = useSelectedEstate();
   const estateId = estate?.id ?? '';
@@ -138,9 +120,6 @@ export default function EstateLeadsPage() {
   const [page, setPage] = useState(1);
 
   const leadsQuery = useQuery({
-    // The page is part of the key, so paging fetches the next 25 instead of
-    // reusing the first page from the cache. Invalidating the leads key still
-    // matches every page.
     queryKey: [...estateKeys.leads(estateId, market || undefined), page],
     queryFn: () =>
       unwrap(
@@ -157,8 +136,6 @@ export default function EstateLeadsPage() {
   const leads = useMemo(() => leadsQuery.data?.items ?? [], [leadsQuery.data]);
   const total = leadsQuery.data?.total ?? 0;
 
-  // Search is client-side because the page is already small (25 rows): a
-  // round-trip per keystroke would make the inbox feel slower than it is.
   const visible = useMemo(() => {
     const term = search.trim().toLowerCase();
     if (!term) return leads;

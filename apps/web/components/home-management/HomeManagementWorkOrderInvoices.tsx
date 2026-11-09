@@ -172,12 +172,7 @@ const canPayInvoice = (invoice: HomeManagementWorkOrderInvoice) =>
   invoice.status === 'APPROVED' &&
   (invoice.payoutStatus === 'PENDING' || invoice.payoutStatus === 'FAILED');
 
-/**
- * What the pay dialog says about how an invoice is paid (audit UX-16): the
- * split between held money and a card top-up, and a button that says exactly
- * what pressing it does. Without a preview (still loading, or it failed) it
- * falls back to describing the rule, not an amount it does not know.
- */
+// Without a preview (loading or failed) it describes the rule, not an amount it doesn't know.
 const vendorPayCopy = (
   invoice: HomeManagementWorkOrderInvoice,
   preview: { data?: HomeManagementInvoicePaymentPreview; isLoading: boolean; isError: boolean },
@@ -257,11 +252,7 @@ interface HomeManagementWorkOrderInvoicesProps {
   workOrder: HomeManagementWorkOrder;
 }
 
-/**
- * Keeps the vendor invoice decision record local to the work order it settles.
- * This deliberately stops at finance review: payment initiation and payout
- * reconciliation remain separate controlled workflows.
- */
+// Stops at finance review: payment initiation and payout reconciliation are separate controlled workflows.
 export function HomeManagementWorkOrderInvoices({
   workOrder,
 }: HomeManagementWorkOrderInvoicesProps) {
@@ -429,12 +420,9 @@ export function HomeManagementWorkOrderInvoices({
     },
   });
 
-  // Which company takes a top-up when held rent falls short (Paystack or Monnify).
   const providers = usePaymentProviders();
-  // The invoice open in the pay dialog, and why its chosen company could not take a top-up.
   const [payTarget, setPayTarget] = useState<HomeManagementWorkOrderInvoice | null>(null);
   const [providerError, setProviderError] = useState<string | null>(null);
-  // How paying splits between held money and a card top-up, shown before Pay.
   const paymentPreview = useQuery({
     queryKey: homeManagementKeys.invoicePaymentPreview(payTarget?.id ?? '', providers.provider),
     queryFn: () =>
@@ -461,8 +449,7 @@ export function HomeManagementWorkOrderInvoices({
       unwrap(homeManagementService.payWorkOrderInvoice(invoiceId, provider)),
     onMutate: () => setProviderError(null),
     onSuccess: async (result) => {
-      // The owner's held rent doesn't cover it: the shortfall is paid on
-      // Paystack, and the vendor is paid once it lands.
+      // Held rent doesn't cover it: the shortfall is paid on Paystack, and the vendor is paid once it lands.
       if (result.topUp) {
         window.location.assign(result.topUp.authorizationUrl);
         return;
@@ -480,7 +467,6 @@ export function HomeManagementWorkOrderInvoices({
       }
     },
     onError: (error, { provider }) => {
-      // That company cannot take the top-up right now: say so in the dialog, with the other one picked.
       const unavailable = providers.recover(error, provider);
       if (unavailable) setProviderError(unavailable);
       else toast.error(error.message || 'Unable to pay this invoice.');

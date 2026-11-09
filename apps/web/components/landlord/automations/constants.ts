@@ -39,5 +39,5 @@ export const CADENCE_LABELS: Record<BillingCycle, string> = {
   ANNUAL: 'Annual',
 };
 
-/** Merge fields the backend renders per recipient. */
+// Must match the merge fields the backend renders per recipient.
 export const MERGE_FIELDS = ['{{tenant_name}}', '{{property}}'];

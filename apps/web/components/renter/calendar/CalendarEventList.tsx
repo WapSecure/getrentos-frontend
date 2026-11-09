@@ -50,7 +50,6 @@ export const CalendarEventList = ({
 }: CalendarEventListProps) => {
   const [isExpanded, setIsExpanded] = useState(true);
 
-  // Sort events by date
   const sortedEvents = [...events].sort((a, b) => {
     return new Date(a.date).getTime() - new Date(b.date).getTime();
   });

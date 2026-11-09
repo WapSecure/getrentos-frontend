@@ -6,11 +6,7 @@ import { speakNow } from '@/lib/voice';
 
 const KEY = 'gate.speakResults';
 
-/**
- * "Speak results" at the gate desk: when on, each outcome is read aloud so
- * the guard can keep their eyes on the visitor. The choice is kept in this
- * browser. Same wording as the gate phone (@sureground/shared).
- */
+// Same wording as the gate phone (@sureground/shared).
 export function useGateVoice(result: GateOutcome | null, refusal: string | null) {
   const [enabled, setEnabled] = useState(() => {
     try {

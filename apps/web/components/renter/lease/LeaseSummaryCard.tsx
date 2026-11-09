@@ -44,7 +44,6 @@ export const LeaseSummaryCard = ({ lease }: LeaseSummaryCardProps) => {
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
       <Card>
         <div className="relative">
-          {/* Status Bar */}
           <div className={`h-1 ${getStatusColor()}`} />
 
           <div className="p-4">
@@ -101,7 +100,6 @@ export const LeaseSummaryCard = ({ lease }: LeaseSummaryCardProps) => {
               </div>
             </div>
 
-            {/* Landlord Info Mini */}
             <div className="mt-3 pt-3 border-t border-border flex items-center gap-3">
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
                 {lease.landlord.name.charAt(0)}

@@ -77,10 +77,8 @@ const propertyTypes: { value: PropertyType; label: string }[] = [
 
 const steps = ['Property info', 'Media', 'Verification', 'Review'];
 
-/** sessionStorage key for a property being added when the session ran out. */
 export const ADD_PROPERTY_DRAFT_KEY = 'landlord-add-property';
 
-/** What survives a session ending: the typed details. Files cannot be kept. */
 type PropertyDraft = Pick<
   FormState,
   | 'name'
@@ -103,7 +101,6 @@ interface FormState {
   city: string;
   state: string;
   country: string;
-  /** Set when the address was picked from Google. */
   placeId?: string;
   checked?: VerifiedAddress;
   description: string;
@@ -145,8 +142,6 @@ export const AddPropertyModal = ({
   const [form, setForm] = useState<FormState>(initialFormState);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  // If the session ends while the landlord is filling this in, keep the typed
-  // details so they are waiting after sign-in (photos and documents are added again).
   const draftRestored = useSessionExpiryDraft<PropertyDraft>(
     ADD_PROPERTY_DRAFT_KEY,
     () =>
@@ -176,8 +171,7 @@ export const AddPropertyModal = ({
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  // Closing (the X, Escape, a click outside) keeps what was typed, so reopening
-  // resumes where they left off; only a saved property clears the form.
+  // Closing keeps what was typed; only a saved property clears the form.
   const handleClose = () => {
     if (isSubmitting) return;
     setSubmitError(null);
@@ -521,7 +515,6 @@ const UploadField = ({
   required,
   accept,
 }: {
-  /** A photo of a document: advise a retake if it is blurry, dark, glared or too small. */
   checkPhotoQuality?: boolean;
   label: string;
   icon: React.ElementType;
@@ -564,18 +557,11 @@ const UploadField = ({
 };
 
 const MediaPreview = ({ file }: { file: File }) => {
-  // Created inside the effect, not a useState initialiser: under React
-  // StrictMode the effect runs, is cleaned up (revoking the URL), then runs
-  // again: an initialiser-created URL stays revoked and the preview renders
-  // as a broken image in dev.
+  // Created in the effect: under StrictMode an initialiser-created URL stays revoked and the preview breaks in dev.
   const [url, setUrl] = useState<string | null>(null);
   useEffect(() => {
     const objectUrl = URL.createObjectURL(file);
-    // The recommended useMemo form is wrong here: StrictMode's
-    // effect -> cleanup -> effect cycle revokes the memoised URL and never
-    // recreates it, so the preview renders as a broken image. Creating the URL
-    // in the effect and storing the result means the second pass mints a live
-    // one, which is why this state write is deliberate.
+    // Deliberate: StrictMode's effect-cleanup-effect cycle revokes a memoised URL without recreating it.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setUrl(objectUrl);
     return () => URL.revokeObjectURL(objectUrl);

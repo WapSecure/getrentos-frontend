@@ -30,15 +30,7 @@ function payoutState(status: string): 'paid' | 'failed' | 'pending' {
   return s === 'SUCCESS' ? 'paid' : s === 'FAILED' ? 'failed' : 'pending';
 }
 
-/**
- * An agency agent's own side of per-agent payouts: what they've earned from the
- * firm's commissions, their recent payouts, and the bank account it goes to.
- *
- * Rendered inside the agency portal, and also in the realtor and agent portals,
- * because many of a firm's agents are plain realtor/agent accounts that never
- * see /agency. There (`standalone`) it renders nothing unless the viewer belongs
- * to an agency, and brings its own heading and toast.
- */
+// Also rendered in the realtor and agent portals (`standalone`), since many agency agents never see /agency; there it renders nothing unless the viewer belongs to an agency.
 export function AgencyAgentSelfPayout({
   onToast,
   standalone = false,
@@ -95,10 +87,8 @@ export function AgencyAgentSelfPayout({
   const account = myAccountQuery.data;
   const summary = mySummaryQuery.data;
   const myPayouts = (myPayoutsQuery.data ?? []).slice(0, 5);
-  // The bank's name for the account comes back before saving (UX-28).
   const canSave = lookupAllowsSave(lookup);
 
-  // Outside the agency portal, only agency members (or agents still owed a share) see this.
   if (standalone && !(summary?.agencyName || (summary?.earned ?? 0) > 0)) return null;
 
   const cards = (

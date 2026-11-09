@@ -1,4 +1,4 @@
-/** Whose "Needs your attention" feed; `manager` is a property-management firm, `estate` one estate. */
+/** `manager` is a property-management firm, `estate` one estate. */
 export type AttentionPersona =
   | 'renter'
   | 'landlord'

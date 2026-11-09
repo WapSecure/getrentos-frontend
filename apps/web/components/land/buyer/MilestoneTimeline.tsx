@@ -35,7 +35,6 @@ const ICON_TONE = {
   WAIVED: 'text-info',
 } as const;
 
-/** Asks why a delivered step is wrong; the developer sees the reason and re-delivers. */
 const DisputeDialog = ({
   milestone,
   onClose,
@@ -113,12 +112,7 @@ const DisputeDialog = ({
   );
 };
 
-/**
- * Conveyance steps in order, with Confirm and Dispute on a delivered step.
- * Shared by developer purchases (`showRelease`: each confirmation releases a
- * share of escrow) and land resales (escrow releases once the required steps
- * are all confirmed).
- */
+// Developer purchases release a share of escrow per confirmation; resales release once every required step is confirmed.
 export const MilestoneTimeline = ({
   milestones,
   contractOpen,
@@ -129,14 +123,12 @@ export const MilestoneTimeline = ({
   pendingKey,
 }: {
   milestones: LandMilestone[];
-  /** False once the contract has ended: nothing can be confirmed or disputed. */
   contractOpen: boolean;
   /** Resales only block on earlier required steps. */
   requiredOnly?: boolean;
   showRelease?: boolean;
   onConfirm: (key: string) => Promise<unknown>;
   onDispute: (key: string, reason: string) => Promise<unknown>;
-  /** The step whose request is in flight. */
   pendingKey?: string | null;
 }) => {
   const [confirming, setConfirming] = useState<LandMilestone | null>(null);

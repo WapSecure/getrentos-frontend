@@ -11,12 +11,6 @@ export interface HubTab {
   icon: ElementType;
 }
 
-/**
- * Reads the active tab from `?tab=` and returns a setter that writes it back
- * (dropping the param entirely for the default tab, so the canonical URL
- * stays clean). Shared by the renter hub pages that merged several former
- * sidebar entries into one tabbed destination.
- */
 export function useHubTab(defaultTab: string, validTabs: readonly string[]) {
   const router = useRouter();
   const pathname = usePathname();

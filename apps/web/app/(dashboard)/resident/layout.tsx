@@ -19,7 +19,6 @@ export type ResidentUser = { fullName: string; email: string; role?: string; rol
 
 const ResidentUserContext = createContext<ResidentUser | null>(null);
 
-/** Returns the signed-in resident's profile, populated once by the resident layout's auth check. */
 export const useResidentUser = () => useContext(ResidentUserContext);
 
 export default function ResidentLayout({ children }: { children: ReactNode }) {

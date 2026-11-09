@@ -27,16 +27,10 @@ import { applyLastApplication } from '@sureground/shared';
 import { renterKeys } from '@/lib/queryKeys';
 import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
 
-/** Matches the `min` the move-in picker enforces, so the two cannot disagree. */
+// Must match the move-in picker's `min`.
 const todayIso = () => new Date().toISOString().slice(0, 10);
 
-/**
- * `availableFrom` is the listing's own date and is often already in the past
- * (a stale advert, or seed data). The picker sets `min` to today, but `min`
- * does NOT clamp a value that is pre-filled into it: so defaulting straight to
- * `availableFrom` let an application be submitted with a move-in date that had
- * already gone by. Fall back to the earliest date the picker actually offers.
- */
+// `min` doesn't clamp a pre-filled value, so a past `availableFrom` must not be the default.
 const earliestMoveInDate = (availableFrom?: string | null): string => {
   const today = todayIso();
   const available = availableFrom?.slice(0, 10);
@@ -72,7 +66,6 @@ const buildInitialData = (
   ],
 });
 
-/** Turns the API's refusal into a sentence that says what to change and where. */
 function refusalMessage(error: unknown): string {
   if (error instanceof ApiError && error.status === 400) {
     const body = error.details as { message?: string | string[] } | undefined;
@@ -105,22 +98,16 @@ export default function PropertyApplyPage() {
   });
   const property = propertyQuery.data ?? null;
 
-  // Gate the whole wizard on identity verification, rather than only rejecting
-  // at submit: a renter shouldn't fill four steps and upload documents only to
-  // be turned away at the end (and lose the draft).
   const kycQuery = useQuery({
     queryKey: ['kyc-status'],
     queryFn: () => unwrap(kycService.getStatus()),
   });
-  // What the renter told us last time, so this form starts filled in. A
-  // failure (or an API without the endpoint yet) just means an empty form.
   const lastDetailsQuery = useQuery({
     queryKey: renterKeys.lastApplicationDetails,
     queryFn: () => unwrapOptional(renterService.getLastApplicationDetails(), null),
     staleTime: 5 * 60_000,
     retry: false,
   });
-  // The server's own answer (review or NIN); the old review row only as a fallback.
   const identityApproved =
     kycQuery.data?.identityVerified ?? kycQuery.data?.identity?.status === 'APPROVED';
   const verificationHref = `${ROUTES.RENTER_SETTINGS}?tab=verification`;
@@ -130,7 +117,6 @@ export default function PropertyApplyPage() {
     mutationFn: (data: ApplicationFormData) =>
       unwrap(renterService.submitApplication(property?.id ?? '', data)),
     onMutate: () => setSubmitError(null),
-    // The API's validation messages name DTO fields; say which step to fix.
     onError: (error) => setSubmitError(refusalMessage(error)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: renterKeys.applications });

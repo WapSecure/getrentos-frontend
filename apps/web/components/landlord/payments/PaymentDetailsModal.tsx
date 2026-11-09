@@ -27,7 +27,6 @@ const escrowSteps: { key: EscrowStatus; label: string }[] = [
 
 const stepOrder: EscrowStatus[] = ['held', 'pending_review', 'released'];
 
-/** What each payout state means for the landlord, under its badge. */
 const payoutNote: Record<RentPayoutStatus, string> = {
   QUEUED: 'This rent is on an owner statement and waits to be sent to your bank.',
   SENT: 'The transfer is with the bank. It usually lands within a working day.',
@@ -120,8 +119,7 @@ export const PaymentDetailsModal = ({ payment, onClose }: PaymentDetailsModalPro
             resolved. Landlords cannot pay it out early or skip this step.
           </Alert>
 
-          {/* `releaseDate` is the scheduled release while the rent is held. Leaving
-              escrow is not the bank transfer itself, which follows separately. */}
+          {/* Leaving escrow on releaseDate is not the bank transfer, which follows separately. */}
           {payment.escrowStatus === 'released' && payment.payoutStatus ? (
             <div className="flex flex-col items-center gap-1.5 text-center">
               <Badge variant={rentPayoutStatusBadges[payment.payoutStatus].variant}>

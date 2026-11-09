@@ -8,10 +8,6 @@ import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { renterService } from '@/services/renterService';
 
-/**
- * "Your lease, explained": what the renter's own lease says, any notice served,
- * and advice on a pending renewal with a counter-offer they can copy and send.
- */
 export function LeaseGuideCard() {
   const [copied, setCopied] = useState(false);
   const {

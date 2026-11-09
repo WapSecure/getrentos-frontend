@@ -8,12 +8,6 @@ import { unwrap } from '@/lib/apiHelpers';
 import { homeManagementKeys } from '@/lib/queryKeys';
 import { homeManagementService } from '@/services/homeManagementService';
 
-/**
- * Checks on a vendor's invoice, shown where it is approved or rejected: the
- * sums, the agreed price, possible double billing, the usual price, paperwork
- * and the vendor's record, plus questions to put to the vendor. It never
- * decides. Hidden if it fails: the decision does not depend on it.
- */
 export function InvoiceCheckPanel({ invoiceId }: { invoiceId: string }) {
   const { data, isLoading } = useQuery({
     queryKey: homeManagementKeys.invoiceCheck(invoiceId),

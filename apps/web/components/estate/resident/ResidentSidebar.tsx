@@ -37,15 +37,10 @@ export const residentNavItems: NavItem[] = [
   { label: 'Amenities', href: ROUTES.RESIDENT_AMENITIES, icon: CalendarCheck },
   { label: 'Committee', href: ROUTES.RESIDENT_COMMITTEE, icon: Landmark },
   { label: 'Governance', href: ROUTES.RESIDENT_GOVERNANCE, icon: BookOpen },
-  // Last, and outside the groups above it, because it is not a place you browse
-  // to: it is where a banner sends you when the estate is calling the roll.
   { label: 'Emergency', href: ROUTES.RESIDENT_EMERGENCY, icon: Siren },
 ];
 
-// Positional slices, like the estate sidebar's: moving an item means moving the
-// boundaries. The emergency screen gets a group of its own rather than a place in
-// "Community", because it is not a place a resident browses to: it is where the
-// banner sends them when the estate is calling the roll.
+// Positional slices: moving an item means moving the boundaries.
 const baseResidentNavGroups = [
   { label: 'Overview', items: residentNavItems.slice(0, 2) },
   { label: 'Access and services', items: residentNavItems.slice(2, 8) },

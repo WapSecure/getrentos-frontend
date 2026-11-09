@@ -1,12 +1,4 @@
-/**
- * How guests reach a person. Set in the environment; anything left empty is
- * simply not shown, so the app never displays a made-up number.
- *
- *   NEXT_PUBLIC_SUPPORT_PHONE     e.g. +2348000000000 (calls)
- *   NEXT_PUBLIC_SUPPORT_WHATSAPP  e.g. +2348000000000 (WhatsApp chat)
- *   NEXT_PUBLIC_SUPPORT_HOURS     e.g. "Every day, 7am to 11pm"
- *   NEXT_PUBLIC_SUPPORT_EMAIL     defaults to the public support inbox
- */
+// Anything left empty in the environment is not shown, so the app never displays a made-up number.
 export const SUPPORT = {
   phone: process.env.NEXT_PUBLIC_SUPPORT_PHONE?.trim() || '',
   whatsapp: process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP?.trim() || '',
@@ -22,10 +14,7 @@ export const hasSupportLine = () => Boolean(SUPPORT.phone || SUPPORT.whatsapp);
 export const whatsappLink = (number: string, text?: string) =>
   `https://wa.me/${number.replace(/\D/g, '')}${text ? `?text=${encodeURIComponent(text)}` : ''}`;
 
-/**
- * A WhatsApp link for a Nigerian number as people type it (0803…, +234 803…,
- * 234803…). Null when it isn't a usable mobile number. Mirrors the mobile helper.
- */
+// Mirrors the mobile helper.
 export function nigerianWhatsappLink(phone?: string | null, text?: string): string | null {
   const digits = (phone ?? '').replace(/\D/g, '');
   const intl = digits.startsWith('234')

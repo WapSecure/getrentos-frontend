@@ -40,29 +40,12 @@ export default function GatemanVehiclesPage() {
   const [vehicleDescription, setVehicleDescription] = useState('');
   const [driverName, setDriverName] = useState('');
   const [purpose, setPurpose] = useState('VISITOR');
-  /**
-   * `null` means the guard has not touched the gate field, so it follows the
-   * console's post. An explicit `''` means they chose "Not specified" for this
-   * vehicle, which is a real answer and must not be overwritten.
-   */
+  // `null` follows the console's post; `''` is an explicit "Not specified" and must not be overwritten.
   const [gateId, setGateId] = useState<string | null>(null);
   const [photo, setPhoto] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
-  /**
-   * Set when the estate's watch list refused this vehicle.
-   *
-   * Kept apart from `error` on purpose: a blocked registration is the estate's
-   * answer, and the guard needs the plate and the reason in front of them to
-   * decide whether they are looking at the car the estate meant.
-   */
   const [refusal, setRefusal] = useState<WatchlistRefusal | null>(null);
   const [overrideError, setOverrideError] = useState<string | null>(null);
-  /**
-   * The estate's note about a vehicle it matched but did not refuse.
-   *
-   * The log went through, on purpose. A guard who reads this as a problem starts
-   * second-guessing an entry the estate already decided to allow.
-   */
   const [warning, setWarning] = useState<string | null>(null);
 
   const { estate, gate, isLoading: isEstateLoading } = useGatemanPost();
@@ -101,8 +84,6 @@ export default function GatemanVehiclesPage() {
       setVehicleDescription('');
       setDriverName('');
       setPurpose('VISITOR');
-      // Back to following the console's post, so the next vehicle does not have
-      // to re-pick the barrier the guard is still standing at.
       setGateId(null);
       setPhoto(null);
       setError(null);

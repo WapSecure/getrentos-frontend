@@ -2,12 +2,7 @@
 
 import { Clock } from 'lucide-react';
 
-/**
- * Shown while a recently changed payout account is inside its cooldown. The
- * backend refuses payouts to it until `holdUntil`; this says so, and why, so a
- * delayed payout is not a mystery — and so someone who did not make the change
- * knows to act.
- */
+// The backend refuses payouts to a recently changed account until `holdUntil`; saying so lets someone who didn't make the change act.
 export function PayoutHoldNotice({ holdUntil }: { holdUntil?: string | null }) {
   // The API only sends a hold while it is still running.
   if (!holdUntil) return null;
@@ -29,5 +24,5 @@ export function PayoutHoldNotice({ holdUntil }: { holdUntil?: string | null }) {
   );
 }
 
-/** One line telling people, before they save, what a change does (same words on mobile). */
+/** Same words as mobile. */
 export { PAYOUT_CHANGE_COOLDOWN_HINT } from '@sureground/shared';

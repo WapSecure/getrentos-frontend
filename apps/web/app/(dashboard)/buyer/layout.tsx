@@ -19,7 +19,6 @@ export type BuyerUser = { fullName: string; email: string; role?: string; roles?
 
 const BuyerUserContext = createContext<BuyerUser | null>(null);
 
-/** Returns the signed-in buyer's profile, populated once by the buyer layout's auth check. */
 export const useBuyerUser = () => useContext(BuyerUserContext);
 
 export default function BuyerLayout({ children }: { children: ReactNode }) {

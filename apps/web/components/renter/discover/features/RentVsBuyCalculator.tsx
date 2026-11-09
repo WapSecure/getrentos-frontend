@@ -94,7 +94,6 @@ export const RentVsBuyCalculator = ({ propertyPrice, monthlyRent }: RentVsBuyCal
           </div>
 
           <div className="p-5 space-y-5">
-            {/* Property Info Cards */}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="rounded-lg border border-info/20 bg-info-subtle p-3">
                 <div className="flex items-center gap-2 mb-1">
@@ -114,7 +113,6 @@ export const RentVsBuyCalculator = ({ propertyPrice, monthlyRent }: RentVsBuyCal
               </div>
             </div>
 
-            {/* Input Section */}
             <div className="space-y-3">
               <Field
                 label="Down payment"
@@ -145,7 +143,6 @@ export const RentVsBuyCalculator = ({ propertyPrice, monthlyRent }: RentVsBuyCal
               </div>
             </div>
 
-            {/* Results Section */}
             <div className="space-y-3">
               <h4 className="font-semibold text-foreground flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-primary" />

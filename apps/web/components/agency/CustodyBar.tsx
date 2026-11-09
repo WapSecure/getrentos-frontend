@@ -36,28 +36,7 @@ import {
   type ManagementMandateDto,
 } from '@/services/mandateService';
 
-/**
- * Who the manager is acting for, always on screen.
- *
- * A manager and an owner look at the same pages. The one thing that must never be
- * ambiguous is whose asset is on the page — every destructive action, every fee
- * and every statement belongs to somebody, and getting it wrong is not a styling
- * mistake. So the answer is not a field on a form, it is a bar that is always
- * there, naming the owner, the property and when the engagement ends.
- *
- * Three states, and the two unhappy ones say so out loud rather than degrading
- * into a blank bar:
- *
- * - **Nothing to manage.** No mandate at all. Says so, and links to how an
- *   engagement starts.
- * - **Nothing selected, but something to select.** Deliberately not defaulted
- *   when there is more than one client, so the first act is choosing.
- * - **Selected.** The owner, the property, the end date, and the scope's limits.
- *
- * It also flags a mandate that grants nothing. A FINANCE-only engagement passes
- * its own checks and then renders an empty portfolio, and an empty portfolio with
- * no explanation reads as a bug or as data loss.
- */
+// A FINANCE-only mandate passes its checks but renders an empty portfolio, so it is flagged rather than left to read as data loss.
 export function CustodyBar() {
   const { mandates, live, selected, select, loading, error } = useCustody();
   const [open, setOpen] = useState(false);

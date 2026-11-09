@@ -57,7 +57,6 @@ function MetricCard({ metric }: { metric: PortfolioMetric }) {
   );
 }
 
-/** Exact portfolio roll-up supplied by the dedicated dashboard API summary. */
 export function HomeManagementPortfolioAnalytics({
   summary,
   isLoading = false,

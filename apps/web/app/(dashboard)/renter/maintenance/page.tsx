@@ -51,7 +51,6 @@ export default function MaintenancePage() {
   }, [summaryKey, reloadKey]);
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 10;
-  // Reopen the report form when the renter comes back from signing in with a draft.
   const [showReportModal, setShowReportModal] = useState(() =>
     hasSessionDraft(REPORT_MAINTENANCE_DRAFT_KEY)
   );
@@ -182,14 +181,9 @@ export default function MaintenancePage() {
   };
 
   const handleMessage = () => {
-    // Keep the conversation on-platform (Sureground messaging) rather than opening
-    // the device's email client: in-app messaging is the channel the rest of the
-    // product points tenants to, and it keeps a record against the tenancy.
     router.push('/renter/messages');
   };
 
-  // Scheduled maintenance is derived from real requests that are still active
-  // (submitted / assigned / in progress): no fabricated entries.
   const scheduledMaintenance = requests
     .filter((r) => r.scheduledFor && r.status !== 'resolved' && r.status !== 'cancelled')
     .map((r) => ({

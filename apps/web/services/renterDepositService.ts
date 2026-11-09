@@ -57,12 +57,12 @@ export function disputeDeduction(
   );
 }
 
-/** GET /renter/deposits/plan: getting a held deposit back, worked out by Sureground. */
+/** Worked out by Sureground. */
 export interface DepositPlan {
   leaseId: string;
   overview: string;
   steps: { kind: 'do' | 'keep' | 'dispute'; text: string }[];
-  /** Deductions worth questioning, with the grounds and a drafted reason. */
+  /** With the grounds and a drafted reason. */
   disputes: {
     deductionId: string;
     amount: string;

@@ -15,10 +15,7 @@ import { DeliverMilestoneDialog } from './DeliverMilestoneDialog';
 import { MilestoneList } from './MilestoneList';
 import { ConditionsPanel } from '../closing/ConditionsPanel';
 
-/**
- * Conveyance steps on the sale of a whole parcel through a marketplace offer.
- * The buyer's money stays in escrow until they confirm every required step.
- */
+// The buyer's money stays in escrow until they confirm every required step.
 export const ResaleConveyanceView = ({ txId }: { txId: string }) => {
   const queryClient = useQueryClient();
   const { notify } = useNotify();
@@ -46,8 +43,7 @@ export const ResaleConveyanceView = ({ txId }: { txId: string }) => {
       input: LandMilestoneDeliverInput;
     }) => unwrap(landDeveloperService.deliverTransactionMilestone(txId, milestone.key, input)),
     onSuccess: (updated) => {
-      // By key: before the first action the steps are planned (`planned:<KEY>` ids)
-      // and acting creates every row, so the list is reloaded for the real ids.
+      // By key: planned steps have `planned:<KEY>` ids until the first action creates the rows, so the list reloads for the real ids.
       queryClient.setQueryData<LandMilestone[]>(key, (current) =>
         current?.map((milestone) => (milestone.key === updated.key ? updated : milestone))
       );

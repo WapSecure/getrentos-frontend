@@ -17,7 +17,7 @@ const typeColors: Record<string, string> = {
   personal: 'var(--primary)',
 };
 
-const HOURS = Array.from({ length: 12 }, (_, i) => i + 8); // 8 AM to 8 PM
+const HOURS = Array.from({ length: 12 }, (_, i) => i + 8);
 
 export const CalendarWeekView = ({ events, currentDate, onEventClick }: CalendarWeekViewProps) => {
   const weekStart = startOfWeek(currentDate, { weekStartsOn: 0 });
@@ -43,7 +43,6 @@ export const CalendarWeekView = ({ events, currentDate, onEventClick }: Calendar
     <div className="bg-card rounded-2xl border border-border overflow-hidden">
       <div className="overflow-x-auto">
         <div className="min-w-[700px]">
-          {/* Header */}
           <div className="grid grid-cols-8 border-b border-border">
             <div className="p-2 text-center text-xs font-medium text-muted-foreground w-16" />
             {days.map((day, index) => (
@@ -62,7 +61,6 @@ export const CalendarWeekView = ({ events, currentDate, onEventClick }: Calendar
             ))}
           </div>
 
-          {/* Time Grid */}
           <div className="relative">
             {HOURS.map((hour) => (
               <div key={hour} className="grid grid-cols-8 border-b border-border">

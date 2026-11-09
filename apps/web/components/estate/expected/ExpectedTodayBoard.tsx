@@ -8,19 +8,7 @@ import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
 
-/**
- * Who the estate expects today.
- *
- * Three answers on one screen because a guard asking "who is coming?" does not
- * care which table the answer came from, and the estate currently has to look in
- * three places. The rows are grouped by kind anyway — an invitation, a standing
- * authorisation and a parcel are handled differently at a barrier — but they
- * share a deadline and a household, which is what makes one board worth having.
- *
- * It is a HINT board, and it says so. Nothing here opens a barrier: the person
- * still presents a PIN, and this only tells the guard they are expected. A board
- * that admitted people would be a new way in, invented by a display.
- */
+// A hint board only: nothing here admits anyone; the person still presents a PIN.
 export const ExpectedTodayBoard = ({ estateId }: { estateId: string }) => {
   const boardQuery = useQuery({
     queryKey: estateKeys.expectedToday(estateId),
@@ -158,13 +146,6 @@ const Section = ({
   </div>
 );
 
-/**
- * One expected arrival.
- *
- * The deadline is the loudest thing after the name, because it is the only part
- * of the row the estate can be wrong about: a pass is a permission with an end,
- * and a guard reads "until Friday" differently from "by 18:00 today".
- */
 const Row = ({
   title,
   subtitle,

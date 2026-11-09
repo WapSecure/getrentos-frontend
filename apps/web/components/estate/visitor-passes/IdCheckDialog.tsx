@@ -16,32 +16,7 @@ import { estateService } from '@/services/estateService';
 import { unwrapOptional } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
 
-/**
- * The identity document recorded against one visitor's pass.
- *
- * ## Why this is a dialog rather than a column
- *
- * The document is fetched only when the office asks about ONE pass. Putting it on
- * the list would mean the passes list requesting a signed URL for every visitor's
- * identity document in a page — a far wider disclosure than anybody intended, and
- * a lot of signed URLs minted for rows nobody looked at. The query key is keyed by
- * the pass for the same reason.
- *
- * ## Why the office sees it and the household does not
- *
- * The document belongs to the GUEST. The office is who a dispute lands on and
- * already handles the estate's records; the resident issued the invitation but was
- * never shown the document and did not ask for it. Handing a household a
- * photograph of their visitor's licence is a disclosure the visitor never agreed
- * to, so `mayViewIdDocument` excludes them — and the server enforces that, not
- * this screen.
- *
- * ## What it says when there is nothing
- *
- * "No identity document was recorded" — with the reason it is not a failure. A
- * guard who reads absence as a rule starts turning people away over paperwork,
- * which turns the estate's policy into ours.
- */
+// Fetched per pass, never on the list, so identity documents aren't signed for every row; the server decides who may view them.
 export const IdCheckDialog = ({
   estateId,
   passId,
@@ -55,23 +30,8 @@ export const IdCheckDialog = ({
 
   const checkQuery = useQuery({
     queryKey: estateKeys.visitorIdCheck(estateId, passId),
-    /**
-     * `unwrapOptional`, NOT `unwrap` — and this is the whole "no document" case.
-     *
-     * Nest answers a handler that returns `null` with 200 and NO BODY. `unwrap`'s
-     * `as T` cast hides that the runtime value is `undefined`, and react-query
-     * rejects `undefined` outright with "Query data cannot be undefined" — so the
-     * ordinary, allowed outcome of "the guard recorded nothing" arrived as
-     * `isError` and the dialog said "That record could not be read just now."
-     *
-     * The first version of this used `unwrap` and the browser found it
-     * immediately. E3 hit the identical trap on the emergency roll call and wrote
-     * it into the programme doc; every future "null means none" endpoint has to
-     * use this helper.
-     */
+    /** `unwrapOptional`, not `unwrap`: Nest answers null with an empty 200, which react-query rejects as undefined. */
     queryFn: () => unwrapOptional(estateService.getVisitorIdCheck(estateId, passId), null),
-    // Only fetched when the office opens the document. Nothing about this pass's
-    // identity document is loaded by rendering a list.
     enabled: open,
   });
 
@@ -122,10 +82,7 @@ export const IdCheckDialog = ({
                 </div>
 
                 {check.documentUrl ? (
-                  /* A plain <img>, not next/image: the src is a short-lived signed
-                     URL for a private object, so there is nothing for the
-                     optimizer to cache and a cached derivative of somebody's
-                     identity document is the last thing to leave lying around. */
+                  /* Plain <img>, not next/image: a short-lived signed URL to an identity document must not be cached by the optimizer. */
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img
                     src={check.documentUrl}

@@ -16,9 +16,7 @@ export const landSiteTourKeys = {
   attending: ['land', 'tours', 'attending'] as const,
 };
 
-/** Live guided video tours: the buyer's, the host's and the attendee's calls. */
 export const landSiteTourService = {
-  // ─── The buyer ─────────────────────────────────────────────────────────────
   mine: () => safeCall(() => authFetch<LandSiteTour[]>('/buyer/land/tours')),
 
   request: (input: {
@@ -60,7 +58,6 @@ export const landSiteTourService = {
       })
     ),
 
-  // ─── The host ──────────────────────────────────────────────────────────────
   hosting: () => safeCall(() => authFetch<LandSiteTour[]>('/owner/land/tours')),
 
   propose: (tourId: string, slots: string[], meetingUrl: string) =>
@@ -76,7 +73,6 @@ export const landSiteTourService = {
       post<LandSiteTour>(`${tourPath('owner', tourId)}/complete`, { notes: notes.trim() })
     ),
 
-  // ─── Either side ───────────────────────────────────────────────────────────
   cancel: (side: 'buyer' | 'owner', tourId: string, reason: string) =>
     safeCall(() =>
       post<LandSiteTour>(`${tourPath(side, tourId)}/cancel`, { reason: reason.trim() })

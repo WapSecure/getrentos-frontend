@@ -20,12 +20,7 @@ const formatDate = (iso: string) =>
 
 const MIN_REASON = 10;
 
-/**
- * The surveyor on a case compares the parcel's outline with the survey plan
- * and signs off the version they checked, or returns it with what is wrong.
- * Survey-plan outlines show the beacons in the plan's own grid so they can be
- * read against the plan line by line.
- */
+// Survey-plan outlines show the beacons in the plan's own grid so they can be read against the plan.
 export function BoundarySignOffPanel({
   seatId,
   versions,
@@ -34,7 +29,6 @@ export function BoundarySignOffPanel({
 }: {
   seatId: string;
   versions: LandBoundaryVersion[];
-  /** False until the seat is active and the conflict declaration is made. */
   canDecide: boolean;
   onUpdated: (next: LandReviewCase) => void;
 }) {

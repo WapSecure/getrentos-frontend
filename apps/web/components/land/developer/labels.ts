@@ -63,11 +63,10 @@ export const TITLE_EVENT_KIND_LABELS: Record<LandTitleEventKind, string> = {
   OTHER: 'Other',
 };
 
-/** Falls back to a readable form of an unknown enum value. */
 export const labelOf = <K extends string>(table: Record<K, Labelled>, value: string): Labelled =>
   table[value as K] ?? { label: value.toLowerCase().replace(/_/g, ' '), variant: 'neutral' };
 
-/** Milestones the developer may only deliver once the plot is paid in full. */
+/** The developer may deliver these only once the plot is paid in full. */
 export const FULL_PAYMENT_MILESTONES = new Set([
   'PHYSICAL_ALLOCATION',
   'DEED_OF_ASSIGNMENT',

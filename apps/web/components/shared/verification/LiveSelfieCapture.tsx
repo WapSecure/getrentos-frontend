@@ -6,7 +6,6 @@ import type { SmileLivenessSession } from '@/services/trustService';
 
 type CaptureImage = { image: string; image_type_id: number };
 
-/** Smile ID image types the capture produces (selfie and liveness frames). */
 const SELFIE = 2;
 const LIVENESS = 6;
 
@@ -16,7 +15,6 @@ function jpegFrom(base64: string, name: string): File {
   return new File([bytes], name, { type: 'image/jpeg' });
 }
 
-/** Why the browser can't run the live selfie, or null when it can. */
 export function liveCaptureBlocker(): string | null {
   if (typeof window === 'undefined') return null;
   if (!window.isSecureContext) return 'The live selfie needs a secure (https) connection.';
@@ -27,14 +25,7 @@ export function liveCaptureBlocker(): string | null {
   return null;
 }
 
-/**
- * Smile ID's official browser capture (`<smart-camera-web>` from
- * @smileid/web-sdk): it guides the person through a selfie and a series of
- * liveness frames from the camera. The frames go straight to Smile's
- * SmartSelfie registration with the short-lived token our server issued;
- * Smile decides, and tells our server by signed webhook. Nothing this
- * component reports can pass the check: `onSubmitted` only means "sent".
- */
+// Frames go straight to Smile with our short-lived token, and Smile tells our server by signed webhook: `onSubmitted` only means "sent", never "passed".
 export function LiveSelfieCapture({
   session,
   onSubmitted,

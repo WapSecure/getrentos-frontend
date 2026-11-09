@@ -1,8 +1,4 @@
-/**
- * Property types shown in the product use human-readable labels, while the
- * API deliberately accepts Prisma enum values. Keep that conversion at the
- * client boundary so labels such as `Land` never leak into an API request.
- */
+// The API takes Prisma enum values: convert at the client boundary so labels such as `Land` never reach a request.
 export const PROPERTY_TYPE_OPTIONS = [
   { value: 'APARTMENT', label: 'Apartment' },
   { value: 'DUPLEX', label: 'Duplex' },
@@ -27,13 +23,11 @@ const API_TO_DISPLAY = Object.fromEntries(
   PROPERTY_TYPE_OPTIONS.map(({ value, label }) => [value, label])
 ) as Record<ApiPropertyType, DisplayPropertyType>;
 
-/** Converts a display label or enum value to the exact API enum value. */
 export const toApiPropertyType = (value: string | undefined): ApiPropertyType | undefined => {
   if (!value) return undefined;
   return DISPLAY_TO_API[value] ?? DISPLAY_TO_API[value.toLowerCase()];
 };
 
-/** Converts an API enum value to the label used in cards, filters and forms. */
 export const toDisplayPropertyType = (value: string | undefined): string => {
   if (!value) return '';
   const apiValue = toApiPropertyType(value);

@@ -35,9 +35,6 @@ export const EstateNavbar = ({ user }: EstateNavbarProps) => {
       >
         <div className="px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center gap-2 h-16">
-            {/* Phone widths: the wordmark collapses to the mark (still named for
-                screen readers), the switcher truncates, and the theme toggle
-                moves into the menu, so the bar never scrolls sideways. */}
             <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-4">
               <Logo size="md" className="[&>span]:sr-only sm:[&>span]:not-sr-only" />
               <EstateSwitcher />

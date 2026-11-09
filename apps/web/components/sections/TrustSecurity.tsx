@@ -2,11 +2,7 @@ import Link from 'next/link';
 import { Shield, Lock, CreditCard, FileCheck, Eye, Users } from 'lucide-react';
 import { MarketingCard, SectionHeading } from './primitives';
 
-/**
- * Each item here is something the platform does today. Claims of a grade or a
- * licence ("bank-grade", "regulated", "AI-powered", "24/7") are left out on
- * purpose: they can't be shown, and a trust product can't afford to overstate.
- */
+// No grade or licence claims ("bank-grade", "regulated", "AI-powered", "24/7"): they can't be shown.
 const trustFeatures = [
   {
     icon: Shield,

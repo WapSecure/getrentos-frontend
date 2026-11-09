@@ -25,11 +25,6 @@ interface ManageGatesModalProps {
   onClose: () => void;
 }
 
-/**
- * Compact add/list/delete surface for an estate's gates, reachable from both
- * estate/vehicles and estate/deliveries: small enough that it doesn't
- * warrant a dedicated route.
- */
 export const ManageGatesModal = ({ isOpen, estateId, onClose }: ManageGatesModalProps) => {
   const queryClient = useQueryClient();
   const [name, setName] = useState('');

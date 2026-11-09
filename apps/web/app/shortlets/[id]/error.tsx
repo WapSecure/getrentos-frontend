@@ -3,7 +3,6 @@
 import { useEffect } from 'react';
 import { PageErrorState } from '@sureground/ui';
 
-/** Segment error boundary for individual shortlet listing pages. */
 export default function ShortletError({
   error,
   reset,

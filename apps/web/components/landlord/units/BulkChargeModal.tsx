@@ -267,8 +267,7 @@ export function BulkChargeModal({ isOpen, onClose, properties }: BulkChargeModal
                         </div>
                       </div>
                       <span className="text-xs text-muted-foreground shrink-0">
-                        {/* The rent that will be charged is the agreed one; the
-                            asking rent only stands in before a lease exists. */}
+                        {/* The agreed rent is charged; the asking rent stands in only before a lease exists. */}
                         {unit.leaseRent !== undefined || unit.askingRent !== undefined
                           ? `${formatCurrency((unit.leaseRent ?? unit.askingRent)!, { compact: true })}${rentSuffix(unit.leaseRentPeriod ?? unit.askingRentPeriod)}`
                           : 'Not priced yet'}

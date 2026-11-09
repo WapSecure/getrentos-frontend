@@ -10,7 +10,6 @@ import {
 } from '@/lib/apiHelpers';
 import { TIER_LABELS } from './trustTiers';
 
-/** Static copy for the per-action verification guards. */
 const BASE_COPY: Record<
   Exclude<VerificationReason, 'TRUST_TIER_REQUIRED'>,
   { message: string; cta: string }
@@ -29,7 +28,6 @@ const BASE_COPY: Record<
   },
 };
 
-/** Builds the copy for the trust-tier guard, tuned to whether tier 2 (identity) or 3+ (financial) is required. */
 function tierCopy(tierRequired?: number, currentTier?: number): { message: string; cta: string } {
   const required = tierRequired ?? 2;
   const current = currentTier ?? 0;
@@ -51,12 +49,7 @@ interface NoticeMeta {
   withheldReason?: TrustWithheldReason;
 }
 
-/**
- * Copy for a tier requirement that the user already satisfies on evidence but
- * which something else is holding back (backend `withheldReason`). Sending them
- * to verification would be a loop: they hold the evidence already: so the CTA
- * points at the trust profile, which shows what the tier is actually waiting on.
- */
+/** The user already holds the evidence, so sending them to verification would loop: point at the trust profile instead. */
 const WITHHELD_COPY: Record<TrustWithheldReason, { message: string; cta: string }> = {
   SCORE_BELOW_TIER3_MIN: {
     message:
@@ -85,7 +78,6 @@ const WITHHELD_COPY: Record<TrustWithheldReason, { message: string; cta: string 
   },
 };
 
-/** Accepts either a thrown VerificationRequiredError (unwrap/mutation) or a failed safeCall ApiResponse. */
 function readMeta(error: unknown): NoticeMeta | null {
   if (error instanceof VerificationRequiredError) {
     return {
@@ -112,29 +104,17 @@ function readMeta(error: unknown): NoticeMeta | null {
 }
 
 interface VerificationRequiredNoticeProps {
-  /** The caught error / failed response from a gated action: renders nothing unless it's a verification/tier gate. */
   error: unknown;
-  /** Destination for ownership-proof upsell (the property page). */
   href: string;
-  /** Destination for identity/license/trust-tier upsell (the persona's Verification Center). Falls back to `href`. */
   verificationHref?: string;
-  /**
-   * Destination for the score-withheld upsell (the persona's trust profile,
-   * which shows the score breakdown). Falls back to `verificationHref`.
-   */
   scoreHref?: string;
 }
 
-/**
- * True when `error` is a verification/trust-tier gate that this notice renders.
- * Callers use it to keep the gate to the notice alone, instead of repeating it
- * as a toast or a field error.
- */
+/** Callers use it to show the gate in this notice alone, not also as a toast or field error. */
 export function isVerificationGateError(error: unknown): boolean {
   return Boolean(readMeta(error)?.reason);
 }
 
-/** Inline callout shown near a gated action's submit button when it 403s for lack of verification or trust tier. */
 export const VerificationRequiredNotice = ({
   error,
   href,
@@ -161,7 +141,6 @@ export const VerificationRequiredNotice = ({
     const copy = BASE_COPY[meta.reason];
     message = copy.message;
     cta = copy.cta;
-    // Ownership proof lives on the property page; identity/license are trust upsells.
     destination = meta.reason === 'OWNERSHIP_PROOF_REQUIRED' ? href : (verificationHref ?? href);
   }
 

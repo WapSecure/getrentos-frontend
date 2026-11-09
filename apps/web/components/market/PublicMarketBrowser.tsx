@@ -41,8 +41,7 @@ import { SaveListingButton } from './SaveListingButton';
 import { ListingComparisonDialog } from './ListingComparisonDialog';
 import { trustChainLabel } from '@sureground/shared';
 
-// Shared with the server component that pre-renders the first page, so the two
-// cannot ask for different page sizes.
+// Shared with the server component that pre-renders the first page, so both ask for the same page size.
 const PAGE_SIZE = PUBLIC_MARKET_PAGE_SIZE;
 
 const SORTS: Record<PublicMarket, { value: string; label: string }[]> = {
@@ -61,7 +60,6 @@ const SORTS: Record<PublicMarket, { value: string; label: string }[]> = {
 const humaniseSlug = (slug: string) =>
   slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
-/** Spelled out rather than `noun + 's'`: "propertys" is not a word. */
 const NOUNS: Record<PublicMarket, { one: string; many: string }> = {
   rent: { one: 'rental', many: 'rentals' },
   sale: { one: 'property', many: 'properties' },
@@ -132,11 +130,7 @@ const ListingCard = ({
         </p>
 
         <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-          {/*
-          Falsy, not just nullish: many properties are listed without bedroom or
-          size data, and "0 bed" reads as a claim about the property rather than
-          as a missing field. Better to show nothing than to show a wrong number.
-        */}
+          {/* Falsy, not nullish: many listings have no bedroom or size data, and "0 bed" reads as a claim. */}
           {listing.bedrooms ? (
             <span className="flex items-center gap-1">
               <BedDouble className="h-3.5 w-3.5" />
@@ -169,8 +163,6 @@ const ListingCard = ({
               </span>
             )}
           </p>
-          {/* Browsing is open to anyone; contacting the landlord or making an offer
-            is not: the detail page says so and carries the sign-in step. */}
           <Link
             href={href}
             className="inline-flex items-center gap-1 rounded-sm text-sm font-semibold text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
@@ -207,7 +199,6 @@ function mapMedia(listing: PublicListingCard) {
       />
     );
   }
-  // No photo: a short strip that says so, not a photo-sized block of grey.
   return (
     <div className="flex h-24 w-full items-center justify-center gap-2 bg-muted text-sm text-muted-foreground">
       <ImageOff className="h-4 w-4" aria-hidden />
@@ -261,7 +252,6 @@ const FilterToggle = ({
   onChange: (value: boolean) => void;
 }) => <Checkbox checked={checked} onCheckedChange={onChange} label={label} />;
 
-/** Waits for typing to pause before a value is used in a request. */
 function useDebouncedValue<T>(value: T, delayMs: number): T {
   const [debounced, setDebounced] = useState(value);
   useEffect(() => {
@@ -271,17 +261,7 @@ function useDebouncedValue<T>(value: T, delayMs: number): T {
   return debounced;
 }
 
-/**
- * Public browse for rentals and sales.
- *
- * One component for both markets because the alternative is two pages that look
- * the same and are maintained separately. The differences are parameterised
- * (sort vocabulary, price period, whether media exists) rather than duplicated.
- *
- * `estate` comes from the URL: this is where a public estate storefront's "For
- * rent" / "For sale" links land, so the filter has to survive the click: and the
- * banner has to be visible, or a visitor cannot tell why the market is so small.
- */
+// `estate` comes from the URL (an estate storefront's links), so the filter and its banner must survive the click.
 export const PublicMarketBrowser = ({
   market,
   initialData,
@@ -342,8 +322,7 @@ export const PublicMarketBrowser = ({
   const { data, isLoading, isError } = useQuery({
     queryKey: ['public-market', market, filters],
     queryFn: () => unwrap(publicMarketService.list(market, filters)),
-    // Only the default view may start from the server payload: seeding a filtered
-    // query with page 1 of everything would show the wrong listings while loading.
+    // Only the default view may start from the server payload: a filtered query seeded with page 1 of everything shows the wrong listings.
     initialData: isDefaultView ? initialData : undefined,
     enabled: !priceRangeInvalid,
     placeholderData: keepPreviousData,

@@ -21,15 +21,6 @@ export const metadata: Metadata = {
 
 const FIRST_PAGE_SIZE = 12;
 
-/**
- * Fetch the first page on the server.
- *
- * This is a public directory, so the point of it is to be found: rendering the
- * estate names and cities into the HTML is what lets a crawler index them. It
- * also means the first paint already has content instead of a skeleton.
- * Failures return null: the client refetches, so a directory page should
- * degrade to "loading" rather than error.
- */
 async function fetchFirstPage(): Promise<Paginated<EstateDirectoryEntry> | null> {
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';

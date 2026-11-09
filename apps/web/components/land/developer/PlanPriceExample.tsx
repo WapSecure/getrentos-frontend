@@ -8,7 +8,7 @@ import { priceExample } from './planPricing';
 
 interface PlanPriceExampleProps {
   terms: Pick<LandPaymentPlanTerms, 'durationMonths' | 'initialDepositBps' | 'priceUpliftBps'>;
-  /** Layout fees per plot (documentation + survey + levy). */
+  /** Per plot: documentation + survey + levy. */
   fees: number;
   plotPrice: number;
   onPlotPriceChange?: (price: number) => void;
@@ -21,7 +21,6 @@ const Row = ({ label, value, strong }: { label: string; value: string; strong?: 
   </div>
 );
 
-/** What a buyer would pay under these terms, worked through on one plot price. */
 export const PlanPriceExample = ({
   terms,
   fees,

@@ -5,7 +5,7 @@ import { ReviewerAuthGate } from '@/components/land/reviews/ReviewerAuthGate';
 
 export const metadata: Metadata = { title: 'Land Watch', robots: { index: false, follow: false } };
 
-/** Land Watch is for whoever owns the land: an owner's parcel or a buyer's plot, any role. */
+// Any role: access follows land ownership.
 export default function LandWatchLayout({ children }: { children: ReactNode }) {
   return (
     <main className="min-h-screen bg-background pt-16">

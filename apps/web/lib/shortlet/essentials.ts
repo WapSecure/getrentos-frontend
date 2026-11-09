@@ -1,4 +1,4 @@
-/** Amenities hosts can tick; guests filter on the same names. */
+/** Guests filter on the same names. */
 export const SHORTLET_AMENITIES = [
   'WiFi',
   'Parking',
@@ -33,7 +33,6 @@ export const INTERNET_TYPE_LABEL: Record<string, string> = {
   SATELLITE: 'Satellite (e.g. Starlink)',
 };
 
-/** "24 hours a day" or "About 16 hours a day". */
 export const powerHoursLabel = (hours: number) =>
   hours >= 24
     ? 'Power 24 hours a day'

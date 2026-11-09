@@ -147,7 +147,6 @@ export const ApplicationCard = ({
     );
   }
 
-  // Grid view
   return (
     <div className="group overflow-hidden rounded-xl border border-border bg-card shadow-xs transition-[border-color,box-shadow] hover:border-foreground/15 hover:shadow-sm">
       <div className="relative flex h-32 items-center justify-center bg-muted">

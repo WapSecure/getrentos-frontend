@@ -15,11 +15,6 @@ const TYPE_LABEL = {
   DOCUMENT_PICKUP: 'Document pickup',
 } as const;
 
-/**
- * "Today's route": the agent's visits for today (and anything overdue) in a
- * drivable order, booked inspections kept, with arrival times and a Google
- * Maps link. Hidden when there is nothing to visit.
- */
 export function TodaysRoute() {
   const [start, setStart] = useState<{ latitude: number; longitude: number } | undefined>();
   const [locating, setLocating] = useState(false);

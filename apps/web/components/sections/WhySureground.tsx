@@ -1,11 +1,6 @@
 import { Banknote, Layers, Lock, BadgeCheck } from 'lucide-react';
 import { MarketingCard, SectionHeading } from './primitives';
 
-/**
- * Replaces a strip of made-up platform metrics (users, properties, volume). These
- * are facts about how the product works, so they stay true without a data feed.
- * When real usage numbers exist, this is the place to show them.
- */
 const reasons = [
   {
     icon: Layers,

@@ -18,7 +18,6 @@ import { bpsToPercent, percentToBps, planTermProblems } from './planPricing';
 interface PlanFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** Editing this plan; omit to create one. */
   plan?: LandPaymentPlan | null;
   fees: number;
   samplePlotPrice: number;
@@ -229,7 +228,6 @@ const PlanForm = ({
   );
 };
 
-/** Create or edit a payment plan, with a live example of what a buyer would pay. */
 export const PlanFormDialog = ({ open, onOpenChange, plan, ...rest }: PlanFormDialogProps) => (
   <Dialog open={open} onOpenChange={onOpenChange}>
     <DialogContent className="max-w-2xl">

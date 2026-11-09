@@ -7,7 +7,6 @@ import { Switch } from '@sureground/ui';
 interface MultiRoleToggleProps {
   enabled: boolean;
   onToggle: (value: boolean) => void;
-  /** 'card' = standalone panel; 'bar' = compact inline control for a footer action bar. */
   variant?: 'card' | 'bar';
 }
 

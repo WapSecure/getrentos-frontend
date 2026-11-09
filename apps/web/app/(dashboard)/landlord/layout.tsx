@@ -19,7 +19,6 @@ export type LandlordUser = { fullName: string; email: string; role?: string; rol
 
 const LandlordUserContext = createContext<LandlordUser | null>(null);
 
-/** Returns the signed-in landlord's profile, populated once by the landlord layout's auth check. */
 export const useLandlordUser = () => useContext(LandlordUserContext);
 
 export default function LandlordLayout({ children }: { children: ReactNode }) {
@@ -40,9 +39,7 @@ export default function LandlordLayout({ children }: { children: ReactNode }) {
 
       const parsedUser = getStoredUser<LandlordUser>();
       if (parsedUser) {
-        // A property manager works here too, on the properties a mandate gives
-        // them: the backend scopes every /landlord route to those (see
-        // PROPERTY_CONTROLLER_ROLES), so the workspace is the same one.
+        // Property managers share this workspace; the backend scopes /landlord routes to their mandates.
         const hasLandlordRole = (parsedUser.roles || []).some((r) =>
           ['landlord', 'manager'].includes(BACKEND_ROLE_TO_ID[r])
         );

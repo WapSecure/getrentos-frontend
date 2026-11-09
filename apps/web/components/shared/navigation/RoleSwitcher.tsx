@@ -11,7 +11,6 @@ interface RoleSwitcherProps {
   currentRoleId?: string;
 }
 
-/** The account's roles as menu items; renders inside an AccountMenu. */
 export const RoleSwitcher = ({ currentRoleId }: RoleSwitcherProps) => {
   const router = useRouter();
 
@@ -35,7 +34,6 @@ export const RoleSwitcher = ({ currentRoleId }: RoleSwitcherProps) => {
 
   return (
     <>
-      {/* A single-role account has nothing to switch to, but can still add a role. */}
       {userRoleIds.length > 1 && (
         <>
           <DropdownMenuLabel className="px-3 pb-1 pt-2 text-xs font-medium text-muted-foreground">

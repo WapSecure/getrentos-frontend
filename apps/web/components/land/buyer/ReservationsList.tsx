@@ -23,7 +23,6 @@ import { StartPurchaseDialog } from './StartPurchaseDialog';
 import { countdownTo, plotLabel } from './landSaleLogic';
 import { useNow } from './useNow';
 
-/** My plot holds: live ones with a countdown first, the history after. */
 export const ReservationsList = () => {
   const queryClient = useQueryClient();
   const now = useNow();

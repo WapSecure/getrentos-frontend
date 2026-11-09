@@ -2,8 +2,6 @@ import { AlertOctagon, AlertTriangle, CheckCircle2 } from 'lucide-react';
 
 export type CheckLevel = 'ok' | 'watch' | 'concern';
 
-// Check tints are an icon colour, not a status chip, so they map to the
-// semantic text tokens rather than to <Badge>.
 const levelStyle: Record<
   CheckLevel,
   { icon: React.ElementType; className: string; label: string }
@@ -13,10 +11,6 @@ const levelStyle: Record<
   ok: { icon: CheckCircle2, className: 'text-success', label: 'Fine' },
 };
 
-/**
- * A list of checks worked out by Sureground, each marked fine, worth a look or
- * a concern. Used by applicant screening and the vendor invoice check.
- */
 export function CheckList({ items }: { items: { level: CheckLevel; text: string }[] }) {
   return (
     <ul className="space-y-1.5">

@@ -100,7 +100,6 @@ export const NeighborhoodCompare = ({ listingId, propertyLocation }: Neighborhoo
 
             {!isLoading && insights && (
               <>
-                {/* Commute times */}
                 {insights.travelTimes && (
                   <div className="mb-6">
                     <h4 className="text-sm font-medium text-foreground mb-3">
@@ -124,7 +123,6 @@ export const NeighborhoodCompare = ({ listingId, propertyLocation }: Neighborhoo
                   </div>
                 )}
 
-                {/* Walkability */}
                 {insights.walkability && (
                   <div className="mb-6 p-3 rounded-lg bg-secondary">
                     <div className="flex flex-wrap items-center justify-between gap-x-3">
@@ -139,7 +137,6 @@ export const NeighborhoodCompare = ({ listingId, propertyLocation }: Neighborhoo
                   </div>
                 )}
 
-                {/* Nearby places by category */}
                 {categories.length > 0 ? (
                   <div className="space-y-6">
                     {categories.map(([category]) => {

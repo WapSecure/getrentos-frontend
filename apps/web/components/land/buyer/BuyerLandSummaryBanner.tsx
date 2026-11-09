@@ -11,11 +11,6 @@ import { useNow } from './useNow';
 
 const LIVE_PURCHASE_PAGE = { page: 1, pageSize: 1 };
 
-/**
- * Shortcuts above the buyer's land marketplace: estates selling plots, and
- * the buyer's own holds and purchases (counts load quietly; a failure just
- * hides the number).
- */
 export const BuyerLandSummaryBanner = () => {
   const now = useNow(60_000);
   const reservations = useQuery({

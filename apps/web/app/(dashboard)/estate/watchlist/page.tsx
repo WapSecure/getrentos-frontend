@@ -36,7 +36,6 @@ const statusFilters: { value: StatusFilter; label: string }[] = [
   { value: 'lifted', label: 'Lifted' },
 ];
 
-/** The API expects the Prisma enum; the filter buttons read better in lower case. */
 const toApiStatus = (filter: StatusFilter): WatchlistStatus | undefined =>
   filter === 'active' ? 'ACTIVE' : filter === 'lifted' ? 'LIFTED' : undefined;
 
@@ -117,9 +116,6 @@ export default function EstateWatchlistPage() {
         }
       />
 
-      {/* Says what the list does, because a manager who assumes it is only a note
-          would never rely on it: and one who assumes a WATCH entry stops
-          somebody would find out at the barrier instead. */}
       <Alert variant="neutral" className="mb-6">
         <p>
           Everybody on this list is checked against at every way into the estate: a visitor pass

@@ -1,9 +1,7 @@
 import type { Metadata } from 'next';
 import { LegalPage } from '@/components/layout/LegalPage';
 
-// Baseline terms written from how the platform works (roles, escrow, plans,
-// disputes). They have NOT been reviewed by counsel and should be before launch,
-// in particular the liability, fee, escrow and governing-law sections.
+// Not reviewed by counsel: have the liability, fee, escrow and governing-law sections checked before launch.
 
 export const metadata: Metadata = {
   title: 'Terms of Service',

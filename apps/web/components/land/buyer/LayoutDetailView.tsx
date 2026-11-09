@@ -20,7 +20,6 @@ import { plotLabel, quotePlot } from './landSaleLogic';
 import { EstateCommitmentsSection } from '../estate-infrastructure/EstateCommitmentsSection';
 import { OpenConditionsNotice } from '../market/OpenConditionsNotice';
 
-/** One estate: its facts, fees, plot map, plans and the reserve flow. */
 export const LayoutDetailView = ({ layoutId }: { layoutId: string }) => {
   const searchParams = useSearchParams();
   const [chosenId, setChosenId] = useState<string | null>(null);

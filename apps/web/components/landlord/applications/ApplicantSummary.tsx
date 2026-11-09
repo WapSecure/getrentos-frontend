@@ -7,11 +7,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import { landlordService } from '@/services/landlordService';
 
-/**
- * The screening facts in plain words, with questions to ask the applicant and
- * checks to make. It never ranks or recommends; the decision is the landlord's.
- * Hidden if it fails: the full report below is the record.
- */
+// Never ranks or recommends: the decision is the landlord's. Hidden if it fails; the full report below is the record.
 export function ApplicantSummary({ applicationId }: { applicationId: string }) {
   const { data, isLoading } = useQuery({
     queryKey: landlordKeys.applicantSummary(applicationId),

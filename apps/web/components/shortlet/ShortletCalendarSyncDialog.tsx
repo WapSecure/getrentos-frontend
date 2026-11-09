@@ -26,7 +26,6 @@ import type { ShortletCalendarFeed, ShortletListing } from '@/types/shortlet';
 
 const SOURCES = ['Airbnb', 'Booking.com', 'VRBO', 'Google Calendar', 'Other'];
 
-/** Where each site hides its calendar export link, in the host's own words. */
 const WHERE_TO_FIND: Record<string, string> = {
   Airbnb: 'Airbnb: Calendar → Availability → Connect calendars → Export calendar.',
   'Booking.com': 'Booking.com: Rates & Availability → Sync calendars → Export calendar.',
@@ -43,10 +42,6 @@ const hostOf = (url: string) => {
   }
 };
 
-/**
- * Two-way calendar sync for one listing, so a stay booked on another site can't
- * be booked here too, and the other way round.
- */
 export function ShortletCalendarSyncDialog({
   listing,
   onClose,

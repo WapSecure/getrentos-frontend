@@ -11,14 +11,12 @@ import { logoutSession } from '@/lib/apiClient';
 import { ROUTES } from '@/lib/constants/auth';
 import { currentPath, withNext } from '@/lib/nextPath';
 
-/** Signs out and comes back to this invitation as someone else. */
 async function switchAccount() {
   const back = withNext(ROUTES.LOGIN, currentPath(), { reason: 'invite' });
   await logoutSession();
   window.location.assign(back);
 }
 
-/** Where a staff invitation link lands: see what it is, then join. */
 export function AgencyJoinView() {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -44,8 +42,7 @@ export function AgencyJoinView() {
       const roles = getStoredUser<{ roles?: string[] }>()?.roles ?? [];
       if (!roles.includes('PROPERTY_MANAGER'))
         updateStoredUser({ roles: [...roles, 'PROPERTY_MANAGER'] });
-      // Anything fetched before joining (the clients list, refused) was answered
-      // for someone outside the firm; drop it rather than show it.
+      // Anything fetched before joining was answered for someone outside the firm; drop it rather than show it.
       await queryClient.resetQueries();
       router.push('/agency');
     },

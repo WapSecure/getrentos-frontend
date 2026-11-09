@@ -8,14 +8,7 @@ import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { agencyTrustService, AGENCY_TRUST_ENTRY_LABELS } from '@/services/agencyTrustService';
 
-/**
- * What the firm holds for one client, from the client-money ledger.
- *
- * The balance is the firm's own account for this owner — never the platform's or
- * another firm's. When the stored balance disagrees with the sum of its own
- * entries the card says so out loud rather than quietly showing a figure the
- * ledger cannot stand behind.
- */
+// When the stored balance disagrees with the sum of its entries the card says so, rather than show a figure the ledger can't back.
 export function AgencyOwnerTrustCard({ ownerId }: { ownerId: string }) {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['agency', 'trust', ownerId],

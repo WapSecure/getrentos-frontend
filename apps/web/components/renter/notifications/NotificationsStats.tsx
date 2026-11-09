@@ -66,7 +66,6 @@ export const NotificationsStats = ({ notifications, unreadCount }: Notifications
   const total = notifications.length;
   const readCount = notifications.filter((n) => n.read).length;
 
-  // Calculate type counts
   const typeCounts = notifications.reduce(
     (acc, n) => {
       acc[n.type] = (acc[n.type] || 0) + 1;
@@ -75,7 +74,6 @@ export const NotificationsStats = ({ notifications, unreadCount }: Notifications
     {} as Record<string, number>
   );
 
-  // Get top 3 notification types
   const sortedTypes = Object.entries(typeCounts)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 3);

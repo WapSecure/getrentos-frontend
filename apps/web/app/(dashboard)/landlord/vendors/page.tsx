@@ -32,7 +32,7 @@ export default function LandlordVendorsPage() {
   const [viewing, setViewing] = useState<Vendor | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
-  // The vendors endpoint does not accept a search param, so search stays client-side.
+  // The endpoint takes no search param, so search is client-side.
   const vendorsKey = [...landlordKeys.vendors, { page, pageSize: PAGE_SIZE }];
   const { data, isPending, isError, refetch } = useQuery({
     queryKey: vendorsKey,

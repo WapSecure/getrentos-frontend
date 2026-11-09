@@ -50,11 +50,7 @@ const timeOf = (iso: string) =>
     minute: '2-digit',
   });
 
-/**
- * The owner's activity log: what managers, Sureground, tenants and automatic
- * jobs have done on their properties, newest first. The owner's own actions are
- * left out, and nothing is shown beyond who, what, where and when.
- */
+// Leaves out the owner's own actions, and shows nothing beyond who, what, where and when.
 export const PropertyActivityLog = () => {
   const [propertyId, setPropertyId] = useState('');
   const [who, setWho] = useState<'managers' | 'everyone'>('everyone');

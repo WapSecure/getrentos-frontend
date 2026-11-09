@@ -38,11 +38,8 @@ interface BuyerEscrowTransactionDetailModalProps {
   transaction: BuyerEscrowTransaction | null;
   onClose: () => void;
   onMakePayment: (transactionId: string, stage: 'deposit' | 'release') => void;
-  /** A deposit, or a release of the held funds, is on its way to the server. */
   isPaying?: boolean;
-  /** Which company takes the deposit (Paystack or Monnify). */
   providers: PaymentProviderChoice;
-  /** Why the last try failed when the chosen company could not take it. */
   providerError?: string | null;
 }
 
@@ -86,7 +83,6 @@ export const BuyerEscrowTransactionDetailModal = ({
   const router = useRouter();
   const [showActivityLog, setShowActivityLog] = useState(false);
   const [confirmingRelease, setConfirmingRelease] = useState(false);
-  // The deposit's pay dialog, opened from the "Make deposit payment" step.
   const [payOpen, setPayOpen] = useState(false);
 
   const handleClose = () => {
@@ -236,7 +232,6 @@ export const BuyerEscrowTransactionDetailModal = ({
             </div>
           )}
 
-          {/* Land sales only: renders nothing for any other property. */}
           <LandConveyanceEntry transaction={transaction} />
 
           <Alert variant="info" icon={Lock}>

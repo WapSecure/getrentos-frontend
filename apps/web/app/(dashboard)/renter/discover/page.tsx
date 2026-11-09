@@ -34,8 +34,6 @@ export default function DiscoverPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const queryFromUrl = searchParams.get('q')?.trim() ?? '';
-  // Arriving from an estate microsite (`?estate=<slug>`). Carried in the filters so
-  // every listing query on this page: grid AND map: stays scoped to that estate.
   const estateFromUrl = searchParams.get('estate')?.trim() ?? '';
   const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
   const [compareList, setCompareList] = useState<Property[]>([]);
@@ -49,9 +47,7 @@ export default function DiscoverPage() {
     propertyType: searchParams.get('propertyType')?.trim() ?? '',
     verifiedOnly: searchParams.get('verifiedOnly') === 'true',
   }));
-  // Typed explicitly (not inferred) so `estate` stays OPTIONAL: the filter panel and
-  // the saved-search helpers build filter objects without it, and a required key
-  // would make every one of them a type error.
+  // Explicit so `estate` stays optional for the filter panel and saved-search helpers.
   const filters: {
     location: string;
     minPrice: string;
@@ -149,7 +145,7 @@ export default function DiscoverPage() {
       />
 
       <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_20rem]">
-        {/* Not a second <main>: the page already has one; this is the results column. */}
+        {/* Not a second <main>: the page already has one. */}
         <section aria-label="Search results" className="min-w-0 space-y-5">
           <PlainLanguageSearch
             onApply={(values) => setFilterOptions((prev) => ({ ...prev, ...values }))}

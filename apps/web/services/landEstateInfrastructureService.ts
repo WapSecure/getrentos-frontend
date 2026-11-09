@@ -24,9 +24,7 @@ export const estateInfrastructureKeys = {
   public: (layoutId: string) => ['land', 'infrastructure', 'public', layoutId] as const,
 };
 
-/** Estate infrastructure promises: the developer's, the buyer's and the public's calls. */
 export const landEstateInfrastructureService = {
-  // ─── The developer ─────────────────────────────────────────────────────────
   forDeveloper: (propertyId: string) =>
     safeCall(() => authFetch<EstateCommitment[]>(ownerPath(propertyId))),
 
@@ -53,7 +51,6 @@ export const landEstateInfrastructureService = {
   proposeChange: (propertyId: string, input: EstateChangeOrderInput) =>
     safeCall(() => post<EstateCommitment[]>(`${ownerPath(propertyId)}/change-orders`, input)),
 
-  // ─── The buyer ─────────────────────────────────────────────────────────────
   forPurchase: (purchaseId: string) =>
     safeCall(() => authFetch<EstateCommitment[]>(buyerPath(purchaseId))),
 
@@ -78,7 +75,6 @@ export const landEstateInfrastructureService = {
       )
     ),
 
-  // ─── Anyone ────────────────────────────────────────────────────────────────
   forEstate: (layoutId: string) =>
     safeCall(() =>
       authFetch<EstateCommitment[]>(`/land/layouts/${encodeURIComponent(layoutId)}/infrastructure`)

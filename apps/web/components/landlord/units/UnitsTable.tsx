@@ -26,7 +26,6 @@ const statusConfig: Record<UnitOccupancyStatus, { label: string; variant: BadgeV
 interface UnitsTableProps {
   units: Unit[];
   onMarkVacant: (unitId: string) => Promise<void>;
-  /** Opens the record-occupier dialog; the form itself lives in the modal. */
   onRecordOccupier: (unit: Unit) => void;
   onChargeUnit: (unit: Unit) => void;
   pendingUnitId?: string;
@@ -82,8 +81,6 @@ export const UnitsTable = ({
                     </span>
                   </td>
                   <td className="px-4 py-3 text-foreground font-medium whitespace-nowrap">
-                    {/* The agreed rent once let, otherwise the asking rent the
-                        advert publishes. */}
                     {unit.leaseRent !== undefined || unit.askingRent !== undefined
                       ? formatCurrency((unit.leaseRent ?? unit.askingRent)!, {
                           compact: true,

@@ -7,7 +7,6 @@ import {
   type VerifiedAddress,
 } from '@/lib/apiHelpers';
 
-/** Google address search through our API: suggestions while typing, then the checked address. */
 export const placesService = {
   async search(
     query: string,

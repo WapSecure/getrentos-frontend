@@ -8,12 +8,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { useProCheckout } from '@/hooks/useProCheckout';
 import { Button, Skeleton } from '@sureground/ui';
 
-/**
- * Where the payment gateway returns the customer.
- *
- * The result is confirmed server-side against the gateway: the query string is
- * only used to find the reference, never as proof of payment.
- */
+// Confirmed server-side; the query string only finds the reference, never proves payment.
 function BillingReturnContent() {
   const searchParams = useSearchParams();
   // Paystack appends both; older integrations only send trxref.
@@ -26,8 +21,6 @@ function BillingReturnContent() {
     message?: string;
   }>({ status: 'pending' });
 
-  // Derived rather than written into state: a missing reference is a fact about
-  // the URL, not something the effect needs to synchronise.
   const view = reference
     ? state
     : { status: 'error' as const, message: 'No payment reference was provided.' };

@@ -14,10 +14,7 @@ import { formatCurrency } from '@/lib/format';
 import type { LandMarketTrendPoint } from '@/types/landMarket';
 import { monthLabel } from './InsightsCharts';
 
-/**
- * The one land-market chart that needs recharts, in its own module so the
- * market page can load it after the rest of the page (it is ~100 kB).
- */
+// Its own module so the market page can load recharts (~100 kB) after the rest.
 const TrendTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
   if (!active || !payload?.length) return null;
   const point = payload[0].payload as { median?: number; count: number };
@@ -34,10 +31,7 @@ const TrendTooltip = ({ active, payload, label }: TooltipProps<number, string>) 
   );
 };
 
-/**
- * Median asking ₦/m² by month of publication. One series, so no legend: the
- * heading names it. Months without a priced listing show as gaps, not zeros.
- */
+// Months without a priced listing are gaps, not zeros.
 export const PriceTrendChart = ({ trend }: { trend: LandMarketTrendPoint[] }) => {
   const data = trend.map((p) => ({
     month: monthLabel(p.month),

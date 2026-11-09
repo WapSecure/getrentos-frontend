@@ -1,19 +1,14 @@
 import type { LandMilestone } from './landBuyer';
 
-/**
- * Diaspora mode (blueprint §8.4), mirroring the backend's
- * `land-representative.service.ts`: people a buyer appoints to act for them,
- * and the two-person rule on releasing money.
- */
+/** Mirrors the backend's `land-representative.service.ts`. */
 
 export type RepresentativeScope = 'VIEW' | 'CO_APPROVE' | 'ATTEND';
 export type RepresentativeRelationship = 'FAMILY' | 'LAWYER' | 'FRIEND' | 'AGENT' | 'OTHER';
 export type RepresentativeStatus = 'INVITED' | 'ACTIVE' | 'DECLINED' | 'REVOKED';
 
-/** An appointment, seen by either side: `name`/`email` are the other person. */
+/** `name`/`email` are the other person. */
 export interface LandRepresentativeAppointment {
   id: string;
-  /** The buyer being represented. */
   principalId: string;
   relationship: RepresentativeRelationship;
   scopes: RepresentativeScope[];

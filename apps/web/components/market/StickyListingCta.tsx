@@ -4,12 +4,6 @@ import { useEffect, useState } from 'react';
 import type { PublicDetailMarket } from '@/lib/publicListingDetail';
 import { ListingCallToAction } from './ListingCallToAction';
 
-/**
- * The price and main action, pinned to the bottom of the screen while the
- * page's own call to action is out of view: on a phone that is below the
- * gallery and every detail, so without this the visitor has to scroll the
- * whole page to find out how to enquire.
- */
 export function StickyListingCta({
   watchId,
   price,
@@ -18,7 +12,6 @@ export function StickyListingCta({
   id,
   returnPath,
 }: {
-  /** Id of the page's own call to action; the bar hides while it is on screen. */
   watchId: string;
   price: string;
   priceUnit?: string | null;
@@ -32,10 +25,9 @@ export function StickyListingCta({
     const target = document.getElementById(watchId);
     if (!target || typeof IntersectionObserver === 'undefined') return;
     // Shown until the page's own button is wholly on screen, not just its top edge.
-    const observer = new IntersectionObserver(
-      ([entry]) => setShow(entry.intersectionRatio < 1),
-      { threshold: [0, 1] }
-    );
+    const observer = new IntersectionObserver(([entry]) => setShow(entry.intersectionRatio < 1), {
+      threshold: [0, 1],
+    });
     observer.observe(target);
     return () => observer.disconnect();
   }, [watchId]);

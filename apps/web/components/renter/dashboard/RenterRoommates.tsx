@@ -130,7 +130,6 @@ export const RenterRoommates = () => {
             </motion.div>
           ))}
 
-          {/* Rent Split Summary */}
           <div className="mt-4 p-3 rounded-lg bg-accent border border-primary/20">
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm font-medium text-foreground">Rent split</span>

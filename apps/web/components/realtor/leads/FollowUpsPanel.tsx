@@ -21,18 +21,11 @@ const STEP: Record<FollowUpStep, { label: string; variant: BadgeVariant }> = {
   last_try: { label: 'Last try', variant: 'neutral' },
 };
 
-/** How many show before "Show all". */
 const FIRST = 4;
 
-/**
- * "Follow up today": open leads due a nudge, most pressing first, each with
- * the reason and a drafted message the realtor sends on WhatsApp or email,
- * then marks contacted. Hidden when nothing is due or if it fails.
- */
 export function FollowUpsPanel() {
   const queryClient = useQueryClient();
   const toast = useToast();
-  // The lead's language, for the messages; the panel itself stays in English.
   const [language, setLanguage] = useState<ReplyLanguage>('en');
   const [showAll, setShowAll] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);

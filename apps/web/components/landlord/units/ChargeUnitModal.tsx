@@ -22,7 +22,7 @@ interface ChargeUnitModalProps {
   errorMessage?: string | null;
 }
 
-/** Charges one unit's tenant. Deliberately single-unit: Free plans collect rent. */
+// Deliberately single-unit: Free plans collect rent.
 export const ChargeUnitModal = ({
   unit,
   onClose,
@@ -59,8 +59,7 @@ const ChargeUnitForm = ({
   isPending?: boolean;
   errorMessage?: string | null;
 }) => {
-  // Prefill from what the lease actually charges (never the legacy unit column),
-  // and mirror its cadence so the charge matches the signed agreement.
+  // Prefill from the lease (never the legacy unit column) and mirror its cadence, so the charge matches the signed agreement.
   const rent = unit.leaseRent ?? unit.askingRent;
   const period = unit.leaseRentPeriod ?? unit.askingRentPeriod;
 

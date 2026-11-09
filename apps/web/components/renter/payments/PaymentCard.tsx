@@ -19,7 +19,6 @@ interface Payment {
   escrowStatus: 'not_funded' | 'held' | 'pending_review' | 'released' | 'frozen';
   releaseDate?: string;
   heldReason?: string;
-  /** A checkout the tenant opened and closed, which they can go back to. */
   resumeCheckout?: { url: string; reference: string; expiresAt: string };
 }
 
@@ -32,7 +31,6 @@ interface PaymentCardProps {
   onConfirmMoveIn: () => void;
 }
 
-/** Plain-language state of money that has been collected. */
 const escrowLabel = (status: Payment['escrowStatus']): string =>
   ({
     not_funded: 'not paid yet',
@@ -42,7 +40,6 @@ const escrowLabel = (status: Payment['escrowStatus']): string =>
     frozen: 'on hold while a problem is reviewed',
   })[status] ?? status;
 
-/** What is still to pay on a charge, after part-payments and credit. */
 export const leftToPay = (p: { amount: number; amountPaid?: number; outstanding?: number }) =>
   p.outstanding ?? p.amount - (p.amountPaid ?? 0);
 
@@ -59,8 +56,7 @@ export const PaymentCard = ({
 
   const isPayable = payment.status === 'pending' || payment.status === 'overdue';
   const isHeld = payment.status === 'paid' && payment.escrowStatus === 'held';
-  // The tenant closed Paystack's page: they go back to the same checkout rather
-  // than wait for it to lapse (or risk opening a second one).
+  // Reopen the same checkout rather than wait for it to lapse or open a second one.
   const resume = payment.status === 'processing' ? payment.resumeCheckout : undefined;
   const left = leftToPay(payment);
 

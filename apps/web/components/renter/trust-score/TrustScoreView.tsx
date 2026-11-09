@@ -10,14 +10,9 @@ import { renterKeys } from '@/lib/queryKeys';
 import type { TrustRequirementKey } from '@/types/trust-score';
 
 interface TrustScoreViewProps {
-  /** Opens the in-page Verification tab. */
   onVerify: () => void;
 }
 
-/**
- * The renter's trust page: the shared overview, plus the renter's real score
- * changes (each one recorded with its reason) inside the details.
- */
 export const TrustScoreView = ({ onVerify }: TrustScoreViewProps) => {
   const router = useRouter();
   const history = useQuery({

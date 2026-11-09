@@ -27,7 +27,6 @@ export const MessageLabels = ({ labels, onSelectLabel, selectedLabel }: MessageL
       </div>
 
       <div className="p-2 space-y-1">
-        {/* All Labels Option */}
         <button
           type="button"
           aria-pressed={selectedLabel === 'all'}

@@ -26,7 +26,6 @@ import {
   useUploadLandDocument,
 } from './useLandDocuments';
 
-/** Anchor the review panel links to when documents are what blocks submission. */
 export const LAND_DOCUMENTS_ANCHOR = 'land-documents';
 
 const UploadDialog = ({
@@ -180,11 +179,7 @@ const DocumentRow = ({
   );
 };
 
-/**
- * The parcel's document file: titles, survey plan, search reports, layout
- * plans. Diligence, the estate layout, conveyance steps and the chain of title
- * all cite these, and anything cited stays.
- */
+// Diligence, layouts, conveyance steps and the chain of title cite these, and anything cited stays.
 export const LandDocumentsSection = ({
   propertyId,
   notify,

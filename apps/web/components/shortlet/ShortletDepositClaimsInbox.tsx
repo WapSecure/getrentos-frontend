@@ -24,10 +24,6 @@ const STATUS_LABEL: Record<ShortletDepositClaimStatus, string> = {
   REJECTED: 'Rejected',
 };
 
-/**
- * Deposit claims list. In the host workspace it lists claims the host filed
- * (or that are against their stays); the guest view is read-only.
- */
 export function ShortletDepositClaimsInbox({ role }: { role: 'host' | 'guest' }) {
   const { data, isLoading } = useQuery({
     queryKey: shortletKeys.depositClaims,

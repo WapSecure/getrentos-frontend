@@ -1,6 +1,5 @@
 import { videoProblem } from '@sureground/shared';
 
-/** The length of a local video file in seconds, or undefined if the browser can't read it. */
 function readDuration(file: File): Promise<number | undefined> {
   return new Promise((resolve) => {
     const url = URL.createObjectURL(file);
@@ -19,7 +18,6 @@ function readDuration(file: File): Promise<number | undefined> {
   });
 }
 
-/** Why this file can't be a video tour (too big or too long), or null when it can. */
 export async function videoFileProblem(file: File): Promise<string | null> {
   const bySize = videoProblem({ size: file.size });
   if (bySize) return bySize;

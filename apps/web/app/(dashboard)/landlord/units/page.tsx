@@ -57,7 +57,6 @@ function LandlordUnitsPageContent() {
   const [chargeError, setChargeError] = useState<string | null>(null);
   const toast = useToast();
 
-  // Debounce the search input; reset to page 1 inside the timer callback.
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchQuery);
@@ -73,16 +72,13 @@ function LandlordUnitsPageContent() {
   const properties = propertiesData?.items ?? [];
   const totalProperties = propertiesData?.total ?? 0;
 
-  // Fetch one row solely to read the portfolio-wide count. Bulk-action
-  // modals load their own paginated unit lists rather than treating a 100-row
-  // batch as the full portfolio.
+  // One row, only for the portfolio-wide count.
   const { data: unitsSummaryData } = useQuery({
     queryKey: [...landlordKeys.units(), { page: 1, pageSize: 1 }],
     queryFn: () => unwrap(landlordService.listUnits({ page: 1, pageSize: 1 })),
   });
   const totalUnits = unitsSummaryData?.total ?? 0;
 
-  // Paginated, server-filtered list for the table.
   const {
     data,
     isPending: isLoadingUnits,
@@ -135,11 +131,8 @@ function LandlordUnitsPageContent() {
             rentAmount: record.rentAmount,
             rentPeriod: record.rentPeriod,
             securityDeposit: 0,
-            // The tenancy is already running, so record it as in force rather
-            // than as a draft that could never be sent or signed.
             recordExisting: true,
           },
-          // The tenancy already exists, so there is nobody to send it to.
           false
         )
       ),
@@ -193,7 +186,6 @@ function LandlordUnitsPageContent() {
     }
   };
 
-  // Single-unit charging: available on every plan, unlike the bulk variant.
   const chargeUnitMutation = useMutation({
     mutationFn: (input: ChargeUnitInput) => unwrap(landlordService.chargeUnit(input)),
     onSuccess: () => {

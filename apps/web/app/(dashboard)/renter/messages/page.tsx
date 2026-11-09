@@ -61,8 +61,6 @@ export default function MessagesPage() {
   const invalidateReminders = () =>
     queryClient.invalidateQueries({ queryKey: renterKeys.reminders });
 
-  // Real-time: refresh the conversation list whenever either participant
-  // sends a message or starts a conversation (pushed over the WebSocket).
   useRealtimeEvent('conversation:update', () => {
     invalidateConversations();
   });
@@ -212,7 +210,6 @@ export default function MessagesPage() {
     }
   };
 
-  // Opened from a message notification.
   useOpenConversationFromUrl(data !== undefined, (id) => {
     const conversation = conversations.find((c) => c.id === id);
     if (conversation) handleSelectConversation(conversation);

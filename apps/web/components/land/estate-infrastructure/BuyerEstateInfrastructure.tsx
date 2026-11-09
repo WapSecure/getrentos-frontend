@@ -18,7 +18,6 @@ type Pending =
   | { kind: 'dispute'; commitment: EstateCommitment }
   | null;
 
-/** The estate's promises on a buyer's purchase: answer change requests, dispute a delivery. */
 export const BuyerEstateInfrastructure = ({
   purchaseId,
   notify,

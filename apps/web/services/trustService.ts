@@ -1,7 +1,6 @@
 import { authFetch, safeCall, type ApiResponse } from '@/lib/apiHelpers';
 import type { TrustExplanation, TrustOverview, TrustPortal } from '@/types/trust-score';
 
-/** What the browser needs to run Smile ID's live selfie capture and submit it. */
 export interface SmileLivenessSession {
   token: string;
   partnerId: string;
@@ -112,7 +111,7 @@ export interface TrustConsentDto {
 }
 
 export const trustService = {
-  /** Start (or idempotently resume) a PERSON verification for the signed-in user. */
+  /** Idempotent: resumes an existing one. */
   async startVerification(input: {
     subjectId: string;
     purpose: TrustPurpose;
@@ -135,12 +134,12 @@ export const trustService = {
     return safeCall(() => authFetch<TrustVerificationDetailDto>(`/trust/verifications/${id}`));
   },
 
-  /** Identity status, the portal's requirements, tier and score (self-only). */
+  /** Self-only. */
   async getOverview(portal: TrustPortal): Promise<ApiResponse<TrustOverview>> {
     return safeCall(() => authFetch<TrustOverview>(`/trust/overview?portal=${portal}`));
   },
 
-  /** Plain-language explanation of the caller's own trust score (self-only). */
+  /** Self-only. */
   async getExplanation(): Promise<ApiResponse<TrustExplanation>> {
     return safeCall(() => authFetch<TrustExplanation>('/trust-score/explanation'));
   },
@@ -187,7 +186,7 @@ export const trustService = {
     );
   },
 
-  /** Sends a phone OTP for the PHONE_OTP step; returns the challenge reference. */
+  /** Returns the challenge reference. */
   async sendPhoneOtp(verificationId: string): Promise<ApiResponse<{ reference: string }>> {
     return safeCall(() =>
       authFetch<{ reference: string }>(`/trust/verifications/${verificationId}/phone-otp/send`, {
@@ -208,10 +207,7 @@ export const trustService = {
     );
   },
 
-  /**
-   * Starts a Smile ID live selfie for the liveness step. The token is bound on
-   * the server to this user, our webhook and the recorded consent.
-   */
+  /** The token is bound server-side to this user, our webhook and the recorded consent. */
   async startLivenessSession(verificationId: string): Promise<ApiResponse<SmileLivenessSession>> {
     return safeCall(() =>
       authFetch<SmileLivenessSession>(`/trust/verifications/${verificationId}/liveness/session`, {
@@ -220,10 +216,7 @@ export const trustService = {
     );
   },
 
-  /**
-   * Asks the server to check a submitted live selfie with Smile ID, for when the
-   * webhook is late. The server queries Smile itself; this only names the job.
-   */
+  /** For a late webhook: the server queries Smile itself; this only names the job. */
   async checkLiveness(
     verificationId: string,
     jobId: string
@@ -236,7 +229,6 @@ export const trustService = {
     );
   },
 
-  /** Runs a bank-account name-enquiry check (BANK_ACCOUNT_CHECK step). */
   async submitBankAccount(
     verificationId: string,
     input: {
@@ -254,7 +246,6 @@ export const trustService = {
     );
   },
 
-  /** Runs a professional/authority document check (DOCUMENT_CHECK step). */
   async submitDocument(
     verificationId: string,
     input: {
@@ -272,7 +263,7 @@ export const trustService = {
     );
   },
 
-  /** Starts (or idempotently resumes) a PROPERTY_LISTING verification you own. */
+  /** Idempotent: resumes an existing one. */
   async startPropertyVerification(
     propertyId: string,
     purpose: 'PROPERTY_LISTING' | 'OWNERSHIP_CLAIM' = 'PROPERTY_LISTING',
@@ -286,7 +277,6 @@ export const trustService = {
     );
   },
 
-  /** PROPERTY_ADDRESS_CHECK — normalises/validates the property address. */
   async submitPropertyAddress(
     verificationId: string,
     input: { address: string; city?: string; state?: string; country?: string }
@@ -299,7 +289,7 @@ export const trustService = {
     );
   },
 
-  /** PROPERTY_DOCUMENT_CHECK — title/ownership document (needs DOCUMENT_PROCESSING consent). */
+  /** Needs DOCUMENT_PROCESSING consent. */
   async submitPropertyDocument(
     verificationId: string,
     input: {
@@ -317,7 +307,7 @@ export const trustService = {
     );
   },
 
-  /** OWNERSHIP_CHECK — both sides are resolved server-side. */
+  /** Both sides are resolved server-side. */
   async submitOwnershipCheck(
     verificationId: string,
     country = 'NG'

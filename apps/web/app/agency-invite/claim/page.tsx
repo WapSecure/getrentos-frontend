@@ -67,12 +67,10 @@ function ClaimContent() {
         return;
       }
 
-      // PENDING
       if (!isAuthenticated()) {
         setPhase('needs-auth');
         return;
       }
-      // Nothing is accepted until the owner says so on the summary below.
       setPhase('ready');
     };
 

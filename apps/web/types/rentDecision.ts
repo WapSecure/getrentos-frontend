@@ -1,4 +1,4 @@
-/** "Can I afford it?": every figure worked out by Sureground. Income is never stored. */
+/** Income is never stored. */
 export interface Affordability {
   listingId: string;
   monthlyIncome: number | null;
@@ -17,7 +17,6 @@ export interface AffordabilityInput {
   monthlySaving?: number;
 }
 
-/** One home in a shortlist comparison. */
 export interface ComparedHome {
   listingId: string;
   label: string;

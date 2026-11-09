@@ -14,26 +14,16 @@ const ALL_TYPES = '__all__';
 const NONE = '';
 
 interface LandDocumentPickerProps {
-  /** The land property whose documents may be chosen. */
   propertyId: string | null | undefined;
   label: string;
-  /** The chosen document id; '' for none. */
+  /** '' for none. */
   value: string;
   onChange: (documentId: string) => void;
   hint?: string;
-  /** Type preselected for the filter and for "Upload new", e.g. LAYOUT_PLAN. */
   suggestedType?: LandDocumentType;
   disabled?: boolean;
 }
 
-/**
- * Choose one of the property's documents, or upload a new one and choose it.
- *
- * The API links milestones, layouts and title entries to a document already on
- * the property, so this lists those documents (filterable by type, each with a
- * preview) and offers an inline upload for the one that is not there yet. It
- * renders no form of its own, so it can sit inside the caller's form.
- */
 export const LandDocumentPicker = ({
   propertyId,
   label,
@@ -69,7 +59,7 @@ export const LandDocumentPicker = ({
       label: `${document.name} · ${landDocumentTypeLabel(document.documentType)}`,
       searchText: `${document.name} ${landDocumentTypeLabel(document.documentType)}`,
     })),
-    // A reference saved earlier that is no longer listed (e.g. removed) stays visible.
+    // A saved reference no longer listed stays visible.
     ...(value && !selected && !isLoading
       ? [{ value, label: 'A document no longer on this property' }]
       : []),

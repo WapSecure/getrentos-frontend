@@ -8,7 +8,6 @@ export const ForgotPasswordLeftContent = () => {
   return (
     <div className="relative hidden border-r border-border bg-muted/30 transition-all duration-300 lg:flex lg:w-1/2">
       <div className="relative z-10 flex flex-col justify-between p-12 lg:p-16 w-full">
-        {/* Logo - Now clickable */}
         <div className="mb-12">
           <Logo size="lg" />
         </div>
@@ -21,9 +20,7 @@ export const ForgotPasswordLeftContent = () => {
           >
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary border border-border mb-6">
               <BadgeCheck className="w-3 h-3 text-primary" />
-              <span className="text-xs font-medium text-foreground">
-                FORGOT PASSWORD
-              </span>
+              <span className="text-xs font-medium text-foreground">FORGOT PASSWORD</span>
             </div>
 
             <h1 className="text-4xl lg:text-5xl font-bold text-foreground mb-4">

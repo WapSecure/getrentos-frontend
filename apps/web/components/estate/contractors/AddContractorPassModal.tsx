@@ -20,7 +20,7 @@ import {
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 
-/** The API's cap. Kept in step so the form never allows what the server will reject. */
+// Must match the API's cap.
 const MAX_VALIDITY_DAYS = 366;
 
 const DAYS = [
@@ -52,7 +52,6 @@ interface AddContractorPassModalProps {
   onClose: () => void;
   onSubmit: (data: AddContractorPassInput) => void;
   isSubmitting?: boolean;
-  /** The API's own wording. For a Free estate this is the Enterprise upsell. */
   error?: string | null;
 }
 
@@ -62,24 +61,9 @@ const localDate = (offsetDays: number) => {
   return date.toISOString().slice(0, 10);
 };
 
-/** Same normalisation idea as the server's: is there more than one name word? */
+// Mirrors the server's normalisation.
 const hasFullName = (value: string) => value.trim().split(/\s+/).filter(Boolean).length >= 2;
 
-/**
- * Authorises somebody to arrive repeatedly.
- *
- * The form refuses two things before the request is made, because the API
- * refuses them too and a round trip teaches the manager nothing:
- *
- *  - A single name word with no phone. There is nothing to screen them against,
- *    and an authorisation the gate cannot check is one it cannot enforce.
- *  - A window with one end, or a span past a year. Both are the server's rules;
- *    saying so here means the manager is told why rather than just "no".
- *
- * The Enterprise refusal is shown from the API's own message, because that
- * message names the tier: and this modal is the moment an estate finds out the
- * feature is paid for.
- */
 export const AddContractorPassModal = ({
   isOpen,
   estateId,
@@ -157,9 +141,7 @@ export const AddContractorPassModal = ({
       phone: phone.trim() || undefined,
       company: company.trim() || undefined,
       trade: trade.trim() || undefined,
-      // A date input is a calendar day; the API wants an instant. Midnight to
-      // the end of the last day, so a permission does not lapse the morning it
-      // was set to run until.
+      // The API wants an instant: run to the end of the last day so the permission doesn't lapse that morning.
       validFrom: new Date(`${validFrom}T00:00:00`).toISOString(),
       validUntil: new Date(`${validUntil}T23:59:59`).toISOString(),
       daysOfWeek,

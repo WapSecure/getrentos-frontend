@@ -7,12 +7,6 @@ import { unwrap } from '@/lib/apiHelpers';
 import { maintenanceTriageService } from '@/services/maintenanceTriageService';
 import type { MaintenanceTriage, MaintenanceTriageDecision } from '@/types/maintenance';
 
-/**
- * Runs the triage copilot on one request and records the person's decision.
- * Shared by the landlord maintenance list and the home-management work-order
- * queue (where property managers work), so both behave the same way.
- * `onApplied` runs after an accept changed the request, to refresh the list.
- */
 export function useMaintenanceTriage({
   onApplied,
   assignVendor,
@@ -56,7 +50,6 @@ export function useMaintenanceTriage({
           await assignVendor(requestId!, alsoAssignVendorId);
           assigned = true;
         } catch (error) {
-          // The triage is already applied; say plainly that only the assignment failed.
           toast.error(
             (error as Error).message ||
               'The triage was applied, but the vendor could not be assigned.'

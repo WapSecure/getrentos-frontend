@@ -13,14 +13,6 @@ import { EstateFeatureGate } from '@/components/estate/shared/EstateFeatureGate'
 import { OnSiteBoard } from '@/components/estate/dwell/OnSiteBoard';
 import { AuthorisationDwellPanel } from '@/components/estate/dwell/AuthorisationDwellPanel';
 
-/**
- * How often the on-site board re-reads itself.
- *
- * Longer than the gate console's fifteen seconds and deliberately so: this screen
- * is watched while something is being decided, not while somebody is standing at
- * a barrier, and a visit's elapsed time changes by the minute at most. Half a
- * minute keeps the numbers honest without making the office a load generator.
- */
 const BOARD_POLL_MS = 30_000;
 
 const DAY_MS = 24 * 60 * 60_000;
@@ -38,32 +30,12 @@ const SORT_OPTIONS = [
 
 const windowStart = (days: string) => new Date(Date.now() - Number(days) * DAY_MS).toISOString();
 
-/**
- * Dwell analytics: who is still inside, and how long visits actually run.
- *
- * ENTERPRISE, and the only feature in this programme that is: the gating rule in
- * `docs/estate-gate-programme.md` is that an estate without it makes slower
- * decisions, where an estate without the watchlist or mustering admits somebody
- * it banned or loses track of who was in the building. That is why this is the
- * page with an upsell on it and those two are not.
- *
- * Two halves on one screen because they answer the same question at different
- * distances: the board is now, and the report is the period somebody is deciding
- * about. A manager never needs one without being one click from the other.
- */
 export default function EstateDwellPage() {
   const { estate, isLoading: isEstateLoading } = useSelectedEstate();
   const [rangeDays, setRangeDays] = useState('30');
   const [sort, setSort] = useState<'dwell' | 'visits'>('dwell');
 
-  /**
-   * Held in state beside the range rather than derived during render.
-   *
-   * `new Date(Date.now() - n)` in the render body produces a different instant
-   * every time, and it is in the query key: so react-query would see a brand new
-   * window on each render and fetch forever. The pair only moves when the manager
-   * picks a different range, which is exactly when it should.
-   */
+  // Held in state, not derived in render: the window is in the query key, so a fresh Date each render would refetch forever.
   const [from, setFrom] = useState(() => windowStart('30'));
 
   const selectRange = (days: string) => {
@@ -71,23 +43,13 @@ export default function EstateDwellPage() {
     setFrom(windowStart(days));
   };
 
-  /**
-   * Whether it is worth asking the API at all.
-   *
-   * A known shortfall is not worth two guaranteed 403s on every visit: and in a
-   * browser console they are two red errors that make a real one harder to spot.
-   * An UNKNOWN tier is not a shortfall, so it still asks: the rule everywhere in
-   * this codebase is that an absent plan fails open, and the gate then shows the
-   * upsell from whatever the API refuses with.
-   */
+  // Skip the API on a known shortfall; an unknown tier still asks, since an absent plan fails open.
   const entitled = !estate?.planTier || tierAtLeast(estate.planTier, 'ENTERPRISE');
 
   const boardQuery = useQuery({
     queryKey: estateKeys.onSiteBoard(estate?.id ?? ''),
     queryFn: () => unwrap(estateService.getOnSiteBoard(estate!.id)),
     enabled: !!estate && entitled,
-    // Polls only while there is a board to poll. An empty estate has nothing to
-    // watch, and a page left open on a quiet desk should not keep asking.
     refetchInterval: (query) => (query.state.data?.entries.length ? BOARD_POLL_MS : false),
   });
 
@@ -104,8 +66,6 @@ export default function EstateDwellPage() {
 
   if (!estate) return <RedirectToEstateSetup />;
 
-  // Either query can carry the refusal, because the gate fails open on an unknown
-  // tier and lets the API be the authority.
   const refusal = boardQuery.error ?? reportQuery.error;
 
   return (

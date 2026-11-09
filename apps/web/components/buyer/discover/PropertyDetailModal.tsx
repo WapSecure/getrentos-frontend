@@ -27,7 +27,6 @@ interface PropertyDetailModalProps {
   onRequestViewing: () => void;
   onMakeOffer: () => void;
   onMessageOwner: () => void;
-  /** The buyer's offer still in play on this listing, if any. */
   openOffer?: { id: string; offerAmount: number; status: string } | null;
   onViewOffer?: (offerId: string) => void;
 }

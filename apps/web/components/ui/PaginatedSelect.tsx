@@ -25,13 +25,6 @@ interface PaginatedSelectProps<T> {
   ariaLabel?: string;
 }
 
-/**
- * A selector backed by a server-paginated collection.
- *
- * It deliberately keeps fetching in the owning feature so the service and
- * query-key contracts remain explicit, while giving every operational picker
- * the same search and pagination affordances.
- */
 export function PaginatedSelect<T>({
   value,
   onValueChange,
@@ -64,9 +57,6 @@ export function PaginatedSelect<T>({
     ...items.map((item) => ({ value: getItemValue(item), label: getItemLabel(item) })),
   ];
 
-  // Everything fits on one page and nothing is being searched: the search box
-  // and pager would only stack controls around a short list, so show the
-  // dropdown alone. They come back once there is more than a page of options.
   const compact = !search.trim() && page <= 1 && total <= pageSize;
 
   return (

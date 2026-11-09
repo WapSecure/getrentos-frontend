@@ -6,11 +6,6 @@ import { useQuery } from '@tanstack/react-query';
 import { ShieldAlert } from 'lucide-react';
 import { agencyOnboardingService } from '@/services/agencyOnboardingService';
 
-/**
- * Says, on every agency screen, when Sureground has not verified the firm yet:
- * the firm can work, but payouts and the owners' directory wait on it.
- * Nothing shows for a verified firm, or for staff of a firm they do not own.
- */
 export function AgencyVerificationBanner() {
   const pathname = usePathname();
   const { data } = useQuery({

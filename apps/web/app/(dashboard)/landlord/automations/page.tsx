@@ -21,8 +21,6 @@ export default function LandlordAutomationsPage() {
     TABS.map((tab) => tab.id)
   );
 
-  // The header sits outside the gate, so the page keeps its heading (and its
-  // name for screen readers) on the upgrade screen too, as Microsite does.
   return (
     <>
       <PageHeader

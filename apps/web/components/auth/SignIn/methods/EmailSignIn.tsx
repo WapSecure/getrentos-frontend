@@ -44,7 +44,6 @@ interface EmailSignInProps {
   onLoginAttempt: () => void;
   isLocked: boolean;
   lockoutTimer: number | null;
-  /** Internal destination to return to after login (from ?next=). */
   nextPath?: string | null;
 }
 
@@ -71,7 +70,6 @@ export const EmailSignIn = ({
       authService.login(identifier, password, rememberMe),
   });
 
-  /** Saves the session and navigates to the role dashboard. */
   const finishLogin = (result: AuthResult, identifier?: string) => {
     const primaryRoleId = resolvePrimaryRoleId(result.roles);
     saveAuthSession(
@@ -82,8 +80,6 @@ export const EmailSignIn = ({
       rememberMe
     );
     if (rememberMe && identifier) saveRememberedIdentifier(identifier);
-    // Bounce the user back to their intended destination when present (e.g.
-    // deep links gated by the proxy), otherwise the role dashboard.
     router.push(nextPath || getDashboardRoute(primaryRoleId));
   };
 
@@ -124,10 +120,7 @@ export const EmailSignIn = ({
     mode: 'onChange',
   });
 
-  // Prefill the identifier when the user previously signed in with "Remember me",
-  // and surface a notice when the previous session expired.
   useEffect(() => {
-    // Mount-time sync with persisted storage: intentional synchronous setState.
     /* eslint-disable react-hooks/set-state-in-effect */
     const remembered = getRememberedIdentifier();
     if (remembered) {
@@ -150,8 +143,6 @@ export const EmailSignIn = ({
     const response = await loginMutation.mutateAsync(data);
 
     if (response.success && response.data) {
-      // Account has two-factor authentication: hold the challenge token and
-      // prompt for the authenticator-app code before issuing a session.
       if (isTwoFactorChallenge(response.data)) {
         setPendingChallenge({ token: response.data.challengeToken, identifier: data.identifier });
         setTwoFactorCode('');
@@ -173,7 +164,6 @@ export const EmailSignIn = ({
   return (
     <form method="post" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {pendingChallenge ? (
-        /* Two-factor authentication step */
         <div className="space-y-4">
           <Alert variant="info" icon={ShieldCheck} title="Two-factor authentication">
             Enter the 6-digit code from your authenticator app, or one of your backup codes, to

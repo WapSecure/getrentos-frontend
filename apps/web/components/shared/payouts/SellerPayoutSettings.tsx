@@ -37,16 +37,9 @@ const STATUS_META: Record<SellerPayoutStatus, { label: string; variant: BadgeVar
 };
 
 interface SellerPayoutSettingsProps {
-  /** One line under the heading, in the persona's own words. */
   description: string;
 }
 
-/**
- * The payout account marketplace sale proceeds are sent to, and where each sale's
- * payout stands. Shared by every persona that can sell on the marketplace
- * (Property Owner, Realtor, Agent): they sell through the same seller API, so
- * there is one account and one list, whichever dashboard they open it from.
- */
 export const SellerPayoutSettings = ({ description }: SellerPayoutSettingsProps) => {
   const queryClient = useQueryClient();
   const [bankCode, setBankCode] = useState('');
@@ -66,10 +59,8 @@ export const SellerPayoutSettings = ({ description }: SellerPayoutSettingsProps)
     placeholderData: keepPreviousData,
   });
 
-  // The bank's name for the account comes back before saving (UX-28).
   const canSave = lookupAllowsSave(lookup);
-  // PENDING only waits on the seller when there is no verified account yet;
-  // otherwise it is queued for the next payout run.
+  // PENDING waits on the seller only when there is no verified account; otherwise it is queued for the next payout run.
   const pendingMeta = account?.verified
     ? { label: 'Queued for the next hourly payout', variant: 'info' as BadgeVariant }
     : STATUS_META.PENDING;
@@ -188,8 +179,7 @@ export const SellerPayoutSettings = ({ description }: SellerPayoutSettingsProps)
                         {payoutSentToLabel(sale.sentTo)}
                       </p>
                     )}
-                    {/* The API sends no reason for a failed sale payout; say what
-                        happens next so the seller is not left guessing (UX-36). */}
+                    {/* The API sends no reason for a failed sale payout, so say what happens next. */}
                     {sale.payoutStatus === 'FAILED' && (
                       <p className="text-xs text-muted-foreground mt-1">
                         {PAYOUT_FAILED_NEXT_STEP}

@@ -25,10 +25,7 @@ const NOT_FILTERED_HERE: [keyof RentalSearchParse['filters'], string][] = [
   ['sortBy', 'sorted as asked'],
 ];
 
-/**
- * "Describe what you want" for Discover. The sentence is turned into the page's
- * own filters; anything the page cannot filter on is shown, not dropped.
- */
+// Anything the page cannot filter on is shown, not dropped.
 export function PlainLanguageSearch({
   onApply,
 }: {

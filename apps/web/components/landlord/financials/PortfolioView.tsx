@@ -35,7 +35,6 @@ const SORT_OPTIONS: { value: SortKey; label: string }[] = [
 
 const percent = (value: number | null) => (value === null ? '—' : `${value.toFixed(1)}%`);
 
-/** Compact naira that copes with billions and with a loss. */
 const money = (value: number): string => {
   const sign = value < 0 ? '-' : '';
   const amount = Math.abs(value);

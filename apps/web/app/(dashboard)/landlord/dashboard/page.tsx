@@ -23,7 +23,6 @@ import { AttentionFeed } from '@/components/shared/attention/AttentionFeed';
 import { IdentityNudge } from '@/components/shared/verification/IdentityNudge';
 import { ROUTES } from '@/lib/constants/auth';
 
-// recharts is heavy (~400 KB): load it only when this dashboard mounts.
 const LandlordRevenueChart = dynamic(
   () =>
     import('@/components/landlord/dashboard/LandlordRevenueChart').then(
@@ -81,9 +80,6 @@ export default function LandlordDashboardPage() {
       />
       <AttentionFeed persona="landlord" />
 
-      {/* Defaulting the stats to zeros made this render "Add your first
-          property" while the request was still in flight, so an established
-          landlord was told their portfolio was empty on every load. */}
       {isLoading ? (
         <div className="space-y-6">
           <StatGridSkeleton count={4} />

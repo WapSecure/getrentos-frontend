@@ -37,14 +37,12 @@ const MARKET_NOUN: Record<PublicDetailMarket, string> = {
   land: 'Land',
 };
 
-/** When money paid through Sureground reaches the other side, per market. */
 const PROTECTION_LINE: Record<PublicDetailMarket, string> = {
   rent: 'Pay through Sureground: we hold your rent and release it to the landlord on schedule, unless you raise a dispute.',
   sale: 'Pay through Sureground: we hold your deposit and only release it to the seller once you confirm receipt.',
   land: 'Pay through Sureground: we hold your money and only release it to the seller once the conveyance steps are confirmed.',
 };
 
-/** Shared `generateMetadata` for the three public detail routes. */
 export async function publicListingMetadata(
   market: PublicDetailMarket,
   id: string
@@ -69,11 +67,6 @@ export async function publicListingMetadata(
   };
 }
 
-/**
- * A public listing page: server-rendered so a shared link previews properly and
- * a crawler sees the listing, with the one thing a visitor can't do signed out:
- * contact or pay: handed to sign-in.
- */
 export async function PublicListingPage({
   market,
   id,
@@ -81,7 +74,6 @@ export async function PublicListingPage({
 }: {
   market: PublicDetailMarket;
   id: string;
-  /** Market-specific sections under the listing (land: comparables and assurance). */
   extra?: ReactNode;
 }) {
   const listing = await fetchPublicListing(market, id);

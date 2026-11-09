@@ -37,8 +37,7 @@ export const PhoneSignup = ({ onSubmit, isLoading }: PhoneSignupProps) => {
     },
   });
 
-  // useWatch rather than watch(): watch() returns a function the React Compiler
-  // cannot memoize, so calling it makes the compiler skip this whole component.
+  // useWatch, not watch(): the React Compiler can't memoize watch() and skips the whole component.
   const password = useWatch({ control, name: 'password' });
   const confirmPassword = useWatch({ control, name: 'confirmPassword' });
 
@@ -190,7 +189,6 @@ export const PhoneSignup = ({ onSubmit, isLoading }: PhoneSignupProps) => {
         }
       />
 
-      {/* Submit Button */}
       <Button
         type="submit"
         disabled={!isValid || !agreedToTerms}

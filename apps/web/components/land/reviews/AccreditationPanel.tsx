@@ -41,7 +41,7 @@ const STATUS_VARIANT: Record<LandProfessionalStatus, 'success' | 'warning' | 'da
     EXPIRED: 'neutral',
   };
 
-/** Roles a fresh application may be made for: none open, accredited or suspended. */
+/** Roles with no open, accredited or suspended application. */
 const openRoles = (records: LandProfessional[]) =>
   ROLES.filter(
     (role) =>
@@ -165,7 +165,6 @@ const AccreditationRecord = ({
   );
 };
 
-/** Apply for, and track, accreditation as a land surveyor, lawyer, valuer or inspector. */
 export const AccreditationPanel = () => {
   const queryClient = useQueryClient();
   const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(

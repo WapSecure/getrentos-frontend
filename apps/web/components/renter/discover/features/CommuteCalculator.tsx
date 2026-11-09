@@ -44,7 +44,6 @@ export const CommuteCalculator = ({ listingId, propertyLocation }: CommuteCalcul
     setError(null);
     setCommuteTime(null);
 
-    // Uses the real Google Distance Matrix data served by the backend.
     const response = await renterService.getGeoInsights(listingId, destination);
     const insights = response.data;
 

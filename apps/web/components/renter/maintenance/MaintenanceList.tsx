@@ -141,7 +141,6 @@ export const MaintenanceList = ({
         </div>
       </Card>
 
-      {/* Details Modal */}
       {selectedRequest && (
         <MaintenanceDetailsModal
           isOpen={showDetailsModal}
@@ -151,7 +150,6 @@ export const MaintenanceList = ({
         />
       )}
 
-      {/* Vendor Rating Modal */}
       <VendorRatingModal
         isOpen={showRatingModal}
         onClose={() => setShowRatingModal(false)}

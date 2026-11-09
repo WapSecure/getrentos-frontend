@@ -8,10 +8,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-/**
- * Where someone a buyer appointed acts for them. Any signed-in account: an
- * accepted appointment, not a role, is what grants access.
- */
+// Any signed-in account: an accepted appointment, not a role, grants access.
 export default function LandRepresentingLayout({ children }: { children: ReactNode }) {
   return (
     <main className="min-h-screen bg-background pt-16">

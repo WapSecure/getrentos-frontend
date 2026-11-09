@@ -26,28 +26,10 @@ const RANGES = [
   { value: '30', label: 'Last 30 nights' },
 ];
 
-/**
- * Which rounds were due, and which of them nobody walked.
- *
- * This is the screen the feature is bought for, so it is ordered by what
- * happened rather than by when: a round nobody walked is the loudest thing on
- * the page. Every label is written server-side and rendered verbatim, because
- * the office's screen and the notice the office was already sent have to agree
- * about the same night.
- *
- * The honest limit is stated on the page rather than left to be discovered: a
- * scan proves somebody holding the code was at the checkpoint, and a code
- * photographed off the wall would defeat that. Which is why the register next
- * door treats a new code as a one-click action.
- */
 export const RoundReport = ({ estateId }: { estateId: string }) => {
   const [rangeDays, setRangeDays] = useState('14');
   const [referenceTime] = useState(() => Date.now());
-  /**
-   * Held in state rather than computed during render: an instant computed in the
-   * render body is a different instant every time, and it is in the query key,
-   * so react-query would see a new window on every render and fetch forever.
-   */
+  /** In state, not computed in render: it is in the query key, so a fresh instant each render would refetch forever. */
   const [from, setFrom] = useState(() => new Date(referenceTime - 14 * DAY_MS).toISOString());
 
   const selectRange = (days: string) => {
@@ -104,11 +86,7 @@ export const RoundReport = ({ estateId }: { estateId: string }) => {
 
       {report && (
         <div className="grid gap-3 sm:grid-cols-3">
-          {/*
-           * Every round in the period, open ones included. `tally.closed` is the
-           * DECIDED count, so using it here said "0 rounds due" directly above a
-           * round listed underneath it.
-           */}
+          {/* Every round in the period, open ones included: `tally.closed` counts only decided rounds. */}
           <Stat label="Rounds due" value={rounds.length} hint={report.tally.label} />
           <Stat label="Walked" value={report.tally.walked} tone="success" />
           <Stat
@@ -128,8 +106,6 @@ export const RoundReport = ({ estateId }: { estateId: string }) => {
       ) : (
         <div className="space-y-3">
           {[...rounds]
-            // Missed first: the page exists to make the night nobody walked the
-            // loudest thing on it, not the most recent thing.
             .sort((a, b) => {
               const rank = (round: PatrolRound) =>
                 round.status === 'MISSED' ? 0 : round.status === 'OPEN' ? 1 : 2;

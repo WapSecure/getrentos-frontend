@@ -9,11 +9,7 @@ import { accountSecurityService } from '@/services/accountSecurityService';
 import { unwrap } from '@/lib/apiHelpers';
 import { accountSecurityKeys } from '@/lib/queryKeys';
 
-/**
- * "Where you're signed in": every device with a live session, this one first,
- * and a way to sign any of the others out. A signed-out device loses access at
- * its next refresh, so the copy says "within 15 minutes" rather than "now".
- */
+// A signed-out device loses access at its next refresh, so the copy says "within 15 minutes", not "now".
 export const SignedInDevices = () => {
   const queryClient = useQueryClient();
   const toast = useToast();

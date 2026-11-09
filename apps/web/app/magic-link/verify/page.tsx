@@ -28,8 +28,7 @@ function MagicLinkVerifyContent() {
       const response = await authService.verifyMagicLink(token);
       const data = response.success ? response.data : undefined;
       if (data && 'requiresTwoFactor' in data) {
-        // The link stands in for the password; the authenticator code is
-        // still owed. The OAuth callback page already finishes that step.
+        // The link replaces the password only; the authenticator code is still owed.
         window.location.replace(
           `/oauth/callback#${new URLSearchParams({ challenge_token: data.challengeToken })}`
         );
@@ -39,9 +38,7 @@ function MagicLinkVerifyContent() {
         const { accessToken, ...user } = data;
         const primaryRoleId = resolvePrimaryRoleId(user.roles);
 
-        // Magic-link sign-in is session-only by default (the refresh token is
-        // an httpOnly session cookie): consistent with an unchecked
-        // "Remember me" checkbox.
+        // Session-only: the refresh token is an httpOnly session cookie, as with "Remember me" unchecked.
         saveAuthSession(
           {
             accessToken,

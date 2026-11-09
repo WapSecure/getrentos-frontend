@@ -36,16 +36,6 @@ const STATUS_VARIANT: Record<string, BadgeVariant> = {
   VOID: 'neutral',
 };
 
-/**
- * The firm's commission book: what it has earned letting and renewing its
- * clients' tenancies, and the rate card those earnings come from.
- *
- * A commission is earned automatically the moment a managed tenancy is let or a
- * renewal is accepted — there is nothing to raise by hand here, so the screen is
- * a ledger plus the two rates that drive it. Payout settlement (turning earned
- * commission into money in the firm's account) is a later slice; until then the
- * rows read EARNED.
- */
 export function AgencyCommissionsView() {
   const queryClient = useQueryClient();
   const queryKey = ['agency', 'commissions'];
@@ -148,7 +138,6 @@ export function AgencyCommissionsView() {
         description="What your firm has earned letting and renewing your clients’ tenancies."
       />
 
-      {/* Totals */}
       <div className="grid gap-4 sm:grid-cols-3">
         <StatCard
           icon={Coins}
@@ -167,7 +156,6 @@ export function AgencyCommissionsView() {
         <StatCard icon={Percent} label="Commissions" value={data.totals.count} accent="primary" />
       </div>
 
-      {/* Rate card */}
       <Card className="mt-6 rounded-2xl p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
@@ -230,7 +218,6 @@ export function AgencyCommissionsView() {
         )}
       </Card>
 
-      {/* Ledger */}
       <div className="mt-6">
         <h2 className="mb-2 text-sm font-semibold text-foreground">Ledger</h2>
         {data.commissions.length === 0 ? (

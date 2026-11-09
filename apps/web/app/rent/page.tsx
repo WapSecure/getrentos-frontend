@@ -24,15 +24,6 @@ export const metadata: Metadata = {
   },
 };
 
-/**
- * Pre-render the first page on the server.
- *
- * A public market exists to be found, so the listings: not just the heading:
- * need to be in the HTML a crawler receives. The mapping is shared with the
- * client service, so the server-rendered cards and the hydrated ones are built by
- * the same code. A failure returns null and the client refetches, so this
- * degrades to "loading" rather than erroring the page.
- */
 async function fetchFirstPage(): Promise<Paginated<PublicListingCard> | null> {
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';

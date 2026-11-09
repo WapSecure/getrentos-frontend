@@ -112,7 +112,6 @@ const AppointmentRow = ({
   );
 };
 
-/** The buyer appoints, and ends, the people who act for them on land. */
 export const RepresentativesManager = () => {
   const queryClient = useQueryClient();
   const [email, setEmail] = useState('');

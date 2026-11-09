@@ -3,7 +3,6 @@
 import { useEffect } from 'react';
 import { PageErrorState } from '@sureground/ui';
 
-/** Segment error boundary for microsite (l/[slug]) pages. */
 export default function MicrositeError({
   error,
   reset,

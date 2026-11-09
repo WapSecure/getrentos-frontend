@@ -45,8 +45,7 @@ const PAYOUT_BADGE: Record<
 > = {
   PAID: { label: 'Paid out', variant: 'success' },
   PENDING: { label: 'Payout pending', variant: 'warning' },
-  // Neither of these is a failure. Money held for a second signature is the
-  // control working, and a refusal holds the money rather than losing it.
+  // Neither is a failure: money held for a second signature is the control working, and a refusal holds the money rather than losing it.
   AWAITING_APPROVAL: { label: 'Awaiting 2nd approval', variant: 'info' },
   FAILED: { label: 'Payout failed', variant: 'danger' },
   REJECTED: { label: 'Payout held back', variant: 'warning' },
@@ -72,7 +71,6 @@ export function OwnerStatementsView() {
   const statements = data?.items ?? [];
   const total = data?.total ?? 0;
 
-  // Dropdown of properties for generating a statement.
   const { data: propertiesData } = useQuery({
     queryKey: [...landlordKeys.properties, { page: 1, pageSize: 100 }],
     queryFn: () => unwrap(landlordService.listProperties({ page: 1, pageSize: 100 })),
@@ -183,13 +181,7 @@ export function OwnerStatementsView() {
     },
   });
 
-  /**
-   * Query a figure on this statement.
-   *
-   * The toast says what actually happens — the figure is not going to change —
-   * because an owner who expects an edit will sit refreshing a number that is
-   * deliberately immutable.
-   */
+  // The toast says the figure won't change: statements are immutable, and an owner expecting an edit would sit refreshing.
   const raiseDispute = useMutation({
     mutationFn: ({ lineId, reason }: { lineId: string; reason: string }) =>
       unwrap(landlordService.disputeStatementLine(detailId ?? '', lineId, reason)),
@@ -418,8 +410,7 @@ export function OwnerStatementsView() {
               <StatementDisputeSection
                 lineItems={detail.lineItems}
                 disputes={detail.disputes}
-                // A draft can be regenerated, so querying one would convene a
-                // decision about a document that does not have to exist.
+                // A draft can be regenerated, so only an issued statement can be queried.
                 canRaise={detail.status === 'ISSUED'}
                 isRaising={raiseDispute.isPending}
                 isWithdrawing={withdrawDispute.isPending}

@@ -59,7 +59,6 @@ const priorities: { value: MaintenancePriority; label: string; description: stri
   { value: 'urgent', label: 'Urgent', description: 'Needs prompt attention' },
 ];
 
-/** sessionStorage key for a report being written when the session ran out. */
 export const REPORT_MAINTENANCE_DRAFT_KEY = 'renter-report-maintenance';
 
 const createEmptyForm = (): ReportFormData => ({
@@ -81,7 +80,6 @@ export const ReportMaintenanceModal = ({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [photos, setPhotos] = useState<File[]>([]);
   const [photoError, setPhotoError] = useState<string | null>(null);
-  // "Fill in from photos": a draft of the fields below, shown with any safety note.
   const [repairDraft, setRepairDraft] = useState<RepairDraft | null>(null);
   const [isDrafting, setIsDrafting] = useState(false);
   const fillFromPhotos = async () => {
@@ -107,8 +105,6 @@ export const ReportMaintenanceModal = ({
   };
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // If the session ends while the renter is writing, keep the report (photos
-  // cannot be kept, only the text) so it is waiting after they sign back in.
   const draftRestored = useSessionExpiryDraft<ReportFormData>(
     REPORT_MAINTENANCE_DRAFT_KEY,
     () =>
@@ -119,8 +115,6 @@ export const ReportMaintenanceModal = ({
     isOpen
   );
 
-  // Object URLs are created once per photo set and revoked whenever it
-  // changes (or the modal unmounts) so previews don't leak memory.
   const photoPreviewUrls = useMemo(
     () => photos.map((photo) => URL.createObjectURL(photo)),
     [photos]

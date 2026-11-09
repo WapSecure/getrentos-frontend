@@ -100,7 +100,6 @@ export default function AgentMessagesPage() {
     setActiveId(id);
   };
 
-  // Opened from a message notification.
   useOpenConversationFromUrl(conversationsData !== undefined, handleSelect);
 
   const handleSend = async (text: string, files: File[]) => {

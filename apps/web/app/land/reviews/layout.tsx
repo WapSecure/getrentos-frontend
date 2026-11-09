@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-/** The outside professional's desk: any signed-in account; a seat grants access. */
+// Any signed-in account: a seat grants access.
 export default function LandReviewsLayout({ children }: { children: ReactNode }) {
   return (
     <main className="min-h-screen bg-background pt-16">

@@ -43,7 +43,6 @@ const WHAT: Record<PaymentKind, string> = {
   VENDOR_TOP_UP: 'top-up for the vendor invoice',
 };
 
-/** What the payment was for, when the API did not say. */
 const FALLBACK_TITLE: Record<PaymentKind, string> = {
   RENT: 'Rent',
   ESCROW: 'Purchase deposit',
@@ -54,7 +53,6 @@ const FALLBACK_TITLE: Record<PaymentKind, string> = {
   VENDOR_TOP_UP: 'Vendor invoice top-up',
 };
 
-/** What happens to the money now, in the payer's words. */
 const NEXT: Record<PaymentKind, { title: string; body: string }> = {
   RENT: RENT_NEXT,
   ESCROW: SALE_DEPOSIT_NEXT,
@@ -108,7 +106,6 @@ const lagosDate = (iso: string) =>
     year: 'numeric',
   });
 
-/** The big round mark at the top of each state. */
 function StatusMark({
   icon: Icon,
   tone,
@@ -188,7 +185,6 @@ function Heading({
   eyebrow?: string;
   title: string;
   body?: ReactNode;
-  /** The amount, shown big; a sentence stays smaller so it does not wrap. */
   large?: boolean;
 }) {
   return (
@@ -208,7 +204,6 @@ function Heading({
   );
 }
 
-/** A confirmed payment, as a receipt. */
 export function PaymentSuccess({ payment, back }: { payment: PaymentStatus; back: string }) {
   const title = payment.title || FALLBACK_TITLE[payment.kind];
   const next = NEXT[payment.kind];
@@ -274,7 +269,6 @@ export function PaymentSuccess({ payment, back }: { payment: PaymentStatus; back
   );
 }
 
-/** What the attempt was for, so a payer who is worried has something concrete. */
 function AttemptSummary({ payment }: { payment: PaymentStatus }) {
   return (
     <Card className="px-5 py-1">
@@ -313,7 +307,6 @@ export function PaymentStillPending({
 }: {
   payment: PaymentStatus;
   back: string;
-  /** Ask again after the page has stopped asking on its own. */
   onCheckAgain?: () => void;
   checking?: boolean;
 }) {
@@ -362,11 +355,7 @@ export function PaymentFailed({ payment, back }: { payment: PaymentStatus; back:
   );
 }
 
-/**
- * The status could not be fetched (often a flaky connection on the way back
- * from the bank): not the same as "no such payment", so offer a retry and
- * show the reference to quote.
- */
+/** A failed status fetch isn't "no such payment", so offer a retry and show the reference. */
 export function PaymentLookupFailed({
   reference,
   onRetry,
@@ -415,11 +404,7 @@ export function PaymentNotFound() {
   );
 }
 
-/**
- * Not signed in here, so the outcome can't be looked up: most often the payer
- * paid from the mobile app's in-app browser, sometimes a web session expired
- * during checkout. Neutral on purpose: nothing here says the payment worked.
- */
+/** Neutral on purpose: not signed in here (often the app's in-app browser), so nothing says the payment worked. */
 export function PaymentDoneElsewhere() {
   return (
     <Shell>

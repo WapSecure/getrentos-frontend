@@ -7,7 +7,6 @@ import { unwrap } from '@/lib/apiHelpers';
 import { landDeveloperKeys } from '@/lib/landDeveloperQueryKeys';
 import { landDeveloperService } from '@/services/landDeveloperService';
 
-/** Collected, held, released, outstanding and overdue across plot purchases. */
 export const CollectionsSummaryCards = ({ layoutId }: { layoutId?: string }) => {
   const { data, isLoading, error } = useQuery({
     queryKey: landDeveloperKeys.collections(layoutId),

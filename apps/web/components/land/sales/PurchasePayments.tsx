@@ -30,10 +30,6 @@ const PAYMENT_STATUS = {
   FAILED: { label: 'Failed', variant: 'danger' },
 } as const;
 
-/**
- * Buyer payments Sureground holds, the shares released to the developer as
- * steps are confirmed, and whether each share has reached their bank.
- */
 export const PurchasePayments = ({
   payments,
   releases,

@@ -39,7 +39,6 @@ const SECTIONS: {
   { key: 'watch', label: 'Land Watch', icon: Eye, href: () => '/land/watch' },
 ];
 
-/** Moves between the views of one land property. Scrolls sideways on narrow screens. */
 export const LandPropertyNav = ({ propertyId, active, className }: LandPropertyNavProps) => (
   <nav aria-label="Land property sections" className={cn('-mx-1 overflow-x-auto px-1', className)}>
     <ul className="flex w-max gap-1 rounded-xl bg-secondary p-1">

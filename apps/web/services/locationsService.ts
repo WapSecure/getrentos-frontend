@@ -7,8 +7,6 @@ export interface LocationCountry {
   states: string[];
 }
 
-// ---- Public country/state reference data (used in signup + profile forms) ----
-
 export async function listLocations(): Promise<ApiResponse<LocationCountry[]>> {
   return safeCall(() => authFetch<LocationCountry[]>('/geo/locations'));
 }

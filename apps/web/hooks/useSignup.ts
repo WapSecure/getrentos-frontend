@@ -56,8 +56,7 @@ export const useSignup = () => {
   const sendOtp = async (identifier: string, method: 'email' | 'phone' | 'whatsapp') => {
     setError(null);
 
-    // A fresh signup always starts as Renter — never inherit a role selection
-    // from a previous (persisted) attempt.
+    // A fresh signup starts as renter, never with a persisted earlier selection.
     setData({ selectedRoles: ['renter'] });
 
     const response = await sendOtpMutation.mutateAsync({ identifier, method });
@@ -108,8 +107,7 @@ export const useSignup = () => {
       setError('Your verification session expired. Please start over.');
       return false;
     }
-    // The password is only ever held in memory, so a reload part-way through
-    // loses it; ask for it again rather than sending an empty one.
+    // The password is held only in memory, so after a reload ask for it again rather than send an empty one.
     if (!data.password) {
       setError('For your security, please start sign-up again and re-enter your password.');
       return false;
@@ -129,13 +127,9 @@ export const useSignup = () => {
       );
       localStorage.setItem(STORAGE_KEYS.SELECTED_ROLES, JSON.stringify(data.selectedRoles));
 
-      // Account is created now, with no document/facial verification required
-      // — route back to the page that sent them to sign up, if any, or else
-      // straight to the primary role dashboard. Identity/license/ownership
-      // checks happen later, at the point of use.
+      // No verification at signup: identity, licence and ownership checks happen at the point of use.
       const primaryRole = data.selectedRoles[0];
       router.push(takeSignupNext() ?? getDashboardRoute(primaryRole));
-      // Done with the sign-up details, including the password held in memory.
       reset();
     } else {
       setError(response.message || 'Failed to create account');

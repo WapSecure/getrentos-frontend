@@ -24,7 +24,6 @@ const STATUS_OPTIONS = [
   })),
 ];
 
-/** My plot purchases, newest first, with what is due next. */
 export const PurchasesList = () => {
   const [status, setStatus] = useState('');
   const [page, setPage] = useState(1);

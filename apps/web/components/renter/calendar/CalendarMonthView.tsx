@@ -26,7 +26,6 @@ export const CalendarMonthView = ({
   const monthEnd = endOfMonth(currentDate);
   const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
-  // Get day of week for first day (0 = Sunday)
   const startDay = monthStart.getDay();
   const paddingDays = Array(startDay).fill(null);
 

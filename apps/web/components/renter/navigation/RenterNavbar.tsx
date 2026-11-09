@@ -64,10 +64,8 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
       >
         <div className="px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between gap-4">
-            {/* Logo */}
             <Logo size="md" />
 
-            {/* Desktop Navigation Links */}
             <div className="hidden items-center gap-1 rounded-xl bg-secondary/60 p-1 md:flex">
               <Link
                 href={ROUTES.RENTER_DASHBOARD}
@@ -93,7 +91,6 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
               </Link>
             </div>
 
-            {/* Search Bar - Desktop */}
             <form
               className="mx-4 hidden max-w-md flex-1 md:flex"
               role="search"
@@ -118,7 +115,6 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
               />
             </form>
 
-            {/* Right Section */}
             <div className="flex items-center gap-3">
               <div className="hidden sm:block">
                 <LanguageToggle />
@@ -140,10 +136,8 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
                 viewAllHref={ROUTES.RENTER_NOTIFICATIONS}
               />
 
-              {/* Profile Dropdown */}
               <RenterProfileDropdown user={user} />
 
-              {/* Mobile Menu Button */}
               <IconButton
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
@@ -155,7 +149,6 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
             </div>
           </div>
 
-          {/* Mobile Search Bar */}
           <form className="py-3 md:hidden" role="search" onSubmit={handleSearch}>
             <Input
               type="text"
@@ -177,7 +170,6 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
         </div>
       </nav>
 
-      {/* Mobile Menu */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div

@@ -23,11 +23,7 @@ import { agentOfflineQueue } from '@/lib/agentOfflineQueue';
 import { isAgentConnectionFailure, requireAgentQueueOwner } from '@/lib/agentQueueOwner';
 import { useAgentUser } from '../layout';
 
-/**
- * A visit stores its subject in lower case; the API spells it in caps. Written
- * out case by case rather than `toUpperCase() as ...` so the compiler checks
- * every member of the union is covered and the result keeps its literal type.
- */
+// Spelled out per case rather than `toUpperCase() as ...` so the compiler checks every member of the union.
 const API_SUBJECT_TYPES: Record<VerificationVisit['subjectType'], 'TENANT' | 'BUYER' | 'PROPERTY'> =
   {
     tenant: 'TENANT',

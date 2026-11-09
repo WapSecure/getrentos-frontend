@@ -19,7 +19,6 @@ export default function ResidentAnnouncementsPage() {
     queryFn: () => unwrap(estateResidentService.listMyAnnouncements({ pageSize: 50 })),
   });
   const announcements = data?.items ?? [];
-  // Listen to an update instead of reading it, with the browser's own voice.
   const readAloud = useReadAloud();
 
   return (

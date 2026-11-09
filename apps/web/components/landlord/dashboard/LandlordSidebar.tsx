@@ -42,7 +42,6 @@ import { ROUTES } from '@/lib/constants/auth';
 import { createRoleNavigation, GroupedSidebar } from '@/components/shared/dashboard/GroupedSidebar';
 import { usePlanTier } from '@/hooks/usePlanTier';
 
-/** Nav items whose destination page is gated behind the Pro plan (see Batch 7b). */
 const PRO_GATED_ROUTES = new Set<string>([
   ROUTES.LANDLORD_MICROSITE,
   ROUTES.LANDLORD_FINANCIALS,
@@ -61,10 +60,7 @@ const item = (labelKey: TranslationKey, href: string, icon: React.ElementType): 
   icon,
 });
 
-// Payments (+ Arrears), Maintenance (+ Home Management) and Financials
-// (+ Owner Statements) are tabbed hubs, so those folded entries have no row of their own.
-// Groups follow the landlord's jobs: letting a place, running the tenancy, the
-// money and records, the people who help, and growing the business.
+// Payments, Maintenance and Financials are tabbed hubs, so Arrears, Home Management and Owner Statements have no row of their own.
 const baseNavGroups = [
   {
     label: 'Overview',

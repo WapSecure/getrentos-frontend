@@ -56,11 +56,6 @@ import { LandWatchJobsCard } from './LandWatchJobsCard';
 type Notify = (message: string, variant?: ToastVariant) => void;
 const TIERS: LandWatchTier[] = ['ESSENTIAL', 'PROTECTED', 'MANAGED'];
 
-/**
- * Land Watch for the person who owns the land: watched parcels and plots, the
- * inspection reports on them, incidents and obligation reminders. `?id=` opens
- * one watch; without it, the list and the form to start watching.
- */
 export const LandWatchWorkspace = () => {
   const params = useSearchParams();
   const router = useRouter();
@@ -80,8 +75,6 @@ export const LandWatchWorkspace = () => {
     </div>
   );
 };
-
-// ─── The list, and starting a watch ──────────────────────────────────────────
 
 const WatchList = ({ onOpen, notify }: { onOpen: (id: string) => void; notify: Notify }) => {
   const [adding, setAdding] = useState(false);
@@ -212,7 +205,6 @@ const SubscribeCard = ({
     queryKey: landKeys.watchOptions,
     queryFn: () => unwrap(landWatchService.options()),
   });
-  // Land already watched is left out: it has its own watch to open instead.
   const options = (landOptions.data ?? [])
     .filter((o) => !o.watchId)
     .map((o) => ({
@@ -298,8 +290,6 @@ const SubscribeCard = ({
     </Card>
   );
 };
-
-// ─── One watch ───────────────────────────────────────────────────────────────
 
 const WatchDetail = ({
   id,

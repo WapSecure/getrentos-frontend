@@ -23,7 +23,6 @@ import type { DeliveryCodeScreen, Gate, Household } from '@/types/estate';
 
 interface LogDeliveryModalProps {
   isOpen: boolean;
-  /** The estate the parcel is being logged against, needed to check a code. */
   estateId: string;
   households: Household[];
   householdTotal: number;
@@ -44,25 +43,7 @@ interface LogDeliveryModalProps {
   isSubmitting?: boolean;
 }
 
-/**
- * Logging a parcel at the gate, by one of two routes.
- *
- * The guard either picks the household from a list: because the courier said a
- * name and the guard recognised it: or the courier presents the code the
- * household sent them, in which case the household names itself and the guard
- * does not choose at all.
- *
- * The code route is offered first, and deliberately: everything about the old
- * route rests on the guard's recollection of what was said at a barrier, and the
- * parcel ends up recorded against whoever that suggested. A code removes the
- * guess.
- *
- * The shell below is thin on purpose. All the form's state lives in
- * `LogDeliveryForm`, which is only mounted while the dialog is open, so the next
- * opening cannot inherit the last one's household or an already-spent code: the
- * parent closes this dialog itself on success and never calls `onClose`, so
- * "clear the fields on close" was never going to cover that case.
- */
+// Form state lives in LogDeliveryForm, mounted only while open: the parent closes this on success without calling onClose, so the next opening must not inherit a spent code.
 export const LogDeliveryModal = ({ isOpen, ...props }: LogDeliveryModalProps) => (
   <Dialog open={isOpen} onOpenChange={(next) => !next && props.onClose()}>
     <LogDeliveryForm {...props} />
@@ -102,8 +83,6 @@ const LogDeliveryForm = ({
     onSuccess: (result) => {
       setScreen(result);
       setCheckError(null);
-      // A match pre-fills the courier, so the guard is not retyping what the
-      // household already told the estate.
       if (result.matched && result.courier) setCourier((current) => current || result.courier!);
     },
     onError: (error) => {
@@ -124,9 +103,7 @@ const LogDeliveryForm = ({
 
   const handleSubmit = () => {
     onSubmit({
-      // A verified code is sent INSTEAD of a household, never alongside one: a
-      // guard holding a code does not get to overrule it with somebody they
-      // picked, and the server would ignore it anyway.
+      // A verified code is sent instead of a household, never alongside one.
       ...(matched ? { code: code.trim() } : { householdId }),
       courier: courier.trim() || undefined,
       recipientName: recipientName.trim() || undefined,
@@ -148,9 +125,7 @@ const LogDeliveryForm = ({
                 value={code}
                 onValueChange={(value) => {
                   setCode(value);
-                  // Any edit invalidates the last answer. Showing a stale "this is
-                  // for Block C" beside a code the guard has since changed is worse
-                  // than showing nothing.
+                  // Any edit invalidates the last match, so a stale household never shows beside a changed code.
                   if (screen || checkError) {
                     setScreen(null);
                     setCheckError(null);
@@ -186,9 +161,7 @@ const LogDeliveryForm = ({
           )}
 
           {screen && !screen.matched && (
-            // Worded by the server and shown as-is. The refusal says the same
-            // thing whether the code was wrong, expired or already used, so this
-            // screen cannot be used to work out whether a household exists here.
+            // Shown as-is: the refusal is identical for wrong, expired or used codes, so it can't reveal whether a household exists.
             <Alert variant="warning" className="mt-3">
               <p className="text-xs">
                 {screen.message} {screen.instruction}

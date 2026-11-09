@@ -1,15 +1,10 @@
 import type { LandClosingFields } from './landClosing';
 
 /**
- * Developer estate inventory, plot sales and conveyance, as the owner API
- * returns them (src/modules/land/dto/land-sales-response.dto.ts,
- * land-insights.dto.ts, land-integrity-response.dto.ts).
- *
- * Money is whole naira as a JS number; rates are basis points (1% = 100).
+ * Mirrors src/modules/land/dto/land-sales-response.dto.ts, land-insights.dto.ts and
+ * land-integrity-response.dto.ts. Money is whole naira; rates are basis points (1% = 100).
  */
 import type { LandAreaUnit, LandAssuranceTier, LandDiligenceStatus, LandTitleType } from './land';
-
-// ─── Layout, plots, plans ────────────────────────────────────────────────────
 
 export type LandLayoutStatus = 'DRAFT' | 'PUBLISHED' | 'CLOSED';
 
@@ -67,7 +62,6 @@ export interface LandLayout {
 
 export interface OwnerLandLayout extends LandLayout {
   paymentPlans: LandPaymentPlan[];
-  /** Plot count by status. */
   plotCounts: Partial<Record<LandPlotStatus, number>>;
 }
 
@@ -118,8 +112,6 @@ export interface LandPlotImportRowError {
   errors: string[];
 }
 
-// ─── Requests ────────────────────────────────────────────────────────────────
-
 export interface LandLayoutInput {
   name: string;
   description?: string | null;
@@ -159,8 +151,6 @@ export interface LandMilestoneDeliverInput {
   documentId?: string;
   note?: string;
 }
-
-// ─── Purchases ───────────────────────────────────────────────────────────────
 
 export const LAND_PURCHASE_STATUSES = [
   'PENDING_DEPOSIT',
@@ -205,7 +195,6 @@ export interface LandPurchaseSummary {
   status: LandPurchaseStatus;
   layoutId: string;
   layoutName: string;
-  /** The master land property the estate sits on. */
   propertyId?: string;
   plotId: string;
   plotNumber: string;
@@ -265,7 +254,6 @@ export interface LandEscrowRelease {
   amount: number;
   reason: string;
   createdAt: string;
-  /** Where the payout of this release to the developer's bank stands. */
   payoutStatus?: LandReleasePayoutStatus;
   paidAt?: string;
   approvedAt?: string;
@@ -307,11 +295,9 @@ export interface SellerLandPurchaseListParams {
   pageSize?: number;
   status?: LandPurchaseStatus;
   layoutId?: string;
-  /** Purchase reference, exact plot number or buyer name. */
+  /** Matches purchase reference, exact plot number or buyer name. */
   search?: string;
 }
-
-// ─── Insights ────────────────────────────────────────────────────────────────
 
 export interface LandRiskAssessment {
   propertyId: string;
@@ -366,8 +352,6 @@ export interface LandSellerAnalytics {
   } | null;
 }
 
-// ─── Chain of title ──────────────────────────────────────────────────────────
-
 export const LAND_TITLE_EVENT_KINDS = [
   'ORIGINAL_GRANT',
   'EXCISION',
@@ -409,8 +393,6 @@ export interface LandTitleEventInput {
   documentId?: string;
 }
 
-// ─── My layouts ──────────────────────────────────────────────────────────────
-
 export interface LandPlotCounts {
   total: number;
   available: number;
@@ -421,7 +403,6 @@ export interface LandPlotCounts {
   withheld: number;
 }
 
-/** One estate layout the caller can sell from (GET owner/land/layouts). */
 export interface OwnerLandLayoutSummary {
   id: string;
   name: string;
@@ -437,7 +418,6 @@ export interface OwnerLandLayoutSummary {
   createdAt: string;
 }
 
-/** The land resale a seller is conveying. */
 export interface LandResaleSummary {
   transactionId: string;
   propertyId: string;

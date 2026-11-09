@@ -53,25 +53,15 @@ const PORTAL_NOUN: Record<TrustPortal, string> = {
 
 interface TrustOverviewViewProps {
   portal: TrustPortal;
-  /** Where each requirement is done in this portal (or a handler for an in-page tab). */
   onAction: (key: TrustRequirementKey) => void;
-  /** Extra detail for the disclosure, e.g. the renter's score history. */
   moreDetails?: ReactNode;
 }
 
-/**
- * The Trust & Verification page for every portal (trust redesign). It answers,
- * in order: am I verified, what is my score, what is still needed here, and
- * what do I do next. Identity is shown apart from the score, because they
- * measure different things: who you are, and how much history backs you.
- * Only the requirements of this portal are listed, so a renter is never asked
- * for a landlord's checks. Every value comes from GET /trust/overview.
- */
+// Identity is shown apart from the score: they measure different things.
 export function TrustOverviewView({ portal, onAction, moreDetails }: TrustOverviewViewProps) {
   const query = useQuery({
     queryKey: trustKeys.overview(portal),
     queryFn: () => unwrap(trustService.getOverview(portal)),
-    // While a provider or reviewer is deciding, check back without a reload.
     refetchInterval: (q) =>
       q.state.data?.requirements.some((r) => r.status === 'PENDING_PROVIDER') ? 5000 : false,
   });
@@ -93,7 +83,6 @@ export function TrustOverviewView({ portal, onAction, moreDetails }: TrustOvervi
 
   return (
     <div className="space-y-6">
-      {/* A. Overview: identity and score side by side, never merged. */}
       <Card>
         <div className="grid divide-y divide-border sm:grid-cols-2 sm:divide-x sm:divide-y-0">
           <div className="space-y-2 p-5">
@@ -128,7 +117,6 @@ export function TrustOverviewView({ portal, onAction, moreDetails }: TrustOvervi
           </div>
         </div>
 
-        {/* D. One primary action. */}
         {nextAction && (
           <div className="flex flex-col gap-3 border-t border-border px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-foreground">
@@ -145,7 +133,6 @@ export function TrustOverviewView({ portal, onAction, moreDetails }: TrustOvervi
         )}
       </Card>
 
-      {/* B. What this portal needs. */}
       <Card>
         <CardHeader
           action={
@@ -199,7 +186,6 @@ export function TrustOverviewView({ portal, onAction, moreDetails }: TrustOvervi
         </CardContent>
       </Card>
 
-      {/* C. Details, only when asked for. */}
       <details className="group rounded-xl border border-border bg-card">
         <summary className="cursor-pointer list-none px-5 py-4 text-sm font-medium text-foreground focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/12 rounded-xl">
           How this works

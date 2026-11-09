@@ -14,7 +14,7 @@ import {
 } from '@/lib/site';
 import './globals.css';
 
-// Self-hosted at build time; @sureground/ui reads --font-manrope into --font-ui.
+// @sureground/ui reads --font-manrope into --font-ui.
 const manrope = Manrope({ subsets: ['latin'], display: 'swap', variable: '--font-manrope' });
 
 export const metadata: Metadata = {
@@ -37,8 +37,6 @@ export const metadata: Metadata = {
   ],
   alternates: {
     canonical: '/',
-    // Both locales (en + Nigerian Pidgin) share the same URL: the language
-    // switch is a client-side preference, so only the default is advertised.
     languages: {
       'x-default': '/',
       en: '/',
@@ -75,14 +73,7 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-/**
- * This layout reads one request header: the Content-Security-Policy nonce the
- * proxy (proxy.ts) generates per request, for the theme script. That makes
- * every page render dynamically, per visitor: unavoidable with a nonce-based
- * CSP, since a prerendered page would carry no nonce and its scripts would be
- * blocked. Keep it to that one header; the saved language is still restored in
- * the browser by LanguageProvider.
- */
+// Reads only the CSP nonce header, which makes every page dynamic: unavoidable with a nonce-based CSP.
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const nonce = (await headers()).get('x-nonce') ?? undefined;
   return (

@@ -30,7 +30,6 @@ interface Payment {
 interface PaymentExportProps {
   isOpen: boolean;
   onClose: () => void;
-  /** Every payment the renter has, not one page of the history. */
   payments: Payment[];
   isLoading?: boolean;
   /** Set when the full history could not be loaded, so nothing partial is exported. */
@@ -38,7 +37,6 @@ interface PaymentExportProps {
 }
 
 const statusLabel = (status: Payment['status']) => paymentStatusBadges[status]?.label ?? status;
-/** A paid charge is dated by when it was paid; an open one by when it is due. */
 const rowDate = (p: Payment) =>
   formatLagosDate(p.status === 'paid' ? p.date : (p.dueDate ?? p.date));
 

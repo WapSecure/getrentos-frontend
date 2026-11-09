@@ -7,12 +7,6 @@ import { Button } from '@sureground/ui';
 import { geocodeService, LAGOS_POINT, type MapPoint } from '@/services/geocodeService';
 import { addBaseTiles } from '@/lib/mapTiles';
 
-/**
- * Where the property is, as the owner says: "Find on map" suggests a pin from
- * the typed address, and the owner drags it (or clicks the map) onto the right
- * building. Leaving it alone is allowed; the property is then placed from its
- * address, less precisely.
- */
 export const LocationPicker = ({
   address,
   city,
@@ -28,7 +22,6 @@ export const LocationPicker = ({
   country?: string;
   value: MapPoint | null;
   onChange: (point: MapPoint | null) => void;
-  /** The current pin is our guess from the address, not the owner's. */
   guessed?: boolean;
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -48,7 +41,6 @@ export const LocationPicker = ({
     onChangeRef.current = onChange;
   });
 
-  // The map is created once there is a pin to show, and kept.
   const hasPin = value != null;
   useEffect(() => {
     if (!hasPin || mapRef.current) return;

@@ -10,12 +10,10 @@ export const SignInLeftContent = () => {
   return (
     <aside className="relative hidden border-r border-border bg-muted/30 transition-all duration-300 lg:flex lg:w-1/2">
       <div className="relative z-10 flex flex-col justify-between p-12 lg:p-16 w-full">
-        {/* Logo - Now clickable */}
         <div className="mb-12">
           <Logo size="lg" />
         </div>
 
-        {/* Main Content */}
         <div className="flex-1">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -42,7 +40,6 @@ export const SignInLeftContent = () => {
           </motion.div>
         </div>
 
-        {/* Bottom Trust Signals */}
         <div className="mt-12 pt-6 border-t border-border">
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <div className="flex items-center gap-4">

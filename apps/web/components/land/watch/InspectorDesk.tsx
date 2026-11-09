@@ -55,11 +55,6 @@ const STATUS_WORDS: Record<string, string> = {
   REQUESTED: 'Not yet assigned',
 };
 
-/**
- * The inspector's desk on the web. Field work is meant for the phone (camera,
- * GPS, offline capture); this covers filing from a laptop with the browser's
- * location, and seeing what is assigned.
- */
 export const InspectorDesk = () => {
   const params = useSearchParams();
   const router = useRouter();

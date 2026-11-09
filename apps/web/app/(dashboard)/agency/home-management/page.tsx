@@ -6,7 +6,6 @@ import { useCustody } from '@/components/agency/CustodyProvider';
 import { PageHeader } from '@sureground/ui';
 
 export default function AgencyHomeManagementPage() {
-  // Acting for one client narrows the whole page to that client's home.
   const { selected } = useCustody();
   const scope = selected
     ? (selected.propertyTitle ?? 'the selected property') +

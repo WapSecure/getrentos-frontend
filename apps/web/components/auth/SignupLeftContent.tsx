@@ -50,12 +50,10 @@ export const SignupLeftContent = () => {
   return (
     <aside className="relative hidden border-r border-border bg-muted/30 transition-all duration-300 lg:flex lg:w-1/2">
       <div className="relative z-10 flex flex-col justify-between p-12 lg:p-16 w-full">
-        {/* Logo - Now clickable */}
         <div className="mb-12">
           <Logo size="lg" />
         </div>
 
-        {/* Main Content */}
         <div className="flex-1">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -77,7 +75,6 @@ export const SignupLeftContent = () => {
               payments, and the tools for every role you manage.
             </p>
 
-            {/* Trust Features Grid */}
             <div className="grid grid-cols-2 gap-4 mb-8">
               {trustFeatures.slice(0, 4).map((feature, index) => (
                 <motion.div
@@ -98,7 +95,6 @@ export const SignupLeftContent = () => {
               ))}
             </div>
 
-            {/* Trust Score Preview */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -126,7 +122,6 @@ export const SignupLeftContent = () => {
           </motion.div>
         </div>
 
-        {/* Bottom Trust Signals */}
         <div className="mt-12 pt-6 border-t border-border">
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <div className="flex items-center gap-4">

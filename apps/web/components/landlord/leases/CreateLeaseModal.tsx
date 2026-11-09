@@ -53,17 +53,9 @@ export const CreateLeaseModal = ({
   const handleUnitChange = (id: string) => {
     setUnitId(id);
     const unit = vacantUnits.find((u) => u.id === id);
-    // The unit's asking rent: the price the landlord set and the advert
-    // publishes, so the lease starts from the same figure.
     if (unit && !rentAmount) setRentAmount(String(unit.askingRent ?? ''));
-    // An approved applicant is the tenant: prefill rather than make the
-    // landlord retype a name we already hold.
     if (unit?.approvedApplicant) {
       setTenantName(unit.approvedApplicant.name);
-      // Auto-draft the lease for an approved applicant: default a standard
-      // 12-month term starting today, so the landlord reviews and sends
-      // instead of re-entering everything (and spares them clicking the date
-      // picker forward a year). They can still change either date.
       const today = new Date();
       if (!leaseStart) setLeaseStart(format(today, 'yyyy-MM-dd'));
       if (!leaseEnd) setLeaseEnd(format(subDays(addYears(today, 1), 1), 'yyyy-MM-dd'));
@@ -103,10 +95,7 @@ export const CreateLeaseModal = ({
       leaseStart,
       leaseEnd,
       rentAmount: Number(rentAmount),
-      // Default to yearly: rent in Nigeria is let by the year, and the vacant-unit
-      // list does not always carry the unit's period. Without this the lease is
-      // saved with no cadence and the card falls back to the term dates — a short
-      // test term then reads "Monthly rent" on an amount that is really annual.
+      // Default to yearly: Nigerian rent is let by the year, and with no period a short term would read as monthly rent.
       rentPeriod: selectedUnit.askingRentPeriod ?? 'year',
       securityDeposit: securityDeposit ? Number(securityDeposit) : undefined,
     };

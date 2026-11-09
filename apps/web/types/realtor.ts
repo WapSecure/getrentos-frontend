@@ -21,13 +21,11 @@ export type RealtorOfferStatus =
   | 'closed';
 
 /**
- * The ledger's own states. There is no "invoiced": commission becomes real when
- * the sale's escrow releases, and a sale reversed before any payout claimed it
- * is voided with a reason rather than quietly disappearing.
+ * No "invoiced": commission becomes real when escrow releases, and a reversed sale is voided with a
+ * reason.
  */
 export type CommissionStatus = 'available' | 'paid' | 'void';
 
-/** Which side of the deal earned the commission. */
 export type CommissionSide = 'listing' | 'buyer';
 
 export type RealtorPayoutStatus = 'pending' | 'success' | 'failed';
@@ -112,11 +110,10 @@ export interface Commission {
   propertyTitle: string;
   clientName: string;
   dealValue: number;
-  /** The rate snapshotted when this was earned — later config changes never restate it. */
+  /** Snapshotted when earned; later config changes never restate it. */
   ratePct: number;
   amount: number;
   status: CommissionStatus;
-  /** When the sale settled: the moment this became real. */
   earnedAt: string;
   paidAt?: string;
   voidReason?: string;
@@ -125,9 +122,8 @@ export interface Commission {
 export interface RealtorCommissionSummary {
   /** Earned and withdrawable right now. */
   available: number;
-  /** Commission on deals still under escrow — not owed yet. */
+  /** Commission on deals still under escrow; not owed yet. */
   pending: number;
-  /** Already settled to the bank. */
   paid: number;
   totalEarned: number;
   dealsClosed: number;
@@ -149,7 +145,7 @@ export interface RealtorPayoutAccount {
   /** Masked: only the last four digits are ever returned. */
   accountNumber: string;
   accountName: string;
-  /** While a recent change is on hold; not sent by the API yet, shown once it is. */
+  /** Not sent by the API yet; shown once it is. */
   payoutHoldUntil?: string | null;
 }
 
@@ -162,8 +158,7 @@ export interface RealtorPayout {
   transferRef?: string | null;
   paidAt?: string | null;
   failureReason?: string | null;
-  /** How many commission rows this batch settled. */
-  /** Where it went (bank + last four digits), only when the API can prove it. */
+  /** Bank + last four digits, only when the API can prove it. */
   sentTo?: PayoutSentTo | null;
   commissionCount: number;
   createdAt: string;

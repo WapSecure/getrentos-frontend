@@ -20,9 +20,7 @@ import type { TourModalMode } from '@/types/virtual-tour';
 interface VirtualTourViewerModalProps {
   propertyTitle: string | null;
   propertyId: string | null;
-  /** The landlord's uploaded walkthrough video, when the property has one. */
   videoTourUrl?: string;
-  /** Shown to the renter as the person who will host a live viewing. */
   hostName?: string;
   initialMode?: TourModalMode;
   onClose: () => void;

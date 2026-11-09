@@ -40,7 +40,6 @@ interface ServerRejection {
   areaProblem?: string;
 }
 
-/** Reads the per-row errors out of a rejected import, when the API passed them on. */
 const toRejection = (error: unknown): ServerRejection => {
   const rowErrors = new Map<number, string[]>();
   let areaProblem: string | undefined;
@@ -274,7 +273,6 @@ const ImportBody = ({
   );
 };
 
-/** Bulk plot import from a CSV: parsed and checked in the browser, then sent in one batch. */
 export const PlotImportDialog = ({ open, onOpenChange, ...rest }: PlotImportDialogProps) => (
   <Dialog open={open} onOpenChange={onOpenChange}>
     <DialogContent className="max-w-2xl">

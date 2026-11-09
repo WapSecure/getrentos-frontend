@@ -44,11 +44,7 @@ interface ManagedIntakeDialogProps {
   onSubmitted: (intake: ManagedIntake) => void;
 }
 
-/**
- * The owner's ask: what the property is and what they need. The fee shown is
- * indicative — Sureground visits first and the proposal is what binds — so it is
- * labelled that way rather than presented as a quote.
- */
+// The fee is indicative (Sureground visits first and the proposal binds), so it is labelled that way, not as a quote.
 export const ManagedIntakeDialog = ({
   property,
   cards,

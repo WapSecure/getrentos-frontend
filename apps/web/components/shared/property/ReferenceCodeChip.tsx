@@ -3,14 +3,6 @@
 import { useState } from 'react';
 import { Check, Copy } from 'lucide-react';
 
-/**
- * A property's shareable reference code (PR-AB7K-9Q) with one-tap copy.
- *
- * This is the handle an owner reads out and an agent types, so it has to be easy
- * to lift off the screen — far more than a UUID ever was. Shared across the owner
- * and landlord property views (where the owner copies it to share) and the
- * managed-properties view (where the holder sees which property a mandate is for).
- */
 export const ReferenceCodeChip = ({
   code,
   className = '',

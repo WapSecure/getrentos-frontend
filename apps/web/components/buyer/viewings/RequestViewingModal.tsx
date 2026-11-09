@@ -54,7 +54,6 @@ export const RequestViewingModal = ({
   const [mode, setMode] = useState<'IN_PERSON' | 'VIDEO'>('IN_PERSON');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  // Video viewings are offered only once the call service is set up.
   const { data: videoCalls } = useQuery({
     ...videoCallAvailabilityQuery,
     queryFn: () => unwrap(videoCallService.availability()),

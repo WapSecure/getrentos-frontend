@@ -16,16 +16,9 @@ import {
 } from '@sureground/ui';
 import type { EmergencyKind } from '@/types/estate';
 
-/** The API's floor on a description, kept in step so the form cannot under-run it. */
+// The API's minimum description length; keep in step.
 const DESCRIPTION_MIN_LENGTH = 3;
 
-/**
- * The six kinds, as a manager picks them.
- *
- * Plain nouns on purpose. The sentence people receive is composed server-side
- * from the kind: "a gas leak, leave by the nearest exit": so this list only
- * has to be unambiguous to the person choosing, not grammatical.
- */
 const KIND_OPTIONS: { value: EmergencyKind; label: string }[] = [
   { value: 'FIRE', label: 'Fire' },
   { value: 'GAS_LEAK', label: 'Gas leak' },
@@ -38,13 +31,7 @@ const KIND_OPTIONS: { value: EmergencyKind; label: string }[] = [
 export interface DeclareMusterInput {
   kind: EmergencyKind;
   description: string;
-  /**
-   * Omitted when the manager does not have one to hand.
-   *
-   * The API accepts a declaration with no assembly point and the resident copy
-   * falls back to "leave by the nearest exit". A form field that blocked a 3am
-   * alarm would be worse than an incomplete record, so this is never required.
-   */
+  /** Optional: the API accepts no assembly point, and a required field must never block an alarm. */
   assemblyPoint?: string;
 }
 
@@ -56,21 +43,7 @@ interface DeclareMusterModalProps {
   error?: string | null;
 }
 
-/**
- * Raises the alarm.
- *
- * Two things are required and one is not, which is the design of the whole
- * form: the kind and the manager's own account of what they saw are what make
- * the record useful to a fire officer or an insurer afterwards, and the assembly
- * point is the one thing somebody raising an alarm at 3am may not have decided
- * yet.
- *
- * What is NOT on this form is the roll. It is built by the server in the same
- * transaction that records the declaration, from who the estate believes is
- * inside at that moment: a client that assembled it would be assembling it from
- * whatever its cache last saw, and the value of a roll call is that it is a
- * snapshot taken at a stated time.
- */
+// The roll is built by the server in the declaring transaction, as a snapshot; never assemble it here.
 export const DeclareMusterModal = ({
   isOpen,
   onClose,

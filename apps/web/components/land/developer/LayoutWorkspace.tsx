@@ -59,7 +59,6 @@ const LayoutDetails = ({ layout }: { layout: OwnerLandLayout }) => (
   </Card>
 );
 
-/** Why a layout cannot be started yet, or the form that starts one. */
 const LayoutSetup = ({
   record,
   notify,
@@ -135,7 +134,6 @@ const LayoutSetup = ({
   );
 };
 
-/** The developer's estate on one parcel: status, inventory, plots and payment plans. */
 export const LayoutWorkspace = ({ record }: { record: OwnerLandRecord }) => {
   const queryClient = useQueryClient();
   const propertyId = record.property.id;

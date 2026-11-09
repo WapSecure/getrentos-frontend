@@ -132,7 +132,6 @@ export const RenterSupportPage = () => {
       />
 
       <div className="grid gap-4 lg:grid-cols-5">
-        {/* Thread list */}
         <aside className="space-y-2 lg:col-span-2">
           <div className="flex items-center justify-between">
             <p className="text-sm font-semibold text-foreground">My conversations</p>
@@ -193,7 +192,6 @@ export const RenterSupportPage = () => {
           )}
         </aside>
 
-        {/* Active thread / compose */}
         <section className="lg:col-span-3">
           {composing || !activeThread ? (
             <Card className="p-5">

@@ -12,27 +12,19 @@ import {
   Input,
 } from '@sureground/ui';
 
-/** The API's floor. Kept in step so the form never allows what the server will reject. */
+// The API's minimum; keep in step.
 const REASON_MIN_LENGTH = 10;
 
 interface LiftWatchlistEntryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  /** Who is being taken off the list, for the confirmation copy. */
   label: string;
   onSubmit: (reason: string) => void;
   isSubmitting?: boolean;
   error?: string | null;
 }
 
-/**
- * Takes an entry off the watch list.
- *
- * A reason is required, and the copy says what the change actually does: from
- * the next arrival onward, nothing is refused. Lifting is not a soft delete:
- * the row stays, the audit keeps it, and the estate can still answer "was this
- * person on our list in March, and who decided that?".
- */
+// Lifting isn't a delete: the row and audit stay, so the estate can still say who was listed and who decided.
 export const LiftWatchlistEntryModal = ({
   isOpen,
   onClose,

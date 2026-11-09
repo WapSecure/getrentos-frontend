@@ -12,12 +12,6 @@ import {
   type TenancyImportResult,
 } from '@/services/portfolioImportService';
 
-/**
- * Bring the tenancies you take over onto Sureground: each row becomes a signed
- * lease on an existing unit, with the deposit you hold recorded (not moved),
- * any arrears carried over as an opening balance, and rent billed on schedule
- * from the next due date. Dry run first; a file with errors imports nothing.
- */
 export function TenancyImportCard() {
   const { live, loading } = useCustody();
   const fileRef = useRef<HTMLInputElement>(null);

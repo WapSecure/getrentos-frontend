@@ -6,10 +6,6 @@ export interface InvoiceLine {
   amount: number;
 }
 
-/**
- * What an invoice is made of: rent plus any recurring extras, and the period
- * it covers. Renders nothing for single-amount charges with no period.
- */
 export function InvoiceLines({
   lines,
   periodStart,

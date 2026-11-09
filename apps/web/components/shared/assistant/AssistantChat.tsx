@@ -35,9 +35,7 @@ import { useLanguage } from '@/lib/i18n/LanguageContext';
 interface ChatMessage extends AssistantTurn {
   links?: AssistantLink[];
   suggestions?: string[];
-  /** The language an answer is in, for reading it aloud. */
   language?: ReplyLanguage;
-  /** Set when the answer could not be given in the language asked for. */
   fellBackFrom?: ReplyLanguage;
 }
 
@@ -45,24 +43,20 @@ const MAX_QUESTION = 500;
 const HISTORY_TURNS = 6;
 
 export interface AssistantChatProps {
-  /** Sends a question with the recent turns; resolves to the reply or throws. */
   ask: (
     question: string,
     history: AssistantTurn[],
     language: ReplyLanguage
   ) => Promise<AssistantReply>;
   starters: string[];
-  /** What the assistant covers, shown under the title. */
   scope: string;
   placeholder: string;
 }
 
-/** "Ask Sureground": read-only answers from the user's own account, opened from the navbar. */
 export const AssistantChat = ({ ask: askFn, starters, scope, placeholder }: AssistantChatProps) => {
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  // Answers follow the app's language unless the person picked another one here.
   const { language: appLanguage } = useLanguage();
   const [override, setOverride] = useState<ReplyLanguage | null>(savedReplyLanguage);
   const language = override ?? appLanguage;
@@ -113,7 +107,6 @@ export const AssistantChat = ({ ask: askFn, starters, scope, placeholder }: Assi
     }
   };
 
-  // Spoken words land in the box, so the person can check them before sending.
   const voice = useVoiceInput(language, setDraft);
   const readAloud = useReadAloud();
 

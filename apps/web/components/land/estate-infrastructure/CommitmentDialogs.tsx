@@ -89,7 +89,6 @@ interface BaseProps<T> {
   onSubmit: (input: T) => void;
 }
 
-/** Add a promise: what will be built, and by when. */
 export const CommitmentFormDialog = (props: BaseProps<EstateCommitmentInput>) => {
   const id = useId();
   const [kind, setKind] = useState<EstateCommitmentKind>('ROADS');
@@ -152,7 +151,7 @@ export const CommitmentFormDialog = (props: BaseProps<EstateCommitmentInput>) =>
   );
 };
 
-/** Report progress; claiming delivery needs evidence from the estate's documents. */
+/** Claiming delivery needs evidence from the estate's documents. */
 export const ProgressDialog = ({
   propertyId,
   commitment,
@@ -211,7 +210,6 @@ export const ProgressDialog = ({
   );
 };
 
-/** Ask to move the date, change the scope, or withdraw a promise. */
 export const ChangeOrderDialog = ({
   commitment,
   ...props

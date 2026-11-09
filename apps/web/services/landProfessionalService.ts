@@ -5,7 +5,6 @@ export const landProfessionalKeys = {
   mine: ['land', 'professionals', 'me'] as const,
 };
 
-/** The professional's own accreditation records. */
 export const landProfessionalService = {
   mine: () => safeCall(() => authFetch<LandProfessional[]>('/land/professionals/me')),
 

@@ -31,12 +31,9 @@ const mapPublicLand = (listing: PublicLandListingApi): PublicLandListing => ({
   diligence: listing.diligence,
 });
 
-/** Public land market intelligence. Every figure covers verified, in-date land only. */
+/** Every figure covers verified, in-date land only. */
 export const landMarketService = {
-  /**
-   * The public land search with the assurance-tier filter, which
-   * `landService.listPublic` does not pass through.
-   */
+  /** `landService.listPublic` does not pass the assurance-tier filter through. */
   listPublic: (params: AssuredLandListParams = {}) =>
     safeCall(async () => {
       const response = await authFetch<Paginated<PublicLandListingApi>>(

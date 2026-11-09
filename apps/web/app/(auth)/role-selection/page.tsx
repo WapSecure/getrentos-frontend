@@ -10,14 +10,7 @@ import { Button, ThemeToggle } from '@sureground/ui';
 import { useSignup } from '@/hooks/useSignup';
 import { ROLES } from '@/lib/constants/auth';
 
-/**
- * Role cards are always clickable. With multi-role off, picking another card
- * swaps the selection (see `addRole`), and with it on, the pick is added: so
- * there is no state where a card should silently ignore a click. Signup starts
- * with Renter pre-selected, so a disabled gate here used to make every other
- * role look broken: clicking Landlord did nothing and the account was created
- * as a Renter.
- */
+// Never disable a card: signup pre-selects Renter, so a disabled gate made every other role unpickable.
 export default function RoleSelectionPage() {
   const router = useRouter();
   const {
@@ -32,9 +25,6 @@ export default function RoleSelectionPage() {
 
   const handleContinue = async () => {
     if (signupData.selectedRoles.length === 0) return;
-    // Every account is created immediately, with no upfront document/facial
-    // verification: identity/license/ownership checks happen later, at the
-    // point of use, for the specific actions that need them.
     await createAccount();
   };
 
@@ -42,9 +32,7 @@ export default function RoleSelectionPage() {
     router.back();
   };
 
-  // Admin/BackOffice, Gateman, Resident and Property Manager are provisioned out
-  // of band: never offered as a self-serve signup option (gateman and resident
-  // are granted by an estate manager, a property manager with their firm).
+  // Admin, Gateman, Resident and Property Manager are provisioned out of band, never offered at self-serve signup.
   const roleList = Object.values(ROLES)
     .filter(
       (role) =>
@@ -57,7 +45,6 @@ export default function RoleSelectionPage() {
 
   return (
     <div className="relative flex h-dvh flex-col overflow-hidden bg-background">
-      {/* Back Button */}
       <motion.button
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
@@ -74,11 +61,8 @@ export default function RoleSelectionPage() {
         <ThemeToggle />
       </div>
 
-      {/* Scrollable content: header + role grid scroll internally so the
-          action bar below stays on screen. */}
       <div className="min-h-0 flex-1 overflow-y-auto">
         <div className="mx-auto max-w-6xl px-4 pb-8 pt-24 sm:px-6 lg:px-8">
-          {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: -30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -97,7 +81,6 @@ export default function RoleSelectionPage() {
             </p>
           </motion.div>
 
-          {/* Role Cards Grid */}
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {roleList.map((role, index) => (
               <motion.div
@@ -118,8 +101,6 @@ export default function RoleSelectionPage() {
         </div>
       </div>
 
-      {/* Persistent action bar: toggle + Create Account stay on screen while
-          the role grid scrolls behind them. */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}

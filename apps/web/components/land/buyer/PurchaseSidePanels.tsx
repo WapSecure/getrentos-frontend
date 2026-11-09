@@ -19,7 +19,6 @@ import {
 
 type Notify = (message: string, variant: 'success' | 'error') => void;
 
-/** What is due now and the button that opens the pay dialog. */
 export const PayNextCard = ({
   purchase,
   onPay,
@@ -76,7 +75,6 @@ export const PayNextCard = ({
   );
 };
 
-/** The contract of sale and the letter of allocation, downloaded as PDFs. */
 export const PurchaseDocuments = ({
   purchase,
   notify,
@@ -133,10 +131,7 @@ export const PurchaseDocuments = ({
   );
 };
 
-/**
- * Cancelling, with the refund it would produce spelled out first: what was
- * paid less the plan's forfeiture charge, late fees kept.
- */
+// The refund is what was paid less the plan's forfeiture charge; late fees are kept.
 export const CancelPurchaseCard = ({
   purchase,
   onCancel,

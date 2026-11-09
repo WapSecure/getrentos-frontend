@@ -6,11 +6,6 @@ import { Button } from '@sureground/ui';
 import { videoCallState, type VideoCallJoin } from '@sureground/shared';
 import { unwrap, type ApiResponse } from '@/lib/apiHelpers';
 
-/**
- * "Join video call" for a confirmed video viewing. Shows when the call opens
- * until then, and opens the room in a new tab with a link that only works for
- * this person.
- */
 export const VideoCallButton = ({
   viewing,
   join,
@@ -24,7 +19,6 @@ export const VideoCallButton = ({
   const [joining, setJoining] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Re-check every half minute so the button opens on time without a reload.
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 30_000);
     return () => clearInterval(timer);

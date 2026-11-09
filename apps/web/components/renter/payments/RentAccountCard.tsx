@@ -10,11 +10,7 @@ import { chargeLabel } from '@/lib/chargeCategory';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 
-/**
- * Money paid in per lease: each payment, what it paid, and any credit held
- * (an overpayment), which pays the next invoice automatically — or can be
- * refunded to the card or account it came from.
- */
+// Credit pays the next invoice automatically, or can be refunded to the card or account it came from.
 export const RentAccountCard = () => {
   const queryClient = useQueryClient();
   const [confirming, setConfirming] = useState<{ leaseId: string; amount: number } | null>(null);

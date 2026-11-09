@@ -23,11 +23,7 @@ const formatShortDate = (value?: string) => {
   }).format(date);
 };
 
-/**
- * A live dashboard entry for the renter's operational home record. It deliberately
- * links to the existing lease, maintenance, document, and payment workflows instead
- * of maintaining a second client-side "home management" data model.
- */
+// Links to the existing workflows rather than keeping a second client-side home-management model.
 export const RenterHomeManagement = () => {
   const { data: lease, isLoading: leaseLoading } = useQuery({
     queryKey: renterKeys.lease,

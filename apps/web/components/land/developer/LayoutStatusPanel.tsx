@@ -20,7 +20,6 @@ interface LayoutStatusPanelProps {
   notify: Notify;
 }
 
-/** Whether the master parcel itself could be sold: the bar a layout must clear to publish. */
 export const isParcelSaleReady = (record: OwnerLandRecord, now = Date.now()) => {
   const diligence = record.diligence;
   return (
@@ -30,12 +29,6 @@ export const isParcelSaleReady = (record: OwnerLandRecord, now = Date.now()) => 
   );
 };
 
-/**
- * Where the layout stands (draft, on sale, closed) and the switch between
- * them. Publishing has three preconditions on the server; they are shown as a
- * checklist so the owner sees what is missing before pressing the button, and
- * anything else the server refuses with is kept on screen, not just toasted.
- */
 export const LayoutStatusPanel = ({ record, layout, onEdit, notify }: LayoutStatusPanelProps) => {
   const queryClient = useQueryClient();
   const propertyId = layout.propertyId;

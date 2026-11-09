@@ -22,7 +22,6 @@ import { plotLabel } from './labels';
 interface PlotFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** Editing this plot; omit to add one. */
   plot?: LandPlot | null;
   isSaving: boolean;
   onCreate: (input: LandPlotInput) => void;
@@ -167,7 +166,6 @@ const PlotForm = ({
   );
 };
 
-/** Add one plot, or change the price, tags or corner flag of an unsold one. */
 export const PlotFormDialog = ({ open, onOpenChange, plot, ...rest }: PlotFormDialogProps) => (
   <Dialog open={open} onOpenChange={onOpenChange}>
     <DialogContent className="max-w-lg">

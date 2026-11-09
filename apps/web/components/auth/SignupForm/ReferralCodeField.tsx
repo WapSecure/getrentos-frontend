@@ -6,7 +6,6 @@ import { Gift } from 'lucide-react';
 import { Input } from '@sureground/ui';
 import { useSignupStore } from '@/lib/store/signupStore';
 
-/** Reads ?ref=CODE off the signup URL once, and lets the user edit/type a code manually too. */
 export const ReferralCodeField = () => {
   const searchParams = useSearchParams();
   const { data, setData } = useSignupStore();

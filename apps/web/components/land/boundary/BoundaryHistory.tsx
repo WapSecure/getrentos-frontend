@@ -92,10 +92,7 @@ function VersionRow({ version }: { version: LandBoundaryVersion }) {
   );
 }
 
-/**
- * Where the outline stands with the case's surveyor, and every outline the
- * parcel has had. A redraw starts a new version that needs its own check.
- */
+// A redraw starts a new version that needs its own surveyor check.
 export function BoundaryHistory({
   propertyId,
   status,

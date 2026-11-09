@@ -13,7 +13,7 @@ import {
 } from '@sureground/ui';
 import type { MusterTally } from '@/types/estate';
 
-/** The API's floor on a closing note, kept in step so the form cannot under-run it. */
+// The API's minimum note length; keep in step.
 const NOTE_MIN_LENGTH = 3;
 
 interface CloseMusterDialogProps {
@@ -25,20 +25,7 @@ interface CloseMusterDialogProps {
   error?: string | null;
 }
 
-/**
- * Stands the roll down.
- *
- * Closing with people still unaccounted for is allowed and always will be: an
- * estate that searched and could not find somebody has to be able to stop, and a
- * system that refused would teach managers to tick names they cannot verify.
- * What is not allowed is closing that way *silently*, so the note is required
- * here exactly when the API will require it: the manager finds that out from
- * this screen rather than from a 400 at the end of an incident.
- *
- * A roll may close with somebody marked as needing help and no note at all. That
- * is not a gap: the roll exists to find people, and "found, being treated"
- * answers the question it was asked.
- */
+// Closing with people unaccounted for is allowed, but the note is then required, exactly as the API requires it.
 export const CloseMusterDialog = ({
   isOpen,
   tally,

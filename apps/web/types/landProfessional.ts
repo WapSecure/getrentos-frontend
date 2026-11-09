@@ -1,9 +1,8 @@
 import type { LandReviewerRole } from './landReviewer';
 
 /**
- * Accreditation as a land professional (blueprint §19.1), mirroring the
- * backend's `land-professional.service.ts`. Only accredited professionals,
- * in date and covering a parcel's state, can be engaged on a case.
+ * Mirrors the backend's `land-professional.service.ts`. Only accredited professionals, in date and
+ * covering the parcel's state, can be engaged.
  */
 
 export type LandProfessionalStatus =
@@ -53,7 +52,7 @@ export const LAND_PROFESSIONAL_STATUS_LABELS: Record<LandProfessionalStatus, str
   EXPIRED: 'Expired',
 };
 
-/** The register each role's licence is checked against; matches the backend default. */
+/** Matches the backend default. */
 export const LAND_PROFESSIONAL_REGULATORS: Record<LandReviewerRole, string> = {
   SURVEYOR: 'SURCON',
   LAWYER: 'NBA',

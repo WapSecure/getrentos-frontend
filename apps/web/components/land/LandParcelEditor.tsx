@@ -61,11 +61,7 @@ const emptyParcel: LandParcelInput = {
 const textValue = (value: string | number | undefined | null) =>
   value === undefined || value === null ? '' : String(value);
 
-/**
- * The editable part of a saved parcel. The record also carries server-owned
- * fields (id, propertyId, diligence, timestamps), and the API refuses any
- * field it does not accept, so sending the record back as-is failed every save.
- */
+/** Only the fields the API accepts: it refuses server-owned ones, so sending the record back fails. */
 const editableParcel = (parcel: LandParcel): LandParcelInput => {
   const { id, propertyId, diligence, createdAt, updatedAt, ...input } = parcel;
   void id;
@@ -82,8 +78,7 @@ export const LandParcelEditor = ({
   onSave,
   onUploadProof,
 }: LandParcelEditorProps) => {
-  // The parent keys this editor by property id, so it remounts on record
-  // change and the initializers always reflect the active parcel.
+  // The parent keys this by property id, so the initializers always reflect the active parcel.
   const [parcel, setParcel] = useState<LandParcelInput>(
     record.parcel ? editableParcel(record.parcel) : emptyParcel
   );
@@ -158,8 +153,7 @@ export const LandParcelEditor = ({
   };
 
   const handleSave = async () => {
-    // Survey-plan beacons go to the API as entered, with their coordinate
-    // system, so the boundary history keeps the plan's own numbers.
+    // Survey-plan beacons go as entered, with their coordinate system, so the boundary history keeps the plan's own numbers.
     const plan = completeRows(surveyRows);
     const surveyOutline =
       plan.length >= 3 ? { type: 'Polygon', coordinates: [[...plan, plan[0]]] } : null;

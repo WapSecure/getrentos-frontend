@@ -7,11 +7,7 @@ import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 
-/**
- * AI briefing over the portfolio analytics: a headline, insights and prioritised
- * next steps. Fetches on its own and hides on error, so it never blocks the
- * analytics page it sits above.
- */
+// Fetches on its own and hides on error, so it never blocks the analytics page.
 export const PortfolioBriefingCard = () => {
   const query = useQuery({
     queryKey: landlordKeys.portfolioBriefing,

@@ -14,11 +14,6 @@ import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { ROUTES } from '@/lib/constants/auth';
 import { SectionNav } from './SectionNav';
 
-/**
- * The landlord's lettings pipeline, in the order a let happens: advertise,
- * show the place, take applications, agree terms, follow up leads. Labels come
- * from the same translations as the sidebar, so the two always agree.
- */
 export function LandlordLettingsNav() {
   const { t } = useLanguage();
   return (
@@ -39,7 +34,6 @@ export function LandlordLettingsNav() {
   );
 }
 
-/** The owner's sales pipeline: list, take enquiries, show, agree, complete in escrow. */
 export function OwnerSellingNav() {
   const { t } = useLanguage();
   return (

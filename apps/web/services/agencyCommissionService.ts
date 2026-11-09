@@ -68,9 +68,8 @@ export interface AgencyPayout {
   status: string;
   commissions: number;
   failureReason: string | null;
-  /** The transfer reference to quote to the bank. */
   transferRef?: string | null;
-  /** Where it went (bank + last four digits), only when the API can prove it. */
+  /** Bank + last four digits, only when the API can prove it. */
   sentTo?: PayoutSentTo | null;
   paidAt: string | null;
   createdAt: string;
@@ -149,21 +148,16 @@ export const agencyCommissionService = {
     );
   },
 
-  // --- Per-agent on-platform payouts -------------------------------------------
-
-  /** Firm view: each agent's unpaid share + whether they're ready to be paid. */
   agentPayable(): Promise<ApiResponse<AgentPayable[]>> {
     return safeCall(() => authFetch<AgentPayable[]>('/agency/commissions/agent-payouts/payable'));
   },
 
-  /** Firm action: pay every ready agent their outstanding share. */
   runAgentPayouts(): Promise<ApiResponse<AgentPayRunResult>> {
     return safeCall(() =>
       authFetch<AgentPayRunResult>('/agency/commissions/agent-payouts/run', { method: 'POST' })
     );
   },
 
-  /** The signed-in agent's own payout account. */
   getMyAgentAccount(): Promise<ApiResponse<AgentPayoutAccount>> {
     return safeCall(() =>
       authFetch<AgentPayoutAccount>('/agency/commissions/agent-payouts/my-account')
@@ -212,9 +206,8 @@ export interface AgentPayout {
   status: string;
   commissions: number;
   failureReason: string | null;
-  /** The transfer reference to quote to the bank. */
   transferRef?: string | null;
-  /** Where it went (bank + last four digits), only when the API can prove it. */
+  /** Bank + last four digits, only when the API can prove it. */
   sentTo?: PayoutSentTo | null;
   paidAt: string | null;
   createdAt: string;
@@ -242,6 +235,6 @@ export interface AgentPayoutSummary {
   tier: number;
   withdrawTierRequired: number;
   canReceive: boolean;
-  /** The agency the viewer belongs to; null outside one. */
+  /** Null outside an agency. */
   agencyName: string | null;
 }

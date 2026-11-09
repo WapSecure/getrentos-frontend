@@ -5,7 +5,6 @@ import { LandPropertyShell } from '@/components/land/developer/LandPropertyShell
 import { RiskBreakdownCard } from '@/components/land/developer/RiskBreakdownCard';
 import { SellerAnalyticsPanel } from '@/components/land/developer/SellerAnalyticsPanel';
 
-/** Listing performance, market position and risk for one land parcel. */
 export default function OwnerLandAnalyticsPage() {
   const { propertyId } = useParams<{ propertyId: string }>();
   return (

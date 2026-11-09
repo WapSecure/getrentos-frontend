@@ -32,7 +32,6 @@ const DeductionItem = ({
   suggestion,
 }: {
   d: TenantDeduction;
-  /** Grounds and a drafted reason from the deposit-back plan. */
   suggestion?: DepositPlan['disputes'][number];
 }) => {
   const queryClient = useQueryClient();
@@ -122,7 +121,6 @@ const DeductionItem = ({
             <Button
               variant="link"
               onClick={() => {
-                // Start from the drafted reason; the tenant edits it before sending.
                 if (suggestion && !reason) setReason(suggestion.draft);
                 setOpen(true);
               }}
@@ -138,7 +136,6 @@ const DeductionItem = ({
 
 const STEP_ICON = { do: CircleCheck, keep: FileCheck2, dispute: Scale } as const;
 
-/** "Getting it back": steps, evidence to keep and deductions worth questioning. */
 const DepositPlanPanel = ({ plan, disclaimer }: { plan: DepositPlan; disclaimer: string }) => (
   <section
     aria-label="Getting your deposit back"
@@ -271,11 +268,7 @@ const DepositCard = ({
   );
 };
 
-/**
- * The tenant's deposit: how much, who holds it, every claim on it and what
- * comes back. Claims the tenant disagrees with can be disputed here, and the
- * deposit is not returned until the owner has answered.
- */
+// The deposit is not returned until the owner has answered the tenant's disputes.
 export const DepositSection = () => {
   const deposits = useQuery({
     queryKey: renterKeys.deposits,

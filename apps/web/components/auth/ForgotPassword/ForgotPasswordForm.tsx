@@ -144,7 +144,6 @@ export const ForgotPasswordForm = ({ onSuccess, showToast }: ForgotPasswordFormP
   return (
     <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12">
       <div className="w-full max-w-md">
-        {/* Back Button */}
         <Button
           variant="link"
           onClick={handleBack}
@@ -154,7 +153,6 @@ export const ForgotPasswordForm = ({ onSuccess, showToast }: ForgotPasswordFormP
           Back
         </Button>
 
-        {/* Mobile Header */}
         <div className="lg:hidden text-center mb-8">
           <div className="mb-4 flex justify-center">
             <Logo size="md" />

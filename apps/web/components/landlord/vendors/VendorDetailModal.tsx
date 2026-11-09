@@ -67,7 +67,6 @@ const JobRow = ({ job }: { job: VendorJob }) => (
   </li>
 );
 
-/** A vendor's whole record: how they rate, what they cost, how fast, and every job. */
 export const VendorDetailModal = ({ vendor, onClose }: VendorDetailModalProps) => {
   const queryClient = useQueryClient();
   const planGate = usePlanGateModal();
@@ -120,7 +119,6 @@ export const VendorDetailModal = ({ vendor, onClose }: VendorDetailModalProps) =
 
   if (!vendor) return null;
   const current = data?.vendor ?? vendor;
-  // The bank's name for the account comes back before saving (UX-28).
   const canSavePayoutAccount = lookupAllowsSave(lookup);
 
   const stats = [

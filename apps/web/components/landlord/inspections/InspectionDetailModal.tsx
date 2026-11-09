@@ -61,11 +61,9 @@ export const InspectionDetailModal = ({
   onChanged,
 }: InspectionDetailModalProps) => {
   const queryClient = useQueryClient();
-  /** The finding a photo is being added to, while the photo picker is open. */
   const [photoFor, setPhotoFor] = useState<{ id: string; area: string } | null>(null);
   const [pendingPhotos, setPendingPhotos] = useState<PendingUpload[]>([]);
 
-  // New-item form state.
   const [area, setArea] = useState('');
   const [condition, setCondition] = useState<InspectionCondition>('GOOD');
   const [notes, setNotes] = useState('');
@@ -200,7 +198,6 @@ export const InspectionDetailModal = ({
                 </p>
               )}
 
-              {/* Items */}
               <div className="space-y-3">
                 {inspection.items.length === 0 ? (
                   <p className="text-sm text-muted-foreground">No areas recorded yet.</p>
@@ -251,7 +248,6 @@ export const InspectionDetailModal = ({
                 )}
               </div>
 
-              {/* Add-item form (draft only) */}
               {isDraft && (
                 <div className="space-y-3 rounded-xl border border-dashed border-border p-4">
                   <p className="text-sm font-medium text-foreground">Add an area</p>
@@ -296,7 +292,6 @@ export const InspectionDetailModal = ({
                 </div>
               )}
 
-              {/* Lifecycle actions */}
               <div className="flex justify-end gap-2 border-t border-border pt-4">
                 <Button variant="outline" onClick={onClose}>
                   Close

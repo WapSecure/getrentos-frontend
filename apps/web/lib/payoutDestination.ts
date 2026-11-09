@@ -1,8 +1,4 @@
-/**
- * Where a payout goes, in words, for the confirmation before money moves:
- * "Ada Obi, GTBank account ending 1234". Only the last four digits are shown,
- * whether the API sends the full number or a masked one.
- */
+// Only the last four digits are shown, whether the API sends the full number or a masked one.
 export function payoutDestination(account: {
   bankName?: string | null;
   accountNumber?: string | null;

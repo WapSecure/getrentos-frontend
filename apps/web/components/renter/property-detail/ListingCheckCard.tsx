@@ -25,10 +25,7 @@ const LEVEL_STYLE: Record<
   },
 };
 
-/**
- * "Should I rent this?" The level and every figure come from Sureground data by
- * rule; the wording may be automated. Never a verdict on the landlord.
- */
+// Level and figures come from Sureground data by rule; never a verdict on the landlord.
 export function ListingCheckCard({ listingId }: { listingId: string }) {
   const { data, isLoading, isError } = useQuery({
     queryKey: renterKeys.listingCheck(listingId),

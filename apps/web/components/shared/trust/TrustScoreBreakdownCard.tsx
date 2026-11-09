@@ -7,14 +7,6 @@ interface TrustScoreBreakdownCardProps {
   breakdown: TrustScoreBreakdown;
 }
 
-/**
- * Shows WHY a trust score is what it is.
- *
- * The score is weighted by cost-to-fake (identity 35, financial 25, role 15,
- * contact 15, activity 10, minus a capped penalty), so an unexplained number is
- * both unhelpful and easy to misread as arbitrary. Each row states how much of
- * its own weight the account has actually earned.
- */
 export const TrustScoreBreakdownCard = ({ breakdown }: TrustScoreBreakdownCardProps) => {
   const dimensions = breakdown.dimensions ?? [];
 

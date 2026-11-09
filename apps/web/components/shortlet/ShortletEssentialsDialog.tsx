@@ -41,11 +41,7 @@ const withNotStated = (labels: Record<string, string>) => [
   ...Object.entries(labels).map(([value, label]) => ({ value, label })),
 ];
 
-/**
- * What a guest needs to know before booking: rules, and the honest answer to
- * "will there be light, water and Wi-Fi?". Check-in instructions live here too,
- * but only guests with a confirmed, paid stay ever see them.
- */
+// Check-in instructions are only ever shown to guests with a confirmed, paid stay.
 export function ShortletEssentialsDialog({
   listing,
   onClose,

@@ -5,7 +5,6 @@ import { formatCurrency, formatDate } from '@/lib/format';
 import type { LandInstallment } from '@/types/landDeveloper';
 import { INSTALLMENT_STATUS } from '../developer/labels';
 
-/** The purchase's schedule: each installment, what was paid and what is still owed. */
 export const InstallmentSchedule = ({ installments }: { installments: LandInstallment[] }) => {
   if (installments.length === 0) {
     return (

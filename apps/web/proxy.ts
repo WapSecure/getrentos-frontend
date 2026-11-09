@@ -10,49 +10,16 @@ import {
   cspReportUri,
 } from '@sureground/shared/csp';
 
-/**
- * CSP rollout switch. This is the customer-facing app, with more third parties
- * (map tiles, video and 360° tour embeds, uploads served from storage) than the
- * back office, so by default the policy is sent as
- * Content-Security-Policy-Report-Only: browsers log every violation to the
- * console (and POST it to CSP_REPORT_URI when set) but block nothing. Watch it
- * in staging/production, add any missing origin, then build with
- * NEXT_PUBLIC_CSP_ENFORCE=true to enforce it. Inlined at build time.
- */
+// Report-Only by default (violations logged, nothing blocked); build with NEXT_PUBLIC_CSP_ENFORCE=true to enforce. Inlined at build time.
 const ENFORCE_CSP = process.env.NEXT_PUBLIC_CSP_ENFORCE === 'true';
-/** Pages with the live selfie (identity verification): every role's verification and trust pages. */
 const LIVE_CAPTURE_PATH = /\/(verification|trust-score)(\/|$)/;
 const DEV = process.env.NODE_ENV !== 'production';
 
-/**
- * Next 16 proxy (formerly known as middleware). Runs on the Node.js runtime
- * for every matching request.
- *
- * Responsibility: apply hardening security headers to every response,
- * including a per-request nonce Content-Security-Policy (policy built in
- * @sureground/shared/csp) and, in production over HTTPS, Strict-Transport-Security.
- *
- * Nonce wiring: the policy is set on the response and also on the forwarded
- * request, because Next reads the nonce back out of the request's CSP header and
- * stamps it on every script it renders. `x-nonce` carries it to the root layout
- * for the theme script (next-themes). A fresh nonce per request means pages must
- * render dynamically: a prerendered page would carry no nonce and its scripts
- * would be blocked, which is why the root layout reads `x-nonce`.
- *
- * It does NOT gate auth. The session lives in two places the proxy cannot see:
- * the access token is held in page memory only (never in web storage), and the refresh
- * token is an httpOnly cookie set by the API on a different origin
- * (localhost:4000 in dev) and scoped `Path=/auth` — so it is never attached to
- * a request for a page route on this origin. Auth is enforced client-side by
- * the role layouts (`ensureValidSession()` + `isAuthenticated()` + role check).
- * A server-side gate only becomes possible once the app and API share an origin
- * and the refresh cookie is path-`/`; revisit this then.
- */
+// The nonce is set on the response and the forwarded request (Next reads it from there); `x-nonce` carries it to the root layout.
+// No auth gate: the access token lives in page memory and the refresh cookie is on the API origin with Path=/auth, so the role layouts enforce auth.
 export default function proxy(request: NextRequest) {
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
-  // HTTPS-only behaviour (HSTS, upgrade-insecure-requests) stays off in dev and
-  // for `next start` on localhost. `nextUrl.hostname` is the server's own bind
-  // host, so read the public host the request was addressed to.
+  // HTTPS-only behaviour stays off on localhost; `nextUrl.hostname` is the bind host, so read the public host.
   const host = request.headers.get('x-forwarded-host') ?? request.headers.get('host');
   const secure = !DEV && !isLocalHost(host);
   // Only the verification pages run Smile ID's live selfie: camera, WebAssembly
@@ -63,16 +30,12 @@ export default function proxy(request: NextRequest) {
     dev: DEV,
     liveCapture,
     apiUrl: process.env.NEXT_PUBLIC_API_URL,
-    // Upload storage/CDN origins when they differ from the API (comma
-    // separated; server-only, read at runtime).
+    // Server-only, read at runtime.
     mediaOrigins: parseOriginList(process.env.CSP_MEDIA_ORIGINS),
-    // Leaflet tiles, and Mux posters on shortlet listing videos.
     imgSrc: [...MAP_TILE_ORIGINS, 'https://image.mux.com'],
-    // YouTube/Vimeo players and 360° tour providers on shortlet listings.
     frameSrc: EMBED_FRAME_ORIGINS,
     // Browsers ignore it in a Report-Only policy (and warn), so only when enforcing.
     upgradeInsecureRequests: secure && ENFORCE_CSP,
-    // CSP_REPORT_URI, or the API's /security/csp-report receiver by default.
     reportUri: cspReportUri(process.env.CSP_REPORT_URI, process.env.NEXT_PUBLIC_API_URL),
   });
   const cspHeader = cspHeaderName(ENFORCE_CSP);
@@ -97,6 +60,5 @@ export default function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Everything except Next internals and static assets.
   matcher: ['/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|.*\\.[\\w]+$).*)'],
 };

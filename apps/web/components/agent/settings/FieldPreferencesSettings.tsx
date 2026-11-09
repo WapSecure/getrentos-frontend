@@ -14,7 +14,6 @@ import {
   type AgentWorkingDay,
 } from '@/services/agentService';
 
-// Starting suggestions only; an agent can add any area they cover.
 const SUGGESTED_AREAS = ['Victoria Island', 'Lekki', 'Ikoyi', 'Ikeja', 'Surulere', 'Yaba'];
 
 const DAY_LABELS: Record<AgentWorkingDay, string> = {
@@ -65,7 +64,6 @@ export const FieldPreferencesSettings = () => {
     setDays((prev) => (prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]));
 
   const trimmedArea = newArea.trim();
-  /** Adds a typed area, or the area picked from the suggestions, then clears the box. */
   const addArea = (name = trimmedArea) => {
     const area = name.trim().slice(0, 60);
     if (area.length < 2) return;

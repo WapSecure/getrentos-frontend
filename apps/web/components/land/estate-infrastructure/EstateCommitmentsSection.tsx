@@ -9,7 +9,6 @@ import {
 } from '@/services/landEstateInfrastructureService';
 import { CommitmentCard } from './CommitmentCard';
 
-/** The estate page's "what the developer promised" list; hidden when there is none. */
 export const EstateCommitmentsSection = ({ layoutId }: { layoutId: string }) => {
   const { data, isLoading } = useQuery({
     queryKey: estateInfrastructureKeys.public(layoutId),

@@ -62,7 +62,7 @@ export default function EstateVehiclesPage() {
     enabled: !!estate,
     placeholderData: keepPreviousData,
   });
-  // The API only supports an "open" boolean filter: "exited" is applied client-side on this page.
+  // The API only filters by "open"; "exited" is applied here.
   const logs = (data?.items ?? []).filter((log) =>
     statusFilter === 'exited' ? !!log.exitedAt : true
   );

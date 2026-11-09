@@ -1,11 +1,6 @@
 import type { LandInstallment, LandPaymentPlanTerms } from '@/types/landDeveloper';
 
-/**
- * Client mirror of the backend's land purchase arithmetic
- * (src/modules/land/domain/payment-schedule.ts), used for live previews only:
- * the server computes the real contract. BigInt keeps `amount × bps` exact
- * for amounts up to the API's ₦1tn ceiling.
- */
+// Mirrors the backend's land purchase arithmetic (src/modules/land/domain/payment-schedule.ts) for previews only. BigInt keeps `amount × bps` exact up to the API's ₦1tn ceiling.
 
 const BPS = BigInt(10_000);
 const HALF = BigInt(5_000);
@@ -32,9 +27,8 @@ export interface PlanPriceExample {
   totalPrice: number;
   /** Deposit share of the uplifted price plus all fees; everything for outright. */
   initialPayment: number;
-  /** A regular monthly installment after the deposit; 0 for outright. */
   monthlyInstallment: number;
-  /** The final installment absorbs the rounding remainder, so it can differ. */
+  /** The final installment absorbs the rounding remainder. */
   finalInstallment: number;
   durationMonths: number;
 }
@@ -77,11 +71,7 @@ export const priceExample = (
   };
 };
 
-/**
- * What the buyer gets back if a purchase is revoked now: everything paid less
- * the plan's forfeiture charge. Late fees already paid are kept, so they are
- * taken out first, exactly as the server does.
- */
+/** Paid less the forfeiture charge; paid late fees are kept, so they are taken out first, as the server does. */
 export const refundPreview = (
   amountPaid: number,
   installments: Pick<LandInstallment, 'status' | 'lateFee'>[],
@@ -95,7 +85,6 @@ export const refundPreview = (
   return { lateFeesPaid, principalPaid, charge, refund: principalPaid - charge };
 };
 
-/** Plan terms the server would refuse, phrased for the form. */
 export const planTermProblems = (terms: LandPaymentPlanTerms): string[] => {
   const problems: string[] = [];
   if (terms.durationMonths > 0 && terms.initialDepositBps >= 10_000) {

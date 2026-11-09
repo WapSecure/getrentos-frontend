@@ -1,7 +1,4 @@
-/**
- * Nigerian banks and their Paystack bank codes, for payout-account forms.
- * Not exhaustive: forms offer "Other bank" for a code that is not listed.
- */
+// Not exhaustive: forms offer "Other bank" for a code that is not listed.
 export const NIGERIAN_BANKS: { code: string; name: string }[] = [
   { code: '044', name: 'Access Bank' },
   { code: '023', name: 'Citibank Nigeria' },

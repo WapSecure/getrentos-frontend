@@ -26,23 +26,11 @@ interface WalkInDialogProps {
   isOpen: boolean;
   onClose: () => void;
   estateId: string;
-  /** The barrier the visitor is standing at, when the console knows it. */
   gateId?: string;
-  /** Fired once the household has been asked, so the guard sees what happened. */
   onRaised: (pass: VisitorPass) => void;
 }
 
-/**
- * Raises a walk-in: somebody is at the barrier with nothing arranged.
- *
- * The household is chosen from the estate's own list rather than typed, so the
- * request cannot be addressed to a unit that does not exist. Submitting asks the
- * household and does not admit anyone: the barrier stays shut until they answer.
- *
- * Households with no linked app account are shown but disabled. Only their
- * resident can consent, so a request to them could never be answered, and saying
- * so here is kinder than a rejection ten minutes later.
- */
+// Submitting asks the household and admits no one. Households with no linked app account are disabled: only their resident can consent.
 export const WalkInDialog = ({
   isOpen,
   onClose,
@@ -57,20 +45,10 @@ export const WalkInDialog = ({
   const [visitorPhone, setVisitorPhone] = useState('');
   const [purpose, setPurpose] = useState('');
   const [error, setError] = useState<string | null>(null);
-  /**
-   * Set when the estate's watch list refused the visitor.
-   *
-   * Held here rather than shown as `error`, because it is the estate's answer
-   * and not a failure: everything the guard typed stays exactly as it is, and
-   * the only thing that changes the outcome is a stated reason to admit them.
-   */
+  /** Kept apart from `error`: a watch-list refusal is the estate's answer, not a failure, so what the guard typed stays. */
   const [refusal, setRefusal] = useState<WatchlistRefusal | null>(null);
   const [overrideError, setOverrideError] = useState<string | null>(null);
-  /**
-   * What the estate's list said when the guard asked before attempting the
-   * raise. Set only for an answer that is not a refusal: a refusal is not an
-   * advisory and belongs to the panel below, which owns the decision.
-   */
+  /** Only a non-refusal answer goes here; a refusal belongs to the blocked notice. */
   const [screening, setScreening] = useState<WatchlistScreening | null>(null);
 
   const { data: householdsData, isLoading } = useQuery({
@@ -132,8 +110,6 @@ export const WalkInDialog = ({
         setRefusal(blocked);
         return;
       }
-      // The estate refuses a request it cannot get answered; surfacing the API's
-      // own words here is more use than a generic failure.
       const message = err instanceof Error ? err.message : 'Could not raise that request.';
       if (input?.overrideReason) {
         setOverrideError(message);
@@ -145,13 +121,6 @@ export const WalkInDialog = ({
 
   const canSubmit = !!household && visitorName.trim().length > 0 && !request.isPending;
 
-  /**
-   * Asks about this visitor before anything is attempted.
-   *
-   * Needs the household first, because the question is "this visitor, coming to
-   * see this unit": and because if the answer refuses them, the only way
-   * forward is the override, which raises the request.
-   */
   const canCheck =
     !!household &&
     !request.isPending &&
@@ -169,9 +138,7 @@ export const WalkInDialog = ({
       setError(null);
       setOverrideError(null);
       if (result.blocked) {
-        // The same answer the raise would give, reached earlier: before the
-        // guard has promised the visitor anything, and without a household being
-        // asked to consent to somebody the estate has already refused.
+        // The answer the raise would give, reached before a household is asked to consent to someone the estate has refused.
         setScreening(null);
         setRefusal({ message: result.message ?? '', matches: result.matches });
         return;
@@ -265,8 +232,6 @@ export const WalkInDialog = ({
             />
           )}
 
-          {/* Last thing before the footer, because it is the last thing worth
-              knowing before a household is asked. */}
           <div className="space-y-2">
             <Button
               variant="outline"
@@ -288,10 +253,7 @@ export const WalkInDialog = ({
         </div>
 
         <div className="mt-6 space-y-2 border-t border-border pt-4">
-          {/* Once the estate has refused, the primary action is gone on
-              purpose. Leaving "Ask for approval" here would invite a retry
-              that returns the same refusal while the visitor waits: the
-              only route forward is the stated override inside the notice. */}
+          {/* Once refused, the primary action is gone on purpose: a retry returns the same refusal, and the only route is the override. */}
           {refusal ? (
             <Button variant="outline" fullWidth onClick={handleClose}>
               Close

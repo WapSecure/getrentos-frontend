@@ -27,11 +27,7 @@ export const PlotStatusLegend = () => (
   </ul>
 );
 
-/**
- * Every plot as a button coloured by status, with availability filters. This
- * is the accessible way to pick a plot, and the only one when the developer
- * has not uploaded plot outlines.
- */
+// The accessible way to pick a plot, and the only one when plots have no outlines.
 export const PlotGrid = ({
   plots,
   selectedId,

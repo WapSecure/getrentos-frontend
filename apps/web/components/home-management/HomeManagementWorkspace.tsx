@@ -24,8 +24,6 @@ import {
 import { ownerService } from '@/services/ownerService';
 import { propertyAuthorityService } from '@/services/propertyAuthorityService';
 
-// Care plans, SLA policies, escalations and work orders sit below the fold:
-// load them after the first screen.
 const sectionFallback = () => <Skeleton className="h-48 w-full rounded-xl" />;
 const HomeManagementSlaPolicies = dynamic(
   () =>
@@ -60,10 +58,7 @@ export type HomeManagementWorkspaceRole = 'owner' | 'landlord' | 'manager';
 
 interface HomeManagementWorkspaceProps {
   role: HomeManagementWorkspaceRole;
-  /**
-   * Narrows everything to one property: the client a manager is acting for.
-   * Their pickers, lists and history then cannot reach another client's home.
-   */
+  /** Narrows everything to the client's property, so pickers, lists and history can't reach another client's home. */
   scopePropertyId?: string;
 }
 
@@ -91,7 +86,6 @@ export function HomeManagementWorkspace({ role, scopePropertyId }: HomeManagemen
     queryKey: homeManagementKeys.properties(role),
     queryFn: async (): Promise<HomeManagementProperty[]> => {
       if (role === 'manager') {
-        // A manager operates the properties mandated to them, not their own.
         const managed = await unwrap(propertyAuthorityService.managed());
         return managed
           .filter((property) => property.canManage && !property.archived)
@@ -159,19 +153,14 @@ export function HomeManagementWorkspace({ role, scopePropertyId }: HomeManagemen
     placeholderData: keepPreviousData,
   });
 
-  // The health summary is counted across every property the caller holds, so it
-  // is not shown while the view is narrowed to one client's home.
+  // The health summary counts every property the caller holds, so it is hidden while narrowed to one client.
   const dashboardQuery = useQuery({
     queryKey: homeManagementKeys.dashboard,
     enabled: !scopePropertyId,
     queryFn: () => unwrap(homeManagementService.getDashboard()),
   });
 
-  // Owners and landlords keep their own vendor directory (/owner|landlord/vendors).
-  // A manager or agent operates someone else's property, so their assignable
-  // vendors are the OWNERS' directories for the properties they control — served
-  // by /home-management/vendors, deduped across those owners. Assignment is still
-  // validated against each property's owner at write time.
+  // A manager's assignable vendors are the owners' directories for the properties they control; assignment is still validated against each owner at write time.
   const vendorsQuery = useQuery({
     queryKey: [...homeManagementKeys.vendors, role],
     queryFn: async (): Promise<HomeManagementVendor[]> => {
@@ -286,8 +275,7 @@ export function HomeManagementWorkspace({ role, scopePropertyId }: HomeManagemen
 
       <HomeManagementInspectionFeed propertyId={scopePropertyId} />
 
-      {/* The records panel links to owner/landlord document + vendor routes that
-          the agency portal does not have, so it is omitted for managers. */}
+      {/* The records panel links to owner/landlord routes the agency portal lacks, so managers don't get it. */}
       {role !== 'manager' && <HomeManagementRecordsPanel role={role} />}
     </div>
   );

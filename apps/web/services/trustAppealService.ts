@@ -1,13 +1,8 @@
 import { authFetch, safeCall, type ApiResponse } from '@/lib/apiHelpers';
 
 /**
- * Trust appeals (TG-06) — contesting a rejected trust decision.
- *
- * The subject of a rejected property-authority claim or a failed/rejected
- * verification can appeal it. The appeal is resolved by someone *other* than the
- * officer who made the original decision; overturning it reopens the target for a
- * fresh review. This service covers both halves: the subject's side (`file`,
- * `listMine`) and the reviewer's side (`listForReview`, `resolve`).
+ * Resolved by someone other than the original officer; overturning reopens the target for a fresh
+ * review.
  */
 
 /** Decision types a subject can appeal — mirrors backend APPEAL_TARGET_TYPES. */
@@ -39,7 +34,6 @@ export interface TrustAppealDto {
 export type AppealDecision = 'UPHELD' | 'OVERTURNED';
 
 export const trustAppealService = {
-  /** Subject: appeal a rejected decision about you. */
   async file(input: {
     targetType: AppealTargetType;
     targetId: string;
@@ -53,19 +47,17 @@ export const trustAppealService = {
     );
   },
 
-  /** Subject: appeals you have filed, newest first. */
   async listMine(): Promise<ApiResponse<TrustAppealDto[]>> {
     return safeCall(() => authFetch<TrustAppealDto[]>('/trust/appeals/mine'));
   },
 
-  /** Reviewer: the appeal queue (open + under review), oldest first. */
   async listForReview(): Promise<ApiResponse<TrustAppealDto[]>> {
     return safeCall(() => authFetch<TrustAppealDto[]>('/admin/trust/appeals'));
   },
 
   /**
-   * Reviewer: uphold or overturn an appeal. The reviewer must not be the original
-   * decision-maker (the backend enforces this). Overturning reopens the target.
+   * The backend enforces that the reviewer is not the original decision-maker. Overturning reopens
+   * the target.
    */
   async resolve(
     id: string,

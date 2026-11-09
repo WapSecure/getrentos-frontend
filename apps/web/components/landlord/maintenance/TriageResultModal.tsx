@@ -35,16 +35,13 @@ const CATEGORIES: MaintenanceTriageCategory[] = [
 const URGENCIES: MaintenanceTriageUrgency[] = ['LOW', 'MEDIUM', 'HIGH', 'URGENT'];
 
 interface TriageResultModalProps {
-  /** The triage result to show, or null while it is still loading. */
   triage: MaintenanceTriage | null;
   open: boolean;
   onClose: () => void;
   onAssignVendor?: (vendorId: string) => void;
   isAssigning?: boolean;
-  /** Accept (as proposed or edited) or reject the proposal. Hidden when absent. */
   onDecide?: (decision: MaintenanceTriageDecision, alsoAssignVendorId?: string) => void;
   isDeciding?: boolean;
-  /** Offer to assign the suggested vendor in the same step. */
   canAssignVendor?: boolean;
 }
 
@@ -79,7 +76,6 @@ export const TriageResultModal = ({
         </div>
       ) : (
         <TriageBody
-          // A new proposal starts fresh: no edits or rejection carried over.
           key={triage.reviewId ?? triage.triagedAt}
           triage={triage}
           onAssignVendor={onAssignVendor}

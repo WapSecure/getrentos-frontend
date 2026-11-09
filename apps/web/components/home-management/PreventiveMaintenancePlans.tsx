@@ -142,7 +142,6 @@ export function PreventiveMaintenancePlans({
   });
   const propertyAssets = useMemo(() => assetsQuery.data?.items ?? [], [assetsQuery.data]);
 
-  // Vendors scoped to the selected property's owner (see work-order queue).
   const createVendorsQuery = useQuery({
     enabled: isCreateOpen && Boolean(form.propertyId),
     queryKey: [...homeManagementKeys.vendors, 'plan-create', form.propertyId],

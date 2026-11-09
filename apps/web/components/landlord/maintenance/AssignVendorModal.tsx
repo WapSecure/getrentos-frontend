@@ -25,9 +25,7 @@ interface AssignVendorModalProps {
   request: LandlordMaintenanceRequest | null;
   onClose: () => void;
   onAssign: (requestId: string, vendorId: string, scheduledFor?: string) => void;
-  /** Shown under the list when assigning fails, e.g. the visit time was not acceptable. */
   error?: string | null;
-  /** The vendor currently being assigned, if any, so the row shows in-flight feedback. */
   assigningVendorId?: string | null;
 }
 

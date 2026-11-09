@@ -20,7 +20,6 @@ export interface ActivityPage {
   properties: { id: string; title: string }[];
 }
 
-/** What others have done on the caller's properties, newest first. */
 export function ownerActivity(input: {
   propertyId?: string;
   who: 'managers' | 'everyone';

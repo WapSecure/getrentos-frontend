@@ -27,7 +27,6 @@ export const OtpVerification = ({
   const [canResend, setCanResend] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Timer countdown
   useEffect(() => {
     if (timeLeft > 0) {
       timerRef.current = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
@@ -37,7 +36,6 @@ export const OtpVerification = ({
     }
   }, [timeLeft]);
 
-  // Update canResend when timer expires
   useEffect(() => {
     if (timeLeft === 0) {
       setCanResend(true);
@@ -84,10 +82,8 @@ export const OtpVerification = ({
         </p>
       </div>
 
-      {/* OTP Inputs */}
       <OtpInput value={otp} onChange={setOtp} disabled={isLoading} />
 
-      {/* Timer & Resend */}
       <div className="text-center">
         {!canResend ? (
           <p className="text-sm text-muted-foreground">Resend code in {formatTime(timeLeft)}</p>
@@ -103,7 +99,6 @@ export const OtpVerification = ({
         )}
       </div>
 
-      {/* Submit Button */}
       <Button
         onClick={handleSubmit}
         disabled={otp.join('').length !== AUTH_CONSTANTS.OTP_LENGTH}

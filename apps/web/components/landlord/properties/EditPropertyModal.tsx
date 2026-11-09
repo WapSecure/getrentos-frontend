@@ -17,11 +17,8 @@ import type { Property, PropertyType, PropertyUpdatePayload } from '@/types/land
 import { videoFileProblem } from '@/lib/videoFile';
 
 type Photo = {
-  /** Stable key for React; the storage key for saved photos, a synthetic id for new files. */
   id: string;
-  /** Present once the image has been uploaded. */
   key?: string;
-  /** Signed URL for saved photos, object URL for files picked in this session. */
   url: string;
   file?: File;
 };
@@ -88,8 +85,7 @@ const EditPropertyForm = ({
       ? { latitude: property.latitude, longitude: property.longitude }
       : null
   );
-  // Only a pin the landlord moved is sent, so saving other details does not
-  // re-confirm a location nobody looked at.
+  // Only a moved pin is sent, so saving other details doesn't re-confirm a location nobody looked at.
   const [pinMoved, setPinMoved] = useState(false);
   const [totalUnits, setTotalUnits] = useState(String(property.totalUnits));
   const [estimatedValue, setEstimatedValue] = useState(
@@ -108,7 +104,6 @@ const EditPropertyForm = ({
   const [mediaError, setMediaError] = useState<string | null>(null);
   const objectUrls = useRef<string[]>([]);
 
-  // Revoke any object URLs we created for freshly picked files.
   useEffect(
     () => () => {
       objectUrls.current.forEach((url) => URL.revokeObjectURL(url));
@@ -161,7 +156,6 @@ const EditPropertyForm = ({
     setSaving(true);
     setMediaError(null);
     try {
-      // Upload anything picked in this session, then send the resulting keys.
       const uploaded = await Promise.all(
         photos.map(async (photo) => {
           if (photo.key) return photo.key;
@@ -195,9 +189,7 @@ const EditPropertyForm = ({
         videoTourKey: nextVideoKey,
       });
 
-      // Detached blobs are left for the backend's own staging/GC policy:
-      // DELETE /landlord/properties/media/upload refuses keys still attached
-      // to a property, so a best-effort delete here would only race the PATCH.
+      // Detached blobs are left to the backend's GC: its DELETE refuses keys still attached, so deleting here would race the PATCH.
       onClose();
     } catch (error) {
       setMediaError(

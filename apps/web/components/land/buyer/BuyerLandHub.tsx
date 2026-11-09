@@ -9,7 +9,6 @@ import { ReservationsList } from './ReservationsList';
 
 type HubTab = 'purchases' | 'reservations';
 
-/** The buyer's land hub: plot holds and installment purchases. */
 export const BuyerLandHub = () => {
   const router = useRouter();
   const searchParams = useSearchParams();

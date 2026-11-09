@@ -9,14 +9,12 @@ import {
   type LandSiteTour,
 } from '@/types/landSiteTour';
 
-/** One tour, as either side sees it; the actions are passed in. */
 export const TourCard = ({
   tour,
   who,
   children,
 }: {
   tour: LandSiteTour;
-  /** The other party's name, with its role. */
   who: string;
   children?: ReactNode;
 }) => (

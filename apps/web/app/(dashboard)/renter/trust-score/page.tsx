@@ -23,8 +23,6 @@ export default function RenterStandingPage() {
 
   return (
     <>
-      {/* Verification and Credit report bring their own page heading; the
-          trust tab needs one, so the page always has a name for screen readers. */}
       {activeTab === 'trust' && (
         <PageHeader
           title="Trust score"

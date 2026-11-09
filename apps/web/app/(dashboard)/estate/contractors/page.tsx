@@ -36,7 +36,7 @@ import type { ContractorPass, ContractorPassStatus, IssuedContractorPass } from 
 
 const PAGE_SIZE = 10;
 
-/** The API's floor on a withdrawal reason, kept in step so the form cannot under-run it. */
+// Must match the API's minimum withdrawal reason length.
 const REASON_MIN_LENGTH = 10;
 
 type StatusFilter = 'all' | 'active' | 'revoked' | 'expired';
@@ -57,15 +57,6 @@ const statusTone: Record<ContractorPassStatus, BadgeVariant> = {
   EXPIRED: 'neutral',
 };
 
-/**
- * The estate's standing authorisations.
- *
- * Named "contractors" in the nav because that is what an estate calls them, but
- * the list is anybody who comes back: a cleaner, a driver, a tutor. What the page
- * has to make clear is the thing that is easy to get wrong: this is permission
- * to keep arriving, not a visit. Each arrival still appears as its own visitor
- * pass, which is why the visit count here is the number worth looking at.
- */
 export default function EstateContractorPassesPage() {
   const queryClient = useQueryClient();
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -103,8 +94,7 @@ export default function EstateContractorPassesPage() {
       invalidate();
       setPage(1);
       setIsAddOpen(false);
-      // Shown once and never again: the API could not tell us this PIN a second
-      // time if we asked, which is what makes the stored hash worth having.
+      // Shown once: the API stores only a hash and cannot return this PIN again.
       setIssued(created);
     },
   });
@@ -149,9 +139,6 @@ export default function EstateContractorPassesPage() {
         }
       />
 
-      {/* The distinction the whole feature rests on, said plainly, because a
-          manager who thinks this replaces the visitor passes would stop expecting
-          to see individual arrivals. */}
       <Alert variant="neutral" className="mb-6">
         <p>
           This authorises somebody to{' '}
@@ -166,7 +153,6 @@ export default function EstateContractorPassesPage() {
         </p>
       </Alert>
 
-      {/* The code, once. */}
       {issued && (
         <Card className="border-primary/40 p-5 mb-6">
           <div className="flex flex-wrap items-start justify-between gap-4">
@@ -297,7 +283,6 @@ export default function EstateContractorPassesPage() {
         error={createPass.error ? (createPass.error as Error).message : null}
       />
 
-      {/* Withdrawing, inline: one field, and the reason is the point of it. */}
       <Dialog open={!!revoking} onOpenChange={(open) => !open && setRevoking(null)}>
         <DialogContent size="md">
           {revoking && (

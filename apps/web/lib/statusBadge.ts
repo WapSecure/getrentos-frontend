@@ -37,17 +37,7 @@ export interface StatusBadgeEntry {
   icon?: LucideIcon;
 }
 
-/**
- * Shared status -> {label, variant} lookups for the `<Badge>` component, so
- * a status vocabulary (payment, lease, application, offer, task, escrow...)
- * is defined once instead of re-declared per card/table with hand-rolled
- * pill markup.
- */
-/**
- * A rent charge's state. `pending` is a charge not paid yet and not late, so it
- * reads "Due": "Pending" would suggest money already sent. "Processing" is the
- * in-flight payment. Mobile uses the same words (`apps/mobile/lib/api/payments.ts`).
- */
+// `pending` reads "Due": "Pending" would suggest money already sent. Mobile uses the same words (apps/mobile/lib/api/payments.ts).
 export const paymentStatusBadges: Record<RentPaymentStatus, StatusBadgeEntry> = {
   paid: { label: 'Paid', variant: 'success', icon: CheckCircle2 },
   pending: { label: 'Due', variant: 'neutral', icon: Clock },
@@ -64,7 +54,6 @@ export const escrowStatusBadges: Record<EscrowStatus, StatusBadgeEntry> = {
   frozen: { label: 'On hold: dispute open', variant: 'danger', icon: Ban },
 };
 
-/** The bank transfer that follows release from escrow (UX-33). */
 export const rentPayoutStatusBadges: Record<RentPayoutStatus, StatusBadgeEntry> = {
   QUEUED: { label: 'Queued for payout', variant: 'neutral', icon: Clock },
   SENT: { label: 'Sent to bank', variant: 'info' },
@@ -89,14 +78,7 @@ export const viewingRequestStatusBadges: Record<ViewingRequestStatus, StatusBadg
   cancelled: { label: 'Cancelled', variant: 'neutral', icon: XCircle },
 };
 
-/**
- * Case statuses.
- *
- * Lives here rather than inside the legal-case components for the same reason
- * every other vocabulary does: so "what colour is filed" has one answer. The
- * `DECIDED` variant is `warning` on purpose — a decision usually starts work
- * (enforcement) rather than ending it, so it should not read as done.
- */
+// `DECIDED` is `warning` on purpose: a decision usually starts enforcement rather than ending the case.
 export const legalCaseStatusBadges: Record<LegalCaseStatus, StatusBadgeEntry> = {
   OPEN: { label: 'Open', variant: 'neutral' },
   FILED: { label: 'Filed', variant: 'info' },
@@ -105,15 +87,6 @@ export const legalCaseStatusBadges: Record<LegalCaseStatus, StatusBadgeEntry> = 
   WITHDRAWN: { label: 'Withdrawn', variant: 'neutral' },
 };
 
-/**
- * Lead pipeline stages.
- *
- * Centralised with the other vocabularies so the pipeline reads with one voice.
- * The nine stages fold onto the five tokens by meaning, not by hue: a request
- * awaiting the landlord is `warning`, anything in flight (inquiry, viewing
- * confirmed, application in) is `info`, a good end (viewing done, approved) is
- * `success`, a stopped one (cancelled) is `neutral`, and a refusal is `danger`.
- */
 export const leadStageBadges: Record<LeadStage, StatusBadgeEntry> = {
   inquiry: { label: 'Inquiry', variant: 'info' },
   requested: { label: 'Viewing Requested', variant: 'warning', icon: Clock },
@@ -149,14 +122,6 @@ export const applicationStatusBadges: Record<ApplicationStatus, StatusBadgeEntry
   withdrawn: { label: 'Withdrawn', variant: 'neutral' },
 };
 
-/**
- * A property's, or a person's, verification standing.
- *
- * Defined once because the property card, the listing card and the verification
- * banner all render it — and each of them used to carry its own copy of the same
- * four colours, which is why "unverified" was grey in one place and amber in
- * another.
- */
 export const verificationBadges: Record<VerificationStatus, StatusBadgeEntry> = {
   verified: { label: 'Verified', variant: 'success', icon: ShieldCheck },
   pending: { label: 'Pending review', variant: 'warning', icon: ShieldAlert },

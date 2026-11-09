@@ -39,10 +39,7 @@ function VendorRating({ rating }: { rating?: number }) {
   );
 }
 
-/** Vendor directory cards intentionally use the vendor's durable profile data.
- * Current work-order workload belongs in the paginated work-order queue rather
- * than being inferred from a single page of results.
- */
+// Uses the vendor's durable profile: workload belongs in the paginated queue, not inferred from one page.
 export function HomeManagementVendorPerformance({
   vendors,
   isLoading = false,

@@ -4,10 +4,7 @@ import type { GuestSummary } from '@/types/shortlet';
 const memberSince = (iso: string) =>
   new Date(iso).toLocaleDateString('en-NG', { month: 'short', year: 'numeric' });
 
-/**
- * The guest at a glance, for a host deciding on a request: counts across
- * Sureground only, never other hosts' details.
- */
+// Counts across Sureground only, never other hosts' details.
 export function GuestSummaryLine({ summary }: { summary: GuestSummary }) {
   const isNew = summary.completedStays === 0;
   return (

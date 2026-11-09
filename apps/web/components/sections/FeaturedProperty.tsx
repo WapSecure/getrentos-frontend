@@ -2,11 +2,6 @@ import { MapPin, Bed, Bath, Square, Building2 } from 'lucide-react';
 import { LinkButton } from './primitives';
 import { ROUTES } from '@/lib/constants/auth';
 
-/**
- * An illustration of what a verified listing looks like, and labelled as one. It
- * used to present itself as a real property (with an id and a "Verified" badge)
- * and lead to sign-up, which read as a real listing that did not exist.
- */
 const example = {
   title: '2 Bed Loft',
   price: '4.2M',

@@ -35,14 +35,13 @@ export interface Property {
   city: string;
   state: string;
   country: string;
-  /** The map pin, and when the landlord confirmed it (absent: a guess from the address). */
+  /** Absent: a guess from the address. */
   latitude?: number;
   longitude?: number;
   locationConfirmedAt?: string;
   /** The Google place the address was checked against; absent for a typed address. */
   placeId?: string;
   addressVerifiedAt?: string;
-  /** Local government area, from the checked address. */
   lga?: string;
   description?: string;
   coverImage: string;
@@ -56,19 +55,18 @@ export interface Property {
   occupiedUnits: number;
   /** Contracted rent per year across let units, normalised to a year. */
   annualRentRoll: number;
-  /** What the property is worth today and what was paid for it, in naira. Optional — they drive cap rate and yield. */
+  /** In naira. Optional; they drive cap rate and yield. */
   estimatedValue?: number;
   purchasePrice?: number;
-  /** Human-friendly shareable handle, e.g. "PR-AB7K-9Q". Share it so an agent can request to act for the property. */
+  /** Share it so an agent can request to act for the property. */
   referenceCode?: string | null;
   createdAt: string;
   archived?: boolean;
 }
 
 /**
- * Fields a landlord may change after a property exists (PATCH /landlord/properties/:id).
- * Media is sent as storage keys; `null` clears a single key and an empty
- * `galleryImageKeys` array clears the gallery.
+ * Media is sent as storage keys; `null` clears a single key and an empty `galleryImageKeys` clears
+ * the gallery.
  */
 export type PropertyUpdatePayload = Partial<
   Pick<
@@ -102,19 +100,14 @@ export interface Unit {
   unitName: string;
   bedrooms: number;
   bathrooms: number;
-  /**
-   * This unit's asking rent and its cadence — annual unless stated. The advert
-   * publishes a snapshot of it; the lease fixes what is charged.
-   */
+  /** Annual unless stated. The advert publishes a snapshot; the lease fixes what is charged. */
   askingRent?: number;
   askingRentPeriod?: 'month' | 'year';
-  /** What the signed lease charges, when the unit is let. */
   leaseRent?: number;
   leaseRentPeriod?: 'month' | 'year';
   occupancyStatus: UnitOccupancyStatus;
   tenantId?: string;
   tenantName?: string;
-  /** Approved applicant waiting on this unit; the lease links to their account. */
   approvedApplicant?: {
     applicationId: string;
     userId?: string;
@@ -130,11 +123,10 @@ export interface Listing {
   propertyName: string;
   unitName: string;
   listingTitle: string;
-  /** The advert's asking rent, in `rentPeriod`. */
   askingRent: number;
-  /** Cadence of `askingRent`. Yearly upfront is the Nigerian market default. */
+  /** Yearly upfront is the Nigerian market default. */
   rentPeriod: RentPeriod;
-  /** Whether the landlord will accept the tenant repaying in monthly installments via Sureground Flex, instead of the full amount upfront. Only meaningful when rentPeriod is 'year'. */
+  /** Only meaningful when rentPeriod is 'year'. */
   allowsMonthlyPayment: boolean;
   securityDeposit?: number;
   amenities: string[];
@@ -142,7 +134,7 @@ export interface Listing {
   allowPets: boolean;
   furnished: boolean;
   shortLetEnabled: boolean;
-  /** The property's media (a listing has none of its own). Signed per request. */
+  /** A listing has no media of its own. Signed per request. */
   coverImage?: string;
   galleryImages?: string[];
   videoTourUrl?: string;
@@ -167,13 +159,11 @@ export interface Lease {
   status: LeaseStatus;
   tenantSigned: boolean;
   landlordSigned: boolean;
-  /** Deadline for the tenant's first payment, while the lease is conditional. */
+  /** While the lease is conditional. */
   paymentDueAt?: string;
-  /** Set once the landlord confirmed handover. */
   possessionConfirmedAt?: string;
   /**
-   * Renewal terms awaiting the tenant's answer. While this is present the lease
-   * still carries its current rent and end date — accepting is what applies them.
+   * While present the lease still carries its current rent and end date; accepting applies them.
    */
   pendingRenewalOffer?: {
     id: string;
@@ -212,7 +202,7 @@ export interface ScreeningAffordability {
   /** A year's rent as a share of a year's declared income. */
   rentToIncomePercent?: number | null;
   band: AffordabilityBand;
-  /** Whether a proof of income or bank statement is attached; otherwise income is self-declared. */
+  /** Otherwise income is self-declared. */
   incomeEvidenced: boolean;
 }
 
@@ -220,7 +210,7 @@ export interface ScreeningDocument {
   name: string;
   required: boolean;
   uploaded: boolean;
-  /** Short-lived link to a file the applicant attached to this application. */
+  /** Short-lived link. */
   url?: string;
   sizeBytes?: number;
   isCreditReport: boolean;
@@ -305,19 +295,14 @@ export interface RentPayment {
   disputeReason?: string;
   /** Lowercased charge category: 'rent' | 'late_fee' | 'service_charge' | ... */
   category?: string;
-  /** True when a late fee has already been raised against this (rent) charge. */
   lateFeeApplied?: boolean;
-  /** Naira received so far; less than `amount` while part-paid. */
+  /** Less than `amount` while part-paid. */
   amountPaid?: number;
   /** The period billed, when the charge came from a rent schedule. */
   periodStart?: string;
   periodEnd?: string;
-  /** Invoice breakdown: rent plus recurring extras. */
   lines?: { category: string; label: string; amount: number }[];
-  /**
-   * The bank transfer to the owner for this rent, from the owner statement that
-   * pays it out. Null while it is on no statement.
-   */
+  /** Null while it is on no statement. */
   payoutStatus?: RentPayoutStatus | null;
 }
 
@@ -334,24 +319,22 @@ export interface Vendor {
   name: string;
   serviceType: string;
   phone: string;
-  /** CAC registration number + class, when the vendor is a registered business. */
   registrationNumber?: string | null;
   businessType?: BusinessRegistrationType | null;
   /** Inactive vendors keep their history but cannot be given new work. */
   isActive: boolean;
-  /** Mean of the rated jobs — 0 while `ratingCount` is 0, so check the count before showing stars. */
+  /** 0 while `ratingCount` is 0, so check the count before showing stars. */
   rating: number;
   ratingCount: number;
   jobsCompleted: number;
   openJobs: number;
-  /** Approved cost of completed jobs, in naira. */
+  /** In naira. */
   totalSpend: number;
   averageCost: number | null;
   averageResolutionDays: number | null;
   nextVisitAt?: string;
 }
 
-/** What a landlord types when adding or editing a vendor. */
 export type VendorInput = Pick<
   Vendor,
   'name' | 'serviceType' | 'phone' | 'registrationNumber' | 'businessType'
@@ -381,7 +364,7 @@ export interface LandlordMaintenanceRequest {
   issueTitle: string;
   category: MaintenanceCategory;
   description: string;
-  /** The agreed scope of work, set when a triage proposal is accepted. */
+  /** Set when a triage proposal is accepted. */
   workOrderScope?: string | null;
   priority: MaintenancePriority;
   status: MaintenanceRequestStatus;
@@ -392,11 +375,9 @@ export interface LandlordMaintenanceRequest {
   unitName: string;
   assignedVendorId?: string;
   assignedVendorName?: string;
-  /** When the assigned vendor is due to visit. */
   scheduledFor?: string;
-  /** The landlord's own 1-5 mark for the vendor on this job. */
+  /** 1-5. */
   vendorRating?: number;
-  /** What the tenant gave, when they rated the job. */
   tenantVendorRating?: number;
   createdAt: string;
   updatedAt: string;
@@ -476,7 +457,7 @@ export interface LandlordViewingRequest {
   /** 'video': a live video call at scheduledAt that the landlord hosts. */
   mode: 'in_person' | 'video';
   requestedAt: string;
-  /** The slot the renter asked for. The landlord's confirmed time is `scheduledAt`. */
+  /** The slot the renter asked for; the confirmed time is `scheduledAt`. */
   preferredAt?: string;
   scheduledAt?: string;
   notes?: string;
@@ -545,7 +526,7 @@ export interface PropertyPerformance {
   grossYield: number | null;
   yieldOnCost: number | null;
   appreciation: number | null;
-  /** Cap rate minus the portfolio cap rate, in percentage points. */
+  /** In percentage points. */
   capRateVsPortfolio: number | null;
   /** Figures the landlord could add to unlock the rates above. */
   missing: ('estimatedValue' | 'purchasePrice')[];
@@ -560,7 +541,7 @@ export interface PortfolioSummary {
   rentCollected: number;
   operatingExpenses: number;
   netOperatingIncome: number;
-  /** Worth of the properties that have a value on file only. */
+  /** Only the properties that have a value on file. */
   portfolioValue: number;
   valuedPropertyCount: number;
   capRate: number | null;
@@ -574,7 +555,6 @@ export interface PortfolioAnalytics {
   properties: PropertyPerformance[];
 }
 
-/** Plain-language AI briefing over the portfolio analytics (GET /ai/portfolio/briefing). */
 export interface PortfolioBriefing {
   hasData: boolean;
   headline: string;
@@ -585,7 +565,7 @@ export interface PortfolioBriefing {
   generatedAt: string;
 }
 
-/** A lease's recurring rent: each later period invoiced `leadDays` before it is due. */
+/** Each later period is invoiced `leadDays` before it is due. */
 export interface RentScheduleItem {
   id?: string;
   category: 'SERVICE_CHARGE' | 'LEVY';
@@ -613,7 +593,6 @@ export interface RentScheduleInput {
   items?: RentScheduleItem[];
 }
 
-/** Money paid into a lease's rent account and the tenant's credit. */
 export interface LeaseRentAccount {
   leaseId: string;
   creditBalance: number;

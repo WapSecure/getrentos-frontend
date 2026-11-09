@@ -14,7 +14,7 @@ import { translations, type Language, type TranslationKey } from './translations
 const STORAGE_KEY = 'sureground_language';
 /** Mirrored to a cookie too, so other tabs and the API can see the choice. */
 export const LANGUAGE_COOKIE_KEY = 'sureground_language';
-const COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
+const COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 
 interface LanguageContextValue {
   language: Language;
@@ -35,14 +35,11 @@ export const LanguageProvider = ({
   initialLanguage = 'en',
 }: {
   children: ReactNode;
-  /** Language to start in. The app root leaves it at English; see the effect below. */
   initialLanguage?: Language;
 }) => {
   const [language, setLanguageState] = useState<Language>(initialLanguage);
 
-  // The server renders in English (it must not read the cookie, or every page
-  // becomes uncacheable), so a saved preference is restored here, right after the
-  // first paint. Only a visitor who chose Pidgin sees the difference.
+  // The server renders English (reading the cookie would make every page uncacheable), so a saved preference is restored after first paint.
   useEffect(() => {
     if (initialLanguage !== 'en') return;
     const fromCookie = document.cookie

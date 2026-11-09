@@ -23,16 +23,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
 import type { IssuedPatrolCheckpoint, PatrolCheckpoint } from '@/types/estate';
 
-/**
- * The estate's patrol points, and the codes that live at them.
- *
- * The screen leads with adding a checkpoint rather than with the list, because
- * a register with nothing in it is the normal starting state and the code is the
- * only thing that has to be dealt with carefully: it is shown once, here, and
- * never again. That is not a limitation to apologise for — a code the office
- * could read back is one it could read out to somebody who is not at the
- * checkpoint, and the whole mechanism is that the code is proof of presence.
- */
+// A code is shown once and never again: one the office could read back could be read out to someone not at the checkpoint.
 export const CheckpointRegister = ({ estateId }: { estateId: string }) => {
   const queryClient = useQueryClient();
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -64,7 +55,6 @@ export const CheckpointRegister = ({ estateId }: { estateId: string }) => {
       setCopied(false);
       reset();
       queryClient.invalidateQueries({ queryKey: estateKeys.patrolCheckpoints(estateId) });
-      // The routes read the register, so a new point can be added to a round.
       queryClient.invalidateQueries({ queryKey: estateKeys.patrolRoutes(estateId) });
     },
   });
@@ -203,10 +193,7 @@ export const CheckpointRegister = ({ estateId }: { estateId: string }) => {
         </div>
       )}
 
-      {/* The fields are cleared by `reset` on close rather than by remounting:
-          `Dialog` already unmounts its children when `open` goes false, and this
-          parent's state would survive that regardless — which is the trap that
-          has caught three dialogs in this programme already. */}
+      {/* Cleared by `reset` on close: Dialog unmounts its children, but this parent's state survives. */}
       <Dialog open={isAddOpen} onOpenChange={(open) => (open ? setIsAddOpen(true) : reset())}>
         <DialogContent className="max-w-lg p-6">
           <DialogTitle className="pr-8 text-xl font-semibold tracking-[-0.02em] text-foreground">
@@ -299,15 +286,6 @@ export const CheckpointRegister = ({ estateId }: { estateId: string }) => {
   );
 };
 
-/**
- * The one moment a code is readable.
- *
- * Deliberately loud, and it says where the code belongs rather than only what it
- * is: printing a code and leaving it on the office desk produces a register that
- * anybody can scan from indoors, which is the failure mode the whole feature
- * exists to avoid. The wording underneath comes from the server so the console
- * and the guard's refusal cannot describe the same code differently.
- */
 const IssuedCodeNotice = ({
   checkpoint,
   copied,

@@ -1,10 +1,6 @@
 import { useEffect, useState } from 'react';
 import { checkPhotoQuality } from '@sureground/ui';
 
-/**
- * Retake advice for a picked photo of a document: blur, darkness, glare, size.
- * Empty for a good photo, a non-image, or no file. Advice only.
- */
 export function usePhotoAdvice(file: File | null): string[] {
   const [advice, setAdvice] = useState<{ file: File; problems: string[] } | null>(null);
   useEffect(() => {

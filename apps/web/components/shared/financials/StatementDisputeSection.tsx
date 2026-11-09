@@ -5,34 +5,11 @@ import { Badge, Button, Field, Select, Textarea } from '@sureground/ui';
 import { Gavel, Undo2 } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/format';
 
-/**
- * An owner's own queries about the figures on a statement, and the way to raise
- * one.
- *
- * The rule the copy has to carry: **an issued statement is never rewritten.** An
- * owner who queries a charge and is upheld does not see the number change on the
- * statement in front of them — they see a correction on the next one. A screen
- * that implied otherwise would have them refreshing this dialog looking for a
- * figure that is never going to move, and would hide the one thing worth telling
- * them: that the wrong figure stays on the record with the correction beside it.
- *
- * `moneyEffect` is rendered rather than derived, because the difference between
- * "your payout is paused" and "your payout already went" is the whole question a
- * person opens this to answer.
- */
+// An issued statement is never rewritten: an upheld query shows as a correction on the next one. `moneyEffect` is rendered, not derived.
 
-/** How long a reason has to be. Mirrors the API's own floor. */
+/** Mirrors the API's floor. */
 export const MIN_DISPUTE_REASON = 20;
 
-/**
- * The shape this section reads, declared here rather than borrowed from a
- * service.
- *
- * A landlord statement and an estate one are different types that happen to
- * agree, and the owner sees the same thing either way. Taking the shape rather
- * than a type keeps this shared without a shared component importing a feature
- * module's types — the coupling that makes two surfaces drift.
- */
 export interface DisputeForDisplay {
   id: string;
   lineId: string;
@@ -47,7 +24,6 @@ export interface DisputeForDisplay {
   moneyEffect: 'HELD' | 'IN_FLIGHT' | 'PAID' | 'NONE';
 }
 
-/** A line the owner could query. */
 export interface LineForDispute {
   id: string;
   label: string;
@@ -75,7 +51,6 @@ export function StatementDisputeSection({
 }: {
   lineItems?: LineForDispute[];
   disputes?: DisputeForDisplay[];
-  /** False on a draft, which can simply be regenerated. */
   canRaise: boolean;
   isRaising?: boolean;
   isWithdrawing?: boolean;
@@ -88,9 +63,7 @@ export function StatementDisputeSection({
   const openLineIds = new Set(
     (disputes ?? []).filter((d) => d.status === 'OPEN').map((d) => d.lineId)
   );
-  // A line already under review is not offered again — the API refuses it, and
-  // offering it would be offering something that cannot happen. A zero line is
-  // left out too: reversing it would correct nothing.
+  // A line already under review is left out (the API refuses it), and so is a zero line: reversing it corrects nothing.
   const disputable = (lineItems ?? []).filter(
     (line) => line.amount !== 0 && !openLineIds.has(line.id)
   );
@@ -140,7 +113,6 @@ export function StatementDisputeSection({
                   </p>
                 )}
 
-                {/* What the owner is told, which is the reason the note is required. */}
                 {dispute.outcomeNote && (
                   <p className="mt-1 text-xs text-muted-foreground">
                     {dispute.status === 'UPHELD'

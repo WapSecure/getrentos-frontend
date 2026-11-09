@@ -9,19 +9,7 @@ interface EstateMicrositePageProps {
   params: Promise<{ slug: string }>;
 }
 
-/**
- * The API answers 404 for a slug that is switched off, suspended, or whose
- * owner no longer holds a plan that grants a microsite. Each of those is a real
- * "gone", so it has to reach the client as Next's notFound(): resolving it to
- * a null profile instead made the page answer 200 with a not-found body, which
- * invites search engines to index a dead page.
- *
- * A failure that is NOT a 404 is a different thing and must not be reported as
- * "this does not exist": it resolves to `error` so the segment error boundary
- * can offer a retry. Previously every failure collapsed into null, which meant
- * error.tsx could never fire: a timeout was indistinguishable from a dead
- * estate.
- */
+// A 404 must reach notFound() so the response is a 404; other failures resolve to `error` so error.tsx can offer a retry.
 type ProfileResult =
   | { kind: 'ok'; profile: EstateStorefront }
   | { kind: 'missing' }
@@ -30,10 +18,6 @@ type ProfileResult =
 async function fetchProfile(slug: string): Promise<ProfileResult> {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
   try {
-    // One canonical public estate endpoint. /estate-microsites/:slug returned a
-    // strict subset of this from a second service, so the same "is this estate
-    // visible?" rule lived in two places: and this page had to merge two
-    // shapes for the same estate.
     const res = await fetch(`${apiUrl}/estate-storefronts/${slug}`, { cache: 'no-store' });
     if (res.status === 404) return { kind: 'missing' };
     if (!res.ok) return { kind: 'error' };
@@ -48,14 +32,8 @@ export async function generateMetadata({ params }: EstateMicrositePageProps): Pr
   const result = await fetchProfile(slug);
 
   if (result.kind !== 'ok') {
-    // No brand here: the root layout's `%s | Sureground` template already appends
-    // it, so including it produced "Estate not found | Sureground | Sureground".
-    //
-    // `noindex` is load-bearing, not belt-and-braces. `app/loading.tsx` puts a
-    // Suspense boundary at the root, so the shell: and its 200 status: is
-    // flushed before this page can reach notFound(). The body is the 404 page
-    // but the code stays 200, so this directive is what actually keeps a dead
-    // estate out of search results.
+    // No brand: the root layout's title template appends it.
+    // `noindex` is load-bearing: the root Suspense boundary flushes a 200 before notFound() runs, so this keeps a dead estate out of search.
     return { title: 'Estate not found', robots: { index: false, follow: false } };
   }
 
@@ -82,14 +60,9 @@ export async function generateMetadata({ params }: EstateMicrositePageProps): Pr
 export default async function EstateMicrositePage({ params }: EstateMicrositePageProps) {
   const { slug } = await params;
 
-  // Pre-fetch the profile server-side (also used for metadata) so the client
-  // component hydrates instantly instead of re-fetching the same endpoint.
   const result = await fetchProfile(slug);
 
-  // A dead slug renders the 404 page and, importantly, answers with a 404.
   if (result.kind === 'missing') notFound();
-  // Anything else throws into error.tsx, which is the only thing that can
-  // honestly offer "Try again".
   if (result.kind === 'error') throw new Error(`Could not load estate microsite "${slug}"`);
 
   return (

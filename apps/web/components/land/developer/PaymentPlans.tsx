@@ -25,7 +25,6 @@ const Term = ({ label, value }: { label: string; value: string }) => (
   </div>
 );
 
-/** The plans buyers can choose from, with an example on the cheapest available plot. */
 export const PaymentPlans = ({ layout, notify }: PaymentPlansProps) => {
   const queryClient = useQueryClient();
   const propertyId = layout.propertyId;

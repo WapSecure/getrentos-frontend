@@ -1,12 +1,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
-/**
- * Landing-page building blocks. Plain markup and CSS only: the shared UI
- * SectionHeader and Card fade in from opacity 0 with JavaScript, which leaves the
- * server-rendered text invisible until scripts run and drags an animation
- * library into a page that otherwise needs none.
- */
+// Plain markup and CSS: the shared SectionHeader and Card fade in with JavaScript, leaving server-rendered text invisible until scripts run.
 
 export const SectionHeading = ({
   badge,
@@ -58,11 +53,7 @@ const buttonVariants = {
 };
 const buttonSizes = { md: 'px-4 py-2.5 text-sm', lg: 'px-6 py-3 text-base' };
 
-/**
- * A link that looks like the shared Button. The shared Button animates with
- * framer-motion, which would put that library on every landing-page load for the
- * sake of a hover effect.
- */
+/** Not the shared Button, which would load framer-motion on every landing page for a hover effect. */
 export const LinkButton = ({
   href,
   variant = 'primary',

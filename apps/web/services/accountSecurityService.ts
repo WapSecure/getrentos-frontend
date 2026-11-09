@@ -8,11 +8,7 @@ import type {
   TwoFactorStatus,
 } from '@/types/accountSecurity';
 
-/**
- * The signed-in person's own security (backend /users/me/security), the same
- * for every role. Changes that need the person to confirm it's them are
- * prompted by the StepUpDialog and replayed by authFetch.
- */
+/** Step-up confirmations are prompted by StepUpDialog and replayed by authFetch. */
 export const accountSecurityService = {
   async getOverview(): Promise<ApiResponse<SecurityOverview>> {
     return safeCall(() => authFetch('/users/me/security'));
@@ -30,7 +26,6 @@ export const accountSecurityService = {
     );
   },
 
-  // ---- Authenticator app ----
   async getTwoFactorStatus(): Promise<ApiResponse<TwoFactorStatus>> {
     return safeCall(() => authFetch('/users/me/security/2fa'));
   },
@@ -39,7 +34,7 @@ export const accountSecurityService = {
     return safeCall(() => authFetch('/users/me/security/2fa/enroll', { method: 'POST' }));
   },
 
-  /** Turns two-factor on and returns the backup codes, which are shown only this once. */
+  /** The backup codes are shown only this once. */
   async enableTwoFactor(
     token: string
   ): Promise<ApiResponse<{ enabled: boolean; recoveryCodes: string[] }>> {
@@ -51,7 +46,6 @@ export const accountSecurityService = {
     );
   },
 
-  /** Takes an authenticator code or a backup code. */
   async disableTwoFactor(token: string): Promise<ApiResponse<{ enabled: boolean }>> {
     return safeCall(() =>
       authFetch('/users/me/security/2fa/disable', {
@@ -61,16 +55,14 @@ export const accountSecurityService = {
     );
   },
 
-  /** New backup codes; the old ones stop working. Needs the person to confirm it's them. */
+  /** The old codes stop working; needs step-up confirmation. */
   async regenerateRecoveryCodes(): Promise<ApiResponse<{ recoveryCodes: string[] }>> {
     return safeCall(() => authFetch('/users/me/security/2fa/recovery-codes', { method: 'POST' }));
   },
 
-  // ---- Transaction PIN ----
   /**
-   * Set, change or reset the 6-digit PIN. Changing one takes the current
-   * password and PIN; a first or forgotten PIN takes the password and an
-   * emailed code (`sendSecurityCode`). Accounts with no password leave it out.
+   * Changing takes the current password and PIN; a first or forgotten PIN takes the password and an
+   * emailed code. Accounts with no password leave it out.
    */
   async setTransactionPin(
     input: SetTransactionPinInput
@@ -83,17 +75,14 @@ export const accountSecurityService = {
     );
   },
 
-  /** Emails a 6-digit code that proves it's the account holder (e.g. to reset a PIN). */
   async sendSecurityCode(): Promise<ApiResponse<{ reference: string; sentTo: string }>> {
     return safeCall(() => authFetch('/users/me/security/step-up/code', { method: 'POST' }));
   },
 
-  // ---- Passkeys (WebAuthn) ----
   async listPasskeys(): Promise<ApiResponse<{ hasPasskey: boolean; passkeys: Passkey[] }>> {
     return safeCall(() => authFetch('/users/me/security/passkey'));
   },
 
-  /** WebAuthn creation options to pass to the browser's startRegistration(). */
   async startPasskeyRegistration(): Promise<ApiResponse<Record<string, unknown>>> {
     return safeCall(() =>
       authFetch('/users/me/security/passkey/register/options', { method: 'POST' })
@@ -116,7 +105,6 @@ export const accountSecurityService = {
     return safeCall(() => authFetch(`/users/me/security/passkey/${id}`, { method: 'DELETE' }));
   },
 
-  // ---- Where you're signed in ----
   async listSessions(): Promise<ApiResponse<AccountSession[]>> {
     return safeCall(() => authFetch('/users/me/security/sessions'));
   },
@@ -126,7 +114,7 @@ export const accountSecurityService = {
     return safeCall(() => authFetch(`/users/me/security/sessions/${id}`, { method: 'DELETE' }));
   },
 
-  /** Keeps this device; needs the person to confirm it's them. */
+  /** Needs step-up confirmation. */
   async signOutOtherSessions(): Promise<ApiResponse<{ revoked: number }>> {
     return safeCall(() =>
       authFetch('/users/me/security/sessions/sign-out-others', { method: 'POST' })

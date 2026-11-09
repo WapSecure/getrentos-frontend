@@ -12,14 +12,7 @@ import { useCustody } from './CustodyProvider';
 
 export type AgencyMembership = 'loading' | 'member' | 'not-member' | 'unknown';
 
-/**
- * Whether the signed-in account works in a managing agency.
- *
- * A member of a firm can list its team; anyone else is refused. Someone named
- * directly on an engagement (without a firm) still has clients to act for, so
- * they count as inside too. Anything other than a clear refusal is "unknown",
- * and the pages handle it themselves.
- */
+// Someone named directly on an engagement (without a firm) counts as inside; anything but a clear refusal is "unknown".
 export function useAgencyMembership(enabled = true): AgencyMembership {
   const custody = useCustody();
   const team = useQuery({
@@ -44,7 +37,6 @@ export function useAgencyMembership(enabled = true): AgencyMembership {
   return 'unknown';
 }
 
-/** The one state every agency page shows to an account outside any firm. */
 export function AgencyNotMemberState({ roles }: { roles?: string[] }) {
   const home = getDashboardRoute(resolvePrimaryRoleId(roles));
   return (
@@ -73,16 +65,11 @@ export function AgencyLoadingState() {
   );
 }
 
-/**
- * A neutral top bar for accounts that do not work in an owner's workspace (a
- * renter starting a firm, say): no landlord links or "Landlord" label.
- */
 export function AgencyPlainHeader({
   user,
   showAssistant = false,
 }: {
   user: { fullName: string; email: string; roles?: string[] } | null;
-  /** Only firm members can ask about the firm's book. */
   showAssistant?: boolean;
 }) {
   const roleId = resolvePrimaryRoleId(user?.roles);
@@ -101,7 +88,6 @@ export function AgencyPlainHeader({
   );
 }
 
-/** True for accounts that work in the owner/manager workspace this shell borrows. */
 export function usesOwnerWorkspace(roles?: string[]): boolean {
   return Boolean(
     roles?.some(

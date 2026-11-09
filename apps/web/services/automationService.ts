@@ -53,7 +53,6 @@ export interface CreateRuleInput {
 }
 
 export const automationService = {
-  // --- broadcast ---
   broadcast(input: BroadcastInput): Promise<ApiResponse<{ recipientCount: number }>> {
     return safeCall(() =>
       authFetch('/landlord/announcements/broadcast', {
@@ -63,7 +62,6 @@ export const automationService = {
     );
   },
 
-  // --- templates ---
   listTemplates(): Promise<ApiResponse<AnnouncementTemplate[]>> {
     return safeCall(() => authFetch('/landlord/announcements/templates'));
   },
@@ -96,7 +94,6 @@ export const automationService = {
     );
   },
 
-  // --- rules ---
   listRules(): Promise<ApiResponse<AutomationRule[]>> {
     return safeCall(() => authFetch('/landlord/automation-rules'));
   },

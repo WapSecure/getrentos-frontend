@@ -7,10 +7,7 @@ import {
 import { unwrap } from '@/lib/apiHelpers';
 import { subscriptionKeys } from '@/lib/queryKeys';
 
-/**
- * Canonical Pro pricing + entitlements, read from the backend so the price
- * shown to a customer is always the price we charge (single source of truth).
- */
+// Read from the backend so the price shown is always the price charged.
 export function usePlanPricing() {
   const { data, isLoading, isError } = useQuery({
     queryKey: subscriptionKeys.pricing,

@@ -24,7 +24,6 @@ export const PreferencesSettings = () => {
   } = useQuery({
     queryKey: ownerKeys.preferences,
     queryFn: () => unwrap(ownerService.getPreferences()),
-    // Shown in place with a retry, so the other settings sections stay usable.
     throwOnError: false,
   });
 
@@ -61,8 +60,7 @@ export const PreferencesSettings = () => {
         Negotiation defaults and workspace preferences
       </p>
 
-      {/* The form only appears once the saved values are in: showing the
-          defaults on a failed load would let Save overwrite the real ones. */}
+      {/* Only shown once the saved values load: defaults on a failed load would let Save overwrite the real ones. */}
       <QueryState
         isLoading={isPending}
         isError={isError && !prefs}

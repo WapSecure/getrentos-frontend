@@ -11,11 +11,6 @@ import { shortletKeys } from '@/lib/queryKeys';
 import { formatDate } from '@/lib/format';
 import type { ShortletConversation } from '@/types/shortlet';
 
-/**
- * Guest <-> host message threads for shortlets. Renders a conversation list
- * on the left and the selected thread on the right; new messages are sent via
- * the role-appropriate endpoint and conversations refresh on send.
- */
 export function ShortletMessagesInbox({ role }: { role: 'guest' | 'host' }) {
   const queryClient = useQueryClient();
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -59,7 +54,6 @@ export function ShortletMessagesInbox({ role }: { role: 'guest' | 'host' }) {
   return (
     <div className="flex h-[70vh] flex-col overflow-hidden rounded-xl border border-border">
       <div className="grid h-full grid-cols-1 md:grid-cols-[280px_1fr]">
-        {/* Conversation list */}
         <div className="border-b border-border md:border-b-0 md:border-r">
           <div className="border-b border-border p-3">
             <p className="flex items-center gap-2 font-medium">
@@ -113,7 +107,6 @@ export function ShortletMessagesInbox({ role }: { role: 'guest' | 'host' }) {
           </div>
         </div>
 
-        {/* Thread */}
         <div className="flex min-h-0 flex-col">
           {active ? (
             <>

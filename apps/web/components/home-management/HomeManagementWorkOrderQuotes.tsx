@@ -103,10 +103,6 @@ interface HomeManagementWorkOrderQuotesProps {
   vendors?: HomeManagementVendor[];
 }
 
-/**
- * Keeps quote selection and its audit-sensitive approval flow separate from
- * the broader work-order lifecycle controls.
- */
 export function HomeManagementWorkOrderQuotes({
   workOrder,
   vendors = [],
@@ -146,11 +142,7 @@ export function HomeManagementWorkOrderQuotes({
   const validExpiry = !form.validUntil || Boolean(formExpiry && timestamp(formExpiry)! > now);
   const canCreateQuote = isWorkOrderOpen(workOrder) && validAmount && validScope && validExpiry;
   const approvalAuthorityIsLoading = currentUserId === undefined;
-  /**
-   * Whether a quote can still be selected. Selecting one locks the approved
-   * cost an invoice is later checked against. Only the owner operates home
-   * management, so they select quotes on jobs they logged too.
-   */
+  /** Selecting a quote locks the approved cost an invoice is later checked against. */
   const canApproveQuotes = isWorkOrderOpen(workOrder) && !workOrder.approvedAt;
 
   const invalidateQuoteViews = async () => {

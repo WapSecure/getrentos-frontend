@@ -40,10 +40,6 @@ export const formatDate = (
 /** Payment dates are read in Lagos time, whatever zone the browser is in. */
 export const APP_TIME_ZONE = 'Africa/Lagos';
 
-/**
- * `formatDate` in Lagos time, so a payment made at 23:30 in Lagos does not show
- * as the next day for someone paying from abroad.
- */
 export const formatLagosDate = (dateString: string, style: 'short' | 'long' = 'short'): string => {
   const date = new Date(dateString);
   if (Number.isNaN(date.getTime())) return '—';
@@ -76,24 +72,12 @@ export const getInitials = (fullName: string): string => {
   return `${first}${last}`.toUpperCase() || 'U';
 };
 
-/**
- * "1 bed" / "2 beds".
- *
- * Several panels hard-coded the plural (`{bedrooms} beds`), so a studio or a
- * one-bed read "1 beds" / "1 baths" — while the Discover card and the property
- * detail page inflected it correctly. Centralised so the surfaces cannot drift
- * apart again.
- */
 export const pluralize = (
   count: number,
   singular: string,
   plural: string = `${singular}s`
 ): string => `${count} ${count === 1 ? singular : plural}`;
 
-/**
- * How an offer sits against the asking price, in words: "6% below asking",
- * "2.5% above asking", "At the asking price". Whole numbers drop the decimal.
- */
 export const formatAskingDifference = (diffPct: number): string => {
   if (diffPct === 0) return 'At the asking price';
   const size = Math.abs(diffPct);

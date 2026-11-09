@@ -7,9 +7,7 @@ import type { LandLayoutInput, OwnerLandLayout } from '@/types/landDeveloper';
 import { LandDocumentPicker } from '../documents/LandDocumentPicker';
 
 interface LayoutFormProps {
-  /** The parcel the estate is laid out on; its documents back the layout plan. */
   propertyId: string;
-  /** Editing an existing layout; omit to create one. */
   layout?: OwnerLandLayout;
   isSaving: boolean;
   submitLabel: string;
@@ -41,7 +39,6 @@ const fromLayout = (layout?: OwnerLandLayout): FormState => ({
   developmentLevy: layout?.fees.developmentLevy ?? 0,
 });
 
-/** Estate name, approval, reservation hold and the per-plot fees. */
 export const LayoutForm = ({
   propertyId,
   layout,
@@ -78,7 +75,7 @@ export const LayoutForm = ({
     const documentId = form.layoutPlanDocumentId.trim();
     onSubmit({
       name,
-      // On edit, an emptied field is cleared with null; on create it is left out.
+      // On edit an emptied field is cleared with null; on create it is left out.
       description: description || (layout ? null : undefined),
       layoutApprovalReference: reference || (layout ? null : undefined),
       layoutPlanDocumentId: documentId || (layout ? null : undefined),

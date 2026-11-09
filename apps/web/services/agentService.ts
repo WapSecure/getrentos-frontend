@@ -135,7 +135,6 @@ export interface AgentAssignableProperty {
   title: string;
   city: string;
   state: string;
-  /** Already assigned to this agent. */
   assigned?: boolean;
 }
 
@@ -231,14 +230,13 @@ export interface AgentWorkOrder {
 }
 
 export const agentService = {
-  /** The day's visits in a drivable order; optionally from where the agent is now. */
   getRoute: (start?: { latitude: number; longitude: number }) =>
     safeCall(() =>
       authFetch<AgentRoute>(
         `/agent/route${start ? `?latitude=${start.latitude}&longitude=${start.longitude}` : ''}`
       )
     ),
-  /** Suggest each room's condition and notes from the inspection photos. Saves nothing. */
+  /** Suggestions only; saves nothing. */
   draftInspectionReport: (taskId: string, body: InspectionDraftRequest) =>
     safeCall<InspectionDraft>(() =>
       authFetch(`/agent/inspections/${taskId}/draft-report`, {
@@ -434,7 +432,6 @@ export const agentService = {
   removeInspectionPhoto: (photoId: string): Promise<ApiResponse<void>> =>
     safeCall(() => authFetch(`/agent/inspections/photos/${photoId}`, { method: 'DELETE' })),
 
-  // ---- field work orders ----
   listWorkOrders: (): Promise<ApiResponse<AgentWorkOrder[]>> =>
     safeCall(() => authFetch<AgentWorkOrder[]>('/agent/work-orders')),
   getWorkOrder: (id: string): Promise<ApiResponse<AgentWorkOrder>> =>

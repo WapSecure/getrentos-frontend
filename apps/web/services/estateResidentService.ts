@@ -28,7 +28,6 @@ import type { PaymentProvider } from '@/types/payments';
 type PageQuery = { page?: number; pageSize?: number };
 
 export const estateResidentService = {
-  /** Read-only answers about the resident's own household. */
   askAssistant: (question: string, history: AssistantTurn[], language?: ReplyLanguage) =>
     safeCall<AssistantReply>(() =>
       authFetch('/resident/assistant/ask', {
@@ -139,11 +138,8 @@ export const estateResidentService = {
   },
 
   /**
-   * Declare a parcel, and get the code that proves it at the gate.
-   *
-   * The reply is the only time the code exists — it is stored hashed and there is
-   * no endpoint that will show it again, so the caller must present it before the
-   * response is dropped.
+   * The reply is the only time the code exists (it is stored hashed), so show it before dropping
+   * the response.
    */
   async declareExpectedDelivery(data: {
     courier: string;
@@ -197,17 +193,13 @@ export const estateResidentService = {
     );
   },
 
-  /**
-   * Consents to a walk-in: somebody is at the gate asking for this household, and
-   * the estate will not let them in until somebody who lives here says so.
-   */
   async approveWalkInVisitorPass(passId: string): Promise<ApiResponse<VisitorPass>> {
     return safeCall(() =>
       authFetch(`/estate/resident/visitor-passes/${passId}/approve`, { method: 'POST' })
     );
   },
 
-  /** Refuses a walk-in. The reason is carried through to the guard. */
+  /** The reason is carried through to the guard. */
   async denyWalkInVisitorPass(passId: string, reason?: string): Promise<ApiResponse<VisitorPass>> {
     return safeCall(() =>
       authFetch(`/estate/resident/visitor-passes/${passId}/deny`, {
@@ -238,24 +230,14 @@ export const estateResidentService = {
   },
 
   /**
-   * The roll call in progress, or null.
-   *
-   * Null is the ordinary answer and not an error: most of the time the estate is
-   * not on fire. No estate or household id is sent — the household is resolved
-   * from the signed-in user, so there is nothing here to tamper with to read
-   * another household's lines.
+   * Null is the ordinary answer, not an error; the household is resolved server-side from the
+   * signed-in user.
    */
   async getMyEmergency(): Promise<ApiResponse<ResidentEmergency | null>> {
     return safeCall(() => authFetch('/estate/resident/emergency'));
   },
 
-  /**
-   * Answers for your own household.
-   *
-   * Moves this household's residents only. A visitor line stays with the marshal:
-   * the person the estate admitted is not necessarily the person holding the
-   * phone, and a household cannot honestly mark somebody else as accounted for.
-   */
+  /** Moves this household's residents only; visitor lines stay with the marshal. */
   async answerMyRollCall(data: {
     state: MusterSelfAnswer;
     stateNote?: string;

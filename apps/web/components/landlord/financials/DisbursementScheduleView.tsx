@@ -40,8 +40,7 @@ const STATUS_BADGE: Record<
 > = {
   SUCCESS: { label: 'Paid out', variant: 'success' },
   PENDING: { label: 'Payout pending', variant: 'warning' },
-  // Held is the control working, not a failure: an amount over the auto-payout
-  // limit waits for a second approver on an owner statement.
+  // Held is the control working, not a failure: an amount over the auto-payout limit waits for a second approver.
   HELD: { label: 'Needs approval', variant: 'info' },
   FAILED: { label: 'Failed', variant: 'danger' },
 };
@@ -70,9 +69,7 @@ export function DisbursementScheduleView() {
   });
   const missingPayoutAccount = payoutAccountChecked && !payoutAccount?.verified;
 
-  // Seed the form from the saved schedule once, during render (the React-blessed
-  // "adjust state when data arrives" pattern — an effect that setState's would
-  // cascade a render).
+  // Seeded during render, not in an effect, so arriving data doesn't cascade a second render.
   if (!seeded && data?.schedule) {
     setSeeded(true);
     setEnabled(data.schedule.enabled);

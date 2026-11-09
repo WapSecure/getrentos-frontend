@@ -1,9 +1,6 @@
 import type { LandPlotStatus, SellerLandPurchaseListParams } from '@/types/landDeveloper';
 
-/**
- * React Query keys for the developer / seller side of land. Everything sits
- * under `['land', 'developer']` so a single invalidation can refresh it all.
- */
+// Everything sits under ['land', 'developer'] so one invalidation refreshes it all.
 export const landDeveloperKeys = {
   all: ['land', 'developer'] as const,
   property: (propertyId: string) => ['land', 'developer', 'property', propertyId] as const,
@@ -17,10 +14,8 @@ export const landDeveloperKeys = {
   risk: (propertyId: string) => ['land', 'developer', 'property', propertyId, 'risk'] as const,
   titleHistory: (propertyId: string) =>
     ['land', 'developer', 'property', propertyId, 'title-history'] as const,
-  /** The property's documents; their usage changes whenever something cites one. */
   documents: (propertyId: string) =>
     ['land', 'developer', 'property', propertyId, 'documents'] as const,
-  /** Every layout the owner can sell from (owned or under a mandate). */
   layouts: ['land', 'developer', 'layouts'] as const,
   purchases: ['land', 'developer', 'purchases'] as const,
   purchaseList: (params: SellerLandPurchaseListParams) =>

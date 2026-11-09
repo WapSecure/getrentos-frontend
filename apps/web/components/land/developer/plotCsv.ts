@@ -1,15 +1,9 @@
 import type { LandAreaUnit } from '@/types/land';
 import type { LandPlotInput } from '@/types/landDeveloper';
 
-/**
- * Client-side CSV handling for the bulk plot import: parse the file, map each
- * row to the API's plot shape, and catch the mistakes the server would reject
- * so the developer can fix the spreadsheet before uploading. The server still
- * validates everything (geometry, the parcel's total area, plots that already
- * exist) and its verdict is the one that counts.
- */
+// The server still validates everything (geometry, the parcel's total area, existing plots) and its verdict counts.
 
-/** The API accepts at most this many rows per import. */
+/** The API's maximum rows per import. */
 export const MAX_IMPORT_ROWS = 1000;
 const MAX_NAIRA = 1_000_000_000_000;
 
@@ -28,11 +22,7 @@ export const PLOT_CSV_TEMPLATE_ROWS: string[][] = [
   ['2', 'A', '600', 'SQUARE_METERS', '16500000', 'true', 'corner;road-facing'],
 ];
 
-/**
- * RFC 4180 CSV: quoted fields, doubled quotes, commas and newlines inside
- * quotes, CRLF or LF line endings and a leading byte-order mark. Blank lines
- * are dropped.
- */
+/** RFC 4180: quoted fields, doubled quotes, newlines inside quotes, CRLF or LF and a byte-order mark; blank lines are dropped. */
 export const parseCsv = (text: string): string[][] => {
   const source = text.charCodeAt(0) === 0xfeff ? text.slice(1) : text;
   const rows: string[][] = [];
@@ -127,9 +117,9 @@ const TRUE_VALUES = new Set(['true', 'yes', 'y', '1', 'corner', 'x']);
 const FALSE_VALUES = new Set(['false', 'no', 'n', '0', '']);
 
 export interface ParsedPlotRow {
-  /** 1-based line in the file, counting the header as line 1. */
+  /** 1-based, counting the header as line 1. */
   line: number;
-  /** Position in the array sent to the API (matches the server's `index`). */
+  /** Matches the server's `index`. */
   index: number;
   plot: LandPlotInput;
   errors: string[];
@@ -137,9 +127,7 @@ export interface ParsedPlotRow {
 
 export interface ParsedPlotFile {
   rows: ParsedPlotRow[];
-  /** Problems with the file as a whole (missing columns, too many rows). */
   fileErrors: string[];
-  /** Columns that were ignored because nothing maps to them. */
   ignoredColumns: string[];
 }
 
@@ -160,7 +148,6 @@ const plotKey = (plotNumber: string, block?: string) =>
 const plotLabel = (plotNumber: string, block?: string) =>
   block ? `${block}/${plotNumber}` : plotNumber;
 
-/** Turns CSV text into plot rows with the problems found in each. */
 export const parsePlotCsv = (text: string): ParsedPlotFile => {
   const table = parseCsv(text);
   if (table.length === 0) {

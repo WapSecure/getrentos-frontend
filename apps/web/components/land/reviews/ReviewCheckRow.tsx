@@ -25,7 +25,6 @@ const STATUS_BADGE: Record<
   NOT_APPLICABLE: { label: 'Not applicable', variant: 'info' },
 };
 
-/** One check on the reviewer's seat: Pass / Flag / N-A with a note. */
 export const ReviewCheckRow = ({
   check,
   documents,
@@ -39,7 +38,6 @@ export const ReviewCheckRow = ({
   editable: boolean;
   isSaving: boolean;
   onDecide: (status: LandDiligenceCheckStatus, note: string) => void;
-  /** Upload / cite / uncite on this seat; offered on document-backed checks. */
   evidence?: ReviewEvidenceActions;
 }) => {
   const [status, setStatus] = useState<LandDiligenceCheckStatus | null>(

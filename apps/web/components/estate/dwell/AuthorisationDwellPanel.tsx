@@ -16,23 +16,7 @@ const statusTone: Record<string, BadgeVariant> = {
   EXPIRED: 'neutral',
 };
 
-/**
- * How long each standing authorisation's visits actually ran.
- *
- * The number an estate reviews: E2 tells them how often somebody came, and this
- * tells them how long they stayed. "We authorised a cleaner for Tuesdays,
- * 08:00–17:00, and they are admitted for nine hours" is the sentence this screen
- * exists to make visible, and neither half of it is visible from the other.
- *
- * `summaryLabel` is composed server-side and printed as-is, so the console, the
- * report and anything else that reads this cannot end up disagreeing about the
- * same authorisation.
- *
- * The counts that matter are shown ALOUD rather than folded into the average:
- * visits that never ended, and visits past the authorised end. An average over
- * completed visits is silent about both, which is exactly why an estate that only
- * looked at an average would never notice either.
- */
+// `summaryLabel` is composed server-side and printed as-is, so every surface describes an authorisation the same way.
 export const AuthorisationDwellPanel = ({ report, isLoading }: AuthorisationDwellPanelProps) => {
   const [showOnlyUsed, setShowOnlyUsed] = useState(false);
 
@@ -126,8 +110,6 @@ export const AuthorisationDwellPanel = ({ report, isLoading }: AuthorisationDwel
 
               <p className="text-sm text-muted-foreground mt-3">{row.summaryLabel}</p>
 
-              {/* Named separately from the average, because an average over
-                  completed visits cannot see either of these. */}
               {row.openVisits > 0 && (
                 <p className="text-xs text-warning mt-1">
                   {row.openVisits === 1
@@ -149,16 +131,7 @@ export const AuthorisationDwellPanel = ({ report, isLoading }: AuthorisationDwel
   );
 };
 
-/**
- * Minutes as a person reads them.
- *
- * The API sends the two durations as plain numbers and words every SENTENCE
- * itself, so this has to render them the same way the sentence beneath them does
- *: otherwise one card reads "4h 30m on average" and then "longest 5h" in a
- * different idiom two lines apart. It mirrors the server's `describeDuration`,
- * which is why it is "1h 30m" rather than the "1 hr 30 min" the home-management
- * SLA panel uses for a different feature's figures.
- */
+// Mirrors the server's `describeDuration` ("1h 30m") so figures match the sentences beside them.
 function formatMinutes(minutes: number): string {
   const total = Math.max(0, Math.round(minutes));
   if (total < 60) return `${total}m`;

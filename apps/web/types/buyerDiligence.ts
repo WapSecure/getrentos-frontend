@@ -1,4 +1,3 @@
-/** GET /buyer/listings/:id/diligence: due diligence on a property for sale, from what is on file. */
 export interface BuyerDiligence {
   listingId: string;
   price: { asking: string; vsSimilar: string | null };
@@ -10,7 +9,6 @@ export interface BuyerDiligence {
     why: string;
   }[];
   summary: string;
-  /** Questions to ask the seller. */
   questions: string[];
   source: 'ai' | 'heuristic';
   disclaimer: string;

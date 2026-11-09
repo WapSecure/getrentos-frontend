@@ -1,17 +1,13 @@
 import type { LandWatchInspection } from '@sureground/shared';
 
-/**
- * A buyer's pre-purchase inspection (blueprint §8.4, US-06): the shared
- * inspection the Land Watch screens use, plus the land and the buyer's
- * questions. Mirrors `land-pre-purchase-inspection.service.ts`.
- */
+/** Mirrors `land-pre-purchase-inspection.service.ts`. */
 export interface PrePurchaseInspection extends LandWatchInspection {
   land: string;
   city: string;
   state: string;
   instructions?: string | null;
   reinspectionOfId?: string;
-  /** Set for an estate plot's inspection; it can back a reservation held subject to it. */
+  /** Can back a reservation held subject to it. */
   plotId?: string;
   questions: PrePurchaseInspectionQuestion[];
   disclaimer: string;
@@ -33,7 +29,7 @@ export type InspectionFocus =
   | 'DRAINAGE'
   | 'NEIGHBOURS';
 
-/** What the buyer can ask the inspector to look at; matches the backend list. */
+/** Matches the backend list. */
 export const INSPECTION_FOCUS_LABELS: Record<InspectionFocus, string> = {
   BEACONS: 'Find and photograph every boundary beacon',
   ACCESS: 'Show the access road and how the land is reached',

@@ -48,12 +48,9 @@ export const navItems: NavItem[] = [
   { label: 'Verification', href: ROUTES.BUYER_VERIFICATION, icon: BadgeCheck },
 ];
 
-/** Picks items by route, so a group can never drift from its label as items are added. */
 const pick = (...hrefs: string[]) =>
   hrefs.flatMap((href) => navItems.filter((item) => item.href === href));
 
-// Groups follow a buyer's journey: find a property, buy it, keep the records,
-// and build the trust that sellers see.
 const baseNavGroups = [
   { label: 'Overview', items: pick(ROUTES.BUYER_DASHBOARD) },
   {
@@ -108,7 +105,6 @@ export const BuyerSidebar = () => {
       groups={navGroups.map((group) => ({
         ...group,
         items: group.items
-          // Land links only while the land marketplace is open (LAND_MODE).
           .filter((item) => land.marketplace || !MARKETPLACE_ONLY.has(item.href))
           .map((item) => ({
             ...item,

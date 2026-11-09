@@ -14,10 +14,6 @@ function Cell({ value }: { value: boolean | string }) {
   );
 }
 
-/**
- * Free-vs-Pro value matrix. Rows come from the backend pricing catalog so the
- * two plans can never be described inconsistently across personas.
- */
 export function PlanComparisonTable({
   rows,
   proLabel = 'Pro',

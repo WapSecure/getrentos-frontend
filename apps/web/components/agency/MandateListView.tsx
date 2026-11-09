@@ -33,25 +33,7 @@ import { useMandateActions, type ReasonAction, type SimpleAction } from './useMa
 import { describeAgencyError } from './agencyAccess';
 import { CapabilityChip } from './mandatePresentation';
 
-/**
- * The engagements a firm holds, and what can be done to each one.
- *
- * This screen exists because a mandate has a lifecycle and the API has eighteen
- * routes for it, and until now none of them had a face. The lifecycle is the point:
- * a mandate provisions nothing until BOTH parties have signed and Sureground has
- * verified it, so "why can I not do anything yet" is the question this screen is
- * mostly answering.
- *
- * Actions are shown from the permission set the API returns with the mandate,
- * not from its status. Status alone is not enough: whether a caller may pause an
- * engagement depends on who they are, which the screen cannot work out from a
- * status field. Deriving it here would restate rules the API already enforces,
- * and the two would drift — which is exactly how this screen came to offer
- * "Pause" to managers the API then refused.
- *
- * Where an action needs a reason, it needs a real one — the backend requires at
- * least ten characters, since a second person may have to decide on it.
- */
+// Actions come from the API's permission set, not the status; a reason needs at least ten characters, as the backend requires.
 
 const STATUS_VARIANT: Record<MandateStatus, 'success' | 'warning' | 'danger' | 'neutral' | 'info'> =
   {
@@ -64,8 +46,6 @@ const STATUS_VARIANT: Record<MandateStatus, 'success' | 'warning' | 'danger' | '
     EXPIRED: 'neutral',
     REJECTED: 'danger',
   };
-
-/** The actions that end or pause an engagement, each with the reason it needs. */
 
 export function MandateListView() {
   const queryClient = useQueryClient();

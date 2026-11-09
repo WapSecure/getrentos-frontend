@@ -49,14 +49,7 @@ const PAYOUT_STATUS: Record<RealtorPayoutStatus, { label: string; variant: Badge
   failed: { label: 'Failed', variant: 'danger' },
 };
 
-/**
- * Where commission is paid out and what has been paid so far.
- *
- * The withdrawal is shown before it is attempted: a realtor holding a balance
- * they cannot take out needs to know why at a glance, and the reason comes from
- * the summary rather than from a 403, because a tier held down by an open
- * dispute and one held down by missing evidence need different advice.
- */
+// The withdrawal block reason comes from the summary, not a 403: a dispute hold and missing evidence need different advice.
 export const RealtorPayoutSection = () => {
   const queryClient = useQueryClient();
   const [bankCode, setBankCode] = useState('');
@@ -70,8 +63,7 @@ export const RealtorPayoutSection = () => {
 
   const { data: account } = useQuery({
     queryKey: realtorKeys.payoutAccount,
-    // The API answers 200 with no body when there is no account yet, which
-    // axios turns into `undefined`: a value react-query rejects outright.
+    // No account yet comes back as 200 with no body, which axios makes `undefined`, a value react-query rejects.
     queryFn: () => unwrapOptional(realtorService.getPayoutAccount(), null),
   });
 
@@ -114,15 +106,13 @@ export const RealtorPayoutSection = () => {
       ),
     onSuccess: (payout) => {
       setJustPaid(payout.amount);
-      // Everything the money touches has to refresh, or the balance still shows
-      // as withdrawable after it has gone.
+      // Everything the money touches must refresh, or the balance still shows as withdrawable.
       queryClient.invalidateQueries({ queryKey: realtorKeys.commissions });
       queryClient.invalidateQueries({ queryKey: realtorKeys.payoutsSummary });
       queryClient.invalidateQueries({ queryKey: realtorKeys.payouts });
     },
   });
 
-  // The bank's name for the account comes back before saving (UX-28).
   const canSave = lookupAllowsSave(lookup);
   const rows = payouts?.items ?? [];
   const total = payouts?.total ?? 0;
@@ -135,7 +125,6 @@ export const RealtorPayoutSection = () => {
         <h2 className="text-lg font-semibold text-foreground">Payouts</h2>
       </div>
 
-      {/* Payout account */}
       <Card className="p-5">
         <div className="flex items-center gap-2 mb-3">
           <Landmark className="w-4 h-4 text-muted-foreground" />
@@ -204,7 +193,6 @@ export const RealtorPayoutSection = () => {
         </div>
       </Card>
 
-      {/* Balance + withdraw */}
       <Card className="p-5">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -242,7 +230,6 @@ export const RealtorPayoutSection = () => {
           </p>
         )}
 
-        {/* The requirement, shown before it is hit. */}
         {!withdraw.error && summary && blocked && (
           <div className="mt-4">
             <VerificationRequiredNotice
@@ -258,7 +245,6 @@ export const RealtorPayoutSection = () => {
             />
           </div>
         )}
-        {/* Anything other than a verification gate: say what went wrong. */}
         {withdraw.error && !isVerificationGateError(withdraw.error) && (
           <Alert variant="danger" className="mt-3">
             {withdraw.error.message || 'Your withdrawal didn’t go through. Please try again.'}
@@ -286,7 +272,6 @@ export const RealtorPayoutSection = () => {
         onConfirm={() => withdraw.mutate()}
       />
 
-      {/* Payout history */}
       <Card>
         <div className="px-5 pt-5">
           <h3 className="text-sm font-semibold text-foreground">Payout history</h3>
@@ -324,7 +309,6 @@ export const RealtorPayoutSection = () => {
                       </td>
                       <td className="p-4 min-w-56">
                         <Badge variant={meta.variant}>{meta.label}</Badge>
-                        {/* Paid date, reference for the bank, and for a failure why and what next. */}
                         <PayoutRowDetails
                           state={
                             p.status === 'success'

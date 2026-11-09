@@ -25,7 +25,7 @@ export const ApplicationCard = ({
   onRequestInfo,
 }: ApplicationCardProps) => {
   const isVerified = application.verificationStatus === 'verified';
-  // Only an open application can be decided; withdrawn ones are closed like approved and rejected.
+  // Withdrawn counts as decided, like approved and rejected.
   const isDecided = application.status !== 'pending' && application.status !== 'under_review';
 
   return (

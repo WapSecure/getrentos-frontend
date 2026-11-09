@@ -18,10 +18,8 @@ export type OfferStatus =
   | 'expired'
   | 'closed';
 export type FinancingType = 'cash' | 'mortgage' | 'installment';
-// deposit → held → released, with frozen (a dispute is open) and refunded as
-// terminal branches. VERIFICATION_PENDING / SETTLEMENT_PENDING / DISPUTED exist
-// in the enum but no service writes them (a dispute sets FROZEN), so they are
-// not surfaced (DEF-240).
+// Only these states are written (a dispute sets FROZEN); VERIFICATION_PENDING,
+// SETTLEMENT_PENDING and DISPUTED are never surfaced.
 export type SaleEscrowStatus =
   | 'deposit_pending'
   | 'funds_held'
@@ -45,14 +43,13 @@ export interface OwnerProperty {
   city: string;
   state: string;
   country: string;
-  /** The map pin, and when the owner confirmed it (absent: a guess from the address). */
+  /** Absent: a guess from the address. */
   latitude?: number;
   longitude?: number;
   locationConfirmedAt?: string;
   /** The Google place the address was checked against; absent for a typed address. */
   placeId?: string;
   addressVerifiedAt?: string;
-  /** Local government area, from the checked address. */
   lga?: string;
   ownerName: string;
   verificationStatus: OwnershipVerificationStatus;
@@ -67,10 +64,10 @@ export interface OwnerProperty {
   galleryImageUrls?: string[];
   /** Storage key of the video tour; null on an update removes it. */
   videoTourKey?: string | null;
-  /** Signed link to the video tour, valid for a few hours. */
+  /** Valid for a few hours. */
   videoTourUrl?: string;
   hasActiveSaleListing: boolean;
-  /** Human-friendly shareable handle, e.g. "PR-AB7K-9Q". Owners share it so an agent can request to act for the property. */
+  /** Share it so an agent can request to act for the property. */
   referenceCode?: string | null;
   createdAt: string;
 }
@@ -117,7 +114,7 @@ export interface SaleOffer {
   depositAmount?: number;
   message?: string;
   status: OfferStatus;
-  /** Whose answer it waits on; absent from older APIs (then: open means the owner). */
+  /** Absent from older APIs (then open means the owner). */
   awaiting?: 'owner' | 'buyer' | null;
   submittedAt: string;
 }
@@ -150,7 +147,7 @@ export interface EscrowSaleTransaction {
   offerId: string;
   propertyId: string;
   propertyName: string;
-  /** The property's type, e.g. 'LAND' (whose sales carry conveyance steps). */
+  /** 'LAND' sales carry conveyance steps. */
   propertyType?: string;
   buyerName: string;
   salePrice: number;
@@ -160,7 +157,7 @@ export interface EscrowSaleTransaction {
   disputeReason?: string;
   createdAt: string;
   releasedAt?: string;
-  /** Once escrow is released: whether the transfer to your payout account went out. Absent before release. */
+  /** Absent before escrow is released. */
   sellerPayoutStatus?: 'PENDING' | 'PROCESSING' | 'PAID' | 'FAILED';
   sellerPaidAt?: string;
 }

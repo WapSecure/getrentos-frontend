@@ -5,10 +5,6 @@ import type { LandInstallment } from '@/types/landBuyer';
 import { InstallmentStatusBadge } from './LandSaleBadges';
 import type { ScheduleSummary } from './landSaleLogic';
 
-/**
- * The installment schedule, with the one the Pay button settles highlighted
- * and overdue rows (and their late fees) called out.
- */
 export const PaymentSchedule = ({
   installments,
   summary,

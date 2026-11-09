@@ -17,21 +17,15 @@ interface OpenCharge {
 }
 
 interface PaymentsSummaryProps {
-  /** Open charges, soonest due first, as the API returns them with `open=true`. */
   openCharges: OpenCharge[];
-  /** How many charges are open in all (the API's total, which may exceed the list). */
   openCount: number;
-  /** The API's account-wide figures. Older APIs send none; then they are worked out from `openCharges`. */
+  // Older APIs send none; then they are worked out from `openCharges`.
   summary?: AccountSummary;
-  /** Opens the pay dialog for the oldest open charge. */
   onPay: () => void;
   isPaying?: boolean;
 }
 
-/**
- * What the renter owes and the one way to pay it. Figures come from every open
- * charge (not the page of history below), so they stay right past ten charges.
- */
+// Figures come from every open charge, not the page of history below.
 export const PaymentsSummary = ({
   openCharges,
   openCount,
@@ -62,8 +56,7 @@ export const PaymentsSummary = ({
     );
   }
 
-  // Server figures cover every charge. Without them, the sum of the loaded open
-  // charges is only a floor when the API has more than it returned.
+  // Without server figures, the sum of the loaded open charges is only a floor.
   const owed = summary?.amountOwedNaira ?? openCharges.reduce((sum, c) => sum + leftToPay(c), 0);
   const overdue =
     summary?.overdueCount ?? openCharges.filter((charge) => charge.status === 'overdue').length;

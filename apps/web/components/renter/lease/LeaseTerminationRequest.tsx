@@ -51,9 +51,7 @@ export const LeaseTerminationRequest = ({
       setNoticeDate('');
       setReason('');
     } catch (err) {
-      // The API refuses a second notice while one is already awaiting a decision.
-      // Letting the rejection escape left the button spinning on "Submitting…"
-      // with the modal open and nothing said about why.
+      // The API refuses a second notice while one awaits a decision; catching it stops the button spinning with nothing said.
       setError(err instanceof Error ? err.message : 'Unable to submit this request.');
     } finally {
       setIsSubmitting(false);

@@ -115,7 +115,6 @@ export const NotificationCard = ({
     if (href) router.push(href);
   };
 
-  // No event parameter needed since Button component doesn't pass it
   const handleMarkAsReadClick = () => {
     onMarkAsRead(notification.id);
   };

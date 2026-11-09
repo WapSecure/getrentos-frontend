@@ -57,8 +57,6 @@ export const GatemanNavbar = ({ user }: GatemanNavbarProps) => {
             <AccountMenu user={user} roleId="gateman" roleLabel="Gate" />
           </div>
         </div>
-        {/* Below desktop the four gate tasks get a row of their own, so the bar
-            reflows on the phones and tablets guards actually carry. */}
         <div className="grid grid-cols-4 gap-1 pb-2 lg:hidden">{links(true)}</div>
       </div>
     </nav>

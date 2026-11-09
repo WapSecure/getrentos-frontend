@@ -92,16 +92,13 @@ function BuyerOffersPageContent() {
     onSuccess: (_result, offerId) => invalidate(offerId),
   });
 
-  // Reopen the offer form when the buyer comes back from signing in with a draft.
   const [isMakeOfferOpen, setIsMakeOfferOpen] = useState(
     () => !!defaultPropertyId || hasSessionDraft(MAKE_OFFER_DRAFT_KEY)
   );
-  // ?offer=… (from a listing the buyer already has an offer on) opens that thread.
   const [activeOfferId, setActiveOfferId] = useState<string | null>(
     () => searchParams.get('offer') || null
   );
 
-  // Negotiation thread for the currently-open offer.
   const { data: thread = [] } = useQuery({
     queryKey: buyerKeys.offerThread(activeOfferId ?? ''),
     queryFn: () => unwrap(buyerService.getOfferThread(activeOfferId as string)),

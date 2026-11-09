@@ -42,10 +42,7 @@ const STATUS_COPY: Record<RentSchedule['status'], string> = {
   ENDED: 'Every period of this lease has been billed.',
 };
 
-/**
- * Recurring rent for a signed lease: what the next invoice will be, when it is
- * raised, and the extras billed with it. Edits apply to invoices not yet raised.
- */
+// Edits apply only to invoices not yet raised.
 export const RentScheduleModal = ({ lease, onClose }: RentScheduleModalProps) => {
   const queryClient = useQueryClient();
   const leaseId = lease?.id ?? '';
@@ -73,7 +70,6 @@ export const RentScheduleModal = ({ lease, onClose }: RentScheduleModalProps) =>
     },
   });
 
-  // Two-step: the first click asks, the second refunds.
   const [confirmRefund, setConfirmRefund] = useState(false);
   const refundCredit = useMutation({
     mutationFn: async () => {
@@ -99,7 +95,6 @@ export const RentScheduleModal = ({ lease, onClose }: RentScheduleModalProps) =>
   const [items, setItems] = useState<RentScheduleItem[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
 
-  // Reset the form whenever the server's copy changes (load, save, issue).
   const [syncedFrom, setSyncedFrom] = useState<RentSchedule | null | undefined>(undefined);
   if (schedule.data !== syncedFrom) {
     const s = schedule.data;

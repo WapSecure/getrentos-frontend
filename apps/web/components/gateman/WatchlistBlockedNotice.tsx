@@ -5,20 +5,10 @@ import { ShieldAlert } from 'lucide-react';
 import { Button, Field, Input } from '@sureground/ui';
 import type { WatchlistMatch, WatchlistMatchedOn } from '@/types/estate';
 
-/** Matches the API's floor. Kept in step so the guard is not told off by the server for something the form allowed. */
+/** Matches the API's floor. */
 export const OVERRIDE_REASON_MIN_LENGTH = 10;
 
-/**
- * How the match was made, in two or three words.
- *
- * A label rather than a sentence: every sentence in this panel comes from the
- * API, so there is exactly one copy of the wording and the two platforms cannot
- * drift into telling guards different things. This is only here because "which
- * detail matched" is the one fact a guard needs at a glance before deciding
- * whether the person in front of them is really the person on the list.
- *
- * Exported so the pre-write check says it the same way.
- */
+/** Only a label: every sentence in this panel comes from the API, so web and mobile can't drift. */
 export const describeWatchlistBasis = (matchedOn: WatchlistMatchedOn) =>
   matchedOn === 'NAME'
     ? 'name only'
@@ -29,30 +19,14 @@ export const describeWatchlistBasis = (matchedOn: WatchlistMatchedOn) =>
 interface WatchlistBlockedNoticeProps {
   /** What the API said. Rendered verbatim. */
   message: string;
-  /** The entries that fired. Empty only when the API withheld them. */
   matches: WatchlistMatch[];
   onOverride: (reason: string) => void;
-  /** Abandons the write: the guard turns the visitor away instead. */
   onDefer?: () => void;
   isOverriding?: boolean;
-  /** A failure of the override attempt itself, shown without losing the reason typed. */
   error?: string | null;
 }
 
-/**
- * Shown when an estate's watch list refuses an entry.
- *
- * Deliberately not shaped like the error box used elsewhere on these screens.
- * This is the estate's instruction being carried out, not a fault: a guard who
- * reads it as a failure will retry, and retrying gives the same answer while
- * somebody waits at the barrier. So it states the instruction, quotes the
- * estate's reason, and says plainly that asking again changes nothing.
- *
- * The override is two deliberate steps rather than one button. Refusing is the
- * default: that is what the estate asked for: and admitting somebody anyway is
- * a decision a guard makes on purpose, with a reason, because that reason is
- * what the estate office is told and what the audit records.
- */
+// Not styled as an error: a guard who reads it as a failure retries and gets the same answer. Overriding takes two steps and a reason, because the reason is what the estate office and the audit record.
 export const WatchlistBlockedNotice = ({
   message,
   matches,
@@ -85,9 +59,6 @@ export const WatchlistBlockedNotice = ({
                       {` · matched on ${describeWatchlistBasis(match.matchedOn)}`}
                     </span>
                   </p>
-                  {/* The estate's own words, quoted rather than paraphrased: the
-                      guard has to say something to a human, and this is the only
-                      version anybody actually agreed to. */}
                   <p className="text-xs text-muted-foreground">Reason: {match.reason}</p>
                 </div>
               ))}
@@ -114,9 +85,6 @@ export const WatchlistBlockedNotice = ({
             </div>
           ) : (
             <div className="space-y-2 pt-1">
-              {/* The hint says what the reason is for. Without it a guard types
-                  "ok", the form refuses it, and a control that exists to prevent
-                  a wrong refusal ends up looking broken. */}
               <Field
                 label="Why are you admitting them?"
                 htmlFor="watchlist-override-reason"
@@ -147,8 +115,6 @@ export const WatchlistBlockedNotice = ({
                   size="sm"
                   disabled={isOverriding}
                   onClick={() => {
-                    // The reason survives "never mind", so a guard who
-                    // reconsiders twice does not retype it.
                     setIsOverridingNow(false);
                   }}
                 >

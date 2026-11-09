@@ -31,7 +31,6 @@ export default function ApplicationsPage() {
   const data = applicationsQuery.data;
   const applications = data?.items ?? [];
   const total = data?.total ?? 0;
-  // Private notes are persisted server-side (ApplicationNote records).
   const notesQuery = useQuery({
     queryKey: renterKeys.allApplicationNotes,
     queryFn: () => unwrap(renterService.listAllApplicationNotes()),

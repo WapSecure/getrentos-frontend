@@ -9,21 +9,10 @@ import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
 import type { EstateListing } from '@/types/estate-marketplace';
 
-/** Must match MAX_LISTING_MEDIA on the server, or the UI promises what the API refuses. */
+// Must match MAX_LISTING_MEDIA on the server.
 const MAX_PHOTOS = 12;
 
-/**
- * The estate's own photos for one of its listings.
- *
- * Photos hang off the LISTING, not the property: an estate is photographing an
- * asset it does not own, so anything uploaded here never touches the owner's
- * property record.
- *
- * When the estate has supplied none, the panel says so and explains what the
- * listing is showing instead. A manager looking at their own listing and seeing
- * someone else's photo has no way to know why: the property's cover is being
- * used as a fallback, and that is worth stating rather than leaving as a mystery.
- */
+// Photos belong to the listing, not the property: the estate doesn't own the asset, so uploads never touch the owner's record.
 export const ListingMediaPanel = ({
   estateId,
   listing,

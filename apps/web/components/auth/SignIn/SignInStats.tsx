@@ -2,11 +2,6 @@
 
 import { motion } from 'framer-motion';
 
-/**
- * Three things that are true of the platform. This used to show made-up member,
- * transaction-volume and satisfaction figures (in dollars, for a naira product);
- * when real usage numbers exist they can go here.
- */
 const highlights = [
   { headline: 'Protected', caption: 'Sureground holds your payment' },
   { headline: 'Verified', caption: 'Identity checks' },

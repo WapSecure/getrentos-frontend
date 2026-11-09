@@ -20,7 +20,6 @@ export type GatemanUser = { fullName: string; email: string; role?: string; role
 
 const GatemanUserContext = createContext<GatemanUser | null>(null);
 
-/** Returns the signed-in gateman's profile, populated once by the gateman layout's auth check. */
 export const useGatemanUser = () => useContext(GatemanUserContext);
 
 export default function GatemanLayout({ children }: { children: ReactNode }) {
@@ -68,13 +67,9 @@ export default function GatemanLayout({ children }: { children: ReactNode }) {
 
   return (
     <GatemanUserContext.Provider value={user}>
-      {/* One estate and one barrier for the whole console. Mounted above the
-          navbar so the switcher and every gate page read the same post: an
-          arrival recorded from the vehicles page must be attributed to the same
-          barrier as one recorded from check-in. */}
+      {/* Above the navbar so every gate page attributes arrivals to the same barrier. */}
       <GatemanPostProvider>
-        {/* Renders nothing. Mounted here so the offline queue drains while a
-            guard is actually at the gate. */}
+        {/* Mounted here so the offline queue drains while a guard is at the gate. */}
         <GateQueueSync />
         <div className="min-h-screen bg-background">
           <GatemanNavbar user={user} />

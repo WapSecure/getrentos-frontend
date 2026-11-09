@@ -39,7 +39,6 @@ import { useEstatePlan } from '@/hooks/useEstatePlan';
 import { AttentionFeed } from '@/components/shared/attention/AttentionFeed';
 import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
 
-// Charts pull in recharts; load them after the page so it opens faster.
 const EstateDuesTrendChart = dynamic(
   () =>
     import('@/components/estate/dashboard/EstateDuesTrendChart').then(

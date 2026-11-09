@@ -55,15 +55,6 @@ interface OwnerGroup {
   liveCount: number;
 }
 
-/**
- * The firm's whole book, grouped by the client it belongs to, plus owners the
- * firm has invited but who aren't yet under a mandate.
- *
- * The custody bar answers "who am I acting for right now?" for a single property;
- * this answers "who are all my clients, and what do I run for each?". Choosing a
- * property here sets custody and drops into that client's workspace, so the
- * one-client discipline still holds once you are working.
- */
 export function AgencyOwnersView() {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -118,7 +109,6 @@ export function AgencyOwnersView() {
   };
 
   const invites = invitesQuery.data ?? [];
-  // Outstanding (not yet a mandate) invites are the actionable ones to surface.
   const outstandingInvites = invites.filter(
     (i) => i.status === 'PENDING' || i.status === 'EXPIRED'
   );
@@ -208,7 +198,6 @@ export function AgencyOwnersView() {
         </div>
       )}
 
-      {/* Invited owners not yet under a mandate */}
       {outstandingInvites.length > 0 && (
         <div className="mt-8">
           <h2 className="mb-2 text-sm font-semibold text-foreground">Invited owners</h2>

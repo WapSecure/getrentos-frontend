@@ -8,7 +8,6 @@ import { RenterPageHeader } from '../shared/RenterPageHeader';
 
 interface MaintenanceHeaderProps {
   onReport: () => void;
-  /** Sits beside the report button, e.g. the alerts bell. */
   extraAction?: ReactNode;
 }
 

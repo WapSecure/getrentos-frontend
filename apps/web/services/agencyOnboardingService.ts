@@ -17,9 +17,7 @@ export interface AgencyProfileInput {
   registrationNumber: string;
   registeredAddress: string;
   /**
-   * The Google place the registered address was picked from. Re-send it on an
-   * edit when the address is unchanged: a save without it stores the address
-   * as unchecked.
+   * Re-send it when the address is unchanged: a save without it stores the address as unchecked.
    */
   registeredPlaceId?: string;
   state: string;

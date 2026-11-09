@@ -5,20 +5,7 @@ import { Button } from '@sureground/ui';
 import type { ManagementMandateDto } from '@/services/mandateService';
 import type { ReasonAction, SimpleAction } from './useMandateActions';
 
-/**
- * The lifecycle buttons for one engagement, on whatever screen is showing it.
- *
- * Which buttons appear comes entirely from the API's `permissions`, never from
- * `status`. Status is not enough to answer the question: whether a caller may
- * pause an engagement depends on who they are — the owner or the platform may,
- * the manager may not — and a screen cannot work that out from a status field.
- * Restating the rules here is how this component previously came to offer
- * "Pause" to managers the API then refused with a 403.
- *
- * An action that is unavailable is *absent*, not disabled. A greyed-out button
- * implies "not yet, or not in this state", which is wrong: for most callers
- * these actions are never available, on any state.
- */
+// Buttons come from the API's `permissions`, never `status`: who may act depends on the caller. An unavailable action is absent, not disabled.
 export function MandateActionButtons({
   mandate,
   busy,
@@ -84,13 +71,7 @@ export function MandateActionButtons({
           Record handover
         </Button>
       )}
-      {/*
-        Two different ways an engagement ends, and the API decides which are open
-        to this caller. Staff cannot end one directly — they ask, and a second
-        staff member approves — so for them only the asking button appears. An
-        owner who is also staff sees both, because withdrawing their own consent
-        is a separate right from the pair rule.
-      */}
+      {/* Staff ask to end an engagement and a second staff member approves; an owner who is also staff sees both. */}
       {permissions.canRequestTermination && (
         <Button
           size="sm"

@@ -22,11 +22,6 @@ import {
   type UnitImportResult,
 } from '@/services/portfolioImportService';
 
-/**
- * Bring an existing block's units onto Sureground from a spreadsheet. Always a
- * dry run first: you see exactly what would be added, skipped and why any row
- * is refused before anything is written. Importing is all-or-nothing.
- */
 export function PortfolioImportView() {
   const { live, loading } = useCustody();
   const fileRef = useRef<HTMLInputElement>(null);

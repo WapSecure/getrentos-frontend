@@ -23,26 +23,15 @@ import { landDocumentTypeLabel } from '../documents/landDocumentRules';
 import { isUploadReady, LandDocumentUploadFields } from '../documents/LandDocumentUploadFields';
 
 export interface ReviewEvidenceActions {
-  /** Each resolves once the refreshed case is stored; a rejection is reported by the caller. */
   upload: (input: LandReviewUploadInput) => Promise<unknown>;
   cite: (input: LandReviewCiteInput) => Promise<unknown>;
   uncite: (documentId: string) => Promise<unknown>;
-  /** Which check (by key) has an evidence request in flight. */
   busyKey: string | null;
-  /**
-   * The reviewer's own name, to tell their citations from Sureground staff's: the
-   * case only says who cited a document by name. Null when unknown, in which
-   * case Remove is offered and the API refuses anything not theirs.
-   */
+  /** Tells their citations from staff's, as the case names citers only. Null offers Remove and the API refuses anything not theirs. */
 }
 
 type Mode = 'idle' | 'upload' | 'cite';
 
-/**
- * The evidence a document-backed check rests on, and the reviewer's ways to
- * supply it: upload their own file (e.g. a registry search report) cited on
- * the check, or cite a document already on the property.
- */
 export const ReviewCheckEvidence = ({
   check,
   documents,

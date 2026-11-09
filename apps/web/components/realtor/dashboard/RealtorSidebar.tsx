@@ -29,7 +29,6 @@ interface NavItem {
   icon: React.ElementType;
 }
 
-/** Nav items whose destination is entirely Pro-gated (see the Realtor/Owner gating extension). */
 const PRO_GATED_ROUTES = new Set<string>([ROUTES.REALTOR_COMMISSIONS]);
 
 export const navItems: NavItem[] = [
@@ -51,13 +50,9 @@ export const navItems: NavItem[] = [
   { label: 'Verification', href: ROUTES.REALTOR_VERIFICATION, icon: BadgeCheck },
 ];
 
-/** Picks items by route, so a group can never drift from its label as items are added. */
 const pick = (...hrefs: string[]) =>
   hrefs.flatMap((href) => navItems.filter((item) => item.href === href));
 
-// Groups follow a realtor's work: winning business, closing deals and getting
-// paid, records, and their professional standing (verification is a priority
-// for a realtor, so it sits with their profile rather than under settings).
 const baseNavGroups = [
   { label: 'Overview', items: pick(ROUTES.REALTOR_DASHBOARD) },
   {

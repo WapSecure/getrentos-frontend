@@ -1,9 +1,4 @@
-/**
- * Pure rules of a developer plot sale as the buyer's screens need them. Each
- * one mirrors the backend (`domain/payment-schedule.ts`, `domain/purchase-rules.ts`
- * and the milestone services) so what the screen promises is what the API does;
- * the API stays the authority and its error message is always surfaced.
- */
+// Mirrors the backend (domain/payment-schedule.ts, domain/purchase-rules.ts, the milestone services); the API stays the authority.
 import type {
   LandInstallment,
   LandMilestone,
@@ -20,7 +15,6 @@ const BPS = 10_000;
 export const applyBps = (amount: number, bps: number): number =>
   Math.floor((amount * bps + BPS / 2) / BPS);
 
-/** 250 → "2.5%", 1000 → "10%". */
 export const bpsToPercent = (bps: number): string => {
   const pct = bps / 100;
   return `${Number.isInteger(pct) ? pct : pct.toFixed(2).replace(/0+$/, '')}%`;
@@ -36,13 +30,7 @@ export interface PlotQuote {
   durationMonths: number;
 }
 
-/**
- * What a plan costs on a given plot, exactly as the API prices a new purchase:
- * the uplift applies only to installment plans, the deposit is a share of the
- * contract price and every fee is due with it, and an outright plan is all due
- * at once. The monthly figure is the regular installment (any remainder lands
- * on the last one).
- */
+/** As the API prices a purchase: uplift only on installment plans; the deposit is a share of the contract price with every fee due with it; outright is all due at once; the last installment takes any remainder. */
 export const quotePlot = (
   plotPrice: number,
   feesTotal: number,
@@ -71,15 +59,11 @@ export const quotePlot = (
 
 export interface Countdown {
   expired: boolean;
-  /** Milliseconds left, never negative. */
   remainingMs: number;
-  /** "2h 14m", "14m 05s", "Expired". */
   label: string;
-  /** Under an hour left. */
   urgent: boolean;
 }
 
-/** Time left on a reservation hold. */
 export const countdownTo = (expiresAt: string, now: number = Date.now()): Countdown => {
   const remainingMs = Math.max(0, new Date(expiresAt).getTime() - now);
   if (!Number.isFinite(remainingMs) || remainingMs <= 0) {
@@ -110,19 +94,14 @@ export interface ScheduleSummary {
   lateFees: number;
   /** Still owed across the schedule, late fees included. */
   remaining: number;
-  /** The installment the Pay button settles. */
   nextInstallmentId?: string;
-  /** Paid share of the schedule's principal, 0-100. */
+  /** Paid share of the principal, 0-100. */
   percentPaid: number;
 }
 
 const isSettled = (i: LandInstallment) => i.status === 'PAID' || i.status === 'WAIVED';
 
-/**
- * Totals for a payment schedule. The next one due is the API's `nextDue` when
- * given, else the earliest unsettled installment (which is what the API pays
- * when no installment is named).
- */
+/** Next due is the API's `nextDue`, else the earliest unsettled installment (what the API pays when none is named). */
 export const summariseSchedule = (
   installments: LandInstallment[],
   nextDue?: LandNextDue | null
@@ -146,17 +125,14 @@ export const summariseSchedule = (
   };
 };
 
-/** Statuses in which an installment can be paid. */
 export const PAYABLE_PURCHASE_STATUSES: LandPurchaseStatus[] = [
   'PENDING_DEPOSIT',
   'ACTIVE',
   'DEFAULTED',
 ];
 
-/** Statuses in which the buyer may cancel. */
 export const CANCELLABLE_PURCHASE_STATUSES: LandPurchaseStatus[] = ['PENDING_DEPOSIT', 'ACTIVE'];
 
-/** Statuses in which the buyer may confirm or dispute a conveyance step. */
 export const CONFIRMABLE_PURCHASE_STATUSES: LandPurchaseStatus[] = [
   'ACTIVE',
   'PAID_IN_FULL',
@@ -164,20 +140,16 @@ export const CONFIRMABLE_PURCHASE_STATUSES: LandPurchaseStatus[] = [
 ];
 
 export interface RefundPreview {
-  /** What was paid towards the price (late fees excluded). */
+  /** Paid towards the price, late fees excluded. */
   principalPaid: number;
   /** Late fees paid: kept, never refunded. */
   lateFeesPaid: number;
-  /** The plan's forfeiture on the principal paid. */
   charge: number;
   refund: number;
   chargeBps: number;
 }
 
-/**
- * What cancelling now would refund: everything paid less the plan's
- * forfeiture charge, with paid late fees kept by the developer.
- */
+/** Everything paid less the forfeiture charge; paid late fees are kept by the developer. */
 export const refundPreview = (
   purchase: Pick<LandPurchaseDetail, 'amountPaid' | 'installments' | 'terms'>
 ): RefundPreview => {
@@ -200,16 +172,10 @@ const SATISFIED = new Set(['CONFIRMED', 'WAIVED']);
 export interface MilestoneAction {
   canConfirm: boolean;
   canDispute: boolean;
-  /** Earlier steps that must be confirmed first. */
   blockedBy: string[];
 }
 
-/**
- * Whether the buyer can act on a step. Only a DELIVERED step can be confirmed
- * or disputed, and confirmations go in order: on a developer sale every
- * earlier step must be satisfied; on a resale only the earlier required ones
- * (`requiredOnly`).
- */
+/** Only a DELIVERED step can be acted on, in order: every earlier step on a developer sale, only earlier required ones on a resale. */
 export const milestoneAction = (
   milestones: LandMilestone[],
   milestone: LandMilestone,
@@ -233,7 +199,6 @@ export const milestoneAction = (
   };
 };
 
-/** Tailwind classes for a plot's status, used on the grid, the map legend and badges. */
 export const PLOT_STATUS_STYLES: Record<
   LandPlotStatus,
   { cell: string; swatch: string; hex: string }
@@ -273,12 +238,7 @@ export const PLOT_STATUS_STYLES: Record<
 export const plotLabel = (plot: { plotNumber: string; block?: string }) =>
   plot.block ? `Block ${plot.block}, plot ${plot.plotNumber}` : `Plot ${plot.plotNumber}`;
 
-/**
- * The next payment as the lines it is made of, so a late fee is never folded
- * into one number: "Land payment ₦X", "Late fee ₦Y". Only when the instalment
- * is untouched and the lines add up to what is due; otherwise undefined and
- * the pay dialog shows the single amount.
- */
+/** Split so a late fee is never folded into one number; only when the instalment is untouched and the lines add up to what is due. */
 export function nextDueParts(
   nextDue: Pick<LandNextDue, 'installmentId' | 'amount'> | null | undefined,
   installments: Pick<LandInstallment, 'id' | 'amount' | 'amountPaid' | 'lateFee'>[]

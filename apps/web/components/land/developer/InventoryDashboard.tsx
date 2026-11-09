@@ -27,7 +27,6 @@ const Figure = ({ label, value, note }: { label: string; value: string; note?: s
   </Card>
 );
 
-/** Plots by status, sell-through, inventory value and what buyers owe. */
 export const InventoryDashboard = ({ propertyId }: { propertyId: string }) => {
   const { data, isLoading, error } = useQuery({
     queryKey: landDeveloperKeys.dashboard(propertyId),

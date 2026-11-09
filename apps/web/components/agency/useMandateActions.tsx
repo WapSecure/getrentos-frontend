@@ -8,24 +8,8 @@ import { mandateKeys } from '@/lib/queryKeys';
 import * as mandateService from '@/services/mandateService';
 import type { ManagementMandateDto } from '@/services/mandateService';
 
-/**
- * Every lifecycle move a screen can make on an engagement, in one place.
- *
- * The list and the detail page offer the same actions — a manager who can pause
- * an engagement from the list can pause it from its own page — so the mutation,
- * the reason prompts and the cache invalidation live here rather than twice. The
- * only thing a caller decides is *which* actions to show, and it decides that
- * from the API's `permissions`, never from the status.
- *
- * The reason text is deliberately enforced client-side as well as server-side.
- * The server requires ten characters because a second person may have to decide
- * on the reason; asking for it up front is cheaper than a round trip that fails.
- */
-
-/** Actions that end or pause an engagement, each needing a reason on the record. */
 export type ReasonAction = 'notice' | 'terminate' | 'suspend' | 'request-termination';
 
-/** Actions that need nothing said about them beyond the fact of doing them. */
 export type SimpleAction = 'submit' | 'sign' | 'resume' | 'handover';
 
 export type MandateAction = ReasonAction | SimpleAction;
@@ -101,8 +85,7 @@ export function useMandateActions() {
         case 'submit':
           return unwrap(service.submit(mandate.id));
         case 'sign':
-          // The side is inferred from who is calling, so the UI cannot sign for
-          // the other party even if it tried.
+          // The server infers the side from the caller, so the UI can't sign for the other party.
           return unwrap(service.sign(mandate.id));
         case 'notice':
           return unwrap(service.serveNotice(mandate.id));
@@ -120,9 +103,7 @@ export function useMandateActions() {
     },
     onSuccess: (result, input) => {
       invalidateMandate(queryClient, input.mandate.id);
-      // An action can move the record, so the row the caller is looking at must
-      // be refetched too — otherwise a detail page keeps showing the old status
-      // while the list behind it has moved on.
+      // An action can move the record, so the detail query is refetched too, not just the list.
       if (isDto(result)) {
         queryClient.setQueryData(mandateKeys.one(input.mandate.id), result);
       }
@@ -132,17 +113,13 @@ export function useMandateActions() {
   });
 
   return {
-    /** The mutation, so a caller can disable buttons while one is in flight. */
     act,
-    /** Run an action that needs nothing said about it. */
     runSimple: (mandate: ManagementMandateDto, action: SimpleAction) =>
       act.mutate({ mandate, action }),
-    /** Open the reason prompt for an action that needs one. */
     askReason: (mandate: ManagementMandateDto, action: ReasonAction) => {
       setReason('');
       setPending({ mandate, action });
     },
-    /** The prompt itself, or null. Render it once inside the caller's tree. */
     dialog: pending ? (
       <ConfirmDialog
         open
@@ -173,7 +150,6 @@ export function useMandateActions() {
   };
 }
 
-/** Every cache a lifecycle move can invalidate, for one engagement. */
 function invalidateMandate(queryClient: ReturnType<typeof useQueryClient>, id: string) {
   for (const key of [
     mandateKeys.managing,
@@ -185,15 +161,7 @@ function invalidateMandate(queryClient: ReturnType<typeof useQueryClient>, id: s
   }
 }
 
-/**
- * `requestTermination` answers with the request, not the mandate, while every
- * other action answers with the mandate. Only the latter is safe to write into
- * the mandate cache.
- *
- * The test is on fields only a mandate carries. `id` and `status` would not do
- * it: a termination request has both, so keying on those would write a request
- * into the mandate cache and the page would render it as an engagement.
- */
+// `requestTermination` answers with the request, not the mandate; test on mandate-only fields, since a request also has `id` and `status`.
 function isDto(result: unknown): result is ManagementMandateDto {
   return Boolean(
     result &&

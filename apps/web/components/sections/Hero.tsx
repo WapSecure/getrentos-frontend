@@ -2,10 +2,7 @@ import { ArrowRight, Shield, Lock, FileCheck, Eye } from 'lucide-react';
 import { LinkButton } from './primitives';
 import { ROUTES } from '@/lib/constants/auth';
 
-/**
- * Only things the platform actually does. Each chip stays at "what happens", not
- * a grade or a licence ("bank-grade", "regulated") that nobody has awarded us.
- */
+// No grade or licence claims ("bank-grade", "regulated") that nobody has awarded.
 const trustItems = [
   { icon: Shield, text: 'IDENTITY VERIFICATION' },
   { icon: Lock, text: 'PROTECTED PAYMENTS' },

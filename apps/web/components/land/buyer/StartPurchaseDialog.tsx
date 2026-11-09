@@ -24,11 +24,7 @@ import { TrustLabelsList } from '../market/TrustLabelsList';
 import { PaymentPlanCard } from './PaymentPlanCard';
 import { countdownTo, plotLabel, quotePlot } from './landSaleLogic';
 
-/**
- * Turns a held plot into a purchase on one of the estate's active plans. The
- * contract freezes the plan and fees at this moment; the buyer then pays the
- * deposit from the purchase page.
- */
+// The contract freezes the plan and fees at this moment.
 export const StartPurchaseDialog = ({
   reservation,
   onClose,
@@ -49,7 +45,7 @@ export const StartPurchaseDialog = ({
   });
   const plans = (layout.data?.paymentPlans ?? []).filter((p) => p.active);
   const chosen = plans.find((p) => p.id === planId) ?? null;
-  // What was not verified on the estate's land: the buyer must accept it (US-03).
+  // What was not verified on the estate's land: the buyer must accept it.
   const notVerified = layout.data?.notVerified ?? [];
   const needsAcceptance = notVerified.length > 0 && !accepted;
 

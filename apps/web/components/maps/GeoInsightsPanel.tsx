@@ -126,7 +126,6 @@ export const GeoInsightsPanel = ({
         </div>
       ) : (
         <>
-          {/* Map */}
           <PropertyMap
             center={{ latitude: insights.latitude ?? 0, longitude: insights.longitude ?? 0 }}
             markers={marker}
@@ -134,7 +133,6 @@ export const GeoInsightsPanel = ({
             openMarkerId={insights.listingId}
           />
 
-          {/* Pricing + walkability */}
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="rounded-2xl border border-border bg-card p-4">
               <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
@@ -189,7 +187,6 @@ export const GeoInsightsPanel = ({
             )}
           </div>
 
-          {/* AI summary */}
           {insights.aiSummary && (
             <div className="rounded-2xl border border-primary/20 bg-accent/40 p-4">
               <div className="flex items-center gap-2 text-xs font-semibold text-primary">
@@ -200,7 +197,6 @@ export const GeoInsightsPanel = ({
             </div>
           )}
 
-          {/* Travel times */}
           <div className="rounded-2xl border border-border bg-card p-4">
             <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
               <Car className="h-4 w-4" />
@@ -259,7 +255,6 @@ export const GeoInsightsPanel = ({
             )}
           </div>
 
-          {/* Neighborhood */}
           {insights.neighborhood && Object.keys(insights.neighborhood).length > 0 && (
             <div className="rounded-2xl border border-border bg-card p-4">
               <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">

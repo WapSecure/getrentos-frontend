@@ -2,9 +2,8 @@ import { authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
 import type { PayoutSentTo } from '@sureground/shared';
 
 /**
- * Sale-proceeds payouts for anyone who sells on the marketplace — Property
- * Owners, Realtors and Agents all sell through the same seller API, so they
- * share one payout account and one list of payouts.
+ * Owners, Realtors and Agents share the seller API, so they share one payout account and payout
+ * list.
  */
 export interface SellerPayoutAccount {
   bankCode: string;
@@ -12,7 +11,7 @@ export interface SellerPayoutAccount {
   accountNumber: string;
   accountName: string;
   verified: boolean;
-  /** While a recent change is on hold; not sent by the API yet, shown once it is. */
+  /** Not sent by the API yet; shown once it is. */
   payoutHoldUntil?: string | null;
 }
 
@@ -25,7 +24,7 @@ export interface SellerSalePayout {
   paidAt?: string;
   propertyTitle?: string;
   releasedAt?: string;
-  /** Where it went (bank + last four digits), only when the API can prove it. */
+  /** Bank + last four digits, only when the API can prove it. */
   sentTo?: PayoutSentTo | null;
 }
 

@@ -24,7 +24,6 @@ import { LAND_DISPUTE_KINDS, type LandDispute } from '@/types/landDispute';
 const LIVE = new Set(['OPEN', 'UNDER_INVESTIGATION', 'APPEALED']);
 const words = (value: string) => value.replace(/_/g, ' ').toLowerCase();
 
-/** One land dispute, as a party sees it: add evidence while it is live, appeal once when decided. */
 export default function LandDisputePage() {
   const { disputeId } = useParams<{ disputeId: string }>();
   const queryClient = useQueryClient();

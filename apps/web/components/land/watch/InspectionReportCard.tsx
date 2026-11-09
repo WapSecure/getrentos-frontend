@@ -13,22 +13,12 @@ import {
 import { formatDate } from '@/lib/format';
 
 interface InspectionReportCardProps {
-  /** An inspection as its owner sees it (LandInspectionService.ownerView). */
   inspection: LandWatchInspection;
-  /** What the owner can do with it (reinspect, ask a question), shown under the report. */
   actions?: ReactNode;
   className?: string;
 }
 
-/**
- * One field inspection for the person who asked for it: who went and when,
- * what they found at the boundary, and the photos with when and where each
- * was taken. Used by Land Watch and by a buyer's pre-purchase inspections;
- * each passes its own actions.
- *
- * The report appears only once Sureground has accepted it; until then the card
- * shows where the inspection stands.
- */
+// The report shows only once Sureground has accepted it.
 export const InspectionReportCard = ({
   inspection: i,
   actions,

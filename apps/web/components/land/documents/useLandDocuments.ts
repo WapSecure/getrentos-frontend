@@ -7,13 +7,9 @@ import { landKeys } from '@/lib/queryKeys';
 import { landDeveloperService } from '@/services/landDeveloperService';
 import type { LandDocument, LandDocumentUploadInput } from '@/types/landDocument';
 
-/**
- * Preview links are signed for 15 minutes; refetching well inside that keeps
- * "Preview" working on a page left open.
- */
+// Preview links are signed for 15 minutes; refetch well inside that.
 const DOCUMENTS_STALE_MS = 5 * 60_000;
 
-/** A land property's documents, for the owner (or a mandate holder). */
 export const useLandDocuments = (propertyId: string | null | undefined) =>
   useQuery({
     queryKey: landDeveloperKeys.documents(propertyId ?? ''),
@@ -23,10 +19,6 @@ export const useLandDocuments = (propertyId: string | null | undefined) =>
     refetchInterval: 10 * 60_000,
   });
 
-/**
- * Everything a new or removed document changes: the list itself, and the
- * parcel's submission blockers ("Upload the title documents…").
- */
 const useRefreshAfterDocumentChange = (propertyId: string) => {
   const queryClient = useQueryClient();
   return () => {
@@ -43,7 +35,6 @@ export const useUploadLandDocument = (propertyId: string) => {
     mutationFn: (input: LandDocumentUploadInput) =>
       unwrap(landDeveloperService.uploadDocument(propertyId, input)),
     onSuccess: (document) => {
-      // Shown straight away (a picker selects it), then refreshed from the API.
       queryClient.setQueryData<LandDocument[]>(
         landDeveloperKeys.documents(propertyId),
         (current) => [document, ...(current ?? []).filter((d) => d.id !== document.id)]
@@ -62,7 +53,6 @@ export const useDeleteLandDocument = (propertyId: string) => {
   });
 };
 
-/** Whatever a document is relied on by, as short labels. */
 export const usageLabels = (
   document: LandDocument,
   checkLabel: (key: string) => string = (key) => key.toLowerCase().replace(/_/g, ' ')

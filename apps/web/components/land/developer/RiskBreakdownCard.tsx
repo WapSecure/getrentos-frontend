@@ -20,13 +20,11 @@ const BAND = {
   HIGH: { label: 'High risk', variant: 'danger', bar: 'bg-destructive' },
 } as const;
 
-/** The parcel's 0-100 risk score, what drives it, and the assurance tier it has earned. */
 export const RiskBreakdownCard = ({
   propertyId,
   compact = false,
 }: {
   propertyId: string;
-  /** A one-line summary for the portfolio view. */
   compact?: boolean;
 }) => {
   const { data, isLoading, error } = useQuery({

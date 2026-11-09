@@ -37,7 +37,6 @@ const PAGE_SIZE = 20;
 const formatWhen = (iso: string) =>
   new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
 
-/** The API calls a request "pending"; the badges call it "requested". */
 const badgeFor = (status: OwnerViewing['status']) =>
   viewingRequestStatusBadges[status === 'pending' ? 'requested' : status];
 
@@ -47,7 +46,6 @@ export default function OwnerViewingsPage() {
   const [filter, setFilter] = useState<(typeof FILTERS)[number]['value']>('requested');
   const [rescheduling, setRescheduling] = useState<OwnerViewing | null>(null);
   const [newTime, setNewTime] = useState('');
-  // When the page opened; close enough to "now" for offering "Mark as done".
   const [openedAt] = useState(() => Date.now());
 
   const query = useQuery({
@@ -183,7 +181,6 @@ export default function OwnerViewingsPage() {
 
                   {viewing.status === 'pending' && (
                     <div className="mt-3 flex flex-wrap gap-2">
-                      {/* A time already gone can't be confirmed; offer another. */}
                       {!past && (
                         <Button
                           variant="primary"

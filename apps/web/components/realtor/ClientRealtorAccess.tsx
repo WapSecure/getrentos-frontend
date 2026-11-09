@@ -20,7 +20,6 @@ import { realtorService } from '@/services/realtorService';
 
 const PAGE_SIZE = 10;
 
-/** `showHeader={false}` when the page already gives its own heading. */
 export function ClientRealtorAccess({ showHeader = true }: { showHeader?: boolean } = {}) {
   const queryClient = useQueryClient();
   const toast = useToast();

@@ -1,6 +1,5 @@
 import { Clock, Zap } from 'lucide-react';
 
-/** Shown instead of the Flex sign-up while Flex isn't taking new plans. */
 export const FlexPausedCard = () => (
   <div className="overflow-hidden rounded-[1.75rem] border border-border/70 bg-card shadow-sm">
     <div className="p-6 sm:p-7">

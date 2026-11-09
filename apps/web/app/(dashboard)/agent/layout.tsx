@@ -26,7 +26,6 @@ export type AgentUser = {
 
 const AgentUserContext = createContext<AgentUser | null>(null);
 
-/** Returns the signed-in agent's profile, populated once by the agent layout's auth check. */
 export const useAgentUser = () => useContext(AgentUserContext);
 
 export default function AgentLayout({ children }: { children: ReactNode }) {

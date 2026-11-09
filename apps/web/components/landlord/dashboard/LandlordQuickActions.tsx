@@ -36,9 +36,7 @@ export const LandlordQuickActions = () => {
   return (
     <Card>
       <CardHeader className="pb-2">
-        {/* Sits beside the revenue chart and activity feed, which are both h2,
-            so it must match: at h3 a screen reader announces quick actions as
-            a subsection of "Recent activity", which it is not. */}
+        {/* h2 to match the revenue chart and activity feed: at h3 a screen reader nests it under "Recent activity". */}
         <CardTitle as="h2">Quick actions</CardTitle>
         <CardDescription>Your everyday tasks, close at hand.</CardDescription>
       </CardHeader>

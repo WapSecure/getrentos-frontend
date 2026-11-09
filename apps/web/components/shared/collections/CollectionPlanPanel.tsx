@@ -18,23 +18,15 @@ const STAGE: Record<CollectionStage, { label: string; variant: BadgeVariant }> =
   formal_demand: { label: 'Formal demand', variant: 'danger' },
 };
 
-/** Rent arrears across the landlord's properties, or dues at one estate. */
 export type CollectionPlanSource = { kind: 'rent' } | { kind: 'dues'; estateId: string };
 
-/**
- * "Collection plan": who to contact first, what step fits each person, an
- * instalment split where it helps, and a message to send. Nothing is sent
- * from here; the person copies and sends it themselves.
- */
 export function CollectionPlanPanel({
   source,
   noticesHref,
 }: {
   source: CollectionPlanSource;
-  /** Rent only: where the notice ladder lives. */
   noticesHref?: string;
 }) {
-  // The tenant's or household's language, for the messages; the plan itself stays in English.
   const [language, setLanguage] = useState<ReplyLanguage>('en');
   const { data, isLoading, isError, isFetching } = useQuery({
     queryKey:

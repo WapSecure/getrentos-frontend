@@ -42,7 +42,6 @@ interface PlotInventoryProps {
   notify: Notify;
 }
 
-/** The layout's plots: filter, search, add, import, edit, withhold and release. */
 export const PlotInventory = ({ propertyId, layoutStatus, notify }: PlotInventoryProps) => {
   const queryClient = useQueryClient();
   const [status, setStatus] = useState<LandPlotStatus | undefined>(undefined);

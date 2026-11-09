@@ -69,8 +69,7 @@ export const OwnerPropertyCard = ({
   const verification = verificationConfig[property.verificationStatus];
   const VerificationIcon = verification.icon;
   const purchasePrice = property.purchasePrice ?? 0;
-  // A property the owner has not valued has no appreciation to show. Computing it
-  // anyway produced NaN%, and the card printed a confident ₦0.
+  // No valuation, no appreciation: computing it anyway printed NaN% and ₦0.
   const appreciation =
     property.estimatedValue != null && purchasePrice > 0
       ? ((property.estimatedValue - purchasePrice) / purchasePrice) * 100

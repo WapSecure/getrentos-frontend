@@ -48,8 +48,7 @@ export default function OwnerMessagesPage() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchQuery);
-      // Only a new search closes the open conversation; the first run on load
-      // must not undo one opened from a notification.
+      // The first run on load must not close a conversation opened from a notification.
       if (lastSearch.current !== searchQuery) {
         lastSearch.current = searchQuery;
         setPage(1);
@@ -101,7 +100,6 @@ export default function OwnerMessagesPage() {
     if (conv && conv.unreadCount > 0) markReadMutation.mutate(id);
   };
 
-  // Opened from a message notification.
   useOpenConversationFromUrl(data !== undefined, handleSelect);
 
   const handleSend = async (text: string) => {

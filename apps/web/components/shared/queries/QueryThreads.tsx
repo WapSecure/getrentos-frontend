@@ -37,7 +37,6 @@ const lagos = (iso: string) =>
     timeStyle: 'short',
   });
 
-/** How the reply promise stands, in words. */
 const slaText = (q: QuerySummary) => {
   if (q.firstResponseAt) {
     const h = q.answeredInHours ?? 0;
@@ -160,7 +159,6 @@ const ThreadView = ({ id, onBack }: { id: string; onBack: () => void }) => {
     },
     onError,
   });
-  // A drafted reply from the property's records, for the manager side.
   const [draft, setDraft] = useState<OwnerQueryDraft | null>(null);
   const drafting = useMutation({
     mutationFn: () => unwrap(ownerQueryService.draftReply(id)),
@@ -318,11 +316,6 @@ const ThreadView = ({ id, onBack }: { id: string; onBack: () => void }) => {
   );
 };
 
-/**
- * Questions between an owner and their manager, as threads on the engagement.
- * Owners ask and follow up; a firm's staff answer for the properties they
- * manage. The first-reply promise is shown on every thread.
- */
 export const QueryThreads = ({ as }: { as: 'owner' | 'manager' }) => {
   const [openId, setOpenId] = useState<string | null>(null);
   const [asking, setAsking] = useState(false);

@@ -53,7 +53,6 @@ export const OwnerLandWorkspace = () => {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const searchParams = useSearchParams();
-  // `?property=` opens a parcel directly, e.g. when coming back from its layout or sales.
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(() =>
     searchParams.get('property')
   );
@@ -122,8 +121,7 @@ export const OwnerLandWorkspace = () => {
       try {
         await unwrap(landService.upsertParcel(property.id, input.parcel));
       } catch {
-        // Keep the registered LAND property discoverable in the private workspace
-        // so the owner can complete the parcel record instead of creating a duplicate.
+        // Keep the registered LAND property so the owner completes it rather than creating a duplicate.
         return { property, parcelSaved: false, failedProofCount: 0, submitted: false };
       }
 
@@ -133,8 +131,6 @@ export const OwnerLandWorkspace = () => {
           ])
         : [];
       const failedProofCount = proofResult.filter((result) => result.status === 'rejected').length;
-      // A parcel registered complete goes straight into review. If it is not
-      // complete yet, the review panel lists what is missing instead.
       let submitted = false;
       if (input.ownershipProof && failedProofCount === 0) {
         try {
@@ -326,7 +322,7 @@ export const OwnerLandWorkspace = () => {
                 record={selected}
                 isSaving={saveParcel.isPending}
                 onSave={async (parcel) => {
-                  // The mutation's onError already tells the owner what went wrong.
+                  // onError already tells the owner what went wrong.
                   await saveParcel
                     .mutateAsync({ propertyId: selected.property.id, parcel })
                     .catch(() => undefined);

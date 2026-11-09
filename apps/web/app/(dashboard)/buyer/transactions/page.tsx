@@ -54,7 +54,6 @@ export default function BuyerTransactionsPage() {
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: buyerKeys.transactions });
 
-  // Which company takes the deposit, and why the last one could not.
   const providers = usePaymentProviders();
   const [providerError, setProviderError] = useState<string | null>(null);
   const depositMutation = useMutation({
@@ -62,17 +61,14 @@ export default function BuyerTransactionsPage() {
       unwrap(buyerService.depositTransaction(id, provider)),
     onMutate: () => setProviderError(null),
     onSuccess: (result) => {
-      // The deposit is paid on Paystack's page. The API reuses an open checkout,
-      // so a second click lands on the same one rather than a second charge.
+      // The API reuses an open checkout, so a second click never creates a second charge.
       if (result.authorizationUrl) {
         window.location.assign(result.authorizationUrl);
         return;
       }
-      // No gateway configured (development): the API recorded it already.
       invalidate();
     },
     onError: (reason: Error, { provider }) => {
-      // That company cannot take it right now: say so by the button, with the other one picked.
       const unavailable = providers.recover(reason, provider);
       if (unavailable) setProviderError(unavailable);
       else toast.show(reason.message, 'error');

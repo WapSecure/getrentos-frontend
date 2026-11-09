@@ -5,11 +5,6 @@ export const alt = `${SITE_NAME}: Rent, buy and manage property`;
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
-/**
- * Default OpenGraph / social card image, generated at build time.
- * Reflects the platform's primary brand colour and clean, Apple-inspired
- * visual language used across the app.
- */
 export default function OpengraphImage() {
   return new ImageResponse(
     <div
@@ -36,7 +31,6 @@ export default function OpengraphImage() {
             justifyContent: 'center',
           }}
         >
-          {/* The Sureground mark: an open roof over a solid ground line. */}
           <svg width="34" height="34" viewBox="0 0 128 128">
             <g
               fill="none"

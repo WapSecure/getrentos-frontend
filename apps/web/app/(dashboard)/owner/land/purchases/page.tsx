@@ -10,7 +10,6 @@ const ScopedSalesDesk = () => {
   return <SalesDesk key={property ?? 'all'} initialPropertyId={property} />;
 };
 
-/** The plot sales desk across the owner's estates (`?property=` scopes it to one). */
 export default function OwnerLandPurchasesPage() {
   return (
     <Suspense fallback={<Skeleton className="h-96 rounded-2xl" />}>

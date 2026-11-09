@@ -33,8 +33,7 @@ export const ListingCard = ({
   isUpdating = false,
 }: ListingCardProps) => {
   const status = statusConfig[listing.status];
-  // Signed URLs expire and can fail, so fall back to the placeholder rather
-  // than showing a broken image.
+  // Signed URLs expire, so fall back to the placeholder.
   const [coverFailed, setCoverFailed] = useState(false);
   const showCover = Boolean(listing.coverImage) && !coverFailed;
 

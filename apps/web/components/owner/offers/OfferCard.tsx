@@ -84,8 +84,6 @@ export const OfferCard = ({ offer, onClick, delay = 0 }: OfferCardProps) => {
 
       <div className="mt-3 flex items-center justify-between gap-3 border-t border-border pt-3">
         <p className="text-xs text-muted-foreground">Submitted {formatDate(offer.submittedAt)}</p>
-        {/* The whole card opens the offer, but a card alone does not say so:
-            the button is the visible way in, and names the decision waiting. */}
         <Button
           variant={needsOwner ? 'primary' : 'outline'}
           size="sm"

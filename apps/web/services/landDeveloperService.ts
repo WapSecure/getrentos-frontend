@@ -48,15 +48,7 @@ const saveBlob = (blob: Blob, filename: string) => {
   window.URL.revokeObjectURL(url);
 };
 
-/**
- * The seller side of land: a developer's estate layout (plots, payment plans,
- * inventory), the plot sales desk, single-parcel resale conveyance, and the
- * insight / chain-of-title endpoints for one land property.
- */
 export const landDeveloperService = {
-  // ─── Layout ────────────────────────────────────────────────────────────────
-
-  /** Every layout the caller can sell from: owned outright or under a listing mandate. */
   listMyLayouts: () => safeCall(() => authFetch<OwnerLandLayoutSummary[]>('/owner/land/layouts')),
 
   /** 404 when the parcel has no layout yet; pair with `unwrapOptional`. */
@@ -78,8 +70,6 @@ export const landDeveloperService = {
   getDashboard: (propertyId: string) =>
     safeCall(() => authFetch<LandInventoryDashboard>(`${layoutPath(propertyId)}/dashboard`)),
 
-  // ─── Plots ─────────────────────────────────────────────────────────────────
-
   listPlots: (propertyId: string, params: { status?: LandPlotStatus; block?: string } = {}) =>
     safeCall(() =>
       authFetch<LandPlot[]>(
@@ -91,8 +81,8 @@ export const landDeveloperService = {
     safeCall(() => authFetch<LandPlot>(`${layoutPath(propertyId)}/plots`, json('POST', input))),
 
   /**
-   * All-or-nothing. A rejection carries `errors: [{ index, plotNumber, errors }]`
-   * in the error details when the API forwards it.
+   * All-or-nothing; a rejection carries `errors: [{ index, plotNumber, errors }]` in the error
+   * details.
    */
   importPlots: (propertyId: string, rows: LandPlotInput[]) =>
     safeCall(() =>
@@ -117,8 +107,6 @@ export const landDeveloperService = {
       authFetch<LandPlot>(`${layoutPath(propertyId)}/plots/${plotId}/release`, json('POST'))
     ),
 
-  // ─── Payment plans ─────────────────────────────────────────────────────────
-
   createPlan: (propertyId: string, input: LandPaymentPlanInput) =>
     safeCall(() =>
       authFetch<LandPaymentPlan>(`${layoutPath(propertyId)}/plans`, json('POST', input))
@@ -128,8 +116,6 @@ export const landDeveloperService = {
     safeCall(() =>
       authFetch<LandPaymentPlan>(`${layoutPath(propertyId)}/plans/${planId}`, json('PATCH', input))
     ),
-
-  // ─── Sales desk ────────────────────────────────────────────────────────────
 
   listPurchases: (params: SellerLandPurchaseListParams = {}) =>
     safeCall(() =>
@@ -160,7 +146,6 @@ export const landDeveloperService = {
       )
     ),
 
-  /** Record title perfection progress: submitted, or approved with a reference. */
   updatePerfectionStep: (
     purchaseId: string,
     key: string,
@@ -173,7 +158,6 @@ export const landDeveloperService = {
       )
     ),
 
-  /** Mark a condition precedent met (layout approval, plot identified on site). */
   deliverCondition: (
     purchaseId: string,
     key: string,
@@ -200,10 +184,7 @@ export const landDeveloperService = {
       saveBlob(blob, `${reference ?? 'land-purchase'}-${kind}.pdf`);
     }),
 
-  // ─── Resale conveyance ─────────────────────────────────────────────────────
-
   /** 400 for a transaction that is not a land sale. */
-  /** The resale being conveyed: its property (for document pickers), buyer and escrow state. */
   getResale: (txId: string) =>
     safeCall(() => authFetch<LandResaleSummary>(`/owner/land/transactions/${txId}`)),
 
@@ -231,9 +212,7 @@ export const landDeveloperService = {
       )
     ),
 
-  // ─── Property documents ────────────────────────────────────────────────────
-
-  /** Newest first, each with a short-lived preview link and where it is used. */
+  /** Newest first, each with a short-lived preview link. */
   listDocuments: (propertyId: string) =>
     safeCall(() => authFetch<LandDocument[]>(documentsPath(propertyId))),
 
@@ -255,8 +234,6 @@ export const landDeveloperService = {
       })
     ),
 
-  // ─── Insights and chain of title ───────────────────────────────────────────
-
   getSellerAnalytics: (propertyId: string) =>
     safeCall(() =>
       authFetch<LandSellerAnalytics>(`/owner/land/${encodeURIComponent(propertyId)}/analytics`)
@@ -272,7 +249,7 @@ export const landDeveloperService = {
       authFetch<LandTitleEvent[]>(`/owner/land/${encodeURIComponent(propertyId)}/title-history`)
     ),
 
-  /** Returns the whole chain, oldest first, with the new owner entry unverified. */
+  /** The new owner entry comes back unverified. */
   addTitleEvent: (propertyId: string, input: LandTitleEventInput) =>
     safeCall(() =>
       authFetch<LandTitleEvent[]>(

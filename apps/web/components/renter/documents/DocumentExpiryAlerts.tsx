@@ -13,7 +13,6 @@ interface Document {
 interface DocumentExpiryAlertsProps {
   documents: Document[];
   summary?: { expiring: number; expired: number };
-  /** Filters the list down to the documents that need attention. */
   onReview?: () => void;
 }
 

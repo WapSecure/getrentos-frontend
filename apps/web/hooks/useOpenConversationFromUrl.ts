@@ -3,12 +3,6 @@
 import { useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 
-/**
- * Opens the conversation named in `?conversation=<id>`: where a message
- * notification lands. Waits for the page's conversation list (`ready`), opens
- * each id once, and reacts when another notification is clicked while the
- * inbox is already open.
- */
 export function useOpenConversationFromUrl(ready: boolean, open: (conversationId: string) => void) {
   const id = useSearchParams().get('conversation');
   const handled = useRef<string | null>(null);

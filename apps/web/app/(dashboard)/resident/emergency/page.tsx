@@ -28,22 +28,7 @@ import {
 import { MusterTallyStrip } from '@/components/estate/emergency/MusterTallyStrip';
 import type { MusterSelfAnswer } from '@/types/estate';
 
-/**
- * The roll call, from a household's point of view.
- *
- * Three design decisions are worth stating, because each is a place this screen
- * could have been built the other way:
- *
- *  - The estate's numbers are shown, its roll is not. "9 of 12 accounted for" is
- *    genuinely reassuring and identifies nobody; a list of names, units and who
- *    was home in the middle of the night is the most sensitive thing this estate
- *    produces. The API will not serve it here, and this screen does not ask.
- *  - There is no "not yet accounted for" button. It is the state a household is
- *    in until somebody answers, so offering it would let a roll sit unanswered
- *    with a tick beside it.
- *  - An answer is one tap. The note is offered underneath and is never required:
- *    a household answering in a stairwell should not be filling in a form.
- */
+// Never request the estate's roll here: its names and units are the most sensitive data the estate holds.
 export default function ResidentEmergencyPage() {
   const queryClient = useQueryClient();
   const [selected, setSelected] = useState<MusterSelfAnswer | null>(null);
@@ -51,9 +36,7 @@ export default function ResidentEmergencyPage() {
 
   const { data, isLoading } = useQuery({
     queryKey: estateResidentKeys.emergency,
-    // "Your estate is not calling the roll" arrives as a 200 with an empty body.
-    // `unwrap` would hand react-query an undefined result, which it rejects: so
-    // the calm, ordinary case would render as a broken page.
+    // "Not calling the roll" is a 200 with an empty body; `unwrap` would hand react-query undefined.
     queryFn: () => unwrapOptional(estateResidentService.getMyEmergency(), null),
     refetchInterval: (query) => (query.state.data ? 15_000 : false),
   });
@@ -62,8 +45,7 @@ export default function ResidentEmergencyPage() {
     mutationFn: (input: { state: MusterSelfAnswer; stateNote?: string }) =>
       unwrap(estateResidentService.answerMyRollCall(input)),
     onSuccess: () => {
-      // The banner on the dashboard reads the same key, so answering here
-      // clears it there rather than leaving a stale "you have not answered".
+      // Shares the dashboard banner's key, so answering here clears it.
       queryClient.invalidateQueries({ queryKey: estateResidentKeys.emergency });
       setSelected(null);
       setNote('');
@@ -91,8 +73,6 @@ export default function ResidentEmergencyPage() {
   }
 
   const { muster, myEntries } = data;
-  // The people who live here: the lines this household's answer covers. Visitor
-  // lines are shown, but a marshal answers for them.
   const mine = residentLines(myEntries);
   const visitorEntries = myEntries.filter((entry) => entry.basis !== 'RESIDENT');
   const states = mine.map((entry) => entry.state);
@@ -121,7 +101,6 @@ export default function ResidentEmergencyPage() {
         </div>
       </div>
 
-      {/* The one action this page exists for. */}
       <Card className="p-5">
         <h2 className="font-semibold text-foreground">
           {answered ? 'Is this still right?' : 'Where is your household?'}
@@ -204,7 +183,6 @@ export default function ResidentEmergencyPage() {
         )}
       </Card>
 
-      {/* Your own lines, and the estate's numbers. Never the estate's roll. */}
       <Card className="p-5">
         <h2 className="font-semibold text-foreground">Your household</h2>
         {myEntries.length === 0 ? (
@@ -231,10 +209,6 @@ export default function ResidentEmergencyPage() {
           </div>
         )}
 
-        {/* Visitors your household was admitted are on this roll and this
-            household cannot answer for them, so they are named rather than
-            hidden: a resident who does not see them has no way to tell a marshal
-            that somebody is still inside. */}
         {visitorEntries.length > 0 && (
           <div className="mt-4 pt-3 border-t border-border">
             <p className="text-sm font-medium text-foreground">

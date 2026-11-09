@@ -95,21 +95,15 @@ export function ShortletListingDetail({
   initialListing,
 }: {
   listingId: string;
-  /** Server-rendered listing (ISR) used to hydrate the query instantly. */
   initialListing?: ShortletListing;
 }) {
   const router = useRouter();
   const queryClient = useQueryClient();
-  // The session is only readable on the client. useSyncExternalStore serves the
-  // server snapshot (signed-out) during SSR and the hydration render, then
-  // switches to the real value after hydration commits — so the first
-  // client render matches the server HTML and there is no mismatch (DEF-216).
-  // Mirrors ListingCallToAction on the same pages; avoids setState-in-effect.
+  // The session is client-only: useSyncExternalStore serves the signed-out snapshot during SSR and hydration, so the markup matches.
   const isSignedIn = useSyncExternalStore(subscribeToNothing, isAuthenticated, () => false);
   const wishlist = useShortletWishlist();
   const [bookingOpen, setBookingOpen] = useState(false);
   const [createdBooking, setCreatedBooking] = useState<ShortletBooking | null>(null);
-  // Which company takes the payment, and why the last one could not.
   const providers = usePaymentProviders();
   const [providerError, setProviderError] = useState<string | null>(null);
   const [messageOpen, setMessageOpen] = useState(false);
@@ -117,7 +111,6 @@ export function ShortletListingDetail({
   const [activeImage, setActiveImage] = useState(0);
   const [mediaTab, setMediaTab] = useState<MediaTab>('photos');
 
-  // Record one view/impression per page visit (fire-and-forget).
   const viewRecorded = useRef(false);
   useEffect(() => {
     if (viewRecorded.current || !listingId) return;
@@ -128,7 +121,6 @@ export function ShortletListingDetail({
   const { data: listing, isLoading } = useQuery({
     queryKey: shortletKeys.listing(listingId),
     queryFn: () => unwrap(shortletService.getListing(listingId)),
-    // Hydrate from the ISR-rendered payload; avoid an immediate refetch.
     initialData: initialListing,
     staleTime: 5 * 60_000,
   });
@@ -159,7 +151,6 @@ export function ShortletListingDetail({
       toast.success('Booking request sent: the host will confirm shortly.');
     },
     onError: (reason: Error) => {
-      // An identity gate is explained inside the dialog with a link to verify, not as a passing toast.
       if (!(reason instanceof VerificationRequiredError)) {
         toast.error(reason.message);
       }
@@ -181,7 +172,6 @@ export function ShortletListingDetail({
       toast.success('Payment received: your stay is confirmed.');
     },
     onError: (reason: Error, { provider }) => {
-      // That company cannot take it right now: say so by the button, with the other one picked.
       const unavailable = providers.recover(reason, provider);
       if (unavailable) setProviderError(unavailable);
       else toast.error(reason.message);
@@ -196,9 +186,7 @@ export function ShortletListingDetail({
     setBookingOpen(true);
   };
 
-  // `isError` may be true after a failed background refresh even though the
-  // ISR-rendered `listing` is still present: only treat it as missing when
-  // there is genuinely no listing to show.
+  // `isError` can be true after a failed background refresh while the ISR `listing` is still there; only treat it as missing when there is none.
   if (isLoading) {
     return (
       <div className="mx-auto max-w-6xl px-4 py-8">
@@ -241,7 +229,6 @@ export function ShortletListingDetail({
         ← Back
       </Button>
 
-      {/* Media hero */}
       <div className="overflow-hidden rounded-xl border border-border bg-secondary/40">
         {showTabs && (
           <Tabs
@@ -278,8 +265,7 @@ export function ShortletListingDetail({
               className="aspect-video w-full bg-black"
             />
           ) : (
-            // A pasted YouTube or Vimeo link: that provider's own player, not
-            // a <video> element, which cannot play a web page.
+            // A pasted YouTube or Vimeo link needs that provider's player: a <video> element can't play a web page.
             <iframe
               src={video.embedUrl}
               title={`${listing.title} video tour`}
@@ -290,8 +276,7 @@ export function ShortletListingDetail({
             />
           )
         ) : tab === 'tour' && tour ? (
-          // Only known 360° providers are framed; scripts run, but the page
-          // cannot reach ours.
+          // Only known 360° providers are framed: their scripts run but can't reach our page.
           <iframe
             src={tour.embedUrl}
             title={`${listing.title} 360° tour`}
@@ -370,7 +355,6 @@ export function ShortletListingDetail({
       </div>
 
       <div className="mt-6 grid gap-6 md:grid-cols-3">
-        {/* Left column */}
         <div className="space-y-6 md:col-span-2">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">{listing.title}</h1>
@@ -618,7 +602,6 @@ export function ShortletListingDetail({
           </section>
         </div>
 
-        {/* Right column: booking card */}
         <div className="md:sticky md:top-6 md:self-start">
           <Card className="p-5">
             <p className="text-2xl font-semibold">

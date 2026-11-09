@@ -14,7 +14,6 @@ interface LocationFieldsProps {
   onCountryChange: (country: string) => void;
   onStateChange: (state: string) => void;
   onCityChange?: (city: string) => void;
-  /** Show the City dropdown (defaults to true). */
   showCity?: boolean;
   countryLabel?: string;
   stateLabel?: string;
@@ -22,16 +21,10 @@ interface LocationFieldsProps {
   countryPlaceholder?: string;
   statePlaceholder?: string;
   cityPlaceholder?: string;
-  /** Marks the Country, State (and City) labels as required. */
   required?: boolean;
   className?: string;
 }
 
-/**
- * Country + State + City dropdowns. Country and State are driven by the
- * backend `/geo/locations` reference data; City comes from the location
- * constants so users never type a city name by hand.
- */
 export const LocationFields = ({
   country,
   state,

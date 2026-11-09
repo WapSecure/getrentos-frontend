@@ -2,10 +2,8 @@ import type { ReplyLanguage } from '@/lib/replyLanguage';
 
 export type CollectionStage = 'reminder' | 'instalments' | 'formal_demand';
 
-/** One tenant or household in a collection plan. */
 export interface CollectionDebtor {
   key: string;
-  /** leaseId (rent) or householdId (dues). */
   ref: string;
   label: string;
   owed: string;

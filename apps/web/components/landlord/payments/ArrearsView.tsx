@@ -25,7 +25,6 @@ const PAGE_SIZE = 10;
 const daysOverdue = (dueDate: string) =>
   Math.max(0, Math.floor((Date.now() - new Date(dueDate).getTime()) / MS_PER_DAY));
 
-/** The arrears ladder rung a charge sits on, by how long it has run overdue. */
 const ladderStage = (days: number): { label: string; variant: 'warning' | 'danger' } =>
   days >= 30
     ? { label: 'Seriously overdue', variant: 'danger' }

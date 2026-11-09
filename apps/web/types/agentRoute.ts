@@ -1,4 +1,3 @@
-/** GET /agent/route: the day's visits in a drivable order, worked out by Sureground. */
 export interface AgentRoute {
   date: string;
   stops: {

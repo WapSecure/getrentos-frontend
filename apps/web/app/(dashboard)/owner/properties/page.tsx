@@ -105,7 +105,6 @@ export default function OwnerPropertiesPage() {
   }, [searchQuery]);
 
   const [filter, setFilter] = useState<VerificationFilter>('all');
-  // Reopen the form when the owner comes back from signing in with a draft.
   const [isAddModalOpen, setIsAddModalOpen] = useState(() =>
     hasSessionDraft(ADD_OWNER_PROPERTY_DRAFT_KEY)
   );

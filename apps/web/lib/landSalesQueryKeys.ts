@@ -1,11 +1,6 @@
 import type { BuyerLandPurchaseListParams, PublicLandLayoutListParams } from '@/types/landBuyer';
 import type { LandMarketInsightsParams } from '@/types/landMarket';
 
-/**
- * Query keys for estate sales, land market intelligence and outside reviews.
- * Separate from `lib/queryKeys.ts` so the land-enterprise screens can evolve
- * without touching the shared key map.
- */
 export const landLayoutKeys = {
   all: ['land', 'layouts'] as const,
   list: (params: PublicLandLayoutListParams) => ['land', 'layouts', 'list', params] as const,

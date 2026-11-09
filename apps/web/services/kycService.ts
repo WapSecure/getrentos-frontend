@@ -10,7 +10,7 @@ export interface KycItem {
 export interface IdentityKyc extends KycItem {
   documentType: string;
   selfieUrl?: string;
-  /** 0-1 face-similarity when automatic face matching ran. */
+  /** 0-1 face similarity, when automatic face matching ran. */
   matchScore?: number;
   /** User id or 'AUTO_FACE_MATCH'. */
   verifiedBy?: string;
@@ -30,19 +30,14 @@ export interface KycStatus {
   isVerified: boolean;
   verificationStatus: string;
   trustScore: number;
-  /** 0-5 trust tier derived from verification state + score (mirrors backend). */
+  /** 0-5, derived from verification state + score (mirrors backend). */
   tier?: number;
   /**
-   * Identity verified by any route the server accepts (an approved review or a
-   * passed NIN check). Gate on this: identity.status is only the older review
-   * flow and stays PENDING for someone verified by NIN.
+   * Gate on this: `identity.status` is only the older review flow and stays PENDING for someone
+   * verified by NIN.
    */
   identityVerified?: boolean;
-  /**
-   * ISO date the identity grace period ends. Set while an unverified account
-   * keeps its listing and payout capability: verify identity before then or
-   * listings, payout accounts and withdrawals stop working.
-   */
+  /** ISO; verify identity before then or listings, payout accounts and withdrawals stop working. */
   identityGraceEndsAt?: string;
   identity?: IdentityKyc;
   license?: LicenseKyc;
@@ -66,7 +61,6 @@ export const kycService = {
     return safeCall(() => authFetch<KycStatus>('/users/me/kyc'));
   },
 
-  /** Submits identity documents (multipart) for human review. */
   async submitIdentity(params: {
     document: File;
     selfie?: File;
@@ -86,7 +80,6 @@ export const kycService = {
     });
   },
 
-  /** Submits a realtor/agent license (multipart) for human review. */
   async submitLicense(params: {
     licenseNumber: string;
     document?: File;

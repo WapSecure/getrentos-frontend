@@ -26,12 +26,6 @@ import { ReportLandProblemDialog } from '../disputes/ReportLandProblemDialog';
 import { RequestTourDialog } from '../tours/RequestTourDialog';
 import { RequestInspectionDialog } from '../inspections/RequestInspectionDialog';
 
-/**
- * Market context under a public land listing: its assurance tier, where its
- * price per m² sits among comparable verified land, and those comparables.
- * Everything here comes from public endpoints; a failure hides the section
- * rather than breaking the listing page.
- */
 export const ListingMarketSection = ({ listingId }: { listingId: string }) => {
   const [reporting, setReporting] = useState(false);
   const [touring, setTouring] = useState(false);

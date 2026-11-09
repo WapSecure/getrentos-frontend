@@ -25,7 +25,6 @@ export type RenterUser = {
 
 const RenterUserContext = createContext<RenterUser | null>(null);
 
-/** Returns the signed-in renter's profile, populated once by the renter layout's auth check. */
 export const useRenterUser = () => useContext(RenterUserContext);
 
 export default function RenterLayout({ children }: { children: ReactNode }) {

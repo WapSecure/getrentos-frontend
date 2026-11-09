@@ -27,7 +27,6 @@ export interface PnlReport {
   totals: { income: number; expenses: number; net: number };
 }
 
-/** Pull a CSV the server generated and hand it to the browser as a download. */
 async function download(path: string, filename: string): Promise<void> {
   const blob = await authDownload(path);
   const url = window.URL.createObjectURL(blob);

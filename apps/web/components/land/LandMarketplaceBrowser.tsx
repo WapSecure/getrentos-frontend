@@ -62,7 +62,6 @@ import type { LandAssuranceTier } from '@/types/land';
 
 type MarketplaceMode = 'public' | 'buyer';
 type Sort = 'newest' | 'price_asc' | 'price_desc';
-/** Whether the person browsing can actually make an offer, and if not, why. */
 type LandViewer = 'buyer' | 'member' | 'anonymous';
 
 interface LandMarketplaceBrowserProps {
@@ -100,14 +99,13 @@ const TITLE_TYPE_OPTIONS = [
   { value: 'SURVEY_PLAN', label: 'Survey plan' },
 ];
 
-/** "At least this tier"; BASIC is every verified listing, so it is the default. */
 const ASSURANCE_OPTIONS = [
   { value: '', label: 'Any assurance' },
   { value: 'STANDARD', label: 'Registry-searched or better' },
   { value: 'PREMIUM', label: 'Independently reviewed only' },
 ];
 
-/** Square metres; a standard Lagos plot is roughly 450–650 sqm. */
+/** Square metres. */
 const AREA_OPTIONS = [
   { value: '', label: 'Any plot size' },
   { value: '450', label: '450 sqm+ (a plot)' },
@@ -175,8 +173,7 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
   });
   const listings = data?.items ?? [];
 
-  // A link naming a listing (?property=<id>, as after "Add a buyer account")
-  // opens it as soon as it is on the page, until it is closed.
+  // ?property=<id> opens that listing once it is on the page.
   const [linkedListingId, setLinkedListingId] = useState<string | null>(() =>
     typeof window === 'undefined'
       ? null
@@ -187,7 +184,6 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
     (linkedListingId ? (listings.find((listing) => listing.id === linkedListingId) ?? null) : null);
   const total = data?.total ?? 0;
 
-  // Saving is shown at once and undone if the server refuses.
   const saveListing = useMutation({
     mutationFn: (listingId: string) => unwrap(buyerService.saveListing(listingId)),
     onMutate: (listingId) => setSavedListingIds((ids) => [...ids, listingId]),
@@ -226,11 +222,6 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
     }
   };
 
-  /**
-   * Who is looking at the parcels. `mode` only says which surface rendered the
-   * marketplace, so on the public page the CTAs used to tell a signed-in visitor
-   * to "sign in": and sent them to a sign-in form they had already passed.
-   */
   const [viewer] = useState<LandViewer>(() =>
     viewerHasRole('buyer') ? 'buyer' : viewerIsSignedIn() ? 'member' : 'anonymous'
   );
@@ -238,11 +229,6 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
   const addRole = useAddRole();
   const needsSignIn = viewer === 'anonymous';
 
-  /**
-   * Buyers act in place. A signed-in visitor without a buyer account is pointed
-   * at the buyer area, whose layout moves them somewhere they can actually use,
-   * rather than at the sign-in form.
-   */
   const buyerRoute = (path: string) =>
     canOffer ? path : needsSignIn ? ROUTES.LOGIN : ROUTES.BUYER_LAND;
 
@@ -656,8 +642,6 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
                   </Button>
                 </div>
               ) : (
-                // Signed in, but not as a buyer: there is nothing here this
-                // account can do, so say why instead of two dead-end buttons.
                 <div className="flex flex-col gap-3 border-t border-border p-5 sm:flex-row sm:items-center">
                   <p className="flex-1 text-sm text-muted-foreground">
                     Questions and offers on land come from a buyer account. Add one to this account

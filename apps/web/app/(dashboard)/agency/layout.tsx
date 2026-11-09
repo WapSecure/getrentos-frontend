@@ -18,9 +18,7 @@ import { currentPath, withNext } from '@/lib/nextPath';
 
 type NavbarUser = { fullName: string; email: string; roles?: string[] };
 
-// The signed-in profile lives in browser storage, outside React: read it during
-// render (as CustodyProvider does) rather than copying it into state from an
-// effect. The raw string is the snapshot so it stays referentially stable.
+// The raw string is the snapshot so it stays referentially stable.
 const subscribeToStorage = (onChange: () => void) => {
   window.addEventListener('storage', onChange);
   return () => window.removeEventListener('storage', onChange);
@@ -30,22 +28,6 @@ const readStoredUserRaw = () =>
 const subscribeToNothing = () => () => {};
 const readSignedOut = () => !readStoredUserRaw() && !isAuthenticated();
 
-/**
- * The agency shell.
- *
- * A firm's portal is not an owner's portal with a different label. An owner looks
- * at everything they have; a manager looks at one client's things at a time, on
- * that client's instruction. So the shell is built around custody rather than
- * around a portfolio: the provider holds which client is selected, and the bar
- * states it on every screen inside here.
- *
- * Mounted once, at the layout, so the selection cannot disagree between two pages
- * and the bar cannot be forgotten by a page that was added later.
- *
- * Above it sits the same top bar as the owner workspace a manager works in, so a
- * firm's staff have their notifications, account menu and sign-out here too.
- */
-/** Pages for joining or setting up a firm: no client is in play, so no custody bar. */
 const OUTSIDE_CUSTODY = ['/agency/setup', '/agency/join'];
 
 export default function AgencyLayout({ children }: { children: ReactNode }) {
@@ -62,9 +44,7 @@ export default function AgencyLayout({ children }: { children: ReactNode }) {
     }
   }, [raw]);
 
-  // Nobody signed in: send them to sign in and back here, without calling the
-  // API first (a refused call would read as an expired session). An invitation
-  // link says why they are being asked to sign in.
+  // Redirect before any API call: a refused call would read as an expired session.
   const signedOut = useSyncExternalStore(subscribeToStorage, readSignedOut, () => false);
   const hydrated = useSyncExternalStore(
     subscribeToNothing,
@@ -88,11 +68,6 @@ export default function AgencyLayout({ children }: { children: ReactNode }) {
   );
 }
 
-/**
- * Someone outside any firm gets one clear "not a member" page on every agency
- * route, rather than each page's own refusal. Setting up or joining a firm is
- * open to anyone signed in.
- */
 function AgencyShell({
   user,
   outsideCustody,

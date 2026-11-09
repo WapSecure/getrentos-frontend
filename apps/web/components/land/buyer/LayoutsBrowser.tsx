@@ -20,7 +20,6 @@ import type { PublicLandLayoutSummary } from '@/types/landBuyer';
 const PAGE_SIZE = 12;
 
 const priceRange = (layout: PublicLandLayoutSummary) => {
-  // No plot is on sale right now; some may only be reserved and come back.
   if (layout.priceFrom === undefined) return 'None available';
   if (layout.priceTo === undefined || layout.priceTo === layout.priceFrom) {
     return formatCurrency(layout.priceFrom, { compact: true });
@@ -28,7 +27,6 @@ const priceRange = (layout: PublicLandLayoutSummary) => {
   return `${formatCurrency(layout.priceFrom, { compact: true })} – ${formatCurrency(layout.priceTo, { compact: true })}`;
 };
 
-/** Estates selling plots on verified, in-date master parcels. */
 export const LayoutsBrowser = () => {
   const [search, setSearch] = useState('');
   const [debounced, setDebounced] = useState('');

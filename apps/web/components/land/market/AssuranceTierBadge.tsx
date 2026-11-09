@@ -6,10 +6,6 @@ import { LAND_ASSURANCE_TIER_DESCRIPTIONS } from '@/types/landMarket';
 const isTier = (value: unknown): value is LandAssuranceTier =>
   value === 'BASIC' || value === 'STANDARD' || value === 'PREMIUM';
 
-/**
- * The public assurance tier of a verified parcel. Renders nothing when the
- * listing carries no tier (older verifications, or not yet computed).
- */
 export const AssuranceTierBadge = ({
   tier,
   className,

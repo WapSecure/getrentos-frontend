@@ -20,7 +20,6 @@ import { estateService } from '@/services/estateService';
 const MAX_OPTIONS = 10;
 
 interface CreatePollModalProps {
-  /** For "Write it for me": drafts a neutral question and options from a topic. */
   estateId?: string;
   isOpen: boolean;
   onClose: () => void;

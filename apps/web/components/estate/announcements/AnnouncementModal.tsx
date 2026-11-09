@@ -21,9 +21,7 @@ import { estateService } from '@/services/estateService';
 import type { Announcement } from '@/types/estate';
 
 interface AnnouncementModalProps {
-  /** For "Write it for me": drafts from the manager's notes. */
   estateId?: string;
-  /** Notes to start from, e.g. a shared problem from the reports digest. */
   initialNotes?: string;
   isOpen: boolean;
   announcement: Announcement | null;

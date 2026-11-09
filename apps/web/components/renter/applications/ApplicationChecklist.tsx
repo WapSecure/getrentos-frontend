@@ -103,7 +103,6 @@ export const ApplicationChecklist = ({ onComplete }: ApplicationChecklistProps) 
 
       {isExpanded && (
         <div className="p-4 pt-0 space-y-3">
-          {/* Progress Bar */}
           <div className="mb-3">
             <div className="h-2 bg-secondary rounded-full overflow-hidden">
               <div
@@ -113,7 +112,6 @@ export const ApplicationChecklist = ({ onComplete }: ApplicationChecklistProps) 
             </div>
           </div>
 
-          {/* Checklist Items */}
           {items.map((item, index) => (
             <motion.div
               key={item.id}

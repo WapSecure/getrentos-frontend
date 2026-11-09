@@ -142,8 +142,7 @@ export function MaintenanceRequestsView() {
 
   return (
     <>
-      {/* Zero is a claim about the portfolio, so wait until it has been read
-          before making it. */}
+      {/* Zero is a claim about the portfolio, so wait until it has loaded. */}
       <PageHeader
         title="Maintenance"
         description={

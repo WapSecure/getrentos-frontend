@@ -32,12 +32,6 @@ const TREATMENT: Record<DepositTreatment, string> = {
   PAID_TO_SUREGROUND: 'Paid to Sureground',
 };
 
-/**
- * The handover pack for a change of manager: the property's state when the
- * change took effect, and where the sign-off stands. Each party signs the same
- * frozen pack (its hash), or disputes it instead.
- */
-/** Where a handover sits: under the agency's client engagements, or the landlord's change of manager. */
 const handoverParent = (pathname: string) =>
   pathname.startsWith('/agency/')
     ? { label: 'Client engagements', href: '/agency/mandates' }

@@ -54,8 +54,6 @@ export default function SignupPage() {
     window.location.href = ROUTES.SIGNUP;
   };
 
-  // A page that sent them here to sign up (an invitation, say) is where they
-  // land once the account exists. Kept for the tab, since sign-up spans pages.
   const [nextPath] = useState<string | null>(() =>
     typeof window === 'undefined'
       ? null
@@ -65,7 +63,6 @@ export default function SignupPage() {
     if (nextPath) rememberSignupNext(nextPath);
   }, [nextPath]);
 
-  // If step is 'roles', redirect to role selection.
   useEffect(() => {
     if (step === 'roles') {
       window.location.href = ROUTES.ROLE_SELECTION;
@@ -88,10 +85,8 @@ export default function SignupPage() {
         <ThemeToggle />
       </div>
 
-      {/* Left Side - Content */}
       <SignupLeftContent />
 
-      {/* Right Side - Form */}
       <section className="relative z-10 flex w-full items-center justify-center px-4 py-20 sm:px-8 lg:w-1/2 lg:px-12 lg:py-16">
         <div className="w-full max-w-[32rem] rounded-[2rem] border border-border/70 bg-card/95 p-6 shadow-[0_24px_80px_-32px_rgba(15,23,42,0.28)] backdrop-blur-xl sm:p-9 dark:shadow-[0_24px_80px_-32px_rgba(0,0,0,0.7)]">
           <div className="mb-8">
@@ -126,7 +121,6 @@ export default function SignupPage() {
             </p>
           </div>
 
-          {/* Error Display */}
           <AnimatePresence>
             {error && (
               <motion.div
@@ -140,7 +134,6 @@ export default function SignupPage() {
             )}
           </AnimatePresence>
 
-          {/* Step Content */}
           <AnimatePresence mode="wait">
             {step === 'signup' && (
               <motion.div
@@ -150,7 +143,6 @@ export default function SignupPage() {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3 }}
               >
-                {/* Method Selection */}
                 <div className="mb-7">
                   <AuthMethodTabs
                     label="Choose a signup method"
@@ -164,7 +156,6 @@ export default function SignupPage() {
                   />
                 </div>
 
-                {/* Signup Form */}
                 {method === SIGNUP_METHODS.EMAIL ? (
                   <EmailSignup onSubmit={handleSendOtp} isLoading={isLoading} />
                 ) : (
@@ -202,7 +193,6 @@ export default function SignupPage() {
             )}
           </AnimatePresence>
 
-          {/* Login Link - only show on signup step */}
           {step === 'signup' && (
             <p className="mt-7 text-center text-sm text-muted-foreground">
               Already have an account?{' '}
@@ -215,7 +205,6 @@ export default function SignupPage() {
             </p>
           )}
 
-          {/* Trust Badges for Mobile */}
           <div className="mt-8 border-t border-border pt-6 lg:hidden">
             <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
               <span className="flex items-center gap-1">

@@ -1,6 +1,6 @@
 import type { ReplyLanguage } from '@/lib/replyLanguage';
 
-/** One way forward, with what it brings in over the first year after the lease ends. */
+/** Over the first year after the lease ends. */
 export interface RenewalOption {
   key: 'renew' | 'relet';
   rentPerYear: string;
@@ -8,7 +8,7 @@ export interface RenewalOption {
   basis: string[];
 }
 
-/** GET /landlord/leases/:id/renewal-advice. Every figure is worked out by Sureground. */
+/** Every figure is worked out by Sureground. */
 export interface RenewalAdvice {
   leaseId: string;
   tenantName: string;
@@ -41,7 +41,7 @@ export interface RenewalAdvice {
     comparison: string;
   };
   summary: string;
-  /** Pre-fills the renewal offer: rent in the lease's own period, end date as YYYY-MM-DD. */
+  /** Rent in the lease's own period, end date as YYYY-MM-DD. */
   draft: {
     rentAmount: number;
     leaseEnd: string;

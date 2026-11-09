@@ -202,7 +202,6 @@ export const DocumentCard = ({
     );
   }
 
-  // Grid view
   return (
     <>
       <Card hover selected={isSelected} className="group">

@@ -29,7 +29,6 @@ export interface DepositDeduction {
   decidedById: string | null;
   decidedAt: string | null;
   decisionNote: string | null;
-  /** The tenant's objection and the owner's answer to it. */
   tenantDisputedAt: string | null;
   tenantDisputeReason: string | null;
   disputeAnsweredAt: string | null;
@@ -129,7 +128,6 @@ export const depositService = {
     );
   },
 
-  /** Answer a tenant's dispute of a deduction that already counts: keep it, or drop it. */
   answerDispute(
     id: string,
     deductionId: string,

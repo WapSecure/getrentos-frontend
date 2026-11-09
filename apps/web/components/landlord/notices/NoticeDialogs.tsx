@@ -18,19 +18,7 @@ import {
 import type { NoticeKind, NoticeServiceMethod, TenancyNotice } from '@/types/tenancy-notice';
 import type { UnconfiguredPeriod } from '@/types/tenancy-notice';
 
-/**
- * Raising and serving a notice.
- *
- * Two things are load-bearing here rather than cosmetic:
- *
- * - **The service date is declared, not defaulted to today.** Whether a period
- *   runs from the day of service or the day after is interpretation and it
- *   varies, so the platform does not decide it silently. Pre-filling today would
- *   be a decision, so the field starts empty and says why.
- * - **The period that will apply is shown before submitting**, with its basis and
- *   a warning when the jurisdiction has none recorded. A firm should never learn
- *   that fact from a rejection after telling a tenant something.
- */
+// The service date is declared, not defaulted: whether a period runs from the day of service or the day after varies, so pre-filling today would decide it.
 
 const KINDS: { value: NoticeKind; label: string; statutory: boolean }[] = [
   { value: 'ARREARS_REMINDER', label: 'Arrears reminder', statutory: false },
@@ -117,8 +105,6 @@ export function RaiseNoticeDialog({
               onValueChange={(value) => setKind(value as NoticeKind)}
               options={KINDS.map((entry) => ({
                 value: entry.value,
-                // A step with no recorded period is worth flagging before it is
-                // chosen, not after it is rejected.
                 label:
                   entry.statutory &&
                   unconfigured.some(

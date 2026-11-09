@@ -1,18 +1,12 @@
 import { percentileWords } from '@sureground/shared';
 import { formatCurrency } from '@/lib/format';
 
-/** 1 → "1st", 22 → "22nd", 13 → "13th". */
 export const ordinal = (n: number) => {
   const mod100 = n % 100;
   if (mod100 >= 11 && mod100 <= 13) return `${n}th`;
   return `${n}${['th', 'st', 'nd', 'rd'][n % 10] ?? 'th'}`;
 };
 
-/**
- * Where a price per m² sits on a 0-100 strip, with the comparables' median
- * marked. Text carries the same facts, so the bar is decoration for sighted
- * readers rather than the only way to read the position.
- */
 export const PricePositionBar = ({
   percentile,
   subjectPricePerSqm,

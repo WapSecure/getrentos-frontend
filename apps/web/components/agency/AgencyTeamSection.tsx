@@ -6,12 +6,6 @@ import { Button, ListSkeleton, NumberInput } from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 import type { AgencyTeam } from '@/services/agencyCommissionService';
 
-/**
- * The firm's agents and how commissions divide across them. Each agent has a
- * default split % of the commissions credited to them; the table rolls up their
- * deals, the firm commission on those, and the agent's share. Unassigned
- * commissions sit in their own row until credited.
- */
 export function AgencyTeamSection({
   team,
   isLoading,

@@ -29,8 +29,7 @@ export const RenterRecommendedProperties = () => {
   const savedListings = savedListingsData?.items ?? [];
   const savedIds = savedListings.map((p) => p.id);
   const [failedImages, setFailedImages] = useState<string[]>([]);
-  // Shown at once while the request runs; dropped when it settles, so a
-  // failed save falls back to the server's list.
+  // Optimistic until the request settles, so a failed save falls back to the server's list.
   const [pendingSaved, setPendingSaved] = useState<Record<string, boolean>>({});
   const isSaved = (propertyId: string) => pendingSaved[propertyId] ?? savedIds.includes(propertyId);
 
@@ -132,7 +131,6 @@ export const RenterRecommendedProperties = () => {
                 />
               </div>
 
-              {/* Property Details */}
               <div className="p-3">
                 <div className="flex justify-between items-start gap-2 mb-1">
                   <h3 className="min-w-0 font-semibold text-foreground text-sm">

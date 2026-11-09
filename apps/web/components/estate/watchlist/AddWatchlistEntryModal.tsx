@@ -15,7 +15,7 @@ import {
 } from '@sureground/ui';
 import type { WatchlistSeverity, WatchlistSubjectType } from '@/types/estate';
 
-/** The API's floor. Kept in step so the form never allows what the server will reject. */
+// The API's minimum; keep in step.
 const REASON_MIN_LENGTH = 10;
 
 const SUBJECT_OPTIONS = [
@@ -23,13 +23,7 @@ const SUBJECT_OPTIONS = [
   { value: 'VEHICLE', label: 'A vehicle' },
 ];
 
-/**
- * What the two severities actually do, in the estate's terms.
- *
- * Written out rather than left to the enum names. "WATCH" on its own reads like
- * a weaker BLOCK, and a manager who expects it to stop somebody would find out
- * at the barrier instead: where the person has already been let in.
- */
+// Spelled out because WATCH reads like a weaker BLOCK, and it stops nobody.
 const SEVERITY_OPTIONS = [
   { value: 'BLOCK', label: 'Do not admit them' },
   { value: 'WATCH', label: 'Admit, but tell the office' },
@@ -54,20 +48,6 @@ interface AddWatchlistEntryModalProps {
   error?: string | null;
 }
 
-/**
- * Adds somebody to an estate's watch list.
- *
- * The form refuses two combinations before the request is made, because the API
- * refuses them too and a round trip teaches the manager nothing:
- *
- *  - A person with a single name word and no phone. "Chioma" is not an identity,
- *    so the rule could only ever flag everybody who shares the name.
- *  - A vehicle with no registration. There is nothing else a guard can compare.
- *
- * Both are refused with the reason on screen, because the point is not to block
- * the manager: it is to stop the estate believing it is protected by a rule
- * that can never fire.
- */
 export const AddWatchlistEntryModal = ({
   isOpen,
   onClose,
@@ -102,8 +82,7 @@ export const AddWatchlistEntryModal = ({
     onClose();
   };
 
-  // The same rule the API applies: at least two name words, or a number to fall
-  // back on. Mirrored here only to explain it: the server remains the authority.
+  // Mirrors the API's rule (two name words or a phone); the server stays the authority.
   const nameWordCount = label.trim().split(/\s+/).filter(Boolean).length;
   const hasPhone = phone.replace(/\D/g, '').length >= 7;
   const cannotMatch = isVehicle ? plateNumber.trim().length < 3 : nameWordCount < 2 && !hasPhone;
@@ -126,11 +105,7 @@ export const AddWatchlistEntryModal = ({
                 onValueChange={(value) => {
                   const next = value as WatchlistSubjectType;
                   if (next === subjectType) return;
-                  // Everything identity-bearing is cleared on a change of
-                  // subject. Carrying it over is not neutral: a description
-                  // typed for a vehicle ("Black Hilux") is two words, so it
-                  // would be accepted as a person's name and the estate would
-                  // have filed a rule about somebody who does not exist.
+                  // Identity fields are cleared on a change of subject: a vehicle description like "Black Hilux" would pass as a person's name.
                   setLabel('');
                   setPhone('');
                   setPlateNumber('');
@@ -262,8 +237,7 @@ export const AddWatchlistEntryModal = ({
                 severity,
                 phone: isVehicle ? undefined : phone.trim() || undefined,
                 plateNumber: isVehicle ? plateNumber.trim() || undefined : undefined,
-                // A date input is a calendar day; the API wants an instant. End
-                // of that day, so an entry does not lapse the morning it is set.
+                // The API wants an instant: end of that day, so the entry doesn't lapse that morning.
                 expiresAt: expiresAt ? new Date(`${expiresAt}T23:59:59`).toISOString() : undefined,
                 photo: photo ?? undefined,
               })

@@ -24,10 +24,7 @@ export const LeaseView = () => {
   const queryClient = useQueryClient();
   const toast = useToast();
 
-  // A renter whose lease is still awaiting signature has no active lease, no
-  // renewal offer, no increases and no reminders yet: the API answers those with
-  // 404. They are "nothing to report", not an outage: treating them as failures
-  // replaced this whole tab with an error and hid the sign-your-lease card.
+  // Before signature the API answers these with 404: nothing to report, not an outage.
   const leaseQuery = useQuery({
     queryKey: renterKeys.lease,
     queryFn: () => unwrapOptional(renterService.getLease(), null),
@@ -36,11 +33,7 @@ export const LeaseView = () => {
   const pendingLeaseQuery = useQuery({
     queryKey: renterKeys.pendingLease,
     queryFn: () => unwrapOptional(renterService.getPendingLease(), null),
-    // Always fetch this. It used to be gated on `!lease`, so as soon as the
-    // renter's active lease resolved the query was disabled: and a disabled
-    // query cannot refetch. Invalidation then marked it stale with no way to
-    // refresh, leaving the sign-your-lease card showing the pre-signature state
-    // for a tenant who had already signed.
+    // Always fetched: a disabled query can't refetch, so after signing it would stay stale.
   });
   const renewalOfferQuery = useQuery({
     queryKey: renterKeys.renewalOffer,
@@ -145,9 +138,7 @@ export const LeaseView = () => {
 
   return (
     <>
-      {/* A tenant can hold an executed lease and be signing another at the same
-          time. The new one is shown first: left to the bottom of the page they
-          would never see the payment it depends on, and it would lapse. */}
+      {/* A lease being signed goes first: at the bottom the tenant would miss the payment it depends on and it would lapse. */}
       {pendingLease && (
         <div className="mb-6">
           <PendingLeaseCard

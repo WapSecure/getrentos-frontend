@@ -34,10 +34,6 @@ const send = <T>(path: string, method: string, body?: unknown) =>
     })
   );
 
-/**
- * The seller's authority to sell a land parcel (owner side), and a signatory's
- * consent requests (any signed-in account).
- */
 export const landAuthorityService = {
   get: (propertyId: string) =>
     safeCall(() => authFetch<LandAuthorityView | LandAuthorityEmptyView>(base(propertyId))),

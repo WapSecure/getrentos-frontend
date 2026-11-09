@@ -54,8 +54,7 @@ const EstateCard = ({ estate }: { estate: EstateDirectoryEntry }) => {
               <ArrowRight className="h-4 w-4" />
             </span>
           ) : (
-            // The estate has live listings but no public page yet. Saying so is
-            // better than a card that looks clickable and is not.
+            // No public page yet: shown as not clickable rather than as a card that links nowhere.
             <span className="text-sm text-muted-foreground">
               This estate has not published a public page yet.
             </span>
@@ -77,19 +76,9 @@ const EstateCard = ({ estate }: { estate: EstateDirectoryEntry }) => {
   );
 };
 
-/**
- * Public directory of estates.
- *
- * The directory only lists estates that are actually worth visiting: one with a
- * live listing or a published page: because a directory of empty pages is worse
- * than no directory. An estate whose page is not published yet can still appear
- * (it has live listings) and the card says so rather than pretending to be
- * clickable.
- */
 export const EstatesDirectoryBrowser = ({
   initialData,
 }: {
-  /** The server-rendered first page. Used only for the unfiltered view. */
   initialData?: Paginated<EstateDirectoryEntry>;
 }) => {
   const [search, setSearch] = useState('');
@@ -103,8 +92,7 @@ export const EstatesDirectoryBrowser = ({
     pageSize: PAGE_SIZE,
   };
 
-  // Only the default view may start from the server payload: seeding a filtered
-  // query with page 1 of everything would show the wrong estates while it loads.
+  // Only the unfiltered view may start from the server payload; seeding a filtered query with it would show the wrong estates while loading.
   const isDefaultView = !search.trim() && !city && page === 1;
 
   const { data, isLoading, isError } = useQuery({

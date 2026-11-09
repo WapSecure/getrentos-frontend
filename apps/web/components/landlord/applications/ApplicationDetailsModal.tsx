@@ -12,12 +12,8 @@ interface ApplicationDetailsModalProps {
   onApprove: (id: string) => void;
   onReject: (id: string) => void;
   onRequestInfo: (id: string) => void;
-  /**
-   * Who already holds an approved application for this unit, when the page
-   * knows. Approving would be refused, so say so here instead of after.
-   */
+  // Approving would be refused while another approved application holds the unit, so say so up front.
   unitHeldBy?: string | null;
-  /** The next step once approved: the lease drafted for them, to review and send. */
   onReviewLease?: () => void;
 }
 
@@ -30,7 +26,7 @@ export const ApplicationDetailsModal = ({
   unitHeldBy = null,
   onReviewLease,
 }: ApplicationDetailsModalProps) => {
-  // Only an open application can be decided; withdrawn ones are closed like approved and rejected.
+  // Withdrawn counts as decided, like approved and rejected.
   const isDecided = application?.status !== 'pending' && application?.status !== 'under_review';
 
   return (

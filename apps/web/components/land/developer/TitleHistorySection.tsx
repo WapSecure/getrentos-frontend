@@ -17,11 +17,7 @@ const kindLabel = (kind: string) =>
   TITLE_EVENT_KIND_LABELS[kind as keyof typeof TITLE_EVENT_KIND_LABELS] ??
   kind.toLowerCase().replace(/_/g, ' ');
 
-/**
- * The parcel's chain of title, oldest first. Owners can add links; each stays
- * "unverified" until a reviewer confirms it, and only verified links count as
- * evidence in diligence.
- */
+// Oldest first. Links stay unverified until a reviewer confirms them, and only verified links count in diligence.
 export const TitleHistorySection = ({
   propertyId,
   notify,

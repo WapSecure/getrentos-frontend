@@ -13,14 +13,7 @@ import {
 } from '@sureground/ui';
 import type { MusterRollEntry, MusterRollState } from '@/types/estate';
 
-/**
- * The four things a marshal can say about one person.
- *
- * "Not yet accounted for" is on the list even though it is where everybody
- * starts, because a mistap has to be undoable: a roll that cannot be corrected
- * is one a marshal stops trusting. Note the wording: this is the marshal
- * speaking about somebody else, so it reads "Accounted for", never "safe".
- */
+// "Not yet accounted for" stays selectable so a mistap can be undone; the wording is "Accounted for", never "safe".
 const STATE_ACTIONS: RadioOption<MusterRollState>[] = [
   { value: 'ACCOUNTED', label: 'Accounted for', tone: 'success' },
   { value: 'NOT_ON_SITE', label: 'Not on site', tone: 'primary' },
@@ -37,27 +30,11 @@ const stateTone: Record<MusterRollState, BadgeVariant> = {
 
 interface RollEntryRowProps {
   entry: MusterRollEntry;
-  /** False once the muster is closed or timed out: a finished record stops moving. */
   rollOpen: boolean;
   isSaving: boolean;
-  /** Answers for one person. Called with no note on a plain tap. */
   onAnswer: (entryId: string, state: MusterRollState, stateNote?: string) => Promise<boolean>;
 }
 
-/**
- * One name on the roll.
- *
- * The tap records the answer on its own, with no note required, because a
- * marshal with a torch in one hand works in single taps. A note is available
- * underneath for the two answers that usually want one: "not on site" and
- * "needs help": but it never stands between a marshal and recording that
- * somebody is out.
- *
- * `basisLabel` is the API's wording, not ours: it distinguishes a resident of
- * the estate from somebody who was inside when the alarm went, and from somebody
- * admitted *after* the roll was taken: a claim about where a person physically
- * was, which is not this screen's to guess at.
- */
 export const RollEntryRow = ({ entry, rollOpen, isSaving, onAnswer }: RollEntryRowProps) => {
   const [isNoting, setIsNoting] = useState(false);
   const [note, setNote] = useState(entry.stateNote ?? '');
@@ -95,9 +72,7 @@ export const RollEntryRow = ({ entry, rollOpen, isSaving, onAnswer }: RollEntryR
               activation="manual"
               value={entry.state}
               onValueChange={(state) => {
-                // A tap that changes nothing is not sent: the API treats it as
-                // a decision, and the record of who answered this person would
-                // then name a marshal who did nothing.
+                // A tap that changes nothing isn't sent: the API would record this marshal as having answered.
                 if (state === entry.state) return;
                 onAnswer(entry.id, state);
               }}
@@ -143,8 +118,7 @@ export const RollEntryRow = ({ entry, rollOpen, isSaving, onAnswer }: RollEntryR
                   variant="secondary"
                   isLoading={isSaving}
                   onClick={async () => {
-                    // Saves the note against whatever the person is currently
-                    // marked as, so adding a note can never silently re-answer them.
+                    // Saves against the current answer, so adding a note never re-answers the person.
                     const saved = await onAnswer(entry.id, entry.state, note.trim() || undefined);
                     if (saved) setIsNoting(false);
                   }}

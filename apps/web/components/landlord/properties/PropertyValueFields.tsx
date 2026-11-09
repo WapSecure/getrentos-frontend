@@ -9,7 +9,6 @@ interface PropertyValueFieldsProps {
   onPurchasePriceChange: (value: string) => void;
 }
 
-/** What the property is worth and what it cost: the two numbers Portfolio needs for cap rate and yield. */
 export const PropertyValueFields = ({
   estimatedValue,
   purchasePrice,

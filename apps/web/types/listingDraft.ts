@@ -1,4 +1,3 @@
-/** Rent guidance from similar homes, as the listing creator returns it. */
 export interface ListingPriceGuide {
   similarHomes: number;
   typicalPerYear: string | null;

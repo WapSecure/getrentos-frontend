@@ -3,13 +3,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { languageLabel, type ReplyLanguage } from '@/lib/replyLanguage';
 
-/**
- * Voice in and out in the browser, using the browser's own speech services.
- * Sureground never receives audio: the browser turns speech into text (Chrome
- * does this with Google's service) and the person sends the text themselves.
- */
+// Sureground never receives audio: the browser turns speech into text and the person sends the text themselves.
 
-/** Nigerian locales for each reply language; Pidgin is recognised as Nigerian English. */
+/** Pidgin is recognised as Nigerian English. */
 export const SPEECH_LOCALE: Record<ReplyLanguage, string> = {
   en: 'en-NG',
   pcm: 'en-NG',
@@ -59,7 +55,6 @@ function errorText(code: string, language: ReplyLanguage): string {
   }
 }
 
-/** Speak a question; the words land in the box as they are recognised, to check before sending. */
 export function useVoiceInput(language: ReplyLanguage, onText: (text: string) => void) {
   const [available] = useState(() => recognitionCtor() !== null);
   const [listening, setListening] = useState(false);
@@ -101,10 +96,6 @@ export function useVoiceInput(language: ReplyLanguage, onText: (text: string) =>
   return { available, listening, error, start, stop };
 }
 
-/**
- * Read an answer aloud with the browser's voices. English and Pidgin use any
- * English voice; Yoruba, Hausa and Igbo only when the browser has one.
- */
 export function useReadAloud() {
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [speaking, setSpeaking] = useState<number | null>(null);
@@ -155,7 +146,6 @@ export function useReadAloud() {
   return { canRead, speaking, toggle };
 }
 
-/** Say a short line now in the browser, interrupting anything already being read. */
 export function speakNow(text: string) {
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
   window.speechSynthesis.cancel();

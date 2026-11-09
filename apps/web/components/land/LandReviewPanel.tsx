@@ -11,11 +11,9 @@ interface LandReviewPanelProps {
   record: OwnerLandRecord;
   isSubmitting: boolean;
   onSubmit: () => void;
-  /** Id of the parcel's documents section, linked from a missing-documents blocker. */
   documentsAnchor?: string;
 }
 
-/** A blocker the owner clears by uploading documents ("Upload the title documents…"). */
 const isDocumentsBlocker = (blocker: string) => /^upload\b|document/i.test(blocker);
 
 const CHECK_ICON: Record<
@@ -28,7 +26,6 @@ const CHECK_ICON: Record<
   PENDING: { icon: Clock3, className: 'text-muted-foreground' },
 };
 
-/** What the owner is asked to do next, by diligence status. */
 const PROMPT: Record<string, { title: string; body: string; action: string }> = {
   NOT_STARTED: {
     title: 'Submit for diligence review',
@@ -52,14 +49,6 @@ const PROMPT: Record<string, { title: string; body: string; action: string }> = 
   },
 };
 
-/**
- * Where a parcel stands in diligence and what it takes to move it on.
- *
- * Submission is an explicit step: saving the parcel no longer puts it in the
- * review queue. The backend says whether the parcel can be submitted and, if
- * not, why — those reasons are shown as a list rather than surfaced as an
- * error after the owner presses the button.
- */
 export const LandReviewPanel = ({
   record,
   isSubmitting,

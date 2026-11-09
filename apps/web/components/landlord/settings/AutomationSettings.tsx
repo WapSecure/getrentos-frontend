@@ -7,7 +7,6 @@ import { landlordService, type LandlordAutomationSettings } from '@/services/lan
 import { UpgradeToProModal } from '@/components/shared/subscription/UpgradeToProModal';
 import type { PlanGateReason } from '@/lib/planGate';
 
-/** The switches, as opposed to the numeric policy that sits below them. */
 type AutomationToggleKey =
   | 'rentReminders'
   | 'overdueAlerts'
@@ -62,7 +61,7 @@ const DEFAULT_SETTINGS: LandlordAutomationSettings = {
 
 /** Mirrors MAX_RENT_GRACE_DAYS on the API, which rejects anything larger. */
 const MAX_GRACE_DAYS = 90;
-/** Mirror the API caps on the late-fee rule. */
+// Must match the API caps on the late-fee rule.
 const MAX_LATE_FEE_PERCENT = 100;
 const MAX_LATE_FEE_AFTER_DAYS = 90;
 
@@ -87,7 +86,6 @@ export const AutomationSettings = () => {
     fetchSettings();
   }, []);
 
-  /** Save a numeric late-fee field on blur, bounded, like the grace window. */
   const saveLateFeeField = async (
     field: 'lateFeePercent' | 'lateFeeAfterDays',
     value: number,
@@ -121,14 +119,10 @@ export const AutomationSettings = () => {
     }
   };
 
-  /**
-   * Saved on blur rather than per keystroke: the endpoint takes the whole
-   * settings object, and "3" on the way to "30" is not a window anyone chose.
-   */
+  // Saved on blur: the endpoint takes the whole settings object, and "3" on the way to "30" is not a window anyone chose.
   const saveGraceDays = async (value: number) => {
     if (value === settings.graceDays) return;
-    // Out of range: leave the field alone so the warning beside it can explain
-    // why, rather than sending a request the API will reject.
+    // Out of range: leave the field so the warning can explain, rather than send a request the API rejects.
     if (value < 0 || value > MAX_GRACE_DAYS) return;
     const previous = settings;
     const next = { ...settings, graceDays: value };
@@ -139,7 +133,6 @@ export const AutomationSettings = () => {
       setGraceDays(response.data.graceDays);
       return;
     }
-    // Put the field back where it was, so it never shows a value we did not store.
     setSettings(previous);
     setGraceDays(previous.graceDays);
     if (response.planGateReason) setUpgradeReason(response.planGateReason);
@@ -204,8 +197,7 @@ export const AutomationSettings = () => {
                 min={0}
                 max={MAX_GRACE_DAYS}
                 value={graceDays}
-                // NumberInput hands back the digit string; keep the state numeric
-                // so the saved payload satisfies the API's integer validation.
+                // NumberInput returns a digit string; the API validates an integer.
                 onValueChange={(value) => setGraceDays(Number(value) || 0)}
                 onBlur={() => void saveGraceDays(graceDays)}
                 placeholder="e.g. 5"

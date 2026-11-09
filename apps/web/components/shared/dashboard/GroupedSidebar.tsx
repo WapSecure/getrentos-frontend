@@ -18,34 +18,19 @@ export interface GroupedSidebarItem {
   label?: ReactNode;
   href: string;
   icon: ElementType;
-  /** Shows a small lock badge: the page itself still opens, and prompts to upgrade. */
   locked?: boolean;
-  /**
-   * Which plan clears the lock, so the badge can say so out loud.
-   *
-   * Defaults to Pro, which is what every gated item was until Enterprise
-   * existed. Pass this whenever the gate is not Pro, or the badge announces the
-   * wrong plan to a screen reader.
-   */
+  /** Defaults to Pro; pass it for any other plan, or the badge announces the wrong plan to screen readers. */
   lockedPlan?: PlanTier;
-  /** Optional operational count, kept textual so callers control its accessible name. */
   badge?: ReactNode;
 }
 
 export interface GroupedSidebarGroup {
   label: string;
   items: GroupedSidebarItem[];
-  /** Primary links stay visible; contextual and utility groups use progressive disclosure. */
   kind?: 'primary' | 'contextual' | 'utility';
   defaultExpanded?: boolean;
 }
 
-/**
- * Builds a consistent role-aware hierarchy without duplicating route metadata.
- * Every item remains available exactly once: frequent destinations become the
- * primary layer, account destinations become utilities, and the rest retain
- * their existing workflow grouping as contextual navigation.
- */
 export function createRoleNavigation<TGroup extends GroupedSidebarGroup>(
   groups: TGroup[],
   primaryHrefs: readonly string[],
@@ -98,11 +83,7 @@ interface GroupedMobileNavigationProps extends GroupedSidebarProps {
 export const isSidebarRouteActive = (pathname: string, href: string, dashboardHref: string) =>
   pathname === href || (href !== dashboardHref && pathname.startsWith(`${href}/`));
 
-/**
- * The one sidebar link for this page: the most specific match, so a section
- * nested under another (/buyer/land/purchases under /buyer/land) doesn't light
- * up both.
- */
+/** The most specific match, so a nested section doesn't light up its parent too. */
 export const activeSidebarHref = (
   pathname: string,
   groups: GroupedSidebarGroup[],
@@ -115,11 +96,6 @@ export const activeSidebarHref = (
 
 const slug = (label: string) => label.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
-/**
- * Which groups this person has folded away, remembered per workspace in the
- * browser. Everything starts open, so nothing is hidden until they choose to
- * hide it; the group holding the current page always shows.
- */
 const storageKey = (scope: string) => `sureground.sidebar.collapsed-v2:${slug(scope)}`;
 const NONE: readonly string[] = [];
 const cache = new Map<string, readonly string[]>();
@@ -219,11 +195,6 @@ function SidebarLink({
   );
 }
 
-/**
- * The groups of links, each foldable from its heading. A group of one item
- * (Overview → Dashboard) is just the item: a heading and a fold for one link
- * is more furniture than wayfinding.
- */
 function SidebarGroups({
   scope,
   idPrefix,
@@ -269,8 +240,7 @@ function SidebarGroups({
           );
         }
         const id = `${idPrefix}-${slug(group.label)}`;
-        // Landing in a folded group (search, a notification, a typed URL)
-        // shows it: a page whose own link is hidden would feel lost.
+        // Landing in a folded group shows it: a page whose own link is hidden would feel lost.
         const holdsPage = group.items.some((i) => i.href === activeHref);
         const open = holdsPage || !collapsed.includes(group.label);
         return (
@@ -313,11 +283,6 @@ function SidebarGroups({
   );
 }
 
-/**
- * The folded sidebar: the role's primary destinations as icons, plus the
- * current page when it lives deeper, so "where am I" survives the fold. The
- * rest is one click away behind Expand, not a column of 25 unlabelled icons.
- */
 function SidebarRail({
   ariaLabel,
   groups,
@@ -350,12 +315,7 @@ function SidebarRail({
   );
 }
 
-/**
- * The five slots of the phone and tablet bar: the role's first four primary
- * pages, then Messages when the role has it (as every role's tab bar in the
- * native app does), otherwise its fifth primary page. Everything else is in
- * the menu.
- */
+/** The first four primary pages, then Messages when the role has it (as the native tab bar does), otherwise the fifth. */
 export const phoneBarItems = (primary: GroupedSidebarItem[]): GroupedSidebarItem[] => {
   const messages = primary.find((item) => item.href.endsWith('/messages'));
   const rest = primary.filter((item) => item !== messages);
@@ -459,9 +419,7 @@ export function GroupedMobileNavigation({
 }: GroupedMobileNavigationProps) {
   const pathname = usePathname();
   const activeHref = activeSidebarHref(pathname, groups, dashboardHref);
-  // The drawer is open while this is mounted. Escape closes it, and closing
-  // puts focus back on whatever opened it (the menu button), so keyboard and
-  // screen-reader users are not dropped at the top of the page.
+  // Closing returns focus to the menu button, so keyboard and screen-reader users aren't dropped at the top of the page.
   const close = useRef(onNavigate);
   useEffect(() => {
     close.current = onNavigate;

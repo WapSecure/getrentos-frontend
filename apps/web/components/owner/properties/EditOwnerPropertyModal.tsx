@@ -85,15 +85,13 @@ const EditOwnerPropertyForm = ({
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // The photo is staged first and only attached on save, matching the API: the
-  // upload returns a storage key, and `coverImageKey` is what binds it.
+  // Staged first and attached on save, as the API binds the upload's key through `coverImageKey`.
   const [coverKey, setCoverKey] = useState(property.coverImageKey);
   const [previewUrl, setPreviewUrl] = useState(property.coverImageUrl);
   const [isUploading, setIsUploading] = useState(false);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // The video tour works the same way: staged on pick, attached on save.
   const [videoKey, setVideoKey] = useState<string | null>(property.videoTourKey ?? null);
   const [videoPreview, setVideoPreview] = useState(property.videoTourUrl);
   const [isUploadingVideo, setIsUploadingVideo] = useState(false);
@@ -121,7 +119,6 @@ const EditOwnerPropertyForm = ({
     }
   };
 
-  // Release the local preview once it is replaced or the modal closes.
   useEffect(() => {
     if (!previewUrl?.startsWith('blob:')) return;
     return () => URL.revokeObjectURL(previewUrl);
@@ -131,8 +128,7 @@ const EditOwnerPropertyForm = ({
     setPhotoError(null);
     setIsUploading(true);
     try {
-      // `unwrap` takes the pending response and resolves to its payload, so it
-      // must be awaited: destructuring the promise itself yields undefined.
+      // `unwrap` must be awaited: destructuring the promise itself yields undefined.
       const { key } = await unwrap(ownerService.uploadPropertyMedia(file));
       setCoverKey(key);
       setPreviewUrl(URL.createObjectURL(file));
@@ -155,12 +151,10 @@ const EditOwnerPropertyForm = ({
       country,
       ...(location.placeId ? { placeId: location.placeId } : {}),
       estimatedValue: Number(estimatedValue) || property.estimatedValue,
-      // Only send the cover when it changed; an unconditional write would
-      // push a stale key back over a photo edited elsewhere.
+      // Only send the cover when it changed, or a stale key overwrites a photo edited elsewhere.
       ...(coverKey !== property.coverImageKey ? { coverImageKey: coverKey } : {}),
       ...(videoKey !== (property.videoTourKey ?? null) ? { videoTourKey: videoKey } : {}),
-      // Only a pin the owner moved, so saving other details does not
-      // re-confirm a location nobody looked at.
+      // Only a pin the owner moved, so saving other details doesn't re-confirm a location nobody looked at.
       ...(pinMoved && pin ? { latitude: pin.latitude, longitude: pin.longitude } : {}),
     };
     try {

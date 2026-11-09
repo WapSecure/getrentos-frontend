@@ -42,7 +42,6 @@ export default function EstateIncidentsPage() {
   } | null>(null);
 
   const { estate, isLoading: isEstateLoading } = useSelectedEstate();
-  // "Draft an update" from a shared problem opens the announcement dialog with its notes.
   const [updateNotes, setUpdateNotes] = useState<string | null>(null);
   const toast = useToast();
 

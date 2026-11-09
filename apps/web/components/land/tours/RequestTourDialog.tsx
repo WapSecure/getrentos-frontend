@@ -24,7 +24,6 @@ import { LAND_TOUR_DISCLAIMER } from '@/types/landSiteTour';
 
 export const BUYER_TOURS_ROUTE = '/buyer/land/tours';
 
-/** Every IANA zone the browser knows, for the shared searchable Select. */
 const TIME_ZONE_OPTIONS = (() => {
   try {
     const zones = (
@@ -53,11 +52,6 @@ const browserZone = () => {
   }
 };
 
-/**
- * Ask the land's owner or developer for a live guided video tour. The buyer
- * gives their time zone (their browser's by default), when suits them, and
- * may bring a representative; they accept that a tour is not a search.
- */
 export const RequestTourDialog = ({
   open,
   onClose,

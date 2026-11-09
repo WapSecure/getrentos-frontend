@@ -451,8 +451,7 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
               </div>
               {(b.status === 'CONFIRMED' || b.status === 'COMPLETED') &&
                 b.depositStatus === 'HELD' &&
-                // The deposit covers the stay, so a claim only makes sense once
-                // the guest has checked out. The API refuses it before then.
+                // A claim only makes sense once the guest has checked out; the API refuses it before then.
                 b.checkOut <= TODAY &&
                 b.depositClaimStatus !== 'PENDING' && (
                   <div className="mt-3 flex justify-end gap-2 border-t border-border pt-3">
@@ -659,8 +658,6 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
   );
 };
 
-// ---------- Create listing dialog ----------
-
 function CreateListingDialog({
   role,
   onClose,
@@ -722,7 +719,6 @@ function CreateListingDialog({
   });
   const propertyOptions = useMemo(() => properties ?? [], [properties]);
 
-  // Photos already on the selected property, offered as one-click suggestions.
   const mediaSuggestions = useMemo(() => {
     const selected = propertyOptions.find((p) => p.id === propertyId);
     if (!selected) return [];
@@ -739,9 +735,6 @@ function CreateListingDialog({
       onCreated();
     },
     onError: (reason: Error) => {
-      // The trust-tier gate (publishing a shortlet needs an identity-verified
-      // Tier 2 account) surfaces as an inline verification notice by the
-      // publish button, not a toast — so the host sees exactly what to do.
       if (reason instanceof VerificationRequiredError) return;
       toast.error(reason.message);
     },
@@ -943,8 +936,6 @@ function CreateListingDialog({
   );
 }
 
-// ---------- Edit listing dialog ----------
-
 function EditListingDialog({
   listing,
   role,
@@ -979,7 +970,6 @@ function EditListingDialog({
   });
   const toast = useToast();
 
-  // Photos already on the underlying property, offered as one-click suggestions.
   const { data: properties } = useQuery({
     queryKey: [role, 'properties', 'for-shortlet'],
     queryFn: async () => {
@@ -1149,9 +1139,6 @@ function EditListingDialog({
   );
 }
 
-// ---------- Block dates dialog ----------
-
-/** One line naming the peak-season rules in force, or null when there are none. */
 function peakSummary(l: ShortletListing): string | null {
   const parts: string[] = [];
   const seasons = l.seasons ?? [];

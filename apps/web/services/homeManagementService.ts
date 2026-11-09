@@ -153,15 +153,14 @@ export type HomeManagementWorkOrder = {
   issueTitle: string;
   category: string;
   description: string;
-  /** The agreed scope of work, set when a triage proposal is accepted. */
+  /** Set when a triage proposal is accepted. */
   workOrderScope?: string | null;
   priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
   status: 'SUBMITTED' | 'ASSIGNED' | 'IN_PROGRESS' | 'RESOLVED' | 'CANCELLED';
   dueAt?: string | null;
   /**
-   * SLA fields are optional while older work-order records and API deployments
-   * are being reconciled. Their absence must never prevent the work-order
-   * control centre from rendering.
+   * SLA fields are optional while older records are reconciled; their absence must never stop the
+   * control centre rendering.
    */
   isEmergency?: boolean;
   responseDueAt?: string | null;
@@ -176,10 +175,7 @@ export type HomeManagementWorkOrder = {
   createdById?: string | null;
   createdAt: string;
   resolvedAt?: string | null;
-  /**
-   * Resident photo evidence. The API signs a short-lived download URL per read
-   * so these are safe to render directly.
-   */
+  /** The API signs a short-lived download URL per read, so these are safe to render directly. */
   images?: string[] | null;
   unit: {
     unitName?: string | null;
@@ -192,11 +188,7 @@ export type HomeManagementWorkOrder = {
 
 export type HomeManagementWorkOrderQuoteStatus = 'SUBMITTED' | 'APPROVED' | 'REJECTED';
 
-/**
- * Vendor estimates are recorded by an authenticated Home Management operator.
- * Keep relation fields optional so the UI remains resilient while an older API
- * response, or a deleted vendor/user relation, is being reconciled.
- */
+/** Relation fields stay optional for older API responses and deleted vendor/user relations. */
 export type HomeManagementWorkOrderQuote = {
   id: string;
   maintenanceRequestId?: string;
@@ -244,19 +236,17 @@ export type HomeManagementWorkOrderInvoiceStatus =
   | 'VOID';
 
 /**
- * Whether the vendor has actually been paid — separate from `status` above,
- * which tracks the approval workflow. An invoice can sit APPROVED for a while
- * before this ever leaves PENDING.
+ * Whether the vendor has been paid; separate from the approval `status`, so APPROVED can sit beside
+ * PENDING.
  */
 export type HomeManagementInvoicePayoutStatus = 'PENDING' | 'PROCESSING' | 'PAID' | 'FAILED';
 
-/** How paying an invoice would split between held funds and a card top-up. Whole naira. */
+/** Whole naira. */
 export interface HomeManagementInvoicePaymentPreview {
   invoiceId: string;
   invoiceTotal: number;
   /** Paid from the money Sureground holds for the owner. */
   fromHeldFunds: number;
-  /** The shortfall paid by card. */
   topUp: number;
   /** The card or bank fee the payer covers on the top-up. */
   topUpFee: number;
@@ -268,11 +258,7 @@ export interface HomeManagementInvoicePaymentPreview {
   reason?: string;
 }
 
-/**
- * Monetary values in Home Management are whole currency units. This mirrors
- * approved work-order spend and quote amounts, so the invoice UI never needs
- * to round or reconcile fractional cents client-side.
- */
+/** Whole currency units, matching approved work-order spend and quotes. */
 export type HomeManagementWorkOrderInvoiceLineItem = {
   id?: string;
   description: string;
@@ -320,7 +306,7 @@ export type VendorPayoutAccount = {
   accountNumber: string;
   accountName: string;
   verified: boolean;
-  /** Set while payouts wait after a change of bank details (ISO); null when none is held. */
+  /** ISO; set while payouts wait after a change of bank details, null when none is held. */
   payoutHoldUntil?: string | null;
 };
 
@@ -364,8 +350,7 @@ export type AssignHomeManagementWorkOrderVendorInput = {
 export type ResolveHomeManagementWorkOrderInput = {
   resolutionNote?: string;
   /**
-   * What the completed work cost. Required when the work order never went
-   * through spend approval, because invoicing reconciles the vendor bill
+   * Required when the work order never went through spend approval: invoicing reconciles the bill
    * against it.
    */
   finalCost?: number;
@@ -445,11 +430,7 @@ export type UpdateHomeManagementSlaPolicyInput = Partial<
   Omit<CreateHomeManagementSlaPolicyInput, 'propertyId'>
 >;
 
-/**
- * The escalation endpoint returns safe operational work-order data together
- * with the reason it entered the queue. Keep the breach label open-ended so
- * newly introduced backend classifications do not break the dashboard.
- */
+/** The breach label stays open-ended so new backend classifications do not break the dashboard. */
 export type HomeManagementWorkOrderSlaState = Pick<
   HomeManagementWorkOrder,
   | 'id'
@@ -562,11 +543,7 @@ const normalizeTimelineEvents = (payload: unknown): HomeManagementTimelineEvent[
 export const homeManagementService = {
   getDashboard: () =>
     safeCall(() => authFetch<HomeManagementDashboard>('/home-management/dashboard')),
-  /**
-   * Vendors the caller can pre-assign — the owners' directories for the
-   * properties they control. Used by the manager/agent view, whose vendors
-   * belong to the property owners, not to themselves.
-   */
+  /** The owners' vendor directories for the properties the caller controls. */
   listAssignableVendors: (propertyId?: string) =>
     safeCall(() =>
       authFetch<HomeManagementVendor[]>(
@@ -779,7 +756,7 @@ export const homeManagementService = {
         method: 'POST',
       })
     ),
-  /** Checks on an invoice before approving it. Read-only. */
+  /** Read-only. */
   checkWorkOrderInvoice: (invoiceId: string) =>
     safeCall(() => authFetch<InvoiceCheck>(`/home-management/invoices/${invoiceId}/check`)),
   approveWorkOrderInvoice: (invoiceId: string) =>
@@ -802,12 +779,7 @@ export const homeManagementService = {
         body: JSON.stringify(data),
       })
     ),
-  /**
-   * How paying an approved invoice would split, before anything is paid: what
-   * comes from the money Sureground holds for the owner, and what a card top-up
-   * (with its fee, for `provider`) would cover. Whole naira. A preview: the
-   * split is worked out again when the invoice is paid.
-   */
+  /** Whole naira. A preview: the split is worked out again when the invoice is paid. */
   getWorkOrderInvoicePaymentPreview: (invoiceId: string, provider?: PaymentProvider) =>
     safeCall(() =>
       authFetch<HomeManagementInvoicePaymentPreview>(
@@ -827,7 +799,6 @@ export const homeManagementService = {
       }>(`/home-management/invoices/${invoiceId}/pay${providerQuery(provider)}`, { method: 'POST' })
     ),
 
-  // ---- Vendor payout account ----
   getVendorPayoutAccount: (vendorId: string) =>
     safeCall(() =>
       authFetch<VendorPayoutAccount>(`/home-management/vendors/${vendorId}/payout-account`)

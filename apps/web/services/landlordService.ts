@@ -117,8 +117,8 @@ export interface Expense {
 }
 
 /**
- * Recording an expense either posts it, or — when a manager's spend is above the
- * owner's approval cap — returns a pending approval the owner must sign off.
+ * Above the owner's approval cap, a manager's expense returns a pending approval instead of
+ * posting.
  */
 export type CreateExpenseResult =
   | { status: 'posted'; expense: Expense }
@@ -135,12 +135,8 @@ export interface ManagementFeeConfig {
 
 export type OwnerStatementStatus = 'DRAFT' | 'ISSUED';
 /**
- * Where a payout has got to.
- *
- * `AWAITING_APPROVAL` and `REJECTED` are not failure states and must not be
- * rendered as one. Above the platform threshold the money is held on purpose for
- * a second person, and a refusal holds it further rather than losing it — the
- * owner is still owed the money either way.
+ * `AWAITING_APPROVAL` and `REJECTED` are not failures: the money is held on purpose and the owner
+ * is still owed it.
  */
 export type OwnerStatementPayoutStatus =
   | 'PENDING'
@@ -149,7 +145,6 @@ export type OwnerStatementPayoutStatus =
   | 'FAILED'
   | 'REJECTED';
 
-/** Why a payout is not on its way, when a second person is holding it. */
 export interface StatementRelease {
   id: string;
   amount: number;
@@ -166,9 +161,8 @@ export interface OwnerStatementLineItem {
   id: string;
   label: string;
   amount: number; /**
-   * Where the line came from. The statement is a view of the ledger, so a line
-   * cites the movement it renders and the document behind it. Null on a line
-   * written before the ledger became the source of truth.
+   * Cites the ledger movement and document the line renders; null on lines written
+   * before the ledger was the source of truth.
    */
   ledgerEntryId?: string | null;
   sourceType?: string | null;
@@ -178,12 +172,8 @@ export interface OwnerStatementLineItem {
 }
 
 /**
- * An owner saying one line of an issued statement is wrong.
- *
- * `moneyEffect` is the field that matters and the reason this is not a boolean:
- * `HELD` means the payout can still be stopped, `IN_FLIGHT` and `PAID` mean it
- * cannot. Telling an owner their money is held while a transfer is with the bank
- * is how one problem becomes two.
+ * `moneyEffect` is why this is not a boolean: `HELD` means the payout can still be stopped,
+ * `IN_FLIGHT` and `PAID` mean it cannot.
  */
 export interface StatementLineDispute {
   id: string;
@@ -201,7 +191,7 @@ export interface StatementLineDispute {
   firmRespondedAt: string | null;
   resolvedByName: string | null;
   resolvedAt: string | null;
-  /** What the owner is told, and the whole reason the field is required. */
+  /** What the owner is told; the reason the field is required. */
   outcomeNote: string | null;
   adjustmentEntryId: string | null;
   createdAt: string;
@@ -210,7 +200,6 @@ export interface StatementLineDispute {
 
 export type StatementLineDisputeStatus = 'OPEN' | 'UPHELD' | 'REJECTED' | 'WITHDRAWN';
 
-/** What disputes are doing to one statement's payout, when there are any. */
 export interface StatementDisputeSummary {
   openCount: number;
   totalCount: number;
@@ -236,17 +225,16 @@ export interface OwnerStatement {
   status: OwnerStatementStatus;
   payoutStatus: OwnerStatementPayoutStatus;
   transferRef?: string;
-  /** The most recent ask to release this payout. Detail response only. */
+  /** Detail response only. */
   release?: StatementRelease | null;
-  /** Disputes against lines of this statement, newest first. Detail only. */
+  /** Newest first. Detail only. */
   disputes?: StatementLineDispute[];
   disputeSummary?: StatementDisputeSummary | null;
   paidAt: string | null;
   generatedAt: string;
   issuedAt: string | null;
-  /** When the owner was last emailed this statement, or null if not yet sent. */
+  /** Null if not yet sent. */
   emailSentAt: string | null;
-  /** The last email failure, when the most recent send did not land. */
   emailError: string | null;
   lineItems?: OwnerStatementLineItem[];
 }
@@ -315,9 +303,7 @@ export interface LandlordAutomationSettings {
   leaseExpiry: boolean;
   /** Days rent may run past its due date before it is flagged overdue. */
   graceDays: number;
-  /** Auto-charge a late fee on rent left unpaid past the window. */
   lateFees: boolean;
-  /** The late fee as a percentage of the overdue amount. */
   lateFeePercent: number;
   /** Days past the due date before a late fee is raised (on top of grace). */
   lateFeeAfterDays: number;
@@ -338,7 +324,6 @@ export interface LandlordDashboardStats {
 }
 
 export const landlordService = {
-  // ---- Dashboard ----
   async getDashboardStats(): Promise<ApiResponse<LandlordDashboardStats>> {
     return safeCall(() => authFetch('/landlord/dashboard/stats'));
   },
@@ -355,7 +340,6 @@ export const landlordService = {
     return safeCall(() => authFetch('/landlord/dashboard/revenue-trend'));
   },
 
-  // ---- Notifications feed ----
   async getNotifications(): Promise<
     ApiResponse<
       {
@@ -381,7 +365,6 @@ export const landlordService = {
     return safeCall(() => authFetch('/landlord/notifications/read-all', { method: 'POST' }));
   },
 
-  // ---- Properties ----
   async listProperties(
     params: {
       search?: string;
@@ -454,7 +437,6 @@ export const landlordService = {
     return safeCall(() => authFetch(`/landlord/properties/${id}`, { method: 'DELETE' }));
   },
 
-  // ---- Units ----
   async listUnits(
     params: { search?: string; propertyId?: string; page?: number; pageSize?: number } = {}
   ): Promise<ApiResponse<Paginated<Unit>>> {
@@ -495,7 +477,6 @@ export const landlordService = {
     );
   },
 
-  // ---- Listings ----
   async listListings(status?: string): Promise<ApiResponse<Listing[]>> {
     return safeCall(() => authFetch(`/landlord/listings${toQuery({ status })}`));
   },
@@ -529,7 +510,6 @@ export const landlordService = {
     return safeCall(() => authFetch(`/landlord/listings/${id}/toggle-pause`, { method: 'PATCH' }));
   },
 
-  // ---- Applications ----
   async listApplications(
     params: { status?: string; page?: number; pageSize?: number } = {}
   ): Promise<ApiResponse<Paginated<RentalApplication>>> {
@@ -554,7 +534,7 @@ export const landlordService = {
     return safeCall(() => authFetch(`/landlord/applications/${applicationId}/screening`));
   },
 
-  /** Ask the applicant for more information by message; a pending application moves to under review. */
+  /** A pending application moves to under review. */
   async requestApplicationInfo(
     applicationId: string,
     message: string
@@ -567,7 +547,7 @@ export const landlordService = {
     );
   },
 
-  /** The screening facts in plain words, with questions and checks. Never a ranking or a decision. */
+  /** Never a ranking or a decision. */
   async getApplicantSummary(applicationId: string): Promise<ApiResponse<ApplicantSummary>> {
     return safeCall(() => authFetch(`/landlord/applications/${applicationId}/screening/summary`));
   },
@@ -589,7 +569,6 @@ export const landlordService = {
     return safeCall(() => authFetch(`/landlord/applications/${id}/tenancy-standing`));
   },
 
-  // ---- Leases ----
   async listLeases(
     params: { status?: string; page?: number; pageSize?: number } = {}
   ): Promise<ApiResponse<Paginated<Lease>>> {
@@ -610,8 +589,8 @@ export const landlordService = {
     return safeCall(() =>
       authFetch('/landlord/leases', {
         method: 'POST',
-        // tenantId is omitted when there is no linked applicant: the API then
-        // falls back to this unit's approved applicant, or to the name alone.
+        // tenantId is omitted when there is no linked applicant: the API then falls back to this
+        // unit's approved applicant, or to the name alone.
         body: JSON.stringify({
           unitId: data.unitId,
           tenantName: data.tenantName,
@@ -632,7 +611,7 @@ export const landlordService = {
     return safeCall(() => authFetch(`/landlord/leases/${id}/send`, { method: 'PATCH' }));
   },
 
-  /** Sends a renewal offer; a note goes to the tenant as a message with it. */
+  /** A note goes to the tenant as a message with it. */
   async renewLease(
     id: string,
     rentAmount: number,
@@ -647,7 +626,7 @@ export const landlordService = {
     );
   },
 
-  /** Renew or re-let: first-year figures for each, a suggested rent and a drafted note. */
+  /** First-year figures for each, a suggested rent and a drafted note. */
   async getRenewalAdvice(
     id: string,
     language: ReplyLanguage = 'en'
@@ -702,7 +681,7 @@ export const landlordService = {
     return safeCall(() => authFetch(`/landlord/leases/${leaseId}/rent-account`));
   },
 
-  /** Refund the tenant's credit, back the way they paid it. */
+  /** Back the way they paid it. */
   async refundTenantCredit(
     leaseId: string,
     reason?: string
@@ -765,12 +744,8 @@ export const landlordService = {
     });
   },
 
-  // ---- Legal cases ----
-  //
-  // An eviction is `kind: 'EVICTION'` rather than its own endpoint. The notice
-  // steps that used to live here (`issue-notice` with a hand-typed cure period)
-  // are gone: notices belong to the tenancy's ladder, which resolves the period,
-  // records where the number came from, and refuses to invent one.
+  // An eviction is `kind: 'EVICTION'`; its notices belong to the tenancy's ladder, which resolves
+  // the period.
 
   async listLegalCases(
     params: {
@@ -807,9 +782,8 @@ export const landlordService = {
   },
 
   /**
-   * File in court. For a possession case this is refused until the notice to
-   * quit and the notice of intention have both run out, so the server's refusal
-   * is worth showing verbatim rather than replacing with something generic.
+   * A possession case is refused until both notices have run out; show the server's refusal
+   * verbatim.
    */
   async fileLegalCase(
     id: string,
@@ -898,10 +872,7 @@ export const landlordService = {
     );
   },
 
-  /**
-   * Record what happened at a sitting. An adjournment must name the date it was
-   * adjourned to, and the server books that as the next sitting.
-   */
+  /** An adjournment must name its date; the server books it as the next sitting. */
   async recordHearing(
     id: string,
     hearingId: string,
@@ -915,10 +886,7 @@ export const landlordService = {
     );
   },
 
-  /**
-   * The printable notice record. Still an internal draft rather than a certified
-   * notice — the PDF says so on its face.
-   */
+  /** Still an internal draft, not a certified notice; the PDF says so. */
   async downloadNoticePdf(noticeId: string): Promise<ApiResponse<void>> {
     return safeCall(async () => {
       const blob = await authDownload(`/landlord/tenancy-notices/${noticeId}/document`);
@@ -933,21 +901,19 @@ export const landlordService = {
     });
   },
 
-  // ---- Tenants ----
   async listTenants(
     params: { page?: number; pageSize?: number } = {}
   ): Promise<ApiResponse<Paginated<Tenant>>> {
     return safeCall(() => authFetch<Paginated<Tenant>>(`/landlord/tenants${toQuery(params)}`));
   },
 
-  // ---- Payments ----
   async listPayments(
     params: {
       status?: string;
       sort?: 'due_date_asc' | 'due_date_desc';
       page?: number;
       pageSize?: number;
-      /** Tenant name, property title or payment reference, across every page. */
+      /** Searches every page. */
       search?: string;
     } = {}
   ): Promise<ApiResponse<Paginated<RentPayment>>> {
@@ -976,10 +942,7 @@ export const landlordService = {
     );
   },
 
-  /**
-   * Charge one unit. Separate from bulkCharge because charging a single tenant
-   * is core rent collection and stays available on the Free plan.
-   */
+  /** Separate from bulkCharge so single-tenant charging stays on the Free plan. */
   async chargeUnit(data: {
     unitId: string;
     category: ChargeCategory;
@@ -992,12 +955,11 @@ export const landlordService = {
     );
   },
 
-  // ---- Portfolio ----
   async getPortfolioAnalytics(): Promise<ApiResponse<PortfolioAnalytics>> {
     return safeCall(() => authFetch('/landlord/portfolio/analytics'));
   },
 
-  /** Draft a title, amenities and description for a unit from its property and photos. Saves nothing. */
+  /** Saves nothing. */
   async draftListing(unitId: string): Promise<ApiResponse<ListingDraft>> {
     return safeCall(() =>
       authFetch('/landlord/listings/assist/draft', {
@@ -1007,7 +969,6 @@ export const landlordService = {
     );
   },
 
-  /** Check a listing before publishing: price, photos, contact details, warning signs. */
   async selfCheckListing(input: ListingSelfCheckInput): Promise<ApiResponse<ListingSelfCheck>> {
     return safeCall(() =>
       authFetch('/landlord/listings/assist/self-check', {
@@ -1017,12 +978,10 @@ export const landlordService = {
     );
   },
 
-  /** An owner statement in plain words: where the money went, what changed, what to ask. */
   async explainStatement(id: string): Promise<ApiResponse<StatementExplanation>> {
     return safeCall(() => authFetch(`/landlord/owner-statements/${id}/explain`));
   },
 
-  /** A step and a message per tenant in arrears; messages in `language` when given. */
   async getCollectionPlan(language: ReplyLanguage = 'en'): Promise<ApiResponse<CollectionPlan>> {
     return safeCall(() =>
       authFetch(`/landlord/collections/plan${language === 'en' ? '' : `?language=${language}`}`)
@@ -1046,7 +1005,6 @@ export const landlordService = {
     return safeCall(() => authFetch('/ai/portfolio/briefing'));
   },
 
-  // ---- Financials ----
   async getFinancialStats(period: string): Promise<ApiResponse<FinancialStats>> {
     return safeCall(() => authFetch(`/landlord/financials/stats${toQuery({ period })}`));
   },
@@ -1069,7 +1027,6 @@ export const landlordService = {
     });
   },
 
-  // ---- Expenses ----
   async listExpenses(
     params: { propertyId?: string; category?: string; page?: number; pageSize?: number } = {}
   ): Promise<ApiResponse<Paginated<Expense>>> {
@@ -1092,7 +1049,6 @@ export const landlordService = {
     return safeCall(() => authFetch(`/landlord/expenses/${id}`, { method: 'DELETE' }));
   },
 
-  // ---- Management fee configuration ----
   async getManagementFeeConfig(
     propertyId: string
   ): Promise<ApiResponse<ManagementFeeConfig | null>> {
@@ -1109,7 +1065,6 @@ export const landlordService = {
     );
   },
 
-  // ---- Owner statements ----
   async listOwnerStatements(
     params: { page?: number; pageSize?: number } = {}
   ): Promise<ApiResponse<Paginated<OwnerStatement>>> {
@@ -1145,12 +1100,11 @@ export const landlordService = {
     );
   },
 
-  /** Download a statement as a PDF (draft or issued). */
+  /** Draft or issued. */
   async downloadOwnerStatementPdf(id: string): Promise<Blob> {
     return authDownload(`/landlord/owner-statements/${id}/pdf`);
   },
 
-  /** Email the owner their copy of an issued statement again. */
   async resendOwnerStatementEmail(
     id: string
   ): Promise<ApiResponse<{ emailSentAt: string | null; emailError: string | null }>> {
@@ -1160,11 +1114,8 @@ export const landlordService = {
   },
 
   /**
-   * Say that one line is wrong.
-   *
-   * An issued statement is never edited, so this does not change the figure. If
-   * it is upheld the correction arrives on the NEXT statement, and until it is
-   * decided a payout that has not been sent is held.
+   * An issued statement is never edited: an upheld correction arrives on the next statement, and an
+   * unsent payout is held until it is decided.
    */
   async disputeStatementLine(
     statementId: string,
@@ -1179,7 +1130,7 @@ export const landlordService = {
     );
   },
 
-  /** Take back your own complaint, before anybody has decided it. */
+  /** Only before anybody has decided it. */
   async withdrawStatementLineDispute(
     statementId: string,
     disputeId: string
@@ -1192,7 +1143,6 @@ export const landlordService = {
     );
   },
 
-  // ---- Vendors ----
   async listVendors(
     params: { page?: number; pageSize?: number; activeOnly?: boolean } = {}
   ): Promise<ApiResponse<Paginated<Vendor>>> {
@@ -1222,7 +1172,6 @@ export const landlordService = {
     return safeCall(() => authFetch(`/landlord/vendors/${id}`, { method: 'DELETE' }));
   },
 
-  // ---- Maintenance ----
   async listMaintenanceRequests(
     params: { status?: string; page?: number; pageSize?: number } = {}
   ): Promise<ApiResponse<Paginated<LandlordMaintenanceRequest>>> {
@@ -1286,7 +1235,6 @@ export const landlordService = {
     );
   },
 
-  // ---- Documents ----
   async listDocuments(
     params: { search?: string; category?: string; page?: number; pageSize?: number } = {}
   ): Promise<ApiResponse<Paginated<LandlordDocument>>> {
@@ -1311,7 +1259,6 @@ export const landlordService = {
     return safeCall(() => authFetch(`/landlord/documents/${id}/download`));
   },
 
-  // ---- Reviews ----
   async listReviews(
     params: { page?: number; pageSize?: number } = {}
   ): Promise<ApiResponse<Paginated<TenantReview>>> {
@@ -1324,7 +1271,6 @@ export const landlordService = {
     return safeCall(() => authFetch('/landlord/reviews/summary'));
   },
 
-  // ---- Messages ----
   async listConversations(
     params: { search?: string; page?: number; pageSize?: number } = {}
   ): Promise<ApiResponse<Paginated<Conversation>>> {
@@ -1374,7 +1320,6 @@ export const landlordService = {
     );
   },
 
-  // ---- Leads inbox ----
   async listLeads(
     params: {
       search?: string;
@@ -1425,7 +1370,7 @@ export const landlordService = {
     );
   },
 
-  /** The host's link into a confirmed video viewing, from 15 minutes before it. */
+  /** Available from 15 minutes before the viewing. */
   async joinVideoCall(id: string): Promise<ApiResponse<VideoCallJoin>> {
     return safeCall(() =>
       authFetch<VideoCallJoin>(`/landlord/viewing-requests/${id}/video-call`, { method: 'POST' })
@@ -1444,7 +1389,6 @@ export const landlordService = {
     );
   },
 
-  // ---- Offers (for-sale listings the landlord owns or manages) ----
   async listOffers(
     params: { page?: number; pageSize?: number; status?: string; search?: string } = {}
   ): Promise<ApiResponse<Paginated<LandlordOffer>>> {
@@ -1482,7 +1426,6 @@ export const landlordService = {
     return safeCall(() => authFetch<LandlordOfferMessage[]>(`/landlord/offers/${id}/thread`));
   },
 
-  // ---- Microsite ----
   async getMicrositeSettings(): Promise<ApiResponse<LandlordMicrositeSettings>> {
     return safeCall(() => authFetch('/landlord/microsite'));
   },
@@ -1503,7 +1446,6 @@ export const landlordService = {
     );
   },
 
-  // ---- Settings: Profile ----
   async getProfile(): Promise<ApiResponse<LandlordProfile>> {
     return safeCall(() => authFetch('/landlord/profile'));
   },
@@ -1524,7 +1466,6 @@ export const landlordService = {
     );
   },
 
-  // ---- Settings: Notifications ----
   async getNotificationPreferences(): Promise<ApiResponse<LandlordNotificationPreference[]>> {
     return safeCall(() => authFetch('/landlord/settings/notifications'));
   },
@@ -1540,7 +1481,6 @@ export const landlordService = {
     );
   },
 
-  // ---- Settings: Payout ----
   async getPayoutAccount(): Promise<ApiResponse<LandlordPayoutAccount>> {
     return safeCall(() => authFetch('/landlord/settings/payout'));
   },
@@ -1553,7 +1493,6 @@ export const landlordService = {
     );
   },
 
-  // ---- Settings: Automation ----
   async getAutomationSettings(): Promise<ApiResponse<LandlordAutomationSettings>> {
     return safeCall(() => authFetch('/landlord/settings/automation'));
   },
@@ -1566,9 +1505,6 @@ export const landlordService = {
     );
   },
 
-  // ---- Tenancy notices ----
-
-  /** Where a tenancy stands: what is served, what is next, what blocks it. */
   async getLeaseLadder(leaseId: string): Promise<ApiResponse<LeaseLadder>> {
     return safeCall(() => authFetch(`/landlord/tenancy-notices/lease/${leaseId}`));
   },
@@ -1584,10 +1520,7 @@ export const landlordService = {
     return safeCall(() => authFetch(`/landlord/tenancy-notices${toQuery(params)}`));
   },
 
-  /**
-   * Served notices running out, so the next step can be prepared before the
-   * current one completes rather than after.
-   */
+  /** So the next step can be prepared before the current one completes. */
   async listExpiringNotices(withinDays?: number): Promise<ApiResponse<TenancyNotice[]>> {
     return safeCall(() =>
       authFetch(`/landlord/tenancy-notices/expiring${toQuery({ withinDays })}`)
@@ -1600,9 +1533,8 @@ export const landlordService = {
     reason: string;
     arrearsAmount?: number;
     /**
-     * A number typed for this one notice. Kept available because counsel may
-     * advise a period the register does not hold — it is recorded as the least
-     * certain source and still needs a basis.
+     * For a period the register does not hold; recorded as the least certain source and still needs
+     * a basis.
      */
     manualDays?: number;
     manualBasis?: string;
@@ -1613,9 +1545,8 @@ export const landlordService = {
   },
 
   /**
-   * Record service. This is where the period starts running, and the date is
-   * declared rather than assumed: whether it runs from the day of service or the
-   * day after is interpretation, so the person serving says which.
+   * The period starts running here; the person serving declares whether it runs from the day of
+   * service or the day after.
    */
   async serveNotice(
     id: string,
@@ -1650,8 +1581,6 @@ export const landlordService = {
       })
     );
   },
-
-  // ---- The period register ----
 
   async getNoticePeriods(): Promise<ApiResponse<NoticePeriodSettings>> {
     return safeCall(() => authFetch('/landlord/tenancy-notices/periods'));

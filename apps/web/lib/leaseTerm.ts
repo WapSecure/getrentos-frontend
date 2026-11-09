@@ -1,16 +1,7 @@
-/**
- * Wording for a lease rent figure.
- *
- * Leases written before `Lease.rentPeriod` existed carry a single amount with no
- * cadence, and labelling that "Monthly rent" turned an annual figure into a 12x
- * overstatement on the very document a tenant signs. Where the cadence is
- * recorded it is used; otherwise the term dates are the only evidence left.
- */
-/** Short suffix for inline figures, e.g. "₦2.4M/yr". */
+// Leases written before `Lease.rentPeriod` have no cadence, and labelling them "Monthly rent" overstated annual rent 12x: fall back to the term dates.
 export const rentSuffix = (period: 'month' | 'year' | undefined): string =>
   period === 'year' ? '/yr' : period === 'month' ? '/mo' : '';
 
-/** Inline suffix for a lease rent, falling back to the term when no cadence is recorded. */
 export function leaseRentSuffix(
   period: 'month' | 'year' | undefined,
   leaseStart: string,
@@ -23,10 +14,6 @@ export function leaseRentSuffix(
   return '';
 }
 
-/**
- * Label for a lease rent. Prefers the cadence recorded on the lease and only
- * falls back to the term-derived wording for leases written before it existed.
- */
 export function leaseRentLabel(
   period: 'month' | 'year' | undefined,
   leaseStart: string,

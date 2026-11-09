@@ -22,11 +22,6 @@ const OWNER: Record<LandPerfectionStep['owner'], string> = {
   SUREGROUND: 'Sureground',
 };
 
-/**
- * Title perfection after completion: each step's owner, due date, and its
- * submission and approval shown separately. The developer can record
- * progress; the buyer follows it.
- */
 export const PerfectionPanel = ({
   perfection,
   role,

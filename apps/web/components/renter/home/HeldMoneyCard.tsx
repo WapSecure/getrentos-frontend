@@ -18,11 +18,6 @@ const formatLagosDate = (iso: string) =>
     timeZone: 'Africa/Lagos',
   }).format(new Date(iso));
 
-/**
- * Money Sureground is holding for the renter, on the home overview: rent held
- * under Payment Protection (with the next release date) and the deposit
- * balance. Hidden when nothing is held.
- */
 export function HeldMoneyCard() {
   const paymentsQuery = useQuery({
     queryKey: [...renterKeys.payments, { page: 1, pageSize: 100 }],

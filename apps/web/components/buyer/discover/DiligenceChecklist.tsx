@@ -19,11 +19,6 @@ const STATUS: Record<
   concern: { icon: AlertOctagon, className: 'text-destructive', label: 'Concern' },
 };
 
-/**
- * "Check before you buy": title, consent, survey and charting, registry
- * search, viewing, seller, warning signs, lawyer and escrow, marked from what
- * is on file, with questions for the seller. Loads only when asked.
- */
 export function DiligenceChecklist({ listingId }: { listingId: string }) {
   const [asked, setAsked] = useState(false);
   const { data, isLoading, isError } = useQuery({

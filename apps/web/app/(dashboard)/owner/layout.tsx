@@ -19,7 +19,6 @@ export type OwnerUser = { fullName: string; email: string; role?: string; roles?
 
 const OwnerUserContext = createContext<OwnerUser | null>(null);
 
-/** Returns the signed-in owner's profile, populated once by the owner layout's auth check. */
 export const useOwnerUser = () => useContext(OwnerUserContext);
 
 export default function OwnerLayout({ children }: { children: ReactNode }) {

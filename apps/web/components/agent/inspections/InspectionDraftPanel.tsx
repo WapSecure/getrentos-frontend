@@ -28,7 +28,6 @@ const CHANGE: Record<
 
 export const roomKey = (room: string) => room.trim().replace(/\s+/g, ' ').toLowerCase();
 
-/** Fill matching rooms from a draft, keeping the agent's own notes above the suggestion. */
 export function applyDraftToRooms(
   rooms: InspectionRoomEntry[],
   draft: InspectionDraft
@@ -43,11 +42,6 @@ export function applyDraftToRooms(
   });
 }
 
-/**
- * "Draft the report from photos" for the web inspection form. Suggests each
- * room's condition and notes and, on a move-out, what looks different since
- * move-in. Nothing is saved until the agent saves the inspection.
- */
 export function InspectionDraftPanel({
   taskId,
   type,

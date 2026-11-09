@@ -1,4 +1,4 @@
-/** Live guided video tours (blueprint §8.4); mirrors `land-site-tour.service.ts`. */
+/** Mirrors `land-site-tour.service.ts`. */
 
 export type LandSiteTourStatus =
   | 'REQUESTED'
@@ -10,7 +10,7 @@ export type LandSiteTourStatus =
 
 export interface LandSiteTourSlot {
   at: string;
-  /** Formatted in the viewer's zone (`timeZone`). */
+  /** In the viewer's zone (`timeZone`). */
   local: string;
 }
 
@@ -26,7 +26,6 @@ export interface LandSiteTour {
   buyerName: string;
   hostName: string;
   attendeeName?: string;
-  /** The zone the `local` times are shown in for this viewer. */
   timeZone: string;
   buyerTimeZone: string;
   preferredTimes?: string;
@@ -64,6 +63,6 @@ export const LAND_SITE_TOUR_STATUS_VARIANT: Record<
   HOST_NO_SHOW: 'danger',
 };
 
-/** Shown before booking, and kept on every tour: matches the backend wording. */
+/** Matches the backend wording. */
 export const LAND_TOUR_DISCLAIMER =
   'A video tour shows the land as it looks today. It is not a registry search, a survey or an inspection, and it does not confirm who owns the land or where its boundaries are.';

@@ -2,17 +2,7 @@ import { Clock, Shield, ShieldCheck } from 'lucide-react';
 import { trustChainLabel } from '@sureground/shared';
 import type { PropertyTrustChain } from '@/types/renter';
 
-/**
- * Compact trust-chain badge for a listing card — the teaser for the full chain
- * on the property detail page. Says in words where verification stands
- * ("Fully verified", "Verified · ownership pending", "Verification in
- * progress"), with the per-link status in the hover title.
- * Shared across the renter browse, public market and microsite cards.
- *
- * Absolutely positioned (top-left of the card image), so its parent needs a
- * positioning context. Falls back to the legacy single "Verified" pill when the
- * payload carries no chain, so older listings are unaffected.
- */
+// Absolutely positioned, so its parent needs a positioning context.
 export const TrustChainBadge = ({
   chain,
   fallbackVerified,

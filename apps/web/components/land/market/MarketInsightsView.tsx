@@ -44,10 +44,6 @@ const Tile = ({ label, value, hint }: { label: string; value: string; hint?: str
   </div>
 );
 
-/**
- * Asking prices for verified land, filterable by area, estate and title. The
- * filters live in the URL so a view can be shared or linked from a listing.
- */
 export const MarketInsightsView = () => {
   const router = useRouter();
   const pathname = usePathname();

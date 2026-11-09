@@ -147,7 +147,6 @@ const toOwnerPropertyPayload = (property: Partial<OwnerPropertyApi>): Partial<Ow
   return apiPropertyType ? { ...property, propertyType: apiPropertyType } : property;
 };
 
-/** A buyer's request to view one of the seller's for-sale listings. */
 export interface OwnerViewing {
   id: string;
   listingId: string;
@@ -170,10 +169,8 @@ export const ownerService = {
         body: JSON.stringify({ question, history, language }),
       })
     ),
-  // Dashboard
   getDashboard: () => safeCall(() => authFetch<OwnerDashboard>('/owner/dashboard')),
 
-  // Properties
   listProperties: (
     params: { search?: string; verificationStatus?: string; page?: number; pageSize?: number } = {}
   ) =>
@@ -218,12 +215,8 @@ export const ownerService = {
     ),
 
   /**
-   * Stage a property photo and hand back its storage key.
-   *
-   * Two steps on purpose: the key only becomes part of the property when it is
-   * sent back through `updateProperty` as `coverImageKey`. Before this existed,
-   * an owner had no way to photograph their own property at all — the only
-   * upload route was the landlord one, which is closed to a PROPERTY_OWNER.
+   * Two steps on purpose: the key only joins the property when sent back through `updateProperty`
+   * as `coverImageKey`.
    */
   uploadPropertyMedia: (file: File, kind: 'image' | 'video' = 'image') =>
     safeCall(async () => {
@@ -236,7 +229,6 @@ export const ownerService = {
       });
     }),
 
-  /** Discard a staged upload that was never attached to a property. */
   removePropertyMedia: (key: string) =>
     safeCall(() =>
       authFetch<{ deleted: boolean }>('/owner/properties/media/upload', {
@@ -245,10 +237,9 @@ export const ownerService = {
       })
     ),
 
-  // Buyers' viewings on for-sale listings
   listViewings: (params: { status?: string; page?: number; pageSize?: number } = {}) =>
     safeCall(() => authFetch<Paginated<OwnerViewing>>(`/owner/viewings${toQuery(params)}`)),
-  /** Confirm at the buyer's time, or pass another ISO time to offer instead. */
+  /** Pass another ISO time to offer that instead. */
   confirmViewing: (id: string, scheduledAt?: string) =>
     safeCall(() =>
       authFetch<OwnerViewing>(`/owner/viewings/${id}/confirm`, {
@@ -260,13 +251,12 @@ export const ownerService = {
     safeCall(() => authFetch<OwnerViewing>(`/owner/viewings/${id}/decline`, { method: 'PATCH' })),
   completeViewing: (id: string) =>
     safeCall(() => authFetch<OwnerViewing>(`/owner/viewings/${id}/complete`, { method: 'PATCH' })),
-  /** The seller's link into a confirmed video viewing, from 15 minutes before it. */
+  /** Available from 15 minutes before the viewing. */
   joinViewingCall: (id: string) =>
     safeCall(() =>
       authFetch<VideoCallJoin>(`/owner/viewings/${id}/video-call`, { method: 'POST' })
     ),
 
-  // Sale listings
   listListings: (
     params: { search?: string; status?: string; page?: number; pageSize?: number } = {}
   ) =>
@@ -276,7 +266,7 @@ export const ownerService = {
     price: number;
     listingTitle?: string;
     amenities?: string[];
-    /** Save Draft or Publish; left out, the listing waits for review. */
+    /** Left out, the listing waits for review. */
     intent?: 'draft' | 'publish';
   }) =>
     safeCall(() => authFetch('/owner/listings', { method: 'POST', body: JSON.stringify(data) })),
@@ -288,7 +278,6 @@ export const ownerService = {
       })
     ),
 
-  // Offers
   listOffers: (
     params: { search?: string; status?: string; page?: number; pageSize?: number } = {}
   ) => safeCall(() => authFetch<Paginated<OwnerOfferApi>>(`/owner/offers${toQuery(params)}`)),
@@ -304,7 +293,6 @@ export const ownerService = {
       })
     ),
 
-  // Transactions / escrow
   listTransactions: (
     params: { search?: string; status?: string; page?: number; pageSize?: number } = {}
   ) =>
@@ -314,18 +302,15 @@ export const ownerService = {
   releaseTransaction: (id: string) =>
     safeCall(() => authFetch(`/owner/transactions/${id}/release`, { method: 'POST' })),
 
-  // Analytics
   getAnalyticsMetrics: () =>
     safeCall(() => authFetch<OwnerMetricApi[]>('/owner/analytics/metrics')),
   getAnalyticsSummary: () => safeCall(() => authFetch('/owner/analytics/summary')),
 
-  // Leads
   listLeads: (params: { search?: string; stage?: string; page?: number; pageSize?: number } = {}) =>
     safeCall(() => authFetch<Paginated<OwnerLeadApi>>(`/owner/leads${toQuery(params)}`)),
   getRealtors: (params: { search?: string; page?: number; pageSize?: number } = {}) =>
     safeCall(() => authFetch<Paginated<RealtorOption>>(`/owner/leads/realtors${toQuery(params)}`)),
 
-  // Documents
   listDocuments: (
     params: { search?: string; category?: string; page?: number; pageSize?: number } = {}
   ) => safeCall(() => authFetch<Paginated<OwnerDocumentApi>>(`/owner/documents${toQuery(params)}`)),
@@ -347,18 +332,15 @@ export const ownerService = {
   deleteDocument: (id: string) =>
     safeCall(() => authFetch(`/owner/documents/${id}`, { method: 'DELETE' })),
 
-  // Reviews
   listReviews: (params: { page?: number; pageSize?: number } = {}) =>
     safeCall(() => authFetch<Paginated<OwnerReview>>(`/owner/reviews${toQuery(params)}`)),
   getRatingSummary: () => safeCall(() => authFetch<OwnerRatingSummary>('/owner/reviews/summary')),
 
-  // Profile / settings
   getProfile: () => safeCall(() => authFetch<OwnerProfile>('/owner/profile')),
   getTrustProfile: () => safeCall(() => authFetch<TrustProfile>('/owner/trust-profile')),
   updateProfile: (data: Partial<OwnerProfile>) =>
     safeCall(() => authFetch('/owner/profile', { method: 'PUT', body: JSON.stringify(data) })),
 
-  // Notification preferences
   getNotificationPreferences: () =>
     safeCall(() => authFetch<OwnerNotificationPreference[]>('/owner/settings/notifications')),
   updateNotificationPreferences: (preferences: OwnerNotificationPreference[]) =>
@@ -369,7 +351,6 @@ export const ownerService = {
       })
     ),
 
-  // Preferences
   getPreferences: () => safeCall(() => authFetch<OwnerPreferences>('/owner/settings/preferences')),
   updatePreferences: (data: Partial<OwnerPreferences>) =>
     safeCall(() =>
@@ -379,7 +360,6 @@ export const ownerService = {
       })
     ),
 
-  // Notifications feed
   getNotifications: (params: { page?: number; pageSize?: number } = {}) =>
     safeCall(() =>
       authFetch<Paginated<OwnerNotification>>(`/owner/notifications${toQuery(params)}`)
@@ -389,13 +369,11 @@ export const ownerService = {
   markAllNotificationsRead: () =>
     safeCall(() => authFetch('/owner/notifications/read-all', { method: 'POST' })),
 
-  // Portfolio trend
   getPortfolioTrend: () =>
     safeCall(() =>
       authFetch<{ label: string; value: number }[]>('/owner/analytics/portfolio-trend')
     ),
 
-  // Market insights (comparable sales)
   getMarketInsights: (city?: string) =>
     safeCall(() =>
       authFetch<OwnerMarketInsights>(
@@ -403,11 +381,9 @@ export const ownerService = {
       )
     ),
 
-  // Offer negotiation thread
   getOfferThread: (offerId: string) =>
     safeCall(() => authFetch<OwnerOfferThreadMessage[]>(`/owner/offers/${offerId}/thread`)),
 
-  // Messages
   listConversations: (params: { search?: string; page?: number; pageSize?: number } = {}) =>
     safeCall(() =>
       authFetch<Paginated<OwnerConversation>>(`/owner/messages/conversations${toQuery(params)}`)

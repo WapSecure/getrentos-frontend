@@ -45,8 +45,7 @@ export function PaymentsView() {
   const [filter, setFilter] = useState<'all' | RentPaymentStatus>('all');
   const [selectedPayment, setSelectedPayment] = useState<RentPayment | null>(null);
 
-  // The server searches every page (tenant, property, reference), so the term
-  // is sent once typing pauses rather than on every keystroke.
+  // The server searches every page, so the term is sent once typing pauses.
   const search = useDebouncedValue(searchQuery.trim());
   const paymentsQuery = useQuery({
     queryKey: [

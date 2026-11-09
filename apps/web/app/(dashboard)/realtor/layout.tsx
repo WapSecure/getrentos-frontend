@@ -19,7 +19,6 @@ export type RealtorUser = { fullName: string; email: string; role?: string; role
 
 const RealtorUserContext = createContext<RealtorUser | null>(null);
 
-/** Returns the signed-in realtor's profile, populated once by the realtor layout's auth check. */
 export const useRealtorUser = () => useContext(RealtorUserContext);
 
 export default function RealtorLayout({ children }: { children: ReactNode }) {

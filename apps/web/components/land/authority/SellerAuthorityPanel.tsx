@@ -59,11 +59,7 @@ interface SellerAuthorityPanelProps {
 const isClaim = (view: unknown): view is LandAuthorityView =>
   Boolean(view && typeof view === 'object' && (view as LandAuthorityView).authority);
 
-/**
- * The seller's authority to sell this land: the capacity they sell in, the
- * instrument it rests on, and everyone whose consent it needs. Land review
- * cannot be approved until Sureground has verified it.
- */
+// Land review can't be approved until Sureground has verified the seller's authority.
 export const SellerAuthorityPanel = ({ propertyId }: SellerAuthorityPanelProps) => {
   const queryClient = useQueryClient();
   const key = landKeys.authority(propertyId);
@@ -103,7 +99,6 @@ export const SellerAuthorityPanel = ({ propertyId }: SellerAuthorityPanelProps) 
       <StatusCard view={isClaim(view) ? view : null} />
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <DeclarationCard
-          // A new or replaced claim starts the form from what the server holds.
           key={claim ? `${claim.id}:${claim.status}` : 'new'}
           propertyId={propertyId}
           view={isClaim(view) ? view : null}
@@ -130,8 +125,6 @@ export const SellerAuthorityPanel = ({ propertyId }: SellerAuthorityPanelProps) 
     </div>
   );
 };
-
-// ─── Where the claim stands ──────────────────────────────────────────────────
 
 const StatusCard = ({ view }: { view: LandAuthorityView | null }) => {
   if (!view) {
@@ -201,8 +194,6 @@ const StatusCard = ({ view }: { view: LandAuthorityView | null }) => {
     </Card>
   );
 };
-
-// ─── Capacity and instrument ─────────────────────────────────────────────────
 
 interface CardProps {
   propertyId: string;
@@ -314,7 +305,7 @@ const DeclarationCard = ({
               />
             </Field>
             <LandDocumentPicker
-              // The picker reads its suggested type once; a new instrument type re-presets it.
+              // The picker reads its suggested type once, so a new instrument type remounts it.
               key={instrumentType || 'none'}
               propertyId={propertyId}
               label="The instrument document"
@@ -345,8 +336,6 @@ const DeclarationCard = ({
     </Card>
   );
 };
-
-// ─── Who must consent ────────────────────────────────────────────────────────
 
 const SignatoriesCard = ({ propertyId, view, onSaved, onFailed }: CardProps) => {
   const { authority, requirements } = view;
@@ -613,8 +602,6 @@ const SignatoryRow = ({
     </li>
   );
 };
-
-// ─── Submit, appeal, withdraw ────────────────────────────────────────────────
 
 const ActionsCard = ({
   propertyId,

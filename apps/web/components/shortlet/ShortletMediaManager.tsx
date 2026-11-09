@@ -16,12 +16,6 @@ export interface ShortletMediaState {
   tourUrl: string;
 }
 
-/**
- * Lets a host manage a shortlet listing's media: an ordered photo gallery
- * (first photo = cover), an uploaded or external video, and a 360/tour URL.
- * Newly uploaded files preview immediately via object URLs; stored keys are
- * attached to the listing when the parent dialog saves.
- */
 export function ShortletMediaManager({
   value,
   onChange,
@@ -31,11 +25,8 @@ export function ShortletMediaManager({
 }: {
   value: ShortletMediaState;
   onChange: (next: ShortletMediaState) => void;
-  /** Signed URLs matching the initial imageKeys (edit mode) so existing photos render. */
   initialImages?: string[];
-  /** Signed URL of the already-uploaded video (edit mode). */
   initialVideoPreview?: string;
-  /** Property gallery the host can import as a starting point: {key, url}. */
   suggestions?: { key: string; url: string }[];
 }) {
   const toast = useToast();
@@ -52,7 +43,7 @@ export function ShortletMediaManager({
   const videoInputRef = useRef<HTMLInputElement>(null);
 
   const importSuggestion = (s: { key: string; url: string }) => {
-    if (value.imageKeys.includes(s.key)) return; // already added
+    if (value.imageKeys.includes(s.key)) return;
     setPreviews((prev) => ({ ...prev, [s.key]: s.url }));
     onChange({ ...value, imageKeys: [...value.imageKeys, s.key] });
   };

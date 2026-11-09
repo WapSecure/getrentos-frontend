@@ -1,6 +1,5 @@
 import { authFetch, safeCall, type ApiResponse } from '@/lib/apiHelpers';
 
-/** The roles anyone may choose at sign-up, and so may add to their account later. */
 export type AddableRoleId =
   | 'renter'
   | 'landlord'
@@ -23,7 +22,6 @@ export const ADDABLE_ROLE_IDS: AddableRoleId[] = [
 export interface AddRoleResult {
   role: AddableRoleId;
   added: boolean;
-  /** Every role the account now holds, as role codes (as sign-in returns them). */
   roles: string[];
 }
 

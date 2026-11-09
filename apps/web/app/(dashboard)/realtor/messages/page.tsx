@@ -64,11 +64,8 @@ function RealtorMessagesPageContent() {
     setActiveId(conversationId);
   };
 
-  // Opened from a message notification.
   useOpenConversationFromUrl(!conversationsLoading, activateConversation);
 
-  // Open (or start) the conversation for a client the user navigated from,
-  // e.g. the "Message" button on the Clients page (?client=<id>).
   const startConversation = useMutation({
     mutationFn: (clientId: string) => unwrap(realtorService.startConversation(clientId)),
     onSuccess: (conversation) => {

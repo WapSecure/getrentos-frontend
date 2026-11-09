@@ -1,16 +1,11 @@
 import type { LandDiligenceCheckStatus } from '@/types/land';
 import type { LandReviewCheck, LandReviewDocument } from '@/types/landReviewer';
 
-/**
- * The backend's rules for deciding a diligence check (LandService.recordCheck),
- * so the form can explain a refusal before it is sent. The API still decides.
- */
+// Mirrors LandService.recordCheck; the API still decides.
 
-/** A document on the case is cited against this check. */
 export const hasCitedDocument = (check: LandReviewCheck, documents: LandReviewDocument[]) =>
   documents.some((d) => d.link?.checklistKey === check.key);
 
-/** Why `status` cannot be recorded with this note, or null when it can. */
 export const decisionProblem = (
   check: LandReviewCheck,
   status: LandDiligenceCheckStatus,
@@ -29,6 +24,5 @@ export const decisionProblem = (
   return null;
 };
 
-/** Checks on the seat still awaiting a decision. */
 export const pendingChecks = (checks: LandReviewCheck[]) =>
   checks.filter((c) => c.status === 'PENDING');

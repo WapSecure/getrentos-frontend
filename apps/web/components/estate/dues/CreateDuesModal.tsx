@@ -71,8 +71,7 @@ export const CreateDuesModal = ({
   const [chargeAll, setChargeAll] = useState(true);
   const [selectedHouseholdIds, setSelectedHouseholdIds] = useState<string[]>([]);
 
-  // The caller requests only active households from the server. Retaining the
-  // local guard makes this safe if a cached response predates that filter.
+  // Kept in case a cached response predates the server's active-only filter.
   const activeHouseholds = households.filter((h) => h.status === 'active');
 
   const handleClose = () => {

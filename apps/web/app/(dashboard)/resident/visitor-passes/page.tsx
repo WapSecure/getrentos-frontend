@@ -27,7 +27,6 @@ import type { IssuedVisitorPass, VisitorPass } from '@/types/estate';
 
 const statusVariant: Record<VisitorPass['status'], 'success' | 'warning' | 'neutral' | 'danger'> = {
   pending: 'warning',
-  // Warning, not neutral: this one is waiting on this household to answer.
   awaiting_approval: 'warning',
   approved: 'success',
   checked_in: 'success',
@@ -60,9 +59,7 @@ export default function ResidentVisitorPassesPage() {
   const queryClient = useQueryClient();
   const [isIssueModalOpen, setIsIssueModalOpen] = useState(false);
   const [issuedPass, setIssuedPass] = useState<IssuedVisitorPass | null>(null);
-  /** A short message about the last walk-in decision, or a failure to make one. */
   const [notice, setNotice] = useState<string | null>(null);
-  /** The walk-in being refused, so the reason can be collected. */
   const [denying, setDenying] = useState<VisitorPass | null>(null);
   const [denyReason, setDenyReason] = useState('');
 
@@ -94,11 +91,6 @@ export default function ResidentVisitorPassesPage() {
     onSuccess: invalidate,
   });
 
-  /**
-   * Consenting to a walk-in. Somebody is standing at the gate, so the outcome is
-   * always reported: staying silent here leaves a visitor waiting with no idea
-   * whether anyone is deciding.
-   */
   const approveMutation = useMutation({
     mutationFn: (passId: string) => unwrap(estateResidentService.approveWalkInVisitorPass(passId)),
     onSuccess: (pass) => {
@@ -122,9 +114,6 @@ export default function ResidentVisitorPassesPage() {
       setNotice(error instanceof Error ? error.message : 'Could not refuse that visitor.'),
   });
 
-  // Walk-ins waiting on this household get their own block above the list: this
-  // is the one thing here where a person is standing at a barrier while the
-  // resident reads the screen.
   const awaiting = passes.filter((pass) => pass.status === 'awaiting_approval');
   const others = passes.filter((pass) => pass.status !== 'awaiting_approval');
 
@@ -156,7 +145,6 @@ export default function ResidentVisitorPassesPage() {
         </Alert>
       )}
 
-      {/* Someone is at the gate, so this sits above everything else on the page. */}
       {awaiting.length > 0 && (
         <div className="space-y-3 mb-6">
           <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
@@ -254,13 +242,6 @@ export default function ResidentVisitorPassesPage() {
 
       <VisitorPinDialog pass={issuedPass} onClose={() => setIssuedPass(null)} />
 
-      {/*
-        Collects why a visitor was refused. The reason is optional: somebody
-        declining a visitor should not have to justify it to reach the button:
-        but when it is given the guard reads it out loud, so it is framed as
-        something to say to the person at the barrier rather than as a note for
-        the record.
-      */}
       <Dialog
         open={!!denying}
         onOpenChange={(open) => {

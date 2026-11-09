@@ -4,11 +4,6 @@ import { useEffect } from 'react';
 import { AlertTriangle, RefreshCcw } from 'lucide-react';
 import { Button } from '@sureground/ui';
 
-/**
- * Catches errors thrown anywhere inside the role dashboards so a single
- * failing section never blanks the whole app (the root error.tsx remains as
- * the final fallback).
- */
 export default function DashboardError({
   error,
   reset,

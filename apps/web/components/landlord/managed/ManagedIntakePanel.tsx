@@ -31,11 +31,7 @@ const lagosDateTime = (iso: string) =>
     timeStyle: 'short',
   });
 
-/**
- * Where an owner's Sureground Managed request stands, under its property. The
- * proposal is accepted here, and accepting is signing, so the agreement is an
- * explicit tick rather than implied by the button.
- */
+// Accepting the proposal is signing, so the agreement is an explicit tick rather than implied by the button.
 export const ManagedIntakePanel = ({
   intake,
   onChanged,
@@ -45,7 +41,6 @@ export const ManagedIntakePanel = ({
 }) => {
   const [agree, setAgree] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // Accepted is the last step and it is complete, not in progress.
   const current = intake.status === 'ACCEPTED' ? STEPS.length : stepIndex(intake.status);
   const proposal = intake.proposal;
 

@@ -48,7 +48,7 @@ export interface ViewingRequest {
   /** 'video': a live video call at scheduledAt, hosted by the landlord. */
   mode: 'in_person' | 'video';
   requestedAt: string;
-  /** The slot the renter asked for. The landlord's confirmed time is `scheduledAt`. */
+  /** The slot the renter asked for; the confirmed time is `scheduledAt`. */
   preferredAt?: string;
   scheduledAt?: string;
   notes?: string;
@@ -175,16 +175,11 @@ export interface PendingLease {
   landlord: { name: string; email: string; phone: string };
   tenantSigned: boolean;
   landlordSigned: boolean;
-  /**
-   * Where the lease is: the tenant still has to sign, then get the first
-   * payment into escrow before the landlord hands over.
-   */
+  /** The tenant signs, then the first payment reaches escrow before the landlord hands over. */
   status: 'sent' | 'awaiting_payment' | 'awaiting_landlord' | 'signed';
-  /** Amount that must reach escrow to keep the lease, once signed. */
   amountDue?: number;
-  /** Deadline for that payment; the lease lapses and the unit is re-let after it. */
+  /** After it the lease lapses and the unit is re-let. */
   paymentDueAt?: string;
-  /** True once the first payment is held in escrow. */
   paymentInEscrow: boolean;
 }
 
@@ -217,30 +212,28 @@ export interface Payment {
   description: string;
   dueDate: string;
   escrowStatus: 'not_funded' | 'held' | 'pending_review' | 'released' | 'frozen';
-  /** Scheduled auto-release date (ISO) for funds held by Sureground. Present only while held. */
+  /** ISO. Present only while held. */
   releaseDate?: string;
   /** Short machine reason the money is held (e.g. 'rent_hold'). Present only while held. */
   heldReason?: string;
-  /** Present when the payment is initialized with a real gateway (redirect here to complete checkout). */
+  /** Present only with a real gateway: redirect here to complete checkout. */
   authorizationUrl?: string;
-  /** Gateway reference: the checkout in flight while processing, the one that paid it once paid. */
+  /** The checkout in flight while processing, the one that paid it once paid. */
   reference?: string;
-  /** Card or bank fee the payer covered on top of the charge, when the API knows it. */
+  /** Only when the API knows it. */
   feeNaira?: number;
-  /** Amount plus fee: what the payer was charged in all. Sent with `feeNaira`. */
+  /** Amount plus fee. Sent with `feeNaira`. */
   totalChargedNaira?: number;
-  /** Naira Sureground is holding for this charge right now (0 once released). */
+  /** 0 once released. */
   heldAmountNaira?: number;
-  /** A checkout the tenant opened and closed, which they can go back to until `expiresAt`. */
+  /** Reopenable until `expiresAt`. */
   resumeCheckout?: { url: string; reference: string; expiresAt: string };
-  /** Naira paid against this charge so far (part-payments and credit). */
+  /** Includes part-payments and credit. */
   amountPaid?: number;
-  /** Naira still owed on this charge. */
   outstanding?: number;
   /** The period billed, when the charge came from a rent schedule. */
   periodStart?: string;
   periodEnd?: string;
-  /** Invoice breakdown: rent plus recurring extras. */
   lines?: { category: string; label: string; amount: number }[];
 }
 
@@ -271,7 +264,6 @@ export interface RentAccount {
     amount: number;
     appliedAt: string;
   }[];
-  /** Credit paid back to the tenant, the way it was paid. */
   refunds?: {
     id: string;
     amount: number;
@@ -298,16 +290,15 @@ export interface Receipt {
   date: string;
   fileName: string;
   url: string;
-  /** What the charge was for. Older APIs leave it out. */
+  /** Older APIs leave it out. */
   category?: ChargeCategory;
   /** The period billed, when the charge came from a rent schedule. */
   periodStart?: string;
   periodEnd?: string;
-  /** Gateway reference of the payment. */
   reference?: string;
 }
 
-/** Account-wide payment figures, over every charge (not one page). */
+/** Over every charge, not one page. */
 export interface PaymentsSummary {
   amountOwedNaira: number;
   openCount: number;
@@ -456,11 +447,8 @@ export interface TrustScoreOverview {
   history: TrustScoreHistoryItem[];
   badges: Badge[];
   /**
-   * Dimension-engine breakdown (identity/financial/role/contact/activity minus
-   * penalty), surfaced only while the trust-score engine is on — same shape the
-   * other roles already receive from `/<role>/trust-profile`. Optional so the
-   * renter page degrades to the legacy factor list when the engine is off or
-   * the field is absent.
+   * Only while the trust-score engine is on; optional so the page falls back to the legacy factor
+   * list.
    */
   scoreBreakdown?: TrustScoreBreakdown;
 }
@@ -514,14 +502,13 @@ export interface RenterListingsFilters {
   bathrooms?: string;
   propertyType?: string;
   verifiedOnly?: boolean;
-  /** Estate public slug — limits results to properties inside that estate. */
+  /** Estate public slug; limits results to properties inside that estate. */
   estate?: string;
   page?: number;
   pageSize?: number;
 }
 
 export const renterService = {
-  // ---- Listings ----
   async listListings(
     filters: RenterListingsFilters = {}
   ): Promise<ApiResponse<Paginated<Property>>> {
@@ -542,13 +529,13 @@ export const renterService = {
     return safeCall(() => authFetch(`/renter/listings/${id}`));
   },
 
-  /** Real map + neighborhood/property insights for a listing (OpenStreetMap + optional AI). */
+  /** OpenStreetMap + optional AI. */
   async getGeoInsights(id: string, destination?: string): Promise<ApiResponse<GeoInsights>> {
     const query = destination ? `?destination=${encodeURIComponent(destination)}` : '';
     return safeCall(() => authFetch(`/renter/listings/${id}/geo-insights${query}`));
   },
 
-  /** Plain-language search: turns a sentence into Discover filters (never results). */
+  /** Turns a sentence into Discover filters, never results. */
   parseSearch(query: string): Promise<ApiResponse<RentalSearchParse>> {
     return safeCall(() =>
       authFetch('/renter/listings/search/parse', {
@@ -558,8 +545,7 @@ export const renterService = {
     );
   },
 
-  /** "Should I rent this?": facts, a rule-based level and plain advice for one listing. */
-  /** Rent against income and the cash needed to move in. The figures are used once, never stored. */
+  /** The figures are used once, never stored. */
   getAffordability(
     listingId: string,
     input: AffordabilityInput = {}
@@ -572,7 +558,6 @@ export const renterService = {
     );
   },
 
-  /** Two to four rentals side by side, with the trade-offs in plain words. */
   compareShortlist(
     listingIds: string[],
     monthlyIncome?: number
@@ -589,7 +574,6 @@ export const renterService = {
     return safeCall(() => authFetch(`/renter/listings/${id}/check`));
   },
 
-  // ---- Saved listings ----
   async listSavedListings(
     params: ListSavedListingsParams = {}
   ): Promise<ApiResponse<Paginated<SavedListingItem>>> {
@@ -638,7 +622,6 @@ export const renterService = {
     );
   },
 
-  // ---- Wishlists ----
   async listWishlists(): Promise<ApiResponse<Wishlist[]>> {
     return safeCall(() => authFetch('/renter/wishlists'));
   },
@@ -659,7 +642,6 @@ export const renterService = {
     return safeCall(() => authFetch(`/renter/wishlists/${id}`, { method: 'DELETE' }));
   },
 
-  // ---- Recently viewed ----
   async listRecentlyViewed(): Promise<ApiResponse<RecentlyViewedItem[]>> {
     return safeCall(() => authFetch('/renter/recently-viewed'));
   },
@@ -668,17 +650,14 @@ export const renterService = {
     return safeCall(() => authFetch(`/renter/recently-viewed/${listingId}`, { method: 'POST' }));
   },
 
-  // ---- Recommendations ----
   async getRecommendations(): Promise<ApiResponse<Property[]>> {
     return safeCall(() => authFetch('/renter/recommendations'));
   },
 
-  // ---- Application assistant ----
   async getApplicationAssistant(): Promise<ApiResponse<ApplicationAssistant>> {
     return safeCall(() => authFetch('/renter/application-assistant'));
   },
 
-  // ---- Applications ----
   async listMyApplications(
     params: { page?: number; pageSize?: number } = {}
   ): Promise<ApiResponse<Paginated<Application>>> {
@@ -761,7 +740,7 @@ export const renterService = {
     );
   },
 
-  /** The renter's own details from their latest application (null if none). */
+  /** Null if none. */
   getLastApplicationDetails: () =>
     safeCall(() => authFetch<LastApplicationDetails | null>('/renter/applications/last-details')),
 
@@ -797,10 +776,8 @@ export const renterService = {
                 },
               ]
             : undefined,
-          // The API contract is name/uploaded/required/documentId. `url` is a
-          // short-lived signed link kept for the wizard's local preview; sending
-          // it fails validation (forbidNonWhitelisted) and rejects the whole
-          // application.
+          // The API contract is name/uploaded/required/documentId. Sending the local-preview `url`
+          // fails validation (forbidNonWhitelisted) and rejects the whole application.
           documents: data.documents.map((doc) => ({
             name: doc.name,
             uploaded: doc.uploaded,
@@ -812,12 +789,10 @@ export const renterService = {
     );
   },
 
-  // ---- Roommates ----
   async listRoommates(): Promise<ApiResponse<Roommate[]>> {
     return safeCall(() => authFetch('/renter/roommates'));
   },
 
-  // ---- Reviews ----
   async getPendingReviews(): Promise<ApiResponse<PendingReview[]>> {
     return safeCall(() => authFetch('/renter/reviews/pending'));
   },
@@ -853,7 +828,7 @@ export const renterService = {
     );
   },
 
-  /** Pending roommate invites addressed to the current user (they're the invitee). */
+  /** Addressed to the current user as invitee. */
   async listMyRoommateInvites(): Promise<ApiResponse<Roommate[]>> {
     return safeCall(() => authFetch('/renter/roommates/invites'));
   },
@@ -910,7 +885,6 @@ export const renterService = {
     );
   },
 
-  // ---- Calendar ----
   async listCalendarEvents(): Promise<ApiResponse<CalendarEvent[]>> {
     return safeCall(() => authFetch('/renter/calendar-events'));
   },
@@ -934,12 +908,10 @@ export const renterService = {
     return safeCall(() => authFetch(`/renter/calendar-events/${id}`, { method: 'DELETE' }));
   },
 
-  // ---- Trust score ----
   async getTrustScore(): Promise<ApiResponse<TrustScoreOverview>> {
     return safeCall(() => authFetch('/renter/trust-score'));
   },
 
-  // ---- Flex financing ----
   async getFinancing(): Promise<ApiResponse<FinancingOverview>> {
     return safeCall(() => authFetch('/renter/financing'));
   },
@@ -964,7 +936,6 @@ export const renterService = {
     );
   },
 
-  // ---- Documents ----
   async listDocuments(
     params: ListRenterDocumentsParams = {}
   ): Promise<ApiResponse<Paginated<RenterDocument>>> {
@@ -1014,7 +985,6 @@ export const renterService = {
     return safeCall(() => authFetch(`/renter/documents/${id}`, { method: 'DELETE' }));
   },
 
-  // ---- Messages ----
   async listConversations(
     params: { page?: number; pageSize?: number } = {}
   ): Promise<ApiResponse<Paginated<Conversation>>> {
@@ -1048,14 +1018,14 @@ export const renterService = {
     );
   },
 
-  /** A personal link into a confirmed video viewing, from 15 minutes before it. */
+  /** Available from 15 minutes before the viewing. */
   async joinVideoCall(id: string): Promise<ApiResponse<VideoCallJoin>> {
     return safeCall(() =>
       authFetch<VideoCallJoin>(`/renter/viewing-requests/${id}/video-call`, { method: 'POST' })
     );
   },
 
-  /** Whether live video viewings can be booked at all (the service is configured). */
+  /** False when the video service is not configured. */
   async videoCallsAvailable(): Promise<ApiResponse<{ available: boolean }>> {
     return safeCall(() => authFetch<{ available: boolean }>('/video-calls/availability'));
   },
@@ -1078,7 +1048,6 @@ export const renterService = {
     );
   },
 
-  // ---- Support threads ----
   async listSupportThreads(): Promise<ApiResponse<SupportThread[]>> {
     return safeCall(() => authFetch<SupportThread[]>('/renter/support/threads'));
   },
@@ -1134,7 +1103,6 @@ export const renterService = {
     );
   },
 
-  // ---- Message reminders ----
   async listReminders(): Promise<ApiResponse<Reminder[]>> {
     return safeCall(() => authFetch('/renter/messages/reminders'));
   },
@@ -1159,7 +1127,6 @@ export const renterService = {
     return safeCall(() => authFetch(`/renter/messages/reminders/${id}`, { method: 'DELETE' }));
   },
 
-  // ---- Message templates ----
   async listMessageTemplates(): Promise<ApiResponse<MessageTemplate[]>> {
     return safeCall(() => authFetch('/renter/messages/templates'));
   },
@@ -1187,7 +1154,6 @@ export const renterService = {
     return safeCall(() => authFetch(`/renter/messages/templates/${id}`, { method: 'DELETE' }));
   },
 
-  // ---- Quick replies ----
   async listQuickReplies(): Promise<ApiResponse<QuickReply[]>> {
     return safeCall(() => authFetch('/renter/messages/quick-replies'));
   },
@@ -1217,14 +1183,12 @@ export const renterService = {
     return safeCall(() => authFetch(`/renter/messages/quick-replies/${id}`, { method: 'DELETE' }));
   },
 
-  // ---- Help feedback ----
   async submitFeedback(data: { rating?: number; message: string }): Promise<ApiResponse<Feedback>> {
     return safeCall(() =>
       authFetch('/renter/feedback', { method: 'POST', body: JSON.stringify(data) })
     );
   },
 
-  // ---- Lease ----
   async getLease(): Promise<ApiResponse<Lease>> {
     return safeCall(() => authFetch('/renter/lease'));
   },
@@ -1278,7 +1242,7 @@ export const renterService = {
     );
   },
 
-  /** A specific lease (e.g. one awaiting signature) or, without an id, the current one. */
+  /** Without an id, the current lease. */
   async downloadLeasePdf(leaseId?: string): Promise<ApiResponse<void>> {
     return safeCall(async () => {
       const blob = await authDownload(
@@ -1295,7 +1259,6 @@ export const renterService = {
     });
   },
 
-  // ---- Payments ----
   async listPayments(
     params: {
       page?: number;
@@ -1317,8 +1280,8 @@ export const renterService = {
   },
 
   /**
-   * `amount` (naira) pays part of the charge, or ahead; omitted, it pays what is owed.
-   * `provider` names the company that takes it (Paystack or Monnify); omitted, the default one.
+   * `amount` (naira) pays part of the charge, or ahead; omitted, it pays what is owed. `provider`
+   * (Paystack or Monnify) omitted means the default one.
    */
   async payNow(
     paymentId: string,
@@ -1338,7 +1301,7 @@ export const renterService = {
     return safeCall(() => authFetch('/renter/payments/account'));
   },
 
-  /** Refund my credit on a lease, back to the card or account I paid with. */
+  /** Back to the card or account paid with. */
   async refundCredit(leaseId: string): Promise<ApiResponse<CreditRefundResult>> {
     return safeCall(() =>
       authFetch(`/renter/payments/account/${leaseId}/refund`, { method: 'POST' })
@@ -1354,10 +1317,7 @@ export const renterService = {
     );
   },
 
-  /**
-   * Confirm move-in and release the held rent to the landlord. Step-up protected
-   * on the API; the shared client handles the "confirm it's you" prompt + replay.
-   */
+  /** Step-up protected; the shared client handles the prompt and replay. */
   async confirmMoveIn(paymentId: string): Promise<ApiResponse<Payment>> {
     return safeCall(() =>
       authFetch(`/renter/payments/${paymentId}/confirm-move-in`, { method: 'POST' })
@@ -1387,7 +1347,6 @@ export const renterService = {
     return safeCall(() => authFetch(`/renter/payments/methods/${id}`, { method: 'DELETE' }));
   },
 
-  // ---- Maintenance ----
   async getMaintenanceSummary(): Promise<ApiResponse<MaintenanceSummary>> {
     return safeCall(() => authFetch<MaintenanceSummary>('/renter/maintenance/summary'));
   },
@@ -1417,7 +1376,7 @@ export const renterService = {
     return safeCall(() => authFetch('/renter/maintenance', { method: 'POST', body: formData }));
   },
 
-  /** A repair request drafted from photos (and a note). Nothing is stored or sent. */
+  /** Nothing is stored or sent. */
   async draftRepairFromPhotos(photos: File[], note?: string): Promise<ApiResponse<RepairDraft>> {
     const formData = new FormData();
     photos.slice(0, 3).forEach((photo) => formData.append('files', photo));
@@ -1440,7 +1399,6 @@ export const renterService = {
     );
   },
 
-  // ---- Inspections ----
   async listInspections(): Promise<ApiResponse<RenterInspection[]>> {
     const [agentVisits, conditionReports] = await Promise.all([
       safeCall(() => authFetch<RenterInspectionApi[]>('/renter/inspections')),
@@ -1508,7 +1466,6 @@ export const renterService = {
     );
   },
 
-  // ---- Notifications ----
   async listNotifications(
     params: { page?: number; pageSize?: number } = {}
   ): Promise<ApiResponse<Paginated<Notification>>> {
@@ -1525,7 +1482,6 @@ export const renterService = {
     return safeCall(() => authFetch('/renter/notifications/read-all', { method: 'POST' }));
   },
 
-  /** The renter's lease explained, with renewal advice when an offer is open. */
   async getLeaseGuide(): Promise<ApiResponse<LeaseGuide>> {
     return safeCall(() => authFetch('/renter/lease/guide'));
   },
@@ -1567,12 +1523,10 @@ export const renterService = {
     );
   },
 
-  // ---- Dashboard ----
   async getDashboardStats(): Promise<ApiResponse<DashboardStats>> {
     return safeCall(() => authFetch('/renter/dashboard/stats'));
   },
 
-  // ---- Settings ----
   async getProfile(): Promise<ApiResponse<RenterProfile>> {
     return safeCall(() => authFetch('/renter/profile'));
   },
@@ -1635,7 +1589,6 @@ export const renterService = {
     );
   },
 
-  // ---- Saved searches ----
   async listSavedSearches(): Promise<ApiResponse<SavedSearch[]>> {
     return safeCall(() => authFetch('/renter/saved-searches'));
   },
@@ -1663,7 +1616,6 @@ export const renterService = {
     return safeCall(() => authFetch(`/renter/saved-searches/${id}`, { method: 'DELETE' }));
   },
 
-  // ---- Move-in checklist ----
   async getMoveInChecklist(): Promise<ApiResponse<MoveInChecklistItem[]>> {
     return safeCall(() => authFetch('/renter/dashboard/move-in-checklist'));
   },
@@ -1674,7 +1626,6 @@ export const renterService = {
     );
   },
 
-  // ---- Move-out checklist ----
   async getMoveOutChecklist(): Promise<ApiResponse<MoveOutChecklistItem[]>> {
     return safeCall(() => authFetch('/renter/dashboard/move-out-checklist'));
   },

@@ -1,11 +1,4 @@
-/**
- * Server-safe detail pages for the public markets: one rental, one sale, one
- * land parcel. Shortlets have their own richer page (booking calendar).
- *
- * Like `publicListingMap`, this has NO imports so server components can use it.
- * Every route read here is `@Public()` and returns a publicly safe DTO: owner
- * contact details are never in it, so nothing needs stripping.
- */
+// No imports, so server components can use it. Every route read here is `@Public()` and its DTO never carries owner contact details.
 
 export type PublicDetailMarket = 'rent' | 'sale' | 'land';
 
@@ -31,13 +24,11 @@ export interface PublicListingDetail {
   amenities: string[];
   facts: PublicListingFact[];
   host?: { label: string; name: string; verified?: boolean; rating?: number; reviews?: number };
-  /** Sale only: an offer is accepted or a sale is in progress. */
   underOffer?: boolean;
 }
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
-/** Cached for a minute: fresh enough for price changes, cheap for crawlers. */
 export const PUBLIC_DETAIL_REVALIDATE = 60;
 
 async function get<T>(path: string): Promise<T | null> {
@@ -45,16 +36,12 @@ async function get<T>(path: string): Promise<T | null> {
   try {
     res = await fetch(`${API}${path}`, { next: { revalidate: PUBLIC_DETAIL_REVALIDATE } });
   } catch (cause) {
-    // The API was unreachable: a transport failure, not a missing listing. Surface
-    // it (the route's error boundary shows a retry) rather than returning null and
-    // rendering a 404 that tells visitors and search engines the listing is gone
-    // during a temporary outage (DEF-237).
+    // Unreachable API: throw so the error boundary offers a retry, rather than a 404 telling search engines the listing is gone.
     throw new Error(`Public listing request failed: ${path}`, { cause });
   }
-  // A client-status response (404, or an unpublished / forbidden listing) is a real
-  // "not available" → the caller renders notFound().
+  // A 4xx (missing, unpublished or forbidden listing) is a real "not available".
   if (res.status >= 400 && res.status < 500) return null;
-  // A server error (5xx) is an outage, not a missing listing — surface it too.
+  // A 5xx is an outage, not a missing listing.
   if (!res.ok) throw new Error(`Public listing request failed (${res.status}): ${path}`);
   return (await res.json()) as T;
 }
@@ -244,7 +231,6 @@ export async function fetchPublicListing(
   };
 }
 
-/** Where each market's browse page lives, for breadcrumbs and "back to results". */
 export const MARKET_PATH: Record<PublicDetailMarket, string> = {
   rent: '/rent',
   sale: '/buy',

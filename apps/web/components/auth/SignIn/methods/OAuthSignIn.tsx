@@ -32,12 +32,6 @@ function GoogleMark() {
   );
 }
 
-/**
- * OAuth sign-in entry point. Redirects the browser to the backend, which
- * performs the provider flow (real Google when credentials exist, or the
- * dev-simulated consent screen otherwise) and finally redirects to
- * /oauth/callback with fresh tokens.
- */
 export const OAuthSignIn = () => {
   const handleGoogle = () => {
     window.location.href = authService.oauthUrl('google');

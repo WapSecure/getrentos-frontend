@@ -20,12 +20,9 @@ export const FinancingView = () => {
   const queryClient = useQueryClient();
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
   const toast = useToast();
-  // Which company takes the instalment, and why the last one could not.
   const providers = usePaymentProviders();
   const [providerError, setProviderError] = useState<string | null>(null);
-  // Why the last try failed for any other reason (network, a check, the plan).
   const [payError, setPayError] = useState<string | null>(null);
-  // The instalment open in the pay dialog.
   const [payingInstallmentId, setPayingInstallmentId] = useState<string | null>(null);
 
   const {
@@ -72,8 +69,7 @@ export const FinancingView = () => {
     },
     onSuccess: (updated) => {
       if (updated.authorizationUrl) {
-        // Real gateway flow: the installment is PROCESSING until the
-        // renter completes checkout, so redirect instead of claiming success.
+        // The instalment stays PROCESSING until checkout completes, so redirect instead of claiming success.
         window.location.href = updated.authorizationUrl;
         return;
       }

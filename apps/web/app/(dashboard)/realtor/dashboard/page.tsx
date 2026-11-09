@@ -17,7 +17,6 @@ import { IdentityNudge } from '@/components/shared/verification/IdentityNudge';
 import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
 import { ROUTES } from '@/lib/constants/auth';
 
-// recharts is heavy: load it only when this dashboard mounts.
 const RealtorCommissionChart = dynamic(
   () =>
     import('@/components/realtor/dashboard/RealtorCommissionChart').then(
@@ -41,8 +40,7 @@ export default function RealtorDashboardPage() {
     queryKey: realtorKeys.dashboard,
     queryFn: () => unwrap(realtorService.getDashboard()),
   });
-  // Commissions sit behind a class-level @RequiresPlan('PRO') controller, so a
-  // Free realtor must not fetch them: they'd 403 and log console errors.
+  // Commissions are PRO-only server-side; a Free realtor's fetch would 403.
   const { data: commissionSummary } = useQuery({
     queryKey: realtorKeys.commissions,
     queryFn: () => unwrap(realtorService.getCommissionsSummary()),
@@ -71,8 +69,6 @@ export default function RealtorDashboardPage() {
       />
       <AttentionFeed persona="realtor" />
 
-      {/* Zeros while the numbers load (or after they fail) told a busy
-          realtor they had no clients and no listings. */}
       {statsLoading ? (
         <StatGridSkeleton count={6} className="mb-8" />
       ) : statsError && !stats ? (

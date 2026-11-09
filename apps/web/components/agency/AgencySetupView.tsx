@@ -61,7 +61,7 @@ const FIELD_ORDER: FieldKey[] = [
 ];
 const fieldId = (key: FieldKey) => `agency-setup-${key}`;
 
-/** RC, BN or IT, then 4 to 9 digits, as printed on the certificate (same rule as the API). */
+/** Same rule as the API: RC, BN or IT, then 4 to 9 digits. */
 const CAC_NUMBER = /^(BN|RC|IT)\s?-?\d{4,9}$/i;
 const CAC_HINT =
   'Enter it as printed on the certificate, e.g. RC 1234567, BN 3456789 or IT 123456.';
@@ -82,7 +82,6 @@ function validate(form: AgencyProfileInput): FieldErrors {
   return errors;
 }
 
-/** Puts a server refusal on the field it is about, when it names one. */
 function serverFieldError(message: string): FieldErrors | null {
   if (/CAC number|registration ?number/i.test(message)) return { registrationNumber: message };
   for (const key of FIELD_ORDER) {
@@ -108,12 +107,6 @@ const fromFirm = (firm: AgencyOnboarding): AgencyProfileInput => ({
   contactPhone: firm.profile?.contactPhone ?? '',
 });
 
-/**
- * Starting a property management firm on Sureground, and seeing where its
- * business verification stands. A firm can set up its team and clients while it
- * waits; Sureground checks the CAC registration before it can receive payouts or
- * appear in the owners' vetted-firms directory.
- */
 export function AgencySetupView() {
   const queryClient = useQueryClient();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -134,7 +127,6 @@ export function AgencySetupView() {
   const form = draft ?? (firm ? fromFirm(firm) : EMPTY);
   const set = (patch: Partial<AgencyProfileInput>) => {
     setDraft({ ...form, ...patch });
-    // A field's message goes once the person changes that field.
     const touched = Object.keys(patch) as FieldKey[];
     if (touched.some((key) => errors[key])) {
       setErrors((prev) => {
@@ -148,7 +140,6 @@ export function AgencySetupView() {
   const registeredAddress: AddressValue | null = form.registeredAddress
     ? { text: form.registeredAddress, placeId: form.registeredPlaceId }
     : null;
-  // A pick fills the address and its state; typing over it drops the check.
   const onRegisteredAddress = (next: AddressValue | null) => {
     const v = next?.verified;
     if (v) {

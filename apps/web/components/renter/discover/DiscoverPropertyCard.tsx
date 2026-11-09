@@ -21,13 +21,7 @@ interface DiscoverPropertyCardProps {
   onOpenTour: () => void;
 }
 
-/**
- * A listing's detail can be genuinely absent: one created without a unit has no
- * bedroom or bathroom count to report, and no floor area either. Printing the
- * raw number turns "we don't know" into "0 beds", which reads as a real
- * measurement and contradicts the listing's own title ("3-bedroom apartment …
- * 0 beds"). Missing detail shows as an em dash instead.
- */
+// Missing detail shows as an em dash: "0 beds" would read as a real measurement.
 function listingDetail(value: number | null | undefined, singular: string, plural: string): string {
   if (!value) return '—';
   return `${value} ${value === 1 ? singular : plural}`;
@@ -95,10 +89,7 @@ export const DiscoverPropertyCard = ({
 
         <IconButton
           onClick={handleSaveClick}
-          // Icon-only, and the same heart repeats down every card, so without a
-          // name a screen reader offers a column of identical "button"s with no
-          // way to tell which property each one saves. The label also carries
-          // the current state, which the fill colour only conveys visually.
+          // Icon-only and repeated on every card, so the label names the property and the saved state.
           label={
             isSaved
               ? `Remove ${property.title} from your shortlist`

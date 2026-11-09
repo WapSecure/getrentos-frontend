@@ -55,10 +55,8 @@ export const PayoutSettings = () => {
     fetchPayoutAccount();
   }, [reloads]);
 
-  // The bank's name for the account comes back before saving (UX-28).
   const canSave = lookupAllowsSave(lookup);
 
-  // Resolves true only when the account was saved, so the button says "Saved" only then.
   const handleSave = async (): Promise<boolean> => {
     if (!canSave) return false;
     setSubmitError(null);
@@ -84,7 +82,6 @@ export const PayoutSettings = () => {
     setSubmitError(response);
     return false;
   };
-  // Verification gates have their own notice; anything else is said plainly here.
   const saveFailedMessage =
     submitError && !isVerificationGateError(submitError)
       ? ((submitError as { error?: string }).error ??

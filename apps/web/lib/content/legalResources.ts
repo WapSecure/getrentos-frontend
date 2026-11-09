@@ -9,12 +9,7 @@ export interface LegalResource {
   source: string;
 }
 
-/**
- * Reference guidance only: not legal advice. Each entry's `source` is
- * deliberately framed as "verify with local regulations", matching the
- * same non-authoritative stance as the rent-increase checker in
- * shared/compliance/rent-increase-rules.ts on the backend.
- */
+// Reference guidance only, not legal advice: each `source` says "verify with local regulations", like the backend rent-increase checker.
 export const LEGAL_RESOURCES: LegalResource[] = [
   {
     id: 'general-tenant-rights',

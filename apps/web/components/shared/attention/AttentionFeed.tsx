@@ -17,10 +17,6 @@ const TONE = {
   info: { icon: Bell, cls: 'text-muted-foreground' },
 } as const;
 
-/**
- * "Needs your attention": a short ranked list built by rules from the person's
- * own data, each with a link to where they can act. Hidden when nothing is due.
- */
 export function AttentionFeed({
   persona,
   estateId,
@@ -31,14 +27,11 @@ export function AttentionFeed({
   const { data, isLoading } = useQuery({
     queryKey: attentionKeys.feed(persona, estateId),
     queryFn: () => unwrap(attentionService.get(persona, estateId)),
-    // An estate feed needs the estate it is for.
     enabled: persona !== 'estate' || Boolean(estateId),
     staleTime: 60_000,
   });
 
-  // The feed sits between a page header and the first content section on
-  // dashboards that space sections with their own margins, so it carries its
-  // own; under a space-y parent the class margin wins and nothing doubles.
+  // Carries its own margin for dashboards that space sections by margin; under a space-y parent the class margin wins, so nothing doubles.
   if (isLoading) {
     return (
       <Card className="mb-6 p-4 space-y-2">

@@ -14,13 +14,7 @@ const TURN: Record<ComparedOffer['turn'], { label: string; variant: BadgeVariant
   buyer: { label: "Buyer's turn", variant: 'neutral' },
 };
 
-/**
- * "Compare offers": every live offer on each listing side by side (price
- * against asking, financing, deposit, documents, the buyer's record on
- * Sureground, expiry and whose turn it is) with a counter option worked out
- * from the figures. It never says which offer to take. Hidden when there are
- * no live offers, or if it fails: the offers below are the record.
- */
+// It never says which offer to take.
 export function OfferComparisonPanel() {
   const { data, isLoading } = useQuery({
     queryKey: sellerOfferKeys.comparison,

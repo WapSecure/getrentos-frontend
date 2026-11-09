@@ -5,7 +5,6 @@ import { Button } from '@sureground/ui';
 import { RenterPageHeader } from '../shared/RenterPageHeader';
 
 interface PaymentsHeaderProps {
-  /** Export the payment history. Absent on tabs that are not the history. */
   onExport?: () => void;
 }
 

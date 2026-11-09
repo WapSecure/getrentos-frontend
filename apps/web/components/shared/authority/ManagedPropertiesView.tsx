@@ -43,16 +43,6 @@ import {
 import { authorityKeys } from '@/lib/queryKeys';
 import { unwrap } from '@/lib/apiHelpers';
 
-/**
- * "Properties I manage": the properties the signed-in user may act for because
- * someone granted them authority, plus the claims they have filed and not yet
- * had decided.
- *
- * Mounted per persona (owner / agent / realtor) because each portal has its own
- * navigation, but the content is identical: a mandate is a fact about a
- * property, not about which dashboard you happen to be looking at.
- */
-
 const STATUS_VARIANTS: Record<string, BadgeVariant> = {
   ACTIVE: 'success',
   PENDING: 'warning',
@@ -65,11 +55,6 @@ const statusBadge = (status: string) => (
   <Badge variant={STATUS_VARIANTS[status] ?? 'neutral'}>{status.toLowerCase()}</Badge>
 );
 
-/**
- * The three capabilities a mandate carries, shown as chips so the limits are
- * visible. They are deliberately separate: being allowed to advertise a
- * property, to run its tenancy, and to move its money are different grants.
- */
 const CapabilityChips = ({
   canList,
   canManage,
@@ -200,14 +185,7 @@ const ClaimRow = ({ claim }: { claim: PropertyAuthorityDto }) => (
   </Card>
 );
 
-/**
- * What actually happened when a claim was submitted.
- *
- * The backend answers a claim that already exists by returning it untouched
- * rather than creating a duplicate, and `justCreated` says which happened — a
- * fresh claim is PENDING just like a pre-existing one, so the status alone can't
- * tell them apart. Announce "filed" only when something was actually filed.
- */
+/** A duplicate claim comes back untouched and PENDING like a new one, so only `justCreated` says whether one was filed. */
 const claimOutcomeMessage = (authority: PropertyAuthorityDto) => {
   if (authority.justCreated) return 'Claim filed. It grants nothing until an officer approves it.';
   if (authority.status === 'ACTIVE')
@@ -229,10 +207,7 @@ const ClaimForm = () => {
   const resolveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const resolveSeq = useRef(0);
 
-  // Live-confirm the property behind the code as it is typed, so a mistyped code
-  // is caught before a claim is filed rather than after an officer looks at it.
-  // Debounced, and guarded by a sequence number so a slow lookup can't overwrite
-  // the result of a later keystroke.
+  // Live-checks the code as it is typed; debounced, with a sequence number so a slow lookup can't overwrite a later keystroke.
   const onRefChange = (value: string) => {
     setPropertyRef(value);
     setResolved(null);
@@ -247,7 +222,7 @@ const ClaimForm = () => {
     const seq = (resolveSeq.current += 1);
     resolveTimer.current = setTimeout(() => {
       void propertyAuthorityService.resolve(trimmed).then((res) => {
-        if (seq !== resolveSeq.current) return; // a newer keystroke won
+        if (seq !== resolveSeq.current) return;
         if (res.success && res.data) {
           setResolved(res.data);
           setLookup('idle');

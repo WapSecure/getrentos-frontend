@@ -85,7 +85,6 @@ export const RoommateTasks = ({ roommates, onAddTask, onCompleteTask }: Roommate
 
       {isExpanded && (
         <div id={panelId} className="p-4 pt-0 space-y-3">
-          {/* Add Task */}
           <form
             className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto_auto]"
             onSubmit={handleAddTask}
@@ -117,7 +116,6 @@ export const RoommateTasks = ({ roommates, onAddTask, onCompleteTask }: Roommate
             />
           </form>
 
-          {/* Task List */}
           <div className="space-y-2 max-h-48 overflow-y-auto">
             {allTasks.length === 0 ? (
               <EmptyState icon={Clipboard} title="No tasks assigned" size="compact" bare />

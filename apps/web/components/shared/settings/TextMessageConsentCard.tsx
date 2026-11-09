@@ -7,12 +7,7 @@ import { Alert, Card, Switch } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { getMessagingConsent, setMessagingConsent } from '@/services/messagingConsentService';
 
-/**
- * Opt in to texts for the few things that should reach you away from the app:
- * rent due or overdue, deposit decisions, emergencies, a payout account
- * change, someone posing as your landlord. Off until you turn it on, and only
- * to a verified number.
- */
+// Off until turned on, and only to a verified number.
 export const TextMessageConsentCard = () => {
   const queryClient = useQueryClient();
   const consent = useQuery({

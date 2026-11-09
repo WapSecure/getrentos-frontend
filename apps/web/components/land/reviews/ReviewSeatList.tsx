@@ -16,7 +16,6 @@ import { pendingChecks } from './reviewRules';
 
 const PAGE_SIZE = 20;
 
-/** The professional's active land review seats. */
 export const ReviewSeatList = () => {
   const [page, setPage] = useState(1);
   const { data, isLoading, isError, error, refetch, isRefetching } = useQuery({

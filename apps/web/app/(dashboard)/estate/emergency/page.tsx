@@ -29,12 +29,6 @@ import type { EmergencyMuster, MusterRollState, MusterSummary } from '@/types/es
 
 const PAGE_SIZE = 5;
 
-/**
- * Several marshals work the same roll at once, so the console re-reads it while
- * an emergency is open. Fifteen seconds is short enough that a name answered at
- * the far end of the estate stops looking outstanding here, and long enough not
- * to hammer the API through an incident that may last hours.
- */
 const ACTIVE_MUSTER_POLL_MS = 15_000;
 
 type RollFilter = 'all' | 'outstanding' | 'help';
@@ -45,17 +39,6 @@ const rollFilters: { value: RollFilter; label: string }[] = [
   { value: 'help', label: 'Needs help' },
 ];
 
-/**
- * Raising the alarm, and calling the roll.
- *
- * Free on every plan, and the nav says so by not gating it: an estate that has
- * to pay to find out whether the people inside its building are safe is an
- * estate that will not find out. Nothing on this page is sold.
- *
- * The screen has one job: the numbers at the top have to be the estate's own,
- * counted by the server, and every name beneath them has to be answerable in a
- * single tap. A marshal working through a roll in a stairwell has one hand free.
- */
 export default function EstateEmergencyPage() {
   const queryClient = useQueryClient();
   const [isDeclareOpen, setIsDeclareOpen] = useState(false);
@@ -68,21 +51,13 @@ export default function EstateEmergencyPage() {
 
   const activeQuery = useQuery({
     queryKey: estateKeys.activeMuster(estate?.id ?? ''),
-    // `unwrapOptional`, not `unwrap`: "no roll call is running" comes back as a
-    // 200 with an empty body, which `unwrap` casts to null while the runtime
-    // value is undefined: and react-query rejects an undefined result outright,
-    // replacing the whole console with an error state.
+    // `unwrapOptional`: "no roll call" is a 200 with an empty body, and react-query rejects an undefined result.
     queryFn: () => unwrapOptional(estateService.getActiveMuster(estate!.id), null),
     enabled: !!estate,
-    // Polls only while there is something to poll. An idle console sitting on a
-    // history list has no reason to keep asking, and a page left open overnight
-    // is the common case.
     refetchInterval: (query) => (query.state.data ? ACTIVE_MUSTER_POLL_MS : false),
   });
   const active = activeQuery.data ?? null;
 
-  // A roll closed yesterday is a record, not a live screen: fetched only when a
-  // manager asks for it, and rendered without any of the answering controls.
   const pastQuery = useQuery({
     queryKey: estateKeys.emergencyMuster(estate?.id ?? '', selectedMusterId ?? ''),
     queryFn: () => unwrap(estateService.getMuster(estate!.id, selectedMusterId!)),
@@ -187,9 +162,6 @@ export default function EstateEmergencyPage() {
       />
 
       {!active && !muster && (
-        /* The ordinary state, said plainly rather than as an empty table: this
-           screen is only ever opened on purpose, so it should confirm that
-           nothing is being called before it shows a history. */
         <Alert
           variant="success"
           icon={ShieldCheck}
@@ -203,7 +175,6 @@ export default function EstateEmergencyPage() {
         </Alert>
       )}
 
-      {/* The live console, or a closed roll being reviewed. */}
       {muster && (
         <div className="space-y-4 mb-8">
           {!active && selectedMusterId && (
@@ -338,8 +309,6 @@ export default function EstateEmergencyPage() {
         </div>
       )}
 
-      {/* History: hidden while somebody is answering a live roll, so the page has
-          one thing on it at a time. */}
       {!active && !selectedMusterId && (
         <>
           <h2 className="text-lg font-semibold text-foreground mb-3">Past roll calls</h2>
@@ -379,11 +348,7 @@ export default function EstateEmergencyPage() {
         </>
       )}
 
-      {/* Keyed on open, so the form starts empty every time. Without this the
-          modal keeps its state between openings: and a second declaration would
-          inherit the first one's assembly point, which is then broadcast to every
-          household as where to go. A stale "gather at the car park" is worse than
-          no instruction at all. */}
+      {/* Keyed on open so the form starts empty: a stale assembly point would be broadcast to every household. */}
       <DeclareMusterModal
         key={isDeclareOpen ? 'declare-open' : 'declare-closed'}
         isOpen={isDeclareOpen}
@@ -395,8 +360,7 @@ export default function EstateEmergencyPage() {
 
       {active && (
         <CloseMusterDialog
-          // Same reason as above: a closing note describes one incident, and this
-          // one is written into the record.
+          // Keyed for the same reason: a closing note belongs to one incident.
           key={isCloseOpen ? 'close-open' : 'close-closed'}
           isOpen={isCloseOpen}
           tally={active.tally}
@@ -410,12 +374,6 @@ export default function EstateEmergencyPage() {
   );
 }
 
-/**
- * One row of history.
- *
- * The description leads rather than the kind, because "Smoke on the third floor"
- * is what identifies a roll call a year later: the kind is only ever one of six.
- */
 const HistoryRow = ({ summary, onOpen }: { summary: MusterSummary; onOpen: () => void }) => (
   <button
     type="button"

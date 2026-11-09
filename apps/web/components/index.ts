@@ -1,13 +1,10 @@
-// Layout Components
 export { Navigation } from './layout/Navigation';
 export { Footer } from './layout/Footer';
 
-// UI Components
 export { Button } from '@sureground/ui';
 export { Card } from '@sureground/ui';
 export { SectionHeader } from '@sureground/ui';
 
-// Section Components
 export { Hero } from './sections/Hero';
 export { FeaturedProperty } from './sections/FeaturedProperty';
 export { Features } from './sections/Features';

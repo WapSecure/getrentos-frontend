@@ -8,17 +8,9 @@ import { kycService } from '@/services/kycService';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
 
-/** The deadline wording for an account in the identity grace period. */
 export const identityGraceMessage = (endsAt: string) =>
   `Verify your identity by ${formatDate(endsAt)} to keep publishing listings and receiving payouts.`;
 
-/**
- * Tells a person whose identity is not yet verified, before they start, what
- * verification unlocks and where to do it. Without this they learn about the
- * gate only when a filled-in form is refused (publishing a listing 403s).
- * Renders nothing while loading, on error, or once identity is verified. An
- * account in the identity grace period is told the date it must verify by.
- */
 export function IdentityNudge({
   verificationHref,
   unlocks,
@@ -26,9 +18,7 @@ export function IdentityNudge({
   className,
 }: {
   verificationHref: string;
-  /** What verification unlocks for this workspace, e.g. "publish listings, sign leases and receive payouts". */
   unlocks: string;
-  /** Realtors and agents are also gated on a verified licence. */
   requirement?: 'identity' | 'licence';
   className?: string;
 }) {
@@ -46,7 +36,6 @@ export function IdentityNudge({
   const row = licence ? data.license : data.identity;
   const inReview = row?.status === 'PENDING' || row?.status === 'PENDING_REVIEW';
   const what = licence ? 'licence' : 'identity';
-  // An account in the grace period has a date to beat, not just something to unlock.
   const graceEndsAt = licence ? undefined : data.identityGraceEndsAt;
 
   return (

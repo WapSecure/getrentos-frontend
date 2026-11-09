@@ -11,24 +11,12 @@ import {
 } from '@sureground/ui';
 import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
 
-/**
- * Which estate and which barrier this guard is working.
- *
- * The browser counterpart of the mobile gate console's post switcher. It lives
- * in the navbar rather than on a single page because every gate screen writes
- * against the same post: an arrival recorded from the vehicles page has to be
- * attributed to the same barrier as one recorded from check-in.
- */
+// In the navbar because every gate screen writes against the same post.
 export const PostSwitcher = () => {
   const { estate, estates, gate, gates, needsGateChoice, selectEstate, selectGate, isLoading } =
     useGatemanPost();
 
-  // Nothing to choose and nothing to warn about: a lone gate on a lone estate is
-  // already known, so the control would only take up room. Stays mounted while
-  // the post is loading, because a control that vanishes and pops back in is
-  // worse than one that is briefly blank: and during that window the "pick your
-  // gate" warning would be absent exactly when the guard is about to check
-  // someone in.
+  // Hidden for a lone gate on a lone estate, but kept mounted while loading: otherwise the "pick your gate" warning would vanish just as the guard checks someone in.
   if (!isLoading && estates.length <= 1 && gates.length <= 1) return null;
 
   const label =
@@ -62,8 +50,7 @@ export const PostSwitcher = () => {
               {estates.map((option) => (
                 <DropdownMenuItem
                   key={option.id}
-                  // Changing estate keeps the menu open: the guard still has to
-                  // pick a gate on the new estate.
+                  // Changing estate keeps the menu open: the guard still has to pick a gate.
                   onSelect={(event) => {
                     event.preventDefault();
                     selectEstate(option.id);

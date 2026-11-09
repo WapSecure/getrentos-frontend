@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-/** The inspector's desk: any signed-in account; an assignment grants access. */
+// Any signed-in account: an assignment grants access.
 export default function LandInspectionsLayout({ children }: { children: ReactNode }) {
   return (
     <main className="min-h-screen bg-background pt-16">

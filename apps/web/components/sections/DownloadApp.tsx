@@ -1,10 +1,5 @@
 import { Smartphone } from 'lucide-react';
 
-/**
- * The app is not in the stores yet, so this says so. It used to offer App Store
- * and Google Play buttons that did nothing, and a "scan to download" box that was
- * not a QR code. Swap in the real store links here when the apps are published.
- */
 export const DownloadApp = () => (
   <section id="download" className="px-4 py-20">
     <div className="mx-auto max-w-7xl">

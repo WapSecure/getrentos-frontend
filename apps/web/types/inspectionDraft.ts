@@ -1,6 +1,5 @@
 import type { RoomCondition } from '@/types/agent';
 
-/** A report drafted from inspection photos, as the API returns it. Nothing is saved. */
 export interface InspectionDraft {
   rooms: {
     room: string;

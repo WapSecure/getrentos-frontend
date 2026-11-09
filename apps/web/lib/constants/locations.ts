@@ -1,13 +1,6 @@
-/**
- * Location reference data for country/state/city dropdowns.
- *
- * Countries and their states are served by the backend `/geo/locations`
- * endpoint (single source of truth). City data lives here as a constant so the
- * app never makes users type a city name, and so new cities can be added
- * without a backend deploy.
- */
+// Countries and states come from the backend `/geo/locations`; cities live here so they can be added without a backend deploy.
 
-/** The 36 states + FCT of Nigeria (matches the backend reference data). */
+/** Matches the backend reference data. */
 export const NIGERIA_STATES = [
   'Abia',
   'Adamawa',
@@ -48,7 +41,6 @@ export const NIGERIA_STATES = [
   'Zamfara',
 ] as const;
 
-/** Major cities / towns keyed by Nigerian state name. */
 export const NIGERIA_STATE_CITIES: Record<string, string[]> = {
   Abia: ['Umuahia', 'Aba', 'Ohafia', 'Arochukwu', 'Bende', 'Isuikwuato', 'Ukwa', 'Uzuakoli'],
   Adamawa: ['Yola', 'Jimeta', 'Mubi', 'Numan', 'Gombi', 'Hong', 'Michika', 'Mayo Belwa', 'Ganye'],
@@ -134,11 +126,6 @@ export const NIGERIA_STATE_CITIES: Record<string, string[]> = {
   Zamfara: ['Gusau', 'Kaura Namoda', 'Talata Mafara', 'Anka', 'Gummi', 'Tsafe'],
 };
 
-/**
- * Fallback major cities for countries without per-state city data. Kept small —
- * the primary market is Nigeria; these cover the most common alternatives so
- * the city field is never a manual text box.
- */
 export const COUNTRY_MAJOR_CITIES: Record<string, string[]> = {
   Nigeria: [
     'Lagos',
@@ -189,15 +176,10 @@ export const COUNTRY_MAJOR_CITIES: Record<string, string[]> = {
   Australia: ['Sydney', 'Melbourne', 'Brisbane', 'Perth', 'Adelaide', 'Canberra'],
 };
 
-/** Every Nigerian city, deduped and sorted — used by marketplace "All cities" filters. */
 export const ALL_NIGERIAN_CITIES = [...new Set(Object.values(NIGERIA_STATE_CITIES).flat())].sort(
   (a, b) => a.localeCompare(b)
 );
 
-/**
- * Returns the city options for a given state, falling back to the country's
- * major cities when the state has no dedicated city list.
- */
 export const getCitiesFor = (state: string, country?: string): string[] => {
   const stateCities = NIGERIA_STATE_CITIES[state];
   if (stateCities && stateCities.length > 0) return stateCities;

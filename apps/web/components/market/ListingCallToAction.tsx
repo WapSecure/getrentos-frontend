@@ -27,12 +27,7 @@ const subscribeToNothing = () => () => {};
 const PRIMARY =
   'flex h-12 w-full items-center justify-center rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition hover:-translate-y-0.5 hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2';
 
-/**
- * The detail page's call to action. The page is statically rendered, so the
- * session is read after mount: signed-in viewers go straight to the offer or
- * enquiry instead of being asked to sign in again. A listing under offer takes
- * no new offers, so it says so instead.
- */
+// The page is statically rendered, so the session is read after mount.
 export function ListingCallToAction({
   market,
   id,
@@ -44,10 +39,8 @@ export function ListingCallToAction({
   id: string;
   returnPath: string;
   underOffer?: boolean;
-  /** Just the main button, for the bar that follows the visitor on small screens. */
   compact?: boolean;
 }) {
-  // False on the server and during hydration, then the stored session.
   const signedIn = useSyncExternalStore(subscribeToNothing, viewerIsSignedIn, () => false);
 
   if (underOffer) {

@@ -94,8 +94,7 @@ export function BulkPricingModal({ isOpen, onClose, properties }: BulkPricingMod
     onSuccess: (result) => {
       void queryClient.invalidateQueries({ queryKey: landlordKeys.units() });
       void queryClient.invalidateQueries({ queryKey: landlordKeys.listings() });
-      // Published adverts carry the price the market sees, so say when they moved
-      // too: otherwise the landlord cannot tell what the re-price reached.
+      // Published adverts carry the market price, so report when they moved too.
       const listings =
         result.listingsUpdated > 0
           ? ` and ${result.listingsUpdated} live advert${result.listingsUpdated === 1 ? '' : 's'}`

@@ -11,10 +11,8 @@ export type BuyerOfferStatus =
   | 'expired'
   | 'closed';
 export type FinancingType = 'cash' | 'mortgage' | 'installment';
-// The escrow lifecycle the backend actually drives: deposit → held → released,
-// with frozen (a dispute is open) and refunded as terminal branches. The enum
-// also has VERIFICATION_PENDING / SETTLEMENT_PENDING / DISPUTED, but no service
-// ever writes them (a dispute sets FROZEN), so they are not surfaced (DEF-240).
+// Only these states are written (a dispute sets FROZEN); VERIFICATION_PENDING,
+// SETTLEMENT_PENDING and DISPUTED are never surfaced.
 export type BuyerEscrowStatus =
   | 'deposit_pending'
   | 'funds_held'
@@ -27,7 +25,7 @@ export interface BuyerPropertyListing {
   title: string;
   propertyType: ListingPropertyType;
   askingPrice: number;
-  /** False when the listing is already under offer / sold — not accepting new offers. */
+  /** False once under offer or sold. */
   acceptingOffers?: boolean;
   /** Left out until the property is verified; see addressHidden. */
   address?: string;
@@ -42,9 +40,8 @@ export interface BuyerPropertyListing {
   ownerName: string;
   ownerVerified: boolean;
   listedDate: string;
-  /** Signed link to the cover photo. */
   image?: string;
-  /** Signed link to the seller's video tour (valid for a few hours). */
+  /** Valid for a few hours. */
   videoTourUrl?: string;
   /** The tour was filmed in the Sureground app at the property. */
   videoTourFilmedOnSite?: boolean;
@@ -56,7 +53,6 @@ export interface ViewingRequest {
   propertyTitle: string;
   requestedDate: string;
   requestedTime: string;
-  /** The viewing time as an ISO instant. */
   scheduledAt?: string;
   status: ViewingRequestStatus;
   /** 'video': a live video call the seller hosts at scheduledAt. */
@@ -66,7 +62,7 @@ export interface ViewingRequest {
 
 export interface BuyerOffer {
   id: string;
-  /** The sale listing the offer is on (the id discover shows as the listing). */
+  /** The id discover shows as the listing. */
   listingId?: string;
   propertyId: string;
   propertyTitle: string;
@@ -110,11 +106,11 @@ export interface BuyerEscrowTransaction {
   offerId: string;
   propertyId: string;
   propertyTitle: string;
-  /** The property's type, e.g. 'LAND' (whose sales carry conveyance steps). */
+  /** 'LAND' sales carry conveyance steps. */
   propertyType?: string;
   ownerName: string;
   purchasePrice: number;
-  /** What the buyer pays in for this sale: the agreed deposit, else the price. */
+  /** The agreed deposit, else the price. */
   depositAmount?: number;
   escrowStatus: BuyerEscrowStatus;
   milestones: EscrowMilestone[];

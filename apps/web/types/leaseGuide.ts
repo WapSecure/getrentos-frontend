@@ -1,4 +1,3 @@
-/** The renter's lease guide, as the API returns it. */
 export interface LeaseGuide {
   leaseId: string;
   summary: string[];

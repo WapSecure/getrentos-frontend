@@ -57,8 +57,7 @@ const PAYOUT_BADGE: Record<
 > = {
   PAID: { label: 'Paid out', variant: 'success' },
   PENDING: { label: 'Payout pending', variant: 'warning' },
-  // Neither of these is a failure. Money held for a second signature is the
-  // control working, and a refusal holds the money rather than losing it.
+  // Neither is a failure: a held payout is the second-signature control working, and a refusal keeps the money.
   AWAITING_APPROVAL: { label: 'Awaiting 2nd approval', variant: 'info' },
   FAILED: { label: 'Payout failed', variant: 'danger' },
   REJECTED: { label: 'Payout held back', variant: 'warning' },
@@ -147,12 +146,7 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
     },
   });
 
-  /**
-   * The organisation's owner querying a figure on this statement.
-   *
-   * The toast says the figure is not going to change, because an owner who
-   * expects an edit will sit refreshing a number that is deliberately immutable.
-   */
+  /** The toast says the figure won't change: an issued statement is immutable. */
   const raiseDispute = useMutation({
     mutationFn: ({ lineId, reason }: { lineId: string; reason: string }) =>
       unwrap(estateService.disputeStatementLine(estateId, detailId ?? '', lineId, reason)),
@@ -350,8 +344,7 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
               <StatementDisputeSection
                 lineItems={detail.lineItems}
                 disputes={detail.disputes}
-                // A draft can be regenerated, so querying one would convene a
-                // decision about a document that does not have to exist.
+                // A draft can be regenerated, so it can't be queried.
                 canRaise={detail.status === 'ISSUED'}
                 isRaising={raiseDispute.isPending}
                 isWithdrawing={withdrawDispute.isPending}
@@ -408,7 +401,6 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
   );
 }
 
-/** Where estate dues are paid out to once a statement is issued. */
 export function EstatePayoutAccountCard({ estateId }: { estateId: string }) {
   const queryClient = useQueryClient();
   const toast = useToast();
@@ -424,7 +416,6 @@ export function EstatePayoutAccountCard({ estateId }: { estateId: string }) {
     queryFn: () => unwrap(estateService.getPayoutAccount(estateId)),
   });
 
-  // The bank's name for the account comes back before saving (UX-28).
   const canSave = lookupAllowsSave(lookup);
 
   const save = useMutation({

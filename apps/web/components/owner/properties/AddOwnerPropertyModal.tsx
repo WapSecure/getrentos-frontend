@@ -48,7 +48,6 @@ export interface OwnerPropertySubmissionResult {
 
 const steps = ['Ownership info', 'Documents', 'Declaration', 'Status'];
 
-/** sessionStorage key for a property being added when the session ran out. */
 export const ADD_OWNER_PROPERTY_DRAFT_KEY = 'owner-add-property';
 
 const propertyTypes = PROPERTY_TYPE_OPTIONS;
@@ -60,7 +59,6 @@ interface FormState {
   city: string;
   state: string;
   country: string;
-  /** Set when the address was picked from Google. */
   placeId?: string;
   checked?: VerifiedAddress;
   ownerName: string;
@@ -75,7 +73,6 @@ interface FormState {
   pin: MapPoint | null;
 }
 
-/** What survives a session ending: the typed details. Files cannot be kept. */
 type OwnerPropertyDraft = Pick<
   FormState,
   | 'name'
@@ -124,8 +121,6 @@ export const AddOwnerPropertyModal = ({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [uploadWarning, setUploadWarning] = useState<string | null>(null);
 
-  // If the session ends while the owner is filling this in, keep the typed
-  // details so they are waiting after sign-in (documents are attached again).
   const draftRestored = useSessionExpiryDraft<OwnerPropertyDraft>(
     ADD_OWNER_PROPERTY_DRAFT_KEY,
     () =>
@@ -213,8 +208,7 @@ export const AddOwnerPropertyModal = ({
           country: form.country,
           placeId: form.placeId,
           ownerName: form.ownerName,
-          // Blank stays absent: a 0 value showed as "₦0" on the card and a
-          // made-up purchase date of today skewed the investment figures.
+          // Blank stays absent: a 0 showed as "₦0" and a made-up purchase date skewed the investment figures.
           ...(Number(form.estimatedValue) > 0
             ? { estimatedValue: Number(form.estimatedValue) }
             : {}),
@@ -495,7 +489,6 @@ const UploadField = ({
   file: File | null;
   onSelect: (file: File | null) => void;
 }) => {
-  // Every field here is an ownership document: advise a retake of a poor photo.
   const advice = usePhotoAdvice(file);
   return (
     <div className="space-y-1.5">

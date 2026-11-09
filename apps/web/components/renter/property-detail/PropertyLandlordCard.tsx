@@ -64,8 +64,7 @@ export const PropertyLandlordCard = ({ property }: PropertyLandlordCardProps) =>
         </div>
       </div>
 
-      {/* The landlord's direct email/phone are deliberately not shown to renters:
-          contact runs through in-app Messages so conversations stay on Sureground. */}
+      {/* Landlord contact details are deliberately hidden: contact runs through in-app Messages. */}
       <div className="mt-3 space-y-1.5 text-xs text-muted-foreground">
         {typeof property.landlordResponseRate === 'number' && (
           <div className="flex items-center gap-1.5">

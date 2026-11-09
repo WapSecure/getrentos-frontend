@@ -11,13 +11,12 @@ import {
   NumberInput,
 } from '@sureground/ui';
 
-/** Mirrors MAX_GRACE_DAYS on the API, which rejects anything larger. */
+// Must match MAX_GRACE_DAYS on the API.
 const MAX_GRACE_DAYS = 90;
 
 interface DueSettingsModalProps {
   isOpen: boolean;
   currentLateFeeAmount: number;
-  /** The estate's current grace window, in days. */
   currentGraceDays: number;
   onClose: () => void;
   onSubmit: (data: { lateFeeAmount: number; graceDays: number }) => void;
@@ -80,8 +79,7 @@ export const DueSettingsModal = ({
               min={0}
               max={MAX_GRACE_DAYS}
               value={graceDays}
-              // NumberInput hands back the digit string; keep the state numeric
-              // so the payload satisfies the API's integer validation.
+              // NumberInput returns a digit string; the API validates an integer.
               onValueChange={(v) => setGraceDays(Number(v) || 0)}
               placeholder="e.g. 5"
             />

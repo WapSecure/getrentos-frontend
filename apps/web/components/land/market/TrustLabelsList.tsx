@@ -6,11 +6,7 @@ import {
   type LandTrustLabel,
 } from '@/types/land';
 
-/**
- * What Sureground checked on a parcel, one scoped label per claim (what, by
- * whom, when), followed by what was not checked. Deliberately no single
- * "Verified" tick: a buyer sees the gaps alongside the passes.
- */
+// Deliberately no single "Verified" tick: a buyer sees the gaps alongside the passes.
 export const TrustLabelsList = ({
   labels,
   notVerified,

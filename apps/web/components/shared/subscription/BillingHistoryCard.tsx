@@ -18,7 +18,6 @@ const day = (iso: string | null) =>
       })
     : '—';
 
-/** Status pill, wording kept to what the customer needs to know. */
 function StatusPill({ status }: { status: SubscriptionInvoice['status'] }) {
   const variants: Record<SubscriptionInvoice['status'], BadgeVariant> = {
     PAID: 'success',
@@ -33,17 +32,7 @@ function StatusPill({ status }: { status: SubscriptionInvoice['status'] }) {
   return <Badge variant={variants[status]}>{labels[status]}</Badge>;
 }
 
-/**
- * The customer's payment history.
- *
- * Exists because "you were charged" is not a receipt. Someone doing their books
- * (or reconciling a bank statement) needs the amount, the date, and the period
- * it covered: and a line item explaining every debit they can see, including
- * the card-verification charge we take and refund.
- *
- * Rendered for Free accounts as well as Pro: a customer who cancelled still
- * needs this, and their history must not disappear with their plan.
- */
+// Rendered for Free accounts too: a customer who cancelled still needs their receipts.
 export function BillingHistoryCard() {
   const { invoices, isLoading } = useInvoices();
 
@@ -51,7 +40,6 @@ export function BillingHistoryCard() {
     return <CardSkeleton lines={4} />;
   }
 
-  // Nothing charged yet: an empty table would just be noise on a free account.
   if (!invoices || invoices.items.length === 0) return null;
 
   return (

@@ -35,10 +35,6 @@ const Section = ({ title, children }: { title: string; children: React.ReactNode
   </section>
 );
 
-/**
- * The buyer decision dossier, laid out to read on screen and to print or save
- * as PDF from the browser (blueprint §8.3).
- */
 export const LandDossierView = ({ dossier }: { dossier: LandDossier }) => {
   const { subject, parcel, acquisitionCost: cost } = dossier;
   return (

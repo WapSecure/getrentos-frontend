@@ -161,8 +161,6 @@ export const MaintenanceRequestCard = ({
             <UserCog className="w-3.5 h-3.5" />
             {request.assignedVendorName ? 'Reassign' : 'Assign vendor'}
           </Button>
-          {/* Quick actions sit together at the end, and drop to their own
-              line rather than squeezing the labelled buttons. */}
           <div className="ml-auto flex shrink-0 items-center gap-2">
             {request.assignedVendorName && (
               <Button

@@ -21,10 +21,7 @@ import { shortletService } from '@/services/shortletService';
 import { formatCurrency } from '@/lib/format';
 import type { ShortletBooking } from '@/types/shortlet';
 
-/**
- * Host files a damage claim against a HELD security deposit. The amount cannot
- * exceed the held deposit and only one claim can be pending per booking.
- */
+/** The amount can't exceed the held deposit, and only one claim can be pending per booking. */
 export function ShortletOpenDepositClaimDialog({
   booking,
   onClose,
@@ -41,8 +38,6 @@ export function ShortletOpenDepositClaimDialog({
   const toast = useToast();
 
   const open = useMutation({
-    // Evidence stays local until the host confirms: they can preview/zoom/rotate
-    // each photo first, and nothing is uploaded to storage until "File claim".
     mutationFn: async () => {
       const keys: string[] = [];
       if (evidence.length) {

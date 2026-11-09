@@ -13,7 +13,6 @@ export const prePurchaseInspectionKeys = {
   mine: ['land', 'pre-purchase-inspections'] as const,
 };
 
-/** The buyer's independent pre-purchase inspections. */
 export const prePurchaseInspectionService = {
   mine: () => safeCall(() => authFetch<PrePurchaseInspection[]>('/buyer/land/inspections')),
 

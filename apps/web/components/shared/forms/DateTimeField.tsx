@@ -3,22 +3,12 @@
 import { useId } from 'react';
 import { DatePicker, TimePicker } from '@sureground/ui';
 
-/**
- * A date and a time, chosen with the app's own pickers instead of the browser's
- * `datetime-local` control (which looks different on every device and can't be
- * styled). The value keeps the exact shape that control had, `YYYY-MM-DDTHH:mm`,
- * so a form can swap one for the other without touching its own logic.
- *
- * Until both halves are picked the value is partial (`2026-09-22T` or `T14:00`),
- * which is truthy but not a real moment: check it with `isCompleteDateTime`
- * before building a Date from it.
- */
+// Keeps the `datetime-local` value shape (`YYYY-MM-DDTHH:mm`). Until both halves are picked the value is partial yet truthy: check `isCompleteDateTime` first.
 
 const COMPLETE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
 
 export const isCompleteDateTime = (value: string) => COMPLETE.test(value);
 
-/** A whole date and time that is still to come. */
 export const isFutureDateTime = (value: string) =>
   isCompleteDateTime(value) && new Date(value).getTime() > Date.now();
 
@@ -42,11 +32,8 @@ interface DateTimeFieldProps {
   label: string;
   /** Earliest selectable date, `YYYY-MM-DD`. Defaults to today; pass `null` to allow past dates. */
   minDate?: string | null;
-  /** Warn (and let the form block) when the chosen moment has already passed. */
   requireFuture?: boolean;
-  /** Minutes between the times offered. */
   timeStep?: number;
-  /** Earliest hour of day to offer (0–24). Defaults to the whole day. */
   minHour?: number;
   /** Latest hour of day to offer, exclusive (0–24). Defaults to the whole day. */
   maxHour?: number;

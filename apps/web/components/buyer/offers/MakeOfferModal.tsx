@@ -43,7 +43,6 @@ const financingOptions: { value: FinancingType; label: string }[] = [
 const LISTING_PAGE_SIZE = 10;
 /** Matches the backend default when the buyer leaves the deposit blank. */
 const DEFAULT_DEPOSIT_RATE = 0.1;
-/** sessionStorage key for an offer typed when the session ran out. */
 export const MAKE_OFFER_DRAFT_KEY = 'buyer-make-offer';
 
 interface OfferDraft {
@@ -61,8 +60,6 @@ export const MakeOfferModal = ({
   onSubmit,
 }: MakeOfferModalProps) => {
   const [propertyId, setPropertyId] = useState(defaultPropertyId || '');
-  // Opened from a listing, the property is settled: show it as a line with a
-  // way to change it, not a search box and a page of 64 others.
   const [choosingProperty, setChoosingProperty] = useState(!defaultPropertyId);
   const [listingSearch, setListingSearch] = useState('');
   const [listingPage, setListingPage] = useState(1);
@@ -77,8 +74,6 @@ export const MakeOfferModal = ({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [acceptedRisks, setAcceptedRisks] = useState(false);
 
-  // If the session ends while the buyer is typing (or as they submit), keep the
-  // offer so it is waiting for them after they sign back in.
   const draftRestored = useSessionExpiryDraft<OfferDraft>(
     MAKE_OFFER_DRAFT_KEY,
     () =>
@@ -122,7 +117,7 @@ export const MakeOfferModal = ({
     listings.find((listing) => listing.id === propertyId) ??
     (defaultListing?.id === propertyId ? defaultListing : undefined);
 
-  // Land: the buyer must accept what was not verified on the parcel (US-03).
+  // Land: the buyer must accept what was not verified on the parcel.
   const isLand = isLandPropertyType(selectedListing?.propertyType);
   const landListing = useQuery({
     queryKey: [...landKeys.publicListing(selectedListing?.id ?? '')],

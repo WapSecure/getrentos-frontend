@@ -1,9 +1,7 @@
 import type { Metadata } from 'next';
 import { LegalPage } from '@/components/layout/LegalPage';
 
-// Baseline text written from what the platform actually collects and does. It has
-// NOT been reviewed by counsel: have it checked against the NDPA 2023 and the
-// company's own registration details before relying on it.
+// Not reviewed by counsel: check it against the NDPA 2023 and the company's registration details before relying on it.
 
 export const metadata: Metadata = {
   title: 'Privacy Policy',

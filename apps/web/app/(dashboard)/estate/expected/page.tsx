@@ -14,41 +14,14 @@ import { EstateFeatureGate } from '@/components/estate/shared/EstateFeatureGate'
 import { ExpectedTodayBoard } from '@/components/estate/expected/ExpectedTodayBoard';
 import { ImportGuestListModal } from '@/components/estate/expected/ImportGuestListModal';
 
-/**
- * Who the estate expects today.
- *
- * One screen rather than the three it replaces, because a guard asking "who is
- * coming?" does not care which table the answer lives in — invitations nobody
- * has used, standing authorisations due today, and parcels still waiting are one
- * question asked of three sources.
- *
- * It is a HINT board and the page says so out loud. Nothing on it opens a
- * barrier: admissions stay exactly where they were, with the pass PIN and the
- * guard. That is also why the guard console reads the same board — see the guard
- * page — even though the guest list behind it is the office's.
- *
- * ENTERPRISE, and the gate is on the OFFICE. The board replaces a phone call;
- * a guard without it still checks anybody in by PIN, so an estate that has not
- * bought this is slower rather than less safe. That is the same test dwell and
- * patrol pass, and it is why the API leaves the read to the guard ungated.
- */
 export default function EstateExpectedPage() {
   const { estate, isLoading: isEstateLoading } = useSelectedEstate();
   const [isImportOpen, setIsImportOpen] = useState(false);
 
-  /**
-   * Whether it is worth asking the API at all.
-   *
-   * A known shortfall is not worth a guaranteed 403 on every visit — in a
-   * browser console that is a red error which makes a real one harder to find.
-   * An UNKNOWN tier is not a shortfall: an absent plan fails open everywhere in
-   * this codebase, so it still asks and lets the API be the authority.
-   */
+  // Skip the API on a known shortfall; an unknown tier still asks, since an absent plan fails open.
   const entitled = !estate?.planTier || tierAtLeast(estate.planTier, 'ENTERPRISE');
 
-  // `estate?.id ?? ''` rather than `estate!.id`: the hook runs before the
-  // `!estate` guard below, so the assertion would be a lie on the first render.
-  // `enabled` is what stops the request; the key only has to be stable.
+  // `?? ''` rather than `!`: the hook runs before the `!estate` guard; `enabled` stops the request.
   const boardQuery = useQuery({
     queryKey: estateKeys.expectedToday(estate?.id ?? ''),
     queryFn: () => unwrap(estateService.getExpectedToday(estate!.id)),

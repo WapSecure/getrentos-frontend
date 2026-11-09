@@ -25,12 +25,7 @@ const formatDeadline = (value: string) =>
     timeZoneName: 'short',
   });
 
-/**
- * A lease in progress is not one thing. The tenant signs, then owes the first
- * payment into escrow, then waits for the landlord to hand over: each stage
- * asks something different, so the card shows one at a time rather than
- * implying a single "sign here" step.
- */
+// Each stage asks something different (sign, pay into escrow, await handover), so the card shows one at a time.
 export const PendingLeaseCard = ({ lease, onSign, isPending }: PendingLeaseCardProps) => {
   const [signatureData, setSignatureData] = useState<string | null>(null);
   const [hasOpened, setHasOpened] = useState(false);

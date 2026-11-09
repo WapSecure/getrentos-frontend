@@ -15,7 +15,6 @@ import { InspectionReportCard } from '../watch/InspectionReportCard';
 
 type Notify = (message: string, variant?: 'success' | 'error') => void;
 
-/** Questions on the report and the follow-ups a buyer can ask for. */
 const BuyerInspectionActions = ({
   inspection,
   notify,
@@ -110,7 +109,6 @@ const BuyerInspectionActions = ({
   );
 };
 
-/** The buyer's pre-purchase inspections: where each stands, and the report once accepted. */
 export const BuyerInspections = () => {
   const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(
     null

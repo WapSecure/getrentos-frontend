@@ -1,4 +1,3 @@
-/** A condition precedent on a plot purchase (blueprint §9.3). */
 export interface LandClosingCondition {
   key: string;
   label: string;
@@ -6,7 +5,6 @@ export interface LandClosingCondition {
   deadline?: string;
   /** Past its deadline unmet, or failed: the buyer may cancel in full. */
   failed: boolean;
-  /** Why it was satisfied at the start. */
   basis?: string;
   remedy: string;
   /** The developer delivers it and the buyer confirms it. */
@@ -18,7 +16,6 @@ export interface LandClosingCondition {
   note?: string;
 }
 
-/** One line of the closing checklist (§9.4). */
 export interface LandClosingChecklistItem {
   key: string;
   label: string;
@@ -26,7 +23,6 @@ export interface LandClosingChecklistItem {
   detail?: string;
 }
 
-/** A title perfection step (§9.5): submission and approval are separate. */
 export interface LandPerfectionStep {
   key: string;
   label: string;

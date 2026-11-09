@@ -75,8 +75,6 @@ export default function PropertyDetailPage() {
         renterService.recordListingView(params.id).catch(() => {});
         return data;
       } catch (error) {
-        // A home that has been let or withdrawn is gone, not a connection
-        // problem: null renders the "not found" state below.
         if (error instanceof ApiError && error.status === 404) return null;
         throw error;
       }
@@ -185,9 +183,7 @@ export default function PropertyDetailPage() {
                 <div className="flex items-center gap-2 flex-wrap">
                   <h1 className="text-2xl font-bold text-foreground">{property.title}</h1>
                   {property.trustChain?.steps.length
-                    ? // The chain's own words, not a blanket tick: "Verified" next to
-                      // a panel saying ownership isn't confirmed read as a contradiction.
-                      (() => {
+                    ? (() => {
                         const { label, tone } = trustChainLabel(property.trustChain);
                         return (
                           <Badge
@@ -336,14 +332,10 @@ export default function PropertyDetailPage() {
 
           <GeoInsightsPanel listingId={property.id} title={property.title} />
 
-          {/* Moved here from every Discover card: these are questions about one
-              home, asked once a renter is weighing it, not while scanning. */}
           <Card className="p-4">
             <h2 className="text-sm font-semibold text-foreground">Plan your move</h2>
             <div className="mt-2 flex flex-wrap gap-4 text-xs text-muted-foreground">
               <CommuteCalculator listingId={property.id} propertyLocation={property.location} />
-              {/* The calculator compares against a monthly mortgage payment, so
-                  the rent is normalised to a month first. */}
               <RentVsBuyCalculator
                 propertyPrice={property.price}
                 monthlyRent={property.period === 'year' ? property.price / 12 : property.price}

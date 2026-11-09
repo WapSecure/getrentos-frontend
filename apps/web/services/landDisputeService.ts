@@ -5,7 +5,6 @@ const base = '/land/disputes';
 const json = (path: string, body: unknown) =>
   safeCall(() => authFetch<LandDispute>(path, { method: 'POST', body: JSON.stringify(body) }));
 
-/** Land disputes for the people involved: reporter, owner, buyer. */
 export const landDisputeService = {
   open: (input: {
     propertyId: string;
@@ -18,7 +17,7 @@ export const landDisputeService = {
     safeCall(() => authFetch<LandDispute>(`${base}/${encodeURIComponent(disputeId)}`)),
   appeal: (disputeId: string, reason: string) =>
     json(`${base}/${encodeURIComponent(disputeId)}/appeal`, { reason }),
-  /** Multipart: the browser sets the boundary. Evidence is kept permanently. */
+  /** Evidence is kept permanently. */
   addEvidence: (disputeId: string, file: File, note?: string) => {
     const form = new FormData();
     form.append('file', file);

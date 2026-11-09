@@ -14,7 +14,6 @@ export type LandDiligenceStatus =
   /** Paused by staff or the system (a dispute hold, an encumbrance): off the market. */
   | 'SUSPENDED';
 
-/** One condition of a CONDITIONAL approval, as the owner and staff see it. */
 export interface LandDiligenceCondition {
   id: string;
   text: string;
@@ -29,7 +28,6 @@ export interface LandDiligenceCondition {
   decisionNote?: string;
 }
 
-/** Why and since when a case is SUSPENDED. */
 export interface LandDiligenceSuspension {
   at: string;
   reason: string;
@@ -38,7 +36,6 @@ export interface LandDiligenceSuspension {
   from?: LandDiligenceStatus;
 }
 
-/** What a CONDITIONAL approval still waits on, as buyers see it. */
 export interface LandOpenCondition {
   text: string;
   dueAt?: string;
@@ -75,7 +72,6 @@ export type LandDiligenceCheckStatus = 'PENDING' | 'PASSED' | 'FLAGGED' | 'NOT_A
 
 export type { LandAssuranceTier } from '@sureground/shared';
 
-/** One item of the diligence checklist seeded for the parcel's title type. */
 export interface LandDiligenceCheck {
   key: string;
   label: string;
@@ -91,13 +87,11 @@ export interface LandDiligenceCheck {
 export interface LandDiligence {
   status: LandDiligenceStatus;
   findings?: string | null;
-  /** Public and owner-safe checklist entries supplied by compliance. */
   checklist?: unknown;
   checks?: LandDiligenceCheck[];
   reviewedAt?: string | null;
   expiresAt?: string | null;
   submittedAt?: string;
-  /** When the review is owed by. */
   slaDueAt?: string;
   riskScore?: number;
   assuranceTier?: LandAssuranceTier;
@@ -113,9 +107,9 @@ export interface LandParcelInput {
   areaUnit: LandAreaUnit;
   frontage?: number;
   depth?: number;
-  /** GeoJSON-like boundary data. It is optional until a surveyed plan is uploaded. */
+  /** Optional until a surveyed plan is uploaded. */
   boundaryGeometry?: unknown;
-  /** The coordinate system boundaryGeometry is in; survey plans use Minna grids. Default WGS 84. */
+  /** Survey plans use Minna grids. Default WGS 84. */
   boundaryCrs?: CrsCode;
   boundaryNotes?: string;
   zoning?: string;
@@ -150,7 +144,7 @@ export interface LandPropertySummary {
   city: string;
   state: string;
   country?: string;
-  /** The property's map pin, where the outline editor starts. */
+  /** Where the outline editor starts. */
   latitude?: number;
   longitude?: number;
   verificationStatus?: string;
@@ -164,11 +158,9 @@ export interface OwnerLandRecord {
   property: LandPropertySummary;
   parcel: LandParcel | null;
   diligence: LandDiligence | null;
-  /** Whether diligence can be submitted (or resubmitted) now, and if not, why. */
   submission: { canSubmit: boolean; blockers: string[] };
-  /** The outline now on the parcel and whether a surveyor signed it off. */
   boundary: LandBoundaryStatus | null;
-  /** Backend may expose this at the top level for fast collection rendering. */
+  /** The backend may expose this at the top level. */
   listing?: {
     id: string;
     title?: string;
@@ -177,7 +169,7 @@ export interface OwnerLandRecord {
   } | null;
 }
 
-/** Exact API shape for /owner/land. The service adapts this to OwnerLandRecord. */
+/** Exact API shape for /owner/land; the service adapts it to OwnerLandRecord. */
 export interface OwnerLandApiRecord {
   propertyId: string;
   title: string;
@@ -220,7 +212,7 @@ export interface PublicLandListing {
   diligence?: PublicLandDiligence | null;
 }
 
-/** The public API intentionally omits private title references and proof files. */
+/** The public API omits private title references and proof files. */
 export interface PublicLandParcel {
   plotNumber?: string;
   block?: string;
@@ -243,7 +235,6 @@ export interface PublicLandParcel {
   fractionalOwnershipAllowed: boolean;
 }
 
-/** Exact public API shape. Sensitive title numbers and proof files are absent. */
 export interface PublicLandListingApi {
   id: string;
   propertyId: string;

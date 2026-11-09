@@ -18,13 +18,12 @@ export interface SurveyRow {
   northing: string;
 }
 
-/** The grids a Nigerian survey plan can be in; WGS 84 is offered for GPS readings. */
 const SYSTEM_OPTIONS = [
   ...SUPPORTED_CRS.filter((c) => c.code !== 'EPSG:4326'),
   ...SUPPORTED_CRS.filter((c) => c.code === 'EPSG:4326'),
 ].map((c) => ({ value: c.code, label: c.label }));
 
-/** Matches the API: an outline this far from the confirmed pin is refused. */
+// Must match the API: an outline this far from the confirmed pin is refused.
 const MAX_PIN_DISTANCE_M = 3000;
 
 const distanceM = (a: BoundaryCorner, b: { latitude: number; longitude: number }) => {
@@ -37,7 +36,6 @@ const distanceM = (a: BoundaryCorner, b: { latitude: number; longitude: number }
   return 2 * 6_371_000 * Math.asin(Math.sqrt(h));
 };
 
-/** Reads "552568.12, 712566.37" style lines (comma, tab or space separated) into rows. */
 export function parseCoordinateLines(text: string): SurveyRow[] {
   return text
     .split(/\r?\n/)
@@ -48,7 +46,7 @@ export function parseCoordinateLines(text: string): SurveyRow[] {
     .map((parts) => ({ easting: parts[parts.length - 2], northing: parts[parts.length - 1] }));
 }
 
-/** The rows that are complete numbers, as [x, y] in the chosen system. */
+/** Complete rows only, as [x, y] in the chosen system. */
 export function completeRows(rows: SurveyRow[]): [number, number][] {
   return rows
     .filter((row) => row.easting !== '' && row.northing !== '')
@@ -61,16 +59,9 @@ interface SurveyCoordinatesEntryProps {
   onCrsChange: (crs: CrsCode) => void;
   rows: SurveyRow[];
   onRowsChange: (rows: SurveyRow[]) => void;
-  /** The owner's confirmed map pin, to catch a plan read in the wrong grid. */
   pin: { latitude: number; longitude: number } | null;
 }
 
-/**
- * Beacon coordinates typed or pasted from a survey plan. They are shown on the
- * map as they will be saved, and checked against the two mistakes that are
- * easy to make: the wrong coordinate system, and latitude/longitude typed
- * where the plan gives eastings and northings.
- */
 export function SurveyCoordinatesEntry({
   crs,
   onCrsChange,
@@ -105,7 +96,6 @@ export function SurveyCoordinatesEntry({
       if (metres <= MAX_PIN_DISTANCE_M) return null;
       return `Read as ${crsLabel(crs)}, these corners are ${Math.round(metres / 1000)} km from the property’s map pin. Check the coordinate system printed on the plan.`;
     }
-    // Not in Nigeria as entered: say what the numbers look like.
     const raw = diagnoseCoordinates(entered);
     if (raw.kind === 'projected') {
       const fits = raw.candidates.filter((code) => code !== crs).map(crsLabel);

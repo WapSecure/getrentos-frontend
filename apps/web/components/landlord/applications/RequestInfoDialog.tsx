@@ -20,7 +20,6 @@ import { landlordService } from '@/services/landlordService';
 import type { ApplicantSummary } from '@/types/applicantSummary';
 import type { RentalApplication } from '@/types/landlord';
 
-/** A starting message: the summary's questions when they have loaded, else a plain ask. */
 function draftFor(application: RentalApplication, summary: ApplicantSummary | undefined) {
   const first = application.applicantName.split(' ')[0];
   const questions = summary?.questions ?? [];
@@ -29,11 +28,7 @@ function draftFor(application: RentalApplication, summary: ApplicantSummary | un
     : `Hello ${first}, thank you for applying for ${application.unitName}. Before I decide, could you share `;
 }
 
-/**
- * "Request info": the landlord writes what they need, the applicant gets it as
- * a message they can reply to, and a pending application moves to under
- * review. Only applicants with a Sureground account can be messaged.
- */
+// Only applicants with a Sureground account can be messaged; sending moves a pending application to under review.
 export function RequestInfoDialog({
   application,
   onClose,

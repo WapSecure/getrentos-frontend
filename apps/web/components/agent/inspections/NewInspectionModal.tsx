@@ -69,10 +69,7 @@ export const NewInspectionModal = ({
 
   const selectedTask = tasks.find((t) => t.id === taskId);
 
-  // Photos are saved to the task's draft as soon as they are taken (often on the
-  // phone), so picking a task must bring them in; otherwise the web form looks
-  // empty and "Draft the report" has nothing to read. Rooms come from the saved
-  // draft, or from the photos' room labels when the draft has none yet.
+  // Photos are saved to the task's draft as they are taken (often on the phone), so picking a task must load them or the form looks empty.
   const saved = useQuery({
     queryKey: ['agent', 'inspection-draft', taskId],
     queryFn: () => unwrap(agentService.getInspection(taskId)),

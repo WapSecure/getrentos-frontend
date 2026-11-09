@@ -13,8 +13,8 @@ import {
   type SaleApiItem,
 } from '@/lib/publicListingMap';
 
-// The market types live with the mapping, so the server-rendered first page of
-// /rent and /buy and this client service cannot describe a listing differently.
+// The market types live with the mapping so the server-rendered first page and this service
+// describe a listing identically.
 export type { PublicListingCard, PublicMarket, PublicMarketFilters } from '@/lib/publicListingMap';
 
 export const publicMarketService = {

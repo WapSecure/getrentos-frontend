@@ -9,7 +9,6 @@ import { buyerKeys, renterKeys, shortletKeys } from '@/lib/queryKeys';
 
 export const marketSavedKey = ['public-market', 'saved-listing-ids'] as const;
 
-/** Account-wide saved state shared with renter, buyer and shortlet dashboards. */
 export function useMarketSaved() {
   const queryClient = useQueryClient();
   const [signedIn] = useState(viewerIsSignedIn);

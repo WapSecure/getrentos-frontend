@@ -4,18 +4,7 @@ import { subscriptionService } from '@/services/subscriptionService';
 import { unwrap } from '@/lib/apiHelpers';
 import { subscriptionKeys } from '@/lib/queryKeys';
 
-/**
- * The caller's own subscription tier — every signed-in user has one (FREE by default).
- *
- * `isPro` means "reaches Pro or above", not "is exactly Pro". It used to be an
- * equality test, which told an ENTERPRISE subscriber they were on the free plan
- * and locked them out of features their own plan includes. Every consumer asks
- * "may I use this?", so the ladder is the only correct answer.
- *
- * Note which plan this is: the *caller's*. An estate feature is entitled from
- * the estate owner's plan, which is a different subscription — use
- * `estate.planTier` for anything gated on the estate rather than on the user.
- */
+// The caller's own plan; `isPro` means Pro or above, not exactly Pro. Estate features use `estate.planTier`.
 export function usePlanTier() {
   const { data, isLoading } = useQuery({
     queryKey: subscriptionKeys.mine,

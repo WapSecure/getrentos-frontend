@@ -16,18 +16,7 @@ import {
 import type { Lease } from '@/types/landlord';
 import type { LegalCaseKind } from '@/types/legal-case';
 
-/**
- * Opening a case.
- *
- * Two things the form has to get right:
- *
- * - **Only a tenancy can carry a possession claim.** An eviction is refused
- *   server-side without one, because the notices on the tenancy are what the
- *   claim rests on. The form says so before it is submitted rather than after.
- * - **The settlement period and the court are not asked for here.** Nothing has
- *   been filed yet; `OPEN` means exactly "opened, nothing issued". Court and suit
- *   number are asked for at the point of filing, which is the moment they exist.
- */
+// A possession claim needs a tenancy (the server refuses one without); court and suit number are asked for at filing, when they exist.
 
 export const CASE_KIND_OPTIONS: { value: LegalCaseKind; label: string }[] = [
   { value: 'EVICTION', label: 'Eviction — recovering possession' },
@@ -86,10 +75,6 @@ export function OpenLegalCaseModal({
             />
           </Field>
 
-          {/*
-            The tenancy picker is only shown when it is required, but it is
-            labelled as what it is: the thing the notice ladder hangs off.
-          */}
           <Field
             label="Which tenancy"
             required={needsLease}

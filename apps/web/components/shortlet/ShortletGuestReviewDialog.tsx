@@ -20,7 +20,6 @@ import type { ShortletBooking } from '@/types/shortlet';
 
 const RATINGS = [1, 2, 3, 4, 5];
 
-/** Host rates a guest after a completed stay (one review per booking). */
 export function ShortletGuestReviewDialog({
   booking,
   onClose,

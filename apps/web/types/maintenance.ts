@@ -13,14 +13,7 @@ export type MaintenanceRequestStatus =
   | 'resolved'
   | 'cancelled';
 
-/**
- * AI triage result for a maintenance request.
- *
- * The backend speaks UPPERCASE `MaintenanceCategory` / `MaintenancePriority`
- * (its Prisma enums), whereas the rest of the web app uses the lowercase
- * variants above. Keep the raw shape here and lowercase-map at the point of use
- * for badge/icon lookups.
- */
+/** The backend sends UPPERCASE enums; keep the raw shape and lowercase-map at the point of use. */
 export type MaintenanceTriageCategory =
   | 'PLUMBING'
   | 'ELECTRICAL'
@@ -42,11 +35,11 @@ export interface MaintenanceTriage {
   model: string | null;
   triagedAt: string;
   requestId: string;
-  /** The stored proposal; send it back with the decision. */
+  /** Send it back with the decision. */
   reviewId?: string;
 }
 
-/** A person's decision on a triage proposal. Accepting applies category and urgency to the request. */
+/** Accepting applies category and urgency to the request. */
 export type MaintenanceTriageDecision =
   | {
       decision: 'accept';
@@ -83,7 +76,6 @@ export interface MaintenanceRequest {
   images: string[];
   assignedVendorId?: string;
   assignedVendorName?: string;
-  /** When the assigned vendor is due to visit. */
   scheduledFor?: string;
   createdAt: string;
   updatedAt: string;
@@ -97,12 +89,11 @@ export interface MaintenanceRequest {
   vendorRating?: number;
 }
 
-/** Totals across all of a renter's maintenance requests. */
 export interface MaintenanceSummary {
   total: number;
   open: number;
   resolved: number;
   urgent: number;
-  /** Hours from report to resolution, or to now while still open, averaged. */
+  /** Averaged; open requests count up to now. */
   avgResponseHours: number;
 }

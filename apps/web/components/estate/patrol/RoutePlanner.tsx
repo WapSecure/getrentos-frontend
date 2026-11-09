@@ -27,7 +27,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
 import type { PatrolRoute } from '@/types/estate';
 
-/** 0 = Sunday, matching the API and the estate's own week. */
+/** 0 = Sunday, matching the API. */
 const DAYS = [
   { value: 0, label: 'Sun' },
   { value: 1, label: 'Mon' },
@@ -48,7 +48,7 @@ type Draft = {
   startTime: string;
   windowMinutes: string;
   daysOfWeek: number[];
-  /** Ordered: the array order IS the order the round is meant to be walked in. */
+  /** Array order is the walking order. */
   checkpointIds: string[];
 };
 
@@ -60,15 +60,6 @@ const emptyDraft = (): Draft => ({
   checkpointIds: [],
 });
 
-/**
- * The rounds an estate walks, and in what order.
- *
- * Order is shown as an ordered list rather than hidden, because it is the only
- * thing on this screen that a guard's experience depends on and the server
- * deliberately reports it without enforcing it: walking a round out of order is
- * information, not an error. Showing the order is what makes that information
- * readable later.
- */
 export const RoutePlanner = ({ estateId }: { estateId: string }) => {
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
@@ -251,9 +242,7 @@ export const RoutePlanner = ({ estateId }: { estateId: string }) => {
         </div>
       )}
 
-      {/* Cleared by `close` on dismiss rather than by remounting, for the reason
-          recorded on the checkpoint dialog: `Dialog` unmounts its children when
-          `open` goes false, but this component's draft state would survive it. */}
+      {/* Cleared by `close` on dismiss: Dialog unmounts its children, but this component's draft state survives. */}
       <Dialog open={isOpen} onOpenChange={(open) => (open ? setIsOpen(true) : close())}>
         <DialogContent size="lg">
           <DialogTitle className="pr-8 text-xl font-semibold tracking-[-0.02em] text-foreground">

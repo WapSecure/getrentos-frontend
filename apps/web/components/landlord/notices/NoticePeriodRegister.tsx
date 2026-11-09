@@ -7,15 +7,7 @@ import { Alert, Badge, Button, Card, Field, NumberInput, Select, Textarea } from
 import { formatDate } from '@/lib/format';
 import type { NoticeKind, NoticePeriodSettings, UnconfiguredPeriod } from '@/types/tenancy-notice';
 
-/**
- * The period register, and the worklist of what is still missing.
- *
- * This is one screen for two reasons. A firm that has recorded nothing cannot
- * serve anything that runs for a period, so the missing entries are not
- * housekeeping — they are the thing blocking the ladder. And the number a firm
- * enters is *theirs*: this platform ships no day counts of its own, so the entry
- * carries a basis and is recorded as the firm's, not as an authority.
- */
+// Sureground ships no day counts of its own: each entry is the firm's, with its basis, and missing ones block the ladder.
 
 const JURISDICTIONS: { value: string; label: string }[] = [
   { value: 'NG-LA', label: 'Lagos' },

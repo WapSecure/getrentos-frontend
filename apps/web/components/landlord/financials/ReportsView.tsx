@@ -44,7 +44,6 @@ export function ReportsView() {
 
   return (
     <div className="space-y-8">
-      {/* Rent roll */}
       <section>
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
@@ -111,7 +110,6 @@ export function ReportsView() {
         )}
       </section>
 
-      {/* Income & expenses (P&L) */}
       <section>
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
@@ -192,7 +190,6 @@ export function ReportsView() {
         )}
       </section>
 
-      {/* Other exports */}
       <section>
         <h2 className="mb-3 text-lg font-semibold text-foreground">More exports</h2>
         <div className="flex flex-wrap gap-3">

@@ -5,7 +5,7 @@ export interface MapPoint {
   longitude: number;
 }
 
-/** Where an address probably is: a starting pin for the owner to correct. */
+/** A starting pin for the owner to correct. */
 export const geocodeService = {
   suggest(place: {
     address: string;

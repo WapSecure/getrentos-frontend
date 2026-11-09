@@ -1,20 +1,19 @@
 import type { LandAssuranceTier, LandTitleType } from '@/types/land';
 
 /**
- * Public land market intelligence, mirroring the backend's `land-insights.dto.ts`.
- * Figures cover verified, in-date listings only. Money is whole naira.
+ * Mirrors the backend's `land-insights.dto.ts`. Figures cover verified, in-date listings only.
+ * Money is whole naira.
  */
 
 export interface LandMarketInsightsParams {
   state?: string;
   city?: string;
-  /** An estate's public storefront slug. */
   estate?: string;
   titleType?: LandTitleType;
 }
 
 export interface NairaDistribution {
-  /** Listings that contributed (those with a recorded area, for ₦/m²). */
+  /** Those with a recorded area, for ₦/m². */
   sampleSize: number;
   min?: number;
   p25?: number;
@@ -51,7 +50,6 @@ export interface LandMarketInsights {
 }
 
 export interface LandComparable {
-  /** Listing id. */
   id: string;
   title: string;
   city: string;

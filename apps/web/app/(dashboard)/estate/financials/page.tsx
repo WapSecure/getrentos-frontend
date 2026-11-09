@@ -19,7 +19,6 @@ import { useEstatePlan } from '@/hooks/useEstatePlan';
 import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
 import type { EstateFinancialStats as EstateFinancialStatsData } from '@/types/estate';
 
-// Charts pull in recharts; load them after the page so it opens faster.
 const EstateFinancialsChart = dynamic(
   () =>
     import('@/components/estate/financials/EstateFinancialsChart').then(

@@ -6,9 +6,7 @@ import { Badge } from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type { BuyerEscrowTransaction, BuyerEscrowStatus } from '@/types/buyer';
 
-// The live escrow lifecycle the backend actually drives: deposit → held →
-// released. (VERIFICATION_PENDING / SETTLEMENT_PENDING exist in the enum but no
-// transaction is ever moved into them, so they are not shown as progress steps.)
+// VERIFICATION_PENDING and SETTLEMENT_PENDING exist in the enum but no transaction ever enters them, so they are not shown as steps.
 const escrowSteps: { key: BuyerEscrowStatus; label: string }[] = [
   { key: 'deposit_pending', label: 'Deposit pending' },
   { key: 'funds_held', label: 'Funds held' },

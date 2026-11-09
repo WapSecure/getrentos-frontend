@@ -32,7 +32,6 @@ export const TrustScoreRing = ({ score, size = 120, strokeWidth = 8 }: TrustScor
   return (
     <div className="relative" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="transform -rotate-90" aria-hidden="true">
-        {/* Background circle */}
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -41,7 +40,6 @@ export const TrustScoreRing = ({ score, size = 120, strokeWidth = 8 }: TrustScor
           strokeWidth={strokeWidth}
           className="stroke-border"
         />
-        {/* Progress circle */}
         <motion.circle
           cx={size / 2}
           cy={size / 2}

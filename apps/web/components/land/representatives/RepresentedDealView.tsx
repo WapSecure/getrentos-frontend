@@ -21,10 +21,6 @@ import {
   type LandDealRef,
 } from '@/services/landRepresentativeService';
 
-/**
- * A buyer's deal as their representative sees it: the conveyance steps, and
- * where the two-person rule applies, the steps waiting for their approval.
- */
 export const RepresentedDealView = ({ deal }: { deal: LandDealRef }) => {
   const queryClient = useQueryClient();
   const [approving, setApproving] = useState<LandMilestone | null>(null);

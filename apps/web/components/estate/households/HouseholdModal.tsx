@@ -15,12 +15,11 @@ interface HouseholdModalProps {
     contactEmail?: string;
   }) => void;
   isSubmitting?: boolean;
-  /** The server's reason the last save failed, shown in the dialog. */
   errorMessage?: string | null;
 }
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-// Digits with the usual separators; at least seven digits, e.g. 0801 234 5678 or +234 801 234 5678.
+// At least seven digits, with the usual separators.
 const PHONE_PATTERN = /^\+?[\d\s()-]{7,20}$/;
 
 export const HouseholdModal = ({

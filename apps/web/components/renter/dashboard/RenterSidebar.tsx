@@ -59,9 +59,7 @@ const baseNavGroups: NavGroup[] = [
   {
     label: 'Your tenancy',
     items: [
-      // "My Home" is now a hub: Overview / Lease / Documents / Inspections tabs.
       { labelKey: 'sidebar.my_home', href: ROUTES.RENTER_HOME, icon: House },
-      // "Payments" now carries a Flex Financing tab.
       { labelKey: 'sidebar.payments', href: ROUTES.RENTER_PAYMENTS, icon: CreditCard },
       { labelKey: 'sidebar.maintenance', href: ROUTES.RENTER_MAINTENANCE, icon: Wrench },
       { labelKey: 'sidebar.roommates', href: ROUTES.RENTER_ROOMMATES, icon: Users },
@@ -77,11 +75,9 @@ const baseNavGroups: NavGroup[] = [
   {
     label: 'Trust and support',
     items: [
-      // "Trust & Credit" hub: Trust Score / Verification / Credit Report tabs.
       { label: 'Trust & Credit', href: ROUTES.RENTER_TRUST_SCORE, icon: Star },
       { labelKey: 'sidebar.referrals', href: ROUTES.RENTER_REFERRALS, icon: Gift },
       { labelKey: 'sidebar.settings', href: ROUTES.RENTER_SETTINGS, icon: Settings },
-      // "Help" now carries a Legal Resources tab.
       { labelKey: 'sidebar.help', href: ROUTES.RENTER_HELP, icon: HelpCircle },
     ],
   },

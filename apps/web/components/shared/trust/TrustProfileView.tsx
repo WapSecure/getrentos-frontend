@@ -13,17 +13,13 @@ type ProfilePortal = Extract<TrustPortal, 'owner' | 'agent' | 'realtor' | 'buyer
 
 interface TrustProfileViewProps {
   portal: ProfilePortal;
-  /** TanStack query key for this role's trust profile. */
   queryKey: readonly unknown[];
-  /** Fetches the role trust profile (what others see) from the backend. */
   queryFn: () => Promise<ApiResponse<TrustProfile>>;
   title: string;
   subtitle: string;
-  /** Who sees the profile, e.g. "buyers and realtors". */
   audience: string;
 }
 
-/** Where each requirement is done, per portal. */
 function hrefFor(portal: ProfilePortal, key: TrustRequirementKey): string {
   switch (key) {
     case 'EMAIL':
@@ -33,17 +29,10 @@ function hrefFor(portal: ProfilePortal, key: TrustRequirementKey): string {
     case 'PROPERTY_OWNERSHIP':
       return `/${portal}/properties`;
     default:
-      // Phone, NIN, live selfie and the bank check all live on the Verification page.
       return `/${portal}/verification`;
   }
 }
 
-/**
- * Trust & Verification for owners, agents, realtors and buyers: the shared
- * overview (identity apart from score, this portal's requirements, one next
- * step), then what others see on the profile, folded away. Every value comes
- * from the backend.
- */
 export const TrustProfileView = ({
   portal,
   queryKey,

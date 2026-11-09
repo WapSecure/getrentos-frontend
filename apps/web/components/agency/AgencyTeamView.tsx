@@ -31,11 +31,6 @@ const KEY = ['agency', 'team'] as const;
 /** An end date picked as a day means "through the end of that day" in Lagos. */
 const endOfDay = (day: string) => (day ? new Date(`${day}T23:59:59+01:00`).toISOString() : null);
 
-/**
- * The firm's team. Everyone on it can see who's who; only the principal can
- * invite, change a role or end date, suspend or remove. Operating roles get the
- * firm's client properties as soon as they join; an accountant does not.
- */
 export function AgencyTeamView() {
   const queryClient = useQueryClient();
   const myId = getStoredUser<{ id?: string }>()?.id;

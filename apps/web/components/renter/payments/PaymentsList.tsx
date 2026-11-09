@@ -36,7 +36,6 @@ type StatusFilter = PaymentStatusFilter;
 
 interface PaymentsListProps {
   payments: Payment[];
-  /** Every payment the renter has, across all pages (the list holds one page). */
   total: number;
   onPayNow: (id: string) => void;
   onDownloadReceipt: (id: string) => void;
@@ -46,10 +45,7 @@ interface PaymentsListProps {
   onSearchChange: (value: string) => void;
   filterStatus: StatusFilter;
   onFilterChange: (value: StatusFilter) => void;
-  /**
-   * True when the API searched and filtered every payment itself. An older API
-   * ignores both, so the list falls back to filtering the page it holds.
-   */
+  // An older API ignores search and filters, so the list falls back to filtering the page it holds.
   serverFiltered: boolean;
 }
 
@@ -77,8 +73,6 @@ export const PaymentsList = ({
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
 
-  // An older API pages the history without searching or filtering it, so both
-  // work on the payments shown here; say so rather than miss older charges.
   const pageOnly = !serverFiltered && total > payments.length;
   const filtering = searchTerm.trim() !== '' || filterStatus !== 'all';
 

@@ -15,11 +15,6 @@ import {
 import { recentMonthOptions } from '@sureground/shared';
 import { agencyDashboardService } from '@/services/agencyDashboardService';
 
-/**
- * The firm's KPI pack over a run of months: collection, arrears, occupancy,
- * repairs, owner payouts and retention. The same figures Sureground ops see for
- * the firm, so there is one version of how the firm is doing.
- */
 export function AgencyPerformanceView() {
   const months = useMemo(() => recentMonthOptions(), []);
   const [from, setFrom] = useState(months[2].value);

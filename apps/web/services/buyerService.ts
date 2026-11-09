@@ -113,12 +113,10 @@ export interface BuyerMessage {
   read: boolean;
 }
 
-/** Backend API shapes (already mapped camelCase). */
 export type BuyerListingApi = BuyerPropertyListing;
 export type BuyerViewingApi = ViewingRequest;
 export type BuyerOfferApi = BuyerOffer;
 export type BuyerTransactionApi = BuyerEscrowTransaction;
-/** The deposit call answers with the transaction plus the Paystack checkout to send the buyer to. */
 export type BuyerEscrowDepositResult = BuyerEscrowTransaction & {
   authorizationUrl?: string | null;
 };
@@ -138,7 +136,7 @@ export interface DiscoverFilters {
   propertyType?: string;
   sort?: string;
   search?: string;
-  /** Estate public slug — limits results to properties inside that estate. */
+  /** Estate public slug; limits results to properties inside that estate. */
   estate?: string;
   page?: number;
   pageSize?: number;
@@ -191,10 +189,8 @@ export const buyerService = {
         body: JSON.stringify({ question, history, language }),
       })
     ),
-  // Dashboard
   getDashboard: () => safeCall(() => authFetch<BuyerDashboard>('/buyer/dashboard')),
 
-  // Discover listings
   discover: (filters: DiscoverFilters = {}) =>
     safeCall(async () => {
       const response = await authFetch<Paginated<BuyerListingApi>>(
@@ -223,7 +219,6 @@ export const buyerService = {
       (await authFetch<BuyerListingApi[]>('/buyer/listings/recommendations')).map(mapBuyerListing)
     ),
 
-  // Saved listings
   listSaved: (options: BuyerListOptions = {}) =>
     safeCall(async () => {
       const response = await authFetch<Paginated<BuyerListingApi>>(
@@ -231,7 +226,6 @@ export const buyerService = {
       );
       return { ...response, items: response.items.map(mapBuyerListing) };
     }),
-  /** Due diligence on a property for sale, from what is on file. Read-only. */
   getDiligence: (listingId: string) =>
     safeCall(() => authFetch<BuyerDiligence>(`/buyer/listings/${listingId}/diligence`)),
   saveListing: (listingId: string) =>
@@ -239,7 +233,6 @@ export const buyerService = {
   unsaveListing: (listingId: string) =>
     safeCall(() => authFetch(`/buyer/saved/${listingId}`, { method: 'DELETE' })),
 
-  // Viewings
   listViewings: (options: BuyerListOptions & { status?: ViewingRequest['status'] } = {}) =>
     safeCall(() =>
       authFetch<Paginated<BuyerViewingApi>>(
@@ -257,7 +250,7 @@ export const buyerService = {
     mode?: 'IN_PERSON' | 'VIDEO';
   }) =>
     safeCall(() => authFetch('/buyer/viewings', { method: 'POST', body: JSON.stringify(data) })),
-  /** A personal link into a confirmed video viewing, from 15 minutes before it. */
+  /** Available from 15 minutes before the viewing. */
   joinVideoCall: (id: string) =>
     safeCall(() =>
       authFetch<VideoCallJoin>(`/buyer/viewings/${id}/video-call`, { method: 'POST' })
@@ -267,7 +260,6 @@ export const buyerService = {
       authFetch(`/buyer/viewings/${id}`, { method: 'PATCH', body: JSON.stringify(data) })
     ),
 
-  // Offers
   listOffers: (filters: BuyerOffersFilters = {}) =>
     safeCall(() =>
       authFetch<Paginated<BuyerOfferApi>>(
@@ -301,7 +293,6 @@ export const buyerService = {
   getOfferThread: (id: string) =>
     safeCall(() => authFetch<BuyerOfferThreadMessage[]>(`/buyer/offers/${id}/thread`)),
 
-  // Transactions / escrow
   listTransactions: (filters: BuyerTransactionsFilters = {}) =>
     safeCall(() =>
       authFetch<Paginated<BuyerTransactionApi>>(
@@ -326,7 +317,6 @@ export const buyerService = {
   refundTransaction: (id: string) =>
     safeCall(() => authFetch(`/buyer/transactions/${id}/refund`, { method: 'POST' })),
 
-  // Documents
   listDocuments: (filters: BuyerDocumentsFilters = {}) =>
     safeCall(() =>
       authFetch<Paginated<BuyerDocumentApi>>(
@@ -356,7 +346,6 @@ export const buyerService = {
   deleteDocument: (id: string) =>
     safeCall(() => authFetch(`/buyer/documents/${id}`, { method: 'DELETE' })),
 
-  // Reviews
   listReviews: (options: BuyerListOptions = {}) =>
     safeCall(() =>
       authFetch<Paginated<BuyerReview>>(
@@ -364,13 +353,11 @@ export const buyerService = {
       )
     ),
 
-  // Profile / settings
   getProfile: () => safeCall(() => authFetch<BuyerProfile>('/buyer/profile')),
   getTrustProfile: () => safeCall(() => authFetch<TrustProfile>('/buyer/trust-profile')),
   updateProfile: (data: Partial<BuyerProfile>) =>
     safeCall(() => authFetch('/buyer/profile', { method: 'PUT', body: JSON.stringify(data) })),
 
-  // Payment method
   getPaymentMethod: () =>
     safeCall(() => authFetch<BuyerPaymentMethod>('/buyer/settings/payment-method')),
   updatePaymentMethod: (data: { bankName: string; accountNumber: string; accountName: string }) =>
@@ -381,7 +368,6 @@ export const buyerService = {
       })
     ),
 
-  // Notification preferences
   getNotificationPreferences: () =>
     safeCall(() => authFetch<BuyerNotificationPreference[]>('/buyer/settings/notifications')),
   updateNotificationPreferences: (preferences: BuyerNotificationPreference[]) =>
@@ -392,7 +378,6 @@ export const buyerService = {
       })
     ),
 
-  // Search preferences
   getSearchPreferences: () =>
     safeCall(() => authFetch<BuyerSearchPreferences>('/buyer/settings/search-preferences')),
   updateSearchPreferences: (data: Partial<BuyerSearchPreferences>) =>
@@ -403,7 +388,6 @@ export const buyerService = {
       })
     ),
 
-  // Notifications feed
   getNotifications: (options: BuyerListOptions = {}) =>
     safeCall(() =>
       authFetch<Paginated<BuyerNotification>>(
@@ -415,8 +399,6 @@ export const buyerService = {
   markAllNotificationsRead: () =>
     safeCall(() => authFetch('/buyer/notifications/read-all', { method: 'POST' })),
 
-  // Messages
-  /** Opens (or reopens) the thread with the seller of a for-sale listing. */
   startConversationAboutListing: (listingId: string) =>
     safeCall(() =>
       authFetch<BuyerConversation>('/buyer/messages/conversations', {

@@ -2,10 +2,8 @@ import type { LandClosingFields } from './landClosing';
 import type { LandNotVerifiedItem, LandOpenCondition, LandTrustLabel } from './land';
 
 /**
- * Developer estate (layout) sales as the buyer and the public see them.
- *
- * Mirrors the backend's `land-sales-response.dto.ts`. Money is whole naira as a
- * JSON number; rates are basis points (1% = 100).
+ * Mirrors the backend's `land-sales-response.dto.ts`. Money is whole naira; rates are basis points
+ * (1% = 100).
  */
 
 export type LandPlotStatus =
@@ -54,16 +52,15 @@ export interface LandPaymentPlan {
   active: boolean;
 }
 
-/** A worked example of what a plan costs on a real plot (the cheapest available one). */
+/** On the cheapest available plot. */
 export interface LandPlanPriceExample {
   plotPrice: number;
   priceUplift: number;
   /** Documentation + survey + development levy. */
   fees: number;
   totalPrice: number;
-  /** Deposit share of the price plus all fees, due to start. */
   initialPayment: number;
-  /** A regular monthly installment after the deposit; 0 for outright. */
+  /** 0 for outright. */
   monthlyInstallment: number;
   durationMonths: number;
 }
@@ -107,20 +104,19 @@ export interface PublicLandLayoutSummary {
   publishedAt?: string;
 }
 
-/** What a reservation means; the buyer accepts `version` to reserve. */
+/** The buyer accepts `version` to reserve. */
 export interface LandReservationTerms {
   version: string;
   points: string[];
-  /** The extra term when the hold is subject to the buyer's inspection; absent when not offered. */
+  /** Absent when not offered. */
   subjectToInspection?: string;
 }
 
 export interface PublicLandLayoutDetail extends PublicLandLayoutSummary {
   reservationHoldHours: number;
-  /** Days a plot may be held while the buyer's inspection runs; 0 when not offered. */
+  /** 0 when not offered. */
   inspectionHoldDays: number;
   reservationTerms: LandReservationTerms;
-  /** The master parcel's scoped trust labels. */
   labels?: LandTrustLabel[];
   /** Checks not verified on the master parcel; the buyer accepts these to purchase. */
   notVerified?: LandNotVerifiedItem[];
@@ -150,7 +146,6 @@ export interface LandReservation {
   expiresAt: string;
   createdAt: string;
   termsVersion?: string;
-  /** Held subject to this pre-purchase inspection. */
   subjectToInspectionId?: string;
 }
 
@@ -178,7 +173,7 @@ export interface LandInstallment {
   amount: number;
   amountPaid: number;
   lateFee: number;
-  /** Still owed on this installment, late fee included. */
+  /** Late fee included. */
   outstanding: number;
   status: LandInstallmentStatus;
   paidAt?: string;
@@ -201,7 +196,6 @@ export interface LandEscrowRelease {
   amount: number;
   reason: string;
   createdAt: string;
-  /** Where the payout of this release to the developer's bank stands. */
   payoutStatus?: LandReleasePayoutStatus;
   paidAt?: string;
   approvedAt?: string;
@@ -219,13 +213,12 @@ export interface LandNextDue {
   sequence: number;
   label: string;
   dueDate: string;
-  /** Amount to pay now, late fee included. */
+  /** Late fee included. */
   amount: number;
   overdue: boolean;
 }
 
 export interface LandPurchaseSummary {
-  /** The master land property the estate sits on. */
   propertyId?: string;
   id: string;
   reference: string;
@@ -293,7 +286,7 @@ export interface LandPaymentInit {
   purchaseId: string;
   paymentId: string;
   reference: string;
-  /** Naira charged, late fee included. */
+  /** Naira, late fee included. */
   amount: number;
   /** True when no gateway is configured and success was simulated. */
   simulated: boolean;
@@ -306,7 +299,6 @@ export interface LandStatementEntry {
   description: string;
   debit: number;
   credit: number;
-  /** Running balance owed after this entry. */
   balance: number;
 }
 

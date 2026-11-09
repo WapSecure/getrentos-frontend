@@ -37,10 +37,7 @@ type OperationsAction = AttentionMetric & {
 
 interface HomeManagementOperationsCommandCenterProps {
   role: HomeManagementOperationsRole;
-  /**
-   * The backend calculates this summary over the entire active portfolio.
-   * The paginated operational tables below never determine these counts.
-   */
+  // Calculated by the backend over the whole active portfolio, never from the paginated tables below.
   summary?: HomeManagementDashboard;
   isLoading?: boolean;
 }
@@ -106,7 +103,6 @@ function CommandCenterLoadingState() {
   );
 }
 
-/** Portfolio-wide service-risk overview backed by aggregate API metrics. */
 export function HomeManagementOperationsCommandCenter({
   role,
   summary,

@@ -19,10 +19,8 @@ export default function robots(): MetadataRoute.Robots {
         '/gateman',
         '/resident',
         '/admin',
-        // Internal / dev-only OAuth helpers.
         '/oauth',
         '/magic-link',
-        // Query parameters should not create duplicate indexable URLs.
         '/shortlets?',
         '/land?',
       ],

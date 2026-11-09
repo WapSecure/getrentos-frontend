@@ -47,7 +47,6 @@ import { trustService, type TrustIdType, type TrustPurpose } from '@/services/tr
 const ACTIONABLE = ['NOT_STARTED', 'FAILED', 'REVIEW_REQUIRED'];
 const IDENTITY_STEP_TYPES = ['NIN_CHECK', 'BVN_CHECK'];
 const BIO_STEP_TYPES = ['SELFIE_CAPTURE', 'LIVENESS_CHECK', 'FACE_MATCH'];
-/** Purposes whose onboarding policy includes the BANK_ACCOUNT_CHECK step (hosts/agents). */
 const HOST_ONBOARD_PURPOSES: TrustPurpose[] = [
   'LANDLORD_ONBOARDING',
   'PROPERTY_OWNER_ONBOARDING',
@@ -59,7 +58,6 @@ interface VerificationCenterProps {
   subjectId: string;
   purpose: TrustPurpose;
   description?: string;
-  /** Persona's trust-score route for the footer tile (omitted to hide the tile). */
   trustScoreHref?: string;
 }
 
@@ -79,8 +77,6 @@ export const VerificationCenter = ({
   const [lastName, setLastName] = useState('');
   const [phoneRef, setPhoneRef] = useState<string | null>(null);
   const [otpCode, setOtpCode] = useState('');
-  // Smile ID live selfie: the session while the capture is open, then the job
-  // it was sent as while Smile decides.
   const [liveSession, setLiveSession] = useState<SmileLivenessSession | null>(null);
   const [liveJob, setLiveJob] = useState<string | null>(null);
   const [liveUnavailable, setLiveUnavailable] = useState<string | null>(null);
@@ -91,17 +87,13 @@ export const VerificationCenter = ({
   const [documentNumber, setDocumentNumber] = useState('');
   const [documentHolder, setDocumentHolder] = useState('');
   const autoStarted = useRef(false);
-  // Which stage the person opened; null follows the first stage that needs them.
   const [openStage, setOpenStage] = useState<string | null>(null);
 
-  // Every step changes the trust page too (identity status and requirements).
   const invalidateVerification = () => {
     queryClient.invalidateQueries({ queryKey: ['trust-verification', verificationId] });
     queryClient.invalidateQueries({ queryKey: trustKeys.all });
   };
 
-  // Live update: when the orchestrator decides (auto or reviewer), refresh the
-  // status chip + tier without a manual reload.
   useRealtimeEvent('verification:decided', () => {
     queryClient.invalidateQueries({ queryKey: ['kyc-status'] });
     queryClient.invalidateQueries({ queryKey: ['trust-verification'] });
@@ -117,8 +109,7 @@ export const VerificationCenter = ({
     queryKey: ['trust-verification', verificationId],
     queryFn: () => (verificationId ? unwrap(trustService.getVerification(verificationId)) : null),
     enabled: Boolean(verificationId),
-    // A check decided by a provider (Smile ID's live selfie) lands a little
-    // later; look again until it does, as the mobile app does.
+    // A provider-decided check (Smile ID's live selfie) lands a little later; look again until it does, as the mobile app does.
     refetchInterval: (q) =>
       q.state.data?.steps?.some((st) => st.status === 'WAITING_FOR_PROVIDER') ? 5000 : false,
   });
@@ -142,15 +133,12 @@ export const VerificationCenter = ({
       setError(reason instanceof Error ? reason.message : 'Unable to load your verification.'),
   });
 
-  // Idempotently start/resume the orchestrated verification once (start is
-  // safe: resumes an open verification or creates one for the signed-in user).
+  // Start is idempotent: it resumes an open verification or creates one.
   useEffect(() => {
     if (
       subjectId &&
       kyc &&
-      // Same rule as isVerified below. An account whose status reads APPROVED
-      // while identityVerified is false (seeded, or approved before the checks
-      // existed) got no verification started and no "complete" line: stuck.
+      // Same rule as isVerified below: an account APPROVED while identityVerified is false would otherwise be stuck with nothing started.
       !(kyc.identityVerified ?? kyc.verificationStatus === 'APPROVED') &&
       !autoStarted.current &&
       !startMutation.isPending
@@ -284,8 +272,7 @@ export const VerificationCenter = ({
       setError(reason instanceof Error ? reason.message : 'Unable to verify the code.'),
   });
 
-  // Starts Smile ID's live selfie. A static photo is never accepted for this
-  // step: liveness is decided by Smile from the live capture, by webhook.
+  // A static photo is never accepted here: Smile decides liveness from the live capture, by webhook.
   const liveStart = useMutation({
     mutationFn: () => unwrap(trustService.startLivenessSession(verificationId!)),
     onSuccess: (session) => {
@@ -299,9 +286,7 @@ export const VerificationCenter = ({
     },
   });
 
-  // While Smile decides, ask the server to check with Smile too (the webhook
-  // can be slow, and can't reach a local API). The server only accepts Smile's
-  // answer for the job it issued.
+  // While Smile decides, ask the server to check too (the webhook can be slow, and can't reach a local API); it only accepts Smile's answer for the job it issued.
   useEffect(() => {
     if (!liveJob || !verificationId) return;
     let stopped = false;
@@ -343,7 +328,6 @@ export const VerificationCenter = ({
       setBankCode('');
       setError(null);
       invalidateVerification();
-      // Bank completion can lift the account to tier 3: refresh the chip.
       queryClient.invalidateQueries({ queryKey: ['kyc-status'] });
     },
     onError: (reason) =>
@@ -371,14 +355,12 @@ export const VerificationCenter = ({
       setError(reason instanceof Error ? reason.message : 'Unable to run the document check.'),
   });
 
-  // Identity, specifically: `isVerified` on the KYC row is broader (an account
-  // can carry it while the listing and lease gates still ask for identity).
+  // Identity specifically: the KYC row's `isVerified` is broader, and the listing and lease gates may still ask for identity.
   const isVerified =
     kyc?.identityVerified ??
     (kyc?.identity?.status === 'APPROVED' || kyc?.verificationStatus === 'APPROVED');
   const steps = verification?.steps ?? [];
-  // Only the ID numbers this verification has a check for (onboarding asks for
-  // a NIN; BVN only where a policy includes it). Offering others would fail.
+  // Only the ID numbers this verification has a check for; offering others would fail.
   const idTypeOptions = (['NIN', 'BVN'] as const).filter((t) =>
     steps.some((s) => s.stepType === `${t}_CHECK`)
   );
@@ -393,7 +375,6 @@ export const VerificationCenter = ({
   const runnableBio = steps.find(
     (s) => BIO_STEP_TYPES.includes(s.stepType) && actionable(s.status)
   );
-  // Bank step only applies to host/agent onboardings (renter policies skip it).
   const bankRequired =
     verification !== undefined
       ? steps.some((s) => s.stepType === 'BANK_ACCOUNT_CHECK')
@@ -401,7 +382,6 @@ export const VerificationCenter = ({
   const runnableBank = bankRequired
     ? steps.find((s) => s.stepType === 'BANK_ACCOUNT_CHECK' && actionable(s.status))
     : undefined;
-  // Document step only applies to agent onboarding (professional/authority docs).
   const documentRequired =
     verification !== undefined
       ? steps.some((s) => s.stepType === 'DOCUMENT_CHECK')
@@ -432,9 +412,6 @@ export const VerificationCenter = ({
     Boolean(docConsent) &&
     !documentMutation.isPending;
 
-  // One ordered path. Each stage carries its own consent, so nothing has to be
-  // agreed "above" before it can be used below; the first stage that still
-  // needs the person is open, the rest are folded to a line.
   type StageStatus = 'done' | 'todo' | 'failed' | 'review' | 'waiting' | 'pending';
   const stageStatus = (types: string[]): StageStatus => {
     const own = steps.filter((s) => types.includes(s.stepType));
@@ -797,8 +774,6 @@ export const VerificationCenter = ({
     null;
   const openKey = openStage ?? currentKey;
 
-  // One chip for the whole picture: the KYC row and the orchestrator each had
-  // their own vocabulary ("Pending review" beside "0 of 6 passed · PROCESSING").
   const overall = isVerified
     ? { label: 'Verified', cls: 'bg-success-subtle text-success' }
     : kyc?.verificationStatus === 'REJECTED' || verification?.decision === 'REJECT'
@@ -888,8 +863,6 @@ export const VerificationCenter = ({
           variant="danger"
           icon={ShieldAlert}
           action={
-            // The phone check needs a number on the profile: send the person
-            // to their own portal's settings rather than leave them guessing.
             /phone number/i.test(error) ? (
               <Button size="sm" variant="outline" href={`/${portal}/settings?tab=profile`}>
                 Add your phone number
@@ -1011,7 +984,6 @@ export const VerificationCenter = ({
         </div>
       )}
 
-      {/* The manual route, inline, so it is the same in every portal. */}
       {!isVerified &&
         !steps.some((s) => IDENTITY_STEP_TYPES.includes(s.stepType) && s.status === 'PASSED') && (
           <IdentityDocumentFallback />

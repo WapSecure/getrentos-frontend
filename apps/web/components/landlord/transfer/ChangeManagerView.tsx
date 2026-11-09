@@ -45,12 +45,7 @@ const STATUS: Record<
 /** Today in Lagos, as YYYY-MM-DD. */
 const lagosToday = () => new Date(Date.now() + 60 * 60_000).toISOString().slice(0, 10);
 
-/**
- * Changing who manages a property: from the current manager (or from managing
- * it yourself) to a verified firm, Sureground Managed, or back to you, at a time
- * you choose. The current manager runs it until then; at that time their access
- * ends, the new manager's begins, and every tenant is told.
- */
+// The current manager runs it until the chosen time; then their access ends, the new manager's begins and every tenant is told.
 export function ChangeManagerView() {
   const queryClient = useQueryClient();
   const [propertyId, setPropertyId] = useState('');
@@ -123,7 +118,6 @@ export function ChangeManagerView() {
   const blocked =
     !propertyId ||
     !effectiveAt ||
-    // A property already under management changes hands: say which engagement ends.
     (!!p?.running.length && !fromMandateId) ||
     (incoming.kind === 'SELF' && !fromMandateId) ||
     (incoming.kind === 'FIRM' && !incoming.id) ||
@@ -220,7 +214,6 @@ export function ChangeManagerView() {
                     {
                       value: 'SUREGROUND',
                       label: 'Sureground Managed',
-                      // You cannot move a property to the manager you are ending.
                       disabled: !!outgoing?.managerIsSureground,
                     },
                     { value: 'FIRM', label: 'A verified firm' },

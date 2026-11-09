@@ -11,7 +11,6 @@ import {
 } from '@sureground/ui';
 import type { Unit } from '@/types/landlord';
 
-/** What a landlord knows about an occupier who will not use Sureground themselves. */
 export interface OccupierRecord {
   tenantName: string;
   rentAmount: number;
@@ -35,11 +34,7 @@ interface RecordOccupierModalProps {
   errorMessage?: string | null;
 }
 
-/**
- * Records a tenancy that already exists, for someone who has no Sureground
- * account. It creates a signed lease, because the agreement is already in
- * force — there is nobody to send it to and nothing to draft.
- */
+// Creates a signed lease: the agreement is already in force, so there is nobody to send it to.
 export const RecordOccupierModal = ({
   unit,
   onClose,

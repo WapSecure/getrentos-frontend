@@ -7,13 +7,7 @@ import { addBaseTiles } from '@/lib/mapTiles';
 import { LAND_PLOT_STATUS_LABELS, type LandPlot } from '@/types/landBuyer';
 import { PLOT_STATUS_STYLES, plotLabel } from './landSaleLogic';
 
-/**
- * An estate's plots drawn from their surveyed outlines, coloured by status.
- * Read-only: clicking a plot selects it. Uses the same tiles as the single
- * parcel map (ParcelBoundaryMap), which only draws one outline. Plots without
- * an outline are simply absent here; the plot grid beside it lists every plot,
- * so nothing is reachable only by map.
- */
+// Plots without an outline are absent here; the plot grid lists every plot.
 export const PlotLayoutMap = ({
   plots,
   selectedId,
@@ -107,6 +101,5 @@ export const PlotLayoutMap = ({
   );
 };
 
-/** Whether any plot carries a usable outline. */
 export const hasPlotOutlines = (plots: LandPlot[]) =>
   plots.some((plot) => boundaryCorners(plot.boundaryGeometry) !== null);

@@ -17,7 +17,6 @@ const ICON: Record<LandMilestoneStatus, { icon: React.ElementType; className: st
 
 export interface MilestoneDeliverability {
   allowed: boolean;
-  /** Why not, shown under the step when delivery is blocked. */
   reason?: string;
 }
 
@@ -25,14 +24,10 @@ interface MilestoneListProps {
   milestones: LandMilestone[];
   deliverability: (milestone: LandMilestone) => MilestoneDeliverability;
   onDeliver: (milestone: LandMilestone) => void;
-  /** Show each step's share of the price released from escrow (developer sales). */
   showRelease?: boolean;
 }
 
-/**
- * The conveyance steps of a land sale. The seller marks a step delivered; the
- * buyer then confirms it (or disputes it), which is what releases escrow.
- */
+// The buyer's confirmation, not the seller's delivery, releases escrow.
 export const MilestoneList = ({
   milestones,
   deliverability,

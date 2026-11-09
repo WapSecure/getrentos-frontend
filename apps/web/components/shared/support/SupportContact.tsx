@@ -2,17 +2,12 @@ import { MessageCircle, Phone } from 'lucide-react';
 import { SUPPORT, hasSupportLine, whatsappLink } from '@/lib/support';
 import { cn } from '@sureground/shared';
 
-/**
- * "Talk to a person" links: call and WhatsApp. Renders nothing until the
- * numbers are configured (see lib/support.ts), so no placeholder ever shows.
- */
 export function SupportContact({
   lead = 'Need help? Talk to Sureground support:',
   context,
   className,
 }: {
   lead?: string;
-  /** Pre-filled WhatsApp message, e.g. a booking reference. */
   context?: string;
   className?: string;
 }) {

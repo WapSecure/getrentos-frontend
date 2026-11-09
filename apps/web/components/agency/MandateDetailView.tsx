@@ -31,20 +31,6 @@ import { CapabilityChip, formatMoment, MandateStatusBadge } from './mandatePrese
 import { useMandateActions } from './useMandateActions';
 import { describeAgencyError } from './agencyAccess';
 
-/**
- * One engagement, in full.
- *
- * The list answers "what am I engaged on". This answers "what was actually
- * agreed, and where has it got to" — which is the question that gets asked when
- * something has gone wrong, months later, by someone who was not in the room.
- * So it is deliberately a record rather than a summary: both signatures with
- * their dates, who decided and why, when notice was served, whether the handover
- * pack was exchanged.
- *
- * The actions offered are the same ones the list offers, from the same permission
- * set — a manager who can pause an engagement from the list can pause it from
- * here, and neither screen decides that for itself.
- */
 export function MandateDetailView() {
   const params = useParams<{ id: string }>();
   const id = params?.id ?? '';
@@ -178,16 +164,13 @@ export function MandateDetailView() {
         <h2 className="text-sm font-semibold">How it got here</h2>
         <ol className="mt-3 space-y-3">
           <Moment label="Created" at={mandate.createdAt} />
-          {/* No timestamp is kept for the submission step, so this row states the
-              fact without inventing a date for it. */}
+          {/* No timestamp is kept for submission, so no date is shown. */}
           <li className="flex flex-wrap items-baseline gap-x-2 text-sm">
             <span className="font-medium">Sent to the owner</span>
             <span className="text-muted-foreground">
               {mandate.submittedById ? 'sent' : 'not yet sent'}
             </span>
           </li>
-          {/* The two signatures are listed separately because the whole model
-              turns on both existing: a half-signed agreement provisions nothing. */}
           <Moment
             label="Signed by the owner"
             at={mandate.signedByOwnerAt}
@@ -288,11 +271,6 @@ function Fact({ label, value, icon }: { label: string; value: string; icon?: Rea
   );
 }
 
-/**
- * One event in the engagement's life. Absent moments are shown rather than
- * hidden: "not yet signed" is information, and a timeline that silently omits a
- * step reads as though the step does not exist.
- */
 function Moment({
   label,
   at,

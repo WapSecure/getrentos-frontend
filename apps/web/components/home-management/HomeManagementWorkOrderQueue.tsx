@@ -43,8 +43,6 @@ import {
   type HomeManagementWorkOrder,
 } from '@/services/homeManagementService';
 
-// Quotes and invoices only show once a work order exists, so they load after
-// the queue instead of with the page.
 const panelFallback = () => <Skeleton className="h-40 w-full rounded-lg" />;
 const HomeManagementWorkOrderQuotes = dynamic(
   () =>
@@ -257,9 +255,7 @@ export function HomeManagementWorkOrderQueue({
       ),
   });
   const propertyAssets = useMemo(() => assetsQuery.data?.items ?? [], [assetsQuery.data]);
-  // Vendors scoped to the selected property's owner, so a manager/agent spanning
-  // several owners only sees vendors valid for the property they picked. Falls
-  // back to the portfolio-wide prop before a property is chosen.
+  // Vendors scoped to the selected property's owner, so a manager spanning several owners only sees valid ones.
   const createVendorsQuery = useQuery({
     enabled: isCreateOpen && Boolean(form.propertyId),
     queryKey: [...homeManagementKeys.vendors, 'work-order-create', form.propertyId],
@@ -293,7 +289,6 @@ export function HomeManagementWorkOrderQueue({
   const canCreateUnit =
     Boolean(form.propertyId) && Boolean(unitForm.unitName.trim()) && hasValidUnitDetails;
 
-  // Property managers triage here (the agency workspace mounts this queue).
   const triage = useMaintenanceTriage({
     onApplied: () => invalidateWorkOrderViews(),
     assignVendor: (id, vendorId) => assignVendor.mutateAsync({ id, assignedVendorId: vendorId }),
@@ -442,8 +437,7 @@ export function HomeManagementWorkOrderQueue({
   ) => {
     if (isLifecycleActionPending) return;
     setLifecycleNote('');
-    // A work order that never went through spend approval has no ceiling to
-    // invoice against, so completing it is where its real cost is captured.
+    // Without spend approval there is no ceiling to invoice against, so completing it captures the real cost.
     setLifecycleCost(
       action === 'resolve' && workOrder.approvedCost === null && workOrder.estimatedCost
         ? String(workOrder.estimatedCost)
@@ -520,9 +514,7 @@ export function HomeManagementWorkOrderQueue({
   const lifecycleNoteLabel = isResolvingLifecycleWorkOrder
     ? 'Resolution note'
     : 'Cancellation reason';
-  // Invoicing reconciles the vendor's bill against the work order's approved
-  // cost, and this work order never had one approved: so the cost has to be
-  // captured here or the job can never be paid.
+  // Invoicing reconciles against the approved cost and this work order never had one: capture it here or the job can never be paid.
   const lifecycleCostNeeded = Boolean(
     isResolvingLifecycleWorkOrder && lifecycleDialog?.workOrder.approvedCost === null
   );

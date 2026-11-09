@@ -23,8 +23,6 @@ export const metadata: Metadata = {
   },
 };
 
-/** Same reasoning as /rent: the listings themselves belong in the HTML a crawler
- * receives, built by the same mapping the client uses. */
 async function fetchFirstPage(): Promise<Paginated<PublicListingCard> | null> {
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';

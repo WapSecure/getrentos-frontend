@@ -1,9 +1,5 @@
 import { languageLabels, type Language } from '@/lib/i18n/translations';
 
-/**
- * Languages Sureground can answer in: the app's own languages (English and
- * Pidgin, from i18n) plus languages only the AI answers in so far.
- */
 export type ReplyLanguage = Language | 'yo' | 'ha' | 'ig';
 
 export const REPLY_LANGUAGES: { value: ReplyLanguage; label: string }[] = [
@@ -19,10 +15,6 @@ export const languageLabel = (code: ReplyLanguage) =>
 
 const KEY = 'sureground.replyLanguage';
 
-/**
- * A reply language the person chose in the assistant, overriding the app's
- * language. Null when they never chose one, so answers follow the app.
- */
 export function savedReplyLanguage(): ReplyLanguage | null {
   try {
     const v = typeof window === 'undefined' ? null : window.localStorage.getItem(KEY);

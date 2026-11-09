@@ -21,49 +21,27 @@ import { transferNote } from '@/lib/paymentCopy';
 export interface PayDialogProps {
   open: boolean;
   onClose: () => void;
-  /** "Pay rent", "Pay instalment", "Pay dues"… */
   title: string;
-  /** What is being paid for: a property, a booking, an estate. "· due <date>" is added after it. */
   context?: ReactNode;
-  /** Shown as "due 7 November 2026", in Lagos time. */
+  /** Shown in Lagos time. */
   dueDate?: string | null;
   overdue?: boolean;
-  /** The large amount in the header. */
   owed: number;
-  /** The small word after it. Defaults to "owed". */
   owedLabel?: string;
-  /** What is paid now, before the fee. Defaults to `owed`; 0 means not ready (an amount still to enter). */
+  /** Defaults to `owed`; 0 means not ready (an amount still to enter). */
   amount?: number;
-  /** The breakdown's first row: "Rent", "Instalment", "Dues", "Deposit", "Stay"… */
   itemLabel: string;
-  /**
-   * When what is paid is made of separate amounts (a land payment and its late
-   * fee), the rows that add up to it, shown in place of the single item row.
-   */
   itemParts?: { label: string; amount: number }[];
-  /** One line under the breakdown, shown when there is a fee: who receives the full amount. */
   receiverLine: ReactNode;
-  /** The flow's own protection sentence, after the secure-page reassurance. */
   protection: ReactNode;
-  /** The "How much" step, for flows that allow paying part. */
   amountStep?: ReactNode;
   providers: PaymentProviderChoice;
-  /** Why the last try failed when the chosen company could not take it: choose another. */
   providerError?: string | null;
-  /** Why the last try failed for any other reason, shown above the button. */
   error?: string | null;
   onPay: () => void;
   busy?: boolean;
-  /** The button when `amount` is 0. */
   notReadyLabel?: string;
-  /**
-   * When the card is only charged for a shortfall (a vendor invoice paid from
-   * held rent first): no fee or total row is added, `itemParts` may show the
-   * split, this note says when a card top-up is taken, and the button reads
-   * `buttonLabel`. `disabled` holds the button (the split is still being worked
-   * out, or it cannot be paid); `secureLine` replaces the secure-page sentence
-   * once it is known whether a card is needed at all.
-   */
+  /** The card is charged only for a shortfall (an invoice paid from held rent first): no fee or total row is added. */
   topUpOnly?: {
     note: ReactNode;
     buttonLabel: string;
@@ -80,7 +58,6 @@ const lagosDate = (iso: string) =>
     year: 'numeric',
   });
 
-/** A small heading for each step of the dialog, numbered only when there is more than one. */
 function Step({ n, children }: { n?: number; children: ReactNode }) {
   return (
     <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -94,11 +71,6 @@ function Step({ n, children }: { n?: number; children: ReactNode }) {
   );
 }
 
-/**
- * The one way to pay anything on Sureground: what is owed, (how much,) who
- * takes the payment, exactly what will be charged, then that company's secure
- * page. Each flow brings its own words; the layout is the same everywhere.
- */
 export const PayDialog = ({
   open,
   onClose,

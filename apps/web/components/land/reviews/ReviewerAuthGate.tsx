@@ -7,13 +7,7 @@ import { ensureValidSession } from '@/lib/apiClient';
 import { isAuthenticated } from '@/lib/constants/auth';
 import { signInThen } from '@/lib/constants/landBuyerRoutes';
 
-/**
- * Signed-in only, whatever the role. A reviewer is engaged by seat, not by
- * account type: a surveyor may hold a renter or buyer account, or none of the
- * dashboard roles at all, so this sits outside the role dashboards and only
- * checks for a session (the same client-side check the role layouts use). The
- * API refuses anything outside the caller's own seat.
- */
+// Session check only: reviewers are engaged by seat, not account type, and the API refuses anything outside the caller's seat.
 export const ReviewerAuthGate = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
   const pathname = usePathname();

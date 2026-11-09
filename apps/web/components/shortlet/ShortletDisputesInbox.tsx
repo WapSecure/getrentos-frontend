@@ -27,10 +27,6 @@ const STATUS_VARIANT: Record<ShortletDisputeStatus, BadgeVariant> = {
   RESOLVED: 'success',
 };
 
-/**
- * Shortlet disputes: lists the disputes the current user raised or is the
- * subject of, with a thread view to discuss and let admins resolve.
- */
 export function ShortletDisputesInbox() {
   const queryClient = useQueryClient();
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -69,7 +65,6 @@ export function ShortletDisputesInbox() {
 
   return (
     <div className="grid h-[70vh] grid-cols-1 gap-4 sm:grid-cols-[280px_1fr]">
-      {/* Dispute list */}
       <div className="overflow-y-auto rounded-lg border border-border">
         {isLoading ? (
           <div className="space-y-2 p-3">
@@ -112,7 +107,6 @@ export function ShortletDisputesInbox() {
         )}
       </div>
 
-      {/* Thread */}
       <div className="flex min-h-0 flex-col rounded-lg border border-border">
         {!active ? (
           <div className="flex flex-1 items-center justify-center p-6 text-center text-sm text-muted-foreground">

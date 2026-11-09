@@ -11,15 +11,7 @@ import {
   type AuthorityRelationship,
 } from '@/services/propertyAuthorityService';
 
-/**
- * Mandates awaiting the signed-in co-owner's countersignature.
- *
- * Co-owner quorum is unanimous: an agent/manager mandate on a property with more
- * than one co-owner only takes effect once every co-owner has countersigned. This
- * is the co-owner's side of that — review the ones waiting on them, countersign or
- * decline. Renders nothing when there are none, so it is invisible unless it
- * matters.
- */
+// Co-owner quorum is unanimous: a mandate on a co-owned property takes effect only once every co-owner countersigns.
 export function MandateCountersignSection() {
   const queryClient = useQueryClient();
   const queryKey = ['property-authority', 'awaiting-countersignature'];

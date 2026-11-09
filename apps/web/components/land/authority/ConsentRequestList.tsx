@@ -16,7 +16,6 @@ import { landKeys } from '@/lib/queryKeys';
 import { landAuthorityService } from '@/services/landAuthorityService';
 import { errorMessage } from '../developer/feedback';
 
-/** The consent requests addressed to the signed-in account, each answerable in place. */
 export const ConsentRequestList = () => {
   const query = useQuery({
     queryKey: landKeys.consentRequests,

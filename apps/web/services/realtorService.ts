@@ -70,7 +70,6 @@ export interface RealtorAssignablePropertyApi {
   state: string;
   verificationStatus: string;
   isVerified: boolean;
-  /** Already assigned to this realtor. */
   assigned?: boolean;
 }
 
@@ -370,12 +369,11 @@ export const realtorService = {
         body: JSON.stringify({ question, history, language }),
       })
     ),
-  /** Leads due a follow-up today, each with a drafted message in the chosen language. */
+  /** Each with a drafted message in the chosen language. */
   getFollowUps: (language: ReplyLanguage = 'en'): Promise<ApiResponse<FollowUpPlan>> =>
     safeCall(() =>
       authFetch(`/realtor/follow-ups${language === 'en' ? '' : `?language=${language}`}`)
     ),
-  /** Record that the realtor just followed up with a lead. */
   markLeadContacted: (leadId: string): Promise<ApiResponse<RealtorLeadApi>> =>
     safeCall(() => authFetch(`/realtor/leads/${leadId}/contacted`, { method: 'POST' })),
   getDashboard: (): Promise<ApiResponse<RealtorDashboardStats>> =>
@@ -471,8 +469,6 @@ export const realtorService = {
   getCommissionsSummary: () =>
     safeCall(() => authFetch<RealtorCommissionSummary>('/realtor/commissions/summary')),
 
-  // -------- Payouts --------
-
   getPayoutAccount: () =>
     safeCall(() => authFetch<RealtorPayoutAccount | null>('/realtor/commissions/payout-account')),
   savePayoutAccount: (data: { bankCode: string; accountNumber: string }) =>
@@ -543,7 +539,6 @@ export const realtorService = {
       authFetch(`/realtor/clients/${relationshipId}/properties/${propertyId}`, { method: 'DELETE' })
     ),
 
-  // Settings
   getSettingsProfile: () =>
     safeCall(() =>
       authFetch<{
@@ -607,7 +602,6 @@ export const realtorService = {
       authFetch('/realtor/settings/preferences', { method: 'PUT', body: JSON.stringify(data) })
     ),
 
-  // Notifications feed
   getNotifications: (params: RealtorPageParams = {}) =>
     safeCall(() =>
       authFetch<Paginated<RealtorNotificationApi>>(
@@ -619,7 +613,6 @@ export const realtorService = {
   markAllNotificationsRead: () =>
     safeCall(() => authFetch('/realtor/notifications/read-all', { method: 'POST' })),
 
-  // Dashboard extras
   getDashboardActivity: () =>
     safeCall(() =>
       authFetch<{ id: string; type: string; title: string; description: string; date: string }[]>(

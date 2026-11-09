@@ -27,7 +27,6 @@ export interface TrustProfileStat {
   value: string;
 }
 
-/** One dimension of the trust score, resolved for display (earned of weight). */
 export interface TrustScoreDimension {
   id: string;
   label: string;
@@ -35,7 +34,6 @@ export interface TrustScoreDimension {
   weight: number;
 }
 
-/** Plain-language stage over the 0–100 score (New / Building / …). */
 export interface TrustStage {
   id: string;
   label: string;
@@ -43,22 +41,17 @@ export interface TrustStage {
   min: number;
 }
 
-/**
- * How the score decomposes (dimension.v2). Optional: the backend only sends it
- * while the dimension engine is on, so the UI must degrade gracefully.
- */
+/** Only sent while the dimension engine is on; the UI must degrade gracefully. */
 export interface TrustScoreBreakdown {
   version: string;
   total: number;
   earned: number;
   penalty: number;
   dimensions: TrustScoreDimension[];
-  /** The stage band this score sits in, for a wording-first UI. */
   stage?: TrustStage;
   reasonCodes: string[];
 }
 
-/** Role-appropriate trust profile returned by /<role>/trust-profile. */
 export interface TrustProfile {
   trustScore: number;
   /** No longer sent: an all-account average is not a fair comparison. */
@@ -71,10 +64,8 @@ export interface TrustProfile {
 }
 
 /**
- * Plain-language explanation of the caller's own trust score, from
- * GET /trust-score/explanation. The numbers come from the deterministic score
- * engine; `summary`/`strengths`/`improvements` are phrased (by AI when
- * configured, else a deterministic template — see `source`).
+ * The numbers come from the deterministic score engine; the wording is AI or a template (see
+ * `source`).
  */
 export interface TrustExplanation {
   total: number;
@@ -86,7 +77,6 @@ export interface TrustExplanation {
   generatedAt: string;
 }
 
-/** One status vocabulary for identity and every requirement (GET /trust/overview). */
 export type TrustStatus =
   | 'NOT_STARTED'
   | 'ACTION_REQUIRED'
@@ -129,7 +119,7 @@ export type TrustPortal =
   | 'realtor'
   | 'manager';
 
-/** The signed-in person's trust page, from stored records only. */
+/** From stored records only. */
 export interface TrustOverview {
   portal: TrustPortal;
   identity: {

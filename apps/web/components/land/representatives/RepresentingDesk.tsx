@@ -78,7 +78,6 @@ const PrincipalDeals = ({ appointment }: { appointment: LandRepresentativeAppoin
   );
 };
 
-/** Video tours a buyer asked this representative to join. */
 const AttendingTours = () => {
   const tours = useQuery({
     queryKey: landSiteTourKeys.attending,
@@ -101,7 +100,6 @@ const AttendingTours = () => {
   );
 };
 
-/** Buyers the signed-in person represents, and invitations waiting for an answer. */
 export const RepresentingDesk = () => {
   const queryClient = useQueryClient();
   const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(

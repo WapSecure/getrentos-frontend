@@ -9,19 +9,7 @@ interface OnSiteBoardProps {
   isLoading: boolean;
 }
 
-/**
- * Who the estate believes is still inside.
- *
- * Every sentence here is composed server-side and printed verbatim:
- * `insideLabel`, `expectationLabel`, `tally.label`. That is deliberate: the two
- * sentences carry the distinction this screen turns on (an elapsed time the
- * estate said nothing about, versus a visit past a window it wrote down), and the
- * office's own notification uses the same words. A client that rebuilt them would
- * be free to describe the same visit differently from the alert about it.
- *
- * So there is no duration formatter on this page. The only numbers rendered
- * directly are the two counts, which need no formatting to be readable.
- */
+// Every sentence is composed server-side and printed verbatim to match the office's notification; don't format durations here.
 export const OnSiteBoard = ({ board, isLoading }: OnSiteBoardProps) => {
   if (isLoading) {
     return <ListSkeleton variant="cards" rows={3} />;
@@ -57,8 +45,6 @@ export const OnSiteBoard = ({ board, isLoading }: OnSiteBoardProps) => {
           </div>
         </div>
         <p className="text-sm text-muted-foreground mt-3">{board.tally.label}</p>
-        {/* The rule, stated on the screen that shows its results. An alert whose
-            threshold is invisible to the reader is one they cannot calibrate. */}
         <p className="text-xs text-muted-foreground mt-2">
           The office is told once about a visit that runs more than {board.graceMinutes} minutes
           past the end the estate authorised, and only where the estate stated an end: a standing

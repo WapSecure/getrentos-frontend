@@ -14,7 +14,7 @@ import type { LandSiteTour } from '@/types/landSiteTour';
 import { DateTimeField } from '@/components/shared/forms/DateTimeField';
 import { TourCard } from './TourCard';
 
-/** Daylight at the land: starts from 08:00 to 16:30 Lagos time, as the API requires. */
+/** Starts from 08:00 to 16:30 Lagos time, as the API requires. */
 const EARLIEST_TOUR_HOUR = 8;
 const LATEST_TOUR_HOUR_EXCLUSIVE = 17;
 
@@ -29,7 +29,6 @@ const HostActions = ({ tour, notify }: { tour: LandSiteTour; notify: Notify }) =
   const [notes, setNotes] = useState('');
   const [reason, setReason] = useState('');
   const [cancelling, setCancelling] = useState(false);
-  // Each call answers with the updated tour: show it at once, then refresh.
   const done = (message: string) => (updated: LandSiteTour) => {
     queryClient.setQueryData<LandSiteTour[]>(landSiteTourKeys.host, (list) =>
       list?.map((t) => (t.id === updated.id ? updated : t))
@@ -163,7 +162,6 @@ const HostActions = ({ tour, notify }: { tour: LandSiteTour; notify: Notify }) =
   );
 };
 
-/** Video tours buyers have asked the owner or developer for. */
 export const HostTours = () => {
   const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(
     null

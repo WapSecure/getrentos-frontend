@@ -99,11 +99,6 @@ function cancelDescription(b: ShortletBooking): string {
   return 'This will cancel your booking.';
 }
 
-/**
- * Deposit + deposit-claim facts on a booking card, rendered as one aligned
- * stack so the withheld / refunded split reads clearly. Uses the structured
- * refunded amount from the API (deposit minus any claim deduction).
- */
 function DepositClaimBadges({ b }: { b: ShortletBooking }) {
   if (b.deposit == null) return null;
   const decided =
@@ -203,9 +198,7 @@ export const GuestBookingsWorkspace = () => {
     onError: (reason: Error) => toast.error(reason.message),
   });
 
-  // Which company takes the payment (Paystack or Monnify): one choice for every booking here.
   const providers = usePaymentProviders();
-  // The booking open in the pay dialog, and why its chosen company could not take it.
   const [payTarget, setPayTarget] = useState<ShortletBooking | null>(null);
   const [providerError, setProviderError] = useState<string | null>(null);
   const pay = useMutation({
@@ -214,7 +207,6 @@ export const GuestBookingsWorkspace = () => {
     onMutate: () => setProviderError(null),
     onSuccess: (res) => {
       if (res.authorizationUrl) {
-        // Real gateway flow: redirect to the payment company's checkout.
         window.location.href = res.authorizationUrl;
         return;
       }
@@ -223,7 +215,6 @@ export const GuestBookingsWorkspace = () => {
       toast.success('Payment received: your stay is confirmed.');
     },
     onError: (reason: Error, { provider }) => {
-      // That company cannot take it right now: say so in the dialog, with the other one picked.
       const unavailable = providers.recover(reason, provider);
       if (unavailable) setProviderError(unavailable);
       else toast.error(reason.message);

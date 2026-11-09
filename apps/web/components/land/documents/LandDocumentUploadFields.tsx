@@ -11,7 +11,6 @@ import {
 } from './landDocumentRules';
 
 interface LandDocumentUploadFieldsProps {
-  /** Prefix for the inputs' ids, from `useId`. */
   id: string;
   documentType: LandDocumentType | '';
   onDocumentTypeChange: (value: LandDocumentType) => void;
@@ -20,11 +19,6 @@ interface LandDocumentUploadFieldsProps {
   disabled?: boolean;
 }
 
-/**
- * What the document is, and the file. Controlled, so each caller owns the
- * submit: the parcel's documents, the inline "upload new" of a picker, or an
- * outside reviewer's evidence.
- */
 export const LandDocumentUploadFields = ({
   id,
   documentType,
@@ -64,6 +58,5 @@ export const LandDocumentUploadFields = ({
   );
 };
 
-/** True when the fields hold an upload the API should accept. */
 export const isUploadReady = (documentType: LandDocumentType | '', file: File | null) =>
   Boolean(documentType && file && !landDocumentFileProblem(file));

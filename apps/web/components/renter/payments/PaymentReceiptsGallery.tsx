@@ -32,7 +32,6 @@ interface Receipt {
   reference?: string;
 }
 
-/** "Rent · 1 Aug 2026 – 31 Aug 2026", or just the charge when no period is known. */
 const receiptLabel = (receipt: Receipt): string | null => {
   if (!receipt.category && !receipt.periodStart) return null;
   const what = chargeTitle(receipt.category);
@@ -43,7 +42,6 @@ const receiptLabel = (receipt: Receipt): string | null => {
 interface PaymentReceiptsGalleryProps {
   receipts: Receipt[];
   onDownload: (receiptId: string) => void;
-  /** Every receipt the renter has, across pages (the gallery holds one page). */
   total?: number;
 }
 
@@ -59,7 +57,6 @@ export const PaymentReceiptsGallery = ({
   const formatDate = (dateString: string) => formatLagosDate(dateString);
   const pageOnly = total > receipts.length;
 
-  // People look a receipt up by home, amount, date, charge or reference, not by its file name.
   const filteredReceipts = receipts.filter((receipt) => {
     const term = searchTerm.toLowerCase();
     return (
@@ -160,7 +157,6 @@ export const PaymentReceiptsGallery = ({
         )}
       </Card>
 
-      {/* Receipt details remain visible alongside the reusable file viewer. */}
       <Dialog
         open={showPreview && Boolean(selectedReceipt) && !selectedReceipt?.url}
         onOpenChange={(open) => !open && setShowPreview(false)}

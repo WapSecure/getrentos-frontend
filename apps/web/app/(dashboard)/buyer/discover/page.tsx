@@ -33,8 +33,6 @@ export default function BuyerDiscoverPage() {
   const [sortOrder, setSortOrder] = useState<SortOrder>('default');
   const [page, setPage] = useState(1);
   const searchParams = useSearchParams();
-  // Arriving from an estate microsite (`?estate=<slug>`). Kept in the query key so
-  // switching estates refetches rather than serving the previous estate's page.
   const estateFromUrl = searchParams.get('estate')?.trim() ?? '';
   const PAGE_SIZE = 9;
 
@@ -75,8 +73,6 @@ export default function BuyerDiscoverPage() {
   const data = listingsQuery.data;
   const listings = data?.items ?? [];
   const total = data?.total ?? 0;
-  // Offers still in play, so a listing the buyer already offered on leads back
-  // to that offer instead of starting a second one.
   const { data: myOffers } = useQuery({
     queryKey: [...buyerKeys.offers, { page: 1, pageSize: 100, open: true }],
     queryFn: () => unwrap(buyerService.listOffers({ page: 1, pageSize: 100 })),

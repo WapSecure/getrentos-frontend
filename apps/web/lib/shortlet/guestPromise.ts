@@ -33,11 +33,10 @@ export const OUTCOME_LABEL: Record<GuestPromiseOutcome, string> = {
   NOT_UPHELD: 'Not upheld',
 };
 
-/** The promise in one sentence, for listings and bookings. */
 export const GUEST_PROMISE_TEXT =
   "If the place isn't as described, you can't get in, or it's unsafe, tell us within 24 hours of check-in. We hold the host's payment while we check, and refund you if we uphold it.";
 
-/** "27 September 2026 at 11:00 pm", in Lagos time: the report deadline is to the hour. */
+/** In Lagos time: the report deadline is to the hour. */
 export const formatDeadline = (iso: string) =>
   new Date(iso).toLocaleString('en-NG', {
     dateStyle: 'long',

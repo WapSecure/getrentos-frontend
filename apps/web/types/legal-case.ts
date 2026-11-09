@@ -1,16 +1,6 @@
 /**
- * Legal cases: recovery, injunction, title dispute, and eviction.
- *
- * This replaces the eviction-only surface. An eviction is now a `kind` rather
- * than its own system, because a matter that reaches court needs hearings, an
- * outcome and enforcement whether it is about possession or about money.
- *
- * Two fields that used to be here are deliberately gone: `noticeIssuedAt` and
- * `cureDeadline`. The old eviction flow computed a cure deadline from a number
- * someone typed, with no basis recorded. The tenancy's notice ladder owns that
- * now — it resolves the period, records where the number came from, and refuses
- * to invent one — so a case points at its tenancy instead of carrying a second
- * answer to when a notice ran.
+ * An eviction is a `kind`, not its own system. The case points at its tenancy, whose notice ladder
+ * owns notice periods.
  */
 
 export type LegalCaseKind =
@@ -39,13 +29,11 @@ export interface LegalCaseHearing {
   notes: string | null;
 }
 
-/** Something still to do on a case, with the reason it is outstanding. */
 export interface LegalCaseOutstanding {
   action: string;
   detail: string;
 }
 
-/** A single cost or disbursement recorded against the case. */
 export interface LegalCaseCost {
   id: string;
   /** Whole Naira, like every Expense. */
@@ -54,7 +42,7 @@ export interface LegalCaseCost {
   incurredAt: string;
 }
 
-/** What the case has cost so far — the same expenses that reach the owner's statement. */
+/** The same expenses that reach the owner's statement. */
 export interface LegalCaseCosts {
   /** Whole Naira. */
   totalAmount: number;
@@ -70,7 +58,6 @@ export interface LegalCase {
 
   propertyId: string;
   property: { id: string; title: string; address: string; city: string; state: string };
-  /** The tenancy, which is where the notice ladder lives. */
   leaseId: string | null;
   unitName: string | null;
   tenantId: string | null;
@@ -88,7 +75,7 @@ export interface LegalCase {
   enforcementAt: string | null;
   enforcementNotes: string | null;
 
-  /** The advocate instructed on the owner's behalf. Null until counsel is engaged. */
+  /** Null until counsel is engaged. */
   advocateName: string | null;
   advocateFirm: string | null;
   advocateContact: string | null;
@@ -101,17 +88,14 @@ export interface LegalCase {
   createdAt: string;
 
   hearings: LegalCaseHearing[];
-  /** Derived on the server from the hearings, so it cannot disagree with them. */
+  /** Derived on the server from the hearings. */
   nextHearingAt: string | null;
 
-  /**
-   * Whether the notice ladder would let a possession claim be filed today.
-   * Null for a case that is not about possession — the question does not apply.
-   */
+  /** Null for a case that is not about possession. */
   ladderReadyToFile: boolean | null;
 
   outstanding: LegalCaseOutstanding[];
 
-  /** Costs and disbursements recorded against the case, carried to the owner's account. */
+  /** Carried to the owner's account. */
   costs: LegalCaseCosts;
 }

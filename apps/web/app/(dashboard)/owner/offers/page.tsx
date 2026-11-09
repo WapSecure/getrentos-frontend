@@ -68,7 +68,6 @@ export default function OwnerOffersPage() {
   const offers = data?.items ?? [];
   const total = data?.total ?? 0;
 
-  // Negotiation thread for the currently-open offer, fetched from the backend.
   const { data: thread = [] } = useQuery({
     queryKey: ownerKeys.offerThread(activeOfferId ?? ''),
     queryFn: () => unwrap(ownerService.getOfferThread(activeOfferId as string)),
@@ -166,7 +165,7 @@ export default function OwnerOffersPage() {
 
       <OfferComparisonPanel />
 
-      {/* Accepting an offer opens an escrow/payout obligation: financially verified (tier 3) owners only. */}
+      {/* Accepting opens an escrow/payout obligation: tier 3 only. */}
       {(acceptMutation.error || rejectMutation.error || counterMutation.error) && (
         <div className="mb-6">
           <VerificationRequiredNotice

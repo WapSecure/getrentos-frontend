@@ -36,8 +36,6 @@ const statusFilters: { value: 'all' | LeaseStatus; label: string }[] = [
 const PAGE_SIZE = 10;
 
 function LandlordLeasesPageContent() {
-  // Arriving from an approval (?status=draft) shows the lease the backend
-  // drafted for the approved applicant, ready to review and send.
   const statusParam = useSearchParams().get('status');
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
@@ -73,7 +71,6 @@ function LandlordLeasesPageContent() {
   const leases = data?.items ?? [];
   const total = data?.total ?? 0;
 
-  // Header stat: total active (signed) leases across the portfolio.
   const { data: activeData, isLoading: isLoadingActive } = useQuery({
     queryKey: [...landlordKeys.leases('signed'), { page: 1, pageSize: 1 }],
     queryFn: () => unwrap(landlordService.listLeases({ status: 'signed', page: 1, pageSize: 1 })),
@@ -112,10 +109,7 @@ function LandlordLeasesPageContent() {
             leaseStart,
             leaseEnd,
             rentAmount,
-            // Forward the cadence the modal resolved (the unit's period, else a
-            // yearly default). Dropping it here was why a manually drafted lease
-            // saved with no period and the card then mislabelled a short test
-            // term as "Monthly rent".
+            // Forward the resolved cadence, or a manually drafted lease saves with no period.
             rentPeriod,
             securityDeposit,
           },
@@ -138,8 +132,6 @@ function LandlordLeasesPageContent() {
     mutationFn: ({ id, signatureData }: { id: string; signatureData: string }) =>
       unwrap(landlordService.signLease(id, signatureData)),
     onSuccess: (updated) => {
-      // Patch the signed lease into every cached leases list so the card
-      // reflects the new status instantly, before the background refetch lands.
       queryClient.setQueriesData<{ items: Lease[]; total: number } | undefined>(
         { queryKey: ['landlord', 'leases'] },
         (old) =>
@@ -212,8 +204,6 @@ function LandlordLeasesPageContent() {
 
   return (
     <>
-      {/* A count of zero is a claim about the portfolio, so do not make it
-          until the portfolio has actually been read. */}
       <PageHeader
         title="Leases"
         description={

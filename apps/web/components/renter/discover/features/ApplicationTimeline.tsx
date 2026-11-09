@@ -101,7 +101,6 @@ export const ApplicationTimeline = ({
       </div>
 
       <div className="p-4">
-        {/* Progress Bar */}
         <div className="mb-4">
           <div className="flex justify-between text-xs text-muted-foreground mb-1">
             <span>Overall progress</span>
@@ -119,7 +118,6 @@ export const ApplicationTimeline = ({
           </div>
         </div>
 
-        {/* Timeline Steps */}
         <div className="space-y-4">
           {steps.map((step, index) => (
             <motion.div
@@ -129,7 +127,6 @@ export const ApplicationTimeline = ({
               transition={{ delay: index * 0.1 }}
               className="flex gap-3"
             >
-              {/* Icon */}
               <div className="relative shrink-0">
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center ${
@@ -157,7 +154,6 @@ export const ApplicationTimeline = ({
                 )}
               </div>
 
-              {/* Content */}
               <div className="min-w-0 flex-1 pb-6">
                 <div className="flex justify-between items-start gap-2">
                   <h4 className={`text-sm font-semibold ${getStatusColor(step.status)}`}>
@@ -167,7 +163,6 @@ export const ApplicationTimeline = ({
                 </div>
                 <p className="text-xs text-muted-foreground mt-0.5">{step.description}</p>
 
-                {/* Estimated dates */}
                 {step.id === 'submitted' && submittedDate && (
                   <p className="text-xs text-muted-foreground mt-1">
                     Submitted: {new Date(submittedDate).toLocaleDateString()}
@@ -183,7 +178,6 @@ export const ApplicationTimeline = ({
           ))}
         </div>
 
-        {/* Next Steps */}
         {currentStatus === 'approved' && (
           <Alert variant="success" icon={CalendarDays} title="Next steps" className="mt-4">
             Schedule your move-in inspection and complete the lease agreement

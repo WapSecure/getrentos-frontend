@@ -50,7 +50,6 @@ const Fact = ({ label, value }: { label: string; value?: string | number | null 
     </div>
   );
 
-/** The case as the reviewer's seat sees it: their checks, the parcel and its documents. */
 export const ReviewSeatDetail = ({ seatId }: { seatId: string }) => {
   const queryClient = useQueryClient();
   const [savingKey, setSavingKey] = useState<string | null>(null);
@@ -374,7 +373,6 @@ export const ReviewSeatDetail = ({ seatId }: { seatId: string }) => {
             )}
           </section>
           {data.boundaryVersions ? (
-            // The surveyor checks the outline against the plan and signs it off.
             <BoundarySignOffPanel
               seatId={seatId}
               versions={data.boundaryVersions}

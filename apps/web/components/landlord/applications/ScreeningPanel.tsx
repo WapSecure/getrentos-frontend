@@ -35,7 +35,6 @@ const outcomeBadge: Record<ReferenceOutcome, { label: string; variant: BadgeVari
   unreachable: { label: 'Couldn’t reach', variant: 'warning' },
 };
 
-// The editable outcome picker still needs the plain labels on their own.
 const outcomeLabel: Record<ReferenceOutcome, string> = {
   not_contacted: outcomeBadge.not_contacted.label,
   confirmed: outcomeBadge.confirmed.label,
@@ -170,7 +169,6 @@ const ReferenceRow = ({
   );
 };
 
-/** Everything a landlord needs to weigh an application, with what the applicant shared opened up. */
 export const ScreeningPanel = ({
   applicationId,
   employmentStatus,

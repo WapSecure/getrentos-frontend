@@ -47,13 +47,6 @@ interface NavItem {
   icon: React.ElementType;
 }
 
-/**
- * Nav items whose destination is entirely Pro-gated. Home Management and
- * Shortlets were already backend-gated in Batch 7b (their controllers allow
- * both LANDLORD and PROPERTY_OWNER, and PlanTierGuard checks the caller's
- * own subscription regardless of role) but never got the lock-icon treatment
- * on this sidebar: fixed here alongside the new Analytics gate.
- */
 const PRO_GATED_ROUTES = new Set<string>([ROUTES.OWNER_ANALYTICS, ROUTES.OWNER_HOME_MANAGEMENT]);
 const LAND_ROUTES = new Set<string>([ROUTES.OWNER_LAND, OWNER_LAND_SALES_ROUTE]);
 
@@ -61,10 +54,8 @@ export const navItems: NavItem[] = [
   { labelKey: 'sidebar.dashboard', href: ROUTES.OWNER_DASHBOARD, icon: LayoutDashboard },
   { labelKey: 'sidebar.properties', href: ROUTES.OWNER_PROPERTIES, icon: Building2 },
   { labelKey: 'sidebar.land_marketplace', href: ROUTES.OWNER_LAND, icon: MapPinned },
-  // Literal label: plot sales on the owner's estates, apart from whole-parcel sales.
   { label: 'Plot sales', href: OWNER_LAND_SALES_ROUTE, icon: ReceiptText },
   { labelKey: 'sidebar.shortlets', href: ROUTES.OWNER_SHORTLETS, icon: BedDouble },
-  // Stays the owner booked as a guest, apart from the ones they host above.
   { label: 'My stays', href: ROUTES.OWNER_BOOKINGS, icon: Luggage },
   { labelKey: 'sidebar.sale_listings', href: ROUTES.OWNER_LISTINGS, icon: Megaphone },
   { labelKey: 'sidebar.buyer_leads', href: ROUTES.OWNER_LEADS, icon: Users },
@@ -82,8 +73,7 @@ export const navItems: NavItem[] = [
   { labelKey: 'sidebar.realtor_access', href: ROUTES.OWNER_REALTORS, icon: UserRoundCheck },
   { labelKey: 'sidebar.reviews', href: ROUTES.OWNER_REVIEWS, icon: Star },
   { labelKey: 'sidebar.trust_profile', href: ROUTES.OWNER_TRUST_PROFILE, icon: BadgeCheck },
-  // Literal label (like Billing below): a mandate holder is not necessarily the
-  // owner, so this is not phrased as one of the owner's own properties.
+  // Literal label: a mandate holder is not necessarily the owner.
   { label: 'Managed properties', href: ROUTES.OWNER_MANAGED, icon: KeyRound },
   { labelKey: 'sidebar.activity', href: ROUTES.OWNER_ACTIVITY, icon: History },
   { labelKey: 'sidebar.queries', href: ROUTES.OWNER_QUERIES, icon: MessageSquareText },
@@ -97,12 +87,9 @@ export const navItems: NavItem[] = [
   { label: 'Verification', href: '/owner/verification', icon: IdCard },
 ];
 
-/** Picks items by route, so a group can never drift from its label as items are added. */
 const pick = (...hrefs: string[]) =>
   hrefs.flatMap((href) => navItems.filter((item) => item.href === href));
 
-// Groups follow the owner's jobs: selling, land, short stays, looking after the
-// property, money and records, the people who manage it, and the account.
 const baseNavGroups = [
   { label: 'Overview', items: pick(ROUTES.OWNER_DASHBOARD, ROUTES.OWNER_PROPERTIES) },
   {
@@ -189,7 +176,6 @@ export const OwnerSidebar = () => {
       groups={navGroups.map((group) => ({
         ...group,
         items: group.items
-          // Land links only while owners can use land (LAND_MODE).
           .filter((item) => land.owners || !LAND_ROUTES.has(item.href))
           .map((item) => ({
             ...item,

@@ -13,7 +13,6 @@ import { LAND_DISPUTE_KINDS } from '@/types/landDispute';
 const kindLabel = (kind: string) => LAND_DISPUTE_KINDS.find((k) => k.value === kind)?.label ?? kind;
 const statusLabel = (status: string) => status.replace(/_/g, ' ').toLowerCase();
 
-/** Land disputes I raised, about my land, or on my purchases. */
 export default function MyLandDisputesPage() {
   const query = useQuery({
     queryKey: landDisputeKeys.mine,

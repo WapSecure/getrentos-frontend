@@ -14,20 +14,10 @@ interface WatchlistEntryRowProps {
   onLift: () => void;
 }
 
-/**
- * One entry on the estate's watch list.
- *
- * Shows the contacts as they were recorded rather than claiming which of them
- * the matching runs on. Working that out here would mean reimplementing the
- * server's normalisation in the browser, and the two would drift: the list
- * would start claiming to cover somebody it no longer fires for. The API refuses
- * an entry with nothing matchable at creation, so every row here does fire.
- */
+// Contacts are shown as recorded; re-implementing the server's normalisation here would drift.
 export const WatchlistEntryRow = ({ entry, onLift }: WatchlistEntryRowProps) => {
   const isLifted = entry.status === 'LIFTED';
-  // Compared, not normalised: an entry that has passed its date is no longer
-  // enforced, and saying "do not admit" about a rule that has stopped applying
-  // is worse than saying nothing.
+  // An entry past its date is no longer enforced, so it must not say "do not admit".
   const isExpired = !isLifted && !!entry.expiresAt && new Date(entry.expiresAt) <= new Date();
   const isBlock = entry.severity === 'BLOCK';
   const inForce = !isLifted && !isExpired;

@@ -3,16 +3,13 @@
 import { Star } from 'lucide-react';
 
 interface StarRatingProps {
-  /** Whole or fractional stars to show filled. */
   value: number;
-  /** When given, the stars become buttons that call this with 1-5. */
   onRate?: (rating: number) => void;
   disabled?: boolean;
   size?: 'sm' | 'md';
   label?: string;
 }
 
-/** Five stars: a read-out when `onRate` is absent, a picker when it is given. */
 export const StarRating = ({
   value,
   onRate,

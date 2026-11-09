@@ -39,7 +39,6 @@ const statusFilters: { value: 'all' | ListingStatus; label: string }[] = [
 export default function LandlordListingsPage() {
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState<'all' | ListingStatus>('all');
-  // Reopen the listing form when the landlord comes back from signing in with a draft.
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(() =>
     hasSessionDraft(CREATE_LISTING_DRAFT_KEY)
   );

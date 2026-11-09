@@ -5,13 +5,8 @@ import { paymentKeys } from '@/lib/queryKeys';
 import { getPaymentProviders } from '@/services/paymentStatusService';
 import type { PaymentProvider, PaymentProviderOption } from '@/types/payments';
 
-/** The API's code when the chosen company cannot take a payment right now (409). */
 export const PAYMENT_PROVIDER_UNAVAILABLE = 'PAYMENT_PROVIDER_UNAVAILABLE';
 
-/**
- * The company named in a "this provider is unavailable" refusal, and the
- * sentence to show, or null when `error` is any other failure.
- */
 export function providerUnavailable(
   error: unknown
 ): { provider?: PaymentProvider; message: string } | null {
@@ -24,16 +19,6 @@ export function providerUnavailable(
   return matches ? { provider: body.provider, message: error.message } : null;
 }
 
-/**
- * Which company takes this payment: Paystack or Monnify, so a payer can switch
- * when one is down. Defaults to the first available one. `provider` is
- * undefined until the list loads (or when it cannot), and the pay route then
- * uses the default company.
- *
- * `recover(error, tried)` turns a 409 "provider unavailable" into the message to
- * show, marks that company unavailable here and moves the choice to the next
- * available one; it returns null for any other error.
- */
 export function usePaymentProviders() {
   const queryClient = useQueryClient();
   const query = useQuery({
@@ -76,11 +61,7 @@ export function usePaymentProviders() {
     options,
     provider,
     choose: setChosen,
-    /**
-     * Show the choice when Sureground works with more than one company, even if
-     * one is down right now: the payer sees it greyed out with why, rather than
-     * wondering where it went. Hidden only when there is a single company.
-     */
+    // Shown whenever there is more than one company, even if one is down, so the payer sees why it is greyed out.
     canChoose:
       options.filter((option) => option.available || option.reason !== 'is not set up').length > 1,
     recover,

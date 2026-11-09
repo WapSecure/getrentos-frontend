@@ -16,9 +16,8 @@ export interface AssistantReply {
   suggestions: string[];
   source: 'ai' | 'heuristic';
   model: string | null;
-  /** The language the answer is in; rule-based answers are English. */
+  /** Rule-based answers are English. */
   language?: ReplyLanguage;
-  /** The language that was asked for. */
   requestedLanguage?: ReplyLanguage;
 }
 

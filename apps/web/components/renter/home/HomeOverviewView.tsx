@@ -116,22 +116,17 @@ const quickActions = [
   },
 ];
 
-// The "next payment" shown on the overview can come from the active lease's
-// reminder schedule or from a signed lease still awaiting its first payment.
 type NextPaymentCandidate = {
   dueDate: string;
   amount: number;
-  // Server-provided for reminders; absent for a first payment (we show the due
-  // date rather than a countdown, so render never needs the current time).
+  // Absent for a first payment: the due date is shown instead, so render never needs the current time.
   daysRemaining?: number;
   isFirstPayment?: boolean;
 };
 type FirstPaymentReminder = NextPaymentCandidate & { id: string; isFirstPayment: true };
 
 export function HomeOverviewView() {
-  // A renter with no active lease yet (e.g. one still awaiting signature) gets a
-  // 404 here. That's "no active lease", not an outage, so tolerate it and fall
-  // through to the empty state below rather than showing a scary error.
+  // No active lease yet answers 404: that is the empty state, not an outage.
   const leaseQuery = useQuery({
     queryKey: renterKeys.lease,
     queryFn: () => unwrapOptional(renterService.getLease(), null),
@@ -163,10 +158,7 @@ export function HomeOverviewView() {
   );
   const documents = documentsQuery.data?.items ?? [];
   const paymentReminders = useMemo(() => remindersQuery.data ?? [], [remindersQuery.data]);
-  // A signed lease still awaiting its first payment is real money due now, but it
-  // lives on the pending lease, not in the reminder schedule — so without this the
-  // "Next rent" tile and the "Upcoming" panel claimed "no upcoming payment" while
-  // the banner above told the tenant to pay the first rent by a deadline (DEF-236).
+  // A first payment lives on the pending lease, not the reminder schedule, so it is merged in here.
   const firstPaymentDue = useMemo<FirstPaymentReminder | null>(() => {
     if (pendingLease?.status !== 'awaiting_payment') return null;
     if (pendingLease.amountDue == null || !pendingLease.paymentDueAt) return null;
@@ -195,8 +187,7 @@ export function HomeOverviewView() {
   const nextPayment = useMemo<NextPaymentCandidate | undefined>(() => {
     const candidates: NextPaymentCandidate[] = [...paymentReminders];
     if (firstPaymentDue) candidates.push(firstPaymentDue);
-    // Soonest due first. dueDate is an ISO string, so it sorts chronologically
-    // and agrees with the reminders' own daysRemaining order.
+    // dueDate is ISO, so it sorts chronologically and agrees with daysRemaining.
     return candidates.sort((a, b) => a.dueDate.localeCompare(b.dueDate))[0];
   }, [paymentReminders, firstPaymentDue]);
   const isLoading =

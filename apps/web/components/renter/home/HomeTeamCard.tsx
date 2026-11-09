@@ -66,13 +66,7 @@ const Verdict = ({ result }: { result: CheckResult }) => {
   );
 };
 
-/**
- * Who really manages the tenant's home, and how to tell an impostor: the
- * verified landlord and managers (contacts shown partly, to compare against),
- * the rule that rent is paid only in Sureground, a check for any number or
- * email someone used, and a report that reaches Sureground and the real
- * landlord.
- */
+// Contacts are shown only partly, so a tenant can compare them against an impostor's.
 export const HomeTeamCard = () => {
   const team = useQuery({ queryKey: ['renter', 'home-team'], queryFn: () => unwrap(homeTeam()) });
   const [kind, setKind] = useState<CheckKind>('PHONE');

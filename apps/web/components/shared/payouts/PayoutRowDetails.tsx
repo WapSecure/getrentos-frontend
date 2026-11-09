@@ -11,11 +11,6 @@ import {
 } from '@sureground/shared';
 import { formatDate } from '@/lib/format';
 
-/**
- * What someone needs to track one payout without asking support (UX-31): the
- * date it was paid, the transfer reference to show their bank, and for a failed
- * one why and what happens next. Fields the API does not send are left out.
- */
 export function PayoutRowDetails({
   state,
   paidAt,

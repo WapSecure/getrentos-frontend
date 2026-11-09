@@ -26,10 +26,6 @@ import type { GuestPromiseProblem, ShortletBooking } from '@/types/shortlet';
 const MAX_PHOTOS = 6;
 const MIN_DESCRIPTION = 20;
 
-/**
- * A guest tells us, within 24 hours of check-in, that the stay isn't what they
- * paid for. Photos are only uploaded when they send the report.
- */
 export function GuestPromiseReportDialog({
   booking,
   onClose,
@@ -43,9 +39,7 @@ export function GuestPromiseReportDialog({
   const [problem, setProblem] = useState<GuestPromiseProblem | null>(null);
   const [description, setDescription] = useState('');
   const [photos, setPhotos] = useState<PendingUpload[]>([]);
-  // Shown inline. Cleared as soon as the guest edits, so a message they have
-  // already acted on does not sit there contradicting the form (adding the photo
-  // it asked for used to leave "Add at least one photo" on screen).
+  // Cleared as soon as the guest edits, so a message they have acted on doesn't contradict the form.
   const [error, setError] = useState<string | null>(null);
 
   const needsPhoto = problem !== null && problem !== 'NO_ACCESS';

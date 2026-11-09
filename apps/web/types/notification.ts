@@ -24,7 +24,6 @@ export interface Notification {
   };
   /** An in-app path to open when the notification is clicked. */
   actionUrl?: string;
-  /** Set on a message notification: the conversation it is about. */
   conversationId?: string;
   metadata?: NotificationMetadata;
 }

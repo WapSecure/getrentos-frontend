@@ -21,12 +21,7 @@ const COPY: Record<PlanGateReason, { title: string; description: string }> = {
   },
 };
 
-/**
- * Shown instead of a generic error toast whenever a gated action 403s with
- * PLAN_UPGRADE_REQUIRED or PLAN_LIMIT_REACHED (see lib/planGate.ts). No live
- * checkout exists yet: the CTA opens a mailto so the team can upgrade the
- * account manually via the admin backoffice.
- */
+// No live checkout yet: the CTA opens a mailto so the team upgrades the account in the backoffice.
 export const UpgradeToProModal = ({ isOpen, onClose, reason }: UpgradeToProModalProps) => {
   const copy = COPY[reason ?? 'PLAN_UPGRADE_REQUIRED'];
 

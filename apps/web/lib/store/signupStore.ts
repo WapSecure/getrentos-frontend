@@ -17,9 +17,7 @@ export type SignupStep = 'signup' | 'otp' | 'roles';
 interface SignupStore {
   data: SignupData;
   step: SignupStep;
-  /** Reference from /auth/otp/send, needed again at /auth/signup. Must survive
-   * navigation from /signup to /role-selection, so it lives here rather than
-   * in a hook's local state. */
+  /** Needed again at /auth/signup, after navigating to /role-selection. */
   otpReference: string | null;
   setData: (data: Partial<SignupData>) => void;
   setStep: (step: SignupStep) => void;
@@ -37,8 +35,6 @@ const initialState: SignupData = {
   fullName: '',
   password: '',
   method: 'email',
-  // Every new account defaults to Renter until the user explicitly picks a
-  // different role card during role selection.
   selectedRoles: ['renter'],
   isVerified: false,
   referralCode: '',
@@ -63,7 +59,6 @@ export const useSignupStore = create<SignupStore>()(
 
       addRole: (roleId) =>
         set((state) => {
-          // If multi-role is disabled, only allow one role
           const selectedRoles = state.canAddMoreRoles
             ? [...state.data.selectedRoles, roleId]
             : [roleId];
@@ -96,7 +91,6 @@ export const useSignupStore = create<SignupStore>()(
     {
       name: 'signup-storage',
       // The password stays in memory only: never written to localStorage.
-      // Step and canAddMoreRoles are not persisted either.
       partialize: (state) => ({
         data: { ...state.data, password: '' },
         otpReference: state.otpReference,

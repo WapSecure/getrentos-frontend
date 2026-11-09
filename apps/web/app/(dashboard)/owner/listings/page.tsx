@@ -99,19 +99,15 @@ export default function OwnerListingsPage() {
         toast.success('Sent for review. Sureground checks it before it goes live.');
       }
     },
-    // A refusal used to vanish: the modal closes before the request answers.
     onError: (error) => toast.error(error.message || 'Could not update this listing.'),
   });
 
-  // Awaited by the form, which then saves the photos and closes; a refusal
-  // stays in the form (and in the notice below) instead of vanishing.
   const handleCreate = (data: Omit<SaleListing, 'id' | 'createdAt'>, publishNow: boolean) =>
     createMutation.mutateAsync({
       propertyId: data.propertyId,
       price: data.askingPrice,
       listingTitle: data.listingTitle,
       amenities: data.features,
-      // Save Draft keeps it off the market; Publish puts it live, or in review.
       intent: publishNow ? 'publish' : 'draft',
     });
 
@@ -156,7 +152,7 @@ export default function OwnerListingsPage() {
         className="mb-6"
       />
 
-      {/* Publishing a for-sale listing needs an identity-verified account (tier 2). */}
+      {/* Publishing a for-sale listing needs tier 2. */}
       {createMutation.error && (
         <div className="mb-6">
           <VerificationRequiredNotice

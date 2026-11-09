@@ -39,20 +39,13 @@ const TABS: HubTab[] = [
 
 const PAGE_SIZE = 10;
 const RECEIPTS_PAGE_SIZE = 12;
-/**
- * The API's largest page. The summary's figures come from the API's own
- * account-wide summary; only an older API without one leaves the summary to sum
- * this page, saying "at least" when there are more.
- */
+// The API's largest page size.
 const MAX_PAGE_SIZE = 100;
 
-/** Real gateway checkout redirect: pulled out of component scope so it reads as an
- *  ordinary side effect rather than a render-path mutation. */
 function redirectToCheckout(url: string) {
   window.location.href = url;
 }
 
-/** Every payment, page by page, for an export that is not limited to one page. */
 async function fetchAllPayments(): Promise<Payment[]> {
   const all: Payment[] = [];
   for (let page = 1; ; page++) {
@@ -79,7 +72,6 @@ export default function PaymentsPage() {
   const [disputingPaymentId, setDisputingPaymentId] = useState<string | null>(null);
   const [confirmingMoveInId, setConfirmingMoveInId] = useState<string | null>(null);
   const [payingPaymentId, setPayingPaymentId] = useState<string | null>(null);
-  // Which company takes the payment, and why the last one could not.
   const providers = usePaymentProviders();
   const [providerError, setProviderError] = useState<string | null>(null);
 
@@ -98,9 +90,7 @@ export default function PaymentsPage() {
       unwrap(renterService.listPayments({ page, pageSize: PAGE_SIZE, ...listFilters })),
     placeholderData: keepPreviousData,
   });
-  // Every open charge across all pages, soonest due first: what the renter owes,
-  // and the oldest one, which the summary's pay button opens. Checkout takes one
-  // charge at a time, never a combined total.
+  // Checkout takes one charge at a time, never a combined total.
   const openChargesQuery = useQuery({
     queryKey: [...renterKeys.payments, { page: 1, pageSize: MAX_PAGE_SIZE, open: true }],
     queryFn: () =>
@@ -118,7 +108,6 @@ export default function PaymentsPage() {
     queryFn: () => unwrap(renterService.listPaymentMethods()),
     enabled: activeTab === 'account',
   });
-  // Export covers the whole history, so it loads every page when it is opened.
   const exportQuery = useQuery({
     queryKey: [...renterKeys.payments, 'export'],
     queryFn: fetchAllPayments,
@@ -132,12 +121,8 @@ export default function PaymentsPage() {
   const openCharges = openChargesQuery.data?.items ?? [];
   const openCount = openChargesQuery.data?.total ?? 0;
   const nextCharge = openCharges[0] ?? null;
-  // Account-wide figures from the server. An older API sends none, and the
-  // summary then works them out from the open charges it holds.
   const summary = paymentsQuery.data?.summary ?? openChargesQuery.data?.summary;
 
-  // Outcomes are transient toasts, as on other pages: an in-page "inbox" held in
-  // component state looked persistent but emptied on every reload (UX-18).
   const pushNotification = ({ type, title, message }: Notice) =>
     toast.show(`${title}. ${message}`, type);
 
@@ -155,8 +140,7 @@ export default function PaymentsPage() {
     }) => unwrap(renterService.payNow(paymentId, method, amount, provider)),
     onSuccess: (updated) => {
       if (updated.authorizationUrl) {
-        // Real gateway flow: the payment is PROCESSING until checkout
-        // completes, so redirect instead of claiming success.
+        // The payment stays PROCESSING until checkout completes, so redirect rather than claim success.
         redirectToCheckout(updated.authorizationUrl);
         return;
       }
@@ -164,7 +148,6 @@ export default function PaymentsPage() {
       queryClient.invalidateQueries({ queryKey: renterKeys.payments });
       queryClient.invalidateQueries({ queryKey: renterKeys.receipts });
       queryClient.invalidateQueries({ queryKey: ['renter', 'rent-accounts'] });
-      // Say "Paid" only when the API says the charge is paid.
       const left = updated.outstanding ?? 0;
       if (updated.status === 'paid') {
         toast.success(updated.reference ? `Paid. Reference ${updated.reference}` : 'Paid.');
@@ -181,7 +164,6 @@ export default function PaymentsPage() {
       }
     },
     onError: (error: Error, variables) => {
-      // That company cannot take it right now: reopen the choice with the other one picked.
       const unavailable = providers.recover(error, variables.provider);
       if (unavailable) {
         setProviderError(unavailable);
@@ -199,7 +181,6 @@ export default function PaymentsPage() {
 
   const owedOn = leftToPay;
 
-  // A charge on this page, or an open one (which may be on another page).
   const findPayment = (paymentId: string | null): Payment | null =>
     payments.find((p) => p.id === paymentId) ?? openCharges.find((p) => p.id === paymentId) ?? null;
 
@@ -211,8 +192,7 @@ export default function PaymentsPage() {
     const payment = findPayment(paymentId);
     if (!payment) return;
     setProviderError(null);
-    // The API decides: with a gateway it returns a checkout to redirect to;
-    // when payments are simulated it settles the charge itself and returns none.
+    // With a gateway the API returns a checkout; when simulated it settles the charge and returns none.
     payNowMutation.mutate({
       paymentId,
       method: payment.method ?? 'card',
@@ -224,7 +204,6 @@ export default function PaymentsPage() {
 
   const handleDownloadReceipt = (receiptId: string) => {
     const receipt = receipts.find((r) => r.id === receiptId || r.paymentId === receiptId);
-    // A row's own signed link works even when its receipt is not on the loaded page.
     const url = receipt?.url || payments.find((p) => p.id === receiptId)?.receiptUrl;
     if (!url) {
       pushNotification({

@@ -23,7 +23,6 @@ import { AttentionFeed } from '@/components/shared/attention/AttentionFeed';
 import { IdentityNudge } from '@/components/shared/verification/IdentityNudge';
 import { ROUTES } from '@/lib/constants/auth';
 
-// recharts is heavy: load it only when this dashboard mounts.
 const OwnerPortfolioChart = dynamic(
   () =>
     import('@/components/owner/dashboard/OwnerPortfolioChart').then((m) => m.OwnerPortfolioChart),

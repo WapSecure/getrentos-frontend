@@ -28,20 +28,7 @@ import {
 } from '@/services/mandateService';
 import { describeAgencyError } from './agencyAccess';
 
-/**
- * The workspace: one client's properties, and what this engagement lets you do
- * with them.
- *
- * Deliberately built around the SELECTED client rather than around everything the
- * firm holds. An owner's portal answers "what do I have"; a manager's has to
- * answer "what may I do for the person who hired me", and those are different
- * questions with different answers for the same property.
- *
- * It refuses to guess. With no client selected it shows nothing and says why,
- * rather than falling back to the whole portfolio — acting on the wrong client's
- * property is the failure the custody bar exists to prevent, and a helpful
- * default would be the same bug wearing a friendlier face.
- */
+// With no client selected this shows nothing rather than the whole portfolio: acting on the wrong client's property is what the custody bar prevents.
 export function AgencyWorkspaceView() {
   const { selected, live, loading, error } = useCustody();
 
@@ -53,9 +40,7 @@ export function AgencyWorkspaceView() {
   } = useQuery({
     queryKey: authorityKeys.managed,
     queryFn: () => unwrap(propertyAuthorityService.managed()),
-    // Nothing to ask for until we know which client. Skipping the query rather
-    // than filtering the answer keeps "no selection" from looking like "no
-    // properties".
+    // Skip the query rather than filter the answer, so "no selection" never looks like "no properties".
     enabled: Boolean(selected),
   });
 
@@ -72,7 +57,6 @@ export function AgencyWorkspaceView() {
     return <PageErrorState description={error} />;
   }
 
-  // A chosen client whose engagement is over: say so plainly, with nothing to act on.
   if (selected && hasEnded(selected)) {
     const on = endedOn(selected);
     return (
@@ -173,8 +157,7 @@ export function AgencyWorkspaceView() {
                     </p>
                   </div>
                   <Link
-                    // The owner workspace has no per-property page; a property opens as
-                    // its units, the same place a landlord's property card goes.
+                    // The owner workspace has no per-property page; a property opens as its units.
                     href={`${ROUTES.LANDLORD_UNITS}?property=${property.propertyId}`}
                     className="text-sm font-medium text-primary hover:underline"
                   >

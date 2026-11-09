@@ -12,12 +12,7 @@ import {
 } from '@/services/agencyCommissionService';
 import { AgencyAgentSelfPayout } from './AgencyAgentSelfPayout';
 
-/**
- * On-platform per-agent payouts. Two audiences on one surface:
- *  - the firm reviews each agent's unpaid share + readiness, then pays them all;
- *  - an agent sets up their own account and sees what they've earned / been paid.
- * The viewer may be both (a firm owner is also an agent), so both panels show.
- */
+// A firm owner is also an agent, so both panels can show.
 export function AgencyAgentPayoutSection({
   onToast,
 }: {
@@ -68,7 +63,6 @@ export function AgencyAgentPayoutSection({
         Agent payouts
       </h2>
 
-      {/* Firm: pay the agents */}
       <div className="rounded-2xl border border-border bg-card p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>

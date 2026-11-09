@@ -42,12 +42,10 @@ export const ApplicationsList = ({
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [withdrawApplication, setWithdrawApplication] = useState<Application | null>(null);
 
-  // Filter applications
   const filteredApplications = applications.filter(
     (app) => filterStatus === 'all' || app.status === filterStatus
   );
 
-  // Sort applications
   const sortedApplications = [...filteredApplications].sort((a, b) => {
     switch (sortBy) {
       case 'recent':
@@ -95,7 +93,6 @@ export const ApplicationsList = ({
         ))}
       </div>
 
-      {/* Application Details Modal */}
       {selectedApplication && (
         <ApplicationDetailsModal
           isOpen={showDetailsModal}

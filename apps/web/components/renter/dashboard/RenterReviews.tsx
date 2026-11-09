@@ -58,7 +58,6 @@ export const RenterReviews = () => {
     },
   });
 
-  // Real average from the reviews the renter has written.
   const averageRating = useMemo(() => {
     if (submitted.length === 0) return 0;
     return submitted.reduce((sum, r) => sum + r.rating, 0) / submitted.length;
@@ -81,8 +80,7 @@ export const RenterReviews = () => {
     });
   };
 
-  // Nothing to write and nothing written yet: reviews only become relevant
-  // after a lease ends, so keep the card off the dashboard until then.
+  // Reviews only become relevant after a lease ends, so the card stays off the dashboard until then.
   if (pending.length === 0 && submitted.length === 0) return null;
 
   return (
@@ -118,7 +116,6 @@ export const RenterReviews = () => {
             </div>
           )}
 
-          {/* Pending Reviews */}
           {pending.length > 0 && (
             <div>
               <h3 className="text-sm font-medium text-foreground mb-3">Pending reviews</h3>
@@ -188,7 +185,6 @@ export const RenterReviews = () => {
         </div>
       </motion.div>
 
-      {/* Review Modal */}
       <Dialog
         open={showReviewModal && selectedReview !== null}
         onOpenChange={(next) => !next && !submitMutation.isPending && setShowReviewModal(false)}
@@ -204,7 +200,6 @@ export const RenterReviews = () => {
                 : `How was your experience with ${selectedReview.landlord}?`}
             </DialogDescription>
 
-            {/* Star Rating */}
             <div className="flex justify-center gap-2 mb-4" role="group" aria-label="Rating">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
@@ -226,7 +221,6 @@ export const RenterReviews = () => {
               ))}
             </div>
 
-            {/* Review Text */}
             <Field label="Your review" className="mb-4">
               <Textarea
                 placeholder="Share your experience..."

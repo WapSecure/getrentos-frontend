@@ -37,11 +37,7 @@ const statusFilters: { value: 'all' | InspectionStatus; label: string }[] = [
 
 const PAGE_SIZE = 12;
 
-/**
- * The inspections screen. Role-agnostic: it talks to the /inspections API, which
- * any property-controller (landlord, owner, or manager) may use, so the landlord
- * and owner portals both render this.
- */
+// Role-agnostic: /inspections serves any property controller, so the landlord and owner portals both render this.
 export function InspectionsView() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
@@ -61,7 +57,6 @@ export function InspectionsView() {
   const inspections = data?.items ?? [];
   const total = data?.total ?? 0;
 
-  // Properties feed the create modal's picker.
   const { data: propertiesData } = useQuery({
     queryKey: landlordKeys.properties,
     queryFn: () => unwrap(landlordService.listProperties({ pageSize: 100 })),

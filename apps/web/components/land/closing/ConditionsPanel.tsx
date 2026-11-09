@@ -23,11 +23,6 @@ const CHECK_ICON = {
   BLOCKED: <XCircle className="h-4 w-4 shrink-0 text-destructive" aria-hidden />,
 };
 
-/**
- * Conditions precedent on a plot purchase and the closing checklist built
- * from them. The buyer confirms or waives; the developer marks deliverable
- * conditions met with a note.
- */
 export const ConditionsPanel = ({
   conditions,
   checklist,
@@ -45,7 +40,7 @@ export const ConditionsPanel = ({
   onConfirm?: (key: string) => void;
   onWaive?: (key: string) => void;
   onDeliver?: (key: string, note: string) => void;
-  /** Who delivers conditions: the developer on a plot, the seller on a resale. */
+  /** The developer on a plot, the seller on a resale. */
   sellerLabel?: string;
 }) => {
   const [delivering, setDelivering] = useState<string | null>(null);

@@ -4,7 +4,6 @@ import { formatCurrency } from '@/lib/format';
 import { LAND_TITLE_TYPE_LABELS } from '@/types/land';
 import type { LandTitleTypeBreakdown, NairaDistribution } from '@/types/landMarket';
 
-/** "2026-03" → "Mar 2026". */
 export const monthLabel = (month: string) => {
   const [y, m] = month.split('-').map(Number);
   if (!y || !m) return month;
@@ -15,7 +14,6 @@ export const monthLabel = (month: string) => {
   });
 };
 
-/** Median ₦/m² by title document, as plain bars scaled to the dearest group. */
 export const TitleTypeBars = ({ groups }: { groups: LandTitleTypeBreakdown[] }) => {
   const priced = groups.filter((g) => g.medianPricePerSqm !== undefined);
   const max = Math.max(1, ...priced.map((g) => g.medianPricePerSqm ?? 0));
@@ -50,7 +48,6 @@ export const TitleTypeBars = ({ groups }: { groups: LandTitleTypeBreakdown[] }) 
   );
 };
 
-/** The spread of ₦/m²: the middle half as a band, the median as a tick. */
 export const DistributionStrip = ({ dist }: { dist: NairaDistribution }) => {
   const { min, p25, median, p75, max } = dist;
   if (min === undefined || max === undefined || median === undefined) {

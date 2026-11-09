@@ -13,17 +13,7 @@ const CYCLE_SEGMENTS: Segment<BillingCycle>[] = [
   { value: 'ANNUAL', label: 'Annual' },
 ];
 
-/**
- * The Pro offer card: price (monthly/annual), trial and CTA. Reads its numbers
- * from the backend pricing catalog so the displayed price always equals the
- * charged price. `onUpgrade` (wired to checkout) takes precedence; when absent
- * it falls back to the contact-us CTA.
- *
- * `trialAvailable` decides whether this is an offer for a free trial or for a
- * straight purchase. A customer who has already used their trial is never
- * shown "start your free trial": offering something we would refuse is worse
- * than showing them the real price.
- */
+// A customer who has used their trial is never offered one (`trialAvailable`): offering something we'd refuse is worse than the real price.
 export function ProPriceCard({
   pricing,
   isPro = false,

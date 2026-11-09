@@ -27,7 +27,6 @@ import type { ShortletListing, ShortletSeason } from '@/types/shortlet';
 
 const TODAY = new Date().toISOString().slice(0, 10);
 
-/** Dec 20 to Jan 3: the Detty December peak, when diaspora guests fly home. */
 function dettyDecemberDates() {
   const year = new Date().getFullYear();
   return { startDate: `${year}-12-20`, endDate: `${year + 1}-01-03` };
@@ -35,10 +34,6 @@ function dettyDecemberDates() {
 
 const toNum = (v: string) => (v.trim() === '' ? 0 : Number(v));
 
-/**
- * Peak-season tools for one listing: discounts for long and last-minute stays,
- * notice and turnover days, and seasons with their own rate and minimum stay.
- */
 export function ShortletPeakPricingDialog({
   listing,
   onClose,

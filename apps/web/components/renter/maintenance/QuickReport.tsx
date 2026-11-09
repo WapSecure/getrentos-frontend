@@ -18,7 +18,6 @@ import type { CreateMaintenanceRequestInput, MaintenanceCategory } from '@/types
 
 interface QuickReportProps {
   onQuickReport: (data: CreateMaintenanceRequestInput) => Promise<boolean>;
-  /** Opens the full report form for anything the quick options don't cover. */
   onCustomReport: () => void;
 }
 

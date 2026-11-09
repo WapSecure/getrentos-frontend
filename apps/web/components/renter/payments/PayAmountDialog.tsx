@@ -11,7 +11,6 @@ import { RENT_PART_PROTECTION, RENT_PROTECTION } from '@/lib/paymentCopy';
 const MIN_PART_PAYMENT = 1_000;
 
 interface PayAmountDialogProps {
-  /** The charge being paid, or null when closed. */
   payment: {
     propertyName: string;
     owed: number;
@@ -20,21 +19,13 @@ interface PayAmountDialogProps {
   } | null;
   onClose: () => void;
   onPay: (amount: number | undefined) => void;
-  /** Which company takes the payment (Paystack or Monnify). */
   providers: PaymentProviderChoice;
-  /** Why the last try failed when the chosen company could not take it: choose another. */
   providerError?: string | null;
-  /** Why the last try failed for any other reason. */
   error?: string | null;
-  /** While the payment is being started: the dialog stays open and shows it. */
   busy?: boolean;
 }
 
-/**
- * Pay what a charge owes, or part of it: choose how much, choose who takes
- * the payment, see exactly what will be charged, then go to that company's
- * secure page. Anything paid goes to this charge first.
- */
+// Anything paid goes to this charge first.
 export const PayAmountDialog = ({
   payment,
   onClose,
@@ -66,7 +57,6 @@ export const PayAmountDialog = ({
   const part = Number(amount);
   const minPart = Math.min(MIN_PART_PAYMENT, owed);
   const partValid = part >= minPart && part < owed;
-  // Only once something is typed: an empty box is not yet a mistake.
   const partError =
     mode !== 'part' || !amount
       ? undefined

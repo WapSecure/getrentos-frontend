@@ -19,7 +19,6 @@ export const metadata: Metadata = {
   },
 };
 
-/** The first peak week of this year's season, so the page opens on real December totals. */
 function peakWeek() {
   const year = new Date().getUTCFullYear();
   return { checkIn: `${year}-12-20`, checkOut: `${year}-12-27` };

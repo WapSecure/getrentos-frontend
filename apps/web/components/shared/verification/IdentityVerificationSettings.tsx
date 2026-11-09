@@ -38,20 +38,11 @@ const statusConfig: Record<
 };
 
 interface IdentityVerificationSettingsProps {
-  /** Why this matters for the current persona, shown above the form. */
   description?: string;
-  /** The one Verification page for this portal (NIN and live selfie). */
   verificationHref: string;
 }
 
-/**
- * Settings → Verification. Identity is verified in one place, the
- * Verification page (NIN and a live selfie); this tab shows the status and
- * points there. The ID-document upload is kept only as a fallback for people
- * who cannot use their NIN: it is checked by our team, and it never verifies
- * on its own, because a live selfie is still required (security gap ID-16).
- * There is no photo "selfie" here: an uploaded photo is not a liveness check.
- */
+// The ID-document upload is only a fallback: it never verifies on its own, since a live selfie is still required.
 export const IdentityVerificationSettings = ({
   description = 'Verify your identity to unlock actions like submitting applications and offers.',
   verificationHref,
@@ -62,8 +53,7 @@ export const IdentityVerificationSettings = ({
   });
 
   const identity = status?.identity;
-  // Verified by NIN counts as approved even while an older document review is
-  // still pending: no point asking for documents again.
+  // Verified by NIN counts as approved even while an older document review is pending.
   const verified = status?.identityVerified ?? identity?.status === 'APPROVED';
   const shownStatus = verified ? 'APPROVED' : identity?.status;
   const config = shownStatus ? statusConfig[shownStatus] : undefined;

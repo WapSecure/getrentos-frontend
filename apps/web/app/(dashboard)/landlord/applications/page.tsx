@@ -53,8 +53,6 @@ export default function LandlordApplicationsPage() {
   const applications = data?.items ?? [];
   const total = data?.total ?? 0;
 
-  // Header stat: every application still waiting for a decision (pending or under review),
-  // across the whole portfolio rather than the page on screen.
   const { data: awaitingCount = 0 } = useQuery({
     queryKey: [...landlordKeys.applications('awaiting'), 'count'],
     queryFn: async () => {
@@ -66,8 +64,6 @@ export default function LandlordApplicationsPage() {
     },
   });
 
-  // Approval drafts the lease on the server (unit, tenant, rent, a standard
-  // term); what is left is to review it and send it.
   const openDraftLeases = () => router.push(`${ROUTES.LANDLORD_LEASES}?status=draft`);
 
   const updateStatusMutation = useMutation({
@@ -77,9 +73,6 @@ export default function LandlordApplicationsPage() {
       queryClient.invalidateQueries({ queryKey: ['landlord', 'applications'] });
       setSelectedApplication((prev) => (prev && prev.id === updated.id ? updated : prev));
       if (updated.status === 'approved') {
-        // Approval is half the job: the tenancy starts with a lease.
-        // Long enough to act on; the approved application also keeps a
-        // Review lease button, so the next step never depends on this toast.
         toast.success(
           `${updated.applicantName}'s application approved. We've drafted their lease: review and send it.`,
           { duration: 12_000, action: { label: 'Review lease', onClick: openDraftLeases } }
@@ -88,19 +81,16 @@ export default function LandlordApplicationsPage() {
         toast.success(`${updated.applicantName}'s application rejected.`);
       }
     },
-    // A refused change (say, the unit is already let) must say why, not fail silently.
     onError: (error: Error) => toast.error(error.message || 'That change was not saved.'),
   });
 
   const handleApprove = (id: string) => updateStatusMutation.mutate({ id, status: 'approved' });
   const handleReject = (id: string) => updateStatusMutation.mutate({ id, status: 'rejected' });
-  // Opens the message to the applicant; sending it moves a pending application to under review.
   const handleRequestInfo = (id: string) => {
     setRequestingInfo(
       applications.find((a) => a.id === id) ??
         (selectedApplication?.id === id ? selectedApplication : null)
     );
-    // One dialog at a time: the details close while the message is written.
     setSelectedApplication(null);
   };
 

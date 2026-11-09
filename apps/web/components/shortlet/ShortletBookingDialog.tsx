@@ -37,7 +37,6 @@ const DISCOUNT_LABEL: Record<ShortletDiscountType, string> = {
 };
 
 /** The `YYYY-MM-DD` day after `date`, in the UTC keys the API's calendar uses. */
-/** True when a booking attempt was refused only for an unverified identity. */
 const isIdentityGate = (error: unknown) =>
   (error instanceof VerificationRequiredError
     ? error.reason
@@ -68,21 +67,16 @@ export function ShortletBookingDialog({
   createdBooking: ShortletBooking | null;
   paying: boolean;
   onPay: (bookingId: string) => void;
-  /** Which company takes the payment (Paystack or Monnify). */
   providers: PaymentProviderChoice;
-  /** Why the last try failed when the chosen company could not take it. */
   providerError?: string | null;
-  /** The last failed booking attempt, so an identity gate can offer the way forward. */
   bookError?: unknown;
 }) {
-  // The viewer's own verification and "my stays" pages; resolved once per mount.
   const [guestRoutes] = useState(guestStayRoutes);
   const router = useRouter();
   const [checkIn, setCheckIn] = useState('');
   const [checkOut, setCheckOut] = useState('');
   const [guestCount, setGuestCount] = useState('1');
   const [error, setError] = useState<string | null>(null);
-  // The pay dialog for the booking just made.
   const [payOpen, setPayOpen] = useState(false);
   const payAmount = createdBooking
     ? (createdBooking.total ?? 0) + (createdBooking.taxAmount ?? 0) + (createdBooking.deposit ?? 0)
@@ -95,19 +89,13 @@ export function ShortletBookingDialog({
     enabled: Boolean(checkIn && checkOut),
   });
 
-  // The booked/blocked calendar, so the pickers can grey out nights that are
-  // already taken instead of accepting them and refusing on submit.
   const { data: calendar } = useQuery({
     queryKey: [...shortletKeys.availability(listing.id), 'calendar'],
     queryFn: () => unwrap(shortletService.availability(listing.id)),
   });
 
   const unavailableNights = useMemo(() => calendar?.unavailableDates ?? [], [calendar]);
-  /**
-   * A taken night cannot start a stay. It can *end* one: the guest leaves in
-   * the morning and the next arrives that afternoon: so a check-out is only
-   * blocked when the night before it is taken.
-   */
+  /** A taken night can't start a stay but can end one (checkout morning, next arrival afternoon), so a check-out is blocked only when the night before is taken. */
   const blockedCheckOuts = useMemo(() => unavailableNights.map(nextDay), [unavailableNights]);
 
   const handleCheckIn = (value: string) => {

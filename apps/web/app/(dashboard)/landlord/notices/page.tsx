@@ -33,21 +33,6 @@ import { landlordKeys } from '@/lib/queryKeys';
 import { formatDate } from '@/lib/format';
 import type { NoticeKind, NoticeServiceMethod, TenancyNotice } from '@/types/tenancy-notice';
 
-/**
- * Notices.
- *
- * Reworked from one long page that stacked a configuration form, a tenancy
- * picker, a ladder and a list of everything — four things with four different
- * jobs, in an order that served none of them. The daily question is "what is
- * running and what runs out soon", so that is the page; the period register is
- * configuration and lives behind its own tab, surfacing only as a warning when it
- * is actually blocking something.
- *
- * The one thing kept from before is the wording around a block, because a
- * possession claim served too early is technically fatal and the sentence
- * explaining the date is worth the space.
- */
-
 type Tab = 'running' | 'periods';
 
 export default function LandlordNoticesPage() {
@@ -58,12 +43,7 @@ export default function LandlordNoticesPage() {
   const [openLadder, setOpenLadder] = useState<string | null>(null);
   const [dismissedLink, setDismissedLink] = useState<string | null>(null);
 
-  /*
-    Two ways in: the row you clicked, and ?leaseId from a legal case. The link is
-    derived rather than copied into state so that arriving here again with a
-    different tenancy still opens — a client-side navigation does not remount
-    this component, so state seeded on mount would go stale.
-  */
+  // Derived, not state: client navigation doesn't remount, so state seeded on mount would go stale.
   const ladderFor = openLadder ?? (leaseIdParam !== dismissedLink ? leaseIdParam : null);
 
   const closeLadder = () => {
@@ -100,11 +80,6 @@ export default function LandlordNoticesPage() {
     enabled: ladderFor !== null,
   });
 
-  /*
-    A tenancy the reader cannot open is not worth a modal: the page behind it is
-    still the answer to the question they arrived with, so it goes to the same
-    place as every other outcome on this screen.
-  */
   useEffect(() => {
     if (!ladderFailed) return;
     toast.error('That tenancy is not one you can read.');
@@ -169,7 +144,6 @@ export default function LandlordNoticesPage() {
     onError,
   });
 
-  // Soonest first: the whole point of this view is what runs out next.
   const notices = [...(running?.notices ?? [])].sort(
     (a, b) =>
       (a.daysRemaining ?? Number.MAX_SAFE_INTEGER) - (b.daysRemaining ?? Number.MAX_SAFE_INTEGER)
@@ -267,11 +241,6 @@ export default function LandlordNoticesPage() {
         ]}
       />
 
-      {/*
-        The register only surfaces on the daily view when it is actually standing
-        in the way of something. Otherwise it is configuration, and configuration
-        does not belong at the top of a worklist.
-      */}
       {tab === 'running' && unconfigured > 0 && (
         <Alert
           variant="warning"
@@ -331,15 +300,9 @@ export default function LandlordNoticesPage() {
         />
       )}
 
-      {/* The tenancy behind a row, or behind ?leaseId from a legal case. */}
       {ladder && (
         <Dialog open onOpenChange={(open) => !open && closeLadder()}>
           <DialogContent size="lg" padded={false}>
-            {/*
-              The header carries the tenancy so the body does not have to, and
-              stays put while the ladder scrolls — the one action in here should
-              never scroll out of reach.
-            */}
             <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-border bg-card px-5 py-4">
               <div className="min-w-0">
                 <DialogTitle className="text-xl font-semibold tracking-[-0.02em] text-foreground">
@@ -356,11 +319,6 @@ export default function LandlordNoticesPage() {
                 </p>
               </div>
 
-              {/*
-                Raising lives with the ladder rather than on the daily list,
-                because it is always "the next step" — there is no meaningful way
-                to raise one out of sequence, and the server refuses it.
-              */}
               {ladder.next && !ladder.nextBlockedReason && (
                 <Button className="mr-7 shrink-0" onClick={() => setRaising(true)}>
                   <Plus className="mr-1.5 h-4 w-4" aria-hidden />

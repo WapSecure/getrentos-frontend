@@ -17,11 +17,6 @@ const PERSONAS: Segment<PlanPersona>[] = [
   { value: 'realtor', label: 'Realtors' },
 ];
 
-/**
- * Public pricing page: the surface prospective customers see before signing
- * up. Price and entitlements come from the backend catalog so what we show is
- * exactly what we charge.
- */
 export default function PricingPage() {
   const router = useRouter();
   const { pricing, entitlementsFor, isLoading } = usePlanPricing();

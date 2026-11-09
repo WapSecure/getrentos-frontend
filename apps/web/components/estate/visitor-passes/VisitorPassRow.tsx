@@ -6,7 +6,6 @@ import type { VisitorPass } from '@/types/estate';
 
 const statusVariant: Record<VisitorPass['status'], 'success' | 'warning' | 'neutral' | 'danger'> = {
   pending: 'warning',
-  // Warning, not neutral: this one is waiting on the household to answer.
   awaiting_approval: 'warning',
   approved: 'success',
   checked_in: 'success',
@@ -55,9 +54,6 @@ export const VisitorPassRow = ({ pass, estateId, onRevoke, isRevoking }: Visitor
         </p>
       </div>
       <div className="flex items-center gap-3 shrink-0">
-        {/* Offered on every pass, including ones the guard admitted without a
-            document: the dialog is where the reason that is allowed gets
-            explained, which a hidden button could not do. */}
         <IdCheckDialog estateId={estateId} passId={pass.id} visitorName={pass.visitorName} />
         <Badge variant={statusVariant[pass.status]}>{statusLabels[pass.status]}</Badge>
         {pass.status === 'pending' && (

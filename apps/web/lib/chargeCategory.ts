@@ -8,10 +8,8 @@ const LABELS: Record<ChargeCategory, string> = {
   LATE_FEE: 'Late fee',
 };
 
-/** Lower-case label for running text, e.g. "to service charge due Mar 15". */
 export const chargeLabel = (category?: ChargeCategory): string =>
   (category ? LABELS[category] : LABELS.RENT).toLowerCase();
 
-/** Label for a heading or list entry, e.g. "Service charge". Unknown values read as "Charge". */
 export const chargeTitle = (category?: ChargeCategory): string =>
   category ? (LABELS[category] ?? 'Charge') : LABELS.RENT;

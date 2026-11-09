@@ -36,9 +36,8 @@ export interface FinancingPlan {
   appliedAt: string;
   landlordPaidAt?: string;
   installments: FinancingInstallment[];
-  /** Present when an installment payment is initialized with a real gateway (redirect here to complete checkout). */
+  /** Present only with a real gateway: redirect here to complete checkout. */
   authorizationUrl?: string;
-  /** Gateway reference for the installment currently being paid. */
   reference?: string;
 }
 
@@ -48,7 +47,7 @@ export interface FinancingOverview {
   propertyName: string;
   landlordName: string;
   applicationStatus: FinancingApplicationStatus;
-  /** False while Flex is paused for new plans. Existing plans keep working. */
+  /** Existing plans keep working. */
   newPlansOpen?: boolean;
   plan?: FinancingPlan;
 }

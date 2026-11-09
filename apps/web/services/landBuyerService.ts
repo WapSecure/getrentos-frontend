@@ -22,7 +22,6 @@ const post = <T>(path: string, body?: unknown) =>
     ...(body === undefined ? {} : { body: JSON.stringify(body) }),
   });
 
-/** Saves a blob the browser just downloaded under `filename`. */
 const saveBlob = (blob: Blob, filename: string) => {
   const url = window.URL.createObjectURL(blob);
   const link = document.createElement('a');
@@ -34,7 +33,6 @@ const saveBlob = (blob: Blob, filename: string) => {
   window.URL.revokeObjectURL(url);
 };
 
-/** Public estate browsing (no account needed). */
 export const landLayoutService = {
   list: (params: PublicLandLayoutListParams = {}) =>
     safeCall(() =>
@@ -53,10 +51,7 @@ export const landLayoutService = {
     safeCall(() => authFetch<PublicLandLayoutDetail>(`/land/layouts/${layoutId}`)),
 };
 
-/** The buyer side of developer plot sales and land resale conveyance. */
 export const landBuyerService = {
-  // ---- Reservations ----
-  /** Hold a plot on the terms the buyer accepted; optionally while their inspection of it runs. */
   reserve: (
     plotId: string,
     input: { acceptedTermsVersion: string; subjectToInspectionId?: string }
@@ -75,7 +70,6 @@ export const landBuyerService = {
   cancelReservation: (reservationId: string) =>
     safeCall(() => post<LandReservation>(`/buyer/land/reservations/${reservationId}/cancel`)),
 
-  // ---- Purchases ----
   /** `acknowledgedNotVerified`: keys of the estate land's not-verified checks the buyer accepts. */
   startPurchase: (reservationId: string, planId: string, acknowledgedNotVerified: string[] = []) =>
     safeCall(() =>
@@ -120,7 +114,6 @@ export const landBuyerService = {
       )
     ),
 
-  /** Accept a condition the developer delivered, or give one up (waive). */
   settleCondition: (purchaseId: string, key: string, how: 'confirm' | 'waive') =>
     safeCall(() =>
       post<LandPurchaseDetail>(
@@ -143,14 +136,12 @@ export const landBuyerService = {
       )
     ),
 
-  /** Downloads the contract of sale summary or the letter of allocation (PDF). */
   downloadDocument: (purchaseId: string, kind: LandSaleDocumentKind, reference?: string) =>
     safeCall(async () => {
       const blob = await authDownload(`/buyer/land/purchases/${purchaseId}/documents/${kind}`);
       saveBlob(blob, `${reference ?? purchaseId}-${kind}.pdf`);
     }),
 
-  // ---- Single-parcel resale conveyance ----
   /** Empty for a transaction whose property is not land. */
   listTransactionMilestones: (txId: string) =>
     safeCall(() => authFetch<LandMilestone[]>(`/buyer/land/transactions/${txId}/milestones`)),
@@ -170,7 +161,7 @@ export const landBuyerService = {
       )
     ),
 
-  /** Conditions precedent on a land resale (§9.3); 400 for a sale that is not land. */
+  /** 400 for a sale that is not land. */
   listTransactionConditions: (txId: string) =>
     safeCall(() =>
       authFetch<LandClosingCondition[]>(`/buyer/land/transactions/${txId}/conditions`)

@@ -42,7 +42,6 @@ import { providerQuery } from '@/services/paymentStatusService';
 import type { PaymentProvider } from '@/types/payments';
 
 export interface ShortletListParams {
-  /** Only stays with all of these amenities. */
   amenities?: string[];
   /** Only stays whose host says they have power 24 hours a day. */
   power24h?: boolean;
@@ -57,9 +56,9 @@ export interface ShortletListParams {
   sort?: 'newest' | 'price_asc' | 'price_desc';
   checkIn?: string;
   checkOut?: string;
-  /** Estate public slug — limits results to shortlets inside that estate. */
+  /** Estate public slug; limits results to shortlets inside that estate. */
   estate?: string;
-  /** Public browse: title, address, city, state or estate name. */
+  /** Matches title, address, city, state or estate name. */
   search?: string;
   bedrooms?: number;
   bathrooms?: number;
@@ -93,9 +92,8 @@ const listQuery = (params: ShortletListParams): string =>
     estate: params.estate,
   });
 
-/** Earnings split by when they can be withdrawn. Amounts are whole naira. */
+/** Whole naira. */
 export interface ShortletPayoutSummary {
-  /** Ready to withdraw now. */
   available: number;
   /** Earned, but the stay hasn't started or is still inside the hold. */
   upcoming: number;
@@ -107,26 +105,22 @@ export interface ShortletPayoutSummary {
   inTransit: number;
   /** Cancellation fees still owed; taken out of the next withdrawals. */
   penaltiesOutstanding: number;
-  /** When the next held earnings unlock. */
   nextReleaseAt: string | null;
   /** Hours earnings are held after check-in (longer for a first payout). */
   holdHours: number;
   accountSet: boolean;
-  /** The host's trust tier, and the tier withdrawing requires. */
   hostTier: number;
   withdrawTierRequired: number;
   /** False when the host is below `withdrawTierRequired`, so the client can explain first. */
   canWithdraw: boolean;
   /**
-   * Set when the tier is held back by something other than missing evidence —
-   * an open dispute, a review case, the score floor. Names the real blocker so
-   * the dialog does not send an already-verified host to get verified again.
+   * Names a blocker other than missing evidence, so an already-verified host is not sent to verify
+   * again.
    */
   withdrawWithheldReason?: TrustWithheldReason | null;
 }
 
 export const shortletService = {
-  // -------- Public marketplace --------
   listPublic: (params: ShortletListParams = {}) =>
     safeCall(() => authFetch<Paginated<ShortletListing>>(`/shortlets${listQuery(params)}`)),
 
@@ -140,7 +134,6 @@ export const shortletService = {
       )
     ),
 
-  // -------- Guest --------
   book: (listingId: string, input: CreateShortletBookingInput) =>
     safeCall(() =>
       authFetch<ShortletBooking>(`/shortlets/${listingId}/book`, {
@@ -183,7 +176,6 @@ export const shortletService = {
       )
     ),
 
-  // -------- Host rates guest --------
   createGuestReview: (bookingId: string, input: CreateShortletReviewInput) =>
     safeCall(() =>
       authFetch<ShortletGuestReview>(`/host/shortlets/bookings/${bookingId}/guest-review`, {
@@ -192,7 +184,6 @@ export const shortletService = {
       })
     ),
 
-  // -------- Guest received reviews --------
   myGuestReviews: (page = 1, pageSize = 20) =>
     safeCall(() =>
       authFetch<Paginated<ShortletGuestReview>>(
@@ -200,7 +191,6 @@ export const shortletService = {
       )
     ),
 
-  // -------- Guest wishlist --------
   wishlistIds: () => safeCall(() => authFetch<string[]>(`/shortlets/wishlist/ids`)),
 
   myWishlist: (params: ShortletListParams = {}) =>
@@ -218,7 +208,6 @@ export const shortletService = {
       authFetch<{ saved: boolean }>(`/shortlets/${listingId}/wishlist`, { method: 'DELETE' })
     ),
 
-  // -------- Guest messaging --------
   startConversation: (listingId: string, text: string) =>
     safeCall(() =>
       authFetch<ShortletConversation>(`/shortlets/${listingId}/messages`, {
@@ -243,7 +232,6 @@ export const shortletService = {
   markRead: (conversationId: string) =>
     safeCall(() => authFetch(`/shortlets/messages/${conversationId}/read`, { method: 'POST' })),
 
-  // -------- Host messaging --------
   hostMessages: (params: ShortletListParams = {}) =>
     safeCall(() =>
       authFetch<Paginated<ShortletConversation>>(`/host/shortlets/messages${listQuery(params)}`)
@@ -262,7 +250,6 @@ export const shortletService = {
       authFetch(`/host/shortlets/messages/${conversationId}/read`, { method: 'POST' })
     ),
 
-  // -------- Host payouts --------
   payoutAccount: () =>
     safeCall(() => authFetch<ShortletPayoutAccount | null>('/host/shortlets/payout-account')),
 
@@ -287,7 +274,6 @@ export const shortletService = {
       authFetch<ShortletPayout>('/host/shortlets/payouts/request', { method: 'POST' })
     ),
 
-  // -------- Host --------
   createListing: (input: CreateShortletListingInput) =>
     safeCall(() =>
       authFetch<ShortletListing>('/host/shortlets', { method: 'POST', body: JSON.stringify(input) })
@@ -462,7 +448,6 @@ export const shortletService = {
   recordView: (listingId: string) =>
     safeCall(() => authFetch(`/shortlets/${listingId}/view`, { method: 'POST' })),
 
-  // -------- Disputes --------
   openDispute: (bookingId: string, input: OpenShortletDisputeInput) =>
     safeCall(() =>
       authFetch<ShortletDispute>(`/shortlets/bookings/${bookingId}/dispute`, {
@@ -476,7 +461,6 @@ export const shortletService = {
       authFetch<Paginated<ShortletDispute>>(`/shortlets/disputes${listQuery(params)}`)
     ),
 
-  // -------- Deposit claims --------
   openDepositClaim: (bookingId: string, input: OpenDepositClaimInput) =>
     safeCall(() =>
       authFetch<ShortletDepositClaim>(`/host/shortlets/bookings/${bookingId}/deposit-claim`, {

@@ -61,8 +61,7 @@ export const LandlordStatsCards = ({
       icon: Clock,
       label: 'Reserved units',
       value: reservedUnits,
-      // Off the market but not let: a lease is out for signature or the first
-      // payment is still due. Counting these as rented overstated the tenancy.
+      // Off the market but not let (awaiting signature or first payment), so not counted as rented.
       subtitle: 'Awaiting signature or payment',
       accent: 'orange',
     },
@@ -76,9 +75,7 @@ export const LandlordStatsCards = ({
     {
       icon: Banknote,
       label: 'Annual rent roll',
-      // Rent here is contracted and paid by the year. A "monthly revenue"
-      // figure invited the reader to expect twelve payments and understated
-      // the tenancy twelvefold.
+      // Rent is contracted and paid yearly, so this is an annual figure, not monthly revenue.
       value: moneyVisible ? annualRentRoll : '••••••',
       subtitle: 'Contracted across let units, per year',
       accent: 'green',

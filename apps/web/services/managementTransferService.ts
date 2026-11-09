@@ -1,6 +1,5 @@
 import { authFetch, safeCall, type ApiResponse } from '@/lib/apiHelpers';
 
-/** A disputed or unfinished matter on the property the owner sees before changing manager. */
 export interface TransferOpenItem {
   kind:
     | 'LEGAL_CASE'
@@ -124,7 +123,7 @@ export const managementTransferService = {
         `/management-transfers/preview?propertyId=${encodeURIComponent(propertyId)}`
       )
     ),
-  /** Asks the owner to confirm it's them (handled by authFetch) before scheduling. */
+  /** Needs step-up confirmation (handled by authFetch). */
   request: (input: RequestTransferInput): Promise<ApiResponse<ManagementTransfer>> =>
     safeCall(() =>
       authFetch<ManagementTransfer>('/management-transfers', {

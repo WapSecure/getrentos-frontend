@@ -9,7 +9,6 @@ export type FollowUpStep =
   | 'check_in'
   | 'last_try';
 
-/** One lead due a follow-up today, with the step code chose and a drafted message. */
 export interface FollowUp {
   leadId: string;
   name: string;
@@ -27,7 +26,6 @@ export interface FollowUp {
   messageInEnglish: string | null;
 }
 
-/** GET /realtor/follow-ups */
 export interface FollowUpPlan {
   overview: string;
   followUps: FollowUp[];

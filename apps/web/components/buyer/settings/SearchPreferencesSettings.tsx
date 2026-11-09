@@ -51,7 +51,6 @@ export const SearchPreferencesSettings = () => {
     .split(',')
     .map((l) => l.trim())
     .filter(Boolean);
-  /** Adds a typed area, or the area picked from the suggestions, then clears the box. */
   const addLocation = (name = newLocation) => {
     const area = name.trim();
     if (area.length < 2) return;

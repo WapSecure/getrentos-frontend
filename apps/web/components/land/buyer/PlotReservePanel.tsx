@@ -39,7 +39,7 @@ import { plotLabel } from './landSaleLogic';
 
 type Viewer = 'buyer' | 'member' | 'anonymous';
 
-/** "1 November 2026 at 12:01 am", in Lagos time: a hold ends at a set minute. */
+/** In Lagos time: a hold ends at a set minute. */
 const formatHoldEnd = (iso: string) =>
   new Date(iso).toLocaleString('en-NG', {
     dateStyle: 'long',
@@ -47,12 +47,6 @@ const formatHoldEnd = (iso: string) =>
     timeZone: 'Africa/Lagos',
   });
 
-/**
- * The selected plot and the one thing a visitor can do with it: hold it.
- * Signed-out visitors go to sign-in and come straight back to this plot;
- * a signed-in account without a buyer role is offered one; a buyer reserves
- * in place and is taken on to choose a plan.
- */
 export const PlotReservePanel = ({
   layout,
   plot,
@@ -90,8 +84,6 @@ export const PlotReservePanel = ({
       )
     : undefined;
   const holdByInspection = byInspection && Boolean(openInspection && terms?.subjectToInspection);
-  // A reserved plot may be the viewer's own hold: recognise it and take them
-  // straight on to their purchase instead of describing it as someone else's.
   const myReservations = useQuery({
     queryKey: buyerLandKeys.reservations,
     queryFn: () => unwrap(landBuyerService.listReservations()),

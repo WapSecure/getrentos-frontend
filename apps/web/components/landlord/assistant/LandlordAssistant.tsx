@@ -11,7 +11,6 @@ const STARTERS = [
   'How many units are vacant?',
 ];
 
-/** Ask Sureground for landlords: arrears, leases, repairs, applications and occupancy. */
 export const LandlordAssistant = () => (
   <AssistantChat
     ask={(question, history, language) =>

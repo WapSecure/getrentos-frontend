@@ -36,11 +36,7 @@ const statusFilters: { value: 'all' | DepositStatus; label: string }[] = [
 
 const PAGE_SIZE = 12;
 
-/**
- * The deposits screen. Role-agnostic: it talks to the /deposits API, which any
- * property-controller (landlord, owner, or manager) may use, so the landlord and
- * owner portals both render this.
- */
+// Role-agnostic: /deposits serves any property controller, so the landlord and owner portals both render this.
 export function DepositsView() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
@@ -60,7 +56,6 @@ export function DepositsView() {
   const deposits = data?.items ?? [];
   const total = data?.total ?? 0;
 
-  // Active leases feed the record-deposit picker.
   const { data: leasesData } = useQuery({
     queryKey: [...landlordKeys.leases('signed'), { forDeposits: true }],
     queryFn: () => unwrap(landlordService.listLeases({ status: 'signed', pageSize: 100 })),

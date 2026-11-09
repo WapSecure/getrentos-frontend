@@ -7,11 +7,6 @@ import { trustService } from '@/services/trustService';
 import { unwrap } from '@/lib/apiHelpers';
 import { trustKeys } from '@/lib/queryKeys';
 
-/**
- * Plain-language narrative of the caller's own trust score (GET /trust-score/
- * explanation). Role-agnostic and self-only, so every role reuses it. It fetches
- * on its own and hides itself on error, never blocking the page it sits on.
- */
 export const TrustExplanationCard = () => {
   const query = useQuery({
     queryKey: trustKeys.explanation,
@@ -35,9 +30,7 @@ export const TrustExplanationCard = () => {
   const data = query.data;
   if (query.isError || !data) return null;
 
-  // Defensive: the explanation can come from the AI path, whose list fields are
-  // not guaranteed to arrive as arrays — never let a malformed payload crash the
-  // page this card sits on.
+  // The AI path's list fields may not arrive as arrays; never let a malformed payload crash the page.
   const strengths = Array.isArray(data.strengths) ? data.strengths : [];
   const improvements = Array.isArray(data.improvements) ? data.improvements : [];
 

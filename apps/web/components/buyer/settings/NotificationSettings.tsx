@@ -111,7 +111,6 @@ export const NotificationSettings = () => {
   );
 };
 
-/** Shown where a category has no email: these updates are in-app and push only. */
 const NoEmail = () => (
   <span
     className="text-xs text-muted-foreground"

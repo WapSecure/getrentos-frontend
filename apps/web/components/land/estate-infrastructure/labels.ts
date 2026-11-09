@@ -42,7 +42,7 @@ export const CHANGE_KIND_OPTIONS = (Object.keys(CHANGE_KIND_LABELS) as EstateCha
 
 type BadgeVariant = 'success' | 'warning' | 'danger' | 'neutral' | 'info';
 
-/** One colour per state; overdue and withdrawn win over the stored status. */
+/** Overdue and withdrawn win over the stored status. */
 export const commitmentBadge = (
   commitment: Pick<EstateCommitment, 'status' | 'overdue' | 'withdrawn'>
 ): { label: string; variant: BadgeVariant } => {

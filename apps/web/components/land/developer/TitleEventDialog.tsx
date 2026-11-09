@@ -151,7 +151,6 @@ const TitleEventForm = ({
   );
 };
 
-/** Records one link in the parcel's chain of title, to be verified by compliance. */
 export const TitleEventDialog = ({ open, onOpenChange, ...rest }: TitleEventDialogProps) => (
   <Dialog open={open} onOpenChange={onOpenChange}>
     <DialogContent className="max-w-2xl">

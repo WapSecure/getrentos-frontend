@@ -17,21 +17,16 @@ export interface MapMarker {
   priceLabel?: string;
   imageUrl?: string;
   href?: string;
-  /**
-   * The location is only approximate (an unverified property): draw a shaded
-   * area that is sure to contain it, not a pin on a door.
-   */
+  /** Approximate location: draw an area sure to contain it, not a pin on a door. */
   approximate?: boolean;
 }
 
 interface PropertyMapProps {
-  /** Optional explicit center; falls back to the first marker, then Lagos. */
   center?: { latitude: number; longitude: number };
   markers?: MapMarker[];
   zoom?: number;
   height?: number | string;
   className?: string;
-  /** Marker id whose info window should be open initially. */
   openMarkerId?: string;
 }
 
@@ -45,8 +40,7 @@ function escapeHtml(text: string): string {
 
 const LAGOS = { lat: 6.5244, lng: 3.3792 };
 
-/** Custom styled pin (avoids Leaflet's default icon asset bundling issue). */
-/** Abbreviate a formatted price label (e.g. "₦8,500,000/yr") for a map pin → "₦8.5M". */
+/** Avoids Leaflet's default icon asset bundling issue. */
 function abbreviatePriceLabel(priceLabel?: string): string {
   if (!priceLabel) return '₦';
   const digits = priceLabel.split('/')[0].replace(/[^0-9]/g, '');
@@ -65,10 +59,6 @@ function pinIconHtml(priceLabel?: string): string {
   )}</div>`;
 }
 
-/**
- * Leaflet map on Mapbox tiles when a token is configured, OpenStreetMap
- * otherwise (see lib/mapTiles).
- */
 export const PropertyMap = ({
   center,
   markers = [],
@@ -84,8 +74,7 @@ export const PropertyMap = ({
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Initialise the map exactly once (Leaflet touches `window`, so we load it
-  // dynamically on the client).
+  // Leaflet touches `window`, so it is loaded on the client, once.
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -114,7 +103,6 @@ export const PropertyMap = ({
     };
   }, []);
 
-  // Render markers + keep the view in sync when props change.
   useEffect(() => {
     if (!ready || !mapRef.current || !leafletRef.current) return;
     const L = leafletRef.current;
@@ -129,7 +117,6 @@ export const PropertyMap = ({
 
     map.setView(mapCenter, withCoords.length > 0 || center ? zoom : 11);
 
-    // Clear previous markers.
     markersRef.current.forEach((marker: any) => marker.remove());
     markersRef.current = [];
 

@@ -10,11 +10,7 @@ import { ROUTES } from '@/lib/constants/auth';
 
 const rentStatusConfig = paymentStatusBadges;
 
-/**
- * The chip sits beside the tenant's name, where a bare "Pending" reads as a
- * status of the person rather than of their rent. The variant comes from the one
- * payment vocabulary — only the wording is scoped to this card.
- */
+// A bare "Pending" beside a name reads as the person's status, so the wording is scoped to rent.
 const RENT_LABEL: Record<RentPaymentStatus, string> = {
   paid: 'Rent paid',
   pending: 'Rent due',
@@ -27,9 +23,7 @@ interface TenantCardProps {
   delay?: number;
 }
 
-// A lease can start in the future, so "Moved in" would be wrong for a date that
-// hasn't arrived yet. Pick the tense from the date. Kept at module scope so the
-// time read stays out of the component's render body.
+// A lease can start in the future, so the tense comes from the date; module scope keeps the time read out of render.
 const moveInTense = (dateString?: string | null): string => {
   if (!dateString) return 'Moved in';
   const date = new Date(dateString);

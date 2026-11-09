@@ -21,11 +21,9 @@ import { useLandAvailability } from '@/hooks/useLandAvailability';
 interface NavLink {
   label: string;
   href: string;
-  /** One line under the label in the Marketplaces menu. */
   hint?: string;
 }
 
-/** The places to find a property, grouped so the bar stays on one line. */
 const MARKETPLACE_LINKS: NavLink[] = [
   { label: 'Rent', href: '/rent', hint: 'Homes to rent' },
   { label: 'Buy', href: '/buy', hint: 'Homes for sale' },
@@ -39,8 +37,7 @@ const MARKETPLACE_LINKS: NavLink[] = [
   },
 ];
 
-// The two in-page anchors are written as `/#…` so they work from every page that
-// shows this bar, not only from the landing page.
+// Written as `/#…` so the anchors work from every page showing this bar.
 const PAGE_LINKS: NavLink[] = [
   { label: 'Home management', href: ROUTES.HOME_MANAGEMENT },
   { label: 'Roles', href: '/#roles' },
@@ -48,7 +45,6 @@ const PAGE_LINKS: NavLink[] = [
   { label: 'Pricing', href: ROUTES.PRICING },
 ];
 
-/** Every item is a single, unbreakable line; nothing is allowed to shrink or wrap. */
 const linkBase =
   'inline-flex shrink-0 items-center whitespace-nowrap rounded-lg px-1 py-1 text-sm font-medium transition-colors';
 const linkIdle = 'text-muted-foreground hover:text-foreground';
@@ -58,7 +54,6 @@ const isCurrent = (pathname: string, href: string) => !href.includes('#') && pat
 
 export const Navigation = () => {
   const land = useLandAvailability();
-  // Land drops out of the menus while its marketplace is closed (LAND_MODE).
   const marketplaceLinks = land.marketplace
     ? MARKETPLACE_LINKS
     : MARKETPLACE_LINKS.filter((link) => link.href !== ROUTES.LAND_MARKETPLACE);
@@ -67,9 +62,7 @@ export const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const isSignedIn = useAuthStore((s) => s.isAuthenticated);
-  // Computed client-side only (localStorage is unavailable on the server).
-  // The Dashboard link only renders once the reactive auth store flips to
-  // signed-in: after hydration: so there is no SSR/client mismatch.
+  // The Dashboard link renders only once the auth store flips to signed-in after hydration, so SSR and client agree.
   const [dashboardHref] = useState<string>(() =>
     typeof window === 'undefined' ? ROUTES.DASHBOARD : getDashboardRoute(getUserRole() || 'renter')
   );
@@ -80,7 +73,6 @@ export const Navigation = () => {
     };
     window.addEventListener('scroll', handleScroll);
 
-    // Sync auth state from storage into the reactive store on first paint.
     useAuthStore.getState().init();
 
     return () => window.removeEventListener('scroll', handleScroll);
@@ -110,7 +102,6 @@ export const Navigation = () => {
               <Logo />
             </div>
 
-            {/* Links: one row, centred between the logo and the account actions. */}
             <div className="hidden min-w-0 flex-1 items-center justify-center gap-5 lg:flex xl:gap-7">
               <DropdownMenu>
                 <DropdownMenuTrigger
@@ -153,7 +144,6 @@ export const Navigation = () => {
               ))}
             </div>
 
-            {/* Account actions, always together on the right. */}
             <div className="hidden shrink-0 items-center gap-3 lg:flex">
               {!isSignedIn ? (
                 <>

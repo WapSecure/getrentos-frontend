@@ -13,16 +13,10 @@ interface RenewalAdvicePanelProps {
   isFetching: boolean;
   language: ReplyLanguage;
   onLanguageChange: (language: ReplyLanguage) => void;
-  /** Put the suggested rent, end date and note into the offer. */
   onUse: (advice: RenewalAdvice) => void;
 }
 
-/**
- * "Renew or re-let?": the tenant's record on this lease, the market, the
- * notice deadline and what each path brings in over the first year, all
- * worked out by Sureground. It never decides for the landlord. Hidden if it
- * fails: the offer form below still works on its own.
- */
+// Never decides for the landlord. Hidden if it fails: the offer form below still works on its own.
 export function RenewalAdvicePanel({
   advice,
   isLoading,

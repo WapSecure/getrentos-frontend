@@ -7,13 +7,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import type { BillingCycle } from '@/services/subscriptionService';
 import { billingKeys, subscriptionKeys } from '@/lib/queryKeys';
 
-/**
- * Starts a Pro checkout and, when the gateway hands the customer back, applies
- * the result.
- *
- * The price is never sent from here — the backend reads it from its own
- * catalog, so the client cannot influence what is charged.
- */
+// The price is never sent from here: the backend reads its own catalog.
 export function useProCheckout() {
   const queryClient = useQueryClient();
   const [upgrading, setUpgrading] = useState(false);
@@ -35,7 +29,6 @@ export function useProCheckout() {
         const session = await unwrap(billingService.startCheckout(cycle));
 
         if (session.authorizationUrl) {
-          // Hand off to the gateway; it returns the customer to /billing/return.
           window.location.href = session.authorizationUrl;
           return;
         }
@@ -44,7 +37,7 @@ export function useProCheckout() {
           throw new Error('Checkout is unavailable. No payment gateway session was created.');
         }
 
-        // No gateway configured (dev): confirm the simulated payment and refresh.
+        // No gateway configured (dev): confirm the simulated payment.
         await unwrap(billingService.verifyCheckout(session.reference));
         await refresh();
       } catch (err) {

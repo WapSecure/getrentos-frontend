@@ -1,7 +1,7 @@
 import { authFetch, safeCall, toQuery } from '@/lib/apiHelpers';
 import type { LandDossier } from '@/types/landDossier';
 
-/** Buyer decision dossiers (signed-in; every view is recorded). */
+/** Every view is recorded. */
 export const landDossierService = {
   forListing: (listingId: string) =>
     safeCall(() =>

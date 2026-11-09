@@ -3,10 +3,8 @@ import type { LandDiligenceCheckStatus, LandTitleType } from '@/types/land';
 import type { LandDocumentType } from '@/types/landDocument';
 
 /**
- * The outside professional's desk (`/land/reviews`), mirroring the backend's
- * `land-reviewer.dto.ts`. A seat, not a role, grants access: any signed-in
- * account can call the endpoints, and the API refuses anything outside the
- * caller's own seat.
+ * Mirrors the backend's `land-reviewer.dto.ts`. A seat, not a role, grants access; the API refuses
+ * anything outside the caller's seat.
  */
 
 export type LandReviewerRole = 'SURVEYOR' | 'LAWYER' | 'VALUER' | 'INSPECTOR';
@@ -18,7 +16,6 @@ export interface LandReviewCheck {
   required: boolean;
   requiresDocument: boolean;
   status: LandDiligenceCheckStatus;
-  /** Only the reviewer's own note. */
   note: string | null;
   decidedByMe: boolean;
   decidedAt: string | null;
@@ -61,7 +58,6 @@ export interface LandReviewParcel {
   tenure: string | null;
 }
 
-/** One document on the property; the file part is the shared evidence shape. */
 export interface LandReviewDocument {
   id: string;
   kind: 'STORED' | 'EXTERNAL';
@@ -75,17 +71,16 @@ export interface LandReviewDocument {
   uploadedAt: string;
   urlExpiresInSeconds?: number | null;
   documentType: string;
-  /** Its citations on this seat's checks; one document can back several. */
+  /** One document can back several checks. */
   links: LandReviewDocumentLink[];
   /** @deprecated The first of `links`. */
   link?: LandReviewDocumentLink | null;
-  /** Also cited on a check outside your seat. You can still cite it on yours. */
+  /** Also cited on a check outside your seat. */
   citedOnOtherCheck?: boolean;
 }
 
 export interface LandReviewDocumentLink {
   linkedByName: string;
-  /** You made this citation, so you may remove it. */
   linkedByMe?: boolean;
   linkedAt: string;
   checklistKey?: string | null;
@@ -94,12 +89,12 @@ export interface LandReviewDocumentLink {
 
 export interface LandReviewCase extends MyLandReviewSummary {
   seatStatus: LandReviewerSeatStatus;
-  /** NONE once you declared no conflict; null until you declare (work is locked until then). */
+  /** NONE once no conflict was declared; null until declared (work is locked until then). */
   conflictDeclaration: 'NONE' | 'DECLARED' | null;
   /** Send back as expectedVersion with a decision. */
   caseVersion: number;
   parcel: LandReviewParcel;
-  /** Surveyor seats only: every outline the parcel has had, newest first. */
+  /** Surveyor seats only. Newest first. */
   boundaryVersions?: LandBoundaryVersion[];
   /** Only for seats verifying ownership against the registry. */
   ownerLegalName: string | null;
@@ -113,7 +108,6 @@ export interface DecideLandReviewCheckInput {
   expectedVersion?: number;
 }
 
-/** The reviewer's own evidence, optionally cited on one of their checks straight away. */
 export interface LandReviewUploadInput {
   documentType: LandDocumentType;
   file: File;
@@ -134,6 +128,6 @@ export const LAND_REVIEWER_ROLE_LABELS: Record<LandReviewerRole, string> = {
   INSPECTOR: 'Inspector',
 };
 
-/** The backend accepts reports of 20-20 000 characters. */
+/** The backend accepts 20-20 000 characters. */
 export const LAND_REVIEW_REPORT_MIN = 20;
 export const LAND_REVIEW_REPORT_MAX = 20_000;

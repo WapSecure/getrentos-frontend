@@ -22,19 +22,7 @@ import { ApiError, unwrap, unwrapOptional } from '@/lib/apiHelpers';
 import { estateResidentKeys } from '@/lib/queryKeys';
 import type { ExpectedDelivery, IssuedExpectedDelivery } from '@/types/estate';
 
-/**
- * Parcels this household says are coming, and the code that proves it.
- *
- * The reason this exists, in the household's own terms: without a code, a parcel
- * is released on a courier's word alone, and the resident whose name was used has
- * no way to show it was never handed to them. So the panel leads with the action
- * that prevents that rather than with what has already arrived.
- *
- * Every label shown here comes from the server. The difference between "expired"
- * and "cancelled": two genuinely different things that happened to this
- * household: is decided once, in `delivery.util.ts`, so this screen cannot drift
- * into saying something the guard's own refusal would contradict.
- */
+// Every label comes from the server (delivery.util.ts), so this screen can't contradict the guard's refusal.
 export const ExpectedDeliveriesPanel = () => {
   const queryClient = useQueryClient();
   const [isDeclareOpen, setIsDeclareOpen] = useState(false);
@@ -46,8 +34,7 @@ export const ExpectedDeliveriesPanel = () => {
 
   const { data, isLoading } = useQuery({
     queryKey: estateResidentKeys.expectedDeliveries,
-    // An empty list is the ordinary case, not a failure. `unwrap` would turn the
-    // "nothing expected yet" screen into an error state.
+    // An empty list is the ordinary case; `unwrap` would turn it into an error state.
     queryFn: () => unwrapOptional(estateResidentService.listMyExpectedDeliveries(), []),
   });
   const expected = data ?? [];
@@ -66,8 +53,7 @@ export const ExpectedDeliveriesPanel = () => {
         })
       ),
     onSuccess: (row) => {
-      // Presented immediately and deliberately: this is the only moment the code
-      // exists outside the household's own app.
+      // Shown at once: this is the only moment the code exists outside the household's app.
       setIssued(row);
       setError(null);
       invalidate();
@@ -208,8 +194,6 @@ export const ExpectedDeliveriesPanel = () => {
                 </Button>
               </div>
 
-              {/* Said plainly, because a resident who assumes they can look it
-                  up later will not save it, and then cannot get it back. */}
               <p className="mt-3 text-xs text-muted-foreground">
                 This is the only time the code is shown. If you lose it, withdraw this parcel and
                 get a new one.
@@ -279,11 +263,6 @@ export const ExpectedDeliveriesPanel = () => {
   );
 };
 
-/**
- * A withdrawal and an expiry carry the same weight on purpose: neither is a
- * success and neither is something the household has to act on. They stay
- * textually distinct inside the label, which is where it matters.
- */
 const statusVariantFor = (
   status: ExpectedDelivery['status']
 ): 'success' | 'warning' | 'neutral' => {

@@ -52,8 +52,7 @@ export const IssueVisitorPassModal = ({
   const [purpose, setPurpose] = useState('');
   const [expiresAt, setExpiresAt] = useState('');
 
-  // The server query is already constrained to active households. Keep the
-  // guard here to prevent a stale cached record from being selected.
+  // Kept so a stale cached household can't be selected; the server already filters to active ones.
   const activeHouseholds = households.filter((h) => h.status === 'active');
 
   const handleClose = () => {

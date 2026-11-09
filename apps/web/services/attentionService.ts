@@ -13,7 +13,7 @@ const PATH: Record<Exclude<AttentionPersona, 'estate'>, string> = {
 };
 
 export const attentionService = {
-  /** "Needs your attention", built by rules from the person's own data. `estateId` is required for an estate. */
+  /** `estateId` is required for an estate. */
   get: (persona: AttentionPersona, estateId?: string) =>
     safeCall<{ items: AttentionItem[] }>(() =>
       authFetch(persona === 'estate' ? `/estate/${estateId}/attention` : PATH[persona])

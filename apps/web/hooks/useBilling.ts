@@ -6,7 +6,6 @@ import { billingService } from '@/services/billingService';
 import { unwrap } from '@/lib/apiHelpers';
 import { billingKeys, subscriptionKeys } from '@/lib/queryKeys';
 
-/** The caller's billing lifecycle state (status, trial/period end, cancellation). */
 export function useBilling() {
   const { data, isLoading } = useQuery({
     queryKey: billingKeys.mine,
@@ -17,12 +16,7 @@ export function useBilling() {
   return { billing: data, isLoading };
 }
 
-/**
- * The caller's payment history.
- *
- * Not persona-scoped and not gated on Pro: a customer who cancelled needs their
- * receipts too, and that is when they ask for them.
- */
+// Not gated on Pro: a customer who cancelled still needs their receipts.
 export function useInvoices(page = 1) {
   const { data, isLoading } = useQuery({
     queryKey: billingKeys.invoices(page),
@@ -33,10 +27,7 @@ export function useInvoices(page = 1) {
   return { invoices: data, isLoading };
 }
 
-/**
- * Cancel / resume. Both refresh the billing state *and* the tier query, since
- * plan gates elsewhere in the app read the tier.
- */
+// Refreshes the tier query too: plan gates elsewhere read it.
 export function useManageSubscription() {
   const queryClient = useQueryClient();
 
@@ -60,13 +51,7 @@ export function useManageSubscription() {
   return { cancel, reactivate, pending: cancel.isPending || reactivate.isPending };
 }
 
-/**
- * Opens the provider's hosted card-update page.
- *
- * Redirecting out is deliberate: Paystack tokenizes the replacement card and
- * refunds the verification charge it takes, which we are better off not
- * reimplementing — and it keeps card details away from us entirely.
- */
+// Paystack's hosted page tokenizes the card and refunds its check charge, and keeps card details away from us.
 export function useCardUpdateLink() {
   const [opening, setOpening] = useState(false);
   const [error, setError] = useState<string | null>(null);

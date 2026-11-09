@@ -1,7 +1,4 @@
-/**
- * Ambient type declarations for `jsqr` (the package ships no TypeScript types).
- * Based on the public jsQR API surface used by the gateman QR verify flow.
- */
+/** Ambient types for `jsqr` (the package ships none). */
 declare module 'jsqr' {
   export interface QRCode {
     data: string;

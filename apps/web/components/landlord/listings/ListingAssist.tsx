@@ -9,10 +9,6 @@ import { landlordKeys } from '@/lib/queryKeys';
 import { landlordService } from '@/services/landlordService';
 import type { ListingDraft } from '@/types/listingDraft';
 
-/**
- * "Draft it for me": fills the title and amenities from the unit's property and
- * photos. Nothing is saved; the landlord edits and publishes as usual.
- */
 export function DraftAssist({
   unitId,
   onApply,
@@ -89,7 +85,6 @@ export function DraftAssist({
   );
 }
 
-/** "Before you publish": the self-check, re-run a moment after the landlord stops typing. */
 export function SelfCheckPanel({
   unitId,
   listingTitle,

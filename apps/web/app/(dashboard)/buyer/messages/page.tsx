@@ -103,11 +103,8 @@ export default function BuyerMessagesPage() {
     if (conv && conv.unreadCount > 0) markReadMutation.mutate(id);
   };
 
-  // Opened from a message notification.
   useOpenConversationFromUrl(conversationsData !== undefined, handleSelect);
 
-  // "Ask a question" on a listing links here as ?property=<listingId>: open the
-  // thread with its seller, then hand over to ?conversation= to show it.
   const router = useRouter();
   const pathname = usePathname();
   const askingAbout = useSearchParams().get('property');

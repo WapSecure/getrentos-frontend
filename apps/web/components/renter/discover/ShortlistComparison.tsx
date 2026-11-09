@@ -14,11 +14,7 @@ const CHECK: Record<ComparedHome['listingCheck'], { label: string; variant: Badg
   be_cautious: { label: 'Be cautious', variant: 'danger' },
 };
 
-/**
- * The trade-offs between the homes being compared: rent and where it sits,
- * against similar homes, cash to move in and each home's listing check. It
- * never picks for the renter. Hidden if it fails: the table above still works.
- */
+// Never picks for the renter. Hidden if it fails: the table above still works.
 export function ShortlistComparison({ listingIds }: { listingIds: string[] }) {
   const { data, isLoading } = useQuery({
     queryKey: renterKeys.shortlistComparison(listingIds),

@@ -24,7 +24,6 @@ interface DiscoverPropertyGridProps {
     propertyType: string;
     verifiedOnly: boolean;
     search?: string;
-    /** Estate public slug: set when arriving from an estate microsite. */
     estate?: string;
   };
   savedProperties: string[];
@@ -57,7 +56,6 @@ export const DiscoverPropertyGrid = ({
 
   const filtersKey = JSON.stringify(listingsFilters);
   useEffect(() => {
-    // Reset to page 1 whenever the filter values change.
     const timer = setTimeout(() => setPage(1), 0);
     return () => clearTimeout(timer);
   }, [filtersKey]);

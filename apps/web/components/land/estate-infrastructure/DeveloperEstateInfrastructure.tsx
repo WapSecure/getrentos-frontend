@@ -25,7 +25,6 @@ type Open =
   | { kind: 'change'; commitment: EstateCommitment }
   | null;
 
-/** The developer's estate promises: add them, report progress, ask buyers about changes. */
 export const DeveloperEstateInfrastructure = ({
   propertyId,
   notify,

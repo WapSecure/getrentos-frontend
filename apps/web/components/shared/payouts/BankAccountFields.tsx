@@ -12,7 +12,6 @@ import { getBanks, resolveBankAccount } from '@/services/paymentStatusService';
 
 const OTHER_BANK = 'other';
 
-/** A Nigerian account number is 10 digits (NUBAN). */
 export const accountNumberOk = (n: string) => /^\d{10}$/.test(n);
 const bankCodeOk = (c: string) => /^\d{3,9}$/.test(c);
 
@@ -21,22 +20,12 @@ interface BankAccountFieldsProps {
   onBankCode: (code: string) => void;
   accountNumber: string;
   onAccountNumber: (n: string) => void;
-  /** Prefix for the controls' ids, unique on the page. */
   idPrefix: string;
-  /** Told the account holder's name once it is found, and null while it is not. */
   onAccountName?: (name: string | null) => void;
-  /**
-   * Told where the name check stands. Callers keep save disabled until
-   * `lookupAllowsSave` (UX-28): the name is found, or honestly could not be checked.
-   */
+  /** Callers keep save disabled until `lookupAllowsSave`: the name is found, or honestly could not be checked. */
   onLookup?: (lookup: AccountLookup) => void;
 }
 
-/**
- * Bank and account number, the way every web payout form asks (audit D10): pick
- * the bank by name, type the 10 digits, and the name on the account appears
- * before saving. "Other bank" still takes a code for a bank not listed.
- */
 export function BankAccountFields({
   bankCode,
   onBankCode,
@@ -50,7 +39,6 @@ export function BankAccountFields({
     queryKey: paymentKeys.banks,
     queryFn: () => unwrap(getBanks()),
     staleTime: 60 * 60_000,
-    // Without the list the form still works from the built-in banks.
     throwOnError: false,
   });
   const banks = bankList?.banks ?? NIGERIAN_BANKS;
@@ -63,7 +51,6 @@ export function BankAccountFields({
   );
 
   const [other, setOther] = useState(false);
-  // A saved code that is not in the list opens "Other bank" with it filled in.
   const listed = banks.some((b) => b.code === bankCode);
   const showOther = other || (!!bankCode && !listed && !!bankList);
 

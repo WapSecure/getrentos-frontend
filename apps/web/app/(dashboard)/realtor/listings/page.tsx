@@ -41,7 +41,6 @@ export default function RealtorListingsPage() {
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<StatusFilter>('all');
-  // Reopen the listing form when the realtor comes back from signing in with a draft.
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(() =>
     hasSessionDraft(REALTOR_CREATE_LISTING_DRAFT_KEY)
   );
@@ -92,7 +91,6 @@ export default function RealtorListingsPage() {
       setIsCreateModalOpen(false);
     },
     onError: (error) => {
-      // Verification/tier gates surface as an inline upsell inside the modal, not a toast.
       if (error instanceof VerificationRequiredError) return;
       toast.error(error.message || 'Unable to create this listing. Please try again.');
     },

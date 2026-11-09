@@ -42,9 +42,7 @@ const formatDate = (value: string) =>
 export default function ResidentDuesPage() {
   const queryClient = useQueryClient();
   const [payError, setPayError] = useState<{ dueId: string; message: string } | null>(null);
-  // Which company takes the payment (Paystack or Monnify): one choice for every due here.
   const providers = usePaymentProviders();
-  // The due open in the pay dialog, and why its chosen company could not take it.
   const [payingDueId, setPayingDueId] = useState<string | null>(null);
   const [providerError, setProviderError] = useState<string | null>(null);
 
@@ -60,8 +58,6 @@ export default function ResidentDuesPage() {
     onMutate: () => setProviderError(null),
     onSuccess: (updated) => {
       setPayError(null);
-      // A real gateway checkout was started: send the resident to Paystack to complete it.
-      // The webhook confirms payment server-side once they finish there.
       if (updated.authorizationUrl) {
         window.location.href = updated.authorizationUrl;
         return;
@@ -70,7 +66,6 @@ export default function ResidentDuesPage() {
       queryClient.invalidateQueries({ queryKey: estateResidentKeys.dues() });
     },
     onError: (err, { dueId, provider }) => {
-      // That company cannot take it right now: say so in the dialog, with the other one picked.
       const unavailable = providers.recover(err, provider);
       if (unavailable) {
         setProviderError(unavailable);
@@ -106,8 +101,6 @@ export default function ResidentDuesPage() {
           <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
             {dues.map((due) => {
               const isPaying = payMutation.isPending && payMutation.variables?.dueId === due.id;
-              // A checkout that was opened and left can be picked up again: the API checks
-              // whether the earlier one went through before starting another.
               const canPay =
                 due.status === 'pending' || due.status === 'overdue' || due.status === 'processing';
               return (

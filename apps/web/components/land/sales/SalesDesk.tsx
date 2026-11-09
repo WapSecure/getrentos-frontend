@@ -37,11 +37,9 @@ const PAGE_SIZE = 20;
 const ALL = 'all';
 
 interface SalesDeskProps {
-  /** Opens the desk filtered to this parcel's estate (from the property navigation). */
   initialPropertyId?: string;
 }
 
-/** The chosen estate at a glance: whose it is and what is left to sell. */
 const EstateSummary = ({ layout }: { layout: OwnerLandLayoutSummary }) => {
   const { plots } = layout;
   const figures = [
@@ -151,7 +149,6 @@ const columns: Column<LandPurchaseSummary>[] = [
   },
 ];
 
-/** Plot purchases across the owner's estates, with collections at the top. */
 export const SalesDesk = ({ initialPropertyId }: SalesDeskProps) => {
   const router = useRouter();
   const layouts = useOwnerLayouts();
@@ -162,7 +159,6 @@ export const SalesDesk = ({ initialPropertyId }: SalesDeskProps) => {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
 
-  // Preselect the estate of the parcel the owner came from, once layouts load.
   const scopedLayout = useMemo(
     () =>
       initialPropertyId

@@ -12,7 +12,6 @@ interface Filters {
   bathrooms: string;
   propertyType: string;
   verifiedOnly: boolean;
-  /** Estate public slug carried through from the URL, not editable in the panel. */
   estate?: string;
 }
 
@@ -20,8 +19,7 @@ interface DiscoverFiltersProps {
   onApplyFilters: (filters: Filters) => void;
 }
 
-// The backend's own property types: anything else ("House", "Townhouse") is not a
-// type a listing can have, so the search would fail. Studio flats are apartments.
+// Only the backend's own property types: any other value fails the search. Studio flats are apartments.
 const propertyTypes = [
   { value: 'APARTMENT', label: 'Apartment' },
   { value: 'DUPLEX', label: 'Duplex' },
@@ -105,7 +103,6 @@ export const DiscoverFilters = ({ onApplyFilters }: DiscoverFiltersProps) => {
       {isExpanded && (
         <div id="property-discovery-filters" className="border-t border-border p-4">
           <div className="mb-4 space-y-3">
-            {/* Location */}
             <Field label="Location">
               <Input
                 type="text"
@@ -115,7 +112,6 @@ export const DiscoverFilters = ({ onApplyFilters }: DiscoverFiltersProps) => {
               />
             </Field>
 
-            {/* Price Range: Min and Max side by side, full card width */}
             <div className="grid grid-cols-2 gap-2">
               <Field label="Min rent / year">
                 <CurrencyInput
@@ -135,7 +131,6 @@ export const DiscoverFilters = ({ onApplyFilters }: DiscoverFiltersProps) => {
               </Field>
             </div>
 
-            {/* Bedrooms + Bathrooms: compact pair */}
             <div className="grid grid-cols-2 gap-3">
               <Field label="Bedrooms">
                 <Select
@@ -155,7 +150,6 @@ export const DiscoverFilters = ({ onApplyFilters }: DiscoverFiltersProps) => {
               </Field>
             </div>
 
-            {/* Property Type */}
             <Field label="Property type">
               <Select
                 value={filters.propertyType}
@@ -165,7 +159,6 @@ export const DiscoverFilters = ({ onApplyFilters }: DiscoverFiltersProps) => {
               />
             </Field>
 
-            {/* Verified Only Toggle */}
             <Checkbox
               className="pt-1"
               checked={filters.verifiedOnly}

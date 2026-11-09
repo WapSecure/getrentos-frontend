@@ -15,7 +15,6 @@ import { LandDocumentPicker } from '../documents/LandDocumentPicker';
 
 interface DeliverMilestoneDialogProps {
   milestone: LandMilestone | null;
-  /** The land sold; its documents can be attached as evidence. Unknown: no picker. */
   propertyId?: string | null;
   onOpenChange: (open: boolean) => void;
   isSaving: boolean;
@@ -83,7 +82,6 @@ const DeliverForm = ({
   );
 };
 
-/** Marks a conveyance step delivered, with an optional note and evidence document. */
 export const DeliverMilestoneDialog = ({
   milestone,
   propertyId,

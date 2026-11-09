@@ -69,7 +69,6 @@ export default function LandlordOffersPage() {
   const offers: LandlordOffer[] = data?.items ?? [];
   const total = data?.total ?? 0;
 
-  // Negotiation thread for the currently-open offer, fetched from the backend.
   const { data: thread = [] } = useQuery({
     queryKey: landlordKeys.offerThread(activeOfferId ?? ''),
     queryFn: () => unwrap(landlordService.getOfferThread(activeOfferId as string)),
@@ -167,7 +166,7 @@ export default function LandlordOffersPage() {
 
       <OfferComparisonPanel />
 
-      {/* Accepting an offer opens an escrow/payout obligation: financially verified (tier 3) landlords only. */}
+      {/* Accepting opens an escrow/payout obligation: tier 3 only. */}
       {(acceptMutation.error || rejectMutation.error || counterMutation.error) && (
         <div className="mb-6">
           <VerificationRequiredNotice

@@ -53,20 +53,13 @@ export function ShortletPayoutsDialog({
   trustProfileHref,
 }: {
   onClose: () => void;
-  /** Where the 'Verify now' upsell link goes (the persona's Verification Center). */
   verificationHref: string;
-  /**
-   * Where the "something else is holding your tier" upsell goes (the persona's
-   * trust profile). Omitted for personas that have no profile page, in which
-   * case the notice falls back to `verificationHref`.
-   */
   trustProfileHref?: string;
 }) {
   const queryClient = useQueryClient();
   const [bankCode, setBankCode] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
   const [lookup, setLookup] = useState<AccountLookup>(INCOMPLETE_ACCOUNT_LOOKUP);
-  // Changing the saved account opens the same form as setting one up.
   const [editingAccount, setEditingAccount] = useState(false);
   // Money moves only after the amount and the account it goes to are confirmed.
   const [confirmingWithdraw, setConfirmingWithdraw] = useState(false);
@@ -78,8 +71,7 @@ export function ShortletPayoutsDialog({
   });
   const { data: account } = useQuery({
     queryKey: ['shortlets', 'host', 'payout-account'],
-    // No account yet comes back as 200 with no body, and an undefined query
-    // result makes react-query throw "Query data cannot be undefined".
+    // No account yet comes back as 200 with no body, and an undefined result makes react-query throw.
     queryFn: () => unwrapOptional(shortletService.payoutAccount(), null),
   });
   const { data: payouts } = useQuery({
@@ -145,11 +137,7 @@ export function ShortletPayoutsDialog({
               verificationHref={verificationHref}
             />
           )}
-          {/* The same requirement, shown before the host tries: the balance below is
-              real money they cannot withdraw yet, so say so up front. When the tier
-              is only held back by something else: an open dispute, a review case:
-              the summary says which, because sending an already-verified host to get
-              verified again is a dead end. */}
+          {/* Shown before the host tries; when the tier is held back by something else (a dispute, a review) the summary says which, since re-verifying would be a dead end. */}
           {!withdraw.error && summary && !summary.canWithdraw && (
             <VerificationRequiredNotice
               error={{
@@ -163,7 +151,6 @@ export function ShortletPayoutsDialog({
               scoreHref={trustProfileHref}
             />
           )}
-          {/* Balance */}
           <div className="flex items-center justify-between rounded-lg border border-border bg-secondary/40 p-4">
             <div className="flex items-center gap-2">
               <Wallet className="h-5 w-5 text-muted-foreground" />
@@ -190,7 +177,6 @@ export function ShortletPayoutsDialog({
             </Button>
           </div>
 
-          {/* Money that is earned but not withdrawable yet, with the reason for each part. */}
           {summary &&
             (summary.upcoming > 0 ||
               summary.frozen > 0 ||
@@ -253,7 +239,6 @@ export function ShortletPayoutsDialog({
             </p>
           )}
 
-          {/* Payout account */}
           {account && !editingAccount ? (
             <div className="rounded-lg border border-border p-4">
               <p className="text-sm font-medium">Payout account</p>
@@ -318,7 +303,6 @@ export function ShortletPayoutsDialog({
             </div>
           )}
 
-          {/* Ledger */}
           <div>
             <p className="mb-2 text-sm font-medium">Payout history</p>
             {payouts && payouts.items.length === 0 ? (

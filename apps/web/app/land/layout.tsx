@@ -6,7 +6,6 @@ import { Footer } from '@/components/layout/Footer';
 import { Navigation } from '@/components/layout/Navigation';
 import { LandAvailabilityGate } from '@/components/land/availability/LandAvailabilityGate';
 
-/** Public land pages follow the marketplace; the reviewer's desk follows owner onboarding. */
 export default function LandLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   // A party to a land dispute must always reach the case, whatever LAND_MODE says.
@@ -15,7 +14,6 @@ export default function LandLayout({ children }: { children: ReactNode }) {
   return (
     <LandAvailabilityGate
       audience={audience}
-      // The pages bring their own navigation; keep it around the notice.
       shell={(notice) => (
         <>
           <Navigation />

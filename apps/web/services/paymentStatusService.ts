@@ -1,7 +1,6 @@
 import { authFetch, safeCall, type ApiResponse } from '@/lib/apiHelpers';
 import type { PaymentProvider, PaymentProviderOption, PaymentStatus } from '@/types/payments';
 
-/** The state of one of the signed-in user's payments, for the page Paystack returns them to. */
 export function getPaymentStatus(reference: string): Promise<ApiResponse<PaymentStatus>> {
   return safeCall(() =>
     authFetch<PaymentStatus>(`/payments/${encodeURIComponent(reference)}/status`)
@@ -9,15 +8,15 @@ export function getPaymentStatus(reference: string): Promise<ApiResponse<Payment
 }
 
 /**
- * The amount a fee lookup is for. Whole naira go as `amount`, which every
- * version of the API takes; an amount with kobo goes as `amountKobo`.
+ * Whole naira go as `amount`, which every API version takes; an amount with kobo goes as
+ * `amountKobo`.
  */
 function feeAmountQuery(amount: number): string {
   const kobo = Math.round(amount * 100);
   return kobo % 100 === 0 ? `amount=${kobo / 100}` : `amountKobo=${kobo}`;
 }
 
-/** The card or bank fee added to a payment of `amount` naira (kobo allowed). All figures in kobo. */
+/** `amount` is naira (kobo allowed); all returned figures are in kobo. */
 export interface CheckoutFee {
   amountKobo: number;
   feeKobo: number;
@@ -28,7 +27,7 @@ export function getCheckoutFee(amount: number): Promise<ApiResponse<CheckoutFee>
   return safeCall(() => authFetch<CheckoutFee>(`/payments/checkout-fee?${feeAmountQuery(amount)}`));
 }
 
-/** The fee on a payment of `amount` naira (kobo allowed) when `provider` takes it. All figures in kobo. */
+/** `amount` is naira (kobo allowed); all returned figures are in kobo. */
 export function getProviderFee(
   amount: number,
   provider: PaymentProvider
@@ -40,12 +39,11 @@ export function getProviderFee(
   );
 }
 
-/** The companies that can take a payment, and whether each can right now. */
 export function getPaymentProviders(): Promise<ApiResponse<PaymentProviderOption[]>> {
   return safeCall(() => authFetch<PaymentProviderOption[]>('/payments/providers'));
 }
 
-/** `?provider=` for a pay route, or nothing when the payer has not chosen (the default company). */
+/** Nothing when the payer has not chosen (the default company). */
 export function providerQuery(provider?: PaymentProvider | null): string {
   return provider ? `?provider=${provider}` : '';
 }
@@ -55,7 +53,6 @@ export interface Bank {
   name: string;
 }
 
-/** Banks a payout can be sent to, by name and Paystack code. */
 export function getBanks(): Promise<
   ApiResponse<{ banks: Bank[]; source: 'paystack' | 'fallback' }>
 > {
@@ -64,7 +61,7 @@ export function getBanks(): Promise<
   );
 }
 
-/** The name on a bank account, shown before a payout account is saved. */
+/** Shown before a payout account is saved. */
 export function resolveBankAccount(data: {
   bankCode: string;
   accountNumber: string;

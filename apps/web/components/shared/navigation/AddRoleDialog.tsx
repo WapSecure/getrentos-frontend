@@ -9,11 +9,6 @@ import { getStoredUser } from '@/lib/authStorage';
 import { useAddRole } from '@/hooks/useAddRole';
 import { ADDABLE_ROLE_IDS, type AddableRoleId } from '@/services/accountRolesService';
 
-/**
- * Take on another role with the same account: one login can rent, own, buy
- * and so on. Nothing is asked for here, as at sign-up; anything that needs a
- * document (identity, ownership, a licence) asks for it when it is used.
- */
 export const AddRoleDialog = ({
   open,
   onClose,
@@ -21,7 +16,6 @@ export const AddRoleDialog = ({
 }: {
   open: boolean;
   onClose: () => void;
-  /** Role codes the account already holds. */
   heldRoles: string[];
 }) => {
   const addRole = useAddRole();
@@ -72,8 +66,7 @@ export const AddRoleDialog = ({
             ))
           )}
           {!held.has('manager') && (
-            // A firm is not a role you add: it is a business Sureground verifies,
-            // so it has its own setup rather than a one-tap switch.
+            // A firm is not a role you add: Sureground verifies it, so it has its own setup.
             <Link
               href="/agency/setup"
               onClick={onClose}
@@ -107,17 +100,12 @@ export const AddRoleDialog = ({
 
 const OPEN_EVENT = 'sureground:add-role';
 
-/**
- * Opens the add-role dialog from anywhere, such as a profile menu. The menu
- * is closed first (they close on an outside click), so the dialog is not
- * drawn underneath it.
- */
+/** Closes the menu first, so the dialog isn't drawn underneath it. */
 export function openAddRoleDialog() {
   document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
   window.dispatchEvent(new Event(OPEN_EVENT));
 }
 
-/** The one add-role dialog for the signed-in app; mounted in the dashboard layout. */
 export const AddRoleDialogHost = () => {
   const [open, setOpen] = useState(false);
   const [held, setHeld] = useState<string[]>([]);

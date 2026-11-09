@@ -6,7 +6,6 @@ import { MaintenanceRequestsView } from '@/components/landlord/maintenance/Maint
 import dynamic from 'next/dynamic';
 import { Skeleton } from '@sureground/ui';
 
-// Only the Home management tab needs the workspace: load it when that tab opens.
 const HomeManagementWorkspace = dynamic(
   () =>
     import('@/components/home-management/HomeManagementWorkspace').then(

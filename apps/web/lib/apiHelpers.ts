@@ -1,6 +1,5 @@
 export * from '@sureground/shared';
 
-/** Standard server-side paginated response envelope. */
 export interface Paginated<T> {
   items: T[];
   total: number;

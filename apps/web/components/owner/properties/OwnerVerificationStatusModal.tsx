@@ -24,7 +24,6 @@ interface OwnerVerificationStatusModalProps {
   property: OwnerProperty | null;
   onClose: () => void;
   onResubmit: (propertyId: string, proof: LandOwnershipProofInput) => Promise<void>;
-  /** Called after the automated verification verifies the property, so the list refreshes. */
   onVerified?: () => void;
 }
 
@@ -76,7 +75,6 @@ export const OwnerVerificationStatusModal = ({
     useState<LandOwnershipProofInput['documentType']>('C_OF_O');
   const [isResubmitting, setIsResubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // Automated (orchestrated) verification state.
   const [titleDocumentType, setTitleDocumentType] = useState('C_OF_O');
   const [titleDocumentNumber, setTitleDocumentNumber] = useState('');
   const [documentOwnerName, setDocumentOwnerName] = useState('');
@@ -88,14 +86,9 @@ export const OwnerVerificationStatusModal = ({
 
   const config = statusConfig[property.verificationStatus];
   const Icon = config.icon;
-  // Pending properties may need supplemental evidence too. This also gives an
-  // owner a safe retry path if one document upload failed after registration.
+  // Pending properties may need more evidence too, and this gives a retry if a document upload failed.
   const canResubmit = property.verificationStatus !== 'verified';
 
-  /**
-   * Runs the orchestrated property verification: address -> title document ->
-   * ownership. All three must pass for the property to be verified.
-   */
   const handleRunTrustVerification = async () => {
     if (!property) return;
     setIsRunning(true);
@@ -239,7 +232,6 @@ export const OwnerVerificationStatusModal = ({
 
           {error && <Alert variant="danger">{error}</Alert>}
 
-          {/* Orchestrated verification: address -> title document -> ownership. */}
           <div className="rounded-lg border border-border p-3 space-y-3">
             <div className="flex items-start gap-2">
               <ShieldCheck className="w-4 h-4 text-primary mt-0.5 shrink-0" />

@@ -9,11 +9,6 @@ import { CHANGE_KIND_LABELS, COMMITMENT_STATUS_LABELS, commitmentBadge } from '.
 
 const ROLE_LABELS = { DEVELOPER: 'Developer', BUYER: 'Buyer', STAFF: 'Sureground' } as const;
 
-/**
- * One infrastructure promise, as every audience sees it: what, when, where it
- * stands, any pending change, and (when the viewer may see it) the timeline.
- * Actions for the viewer's role go in `children`.
- */
 export const CommitmentCard = ({
   commitment,
   children,

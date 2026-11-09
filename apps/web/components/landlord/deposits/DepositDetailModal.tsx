@@ -36,12 +36,7 @@ const DEDUCTION_VARIANT: Record<DeductionStatus, BadgeVariant> = {
 const formatNaira = (amount: number) =>
   `₦${amount.toLocaleString('en-NG', { maximumFractionDigits: 0 })}`;
 
-/**
- * One deduction, with what the owner can do about it. A tenant's dispute is
- * shown in their words; a disputed proposal is approved only with an answer,
- * and a disputed deduction that already counts is kept (with a reason) or
- * dropped. Errors are shown, not swallowed.
- */
+// A disputed proposal is approved only with an answer; a disputed deduction that already counts is kept (with a reason) or dropped.
 const DeductionRow = ({
   depositId,
   deduction: d,
@@ -292,7 +287,6 @@ export const DepositDetailModal = ({ depositId, onClose }: DepositDetailModalPro
                 </div>
               </div>
 
-              {/* Balances */}
               <div className="grid grid-cols-2 gap-3 rounded-xl bg-secondary p-4 sm:grid-cols-4">
                 {[
                   { label: 'Held', value: deposit.summary.held },
@@ -319,7 +313,6 @@ export const DepositDetailModal = ({ depositId, onClose }: DepositDetailModalPro
                 </Alert>
               )}
 
-              {/* Deductions */}
               <div className="space-y-3">
                 <p className="text-sm font-medium text-foreground">Deductions</p>
                 {deposit.deductions.length === 0 ? (
@@ -337,7 +330,6 @@ export const DepositDetailModal = ({ depositId, onClose }: DepositDetailModalPro
                 )}
               </div>
 
-              {/* Record a deduction (while open) */}
               {deposit.status !== 'RETURNED' && (
                 <div className="space-y-3 rounded-xl border border-dashed border-border p-4">
                   <p className="text-sm font-medium text-foreground">Record a deduction</p>
@@ -367,7 +359,6 @@ export const DepositDetailModal = ({ depositId, onClose }: DepositDetailModalPro
                 </div>
               )}
 
-              {/* Actions */}
               <div className="flex justify-end gap-2 border-t border-border pt-4">
                 <Button variant="outline" onClick={onClose}>
                   Close

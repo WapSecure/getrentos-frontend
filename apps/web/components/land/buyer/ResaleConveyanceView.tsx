@@ -22,11 +22,7 @@ import { ConditionsPanel } from '../closing/ConditionsPanel';
 import { CoApprovalCard } from '../representatives/CoApprovalCard';
 import { landRepresentativeKeys } from '@/services/landRepresentativeService';
 
-/**
- * Conveyance on a land resale (a marketplace transaction). Escrow is released
- * to the seller only once every required step (deed executed, possession
- * handed over) is confirmed by the buyer.
- */
+// Escrow is released to the seller only once the buyer confirms every required step.
 export const ResaleConveyanceView = ({ txId }: { txId: string }) => {
   const queryClient = useQueryClient();
   const [pendingKey, setPendingKey] = useState<string | null>(null);

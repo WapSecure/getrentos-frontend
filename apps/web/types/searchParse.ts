@@ -1,4 +1,4 @@
-/** Discover filters read from a plain-language search. Prices are yearly naira. */
+/** Prices are yearly naira. */
 export interface RentalSearchFilters {
   location?: string;
   state?: string;

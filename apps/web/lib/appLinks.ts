@@ -1,18 +1,6 @@
 import appLinks from '@sureground/shared/constants/app-links.json';
 
-/**
- * The two files phones fetch from this site to let the Sureground app open
- * links to it (iOS universal links, Android app links). The paths come from
- * packages/shared/src/constants/app-links.json, the same list the app's build
- * claims, so the site and the app never disagree.
- *
- * Configured by environment, because the IDs belong to the app store accounts:
- * - APPLE_TEAM_ID (required for iOS), IOS_BUNDLE_ID (default io.getsureground.app)
- * - ANDROID_CERT_SHA256: comma-separated SHA-256 signing-certificate
- *   fingerprints (required for Android; Play App Signing's key, plus the upload
- *   key for internal builds), ANDROID_PACKAGE (default io.getsureground.app)
- * Without them the files are not served, and links simply open the website.
- */
+// Paths come from packages/shared/src/constants/app-links.json, the list the app build claims, so site and app never disagree; without APPLE_TEAM_ID / ANDROID_CERT_SHA256 the files are not served.
 
 export interface AppLinkEnv {
   appleTeamId?: string;
@@ -30,7 +18,6 @@ export function appLinkEnv(env: NodeJS.ProcessEnv = process.env): AppLinkEnv {
   };
 }
 
-/** apple-app-site-association, or null when the team ID is not configured. */
 export function appleAppSiteAssociation(env: AppLinkEnv) {
   if (!env.appleTeamId || !env.iosBundleId) return null;
   const appID = `${env.appleTeamId}.${env.iosBundleId}`;
@@ -40,7 +27,6 @@ export function appleAppSiteAssociation(env: AppLinkEnv) {
         {
           appIDs: [appID],
           components: [
-            // Pages under a claimed prefix that only the website has.
             ...appLinks.webOnly.map((p) => ({ '/': `${p}*`, exclude: true })),
             ...appLinks.claimed.flatMap((p) => [{ '/': p }, { '/': `${p}/*` }]),
           ],
@@ -52,7 +38,6 @@ export function appleAppSiteAssociation(env: AppLinkEnv) {
   };
 }
 
-/** assetlinks.json statements, or null when no certificate is configured. */
 export function assetLinks(env: AppLinkEnv) {
   const fingerprints = (env.androidCertSha256 ?? '')
     .split(',')

@@ -14,7 +14,6 @@ const post = <T>(path: string, body?: unknown) =>
     ...(body === undefined ? {} : { body: JSON.stringify(body) }),
   });
 
-/** A plot purchase or a land resale, as the co-approval routes address them. */
 export type LandDealRef = { purchaseId: string } | { transactionId: string };
 
 const dealPath = (deal: LandDealRef) =>
@@ -32,9 +31,7 @@ export const landRepresentativeKeys = {
   resale: (txId: string) => ['land', 'representatives', 'resale', txId] as const,
 };
 
-/** Diaspora mode: the buyer's representatives, and the representative's own desk. */
 export const landRepresentativeService = {
-  // ─── The buyer ─────────────────────────────────────────────────────────────
   mine: () =>
     safeCall(() => authFetch<LandRepresentativeAppointment[]>('/buyer/land/representatives')),
 
@@ -75,7 +72,6 @@ export const landRepresentativeService = {
   keepCoApproval: (deal: LandDealRef) =>
     safeCall(() => post<CoApprovalView>(`/buyer/land/${dealPath(deal)}/co-approval/keep`)),
 
-  // ─── The representative ────────────────────────────────────────────────────
   representing: () =>
     safeCall(() => authFetch<LandRepresentativeAppointment[]>('/land/representing')),
 

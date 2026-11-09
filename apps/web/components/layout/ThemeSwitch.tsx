@@ -8,12 +8,7 @@ import { IconButton } from '@sureground/ui';
 const className =
   'h-10 w-10 rounded-full border border-border bg-secondary text-foreground backdrop-blur-sm hover:bg-foreground/[0.08] hover:text-foreground';
 
-/**
- * The light/dark switch for the public pages. The shared ThemeToggle animates with
- * framer-motion and renders nothing until it mounts, so the buttons beside it
- * jumped when it appeared. This one keeps its space from the first paint and needs
- * no animation library.
- */
+// Not the shared ThemeToggle: that renders nothing until mounted, so the buttons beside it jumped.
 export const ThemeSwitch = () => {
   const [mounted, setMounted] = useState(false);
   const { theme, resolvedTheme, setTheme } = useTheme();

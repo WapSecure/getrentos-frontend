@@ -11,7 +11,6 @@ const STARTERS = [
   'How many open leads do I have?',
 ];
 
-/** Ask Sureground for realtors: listings, offers, leads, viewings, clients and commissions. */
 export const RealtorAssistant = () => (
   <AssistantChat
     ask={(question, history, language) =>

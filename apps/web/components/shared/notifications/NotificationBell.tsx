@@ -27,7 +27,6 @@ export interface BellNotification {
   id: string;
   type: string;
   title: string;
-  /** The text under the title; the renter feed calls it `message`. */
   body?: string;
   message?: string;
   read: boolean;
@@ -37,28 +36,21 @@ export interface BellNotification {
   action?: { url: string };
 }
 
-/** A feed is either a bare list or one page of a paginated list. */
 export type BellFeed = BellNotification[] | { items: BellNotification[]; total?: number };
 
 interface FeedSourceProps {
-  /** The feed's cache key. With `pageSize`, the page is appended as `{ page, pageSize }`. */
   queryKey: QueryKey;
   fetchNotifications: (params: { page: number; pageSize?: number }) => Promise<BellFeed>;
   markRead: (id: string) => Promise<unknown>;
   markAllRead: () => Promise<unknown>;
-  /** Asks the server for the page size and keys the cache by page. */
   pageSize?: number;
-  /** Pages through the feed inside the panel when it has more than one page. */
   paginate?: boolean;
-  /** Refetches everything under `queryKey` once a mark-read settles. */
   refetchAfterMarking?: boolean;
-  /** Refreshes the feed when the backend pushes `notification:new`. Defaults to true. */
   realtime?: boolean;
   viewAllHref?: string;
   viewAllLabel?: string;
 }
 
-/** A `GET <basePath>`, `PATCH <basePath>/:id/read` and `POST <basePath>/read-all` feed. */
 interface BasePathProps {
   basePath: string;
 }
@@ -85,11 +77,6 @@ function RealtimeRefresh({ onNotification }: { onNotification: () => void }) {
   return null;
 }
 
-/**
- * A portal's notification bell. Clicking an item marks it read and opens what
- * it is about (lib/notificationHref.ts). Each portal brings its own feed; the
- * panel, the unread dot and the optimistic mark-read are shared.
- */
 export function NotificationBell(props: NotificationBellProps) {
   const { portal } = props;
   const {
@@ -133,7 +120,6 @@ export function NotificationBell(props: NotificationBellProps) {
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  // Mark it read, then open what it is about (if it is about something).
   const openNotification = (notification: BellNotification) => {
     if (!notification.read) markRead.mutate(notification.id);
     const href = notificationHref(portal, notification);

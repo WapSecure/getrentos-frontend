@@ -20,13 +20,7 @@ const DOCUMENT_TYPE_LABELS: Record<IdentityDocumentType, string> = {
   BVN: 'BVN',
 };
 
-/**
- * The manual identity route, for people who cannot use their NIN: an ID
- * document checked by our team. It never verifies on its own: a live selfie is
- * still required (security gap ID-16), and there is no photo "selfie" upload,
- * because an uploaded photo is not a liveness check. Hidden once identity is
- * verified or while a document is already with our team.
- */
+// Never verifies on its own: a live selfie is still required, and there is no photo "selfie" upload because a photo is not a liveness check.
 export function IdentityDocumentFallback() {
   const queryClient = useQueryClient();
   const [documentType, setDocumentType] = useState<IdentityDocumentType>('NATIONAL_ID');

@@ -8,11 +8,7 @@ import { mine, type ManagementMandateDto } from '@/services/mandateService';
 import { spendApprovalService } from '@/services/spendApprovalService';
 import { unwrap } from '@/lib/apiHelpers';
 
-/**
- * Lets the owner set, per managed engagement, the most a manager may spend before
- * it needs the owner's sign-off. Shown only when the owner has a live engagement
- * — the cap has no meaning without a manager to measure against.
- */
+// Shown only with a live engagement: the cap means nothing without a manager to measure against.
 export function SpendCapSettings() {
   const { data } = useQuery({
     queryKey: ['mandates', 'mine'],

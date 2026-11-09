@@ -5,17 +5,11 @@ import { CircleDashed } from 'lucide-react';
 import { formatDate } from '@/lib/format';
 import type { LandOpenCondition } from '@/types/land';
 
-/**
- * A conditional approval's open conditions, shown to buyers: the land is
- * verified subject to these, and reservations and offers open once they are
- * met. Renders nothing when there are none.
- */
 export const OpenConditionsNotice = ({
   conditions,
   action = 'reservations and offers',
 }: {
   conditions?: LandOpenCondition[];
-  /** What waits on the conditions, e.g. "reservations". */
   action?: string;
 }) => {
   if (!conditions?.length) return null;

@@ -25,7 +25,6 @@ export type EstateUser = { fullName: string; email: string; role?: string; roles
 
 const EstateUserContext = createContext<EstateUser | null>(null);
 
-/** Returns the signed-in estate manager's profile, populated once by the estate layout's auth check. */
 export const useEstateUser = () => useContext(EstateUserContext);
 
 const SELECTED_ESTATE_STORAGE_KEY = 'sureground:selectedEstateId';
@@ -39,13 +38,7 @@ interface SelectedEstateValue {
 
 const SelectedEstateContext = createContext<SelectedEstateValue | null>(null);
 
-/**
- * A manager's currently-selected estate out of their whole portfolio.
- * Every manager-facing estate page should read from this instead of
- * calling estateService.getMyEstate() directly: that endpoint only
- * resolves a single ("first") estate and stays reserved for the
- * gateman/resident personas, who are always tied to exactly one.
- */
+// Manager pages read this, not estateService.getMyEstate(), which resolves only the first estate (kept for gateman/resident).
 export const useSelectedEstate = () => {
   const ctx = useContext(SelectedEstateContext);
   if (!ctx) throw new Error('useSelectedEstate must be used within the estate layout');
@@ -75,8 +68,6 @@ function SelectedEstateProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // The console is for estates the caller manages. An estate they only guard
-  // belongs in the gate console, not here behind the manager's navigation.
   const managed = (estates ?? []).filter((candidate) => candidate.capacity !== 'GATE');
   const guardsOnly = !isLoading && (estates?.length ?? 0) > 0 && managed.length === 0;
   const router = useRouter();

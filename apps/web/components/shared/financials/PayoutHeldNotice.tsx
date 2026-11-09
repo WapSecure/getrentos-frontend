@@ -4,24 +4,7 @@ import { Clock, Gavel, ShieldAlert } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { formatCurrency, formatDate } from '@/lib/format';
 
-/**
- * Why an owner's payout is not on its way.
- *
- * Three states look alike on a screen and must not be confused: the bank is slow
- * (`PENDING`), a second person is checking (`AWAITING_APPROVAL`), or a second
- * person refused (`REJECTED`). The first is a wait. The other two are decisions
- * about this owner's money, and the refusal is the one they will ring up about —
- * so it is the one that has to say why.
- *
- * A dispute takes precedence over the threshold explanation when both are true,
- * because the threshold is not why THIS payout is stuck: the owner's own open
- * complaint is, and telling them "payouts above X need two people" while their
- * query sits unanswered would be technically true and useless.
- *
- * Neither held state is a failure and neither loses the money. It has not been
- * sent, which is not the same as not being owed, and a screen that renders it as
- * an error would send the owner looking for a problem that does not exist.
- */
+// A dispute outranks the threshold explanation, since the owner's own open complaint is why this payout is stuck. Held is not failed: never render it as an error.
 export interface StatementReleaseSummary {
   id: string;
   amount: number;
@@ -50,8 +33,6 @@ export function PayoutHeldNotice({
 }) {
   const openDisputes = disputeSummary?.openCount ?? 0;
 
-  // The complaint is holding the money: that is the answer to "why is this
-  // stuck", and it is also the one the owner can act on.
   if (disputeSummary?.moneyEffect === 'HELD') {
     return (
       <Notice tone="attention" Icon={Gavel} title="Held while a line is disputed">
@@ -63,7 +44,6 @@ export function PayoutHeldNotice({
         {disputeSummary.reason && (
           <p className="text-xs text-muted-foreground">&ldquo;{disputeSummary.reason}&rdquo;</p>
         )}
-        {/* Also refused by a person? Both are true and the owner needs both. */}
         {payoutStatus === 'REJECTED' && release?.decisionNote && (
           <p className="text-xs text-muted-foreground">
             A reviewer also held it back: &ldquo;{release.decisionNote}&rdquo;
@@ -80,8 +60,7 @@ export function PayoutHeldNotice({
   const refused = payoutStatus === 'REJECTED';
   const awaiting = payoutStatus === 'AWAITING_APPROVAL';
 
-  // A dispute that can no longer stop the money. Saying "held" here would be a lie
-  // a person would act on — the money is gone or going.
+  // A dispute that can no longer stop the money: saying "held" here would be false, the money is gone or going.
   const sentOrGoing =
     openDisputes > 0 &&
     (disputeSummary?.moneyEffect === 'IN_FLIGHT' || disputeSummary?.moneyEffect === 'PAID');
@@ -114,7 +93,6 @@ export function PayoutHeldNotice({
             <p className="text-sm text-muted-foreground">&ldquo;{release.decisionNote}&rdquo;</p>
           )}
           <p className="text-xs text-muted-foreground">
-            {/* The distinction that matters to the reader. */}
             The money is still owed to you. It has not been sent or lost. Sending it again is
             possible once whatever was raised has been dealt with.
           </p>
@@ -143,7 +121,6 @@ export function PayoutHeldNotice({
   );
 }
 
-/** The shell every state shares, so they cannot drift apart. */
 function Notice({
   tone,
   Icon,

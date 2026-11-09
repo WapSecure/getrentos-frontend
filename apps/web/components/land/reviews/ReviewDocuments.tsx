@@ -15,11 +15,7 @@ const sizeLabel = (bytes?: number | null) =>
       : `${Math.ceil(bytes / 1024)} KB`
     : null;
 
-/**
- * Documents on the property. Stored files open in the in-app viewer from a
- * short-lived signed URL (reload the case if one has expired); an external
- * address is somebody's word, not a file we hold, and is labelled so.
- */
+// An external address is somebody's word, not a file Sureground holds, and is labelled so.
 export const ReviewDocuments = ({
   documents,
   checks,
@@ -41,8 +37,7 @@ export const ReviewDocuments = ({
             <p className="text-xs text-muted-foreground">
               {[
                 humanise(doc.documentType),
-                // PARTY covers the owner and engaged professionals alike, so it is not
-                // attributed to the owner.
+                // PARTY covers the owner and engaged professionals, so it isn't attributed to the owner.
                 doc.source === 'ADMIN' ? 'Added by Sureground' : 'On the property file',
                 formatDate(doc.uploadedAt),
                 sizeLabel(doc.sizeBytes),

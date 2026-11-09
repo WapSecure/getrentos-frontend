@@ -22,41 +22,14 @@ const TABS = [
 
 type Tab = (typeof TABS)[number]['value'];
 
-/**
- * Patrols: whether the rounds an estate set up actually happen.
- *
- * ENTERPRISE, and the gate is on the OFFICE, never on the guard. The reason is
- * in the programme doc: an estate without this makes a slower decision, where an
- * estate without the watchlist admits somebody it banned. But scanning is not
- * gated even here: a guard standing at a checkpoint at 02:00 is the wrong
- * person to hear about a billing state, and refusing the scan would lose the
- * patrol record over it. The API enforces exactly that split, and this page only
- * decides which half of it to render.
- *
- * Three tabs rather than one long page because they are three different jobs
- * done at three different times: reading last night, setting up tonight, and
- * dealing with a code that has gone missing. The report is first because it is
- * the one anybody opens without being asked to.
- */
 export default function EstatePatrolPage() {
   const { estate, isLoading: isEstateLoading } = useSelectedEstate();
   const [tab, setTab] = useState<Tab>('report');
 
-  /**
-   * Whether it is worth asking the API at all.
-   *
-   * A known shortfall is not worth three guaranteed 403s on every visit: and in
-   * a browser console they are three red errors that make a real one harder to
-   * find. An UNKNOWN tier is not a shortfall: the rule everywhere in this
-   * codebase is that an absent plan fails open, so it still asks and lets the
-   * API be the authority.
-   */
+  // Skip the API on a known shortfall; an unknown tier still asks, since an absent plan fails open.
   const entitled = !estate?.planTier || tierAtLeast(estate.planTier, 'ENTERPRISE');
 
-  // The key reads `estate?.id ?? ''` rather than `estate!.id`: the hooks run
-  // before the `!estate` guard below, so on the first render the assertion is a
-  // lie and the render throws "Cannot read properties of null (reading 'id')".
-  // `enabled` is what stops the request; the key only has to be stable.
+  // `?? ''` rather than `!`: the hooks run before the `!estate` guard; `enabled` stops the request.
   const reportQuery = useQuery({
     queryKey: estateKeys.patrolReport(estate?.id ?? ''),
     queryFn: () => unwrap(estateService.getPatrolReport(estate!.id, {})),

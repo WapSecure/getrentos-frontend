@@ -32,8 +32,7 @@ export default function LandlordTenantsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [rentFilter, setRentFilter] = useState<'all' | RentPaymentStatus>('all');
 
-  // The tenants endpoint does not accept search/status params, so search and
-  // rent-status filtering stay client-side on the current page.
+  // The endpoint takes no search/status params, so filtering is client-side on this page.
   const { data, isPending, isError, refetch } = useQuery({
     queryKey: [...landlordKeys.tenants, { page, pageSize: PAGE_SIZE }],
     queryFn: () => unwrap(landlordService.listTenants({ page, pageSize: PAGE_SIZE })),
@@ -56,8 +55,6 @@ export default function LandlordTenantsPage() {
 
   return (
     <>
-      {/* Zero is a claim about the portfolio, so wait until it has been read
-          before making it. */}
       <PageHeader
         title="Tenants"
         description={

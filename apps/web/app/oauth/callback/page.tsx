@@ -23,8 +23,7 @@ interface MeResponse {
 function OAuthCallbackContent() {
   const router = useRouter();
   const query = useSearchParams();
-  // The result arrives in the URL fragment (older links used the query).
-  // Read it once, then drop it from the address bar and history.
+  // Read the fragment once, then drop it from the address bar and history.
   const [searchParams] = useState(() => {
     const merged = new URLSearchParams(query.toString());
     if (typeof window !== 'undefined' && window.location.hash.length > 1) {
@@ -40,8 +39,6 @@ function OAuthCallbackContent() {
     }
   }, []);
   const [error, setError] = useState<string | null>(null);
-  // Google proved who you are, but your account also has an authenticator app:
-  // the backend sent a short-lived challenge instead of a session.
   const challenge = searchParams.get('challenge_token');
   const refusal = searchParams.get('error');
   const [code, setCode] = useState('');
@@ -49,8 +46,7 @@ function OAuthCallbackContent() {
 
   const openSession = (accessToken: string, me: MeResponse) => {
     const primaryRoleId = resolvePrimaryRoleId(me.roles);
-    // Session-only by default (refresh token is an httpOnly session cookie)
-    //: consistent with an unchecked "Remember me" checkbox.
+    // Session-only: the refresh token is an httpOnly session cookie, as with "Remember me" unchecked.
     saveAuthSession(
       {
         accessToken,
@@ -76,7 +72,6 @@ function OAuthCallbackContent() {
   };
 
   useEffect(() => {
-    // Refused (e.g. a suspended account) or waiting on a 2FA code: nothing to exchange.
     if (refusal) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setError(refusal);
@@ -84,8 +79,7 @@ function OAuthCallbackContent() {
     }
     if (challenge) return;
 
-    // The backend delivers the access token in the URL and the refresh token
-    // in an httpOnly cookie (not visible here).
+    // The refresh token arrives as an httpOnly cookie, not visible here.
     const accessToken = searchParams.get('access_token');
 
     if (!accessToken) {
@@ -95,7 +89,6 @@ function OAuthCallbackContent() {
 
     const complete = async () => {
       try {
-        // Fetch the authenticated profile so the session has the full user.
         const me = await apiFetch<MeResponse>('/auth/me', {
           headers: { Authorization: `Bearer ${accessToken}` },
         });

@@ -22,10 +22,6 @@ import type { ShortletBooking } from '@/types/shortlet';
 
 const MIN_REASON = 10;
 
-/**
- * The host calls off a confirmed stay. Before they commit, the dialog shows the
- * server's own numbers: what the guest gets back and what the host will owe.
- */
 export function HostCancelBookingDialog({
   booking,
   onClose,

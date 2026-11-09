@@ -2,7 +2,7 @@ import type { PayoutSentTo } from '@sureground/shared';
 export type ShortletPricingMode = 'PER_NIGHT' | 'FLAT_STAY';
 export type ShortletDiscountType = 'WEEKLY' | 'TWO_WEEK' | 'MONTHLY' | 'LAST_MINUTE';
 
-/** A date range with its own nightly rate and/or minimum stay; start/end are the first and last night. */
+/** start/end are the first and last night. */
 export interface ShortletSeason {
   id: string;
   name: string;
@@ -20,7 +20,6 @@ export interface ShortletSeasonInput {
   minNights?: number | null;
 }
 
-/** The peak-season rules a host sets on a listing. */
 export interface ShortletPricingRules {
   weeklyDiscountPct?: number;
   twoWeekDiscountPct?: number;
@@ -52,15 +51,12 @@ export interface ShortletListing {
   images: string[];
   videoKey?: string;
   videoUrl?: string;
-  /** The uploaded video re-encoded for streaming, once ready (its poster is used here). */
+  /** Once ready; its poster is used here. */
   videoStream?: { hlsUrl: string; posterUrl: string; durationSeconds?: number };
   tourUrl?: string;
   cancellationPolicy: ShortletCancellationPolicy;
   deposit?: number;
-  /**
-   * Hours after check-out this listing keeps the deposit claimable. Absent means
-   * the platform default from the admin Fees tab applies.
-   */
+  /** Absent means the platform default from the admin Fees tab applies. */
   depositClaimWindowHours?: number;
   ratingAverage?: number;
   reviewCount: number;
@@ -77,11 +73,10 @@ export interface ShortletListing {
   lastMinuteDays: number;
   advanceNoticeDays: number;
   prepDays: number;
-  /** Current and upcoming seasons. */
   seasons: ShortletSeason[];
-  /** Confirmed stays the host cancelled on this listing in the last 12 months (detail view). */
+  /** Last 12 months (detail view). */
   hostCancellations12m?: number;
-  /** Newest inspection by an independent, licensed agent; absent when none qualifies. */
+  /** By an independent, licensed agent; absent when none qualifies. */
   inspection?: ShortletInspectionBadge;
   /** Search with dates: the all-in price for those dates, or why they can't be booked. */
   stayQuote?: StayQuoteResult;
@@ -137,15 +132,15 @@ export interface ShortletBooking {
   discountAmount?: number;
   total: number;
   status: ShortletBookingStatus;
-  /** Who cancelled, when the booking is CANCELLED and it is known. */
+  /** When the booking is CANCELLED and it is known. */
   cancelledBy?: 'GUEST' | 'HOST' | 'ADMIN';
   /** The host's reason, when the host cancelled. */
   cancellationReason?: string;
-  /** How to get in; only on a confirmed, paid stay. */
+  /** Only on a confirmed, paid stay. */
   checkInInstructions?: string;
   /** Guest view only. */
   guestPromise?: GuestPromiseStatus;
-  /** Host view only: the guest at a glance. */
+  /** Host view only. */
   guestSummary?: GuestSummary;
   paymentStatus?: 'UNPAID' | 'PROCESSING' | 'PAID' | 'REFUNDED';
   paidAt?: string;
@@ -159,14 +154,14 @@ export interface ShortletBooking {
   depositRefundedAt?: string;
   platformFee?: number;
   taxAmount?: number;
-  /** Tax returned with a stay refund, at the same share as the stay. */
+  /** At the same share as the stay. */
   taxRefundAmount?: number;
   hostNet?: number;
   depositClaimStatus?: ShortletDepositClaimStatus;
   depositClaimAmount?: number;
-  /** Naira withheld from the guest deposit by the latest resolved claim. */
+  /** Naira, by the latest resolved claim. */
   depositClaimDeducted?: number;
-  /** Naira actually returned to the guest from the deposit (after any claim deduction). */
+  /** Naira, after any claim deduction. */
   depositRefundedAmount?: number;
   reviewed?: boolean;
   guestReviewed?: boolean;
@@ -186,17 +181,15 @@ export interface ShortletDepositClaim {
   listingTitle?: string;
   claimedBy: string;
   guestName: string;
-  /** First night of the stay the claim is against. */
   checkIn?: string;
-  /** Checkout of the stay the claim is against. */
   checkOut?: string;
   amount: number;
   reason: string;
   evidence: string[];
   status: ShortletDepositClaimStatus;
-  /** Naira withheld from the guest refund by this claim (resolved claims only). */
+  /** Naira (resolved claims only). */
   deductedAmount?: number;
-  /** Naira refunded to the guest = deposit - deducted (resolved claims only). */
+  /** Naira: deposit - deducted (resolved claims only). */
   refundedAmount?: number;
   resolution?: string;
   createdAt: string;
@@ -245,7 +238,7 @@ export interface ShortletAvailability {
   seasonalNights?: number;
   taxName?: string;
   taxPct?: number;
-  /** Booked/blocked nights (`YYYY-MM-DD`); only sent when no range is asked for. */
+  /** `YYYY-MM-DD`; only sent when no range is asked for. */
   unavailableDates?: string[];
 }
 
@@ -274,7 +267,7 @@ export interface CreateShortletListingInput extends ShortletPricingRules {
   deposit?: number;
 }
 
-/** House rules, power, water, internet and check-in instructions; null clears a field. */
+/** Null clears a field. */
 export interface ShortletEssentialsInput {
   houseRules?: string | null;
   petsAllowed?: boolean | null;
@@ -354,7 +347,7 @@ export interface ShortletMessage {
   text: string;
   timestamp: string;
   read: boolean;
-  /** Contact details in this message were hidden (no paid stay yet). */
+  /** Hidden because there is no paid stay yet. */
   contactMasked?: boolean;
 }
 
@@ -381,7 +374,7 @@ export interface ShortletPayoutAccount {
   bankName: string;
   accountNumber: string;
   accountName: string;
-  /** Set while payouts wait after a change of bank details (ISO); null when none is held. */
+  /** ISO; set while payouts wait after a change of bank details, null when none is held. */
   payoutHoldUntil?: string | null;
 }
 
@@ -389,15 +382,14 @@ export interface ShortletPayout {
   id: string;
   hostId: string;
   hostName?: string;
-  /** Sent to the bank, after any cancellation fees. */
+  /** After any cancellation fees. */
   amount: number;
-  /** Cancellation fees taken out of this payout. */
   penaltyDeducted?: number;
   status: 'PENDING' | 'SUCCESS' | 'FAILED';
   transferRef?: string;
   paidAt?: string;
   bookingCount: number;
-  /** Where it went (bank + last four digits), only when the API can prove it. */
+  /** Bank + last four digits, only when the API can prove it. */
   sentTo?: PayoutSentTo | null;
   createdAt: string;
 }
@@ -418,13 +410,12 @@ export interface BlockedDateRange {
   startDate: string;
   endDate: string;
   reason?: string;
-  /** Name of the outside calendar these dates came from; the host can't remove them here. */
+  /** The host can't remove these dates here. */
   importedFrom?: string;
-  /** Closed because the host cancelled a booking on them; can't be reopened. */
+  /** Can't be reopened. */
   lockedByCancellation?: boolean;
 }
 
-/** An outside calendar (Airbnb, Booking.com, ...) whose events block dates here. */
 export interface ShortletCalendarFeed {
   id: string;
   name: string;
@@ -437,7 +428,6 @@ export interface ShortletCalendarFeed {
 }
 
 export interface ShortletCalendarSync {
-  /** The link other sites subscribe to. */
   exportUrl: string;
   feeds: ShortletCalendarFeed[];
 }
@@ -466,7 +456,7 @@ export interface ShortletDispute {
   resolution?: string;
   createdAt: string;
   resolvedAt?: string;
-  /** A Guest Promise report (filed within 24h of check-in). */
+  /** Filed within 24h of check-in. */
   guestPromise?: boolean;
   problemType?: GuestPromiseProblem;
   evidenceUrls?: string[];
@@ -481,7 +471,6 @@ export type GuestPromiseProblem =
   | 'MISSING_ESSENTIALS';
 export type GuestPromiseOutcome = 'FULL_REFUND' | 'PARTIAL_REFUND' | 'NOT_UPHELD';
 
-/** The Guest Promise on one of the guest's bookings. */
 export interface GuestPromiseStatus {
   canReport: boolean;
   opensAt: string;
@@ -542,7 +531,6 @@ export interface ShortletViewsAnalytics {
   daily: { date: string; views: number }[];
 }
 
-/** What cancelling a confirmed stay would refund the guest and cost the host. */
 export interface HostCancelPreview {
   canCancel: boolean;
   blockedReason?: string;
@@ -551,7 +539,7 @@ export interface HostCancelPreview {
   /** Stay, tax and deposit, in naira. */
   guestRefund: number;
   feePercent: number;
-  /** Taken from the host's future payouts, in naira. */
+  /** In naira. */
   fee: number;
 }
 
@@ -575,7 +563,7 @@ export interface ShortletHostPenalty {
 
 export type InspectedRoomCondition = 'excellent' | 'good' | 'fair';
 
-/** An inspection that earns the "Inspected" badge (see backend shortlet-inspection.ts). */
+/** See backend shortlet-inspection.ts. */
 export interface ShortletInspectionBadge {
   inspectedAt: string;
   /** First name and initial. */
@@ -586,25 +574,23 @@ export interface ShortletInspectionBadge {
   condition: InspectedRoomCondition;
 }
 
-/** What a host sees about a guest: counts across Sureground only. */
+/** Counts across Sureground only. */
 export interface GuestSummary {
   identityVerified: boolean;
   memberSince: string;
   completedStays: number;
   ratingAverage?: number;
   ratingCount: number;
-  /** Stays the guest cancelled in the last 12 months. */
   cancellations12m: number;
   /** Deposit claims upheld against the guest. */
   damageClaimsUpheld: number;
 }
 
-/** The all-in price for given dates, as the checkout will charge it. */
-/** The Sureground fee on a booking made now; taken from the host payout, never charged to guests. */
+/** As the checkout will charge it. */
+/** Taken from the host payout, never charged to guests. */
 export interface HostShortletFees {
   commissionPct: number;
   standardCommissionPct: number;
-  /** When the launch rate ends, if one is running. */
   introEndsAt?: string;
 }
 
@@ -634,7 +620,7 @@ export interface FairPrice {
   bedrooms: number;
 }
 
-/** What a person reads for each status; badges never show the raw code. */
+/** Badges never show the raw code. */
 export const SHORTLET_BOOKING_STATUS_LABEL: Record<ShortletBookingStatus, string> = {
   REQUESTED: 'Requested',
   CONFIRMED: 'Confirmed',

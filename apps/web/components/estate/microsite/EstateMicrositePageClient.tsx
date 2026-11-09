@@ -11,7 +11,6 @@ import type { EstateStorefront } from '@/types/estate-marketplace';
 
 interface EstateMicrositePageClientProps {
   slug: string;
-  /** Server-fetched profile (from generateMetadata) used to hydrate the query. */
   initialProfile?: EstateStorefront;
 }
 

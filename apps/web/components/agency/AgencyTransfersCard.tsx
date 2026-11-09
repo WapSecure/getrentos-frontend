@@ -8,11 +8,6 @@ import { formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { managementTransferService } from '@/services/managementTransferService';
 
-/**
- * Properties the firm is handing over or taking over. Shown so neither side is
- * surprised: the outgoing team keeps running the property until the date, the
- * incoming one sets up its engagement to start on it.
- */
 export function AgencyTransfersCard() {
   const transfers = useQuery({
     queryKey: ['management-transfers', 'managing'],

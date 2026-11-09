@@ -5,15 +5,7 @@ import { ChevronDown, Info } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { formatCurrency } from '@/lib/format';
 
-/**
- * One line of a statement, as the ledger holds it.
- *
- * The provenance fields are what turn a statement from a list of figures into
- * something a reader can check: each line names the ledger entry it was read
- * from and the document behind it. They are absent on statements written before
- * the ledger became the source of truth, so every one of them is optional and
- * the trace is only offered when there is something to show.
- */
+/** Provenance fields are absent on statements written before the ledger was the source of truth, so all are optional. */
 export interface StatementLineItem {
   id: string;
   label: string;
@@ -25,15 +17,7 @@ export interface StatementLineItem {
   propertyId?: string | null;
 }
 
-/**
- * The figures a statement resolves to.
- *
- * `netPayout` is not `grossIncome - totalExpenses - managementFee` on its own:
- * VAT is charged on top of the fee and the maintenance markup is charged apart
- * from the expense it applies to, so both are steps in the ladder. `whtAmount`
- * is the exception — it was never a movement, so it sits outside the ladder and
- * is disclosed rather than deducted.
- */
+/** `netPayout` also deducts VAT on the fee and the maintenance markup; `whtAmount` was never a movement, so it is disclosed, not deducted. */
 export interface StatementTotals {
   grossIncome: number;
   totalExpenses: number;
@@ -61,12 +45,10 @@ const COMPONENT_LABEL: Record<string, string> = {
   VAT: 'VAT',
 };
 
-/** Ledger and document ids are long; the tail is what a reader copies into a support thread. */
 const shortRef = (id: string) => `${id.slice(0, 8)}…`;
 
 function Row({ label, amount, deduction }: { label: string; amount: number; deduction?: boolean }) {
-  // The sign is composed here rather than by negating the number, so a zero
-  // deduction never renders as "-0" — `Intl` formats negative zero with a sign.
+  // The sign is composed here, not by negating: `Intl` formats negative zero as "-0".
   const signed = deduction && amount !== 0;
   return (
     <div className="flex items-center justify-between text-sm">
@@ -119,11 +101,6 @@ function TracePanel({ item }: { item: StatementLineItem }) {
   );
 }
 
-/**
- * The body of a statement: every line, where it came from, and the ladder from
- * gross income down to the payout. Shared by the owner and estate statements so
- * the two cannot drift apart in how they explain the same ledger.
- */
 export function StatementBreakdown({
   lineItems,
   totals,

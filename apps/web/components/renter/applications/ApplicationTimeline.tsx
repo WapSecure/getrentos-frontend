@@ -15,7 +15,6 @@ interface ApplicationTimelineProps {
   currentStatus: 'pending' | 'under_review' | 'approved' | 'rejected' | 'withdrawn';
 }
 
-// Map status to icon components (declared outside render)
 const statusIconMap: Record<string, React.ElementType> = {
   pending: Clock,
   under_review: UserCheck,
@@ -54,14 +53,12 @@ export const ApplicationTimeline = ({ timeline, currentStatus }: ApplicationTime
   const totalSteps = timeline.length;
   const progress = (completedCount / totalSteps) * 100;
 
-  // Get the appropriate icon component based on status
   const StatusIcon = statusIconMap[currentStatus] || Clock;
   const statusColor = statusColorMap[currentStatus] || 'text-muted-foreground';
   const statusLabel = getStatusLabel(currentStatus);
 
   return (
     <div className="space-y-6">
-      {/* Status Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <StatusIcon className={`w-5 h-5 ${statusColor}`} />
@@ -72,7 +69,6 @@ export const ApplicationTimeline = ({ timeline, currentStatus }: ApplicationTime
         </span>
       </div>
 
-      {/* Progress Bar */}
       <div className="h-2 bg-border rounded-full overflow-hidden">
         <motion.div
           initial={{ width: 0 }}
@@ -82,7 +78,6 @@ export const ApplicationTimeline = ({ timeline, currentStatus }: ApplicationTime
         />
       </div>
 
-      {/* Timeline Steps */}
       <div className="relative">
         <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-border" />
 

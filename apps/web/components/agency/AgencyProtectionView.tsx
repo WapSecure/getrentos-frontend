@@ -44,11 +44,6 @@ const emptyForm = {
   note: '',
 };
 
-/**
- * The firm's client-money-protection register — the compliance posture it stands
- * behind. Attestations are declared here and surfaced to clients on their money
- * view; segregation and daily reconciliation are enforced elsewhere.
- */
 export function AgencyProtectionView() {
   const queryClient = useQueryClient();
   const queryKey = ['agency', 'protection'];

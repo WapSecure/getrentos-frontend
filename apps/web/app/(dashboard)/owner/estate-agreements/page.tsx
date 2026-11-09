@@ -19,14 +19,6 @@ import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
 import type { EstateAgreement } from '@/types/estate-marketplace';
 
-/**
- * Estates asking to market a property the signed-in user owns.
- *
- * The copy does the reassuring, because the question is a nervous one: an owner
- * being asked to hand a third party the right to advertise their property needs
- * to know, before they click, that they keep the property and the money. Making
- * that explicit is the difference between an approval and a support ticket.
- */
 export default function OwnerEstateAgreementsPage() {
   const queryClient = useQueryClient();
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -149,8 +141,7 @@ export default function OwnerEstateAgreementsPage() {
               {isPending ? (
                 <Button
                   variant="outline"
-                  // The API requires a reason of at least 10 characters; an empty
-                  // one used to be sent and refused.
+                  // The API requires a reason of at least 10 characters.
                   disabled={reason.trim().length < 10}
                   isLoading={decline.isPending}
                   onClick={() => decline.mutate(agreement.id)}

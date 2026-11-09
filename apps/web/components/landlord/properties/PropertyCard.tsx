@@ -55,9 +55,7 @@ export const PropertyCard = ({
   const vacantUnits = property.totalUnits - property.occupiedUnits;
   const occupancyPct =
     property.totalUnits > 0 ? Math.round((property.occupiedUnits / property.totalUnits) * 100) : 0;
-  // Cover images are presigned MinIO URLs, so they can expire or fail to load
-  // (e.g. a long-open tab): fall back to the placeholder rather than a broken
-  // image icon.
+  // Presigned URLs can expire in a long-open tab, so fall back to the placeholder.
   const [coverFailed, setCoverFailed] = useState(false);
   const showCover = Boolean(property.coverImage) && !coverFailed;
 
@@ -65,9 +63,7 @@ export const PropertyCard = ({
     <div className="group relative overflow-hidden rounded-xl border border-border bg-card shadow-xs transition-shadow hover:shadow-md">
       <div className={`relative bg-muted ${showCover ? 'aspect-[16/10]' : 'h-24'}`}>
         {showCover ? (
-          // Signed storage URLs are not in next.config's remotePatterns, so
-          // next/image cannot optimise these; the same escape hatch is used by
-          // ListingCard and ListingPreviewModal.
+          // Signed storage URLs aren't in next.config's remotePatterns, so next/image can't optimise them.
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={property.coverImage}

@@ -13,11 +13,6 @@ interface LandConveyanceEntryProps {
   transaction: Pick<BuyerEscrowTransaction, 'id' | 'propertyType'>;
 }
 
-/**
- * The way into a land resale's conveyance steps from a transaction. Only land
- * sales have them, and the transaction says what it sold, so nothing is asked
- * of the API for any other property.
- */
 export const LandConveyanceEntry = ({ transaction }: LandConveyanceEntryProps) => {
   const txId = transaction.id;
   const isLand = transaction.propertyType === 'LAND';

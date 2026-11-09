@@ -18,21 +18,11 @@ export interface Estate {
   householdCount: number;
   createdAt: string;
   /**
-   * What this estate's subscription reaches — the ESTATE'S plan, not the
-   * viewer's.
-   *
-   * An estate is entitled through its organisation's owner, so a manager on a
-   * free personal plan still administers an Enterprise estate, and a manager on
-   * Pro still cannot use Enterprise features on a free one. Any "is this paid
-   * for?" badge in the estate console has to read this, and must treat an absent
-   * value as UNKNOWN rather than FREE: hiding a feature the estate pays for is
-   * worse than showing one that refuses with an upsell on submit.
+   * The estate's plan, not the viewer's. Treat an absent value as UNKNOWN, never FREE: hiding a
+   * paid feature is worse than an upsell on submit.
    */
   planTier?: PlanTier;
-  /**
-   * What the viewer is at this estate: its MANAGER, or GATE staff posted there.
-   * Only the viewer's own estate list carries it.
-   */
+  /** Only the viewer's own estate list carries it. */
   capacity?: 'MANAGER' | 'GATE';
 }
 
@@ -121,7 +111,7 @@ export interface Due {
   description?: string;
   isRecurring: boolean;
   createdAt: string;
-  /** Only set when payMyDue started a real Paystack checkout (Paystack configured). */
+  /** Only set when payMyDue started a real Paystack checkout. */
   authorizationUrl?: string;
   reference?: string;
 }
@@ -134,7 +124,7 @@ export interface EstateFinancialStats {
 }
 
 export type EstateStatementStatus = 'DRAFT' | 'ISSUED';
-/** See `OwnerStatementPayoutStatus` — the two held states are not failures. */
+/** See `OwnerStatementPayoutStatus`: the two held states are not failures. */
 export type EstateStatementPayoutStatus =
   | 'PENDING'
   | 'AWAITING_APPROVAL'
@@ -142,7 +132,6 @@ export type EstateStatementPayoutStatus =
   | 'FAILED'
   | 'REJECTED';
 
-/** Why a payout is not on its way, when a second person is holding it. */
 export interface EstateStatementRelease {
   id: string;
   amount: number;
@@ -153,13 +142,7 @@ export interface EstateStatementRelease {
   thresholdAtRequest: number;
 }
 
-/**
- * The organisation's owner querying one line of an estate statement.
- *
- * Only the owner may raise one: every member of the estate office can read these
- * statements, and a manager disputing their own firm's figures would be
- * adjudicating themselves. The firm gets a reply route and never a verdict.
- */
+/** Only the organisation's owner may raise one; the firm gets a reply route, never a verdict. */
 export interface EstateStatementLineDispute {
   id: string;
   statementId: string;
@@ -193,9 +176,8 @@ export interface EstateStatementLineItem {
   id: string;
   label: string;
   amount: number; /**
-   * Where the line came from. The statement is a view of the ledger, so a line
-   * cites the movement it renders and the document behind it. Null on a line
-   * written before the ledger became the source of truth.
+   * Cites the ledger movement and document the line renders; null on lines written
+   * before the ledger was the source of truth.
    */
   ledgerEntryId?: string | null;
   sourceType?: string | null;
@@ -221,9 +203,9 @@ export interface EstateStatement {
   status: EstateStatementStatus;
   payoutStatus: EstateStatementPayoutStatus;
   transferRef?: string;
-  /** The most recent ask to release this payout. Detail response only. */
+  /** Detail response only. */
   release?: EstateStatementRelease | null;
-  /** Queries against lines of this statement, newest first. Detail only. */
+  /** Newest first. Detail only. */
   disputes?: EstateStatementLineDispute[];
   disputeSummary?: EstateStatementDisputeSummary | null;
   paidAt: string | null;
@@ -241,15 +223,13 @@ export interface EstatePayoutAccount {
   /** CAC registration number + class of the estate's organisation, if given. */
   registrationNumber?: string | null;
   businessType?: 'BUSINESS_NAME' | 'LIMITED_COMPANY' | 'INCORPORATED_TRUSTEES' | null;
-  /** While a recent change is on hold; not sent by the API yet, shown once it is. */
+  /** Not sent by the API yet; shown once it is. */
   payoutHoldUntil?: string | null;
 }
 
 /**
- * `awaiting_approval` is a walk-in the gate raised and the household has not
- * answered; `approved` means they consented and the guard has not admitted them
- * yet. Consent and entry are kept apart on purpose, so the audit can show both
- * times and there is no arrival recorded for someone who walked away.
+ * `awaiting_approval`: the household has not answered; `approved`: consented but not yet admitted.
+ * Consent and entry are kept apart on purpose for the audit.
  */
 export type VisitorPassStatus =
   | 'pending'
@@ -262,10 +242,8 @@ export type VisitorPassStatus =
   | 'denied';
 
 /**
- * `resident` when the household raised it; `gate` when a guard raised it
- * because somebody arrived with nothing; `contractor` when the estate office
- * authorised them to keep arriving, so the credential they used was not a pass
- * the household issued for one visit.
+ * `contractor` means a standing authorisation from the estate office, not a pass the household
+ * issued.
  */
 export type VisitorPassSource = 'resident' | 'gate' | 'contractor';
 
@@ -281,19 +259,12 @@ export interface VisitorPass {
   source: VisitorPassSource;
   expiresAt: string;
   checkedInAt?: string;
-  /** Set once the gate logs the visitor off the estate. */
   checkedOutAt?: string;
-  /** When the household answered a walk-in request. */
   respondedAt?: string;
-  /** Why they refused, so the guard can tell the visitor something. */
   denialReason?: string;
   /**
-   * Set only on a write that screened somebody at a gate, and only when the
-   * estate's list matched without refusing them.
-   *
-   * Absent on a pass read from the estate's records: that pass was not screened
-   * at the moment somebody is looking at it, and a warning there would report a
-   * check that never happened.
+   * Only on a write that screened somebody at a gate and matched without refusing; absent on passes
+   * read from records.
    */
   watchlistWarning?: string;
   createdAt: string;
@@ -333,53 +304,39 @@ export interface DeliveryLog {
 export type ExpectedDeliveryStatus = 'AWAITING' | 'RECEIVED' | 'CANCELLED' | 'EXPIRED';
 
 /**
- * A parcel a household has said is coming.
- *
- * Every label here is written server-side and rendered verbatim. The rule the
- * resident reads, in their own words, is the same one the guard is refused by —
- * the two cannot be allowed to drift into different sentences about the same
- * code.
+ * Every label is written server-side and rendered verbatim, so the resident and guard read the same
+ * rule.
  */
 export interface ExpectedDelivery {
   id: string;
   courier: string;
   description?: string | null;
   status: ExpectedDeliveryStatus;
-  /** 'Waiting for the courier' / 'Handed over at the gate' / … */
   statusLabel: string;
   /** Whether the code can still be presented at the gate. */
   live: boolean;
   expiresAt: string;
-  /** 'Amazon — a phone case, until Tuesday 15:00' */
   summary: string;
   createdAt: string;
-  /** Set when it was handed over, so the household can see it was taken in. */
+  /** Set when it was handed over. */
   receivedAt?: string | null;
   receivedAtGateName?: string | null;
-  /** The parcel record this expectation produced, so it can be followed to collection. */
   deliveryLogId?: string | null;
 }
 
 /**
- * The declaration's reply, and the ONLY place the code ever exists.
- *
- * It is not stored in plaintext and cannot be asked for again — a household that
- * loses it declares again. That is deliberate: a retrievable code is one the
- * estate office can read out to a courier who is not carrying anything.
+ * The only place the code ever exists: it is not stored in plaintext and cannot be asked for again.
  */
 export interface IssuedExpectedDelivery extends ExpectedDelivery {
-  /** The six digits to give the courier. Present only in this response. */
+  /** Present only in this response. */
   code: string;
-  /** What to tell the household about it, worded server-side. */
+  /** Worded server-side. */
   guidance: string;
 }
 
 /**
- * The gate's answer to a code, in the shape a screening decision takes.
- *
- * There is no reason field, because a screen that distinguished "no such code"
- * from "that code expired" would be a way to ask whether a named household exists
- * in this estate, answerable by anybody standing at the barrier.
+ * No reason field on purpose: distinguishing "no such code" from "expired" would reveal whether a
+ * household exists.
  */
 export interface DeliveryCodeScreen {
   matched: boolean;
@@ -390,9 +347,7 @@ export interface DeliveryCodeScreen {
   description?: string | null;
   expiresAt?: string;
   declaredAt?: string;
-  /** What this means, for the guard. */
   message: string;
-  /** What to do next, for the guard. */
   instruction: string;
 }
 
@@ -410,7 +365,6 @@ export interface VehicleLog {
   gateName?: string;
   enteredAt: string;
   exitedAt?: string;
-  /** Set only on the write that logged this vehicle — see `VisitorPass`. */
   watchlistWarning?: string;
   createdAt: string;
 }
@@ -426,51 +380,38 @@ export interface Gate {
 /** `PERSON` is recognised by name or phone; `VEHICLE` by registration. */
 export type WatchlistSubjectType = 'PERSON' | 'VEHICLE';
 
-/**
- * `BLOCK` refuses entry. `WATCH` admits the visitor but the estate wants to be
-told, for somebody they would rather know about than exclude.
- */
+/** `BLOCK` refuses entry. `WATCH` admits the visitor but tells the estate. */
 export type WatchlistSeverity = 'BLOCK' | 'WATCH';
 
 /**
- * Lifted entries stay on the list rather than being deleted, so the estate can
- * still answer "was this person on our list in March, and who decided that?" —
- * a question that gets asked precisely when something has gone wrong.
+ * Lifted entries stay on the list rather than being deleted, so past decisions can still be
+ * audited.
  */
 export type WatchlistStatus = 'ACTIVE' | 'LIFTED';
 
 /**
- * Which detail the match was found on.
- *
- * Not cosmetic: a plate or a phone number is an identifier, while a name is a
- * coincidence waiting to happen, and a guard looking at a real person is
- * entitled to know which one they are looking at before deciding.
+ * A plate or phone is an identifier, a name is a coincidence; the guard needs to know which
+ * matched.
  */
 export type WatchlistMatchedOn = 'NAME' | 'PHONE' | 'PLATE';
 
 export type ContractorPassStatus = 'ACTIVE' | 'REVOKED' | 'EXPIRED';
 
 /**
- * A standing authorisation for somebody who arrives repeatedly.
- *
- * Not a kind of VisitorPass: that IS a visit — created, used once, closed. This
- * is a permission that outlives any single arrival, so the two answer different
- * questions. Every arrival here still records its own visitor pass, which is
- * what keeps "who is inside?" and check-out working unchanged.
+ * A standing permission, not a VisitorPass; every arrival still records its own pass so "who is
+ * inside?" and check-out keep working.
  */
 export interface ContractorPass {
   id: string;
   estateId: string;
   householdId: string;
-  /** The unit they work for, when the authorisation names one. */
   householdLabel?: string | null;
-  /** The person, not the firm — a company that rotates staff is re-authorised. */
+  /** The person, not the firm: a company that rotates staff is re-authorised. */
   name: string;
   phone?: string | null;
   company?: string | null;
   trade?: string | null;
   status: ContractorPassStatus;
-  /** Ready to render: Active / Withdrawn / Expired. */
   statusLabel: string;
   validFrom: string;
   validUntil: string;
@@ -478,27 +419,15 @@ export interface ContractorPass {
   daysOfWeek: number[];
   dailyFrom?: string | null;
   dailyTo?: string | null;
-  /** "Monday and Thursday, 08:00-17:00, until 31 Dec 2026". */
   scheduleLabel: string;
-  /**
-   * Arrivals this authorisation has let in, ever.
-   *
-   * The number an estate actually reviews: a cleaner authorised for Tuesdays who
-   * has been admitted forty times is the shape of problem this exists to show.
-   */
+  /** Arrivals this authorisation has ever let in. */
   visitCount: number;
   createdAt: string;
   revokedAt?: string | null;
   revokeReason?: string | null;
 }
 
-/**
- * The one and only time the PIN is visible.
- *
- * Nothing can read it back afterwards, so there is no "show me the code again"
- * screen — the manager hands it over once, or withdraws the authorisation and
- * issues a new one.
- */
+/** The only time the PIN is visible; nothing can read it back. */
 export interface IssuedContractorPass extends ContractorPass {
   pin: string;
   qrDataUrl: string;
@@ -525,11 +454,8 @@ export interface WatchlistEntry {
 }
 
 /**
- * One entry a visitor or vehicle matched.
- *
- * `message` is written server-side and shown verbatim. It is the only place the
- * wording lives, so the gate console on either platform cannot drift into
- * saying something the estate did not.
+ * `message` is written server-side and shown verbatim, so neither platform's gate console can
+ * drift.
  */
 export interface WatchlistMatch {
   entryId: string;
@@ -538,64 +464,35 @@ export interface WatchlistMatch {
   severity: WatchlistSeverity;
   reason: string;
   matchedOn: WatchlistMatchedOn;
-  /** True when this match should refuse the entry, false when it only warns. */
   blocked: boolean;
   message: string;
 }
 
 /**
- * The result of screening somebody.
- *
- * Always the same shape whether or not anything matched, so a caller cannot
- * mistake "not screened" for "screened and clear" — only one of those means
- * anything.
+ * Always the same shape whether or not anything matched, so "not screened" is never mistaken for
+ * "clear".
  */
 export interface WatchlistScreening {
   flagged: boolean;
   blocked: boolean;
   matches: WatchlistMatch[];
-  /**
-   * The refusal in words, when there is one to give.
-   *
-   * Undefined when nothing blocked — "nothing found" is better said plainly by
-   * the caller than by a sentence that has to hedge about what it did not cover.
-   */
+  /** Undefined when nothing blocked. */
   message?: string;
 }
 
-/**
- * What kind of emergency was declared.
- *
- * Drives the wording every resident is sent, which is why it is a fixed set
- * rather than free text: "gas leak" has to reach people as "a gas leak, leave by
- * the nearest exit", not depend on what a manager typed at 3am.
- */
+/** A fixed set because it drives the wording every resident is sent. */
 export type EmergencyKind = 'FIRE' | 'GAS_LEAK' | 'STRUCTURAL' | 'SECURITY' | 'MEDICAL' | 'OTHER';
 
-/**
- * `TIMED_OUT` is not a kind of closed.
- *
- * A roll nobody stood down has no all-clear to report — the estate stopped
- * asking, which is a different and less reassuring thing to tell people, so it
- * keeps its own status and its own wording.
- */
+/** `TIMED_OUT` is not a kind of closed: it keeps its own status and wording. */
 export type MusterStatus = 'ACTIVE' | 'CLOSED' | 'TIMED_OUT';
 
-/** Where one person is. `UNACCOUNTED` is where everybody starts. */
+/** `UNACCOUNTED` is where everybody starts. */
 export type MusterRollState = 'UNACCOUNTED' | 'ACCOUNTED' | 'NOT_ON_SITE' | 'NEEDS_HELP';
 
-/**
- * One name on a roll call.
- *
- * `basisLabel` says why they are on the roll — a resident of the estate, or
- * somebody who was inside when the alarm was raised. A visitor admitted *after*
- * the roll was taken gets a third wording, because claiming they were here when
- * the alarm went is a claim about where a person physically was.
- */
+/** `basisLabel` says why they are on the roll, worded server-side. */
 export interface MusterRollEntry {
   id: string;
   householdId: string;
-  /** The unit, so a marshal can walk the roll in order. */
   unitLabel: string;
   personName: string;
   basis: 'RESIDENT' | 'ON_SITE';
@@ -603,20 +500,13 @@ export interface MusterRollEntry {
   visitorPassId?: string | null;
   admittedAt?: string | null;
   state: MusterRollState;
-  /** Ready to render: Accounted for / Not yet accounted for / … */
   stateLabel: string;
   stateAt?: string | null;
   stateById?: string | null;
   stateNote?: string | null;
 }
 
-/**
- * The numbers at the top of the screen.
- *
- * Counted server-side and never derived here: the console, the resident app and
- * the notification people are sent must all print the same figures, and three
- * independent sums of the same roll is three chances to disagree.
- */
+/** Counted server-side; never derive these here, so every surface prints the same figures. */
 export interface MusterTally {
   total: number;
   accountedFor: number;
@@ -631,29 +521,26 @@ export interface EmergencyMuster {
   id: string;
   estateId: string;
   kind: EmergencyKind;
-  /** 'Fire' / 'Gas leak' — the heading. */
   kindLabel: string;
   description: string;
   assemblyPoint?: string | null;
-  /** What residents were told to do, composed server-side. */
+  /** Composed server-side. */
   assemblyInstruction: string;
   status: MusterStatus;
-  /** 'In progress' / 'Closed' / 'Timed out'. */
   statusLabel: string;
   declaredAt: string;
   declaredById: string;
   closedAt?: string | null;
   closedById?: string | null;
   closingNote?: string | null;
-  /** False once closed or timed out: the roll stops moving for a reason. */
+  /** False once closed or timed out. */
   rollOpen: boolean;
   tally: MusterTally;
-  /** "13 people on the roll, 1 person accounted for, …" */
   tallyLabel: string;
   roll: MusterRollEntry[];
 }
 
-/** A roll call as the history list shows it — no names, because a roll can be hundreds long. */
+/** No names: a roll can be hundreds long. */
 export interface MusterSummary {
   id: string;
   kind: EmergencyKind;
@@ -668,38 +555,27 @@ export interface MusterSummary {
 }
 
 /**
- * What a resident sees during an emergency: their own lines, and the estate's
- * numbers. Never the estate's roll — a list of names, units and who was home in
- * the middle of the night is the most sensitive thing this feature produces.
+ * Never the estate's roll: the list of names and who was home is the most sensitive thing this
+ * feature produces.
  */
 export interface ResidentEmergency {
   muster: EmergencyMuster;
   myEntries: MusterRollEntry[];
 }
 
-/** What a resident may say about their own household. */
 export type MusterSelfAnswer = 'ACCOUNTED' | 'NOT_ON_SITE' | 'NEEDS_HELP';
 
-/**
- * Where the estate's expectation of an end came from. `NONE` is the ordinary
- * case, not a fault: only a standing authorisation's hours state an end.
- */
+/** `NONE` is the ordinary case, not a fault: only a standing authorisation's hours state an end. */
 export type ExpectedOutSource = 'AUTHORISED_WINDOW' | 'NONE';
 
 /**
- * One person the estate believes is still inside.
- *
- * `insideLabel` and `expectationLabel` are composed server-side and shown
- * verbatim. They carry the distinction this whole feature turns on — an elapsed
- * time the estate said nothing about versus a visit past a window it wrote down —
- * and a client that rebuilt those sentences would be free to get the difference
- * wrong.
+ * `insideLabel` and `expectationLabel` are composed server-side and shown verbatim; do not rebuild
+ * them.
  */
 export interface OnSiteEntry {
   passId: string;
   visitorName: string;
   source: 'RESIDENT' | 'GATE' | 'CONTRACTOR';
-  /** 'Pass from the household' / 'Walk-in admitted at the gate' / … */
   sourceLabel: string;
   householdId: string;
   unitLabel: string;
@@ -708,16 +584,14 @@ export interface OnSiteEntry {
   authorisationName?: string | null;
   admittedAt: string;
   minutesInside: number;
-  /** 'Inside 3h 20m' / 'Inside 10h — past the end the estate authorised by 2h' */
   insideLabel: string;
   expectedOutAt?: string | null;
   expectedOutSource: ExpectedOutSource;
-  /** 'Authorised until 17:00' / 'No end was stated for this visit' */
   expectationLabel: string;
   minutesOver: number;
   /** Past the authorised end by more than the grace period. */
   overstaying: boolean;
-  /** When the office was told, so the screen can say the alert has already gone. */
+  /** So the screen can say the alert has already gone. */
   reportedAt?: string | null;
 }
 
@@ -725,7 +599,6 @@ export interface OnSiteTally {
   open: number;
   overstaying: number;
   oldestMinutes: number | null;
-  /** '4 inside, 1 past the end the estate authorised' */
   label: string;
 }
 
@@ -739,7 +612,6 @@ export interface OnSiteBoard {
   entries: OnSiteEntry[];
 }
 
-/** One standing authorisation, measured over a period. */
 export interface AuthorisationDwell {
   contractorPassId: string;
   name: string;
@@ -751,7 +623,7 @@ export interface AuthorisationDwell {
   scheduleLabel: string;
   visits: number;
   completed: number;
-  /** Still recorded as inside — the number a completed average hides. */
+  /** Still recorded as inside: the number a completed average hides. */
   openVisits: number;
   overstays: number;
   /** Mean dwell over COMPLETED visits only; null when none finished. */
@@ -760,7 +632,6 @@ export interface AuthorisationDwell {
   totalMinutes: number;
   firstVisitAt?: string | null;
   lastVisitAt?: string | null;
-  /** One line the screen can print without re-doing any of the arithmetic. */
   summaryLabel: string;
 }
 
@@ -943,43 +814,26 @@ export interface EstateMicrositeSettings {
   enabled: boolean;
 }
 
-/* -------------------------------------------------------------------------- */
-/* Patrols                                                                     */
-/* -------------------------------------------------------------------------- */
-
-/**
- * A point on a patrol, and the place the code lives.
- *
- * There is deliberately no code on this type. The code is returned exactly once,
- * when it is minted or re-issued, and no list endpoint ever carries one — a
- * checkpoint whose code the booth could read is one that certifies nothing, and
- * a guard could scan the whole register without walking it.
- */
+/** Deliberately no code on this type: it is returned only once, when minted or re-issued. */
 export interface PatrolCheckpoint {
   id: string;
   name: string;
   location?: string | null;
   active: boolean;
-  /** How many routes this checkpoint sits on, so retiring one can warn. */
+  /** So retiring one can warn. */
   routeCount: number;
-  /** How many times it has ever been scanned. Retiring keeps these. */
+  /** Retiring keeps these. */
   scanCount: number;
   createdAt: string;
 }
 
-/**
- * The reply to minting a code — the only moment it exists in readable form.
- *
- * `guidance` says where the code belongs, worded server-side, because the whole
- * mechanism depends on somebody printing it and putting it up at the right
- * place, and the console is the last chance to say so.
- */
+/** The only moment the code exists in readable form; `guidance` is worded server-side. */
 export interface IssuedPatrolCheckpoint extends PatrolCheckpoint {
   code: string;
   guidance: string;
 }
 
-/** A checkpoint in a route's walk order. `position` is the intended order. */
+/** `position` is the intended order. */
 export interface PatrolRouteCheckpoint {
   id: string;
   name: string;
@@ -998,7 +852,7 @@ export interface PatrolRoute {
   windowMinutes: number;
   active: boolean;
   checkpoints: PatrolRouteCheckpoint[];
-  /** 'Every day, from 22:00, within 1h 30m' — rendered verbatim. */
+  /** Rendered verbatim. */
   scheduleLabel: string;
   createdAt: string;
 }
@@ -1009,22 +863,16 @@ export interface PatrolScan {
   id: string;
   checkpointId: string;
   checkpointName: string;
-  /** Where this checkpoint sat in the route, so out-of-order walks are visible. */
   expectedPosition: number | null;
   scannedAt: string;
   scannedBy: string;
-  /** Scanned after the window had closed. Recorded, not refused. */
+  /** Recorded, not refused. */
   late: boolean;
 }
 
 /**
- * One night's patrol, whether or not it happened.
- *
- * A round is a row rather than something inferred from scans, because the thing
- * an estate is buying is the night nobody walked — which by definition has no
- * scans to infer from. `expected` and `missing` are judged against the roster
- * frozen when the round opened, so editing a route today cannot rewrite last
- * night.
+ * A round is a row, not inferred from scans, so a night nobody walked still shows. `expected` and
+ * `missing` use the roster frozen when the round opened.
  */
 export interface PatrolRound {
   id: string;
@@ -1033,17 +881,14 @@ export interface PatrolRound {
   scheduledFor: string;
   windowEndsAt: string;
   status: PatrolRoundStatus;
-  /** 'Walked' / 'Not walked' / 'Incomplete — 2 of 6 missed' / '3 of 6 so far'. */
   statusLabel: string;
   expected: number;
   scanned: number;
-  /** The checkpoints nobody reached, named, so the office knows where to send somebody. */
   missing: { id: string; name: string; position: number | null }[];
   late: number;
-  /** Whether they were reached in the order the route states. */
   inOrder: boolean;
   scans: PatrolScan[];
-  /** When the office was told, if it has been. Null means it never happened. */
+  /** Null means it never happened. */
   reportedAt?: string | null;
 }
 
@@ -1059,19 +904,11 @@ export interface PatrolReport {
     missed: number;
     open: number;
     missedScans: number;
-    /** '3 rounds, 1 not walked' */
     label: string;
   };
 }
 
-/**
- * The guard's answer to a code, and every failure shares ONE sentence.
- *
- * A screen that distinguished "no such code" from "that checkpoint is not on a
- * round tonight" would be a way to map an estate's patrol points by trying
- * codes. `instruction` says what to do next, which in every failing case is the
- * same thing: fall back to what you can see.
- */
+/** Every failure shares one sentence, so codes cannot be tried to map patrol points. */
 export interface PatrolScanResult {
   accepted: boolean;
   checkpointId?: string;
@@ -1084,22 +921,13 @@ export interface PatrolScanResult {
   scannedAt?: string;
   /** True when this scan arrived after the window closed but was still recorded. */
   late?: boolean;
-  /** True when this checkpoint was already scanned on this round. */
   alreadyScanned?: boolean;
   message: string;
   instruction: string;
 }
 
-/* -------------------------------------------------------------------------- */
-/* Expected today                                                              */
-/* -------------------------------------------------------------------------- */
 /**
- * One arrival the estate has been told about.
- *
- * Every row carries the deadline it was given, and nothing here says a visitor
- * is definitely coming — the board reports what the estate knows, and the PIN is
- * what actually admits anybody. `deadlineToday` is computed against the ESTATE's
- * own day, so a screen never has to decide what "today" means for itself.
+ * `deadlineToday` is computed against the estate's own day; the PIN, not this row, admits anybody.
  */
 export interface ExpectedVisitor {
   id: string;
@@ -1110,11 +938,10 @@ export interface ExpectedVisitor {
   visitorPhone?: string | null;
   purpose?: string | null;
   deadline: string;
-  /** 'by 18:00 today' / 'by Sat 3 Oct, 09:00' — server-worded. */
+  /** Server-worded. */
   deadlineLabel: string;
   deadlineToday: boolean;
   source: 'RESIDENT' | 'GATE' | 'CONTRACTOR' | 'IMPORT';
-  /** 'Pass from the household' / 'From a guest list the office entered'. */
   sourceLabel: string;
 }
 
@@ -1125,12 +952,10 @@ export interface ExpectedContractor {
   trade?: string | null;
   householdId?: string | null;
   unitLabel?: string | null;
-  /** '08:00-17:00' or the estate's own words for "any time". */
   hoursLabel: string;
   deadline: string;
   deadlineLabel: string;
   deadlineToday: boolean;
-  /** 'Mondays and Thursdays' / 'Every day'. */
   daysLabel: string;
 }
 
@@ -1146,12 +971,7 @@ export interface ExpectedParcel {
   deadlineToday: boolean;
 }
 
-/**
- * Who the estate expects, and which of them by the end of today.
- *
- * A hint board. Nothing on it opens a barrier — the pass PIN remains the only
- * thing that admits anybody.
- */
+/** A hint board: the pass PIN remains the only thing that admits anybody. */
 export interface ExpectedToday {
   estateId: string;
   asOf: string;
@@ -1168,16 +988,8 @@ export interface ExpectedToday {
 }
 
 /**
- * The identity document a guard was shown at the barrier.
- *
- * `documentTypeLabel` is what a screen displays — the server words it, so a
- * recorded check reads the same everywhere. `documentUrl` is a short-lived signed
- * URL, and is present only when this caller may see the document: its absence
- * means a check exists that is not this caller's to look at.
- *
- * Note this is fetched for ONE pass at a time, never as part of a list. One
- * estate-wide key would put a signed URL for every visitor's document into a
- * single cached response.
+ * `documentUrl` is short-lived, and absent when this caller may not see the document. Fetched for
+ * one pass at a time, never in a list.
  */
 export interface VisitorIdCheck {
   id: string;
@@ -1194,24 +1006,18 @@ export interface VisitorIdCheck {
   notice?: string;
 }
 
-/** One line of a guest list that could not be added, numbered like the spreadsheet. */
+/** Numbered like the spreadsheet. */
 export interface GuestListImportError {
   row: number;
   visitorName?: string;
   message: string;
 }
 
-/**
- * What a guest list produced.
- *
- * Per row, never all-or-nothing: one unreadable line must not refuse the rest,
- * so the screen has to be able to show what was taken and what was not.
- */
+/** Per row, never all-or-nothing. */
 export interface GuestListImportResult {
   created: number;
   failed: number;
   errors: GuestListImportError[];
-  /** 'Added 2 of 3. 1 row needs attention.' */
   label: string;
   expiresAt: string;
   deadlineLabel: string;

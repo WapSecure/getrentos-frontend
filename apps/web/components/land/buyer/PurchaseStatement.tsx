@@ -14,10 +14,7 @@ const KIND_LABELS = {
   WAIVER: 'Waiver',
 } as const;
 
-/**
- * A running balance below zero means the buyer has paid ahead of the schedule:
- * show it as credit, never as a minus sign that reads like debt.
- */
+// A negative running balance is credit: never show it as a minus that reads like debt.
 const BalanceCell = ({ balance }: { balance: number }) =>
   balance < 0 ? (
     <span className="text-success">{formatCurrency(-balance)} credit</span>
@@ -25,7 +22,6 @@ const BalanceCell = ({ balance }: { balance: number }) =>
     <>{formatCurrency(balance)}</>
   );
 
-/** Ledger of charges and payments with a running balance. Loaded on demand. */
 export const PurchaseStatement = ({ purchaseId }: { purchaseId: string }) => {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: buyerLandKeys.statement(purchaseId),

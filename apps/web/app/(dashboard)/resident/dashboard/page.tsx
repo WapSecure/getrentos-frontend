@@ -56,10 +56,7 @@ export default function ResidentDashboardPage() {
     queryFn: () => unwrap(estateResidentService.getMyHousehold()),
   });
 
-  // A due is outstanding until it is actually paid. Filtering the list to
-  // `pending` reported ₦0 to residents who owed money, because a due that is
-  // past its date is `overdue`, not `pending`. This shares the dues page's
-  // query, so the tile and the dues list always agree.
+  // A past-due due is `overdue`, not `pending`, so filtering to `pending` under-reports what is owed.
   const { data: duesData } = useQuery({
     queryKey: estateResidentKeys.dues(),
     queryFn: () => unwrap(estateResidentService.listMyDues({ pageSize: 50 })),
@@ -86,9 +83,6 @@ export default function ResidentDashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* First, above even the household header: if the estate is calling the
-          roll, nothing else on this screen matters as much. Renders nothing when
-          there is no emergency, which is almost always. */}
       <EmergencyBanner />
 
       <PageHeader

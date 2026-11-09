@@ -94,7 +94,6 @@ export const ApplicationNotes = ({
         </Button>
       </div>
 
-      {/* Add Note Form */}
       {isAdding && (
         <motion.div
           initial={{ opacity: 0, height: 0 }}
@@ -128,7 +127,6 @@ export const ApplicationNotes = ({
 
       {saveError && <Alert variant="danger">{saveError}</Alert>}
 
-      {/* Notes List */}
       <div className="space-y-2">
         {notes.length === 0 && !isAdding && (
           <EmptyState icon={StickyNote} title="No notes yet" size="compact" bare />

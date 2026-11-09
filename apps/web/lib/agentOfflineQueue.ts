@@ -4,14 +4,7 @@ import { currentAgentQueueOwner, requireAgentQueueOwner } from './agentQueueOwne
 
 export type AgentOfflineOperationType = 'inspection' | 'verification' | 'document' | 'message';
 
-/**
- * Each queued operation carries exactly the payload its service call needs, so a
- * replay can switch on `type` and get the right payload type without a cast.
- *
- * Derived from the service signatures rather than restated, so changing a method
- * fails the build here instead of at runtime on a device that is offline and has
- * nowhere to report the error.
- */
+// Derived from the service signatures so a changed method fails the build, not a replay on an offline device with nowhere to report it.
 export type AgentOfflinePayloads = {
   inspection: Parameters<typeof agentService.submitInspection>[0];
   verification: Parameters<typeof agentService.submitVerification>[0];
@@ -43,14 +36,12 @@ export const agentOfflineQueue = {
     return readAll().filter((item) => item.ownerId === ownerId);
   },
   unownedCount: () => readAll().filter((item) => !item.ownerId).length,
-  // Generic in the type so the payload is checked against that member of the
-  // union — the one place that stops a wrongly-shaped payload being queued.
+  // Generic so the payload is checked against its union member: the one place that stops a wrongly shaped payload being queued.
   enqueue: <K extends AgentOfflineOperationType>(
     type: K,
     payload: AgentOfflinePayloads[K],
     expectedOwner?: string
   ) => {
-    // Rebuilt rather than spread, so the mapped type is satisfied by construction.
     const item = {
       id: crypto.randomUUID(),
       type,

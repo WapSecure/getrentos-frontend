@@ -3,11 +3,6 @@ import { ShortletListingDetail } from '@/components/shortlet/ShortletListingDeta
 import { SITE_URL } from '@/lib/site';
 import type { ShortletListing } from '@/types/shortlet';
 
-/**
- * ISR: listing pages are cached after the first request and revalidated in the
- * background every hour. This keeps the page fast and crawlable while staying
- * fresh as hosts update availability/pricing.
- */
 export const revalidate = 3600;
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
@@ -56,8 +51,6 @@ export async function generateMetadata({ params }: ShortletDetailPageProps): Pro
 
 export default async function ShortletDetailPage({ params }: ShortletDetailPageProps) {
   const { id } = await params;
-  // Pre-fetch the listing server-side so the page renders with real content
-  // (better SEO + LCP) and the client query hydrates instantly.
   const listing = await fetchListing(id);
   return <ShortletListingDetail listingId={id} initialListing={listing ?? undefined} />;
 }

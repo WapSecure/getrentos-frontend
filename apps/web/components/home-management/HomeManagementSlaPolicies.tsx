@@ -176,11 +176,7 @@ interface HomeManagementSlaPoliciesProps {
   isPropertiesLoading?: boolean;
 }
 
-/**
- * Per-property service objectives with explicit emergency-routing and active
- * states. Policy edits are intentionally scoped by property so an operator
- * cannot silently apply one home's service promise to another home.
- */
+// Edits are scoped by property so one home's service promise can't silently apply to another.
 export function HomeManagementSlaPolicies({
   properties,
   isPropertiesLoading = false,

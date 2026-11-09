@@ -9,7 +9,6 @@ import type {
 
 const seatPath = (seatId: string) => `/land/reviews/${encodeURIComponent(seatId)}`;
 
-/** The outside professional's own land review seats. */
 export const landReviewerService = {
   listMine: (page = 1, pageSize = 20) =>
     safeCall(() =>
@@ -19,7 +18,6 @@ export const landReviewerService = {
   getSeat: (seatId: string) =>
     safeCall(() => authFetch<LandReviewCase>(`/land/reviews/${encodeURIComponent(seatId)}`)),
 
-  /** Surveyor: sign off, or return with a reason, the outline now on the parcel. */
   signOffBoundary: (
     seatId: string,
     versionId: string,
@@ -72,7 +70,7 @@ export const landReviewerService = {
       })
     ),
 
-  /** Multipart: the file lands on the property, cited on `checklistKey` when given. */
+  /** The file lands on the property, cited on `checklistKey` when given. */
   uploadDocument: (seatId: string, input: LandReviewUploadInput) => {
     const form = new FormData();
     form.append('file', input.file);
@@ -84,7 +82,6 @@ export const landReviewerService = {
     );
   },
 
-  /** Cites a document already on the property against one of the seat's checks. */
   citeDocument: (seatId: string, input: LandReviewCiteInput) =>
     safeCall(() =>
       authFetch<LandReviewCase>(`${seatPath(seatId)}/citations`, {
@@ -97,7 +94,7 @@ export const landReviewerService = {
       })
     ),
 
-  /** Withdraws one of the reviewer's own citations on a check (403 for anyone else's). */
+  /** 403 for anyone else's citation. */
   uncite: (seatId: string, documentId: string, checklistKey: string) =>
     safeCall(() =>
       authFetch<LandReviewCase>(

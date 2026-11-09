@@ -4,13 +4,7 @@ import { Check, FileCheck, Home, ShieldCheck, UserCheck, type LucideIcon } from 
 import { trustChainLabel } from '@sureground/shared';
 import type { Property, PropertyTrustStepId } from '@/types/renter';
 
-/**
- * The property trust chain, rendered for renters on the property detail page:
- * verified owner → ownership confirmed → property verified → payment protected.
- * It is the consumer-facing proof of the Sureground moat — why a listing here is
- * safer than one on an open marketplace. Renders nothing when the payload
- * carries no chain (older listings, or the browse list where it is omitted).
- */
+// Renders nothing when the payload has no chain (older listings, or the browse list where it is omitted).
 
 const STEP_ICON: Record<PropertyTrustStepId, LucideIcon> = {
   owner: UserCheck,
@@ -42,7 +36,6 @@ export const PropertyTrustChain = ({ property }: { property: Property }) => {
           const isLast = index === chain.steps.length - 1;
           return (
             <li key={step.id} className="relative flex gap-3">
-              {/* Connector line between the chain links */}
               {!isLast && (
                 <span
                   aria-hidden

@@ -12,7 +12,6 @@ import {
   type TrustAppealStatus,
 } from '@/services/trustAppealService';
 
-/** Shared query key so every mounted control reuses one `listMine` fetch. */
 const MY_APPEALS_KEY = ['trust', 'appeals', 'mine'] as const;
 
 const STATUS_PRESENTATION: Record<
@@ -49,19 +48,9 @@ const STATUS_PRESENTATION: Record<
 interface AppealControlProps {
   targetType: AppealTargetType;
   targetId: string;
-  /** Short context shown in the prompt, e.g. "this claim" or "this verification". */
   subject?: string;
 }
 
-/**
- * The subject's side of a trust appeal (TG-06): contest a rejected decision, or
- * see the status of the appeal already filed against it.
- *
- * It fetches the signed-in user's appeals once (shared query key) and matches the
- * one for this target, so it can either offer the appeal form or show where the
- * existing appeal stands — a subject never files two appeals for the same
- * decision, and the backend enforces that too.
- */
 export const AppealControl = ({
   targetType,
   targetId,
