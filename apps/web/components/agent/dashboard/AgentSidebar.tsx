@@ -14,6 +14,7 @@ import {
   Settings,
   KeyRound,
   Luggage,
+  IdCard,
 } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n/translations';
@@ -41,14 +42,37 @@ export const navItems: NavItem[] = [
   { label: 'Managed properties', href: ROUTES.AGENT_MANAGED, icon: KeyRound },
   { label: 'My stays', href: ROUTES.AGENT_BOOKINGS, icon: Luggage },
   { labelKey: 'sidebar.settings', href: ROUTES.AGENT_SETTINGS, icon: Settings },
-  { label: 'Verification', href: '/agent/verification', icon: BadgeCheck },
+  { label: 'Verification', href: '/agent/verification', icon: IdCard },
 ];
 
+/** Picks items by route, so a group can never drift from its label as items are added. */
+const pick = (...hrefs: string[]) =>
+  hrefs.flatMap((href) => navItems.filter((item) => item.href === href));
+
 const baseNavGroups = [
-  { label: 'Overview', items: navItems.slice(0, 1) },
-  { label: 'Field operations', items: navItems.slice(1, 6) },
-  { label: 'Messages and documents', items: navItems.slice(6, 8) },
-  { label: 'Trust and account', items: navItems.slice(8) },
+  { label: 'Overview', items: pick(ROUTES.AGENT_DASHBOARD) },
+  {
+    label: 'Field operations',
+    items: pick(
+      ROUTES.AGENT_TASKS,
+      ROUTES.AGENT_INSPECTIONS,
+      ROUTES.AGENT_VERIFICATIONS,
+      ROUTES.AGENT_WORK_ORDERS,
+      ROUTES.AGENT_SYNC
+    ),
+  },
+  { label: 'Messages and documents', items: pick(ROUTES.AGENT_DOCUMENTS, ROUTES.AGENT_MESSAGES) },
+  {
+    label: 'Trust and account',
+    items: pick(
+      ROUTES.AGENT_REVIEWS,
+      ROUTES.AGENT_TRUST_PROFILE,
+      ROUTES.AGENT_MANAGED,
+      ROUTES.AGENT_BOOKINGS,
+      ROUTES.AGENT_SETTINGS,
+      '/agent/verification'
+    ),
+  },
 ];
 
 export const navGroups = createRoleNavigation(
