@@ -213,7 +213,7 @@ which the table above covers.
 - `apps/backoffice/components/admin/dashboard/AdminSidebar.tsx` (Codex).
 - Pages: the ten pipeline pages; detail views using breadcrumbs; Automations, estate Microsite and renter Trust score headings.
 
-## 11. Efficiency and feature flags
+## Efficiency and feature flags
 
 **Steps to reach a page (landlord, 1440×1000).** Before the redesign every group started open:
 34 links in a 1,924px sidebar, of which the first 15 were visible without scrolling.
