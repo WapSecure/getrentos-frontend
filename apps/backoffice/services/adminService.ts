@@ -333,6 +333,32 @@ export const adminService = {
     );
   },
 
+  /** Ends every session the user has (account takeover response). Asks the officer to confirm it's them. */
+  async signOutUserEverywhere(
+    userId: string,
+    reason: string
+  ): Promise<ApiResponse<{ success: boolean; revokedSessions: number }>> {
+    return safeCall(() =>
+      authFetch(`/admin/users/${userId}/security/logout-all`, {
+        method: 'POST',
+        body: JSON.stringify({ reason }),
+      })
+    );
+  },
+
+  /** Removes the user's authenticator and backup codes and ends every session. */
+  async resetUserTwoFactor(
+    userId: string,
+    reason: string
+  ): Promise<ApiResponse<{ success: boolean }>> {
+    return safeCall(() =>
+      authFetch(`/admin/users/${userId}/security/reset-2fa`, {
+        method: 'POST',
+        body: JSON.stringify({ reason }),
+      })
+    );
+  },
+
   async updateUserSubscription(userId: string, tier: PlanTier): Promise<ApiResponse<PlatformUser>> {
     return safeCall(() =>
       authFetch(`/admin/users/${userId}/subscription`, {
