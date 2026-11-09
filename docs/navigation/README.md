@@ -272,14 +272,24 @@ No navigation-related regression. Dev-server timings; production will be faster.
 | Buyer    | 12                                     | 7, Documents, yes                        | 8.53:1                    |
 | Estate   | 19                                     | 7, Vehicles, yes                         | 8.53:1                    |
 
-The rail is 72px wide in every role. Backoffice rail, keyboard and resilience in the browser: pending
-(the VS Code panel was hidden).
+The rail is 72px wide in every role.
+
+**Backoffice** (signed in as `qa-audit-staff-backoffice-admin` with two-factor, on `/admin/disputes`):
+
+- Sidebar: 17 Tab stops, all with a focus ring.
+- Rail: 72px, 6 links, current page (Disputes) marked.
+- Each layout request failed in turn (notifications, 2FA status, managed queue counts): the sidebar, top bar and page all stay. When the page's own data (`/admin/disputes`) fails, the error shows inside the page.
+
+**After the central config** (2adad1a4, df5b52ec, 6ad9ad1c), the route matrix was re-run with no request interception: landlord 34, owner 29, renter 16, realtor 16, agent 14, buyer 15 and estate 26 pages. No issues.
+Phone drawer at 390px, landlord: the same 34 links as the desktop sidebar, with the same three plan locks (Automations, Financials, Microsite).
+Drawer gating for owner, realtor and buyer is covered by the config equivalence check but was not opened in the browser.
 
 ## 10. Remaining issues and recommendations
 
 1. **Backoffice:**
    - Done: groups fixed in code (89c728bb), and the test admin `qa-audit-staff-backoffice-admin` now has two-factor.
-   - Still to do: open the backoffice in the browser (the sign-in did not submit in the bridge; check by hand); the icon rail; Title Case labels ("Trust Reviews") against the sentence-case rule. Those labels are also lookup keys in the sidebar code, so change them together.
+   - Done in the browser: sign-in with two-factor, rail, keyboard and resilience (see the second pass above).
+   - Still to do: Title Case labels ("Trust Reviews") against the sentence-case rule. Those labels are also lookup keys in the sidebar code, so change them together.
 2. **More screenshots:** phone and tablet before-and-after (desktop is in section 4).
 3. **Not tested yet:**
    - orientation change
