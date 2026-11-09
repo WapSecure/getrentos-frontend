@@ -51,25 +51,53 @@ export const navItems: NavItem[] = [
   { label: 'Verification', href: ROUTES.REALTOR_VERIFICATION, icon: BadgeCheck },
 ];
 
+/** Picks items by route, so a group can never drift from its label as items are added. */
+const pick = (...hrefs: string[]) =>
+  hrefs.flatMap((href) => navItems.filter((item) => item.href === href));
+
+// Groups follow a realtor's work: winning business, closing deals and getting
+// paid, records, and their professional standing (verification is a priority
+// for a realtor, so it sits with their profile rather than under settings).
 const baseNavGroups = [
-  { label: 'Overview', items: navItems.slice(0, 1) },
-  { label: 'Business development', items: navItems.slice(1, 4) },
-  { label: 'Transactions', items: navItems.slice(4, 7) },
-  { label: 'Messages and documents', items: navItems.slice(7, 9) },
-  { label: 'Trust and account', items: navItems.slice(9) },
+  { label: 'Overview', items: pick(ROUTES.REALTOR_DASHBOARD) },
+  {
+    label: 'Clients and listings',
+    items: pick(ROUTES.REALTOR_LISTINGS, ROUTES.REALTOR_CLIENTS, ROUTES.REALTOR_LEADS),
+  },
+  {
+    label: 'Deals and commissions',
+    items: pick(
+      ROUTES.REALTOR_VIEWINGS,
+      ROUTES.REALTOR_OFFERS,
+      ROUTES.REALTOR_COMMISSIONS,
+      ROUTES.REALTOR_MANAGED
+    ),
+  },
+  {
+    label: 'Messages and documents',
+    items: pick(ROUTES.REALTOR_MESSAGES, ROUTES.REALTOR_DOCUMENTS),
+  },
+  {
+    label: 'Professional profile',
+    items: pick(ROUTES.REALTOR_VERIFICATION, ROUTES.REALTOR_TRUST_PROFILE, ROUTES.REALTOR_REVIEWS),
+  },
+  {
+    label: 'Account',
+    items: pick(ROUTES.REALTOR_SETTINGS, ROUTES.REALTOR_BILLING, ROUTES.REALTOR_BOOKINGS),
+  },
 ];
 
 export const navGroups = createRoleNavigation(
   baseNavGroups,
   [
     ROUTES.REALTOR_DASHBOARD,
-    ROUTES.REALTOR_CLIENTS,
     ROUTES.REALTOR_LISTINGS,
+    ROUTES.REALTOR_CLIENTS,
     ROUTES.REALTOR_LEADS,
-    ROUTES.REALTOR_VIEWINGS,
     ROUTES.REALTOR_OFFERS,
+    ROUTES.REALTOR_MESSAGES,
   ],
-  [ROUTES.REALTOR_SETTINGS, ROUTES.REALTOR_BILLING, ROUTES.REALTOR_VERIFICATION]
+  [ROUTES.REALTOR_SETTINGS, ROUTES.REALTOR_BILLING, ROUTES.REALTOR_BOOKINGS]
 );
 
 export const RealtorSidebar = () => {

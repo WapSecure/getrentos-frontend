@@ -48,12 +48,38 @@ export const navItems: NavItem[] = [
   { label: 'Verification', href: ROUTES.BUYER_VERIFICATION, icon: BadgeCheck },
 ];
 
+/** Picks items by route, so a group can never drift from its label as items are added. */
+const pick = (...hrefs: string[]) =>
+  hrefs.flatMap((href) => navItems.filter((item) => item.href === href));
+
+// Groups follow a buyer's journey: find a property, buy it, keep the records,
+// and build the trust that sellers see.
 const baseNavGroups = [
-  { label: 'Overview', items: navItems.slice(0, 1) },
-  { label: 'Find property', items: navItems.slice(1, 5) },
-  { label: 'Buying journey', items: navItems.slice(5, 9) },
-  { label: 'Messages and documents', items: navItems.slice(9, 11) },
-  { label: 'Trust and account', items: navItems.slice(11) },
+  { label: 'Overview', items: pick(ROUTES.BUYER_DASHBOARD) },
+  {
+    label: 'Find property',
+    items: pick(ROUTES.BUYER_DISCOVER, ROUTES.BUYER_SAVED, ROUTES.BUYER_LAND),
+  },
+  {
+    label: 'Buying',
+    items: pick(
+      ROUTES.BUYER_VIEWINGS,
+      ROUTES.BUYER_OFFERS,
+      ROUTES.BUYER_TRANSACTIONS,
+      LAND_BUYER_ROUTES.HUB
+    ),
+  },
+  { label: 'Messages and documents', items: pick(ROUTES.BUYER_MESSAGES, ROUTES.BUYER_DOCUMENTS) },
+  {
+    label: 'Trust and account',
+    items: pick(
+      ROUTES.BUYER_TRUST_PROFILE,
+      ROUTES.BUYER_REVIEWS,
+      ROUTES.BUYER_SETTINGS,
+      ROUTES.BUYER_VERIFICATION,
+      ROUTES.BUYER_BOOKINGS
+    ),
+  },
 ];
 
 export const navGroups = createRoleNavigation(
@@ -62,11 +88,11 @@ export const navGroups = createRoleNavigation(
     ROUTES.BUYER_DASHBOARD,
     ROUTES.BUYER_DISCOVER,
     ROUTES.BUYER_SAVED,
-    ROUTES.BUYER_VIEWINGS,
     ROUTES.BUYER_OFFERS,
     ROUTES.BUYER_TRANSACTIONS,
+    ROUTES.BUYER_MESSAGES,
   ],
-  [ROUTES.BUYER_SETTINGS, ROUTES.BUYER_VERIFICATION]
+  [ROUTES.BUYER_SETTINGS, ROUTES.BUYER_VERIFICATION, ROUTES.BUYER_BOOKINGS]
 );
 
 const MARKETPLACE_ONLY = new Set<string>([ROUTES.BUYER_LAND, LAND_BUYER_ROUTES.HUB]);
