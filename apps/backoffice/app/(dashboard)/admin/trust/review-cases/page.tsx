@@ -75,7 +75,7 @@ export default function TrustReviewCasesPage() {
     <>
       <PageHeader
         title="Trust Review Cases"
-        description="Verifications flagged for a human decision. Blocking decisions (reject / restrict) are four-eyes: they need a second officer."
+        description="Verifications flagged for a human decision. Every decision needs a second officer, who works through the case's evidence checklist."
       />
 
       <div className="mb-4 flex flex-col gap-3 sm:flex-row">
