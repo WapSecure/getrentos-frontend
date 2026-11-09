@@ -137,7 +137,7 @@ export function useSessionActivity(
     setIsExtending(true);
     void refreshSession().then((extended) => {
       setIsExtending(false);
-      // On failure refreshSession() has already fired the expired listeners and the redirect.
+      // A refused refresh already fired the expired redirect; an unreachable API keeps the prompt.
       if (!extended) return;
       lastActivityRef.current = Date.now();
       setSecondsLeft(null);

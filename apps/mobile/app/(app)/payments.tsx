@@ -386,6 +386,10 @@ function PaymentRow({
           />
         ) : p.status === 'processing' && p.resumeCheckout ? (
           <Button label="Resume payment" size="sm" fullWidth={false} onPress={onResume} />
+        ) : p.status === 'processing' ? (
+          // The checkout was left too long ago to resume. Paying again is safe:
+          // the API asks Paystack about the earlier one and refuses if it was paid.
+          <Button label="Pay again" size="sm" fullWidth={false} loading={paying} onPress={onPay} />
         ) : releasable ? (
           <Button
             label="Confirm move-in"

@@ -49,6 +49,10 @@ function PaymentReturnContent() {
     refetchInterval: (query) =>
       query.state.data?.status === 'PENDING' && !gaveUp ? POLL_MS : false,
     retry: 2,
+    // A payer just back from paying, on a weak connection, must see "we couldn't
+    // check, try again" (PaymentLookupFailed below), never the app's error page:
+    // the app-wide default sends a failed first load to the nearest boundary.
+    throwOnError: false,
   });
 
   const payment = status.data;
