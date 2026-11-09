@@ -1,0 +1,88 @@
+import {
+  BedDouble,
+  Calendar,
+  CalendarCheck,
+  CreditCard,
+  FileText,
+  Gift,
+  Heart,
+  HelpCircle,
+  House,
+  LayoutDashboard,
+  MessageCircle,
+  Search,
+  Settings,
+  Star,
+  Users,
+  Wrench,
+} from 'lucide-react';
+import { ROUTES } from '@/lib/constants/auth';
+import { defineRoleNavigation } from '../resolve';
+
+export const renterNavigation = defineRoleNavigation({
+  ariaLabel: 'Renter navigation',
+  workspaceLabel: 'Renter',
+  dashboardHref: ROUTES.RENTER_DASHBOARD,
+  items: [
+    {
+      id: 'dashboard',
+      labelKey: 'sidebar.dashboard',
+      href: ROUTES.RENTER_DASHBOARD,
+      icon: LayoutDashboard,
+    },
+    { id: 'discover', labelKey: 'sidebar.discover', href: ROUTES.RENTER_DISCOVER, icon: Search },
+    { id: 'saved', labelKey: 'sidebar.saved', href: ROUTES.RENTER_SAVED, icon: Heart },
+    {
+      id: 'bookings',
+      labelKey: 'sidebar.shortlet_bookings',
+      href: ROUTES.RENTER_BOOKINGS,
+      icon: BedDouble,
+    },
+    {
+      id: 'applications',
+      labelKey: 'sidebar.applications',
+      href: ROUTES.RENTER_APPLICATIONS,
+      icon: FileText,
+    },
+    {
+      id: 'viewings',
+      labelKey: 'sidebar.viewings',
+      href: ROUTES.RENTER_VIEWINGS,
+      icon: CalendarCheck,
+    },
+    { id: 'home', labelKey: 'sidebar.my_home', href: ROUTES.RENTER_HOME, icon: House },
+    {
+      id: 'payments',
+      labelKey: 'sidebar.payments',
+      href: ROUTES.RENTER_PAYMENTS,
+      icon: CreditCard,
+    },
+    {
+      id: 'maintenance',
+      labelKey: 'sidebar.maintenance',
+      href: ROUTES.RENTER_MAINTENANCE,
+      icon: Wrench,
+    },
+    { id: 'roommates', labelKey: 'sidebar.roommates', href: ROUTES.RENTER_ROOMMATES, icon: Users },
+    {
+      id: 'messages',
+      labelKey: 'sidebar.messages',
+      href: ROUTES.RENTER_MESSAGES,
+      icon: MessageCircle,
+    },
+    { id: 'calendar', labelKey: 'sidebar.calendar', href: ROUTES.RENTER_CALENDAR, icon: Calendar },
+    { id: 'trustScore', label: 'Trust & Credit', href: ROUTES.RENTER_TRUST_SCORE, icon: Star },
+    { id: 'referrals', labelKey: 'sidebar.referrals', href: ROUTES.RENTER_REFERRALS, icon: Gift },
+    { id: 'settings', labelKey: 'sidebar.settings', href: ROUTES.RENTER_SETTINGS, icon: Settings },
+    { id: 'help', labelKey: 'sidebar.help', href: ROUTES.RENTER_HELP, icon: HelpCircle },
+  ],
+  groups: [
+    { label: 'Overview', items: ['dashboard'] },
+    { label: 'Find a home', items: ['discover', 'saved', 'bookings', 'applications', 'viewings'] },
+    { label: 'Your tenancy', items: ['home', 'payments', 'maintenance', 'roommates'] },
+    { label: 'Communication', items: ['messages', 'calendar'] },
+    { label: 'Trust and support', items: ['trustScore', 'referrals', 'settings', 'help'] },
+  ],
+  primary: ['dashboard', 'discover', 'home', 'payments', 'maintenance', 'messages'],
+  utility: ['settings', 'help'],
+});

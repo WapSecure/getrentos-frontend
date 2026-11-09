@@ -1,0 +1,93 @@
+import {
+  BadgeCheck,
+  CalendarClock,
+  FolderOpen,
+  Handshake,
+  KeyRound,
+  LayoutDashboard,
+  Luggage,
+  Megaphone,
+  MessageCircle,
+  Settings,
+  Star,
+  UserPlus,
+  Users,
+  Wallet,
+} from 'lucide-react';
+import { ROUTES } from '@/lib/constants/auth';
+import { defineRoleNavigation } from '../resolve';
+
+export const realtorNavigation = defineRoleNavigation({
+  ariaLabel: 'Realtor navigation',
+  workspaceLabel: 'Realtor',
+  dashboardHref: ROUTES.REALTOR_DASHBOARD,
+  items: [
+    {
+      id: 'dashboard',
+      labelKey: 'sidebar.dashboard',
+      href: ROUTES.REALTOR_DASHBOARD,
+      icon: LayoutDashboard,
+    },
+    { id: 'clients', labelKey: 'sidebar.clients', href: ROUTES.REALTOR_CLIENTS, icon: Users },
+    {
+      id: 'listings',
+      labelKey: 'sidebar.listings',
+      href: ROUTES.REALTOR_LISTINGS,
+      icon: Megaphone,
+    },
+    { id: 'leads', labelKey: 'sidebar.leads', href: ROUTES.REALTOR_LEADS, icon: UserPlus },
+    {
+      id: 'viewings',
+      labelKey: 'sidebar.viewings',
+      href: ROUTES.REALTOR_VIEWINGS,
+      icon: CalendarClock,
+    },
+    { id: 'offers', labelKey: 'sidebar.offers', href: ROUTES.REALTOR_OFFERS, icon: Handshake },
+    {
+      id: 'commissions',
+      labelKey: 'sidebar.commissions',
+      href: ROUTES.REALTOR_COMMISSIONS,
+      icon: Wallet,
+      plan: 'PRO',
+    },
+    {
+      id: 'documents',
+      labelKey: 'sidebar.documents',
+      href: ROUTES.REALTOR_DOCUMENTS,
+      icon: FolderOpen,
+    },
+    {
+      id: 'messages',
+      labelKey: 'sidebar.messages',
+      href: ROUTES.REALTOR_MESSAGES,
+      icon: MessageCircle,
+    },
+    { id: 'reviews', labelKey: 'sidebar.reviews', href: ROUTES.REALTOR_REVIEWS, icon: Star },
+    {
+      id: 'trustProfile',
+      labelKey: 'sidebar.trust_profile',
+      href: ROUTES.REALTOR_TRUST_PROFILE,
+      icon: BadgeCheck,
+    },
+    { id: 'managed', label: 'Managed properties', href: ROUTES.REALTOR_MANAGED, icon: KeyRound },
+    { id: 'bookings', label: 'My stays', href: ROUTES.REALTOR_BOOKINGS, icon: Luggage },
+    { id: 'settings', labelKey: 'sidebar.settings', href: ROUTES.REALTOR_SETTINGS, icon: Settings },
+    { id: 'billing', label: 'Billing', href: ROUTES.REALTOR_BILLING, icon: BadgeCheck },
+    {
+      id: 'verification',
+      label: 'Verification',
+      href: ROUTES.REALTOR_VERIFICATION,
+      icon: BadgeCheck,
+    },
+  ],
+  groups: [
+    { label: 'Overview', items: ['dashboard'] },
+    { label: 'Clients and listings', items: ['listings', 'clients', 'leads'] },
+    { label: 'Deals and commissions', items: ['viewings', 'offers', 'commissions', 'managed'] },
+    { label: 'Messages and documents', items: ['messages', 'documents'] },
+    { label: 'Professional profile', items: ['verification', 'trustProfile', 'reviews'] },
+    { label: 'Account', items: ['settings', 'billing', 'bookings'] },
+  ],
+  primary: ['dashboard', 'listings', 'clients', 'leads', 'offers', 'messages'],
+  utility: ['settings', 'billing', 'bookings'],
+});
