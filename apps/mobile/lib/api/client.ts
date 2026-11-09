@@ -7,6 +7,7 @@ import {
   STEP_UP_HEADER,
   STEP_UP_REQUIRED,
 } from '../stepUp';
+import { getInstallId } from '../auth/installId';
 
 export interface ApiErrorDetails {
   tierRequired?: number;
@@ -71,7 +72,12 @@ async function send(path: string, init: RequestInit, timeoutMs: number): Promise
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    return await fetch(`${env.apiUrl}${path}`, { ...init, signal: controller.signal });
+    // Sent on every request so the API can tell a new device from a known one at sign-in.
+    const deviceId = await getInstallId();
+    const headers = deviceId
+      ? { ...(init.headers as Record<string, string>), 'x-device-id': deviceId }
+      : init.headers;
+    return await fetch(`${env.apiUrl}${path}`, { ...init, headers, signal: controller.signal });
   } catch (err) {
     const aborted = err instanceof Error && err.name === 'AbortError';
     throw new ApiError(
