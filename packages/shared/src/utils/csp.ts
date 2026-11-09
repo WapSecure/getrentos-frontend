@@ -119,6 +119,20 @@ export function isLocalHost(hostHeader: string | null | undefined): boolean {
   );
 }
 
+/**
+ * Where violation reports go: CSP_REPORT_URI when set, otherwise the API's
+ * receiver (POST /security/csp-report), so a report-only rollout collects
+ * data without extra configuration.
+ */
+export function cspReportUri(
+  configured: string | null | undefined,
+  apiUrl: string | null | undefined
+): string | null {
+  if (configured && configured.trim()) return configured.trim();
+  const api = apiUrl?.trim().replace(/\/+$/, '');
+  return api && httpOrigin(api) ? `${api}/security/csp-report` : null;
+}
+
 /** Header name for an enforced or a watch-only policy. */
 export function cspHeaderName(
   enforce: boolean

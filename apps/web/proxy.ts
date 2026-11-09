@@ -7,6 +7,7 @@ import {
   cspHeaderName,
   isLocalHost,
   parseOriginList,
+  cspReportUri,
 } from '@getrentos/shared/csp';
 
 /**
@@ -71,7 +72,8 @@ export default function proxy(request: NextRequest) {
     frameSrc: EMBED_FRAME_ORIGINS,
     // Browsers ignore it in a Report-Only policy (and warn), so only when enforcing.
     upgradeInsecureRequests: secure && ENFORCE_CSP,
-    reportUri: process.env.CSP_REPORT_URI,
+    // CSP_REPORT_URI, or the API's /security/csp-report receiver by default.
+    reportUri: cspReportUri(process.env.CSP_REPORT_URI, process.env.NEXT_PUBLIC_API_URL),
   });
   const cspHeader = cspHeaderName(ENFORCE_CSP);
 
