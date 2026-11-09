@@ -21,10 +21,6 @@ import { CoApprovalCard } from '@/components/land/LandRequests';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
-/**
- * Conveyance on a land resale: the buyer's payment is held until every
- * required step (deed, possession on site…) is confirmed.
- */
 export default function BuyerLandResale() {
   const { txId } = useLocalSearchParams<{ txId: string }>();
   const { colors, spacing } = useTheme();

@@ -60,7 +60,6 @@ export default function LandlordOverview() {
     queryKey: qk.landlord.revenueTrend,
     queryFn: landlordApi.revenueTrend,
   });
-  // Drives the bell badge; the notifications screen owns the full list.
   const notifications = useQuery({
     queryKey: qk.landlord.notifications,
     queryFn: landlordApi.notifications,
@@ -178,10 +177,7 @@ export default function LandlordOverview() {
         errorTitle="We couldn't load your dashboard"
         errorDescription="Your property and payment data is safe. Check your connection and try again."
       >
-        {/* Before anything else: an unverified landlord cannot publish, sign or
-            be paid, and should hear that here, not when a form is refused. */}
         <IdentityNudge unlocks="listings, leases and payouts" />
-        {/* What needs you first: rent that hasn't come in, then repairs waiting. */}
         {s && s.outstandingPayments > 0 ? (
           <AttentionCard
             Icon={TriangleAlert}
@@ -215,7 +211,6 @@ export default function LandlordOverview() {
           visible={showMoney}
           onToggle={toggleMoney}
         >
-          {/* A single point isn't a trend, so the chart waits for two. */}
           {(revenue.data?.length ?? 0) > 1 ? <RevenueTrendChart points={revenue.data!} /> : null}
         </PortfolioCard>
 

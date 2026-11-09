@@ -28,7 +28,6 @@ const TIERS: LandWatchTier[] = ['ESSENTIAL', 'PROTECTED', 'MANAGED'];
 const optionValue = (o: { kind: string; propertyId: string | null; landPlotId: string | null }) =>
   o.kind === 'PLOT' ? `plot:${o.landPlotId}` : `parcel:${o.propertyId}`;
 
-/** Put a parcel the owner holds, or a plot they bought, under Land Watch. */
 export default function LandWatchNew() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();

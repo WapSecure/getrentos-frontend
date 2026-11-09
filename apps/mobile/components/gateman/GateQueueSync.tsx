@@ -6,20 +6,7 @@ import { useToast } from '@sureground/ui-native';
 import { gateOfflineQueue, replayGateQueue, type GateReplaySummary } from '@/lib/gateOfflineQueue';
 import { qk } from '@/lib/query/keys';
 
-/**
- * Drains the gate's offline queue.
- *
- * Mounted inside the gate console rather than at the app root: a guard is the
- * only person who records these writes, and the gate console is where they will
- * be looking when the network returns. Rendering nothing is the point: the
- * queue's state is shown in the Check-In screen where the guard acts, not as a
- * banner strapped across every screen in the app.
- *
- * Replay is attempted on three signals, because on a phone no single one is
- * reliable: connectivity returning, the app coming back to the foreground (a
- * phone carried into signal never fires a connectivity change), and the console
- * mounting.
- */
+// Replays on reconnect, on return to the foreground (a phone carried into signal never fires a connectivity change) and on mount: no single signal is reliable on a phone.
 export function GateQueueSync() {
   const toast = useToast();
   const qc = useQueryClient();
@@ -33,7 +20,6 @@ export function GateQueueSync() {
     const report = (summary: GateReplaySummary | null) => {
       if (cancelled || !summary) return;
 
-      // Refresh the estate's own view of who is inside as soon as writes land.
       if (summary.sent > 0) void qc.invalidateQueries({ queryKey: qk.gateman.all });
 
       if (summary.unconfirmed.length > 0) {

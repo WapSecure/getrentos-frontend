@@ -20,7 +20,6 @@ import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
 import { formatDate } from '@/lib/format';
 
-/** Land I watch: inspection reports, incidents and reminders. */
 export default function LandWatch() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();

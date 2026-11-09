@@ -34,12 +34,6 @@ import { formatDate, formatNaira } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
-/**
- * One deposit: balances, each deduction with what the owner can do about it,
- * recording a new deduction, and returning the balance. A disputed deduction
- * is approved only with an answer to the tenant, and one that already counts
- * is kept (with a reason) or dropped.
- */
 export default function DepositDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, spacing, radius } = useTheme();

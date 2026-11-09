@@ -39,7 +39,6 @@ const TONE: Record<AuthorityStatus, 'success' | 'warning' | 'danger' | 'neutral'
   EXPIRED: 'neutral',
 };
 
-/** Properties you act for on someone else's behalf, and claims awaiting an officer. */
 export default function ManagedProperties() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();

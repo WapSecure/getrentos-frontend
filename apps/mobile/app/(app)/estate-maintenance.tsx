@@ -17,7 +17,6 @@ import { haptics } from '@/lib/haptics';
 import { qk } from '@/lib/query/keys';
 import { errorMessage } from '@/lib/api/client';
 
-/** Repairs residents asked for: pick one up, then close it with what was done. */
 export default function EstateMaintenance() {
   const { colors } = useTheme();
   const qc = useQueryClient();

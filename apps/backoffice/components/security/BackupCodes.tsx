@@ -2,10 +2,7 @@
 
 import { Alert, Button, useToast } from '@sureground/ui';
 
-/**
- * Two-factor backup codes, shown once right after they are made. Each works a
- * single time in place of the authenticator code (security gap AU-07).
- */
+/** Shown once; each code works a single time in place of the authenticator code (AU-07). */
 export function BackupCodes({ codes, onDone }: { codes: string[]; onDone: () => void }) {
   const toast = useToast();
   const text = codes.join('\n');

@@ -51,8 +51,6 @@ import { VerificationGateNotice } from '@/components/VerificationGateNotice';
 import { readGate } from '@/lib/verificationGate';
 import { kycApi } from '@/lib/api/kyc';
 
-/* ---------------------------------- cards --------------------------------- */
-
 export function LeadCard({ lead }: { lead: RealtorLead }) {
   const { colors, spacing } = useTheme();
   const stage = leadStage(lead.status);
@@ -94,7 +92,6 @@ export function LeadCard({ lead }: { lead: RealtorLead }) {
   );
 }
 
-/** A viewing as a line in a day plan: when, where, with whom, and its state. */
 export function ViewingRow({
   v,
   onPress,
@@ -223,7 +220,6 @@ export function OfferCard({ o }: { o: RealtorOffer }) {
   );
 }
 
-/** Call, WhatsApp and email, each shown only when the lead gave that contact. */
 export function ContactActions({
   phone,
   email,
@@ -269,8 +265,6 @@ export function ContactActions({
   );
 }
 
-/* --------------------------------- sheets --------------------------------- */
-
 export function AddLeadSheet({
   open,
   onClose,
@@ -278,7 +272,6 @@ export function AddLeadSheet({
 }: {
   open: boolean;
   onClose: () => void;
-  /** Start with this listing picked, e.g. when adding from a listing. */
   listingId?: string;
 }) {
   const [submitting, setSubmitting] = useState(false);
@@ -350,7 +343,6 @@ function AddLeadForm({
       <TextField
         label="Phone"
         value={phone}
-        // Digits and one leading "+" only.
         onChangeText={(v) => setPhone(v.replace(/[^\d+]/g, '').replace(/(?!^)\+/g, ''))}
         keyboardType="phone-pad"
         editable={!save.isPending}
@@ -411,10 +403,6 @@ function AddLeadForm({
   );
 }
 
-/**
- * Book a viewing. A lead tied to a listing books that listing; otherwise the
- * realtor picks one of their listings.
- */
 export function ScheduleViewingSheet({
   open,
   onClose,
@@ -424,7 +412,6 @@ export function ScheduleViewingSheet({
   open: boolean;
   onClose: () => void;
   lead?: RealtorLead;
-  /** Start with this listing picked, e.g. when booking from a listing. */
   listingId?: string;
 }) {
   const [submitting, setSubmitting] = useState(false);
@@ -562,7 +549,6 @@ function ScheduleViewingForm({
   );
 }
 
-/** Invite an owner or landlord by email, confirming who they are before sending. */
 export function InviteClientSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [submitting, setSubmitting] = useState(false);
   return (
@@ -598,7 +584,6 @@ function InviteClientForm({
     },
     onSettled: () => onSubmittingChange(false),
   });
-  // Known up front: an unverified realtor is told before filling the form, not after.
   const kyc = useQuery({ queryKey: ['kyc-status'], queryFn: kycApi.getStatus });
   const knownUnverified = kyc.data?.identityVerified === false;
   const gateError = readGate(invite.error)

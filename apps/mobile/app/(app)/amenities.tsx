@@ -25,7 +25,7 @@ import { dayNoon, isSlotFree, lagosDays, slotStart, type LagosDay } from '@/lib/
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
-const HOUR_SLOTS = Array.from({ length: 14 }, (_, i) => 8 + i); // 8am–9pm
+const HOUR_SLOTS = Array.from({ length: 14 }, (_, i) => 8 + i);
 const DURATIONS = [
   { label: '30 min', minutes: 30 },
   { label: '1 hr', minutes: 60 },
@@ -255,7 +255,6 @@ function BookAmenityForm({
   });
   const busy = useMemo(() => busyQuery.data ?? [], [busyQuery.data]);
 
-  // Only hours that are still ahead and have at least the shortest booking free.
   const hours = HOUR_SLOTS.filter((h) =>
     isSlotFree(slotStart(days[dayIndex], h), SHORTEST_MINUTES, busy)
   );

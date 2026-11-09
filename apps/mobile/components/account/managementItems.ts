@@ -8,10 +8,6 @@ import {
 } from 'lucide-react-native';
 import type { SettingsItem } from './SettingsList';
 
-/**
- * The property-control rows landlords and owners share: the same screens on
- * the web sit under both portals, so both account menus list them in one group.
- */
 export const managementItems = (): SettingsItem[] => [
   {
     key: 'inspections',

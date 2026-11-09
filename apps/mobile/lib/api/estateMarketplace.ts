@@ -4,27 +4,11 @@ import { appendFile, type PickedFile } from './documents';
 import type { Tone } from './estateManager';
 import type { Paginated } from './properties';
 
-/**
- * The estate's own marketplace: the properties inside it that it may advertise,
- * the listings it publishes for them, and the enquiries those listings bring in.
- *
- * Two separate consents run through this. Bringing a property into the estate
- * makes it findable under the estate; publishing a listing for it needs the
- * OWNER's agreement, which only they can give (from their own app). The estate
- * never owns the property and never handles its money.
- *
- * Routes live under `/estates/:id/...` (plural), not the office's `/estate/:id`.
- * On every plan: Free caps how many properties and live listings an estate may
- * have (PLAN_LIMIT_REACHED), and bulk publishing is Enterprise
- * (PLAN_UPGRADE_REQUIRED).
- */
-
-/* ---------------------------------- types --------------------------------- */
+/** Routes live under `/estates/:id/...` (plural), not the office's `/estate/:id`. Publishing needs the owner's agreement. Free caps properties and live listings (PLAN_LIMIT_REACHED); bulk publishing is Enterprise (PLAN_UPGRADE_REQUIRED). */
 
 export type AgreementStatus = 'PENDING' | 'ACTIVE' | 'DECLINED' | 'REVOKED';
 export type ListingType = 'RENT' | 'SALE' | 'SHORTLET';
 export type ListingStatus = 'DRAFT' | 'PENDING_VERIFICATION' | 'PUBLISHED' | 'PAUSED' | 'CLOSED';
-/** The statuses a manager can move a listing to. */
 export type ListingStatusChange = 'PUBLISHED' | 'PAUSED' | 'CLOSED';
 
 export interface MarketplaceInventory {
@@ -40,7 +24,6 @@ export interface MarketplaceInventory {
   shortLets: number;
 }
 
-/** A property inside the estate, and whether its owner lets the estate market it. */
 export interface MarketingAgreement {
   id: string;
   estateId: string;
@@ -54,17 +37,14 @@ export interface MarketingAgreement {
   ownerName?: string;
   requestedByEmail?: string | null;
   note?: string | null;
-  /** Why it was declined or revoked. */
   decisionNote?: string | null;
   approvedAt?: string | null;
   expiresAt?: string | null;
   createdAt: string;
-  /** Whether the estate may publish for it right now. */
   effective: boolean;
   estateListingCount: number;
 }
 
-/** A property the estate could bring in, from the address search. */
 export interface PropertyCandidate {
   id: string;
   title: string;
@@ -133,7 +113,6 @@ export interface BulkPublishResult {
 
 export type LeadMarket = ListingType;
 
-/** One enquiry on a property this estate markets. */
 export interface EstateLead {
   id: string;
   leadName: string;
@@ -155,8 +134,6 @@ export interface EstateLead {
   listedByEstate: boolean;
 }
 
-/* ------------------------------- query keys ------------------------------- */
-
 /**
  * Nested under the office's `['estate-manager', estateId]`, so invalidating the
  * whole estate also refreshes the marketplace.
@@ -174,8 +151,6 @@ export const marketplaceKeys = {
     ['estate-manager', estateId, 'marketplace', 'leads', { market, search }] as const,
 };
 
-/* ----------------------------------- api ---------------------------------- */
-
 export const LISTINGS_PAGE_SIZE = 30;
 export const LEADS_PAGE_SIZE = 25;
 /** Photos one listing may hold (the server takes what fits beyond this). */
@@ -186,10 +161,9 @@ export const estateMarketplaceApi = {
 
   agreements: (estateId: string) =>
     apiFetch<MarketingAgreement[]>(`/estates/${estateId}/agreements`),
-  /** Address search for a property to bring in. Excludes ones in another estate. */
+  /** Excludes properties in another estate. */
   candidates: (estateId: string, search: string) =>
     apiFetch<PropertyCandidate[]>(`/estates/${estateId}/property-candidates${toQuery({ search })}`),
-  /** Brings the property in and asks its owner for marketing rights. */
   requestAgreement: (estateId: string, body: { propertyId: string; note?: string }) =>
     apiFetch<MarketingAgreement>(`/estates/${estateId}/agreements`, { method: 'POST', body }),
   /** Also ends any agreement and closes the estate's listings for it. */
@@ -204,7 +178,7 @@ export const estateMarketplaceApi = {
     ),
   createListing: (estateId: string, body: NewListing) =>
     apiFetch<EstateListing>(`/estates/${estateId}/listings`, { method: 'POST', body }),
-  /** Change a listing's headline, price or start date. Only what is sent changes. */
+  /** Only what is sent changes. */
   updateListing: (
     estateId: string,
     listingId: string,
@@ -247,8 +221,6 @@ export const estateMarketplaceApi = {
     ),
 };
 
-/* --------------------------------- helpers -------------------------------- */
-
 export const LISTING_TYPES: { value: ListingType; label: string }[] = [
   { value: 'RENT', label: 'For rent' },
   { value: 'SALE', label: 'For sale' },
@@ -276,18 +248,14 @@ export const AGREEMENT_STATUS: Record<AgreementStatus, { label: string; tone: To
   REVOKED: { label: 'Revoked', tone: 'danger' },
 };
 
-/** What one listing's headline should say: its own title, else the property's. */
 export const listingName = (l: Pick<EstateListing, 'listingTitle' | 'propertyTitle'>) =>
   l.listingTitle?.trim() || l.propertyTitle;
 
-/** What the price is per, for the `Price` suffix. A rent's period isn't on the listing. */
+/** A rent's period isn't on the listing. */
 export const listingPricePeriod = (t: ListingType) =>
   t === 'SHORTLET' ? ('night' as const) : null;
 
-/**
- * Where a listing can go next. Closed is final here: re-opening one could sit
- * beside a newer listing for the same property, so the office makes a new one.
- */
+/** Closed is final: re-opening one could sit beside a newer listing for the same property. */
 export function listingMoves(status: ListingStatus): ListingStatusChange[] {
   switch (status) {
     case 'PUBLISHED':
@@ -320,7 +288,6 @@ export function statusChangedMessage(l: Pick<EstateListing, 'status'>): string {
   }
 }
 
-/** Drafts the office could publish in one go. */
 export const unpublishedIds = (listings: Pick<EstateListing, 'id' | 'status'>[]) =>
   listings
     .filter((l) => l.status === 'DRAFT' || l.status === 'PENDING_VERIFICATION')
@@ -333,11 +300,9 @@ export function bulkPublishMessage(r: BulkPublishResult): string {
   return `${published}, ${r.skipped.length} skipped${first ? `: ${first}` : '.'}`;
 }
 
-/** Properties the estate may publish for right now. */
 export const marketable = (agreements: MarketingAgreement[]) =>
   agreements.filter((a) => a.effective);
 
-/** Waiting on an owner first, then what can be marketed, then the rest. */
 export function agreementOrder(agreements: MarketingAgreement[]): MarketingAgreement[] {
   const rank: Record<AgreementStatus, number> = { PENDING: 0, ACTIVE: 1, DECLINED: 2, REVOKED: 3 };
   return [...agreements].sort(
@@ -349,7 +314,6 @@ export function agreementOrder(agreements: MarketingAgreement[]): MarketingAgree
 
 export type CandidateState = 'can-market' | 'awaiting' | 'ask' | 'add';
 
-/** What the search can do with a property it found. */
 export function candidateState(
   c: Pick<PropertyCandidate, 'agreementStatus' | 'inThisEstate'>
 ): CandidateState {
@@ -366,10 +330,7 @@ export const agreementRequestedMessage = (a: Pick<MarketingAgreement, 'status'>)
 /** Search needs three characters: fewer would match half the estate. */
 export const MIN_CANDIDATE_SEARCH = 3;
 
-/**
- * Whole naira from what was typed ("₦1,500,000", "1500000"). Null when it isn't
- * a positive whole amount: the API takes integers only.
- */
+/** Null when it isn't a positive whole amount: the API takes integers only. */
 export function parseNaira(input: string): number | null {
   const cleaned = input.replace(/[₦,\s]/g, '');
   if (!/^\d+(\.\d+)?$/.test(cleaned)) return null;
@@ -377,10 +338,7 @@ export function parseNaira(input: string): number | null {
   return Number.isFinite(n) && n > 0 ? n : null;
 }
 
-/**
- * The create body. A short let needs its own terms; the asking price doubles as
- * the nightly rate so the office isn't asked for the same figure twice.
- */
+/** The asking price doubles as a short let's nightly rate. */
 export function buildListing(input: {
   propertyId: string;
   listingType: ListingType;
@@ -408,22 +366,15 @@ export const createdMessage = (l: Pick<EstateListing, 'status'>) =>
     ? 'Published. It’s live in the market and on the estate page.'
     : 'Saved as a draft. Publish it when you’re ready.';
 
-/** Photos a listing can still take. */
 export const photoRoom = (l: Pick<EstateListing, 'media'>) =>
   Math.max(0, MAX_LISTING_PHOTOS - (l.media?.length ?? 0));
 
-/**
- * A plan refusal, and which kind: a Free cap that upgrading lifts (`limit`), or
- * a feature the plan doesn't include at all (`feature`).
- */
 export function planGate(e: unknown): 'limit' | 'feature' | null {
   if (!(e instanceof ApiError)) return null;
   if (e.code === 'PLAN_LIMIT_REACHED') return 'limit';
   if (e.code === 'PLAN_UPGRADE_REQUIRED' || e.status === 402) return 'feature';
   return null;
 }
-
-/* ---------------------------------- leads --------------------------------- */
 
 export const LEAD_MARKET: Record<LeadMarket, { label: string; tone: Tone }> = {
   RENT: { label: 'To rent', tone: 'info' },
@@ -451,11 +402,7 @@ const STAGE_LABELS: Record<string, string> = {
   expired: 'Expired',
 };
 
-/**
- * Enquiries come from several sources, each with its own status words. Known
- * ones read as a person would say them; an unknown one is still shown,
- * de-underscored, rather than hidden.
- */
+/** An unknown status is still shown, de-underscored, rather than hidden. */
 export function leadStageLabel(stage: string): string {
   const key = stage.trim().toLowerCase();
   if (STAGE_LABELS[key]) return STAGE_LABELS[key];
@@ -463,7 +410,6 @@ export function leadStageLabel(stage: string): string {
   return plain ? plain.charAt(0).toUpperCase() + plain.slice(1) : 'Enquiry';
 }
 
-/** Stages where nothing more is going to happen. */
 export const isLeadClosed = (stage: string) =>
   ['rejected', 'declined', 'cancelled', 'withdrawn', 'expired', 'completed'].includes(
     stage.trim().toLowerCase()

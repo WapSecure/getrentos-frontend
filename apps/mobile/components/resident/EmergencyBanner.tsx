@@ -11,17 +11,7 @@ import {
   residentLines,
 } from '@/lib/emergency/answerOptions';
 
-/**
- * The estate is calling the roll, and this household owes an answer.
- *
- * Owns its own query on the shared `qk.resident.emergency` key, so the home
- * banner and the answer screen always agree: a banner still saying "you have not
- * answered" beside a screen that has just been answered is worse than no banner.
- *
- * Renders nothing when the estate is not in the middle of an emergency, which is
- * the ordinary case. An all-clear is not shown here: once the roll is down there
- * is nothing to answer, and the household has already been sent the stand-down.
- */
+// Owns its query on the shared `qk.resident.emergency` key so the home banner and the answer screen always agree.
 export function EmergencyBanner() {
   const { colors, spacing } = useTheme();
 
@@ -39,13 +29,7 @@ export function EmergencyBanner() {
   const needsHelp = states.includes('NEEDS_HELP');
   const someAnswered = states.some((state) => state !== 'UNACCOUNTED');
 
-  /**
-   * What to say about where this household stands.
-   *
-   * A household of three can genuinely be half-answered: one flat empty, one
-   * inside: so "your household has not answered" would be false and "your
-   * household has answered" would hide the line a marshal still has to chase.
-   */
+  /** A household can be half-answered, so neither "has answered" nor "has not answered" is true of all of it. */
   const standing =
     states.length === 0
       ? 'Your household is not on this roll call.'

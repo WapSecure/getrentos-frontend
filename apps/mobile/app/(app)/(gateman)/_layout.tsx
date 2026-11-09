@@ -6,30 +6,15 @@ import { GateQueueSync } from '@/components/gateman/GateQueueSync';
 import { GatemanPostProvider } from '@/lib/gateman/GatemanPostProvider';
 import { premiumTabBarOptions } from '@/lib/navigationStyles';
 
-/**
- * The gate console.
- *
- * The Deliveries tab file is `gate-deliveries.tsx`, not `deliveries.tsx`,
- * deliberately: route groups don't contribute a URL segment, so a group screen
- * also answers on its bare path: `(gateman)/deliveries` and the top-level
- * `deliveries.tsx` (the resident deliveries screen) would both claim
- * `/deliveries`. Expo Router's generated types express routes as a union, so
- * that duplicate collapses silently and `tsc` will never flag it; the clash
- * only surfaces at runtime as a mis-resolved deep link. Migrating the shared
- * screens out of the top-level namespace is a bigger cleanup: until then, any
- * new portal tab whose name already exists at the top level needs a prefix.
- */
+// Tab files that share a name with a top-level screen take a `gate-` prefix: a group screen also answers on its bare path, and Expo Router's typed-route union hides the clash from tsc until a deep link mis-resolves at runtime.
 export default function GatemanTabsLayout() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
 
   return (
-    // One estate and one gate for the whole console: every tab has to agree about
-    // which ground the guard is standing on, or an entry could be admitted in one
-    // estate and checked out in another.
+    // One estate and gate for every tab, or an entry could be admitted in one estate and checked out in another.
     <GatemanPostProvider>
-      {/* Renders nothing. Mounted here rather than at the app root so the queue
-          drains while a guard is actually at the gate. */}
+      {/* Mounted here, not at the app root, so the queue drains while a guard is at the gate. */}
       <GateQueueSync />
       <Tabs screenOptions={premiumTabBarOptions(colors, insets.bottom)}>
         <Tabs.Screen
@@ -39,10 +24,7 @@ export default function GatemanTabsLayout() {
             tabBarIcon: ({ color, size }) => <KeyRound color={color} size={size} />,
           }}
         />
-        {/* Second, directly after Check-In, because it is the same job done in
-            the other order: Check-In answers "is this pass good?" and this
-            answers "were they expected?", which is the question a guard is
-            asked first. Read-only — nothing on it opens the barrier. */}
+        {/* Read-only: nothing on it opens the barrier. */}
         <Tabs.Screen
           name="gate-expected"
           options={{

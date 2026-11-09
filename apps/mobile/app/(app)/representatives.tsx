@@ -40,11 +40,7 @@ const STATUS = {
   REVOKED: { label: 'Revoked', tone: 'neutral' },
 } as const;
 
-/**
- * Realtors and field agents who want to work on your properties. Nothing
- * happens until you approve them, and even then they only reach the
- * properties you pick. Shared by owners and landlords.
- */
+/** Nothing happens until you approve a representative, and then they reach only the properties you pick. */
 export default function Representatives() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
@@ -302,8 +298,7 @@ function AgentTaskForm({ rep, onDone }: { rep: Representative; onDone: () => voi
   const [priority, setPriority] = useState<AgentTaskPriority>('MEDIUM');
   const [dueDate, setDueDate] = useState('');
   const [dueTime, setDueTime] = useState('10:00');
-  // The API lists every property you own; it refuses a task on one you haven't
-  // given this agent, so the hint says so up front.
+  // The API lists every property you own but refuses a task on one not given to this agent, so the hint says so.
   const properties = useQuery({
     queryKey: qk.representatives.assignable('agent', rep.id, ''),
     queryFn: () => representativesApi.assignable('agent', rep.id),

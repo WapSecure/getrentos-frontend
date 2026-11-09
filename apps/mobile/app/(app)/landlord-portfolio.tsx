@@ -42,7 +42,6 @@ const DEFINITIONS: [string, string][] = [
   ['Appreciation', 'How much the property is worth now compared with what you paid.'],
 ];
 
-/** How each property earns, side by side (Pro), with an AI briefing on top. */
 export default function LandlordPortfolio() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
@@ -213,7 +212,7 @@ function Unvalued({ data }: { data: PortfolioAnalytics }) {
   );
 }
 
-/** The AI briefing. It fetches on its own and hides on error, so it never blocks the figures. */
+/** Fetches on its own and hides on error, so it never blocks the figures. */
 function Briefing() {
   const { colors, spacing } = useTheme();
   const q = useQuery({

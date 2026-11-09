@@ -28,7 +28,6 @@ const LABEL = {
   failed: { label: 'Failed', tone: 'danger' },
 } as const;
 
-/** One withdrawal and exactly which commissions it settled. */
 export default function RealtorPayoutDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, spacing, radius } = useTheme();

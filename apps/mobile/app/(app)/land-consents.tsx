@@ -37,7 +37,6 @@ const TONE: Record<LandSignatoryConsent, BadgeTone> = {
   WAIVED: 'neutral',
 };
 
-/** Land sales whose seller named you as someone whose consent the sale needs. */
 export default function LandConsents() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();

@@ -201,7 +201,6 @@ function LeaseCard({
           <Price amount={l.rentAmount} period="year" variant="callout" />
         </View>
 
-        {/* Signature state is the thing a landlord chases, so surface it plainly. */}
         <View style={{ flexDirection: 'row', gap: spacing.sm }}>
           <SignatureChip label="Landlord" signed={l.landlordSigned} />
           <SignatureChip label="Tenant" signed={l.tenantSigned} />
@@ -254,7 +253,7 @@ function LeaseCard({
   );
 }
 
-/** The landlord countersigns only once the tenant's rent is held; earlier, the note says what it waits for. */
+/** The landlord countersigns only once the tenant's rent is held. */
 const SIGNABLE = new Set<LeaseStatus>(['awaiting_landlord']);
 
 const LEASE_STATUS_NOTE: Partial<Record<LeaseStatus, string>> = {

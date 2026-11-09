@@ -25,10 +25,6 @@ import { ApiError } from '@/lib/api/client';
 import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 
-/**
- * Draft a listing on a property a client assigned. Client → property → terms;
- * opened from a property, it starts at the terms.
- */
 export default function RealtorNewListing() {
   const params = useLocalSearchParams<{ relationshipId?: string; propertyId?: string }>();
   const { colors, spacing, radius } = useTheme();

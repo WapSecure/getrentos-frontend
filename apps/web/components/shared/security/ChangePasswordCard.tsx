@@ -9,7 +9,7 @@ import { accountSecurityService } from '@/services/accountSecurityService';
 
 const { PASSWORD_MIN_LENGTH, PASSWORD_MAX_LENGTH } = AUTH_CONSTANTS;
 
-/** Change password, for any role. The API also refuses a password found in a known breach. */
+/** The API also refuses a password found in a known breach. */
 export const ChangePasswordCard = () => {
   const toast = useToast();
   const [currentPassword, setCurrentPassword] = useState('');
@@ -31,7 +31,6 @@ export const ChangePasswordCard = () => {
         return;
       }
       const message = res.message || 'Could not change your password';
-      // A wrong current password belongs on that field; anything else is about the new one.
       if (/current/i.test(message)) setCurrentError(message);
       else setNewError(message);
     },

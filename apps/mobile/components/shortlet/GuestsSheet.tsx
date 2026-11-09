@@ -4,7 +4,6 @@ import { Button, Text, useTheme } from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { Stepper } from '@/components/host/HostUI';
 
-/** Who's coming: one number, set with a stepper. */
 export function GuestsSheet(props: {
   open: boolean;
   onClose: () => void;

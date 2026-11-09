@@ -5,14 +5,9 @@ import type { TrustProfile } from './buyerTrustProfile';
 import type { VideoCallJoin } from '@sureground/shared';
 import type { VideoOnSiteReport } from '../filmedOnSite';
 
-/**
- * The property-owner portal (sellers). Mirrors the backend's /owner/* routes;
- * statuses arrive lowercase, as the API maps them.
- */
+/** Statuses arrive lowercase, as the API maps them. */
 
 type Tone = 'warning' | 'info' | 'success' | 'danger' | 'neutral';
-
-/* -------------------------------- dashboard -------------------------------- */
 
 export interface OwnerDashboard {
   totalProperties: number;
@@ -24,8 +19,6 @@ export interface OwnerDashboard {
   portfolioValue: number;
   recentActivity: { id: string; type: string; message: string; timestamp: string }[];
 }
-
-/* ------------------------------- properties ------------------------------- */
 
 export type OwnerVerificationStatus =
   | 'pending_review'
@@ -55,11 +48,9 @@ export interface OwnerProperty {
   city: string;
   state: string;
   country: string;
-  /** The Google place the address was checked against, when it was picked from the search. */
   placeId?: string | null;
   /** When the API last checked the address against Google; absent for a typed address. */
   addressVerifiedAt?: string | null;
-  /** Local government area, from Google, for a checked address. */
   lga?: string | null;
   ownerName: string;
   verificationStatus: OwnerVerificationStatus;
@@ -91,7 +82,7 @@ export interface CreateOwnerPropertyInput {
   city: string;
   state: string;
   country: string;
-  /** The Google place the address was picked from; the API checks it and stores Google's details. */
+  /** The API checks it and stores Google's details. */
   placeId?: string;
   bedrooms?: number;
   bathrooms?: number;
@@ -100,8 +91,6 @@ export interface CreateOwnerPropertyInput {
   purchasePrice?: number;
   description?: string;
 }
-
-/* -------------------------------- listings -------------------------------- */
 
 export type OwnerListingStatus =
   | 'draft'
@@ -140,8 +129,6 @@ export interface OwnerListing {
   status: OwnerListingStatus;
   createdAt: string;
 }
-
-/* --------------------------------- offers --------------------------------- */
 
 export type OwnerOfferStatus =
   | 'submitted'
@@ -189,7 +176,6 @@ export interface OwnerOffer {
   submittedAt: string;
 }
 
-/** True when an offer is waiting on the owner's answer. */
 export const awaitingOwner = (o: Pick<OwnerOffer, 'status' | 'awaiting'>) =>
   o.awaiting !== undefined
     ? o.awaiting === 'owner'
@@ -206,7 +192,6 @@ export interface OwnerOfferThreadMessage {
   timestamp: string;
 }
 
-/** How far an offer sits from the asking price, e.g. "8% under asking". */
 export function offerGap(offer: number, asking: number): string {
   if (!asking) return '';
   const pct = Math.round(((offer - asking) / asking) * 100);
@@ -214,12 +199,7 @@ export function offerGap(offer: number, asking: number): string {
   return `${Math.abs(pct)}% ${pct < 0 ? 'under' : 'over'} asking`;
 }
 
-/* ------------------------------ transactions ------------------------------ */
-
-// deposit → held → released, with frozen (a dispute is open) and refunded as
-// terminal branches. VERIFICATION_PENDING / SETTLEMENT_PENDING / DISPUTED are in
-// the enum but never written (a dispute sets FROZEN), so they aren't surfaced
-// (DEF-240).
+// FROZEN means a dispute is open. VERIFICATION_PENDING, SETTLEMENT_PENDING and DISPUTED are never written, so they are not surfaced.
 export type OwnerEscrowStatus =
   | 'deposit_pending'
   | 'funds_held'
@@ -232,7 +212,6 @@ export interface OwnerTransaction {
   offerId: string;
   propertyId: string;
   propertyName: string;
-  /** What was sold; a land sale has conveyance steps. */
   propertyType?: string;
   buyerName: string;
   salePrice: number;
@@ -242,12 +221,9 @@ export interface OwnerTransaction {
   disputeReason?: string;
   createdAt: string;
   releasedAt?: string;
-  /** Once released: whether your payout has gone out. */
   sellerPayoutStatus?: 'PENDING' | 'PROCESSING' | 'PAID' | 'FAILED';
   sellerPaidAt?: string;
 }
-
-/* ------------------------------ leads & more ------------------------------ */
 
 export type OwnerLeadStage =
   | 'new'
@@ -320,7 +296,6 @@ export interface OwnerProfile {
 }
 
 export interface OwnerNotification {
-  /** An in-app path the notification is about. */
   actionUrl?: string;
   /** Set on a message: the conversation it is in. */
   conversationId?: string;
@@ -381,8 +356,6 @@ export interface OwnerPreferences {
   allowRentalConversion: boolean;
 }
 
-/* -------------------------------- messages -------------------------------- */
-
 export interface OwnerConversation {
   id: string;
   propertyId?: string;
@@ -423,11 +396,8 @@ export const OWNERSHIP_DOCUMENTS = [
 ] as const;
 export type OwnershipDocumentType = (typeof OWNERSHIP_DOCUMENTS)[number]['value'];
 
-/* ----------------------------------- api ----------------------------------- */
-
 const page = (p: number, size: number, extra = '') => `?page=${p}&pageSize=${size}${extra}`;
 
-/** A buyer's request to view one of the seller's for-sale listings. */
 export interface OwnerViewing {
   id: string;
   listingId: string;
@@ -497,7 +467,6 @@ export const ownerApi = {
       body: { key },
     }),
 
-  /** Starts ownership verification for a property with one proof document. */
   submitOwnershipProof: (
     propertyId: string,
     documentType: OwnershipDocumentType,
@@ -549,7 +518,6 @@ export const ownerApi = {
   deleteDocument: (id: string) =>
     apiFetch<{ id: string; deleted: boolean }>(`/owner/documents/${id}`, { method: 'DELETE' }),
   trustProfile: () => apiFetch<TrustProfile>('/owner/trust-profile'),
-  /** Adds the landlord workspace to the account so this property can be rented out. */
   convertToRental: (propertyId: string) =>
     apiFetch<{ propertyId: string; landlordRoleGranted: boolean; roles: string[] }>(
       `/owner/properties/${propertyId}/convert-to-rental`,

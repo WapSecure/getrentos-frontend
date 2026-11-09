@@ -73,8 +73,7 @@ export default function VerifyIdentity() {
   const submitMutation = useMutation({
     mutationFn: () => {
       if (!document) throw new Error('Choose your document first');
-      // Document only: an uploaded photo is not a liveness check (ID-08). The
-      // live selfie is still required on top of an approved document (ID-16).
+      // Document only: an uploaded photo is not a liveness check, and the live selfie is still required on top.
       return kycApi.submitIdentity({ documentType, document });
     },
     onSuccess: () => {

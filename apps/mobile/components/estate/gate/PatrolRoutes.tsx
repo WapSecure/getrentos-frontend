@@ -35,16 +35,11 @@ import {
 import { haptics } from '@/lib/haptics';
 import { errorMessage } from '@/lib/api/client';
 
-/**
- * The rounds an estate walks: when they start, how long they may take, and
- * which checkpoints in which order. The order is recorded, not enforced: a
- * round walked out of sequence is reported as such, never refused.
- */
+// The order is recorded, not enforced: a round walked out of sequence is reported as such, never refused.
 export function PatrolRoutes({ estateId }: { estateId: string }) {
   const { colors, spacing, radius } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
-  // null: closed. 'new': adding. A route: editing it.
   const [editing, setEditing] = useState<PatrolRoute | 'new' | null>(null);
 
   const routes = useQuery({
@@ -92,7 +87,6 @@ export function PatrolRoutes({ estateId }: { estateId: string }) {
       <QueryState
         query={routes}
         skeleton={<Skeleton height={160} radius={radius.lg} />}
-        // With no checkpoints in use the hint above says what to do instead.
         isEmpty={!routes.data?.length && active.length > 0}
         empty={{
           icon: <RouteIcon size={34} color={colors.mutedForeground} />,

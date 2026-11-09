@@ -1,12 +1,6 @@
 import { apiDownload, apiFetch } from './client';
 import type { BadgeTone } from '@sureground/ui-native';
 
-/**
- * The landlord financials beyond the overview: budgets against actual spend,
- * automatic payouts of the held balance, reports with CSV exports, and the
- * portfolio comparison (Pro) with its AI briefing.
- */
-
 export type ExpenseCategory =
   | 'UTILITIES'
   | 'INSURANCE'
@@ -60,7 +54,6 @@ export interface Budget {
   periodEnd: string;
 }
 
-/** Green under 80%, amber to 100%, red over. */
 export function utilisationTone(pct: number): BadgeTone {
   if (pct > 100) return 'danger';
   if (pct >= 80) return 'warning';
@@ -109,7 +102,6 @@ export interface PayoutSchedule {
   recent: PayoutRecord[];
 }
 
-/** What a run would send now: the held balance less the reserve, never negative. */
 export const payableNow = (balance: number, reserve: number) => Math.max(0, balance - reserve);
 
 export interface RentRollRow {
@@ -225,13 +217,11 @@ export const PORTFOLIO_SORTS: { value: PortfolioSort; label: string }[] = [
   { value: 'occupancyRate', label: 'Occupancy' },
 ];
 
-/** Highest first; a property without the figure sinks to the bottom. */
 export const sortPerformance = (rows: PropertyPerformance[], key: PortfolioSort) =>
   [...rows].sort((a, b) => (b[key] ?? -Infinity) - (a[key] ?? -Infinity));
 
 export const percent = (value: number | null) => (value === null ? '—' : `${value.toFixed(1)}%`);
 
-/** Blank leaves the figure unset; anything else must be a whole positive amount. */
 export function optionalAmount(text: string): number | undefined | null {
   const t = text.trim();
   if (!t) return undefined;

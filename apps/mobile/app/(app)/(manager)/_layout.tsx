@@ -4,11 +4,7 @@ import { FileSignature, Home, MessageSquareText, User, Users } from 'lucide-reac
 import { useTheme } from '@sureground/ui-native';
 import { premiumTabBarOptions } from '@/lib/navigationStyles';
 
-/**
- * The agency workspace for a property-management firm's staff. The custody
- * provider (in the app layout) sits above these tabs and the screens pushed
- * over them, so they all agree on which client is selected.
- */
+// The custody provider sits above these tabs and the screens pushed over them, so they all agree on the selected client.
 export default function ManagerTabsLayout() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();

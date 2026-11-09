@@ -29,14 +29,12 @@ import { AddressInput } from '@/components/forms/AddressInput';
 
 const PROPERTY_TYPES = ['Apartment', 'House', 'Duplex', 'Bungalow', 'Land', 'Commercial'];
 
-/** "Lekki, Ikoyi" as a list of areas. */
 const splitAreas = (stored: string | null | undefined): string[] =>
   (stored ?? '')
     .split(',')
     .map((a) => a.trim())
     .filter(Boolean);
 
-/** The list with `area` added once, whatever its case. */
 const withArea = (areas: string[], area: string): string[] => {
   const a = area.trim();
   return !a || areas.some((x) => x.toLowerCase() === a.toLowerCase()) ? areas : [...areas, a];
@@ -83,7 +81,6 @@ function SearchPreferencesForm({ data }: { data: BuyerSearchPreferencesData }) {
   const [maxBudget, setMaxBudget] = useState(data.maxBudget ? String(data.maxBudget) : '');
   // Stored as one comma-separated string; edited as a list of areas.
   const [areas, setAreas] = useState<string[]>(() => splitAreas(data.preferredLocations));
-  // What is in the search field: a typed area waits for "Add area"; a picked one is added at once.
   const [areaInput, setAreaInput] = useState<AddressValue | null>(null);
   const typedArea = areaInput && !areaInput.placeId ? areaInput.text.trim() : '';
 
@@ -99,7 +96,6 @@ function SearchPreferencesForm({ data }: { data: BuyerSearchPreferencesData }) {
       buyerSettingsApi.updateSearchPreferences({
         minBudget: Number(minBudget) || 0,
         maxBudget: Number(maxBudget) || 0,
-        // An area typed but not yet added still counts.
         preferredLocations: withArea(areas, typedArea).join(', '),
         preferredTypes,
         notifyOnMatch,

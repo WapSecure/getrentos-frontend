@@ -4,7 +4,6 @@ import { portalsForRoles, usablePortal } from '@/lib/roles';
 describe('owner portal', () => {
   it('opens for property owners', () => {
     expect(usablePortal(['PROPERTY_OWNER'])).toBe('owner');
-    // Landlord outranks owner when someone is both.
     expect(portalsForRoles(['PROPERTY_OWNER', 'LANDLORD'])[0]).toBe('landlord');
   });
 

@@ -6,7 +6,6 @@ import { Stepper } from '@/components/host/HostUI';
 import { AMENITIES } from '@/lib/api/hostShortlets';
 import type { ShortletFilters, ShortletSort } from '@/lib/api/shortlets';
 
-/** The refinements the filter sheet owns (search text and dates live on the screen). */
 export type StayRefinements = Pick<
   ShortletFilters,
   | 'minPrice'
@@ -30,7 +29,6 @@ export const QUICK_TOGGLES: {
   { key: 'petsAllowed', label: 'Pets allowed' },
 ];
 
-/** How many refinements are active, for the Filters chip count. */
 export function refinementCount(r: StayRefinements): number {
   return (
     (r.minPrice ? 1 : 0) +

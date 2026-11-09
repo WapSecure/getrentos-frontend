@@ -14,7 +14,6 @@ import { StayCard } from './StayCard';
 
 const PAGE_SIZE = 20;
 
-/** Where a result opens: the stay, carrying the dates and party already chosen. */
 export function openStay(
   id: string,
   filters: Pick<ShortletFilters, 'checkIn' | 'checkOut' | 'guests'>
@@ -31,10 +30,6 @@ export function openStay(
   });
 }
 
-/**
- * Paged stay results for a set of filters, with the wishlist heart wired up.
- * The header scrolls with the list so the page reads as one surface.
- */
 export function StayResults({
   filters,
   header,
@@ -54,7 +49,6 @@ export function StayResults({
     queryFn: ({ pageParam }) => shortletsApi.list(filters, pageParam, PAGE_SIZE),
     initialPageParam: 1,
     getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
-    // Changing a filter keeps the current results up until the new ones land.
     placeholderData: keepPreviousData,
   });
   const wishlistQuery = useQuery({
@@ -116,7 +110,6 @@ export function StayResults({
         </View>
       )}
       ListHeaderComponent={listHeader}
-      // The states sit under the header so the caller's filters stay usable.
       ListEmptyComponent={
         <QueryState
           query={query}

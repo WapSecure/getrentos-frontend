@@ -29,26 +29,13 @@ import {
   transactionPinBody,
 } from '@/lib/stepUpSetup';
 
-/** With no factor yet: set a PIN, or add a passkey (Face ID / fingerprint). */
 type SetupChoice = 'pin' | 'passkey';
 
-/**
- * Mounted once at the root. When the API asks for confirmation before a
- * sensitive change, this asks for the account's strongest factor and hands the
- * token back to apiFetch, which replays the request. Cancelling resolves null,
- * so the original call fails with the API's own "confirm it's you" message.
- *
- * A password alone confirms nothing, so an account with no factor sets one up
- * here first (password + emailed code, then a PIN or a passkey) and confirms
- * with it.
- */
+// Cancelling resolves null, so the original call fails with the API's own "confirm it's you" message. A password alone confirms nothing, so an account with no factor sets one up here first.
 export function StepUpSheet({
   summary: summaryProp,
 }: {
-  /**
-   * What is being authorised, e.g. "Withdraw ₦250,000 to GTBank ••••1234" (UX-30).
-   * A summary the request itself carries (`withStepUpSummary`) wins over this one.
-   */
+  /** A summary the request itself carries (`withStepUpSummary`) wins over this one. */
   summary?: string;
 } = {}) {
   const { colors, spacing, radius } = useTheme();
@@ -59,7 +46,7 @@ export function StepUpSheet({
   const [method, setMethod] = useState<StepUpMethod | null>(null);
   const [hasPassword, setHasPassword] = useState(true);
   const [value, setValue] = useState('');
-  // Without the phone, a one-time backup code stands in for the authenticator (AU-07).
+  // Without the phone, a one-time backup code stands in for the authenticator.
   const [useBackupCode, setUseBackupCode] = useState(false);
   const [password, setPassword] = useState('');
   const [pin, setPin] = useState('');
@@ -111,8 +98,7 @@ export function StepUpSheet({
     return () => registerStepUpPrompt(null);
   }, []);
 
-  // A token bound to a challenge approves one request only, so it isn't kept
-  // for later ones (security gap AU-02).
+  // A token bound to a challenge approves one request only, so it isn't kept for later ones.
   const remember = (res: { stepUpToken: string; expiresIn: number }) => {
     if (!challenge.current) rememberStepUpToken(res.stepUpToken, res.expiresIn);
   };
@@ -153,7 +139,7 @@ export function StepUpSheet({
 
   const passkeyStepUp = async () => {
     const options = await securityApi.startPasskeyStepUp();
-    const assertion = await authenticatePasskey(options); // OS biometric / security-key prompt
+    const assertion = await authenticatePasskey(options);
     const res = await securityApi.confirmStepUp({
       passkeyResponse: assertion,
       challengeId: challenge.current,
@@ -164,7 +150,6 @@ export function StepUpSheet({
 
   const confirmWithPasskey = () => run(passkeyStepUp);
 
-  /** No factor yet: set the PIN with the emailed code, then confirm with it. */
   const setPinAndConfirm = () =>
     run(async () => {
       await securityApi.setTransactionPin(
@@ -181,7 +166,6 @@ export function StepUpSheet({
       await confirmWith({ pin });
     });
 
-  /** No factor yet: add a passkey with a set-up-only token, then confirm with it. */
   const addPasskeyAndConfirm = () =>
     run(async () => {
       await addPasskeyWithEmailedCode(

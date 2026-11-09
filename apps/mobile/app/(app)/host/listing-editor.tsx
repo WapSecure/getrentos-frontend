@@ -99,11 +99,6 @@ const fromListing = (l: HostListing): Draft => ({
 const naira = (v: string) => Number(v.replace(/\D/g, '')) || 0;
 const STEPS = ['Home', 'The stay', 'Price', 'Review'] as const;
 
-/**
- * New listing: a short guided flow, one decision per screen. Editing: the same
- * sections on one page. Photos default to the property's own, so a host can
- * go live without re-uploading anything.
- */
 export default function ListingEditor() {
   const { id } = useLocalSearchParams<{ id?: string }>();
   const listings = useQuery({
@@ -145,8 +140,6 @@ function Loading() {
     </View>
   );
 }
-
-/* --------------------------------- create --------------------------------- */
 
 function CreateFlow() {
   const { colors, spacing } = useTheme();
@@ -542,8 +535,6 @@ function ReviewStep({ d, onJump }: { d: Draft; onJump: (step: number) => void })
     </Card>
   );
 }
-
-/* ---------------------------------- edit ---------------------------------- */
 
 function EditForm({ listing }: { listing: HostListing }) {
   const { colors, spacing } = useTheme();

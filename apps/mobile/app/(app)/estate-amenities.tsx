@@ -35,7 +35,6 @@ import { errorMessage } from '@/lib/api/client';
 
 type View_ = 'bookings' | 'amenities';
 
-/** Shared spaces residents can book, and the bookings on them. */
 export default function EstateAmenities() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
@@ -44,7 +43,6 @@ export default function EstateAmenities() {
   const { estate, estateId } = useEstate();
   const [view, setView] = useState<View_>('bookings');
   const [adding, setAdding] = useState(false);
-  // "Now" as of opening the screen; close enough to split ahead from past.
   const [openedAt] = useState(() => new Date());
 
   const amenities = useQuery({

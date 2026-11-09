@@ -6,14 +6,8 @@ import { BrandLogo, Button, LinkButton, Text, useTheme } from '@sureground/ui-na
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { biometricSupport, unlockWithBiometrics, useAppLockEnabled } from '@/lib/appLock';
 
-/** Away this long and the app locks again on return. */
 const RELOCK_AFTER_MS = 60_000;
 
-/**
- * Covers the app until the owner unlocks it, when app lock is on. Locks on a
- * cold start and after a minute in the background: not right after the user
- * signs in with a password or switches the lock on, which already prove it's them.
- */
 export function AppLockGate() {
   const { status, signOut } = useAuth();
   const { enabled } = useAppLockEnabled();
@@ -50,7 +44,6 @@ export function AppLockGate() {
     if (ok) setLocked(false);
   }, [prompting]);
 
-  // Prompt straight away when the lock appears.
   useEffect(() => {
     if (!active || !locked) return;
     if (provenThisCommit.current) {

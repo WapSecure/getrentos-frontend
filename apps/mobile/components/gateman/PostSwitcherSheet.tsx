@@ -4,17 +4,8 @@ import { Button, Card, Text, useTheme } from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
 
-/** "2 gates" / "1 gate": a guard reading "1 gates" is a small but visible sign
- * that nobody looked at this screen with real data. */
 const describeGateCount = (count: number) => (count === 1 ? '1 gate' : `${count} gates`);
 
-/**
- * Says where this guard is working, and lets them change it.
- *
- * Two questions in one control because they are one question: which patch of
- * ground is this guard responsible for. A guard posted to a single gate sees a
- * plain statement of fact; one with a choice gets the choice.
- */
 export function PostSwitcherSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { colors, spacing } = useTheme();
   const { estates, estate, gates, gate, selectEstate, selectGate } = useGatemanPost();
@@ -38,9 +29,6 @@ export function PostSwitcherSheet({ open, onClose }: { open: boolean; onClose: (
               const selected = option.id === estate?.id;
               return (
                 <Card key={option.id} elevated={selected} padding="none">
-                  {/* The whole row is the tap target. A guard reaches for the
-                      estate's name, not for a small button at the far edge of
-                      the row: and missing it looks like the sheet is broken. */}
                   <Pressable
                     disabled={selected}
                     onPress={() => selectEstate(option.id)}
@@ -57,19 +45,14 @@ export function PostSwitcherSheet({ open, onClose }: { open: boolean; onClose: (
                     <View style={{ flex: 1, gap: 2 }}>
                       <Text variant="bodyStrong">{option.name}</Text>
                       <Text variant="caption" color="mutedForeground">
-                        {/* The count is only known for the estate we have
-                            actually loaded its gates for. Showing the stored
-                            `gateCount` for the others would quote a planning
-                            number that drifts from the barriers really named. */}
+                        {/* Only the loaded estate's count is real: the stored gateCount is a planning number that drifts from the gates actually named. */}
                         {selected && gates.length > 0
                           ? `${option.city} · ${describeGateCount(gates.length)}`
                           : option.city}
                       </Text>
                     </View>
                     {selected ? (
-                      // A tick, not a disabled "Current" button: a disabled
-                      // button reads as "you may not go here" rather than "you
-                      // are already here".
+                      // A tick, not a disabled "Current" button, which would read as "you may not go here".
                       <Check size={18} color={colors.primary} />
                     ) : (
                       <Text variant="caption" color="primary">

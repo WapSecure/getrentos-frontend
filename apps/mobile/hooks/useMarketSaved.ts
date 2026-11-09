@@ -9,7 +9,6 @@ import { rememberListing } from '@/lib/pendingListing';
 import { qk } from '@/lib/query/keys';
 import { useToast } from '@sureground/ui-native';
 
-/** One saved-listing state for rent, sale, shortlet and land. */
 export function useMarketSaved(kind: MarketKind) {
   const { status } = useAuth();
   const queryClient = useQueryClient();

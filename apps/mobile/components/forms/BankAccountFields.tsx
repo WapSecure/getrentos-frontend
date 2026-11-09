@@ -12,12 +12,7 @@ export { accountNumberOk };
 
 const OTHER_BANK = 'other';
 
-/**
- * Bank and account number, the way every payout form asks (audit D10): pick
- * the bank by name (or tap a common one), type the 10 digits, and the name on
- * the account appears before saving. "Other bank" still takes a code for a
- * bank not listed. Codes keep their leading zeros.
- */
+// Bank codes keep their leading zeros.
 export function BankAccountFields({
   bankCode,
   onBankCode,
@@ -30,12 +25,8 @@ export function BankAccountFields({
   onBankCode: (code: string) => void;
   accountNumber: string;
   onAccountNumber: (n: string) => void;
-  /** Told the account holder's name once it is found, and null while it is not. */
   onAccountName?: (name: string | null) => void;
-  /**
-   * Told where the name check stands. Callers keep save disabled until
-   * `lookupAllowsSave` (UX-28): the name is found, or honestly could not be checked.
-   */
+  /** Callers keep save disabled until `lookupAllowsSave`: the name is found, or honestly could not be checked. */
   onLookup?: (lookup: AccountLookup) => void;
 }) {
   const { colors, spacing } = useTheme();

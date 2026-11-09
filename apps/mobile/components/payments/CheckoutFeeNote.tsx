@@ -3,13 +3,7 @@ import { useCheckoutFee } from '@/hooks/useCheckoutFee';
 import type { PaymentProvider } from '@/lib/api/paymentStatus';
 import { formatNaira } from '@/lib/format';
 
-/**
- * "Card or bank fee ₦X · You pay ₦Y" for a payment of `amount` naira, shown
- * beside a pay button so the total on the payment page is no surprise. The
- * payer covers the fee so the landlord, seller or estate gets the full amount.
- * Pass the payer's chosen `provider`: fees differ per company.
- * Renders nothing until the fee is known, or when there is none.
- */
+// Fees differ per company, so pass the payer's chosen provider. The payer covers the fee so the receiver gets the full amount.
 export function CheckoutFeeNote({
   amount,
   provider,

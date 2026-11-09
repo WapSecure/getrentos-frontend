@@ -8,7 +8,6 @@ import { relativeTime } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
-/** What a notification row needs, whichever portal's API it came from. */
 export interface InboxNotification {
   id: string;
   type: string;
@@ -16,17 +15,10 @@ export interface InboxNotification {
   body: string;
   read: boolean;
   createdAt: string;
-  /** Where it leads, when the API says. */
   actionUrl?: string;
-  /** Set on a message: the conversation it is in. */
   conversationId?: string;
 }
 
-/**
- * A portal's notification inbox: unread first to the eye (dot and tinted
- * icon), "Mark all read", and a tap that marks one read and opens what it is
- * about. Each portal supplies its data, its icons and where a tap goes.
- */
 export function NotificationsInbox({
   eyebrow,
   items,
@@ -46,7 +38,6 @@ export function NotificationsInbox({
   error: boolean;
   refreshing: boolean;
   onRefresh: () => void;
-  /** Mark it read if needed, then go where it points. */
   onOpen: (n: InboxNotification) => void;
   onReadAll: () => void;
   readingAll: boolean;

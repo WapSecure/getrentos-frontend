@@ -23,11 +23,7 @@ import { errorMessage } from '@/lib/api/client';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
-/**
- * Consent to be texted (SMS and/or WhatsApp) for the few urgent things, to the
- * verified number on the profile. The same consent the web settings card and
- * Ask Sureground on WhatsApp read.
- */
+/** The same consent the web settings card and Ask Sureground on WhatsApp read. */
 export default function TextMessageSettings() {
   const { colors, spacing, radius } = useTheme();
   const query = useQuery({ queryKey: qk.messagingConsent, queryFn: messagingConsentApi.get });

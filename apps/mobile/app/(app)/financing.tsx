@@ -85,7 +85,6 @@ export default function Financing() {
   );
 }
 
-/** Shown instead of the sign-up while Flex isn't taking new plans. */
 function PausedCard() {
   const { colors, spacing } = useTheme();
   return (
@@ -263,7 +262,6 @@ function ActivePlanCard({ overview }: { overview: { plan: FinancingPlan } }) {
   const plan = overview.plan;
   const paidCount = plan.installments.filter((i) => i.status === 'paid').length;
   const nextDue = plan.installments.find((i) => i.status === 'due' || i.status === 'overdue');
-  // Which company takes the instalment, and why the last one could not.
   const providers = usePaymentProviders();
   const [providerError, setProviderError] = useState<string | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -286,7 +284,6 @@ function ActivePlanCard({ overview }: { overview: { plan: FinancingPlan } }) {
       qc.invalidateQueries({ queryKey: qk.renter.financing });
     },
     onError: (err, { provider }) => {
-      // That company cannot take it right now: say so in the sheet, with the other one picked.
       const unavailable = providers.recover(err, provider);
       if (unavailable) setProviderError(unavailable);
       else {

@@ -2,10 +2,6 @@ import { apiFetch } from './client';
 import type { Paginated } from './properties';
 import type { PayoutSentTo } from '@sureground/shared';
 
-/**
- * Where sale proceeds go. Owners, realtors and agents all sell through the
- * marketplace seller API, so they share one payout account and one list.
- */
 export interface SellerPayoutAccount {
   bankCode: string;
   bankName: string;
@@ -29,11 +25,7 @@ export interface SellerSalePayout {
   sentTo?: PayoutSentTo | null;
 }
 
-/**
- * Common Nigerian banks with their Paystack codes, so most people tap rather
- * than look a code up. "Other bank" still takes any code; the API resolves the
- * account against the bank either way and says so if it doesn't match.
- */
+/** "Other bank" still takes any code; the API resolves the account against the bank either way. */
 export const COMMON_BANKS = [
   { code: '058', name: 'GTBank' },
   { code: '044', name: 'Access' },

@@ -162,7 +162,6 @@ describe('confirming steps', () => {
 
 describe('estates and reservations', () => {
   it('quotes a plot as the server prices it', () => {
-    // 6 months, 30% deposit, 10% uplift on ₦4.1m with ₦900k fees.
     expect(
       quotePlot(4_100_000, 900_000, {
         durationMonths: 6,

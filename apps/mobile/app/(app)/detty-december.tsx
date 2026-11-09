@@ -16,11 +16,7 @@ import { SupportContact } from '@/components/shortlet/StayUI';
 import { peakWeek, seasonRange } from '@/lib/stays';
 import { shiftDay } from '@/lib/hostDates';
 
-/**
- * Detty December campaign palette: a fixed night sky with an amber accent, so the
- * hero reads the same in light and dark mode. No theme token covers it; keep in
- * step with the banner in app/(app)/shortlets.tsx.
- */
+// Fixed so the hero reads the same in light and dark; keep in step with the banner in app/(app)/shortlets.tsx.
 const NIGHT = {
   bg: '#121823',
   text: '#ffffff',
@@ -55,7 +51,6 @@ const PROMISES: { icon: LucideIcon; title: string; body: string }[] = [
 
 type Week = 'first' | 'second' | 'season';
 
-/** Detty December: the peak weeks, priced in full, from hosts guests can trust. */
 export default function DettyDecember() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
@@ -77,7 +72,6 @@ export default function DettyDecember() {
 
   const header = (
     <View style={{ gap: spacing['2xl'], paddingBottom: spacing.lg }}>
-      {/* Hero */}
       <View
         style={{
           backgroundColor: NIGHT.bg,
@@ -128,7 +122,6 @@ export default function DettyDecember() {
         </Text>
       </View>
 
-      {/* Why book here */}
       <View style={{ paddingHorizontal: spacing.xl, gap: spacing.lg }}>
         {PROMISES.map((p) => (
           <View key={p.title} style={{ flexDirection: 'row', gap: spacing.md }}>
@@ -155,7 +148,6 @@ export default function DettyDecember() {
         <SupportContact lead="Questions before you book? Talk to a person." />
       </View>
 
-      {/* The week */}
       <View style={{ gap: spacing.sm }}>
         <Text
           variant="heading"

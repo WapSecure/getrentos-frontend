@@ -478,7 +478,6 @@ function PhoneForm(props: Shared) {
                 textContentType="telephoneNumber"
                 returnKeyType="next"
                 value={value}
-                // Digits and a leading '+' only.
                 onChangeText={(t) => onChange(t.replace(/[^\d+]/g, '').replace(/(?!^)\+/g, ''))}
                 onBlur={onBlur}
                 onSubmitEditing={() => pwRef.current?.focus()}

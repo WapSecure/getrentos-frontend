@@ -165,7 +165,6 @@ function ProfileForm({ initial }: { initial: RealtorProfile }) {
           label="Phone number"
           savedPhone={initial.phone}
           value={phone}
-          // Digits and one leading "+" only.
           onChangeText={(v) => setPhone(v.replace(/[^\d+]/g, '').replace(/(?!^)\+/g, ''))}
         />
       </Card>

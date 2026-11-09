@@ -14,7 +14,6 @@ import { providerQuery, type PaymentProvider } from './paymentStatus';
 
 export type { DisputeMessage, ShortletDispute, ShortletSeason };
 
-/** A host's claim on the guest's deposit, with signed previews of the evidence. */
 export type GuestDepositClaim = DepositClaim & { evidenceUrls?: string[] };
 
 export type ShortletBookingStatus =
@@ -54,7 +53,6 @@ export const CANCELLATION_POLICY_LABEL: Record<ShortletCancellationPolicy, strin
 
 export type ShortletDiscountType = 'WEEKLY' | 'TWO_WEEK' | 'MONTHLY' | 'LAST_MINUTE';
 
-/** Search with dates: the all-in price for those dates. */
 export interface StayQuote {
   nights: number;
   /** Nights after any discount. */
@@ -131,7 +129,6 @@ export interface ShortletListing {
   lastMinuteDays?: number;
   advanceNoticeDays?: number;
   prepDays?: number;
-  /** Current and upcoming seasons. */
   seasons?: ShortletSeason[];
   /** Confirmed stays the host cancelled in the last 12 months (detail only). */
   hostCancellations12m?: number;
@@ -179,7 +176,6 @@ export type GuestPromiseProblem =
 
 export type GuestPromiseOutcome = 'FULL_REFUND' | 'PARTIAL_REFUND' | 'NOT_UPHELD';
 
-/** Where the guest stands with the Guest Promise on one booking. */
 export interface GuestPromiseStatus {
   canReport: boolean;
   opensAt: string;
@@ -244,7 +240,6 @@ export interface ShortletBooking {
   createdAt: string;
 }
 
-/** Availability plus a live price quote for the requested range. */
 export interface ShortletAvailability {
   listingId: string;
   available: boolean;
@@ -375,14 +370,11 @@ export const shortletsApi = {
   book: (listingId: string, input: CreateShortletBookingInput) =>
     apiFetch<ShortletBooking>(`/shortlets/${listingId}/book`, { method: 'POST', body: input }),
 
-  /** Starts (or continues) the conversation with this stay's host. */
   messageHost: (listingId: string, text: string) =>
     apiFetch<ShortletConversation>(`/shortlets/${listingId}/messages`, {
       method: 'POST',
       body: { text },
     }),
-
-  /* ------------------------------- messages ------------------------------ */
 
   conversations: (page = 1, pageSize = 50) =>
     apiFetch<Paginated<ShortletConversation>>(
@@ -397,8 +389,6 @@ export const shortletsApi = {
 
   markRead: (conversationId: string) =>
     apiFetch<void>(`/shortlets/messages/${conversationId}/read`, { method: 'POST' }),
-
-  /* ------------------------------- bookings ------------------------------ */
 
   myBookings: (page = 1, pageSize = 20) =>
     apiFetch<Paginated<ShortletBooking>>(`/shortlets/bookings?page=${page}&pageSize=${pageSize}`),
@@ -419,13 +409,10 @@ export const shortletsApi = {
       body: { rating, comment },
     }),
 
-  /** What hosts have said about this guest. */
   reviewsOfMe: (page = 1, pageSize = 50) =>
     apiFetch<Paginated<ShortletGuestReview>>(
       `/shortlets/bookings/guest-reviews?page=${page}&pageSize=${pageSize}`
     ),
-
-  /* ----------------------- guest promise & disputes ---------------------- */
 
   uploadPromisePhoto: (bookingId: string, file: PickedFile) => {
     const form = new FormData();
@@ -463,13 +450,10 @@ export const shortletsApi = {
       body: { text },
     }),
 
-  /** Claims hosts have made on this guest's deposits. */
   depositClaims: (page = 1, pageSize = 50) =>
     apiFetch<Paginated<GuestDepositClaim>>(
       `/shortlets/bookings/deposit-claims?page=${page}&pageSize=${pageSize}`
     ),
-
-  /* ------------------------------- wishlist ------------------------------ */
 
   wishlist: (page = 1, pageSize = 20) =>
     apiFetch<Paginated<ShortletListing>>(`/shortlets/wishlist?page=${page}&pageSize=${pageSize}`),

@@ -21,7 +21,6 @@ import { useAuth } from '@/lib/auth/AuthProvider';
 
 const POLL_MS = 8000;
 
-/** The fields a thread needs; host and guest conversations both have them. */
 export interface ThreadMessage {
   id: string;
   senderId: string;
@@ -43,11 +42,7 @@ type Row =
   | { kind: 'sent'; m: ThreadMessage }
   | { kind: 'pending'; key: string; text: string; error?: string };
 
-/**
- * One shortlet thread, for either side. Conversations carry their messages
- * inline, so the open thread polls the conversation list; sending returns the
- * updated conversation, which is written straight into the cache.
- */
+// Messages come inline with conversations, so the open thread polls the conversation list, and a send's returned conversation goes straight into the cache.
 export function ConversationThread<C extends ThreadConversation>({
   id,
   queryKey,
@@ -62,7 +57,6 @@ export function ConversationThread<C extends ThreadConversation>({
   list: () => Promise<Paginated<C>>;
   send: (conversationId: string, text: string) => Promise<C>;
   markRead: (conversationId: string) => Promise<unknown>;
-  /** Who's on the other side when the name hasn't loaded ("Guest", "Host"). */
   fallbackName: string;
   backLabel?: string;
 }) {

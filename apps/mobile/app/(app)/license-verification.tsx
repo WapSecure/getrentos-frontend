@@ -30,7 +30,6 @@ const STATUS: Record<KycStatus, { label: string; tone: BadgeTone }> = {
   REJECTED: { label: 'Rejected', tone: 'danger' },
 };
 
-/** A realtor's or agent's licence, sent for human review (web: LicenseVerificationSettings). */
 export default function LicenseVerification() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();

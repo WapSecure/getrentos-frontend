@@ -57,10 +57,6 @@ import { goBack } from '@/lib/goBack';
 const PAGE_SIZE = 20;
 const ALL = 'all';
 
-/**
- * Every unit across the portfolio in one list: search by unit or tenant,
- * narrow to a property, and act on a unit without opening its property.
- */
 export default function LandlordUnits() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();

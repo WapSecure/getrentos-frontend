@@ -47,8 +47,6 @@ export default function GatemanAccount() {
           ) : null}
         </View>
 
-        {/* Portals, not posts: for an account that is also a landlord or a buyer.
-            Renders nothing for a single-workspace guard. */}
         <WorkspaceSwitcher />
 
         <SettingsGroup
@@ -90,9 +88,7 @@ export default function GatemanAccount() {
                   </Text>
                 </View>
               </View>
-              {/* Shown even for a single-estate guard: the gate still has to be
-                chosen when an estate names more than one, and this is where
-                they will come looking for it. */}
+              {/* Shown even for a single-estate guard: an estate with several gates still needs one chosen. */}
               <Button
                 label="Change estate or gate"
                 variant="outline"

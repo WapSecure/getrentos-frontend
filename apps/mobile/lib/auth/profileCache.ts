@@ -1,19 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { AuthProfile } from '../api/auth';
 
-/**
- * The signed-in user's profile, kept on disk so a cold start with no network can
- * still work out which portal to open.
- *
- * A stored token is not enough on its own. The portal a person gets is derived
- * from their roles, so an app holding a session but no profile cannot place the
- * user anywhere and falls back to "no portal". That is precisely the guard whose
- * phone restarted at the barrier — locked out of the console they need, at the
- * moment the offline queue exists to help them.
- *
- * Deliberately not in secure storage: a profile is identity, not a credential,
- * and this only ever mirrors what `/auth/me` already returned to this device.
- */
+// Lets an offline cold start pick a portal, which comes from the roles. Not in secure storage: a profile is identity, not a credential.
 const KEY = 'sureground.profile';
 
 export async function readCachedProfile(): Promise<AuthProfile | null> {
@@ -21,8 +9,7 @@ export async function readCachedProfile(): Promise<AuthProfile | null> {
     const raw = await AsyncStorage.getItem(KEY);
     return raw ? (JSON.parse(raw) as AuthProfile) : null;
   } catch {
-    // A corrupt cache must not break the bootstrap; `/auth/me` is still the
-    // authority on the next online start.
+    // A corrupt cache must not break the bootstrap; `/auth/me` stays the authority.
     return null;
   }
 }

@@ -146,7 +146,6 @@ export default function HostCalendar() {
         ]);
         return;
       }
-      // Two taps make a range; a tap before the start restarts it.
       if (!selStart || selEnd || d < selStart) {
         setSelStart(d);
         setSelEnd(null);
@@ -163,7 +162,6 @@ export default function HostCalendar() {
   );
 
   const count = selStart ? nightsBetween(selStart, selEnd ?? selStart).length : 0;
-  // The calendar waits for both the blocks and the stays; only the blocks can fail it.
   const calendarQuery = {
     data: stays.isPending ? undefined : blocked.data,
     isError: blocked.isError,

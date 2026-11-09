@@ -31,10 +31,7 @@ import { goBack } from '@/lib/goBack';
 const MAX_PHOTOS = 6;
 const MIN_DESCRIPTION = 20;
 
-/**
- * The Guest Promise, used: within 24 hours of check-in the guest tells us the
- * stay isn't what they paid for. Photos upload only when they send it.
- */
+/** Photos upload only when the report is sent. */
 export default function GuestPromiseReport() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, spacing, radius } = useTheme();

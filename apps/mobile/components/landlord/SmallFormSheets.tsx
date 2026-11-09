@@ -1,8 +1,3 @@
-/**
- * The short single-purpose forms: uploading a document, generating an owner
- * statement and setting a management fee.
- * Each is a few fields, so they share a module rather than one file apiece.
- */
 import { useState } from 'react';
 import { View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -33,8 +28,6 @@ import { pickDocument } from '@/lib/filePicker';
 
 const fail = (toast: ReturnType<typeof useToast>, e: unknown, fallback: string) =>
   toast.show(e instanceof ApiError ? e.message : fallback, 'error');
-
-/* ------------------------------ document ------------------------------- */
 
 export function UploadDocumentSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [submitting, setSubmitting] = useState(false);
@@ -67,7 +60,6 @@ function UploadDocumentForm({
     const picked = await pickDocument();
     if (!picked) return;
     setFile(picked);
-    // Default the name from the file, minus its extension.
     if (!name) setName(picked.name.replace(/\.[^.]+$/, ''));
   };
 
@@ -129,8 +121,6 @@ function UploadDocumentForm({
   );
 }
 
-/* --------------------------- owner statement --------------------------- */
-
 export function GenerateStatementSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [submitting, setSubmitting] = useState(false);
   return (
@@ -159,7 +149,6 @@ function GenerateStatementForm({
   const qc = useQueryClient();
   const toast = useToast();
 
-  // Default to last calendar month, the period people most often close.
   const now = new Date();
   const [periodStart, setPeriodStart] = useState(
     toISODate(new Date(now.getFullYear(), now.getMonth() - 1, 1))
@@ -210,8 +199,6 @@ function GenerateStatementForm({
     </View>
   );
 }
-
-/* --------------------------- management fee ---------------------------- */
 
 export function ManagementFeeSheet({
   open,

@@ -21,7 +21,6 @@ import { relativeTime } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
 
-/** Guests' messages, unread first. */
 export default function HostInbox() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();

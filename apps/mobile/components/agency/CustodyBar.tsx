@@ -22,10 +22,6 @@ import {
 } from '@/lib/api/agency';
 import { Sheet } from '@/components/Sheet';
 
-/**
- * Whose property the manager is acting on, stated on every agency screen, with
- * the switch beside it. Choosing comes before changing anything.
- */
 export function CustodyBar() {
   const { colors, spacing } = useTheme();
   const { mandates, selected, loading, error, reload } = useCustody();
@@ -130,7 +126,6 @@ function SelectedBadges({ m }: { m: Mandate }) {
   );
 }
 
-/** Every engagement, live ones first, with why a non-live one can't be acted under. */
 export function ClientPicker({ onDone }: { onDone: () => void }) {
   const { colors, spacing } = useTheme();
   const { mandates, selected, select } = useCustody();

@@ -23,10 +23,6 @@ import { useAuth } from '@/lib/auth/AuthProvider';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
 
-/**
- * One dispute, for either side: what was raised, where it stands, and the
- * thread with support. Callers supply the data and the words that differ.
- */
 export function DisputeThread({
   id,
   disputesKey,
@@ -44,7 +40,6 @@ export function DisputeThread({
   listMessages: (disputeId: string) => Promise<DisputeMessage[]>;
   sendMessage: (disputeId: string, text: string) => Promise<DisputeMessage>;
   categoryLabel: (category: string) => string;
-  /** How a refund reads from this side ("₦X was refunded to the guest."). */
   refundText: (amount: number) => string;
 }) {
   const { profile } = useAuth();

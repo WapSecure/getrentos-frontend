@@ -27,21 +27,7 @@ import {
 } from '@/lib/emergency/answerOptions';
 import { formatTime } from '@/lib/format';
 
-/**
- * The roll call, from a household's point of view.
- *
- * Three decisions worth stating, because each is a place this screen could have
- * been built the other way:
- *
- *  - The estate's numbers are shown, its roll is not. "9 of 12 accounted for" is
- *    reassuring and identifies nobody; a list of names, units and who was home in
- *    the middle of the night is the most sensitive thing this estate produces.
- *  - There is no "not yet accounted for" button. It is the state a household is
- *    in until somebody answers, so offering it would let a roll sit unanswered
- *    with a tick beside it.
- *  - An answer is one tap. The note is offered underneath and never required: a
- *    household answering in a stairwell should not be filling in a form.
- */
+// Show the estate's numbers, never its roll (the most sensitive data the estate holds). No "not accounted for" button, and the note is never required.
 export default function ResidentEmergency() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
@@ -53,8 +39,7 @@ export default function ResidentEmergency() {
   const query = useQuery({
     queryKey: qk.resident.emergency,
     queryFn: () => residentApi.getEmergency(),
-    // While an emergency is open this is the most important screen on the phone,
-    // and a marshal may be answering for this household from the other end.
+    // Polled while open: a marshal may be answering for this household.
     refetchInterval: (q) => (q.state.data ? 15_000 : false),
   });
 
@@ -73,8 +58,6 @@ export default function ResidentEmergency() {
   });
 
   const data = query.data;
-  // The people who live here: the lines this household's answer covers. Visitor
-  // lines are shown, but a marshal answers for them.
   const mine = residentLines(data?.myEntries ?? []);
   const visitorEntries = (data?.myEntries ?? []).filter((entry) => entry.basis !== 'RESIDENT');
   const states = mine.map((entry) => entry.state);
@@ -162,7 +145,6 @@ export default function ResidentEmergency() {
                 </View>
               </Card>
 
-              {/* The one action this screen exists for. */}
               <Card elevated>
                 <Text variant="bodyStrong">
                   {answered ? 'Is this still right?' : 'Where is your household?'}
@@ -254,7 +236,6 @@ export default function ResidentEmergency() {
                 ) : null}
               </Card>
 
-              {/* Your own lines, and the estate's numbers. Never the estate's roll. */}
               <Card elevated>
                 <Text variant="bodyStrong">Your household</Text>
                 {(data.myEntries ?? []).length === 0 ? (
@@ -291,10 +272,6 @@ export default function ResidentEmergency() {
                   ))
                 )}
 
-                {/* Visitors this household was admitted are on the roll and this
-                  household cannot answer for them, so they are named rather than
-                  hidden: a resident who does not see them has no way to tell a
-                  marshal that somebody is still inside. */}
                 {visitorEntries.length > 0 ? (
                   <>
                     <Divider style={{ marginTop: spacing.md }} />

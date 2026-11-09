@@ -35,10 +35,6 @@ import { Sheet } from '@/components/Sheet';
 import { Stepper } from '@/components/host/HostUI';
 import { goBack } from '@/lib/goBack';
 
-/**
- * How the price moves: discounts for long and last-minute stays, notice and
- * turnover days, and seasons with their own rate and minimum stay.
- */
 export default function HostPricing() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, spacing, radius } = useTheme();

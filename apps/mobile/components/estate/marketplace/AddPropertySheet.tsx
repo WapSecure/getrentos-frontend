@@ -17,10 +17,6 @@ import {
 import { haptics } from '@/lib/haptics';
 import { MarketplaceFormError } from './MarketplaceUI';
 
-/**
- * Ask a property's owner to bring it into the estate and let the estate market
- * it. Nothing changes until the owner approves.
- */
 export function AddPropertySheet({
   open,
   onClose,

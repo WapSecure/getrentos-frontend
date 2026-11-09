@@ -1,10 +1,5 @@
 import { apiFetch } from './client';
 
-/**
- * Landlord automations (Pro): a one-off broadcast to tenants, saved message
- * templates, and rules that send on a schedule or when a tenancy event happens.
- */
-
 export type BroadcastAudience = 'ALL_TENANTS' | 'PROPERTY' | 'IN_ARREARS';
 export type AutomationTrigger = 'SCHEDULE' | 'RENT_DUE_SOON' | 'RENT_OVERDUE' | 'LEASE_EXPIRING';
 export type Cadence = 'MONTHLY' | 'QUARTERLY' | 'ANNUAL';
@@ -86,7 +81,6 @@ export const CADENCE_LABEL: Record<Cadence, string> = {
   ANNUAL: 'Annual',
 };
 
-/** Merge fields the server fills in per recipient. */
 export const MERGE_FIELDS = ['{{tenant_name}}', '{{property}}'];
 
 export interface RuleForm {
@@ -126,11 +120,6 @@ export const ruleToForm = (r: AutomationRule): RuleForm => ({
   enabled: r.enabled,
 });
 
-/**
- * What the server takes. A scheduled rule broadcasts to an audience on a
- * cadence; an event rule messages the tenant the event is about, optionally
- * only on one property.
- */
 export function rulePayload(f: RuleForm, editing = false): RuleInput {
   const full = buildRule(f);
   if (!editing) return full;
@@ -159,7 +148,6 @@ function buildRule(f: RuleForm): RuleInput {
   return { ...common, trigger: f.trigger, ...(f.propertyId ? { propertyId: f.propertyId } : {}) };
 }
 
-/** What still stops the rule being saved, or null. */
 export function ruleBlocker(f: RuleForm): string | null {
   if (!f.name.trim()) return 'Name the rule.';
   if (f.trigger === 'SCHEDULE') {
@@ -170,7 +158,6 @@ export function ruleBlocker(f: RuleForm): string | null {
   return null;
 }
 
-/** What still stops a broadcast going, or null. */
 export function broadcastBlocker(b: BroadcastInput): string | null {
   if (b.audience === 'PROPERTY' && !b.propertyId) return 'Choose the property.';
   if (!b.title.trim() || !b.body.trim()) return 'Write the title and the message.';

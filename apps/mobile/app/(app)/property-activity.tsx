@@ -32,11 +32,6 @@ const WHO_OPTIONS: { value: ActivityWho; label: string }[] = [
   { value: 'managers', label: 'Managers only' },
 ];
 
-/**
- * What managers, Sureground, tenants and automatic jobs have done on the
- * caller's properties, newest first. The caller's own actions are left out.
- * Shared by the landlord and owner portals (the web's PropertyActivityLog).
- */
 export default function PropertyActivity() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();

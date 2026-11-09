@@ -49,7 +49,6 @@ function CreateListingForm({
   const qc = useQueryClient();
   const toast = useToast();
 
-  // Only units with no live listing can be listed.
   const vacant = useQuery({
     queryKey: ['landlord', 'listings', 'vacant-units'],
     queryFn: landlordApi.listingVacantUnits,
@@ -67,7 +66,6 @@ function CreateListingForm({
   const chooseUnit = (id: string) => {
     setUnitId(id);
     const u = units.find((x) => x.id === id);
-    // Prefill from the unit so the common case is a single tap.
     if (u) {
       if (!title) setTitle(`${u.propertyName}: ${u.unitName}`);
       if (!rent && u.askingRent) setRent(String(u.askingRent));
@@ -91,7 +89,6 @@ function CreateListingForm({
     onMutate: () => onSubmittingChange(true),
     onSuccess: (listing) => {
       qc.invalidateQueries({ queryKey: ['landlord', 'listings'] });
-      // The publication gate either puts it live or holds it for an admin.
       toast.show(
         listing.status === 'pending_verification'
           ? 'Listing created and held for review: it goes live once approved.'
@@ -100,7 +97,6 @@ function CreateListingForm({
       );
       onClose();
     },
-    // A verification gate is shown inline with the way forward; anything else is a toast.
     onError: (e) => {
       if (readGate(e)) return;
       toast.show(errorMessage(e, 'Could not create that listing.'), 'error');

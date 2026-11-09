@@ -2,12 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import * as Speech from 'expo-speech';
 import { languageLabel, type ReplyLanguage } from './replyLanguage';
 
-/**
- * Voice in and out on the phone, using the device's own speech services only:
- * nothing is recorded or sent to Sureground or any other provider by this code.
- * Speech-to-text needs a development or store build; in Expo Go the module is
- * absent, so voice input reports itself unavailable instead of crashing.
- */
+// Device speech services only: nothing is sent to Sureground or any other provider. Expo Go lacks the module,
+// so voice input reports itself unavailable.
 
 type RecognitionModule = typeof import('expo-speech-recognition');
 
@@ -19,7 +15,7 @@ try {
   recognition = null;
 }
 
-/** Nigerian locales for each reply language; Pidgin is recognised as Nigerian English. */
+// Pidgin is recognised as Nigerian English.
 export const SPEECH_LOCALE: Record<ReplyLanguage, string> = {
   en: 'en-NG',
   pcm: 'en-NG',
@@ -45,10 +41,6 @@ function errorText(code: string, language: ReplyLanguage): string {
   }
 }
 
-/**
- * Speak a question instead of typing it. `onText` receives the words as they
- * are recognised, so the person sees and can fix them before sending.
- */
 export function useVoiceInput(language: ReplyLanguage, onText: (text: string) => void) {
   const [listening, setListening] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -99,10 +91,6 @@ export function useVoiceInput(language: ReplyLanguage, onText: (text: string) =>
   return { available, listening, error, start, stop };
 }
 
-/**
- * Read an answer aloud with the phone's voices. English and Pidgin use a
- * Nigerian English voice; Yoruba, Hausa and Igbo only when the phone has one.
- */
 export function useReadAloud() {
   const [voices, setVoices] = useState<Speech.Voice[]>([]);
   const [speaking, setSpeaking] = useState<number | null>(null);
@@ -140,7 +128,6 @@ export function useReadAloud() {
   return { canRead, speaking, toggle };
 }
 
-/** Say a short line now, interrupting anything already being read. */
 export function speakNow(text: string, language: ReplyLanguage = 'en') {
   void Speech.stop();
   Speech.speak(text, { language: SPEECH_LOCALE[language] });

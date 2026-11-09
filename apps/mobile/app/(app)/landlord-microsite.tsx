@@ -102,7 +102,7 @@ function MicrositeForm({ initial }: { initial: MicrositeSettings }) {
       return landlordApi.uploadMicrositeBanner(file);
     },
     onSuccess: (result) => {
-      if (!result) return; // the picker was dismissed
+      if (!result) return;
       qc.invalidateQueries({ queryKey: qk.landlord.microsite });
       toast.show('Banner updated.', 'success');
     },
@@ -166,7 +166,6 @@ function MicrositeForm({ initial }: { initial: MicrositeSettings }) {
           </View>
         )}
 
-        {/* Always offer the swap, even over an existing banner. */}
         <View
           style={{
             position: 'absolute',

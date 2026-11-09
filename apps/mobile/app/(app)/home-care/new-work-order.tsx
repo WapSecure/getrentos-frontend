@@ -41,7 +41,6 @@ export default function NewWorkOrder() {
   const qc = useQueryClient();
   const toast = useToast();
   const homes = useMyHomes();
-  // "Log a repair" from an asset opens this with the home and item chosen.
   const params = useLocalSearchParams<{ propertyId?: string; assetId?: string; title?: string }>();
   const [propertyId, setPropertyId] = useState(params.propertyId ?? '');
   const [unitId, setUnitId] = useState('');
@@ -70,7 +69,6 @@ export default function NewWorkOrder() {
 
   const create = useMutation({
     mutationFn: async () => {
-      // A home with no units yet gets one named by the host, in the same step.
       const unit = unitId || (await homeCareApi.addUnit(propertyId, newUnit.trim())).id;
       const estimated = Number(cost.replace(/\D/g, '')) || undefined;
       return homeCareApi.createWorkOrder({

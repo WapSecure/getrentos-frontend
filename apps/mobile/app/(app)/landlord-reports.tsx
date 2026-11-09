@@ -32,10 +32,6 @@ import { goBack } from '@/lib/goBack';
 import { planRefusal, retryUnlessPlanGate } from '@/lib/api/estateGate';
 import { ProUpsell } from '@/components/estate/governance/ProUpsell';
 
-/**
- * Reports: the rent roll, income and expenses per property over a chosen
- * window, and CSV exports of each, plus arrears and statement history.
- */
 export default function LandlordReports() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();

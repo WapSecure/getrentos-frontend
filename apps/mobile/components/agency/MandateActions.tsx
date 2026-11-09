@@ -15,11 +15,7 @@ import {
 import { errorMessage } from '@/lib/api/client';
 import { Sheet } from '@/components/Sheet';
 
-/**
- * What this viewer may do to an engagement, exactly as the API says
- * (`permissions`). Actions that need a reason ask for one first; serving
- * notice asks to confirm, since its clock can't be back-dated.
- */
+// Serving notice asks to confirm, since its clock can't be back-dated.
 export function MandateActions({ mandate }: { mandate: Mandate }) {
   const { spacing } = useTheme();
   const qc = useQueryClient();

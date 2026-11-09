@@ -5,11 +5,6 @@ import { savedListingsApi, type Paginated, type SavedProperty } from '@/lib/api/
 import { track, report } from '@/lib/analytics';
 import { useToast } from '@sureground/ui-native';
 
-/**
- * The renter's saved listings as a fast `Set` of listing ids, plus an
- * optimistic `toggle`. One source of truth for the heart on every card and the
- * Saved tab.
- */
 export function useSavedListings() {
   const qc = useQueryClient();
   const toast = useToast();

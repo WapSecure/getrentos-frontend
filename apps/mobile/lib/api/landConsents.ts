@@ -1,11 +1,6 @@
 import type { LandConsentRequest } from '@sureground/shared';
 import { apiFetch } from './client';
 
-/**
- * Land sales whose seller named you as someone whose consent the sale needs
- * (a co-owner, family member, principal). Objecting pauses the sale until
- * Sureground resolves it.
- */
 export const MIN_OBJECTION = 5;
 
 export const landConsentsApi = {

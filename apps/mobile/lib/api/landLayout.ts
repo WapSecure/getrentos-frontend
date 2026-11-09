@@ -3,11 +3,7 @@ import { ApiError, apiFetch } from './client';
 import type { LandAreaUnit } from './ownerLand';
 import { applyBps } from './landSales';
 
-/**
- * A developer's estate on one parcel: the layout (draft, on sale, closed), its
- * plots, the payment plans buyers choose from, and how the seller's listings
- * are doing. Money is whole naira; rates are basis points (1% = 100).
- */
+/** Money is whole naira; rates are basis points (1% = 100). */
 
 export type LayoutStatus = 'DRAFT' | 'PUBLISHED' | 'CLOSED';
 export const PLOT_STATUSES = [
@@ -151,8 +147,6 @@ export interface SellerAnalytics {
   } | null;
 }
 
-/* ------------------------------ layout form ------------------------------ */
-
 export interface LayoutForm {
   name: string;
   description: string;
@@ -177,7 +171,6 @@ export const layoutToForm = (l?: Layout | null): LayoutForm => ({
   developmentLevy: String(l?.fees.developmentLevy ?? 0),
 });
 
-/** What the server would refuse in the layout form, or null. */
 export function layoutProblem(f: LayoutForm): string | null {
   if (f.name.trim().length < 2) return 'Name the estate (at least 2 characters).';
   const hold = Number(f.reservationHoldHours);
@@ -193,10 +186,7 @@ export function layoutProblem(f: LayoutForm): string | null {
 
 const money = (v: string) => Math.max(0, Math.round(Number(v) || 0));
 
-/**
- * The body to send. On an edit, a cleared optional text is sent as null so the
- * server clears it; on create it is left out.
- */
+/** On an edit a cleared optional text is sent as null so the server clears it; on create it is left out. */
 export function layoutInput(f: LayoutForm, editing: boolean): LayoutInput {
   const opt = (v: string) => (v.trim() ? v.trim() : editing ? null : undefined);
   return {
@@ -212,7 +202,6 @@ export function layoutInput(f: LayoutForm, editing: boolean): LayoutInput {
   };
 }
 
-/** What publishing needs: a sale-ready parcel, an available plot, an active plan. */
 export function publishChecklist(input: {
   parcelSaleReady: boolean;
   available: number;
@@ -237,15 +226,12 @@ export function publishChecklist(input: {
   ];
 }
 
-/* ------------------------------- plot form ------------------------------- */
-
 export const parseTags = (value: string) =>
   value
     .split(',')
     .map((t) => t.trim())
     .filter(Boolean);
 
-/** Plots that can still be edited, withheld or released. */
 export const EDITABLE_PLOT = new Set<PlotStatus>(['AVAILABLE', 'WITHHELD']);
 
 export function plotProblem(
@@ -260,8 +246,6 @@ export function plotProblem(
   if (tags.some((t) => t.length > 40)) return 'Each tag must be 40 characters or fewer.';
   return null;
 }
-
-/* ------------------------------- plan form ------------------------------- */
 
 export const percentToBps = (p: string | number) => {
   const v = Number(p);
@@ -380,7 +364,6 @@ export const planInput = (f: PlanForm) => ({
   revocationChargeBps: percentToBps(f.forfeiture),
 });
 
-/** Plan terms the server would refuse, phrased for the form. */
 export function planTermProblems(t: PlanTerms): string[] {
   const problems: string[] = [];
   if (t.durationMonths > 0 && t.initialDepositBps >= 10_000) {
@@ -392,7 +375,6 @@ export function planTermProblems(t: PlanTerms): string[] {
   return problems;
 }
 
-/** The first thing wrong with the plan form, or null. */
 export function planProblem(f: PlanForm): string | null {
   if (f.name.trim().length < 2) return 'Name the plan (at least 2 characters).';
   for (const field of PLAN_FIELDS) {
@@ -423,8 +405,6 @@ export function priceExample(
   }
   return { priceUplift, totalPrice, initialPayment, monthlyInstallment, finalInstallment, months };
 }
-
-/* ---------------------------------- api ---------------------------------- */
 
 const layoutPath = (propertyId: string) => `/owner/land/${encodeURIComponent(propertyId)}/layout`;
 

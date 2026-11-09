@@ -12,14 +12,9 @@ interface Props {
   onDraft: () => void;
   loading: boolean;
   error: string | null;
-  /** Extra controls, such as a language picker. */
   children?: ReactNode;
 }
 
-/**
- * "Write it for me" for estate managers' forms: a few words in, a draft into
- * the fields below to edit before posting. Nothing is posted from here.
- */
 export function WriteItForMe({
   hint,
   placeholder,

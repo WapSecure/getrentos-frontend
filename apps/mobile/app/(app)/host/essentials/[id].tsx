@@ -42,10 +42,6 @@ const TRI_OPTIONS: { value: Tri; label: string }[] = [
   { value: 'no', label: 'No' },
 ];
 
-/**
- * What guests need to know before they book (rules, power, water, internet)
- * and what only a paid guest sees (how to get in).
- */
 export default function HostEssentials() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, spacing, radius } = useTheme();

@@ -1,9 +1,5 @@
 import { apiFetch } from './client';
 
-/**
- * Estates asking to market a property you own. Approving only grants the
- * right to advertise; the property and its money stay yours.
- */
 export type EstateAgreementStatus = 'PENDING' | 'ACTIVE' | 'DECLINED' | 'REVOKED';
 
 export interface EstateAgreement {

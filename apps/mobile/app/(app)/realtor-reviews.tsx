@@ -11,7 +11,6 @@ import { formatDate } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
 
-/** What clients say, with the rating spread. */
 export default function RealtorReviews() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();

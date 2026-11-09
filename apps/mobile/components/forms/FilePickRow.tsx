@@ -5,11 +5,6 @@ import { Text, useTheme } from '@sureground/ui-native';
 import type { PickedFile } from '@/lib/api/documents';
 import { checkPickedPhoto } from '@/lib/photoQuality';
 
-/**
- * A labelled slot for one file: dashed and tappable while empty, green with the
- * file's name (and a Remove link, when `onClear` is given) once chosen. The
- * caller does the picking, so the same row serves documents, selfies and CSVs.
- */
 export function FilePickRow({
   label,
   file,
@@ -25,10 +20,6 @@ export function FilePickRow({
   onClear?: () => void;
   icon?: LucideIcon;
   emptyText?: string;
-  /**
-   * A photo of a document: once chosen, say how to retake it if it is blurry,
-   * dark, glared or too small. Advice only; it can still be sent.
-   */
   checkPhotoQuality?: boolean;
 }) {
   const { colors, spacing, radius } = useTheme();

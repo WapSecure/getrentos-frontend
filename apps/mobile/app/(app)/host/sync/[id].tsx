@@ -29,10 +29,6 @@ import { goBack } from '@/lib/goBack';
 
 const SOURCES = ['Airbnb', 'Booking.com', 'Vrbo', 'Other'] as const;
 
-/**
- * Two-way calendar sync with other sites, so the same night is never sold
- * twice: give them our link, and paste theirs here.
- */
 export default function HostCalendarSync() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, spacing, radius } = useTheme();

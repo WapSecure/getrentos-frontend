@@ -29,7 +29,6 @@ export const searchParseApi = {
 /** A sentence ("2 bed in Yaba under 2m") is parsed; a word or two stays a plain text search. */
 export const looksLikeSentence = (text: string) => text.trim().split(/\s+/).length >= 3;
 
-/** Map parsed filters onto the app's listing filters. */
 export function toListingFilters(r: RentalSearchParse, known: readonly string[]): ListingFilters {
   const f = r.filters;
   return {

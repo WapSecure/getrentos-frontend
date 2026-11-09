@@ -5,23 +5,13 @@ import { Avatar, Button, Divider, Text, ThemeToggle, useTheme } from '@suregroun
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useIdentityVerification } from '@/hooks/useIdentityVerification';
 
-/**
- * The top and bottom of every portal's Account tab, so they read the same
- * whoever is signed in: who you are and in which role, then — after the
- * portal's own groups — appearance, sign out and the app version.
- */
-
-/** Who is signed in, and as what. */
 export function AccountHeader({
   role,
   fallbackName,
   note,
 }: {
-  /** The role this workspace is for, e.g. "Landlord". */
   role: string;
-  /** Shown until the profile has a name. */
   fallbackName: string;
-  /** One quiet line under the role, e.g. a rating or a count. */
   note?: string;
 }) {
   const { profile } = useAuth();
@@ -62,7 +52,6 @@ export function AccountHeader({
   );
 }
 
-/** Light / dark / auto, as the last row of the Settings group. */
 export function AppearanceFooter() {
   const { spacing } = useTheme();
   return (
@@ -76,7 +65,6 @@ export function AppearanceFooter() {
   );
 }
 
-/** Sign out (after a confirmation) and the app version. */
 export function AccountFooter() {
   const { signOut } = useAuth();
   const { colors, spacing } = useTheme();

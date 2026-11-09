@@ -4,8 +4,6 @@ import type { Paginated } from './properties';
 import type { VideoCallJoin } from '@sureground/shared';
 import type { VideoOnSiteReport } from '../filmedOnSite';
 
-/* ------------------------------ dashboard ------------------------------ */
-
 export interface LandlordDashboardStats {
   totalProperties: number;
   occupiedUnits: number;
@@ -39,8 +37,6 @@ export interface RevenuePoint {
   value: number;
 }
 
-/* ------------------------------ properties ----------------------------- */
-
 export type VerificationStatus = 'verified' | 'pending' | 'unverified' | 'rejected';
 
 export interface LandlordProperty {
@@ -55,11 +51,9 @@ export interface LandlordProperty {
   latitude?: number;
   longitude?: number;
   locationConfirmedAt?: string;
-  /** The Google place the address was checked against, when it was picked from the search. */
   placeId?: string | null;
   /** When the API last checked the address against Google; absent for a typed address. */
   addressVerifiedAt?: string | null;
-  /** Local government area, from Google, for a checked address. */
   lga?: string | null;
   description?: string;
   coverImage?: string;
@@ -78,8 +72,6 @@ export interface LandlordProperty {
   createdAt: string;
   archived: boolean;
 }
-
-/* -------------------------------- tenants ------------------------------ */
 
 export type RentStatus = 'paid' | 'due' | 'overdue' | 'partial';
 
@@ -130,8 +122,6 @@ export const VERIFICATION_TONE: Record<
   rejected: 'danger',
 };
 
-/* --------------------------------- units ------------------------------- */
-
 export type OccupancyStatus = 'occupied' | 'vacant' | 'reserved';
 
 export interface LandlordUnit {
@@ -143,7 +133,6 @@ export interface LandlordUnit {
   bathrooms: number;
   askingRent: number;
   askingRentPeriod: 'year' | 'month';
-  /** The agreed rent of the current tenancy, once one exists. */
   leaseRent?: number;
   leaseRentPeriod?: 'year' | 'month';
   occupancyStatus: OccupancyStatus;
@@ -162,8 +151,6 @@ export const OCCUPANCY_TONE: Record<OccupancyStatus, 'success' | 'warning' | 'ne
   vacant: 'neutral',
   reserved: 'warning',
 };
-
-/* ----------------------------- applications ---------------------------- */
 
 export type ApplicationStatus = 'pending' | 'under_review' | 'approved' | 'rejected' | 'withdrawn';
 
@@ -204,8 +191,6 @@ export const APPLICATION_STATUS_TONE: Record<
   rejected: 'danger',
   withdrawn: 'neutral',
 };
-
-/* -------------------------------- leases ------------------------------- */
 
 export type LeaseStatus =
   | 'draft'
@@ -269,8 +254,6 @@ export const LEASE_STATUS_LABEL: Record<LeaseStatus, string> = {
   terminated: 'Terminated',
 };
 
-/* ----------------------------- maintenance ----------------------------- */
-
 export type MaintenancePriority = 'low' | 'medium' | 'high' | 'urgent';
 export type MaintenanceStatus =
   | 'pending'
@@ -326,8 +309,6 @@ export const PRIORITY_TONE: Record<MaintenancePriority, 'danger' | 'warning' | '
     low: 'neutral',
   };
 
-/* ------------------------------- payments ------------------------------ */
-
 export type LandlordPaymentStatus = 'paid' | 'pending' | 'overdue' | 'processing' | 'failed';
 
 export interface LandlordPayment {
@@ -379,8 +360,6 @@ export const LANDLORD_PAYMENT_TONE: Record<
   failed: 'danger',
 };
 
-/* ------------------------------ financials ----------------------------- */
-
 export interface FinancialsStats {
   rentalIncome: number;
   outstandingRent: number;
@@ -388,14 +367,12 @@ export interface FinancialsStats {
   netProfit: number;
 }
 
-/** One month of the income-vs-expenses chart. Both figures are Naira. */
+/** Both figures are naira. */
 export interface FinancialsPoint {
   period: string;
   income: number;
   expenses: number;
 }
-
-/* ------------------------------- expenses ------------------------------ */
 
 export const EXPENSE_CATEGORIES = [
   'UTILITIES',
@@ -438,13 +415,9 @@ export interface CreateExpenseInput {
   note?: string;
 }
 
-/* --------------------------- owner statements -------------------------- */
-
 export type OwnerStatementStatus = 'draft' | 'issued' | 'paid';
 export type PayoutStatus = 'pending' | 'processing' | 'paid' | 'failed';
 
-/** An owner statement in plain words, as the API returns it. */
-/** An applicant's screening facts in plain words, as the API returns it. */
 export interface ApplicantSummary {
   applicationId: string;
   summary: string;
@@ -493,8 +466,6 @@ export const PAYOUT_TONE: Record<PayoutStatus, 'success' | 'warning' | 'danger' 
   failed: 'danger',
 };
 
-/* ------------------------------- listings ------------------------------ */
-
 /** The server's ListingStatus enum, lowercased by the DTO mapper. */
 export type ListingStatus = 'draft' | 'pending_verification' | 'published' | 'paused' | 'closed';
 
@@ -539,8 +510,6 @@ export const LISTING_STATUS_TONE: Record<
   closed: 'neutral',
 };
 
-/* --------------------------------- leads ------------------------------- */
-
 export type LeadStage = 'inquiry' | 'viewing' | 'application' | 'lease' | 'lost';
 
 export interface LandlordLead {
@@ -577,16 +546,12 @@ export const LEAD_STAGE_TONE: Record<LeadStage, 'info' | 'warning' | 'success' |
   lost: 'neutral',
 };
 
-/* ------------------------------- microsite ----------------------------- */
-
 export interface MicrositeSettings {
   slug: string;
   bio?: string;
   bannerUrl?: string;
   enabled: boolean;
 }
-
-/* ------------------------------- reviews ------------------------------- */
 
 export interface LandlordReviewSummary {
   averageRating: number;
@@ -607,8 +572,6 @@ export interface LandlordReview {
   comment: string;
   createdAt: string;
 }
-
-/* ------------------------------ documents ------------------------------ */
 
 export const DOCUMENT_CATEGORIES = [
   'lease_agreements',
@@ -634,10 +597,7 @@ export interface LandlordDocument {
   sizeLabel: string;
 }
 
-/* ---------------------------- notifications ---------------------------- */
-
 export interface LandlordNotification {
-  /** An in-app path the notification is about. */
   actionUrl?: string;
   /** Set on a message: the conversation it is in. */
   conversationId?: string;
@@ -648,8 +608,6 @@ export interface LandlordNotification {
   read: boolean;
   createdAt: string;
 }
-
-/* -------------------------------- vendors ------------------------------ */
 
 export interface LandlordVendor {
   id: string;
@@ -665,8 +623,6 @@ export interface CreateVendorInput {
   serviceType: string;
   phone: string;
 }
-
-/* ------------------------------- settings ------------------------------ */
 
 export interface LandlordProfile {
   fullName: string;
@@ -722,8 +678,6 @@ export interface LandlordNotificationPreference {
   push: boolean;
 }
 
-/* ------------------------------- charges ------------------------------- */
-
 export const CHARGE_CATEGORIES = ['RENT', 'SERVICE_CHARGE', 'DEPOSIT', 'LEVY'] as const;
 export type ChargeCategory = (typeof CHARGE_CATEGORIES)[number];
 
@@ -752,15 +706,12 @@ export interface ChargeInput {
   billingCycle: BillingCycle;
 }
 
-/** What a proposed renewal rent would mean, before committing to it. */
 export interface RenewalCheck {
   allowed?: boolean;
   percentageIncrease?: number;
   message?: string;
   [key: string]: unknown;
 }
-
-/* --------------------------- conversations ----------------------------- */
 
 export interface LandlordMessage {
   id: string;
@@ -770,8 +721,6 @@ export interface LandlordMessage {
   timestamp: string;
   read: boolean;
 }
-
-/* ------------------------ property & unit admin ------------------------ */
 
 export const PROPERTY_TYPES = [
   'apartment',
@@ -791,7 +740,6 @@ export const PROPERTY_TYPE_LABEL: Record<PropertyType, string> = {
 };
 
 export interface UpdatePropertyInput {
-  /** Where the app's camera filmed a new video tour, for the badge. */
   videoTourOnSite?: VideoOnSiteReport;
   /** The pin the owner placed on the map; both or neither. */
   latitude?: number;
@@ -802,7 +750,7 @@ export interface UpdatePropertyInput {
   city?: string;
   state?: string;
   country?: string;
-  /** The Google place the address was picked from; a changed address without one is saved unchecked. */
+  /** A changed address without one is saved unchecked. */
   placeId?: string;
   description?: string;
   /** Storage keys from uploadPropertyMedia; null clears the cover. */
@@ -812,7 +760,6 @@ export interface UpdatePropertyInput {
   videoTourKey?: string | null;
 }
 
-/** Whether the applicant agreed to share their standing from a past tenancy. */
 export interface TenancyStanding {
   /** False when the applicant chose not to share — the other fields are then absent. */
   shared: boolean;
@@ -822,8 +769,6 @@ export interface TenancyStanding {
   emailVerified?: boolean;
   phoneVerified?: boolean;
 }
-
-/* ------------------------------- creation ------------------------------ */
 
 export type ManagementFeeType = 'PERCENTAGE' | 'FLAT';
 
@@ -844,11 +789,10 @@ export interface CreatePropertyInput {
   city: string;
   state: string;
   country: string;
-  /** The Google place the address was picked from; the API checks it and stores Google's details. */
+  /** The API checks it and stores Google's details. */
   placeId?: string;
   description?: string;
   totalUnits?: number;
-  /** Storage keys returned by uploadPropertyMedia. */
   coverImageKey?: string;
   galleryImageKeys?: string[];
   videoTourKey?: string;
@@ -888,16 +832,10 @@ export interface CreateLeaseInput {
   rentAmount: number;
   rentPeriod?: 'month' | 'year';
   securityDeposit?: number;
-  /** Send to the tenant straight away rather than saving a draft. */
   sendImmediately: boolean;
-  /**
-   * The tenancy already exists (a sitting tenant being onboarded). The lease is
-   * created SIGNED rather than DRAFT — there is nobody to send it to.
-   */
+  /** A sitting tenant being onboarded: the lease is created SIGNED rather than DRAFT. */
   recordExisting?: boolean;
 }
-
-/* ------------------------------- messages ------------------------------ */
 
 export interface LandlordConversation {
   id: string;
@@ -910,7 +848,6 @@ export interface LandlordConversation {
 
 export type LandlordViewingStatus = 'requested' | 'confirmed' | 'completed' | 'cancelled';
 
-/** A renter's request to view one of the landlord's (or managed) properties. */
 export interface LandlordViewingRequest {
   id: string;
   propertyId: string;
@@ -942,7 +879,6 @@ export const landlordApi = {
   units: (propertyId: string) =>
     apiFetch<Paginated<LandlordUnit>>(`/landlord/units?propertyId=${propertyId}`),
 
-  /** Every unit across the portfolio, searchable by unit or tenant, a page at a time. */
   unitsPage: (params: { search?: string; propertyId?: string; page: number; pageSize: number }) => {
     const q = new URLSearchParams({ page: String(params.page), pageSize: String(params.pageSize) });
     if (params.search) q.set('search', params.search);
@@ -1031,7 +967,6 @@ export const landlordApi = {
 
   ownerStatement: (id: string) => apiFetch<OwnerStatement>(`/landlord/owner-statements/${id}`),
 
-  /** The statement in plain words: where the money went, what changed, what to ask. */
   explainOwnerStatement: (id: string) =>
     apiFetch<StatementExplanation>(`/landlord/owner-statements/${id}/explain`),
 
@@ -1224,7 +1159,7 @@ export const landlordApi = {
   tenancyStanding: (applicationId: string) =>
     apiFetch<TenancyStanding>(`/landlord/applications/${applicationId}/tenancy-standing`),
 
-  /** The screening facts in plain words, with questions and checks. Never a ranking or a decision. */
+  /** Never a ranking or a decision. */
   applicantSummary: (applicationId: string) =>
     apiFetch<ApplicantSummary>(`/landlord/applications/${applicationId}/screening/summary`),
 
@@ -1273,8 +1208,6 @@ export const landlordApi = {
       body: input,
     }),
 
-  /* ------------------------------ file I/O ----------------------------- */
-
   /** Returns the storage key to attach to a property; the file is not committed yet. */
   uploadPropertyMedia: (file: PickedFile, kind: 'image' | 'video') => {
     const form = new FormData();
@@ -1301,7 +1234,6 @@ export const landlordApi = {
     return apiUpload<MicrositeSettings>('/landlord/microsite/banner', form);
   },
 
-  /** Streams a PDF; returns the bytes to write to disk and share. */
   leasePdf: (id: string) => apiDownload(`/landlord/leases/${id}/pdf`),
 
   /** Streams CSV, not JSON. */

@@ -32,7 +32,6 @@ export interface RenterDocumentSummary {
   types: Record<string, number>;
 }
 
-/** A file picked on-device, in the shape `expo-document-picker` / `expo-image-picker` return. */
 export interface PickedFile {
   uri: string;
   name: string;
@@ -60,7 +59,6 @@ export const documentsApi = {
 
   getSummary: () => apiFetch<RenterDocumentSummary>('/renter/documents/summary'),
 
-  /** Uploads a file to the renter's document library and returns the stored record. */
   upload: (file: PickedFile, name: string, type: string, category: string, tags: string[] = []) => {
     const form = new FormData();
     appendFile(form, 'file', file);

@@ -55,10 +55,7 @@ export default function SubmitInspection() {
   const [uploadingKey, setUploadingKey] = useState<number | null>(null);
   const nextRoomKey = useRef(0);
 
-  // A draft is saved server-side as soon as it exists, so reopening this screen
-  // must show what was already recorded. Starting from an empty form silently
-  // threw away every room the agent had entered. Hydrate once, then leave the
-  // local state alone so edits are not clobbered by a refetch.
+  // The draft is saved server-side, so hydrate from it once, then leave local edits alone so a refetch can't clobber them.
   const saved = useQuery({
     queryKey: ['agent', 'inspection', taskId],
     queryFn: () => agentApi.inspection(taskId),
@@ -123,8 +120,6 @@ export default function SubmitInspection() {
     setRooms((prev) => prev.filter((r) => r.key !== key));
   };
 
-  // Fill each matching room from the draft; the agent's own notes are kept and
-  // the suggestion is added below them. Everything stays editable until submit.
   const applyDraft = (draft: InspectionDraft) => {
     const byKey = new Map(draft.rooms.map((r) => [roomKey(r.room), r]));
     setRooms((prev) =>

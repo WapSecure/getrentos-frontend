@@ -37,11 +37,6 @@ import { goBack } from '@/lib/goBack';
 
 type IncomingKind = Incoming['kind'];
 
-/**
- * Move a property to a verified firm, to Sureground Managed, or back to
- * yourself. The current manager runs it until the date chosen; then their
- * access ends, the new manager's begins, and every tenant is told.
- */
 export default function ChangeManager() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
@@ -122,7 +117,6 @@ export default function ChangeManager() {
   };
 
   const incomingOptions: { value: IncomingKind; label: string; disabled?: boolean }[] = [
-    // You cannot move a property to the manager you are ending.
     { value: 'SUREGROUND', label: 'Sureground Managed', disabled: !!outgoing?.managerIsSureground },
     { value: 'FIRM', label: 'A verified firm' },
     { value: 'SELF', label: 'Me' },

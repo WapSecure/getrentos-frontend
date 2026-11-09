@@ -9,11 +9,6 @@ import { MyPayout } from '@/components/agency/AgentSelfPayout';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
-/**
- * A realtor's or agent's share of a management firm's commissions. Many of a
- * firm's agents use plain realtor/agent accounts and never open the agency
- * workspace, so they see their share here.
- */
 export default function AgencyShare() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();

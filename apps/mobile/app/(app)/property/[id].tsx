@@ -97,7 +97,6 @@ export default function PropertyDetail() {
 
   const saved = savedIds.has(id);
   const p = query.data;
-  // The sticky bar's square actions sit beside a full-height button.
   const actionStyle = { width: 52, height: 52, borderRadius: 14, backgroundColor: 'transparent' };
 
   return (
@@ -373,7 +372,6 @@ export default function PropertyDetail() {
         </View>
       </ScrollView>
 
-      {/* floating controls over the gallery */}
       <View
         pointerEvents="box-none"
         style={{
@@ -404,7 +402,6 @@ export default function PropertyDetail() {
         ) : null}
       </View>
 
-      {/* sticky action bar */}
       {p ? (
         <View
           style={{
@@ -445,8 +442,7 @@ export default function PropertyDetail() {
             />
           ) : null}
           {p.acceptingApplications !== false ? (
-            // A let unit is no longer available, so don't invite a viewing of it
-            // (the Apply button is already disabled for the same reason) (DEF-244).
+            // A let unit is no longer available, so don't invite a viewing of it.
             <IconButton
               onPress={() => setViewingSheetOpen(true)}
               accessibilityLabel="Book a viewing"

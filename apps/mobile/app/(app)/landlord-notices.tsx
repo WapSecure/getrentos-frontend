@@ -40,14 +40,8 @@ import { goBack } from '@/lib/goBack';
 
 type Tab = 'running' | 'periods';
 
-/** Tenancies far enough along to receive a notice. */
 const NOTICEABLE = new Set(['signed', 'active', 'expired']);
 
-/**
- * Tenancy notices. The daily view is what is running and what runs out next;
- * the period register is configuration on its own tab, surfacing on the daily
- * view only when it is blocking something.
- */
 export default function LandlordNotices() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
@@ -60,7 +54,6 @@ export default function LandlordNotices() {
   });
   const periods = useQuery({ queryKey: qk.notices.periods, queryFn: noticesApi.periods });
 
-  // Soonest first: the whole point of this view is what runs out next.
   const notices = [...(running.data?.notices ?? [])].sort(
     (a, b) => (a.daysRemaining ?? Infinity) - (b.daysRemaining ?? Infinity)
   );
@@ -244,11 +237,7 @@ function TenancyPicker({ onPick }: { onPick: (leaseId: string) => void }) {
   );
 }
 
-/**
- * The period register and the worklist of what is still missing. The number
- * a landlord enters is theirs: the platform ships no day counts, so every
- * entry carries a basis and is recorded as the landlord's, not as authority.
- */
+/** The platform ships no day counts: every period is the landlord's own entry, with its basis, never presented as authority. */
 function PeriodRegister({ settings }: { settings: NoticePeriodSettings }) {
   const { colors, spacing, radius } = useTheme();
   const qc = useQueryClient();

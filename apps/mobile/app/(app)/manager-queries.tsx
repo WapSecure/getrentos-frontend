@@ -32,10 +32,6 @@ import { goBack } from '@/lib/goBack';
 
 const CATEGORIES = Object.keys(QUERY_CATEGORY_LABEL) as QueryCategory[];
 
-/**
- * Questions from an owner to whoever manages their property, as threads with a
- * 24-hour first-reply promise. Landlords and owners both ask from this side.
- */
 export default function ManagerQueries() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();

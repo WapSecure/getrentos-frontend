@@ -34,7 +34,6 @@ import {
   type BoundaryCorner,
 } from '@sureground/shared';
 
-/** The parcel's facts and outline: what diligence reviews. */
 const orUndefined = (v: string) => (v.trim() ? v.trim() : undefined);
 
 export function ParcelForm({ r, onDone }: { r: OwnerLandRecord; onDone: () => void }) {

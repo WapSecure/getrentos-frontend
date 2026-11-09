@@ -53,7 +53,6 @@ const FILTERS: { value: Filter; label: string }[] = [
 
 const perYear = (l: RealtorListing) => (l.listingType === 'RENT' ? ' / yr' : '');
 
-/** Homes the realtor markets for clients. Drafts go live when the client publishes them. */
 export default function RealtorListings() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();

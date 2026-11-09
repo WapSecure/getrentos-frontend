@@ -22,11 +22,8 @@ import {
 import { SUPPORT, hasSupportLine, telUrl, whatsappUrl } from '@/lib/support';
 import { haptics } from '@/lib/haptics';
 
-/* -------------------------------- trust chip ------------------------------ */
-
 type ChipTone = 'success' | 'info' | 'purple' | 'neutral' | 'onImage';
 
-/** A small, quiet signal of trust: an icon and a word, never a shouty badge. */
 export function TrustChip({
   icon: Icon,
   label,
@@ -42,7 +39,6 @@ export function TrustChip({
     info: { fg: colors.primary, bg: colors.infoSubtle },
     purple: { fg: colors.purple, bg: colors.purpleSubtle },
     neutral: { fg: colors.foreground, bg: colors.secondary },
-    // Over a photo: a card-coloured pill, so it reads in light and dark mode.
     onImage: { fg: colors.foreground, bg: colors.card },
   };
   const c = map[tone];
@@ -67,7 +63,6 @@ export function TrustChip({
   );
 }
 
-/** The trust signals a stay has earned, in a fixed order. */
 export function TrustChips({
   listing,
   onImage,
@@ -97,9 +92,6 @@ export function TrustChips({
   return <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>{chips}</View>;
 }
 
-/* --------------------------------- section -------------------------------- */
-
-/** A titled block on a long page, with room to breathe above it. */
 export function Section({
   title,
   caption,
@@ -132,7 +124,6 @@ export function Section({
   );
 }
 
-/** Icon, a strong line and a quiet one: the unit of every fact list. */
 export function InfoRow({
   icon: Icon,
   title,
@@ -176,8 +167,6 @@ export function InfoRow({
   );
 }
 
-/* ----------------------------- price breakdown ---------------------------- */
-
 function Line({ line }: { line: PriceLine }) {
   const { colors } = useTheme();
   return (
@@ -205,10 +194,6 @@ function Line({ line }: { line: PriceLine }) {
   );
 }
 
-/**
- * What the guest pays, line by line, then the total and: apart from it: the
- * refundable deposit. Ends with where the money waits.
- */
 export function PriceBreakdown({
   quote,
   deposit,
@@ -242,9 +227,6 @@ export function PriceBreakdown({
   );
 }
 
-/* ------------------------------ guest promise ----------------------------- */
-
-/** The promise, stated plainly, with the protection that backs it. */
 export function GuestPromiseCard({ children }: { children?: ReactNode }) {
   const { colors, spacing, radius } = useTheme();
   return (
@@ -279,8 +261,6 @@ export function GuestPromiseCard({ children }: { children?: ReactNode }) {
     </Card>
   );
 }
-
-/* --------------------------------- support -------------------------------- */
 
 function SupportAction({
   icon: Icon,
@@ -322,10 +302,7 @@ function SupportAction({
   );
 }
 
-/**
- * Call or WhatsApp a person at Sureground. Renders nothing until the support
- * line is configured, so no screen ever shows a placeholder number.
- */
+// Renders nothing until the support line is configured, so no screen shows a placeholder number.
 export function SupportContact({ lead, context }: { lead?: string; context?: string }) {
   const { spacing } = useTheme();
   if (!hasSupportLine()) return null;

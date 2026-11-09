@@ -2,17 +2,8 @@ import { ApiError, apiFetch } from './client';
 import type { ManagedEstate } from './estateManager';
 import type { Paginated } from './properties';
 
-/**
- * Setting an estate up and running its gate staff.
- *
- * Creating the first estate is open to every plan. A second one under the same
- * account is Pro: the API refuses it with 403 `PLAN_LIMIT_REACHED`. Staff
- * (gatemen) are on every plan.
- */
+/** A second estate under the same account is Pro: the API refuses it with 403 `PLAN_LIMIT_REACHED`. */
 
-/* ---------------------------------- types --------------------------------- */
-
-/** A gateman posted to the estate. They sign in with their own Sureground account. */
 export interface StaffMember {
   userId: string;
   name: string;
@@ -25,26 +16,22 @@ export interface NewEstate {
   address: string;
   city: string;
   state: string;
-  /** The Google place the address was picked from; the API checks it and stores Google's details and pin. */
+  /** The API checks it and stores Google's details and pin. */
   placeId?: string;
   /** 1 to 50; omit when unknown. */
   gateCount?: number;
 }
 
-/** What the setup form holds before it is checked: every field as typed. */
 export interface EstateDraft {
   name: string;
   address: string;
   city: string;
   state: string;
-  /** Set when the address was picked from Google. */
   placeId?: string;
   gateCount: string;
 }
 
 export type EstateDraftErrors = Partial<Record<keyof EstateDraft, string>>;
-
-/* ---------------------------------- keys ---------------------------------- */
 
 export const STAFF_PAGE_SIZE = 20;
 
@@ -52,8 +39,6 @@ export const staffSetupKeys = {
   /** Everything cached for the estate's staff list; invalidate this after a write. */
   staff: (estateId: string) => ['estate-manager', estateId, 'staff'] as const,
 };
-
-/* ----------------------------------- api ---------------------------------- */
 
 export const estateStaffSetupApi = {
   createEstate: (body: NewEstate) =>
@@ -76,8 +61,6 @@ export const estateStaffSetupApi = {
     apiFetch<void>(`/estate/${estateId}/staff/${userId}`, { method: 'DELETE' }),
 };
 
-/* --------------------------------- helpers -------------------------------- */
-
 export const MAX_GATES = 50;
 
 export const isEmail = (value: string) => /^\S+@\S+\.\S+$/.test(value.trim());
@@ -93,10 +76,7 @@ export const isPlanLimitError = (err: unknown) =>
   err instanceof ApiError &&
   (err.code === 'PLAN_LIMIT_REACHED' || err.code === 'PLAN_UPGRADE_REQUIRED' || err.status === 402);
 
-/**
- * Checks the setup form the way the API will. Returns either the body to send
- * or what to fix, keyed by field.
- */
+/** Checks the setup form the way the API will. */
 export function validateEstateDraft(
   draft: EstateDraft
 ): { ok: true; body: NewEstate } | { ok: false; errors: EstateDraftErrors } {
@@ -138,7 +118,6 @@ export function validateEstateDraft(
   };
 }
 
-/** "3 gatemen", "1 gateman", "No gatemen yet". */
 export function staffCount(total: number): string {
   if (!total) return 'No gatemen yet';
   return `${total.toLocaleString('en-NG')} ${total === 1 ? 'gateman' : 'gatemen'}`;

@@ -9,10 +9,6 @@ import { managementApi, type QuerySummary } from '@/lib/api/management';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { QueryRow } from '@/components/management/QueryRow';
 
-/**
- * Owners' questions to the firm, from the manager's side: each has a 24-hour
- * first-reply promise, and "Waiting on you" means it's yours to answer.
- */
 export default function AgencyQuestions() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();

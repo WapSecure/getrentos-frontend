@@ -1,7 +1,6 @@
 import { Platform } from 'react-native';
 import type { Palette } from '@sureground/tokens';
 
-/** Consistent, comfortably sized bottom navigation across every portal. */
 export function premiumTabBarOptions(colors: Palette, bottomInset: number) {
   return {
     headerShown: false,
@@ -10,8 +9,7 @@ export function premiumTabBarOptions(colors: Palette, bottomInset: number) {
     tabBarStyle: {
       backgroundColor: colors.card,
       borderTopColor: colors.border,
-      // Icon (24) + label (14) + item margins (6) need 50px clear; 62 clipped
-      // the labels on phones without a bottom inset.
+      // Icon, label and margins need 50px; 62 clipped the labels on phones without a bottom inset.
       height: 68 + bottomInset,
       paddingTop: 6,
       paddingBottom: Math.max(bottomInset, 6),

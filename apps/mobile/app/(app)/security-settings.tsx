@@ -113,7 +113,7 @@ export default function SecuritySettings() {
   );
 }
 
-/** Face ID / fingerprint before the app opens: on this phone only. */
+/** The biometric lock applies to this phone only. */
 function AppLockSection() {
   const { colors } = useTheme();
   const toast = useToast();
@@ -269,7 +269,7 @@ function TwoFactorSection({ overview }: { overview: SecurityOverview }) {
     qc.setQueryData<SecurityOverview>(qk.security, (old) =>
       old ? { ...old, twoFactor: { enrolled: enabled, enabled, recoveryCodesLeft } } : old
     );
-  // Backup codes are shown once, right after they are made (AU-07).
+  // Backup codes are shown once, right after they are made.
   const [freshCodes, setFreshCodes] = useState<string[] | null>(null);
   const codesLeft = overview.twoFactor.recoveryCodesLeft ?? 0;
   const [enrollment, setEnrollment] = useState<TwoFactorEnrollment | null>(null);
@@ -488,12 +488,7 @@ function TwoFactorSection({ overview }: { overview: SecurityOverview }) {
   );
 }
 
-/**
- * A transaction PIN: a separate secret from the login password, used to
- * confirm money actions. Changing one takes the password and the current PIN;
- * a first PIN, or a forgotten one, takes the password and an emailed code.
- * Accounts with no password (Google / Apple only) use the emailed code alone.
- */
+/** Accounts with no password (Google / Apple only) confirm with the emailed code alone. */
 function TransactionPinSection({ overview }: { overview: SecurityOverview }) {
   const { colors, spacing } = useTheme();
   const toast = useToast();
@@ -679,11 +674,7 @@ function TransactionPinSection({ overview }: { overview: SecurityOverview }) {
   );
 }
 
-/**
- * Passkeys (WebAuthn): the strongest step-up factor. Shown only where the
- * device supports it (needs a native build + hosted association files, so it is
- * absent in Expo Go / on the web).
- */
+/** Passkeys need a native build and hosted association files, so they are absent in Expo Go and on the web. */
 function PasskeySection() {
   const { colors, spacing } = useTheme();
   const toast = useToast();
@@ -698,7 +689,7 @@ function PasskeySection() {
   const addMutation = useMutation({
     mutationFn: async () => {
       const options = await securityApi.startPasskeyRegistration();
-      const attestation = await registerPasskey(options); // OS Face ID / fingerprint / security-key prompt
+      const attestation = await registerPasskey(options);
       return securityApi.finishPasskeyRegistration(attestation, 'This phone');
     },
     onSuccess: () => {
@@ -775,10 +766,7 @@ function PasskeySection() {
   );
 }
 
-/**
- * Where you're signed in: every device with a live session, this phone first.
- * A signed-out device loses access at its next refresh, within 15 minutes.
- */
+/** A signed-out device loses access at its next refresh, within 15 minutes. */
 function SignedInDevicesSection() {
   const { colors, spacing } = useTheme();
   const toast = useToast();
@@ -925,10 +913,7 @@ function PasswordSection() {
   );
 }
 
-/**
- * Google/Apple-only accounts have no password to change or confirm with. The
- * reset flow sets one, which then unlocks password change and deactivation.
- */
+/** Google/Apple-only accounts have no password; the reset flow sets one. */
 function SocialOnlyNote() {
   const { colors } = useTheme();
   return (

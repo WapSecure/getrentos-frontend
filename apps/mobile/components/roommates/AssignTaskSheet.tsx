@@ -12,7 +12,6 @@ interface Props {
   submitting: boolean;
 }
 
-/** Chores people actually split, offered as one-tap fills. */
 const SUGGESTIONS = ['Kitchen', 'Bathrooms', 'Bins', 'Living room', 'Utility bills', 'Groceries'];
 
 export function AssignTaskSheet({ open, onClose, roommate, onSubmit, submitting }: Props) {

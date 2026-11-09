@@ -9,12 +9,7 @@ import {
 const authenticateWithPasskey = (options: unknown) =>
   startAuthentication({ optionsJSON: options as PublicKeyCredentialRequestOptionsJSON });
 
-/**
- * Mounted once at the root so admin actions that need a fresh confirmation
- * prompt for it and replay the request, instead of failing. Staff with no
- * factor yet confirm with their password and an emailed code, which only
- * opens two-factor set-up.
- */
+/** Mounted once at the root so admin actions needing step-up prompt and replay instead of failing. Staff with no factor confirm with password and an emailed code, which only opens two-factor set-up. */
 export function StepUpDialog() {
   return (
     <SharedStepUpDialog

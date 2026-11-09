@@ -2,12 +2,6 @@ import { apiFetch } from './client';
 import { toQuery } from './query';
 import type { Paginated } from './properties';
 
-/**
- * A property client's side of working with professionals: approve a realtor
- * or agent who asked to represent you, choose exactly which properties they
- * may touch, revoke them, and (agents) hand them a field task. Owners and
- * landlords share it.
- */
 export type RepKind = 'realtor' | 'agent';
 export type RepStatus = 'PENDING' | 'ACTIVE' | 'REVOKED';
 

@@ -6,7 +6,6 @@ import type { StatementExplanation } from '@/lib/api/landlord';
 import { landlordApi } from '@/lib/api/landlord';
 import { qk } from '@/lib/query/keys';
 
-/** A statement in plain words, shown inside its card when the landlord asks for it. */
 export function StatementExplainer({ statementId }: { statementId: string }) {
   const { radius } = useTheme();
   const q = useQuery({
@@ -15,7 +14,6 @@ export function StatementExplainer({ statementId }: { statementId: string }) {
     staleTime: 10 * 60_000,
     retry: false,
   });
-  // The landlord asked for this, so a failure shows with a retry rather than vanishing.
   return (
     <QueryState
       query={q}

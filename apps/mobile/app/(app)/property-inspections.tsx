@@ -48,11 +48,6 @@ const FILTERS: { value: Filter; label: string }[] = [
   { value: 'SHARED', label: 'Shared' },
 ];
 
-/**
- * Condition reports at move-in, move-out and routine checks, for the
- * properties the caller controls (landlord, owner or manager). The renter's
- * read-only view of the same reports is `inspections.tsx`.
- */
 export default function PropertyInspections() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();

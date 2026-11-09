@@ -21,12 +21,7 @@ interface Props {
   onChanged?: (phone: string) => void;
 }
 
-/**
- * A phone number on the account changes only after the new number proves
- * itself with a code: it can receive password reset codes. The API asks the
- * account holder to confirm it's them first (the StepUpSheet at the root
- * handles that), signs out other devices and emails an alert.
- */
+// The API asks for step-up first (the root StepUpSheet handles it), signs out other devices and emails an alert.
 export function ChangePhoneSheet({ open, onClose, onChanged }: Props) {
   return (
     <Sheet open={open} onClose={onClose} title="Change phone number">
@@ -77,7 +72,6 @@ function Form({ onClose, onChanged }: Omit<Props, 'open'>) {
               label="New phone number"
               placeholder="+234 801 234 5678"
               value={newPhone}
-              // Digits and one leading "+" only.
               onChangeText={(v) => setNewPhone(v.replace(/[^\d+]/g, '').replace(/(?!^)\+/g, ''))}
               keyboardType="phone-pad"
               autoComplete="tel"

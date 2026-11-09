@@ -86,7 +86,6 @@ export default function LandlordDocuments() {
             return (
               <Chip
                 key={c}
-                // Tapping the active chip clears it, so there is always a way back to all.
                 onPress={() => setCategory(selected ? undefined : c)}
                 selected={selected}
                 label={DOCUMENT_CATEGORY_LABEL[c]}

@@ -31,7 +31,6 @@ import { StatusPill } from '@/components/host/HostUI';
 import { ContactActions, ScheduleViewingSheet, ViewingRow } from '@/components/realtor/RealtorUI';
 import { goBack } from '@/lib/goBack';
 
-/** The open stages in order; won and lost are endings, shown separately. */
 const TRACK = LEAD_STAGES.filter((s) => s.value !== 'LOST');
 
 export default function RealtorLead() {
@@ -48,8 +47,7 @@ export default function RealtorLead() {
   });
   const theirs = viewings.data?.items.filter((v) => v.lead?.id === id) ?? [];
 
-  // A stage change is the realtor's own bookkeeping, so it shows at once and
-  // rolls back with a toast if the server refuses it.
+  // Optimistic: shows at once and rolls back with a toast if the server refuses.
   const move = useOptimisticMutation({
     mutationFn: (status: LeadStatus) => realtorApi.updateLead(id, status),
     patches: (status) => [

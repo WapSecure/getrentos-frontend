@@ -43,7 +43,6 @@ import { goBack } from '@/lib/goBack';
 
 const ALL = '';
 
-/** One estate: its plots, payment plans and fees, and reserving a plot. */
 export default function LandEstate() {
   const { id, plot } = useLocalSearchParams<{ id: string; plot?: string }>();
   const { colors, spacing } = useTheme();
@@ -314,7 +313,6 @@ function PlotCell({
   );
 }
 
-/** Reserve a plot (a free hold), or say why it can't be. */
 function ReservePanel({
   estate: e,
   plot: p,

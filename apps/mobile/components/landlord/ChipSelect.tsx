@@ -11,12 +11,10 @@ interface Props<T extends string> {
   options: Option<T>[];
   value: T | undefined;
   onChange: (value: T) => void;
-  /** Shown instead of the chips when there is nothing to choose from. */
   emptyText?: string;
   disabled?: boolean;
 }
 
-/** Single-choice chips: the landlord forms' stand-in for a select. */
 export function ChipSelect<T extends string>({
   label,
   options,

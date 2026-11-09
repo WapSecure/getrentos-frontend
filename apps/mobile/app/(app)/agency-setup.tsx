@@ -36,7 +36,6 @@ import { AddressInput } from '@/components/forms/AddressInput';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
-/** The firm's details and its CAC verification (KYB), or starting a firm. */
 export default function AgencySetup() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
@@ -46,7 +45,6 @@ export default function AgencySetup() {
       try {
         return await agencyFirmApi.onboarding();
       } catch (e) {
-        // No firm yet: this is where one is started.
         if (e instanceof ApiError && e.status === 404) return null;
         throw e;
       }
@@ -145,7 +143,6 @@ function Details({ firm }: { firm: Onboarding | null }) {
   const toast = useToast();
   const { refreshProfile, switchWorkspace } = useAuth();
   const [f, setF] = useState<SetupForm>(() => setupToForm(firm));
-  // The checked details of an address picked in this visit, for the field's LGA and state line.
   const [picked, setPicked] = useState<VerifiedAddress | undefined>();
   const editable = setupEditable(firm);
   const set = (k: keyof SetupForm) => (v: string) => setF((x) => ({ ...x, [k]: v }));
@@ -159,7 +156,6 @@ function Details({ firm }: { firm: Onboarding | null }) {
         'success'
       );
       if (!firm) {
-        // Starting a firm makes this account a property manager.
         await refreshProfile();
         switchWorkspace('manager');
       }
@@ -213,7 +209,6 @@ function Details({ firm }: { firm: Onboarding | null }) {
           setF((x) => ({
             ...x,
             registeredAddress: next?.text ?? '',
-            // Typing over a checked address clears the check.
             registeredPlaceId: next?.placeId,
             ...(next?.verified ? { state: next.verified.state } : {}),
           }));

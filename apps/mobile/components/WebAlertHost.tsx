@@ -9,10 +9,6 @@ import {
   type WebAlertEntry,
 } from '@/lib/webAlert';
 
-/**
- * Shows `Alert.alert` on web in the same sheet the app confirms with
- * elsewhere. Renders nothing on phones, where the native alert is used.
- */
 export function WebAlertHost() {
   const [entry, setEntry] = useState<WebAlertEntry | null>(null);
   useEffect(() => (Platform.OS === 'web' ? subscribeWebAlert(setEntry) : undefined), []);
@@ -26,7 +22,6 @@ function AlertSheet({ entry }: { entry: WebAlertEntry | null }) {
   const dismiss = () => {
     if (entry && cancel) answerWebAlert(entry.id, cancel);
   };
-  // The action first, cancel last, as in the app's other sheets.
   const ordered = entry
     ? [...entry.buttons].sort((a, b) => Number(a.style === 'cancel') - Number(b.style === 'cancel'))
     : [];

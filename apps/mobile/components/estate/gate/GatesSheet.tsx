@@ -19,10 +19,6 @@ import { estateGateApi, gateKeys, type Gate } from '@/lib/api/estateGate';
 import { haptics } from '@/lib/haptics';
 import { errorMessage } from '@/lib/api/client';
 
-/**
- * The estate's gates: add one, or remove one it no longer uses. Small enough to
- * live in a sheet, reached from both the vehicle and the delivery logs.
- */
 export function GatesSheet({
   open,
   estateId,

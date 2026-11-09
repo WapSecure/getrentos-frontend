@@ -1,7 +1,6 @@
 import type { PlaceKind, PlaceSuggestion, VerifiedAddress } from '@sureground/shared';
 import { apiFetch } from './client';
 
-/** Google address search through our API: suggestions while typing, then the checked address. */
 export const placesApi = {
   search: async (query: string, opts: { session: string; kind: PlaceKind }) => {
     const q = new URLSearchParams({ q: query, session: opts.session, kind: opts.kind });

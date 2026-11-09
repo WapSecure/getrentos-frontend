@@ -2,10 +2,7 @@ import { apiFetch } from './client';
 import type { Paginated } from './buyer';
 import { providerQuery, type PaymentProvider } from './paymentStatus';
 
-// deposit → held → released, with frozen (a dispute is open) and refunded as
-// terminal branches. The enum also has VERIFICATION_PENDING / SETTLEMENT_PENDING
-// / DISPUTED, but no service ever writes them (a dispute sets FROZEN), so they
-// are not surfaced (DEF-240).
+// FROZEN means a dispute is open. VERIFICATION_PENDING, SETTLEMENT_PENDING and DISPUTED are never written, so they are not surfaced.
 export type BuyerEscrowStatus =
   | 'deposit_pending'
   | 'funds_held'
@@ -37,7 +34,6 @@ export interface BuyerTransaction {
   offerId: string;
   propertyId: string;
   propertyTitle: string;
-  /** What was bought; a land sale has conveyance steps the buyer confirms. */
   propertyType?: string;
   ownerName: string;
   purchasePrice: number;

@@ -28,7 +28,6 @@ const KINDS: { value: LandWatchJobKind; description: string }[] = [
 const MIN = 10;
 const MAX = 2000;
 
-/** Ask Sureground to find vendors for work on a Managed watch. */
 export default function LandWatchJobNew() {
   const { watchId } = useLocalSearchParams<{ watchId: string }>();
   const { colors, spacing } = useTheme();

@@ -106,7 +106,6 @@ export default function Marketplace() {
   const [sort, setSort] = useState<MarketSort>('newest');
   const [estate, setEstate] = useState<{ slug: string; name: string } | null>(null);
 
-  // Debounce typing into the query.
   useEffect(() => {
     const t = setTimeout(() => setSearch(searchText.trim()), 350);
     return () => clearTimeout(t);
@@ -124,7 +123,6 @@ export default function Marketplace() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      {/* Fixed chrome: brand, search and the market switcher stay in reach. */}
       <View
         style={{
           paddingTop: insets.top + spacing.sm,
@@ -264,8 +262,6 @@ export default function Marketplace() {
   );
 }
 
-/* ------------------------------- listings ------------------------------- */
-
 function Listings({
   kind,
   search,
@@ -287,7 +283,6 @@ function Listings({
   const saved = useMarketSaved(kind);
   const [refine, setRefine] = useState<MarketRefinements>({});
   const [sheetOpen, setSheetOpen] = useState(false);
-  // Shortlets: with dates, every stay shows the total for exactly those nights.
   const [dates, setDates] = useState<StayDates | null>(null);
   const [datesOpen, setDatesOpen] = useState(false);
   const dated = kind === 'shortlet' && !!dates;
@@ -316,9 +311,7 @@ function Listings({
   const items = useMemo(() => query.data?.pages.flatMap((p) => p.items) ?? [], [query.data]);
   const total = query.data?.pages[0]?.total ?? 0;
 
-  // A new search, sort or filter starts from the top. The list stays mounted
-  // while results load (keepPreviousData), so it would otherwise stay anchored
-  // to whichever card was in view, which may now sit at the bottom.
+  // A new search, sort or filter scrolls to the top: the list stays mounted (keepPreviousData), so it would stay anchored mid-list.
   const listRef = useRef<FlashListRef<MarketCard>>(null);
   useEffect(() => {
     listRef.current?.scrollToOffset({ offset: 0, animated: false });
@@ -639,8 +632,6 @@ function Listings({
   );
 }
 
-/* ------------------------------- estates ------------------------------- */
-
 function EstatesDirectory({
   search,
   intro,
@@ -780,9 +771,6 @@ function EstatesDirectory({
   );
 }
 
-/* ------------------------------- join bar ------------------------------- */
-
-/** The one thing browsing can't do: said plainly, not as a paywall. */
 function JoinBar() {
   const { colors, spacing, radius, shadows } = useTheme();
   const insets = useSafeAreaInsets();

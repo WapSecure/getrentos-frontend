@@ -3,12 +3,11 @@ import { authApi, type OtpMethod } from '../api/auth';
 import type { SignupRoleId } from '../roles';
 import { useAuth } from './AuthProvider';
 
-/** How the account is created. */
 type Method = 'email' | 'phone';
 
 interface Draft {
   method: Method;
-  /** How the verification code is delivered — `whatsapp` still creates a phone account. */
+  /** `whatsapp` still creates a phone account. */
   otpMethod: OtpMethod;
   fullName: string;
   email?: string;
@@ -22,13 +21,11 @@ interface SignupContextValue {
   otpReference: string | null;
   selectedRoles: SignupRoleId[];
   multiRole: boolean;
-  /** Step 1 → sends the OTP and records the draft. */
   startVerification: (draft: Draft) => Promise<void>;
   verify: (code: string) => Promise<void>;
   resend: () => Promise<void>;
   toggleRole: (id: SignupRoleId) => void;
   setMultiRole: (v: boolean) => void;
-  /** Final step → creates the account and signs the user in. */
   createAccount: () => Promise<void>;
   reset: () => void;
 }

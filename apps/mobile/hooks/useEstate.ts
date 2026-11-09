@@ -5,11 +5,6 @@ import { qk } from '@/lib/query/keys';
 
 const KEY = 'estate-manager.selected-estate';
 
-/**
- * The estate the manager is working in. Most run one; someone who runs several
- * keeps their choice across launches, and falls back to the first if the chosen
- * one is no longer theirs.
- */
 export function useEstate() {
   const qc = useQueryClient();
   const estates = useQuery({

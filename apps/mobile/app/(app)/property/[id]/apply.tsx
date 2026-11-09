@@ -123,7 +123,6 @@ const EMPLOYMENT_OPTIONS = EMPLOYMENT_STATUSES;
 const LEASE_TERM_OPTIONS = ['6 months', '12 months', '24 months'];
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-/** The API's refusal as a sentence that says what to change and where. */
 function refusalMessage(error: unknown): string {
   if (error instanceof ApiError) {
     const body = (error as { details?: unknown }).details as
@@ -151,9 +150,7 @@ function validateStep(step: number, data: FormState): FieldErrors {
   } else if (step === 2) {
     if (!data.monthlyIncome.trim()) errors.monthlyIncome = 'Enter your monthly income';
   } else if (step === 3) {
-    // Both contacts are optional as a whole, but a half-filled one is refused
-    // by the API (a reference needs a phone number), and that refusal used to
-    // land on the review step with nothing to point at.
+    // A half-filled contact is refused by the API (a reference needs a phone number), so catch it on this step.
     type TextKey = {
       [K in keyof FormState]-?: FormState[K] extends string ? K : never;
     }[keyof FormState];
@@ -215,8 +212,7 @@ export default function ApplyToRent() {
   });
   const [submitted, setSubmitted] = useState<RenterApplication | null>(null);
 
-  // Start from what the renter told us last time: their own details, filled
-  // only into fields that are still empty, once, when the answer arrives.
+  // Prefill from last time, once, into fields that are still empty.
   const lastDetails = useQuery({
     queryKey: qk.renter.lastApplicationDetails,
     queryFn: applicationsApi.lastDetails,
@@ -240,7 +236,6 @@ export default function ApplyToRent() {
     }
   }
 
-  // Until the renter picks their own date, fall back to the listing's availability.
   const moveInDate = data.moveInDate || property?.availableFrom || '';
 
   useEffect(() => {
@@ -286,8 +281,6 @@ export default function ApplyToRent() {
   const removeDocument = (name: string) =>
     setDocument(name, { uploaded: false, documentId: undefined, url: undefined });
 
-  // Files already in the renter's documents can be attached instead of picked
-  // and uploaded again (the API accepts any document the applicant owns).
   // Newest first, so a same-named match is the latest copy; expired ones skipped.
   const library = useQuery({
     queryKey: [...qk.renter.documents, 'application-library'],
@@ -337,8 +330,7 @@ export default function ApplyToRent() {
               },
             ]
           : undefined,
-        // Drop `url`: it is a signed link for showing the file back to the
-        // applicant, and the API rejects any property it does not declare.
+        // Drop `url`: it is a signed display link, and the API rejects any property it does not declare.
         documents: data.documents.map(({ name, uploaded, required, documentId }) => ({
           name,
           uploaded,
@@ -356,8 +348,7 @@ export default function ApplyToRent() {
     onError: () => haptics.error(),
   });
 
-  // Leaving mid-application (swipe back, Android back, header back on step 1)
-  // would silently throw away everything typed: ask first.
+  // Leaving mid-application (swipe back, Android back, header back) would discard everything typed: ask first.
   const navigation = useNavigation();
   const dirty = step > 0 || !!data.currentAddress || !!data.employer || !!data.monthlyIncome;
   useEffect(
@@ -583,8 +574,6 @@ export default function ApplyToRent() {
     </KeyboardAvoidingView>
   );
 }
-
-/* ------------------------------ steps ----------------------------------- */
 
 function PersonalStep({
   data,
@@ -853,7 +842,6 @@ function DocumentsStep({
   update: <K extends keyof FormState>(k: K, v: FormState[K]) => void;
   onUpload: (doc: ApplicationDocument) => void;
   onRemove: (name: string) => void;
-  /** How many still-missing documents have a saved copy in the renter's documents. */
   savedCount: number;
   onUseSaved: () => void;
   uploadingName?: string;
@@ -1084,8 +1072,6 @@ function ReviewStep({
     </View>
   );
 }
-
-/* --------------------------- small pieces -------------------------------- */
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   const { spacing } = useTheme();

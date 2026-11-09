@@ -52,7 +52,6 @@ export const assistantApi = {
     ),
 };
 
-/** The server links to web screens; these are the matching app screens. */
 const MOBILE_ROUTES: Record<string, string> = {
   '/renter/home': '/(app)/(renter)',
   '/renter/home?tab=lease': '/(app)/lease',

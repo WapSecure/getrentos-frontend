@@ -24,7 +24,6 @@ import { qk } from '@/lib/query/keys';
 
 type Filter = '' | 'ACTIVE' | 'INACTIVE';
 
-/** Every home in the estate, searchable by unit, name or phone. */
 export default function EstateHouseholds() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();

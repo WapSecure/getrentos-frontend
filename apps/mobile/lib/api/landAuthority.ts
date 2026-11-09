@@ -7,12 +7,7 @@ import type {
 } from '@sureground/shared';
 import { apiFetch } from './client';
 
-/**
- * The seller's authority to sell a land parcel: the capacity they sell in, the
- * instrument it rests on, and whose consent it needs. Land review cannot be
- * approved until Sureground has verified it. Types and wording come from
- * @sureground/shared so web and mobile read a claim the same way.
- */
+/** Land review cannot be approved until Sureground has verified it. */
 
 export interface DeclareAuthorityInput {
   capacity: LandSellerCapacity;
@@ -27,18 +22,15 @@ export interface AddSignatoryInput {
   role: LandSignatoryRole;
   fullName: string;
   phone?: string;
-  /** Their Sureground email, so they can answer from their own account. */
   email?: string;
 }
 
 export const isClaim = (view: unknown): view is LandAuthorityView =>
   !!view && typeof view === 'object' && !!(view as LandAuthorityView).authority;
 
-/** Claims a seller can still change: not under objection, not rejected or revoked. */
 export const isEditable = (status: string) =>
   status === 'DRAFT' || status === 'PENDING_REVIEW' || status === 'VERIFIED';
 
-/** Why the declaration can't be saved yet, or null. */
 export function declareBlocker(input: {
   capacity: string;
   principalRequired: boolean;

@@ -43,7 +43,6 @@ export function MoveToWishlistSheet({ open, onClose, savedListingId, currentWish
       ...(currentWishlistId && currentWishlistId !== wishlistId
         ? [
             {
-              // It leaves the wishlist it was filed under.
               queryKey: qk.listings.savedByWishlist(currentWishlistId),
               update: (old: unknown) => {
                 const page = old as Paginated<SavedProperty>;

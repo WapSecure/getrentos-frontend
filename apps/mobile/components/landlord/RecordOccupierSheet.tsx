@@ -26,11 +26,7 @@ const oneYearAfter = (iso: string) => {
   return toISODate(date);
 };
 
-/**
- * Records a tenancy that already exists, for someone with no Sureground account.
- * It creates a SIGNED lease, because the agreement is already in force — there
- * is nobody to send it to and nothing to draft.
- */
+// Creates a SIGNED lease: the agreement is already in force, so there is nobody to send it to and nothing to draft.
 export function RecordOccupierSheet({ open, onClose, unit }: Props) {
   const [submitting, setSubmitting] = useState(false);
   return (
@@ -81,7 +77,6 @@ function RecordForm({
         rentAmount: Number(rent),
         rentPeriod: period,
         securityDeposit: 0,
-        // The tenancy is already running: record it in force, do not draft it.
         recordExisting: true,
         sendImmediately: false,
       }),

@@ -38,10 +38,6 @@ import { errorMessage } from '@/lib/api/client';
 
 const naira = (n: number) => `₦${Math.round(n).toLocaleString('en-NG')}`;
 
-/**
- * Raise a charge: a service fee or levy for every active home, or for the ones
- * picked. Opened from a household, it starts with that home selected.
- */
 export default function EstateCharge() {
   const params = useLocalSearchParams<{ householdId?: string }>();
   const { colors, spacing, radius } = useTheme();
@@ -57,7 +53,6 @@ export default function EstateCharge() {
   const [recurring, setRecurring] = useState(false);
   const [cycle, setCycle] = useState<NewCharge['billingCycle']>('MONTHLY');
   const [audience, setAudience] = useState<'all' | 'some'>(params.householdId ? 'some' : 'all');
-  // id → unit label, so chosen homes stay visible whatever the search shows.
   const [picked, setPicked] = useState<Record<string, string>>({});
   const [search, setSearch] = useState('');
   const term = useDebouncedValue(search.trim(), 300);
@@ -74,7 +69,6 @@ export default function EstateCharge() {
     queryFn: () => estateManagerApi.households(estateId, { status: 'ACTIVE' }),
     enabled: !!estateId,
   });
-  // Opened for one household: select it once it is known.
   const preset = useQuery({
     queryKey: qk.estateManager.household(estateId, params.householdId ?? ''),
     queryFn: () => estateManagerApi.household(estateId, params.householdId!),

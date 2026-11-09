@@ -5,12 +5,7 @@ import type { ErrorBoundaryProps } from 'expo-router';
 import { getPalette } from '@sureground/tokens';
 import { report } from '@/lib/analytics';
 
-/**
- * Branded fallback for uncaught render errors, wired via expo-router's
- * `ErrorBoundary` export in the root layout. Deliberately self-contained: no
- * theme/provider hooks: so it still renders when the failure is high in the
- * tree. In dev it shows the message; in production it stays generic.
- */
+// Self-contained (no theme or provider hooks) so it still renders when the failure is high in the tree.
 export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
   const isDev = Constants.executionEnvironment !== 'standalone' && __DEV__;
   const colors = getPalette(useColorScheme() === 'dark' ? 'dark' : 'light');

@@ -24,10 +24,6 @@ import { goBack } from '@/lib/goBack';
 
 export type QueueView = 'open' | 'closed';
 
-/**
- * A work queue for the office: what is still waiting, and what was closed.
- * Incidents, maintenance and violations all read this way.
- */
 export function QueueScreen<T extends { id: string }>({
   eyebrow,
   title,
@@ -63,7 +59,6 @@ export function QueueScreen<T extends { id: string }>({
   emptyOpen: { title: string; description: string };
   emptyClosed: { title: string; description: string };
   icon: ReactNode;
-  /** Shown above the list, such as a summary card. */
   header?: ReactNode;
 }) {
   const { colors, spacing, radius } = useTheme();
@@ -136,7 +131,6 @@ export function QueueScreen<T extends { id: string }>({
   );
 }
 
-/** One queue item: what, where, how urgent, since when, and what can be done. */
 export function QueueCard({
   title,
   where,
@@ -153,7 +147,6 @@ export function QueueCard({
   pills: { label: string; tone: Tone }[];
   createdAt: string;
   photoUrl?: string;
-  /** How it was closed, shown on closed items. */
   notes?: string;
   actions?: ReactNode;
 }) {
@@ -208,7 +201,6 @@ export function QueueCard({
   );
 }
 
-/** Resolve or dismiss, with a note that stays on the record. */
 export function CloseSheet({
   open,
   how,
@@ -219,7 +211,6 @@ export function CloseSheet({
 }: {
   open: boolean;
   how: 'resolve' | 'dismiss';
-  /** e.g. "incident", "ticket". */
   what: string;
   busy?: boolean;
   onClose: () => void;

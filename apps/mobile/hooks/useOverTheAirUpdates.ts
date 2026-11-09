@@ -3,16 +3,9 @@ import { AppState } from 'react-native';
 import * as Updates from 'expo-updates';
 import { track } from '@/lib/analytics';
 
-/** Don't ask the update server more often than this. */
 const MIN_INTERVAL_MS = 30 * 60 * 1000;
 
-/**
- * Keeps the JavaScript up to date between store releases. Checks when the app
- * comes to the foreground and downloads in the background; the new version
- * applies on the next launch, so nobody is interrupted mid-task.
- *
- * Inactive in development and Expo Go (`Updates.isEnabled` is false there).
- */
+/** The new version applies on the next launch, so nobody is interrupted. Inactive in development and Expo Go (`Updates.isEnabled` is false there). */
 export function useOverTheAirUpdates() {
   const lastCheck = useRef(0);
 

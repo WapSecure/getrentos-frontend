@@ -9,7 +9,6 @@ import {
 const authenticateWithPasskey = (options: unknown) =>
   startAuthentication({ optionsJSON: options as PublicKeyCredentialRequestOptionsJSON });
 
-/** Mounted once at the root; see the shared dialog for how step-up works. */
 export function StepUpDialog() {
   return <SharedStepUpDialog authenticateWithPasskey={authenticateWithPasskey} />;
 }

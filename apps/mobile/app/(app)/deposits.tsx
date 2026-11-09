@@ -44,10 +44,8 @@ const FILTERS: { value: Filter; label: string }[] = [
   { value: 'RETURNED', label: 'Returned' },
 ];
 
-/** Leases a deposit can be held against: the tenancy has been signed. */
 const HOLDABLE = new Set(['signed', 'active', 'awaiting_landlord']);
 
-/** The security-deposit register: what is held, deducted and returned, per tenancy. */
 export default function Deposits() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();

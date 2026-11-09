@@ -1,6 +1,6 @@
 import { mobileRouteFor } from '../lib/api/assistant';
 
-// The paths the server's renter assistant may link to (RENTER_ASSISTANT_LINKS).
+// Must match the server's *_ASSISTANT_LINKS lists (renter, landlord, realtor, owner, buyer, agent, estate, resident).
 const SERVER_PATHS = [
   '/renter/home',
   '/renter/home?tab=lease',
@@ -17,7 +17,6 @@ const SERVER_PATHS = [
   '/renter/settings',
   '/renter/help',
   '/renter/support',
-  // RENTER_ASSISTANT_LINKS above, LANDLORD_ASSISTANT_LINKS below.
   '/landlord/dashboard',
   '/landlord/properties',
   '/landlord/units',
@@ -33,7 +32,6 @@ const SERVER_PATHS = [
   '/landlord/messages',
   '/landlord/settings',
   '/landlord/help',
-  // REALTOR_ASSISTANT_LINKS
   '/realtor/dashboard',
   '/realtor/listings',
   '/realtor/offers',
@@ -47,7 +45,6 @@ const SERVER_PATHS = [
   '/realtor/verification',
   '/realtor/settings',
   '/realtor/help',
-  // OWNER_ASSISTANT_LINKS
   '/owner/dashboard',
   '/owner/properties',
   '/owner/listings',
@@ -60,7 +57,6 @@ const SERVER_PATHS = [
   '/owner/verification',
   '/owner/settings',
   '/owner/help',
-  // BUYER_ASSISTANT_LINKS
   '/buyer/dashboard',
   '/buyer/discover',
   '/buyer/saved',
@@ -72,7 +68,6 @@ const SERVER_PATHS = [
   '/buyer/verification',
   '/buyer/settings',
   '/buyer/help',
-  // AGENT_ASSISTANT_LINKS
   '/agent/dashboard',
   '/agent/tasks',
   '/agent/inspections',
@@ -85,7 +80,6 @@ const SERVER_PATHS = [
   '/agent/verification',
   '/agent/settings',
   '/agent/help',
-  // ESTATE_ASSISTANT_LINKS
   '/estate/dashboard',
   '/estate/households',
   '/estate/dues',
@@ -99,7 +93,6 @@ const SERVER_PATHS = [
   '/estate/announcements',
   '/estate/staff',
   '/estate/billing',
-  // RESIDENT_ASSISTANT_LINKS
   '/resident/dashboard',
   '/resident/dues',
   '/resident/visitor-passes',

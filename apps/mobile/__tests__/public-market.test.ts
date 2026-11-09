@@ -22,7 +22,6 @@ const page = <T>(items: T[]) => ({
   totalPages: 1,
 });
 
-/** The query string of the most recent request, as a plain object. */
 const lastQuery = () => {
   const [path] = fetchMock.mock.calls.at(-1)!;
   const [route, qs = ''] = String(path).split('?');
@@ -35,9 +34,7 @@ beforeEach(() => {
 });
 
 describe('public marketplace requests', () => {
-  // The API runs with forbidNonWhitelisted: one undeclared param is a 400, so
-  // each market must send exactly the names its route declares. Filters a
-  // market does not take are passed in on purpose, to prove they are dropped.
+  // The API rejects undeclared params (forbidNonWhitelisted); unsupported filters are passed on purpose to prove they are dropped.
   const everything = {
     search: 'Lekki',
     estate: 'palm-grove',
@@ -130,8 +127,8 @@ describe('public marketplace requests', () => {
 describe('public marketplace helpers', () => {
   it('counts only the refinements a market accepts', () => {
     const f = { bedrooms: 2, titleType: 'SURVEY_PLAN', verifiedOnly: false, minPrice: 5 };
-    expect(activeFilterCount('rent', f)).toBe(2); // bedrooms, minPrice
-    expect(activeFilterCount('land', f)).toBe(2); // titleType, minPrice
+    expect(activeFilterCount('rent', f)).toBe(2);
+    expect(activeFilterCount('land', f)).toBe(2);
   });
 
   it('shares the public web page for every market', () => {

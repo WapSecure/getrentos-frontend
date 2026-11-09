@@ -6,7 +6,6 @@ jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock')
 );
 
-/** Loads the module fresh, so its start-up migration runs against this test's storage. */
 async function loadMigration() {
   let migration: Promise<void> | undefined;
   jest.isolateModules(() => {

@@ -53,10 +53,6 @@ import { formatDate } from '@/lib/format';
 const CONDITIONS: LandBoundaryCondition[] = ['INTACT', 'DISTURBED', 'ENCROACHED', 'INCONCLUSIVE'];
 const OPEN = new Set(['ASSIGNED', 'QUERIED']);
 
-/**
- * One inspection in the field: directions, photos with time and place (queued
- * when there is no signal), and the report.
- */
 export default function LandInspectionJob() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, spacing, radius } = useTheme();

@@ -31,9 +31,7 @@ import {
 } from '@/lib/api/assistant';
 
 interface ChatMessage extends AssistantTurn {
-  /** The language an answer is in, for reading it aloud. */
   language?: ReplyLanguage;
-  /** Set when the answer could not be given in the language asked for. */
   fellBackFrom?: ReplyLanguage;
   links?: AssistantLink[];
   suggestions?: string[];
@@ -136,7 +134,6 @@ const COPY: Record<AssistantPersona, { starters: string[]; scope: string; placeh
   },
 };
 
-/** Ask Sureground: read-only answers from the user's own account (renter or landlord). */
 export default function AskScreen() {
   const params = useLocalSearchParams<{ persona?: string; estateId?: string }>();
   const persona: AssistantPersona =
@@ -198,11 +195,9 @@ export default function AskScreen() {
     ask.mutate({ question, history });
   };
 
-  // Spoken words land in the box, so the person can check them before sending.
   const voice = useVoiceInput(language, setText);
   const readAloud = useReadAloud();
 
-  // The same assistant on WhatsApp, once it is set up and the person has WhatsApp turned on.
   const consent = useQuery({
     queryKey: qk.messagingConsent,
     queryFn: messagingConsentApi.get,

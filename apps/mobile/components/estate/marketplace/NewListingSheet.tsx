@@ -28,7 +28,6 @@ import {
 import { haptics } from '@/lib/haptics';
 import { MarketplaceFormError } from './MarketplaceUI';
 
-/** Advertise a property the estate is cleared to market. */
 export function NewListingSheet({
   open,
   onClose,
@@ -40,7 +39,6 @@ export function NewListingSheet({
   onClose: () => void;
   estateId: string;
   agreements: MarketingAgreement[];
-  /** Offered when nothing can be listed yet: takes the manager to their properties. */
   onAddProperty: () => void;
 }) {
   return (

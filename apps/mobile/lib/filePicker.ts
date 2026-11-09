@@ -25,10 +25,7 @@ function resolveMimeType(name: string, reported?: string | null): string {
   return (ext && EXT_MIME[ext]) || reported || 'application/octet-stream';
 }
 
-/**
- * Picks a spreadsheet saved as CSV. Android reports CSV under several types, so
- * all of them are offered; the file is always sent as text/csv.
- */
+// Android reports CSV under several types, so all are offered; the file is always sent as text/csv.
 export async function pickCsv(): Promise<PickedFile | null> {
   const result = await DocumentPicker.getDocumentAsync({
     type: ['text/csv', 'text/comma-separated-values', 'application/csv', 'text/plain'],
@@ -40,7 +37,6 @@ export async function pickCsv(): Promise<PickedFile | null> {
   return { uri: asset.uri, name: asset.name, mimeType: 'text/csv' };
 }
 
-/** Opens the system document picker (PDF or image). Returns `null` if the user cancels. */
 export async function pickDocument(): Promise<PickedFile | null> {
   const result = await DocumentPicker.getDocumentAsync({
     type: ['application/pdf', 'image/*'],
@@ -56,7 +52,6 @@ export async function pickDocument(): Promise<PickedFile | null> {
   };
 }
 
-/** Opens the photo library for a single image (e.g. a profile avatar). Returns `null` if cancelled. */
 export async function pickImage(): Promise<PickedFile | null> {
   const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
   if (!perm.granted) return null;
@@ -73,7 +68,6 @@ export async function pickImage(): Promise<PickedFile | null> {
   return { uri: asset.uri, name, mimeType: resolveMimeType(name, asset.mimeType) };
 }
 
-/** Opens the photo library for a single, uncropped photo (e.g. a maintenance issue). Returns `null` if cancelled. */
 export async function pickPhoto(): Promise<PickedFile | null> {
   const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
   if (!perm.granted) return null;
@@ -88,7 +82,6 @@ export async function pickPhoto(): Promise<PickedFile | null> {
   return { uri: asset.uri, name, mimeType: resolveMimeType(name, asset.mimeType) };
 }
 
-/** Launches the front camera for a selfie capture. Returns `null` if denied or cancelled. */
 export async function captureSelfie(): Promise<PickedFile | null> {
   const perm = await ImagePicker.requestCameraPermissionsAsync();
   if (!perm.granted) return null;
@@ -104,7 +97,6 @@ export async function captureSelfie(): Promise<PickedFile | null> {
   return { uri: asset.uri, name: 'selfie.jpg', mimeType: asset.mimeType ?? 'image/jpeg' };
 }
 
-/** Launches the back camera to take a new photo (e.g. a maintenance issue photo). Returns `null` if denied or cancelled. */
 export async function capturePhoto(): Promise<PickedFile | null> {
   const perm = await ImagePicker.requestCameraPermissionsAsync();
   if (!perm.granted) return null;
@@ -118,7 +110,6 @@ export async function capturePhoto(): Promise<PickedFile | null> {
   return { uri: asset.uri, name: 'photo.jpg', mimeType: asset.mimeType ?? 'image/jpeg' };
 }
 
-/** Opens the photo library for several photos at once (e.g. a listing gallery). Empty if cancelled. */
 export async function pickPhotos(limit = 10): Promise<PickedFile[]> {
   const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
   if (!perm.granted) return [];
@@ -137,7 +128,6 @@ export async function pickPhotos(limit = 10): Promise<PickedFile[]> {
   });
 }
 
-/** A picked or recorded video, with what is known of its size before upload. */
 export interface PickedVideo extends PickedFile {
   /** Bytes, when the platform reports it. */
   size?: number;
@@ -155,7 +145,6 @@ function toPickedVideo(asset: ImagePicker.ImagePickerAsset, fallbackName: string
   };
 }
 
-/** Opens the library for one video (e.g. a property tour). Returns `null` if cancelled. */
 export async function pickVideo(): Promise<PickedVideo | null> {
   const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
   if (!perm.granted) return null;
@@ -167,7 +156,6 @@ export async function pickVideo(): Promise<PickedVideo | null> {
   return toPickedVideo(result.assets[0], 'tour.mp4');
 }
 
-/** Films a walkthrough with the back camera, up to five minutes. Returns `null` if denied or cancelled. */
 export async function recordVideo(): Promise<PickedVideo | null> {
   const perm = await ImagePicker.requestCameraPermissionsAsync();
   if (!perm.granted) return null;

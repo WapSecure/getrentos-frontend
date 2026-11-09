@@ -29,7 +29,7 @@ const SORTS: { value: ListingFilters['sort']; label: string }[] = [
   { value: 'price_desc', label: 'Price: High to low' },
 ];
 
-/** Enum values the API accepts, with the labels the product shows. Mirrors the web's `PROPERTY_TYPE_OPTIONS`. */
+// Enum values the API accepts; keep in step with the web's `PROPERTY_TYPE_OPTIONS`.
 const PROPERTY_TYPES = [
   { value: 'APARTMENT', label: 'Apartment' },
   { value: 'DUPLEX', label: 'Duplex' },

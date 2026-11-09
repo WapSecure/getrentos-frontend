@@ -7,27 +7,9 @@ import type { VisitorPass, VisitorPassStatus } from './visitor-pass';
 
 export type { VisitorPass, VisitorPassSource, VisitorPassStatus } from './visitor-pass';
 
-/**
- * The gate console.
- *
- * These are the estate *management* endpoints (`/estate/:id/...`), not the
- * resident ones in `resident.ts`. The backend gates exactly this subset to
- * `ESTATE_MANAGER + GATEMAN`, which is why a guard never needs an estate id
- * passed in — `getMyEstate` resolves their post.
- *
- * Case asymmetry to preserve: the read mappers lowercase statuses for display,
- * while the create DTOs validate against the raw (UPPERCASE) Prisma enums. The
- * list filters accept either case — the backend normalises with `toUpperCase()`
- * — so these callers send lowercase to match the shapes they read back.
- */
+/** Estate management endpoints the backend opens to ESTATE_MANAGER + GATEMAN. Read mappers lowercase statuses, create DTOs validate the raw UPPERCASE enums, and list filters accept either case. */
 
-/**
- * Builds the body for a gate write, omitting what the gate does not know.
- *
- * Sends nothing at all when there is nothing to say, rather than an object full
- * of `undefined` — and an absent `gateId` means "no gate recorded", which is a
- * different claim from an empty one. The API validates whichever fields arrive.
- */
+/** An absent `gateId` means "no gate recorded", which is a different claim from an empty one. */
 function buildGateWriteBody(extra: Record<string, unknown>): Record<string, unknown> | undefined {
   const body = Object.fromEntries(
     Object.entries(extra).filter(([, value]) => value !== undefined && value !== '')
@@ -35,7 +17,7 @@ function buildGateWriteBody(extra: Record<string, unknown>): Record<string, unkn
   return Object.keys(body).length > 0 ? body : undefined;
 }
 
-/** The estate a guard is posted to. `gateCount` can be 0 before gates are named. */
+/** `gateCount` can be 0 before gates are named. */
 export interface GatemanEstate {
   id: string;
   name: string;
@@ -85,13 +67,7 @@ export interface DeliveryLog {
   createdAt: string;
 }
 
-/**
- * The gate's answer to a code the household sent its courier.
- *
- * There is no reason field, and that is the point: one wording covers a wrong,
- * expired, spent, withdrawn or another-estate code, so this screen cannot be
- * used to work out whether a household exists here.
- */
+/** No reason field on purpose: one wording covers every failure, so the screen cannot reveal whether a household exists here. */
 export interface DeliveryCodeScreen {
   matched: boolean;
   householdId?: string;
@@ -101,20 +77,11 @@ export interface DeliveryCodeScreen {
   description?: string | null;
   expiresAt?: string;
   declaredAt?: string;
-  /** What this means, for the guard. */
   message: string;
-  /** What to do next, for the guard. */
   instruction: string;
 }
 
-/**
- * The gate's answer to a patrol checkpoint's code.
- *
- * Same shape of contract as `DeliveryCodeScreen`, and the same reasoning: every
- * failure shares one sentence, so trying codes cannot map an estate's patrol
- * points. The difference is that a patrol scan WRITES — it is the record that
- * the round was walked — so `accepted` is the thing the guard is waiting for.
- */
+/** Every failure shares one sentence, so trying codes cannot map an estate's patrol points. A scan writes the round's record. */
 export interface PatrolScanResult {
   accepted: boolean;
   checkpointName?: string;
@@ -151,13 +118,7 @@ export interface VehicleLog {
   createdAt: string;
 }
 
-/**
- * One arrival the estate has been told about.
- *
- * Every row carries the deadline it was given, and nothing here says a visitor
- * is definitely coming. `deadlineLabel` is worded by the server so a guard's
- * screen never has to decide whether "until Friday" includes today.
- */
+/** `deadlineLabel` is server-worded so a guard's screen never has to decide whether "until Friday" includes today. */
 export interface ExpectedVisitor {
   id: string;
   householdId: string;
@@ -199,14 +160,7 @@ export interface ExpectedParcel {
   deadlineToday: boolean;
 }
 
-/**
- * Who the estate expects today.
- *
- * A hint board, and the guard's screen says so out loud: nothing here opens a
- * barrier, and the pass PIN is still what admits anybody. It is readable at the
- * gate on purpose — the guard is the one being asked "am I expecting them?" —
- * and showing it is safe precisely because it cannot admit anyone.
- */
+/** A hint board: nothing here admits anybody (the pass PIN still does), which is why it is safe to show at the gate. */
 export interface ExpectedToday {
   estateId: string;
   asOf: string;
@@ -222,17 +176,7 @@ export interface ExpectedToday {
   };
 }
 
-/**
- * The identity document a guard was shown at the barrier.
- *
- * `documentTypeLabel` is what a screen displays — the server words it, so a
- * recorded check reads the same on every client and cannot drift from the
- * vocabulary above. `documentUrl` is a short-lived signed URL and is present
- * only when this caller may see the document at all.
- *
- * The absence of `documentUrl` is NOT an error: it means a check exists and it is
- * not this caller's to look at.
- */
+/** `documentTypeLabel` is server-worded. `documentUrl` is short-lived and absent when this caller may not see the document; that absence is not an error. */
 export interface VisitorIdCheck {
   id: string;
   visitorPassId: string;
@@ -264,65 +208,29 @@ export interface Incident {
   createdAt: string;
 }
 
-/**
- * The optional facts a gate write can carry, both of which are about the same
- * thing: what actually happened at the barrier, and where it is.
- *
- * A `type` rather than an `interface` deliberately — only a type alias gets an
- * implicit index signature, which is what lets it be spread into the request
- * body builder below.
- */
+/** A `type`, not an `interface`: only a type alias gets the implicit index signature the body builder spreads. */
 export type GateWriteOptions = {
   /** ISO time the guard acted, for a write queued offline. */
   occurredAt?: string;
-  /** The barrier the guard is standing at. */
   gateId?: string;
-  /**
-   * A guard's stated reason for admitting somebody the estate has blocked.
-   *
-   * Only ever set on a deliberate override, never on the first attempt: the
-   * reason is the whole point of the override, and it is what the estate office
-   * is told when they are woken by the notification.
-   */
+  /** Set only on a deliberate override, never on the first attempt; it is what the estate office is told. */
   overrideReason?: string;
 };
 
 export const gatemanApi = {
-  /** The estate this guard is posted to; `null` when they hold no post yet. */
+  /** `null` when they hold no post yet. */
   getMyEstate: () => apiFetchOrNull<GatemanEstate>('/estate/me'),
 
-  /**
-   * Every estate this guard can open.
-   *
-   * `/estate/me` answers with one estate and offers no way to ask for another,
-   * so a guard posted to two estates was locked to whichever came back — always
-   * the oldest, with nothing on screen to say another existed.
-   */
+  /** `/estate/me` answers with one estate only, so a guard posted to two would be locked to the oldest. */
   listMyEstates: () => apiFetch<GatemanEstate[]>('/estate/mine'),
 
   listGates: (estateId: string) => apiFetch<Gate[]>(`/estate/${estateId}/gates`),
 
-  /**
-   * Who the estate expects today, for the guard being asked at the barrier.
-   *
-   * Read-only, and deliberately open to a guard even where the guest list behind
-   * it is the office's: this replaces a phone call to the office, and nothing on
-   * it admits anybody, so a guard holding it cannot let in someone the estate
-   * would not have. It is a hint board — a visitor still presents their PIN.
-   */
+  /** Deliberately open to a guard: nothing on it admits anybody, and a visitor still presents their PIN. */
   getExpectedToday: (estateId: string) =>
     apiFetch<ExpectedToday>(`/estate/${estateId}/expected-today`),
 
-  /**
-   * Records the document a guard was shown against a visitor's pass.
-   *
-   * Recording does not admit anybody — the visitor is admitted on their pass as
-   * always — and it is NOT queued offline like a check-in: the photograph is the
-   * evidence, so a write that waited in a queue would be filed against the moment
-   * the network came back rather than the moment the guard looked at the
-   * document. A guard with no connection keeps the pass flow and loses the photo,
-   * which is the right way round.
-   */
+  /** Not queued offline: the photo is evidence, and a queued write would be filed at reconnect time rather than when the guard looked. */
   recordVisitorIdCheck: (
     estateId: string,
     passId: string,
@@ -339,15 +247,7 @@ export const gatemanApi = {
   getVisitorIdCheck: (estateId: string, passId: string) =>
     apiFetchOrNull<VisitorIdCheck>(`/estate/${estateId}/visitor-passes/${passId}/id-check`),
 
-  /**
-   * Asks the estate's watch list about somebody, instead of attempting a write.
-   *
-   * For a guard who would rather find out before they have told a visitor they
-   * are asking the household — and so a household is never asked to consent to
-   * somebody the estate has already refused. Answering "nobody matched" reveals
-   * who the estate is watching, so the endpoint is access-checked like every
-   * other estate route.
-   */
+  /** Access-checked like other estate routes: "nobody matched" reveals who the estate is watching. */
   screenWatchlist: (
     estateId: string,
     query: { name?: string; phone?: string; plateNumber?: string }
@@ -367,54 +267,27 @@ export const gatemanApi = {
       `/estate/${estateId}/visitor-passes${toQuery({ status, page, pageSize })}`
     ),
 
-  /**
-   * Every walk-in the gate has raised, whatever its state.
-   *
-   * One read rather than one per state, so a request the household has just
-   * answered cannot slip between two queries: the console has to be able to tell
-   * "waiting", "approved" and "refused" apart from the same snapshot.
-   */
+  /** One read, not one per state, so a request the household just answered cannot slip between two queries. */
   listWalkIns: (estateId: string, page = 1, pageSize = 50) =>
     apiFetch<Paginated<VisitorPass>>(
       `/estate/${estateId}/visitor-passes${toQuery({ source: 'gate', page, pageSize })}`
     ),
 
-  /**
-   * Checks a visitor in. `pin` is the 6-digit code the resident shared — the QR
-   * code at the gate encodes exactly this pin, so the keyboard path and the scan
-   * path converge on the same call.
-   *
-   * `occurredAt` is only sent by the offline queue. Without it a check-in that
-   * waited in the queue is judged against the clock at replay, so a pass that
-   * expired while the network was down is refused and the arrival is lost — the
-   * guest is standing at the gate but the estate has no record of them.
-   */
+  /** The QR code encodes exactly this pin. `occurredAt` is sent only by the offline queue, so a pass that expired while offline is not judged at replay time. */
   verifyVisitorPass: (estateId: string, pin: string, options: GateWriteOptions = {}) =>
     apiFetch<VisitorPass>(`/estate/${estateId}/visitor-passes/verify`, {
       method: 'POST',
       body: buildGateWriteBody({ pin, ...options }),
     }),
 
-  /**
-   * Logs a checked-in visitor off the estate. Until this existed a pass stayed
-   * checked in forever, so "who is inside?" was unanswerable for people.
-   *
-   * `occurredAt` carries the same meaning as on check-in: the time the guard
-   * actually let the visitor out, not the time the queue got to send it.
-   */
+  /** `occurredAt` is when the guard let the visitor out, not when the queue sent it. */
   checkOutVisitorPass: (estateId: string, passId: string, options: GateWriteOptions = {}) =>
     apiFetch<VisitorPass>(`/estate/${estateId}/visitor-passes/${passId}/check-out`, {
       method: 'PATCH',
       body: buildGateWriteBody(options),
     }),
 
-  /**
-   * Raises a walk-in: somebody is at the barrier with nothing arranged.
-   *
-   * The guard names the unit rather than quoting a code, because there is no
-   * code. This does not admit anyone — it asks the household, and the gate stays
-   * shut until they answer.
-   */
+  /** Does not admit anyone: it asks the household, and the gate stays shut until they answer. */
   requestWalkIn: (
     estateId: string,
     data: {
@@ -432,20 +305,13 @@ export const gatemanApi = {
       body: data,
     }),
 
-  /**
-   * Opens the barrier for a walk-in the household has already approved.
-   *
-   * Takes the same optional `occurredAt` as the other gate writes: a guard whose
-   * connection drops between the approval and the barrier gets their admission
-   * queued, and it must be recorded as happening when they acted.
-   */
+  /** `occurredAt` records a queued admission as happening when the guard acted. */
   admitWalkIn: (estateId: string, passId: string, options: GateWriteOptions = {}) =>
     apiFetch<VisitorPass>(`/estate/${estateId}/visitor-passes/${passId}/admit`, {
       method: 'PATCH',
       body: buildGateWriteBody(options),
     }),
 
-  /** Withdraws a walk-in the gate raised — wrong unit, or the visitor left. */
   cancelWalkIn: (estateId: string, passId: string) =>
     apiFetch<VisitorPass>(`/estate/${estateId}/visitor-passes/${passId}/cancel`, {
       method: 'PATCH',
@@ -456,12 +322,7 @@ export const gatemanApi = {
       `/estate/${estateId}/deliveries${toQuery({ status, page, pageSize })}`
     ),
 
-  /**
-   * Ask whether a code names a delivery this estate is expecting.
-   *
-   * Writes nothing, so checking a code does not use it up — a guard may check
-   * one, find the van is carrying a different parcel, and check another.
-   */
+  /** Writes nothing: checking a code does not use it up. */
   verifyDeliveryCode: (estateId: string, code: string) =>
     apiFetch<DeliveryCodeScreen>(`/estate/${estateId}/deliveries/verify`, {
       method: 'POST',
@@ -469,18 +330,7 @@ export const gatemanApi = {
       body: { code },
     }),
 
-  /**
-   * Record reaching a patrol checkpoint, by the code printed at it.
-   *
-   * Unlike the visitor-pass writes this answers a refusal with 200 and a
-   * sentence rather than an error: a guard's screen must not become a way to map
-   * an estate's patrol points by trying codes, so every failure shares one
-   * wording and the caller reads `accepted`.
-   *
-   * `occurredAt` is what makes the queued version honest — a scan taken at 22:10
-   * inside a window that shut at 22:30 must not be judged late because the
-   * connection came back at 23:00.
-   */
+  /** A refusal is a 200 with one shared sentence, so trying codes cannot map patrol points; read `accepted`. `occurredAt` keeps a queued scan judged by when it was taken. */
   scanPatrolCheckpoint: (estateId: string, code: string, options: { occurredAt?: string } = {}) =>
     apiFetch<PatrolScanResult>(`/estate/${estateId}/patrols/scan`, {
       method: 'POST',
@@ -491,11 +341,7 @@ export const gatemanApi = {
     estateId: string,
     data: {
       householdId?: string;
-      /**
-       * The code the household gave the courier. When present the server derives
-       * the household from it and ignores `householdId`, so a guard holding a
-       * code cannot redirect the parcel to somebody the code does not name.
-       */
+      /** When present the server derives the household from it and ignores `householdId`. */
       code?: string;
       courier?: string;
       recipientName?: string;
@@ -571,5 +417,4 @@ export const gatemanApi = {
   },
 };
 
-/** The description the panic button files, so the office can triage it on sight. */
 export const PANIC_DESCRIPTION = 'Panic button activated';

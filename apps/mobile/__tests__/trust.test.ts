@@ -67,7 +67,6 @@ describe('trust verification helpers', () => {
     ];
     expect(checkKinds(steps)).toEqual(['phone', 'identity', 'biometric', 'bank']);
     expect(checkState(steps, 'phone')).toBe('done');
-    // Half the selfie steps passed is still a selfie to take.
     expect(checkState(steps, 'biometric')).toBe('todo');
   });
 

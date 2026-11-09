@@ -35,7 +35,6 @@ import {
 import { formatDate, formatTime } from '@/lib/format';
 import { goBack } from '@/lib/goBack';
 
-/** Re-read while somebody is inside: elapsed times move by the minute, not the second. */
 const BOARD_POLL_MS = 30_000;
 
 const RANGES = [
@@ -50,12 +49,7 @@ const UPSELL_POINTS = [
   'How long each regular visitor actually stays',
 ];
 
-/**
- * Dwell analytics (Enterprise): who is still inside right now, and how long
- * regular visitors' visits actually run. Every sentence is worded by the
- * server and shown as-is, so this screen and the office's overstay alert
- * describe the same visit the same way.
- */
+// Sentences are worded by the server and shown as-is, so this screen matches the office's overstay alert.
 export default function EstateDwell() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();

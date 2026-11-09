@@ -33,7 +33,6 @@ import { ApplicantSummaryPanel } from '@/components/landlord/ApplicantSummaryPan
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
 
-/** Statuses that still await the landlord's decision. */
 const OPEN_STATUSES: ApplicationStatus[] = ['pending', 'under_review'];
 
 export default function LandlordApplications() {
@@ -164,7 +163,6 @@ function ApplicationCard({
   onReject,
 }: {
   application: LandlordApplication;
-  /** The decision being sent for this application, if any. */
   deciding: ApplicationStatus | null;
   onApprove: () => void;
   onReject: () => void;

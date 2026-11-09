@@ -27,7 +27,6 @@ import { formatNaira } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
-/** Buyers who appointed this account to represent them, and their land deals. */
 export default function LandRepresenting() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();

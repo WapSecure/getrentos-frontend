@@ -2,7 +2,6 @@ import { apiFetch } from './client';
 import type { Paginated } from './properties';
 import type { NotificationCategory } from './notificationPreferences';
 
-/** An action the API attaches to a notification, e.g. "View application". */
 export interface NotificationAction {
   label: string;
   url: string;

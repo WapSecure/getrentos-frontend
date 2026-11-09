@@ -37,7 +37,6 @@ import { goBack } from '@/lib/goBack';
 
 const PAGE_SIZE = 20;
 
-/** The toast for a payment the API settled without a checkout, worded from its real status. */
 function paidOutcome(p: Payment): [string, 'success' | 'info'] {
   if (p.status === 'paid')
     return [p.reference ? `Paid. Reference ${p.reference}` : 'Paid.', 'success'];
@@ -61,12 +60,10 @@ export default function Payments() {
   const checkout = usePaystackCheckout();
   const [disputePayment, setDisputePayment] = useState<Payment | null>(null);
   const [payPayment, setPayPayment] = useState<Payment | null>(null);
-  // Which company takes the payment, and why the last one could not.
   const providers = usePaymentProviders();
   const [providerError, setProviderError] = useState<string | null>(null);
 
-  // The whole history, a page at a time as the renter scrolls: a fixed first 50
-  // used to drop older records with no way to reach them.
+  // Paged as the renter scrolls, so older records stay reachable.
   const query = useInfiniteQuery({
     queryKey: qk.renter.paymentsHistory,
     queryFn: ({ pageParam }) => paymentsApi.list(pageParam, PAGE_SIZE),
@@ -74,7 +71,7 @@ export default function Payments() {
     getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
   });
   const items = useMemo(() => query.data?.pages.flatMap((p) => p.items) ?? [], [query.data]);
-  // Account-wide figures from the API (every charge, not the pages loaded). Older APIs send none.
+  // Account-wide figures from the API, not the loaded pages; older APIs send none.
   const summary = query.data?.pages[0]?.summary;
   const refreshPayments = () => qc.invalidateQueries({ queryKey: qk.renter.paymentsAll });
 
@@ -96,7 +93,7 @@ export default function Payments() {
       if (payment.authorizationUrl) {
         await checkout(payment.authorizationUrl, payment.reference);
       } else {
-        // Say "Paid" only when the API says the charge is paid (same words as web).
+        // Say "Paid" only when the API says the charge is paid.
         toast.show(...paidOutcome(payment));
       }
       refreshPayments();
@@ -267,7 +264,6 @@ export default function Payments() {
   );
 }
 
-/** What the renter owes across every charge, and what Sureground is holding: the same figures as web. */
 function PaymentsSummaryCard({ summary }: { summary: PaymentsSummary }) {
   const { spacing } = useTheme();
   const held =
@@ -323,7 +319,6 @@ function PaymentRow({
   paying: boolean;
   releasing: boolean;
   onPay: () => void;
-  /** Back to the checkout the tenant closed. */
   onResume: () => void;
   onDispute: () => void;
   onConfirmMoveIn: () => void;

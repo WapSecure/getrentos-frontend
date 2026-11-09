@@ -2,13 +2,7 @@ import { Alert } from 'react-native';
 import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 
-/**
- * Writes downloaded bytes to the cache and hands them to the OS share sheet,
- * which is how a file reaches the user's own storage on both platforms.
- *
- * These endpoints stream behind the bearer token, so they cannot be opened as
- * a plain URL — the bytes have to come through the API client first.
- */
+// These endpoints stream behind the bearer token, so the bytes go through the API client, not a plain URL.
 export async function shareDownloadedFile(
   bytes: Uint8Array,
   fileName: string,
@@ -26,7 +20,6 @@ export async function shareDownloadedFile(
   }
 }
 
-/** Shares text made on the device (a CSV template, say) as a file. */
 export function shareTextFile(
   text: string,
   fileName: string,
@@ -36,6 +29,6 @@ export function shareTextFile(
   return shareDownloadedFile(new TextEncoder().encode(text), fileName, mimeType, dialogTitle);
 }
 
-/** UTI hints the iOS share sheet uses to offer sensible destinations. */
+// UTI hints the iOS share sheet uses to offer destinations.
 export const PDF_MIME = 'application/pdf';
 export const CSV_MIME = 'text/csv';

@@ -5,7 +5,6 @@ import { DetailHeader } from './DetailHeader';
 
 type DetailScreenHeaderProps = React.ComponentProps<typeof DetailHeader>;
 
-/** Safe-area-aware page chrome for full-screen secondary workflows. */
 export function DetailScreenHeader(props: DetailScreenHeaderProps) {
   const insets = useSafeAreaInsets();
   const { spacing } = useTheme();

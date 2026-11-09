@@ -44,7 +44,6 @@ import { ConditionsList, DeliverForm, MilestoneList } from '@/components/land/Co
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
-/** One plot purchase from the seller's side: money, conditions, conveyance, title. */
 export default function OwnerLandPurchase() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, spacing } = useTheme();

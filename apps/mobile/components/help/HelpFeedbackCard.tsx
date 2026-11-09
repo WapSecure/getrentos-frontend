@@ -7,7 +7,6 @@ import { StarRating } from '@/components/reviews/StarRating';
 import { feedbackApi } from '@/lib/api/feedback';
 import { errorMessage } from '@/lib/api/client';
 
-/** "Was this helpful?": the help centre's rating-plus-note widget. */
 export function HelpFeedbackCard() {
   const { colors, spacing } = useTheme();
   const toast = useToast();

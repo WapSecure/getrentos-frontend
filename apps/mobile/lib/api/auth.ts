@@ -35,7 +35,6 @@ export const isTwoFactorChallenge = (r: LoginResult): r is TwoFactorChallenge =>
   'requiresTwoFactor' in r && r.requiresTwoFactor === true;
 
 export const authApi = {
-  // ---- password sign-in ----------------------------------------------------
   login: (identifier: string, password: string) =>
     apiFetch<LoginResult>('/auth/login', {
       method: 'POST',
@@ -58,7 +57,6 @@ export const authApi = {
       body: { challengeToken, token },
     }),
 
-  // ---- session ----------------------------------------------------------
   refresh: (refreshToken: string) =>
     apiFetch<{ accessToken: string; refreshToken?: string }>('/auth/refresh', {
       method: 'POST',
@@ -75,7 +73,6 @@ export const authApi = {
 
   me: () => apiFetch<AuthProfile>('/auth/me'),
 
-  // ---- one-time codes (signup + password reset) --------------------------
   sendOtp: (identifier: string, method: OtpMethod, purpose: OtpPurpose) =>
     apiFetch<{ reference: string }>('/auth/otp/send', {
       method: 'POST',
@@ -97,7 +94,6 @@ export const authApi = {
       body: { reference },
     }),
 
-  // ---- account creation ------------------------------------------------
   signup: (input: {
     email?: string;
     phone?: string;
@@ -117,8 +113,6 @@ export const authApi = {
       })
     ),
 
-  // ---- password reset -------------------------------------------------
-  /** Recovery with a face check, for someone who lost the email or phone the code goes to. */
   startFaceRecovery: (identifier: string) =>
     apiFetch<{ recoveryId: string; secret: string; session: SmileLivenessSession }>(
       '/auth/recovery/face/start',
@@ -144,7 +138,6 @@ export const authApi = {
       body: { reference, newPassword },
     }),
 
-  // ---- magic link -------------------------------------------------------
   sendMagicLink: (email: string) =>
     apiFetch<{ message: string }>('/auth/magic-link/send', {
       method: 'POST',
@@ -159,7 +152,6 @@ export const authApi = {
       body: { token },
     }),
 
-  // ---- OAuth ----------------------------------------------------------
   /** Provider start URL; opened in an in-app browser, redirects back to sureground://oauth. */
   oauthUrl: (provider: 'google' | 'apple') => `${env.apiUrl}/auth/oauth/${provider}?client=mobile`,
 };

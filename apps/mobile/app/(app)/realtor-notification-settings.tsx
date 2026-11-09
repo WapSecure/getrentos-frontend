@@ -27,12 +27,7 @@ const COPY: Record<string, { label: string; hint: string }> = {
   reviews: { label: 'Reviews', hint: 'A client reviews you' },
 };
 
-/**
- * Which updates buzz the phone, and which are also emailed. Everything still
- * lands in Notifications; this only decides what interrupts. Email exists only
- * for the kinds Sureground emails (offers and commission), so only those rows
- * offer it.
- */
+/** Email exists only for the kinds Sureground emails (offers and commission). */
 export default function RealtorNotificationSettings() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();

@@ -2,11 +2,9 @@ import { apiFetch } from './client';
 import { toQuery } from './query';
 import type { VideoStream } from '@sureground/shared';
 
-/** One rental listing as returned by `/renter/listings`. Mirrors `RenterPropertyDto`. */
 export interface RenterProperty {
-  /** Listing id — the id used by save/apply endpoints. */
+  /** The id the save/apply endpoints use. */
   id: string;
-  /** Underlying property id. */
   propertyId: string;
   title: string;
   location: string;
@@ -28,13 +26,10 @@ export interface RenterProperty {
   size: number;
   rating: number;
   verified: boolean;
-  /** The four-link trust chain (owner, ownership, property, payment); see trustChainLabel. */
   trustChain?: { steps: { id: string; label: string; met: boolean; detail: string }[] };
   score?: number;
   image: string;
-  /** Signed URLs for the full gallery (cover first). */
   images?: string[];
-  /** Signed URL for the video tour. */
   videoTourUrl?: string;
   /** The video tour was filmed in the app at the property. */
   videoTourFilmedOnSite?: boolean;
@@ -120,7 +115,6 @@ export const propertiesApi = {
   getById: (id: string) => apiFetch<RenterProperty>(`/renter/listings/${id}`),
 };
 
-/** A saved listing — a `RenterProperty` plus the save metadata. */
 export type SavedProperty = RenterProperty & {
   savedListingId: string;
   wishlistId: string | null;

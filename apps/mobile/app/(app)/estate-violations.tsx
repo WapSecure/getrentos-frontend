@@ -29,7 +29,6 @@ import { haptics } from '@/lib/haptics';
 import { qk } from '@/lib/query/keys';
 import { errorMessage } from '@/lib/api/client';
 
-/** Rule breaches by household: record one, warn the resident, then close it. */
 export default function EstateViolations() {
   const { colors } = useTheme();
   const qc = useQueryClient();

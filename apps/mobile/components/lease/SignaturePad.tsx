@@ -5,11 +5,7 @@ import { LinkButton, Text, useTheme } from '@sureground/ui-native';
 
 const PAD_HEIGHT = 180;
 
-/**
- * A minimal but real signature capture: freehand strokes drawn as SVG paths,
- * rasterized to a PNG data URI via react-native-svg's native `toDataURL`:
- * no extra native dependency needed for the capture step.
- */
+// Rasterized with react-native-svg's native toDataURL, so capture needs no extra native dependency.
 export function SignaturePad({ onChange }: { onChange: (dataUri: string | null) => void }) {
   const { colors, spacing, radius } = useTheme();
   const svgRef = useRef<React.ComponentRef<typeof Svg>>(null);
@@ -22,9 +18,6 @@ export function SignaturePad({ onChange }: { onChange: (dataUri: string | null) 
     return `${locationX.toFixed(1)},${locationY.toFixed(1)}`;
   };
 
-  // A lazy state initializer keeps this instance stable across renders. The
-  // handlers only ever touch state via functional updaters: never a ref:
-  // so nothing here reads a value during render.
   const [panResponder] = useState(() =>
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
@@ -54,9 +47,7 @@ export function SignaturePad({ onChange }: { onChange: (dataUri: string | null) 
     onChange(null);
   };
 
-  // Capture only after a completed stroke has actually committed to the SVG:
-  // calling toDataURL synchronously on release would rasterize the previous
-  // frame, since the state update hasn't painted yet.
+  // Capture only after the stroke commits: toDataURL on release would rasterize the previous frame.
   useEffect(() => {
     if (strokes.length === 0) return;
     svgRef.current?.toDataURL((base64: string) => {

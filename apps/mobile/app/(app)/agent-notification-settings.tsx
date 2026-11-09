@@ -26,10 +26,6 @@ const COPY: Record<string, { label: string; hint: string }> = {
   system: { label: 'Account and listing updates', hint: 'Changes to your account or assignments' },
 };
 
-/**
- * Which agent updates buzz the phone, and which are also emailed. Everything
- * still lands in Notifications; this only decides what interrupts.
- */
 export default function AgentNotificationSettings() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();

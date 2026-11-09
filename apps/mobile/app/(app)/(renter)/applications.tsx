@@ -47,7 +47,6 @@ export default function Applications() {
     () => (filter === 'all' ? all : all.filter((a) => a.status === filter)),
     [all, filter]
   );
-  // Only offer statuses the renter actually has, each with its count.
   const counts = useMemo(() => {
     const c = new Map<ApplicationStatus, number>();
     all.forEach((a) => c.set(a.status, (c.get(a.status) ?? 0) + 1));

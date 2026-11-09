@@ -6,16 +6,10 @@ import type { FaceCheckStatus, SmileLivenessSession } from '@/lib/api/trust';
 import { errorMessage } from '@/lib/api/client';
 import { LiveSelfieCheck } from './LiveSelfieCheck';
 
-/** How often, and how long, to ask the server whether Smile has decided. */
 const POLL_MS = 3000;
 const GIVE_UP_MS = 2 * 60_000;
 
-/**
- * A face check matched against the account's verified live selfie (Smile ID),
- * for account recovery or a PIN reset. The server starts it, Smile's capture
- * runs, and the server alone decides: this only asks it until it has.
- * Rendered only where `liveSelfieSupported()` is true.
- */
+// The server alone decides; this only polls it until it has. Rendered only where `liveSelfieSupported()` is true.
 export function FaceCheckButton({
   label,
   start,

@@ -24,7 +24,6 @@ import { errorMessage } from '@/lib/api/client';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
-/** Defaults used across a realtor's listings and deals (web: BusinessPreferencesSettings). */
 export default function RealtorPreferences() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();

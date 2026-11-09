@@ -38,7 +38,6 @@ function Icon({ name, size, color }: { name: string; size: number; color: string
   return <Comp size={size} color={color} />;
 }
 
-/** Where each requirement is done, per portal. */
 const PROFILE_ROUTE: Record<ProfilePortal, Href> = {
   owner: '/(app)/owner-profile',
   realtor: '/(app)/realtor-profile',
@@ -61,10 +60,6 @@ function routeFor(portal: ProfilePortal, key: TrustRequirementKey): Href {
 
 type ProfilePortal = Extract<TrustPortal, 'owner' | 'agent' | 'realtor' | 'buyer'>;
 
-/**
- * Trust & Verification for owners, agents, realtors and buyers: the shared
- * overview, then what others see on the profile, folded into the details.
- */
 export function TrustProfileView({
   portal,
   queryKey,
@@ -76,7 +71,6 @@ export function TrustProfileView({
   queryKey: readonly unknown[];
   queryFn: () => Promise<TrustProfile>;
   eyebrow: string;
-  /** Who sees the profile, e.g. "buyers and realtors". */
   audience: string;
 }) {
   const { colors, spacing } = useTheme();

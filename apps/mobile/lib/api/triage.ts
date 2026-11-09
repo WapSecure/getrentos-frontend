@@ -1,6 +1,6 @@
 import { apiFetch } from './client';
 
-/** A proposed triage for one maintenance request. Server enums are upper-case. */
+/** Server enums are upper-case. */
 export interface MaintenanceTriage {
   requestId: string;
   reviewId?: string;
@@ -17,7 +17,7 @@ export type TriageDecision =
   | { decision: 'accept'; draftWorkOrder?: string }
   | { decision: 'reject'; reason: string };
 
-/** The triage copilot, shared with web. The server checks the caller's authority each time. */
+/** The server checks the caller's authority each time. */
 export const triageApi = {
   triage: (requestId: string) =>
     apiFetch<MaintenanceTriage>(`/ai/maintenance/${requestId}/triage`, { method: 'POST' }),

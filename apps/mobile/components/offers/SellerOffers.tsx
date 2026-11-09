@@ -46,11 +46,6 @@ const FILTERS: { value: Filter; label: string; match: (o: OwnerOffer) => boolean
   { value: 'all', label: 'All', match: () => true },
 ];
 
-/**
- * Buyers' offers on the seller's properties, filtered by what needs a reply.
- * The owner portal shows it as a tab; the landlord opens it from the account
- * menu. `header` is the screen chrome above the filters.
- */
 export function SellerOffers({
   side,
   header,
@@ -58,7 +53,6 @@ export function SellerOffers({
 }: {
   side: OfferSide;
   header: React.ReactNode;
-  /** Pad for the status bar (a tab screen); off when a header above already does. */
   topInset?: boolean;
 }) {
   const { colors, spacing, radius } = useTheme();

@@ -86,7 +86,6 @@ describe('notification routes', () => {
         'owner'
       )
     ).toBe('/(app)/shortlet-conversation/c1');
-    // No chat screen for this portal: its inbox, as before.
     expect(routeForNotification({ type: 'NEW_MESSAGE', conversationId: 'c1' }, 'gateman')).toBe(
       '/(app)/notifications'
     );
@@ -137,7 +136,6 @@ describe('hosting notifications', () => {
     expect(
       routeForNotification({ type: 'SHORTLET_BOOKING_CANCELLED', bookingId: 'b9' }, 'buyer')
     ).toBe('/(app)/shortlet-stay/b9');
-    // Hosts keep their own booking screen.
     expect(
       routeForNotification({ type: 'SHORTLET_BOOKING_CONFIRMED', bookingId: 'b9' }, 'landlord')
     ).not.toBe('/(app)/shortlet-stay/b9');

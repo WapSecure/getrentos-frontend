@@ -33,7 +33,6 @@ import { goBack } from '@/lib/goBack';
 
 const OPEN = ['REQUESTED', 'PROPOSED', 'SCHEDULED'];
 
-/** Live video tours buyers have asked for on the owner's land. */
 export default function OwnerLandTours() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();

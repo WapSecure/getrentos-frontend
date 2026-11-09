@@ -10,7 +10,6 @@ const TOGGLE_KEY = ['buyer', 'saved', 'toggle'] as const;
 
 type Toggle = { id: string; next: boolean };
 
-/** The buyer's saved listings as a fast `Set` of ids, plus an optimistic `toggle`. */
 export function useBuyerSaved() {
   const qc = useQueryClient();
   const toast = useToast();
@@ -21,9 +20,7 @@ export function useBuyerSaved() {
     staleTime: 60_000,
   });
 
-  // Saves still in flight. A save only knows the listing's id, so it cannot be
-  // written into the cached list; it is overlaid on the set instead, which
-  // makes the heart fill the moment it is tapped.
+  // A save only knows the listing's id, so in-flight saves are overlaid on the set rather than written into the cached list.
   const pending = useMutationState({
     filters: { mutationKey: TOGGLE_KEY, status: 'pending' },
     select: (m) => m.state.variables as Toggle,

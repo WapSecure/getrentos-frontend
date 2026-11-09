@@ -33,7 +33,6 @@ import { goBack } from '@/lib/goBack';
 
 const STATUS_LABEL: Record<VisitorPassStatus, string> = {
   pending: 'Pending',
-  // A walk-in the gate raised: this household is being asked to decide.
   awaiting_approval: 'Needs your answer',
   approved: 'Approved',
   checked_in: 'Checked in',
@@ -45,7 +44,6 @@ const STATUS_LABEL: Record<VisitorPassStatus, string> = {
 
 const STATUS_TONE: Record<VisitorPassStatus, BadgeTone> = {
   pending: 'warning',
-  // Warning tone, not neutral: this one is waiting on the resident.
   awaiting_approval: 'warning',
   approved: 'success',
   checked_in: 'success',
@@ -69,12 +67,9 @@ export default function ResidentVisitorPasses() {
 
   const [issueOpen, setIssueOpen] = useState(false);
   const [issuedPass, setIssuedPass] = useState<IssuedVisitorPass | null>(null);
-  /** The walk-in the resident is refusing, so the reason can be collected. */
   const [denying, setDenying] = useState<VisitorPass | null>(null);
 
-  // A walk-in lapses ten minutes after it is raised. While one is open the list
-  // keeps refreshing and the clock keeps ticking, so a dead request stops
-  // offering buttons that could only fail.
+  // A walk-in lapses ten minutes after it is raised; keep refreshing so a dead request stops offering buttons.
   const [now, setNow] = useState(() => Date.now());
   const query = useQuery({
     queryKey: qk.resident.visitorPasses,
@@ -110,11 +105,7 @@ export default function ResidentVisitorPasses() {
     onError: () => toast.show("Couldn't revoke that pass. Try again.", 'error'),
   });
 
-  /**
-   * Consenting to a walk-in. Someone is standing at the gate, so the outcome is
-   * always reported: silence here means a visitor is left waiting with no idea
-   * whether anyone is deciding.
-   */
+  /** Always report the outcome: a visitor is standing at the gate waiting. */
   const approve = useMutation({
     mutationFn: (passId: string) => residentApi.approveWalkIn(passId),
     onSuccess: (pass) => {
@@ -156,9 +147,7 @@ export default function ResidentVisitorPasses() {
       : pass
   );
 
-  // Walk-ins waiting on this household get their own section at the top and are
-  // kept out of the list below: this is the one thing on the screen where a real
-  // person is standing at a barrier while the resident reads it.
+  // Walk-ins get their own section at the top: a real person is waiting at the barrier.
   const awaiting = passes.filter((pass) => pass.status === 'awaiting_approval');
   const others = passes.filter((pass) => pass.status !== 'awaiting_approval');
 
@@ -295,14 +284,7 @@ export default function ResidentVisitorPasses() {
   );
 }
 
-/**
- * Collects why a visitor was refused.
- *
- * The reason is optional: somebody declining a visitor should not have to
- * justify it to reach the button: but when it is given the guard reads it out
- * loud, so it is framed as something to say to the person at the barrier rather
- * than as a note for the record.
- */
+/** Optional, but the guard reads it aloud, so it is framed as something to say to the visitor. */
 function DenyWalkInSheet({
   pass,
   onClose,

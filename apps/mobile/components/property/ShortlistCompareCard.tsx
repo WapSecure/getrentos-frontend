@@ -20,10 +20,6 @@ const CHECK: Record<ComparedHome['listingCheck'], { label: string; tone: BadgeTo
   be_cautious: { label: 'Be cautious', tone: 'danger' },
 };
 
-/**
- * "Compare these homes" above the saved list: up to four saved rentals side by
- * side, run when the renter asks. It never picks for them.
- */
 export function ShortlistCompareCard({ listingIds }: { listingIds: string[] }) {
   const { colors, spacing, radius } = useTheme();
   const ids = listingIds.slice(0, 4);

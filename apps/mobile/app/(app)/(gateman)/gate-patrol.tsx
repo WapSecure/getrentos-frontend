@@ -18,32 +18,7 @@ import { gateOfflineQueue, useGateQueue } from '@/lib/gateOfflineQueue';
 import { haptics } from '@/lib/haptics';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 
-/**
- * Recording a patrol checkpoint.
- *
- * Prefixed `gate-` for the same reason `gate-deliveries` is: route groups don't
- * contribute a URL segment, so a group screen also answers on its bare path, and
- * Expo Router's generated route union would collapse a clash silently. There is
- * no top-level `patrol.tsx` today: the prefix is what keeps it that way.
- *
- * One field and one button, because it is used at two in the morning by somebody
- * holding a phone in one hand. The code is printed at the checkpoint, so the
- * guard types it standing in front of it, which is the whole mechanism: the code
- * is the proof they went there.
- *
- * Two things this screen is careful about:
- *
- * 1. A refusal is rendered as the server wrote it and is NOT styled as an error.
- *    Every failure shares one sentence on purpose, so that trying codes cannot
- *    map the estate's patrol points; making it red and alarming would invite a
- *    guard to try another code and learn exactly what the wording exists to
- *    withhold. It is still a thing they need to read, so it is not silent either.
- * 2. A scan queued offline carries the moment it HAPPENED, not the moment it was
- *    sent. A scan taken inside the window and typed up after the connection came
- *    back must still count as inside the window, or the estate is told nobody
- *    walked a patrol somebody did walk: which is the one error this feature
- *    exists to prevent.
- */
+// A scan queued offline carries when it happened, not when it was sent, or a walked patrol reads as missed. Prefixed `gate-` to avoid a bare-path route clash.
 export default function GatemanPatrol() {
   const { colors, spacing } = useTheme();
   const toast = useToast();
@@ -69,9 +44,7 @@ export default function GatemanPatrol() {
     },
     onError: async () => {
       if (!estate) return;
-      // The one case worth queueing is the connection being gone. A 403 or a
-      // malformed code would only be repeated, so those are reported now rather
-      // than parked in a queue that will never drain.
+      // Only a lost connection is queued: a 403 or malformed code would just repeat and never drain.
       await gateOfflineQueue.enqueue('patrol-scan', {
         estateId: estate.id,
         code: code.trim(),
@@ -101,9 +74,7 @@ export default function GatemanPatrol() {
             value={code}
             onValueChange={(next) => {
               setCode(next);
-              // Any edit clears the last answer: a stale "Main gate · step 1 of
-              // 3" beside a code the guard has since changed is worse than
-              // nothing.
+              // Any edit clears the last answer: a stale result beside a changed code is worse than nothing.
               if (result) setResult(null);
             }}
             placeholder="The six digits on the label"
@@ -149,10 +120,7 @@ export default function GatemanPatrol() {
             </View>
           </Card>
         ) : result ? (
-          // Rendered as the server wrote it, never interpreted. One wording
-          // covers an unknown code, a retired checkpoint, and a checkpoint that
-          // is not on a round tonight: so this screen cannot be used to work out
-          // which checkpoints exist here.
+          // Rendered as the server wrote it: one wording covers every failure, so trying codes can't map the checkpoints.
           <Card>
             <View style={{ gap: spacing.sm }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>

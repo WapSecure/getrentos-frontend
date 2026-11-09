@@ -7,11 +7,7 @@ import { videoCallState, type VideoCallJoin } from '@sureground/shared';
 import { errorMessage } from '@/lib/api/client';
 import { formatDate, formatTime } from '@/lib/format';
 
-/**
- * "Join video call" on a confirmed video viewing. Until the call opens it says
- * when it will; once open it fetches a personal link and opens the room in the
- * in-app browser, which has the camera and microphone.
- */
+// Opens the room in the in-app browser, which has the camera and microphone.
 export function VideoCallAction({
   viewing,
   join,
@@ -26,7 +22,6 @@ export function VideoCallAction({
   const [now, setNow] = useState(() => new Date());
   const [joining, setJoining] = useState(false);
 
-  // Re-check every half minute so the button opens on time.
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 30_000);
     return () => clearInterval(timer);

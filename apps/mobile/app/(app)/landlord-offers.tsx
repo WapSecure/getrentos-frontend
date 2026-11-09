@@ -4,7 +4,6 @@ import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { SellerOffers } from '@/components/offers/SellerOffers';
 import { goBack } from '@/lib/goBack';
 
-/** Buyers' offers on a landlord's properties: the same flow as the owner's. */
 export default function LandlordOffers() {
   const { colors } = useTheme();
   return (

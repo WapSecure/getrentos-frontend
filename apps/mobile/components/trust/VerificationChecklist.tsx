@@ -43,11 +43,7 @@ import { formatDate } from '@/lib/format';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
 import { BankAccountFields, accountNumberOk } from '@/components/forms/BankAccountFields';
 
-/**
- * The instant identity checks (phone code, NIN/BVN, selfie, bank account,
- * professional document) the trust orchestrator asks for, with the consent each
- * one needs. Starting is idempotent: it resumes the open verification.
- */
+// Starting is idempotent: it resumes the open verification.
 export function VerificationChecklist({
   subjectId,
   purpose,
@@ -107,7 +103,6 @@ export function VerificationChecklist({
   const kinds = checkKinds(v.steps);
   const states = kinds.map((k) => checkState(v.steps, k));
   const done = states.filter((st) => st === 'done').length;
-  // The first check that needs the person opens; the rest fold to one line.
   const current =
     kinds.find((_, i) => states[i] === 'todo' || states[i] === 'failed') ??
     kinds.find((_, i) => states[i] === 'review' || states[i] === 'waiting') ??
@@ -177,7 +172,6 @@ const STATE_BADGE: Record<
   waiting: { label: 'Checking', tone: 'neutral' },
 };
 
-/** One numbered check: a line that opens to its form when it needs the person. */
 function CheckStage({
   index,
   kind,
@@ -273,7 +267,6 @@ function CheckRunner({
     onSuccess: () => qc.invalidateQueries({ queryKey: qk.trust.consents }),
     onError: (e) => toast.show(errorMessage(e, 'Could not record your consent.'), 'error'),
   });
-  // The numbered line above already names the check, so no title or card here.
   return (
     <View style={{ gap: spacing.md }}>
       {consentType && !consented ? (
@@ -306,7 +299,6 @@ function CheckRunner({
 
 type FormProps = { verificationId: string; onDone: () => void };
 
-/** The step result text for a check that ran but did not pass. */
 function outcomeToast(status: string | undefined, passed: string) {
   if (status === 'PASSED') return { text: passed, tone: 'success' as const };
   if (status === 'REVIEW_REQUIRED')
@@ -454,8 +446,7 @@ function PhoneForm({ verificationId, onDone }: FormProps) {
 function SelfieForm({ verificationId, onDone }: FormProps) {
   const { spacing } = useTheme();
   const toast = useToast();
-  // Smile ID's live check needs its native code (a development or store build).
-  // There is no photo fallback: a photo cannot show someone is present (ID-08).
+  // Smile ID's live check needs its native code (a development or store build). No photo fallback: a photo can't show someone is present.
   const supported = liveSelfieSupported;
   const [unavailable, setUnavailable] = useState(false);
   const [session, setSession] = useState<SmileLivenessSession | null>(null);
@@ -679,7 +670,6 @@ function AppealCard({ verificationId }: { verificationId: string }) {
   );
 }
 
-/** Consents in force, each revocable. */
 function ConsentList({ consents }: { consents: TrustConsent[] | undefined }) {
   const { spacing } = useTheme();
   const qc = useQueryClient();

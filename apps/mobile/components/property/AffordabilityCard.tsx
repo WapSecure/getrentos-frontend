@@ -25,11 +25,7 @@ const BAND: Record<Affordability['band'], { label: string; tone: BadgeTone } | n
   unknown: null,
 };
 
-/**
- * "Can I afford it?" on the phone: rent against income (the same rule landlord
- * screening uses), cash to move in, and how long saving it takes. Worked out
- * by Sureground; what is entered is used for this answer only.
- */
+// Rent against income uses the same rule as landlord screening; what is entered is used for this answer only.
 export function AffordabilityCard({ listingId }: { listingId: string }) {
   const { colors, spacing, radius } = useTheme();
   const [form, setForm] = useState<AffordabilityInput>({});

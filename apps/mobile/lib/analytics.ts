@@ -1,16 +1,9 @@
-/**
- * Analytics + error-reporting seam.
- *
- * One indirection so screens call `track(...)` / `report(...)`. Product events
- * become privacy-safe Sentry breadcrumbs and caught failures become reports;
- * development also keeps its readable console sink. Never throws.
- */
+// Events become privacy-safe Sentry breadcrumbs. Nothing here may throw.
 
 import { Sentry } from './monitoring';
 
 type Props = Record<string, string | number | boolean | null | undefined>;
 
-/** Domain events. Add to the union as screens need them — keeps names greppable. */
 export type AnalyticsEvent =
   | 'app_error'
   | 'sign_in'
@@ -61,7 +54,6 @@ export function track(event: AnalyticsEvent, props?: Props): void {
   }
 }
 
-/** Non-fatal error reporting (caught exceptions, failed mutations). */
 export function report(error: unknown, context?: Props): void {
   try {
     const message = error instanceof Error ? error.message : String(error);

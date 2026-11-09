@@ -55,7 +55,6 @@ const ASSET_KINDS = [
   'Other',
 ];
 
-/** What warranty news to show: expired, expiring within 60 days, or nothing. */
 function warranty(a: Asset): { text: string; warn: boolean } | null {
   if (!a.warrantyExpiresAt) return null;
   const days = Math.round((new Date(a.warrantyExpiresAt).getTime() - Date.now()) / 86_400_000);
@@ -65,7 +64,6 @@ function warranty(a: Asset): { text: string; warn: boolean } | null {
   return { text: `Warranty to ${formatDate(a.warrantyExpiresAt, 'medium')}`, warn: false };
 }
 
-/** The things in each home that break: ACs, generators, pumps: with warranties and servicing. */
 export default function Assets() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();

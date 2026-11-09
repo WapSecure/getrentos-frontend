@@ -40,10 +40,6 @@ import { errorMessage } from '@/lib/api/client';
 
 const POLL_MS = 8000;
 
-/**
- * Emergencies: declare one, work the roll call until everyone has an answer,
- * and stand down. Opened with `id`, it shows a past roll, read-only.
- */
 export default function EstateEmergency() {
   const { id } = useLocalSearchParams<{ id?: string }>();
   const { colors, spacing, radius } = useTheme();
@@ -116,8 +112,6 @@ export default function EstateEmergency() {
     </ScrollView>
   );
 }
-
-/* -------------------------------- declare --------------------------------- */
 
 function DeclareForm({ estateId, households }: { estateId: string; households: number }) {
   const { colors, spacing } = useTheme();
@@ -229,8 +223,6 @@ function History({ items, loading }: { items: MusterSummary[]; loading: boolean 
     </View>
   );
 }
-
-/* ---------------------------------- roll ---------------------------------- */
 
 function Roll({ estateId, muster }: { estateId: string; muster: EmergencyMuster }) {
   const { colors, spacing, radius } = useTheme();

@@ -7,25 +7,18 @@ import type { Payment } from '@/lib/api/payments';
 import { formatNaira } from '@/lib/format';
 import { RENT_PART_PROTECTION, RENT_PROTECTION } from '@/lib/paymentCopy';
 
-/** Matches the backend: the smallest part-payment accepted. */
+/** Must match the backend: the smallest part-payment accepted. */
 const MIN_PART_PAYMENT = 1_000;
 
 interface Props {
   payment: Payment | null;
   onClose: () => void;
   onPay: (amount: number | undefined) => void;
-  /** Which company takes the payment (Paystack or Monnify). */
   providers: PaymentProviderChoice;
-  /** Why the last try failed when the chosen company could not take it: choose another. */
   providerError?: string | null;
-  /** While the payment is being started: the sheet stays open and shows it. */
   busy?: boolean;
 }
 
-/**
- * Pay rent: what a charge owes, or part of it (same rules and layout as the
- * web pay dialog). Anything paid goes to this charge first.
- */
 export function PayAmountSheet({ payment, onClose, onPay, providers, providerError, busy }: Props) {
   const { spacing } = useTheme();
   const [mode, setMode] = useState<'full' | 'part'>('full');
@@ -48,7 +41,6 @@ export function PayAmountSheet({ payment, onClose, onPay, providers, providerErr
   const part = amount ?? 0;
   const partValid = part >= min && part < owed;
   const paying = mode === 'part' ? (partValid ? part : 0) : owed;
-  // Only once something is typed: an empty box is not yet a mistake.
   const partError =
     mode !== 'part' || !amount
       ? undefined

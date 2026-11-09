@@ -18,7 +18,6 @@ describe('web upload file parts', () => {
       name: 'id.pdf',
       type: 'application/pdf',
     });
-    // Not attached yet: a browser would otherwise send "[object Object]".
     expect(form.get('file')).toBeNull();
 
     await attachQueuedWebFiles(form);
@@ -27,7 +26,6 @@ describe('web upload file parts', () => {
     expect(part.name).toBe('id.pdf');
     expect(part.type).toBe('application/pdf');
 
-    // A retried upload (after a token refresh) must not attach it twice.
     await attachQueuedWebFiles(form);
     expect(form.getAll('file')).toHaveLength(1);
     expect(globalThis.fetch).toHaveBeenCalledTimes(1);

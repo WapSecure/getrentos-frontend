@@ -10,13 +10,6 @@ interface Props {
 
 const PLOT_HEIGHT = 96;
 
-/**
- * Monthly rent collected: magnitude per discrete period, so bars rather than a
- * line. One series, so no legend: the section heading names it.
- *
- * Only the peak is labelled by default; tapping a bar reveals that month's
- * figure, which is the touch equivalent of a hover tooltip.
- */
 export function RevenueTrendChart({ points }: Props) {
   const { colors, spacing, radius } = useTheme();
   const [selected, setSelected] = useState<number | null>(null);
@@ -48,7 +41,6 @@ export function RevenueTrendChart({ points }: Props) {
         }}
       >
         {points.map((p, i) => {
-          // A zero month still gets a hairline so the period reads as present.
           const h = max > 0 ? Math.max((p.value / max) * PLOT_HEIGHT, 2) : 2;
           const isActive = i === active;
           return (
@@ -73,7 +65,6 @@ export function RevenueTrendChart({ points }: Props) {
         })}
       </View>
 
-      {/* Recessive axis: month labels only, no gridlines behind six bars. */}
       <View style={{ flexDirection: 'row', gap: 2 }}>
         {points.map((p, i) => (
           <View key={`${p.label}-label-${i}`} style={{ flex: 1, alignItems: 'center' }}>

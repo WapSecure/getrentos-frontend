@@ -35,15 +35,12 @@ import { relativeTime } from '@/lib/format';
 
 const POLL_MS = 8000;
 
-/** One message, already told whose side it is on. */
 export interface ThreadMessage {
   id: string;
   text: string;
   timestamp: string;
   mine: boolean;
-  /** Read out for the other side's messages. */
   senderName?: string;
-  /** Files sent with the message, shown by name. */
   attachments?: { id: string; name: string }[];
 }
 
@@ -56,11 +53,6 @@ interface Pending {
 
 type Row = { kind: 'sent'; m: ThreadMessage } | ({ kind: 'pending' } & Pending);
 
-/**
- * One conversation, for any portal: it refreshes while open, shows a message
- * the moment it is sent, and offers a retry when sending fails. Callers supply
- * their own API and say who the thread is with.
- */
 export function MessageThread({
   id,
   name,
@@ -75,22 +67,16 @@ export function MessageThread({
   pickAttachment,
 }: {
   id: string;
-  /** Who the thread is with. */
   name?: string;
-  /** A second line under the name: the property, or their role. */
   context?: string;
   messagesKey: readonly unknown[];
-  /** Oldest first. */
   fetchMessages: () => Promise<ThreadMessage[]>;
   send: (text: string, file?: PickedFile) => Promise<unknown>;
   /** Omit when the portal's API marks a thread read as it is fetched. */
   markRead?: () => Promise<unknown>;
-  /** The inbox list to refresh when something here changes. */
   conversationsKey: readonly unknown[];
   emptyDescription: string;
-  /** An action beside the name, e.g. pin this conversation. */
   headerAccessory?: ReactNode;
-  /** Provide to let the user attach one file to a message. */
   pickAttachment?: () => Promise<PickedFile | null>;
 }) {
   const { colors, spacing, radius } = useTheme();
@@ -100,7 +86,6 @@ export function MessageThread({
   const [file, setFile] = useState<PickedFile | null>(null);
   const [pending, setPending] = useState<Pending[]>([]);
 
-  // Only this thread's messages are polled while it is open.
   const messages = useQuery({
     queryKey: messagesKey,
     queryFn: fetchMessages,
@@ -108,7 +93,6 @@ export function MessageThread({
     refetchInterval: POLL_MS,
   });
 
-  // Mark read on open and whenever new messages arrive.
   const count = messages.data?.length ?? 0;
   useEffect(() => {
     if (!id || !count || !markRead) return;

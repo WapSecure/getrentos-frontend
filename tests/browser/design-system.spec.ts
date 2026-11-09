@@ -1,8 +1,7 @@
 import { test, expect, type Page, type TestInfo } from '@playwright/test';
 import { auditVisualPage } from './helpers/visualQa';
 
-// Browser-only fixtures exercise the real layouts and components. These tests
-// never contact a payment provider or a live backend and cannot seed an account.
+// Browser-only fixtures: never contact a payment provider or a live backend.
 const webURL = 'http://localhost:43130';
 const adminURL = 'http://localhost:43131';
 const stats = {

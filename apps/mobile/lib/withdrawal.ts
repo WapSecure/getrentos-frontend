@@ -1,4 +1,3 @@
-/** Why a verified earner still can't withdraw (the backend names the real blocker). */
 export const WITHHELD: Record<string, string> = {
   SCORE_BELOW_TIER3_MIN:
     'Your checks are complete, but your trust score is below what withdrawing needs. It restores itself as your trust profile builds.',
@@ -9,7 +8,6 @@ export const WITHHELD: Record<string, string> = {
   ACCOUNT_RESTRICTED: 'Your account is restricted. Contact support to withdraw.',
 };
 
-/** What stops a withdrawal right now, in words, or null when nothing does. */
 export function withdrawBlocker(s: {
   accountSet: boolean;
   canWithdraw: boolean;

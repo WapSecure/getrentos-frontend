@@ -6,15 +6,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { apiFetch } from './api/client';
 import { track } from './analytics';
 
-/**
- * Push notifications: permission, the device's Expo push token, and telling
- * the API which phone belongs to which user. Everything here is best effort —
- * push is an enhancement, so a failure is logged and never blocks sign-in.
- */
+// Best effort: a push failure is logged and never blocks sign-in.
 
 const TOKEN_KEY = 'sureground.pushToken';
 
-// While the app is open, still show the banner — the in-app bell updates too.
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowBanner: true,
@@ -36,10 +31,6 @@ export type PushRegistration =
   | { status: 'denied' }
   | { status: 'unavailable'; reason: string };
 
-/**
- * Asks for permission (only if not already decided), gets this phone's token
- * and registers it for the signed-in user.
- */
 export async function registerForPush(): Promise<PushRegistration> {
   try {
     if (Platform.OS === 'web') return { status: 'unavailable', reason: 'web' };
@@ -77,10 +68,7 @@ export async function registerForPush(): Promise<PushRegistration> {
   }
 }
 
-/**
- * Stops pushes to this phone. Call BEFORE the session is cleared — the API
- * only lets a user remove their own device.
- */
+// Call before the session is cleared: the API only lets a user remove their own device.
 export async function unregisterPush(): Promise<void> {
   try {
     const token = await AsyncStorage.getItem(TOKEN_KEY);
@@ -93,14 +81,12 @@ export async function unregisterPush(): Promise<void> {
   Notifications.setBadgeCountAsync(0).catch(() => undefined);
 }
 
-/** What a tapped notification carries — mirrors the API's push payload. */
+// Mirrors the API's push payload.
 export interface PushData {
   notificationId?: string;
   type?: string;
   actionUrl?: string;
-  /** The booking a shortlet notification is about, so a tap can open it. */
   bookingId?: string;
-  /** The conversation a message is in, so a tap opens that chat. */
   conversationId?: string;
 }
 

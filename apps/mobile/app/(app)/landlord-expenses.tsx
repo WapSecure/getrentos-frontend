@@ -163,7 +163,6 @@ function ExpenseRow({ expense: e, onRemove }: { expense: LandlordExpense; onRemo
           </Text>
         ) : null}
 
-        {/* Linked repairs are how an expense ties back to a tenant's report. */}
         {e.maintenanceRequestId ? (
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
             <Wrench size={12} color={colors.mutedForeground} />

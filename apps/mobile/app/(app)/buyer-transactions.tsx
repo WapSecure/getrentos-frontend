@@ -38,12 +38,7 @@ import { PaySheet } from '@/components/payments/PaySheet';
 import { usePaymentProviders } from '@/hooks/usePaymentProviders';
 import type { PaymentProvider } from '@/lib/api/paymentStatus';
 
-/**
- * The happy path, in order — the live stages the backend actually drives:
- * deposit → held → released. (VERIFICATION_PENDING / SETTLEMENT_PENDING exist in
- * the enum but no transaction is ever moved into them, so they are not shown.)
- * Mirrors the web stepper.
- */
+// Only the stages the backend drives (VERIFICATION_PENDING and SETTLEMENT_PENDING are never set); mirrors the web stepper.
 const STAGES: { key: BuyerEscrowStatus; label: string; description: string }[] = [
   {
     key: 'deposit_pending',
@@ -106,9 +101,7 @@ export default function BuyerTransactions() {
   const fail = (fallback: string) => (err: unknown) =>
     toast.show(errorMessage(err, fallback), 'error');
 
-  // Which company takes the deposit (Paystack or Monnify).
   const providers = usePaymentProviders();
-  // The purchase in the pay sheet; kept while the sheet slides away.
   const [payTx, setPayTx] = useState<BuyerTransaction | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [providerError, setProviderError] = useState<string | null>(null);
@@ -129,7 +122,6 @@ export default function BuyerTransactions() {
       invalidate();
     },
     onError: (err, { provider }) => {
-      // That company cannot take it right now: say so in the sheet, with the other one picked.
       const unavailable = providers.recover(err, provider);
       if (unavailable) {
         setProviderError(unavailable);
@@ -175,7 +167,6 @@ export default function BuyerTransactions() {
       { text: 'Request refund', style: 'destructive', onPress: () => refundMutation.mutate(tx.id) },
     ]);
 
-  // Only the card being acted on shows a spinner.
   const busy = (m: { isPending: boolean; variables?: string }, id: string) =>
     m.isPending && m.variables === id;
 
@@ -302,8 +293,6 @@ export default function BuyerTransactions() {
     </View>
   );
 }
-
-/* ------------------------------ transaction ------------------------------ */
 
 function TransactionCard({
   tx,
@@ -465,7 +454,6 @@ function TransactionCard({
   );
 }
 
-/** Where the purchase is in escrow: done, current (with what happens now), or still ahead. */
 function StageTimeline({ status }: { status: BuyerEscrowStatus }) {
   const { colors, spacing } = useTheme();
   const current = STAGES.findIndex((s) => s.key === status);

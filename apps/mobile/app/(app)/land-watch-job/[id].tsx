@@ -67,7 +67,6 @@ const SUCCESS: Record<Action['type'], string> = {
   cancel: 'Job cancelled.',
 };
 
-/** One vendor job on a Managed watch: quotes to choose from, then proof of the work. */
 export default function LandWatchJobScreen() {
   const { id, watchId } = useLocalSearchParams<{ id: string; watchId: string }>();
   const { colors, spacing, radius } = useTheme();

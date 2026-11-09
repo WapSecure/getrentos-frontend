@@ -57,11 +57,7 @@ function CreatePropertyForm({
   const [pin, setPin] = useState<MapPoint | null>(null);
   const [cover, setCover] = useState<{ uri: string; key: string } | null>(null);
 
-  /**
-   * The API takes media as storage keys, so the photo uploads first and the
-   * property carries its key. An upload the landlord then abandons is left
-   * uncommitted server-side rather than attached to anything.
-   */
+  // The API takes media as storage keys, so the photo uploads first; an upload then abandoned stays uncommitted server-side.
   const uploadCover = useMutation({
     mutationFn: async () => {
       const file = await pickImage();

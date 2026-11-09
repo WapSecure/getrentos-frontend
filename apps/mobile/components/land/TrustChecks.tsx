@@ -11,11 +11,7 @@ import {
 import { Badge, Text, useTheme } from '@sureground/ui-native';
 import { formatDate } from '@/lib/format';
 
-/**
- * What Sureground checked on a parcel, one scoped claim per line (what, by whom,
- * when), then what was not checked. Deliberately no single "Verified" tick: a
- * buyer sees the gaps beside the passes. Web: components/land/market/TrustLabelsList.
- */
+// Deliberately no single "Verified" tick: a buyer sees the gaps beside the passes.
 export function TrustChecks({
   tier,
   labels = [],
@@ -25,7 +21,6 @@ export function TrustChecks({
   tier?: LandAssuranceTier;
   labels?: LandTrustLabel[];
   notVerified?: LandNotVerifiedItem[];
-  /** Leave out each check's scope lines. */
   compact?: boolean;
 }) {
   const { colors, spacing } = useTheme();

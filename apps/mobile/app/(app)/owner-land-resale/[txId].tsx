@@ -20,10 +20,7 @@ import { ConditionsList, DeliverForm, MilestoneList } from '@/components/land/Co
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
-/**
- * Conveyance on a land resale. The seller marks each step delivered; the buyer
- * confirms each, and the payment is released once every required step is.
- */
+/** The payment is released only once the buyer has confirmed every required step. */
 export default function OwnerLandResale() {
   const { txId, property } = useLocalSearchParams<{ txId: string; property?: string }>();
   const { colors, spacing } = useTheme();

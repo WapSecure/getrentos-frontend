@@ -27,11 +27,7 @@ const ICON = {
   WAIVED: { Icon: CheckCircle2, tone: 'mutedForeground' as const },
 };
 
-/**
- * Conveyance steps from the buyer's side: confirm a step once it is in hand
- * (which may release money to the seller) or dispute it. Steps are confirmed
- * in order.
- */
+// Steps are confirmed in order; confirming one may release money to the seller.
 export function BuyerMilestones({
   milestones,
   contractOpen,
@@ -202,7 +198,6 @@ function DisputeForm({
 
 const CHECK_ICON = { DONE: CheckCircle2, OPEN: CircleDashed, BLOCKED: XCircle } as const;
 
-/** Conditions precedent from the buyer's side: confirm a delivered one, or waive it. */
 export function BuyerConditions({
   conditions,
   checklist,
@@ -309,7 +304,6 @@ export function BuyerConditions({
   );
 }
 
-/** A small "the money is held" note shown above the steps. */
 export function HeldNote({ text }: { text: string }) {
   return <FormAlert tone="info" message={text} />;
 }

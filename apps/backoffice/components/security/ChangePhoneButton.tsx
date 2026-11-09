@@ -15,12 +15,7 @@ import {
 } from '@sureground/ui';
 import { authFetch } from '@sureground/shared';
 
-/**
- * A phone number on file changes only after the new number proves itself with
- * a code sent to it. The API also asks the account holder to confirm it's them
- * first (StepUpDialog handles that automatically), signs out other devices and
- * emails an alert.
- */
+/** Changes only after the new number is verified by code; the API also asks for step-up, signs out other devices and emails an alert. */
 export function ChangePhoneButton({ onChanged }: { onChanged?: (phone: string) => void }) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);

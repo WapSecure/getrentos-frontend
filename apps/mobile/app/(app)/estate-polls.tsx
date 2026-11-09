@@ -39,7 +39,6 @@ import { errorMessage } from '@/lib/api/client';
 
 const MAX_OPTIONS = 10;
 
-/** Ask the estate a question: one vote per household, results as they come in. */
 export default function EstatePolls() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();

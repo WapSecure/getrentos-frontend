@@ -31,7 +31,6 @@ import { haptics } from '@/lib/haptics';
 import { qk } from '@/lib/query/keys';
 import { errorMessage } from '@/lib/api/client';
 
-/** What residents and the gate have reported, most urgent first. */
 export default function EstateIncidents() {
   const { colors } = useTheme();
   const qc = useQueryClient();
@@ -174,7 +173,6 @@ const PRIORITIES: { value: IncidentPriority; label: string }[] = [
   { value: 'critical', label: 'Critical' },
 ];
 
-/** Something the manager saw on a walk round: a broken light, a gap in the fence. */
 function ReportForm({ estateId, onDone }: { estateId: string; onDone: () => void }) {
   const { colors, spacing } = useTheme();
   const qc = useQueryClient();

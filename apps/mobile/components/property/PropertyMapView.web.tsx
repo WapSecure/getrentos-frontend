@@ -5,11 +5,7 @@ import { buildMapHtml, readBoundaryMessage, type PropertyMapViewProps } from './
 
 export type { PropertyMapMarker, PropertyMapViewProps } from './propertyMapHtml';
 
-/**
- * The web build's map. react-native-webview has no web implementation, so the
- * same Leaflet page the phones load runs in an iframe instead, talking to this
- * component with postMessage both ways.
- */
+// react-native-webview has no web implementation, so the phones' Leaflet page runs in an iframe here, talking over postMessage both ways.
 export function PropertyMapView({
   markers,
   center,

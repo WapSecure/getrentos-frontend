@@ -2,11 +2,6 @@ import { apiFetch } from './client';
 import type { Paginated } from './properties';
 import type { OwnerOffer, OwnerOfferThreadMessage } from './owner';
 
-/**
- * Purchase offers from the seller's side. An owner and a landlord receive the
- * same offers through the same API shape under their own prefix, so one client
- * (and one pair of screens) serves both.
- */
 export type OfferSide = 'owner' | 'landlord';
 
 export const asOfferSide = (value: unknown): OfferSide =>
@@ -28,12 +23,10 @@ export function sellerOffers(side: OfferSide) {
     reject: (id: string) => apiFetch<unknown>(`${base}/${id}/reject`, { method: 'POST' }),
     counter: (id: string, amount: number, message?: string) =>
       apiFetch<unknown>(`${base}/${id}/counter`, { method: 'POST', body: { amount, message } }),
-    /** Live offers side by side per listing, with counter options. The same for owners and landlords. */
     compare: () => apiFetch<OfferComparison>('/seller/offers/compare'),
   };
 }
 
-/** One live offer in a comparison, as the API returns it. */
 export interface ComparedOffer {
   offerId: string;
   buyerName: string;
@@ -41,7 +34,6 @@ export interface ComparedOffer {
   amount: string;
   pricePosition: string;
   originalAmount: string | null;
-  /** Your own counter, waiting on the buyer. */
   yourCounter: string | null;
   /** Who moved last: "yours" means the seller can respond. */
   turn: 'yours' | 'buyer' | 'new';

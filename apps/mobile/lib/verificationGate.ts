@@ -1,9 +1,6 @@
 import { ApiError } from './api/client';
 
-/**
- * What a verification or trust-tier 403 means, in words.
- * Mirrors the web's VerificationRequiredNotice so both apps say the same thing.
- */
+// Mirrors the web's VerificationRequiredNotice.
 
 const GATE_CODES = [
   'IDENTITY_REQUIRED',
@@ -26,11 +23,9 @@ export interface GateCopy {
   code: GateCode;
   message: string;
   cta: string;
-  /** The trust score, not missing evidence, is what is holding the user back. */
   scoreWithheld: boolean;
 }
 
-/** Reads a thrown error as a verification gate, or null when it is some other failure. */
 export function readGate(error: unknown): GateCopy | null {
   if (!(error instanceof ApiError) || error.status !== 403) return null;
   const code = error.code as GateCode | undefined;
@@ -39,7 +34,7 @@ export function readGate(error: unknown): GateCopy | null {
   if (code === 'TRUST_TIER_REQUIRED') {
     const { tierRequired = 2, currentTier = 0, reason } = error.details;
     if (reason === 'SCORE_BELOW_TIER3_MIN') {
-      // Sending them to verification would be a loop — the checks are done.
+      // Sending them to verification would be a loop: the checks are done.
       return {
         code,
         scoreWithheld: true,

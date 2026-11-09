@@ -57,13 +57,8 @@ const FILTER_TEST: Record<Filter, (c: LegalCase) => boolean> = {
   all: () => true,
 };
 
-/** Tenancies a case can be brought on: signed at some point. */
 const CASEABLE = new Set(['signed', 'active', 'expired', 'terminated']);
 
-/**
- * Legal cases, arranged around what needs doing: a claim that cannot be filed
- * yet, a filed case with no next date, a decision nobody has enforced.
- */
 export default function LegalCases() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();

@@ -5,12 +5,6 @@ import type { ShortletBookingStatus, ShortletCancellationPolicy } from './shortl
 import type { VideoOnSiteReport } from '../filmedOnSite';
 import type { PayoutSentTo } from '@sureground/shared';
 
-/**
- * Hosting short stays: the host's side of /host/shortlets. Owners, landlords,
- * realtors and agents with a mandate all host through the same API, on any
- * plan. Sureground takes a percentage of each stay from the host payout.
- */
-
 export type PricingMode = 'PER_NIGHT' | 'FLAT_STAY';
 export type HostListingStatus = 'PUBLISHED' | 'PAUSED' | 'CLOSED' | 'PENDING_VERIFICATION' | string;
 
@@ -94,7 +88,6 @@ export interface ListingPricingInput {
   cancellationPolicy?: ShortletCancellationPolicy;
   imageKeys?: string[];
   videoKey?: string;
-  /** Where the app's camera filmed a new video, for the "Filmed on site" badge. */
   videoOnSite?: VideoOnSiteReport;
   videoUrl?: string;
   tourUrl?: string;
@@ -117,7 +110,7 @@ export interface PricingRulesInput {
   prepDays?: number;
 }
 
-/** House rules, power, water, internet and check-in instructions; null clears a field. */
+/** Null clears a field. */
 export interface EssentialsInput {
   houseRules?: string | null;
   petsAllowed?: boolean | null;
@@ -382,17 +375,15 @@ export const BOOKING_VIEW_QUERY: Record<BookingView, string> = {
 const page = (p: number, size: number, extra = '') =>
   `?page=${p}&pageSize=${size}${extra ? `&${extra}` : ''}`;
 
-/** The Sureground fee on a booking made now; taken from the host payout, never charged to guests. */
+/** Taken from the host payout, never charged to guests. */
 export interface HostFees {
   commissionPct: number;
   standardCommissionPct: number;
-  /** When the launch rate ends, if one is running. */
   introEndsAt?: string;
 }
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-/** The fee in words: the rate now, and the last day (Lagos) a launch rate applies. */
 export function feeNote(f: HostFees): string {
   const now =
     f.commissionPct === 0
@@ -409,7 +400,6 @@ export function feeNote(f: HostFees): string {
 }
 
 export const hostShortletsApi = {
-  // ---- listings ----
   // The API caps pages at 100; screens find a listing in this one page.
   listings: (p = 1, size = 100) =>
     apiFetch<Paginated<HostListing>>(`/host/shortlets${page(p, size)}`),
@@ -442,7 +432,6 @@ export const hostShortletsApi = {
     );
   },
 
-  // ---- bookings ----
   bookings: (view: BookingView, p = 1, size = 20) =>
     apiFetch<Paginated<HostBooking>>(
       `/host/shortlets/bookings${page(p, size, BOOKING_VIEW_QUERY[view])}`
@@ -479,7 +468,6 @@ export const hostShortletsApi = {
   ) =>
     apiFetch<ShortletDispute>(`/shortlets/bookings/${id}/dispute`, { method: 'POST', body: input }),
 
-  // ---- calendar ----
   blocked: (listingId: string) =>
     apiFetch<BlockedRange[]>(`/host/shortlets/${listingId}/blocked-dates`),
   block: (listingId: string, startDate: string, endDate: string, reason?: string) =>
@@ -505,7 +493,6 @@ export const hostShortletsApi = {
   removeFeed: (feedId: string) =>
     apiFetch<void>(`/host/shortlets/calendar-feeds/${feedId}`, { method: 'DELETE' }),
 
-  // ---- seasons ----
   seasons: (listingId: string) =>
     apiFetch<ShortletSeason[]>(`/host/shortlets/${listingId}/seasons`),
   addSeason: (
@@ -525,7 +512,6 @@ export const hostShortletsApi = {
   deleteSeason: (seasonId: string) =>
     apiFetch<void>(`/host/shortlets/seasons/${seasonId}`, { method: 'DELETE' }),
 
-  // ---- messages ----
   conversations: (p = 1, size = 50) =>
     apiFetch<Paginated<HostConversation>>(`/host/shortlets/messages${page(p, size)}`),
   send: (conversationId: string, text: string) =>
@@ -536,7 +522,6 @@ export const hostShortletsApi = {
   markRead: (conversationId: string) =>
     apiFetch<void>(`/host/shortlets/messages/${conversationId}/read`, { method: 'POST' }),
 
-  // ---- money ----
   earnings: () => apiFetch<EarningsAnalytics>('/host/shortlets/analytics'),
   views: () => apiFetch<ViewsAnalytics>('/host/shortlets/analytics/views'),
   payoutAccount: () => apiFetchOrNull<HostPayoutAccount>('/host/shortlets/payout-account'),
@@ -553,7 +538,6 @@ export const hostShortletsApi = {
   penalties: (p = 1, size = 20) =>
     apiFetch<Paginated<HostPenalty>>(`/host/shortlets/cancellation-fees${page(p, size)}`),
 
-  // ---- disputes & claims ----
   disputes: (p = 1, size = 50) =>
     apiFetch<Paginated<ShortletDispute>>(`/shortlets/disputes${page(p, size)}`),
   disputeMessages: (disputeId: string) =>
@@ -566,8 +550,6 @@ export const hostShortletsApi = {
   depositClaims: (p = 1, size = 50) =>
     apiFetch<Paginated<DepositClaim>>(`/host/shortlets/deposit-claims${page(p, size)}`),
 };
-
-/* ---------------------------- shared vocabulary ---------------------------- */
 
 export const AMENITIES = [
   'WiFi',
@@ -629,7 +611,6 @@ export const DISPUTE_CATEGORIES: { value: DisputeCategory; label: string }[] = [
   { value: 'OTHER', label: 'Other' },
 ];
 
-/** "20 Dec – 3 Jan". */
 export function stayRange(checkIn: string, checkOut: string): string {
   const fmt = (iso: string) =>
     new Date(`${iso.slice(0, 10)}T12:00:00`).toLocaleDateString('en-NG', {
@@ -639,14 +620,12 @@ export function stayRange(checkIn: string, checkOut: string): string {
   return `${fmt(checkIn)} – ${fmt(checkOut)}`;
 }
 
-/** Whole days from today (local) to a date; negative in the past. */
 export function daysUntil(iso: string, now = new Date()): number {
   const d = new Date(`${iso.slice(0, 10)}T00:00:00`);
   const t = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   return Math.round((d.getTime() - t.getTime()) / 86_400_000);
 }
 
-/** "Today", "Tomorrow", "In 5 days", "3 days ago". */
 export function relativeDay(iso: string, now = new Date()): string {
   const n = daysUntil(iso, now);
   if (n === 0) return 'Today';
@@ -655,14 +634,12 @@ export function relativeDay(iso: string, now = new Date()): string {
   return n > 0 ? `In ${n} days` : `${-n} days ago`;
 }
 
-/** Dec 20 – Jan 3 of the coming Detty December, when diaspora guests fly home. */
 export function dettyDecember(now = new Date()): { startDate: string; endDate: string } {
   const year =
     now.getMonth() === 0 && now.getDate() <= 3 ? now.getFullYear() - 1 : now.getFullYear();
   return { startDate: `${year}-12-20`, endDate: `${year + 1}-01-03` };
 }
 
-/** One line naming the pricing rules in force, or null when there are none. */
 export function rulesSummary(l: HostListing): string | null {
   const parts: string[] = [];
   if (l.seasons?.length)

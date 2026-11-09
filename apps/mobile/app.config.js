@@ -1,25 +1,10 @@
 /**
- * Layered on app.json.
- *
- * - Passkeys (WebAuthn) bind to a registrable domain. iOS needs the Associated
- *   Domains entitlement (`webcredentials:<rpid>`) for it; Android verifies via a
- *   server-hosted assetlinks.json and needs no app-side entry. Set
- *   WEBAUTHN_RP_ID at build time to the same shared parent domain the backend
- *   uses, and host apple-app-site-association + assetlinks.json under it.
- * - App links: with APP_LINK_DOMAIN set (e.g. getsureground.io), website links to
- *   the paths in packages/shared/src/constants/app-links.json open the app
- *   instead of the browser: iOS via `applinks:` (the site serves
- *   /.well-known/apple-app-site-association), Android via a verified intent
- *   filter (the site serves /.well-known/assetlinks.json). lib/deepLinks maps
- *   each path onto an app route.
- * - A build for testing against a computer on the local network (EAS profile
- *   "device-test") talks plain http, which Android 9+ blocks unless the app
- *   opts in. Only that profile sets ALLOW_CLEARTEXT, so preview and production
- *   builds stay https-only.
+ * Passkeys: iOS needs the `webcredentials:<rpid>` entitlement; set WEBAUTHN_RP_ID to the backend's shared parent domain.
+ * App links: with APP_LINK_DOMAIN set, website paths in packages/shared/src/constants/app-links.json open the app.
+ * Only the "device-test" profile sets ALLOW_CLEARTEXT, so preview and production builds stay https-only.
  */
 const appLinks = require('@sureground/shared/constants/app-links.json');
 
-/** Adds iOS associated domains and Android verified link filters for the website. */
 function withAppLinks(config, domain) {
   if (!domain) return config;
   return {
@@ -36,8 +21,7 @@ function withAppLinks(config, domain) {
           action: 'VIEW',
           autoVerify: true,
           category: ['BROWSABLE', 'DEFAULT'],
-          // Each path exactly, and everything below it. A bare pathPrefix is a
-          // plain string match, so "/l" alone would also catch "/login".
+          // A bare pathPrefix is a plain string match, so "/l" alone would also catch "/login".
           data: appLinks.claimed.flatMap((path) => [
             { scheme: 'https', host: domain, path },
             { scheme: 'https', host: domain, pathPrefix: `${path}/` },

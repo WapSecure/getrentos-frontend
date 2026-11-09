@@ -55,8 +55,7 @@ export default function OwnerPropertyDetail() {
   const [proofOpen, setProofOpen] = useState(false);
   const { refreshProfile, switchWorkspace } = useAuth();
 
-  // Rent it out: adds the landlord workspace; the property is already there,
-  // since owner and landlord properties are the same records.
+  // Owner and landlord properties are the same records, so renting it out only adds the landlord workspace.
   const rentOut = useMutation({
     mutationFn: () => ownerApi.convertToRental(id),
     onSuccess: async () => {
@@ -98,7 +97,6 @@ export default function OwnerPropertyDetail() {
     qc.invalidateQueries({ queryKey: qk.owner.dashboard });
   };
 
-  /** Uploads a video and puts it on the property in place of any earlier one. */
   const attachVideo = async (file: PickedVideo, onSite: VideoOnSiteReport | null) => {
     const previous = property.data?.videoTourKey;
     const { key } = await ownerApi.uploadMedia(file, 'video');
@@ -412,8 +410,7 @@ function ListForm({ property, onDone }: { property: OwnerProperty; onDone: () =>
     property.estimatedValue ? String(property.estimatedValue) : ''
   );
   const value = Number(price.replace(/\D/g, ''));
-  // Recent completed sales in the same city. The API doesn't match on property
-  // type, so it's shown as context and only suggested when there are a few.
+  // The API doesn't match on property type, so comparables are context, suggested only when there are a few.
   const insights = useQuery({
     queryKey: qk.owner.marketInsights(property.city),
     queryFn: () => ownerApi.marketInsights(property.city),

@@ -11,7 +11,6 @@ import {
 import { whatsappLink } from '@/lib/api/realtor';
 import { formatDate } from '@/lib/format';
 
-/** One enquiry: who, about which property, how far it has got, and how to reach them. */
 export function LeadCard({ lead: l }: { lead: EstateLead }) {
   const { colors, spacing } = useTheme();
   const market = LEAD_MARKET[l.market] ?? { label: l.market, tone: 'neutral' as const };

@@ -1,9 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-/**
- * The client (mandate id) a manager last chose, per device. Cleared on
- * sign-out so the next person on the phone starts with no client selected.
- */
+// Cleared on sign-out so the next person on the phone starts with no client selected.
 const KEY = 'sureground.agency.client';
 
 export async function readSelectedClient(): Promise<string | null> {

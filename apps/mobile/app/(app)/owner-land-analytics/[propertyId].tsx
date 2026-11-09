@@ -17,7 +17,6 @@ import { formatDate, formatNaira } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
-/** How the land's sale listings are doing, and how its price sits against the market. */
 export default function OwnerLandAnalytics() {
   const { propertyId } = useLocalSearchParams<{ propertyId: string }>();
   const { colors, spacing } = useTheme();

@@ -15,11 +15,7 @@ import {
 } from '@sureground/ui';
 import { authFetch } from '@sureground/shared';
 
-/**
- * The sign-in email changes only after the new address proves itself with a
- * code. The API also asks the account holder to confirm it's them first
- * (StepUpDialog handles that automatically), and emails the old address.
- */
+/** Changes only after the new address is verified by code; the API also asks for step-up and emails the old address. */
 export function ChangeEmailButton({ onChanged }: { onChanged?: (email: string) => void }) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);

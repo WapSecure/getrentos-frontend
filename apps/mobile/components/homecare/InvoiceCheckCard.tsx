@@ -6,11 +6,6 @@ import { Button, Skeleton, Text, useTheme } from '@sureground/ui-native';
 import { homeCareApi } from '@/lib/api/homeCare';
 import { qk } from '@/lib/query/keys';
 
-/**
- * "Check this invoice" before approving on the phone: the checks worked out by
- * Sureground and questions for the vendor. Loads only when asked; it never
- * decides.
- */
 export function InvoiceCheckCard({ invoiceId }: { invoiceId: string }) {
   const { colors, spacing, radius } = useTheme();
   const [asked, setAsked] = useState(false);

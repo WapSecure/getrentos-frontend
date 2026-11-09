@@ -27,7 +27,6 @@ import { errorMessage } from '@/lib/api/client';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
-/** Live video tours of land the buyer asked for. */
 export default function BuyerLandTours() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();

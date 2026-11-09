@@ -31,35 +31,26 @@ import { persister } from '../query/client';
 
 interface PendingTwoFactor {
   challengeToken: string;
-  /** Absent when the challenge came from Google (the redirect carries only the token). */
+  /** Absent for Google: its redirect carries only the token. */
   profile?: AuthProfile;
 }
 
 interface AuthContextValue {
   status: 'loading' | 'authenticated' | 'unauthenticated';
   profile: AuthProfile | null;
-  /** Who the user is — their most senior role's portal, built or not. */
   portal: Portal | null;
-  /** The portal to actually open; `null` when nothing they hold is built. */
   usablePortal: Portal | null;
-  /** Built workspaces this account can open; more than one shows a switcher. */
   workspaces: Portal[];
-  /** Open another workspace this account holds, and remember it on this device. */
   switchWorkspace: (portal: Portal) => void;
   pendingTwoFactor: PendingTwoFactor | null;
   signIn: (identifier: string, password: string) => Promise<{ requiresTwoFactor: boolean }>;
   completeTwoFactor: (code: string) => Promise<void>;
   cancelTwoFactor: () => void;
-  /** Resolves `requiresTwoFactor: true` when the account needs its authenticator code next. */
   signInWithMagicLink: (token: string) => Promise<{ requiresTwoFactor: boolean }>;
-  /** Provider sign-in (system browser). Throws `OAuthCancelled` if dismissed. */
-  /** Resolves `requiresTwoFactor: true` when the account needs its authenticator code next. */
+  /** Throws `OAuthCancelled` if dismissed. */
   signInWithProvider: (provider: 'google') => Promise<{ requiresTwoFactor: boolean }>;
-  /** Resolves `requiresTwoFactor: true` when the account needs its authenticator code next. */
   signInWithApple: () => Promise<{ requiresTwoFactor: boolean }>;
-  /** Adopt a session obtained elsewhere (signup). */
   applyExternalSession: (session: AuthSession) => void;
-  /** Re-reads who the user is, after a change like a new email or a new role. */
   refreshProfile: () => Promise<void>;
   signOut: () => Promise<void>;
 }
@@ -79,8 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [preferredPortal, setPreferredPortal] = useState<Portal | null>(null);
   const [pendingTwoFactor, setPendingTwoFactor] = useState<PendingTwoFactor | null>(null);
 
-  // Access token in a ref so the API client reads the latest value without a
-  // re-render, and refresh stays single-flight across concurrent 401s.
+  // A ref, so the API client reads the latest token without a re-render and refresh stays single-flight across concurrent 401s.
   const accessTokenRef = useRef<string | null>(null);
   const refreshTokenRef = useRef<string | null>(null);
   const refreshInFlight = useRef<Promise<string | null> | null>(null);
@@ -140,13 +130,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return refreshInFlight.current;
   }, [teardown]);
 
-  // Wire the transport once.
   useEffect(() => {
     configureApi({
       getAccessToken: () => accessTokenRef.current,
       refresh,
-      // Suspension is final for this session: drop it (and the cached screens)
-      // straight away and tell the person why, instead of leaving stale data up.
+      // Suspension is final for this session: drop it and the cached screens at once rather than leave stale data up.
       onSuspended: async (message) => {
         if (!accessTokenRef.current) return;
         markSessionExpired({ message, tone: 'error' });
@@ -155,19 +143,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   }, [refresh, teardown]);
 
-  // Keep the analytics identity in step with the session.
   useEffect(() => {
     if (profile?.id) identify(profile.id);
     else resetAnalytics();
   }, [profile?.id]);
 
-  // Mirror the profile to disk. Driven by the profile itself rather than by each
-  // sign-in path, so a new way of obtaining a session can't forget to cache it.
+  // Driven by the profile, not by each sign-in path, so a new way of getting a session can't forget to cache it.
   useEffect(() => {
     if (profile) void writeCachedProfile(profile);
   }, [profile]);
 
-  // Restore the session on cold start.
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -195,11 +180,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (err instanceof ApiError && err.isAuth) {
           await teardown();
         } else {
-          // Offline, or the server is down. Trust the stored token so the app
-          // still opens — and restore the cached profile with it, because the
-          // portal comes from the user's roles. Setting `authenticated` alone
-          // leaves every role without a portal and drops them on "portal
-          // unavailable", which is no use to a guard at a barrier with no signal.
+          // Offline: trust the stored token and restore the cached profile with it. The portal comes from the roles,
+          // so without the profile a guard at a barrier with no signal gets no portal.
           const cached = await readCachedProfile();
           if (!cancelled) {
             setProfile(cached);
@@ -273,7 +255,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     accessTokenRef.current = accessToken;
     refreshTokenRef.current = refreshToken;
     await writeTokens({ accessToken, refreshToken });
-    // OAuth hands back tokens only; pull the full profile like the web callback.
+    // OAuth returns tokens only, so fetch the profile.
     const prof = await authApi.me();
     setProfile(prof);
     setStatus('authenticated');
@@ -284,7 +266,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     void readPreferredPortal().then(setPreferredPortal);
   }, []);
 
-  // In-app purchases are tied to the signed-in account (see lib/purchases).
   const userId = profile?.id;
   useEffect(() => {
     if (userId) void identifyPurchaser(userId);
@@ -300,7 +281,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signOut = useCallback(async () => {
-    // While the session is still valid: stop pushes to this phone.
+    // Before the session is cleared: the API only lets a user remove their own device.
     await unregisterPush();
     await forgetPurchaser();
     const rt = refreshTokenRef.current;

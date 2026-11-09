@@ -23,11 +23,6 @@ const TYPE_LABEL = {
   DOCUMENT_PICKUP: 'Document pickup',
 } as const;
 
-/**
- * "Today's route" on the phone: the day's visits in a drivable order with
- * arrival times, starting from where the agent is if they share it, and a
- * button into Google Maps. Hidden when there is nothing to visit.
- */
 export function RouteCard() {
   const { colors, spacing, radius } = useTheme();
   const toast = useToast();

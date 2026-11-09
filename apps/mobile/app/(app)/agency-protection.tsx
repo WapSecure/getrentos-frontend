@@ -33,7 +33,6 @@ import { Sheet } from '@/components/Sheet';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
-/** The firm's client-money protection: the scheme it belongs to and its cover. */
 export default function AgencyProtection() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();

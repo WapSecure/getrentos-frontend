@@ -25,8 +25,6 @@ import {
 import type { ShortletBookingStatus } from '@/lib/api/shortlets';
 import { haptics } from '@/lib/haptics';
 
-/* ------------------------------- status pill ------------------------------ */
-
 export type Tone = 'success' | 'warning' | 'info' | 'neutral' | 'danger';
 
 export const BOOKING_STATUS: Record<ShortletBookingStatus, { label: string; tone: Tone }> = {
@@ -52,7 +50,6 @@ export function listingStatus(status: string): { label: string; tone: Tone } {
   }
 }
 
-/** A dot plus a word: status at a glance without a heavy badge. */
 export function StatusPill({ label, tone }: { label: string; tone: Tone }) {
   const { colors, radius } = useTheme();
   const map: Record<Tone, { fg: string; bg: string }> = {
@@ -83,8 +80,6 @@ export function StatusPill({ label, tone }: { label: string; tone: Tone }) {
     </View>
   );
 }
-
-/* -------------------------------- thumbnail ------------------------------- */
 
 export function Thumb({ uri, size = 64 }: { uri?: string; size?: number }) {
   const { colors, radius } = useTheme();
@@ -119,13 +114,6 @@ export function Thumb({ uri, size = 64 }: { uri?: string; size?: number }) {
   );
 }
 
-/* -------------------------------- stay card ------------------------------- */
-
-/**
- * One stay: who, when, how long and what the host takes home. The guest's
- * track record is summarised in one line, so a request can be judged at a
- * glance before opening it.
- */
 export function StayCard({ b, compact }: { b: HostBooking; compact?: boolean }) {
   const { colors, spacing } = useTheme();
   const s = BOOKING_STATUS[b.status];
@@ -186,7 +174,6 @@ export function StayCard({ b, compact }: { b: HostBooking; compact?: boolean }) 
   );
 }
 
-/** The guest at a glance, counted across Sureground only. */
 export function GuestLine({ g }: { g: NonNullable<HostBooking['guestSummary']> }) {
   const { colors, spacing } = useTheme();
   const bits = [
@@ -219,8 +206,6 @@ export function GuestLine({ g }: { g: NonNullable<HostBooking['guestSummary']> }
     </View>
   );
 }
-
-/* ------------------------------- listing row ------------------------------ */
 
 export function ListingRow({ l, onPress }: { l: HostListing; onPress: () => void }) {
   const { colors, spacing } = useTheme();
@@ -269,9 +254,6 @@ export function ListingRow({ l, onPress }: { l: HostListing; onPress: () => void
   );
 }
 
-/* --------------------------------- stepper -------------------------------- */
-
-/** A +/- control for small whole numbers (guests, nights, percentages). */
 export function Stepper({
   label,
   hint,
@@ -358,14 +340,10 @@ export function Stepper({
   );
 }
 
-/* ------------------------------ plans and fees ---------------------------- */
-
 export const isUpgradeError = (err: unknown) =>
   err instanceof ApiError &&
-  // A paid feature, or a free plan's cap (e.g. how many listings may be live).
   (err.status === 402 || err.code === 'PLAN_UPGRADE_REQUIRED' || err.code === 'PLAN_LIMIT_REACHED');
 
-/** What Sureground takes from each stay. Quiet until the rate has loaded. */
 export function HostFeeNote() {
   const { colors, spacing } = useTheme();
   const fees = useQuery({

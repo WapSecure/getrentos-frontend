@@ -9,11 +9,6 @@ export type DayState = 'booked' | 'request' | 'blocked' | 'imported' | 'free';
 
 const WEEKDAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
-/**
- * One month of nights. Booked, requested and blocked nights are coloured; a
- * selected range (for blocking) is drawn solid. Past nights are dimmed and
- * can't be picked.
- */
 export const MonthCalendar = memo(function MonthCalendar({
   month,
   states,
@@ -22,7 +17,6 @@ export const MonthCalendar = memo(function MonthCalendar({
   today,
   onPress,
 }: {
-  /** Any date in the month to draw. */
   month: Date;
   states: Map<string, DayState>;
   selStart?: string | null;
@@ -33,7 +27,7 @@ export const MonthCalendar = memo(function MonthCalendar({
   const { colors, spacing, radius } = useTheme();
   const cells = useMemo(() => {
     const first = new Date(month.getFullYear(), month.getMonth(), 1);
-    const lead = (first.getDay() + 6) % 7; // Monday first
+    const lead = (first.getDay() + 6) % 7;
     const days = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
     const out: (string | null)[] = Array(lead).fill(null);
     for (let d = 1; d <= days; d += 1)

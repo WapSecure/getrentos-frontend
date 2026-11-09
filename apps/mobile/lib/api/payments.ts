@@ -5,11 +5,7 @@ import { providerQuery, type PaymentProvider } from './paymentStatus';
 export type PaymentStatus = 'paid' | 'pending' | 'overdue' | 'processing';
 export type PaymentMethod = 'card' | 'bank_transfer' | 'wallet';
 
-/**
- * The same words and tones as web `paymentStatusBadges` (apps/web/lib/statusBadge.ts):
- * an unpaid charge that is not late is "Due" (neutral), never "Pending", which
- * would read as money already sent.
- */
+/** Matches web `paymentStatusBadges`: an unpaid charge that is not late is "Due", never "Pending", which would read as money already sent. */
 export const PAYMENT_STATUS_LABEL: Record<PaymentStatus, string> = {
   paid: 'Paid',
   pending: 'Due',
@@ -42,11 +38,9 @@ export interface Payment {
   /** A checkout the tenant opened and closed, which they can go back to until `expiresAt`. */
   resumeCheckout?: { url: string; reference: string; expiresAt: string };
   reference?: string;
-  /** Present once this payment has been disputed and is under review. */
   disputeReason?: string;
   /** While the money is held, when it releases to the landlord automatically. */
   releaseDate?: string;
-  /** What is still owed on this charge after any part-payments. */
   outstanding?: number;
   /** Naira paid against this charge so far (part-payments and credit). */
   amountPaid?: number;
@@ -96,11 +90,9 @@ export interface Receipt {
   /** The period billed, when the charge came from a rent schedule. */
   periodStart?: string;
   periodEnd?: string;
-  /** Gateway reference of the payment. */
   reference?: string;
 }
 
-/** A card, bank account or wallet the renter has saved for rent payments. */
 export interface SavedPaymentMethod {
   id: string;
   type: 'card' | 'bank' | 'wallet';
@@ -140,7 +132,7 @@ export const paymentsApi = {
   dispute: (id: string, reason: string) =>
     apiFetch<Payment>(`/renter/payments/${id}/dispute`, { method: 'POST', body: { reason } }),
 
-  /** Confirm move-in and release held rent. Step-up handled by the api client. */
+  /** Step-up is handled by the API client. */
   confirmMoveIn: (id: string) =>
     apiFetch<Payment>(`/renter/payments/${id}/confirm-move-in`, { method: 'POST' }),
 

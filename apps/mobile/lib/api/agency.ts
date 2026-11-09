@@ -1,12 +1,7 @@
 import type { BadgeTone } from '@sureground/ui-native';
 import { apiFetch } from './client';
 
-/**
- * The agency workspace: staff of a property-management firm acting for their
- * clients. Every engagement is a mandate; a manager works on one client's
- * property at a time (custody), and what they may do is decided by the API
- * (`permissions`, `capabilities`), never worked out here.
- */
+/** What a manager may do is decided by the API (`permissions`, `capabilities`), never worked out here. */
 
 export const MANDATE_SCOPES = ['RENT', 'MAINTENANCE', 'LISTINGS', 'LEGAL', 'COMPLIANCE'] as const;
 export type MandateScope = (typeof MANDATE_SCOPES)[number];
@@ -82,13 +77,11 @@ export interface Mandate {
   createdAt: string;
 }
 
-/** Operative right now: active, and not past an agreed end date. */
 export function isLive(m: Mandate, now = Date.now()): boolean {
   if (m.status !== 'ACTIVE') return false;
   return !(m.endAt && Date.parse(m.endAt) <= now);
 }
 
-/** Over for good: ended, expired, or active but past its end date. */
 export function hasEnded(m: Mandate, now = Date.now()): boolean {
   if (m.status === 'TERMINATED' || m.status === 'EXPIRED') return true;
   return m.status === 'ACTIVE' && !!m.endAt && Date.parse(m.endAt) <= now;
@@ -96,11 +89,9 @@ export function hasEnded(m: Mandate, now = Date.now()): boolean {
 
 export const endedOn = (m: Mandate) => m.terminatedAt ?? m.endAt ?? null;
 
-/** The scope grants nothing enforceable yet, which explains an empty portfolio. */
 export const grantsNothing = (m: Mandate) =>
   !m.capabilities.canList && !m.capabilities.canManage && !m.capabilities.canTransact;
 
-/** A day in Lagos time, as web shows it: "4 Nov 2026". */
 export const formatDay = (iso: string | null | undefined) => {
   if (!iso) return '—';
   const d = new Date(iso);
@@ -122,7 +113,6 @@ export function noticeEndsAt(m: Pick<Mandate, 'noticeServedAt' | 'noticePeriodDa
     : new Date(served + m.noticePeriodDays * 86_400_000).toISOString();
 }
 
-/** How the engagement ends, in plain words. */
 export function noticeSummary(m: Mandate): string {
   if (m.status === 'TERMINATED')
     return m.terminatedAt ? `Ended ${formatDay(m.terminatedAt)}` : 'Ended';
@@ -142,13 +132,7 @@ export const managerLabel = (m: Mandate) =>
     ? 'Sureground is the manager'
     : (m.managerOrganizationName ?? m.managerName ?? 'Manager');
 
-/**
- * Which client is selected, from what was stored and what the manager holds.
- * A stored choice counts only while the mandate is still theirs (live or not,
- * so the bar can say why it can't be acted under). With nothing stored, one
- * live mandate is chosen for them; with several, none is, so choosing comes
- * first.
- */
+/** A stored choice counts only while the mandate is still theirs. With nothing stored, a single live mandate is chosen; with several, none is. */
 export function resolveSelection(
   stored: string | null,
   mandates: Mandate[],
@@ -159,7 +143,6 @@ export function resolveSelection(
   return live.length === 1 ? live[0].id : null;
 }
 
-/** Clients, one per owner, sorted by name, with their engagements. */
 export function groupByOwner(mandates: Mandate[], now = Date.now()) {
   const byOwner = new Map<string, { ownerId: string; ownerName: string; mandates: Mandate[] }>();
   for (const m of mandates) {
@@ -175,8 +158,6 @@ export function groupByOwner(mandates: Mandate[], now = Date.now()) {
     .map((g) => ({ ...g, live: g.mandates.filter((m) => isLive(m, now)).length }))
     .sort((a, b) => a.ownerName.localeCompare(b.ownerName));
 }
-
-/* ------------------------------ mandate actions ------------------------------ */
 
 export type MandateAction =
   | 'submit'
@@ -231,7 +212,7 @@ export const ACTION_COPY: Record<
   },
 };
 
-/** The actions this viewer may take now, in the order web shows them. */
+/** In the order web shows them. */
 export function availableActions(m: Mandate): MandateAction[] {
   const p = m.permissions;
   const out: MandateAction[] = [];
@@ -256,8 +237,6 @@ export const ACTION_DONE: Record<MandateAction, string> = {
   'request-termination': 'Request sent to Sureground.',
   terminate: 'Engagement ended.',
 };
-
-/* --------------------------------- other data -------------------------------- */
 
 export interface AgencyDashboard {
   firmName: string;

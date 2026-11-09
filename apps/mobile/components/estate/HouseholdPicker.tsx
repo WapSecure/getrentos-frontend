@@ -7,7 +7,6 @@ import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { estateManagerApi, type Household } from '@/lib/api/estateManager';
 import { qk } from '@/lib/query/keys';
 
-/** Find one active household by unit or name. Shows the choice once made. */
 export function HouseholdPicker({
   estateId,
   value,

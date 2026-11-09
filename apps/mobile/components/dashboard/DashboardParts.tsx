@@ -14,12 +14,6 @@ import {
 import { relativeTime } from '@/lib/format';
 import { BalanceVisibilityButton } from './BalanceVisibilityButton';
 
-/**
- * The building blocks every portal's home screen is made of, so an owner and
- * a landlord open the app to the same shape: what needs you, the money, the
- * numbers, the shortcuts, what happened.
- */
-
 export function dashboardGreeting(now = new Date()): string {
   const h = now.getHours();
   if (h < 12) return 'Good morning';
@@ -27,11 +21,8 @@ export function dashboardGreeting(now = new Date()): string {
   return 'Good evening';
 }
 
-/* ------------------------------ needs you first ---------------------------- */
-
 type AttentionTone = 'info' | 'warning' | 'danger';
 
-/** One thing waiting on the user, with where to deal with it. */
 export function AttentionCard({
   Icon,
   title,
@@ -86,12 +77,7 @@ export function AttentionCard({
   );
 }
 
-/* -------------------------------- the money -------------------------------- */
-
-/**
- * The headline figure, with the eye toggle. Anything passed as children (a
- * trend chart) is hidden along with the figure, since it shows the same money.
- */
+// Children (a trend chart) hide with the figure, since they show the same money.
 export function PortfolioCard({
   label,
   amount,
@@ -108,7 +94,6 @@ export function PortfolioCard({
   loading: boolean;
   visible: boolean;
   onToggle: () => void;
-  /** How a screen reader names the figure, e.g. "Portfolio value". */
   spokenLabel?: string;
   children?: ReactNode;
 }) {
@@ -152,13 +137,10 @@ export function PortfolioCard({
   );
 }
 
-/* ------------------------------ quick actions ------------------------------ */
-
 export type QuickActionItem = {
   label: string;
   Icon: LucideIcon;
   onPress: () => void;
-  /** A count worth noticing (open items); hidden at zero. */
   badge?: number;
 };
 
@@ -205,8 +187,6 @@ export function QuickActions({ actions }: { actions: QuickActionItem[] }) {
   );
 }
 
-/* ----------------------------- recent activity ----------------------------- */
-
 export type ActivityItem = {
   id: string;
   Icon: LucideIcon;
@@ -215,7 +195,6 @@ export type ActivityItem = {
   timestamp: string;
 };
 
-/** The latest things that happened, newest first, each with what kind it was. */
 export function ActivityFeed({
   items,
   loading,

@@ -83,7 +83,6 @@ function OfferForm({
       router.push(`/(app)/buyer-offer/${offer.id}`);
     },
     onError: (err) => {
-      // A verification gate is explained inline, with the way forward: not as a toast.
       if (readGate(err)) return;
       toast.show(errorMessage(err, 'Could not submit this offer.'), 'error');
     },

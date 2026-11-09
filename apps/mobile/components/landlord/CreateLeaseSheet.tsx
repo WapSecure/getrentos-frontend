@@ -37,7 +37,7 @@ export function CreateLeaseSheet({ open, onClose }: Props) {
   );
 }
 
-/** One year on from a yyyy-MM-dd date: the usual Nigerian tenancy term. */
+/** One year on: the usual Nigerian tenancy term. */
 function yearAfter(iso: string): string {
   const [y, m, d] = iso.split('-').map(Number);
   return toISODate(new Date(y + 1, m - 1, d));
@@ -128,7 +128,6 @@ function CreateLeaseForm({
             value={leaseStart}
             onChange={(v) => {
               setLeaseStart(v);
-              // Keep the term sensible when the start moves past the end.
               if (leaseEnd <= v) setLeaseEnd(yearAfter(v));
             }}
             disabled={create.isPending}

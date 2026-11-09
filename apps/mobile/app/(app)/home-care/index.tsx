@@ -33,10 +33,6 @@ import { WorkOrderCard } from '@/components/homecare/WorkOrderCard';
 import { HomeCareProGate } from '@/components/homecare/HomeCareProGate';
 import { goBack } from '@/lib/goBack';
 
-/**
- * Keeping the homes in shape: what's broken, what's due, and what's overdue,
- * across every property, with the work that needs you first.
- */
 export default function HomeCare() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
@@ -56,7 +52,6 @@ export default function HomeCare() {
   });
   const d = dashboard.data;
 
-  // Emergencies and anything waiting on a decision first, then the clock.
   const attention = (open.data ?? [])
     .filter((w) => w.isEmergency || (w.approvalRequired && !w.approvedAt) || !w.assignedVendor)
     .sort(

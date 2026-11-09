@@ -1,14 +1,7 @@
 import { apiFetch } from './client';
 import type { BadgeTone } from '@sureground/ui-native';
 
-/**
- * Changing who manages a property, and the handover pack that follows.
- *
- * The owner schedules the change (the API asks them to confirm it's them, which
- * `apiFetch` handles). The current manager runs the property until the date;
- * then their access ends, the new manager's begins and tenants are told. Each
- * party then signs the same frozen pack (by its hash), or disputes it.
- */
+/** Scheduling asks the owner to confirm it's them (`apiFetch` handles that). Each party signs the same frozen pack by its hash, or disputes it. */
 
 export interface TransferOpenItem {
   kind:
@@ -157,7 +150,6 @@ export const lagosToday = (now = Date.now()) =>
 export const effectiveAtFor = (when: 'ASAP' | 'DATE', date: string, now = new Date()) =>
   when === 'ASAP' ? now.toISOString() : date ? `${date}T00:00:00+01:00` : '';
 
-/** What still stops the change being scheduled, or null when it can go. */
 export function transferBlocker(input: {
   preview: TransferPreview | undefined;
   fromMandateId: string;
@@ -176,7 +168,6 @@ export function transferBlocker(input: {
   return null;
 }
 
-/** Where the sign-off stands, and what this viewer may do now. */
 export function handoverActions(h: Handover) {
   const pack = h.pack;
   const v = h.viewer;

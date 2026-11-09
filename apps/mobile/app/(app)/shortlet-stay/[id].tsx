@@ -65,7 +65,6 @@ import type { PaymentProvider } from '@/lib/api/paymentStatus';
 
 type SheetName = 'message' | 'dispute' | 'review' | 'pay' | null;
 
-/** One booked stay, from the guest's side: where it stands, how to get in, the money. */
 export default function StayDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, spacing } = useTheme();
@@ -74,7 +73,6 @@ export default function StayDetail() {
   const toast = useToast();
   const checkout = usePaystackCheckout();
   const [sheet, setSheet] = useState<SheetName>(null);
-  // Which company takes the payment, and why the last one could not.
   const providers = usePaymentProviders();
   const [providerError, setProviderError] = useState<string | null>(null);
 
@@ -201,7 +199,6 @@ export default function StayDetail() {
           onBack={() => goBack()}
         />
 
-        {/* Where it stands */}
         <Card elevated style={{ gap: spacing.md }}>
           <View style={{ flexDirection: 'row', gap: spacing.md, alignItems: 'center' }}>
             <Thumb uri={b.coverImageUrl} size={64} />
@@ -258,7 +255,6 @@ export default function StayDetail() {
           ) : null}
         </Card>
 
-        {/* The trip */}
         <View style={{ gap: spacing.lg }}>
           <InfoRow
             icon={CalendarDays}
@@ -269,7 +265,6 @@ export default function StayDetail() {
           {b.hostName ? <InfoRow icon={Home} title={`Hosted by ${b.hostName}`} /> : null}
         </View>
 
-        {/* Getting in */}
         {b.status === 'CONFIRMED' || b.status === 'COMPLETED' ? (
           <Section title="Getting in">
             {b.address ? (
@@ -325,7 +320,6 @@ export default function StayDetail() {
           </Section>
         ) : null}
 
-        {/* Guest Promise */}
         {promise.kind !== 'none' ? (
           <GuestPromiseCard>
             {promise.kind === 'upcoming' ? (
@@ -361,7 +355,6 @@ export default function StayDetail() {
           </GuestPromiseCard>
         ) : null}
 
-        {/* Money */}
         <Section title="Payment">
           <Card elevated style={{ gap: spacing.sm }}>
             <Line
@@ -422,7 +415,6 @@ export default function StayDetail() {
           ) : null}
         </Section>
 
-        {/* Everything else */}
         <View style={{ gap: spacing.sm }}>
           {b.hostName ? (
             <PressableRow

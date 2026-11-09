@@ -28,7 +28,6 @@ export interface BuyerMessage {
 }
 
 export const buyerMessagesApi = {
-  /** Opens (or reopens) the thread with the seller of a for-sale listing. */
   startAboutListing: (listingId: string) =>
     apiFetch<BuyerConversation>('/buyer/messages/conversations', {
       method: 'POST',

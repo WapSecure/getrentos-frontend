@@ -65,11 +65,7 @@ export default function GatemanDeliveries() {
   const logDelivery = useMutation({
     mutationFn: (data: {
       householdId?: string;
-      /**
-       * The code the household sent its courier. When present the server derives
-       * the household from it, and the parcel is recorded against that household
-       * rather than one the guard picked.
-       */
+      /** When present the server derives the household from it, overriding any the guard picked. */
       code?: string;
       courier?: string;
       recipientName?: string;
@@ -189,19 +185,7 @@ export default function GatemanDeliveries() {
   );
 }
 
-/**
- * Logging a parcel, by one of two routes.
- *
- * The guard either picks the household from a list: because the courier said a
- * name and the guard recognised it: or the courier reads out the code the
- * household sent them, in which case the household names itself.
- *
- * The shell is thin on purpose: the form is only mounted while the sheet is
- * open, so the next opening cannot inherit the last one's household, photo or an
- * already-spent code. The screen's mutation closes the sheet itself on success
- * and never calls `onClose`, so clearing the fields there was never going to
- * cover that case.
- */
+// The form mounts only while the sheet is open, so a reopen can't inherit the last household, photo or spent code (the mutation closes the sheet without calling `onClose`).
 function LogDeliverySheet({
   open,
   estateId,
@@ -285,8 +269,6 @@ function LogDeliveryForm({
       setScreen(result);
       if (result.matched) {
         void haptics.success();
-        // Pre-filled from what the household already told the estate, so the
-        // guard is not retyping it at a barrier.
         if (result.courier) setCourier((current) => current || result.courier!);
       }
     },
@@ -297,8 +279,7 @@ function LogDeliveryForm({
       ),
   });
 
-  // Estates can hold hundreds of households; the picker fetches one page and
-  // narrows locally rather than round-tripping on every keystroke.
+  // Estates can hold hundreds of households: fetch one page and narrow locally rather than per keystroke.
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return households;
@@ -322,8 +303,7 @@ function LogDeliveryForm({
           value={code}
           onValueChange={(next) => {
             setCode(next);
-            // Any edit clears the last answer: a stale "this is for Block C"
-            // beside a code the guard has since changed is worse than nothing.
+            // Any edit clears the last answer: a stale match beside a changed code is worse than nothing.
             if (screen) setScreen(null);
           }}
           placeholder="The six digits the household sent"
@@ -356,9 +336,7 @@ function LogDeliveryForm({
             </View>
           </Card>
         ) : screen ? (
-          // Rendered as the server wrote it, never interpreted: one wording
-          // covers every way a code can fail, so this screen cannot be used to
-          // work out whether a household exists here.
+          // Rendered as the server wrote it: one wording covers every failure, so the screen can't reveal whether a household exists.
           <Card>
             <Text variant="caption" color="mutedForeground">
               {screen.message} {screen.instruction}
@@ -525,8 +503,7 @@ function LogDeliveryForm({
         disabled={!matched && householdId.length === 0}
         onPress={() =>
           onSubmit({
-            // A verified code is sent INSTEAD of a household, never alongside
-            // one: a guard holding a code does not get to overrule it.
+            // A verified code is sent instead of a household, never alongside one.
             ...(matched ? { code: code.trim() } : { householdId }),
             courier: courier.trim() || undefined,
             recipientName: recipientName.trim() || undefined,

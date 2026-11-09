@@ -40,7 +40,6 @@ export interface Conversation {
   messages: Message[];
 }
 
-/** A saved reply the renter can drop into a conversation. */
 export interface MessageTemplate {
   id: string;
   title: string;
@@ -50,7 +49,6 @@ export interface MessageTemplate {
   createdAt: string;
 }
 
-/** A `/shortcut` that expands to a longer response while composing. */
 export interface QuickReply {
   id: string;
   shortcut: string;
@@ -58,7 +56,6 @@ export interface QuickReply {
   createdAt: string;
 }
 
-/** A nudge to follow up on a conversation, at a calendar date and time. */
 export interface MessageReminder {
   id: string;
   message: string;
@@ -73,7 +70,6 @@ export const messagesApi = {
   list: (page = 1, pageSize = 30) =>
     apiFetch<Paginated<Conversation>>(`/renter/messages?page=${page}&pageSize=${pageSize}`),
 
-  /** One conversation with its messages — polled by an open thread. */
   get: (conversationId: string) => apiFetch<Conversation>(`/renter/messages/${conversationId}`),
 
   start: (participantId: string, propertyId?: string) =>
@@ -98,8 +94,6 @@ export const messagesApi = {
   toggleArchive: (conversationId: string) =>
     apiFetch<Conversation>(`/renter/messages/${conversationId}/archive`, { method: 'PATCH' }),
 
-  /* ------------------------------ templates ----------------------------- */
-
   listTemplates: () => apiFetch<MessageTemplate[]>('/renter/messages/templates'),
 
   createTemplate: (input: { title: string; content: string; category?: string }) =>
@@ -117,8 +111,6 @@ export const messagesApi = {
   deleteTemplate: (id: string) =>
     apiFetch<void>(`/renter/messages/templates/${id}`, { method: 'DELETE' }),
 
-  /* ---------------------------- quick replies --------------------------- */
-
   listQuickReplies: () => apiFetch<QuickReply[]>('/renter/messages/quick-replies'),
 
   createQuickReply: (input: { shortcut: string; response: string }) =>
@@ -129,8 +121,6 @@ export const messagesApi = {
 
   deleteQuickReply: (id: string) =>
     apiFetch<void>(`/renter/messages/quick-replies/${id}`, { method: 'DELETE' }),
-
-  /* ------------------------------ reminders ----------------------------- */
 
   listReminders: () => apiFetch<MessageReminder[]>('/renter/messages/reminders'),
 

@@ -7,11 +7,6 @@ import {
   rememberStepUpToken,
 } from '@sureground/shared';
 
-/**
- * The shared authFetch the back office uses: a STAFF_MFA_REQUIRED refusal must
- * drop the cached (enrolment-only) step-up token and tell the app, so it can
- * show the two-factor set-up screen.
- */
 const reply = (status: number, body: unknown) =>
   new Response(JSON.stringify(body), {
     status,

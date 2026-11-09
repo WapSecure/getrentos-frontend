@@ -28,7 +28,6 @@ import { goBack } from '@/lib/goBack';
 
 type Tab = StorefrontListingType | 'ALL';
 
-/** An estate's public page (website: /e/<slug>): the estate, and what is available inside it. */
 export default function EstatePage() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const { colors, spacing } = useTheme();

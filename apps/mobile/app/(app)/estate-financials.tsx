@@ -50,11 +50,6 @@ import { CSV_MIME, shareDownloadedFile } from '@/lib/shareFile';
 import { goBack } from '@/lib/goBack';
 import { errorMessage } from '@/lib/api/client';
 
-/**
- * The estate's money. Reports (what came in, what's outstanding, the trend and
- * a CSV of every due) are Pro. Statements and the payout account are on every
- * plan: they are how collected dues reach the estate's bank.
- */
 export default function EstateFinancials() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();

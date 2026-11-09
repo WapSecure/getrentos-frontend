@@ -39,7 +39,6 @@ const CLAIM_STATUS: Record<string, { label: string; tone: Tone }> = {
   REJECTED: { label: 'Not upheld', tone: 'neutral' },
 };
 
-/** Problems with stays: disputes (both ways) and claims on guests' deposits. */
 export default function HostDisputes() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();

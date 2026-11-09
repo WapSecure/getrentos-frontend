@@ -1,6 +1,5 @@
 import { Linking, Platform } from 'react-native';
 
-/** Opens the phone's maps app with directions to a point (Google Maps on the web). */
 export function openDirections(latitude: number, longitude: number, label: string) {
   const encodedLabel = encodeURIComponent(label);
   const url = Platform.select({

@@ -43,10 +43,6 @@ const titleCase = (s: string) =>
     .replace(/_/g, ' ')
     .replace(/^\w/, (c) => c.toUpperCase());
 
-/**
- * Spend a manager wants to make above the owner's approval limit, the limits
- * themselves, and any mandate waiting on this co-owner's countersignature.
- */
 export default function SpendApprovals() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
@@ -223,7 +219,6 @@ function ApprovalCard({ approval: a, role }: { approval: SpendApproval; role: Sp
   );
 }
 
-/** Per engagement, the most a manager may spend before it needs sign-off. */
 function ApprovalLimits() {
   const { colors, spacing } = useTheme();
   const mandates = useQuery({
@@ -289,11 +284,7 @@ function CapRow({ mandate }: { mandate: OwnerMandate }) {
   );
 }
 
-/**
- * Co-owner quorum is unanimous: a manager or agent mandate on a jointly owned
- * property only takes effect once every co-owner countersigns. Renders nothing
- * when nothing is waiting on this co-owner.
- */
+/** A mandate on a jointly owned property takes effect only once every co-owner countersigns. */
 function CountersignSection() {
   const { colors, spacing } = useTheme();
   const pending = useQuery({

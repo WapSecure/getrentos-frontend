@@ -57,9 +57,7 @@ export default function LandlordListings() {
       );
     },
     onError: (e) => {
-      // Republishing runs the listing trust gate, which refuses until the
-      // landlord's identity is approved. That is a real requirement, not a
-      // failure, so say what to do rather than "something went wrong".
+      // Refused until the landlord's identity is approved: a real requirement, so say what to do, not "something went wrong".
       if (e instanceof ApiError && e.code === 'IDENTITY_REQUIRED') {
         setGateBlocked(true);
         toast.show('Verify your identity to put a listing back online.', 'error');

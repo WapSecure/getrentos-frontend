@@ -1,7 +1,6 @@
 import { View } from 'react-native';
 import { WebView } from 'react-native-webview';
 
-/** A YouTube or Vimeo player page, inside the app. */
 export function EmbedFrame({
   url,
   title,
@@ -9,7 +8,6 @@ export function EmbedFrame({
 }: {
   url: string;
   title: string;
-  /** Take all the space given (a 360° tour) rather than a 16:9 box. */
   fill?: boolean;
 }) {
   return (

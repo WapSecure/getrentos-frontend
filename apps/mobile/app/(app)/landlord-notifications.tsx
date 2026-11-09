@@ -15,10 +15,7 @@ import { landlordApi, type LandlordNotification } from '@/lib/api/landlord';
 import { useOptimisticMutation } from '@/lib/query/optimistic';
 import { NotificationsInbox } from '@/components/notifications/NotificationsInbox';
 
-/**
- * The API's `type` is an open string, so match on the meaningful prefix and
- * fall back to a bell rather than assuming a closed set.
- */
+/** `type` is an open string: match on its prefix and fall back to a bell. */
 function iconFor(type: string) {
   if (type.startsWith('payment') || type.includes('rent')) return Banknote;
   if (type.startsWith('lead')) return UserPlus;

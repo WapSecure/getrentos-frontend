@@ -3,7 +3,6 @@ import { apiFetch, apiUpload } from './client';
 import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
 
-/** An owner's private land records: parcel facts and where diligence stands. */
 export type LandAreaUnit = 'SQUARE_METERS' | 'ACRE' | 'HECTARE';
 export type LandDiligenceStatus =
   | 'NOT_STARTED'
@@ -103,7 +102,6 @@ export interface OwnerLandRecord {
   address: string;
   city: string;
   state: string;
-  /** The property's map pin, where the outline editor starts. */
   latitude?: number;
   longitude?: number;
   isPropertyVerified: boolean;
@@ -111,15 +109,12 @@ export interface OwnerLandRecord {
   hasActiveSaleListing: boolean;
   /** The property's own verification, the second gate before listing. */
   propertyVerificationStatus?: string;
-  /** Whether the parcel can go into the diligence queue now, and if not, why. */
   canSubmitForReview?: boolean;
   submissionBlockers?: string[];
   parcel?: LandParcel | null;
-  /** The outline now on the parcel and whether the case's surveyor signed it off. */
   boundary?: LandBoundaryStatus | null;
 }
 
-/** What the owner is asked to do next, by diligence status. */
 export const REVIEW_PROMPT: Partial<
   Record<LandDiligenceStatus, { title: string; body: string; action: string }>
 > = {
@@ -155,8 +150,6 @@ export function checkProgress(checks: LandDiligenceCheck[] = []) {
 /** Both gates passed: diligence verified and the property itself approved. */
 export const readyToList = (r: OwnerLandRecord) =>
   r.parcel?.diligence?.status === 'VERIFIED' && r.propertyVerificationStatus === 'APPROVED';
-
-/* ------------------------------- documents ------------------------------- */
 
 export const LAND_DOCUMENT_TYPES: { value: string; label: string }[] = [
   { value: 'CERTIFICATE_OF_OCCUPANCY', label: 'Certificate of Occupancy' },
@@ -208,8 +201,6 @@ export interface LandDocument {
   canDelete: boolean;
 }
 
-/* ---------------------------------- risk --------------------------------- */
-
 export interface LandRisk {
   score: number;
   band: 'LOW' | 'MODERATE' | 'HIGH';
@@ -226,8 +217,6 @@ export const RISK_BAND: Record<
   MODERATE: { label: 'Moderate risk', tone: 'warning' },
   HIGH: { label: 'High risk', tone: 'danger' },
 };
-
-/* ---------------------------------- tours -------------------------------- */
 
 export type TourStatus =
   | 'REQUESTED'
@@ -282,7 +271,6 @@ export function lagosToIso(date: string, time: string): string | null {
   return Number.isNaN(iso.getTime()) ? null : iso.toISOString();
 }
 
-/** Why the offered times cannot be sent yet, or null. */
 export function proposeBlocker(slots: (string | null)[], link: string, now = Date.now()) {
   const chosen = slots.filter((s): s is string => !!s);
   if (chosen.length === 0) return 'Offer at least one time.';

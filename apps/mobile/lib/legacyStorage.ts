@@ -1,14 +1,9 @@
 import { useSyncExternalStore } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-/**
- * GetRentos became Sureground. AsyncStorage written before the rename uses keys
- * that start with "getrentos" (the gate and agent offline queues, onboarding,
- * theme, query cache…). Move each one to its "sureground" key once, before the
- * app reads any of them, so queued work and preferences survive. A value
- * already saved under the new key wins. Secure-store keys (tokens) can't be
- * listed, so lib/storage moves those on first read instead.
- */
+// GetRentos became Sureground: move each "getrentos" AsyncStorage key to its "sureground" key once, before
+// anything reads them, so queued work survives. A value under the new key wins. Secure-store keys can't be
+// listed, so lib/storage moves those on first read.
 export const LEGACY_PREFIX = 'getrentos';
 export const NEW_PREFIX = 'sureground';
 
@@ -39,7 +34,7 @@ const migration = migrate().finally(() => {
   listeners.forEach((l) => l());
 });
 
-/** True once stored GetRentos-era keys have moved; the root layout waits on it. */
+// The root layout waits on this.
 export function useLegacyStorageMigrated(): boolean {
   return useSyncExternalStore(
     (onChange) => {

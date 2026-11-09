@@ -40,7 +40,6 @@ import { PropertyGallery } from '@/components/property/PropertyGallery';
 import { StatusPill, listingStatus } from '@/components/host/HostUI';
 import { goBack } from '@/lib/goBack';
 
-/** Everything about one listing, one tap from each tool. */
 export default function HostListingDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, spacing, radius } = useTheme();
@@ -57,7 +56,6 @@ export default function HostListingDetail() {
     enabled: !!l,
   });
 
-  // The switch moves at once; it goes back if the API says no.
   const setStatus = useOptimisticMutation({
     mutationFn: (status: 'PUBLISHED' | 'PAUSED' | 'CLOSED') =>
       hostShortletsApi.setStatus(id, status),

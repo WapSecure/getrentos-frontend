@@ -2,11 +2,6 @@ import { View } from 'react-native';
 import { MapPin } from 'lucide-react-native';
 import { Text, useTheme } from '@sureground/ui-native';
 
-/**
- * The "Filmed on site" mark on a video tour: filmed with the Sureground camera
- * while the phone was at the property's pin. A clip from someone's library
- * never gets it.
- */
 export function FilmedOnSite() {
   const { colors } = useTheme();
   return (

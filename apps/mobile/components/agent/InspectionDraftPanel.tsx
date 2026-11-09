@@ -19,11 +19,6 @@ const CHANGE_TONE: Record<InspectionChange['kind'], BadgeTone> = {
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
-/**
- * "Draft the report from photos": suggests each room's condition and notes from
- * the evidence photos, and on a move-out lists what looks different since
- * move-in. The agent applies, edits and submits; nothing is saved here.
- */
 export function InspectionDraftPanel({
   taskId,
   type,

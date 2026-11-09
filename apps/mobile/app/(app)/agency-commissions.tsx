@@ -37,7 +37,6 @@ const STATUS = {
   VOID: { label: 'Void', tone: 'neutral' as const },
 };
 
-/** What the firm earns on lettings and renewals, who gets credit, and each agent's split. */
 export default function AgencyCommissions() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();

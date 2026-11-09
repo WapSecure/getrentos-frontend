@@ -46,7 +46,6 @@ const KINDS: LandWatchIncidentKind[] = [
 ];
 const date = (iso: string) => formatDate(iso, 'short');
 
-/** One watched parcel or plot: reports with evidence, incidents, reminders. */
 export default function LandWatchDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, spacing, radius } = useTheme();

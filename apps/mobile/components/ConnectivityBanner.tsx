@@ -6,7 +6,6 @@ import Animated, { FadeInDown, FadeOutUp } from 'react-native-reanimated';
 import { CircleCheck, WifiOff } from 'lucide-react-native';
 import { Text, useReducedMotion, useTheme } from '@sureground/ui-native';
 
-/** A global, non-blocking explanation when requests are paused by connectivity. */
 export function ConnectivityBanner() {
   const { colors, spacing, radius, shadows } = useTheme();
   const insets = useSafeAreaInsets();

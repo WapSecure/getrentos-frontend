@@ -42,7 +42,6 @@ import { buyerSettingsApi } from '@/lib/api/buyerSettings';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { firstName } from '@/lib/format';
 
-/** The kinds of activity the buyer dashboard reports. */
 const ACTIVITY_ICON: Record<string, LucideIcon> = {
   offer: FileSignature,
   transaction: Wallet,
@@ -58,7 +57,6 @@ export default function BuyerHome() {
   const { colors, spacing } = useTheme();
 
   const dashboard = useQuery({ queryKey: qk.buyer.dashboard, queryFn: buyerApi.dashboard });
-  // Drives the bell badge; the notifications screen owns the full list.
   const notifications = useQuery({
     queryKey: qk.buyer.notifications(1, 50),
     queryFn: () => buyerSettingsApi.notifications(1, 50),
@@ -154,7 +152,6 @@ export default function BuyerHome() {
         errorTitle="We couldn't load your dashboard"
         errorDescription="Check your connection and try again. Your saved homes and offers are safe."
       >
-        {/* What needs you first: a purchase with a payment in motion. */}
         {d?.activeTransactions ? (
           <AttentionCard
             Icon={Wallet}

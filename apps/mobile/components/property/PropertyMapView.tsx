@@ -6,10 +6,6 @@ import { buildMapHtml, readBoundaryMessage, type PropertyMapViewProps } from './
 
 export type { PropertyMapMarker, PropertyMapViewProps } from './propertyMapHtml';
 
-/**
- * Keyless map powered by Leaflet + OpenStreetMap tiles, embedded via WebView:
- * mirrors the web app's `PropertyMap` (no Google/Mapbox key or billing needed).
- */
 export function PropertyMapView({
   markers,
   center,

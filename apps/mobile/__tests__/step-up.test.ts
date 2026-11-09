@@ -102,7 +102,6 @@ describe('step-up', () => {
       expect(prompt).toHaveBeenCalledWith(expect.objectContaining({ challengeId: 'ch-1' }));
       const replay = fetchMock.mock.calls[1][1] as { headers: Record<string, string> };
       expect(replay.headers['x-step-up-token']).toBe('bound-tok');
-      // Single-use: nothing cached for the next sensitive request.
       expect(currentStepUpToken()).toBeNull();
     });
 

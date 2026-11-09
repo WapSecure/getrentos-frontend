@@ -2,7 +2,6 @@ import type { AddressValue, PlaceKind, VerifiedAddress } from '@sureground/share
 import { AddressInput } from './AddressInput';
 import { LocationFields } from './LocationFields';
 
-/** The address part of a form: what was picked or typed, and the city and state it sits in. */
 export interface AddressFieldsValue {
   address: string;
   city: string;
@@ -16,25 +15,17 @@ export interface AddressFieldsValue {
 interface AddressFieldsProps {
   value: AddressFieldsValue;
   onChange: (patch: Partial<AddressFieldsValue>) => void;
-  /** Called with Google's point after a pick, to start a map pin there. */
   onPin?: (point: { latitude: number; longitude: number }) => void;
   label?: string;
   hint?: string;
   error?: string | null;
   required?: boolean;
-  /** Let the person keep an address Google does not know; saved unchecked, with state and city asked. */
   allowManual?: boolean;
   placeholder?: string;
-  /** What to search for: a full address (default), an area, or either (land, landmarks). */
   kind?: PlaceKind;
   errors?: { country?: string; state?: string; city?: string };
 }
 
-/**
- * Address search plus what an address form needs around it, the native twin
- * of AddressFields on web: a picked address fills in city, state and country
- * (and the map pin through `onPin`); a typed one asks for state and city.
- */
 export function AddressFields({
   value,
   onChange,

@@ -12,7 +12,6 @@ import { formatDate } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
 
-/** "Rent · 1 Aug – 31 Aug", or just the charge when no period is known (same as web). */
 function receiptLabel(receipt: Receipt): string | null {
   if (!receipt.category && !receipt.periodStart) return null;
   const what = (receipt.category && CHARGE_CATEGORY_LABEL[receipt.category]) || 'Rent';

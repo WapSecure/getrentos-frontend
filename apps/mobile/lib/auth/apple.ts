@@ -2,12 +2,7 @@ import { Platform } from 'react-native';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import * as Crypto from 'expo-crypto';
 
-/**
- * Sign in with Apple (iOS). Apple returns a signed identity token; the API
- * verifies it. A fresh nonce is generated per attempt: Apple embeds its
- * SHA-256 in the token and the API checks the raw value, so an intercepted
- * token can't be replayed.
- */
+// A fresh nonce per attempt: Apple embeds its SHA-256 in the token and the API checks the raw value, so an intercepted token can't be replayed.
 
 export class AppleSignInCancelled extends Error {}
 

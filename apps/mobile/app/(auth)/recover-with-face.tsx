@@ -30,12 +30,7 @@ import { AUTH_CONSTANTS } from '@sureground/shared';
 type Step = 'identify' | 'reset' | 'done';
 const STEP_INDEX: Record<Step, number> = { identify: 0, reset: 1, done: 2 };
 
-/**
- * Recover an account with a face check when the email or phone the reset code
- * goes to is lost. The face is matched against the live selfie taken during
- * identity verification (Smile ID); the server decides. Afterwards every
- * device is signed out and payouts pause for 72 hours.
- */
+/** The server decides the match; afterwards every device is signed out and payouts pause for 72 hours. */
 export default function RecoverWithFace() {
   const { colors, spacing } = useTheme();
   const supported = useMemo(() => liveSelfieSupported(), []);

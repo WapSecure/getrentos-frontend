@@ -5,11 +5,6 @@ import { Button, FormAlert, useTheme } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { agencyFirmApi } from '@/lib/api/agencyFirm';
 
-/**
- * Until Sureground verifies the firm it can set up but not be paid. Says where
- * verification stands, and links to finish it unless it is out of the firm's
- * hands (submitted, or suspended).
- */
 export function VerificationBanner() {
   const { spacing } = useTheme();
   const q = useQuery({

@@ -9,14 +9,6 @@ import { VideoTourSheet } from './VideoTourSheet';
 import { FilmedOnSite } from './FilmedOnSite';
 import { locateRecording, type VideoOnSiteReport } from '@/lib/filmedOnSite';
 
-/**
- * A property's or listing's video tour, for the person listing it: film a
- * walkthrough or pick a clip, watch what was uploaded, replace or remove it.
- * The caller does the upload and attaches the key; this only drives the flow.
- *
- * Filming in the app also reads where the phone is, so the server can mark the
- * tour "Filmed on site"; a clip from the library never carries that.
- */
 export function VideoTourField({
   title,
   videoUrl,
@@ -27,12 +19,9 @@ export function VideoTourField({
   onExpired,
 }: {
   title: string;
-  /** Signed link to the current video, for the preview. */
   videoUrl?: string | null;
   hasVideo: boolean;
-  /** The current video was filmed in the app at the property. */
   filmedOnSite?: boolean;
-  /** Uploads the file and attaches it with where it was filmed, if known; rejects to show an error. */
   onUpload: (file: PickedVideo, onSite: VideoOnSiteReport | null) => Promise<unknown>;
   onRemove: () => Promise<unknown>;
   onExpired?: () => void;

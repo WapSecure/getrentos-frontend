@@ -1,11 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { Portal } from './roles';
 
-/**
- * The workspace someone chose to open, for accounts with more than one (an
- * owner who also rents property out, say). Per device, and cleared on sign-out
- * so the next person on the phone starts fresh.
- */
+// Cleared on sign-out so the next person on the phone starts fresh.
 const KEY = 'sureground.preferredPortal';
 
 export async function readPreferredPortal(): Promise<Portal | null> {

@@ -31,7 +31,6 @@ export interface IdentityKyc {
   rejectionReason?: string;
 }
 
-/** A realtor/agent licence sent for human review. */
 export interface LicenseKyc {
   id: string;
   licenseNumber: string;
@@ -45,17 +44,9 @@ export interface KycStatusResponse {
   verificationStatus: string;
   trustScore: number;
   tier?: number;
-  /**
-   * Identity verified by any route the server accepts (an approved review or a
-   * passed NIN check). Gate on this: identity.status is only the older review
-   * flow and stays PENDING for someone verified by NIN.
-   */
+  /** Gate on this: identity.status is only the older review flow and stays PENDING for someone verified by NIN. */
   identityVerified?: boolean;
-  /**
-   * ISO date the identity grace period ends. Set while an unverified account
-   * keeps its listing and payout capability: verify identity before then or
-   * listings, payout accounts and withdrawals stop working.
-   */
+  /** ISO date the identity grace period ends; after it, listings, payout accounts and withdrawals stop working. */
   identityGraceEndsAt?: string;
   identity?: IdentityKyc;
   license?: LicenseKyc;
@@ -78,7 +69,6 @@ export const kycApi = {
     return apiUpload<IdentityKyc>('/users/me/kyc/identity', form);
   },
 
-  /** Realtor/agent licence: number required, document optional. */
   submitLicense: (params: { licenseNumber: string; document?: PickedFile }) => {
     const form = new FormData();
     form.append('licenseNumber', params.licenseNumber);

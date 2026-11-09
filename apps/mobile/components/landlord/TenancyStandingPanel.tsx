@@ -5,12 +5,7 @@ import { CheckCircle2, ChevronDown, Lock, XCircle } from 'lucide-react-native';
 import { LinkButton, Skeleton, Text, useTheme } from '@sureground/ui-native';
 import { landlordApi } from '@/lib/api/landlord';
 
-/**
- * The applicant's record from past tenancies. Fetched only when opened: it
- * is one request per applicant, and most landlords never expand most rows.
- * Respects the applicant's choice: when they have not shared, say so plainly
- * rather than showing empty fields that read as bad news.
- */
+// When the applicant has not shared, say so plainly rather than show empty fields that read as bad news.
 export function TenancyStandingPanel({ applicationId }: { applicationId: string }) {
   const { colors, spacing } = useTheme();
   const [open, setOpen] = useState(false);

@@ -1,10 +1,5 @@
 import { gatemanApi } from '@/lib/api/gateman';
 
-/**
- * The gate's courier-code check and patrol scan once passed a string that
- * apiFetch encoded again, so the API received a quoted string instead of
- * `{ code }` and refused it with a 400. These check what actually goes out.
- */
 describe('gate requests send an object body', () => {
   let fetchSpy: jest.SpyInstance;
   beforeEach(() => {

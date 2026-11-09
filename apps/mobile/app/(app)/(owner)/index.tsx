@@ -34,7 +34,6 @@ import { useAuth } from '@/lib/auth/AuthProvider';
 import { firstName } from '@/lib/format';
 import { IdentityNudge } from '@/components/trust/IdentityNudge';
 
-/** The kinds of activity the owner dashboard reports. */
 const ACTIVITY_ICON: Record<string, LucideIcon> = {
   offer: FileSignature,
   transaction: Wallet,
@@ -47,13 +46,12 @@ export default function OwnerHome() {
   const { visible: showMoney, toggle: toggleMoney } = useMonetaryVisibility();
   const dashboard = useQuery({ queryKey: qk.owner.dashboard, queryFn: ownerApi.dashboard });
   const d = dashboard.data;
-  // Pro only: a Free plan answers with an upgrade error, which is final, so don't retry it.
+  // Pro only: a Free plan's upgrade error is final, so don't retry it.
   const trend = useQuery({
     queryKey: qk.owner.portfolioTrend,
     queryFn: ownerApi.portfolioTrend,
     retry: (n, e) => !isUpgradeError(e) && n < 2,
   });
-  // Drives the bell badge; the notifications screen owns the full list.
   const notifications = useQuery({
     queryKey: qk.owner.notifications,
     queryFn: () => ownerApi.notifications(),
@@ -160,9 +158,7 @@ export default function OwnerHome() {
         errorTitle="We couldn't load your dashboard"
         errorDescription="Check your connection and try again."
       >
-        {/* Before anything else: an unverified owner cannot publish or accept. */}
         <IdentityNudge unlocks="sale listings and offers" />
-        {/* What needs you first: offers waiting on an answer. */}
         {d?.pendingOffers ? (
           <AttentionCard
             Icon={FileSignature}
@@ -181,7 +177,6 @@ export default function OwnerHome() {
           visible={showMoney}
           onToggle={toggleMoney}
         >
-          {/* A single point isn't a trend, so the chart waits for two. */}
           {(trend.data?.length ?? 0) > 1 ? <RevenueTrendChart points={trend.data!} /> : null}
         </PortfolioCard>
 

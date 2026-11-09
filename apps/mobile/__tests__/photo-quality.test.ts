@@ -1,4 +1,3 @@
-/** Document photo checks run on the device before upload (step 3: fewer rejected photos). */
 import { assessPhotoQuality } from '@sureground/shared';
 
 const W = 200;
@@ -14,7 +13,6 @@ const image = (pixel: (x: number, y: number) => number, size = { w: 1200, h: 840
     }
   return { width: W, height: H, data, originalWidth: size.w, originalHeight: size.h };
 };
-// Black "print" on light paper: sharp edges.
 const printed = (x: number, y: number) =>
   (Math.floor(x / 3) + Math.floor(y / 5)) % 4 === 0 ? 20 : 225;
 
@@ -51,8 +49,7 @@ describe('assessPhotoQuality', () => {
 });
 
 describe('base64ToBytes (the phone check decodes its 640 px copy with it)', () => {
-  // Known vectors (RFC 4648) for every padding length; no Node Buffer, which
-  // the app's test type-check does not include.
+  // Known RFC 4648 vectors; no Node Buffer, which the app's test type-check does not include.
   it.each([
     ['', []],
     ['AA==', [0]],

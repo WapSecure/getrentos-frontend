@@ -30,18 +30,7 @@ import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 import { Image as ExpoImage } from 'expo-image';
 
-/**
- * A household's parcels: what is coming, and what has already been taken in.
- *
- * The declaration comes first because it is the only actionable part. The reason
- * it exists: without a code, a parcel is released on a courier's word and the
- * resident whose name was used has no way to show it was never handed to them.
- * So the code leads the screen, not the log.
- *
- * Every label is written server-side and rendered as it arrives: the difference
- * between an expiry and a withdrawal is decided once, in `delivery.util.ts`, so
- * this screen cannot contradict what the guard's own refusal says.
- */
+// Labels are written server-side (`delivery.util.ts`) and rendered as-is, so this screen can't contradict the guard's refusal.
 export default function ResidentDeliveries() {
   const { colors, spacing, radius } = useTheme();
   const qc = useQueryClient();
@@ -234,24 +223,13 @@ export default function ResidentDeliveries() {
   );
 }
 
-/**
- * A withdrawal and an expiry carry the same weight on purpose: neither is a
- * success, and neither is something the household has to act on. They stay
- * textually distinct inside the label, which is where it matters.
- */
 const statusToneFor = (status: ExpectedDelivery['status']): BadgeTone => {
   if (status === 'RECEIVED') return 'success';
   if (status === 'AWAITING') return 'warning';
   return 'neutral';
 };
 
-/**
- * Declaring a parcel, and the one moment its code exists.
- *
- * The sheet holds the code on screen after the declaration instead of closing
- * with a toast: the reply is the only time it is ever returned, and a toast would
- * take it away before the household could give it to the courier.
- */
+// The code is returned only in the declaration reply, so the sheet holds it on screen instead of closing with a toast.
 function DeclareDeliverySheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { colors, spacing } = useTheme();
   const qc = useQueryClient();
@@ -304,8 +282,6 @@ function DeclareDeliverySheet({ open, onClose }: { open: boolean; onClose: () =>
             <Text variant="label" color="mutedForeground">
               GIVE THIS TO THE COURIER
             </Text>
-            {/* Selectable, so the household can long-press to copy through the
-                platform's own gesture rather than a dependency. */}
             <Text variant="display" selectable>
               {issued.code}
             </Text>

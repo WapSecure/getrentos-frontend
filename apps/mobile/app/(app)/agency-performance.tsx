@@ -12,7 +12,6 @@ import { goBack } from '@/lib/goBack';
 
 const rate = (v: number | null) => (v === null ? '—' : `${v}%`);
 
-/** The firm's performance over a range of months, as owners would judge it. */
 export default function AgencyPerformance() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();

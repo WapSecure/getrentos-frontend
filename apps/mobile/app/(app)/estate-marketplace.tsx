@@ -48,10 +48,6 @@ import { goBack } from '@/lib/goBack';
 
 type Tab = 'listings' | 'properties';
 
-/**
- * The estate advertising the homes inside it. Owners keep their property; the
- * estate gains, with each owner's say-so, the right to market it.
- */
 export default function EstateMarketplace() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
@@ -143,8 +139,6 @@ export default function EstateMarketplace() {
     );
 
   const inv = inventory.data;
-  // The three queries as one for QueryState: loaded once agreements and
-  // listings are in and the counts have not failed outright.
   const combined = {
     data:
       agreements.data !== undefined &&

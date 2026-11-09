@@ -33,10 +33,6 @@ import { useEstate } from '@/hooks/useEstate';
 import { estateManagerApi, isOpenItem } from '@/lib/api/estateManager';
 import { qk } from '@/lib/query/keys';
 
-/**
- * Safety and the gate in one place: a live emergency first, then each queue
- * with how much is waiting in it.
- */
 export default function EstateOperations() {
   const { colors, spacing } = useTheme();
   const { estate, estateId, estates, select } = useEstate();
@@ -265,7 +261,6 @@ function Row({
 }: {
   Icon: LucideIcon;
   label: string;
-  /** Undefined while loading. */
   count?: number;
   countLabel?: string;
   note: string;

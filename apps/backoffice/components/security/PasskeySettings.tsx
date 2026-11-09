@@ -25,11 +25,6 @@ import { adminKeys } from '@/lib/queryKeys';
 const isCancelled = (err: unknown) =>
   err instanceof Error && /NotAllowedError|AbortError|cancel/i.test(`${err.name} ${err.message}`);
 
-/**
- * Passkeys on the signed-in staff account: Face ID, a fingerprint or a security
- * key, used to confirm sensitive admin actions. Same flow as the main app's
- * security settings.
- */
 export function PasskeySettings() {
   const queryClient = useQueryClient();
   const toast = useToast();
@@ -44,7 +39,6 @@ export function PasskeySettings() {
   const add = useMutation({
     mutationFn: async () => {
       const options = await unwrap(accountSecurityService.startPasskeyRegistration());
-      // The browser asks for Face ID, a fingerprint or a security key here.
       const attestation = await startRegistration({
         optionsJSON: options as unknown as PublicKeyCredentialCreationOptionsJSON,
       });

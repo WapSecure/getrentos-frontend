@@ -4,19 +4,13 @@ import { LinkButton, TextField, useTheme, type TextFieldProps } from '@suregroun
 import { ChangePhoneSheet } from './ChangePhoneSheet';
 
 interface Props extends Omit<TextFieldProps, 'value' | 'onChangeText'> {
-  /** The number saved on the account; when set, the field is read-only. */
   savedPhone?: string | null;
   value: string;
   onChangeText: (value: string) => void;
-  /** Called with the new number once the change is confirmed. */
   onChanged?: (phone: string) => void;
 }
 
-/**
- * The phone field for every profile form. An account with no number may type
- * one in; a number already on the account changes only through the verified
- * flow (ChangePhoneSheet), because it can receive password reset codes.
- */
+// A saved number changes only through ChangePhoneSheet, because it can receive password reset codes.
 export const VerifiedPhoneField = forwardRef<TextInput, Props>(function VerifiedPhoneField(
   { savedPhone, value, onChangeText, onChanged, hint, ...rest },
   ref

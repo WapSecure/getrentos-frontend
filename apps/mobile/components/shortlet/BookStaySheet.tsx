@@ -21,14 +21,9 @@ interface Props {
   dates: StayDates;
   guests: number;
   onGuestsChange: (n: number) => void;
-  /** Close this sheet and pick other dates. */
   onChangeDates: () => void;
 }
 
-/**
- * The last step before booking: the exact dates, the party, and every naira
- * of the price. Instant stays confirm now; others go to the host first.
- */
 export function BookStaySheet(props: Props) {
   const [submitting, setSubmitting] = useState(false);
   return (

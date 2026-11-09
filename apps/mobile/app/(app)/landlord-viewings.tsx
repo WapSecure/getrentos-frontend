@@ -44,10 +44,6 @@ const FILTERS: { value: LandlordViewingStatus | undefined; label: string }[] = [
 
 const when = (iso: string) => `${formatDate(iso, 'short')}, ${formatTime(iso)}`;
 
-/**
- * Renters' requests to view the landlord's properties: confirm a time or
- * decline, then host the viewing, on a video call when that is what was asked.
- */
 export default function LandlordViewings() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();

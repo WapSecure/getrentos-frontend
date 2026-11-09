@@ -9,11 +9,7 @@ const SCREEN_OPTIONS = {
 const WELCOME_OPTIONS = { animation: 'fade' } as const;
 const TWO_FACTOR_OPTIONS = { presentation: 'modal', animation: 'slide_from_bottom' } as const;
 
-/**
- * Unauthenticated flow. No redirect here: the root `useProtectedRoute` decides
- * when to leave this group. Keeping it a plain navigator avoids the nested
- * redirect war that trips the native stack.
- */
+/** No redirect here: the root `useProtectedRoute` decides, and a nested redirect fights it on the native stack. */
 export default function AuthLayout() {
   return (
     <Stack screenOptions={SCREEN_OPTIONS}>

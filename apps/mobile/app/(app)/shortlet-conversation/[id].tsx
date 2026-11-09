@@ -5,7 +5,6 @@ import { ConversationThread } from '@/components/shortlet/ConversationThread';
 
 const list = () => shortletsApi.conversations();
 
-/** One host thread, from the guest's side. */
 export default function GuestConversationScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   return (

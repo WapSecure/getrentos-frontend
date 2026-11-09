@@ -23,7 +23,6 @@ export default function BuyerConversationThread() {
   const conversation = conversations.data?.items.find((c) => c.id === id);
   const pinned = !!conversation?.isPinned;
 
-  // The pin flips at once and goes back if the server refuses.
   const pin = useOptimisticMutation({
     mutationFn: () => buyerMessagesApi.togglePinned(id),
     patches: () => [

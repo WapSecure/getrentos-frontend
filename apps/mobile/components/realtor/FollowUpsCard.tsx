@@ -33,11 +33,6 @@ const STEP: Record<FollowUpStep, { label: string; tone: BadgeTone }> = {
 
 const FIRST = 3;
 
-/**
- * "Follow up today" on the phone: leads due a nudge, each with the reason and
- * a drafted message to send on WhatsApp or share, then mark contacted.
- * Hidden when nothing is due or if it fails.
- */
 export function FollowUpsCard() {
   const { colors, spacing, radius } = useTheme();
   const qc = useQueryClient();

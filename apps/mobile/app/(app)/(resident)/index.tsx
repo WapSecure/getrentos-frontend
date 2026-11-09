@@ -74,8 +74,7 @@ export default function ResidentHome() {
     queryFn: () => notificationsApi.list(1, 30),
   });
   const unreadCount = (notifications.data?.items ?? []).filter((n) => !n.read).length;
-  // A walk-in has a ten-minute window, so the home screen keeps asking while one
-  // is open: the resident must not have to think to go looking for it.
+  // A walk-in has a ten-minute window, so keep polling while one is open.
   const passes = useQuery({
     queryKey: qk.resident.visitorPasses,
     queryFn: () => residentApi.listVisitorPasses(1, 50),
@@ -110,9 +109,6 @@ export default function ResidentHome() {
 
   return (
     <Screen refreshing={isRefreshing} onRefresh={onRefresh}>
-      {/* First, above even the greeting: if the estate is calling the roll,
-          nothing else on this screen matters as much. Renders nothing when there
-          is no emergency, which is almost always. */}
       <EmergencyBanner />
 
       <DashboardHeader
@@ -135,8 +131,7 @@ export default function ResidentHome() {
             />
             <IconButton
               onPress={() => router.push('/(app)/notifications')}
-              // IconButton already appends ", N unread" from the badge, so the
-              // label must not repeat the count (DEF-243).
+              // IconButton already appends ", N unread" from the badge, so the label must not repeat the count.
               accessibilityLabel="Notifications"
               badge={unreadCount}
               icon={<Bell size={21} color={colors.foreground} />}

@@ -1,44 +1,24 @@
 import { mapTiles, type BoundaryCorner } from '@sureground/shared';
 import { env } from '@/lib/env';
 
-/**
- * The map page both PropertyMapView builds load: Leaflet on Mapbox tiles when
- * EXPO_PUBLIC_MAPBOX_TOKEN is set, OpenStreetMap otherwise. Phones host it in a WebView; the web build in an
- * iframe. Either way the app posts `{ markers, center, zoom, variant,
- * selectedId }` in, and the page posts `{ type: 'markerPress', id }` out.
- */
+// Phones host this page in a WebView, the web build in an iframe. The app posts `{ markers, center, zoom, variant, selectedId }` in; the page posts `{ type: 'markerPress', id }` out.
 export interface PropertyMapMarker {
   id: string;
   latitude: number;
   longitude: number;
-  /** Compact price label shown on the pin, e.g. "₦200K". */
   priceLabel?: string;
 }
 
 export interface PropertyMapViewProps {
   markers: PropertyMapMarker[];
-  /** Explicit center; falls back to the first marker, then Lagos. */
   center?: { latitude: number; longitude: number };
   zoom?: number;
-  /** Fixed height in px. Omit when the wrapping view's `style` already sizes it (e.g. `flex: 1`). */
   height?: number;
-  /**
-   * `price` = pill price tags for a multi-listing map. `location` = a single
-   * pulsing pin for a property's exact spot. `area` = a shaded circle for a
-   * property whose location is only approximate (unverified, or a short stay):
-   * it shows the neighbourhood without pointing at a door.
-   */
+  /** `area` is a shaded circle for an approximate location: it shows the neighbourhood without pointing at a door. */
   variant?: 'price' | 'location' | 'area' | 'picker' | 'boundary';
-  /** `picker` only: the pin was dragged or the map tapped to a new spot. */
   onPinMove?: (point: { latitude: number; longitude: number }) => void;
-  /** `picker` only: change this to move the view to the pin (e.g. after a search). */
   recenter?: number;
-  /**
-   * A land plot's outline, drawn over any variant. With `variant="boundary"`
-   * the owner edits it: a tap adds a corner and corners drag.
-   */
   boundary?: BoundaryCorner[];
-  /** `boundary` only: the outline was changed on the map. */
   onBoundaryChange?: (corners: BoundaryCorner[]) => void;
   selectedId?: string;
   onMarkerPress?: (id: string) => void;
@@ -48,7 +28,6 @@ export interface PropertyMapViewProps {
 
 export const LAGOS = { latitude: 6.5244, longitude: 3.3792 };
 
-/** The corners in a `boundaryChanged` message from the map page; null if malformed. */
 export function readBoundaryMessage(data: unknown): BoundaryCorner[] | null {
   const msg = data as { type?: unknown; corners?: unknown } | null;
   if (msg?.type !== 'boundaryChanged' || !Array.isArray(msg.corners)) return null;
@@ -60,10 +39,7 @@ export function readBoundaryMessage(data: unknown): BoundaryCorner[] | null {
   return corners;
 }
 
-/**
- * The circle drawn for an approximate location. The API moves such a point up
- * to 500 m from the real one, so a 600 m circle always contains the property.
- */
+/** The API moves an approximate point up to 500 m from the real one, so a 600 m circle always contains the property. */
 export const APPROXIMATE_RADIUS_METRES = 600;
 
 export function buildMapHtml(

@@ -31,7 +31,6 @@ import { CollectionPlanCard } from '@/components/collections/CollectionPlanCard'
 
 const PAGE_SIZE = 20;
 
-/** Rent flagged overdue by the automatic arrears check, oldest first. */
 export default function LandlordArrears() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();

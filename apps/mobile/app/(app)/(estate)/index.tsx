@@ -47,10 +47,6 @@ import { qk } from '@/lib/query/keys';
 
 type SheetKind = 'switch' | 'household' | 'announce' | null;
 
-/**
- * The office at a glance: which dues are late, what was collected, and the
- * three things a manager does most (charge, add a home, tell everyone).
- */
 export default function EstateHome() {
   const { colors, spacing, radius } = useTheme();
   const { visible: showMoney, toggle: toggleMoney } = useMonetaryVisibility();
@@ -59,7 +55,7 @@ export default function EstateHome() {
   const [sheet, setSheet] = useState<SheetKind>(null);
   const free = isFreeEstate(estate);
 
-  // What is late. One row is enough to read the count, on every plan.
+  // One row is enough to read the late count, on every plan.
   const overdue = useQuery({
     queryKey: qk.estateManager.attention(estateId),
     queryFn: () => estateManagerApi.dues(estateId, { status: 'OVERDUE', pageSize: 1 }),

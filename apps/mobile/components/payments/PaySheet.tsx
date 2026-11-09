@@ -12,56 +12,30 @@ import { transferNote } from '@/lib/paymentCopy';
 export interface PaySheetProps {
   open: boolean;
   onClose: () => void;
-  /** "Pay rent", "Pay estate dues". */
   title: string;
-  /** What is being paid for: a property, an estate, a plot. */
   context?: string | null;
-  /** When it is due; shown as "due 4 Nov 2026" in Lagos time. */
   dueDate?: string | null;
   overdue?: boolean;
-  /** The large figure under the title. */
   owed: number;
-  /** The small word beside it. Defaults to "owed". */
   owedLabel?: string;
-  /** What this payment is, before the fee: the base of the breakdown. 0 while not yet chosen. */
   amount: number;
-  /** The breakdown's first line: "Rent", "Deposit", "Instalment". */
   itemLabel: string;
-  /**
-   * When what is paid is made of separate amounts (a land payment and its late
-   * fee), the lines that add up to it, shown in place of the single item line.
-   */
   itemParts?: { label: string; amount: number }[];
-  /** Under the breakdown when there is a fee: who still gets the full amount. */
   receiverLine?: string | null;
-  /** One sentence on what happens to the money: "Your rent is held by Sureground until…". */
   protection?: string;
-  /** Step "How much": only where a part payment is possible. */
   howMuch?: ReactNode;
-  /** Shown above the breakdown, for anything the payer must know first. */
   note?: ReactNode;
-  /** False while the payer still has to finish the how-much step. Defaults to amount > 0. */
   ready?: boolean;
-  /** The button while not ready. */
   notReadyLabel?: string;
-  /**
-   * Leave out the fee breakdown when the card amount is not known up front.
-   * `itemParts` are still listed, without a fee or total line.
-   */
   breakdown?: boolean;
-  /** Replaces "Pay ₦X with <company>" when that would not be true. */
   payLabel?: string;
-  /** Replaces the "You finish on <company>'s secure page" sentence. */
   secureLine?: string;
-  /** Which company takes the payment (Paystack or Monnify). */
   providers: PaymentProviderChoice;
-  /** Why the last try failed when the chosen company could not take it: choose another. */
   providerError?: string | null;
   onPay: () => void;
   busy?: boolean;
 }
 
-/** A small numbered heading for each step of the sheet. */
 function Step({ n, children }: { n?: number; children: string }) {
   const { colors, spacing } = useTheme();
   return (
@@ -97,9 +71,7 @@ function Line({
   label: string;
   value: string;
   strong?: boolean;
-  /** What a screen reader says for the value, when the text on screen reads badly aloud. */
   spokenValue?: string;
-  /** Announce the line when it changes (the total, once the fee is known). */
   live?: boolean;
 }) {
   const { spacing } = useTheme();
@@ -129,12 +101,6 @@ function Line({
   );
 }
 
-/**
- * One pay sheet for everything paid on Sureground, matching the web pay
- * dialog: what is owed, how much (where a part payment is possible), which
- * company takes it, exactly what will be charged, then that company's secure
- * page. The screen keeps the pay call; this only presents it.
- */
 export function PaySheet({
   open,
   onClose,

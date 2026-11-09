@@ -25,7 +25,6 @@ export interface CaptureFields {
 const jobPath = (watchId: string, jobId: string) =>
   `/land/watch/${encodeURIComponent(watchId)}/jobs/${encodeURIComponent(jobId)}`;
 
-/** Land Watch for owners and buyers, and the inspector's field desk. */
 export const landWatchApi = {
   mine: () => apiFetch<LandWatchSummary[]>('/land/watch'),
   terms: () => apiFetch<LandWatchTerms>('/land/watch/terms'),
@@ -51,7 +50,7 @@ export const landWatchApi = {
       { method: 'POST', body: {} }
     ),
 
-  /** Vendor work on a Managed watch. None of these are optimistic: each is a commitment. */
+  /** None of these are optimistic: each is a commitment. */
   watchJobs: (watchId: string) =>
     apiFetch<LandWatchJob[]>(`/land/watch/${encodeURIComponent(watchId)}/jobs`),
   requestJob: (watchId: string, body: { kind: LandWatchJobKind; description: string }) =>
@@ -80,7 +79,7 @@ export const landWatchApi = {
 
   jobs: () => apiFetch<InspectorJob[]>('/land/inspections'),
   job: (id: string) => apiFetch<InspectorJob>(`/land/inspections/${encodeURIComponent(id)}`),
-  /** One capture. The server keeps one copy per file or client reference, so a retry is safe. */
+  /** The server keeps one copy per file or client reference, so a retry is safe. */
   uploadEvidence: (id: string, file: PickedFile, fields: CaptureFields) => {
     const form = new FormData();
     appendFile(form, 'file', file);

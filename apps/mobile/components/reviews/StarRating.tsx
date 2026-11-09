@@ -4,13 +4,11 @@ import { useTheme } from '@sureground/ui-native';
 
 interface Props {
   value: number;
-  /** Omit to render a read-only rating. */
   onChange?: (value: number) => void;
   size?: number;
   disabled?: boolean;
 }
 
-/** Five-star rating, interactive when `onChange` is supplied. */
 export function StarRating({ value, onChange, size = 28, disabled = false }: Props) {
   const { colors } = useTheme();
   const readOnly = !onChange;

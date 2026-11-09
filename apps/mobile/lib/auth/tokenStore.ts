@@ -1,9 +1,6 @@
 import { secureStorage } from '../storage';
 
-/**
- * Session tokens. On device they live in the OS secure enclave; the access
- * token is short-lived and the refresh token is rotated on every use.
- */
+// The refresh token is rotated on every use.
 const ACCESS_KEY = 'sureground.accessToken';
 const REFRESH_KEY = 'sureground.refreshToken';
 
@@ -32,7 +29,6 @@ export async function clearTokens(): Promise<void> {
   await Promise.all([secureStorage.remove(ACCESS_KEY), secureStorage.remove(REFRESH_KEY)]);
 }
 
-/** Decodes a JWT `exp` (seconds → ms). Returns null when unreadable. */
 export function accessTokenExpiry(token: string): number | null {
   try {
     const [, payload] = token.split('.');

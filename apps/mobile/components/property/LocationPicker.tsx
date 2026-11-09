@@ -6,12 +6,6 @@ import { PropertyMapView } from '@/components/property/PropertyMapView';
 import { geocodeApi, LAGOS_POINT, type MapPoint } from '@/lib/api/geocode';
 import { haptics } from '@/lib/haptics';
 
-/**
- * Where the property is, as the owner says: "Find on map" suggests a pin from
- * the typed address, and the owner drags it (or taps the map) onto the right
- * building. Leaving it alone is allowed; the property is then placed from its
- * address, less precisely.
- */
 export function LocationPicker({
   address,
   city,

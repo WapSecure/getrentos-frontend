@@ -1,13 +1,4 @@
-/**
- * File parts for uploads made from the web build.
- *
- * React Native's `fetch` uploads a `{ uri, name, type }` object as a file. A
- * browser's FormData does not: it turns the object into the text
- * "[object Object]", so the server got a text field called `file` and refused
- * it ("property file should not exist"). On the web, `appendFile` queues the
- * file here instead, and `apiUpload` reads each picked file's blob:/data: URI
- * into a real File just before sending.
- */
+/** A browser's FormData sends a `{ uri, name, type }` object as "[object Object]", so on web files are queued here and read into real Files before sending. */
 interface QueuedFile {
   field: string;
   uri: string;
@@ -21,7 +12,7 @@ export function queueWebFile(form: FormData, file: QueuedFile): void {
   queued.set(form, [...(queued.get(form) ?? []), file]);
 }
 
-/** Appends every queued file to the form as a real File. Safe to call more than once. */
+/** Safe to call more than once. */
 export async function attachQueuedWebFiles(form: FormData): Promise<void> {
   const files = queued.get(form);
   if (!files) return;

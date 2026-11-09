@@ -32,7 +32,6 @@ import { TriageSheet } from '@/components/landlord/TriageSheet';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
 
-/** Requests still needing the landlord to act. */
 const OPEN = ['pending', 'acknowledged', 'in_progress'];
 
 export default function LandlordMaintenanceScreen() {
@@ -176,7 +175,6 @@ function RequestCard({
 }: {
   request: LandlordMaintenance;
   busy: boolean;
-  /** Which action is in flight, so that button shows progress. */
   pending: 'resolve' | 'escalate' | null;
   onResolve: () => void;
   onEscalate: () => void;

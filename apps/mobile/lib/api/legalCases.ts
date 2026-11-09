@@ -1,13 +1,7 @@
 import { apiFetch } from './client';
 import type { BadgeTone } from '@sureground/ui-native';
 
-/**
- * Legal cases: eviction, rent and debt recovery, injunctions, title disputes.
- *
- * A case moves OPEN → FILED → DECIDED → CLOSED, or leaves as WITHDRAWN. A
- * possession claim rests on the tenancy's notice ladder, and the server refuses
- * to file one before the notices have run out, so its refusal is shown as is.
- */
+/** The server refuses to file a possession claim before the notices have run out, so its refusal is shown as is. */
 
 export type LegalCaseKind =
   | 'EVICTION'
@@ -117,11 +111,9 @@ export const isDone = (c: LegalCase) => c.status === 'CLOSED' || c.status === 'W
 const notReadyToFile = (c: LegalCase) =>
   c.outstanding.some((o) => o.action === 'Not ready to file');
 
-/** A case with no next step: blocked from filing, filed with no date, or decided and not enforced. */
 export const needsAttention = (c: LegalCase) =>
   notReadyToFile(c) || (c.status === 'FILED' && c.nextHearingAt === null) || c.status === 'DECIDED';
 
-/** The short "what is next" line for the list. */
 export function nextLine(
   c: LegalCase,
   fmt: (iso: string) => string
@@ -154,7 +146,6 @@ export type PrimaryAction =
   | { kind: 'record'; hearing: LegalCaseHearing }
   | { kind: 'enforce' };
 
-/** The one next thing to do on a case, chosen by its state. */
 export function primaryAction(c: LegalCase): PrimaryAction {
   if (isDone(c)) return { kind: 'none' };
   if (c.status === 'OPEN') {
@@ -188,7 +179,6 @@ export type TimelineEntry = {
   title: string;
   detail?: string;
   tone: 'neutral' | 'good' | 'warn';
-  /** Still ahead, such as a scheduled sitting. */
   upcoming?: boolean;
 };
 
@@ -198,7 +188,6 @@ const OUTCOME_LABEL = Object.fromEntries(OUTCOMES.map((o) => [o.value, o.label])
   string
 >;
 
-/** What has happened on the case, oldest first; a future sitting lands last. */
 export function timelineFor(c: LegalCase, now = Date.now()): TimelineEntry[] {
   const entries: TimelineEntry[] = [
     { at: c.createdAt, title: 'Case opened', detail: c.description, tone: 'neutral' },
@@ -264,7 +253,6 @@ export function timelineFor(c: LegalCase, now = Date.now()): TimelineEntry[] {
     .map((e) => (Date.parse(e.at) > now ? { ...e, upcoming: true } : e));
 }
 
-/** Why the open-a-case form cannot be sent yet, or null. */
 export function openBlocker(input: {
   kind: LegalCaseKind;
   leaseId: string;

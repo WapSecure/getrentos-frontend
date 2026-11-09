@@ -16,11 +16,6 @@ import { errorMessage } from '@/lib/api/client';
 import { Sheet } from '@/components/Sheet';
 import { SettingsGroup } from './SettingsList';
 
-/**
- * Open another workspace this account has (an owner who also rents out, a
- * renter who is also buying), or add a role it doesn't have yet. The choice of
- * workspace is remembered on this device.
- */
 export function WorkspaceSwitcher() {
   const { workspaces, usablePortal, switchWorkspace } = useAuth();
   const [adding, setAdding] = useState(false);

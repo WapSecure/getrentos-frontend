@@ -4,14 +4,7 @@ import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
 import type { BadgeTone } from '@sureground/ui-native';
 
-/**
- * The property-control screens a landlord and an owner share with the web:
- * the activity log, questions to a manager, spend approvals, deposits and
- * condition inspections. Every route here is role-agnostic on the API (it
- * answers for whatever the caller controls), so both portals use one client.
- */
-
-/* ----------------------------- activity log ---------------------------- */
+/** Every route here is role-agnostic on the API, so the landlord and owner portals share one client. */
 
 export type ActivityActorKind = 'MANAGER' | 'SUREGROUND' | 'TENANT' | 'SYSTEM' | 'OTHER';
 
@@ -50,8 +43,6 @@ export interface ActivityPage {
 }
 
 export type ActivityWho = 'managers' | 'everyone';
-
-/* ------------------------------- queries ------------------------------- */
 
 export type QueryCategory = 'STATEMENT' | 'RENT' | 'MAINTENANCE' | 'TENANT' | 'LEGAL' | 'GENERAL';
 export type QueryStatus = 'OPEN' | 'ANSWERED' | 'RESOLVED';
@@ -113,7 +104,6 @@ export function queryStatusBadge(q: QuerySummary): { label: string; tone: BadgeT
   };
 }
 
-/** How the first-reply promise stands, in words. `fmt` renders the due time. */
 export function querySlaText(q: QuerySummary, fmt: (iso: string) => string): string {
   if (q.firstResponseAt) {
     const h = q.answeredInHours ?? 0;
@@ -123,8 +113,6 @@ export function querySlaText(q: QuerySummary, fmt: (iso: string) => string): str
   if (q.late) return 'No reply yet: overdue';
   return `Reply due by ${fmt(q.firstResponseDueAt)}`;
 }
-
-/* ------------------------------- mandates ------------------------------ */
 
 export type MandateStatus =
   | 'DRAFT'
@@ -136,7 +124,6 @@ export type MandateStatus =
   | 'EXPIRED'
   | 'REJECTED';
 
-/** The owner's side of a management engagement: just what these screens need. */
 export interface OwnerMandate {
   id: string;
   propertyId: string;
@@ -147,8 +134,6 @@ export interface OwnerMandate {
   maintenanceApprovalCap: number | null;
   status: MandateStatus;
 }
-
-/* ---------------------------- spend approvals -------------------------- */
 
 export type SpendApprovalStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED';
 export type SpendApprovalRole = 'owner' | 'requester';
@@ -183,7 +168,6 @@ export interface SpendApproval {
   createdAt: string;
 }
 
-/** A mandate held for co-owner quorum, waiting on the signed-in co-owner. */
 export interface AwaitingCountersign {
   id: string;
   relationship: string;
@@ -193,8 +177,6 @@ export interface AwaitingCountersign {
   countersignApproved?: number;
   countersignRequired?: number;
 }
-
-/* ------------------------------- deposits ------------------------------ */
 
 export type DepositStatus = 'HELD' | 'PARTIALLY_RETURNED' | 'RETURNED';
 export type DeductionStatus = 'PROPOSED' | 'APPROVED' | 'REJECTED';
@@ -263,10 +245,8 @@ export interface DepositHold extends DepositListItem {
   };
 }
 
-/** A tenant's objection the owner has not answered yet. */
 export const disputeOpen = (d: DepositDeduction) => !!d.tenantDisputedAt && !d.disputeAnsweredAt;
 
-/** Why the deposit can't be returned yet, or null when it can. */
 export function returnBlocker(deposit: DepositHold): string | null {
   if (deposit.status === 'RETURNED') return null;
   if (deposit.deductions.some((d) => d.status === 'PROPOSED'))
@@ -275,8 +255,6 @@ export function returnBlocker(deposit: DepositHold): string | null {
     return "Answer the tenant's dispute before returning the deposit.";
   return null;
 }
-
-/* ------------------------------ inspections ---------------------------- */
 
 export type InspectionType = 'MOVE_IN' | 'MOVE_OUT' | 'ROUTINE';
 export type InspectionStatus = 'DRAFT' | 'COMPLETED' | 'SHARED';
@@ -365,8 +343,6 @@ export interface InspectionDetail extends InspectionListItem {
   tenantComment?: string | null;
 }
 
-/* --------------------------------- api --------------------------------- */
-
 /** A drafted reply to an owner's question; the manager edits and sends it. */
 export interface OwnerQueryDraft {
   queryId: string;
@@ -393,7 +369,7 @@ export const managementApi = {
   }) => apiFetch<QueryThread>('/owner-queries', { method: 'POST', body: input }),
   replyQuery: (id: string, body: string) =>
     apiFetch<QueryThread>(`/owner-queries/${id}/messages`, { method: 'POST', body: { body } }),
-  /** A drafted reply from the property's records, for the manager side. Nothing is sent. */
+  /** Nothing is sent. */
   draftQueryReply: (id: string) =>
     apiFetch<OwnerQueryDraft>(`/owner-queries/${id}/draft-reply`, { method: 'POST' }),
   resolveQuery: (id: string) =>

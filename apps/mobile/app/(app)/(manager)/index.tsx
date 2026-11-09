@@ -32,10 +32,6 @@ import { dashboardGreeting } from '@/components/dashboard/DashboardParts';
 import { CustodyBar } from '@/components/agency/CustodyBar';
 import { VerificationBanner } from '@/components/agency/VerificationBanner';
 
-/**
- * The agency home: whose property is in hand and what that engagement allows,
- * what needs attention across the firm, and the firm's figures this month.
- */
 export default function AgencyHome() {
   const { colors, spacing } = useTheme();
   const { profile } = useAuth();
@@ -82,7 +78,6 @@ export default function AgencyHome() {
   );
 }
 
-/** The selected client's property, and what the engagement allows. */
 function Workspace() {
   const { spacing, colors } = useTheme();
   const { selected, live, loading } = useCustody();
@@ -190,7 +185,6 @@ const SEVERITY = {
   info: { tone: 'info' as const, Icon: Info },
 };
 
-/** Map a web link from the attention feed to the mobile screen that shows it. */
 function mobileRoute(path: string): string | null {
   if (path.startsWith('/agency/mandates/')) return `/(app)/agency-mandate/${path.split('/').pop()}`;
   if (path.startsWith('/agency/mandates')) return '/(app)/(manager)/engagements';

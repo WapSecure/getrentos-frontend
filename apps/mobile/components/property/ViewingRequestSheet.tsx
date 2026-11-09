@@ -35,7 +35,6 @@ function ViewingRequestForm({ onClose, propertyId, propertyTitle }: Omit<Props, 
   const toast = useToast();
   const [notes, setNotes] = useState('');
   const [mode, setMode] = useState<'IN_PERSON' | 'VIDEO'>('IN_PERSON');
-  // Video viewings are offered only once the call service is set up.
   const videoCalls = useQuery({
     queryKey: ['video-calls', 'availability'],
     queryFn: viewingsApi.videoCallsAvailable,

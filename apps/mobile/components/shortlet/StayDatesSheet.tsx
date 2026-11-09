@@ -19,7 +19,6 @@ const nightsBetweenDays = (a: string, b: string) =>
     (new Date(`${b}T12:00:00`).getTime() - new Date(`${a}T12:00:00`).getTime()) / 86_400_000
   );
 
-/** "Sat 20 Dec" for the summary tiles. */
 const tileDate = (iso: string) =>
   new Date(`${iso}T12:00:00`).toLocaleDateString('en-NG', {
     weekday: 'short',
@@ -27,22 +26,16 @@ const tileDate = (iso: string) =>
     month: 'short',
   });
 
-/**
- * Pick a stay: tap the night you arrive, then the morning you leave. Taken
- * nights are struck through and a stay can't run across one; the checkout
- * morning itself may be a taken night (someone else arrives that day).
- */
+// A stay can't run across a taken night, but the checkout morning may be one (someone else arrives that day).
 export function StayDatesSheet(props: {
   open: boolean;
   onClose: () => void;
   value?: StayDates | null;
   onChange: (dates: StayDates | null) => void;
-  /** Taken nights, yyyy-MM-dd. */
   unavailable?: readonly string[];
   minNights?: number;
   title?: string;
 }) {
-  // A fresh picker each time it opens, starting from the current dates.
   return <Picker key={props.open ? 'open' : 'closed'} {...props} />;
 }
 
@@ -61,7 +54,6 @@ function Picker({
   const [start, setStart] = useState<string | null>(value?.checkIn ?? null);
   const [end, setEnd] = useState<string | null>(value?.checkOut ?? null);
 
-  /** The first taken night after check-in: the latest possible checkout. */
   const lastCheckout = useMemo(() => {
     if (!start || end) return null;
     let d = start;
@@ -206,7 +198,7 @@ const Month = memo(function Month({
 }) {
   const { colors, spacing } = useTheme();
   const cells = useMemo(() => {
-    const lead = (month.getDay() + 6) % 7; // Monday first
+    const lead = (month.getDay() + 6) % 7;
     const days = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
     const out: (string | null)[] = Array(lead).fill(null);
     for (let d = 1; d <= days; d += 1)
@@ -240,7 +232,6 @@ const Month = memo(function Month({
           const isStart = day === start;
           const isEnd = day === end;
           const inside = !!start && !!end && day > start && day < end;
-          // Choosing checkout: past the next taken night is out of reach.
           const beyond = !!start && !end && !!lastCheckout && day > lastCheckout;
           const pickingEnd = !!start && !end && day > start;
           const disabled = past || beyond || (isTaken && !(pickingEnd && day === lastCheckout));

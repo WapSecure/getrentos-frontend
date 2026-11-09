@@ -37,7 +37,6 @@ export const STAFF_TWO_FACTOR_EXPLAINER =
 
 const CODE_LENGTH = 6;
 
-/** The signed-in staff member's two-factor status, shared by the settings tab and the gate. */
 export function useStaffTwoFactorStatus() {
   return useQuery({
     queryKey: adminKeys.twoFactor,
@@ -69,10 +68,9 @@ function CodeForm({
   isPending: boolean;
   error: string | null;
   onSubmit: (code: string) => void;
-  /** Clears a stale "that code did not work" once the person types again. */
   onCodeChange: () => void;
   onCancel?: () => void;
-  /** Also take a one-time backup code (turning two-factor off without the phone). */
+  /** Also accepts a one-time backup code, for turning two-factor off without the phone. */
   allowBackupCode?: boolean;
 }) {
   const [code, setCode] = useState('');
@@ -127,11 +125,7 @@ function CodeForm({
   );
 }
 
-/**
- * Turns the authenticator app on or off for the signed-in staff member:
- * start enrolment, scan the QR (or type the secret), confirm with a code.
- * `gate` is the focused version shown when two-factor is off: it only sets up.
- */
+/** `gate` is the focused version shown when two-factor is off: it only sets up. */
 export function TwoFactorSetup({ gate = false }: { gate?: boolean }) {
   const queryClient = useQueryClient();
   const toast = useToast();
@@ -139,7 +133,6 @@ export function TwoFactorSetup({ gate = false }: { gate?: boolean }) {
   const [step, setStep] = useState<Step>('idle');
   const [enrollment, setEnrollment] = useState<TwoFactorEnrollment | null>(null);
   const [codeError, setCodeError] = useState<string | null>(null);
-  // Shown once, right after they are made (AU-07).
   const [freshCodes, setFreshCodes] = useState<string[] | null>(null);
   const [confirmNewCodes, setConfirmNewCodes] = useState(false);
 
@@ -162,8 +155,7 @@ export function TwoFactorSetup({ gate = false }: { gate?: boolean }) {
   const enable = useMutation({
     mutationFn: (token: string) => unwrap(accountSecurityService.enableTwoFactor(token)),
     onSuccess: (data) => {
-      // The confirmation used to get here may be the set-up-only kind; drop it
-      // so the next sensitive action asks again with the new factor.
+      // The confirmation used here may be set-up-only; drop it so the next sensitive action asks again with the new factor.
       clearStepUpToken();
       reset();
       // Refresh only once the codes are saved: in the sign-in gate, refreshing

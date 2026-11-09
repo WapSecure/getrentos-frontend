@@ -3,11 +3,7 @@ import { toQuery } from './query';
 import type { Paginated } from './properties';
 import { providerQuery, type PaymentProvider } from './paymentStatus';
 
-/**
- * Home Management ("Home care" in the app): work orders from report to paid
- * invoice, the assets in each home, preventive maintenance and service
- * targets. Owners and landlords; a Pro feature (402 otherwise).
- */
+/** A Pro feature (402 otherwise). */
 
 export type Priority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
 export type WorkOrderStatus = 'SUBMITTED' | 'ASSIGNED' | 'IN_PROGRESS' | 'RESOLVED' | 'CANCELLED';
@@ -73,15 +69,12 @@ export interface InvoiceLine {
   totalAmount?: number;
 }
 
-/** How paying an invoice would split between held funds and a card top-up. Whole naira. */
+/** Whole naira. */
 export interface InvoicePaymentPreview {
   invoiceId: string;
   invoiceTotal: number;
-  /** Paid from the money Sureground holds for the owner. */
   fromHeldFunds: number;
-  /** The shortfall paid by card. */
   topUp: number;
-  /** The card or bank fee the payer covers on the top-up. */
   topUpFee: number;
   /** What the card is charged: topUp + topUpFee. */
   topUpCharge: number;
@@ -189,7 +182,6 @@ export interface Unit {
 
 export type WorkOrderView = 'open' | 'resolved' | 'cancelled';
 
-/** Worked out by Sureground before approving a vendor's invoice. */
 export interface InvoiceCheck {
   invoiceId: string;
   checks: { level: 'ok' | 'watch' | 'concern'; text: string }[];
@@ -201,7 +193,6 @@ export interface InvoiceCheck {
 export const homeCareApi = {
   dashboard: () => apiFetch<HomeCareDashboard>('/home-management/dashboard'),
 
-  // ---- work orders ----
   workOrders: (status?: WorkOrderStatus, page = 1, pageSize = 30, propertyId?: string) =>
     apiFetch<Paginated<WorkOrder>>(
       `/home-management/work-orders${toQuery({ status, page, pageSize, propertyId })}`
@@ -248,7 +239,6 @@ export const homeCareApi = {
       body: reason ? { reason } : {},
     }),
 
-  // ---- quotes ----
   quotes: (id: string) => apiFetch<Paginated<Quote>>(`/home-management/work-orders/${id}/quotes`),
   addQuote: (
     id: string,
@@ -265,7 +255,6 @@ export const homeCareApi = {
       body: { reason },
     }),
 
-  // ---- invoices ----
   invoices: (id: string) =>
     apiFetch<Paginated<Invoice>>(`/home-management/work-orders/${id}/invoices`),
   addInvoice: (
@@ -283,7 +272,6 @@ export const homeCareApi = {
     }),
   submitInvoice: (invoiceId: string) =>
     apiFetch<Invoice>(`/home-management/invoices/${invoiceId}/submit`, { method: 'POST' }),
-  /** Checks on an invoice before approving it. Read-only. */
   checkInvoice: (invoiceId: string) =>
     apiFetch<InvoiceCheck>(`/home-management/invoices/${invoiceId}/check`),
   approveInvoice: (invoiceId: string) =>
@@ -298,34 +286,21 @@ export const homeCareApi = {
       method: 'POST',
       body: { reason },
     }),
-  /**
-   * How paying would split, before anything is paid: what comes from the money
-   * Sureground holds for the owner, and what a card top-up (with its fee, for
-   * `provider`) would cover. A preview: worked out again when the invoice is paid.
-   */
+  /** A preview: worked out again when the invoice is paid. */
   invoicePaymentPreview: (invoiceId: string, provider?: PaymentProvider) =>
     apiFetch<InvoicePaymentPreview>(
       `/home-management/invoices/${invoiceId}/payment-preview${providerQuery(provider)}`
     ),
-  /**
-   * Pays the vendor out of the owner's held rent. When that doesn't cover it,
-   * nothing is sent yet: `topUp` is a Paystack checkout for the shortfall, and
-   * the vendor is paid once it lands.
-   */
+  /** When held rent doesn't cover it, nothing is sent yet: `topUp` is a checkout for the shortfall, and the vendor is paid once it lands. */
   payInvoice: (invoiceId: string, provider?: PaymentProvider) =>
     apiFetch<{
       payoutStatus: string;
       topUp?: { amount: number; authorizationUrl: string; reference: string };
     }>(`/home-management/invoices/${invoiceId}/pay${providerQuery(provider)}`, { method: 'POST' }),
 
-  // ---- vendors (scoped to the signed-in user) ----
   vendors: () =>
     apiFetch<Paginated<Vendor>>('/landlord/vendors?page=1&pageSize=100&activeOnly=true'),
-  /**
-   * A manager assigns from the vendors the API allows for clients' properties,
-   * not from a vendor list of their own. Wrapped as a page so the picker reads
-   * both the same way.
-   */
+  /** A manager assigns from the vendors the API allows for clients' properties, not from a list of their own. */
   managerVendors: async (): Promise<Paginated<Vendor>> => {
     const items = await apiFetch<Vendor[]>('/home-management/vendors');
     return { items, total: items.length, page: 1, pageSize: items.length, totalPages: 1 };
@@ -333,13 +308,11 @@ export const homeCareApi = {
   addVendor: (input: { name: string; serviceType: string; phone: string }) =>
     apiFetch<Vendor>('/landlord/vendors', { method: 'POST', body: input }),
 
-  // ---- homes ----
   units: (propertyId: string) =>
     apiFetch<Unit[]>(`/home-management/units${toQuery({ propertyId })}`),
   addUnit: (propertyId: string, unitName: string) =>
     apiFetch<Unit>('/home-management/units', { method: 'POST', body: { propertyId, unitName } }),
 
-  // ---- assets ----
   assets: (propertyId?: string, status?: AssetStatus) =>
     apiFetch<Paginated<Asset>>(
       `/home-management/assets${toQuery({ propertyId, status, page: 1, pageSize: 100 })}`
@@ -358,7 +331,6 @@ export const homeCareApi = {
   setAssetStatus: (id: string, status: AssetStatus) =>
     apiFetch<Asset>(`/home-management/assets/${id}/status`, { method: 'PATCH', body: { status } }),
 
-  // ---- preventive plans ----
   plans: (propertyId?: string) =>
     apiFetch<Paginated<Plan>>(
       `/home-management/plans${toQuery({ propertyId, page: 1, pageSize: 100 })}`
@@ -375,7 +347,6 @@ export const homeCareApi = {
   completePlan: (id: string) =>
     apiFetch<Plan>(`/home-management/plans/${id}/complete`, { method: 'POST' }),
 
-  // ---- service targets ----
   slaPolicies: (propertyId: string) =>
     apiFetch<Paginated<SlaPolicy>>(
       `/home-management/sla-policies${toQuery({ propertyId, page: 1, pageSize: 20 })}`
@@ -394,8 +365,6 @@ export const homeCareApi = {
       `/home-management/timeline${toQuery({ propertyId, limit })}`
     ),
 };
-
-/* ------------------------------- vocabulary ------------------------------- */
 
 export const CATEGORIES: { value: Category; label: string }[] = [
   { value: 'PLUMBING', label: 'Plumbing' },
@@ -424,17 +393,12 @@ export const STATUS_LABEL: Record<WorkOrderStatus, string> = {
 export const categoryLabel = (c: string) =>
   CATEGORIES.find((x) => x.value === c)?.label ?? c.charAt(0) + c.slice(1).toLowerCase();
 
-/** Minutes as "45 min", "6 h", "2 d". */
 export function minutesLabel(m: number): string {
   if (m < 60) return `${m} min`;
   if (m < 60 * 24) return `${Math.round((m / 60) * 10) / 10} h`;
   return `${Math.round((m / 1440) * 10) / 10} d`;
 }
 
-/**
- * Where a work order's clock stands: the next promise it has to keep, and
- * whether that promise is already broken. Resolved/cancelled have no clock.
- */
 export function slaState(
   w: Pick<WorkOrder, 'status' | 'acknowledgedAt' | 'responseDueAt' | 'resolutionDueAt'>,
   now = Date.now()
@@ -450,7 +414,6 @@ export function slaState(
     : { label: `${what} within ${minutesLabel(mins)}`, overdue: false, due };
 }
 
-/** What the next useful step on a work order is, in words. */
 export function nextStep(w: WorkOrder): string {
   if (w.status === 'RESOLVED') return 'Done. Invoice the vendor if you haven’t.';
   if (w.status === 'CANCELLED') return 'Cancelled.';

@@ -10,12 +10,7 @@ import type { PlanTier } from '@/lib/api/estateManager';
 import { pickPhoto } from '@/lib/filePicker';
 import { FilePickRow } from '@/components/forms/FilePickRow';
 
-/**
- * What an estate below Enterprise sees instead of a feature it hasn't bought.
- * `current` is the estate's plan when known: the API's refusal first, else the
- * estate's own `planTier`. Nothing gated here is a safety feature, and the copy
- * says so, so a manager never reads the lock as "the gate is unsafe".
- */
+// Nothing gated here is a safety feature, and the copy says so, so a manager never reads the lock as "the gate is unsafe".
 export function EnterpriseUpsell({
   feature,
   points,
@@ -52,7 +47,6 @@ export function EnterpriseUpsell({
   );
 }
 
-/** Which gate something happened at. Hidden until the estate has named its gates. */
 export function GateChoice({
   gates,
   value,
@@ -82,7 +76,6 @@ export function GateChoice({
   );
 }
 
-/** An optional photo, picked from the library or camera. */
 export function PhotoField({
   value,
   onChange,
@@ -102,11 +95,7 @@ export function PhotoField({
   );
 }
 
-/**
- * A code the API shows exactly once: a regular visitor's PIN, a checkpoint's
- * code. Says so plainly, and offers to share it now, because nothing can
- * fetch it back afterwards.
- */
+// The API shows this code exactly once and nothing can fetch it back, hence the offer to share it now.
 export function OneTimeCode({
   title,
   code,
@@ -160,7 +149,6 @@ export function OneTimeCode({
   );
 }
 
-/** A headline number with its label, for a phone-width row of figures. */
 export function StatTile({
   value,
   label,

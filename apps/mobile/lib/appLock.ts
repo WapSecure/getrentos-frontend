@@ -3,11 +3,6 @@ import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as LocalAuthentication from 'expo-local-authentication';
 
-/**
- * App lock: Face ID / fingerprint before the app shows anything, for people
- * who hand their phone around. Off by default, per device.
- */
-
 const KEY = 'sureground.appLock';
 
 let enabled: boolean | null = null;
@@ -24,7 +19,6 @@ const load = () =>
     })
     .catch(() => set(false)));
 
-/** `null` while the stored setting is being read. */
 export function useAppLockEnabled() {
   const value = useSyncExternalStore(
     (l) => {
@@ -46,11 +40,9 @@ export function useAppLockEnabled() {
 
 export interface BiometricSupport {
   available: boolean;
-  /** "Face ID", "Touch ID", "fingerprint" or "face unlock" — for button copy. */
   label: string;
 }
 
-/** Whether this phone can do biometrics and has them set up. */
 export async function biometricSupport(): Promise<BiometricSupport> {
   if (Platform.OS === 'web') return { available: false, label: 'biometrics' };
   const [hardware, enrolled, types] = await Promise.all([
@@ -64,7 +56,6 @@ export async function biometricSupport(): Promise<BiometricSupport> {
   return { available: hardware && enrolled, label };
 }
 
-/** Prompts for biometrics (falling back to the phone's passcode). */
 export async function unlockWithBiometrics(reason: string): Promise<boolean> {
   const result = await LocalAuthentication.authenticateAsync({
     promptMessage: reason,

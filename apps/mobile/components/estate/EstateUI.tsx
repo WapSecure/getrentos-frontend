@@ -37,10 +37,7 @@ import { StatusPill, isUpgradeError } from '@/components/host/HostUI';
 
 const naira = (n: number) => `₦${Math.round(n).toLocaleString('en-NG')}`;
 
-/**
- * Asks before recording a payment. A due the resident is paying online gets a
- * sterner question: marking it paid as well would collect twice.
- */
+// A due being paid online gets a sterner question: marking it paid as well would collect twice.
 export function confirmPaid(d: Due, onConfirm: () => void) {
   const what = `${naira(dueTotal(d))} ${dueCategoryLabel(d.category).toLowerCase()} for ${d.unitLabel}`;
   if (d.status === 'processing') {
@@ -59,8 +56,6 @@ export function confirmPaid(d: Due, onConfirm: () => void) {
     { text: 'Mark paid', onPress: onConfirm },
   ]);
 }
-
-/* ---------------------------------- rows ---------------------------------- */
 
 export function HouseholdRow({ h }: { h: Household }) {
   const { colors, spacing } = useTheme();
@@ -105,10 +100,6 @@ export function HouseholdRow({ h }: { h: Household }) {
   );
 }
 
-/**
- * A due as a line: who owes, what for, how much and how late. `onPaid` shows a
- * "Mark paid" action for dues still open.
- */
 export function DueRow({
   d,
   onPaid,
@@ -206,8 +197,6 @@ export function AnnouncementCard({ a, onPress }: { a: Announcement; onPress?: ()
   );
 }
 
-/* --------------------------------- sheets --------------------------------- */
-
 export function EstateSwitcherSheet({
   open,
   onClose,
@@ -276,7 +265,6 @@ export function EstateSwitcherSheet({
   );
 }
 
-/** Add a household, or edit one when `household` is given. */
 export function HouseholdSheet({
   open,
   onClose,
@@ -393,7 +381,6 @@ function HouseholdForm({
   );
 }
 
-/** Tie a resident's Sureground account to the household so they can pay and get passes. */
 export function LinkResidentSheet({
   open,
   onClose,
@@ -466,7 +453,6 @@ function LinkResidentForm({
   );
 }
 
-/** Post an announcement, or edit one when `announcement` is given. */
 export function AnnouncementSheet({
   open,
   onClose,
@@ -479,9 +465,7 @@ export function AnnouncementSheet({
   onClose: () => void;
   estateId: string;
   announcement?: Announcement;
-  /** Notes to draft from, e.g. a shared problem from the reports digest. */
   initialNotes?: string;
-  /** How many households will be told, for the confirmation line. */
   households?: number;
 }) {
   return (

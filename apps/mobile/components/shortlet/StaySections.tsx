@@ -40,8 +40,6 @@ import {
 import { formatDate } from '@/lib/format';
 import { InfoRow, Section } from './StayUI';
 
-/* ---------------------------------- host ---------------------------------- */
-
 export function HostBlock({
   listing,
   onMessage,
@@ -83,8 +81,6 @@ export function HostBlock({
   );
 }
 
-/* ------------------------------- essentials ------------------------------- */
-
 export function EssentialsBlock({ listing }: { listing: ShortletListing }) {
   const { spacing } = useTheme();
   const power = powerSummary(listing);
@@ -115,8 +111,6 @@ export function EssentialsBlock({ listing }: { listing: ShortletListing }) {
     </Section>
   );
 }
-
-/* ------------------------------- house rules ------------------------------ */
 
 function RuleRow({
   label,
@@ -181,8 +175,6 @@ export function RulesBlock({ listing }: { listing: ShortletListing }) {
     </Section>
   );
 }
-
-/* --------------------------------- pricing -------------------------------- */
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -305,8 +297,6 @@ export function FairPriceNote({ listing }: { listing: ShortletListing }) {
     </View>
   );
 }
-
-/* ------------------------------- inspection ------------------------------- */
 
 export function InspectionBlock({ listing }: { listing: ShortletListing }) {
   const { colors, spacing } = useTheme();

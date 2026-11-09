@@ -1,7 +1,6 @@
 import { Platform } from 'react-native';
 import * as Haptics from 'expo-haptics';
 
-/** Haptics that silently no-op where the platform can't do them (web preview). */
 export const haptics = {
   success: () =>
     Platform.OS === 'web'

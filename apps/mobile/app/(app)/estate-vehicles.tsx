@@ -51,11 +51,6 @@ type View_ = 'inside' | 'all';
 
 const when = (iso: string) => `${formatDate(iso, 'short')}, ${formatTime(iso)}`;
 
-/**
- * Vehicles through the estate's gates: who drove in, and whether they have
- * left. The office can log one itself and mark one as gone; the guard's
- * console writes to the same log.
- */
 export default function EstateVehicles() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();

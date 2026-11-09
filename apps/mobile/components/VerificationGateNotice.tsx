@@ -4,7 +4,6 @@ import { ShieldAlert } from 'lucide-react-native';
 import { Button, Text, useTheme } from '@sureground/ui-native';
 import { readGate } from '@/lib/verificationGate';
 
-/** Inline callout for a verification or trust-tier 403, with the way forward. */
 export function VerificationGateNotice({
   error,
   verifyHref = '/(app)/verify-identity',
@@ -13,20 +12,14 @@ export function VerificationGateNotice({
 }: {
   error: unknown;
   verifyHref?: Href;
-  /** The persona's trust profile: used when the score, not evidence, is short. */
   scoreHref?: Href;
-  /** Called before navigating, e.g. to close the sheet the notice sits in. */
   onNavigate?: () => void;
 }) {
   const { colors, spacing, radius } = useTheme();
   const gate = readGate(error);
   if (!gate) return null;
 
-  // Assigned in two statements rather than as one ternary: `expo-router`'s typed
-  // routes expand `Href` to a union with one member per screen, and a ternary
-  // between two of them makes TypeScript materialise the pair and give up once
-  // the app has a few hundred routes (TS2590, "union type that is too complex to
-  // represent"). Assigning each candidate on its own never builds that union.
+  // Two assignments, not a ternary: a ternary between typed-route Hrefs makes TypeScript give up (TS2590, union too complex).
   let destination: Href = verifyHref;
   if (gate.scoreWithheld && scoreHref) destination = scoreHref;
 

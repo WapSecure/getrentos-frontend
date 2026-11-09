@@ -1,9 +1,3 @@
-/**
- * The inspector's offline capture queue: photos survive until uploaded, a
- * retry never mockFiles twice, a dropped connection stops the drain, and a
- * permanent refusal is kept for the inspector to see.
- */
-
 import { enqueueCapture, flushCaptures, loadCaptureQueue } from '../lib/inspectionCaptureQueue';
 import { ApiError } from '../lib/api/client';
 
@@ -141,7 +135,6 @@ describe('inspection capture queue', () => {
         error: 'This inspection is not open for evidence',
       }),
     ]);
-    // A refused capture is not retried on its own.
     mockUploadEvidence.mockClear();
     await flushCaptures();
     expect(mockUploadEvidence).not.toHaveBeenCalled();

@@ -22,7 +22,7 @@ export default function TwoFactor() {
   const [code, setCode] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  // Without the phone, a one-time backup code stands in (AU-07).
+  // Without the phone, a one-time backup code stands in.
   const [useBackupCode, setUseBackupCode] = useState(false);
 
   useEffect(() => {

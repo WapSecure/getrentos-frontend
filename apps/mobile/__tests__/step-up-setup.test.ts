@@ -135,7 +135,6 @@ describe('addPasskeyWithEmailedCode', () => {
   });
 });
 
-/** Security gap AU-07: a one-time backup code stands in for the authenticator code. */
 describe('second-factor codes', () => {
   const { cleanSecondFactorInput, isSecondFactorCode } =
     jest.requireActual<typeof import('@sureground/shared')>('@sureground/shared');

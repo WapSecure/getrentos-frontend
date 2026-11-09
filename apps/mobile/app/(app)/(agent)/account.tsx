@@ -32,7 +32,6 @@ const go = (href: Href) => () => router.push(href);
 
 export default function AgentAccount() {
   const { profile } = useAuth();
-  // The agent profile adds what the session doesn't carry: ratings and tasks done.
   const agent = useQuery({ queryKey: qk.agent.profile, queryFn: agentApi.profile }).data;
   const { verified, known: identityKnown, label: identityLabel } = useIdentityVerification();
   const { licenseLabel, inAgency } = useProSettings();

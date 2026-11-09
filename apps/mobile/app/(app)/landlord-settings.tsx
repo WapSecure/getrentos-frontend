@@ -187,7 +187,7 @@ function ProfileForm({ initial }: { initial: LandlordProfile }) {
       return landlordApi.uploadAvatar(file);
     },
     onSuccess: (result) => {
-      if (!result) return; // the picker was dismissed
+      if (!result) return;
       qc.invalidateQueries({ queryKey: qk.landlord.profile });
       toast.show('Photo updated.', 'success');
     },
@@ -259,7 +259,6 @@ function ProfileForm({ initial }: { initial: LandlordProfile }) {
         placeholder="+234 801 234 5678"
         savedPhone={initial.phone}
         value={phone}
-        // Digits only, with an optional leading +.
         onChangeText={(v) => setPhone(v.replace(/(?!^\+)\D/g, ''))}
       />
       <TextField
@@ -286,8 +285,7 @@ function AutomationCard({ initial }: { initial: AutomationSettings }) {
   const [state, setState] = useState(initial);
 
   const save = useMutation({
-    // Carry the pre-change state so a failure can put the switch back exactly
-    // where it was, rather than guessing at what to undo.
+    // Carry the pre-change state so a failure puts the switch back exactly where it was.
     mutationFn: ({ next }: { next: AutomationSettings; previous: AutomationSettings }) =>
       landlordApi.updateAutomation(next),
     onSuccess: () => qc.invalidateQueries({ queryKey: qk.landlord.automation }),
@@ -297,8 +295,7 @@ function AutomationCard({ initial }: { initial: AutomationSettings }) {
     },
   });
 
-  // Automatic invoice generation is not live yet, so it must not be offered
-  // as a setting that appears to save but has no operational effect.
+  // Automatic invoice generation isn't live: don't offer a setting that saves but does nothing.
   const keys: (keyof AutomationSettings)[] = ['rentReminders', 'overdueAlerts', 'leaseExpiry'];
 
   return (

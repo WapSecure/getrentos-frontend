@@ -11,12 +11,7 @@ interface Props {
 
 const PLOT_HEIGHT = 110;
 
-/**
- * Income against expenses per month. Both series are Naira, so they share one
- * axis: never a second scale. Two series means a legend is always present;
- * tapping a period reveals both its figures, the touch equivalent of a hover
- * tooltip.
- */
+// Both series are Naira, so they share one axis: never a second scale.
 export function IncomeExpenseChart({ points }: Props) {
   const { spacing, radius, scheme } = useTheme();
   const [selected, setSelected] = useState<number | null>(null);
@@ -32,7 +27,6 @@ export function IncomeExpenseChart({ points }: Props) {
 
   return (
     <View style={{ gap: spacing.sm }}>
-      {/* Readout for the selected period: values wear text tokens, not series colour. */}
       <View style={{ height: 34, justifyContent: 'center' }}>
         {shown ? (
           <View style={{ gap: 2 }}>
@@ -67,7 +61,6 @@ export function IncomeExpenseChart({ points }: Props) {
                 justifyContent: 'flex-end',
                 flexDirection: 'row',
                 alignItems: 'flex-end',
-                // 2px surface gap between the paired bars.
                 gap: 2,
                 opacity: isActive ? 1 : 0.55,
               }}
@@ -105,7 +98,7 @@ export function IncomeExpenseChart({ points }: Props) {
         ))}
       </View>
 
-      {/* Two series, so a legend is always present: identity is never colour alone. */}
+      {/* A legend always: identity is never colour alone. */}
       <View style={{ gap: spacing.xs }}>
         <Divider />
         <View style={{ flexDirection: 'row', gap: spacing.lg }}>

@@ -21,15 +21,9 @@ interface Props {
   isFetching: boolean;
   language: ReplyLanguage;
   onLanguageChange: (language: ReplyLanguage) => void;
-  /** Put the suggested rent, end date and note into the offer. */
   onUse: (advice: RenewalAdvice) => void;
 }
 
-/**
- * "Renew or re-let?" on the phone: what each path brings in over the first
- * year, the tenant's record on this lease and the notice deadline. It never
- * decides for the landlord, and hides if it fails: the form still works.
- */
 export function RenewalAdviceCard({
   advice,
   isLoading,

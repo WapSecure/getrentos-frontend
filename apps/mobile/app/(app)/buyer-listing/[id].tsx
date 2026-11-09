@@ -55,8 +55,7 @@ export default function BuyerListingDetail() {
     queryFn: () => buyerApi.getListing(id),
   });
   const listing = query.data;
-  // An offer still in play on this home: the button should lead back to it,
-  // not start a second one beside a counter the seller is waiting on.
+  // An offer still in play: the button leads back to it rather than starting a second.
   const myOffers = useQuery({
     queryKey: qk.buyer.offers(1, 100),
     queryFn: () => buyerOffersApi.list(1, 100),

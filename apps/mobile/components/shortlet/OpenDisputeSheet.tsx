@@ -13,7 +13,6 @@ import { haptics } from '@/lib/haptics';
 
 const MIN_DESCRIPTION = 20;
 
-/** Ask Sureground support to step in on a stay. The thread continues in Disputes. */
 export function OpenDisputeSheet(props: {
   open: boolean;
   onClose: () => void;

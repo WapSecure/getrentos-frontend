@@ -50,11 +50,7 @@ const PERSONA: Partial<Record<string, PlanPersona>> = {
 
 const date = (iso: string) => formatDate(iso, 'medium');
 
-/**
- * Plan and receipts for every paying persona. Pro is bought here through the
- * App Store / Google Play (store rules); a plan bought on the web is still
- * cancelled here, and a store plan is managed in the store.
- */
+// Pro is bought through the App Store / Google Play (store rules); a web plan is still cancelled here, a store plan in the store.
 export default function Billing() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
@@ -224,7 +220,6 @@ function PlanCard({ billing: b }: { billing: MyBilling }) {
           onPress={confirmCancel}
         />
       ) : pro && b.cancelAtPeriodEnd ? (
-        // Changed their mind before the period ended.
         <Button
           label="Keep my plan"
           loading={reactivate.isPending}
@@ -240,11 +235,7 @@ function PlanCard({ billing: b }: { billing: MyBilling }) {
   );
 }
 
-/**
- * Pro through the App Store / Google Play. What the store charges is shown in
- * the store's own formatting, with the auto-renewal terms the stores require
- * next to the button.
- */
+// The stores require the auto-renewal terms next to the button.
 function BuyPro() {
   const { spacing, radius } = useTheme();
   const qc = useQueryClient();
@@ -252,8 +243,7 @@ function BuyPro() {
   const [activating, setActivating] = useState(false);
   const offers = useQuery({ queryKey: ['store', 'pro-offers'], queryFn: loadProOffers });
 
-  // The store confirms the purchase at once; our API hears via RevenueCat's
-  // webhook a moment later. Wait for it rather than claiming Pro early.
+  // The store confirms at once but our API hears via RevenueCat's webhook later: wait for it before claiming Pro.
   const waitForPro = async () => {
     setActivating(true);
     for (let i = 0; i < 15; i += 1) {

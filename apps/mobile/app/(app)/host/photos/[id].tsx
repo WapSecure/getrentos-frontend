@@ -27,17 +27,11 @@ import { DetailHeader } from '@/components/dashboard/DetailHeader';
 const MAX_PHOTOS = 20;
 
 interface Photo {
-  /** Storage key once uploaded; null while uploading. */
   key: string | null;
   uri: string;
   failed?: boolean;
 }
 
-/**
- * The listing's gallery. The first photo is the cover guests see in search.
- * Without photos of its own a listing shows the property's, so a host can
- * start from those and replace them when ready.
- */
 export default function HostPhotos() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, spacing, radius } = useTheme();
@@ -96,7 +90,6 @@ function Gallery({ listing: l }: { listing: HostListing }) {
     if (!picked.length) return;
     const pending: Photo[] = picked.map((f) => ({ key: null, uri: f.uri }));
     setPhotos((cur) => [...cur, ...pending]);
-    // Upload in parallel; each tile fills in as its upload lands.
     await Promise.all(
       picked.map(async (file) => {
         try {
@@ -126,7 +119,6 @@ function Gallery({ listing: l }: { listing: HostListing }) {
     onError: () => void haptics.error(),
   });
 
-  // The video saves on its own, straight away, apart from the photo order.
   const refresh = () => qc.invalidateQueries({ queryKey: qk.host.listings });
   const attachVideo = async (file: PickedVideo, onSite: VideoOnSiteReport | null) => {
     const { key } = await hostShortletsApi.uploadVideo(file);

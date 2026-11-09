@@ -7,13 +7,8 @@ import { tourSource, type VideoStream } from '@sureground/shared';
 import { EmbedFrame } from './EmbedFrame';
 import { VideoTourPlayer } from './VideoTourPlayer';
 
-/** The player is a cinema: black behind the video and white chrome, in either theme. */
 const ON_VIDEO = { bg: '#000', fg: '#fff' };
 
-/**
- * The listing's video tour and 360° tour, full screen in the app. When a
- * listing has both, the viewer switches between them; neither hides the other.
- */
 export function VideoTourSheet({
   open,
   onClose,
@@ -27,7 +22,6 @@ export function VideoTourSheet({
   onClose: () => void;
   title: string;
   videoUrl?: string | null;
-  /** The uploaded video as an adaptive stream, when encoded. */
   videoStream?: VideoStream | null;
   tourUrl?: string | null;
   onExpired?: () => void;

@@ -131,7 +131,6 @@ for (const { type, binary } of [
     await page.reload();
     await expect(page.getByText('Waiting to upload', { exact: true })).toBeVisible();
     expect(await queuedCount(page, binary)).toBe(1);
-    // A refused manual retry must show an error and retain the durable copy.
     await page.getByRole('button', { name: 'Retry', exact: true }).click();
     await expect(page.getByText('Upload could not be completed')).toBeVisible();
     expect(await queuedCount(page, binary)).toBe(1);

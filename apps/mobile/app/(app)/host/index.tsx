@@ -29,10 +29,6 @@ import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { HostFeeNote, StayCard } from '@/components/host/HostUI';
 import { goBack } from '@/lib/goBack';
 
-/**
- * The host's morning view: what needs a reply, who's arriving, and what's
- * ready to withdraw. Everything else is one tap away.
- */
 export default function HostingHome() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
@@ -364,7 +360,6 @@ function Tile({
   );
 }
 
-/** First visit: what hosting is and one clear next step. */
 function FirstListing() {
   const { colors, spacing } = useTheme();
   const steps = [

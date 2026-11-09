@@ -66,7 +66,6 @@ function ChargeForm({
     enabled: !!propertyId,
   });
 
-  // A charge can target several units at once, so selection is a set.
   const [unitIds, setUnitIds] = useState<string[]>([]);
   const [category, setCategory] = useState<ChargeCategory>('RENT');
   const [cycle, setCycle] = useState<BillingCycle>('MONTHLY');
@@ -84,7 +83,6 @@ function ChargeForm({
         dueDate,
         billingCycle: cycle,
       };
-      // One unit uses the single endpoint; several use bulk.
       return unitIds.length === 1
         ? landlordApi.charge({ ...base, unitId: unitIds[0] })
         : landlordApi.bulkCharge({ ...base, unitIds });

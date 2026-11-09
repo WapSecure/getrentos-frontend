@@ -1,6 +1,5 @@
 import { apiFetch } from './client';
 
-/** "Your lease, explained": the renter's own lease, any notice served, and renewal advice. */
 export interface LeaseGuide {
   summary: string[];
   renewalAdvice: string | null;

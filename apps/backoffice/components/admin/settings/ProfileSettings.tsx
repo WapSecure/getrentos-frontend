@@ -65,8 +65,7 @@ const ProfileSettingsForm = ({
   const toast = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Email, and a phone number already on the account, change only through
-  // their verified flows (a code to the new address or number).
+  // Email and an existing phone change only through their verified flows.
   const hasPhone = !!baseline.phone;
   const isDirty = fullName.trim() !== baseline.fullName || (!hasPhone && phone.trim() !== '');
   const isValid = fullName.trim().length >= 2;
@@ -129,8 +128,7 @@ const ProfileSettingsForm = ({
             height={64}
             className="w-16 h-16 rounded-full object-cover"
             loading="lazy"
-            // A short-lived signed storage URL: the optimiser can't cache it and its
-            // host need not be on the allowlist, which otherwise crashes the page.
+            // A short-lived signed URL: the optimiser can't cache it and its host isn't on the allowlist.
             unoptimized
           />
         ) : (

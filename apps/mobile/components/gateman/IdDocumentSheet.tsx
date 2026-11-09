@@ -18,33 +18,7 @@ import { qk } from '@/lib/query/keys';
 import { haptics } from '@/lib/haptics';
 import { Image as ExpoImage } from 'expo-image';
 
-/**
- * Recording the identity document a guard was shown.
- *
- * ## The notice is the most important thing on this screen
- *
- * A guard who believes this step admits somebody will start refusing arrivals who
- * cannot produce ID — which turns the estate's policy into ours and turns a
- * record into a gate. It says what the record is FOR instead, and it is stated
- * above the capture rather than after it, because by the time the photo is taken
- * the belief has already done its damage.
- *
- * ## Why the existing document is shown first
- *
- * One check per pass, so opening this sheet on a pass that already has one shows
- * what was recorded — with the photograph, since a guard at the barrier is
- * allowed to look at it — and offers to replace it. Without that, the guard takes
- * a second photograph to see whether the first one worked.
- *
- * ## Why this is not queued offline
- *
- * Every other gate write goes into the offline queue. This one deliberately does
- * not: the photograph IS the evidence, and a write that waited in a queue would
- * be filed against the moment the network returned rather than the moment the
- * guard looked at the document. A guard with no connection keeps the pass flow
- * and loses the photo, which is the right way round — an admission that happened
- * is worth more than a record of a document nobody can now vouch for.
- */
+// Deliberately not queued offline: the photo is the evidence, and a queued write would be filed against when the network returned, not when the guard looked.
 export function IdDocumentSheet({
   open,
   onClose,
@@ -56,7 +30,6 @@ export function IdDocumentSheet({
   onClose: () => void;
   estateId: string;
   passId: string;
-  /** Shown in the header so the guard can see whose document this is. */
   visitorName?: string;
 }) {
   const { colors, spacing } = useTheme();
@@ -69,18 +42,7 @@ export function IdDocumentSheet({
 
   const existing = useQuery({
     queryKey: qk.gateman.visitorIdCheck(estateId, passId),
-    /**
-     * Coalesced to `null` in the query function, and that is not defensive
-     * padding — it is the "no document recorded" case, which is an allowed and
-     * ordinary outcome.
-     *
-     * The API answers a handler returning `null` with 200 and NO BODY, and
-     * `apiFetch` returns `undefined` for an empty body while its `as T` cast
-     * hides it. react-query rejects `undefined` outright ("Query data cannot be
-     * undefined"), so without this the normal case would arrive as an ERROR and
-     * the sheet would claim the record could not be read. E3's emergency roll
-     * call hit the identical trap, and the web dialog next to this one did too.
-     */
+    // Coalesced to null: the API answers null with 200 and no body, apiFetch returns undefined, and react-query rejects undefined, so the normal "no document" case would show as an error.
     queryFn: async () => (await gatemanApi.getVisitorIdCheck(estateId, passId)) ?? null,
     enabled: open && !!passId,
   });
@@ -94,8 +56,6 @@ export function IdDocumentSheet({
       setFailure(null);
       setFile(null);
       void haptics.success();
-      // The office's view of the same pass is now out of date, and so is this
-      // sheet's idea of what was already recorded.
       void queryClient.invalidateQueries({
         queryKey: qk.gateman.visitorIdCheck(estateId, passId),
       });
@@ -103,9 +63,7 @@ export function IdDocumentSheet({
     },
     onError: (error) => {
       void haptics.tap();
-      // Shown inline rather than only as a toast: a refusal here has a reason
-      // worth reading ("that file type cannot be recorded"), and a toast that
-      // disappears leaves the guard guessing.
+      // Inline, not only a toast: the refusal's reason is worth reading.
       setFailure(
         error instanceof ApiError || error instanceof Error
           ? error.message

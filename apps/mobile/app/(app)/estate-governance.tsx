@@ -57,11 +57,6 @@ type Panel =
   | { kind: 'actions' | 'versions' | 'signatures'; record: GovernanceRecord }
   | null;
 
-/**
- * The estate's rules and decisions: bylaws and meeting minutes kept against
- * the estate itself, so they outlast any one committee. Uploading is free;
- * asking the committee to sign is Pro.
- */
 export default function EstateGovernance() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();

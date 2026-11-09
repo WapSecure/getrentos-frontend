@@ -14,11 +14,9 @@ import { Text, useTheme } from '@sureground/ui-native';
 export interface PropertyGalleryProps {
   images: string[];
   height?: number;
-  /** Message shown when the listing has no photos. */
   emptyLabel?: string;
 }
 
-/** Swipeable photo gallery with page dots, falling back to a labelled placeholder. */
 export function PropertyGallery({
   images,
   height = 260,
@@ -27,9 +25,7 @@ export function PropertyGallery({
   const { colors, spacing } = useTheme();
   const window = useWindowDimensions();
   const [page, setPage] = useState(0);
-  // Each photo is exactly as wide as the gallery itself. The window's width at
-  // launch is not that on the web, in split screen or after a rotation, and a
-  // narrower photo let the next one show beside it.
+  // Each photo is exactly the gallery's width: the launch window width is wrong on the web, in split screen and after a rotation.
   const [measured, setMeasured] = useState<number | null>(null);
   const width = measured ?? window.width;
 
@@ -81,8 +77,7 @@ export function PropertyGallery({
             recyclingKey={uri}
             transition={200}
             accessible={false}
-            // On the web build expo-image renders an <img>; alt keeps it from
-            // being read as an unnamed image. The scroll view announces the page.
+            // On the web build expo-image renders an <img>; alt keeps it from being read as an unnamed image.
             alt={`Photo ${i + 1} of ${images.length}`}
             style={{ width, height }}
           />
@@ -119,7 +114,6 @@ export function PropertyGallery({
   );
 }
 
-/** Cover first, then the gallery, with duplicates collapsed. */
 export function toGallery(image?: string, images?: string[]): string[] {
   return [...new Set([image, ...(images ?? [])].filter((u): u is string => !!u))];
 }

@@ -64,8 +64,7 @@ export default function PrivacySettings() {
         }
       >
         {query.data ? (
-          /* Mounted only once the stored bag has arrived, so the form can seed its
-             own state from props instead of syncing it in an effect. */
+          /* Mounted only once the stored bag arrives, so the form seeds from props instead of syncing in an effect. */
           <PrivacyForm
             initialPrivacy={{ ...DEFAULT_PRIVACY, ...(query.data.privacy ?? {}) }}
             initialShareTenancyStanding={query.data.shareTenancyStanding === true}
@@ -104,7 +103,7 @@ function PrivacyForm({
     mutationFn: (value: boolean) => preferencesApi.update({ shareTenancyStanding: value }),
     onSuccess: () => qc.invalidateQueries({ queryKey: qk.renter.preferences }),
     onError: (e, value) => {
-      setShareTenancyStanding(!value); // put the switch back where it was
+      setShareTenancyStanding(!value);
       toast.show(errorMessage(e, 'Could not update that.'), 'error');
     },
   });

@@ -1,7 +1,6 @@
 import { createElement } from 'react';
 import { View } from 'react-native';
 
-/** A YouTube or Vimeo player page, on the web build. */
 export function EmbedFrame({
   url,
   title,
@@ -9,7 +8,6 @@ export function EmbedFrame({
 }: {
   url: string;
   title: string;
-  /** Take all the space given (a 360° tour) rather than a 16:9 box. */
   fill?: boolean;
 }) {
   return (

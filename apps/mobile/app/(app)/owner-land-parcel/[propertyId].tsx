@@ -50,10 +50,6 @@ import { ParcelForm } from '@/components/land/ParcelForm';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
-/**
- * One parcel: where diligence stands and what moves it on, its documents, its
- * risk, and whether it is ready to list. Parcel facts are edited in a sheet.
- */
 export default function OwnerLandParcel() {
   const { propertyId } = useLocalSearchParams<{ propertyId: string }>();
   const { colors, spacing } = useTheme();
@@ -82,7 +78,6 @@ export default function OwnerLandParcel() {
         errorDescription="It may have been removed."
       >
         {!r ? (
-          // Loaded, but this parcel is not in the list.
           <ErrorState
             title="This parcel did not load"
             description="It may have been removed."
@@ -208,7 +203,6 @@ const CHECK_ICON: Record<LandCheckStatus, { Icon: typeof CheckCircle2; tone: str
   PENDING: { Icon: Clock3, tone: 'mutedForeground' },
 };
 
-/** Where diligence stands, and the submit step with the server's reasons when it can't go. */
 function ReviewPanel({ r }: { r: OwnerLandRecord }) {
   const { colors, spacing } = useTheme();
   const qc = useQueryClient();

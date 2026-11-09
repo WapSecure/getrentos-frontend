@@ -20,11 +20,7 @@ export const DEFAULT_PRIVACY: PrivacyPreferences = {
   shareData: false,
 };
 
-/**
- * The renter's preference bag. The API stores free-form JSON and merges partial
- * updates, so each screen reads and writes only the key it owns — matching how
- * the web settings panels share this endpoint.
- */
+/** The API stores free-form JSON and merges partial updates, so each screen writes only the key it owns. */
 export interface RenterPreferences {
   hideMonetaryValues?: boolean;
   privacy?: Partial<PrivacyPreferences>;

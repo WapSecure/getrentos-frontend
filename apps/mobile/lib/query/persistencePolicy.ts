@@ -13,7 +13,7 @@ const SENSITIVE_CACHE_TERMS = [
   'visitor',
 ] as const;
 
-/** Only non-sensitive successful queries may be written to unencrypted AsyncStorage. */
+// Only non-sensitive successful queries may be written to unencrypted AsyncStorage.
 export function shouldPersistQuery(query: {
   queryKey: readonly unknown[];
   state: { status: string };

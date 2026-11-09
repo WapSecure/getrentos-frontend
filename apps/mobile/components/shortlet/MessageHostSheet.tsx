@@ -12,7 +12,6 @@ import { haptics } from '@/lib/haptics';
 
 type HostOf = Pick<ShortletListing, 'id' | 'title' | 'hostName'>;
 
-/** Ask the host a question; the thread continues in Messages. */
 export function MessageHostSheet(props: { open: boolean; onClose: () => void; listing: HostOf }) {
   return <Inner key={props.open ? 'open' : 'closed'} {...props} />;
 }

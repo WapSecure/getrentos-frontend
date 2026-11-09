@@ -5,21 +5,12 @@ import { useToast } from '@sureground/ui-native';
 import { errorMessage } from '../api/client';
 import { useAuth } from './AuthProvider';
 
-/**
- * Catches an incoming magic-link deep link — `sureground://magic-link?token=…`
- * (or a universal link with the same query) — and exchanges it for a session.
- *
- * The listener is registered exactly once; the handler reads the latest
- * callbacks through a ref so this effect never re-subscribes on re-render.
- */
 export function useMagicLink() {
   const { signInWithMagicLink } = useAuth();
   const toast = useToast();
   const handled = useRef<Set<string>>(new Set());
   const deps = useRef({ signInWithMagicLink, toast });
-  // Latest callbacks kept in a ref so the listener below never has to
-  // re-subscribe. Written from an effect rather than during render, which would
-  // be a render-time ref access.
+  // Latest callbacks in a ref so the listener registers once and never re-subscribes; written in an effect, not during render.
   useEffect(() => {
     deps.current = { signInWithMagicLink, toast };
   });

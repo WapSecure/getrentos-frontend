@@ -29,11 +29,7 @@ const RANGES = [7, 14, 30];
 
 const when = (iso: string) => `${formatDate(iso, 'short')}, ${formatTime(iso)}`;
 
-/**
- * "Did the patrol go out?" Every round that was due, and the night nobody
- * walked shown first. Labels are worded by the server so this agrees with the
- * notice the office was already sent.
- */
+// Labels are worded by the server so this agrees with the notice the office was already sent.
 export function PatrolReport({ estateId }: { estateId: string }) {
   const { spacing, radius } = useTheme();
   const [days, setDays] = useState(14);

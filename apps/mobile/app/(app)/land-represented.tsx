@@ -21,10 +21,6 @@ import { formatDate } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
-/**
- * A represented buyer's deal: its conveyance steps, and the second approval
- * this representative gives on delivered steps when two-person approval is on.
- */
 export default function LandRepresented() {
   const { kind, id } = useLocalSearchParams<{ kind: 'purchase' | 'transaction'; id: string }>();
   const deal: Deal = { kind: kind === 'transaction' ? 'transaction' : 'purchase', id };

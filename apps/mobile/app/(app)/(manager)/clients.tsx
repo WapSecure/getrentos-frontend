@@ -33,7 +33,6 @@ import { errorMessage } from '@/lib/api/client';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { Sheet } from '@/components/Sheet';
 
-/** The firm's clients, one per owner, and owners invited who haven't joined. */
 export default function AgencyClients() {
   const { colors, spacing } = useTheme();
   const custody = useCustody();

@@ -3,21 +3,7 @@ import { appendFile, type PickedFile } from './documents';
 import type { EstateDuesPoint, Tone } from './estateManager';
 import type { Paginated } from './properties';
 
-/**
- * The estate office's records and money: governance documents, the committee,
- * the financial reports, dues statements with their payout, and the public
- * microsite. Manager-side only (`/estate/:id/...`); residents read their own
- * governance and committee through `lib/api/resident`.
- *
- * Plans, as the API enforces them on the ESTATE'S plan (its owner's):
- * - Governance and the committee are on every plan, except that asking the
- *   committee to sign a document is Pro.
- * - Financial reporting (stats, chart, CSV) and the microsite are Pro.
- * - Statements and the payout account are on every plan.
- * A refusal comes back as PLAN_UPGRADE_REQUIRED (see `isUpgradeError`).
- */
-
-/* ---------------------------------- keys ---------------------------------- */
+/** Plans are enforced on the estate's plan: asking the committee to sign, financial reporting and the microsite are Pro. Refusals come back as PLAN_UPGRADE_REQUIRED. */
 
 /**
  * Nested under the estate manager's per-estate key, so invalidating
@@ -43,8 +29,6 @@ export const governanceKeys = {
   payoutAccount: (estateId: string) => ['estate-manager', estateId, 'payout-account'] as const,
   microsite: (estateId: string) => ['estate-manager', estateId, 'microsite'] as const,
 };
-
-/* ---------------------------------- types --------------------------------- */
 
 export type GovernanceRecordType = 'bylaws' | 'meeting_minutes' | 'other';
 export type GovernanceFilter = GovernanceRecordType | 'all';
@@ -199,8 +183,6 @@ export interface EstatePayoutAccount {
   payoutHoldUntil?: string | null;
 }
 
-/* ----------------------------------- api ---------------------------------- */
-
 export const STATEMENTS_PAGE_SIZE = 10;
 
 export const estateGovernanceApi = {
@@ -239,7 +221,6 @@ export const estateGovernanceApi = {
     apiFetch<EstateFinancialStats>(`/estate/${estateId}/financials/stats?period=${period}`),
   financialChart: (estateId: string) =>
     apiFetch<EstateDuesPoint[]>(`/estate/${estateId}/financials/chart`),
-  /** Every due as CSV; bytes to write to disk and share. */
   financialsExport: (estateId: string) => apiDownload(`/estate/${estateId}/financials/export`),
 
   statements: (estateId: string, page = 1) =>
@@ -277,8 +258,6 @@ export const estateGovernanceApi = {
   },
 };
 
-/* ------------------------------- governance ------------------------------- */
-
 export const GOVERNANCE_TYPES: { value: GovernanceRecordType; label: string }[] = [
   { value: 'bylaws', label: 'Bylaws' },
   { value: 'meeting_minutes', label: 'Minutes' },
@@ -292,11 +271,7 @@ export const governanceTypeLabel = (t: GovernanceRecordType) =>
 export const GOVERNANCE_TITLE_MAX = 150;
 export const GOVERNANCE_MAX_BYTES = 20 * 1024 * 1024;
 
-/**
- * Where a record stands with the committee's signatures, or null when it never
- * asked for any. A record nobody can sign yet (no committee) says so rather
- * than "0 of 0 signed", which reads as done.
- */
+/** Null when the record never asked for signatures. With no committee yet it says so rather than "0 of 0 signed", which reads as done. */
 export function signatureState(
   r: Pick<GovernanceRecord, 'requiresSignatures' | 'status' | 'signatureProgress'>
 ): { label: string; tone: Tone } | null {
@@ -306,8 +281,6 @@ export function signatureState(
   if (!p || p.total === 0) return { label: 'No committee to sign yet', tone: 'warning' };
   return { label: `${p.signed} of ${p.total} signed`, tone: 'warning' };
 }
-
-/* -------------------------------- committee ------------------------------- */
 
 export const COMMITTEE_TITLES: { value: CommitteeTitle; label: string }[] = [
   { value: 'president', label: 'President' },
@@ -320,7 +293,6 @@ export const COMMITTEE_TITLES: { value: CommitteeTitle; label: string }[] = [
 export const committeeTitleLabel = (t: string) =>
   COMMITTEE_TITLES.find((x) => x.value === t)?.label ?? 'Member';
 
-/** The board in rank order (president first), longest-serving first within a rank. */
 export function committeeOrder<T extends Pick<CommitteeMember, 'title' | 'appointedAt'>>(
   members: T[]
 ): T[] {
@@ -333,15 +305,11 @@ export function committeeOrder<T extends Pick<CommitteeMember, 'title' | 'appoin
   );
 }
 
-/* ------------------------------- financials ------------------------------- */
-
 export const REPORT_PERIODS: { value: ReportPeriod; label: string; span: string }[] = [
   { value: 'monthly', label: 'Month', span: 'the last month' },
   { value: 'quarterly', label: 'Quarter', span: 'the last 3 months' },
   { value: 'yearly', label: 'Year', span: 'the last 12 months' },
 ];
-
-/* ------------------------------- statements ------------------------------- */
 
 /** Neither held state is a failure: the money has not been sent, not lost. */
 export const PAYOUT_STATE: Record<StatementPayoutStatus, { label: string; tone: Tone }> = {
@@ -352,7 +320,6 @@ export const PAYOUT_STATE: Record<StatementPayoutStatus, { label: string; tone: 
   REJECTED: { label: 'Payout held back', tone: 'warning' },
 };
 
-/** The one badge a statement row needs: a draft is just a draft. */
 export function statementBadge(s: Pick<EstateStatement, 'status' | 'payoutStatus'>): {
   label: string;
   tone: Tone;
@@ -364,11 +331,7 @@ export function statementBadge(s: Pick<EstateStatement, 'status' | 'payoutStatus
 export const canRetryPayout = (s: Pick<EstateStatement, 'status' | 'payoutStatus'>) =>
   s.status === 'ISSUED' && (s.payoutStatus === 'FAILED' || s.payoutStatus === 'REJECTED');
 
-/**
- * The ladder from gross income down to the payout. VAT and the maintenance
- * markup are steps only when charged; withholding tax is never a step (it is
- * withheld from the manager's fee, not the payout) so it is left to a note.
- */
+/** Withholding tax is never a step: it is withheld from the manager's fee, not the payout. */
 export function statementLadder(
   s: Pick<
     EstateStatement,
@@ -387,11 +350,7 @@ export function statementLadder(
   return rows;
 }
 
-/**
- * Why an issued statement's money has not gone out, in words, or null when
- * nothing is holding it. A dispute that is holding the money is the reason
- * that matters, so it wins over a second-approval hold.
- */
+/** Null when nothing is holding the money. A dispute wins over a second-approval hold. */
 export function payoutHold(
   s: Pick<EstateStatement, 'status' | 'payoutStatus' | 'release' | 'disputeSummary'>
 ): { title: string; body: string; quote?: string | null; tone: Tone } | null {
@@ -433,7 +392,6 @@ export function payoutHold(
   return null;
 }
 
-/** What to tell the manager after issuing or retrying, by where the money ended up. */
 export function payoutOutcome(
   payoutStatus: StatementPayoutStatus,
   action: 'issue' | 'retry'
@@ -465,7 +423,6 @@ export function payoutOutcome(
   }
 }
 
-/** Last calendar month, as `yyyy-MM-dd`: the period most often closed. */
 export function lastMonthPeriod(now: Date = new Date()): {
   periodStart: string;
   periodEnd: string;
@@ -482,8 +439,6 @@ export function lastMonthPeriod(now: Date = new Date()): {
 export const payoutAccountValid = (bankCode: string, accountNumber: string) =>
   /^\d{3,6}$/.test(bankCode.trim()) && /^\d{10}$/.test(accountNumber.trim());
 
-/* -------------------------------- microsite ------------------------------- */
-
 const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 export const MICROSITE_SLUG_MAX = 60;
 export const MICROSITE_BIO_MAX = 500;
@@ -492,7 +447,6 @@ export const MICROSITE_BANNER_MAX_BYTES = 5 * 1024 * 1024;
 
 export const isValidSlug = (slug: string) => slug.length <= MICROSITE_SLUG_MAX && SLUG.test(slug);
 
-/** A link as typed, made into one the API accepts where it can: lower case, spaces to hyphens. */
 export const normaliseSlug = (input: string) =>
   input
     .toLowerCase()
@@ -500,6 +454,5 @@ export const normaliseSlug = (input: string) =>
     .replace(/[^a-z0-9-]/g, '')
     .replace(/-{2,}/g, '-');
 
-/** The public address of an estate's page on the website. */
 export const micrositeUrl = (webUrl: string, slug: string) =>
   `${webUrl.replace(/\/$/, '')}/e/${slug}`;

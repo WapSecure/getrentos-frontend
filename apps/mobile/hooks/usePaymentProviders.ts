@@ -11,10 +11,7 @@ import { qk } from '@/lib/query/keys';
 /** The API's code when the chosen company cannot take a payment right now (409). */
 export const PAYMENT_PROVIDER_UNAVAILABLE = 'PAYMENT_PROVIDER_UNAVAILABLE';
 
-/**
- * The company named in a "this provider is unavailable" refusal, and the
- * sentence to show, or null when `error` is any other failure.
- */
+/** Null when `error` is not a "provider unavailable" refusal. */
 export function providerUnavailable(
   error: unknown
 ): { provider?: PaymentProvider; message: string } | null {
@@ -30,16 +27,7 @@ export function providerUnavailable(
   return { provider, message: error.message };
 }
 
-/**
- * Which company takes this payment: Paystack or Monnify, so a payer can switch
- * when one is down. Defaults to the first available one. `provider` is
- * undefined until the list loads (or when it cannot), and the pay route then
- * uses the default company.
- *
- * `recover(error, tried)` turns a 409 "provider unavailable" into the message to
- * show, marks that company unavailable here and moves the choice to the next
- * available one; it returns null for any other error.
- */
+/** `provider` is undefined until the list loads (or when it cannot), and the pay route then uses the default company. */
 export function usePaymentProviders() {
   const queryClient = useQueryClient();
   const query = useQuery({
@@ -48,7 +36,7 @@ export function usePaymentProviders() {
     staleTime: 60_000,
   });
   const [chosen, setChosen] = useState<PaymentProvider | null>(null);
-  // Companies a pay call was just refused by, kept out of the choice even if the list was fetched before.
+  // Companies that just refused a pay call stay out of the choice even if the list was fetched before.
   const [refused, setRefused] = useState<PaymentProvider[]>([]);
 
   const options = useMemo<PaymentProviderOption[]>(
@@ -82,11 +70,7 @@ export function usePaymentProviders() {
     options,
     provider,
     choose: setChosen,
-    /**
-     * Show the choice when Sureground works with more than one company, even if
-     * one is down right now: the payer sees it greyed out with why, rather than
-     * wondering where it went. Hidden only when there is a single company.
-     */
+    /** Shown whenever there is more than one company, even if one is down: the payer sees it greyed out with why. */
     canChoose:
       options.filter((option) => option.available || option.reason !== 'is not set up').length > 1,
     recover,

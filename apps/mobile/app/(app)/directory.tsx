@@ -32,7 +32,6 @@ export default function ResidentDirectory() {
     enabled: !!household.data?.directoryOptIn,
   });
 
-  // A preference: the switch moves at once and goes back if the server refuses.
   const toggleOptIn = useOptimisticMutation({
     mutationFn: (optIn: boolean) => residentApi.setDirectoryOptIn(optIn),
     patches: (optIn) => [

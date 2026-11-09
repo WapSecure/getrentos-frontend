@@ -38,11 +38,6 @@ import { goBack } from '@/lib/goBack';
 import { planRefusal, retryUnlessPlanGate } from '@/lib/api/estateGate';
 import { ProUpsell } from '@/components/estate/governance/ProUpsell';
 
-/**
- * Budgets against actual spend, per property and category, for the current
- * month, quarter or year. Actuals include recorded expenses and completed
- * work-order costs.
- */
 export default function LandlordBudgets() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();

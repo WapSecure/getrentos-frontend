@@ -21,15 +21,9 @@ const URGENCY_TONE = { LOW: 'neutral', MEDIUM: 'info', HIGH: 'warning', URGENT: 
 interface Props {
   request: LandlordMaintenance | null;
   onClose: () => void;
-  /** After an accept changed the request. */
   onApplied: () => void;
 }
 
-/**
- * Automated triage on the phone: read the suggestion, then apply it (optionally
- * assigning the suggested vendor through the landlord's own assign path) or say
- * what it got wrong. Editing category and urgency stays on the web.
- */
 export function TriageSheet({ request, onClose, onApplied }: Props) {
   return (
     <Sheet open={!!request} onClose={onClose} title="Automated triage">

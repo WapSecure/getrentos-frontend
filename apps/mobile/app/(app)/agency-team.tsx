@@ -33,7 +33,6 @@ import { ChipSelect } from '@/components/landlord/ChipSelect';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
-/** The firm's team. Only the principal invites, changes roles and removes people. */
 export default function AgencyTeam() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();

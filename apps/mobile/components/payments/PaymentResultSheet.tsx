@@ -13,7 +13,6 @@ import {
   type PaymentResult,
 } from '@/lib/paymentResult';
 
-/** What a payment was for when Sureground has no title for it. */
 const FALLBACK_TITLE: Record<PaymentStatus['kind'], string> = {
   RENT: 'Rent',
   ESCROW: 'Deposit',
@@ -24,7 +23,6 @@ const FALLBACK_TITLE: Record<PaymentStatus['kind'], string> = {
   VENDOR_TOP_UP: 'Card top-up',
 };
 
-/** Where the payer can see this payment again, for the kinds with one place for it. */
 const HISTORY: Partial<Record<PaymentStatus['kind'], { label: string; href: string }>> = {
   RENT: { label: 'View my payments', href: '/(app)/payments' },
   FLEX: { label: 'View my Flex plan', href: '/(app)/financing' },
@@ -78,12 +76,7 @@ function Row({ label, value, selectable }: { label: string; value: string; selec
   );
 }
 
-/**
- * How a checkout went, kept on screen until the payer closes it: the amount,
- * what it was for, the reference (which can be copied or shared), and a way
- * to check again or see the payment in their history. Mounted once at the app
- * root; `usePaystackCheckout` fills it.
- */
+// Mounted once at the app root; usePaystackCheckout fills it.
 export function PaymentResultSheet() {
   const result = usePaymentResult();
   const router = useRouter();

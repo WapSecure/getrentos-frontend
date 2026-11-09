@@ -27,7 +27,6 @@ export default function WorkOrders() {
   const insets = useSafeAreaInsets();
   const [view, setView] = useState<WorkOrderView>('open');
 
-  // Open work spans three statuses; fetch them together and order by urgency.
   const open = useQuery({
     queryKey: qk.homeCare.workOrders('open'),
     queryFn: async () => {

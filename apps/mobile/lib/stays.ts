@@ -1,8 +1,3 @@
-/**
- * The guest side of short stays: vocabulary and small rules shared by the
- * search, stay, booking and report screens. Free of UI imports so it can be
- * tested on its own.
- */
 import { INTERNET_TYPES, POWER_SOURCES, WATER_SUPPLY } from './api/hostShortlets';
 import type {
   GuestPromiseOutcome,
@@ -13,8 +8,6 @@ import type {
   ShortletListing,
 } from './api/shortlets';
 import type { DisputeCategory } from './api/hostShortlets';
-
-/* ------------------------------ guest promise ----------------------------- */
 
 export const GUEST_PROMISE_TEXT =
   "If the place isn't as described, you can't get in, or it's unsafe, tell us within 24 hours of check-in. We hold the host's payment while we check, and refund you if we uphold it.";
@@ -51,12 +44,7 @@ export const OUTCOME_LABEL: Record<GuestPromiseOutcome, string> = {
   NOT_UPHELD: 'Not upheld',
 };
 
-/**
- * "27 Sept 2026, 11:00 pm" in Lagos time: report deadlines are to the hour.
- *
- * `hour12` is explicit because `en-NG` otherwise formats 24-hour and prints
- * midnight as an unpadded "0:00", which is what the Guest Promise window showed.
- */
+// `hour12` is explicit: `en-NG` otherwise formats 24-hour and prints midnight as "0:00".
 export const formatDeadline = (iso: string) =>
   new Date(iso).toLocaleString('en-NG', {
     day: 'numeric',
@@ -76,14 +64,11 @@ export type PromiseState =
   | { kind: 'reported'; status?: string }
   | { kind: 'decided'; outcome: GuestPromiseOutcome; refundAmount?: number };
 
-/** Where a paid stay stands with the Guest Promise right now. */
 export function promiseState(b: ShortletBooking, now = new Date()): PromiseState {
   const p = b.guestPromise;
   if (!p) return { kind: 'none' };
   if (p.outcome) return { kind: 'decided', outcome: p.outcome, refundAmount: p.refundAmount };
   if (p.reportId) return { kind: 'reported', status: p.reportStatus };
-  // The promise covers paid stays that are going ahead; after a stay ends
-  // without a report there is nothing left to say about it.
   if (b.status !== 'CONFIRMED' || b.paymentStatus !== 'PAID') return { kind: 'none' };
   if (p.canReport) return { kind: 'open', closesAt: p.closesAt };
   if (now < new Date(p.opensAt))
@@ -91,9 +76,6 @@ export function promiseState(b: ShortletBooking, now = new Date()): PromiseState
   return { kind: 'closed' };
 }
 
-/* -------------------------------- disputes -------------------------------- */
-
-/** The guest's words for the dispute categories. */
 export const GUEST_DISPUTE_CATEGORIES: { value: DisputeCategory; label: string; hint: string }[] = [
   {
     value: 'DAMAGE',
@@ -114,8 +96,6 @@ export const GUEST_DISPUTE_CATEGORIES: { value: DisputeCategory; label: string; 
   { value: 'OTHER', label: 'Something else', hint: 'Anything else support should look at.' },
 ];
 
-/* --------------------------------- pricing -------------------------------- */
-
 export const nightsLabel = (n: number) => `${n} ${n === 1 ? 'night' : 'nights'}`;
 export const guestsLabel = (n: number) => `${n} ${n === 1 ? 'guest' : 'guests'}`;
 
@@ -132,15 +112,10 @@ export const discountLabel = (type: ShortletDiscountType, pct?: number) =>
 export interface PriceLine {
   label: string;
   amount: number;
-  /** Money off, shown with a minus. */
   credit?: boolean;
   note?: string;
 }
 
-/**
- * The quote for a range as the lines a guest reads: nights, the one discount
- * that applied, cleaning and tax. The total is separate so it can be styled.
- */
 export function quoteLines(q: ShortletAvailability): PriceLine[] {
   const nights = q.estimatedNights ?? 0;
   const base = q.estimatedBaseSubtotal ?? q.estimatedSubtotal ?? 0;
@@ -172,7 +147,6 @@ export function quoteLines(q: ShortletAvailability): PriceLine[] {
   return lines;
 }
 
-/** The discounts a listing offers, as short phrases ("10% off 7+ nights"). */
 export function discountPhrases(l: ShortletListing): string[] {
   const out: string[] = [];
   if (l.weeklyDiscountPct) out.push(`${l.weeklyDiscountPct}% off 7+ nights`);
@@ -185,7 +159,6 @@ export function discountPhrases(l: ShortletListing): string[] {
   return out;
 }
 
-/** "20 Dec – 3 Jan" for a season's first and last nights. */
 export function seasonRange(startDate: string, endDate: string): string {
   const fmt = (iso: string) =>
     new Date(`${iso.slice(0, 10)}T12:00:00`).toLocaleDateString('en-NG', {
@@ -195,7 +168,6 @@ export function seasonRange(startDate: string, endDate: string): string {
   return `${fmt(startDate)} – ${fmt(endDate)}`;
 }
 
-/** "Sun 20 Dec": a trip day, short enough for one line. */
 export const tripDay = (iso: string) =>
   new Date(`${iso.slice(0, 10)}T12:00:00`).toLocaleDateString('en-NG', {
     weekday: 'short',
@@ -203,12 +175,9 @@ export const tripDay = (iso: string) =>
     month: 'short',
   });
 
-/* ------------------------------- essentials ------------------------------- */
-
 const labelOf = (list: readonly { value: string; label: string }[], v?: string) =>
   list.find((x) => x.value === v)?.label;
 
-/** "24 hours a day · Grid, Generator", or null when the host hasn't said. */
 export function powerSummary(l: ShortletListing): string | null {
   const sources = (l.powerSources ?? [])
     .map((s) => labelOf(POWER_SOURCES, s))
@@ -237,27 +206,17 @@ export type RuleAnswer = 'yes' | 'no' | 'unknown';
 export const ruleAnswer = (v?: boolean): RuleAnswer =>
   v === true ? 'yes' : v === false ? 'no' : 'unknown';
 
-/* ------------------------------- inspection ------------------------------- */
-
 export const CONDITION_LABEL = {
   excellent: 'Excellent',
   good: 'Good',
   fair: 'Fair',
 } as const;
 
-/* -------------------------------- my stays -------------------------------- */
-
-/**
- * What the guest pays for a booking, deposit aside. A booking's `total` is the
- * stay (nights after discount, plus cleaning); tax is charged on top of it.
- */
+// A booking's `total` is nights after discount plus cleaning; tax is charged on top.
 export const guestTotal = (b: Pick<ShortletBooking, 'total' | 'taxAmount'>) =>
   b.total + (b.taxAmount ?? 0);
 
-/**
- * What came back to the guest for the stay. When the host cancels, the stay,
- * tax and deposit all come back, though the booking records only the stay.
- */
+// When the host cancels, the stay, tax and deposit all come back, though the booking records only the stay.
 export const stayRefund = (b: ShortletBooking): number | undefined =>
   b.cancelledBy === 'HOST' && b.paymentStatus === 'REFUNDED'
     ? guestTotal(b)
@@ -265,14 +224,13 @@ export const stayRefund = (b: ShortletBooking): number | undefined =>
       ? b.refundAmount + (b.taxRefundAmount ?? 0)
       : undefined;
 
-/** Share of a paid stay the guest gets back for cancelling `daysBefore` days out (mirrors the backend). */
+// Mirrors the backend.
 function refundPercent(policy: ShortletBooking['cancellationPolicy'], daysBefore: number): number {
   if (policy === 'FLEXIBLE') return daysBefore >= 1 ? 100 : 0;
   if (policy === 'MODERATE') return daysBefore >= 5 ? 100 : daysBefore >= 1 ? 50 : 0;
   return daysBefore >= 7 ? 100 : daysBefore >= 3 ? 50 : 0;
 }
 
-/** What a guest cancelling today would get back for the stay (stay + tax share), and at what percent. */
 export function cancelRefundEstimate(
   b: ShortletBooking,
   now = new Date()
@@ -287,51 +245,39 @@ export function cancelRefundEstimate(
 
 export type StayTab = 'upcoming' | 'past' | 'cancelled';
 
-/** Which tab a booking belongs in, judged by the checkout day (local). */
 export function stayTab(b: ShortletBooking, today: string): StayTab {
   if (b.status === 'CANCELLED' || b.status === 'DECLINED') return 'cancelled';
   if (b.status === 'COMPLETED') return 'past';
   return b.checkOut.slice(0, 10) < today ? 'past' : 'upcoming';
 }
 
-/* ----------------------------- detty december ----------------------------- */
-
-/** The first peak week of this year's season, so pages open on real December totals. */
 export function peakWeek(now = new Date()): { checkIn: string; checkOut: string } {
   const year =
     now.getMonth() === 0 && now.getDate() <= 3 ? now.getFullYear() - 1 : now.getFullYear();
   return { checkIn: `${year}-12-20`, checkOut: `${year}-12-27` };
 }
 
-/** Detty December is sold from September until the season ends on 3 January. */
 export const isDettySeason = (now = new Date()) =>
   now.getMonth() >= 8 || (now.getMonth() === 0 && now.getDate() <= 3);
-
-/* ------------------------------ stay headline ----------------------------- */
 
 export type HeadlineTone = 'success' | 'warning' | 'info' | 'neutral' | 'danger';
 
 export interface StayHeadline {
-  /** The status in a word or two, for the pill. */
   pill: string;
   tone: HeadlineTone;
-  /** One line: what this means for the guest. */
   title: string;
   detail?: string;
-  /** The one thing to do next, if any. */
   action?: 'pay' | 'review' | 'report' | 'rebook';
 }
 
 const naira = (n: number) => `₦${n.toLocaleString('en-NG')}`;
 
-/** Days from `today` (yyyy-MM-dd) to a date, by calendar day. */
 function daysFrom(today: string, iso: string): number {
   const a = new Date(`${today}T12:00:00`).getTime();
   const b = new Date(`${iso.slice(0, 10)}T12:00:00`).getTime();
   return Math.round((b - a) / 86_400_000);
 }
 
-/** Where a stay stands, told from the guest's side. */
 export function stayHeadline(b: ShortletBooking, today: string, now = new Date()): StayHeadline {
   const refund = b.refundAmount ? naira(b.refundAmount) : null;
   switch (b.status) {

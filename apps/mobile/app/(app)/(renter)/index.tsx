@@ -63,8 +63,7 @@ interface Metric {
 }
 
 const CARD_WIDTH = 200;
-// The trust badge sits on a photo behind a fixed navy scrim, in either theme,
-// so its colours are fixed too; the theme's success green is too dark on it.
+// Fixed colours: the badge sits on a fixed navy scrim in both themes, where the theme's success green is too dark.
 const ON_SCRIM = { bg: 'rgba(9,32,66,0.72)', partial: '#4ade80' };
 
 export default function RenterHome() {
@@ -74,7 +73,6 @@ export default function RenterHome() {
 
   const stats = useQuery({ queryKey: qk.renter.dashboardStats, queryFn: renterApi.dashboardStats });
 
-  // Drives the bell badge; the notifications screen owns the full list.
   const notifications = useQuery({
     queryKey: qk.renter.notifications(1, 30),
     queryFn: () => notificationsApi.list(1, 30),
@@ -140,7 +138,6 @@ export default function RenterHome() {
     notifications.refetch();
     qc.invalidateQueries({ queryKey: ['kyc-status'] });
   };
-  // A refresh failed while older (or disk-cached) data is still on screen.
   const staleQueries = [stats, listings, applications, moveInChecklist].filter(
     (q) => q.isRefetchError
   );
@@ -161,8 +158,7 @@ export default function RenterHome() {
             />
             <IconButton
               onPress={() => router.push('/(app)/notifications')}
-              // IconButton already appends ", N unread" from the badge, so the
-              // label must not repeat the count (DEF-243).
+              // IconButton already appends ", N unread" from the badge, so the label must not repeat the count.
               accessibilityLabel="Notifications"
               badge={unreadCount}
               icon={<Bell size={21} color={colors.foreground} />}
@@ -178,7 +174,6 @@ export default function RenterHome() {
         />
       ) : null}
 
-      {/* What needs you first: identity, then an application in motion. */}
       {showVerifyNudge ? (
         <IdentityNudge unlocks="applications and offers" />
       ) : activeApplication ? (
@@ -246,7 +241,6 @@ export default function RenterHome() {
         </Pressable>
       ) : null}
 
-      {/* Nothing cached and the load failed: say so instead of showing zeros. */}
       {stats.isError && !stats.data ? (
         <Card elevated style={{ gap: spacing.sm }}>
           <Text variant="bodyStrong">Couldn’t load your dashboard</Text>
@@ -348,8 +342,6 @@ export default function RenterHome() {
   );
 }
 
-/* ------------------------------ pieces ----------------------------------- */
-
 function HeroCard({
   property,
   saved,
@@ -360,7 +352,6 @@ function HeroCard({
   onToggleSave: (id: string) => void;
 }) {
   const { colors, radius } = useTheme();
-  // The same words as every other card: "Verified · ownership pending", not a blanket tick.
   const trust = property.trustChain?.steps.length ? trustChainLabel(property.trustChain) : null;
   const badgeText = trust ? trust.label : property.verified ? 'Verified' : null;
   return (

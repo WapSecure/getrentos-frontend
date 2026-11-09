@@ -54,9 +54,7 @@ export default function ResidentDues() {
   const qc = useQueryClient();
   const toast = useToast();
   const checkout = usePaystackCheckout();
-  // Which company takes the payment (Paystack or Monnify): one choice for every due here.
   const providers = usePaymentProviders();
-  // The due in the pay sheet; kept while the sheet slides away.
   const [payDue, setPayDue] = useState<Due | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [providerError, setProviderError] = useState<string | null>(null);
@@ -76,20 +74,15 @@ export default function ResidentDues() {
     onMutate: () => setProviderError(null),
     onSuccess: async (updated) => {
       closeSheet();
-      // A real gateway checkout was started: open it in an in-app browser.
-      // The webhook confirms payment server-side once the resident finishes
-      // there; refetch once they close the browser to pick up the new status.
+      // The webhook confirms payment server-side; refetch once the browser closes.
       if (updated.authorizationUrl) {
         await checkout(updated.authorizationUrl, updated.reference);
       } else if (updated.status === 'paid') {
-        // An earlier checkout had already gone through: it was credited instead
-        // of charging again.
         toast.show('Your earlier payment went through. This due is paid.', 'success');
       }
       qc.invalidateQueries({ queryKey: qk.resident.dues });
     },
     onError: (err, { provider }) => {
-      // That company cannot take it right now: say so in the sheet, with the other one picked.
       const unavailable = providers.recover(err, provider);
       if (unavailable) {
         setProviderError(unavailable);
@@ -162,11 +155,10 @@ export default function ResidentDues() {
 
 function DueCard({ due, onPay, paying }: { due: Due; onPay: () => void; paying: boolean }) {
   const { spacing, colors } = useTheme();
-  // A checkout that was opened and left can be picked up again: the API checks
-  // whether the earlier one went through before starting another.
+  // The API checks whether an earlier checkout went through before starting another.
   const canPay =
     due.status === 'pending' || due.status === 'overdue' || due.status === 'processing';
-  // `amount` already includes any late fee; adding it again overstated the bill.
+  // `amount` already includes any late fee.
   const totalAmount = due.amount;
 
   return (

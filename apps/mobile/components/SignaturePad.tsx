@@ -7,7 +7,6 @@ import { Button, Text, useTheme } from '@sureground/ui-native';
 export interface SignaturePadProps {
   width?: number;
   height?: number;
-  /** Fires with a renderable `data:image/svg+xml,...` URI after every stroke, or `null` once cleared/empty. */
   onChange: (dataUri: string | null) => void;
   disabled?: boolean;
 }
@@ -42,14 +41,7 @@ function signatureReducer(state: SignatureState, action: SignatureAction): Signa
   }
 }
 
-/**
- * Touch-drawn signature capture, built on `react-native-svg` (already a
- * dependency) + core RN `PanResponder` rather than a native gesture library
- * or a new signature-pad package: deliberately avoids the same class of
- * gesture-handler-on-web risk `@gorhom/bottom-sheet` has. Exports the stroke
- * as a standalone SVG document, URL-encoded (not base64) so it needs no
- * `btoa` polyfill.
- */
+// PanResponder rather than a gesture library avoids gesture-handler-on-web risk; the SVG is URL-encoded, not base64, so it needs no btoa polyfill.
 export function SignaturePad({
   width = 320,
   height = 160,
@@ -62,9 +54,7 @@ export function SignaturePad({
     currentPath: '',
   });
 
-  // Side effect (calling the parent's onChange, which is its own setState)
-  // belongs here, not inside setStrokes's updater: calling one component's
-  // setState from inside another's updater trips React's render-purity check.
+  // Call the parent's onChange here, not inside setStrokes's updater: another component's setState inside an updater trips React's render-purity check.
   useEffect(() => {
     if (strokes.length === 0) {
       onChange(null);

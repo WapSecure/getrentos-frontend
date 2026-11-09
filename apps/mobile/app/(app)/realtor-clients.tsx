@@ -35,7 +35,6 @@ const GROUPS: { status: RelationshipStatus; title: string }[] = [
   { status: 'REVOKED', title: 'Ended' },
 ];
 
-/** Owners and landlords who let the realtor represent them. */
 export default function RealtorClients() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();

@@ -3,14 +3,6 @@ import { apiFetch, apiUpload } from './client';
 import { appendFile, type PickedFile } from './documents';
 import type { PayoutSentTo } from '@sureground/shared';
 
-/**
- * Running the firm itself: its team, commissions and payouts, client-money
- * protection, performance, and setting the firm up or joining one. Firm-wide,
- * so none of it depends on which client is selected.
- */
-
-/* ---------------------------------- team ---------------------------------- */
-
 export type AgencyRole =
   | 'OWNER'
   | 'STAFF'
@@ -20,7 +12,6 @@ export type AgencyRole =
   | 'MAINTENANCE_COORDINATOR'
   | 'INSPECTOR';
 
-/** Roles a principal can give, with what each is for. */
 export const ASSIGNABLE_ROLES: {
   value: Exclude<AgencyRole, 'OWNER'>;
   label: string;
@@ -81,8 +72,6 @@ export const isPrincipal = (members: TeamMember[], userId: string | undefined) =
 export const endOfDayLagos = (date: string) =>
   date ? new Date(`${date}T23:59:59+01:00`).toISOString() : null;
 
-/* ------------------------------- commissions ------------------------------ */
-
 export interface Commission {
   id: string;
   type: 'LETTING' | 'RENEWAL';
@@ -134,8 +123,6 @@ export const splitProblem = (v: string) => {
   return v.trim() && Number.isFinite(n) && n >= 0 && n <= 100 ? null : 'Between 0 and 100.';
 };
 
-/* --------------------------------- payouts -------------------------------- */
-
 export interface PayoutAccount {
   bankCode: string;
   bankName: string | null;
@@ -145,7 +132,6 @@ export interface PayoutAccount {
   payoutHoldUntil: string | null;
 }
 
-/** A bank code (3–6 digits) and a 10-digit NUBAN account number. */
 export function bankProblem(bankCode: string, accountNumber: string): string | null {
   if (!/^\d{3,6}$/.test(bankCode.trim())) return 'Enter the bank code (3 to 6 digits).';
   if (!/^\d{10}$/.test(accountNumber.trim())) return 'Account numbers are 10 digits.';
@@ -166,7 +152,6 @@ export interface PayoutRecord {
   status: string;
   failureReason: string | null;
   paidAt?: string | null;
-  /** The transfer reference to quote to the bank. */
   transferRef?: string | null;
   /** Where it went (bank + last four digits), only when the API can prove it. */
   sentTo?: PayoutSentTo | null;
@@ -183,7 +168,6 @@ export interface PayableAgent {
   ready: boolean;
 }
 
-/** Why an agent can't be paid in this run, or "Ready" (web's order). */
 export function agentPayStatus(
   a: PayableAgent,
   requiredTier = 3
@@ -207,8 +191,6 @@ export interface MySummary {
   canReceive: boolean;
   agencyName: string | null;
 }
-
-/* -------------------------------- protection ------------------------------ */
 
 export interface ProtectionAttestation {
   id: string;
@@ -242,8 +224,6 @@ export function protectionProblem(f: {
   if (f.effectiveTo && f.effectiveTo < f.effectiveFrom) return 'Cover cannot end before it starts.';
   return null;
 }
-
-/* ------------------------------- performance ------------------------------ */
 
 export interface KpiReport {
   scope: { kind: 'MANAGED' | 'FIRM' | 'ALL'; name: string };
@@ -295,7 +275,6 @@ export const ARREARS_BUCKET: Record<string, string> = {
   DAYS_90_PLUS: 'Over 90 days',
 };
 
-/** The last `count` months as `yyyy-MM`, newest first, in Lagos time. */
 export function recentMonths(count = 12, now = new Date()): { value: string; label: string }[] {
   const lagos = new Date(now.getTime() + 60 * 60_000);
   const out: { value: string; label: string }[] = [];
@@ -308,8 +287,6 @@ export function recentMonths(count = 12, now = new Date()): { value: string; lab
   }
   return out;
 }
-
-/* ------------------------------ setup and join ---------------------------- */
 
 export type BusinessType = 'BUSINESS_NAME' | 'LIMITED_COMPANY' | 'INCORPORATED_TRUSTEES';
 export const BUSINESS_TYPES: { value: BusinessType; label: string }[] = [
@@ -346,10 +323,7 @@ export interface SetupForm {
   businessType: BusinessType;
   registrationNumber: string;
   registeredAddress: string;
-  /**
-   * The Google place the registered address was picked from. The API stores an
-   * address saved without it as unchecked, so an edit re-sends the stored one.
-   */
+  /** The API stores an address saved without it as unchecked, so an edit re-sends the stored one. */
   registeredPlaceId?: string;
   state: string;
   contactEmail: string;
@@ -371,7 +345,6 @@ export const setupToForm = (o: Onboarding | null): SetupForm => ({
 const CAC_HINT =
   'Enter it as printed on the certificate, e.g. RC 1234567, BN 3456789 or IT 123456.';
 
-/** The first thing wrong with the firm's details, in web's words, or null. */
 export function setupProblem(f: SetupForm): string | null {
   if (!f.name.trim()) return 'Enter your firm’s trading name.';
   if (!f.registeredName.trim()) return 'Enter the registered name from the CAC certificate.';
@@ -389,7 +362,6 @@ export function setupProblem(f: SetupForm): string | null {
   return null;
 }
 
-/** Whether the firm's details can still be changed by this person. */
 export const setupEditable = (o: Onboarding | null) =>
   !o ||
   (o.isOwner && (o.profile.kybStatus === 'NOT_SUBMITTED' || o.profile.kybStatus === 'REJECTED'));
@@ -403,14 +375,11 @@ export interface JoinPreview {
   emailMatches: boolean;
 }
 
-/** The token from an invitation link, or the link pasted whole. */
 export function tokenFrom(input: string): string {
   const t = input.trim();
   const m = t.match(/[?&]token=([^&#\s]+)/);
   return decodeURIComponent(m ? m[1] : t);
 }
-
-/* ----------------------------------- api ---------------------------------- */
 
 const post = <T>(path: string, body?: unknown) =>
   apiFetch<T>(path, { method: 'POST', ...(body !== undefined ? { body } : {}) });

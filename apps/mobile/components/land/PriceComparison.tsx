@@ -8,12 +8,6 @@ import { formatNaira } from '@/lib/format';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { openMarketListing } from '@/lib/pendingListing';
 
-/**
- * Where a parcel's price per m² sits among comparable verified land, and
- * those comparables (web: the "How this parcel compares" section). Public
- * data; when it can't load, or there is nothing to compare, it stays hidden
- * rather than getting in the way of the listing.
- */
 export function PriceComparison({ listingId }: { listingId: string }) {
   const { spacing } = useTheme();
   const { usablePortal } = useAuth();

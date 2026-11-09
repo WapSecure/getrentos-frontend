@@ -6,14 +6,8 @@ const SCREEN_OPTIONS = { headerShown: false } as const;
 const PORTAL_UNAVAILABLE_OPTIONS = { presentation: 'modal' } as const;
 const DETAIL_OPTIONS = { animation: 'slide_from_right' } as const;
 
-/**
- * Authenticated shell. No redirect here: the root `useProtectedRoute` keeps an
- * anonymous user out and routes unbuilt portals to the holding screen. This
- * layout just declares the navigator.
- */
+// No redirect here: the root `useProtectedRoute` keeps anonymous users out and routes unbuilt portals away.
 export default function AppLayout() {
-  // Which client a manager is acting for, shared by the agency tabs and the
-  // screens pushed over them. Only fetched in the agency workspace.
   const { usablePortal } = useAuth();
   return (
     <CustodyProvider enabled={usablePortal === 'manager'}>

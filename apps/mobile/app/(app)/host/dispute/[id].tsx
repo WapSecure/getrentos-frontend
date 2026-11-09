@@ -5,7 +5,6 @@ import { DisputeThread } from '@/components/shortlet/DisputeThread';
 
 const listDisputes = () => hostShortletsApi.disputes();
 
-/** One dispute: what was raised, where it stands, and the thread with support and the guest. */
 export default function HostDisputeDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   return (

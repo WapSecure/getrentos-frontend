@@ -32,7 +32,7 @@ const FAQS: { question: string; answer: string }[] = [
   },
 ];
 
-/** Shared help centre. Pass `?messages=<route>` to point the "Message us" row at the caller's inbox. */
+// `?messages=<route>` points the "Message us" row at the caller's inbox.
 export default function HelpCenter() {
   const { messages } = useLocalSearchParams<{ messages?: string }>();
   const { colors, spacing, radius } = useTheme();

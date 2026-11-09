@@ -53,11 +53,6 @@ import { IdentityNudge } from '@/components/trust/IdentityNudge';
 
 type SheetKind = 'lead' | 'viewing' | 'invite' | null;
 
-/**
- * The realtor's day: who they're showing round today, what's waiting on them
- * (new offers, new leads, pending clients), and what they've earned.
- */
-/** The kinds of activity the realtor dashboard reports. */
 const ACTIVITY_ICON: Record<string, LucideIcon> = {
   lead: UserPlus,
   viewing: CalendarClock,
@@ -275,7 +270,6 @@ export default function RealtorHome() {
         onToggle={toggleMoney}
       />
 
-      {/* Before the numbers: what an unverified realtor cannot do yet. */}
       <IdentityNudge unlocks="listings, clients and commissions" />
       <IdentityNudge requirement="licence" unlocks="listings and clients" />
 

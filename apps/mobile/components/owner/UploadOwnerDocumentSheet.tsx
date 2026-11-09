@@ -15,7 +15,6 @@ interface Props {
   onClose: () => void;
 }
 
-/** Files transfer paperwork. It starts private; the owner shares it from the list. */
 export function UploadOwnerDocumentSheet({ open, onClose }: Props) {
   const [submitting, setSubmitting] = useState(false);
   return (

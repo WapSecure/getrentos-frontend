@@ -33,7 +33,6 @@ import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 import { Image as ExpoImage } from 'expo-image';
 
-/** Independent inspections the buyer commissioned before buying. */
 export default function BuyerLandInspections() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();

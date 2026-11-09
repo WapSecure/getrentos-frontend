@@ -27,7 +27,6 @@ export default function AgentTasks() {
   const query = useQuery({
     queryKey: qk.agent.tasks(1, 50, status),
     queryFn: () => agentApi.tasks(1, 50, { status }),
-    // Switching the filter keeps the last list on screen until the new one arrives.
     placeholderData: keepPreviousData,
   });
   const items = query.data?.items ?? [];

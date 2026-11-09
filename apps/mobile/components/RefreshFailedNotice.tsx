@@ -2,10 +2,6 @@ import { Pressable, View } from 'react-native';
 import { RotateCw } from 'lucide-react-native';
 import { Text, useTheme } from '@sureground/ui-native';
 
-/**
- * A refresh failed but the screen still has what it loaded earlier (or what
- * the disk cache restored). Says so, instead of passing old data off as current.
- */
 export function RefreshFailedNotice({
   onRetry,
   retrying,

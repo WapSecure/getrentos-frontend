@@ -53,7 +53,6 @@ const EMPTY: Record<StayTab, { title: string; description: string }> = {
   cancelled: { title: 'Nothing cancelled', description: 'Cancelled and declined stays show here.' },
 };
 
-/** Every stay the guest has, split the way trips are remembered. */
 export default function MyStays() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
@@ -156,7 +155,6 @@ export default function MyStays() {
   );
 }
 
-/** What hosts have said about this guest: the record hosts see when you book. */
 function HostsOnYou() {
   const { colors, spacing } = useTheme();
   const reviews = useQuery({

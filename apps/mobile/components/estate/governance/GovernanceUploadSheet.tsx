@@ -37,11 +37,7 @@ const MIME: Record<string, string> = {
   docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 };
 
-/**
- * Upload a governance document, or the next version of `newVersionOf`. Asking
- * the committee to sign is Pro: offered locked on a free estate rather than
- * hidden, so the manager knows it exists.
- */
+// Committee signing is Pro: offered locked on a free estate rather than hidden, so the manager knows it exists.
 export function GovernanceUploadSheet({
   open,
   onClose,

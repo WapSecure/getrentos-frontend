@@ -39,7 +39,6 @@ import { ChipSelect } from '@/components/landlord/ChipSelect';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
-/** Camera or library, as the person prefers. Resolves null when they back out. */
 function choosePhoto(): Promise<PickedFile | null> {
   return new Promise((resolve) => {
     Alert.alert('Add a photo', undefined, [
@@ -50,11 +49,6 @@ function choosePhoto(): Promise<PickedFile | null> {
   });
 }
 
-/**
- * One inspection. While a draft: add areas with a condition, notes, an
- * estimated cost and photos, then complete it. A manager working under a
- * mandate can then share the completed report with the owner.
- */
 export default function PropertyInspectionDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, spacing } = useTheme();

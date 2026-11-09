@@ -27,12 +27,6 @@ const UPSELL_POINTS = [
   'Told when a round wasn’t walked, and which points were missed',
 ];
 
-/**
- * Patrols (Enterprise): whether the rounds the estate set up actually happen.
- * Only the office's side is gated; guards can always scan a checkpoint.
- * Three jobs at three different times, so three tabs: reading last night,
- * setting up rounds, and looking after the checkpoint codes.
- */
 export default function EstatePatrol() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
@@ -42,8 +36,7 @@ export default function EstatePatrol() {
   const [refreshing, setRefreshing] = useState(false);
   const locked = lacksTier(estate?.planTier);
 
-  // Every patrol endpoint shares one plan check, so the checkpoint register (which
-  // the Rounds and Checkpoints tabs read anyway) tells us whether to show the upsell.
+  // Every patrol endpoint shares one plan check, so the checkpoint register decides whether to show the upsell.
   const probe = useQuery({
     queryKey: gateKeys.checkpoints(estateId),
     queryFn: () => estateGateApi.patrolCheckpoints(estateId),

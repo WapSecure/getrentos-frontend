@@ -31,10 +31,6 @@ import { qk } from '@/lib/query/keys';
 import { goBack } from '@/lib/goBack';
 import { errorMessage } from '@/lib/api/client';
 
-/**
- * Set up an estate: its name, where it is and how many gates it has. The first
- * one is free on every plan; another one is Pro, and the API says so.
- */
 export default function EstateSetup() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
@@ -45,7 +41,6 @@ export default function EstateSetup() {
     name: '',
     gateCount: '1',
   });
-  // The country is only asked for a typed address; the estate is saved without one.
   const [location, setLocation] = useState<AddressFieldsValue>({
     address: '',
     city: '',

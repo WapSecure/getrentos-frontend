@@ -10,7 +10,6 @@ describe('mapTiles', () => {
   });
 
   it('ignores anything that is not a public Mapbox token', () => {
-    // A secret token (sk.) must never be shipped in a page.
     expect(mapTiles('sk.abc123', 'light').provider).toBe('osm');
     expect(mapTiles('pk.abc"><script>', 'light').provider).toBe('osm');
   });

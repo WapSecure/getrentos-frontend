@@ -2,11 +2,6 @@ import type { BadgeTone } from '@sureground/ui-native';
 import { apiFetch } from './client';
 import type { Portal } from '../roles';
 
-/**
- * The trust orchestrator's identity checks: the verification centre on web
- * (components/shared/verification/VerificationCenter.tsx).
- */
-
 export type TrustPurpose =
   | 'RENTER_ONBOARDING'
   | 'LANDLORD_ONBOARDING'
@@ -14,7 +9,6 @@ export type TrustPurpose =
   | 'PROPERTY_OWNER_ONBOARDING'
   | 'PROPERTY_MANAGER_ONBOARDING';
 
-/** Which onboarding policy each workspace verifies against (web's per-role pages). */
 export function purposeFor(portal: Portal | null | undefined): TrustPurpose {
   switch (portal) {
     case 'landlord':
@@ -169,7 +163,6 @@ export const CONSENT_COPY: Record<ConsentType, { title: string; body: string; pu
 
 const ACTIONABLE = ['NOT_STARTED', 'FAILED', 'REVIEW_REQUIRED'];
 
-/** Every check this verification asks for, in the order the policy lists them. */
 export function checkKinds(steps: TrustStep[]): CheckKind[] {
   const out: CheckKind[] = [];
   for (const s of steps) {
@@ -182,7 +175,6 @@ export function checkKinds(steps: TrustStep[]): CheckKind[] {
 /** Where a face check (recovery or PIN reset) stands; the server decides. */
 export type FaceCheckStatus = 'PENDING' | 'APPROVED' | 'FAILED';
 
-/** What the app needs to run Smile ID's live selfie capture (see trustApi.livenessSession). */
 export interface SmileLivenessSession {
   token: string;
   partnerId: string;
@@ -200,7 +192,6 @@ export interface SmileLivenessSession {
   callbackUrl?: string;
 }
 
-/** One status vocabulary for identity and every requirement (GET /trust/overview). */
 export type TrustStatus =
   | 'NOT_STARTED'
   | 'ACTION_REQUIRED'
@@ -272,10 +263,7 @@ export const TRUST_STATUS: Record<TrustStatus, { label: string; tone: BadgeTone 
 
 export type CheckState = 'done' | 'todo' | 'failed' | 'review' | 'waiting';
 
-/**
- * Where one check stands, from its steps: a selfie is one check to the person
- * even though the policy runs capture, liveness and face match as three steps.
- */
+/** A selfie is one check to the person, though the policy runs capture, liveness and face match as three steps. */
 export function checkState(steps: TrustStep[], kind: CheckKind): CheckState {
   const own = steps.filter((s) => KIND_OF_STEP[s.stepType] === kind);
   if (own.every((s) => s.status === 'PASSED' || s.status === 'SKIPPED')) return 'done';
@@ -286,7 +274,6 @@ export function checkState(steps: TrustStep[], kind: CheckKind): CheckState {
   return 'todo';
 }
 
-/** Checks still to run, in the order the policy lists their first step. */
 export function pendingChecks(steps: TrustStep[]): CheckKind[] {
   const out: CheckKind[] = [];
   for (const s of steps) {
@@ -296,7 +283,6 @@ export function pendingChecks(steps: TrustStep[]): CheckKind[] {
   return out;
 }
 
-/** The consent of this type that is still in force, if any. */
 export function activeConsent(
   consents: TrustConsent[] | undefined,
   type: ConsentType,
@@ -318,9 +304,8 @@ export function idNumberOk(type: TrustIdType, value: string): boolean {
 }
 
 export const trustApi = {
-  /** Identity status, this portal's requirements, tier and score (self-only). */
   overview: (portal: TrustPortal) => apiFetch<TrustOverview>(`/trust/overview?portal=${portal}`),
-  /** Starts or resumes the signed-in user's verification (idempotent). */
+  /** Idempotent: starts or resumes the signed-in user's verification. */
   start: (subjectId: string, purpose: TrustPurpose) =>
     apiFetch<TrustVerification>('/trust/verifications', {
       method: 'POST',
@@ -354,11 +339,7 @@ export const trustApi = {
       method: 'POST',
       body: { reference, code },
     }),
-  /**
-   * A Smile ID live selfie session for the liveness step. The token is bound on
-   * the server to this user, our webhook and the recorded consent; the result
-   * reaches the server from Smile, never from the app.
-   */
+  /** The result reaches the server from Smile, never from the app. */
   livenessSession: (id: string) =>
     apiFetch<SmileLivenessSession>(`/trust/verifications/${id}/liveness/session`, {
       method: 'POST',

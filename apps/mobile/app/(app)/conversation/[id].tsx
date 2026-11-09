@@ -34,7 +34,6 @@ import { haptics } from '@/lib/haptics';
 
 const POLL_MS = 8000;
 
-/** A message on its way to the server (or that failed to get there). */
 interface Outgoing {
   key: string;
   text: string;
@@ -56,8 +55,6 @@ export default function ConversationThread() {
   const [attachment, setAttachment] = useState<PickedFile | null>(null);
   const [outgoing, setOutgoing] = useState<Outgoing[]>([]);
 
-  // Just this thread: polled lightly while open (React Query pauses it when
-  // the app is in the background or the screen is not focused).
   const query = useQuery({
     queryKey: qk.renter.conversation(id),
     queryFn: () => messagesApi.get(id),
@@ -66,8 +63,7 @@ export default function ConversationThread() {
   });
   const conversation = query.data;
 
-  // Mark read whenever unread messages are showing: including replies that
-  // arrive while the thread is open, not just the first time it loads.
+  // Mark read whenever unread messages show, including replies that arrive while the thread is open.
   const marking = useRef(false);
   useEffect(() => {
     if (!conversation || conversation.unreadCount === 0 || marking.current) return;
@@ -81,7 +77,6 @@ export default function ConversationThread() {
       });
   }, [conversation, id, qc]);
 
-  // Announce new incoming messages to screen-reader users.
   const lastSeen = useRef<string | null>(null);
   useEffect(() => {
     const last = conversation?.messages.at(-1);
@@ -124,7 +119,6 @@ export default function ConversationThread() {
       attachment,
       status: 'sending',
     };
-    // Show it straight away; clear the composer so the next message can start.
     setOutgoing((list) => [...list, o]);
     setText('');
     setAttachment(null);
@@ -139,8 +133,7 @@ export default function ConversationThread() {
 
   const discard = (o: Outgoing) => setOutgoing((list) => list.filter((x) => x.key !== o.key));
 
-  // Newest first: the list is inverted, so it opens at the latest message and
-  // only renders what is on screen, however long the thread gets.
+  // Newest first: the list is inverted, so it opens at the latest message.
   const rows = useMemo<Row[]>(() => {
     const sent = (conversation?.messages ?? []).map<Row>((m) => ({ kind: 'message', message: m }));
     const pending = outgoing.map<Row>((o) => ({ kind: 'outgoing', outgoing: o }));
@@ -307,8 +300,6 @@ export default function ConversationThread() {
     </KeyboardAvoidingView>
   );
 }
-
-/* -------------------------------- bubbles -------------------------------- */
 
 function Bubble({
   mine,

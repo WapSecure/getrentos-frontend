@@ -10,7 +10,6 @@ export type FollowUpStep =
   | 'check_in'
   | 'last_try';
 
-/** One lead due a follow-up today, with the step code chose and a drafted message. */
 export interface FollowUp {
   leadId: string;
   name: string;
@@ -39,7 +38,6 @@ export const followUpsApi = {
     apiFetch<FollowUpPlan>(
       `/realtor/follow-ups${language === 'en' ? '' : `?language=${language}`}`
     ),
-  /** Record that the realtor just followed up with this lead. */
   markContacted: (leadId: string) =>
     apiFetch<{ id: string }>(`/realtor/leads/${leadId}/contacted`, { method: 'POST' }),
 };

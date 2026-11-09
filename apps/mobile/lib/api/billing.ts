@@ -47,25 +47,19 @@ export interface SubscriptionInvoice {
   createdAt: string;
 }
 
-/**
- * Plan status, what Pro includes, receipts and cancelling a web plan. Buying
- * Pro in the app goes through the App Store / Google Play (lib/purchases), as
- * store rules require; the API learns about it from RevenueCat.
- */
+/** Buying Pro in the app goes through the App Store / Google Play (lib/purchases), as store rules require. */
 export const billingApi = {
   mine: () => apiFetch<MyBilling>('/billing'),
   pricing: () => apiFetch<PlanPricing>('/me/subscription/pricing'),
   invoices: (page = 1, pageSize = 20) =>
     apiFetch<Paginated<SubscriptionInvoice>>(`/billing/invoices?page=${page}&pageSize=${pageSize}`),
   cancel: () => apiFetch<MyBilling>('/billing/cancel', { method: 'POST' }),
-  /** Undo a cancel before the period ends, so the plan renews after all. */
   reactivate: () => apiFetch<MyBilling>('/billing/reactivate', { method: 'POST' }),
 };
 
 /** Kobo → naira, for the Price component. */
 export const naira = (kobo: number) => kobo / 100;
 
-/** The one-line summary of where a plan stands, matching web's wording. */
 export function planHeadline(b: MyBilling, date: (iso: string) => string): string {
   if (b.status === 'TRIALING')
     return b.trialEndsAt ? `Trial ends ${date(b.trialEndsAt)}` : 'Pro trial active';

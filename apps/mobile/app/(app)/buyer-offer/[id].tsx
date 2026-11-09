@@ -108,7 +108,6 @@ export default function BuyerOfferDetail() {
       </View>
 
       <QueryState query={offersQuery} skeleton={offerSkeleton}>
-        {/* An offer missing from the list keeps the placeholder, as before. */}
         {!offer ? (
           offerSkeleton
         ) : (

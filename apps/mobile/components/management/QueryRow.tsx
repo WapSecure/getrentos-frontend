@@ -4,10 +4,6 @@ import { Badge, Card, PressableScale, Text, useTheme } from '@sureground/ui-nati
 import { querySlaText, queryStatusBadge, type QuerySummary } from '@/lib/api/management';
 import { formatDateTime } from '@/lib/format';
 
-/**
- * One owner–manager question in a list. The owner sees who manages the
- * property; the manager sees which owner asked.
- */
 export function QueryRow({ query: q }: { query: QuerySummary }) {
   const { spacing, colors } = useTheme();
   const badge = queryStatusBadge(q);

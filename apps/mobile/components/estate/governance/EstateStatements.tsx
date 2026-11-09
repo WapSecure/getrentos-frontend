@@ -49,9 +49,6 @@ import { errorMessage } from '@/lib/api/client';
 const period = (s: Pick<EstateStatement, 'periodStart' | 'periodEnd'>) =>
   `${formatDate(s.periodStart, 'medium')} – ${formatDate(s.periodEnd, 'medium')}`;
 
-/* ----------------------------- payout account ----------------------------- */
-
-/** Where estate dues are paid out to when a statement is issued. */
 export function PayoutAccountCard({
   estateId,
   account,
@@ -217,8 +214,6 @@ function PayoutAccountForm({
   );
 }
 
-/* -------------------------------- statements ------------------------------ */
-
 export function StatementRow({ s, onPress }: { s: EstateStatement; onPress: () => void }) {
   const { colors, spacing } = useTheme();
   const badge = statementBadge(s);
@@ -327,7 +322,6 @@ function GenerateForm({ estateId, onDone }: { estateId: string; onDone: () => vo
   );
 }
 
-/** One statement in full, with the action its state allows: issue a draft, or retry a payout. */
 export function StatementSheet({
   estateId,
   statementId,

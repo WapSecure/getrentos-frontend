@@ -54,7 +54,6 @@ function WishlistManageBody() {
     onError: (err) => toast.show(errorMessage(err, 'Could not create that wishlist.'), 'error'),
   });
 
-  // A rename shows at once; a refusal puts the old name back.
   const renameMutation = useOptimisticMutation({
     mutationFn: ({ id, name }: { id: string; name: string }) => wishlistsApi.rename(id, name),
     patches: ({ id, name }) => [

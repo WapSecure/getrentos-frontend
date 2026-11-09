@@ -32,7 +32,6 @@ import { goBack } from '@/lib/goBack';
 
 const scopeLabel = (s: RepScope) => REP_SCOPES.find((x) => x.value === s)?.label ?? s;
 
-/** People the buyer trusts to follow purchases, attend tours and co-approve payments. */
 export default function BuyerLandRepresentatives() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();

@@ -34,7 +34,6 @@ import { haptics } from '@/lib/haptics';
 import { qk } from '@/lib/query/keys';
 import { goBack } from '@/lib/goBack';
 
-/** One home: how to reach the resident, what they owe, and their account link. */
 export default function EstateHousehold() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, spacing, radius } = useTheme();

@@ -20,5 +20,4 @@ export const geocodeApi = {
   },
 };
 
-/** Lagos: where the map opens when an address cannot be found, for the owner to drag from. */
 export const LAGOS_POINT: MapPoint = { latitude: 6.5244, longitude: 3.3792 };

@@ -24,7 +24,6 @@ import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { ContactActions } from '@/components/realtor/RealtorUI';
 import { goBack } from '@/lib/goBack';
 
-/** One client: how to reach them, and the properties they've trusted you with. */
 export default function RealtorClientDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, spacing, radius } = useTheme();

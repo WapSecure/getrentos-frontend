@@ -3,7 +3,7 @@ import { env } from '../env';
 
 WebBrowser.maybeCompleteAuthSession();
 
-/** Allowlisted on the backend — must match exactly. */
+// Allowlisted on the backend: must match exactly.
 const NATIVE_REDIRECT = 'sureground://oauth';
 
 export type OAuthResult =
@@ -18,10 +18,6 @@ export class OAuthCancelled extends Error {
   }
 }
 
-/**
- * Runs a provider sign-in in a secure system browser tab and returns the tokens
- * the backend hands back on the `sureground://oauth#...` deep link.
- */
 export async function startOAuth(provider: 'google'): Promise<OAuthResult> {
   const authUrl =
     `${env.apiUrl}/auth/oauth/${provider}` + `?redirect_uri=${encodeURIComponent(NATIVE_REDIRECT)}`;
@@ -36,14 +32,12 @@ export async function startOAuth(provider: 'google'): Promise<OAuthResult> {
     throw new Error('Sign-in did not complete. Please try again.');
   }
 
-  // Tokens come back in the URL fragment or query:
-  //   sureground://oauth#access_token=…&refresh_token=…
+  // Tokens come back in either the URL fragment or the query.
   const { url } = result;
   const afterHash = url.includes('#') ? url.slice(url.indexOf('#') + 1) : '';
   const afterQuery = url.includes('?') ? url.slice(url.indexOf('?') + 1).split('#')[0] : '';
   const params = new URLSearchParams(afterHash || afterQuery);
 
-  // The API refused the sign-in (e.g. a suspended account) — show its reason.
   const refusal = params.get('error');
   if (refusal) throw new Error(refusal);
 

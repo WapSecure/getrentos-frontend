@@ -122,7 +122,6 @@ function EditForm({
         required
         value={location}
         onChange={(patch) => setLocation((prev) => ({ ...prev, ...patch }))}
-        // Google's point for a picked address; the landlord confirms it by dragging.
         onPin={setPin}
       />
 

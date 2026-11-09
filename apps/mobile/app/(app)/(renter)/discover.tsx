@@ -66,7 +66,6 @@ export default function Discover() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [saveSearchOpen, setSaveSearchOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
-  // A sentence typed in the search box becomes filters; this says what was understood.
   const [understood, setUnderstood] = useState<string | null>(null);
   const understand = useMutation({
     mutationFn: (q: string) => searchParseApi.parse(q),
@@ -78,7 +77,6 @@ export default function Discover() {
   });
   const { savedIds, toggle } = useSavedListings();
 
-  // Debounce the free-text search into the filter set.
   useEffect(() => {
     const t = setTimeout(() => {
       const next = searchText.trim();
@@ -95,7 +93,6 @@ export default function Discover() {
     queryFn: ({ pageParam }) => propertiesApi.list({ ...filters, sortBy }, pageParam, PAGE_SIZE),
     initialPageParam: 1,
     getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
-    // Old results stay up while a new search or filter loads.
     placeholderData: keepPreviousData,
   });
 
@@ -144,7 +141,6 @@ export default function Discover() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      {/* sticky search + filter bar */}
       <View
         style={{
           paddingHorizontal: spacing.xl,

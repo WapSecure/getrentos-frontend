@@ -11,14 +11,7 @@ import {
   useStaffTwoFactorStatus,
 } from './TwoFactorSetup';
 
-/**
- * Staff accounts can't use any admin route until two-factor is on (the API
- * answers STAFF_MFA_REQUIRED). Rather than a wall of failing pages, the
- * signed-in area shows the set-up screen in their place until it is.
- *
- * Any request refused with STAFF_MFA_REQUIRED re-checks the status, so turning
- * two-factor off elsewhere brings the screen straight back.
- */
+/** Staff can't use admin routes until two-factor is on (STAFF_MFA_REQUIRED), so show set-up in place of the pages; any such refusal re-checks the status. */
 export function StaffTwoFactorGate({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const status = useStaffTwoFactorStatus();
@@ -32,10 +25,7 @@ export function StaffTwoFactorGate({ children }: { children: ReactNode }) {
   );
 
   if (status.isLoading) return <PageLoadingState />;
-  // A failed status check leaves the pages up: the API still enforces the rule,
-  // and its refusal re-runs this check.
-  // Only block when the API itself would refuse: a local demo backend can run
-  // with staff two-factor switched off, and the gate must match it.
+  // On a failed check keep the pages up: the API still enforces it. Block only when the API would refuse (a demo backend may switch staff two-factor off).
   if (!status.data || status.data.enabled || status.data.requiredForAdminTools === false)
     return <>{children}</>;
 

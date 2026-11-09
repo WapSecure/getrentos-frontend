@@ -226,7 +226,6 @@ export interface AgentWorkOrderPhoto {
   url: string;
 }
 
-/** An on-site maintenance job an owner assigned to this field agent. */
 export interface AgentWorkOrder {
   id: string;
   issueTitle: string;
@@ -252,7 +251,6 @@ export interface AgentNotificationPreference {
   push: boolean;
 }
 
-/** The day's visits in a drivable order (web: types/agentRoute.ts). */
 export interface AgentRoute {
   date: string;
   stops: {
@@ -335,7 +333,6 @@ export const agentApi = {
   removeInspectionPhoto: (photoId: string) =>
     apiFetch<void>(`/agent/inspections/photos/${photoId}`, { method: 'DELETE' }),
 
-  /** On-site maintenance jobs assigned to this field agent. */
   workOrders: () => apiFetch<AgentWorkOrder[]>('/agent/work-orders'),
 
   startWorkOrder: (id: string) =>

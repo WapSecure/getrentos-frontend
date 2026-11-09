@@ -8,10 +8,7 @@ type DashboardHeaderProps = {
   roleBadge?: string;
   accessory?: React.ReactNode;
   style?: StyleProp<ViewStyle>;
-  /**
-   * Makes the title block a button (e.g. "Switch estate"). Only the title: the
-   * accessory stays outside it, so its own buttons are never nested in this one.
-   */
+  /** Only the title is the button: the accessory stays outside it, so its own buttons are never nested in this one. */
   onTitlePress?: () => void;
   titleAccessibilityLabel?: string;
 };

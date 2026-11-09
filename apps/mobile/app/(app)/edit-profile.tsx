@@ -189,7 +189,6 @@ function ProfileForm({ profile }: { profile: RenterProfile }) {
         label="Phone"
         savedPhone={profile.phone}
         value={phone}
-        // Digits and a leading '+' only.
         onChangeText={(t) => setPhone(t.replace(/[^\d+]/g, '').replace(/(?!^)\+/g, ''))}
         returnKeyType="done"
       />

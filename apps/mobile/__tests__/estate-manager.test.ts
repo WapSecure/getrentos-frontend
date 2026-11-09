@@ -153,7 +153,6 @@ describe('emergency roll call', () => {
       entry('help', 'C9', 'NEEDS_HELP'),
       entry('missing-2', 'A2', 'UNACCOUNTED'),
     ];
-    // A2 before A10: units sort the way a marshal walks them, not as text.
     expect(rollOrder(roll).map((e) => e.id)).toEqual([
       'help',
       'missing-2',
@@ -228,7 +227,6 @@ describe('amenity bookings', () => {
         booking('gone', '2026-10-01T10:00:00.000Z'),
         booking('soon', '2026-10-04T15:00:00.000Z'),
         booking('cancelled', '2026-10-05T10:00:00.000Z', 'cancelled'),
-        // Started but not finished: still in use, so still ahead.
         booking('now', '2026-10-04T11:30:00.000Z'),
       ],
       now

@@ -12,7 +12,6 @@ import { nightsBetween, occupied, shiftDay } from '@/lib/hostDates';
 
 describe('calendar nights', () => {
   it('a stay or block takes every night up to, not including, its end date', () => {
-    // Check in Fri 20th, out Mon 23rd: three nights, the 23rd is free again.
     expect(occupied('2026-12-20', '2026-12-23')).toEqual([
       '2026-12-20',
       '2026-12-21',
@@ -28,7 +27,7 @@ describe('calendar nights', () => {
 });
 
 describe('dates for hosts', () => {
-  const now = new Date(2026, 8, 28, 9, 0); // 28 Sep 2026, morning
+  const now = new Date(2026, 8, 28, 9, 0);
 
   it('counts days by calendar date, not hours', () => {
     expect(daysUntil('2026-09-28', now)).toBe(0);
@@ -96,7 +95,6 @@ describe('pricing rules summary', () => {
 
 describe('host fee note', () => {
   it('names the last Lagos day of a launch rate, then the standard rate', () => {
-    // Ends at midnight Lagos on 1 Feb 2027 = 23:00 UTC on 31 Jan.
     const note = feeNote({
       commissionPct: 3,
       standardCommissionPct: 8,

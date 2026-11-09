@@ -31,7 +31,6 @@ import {
 import { errorMessage } from '@/lib/api/client';
 import { relativeTime } from '@/lib/format';
 
-/** Conversations with active clients. A client who revokes you drops out of this list. */
 export default function RealtorMessages() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
@@ -204,7 +203,6 @@ function Row({ c }: { c: RealtorConversation }) {
   );
 }
 
-/** Pick an active client and open (or reuse) the conversation with them. */
 function ClientPicker({ onDone }: { onDone: () => void }) {
   const { colors, spacing } = useTheme();
   const clients = useQuery({ queryKey: qk.realtor.clients, queryFn: () => realtorApi.clients() });

@@ -3,11 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const KEY = 'sureground.onboardingSeen';
 
-/*
- * One module-level value shared by every caller. Each screen used to keep its
- * own copy, so finishing the intro never reached the root router — signing out
- * later in the same session replayed onboarding.
- */
+// One module-level value for every caller, so finishing the intro reaches the root router.
 let seen: boolean | null = null;
 let loading: Promise<void> | null = null;
 const listeners = new Set<() => void>();
@@ -37,11 +33,7 @@ function subscribe(listener: () => void) {
 
 const getSnapshot = () => seen;
 
-/**
- * Whether the intro flow has been completed on this device.
- * `null` while the stored value is still being read — routing waits on that so
- * a returning user never sees onboarding flash before the welcome screen.
- */
+// `null` while reading; routing waits so a returning user never sees onboarding flash.
 export function useOnboardingSeen() {
   const value = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 
@@ -57,13 +49,11 @@ export function useOnboardingSeen() {
   return { seen: value, markSeen };
 }
 
-/** Clears the flag so the intro plays again. Used by the dev-only replay shortcut. */
 export async function resetOnboarding(): Promise<void> {
   await AsyncStorage.removeItem(KEY).catch(() => undefined);
   emit(false);
 }
 
-/** Test hook: forget the cached value so the next read goes back to storage. */
 export function __resetOnboardingCacheForTests() {
   seen = null;
   loading = null;

@@ -33,7 +33,6 @@ import { goBack } from '@/lib/goBack';
 const ALL = 'all';
 const PAGE_SIZE = 10;
 
-/** The buyer's land: plots on hold and plot purchases, paid through Sureground. */
 export default function BuyerLand() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();

@@ -5,7 +5,6 @@ import { StatusPill } from '@/components/host/HostUI';
 import { AGREEMENT_STATUS, type MarketingAgreement } from '@/lib/api/estateMarketplace';
 import { formatDate } from '@/lib/format';
 
-/** A property in the estate, and whether its owner lets the estate advertise it. */
 export function AgreementCard({
   agreement: a,
   onRemove,

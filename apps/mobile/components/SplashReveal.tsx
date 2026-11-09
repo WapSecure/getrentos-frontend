@@ -10,17 +10,11 @@ import Animated, {
 import { scheduleOnRN } from 'react-native-worklets';
 import { BrandLogo, Text, useReducedMotion, useTheme } from '@sureground/ui-native';
 
-// Kept short: this sits between the native splash and a usable first screen,
-// so every millisecond here is launch time the user waits through.
+// Kept short: every millisecond here is launch time the user waits through.
 const MARK_IN = 380;
 const HOLD = 160;
 const FADE_OUT = 280;
 
-/**
- * Brand reveal that covers the handoff from the native splash to the first
- * screen, so a cold start resolves into the app instead of cutting to it.
- * Unmounts itself once it has faded out.
- */
 export function SplashReveal() {
   const { colors, spacing } = useTheme();
   const reduceMotion = useReducedMotion();
@@ -37,7 +31,6 @@ export function SplashReveal() {
       if (finished) scheduleOnRN(setDone, true);
     };
     if (reduceMotion) {
-      // No scale or drift: show the brand and dissolve.
       markOpacity.set(1);
       markScale.set(1);
       wordOpacity.set(1);
@@ -93,7 +86,6 @@ export function SplashReveal() {
           <BrandLogo size={64} showWordmark={false} />
         </Animated.View>
         <Animated.View style={[{ alignItems: 'center', gap: spacing.xs }, wordStyle]}>
-          {/* wordmark only: the mark above already carries the brand */}
           <Text
             style={{
               color: colors.foreground,

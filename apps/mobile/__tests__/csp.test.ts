@@ -12,7 +12,6 @@ import {
   websocketOrigin,
 } from '@sureground/shared';
 
-/** Policy string → { directive: sources[] }. */
 function directives(policy: string): Record<string, string[]> {
   return Object.fromEntries(
     policy.split('; ').map((part) => {

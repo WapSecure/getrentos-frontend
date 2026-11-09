@@ -9,11 +9,6 @@ import { pickPhotos } from '@/lib/filePicker';
 
 const MAX_PHOTOS = 12;
 
-/**
- * The owner's property photos: add from the library, make one the cover, or
- * remove one. Each change saves straight away. The first photo is the cover
- * buyers see first.
- */
 export function OwnerPhotosField({
   property,
   onChanged,

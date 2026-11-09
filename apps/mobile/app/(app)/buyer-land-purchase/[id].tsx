@@ -54,7 +54,6 @@ import type { PaymentProvider } from '@/lib/api/paymentStatus';
 
 type Tab = 'schedule' | 'conditions' | 'conveyance' | 'title' | 'statement';
 
-/** One plot purchase from the buyer's side: what is owed, what is held, what to confirm. */
 export default function BuyerLandPurchase() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, spacing } = useTheme();
@@ -275,11 +274,9 @@ function Banners({ p }: { p: BuyerPurchaseDetail }) {
 function PayNext({ p, onPaid }: { p: BuyerPurchaseDetail; onPaid: () => void }) {
   const { spacing } = useTheme();
   const toast = useToast();
-  // Which company takes the payment, and why the last one could not.
   const providers = usePaymentProviders();
   const [providerError, setProviderError] = useState<string | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
-  // Opens the payment page, then confirms the result and keeps it on screen.
   const checkout = usePaystackCheckout();
   const closeSheet = () => {
     setSheetOpen(false);
@@ -291,7 +288,6 @@ function PayNext({ p, onPaid }: { p: BuyerPurchaseDetail; onPaid: () => void }) 
     onSuccess: async (init) => {
       closeSheet();
       if (init.authorizationUrl) {
-        // Wait for Sureground to confirm it, then show how it went (amount, reference).
         await checkout(init.authorizationUrl, init.reference);
       } else {
         toast.show(`Payment of ${formatNaira(init.amount)} confirmed.`, 'success');
@@ -299,7 +295,6 @@ function PayNext({ p, onPaid }: { p: BuyerPurchaseDetail; onPaid: () => void }) 
       onPaid();
     },
     onError: (e, provider) => {
-      // That company cannot take it right now: say so in the sheet, with the other one picked.
       const unavailable = providers.recover(e, provider);
       if (unavailable) setProviderError(unavailable);
       else {

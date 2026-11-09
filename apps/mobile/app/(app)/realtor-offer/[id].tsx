@@ -33,10 +33,7 @@ import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { StatusPill } from '@/components/host/HostUI';
 import { goBack } from '@/lib/goBack';
 
-/**
- * One negotiation: every amount on the table in order, and a counter for the
- * realtor. Accepting is the owner's call, since it commits their property.
- */
+/** Accepting is the owner's call, since it commits their property. */
 export default function RealtorOfferDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, spacing, radius } = useTheme();

@@ -54,7 +54,6 @@ const FREQUENCIES = [
 
 const everyLabel = (d: number) => FREQUENCIES.find((f) => f.days === d)?.label ?? `Every ${d} days`;
 
-/** Servicing on a schedule, so things are fixed before they break. */
 export default function Plans() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();

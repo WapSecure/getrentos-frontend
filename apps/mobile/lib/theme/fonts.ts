@@ -7,11 +7,7 @@ import {
 } from '@expo-google-fonts/manrope';
 import type { FontFamilies } from '@sureground/ui-native';
 
-/**
- * The brand typeface, the same one the website uses. Static faces, one per
- * weight the type ramp and screens ask for; ui-native's Text picks the face
- * for a weight, so screens keep writing `fontWeight` as before.
- */
+// ui-native's Text picks the face for a weight, so screens keep writing `fontWeight`.
 export const BRAND_FONT_SOURCES = {
   Manrope_400Regular,
   Manrope_500Medium,

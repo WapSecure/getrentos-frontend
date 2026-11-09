@@ -19,28 +19,7 @@ import { qk } from '@/lib/query/keys';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { formatTime } from '@/lib/format';
 
-/**
- * Who the estate expects today, at the barrier.
- *
- * Prefixed `gate-` for the same reason `gate-deliveries` and `gate-patrol` are:
- * route groups contribute no URL segment, so a group screen also answers on its
- * bare path and Expo Router's generated route union would collapse a clash
- * silently. There is no top-level `expected.tsx` today — the prefix is what keeps
- * it that way.
- *
- * READ-ONLY, and deliberately so. It exists because the question a guard is
- * actually asked is "am I expected?" and the answer currently requires ringing
- * the office. Nothing on it opens a barrier: the visitor still presents their
- * PIN, and this only says the estate already knows they are coming. That is also
- * why the endpoint is readable at the gate even though the guest list behind it
- * belongs to the office — a board that admitted people would be a new way in,
- * invented by a display.
- *
- * Every row shows the deadline the estate gave it rather than counting who is
- * "due", because the guard is the one who has to decide what to do about a
- * visitor holding a pass that expired this morning: turn them away, or ring the
- * resident. Hiding the row would make that decision for them, badly.
- */
+// Read-only on purpose: a board that admitted people would be a new way in. Prefixed `gate-` to avoid a bare-path route clash.
 export default function GatemanExpected() {
   const { spacing } = useTheme();
   const { estate, isLoading: isPostLoading } = useGatemanPost();
@@ -169,14 +148,6 @@ type BoardRow = {
   deadlineToday: boolean;
 };
 
-/**
- * One kind of arrival.
- *
- * A block rather than one flat list because the three are handled differently at
- * a barrier — an invitation is checked in, a regular visitor is usually waved
- * through, and a parcel is handed over — so the guard needs to know which of the
- * three they are looking at before they know what to do with it.
- */
 const Block = ({
   title,
   icon,
@@ -222,10 +193,7 @@ const Block = ({
                     {row.subtitle}
                   </Text>
                 </View>
-                {/* The deadline is the part of a row the estate can be wrong
-                    about, so it is shown rather than filtered away: "until
-                    Friday" and "by 18:00 today" mean different things at a
-                    barrier, and the guard is the one who has to act on it. */}
+                {/* Shown, not filtered: the guard decides what to do about a pass that expired this morning. */}
                 <Text
                   variant="caption"
                   color={row.deadlineToday ? 'foreground' : 'mutedForeground'}

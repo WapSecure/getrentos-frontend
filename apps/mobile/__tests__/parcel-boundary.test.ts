@@ -35,7 +35,6 @@ describe('parcel boundary', () => {
   });
 
   it('flags an outline far from the stated area, in any unit, and nothing close', () => {
-    // The square is about one hectare.
     expect(boundaryAreaMismatch(square, 1, 'HECTARE')).toBeNull();
     expect(boundaryAreaMismatch(square, 2.5, 'ACRE')).toBeNull();
     expect(boundaryAreaMismatch(square, 9_000, 'SQUARE_METERS')).toBeNull();

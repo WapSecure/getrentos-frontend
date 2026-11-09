@@ -58,11 +58,6 @@ const FILTERS: { value: Filter; label: string }[] = [
 
 const when = (iso: string) => `${formatDate(iso, 'short')}, ${formatTime(iso)}`;
 
-/**
- * Parcels taken in at the gate for households, from the office's side: what is
- * still waiting to be picked up, and what was collected. (Residents see their
- * own parcels on a separate screen.)
- */
 export default function EstateDeliveries() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
@@ -290,11 +285,6 @@ export default function EstateDeliveries() {
   );
 }
 
-/**
- * Two ways to say whose parcel it is. The code the household sent its courier
- * comes first, because it names the household itself; picking from the list
- * relies on what was said at the barrier.
- */
 function LogDeliveryForm({ estateId, onDone }: { estateId: string; onDone: () => void }) {
   const { colors, spacing, radius } = useTheme();
   const qc = useQueryClient();

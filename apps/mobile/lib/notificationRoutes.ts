@@ -1,13 +1,6 @@
 import type { Portal } from './roles';
 
-/**
- * Where a notification should take you in the app.
- *
- * The API speaks in web paths (`/renter/payments`) because the same
- * notification also shows on the website. Map the ones the app implements onto
- * native routes; anything unmapped falls back by type, then to the inbox —
- * never to a route that does not exist.
- */
+// Never return a route that does not exist: unmapped paths fall back by type, then to the inbox.
 const WEB_PATH_TO_ROUTE: Record<string, string> = {
   '/renter/payments': '/(app)/payments',
   '/renter/applications': '/(app)/(renter)/applications',
@@ -75,7 +68,6 @@ const WEB_PATH_TO_ROUTE: Record<string, string> = {
   '/estate/financials': '/(app)/estate-financials',
   '/estate/microsite': '/(app)/estate-microsite',
   '/estate/leads': '/(app)/estate-enquiries',
-  // A short-stay chat, from either side: it has its own inbox.
   '/shortlets/messages': '/(app)/shortlet-messages',
   '/estate/violations': '/(app)/estate-violations',
   '/estate/emergency': '/(app)/estate-emergency',
@@ -108,7 +100,6 @@ const WEB_PATH_TO_ROUTE: Record<string, string> = {
   '/resident/committee': '/(app)/committee',
 };
 
-/** Type prefix → route, for notifications that carry no usable action URL. */
 const TYPE_FALLBACK: [prefix: string, route: string][] = [
   ['ESCROW_', '/(app)/buyer-transactions'],
   ['OFFER_', '/(app)/(buyer)/offers'],
@@ -121,21 +112,14 @@ const TYPE_FALLBACK: [prefix: string, route: string][] = [
   ['ESTATE_ANNOUNCEMENT_', '/(app)/(resident)/announcements'],
 ];
 
-/** Owner-side screens for the same notification types. */
 const OWNER_FALLBACK: [prefix: string, route: string][] = [
-  // An estate asking to market their property: answered in estate agreements.
   ['ESTATE_LISTING_REQUESTED', '/(app)/estate-agreements'],
   ['OFFER_', '/(app)/(owner)/offers'],
   ['ESCROW_', '/(app)/owner-transactions'],
-  // A realtor asking to represent them: answered where they manage realtors.
   ['REALTOR_CLIENT_', '/(app)/representatives'],
 ];
 
-/**
- * Realtor-side screens. A realtor's "commission earned" arrives typed as the
- * escrow release that earned it, and their offers are the ones they negotiate.
- */
-/** Landlord-side screens: rent, leases and repairs mean managing them, not paying them. */
+// A realtor's "commission earned" arrives typed as the escrow release that earned it.
 const LANDLORD_FALLBACK: [prefix: string, route: string][] = [
   ['ESTATE_LISTING_REQUESTED', '/(app)/estate-agreements'],
   ['RENT_', '/(app)/landlord-payments'],
@@ -154,9 +138,7 @@ const REALTOR_FALLBACK: [prefix: string, route: string][] = [
   ['REALTOR_CLIENT_', '/(app)/realtor-clients'],
 ];
 
-/** The estate office sees its residents' dues, not a resident's own. */
 const ESTATE_FALLBACK: [prefix: string, route: string][] = [
-  // An owner answered the estate's request to market their property.
   ['ESTATE_LISTING_DECIDED', '/(app)/estate-marketplace'],
   ['ESTATE_DUE_', '/(app)/(estate)/dues'],
   ['ESTATE_ANNOUNCEMENT_', '/(app)/estate-announcements'],
@@ -171,20 +153,13 @@ const ESTATE_FALLBACK: [prefix: string, route: string][] = [
   ['ESTATE_POLL_', '/(app)/estate-polls'],
 ];
 
-/** Portals that host short stays; their shortlet notifications are the host's side. */
 const HOST_PORTALS = new Set<Portal>(['owner', 'landlord']);
 
-/**
- * Shortlet notifications only ever sent to the host. Others (confirmed,
- * cancelled) go to whichever side didn't act, so they can't be routed by
- * type alone.
- */
+// Others (confirmed, cancelled) go to whichever side didn't act, so they can't be routed by type alone.
 const HOST_ONLY_TYPES = new Set(['SHORTLET_BOOKING_REQUEST', 'SHORTLET_REVIEW_RECEIVED']);
 
-/** Portals that book short stays as guests. */
 const GUEST_PORTALS = new Set<Portal>(['renter', 'buyer']);
 
-/** Portals whose tab bar has a Messages tab. */
 const PORTALS_WITH_INBOX = new Set<Portal>([
   'renter',
   'buyer',
@@ -194,7 +169,6 @@ const PORTALS_WITH_INBOX = new Set<Portal>([
   'realtor',
 ]);
 
-/** The native route for a web action path, or null if the app has no screen for it. */
 export function routeForActionUrl(url?: string | null): string | null {
   if (!url) return null;
   // Tolerate absolute URLs and a `/dashboard` prefix the web sometimes uses.
@@ -204,12 +178,10 @@ export function routeForActionUrl(url?: string | null): string | null {
     .replace(/^\/dashboard/, '')
     .replace(/\/$/, '');
   if (WEB_PATH_TO_ROUTE[path]) return WEB_PATH_TO_ROUTE[path];
-  // One land parcel's pages (e.g. its authority to sell) open the land portfolio.
   if (path.startsWith('/owner/land/')) return '/(app)/owner-land';
   return null;
 }
 
-/** Each portal's own conversation screen, for a message notification. */
 const CONVERSATION_ROUTE: Partial<Record<Portal, string>> = {
   renter: '/(app)/conversation',
   landlord: '/(app)/landlord-conversation',
@@ -219,7 +191,6 @@ const CONVERSATION_ROUTE: Partial<Record<Portal, string>> = {
   agent: '/(app)/agent-conversation',
 };
 
-/** Where tapping a push notification should land. Always returns a real route. */
 export function routeForNotification(
   {
     actionUrl,
@@ -234,7 +205,6 @@ export function routeForNotification(
   },
   portal: Portal | null
 ): string {
-  // A message opens its conversation, not just the inbox.
   if (type === 'NEW_MESSAGE' && conversationId) {
     const id = encodeURIComponent(conversationId);
     if (routeForActionUrl(actionUrl) === '/(app)/shortlet-messages') {
@@ -243,7 +213,6 @@ export function routeForNotification(
     const chat = portal ? CONVERSATION_ROUTE[portal] : undefined;
     if (chat) return `${chat}/${id}`;
   }
-  // A guest's stay notification opens that stay: status, money and what to do next.
   if (
     bookingId &&
     type?.startsWith('SHORTLET_') &&
@@ -255,13 +224,11 @@ export function routeForNotification(
   }
   const direct = routeForActionUrl(actionUrl);
   if (direct) return direct;
-  // A host is told about a request on their listing: open that booking.
   if (portal && HOST_PORTALS.has(portal) && type && HOST_ONLY_TYPES.has(type)) {
     return bookingId && type === 'SHORTLET_BOOKING_REQUEST'
       ? `/(app)/host/booking/${bookingId}`
       : '/(app)/host';
   }
-  // Sellers, landlords and estates see the same events from the other side of the table.
   const sellerSide =
     portal === 'owner'
       ? OWNER_FALLBACK

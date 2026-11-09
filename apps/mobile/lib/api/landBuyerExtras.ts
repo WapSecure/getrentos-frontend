@@ -3,17 +3,8 @@ import { apiFetch } from './client';
 import type { BuyerPurchaseDetail } from './landBuyer';
 import type { Milestone } from './landSales';
 
-/**
- * Around a land deal: live video tours of the land, independent pre-purchase
- * inspections, and representatives (people in Nigeria a buyer trusts to follow
- * a purchase, attend tours and give the second approval before money is
- * released). None of these replaces an official search.
- */
-
 const post = <T>(path: string, body?: unknown) =>
   apiFetch<T>(path, { method: 'POST', ...(body !== undefined ? { body } : {}) });
-
-/* ---------------------------------- tours --------------------------------- */
 
 export const LAND_TOUR_DISCLAIMER =
   'A video tour shows the land as it looks today. It is not a registry search, a survey or an inspection, and it does not confirm who owns the land or where its boundaries are.';
@@ -62,7 +53,6 @@ export const tourReasonOk = (s: string) => s.trim().length >= 3 && s.trim().leng
 export const canReportNoShow = (t: Pick<BuyerTour, 'status' | 'scheduledAt'>, now: number) =>
   t.status === 'SCHEDULED' && !!t.scheduledAt && now > Date.parse(t.scheduledAt) + 15 * 60_000;
 
-/** The device's IANA time zone, or Lagos. */
 export function deviceTimeZone(): string {
   try {
     return Intl.DateTimeFormat().resolvedOptions().timeZone || 'Africa/Lagos';
@@ -70,8 +60,6 @@ export function deviceTimeZone(): string {
     return 'Africa/Lagos';
   }
 }
-
-/* -------------------------------- inspections ------------------------------ */
 
 export const PRE_PURCHASE_DISCLAIMER =
   'An inspection records what the land looks like on the day. It is not a registry search or a survey, and it does not confirm who owns the land.';
@@ -124,8 +112,6 @@ export interface PrePurchaseInspection {
 /** Questions about a report and reinspection reasons: 10–2000 characters. */
 export const inspectionTextOk = (s: string) => s.trim().length >= 10 && s.trim().length <= 2000;
 
-/* ------------------------------ representatives ---------------------------- */
-
 export type RepScope = 'VIEW' | 'CO_APPROVE' | 'ATTEND';
 export const REP_SCOPES: { value: RepScope; label: string }[] = [
   { value: 'VIEW', label: 'See my land purchases, their steps and documents' },
@@ -171,14 +157,10 @@ export interface CoApproval {
   pending?: { milestoneKey: string; buyerApproved: boolean; representativeApproved: boolean }[];
 }
 
-/** Which deal two-person approval is about. */
 export type Deal = { kind: 'purchase'; id: string } | { kind: 'transaction'; id: string };
 const dealPath = (d: Deal) =>
   `${d.kind === 'purchase' ? 'purchases' : 'transactions'}/${encodeURIComponent(d.id)}`;
 
-/* ------------------------------ representing desk -------------------------- */
-
-/** A buyer's deals as their representative sees them. */
 export interface PrincipalDeals {
   purchases: {
     purchaseId: string;
@@ -195,8 +177,6 @@ export interface PrincipalDeals {
     youApprovePayments: boolean;
   }[];
 }
-
-/* ----------------------------------- api ---------------------------------- */
 
 export const landBuyerExtrasApi = {
   tours: () => apiFetch<BuyerTour[]>('/buyer/land/tours'),
@@ -251,7 +231,7 @@ export const landBuyerExtrasApi = {
     post<CoApproval>(`/buyer/land/${dealPath(d)}/co-approval/disable`),
   keepCoApproval: (d: Deal) => post<CoApproval>(`/buyer/land/${dealPath(d)}/co-approval/keep`),
 
-  /** Appointments where this account represents a buyer (name/email are the buyer's). */
+  /** `name` and `email` are the buyer's. */
   representing: () => apiFetch<Appointment[]>('/land/representing'),
   respond: (id: string, response: 'ACCEPT' | 'DECLINE') =>
     post<unknown>(`/land/representing/${id}/respond`, { response }),

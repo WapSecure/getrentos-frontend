@@ -10,7 +10,6 @@ import {
 } from '@/lib/api/publicMarket';
 import { LAND_TITLE_TYPE_LABEL } from '@/lib/api/land';
 
-/** The refinements a filter sheet edits: everything except search, sort and estate scope. */
 export type MarketRefinements = Omit<MarketFilters, 'search' | 'sort' | 'estate'>;
 
 const PROPERTY_TYPES: { value: string; label: string }[] = [
@@ -21,7 +20,6 @@ const PROPERTY_TYPES: { value: string; label: string }[] = [
   { value: 'COMMERCIAL', label: 'Commercial' },
 ];
 
-/** Square metres; a standard Lagos plot is roughly 450–650 sqm. */
 const AREAS: { value: number; label: string }[] = [
   { value: 450, label: '1 plot+' },
   { value: 900, label: '2 plots+' },
@@ -55,8 +53,7 @@ export function MarketFilterSheet({
 }) {
   const { spacing } = useTheme();
   const [draft, setDraft] = useState<MarketRefinements>(value);
-  // Start from the applied filters each time the sheet opens (adjusting state
-  // on a prop change during render, not in an effect).
+  // Reset to the applied filters on each open, during render rather than in an effect.
   const [wasOpen, setWasOpen] = useState(open);
   if (open !== wasOpen) {
     setWasOpen(open);
@@ -283,7 +280,6 @@ function ChipRow({ children }: { children: ReactNode }) {
   return <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>{children}</View>;
 }
 
-/** A whole-naira amount; empty means "no bound". */
 function NairaField({
   label,
   value,

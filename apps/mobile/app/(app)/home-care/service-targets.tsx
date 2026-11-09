@@ -35,7 +35,6 @@ import { Stepper } from '@/components/host/HostUI';
 import { PriorityTag } from '@/components/homecare/WorkOrderCard';
 import { goBack } from '@/lib/goBack';
 
-/** Sensible starting targets (minutes) when a home has none for a priority. */
 const DEFAULTS: Record<Priority, { respond: number; resolve: number; escalate: number }> = {
   URGENT: { respond: 30, resolve: 4 * 60, escalate: 60 },
   HIGH: { respond: 2 * 60, resolve: 24 * 60, escalate: 4 * 60 },
@@ -49,7 +48,6 @@ const BREACH: Record<string, string> = {
   ESCALATION_DUE: 'Due for escalation',
 };
 
-/** How fast each priority must be answered and fixed, per home; and what's slipped. */
 export default function ServiceTargets() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
@@ -244,7 +242,6 @@ function TargetForm({
   const qc = useQueryClient();
   const toast = useToast();
   const d = DEFAULTS[priority];
-  // Edited in hours (minutes under an hour for the fastest targets).
   const [respond, setRespond] = useState(
     Math.max(1, Math.round((policy?.responseTargetMinutes ?? d.respond) / 30)) / 2
   );

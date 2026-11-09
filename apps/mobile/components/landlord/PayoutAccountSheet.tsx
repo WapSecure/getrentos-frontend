@@ -18,7 +18,6 @@ import { qk } from '@/lib/query/keys';
 import { haptics } from '@/lib/haptics';
 import { errorMessage } from '@/lib/api/client';
 
-/** Add or change the bank account a landlord's rent is paid out to. */
 export function PayoutAccountSheet({
   open,
   onClose,

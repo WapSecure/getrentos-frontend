@@ -27,7 +27,6 @@ import { qk } from '@/lib/query/keys';
 import { goBack } from '@/lib/goBack';
 import { errorMessage } from '@/lib/api/client';
 
-/** Everything the office has told residents, newest first, with edit and delete. */
 export default function EstateAnnouncements() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();

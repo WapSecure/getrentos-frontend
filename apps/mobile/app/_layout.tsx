@@ -35,11 +35,7 @@ export { ErrorBoundary } from '@/components/ErrorBoundary';
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
-/**
- * The single source of navigation truth. One effect, one `router.replace` per
- * transition: never `<Redirect>` scattered across nested layouts (two of them
- * firing at once trips React's update counter on the native stack).
- */
+/** One effect, one `router.replace` per transition: scattered `<Redirect>`s trip React's update counter on the native stack. */
 function useProtectedRoute(onboardingSeen: boolean | null) {
   const { status, usablePortal, workspaces, switchWorkspace } = useAuth();
   const segments = useSegments();
@@ -51,14 +47,9 @@ function useProtectedRoute(onboardingSeen: boolean | null) {
     // sees onboarding flash before the welcome screen.
     if (status === 'loading' || onboardingSeen === null) return;
 
-    // '(auth)' | '(market)' | '(public)' | '(app)' | undefined (index). The
-    // public market is open to signed-out visitors; signed-in users fall through
-    // to their portal. '(public)' profile pages are open to both.
     const root = segments[0];
     const inApp = root === '(app)';
-    // Route on the portal we can OPEN, not on the user's most senior role:
-    // otherwise a role with no screens yet (realtor, owner, estate) hides a
-    // portal the user does have.
+    // Route on the portal we can open, not the most senior role, which may have no screens yet.
     const portalReady = !!usablePortal;
 
     // Signed in from a public listing that the current workspace can't open,
@@ -76,20 +67,13 @@ function useProtectedRoute(onboardingSeen: boolean | null) {
       if (inApp || root === undefined)
         target = onboardingSeen ? '/(auth)/welcome' : '/(auth)/onboarding';
     } else if (root !== '(public)') {
-      // authenticated (public profile pages, a landlord's or estate's, stay open)
       const group = (segments as string[])[1];
       if (!inApp) {
         target = portalReady ? portalHref(usablePortal) : '/(app)/portal-unavailable';
       } else if (!portalReady) {
         if (group !== 'portal-unavailable') target = '/(app)/portal-unavailable';
       } else if (usablePortal && group?.startsWith('(') && group !== `(${usablePortal})`) {
-        // Two portals' tab groups can share a leaf name (e.g. both define
-        // "account"), and group segments are invisible in the URL, so a
-        // deep link or stale bookmark can resolve into the WRONG portal's
-        // screen. Only re-route when the matched segment is itself a
-        // portal group marker: top-level pushed screens outside any
-        // group (e.g. "violations", "saved") are unambiguous by name and
-        // must stay untouched here.
+        // Group segments are invisible in URLs, so a deep link can resolve into another portal's same-named screen; only re-route on a portal group marker.
         target = portalHref(usablePortal);
       }
     }
@@ -160,9 +144,7 @@ function Gate() {
 }
 
 function RootLayout() {
-  // The native splash stays up (Gate hides it) until the typeface is in, so
-  // the first frame is already in the brand face. If it fails to load, the
-  // platform face stands in rather than holding the app.
+  // The native splash stays up until the typeface loads; if it fails, the platform face stands in.
   const [fontsLoaded, fontError] = useFonts(BRAND_FONT_SOURCES);
   // Stored GetRentos-era keys move to their Sureground names before anything reads them.
   const storageReady = useLegacyStorageMigrated();

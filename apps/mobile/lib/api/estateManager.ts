@@ -5,16 +5,7 @@ import { appendFile, type PickedFile } from './documents';
 import type { VisitorPass } from './visitor-pass';
 import type { Paginated } from './properties';
 
-/**
- * The estate office: what a manager runs for a gated community. Scoped to one
- * estate at a time (`/estate/:id/...`); only the estate's own managers may call
- * these, however many estates the account can see.
- *
- * Dashboard stats and the dues trend are Pro (PLAN_UPGRADE_REQUIRED otherwise);
- * everything else here is on every plan.
- */
-
-/* ---------------------------------- types --------------------------------- */
+/** Only the estate's own managers may call these. Dashboard stats and the dues trend are Pro (PLAN_UPGRADE_REQUIRED otherwise). */
 
 export type PlanTier = 'FREE' | 'PRO' | 'ENTERPRISE';
 
@@ -59,7 +50,6 @@ export interface Household {
   contactEmail?: string;
   status: HouseholdStatus;
   residentUserId?: string;
-  /** The resident has a Sureground account tied to this household. */
   residentLinked: boolean;
   createdAt: string;
 }
@@ -184,7 +174,6 @@ export interface MusterRollEntry {
   unitLabel: string;
   personName: string;
   basis: 'RESIDENT' | 'ON_SITE';
-  /** Why they are on the roll, in words. */
   basisLabel: string;
   state: MusterRollState;
   stateLabel: string;
@@ -261,9 +250,7 @@ export interface AmenityBooking {
   createdAt: string;
 }
 
-/* ----------------------------------- api ---------------------------------- */
-
-/** Per-row outcome of a CSV import; row numbers are the spreadsheet's own lines. */
+/** Row numbers are the spreadsheet's own lines. */
 export interface CsvImportResult {
   created: number;
   failed: number;
@@ -271,33 +258,28 @@ export interface CsvImportResult {
 }
 
 export interface GuestListImportResult extends CsvImportResult {
-  /** 'Added 2 of 3. 1 row needs attention.' */
   label: string;
   expiresAt: string;
   deadlineLabel: string;
 }
 
-/** The template web offers for a households import. */
 export const HOUSEHOLDS_CSV_TEMPLATE =
   'unitLabel,residentName,contactPhone,contactEmail\n' +
   'Block A Plot 1,Chidi Okoro,08012345678,chidi@example.com\n';
 
 export const GUEST_LIST_CSV_TEMPLATE = 'name,phone,purpose\nAda Obi,08012345678,Birthday party\n';
 
-/** "1 household imported, 2 failed" */
 export function importSummary(r: CsvImportResult, noun: [string, string]): string {
   const n = `${r.created} ${r.created === 1 ? noun[0] : noun[1]} imported`;
   return r.failed > 0 ? `${n}, ${r.failed} failed` : n;
 }
 
-/** Builds the guest-list deadline from the picked local day and time. */
 export function deadlineIso(date: string, time: string): string | null {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !/^\d{2}:\d{2}$/.test(time)) return null;
   const at = new Date(`${date}T${time}:00`);
   return Number.isNaN(at.getTime()) ? null : at.toISOString();
 }
 
-/** Open reports that describe the same problem, with code-worked counts. */
 export interface ReportGroup {
   title: string;
   summary: string;
@@ -343,7 +325,7 @@ export const estateManagerApi = {
     appendFile(form, 'file', file);
     return apiUpload<CsvImportResult>(`/estate/${estateId}/households/import`, form);
   },
-  /** One household's guest list, each guest screened like a single invitation. Enterprise. */
+  /** Enterprise. Each guest is screened like a single invitation. */
   importGuestList: (
     estateId: string,
     input: { householdId: string; expiresAt: string; file: PickedFile }
@@ -520,7 +502,6 @@ export const estateManagerApi = {
       method: 'PATCH',
     }),
 
-  /** Open incidents and repair tickets grouped by shared problem. Managers only. */
   reportDigest: (estateId: string) => apiFetch<ReportDigest>(`/estate/${estateId}/reports/digest`),
   /** Drafts to edit before posting; nothing is posted. */
   draftAnnouncement: (estateId: string, notes: string, language: ReplyLanguage = 'en') =>
@@ -584,9 +565,6 @@ export const estateManagerApi = {
     }),
 };
 
-/* --------------------------------- helpers -------------------------------- */
-
-/** The estate to open: the one last chosen if it's still theirs, else the first. */
 export function pickEstate<T extends { id: string }>(
   estates: T[] | undefined,
   storedId: string | null | undefined
@@ -595,7 +573,7 @@ export function pickEstate<T extends { id: string }>(
   return estates.find((e) => e.id === storedId) ?? estates[0];
 }
 
-/** Analytics the estate hasn't paid for. Unknown is treated as paid: see `planTier`. */
+/** Unknown is treated as paid: see `planTier`. */
 export const isFreeEstate = (e?: Pick<ManagedEstate, 'planTier'>) => e?.planTier === 'FREE';
 
 export type Tone = 'success' | 'warning' | 'info' | 'neutral' | 'danger';
@@ -624,17 +602,12 @@ export const BILLING_CYCLES: { value: NewCharge['billingCycle']; label: string; 
     { value: 'ANNUAL', label: 'Yearly', every: 'every year' },
   ];
 
-/**
- * What a due costs today. The API adds a late fee INTO `amount` when the due
- * goes overdue (`lateFeeApplied` only says how much of it is the fee), so the
- * fee must not be added again.
- */
+/** The API adds the late fee INTO `amount` once overdue (`lateFeeApplied` is only its share), so it must not be added again. */
 export const dueTotal = (d: Pick<Due, 'amount'>) => d.amount;
 
 export const isDueOpen = (d: Pick<Due, 'status'>) =>
   d.status === 'pending' || d.status === 'overdue' || d.status === 'processing';
 
-/** "3 days overdue", "Due today", "Due in 5 days": a due against today's date. */
 export function dueWhen(d: Pick<Due, 'dueDate' | 'status' | 'paidDate'>, now = new Date()): string {
   if (d.status === 'paid') return 'Paid';
   if (d.status === 'waived') return 'Waived';
@@ -645,10 +618,6 @@ export function dueWhen(d: Pick<Due, 'dueDate' | 'status' | 'paidDate'>, now = n
   return `${-days} day${days === -1 ? '' : 's'} overdue`;
 }
 
-/**
- * What a household owes across the dues given: the open total and how much of
- * it is overdue. Paid and waived dues owe nothing.
- */
 export function owed(dues: Pick<Due, 'amount' | 'lateFeeApplied' | 'status'>[]): {
   total: number;
   overdue: number;
@@ -666,13 +635,10 @@ export function owed(dues: Pick<Due, 'amount' | 'lateFeeApplied' | 'status'>[]):
   return { total, overdue, count };
 }
 
-/** Who a new charge reaches, in words, so the manager confirms the right thing. */
 export function chargeAudience(selected: number, activeHouseholds: number): string {
   if (!selected) return `Every active household (${activeHouseholds.toLocaleString('en-NG')})`;
   return `${selected} selected household${selected === 1 ? '' : 's'}`;
 }
-
-/* ------------------------------ operations -------------------------------- */
 
 const titleCase = (s: string) => s.replace(/_/g, ' ').replace(/^\w/, (c) => c.toUpperCase());
 
@@ -690,7 +656,6 @@ export const TICKET_PRIORITY_TONE: Record<MaintenanceTicket['priority'], Tone> =
 };
 export const categoryLabel = titleCase;
 
-/** A queue item still waiting on the office. */
 export const isOpenItem = (status: string) =>
   status === 'open' ||
   status === 'in_progress' ||
@@ -711,7 +676,6 @@ export const VIOLATION_CATEGORIES: { value: string; label: string }[] = [
   { value: 'OTHER', label: 'Other' },
 ];
 
-/** Most urgent first, then oldest first: what has waited longest at each level. */
 export function byUrgency<T extends { priority: string; createdAt: string }>(items: T[]): T[] {
   const rank: Record<string, number> = { critical: 0, urgent: 0, high: 1, medium: 2, low: 3 };
   return [...items].sort(
@@ -736,10 +700,6 @@ export const ROLL_STATE: Record<MusterRollState, { label: string; tone: Tone }> 
   NOT_ON_SITE: { label: 'Not on site', tone: 'neutral' },
 };
 
-/**
- * The roll in the order a marshal works it: people needing help, then anyone
- * still missing, then the settled lines; by unit within each.
- */
 export function rollOrder(roll: MusterRollEntry[]): MusterRollEntry[] {
   const rank: Record<MusterRollState, number> = {
     NEEDS_HELP: 0,
@@ -758,42 +718,32 @@ export function rollOrder(roll: MusterRollEntry[]): MusterRollEntry[] {
 /** Closing with people still missing has to be explained; a settled roll does not. */
 export const closingNoteRequired = (t: Pick<MusterTally, 'unaccounted'>) => t.unaccounted > 0;
 
-/** A visitor pass still usable or in use: someone may arrive, or is inside. */
 export const isLivePass = (status: string) =>
   status === 'pending' ||
   status === 'approved' ||
   status === 'awaiting_approval' ||
   status === 'checked_in';
 
-/** A registration as the gate reads it: upper case, no spaces or dashes. */
-/**
- * An active entry past its end date: still on the list, but the gate no longer
- * acts on it. Shown as such, so a phone never presents a lapsed entry as live.
- */
+/** Past its end date: the gate no longer acts on it, so never present it as live. */
 export const isLapsedWatchlistEntry = (
   e: Pick<WatchlistEntry, 'status' | 'expiresAt'>,
   now: Date = new Date()
 ) => e.status === 'ACTIVE' && !!e.expiresAt && new Date(e.expiresAt).getTime() <= now.getTime();
 
+/** A registration as the gate reads it: upper case, no spaces or dashes. */
 export const normalisePlate = (plate: string) => plate.toUpperCase().replace(/[^A-Z0-9]/g, '');
 
-/* -------------------------------- community ------------------------------- */
-
-/** An option's share of the votes cast, as a whole percent. No votes is 0, not NaN. */
+/** No votes is 0, not NaN. */
 export const pollShare = (voteCount: number, totalVotes: number) =>
   totalVotes > 0 ? Math.round((voteCount / totalVotes) * 100) : 0;
 
-/**
- * The option(s) in front. More than one when they are level, and none until
- * somebody has voted, so a tie or an empty poll is never reported as a winner.
- */
+/** None until somebody has voted, and several on a tie, so neither is reported as a winner. */
 export function leadingOptions(poll: Pick<Poll, 'options' | 'totalVotes'>): string[] {
   if (!poll.totalVotes) return [];
   const top = Math.max(...poll.options.map((o) => o.voteCount));
   return poll.options.filter((o) => o.voteCount === top).map((o) => o.id);
 }
 
-/** How many households voted, against how many could. */
 export function turnout(totalVotes: number, households: number): string {
   if (!households) return `${totalVotes} ${totalVotes === 1 ? 'vote' : 'votes'}`;
   return `${totalVotes} of ${households.toLocaleString('en-NG')} households (${pollShare(totalVotes, households)}%)`;
@@ -812,7 +762,6 @@ export function cleanPollOptions(options: string[]): string[] {
   return out;
 }
 
-/** Bookings still ahead (soonest first) and the rest (latest first). Cancelled ones are history. */
 export function bookingBuckets(bookings: AmenityBooking[], now: Date = new Date()) {
   const upcoming: AmenityBooking[] = [];
   const past: AmenityBooking[] = [];

@@ -2,7 +2,6 @@ import { Image, Platform } from 'react-native';
 import { assessPhotoQuality, PHOTO_PROBLEM_COPY } from '@sureground/shared';
 import type { PickedFile } from '@/lib/api/documents';
 
-/** The longest side the check works on: enough to judge focus and light, quick to decode. */
 const CHECK_SIDE = 640;
 
 const originalSize = (uri: string) =>
@@ -29,12 +28,7 @@ export function base64ToBytes(b64: string): Uint8Array {
   return bytes.subarray(0, p);
 }
 
-/**
- * Checks a photo of a document right after it is taken or picked: a 640 px
- * copy, scored for blur, darkness, glare and size (assessPhotoQuality).
- * Returns plain-language retake advice, or nothing for a good photo, a PDF,
- * or anything it can't read: it never stands in the way of an upload.
- */
+// Never blocks an upload: a PDF or an unreadable file gets no advice.
 export async function checkPickedPhoto(file: PickedFile): Promise<string[]> {
   if (!file.mimeType?.startsWith('image/') || Platform.OS === 'web') return [];
   try {

@@ -25,7 +25,6 @@ const dayLabel = (key: string) => {
   return d.toLocaleDateString('en-NG', { weekday: 'long', day: 'numeric', month: 'short' });
 };
 
-/** Everything that happened across the homes, newest first, grouped by day. */
 export default function Activity() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();

@@ -85,7 +85,6 @@ export interface CreateMaintenanceInput {
   photos?: PickedFile[];
 }
 
-/** A repair request drafted from photos, to check and send (web: types/repairDraft.ts). */
 export interface RepairDraft {
   title: string;
   category: MaintenanceCategory;
@@ -114,7 +113,7 @@ export const maintenanceApi = {
     return apiUpload<MaintenanceRequest>('/renter/maintenance', form);
   },
 
-  /** A repair request drafted from photos (and a note). Nothing is stored or sent. */
+  /** Nothing is stored or sent. */
   draftFromPhotos: (photos: PickedFile[], note?: string) => {
     const form = new FormData();
     photos.slice(0, 3).forEach((p) => appendFile(form, 'files', p));

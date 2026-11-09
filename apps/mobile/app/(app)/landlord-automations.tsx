@@ -61,10 +61,6 @@ const TABS: { value: Tab; label: string }[] = [
 
 const mergeHint = `Merge fields: ${MERGE_FIELDS.join(', ')}`;
 
-/**
- * Automations: reach tenants with a one-off broadcast, a saved template, or a
- * rule that sends on a schedule or when rent or a lease needs attention.
- */
 export default function LandlordAutomations() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();

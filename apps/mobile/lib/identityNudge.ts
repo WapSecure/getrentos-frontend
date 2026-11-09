@@ -2,11 +2,6 @@ import { formatDate } from '@/lib/format';
 
 export type NudgeRequirement = 'identity' | 'licence';
 
-/**
- * The words on the verify-identity (or licence) card. An account in the
- * identity grace period gets the date it must verify by: until then it keeps
- * publishing listings and receiving payouts, after it they stop.
- */
 export function identityNudgeCopy({
   unlocks,
   requirement = 'identity',

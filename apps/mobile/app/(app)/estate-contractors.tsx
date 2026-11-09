@@ -69,12 +69,6 @@ const UPSELL_POINTS = [
   'Every arrival still recorded as its own visit',
 ];
 
-/**
- * Regular visitors: standing permission for somebody to keep arriving, not a
- * visit. Each arrival is still its own visitor pass, so "who is inside?" works
- * the same. Issuing one is Enterprise; authorisations already granted run to
- * their end on any plan, and can always be withdrawn.
- */
 export default function EstateContractors() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();

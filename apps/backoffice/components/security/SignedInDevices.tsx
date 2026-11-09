@@ -19,11 +19,7 @@ import { formatRelativeTime, unwrap } from '@sureground/shared';
 import { accountSecurityService } from '@/services/accountSecurityService';
 import { adminKeys } from '@/lib/queryKeys';
 
-/**
- * Where the signed-in staff member is signed in, this device first, with a way
- * to sign any other out. A signed-out device loses access at its next refresh,
- * within 15 minutes.
- */
+/** A signed-out device loses access at its next refresh, within 15 minutes. */
 export function SignedInDevices() {
   const queryClient = useQueryClient();
   const toast = useToast();

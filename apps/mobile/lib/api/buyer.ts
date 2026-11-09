@@ -22,7 +22,6 @@ export interface BuyerProfile {
   verificationStatus: string;
 }
 
-/** What an offer or a viewing request needs to know about a for-sale listing, house or land. */
 export type BuyerListingTarget = Pick<BuyerListing, 'id' | 'title' | 'askingPrice'>;
 
 export interface BuyerListing {
@@ -43,11 +42,8 @@ export interface BuyerListing {
   ownerName: string;
   ownerVerified: boolean;
   listedDate: string;
-  /** Signed URL for the cover image. */
   image?: string;
-  /** Signed URLs for the gallery. */
   images?: string[];
-  /** Signed URL for the video tour. */
   videoTourUrl?: string;
   /** The video tour was filmed in the app at the property. */
   videoTourFilmedOnSite?: boolean;
@@ -78,7 +74,6 @@ export interface ListingFilters {
   search?: string;
 }
 
-/** Due diligence on a property for sale, from what is on file (web: types/buyerDiligence.ts). */
 export interface BuyerDiligence {
   listingId: string;
   price: { asking: string; vsSimilar: string | null };

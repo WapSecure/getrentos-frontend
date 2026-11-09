@@ -10,12 +10,7 @@ import {
 } from './landSales';
 import { providerQuery, type PaymentProvider } from './paymentStatus';
 
-/**
- * The buyer's side of a land deal: plot purchases on developers' estates
- * (Sureground holds every payment and releases it as the buyer confirms each
- * conveyance step) and the conveyance of a single-parcel resale. Rules here
- * mirror the API and web's landSaleLogic so a button shown is one that works.
- */
+/** Rules here mirror the API and web's landSaleLogic, so a button shown is one that works. */
 
 export type PurchaseStatus =
   | 'PENDING_DEPOSIT'
@@ -163,15 +158,11 @@ export interface PaymentInit {
   authorizationUrl?: string | null;
 }
 
-/* ---------------------------------- logic --------------------------------- */
-
-/** "Block B, plot 12", or "Plot 12". */
 export const plotLabel = (p: { plotNumber: string; block?: string | null }) =>
   p.block ? `Block ${p.block}, plot ${p.plotNumber}` : `Plot ${p.plotNumber}`;
 
 const settled = (i: BuyerInstallment) => i.status === 'PAID' || i.status === 'WAIVED';
 
-/** The payment schedule at a glance. */
 export function summariseSchedule(installments: BuyerInstallment[], nextDue?: NextDue | null) {
   const rows = [...installments].sort((a, b) => a.sequence - b.sequence);
   const overdue = rows.filter((i) => i.status === 'OVERDUE');
@@ -211,11 +202,7 @@ export function buyerRefundPreview(
   };
 }
 
-/**
- * Whether the buyer may confirm or dispute a step. Steps are confirmed in
- * order: an earlier step not yet confirmed (or waived) blocks a later one. On
- * a resale only earlier required steps count.
- */
+/** Steps are confirmed in order: an earlier step not yet confirmed (or waived) blocks a later one. On a resale only earlier required steps count. */
 export function milestoneAction(
   milestones: Milestone[],
   m: Milestone,
@@ -240,7 +227,6 @@ export function milestoneAction(
   return { canConfirm: blockedBy.length === 0, canDispute: true, blockedBy };
 }
 
-/** How the refund on an ended purchase stands, in words. */
 export function refundSentence(
   p: Pick<BuyerPurchaseDetail, 'refundDue' | 'refundStatus' | 'refundedAmount'>,
   fmt: (n: number) => string
@@ -257,7 +243,6 @@ export function refundSentence(
   return `A refund of ${fmt(due)} is on its way to the card or account you paid with.`;
 }
 
-/** What cancelling would mean, in the dialog's words. */
 export function cancelDescription(p: BuyerPurchaseDetail, fmt: (n: number) => string) {
   if (p.canCancelInFull) {
     return `A condition of this purchase was not met, so you receive everything you have paid (${fmt(p.amountPaid)}), late fees included, with no cancellation charge. The plot goes back on sale and this cannot be undone.`;
@@ -274,8 +259,6 @@ export function cancelDescription(p: BuyerPurchaseDetail, fmt: (n: number) => st
 /** Dispute reasons the API accepts. */
 export const DISPUTE_MIN = 5;
 export const DISPUTE_MAX = 2000;
-
-/* ------------------------------ estates & plots --------------------------- */
 
 export type PlotStatus =
   | 'AVAILABLE'
@@ -294,7 +277,7 @@ export const PLOT_STATUS_LABEL: Record<PlotStatus, string> = {
   WITHHELD: 'Withheld',
 };
 
-/** The colours web uses for plot status, so the two read the same. */
+/** Matches web's plot status colours. */
 export const PLOT_STATUS_COLOR: Record<PlotStatus, string> = {
   AVAILABLE: '#15803d',
   RESERVED: '#b45309',
@@ -400,7 +383,7 @@ export function quotePlot(
   };
 }
 
-/** Time left on a hold, as web shows it. Urgent under an hour. */
+/** Urgent under an hour. */
 export function countdownTo(expiresAt: string, now = Date.now()) {
   const remainingMs = Date.parse(expiresAt) - now;
   if (!Number.isFinite(remainingMs) || remainingMs <= 0) {
@@ -444,7 +427,6 @@ export function filterPlots(
   });
 }
 
-/** A plan's terms in a sentence, as web's plan card puts it. */
 export function planTermsLine(
   plan: Pick<EstatePlan, 'durationMonths' | 'initialDepositBps' | 'priceUpliftBps'>
 ) {
@@ -456,7 +438,6 @@ export function planTermsLine(
   return `${formatBps(plan.initialDepositBps)} deposit, then ${plan.durationMonths} monthly instalments. ${uplift}`;
 }
 
-/** Live holds first (soonest to run out), then the past ones. */
 export function splitReservations(list: Reservation[], now = Date.now()) {
   const live = list
     .filter((r) => r.status === 'ACTIVE' && !countdownTo(r.expiresAt, now).expired)
@@ -464,8 +445,6 @@ export function splitReservations(list: Reservation[], now = Date.now()) {
   const past = list.filter((r) => !live.includes(r));
   return { live, past };
 }
-
-/* ----------------------------------- api ---------------------------------- */
 
 export type SaleDocument = 'contract-of-sale' | 'allocation-letter';
 
@@ -528,12 +507,7 @@ export const landBuyerApi = {
     apiFetch<{ id: string; plotId?: string | null; status: string }[]>('/buyer/land/inspections'),
 };
 
-/**
- * The next payment as the lines it is made of, so a late fee is never folded
- * into one number: "Land payment ₦X", "Late fee ₦Y". Only when the instalment
- * is untouched and the lines add up to what is due; otherwise undefined and
- * the pay sheet shows the single amount. Same rule as web.
- */
+/** Only when the instalment is untouched and the lines add up to what is due; otherwise undefined. Same rule as web. */
 export function nextDueParts(
   nextDue: Pick<NextDue, 'installmentId' | 'amount'> | null | undefined,
   installments: Pick<BuyerInstallment, 'id' | 'amount' | 'amountPaid' | 'lateFee'>[]

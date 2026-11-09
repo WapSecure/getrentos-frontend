@@ -17,7 +17,7 @@ import { NotificationsInbox } from '@/components/notifications/NotificationsInbo
 
 const KEY = qk.buyer.notifications(1, 50);
 
-/** The API's `type` is an open string: match the meaningful part, fall back to a bell. */
+// The API's `type` is an open string: match the meaningful part, fall back to a bell.
 function iconFor(type: string) {
   const t = type.toLowerCase();
   if (t.startsWith('offer')) return FileSignature;
@@ -28,7 +28,6 @@ function iconFor(type: string) {
   return Bell;
 }
 
-/** What has happened on the buyer's offers, viewings and purchases. */
 export default function BuyerNotificationInbox() {
   const query = useQuery({ queryKey: KEY, queryFn: () => buyerSettingsApi.notifications(1, 50) });
 

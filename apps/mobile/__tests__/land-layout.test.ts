@@ -74,7 +74,6 @@ describe('payment plans', () => {
   });
 
   it('prices a plan as the server does', () => {
-    // 12 months, 30% deposit, 10% premium on ₦10m with ₦900k fees.
     const ex = priceExample(10_000_000, 900_000, {
       durationMonths: 12,
       initialDepositBps: 3000,

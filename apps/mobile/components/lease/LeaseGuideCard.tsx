@@ -5,7 +5,6 @@ import { Button, Card, Skeleton, Text, useTheme } from '@sureground/ui-native';
 import { leaseGuideApi } from '@/lib/api/leaseGuide';
 import { qk } from '@/lib/query/keys';
 
-/** "Your lease, explained" on the phone; the counter-offer opens the share sheet. */
 export function LeaseGuideCard() {
   const { colors, spacing, radius } = useTheme();
   const q = useQuery({

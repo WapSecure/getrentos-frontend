@@ -28,7 +28,6 @@ import { haptics } from '@/lib/haptics';
 import { goBack } from '@/lib/goBack';
 import { errorMessage } from '@/lib/api/client';
 
-/** The estate's gatemen: who can check visitors in, add one, or take one off the gate. */
 export default function EstateStaff() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();

@@ -5,17 +5,7 @@ import type { ShortletAvailability, ShortletListing } from './shortlets';
 import { formatLandArea, LAND_TITLE_TYPE_LABEL, type LandListing } from './land';
 import { trustChainLabel, type TrustChainLike, type TrustLabelTone } from '@sureground/shared';
 
-/**
- * The public marketplace: what anyone can browse without an account, mirroring
- * the web's /rent, /buy, /shortlets, /land and /estates.
- *
- * Every call is `anonymous`: these routes are `@Public()` on the API and return
- * publicly safe DTOs (no owner contact details). Sending a token would not add
- * anything and would make a stale session 401 on a page that needs none.
- *
- * Four modules, four DTOs, three different names for "city". Normalising here
- * means the browse and detail screens are written once.
- */
+/** Every call is `anonymous`: these routes are public, and a token would make a stale session 401 on a page that needs none. */
 
 export const MARKET_KINDS = ['rent', 'sale', 'shortlet', 'land'] as const;
 export type MarketKind = (typeof MARKET_KINDS)[number];
@@ -45,11 +35,8 @@ export interface MarketCard {
   size?: number;
   image?: string;
   verified: boolean;
-  /** Where verification stands, in words (rent and sale): see trustChainLabel. */
   trustLabel?: { label: string; tone: TrustLabelTone };
-  /** A short secondary fact for the card, e.g. "600 sqm · C of O". */
   highlight?: string;
-  /** Trust signals shown over the photo, e.g. "Inspected", "Fair price". */
   badges?: string[];
 }
 
@@ -69,7 +56,6 @@ export interface MarketDetail extends MarketCard {
   longitude?: number;
   /** `approximate` until the property is verified, and always for a stay: draw an area. */
   locationPrecision?: 'exact' | 'approximate';
-  /** Who is behind the listing: a name and trust signal only, never contact details. */
   host?: { label: string; name: string; verified?: boolean; rating?: number; reviews?: number };
   facts: MarketFact[];
   /** Shortlets: the full listing, for the essentials, rules, prices and trust sections. */
@@ -77,9 +63,7 @@ export interface MarketDetail extends MarketCard {
 }
 
 export interface MarketFilters {
-  /** Free text: title, address, city, state or estate name (land: also plot number). */
   search?: string;
-  /** Estate public slug: where an estate's "For rent" / "For sale" lands. */
   estate?: string;
   minPrice?: number;
   maxPrice?: number;
@@ -133,7 +117,6 @@ export const MARKET_FILTERS: Record<MarketKind, readonly (keyof MarketFilters)[]
   land: ['minPrice', 'maxPrice', 'titleType', 'minAreaSqm', 'roadAccess'],
 };
 
-/** How many refinements (beyond search and sort) are active for a market. */
 export function activeFilterCount(kind: MarketKind, f: MarketFilters): number {
   return MARKET_FILTERS[kind].filter((k) => {
     const v = f[k];
@@ -141,7 +124,6 @@ export function activeFilterCount(kind: MarketKind, f: MarketFilters): number {
   }).length;
 }
 
-/** The public web page for a listing: what the share sheet sends. */
 export function marketWebPath(kind: MarketKind, id: string): string {
   const base = { rent: '/rent', sale: '/buy', shortlet: '/shortlets', land: '/land' }[kind];
   return `${base}/${encodeURIComponent(id)}`;
@@ -154,8 +136,6 @@ export const MARKET_SORT_LABEL: Record<MarketSort, string> = {
   price_asc: 'Lowest price',
   price_desc: 'Highest price',
 };
-
-/* ------------------------------- API DTOs ------------------------------- */
 
 interface RentalDto {
   trustChain?: TrustChainLike;
@@ -225,8 +205,6 @@ export interface EstateDirectoryEntry {
   saleCount: number;
 }
 
-/* ------------------------------ normalisers ------------------------------ */
-
 const money = (v: unknown) => {
   const n = typeof v === 'string' ? Number(v) : (v as number);
   return Number.isFinite(n) ? n : 0;
@@ -243,7 +221,6 @@ const humanise = (value?: string) =>
         .replace(/^\w/, (c) => c.toUpperCase())
     : undefined;
 
-/** The plain-words trust label when the listing carries its trust chain. */
 const labelFor = (chain?: TrustChainLike) =>
   chain?.steps.length ? trustChainLabel(chain) : undefined;
 
@@ -276,10 +253,7 @@ const saleToCard = (s: SaleDto): MarketCard => ({
   highlight: humanise(s.propertyType),
 });
 
-/**
- * A stay in the public list. With dates it is priced the way the booking will
- * be — nights, cleaning and tax in — or says why those dates don't work.
- */
+/** With dates it is priced the way the booking will be, or says why those dates don't work. */
 const shortletToCard = (s: ShortletListing): MarketCard => {
   const q = s.stayQuote;
   const nights = (n: number) => `${n} night${n === 1 ? '' : 's'}`;
@@ -340,8 +314,6 @@ const fact = (label: string, value: string | number | undefined | null): MarketF
 const gallery = (cover?: string, images?: string[]) =>
   Array.from(new Set([cover, ...(images ?? [])].filter((x): x is string => !!x)));
 
-/* --------------------------------- query --------------------------------- */
-
 // Each module names its sorts differently; the whitelist rejects unknown params.
 const RENT_SORT: Record<MarketSort, string> = {
   newest: 'recent',
@@ -351,7 +323,6 @@ const RENT_SORT: Record<MarketSort, string> = {
 
 const anon = { anonymous: true } as const;
 
-/** A landlord's or agency's public page (website: /l/<slug>). */
 export interface LandlordMicrosite {
   slug: string;
   landlordId: string;
@@ -365,7 +336,6 @@ export interface LandlordMicrosite {
   listingCount: number;
 }
 
-/** An estate's public page (website: /e/<slug>). */
 export interface EstateStorefront {
   slug: string;
   estateId: string;
@@ -416,7 +386,6 @@ const storefrontToCard = (l: StorefrontListingDto): MarketCard => ({
   bathrooms: positive(l.bathrooms ?? undefined),
   image: l.coverImageUrl || undefined,
   verified: false,
-  // Attribution matters here: the estate, or the property's owner.
   highlight: l.listedByEstate ? 'Marketed by the estate' : `Listed by ${l.ownerName}`,
 });
 
@@ -432,7 +401,6 @@ export const publicMarketApi = {
   microsite(slug: string) {
     return apiFetch<LandlordMicrosite>(`/microsites/${encodeURIComponent(slug)}`, anon);
   },
-  /** A microsite's listings are rentals, the same shape as the rent market. */
   micrositeListings(slug: string, page = 1, pageSize = 20) {
     return mapPage(
       apiFetch<Paginated<RentalDto>>(
@@ -648,7 +616,6 @@ export const publicMarketApi = {
     }
   },
 
-  /** The all-in price of one stay for a date range (public: no account needed). */
   stayQuote(id: string, checkIn: string, checkOut: string) {
     return apiFetch<ShortletAvailability>(
       `/shortlets/${id}/availability${toQuery({ checkIn, checkOut })}`,

@@ -10,11 +10,9 @@ import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { TrustOverview } from '@/components/trust/TrustOverview';
 import { goBack } from '@/lib/goBack';
 
-/** The renter's Trust & Verification screen (same content as the web page). */
 export default function TrustScore() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
-  // Recorded score changes, each with its reason, shown inside the details.
   const history = useQuery({
     queryKey: qk.renter.trustScore,
     queryFn: trustScoreApi.getOverview,

@@ -28,12 +28,6 @@ import { goBack } from '@/lib/goBack';
 
 type Market = 'ALL' | LeadMarket;
 
-/**
- * Everyone who has responded to a property the estate markets: viewings,
- * applications, offers and short-let bookings in one inbox. Only properties
- * whose owner gave the estate permission show here; the rest stay private to
- * their owner.
- */
 export default function EstateEnquiries() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
@@ -53,7 +47,6 @@ export default function EstateEnquiries() {
     initialPageParam: 1,
     getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
     enabled: !!estateId,
-    // Keep the list on screen while a new search or market loads.
     placeholderData: keepPreviousData,
   });
   const leads = useMemo<EstateLead[]>(

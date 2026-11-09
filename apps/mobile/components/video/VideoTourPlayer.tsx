@@ -8,11 +8,6 @@ import { Text, useTheme } from '@sureground/ui-native';
 import { videoSource, type VideoStream } from '@sureground/shared';
 import { EmbedFrame } from './EmbedFrame';
 
-/**
- * A listing's video tour, played in the app: an uploaded file in the native
- * player (fullscreen, picture in picture), or a pasted YouTube or Vimeo link
- * in that provider's own player. Nothing is handed off to the browser.
- */
 export function VideoTourPlayer({
   url,
   stream,
@@ -20,10 +15,8 @@ export function VideoTourPlayer({
   onExpired,
 }: {
   url: string;
-  /** The same upload as an adaptive stream, when it has been encoded. */
   stream?: VideoStream | null;
   title: string;
-  /** The file's signed link stopped working: fetch a fresh one. Called once per link. */
   onExpired?: () => void;
 }) {
   // A stream that fails falls back to the original upload for this viewing.
@@ -79,7 +72,6 @@ function FilePlayer({
     }
   }, [status, onExpired]);
 
-  // With no way to fetch a fresh link, say so instead of a black box.
   if (status === 'error' && !onExpired) return <Unplayable />;
   return (
     <View style={{ width: '100%', aspectRatio: 16 / 9, backgroundColor: '#000' }}>
@@ -92,7 +84,6 @@ function FilePlayer({
         accessibilityLabel={`${title} video tour`}
         style={{ width: '100%', height: '100%' }}
       />
-      {/* A still while the first frames load, so a slow connection shows the place. */}
       {posterUrl && status === 'loading' ? (
         <Image
           source={{ uri: posterUrl }}

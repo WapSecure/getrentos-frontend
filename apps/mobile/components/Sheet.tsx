@@ -16,18 +16,14 @@ import { Text, useReducedMotion, useTheme } from '@sureground/ui-native';
 export interface SheetProps {
   open: boolean;
   onClose: () => void;
-  /** Optional heading row with a grabber above it. */
   title?: string;
-  /** Fixed height, as a percentage of the screen (e.g. `['60%']`). Omit to size to content. */
   snapPoints?: (string | number)[];
-  /** Sticky footer inside the sheet (e.g. Apply / Reset). */
   footer?: ReactNode;
   children: ReactNode;
 }
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
-/** Resolves the first snap point to a pixel height; undefined means size-to-content. */
 function resolveHeight(snapPoints?: (string | number)[]): number | undefined {
   const first = snapPoints?.[0];
   if (typeof first === 'number') return first;
@@ -38,13 +34,7 @@ function resolveHeight(snapPoints?: (string | number)[]): number | undefined {
   return undefined;
 }
 
-/**
- * Themed bottom sheet. Built on React Native's `Modal` so the sheet is a real
- * native overlay: a portal-based sheet renders *underneath* the native
- * `react-native-screens` views that expo-router mounts, and never becomes visible.
- *
- * Driven by `open`; `onClose` fires on backdrop press and Android back.
- */
+// Built on Modal: a portal-based sheet renders underneath the native react-native-screens views expo-router mounts, and never shows.
 export function Sheet({ open, onClose, title, snapPoints, footer, children }: SheetProps) {
   const { colors, spacing, radius } = useTheme();
   const reduceMotion = useReducedMotion();

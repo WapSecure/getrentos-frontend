@@ -45,15 +45,13 @@ function RequestForm({ onClose, listing }: { onClose: () => void; listing: Buyer
   const [time, setTime] = useState('');
   const [notes, setNotes] = useState('');
   const [mode, setMode] = useState<'IN_PERSON' | 'VIDEO'>('IN_PERSON');
-  // Video viewings are offered only once the call service is set up.
   const videoCalls = useQuery({
     queryKey: ['video-calls', 'availability'],
     queryFn: viewingsApi.videoCallsAvailable,
     staleTime: 5 * 60 * 1000,
   });
   const canVideo = videoCalls.data?.available === true;
-  // The time the buyer means, where they are. It used to be sent as if it were
-  // UTC, which put a 10:00 request at 11:00 for a seller in Lagos.
+  // Sent in the buyer's own time zone, not as UTC.
   const scheduledAt = localInstant(date, time || '10:00');
 
   const mutation = useMutation({

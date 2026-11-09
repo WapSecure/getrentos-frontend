@@ -20,7 +20,6 @@ import { relativeTime } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
 
-/** Conversations with hosts, unread first. */
 export default function GuestMessages() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();

@@ -51,10 +51,6 @@ import { errorMessage } from '@/lib/api/client';
 
 type View_ = 'ACTIVE' | 'LIFTED' | 'ALL';
 
-/**
- * People and vehicles the gate should stop or flag. Lifted entries are kept,
- * so the estate can still say who was on the list, when, and who decided.
- */
 export default function EstateWatchlist() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
@@ -204,7 +200,6 @@ export default function EstateWatchlist() {
                     </Text>
                     <View style={{ flexDirection: 'row', gap: spacing.xs }}>
                       {isLapsedWatchlistEntry(item) ? (
-                        // Past its end date: the gate no longer acts on it.
                         <StatusPill label="Not enforced" tone="neutral" />
                       ) : item.status === 'LIFTED' ? (
                         <StatusPill label="Lifted" tone="neutral" />
@@ -303,7 +298,6 @@ function AddForm({ estateId, onDone }: { estateId: string; onDone: () => void })
         severity,
         phone: !vehicle && phone.trim() ? phone.trim() : undefined,
         plateNumber: vehicle && plate.trim() ? normalisePlate(plate) : undefined,
-        // Through the end of the chosen day.
         expiresAt: expires ? new Date(`${expires}T23:59:00`).toISOString() : undefined,
         photo,
       }),
@@ -315,7 +309,6 @@ function AddForm({ estateId, onDone }: { estateId: string; onDone: () => void })
     },
   });
 
-  // A vehicle is only recognisable by its plate; a person by name, better with a phone.
   const ready =
     label.trim().length >= 2 &&
     reason.trim().length >= 10 &&

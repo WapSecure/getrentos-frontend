@@ -36,7 +36,6 @@ import { goBack } from '@/lib/goBack';
 const PAGE_SIZE = 20;
 const ALL = 'all';
 
-/** Plot purchases across the owner's estates: what is paid, owed and waiting on you. */
 export default function OwnerLandSales() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();

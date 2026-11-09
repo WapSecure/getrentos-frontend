@@ -25,7 +25,6 @@ interface Props {
 
 export function GeoInsightsPanel({ listingId }: Props) {
   const { colors, spacing } = useTheme();
-  // A picked place is looked up at once; a typed one waits for "Go".
   const [destinationPlace, setDestinationPlace] = useState<AddressValue | null>(null);
   const destinationInput = destinationPlace?.text ?? '';
   const [destination, setDestination] = useState<string | undefined>(undefined);

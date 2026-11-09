@@ -28,11 +28,7 @@ import { errorMessage } from '@/lib/api/client';
 
 const plural = (n: number, one: string) => `${n} ${one}${n === 1 ? '' : 's'}`;
 
-/**
- * The places a patrol has to reach, each with a code printed and put up there.
- * The code is shown once, when minted, and never again; a lost or seen code is
- * answered by giving the checkpoint a new one.
- */
+// A code is shown once, when minted; a lost or seen code is answered by giving the checkpoint a new one.
 export function PatrolCheckpoints({ estateId }: { estateId: string }) {
   const { colors, spacing, radius } = useTheme();
   const qc = useQueryClient();
@@ -189,7 +185,6 @@ export function PatrolCheckpoints({ estateId }: { estateId: string }) {
   );
 }
 
-/** The one moment a checkpoint's code is readable, with where it belongs. */
 function CheckpointCode({
   checkpoint: c,
   onDone,
@@ -209,7 +204,7 @@ function CheckpointCode({
   );
 }
 
-/** Shows the new code in place, rather than handing off to a second sheet mid-dismiss. */
+// Shown in place, rather than handing off to a second sheet mid-dismiss.
 function AddCheckpointForm({
   estateId,
   onAdded,

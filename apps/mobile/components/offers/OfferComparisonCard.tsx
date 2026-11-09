@@ -11,11 +11,6 @@ const TURN: Record<ComparedOffer['turn'], { label: string; tone: BadgeTone }> = 
   buyer: { label: "Buyer's turn", tone: 'neutral' },
 };
 
-/**
- * "Compare offers" above the offer list: each listing's live offers side by
- * side, with a counter option worked out from the figures. Never which offer
- * to take. Hidden with no live offers, or if it fails.
- */
 export function OfferComparisonCard({ side }: { side: OfferSide }) {
   const { colors, spacing, radius } = useTheme();
   const api = sellerOffers(side);

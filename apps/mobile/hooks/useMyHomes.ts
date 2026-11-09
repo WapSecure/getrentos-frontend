@@ -11,16 +11,11 @@ export interface MyHome {
   image?: string;
 }
 
-/**
- * The homes the signed-in owner, landlord or manager can act on, whichever
- * workspace is open. Hosting and Home care both start from "which home?".
- */
 export function useMyHomes() {
   const { usablePortal } = useAuth();
   return useQuery({
     queryKey: ['my-homes', usablePortal],
     queryFn: async (): Promise<MyHome[]> =>
-      // A manager operates the properties mandated to them that they may manage.
       usablePortal === 'manager'
         ? (await propertyAuthorityApi.managed())
             .filter((p) => p.canManage && !p.archived)

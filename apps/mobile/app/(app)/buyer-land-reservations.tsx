@@ -31,13 +31,11 @@ import { StartPurchase } from '@/components/land/StartPurchase';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
-/** Plots on hold (free, for a limited time) and the holds that ended. */
 export default function BuyerLandReservations() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const [starting, setStarting] = useState<Reservation | null>(null);
   const [showPast, setShowPast] = useState(false);
-  // A ticking clock for the countdowns; refreshed every 30 seconds.
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 30_000);

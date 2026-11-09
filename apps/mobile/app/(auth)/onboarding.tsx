@@ -72,11 +72,7 @@ export default function Onboarding() {
     scrollX.set(e.contentOffset.x);
   });
 
-  /*
-   * The page index follows the scroll position itself. Momentum-end events
-   * never fire for a non-animated `scrollTo` (Reduce Motion), which used to
-   * leave the button stuck on "Continue".
-   */
+  /* The index follows the scroll position: momentum-end never fires for a non-animated `scrollTo` (Reduce Motion). */
   useAnimatedReaction(
     () => (screenWidth > 0 ? Math.round(scrollX.get() / screenWidth) : 0),
     (page, prev) => {
@@ -85,7 +81,6 @@ export default function Onboarding() {
     [screenWidth]
   );
 
-  // Tell screen-reader users which page they landed on, with a light tick for everyone.
   const announced = useRef(0);
   useEffect(() => {
     if (announced.current === index) return;
@@ -231,12 +226,6 @@ export default function Onboarding() {
   );
 }
 
-/* ----------------------------- page indicator ----------------------------- */
-
-/**
- * Segmented progress driven straight off the scroll offset, so the active
- * segment stretches under the finger instead of snapping after the page lands.
- */
 function PageIndicator({
   scrollX,
   screenWidth,
@@ -289,8 +278,6 @@ function Segment({
   return <Animated.View style={[{ flexBasis: 0, borderRadius: radius.full }, style]} />;
 }
 
-/* -------------------------------- slide -------------------------------- */
-
 function Slide({
   slide,
   i,
@@ -313,7 +300,6 @@ function Slide({
   );
   const motion = useMemo(() => ({ offset, animate: !reduceMotion }), [offset, reduceMotion]);
 
-  // The scene drifts and settles as its page comes to rest; copy follows a beat later.
   const sceneStyle = useAnimatedStyle(() => {
     if (reduceMotion) return {};
     const d = offset.get();
@@ -358,11 +344,6 @@ function Slide({
         </Text>
       </Animated.View>
 
-      {/*
-       * The scene sits in a preview surface that takes the rest of the slide and
-       * runs off the bottom edge, so every slide fills the screen no matter how
-       * tall its contents are.
-       */}
       <Animated.View
         importantForAccessibility="no-hide-descendants"
         accessibilityElementsHidden

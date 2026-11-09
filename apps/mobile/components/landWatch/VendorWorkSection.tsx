@@ -26,10 +26,7 @@ import { landWatchApi } from '@/lib/api/landWatch';
 const OPEN = new Set<LandWatchJob['status']>(['REQUESTED', 'QUOTED', 'APPROVED', 'IN_PROGRESS']);
 const MAX_OPEN = 5;
 
-/**
- * Vendor work on a watched parcel: fencing, clearing, beacons. Sureground finds
- * vendors and records the work; the owner pays the vendor. Managed only.
- */
+// Sureground finds vendors and records the work; the owner pays the vendor.
 export function VendorWorkSection({
   watchId,
   tier,

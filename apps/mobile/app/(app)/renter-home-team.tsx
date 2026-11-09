@@ -34,11 +34,6 @@ import { ChipSelect } from '@/components/landlord/ChipSelect';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
-/**
- * Who really manages the tenant's home and how to spot an impostor: the
- * verified landlord and managers, a check for any number, email or account
- * someone used, and a report that reaches Sureground and the real landlord.
- */
 export default function RenterHomeTeam() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();

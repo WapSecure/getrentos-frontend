@@ -23,25 +23,11 @@ export type {
   VehiclePurpose,
 } from './gateman';
 
-/**
- * The estate office's view of the gate: the vehicle and parcel logs, the
- * estate's gates, regular visitors, dwell analytics and patrols.
- *
- * Same `/estate/:id/...` endpoints the guard's console uses for the logs, but
- * read the way the office reads them (every entry, any status), plus the
- * manager-only Enterprise features. Regular visitors, dwell and patrols are
- * ENTERPRISE on the ESTATE's plan: the API refuses with 403
- * `PLAN_UPGRADE_REQUIRED` carrying `required` and `current`.
- */
-
-/* ---------------------------------- types --------------------------------- */
+/** Regular visitors, dwell and patrols are ENTERPRISE on the estate's plan: the API refuses with 403 `PLAN_UPGRADE_REQUIRED`. */
 
 export type ContractorPassStatus = 'ACTIVE' | 'REVOKED' | 'EXPIRED';
 
-/**
- * A standing authorisation for somebody who arrives repeatedly. Not a visit:
- * every arrival under it still records its own visitor pass.
- */
+/** Not a visit: every arrival under it still records its own visitor pass. */
 export interface ContractorPass {
   id: string;
   estateId: string;
@@ -60,9 +46,7 @@ export interface ContractorPass {
   daysOfWeek: number[];
   dailyFrom?: string | null;
   dailyTo?: string | null;
-  /** "Monday and Thursday, 08:00-17:00, until 31 Dec 2026". */
   scheduleLabel: string;
-  /** Arrivals this authorisation has let in, ever. */
   visitCount: number;
   createdAt: string;
   revokedAt?: string | null;
@@ -104,15 +88,12 @@ export interface OnSiteEntry {
   authorisationName?: string | null;
   admittedAt: string;
   minutesInside: number;
-  /** 'Inside 3h 20m' / 'Inside 10h, past the end the estate authorised by 2h' */
   insideLabel: string;
   expectedOutAt?: string | null;
   expectedOutSource: 'AUTHORISED_WINDOW' | 'NONE';
-  /** 'Authorised until 17:00' / 'No end was stated for this visit' */
   expectationLabel: string;
   minutesOver: number;
   overstaying: boolean;
-  /** When the office was told about the overstay. */
   reportedAt?: string | null;
 }
 
@@ -124,7 +105,6 @@ export interface OnSiteBoard {
   entries: OnSiteEntry[];
 }
 
-/** One standing authorisation, measured over a period. */
 export interface AuthorisationDwell {
   contractorPassId: string;
   name: string;
@@ -159,7 +139,7 @@ export interface AuthorisationDwellReport {
 
 export type DwellSort = 'dwell' | 'visits';
 
-/** A patrol point. Never carries its code: that is shown once, when minted. */
+/** Never carries its code: that is shown once, when minted. */
 export interface PatrolCheckpoint {
   id: string;
   name: string;
@@ -172,7 +152,6 @@ export interface PatrolCheckpoint {
 
 export interface IssuedPatrolCheckpoint extends PatrolCheckpoint {
   code: string;
-  /** Where the code belongs, worded by the server. */
   guidance: string;
 }
 
@@ -194,7 +173,6 @@ export interface PatrolRoute {
   windowMinutes: number;
   active: boolean;
   checkpoints: PatrolRouteCheckpoint[];
-  /** 'Every day, from 22:00, within 1h 30m'. */
   scheduleLabel: string;
   createdAt: string;
 }
@@ -227,7 +205,6 @@ export interface PatrolRound {
   scheduledFor: string;
   windowEndsAt: string;
   status: PatrolRoundStatus;
-  /** 'Walked' / 'Not walked' / 'Incomplete, 2 of 6 missed' / '3 of 6 so far'. */
   statusLabel: string;
   expected: number;
   scanned: number;
@@ -254,19 +231,16 @@ export interface PatrolReport {
   };
 }
 
-/* ----------------------------------- api ---------------------------------- */
-
 const PAGE_SIZE = 30;
 
 export const estateGateApi = {
-  /* gates */
   gates: (estateId: string) => apiFetch<Gate[]>(`/estate/${estateId}/gates`),
   addGate: (estateId: string, body: { name: string; location?: string }) =>
     apiFetch<Gate>(`/estate/${estateId}/gates`, { method: 'POST', body }),
   removeGate: (estateId: string, gateId: string) =>
     apiFetch<void>(`/estate/${estateId}/gates/${gateId}`, { method: 'DELETE' }),
 
-  /* vehicles: `open` only narrows to vehicles still inside; omitted is every log. */
+  /* `open` only narrows to vehicles still inside; omitted is every log. */
   vehicleLogs: (estateId: string, opts: { open?: boolean; page?: number } = {}) =>
     apiFetch<Paginated<VehicleLog>>(
       `/estate/${estateId}/vehicle-logs${toQuery({ open: opts.open || undefined, page: opts.page ?? 1, pageSize: PAGE_SIZE })}`
@@ -285,7 +259,6 @@ export const estateGateApi = {
   markVehicleExited: (estateId: string, logId: string) =>
     gatemanApi.markVehicleExited(estateId, logId),
 
-  /* deliveries */
   deliveries: (estateId: string, opts: { status?: DeliveryLogStatus; page?: number } = {}) =>
     apiFetch<Paginated<DeliveryLog>>(
       `/estate/${estateId}/deliveries${toQuery({ status: opts.status, page: opts.page ?? 1, pageSize: PAGE_SIZE })}`
@@ -310,7 +283,7 @@ export const estateGateApi = {
   markDeliveryCollected: (estateId: string, logId: string) =>
     gatemanApi.markDeliveryCollected(estateId, logId),
 
-  /* regular visitors (Enterprise to create; listing and withdrawing stay open) */
+  /* Creating a regular visitor is Enterprise; listing and withdrawing stay open. */
   contractorPasses: (
     estateId: string,
     opts: { status?: ContractorPassStatus; page?: number } = {}
@@ -329,14 +302,12 @@ export const estateGateApi = {
       body: { reason },
     }),
 
-  /* dwell (Enterprise) */
   onSiteBoard: (estateId: string) => apiFetch<OnSiteBoard>(`/estate/${estateId}/dwell/on-site`),
   authorisationDwell: (estateId: string, opts: { from?: string; sort?: DwellSort } = {}) =>
     apiFetch<AuthorisationDwellReport>(
       `/estate/${estateId}/dwell/authorisations${toQuery({ from: opts.from, sort: opts.sort })}`
     ),
 
-  /* patrols (Enterprise) */
   patrolCheckpoints: (estateId: string) =>
     apiFetch<PatrolCheckpoint[]>(`/estate/${estateId}/patrol-checkpoints`),
   addPatrolCheckpoint: (estateId: string, body: { name: string; location?: string }) =>
@@ -374,8 +345,6 @@ export const estateGateApi = {
     apiFetch<PatrolReport>(`/estate/${estateId}/patrols/rounds${toQuery({ from: opts.from })}`),
 };
 
-/* ------------------------------- query keys ------------------------------- */
-
 /**
  * Everything here sits under `['estate-manager', estateId, 'gate', ...]`, so
  * invalidating `qk.estateManager.estate(estateId)` still clears it.
@@ -399,12 +368,7 @@ export const gateKeys = {
     ['estate-manager', estateId, 'gate', 'patrol', 'report', from] as const,
 };
 
-/* ------------------------------ plan gating ------------------------------- */
-
-/**
- * The estate is KNOWN to be below `required`. An absent tier is unknown, not
- * free, and fails open: the screen asks the API and lets its refusal decide.
- */
+/** An absent tier is unknown, not free, and fails open: the API's refusal decides. */
 export const lacksTier = (planTier: PlanTier | undefined, required: PlanTier = 'ENTERPRISE') =>
   Boolean(planTier && !tierAtLeast(planTier, required));
 
@@ -414,10 +378,6 @@ const asTier = (v: unknown): PlanTier | undefined =>
     ? (v as PlanTier)
     : undefined;
 
-/**
- * The plan a refusal asked for and the one the estate is on, or null when the
- * error is not a plan refusal.
- */
 export function planRefusal(err: unknown): { required: PlanTier; current?: PlanTier } | null {
   if (!(err instanceof ApiError)) return null;
   if (err.code !== 'PLAN_UPGRADE_REQUIRED' && err.status !== 402) return null;
@@ -427,10 +387,7 @@ export function planRefusal(err: unknown): { required: PlanTier; current?: PlanT
   };
 }
 
-/** Don't retry a plan refusal: it won't change on the next attempt. */
 export const retryUnlessPlanGate = (count: number, err: unknown) => !planRefusal(err) && count < 2;
-
-/* --------------------------------- labels --------------------------------- */
 
 export const VEHICLE_PURPOSES: { value: Uppercase<VehiclePurpose>; label: string }[] = [
   { value: 'VISITOR', label: 'Visitor' },
@@ -470,12 +427,9 @@ export const WEEK_DAYS: { value: number; short: string; long: string }[] = [
   { value: 0, short: 'Sun', long: 'Sunday' },
 ];
 
-/** Adds or removes a day, keeping the API's order (0 = Sunday first). */
 export function toggleDay(days: number[], day: number): number[] {
   return days.includes(day) ? days.filter((d) => d !== day) : [...days, day].sort((a, b) => a - b);
 }
-
-/* ----------------------------- regular visitors ---------------------------- */
 
 /** The API's caps, kept in step so the form never allows what the server refuses. */
 export const MAX_AUTHORISATION_DAYS = 366;
@@ -500,14 +454,13 @@ export interface ContractorDraft {
   dailyTo: string;
 }
 
-/** Whole calendar days between two `yyyy-MM-dd` dates (can be negative). */
 export function daySpan(from: string, until: string): number {
   const a = Date.UTC(+from.slice(0, 4), +from.slice(5, 7) - 1, +from.slice(8, 10));
   const b = Date.UTC(+until.slice(0, 4), +until.slice(5, 7) - 1, +until.slice(8, 10));
   return Math.round((b - a) / 86_400_000);
 }
 
-/** Why the draft can't be sent yet, in words; null when it can. Mirrors the API's rules. */
+/** Mirrors the API's rules; null when the draft can be sent. */
 export function contractorDraftError(d: ContractorDraft): string | null {
   if (!d.householdId) return 'Choose the household they’re working for.';
   if (d.name.trim().length < 2) return 'Enter their name.';
@@ -529,11 +482,7 @@ export function contractorDraftError(d: ContractorDraft): string | null {
   return null;
 }
 
-/**
- * The API body for a draft. Calendar days become instants: from the start of
- * the first day to the end of the last, so a permission doesn't lapse on the
- * morning it was meant to run until.
- */
+/** From the start of the first day to the end of the last, so a permission doesn't lapse on the morning it was meant to run until. */
 export function contractorPassBody(d: ContractorDraft): NewContractorPass {
   return {
     householdId: d.householdId ?? '',
@@ -548,8 +497,6 @@ export function contractorPassBody(d: ContractorDraft): NewContractorPass {
   };
 }
 
-/* ---------------------------------- dwell --------------------------------- */
-
 /** Minutes as the server's own sentences write them: "45m", "2h", "4h 30m". */
 export function formatMinutes(minutes: number | null | undefined): string {
   if (minutes === null || minutes === undefined) return '–';
@@ -560,11 +507,10 @@ export function formatMinutes(minutes: number | null | undefined): string {
   return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
 }
 
-/** The ISO instant `days` back from `now`. Held in state by callers, never derived in render. */
+/** Held in state by callers, never derived in render. */
 export const windowStart = (days: number, now: number = Date.now()) =>
   new Date(now - days * 86_400_000).toISOString();
 
-/** Overstays first (longest over first), then longest inside. */
 export function onSiteOrder(entries: OnSiteEntry[]): OnSiteEntry[] {
   return [...entries].sort(
     (a, b) =>
@@ -574,9 +520,6 @@ export function onSiteOrder(entries: OnSiteEntry[]): OnSiteEntry[] {
   );
 }
 
-/* --------------------------------- patrols -------------------------------- */
-
-/** The night nobody walked first, then rounds still open, then walked; latest first within each. */
 export function roundOrder(rounds: PatrolRound[]): PatrolRound[] {
   const rank: Record<PatrolRoundStatus, number> = { MISSED: 0, OPEN: 1, COMPLETE: 2 };
   return [...rounds].sort(
@@ -584,7 +527,6 @@ export function roundOrder(rounds: PatrolRound[]): PatrolRound[] {
   );
 }
 
-/** Moves one item up or down a list; out-of-range moves return the list unchanged. */
 export function moveItem<T>(items: T[], index: number, delta: number): T[] {
   const target = index + delta;
   if (index < 0 || index >= items.length || target < 0 || target >= items.length) return items;
@@ -599,7 +541,7 @@ export const windowLabel = (minutes: number) =>
 
 const HH_MM = /^([01]\d|2[0-3]):[0-5]\d$/;
 
-/** Why a round can't be saved yet; null when it can. Mirrors the API's rules. */
+/** Mirrors the API's rules; null when the round can be saved. */
 export function routeDraftError(d: PatrolRouteInput): string | null {
   if (!d.name.trim()) return 'Give the round a name.';
   if (d.name.trim().length > 80) return 'Keep the name under 80 characters.';

@@ -3,11 +3,7 @@ import { File } from 'expo-file-system';
 import { apiFetch } from './client';
 import type { PickedFile } from './documents';
 
-/**
- * Bringing a managed property's units and tenants onto Sureground from a
- * spreadsheet (web: components/agency/PortfolioImportView, TenancyImportCard).
- * Always a dry run first; a file with any error imports nothing.
- */
+/** Always a dry run first; a file with any error imports nothing. */
 
 export interface ImportedUnitRow {
   line: number;
@@ -72,16 +68,11 @@ export const TENANCIES_CSV_TEMPLATE =
 /** The API caps the CSV body at 200,000 characters. */
 export const MAX_CSV_CHARS = 200_000;
 
-/** Whether a checked file may be imported: readable, no row errors, something to add. */
 export function canImport(r: { fileError: string | null; errors: RowErrors[] }, rows: number) {
   return !r.fileError && r.errors.length === 0 && rows > 0;
 }
 
-/**
- * Reads a picked CSV as text (the import API takes the file's text, not an
- * upload). On the web build the picker hands back a blob: URL, which only
- * fetch can read; on a phone it is a file in the app's cache.
- */
+/** The import API takes the file's text, not an upload. On web the picker hands back a blob: URL, which only fetch can read. */
 export async function readCsv(file: PickedFile): Promise<string> {
   if (Platform.OS === 'web') return (await fetch(file.uri)).text();
   return new File(file.uri).text();

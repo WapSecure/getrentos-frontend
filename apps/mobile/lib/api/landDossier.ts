@@ -4,11 +4,7 @@ import { apiFetch } from './client';
 import { toQuery } from './query';
 import { formatNaira } from '../format';
 
-/**
- * The buyer's decision dossier (web: /land/dossier/…): what the land is, what
- * was and wasn't checked, the all-in cost, and the title's history. Signed-in;
- * every view is recorded by the API.
- */
+/** Every view is recorded by the API. */
 
 export type CostStatus = 'CONFIRMED' | 'ESTIMATED' | 'NOT_YET_KNOWN';
 
@@ -77,7 +73,6 @@ export interface LandDossier {
   disclaimer: string;
 }
 
-/** Which dossier: a resale listing, or a plot (and plan) in a developer's estate. */
 export type DossierTarget =
   | { kind: 'listing'; listingId: string }
   | { kind: 'estate'; layoutId: string; plotId?: string; planId?: string };
@@ -88,7 +83,6 @@ export const COST_STATUS: Record<CostStatus, { label: string; tone: BadgeTone }>
   NOT_YET_KNOWN: { label: 'Not yet known', tone: 'neutral' },
 };
 
-/** The figure for one cost line: exact, a range, or a dash when unknown. */
 export function costFigure(item: AcquisitionCostItem): string {
   if (item.status === 'CONFIRMED') return formatNaira(item.amount ?? 0);
   if (item.status === 'ESTIMATED') {
@@ -99,14 +93,12 @@ export function costFigure(item: AcquisitionCostItem): string {
   return '—';
 }
 
-/** The all-in total including estimates, as one figure or a range. */
 export function estimatedTotal(cost: LandDossier['acquisitionCost']): string {
   return cost.estimatedLow === cost.estimatedHigh
     ? formatNaira(cost.estimatedLow)
     : `${formatNaira(cost.estimatedLow)} – ${formatNaira(cost.estimatedHigh)}`;
 }
 
-/** "ROAD_ACCESS" → "Road access" */
 export const words = (value: string) => {
   const text = value.replace(/_/g, ' ').toLowerCase();
   return text.charAt(0).toUpperCase() + text.slice(1);

@@ -23,7 +23,6 @@ import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { errorMessage } from '@/lib/api/client';
 
-/** One gateman: who they are, since when, and a way to take them off the gate. */
 export function StaffRow({
   member,
   removing,
@@ -65,7 +64,6 @@ export function StaffRow({
   );
 }
 
-/** Post someone with a Sureground account to the estate's gates. */
 export function AddGatemanSheet({
   open,
   onClose,

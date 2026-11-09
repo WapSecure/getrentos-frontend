@@ -39,11 +39,6 @@ const TREATMENTS = (Object.keys(DEPOSIT_TREATMENT_LABEL) as DepositTreatment[]).
   label: DEPOSIT_TREATMENT_LABEL[t],
 }));
 
-/**
- * The handover pack for a change of manager: the property's state when the
- * change took effect, and where the sign-off stands. Each party signs the same
- * frozen pack (its hash), or disputes it instead.
- */
 export default function HandoverScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, spacing } = useTheme();

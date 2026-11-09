@@ -52,10 +52,6 @@ import { ChipSelect } from '@/components/landlord/ChipSelect';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
-/**
- * Get a property managed: by Sureground (request, site visit, proposal you
- * accept) or by a vetted firm you appoint. Each property shows where it stands.
- */
 export default function GetManaged() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
@@ -72,7 +68,6 @@ export default function GetManaged() {
   const intakes = useQuery({ queryKey: qk.managed.intakes, queryFn: managedApi.intakes });
 
   const refresh = () => qc.invalidateQueries({ queryKey: qk.managed.all });
-  // The properties section needs all three: the homes, and what is in place for each.
   const propertiesQuery = {
     data: homes.data && mandates.data && intakes.data ? homes.data : undefined,
     isError: homes.isError || mandates.isError || intakes.isError,
@@ -464,7 +459,6 @@ function PropertyRow({
   );
 }
 
-/** Where a request stands; the proposal is accepted here, and accepting signs. */
 function IntakePanel({ intake, onChanged }: { intake: ManagedIntake; onChanged: () => void }) {
   const { colors, spacing, radius } = useTheme();
   const toast = useToast();

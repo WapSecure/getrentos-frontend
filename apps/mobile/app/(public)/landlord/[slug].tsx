@@ -24,7 +24,6 @@ import { openMarketListing } from '@/lib/pendingListing';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
-/** A landlord's or agency's public page (website: /l/<slug>): who they are and what they let. */
 export default function LandlordPage() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const { colors, spacing } = useTheme();

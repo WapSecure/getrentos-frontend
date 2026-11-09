@@ -13,12 +13,7 @@ import { agencyApi, isLive, resolveSelection, type Mandate } from '@/lib/api/age
 import { ApiError } from '@/lib/api/client';
 import { readSelectedClient, writeSelectedClient } from './selectedClient';
 
-/**
- * Which client the manager is acting for, shared by every agency screen so no
- * two can disagree. The choice is kept per device and dropped as soon as the
- * mandate it named is no longer one the manager holds: a stale selection is
- * exactly the mistake this exists to prevent.
- */
+// Dropped as soon as its mandate is no longer held: a stale selection is exactly the mistake this prevents.
 interface Custody {
   mandates: Mandate[];
   live: Mandate[];
@@ -36,7 +31,6 @@ export function CustodyProvider({
   enabled = true,
 }: {
   children: ReactNode;
-  /** Off outside the agency workspace, so no one else fetches mandates. */
   enabled?: boolean;
 }) {
   const [stored, setStored] = useState<string | null>(null);

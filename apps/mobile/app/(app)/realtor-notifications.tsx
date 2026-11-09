@@ -30,10 +30,7 @@ import { relativeTime } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
-/**
- * The API's `type` is an open string, so match on the meaningful prefix and
- * fall back to a bell rather than assuming a closed set.
- */
+/** `type` is an open string: match on its prefix and fall back to a bell. */
 function iconFor(type: string) {
   if (type.startsWith('offer')) return FileSignature;
   if (type.startsWith('escrow') || type.includes('commission') || type.includes('payout'))

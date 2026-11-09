@@ -29,7 +29,6 @@ import { formatDateTime } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
-/** One owner–manager question: the thread, a reply box, resolve and reopen. */
 export default function ManagerQueryThread() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, spacing, radius } = useTheme();
@@ -56,7 +55,6 @@ export default function ManagerQueryThread() {
     },
     onError: fail,
   });
-  // A drafted reply from the property's records, for the manager side.
   const [draft, setDraft] = useState<OwnerQueryDraft | null>(null);
   const drafting = useMutation({
     mutationFn: () => managementApi.draftQueryReply(id),

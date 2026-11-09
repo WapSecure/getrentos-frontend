@@ -24,7 +24,6 @@ import { goBack } from '@/lib/goBack';
 
 type Closing = { agreement: EstateAgreement; action: 'decline' | 'revoke' };
 
-/** Estates asking to advertise your property, and the ones already doing so. */
 export default function EstateAgreements() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();

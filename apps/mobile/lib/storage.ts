@@ -2,13 +2,7 @@ import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { LEGACY_PREFIX, NEW_PREFIX } from './legacyStorage';
 
-/**
- * Secure key/value storage.
- *
- * Native: the OS secure enclave (iOS Keychain / Android Keystore).
- * Web (dev preview only): `localStorage` — NOT secure, and only used so the app
- * can be previewed in a browser. Production web is not a target.
- */
+// Web (dev preview only) falls back to localStorage, which is NOT secure.
 const SECURE_OPTIONS: SecureStore.SecureStoreOptions = {
   keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
 };

@@ -8,33 +8,17 @@ import {
   STEP_UP_REQUIRED,
 } from '../stepUp';
 
-/**
- * Extra fields a trust or verification gate puts on its 403, e.g.
- * `{ error: 'TRUST_TIER_REQUIRED', tierRequired: 3, currentTier: 2 }`.
- */
 export interface ApiErrorDetails {
   tierRequired?: number;
   currentTier?: number;
-  /** Why a tier the user holds was still refused, e.g. `SCORE_BELOW_TIER3_MIN`. */
   reason?: string;
-  /**
-   * The rest of the envelope, verbatim.
-   *
-   * The named fields above are the two or three a gate puts on its 403, but some
-   * refusals carry structure the caller has to act on rather than print: an
-   * estate's watch list answers with the entries that fired and the reason on
-   * file, and a guard can only judge whether to override it if they can see it.
-   * Without this every such caller would be casting `unknown` and re-declaring
-   * the shape it already had.
-   */
+  /** The rest of the envelope, verbatim, for refusals whose structure a caller must act on. */
   [key: string]: unknown;
 }
 
 export class ApiError extends Error {
   status: number;
-  /** Machine-readable code from the API envelope, e.g. `DATABASE_ERROR`. */
   code?: string;
-  /** The whole response body, with the named gate fields above lifted out of it. */
   details: ApiErrorDetails;
   constructor(message: string, status: number, code?: string, details: ApiErrorDetails = {}) {
     super(message);
@@ -51,10 +35,6 @@ export class ApiError extends Error {
   }
 }
 
-/**
- * What to tell the person when a request fails: the API's own message when it
- * sent one (it is written for people), otherwise the screen's fallback.
- */
 export { toQuery, type QueryValue } from './query';
 
 export function errorMessage(e: unknown, fallback: string): string {
@@ -64,7 +44,6 @@ export function errorMessage(e: unknown, fallback: string): string {
 export interface ApiRequest extends Omit<RequestInit, 'body' | 'headers'> {
   body?: unknown;
   headers?: Record<string, string>;
-  /** Skip the Authorization header (used by the login/refresh calls). */
   anonymous?: boolean;
   /** Internal: prevents infinite retry loops after a refresh. */
   _retry?: boolean;
@@ -72,27 +51,20 @@ export interface ApiRequest extends Omit<RequestInit, 'body' | 'headers'> {
   _stepUp?: boolean;
 }
 
-/**
- * The client is transport only. `AuthProvider` injects these two hooks so the
- * client can attach the current access token and, on a 401, ask for a silent
- * refresh — without importing the auth layer (which would be circular).
- */
+/** Injected by `AuthProvider`: importing the auth layer here would be circular. */
 type Hooks = {
   getAccessToken: () => string | null;
   refresh: () => Promise<string | null>;
-  /** The account was suspended mid-session: end it and say why. */
   onSuspended?: (message: string) => Promise<void> | void;
 };
 let hooks: Hooks = { getAccessToken: () => null, refresh: async () => null };
 
-/** The API's code for "this account is suspended", on any authenticated request. */
 export const ACCOUNT_SUSPENDED = 'ACCOUNT_SUSPENDED';
 export function configureApi(next: Hooks) {
   hooks = next;
 }
 
 const REQUEST_TIMEOUT_MS = 20_000;
-/** Uploads get more room — they're bigger and slower than a JSON round-trip. */
 const UPLOAD_TIMEOUT_MS = 60_000;
 
 async function send(path: string, init: RequestInit, timeoutMs: number): Promise<Response> {
@@ -111,7 +83,6 @@ async function send(path: string, init: RequestInit, timeoutMs: number): Promise
   }
 }
 
-/** Parses a JSON envelope, throwing `ApiError` for a non-2xx response. */
 async function readJson<T>(res: Response): Promise<T> {
   if (!res.ok) {
     let message = `Request failed (${res.status})`;
@@ -128,9 +99,7 @@ async function readJson<T>(res: Response): Promise<T> {
       };
       message = payload.message || message;
       code = payload.error;
-      // The named gate fields first, because the API spells them differently on
-      // the wire. Then the whole envelope as well, so a caller that has to act
-      // on a refusal rather than echo it has somewhere to look.
+      // The API spells the gate fields differently on the wire.
       if (typeof payload.required === 'number') details.tierRequired = payload.required;
       if (typeof payload.tier === 'number') details.currentTier = payload.tier;
       if (typeof payload.reason === 'string') details.reason = payload.reason;
@@ -142,9 +111,7 @@ async function readJson<T>(res: Response): Promise<T> {
   }
   if (res.status === 204 || res.status === 205) return undefined as T;
 
-  // Several endpoints answer a successful command with an empty 200/201 body.
-  // `res.json()` throws on those, which would surface a server success as a
-  // client-side failure, so treat an empty body as "no content".
+  // Several endpoints answer success with an empty body, which `res.json()` would throw on.
   const text = await res.text();
   if (!text) return undefined as T;
   return JSON.parse(text) as T;
@@ -172,7 +139,6 @@ export async function apiFetch<T>(path: string, options: ApiRequest = {}): Promi
     REQUEST_TIMEOUT_MS
   );
 
-  // One transparent retry after a silent token refresh.
   if (res.status === 401 && !anonymous && !_retry) {
     const fresh = await hooks.refresh();
     if (fresh) return apiFetch<T>(path, { ...options, _retry: true });
@@ -185,10 +151,9 @@ export async function apiFetch<T>(path: string, options: ApiRequest = {}): Promi
       await hooks.onSuspended?.(err.message);
       throw err;
     }
-    // A sensitive change: confirm it's the account holder, then replay once.
     if (err instanceof ApiError && err.code === STEP_UP_REQUIRED && !_stepUp) {
       clearStepUpToken();
-      // The token approves this exact request, once (security gap AU-02).
+      // The token approves this exact request, once.
       const challengeId =
         typeof err.details?.challengeId === 'string' ? err.details.challengeId : undefined;
       const fresh = await obtainStepUpToken(challengeId);
@@ -204,10 +169,6 @@ export async function apiFetch<T>(path: string, options: ApiRequest = {}): Promi
   }
 }
 
-/**
- * Fetches an endpoint that streams bytes rather than JSON (e.g. the lease PDF).
- * Goes through the same auth and silent-refresh path as `apiFetch`.
- */
 export async function apiDownload(
   path: string,
   _retry = false
@@ -232,7 +193,6 @@ export async function apiDownload(
   }
 
   if (!res.ok) {
-    // An error body is still JSON, so reuse the envelope parser to surface it.
     return readJson(res);
   }
 
@@ -240,23 +200,13 @@ export async function apiDownload(
   return { bytes: new Uint8Array(await res.arrayBuffer()), mimeType };
 }
 
-/**
- * Multipart upload. Native `fetch` sets the `multipart/form-data` boundary
- * itself from a `FormData` body — never set `Content-Type` by hand here.
- */
-/**
- * For an endpoint that answers "there isn't one" with null.
- *
- * The API sends that as an empty body, which `apiFetch` reads as `undefined`,
- * and a query function that returns `undefined` is an error to React Query: the
- * screen shows a failure for what is an ordinary empty state.
- */
+/** The API sends "none" as an empty body, and React Query treats an `undefined` result as an error. */
 export async function apiFetchOrNull<T>(path: string, options: ApiRequest = {}): Promise<T | null> {
   return (await apiFetch<T | null>(path, options)) ?? null;
 }
 
+/** Never set `Content-Type` by hand: native `fetch` sets the multipart boundary itself. */
 export async function apiUpload<T>(path: string, form: FormData, _retry = false): Promise<T> {
-  // Web build: turn the picked files into real File parts (see webFormFiles).
   await attachQueuedWebFiles(form);
   const token = hooks.getAccessToken();
 

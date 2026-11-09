@@ -1,6 +1,5 @@
 import * as Location from 'expo-location';
 
-/** Where and when the phone was as a video tour finished filming; the server judges it. */
 export interface VideoOnSiteReport {
   latitude: number;
   longitude: number;
@@ -10,11 +9,7 @@ export interface VideoOnSiteReport {
 
 const FIX_TIMEOUT_MS = 15_000;
 
-/**
- * Reads the phone's position straight after the camera closes, for the
- * "Filmed on site" badge. Null when location is refused, unavailable, slow, or
- * reported as mocked: the video still uploads, just without the badge.
- */
+// Null when location is refused, unavailable, slow or mocked: the video still uploads, just without the badge.
 export async function locateRecording(): Promise<VideoOnSiteReport | null> {
   try {
     const permission = await Location.requestForegroundPermissionsAsync();

@@ -29,7 +29,6 @@ const WORDS: Partial<Record<LandInspectionStatus, [string, BadgeTone]>> = {
   CANCELLED: ['Called off', 'neutral'],
 };
 
-/** Land inspections Sureground has assigned to me. */
 export default function LandInspections() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();

@@ -27,10 +27,6 @@ const STAGE: Record<CollectionStage, { label: string; tone: BadgeTone }> = {
   formal_demand: { label: 'Formal demand', tone: 'danger' },
 };
 
-/**
- * Collection plan on the phone: who first, which step, any instalment split,
- * and a message the person sends themselves through the share sheet.
- */
 export function CollectionPlanCard({ source }: { source: CollectionPlanSource }) {
   const { colors, spacing, radius } = useTheme();
   const [open, setOpen] = useState<string | null>(null);

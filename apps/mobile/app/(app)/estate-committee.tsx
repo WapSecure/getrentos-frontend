@@ -39,11 +39,6 @@ import { errorMessage } from '@/lib/api/client';
 
 type Panel = { kind: 'appoint' } | { kind: 'edit'; member: CommitteeMember } | null;
 
-/**
- * The board running the estate. Each household holds at most one seat, so
- * appointing someone already on it changes their title. Committee members are
- * the ones who sign governance documents.
- */
 export default function EstateCommittee() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
@@ -298,7 +293,6 @@ function EditForm({
     onSuccess: () => {
       void haptics.success();
       invalidate();
-      // Signature counts on governance records depend on the committee size.
       qc.invalidateQueries({ queryKey: governanceKeys.all(estateId) });
       toast.show(`${member.residentName} has left the committee.`, 'success');
       onDone();

@@ -1,6 +1,5 @@
 import { apiFetch } from './client';
 
-/** Whether Sureground may text this person, and the WhatsApp chat number when it is set up. */
 export interface MessagingConsent {
   phoneEnding: string | null;
   phoneVerified: boolean;

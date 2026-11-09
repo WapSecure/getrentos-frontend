@@ -89,7 +89,6 @@ export default function SignIn() {
     mode: 'onTouched',
   });
 
-  // Prefill a remembered identifier; surface an involuntary sign-out.
   useEffect(() => {
     getRememberedIdentifier().then((v) => {
       if (v) {
@@ -99,11 +98,9 @@ export default function SignIn() {
     });
     const ended = consumeSessionExpired();
     if (ended) toast.show(ended.message, ended.tone);
-    // once, on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Lockout countdown.
   useEffect(() => {
     if (!lockedUntil) return;
     const tick = () => {
@@ -137,9 +134,7 @@ export default function SignIn() {
       const nextAttempts = attempts + 1;
       setAttempts(nextAttempts);
       if (nextAttempts >= MAX_ATTEMPTS) {
-        // This body is an event handler: react-hook-form's handleSubmit invokes it
-        // on submit, never during render. The compiler cannot see that because RHF
-        // is on its incompatible-library list, so it reads this as render-time.
+        // An event handler (RHF's handleSubmit), not render: the compiler can't see that through RHF.
         // eslint-disable-next-line react-hooks/purity
         setLockedUntil(Date.now() + LOCKOUT_MS);
         setFormError(null);

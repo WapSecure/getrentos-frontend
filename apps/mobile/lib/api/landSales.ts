@@ -1,11 +1,7 @@
 import { apiDownload, apiFetch } from './client';
 import type { BadgeTone } from '@sureground/ui-native';
 
-/**
- * Selling land: plot purchases on the owner's estates (the sales desk) and the
- * conveyance of a resale. The seller marks steps delivered; the buyer confirms
- * each, which is what releases money held in escrow.
- */
+/** The buyer's confirmation of each step is what releases money held in escrow. */
 
 export type PurchaseStatus =
   | 'PENDING_DEPOSIT'
@@ -264,10 +260,8 @@ export interface PurchaseDetail extends PurchaseSummary {
   }[];
 }
 
-/** Basis points as a percentage: 250 → "2.5%". */
 export const formatBps = (bps: number) => `${Number((bps / 100).toFixed(2))}%`;
 
-/** Steps that wait for the plot to be paid for in full. */
 export const FULL_PAYMENT_MILESTONES = new Set([
   'PHYSICAL_ALLOCATION',
   'DEED_OF_ASSIGNMENT',
@@ -276,7 +270,6 @@ export const FULL_PAYMENT_MILESTONES = new Set([
 
 const DELIVERABLE = new Set<PurchaseStatus>(['ACTIVE', 'PAID_IN_FULL', 'DEFAULTED']);
 
-/** Whether the seller may mark a step delivered now, and why not when they can't. */
 export function deliverability(
   status: PurchaseStatus,
   m: Pick<Milestone, 'key' | 'status'>
@@ -296,10 +289,7 @@ export function deliverability(
 export const applyBps = (amount: number, bps: number) =>
   Math.floor((Math.round(amount) * Math.round(bps) + 5000) / 10000);
 
-/**
- * What revoking returns to the buyer: everything paid towards the price,
- * less the revocation charge. Late fees paid are kept.
- */
+/** Everything paid towards the price, less the revocation charge; late fees paid are kept. */
 export function refundPreview(
   amountPaid: number,
   installments: Pick<Installment, 'status' | 'lateFee'>[],
@@ -313,7 +303,6 @@ export function refundPreview(
   return { lateFeesPaid, principalPaid, charge, refund: principalPaid - charge };
 }
 
-/** Required steps the buyer has confirmed (or waived), of all required. */
 export function confirmedProgress(milestones: Milestone[]) {
   const required = milestones.filter((m) => m.required);
   const done = required.filter((m) => m.status === 'CONFIRMED' || m.status === 'WAIVED');

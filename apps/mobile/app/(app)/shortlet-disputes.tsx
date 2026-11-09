@@ -38,7 +38,6 @@ const CLAIM_STATUS: Record<string, { label: string; tone: Tone }> = {
 
 type Tab = 'disputes' | 'claims';
 
-/** What the guest has raised with support, and what hosts have claimed from their deposits. */
 export default function GuestDisputes() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();

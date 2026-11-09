@@ -30,13 +30,8 @@ describe('verification gates', () => {
       tier: 2,
     });
     expect(err).toBeInstanceOf(ApiError);
-    // The projections `readGate` reads, under the caller's names.
     expect((err as ApiError).details).toMatchObject({ tierRequired: 3, currentTier: 2 });
-    // And the verbatim envelope alongside them, which is the half that has to
-    // survive for refusals a caller must ACT on rather than print: the gate's
-    // watch list answers 403 with the entries that fired, and a guard cannot
-    // judge an override from a message alone. `toEqual` here would pin only the
-    // two named fields and quietly drop the rest.
+    // toMatchObject, not toEqual: the verbatim envelope (e.g. watch-list entries) must survive alongside the projections.
     expect((err as ApiError).details).toMatchObject({
       error: 'TRUST_TIER_REQUIRED',
       required: 3,

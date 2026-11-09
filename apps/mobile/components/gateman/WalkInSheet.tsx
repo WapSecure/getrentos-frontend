@@ -19,25 +19,11 @@ export interface WalkInSheetProps {
   open: boolean;
   onClose: () => void;
   estateId: string;
-  /** The barrier the visitor is standing at, when the console knows it. */
   gateId?: string;
-  /** Fired once the household has been asked, so the caller can show the result. */
   onRaised: (pass: VisitorPass) => void;
 }
 
-/**
- * Raises a walk-in: somebody is at the barrier with nothing arranged.
- *
- * The guard picks the unit rather than quoting a code, because there is no code.
- * Submitting does NOT admit anyone: it asks the household, and the barrier
- * stays shut until they answer. That is why this screen is framed as a request
- * and never as "let them in".
- *
- * Households without a linked app account are shown but disabled: only their
- * resident can consent, so a request to them could never be answered and the
- * guard would spend the decision window discovering that. Saying so up front is
- * kinder than a rejection ten minutes later.
- */
+// Submitting asks the household and never admits anyone. Households with no linked app account are disabled, since only their resident can consent.
 export function WalkInSheet({ open, onClose, estateId, gateId, onRaised }: WalkInSheetProps) {
   const { colors, spacing } = useTheme();
   const qc = useQueryClient();
@@ -48,20 +34,10 @@ export function WalkInSheet({ open, onClose, estateId, gateId, onRaised }: WalkI
   const [visitorName, setVisitorName] = useState('');
   const [visitorPhone, setVisitorPhone] = useState('');
   const [purpose, setPurpose] = useState('');
-  /**
-   * Set when the estate's watch list refused the visitor.
-   *
-   * Held here rather than toasted, because it is the estate's answer and not a
-   * failure: everything the guard typed stays exactly as it is, and the only
-   * thing that changes the outcome is a stated reason to admit them.
-   */
+  /** Held here rather than toasted: it is the estate's answer, not a failure, and everything typed stays. */
   const [refusal, setRefusal] = useState<WatchlistRefusal | null>(null);
   const [overrideError, setOverrideError] = useState<string | null>(null);
-  /**
-   * What the estate's list said when the guard asked before attempting the
-   * raise. Set only for an answer that is not a refusal: a refusal is not an
-   * advisory and belongs to the notice below, which owns the decision.
-   */
+  /** Never a refusal: a refusal belongs to the notice below, which owns the decision. */
   const [screening, setScreening] = useState<WatchlistScreening | null>(null);
 
   const householdsQuery = useQuery({
@@ -70,9 +46,7 @@ export function WalkInSheet({ open, onClose, estateId, gateId, onRaised }: WalkI
     enabled: open && !!estateId,
   });
 
-  // Derived inside the memo from the query data itself: reading `items ?? []`
-  // outside would allocate a fresh array every render and make the dependency
-  // change on every pass.
+  // Derived inside the memo: `items ?? []` outside would allocate a fresh array every render and change the dependency on every pass.
   const matches = useMemo(() => {
     const households = householdsQuery.data?.items ?? [];
     const term = search.trim().toLowerCase();
@@ -138,13 +112,6 @@ export function WalkInSheet({ open, onClose, estateId, gateId, onRaised }: WalkI
 
   const canSubmit = !!household && visitorName.trim().length > 1 && !request.isPending;
 
-  /**
-   * Asks about this visitor before anything is attempted.
-   *
-   * Needs the household first, because the question is "this visitor, coming to
-   * see this unit": and because if the answer refuses them, the only way
-   * forward is the override, which raises the request.
-   */
   const canCheck =
     !!household &&
     !request.isPending &&
@@ -159,9 +126,7 @@ export function WalkInSheet({ open, onClose, estateId, gateId, onRaised }: WalkI
     onSuccess: (result) => {
       setOverrideError(null);
       if (result.blocked) {
-        // The same answer the raise would give, reached earlier: before the
-        // guard has promised the visitor anything, and without a household being
-        // asked to consent to somebody the estate has already refused.
+        // Checked before the raise, so no household is asked to consent to somebody the estate has already refused.
         setScreening(null);
         setRefusal({ message: result.message ?? '', matches: result.matches });
         return;
@@ -186,10 +151,7 @@ export function WalkInSheet({ open, onClose, estateId, gateId, onRaised }: WalkI
       snapPoints={['85%']}
       footer={
         <View style={{ gap: spacing.xs }}>
-          {/* Once the estate has refused, the primary action is gone on purpose.
-              Leaving "Ask for approval" here would invite a retry that returns
-              the same refusal while the visitor waits: the only route forward
-              is the stated override inside the notice. */}
+          {/* After a refusal the primary action is gone on purpose: a retry returns the same refusal; the only way forward is the override inside the notice. */}
           {refusal ? (
             <Button label="Close" variant="outline" fullWidth onPress={handleClose} />
           ) : (
@@ -309,8 +271,6 @@ export function WalkInSheet({ open, onClose, estateId, gateId, onRaised }: WalkI
           />
         ) : null}
 
-        {/* Last thing before the footer, because it is the last thing worth
-            knowing before a household is asked. */}
         <View style={{ gap: spacing.xs }}>
           <Button
             label="Check the watch list"

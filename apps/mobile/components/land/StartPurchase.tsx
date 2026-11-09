@@ -27,11 +27,7 @@ import { formatBps } from '@/lib/api/landSales';
 import { errorMessage } from '@/lib/api/client';
 import { formatNaira } from '@/lib/format';
 
-/**
- * Choosing a payment plan for a plot on hold, which starts the purchase. The
- * deposit is then paid from the purchase. Anything the developer's land was
- * not verified for must be acknowledged first.
- */
+// Anything the developer's land was not verified for must be acknowledged first.
 export function StartPurchase({
   reservation: r,
   onDone,

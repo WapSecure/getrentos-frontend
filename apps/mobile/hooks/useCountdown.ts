@@ -1,10 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-/**
- * A seconds countdown for "Resend code in 42s". Driven by a deadline rather
- * than decrementing state, so a backgrounded app (where intervals pause)
- * still shows the right number when it comes back.
- */
+/** Driven by a deadline rather than decrementing state, so a backgrounded app (where intervals pause) still shows the right number. */
 export function useCountdown(initialSeconds = 0) {
   const [deadline, setDeadline] = useState<number | null>(() =>
     initialSeconds > 0 ? Date.now() + initialSeconds * 1000 : null

@@ -31,7 +31,6 @@ export interface BuyerViewing {
   /** The viewing time as an ISO instant: show this, in local time. */
   scheduledAt?: string;
   status: BuyerViewingDisplayStatus;
-  /** 'video': a live video call the seller hosts. */
   mode?: 'in_person' | 'video';
   notes?: string;
 }

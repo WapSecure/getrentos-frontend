@@ -95,10 +95,7 @@ function RenewForm({
   const increase =
     lease.rentAmount > 0 ? Math.round(((amount - lease.rentAmount) / lease.rentAmount) * 100) : 0;
 
-  /**
-   * The API owns the rent-increase advisory, so ask it rather than deciding
-   * locally what counts as too steep.
-   */
+  /** The API owns the rent-increase advisory; don't decide locally what counts as too steep. */
   const preview = useMutation({
     mutationFn: () => landlordApi.renewalCheck(lease.id, amount),
     onSuccess: setCheck,

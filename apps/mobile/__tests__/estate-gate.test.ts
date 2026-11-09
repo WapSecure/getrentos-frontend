@@ -107,7 +107,6 @@ describe('regular visitors', () => {
     expect(daySpan('2026-10-10', '2026-10-09')).toBe(-1);
     expect(contractorDraftError(draft({ validUntil: '2026-10-10' }))).toBeNull();
     expect(contractorDraftError(draft({ validUntil: '2026-10-09' }))).toMatch(/end on or after/);
-    // 10 Oct 2026 to 10 Oct 2027 inclusive is 366 days: allowed.
     expect(contractorDraftError(draft({ validUntil: '2027-10-10' }))).toBeNull();
     expect(contractorDraftError(draft({ validUntil: '2027-10-11' }))).toMatch(/367 days/);
   });
@@ -117,7 +116,6 @@ describe('regular visitors', () => {
       /can’t be the same/
     );
     expect(contractorDraftError(draft({ restrictHours: true, dailyTo: '' }))).toMatch(/both/);
-    // A night shift crosses midnight.
     expect(
       contractorDraftError(draft({ restrictHours: true, dailyFrom: '22:00', dailyTo: '06:00' }))
     ).toBeNull();

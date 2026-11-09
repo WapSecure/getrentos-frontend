@@ -32,7 +32,6 @@ import { ChipSelect } from '@/components/landlord/ChipSelect';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
-/** One client: contact, stage, properties, notes, and the money held for them. */
 export default function AgencyClientScreen() {
   const { ownerId } = useLocalSearchParams<{ ownerId: string }>();
   const { colors, spacing } = useTheme();

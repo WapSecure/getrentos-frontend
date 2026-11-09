@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-/** Languages Sureground can answer in. pcm is Nigerian Pidgin. */
+// pcm is Nigerian Pidgin.
 export type ReplyLanguage = 'en' | 'pcm' | 'yo' | 'ha' | 'ig';
 
 export const REPLY_LANGUAGES: { value: ReplyLanguage; label: string }[] = [
@@ -16,7 +16,6 @@ export const languageLabel = (code: ReplyLanguage) =>
 
 const KEY = 'sureground.replyLanguage';
 
-/** The language this device last chose for answers; English when none. */
 export async function loadReplyLanguage(): Promise<ReplyLanguage> {
   try {
     const v = await AsyncStorage.getItem(KEY);

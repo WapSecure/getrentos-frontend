@@ -44,7 +44,6 @@ export default function ReportMaintenance() {
   const [description, setDescription] = useState('');
   const [isEmergency, setIsEmergency] = useState(false);
   const [photos, setPhotos] = useState<PickedFile[]>([]);
-  // "Fill in from photos": a draft of the fields above, shown with any safety note.
   const [draft, setDraft] = useState<RepairDraft | null>(null);
   const fill = useMutation({
     mutationFn: () => maintenanceApi.draftFromPhotos(photos, description),

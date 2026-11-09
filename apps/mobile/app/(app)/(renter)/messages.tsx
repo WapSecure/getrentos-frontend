@@ -60,8 +60,7 @@ export default function Messages() {
     isArchived: !c.isArchived,
   }));
 
-  // Refresh on return to the tab so read state stays current: skipping the
-  // first focus, which the initial fetch already covers.
+  // Refresh on return to the tab, skipping the first focus the initial fetch covers.
   const focusedOnce = useRef(false);
   useFocusEffect(
     useCallback(() => {
@@ -230,7 +229,6 @@ export default function Messages() {
   );
 }
 
-/** A conversation row's shape while it loads. */
 function ConversationRowSkeleton() {
   const { spacing } = useTheme();
   return (
@@ -244,7 +242,6 @@ function ConversationRowSkeleton() {
   );
 }
 
-/** Optimistic pin/archive toggle with rollback. */
 function useConversationToggle(
   call: (id: string) => Promise<Conversation>,
   flip: (c: Conversation) => Conversation
@@ -271,8 +268,6 @@ function useConversationToggle(
     onSuccess: (updated) => patchConversation(qc, updated),
   });
 }
-
-/* ------------------------------- row ------------------------------- */
 
 function ConversationRow({
   conversation: c,

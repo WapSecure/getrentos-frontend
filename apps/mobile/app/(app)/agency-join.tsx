@@ -21,10 +21,6 @@ import { useAuth } from '@/lib/auth/AuthProvider';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
-/**
- * Joining a firm from an invitation. Opened with ?token= from the link, or the
- * link (or token) pasted here.
- */
 export default function AgencyJoin() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
@@ -87,7 +83,6 @@ function Invitation({ token, onReset }: { token: string; onReset: () => void }) 
   const join = useMutation({
     mutationFn: () => agencyFirmApi.join(token),
     onSuccess: async () => {
-      // Joining makes this account a property manager; open the workspace.
       await refreshProfile();
       qc.clear();
       switchWorkspace('manager');

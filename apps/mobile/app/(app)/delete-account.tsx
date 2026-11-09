@@ -10,7 +10,6 @@ import { useAuth } from '@/lib/auth/AuthProvider';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
-/** Permanently deletes a renter account (web: renter settings, AccountDeletion). */
 export default function DeleteAccount() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();

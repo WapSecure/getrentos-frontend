@@ -38,7 +38,6 @@ export default function HostBookings() {
     queryFn: ({ pageParam }) => hostShortletsApi.bookings(view, pageParam),
     initialPageParam: 1,
     getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
-    // The last tab's stays stay put while the next tab loads.
     placeholderData: keepPreviousData,
   });
   const items = query.data?.pages.flatMap((p) => p.items) ?? [];

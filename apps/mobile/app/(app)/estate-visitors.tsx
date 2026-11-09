@@ -57,7 +57,6 @@ type View_ =
   | 'all';
 const VIEWS: { value: View_; label: string }[] = [
   { value: 'CHECKED_IN', label: 'Inside now' },
-  // A walk-in at the gate, waiting for the household to say yes.
   { value: 'AWAITING_APPROVAL', label: 'Waiting on resident' },
   { value: 'PENDING', label: 'Expected' },
   { value: 'APPROVED', label: 'Approved' },
@@ -68,7 +67,6 @@ const VIEWS: { value: View_; label: string }[] = [
   { value: 'all', label: 'All' },
 ];
 
-/** How long a pass the office issues stays valid. The API's default is 24 hours. */
 const VALIDITY: { hours: number; label: string }[] = [
   { hours: 24, label: '24 hours' },
   { hours: 72, label: '3 days' },
@@ -92,7 +90,6 @@ const SOURCE: Record<string, string> = {
   contractor: 'Contractor pass',
 };
 
-/** Who is inside, who is expected, and a pass the office can issue for a household. */
 export default function EstateVisitors() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
@@ -443,7 +440,6 @@ function IssueForm({ estateId, onDone }: { estateId: string; onDone: () => void 
   );
 }
 
-/** The identity document the gate recorded for a visitor, if any. */
 function IdCheckView({ estateId, pass }: { estateId: string; pass: VisitorPass }) {
   const { spacing, radius, colors } = useTheme();
   const check = useQuery({

@@ -20,11 +20,7 @@ interface Props {
   onClose: () => void;
 }
 
-/**
- * The sign-in email changes only after the new address proves itself with a
- * code. The API asks the account holder to confirm it's them first: the
- * StepUpSheet at the root handles that: and emails the old address.
- */
+// The API asks for step-up first (the root StepUpSheet handles it) and emails the old address.
 export function ChangeEmailSheet({ open, onClose }: Props) {
   return (
     <Sheet open={open} onClose={onClose} title="Change sign-in email">

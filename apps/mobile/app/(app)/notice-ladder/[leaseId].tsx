@@ -41,12 +41,7 @@ import { ChipSelect } from '@/components/landlord/ChipSelect';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
-/**
- * Where one tenancy stands on the escalation ladder. Raising is always "the
- * next step" (the server refuses anything out of sequence), and a block is
- * stated in words with its date, because serving the next step early is fatal
- * to the claim.
- */
+/** Serving a step early is fatal to the claim: raising is only ever the next step, and a block is stated with its date. */
 export default function NoticeLadderScreen() {
   const { leaseId } = useLocalSearchParams<{ leaseId: string }>();
   const { colors, spacing } = useTheme();

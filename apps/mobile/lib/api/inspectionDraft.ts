@@ -31,7 +31,7 @@ export interface InspectionDraft {
 }
 
 export const inspectionDraftApi = {
-  /** Suggests a report from the photos already attached. Saves nothing. */
+  /** Saves nothing. */
   draft: (
     taskId: string,
     body: {

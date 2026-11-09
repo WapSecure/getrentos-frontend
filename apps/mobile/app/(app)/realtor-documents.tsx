@@ -38,7 +38,6 @@ import { Sheet } from '@/components/Sheet';
 import { FilePickRow } from '@/components/forms/FilePickRow';
 import { goBack } from '@/lib/goBack';
 
-/** Agency agreements, listing contracts, closing papers and the realtor's licence. */
 export default function RealtorDocuments() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();

@@ -1,26 +1,17 @@
-/**
- * Central query-key factory. Every `useQuery` key comes from here so cache
- * invalidation is precise and greppable.
- */
 export const qk = {
   auth: {
     me: ['auth', 'me'] as const,
   },
   security: ['me', 'security'] as const,
   messagingConsent: ['me', 'messaging-consent'] as const,
-  /** The card or bank fee added to a payment of this many naira. */
   checkoutFee: (amount: number) => ['payments', 'checkout-fee', amount] as const,
-  /** Which companies can take a payment right now (Paystack, Monnify). */
   paymentProviders: ['payments', 'providers'] as const,
-  /** The fee on this many naira when `provider` takes it: fees differ per provider. */
   providerFee: (amount: number, provider: string) =>
     ['payments', 'provider-fee', amount, provider] as const,
-  /** Banks a payout can go to, and the name on one account (lib/api/paymentStatus). */
   banks: ['payments', 'banks'] as const,
   accountName: (bankCode: string, accountNumber: string) =>
     ['payments', 'account-name', bankCode, accountNumber] as const,
   passkeys: ['me', 'security', 'passkeys'] as const,
-  /** Where you're signed in: one live session per device. */
   sessions: ['me', 'security', 'sessions'] as const,
   representatives: {
     list: (kind: 'realtor' | 'agent') => ['representatives', kind] as const,
@@ -32,14 +23,12 @@ export const qk = {
     mine: ['property-authorities', 'mine'] as const,
   },
   estateAgreements: ['estate-agreements', 'mine'] as const,
-  /** Change of manager and the handover pack (lib/api/managementTransfers). */
   transfers: {
     mine: ['management-transfers', 'mine'] as const,
     preview: (propertyId: string) => ['management-transfers', 'preview', propertyId] as const,
     firms: ['management-transfers', 'firms'] as const,
     handover: (id: string) => ['management-transfers', 'handover', id] as const,
   },
-  /** The buyer's land deals (lib/api/landBuyer). */
   buyerLand: {
     all: ['buyer-land'] as const,
     purchases: (status: string) => ['buyer-land', 'purchases', status] as const,
@@ -59,7 +48,6 @@ export const qk = {
     resaleMilestones: (txId: string) => ['buyer-land', 'resale', txId, 'milestones'] as const,
     resaleConditions: (txId: string) => ['buyer-land', 'resale', txId, 'conditions'] as const,
   },
-  /** The agency workspace (lib/api/agency). */
   agency: {
     managing: ['agency', 'managing'] as const,
     mandate: (id: string) => ['agency', 'mandate', id] as const,
@@ -82,7 +70,6 @@ export const qk = {
     kpis: (from: string, to: string) => ['agency', 'kpis', from, to] as const,
     onboarding: ['agency', 'onboarding'] as const,
   },
-  /** Getting a property managed (lib/api/managedService). */
   managed: {
     all: ['managed'] as const,
     feeCard: ['managed', 'fee-card'] as const,
@@ -92,25 +79,21 @@ export const qk = {
     intakes: ['managed', 'intakes'] as const,
     breakFee: (mandateId: string) => ['managed', 'break-fee', mandateId] as const,
   },
-  /** Broadcasts, templates and automation rules (lib/api/automations). */
   automations: {
     rules: ['automations', 'rules'] as const,
     templates: ['automations', 'templates'] as const,
   },
-  /** Legal cases (lib/api/legalCases). */
   legalCases: {
     all: ['legal-cases'] as const,
     list: (limit: number) => ['legal-cases', 'list', limit] as const,
     detail: (id: string) => ['legal-cases', 'detail', id] as const,
   },
-  /** Tenancy notices and arrears (lib/api/tenancyNotices). */
   notices: {
     running: ['notices', 'list', 'SERVED'] as const,
     periods: ['notices', 'periods'] as const,
     ladder: (leaseId: string) => ['notices', 'ladder', leaseId] as const,
     overdue: ['landlord', 'payments', 'overdue'] as const,
   },
-  /** Landlord + owner property control (lib/api/management). */
   management: {
     activity: (propertyId: string, who: string) =>
       ['management', 'activity', propertyId, who] as const,
@@ -134,9 +117,9 @@ export const qk = {
   landInspection: (id: string) => ['land', 'inspections', id] as const,
   host: {
     listings: ['host', 'listings'] as const,
-    /** First page only (dashboard preview). Kept apart from the infinite list key below. */
+    /** Kept apart from the infinite list key below. */
     bookings: (view: string) => ['host', 'bookings', view, 'preview'] as const,
-    /** Infinite list (Bookings screen); its cache holds `{ pages, pageParams }`. */
+    /** Its cache holds `{ pages, pageParams }`. */
     bookingsList: (view: string) => ['host', 'bookings', view, 'list'] as const,
     booking: (id: string) => ['host', 'booking', id] as const,
     listingBookings: (listingId: string) => ['host', 'listing', listingId, 'bookings'] as const,
@@ -161,7 +144,7 @@ export const qk = {
       ['home-care', 'invoice-payment-preview', invoiceId, provider ?? 'default'] as const,
     dashboard: ['home-care', 'dashboard'] as const,
     workOrders: (view: string) => ['home-care', 'work-orders', view] as const,
-    /** Paged resolved/cancelled lists; never shares a key with the open list. */
+    /** Never shares a key with the open list. */
     closedWorkOrders: (view: string) => ['home-care', 'work-orders', 'closed', view] as const,
     workOrder: (id: string) => ['home-care', 'work-order', id] as const,
     quotes: (id: string) => ['home-care', 'work-order', id, 'quotes'] as const,
@@ -184,7 +167,7 @@ export const qk = {
       ['estate-manager', estateId, 'collection-plan', language] as const,
     estates: ['estate-manager', 'estates'] as const,
     selected: ['estate-manager', 'selected'] as const,
-    /** Everything cached for one estate; invalidate this after a write. */
+    /** Invalidate this after a write. */
     estate: (estateId: string) => ['estate-manager', estateId] as const,
     dashboard: (estateId: string) => ['estate-manager', estateId, 'dashboard'] as const,
     duesTrend: (estateId: string) => ['estate-manager', estateId, 'dues-trend'] as const,
@@ -228,15 +211,14 @@ export const qk = {
     applications: ['renter', 'applications'] as const,
     lease: ['renter', 'lease'] as const,
     payments: (page = 1, pageSize = 20) => ['renter', 'payments', { page, pageSize }] as const,
-    /** Every renter payment-list query: invalidating it refreshes paged and endless lists alike. */
+    /** Invalidating it refreshes paged and endless lists alike. */
     paymentsAll: ['renter', 'payments'] as const,
-    /** The payments screen's endless history, loaded page by page. */
     paymentsHistory: ['renter', 'payments', 'history'] as const,
     notifications: (page = 1, pageSize = 20) =>
       ['renter', 'notifications', { page, pageSize }] as const,
     recommended: ['renter', 'recommended'] as const,
     conversations: ['renter', 'conversations'] as const,
-    /** One thread. Lives under `conversations` so invalidating the inbox refreshes it too. */
+    /** Under `conversations` so invalidating the inbox refreshes it too. */
     conversation: (id: string) => ['renter', 'conversations', 'one', id] as const,
     viewings: ['renter', 'viewings'] as const,
     pendingLease: ['renter', 'lease', 'pending'] as const,
@@ -280,7 +262,6 @@ export const qk = {
       ['renter', 'reviews', 'received', { page, pageSize }] as const,
   },
   listings: {
-    /** Infinite list keyed by the active filter set. */
     search: (filters: Record<string, unknown>) => ['listings', 'search', filters] as const,
     detail: (id: string) => ['listings', 'detail', id] as const,
     saved: ['listings', 'saved'] as const,
@@ -289,7 +270,7 @@ export const qk = {
     geoInsights: (id: string, destination?: string) =>
       ['listings', 'geo-insights', id, destination ?? null] as const,
   },
-  /** The signed-out marketplace — public data only, safe to persist. */
+  /** Public data only, safe to persist. */
   market: {
     list: (kind: string, filters: Record<string, unknown>) =>
       ['market', 'list', kind, filters] as const,
@@ -365,7 +346,6 @@ export const qk = {
     list: (filters: Record<string, unknown>) => ['land', 'list', filters] as const,
     detail: (id: string) => ['land', 'detail', id] as const,
     comparables: (id: string) => ['land', 'detail', id, 'comparables'] as const,
-    /** One dossier per listing, or per estate plot and plan. */
     dossier: (target: string) => ['land', 'dossier', target] as const,
   },
   shortlets: {
@@ -377,7 +357,6 @@ export const qk = {
     bookings: (page = 1, pageSize = 20) => ['shortlets', 'bookings', { page, pageSize }] as const,
     wishlist: ['shortlets', 'wishlist'] as const,
     wishlistIds: ['shortlets', 'wishlist', 'ids'] as const,
-    /** Every booking the guest has (the stay screens read one from here). */
     myStays: ['shortlets', 'bookings', 'all'] as const,
     conversations: ['shortlets', 'conversations'] as const,
     disputes: ['shortlets', 'disputes'] as const,
@@ -528,55 +507,27 @@ export const qk = {
     maintenance: ['resident', 'maintenance'] as const,
     dues: ['resident', 'dues'] as const,
     governance: ['resident', 'governance'] as const,
-    /**
-     * The roll call this household is being asked to answer, or null.
-     *
-     * Shared by the banner on the resident home screen and the answer screen, so
-     * answering on one cannot leave a stale banner on the other.
-     */
+    /** Shared by the home banner and the answer screen, so answering on one can't leave the other stale. */
     emergency: ['resident', 'emergency'] as const,
   },
   gateman: {
-    /**
-     * Prefix for the whole console. Used by the offline queue to refresh
-     * everything a guard is looking at once queued writes finally land — the
-     * "inside now" list and the vehicle and delivery logs all move at once.
-     */
+    /** The offline queue invalidates this prefix once queued writes land. */
     all: ['gateman'] as const,
-    /** The guard's own post; every other gateman key hangs off its estate id. */
     myEstate: ['gateman', 'estate'] as const,
-    /** Every estate this guard can open, for the switcher. */
     myEstates: ['gateman', 'estates'] as const,
     gates: (estateId: string) => ['gateman', estateId, 'gates'] as const,
     households: (estateId: string) => ['gateman', estateId, 'households'] as const,
-    /** Visitors currently on the estate — anyone CHECKED_IN, however long ago. */
     visitorsInside: (estateId: string) => ['gateman', estateId, 'inside'] as const,
-    /**
-     * Every gate-raised walk-in, whatever its state. One key, because the console
-     * needs the whole story — waiting, approved, refused — from one snapshot.
-     */
     walkIns: (estateId: string) => ['gateman', estateId, 'walk-ins'] as const,
     deliveries: (estateId: string) => ['gateman', estateId, 'deliveries'] as const,
-    /**
-     * Who is expected today, for the guard being asked at the barrier.
-     *
-     * No window in the key: the board is "now" by definition, so keying on an
-     * instant would add a cache entry per render and reuse none of them.
-     */
+    /** No window in the key: keying on an instant would add a cache entry per render. */
     expectedToday: (estateId: string) => ['gateman', estateId, 'expected-today'] as const,
-    /**
-     * The identity document recorded against one visitor's pass.
-     *
-     * Keyed by the pass, not just the estate: it is a single record about one
-     * person, and reusing one estate-wide key would have every pass share a cache
-     * entry and show the wrong document.
-     */
+    /** Keyed by the pass: an estate-wide key would show the wrong person's document. */
     visitorIdCheck: (estateId: string, passId: string) =>
       ['gateman', estateId, 'id-check', passId] as const,
     vehicleLogs: (estateId: string) => ['gateman', estateId, 'vehicle-logs'] as const,
     incidents: (estateId: string) => ['gateman', estateId, 'incidents'] as const,
   },
-  /** The identity checks run by the trust orchestrator (the verification centre). */
   trust: {
     consents: ['trust', 'consents'] as const,
     verification: (id: string) => ['trust', 'verification', id] as const,

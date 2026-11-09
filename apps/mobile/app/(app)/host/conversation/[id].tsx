@@ -3,7 +3,6 @@ import { qk } from '@/lib/query/keys';
 import { hostShortletsApi } from '@/lib/api/hostShortlets';
 import { ConversationThread } from '@/components/shortlet/ConversationThread';
 
-/** One guest thread, from the host's side. */
 export default function HostConversationScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   return (

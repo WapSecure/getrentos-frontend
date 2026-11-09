@@ -1,8 +1,4 @@
-/**
- * Slot maths for the amenity booking sheet. Estates run on Lagos time (UTC+1, no
- * daylight saving), so days and start hours are Lagos ones whatever zone the
- * phone is on.
- */
+// Estates run on Lagos time (UTC+1, no daylight saving): days and hours are Lagos ones whatever the phone's zone.
 
 const LAGOS_OFFSET_MS = 60 * 60 * 1000;
 
@@ -17,7 +13,6 @@ export interface BusyRange {
   endsAt: string;
 }
 
-/** Today and the following days, as Lagos calendar days. */
 export function lagosDays(count: number, now: Date = new Date()): LagosDay[] {
   const lagos = new Date(now.getTime() + LAGOS_OFFSET_MS);
   return Array.from({ length: count }, (_, i) => {
@@ -28,17 +23,15 @@ export function lagosDays(count: number, now: Date = new Date()): LagosDay[] {
   });
 }
 
-/** The instant a Lagos-time hour starts on a Lagos day. */
 export function slotStart(day: LagosDay, hour: number): Date {
   return new Date(Date.UTC(day.year, day.month, day.day, hour) - LAGOS_OFFSET_MS);
 }
 
-/** Noon on that day, for labelling it without crossing into a neighbouring date. */
+// Noon, so labelling the day never crosses into a neighbouring date.
 export function dayNoon(day: LagosDay): Date {
   return slotStart(day, 12);
 }
 
-/** True when [start, start + minutes) is in the future and clashes with no taken range. */
 export function isSlotFree(
   start: Date,
   minutes: number,

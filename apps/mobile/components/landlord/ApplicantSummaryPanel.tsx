@@ -5,11 +5,7 @@ import { ChevronDown } from 'lucide-react-native';
 import { LinkButton, Skeleton, Text, useTheme } from '@sureground/ui-native';
 import { landlordApi } from '@/lib/api/landlord';
 
-/**
- * The applicant's screening facts in plain words, with questions to ask and
- * checks to make. Fetched only when opened, like the tenancy standing beside
- * it. It never ranks or recommends: the decision stays with the landlord.
- */
+// It never ranks or recommends: the decision stays with the landlord.
 export function ApplicantSummaryPanel({ applicationId }: { applicationId: string }) {
   const { colors, spacing } = useTheme();
   const [open, setOpen] = useState(false);

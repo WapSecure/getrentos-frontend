@@ -30,7 +30,6 @@ import {
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { MandateActions } from '@/components/agency/MandateActions';
 
-/** Every engagement the manager holds, with what each lets them do and what's next. */
 export default function AgencyEngagements() {
   const { colors, spacing } = useTheme();
   const custody = useCustody();

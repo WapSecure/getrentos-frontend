@@ -1,8 +1,4 @@
-/**
- * Formatting helpers. Money on the backend is inconsistent (see the web-app
- * gap list) — these assume major-unit Naira amounts, matching what the current
- * renter endpoints return. Revisit once the minor-unit migration lands.
- */
+// Assumes major-unit Naira amounts, as the current renter endpoints return.
 
 export function formatNaira(amount: number, opts: { compact?: boolean } = {}): string {
   if (opts.compact) {
@@ -16,10 +12,7 @@ export function formatNaira(amount: number, opts: { compact?: boolean } = {}): s
   }).format(amount);
 }
 
-/**
- * Every date and time is shown in Lagos time, whatever zone the phone is on, so a
- * buyer abroad sees the same viewing time as the owner and the web app.
- */
+// Lagos time whatever the phone's zone, so everyone sees the same time as the owner and the web app.
 export const APP_TIME_ZONE = 'Africa/Lagos';
 
 export function formatDate(value: string | Date, style: 'short' | 'medium' = 'medium'): string {
@@ -33,7 +26,6 @@ export function formatDate(value: string | Date, style: 'short' | 'medium' = 'me
   });
 }
 
-/** Clock time only (e.g. a gate check-in at 2:47 PM). */
 export function formatTime(value: string | Date): string {
   const d = typeof value === 'string' ? new Date(value) : value;
   if (Number.isNaN(d.getTime())) return '—';
@@ -44,13 +36,7 @@ export function formatTime(value: string | Date): string {
   });
 }
 
-/**
- * Date and time together, in Lagos time: "Nov 4, 2026, 4:46 PM".
- *
- * For anything that lapses within a day the date alone is misleading — a
- * four-hour visitor pass showed "Expires Nov 4, 2026", which reads as end of
- * day when it actually dies that afternoon.
- */
+// For anything that lapses within a day, the date alone misleads.
 export function formatDateTime(value: string | Date, style: 'short' | 'medium' = 'short'): string {
   const d = typeof value === 'string' ? new Date(value) : value;
   if (Number.isNaN(d.getTime())) return '—';
@@ -72,7 +58,6 @@ export function relativeTime(value: string | Date): string {
 
 export const firstName = (full?: string | null) => full?.trim().split(/\s+/)[0] ?? 'there';
 
-/** "PROPERTY_BUYER" or "tenant" as words: "Property buyer", "Tenant". */
 export function roleLabel(role?: string | null): string | undefined {
   if (!role) return undefined;
   const words = role.replace(/_/g, ' ').trim().toLowerCase();

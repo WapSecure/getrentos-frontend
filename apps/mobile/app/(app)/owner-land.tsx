@@ -27,10 +27,7 @@ import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { ParcelForm } from '@/components/land/ParcelForm';
 import { goBack } from '@/lib/goBack';
 
-/**
- * Land stays private until ownership and diligence are verified. This is
- * where an owner keeps each parcel's record complete so review can finish.
- */
+/** Land stays private until ownership and diligence are verified. */
 export default function OwnerLand() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();

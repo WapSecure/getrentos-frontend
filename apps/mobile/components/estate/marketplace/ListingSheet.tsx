@@ -37,7 +37,6 @@ import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { MarketplaceFormError, patchListing, reportError } from './MarketplaceUI';
 
-/** Manage one listing: publish, pause or take it down, and its photos. */
 export function ListingSheet({
   estateId,
   listing,
@@ -277,7 +276,6 @@ function ListingManager({ estateId, listing }: { estateId: string; listing: Esta
   );
 }
 
-/** Change the headline, price or start date without taking the listing down. */
 function EditListingForm({
   estateId,
   listing,

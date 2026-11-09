@@ -3,10 +3,6 @@ import { router } from 'expo-router';
 import { BadgeCheck, Sparkles } from 'lucide-react-native';
 import { Button, Card, Text, useTheme } from '@sureground/ui-native';
 
-/**
- * What a Pro feature does, in place of the screen an estate on a lower plan
- * can't open: the API refuses it, so show the reason instead of an error.
- */
 export function ProUpsell({
   title,
   description,
@@ -16,7 +12,6 @@ export function ProUpsell({
   title: string;
   description: string;
   perks: string[];
-  /** Who holds the plan; null when the viewer is the one who upgrades. */
   note?: string | null;
 }) {
   const { colors, spacing } = useTheme();

@@ -1,10 +1,5 @@
 import { apiFetch } from './client';
 
-/**
- * Property authority, from the holder's side: the properties you may act for
- * because someone granted you a mandate, and the claims you've filed that an
- * officer hasn't decided yet. Shared by every portal that can hold a mandate.
- */
 export const AUTHORITY_RELATIONSHIPS = [
   { value: 'PROPERTY_MANAGER', label: 'Property manager' },
   { value: 'CO_OWNER', label: 'Co-owner' },

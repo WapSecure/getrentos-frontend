@@ -34,11 +34,6 @@ import { TrustChecks } from '@/components/land/TrustChecks';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
-/**
- * The buyer's decision dossier: what the land is, what was and wasn't checked,
- * the all-in cost, and the title's history. Opened from a land listing (resale)
- * or before starting an estate plot purchase (with the chosen plan).
- */
 export default function LandDossierScreen() {
   const params = useLocalSearchParams<{
     listingId?: string;

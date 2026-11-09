@@ -20,9 +20,7 @@ export default function PortalUnavailable() {
   const { colors, spacing } = useTheme();
   const label = PORTAL_LABEL[portal ?? ''] ?? 'This';
 
-  // Admin is not "coming later": the backoffice is a desktop console by
-  // design, so promising a mobile build here would be a lie. It points at the
-  // web instead.
+  // Admin is desktop-only by design, so point at the web rather than promise a mobile build.
   const isAdmin = portal === 'admin';
 
   return (

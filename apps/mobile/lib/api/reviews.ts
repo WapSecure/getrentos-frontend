@@ -9,7 +9,6 @@ export const REVIEW_CATEGORY_LABEL: Record<ReviewCategory, string> = {
   PROPERTY: 'Property',
 };
 
-/** A tenancy that has ended and is still open for the renter to review. */
 export interface PendingReview {
   id: string;
   leaseId: string;
@@ -40,14 +39,11 @@ export interface SubmitReviewInput {
 }
 
 export const reviewsApi = {
-  /** Tenancies the renter can still write a review for. */
   pending: () => apiFetch<PendingReview[]>('/renter/reviews/pending'),
 
-  /** Reviews this renter has written. */
   submitted: (page = 1, pageSize = 20) =>
     apiFetch<Paginated<Review>>(`/renter/reviews/submitted?page=${page}&pageSize=${pageSize}`),
 
-  /** Reviews landlords and agents have written about this renter. */
   received: (page = 1, pageSize = 20) =>
     apiFetch<Paginated<Review>>(`/renter/reviews?page=${page}&pageSize=${pageSize}`),
 

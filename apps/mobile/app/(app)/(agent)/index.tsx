@@ -134,9 +134,7 @@ export default function AgentHome() {
         errorTitle="We couldn't load your dashboard"
         errorDescription="Check your connection and try again. Your assigned work is safe."
       >
-        {/* Before anything else: an unverified agent cannot run visits or be paid. */}
         <IdentityNudge unlocks="verification visits and payouts" />
-        {/* What needs you first: work past its deadline. */}
         {dashboard.data && dashboard.data.overdueTasks > 0 ? (
           <AttentionCard
             Icon={AlertTriangle}

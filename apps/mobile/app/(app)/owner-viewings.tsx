@@ -40,11 +40,6 @@ const FILTERS: { value: 'requested' | 'confirmed' | undefined; label: string }[]
 
 const when = (iso: string) => `${formatDate(iso, 'short')}, ${formatTime(iso)}`;
 
-/**
- * Buyers' requests to view a property the owner is selling: confirm their
- * time, offer another or decline, then host the viewing, on a video call when
- * that is what was asked.
- */
 export default function OwnerViewings() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();

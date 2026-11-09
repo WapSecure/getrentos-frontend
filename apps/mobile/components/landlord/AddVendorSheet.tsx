@@ -11,7 +11,6 @@ interface Props {
   onClose: () => void;
 }
 
-/** The trades a landlord calls most, offered as one-tap fills. */
 const SERVICE_TYPES = [
   'Plumbing',
   'Electrical',

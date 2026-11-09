@@ -20,7 +20,6 @@ import { goBack } from '@/lib/goBack';
 
 type View_ = 'open' | 'closed';
 
-/** Offers buyers made on listings the realtor manages; open ones first. */
 export default function RealtorOffers() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();

@@ -125,7 +125,6 @@ export default function PublicListing() {
         </View>
       </ScrollView>
 
-      {/* Floating controls over the gallery. */}
       <View
         pointerEvents="box-none"
         style={{
@@ -172,8 +171,6 @@ export default function PublicListing() {
     </View>
   );
 }
-
-/* --------------------------------- body --------------------------------- */
 
 function Body({ listing: p }: { listing: MarketDetail }) {
   const { colors, spacing, radius } = useTheme();
@@ -583,9 +580,6 @@ function SimilarListings({ listing }: { listing: MarketDetail }) {
   );
 }
 
-/* -------------------------------- footer -------------------------------- */
-
-/** When money paid through Sureground reaches the other side, per market. */
 const PROTECTION_LINE: Record<MarketKind, string> = {
   rent: 'We hold your rent and release it to the landlord on schedule, unless you raise a dispute.',
   sale: 'We hold your deposit and only release it to the seller once you confirm receipt.',
@@ -648,10 +642,6 @@ function initials(name: string) {
     .join('');
 }
 
-/**
- * The full price of a stay for the dates chosen in the list: what the booking
- * will cost, or why those dates don't work. Nothing shows without dates.
- */
 function StayTotal({ stay }: { stay: ShortletListing }) {
   const { colors } = useTheme();
   const { checkIn, checkOut } = useLocalSearchParams<{ checkIn?: string; checkOut?: string }>();

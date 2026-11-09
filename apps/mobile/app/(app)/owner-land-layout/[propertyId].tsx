@@ -67,7 +67,6 @@ const TABS: { value: Tab; label: string }[] = [
   { value: 'plans', label: 'Plans' },
 ];
 
-/** Whether the master parcel itself could be sold: what a layout must clear to publish. */
 const parcelSaleReady = (r: OwnerLandRecord | undefined, now: number) => {
   const d = r?.parcel?.diligence;
   return (
@@ -77,7 +76,6 @@ const parcelSaleReady = (r: OwnerLandRecord | undefined, now: number) => {
   );
 };
 
-/** A developer's estate on one parcel: status, inventory, plots and payment plans. */
 export default function OwnerLandLayout() {
   const { propertyId } = useLocalSearchParams<{ propertyId: string }>();
   const { colors, spacing } = useTheme();

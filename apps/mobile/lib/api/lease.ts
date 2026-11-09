@@ -71,7 +71,6 @@ export interface RenewalOffer {
   terms: string;
 }
 
-/** One step in the rent history for the current lease. */
 export interface RentIncrease {
   date: string;
   oldAmount: number;
@@ -80,7 +79,6 @@ export interface RentIncrease {
   reason: string;
 }
 
-/** A rent payment that has not fallen due yet. */
 export interface UpcomingPaymentReminder {
   id: string;
   dueDate: string;

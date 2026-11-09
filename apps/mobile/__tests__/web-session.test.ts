@@ -10,19 +10,13 @@ import {
   STORAGE_KEYS,
 } from '@sureground/shared';
 
-/**
- * The shared web client keeps the access token in memory only (security gap
- * AU-16). Web Storage holds the profile, never a token; a reload gets a new
- * token from the refresh cookie, and a refresh refused because another tab
- * rotated the cookie first is retried once instead of signing the user out.
- */
 const reply = (status: number, body: unknown) =>
   new Response(JSON.stringify(body), {
     status,
     headers: { 'Content-Type': 'application/json' },
   });
 
-/** An unsigned JWT for user `sub`; the client only reads its payload. */
+/** Unsigned is fine: the client only reads the payload. */
 const jwt = (sub: string) =>
   `h.${btoa(JSON.stringify({ sub, exp: Math.floor(Date.now() / 1000) + 900 }))}.s`;
 
@@ -41,7 +35,6 @@ const local = memoryStorage();
 const session = memoryStorage();
 const everything = () => [...local.store.values(), ...session.store.values()].join('\n');
 
-/** Simulates a page load: memory is gone, storage stays. */
 const reload = () => setAuthToken(null);
 
 describe('web session (access token in memory only)', () => {
@@ -78,7 +71,6 @@ describe('web session (access token in memory only)', () => {
     const fetchMock = jest.fn(async () => reply(200, { accessToken: fresh }));
     globalThis.fetch = fetchMock as unknown as typeof fetch;
 
-    // A layout and a component asking at once share one refresh.
     await expect(Promise.all([ensureValidSession(), ensureValidSession()])).resolves.toEqual([
       true,
       true,
@@ -133,7 +125,7 @@ describe('web session (access token in memory only)', () => {
     expect((init.headers as Record<string, string>).Authorization).toBe(`Bearer ${fresh}`);
   });
 
-  // Last: a 429 pauses refreshing for the rest of this module's life.
+  // Must run last: a 429 pauses refreshing for the rest of this module's life.
   it('keeps the session when refreshing is rate limited, and backs off', async () => {
     saveAuthSession({ accessToken: jwt('u1'), user: { id: 'u1' } }, true);
     reload();

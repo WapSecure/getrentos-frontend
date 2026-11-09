@@ -105,7 +105,6 @@ describe('viewing diary', () => {
       [v('late', at(3, 17)), v('early', at(3, 9)), v('next', at(5, 10)), v('gone', at(1, 10))],
       now
     );
-    // A viewing earlier today is still today's, in time order.
     expect(b.today.map((x) => x.id)).toEqual(['early', 'late']);
     expect(b.upcoming.map((x) => x.id)).toEqual(['next']);
     expect(b.past.map((x) => x.id)).toEqual(['gone']);

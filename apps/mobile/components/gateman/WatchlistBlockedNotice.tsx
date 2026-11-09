@@ -8,16 +8,7 @@ import {
   type WatchlistMatchedOn,
 } from '@/lib/gateman/watchlistRefusal';
 
-/**
- * How the match was made, in two or three words.
- *
- * A label rather than a sentence: every sentence here comes from the API, so
- * there is exactly one copy of the wording and the two gates cannot drift into
- * telling guards different things. This is only here because "which detail
- * matched" is the one fact a guard needs at a glance before deciding whether the
- * person in front of them is really the person on the list.
- * Exported so the pre-write check says it the same way.
- */
+/** A label only: every sentence here comes from the API, so the two gates can't drift apart in wording. Exported so the pre-write check says it the same way. */
 export const describeWatchlistBasis = (matchedOn: WatchlistMatchedOn) =>
   matchedOn === 'NAME'
     ? 'name only'
@@ -28,35 +19,13 @@ export const describeWatchlistBasis = (matchedOn: WatchlistMatchedOn) =>
 export interface WatchlistBlockedNoticeProps {
   /** What the API said. Rendered verbatim. */
   message: string;
-  /** The entries that fired. */
   matches: WatchlistMatch[];
   onOverride: (reason: string) => void;
   isOverriding?: boolean;
-  /** A failure of the override attempt itself, shown without losing the reason typed. */
   error?: string | null;
 }
 
-/**
- * Shown when an estate's watch list refuses an entry at the gate.
- *
- * Takes over the screen rather than toasting. A toast disappears in seconds, and
- * this is not a notification: it is the estate's instruction, carrying a reason
- * the guard has to repeat to somebody standing in front of them, and one
- * decision to make.
- *
- * It also says plainly that trying again gives the same answer. A guard who
- * reads a refusal as a failure retries, and retrying costs the visitor time for
- * nothing.
- *
- * The override is two deliberate steps rather than one button. Refusing is the
- * default: that is what the estate asked for: and admitting somebody anyway is
- * a decision a guard makes on purpose, with a reason, because that reason is
- * what the estate office is told and what the audit records.
- *
- * A plain `View` rather than a sheet, so it can be dropped inside a screen, a
- * console card, or a sheet that is already open: a second sheet on top of a
- * sheet is not a thing React Native renders usefully.
- */
+// The override takes two deliberate steps: refusing is the default, and the reason is what the office is told and the audit records. A plain View, not a sheet, because a sheet on top of a sheet doesn't render usefully in React Native.
 export function WatchlistBlockedNotice({
   message,
   matches,
@@ -98,9 +67,7 @@ export function WatchlistBlockedNotice({
           <Text variant="caption" color="mutedForeground">
             {`Matched on ${describeWatchlistBasis(match.matchedOn)}`}
           </Text>
-          {/* The estate's own words, quoted rather than paraphrased: the guard
-              has to say something to a human, and this is the only version
-              anybody actually agreed to. */}
+          {/* The estate's own words, quoted rather than paraphrased: it is the only version anybody agreed to. */}
           <Text variant="caption" color="mutedForeground">
             {`Reason: ${match.reason}`}
           </Text>
@@ -124,9 +91,7 @@ export function WatchlistBlockedNotice({
             onChangeText={setReason}
             placeholder="e.g. Plate differs by one letter, driver is a different man"
             autoCorrect={false}
-            // Says what the reason is for. Without this a guard types "ok", the
-            // form refuses it, and a control meant to prevent a wrong refusal
-            // ends up looking broken.
+            // Says what the reason is for; otherwise a guard types "ok", the form refuses it, and the control looks broken.
             hint={`Recorded against your name and sent to the estate office. At least ${OVERRIDE_REASON_MIN_LENGTH} characters.`}
           />
           {error ? (

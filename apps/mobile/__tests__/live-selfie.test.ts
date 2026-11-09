@@ -1,7 +1,3 @@
-/**
- * Smile ID live selfie (security gap ID-05): the app never claims a verdict,
- * and falls back to the reviewed photo where the native capture isn't built in.
- */
 import { liveSelfieOutcome } from '@/lib/smileid/liveSelfie';
 
 describe('liveSelfieOutcome', () => {
@@ -42,8 +38,7 @@ describe('liveSelfieSupported', () => {
   });
 
   it('is off where the face analyzer cannot load (Expo Go, tests)', () => {
-    // The platform-neutral analyzer stub returns null, as any build without
-    // Smile ID's native code would.
+    // The platform-neutral stub returns null, like a build without Smile ID's native code.
     expect(load('ios').liveSelfieSupported()).toBe(false);
   });
 });

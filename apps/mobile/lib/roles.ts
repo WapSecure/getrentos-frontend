@@ -1,6 +1,6 @@
 import type { BackendRole } from './api/auth';
 
-/** Portal ids, mirroring the web app's role groups. */
+// Mirrors the web app's role groups.
 export type Portal =
   | 'renter'
   | 'landlord'
@@ -77,27 +77,14 @@ export const IMPLEMENTED_PORTALS: readonly Portal[] = [
   'manager',
 ];
 
-/**
- * The portal the app should actually open: the highest-priority portal the user
- * holds that is implemented.
- *
- * `primaryPortal` answers "who is this?": but routing on it strands a user
- * whose most senior role has no screens yet, even when a lower-ranked role of
- * theirs is fully built. An AGENT who also manages an estate, or a REALTOR who
- * also guards a gate, used to land on the holding screen with no way forward.
- *
- * Returns `null` only when nothing they hold is built: the one case that
- * should show the holding screen.
- */
+// Routing on primaryPortal would strand a user whose most senior role has no screens yet.
+// Returns null only when nothing they hold is built.
 export function usablePortal(roles: BackendRole[], preferred?: Portal | null): Portal | null {
   const open = switchablePortals(roles);
-  // A workspace the person chose wins, as long as they still hold it and it's
-  // built; otherwise the most senior one (PORTAL_PRIORITY order) opens.
   if (preferred && open.includes(preferred)) return preferred;
   return open[0] ?? null;
 }
 
-/** Every built workspace this person can open, most senior first. */
 export function switchablePortals(roles: BackendRole[]): Portal[] {
   return portalsForRoles(roles).filter((p) => IMPLEMENTED_PORTALS.includes(p));
 }
@@ -117,9 +104,7 @@ export const PORTAL_LABEL: Record<Portal, string> = {
 };
 export const portalHref = (p: Portal) => `/(app)/(${p})` as const;
 
-/* --------------------- signup role catalogue --------------------------- */
-
-/** Roles a user can self-select at signup (admin / gateman / resident are provisioned out of band). */
+// Admin, gateman and resident are provisioned out of band, never offered at signup.
 export type SignupRoleId =
   | 'renter'
   | 'landlord'
@@ -129,7 +114,6 @@ export type SignupRoleId =
   | 'agent'
   | 'estate';
 
-/** What a role needs verified before its features unlock. */
 export type VerificationReq = 'identity' | 'property' | 'license';
 
 export interface SignupRole {

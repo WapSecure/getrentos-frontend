@@ -34,11 +34,7 @@ import { ChipSelect } from '@/components/landlord/ChipSelect';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
-/**
- * Automatic payouts: sweep the balance Sureground holds to the landlord's bank
- * on a schedule, keeping a reserve back. Anything above the auto-payout limit
- * waits for approval on an owner statement.
- */
+/** Anything above the auto-payout limit waits for approval on an owner statement. */
 export default function LandlordAutoPayouts() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();

@@ -137,11 +137,8 @@ export interface LandListing {
     status: LandDiligenceStatus;
     reviewedAt?: string;
     expiresAt?: string;
-    /** The review level, once reviewed. */
     assuranceTier?: LandAssuranceTier;
-    /** What was checked, by whom and when. */
     labels?: LandTrustLabel[];
-    /** What was not checked, or was flagged. */
     notVerified?: LandNotVerifiedItem[];
   };
 }
@@ -155,12 +152,10 @@ export interface LandFilters {
   search?: string;
 }
 
-/** Formats an area as e.g. `600 sqm` / `2 hectares`. */
 export function formatLandArea(value: number, unit: LandAreaUnit): string {
   return `${value.toLocaleString()} ${LAND_AREA_UNIT_LABEL[unit]}`;
 }
 
-/** Comparable verified land, and where this parcel's ₦/m² sits among it. */
 export interface LandComparables {
   listingId: string;
   subjectPricePerSqm?: number;

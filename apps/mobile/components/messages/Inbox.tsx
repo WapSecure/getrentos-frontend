@@ -15,11 +15,9 @@ import {
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { relativeTime } from '@/lib/format';
 
-/** What an inbox row needs, whichever portal's API it came from. */
 export interface InboxConversation {
   id: string;
   participantName: string;
-  /** What the thread is about or who they are: a property name, or a role. */
   context?: string;
   lastMessage?: string;
   lastMessageTime?: string;
@@ -28,10 +26,6 @@ export interface InboxConversation {
   isArchived?: boolean;
 }
 
-/**
- * A portal's Messages tab: search, pinned threads first, then newest. Every
- * portal uses this one so the inbox looks and behaves the same everywhere.
- */
 export function Inbox({
   subtitle,
   conversations,

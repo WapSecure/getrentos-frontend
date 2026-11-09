@@ -10,11 +10,6 @@ const LICENSE_LABEL: Record<string, string> = {
   REJECTED: 'Rejected: send again',
 };
 
-/**
- * What a realtor's or agent's account menu needs beyond identity: where their
- * licence stands, and whether they belong to a management firm (so their share
- * of its commissions is worth a row).
- */
 export function useProSettings() {
   const kyc = useQuery({ queryKey: ['kyc-status'], queryFn: kycApi.getStatus });
   const share = useQuery({

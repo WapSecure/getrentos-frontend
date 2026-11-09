@@ -28,7 +28,6 @@ import { ChipSelect } from '@/components/landlord/ChipSelect';
 
 type Target = { listingId: string } | { plotId: string };
 
-/** Ask the seller for a live video tour of a listing or an estate plot. */
 export function RequestTour({
   target,
   landName,
@@ -101,7 +100,6 @@ export function RequestTour({
   );
 }
 
-/** Commission an independent inspection of a listing or an estate plot. */
 export function RequestInspection({
   target,
   landName,
@@ -171,10 +169,7 @@ export function RequestInspection({
   );
 }
 
-/**
- * Two-person approval on a deal: once on, money is released to the seller only
- * when the buyer and their representative have both approved each step.
- */
+// Once on, money is released to the seller only when the buyer and their representative have both approved each step.
 export function CoApprovalCard({ deal }: { deal: Deal }) {
   const { spacing } = useTheme();
   const qc = useQueryClient();

@@ -1,7 +1,6 @@
 import { apiFetch } from './client';
 import type { ReplyLanguage } from '../replyLanguage';
 
-/** One way forward, with what it brings in over the first year after the lease ends. */
 export interface RenewalOption {
   key: 'renew' | 'relet';
   rentPerYear: string;
@@ -9,7 +8,6 @@ export interface RenewalOption {
   basis: string[];
 }
 
-/** Renew or re-let for a lease nearing its end. Every figure is worked out by Sureground. */
 export interface RenewalAdvice {
   leaseId: string;
   tenantName: string;
@@ -28,7 +26,7 @@ export interface RenewalAdvice {
     comparison: string;
   };
   summary: string;
-  /** Pre-fills the offer: rent in the lease's own period, end date as YYYY-MM-DD. */
+  /** Rent in the lease's own period, end date as YYYY-MM-DD. */
   draft: {
     rentAmount: number;
     leaseEnd: string;

@@ -5,10 +5,6 @@ import { buyerMessagesApi } from '@/lib/api/buyerMessages';
 import { errorMessage } from '@/lib/api/client';
 import { qk } from '@/lib/query/keys';
 
-/**
- * "Ask a question" on a for-sale listing: opens the buyer's thread with the
- * seller about it (the same one each time) and goes straight into it.
- */
 export function useAskSeller() {
   const qc = useQueryClient();
   const toast = useToast();

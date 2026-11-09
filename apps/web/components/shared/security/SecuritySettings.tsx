@@ -165,7 +165,6 @@ export const SecuritySettings = () => {
   const [enroll, setEnroll] = useState<TwoFactorEnrollment | null>(null);
   const [code, setCode] = useState('');
   const [codeError, setCodeError] = useState<string | null>(null);
-  // Backup codes are shown once, right after they are made.
   const [freshCodes, setFreshCodes] = useState<string[] | null>(null);
   const [confirmNewCodes, setConfirmNewCodes] = useState(false);
 

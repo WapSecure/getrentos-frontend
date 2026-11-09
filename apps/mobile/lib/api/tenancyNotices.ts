@@ -3,15 +3,7 @@ import type { Paginated } from './properties';
 import type { LandlordPayment } from './landlord';
 import type { BadgeTone } from '@sureground/ui-native';
 
-/**
- * Tenancy notices (the escalation ladder) and the arrears that start it.
- *
- * The ladder is walked in order and the server decides every state: a notice
- * is a draft until service is recorded, then runs, then runs out. Nothing here
- * recomputes a state from a date. Periods are never defaulted either: the
- * platform ships no day counts, so a statutory step is refused in a
- * jurisdiction until the landlord records one (or types one for that notice).
- */
+/** The server decides every state: nothing here recomputes one from a date. Periods are never defaulted: a statutory step is refused until the landlord records one. */
 
 export type NoticeState = 'DRAFT' | 'SERVED' | 'EXPIRED' | 'SUPERSEDED' | 'WITHDRAWN';
 export type NoticeKind =
@@ -31,10 +23,8 @@ export const NOTICE_KIND_LABEL: Record<NoticeKind, string> = {
   COURT_SUMMONS: 'Court summons',
 };
 
-/** Steps that run for a statutory period, so need one recorded first. */
 export const STATUTORY_KINDS: NoticeKind[] = ['NOTICE_TO_QUIT', 'NOTICE_OF_INTENTION_TO_RECOVER'];
 
-/** Steps that may carry an arrears amount. */
 export const AMOUNT_KINDS: NoticeKind[] = ['ARREARS_REMINDER', 'DEMAND_LETTER'];
 
 export const NOTICE_STATE: Record<NoticeState, { label: string; tone: BadgeTone }> = {
@@ -134,7 +124,6 @@ export interface RaiseNoticeInput {
   manualBasis?: string;
 }
 
-/** The facts under a step, in the order they get asked, and only the ones there. */
 export function noticeFacts(n: TenancyNotice, fmt: (iso: string) => string): string[] {
   const facts: string[] = [];
   if (n.serviceDate) facts.push(`Served ${fmt(n.serviceDate)}`);
@@ -158,7 +147,6 @@ export function noticeFacts(n: TenancyNotice, fmt: (iso: string) => string): str
   return facts;
 }
 
-/** What stops a raise being submitted, or null when it can go. */
 export function raiseBlocker(input: {
   kind: NoticeKind;
   reason: string;
@@ -176,8 +164,6 @@ export function raiseBlocker(input: {
   return null;
 }
 
-/* -------------------------------- arrears ------------------------------- */
-
 export interface ArrearsPayment extends LandlordPayment {
   amountPaid?: number;
   category?: string;
@@ -189,14 +175,11 @@ const MS_PER_DAY = 86_400_000;
 export const daysOverdue = (dueDate: string, now = Date.now()) =>
   Math.max(0, Math.floor((now - new Date(dueDate).getTime()) / MS_PER_DAY));
 
-/** The arrears rung a charge sits on, by how long it has run overdue. */
 export function arrearsStage(days: number): { label: string; tone: BadgeTone } {
   if (days >= 30) return { label: 'Seriously overdue', tone: 'danger' };
   if (days >= 14) return { label: 'Escalating', tone: 'danger' };
   return { label: 'Overdue', tone: 'warning' };
 }
-
-/* --------------------------------- api --------------------------------- */
 
 export const noticesApi = {
   list: (state?: NoticeState, limit = 200) =>

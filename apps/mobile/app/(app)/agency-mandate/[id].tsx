@@ -22,7 +22,6 @@ import { MandateActions } from '@/components/agency/MandateActions';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
-/** One engagement: its terms, what it allows, its history, and what can be done now. */
 export default function AgencyMandate() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, spacing } = useTheme();

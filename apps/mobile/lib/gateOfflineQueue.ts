@@ -5,41 +5,14 @@ import { gatemanApi } from './api/gateman';
 import { WATCHLIST_BLOCKED } from './gateman/watchlistRefusal';
 import { CONTRACTOR_NOT_PERMITTED } from './gateman/contractorRefusal';
 
-/**
- * A durable queue for the gate writes that must never be lost.
- *
- * Scope is deliberate. Only the three text-only arrival and departure writes are
- * queued: a PIN check-in, a check-out, and admitting an approved walk-in.
- *
- *  - They serialise exactly, so a replay reconstructs the record faithfully. The
- *    photo-bearing writes (vehicle entry, deliveries, incidents) are NOT queued,
- *    because a picked file lives in a cache directory that a restart can empty.
- *    Replaying one could silently file a record without its evidence, and a
- *    record that looks complete but isn't is worse than a loud failure.
- *  - They are the writes where a missing record is a security and audit problem.
- *    "Who is inside the estate?" is only answerable if every arrival and
- *    departure survived the outage.
- *
- * Raising a walk-in is deliberately NOT queued: it asks a household to decide, so
- * it needs the network by definition and a queued request would ask permission
- * for somebody who left ten minutes ago.
- *
- * Check-in and check-out are mutually exclusive per visitor while offline (the
- * server-side "inside now" list is what offers a check-out, and a queued arrival
- * isn't on it yet), so arrival-then-departure can't be reordered by the queue.
- * Items replay in the order they were recorded regardless.
- */
+// Only text-only gate writes are queued: photo writes can't be, because a restart
+// can empty the cache their files live in, and walk-in requests need a household's
+// live answer.
 
 const KEY = 'sureground.gate.offline-queue';
 
 export type GateWriteType = 'check-in' | 'check-out' | 'admit' | 'patrol-scan';
 
-/**
- * Each write carries exactly what its API call needs, so a replay can switch on
- * `type` and get the right payload without a cast. `label` exists only so a
- * failure can be reported to the guard in words they recognise — a bare internal
- * id would tell them nothing.
- */
 export type GateWritePayloads = {
   'check-in': { estateId: string; pin: string; occurredAt: string; gateId?: string; label: string };
   'check-out': {
@@ -49,20 +22,7 @@ export type GateWritePayloads = {
     gateId?: string;
     label: string;
   };
-  /**
-   * An approved walk-in the guard admitted while the connection was down. The
-   * household's consent is already on the server, so the barrier decision is
-   * still the guard's to record — only the network is missing.
-   */
   admit: { estateId: string; passId: string; occurredAt: string; gateId?: string; label: string };
-  /**
-   * Reaching a patrol checkpoint while the connection was down.
-   *
-   * Text-only, so a replay reconstructs the record exactly, and a missing record
-   * is both a security and an audit problem: the difference between "the patrol
-   * happened" and the estate being told nobody walked it. No `gateId` — a
-   * checkpoint is not a barrier.
-   */
   'patrol-scan': { estateId: string; code: string; occurredAt: string; label: string };
 };
 
@@ -75,11 +35,8 @@ export type GateWrite = {
   };
 }[GateWriteType];
 
-/**
- * In-memory mirror of the queue so the screen can render it synchronously.
- * AsyncStorage stays the source of truth: every mutation re-reads and rewrites
- * it, so a cold start or a crash mid-write can't desync the two.
- */
+// AsyncStorage is the source of truth; every mutation re-reads it, so this mirror
+// can't drift after a crash mid-write.
 let snapshot: GateWrite[] = [];
 const listeners = new Set<() => void>();
 
@@ -88,10 +45,8 @@ function emit(next: GateWrite[]) {
   for (const listener of listeners) listener();
 }
 
-/**
- * Serialises every mutation. Two writes racing (a check-in landing while a
- * replay drains) would otherwise read-modify-write the same key and drop one.
- */
+// Serialised so a write landing during a replay can't be lost to a concurrent
+// read-modify-write of the same key.
 let chain: Promise<unknown> = Promise.resolve();
 function serial<T>(fn: () => Promise<T>): Promise<T> {
   const next = chain.then(fn, fn);
@@ -106,34 +61,21 @@ async function readStored(): Promise<GateWrite[]> {
     const parsed: unknown = JSON.parse(raw);
     return Array.isArray(parsed) ? (parsed as GateWrite[]) : [];
   } catch {
-    // A corrupt or unreadable queue must not crash the gate console. Losing it
-    // is bad, but taking the app down at the barrier is worse.
+    // A corrupt queue must not crash the gate console.
     return [];
   }
 }
 
-/**
- * `crypto.randomUUID` isn't guaranteed under Hermes, and the id only has to be
- * unique within one device's queue, so a timestamp plus entropy is enough and
- * avoids pulling in a crypto polyfill for a key nothing else reads.
- */
+// crypto.randomUUID isn't guaranteed under Hermes.
 function newId() {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
-/**
- * Identity of a write, ignoring when it was recorded. A guard whose send failed
- * will reasonably tap again, and queueing the same arrival twice would replay
- * the second copy into a 404 and a confusing "couldn't confirm" warning for a
- * visitor who is, in fact, correctly inside.
- */
+// Ignores the timestamp, so a guard tapping again doesn't queue the same write twice.
 function writeKey(write: GateWrite): string {
   if (write.type === 'check-in') return `check-in:${write.payload.estateId}:${write.payload.pin}`;
   if (write.type === 'patrol-scan') {
-    // Keyed by the LOCAL DAY of the scan, not by the code alone: a guard whose
-    // send failed taps again minutes later and must not queue a second scan of
-    // the same checkpoint — but the same checkpoint is scanned again the next
-    // night, with the same code, and that is a different patrol.
+    // Per local day: the same checkpoint is scanned again on the next night's patrol.
     const { estateId, code, occurredAt } = write.payload;
     return `patrol-scan:${estateId}:${code}:${occurredAt.slice(0, 10)}`;
   }
@@ -141,7 +83,6 @@ function writeKey(write: GateWrite): string {
 }
 
 export const gateOfflineQueue = {
-  /** Current queue from memory. Call `hydrate()` first for a cold start. */
   getSnapshot: () => snapshot,
 
   subscribe: (listener: () => void) => {
@@ -149,7 +90,6 @@ export const gateOfflineQueue = {
     return () => listeners.delete(listener);
   },
 
-  /** Loads the persisted queue into memory. Safe to call repeatedly. */
   hydrate: () =>
     serial(async () => {
       const stored = await readStored();
@@ -159,11 +99,6 @@ export const gateOfflineQueue = {
 
   read: () => readStored(),
 
-  /**
-   * Adds a write to the queue. Returns the item now queued — which is the
-   * existing one when an equivalent write is already waiting, so a repeated tap
-   * is idempotent rather than a second arrival.
-   */
   enqueue: <K extends GateWriteType>(type: K, payload: GateWritePayloads[K]) =>
     serial(async () => {
       const item = {
@@ -173,8 +108,6 @@ export const gateOfflineQueue = {
         createdAt: new Date().toISOString(),
       } as GateWrite;
 
-      // Read through rather than trusting the in-memory copy, so a write landing
-      // during a replay can't be lost by clobbering it with a stale array.
       const stored = await readStored();
       const key = writeKey(item);
       const duplicate = stored.find((existing) => writeKey(existing) === key);
@@ -188,26 +121,16 @@ export const gateOfflineQueue = {
 
   remove: (id: string) =>
     serial(async () => {
-      // Re-read rather than filtering the in-memory copy, so a removal can never
-      // resurrect an item another writer already dropped.
       const next = (await readStored()).filter((item) => item.id !== id);
       await AsyncStorage.setItem(KEY, JSON.stringify(next));
       emit(next);
     }),
 };
 
-/** How a replayed write turned out. */
 type Outcome = 'sent' | 'already-applied' | 'unconfirmed' | 'rejected' | 'retry';
 
-/**
- * A patrol scan the estate answered with a sentence rather than an error.
- *
- * `POST /patrols/scan` deliberately answers a refusal with 200 and a message, so
- * that a guard's screen cannot be used to map an estate's patrol points by trying
- * codes. That means a refused scan RESOLVES rather than rejects, and without this
- * it would be counted as sent and dropped in silence — telling the guard nothing
- * about a patrol that is not recorded anywhere.
- */
+// The patrol scan endpoint refuses with a 200 and a message (so codes can't be
+// probed); without this a refused scan would be counted as sent.
 class GateWriteRefused extends Error {
   constructor(message: string) {
     super(message);
@@ -215,88 +138,39 @@ class GateWriteRefused extends Error {
   }
 }
 
-/**
- * 403s that are the estate's own decision, never a lapsed session.
- *
- * The queue holds arrivals the network dropped. Replaying one of these gets the
- * same answer forever, and the drain STOPS at the first write it cannot settle —
- * so a refusal left sitting in the queue strands every arrival behind it.
- * Anything added here has to be final: a code that could succeed on a later
- * retry does not belong in this set.
- */
+// Must be final answers: the drain stops at the first write it can't settle, so a
+// retryable code here would strand every arrival queued behind it.
 const FINAL_REFUSAL_CODES: ReadonlySet<string> = new Set([
   WATCHLIST_BLOCKED,
   CONTRACTOR_NOT_PERMITTED,
 ]);
 
-/**
- * Decides whether a failed replay should be retried, trusted, or handed to a
- * human. A queue that retries forever behind one poison item never drains, so
- * only genuinely transient problems are allowed to hold the queue up.
- */
 function classify(item: GateWrite, error: unknown): Outcome {
-  // A refusal that arrived as a 200 with a sentence. Final: the estate has no
-  // round for that checkpoint, and asking again gets the same answer.
   if (error instanceof GateWriteRefused) return 'rejected';
-
   if (!(error instanceof ApiError)) return 'retry';
-
-  // Offline or timed out: the normal case, try again on the next signal.
   if (error.isNetwork) return 'retry';
-
-  // The estate itself refused this write — its watch list said no, or the
-  // person's standing authorisation does not cover now. The answer is final, so
-  // it has to be told apart from the 403 below, which means something else
-  // entirely (a lapsed session). Classifying one of these as `retry` would do
-  // real damage: the replay loop `break`s on the first write it cannot settle,
-  // so a single refusal would strand every later arrival behind it and the queue
-  // would never drain again. A person decides instead.
   if (error.code !== undefined && FINAL_REFUSAL_CODES.has(error.code)) return 'rejected';
-
-  // Auth: the token is gone. Retrying without a login can't succeed, but the
-  // write is not the user's fault either, so hold it until they sign in.
+  // Held until the guard signs in again; the write itself is fine.
   if (error.status === 401 || error.status === 403) return 'retry';
-
-  // Server-side fault: the payload is fine, the estate just couldn't take it.
   if (error.status >= 500) return 'retry';
-
-  // Rate limited (including the estate's pause on PIN check-ins after many wrong
-  // codes): the write itself is fine and will land once the pause lifts.
   if (error.status === 429) return 'retry';
-
   if (item.type === 'check-out' && error.status === 409) {
-    // The pass is already closed. Either our own earlier attempt landed and only
-    // its reply was lost, or someone else closed it. Both mean the estate's
-    // record is correct, so there is nothing left to send.
     return 'already-applied';
   }
-
+  // Ambiguous: our write may have landed with a lost reply, or the pass lapsed
+  // offline. Retrying can't tell, so a person checks.
   if (item.type === 'admit' && error.status === 409) {
-    // The pass is no longer in an admittable state — which is either "already
-    // admitted" (our write landed) or "the approval lapsed while we were
-    // offline" (it never will). Indistinguishable from here, so a person looks.
     return 'unconfirmed';
   }
-
   if (item.type === 'check-in' && error.status === 404) {
-    // The API answers "invalid, expired, or already-used" with a single 404, so
-    // this is genuinely ambiguous: our write may have landed with a lost reply,
-    // or the pass may be past rescuing. Retrying can't tell them apart and a
-    // bad pass will never succeed, so stop and let a person look. Reported as
-    // unconfirmed rather than pretending either way.
     return 'unconfirmed';
   }
-
-  // 400 and friends: this payload will never be accepted, however often we ask.
   return 'rejected';
 }
 
 async function dispatch(item: GateWrite): Promise<unknown> {
   switch (item.type) {
-    // The gate travels with the write. By replay time the guard may have moved
-    // to another estate or another barrier, so reading "where am I now" would
-    // attribute the arrival to the wrong place — the record has to say where it
-    // actually happened.
+    // The gate comes from the write, not the guard's current post: they may have moved.
     case 'check-in':
       return gatemanApi.verifyVisitorPass(item.payload.estateId, item.payload.pin, {
         occurredAt: item.payload.occurredAt,
@@ -318,9 +192,6 @@ async function dispatch(item: GateWrite): Promise<unknown> {
         item.payload.code,
         { occurredAt: item.payload.occurredAt }
       );
-      // A refusal is an answer, not a failure of the send — but it is still a
-      // patrol that did not get recorded, so it is handed to a person rather
-      // than counted as sent.
       if (!result.accepted) throw new GateWriteRefused(`${result.message} ${result.instruction}`);
       return result;
     }
@@ -328,28 +199,19 @@ async function dispatch(item: GateWrite): Promise<unknown> {
 }
 
 export interface GateReplaySummary {
-  /** Writes the estate accepted on this pass. */
   sent: number;
-  /** Dropped because the estate's record already existed. */
   alreadyApplied: number;
-  /** Dropped but needs a person: the estate could not confirm the arrival. */
   unconfirmed: string[];
-  /** Dropped because the estate will never accept it. */
   rejected: string[];
-  /** Still queued for the next attempt. */
   remaining: number;
 }
 
 let inFlight: Promise<GateReplaySummary | null> | null = null;
 
-/**
- * Sends everything queued, oldest first, stopping at the first transient
- * failure so ordering and rate are both preserved. Returns `null` when there was
- * nothing to send, so callers can stay silent.
- */
+// Oldest first, stopping at the first transient failure so order is preserved.
+// Returns null when there was nothing to send.
 export function replayGateQueue(): Promise<GateReplaySummary | null> {
-  // NetInfo can fire several times in a burst and a manual retry can overlap it;
-  // two drains would double-send. One at a time.
+  // Network events arrive in bursts; two drains at once would double-send.
   if (inFlight) return inFlight;
 
   inFlight = (async () => {
@@ -388,7 +250,6 @@ export function replayGateQueue(): Promise<GateReplaySummary | null> {
   return inFlight;
 }
 
-/** Live queue for rendering. */
 export function useGateQueue(): GateWrite[] {
   return useSyncExternalStore(gateOfflineQueue.subscribe, gateOfflineQueue.getSnapshot);
 }

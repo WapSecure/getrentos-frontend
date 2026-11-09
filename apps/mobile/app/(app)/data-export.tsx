@@ -37,7 +37,6 @@ export default function DataExport() {
     enabled: false,
   });
 
-  // Every list in the export, whatever the account's roles: "leasesAsTenant" → "Leases as tenant".
   const rows = query.data
     ? Object.entries(query.data)
         .filter((entry): entry is [string, unknown[]] => Array.isArray(entry[1]))

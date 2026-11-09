@@ -9,10 +9,6 @@ import { errorMessage } from '@/lib/api/client';
 
 type Toast = ReturnType<typeof useToast>;
 
-/**
- * A failed write, said the right way: a plan refusal offers the plans (it's
- * not something the manager did wrong), anything else is a toast.
- */
 export function reportError(e: unknown, fallback: string, toast: Toast) {
   const gate = planGate(e);
   if (gate) {
@@ -29,7 +25,6 @@ export function reportError(e: unknown, fallback: string, toast: Toast) {
   toast.show(errorMessage(e, fallback), 'error');
 }
 
-/** A form's error, with a way to the plans when the plan is what refused it. */
 export function MarketplaceFormError({ error, fallback }: { error: unknown; fallback: string }) {
   const { spacing } = useTheme();
   if (!error) return null;
@@ -47,7 +42,6 @@ export function MarketplaceFormError({ error, fallback }: { error: unknown; fall
   );
 }
 
-/** The Free plan's marketplace caps, said once and up front rather than at the moment of refusal. */
 export function FreePlanNote() {
   const { colors, spacing, radius } = useTheme();
   return (
@@ -77,10 +71,7 @@ export function FreePlanNote() {
   );
 }
 
-/**
- * Put a listing the server just returned into the cached pages, so a sheet
- * showing it updates at once instead of after the refetch.
- */
+// Patch the cached pages so an open sheet updates at once instead of after the refetch.
 export function patchListing(qc: QueryClient, estateId: string, listing: EstateListing) {
   qc.setQueryData<InfiniteData<Paginated<EstateListing>>>(
     marketplaceKeys.listings(estateId),

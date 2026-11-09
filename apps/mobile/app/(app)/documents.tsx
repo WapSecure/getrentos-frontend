@@ -48,7 +48,6 @@ export default function Documents() {
   });
   const items = listQuery.data?.items ?? [];
 
-  // The star fills at once; a refusal puts it back with a toast.
   const favoriteMutation = useOptimisticMutation({
     mutationFn: (id: string) => documentsApi.toggleFavorite(id),
     patches: (id) => [

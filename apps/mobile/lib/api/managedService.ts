@@ -1,12 +1,6 @@
 import { apiFetch } from './client';
 import type { BadgeTone } from '@sureground/ui-native';
 
-/**
- * Getting a property managed: by Sureground (an intake: request, site visit,
- * proposal, acceptance signs the mandate) or by a vetted firm (a mandate the
- * firm accepts and Sureground verifies). Either way it is an ordinary mandate.
- */
-
 export type ServicingTier = 'COLLECT_ONLY' | 'COLLECT_MAINTAIN' | 'FULL_MANAGEMENT';
 
 export const TIER_LABEL: Record<ServicingTier, string> = {
@@ -192,15 +186,11 @@ const ENDED: MandateStatus[] = ['TERMINATED', 'EXPIRED', 'REJECTED'];
 const PENDING: MandateStatus[] = ['PENDING_OWNER', 'PENDING_OPS', 'DRAFT'];
 
 export const isLive = (m: Mandate) => !ENDED.includes(m.status);
-/**
- * Ended after running, with the handover not confirmed yet. A request that was
- * cancelled before it went live ended too, but there is nothing to hand over.
- */
+/** A request cancelled before it went live also ended, but has nothing to hand over. */
 export const isWindingDown = (m: Mandate) =>
   m.status === 'TERMINATED' && !m.handoverAt && !!m.activatedAt;
 export const isPendingMandate = (m: Mandate) => PENDING.includes(m.status);
 
-/** Where one property stands, from the owner's newest mandate and newest request on it. */
 export type PropertyState =
   | { kind: 'sureground'; mandate: Mandate; settingUp: ManagedIntake | null }
   | { kind: 'firm'; mandate: Mandate; openIntake: ManagedIntake | null }
@@ -231,7 +221,6 @@ export function propertyState(
   return { kind: 'none', declined: intake?.status === 'DECLINED' ? intake : null };
 }
 
-/** Properties a firm could be appointed to: nothing live or winding down on them. */
 export function openForFirm(propertyIds: string[], mandates: Mandate[]) {
   return propertyIds.filter((id) => {
     const s = propertyState(id, mandates, []);
@@ -239,7 +228,6 @@ export function openForFirm(propertyIds: string[], mandates: Mandate[]) {
   });
 }
 
-/** Minutes as an owner reads them: "1 hour", "2 days". */
 export function humanizeMinutes(minutes: number): string {
   if (minutes < 60) return `${minutes} min`;
   if (minutes < 1440) {
@@ -263,7 +251,6 @@ export function noticeEndsAt(m: Pick<Mandate, 'noticeServedAt' | 'noticePeriodDa
 export const indicativeMonthly = (annualRent: number, feePct: number) =>
   annualRent > 0 ? Math.round((annualRent / 12) * (feePct / 100)) : null;
 
-/** Why the request cannot be sent yet, or null. */
 export function intakeBlocker(units: string, occupied: string): string | null {
   const u = Number(units);
   const o = Number(occupied);
@@ -297,7 +284,6 @@ export const managedApi = {
     }),
   recordHandover: (mandateId: string) =>
     apiFetch<Mandate>(`/management-mandates/${mandateId}/handover`, { method: 'POST' }),
-  /** Create the engagement with the firm, then send it to them. */
   appointFirm: async (firmId: string, propertyId: string) => {
     const created = await apiFetch<Mandate>('/management-mandates', {
       method: 'POST',

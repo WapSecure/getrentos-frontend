@@ -37,10 +37,6 @@ import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
 type Kind = 'units' | 'tenancies';
-/**
- * Bring a managed property's units, then its tenants, onto Sureground from a
- * spreadsheet. Always a dry run first; a file with any error imports nothing.
- */
 export default function AgencyImport() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();

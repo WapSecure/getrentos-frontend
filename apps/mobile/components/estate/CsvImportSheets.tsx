@@ -31,7 +31,6 @@ import { CSV_MIME, shareTextFile } from '@/lib/shareFile';
 import { FilePickRow } from '@/components/forms/FilePickRow';
 import { HouseholdPicker } from '@/components/estate/HouseholdPicker';
 
-/** A CSV slot: the shared file row, wired to the CSV picker. */
 function CsvPick({
   file,
   onPick,
@@ -72,7 +71,6 @@ function TemplateLink({ csv, fileName }: { csv: string; fileName: string }) {
   );
 }
 
-/** Per-row result, with the spreadsheet's own line numbers so the office can fix them. */
 function ImportOutcome({
   result,
   title,

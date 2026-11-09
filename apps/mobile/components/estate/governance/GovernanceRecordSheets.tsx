@@ -12,7 +12,6 @@ import {
 } from '@/lib/api/estateGovernance';
 import { formatDate, formatTime } from '@/lib/format';
 
-/** Every version of a record, newest first; each opens in the browser. */
 export function GovernanceVersionsSheet({
   estateId,
   record,
@@ -65,7 +64,6 @@ export function GovernanceVersionsSheet({
   );
 }
 
-/** Who on the committee has signed a record, in the order they signed. */
 export function GovernanceSignaturesSheet({
   estateId,
   record,

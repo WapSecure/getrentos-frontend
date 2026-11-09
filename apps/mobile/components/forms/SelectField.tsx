@@ -25,11 +25,8 @@ export function SelectField({
   placeholder?: string;
   disabled?: boolean;
   error?: string;
-  /** Help shown under the field while there is no error. */
   hint?: string;
-  /** Adds an asterisk to the label and tells screen readers the field is required. */
   required?: boolean;
-  /** Shows "Optional" beside the label, for forms where most fields are required. */
   optional?: boolean;
 }) {
   const { colors, spacing, radius } = useTheme();

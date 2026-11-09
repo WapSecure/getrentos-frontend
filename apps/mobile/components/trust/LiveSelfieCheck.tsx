@@ -5,12 +5,7 @@ import type { SmileLivenessSession } from '@/lib/api/trust';
 import { loadFaceAnalyzer } from '@/lib/smileid/faceAnalyzer';
 import { liveSelfieOutcome, loadSmileSdk, type LiveSelfieOutcome } from '@/lib/smileid/liveSelfie';
 
-/**
- * Smile ID's certified live selfie capture (enhanced active liveness), full
- * screen. Smile's own screens run the capture and send it to Smile with the
- * server-issued token; the verdict reaches our server by signed webhook. Only
- * rendered where `liveSelfieSupported()` is true.
- */
+// The verdict reaches our server by signed webhook, not through this screen. Only rendered where `liveSelfieSupported()` is true.
 export function LiveSelfieCheck({
   session,
   onClose,
@@ -18,7 +13,6 @@ export function LiveSelfieCheck({
 }: {
   session: SmileLivenessSession;
   onClose: (outcome: LiveSelfieOutcome | null) => void;
-  /** enrol: the verification live selfie. match: a face matched against it (recovery, PIN reset). */
   mode?: 'enrol' | 'match';
 }) {
   const sdk = useMemo(() => loadSmileSdk(), []);

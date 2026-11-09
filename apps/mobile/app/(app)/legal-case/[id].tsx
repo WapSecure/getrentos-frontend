@@ -54,11 +54,6 @@ import { goBack } from '@/lib/goBack';
 
 type SheetKind = 'advocate' | 'cost' | null;
 
-/**
- * One case: where it is, what has happened, and the single next thing to do.
- * Recording counsel and costs, closing and withdrawing sit below as secondary
- * actions.
- */
 export default function LegalCaseScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, spacing } = useTheme();
@@ -260,7 +255,7 @@ const STAGES: { status: LegalCaseStatus; label: string }[] = [
   { status: 'CLOSED', label: 'Closed' },
 ];
 
-/** Where the case is, as a position rather than a word. Withdrawn is a way out, not a stage. */
+/** Withdrawn is a way out, not a stage. */
 function StageTrack({ status }: { status: LegalCaseStatus }) {
   const { colors, spacing, radius } = useTheme();
   if (status === 'WITHDRAWN') {
@@ -328,7 +323,6 @@ function SectionCard({
   );
 }
 
-/** The one primary action for the case's state. */
 function NextAction({
   legalCase: c,
   onSaved,
@@ -456,9 +450,7 @@ function RecordSittingForm({
   const [decisionNotes, setDecisionNotes] = useState('');
   const [notes, setNotes] = useState('');
 
-  // A sitting that decided the matter also decides the case, so both are
-  // written from one action rather than leaving the case filed with a decision
-  // nobody entered.
+  // A sitting that decided the matter also decides the case: write both in one action so the case never stays filed with no decision.
   const record = useCaseMutation(
     async () => {
       const updated = await legalCasesApi.recordHearing(id, hearing.id, {

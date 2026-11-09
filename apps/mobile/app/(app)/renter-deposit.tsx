@@ -32,11 +32,7 @@ import { formatDate, formatNaira } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
-/**
- * The tenant's deposit: how much, who holds it, every claim on it and what
- * comes back. A claim the tenant disagrees with can be disputed, and the deposit
- * is not returned until the owner has answered.
- */
+/** The deposit is not returned until the owner has answered any dispute. */
 export default function RenterDeposit() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
@@ -192,7 +188,6 @@ function DepositCard({
   );
 }
 
-/** "Getting it back": steps, evidence to keep and deductions worth questioning. */
 function DepositPlanBlock({ plan, disclaimer }: { plan: DepositPlan; disclaimer: string }) {
   const { colors, spacing } = useTheme();
   const ICON = { do: CircleCheck, keep: FileCheck2, dispute: Scale } as const;
@@ -237,7 +232,6 @@ function Deduction({
   suggestion,
 }: {
   d: TenantDeduction;
-  /** Grounds and a drafted reason from the deposit-back plan. */
   suggestion?: DepositPlan['disputes'][number];
 }) {
   const { colors, spacing, radius } = useTheme();
@@ -331,7 +325,6 @@ function Deduction({
               size="sm"
               variant="ghost"
               onPress={() => {
-                // Start from the drafted reason; the tenant edits it before sending.
                 if (suggestion && !reason) setReason(suggestion.draft);
                 setOpen(true);
               }}

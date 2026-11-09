@@ -7,20 +7,14 @@ import { Button, useTheme, useToast } from '@sureground/ui-native';
 import { leaseApi } from '@/lib/api/lease';
 import { errorMessage } from '@/lib/api/client';
 
-/**
- * Downloads the signed lease PDF and hands it to the OS share sheet, which is
- * how a file reaches the user's own storage on both platforms. The endpoint
- * streams bytes behind the bearer token, so it cannot be opened as a plain URL.
- */
+// The endpoint streams bytes behind the bearer token, so it can't be opened as a plain URL; the share sheet is how a file reaches the user's storage on both platforms.
 export function DownloadLeaseButton({
   leaseId,
   label = 'Download lease PDF',
   onOpened,
 }: {
-  /** A specific lease; defaults to the current one. */
   leaseId?: string;
   label?: string;
-  /** Called once the document has been handed to the viewer. */
   onOpened?: () => void;
 } = {}) {
   const { colors } = useTheme();

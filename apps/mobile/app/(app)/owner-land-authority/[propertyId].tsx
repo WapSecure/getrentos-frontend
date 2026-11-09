@@ -45,10 +45,6 @@ import { goBack } from '@/lib/goBack';
 
 type Saved = (view: LandAuthorityView, message: string) => void;
 
-/**
- * Show you can sell this land: the capacity you sell in, what it rests on and
- * whose consent it needs. Sureground verifies it before the land is approved.
- */
 export default function OwnerLandAuthority() {
   const { propertyId } = useLocalSearchParams<{ propertyId: string }>();
   const { colors, spacing } = useTheme();

@@ -47,7 +47,6 @@ import {
 
 type Tab = 'leads' | 'viewings';
 
-/** Leads by stage and the viewing diary, the two halves of a realtor's pipeline. */
 export default function RealtorPipeline() {
   const params = useLocalSearchParams<{ tab?: string }>();
   const { colors, spacing } = useTheme();
@@ -96,8 +95,6 @@ export default function RealtorPipeline() {
   );
 }
 
-/* ---------------------------------- leads --------------------------------- */
-
 type Filter = 'OPEN' | LeadStatus;
 
 function Leads({ onAdd }: { onAdd: () => void }) {
@@ -113,12 +110,10 @@ function Leads({ onAdd }: { onAdd: () => void }) {
     queryFn: ({ pageParam }) => realtorApi.leads({ status, search: term, page: pageParam }),
     initialPageParam: 1,
     getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
-    // Keep the last results on screen while a new search or stage loads.
     placeholderData: keepPreviousData,
   });
   const items = useMemo<RealtorLead[]>(() => {
     const all = query.data?.pages.flatMap((p) => p.items) ?? [];
-    // "Open" hides won and lost so the list is what still needs work.
     return filter === 'OPEN'
       ? all.filter((l) => l.status !== 'CLOSED' && l.status !== 'LOST')
       : all;
@@ -184,7 +179,6 @@ function Leads({ onAdd }: { onAdd: () => void }) {
           ItemSeparatorComponent={() => <View style={{ height: spacing.md }} />}
           renderItem={({ item }: { item: RealtorLead }) => <LeadCard lead={item} />}
           ListHeaderComponent={
-            // Today's follow-ups sit above the open leads, not inside a search or stage.
             filter === 'OPEN' && !term ? (
               <View style={{ paddingBottom: spacing.md }}>
                 <FollowUpsCard />
@@ -208,8 +202,6 @@ function Leads({ onAdd }: { onAdd: () => void }) {
     </>
   );
 }
-
-/* -------------------------------- viewings -------------------------------- */
 
 function Viewings({ onAdd }: { onAdd: () => void }) {
   const { colors, spacing, radius } = useTheme();

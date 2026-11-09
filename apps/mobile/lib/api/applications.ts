@@ -27,13 +27,11 @@ export interface ApplicationDocument {
   name: string;
   uploaded: boolean;
   required: boolean;
-  /** Id of the file in the renter's document library, once uploaded. */
   documentId?: string;
   /** Short-lived signed download URL for the uploaded file. */
   url?: string;
 }
 
-/** The checklist every application starts with — mirrors the web wizard. */
 export const DEFAULT_APPLICATION_DOCUMENTS: ApplicationDocument[] = [
   { name: 'Government ID', uploaded: false, required: true },
   { name: 'Proof of Income', uploaded: false, required: true },
@@ -47,7 +45,6 @@ export interface ApplicationTimelineStep {
   completed: boolean;
 }
 
-/** One rental application, as returned by `/renter/applications`. Mirrors `RenterApplicationDto`. */
 export interface RenterApplication {
   id: string;
   propertyId: string;
@@ -82,11 +79,7 @@ export interface ApplicationReferenceInput {
   relationship: string;
 }
 
-/**
- * A document as it goes over the wire. The signed `url` is a display convenience
- * for the wizard's review step — the API whitelist rejects unknown properties, so
- * sending it back failed every application that had an upload attached.
- */
+/** Never send `url` back: the API whitelist rejects unknown properties. */
 export type ApplicationDocumentInput = Omit<ApplicationDocument, 'url'>;
 
 export interface SubmitApplicationInput {

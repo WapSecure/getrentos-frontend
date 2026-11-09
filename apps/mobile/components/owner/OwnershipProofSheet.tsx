@@ -16,7 +16,6 @@ interface Props {
   onClose: () => void;
 }
 
-/** Sends (or re-sends) proof of ownership for review. */
 export function OwnershipProofSheet({ propertyId, open, onClose }: Props) {
   return (
     <Sheet open={open} onClose={onClose} title="Ownership document">

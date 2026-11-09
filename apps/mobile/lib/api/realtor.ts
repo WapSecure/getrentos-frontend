@@ -5,16 +5,7 @@ import type { Paginated } from './properties';
 import type { TrustProfile } from './agentTrustProfile';
 import type { PayoutSentTo } from '@sureground/shared';
 
-/**
- * The realtor's side of /realtor: clients who let them represent a property,
- * listings drafted on those properties, the lead → viewing → offer pipeline,
- * and commission earned when a sale's escrow releases.
- *
- * Realtor listings are created as drafts; the property's owner publishes them.
- * Commissions are Pro (402 PLAN_UPGRADE_REQUIRED otherwise).
- */
-
-/* ---------------------------------- types --------------------------------- */
+/** Realtor listings are created as drafts; the property's owner publishes them. Commissions are Pro (402 PLAN_UPGRADE_REQUIRED otherwise). */
 
 export type RelationshipStatus = 'PENDING' | 'ACTIVE' | 'REVOKED';
 export type RealtorListingStatus =
@@ -256,7 +247,6 @@ export interface RealtorReviewsSummary {
 }
 
 export interface RealtorNotification {
-  /** An in-app path the notification is about. */
   actionUrl?: string;
   /** Set on a message: the conversation it is in. */
   conversationId?: string;
@@ -283,9 +273,6 @@ export interface RealtorProfile {
   avatarUrl?: string | null;
 }
 
-/* ----------------------------------- api ---------------------------------- */
-
-/** Defaults used across a realtor's listings and deals. */
 export interface RealtorBusinessPreferences {
   commissionRate: number;
   serviceAreas: string[];
@@ -479,8 +466,6 @@ export const realtorApi = {
   readAllNotifications: () => apiFetch<void>('/realtor/notifications/read-all', { method: 'POST' }),
 };
 
-/* --------------------------------- helpers -------------------------------- */
-
 export const clientName = (c: RealtorClient) => c.client.legalName || c.client.email;
 export const clientRole = (c: RealtorClient) =>
   c.client.roles.some((r) => r.role === 'LANDLORD') ? 'Landlord' : 'Property owner';
@@ -497,7 +482,6 @@ export const LISTING_STATUS: Record<RealtorListingStatus, { label: string; tone:
   CLOSED: { label: 'Closed', tone: 'neutral' },
 };
 
-/** The lead pipeline, in order. Won and lost both end it. */
 export const LEAD_STAGES: { value: LeadStatus; label: string; tone: Tone }[] = [
   { value: 'NEW', label: 'New', tone: 'info' },
   { value: 'CONTACTED', label: 'Contacted', tone: 'info' },
@@ -508,7 +492,6 @@ export const LEAD_STAGES: { value: LeadStatus; label: string; tone: Tone }[] = [
 export const leadStage = (s: LeadStatus) => LEAD_STAGES.find((x) => x.value === s)!;
 export const isLeadOpen = (s: LeadStatus) => s !== 'CLOSED' && s !== 'LOST';
 
-/** The single most useful move for a lead at this stage. */
 export function leadNextStep(s: LeadStatus): { to: LeadStatus; label: string } | null {
   switch (s) {
     case 'NEW':
@@ -529,7 +512,6 @@ export const VIEWING_STATUS: Record<ViewingStatus, { label: string; tone: Tone }
   CANCELLED: { label: 'Cancelled', tone: 'neutral' },
 };
 
-/** Viewings split the way a realtor plans a day: today, coming up, and done. */
 export function viewingBuckets(viewings: RealtorViewing[], now: Date = new Date()) {
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
   const startOfTomorrow = startOfToday + 24 * 60 * 60 * 1000;
@@ -570,7 +552,6 @@ export interface OfferStep {
   at: string;
 }
 
-/** The negotiation in order: the buyer's offer, then every counter from either side. */
 export function offerThread(o: RealtorOffer): OfferStep[] {
   return [
     { id: o.id, who: 'buyer' as const, amount: o.amount, message: o.message, at: o.createdAt },
@@ -586,27 +567,20 @@ export function offerThread(o: RealtorOffer): OfferStep[] {
   ];
 }
 
-/** The amount currently on the table: the latest step of the thread. */
 export const currentAmount = (o: RealtorOffer) => offerThread(o).at(-1)!.amount;
 
-/** The buyer's own latest figure (their offer, or their latest counter). */
 export const buyerAmount = (o: RealtorOffer) =>
   offerThread(o)
     .filter((step) => step.who === 'buyer')
     .at(-1)!.amount;
 
-/**
- * Your counter still waiting on the buyer, if the latest move was yours on an
- * open offer: the card then shows the buyer's figure with this beside it,
- * instead of presenting your number as the buyer's.
- */
+/** The card shows the buyer's figure with this beside it, so your number is never presented as the buyer's. */
 export function pendingCounter(o: RealtorOffer): number | null {
   if (o.status !== 'COUNTERED') return null;
   const last = offerThread(o).at(-1)!;
   return last.who === 'you' ? last.amount : null;
 }
 
-/** How far an amount sits from the asking price, e.g. "8% under asking". */
 export function vsAsking(amount: number, asking?: number): string | null {
   if (!asking) return null;
   const pct = Math.round(((amount - asking) / asking) * 100);
@@ -644,7 +618,6 @@ export function whatsappLink(phone?: string | null): string | null {
   return intl && intl.length === 13 ? `https://wa.me/${intl}` : null;
 }
 
-/** A local date (yyyy-MM-dd) and time (HH:mm) as the instant the realtor means. */
 export function localInstant(date: string, time: string): string | null {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !/^\d{2}:\d{2}$/.test(time)) return null;
   const d = new Date(`${date}T${time}:00`);

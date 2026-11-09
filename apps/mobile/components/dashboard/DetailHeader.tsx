@@ -12,7 +12,6 @@ type DetailHeaderProps = {
   style?: StyleProp<ViewStyle>;
 };
 
-/** Consistent navigation and hierarchy for secondary workspace screens. */
 export function DetailHeader({
   eyebrow,
   title,

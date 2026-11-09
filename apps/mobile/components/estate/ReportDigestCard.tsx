@@ -22,11 +22,6 @@ const PRIORITY: Record<string, BadgeTone> = {
   HIGH: 'warning',
 };
 
-/**
- * "Shared problems" on the phone: open reports that describe the same thing,
- * with how many households and a next step, and a way to draft an update for
- * residents. Hidden when nothing groups, or if it fails.
- */
 export function ReportDigestCard({ estateId }: { estateId: string }) {
   const { colors, spacing, radius } = useTheme();
   const [notes, setNotes] = useState<string | null>(null);

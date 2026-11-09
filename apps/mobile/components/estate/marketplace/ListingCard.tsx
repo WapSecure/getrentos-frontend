@@ -12,7 +12,6 @@ import {
 } from '@/lib/api/estateMarketplace';
 import { formatNaira } from '@/lib/format';
 
-/** One listing the estate advertises: what, for how much, and whether it's live. */
 export function ListingCard({ listing, onPress }: { listing: EstateListing; onPress: () => void }) {
   const { colors, spacing, radius } = useTheme();
   const s = listingStatus(listing.status);

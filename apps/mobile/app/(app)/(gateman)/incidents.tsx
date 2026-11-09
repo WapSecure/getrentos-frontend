@@ -31,9 +31,7 @@ import { capturePhoto, pickPhoto } from '@/lib/filePicker';
 import { haptics } from '@/lib/haptics';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 
-// `Record<…>` on purpose: these mappers lowercase the raw enum for display, so a
-// new backend member should fail the build here rather than surface as a raw
-// token like "other" in the list.
+// `Record` so a new backend enum member fails the build instead of showing a raw token.
 const CATEGORY_LABEL: Record<IncidentCategory, string> = {
   security: 'Security',
   maintenance: 'Maintenance',

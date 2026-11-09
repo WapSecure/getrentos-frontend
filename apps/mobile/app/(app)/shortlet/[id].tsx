@@ -56,7 +56,6 @@ import { FilmedOnSite } from '@/components/video/FilmedOnSite';
 
 type SheetName = 'dates' | 'book' | 'message' | null;
 
-/** One stay, told in the order a guest decides: trust, fit, price, then the total. */
 export default function ShortletDetail() {
   const params = useLocalSearchParams<{
     id: string;
@@ -79,7 +78,6 @@ export default function ShortletDetail() {
   // Picking dates on the way to booking carries straight on to the booking sheet.
   const [bookAfterDates, setBookAfterDates] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
-  // Past the photos, the floating controls sit on a solid bar with the title.
   const [solidHeader, setSolidHeader] = useState(false);
 
   const query = useQuery({
@@ -196,7 +194,6 @@ export default function ShortletDetail() {
                   gap: spacing['2xl'],
                 }}
               >
-                {/* Title and trust */}
                 <View style={{ gap: spacing.sm }}>
                   <Text variant="title" headingLevel={1}>
                     {listing.title}
@@ -232,7 +229,6 @@ export default function ShortletDetail() {
                 <HostBlock listing={listing} onMessage={() => setSheet('message')} />
                 <Divider />
 
-                {/* The facts that decide a stay */}
                 <View style={{ gap: spacing.lg }}>
                   <InfoRow
                     icon={Clock}
@@ -367,7 +363,6 @@ export default function ShortletDetail() {
               </View>
             </ScrollView>
 
-            {/* Floating controls over the gallery; a solid bar once scrolled past it */}
             <View
               pointerEvents="box-none"
               style={{
@@ -421,7 +416,6 @@ export default function ShortletDetail() {
               </Pressable>
             </View>
 
-            {/* The total, always in reach */}
             <View
               style={{
                 position: 'absolute',

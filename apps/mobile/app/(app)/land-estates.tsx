@@ -24,7 +24,6 @@ import { goBack } from '@/lib/goBack';
 
 const PAGE_SIZE = 12;
 
-/** Estates selling plots on a verified, in-date master parcel. */
 export default function LandEstates() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();

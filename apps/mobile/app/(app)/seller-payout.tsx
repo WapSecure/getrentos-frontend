@@ -47,7 +47,6 @@ const STATUS: Record<SellerPayoutStatus, { label: string; tone: 'info' | 'succes
   FAILED: { label: 'Failed', tone: 'danger' },
 };
 
-/** Where sale proceeds are paid once escrow releases. Shared by every seller role. */
 export default function SellerPayout() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();

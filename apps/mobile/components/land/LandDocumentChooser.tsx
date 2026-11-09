@@ -7,10 +7,6 @@ import { documentTypeLabel, ownerLandApi } from '@/lib/api/ownerLand';
 import { pickDocument } from '@/lib/filePicker';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
 
-/**
- * Choose one of this land's documents, or upload a new one (stored as
- * `uploadType`) and choose it straight away.
- */
 export function LandDocumentChooser({
   propertyId,
   label,

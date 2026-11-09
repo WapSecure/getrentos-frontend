@@ -29,10 +29,7 @@ const STEP_ICON: Record<
   WAIVED: { Icon: CheckCircle2, tone: 'mutedForeground' },
 };
 
-/**
- * The conveyance steps of a land sale. The seller marks a step delivered; the
- * buyer confirms it (or disputes it), which is what releases escrow.
- */
+// The buyer's confirmation, not the seller's delivery, is what releases escrow.
 export function MilestoneList({
   milestones,
   deliverability,
@@ -118,10 +115,6 @@ export function MilestoneList({
 
 const CHECK_ICON = { DONE: CheckCircle2, OPEN: CircleDashed, BLOCKED: XCircle } as const;
 
-/**
- * Conditions precedent on a land sale, and the closing checklist. The seller
- * marks the conditions they deliver as met, with a note the buyer can check.
- */
 export function ConditionsList({
   conditions,
   checklist,
@@ -250,10 +243,6 @@ export function ConditionsList({
   );
 }
 
-/**
- * Marking a step delivered: an optional note to the buyer and, when the land
- * is known, one of its documents as evidence.
- */
 export function DeliverForm({
   milestone,
   propertyId,

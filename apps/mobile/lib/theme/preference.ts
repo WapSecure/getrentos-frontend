@@ -5,16 +5,11 @@ import { useTheme, type ThemePreference } from '@sureground/ui-native';
 const KEY = 'sureground.themePreference';
 const VALID: ThemePreference[] = ['system', 'light', 'dark'];
 
-/** Persist an appearance choice. Pass to `<ThemeProvider onPreferenceChange>`. */
 export function persistThemePreference(next: ThemePreference) {
   AsyncStorage.setItem(KEY, next).catch(() => undefined);
 }
 
-/**
- * Render `<HydrateThemePreference />` anywhere inside `<ThemeProvider>`. On
- * mount it reads the saved choice and applies it if it differs from the
- * current one — no render gating, so there's no mount-timing warning.
- */
+// No render gating, so there's no mount-timing warning.
 export function HydrateThemePreference() {
   const { preference, setPreference } = useTheme();
 

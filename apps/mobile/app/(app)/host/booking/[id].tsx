@@ -219,8 +219,6 @@ export default function HostBookingDetail() {
   );
 }
 
-/* ---------------------------------- hero ---------------------------------- */
-
 function StayHero({ b }: { b: HostBooking }) {
   const { colors, spacing } = useTheme();
   const s = BOOKING_STATUS[b.status];
@@ -317,8 +315,6 @@ function Ended({ b }: { b: HostBooking }) {
   );
 }
 
-/* ---------------------------------- guest --------------------------------- */
-
 function GuestCard({ b }: { b: HostBooking }) {
   const { colors, spacing } = useTheme();
   const g = b.guestSummary!;
@@ -363,8 +359,6 @@ function GuestCard({ b }: { b: HostBooking }) {
     </Card>
   );
 }
-
-/* ---------------------------------- money --------------------------------- */
 
 function MoneyCard({ b }: { b: HostBooking }) {
   const { colors, spacing } = useTheme();
@@ -459,8 +453,6 @@ function Row({ label, value, strong }: { label: string; value: string; strong?: 
     </View>
   );
 }
-
-/* --------------------------------- actions -------------------------------- */
 
 function MoreActions({ b, onPanel }: { b: HostBooking; onPanel: (p: Panel) => void }) {
   const { spacing } = useTheme();

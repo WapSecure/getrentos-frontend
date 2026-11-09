@@ -47,12 +47,6 @@ import { haptics } from '@/lib/haptics';
 import { goBack } from '@/lib/goBack';
 import { errorMessage } from '@/lib/api/client';
 
-/**
- * The estate's public page on the website: one link to share with residents
- * and people thinking of moving in. Pro. The page itself is built on the
- * website; here the manager sets what it says, its banner, its address and
- * whether it is live.
- */
 export default function EstateMicrosite() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
@@ -155,7 +149,7 @@ function MicrositeForm({ estateId, initial }: { estateId: string; initial: Micro
       return file ? estateGovernanceApi.uploadMicrositeBanner(estateId, file) : null;
     },
     onSuccess: (next) => {
-      if (!next) return; // the picker was dismissed
+      if (!next) return;
       void haptics.success();
       keep(next);
       toast.show('Banner updated.', 'success');

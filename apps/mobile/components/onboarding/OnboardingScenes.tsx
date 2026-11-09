@@ -23,16 +23,7 @@ import {
 } from 'lucide-react-native';
 import { Card, Text, useTheme } from '@sureground/ui-native';
 
-/**
- * Onboarding illustrations. Each is a miniature of something the product
- * actually does, composed from design-system tokens: no stock art, no
- * one-off colours.
- */
-
-/* ------------------------------- scroll motion ------------------------------- */
-
 type SceneMotion = {
-  /** Distance of this slide from centre, in pages: −1 entering, 0 settled, 1 leaving. */
   offset: SharedValue<number>;
   animate: boolean;
 };
@@ -42,11 +33,6 @@ export const SceneMotionProvider = SceneMotionContext.Provider;
 
 const LAYER_TRAVEL = 36;
 
-/**
- * A card that travels a little further than the page per unit of `depth`, so a
- * scene's pieces fan out and settle one after another as the finger drags:
- * cheap, UI-thread parallax that tracks the gesture instead of a timer.
- */
 function Layer({
   depth,
   children,
@@ -70,7 +56,6 @@ function Layer({
   return <Animated.View style={[style, animated]}>{children}</Animated.View>;
 }
 
-/** A soft ring that breathes around the escrow lock while the intro is open. */
 function Pulse({ size, color }: { size: number; color: string }) {
   const motion = useContext(SceneMotionContext);
   const animate = !!motion?.animate;
@@ -106,8 +91,6 @@ function Pulse({ size, color }: { size: number; color: string }) {
   );
 }
 
-/* --------------------------- shared building blocks --------------------------- */
-
 function Pill({ label, icon }: { label: string; icon?: React.ReactNode }) {
   const { colors, spacing, radius } = useTheme();
   return (
@@ -130,14 +113,11 @@ function Pill({ label, icon }: { label: string; icon?: React.ReactNode }) {
   );
 }
 
-/* ------------------------------ 1. discovery ------------------------------ */
-
 export function FindPropertiesScene() {
   const { colors, spacing, radius } = useTheme();
 
   return (
     <View style={{ flex: 1, gap: spacing.md }}>
-      {/* search field */}
       <Layer depth={0}>
         <Card elevated style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
           <Search size={17} color={colors.primary} />
@@ -159,7 +139,6 @@ export function FindPropertiesScene() {
         </Card>
       </Layer>
 
-      {/* results */}
       {[
         { title: '2-Bed Apartment · Lekki', price: '₦2,400,000', period: '/ year' },
         { title: 'Studio Flat · Ikate', price: '₦1,850,000', period: '/ year' },
@@ -199,7 +178,6 @@ export function FindPropertiesScene() {
         </Layer>
       ))}
 
-      {/* map strip: takes whatever height is left so the panel always fills */}
       <Layer depth={4} style={{ flex: 1, minHeight: 84 }}>
         <View
           style={{
@@ -225,7 +203,6 @@ export function FindPropertiesScene() {
   );
 }
 
-/** Scattered pin positions for the map strip: fixed so the layout never jitters. */
 const PIN_SPOTS = [
   { left: '16%' as const, top: '12%' as const, size: 17, opacity: 0.85 },
   { left: '62%' as const, top: '8%' as const, size: 19, opacity: 0.9 },
@@ -235,8 +212,6 @@ const PIN_SPOTS = [
   { left: '70%' as const, top: '58%' as const, size: 12, opacity: 0.45 },
   { left: '48%' as const, top: '72%' as const, size: 14, opacity: 0.4 },
 ];
-
-/* -------------------------------- 2. escrow -------------------------------- */
 
 function EscrowNode({
   icon,
@@ -284,7 +259,6 @@ function EscrowNode({
   );
 }
 
-/** A connector that stretches, so the escrow nodes spread over any panel height. */
 function Connector() {
   const { colors } = useTheme();
   return (
@@ -343,7 +317,6 @@ export function EscrowScene() {
         />
       </Layer>
 
-      {/* takes the remaining height so the panel always fills */}
       <Layer depth={3} style={{ flex: 1, minHeight: 76 }}>
         <View
           style={{
@@ -371,8 +344,6 @@ export function EscrowScene() {
   );
 }
 
-/* ------------------------------ 3. verification ------------------------------ */
-
 export function VerifiedPeopleScene() {
   const { colors, spacing, radius } = useTheme();
 
@@ -384,7 +355,6 @@ export function VerifiedPeopleScene() {
 
   return (
     <View style={{ flex: 1, gap: spacing.md, paddingBottom: spacing.md }}>
-      {/* trust summary */}
       <Layer depth={0}>
         <Card elevated style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
           <View
@@ -440,7 +410,6 @@ export function VerifiedPeopleScene() {
         </Layer>
       ))}
 
-      {/* takes the remaining height so the panel always fills */}
       <Layer depth={4} style={{ flex: 1, minHeight: 76 }}>
         <View
           style={{

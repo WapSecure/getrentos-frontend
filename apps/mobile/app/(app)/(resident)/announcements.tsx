@@ -18,7 +18,6 @@ import { useReadAloud } from '@/lib/voice';
 
 export default function ResidentAnnouncements() {
   const { colors, spacing } = useTheme();
-  // Listen to an update instead of reading it, on the phone's own voice.
   const readAloud = useReadAloud();
   const query = useQuery({
     queryKey: qk.resident.announcements(1, 50),

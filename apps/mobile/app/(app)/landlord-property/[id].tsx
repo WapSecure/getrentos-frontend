@@ -64,8 +64,7 @@ export default function LandlordPropertyDetail() {
   const [bulkPricing, setBulkPricing] = useState(false);
   const { isPro } = usePlanTier();
 
-  // The API has no single-property route: the list is the source of truth,
-  // and sharing its query key means arriving from the list costs no refetch.
+  // No single-property route: read from the list, sharing its query key so arriving from the list costs no refetch.
   const property = useQuery({
     queryKey: qk.landlord.properties(),
     queryFn: () => landlordApi.properties(),
@@ -106,7 +105,6 @@ export default function LandlordPropertyDetail() {
     onError: (e) => fail(e, 'Could not delete that property.'),
   });
 
-  /** Uploads a photo and appends its key to the gallery the property already has. */
   const addPhoto = useMutation({
     mutationFn: async () => {
       const file = await pickImage();
@@ -117,14 +115,13 @@ export default function LandlordPropertyDetail() {
       });
     },
     onSuccess: (result) => {
-      if (!result) return; // the picker was dismissed
+      if (!result) return;
       invalidate();
       toast.show('Photo added.', 'success');
     },
     onError: (e) => fail(e, 'Could not add that photo.'),
   });
 
-  /** Uploads a video and puts it on the property in place of any earlier one. */
   const attachVideo = async (file: PickedVideo, onSite: VideoOnSiteReport | null) => {
     const previous = p?.videoTourKey;
     const { key } = await landlordApi.uploadPropertyMedia(file, 'video');

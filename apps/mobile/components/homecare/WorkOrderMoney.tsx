@@ -53,13 +53,7 @@ import type { PaymentProvider } from '@/lib/api/paymentStatus';
 
 const naira = (n: number) => `₦${Math.round(n).toLocaleString('en-NG')}`;
 
-/**
- * What the pay sheet says about how an invoice is paid (audit UX-16), word for
- * word with the web dialog: the split between held money and a card top-up,
- * and a button that says exactly what pressing it does. Without a preview
- * (still loading, or it failed) it describes the rule, not an amount it does
- * not know.
- */
+// Word for word with the web dialog; without a preview it describes the rule, never an amount it does not know.
 function vendorPayCopy(
   invoice: Invoice,
   preview: { data?: InvoicePaymentPreview; isLoading: boolean; isError: boolean },
@@ -134,15 +128,12 @@ function vendorPayCopy(
   };
 }
 
-/* --------------------------------- quotes --------------------------------- */
-
 const QUOTE_TONE: Record<Quote['status'], { label: string; tone: Tone }> = {
   SUBMITTED: { label: 'To decide', tone: 'warning' },
   APPROVED: { label: 'Approved', tone: 'success' },
   REJECTED: { label: 'Rejected', tone: 'neutral' },
 };
 
-/** Vendors' estimates for the job; approving one sets the budget. */
 export function QuotesSection({ w }: { w: WorkOrder }) {
   const { colors, spacing, radius } = useTheme();
   const qc = useQueryClient();
@@ -324,8 +315,6 @@ function QuoteForm({ w, onDone }: { w: WorkOrder; onDone: () => void }) {
   );
 }
 
-/* -------------------------------- invoices -------------------------------- */
-
 const INVOICE_TONE: Record<Invoice['status'], { label: string; tone: Tone }> = {
   DRAFT: { label: 'Draft', tone: 'neutral' },
   SUBMITTED: { label: 'To approve', tone: 'warning' },
@@ -341,7 +330,6 @@ const PAYOUT_LABEL: Record<Invoice['payoutStatus'], string> = {
   FAILED: 'Payment failed',
 };
 
-/** The vendor's bill for the finished job: draft → submit → approve → pay. */
 export function InvoicesSection({ w }: { w: WorkOrder }) {
   const { colors, spacing, radius } = useTheme();
   const qc = useQueryClient();
@@ -350,9 +338,8 @@ export function InvoicesSection({ w }: { w: WorkOrder }) {
   const [adding, setAdding] = useState(false);
   const [payoutFor, setPayoutFor] = useState<string | null>(null);
   const [reasonFor, setReasonFor] = useState<{ kind: 'reject' | 'void'; id: string } | null>(null);
-  // Which company takes a top-up when held rent falls short (Paystack or Monnify).
   const providers = usePaymentProviders();
-  // The invoice in the pay sheet; kept while the sheet slides away.
+  // Kept while the sheet slides away.
   const [payInv, setPayInv] = useState<Invoice | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [providerError, setProviderError] = useState<string | null>(null);
@@ -364,7 +351,6 @@ export function InvoicesSection({ w }: { w: WorkOrder }) {
     queryKey: qk.homeCare.invoices(w.id),
     queryFn: () => homeCareApi.invoices(w.id),
   });
-  // How paying splits between held money and a card top-up, shown before Pay.
   const paymentPreview = useQuery({
     queryKey: qk.homeCare.invoicePaymentPreview(payInv?.id ?? '', providers.provider),
     queryFn: () => homeCareApi.invoicePaymentPreview(payInv!.id, providers.provider),
@@ -439,7 +425,6 @@ export function InvoicesSection({ w }: { w: WorkOrder }) {
       }
       if (v.kind === 'pay') closeSheet();
       const message = errorMessage(e, 'That didn’t go through.');
-      // The API names the missing payout account; offer to add it right here.
       if (v.kind === 'pay' && /payout account/i.test(message)) {
         const inv = invoices.data?.items.find((i) => i.id === v.id);
         if (inv) setPayoutFor(inv.vendorId);

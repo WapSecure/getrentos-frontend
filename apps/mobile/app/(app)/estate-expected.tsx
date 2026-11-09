@@ -14,10 +14,6 @@ import { formatTime } from '@/lib/format';
 import { qk } from '@/lib/query/keys';
 import { goBack } from '@/lib/goBack';
 
-/**
- * Who the estate expects today: visitors, contractors and parcels. A planning
- * view only; nothing here admits anybody, the pass code at the gate does.
- */
 export default function EstateExpected() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();

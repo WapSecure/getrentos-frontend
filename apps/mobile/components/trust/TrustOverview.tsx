@@ -46,12 +46,7 @@ function StatusBadge({ status }: { status: TrustStatus }) {
   return <Badge label={TRUST_STATUS[status].label} tone={TRUST_STATUS[status].tone} />;
 }
 
-/**
- * The Trust & Verification screen body for every portal, matching the web
- * page: identity apart from the score, only this portal's requirements, one
- * next step, and the details folded away. Every value comes from
- * GET /trust/overview.
- */
+// Every value comes from GET /trust/overview.
 export function TrustOverview({
   portal,
   onAction,
@@ -66,7 +61,6 @@ export function TrustOverview({
   const query = useQuery({
     queryKey: qk.trust.overview(portal),
     queryFn: () => trustApi.overview(portal),
-    // While Smile ID is deciding, check back without a pull to refresh.
     refetchInterval: (q) =>
       q.state.data?.requirements.some((r) => r.status === 'PENDING_PROVIDER') ? 5000 : false,
   });
@@ -144,7 +138,6 @@ export function TrustOverview({
             ) : null}
           </Card>
 
-          {/* What this portal needs. */}
           <View style={{ gap: spacing.sm }}>
             <View
               style={{
@@ -217,7 +210,6 @@ export function TrustOverview({
             </Card>
           </View>
 
-          {/* Details, only when asked for. */}
           <Card elevated padding="none">
             <PressableScale
               onPress={() => setOpen((v) => !v)}

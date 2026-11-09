@@ -37,13 +37,12 @@ import {
   type AccountLookup,
 } from '@sureground/shared';
 
-/** Upper-cases a payout status: an agent's own payouts arrive in lower case. */
+// An agent's own payouts arrive in lower case.
 function payoutKey(status: string): 'PENDING' | 'SUCCESS' | 'FAILED' {
   const s = status.toUpperCase();
   return s === 'SUCCESS' || s === 'FAILED' ? s : 'PENDING';
 }
 
-/** Recent payouts, newest first. */
 export function History({ items }: { items: PayoutRecord[] }) {
   const { spacing } = useTheme();
   if (!items.length) return null;
@@ -75,7 +74,6 @@ export function History({ items }: { items: PayoutRecord[] }) {
   );
 }
 
-/** A bank account on file, or the form to set one (with the 24-hour hold note). */
 export function AccountForm({
   account,
   onSave,
@@ -146,11 +144,6 @@ export function AccountForm({
   );
 }
 
-/**
- * An agency agent's own share of the firm's commissions: earned, paid and
- * pending, the account it goes to, and recent payouts. Used in the agency
- * workspace and for realtors and agents who belong to a firm.
- */
 export function MyPayout({
   account,
   summary,

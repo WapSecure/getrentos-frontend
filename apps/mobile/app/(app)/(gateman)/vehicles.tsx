@@ -27,8 +27,7 @@ import { capturePhoto, pickPhoto } from '@/lib/filePicker';
 import { haptics } from '@/lib/haptics';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 
-// The read mapper lowercases the enum; a `Record` here means a new backend
-// purpose fails the build instead of rendering raw.
+// `Record` so a new backend purpose fails the build instead of rendering raw.
 const PURPOSE_LABEL: Record<VehiclePurpose, string> = {
   visitor: 'Visitor',
   resident: 'Resident',
@@ -53,19 +52,8 @@ export default function GatemanVehicles() {
   const [purpose, setPurpose] = useState<VehiclePurpose>('visitor');
   const [gateId, setGateId] = useState('');
   const [photo, setPhoto] = useState<PickedFile | null>(null);
-  /**
-   * Set when the estate's watch list refused this vehicle.
-   *
-   * Kept apart from a toast on purpose: a blocked registration is the estate's
-   * answer, and the guard needs the plate and the reason in front of them to
-   * decide whether they are looking at the car the estate meant.
-   */
   const [refusal, setRefusal] = useState<WatchlistRefusal | null>(null);
   const [overrideError, setOverrideError] = useState<string | null>(null);
-  /**
-   * The estate's note about a vehicle it matched but did not refuse. The log
-   * went through, on purpose.
-   */
   const [warning, setWarning] = useState<string | null>(null);
 
   const { estate, isLoading: isPostLoading } = useGatemanPost();

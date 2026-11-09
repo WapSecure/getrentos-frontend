@@ -15,7 +15,6 @@ interface ProfileSettingsProps {
   user: { fullName: string; email: string } | null;
 }
 
-/** The agent's own name and phone, saved to their account (email changes are verified separately). */
 export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
   const { data: profile } = useQuery({
     queryKey: agentKeys.profile,

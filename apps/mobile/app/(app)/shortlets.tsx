@@ -28,7 +28,6 @@ import {
   type StayRefinements,
 } from '@/components/shortlet/StayFiltersSheet';
 
-/** Short stays: where, when, who: then every result priced for exactly that. */
 export default function Shortlets() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
@@ -60,7 +59,6 @@ export default function Shortlets() {
 
   const header = (
     <View style={{ paddingTop: spacing.sm, gap: spacing.lg, paddingBottom: spacing.lg }}>
-      {/* Where · when · who */}
       <View
         style={{
           marginHorizontal: spacing.xl,
@@ -243,11 +241,7 @@ function SearchCell({
   );
 }
 
-/**
- * Detty December campaign palette: a fixed night sky with an amber accent, so the
- * banner looks the same in light and dark mode. No theme token covers it; keep in
- * step with the hero in app/(app)/detty-december.tsx.
- */
+/** Fixed palette so the banner looks the same in light and dark; keep in step with the hero in app/(app)/detty-december.tsx. */
 const NIGHT = {
   bg: '#121823',
   border: 'rgba(255,255,255,0.08)',
@@ -257,7 +251,6 @@ const NIGHT = {
   amberSoft: 'rgba(255,180,84,0.18)',
 };
 
-/** The season's front door: dark, quiet, one line of promise. */
 function DettyBanner() {
   const { spacing, radius } = useTheme();
   return (

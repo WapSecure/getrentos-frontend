@@ -6,10 +6,6 @@ import { Button, Card, Skeleton, Text, useTheme } from '@sureground/ui-native';
 import { buyerApi, type BuyerDiligence } from '@/lib/api/buyer';
 import { qk } from '@/lib/query/keys';
 
-/**
- * "Check before you buy" on the phone: each due-diligence step marked from
- * what is on file, with questions for the seller. Loads only when asked.
- */
 export function DiligenceCard({ listingId }: { listingId: string }) {
   const { colors, spacing, radius } = useTheme();
   const [asked, setAsked] = useState(false);

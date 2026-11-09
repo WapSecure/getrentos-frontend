@@ -60,7 +60,6 @@ const naira = (n: number) => `₦${Math.round(n).toLocaleString('en-NG')}`;
 
 type Filter = 'all' | 'AVAILABLE' | 'PAID' | 'VOID';
 
-/** Commission earned when a sale completes, and getting it to the bank. */
 export default function RealtorCommissions() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();

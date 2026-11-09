@@ -10,12 +10,10 @@ export interface SettingsItem {
   description?: string;
   icon: LucideIcon;
   onPress: () => void;
-  /** Short value shown on the right, e.g. "72 / 100" or "Verified". */
   value?: string;
   tone?: 'default' | 'success' | 'warning';
 }
 
-/** A titled group of navigation rows: the building block of every account screen. */
 export function SettingsGroup({
   title,
   items,

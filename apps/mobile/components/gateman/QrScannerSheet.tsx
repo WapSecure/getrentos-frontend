@@ -6,15 +6,7 @@ import { Button, Text, useTheme } from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { haptics } from '@/lib/haptics';
 
-/**
- * A visitor's QR payload is the raw 6-digit PIN: the API builds it with
- * `QRCode.toDataURL(pin)`: so a scan is the very same secret the keypad would
- * have collected. This is convenience only, not a second credential.
- *
- * Digits are extracted rather than read verbatim so a wrapped payload (a URL or
- * JSON carrying the PIN) still resolves, and it matches what the web console
- * already does with the codes its users upload.
- */
+// The QR payload is the raw 6-digit PIN, the same secret the keypad takes; digits are extracted so a wrapped payload (a URL or JSON) still resolves, as on the web console.
 export function pinFromScanData(data: string): string | null {
   const digits = data.replace(/\D/g, '');
   return digits.length >= 6 ? digits.slice(0, 6) : null;
@@ -26,19 +18,12 @@ export interface QrScannerSheetProps {
   onScan: (pin: string) => void;
 }
 
-/**
- * Full-screen-ish QR scanner for the gate. Mount it with a changing `key` (as
- * the check-in screen does) so every open starts with a fresh camera and a
- * cleared latch: `react-hooks/set-state-in-effect` forbids resetting that in an
- * effect here.
- */
+// Mount with a changing key so every open gets a fresh camera and a cleared latch: react-hooks/set-state-in-effect forbids resetting them in an effect.
 export function QrScannerSheet({ open, onClose, onScan }: QrScannerSheetProps) {
   const { colors, spacing } = useTheme();
   const [permission, requestPermission] = useCameraPermissions();
   const [error, setError] = useState<string | null>(null);
-  // `onBarcodeScanned` fires every frame while a code is in view. Latching keeps
-  // one QR from being submitted repeatedly, and unsetting the handler stops the
-  // decoder rather than letting it spin behind the result.
+  // onBarcodeScanned fires every frame while a code is in view: the latch submits one QR once.
   const [latched, setLatched] = useState(false);
 
   const handleScan = (result: BarcodeScanningResult) => {
@@ -133,7 +118,6 @@ const styles = StyleSheet.create({
     minHeight: 260,
     borderRadius: 18,
     overflow: 'hidden',
-    // Camera letterbox: black in both themes, like any viewfinder.
     backgroundColor: '#000',
   },
   reticle: {

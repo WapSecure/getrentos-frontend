@@ -28,11 +28,7 @@ import { goBack } from '@/lib/goBack';
 import { withStepUpSummary } from '@/lib/stepUp';
 import { PAYOUT_ARRIVAL_NOTE, payoutAccountLabel, withdrawStepUpSummary } from '@sureground/shared';
 
-/**
- * Money out: the firm's own commission to its bank, agents' shares to theirs,
- * and this person's share as an agent. Sections the API refuses for this
- * person (the firm's payout, paying agents) simply don't show.
- */
+// Sections the API refuses for this person (the firm's payout, paying agents) are hidden, not shown as errors.
 export default function AgencyPayouts() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
@@ -167,7 +163,6 @@ function FirmPayout({
 }: {
   account: PayoutAccount | null;
   available: number;
-  /** Earned, waiting for the owners' rent to cover it. */
   awaiting: number;
   accountSet: boolean;
   history: PayoutRecord[];

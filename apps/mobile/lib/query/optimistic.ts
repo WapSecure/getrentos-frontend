@@ -3,40 +3,22 @@ import { useToast } from '@sureground/ui-native';
 import { ApiError } from '../api/client';
 
 export interface OptimisticPatch<TVars> {
-  /** The cached query to change before the server answers. */
   queryKey: QueryKey;
-  /** The new cache value given the old one; return the old value to leave it alone. */
   update: (old: unknown, vars: TVars) => unknown;
-  /**
-   * `prefix` patches every cached query whose key starts with queryKey (all
-   * pages or filters of a list). Only use it when they share one data shape.
-   */
+  /** Patches every query whose key starts with queryKey; only when they share one data shape. */
   match?: 'exact' | 'prefix';
 }
 
 interface Options<TData, TVars> {
   mutationFn: (vars: TVars) => Promise<TData>;
-  /** One or more caches to update at once (a list and its detail, say). */
   patches: (vars: TVars) => OptimisticPatch<TVars>[];
-  /** Also refetched when the request settles, to pick up server-side changes. */
   invalidate?: QueryKey[];
-  /** Shown if the server refuses and the change is rolled back. */
   errorMessage?: string;
   successMessage?: string;
   onSuccess?: (data: TData, vars: TVars) => void;
 }
 
-/**
- * A mutation whose result shows immediately.
- *
- * The cache is changed first, so a toggle, a save or a mark-as-read appears at
- * once. If the request fails, every patched cache goes back to exactly what
- * it was and a toast says the change did not stick. Either way the touched
- * queries are refetched, so the screen ends on the server's version.
- *
- * Use it for small, reversible changes. Payments, submissions and anything
- * that must be confirmed by the server should wait for the response instead.
- */
+// Only for small, reversible changes: payments and submissions must wait for the server.
 export function useOptimisticMutation<TData = unknown, TVars = void>({
   mutationFn,
   patches,

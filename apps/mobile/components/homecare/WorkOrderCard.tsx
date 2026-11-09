@@ -27,7 +27,6 @@ export function PriorityTag({ p }: { p: Priority }) {
   return <Badge label={humaniseEnum(p)} tone={tone} />;
 }
 
-/** A work order at a glance: what, where, how urgent, and whether its clock is running out. */
 export function WorkOrderCard({ w }: { w: WorkOrder }) {
   const { colors, spacing } = useTheme();
   const sla = slaState(w);

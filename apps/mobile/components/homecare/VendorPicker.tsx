@@ -18,7 +18,6 @@ import { homeCareApi } from '@/lib/api/homeCare';
 import { errorMessage } from '@/lib/api/client';
 import { Sheet } from '@/components/Sheet';
 
-/** Choose one of your vendors, or add one without leaving the form. */
 export function VendorPicker({
   value,
   onChange,

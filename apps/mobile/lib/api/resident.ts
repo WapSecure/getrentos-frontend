@@ -68,14 +68,7 @@ export interface Violation {
 
 export type DeliveryLogStatus = 'received' | 'collected';
 
-/**
- * A parcel this household has said is coming, and the code that proves it.
- *
- * Every label is written server-side and rendered verbatim: the difference
- * between an expiry and a withdrawal is decided once, in `delivery.util.ts`, so
- * the household's own screen cannot drift into saying something the guard's
- * refusal would contradict.
- */
+/** Labels are server-worded and rendered verbatim, so this screen cannot contradict the guard's refusal. */
 export type ExpectedDeliveryStatus = 'AWAITING' | 'RECEIVED' | 'CANCELLED' | 'EXPIRED';
 
 export interface ExpectedDelivery {
@@ -83,12 +76,9 @@ export interface ExpectedDelivery {
   courier: string;
   description?: string | null;
   status: ExpectedDeliveryStatus;
-  /** 'Waiting for the courier' / 'Handed over at the gate' / … */
   statusLabel: string;
-  /** Whether the code can still be presented at the gate. */
   live: boolean;
   expiresAt: string;
-  /** 'Amazon — a phone case, until Tuesday 15:00' */
   summary: string;
   createdAt: string;
   receivedAt?: string | null;
@@ -96,17 +86,10 @@ export interface ExpectedDelivery {
   deliveryLogId?: string | null;
 }
 
-/**
- * The declaration's reply, and the only time the code exists outside the app.
- *
- * It is stored hashed and cannot be retrieved again, so a household that loses
- * it declares again — deliberate, because a code anybody can look up later is one
- * the estate office can read out to a courier who is not carrying anything.
- */
+/** The only time the code exists outside the app: it is stored hashed and cannot be retrieved again. */
 export interface IssuedExpectedDelivery extends ExpectedDelivery {
   /** The six digits to give the courier. Present only in this response. */
   code: string;
-  /** What to tell the household about it, worded server-side. */
   guidance: string;
 }
 
@@ -257,7 +240,6 @@ export interface GovernanceRecord {
   requiresSignatures: boolean;
   status: GovernanceRecordStatus;
   signatureProgress?: SignatureProgress;
-  /** Whether the caller's own committee seat has already signed this record. */
   signedByMe?: boolean;
   createdAt: string;
 }
@@ -270,22 +252,16 @@ export interface Paginated<T> {
   totalPages: number;
 }
 
-/** What kind of emergency was declared. Drives the wording every resident is sent. */
 export type EmergencyKind = 'FIRE' | 'GAS_LEAK' | 'STRUCTURAL' | 'SECURITY' | 'MEDICAL' | 'OTHER';
 
-/**
- * `TIMED_OUT` is not a kind of closed: a roll nobody stood down has no all-clear
- * to report, so it keeps its own status and its own wording.
- */
+/** `TIMED_OUT` is not a kind of closed: a roll nobody stood down has no all-clear to report. */
 export type MusterStatus = 'ACTIVE' | 'CLOSED' | 'TIMED_OUT';
 
-/** Where one person is. `UNACCOUNTED` is where everybody starts. */
+/** `UNACCOUNTED` is where everybody starts. */
 export type MusterRollState = 'UNACCOUNTED' | 'ACCOUNTED' | 'NOT_ON_SITE' | 'NEEDS_HELP';
 
-/** What a resident may say about their own household. */
 export type MusterSelfAnswer = 'ACCOUNTED' | 'NOT_ON_SITE' | 'NEEDS_HELP';
 
-/** One name on a roll call, as this household is allowed to see it. */
 export interface MusterRollEntry {
   id: string;
   householdId: string;
@@ -321,14 +297,10 @@ export interface ResidentMuster {
   statusLabel: string;
   declaredAt: string;
   tally: MusterTally;
-  /** "13 people on the roll, 1 person accounted for, …" */
   tallyLabel: string;
 }
 
-/**
- * What a resident sees during an emergency: their own lines, and the estate's
- * numbers. Never the estate's roll — the names are not this household's to see.
- */
+/** Never the estate's roll: the names are not this household's to see. */
 export interface ResidentEmergency {
   muster: ResidentMuster;
   myEntries: MusterRollEntry[];
@@ -355,12 +327,7 @@ export const residentApi = {
   listDeliveries: (page = 1, pageSize = 20) =>
     apiFetch<Paginated<DeliveryLog>>(`/estate/resident/deliveries${toQuery({ page, pageSize })}`),
 
-  /**
-   * Declare a parcel, and get the code that proves it at the gate.
-   *
-   * The reply is the only time the code exists, so the caller must show it
-   * before the response is dropped.
-   */
+  /** The reply is the only time the code exists, so the caller must show it before the response is dropped. */
   declareExpectedDelivery: (data: { courier: string; description?: string }) =>
     apiFetch<IssuedExpectedDelivery>('/estate/resident/deliveries/expected', {
       method: 'POST',
@@ -402,16 +369,12 @@ export const residentApi = {
   revokeVisitorPass: (passId: string) =>
     apiFetch<VisitorPass>(`/estate/resident/visitor-passes/${passId}/revoke`, { method: 'PATCH' }),
 
-  /**
-   * Consents to a walk-in: someone is at the gate asking for this household and
-   * the estate will not let them in until somebody who lives here says so.
-   */
   approveWalkIn: (passId: string) =>
     apiFetch<VisitorPass>(`/estate/resident/visitor-passes/${passId}/approve`, {
       method: 'POST',
     }),
 
-  /** Refuses a walk-in. The reason is carried through to the guard. */
+  /** The reason is carried through to the guard. */
   denyWalkIn: (passId: string, reason?: string) =>
     apiFetch<VisitorPass>(`/estate/resident/visitor-passes/${passId}/deny`, {
       method: 'POST',
@@ -423,7 +386,6 @@ export const residentApi = {
   bookAmenity: (data: { amenityId: string; startsAt: string; endsAt: string }) =>
     apiFetch<AmenityBooking>('/estate/resident/amenities/book', { method: 'POST', body: data }),
 
-  /** Taken time ranges on an amenity (times only), so the booking sheet can hide them. */
   listAmenityBusy: (amenityId: string) =>
     apiFetch<{ startsAt: string; endsAt: string }[]>(
       `/estate/resident/amenities/${amenityId}/busy`
@@ -446,9 +408,7 @@ export const residentApi = {
   }) => {
     const form = new FormData();
     form.append('description', data.description);
-    // The create DTO validates against the raw (UPPERCASE) Prisma enum;
-    // the read mapper lowercases it for display — same asymmetry the web
-    // frontend's reportMaintenanceTicket already accounts for.
+    // The create DTO validates against the raw UPPERCASE enum; the read mapper lowercases it.
     if (data.category) form.append('category', data.category.toUpperCase());
     if (data.priority) form.append('priority', data.priority.toUpperCase());
     if (data.photo) appendFile(form, 'file', data.photo);
@@ -471,28 +431,11 @@ export const residentApi = {
       body: { signatureData },
     }),
 
-  /**
-   * The roll call in progress, or null.
-   *
-   * Null is the ordinary answer, not an error: most of the time the estate is not
-   * on fire. No household id is sent — the household is resolved from the
-   * signed-in user, so there is nothing here to tamper with.
-   *
-   * Normalised to null here rather than at the call sites, because the handler
-   * returns `null` and Nest sends that as an empty body, which `readJson` yields
-   * as `undefined` — and react-query rejects an undefined query result outright,
-   * so "nothing is happening" would render as a broken screen.
-   */
+  /** Null is the ordinary answer. Normalised here because Nest sends `null` as an empty body, read as `undefined`, which react-query rejects. */
   getEmergency: async (): Promise<ResidentEmergency | null> =>
     (await apiFetch<ResidentEmergency | null>('/estate/resident/emergency')) ?? null,
 
-  /**
-   * Answers for your own household.
-   *
-   * Moves this household's residents only: a visitor line stays with the marshal,
-   * because the person the estate admitted is not necessarily the person holding
-   * the phone.
-   */
+  /** Moves this household's residents only: a visitor line stays with the marshal. */
   answerRollCall: (data: { state: MusterSelfAnswer; stateNote?: string }) =>
     apiFetch<ResidentEmergency>('/estate/resident/emergency/answer', {
       method: 'POST',

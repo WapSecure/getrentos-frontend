@@ -11,7 +11,6 @@ const ICON = {
   be_cautious: ShieldAlert,
 } as const;
 
-/** "Should I rent this?" on the phone. Shows nothing if the check is unavailable. */
 export function ListingCheckCard({ listingId }: { listingId: string }) {
   const { colors, spacing, radius } = useTheme();
   const query = useQuery({
