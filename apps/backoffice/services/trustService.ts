@@ -66,7 +66,15 @@ export const trustService = {
 
   async resolveReviewCase(
     id: string,
-    input: { decision: TrustReviewDecision; reasonCodes?: string[]; note?: string }
+    input: {
+      decision: TrustReviewDecision;
+      reasonCodes?: string[];
+      note?: string;
+      /** Checklist items confirmed (all of them, to approve). */
+      confirmedEvidence?: string[];
+      /** Checklist items that did not pass (to reject or restrict). */
+      failedEvidence?: string[];
+    }
   ): Promise<ApiResponse<TrustReviewCaseSummary & { decision: string }>> {
     return safeCall(() =>
       authFetch(`/admin/trust/review-cases/${id}/resolve`, {
@@ -75,6 +83,8 @@ export const trustService = {
           decision: input.decision,
           reasonCodes: input.reasonCodes ?? [],
           note: input.note ?? '',
+          confirmedEvidence: input.confirmedEvidence ?? [],
+          failedEvidence: input.failedEvidence ?? [],
         }),
       })
     );
