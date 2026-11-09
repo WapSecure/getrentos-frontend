@@ -14,6 +14,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { ListState } from '@/components/shared/ListState';
 import { landlordKeys } from '@/lib/queryKeys';
 import type { ApplicationStatus, RentalApplication } from '@/types/landlord';
+import { LandlordLettingsNav } from '@/components/shared/navigation/WorkflowNavs';
 
 const statusFilters: { value: 'all' | ApplicationStatus; label: string }[] = [
   { value: 'all', label: 'All' },
@@ -113,6 +114,7 @@ export default function LandlordApplicationsPage() {
           </>
         }
       />
+      <LandlordLettingsNav />
 
       <div
         className="mb-6 flex w-full max-w-full gap-2 overflow-x-auto pb-1"

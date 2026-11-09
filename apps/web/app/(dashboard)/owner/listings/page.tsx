@@ -25,6 +25,7 @@ import { ROUTES } from '@/lib/constants/auth';
 import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
 import type { SaleListing, SaleListingStatus } from '@/types/owner';
 import { IdentityNudge } from '@/components/shared/verification/IdentityNudge';
+import { OwnerSellingNav } from '@/components/shared/navigation/WorkflowNavs';
 
 type StatusFilter = 'all' | SaleListingStatus;
 
@@ -147,6 +148,7 @@ export default function OwnerListingsPage() {
           </Button>
         }
       />
+      <OwnerSellingNav />
 
       <IdentityNudge
         verificationHref={ROUTES.OWNER_VERIFICATION}

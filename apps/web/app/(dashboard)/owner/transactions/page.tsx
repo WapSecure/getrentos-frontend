@@ -19,6 +19,7 @@ import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { ownerKeys } from '@/lib/queryKeys';
 import type { EscrowSaleTransaction, SaleEscrowStatus } from '@/types/owner';
+import { OwnerSellingNav } from '@/components/shared/navigation/WorkflowNavs';
 
 type StatusFilter = 'all' | SaleEscrowStatus;
 
@@ -84,6 +85,7 @@ export default function OwnerTransactionsPage() {
           )
         }
       />
+      <OwnerSellingNav />
 
       <div className="mb-6 flex min-w-0 flex-col gap-3 sm:flex-row">
         <SearchInput

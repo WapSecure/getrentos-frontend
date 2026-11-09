@@ -22,6 +22,7 @@ import { ownerKeys, sellerOfferKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
 import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
 import type { OfferStatus, OfferMessage } from '@/types/owner';
+import { OwnerSellingNav } from '@/components/shared/navigation/WorkflowNavs';
 
 type StatusFilter = 'all' | OfferStatus;
 
@@ -161,6 +162,7 @@ export default function OwnerOffersPage() {
           </>
         }
       />
+      <OwnerSellingNav />
 
       <OfferComparisonPanel />
 

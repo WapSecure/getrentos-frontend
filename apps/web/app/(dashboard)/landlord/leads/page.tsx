@@ -27,6 +27,7 @@ import type { LandlordLead, LeadStage } from '@/types/landlord';
 import { ROUTES } from '@/lib/constants/auth';
 import { usePlanGateModal } from '@/hooks/usePlanGateModal';
 import { UpgradeToProModal } from '@/components/shared/subscription/UpgradeToProModal';
+import { LandlordLettingsNav } from '@/components/shared/navigation/WorkflowNavs';
 
 type StageFilter = 'all' | LeadStage;
 
@@ -167,6 +168,7 @@ export default function LandlordLeadsPage() {
           </>
         }
       />
+      <LandlordLettingsNav />
 
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
         <SearchInput

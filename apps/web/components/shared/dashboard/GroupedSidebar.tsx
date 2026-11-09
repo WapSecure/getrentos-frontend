@@ -347,9 +347,21 @@ function SidebarRail({
   );
 }
 
+/**
+ * The five slots of the phone and tablet bar: the role's first four primary
+ * pages, then Messages when the role has it (as every role's tab bar in the
+ * native app does), otherwise its fifth primary page. Everything else is in
+ * the menu.
+ */
+export const phoneBarItems = (primary: GroupedSidebarItem[]): GroupedSidebarItem[] => {
+  const messages = primary.find((item) => item.href.endsWith('/messages'));
+  const rest = primary.filter((item) => item !== messages);
+  return messages ? [...rest.slice(0, 4), messages] : rest.slice(0, 5);
+};
+
 function MobilePrimaryNavigation({ ariaLabel, dashboardHref, groups }: GroupedSidebarProps) {
   const pathname = usePathname();
-  const primaryItems = groups.find((group) => group.kind === 'primary')?.items.slice(0, 5) ?? [];
+  const primaryItems = phoneBarItems(groups.find((group) => group.kind === 'primary')?.items ?? []);
   const activeHref = activeSidebarHref(pathname, groups, dashboardHref);
 
   if (primaryItems.length === 0) return null;

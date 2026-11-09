@@ -24,6 +24,7 @@ import { ownerKeys } from '@/lib/queryKeys';
 import { viewingRequestStatusBadges } from '@/lib/statusBadge';
 import { DateTimeField, isCompleteDateTime } from '@/components/shared/forms/DateTimeField';
 import { VideoCallButton } from '@/components/shared/VideoCallButton';
+import { OwnerSellingNav } from '@/components/shared/navigation/WorkflowNavs';
 
 const FILTERS = [
   { value: 'requested', label: 'To confirm' },
@@ -117,6 +118,7 @@ export default function OwnerViewingsPage() {
           </>
         }
       />
+      <OwnerSellingNav />
 
       <div className="flex flex-wrap gap-2">
         {FILTERS.map((f) => (

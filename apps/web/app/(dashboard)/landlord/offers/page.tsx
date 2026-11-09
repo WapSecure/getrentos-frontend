@@ -23,6 +23,7 @@ import { ROUTES } from '@/lib/constants/auth';
 import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
 import type { LandlordOffer, LandlordOfferStatus } from '@/types/landlord';
 import type { OfferMessage } from '@/types/owner';
+import { LandlordLettingsNav } from '@/components/shared/navigation/WorkflowNavs';
 
 type StatusFilter = 'all' | LandlordOfferStatus;
 
@@ -162,6 +163,7 @@ export default function LandlordOffersPage() {
           </>
         }
       />
+      <LandlordLettingsNav />
 
       <OfferComparisonPanel />
 

@@ -26,6 +26,7 @@ import { landlordKeys } from '@/lib/queryKeys';
 import { viewingRequestStatusBadges } from '@/lib/statusBadge';
 import type { ViewingRequestStatus } from '@/types/landlord';
 import { DateTimeField, isCompleteDateTime } from '@/components/shared/forms/DateTimeField';
+import { LandlordLettingsNav } from '@/components/shared/navigation/WorkflowNavs';
 
 const FILTERS = [
   { value: 'all', label: 'All' },
@@ -121,6 +122,7 @@ export default function LandlordViewingRequestsPage() {
         title="Viewing requests"
         description="Renters who want to see a property before applying. Confirm a time or decline."
       />
+      <LandlordLettingsNav />
 
       <div className="flex flex-wrap gap-2">
         {FILTERS.map((f) => (

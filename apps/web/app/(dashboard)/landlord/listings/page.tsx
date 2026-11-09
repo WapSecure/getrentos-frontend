@@ -27,6 +27,7 @@ import { landlordKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
 import { IdentityNudge } from '@/components/shared/verification/IdentityNudge';
 import type { Listing, ListingStatus } from '@/types/landlord';
+import { LandlordLettingsNav } from '@/components/shared/navigation/WorkflowNavs';
 
 const statusFilters: { value: 'all' | ListingStatus; label: string }[] = [
   { value: 'all', label: 'All' },
@@ -156,6 +157,7 @@ export default function LandlordListingsPage() {
           </Button>
         }
       />
+      <LandlordLettingsNav />
 
       <IdentityNudge
         verificationHref={ROUTES.LANDLORD_VERIFICATION}

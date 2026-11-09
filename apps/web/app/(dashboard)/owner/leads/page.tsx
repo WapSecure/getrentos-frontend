@@ -20,6 +20,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { ownerKeys } from '@/lib/queryKeys';
 import type { BuyerLead, BuyerLeadStage } from '@/types/owner';
 import { ROUTES } from '@/lib/constants/auth';
+import { OwnerSellingNav } from '@/components/shared/navigation/WorkflowNavs';
 
 type StageFilter = 'all' | BuyerLeadStage;
 
@@ -91,6 +92,7 @@ export default function OwnerLeadsPage() {
           </>
         }
       />
+      <OwnerSellingNav />
 
       <div className="mb-6 flex min-w-0 flex-col gap-3 sm:flex-row">
         <SearchInput
