@@ -26,6 +26,7 @@ import {
   Timer,
   Footprints,
   CalendarClock,
+  OctagonAlert,
 } from 'lucide-react';
 import { ROUTES } from '@/lib/constants/auth';
 import { ESTATE_MARKETPLACE_ROUTES } from '@/lib/constants/auth';
@@ -100,7 +101,7 @@ export const navItems: NavItem[] = [
   // same promise the visitor passes and the watch list are making.
   { label: 'Patrols', href: ROUTES.ESTATE_PATROL, icon: Footprints },
   { label: 'Violations', href: ROUTES.ESTATE_VIOLATIONS, icon: TriangleAlert },
-  { label: 'Incidents', href: ROUTES.ESTATE_INCIDENTS, icon: Siren },
+  { label: 'Incidents', href: ROUTES.ESTATE_INCIDENTS, icon: OctagonAlert },
   // Not in GATED_ROUTES, and deliberately not: raising the alarm and calling the
   // roll is free on every plan. An estate that had to pay to find out whether the
   // people inside its building are safe is one that would not find out.
@@ -116,21 +117,65 @@ export const navItems: NavItem[] = [
   { label: 'Billing', href: ROUTES.ESTATE_BILLING, icon: BadgeCheck },
 ];
 
-// The groups are positional slices of `navItems`, so inserting an item means
-// moving the boundaries below with it: otherwise every group after the
-// insertion point silently shifts by one.
+/** Picks items by route, so a group can never drift from its label as items are added. */
+const pick = (...hrefs: string[]) =>
+  hrefs.flatMap((href) => navItems.filter((item) => item.href === href));
+
+// Groups follow the estate office's jobs. Picked by route, not by position in
+// the list above, so inserting an item can no longer shift every group after it.
 const baseNavGroups = [
-  { label: 'Overview', items: navItems.slice(0, 3) },
-  // The upper bound moved by one when Expected today was inserted after Visitor
-  // Passes. Everything from here down is a slice of the list above, so an insert
-  // without this shift drops the last item of each group into the next one.
-  { label: 'Residents and access', items: navItems.slice(3, 12) },
-  // Boundaries moved by one when Patrols was inserted after Deliveries: the
-  // groups are slices of the list above, so an insert without this puts
-  // Emergency in Community and shifts everything after it.
-  { label: 'Safety and operations', items: navItems.slice(12, 17) },
-  { label: 'Community', items: navItems.slice(17, 21) },
-  { label: 'Administration', items: navItems.slice(21) },
+  { label: 'Overview', items: pick(ROUTES.ESTATE_DASHBOARD) },
+  {
+    label: 'Marketplace',
+    items: pick(
+      ESTATE_MARKETPLACE_ROUTES.ESTATE_MARKETPLACE,
+      ESTATE_MARKETPLACE_ROUTES.ESTATE_LEADS
+    ),
+  },
+  {
+    label: 'Residents',
+    items: pick(ROUTES.ESTATE_ANNOUNCEMENTS, ROUTES.ESTATE_HOUSEHOLDS, ROUTES.ESTATE_DUES),
+  },
+  {
+    label: 'Gate and visitors',
+    items: pick(
+      ROUTES.ESTATE_VISITOR_PASSES,
+      ROUTES.ESTATE_EXPECTED,
+      ROUTES.ESTATE_VEHICLES,
+      ROUTES.ESTATE_WATCHLIST,
+      ROUTES.ESTATE_CONTRACTORS,
+      ROUTES.ESTATE_DWELL,
+      ROUTES.ESTATE_DELIVERIES
+    ),
+  },
+  {
+    label: 'Safety',
+    items: pick(
+      ROUTES.ESTATE_PATROL,
+      ROUTES.ESTATE_VIOLATIONS,
+      ROUTES.ESTATE_INCIDENTS,
+      ROUTES.ESTATE_EMERGENCY
+    ),
+  },
+  {
+    label: 'Community',
+    items: pick(
+      ROUTES.ESTATE_MAINTENANCE,
+      ROUTES.ESTATE_POLLS,
+      ROUTES.ESTATE_AMENITIES,
+      ROUTES.ESTATE_GOVERNANCE
+    ),
+  },
+  {
+    label: 'Administration',
+    items: pick(
+      ROUTES.ESTATE_COMMITTEE,
+      ROUTES.ESTATE_MICROSITE,
+      ROUTES.ESTATE_FINANCIALS,
+      ROUTES.ESTATE_STAFF,
+      ROUTES.ESTATE_BILLING
+    ),
+  },
 ];
 
 export const navGroups = createRoleNavigation(
