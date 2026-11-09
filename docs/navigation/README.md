@@ -63,7 +63,12 @@ Backoffice: 61 sidebar pages, signed in as `qa-audit-staff-backoffice-admin` (tw
 - `/admin/rentals/units` marked two links current (Rentals and Units & Tenants).
 - Pressing Enter on the sign-in code step re-ran the password step instead of verifying the code.
 - The top bar repeated Dashboard and Users.
-  `/admin/escrow` stayed on "Loading page…" while the browser panel was hidden; unconfirmed, re-check with the panel visible.
+  All three fixes were re-checked in the browser:
+- Enter on the code step signs in with a single `/auth/login` call.
+- `/admin/rentals/units` has one current link.
+- The top bar shows only the logo.
+
+`/admin/escrow` loads normally with the panel visible; its earlier "Loading page…" came from the hidden browser tab, not the app.
 
 ## 3. Information architecture
 
