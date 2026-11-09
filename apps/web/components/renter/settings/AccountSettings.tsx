@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Mail, Phone } from 'lucide-react';
 import { Button, Field, Input } from '@sureground/ui';
+import { ChangeEmailButton } from '@/components/shared/security/ChangeEmailButton';
+import { ChangePhoneButton } from '@/components/shared/security/ChangePhoneButton';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
@@ -32,11 +34,12 @@ const AccountSettingsForm = ({ initial }: { initial: { email: string; phone: str
   const [phone, setPhone] = useState(initial.phone);
 
   const updateProfileMutation = useMutation({
-    mutationFn: () => unwrap(renterService.updateProfile({ email, phone })),
+    // Email and an existing phone number change only through their verified flows.
+    mutationFn: () => unwrap(renterService.updateProfile({ phone })),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: renterKeys.profile }),
   });
 
-  const handleEmailUpdate = (e: React.FormEvent) => {
+  const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     updateProfileMutation.mutate();
   };
@@ -50,26 +53,46 @@ const AccountSettingsForm = ({ initial }: { initial: { email: string; phone: str
 
       <div>
         <h3 className="text-lg font-medium text-foreground mb-3">Contact information</h3>
-        <form onSubmit={handleEmailUpdate} className="space-y-4">
-          <Field label="Email address">
-            <Input
-              leadingIcon={<Mail className="w-4 h-4" />}
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </Field>
-          <Field label="Phone number">
-            <Input
-              leadingIcon={<Phone className="w-4 h-4" />}
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-            />
-          </Field>
-          <Button type="submit" variant="primary" isLoading={updateProfileMutation.isPending}>
-            Update contact info
-          </Button>
+        <form onSubmit={handleSave} className="space-y-4">
+          <div>
+            <Field
+              label="Email address"
+              hint="Your sign-in email. Changing it sends a code to the new address."
+            >
+              <Input
+                leadingIcon={<Mail className="w-4 h-4" />}
+                type="email"
+                value={email}
+                readOnly
+              />
+            </Field>
+            <ChangeEmailButton onChanged={setEmail} />
+          </div>
+          <div>
+            <Field
+              label="Phone number"
+              hint={initial.phone ? 'Changing it sends a code to the new number.' : undefined}
+            >
+              <Input
+                leadingIcon={<Phone className="w-4 h-4" />}
+                type="tel"
+                value={phone}
+                readOnly={!!initial.phone}
+                onChange={(e) => setPhone(e.target.value)}
+              />
+            </Field>
+            {initial.phone ? <ChangePhoneButton onChanged={setPhone} /> : null}
+          </div>
+          {initial.phone ? null : (
+            <Button
+              type="submit"
+              variant="primary"
+              isLoading={updateProfileMutation.isPending}
+              disabled={!phone.trim()}
+            >
+              Save phone number
+            </Button>
+          )}
         </form>
       </div>
     </div>

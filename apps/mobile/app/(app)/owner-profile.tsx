@@ -14,6 +14,7 @@ import {
   useTheme,
   useToast,
 } from '@sureground/ui-native';
+import { VerifiedPhoneField } from '@/components/account/VerifiedPhoneField';
 import { qk } from '@/lib/query/keys';
 import { ownerApi, type OwnerProfile } from '@/lib/api/owner';
 import { errorMessage } from '@/lib/api/client';
@@ -65,7 +66,6 @@ function ProfileForm({ initial }: { initial: OwnerProfile }) {
     legalName.trim() !== initial.legalName ||
     companyName.trim() !== (initial.companyName ?? '') ||
     phone.trim() !== (initial.phone ?? '');
-  const phoneChanged = phone.trim() !== (initial.phone ?? '');
 
   const save = useMutation({
     mutationFn: () =>
@@ -100,21 +100,12 @@ function ProfileForm({ initial }: { initial: OwnerProfile }) {
           onChangeText={setCompanyName}
           textContentType="organizationName"
         />
-        <View style={{ gap: spacing.xs }}>
-          <TextField
-            label="Phone number"
-            value={phone}
-            onChangeText={(v) => setPhone(v.replace(/(?!^\+)\D/g, ''))}
-            keyboardType="phone-pad"
-            autoComplete="tel"
-            textContentType="telephoneNumber"
-          />
-          {phoneChanged && initial.phoneVerified ? (
-            <Text variant="caption" color="mutedForeground">
-              You’ll need to verify the new number again.
-            </Text>
-          ) : null}
-        </View>
+        <VerifiedPhoneField
+          label="Phone number"
+          savedPhone={initial.phone}
+          value={phone}
+          onChangeText={(v) => setPhone(v.replace(/(?!^\+)\D/g, ''))}
+        />
       </Card>
 
       <Card elevated style={{ gap: spacing.xs }}>

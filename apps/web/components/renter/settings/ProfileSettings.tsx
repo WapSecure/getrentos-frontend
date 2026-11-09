@@ -12,6 +12,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { nameOnly } from '@/lib/validations/input';
 import { ChangeEmailButton } from '@/components/shared/security/ChangeEmailButton';
+import { ChangePhoneButton } from '@/components/shared/security/ChangePhoneButton';
 import { AddressInput } from '@/components/shared/location/AddressInput';
 
 interface ProfileSettingsProps {
@@ -205,43 +206,49 @@ const ProfileSettingsForm = ({
           <ChangeEmailButton onChanged={(email) => setFormData((f) => ({ ...f, email }))} />
         </div>
 
-        <Field
-          label="Phone number"
-          error={otpError || undefined}
-          labelAside={
-            phoneVerified && (
-              <Badge
-                variant="success"
-                icon={<CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" />}
-              >
-                Verified
-              </Badge>
-            )
-          }
-        >
-          <div className="flex gap-2">
-            <Input
-              leadingIcon={<Phone className="w-4 h-4" />}
-              type="tel"
-              value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              className="min-w-0 flex-1"
-            />
-            {!phoneVerified && (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleVerifyPhone}
-                isLoading={isSendingOtp}
-                loadingText="Sending…"
-                icon={<ShieldCheck className="w-4 h-4" />}
-                className="shrink-0"
-              >
-                Verify
-              </Button>
-            )}
-          </div>
-        </Field>
+        <div>
+          <Field
+            label="Phone number"
+            error={otpError || undefined}
+            labelAside={
+              phoneVerified && (
+                <Badge
+                  variant="success"
+                  icon={<CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" />}
+                >
+                  Verified
+                </Badge>
+              )
+            }
+          >
+            <div className="flex gap-2">
+              <Input
+                leadingIcon={<Phone className="w-4 h-4" />}
+                type="tel"
+                value={formData.phone}
+                readOnly={!!initial.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                className="min-w-0 flex-1"
+              />
+              {!phoneVerified && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleVerifyPhone}
+                  isLoading={isSendingOtp}
+                  loadingText="Sending…"
+                  icon={<ShieldCheck className="w-4 h-4" />}
+                  className="shrink-0"
+                >
+                  Verify
+                </Button>
+              )}
+            </div>
+          </Field>
+          {initial.phone ? (
+            <ChangePhoneButton onChanged={(phone) => setFormData((f) => ({ ...f, phone }))} />
+          ) : null}
+        </div>
 
         <Field label="Location">
           <AddressInput

@@ -6,6 +6,7 @@ import { getInitials } from '@/lib/format';
 import { Button, Field, Input, useToast } from '@sureground/ui';
 import { nameOnly } from '@/lib/validations/input';
 import { ChangeEmailButton } from '@/components/shared/security/ChangeEmailButton';
+import { ChangePhoneButton } from '@/components/shared/security/ChangePhoneButton';
 import { agentService } from '@/services/agentService';
 import { unwrap } from '@/lib/apiHelpers';
 import { agentKeys } from '@/lib/queryKeys';
@@ -81,9 +82,20 @@ const ProfileForm = ({
           </Field>
           <ChangeEmailButton onChanged={setEmail} />
         </div>
-        <Field label="Phone number" hint="A new number has to be verified again.">
-          <Input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
-        </Field>
+        <div>
+          <Field
+            label="Phone number"
+            hint={!!initial.phone ? 'Changing it sends a code to the new number.' : undefined}
+          >
+            <Input
+              type="tel"
+              value={phone}
+              readOnly={!!initial.phone}
+              onChange={(e) => setPhone(e.target.value)}
+            />
+          </Field>
+          {!!initial.phone ? <ChangePhoneButton onChanged={setPhone} /> : null}
+        </div>
       </div>
 
       <Button

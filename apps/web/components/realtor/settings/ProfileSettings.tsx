@@ -9,6 +9,7 @@ import { realtorKeys } from '@/lib/queryKeys';
 import { realtorService } from '@/services/realtorService';
 import { nameOnly } from '@/lib/validations/input';
 import { ChangeEmailButton } from '@/components/shared/security/ChangeEmailButton';
+import { ChangePhoneButton } from '@/components/shared/security/ChangePhoneButton';
 
 interface ProfileSettingsProps {
   user: { fullName: string; email: string } | null;
@@ -127,9 +128,20 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
           </Field>
           <ChangeEmailButton onChanged={setEmail} />
         </div>
-        <Field label="Phone number">
-          <Input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
-        </Field>
+        <div>
+          <Field
+            label="Phone number"
+            hint={!!profile?.phone ? 'Changing it sends a code to the new number.' : undefined}
+          >
+            <Input
+              type="tel"
+              value={phone}
+              readOnly={!!profile?.phone}
+              onChange={(e) => setPhone(e.target.value)}
+            />
+          </Field>
+          {!!profile?.phone ? <ChangePhoneButton onChanged={setPhone} /> : null}
+        </div>
         <Field label="Agency / business name" optionalLabel="(optional)">
           <Input
             type="text"

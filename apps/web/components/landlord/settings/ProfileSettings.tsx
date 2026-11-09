@@ -7,6 +7,7 @@ import { Button, Field, Input, SaveButton } from '@sureground/ui';
 import { landlordService } from '@/services/landlordService';
 import { nameOnly } from '@/lib/validations/input';
 import { ChangeEmailButton } from '@/components/shared/security/ChangeEmailButton';
+import { ChangePhoneButton } from '@/components/shared/security/ChangePhoneButton';
 
 interface ProfileSettingsProps {
   user: { fullName: string; email: string } | null;
@@ -16,6 +17,8 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
   const [fullName, setFullName] = useState(user?.fullName || '');
   const [email, setEmail] = useState(user?.email || '');
   const [phone, setPhone] = useState('');
+  // A number already on the account changes only through the verified flow.
+  const [savedPhone, setSavedPhone] = useState('');
   const [companyName, setCompanyName] = useState('');
   const [avatarUrl, setAvatarUrl] = useState<string | undefined>();
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
@@ -28,6 +31,7 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
         setFullName(response.data.fullName);
         setEmail(response.data.email);
         setPhone(response.data.phone || '');
+        setSavedPhone(response.data.phone || '');
         setCompanyName(response.data.companyName || '');
         setAvatarUrl(response.data.avatarUrl);
       }
@@ -105,9 +109,27 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
           </Field>
           <ChangeEmailButton onChanged={setEmail} />
         </div>
-        <Field label="Phone number">
-          <Input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
-        </Field>
+        <div>
+          <Field
+            label="Phone number"
+            hint={!!savedPhone ? 'Changing it sends a code to the new number.' : undefined}
+          >
+            <Input
+              type="tel"
+              value={phone}
+              readOnly={!!savedPhone}
+              onChange={(e) => setPhone(e.target.value)}
+            />
+          </Field>
+          {!!savedPhone ? (
+            <ChangePhoneButton
+              onChanged={(p) => {
+                setPhone(p);
+                setSavedPhone(p);
+              }}
+            />
+          ) : null}
+        </div>
         <Field label="Company / business name" optionalLabel="(optional)">
           <Input
             type="text"
