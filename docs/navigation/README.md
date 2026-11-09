@@ -156,10 +156,19 @@ Also in `screenshots/`: the after version with every group opened (before had no
 
 ## 6. Responsive validation
 
-- **Desktop at 1440px:** sidebar expanded, all groups open, icon rail on, then off again. Checked in the browser for landlord, owner, estate, realtor and agent. Realtor after its regroup: the group holding the current page opens, there is one current link, and the phone bar reads Dashboard, Listings, Clients, Leads, Messages.
-- **Phone at 390px:** bottom bar and drawer for landlord. Checked in the browser.
-- **Tablet at 820px:** landlord checked in the browser (bar, menu button, drawer, Escape, no overflow). Owner, realtor, agent and buyer share the same top bar and shell code. Renter and estate have their own top bars and were reviewed in code only: the bridge would not render below about 1025px wide later in the session.
-- **Not tested:** orientation change, safe-area insets on a real device, and browser back while the drawer is open.
+The VS Code browser renders at 0.8 zoom, so a 390px screen needs a 312px viewport. Earlier
+"stuck at 1,025px" readings were this scaling. Widths below are measured `innerWidth`.
+
+| Role                                    | 390 (phone)                                  | 820 (tablet)                        | 1024        | How                                       |
+| --------------------------------------- | -------------------------------------------- | ----------------------------------- | ----------- | ----------------------------------------- |
+| Landlord, owner, realtor, buyer, estate | No overflow                                  | No overflow                         | No overflow | Signed in, `scrollWidth − innerWidth` = 0 |
+| Agent                                   | Fixed (6dac2be6): menu button was off screen | No overflow                         |             | Same, plus screenshots                    |
+| Renter                                  | Fixed (354584bd): menu button off screen     | Fixed: page scrolled 208px sideways | No overflow | Also 768, 900, 1280: no overflow          |
+
+Phone and tablet screenshots: `screenshots/after-agent-phone.png`, `screenshots/after-agent-tablet.png`.
+Bottom-bar labels cut off at 390px for long names ("Inspectio…", "Verificati…"); readable via the
+accessible name, but shorter labels would help. Not tested: orientation change, safe-area insets on a
+real device, browser back while the drawer is open.
 
 ## 7. Accessibility results (target WCAG 2.2 AA)
 
@@ -210,7 +219,6 @@ Also in `screenshots/`: the after version with every group opened (before had no
    - Still to do: open the backoffice in the browser (the sign-in did not submit in the bridge; check by hand); the icon rail; Title Case labels ("Trust Reviews") against the sentence-case rule. Those labels are also lookup keys in the sidebar code, so change them together.
 2. **More screenshots:** phone and tablet before-and-after (desktop is in section 4).
 3. **Not tested yet:**
-   - tablet top bars for renter and estate
    - orientation change
    - workspace switching with two estates
    - screen readers (VoiceOver on Safari, NVDA on Chrome)
