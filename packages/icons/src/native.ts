@@ -213,6 +213,7 @@ export const MonitorSmartphone = createNativeIcon('MonitorSmartphone', n.Monitor
 export const Moon = createNativeIcon('Moon', n.Moon);
 export const MoreHorizontal = createNativeIcon('MoreHorizontal', n.MoreHorizontal);
 export const MoreVertical = createNativeIcon('MoreVertical', n.MoreVertical);
+export const NairaSign = createNativeIcon('NairaSign', n.NairaSign);
 export const Navigation = createNativeIcon('Navigation', n.Navigation);
 export const Network = createNativeIcon('Network', n.Network);
 export const NotebookPen = createNativeIcon('NotebookPen', n.NotebookPen);

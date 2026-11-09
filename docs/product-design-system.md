@@ -44,7 +44,8 @@ Sureground draws its own icons (`packages/icons`, `@sureground/icons` on web and
 - A branch that still imports Lucide after rebasing runs `pnpm icons:migrate`;
   `pnpm icons:check` fails while any Lucide import is left.
 - A missing icon is drawn in the same style and added to the set; do not pull in
-  another icon library. The set is naira-only: there are no dollar icons.
+  another icon library. The set is naira-only: there are no dollar icons; use
+  `NairaSign` (web and native) for the naira mark.
 
 ## Shared source and checks
 

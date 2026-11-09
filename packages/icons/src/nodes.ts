@@ -2770,6 +2770,11 @@ export const MoreVertical: IconNode = [
   ['rect', { x: 10.86, y: 10.86, width: 2.28, height: 2.28, rx: 0.41 }, 'f'],
   ['rect', { x: 10.86, y: 17.36, width: 2.28, height: 2.28, rx: 0.41 }, 'f'],
 ];
+export const NairaSign: IconNode = [
+  ['path', { d: 'M7.25 19.25V4.75L16.75 19.25V4.75' }, 's'],
+  ['path', { d: 'M4.25 9.75H19.75' }, 's'],
+  ['path', { d: 'M4.25 14.25H19.75' }, 's'],
+];
 export const Navigation: IconNode = [
   ['path', { d: 'M3.75 10.75L20.25 3.75L13.25 20.25L11.25 12.75Z' }, 't'],
   ['path', { d: 'M3.75 10.75L20.25 3.75L13.25 20.25L11.25 12.75Z' }, 's'],

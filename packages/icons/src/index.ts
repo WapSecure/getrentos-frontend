@@ -205,6 +205,7 @@ export const MonitorSmartphone = createIcon('MonitorSmartphone', n.MonitorSmartp
 export const Moon = createIcon('Moon', n.Moon);
 export const MoreHorizontal = createIcon('MoreHorizontal', n.MoreHorizontal);
 export const MoreVertical = createIcon('MoreVertical', n.MoreVertical);
+export const NairaSign = createIcon('NairaSign', n.NairaSign);
 export const Navigation = createIcon('Navigation', n.Navigation);
 export const Network = createIcon('Network', n.Network);
 export const NotebookPen = createIcon('NotebookPen', n.NotebookPen);
