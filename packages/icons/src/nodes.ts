@@ -1216,6 +1216,22 @@ export const Database: IconNode = [
   ['path', { d: 'M4.75 12A7.25 2.75 0 0 0 19.25 12' }, 's'],
   ['rect', { x: 7.1, y: 16.6, width: 1.8, height: 1.8, rx: 0.32 }, 'f'],
 ];
+export const DisclosureCaret: IconNode = [
+  [
+    'path',
+    {
+      d: 'M6.6 9.1H17.4A.9.9 0 0 1 18.05 10.6L12.7 16.25A.95.95 0 0 1 11.3 16.25L5.95 10.6A.9.9 0 0 1 6.6 9.1Z',
+    },
+    't',
+  ],
+  [
+    'path',
+    {
+      d: 'M6.6 9.1H17.4A.9.9 0 0 1 18.05 10.6L12.7 16.25A.95.95 0 0 1 11.3 16.25L5.95 10.6A.9.9 0 0 1 6.6 9.1Z',
+    },
+    's',
+  ],
+];
 export const DoorClosed: IconNode = [
   ['path', { d: 'M5.75 20.25V6.25A3 3 0 0 1 8.75 3.25H14.65L18.25 6.85V20.25' }, 't'],
   ['path', { d: 'M5.75 20.25V6.25A3 3 0 0 1 8.75 3.25H14.65L18.25 6.85V20.25' }, 's'],
@@ -2753,6 +2769,11 @@ export const MoreVertical: IconNode = [
   ['rect', { x: 10.86, y: 4.36, width: 2.28, height: 2.28, rx: 0.41 }, 'f'],
   ['rect', { x: 10.86, y: 10.86, width: 2.28, height: 2.28, rx: 0.41 }, 'f'],
   ['rect', { x: 10.86, y: 17.36, width: 2.28, height: 2.28, rx: 0.41 }, 'f'],
+];
+export const NairaSign: IconNode = [
+  ['path', { d: 'M7.25 19.25V4.75L16.75 19.25V4.75' }, 's'],
+  ['path', { d: 'M4.25 9.75H19.75' }, 's'],
+  ['path', { d: 'M4.25 14.25H19.75' }, 's'],
 ];
 export const Navigation: IconNode = [
   ['path', { d: 'M3.75 10.75L20.25 3.75L13.25 20.25L11.25 12.75Z' }, 't'],
