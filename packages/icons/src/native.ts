@@ -97,6 +97,7 @@ export const Cpu = createNativeIcon('Cpu', n.Cpu);
 export const CreditCard = createNativeIcon('CreditCard', n.CreditCard);
 export const Crown = createNativeIcon('Crown', n.Crown);
 export const Database = createNativeIcon('Database', n.Database);
+export const DisclosureCaret = createNativeIcon('DisclosureCaret', n.DisclosureCaret);
 export const DoorClosed = createNativeIcon('DoorClosed', n.DoorClosed);
 export const DoorOpen = createNativeIcon('DoorOpen', n.DoorOpen);
 export const Download = createNativeIcon('Download', n.Download);

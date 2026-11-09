@@ -90,6 +90,7 @@
   "credit-card": ["CreditCard"],
   "crown": ["Crown"],
   "database": ["Database"],
+  "disclosure-caret": ["DisclosureCaret"],
   "door-closed": ["DoorClosed"],
   "door-open": ["DoorOpen"],
   "download": ["Download"],

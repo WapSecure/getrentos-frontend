@@ -54,7 +54,7 @@ import {
   GitCompareArrows,
   FileCheck2,
   MessageCircleQuestion,
-  ChevronDown,
+  DisclosureCaret,
 } from '@sureground/icons';
 import { ROUTES, unwrap } from '@sureground/shared';
 import { SidebarRailToggle, useSidebarRail } from '@sureground/ui';
@@ -677,7 +677,7 @@ function AdminNavigationGroup({
           }}
         >
           <span className="min-w-0 flex-1 truncate">{label}</span>
-          <ChevronDown
+          <DisclosureCaret
             className={`h-3.5 w-3.5 shrink-0 transition-transform ${expanded ? '' : '-rotate-90'}`}
             aria-hidden="true"
           />

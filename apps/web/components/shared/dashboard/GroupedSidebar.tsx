@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ChevronDown, Lock } from '@sureground/icons';
+import { DisclosureCaret, Lock } from '@sureground/icons';
 import { useCallback, useEffect, useRef, useSyncExternalStore } from 'react';
 import { PLAN_TIER_LABELS } from '@sureground/shared';
 import { SidebarRailToggle, useSidebarRail } from '@sureground/ui';
@@ -206,7 +206,7 @@ function SidebarGroups({
                 onClick={() => setFolded(group.label, open)}
               >
                 <span className="min-w-0 flex-1 truncate">{group.label}</span>
-                <ChevronDown
+                <DisclosureCaret
                   className={`h-3.5 w-3.5 shrink-0 transition-transform ${open ? '' : '-rotate-90'}`}
                   aria-hidden="true"
                 />

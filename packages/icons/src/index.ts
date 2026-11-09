@@ -95,6 +95,7 @@ export const Cpu = createIcon('Cpu', n.Cpu);
 export const CreditCard = createIcon('CreditCard', n.CreditCard);
 export const Crown = createIcon('Crown', n.Crown);
 export const Database = createIcon('Database', n.Database);
+export const DisclosureCaret = createIcon('DisclosureCaret', n.DisclosureCaret);
 export const DoorClosed = createIcon('DoorClosed', n.DoorClosed);
 export const DoorOpen = createIcon('DoorOpen', n.DoorOpen);
 export const Download = createIcon('Download', n.Download);
