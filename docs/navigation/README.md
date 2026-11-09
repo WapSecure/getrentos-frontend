@@ -235,6 +235,44 @@ opened. Counted from the code and the before/after screenshots, not from user se
 - Every hidden link sits under a layout wrapped in `LandAvailabilityGate` (`/owner/land/…`, `/buyer/land/…`, `/land/…`), so a typed land address shows "Land is not available yet" instead of a broken page.
 - Known flicker (code review): `useLandAvailability` treats land as on until the API answers, so with land off the land links show for a moment, then disappear.
 
+## Performance, resilience, rail, keyboard and dark mode (second pass)
+
+**Performance (landlord, dev server, warmed, 1440px).** Same script on `994aa79c^` (before) and `dev`:
+
+|                                            | Before    | After                                                                                     |
+| ------------------------------------------ | --------- | ----------------------------------------------------------------------------------------- |
+| Dashboard load, layout shift (CLS)         | 0.002     | 0.001 (a first run read 0.062, all from dashboard content loading, none from the sidebar) |
+| Sidebar click to new page heading, 5 pages | 118–154ms | 103–148ms                                                                                 |
+| Long tasks during those clicks             | 0         | 0                                                                                         |
+| Layout shifts caused by the sidebar        | 0         | 0                                                                                         |
+
+No navigation-related regression. Dev-server timings; production will be faster.
+
+**Resilience.** Every GET a page makes was made to fail in turn (500), and separately slowed by 5s:
+
+- Before the fixes, a failed notification bell, `/me/subscription` (every sidebar reads it), `/estate/mine`, or the page's own data replaced the whole screen with "Something went wrong", top bar and sidebar included.
+- Fixed in 8cf3ad86, 40d31bb4 and 75fa3ea8:
+  - The bell and plan queries no longer throw.
+  - The estate layout shows its own retry.
+  - Every web role and the backoffice admin segment have an error boundary inside the layout.
+- Re-run: the navigation stays in place for every failure, and page errors show inside the page.
+- Slow responses: the navigation rendered at once.
+
+**Rail, keyboard and dark mode, every web role** (real Tab presses):
+
+| Role     | Sidebar Tab stops, all with focus ring | Rail: links, current page, name on focus | Dark-mode lowest contrast |
+| -------- | -------------------------------------- | ---------------------------------------- | ------------------------- |
+| Landlord | 19                                     | 7, Leases, yes                           | 8.53:1                    |
+| Owner    | 18                                     | 7, Vendors, yes                          | 8.53:1                    |
+| Renter   | 12                                     | 7, Roommates, yes                        | 8.53:1                    |
+| Realtor  | 14                                     | 7, Commissions, yes                      | 8.53:1                    |
+| Agent    | 11                                     | 7, Documents, yes                        | 8.53:1                    |
+| Buyer    | 12                                     | 7, Documents, yes                        | 8.53:1                    |
+| Estate   | 19                                     | 7, Vehicles, yes                         | 8.53:1                    |
+
+The rail is 72px wide in every role. Backoffice rail, keyboard and resilience in the browser: pending
+(the VS Code panel was hidden).
+
 ## 10. Remaining issues and recommendations
 
 1. **Backoffice:**
