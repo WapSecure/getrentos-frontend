@@ -190,11 +190,20 @@ export async function refreshSession(): Promise<boolean> {
 
   refreshPromise = withRefreshLock(async () => {
     try {
-      let res = await postRefresh();
-      if (res.status === 401) {
-        await new Promise((resolve) => setTimeout(resolve, REFRESH_RETRY_DELAY_MS));
+      let res: Response;
+      try {
         res = await postRefresh();
+        if (res.status === 401) {
+          await new Promise((resolve) => setTimeout(resolve, REFRESH_RETRY_DELAY_MS));
+          res = await postRefresh();
+        }
+      } catch {
+        // No answer (offline): not a reason to end the session.
+        return false;
       }
+
+      // The API is down or unreachable: the refresh cookie may still be good, so keep the session.
+      if (res.status >= 500) return false;
 
       // Rate limited: the cookie is still good, so keep the session and wait before trying again.
       if (res.status === 429) {
