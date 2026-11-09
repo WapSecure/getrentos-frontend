@@ -1,20 +1,22 @@
 'use client';
 
 import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CheckCircle2, Circle, Download, TriangleAlert } from 'lucide-react';
 import {
   Alert,
   Badge,
+  Breadcrumbs,
   Button,
   Card,
   CardSkeleton,
   Field,
   Input,
   PageErrorState,
+  PageHeader,
   Select,
   Textarea,
-  PageHeader,
 } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
@@ -35,7 +37,14 @@ const TREATMENT: Record<DepositTreatment, string> = {
  * change took effect, and where the sign-off stands. Each party signs the same
  * frozen pack (its hash), or disputes it instead.
  */
+/** Where a handover sits: under the agency's client engagements, or the landlord's change of manager. */
+const handoverParent = (pathname: string) =>
+  pathname.startsWith('/agency/')
+    ? { label: 'Client engagements', href: '/agency/mandates' }
+    : { label: 'Change manager', href: '/landlord/change-manager' };
+
 export function HandoverView({ transferId }: { transferId: string }) {
+  const pathname = usePathname();
   const queryClient = useQueryClient();
   const [keys, setKeys] = useState('');
   const [deposits, setDeposits] = useState<
@@ -153,6 +162,10 @@ export function HandoverView({ transferId }: { transferId: string }) {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-4 sm:p-6">
+      <Breadcrumbs
+        className="mb-0"
+        items={[handoverParent(pathname), { label: `Handover: ${snap.property.name}` }]}
+      />
       <PageHeader
         title={<>Handover: {snap.property.name}</>}
         description={

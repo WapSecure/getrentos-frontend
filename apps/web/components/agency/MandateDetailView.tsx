@@ -1,13 +1,13 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, FileText, Lock, ShieldCheck, UserRound } from 'lucide-react';
+import { FileText, Lock, ShieldCheck, UserRound } from 'lucide-react';
 import {
   Alert,
   Badge,
+  Breadcrumbs,
   Card,
   CardSkeleton,
   PageErrorState,
@@ -81,15 +81,13 @@ export function MandateDetailView() {
 
   return (
     <div className="mx-auto w-full max-w-4xl space-y-6 px-4 py-6">
-      <div>
-        <Link
-          href="/agency/mandates"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
-          All client engagements
-        </Link>
-      </div>
+      <Breadcrumbs
+        className="mb-0"
+        items={[
+          { label: 'Client engagements', href: '/agency/mandates' },
+          { label: mandate.propertyTitle ?? 'Property' },
+        ]}
+      />
 
       <PageHeader
         title={mandate.propertyTitle ?? 'Property'}

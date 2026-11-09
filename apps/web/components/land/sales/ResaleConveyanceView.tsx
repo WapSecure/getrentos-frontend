@@ -1,11 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Card, PageErrorState, PageHeader, Skeleton } from '@getrentos/ui';
-import { ArrowLeft, Info } from 'lucide-react';
+import { Breadcrumbs, Card, PageErrorState, PageHeader, Skeleton } from '@getrentos/ui';
+import { Info } from 'lucide-react';
 import { ROUTES } from '@getrentos/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { landDeveloperKeys } from '@/lib/landDeveloperQueryKeys';
@@ -84,13 +83,13 @@ export const ResaleConveyanceView = ({ txId }: { txId: string }) => {
 
   return (
     <>
-      <Link
-        href={ROUTES.OWNER_TRANSACTIONS}
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-        Sales in progress
-      </Link>
+      <Breadcrumbs
+        className="mb-0"
+        items={[
+          { label: 'Sales in progress', href: ROUTES.OWNER_TRANSACTIONS },
+          { label: 'Land conveyance' },
+        ]}
+      />
       <PageHeader
         className="mt-2"
         title="Land conveyance"

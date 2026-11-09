@@ -2,18 +2,18 @@
 
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
-import Link from 'next/link';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Building2, Mail, Phone, ShieldCheck, UserRound } from 'lucide-react';
+import { Building2, Mail, Phone, ShieldCheck, UserRound } from 'lucide-react';
 import {
   Badge,
+  Breadcrumbs,
   Button,
   Card,
   Field,
+  PageErrorState,
+  PageLoadingState,
   Select,
   Textarea,
-  PageLoadingState,
-  PageErrorState,
   type BadgeVariant,
   useOptimisticMutation,
   useToast,
@@ -83,13 +83,12 @@ export function AgencyClientDetailView() {
 
   return (
     <div className="mx-auto max-w-3xl p-6">
-      <Link
-        href="/agency/owners"
-        className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        All clients
-      </Link>
+      <Breadcrumbs
+        items={[
+          { label: 'Clients', href: '/agency/owners' },
+          { label: client.ownerName ?? 'Owner' },
+        ]}
+      />
 
       {/* Contact card */}
       <Card className="rounded-2xl p-5">

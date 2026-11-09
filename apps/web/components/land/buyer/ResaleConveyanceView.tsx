@@ -1,10 +1,17 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, EmptyState, PageErrorState, PageHeader, Skeleton, useToast } from '@getrentos/ui';
-import { AlertTriangle, ArrowLeft, Lock, ScrollText } from 'lucide-react';
+import {
+  Alert,
+  Breadcrumbs,
+  EmptyState,
+  PageErrorState,
+  PageHeader,
+  Skeleton,
+  useToast,
+} from '@getrentos/ui';
+import { AlertTriangle, Lock, ScrollText } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { ROUTES } from '@/lib/constants/auth';
 import { buyerLandKeys } from '@/lib/landSalesQueryKeys';
@@ -95,12 +102,13 @@ export const ResaleConveyanceView = ({ txId }: { txId: string }) => {
 
   return (
     <div className="space-y-6">
-      <Link
-        href={ROUTES.BUYER_TRANSACTIONS}
-        className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="h-4 w-4" aria-hidden /> Transactions
-      </Link>
+      <Breadcrumbs
+        className="mb-0"
+        items={[
+          { label: 'Transactions', href: ROUTES.BUYER_TRANSACTIONS },
+          { label: 'Land conveyance' },
+        ]}
+      />
       <PageHeader
         title="Land conveyance"
         description="A land purchase is not complete when the money moves. It is complete when the deed is executed and you have possession."
