@@ -4,6 +4,7 @@ import {
   SMILE_LIVE_CAPTURE_ORIGINS,
   buildContentSecurityPolicy,
   cspHeaderName,
+  cspReportUri,
   httpOrigin,
   isLocalHost,
   mapTiles,
@@ -167,5 +168,27 @@ describe('csp helpers', () => {
       expect(plain).not.toContain('smileidentity');
       expect(plain).not.toContain('worker-src');
     });
+  });
+});
+
+describe('cspReportUri (security gap CI-02)', () => {
+  it('uses CSP_REPORT_URI when set', () => {
+    expect(cspReportUri(' https://reports.example.com/csp ', 'https://api.example.com')).toBe(
+      'https://reports.example.com/csp'
+    );
+  });
+
+  it("defaults to the API's receiver, so a report-only rollout collects data", () => {
+    expect(cspReportUri(undefined, 'https://api.example.com/')).toBe(
+      'https://api.example.com/security/csp-report'
+    );
+    expect(cspReportUri('', 'https://api.example.com/v1')).toBe(
+      'https://api.example.com/v1/security/csp-report'
+    );
+  });
+
+  it('sends nowhere without a usable API URL', () => {
+    expect(cspReportUri(undefined, undefined)).toBeNull();
+    expect(cspReportUri(undefined, 'not a url')).toBeNull();
   });
 });

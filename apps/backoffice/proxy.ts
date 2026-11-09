@@ -4,6 +4,7 @@ import {
   buildContentSecurityPolicy,
   isLocalHost,
   parseOriginList,
+  cspReportUri,
 } from '@getrentos/shared/csp';
 
 const DEV = process.env.NODE_ENV !== 'production';
@@ -50,7 +51,8 @@ export default function proxy(request: NextRequest) {
     // separated; server-only, read at runtime).
     mediaOrigins: parseOriginList(process.env.CSP_MEDIA_ORIGINS),
     upgradeInsecureRequests: secure,
-    reportUri: process.env.CSP_REPORT_URI,
+    // CSP_REPORT_URI, or the API's /security/csp-report receiver by default.
+    reportUri: cspReportUri(process.env.CSP_REPORT_URI, process.env.NEXT_PUBLIC_API_URL),
   });
 
   const requestHeaders = new Headers(request.headers);
