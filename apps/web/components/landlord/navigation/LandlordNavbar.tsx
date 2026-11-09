@@ -11,12 +11,14 @@ import { ROUTES } from '@/lib/constants/auth';
 import { NotificationBell } from '@/components/shared/notifications/NotificationBell';
 import { LandlordAssistant } from '../assistant/LandlordAssistant';
 import { ManagerAssistant } from '@/components/agency/assistant/ManagerAssistant';
+import { useViewerPlanLock } from '@/lib/navigation/gates';
 
 interface LandlordNavbarProps {
   user: { fullName: string; email: string; roles?: string[] } | null;
 }
 
 export const LandlordNavbar = ({ user }: LandlordNavbarProps) => {
+  const isLocked = useViewerPlanLock();
   const router = useRouter();
   const pathname = usePathname();
   // The agency workspace borrows this navbar: there, and for a manager without
@@ -48,6 +50,7 @@ export const LandlordNavbar = ({ user }: LandlordNavbarProps) => {
       }
       profileMenu={<LandlordProfileDropdown user={user} />}
       navigation={landlordNavigation}
+      navigationGates={{ isLocked }}
     />
   );
 };

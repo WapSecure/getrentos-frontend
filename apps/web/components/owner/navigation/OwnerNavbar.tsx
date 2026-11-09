@@ -10,12 +10,15 @@ import { ownerService } from '@/services/ownerService';
 import { ROUTES } from '@/lib/constants/auth';
 import { NotificationBell } from '@/components/shared/notifications/NotificationBell';
 import { OwnerAssistant } from '../assistant/OwnerAssistant';
+import { useNavigationFlags, useViewerPlanLock } from '@/lib/navigation/gates';
 
 interface OwnerNavbarProps {
   user: { fullName: string; email: string } | null;
 }
 
 export const OwnerNavbar = ({ user }: OwnerNavbarProps) => {
+  const flags = useNavigationFlags();
+  const isLocked = useViewerPlanLock();
   const router = useRouter();
 
   return (
@@ -42,6 +45,7 @@ export const OwnerNavbar = ({ user }: OwnerNavbarProps) => {
       }
       profileMenu={<OwnerProfileDropdown user={user} />}
       navigation={ownerNavigation}
+      navigationGates={{ isLocked, flags }}
     />
   );
 };

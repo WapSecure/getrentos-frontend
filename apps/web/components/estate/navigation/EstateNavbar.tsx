@@ -11,12 +11,15 @@ import { EstateSwitcher } from './EstateSwitcher';
 import { EstateAssistant } from '../assistant/EstateAssistant';
 import { RoleMobileNavigation } from '@/components/shared/dashboard/GroupedSidebar';
 import { estateNavigation } from '@/lib/navigation/roles/estate';
+import { estatePlanLock } from '@/lib/navigation/gates';
+import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 
 interface EstateNavbarProps {
   user: { fullName: string; email: string } | null;
 }
 
 export const EstateNavbar = ({ user }: EstateNavbarProps) => {
+  const { estate } = useSelectedEstate();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -73,6 +76,7 @@ export const EstateNavbar = ({ user }: EstateNavbarProps) => {
             </div>
             <RoleMobileNavigation
               config={estateNavigation}
+              gates={{ isLocked: estatePlanLock(estate?.planTier) }}
               onNavigate={() => setIsMobileMenuOpen(false)}
             />
           </motion.div>

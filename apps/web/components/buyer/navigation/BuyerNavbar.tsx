@@ -10,12 +10,14 @@ import { buyerService } from '@/services/buyerService';
 import { ROUTES } from '@/lib/constants/auth';
 import { NotificationBell } from '@/components/shared/notifications/NotificationBell';
 import { BuyerAssistant } from '../assistant/BuyerAssistant';
+import { useNavigationFlags } from '@/lib/navigation/gates';
 
 interface BuyerNavbarProps {
   user: { fullName: string; email: string } | null;
 }
 
 export const BuyerNavbar = ({ user }: BuyerNavbarProps) => {
+  const flags = useNavigationFlags();
   const router = useRouter();
 
   return (
@@ -42,6 +44,7 @@ export const BuyerNavbar = ({ user }: BuyerNavbarProps) => {
       }
       profileMenu={<BuyerProfileDropdown user={user} />}
       navigation={buyerNavigation}
+      navigationGates={{ flags }}
     />
   );
 };

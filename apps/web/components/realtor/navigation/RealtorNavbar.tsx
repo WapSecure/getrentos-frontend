@@ -10,6 +10,7 @@ import { realtorService } from '@/services/realtorService';
 import { ROUTES } from '@/lib/constants/auth';
 import { NotificationBell } from '@/components/shared/notifications/NotificationBell';
 import { RealtorAssistant } from '../assistant/RealtorAssistant';
+import { useViewerPlanLock } from '@/lib/navigation/gates';
 
 interface RealtorNavbarProps {
   user: { fullName: string; email: string } | null;
@@ -18,6 +19,7 @@ interface RealtorNavbarProps {
 const NOTIFICATIONS_PAGE_SIZE = 50;
 
 export const RealtorNavbar = ({ user }: RealtorNavbarProps) => {
+  const isLocked = useViewerPlanLock();
   const router = useRouter();
 
   return (
@@ -47,6 +49,7 @@ export const RealtorNavbar = ({ user }: RealtorNavbarProps) => {
       }
       profileMenu={<RealtorProfileDropdown user={user} />}
       navigation={realtorNavigation}
+      navigationGates={{ isLocked }}
     />
   );
 };

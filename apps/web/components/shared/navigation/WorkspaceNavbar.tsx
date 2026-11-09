@@ -6,7 +6,7 @@ import { Menu, X } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
 import { IconButton, SearchInput, ThemeToggle } from '@sureground/ui';
 import { RoleMobileNavigation } from '@/components/shared/dashboard/GroupedSidebar';
-import type { RoleNavigationConfig } from '@/lib/navigation/types';
+import type { NavigationGates, RoleNavigationConfig } from '@/lib/navigation/types';
 
 interface WorkspaceNavbarProps {
   search: {
@@ -19,6 +19,7 @@ interface WorkspaceNavbarProps {
   notifications: ReactNode;
   profileMenu: ReactNode;
   navigation: RoleNavigationConfig;
+  navigationGates?: NavigationGates;
 }
 
 export const WorkspaceNavbar = ({
@@ -28,6 +29,7 @@ export const WorkspaceNavbar = ({
   notifications,
   profileMenu,
   navigation,
+  navigationGates,
 }: WorkspaceNavbarProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isScrolled, setIsScrolled] = useState(false);
@@ -99,6 +101,7 @@ export const WorkspaceNavbar = ({
           >
             <RoleMobileNavigation
               config={navigation}
+              gates={navigationGates}
               onNavigate={() => setIsMobileMenuOpen(false)}
             />
           </motion.div>

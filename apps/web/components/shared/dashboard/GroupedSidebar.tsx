@@ -76,7 +76,7 @@ const subscribe = (onChange: () => void) => {
   listeners.add(onChange);
   // Folded in another tab: forget what we cached so the next read sees it.
   const onStorage = (e: StorageEvent) => {
-    if (e.key?.startsWith('sureground.sidebar.collapsed:')) {
+    if (e.key?.startsWith('sureground.sidebar.collapsed-v2:')) {
       cache.clear();
       onChange();
     }
@@ -420,12 +420,13 @@ export function RoleSidebar({
   );
 }
 
-/** The phone drawer: ungated, as it has always been, so locked and flagged pages still appear here. */
 export function RoleMobileNavigation({
   config,
+  gates,
   onNavigate,
 }: {
   config: RoleNavigationConfig;
+  gates?: NavigationGates;
   onNavigate: () => void;
 }) {
   const { t } = useLanguage();
@@ -434,7 +435,7 @@ export function RoleMobileNavigation({
       ariaLabel={config.ariaLabel}
       workspaceLabel={config.workspaceLabel}
       dashboardHref={config.dashboardHref}
-      groups={resolveRoleNavigation(config, t)}
+      groups={resolveRoleNavigation(config, t, gates)}
       onNavigate={onNavigate}
     />
   );
