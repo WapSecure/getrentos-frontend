@@ -57,9 +57,7 @@ The run found and fixed:
 Some runs failed for test-harness reasons: the browser panel lost focus, or one request
 failed in the CORS workaround. Every affected page was re-run until it gave a clean result.
 
-Backoffice: not in the matrix. Seed admin accounts cannot sign in without two-factor
-set up (security programme), so the backoffice sidebar and icon rail have not been opened
-in a browser.
+Backoffice: not in the matrix yet. A test admin now has two-factor (needed for every admin page), but the backoffice sign-in in the browser bridge did not submit, so the backoffice pages have not been opened in a browser.
 
 ## 3. Information architecture
 
@@ -196,7 +194,9 @@ Also in `screenshots/`: the after version with every group opened (before had no
 
 ## 10. Remaining issues and recommendations
 
-1. **Backoffice:** sign in with a two-factor-enabled admin, then review the sidebar and icon rail against the brief's administrator priorities.
+1. **Backoffice:**
+   - Done: groups fixed in code (89c728bb), and the test admin `qa-audit-staff-backoffice-admin` now has two-factor.
+   - Still to do: open the backoffice in the browser (the sign-in did not submit in the bridge; check by hand); the icon rail; Title Case labels ("Trust Reviews") against the sentence-case rule. Those labels are also lookup keys in the sidebar code, so change them together.
 2. **More screenshots:** phone and tablet before-and-after (desktop is in section 4).
 3. **Not tested yet:**
    - tablet top bars for renter and estate
