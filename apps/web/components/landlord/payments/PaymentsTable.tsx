@@ -27,7 +27,7 @@ export const PaymentsTable = ({ payments, onViewDetails }: PaymentsTableProps) =
               <th className="px-4 py-3 font-medium text-muted-foreground">Amount</th>
               <th className="px-4 py-3 font-medium text-muted-foreground">Due date</th>
               <th className="px-4 py-3 font-medium text-muted-foreground">Payment status</th>
-              <th className="px-4 py-3 font-medium text-muted-foreground">Escrow</th>
+              <th className="px-4 py-3 font-medium text-muted-foreground">Payment Protection</th>
               <th className="px-4 py-3 font-medium text-muted-foreground">Payout</th>
               <th className="px-4 py-3" />
             </tr>
@@ -44,8 +44,11 @@ export const PaymentsTable = ({ payments, onViewDetails }: PaymentsTableProps) =
                   <td className="px-4 py-3 font-medium text-foreground whitespace-nowrap">
                     {payment.tenantName}
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
-                    {payment.propertyName} • {payment.unitName}
+                  {/* Property and unit on two lines, so the row fits a laptop screen
+                      without scrolling sideways to reach View details. */}
+                  <td className="px-4 py-3 text-muted-foreground">
+                    <span className="block text-foreground">{payment.propertyName}</span>
+                    <span className="block text-xs">{payment.unitName}</span>
                   </td>
                   <td className="px-4 py-3 text-foreground font-medium whitespace-nowrap">
                     {formatCurrency(payment.amount)}
