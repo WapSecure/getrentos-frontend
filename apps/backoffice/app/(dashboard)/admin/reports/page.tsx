@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Users, ShieldCheck, TrendingUp, FileSpreadsheet, Check } from 'lucide-react';
-import { NairaSign } from '@getrentos/ui/NairaSign';
+import { NairaSign } from '@sureground/ui/NairaSign';
 import {
   Button,
   Card,
@@ -15,11 +15,11 @@ import {
   Skeleton,
   StatGridSkeleton,
   useToast,
-} from '@getrentos/ui';
-import { StatCard, type StatCardAccent } from '@getrentos/ui';
-import { formatCurrency } from '@getrentos/shared';
+} from '@sureground/ui';
+import { StatCard, type StatCardAccent } from '@sureground/ui';
+import { formatCurrency } from '@sureground/shared';
 import { adminService } from '@/services/adminService';
-import { unwrap } from '@getrentos/shared';
+import { unwrap } from '@sureground/shared';
 import { adminKeys } from '@/lib/queryKeys';
 
 // recharts is heavy: load it only when the reports page mounts.

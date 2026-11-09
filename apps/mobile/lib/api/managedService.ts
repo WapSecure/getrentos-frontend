@@ -1,10 +1,10 @@
 import { apiFetch } from './client';
-import type { BadgeTone } from '@getrentos/ui-native';
+import type { BadgeTone } from '@sureground/ui-native';
 
 /**
- * Getting a property managed: by GetRentos (an intake: request, site visit,
+ * Getting a property managed: by Sureground (an intake: request, site visit,
  * proposal, acceptance signs the mandate) or by a vetted firm (a mandate the
- * firm accepts and GetRentos verifies). Either way it is an ordinary mandate.
+ * firm accepts and Sureground verifies). Either way it is an ordinary mandate.
  */
 
 export type ServicingTier = 'COLLECT_ONLY' | 'COLLECT_MAINTAIN' | 'FULL_MANAGEMENT';
@@ -67,8 +67,8 @@ export type MandateStatus =
 export const MANDATE_STATUS: Record<MandateStatus, { label: string; tone: BadgeTone }> = {
   DRAFT: { label: 'Draft', tone: 'neutral' },
   PENDING_OWNER: { label: 'Awaiting your signature', tone: 'warning' },
-  PENDING_OPS: { label: 'With GetRentos for review', tone: 'warning' },
-  ACTIVE: { label: 'Managed by GetRentos', tone: 'success' },
+  PENDING_OPS: { label: 'With Sureground for review', tone: 'warning' },
+  ACTIVE: { label: 'Managed by Sureground', tone: 'success' },
   SUSPENDED: { label: 'Paused', tone: 'warning' },
   TERMINATED: { label: 'Ended', tone: 'neutral' },
   EXPIRED: { label: 'Expired', tone: 'neutral' },
@@ -78,7 +78,7 @@ export const MANDATE_STATUS: Record<MandateStatus, { label: string; tone: BadgeT
 export interface Mandate {
   id: string;
   propertyId: string;
-  managerIsGetRentos: boolean;
+  managerIsSureground: boolean;
   managerOrganizationName?: string | null;
   managerName?: string | null;
   deliveryPartnerName?: string | null;
@@ -202,7 +202,7 @@ export const isPendingMandate = (m: Mandate) => PENDING.includes(m.status);
 
 /** Where one property stands, from the owner's newest mandate and newest request on it. */
 export type PropertyState =
-  | { kind: 'getrentos'; mandate: Mandate; settingUp: ManagedIntake | null }
+  | { kind: 'sureground'; mandate: Mandate; settingUp: ManagedIntake | null }
   | { kind: 'firm'; mandate: Mandate; openIntake: ManagedIntake | null }
   | { kind: 'winding-down'; mandate: Mandate }
   | { kind: 'requested'; intake: ManagedIntake }
@@ -219,10 +219,10 @@ export function propertyState(
   const openIntake = intake && OPEN_INTAKE.includes(intake.status) ? intake : null;
 
   if (mandate && isLive(mandate)) {
-    if (mandate.managerIsGetRentos) {
+    if (mandate.managerIsSureground) {
       const settingUp =
         mandate.status !== 'ACTIVE' && intake?.status === 'ACCEPTED' ? intake : null;
-      return { kind: 'getrentos', mandate, settingUp };
+      return { kind: 'sureground', mandate, settingUp };
     }
     return { kind: 'firm', mandate, openIntake };
   }

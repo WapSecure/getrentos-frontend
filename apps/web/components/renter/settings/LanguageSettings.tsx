@@ -1,7 +1,7 @@
 'use client';
 
 import { Globe } from 'lucide-react';
-import { RadioGroup } from '@getrentos/ui';
+import { RadioGroup } from '@sureground/ui';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 export const LanguageSettings = () => {

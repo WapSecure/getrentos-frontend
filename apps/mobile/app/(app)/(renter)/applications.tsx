@@ -16,7 +16,7 @@ import {
   Skeleton,
   Text,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { formatDate } from '@/lib/format';
 import {

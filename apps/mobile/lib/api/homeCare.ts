@@ -77,7 +77,7 @@ export interface InvoiceLine {
 export interface InvoicePaymentPreview {
   invoiceId: string;
   invoiceTotal: number;
-  /** Paid from the money GetRentos holds for the owner. */
+  /** Paid from the money Sureground holds for the owner. */
   fromHeldFunds: number;
   /** The shortfall paid by card. */
   topUp: number;
@@ -189,7 +189,7 @@ export interface Unit {
 
 export type WorkOrderView = 'open' | 'resolved' | 'cancelled';
 
-/** Worked out by GetRentos before approving a vendor's invoice. */
+/** Worked out by Sureground before approving a vendor's invoice. */
 export interface InvoiceCheck {
   invoiceId: string;
   checks: { level: 'ok' | 'watch' | 'concern'; text: string }[];
@@ -300,7 +300,7 @@ export const homeCareApi = {
     }),
   /**
    * How paying would split, before anything is paid: what comes from the money
-   * GetRentos holds for the owner, and what a card top-up (with its fee, for
+   * Sureground holds for the owner, and what a card top-up (with its fee, for
    * `provider`) would cover. A preview: worked out again when the invoice is paid.
    */
   invoicePaymentPreview: (invoiceId: string, provider?: PaymentProvider) =>

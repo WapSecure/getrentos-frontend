@@ -1,6 +1,6 @@
 'use client';
 
-import { Skeleton } from '@getrentos/ui';
+import { Skeleton } from '@sureground/ui';
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { Footer } from '@/components/layout/Footer';

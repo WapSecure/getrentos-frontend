@@ -1,4 +1,4 @@
-import type { BadgeVariant } from '@getrentos/ui';
+import type { BadgeVariant } from '@sureground/ui';
 import type {
   LandInstallmentStatus,
   LandLayoutStatus,

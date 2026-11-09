@@ -3,8 +3,8 @@
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { CircleAlert, ShieldAlert, ShieldCheck } from 'lucide-react';
-import { Badge, EmptyState, QueryState, PageHeader } from '@getrentos/ui';
-import { unwrap } from '@getrentos/shared';
+import { Badge, EmptyState, QueryState, PageHeader } from '@sureground/ui';
+import { unwrap } from '@sureground/shared';
 import { useAdminUser } from '../../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
 import { landQueryKeys } from '@/lib/landDiligence';

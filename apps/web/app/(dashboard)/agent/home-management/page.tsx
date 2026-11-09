@@ -1,7 +1,7 @@
 'use client';
 
 import { HomeManagementWorkspace } from '@/components/home-management/HomeManagementWorkspace';
-import { PageHeader } from '@getrentos/ui';
+import { PageHeader } from '@sureground/ui';
 
 /**
  * A field agent granted an ACTIVE manage mandate operates the property here.

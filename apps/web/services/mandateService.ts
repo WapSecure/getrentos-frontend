@@ -11,7 +11,7 @@ import { authFetch, safeCall, type ApiResponse } from '@/lib/apiHelpers';
  *
  * `managing()` is the client switcher. The backend's own summary for that route
  * is "the client switcher", because it returns every mandate the caller manages —
- * as a named operator, as a member of the appointed firm, or as GetRentos staff on
+ * as a named operator, as a member of the appointed firm, or as Sureground staff on
  * a platform mandate — including the ones not yet live, so a manager can see the
  * engagement they are waiting on and the one that just ended.
  */
@@ -53,7 +53,7 @@ export type MandateStatus = (typeof MANDATE_STATUSES)[number];
 export const MANDATE_STATUS_LABELS: Record<MandateStatus, string> = {
   DRAFT: 'Draft',
   PENDING_OWNER: "Waiting for the owner's signature",
-  PENDING_OPS: 'Waiting for GetRentos to verify',
+  PENDING_OPS: 'Waiting for Sureground to verify',
   ACTIVE: 'Active',
   SUSPENDED: 'Suspended',
   TERMINATED: 'Ended',
@@ -100,7 +100,7 @@ export interface MandateViewerPermissions {
 
 export type ServicingTier = 'COLLECT_ONLY' | 'COLLECT_MAINTAIN' | 'FULL_MANAGEMENT';
 
-/** A published GetRentos Managed tier, as returned by the fee-card endpoint. */
+/** A published Sureground Managed tier, as returned by the fee-card endpoint. */
 export interface ManagedTierCard {
   tier: ServicingTier;
   name: string;
@@ -120,8 +120,8 @@ export interface ManagementMandateDto {
   ownerName?: string | null;
   managerOrganizationId: string | null;
   managerOrganizationName?: string | null;
-  managerIsGetRentos: boolean;
-  /** A vetted firm delivering a GetRentos-managed engagement locally, if any. */
+  managerIsSureground: boolean;
+  /** A vetted firm delivering a Sureground-managed engagement locally, if any. */
   deliveryPartnerOrganizationId?: string | null;
   deliveryPartnerName?: string | null;
   servicingTier: ServicingTier | null;
@@ -176,10 +176,10 @@ export interface MandateTerminationRequestDto {
 
 export interface CreateMandateInput {
   propertyId: string;
-  /** A third-party firm. Mutually exclusive with `managerIsGetRentos`. */
+  /** A third-party firm. Mutually exclusive with `managerIsSureground`. */
   managerOrganizationId?: string | null;
-  /** GetRentos itself as the manager of record. */
-  managerIsGetRentos?: boolean;
+  /** Sureground itself as the manager of record. */
+  managerIsSureground?: boolean;
   managerUserId?: string | null;
   scope: MandateScope[];
   feeConfigId?: string | null;
@@ -202,7 +202,7 @@ export function managedFeeCard(): Promise<ApiResponse<ManagedTierCard[]>> {
   return safeCall(() => authFetch<ManagedTierCard[]>('/management-mandates/managed/fee-card'));
 }
 
-/** A row of GetRentos Managed's published SLA, by maintenance priority. */
+/** A row of Sureground Managed's published SLA, by maintenance priority. */
 export interface ManagedSlaTarget {
   priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
   responseTargetMinutes: number;
@@ -360,7 +360,7 @@ export function pendingTerminationRequests(
 /**
  * Ask to end an engagement.
  *
- * Not a termination: when GetRentos is the manager this needs a second staff
+ * Not a termination: when Sureground is the manager this needs a second staff
  * member to approve it, so the request is the whole point. Where the manager is a
  * third-party firm the backend decides whether to apply it directly.
  */
@@ -380,7 +380,7 @@ export function requestTermination(
  * Approve a termination request — the checker half of maker/checker.
  *
  * Takes no request id: an open request is unambiguous. Must be a DIFFERENT staff
- * member from the one who raised it, and when GetRentos is the manager the agreed
+ * member from the one who raised it, and when Sureground is the manager the agreed
  * notice period binds us too, so skipping it needs `force` plus a note.
  */
 export function approveTermination(

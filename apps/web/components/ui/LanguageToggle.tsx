@@ -1,6 +1,6 @@
 'use client';
 
-import { LanguageToggle as BaseLanguageToggle } from '@getrentos/ui';
+import { LanguageToggle as BaseLanguageToggle } from '@sureground/ui';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { languageLabels, type Language } from '@/lib/i18n/translations';
 

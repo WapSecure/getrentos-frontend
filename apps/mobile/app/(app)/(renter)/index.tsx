@@ -34,7 +34,7 @@ import {
   Skeleton,
   Text,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { RefreshFailedNotice } from '@/components/RefreshFailedNotice';
 import { MetricGrid } from '@/components/dashboard/MetricGrid';
@@ -53,7 +53,7 @@ import { useSavedListings } from '@/hooks/useSavedListings';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { firstName } from '@/lib/format';
 import { withTrustLabel } from '@/lib/trustLabel';
-import { trustChainLabel } from '@getrentos/shared';
+import { trustChainLabel } from '@sureground/shared';
 
 interface Metric {
   key: keyof RenterDashboardStats;
@@ -156,7 +156,7 @@ export default function RenterHome() {
           <View style={{ flexDirection: 'row', gap: 4 }}>
             <IconButton
               onPress={() => router.push('/(app)/ask')}
-              accessibilityLabel="Ask GetRentos"
+              accessibilityLabel="Ask Sureground"
               icon={<MessageCircleQuestion size={21} color={colors.foreground} />}
             />
             <IconButton

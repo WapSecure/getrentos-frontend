@@ -3,7 +3,7 @@
 import { useCallback } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import type { ElementType } from 'react';
-import { Tabs, TabsList, TabsTrigger } from '@getrentos/ui';
+import { Tabs, TabsList, TabsTrigger } from '@sureground/ui';
 
 export interface HubTab {
   id: string;

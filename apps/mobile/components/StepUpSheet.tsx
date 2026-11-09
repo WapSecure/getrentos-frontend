@@ -11,8 +11,8 @@ import {
   Text,
   TextField,
   useTheme,
-} from '@getrentos/ui-native';
-import { cleanSecondFactorInput, isSecondFactorCode } from '@getrentos/shared';
+} from '@sureground/ui-native';
+import { cleanSecondFactorInput, isSecondFactorCode } from '@sureground/shared';
 import { Sheet } from '@/components/Sheet';
 import { securityApi, type StepUpMethod } from '@/lib/api/security';
 import { errorMessage } from '@/lib/api/client';

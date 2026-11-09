@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Button, ConfirmDialog, EmptyState, PageErrorState, Skeleton } from '@getrentos/ui';
+import { Button, ConfirmDialog, EmptyState, PageErrorState, Skeleton } from '@sureground/ui';
 import { Construction } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import {
@@ -56,7 +56,7 @@ export const BuyerEstateInfrastructure = ({
     onSuccess: (next, input) =>
       done(
         input.response === 'OBJECTED'
-          ? 'Objection sent. GetRentos will review the change before it applies.'
+          ? 'Objection sent. Sureground will review the change before it applies.'
           : 'Thanks, your answer is recorded.'
       )(next),
     onError: fail,
@@ -64,7 +64,7 @@ export const BuyerEstateInfrastructure = ({
   const dispute = useMutation({
     mutationFn: (commitmentId: string) =>
       unwrap(landEstateInfrastructureService.dispute(purchaseId, commitmentId, reason)),
-    onSuccess: done('Dispute sent. GetRentos will check the delivery.'),
+    onSuccess: done('Dispute sent. Sureground will check the delivery.'),
     onError: fail,
   });
 
@@ -149,8 +149,8 @@ export const BuyerEstateInfrastructure = ({
         title={pending?.kind === 'object' ? 'Object to this change' : 'Dispute the delivery'}
         description={
           pending?.kind === 'object'
-            ? 'GetRentos reviews every objection before the change can apply. Say what you were promised and why the change affects you.'
-            : 'GetRentos will ask the developer for evidence and may visit. Say what is missing on the ground.'
+            ? 'Sureground reviews every objection before the change can apply. Say what you were promised and why the change affects you.'
+            : 'Sureground will ask the developer for evidence and may visit. Say what is missing on the ground.'
         }
         confirmLabel={pending?.kind === 'object' ? 'Send objection' : 'Send dispute'}
         tone="primary"

@@ -13,9 +13,9 @@ import {
 import { RefreshCcw, TrendingUp } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { adminService } from '@/services/adminService';
-import { unwrap } from '@getrentos/shared';
+import { unwrap } from '@sureground/shared';
 import { adminKeys } from '@/lib/queryKeys';
-import { Badge, Button, Card, Skeleton } from '@getrentos/ui';
+import { Badge, Button, Card, Skeleton } from '@sureground/ui';
 
 interface GrowthPoint {
   month: string;

@@ -1,7 +1,7 @@
 'use client';
 
 import { LayoutGrid, List } from 'lucide-react';
-import { SegmentedControl, Select, ToggleChip } from '@getrentos/ui';
+import { SegmentedControl, Select, ToggleChip } from '@sureground/ui';
 
 interface SavedPropertiesFiltersProps {
   viewMode: 'grid' | 'list';

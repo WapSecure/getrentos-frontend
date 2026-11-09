@@ -10,8 +10,8 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-} from '@getrentos/ui';
-import { ROUTES, logoutSession, getInitials } from '@getrentos/shared';
+} from '@sureground/ui';
+import { ROUTES, logoutSession, getInitials } from '@sureground/shared';
 
 interface AdminProfileDropdownProps {
   user: { fullName: string; email: string } | null;

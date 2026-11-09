@@ -11,7 +11,7 @@ export const SUPPORT = {
   phone: process.env.NEXT_PUBLIC_SUPPORT_PHONE?.trim() || '',
   whatsapp: process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP?.trim() || '',
   hours: process.env.NEXT_PUBLIC_SUPPORT_HOURS?.trim() || '',
-  email: process.env.NEXT_PUBLIC_SUPPORT_EMAIL?.trim() || 'support@getrentos.com',
+  email: process.env.NEXT_PUBLIC_SUPPORT_EMAIL?.trim() || 'support@getsureground.io',
 };
 
 export const telLink = (phone: string) => `tel:${phone.replace(/[^\d+]/g, '')}`;

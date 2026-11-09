@@ -10,7 +10,7 @@ import {
   YAxis,
   type TooltipProps,
 } from 'recharts';
-import { Card } from '@getrentos/ui';
+import { Card } from '@sureground/ui';
 import type { AiUsageDay } from '@/types/admin';
 
 /** "6 Nov" from a Lagos YYYY-MM-DD day, without the viewer's time zone shifting it. */

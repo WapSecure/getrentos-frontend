@@ -11,13 +11,13 @@ import {
   PmKpiPack,
   Select,
   StatGridSkeleton,
-} from '@getrentos/ui';
-import { recentMonthOptions } from '@getrentos/shared';
+} from '@sureground/ui';
+import { recentMonthOptions } from '@sureground/shared';
 import { agencyDashboardService } from '@/services/agencyDashboardService';
 
 /**
  * The firm's KPI pack over a run of months: collection, arrears, occupancy,
- * repairs, owner payouts and retention. The same figures GetRentos ops see for
+ * repairs, owner payouts and retention. The same figures Sureground ops see for
  * the firm, so there is one version of how the firm is doing.
  */
 export function AgencyPerformanceView() {

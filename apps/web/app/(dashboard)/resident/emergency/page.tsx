@@ -14,7 +14,7 @@ import {
   type RadioOption,
   Textarea,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { estateResidentService } from '@/services/estateResidentService';
 import { unwrap, unwrapOptional } from '@/lib/apiHelpers';
 import { estateResidentKeys } from '@/lib/queryKeys';

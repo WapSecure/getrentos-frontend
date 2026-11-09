@@ -46,7 +46,7 @@ export interface BuyerPropertyListing {
   image?: string;
   /** Signed link to the seller's video tour (valid for a few hours). */
   videoTourUrl?: string;
-  /** The tour was filmed in the GetRentos app at the property. */
+  /** The tour was filmed in the Sureground app at the property. */
   videoTourFilmedOnSite?: boolean;
 }
 

@@ -1,4 +1,4 @@
-import type { PlanTier, VisitorIdDocumentType } from '@getrentos/shared';
+import type { PlanTier, VisitorIdDocumentType } from '@sureground/shared';
 
 export interface Estate {
   id: string;

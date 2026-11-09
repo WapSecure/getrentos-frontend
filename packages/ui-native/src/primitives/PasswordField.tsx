@@ -2,7 +2,7 @@ import { forwardRef, useMemo } from 'react';
 import { StyleSheet, View, type TextInput } from 'react-native';
 import { useTheme } from '../theme';
 import { Text } from './Text';
-import { AUTH_CONSTANTS } from '@getrentos/shared';
+import { AUTH_CONSTANTS } from '@sureground/shared';
 import { TextField, type TextFieldProps } from './TextField';
 
 export function passwordStrength(pw: string): 0 | 1 | 2 | 3 | 4 {

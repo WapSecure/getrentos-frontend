@@ -16,7 +16,7 @@ import { formatCurrency } from '@/lib/format';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
-import { Card, EmptyState, Skeleton } from '@getrentos/ui';
+import { Card, EmptyState, Skeleton } from '@sureground/ui';
 
 interface DuesPoint {
   month: string;

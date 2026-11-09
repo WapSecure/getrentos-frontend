@@ -1,10 +1,10 @@
 'use client';
 
-import { Alert, Badge, Button, IconButton, Input, Skeleton } from '@getrentos/ui';
+import { Alert, Badge, Button, IconButton, Input, Skeleton } from '@sureground/ui';
 
 import { useState } from 'react';
 import { Send, MessageCircle, Check, CheckCheck } from 'lucide-react';
-import { getInitials } from '@getrentos/shared';
+import { getInitials } from '@sureground/shared';
 import { format } from 'date-fns';
 
 export interface ThreadMessage {

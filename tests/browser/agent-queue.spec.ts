@@ -1,15 +1,15 @@
 import { test, expect, type Page } from '@playwright/test';
 
 test.setTimeout(90_000);
-const textQueueKey = 'getrentos.agent.offline-queue';
+const textQueueKey = 'sureground.agent.offline-queue';
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
-    if (localStorage.getItem('getrentos_auth_token')) return;
+    if (localStorage.getItem('sureground_auth_token')) return;
     const token = `test.${btoa(JSON.stringify({ exp: Math.floor(Date.now() / 1000) + 3600 }))}.test`;
-    localStorage.setItem('getrentos_auth_token', token);
+    localStorage.setItem('sureground_auth_token', token);
     localStorage.setItem(
-      'getrentos_user',
+      'sureground_user',
       JSON.stringify({
         id: 'agent-queue-test',
         fullName: 'Queue Tester',
@@ -138,7 +138,7 @@ for (const { type, binary } of [
 
     allowSave = true;
     await page.getByRole('button', { name: 'Sync All', exact: true }).click();
-    await expect(page.getByText('1 record saved to GetRentos.')).toBeVisible();
+    await expect(page.getByText('1 record saved to Sureground.')).toBeVisible();
     await expect.poll(() => queuedCount(page, binary)).toBe(0);
     expect(saved).toBe(1);
     if (binary) {
@@ -211,10 +211,10 @@ test('reconnect and manual retry share one upload', async ({ page }) => {
 
 async function switchAccount(page: Page, id: string) {
   await page.evaluate((id) => {
-    const user = JSON.parse(localStorage.getItem('getrentos_user')!);
-    localStorage.setItem('getrentos_user', JSON.stringify({ ...user, id }));
+    const user = JSON.parse(localStorage.getItem('sureground_user')!);
+    localStorage.setItem('sureground_user', JSON.stringify({ ...user, id }));
     localStorage.setItem(
-      'getrentos_auth_token',
+      'sureground_auth_token',
       `test.${btoa(JSON.stringify({ sub: id, exp: Math.floor(Date.now() / 1000) + 3600 }))}.test`
     );
     window.dispatchEvent(new Event('storage'));

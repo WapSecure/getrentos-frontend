@@ -12,8 +12,8 @@ import {
   Pagination,
   Skeleton,
   PageHeader,
-} from '@getrentos/ui';
-import { formatCurrency, formatDate } from '@getrentos/shared';
+} from '@sureground/ui';
+import { formatCurrency, formatDate } from '@sureground/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import { CollectionPlanPanel } from '@/components/shared/collections/CollectionPlanPanel';

@@ -1,7 +1,7 @@
 'use client';
 
 import { MessageCircle } from 'lucide-react';
-import { Card, EmptyState, ListSkeleton, SearchInput } from '@getrentos/ui';
+import { Card, EmptyState, ListSkeleton, SearchInput } from '@sureground/ui';
 import { getInitials, formatRelativeTime } from '@/lib/format';
 
 export interface Conversation {

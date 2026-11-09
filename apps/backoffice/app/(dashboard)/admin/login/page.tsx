@@ -1,6 +1,6 @@
 'use client';
 
-import { ThemeToggle } from '@getrentos/ui';
+import { ThemeToggle } from '@sureground/ui';
 import { AdminSignInForm } from '@/components/auth/AdminSignIn/AdminSignInForm';
 
 // The customer app is a separate origin (its own app in the monorepo), so this

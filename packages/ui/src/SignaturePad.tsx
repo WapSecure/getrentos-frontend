@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from 'react';
 import { Eraser, PenLine, Upload } from 'lucide-react';
-import { cn } from '@getrentos/shared';
+import { cn } from '@sureground/shared';
 
 interface SignaturePadProps {
   onChange: (dataUrl: string | null) => void;

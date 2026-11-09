@@ -17,7 +17,7 @@ import {
   useToast,
   type BadgeVariant,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import {
   spendApprovalService,
   SPEND_APPROVAL_STATUS_LABELS,

@@ -14,8 +14,8 @@ import {
   PageHeader,
   Select,
   useToast,
-} from '@getrentos/ui';
-import type { AddressValue } from '@getrentos/shared';
+} from '@sureground/ui';
+import type { AddressValue } from '@sureground/shared';
 import { NIGERIA_STATES } from '@/lib/constants/locations';
 import { AddressInput } from '@/components/shared/location/AddressInput';
 import { getStoredUser, updateStoredUser } from '@/lib/authStorage';
@@ -109,9 +109,9 @@ const fromFirm = (firm: AgencyOnboarding): AgencyProfileInput => ({
 });
 
 /**
- * Starting a property management firm on GetRentos, and seeing where its
+ * Starting a property management firm on Sureground, and seeing where its
  * business verification stands. A firm can set up its team and clients while it
- * waits; GetRentos checks the CAC registration before it can receive payouts or
+ * waits; Sureground checks the CAC registration before it can receive payouts or
  * appear in the owners' vetted-firms directory.
  */
 export function AgencySetupView() {
@@ -231,7 +231,7 @@ export function AgencySetupView() {
       if (!res.success) throw new Error(res.error || 'Could not submit.');
       return res.data;
     },
-    onSuccess: (next) => onSaved(next, 'Sent to GetRentos for verification.'),
+    onSuccess: (next) => onSaved(next, 'Sent to Sureground for verification.'),
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -254,8 +254,8 @@ export function AgencySetupView() {
         title={firm ? firm.name : 'Start your property management firm'}
         description={
           firm
-            ? 'Your firm’s registration with GetRentos.'
-            : 'Manage properties for owners on GetRentos. Set up now; GetRentos verifies your CAC registration before you can receive payouts or appear to owners.'
+            ? 'Your firm’s registration with Sureground.'
+            : 'Manage properties for owners on Sureground. Set up now; Sureground verifies your CAC registration before you can receive payouts or appear to owners.'
         }
       />
 
@@ -447,7 +447,7 @@ function StatusCard({ firm }: { firm: AgencyOnboarding }) {
         <div>
           <p className="font-medium text-foreground">Suspended</p>
           <p className="text-sm text-muted-foreground">
-            GetRentos has suspended this firm. Contact support to resolve it.
+            Sureground has suspended this firm. Contact support to resolve it.
           </p>
         </div>
       </Card>
@@ -478,7 +478,7 @@ function StatusCard({ firm }: { firm: AgencyOnboarding }) {
         <div className="flex items-center gap-2">
           <p className="font-medium text-foreground">
             {kyb === 'SUBMITTED'
-              ? 'With GetRentos for verification'
+              ? 'With Sureground for verification'
               : kyb === 'REJECTED'
                 ? 'Needs changes'
                 : 'Verification not submitted yet'}
@@ -489,7 +489,7 @@ function StatusCard({ firm }: { firm: AgencyOnboarding }) {
           {kyb === 'SUBMITTED'
             ? `Submitted ${firm.profile?.kybSubmittedAt ? formatDate(firm.profile.kybSubmittedAt) : ''}. You can keep setting up your team and clients meanwhile.`
             : kyb === 'REJECTED'
-              ? `GetRentos said: ${firm.profile?.kybDecisionNote ?? 'please check your details'}. Fix them below and submit again.`
+              ? `Sureground said: ${firm.profile?.kybDecisionNote ?? 'please check your details'}. Fix them below and submit again.`
               : 'Fill in your details, upload the CAC certificate and submit. Until then you can set up, but not receive payouts.'}
         </p>
         <Link href="/agency" className="mt-2 inline-block text-sm text-primary hover:underline">

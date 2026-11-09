@@ -17,7 +17,7 @@ import {
   Textarea,
   clearSessionDraft,
   useSessionExpiryDraft,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { renterService } from '@/services/renterService';
 import type { RepairDraft } from '@/types/repairDraft';
 import type {

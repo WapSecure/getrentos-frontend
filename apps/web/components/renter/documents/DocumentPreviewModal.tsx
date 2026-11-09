@@ -13,7 +13,7 @@ import {
   FilePreview,
   IconButton,
   type BadgeVariant,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 
 interface Document {
   id: string;

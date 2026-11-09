@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { BellOff } from 'lucide-react';
-import { Card, EmptyState } from '@getrentos/ui';
+import { Card, EmptyState } from '@sureground/ui';
 import { NotificationCard } from './NotificationCard';
 
 interface Notification {

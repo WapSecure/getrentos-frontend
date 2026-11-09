@@ -1,7 +1,7 @@
 'use client';
 
 import { LayoutGrid, List } from 'lucide-react';
-import { SegmentedControl, Select } from '@getrentos/ui';
+import { SegmentedControl, Select } from '@sureground/ui';
 
 interface ApplicationsFilterSortProps {
   filterStatus: 'all' | 'pending' | 'under_review' | 'approved' | 'rejected' | 'withdrawn';

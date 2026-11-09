@@ -8,7 +8,7 @@ import * as LocalAuthentication from 'expo-local-authentication';
  * who hand their phone around. Off by default, per device.
  */
 
-const KEY = 'getrentos.appLock';
+const KEY = 'sureground.appLock';
 
 let enabled: boolean | null = null;
 const listeners = new Set<() => void>();

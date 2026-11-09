@@ -25,7 +25,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   Skeleton,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { useCustody } from './CustodyProvider';
 import {
   grantsNothing,

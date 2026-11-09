@@ -11,7 +11,7 @@ import {
   Skeleton,
   Text,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
 import { gatemanApi } from '@/lib/api/gateman';
 import { planRefusal, retryUnlessPlanGate } from '@/lib/api/estateGate';

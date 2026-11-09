@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CircleCheck, FileCheck2, PiggyBank, Scale, ShieldCheck } from 'lucide-react';
-import { Alert, Badge, Button, Card, CardSkeleton, EmptyState, Textarea } from '@getrentos/ui';
+import { Alert, Badge, Button, Card, CardSkeleton, EmptyState, Textarea } from '@sureground/ui';
 
-import { depositHolderText, noDeductionsText } from '@getrentos/shared';
+import { depositHolderText, noDeductionsText } from '@sureground/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { formatCurrency, formatDate } from '@/lib/format';
@@ -194,11 +194,11 @@ const DepositCard = ({
             </span>
             , but it is not recorded as held yet.
           </p>
-          {deposit.paidThroughGetRentos?.paid && (
+          {deposit.paidThroughSureground?.paid && (
             <p className="mt-1">
-              You paid it through GetRentos
-              {deposit.paidThroughGetRentos.paidDate && (
-                <> on {formatDate(deposit.paidThroughGetRentos.paidDate)}</>
+              You paid it through Sureground
+              {deposit.paidThroughSureground.paidDate && (
+                <> on {formatDate(deposit.paidThroughSureground.paidDate)}</>
               )}
               .
             </p>

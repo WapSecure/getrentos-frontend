@@ -1,7 +1,7 @@
 /**
  * Notification categories that have an email behind them.
  *
- * GetRentos emails only what somebody must not miss: money moving, offers,
+ * Sureground emails only what somebody must not miss: money moving, offers,
  * verification results. Messages, visitors, reviews and the rest are in-app and
  * push only, so a settings screen shows an email switch for these categories
  * alone; one for anything else would control nothing.

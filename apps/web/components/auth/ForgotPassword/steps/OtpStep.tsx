@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { Button } from '@getrentos/ui';
+import { Button } from '@sureground/ui';
 import { OtpInput } from '@/components/auth/OtpInput';
 
 interface OtpStepProps {
@@ -79,10 +79,7 @@ export const OtpStep = ({ method, identifier, otp, setOtp, onBack, onResend }: O
         {!canResend ? (
           <p className="text-sm text-muted-foreground">Resend code in {formatTime(timeLeft)}</p>
         ) : (
-          <Button
-            variant="link"
-            onClick={handleResend}
-          >
+          <Button variant="link" onClick={handleResend}>
             Resend code
           </Button>
         )}

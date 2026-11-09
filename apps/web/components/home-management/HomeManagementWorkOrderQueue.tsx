@@ -12,22 +12,22 @@ import {
   UserRound,
   Wrench,
 } from 'lucide-react';
-import { NairaSign } from '@getrentos/ui/NairaSign';
-import { Badge, type BadgeVariant } from '@getrentos/ui';
-import { Button } from '@getrentos/ui';
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrentos/ui';
-import { EmptyState } from '@getrentos/ui';
-import { ListSkeleton } from '@getrentos/ui';
-import { DatePicker } from '@getrentos/ui';
-import { Field } from '@getrentos/ui';
-import { CurrencyInput, Input, NumberInput } from '@getrentos/ui';
-import { Pagination } from '@getrentos/ui';
-import { Select } from '@getrentos/ui';
-import { Switch } from '@getrentos/ui';
-import { Textarea } from '@getrentos/ui';
-import { useToast } from '@getrentos/ui';
+import { NairaSign } from '@sureground/ui/NairaSign';
+import { Badge, type BadgeVariant } from '@sureground/ui';
+import { Button } from '@sureground/ui';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@sureground/ui';
+import { EmptyState } from '@sureground/ui';
+import { ListSkeleton } from '@sureground/ui';
+import { DatePicker } from '@sureground/ui';
+import { Field } from '@sureground/ui';
+import { CurrencyInput, Input, NumberInput } from '@sureground/ui';
+import { Pagination } from '@sureground/ui';
+import { Select } from '@sureground/ui';
+import { Switch } from '@sureground/ui';
+import { Textarea } from '@sureground/ui';
+import { useToast } from '@sureground/ui';
 import dynamic from 'next/dynamic';
-import { Skeleton } from '@getrentos/ui';
+import { Skeleton } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { homeManagementKeys } from '@/lib/queryKeys';

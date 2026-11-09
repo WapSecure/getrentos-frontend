@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Button, EmptyState, PageErrorState, Pagination, Select, Skeleton } from '@getrentos/ui';
+import { Button, EmptyState, PageErrorState, Pagination, Select, Skeleton } from '@sureground/ui';
 import { AlertTriangle, ChevronRight, Landmark } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';

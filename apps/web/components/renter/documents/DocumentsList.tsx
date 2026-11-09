@@ -2,7 +2,7 @@
 
 import { LayoutGrid, List, FileText } from 'lucide-react';
 import { DocumentCard } from './DocumentCard';
-import { Card, Checkbox, EmptyState, SegmentedControl, Select } from '@getrentos/ui';
+import { Card, Checkbox, EmptyState, SegmentedControl, Select } from '@sureground/ui';
 
 interface Document {
   id: string;

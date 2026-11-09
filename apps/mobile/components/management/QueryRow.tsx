@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 import { router } from 'expo-router';
-import { Badge, Card, PressableScale, Text, useTheme } from '@getrentos/ui-native';
+import { Badge, Card, PressableScale, Text, useTheme } from '@sureground/ui-native';
 import { querySlaText, queryStatusBadge, type QuerySummary } from '@/lib/api/management';
 import { formatDateTime } from '@/lib/format';
 

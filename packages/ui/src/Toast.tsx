@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle, AlertCircle, Info, XCircle, X } from 'lucide-react';
-import { cn } from '@getrentos/shared';
+import { cn } from '@sureground/shared';
 
 export type ToastVariant = 'success' | 'error' | 'info' | 'warning';
 

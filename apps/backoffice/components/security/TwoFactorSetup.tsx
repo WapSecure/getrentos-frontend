@@ -19,14 +19,14 @@ import {
   NumberInput,
   QueryState,
   useToast,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import {
   cleanSecondFactorInput,
   clearStepUpToken,
   isSecondFactorCode,
   SECOND_FACTOR_CODE_MAX_LENGTH,
   unwrap,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import { BackupCodes } from '@/components/security/BackupCodes';
 import { accountSecurityService } from '@/services/accountSecurityService';
 import { adminKeys } from '@/lib/queryKeys';
@@ -249,7 +249,7 @@ export function TwoFactorSetup({ gate = false }: { gate?: boolean }) {
         <CardContent className="space-y-4">
           {step === 'setup' && enrollment && (
             <>
-              <Alert variant="neutral" title="Add GetRentos to your authenticator app">
+              <Alert variant="neutral" title="Add Sureground to your authenticator app">
                 <ol className="list-decimal space-y-1 pl-5">
                   <li>Open your authenticator app and add a new account.</li>
                   <li>Scan this QR code, or type the set-up key instead.</li>

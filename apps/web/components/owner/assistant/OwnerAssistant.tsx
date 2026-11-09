@@ -11,7 +11,7 @@ const STARTERS = [
   'Has a realtor asked to work with me?',
 ];
 
-/** Ask GetRentos for property owners: properties, listings, offers, sales, viewings and realtors. */
+/** Ask Sureground for property owners: properties, listings, offers, sales, viewings and realtors. */
 export const OwnerAssistant = () => (
   <AssistantChat
     ask={(question, history, language) =>

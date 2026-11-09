@@ -13,7 +13,7 @@ import {
   Skeleton,
   Text,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { useSavedListings } from '@/hooks/useSavedListings';
 import { qk } from '@/lib/query/keys';
 import { savedListingsApi, type SavedProperty } from '@/lib/api/properties';

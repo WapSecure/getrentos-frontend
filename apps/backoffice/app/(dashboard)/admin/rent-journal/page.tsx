@@ -13,8 +13,8 @@ import {
   Textarea,
   useToast,
   PageHeader,
-} from '@getrentos/ui';
-import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { formatCurrency, formatDate, unwrap } from '@sureground/shared';
 import { useAdminUser } from '../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
 import {
@@ -64,12 +64,12 @@ const ACCOUNT: Record<
   },
   MANAGED_FEE_REVENUE: {
     label: 'Managed fee revenue',
-    help: 'GetRentos Managed’s own fees withheld from owners’ payouts',
+    help: 'Sureground Managed’s own fees withheld from owners’ payouts',
     side: 'Income',
   },
   MANAGED_DELIVERY_COST: {
     label: 'Managed delivery cost',
-    help: 'Partner shares and direct costs of delivering GetRentos Managed',
+    help: 'Partner shares and direct costs of delivering Sureground Managed',
     side: 'Expense',
   },
   PARTNER_SHARE_PAYABLE: {
@@ -79,7 +79,7 @@ const ACCOUNT: Record<
   },
   OPERATING_PAYABLE: {
     label: 'Operating payable',
-    help: 'Direct Managed costs met from GetRentos’s own funds',
+    help: 'Direct Managed costs met from Sureground’s own funds',
     side: 'Liability',
   },
 };
@@ -160,7 +160,7 @@ export default function RentJournalPage() {
     <>
       <PageHeader
         title="Rent journal"
-        description="Double-entry books for rent held by GetRentos, posted from every charge, payment, credit, refund and release. Every hour they are checked against the live rent records; a mismatch means money changed outside those flows."
+        description="Double-entry books for rent held by Sureground, posted from every charge, payment, credit, refund and release. Every hour they are checked against the live rent records; a mismatch means money changed outside those flows."
         actions={
           canRun && (
             <Button

@@ -12,7 +12,7 @@ import {
   DialogTitle,
   Field,
   Textarea,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import {
   prePurchaseInspectionKeys,
@@ -30,7 +30,7 @@ const FOCUS = Object.keys(INSPECTION_FOCUS_LABELS) as InspectionFocus[];
 /**
  * Commission an independent, accredited inspector to visit land before buying
  * it. Every photo is geotagged and timestamped; the report reaches the buyer
- * once GetRentos has checked it.
+ * once Sureground has checked it.
  */
 export const RequestInspectionDialog = ({
   open,
@@ -73,7 +73,7 @@ export const RequestInspectionDialog = ({
           </DialogTitle>
           <DialogDescription className="mt-1 text-sm text-muted-foreground">
             {landName}. An accredited inspector visits within 10 days. Every photo is geotagged and
-            timestamped, and GetRentos checks the report before you see it.
+            timestamped, and Sureground checks the report before you see it.
           </DialogDescription>
         </div>
         <fieldset className="space-y-2">

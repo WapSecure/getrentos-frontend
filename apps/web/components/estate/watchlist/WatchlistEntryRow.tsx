@@ -1,7 +1,7 @@
 'use client';
 
 import { ImageIcon, ShieldAlert, ShieldCheck, Undo2 } from 'lucide-react';
-import { Badge, Button, IconLink } from '@getrentos/ui';
+import { Badge, Button, IconLink } from '@sureground/ui';
 import type { WatchlistEntry } from '@/types/estate';
 
 const formatDate = (value: string) =>

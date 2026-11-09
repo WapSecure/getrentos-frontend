@@ -11,7 +11,7 @@ import {
   DialogTitle,
   Field,
   RadioGroup,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { renterService } from '@/services/renterService';
 import { AddressInput } from '@/components/shared/location/AddressInput';
 

@@ -2,8 +2,8 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Gauge, RefreshCw } from 'lucide-react';
-import { Badge, Button, CardSkeleton } from '@getrentos/ui';
-import { unwrap } from '@getrentos/shared';
+import { Badge, Button, CardSkeleton } from '@sureground/ui';
+import { unwrap } from '@sureground/shared';
 import { adminLandService } from '@/services/adminLandService';
 import { humaniseEnum, landQueryKeys, riskBadgeVariant } from '@/lib/landDiligence';
 import {

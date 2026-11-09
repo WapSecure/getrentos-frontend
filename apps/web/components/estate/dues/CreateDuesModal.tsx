@@ -14,7 +14,7 @@ import {
   ListSkeleton,
   Pagination,
   Select,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import type { Household } from '@/types/estate';
 
 interface CreateDuesModalProps {

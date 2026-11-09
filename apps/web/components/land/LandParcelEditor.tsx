@@ -12,7 +12,7 @@ import {
   Select,
   Switch,
   Textarea,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { FileUp, Save, ShieldCheck } from 'lucide-react';
 import {
   boundaryAreaMismatch,
@@ -22,7 +22,7 @@ import {
   toWgs84,
   type BoundaryCorner,
   type CrsCode,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import { BoundaryHistory } from './boundary/BoundaryHistory';
 import {
   SurveyCoordinatesEntry,
@@ -145,7 +145,7 @@ export const LandParcelEditor = ({
       return 'This parcel passed diligence subject to conditions. It can be listed now; reservations and offers open once the conditions are met.';
     }
     if (diligence?.status === 'SUSPENDED') {
-      return 'This parcel is off the market while GetRentos looks into an issue.';
+      return 'This parcel is off the market while Sureground looks into an issue.';
     }
     if (diligence?.status === 'ACTION_REQUIRED' || diligence?.status === 'REJECTED') {
       return diligence.findings || 'Review the compliance note and upload the requested evidence.';

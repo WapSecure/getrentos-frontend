@@ -19,7 +19,7 @@ import {
   ToggleChip,
   useToast,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';

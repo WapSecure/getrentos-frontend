@@ -1,6 +1,6 @@
 import { View, type StyleProp, type ViewStyle } from 'react-native';
 import { ChevronLeft } from 'lucide-react-native';
-import { IconButton, useTheme } from '@getrentos/ui-native';
+import { IconButton, useTheme } from '@sureground/ui-native';
 import { DashboardHeader } from './DashboardHeader';
 
 type DetailHeaderProps = {

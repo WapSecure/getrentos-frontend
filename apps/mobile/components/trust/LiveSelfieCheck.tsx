@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Modal } from 'react-native';
-import { darkColors, lightColors, radius } from '@getrentos/tokens';
+import { darkColors, lightColors, radius } from '@sureground/tokens';
 import type { SmileLivenessSession } from '@/lib/api/trust';
 import { loadFaceAnalyzer } from '@/lib/smileid/faceAnalyzer';
 import { liveSelfieOutcome, loadSmileSdk, type LiveSelfieOutcome } from '@/lib/smileid/liveSelfie';

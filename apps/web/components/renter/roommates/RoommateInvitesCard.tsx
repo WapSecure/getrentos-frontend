@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Check, X } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button } from '@sureground/ui';
 import type { Roommate } from '@/services/renterService';
 
 interface RoommateInvitesCardProps {

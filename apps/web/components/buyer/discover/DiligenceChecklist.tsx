@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { AlertOctagon, CheckCircle2, Circle, ClipboardCheck, Clock } from 'lucide-react';
-import { Button, Skeleton } from '@getrentos/ui';
+import { Button, Skeleton } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { buyerKeys } from '@/lib/queryKeys';
 import { buyerService } from '@/services/buyerService';

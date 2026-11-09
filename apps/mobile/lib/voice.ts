@@ -4,7 +4,7 @@ import { languageLabel, type ReplyLanguage } from './replyLanguage';
 
 /**
  * Voice in and out on the phone, using the device's own speech services only:
- * nothing is recorded or sent to GetRentos or any other provider by this code.
+ * nothing is recorded or sent to Sureground or any other provider by this code.
  * Speech-to-text needs a development or store build; in Expo Go the module is
  * absent, so voice input reports itself unavailable instead of crashing.
  */
@@ -34,7 +34,7 @@ function errorText(code: string, language: ReplyLanguage): string {
       return `Speaking in ${languageLabel(language)} is not supported on this phone yet. Try English, or type.`;
     case 'not-allowed':
     case 'service-not-allowed':
-      return 'Allow the microphone and speech recognition for GetRentos in Settings to speak your question.';
+      return 'Allow the microphone and speech recognition for Sureground in Settings to speak your question.';
     case 'no-speech':
     case 'speech-timeout':
       return 'Didn’t catch that. Tap the mic and try again.';

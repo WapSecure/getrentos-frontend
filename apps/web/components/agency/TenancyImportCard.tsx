@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Download, Upload, Users } from 'lucide-react';
-import { Alert, Badge, Button, Card, Field, Select, useToast } from '@getrentos/ui';
+import { Alert, Badge, Button, Card, Field, Select, useToast } from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { useCustody } from '@/components/agency/CustodyProvider';
 import {
@@ -13,7 +13,7 @@ import {
 } from '@/services/portfolioImportService';
 
 /**
- * Bring the tenancies you take over onto GetRentos: each row becomes a signed
+ * Bring the tenancies you take over onto Sureground: each row becomes a signed
  * lease on an existing unit, with the deposit you hold recorded (not moved),
  * any arrears carried over as an opening balance, and rent billed on schedule
  * from the next due date. Dry run first; a file with errors imports nothing.
@@ -75,7 +75,7 @@ export function TenancyImportCard() {
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Taking over a property? Bring its tenants with you. Each row becomes a signed lease on a
-            unit that is already on GetRentos. Deposits you hold are recorded as yours, arrears
+            unit that is already on Sureground. Deposits you hold are recorded as yours, arrears
             carry over as an opening balance, and rent is billed from the next due date.
           </p>
         </div>
@@ -113,14 +113,14 @@ export function TenancyImportCard() {
           {csv && <span className="text-sm text-foreground">{csv.name}</span>}
           <a
             href={template}
-            download="getrentos-tenancies-template.csv"
+            download="sureground-tenancies-template.csv"
             className="flex items-center gap-1.5 text-sm text-primary hover:underline"
           >
             <Download className="h-4 w-4" /> Template
           </a>
         </div>
         <p className="text-xs text-muted-foreground">
-          Columns: unit_name, tenant_name, tenant_email (links their GetRentos account when it
+          Columns: unit_name, tenant_name, tenant_email (links their Sureground account when it
           matches), tenant_phone, rent_amount, rent_period (ANNUAL or MONTHLY), lease_start,
           lease_end (YYYY-MM-DD), deposit_amount, arrears_amount and next_due_date (all optional).
         </p>

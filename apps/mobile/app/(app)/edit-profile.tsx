@@ -14,9 +14,9 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { Image } from 'expo-image';
-import { storedAddressValue, type AddressValue } from '@getrentos/shared';
+import { storedAddressValue, type AddressValue } from '@sureground/shared';
 import { AddressInput } from '@/components/forms/AddressInput';
 import { qk } from '@/lib/query/keys';
 import { profileApi, type RenterProfile } from '@/lib/api/profile';

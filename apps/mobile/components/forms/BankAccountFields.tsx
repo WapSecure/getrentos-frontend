@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { CheckCircle2 } from 'lucide-react-native';
-import { Chip, NumberField, Text, useTheme } from '@getrentos/ui-native';
-import { toAccountLookup, type AccountLookup } from '@getrentos/shared';
+import { Chip, NumberField, Text, useTheme } from '@sureground/ui-native';
+import { toAccountLookup, type AccountLookup } from '@sureground/shared';
 import { SelectField } from '@/components/forms/SelectField';
 import { errorMessage } from '@/lib/api/client';
 import { COMMON_BANKS } from '@/lib/api/sellerPayout';

@@ -2,7 +2,7 @@
 
 import { Filter } from 'lucide-react';
 import { useState } from 'react';
-import { Button, IconButton, SearchInput, Select } from '@getrentos/ui';
+import { Button, IconButton, SearchInput, Select } from '@sureground/ui';
 
 interface DocumentSearchProps {
   searchTerm: string;

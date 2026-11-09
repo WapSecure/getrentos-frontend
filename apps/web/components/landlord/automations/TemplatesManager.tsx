@@ -16,7 +16,7 @@ import {
   ListSkeleton,
   Textarea,
   useToast,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import { automationService, type AnnouncementTemplate } from '@/services/automationService';

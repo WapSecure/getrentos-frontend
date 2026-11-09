@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { CalendarClock, Clock, CheckCircle2, XCircle, X } from 'lucide-react';
-import { Badge, Button, type BadgeVariant } from '@getrentos/ui';
+import { Badge, Button, type BadgeVariant } from '@sureground/ui';
 import { formatDate } from '@/lib/format';
 import type { ViewingRequest, ViewingRequestStatus } from '@/types/buyer';
 import { VideoCallButton } from '@/components/shared/VideoCallButton';

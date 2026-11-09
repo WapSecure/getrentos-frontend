@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { Alert, Skeleton, StatCard } from '@getrentos/ui';
+import { Alert, Skeleton, StatCard } from '@sureground/ui';
 import { AlertTriangle, Banknote, Landmark, Lock, Wallet } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { landDeveloperKeys } from '@/lib/landDeveloperQueryKeys';

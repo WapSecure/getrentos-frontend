@@ -3,7 +3,7 @@
 import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Chrome } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button } from '@sureground/ui';
 import { ROUTES } from '@/lib/constants/auth';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';

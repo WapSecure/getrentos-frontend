@@ -3,7 +3,7 @@ import { toQuery } from './query';
 import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
 import type { TrustProfile } from './agentTrustProfile';
-import type { PayoutSentTo } from '@getrentos/shared';
+import type { PayoutSentTo } from '@sureground/shared';
 
 /**
  * The realtor's side of /realtor: clients who let them represent a property,

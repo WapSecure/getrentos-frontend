@@ -13,8 +13,8 @@ import {
   Field,
   RadioGroup,
   Textarea,
-} from '@getrentos/ui';
-import { formatCurrency, unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { formatCurrency, unwrap } from '@sureground/shared';
 import { adminShortletService } from '@/services/adminShortletService';
 import type { AdminGuestPromiseOutcome, AdminShortletDispute } from '@/types/shortlet';
 

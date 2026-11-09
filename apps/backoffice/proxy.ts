@@ -5,7 +5,7 @@ import {
   isLocalHost,
   parseOriginList,
   cspReportUri,
-} from '@getrentos/shared/csp';
+} from '@sureground/shared/csp';
 
 const DEV = process.env.NODE_ENV !== 'production';
 
@@ -15,7 +15,7 @@ const DEV = process.env.NODE_ENV !== 'production';
  *
  * Responsibility: apply hardening security headers to every response,
  * including a per-request nonce Content-Security-Policy (policy built in
- * @getrentos/shared/csp) and, in production over HTTPS, Strict-Transport-Security.
+ * @sureground/shared/csp) and, in production over HTTPS, Strict-Transport-Security.
  * The policy is enforced here from the start: the back office is staff-only and
  * loads nothing third-party beyond the API and its uploads. (The customer web
  * app starts in Report-Only; see apps/web/proxy.ts.)

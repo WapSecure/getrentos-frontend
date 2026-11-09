@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { Scale } from 'lucide-react';
-import { Alert, Badge, Card, Skeleton, type BadgeVariant } from '@getrentos/ui';
+import { Alert, Badge, Card, Skeleton, type BadgeVariant } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { sellerOfferKeys } from '@/lib/queryKeys';
 import { offerComparisonService } from '@/services/offerComparisonService';
@@ -17,7 +17,7 @@ const TURN: Record<ComparedOffer['turn'], { label: string; variant: BadgeVariant
 /**
  * "Compare offers": every live offer on each listing side by side (price
  * against asking, financing, deposit, documents, the buyer's record on
- * GetRentos, expiry and whose turn it is) with a counter option worked out
+ * Sureground, expiry and whose turn it is) with a counter option worked out
  * from the figures. It never says which offer to take. Hidden when there are
  * no live offers, or if it fails: the offers below are the record.
  */

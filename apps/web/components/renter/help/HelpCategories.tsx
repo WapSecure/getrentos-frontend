@@ -10,7 +10,7 @@ import {
   Settings,
   Shield,
 } from 'lucide-react';
-import { Card } from '@getrentos/ui';
+import { Card } from '@sureground/ui';
 
 interface Category {
   id: string;

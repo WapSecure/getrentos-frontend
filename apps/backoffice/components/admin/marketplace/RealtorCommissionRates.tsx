@@ -13,8 +13,8 @@ import {
   Skeleton,
   useToast,
   PageHeader,
-} from '@getrentos/ui';
-import { unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { unwrap } from '@sureground/shared';
 import { adminMarketplaceService } from '@/services/adminMarketplaceService';
 
 /**

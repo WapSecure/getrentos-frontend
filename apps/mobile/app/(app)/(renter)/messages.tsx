@@ -27,7 +27,7 @@ import {
   TextField,
   useReducedMotion,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { messagesApi, type Conversation } from '@/lib/api/messages';
 import { relativeTime } from '@/lib/format';

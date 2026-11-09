@@ -23,7 +23,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { FollowUpsCard } from '@/components/realtor/FollowUpsCard';
 import {

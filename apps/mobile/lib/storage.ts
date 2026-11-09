@@ -1,5 +1,6 @@
 import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
+import { LEGACY_PREFIX, NEW_PREFIX } from './legacyStorage';
 
 /**
  * Secure key/value storage.
@@ -23,7 +24,16 @@ export const secureStorage = {
         return null;
       }
     }
-    return SecureStore.getItemAsync(key, SECURE_OPTIONS);
+    const value = await SecureStore.getItemAsync(key, SECURE_OPTIONS);
+    if (value !== null || !key.startsWith(NEW_PREFIX)) return value;
+    // Saved before the GetRentos → Sureground rename: move it to the new key.
+    const legacyKey = LEGACY_PREFIX + key.slice(NEW_PREFIX.length);
+    const legacy = await SecureStore.getItemAsync(legacyKey, SECURE_OPTIONS);
+    if (legacy !== null) {
+      await SecureStore.setItemAsync(key, legacy, SECURE_OPTIONS);
+      await SecureStore.deleteItemAsync(legacyKey, SECURE_OPTIONS);
+    }
+    return legacy;
   },
   async set(key: string, value: string): Promise<void> {
     if (isWeb) {

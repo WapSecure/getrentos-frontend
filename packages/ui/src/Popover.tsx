@@ -2,7 +2,7 @@
 
 import type { HTMLAttributes } from 'react';
 import * as RadixPopover from '@radix-ui/react-popover';
-import { cn } from '@getrentos/shared';
+import { cn } from '@sureground/shared';
 
 /**
  * A panel anchored to a trigger (notification lists, quick filters): it closes
@@ -46,7 +46,10 @@ export const PopoverContent = ({
 
 export const PopoverHeader = ({ className, ...props }: HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn('flex shrink-0 items-center justify-between gap-2 border-b border-border px-4 py-3', className)}
+    className={cn(
+      'flex shrink-0 items-center justify-between gap-2 border-b border-border px-4 py-3',
+      className
+    )}
     {...props}
   />
 );

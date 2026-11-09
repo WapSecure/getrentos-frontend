@@ -1,5 +1,5 @@
-import type { BadgeTone } from '@getrentos/ui-native';
-import type { LandAssuranceTier, LandNotVerifiedItem, LandTrustLabel } from '@getrentos/shared';
+import type { BadgeTone } from '@sureground/ui-native';
+import type { LandAssuranceTier, LandNotVerifiedItem, LandTrustLabel } from '@sureground/shared';
 import { apiFetch } from './client';
 import { toQuery } from './query';
 import { formatNaira } from '../format';

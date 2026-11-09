@@ -17,7 +17,7 @@ import {
   NumberInput,
   Skeleton,
   useToast,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { PartyPopper, Trash2 } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletKeys } from '@/lib/queryKeys';
@@ -57,7 +57,7 @@ export function ShortletPeakPricingDialog({
   const [lastMinuteDays, setLastMinuteDays] = useState(String(listing.lastMinuteDays || 3));
   const [notice, setNotice] = useState(String(listing.advanceNoticeDays || ''));
   const [prep, setPrep] = useState(String(listing.prepDays || ''));
-  // Empty = use the platform default set by GetRentos.
+  // Empty = use the platform default set by Sureground.
   const [claimWindow, setClaimWindow] = useState(
     listing.depositClaimWindowHours != null ? String(listing.depositClaimWindowHours) : ''
   );
@@ -323,14 +323,14 @@ export function ShortletPeakPricingDialog({
               {listing.deposit ? (
                 <Field
                   label="Deposit claim window (hours)"
-                  hint="After check-out, how long you have to claim the security deposit for damage. Blank uses the GetRentos default."
+                  hint="After check-out, how long you have to claim the security deposit for damage. Blank uses the Sureground default."
                 >
                   <NumberInput
                     min={1}
                     max={720}
                     value={claimWindow}
                     onValueChange={setClaimWindow}
-                    placeholder="GetRentos default"
+                    placeholder="Sureground default"
                   />
                 </Field>
               ) : null}

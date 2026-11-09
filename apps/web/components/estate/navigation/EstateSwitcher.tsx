@@ -9,7 +9,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { ROUTES } from '@/lib/constants/auth';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 

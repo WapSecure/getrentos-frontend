@@ -32,7 +32,7 @@ const deposit = (deductions: DepositDeduction[], status: DepositHold['status'] =
     propertyTitle: 'Flat 2',
     amount: 500_000,
     status,
-    heldByGetRentos: false,
+    heldBySureground: false,
     returnable: 490_000,
     createdAt: '2026-01-01T00:00:00.000Z',
     takenAt: '2026-01-01T00:00:00.000Z',

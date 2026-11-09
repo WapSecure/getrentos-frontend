@@ -23,7 +23,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { SALE_DEPOSIT_PROTECTION } from '@/lib/paymentCopy';
 import type {
@@ -60,13 +60,13 @@ const escrowSteps: { key: BuyerEscrowStatus; label: string; description: string 
   {
     key: 'deposit_pending',
     label: 'Deposit pending',
-    description: 'Pay your deposit to GetRentos, which holds it safely until you confirm receipt.',
+    description: 'Pay your deposit to Sureground, which holds it safely until you confirm receipt.',
   },
   {
     key: 'funds_held',
     label: 'Funds held',
     description:
-      'Your payment is held by GetRentos. Once you have received the property and its documents, confirm receipt to release it to the seller.',
+      'Your payment is held by Sureground. Once you have received the property and its documents, confirm receipt to release it to the seller.',
   },
   {
     key: 'released',
@@ -240,7 +240,7 @@ export const BuyerEscrowTransactionDetailModal = ({
           <LandConveyanceEntry transaction={transaction} />
 
           <Alert variant="info" icon={Lock}>
-            The money you pay is held safely by GetRentos and only released to the seller once you
+            The money you pay is held safely by Sureground and only released to the seller once you
             confirm receipt (for land, once the conveyance steps are confirmed). It is never
             released on a timer, and a dispute keeps it held until it is resolved.
           </Alert>

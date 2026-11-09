@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Alert, View } from 'react-native';
 import { CheckCircle2, Circle, CircleDashed, Clock3, XCircle } from 'lucide-react-native';
-import { Badge, Button, FormAlert, Text, TextField, useTheme } from '@getrentos/ui-native';
+import { Badge, Button, FormAlert, Text, TextField, useTheme } from '@sureground/ui-native';
 import {
   CONDITION_STATUS,
   conditionOpen,
@@ -67,7 +67,7 @@ export function BuyerMilestones({
     Alert.alert(
       `Confirm “${m.label}”?`,
       release
-        ? `Only confirm once you have it in hand. Confirming releases ${formatBps(m.releaseBps)} of the price held by GetRentos to the ${seller}, and cannot be undone.`
+        ? `Only confirm once you have it in hand. Confirming releases ${formatBps(m.releaseBps)} of the price held by Sureground to the ${seller}, and cannot be undone.`
         : 'Only confirm once you have it in hand. Confirming tells us the step is done and cannot be undone.',
       [
         { text: 'Not yet', style: 'cancel' },

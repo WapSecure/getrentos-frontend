@@ -14,7 +14,7 @@ import {
   Textarea,
   useToast,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { landlordService } from '@/services/landlordService';
 import { usePlanTier } from '@/hooks/usePlanTier';
 import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';

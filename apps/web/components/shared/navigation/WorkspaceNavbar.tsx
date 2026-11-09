@@ -4,7 +4,7 @@ import { useEffect, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
-import { IconButton, SearchInput, ThemeToggle } from '@getrentos/ui';
+import { IconButton, SearchInput, ThemeToggle } from '@sureground/ui';
 import {
   GroupedMobileNavigation,
   type GroupedSidebarGroup,

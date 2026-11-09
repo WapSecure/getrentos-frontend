@@ -11,9 +11,9 @@ import {
 } from 'react';
 import { translations, type Language, type TranslationKey } from './translations';
 
-const STORAGE_KEY = 'getrentos_language';
+const STORAGE_KEY = 'sureground_language';
 /** Mirrored to a cookie too, so other tabs and the API can see the choice. */
-export const LANGUAGE_COOKIE_KEY = 'getrentos_language';
+export const LANGUAGE_COOKIE_KEY = 'sureground_language';
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
 
 interface LanguageContextValue {

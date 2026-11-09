@@ -48,7 +48,7 @@ export async function generateMetadata({ params }: MicrositePageProps): Promise<
 
   const { profile } = result;
   const description =
-    profile.bio || `Browse rental listings from ${profile.displayName} on GetRentos.`;
+    profile.bio || `Browse rental listings from ${profile.displayName} on Sureground.`;
 
   return {
     title: profile.displayName,

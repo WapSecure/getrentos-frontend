@@ -8,7 +8,7 @@ import {
   typography,
   type ColorScheme,
   type Palette,
-} from '@getrentos/tokens';
+} from '@sureground/tokens';
 
 /** The weights the type ramp and screens ask for. */
 export type FontWeight = '400' | '500' | '600' | '700' | '800';
@@ -74,7 +74,9 @@ export function resolveFontFamily(
   const want = normalizeWeight(weight);
   if (fonts[want]) return fonts[want];
   const i = WEIGHTS.indexOf(want);
-  const below = WEIGHTS.slice(0, i).reverse().find((w) => fonts[w]);
+  const below = WEIGHTS.slice(0, i)
+    .reverse()
+    .find((w) => fonts[w]);
   const above = WEIGHTS.slice(i + 1).find((w) => fonts[w]);
   return (below && fonts[below]) || (above && fonts[above]) || undefined;
 }
@@ -83,7 +85,10 @@ export function resolveFontFamily(
  * Appends the theme's font to a text style so whatever weight the caller set
  * (in the ramp or an inline `fontWeight`) renders in the loaded face.
  */
-export function withFont(theme: Pick<Theme, 'font'>, style: StyleProp<TextStyle>): StyleProp<TextStyle> {
+export function withFont(
+  theme: Pick<Theme, 'font'>,
+  style: StyleProp<TextStyle>
+): StyleProp<TextStyle> {
   const flat = StyleSheet.flatten(style) ?? {};
   if (flat.fontFamily) return style;
   return [style, theme.font(flat.fontWeight)];

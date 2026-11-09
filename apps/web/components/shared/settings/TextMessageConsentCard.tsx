@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { MessageSquare } from 'lucide-react';
-import { Alert, Card, Switch } from '@getrentos/ui';
+import { Alert, Card, Switch } from '@sureground/ui';
 
 import { unwrap } from '@/lib/apiHelpers';
 import { getMessagingConsent, setMessagingConsent } from '@/services/messagingConsentService';
@@ -77,7 +77,7 @@ export const TextMessageConsentCard = () => {
         {row('WhatsApp', 'Sent on WhatsApp instead of SMS when both are on.', 'whatsapp')}
       </div>
       {c.whatsapp && c.whatsappChatNumber && (
-        <Alert variant="info" title="Ask GetRentos on WhatsApp" className="mt-3">
+        <Alert variant="info" title="Ask Sureground on WhatsApp" className="mt-3">
           Message {c.whatsappChatNumber} on WhatsApp from this number and say &ldquo;hi&rdquo;. Ask
           about your rent, lease, repairs or listings in English, Pidgin, Yoruba, Hausa or Igbo.
           Answers come from your account; nothing is changed or paid on WhatsApp.

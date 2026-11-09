@@ -2,7 +2,7 @@
 
 import { FormEvent, useId, useState } from 'react';
 import { Clipboard, Circle, Plus, ChevronDown, ChevronUp } from 'lucide-react';
-import { Card, EmptyState, IconButton, Input, Select, useToast } from '@getrentos/ui';
+import { Card, EmptyState, IconButton, Input, Select, useToast } from '@sureground/ui';
 
 interface Roommate {
   id: string;

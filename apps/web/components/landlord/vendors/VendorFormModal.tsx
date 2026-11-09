@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Button, Dialog, DialogContent, DialogTitle, Field, Input, Select } from '@getrentos/ui';
+import { Button, Dialog, DialogContent, DialogTitle, Field, Input, Select } from '@sureground/ui';
 import type { Vendor, VendorInput, BusinessRegistrationType } from '@/types/landlord';
 import { BUSINESS_TYPE_LABELS } from '@/services/agencyOnboardingService';
 

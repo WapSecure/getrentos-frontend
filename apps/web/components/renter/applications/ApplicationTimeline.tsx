@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { CheckCircle, Circle, Clock, AlertCircle, Home, UserCheck } from 'lucide-react';
-import { Alert } from '@getrentos/ui';
+import { Alert } from '@sureground/ui';
 
 interface TimelineStep {
   stage: string;

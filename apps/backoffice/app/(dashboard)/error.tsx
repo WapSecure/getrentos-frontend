@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { AlertTriangle, RefreshCcw } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button } from '@sureground/ui';
 
 /** Catches errors thrown anywhere inside the admin backoffice dashboards. */
 export default function AdminDashboardError({

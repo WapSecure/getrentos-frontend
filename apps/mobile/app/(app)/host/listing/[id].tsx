@@ -25,7 +25,7 @@ import {
   formatTimeLabel,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   CANCELLATION_POLICIES,
@@ -87,7 +87,7 @@ export default function HostListingDetail() {
   const confirmClose = () =>
     Alert.alert(
       'Close this listing?',
-      'It comes off GetRentos for good. Confirmed stays still go ahead. To stop bookings for a while, pause it instead.',
+      'It comes off Sureground for good. Confirmed stays still go ahead. To stop bookings for a while, pause it instead.',
       [
         { text: 'Keep it', style: 'cancel' },
         { text: 'Close listing', style: 'destructive', onPress: () => setStatus.mutate('CLOSED') },

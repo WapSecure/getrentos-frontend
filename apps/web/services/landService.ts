@@ -1,4 +1,4 @@
-import type { LandBoundaryVersion } from '@getrentos/shared';
+import type { LandBoundaryVersion } from '@sureground/shared';
 import { authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
 import type {
   LandDiligence,
@@ -114,7 +114,7 @@ export const landService = {
     safeCall(() => authFetch<LandBoundaryVersion[]>(`/owner/land/${propertyId}/boundary/versions`)),
 
   /** Puts the parcel into the diligence review queue (or back into it after changes). */
-  /** Evidence that a condition of a conditional approval is met, for GetRentos to check. */
+  /** Evidence that a condition of a conditional approval is met, for Sureground to check. */
   attachConditionEvidence: (
     propertyId: string,
     conditionId: string,

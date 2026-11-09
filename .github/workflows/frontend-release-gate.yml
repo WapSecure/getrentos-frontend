@@ -49,7 +49,7 @@ jobs:
           node-version: 22.13.1
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @getrentos/shared build
+      - run: pnpm --filter @sureground/shared build
       - run: pnpm tokens:check
       - run: pnpm --filter web type-check
       - run: pnpm --filter backoffice type-check
@@ -63,4 +63,4 @@ jobs:
       - run: pnpm --filter mobile test:ci
       - run: pnpm --filter web build
       - run: pnpm --filter backoffice build
-      - run: pnpm --filter mobile exec expo export --platform web --output-dir /tmp/getrentos-mobile-web
+      - run: pnpm --filter mobile exec expo export --platform web --output-dir /tmp/sureground-mobile-web

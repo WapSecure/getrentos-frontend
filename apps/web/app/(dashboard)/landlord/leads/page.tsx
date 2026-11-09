@@ -15,7 +15,7 @@ import {
   ToggleChip,
   useToast,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { LeadCard } from '@/components/landlord/leads/LeadCard';
 import { ConfirmViewingModal } from '@/components/landlord/leads/ConfirmViewingModal';
 import { NudgeModal } from '@/components/landlord/leads/NudgeModal';

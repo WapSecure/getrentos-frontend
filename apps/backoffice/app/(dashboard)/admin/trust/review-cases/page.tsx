@@ -12,8 +12,8 @@ import {
   Pagination,
   Select,
   PageHeader,
-} from '@getrentos/ui';
-import { unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { unwrap } from '@sureground/shared';
 import { trustService } from '@/services/trustService';
 import { adminKeys } from '@/lib/queryKeys';
 import type {

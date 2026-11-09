@@ -2,9 +2,9 @@
 
 import type { ReactNode } from 'react';
 import { BadgeCheck } from 'lucide-react';
-import { Button } from '@getrentos/ui';
-import { PlanGateError } from '@getrentos/shared';
-import { tierAtLeast, type PlanTier } from '@getrentos/shared';
+import { Button } from '@sureground/ui';
+import { PlanGateError } from '@sureground/shared';
+import { tierAtLeast, type PlanTier } from '@sureground/shared';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { ROUTES } from '@/lib/constants/auth';
 

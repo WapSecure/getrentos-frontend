@@ -20,7 +20,7 @@ import {
   StatGridSkeleton,
   useOptimisticMutation,
   useToast,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { renterService, type RenterDocument } from '@/services/renterService';
 import { unwrap, type Paginated } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';

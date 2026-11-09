@@ -588,7 +588,7 @@ export interface AiUsageSummary {
 /** GET /admin/disputes/:id/summary: a neutral reading of the case for staff. */
 export interface DisputeSummary {
   disputeId: string;
-  /** The record, worked out by GetRentos. */
+  /** The record, worked out by Sureground. */
   facts: string[];
   summary: string;
   buyerSays: string | null;

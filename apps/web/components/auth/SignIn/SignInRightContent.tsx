@@ -10,8 +10,8 @@ import { MagicLinkSignIn } from './methods/MagicLinkSignIn';
 import { OAuthSignIn } from './methods/OAuthSignIn';
 import { SignInMethod } from '@/app/(auth)/login/page';
 import { ROUTES } from '@/lib/constants/auth';
-import { useToast, type ToastVariant } from '@getrentos/ui';
-import { Button, SessionExpiredNotice } from '@getrentos/ui';
+import { useToast, type ToastVariant } from '@sureground/ui';
+import { Button, SessionExpiredNotice } from '@sureground/ui';
 import { AuthMethodTabs } from '../AuthMethodTabs';
 import { safeNextPath, withNext } from '@/lib/nextPath';
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, CardHeader, CardTitle, CardDescription } from '@getrentos/ui';
+import { Card, CardHeader, CardTitle, CardDescription } from '@sureground/ui';
 import { Application } from '@/types/renter';
 
 interface ApplicationAnalyticsProps {

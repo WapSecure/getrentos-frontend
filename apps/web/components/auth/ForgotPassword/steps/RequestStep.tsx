@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Mail, Phone, MessageCircle, CheckCircle, XCircle } from 'lucide-react';
 import { VALIDATION_PATTERNS } from '@/lib/constants/auth';
-import { Field, Input, SegmentedControl, type Segment } from '@getrentos/ui';
+import { Field, Input, SegmentedControl, type Segment } from '@sureground/ui';
 
 const METHOD_SEGMENTS: Segment<'email' | 'phone' | 'whatsapp'>[] = [
   { value: 'email', label: 'Email', icon: <Mail /> },

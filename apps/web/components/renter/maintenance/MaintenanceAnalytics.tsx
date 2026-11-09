@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Clock, CheckCircle, AlertCircle, BarChart3 } from 'lucide-react';
-import { Alert } from '@getrentos/ui';
+import { Alert } from '@sureground/ui';
 import type { MaintenanceSummary } from '@/types/maintenance';
 
 interface MaintenanceAnalyticsProps {

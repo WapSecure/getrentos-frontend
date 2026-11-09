@@ -1,7 +1,7 @@
 import { Pressable, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { Check } from 'lucide-react-native';
-import { Divider, Text, useTheme } from '@getrentos/ui-native';
+import { Divider, Text, useTheme } from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { qk } from '@/lib/query/keys';
 import { wishlistsApi, type Wishlist } from '@/lib/api/wishlists';

@@ -12,7 +12,7 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { dataExportApi } from '@/lib/api/dataExport';
 import { formatDate } from '@/lib/format';
@@ -53,7 +53,7 @@ export default function DataExport() {
     try {
       await Share.share({
         message: JSON.stringify(result, null, 2),
-        title: 'GetRentos data export',
+        title: 'Sureground data export',
       });
     } catch {
       toast.show('Could not share your export.', 'error');
@@ -65,7 +65,7 @@ export default function DataExport() {
       <DetailScreenHeader
         eyebrow="Data portability"
         title="Export your data"
-        subtitle="Prepare a secure copy of your GetRentos records"
+        subtitle="Prepare a secure copy of your Sureground records"
         onBack={() => goBack()}
       />
 
@@ -76,10 +76,10 @@ export default function DataExport() {
           <Card elevated>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
               <Database size={20} color={colors.primary} />
-              <Text variant="heading">Your GetRentos data</Text>
+              <Text variant="heading">Your Sureground data</Text>
             </View>
             <Text variant="callout" color="mutedForeground" style={{ marginTop: spacing.sm }}>
-              Download a copy of your profile and the records GetRentos holds for you: properties,
+              Download a copy of your profile and the records Sureground holds for you: properties,
               leases, payments, offers, bookings, messages and documents.
             </Text>
           </Card>

@@ -1,6 +1,6 @@
 'use client';
 
-import { DocumentPreviewButton } from '@getrentos/ui';
+import { DocumentPreviewButton } from '@sureground/ui';
 import { ExternalLink, FileText, Link2 } from 'lucide-react';
 import { formatDate } from '@/lib/format';
 import type { LandReviewCheck, LandReviewDocument } from '@/types/landReviewer';
@@ -43,7 +43,7 @@ export const ReviewDocuments = ({
                 humanise(doc.documentType),
                 // PARTY covers the owner and engaged professionals alike, so it is not
                 // attributed to the owner.
-                doc.source === 'ADMIN' ? 'Added by GetRentos' : 'On the property file',
+                doc.source === 'ADMIN' ? 'Added by Sureground' : 'On the property file',
                 formatDate(doc.uploadedAt),
                 sizeLabel(doc.sizeBytes),
               ]

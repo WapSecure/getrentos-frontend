@@ -20,10 +20,10 @@ import {
   Wallet,
 } from 'lucide-react';
 import { PropertyMap, type MapMarker } from '@/components/maps/PropertyMap';
-import { Badge } from '@getrentos/ui';
-import { Button } from '@getrentos/ui';
-import { Field } from '@getrentos/ui';
-import { Skeleton } from '@getrentos/ui';
+import { Badge } from '@sureground/ui';
+import { Button } from '@sureground/ui';
+import { Field } from '@sureground/ui';
+import { Skeleton } from '@sureground/ui';
 import { renterService } from '@/services/renterService';
 import { AddressInput } from '@/components/shared/location/AddressInput';
 import { unwrap } from '@/lib/apiHelpers';

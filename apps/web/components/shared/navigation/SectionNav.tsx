@@ -21,7 +21,7 @@ interface SectionNavProps {
 /**
  * Links between the pages of one workflow (a lettings or sales pipeline), so a
  * person can step through it without going back to the sidebar. Looks like the
- * underline tabs in @getrentos/ui, but each entry is a page, so it is a list of
+ * underline tabs in @sureground/ui, but each entry is a page, so it is a list of
  * links with `aria-current`, not a tab list. Scrolls sideways on narrow screens.
  */
 export function SectionNav({ ariaLabel, items, className }: SectionNavProps) {

@@ -11,7 +11,7 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { residentApi, type Poll } from '@/lib/api/resident';
 import { qk } from '@/lib/query/keys';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';

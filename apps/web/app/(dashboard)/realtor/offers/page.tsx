@@ -16,7 +16,7 @@ import {
   TabsTrigger,
   useToast,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
 import { mapRealtorOffer, realtorService, type RealtorOfferApi } from '@/services/realtorService';

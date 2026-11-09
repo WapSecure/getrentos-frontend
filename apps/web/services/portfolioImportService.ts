@@ -35,7 +35,7 @@ export interface ImportedTenancyRow {
   depositAmount: number | null;
   arrearsAmount: number | null;
   nextDueDate: string | null;
-  /** LINKED: matched to the tenant's GetRentos account by email. */
+  /** LINKED: matched to the tenant's Sureground account by email. */
   tenantAccount: 'LINKED' | 'NAME_ONLY';
 }
 

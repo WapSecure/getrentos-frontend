@@ -14,7 +14,7 @@ import {
   TabsTrigger,
   useToast,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { InspectionCard } from '@/components/landlord/inspections/InspectionCard';
 import { CreateInspectionModal } from '@/components/landlord/inspections/CreateInspectionModal';
 import { InspectionDetailModal } from '@/components/landlord/inspections/InspectionDetailModal';

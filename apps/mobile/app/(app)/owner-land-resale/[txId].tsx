@@ -11,7 +11,7 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { confirmedProgress, landSalesApi, type Milestone } from '@/lib/api/landSales';
 import { errorMessage } from '@/lib/api/client';
@@ -107,8 +107,8 @@ export default function OwnerLandResale() {
             <Text variant="heading">Conditions of the sale</Text>
             <Text variant="caption" color="mutedForeground">
               The payment is not released while any condition is open. Mark the ones you deliver as
-              met; GetRentos checked the rest against the record. A condition missed by its deadline
-              lets the buyer cancel with a full refund.
+              met; Sureground checked the rest against the record. A condition missed by its
+              deadline lets the buyer cancel with a full refund.
             </Text>
             <ConditionsList
               conditions={conditions.data ?? []}

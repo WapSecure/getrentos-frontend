@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Button, DocumentUpload, Field, Select } from '@getrentos/ui';
+import { Alert, Button, DocumentUpload, Field, Select } from '@sureground/ui';
 import {
   kycService,
   IDENTITY_DOCUMENT_TYPES,

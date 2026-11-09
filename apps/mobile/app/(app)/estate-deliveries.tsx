@@ -26,7 +26,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { GateChoice, PhotoField } from '@/components/estate/gate/GateUI';
 import { GatesSheet } from '@/components/estate/gate/GatesSheet';

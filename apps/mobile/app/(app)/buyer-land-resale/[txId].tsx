@@ -11,7 +11,7 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { landBuyerApi } from '@/lib/api/landBuyer';
 import { conditionOpen, confirmedProgress, type Milestone } from '@/lib/api/landSales';
@@ -130,7 +130,7 @@ export default function BuyerLandResale() {
               {conds.some((c) => c.failed) ? (
                 <FormAlert
                   tone="warning"
-                  message="A condition was not met. You may cancel and take a full refund of what GetRentos holds from your transactions page, or keep the purchase."
+                  message="A condition was not met. You may cancel and take a full refund of what Sureground holds from your transactions page, or keep the purchase."
                 />
               ) : null}
               <BuyerConditions

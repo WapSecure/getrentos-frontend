@@ -1,8 +1,8 @@
 'use client';
 
 import { FileLock2, Link2, Unlink, Upload } from 'lucide-react';
-import { Badge, Button } from '@getrentos/ui';
-import { formatDate } from '@getrentos/shared';
+import { Badge, Button } from '@sureground/ui';
+import { formatDate } from '@sureground/shared';
 import type {
   LandDiligenceCheck,
   LandDiligenceDocument,

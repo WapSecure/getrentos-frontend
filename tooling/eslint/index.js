@@ -1,6 +1,6 @@
 // Shared ESLint 9 flat config for the TypeScript + React workspace packages.
 // Use it from a package's eslint.config.js:
-//   module.exports = require('@getrentos/eslint-config');
+//   module.exports = require('@sureground/eslint-config');
 const js = require('@eslint/js');
 const globals = require('globals');
 const tseslint = require('typescript-eslint');
@@ -35,5 +35,5 @@ module.exports = tseslint.config(
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/no-explicit-any': 'warn',
     },
-  },
+  }
 );

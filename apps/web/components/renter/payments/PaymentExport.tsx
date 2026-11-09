@@ -12,7 +12,7 @@ import {
   Field,
   RadioGroup,
   Select,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { downloadCsv, printHtml, escapeHtml } from '@/lib/export';
 import { formatCurrency, formatLagosDate } from '@/lib/format';
 import { paymentStatusBadges } from '@/lib/statusBadge';

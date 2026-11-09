@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { Badge, PageHeader } from '@getrentos/ui';
+import { Badge, PageHeader } from '@sureground/ui';
 import { Footer } from '@/components/layout/Footer';
 import { Navigation } from '@/components/layout/Navigation';
 import { unwrap } from '@/lib/apiHelpers';

@@ -28,7 +28,7 @@ import {
   Text,
   TextField,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { ApiError } from '@/lib/api/client';
 import type { PickedFile } from '@/lib/api/documents';
 import { relativeTime } from '@/lib/format';

@@ -16,7 +16,7 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { messagingConsentApi, type MessagingConsent } from '@/lib/api/messagingConsent';
 import { errorMessage } from '@/lib/api/client';
@@ -26,7 +26,7 @@ import { goBack } from '@/lib/goBack';
 /**
  * Consent to be texted (SMS and/or WhatsApp) for the few urgent things, to the
  * verified number on the profile. The same consent the web settings card and
- * Ask GetRentos on WhatsApp read.
+ * Ask Sureground on WhatsApp read.
  */
 export default function TextMessageSettings() {
   const { colors, spacing, radius } = useTheme();
@@ -161,7 +161,7 @@ function ConsentForm({ consent: c }: { consent: MessagingConsent }) {
 
       <FormAlert
         tone="info"
-        title="Ask GetRentos on WhatsApp"
+        title="Ask Sureground on WhatsApp"
         message={
           c.whatsapp && c.whatsappChatNumber
             ? `Message ${c.whatsappChatNumber} on WhatsApp from this number and say "hi". Ask about your rent, lease, repairs or listings in English, Pidgin, Yoruba, Hausa or Igbo. Answers come from your account; nothing is changed or paid on WhatsApp.`

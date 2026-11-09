@@ -2,7 +2,7 @@ import { Pressable, View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { Siren } from 'lucide-react-native';
-import { Card, Text, useTheme } from '@getrentos/ui-native';
+import { Card, Text, useTheme } from '@sureground/ui-native';
 import { residentApi } from '@/lib/api/resident';
 import { qk } from '@/lib/query/keys';
 import {

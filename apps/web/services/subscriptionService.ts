@@ -1,9 +1,9 @@
 import { authFetch, safeCall } from '@/lib/apiHelpers';
 import type { ApiResponse } from '@/lib/apiHelpers';
-import type { PlanTier } from '@getrentos/shared';
+import type { PlanTier } from '@sureground/shared';
 
 /**
- * The ladder is defined once, in `@getrentos/shared`.
+ * The ladder is defined once, in `@sureground/shared`.
  *
  * This used to be a local `'FREE' | 'PRO'`, which is how the client came to
  * believe an ENTERPRISE subscriber — someone on the *most* expensive plan — was

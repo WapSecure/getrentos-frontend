@@ -13,7 +13,7 @@ import {
   Input,
   RadioGroup,
   useSessionExpiryDraft,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import type { ListingCategory } from '@/types/realtor';
 import { PaginatedSelect } from '@/components/ui/PaginatedSelect';
 import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';

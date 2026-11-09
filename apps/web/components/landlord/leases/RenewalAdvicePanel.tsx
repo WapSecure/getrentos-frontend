@@ -1,7 +1,7 @@
 'use client';
 
 import { Scale } from 'lucide-react';
-import { Alert, Badge, Button, Select, Skeleton } from '@getrentos/ui';
+import { Alert, Badge, Button, Select, Skeleton } from '@sureground/ui';
 import { REPLY_LANGUAGES, type ReplyLanguage } from '@/lib/replyLanguage';
 import type { RenewalAdvice } from '@/types/renewalAdvice';
 
@@ -20,7 +20,7 @@ interface RenewalAdvicePanelProps {
 /**
  * "Renew or re-let?": the tenant's record on this lease, the market, the
  * notice deadline and what each path brings in over the first year, all
- * worked out by GetRentos. It never decides for the landlord. Hidden if it
+ * worked out by Sureground. It never decides for the landlord. Hidden if it
  * fails: the offer form below still works on its own.
  */
 export function RenewalAdvicePanel({

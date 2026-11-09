@@ -11,7 +11,7 @@ import type {
   LandWatchSummary,
   LandWatchTerms,
   LandWatchTier,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 
 const send = <T>(path: string, method: string, body?: unknown) =>
   safeCall(() =>

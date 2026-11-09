@@ -18,7 +18,7 @@ import {
   Wallet,
   MessageCircle,
 } from 'lucide-react-native';
-import { Screen } from '@getrentos/ui-native';
+import { Screen } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { agentApi } from '@/lib/api/agent';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -177,7 +177,7 @@ export default function AgentAccount() {
     <Screen>
       <AccountHeader
         role="Field agent"
-        fallbackName="GetRentos agent"
+        fallbackName="Sureground agent"
         note={
           agent?.completedTasks
             ? `${agent.completedTasks} ${agent.completedTasks === 1 ? 'task' : 'tasks'} completed`

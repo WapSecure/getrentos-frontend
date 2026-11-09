@@ -13,7 +13,7 @@ import {
   NumberInput,
   Select,
   Textarea,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 
 import type { NoticeKind, NoticeServiceMethod, TenancyNotice } from '@/types/tenancy-notice';
 import type { UnconfiguredPeriod } from '@/types/tenancy-notice';

@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { CheckCircle2, CircleDashed, ListChecks, XCircle } from 'lucide-react';
-import { Badge, Button, Textarea } from '@getrentos/ui';
-import { formatDate } from '@getrentos/shared';
+import { Badge, Button, Textarea } from '@sureground/ui';
+import { formatDate } from '@sureground/shared';
 import type { LandClosingChecklistItem, LandClosingCondition } from '@/types/landPurchase';
 import { LandCaseSection } from '@/components/admin/land/case/shared';
 

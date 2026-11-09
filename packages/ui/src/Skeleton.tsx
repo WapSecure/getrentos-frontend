@@ -1,4 +1,4 @@
-import { cn } from '@getrentos/shared';
+import { cn } from '@sureground/shared';
 
 /**
  * A placeholder block. A span (displayed as a block) rather than a div, so it

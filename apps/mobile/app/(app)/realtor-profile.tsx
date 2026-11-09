@@ -16,7 +16,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { realtorApi, type RealtorProfile } from '@/lib/api/realtor';
 import { errorMessage } from '@/lib/api/client';

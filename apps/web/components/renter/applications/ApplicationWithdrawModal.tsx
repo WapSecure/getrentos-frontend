@@ -11,7 +11,7 @@ import {
   DialogTitle,
   Field,
   Select,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { Application } from '@/types/renter';
 
 interface ApplicationWithdrawModalProps {

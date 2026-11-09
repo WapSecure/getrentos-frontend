@@ -1,4 +1,4 @@
-import type { PmKpiReport } from '@getrentos/ui';
+import type { PmKpiReport } from '@sureground/ui';
 import { authFetch, safeCall, type ApiResponse } from '@/lib/apiHelpers';
 
 export interface AgencyDashboard {

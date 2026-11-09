@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { Badge, Card } from '@getrentos/ui';
+import { Badge, Card } from '@sureground/ui';
 import { CalendarClock, Video } from 'lucide-react';
 import {
   LAND_SITE_TOUR_STATUS_LABELS,

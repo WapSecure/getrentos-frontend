@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { Skeleton } from '@getrentos/ui';
+import { Skeleton } from '@sureground/ui';
 import { OwnerLandWorkspace } from '@/components/land/OwnerLandWorkspace';
 
 export default function OwnerLandPage() {

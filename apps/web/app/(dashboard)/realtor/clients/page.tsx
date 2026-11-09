@@ -19,7 +19,7 @@ import {
   TabsTrigger,
   useToast,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import type { ClientRole } from '@/types/realtor';
 import { ROUTES } from '@/lib/constants/auth';
 import { unwrap } from '@/lib/apiHelpers';

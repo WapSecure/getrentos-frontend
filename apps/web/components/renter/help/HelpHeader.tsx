@@ -1,7 +1,7 @@
 'use client';
 
 import { Search } from 'lucide-react';
-import { SearchInput } from '@getrentos/ui';
+import { SearchInput } from '@sureground/ui';
 import { RenterPageHeader } from '../shared/RenterPageHeader';
 
 interface HelpHeaderProps {

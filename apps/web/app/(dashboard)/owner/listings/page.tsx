@@ -11,7 +11,7 @@ import {
   Skeleton,
   useToast,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { useEffect, useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Megaphone } from 'lucide-react';
@@ -96,7 +96,7 @@ export default function OwnerListingsPage() {
     onSuccess: (listing, { status }) => {
       invalidate();
       if (status === 'published' && listing?.status === 'pending_verification') {
-        toast.success('Sent for review. GetRentos checks it before it goes live.');
+        toast.success('Sent for review. Sureground checks it before it goes live.');
       }
     },
     // A refusal used to vanish: the modal closes before the request answers.

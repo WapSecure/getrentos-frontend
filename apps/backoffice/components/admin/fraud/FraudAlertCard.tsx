@@ -2,8 +2,8 @@
 
 import { motion } from 'framer-motion';
 import { AlertTriangle, Search, ShieldCheck, ShieldAlert } from 'lucide-react';
-import { Badge, Button, type BadgeVariant } from '@getrentos/ui';
-import { cn, formatRelativeTime } from '@getrentos/shared';
+import { Badge, Button, type BadgeVariant } from '@sureground/ui';
+import { cn, formatRelativeTime } from '@sureground/shared';
 import type { FraudAlert, FraudAlertSeverity, FraudAlertStatus } from '@/types/admin';
 import { roleLabel } from '@/lib/roleLabels';
 

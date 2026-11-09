@@ -1,7 +1,7 @@
 'use client';
 
 import { useId } from 'react';
-import { DatePicker, TimePicker } from '@getrentos/ui';
+import { DatePicker, TimePicker } from '@sureground/ui';
 
 /**
  * A date and a time, chosen with the app's own pickers instead of the browser's

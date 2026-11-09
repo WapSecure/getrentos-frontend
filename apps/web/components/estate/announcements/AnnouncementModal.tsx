@@ -14,7 +14,7 @@ import {
   Input,
   Select,
   Textarea,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { REPLY_LANGUAGES, type ReplyLanguage } from '@/lib/replyLanguage';
 import { estateService } from '@/services/estateService';

@@ -20,7 +20,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   IconButton,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 import { ReferenceCodeChip } from '@/components/shared/property/ReferenceCodeChip';
 import type { OwnerProperty, OwnershipVerificationStatus } from '@/types/owner';

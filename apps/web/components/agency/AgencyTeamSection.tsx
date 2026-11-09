@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Users } from 'lucide-react';
-import { Button, ListSkeleton, NumberInput } from '@getrentos/ui';
+import { Button, ListSkeleton, NumberInput } from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 import type { AgencyTeam } from '@/services/agencyCommissionService';
 

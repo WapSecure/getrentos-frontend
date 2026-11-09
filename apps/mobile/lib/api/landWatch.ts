@@ -9,7 +9,7 @@ import type {
   LandWatchSummary,
   LandWatchTerms,
   LandWatchTier,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import { apiFetch, apiUpload } from './client';
 import { appendFile, type PickedFile } from './documents';
 

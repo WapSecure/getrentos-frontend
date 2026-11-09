@@ -8,7 +8,7 @@ import {
   DialogDescription,
   DialogTitle,
   SignaturePad,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import type { Lease } from '@/types/landlord';
 
 interface SignLeaseModalProps {

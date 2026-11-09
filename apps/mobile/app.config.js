@@ -6,7 +6,7 @@
  *   server-hosted assetlinks.json and needs no app-side entry. Set
  *   WEBAUTHN_RP_ID at build time to the same shared parent domain the backend
  *   uses, and host apple-app-site-association + assetlinks.json under it.
- * - App links: with APP_LINK_DOMAIN set (e.g. getrentos.com), website links to
+ * - App links: with APP_LINK_DOMAIN set (e.g. getsureground.io), website links to
  *   the paths in packages/shared/src/constants/app-links.json open the app
  *   instead of the browser: iOS via `applinks:` (the site serves
  *   /.well-known/apple-app-site-association), Android via a verified intent
@@ -17,7 +17,7 @@
  *   opts in. Only that profile sets ALLOW_CLEARTEXT, so preview and production
  *   builds stay https-only.
  */
-const appLinks = require('@getrentos/shared/constants/app-links.json');
+const appLinks = require('@sureground/shared/constants/app-links.json');
 
 /** Adds iOS associated domains and Android verified link filters for the website. */
 function withAppLinks(config, domain) {

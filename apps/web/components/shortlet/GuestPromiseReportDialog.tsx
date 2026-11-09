@@ -14,7 +14,7 @@ import {
   RadioGroup,
   Textarea,
   type PendingUpload,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { ShieldCheck } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletKeys } from '@/lib/queryKeys';
@@ -95,7 +95,7 @@ export function GuestPromiseReportDialog({
             <ShieldCheck className="h-5 w-5 text-primary" /> Report a problem with your stay
           </DialogTitle>
           <DialogDescription>
-            {booking.propertyTitle}. The GetRentos Guest Promise: we hold the host&rsquo;s payment
+            {booking.propertyTitle}. The Sureground Guest Promise: we hold the host&rsquo;s payment
             while support checks, and refund you if we uphold your report.
             {closesAt && <> You can report until {formatDeadline(closesAt)}.</>}
           </DialogDescription>

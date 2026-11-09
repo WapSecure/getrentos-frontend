@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 import { router } from 'expo-router';
 import { BadgeCheck, Wrench } from 'lucide-react-native';
-import { Button, Card, Text, useTheme } from '@getrentos/ui-native';
+import { Button, Card, Text, useTheme } from '@sureground/ui-native';
 
 /** Home care is Pro: show what it does instead of an error. */
 export function HomeCareProGate() {

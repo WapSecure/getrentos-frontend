@@ -19,7 +19,7 @@ import {
   Textarea,
   type BadgeVariant,
   type ToastVariant,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import {
   LAND_WATCH_JOB_KIND_LABELS,
   LAND_WATCH_JOB_PAYMENT_NOTE,
@@ -29,7 +29,7 @@ import {
   type LandWatchJobKind,
   type LandWatchJobQuote,
   type LandWatchJobQuoteStatus,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { landKeys } from '@/lib/queryKeys';
@@ -57,7 +57,7 @@ const isExpired = (q: LandWatchJobQuote) =>
   q.validUntil != null && new Date(q.validUntil).getTime() < Date.now();
 
 /**
- * Vendor work on a Managed watch: the owner asks for a job, GetRentos posts
+ * Vendor work on a Managed watch: the owner asks for a job, Sureground posts
  * vendors' quotes, the owner accepts one and pays the vendor directly, and
  * the finished work comes back with proof.
  */
@@ -138,7 +138,7 @@ export const LandWatchJobsCard = ({
       ) : items.length === 0 ? (
         managed && (
           <p className="mt-3 text-sm text-muted-foreground">
-            No work asked for yet. Ask for fencing, clearing, security or other work and GetRentos
+            No work asked for yet. Ask for fencing, clearing, security or other work and Sureground
             will bring you vendors&apos; quotes.
           </p>
         )
@@ -186,7 +186,7 @@ const RequestJobDialog = ({
       setKind('');
       setDescription('');
       onClose();
-      onSaved(job, 'Asked. GetRentos will find vendors and post their quotes here.');
+      onSaved(job, 'Asked. Sureground will find vendors and post their quotes here.');
     },
     onError: (e) => onFailed(e, 'Could not ask for the work.'),
   });
@@ -196,7 +196,7 @@ const RequestJobDialog = ({
       <DialogContent size="md">
         <DialogTitle className="text-lg font-semibold text-foreground">Ask for work</DialogTitle>
         <DialogDescription className="mt-1 text-sm text-muted-foreground">
-          GetRentos finds vendors and posts their quotes. You choose one and pay the vendor
+          Sureground finds vendors and posts their quotes. You choose one and pay the vendor
           directly.
         </DialogDescription>
         <div className="mt-4 space-y-4">
@@ -491,7 +491,7 @@ const CancelJobDialog = ({
         <DialogDescription className="mt-1 text-sm text-muted-foreground">
           {job.status === 'APPROVED'
             ? 'You have chosen a vendor. Tell them yourself too; anything already paid is between you and the vendor.'
-            : 'GetRentos stops looking for vendors and any open quotes are closed.'}
+            : 'Sureground stops looking for vendors and any open quotes are closed.'}
         </DialogDescription>
         <div className="mt-4">
           <Field label="Why" required hint="At least 5 characters.">

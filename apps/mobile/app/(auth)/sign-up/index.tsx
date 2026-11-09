@@ -19,7 +19,7 @@ import {
   TextField,
   useReducedMotion,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { errorMessage } from '@/lib/api/client';
 import { useSignup } from '@/lib/auth/SignupContext';
 import { haptics } from '@/lib/haptics';
@@ -30,7 +30,7 @@ import {
   type EmailSignupValues,
   type PhoneSignupValues,
 } from '@/lib/validation';
-import { AUTH_CONSTANTS } from '@getrentos/shared';
+import { AUTH_CONSTANTS } from '@sureground/shared';
 
 type Method = 'email' | 'phone' | 'whatsapp';
 
@@ -42,7 +42,7 @@ export default function SignUpStart() {
   const [showReferral, setShowReferral] = useState(false);
   const [referral, setReferral] = useState('');
 
-  // Pre-fill a referral code carried on the deep link (getrentos://sign-up?ref=CODE).
+  // Pre-fill a referral code carried on the deep link (sureground://sign-up?ref=CODE).
   useEffect(() => {
     let alive = true;
     Linking.getInitialURL()
@@ -268,7 +268,7 @@ function EmailForm(props: Shared) {
   return (
     <AuthScaffold
       kicker="Create account"
-      title="Join GetRentos"
+      title="Join Sureground"
       subtitle="One account for renting, buying, listing and managing property."
       progress={1 / 3}
       progressLabel="Sign-up step 1 of 3"
@@ -429,7 +429,7 @@ function PhoneForm(props: Shared) {
   return (
     <AuthScaffold
       kicker="Create account"
-      title="Join GetRentos"
+      title="Join Sureground"
       subtitle="One account for renting, buying, listing and managing property."
       progress={1 / 3}
       progressLabel="Sign-up step 1 of 3"

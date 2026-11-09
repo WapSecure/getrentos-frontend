@@ -14,7 +14,7 @@ import {
   PageErrorState,
   PageLoadingState,
   type BadgeVariant,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { trustService } from '@/services/trustService';
 import { unwrap } from '@/lib/apiHelpers';
 import { trustKeys } from '@/lib/queryKeys';
@@ -155,7 +155,7 @@ export function TrustOverviewView({ portal, onAction, moreDetails }: TrustOvervi
           }
         >
           <CardTitle as="h2">Needed for {PORTAL_NOUN[portal]}</CardTitle>
-          <CardDescription>Only the checks this part of GetRentos needs.</CardDescription>
+          <CardDescription>Only the checks this part of Sureground needs.</CardDescription>
         </CardHeader>
         <CardContent className="pt-3">
           <ul className="divide-y divide-border">
@@ -210,11 +210,11 @@ export function TrustOverviewView({ portal, onAction, moreDetails }: TrustOvervi
           <p>
             <span className="font-medium text-foreground">Identity</span> says who you are: your NIN
             checked against official records and a live selfie, checked by Smile ID. It is the same
-            in every part of GetRentos.
+            in every part of Sureground.
           </p>
           <p>
             <span className="font-medium text-foreground">Your trust score</span> says how much
-            history backs you: verification, payments and how you have used GetRentos. Checks that
+            history backs you: verification, payments and how you have used Sureground. Checks that
             do not apply to you, such as a landlord&apos;s ownership documents for a renter, never
             count against it.
           </p>

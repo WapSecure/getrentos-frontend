@@ -1,5 +1,5 @@
 import { apiFetch } from './client';
-import type { BadgeTone } from '@getrentos/ui-native';
+import type { BadgeTone } from '@sureground/ui-native';
 
 /**
  * Changing who manages a property, and the handover pack that follows.
@@ -28,7 +28,7 @@ export interface TransferPreview {
   running: {
     mandateId: string;
     manager: string;
-    managerIsGetRentos: boolean;
+    managerIsSureground: boolean;
     scope: string[];
     noticePeriodDays: number;
     noticeServedAt: string | null;
@@ -70,24 +70,24 @@ export interface VettedFirm {
   activeEngagements: number;
 }
 
-export type Incoming = { kind: 'GETRENTOS' } | { kind: 'FIRM'; id: string } | { kind: 'SELF' };
+export type Incoming = { kind: 'SUREGROUND' } | { kind: 'FIRM'; id: string } | { kind: 'SELF' };
 
 export interface RequestTransferInput {
   propertyId: string;
   fromMandateId?: string;
   incomingOrganizationId?: string;
-  incomingIsGetRentos?: boolean;
+  incomingIsSureground?: boolean;
   effectiveAt: string;
   reason?: string;
   acknowledgeOpenItems?: boolean;
 }
 
-export type DepositTreatment = 'HANDED_TO_INCOMING' | 'RETURNED_TO_TENANT' | 'PAID_TO_GETRENTOS';
+export type DepositTreatment = 'HANDED_TO_INCOMING' | 'RETURNED_TO_TENANT' | 'PAID_TO_SUREGROUND';
 
 export const DEPOSIT_TREATMENT_LABEL: Record<DepositTreatment, string> = {
   HANDED_TO_INCOMING: 'Handed to the incoming manager',
   RETURNED_TO_TENANT: 'Returned to the tenant',
-  PAID_TO_GETRENTOS: 'Paid to GetRentos',
+  PAID_TO_SUREGROUND: 'Paid to Sureground',
 };
 
 export interface HandoverSnapshot {
@@ -105,16 +105,16 @@ export interface HandoverSnapshot {
     arrears: number;
     heldForOwner: number;
     credit: number;
-    deposit: { id: string; amount: number; status: string; heldByGetRentos: boolean } | null;
+    deposit: { id: string; amount: number; status: string; heldBySureground: boolean } | null;
   }[];
   totals: {
     arrears: number;
     heldForOwner: number;
     credit: number;
-    depositsWithGetRentos: number;
+    depositsWithSureground: number;
     depositsOutside: number;
   };
-  ownerMoney: { heldByGetRentos: number; heldByOutgoingFirm: number | null };
+  ownerMoney: { heldBySureground: number; heldByOutgoingFirm: number | null };
   openWork: { id: string; category: string; description: string; status: string }[];
   documents: { id: string; type: string; name: string | null }[];
   inspections: { id: string; type: string; status: string; date: string | null }[];

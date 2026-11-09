@@ -10,7 +10,7 @@ import {
   DialogTitle,
   Field,
   Textarea,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import type { MusterTally } from '@/types/estate';
 
 /** The API's floor on a closing note, kept in step so the form cannot under-run it. */

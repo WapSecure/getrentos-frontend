@@ -10,7 +10,7 @@ import {
   DialogTitle,
   Textarea,
   useToast,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { Send } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
@@ -53,7 +53,7 @@ export function ShortletMessageHostDialog({
           />
           <p className="text-xs text-muted-foreground">
             Phone numbers, emails and chat links are hidden until the stay is booked and paid, so
-            you’re both covered by GetRentos Payment Protection.
+            you’re both covered by Sureground Payment Protection.
           </p>
           <Button
             className="w-full"

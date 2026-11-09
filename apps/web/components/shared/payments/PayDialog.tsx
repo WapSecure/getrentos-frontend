@@ -11,7 +11,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { PaymentProviderPicker } from '@/components/shared/payments/PaymentProviderPicker';
 import { useCheckoutFee } from '@/hooks/useCheckoutFee';
 import type { PaymentProviderChoice } from '@/hooks/usePaymentProviders';
@@ -95,7 +95,7 @@ function Step({ n, children }: { n?: number; children: ReactNode }) {
 }
 
 /**
- * The one way to pay anything on GetRentos: what is owed, (how much,) who
+ * The one way to pay anything on Sureground: what is owed, (how much,) who
  * takes the payment, exactly what will be charged, then that company's secure
  * page. Each flow brings its own words; the layout is the same everywhere.
  */
@@ -273,7 +273,7 @@ export const PayDialog = ({
                 {topUpOnly?.secureLine ?? (
                   <>
                     {topUpOnly ? 'If a top-up is needed, you finish' : 'You finish'} on {company}’s
-                    secure page: GetRentos never sees your card details.
+                    secure page: Sureground never sees your card details.
                   </>
                 )}{' '}
                 {protection}

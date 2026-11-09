@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 import { Unlink } from 'lucide-react-native';
-import { Card, IconButton, Text, useTheme } from '@getrentos/ui-native';
+import { Card, IconButton, Text, useTheme } from '@sureground/ui-native';
 import { StatusPill } from '@/components/host/HostUI';
 import { AGREEMENT_STATUS, type MarketingAgreement } from '@/lib/api/estateMarketplace';
 import { formatDate } from '@/lib/format';

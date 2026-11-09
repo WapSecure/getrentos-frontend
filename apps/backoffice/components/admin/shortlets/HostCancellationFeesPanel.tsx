@@ -19,9 +19,9 @@ import {
   Textarea,
   useToast,
   type BadgeVariant,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { CalendarX } from 'lucide-react';
-import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
+import { formatCurrency, formatDate, unwrap } from '@sureground/shared';
 import { adminShortletService } from '@/services/adminShortletService';
 import type { AdminHostPenalty, AdminHostPenaltyStatus } from '@/types/shortlet';
 
@@ -108,7 +108,11 @@ export function HostCancellationFeesPanel({ canWaive }: { canWaive: boolean }) {
       </div>
 
       {isLoading ? (
-        <ListSkeleton rows={3} label="Loading cancellation fees" className="rounded-none border-0" />
+        <ListSkeleton
+          rows={3}
+          label="Loading cancellation fees"
+          className="rounded-none border-0"
+        />
       ) : isError && !data ? (
         <div className="p-4">
           <Alert

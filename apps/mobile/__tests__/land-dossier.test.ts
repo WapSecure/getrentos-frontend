@@ -1,5 +1,5 @@
 import { costFigure, estimatedTotal, words } from '@/lib/api/landDossier';
-import { checkedByText, percentileWords } from '@getrentos/shared';
+import { checkedByText, percentileWords } from '@sureground/shared';
 
 describe('land decision dossier', () => {
   it('shows a confirmed cost exactly, an estimate as a range, and unknown as a dash', () => {
@@ -28,7 +28,9 @@ describe('land decision dossier', () => {
   });
 
   it('shares the trust and price wording with web', () => {
-    expect(checkedByText(['GETRENTOS', 'SURVEYOR'])).toBe('GetRentos and an independent surveyor');
+    expect(checkedByText(['SUREGROUND', 'SURVEYOR'])).toBe(
+      'Sureground and an independent surveyor'
+    );
     expect(percentileWords(0)).toBe('cheaper per m² than most comparable land');
     expect(percentileWords(50)).toBe('around the middle of comparable land per m²');
     expect(percentileWords(95)).toBe('dearer per m² than most comparable land');

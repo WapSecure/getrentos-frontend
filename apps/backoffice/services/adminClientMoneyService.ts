@@ -1,4 +1,4 @@
-import { authFetch, safeCall, type ApiResponse } from '@getrentos/shared';
+import { authFetch, safeCall, type ApiResponse } from '@sureground/shared';
 
 /**
  * Client money — the officer's side.
@@ -27,7 +27,7 @@ export interface IntegrityFinding {
 
 export interface ReconciliationRow {
   id: string;
-  /** Null is the GetRentos platform pool. */
+  /** Null is the Sureground platform pool. */
   organizationId: string | null;
   organizationName: string | null;
   currency: string;
@@ -59,7 +59,7 @@ export interface ReconciliationOverview {
 }
 
 export interface RecordBankBalanceInput {
-  /** Null/omitted is the GetRentos platform pool. */
+  /** Null/omitted is the Sureground platform pool. */
   organizationId?: string | null;
   asOfDate: string;
   balance: number;

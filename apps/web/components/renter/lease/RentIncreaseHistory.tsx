@@ -1,10 +1,10 @@
 'use client';
 
-import { Badge, Card } from '@getrentos/ui';
+import { Badge, Card } from '@sureground/ui';
 import { motion } from 'framer-motion';
 import { TrendingUp, Calendar } from 'lucide-react';
-import { NairaSign } from '@getrentos/ui/NairaSign';
-import { formatPercent } from '@getrentos/shared';
+import { NairaSign } from '@sureground/ui/NairaSign';
+import { formatPercent } from '@sureground/shared';
 
 interface RentIncrease {
   date: string;

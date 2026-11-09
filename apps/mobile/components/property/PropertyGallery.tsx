@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { Image } from 'expo-image';
 import { ImageOff } from 'lucide-react-native';
-import { Text, useTheme } from '@getrentos/ui-native';
+import { Text, useTheme } from '@sureground/ui-native';
 
 export interface PropertyGalleryProps {
   images: string[];

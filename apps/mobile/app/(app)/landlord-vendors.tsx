@@ -14,7 +14,7 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { landlordApi, type LandlordVendor } from '@/lib/api/landlord';
 import { errorMessage } from '@/lib/api/client';

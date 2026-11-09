@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { ArrowLeftRight, Plus } from 'lucide-react-native';
-import { Text, useTheme, useToast } from '@getrentos/ui-native';
+import { Text, useTheme, useToast } from '@sureground/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import {
   PORTAL_LABEL,

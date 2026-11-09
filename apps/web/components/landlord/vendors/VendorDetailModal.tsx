@@ -12,7 +12,7 @@ import {
   DialogTitle,
   ListSkeleton,
   SaveButton,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { homeManagementKeys, landlordKeys } from '@/lib/queryKeys';
@@ -34,7 +34,7 @@ import {
   saveAccountLabel,
   withStepUpSummary,
   type AccountLookup,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 
 interface VendorDetailModalProps {
   vendor: Vendor | null;

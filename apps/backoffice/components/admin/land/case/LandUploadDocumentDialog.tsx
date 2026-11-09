@@ -13,7 +13,7 @@ import {
   Select,
   DocumentUpload,
   type PendingUpload,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { humaniseEnum } from '@/lib/landDiligence';
 import { LAND_DOCUMENT_TYPES, type LandDiligenceCheck, type LandDocumentType } from '@/types/land';
 

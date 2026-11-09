@@ -13,7 +13,7 @@ import {
   Input,
   Pagination,
   ToggleChip,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { EyeOff, Grid3x3, Pencil, Plus, RotateCcw, Search, Upload } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
@@ -217,11 +217,7 @@ export const PlotInventory = ({ propertyId, layoutStatus, notify }: PlotInventor
     <section className="space-y-4">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="-mx-1 overflow-x-auto px-1">
-          <div
-            className="flex w-max gap-2"
-            role="group"
-            aria-label="Plot status"
-          >
+          <div className="flex w-max gap-2" role="group" aria-label="Plot status">
             {filterOptions.map((option) => (
               <ToggleChip
                 key={option.label}

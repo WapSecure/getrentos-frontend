@@ -2,10 +2,10 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { ArrowRight, FileText, House, Wrench } from 'lucide-react';
-import { Button } from '@getrentos/ui';
-import { Badge } from '@getrentos/ui';
-import { Card } from '@getrentos/ui';
-import { CardSkeleton } from '@getrentos/ui';
+import { Button } from '@sureground/ui';
+import { Badge } from '@sureground/ui';
+import { Card } from '@sureground/ui';
+import { CardSkeleton } from '@sureground/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';

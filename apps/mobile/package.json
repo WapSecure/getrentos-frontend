@@ -25,9 +25,9 @@
     "@expo-google-fonts/manrope": "0.4.3",
     "@expo/dom-webview": "~57.0.1",
     "@expo/metro-runtime": "~57.0.16",
-    "@getrentos/shared": "workspace:*",
-    "@getrentos/tokens": "workspace:*",
-    "@getrentos/ui-native": "workspace:*",
+    "@sureground/shared": "workspace:*",
+    "@sureground/tokens": "workspace:*",
+    "@sureground/ui-native": "workspace:*",
     "@gorhom/bottom-sheet": "^5.1.6",
     "@hookform/resolvers": "^5.9.2",
     "@react-native-async-storage/async-storage": "2.2.0",
@@ -102,9 +102,9 @@
     ],
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/$1",
-      "^@getrentos/shared$": "<rootDir>/../../packages/shared/src/index.ts",
-      "^@getrentos/tokens$": "<rootDir>/../../packages/tokens/src/index.ts",
-      "^@getrentos/ui-native$": "<rootDir>/../../packages/ui-native/src/index.ts"
+      "^@sureground/shared$": "<rootDir>/../../packages/shared/src/index.ts",
+      "^@sureground/tokens$": "<rootDir>/../../packages/tokens/src/index.ts",
+      "^@sureground/ui-native$": "<rootDir>/../../packages/ui-native/src/index.ts"
     },
     "transformIgnorePatterns": [
       "node_modules/(?!(.pnpm|(jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|expo-router|standard-navigation|react-navigation|@react-navigation/.*|@sentry/react-native|native-base|react-native-svg))"

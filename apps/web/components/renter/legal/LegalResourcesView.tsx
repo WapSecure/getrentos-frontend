@@ -1,6 +1,6 @@
 'use client';
 
-import { Alert, PageHeader } from '@getrentos/ui';
+import { Alert, PageHeader } from '@sureground/ui';
 import { LegalResourceList } from '@/components/renter/legal/LegalResourceList';
 
 export const LegalResourcesView = () => {

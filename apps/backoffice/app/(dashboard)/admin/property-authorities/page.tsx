@@ -18,8 +18,8 @@ import {
   Textarea,
   type BadgeVariant,
   PageHeader,
-} from '@getrentos/ui';
-import { formatDate, type ApiResponse } from '@getrentos/shared';
+} from '@sureground/ui';
+import { formatDate, type ApiResponse } from '@sureground/shared';
 import {
   propertyAuthorityService,
   type AuthorityStatus,

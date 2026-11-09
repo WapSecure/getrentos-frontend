@@ -14,7 +14,7 @@ import {
   SegmentedControl,
   Text,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   ACTOR_KIND_LABEL,
@@ -33,7 +33,7 @@ const WHO_OPTIONS: { value: ActivityWho; label: string }[] = [
 ];
 
 /**
- * What managers, GetRentos, tenants and automatic jobs have done on the
+ * What managers, Sureground, tenants and automatic jobs have done on the
  * caller's properties, newest first. The caller's own actions are left out.
  * Shared by the landlord and owner portals (the web's PropertyActivityLog).
  */

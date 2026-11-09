@@ -10,7 +10,7 @@ import {
   Field,
   Input,
   NumberInput,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import type { LandPaymentPlan, LandPaymentPlanInput } from '@/types/landDeveloper';
 import { PlanPriceExample } from './PlanPriceExample';
 import { bpsToPercent, percentToBps, planTermProblems } from './planPricing';

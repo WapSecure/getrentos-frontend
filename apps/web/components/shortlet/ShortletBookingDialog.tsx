@@ -15,7 +15,7 @@ import {
   DialogTitle,
   Field,
   NumberInput,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { CreditCard, MapPin } from 'lucide-react';
 import { unwrap, VerificationRequiredError } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
@@ -324,7 +324,7 @@ export function ShortletBookingDialog({
                       : 'Stay'
                   }
                   receiverLine={`The fee goes to the payment company, so the full ${formatCurrency(payAmount)} goes to your booking.`}
-                  protection={`GetRentos holds your payment and only pays the host after check-in.${
+                  protection={`Sureground holds your payment and only pays the host after check-in.${
                     createdBooking.deposit
                       ? ' Your refundable deposit is returned after check-out.'
                       : ''

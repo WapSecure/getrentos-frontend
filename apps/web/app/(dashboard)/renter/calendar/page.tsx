@@ -11,7 +11,7 @@ import type { CalendarEvent, CalendarEventFormData, CalendarViewMode } from '@/t
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
-import { PageErrorState, PageLoadingState, useToast } from '@getrentos/ui';
+import { PageErrorState, PageLoadingState, useToast } from '@sureground/ui';
 
 export default function CalendarPage() {
   const queryClient = useQueryClient();

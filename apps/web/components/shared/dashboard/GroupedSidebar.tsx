@@ -11,8 +11,8 @@ import {
   type ElementType,
   type ReactNode,
 } from 'react';
-import { PLAN_TIER_LABELS, type PlanTier } from '@getrentos/shared';
-import { SidebarRailToggle, useSidebarRail } from '@getrentos/ui';
+import { PLAN_TIER_LABELS, type PlanTier } from '@sureground/shared';
+import { SidebarRailToggle, useSidebarRail } from '@sureground/ui';
 
 export interface GroupedSidebarItem {
   label?: ReactNode;
@@ -120,7 +120,7 @@ const slug = (label: string) => label.toLowerCase().replace(/[^a-z0-9]+/g, '-');
  * browser. Everything starts open, so nothing is hidden until they choose to
  * hide it; the group holding the current page always shows.
  */
-const storageKey = (scope: string) => `getrentos.sidebar.collapsed-v2:${slug(scope)}`;
+const storageKey = (scope: string) => `sureground.sidebar.collapsed-v2:${slug(scope)}`;
 const NONE: readonly string[] = [];
 const cache = new Map<string, readonly string[]>();
 const listeners = new Set<() => void>();
@@ -154,7 +154,7 @@ const subscribe = (onChange: () => void) => {
   listeners.add(onChange);
   // Folded in another tab: forget what we cached so the next read sees it.
   const onStorage = (e: StorageEvent) => {
-    if (e.key?.startsWith('getrentos.sidebar.collapsed:')) {
+    if (e.key?.startsWith('sureground.sidebar.collapsed:')) {
       cache.clear();
       onChange();
     }

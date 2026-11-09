@@ -1,4 +1,4 @@
-import { cn } from '@getrentos/shared';
+import { cn } from '@sureground/shared';
 
 /**
  * The one look every text-like control shares (Input, Textarea, NumberInput,

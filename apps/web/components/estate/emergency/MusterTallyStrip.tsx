@@ -1,7 +1,7 @@
 'use client';
 
 import { Check } from 'lucide-react';
-import { Card } from '@getrentos/ui';
+import { Card } from '@sureground/ui';
 import type { MusterTally } from '@/types/estate';
 
 interface MusterTallyStripProps {

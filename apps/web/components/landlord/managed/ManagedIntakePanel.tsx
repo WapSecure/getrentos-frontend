@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Check } from 'lucide-react';
-import { Alert, Button, Checkbox } from '@getrentos/ui';
+import { Alert, Button, Checkbox } from '@sureground/ui';
 
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
@@ -32,7 +32,7 @@ const lagosDateTime = (iso: string) =>
   });
 
 /**
- * Where an owner's GetRentos Managed request stands, under its property. The
+ * Where an owner's Sureground Managed request stands, under its property. The
  * proposal is accepted here, and accepting is signing, so the agreement is an
  * explicit tick rather than implied by the button.
  */
@@ -95,7 +95,7 @@ export const ManagedIntakePanel = ({
       <div className="mt-3 text-sm text-muted-foreground">
         {intake.status === 'SUBMITTED' && (
           <p>
-            We have your request. Next, GetRentos books a site visit. Indicative fee{' '}
+            We have your request. Next, Sureground books a site visit. Indicative fee{' '}
             {intake.indicativeFeePct}% of rent collected
             {intake.indicativeMonthlyFee !== null && (
               <> (about {formatCurrency(intake.indicativeMonthlyFee)} a month)</>
@@ -105,7 +105,7 @@ export const ManagedIntakePanel = ({
         )}
         {intake.status === 'ASSESSMENT_SCHEDULED' && intake.assessmentScheduledFor && (
           <p>
-            {intake.assessorName ?? 'A GetRentos assessor'} visits on{' '}
+            {intake.assessorName ?? 'A Sureground assessor'} visits on{' '}
             <span className="font-medium text-foreground">
               {lagosDateTime(intake.assessmentScheduledFor)}
             </span>
@@ -115,7 +115,7 @@ export const ManagedIntakePanel = ({
         {intake.status === 'ASSESSED' && <p>We visited. Your proposal is being prepared.</p>}
         {intake.status === 'ACCEPTED' && (
           <p>
-            You accepted on {formatDate(intake.acceptedAt ?? intake.createdAt)}. GetRentos assigns
+            You accepted on {formatDate(intake.acceptedAt ?? intake.createdAt)}. Sureground assigns
             your portfolio manager and takes over once the opening balances are confirmed.
           </p>
         )}
@@ -154,7 +154,7 @@ export const ManagedIntakePanel = ({
 
           {intake.proposalExpired ? (
             <Alert variant="warning" className="mt-3">
-              This proposal has lapsed. Contact GetRentos for a fresh one.
+              This proposal has lapsed. Contact Sureground for a fresh one.
             </Alert>
           ) : (
             <>
@@ -162,7 +162,7 @@ export const ManagedIntakePanel = ({
                 className="mt-3"
                 checked={agree}
                 onCheckedChange={setAgree}
-                label="I agree to GetRentos managing this property on these terms. Accepting signs the management agreement."
+                label="I agree to Sureground managing this property on these terms. Accepting signs the management agreement."
               />
               <Button
                 className="mt-3"

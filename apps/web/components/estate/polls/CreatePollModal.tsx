@@ -13,7 +13,7 @@ import {
   IconButton,
   Input,
   Textarea,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateService } from '@/services/estateService';
 

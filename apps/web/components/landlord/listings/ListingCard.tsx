@@ -12,7 +12,7 @@ import {
   Eye,
   Zap,
 } from 'lucide-react';
-import { Badge, Button } from '@getrentos/ui';
+import { Badge, Button } from '@sureground/ui';
 import { listingStatusBadges } from '@/lib/statusBadge';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type { Listing } from '@/types/landlord';

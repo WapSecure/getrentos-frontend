@@ -2,7 +2,7 @@ import { Pressable, View } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import { useQuery } from '@tanstack/react-query';
 import { ExternalLink, FileText, PenLine } from 'lucide-react-native';
-import { Badge, QueryState, Skeleton, Text, useTheme } from '@getrentos/ui-native';
+import { Badge, QueryState, Skeleton, Text, useTheme } from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import {
   committeeTitleLabel,

@@ -18,8 +18,8 @@ import {
   useToast,
   type PendingUpload,
   PageHeader,
-} from '@getrentos/ui';
-import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { formatCurrency, formatDate, unwrap } from '@sureground/shared';
 import { useAdminUser } from '../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
 import {
@@ -41,12 +41,12 @@ const KIND: Record<
   MISSING_IN_BOOKS: {
     label: 'Not in the books',
     variant: 'danger',
-    help: 'The gateway took money GetRentos has no record of.',
+    help: 'The gateway took money Sureground has no record of.',
   },
   MISSING_AT_GATEWAY: {
     label: 'Not at the gateway',
     variant: 'danger',
-    help: 'GetRentos recorded money the gateway does not show.',
+    help: 'Sureground recorded money the gateway does not show.',
   },
 };
 

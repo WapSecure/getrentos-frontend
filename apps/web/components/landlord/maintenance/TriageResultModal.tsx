@@ -12,7 +12,7 @@ import {
   DialogTitle,
   Select,
   Textarea,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { categoryIcons } from '@/components/landlord/maintenance/MaintenanceRequestCard';
 import { maintenancePriorityBadges } from '@/lib/statusBadge';
 import type {

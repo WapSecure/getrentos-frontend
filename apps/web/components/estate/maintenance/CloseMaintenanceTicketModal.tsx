@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Button, Dialog, DialogContent, DialogTitle, Field, Textarea } from '@getrentos/ui';
+import { Button, Dialog, DialogContent, DialogTitle, Field, Textarea } from '@sureground/ui';
 
 interface CloseMaintenanceTicketModalProps {
   isOpen: boolean;

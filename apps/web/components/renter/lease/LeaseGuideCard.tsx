@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { AlertTriangle, BookOpen, Check, Copy } from 'lucide-react';
-import { Button, Card, Skeleton } from '@getrentos/ui';
+import { Button, Card, Skeleton } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { renterService } from '@/services/renterService';
@@ -78,7 +78,7 @@ export function LeaseGuideCard() {
           <p className="text-sm text-foreground">{g.renewalAdvice}</p>
           {g.facts.market.median && (
             <p className="text-xs text-muted-foreground">
-              Similar homes on GetRentos: typically {g.facts.market.median} a year
+              Similar homes on Sureground: typically {g.facts.market.median} a year
               {g.facts.market.typicalRange
                 ? ` (most between ${g.facts.market.typicalRange.low} and ${g.facts.market.typicalRange.high})`
                 : ''}

@@ -1,7 +1,7 @@
 'use client';
 
 import { CheckCircle, Wallet } from 'lucide-react';
-import { Badge, Button, Card } from '@getrentos/ui';
+import { Badge, Button, Card } from '@sureground/ui';
 import { formatCurrency, formatLagosDate } from '@/lib/format';
 import type { PaymentsSummary as AccountSummary } from '@/services/renterService';
 import { leftToPay } from './PaymentCard';
@@ -53,7 +53,7 @@ export const PaymentsSummary = ({
             <p className="text-sm text-muted-foreground">
               Nothing is due right now.
               {summary && summary.totalHeldNaira > 0
-                ? ` ${formatCurrency(summary.totalHeldNaira)} of your rent is held by GetRentos until it is released to your landlord.`
+                ? ` ${formatCurrency(summary.totalHeldNaira)} of your rent is held by Sureground until it is released to your landlord.`
                 : ''}
             </p>
           </div>
@@ -92,7 +92,7 @@ export const PaymentsSummary = ({
           </p>
           {held > 0 && (
             <p className="mt-1 text-xs text-muted-foreground">
-              {formatCurrency(held)} of your rent is held by GetRentos until it is released to your
+              {formatCurrency(held)} of your rent is held by Sureground until it is released to your
               landlord.
             </p>
           )}

@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
-import { useTheme } from '@getrentos/ui-native';
+import { useTheme } from '@sureground/ui-native';
 import { SelectField } from './SelectField';
 import { locationsApi } from '@/lib/api/locations';
 import { getCitiesFor } from '@/lib/locationCities';

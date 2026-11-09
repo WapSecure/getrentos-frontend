@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { AUTH_CONSTANTS, ERROR_MESSAGES } from '@getrentos/shared';
+import { AUTH_CONSTANTS, ERROR_MESSAGES } from '@sureground/shared';
 
 export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export const PHONE_RE = /^[+]?[0-9][0-9\s-]{6,16}$/;

@@ -10,7 +10,7 @@ import {
   Field,
   Select,
   Textarea,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 
 const categoryOptions = [
   { value: 'SECURITY', label: 'Security' },

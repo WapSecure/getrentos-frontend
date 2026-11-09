@@ -10,7 +10,7 @@ import {
   Field,
   Input,
   Select,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import type { Gate } from '@/types/estate';
 
 const purposeOptions = [

@@ -14,7 +14,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { Button, IconButton } from '@getrentos/ui';
+import { Button, IconButton } from '@sureground/ui';
 import { notificationHref } from '@/lib/notificationHref';
 
 interface NotificationMetadata {

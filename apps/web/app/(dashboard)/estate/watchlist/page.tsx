@@ -13,7 +13,7 @@ import {
   Pagination,
   ToggleChip,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';

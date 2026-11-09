@@ -5,11 +5,11 @@ import { TextMessageConsentCard } from '@/components/shared/settings/TextMessage
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { UserPlus, Handshake, CalendarClock, MessageCircle, Wallet, Star } from 'lucide-react';
-import { Button, Switch, useToast } from '@getrentos/ui';
+import { Button, Switch, useToast } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
 import { realtorService } from '@/services/realtorService';
-import { categorySendsEmail } from '@getrentos/shared';
+import { categorySendsEmail } from '@sureground/shared';
 
 interface NotificationPreference {
   id: string;

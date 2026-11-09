@@ -23,7 +23,7 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   realtorApi,
@@ -45,7 +45,7 @@ import {
   saveAccountLabel,
   withdrawStepUpSummary,
   type AccountLookup,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { withdrawBlocker } from '@/lib/withdrawal';

@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { Platform, View } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import { Video } from 'lucide-react-native';
-import { Button, Text, useTheme, useToast } from '@getrentos/ui-native';
-import { videoCallState, type VideoCallJoin } from '@getrentos/shared';
+import { Button, Text, useTheme, useToast } from '@sureground/ui-native';
+import { videoCallState, type VideoCallJoin } from '@sureground/shared';
 import { errorMessage } from '@/lib/api/client';
 import { formatDate, formatTime } from '@/lib/format';
 

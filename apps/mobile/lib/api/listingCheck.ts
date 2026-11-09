@@ -2,7 +2,7 @@ import { apiFetch } from './client';
 
 export type ListingCheckLevel = 'looks_good' | 'check_carefully' | 'be_cautious';
 
-/** "Should I rent this?" — facts by GetRentos, level by rule, wording possibly automated. */
+/** "Should I rent this?" — facts by Sureground, level by rule, wording possibly automated. */
 export interface ListingCheck {
   listingId: string;
   level: ListingCheckLevel;

@@ -17,7 +17,7 @@ import {
   Pagination,
   useOptimisticMutation,
   useToast,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { renterService, type SavedListingItem } from '@/services/renterService';
 import { unwrap, type Paginated } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';

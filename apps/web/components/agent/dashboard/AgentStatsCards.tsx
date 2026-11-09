@@ -1,6 +1,6 @@
 'use client';
 
-import { StatCard } from '@getrentos/ui';
+import { StatCard } from '@sureground/ui';
 import { Activity, AlertTriangle, CheckCircle2, ClipboardList } from 'lucide-react';
 
 interface AgentStatsCardsProps {

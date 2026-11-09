@@ -16,8 +16,8 @@ import {
   Select,
   Textarea,
   useSessionExpiryDraft,
-} from '@getrentos/ui';
-import { EMPLOYMENT_STATUSES, type AddressValue } from '@getrentos/shared';
+} from '@sureground/ui';
+import { EMPLOYMENT_STATUSES, type AddressValue } from '@sureground/shared';
 import type { Property, Document as ApplicationDocument } from '@/types/renter';
 import { nameOnly } from '@/lib/validations/input';
 import { renterService, type RenterDocument } from '@/services/renterService';

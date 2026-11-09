@@ -24,7 +24,7 @@ import {
   IconButton,
   NumberInput,
   type BadgeVariant,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { format } from 'date-fns';
 
 interface Roommate {

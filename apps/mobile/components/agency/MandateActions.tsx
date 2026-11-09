@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Alert, View } from 'react-native';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Button, FormAlert, Text, TextField, useTheme, useToast } from '@getrentos/ui-native';
+import { Button, FormAlert, Text, TextField, useTheme, useToast } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   ACTION_COPY,

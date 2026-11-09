@@ -13,7 +13,7 @@ import {
   SegmentedControl,
   Skeleton,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { homeCareApi, type WorkOrder, type WorkOrderView } from '@/lib/api/homeCare';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';

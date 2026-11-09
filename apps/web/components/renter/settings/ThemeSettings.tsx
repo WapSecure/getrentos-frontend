@@ -2,7 +2,7 @@
 
 import { useTheme } from 'next-themes';
 import { Moon, Sun, Monitor } from 'lucide-react';
-import { Alert, RadioGroup } from '@getrentos/ui';
+import { Alert, RadioGroup } from '@sureground/ui';
 
 export const ThemeSettings = () => {
   const { theme, setTheme } = useTheme();

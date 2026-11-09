@@ -12,7 +12,7 @@ import {
   Text,
   TextField,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { errorMessage } from '@/lib/api/client';
 import { authApi } from '@/lib/api/auth';
 import { haptics } from '@/lib/haptics';
@@ -25,7 +25,7 @@ import {
   resetPasswordSchema,
   type ResetPasswordValues,
 } from '@/lib/validation';
-import { AUTH_CONSTANTS } from '@getrentos/shared';
+import { AUTH_CONSTANTS } from '@sureground/shared';
 
 type Step = 'identify' | 'reset' | 'done';
 const STEP_INDEX: Record<Step, number> = { identify: 0, reset: 1, done: 2 };
@@ -140,7 +140,7 @@ export default function RecoverWithFace() {
               }}
             />
           ) : (
-            <FormAlert message="Face recovery works in the GetRentos app on your phone. Open the app to continue, or contact support." />
+            <FormAlert message="Face recovery works in the Sureground app on your phone. Open the app to continue, or contact support." />
           )}
           <Text variant="caption" color="mutedForeground">
             Only for accounts that completed the live selfie during identity verification. After
@@ -192,7 +192,7 @@ export default function RecoverWithFace() {
           <Text variant="callout">
             To protect you, payouts and new bank details are on hold until{' '}
             {heldUntil ? formatDate(heldUntil) : 'three days from now'}. If you didn’t do this,
-            contact GetRentos support straight away.
+            contact Sureground support straight away.
           </Text>
         </View>
       )}

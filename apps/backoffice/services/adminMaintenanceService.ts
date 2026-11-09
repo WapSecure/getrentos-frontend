@@ -1,5 +1,5 @@
-import { authFetch, safeCall, toQuery } from '@getrentos/shared';
-import type { ApiResponse } from '@getrentos/shared';
+import { authFetch, safeCall, toQuery } from '@sureground/shared';
+import type { ApiResponse } from '@sureground/shared';
 import type { Paginated } from '@/services/adminService';
 import type {
   AdminMaintenanceOverview,
@@ -137,18 +137,10 @@ export const adminMaintenanceService = {
    * file and serves it back through a short-lived signed URL, so nothing here
    * keeps a link that outlives the record.
    */
-  addQuoteDocument(
-    id: string,
-    file: File,
-    note?: string
-  ): Promise<ApiResponse<EvidenceItem>> {
+  addQuoteDocument(id: string, file: File, note?: string): Promise<ApiResponse<EvidenceItem>> {
     return postDocument(`quotes/${id}/documents`, file, note);
   },
-  addInvoiceDocument(
-    id: string,
-    file: File,
-    note?: string
-  ): Promise<ApiResponse<EvidenceItem>> {
+  addInvoiceDocument(id: string, file: File, note?: string): Promise<ApiResponse<EvidenceItem>> {
     return postDocument(`invoices/${id}/documents`, file, note);
   },
   /** Detaches a file attached to the wrong record. */

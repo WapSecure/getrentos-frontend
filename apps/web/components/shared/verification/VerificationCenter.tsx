@@ -34,7 +34,7 @@ import {
   Progress,
   Select,
   Skeleton,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { TIER_LABELS } from './trustTiers';
 import { LiveSelfieCapture, liveCaptureBlocker } from './LiveSelfieCapture';
 import type { SmileLivenessSession } from '@/services/trustService';
@@ -841,7 +841,7 @@ export const VerificationCenter = ({
             <div>
               <h2 className="text-lg font-bold text-foreground">Your verification</h2>
               <p className="text-sm text-muted-foreground">
-                Each check below adds to what you can do on GetRentos.
+                Each check below adds to what you can do on Sureground.
               </p>
             </div>
           </div>

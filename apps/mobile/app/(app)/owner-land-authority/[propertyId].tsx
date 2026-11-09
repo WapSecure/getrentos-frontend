@@ -20,7 +20,7 @@ import {
   type LandCapacityRule,
   type LandSellerCapacity,
   type LandSignatoryRole,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import {
   Badge,
   Button,
@@ -33,7 +33,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { declareBlocker, isClaim, isEditable, landAuthorityApi } from '@/lib/api/landAuthority';
 import { errorMessage } from '@/lib/api/client';
@@ -47,7 +47,7 @@ type Saved = (view: LandAuthorityView, message: string) => void;
 
 /**
  * Show you can sell this land: the capacity you sell in, what it rests on and
- * whose consent it needs. GetRentos verifies it before the land is approved.
+ * whose consent it needs. Sureground verifies it before the land is approved.
  */
 export default function OwnerLandAuthority() {
   const { propertyId } = useLocalSearchParams<{ propertyId: string }>();
@@ -142,7 +142,7 @@ function Status({ view }: { view: LandAuthorityView | null }) {
         </View>
         <Text variant="callout" color="mutedForeground">
           Buyers need to know the person selling has the right to. Tell us how you hold or represent
-          this land and what that rests on. GetRentos checks it before the land can be approved for
+          this land and what that rests on. Sureground checks it before the land can be approved for
           sale.
         </Text>
       </Card>
@@ -163,7 +163,7 @@ function Status({ view }: { view: LandAuthorityView | null }) {
       {a.status === 'DISPUTED' ? (
         <FormAlert
           tone="error"
-          message="Someone has objected to this sale. It is paused, and you cannot change the claim, until GetRentos resolves the objection."
+          message="Someone has objected to this sale. It is paused, and you cannot change the claim, until Sureground resolves the objection."
         />
       ) : null}
       {a.decision?.note ? (
@@ -356,7 +356,7 @@ function Signatories({
       onSaved(
         updated,
         hadEmail
-          ? 'Added. If they have a GetRentos account with that email, we have asked them to answer.'
+          ? 'Added. If they have a Sureground account with that email, we have asked them to answer.'
           : 'Added.'
       );
     },
@@ -378,8 +378,9 @@ function Signatories({
     <Card style={{ gap: spacing.lg }}>
       <Text variant="heading">Who must consent</Text>
       <Text variant="callout" color="mutedForeground">
-        People with a GetRentos account answer from it. For anyone else, upload their signed consent
-        {requirements.witnessRequired ? ' and name a witness' : ''}; GetRentos checks it.
+        People with a Sureground account answer from it. For anyone else, upload their signed
+        consent
+        {requirements.witnessRequired ? ' and name a witness' : ''}; Sureground checks it.
       </Text>
       {a.signatories.map((s) => (
         <SignatoryRow
@@ -415,7 +416,7 @@ function Signatories({
             maxLength={40}
           />
           <TextField
-            label="GetRentos email (optional)"
+            label="Sureground email (optional)"
             hint="So they can answer from their own account."
             value={email}
             onChangeText={setEmail}
@@ -474,7 +475,7 @@ function SignatoryRow({
       }),
     onSuccess: (updated) => {
       setRecording(false);
-      onSaved(updated, 'Consent recorded. It counts once GetRentos has checked it.');
+      onSaved(updated, 'Consent recorded. It counts once Sureground has checked it.');
     },
     onError: (e) => toast.show(errorMessage(e, 'Could not record that consent.'), 'error'),
   });

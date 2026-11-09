@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { isAuthenticated, logoutSession } from '@getrentos/shared';
+import { isAuthenticated, logoutSession } from '@sureground/shared';
 import { disconnectRealtime } from '@/lib/realtime/socket';
 
 /**

@@ -1,7 +1,7 @@
 'use client';
 
 import { Star, Users } from 'lucide-react';
-import { Badge, Card, EmptyState, Skeleton } from '@getrentos/ui';
+import { Badge, Card, EmptyState, Skeleton } from '@sureground/ui';
 import type { HomeManagementVendor } from '@/services/homeManagementService';
 
 interface HomeManagementVendorPerformanceProps {

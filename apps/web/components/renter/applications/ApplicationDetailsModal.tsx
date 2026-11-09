@@ -31,7 +31,7 @@ import {
   TabsTrigger,
   type BadgeVariant,
   useToast,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { Application } from '@/types/renter';
 import { pluralize } from '@/lib/format';
 import { ApplicationTimeline } from './ApplicationTimeline';

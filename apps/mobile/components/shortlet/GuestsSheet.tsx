@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { View } from 'react-native';
-import { Button, Text, useTheme } from '@getrentos/ui-native';
+import { Button, Text, useTheme } from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { Stepper } from '@/components/host/HostUI';
 

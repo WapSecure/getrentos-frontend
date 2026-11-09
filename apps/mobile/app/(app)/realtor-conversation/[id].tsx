@@ -31,7 +31,7 @@ import {
   Text,
   TextField,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { realtorApi, type RealtorMessage } from '@/lib/api/realtor';
 import type { PickedFile } from '@/lib/api/documents';

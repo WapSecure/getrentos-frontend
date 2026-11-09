@@ -1,13 +1,13 @@
 'use client';
 
 import { Check, FileCheck, Home, ShieldCheck, UserCheck, type LucideIcon } from 'lucide-react';
-import { trustChainLabel } from '@getrentos/shared';
+import { trustChainLabel } from '@sureground/shared';
 import type { Property, PropertyTrustStepId } from '@/types/renter';
 
 /**
  * The property trust chain, rendered for renters on the property detail page:
  * verified owner → ownership confirmed → property verified → payment protected.
- * It is the consumer-facing proof of the GetRentos moat — why a listing here is
+ * It is the consumer-facing proof of the Sureground moat — why a listing here is
  * safer than one on an open marketplace. Renders nothing when the payload
  * carries no chain (older listings, or the browse list where it is omitted).
  */
@@ -33,7 +33,7 @@ export const PropertyTrustChain = ({ property }: { property: Property }) => {
         <span className="text-xs text-muted-foreground">{trustChainLabel(chain).label}</span>
       </div>
       <p className="text-xs text-muted-foreground mb-3">
-        How GetRentos has checked this home and protects your money.
+        How Sureground has checked this home and protects your money.
       </p>
 
       <ol className="relative space-y-3">

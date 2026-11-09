@@ -1,7 +1,7 @@
 'use client';
 
 import { forwardRef, useState, type TextareaHTMLAttributes } from 'react';
-import { cn } from '@getrentos/shared';
+import { cn } from '@sureground/shared';
 import { controlShell } from './controlStyles';
 import { useFieldControl } from './fieldContext';
 

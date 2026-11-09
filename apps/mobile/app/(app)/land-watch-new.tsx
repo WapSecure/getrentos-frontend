@@ -13,8 +13,8 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
-import { LAND_WATCH_TIER_LABELS, type LandWatchTier } from '@getrentos/shared';
+} from '@sureground/ui-native';
+import { LAND_WATCH_TIER_LABELS, type LandWatchTier } from '@sureground/shared';
 import { qk } from '@/lib/query/keys';
 import { landWatchApi } from '@/lib/api/landWatch';
 import { errorMessage } from '@/lib/api/client';
@@ -88,7 +88,7 @@ export default function LandWatchNew() {
             title: options.data?.length ? 'All your land is watched' : 'No land to watch yet',
             description: options.data?.length
               ? 'Every parcel and plot you hold is already under Land Watch.'
-              : 'Land you list as its owner, or a plot you buy on GetRentos, can be watched here.',
+              : 'Land you list as its owner, or a plot you buy on Sureground, can be watched here.',
           }}
         >
           <RadioGroup

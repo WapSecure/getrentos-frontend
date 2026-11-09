@@ -28,7 +28,7 @@ import {
   Skeleton,
   Text,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { residentApi } from '@/lib/api/resident';
 import { qk } from '@/lib/query/keys';
 import { relativeTime, firstName, formatNaira } from '@/lib/format';
@@ -130,7 +130,7 @@ export default function ResidentHome() {
               onPress={() =>
                 router.push({ pathname: '/(app)/ask', params: { persona: 'resident' } })
               }
-              accessibilityLabel="Ask GetRentos"
+              accessibilityLabel="Ask Sureground"
               icon={<MessageCircleQuestion size={21} color={colors.foreground} />}
             />
             <IconButton

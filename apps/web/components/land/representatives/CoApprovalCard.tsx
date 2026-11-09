@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Badge, Button, Card, Select } from '@getrentos/ui';
+import { Badge, Button, Card, Select } from '@sureground/ui';
 import { UsersRound } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
@@ -121,7 +121,7 @@ export const CoApprovalCard = ({
                 <p className="text-muted-foreground">
                   Switches off
                   {data.disableEffectiveAt ? ` on ${formatDate(data.disableEffectiveAt)}` : ''}. If
-                  you did not ask for this, keep it on and contact GetRentos.
+                  you did not ask for this, keep it on and contact Sureground.
                 </p>
                 <Button size="sm" onClick={() => act.mutate('keep')} isLoading={act.isPending}>
                   Keep it on

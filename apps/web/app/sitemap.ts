@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next';
-import { ROUTES } from '@getrentos/shared';
+import { ROUTES } from '@sureground/shared';
 import { SITE_URL } from '@/lib/site';
 
 /**

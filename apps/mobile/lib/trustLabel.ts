@@ -1,4 +1,4 @@
-import { trustChainLabel, type TrustChainLike } from '@getrentos/shared';
+import { trustChainLabel, type TrustChainLike } from '@sureground/shared';
 
 /**
  * Adds the card's plain-words trust label from a listing's trust chain, so the

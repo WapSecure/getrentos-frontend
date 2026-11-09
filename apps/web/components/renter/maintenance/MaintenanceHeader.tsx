@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { Wrench, Plus, Clock } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button } from '@sureground/ui';
 import { RenterPageHeader } from '../shared/RenterPageHeader';
 
 interface MaintenanceHeaderProps {

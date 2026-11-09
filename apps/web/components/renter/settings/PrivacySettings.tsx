@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Eye, User, Users, Globe, Lock, Phone, History } from 'lucide-react';
-import { Button, RadioGroup, Switch, useOptimisticMutation, useToast } from '@getrentos/ui';
+import { Button, RadioGroup, Switch, useOptimisticMutation, useToast } from '@sureground/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';

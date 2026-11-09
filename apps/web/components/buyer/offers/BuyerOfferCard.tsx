@@ -11,7 +11,7 @@ import {
   XCircle,
   Archive,
 } from 'lucide-react';
-import { Badge, type BadgeVariant } from '@getrentos/ui';
+import { Badge, type BadgeVariant } from '@sureground/ui';
 import { formatCurrency, formatDate, formatAskingDifference } from '@/lib/format';
 import type { BuyerOffer, BuyerOfferStatus, FinancingType } from '@/types/buyer';
 

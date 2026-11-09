@@ -20,7 +20,7 @@ import {
   toISODate,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { ownerApi, type OwnerViewing } from '@/lib/api/owner';
 import { BUYER_VIEWING_STATUS_LABEL, BUYER_VIEWING_STATUS_TONE } from '@/lib/api/buyerViewings';

@@ -9,7 +9,7 @@ import {
   Skeleton,
   Text,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import type { RenewalAdvice } from '@/lib/api/renewalAdvice';
 import { REPLY_LANGUAGES, type ReplyLanguage } from '@/lib/replyLanguage';
 

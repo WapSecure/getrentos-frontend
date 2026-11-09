@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { AlertTriangle, CheckCircle2, CircleDashed, Send } from 'lucide-react';
-import { Alert, Badge, Button, Input } from '@getrentos/ui';
+import { Alert, Badge, Button, Input } from '@sureground/ui';
 import { formatDate } from '@/lib/format';
 import type { LandPerfection, LandPerfectionStep } from '@/types/landClosing';
 
@@ -19,7 +19,7 @@ const STEP_BADGE: Record<
 const OWNER: Record<LandPerfectionStep['owner'], string> = {
   DEVELOPER: 'Developer',
   BUYER_LAWYER: "Buyer's lawyer",
-  GETRENTOS: 'GetRentos',
+  SUREGROUND: 'Sureground',
 };
 
 /**

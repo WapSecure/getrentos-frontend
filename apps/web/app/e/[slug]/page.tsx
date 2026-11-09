@@ -48,8 +48,8 @@ export async function generateMetadata({ params }: EstateMicrositePageProps): Pr
   const result = await fetchProfile(slug);
 
   if (result.kind !== 'ok') {
-    // No brand here: the root layout's `%s | GetRentos` template already appends
-    // it, so including it produced "Estate not found | GetRentos | GetRentos".
+    // No brand here: the root layout's `%s | Sureground` template already appends
+    // it, so including it produced "Estate not found | Sureground | Sureground".
     //
     // `noindex` is load-bearing, not belt-and-braces. `app/loading.tsx` puts a
     // Suspense boundary at the root, so the shell: and its 200 status: is
@@ -60,7 +60,7 @@ export async function generateMetadata({ params }: EstateMicrositePageProps): Pr
   }
 
   const { profile } = result;
-  const description = profile.bio || `${profile.name} is on GetRentos.`;
+  const description = profile.bio || `${profile.name} is on Sureground.`;
 
   return {
     title: profile.name,

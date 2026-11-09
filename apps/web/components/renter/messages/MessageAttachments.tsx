@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { FileText, Image as ImageIcon, Link as LinkIcon, Download, Eye, X } from 'lucide-react';
-import { FilePreviewDialog, IconButton } from '@getrentos/ui';
+import { FilePreviewDialog, IconButton } from '@sureground/ui';
 
 interface Attachment {
   name: string;

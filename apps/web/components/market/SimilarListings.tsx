@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowUpRight, Home, MapPin } from 'lucide-react';
-import { Skeleton } from '@getrentos/ui';
+import { Skeleton } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency } from '@/lib/format';
 import { publicMarketService, type PublicMarket } from '@/services/publicMarketService';

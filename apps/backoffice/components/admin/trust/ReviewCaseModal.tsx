@@ -11,7 +11,7 @@ import {
   ShieldAlert,
   UserRoundCheck,
 } from 'lucide-react';
-import { Dialog, DialogContent, DialogTitle } from '@getrentos/ui';
+import { Dialog, DialogContent, DialogTitle } from '@sureground/ui';
 import {
   Alert,
   Badge,
@@ -22,8 +22,8 @@ import {
   Select,
   Textarea,
   type BadgeVariant,
-} from '@getrentos/ui';
-import { formatDate, unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { formatDate, unwrap } from '@sureground/shared';
 import { trustService } from '@/services/trustService';
 import { adminService } from '@/services/adminService';
 import { adminKeys } from '@/lib/queryKeys';

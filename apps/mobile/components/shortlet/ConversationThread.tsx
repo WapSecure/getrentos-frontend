@@ -13,7 +13,7 @@ import {
   Text,
   TextField,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import type { Paginated } from '@/lib/api/properties';
 import { ApiError } from '@/lib/api/client';
 import { relativeTime } from '@/lib/format';
@@ -195,7 +195,7 @@ export function ConversationThread<C extends ThreadConversation>({
               center
               style={{ marginBottom: spacing.md }}
             >
-              Phone numbers and emails stay hidden until a stay is paid. Keep payments on GetRentos
+              Phone numbers and emails stay hidden until a stay is paid. Keep payments on Sureground
               so you’re protected.
             </Text>
           }

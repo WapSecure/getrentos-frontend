@@ -16,7 +16,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { offerGap, OWNER_OFFER_LABEL, OWNER_OFFER_TONE, type OwnerOffer } from '@/lib/api/owner';
 import { asOfferSide, sellerOffers, type OfferSide } from '@/lib/api/sellerOffers';
@@ -69,7 +69,7 @@ export default function OwnerOfferDetail() {
       haptics.success();
       refresh();
       toast.show(
-        'Offer accepted. The buyer can now pay the deposit to GetRentos, which holds it until the buyer confirms receipt.',
+        'Offer accepted. The buyer can now pay the deposit to Sureground, which holds it until the buyer confirms receipt.',
         'success'
       );
     },

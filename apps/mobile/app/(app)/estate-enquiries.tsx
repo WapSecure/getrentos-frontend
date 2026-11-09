@@ -13,7 +13,7 @@ import {
   Text,
   TextField,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { LeadCard } from '@/components/estate/marketplace/LeadCard';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';

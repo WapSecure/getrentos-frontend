@@ -12,7 +12,7 @@ const palette = Object.entries(colors).map(([scheme, values]) => {
 const radii = Object.entries(radius)
   .filter(([name]) => name !== 'none' && name !== 'full')
   .map(([name, value]) => `  --radius-${name}: ${value / 16}rem;`);
-const css = `/* Generated from @getrentos/tokens. Run pnpm tokens:sync to update. */\n${palette.join('\n\n')}\n\n@theme {\n${radii.join('\n')}\n}\n`;
+const css = `/* Generated from @sureground/tokens. Run pnpm tokens:sync to update. */\n${palette.join('\n\n')}\n\n@theme {\n${radii.join('\n')}\n}\n`;
 
 if (process.argv.includes('--check')) {
   if (readFileSync(target, 'utf8') !== css) {

@@ -20,7 +20,7 @@ import {
   toISODate,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { useEstate } from '@/hooks/useEstate';

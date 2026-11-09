@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { AlertTriangle, CheckCircle2, Info, OctagonAlert, X, type LucideIcon } from 'lucide-react';
-import { cn } from '@getrentos/shared';
+import { cn } from '@sureground/shared';
 
 export type AlertVariant = 'info' | 'success' | 'warning' | 'danger' | 'neutral';
 

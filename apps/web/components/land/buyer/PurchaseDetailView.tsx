@@ -15,7 +15,7 @@ import {
   TabsList,
   TabsTrigger,
   useToast,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { Info } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
@@ -57,7 +57,7 @@ const Line = ({ label, value, strong }: { label: string; value: string; strong?:
 /**
  * The refund in the buyer's terms. It goes back automatically to the card or
  * account they paid with; only a share already paid to the developer, or one
- * the bank refused, is finished by GetRentos finance by hand.
+ * the bank refused, is finished by Sureground finance by hand.
  */
 const refundSentence = (purchase: {
   refundDue?: number;
@@ -72,7 +72,7 @@ const refundSentence = (purchase: {
     case 'SETTLED_MANUALLY':
       return `Your refund of ${formatCurrency(refunded || due)} has been paid. Banks usually show it within 5–10 working days.`;
     case 'NEEDS_MANUAL':
-      return `${formatCurrency(refunded)} of your ${formatCurrency(due)} refund has been returned; GetRentos finance is paying the remaining ${formatCurrency(due - refunded)} directly.`;
+      return `${formatCurrency(refunded)} of your ${formatCurrency(due)} refund has been returned; Sureground finance is paying the remaining ${formatCurrency(due - refunded)} directly.`;
     default:
       return `A refund of ${formatCurrency(due)} is on its way to the card or account you paid with.`;
   }
@@ -361,7 +361,7 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
                 onChanged={(message, variant) => toast.show(message, variant)}
               />
               <Alert variant="info" icon={Info}>
-                GetRentos holds your payments. Each step you confirm releases its share to the
+                Sureground holds your payments. Each step you confirm releases its share to the
                 developer, never more than you have paid. Confirm in order, and only once you hold
                 the document or have been shown the plot. Allocation, the deed and the survey in
                 your name come after full payment.

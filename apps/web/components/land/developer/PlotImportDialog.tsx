@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DocumentUpload,
   type PendingUpload,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { AlertTriangle, CheckCircle2, Download, FileSpreadsheet } from 'lucide-react';
 import { ApiError, unwrap } from '@/lib/apiHelpers';
 import { downloadCsv } from '@/lib/export';

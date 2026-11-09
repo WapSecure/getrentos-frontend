@@ -16,7 +16,7 @@ import {
   Select,
   TimePicker,
   ToggleChip,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 

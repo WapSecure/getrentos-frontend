@@ -6,12 +6,12 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Eye, EyeOff, LogIn, ShieldCheck, CheckCircle, XCircle } from 'lucide-react';
-import { Alert, Button, Checkbox, Field, IconButton, Input } from '@getrentos/ui';
+import { Alert, Button, Checkbox, Field, IconButton, Input } from '@sureground/ui';
 import {
   cleanSecondFactorInput,
   isSecondFactorCode,
   SECOND_FACTOR_CODE_MAX_LENGTH,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import {
   resolvePrimaryRoleId,
   ROUTES,
@@ -20,7 +20,7 @@ import {
   type LoginResult,
   type TwoFactorChallenge,
 } from '@/lib/constants/auth';
-import { ToastVariant } from '@getrentos/ui';
+import { ToastVariant } from '@sureground/ui';
 import { authService } from '@/services/authService';
 import { useMutation } from '@tanstack/react-query';
 import {

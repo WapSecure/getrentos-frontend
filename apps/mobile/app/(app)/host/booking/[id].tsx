@@ -34,7 +34,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   DISPUTE_CATEGORIES,
@@ -324,7 +324,7 @@ function GuestCard({ b }: { b: HostBooking }) {
   const g = b.guestSummary!;
   const rows: [string, string, boolean?][] = [
     ['Identity', g.identityVerified ? 'Verified' : 'Not verified yet', !g.identityVerified],
-    ['Stays on GetRentos', String(g.completedStays)],
+    ['Stays on Sureground', String(g.completedStays)],
     [
       'Host ratings',
       g.ratingCount ? `★ ${g.ratingAverage?.toFixed(1)} from ${g.ratingCount}` : 'None yet',
@@ -358,7 +358,7 @@ function GuestCard({ b }: { b: HostBooking }) {
         </View>
       ))}
       <Text variant="caption" color="mutedForeground">
-        Counted across GetRentos only.
+        Counted across Sureground only.
       </Text>
     </Card>
   );
@@ -390,7 +390,7 @@ function MoneyCard({ b }: { b: HostBooking }) {
       ))}
       <Divider />
       <Row label="Guest pays" value={naira(b.total + (b.taxAmount ?? 0))} strong />
-      {b.platformFee ? <Row label="GetRentos fee" value={`−${naira(b.platformFee)}`} /> : null}
+      {b.platformFee ? <Row label="Sureground fee" value={`−${naira(b.platformFee)}`} /> : null}
       {b.hostNet != null ? (
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Text variant="bodyStrong" style={{ flex: 1 }}>

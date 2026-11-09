@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { Pressable, View } from 'react-native';
 import type { LucideIcon } from 'lucide-react-native';
 import { ChevronRight } from 'lucide-react-native';
-import { Card, Text, useTheme } from '@getrentos/ui-native';
+import { Card, Text, useTheme } from '@sureground/ui-native';
 
 export interface SettingsItem {
   key: string;

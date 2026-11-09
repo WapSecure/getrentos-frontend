@@ -12,7 +12,7 @@ import {
   CalendarClock,
   Sparkles,
 } from 'lucide-react';
-import { Badge, Button } from '@getrentos/ui';
+import { Badge, Button } from '@sureground/ui';
 import { formatRelativeTime } from '@/lib/format';
 import { maintenancePriorityBadges, maintenanceStatusBadges } from '@/lib/statusBadge';
 import { StarRating } from '@/components/landlord/vendors/StarRating';

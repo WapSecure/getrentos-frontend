@@ -9,9 +9,9 @@ import {
   DialogDescription,
   DialogTitle,
   Skeleton,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { BedDouble, CalendarCheck, Eye, TrendingUp, Wallet } from 'lucide-react';
-import { NairaSign } from '@getrentos/ui/NairaSign';
+import { NairaSign } from '@sureground/ui/NairaSign';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';
@@ -89,7 +89,7 @@ export function HostEarningsAnalyticsDialog({ onClose }: { onClose: () => void }
                 />
                 <StatCard
                   icon={Wallet}
-                  label="GetRentos fee"
+                  label="Sureground fee"
                   value={formatCurrency(data.platformFees)}
                   hint={
                     data.commissionPct != null && data.commissionPct > 0
@@ -119,7 +119,7 @@ export function HostEarningsAnalyticsDialog({ onClose }: { onClose: () => void }
                     icon={NairaSign}
                     label={`Guest ${data.taxName}`}
                     value={`${data.taxPct}%`}
-                    hint="Added at checkout, collected by GetRentos"
+                    hint="Added at checkout, collected by Sureground"
                   />
                 ) : null}
               </div>

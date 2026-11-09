@@ -10,8 +10,8 @@ import {
   DialogDescription,
   DialogTitle,
   RadioGroup,
-} from '@getrentos/ui';
-import { formatCurrency, unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { formatCurrency, unwrap } from '@sureground/shared';
 import {
   adminChargebacksService,
   type Chargeback,
@@ -71,7 +71,7 @@ export function DecideChargebackDialog({
             {chargeback.provider === 'MONNIFY' ? 'Monnify' : 'Paystack'} dispute{' '}
             {chargeback.providerDisputeId} · payment {chargeback.reference} · {amount}.{' '}
             {chargeback.provider === 'MONNIFY'
-              ? 'Monnify does not send outcomes to GetRentos, so check it on Monnify’s dashboard first.'
+              ? 'Monnify does not send outcomes to Sureground, so check it on Monnify’s dashboard first.'
               : 'Paystack archived it without a result, so check the outcome with Paystack first.'}{' '}
             This can&rsquo;t be changed afterwards.
           </DialogDescription>

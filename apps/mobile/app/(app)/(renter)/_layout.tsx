@@ -1,7 +1,7 @@
 import { Tabs } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Home, Search, FileText, MessageCircle, User } from 'lucide-react-native';
-import { useTheme } from '@getrentos/ui-native';
+import { useTheme } from '@sureground/ui-native';
 import { premiumTabBarOptions } from '@/lib/navigationStyles';
 
 export default function RenterTabsLayout() {

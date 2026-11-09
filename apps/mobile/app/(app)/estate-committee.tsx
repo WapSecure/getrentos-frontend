@@ -17,7 +17,7 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { HouseholdPicker } from '@/components/estate/HouseholdPicker';
 import { Sheet } from '@/components/Sheet';

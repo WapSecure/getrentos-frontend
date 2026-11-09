@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Copy, Check, Mail, Facebook, Twitter, MessageCircle } from 'lucide-react';
-import { Button, Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrentos/ui';
+import { Button, Dialog, DialogContent, DialogDescription, DialogTitle } from '@sureground/ui';
 import { Property } from '@/types/renter';
 
 interface SharePropertyModalProps {
@@ -56,7 +56,7 @@ export const SharePropertyModal = ({ isOpen, onClose, property }: SharePropertyM
       name: 'Email',
       icon: Mail,
       action: () =>
-        (window.location.href = `mailto:?subject=${encodeURIComponent(`Check out this property: ${property.title}`)}&body=${encodeURIComponent(`I found this property on GetRentos: ${shareUrl}`)}`),
+        (window.location.href = `mailto:?subject=${encodeURIComponent(`Check out this property: ${property.title}`)}&body=${encodeURIComponent(`I found this property on Sureground: ${shareUrl}`)}`),
     },
   ];
 

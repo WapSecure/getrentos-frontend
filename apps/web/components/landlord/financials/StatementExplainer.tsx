@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { AlertCircle, Bell, Clock, MessageCircleQuestion, Sparkles } from 'lucide-react';
-import { Card, Skeleton } from '@getrentos/ui';
+import { Card, Skeleton } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import { landlordService } from '@/services/landlordService';

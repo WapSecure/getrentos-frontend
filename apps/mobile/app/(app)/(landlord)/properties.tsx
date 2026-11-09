@@ -17,7 +17,7 @@ import {
   Skeleton,
   Text,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { CreatePropertySheet } from '@/components/landlord/CreatePropertySheet';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';

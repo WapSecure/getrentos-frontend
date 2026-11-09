@@ -15,7 +15,7 @@ import {
   PageErrorState,
   Skeleton,
   StatGridSkeleton,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { landlordService, type LandlordDashboardStats } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';

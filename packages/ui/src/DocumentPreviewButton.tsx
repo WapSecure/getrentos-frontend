@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Eye, Loader2 } from 'lucide-react';
-import { cn } from '@getrentos/shared';
+import { cn } from '@sureground/shared';
 import { FilePreviewDialog } from './FilePreviewDialog';
 
 export interface PreviewFile {

@@ -2,7 +2,7 @@
 
 import { useId, type ReactNode } from 'react';
 import { AlertCircle } from 'lucide-react';
-import { cn } from '@getrentos/shared';
+import { cn } from '@sureground/shared';
 import { FieldContext } from './fieldContext';
 
 interface FieldProps {

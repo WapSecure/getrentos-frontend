@@ -12,7 +12,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { OneTimeCode } from '@/components/estate/gate/GateUI';
 import { StatusPill } from '@/components/host/HostUI';
 import { Sheet } from '@/components/Sheet';

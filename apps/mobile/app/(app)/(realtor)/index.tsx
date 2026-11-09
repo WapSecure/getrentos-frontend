@@ -28,7 +28,7 @@ import {
   Skeleton,
   Text,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { MetricGrid } from '@/components/dashboard/MetricGrid';
 import {
@@ -125,7 +125,7 @@ export default function RealtorHome() {
         <View style={{ flexDirection: 'row', gap: 4 }}>
           <IconButton
             onPress={() => router.push({ pathname: '/(app)/ask', params: { persona: 'realtor' } })}
-            accessibilityLabel="Ask GetRentos"
+            accessibilityLabel="Ask Sureground"
             icon={<MessageCircleQuestion size={21} color={colors.foreground} />}
           />
           <IconButton

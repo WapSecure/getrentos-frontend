@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { View } from 'react-native';
 import { Lock, ShieldCheck } from 'lucide-react-native';
-import { Badge, Button, FormAlert, Text, useTheme } from '@getrentos/ui-native';
+import { Badge, Button, FormAlert, Text, useTheme } from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { PaymentProviderPicker } from '@/components/payments/PaymentProviderPicker';
 import { useCheckoutFee } from '@/hooks/useCheckoutFee';
@@ -34,7 +34,7 @@ export interface PaySheetProps {
   itemParts?: { label: string; amount: number }[];
   /** Under the breakdown when there is a fee: who still gets the full amount. */
   receiverLine?: string | null;
-  /** One sentence on what happens to the money: "Your rent is held by GetRentos until…". */
+  /** One sentence on what happens to the money: "Your rent is held by Sureground until…". */
   protection?: string;
   /** Step "How much": only where a part payment is possible. */
   howMuch?: ReactNode;
@@ -130,7 +130,7 @@ function Line({
 }
 
 /**
- * One pay sheet for everything paid on GetRentos, matching the web pay
+ * One pay sheet for everything paid on Sureground, matching the web pay
  * dialog: what is owed, how much (where a part payment is possible), which
  * company takes it, exactly what will be charged, then that company's secure
  * page. The screen keeps the pay call; this only presents it.
@@ -209,7 +209,7 @@ export function PaySheet({
             <ShieldCheck size={16} color={colors.success} style={{ marginTop: 1 }} />
             <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
               {secureLine ??
-                `You finish on ${company}’s secure page: GetRentos never sees your card details.`}
+                `You finish on ${company}’s secure page: Sureground never sees your card details.`}
               {protection ? ` ${protection}` : ''}
             </Text>
           </View>

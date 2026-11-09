@@ -2,13 +2,13 @@
 
 import { useState } from 'react';
 import { Check, Copy } from 'lucide-react';
-import { IconButton } from '@getrentos/ui';
+import { IconButton } from '@sureground/ui';
 import {
   PAYOUT_ARRIVAL_NOTE,
   PAYOUT_FAILED_NEXT_STEP,
   payoutSentToLabel,
   type PayoutSentTo,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import { formatDate } from '@/lib/format';
 
 /**

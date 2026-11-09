@@ -1,6 +1,6 @@
 import { authFetch, safeCall, type ApiResponse } from '@/lib/apiHelpers';
 
-export type ActivityActorKind = 'MANAGER' | 'GETRENTOS' | 'TENANT' | 'SYSTEM' | 'OTHER';
+export type ActivityActorKind = 'MANAGER' | 'SUREGROUND' | 'TENANT' | 'SYSTEM' | 'OTHER';
 
 export interface ActivityItem {
   id: string;

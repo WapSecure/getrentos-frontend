@@ -9,7 +9,7 @@ import {
   SegmentedControl,
   Skeleton,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { useEffect, useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { ShieldCheck } from 'lucide-react';
@@ -81,7 +81,7 @@ export default function OwnerTransactionsPage() {
           isLoading ? (
             <Skeleton className="h-5 w-48" />
           ) : (
-            `${total} sale${total === 1 ? '' : 's'} protected by GetRentos`
+            `${total} sale${total === 1 ? '' : 's'} protected by Sureground`
           )
         }
       />

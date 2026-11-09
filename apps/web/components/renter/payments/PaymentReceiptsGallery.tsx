@@ -14,7 +14,7 @@ import {
   FilePreviewDialog,
   IconButton,
   SearchInput,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { formatCurrency, formatLagosDate } from '@/lib/format';
 import { chargeTitle, type ChargeCategory } from '@/lib/chargeCategory';
 

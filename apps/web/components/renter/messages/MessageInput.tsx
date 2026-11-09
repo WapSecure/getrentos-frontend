@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Send, Paperclip } from 'lucide-react';
-import { Button, IconButton, Textarea } from '@getrentos/ui';
+import { Button, IconButton, Textarea } from '@sureground/ui';
 import { MessageAttachments } from './MessageAttachments';
 
 interface Attachment {

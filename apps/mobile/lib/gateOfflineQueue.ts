@@ -30,7 +30,7 @@ import { CONTRACTOR_NOT_PERMITTED } from './gateman/contractorRefusal';
  * Items replay in the order they were recorded regardless.
  */
 
-const KEY = 'getrentos.gate.offline-queue';
+const KEY = 'sureground.gate.offline-queue';
 
 export type GateWriteType = 'check-in' | 'check-out' | 'admit' | 'patrol-scan';
 

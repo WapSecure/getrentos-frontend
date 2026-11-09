@@ -12,8 +12,8 @@ import {
   Button,
   RadioGroup,
   Textarea,
-} from '@getrentos/ui';
-import { formatDate, unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { formatDate, unwrap } from '@sureground/shared';
 import { trustService } from '@/services/trustService';
 import { adminKeys } from '@/lib/queryKeys';
 import type { TrustAppeal, TrustAppealDecision } from '@/types/trust';

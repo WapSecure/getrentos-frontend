@@ -13,7 +13,7 @@ import {
   Skeleton,
   Text,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { reviewsApi, type PendingReview, type Review } from '@/lib/api/reviews';
 import { formatDate } from '@/lib/format';

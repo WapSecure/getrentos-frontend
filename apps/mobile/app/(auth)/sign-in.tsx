@@ -17,7 +17,7 @@ import {
   useReducedMotion,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { ApiError, errorMessage } from '@/lib/api/client';
 import { authApi } from '@/lib/api/auth';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -149,7 +149,7 @@ export default function SignIn() {
       setFormError(
         err instanceof ApiError
           ? err.isNetwork
-            ? 'Can’t reach GetRentos. Check your connection.'
+            ? 'Can’t reach Sureground. Check your connection.'
             : err.message
           : 'Sign-in failed. Please try again.'
       );
@@ -209,7 +209,7 @@ export default function SignIn() {
             <Button label="Sign in" loading={isSubmitting} disabled={locked} onPress={onSubmit} />
             <Row>
               <Text variant="callout" color="mutedForeground">
-                New to GetRentos?{' '}
+                New to Sureground?{' '}
               </Text>
               <LinkButton
                 label="Create an account"

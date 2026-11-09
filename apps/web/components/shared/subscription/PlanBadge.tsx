@@ -1,7 +1,7 @@
 'use client';
 
-import { Badge } from '@getrentos/ui';
-import { PLAN_TIER_LABELS } from '@getrentos/shared';
+import { Badge } from '@sureground/ui';
+import { PLAN_TIER_LABELS } from '@sureground/shared';
 import { usePlanTier } from '@/hooks/usePlanTier';
 
 /** Renders nothing while loading: avoids a flash of "Free" before the real tier resolves. */

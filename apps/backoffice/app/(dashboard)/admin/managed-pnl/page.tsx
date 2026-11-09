@@ -21,8 +21,8 @@ import {
   TabsList,
   TabsTrigger,
   PageHeader,
-} from '@getrentos/ui';
-import { formatCurrency, formatDate, recentMonthOptions, unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { formatCurrency, formatDate, recentMonthOptions, unwrap } from '@sureground/shared';
 
 import {
   adminManagedPnlService,
@@ -107,8 +107,8 @@ const RecordCost = ({ canOperate, onSaved }: { canOperate: boolean; onSaved: () 
       <div>
         <h2 className="font-semibold text-foreground">Record a direct cost</h2>
         <p className="text-sm text-muted-foreground">
-          What delivering an engagement cost GetRentos from its own funds: a field trip, staff time,
-          legal work. A mistake is voided, never edited.
+          What delivering an engagement cost Sureground from its own funds: a field trip, staff
+          time, legal work. A mistake is voided, never edited.
         </p>
       </div>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -254,7 +254,7 @@ export default function ManagedPnlPage() {
     <div className="space-y-6">
       <PageHeader
         title="Managed P&L"
-        description="GetRentos Managed’s contribution margin: its own fees, less delivery partners’ share and direct costs. Read from the journal’s Managed-tagged lines, so it is kept apart from platform revenue. Fees count when the owner’s statement pays out."
+        description="Sureground Managed’s contribution margin: its own fees, less delivery partners’ share and direct costs. Read from the journal’s Managed-tagged lines, so it is kept apart from platform revenue. Fees count when the owner’s statement pays out."
       />
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">

@@ -14,7 +14,7 @@ import {
   ShieldCheck,
   ShieldX,
 } from 'lucide-react';
-import type { BadgeVariant } from '@getrentos/ui';
+import type { BadgeVariant } from '@sureground/ui';
 import type {
   RentPaymentStatus,
   RentPayoutStatus,
@@ -57,7 +57,7 @@ export const paymentStatusBadges: Record<RentPaymentStatus, StatusBadgeEntry> = 
 
 export const escrowStatusBadges: Record<EscrowStatus, StatusBadgeEntry> = {
   not_funded: { label: 'Not paid yet', variant: 'neutral' },
-  held: { label: 'Held by GetRentos', variant: 'info', icon: Lock },
+  held: { label: 'Held by Sureground', variant: 'info', icon: Lock },
   pending_review: { label: 'Under review', variant: 'warning', icon: Clock },
   // Released from escrow is not yet money in the landlord's bank: the transfer is a separate step.
   released: { label: 'Released to landlord', variant: 'success', icon: CheckCircle2 },

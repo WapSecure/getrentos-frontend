@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { AlertTriangle, Check, Info, Sparkles } from 'lucide-react';
-import { Button, Card, useToast } from '@getrentos/ui';
+import { Button, Card, useToast } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import { landlordService } from '@/services/landlordService';

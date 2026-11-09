@@ -5,12 +5,12 @@ import { TextMessageConsentCard } from '@/components/shared/settings/TextMessage
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Bell, MessageCircle, FileText, CreditCard, Wrench, Home } from 'lucide-react';
-import { Checkbox, SaveButton, Switch, useToast } from '@getrentos/ui';
+import { Checkbox, SaveButton, Switch, useToast } from '@sureground/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import type { NotificationPreference as FetchedPreference } from '@/services/renterService';
-import { categorySendsEmail } from '@getrentos/shared';
+import { categorySendsEmail } from '@sureground/shared';
 
 interface NotificationPreference {
   id: string;

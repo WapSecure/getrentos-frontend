@@ -1,7 +1,7 @@
 'use client';
 
 import { ImageIcon } from 'lucide-react';
-import { Badge, Button } from '@getrentos/ui';
+import { Badge, Button } from '@sureground/ui';
 import type { MaintenanceTicket } from '@/types/estate';
 
 const statusVariant: Record<

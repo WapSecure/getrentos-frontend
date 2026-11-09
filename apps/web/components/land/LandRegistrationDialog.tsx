@@ -14,7 +14,7 @@ import {
   Input,
   NumberInput,
   Select,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { MapPinned } from 'lucide-react';
 import type { OwnerProperty } from '@/types/owner';
 import {

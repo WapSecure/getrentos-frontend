@@ -1,4 +1,4 @@
-import { Badge, type BadgeVariant } from '@getrentos/ui';
+import { Badge, type BadgeVariant } from '@sureground/ui';
 import { humaniseEnum } from '@/lib/landDiligence';
 
 const variants: Record<string, BadgeVariant> = {

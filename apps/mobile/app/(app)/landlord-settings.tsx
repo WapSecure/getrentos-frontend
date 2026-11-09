@@ -17,7 +17,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   landlordApi,
@@ -32,7 +32,7 @@ import { errorMessage } from '@/lib/api/client';
 import { pickImage } from '@/lib/filePicker';
 import { Image } from 'expo-image';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
-import { categorySendsEmail, maskAccountNumber } from '@getrentos/shared';
+import { categorySendsEmail, maskAccountNumber } from '@sureground/shared';
 import { goBack } from '@/lib/goBack';
 import { PayoutAccountSheet } from '@/components/landlord/PayoutAccountSheet';
 import { PayoutHoldNotice } from '@/components/payouts/PayoutHoldNotice';

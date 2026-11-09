@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronDown, Mail, Phone, MessageCircle, Clock, ArrowRight } from 'lucide-react';
-import { Button, Card, PageHeader } from '@getrentos/ui';
+import { Button, Card, PageHeader } from '@sureground/ui';
 import { SUPPORT, hasSupportLine, telLink, whatsappLink } from '@/lib/support';
 
 interface FAQItem {
@@ -13,14 +13,14 @@ interface FAQItem {
 
 const faqs: FAQItem[] = [
   {
-    question: 'How does GetRentos verify identities and properties?',
+    question: 'How does Sureground verify identities and properties?',
     answer:
       'Signing up is quick: you don\'t need to verify anything to start. Identity, licence and ownership checks are only asked for when something you do needs them, such as listing a property or collecting rent. Listings are reviewed before they go live; look for the green "Verified" badge.',
   },
   {
     question: 'How are payments protected?',
     answer:
-      "It depends on the payment. Rent is held by GetRentos and released to your landlord on schedule. A deposit on a home or land you're buying is held by GetRentos and only released to the seller once you confirm you've received it (for land, once the conveyance steps are confirmed); it is never released on a timer. If something is wrong, raise a dispute and the money stays held until it is resolved.",
+      "It depends on the payment. Rent is held by Sureground and released to your landlord on schedule. A deposit on a home or land you're buying is held by Sureground and only released to the seller once you confirm you've received it (for land, once the conveyance steps are confirmed); it is never released on a timer. If something is wrong, raise a dispute and the money stays held until it is resolved.",
   },
   {
     question: 'How do I contact someone about my account?',
@@ -47,7 +47,7 @@ export const HelpCenterContent = ({ roleLabel, messagesHref }: HelpCenterContent
     <>
       <PageHeader
         title="Help centre"
-        description={`Answers and support for your GetRentos ${roleLabel} account`}
+        description={`Answers and support for your Sureground ${roleLabel} account`}
       />
 
       <div className="grid lg:grid-cols-3 gap-6">

@@ -1,8 +1,8 @@
 'use client';
 
 import { ShieldCheck, Gavel, AlertTriangle, Users } from 'lucide-react';
-import { Button, Card, CardHeader, CardTitle } from '@getrentos/ui';
-import { ROUTES } from '@getrentos/shared';
+import { Button, Card, CardHeader, CardTitle } from '@sureground/ui';
+import { ROUTES } from '@sureground/shared';
 import { useAdminUser } from '@/app/(dashboard)/admin/layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
 import type { AdminPermission } from '@/types/admin';

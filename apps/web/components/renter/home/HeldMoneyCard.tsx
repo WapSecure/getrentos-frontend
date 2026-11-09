@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { ChevronRight, PiggyBank, ShieldCheck } from 'lucide-react';
-import { Button, Card } from '@getrentos/ui';
+import { Button, Card } from '@sureground/ui';
 import { renterService } from '@/services/renterService';
 import { myDeposits } from '@/services/renterDepositService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -19,7 +19,7 @@ const formatLagosDate = (iso: string) =>
   }).format(new Date(iso));
 
 /**
- * Money GetRentos is holding for the renter, on the home overview: rent held
+ * Money Sureground is holding for the renter, on the home overview: rent held
  * under Payment Protection (with the next release date) and the deposit
  * balance. Hidden when nothing is held.
  */
@@ -62,7 +62,7 @@ export function HeldMoneyCard() {
               <ShieldCheck className="h-5 w-5" aria-hidden="true" />
             </span>
             <div className="min-w-0">
-              <p className="text-sm font-medium text-muted-foreground">Rent held by GetRentos</p>
+              <p className="text-sm font-medium text-muted-foreground">Rent held by Sureground</p>
               <p className="text-xl font-semibold text-foreground">{formatCurrency(heldTotal)}</p>
               <p className="text-xs text-muted-foreground">
                 {nextRelease

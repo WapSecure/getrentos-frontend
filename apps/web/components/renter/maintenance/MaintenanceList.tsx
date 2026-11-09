@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Wrench } from 'lucide-react';
-import { Card, EmptyState, SearchInput, Select } from '@getrentos/ui';
+import { Card, EmptyState, SearchInput, Select } from '@sureground/ui';
 import { MaintenanceCard } from './MaintenanceCard';
 import { MaintenanceDetailsModal } from './MaintenanceDetailsModal';
 import { VendorRatingModal } from './VendorRatingModal';

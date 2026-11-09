@@ -12,7 +12,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   deviceTimeZone,
@@ -138,7 +138,7 @@ export function RequestInspection({
     <View style={{ gap: spacing.lg }}>
       <Text variant="callout" color="mutedForeground">
         {landName}. An accredited inspector visits within 10 days. Every photo is geotagged and
-        timestamped, and GetRentos checks the report before you see it.
+        timestamped, and Sureground checks the report before you see it.
       </Text>
       <View style={{ gap: spacing.sm }}>
         <Text variant="callout" color="mutedForeground">
@@ -245,7 +245,7 @@ export function CoApprovalCard({ deal }: { deal: Deal }) {
             <>
               <FormAlert
                 tone="warning"
-                message={`Switches off on ${c.disableEffectiveAt ? formatDateTime(c.disableEffectiveAt) : 'soon'}. If you did not ask for this, keep it on and contact GetRentos.`}
+                message={`Switches off on ${c.disableEffectiveAt ? formatDateTime(c.disableEffectiveAt) : 'soon'}. If you did not ask for this, keep it on and contact Sureground.`}
               />
               <Button
                 label="Keep it on"

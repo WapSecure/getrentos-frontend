@@ -12,7 +12,7 @@ import {
   Field,
   Input,
   Select,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import type { WatchlistSeverity, WatchlistSubjectType } from '@/types/estate';
 
 /** The API's floor. Kept in step so the form never allows what the server will reject. */
@@ -114,7 +114,9 @@ export const AddWatchlistEntryModal = ({
   return (
     <Dialog open={isOpen} onOpenChange={(next) => !next && handleClose()}>
       <DialogContent size="md">
-        <DialogTitle className="text-lg font-semibold text-foreground">Add to watch list</DialogTitle>
+        <DialogTitle className="text-lg font-semibold text-foreground">
+          Add to watch list
+        </DialogTitle>
 
         <div className="mt-4 space-y-4">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -165,9 +167,7 @@ export const AddWatchlistEntryModal = ({
               type="text"
               value={label}
               onChange={(e) => setLabel(e.target.value)}
-              placeholder={
-                isVehicle ? 'e.g. Black Hilux, no plate visible' : 'e.g. Tunde Fagbenle'
-              }
+              placeholder={isVehicle ? 'e.g. Black Hilux, no plate visible' : 'e.g. Tunde Fagbenle'}
             />
           </Field>
 
@@ -264,9 +264,7 @@ export const AddWatchlistEntryModal = ({
                 plateNumber: isVehicle ? plateNumber.trim() || undefined : undefined,
                 // A date input is a calendar day; the API wants an instant. End
                 // of that day, so an entry does not lapse the morning it is set.
-                expiresAt: expiresAt
-                  ? new Date(`${expiresAt}T23:59:59`).toISOString()
-                  : undefined,
+                expiresAt: expiresAt ? new Date(`${expiresAt}T23:59:59`).toISOString() : undefined,
                 photo: photo ?? undefined,
               })
             }

@@ -15,7 +15,7 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { residentApi, type Due, type DueCategory, type DueStatus } from '@/lib/api/resident';
 import { qk } from '@/lib/query/keys';
 import { formatDate, formatNaira } from '@/lib/format';

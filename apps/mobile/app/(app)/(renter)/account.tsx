@@ -42,7 +42,7 @@ import {
   Text,
   ThemeToggle,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useIdentityVerification } from '@/hooks/useIdentityVerification';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
@@ -64,7 +64,7 @@ export default function Account() {
       : 'Not taking new plans right now';
 
   const confirmSignOut = () =>
-    Alert.alert('Sign out of GetRentos?', 'You can sign back in any time.', [
+    Alert.alert('Sign out of Sureground?', 'You can sign back in any time.', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Sign out', style: 'destructive', onPress: signOut },
     ]);
@@ -145,7 +145,7 @@ export default function Account() {
     },
     {
       key: 'flex',
-      label: 'GetRentos Flex',
+      label: 'Sureground Flex',
       description: flexDescription,
       icon: Wallet,
       onPress: go('/(app)/financing'),
@@ -277,7 +277,7 @@ export default function Account() {
         accessible
         accessibilityRole="header"
         accessibilityLabel={[
-          profile?.legalName ?? 'GetRentos user',
+          profile?.legalName ?? 'Sureground user',
           profile?.email ?? profile?.phone,
           verified ? 'verified account' : 'not verified',
         ]
@@ -287,7 +287,7 @@ export default function Account() {
       >
         <Avatar name={profile?.legalName} size={76} />
         <Text variant="heading" style={{ marginTop: spacing.sm }}>
-          {profile?.legalName ?? 'GetRentos user'}
+          {profile?.legalName ?? 'Sureground user'}
         </Text>
         <Text variant="callout" color="mutedForeground">
           {profile?.email ?? profile?.phone ?? ''}
@@ -359,7 +359,7 @@ export default function Account() {
         onPress={confirmSignOut}
       />
       <Text variant="caption" color="mutedForeground" center style={{ marginBottom: spacing.lg }}>
-        GetRentos {Constants.expoConfig?.version ?? ''}
+        Sureground {Constants.expoConfig?.version ?? ''}
       </Text>
     </Screen>
   );

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Fingerprint, ScanFace } from 'lucide-react-native';
-import { BrandLogo, Button, LinkButton, Text, useTheme } from '@getrentos/ui-native';
+import { BrandLogo, Button, LinkButton, Text, useTheme } from '@sureground/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { biometricSupport, unlockWithBiometrics, useAppLockEnabled } from '@/lib/appLock';
 
@@ -45,7 +45,7 @@ export function AppLockGate() {
   const unlock = useCallback(async () => {
     if (prompting) return;
     setPrompting(true);
-    const ok = await unlockWithBiometrics('Unlock GetRentos');
+    const ok = await unlockWithBiometrics('Unlock Sureground');
     setPrompting(false);
     if (ok) setLocked(false);
   }, [prompting]);
@@ -99,7 +99,7 @@ export function AppLockGate() {
       <View style={{ alignItems: 'center', gap: spacing.sm }}>
         <Icon size={44} color={colors.primary} />
         <Text variant="heading" headingLevel={2}>
-          GetRentos is locked
+          Sureground is locked
         </Text>
         <Text variant="callout" color="mutedForeground" center>
           Unlock with {label} to continue.

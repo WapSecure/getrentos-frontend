@@ -32,7 +32,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   securityApi,
@@ -66,7 +66,7 @@ import {
   cleanSecondFactorInput,
   formatRelativeTime,
   isSecondFactorCode,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 
 export default function SecuritySettings() {
   const { colors, spacing } = useTheme();
@@ -129,7 +129,7 @@ function AppLockSection() {
   const toggle = async (next: boolean) => {
     if (next) {
       // Prove it works before relying on it, so nobody locks themselves out.
-      const ok = await unlockWithBiometrics(`Turn on ${support.label} for GetRentos`);
+      const ok = await unlockWithBiometrics(`Turn on ${support.label} for Sureground`);
       if (!ok) return;
       toast.show(`${support.label} lock is on.`, 'success');
     }
@@ -143,7 +143,7 @@ function AppLockSection() {
         label={`${support.label.charAt(0).toUpperCase()}${support.label.slice(1)} lock`}
         description={
           support.available
-            ? `Ask for ${support.label} when GetRentos opens, or after a minute away.`
+            ? `Ask for ${support.label} when Sureground opens, or after a minute away.`
             : `Set up ${support.label} or a screen lock in your phone's settings to use this.`
         }
         value={!!enabled}
@@ -359,7 +359,7 @@ function TwoFactorSection({ overview }: { overview: SecurityOverview }) {
             style={{ flex: 1 }}
             onPress={() =>
               void Share.share({
-                message: `GetRentos two-factor backup codes. Each works once.\n\n${freshCodes.join('\n')}`,
+                message: `Sureground two-factor backup codes. Each works once.\n\n${freshCodes.join('\n')}`,
               })
             }
           />

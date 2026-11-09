@@ -25,7 +25,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type {
   EscrowSaleTransaction,
@@ -55,13 +55,13 @@ const escrowSteps: { key: SaleEscrowStatus; label: string; description: string }
   {
     key: 'deposit_pending',
     label: 'Deposit pending',
-    description: 'Waiting for the buyer to pay their deposit to GetRentos.',
+    description: 'Waiting for the buyer to pay their deposit to Sureground.',
   },
   {
     key: 'funds_held',
     label: 'Funds held',
     description:
-      'Deposit received and held safely by GetRentos. It is released to you when the buyer confirms receipt.',
+      'Deposit received and held safely by Sureground. It is released to you when the buyer confirms receipt.',
   },
   {
     key: 'released',
@@ -144,7 +144,7 @@ export const EscrowTransactionDetailModal = ({
             </Alert>
           ) : isRefunded ? (
             <Alert variant="neutral" icon={ShieldAlert} title="Payment refunded">
-              GetRentos refunded the buyer&apos;s payment and this sale will not go ahead.
+              Sureground refunded the buyer&apos;s payment and this sale will not go ahead.
             </Alert>
           ) : (
             <div>
@@ -199,9 +199,9 @@ export const EscrowTransactionDetailModal = ({
           <LandConveyanceEntry transaction={transaction} />
 
           <Alert variant="info" icon={Lock}>
-            GetRentos holds the buyer’s money and releases it to you once the buyer confirms receipt
-            (for land, once the conveyance steps are confirmed). It is never released on a timer,
-            and a dispute keeps it held until it is resolved.
+            Sureground holds the buyer’s money and releases it to you once the buyer confirms
+            receipt (for land, once the conveyance steps are confirmed). It is never released on a
+            timer, and a dispute keeps it held until it is resolved.
           </Alert>
 
           {transaction.releasedAt && (

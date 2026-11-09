@@ -1,16 +1,16 @@
-// GetRentos brand artifacts as typed components.
+// Sureground brand artifacts as typed components, generated from apps/web/public/brand.
 export { EscrowSecured } from './components/EscrowSecured';
-export { GetRentosAppIcon } from './components/GetRentosAppIcon';
-export { GetRentosBadgeAgent } from './components/GetRentosBadgeAgent';
-export { GetRentosBadgeBusiness } from './components/GetRentosBadgeBusiness';
-export { GetRentosBadgeIdentity } from './components/GetRentosBadgeIdentity';
-export { GetRentosBadgeOwner } from './components/GetRentosBadgeOwner';
-export { GetRentosBadgeProperty } from './components/GetRentosBadgeProperty';
-export { GetRentosLogoDark } from './components/GetRentosLogoDark';
-export { GetRentosLogoMonochrome } from './components/GetRentosLogoMonochrome';
-export { GetRentosLogoPrimary } from './components/GetRentosLogoPrimary';
-export { GetRentosMark } from './components/GetRentosMark';
-export { GetRentosVerifiedBadge } from './components/GetRentosVerifiedBadge';
+export { SuregroundAppIcon } from './components/SuregroundAppIcon';
+export { SuregroundBadgeAgent } from './components/SuregroundBadgeAgent';
+export { SuregroundBadgeBusiness } from './components/SuregroundBadgeBusiness';
+export { SuregroundBadgeIdentity } from './components/SuregroundBadgeIdentity';
+export { SuregroundBadgeOwner } from './components/SuregroundBadgeOwner';
+export { SuregroundBadgeProperty } from './components/SuregroundBadgeProperty';
+export { SuregroundLogoDark } from './components/SuregroundLogoDark';
+export { SuregroundLogoMonochrome } from './components/SuregroundLogoMonochrome';
+export { SuregroundLogoPrimary } from './components/SuregroundLogoPrimary';
+export { SuregroundMark } from './components/SuregroundMark';
+export { SuregroundVerifiedBadge } from './components/SuregroundVerifiedBadge';
 export { TitleVerified } from './components/TitleVerified';
 export { TrustScore28 } from './components/TrustScore28';
 export { TrustScore52 } from './components/TrustScore52';

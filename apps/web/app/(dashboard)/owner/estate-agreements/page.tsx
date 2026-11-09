@@ -13,7 +13,7 @@ import {
   ListSkeleton,
   PageErrorState,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { estateAgreementService } from '@/services/estateMarketplaceService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';

@@ -149,7 +149,7 @@ if (additions.length) {
     );
   }
   console.error(
-    '\nUse a shared @getrentos/ui control. If a raw browser control is essential, document it and intentionally refresh the baseline with `pnpm audit:ui-controls:update`.\n'
+    '\nUse a shared @sureground/ui control. If a raw browser control is essential, document it and intentionally refresh the baseline with `pnpm audit:ui-controls:update`.\n'
   );
   process.exit(1);
 }

@@ -1,4 +1,4 @@
-import type { PayoutSentTo } from '@getrentos/shared';
+import type { PayoutSentTo } from '@sureground/shared';
 export type ShortletPricingMode = 'PER_NIGHT' | 'FLAT_STAY';
 export type ShortletDiscountType = 'WEEKLY' | 'TWO_WEEK' | 'MONTHLY' | 'LAST_MINUTE';
 
@@ -432,7 +432,7 @@ export interface ShortletCalendarFeed {
   lastSyncedAt?: string;
   lastError?: string;
   eventCount: number;
-  /** Imported stays that overlap a GetRentos booking. */
+  /** Imported stays that overlap a Sureground booking. */
   conflictCount: number;
 }
 
@@ -586,7 +586,7 @@ export interface ShortletInspectionBadge {
   condition: InspectedRoomCondition;
 }
 
-/** What a host sees about a guest: counts across GetRentos only. */
+/** What a host sees about a guest: counts across Sureground only. */
 export interface GuestSummary {
   identityVerified: boolean;
   memberSince: string;
@@ -600,7 +600,7 @@ export interface GuestSummary {
 }
 
 /** The all-in price for given dates, as the checkout will charge it. */
-/** The GetRentos fee on a booking made now; taken from the host payout, never charged to guests. */
+/** The Sureground fee on a booking made now; taken from the host payout, never charged to guests. */
 export interface HostShortletFees {
   commissionPct: number;
   standardCommissionPct: number;

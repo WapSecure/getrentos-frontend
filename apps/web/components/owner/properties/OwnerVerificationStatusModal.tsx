@@ -13,7 +13,7 @@ import {
   DocumentUpload,
   Input,
   Select,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { trustService } from '@/services/trustService';

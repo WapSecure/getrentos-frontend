@@ -14,7 +14,7 @@ import {
   Textarea,
   clearSessionDraft,
   useSessionExpiryDraft,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 
 import { useEffect, useState } from 'react';
 import {
@@ -27,9 +27,9 @@ import {
   Trash2,
   AlertTriangle,
 } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button } from '@sureground/ui';
 import { AddressFields } from '@/components/shared/location/AddressFields';
-import type { VerifiedAddress } from '@getrentos/shared';
+import type { VerifiedAddress } from '@sureground/shared';
 import type { Property, PropertyType } from '@/types/landlord';
 import type { LandOwnershipProofInput } from '@/types/land';
 import { usePhotoAdvice } from '@/hooks/usePhotoAdvice';

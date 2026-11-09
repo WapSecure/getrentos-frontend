@@ -16,7 +16,7 @@ export interface PropertyFee {
   amount: number;
 }
 
-/** The four links of the GetRentos trust chain, in display order. */
+/** The four links of the Sureground trust chain, in display order. */
 export type PropertyTrustStepId = 'owner' | 'authority' | 'property' | 'payment';
 
 export interface PropertyTrustStep {
@@ -61,7 +61,7 @@ export interface Property {
   images?: string[];
   /** Signed URL of the landlord's uploaded walkthrough video, when present. */
   videoTourUrl?: string;
-  /** The video tour was filmed in the GetRentos app at the property. */
+  /** The video tour was filmed in the Sureground app at the property. */
   videoTourFilmedOnSite?: boolean;
   score?: number;
   landlordResponseRate?: number;
@@ -77,7 +77,7 @@ export interface Property {
   acceptingApplications?: boolean;
   additionalFees?: PropertyFee[];
   reviews?: PropertyReview[];
-  /** Whether the landlord allows paying this property's rent in monthly installments (GetRentos Flex), instead of the standard upfront yearly payment. */
+  /** Whether the landlord allows paying this property's rent in monthly installments (Sureground Flex), instead of the standard upfront yearly payment. */
   allowsMonthlyPayment?: boolean;
   /** The trust chain, present only on the property detail payload. */
   trustChain?: PropertyTrustChain;
@@ -154,7 +154,7 @@ export interface LandlordInfo {
   name: string;
   email: string;
   phone: string;
-  /** Only when GetRentos actually measures it; never a placeholder. */
+  /** Only when Sureground actually measures it; never a placeholder. */
   responseRate?: number;
   rating?: number;
 }

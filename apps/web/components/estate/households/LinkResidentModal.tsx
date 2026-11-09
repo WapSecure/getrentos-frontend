@@ -9,7 +9,7 @@ import {
   DialogTitle,
   Field,
   Input,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import type { Household } from '@/types/estate';
 
 interface LinkResidentModalProps {
@@ -47,7 +47,7 @@ export const LinkResidentModal = ({
             label="Platform account email"
             required
             error={error || undefined}
-            hint="They must already have a GetRentos account with this email. Linking gives them their own dashboard for this household."
+            hint="They must already have a Sureground account with this email. Linking gives them their own dashboard for this household."
           >
             <Input
               type="email"

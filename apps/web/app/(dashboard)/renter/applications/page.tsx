@@ -10,7 +10,7 @@ import { ApplicationExport } from '@/components/renter/applications/ApplicationE
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
-import { PageErrorState, PageLoadingState, Pagination } from '@getrentos/ui';
+import { PageErrorState, PageLoadingState, Pagination } from '@sureground/ui';
 
 interface Note {
   id: string;

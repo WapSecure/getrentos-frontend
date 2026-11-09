@@ -15,7 +15,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   activeConsent,
@@ -471,8 +471,8 @@ function SelfieForm({ verificationId, onDone }: FormProps) {
   if (!supported) {
     return (
       <Text variant="caption" color="mutedForeground">
-        The live selfie needs the GetRentos app from the App Store or Google Play. It can&apos;t run
-        here.
+        The live selfie needs the Sureground app from the App Store or Google Play. It can&apos;t
+        run here.
       </Text>
     );
   }

@@ -1,4 +1,4 @@
-import type { PlaceKind, PlaceSuggestion, VerifiedAddress } from '@getrentos/shared';
+import type { PlaceKind, PlaceSuggestion, VerifiedAddress } from '@sureground/shared';
 import { apiFetch } from './client';
 
 /** Google address search through our API: suggestions while typing, then the checked address. */

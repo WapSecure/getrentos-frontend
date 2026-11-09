@@ -13,7 +13,7 @@ import {
   PageErrorState,
   PageHeader,
   Skeleton,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { useCustody } from '@/components/agency/CustodyProvider';
 import { unwrap } from '@/lib/apiHelpers';
 import { ROUTES } from '@/lib/constants/auth';
@@ -93,7 +93,7 @@ export function AgencyWorkspaceView() {
         <EmptyState
           icon={FileSignature}
           title="Nothing to act on yet"
-          description="A mandate has to be signed by both sides and verified by GetRentos before it lets you do anything. You will see the properties here the moment it does."
+          description="A mandate has to be signed by both sides and verified by Sureground before it lets you do anything. You will see the properties here the moment it does."
           action={<Button href="/agency/mandates">See your mandates</Button>}
         />
       </div>

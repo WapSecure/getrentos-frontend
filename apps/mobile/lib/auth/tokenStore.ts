@@ -4,8 +4,8 @@ import { secureStorage } from '../storage';
  * Session tokens. On device they live in the OS secure enclave; the access
  * token is short-lived and the refresh token is rotated on every use.
  */
-const ACCESS_KEY = 'getrentos.accessToken';
-const REFRESH_KEY = 'getrentos.refreshToken';
+const ACCESS_KEY = 'sureground.accessToken';
+const REFRESH_KEY = 'sureground.refreshToken';
 
 export interface SessionTokens {
   accessToken: string;

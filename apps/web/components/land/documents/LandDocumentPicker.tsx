@@ -1,7 +1,7 @@
 'use client';
 
 import { useId, useMemo, useState } from 'react';
-import { Button, DocumentPreviewButton, Field, IconButton, Select } from '@getrentos/ui';
+import { Button, DocumentPreviewButton, Field, IconButton, Select } from '@sureground/ui';
 import { Upload, X } from 'lucide-react';
 import { formatDate } from '@/lib/format';
 import type { LandDocumentType } from '@/types/landDocument';

@@ -1,4 +1,4 @@
-import { mapTiles } from '@getrentos/shared';
+import { mapTiles } from '@sureground/shared';
 
 /** The web maps' tiles: Mapbox when NEXT_PUBLIC_MAPBOX_TOKEN is set, else OpenStreetMap. */
 export const WEB_MAP_TILES = mapTiles(process.env.NEXT_PUBLIC_MAPBOX_TOKEN, 'light');

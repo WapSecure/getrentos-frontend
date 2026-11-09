@@ -1,6 +1,6 @@
 'use client';
 
-import { Badge, Button } from '@getrentos/ui';
+import { Badge, Button } from '@sureground/ui';
 import type { VehicleLog } from '@/types/estate';
 
 const purposeLabels: Record<VehicleLog['purpose'], string> = {

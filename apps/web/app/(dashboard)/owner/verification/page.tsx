@@ -11,7 +11,7 @@ export default function OwnerVerificationPage() {
     <VerificationCenter
       subjectId={subjectId}
       purpose="PROPERTY_OWNER_ONBOARDING"
-      description="Verify your identity and ownership to sell property and unlock GetRentos Payment Protection."
+      description="Verify your identity and ownership to sell property and unlock Sureground Payment Protection."
       trustScoreHref={ROUTES.OWNER_TRUST_PROFILE}
     />
   );

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { SafeImage } from '@/components/shared/media/SafeImage';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { isAuthenticated } from '@getrentos/shared';
+import { isAuthenticated } from '@sureground/shared';
 import {
   Alert,
   Badge,
@@ -21,7 +21,7 @@ import {
   Select,
   Skeleton,
   ToggleChip,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { BedDouble, CalendarCheck, ClipboardCheck, Heart, MapPin, Star, Zap } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { SHORTLET_AMENITIES } from '@/lib/shortlet/essentials';

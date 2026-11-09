@@ -18,7 +18,7 @@ import {
   Textarea,
   useToast,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterService } from '@/services/renterService';
 import { renterKeys } from '@/lib/queryKeys';

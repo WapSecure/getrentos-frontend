@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
-import { IconButton, ThemeToggle } from '@getrentos/ui';
+import { IconButton, ThemeToggle } from '@sureground/ui';
 import { ResidentProfileDropdown } from './ResidentProfileDropdown';
 import { NotificationBell } from '@/components/shared/notifications/NotificationBell';
 import { residentNavGroups } from './ResidentSidebar';

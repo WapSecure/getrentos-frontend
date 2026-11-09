@@ -21,8 +21,8 @@ import {
   Textarea,
   useOptimisticMutation,
   useToast,
-} from '@getrentos/ui';
-import { formatDate } from '@getrentos/shared';
+} from '@sureground/ui';
+import { formatDate } from '@sureground/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import { landlordService, type BillingCycle } from '@/services/landlordService';

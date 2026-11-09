@@ -1,8 +1,8 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { SessionTimeoutGuard } from '@getrentos/ui';
-import { ROUTES } from '@getrentos/shared';
+import { SessionTimeoutGuard } from '@sureground/ui';
+import { ROUTES } from '@sureground/shared';
 
 /**
  * Shared shell for the back office. Same job as the main app's dashboard

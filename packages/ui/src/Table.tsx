@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { cn } from '@getrentos/shared';
+import { cn } from '@sureground/shared';
 import { TableSkeleton } from './Skeleton';
 
 export interface Column<T> {

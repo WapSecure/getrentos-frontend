@@ -1,6 +1,6 @@
 'use client';
 
-import { Dialog, DialogContent, DialogTitle } from '@getrentos/ui';
+import { Dialog, DialogContent, DialogTitle } from '@sureground/ui';
 import { EvidencePanel } from '@/components/shared/EvidencePanel';
 import type { EvidenceItem } from '@/types/admin';
 

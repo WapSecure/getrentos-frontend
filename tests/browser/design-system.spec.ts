@@ -67,7 +67,7 @@ async function usePersona(page: Page, roles: string[]) {
 
   await page.route('**/__qa_api/users/me', (route) => route.fulfill({ json: persona }));
   await page.addInitScript((personaUser) => {
-    localStorage.setItem('getrentos_user', JSON.stringify(personaUser));
+    localStorage.setItem('sureground_user', JSON.stringify(personaUser));
   }, persona);
 }
 
@@ -76,10 +76,10 @@ test.beforeEach(async ({ page }, testInfo) => {
     ({ user, theme }) => {
       localStorage.setItem('theme', theme);
       localStorage.setItem(
-        'getrentos_auth_token',
+        'sureground_auth_token',
         `test.${btoa(JSON.stringify({ exp: Math.floor(Date.now() / 1000) + 3600 }))}.test`
       );
-      localStorage.setItem('getrentos_user', JSON.stringify(user));
+      localStorage.setItem('sureground_user', JSON.stringify(user));
     },
     { user, theme: testInfo.project.name.endsWith('dark') ? 'dark' : 'light' }
   );

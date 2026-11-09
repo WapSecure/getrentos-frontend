@@ -10,7 +10,7 @@ import {
   DialogTitle,
   Field,
   Input,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 
 interface DocumentShareModalProps {
   isOpen: boolean;

@@ -12,7 +12,7 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { agentApi } from '@/lib/api/agent';
 import { qk } from '@/lib/query/keys';
 

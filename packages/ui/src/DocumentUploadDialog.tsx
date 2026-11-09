@@ -8,7 +8,7 @@ import { Field } from './Field';
 import { Select } from './Select';
 import { FilePreviewDialog } from './FilePreviewDialog';
 import { checkPhotoQuality } from './photoQuality';
-import { cn } from '@getrentos/shared';
+import { cn } from '@sureground/shared';
 
 export interface UploadedDocumentData {
   name: string;

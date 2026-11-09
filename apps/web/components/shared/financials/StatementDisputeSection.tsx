@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Badge, Button, Field, Select, Textarea } from '@getrentos/ui';
+import { Badge, Button, Field, Select, Textarea } from '@sureground/ui';
 import { Gavel, Undo2 } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/format';
 
@@ -208,9 +208,9 @@ export function StatementDisputeSection({
               </Field>
 
               <p className="text-xs text-muted-foreground">
-                The statement will not be changed. If GetRentos upholds this, the correction appears
-                on your next statement. Until it is decided, a payout that has not been sent is
-                paused.
+                The statement will not be changed. If Sureground upholds this, the correction
+                appears on your next statement. Until it is decided, a payout that has not been sent
+                is paused.
               </p>
 
               <div className="flex justify-end">

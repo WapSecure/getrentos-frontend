@@ -13,8 +13,8 @@ import {
   DialogTitle,
   Field,
   Input,
-} from '@getrentos/ui';
-import { formatCurrency, unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { formatCurrency, unwrap } from '@sureground/shared';
 import { adminChargebacksService } from '@/services/adminChargebacksService';
 
 const REFERENCE = /^[A-Za-z0-9_.|-]{4,100}$/;
@@ -26,7 +26,7 @@ function lagosToday(): string {
 }
 
 /**
- * Monnify does not tell GetRentos when a payer disputes a card payment, so
+ * Monnify does not tell Sureground when a payer disputes a card payment, so
  * finance copies each one in from Monnify's dashboard (audit GW-11). Recording
  * it holds the money back exactly as a Paystack dispute does.
  */
@@ -68,7 +68,7 @@ export function RecordMonnifyDisputeDialog({
     }
     if (!REFERENCE.test(reference.trim())) {
       return setError(
-        'Enter the GetRentos payment reference: 4 to 100 letters, numbers, dots, dashes, underscores or bars.'
+        'Enter the Sureground payment reference: 4 to 100 letters, numbers, dots, dashes, underscores or bars.'
       );
     }
     if (!Number.isInteger(naira) || naira < 1 || naira > MAX_AMOUNT) {
@@ -86,7 +86,7 @@ export function RecordMonnifyDisputeDialog({
         <div className="p-5">
           <DialogTitle>Record a Monnify dispute</DialogTitle>
           <DialogDescription>
-            Monnify does not tell GetRentos when a payer disputes a card payment. Copy each one in
+            Monnify does not tell Sureground when a payer disputes a card payment. Copy each one in
             from Monnify&rsquo;s dashboard so the money is held back while it is open.
           </DialogDescription>
         </div>
@@ -99,7 +99,7 @@ export function RecordMonnifyDisputeDialog({
               autoComplete="off"
             />
           </Field>
-          <Field label="Payment reference" hint="The GetRentos reference of the disputed payment">
+          <Field label="Payment reference" hint="The Sureground reference of the disputed payment">
             <Input
               value={reference}
               onChange={(e) => setReference(e.target.value)}
@@ -128,7 +128,7 @@ export function RecordMonnifyDisputeDialog({
             {naira > 0
               ? `Recording this holds back ${formatCurrency(naira)} of that payment: `
               : 'Recording this holds back the disputed money: '}
-            frozen if GetRentos still has it, kept back from the receiver&rsquo;s payouts if it is
+            frozen if Sureground still has it, kept back from the receiver&rsquo;s payouts if it is
             in their balance, or listed to recover if it was already paid out. It stays held until
             you record the outcome.
           </Alert>

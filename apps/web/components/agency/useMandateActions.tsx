@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ConfirmDialog } from '@getrentos/ui';
+import { ConfirmDialog } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { mandateKeys } from '@/lib/queryKeys';
 import * as mandateService from '@/services/mandateService';
@@ -70,10 +70,10 @@ const REASON_ACTIONS: Record<
     needsReason: true,
   },
   'request-termination': {
-    title: 'Ask GetRentos to end this engagement?',
+    title: 'Ask Sureground to end this engagement?',
     description:
       'This raises a request, not an ending. The mandate keeps running and your access stays ' +
-      'while it is open, and a second GetRentos staff member has to approve it. No one person ' +
+      'while it is open, and a second Sureground staff member has to approve it. No one person ' +
       'ends a client engagement alone.',
     confirmLabel: 'Raise the request',
     promptLabel: 'Why should this engagement end?',

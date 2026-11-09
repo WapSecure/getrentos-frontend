@@ -14,7 +14,15 @@ import {
   Bed,
   Wallet,
 } from 'lucide-react';
-import { Badge, Button, Card, EmptyState, IconButton, ListSkeleton, useToast } from '@getrentos/ui';
+import {
+  Badge,
+  Button,
+  Card,
+  EmptyState,
+  IconButton,
+  ListSkeleton,
+  useToast,
+} from '@sureground/ui';
 import { renterService, type SavedSearch } from '@/services/renterService';
 import { ROUTES } from '@/lib/constants/auth';
 

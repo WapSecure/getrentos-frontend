@@ -1,7 +1,7 @@
 'use client';
 
 import { ReceiptText } from 'lucide-react';
-import { Badge, Button, EmptyState } from '@getrentos/ui';
+import { Badge, Button, EmptyState } from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { escrowStatusBadges, paymentStatusBadges, rentPayoutStatusBadges } from '@/lib/statusBadge';
 import type { RentPayment } from '@/types/landlord';

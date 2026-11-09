@@ -1,4 +1,4 @@
-import { assessPhotoQuality, PHOTO_PROBLEM_COPY, type PhotoProblem } from '@getrentos/shared';
+import { assessPhotoQuality, PHOTO_PROBLEM_COPY, type PhotoProblem } from '@sureground/shared';
 
 /** The longest side the check works on: plenty to judge focus and light, quick to scan. */
 const CHECK_SIDE = 640;

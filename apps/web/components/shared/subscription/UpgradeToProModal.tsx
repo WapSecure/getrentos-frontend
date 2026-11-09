@@ -1,7 +1,7 @@
 'use client';
 
 import { BadgeCheck } from 'lucide-react';
-import { Button, Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrentos/ui';
+import { Button, Dialog, DialogContent, DialogDescription, DialogTitle } from '@sureground/ui';
 import type { PlanGateReason } from '@/lib/planGate';
 
 interface UpgradeToProModalProps {
@@ -48,7 +48,7 @@ export const UpgradeToProModal = ({ isOpen, onClose, reason }: UpgradeToProModal
             <Button
               variant="primary"
               fullWidth
-              href="mailto:hello@getrentos.com?subject=Upgrade%20to%20Pro"
+              href="mailto:hello@getsureground.io?subject=Upgrade%20to%20Pro"
             >
               Contact us to upgrade
             </Button>

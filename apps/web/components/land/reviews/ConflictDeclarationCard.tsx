@@ -1,13 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { Button, Card, Field, Textarea } from '@getrentos/ui';
+import { Button, Card, Field, Textarea } from '@sureground/ui';
 import { ShieldAlert } from 'lucide-react';
 
 /**
  * The conflict-of-interest declaration every engaged professional makes once,
  * before deciding anything. Declaring a conflict withdraws them from the case
- * so GetRentos can engage someone else; it is recorded, not penalised.
+ * so Sureground can engage someone else; it is recorded, not penalised.
  */
 export const ConflictDeclarationCard = ({
   onDeclare,
@@ -37,7 +37,7 @@ export const ConflictDeclarationCard = ({
             <Field
               label="Describe the conflict"
               htmlFor="conflict-note"
-              hint="You will be withdrawn from this case and GetRentos will engage someone else."
+              hint="You will be withdrawn from this case and Sureground will engage someone else."
             >
               <Textarea
                 id="conflict-note"

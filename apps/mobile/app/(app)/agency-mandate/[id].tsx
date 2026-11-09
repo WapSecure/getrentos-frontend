@@ -3,7 +3,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CheckCircle2, Circle } from 'lucide-react-native';
-import { Badge, Card, DetailSkeleton, QueryState, Text, useTheme } from '@getrentos/ui-native';
+import { Badge, Card, DetailSkeleton, QueryState, Text, useTheme } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   agencyApi,
@@ -126,7 +126,7 @@ export default function AgencyMandate() {
                     <Text variant="caption" color="mutedForeground">
                       {r.requestedByName ?? 'Someone'} · {formatDay(r.createdAt)}
                       {r.decidedAt
-                        ? ` · decided by ${r.decidedByName ?? 'GetRentos'} ${formatDay(r.decidedAt)}`
+                        ? ` · decided by ${r.decidedByName ?? 'Sureground'} ${formatDay(r.decidedAt)}`
                         : ''}
                       {r.decisionNote ? ` · ${r.decisionNote}` : ''}
                     </Text>
@@ -172,9 +172,9 @@ function Timeline({ m }: { m: Mandate }) {
     {
       label:
         m.status === 'REJECTED'
-          ? 'Refused by GetRentos'
+          ? 'Refused by Sureground'
           : m.activatedAt
-            ? 'Verified by GetRentos'
+            ? 'Verified by Sureground'
             : 'Awaiting verification',
       when: at(m.decidedAt ?? m.activatedAt),
       note: m.decisionNote,

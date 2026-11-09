@@ -4,8 +4,8 @@ import { Image } from 'expo-image';
 import { useEvent } from 'expo';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { VideoOff } from 'lucide-react-native';
-import { Text, useTheme } from '@getrentos/ui-native';
-import { videoSource, type VideoStream } from '@getrentos/shared';
+import { Text, useTheme } from '@sureground/ui-native';
+import { videoSource, type VideoStream } from '@sureground/shared';
 import { EmbedFrame } from './EmbedFrame';
 
 /**

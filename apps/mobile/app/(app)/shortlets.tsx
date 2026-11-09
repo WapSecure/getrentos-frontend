@@ -14,7 +14,7 @@ import {
   BadgeCheck,
   Users,
 } from 'lucide-react-native';
-import { Chip, Divider, IconButton, Text, TextField, useTheme } from '@getrentos/ui-native';
+import { Chip, Divider, IconButton, Text, TextField, useTheme } from '@sureground/ui-native';
 import type { ShortletFilters } from '@/lib/api/shortlets';
 import { guestsLabel, isDettySeason, seasonRange } from '@/lib/stays';
 import { haptics } from '@/lib/haptics';

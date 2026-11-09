@@ -3,13 +3,13 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CheckCircle2, CircleAlert, Inbox, MapPin, XCircle } from 'lucide-react';
-import { Badge, Button, Card, EmptyState, Skeleton, Textarea, useToast } from '@getrentos/ui';
+import { Badge, Button, Card, EmptyState, Skeleton, Textarea, useToast } from '@sureground/ui';
 import {
   LAND_CONSENT_LABELS,
   LAND_SELLER_CAPACITY_LABELS,
   LAND_SIGNATORY_ROLE_LABELS,
   type LandConsentRequest,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
 import { landKeys } from '@/lib/queryKeys';
@@ -79,7 +79,7 @@ const ConsentRequestCard = ({ item }: { item: LandConsentRequest }) => {
       void queryClient.invalidateQueries({ queryKey: landKeys.consentRequests });
       toast.success(
         decision === 'OBJECT'
-          ? 'Objection recorded. The sale is paused while GetRentos looks into it.'
+          ? 'Objection recorded. The sale is paused while Sureground looks into it.'
           : 'Thank you. Your consent is recorded.'
       );
     },
@@ -148,7 +148,7 @@ const ConsentRequestCard = ({ item }: { item: LandConsentRequest }) => {
                 maxLength={2000}
                 showCount
                 aria-label="Why you object"
-                placeholder="Why you object (GetRentos and the seller see this)"
+                placeholder="Why you object (Sureground and the seller see this)"
               />
               <div className="flex flex-wrap gap-2">
                 <Button

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { MapPin, Bed, Bath, Square, Heart, Star, GitCompare, Calendar, Home } from 'lucide-react';
-import { Button, IconButton } from '@getrentos/ui';
+import { Button, IconButton } from '@sureground/ui';
 import { Property } from '@/types/renter';
 import { formatCurrency } from '@/lib/format';
 import { VirtualTourBadge } from './features/VirtualTourBadge';

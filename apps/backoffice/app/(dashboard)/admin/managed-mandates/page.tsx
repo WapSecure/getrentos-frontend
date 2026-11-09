@@ -22,8 +22,8 @@ import {
   TabsTrigger,
   useToast,
   type BadgeVariant,
-} from '@getrentos/ui';
-import { formatDate, unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { formatDate, unwrap } from '@sureground/shared';
 
 import { adminManagedService, type ManagedMandate } from '@/services/adminManagedService';
 import { useAdminUser } from '../layout';
@@ -78,7 +78,7 @@ const ManagedMandateCard = ({
       unwrap(adminManagedService.activate(mandate.id, managerUserId, deliveryPartner || undefined)),
     onSuccess: () => {
       setError(null);
-      toast.success(`${mandate.propertyTitle ?? 'The engagement'} is now managed by GetRentos.`);
+      toast.success(`${mandate.propertyTitle ?? 'The engagement'} is now managed by Sureground.`);
       void queryClient.invalidateQueries({ queryKey: ['admin', 'managed-mandates'] });
     },
     onError: (err: Error) => setError(err.message || 'Could not activate the engagement.'),
@@ -111,7 +111,7 @@ const ManagedMandateCard = ({
               accepted {formatDate(mandate.createdAt)}
             </p>
             <p className="mt-0.5 text-sm text-muted-foreground">
-              {mandate.servicingTier ? TIER_LABEL[mandate.servicingTier] : 'GetRentos Managed'}
+              {mandate.servicingTier ? TIER_LABEL[mandate.servicingTier] : 'Sureground Managed'}
             </p>
           </div>
         </div>
@@ -173,7 +173,7 @@ const ManagedMandateCard = ({
                 ariaLabel={`Delivery partner for ${mandate.propertyTitle ?? 'property'}`}
                 value={deliveryPartner}
                 onValueChange={setDeliveryPartner}
-                options={[{ value: '', label: 'GetRentos operates it' }, ...partnerOptions]}
+                options={[{ value: '', label: 'Sureground operates it' }, ...partnerOptions]}
               />
             </div>
           </label>
@@ -323,7 +323,7 @@ const ActiveEngagements = ({
       <EmptyState
         icon={Building2}
         title="No live engagements"
-        description="No GetRentos Managed engagements are active right now."
+        description="No Sureground Managed engagements are active right now."
       />
     );
   }
@@ -474,7 +474,7 @@ const ActiveEngagements = ({
                       <p className="mt-0.5 text-sm text-muted-foreground">
                         {mandate.servicingTier
                           ? TIER_LABEL[mandate.servicingTier]
-                          : 'GetRentos Managed'}
+                          : 'Sureground Managed'}
                         {mandate.deliveryPartnerName
                           ? ` · delivered by ${mandate.deliveryPartnerName}`
                           : ''}
@@ -656,9 +656,9 @@ const TerminationRequests = () => {
                     </p>
                     <p className="mt-0.5 text-sm text-foreground">“{request.reason}”</p>
                     {/* The notice position the approver is deciding against: when
-                        GetRentos is the manager, the agreed period binds us, and
+                        Sureground is the manager, the agreed period binds us, and
                         approving an unserved one ends it immediately. */}
-                    {request.managerIsGetRentos && (
+                    {request.managerIsSureground && (
                       <div className="mt-1.5 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                         {request.noticeServedAt ? (
                           <span>
@@ -677,8 +677,8 @@ const TerminationRequests = () => {
                     )}
                   </div>
                 </div>
-                <Badge variant={request.managerIsGetRentos ? 'success' : 'neutral'}>
-                  {request.managerIsGetRentos ? 'GetRentos' : 'Firm'}
+                <Badge variant={request.managerIsSureground ? 'success' : 'neutral'}>
+                  {request.managerIsSureground ? 'Sureground' : 'Firm'}
                 </Badge>
               </div>
             </Card>
@@ -806,7 +806,7 @@ export default function AdminManagedMandatesPage() {
   return (
     <>
       <PageHeader
-        title="GetRentos Managed"
+        title="Sureground Managed"
         description="Activate accepted engagements and manage live engagements, including assigning, activating and reassigning a portfolio manager, one at a time or several at once."
       />
 
@@ -849,7 +849,7 @@ export default function AdminManagedMandatesPage() {
         <EmptyState
           icon={Sparkles}
           title="Nothing waiting"
-          description="No accepted GetRentos Managed engagements need activating right now."
+          description="No accepted Sureground Managed engagements need activating right now."
         />
       ) : (
         <>
@@ -915,7 +915,7 @@ export default function AdminManagedMandatesPage() {
                     ariaLabel="Delivery partner for the selected engagements"
                     value={bulkPartner}
                     onValueChange={setBulkPartner}
-                    options={[{ value: '', label: 'GetRentos operates it' }, ...partnerOptions]}
+                    options={[{ value: '', label: 'Sureground operates it' }, ...partnerOptions]}
                   />
                 </div>
                 <Button

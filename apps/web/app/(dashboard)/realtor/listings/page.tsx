@@ -22,7 +22,7 @@ import {
   clearSessionDraft,
   hasSessionDraft,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import type { RealtorListing, RealtorListingStatus } from '@/types/realtor';
 import { unwrap, VerificationRequiredError } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';

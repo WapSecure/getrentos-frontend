@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { PageLoadingState } from '@getrentos/ui';
+import { PageLoadingState } from '@sureground/ui';
 import { ROUTES, getDashboardRoute, getUserRole, isAuthenticated } from '@/lib/constants/auth';
 
 /**

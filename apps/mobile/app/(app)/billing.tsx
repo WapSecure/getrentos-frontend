@@ -17,7 +17,7 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   billingApi,
@@ -205,7 +205,7 @@ function PlanCard({ billing: b }: { billing: MyBilling }) {
           message={
             storeManaged
               ? `Your last payment failed. Update your payment method in ${storeName} to keep Pro.`
-              : 'Your last payment failed. Update your card from your GetRentos account on the web to keep Pro.'
+              : 'Your last payment failed. Update your card from your Sureground account on the web to keep Pro.'
           }
         />
       ) : null}

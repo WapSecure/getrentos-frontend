@@ -1,7 +1,7 @@
 'use client';
 
 import { TrendingUp, AlertCircle, Wrench, PiggyBank } from 'lucide-react';
-import { StatCard } from '@getrentos/ui';
+import { StatCard } from '@sureground/ui';
 
 interface FinancialStatsProps {
   rentalIncome: number;

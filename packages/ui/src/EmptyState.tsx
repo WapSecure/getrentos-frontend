@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { LucideIcon } from 'lucide-react';
-import { cn } from '@getrentos/shared';
+import { cn } from '@sureground/shared';
 
 interface EmptyStateProps {
   icon: LucideIcon;

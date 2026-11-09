@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { ShieldCheck, ShieldAlert, Eye, Check, X, MessageSquareText } from 'lucide-react';
-import { Badge, Button, IconButton } from '@getrentos/ui';
+import { Badge, Button, IconButton } from '@sureground/ui';
 import { applicationStatusBadges } from '@/lib/statusBadge';
 import { formatCurrency, formatDate, getInitials } from '@/lib/format';
 import type { RentalApplication } from '@/types/landlord';

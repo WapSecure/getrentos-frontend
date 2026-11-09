@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import { useToast } from '@getrentos/ui-native';
+import { useToast } from '@sureground/ui-native';
 import { buyerMessagesApi } from '@/lib/api/buyerMessages';
 import { errorMessage } from '@/lib/api/client';
 import { qk } from '@/lib/query/keys';

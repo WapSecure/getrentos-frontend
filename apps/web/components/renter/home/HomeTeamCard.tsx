@@ -14,7 +14,7 @@ import {
   Input,
   Select,
   Textarea,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 
 import { unwrap } from '@/lib/apiHelpers';
 import { ROUTES } from '@/lib/constants/auth';
@@ -42,7 +42,7 @@ const Verdict = ({ result }: { result: CheckResult }) => {
     return (
       <Alert variant="success" icon={CheckCircle2}>
         This is {result.name}, {result.role.toLowerCase()} for {result.propertyTitle}. Even so, only
-        pay rent in GetRentos.
+        pay rent in Sureground.
       </Alert>
     );
   }
@@ -50,7 +50,7 @@ const Verdict = ({ result }: { result: CheckResult }) => {
     return (
       <Alert variant="danger" icon={ShieldAlert}>
         Do not pay into any bank account, whoever asks. Your landlord and manager are paid by
-        GetRentos; you pay only in GetRentos. If someone asked you to pay this account, report it
+        Sureground; you pay only in Sureground. If someone asked you to pay this account, report it
         below.
       </Alert>
     );
@@ -69,8 +69,8 @@ const Verdict = ({ result }: { result: CheckResult }) => {
 /**
  * Who really manages the tenant's home, and how to tell an impostor: the
  * verified landlord and managers (contacts shown partly, to compare against),
- * the rule that rent is paid only in GetRentos, a check for any number or
- * email someone used, and a report that reaches GetRentos and the real
+ * the rule that rent is paid only in Sureground, a check for any number or
+ * email someone used, and a report that reaches Sureground and the real
  * landlord.
  */
 export const HomeTeamCard = () => {
@@ -118,7 +118,7 @@ export const HomeTeamCard = () => {
       </h2>
       <p className="mt-1 text-sm text-muted-foreground">
         These are the only people verified to act for your home. Anyone else claiming to be your
-        landlord, a new manager or GetRentos is not.
+        landlord, a new manager or Sureground is not.
       </p>
 
       <div className="mt-4 space-y-4">
@@ -150,18 +150,18 @@ export const HomeTeamCard = () => {
       </div>
 
       <div className="mt-5 rounded-xl border border-primary/30 bg-primary/5 p-4 text-sm text-foreground">
-        <p className="font-medium">Pay rent only in GetRentos.</p>
+        <p className="font-medium">Pay rent only in Sureground.</p>
         <p className="mt-1 text-muted-foreground">
           Use{' '}
           <Link href={ROUTES.RENTER_PAYMENTS} className="font-medium text-primary hover:underline">
             Payments
           </Link>
-          . GetRentos never asks you to pay into a personal account, and a change of manager never
+          . Sureground never asks you to pay into a personal account, and a change of manager never
           changes how you pay.
           {hasSupportLine() && (
             <>
               {' '}
-              GetRentos support only contacts you from{' '}
+              Sureground support only contacts you from{' '}
               {[SUPPORT.phone, SUPPORT.whatsapp].filter(Boolean).join(' or ')}.
             </>
           )}
@@ -221,7 +221,7 @@ export const HomeTeamCard = () => {
         {reported ? (
           <p className="flex items-start gap-1.5 text-sm text-foreground">
             <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" aria-hidden />
-            Thank you. GetRentos will look into it, and your landlord and manager have been warned
+            Thank you. Sureground will look into it, and your landlord and manager have been warned
             (without your name). If you already paid, also report it to your bank now.
           </p>
         ) : !reporting ? (
@@ -230,7 +230,7 @@ export const HomeTeamCard = () => {
             onClick={() => setReporting(true)}
             className="whitespace-normal text-left font-medium text-destructive"
           >
-            Report someone posing as your landlord, manager or GetRentos
+            Report someone posing as your landlord, manager or Sureground
           </Button>
         ) : (
           <div className="space-y-3">

@@ -1,7 +1,7 @@
 import { ClientRealtorAccess } from '@/components/realtor/ClientRealtorAccess';
 import { ClientAgentAccess } from '@/components/agent/ClientAgentAccess';
 import { ClientAgentTaskForm } from '@/components/agent/ClientAgentTaskForm';
-import { PageHeader } from '@getrentos/ui';
+import { PageHeader } from '@sureground/ui';
 
 export default function LandlordRealtorsPage() {
   return (

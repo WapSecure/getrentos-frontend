@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 import { useMutation } from '@tanstack/react-query';
 import { Sparkles } from 'lucide-react-native';
-import { Badge, Button, Card, Text, useTheme, type BadgeTone } from '@getrentos/ui-native';
+import { Badge, Button, Card, Text, useTheme, type BadgeTone } from '@sureground/ui-native';
 import type { AgentInspectionType, RoomCondition } from '@/lib/api/agent';
 import { errorMessage } from '@/lib/api/client';
 import {
@@ -64,7 +64,7 @@ export function InspectionDraftPanel({
         </View>
         <Text variant="caption" color="mutedForeground">
           {photoCount === 0
-            ? 'Add photos to your rooms first. GetRentos suggests a condition and notes for each room you can edit.'
+            ? 'Add photos to your rooms first. Sureground suggests a condition and notes for each room you can edit.'
             : type === 'MOVE_OUT'
               ? 'Suggests each room’s condition and notes, and compares with the move-in report.'
               : 'Suggests each room’s condition and notes from your photos. You can edit everything.'}

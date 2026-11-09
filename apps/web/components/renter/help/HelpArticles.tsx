@@ -1,7 +1,7 @@
 'use client';
 
 import { FileText, Eye, ThumbsUp, ChevronRight } from 'lucide-react';
-import { Card, EmptyState } from '@getrentos/ui';
+import { Card, EmptyState } from '@sureground/ui';
 
 interface Article {
   id: string;
@@ -26,7 +26,7 @@ const helpArticles: Article[] = [
   {
     id: '2',
     title: 'Understanding payment protection',
-    description: 'Learn how GetRentos holds your money to protect you',
+    description: 'Learn how Sureground holds your money to protect you',
     category: 'payments',
     views: 876,
     helpful: 92,

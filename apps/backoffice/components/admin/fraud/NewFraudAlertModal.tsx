@@ -11,7 +11,7 @@ import {
   Input,
   Select,
   Textarea,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import type { FraudAlertSeverity } from '@/types/admin';
 
 const SEVERITY_OPTIONS: { value: FraudAlertSeverity; label: string }[] = [

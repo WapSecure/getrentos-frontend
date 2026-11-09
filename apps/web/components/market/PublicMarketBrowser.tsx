@@ -27,7 +27,7 @@ import {
   SearchInput,
   Select,
   Skeleton,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import {
   publicMarketService,
   type PublicListingCard,
@@ -39,7 +39,7 @@ import { formatCurrency } from '@/lib/format';
 import { PROPERTY_TYPE_OPTIONS } from '@/lib/propertyTypes';
 import { SaveListingButton } from './SaveListingButton';
 import { ListingComparisonDialog } from './ListingComparisonDialog';
-import { trustChainLabel } from '@getrentos/shared';
+import { trustChainLabel } from '@sureground/shared';
 
 // Shared with the server component that pre-renders the first page, so the two
 // cannot ask for different page sizes.

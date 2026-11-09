@@ -25,7 +25,7 @@ import { estateService } from '@/services/estateService';
  * replay it into the same rejection forever.
  */
 
-const KEY = 'getrentos.gate.offline-queue';
+const KEY = 'sureground.gate.offline-queue';
 
 export type GateWriteType = 'check-in' | 'check-out' | 'admit';
 

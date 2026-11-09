@@ -13,7 +13,7 @@ import {
   Skeleton,
   Text,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { EnterpriseUpsell, StatTile } from '@/components/estate/gate/GateUI';
 import { StatusPill } from '@/components/host/HostUI';

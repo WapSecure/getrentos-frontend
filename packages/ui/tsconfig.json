@@ -1,5 +1,5 @@
 {
-  "extends": "@getrentos/typescript-config/base.json",
+  "extends": "@sureground/typescript-config/base.json",
   "compilerOptions": {
     "jsx": "react-jsx",
     "lib": ["DOM", "ES2022"],

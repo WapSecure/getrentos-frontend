@@ -1,7 +1,7 @@
 'use client';
 
 import { Search } from 'lucide-react';
-import { Input, Pagination, Select } from '@getrentos/ui';
+import { Input, Pagination, Select } from '@sureground/ui';
 
 interface PaginatedSelectProps<T> {
   value: string;

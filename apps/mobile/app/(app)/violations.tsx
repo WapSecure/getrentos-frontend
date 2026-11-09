@@ -11,7 +11,7 @@ import {
   Skeleton,
   Text,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { residentApi, type ViolationStatus } from '@/lib/api/resident';
 import { qk } from '@/lib/query/keys';
 import { formatDate } from '@/lib/format';

@@ -2,7 +2,7 @@
 
 import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react';
 import Link from 'next/link';
-import { cn } from '@getrentos/shared';
+import { cn } from '@sureground/shared';
 
 export interface ButtonProps extends Omit<
   ButtonHTMLAttributes<HTMLButtonElement>,

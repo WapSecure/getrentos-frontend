@@ -15,7 +15,7 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { AnnouncementSheet } from '@/components/estate/EstateUI';
 import { StatusPill } from '@/components/host/HostUI';

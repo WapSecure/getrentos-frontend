@@ -4,7 +4,7 @@ import { ClipboardList, Wrench } from 'lucide-react';
 import { HubTabs, useHubTab, type HubTab } from '@/components/shared/navigation/HubTabs';
 import { MaintenanceRequestsView } from '@/components/landlord/maintenance/MaintenanceRequestsView';
 import dynamic from 'next/dynamic';
-import { Skeleton } from '@getrentos/ui';
+import { Skeleton } from '@sureground/ui';
 
 // Only the Home management tab needs the workspace: load it when that tab opens.
 const HomeManagementWorkspace = dynamic(

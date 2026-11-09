@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Lock } from 'lucide-react';
-import { Button, Field, Input, useToast } from '@getrentos/ui';
-import { AUTH_CONSTANTS } from '@getrentos/shared';
+import { Button, Field, Input, useToast } from '@sureground/ui';
+import { AUTH_CONSTANTS } from '@sureground/shared';
 import { accountSecurityService } from '@/services/accountSecurityService';
 
 const { PASSWORD_MIN_LENGTH, PASSWORD_MAX_LENGTH } = AUTH_CONSTANTS;

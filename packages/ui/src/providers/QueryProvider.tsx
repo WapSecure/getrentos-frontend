@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { MutationCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MotionConfig } from 'framer-motion';
-import { ApiError, onSessionExpired } from '@getrentos/shared';
+import { ApiError, onSessionExpired } from '@sureground/shared';
 import { ToastProvider, useToast, type ToastApi } from '../ToastProvider';
 
 const GENERIC_MUTATION_ERROR = 'We could not complete that action. Please try again.';

@@ -1,4 +1,4 @@
-import type { LandBoundaryStatus } from '@getrentos/shared';
+import type { LandBoundaryStatus } from '@sureground/shared';
 import { apiFetch, apiUpload } from './client';
 import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';

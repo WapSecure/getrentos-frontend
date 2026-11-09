@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { CreditCard, Building2, Wallet, Trash2 } from 'lucide-react';
-import { Alert, IconButton, ListSkeleton, PageErrorState, useToast } from '@getrentos/ui';
+import { Alert, IconButton, ListSkeleton, PageErrorState, useToast } from '@sureground/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
@@ -44,7 +44,7 @@ export const PaymentSettings = () => {
       <h2 className="text-xl font-semibold text-foreground mb-4">Payment settings</h2>
       <Alert variant="info" className="mb-6">
         You choose how to pay (card, bank transfer or USSD) on Paystack’s or Monnify’s secure page
-        each time you pay. GetRentos never sees or keeps your card details, so there is nothing to
+        each time you pay. Sureground never sees or keeps your card details, so there is nothing to
         add here.
       </Alert>
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { Eye } from 'lucide-react';
-import { Alert } from '@getrentos/ui';
+import { Alert } from '@sureground/ui';
 
 /**
  * The estate's note about somebody it matched but did not refuse.

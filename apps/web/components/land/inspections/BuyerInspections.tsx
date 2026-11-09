@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Button, EmptyState, Field, PageErrorState, Textarea, Toast } from '@getrentos/ui';
+import { Button, EmptyState, Field, PageErrorState, Textarea, Toast } from '@sureground/ui';
 import { ScanSearch } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
@@ -40,7 +40,7 @@ const BuyerInspectionActions = ({
   const fail = (reason: Error) => notify(reason.message, 'error');
   const ask = useMutation({
     mutationFn: () => unwrap(prePurchaseInspectionService.ask(inspection.id, text)),
-    onSuccess: done('Question sent. GetRentos will answer here.'),
+    onSuccess: done('Question sent. Sureground will answer here.'),
     onError: fail,
   });
   const reinspect = useMutation({
@@ -59,7 +59,7 @@ const BuyerInspectionActions = ({
               <p className="text-foreground">You asked: {q.question}</p>
               <p className="mt-1 text-muted-foreground">
                 {q.answer
-                  ? `GetRentos${q.answeredAt ? ` (${formatDate(q.answeredAt)})` : ''}: ${q.answer}`
+                  ? `Sureground${q.answeredAt ? ` (${formatDate(q.answeredAt)})` : ''}: ${q.answer}`
                   : 'Waiting for an answer.'}
               </p>
             </li>

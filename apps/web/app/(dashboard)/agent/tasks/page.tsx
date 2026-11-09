@@ -16,7 +16,7 @@ import {
   TabsList,
   TabsTrigger,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { TaskCard } from '@/components/agent/tasks/TaskCard';
 import type { AgentTask, TaskStatus, TaskType } from '@/types/agent';

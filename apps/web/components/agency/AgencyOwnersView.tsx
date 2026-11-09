@@ -15,7 +15,7 @@ import {
   type BadgeVariant,
   useToast,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { useCustody } from './CustodyProvider';
 import { InviteOwnerModal } from './InviteOwnerModal';
 import { unwrap } from '@/lib/apiHelpers';

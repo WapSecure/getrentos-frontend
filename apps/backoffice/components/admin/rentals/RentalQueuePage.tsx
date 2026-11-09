@@ -3,10 +3,10 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import type { LucideIcon } from 'lucide-react';
-import { DataTable, PageHeader, type Column } from '@getrentos/ui';
-import { EmptyState, PageErrorState, Pagination, SearchInput, Select } from '@getrentos/ui';
-import { unwrap } from '@getrentos/shared';
-import type { ApiResponse } from '@getrentos/shared';
+import { DataTable, PageHeader, type Column } from '@sureground/ui';
+import { EmptyState, PageErrorState, Pagination, SearchInput, Select } from '@sureground/ui';
+import { unwrap } from '@sureground/shared';
+import type { ApiResponse } from '@sureground/shared';
 import { adminKeys } from '@/lib/queryKeys';
 import { useAdminSearchParam } from '@/lib/readAdminSearchParam';
 import type { Paginated } from '@/services/adminService';

@@ -1,5 +1,5 @@
 import { HostTours } from '@/components/land/tours/HostTours';
-import { PageHeader } from '@getrentos/ui';
+import { PageHeader } from '@sureground/ui';
 
 export default function OwnerLandToursPage() {
   return (

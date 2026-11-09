@@ -2,7 +2,7 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { Image } from 'expo-image';
 import { useQuery } from '@tanstack/react-query';
-import { Text, useTheme } from '@getrentos/ui-native';
+import { Text, useTheme } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { recentlyViewedApi } from '@/lib/api/recentlyViewed';
 import { formatNaira } from '@/lib/format';

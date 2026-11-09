@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { CheckCircle2, Circle, CircleDashed, Clock3, XCircle } from 'lucide-react-native';
-import { Badge, Button, FormAlert, Text, TextField, useTheme } from '@getrentos/ui-native';
+import { Badge, Button, FormAlert, Text, TextField, useTheme } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   CONDITION_STATUS,

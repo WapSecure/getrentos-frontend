@@ -14,7 +14,7 @@ import {
   Field,
   Input,
   Select,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { useEstatePlan } from '@/hooks/useEstatePlan';
 
 interface UploadGovernanceRecordModalProps {

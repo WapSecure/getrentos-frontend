@@ -15,7 +15,7 @@ export const DownloadApp = () => (
               MOBILE APP · COMING SOON
             </div>
             <h2 className="mb-4 text-3xl font-bold text-foreground md:text-4xl">
-              The GetRentos app is on its way
+              The Sureground app is on its way
             </h2>
             <p className="text-muted-foreground">
               We&apos;re building the mobile app for iOS and Android. Until it lands in the stores,

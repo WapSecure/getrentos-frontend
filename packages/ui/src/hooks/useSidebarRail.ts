@@ -11,7 +11,7 @@ import { useCallback, useEffect, useSyncExternalStore } from 'react';
  * Browser state goes through an external store, not setState in an effect:
  * the React Compiler lint forbids the latter.
  */
-const KEY = 'getrentos.sidebar.rail';
+const KEY = 'sureground.sidebar.rail';
 const listeners = new Set<() => void>();
 let cached: boolean | undefined;
 

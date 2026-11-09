@@ -13,8 +13,8 @@ import {
   Input,
   Select,
   useToast,
-} from '@getrentos/ui';
-import { unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { unwrap } from '@sureground/shared';
 import { adminMaintenanceService } from '@/services/adminMaintenanceService';
 import type { AdminWorkOrder } from '@/types/maintenance';
 

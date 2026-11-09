@@ -1,1 +1,1 @@
-export * from '@getrentos/shared';
+export * from '@sureground/shared';

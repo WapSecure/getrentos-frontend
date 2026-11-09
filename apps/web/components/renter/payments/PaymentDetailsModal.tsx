@@ -11,7 +11,7 @@ import {
   DialogDescription,
   DialogTitle,
   type DescriptionItem,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { escrowStatusBadges, paymentStatusBadges } from '@/lib/statusBadge';
 import { formatCurrency, formatLagosDate } from '@/lib/format';
 import { InvoiceLines, type InvoiceLine } from '@/components/shared/InvoiceLines';
@@ -51,7 +51,7 @@ interface PaymentDetailsModalProps {
   onConfirmMoveIn: (id: string) => void;
 }
 
-/** How the renter chose to pay. "Wallet" is not a GetRentos balance, so it is not called one. */
+/** How the renter chose to pay. "Wallet" is not a Sureground balance, so it is not called one. */
 const METHOD_LABEL: Record<NonNullable<Payment['method']>, string> = {
   card: 'Card',
   bank_transfer: 'Bank transfer',
@@ -99,7 +99,7 @@ export const PaymentDetailsModal = ({
       ? [{ label: 'Total charged', value: formatCurrency(payment.totalChargedNaira) }]
       : []),
     ...(payment.heldAmountNaira
-      ? [{ label: 'Held by GetRentos', value: formatCurrency(payment.heldAmountNaira) }]
+      ? [{ label: 'Held by Sureground', value: formatCurrency(payment.heldAmountNaira) }]
       : []),
     ...(reference
       ? [
@@ -148,7 +148,7 @@ export const PaymentDetailsModal = ({
               {escrowStatusBadges[payment.escrowStatus]?.label ?? payment.escrowStatus}
               {payment.escrowStatus === 'held' && (
                 <p className="text-xs mt-1">
-                  Held under GetRentos Payment Protection so you have the home in hand first.{' '}
+                  Held under Sureground Payment Protection so you have the home in hand first.{' '}
                   {payment.releaseDate ? (
                     <>
                       It releases to your landlord on {formatLagosDate(payment.releaseDate)}, or

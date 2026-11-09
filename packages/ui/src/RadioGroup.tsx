@@ -1,7 +1,7 @@
 'use client';
 
 import { useId, useRef, type KeyboardEvent, type ReactNode } from 'react';
-import { cn } from '@getrentos/shared';
+import { cn } from '@sureground/shared';
 import { useFieldControl } from './fieldContext';
 
 export interface RadioOption<T extends string = string> {

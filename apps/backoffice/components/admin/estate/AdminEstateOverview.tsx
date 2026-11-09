@@ -29,8 +29,8 @@ import {
   StatGridSkeleton,
   useToast,
   PageHeader,
-} from '@getrentos/ui';
-import { unwrap, formatCurrency } from '@getrentos/shared';
+} from '@sureground/ui';
+import { unwrap, formatCurrency } from '@sureground/shared';
 import { adminKeys } from '@/lib/queryKeys';
 import { adminEstateService } from '@/services/adminEstateService';
 import type { AdminEstateOverview as OverviewData } from '@/types/estate';

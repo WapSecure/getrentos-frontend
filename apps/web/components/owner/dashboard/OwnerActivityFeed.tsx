@@ -1,7 +1,7 @@
 'use client';
 
 import { Users, Handshake, ShieldCheck, FileCheck } from 'lucide-react';
-import { Card, EmptyState } from '@getrentos/ui';
+import { Card, EmptyState } from '@sureground/ui';
 import { formatRelativeTime } from '@/lib/format';
 import type { OwnerDashboard } from '@/services/ownerService';
 

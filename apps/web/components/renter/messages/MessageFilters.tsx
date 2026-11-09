@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Filter, ChevronDown, ChevronUp } from 'lucide-react';
-import { Card, Field, Select } from '@getrentos/ui';
+import { Card, Field, Select } from '@sureground/ui';
 
 interface FilterState {
   type: string;

@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { PageErrorState, PageHeader, Skeleton } from '@getrentos/ui';
+import { PageErrorState, PageHeader, Skeleton } from '@sureground/ui';
 import { ArrowLeft, MapPin } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { landKeys } from '@/lib/queryKeys';

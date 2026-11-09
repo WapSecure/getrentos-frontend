@@ -1,5 +1,5 @@
 import { Eye, EyeOff } from 'lucide-react-native';
-import { IconButton, useTheme } from '@getrentos/ui-native';
+import { IconButton, useTheme } from '@sureground/ui-native';
 
 export function BalanceVisibilityButton({
   visible,

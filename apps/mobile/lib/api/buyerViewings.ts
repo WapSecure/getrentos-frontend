@@ -1,4 +1,4 @@
-import type { VideoCallJoin } from '@getrentos/shared';
+import type { VideoCallJoin } from '@sureground/shared';
 import { apiFetch } from './client';
 import type { Paginated } from './buyer';
 

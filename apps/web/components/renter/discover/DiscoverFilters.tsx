@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Filter, ChevronDown, ChevronUp } from 'lucide-react';
-import { Badge, Button, Checkbox, CurrencyInput, Field, Input, Select } from '@getrentos/ui';
+import { Badge, Button, Checkbox, CurrencyInput, Field, Input, Select } from '@sureground/ui';
 
 interface Filters {
   location: string;

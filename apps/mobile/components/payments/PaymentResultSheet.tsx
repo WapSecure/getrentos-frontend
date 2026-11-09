@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Share, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Badge, Button, Text, useTheme, type BadgeTone } from '@getrentos/ui-native';
+import { Badge, Button, Text, useTheme, type BadgeTone } from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import type { PaymentStatus } from '@/lib/api/paymentStatus';
 import { formatDateTime, formatNaira } from '@/lib/format';
@@ -13,7 +13,7 @@ import {
   type PaymentResult,
 } from '@/lib/paymentResult';
 
-/** What a payment was for when GetRentos has no title for it. */
+/** What a payment was for when Sureground has no title for it. */
 const FALLBACK_TITLE: Record<PaymentStatus['kind'], string> = {
   RENT: 'Rent',
   ESCROW: 'Deposit',

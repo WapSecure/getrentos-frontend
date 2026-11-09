@@ -12,7 +12,7 @@ import {
   DialogTitle,
   Field,
   Input,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 import type { RealtorOffer, OfferThreadMessage } from '@/types/realtor';
 

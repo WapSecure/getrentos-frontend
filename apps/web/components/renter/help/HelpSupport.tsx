@@ -2,7 +2,7 @@
 
 import { MessageCircle, Mail, Clock, ArrowRight, LifeBuoy } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { Button, Card } from '@getrentos/ui';
+import { Button, Card } from '@sureground/ui';
 import { ROUTES } from '@/lib/constants/auth';
 import { SUPPORT } from '@/lib/support';
 

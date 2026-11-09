@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { PageLoadingState } from '@getrentos/ui';
+import { PageLoadingState } from '@sureground/ui';
 import { ensureValidSession } from '@/lib/apiClient';
 import { isAuthenticated } from '@/lib/constants/auth';
 import { signInThen } from '@/lib/constants/landBuyerRoutes';

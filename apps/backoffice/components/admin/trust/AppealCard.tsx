@@ -1,8 +1,8 @@
 'use client';
 
 import { Gavel, Building2, Fingerprint } from 'lucide-react';
-import { Badge, Button, Card, type BadgeVariant } from '@getrentos/ui';
-import { formatDate } from '@getrentos/shared';
+import { Badge, Button, Card, type BadgeVariant } from '@sureground/ui';
+import { formatDate } from '@sureground/shared';
 import type { TrustAppeal, TrustAppealStatus, TrustAppealTargetType } from '@/types/trust';
 
 export const APPEAL_STATUS_META: Record<

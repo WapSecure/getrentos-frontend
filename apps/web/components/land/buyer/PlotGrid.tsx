@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { SearchX } from 'lucide-react';
-import { Checkbox, EmptyState, Select } from '@getrentos/ui';
+import { Checkbox, EmptyState, Select } from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 import { LAND_PLOT_STATUS_LABELS, type LandPlot, type LandPlotStatus } from '@/types/landBuyer';
 import { PLOT_STATUS_STYLES, plotLabel } from './landSaleLogic';

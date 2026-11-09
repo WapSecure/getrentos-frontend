@@ -16,8 +16,8 @@ import {
   Textarea,
   useToast,
   PageHeader,
-} from '@getrentos/ui';
-import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { formatCurrency, formatDate, unwrap } from '@sureground/shared';
 import { useAdminUser } from '../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
 import {
@@ -46,7 +46,7 @@ const KIND_LABEL: Record<string, string> = {
  * Money the gateway confirmed, for an amount that did not match its charge.
  *
  * These used to be logged and dropped: the payer had paid and nothing on
- * GetRentos recorded it. Each one now waits here until finance refunds it or
+ * Sureground recorded it. Each one now waits here until finance refunds it or
  * applies it by hand, and records what was done.
  */
 export default function UnmatchedPaymentsPage() {

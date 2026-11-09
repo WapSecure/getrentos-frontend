@@ -19,7 +19,7 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   DEPOSIT_STATUS_LABEL,
@@ -157,7 +157,7 @@ function DepositRow({ deposit: d }: { deposit: DepositListItem }) {
         </View>
         <Text variant="caption" color="mutedForeground">
           Recorded {formatDate(d.createdAt, 'short')}
-          {d.heldByGetRentos ? ' · Held by GetRentos' : ''}
+          {d.heldBySureground ? ' · Held by Sureground' : ''}
         </Text>
       </Card>
     </PressableScale>

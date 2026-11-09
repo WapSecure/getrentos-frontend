@@ -5,7 +5,7 @@ import { SafeImage } from '@/components/shared/media/SafeImage';
 import { useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Camera, User, Mail, Phone, ShieldCheck, CheckCircle2 } from 'lucide-react';
-import { Badge, Button, Field, IconButton, Input, SaveButton, Textarea } from '@getrentos/ui';
+import { Badge, Button, Field, IconButton, Input, SaveButton, Textarea } from '@sureground/ui';
 import { OTPModal } from '@/components/auth/OTPModal';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';

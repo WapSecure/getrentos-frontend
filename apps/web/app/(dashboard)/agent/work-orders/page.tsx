@@ -19,7 +19,7 @@ import {
   useToast,
   type BadgeVariant,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { agentService, type AgentWorkOrder } from '@/services/agentService';
 

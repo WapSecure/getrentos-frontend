@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Button, Dialog, DialogContent, DialogTitle, Field, Input } from '@getrentos/ui';
+import { Button, Dialog, DialogContent, DialogTitle, Field, Input } from '@sureground/ui';
 
 interface InviteGatemanModalProps {
   isOpen: boolean;
@@ -35,7 +35,7 @@ export const InviteGatemanModal = ({
             label="Platform account email"
             required
             error={error || undefined}
-            hint="They must already have a GetRentos account with this email."
+            hint="They must already have a Sureground account with this email."
           >
             <Input
               type="email"

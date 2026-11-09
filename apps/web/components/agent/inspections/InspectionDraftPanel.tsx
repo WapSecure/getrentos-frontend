@@ -2,7 +2,7 @@
 
 import { useMutation } from '@tanstack/react-query';
 import { Sparkles } from 'lucide-react';
-import { Badge, Button, Card, type BadgeVariant } from '@getrentos/ui';
+import { Badge, Button, Card, type BadgeVariant } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { agentService } from '@/services/agentService';
 import type { InspectionRoomEntry, InspectionType } from '@/types/agent';
@@ -90,7 +90,7 @@ export function InspectionDraftPanel({
         {!taskId
           ? 'Choose a task and add photos to your rooms first.'
           : photoCount === 0
-            ? 'Add photos to your rooms first. GetRentos suggests a condition and notes for each room you can edit.'
+            ? 'Add photos to your rooms first. Sureground suggests a condition and notes for each room you can edit.'
             : type === 'move_out'
               ? 'Suggests each room’s condition and notes, and compares with the move-in report.'
               : 'Suggests each room’s condition and notes from your photos. You can edit everything.'}

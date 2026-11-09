@@ -12,7 +12,7 @@ export interface CreditRefundRow {
 const WHO: Record<CreditRefundRow['requestedAs'], string> = {
   TENANT: 'by the tenant',
   MANAGER: 'by the landlord',
-  ADMIN: 'by GetRentos',
+  ADMIN: 'by Sureground',
 };
 
 /** Lease credit paid back: what went back, and what returned to credit if the gateway refused. */
@@ -36,7 +36,7 @@ export function CreditRefundHistory({ refunds }: { refunds?: CreditRefundRow[] }
           {(r.status === 'FAILED' || r.status === 'PARTLY_REFUNDED') && (
             <p className="text-warning">
               {formatCurrency(r.amount - r.refundedAmount)} could not be refunded and is back as
-              credit. GetRentos finance sees failed refunds and follows up.
+              credit. Sureground finance sees failed refunds and follows up.
             </p>
           )}
         </li>

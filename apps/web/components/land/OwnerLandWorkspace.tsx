@@ -14,7 +14,7 @@ import {
   type ToastVariant,
   useToast,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import {
   ArrowRight,
   FileSearch,

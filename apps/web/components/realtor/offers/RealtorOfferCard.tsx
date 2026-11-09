@@ -1,7 +1,7 @@
 'use client';
 
 import { Clock, RefreshCcw, CheckCircle2, XCircle, Archive, Undo2, Hourglass } from 'lucide-react';
-import { Badge, Card, type BadgeVariant } from '@getrentos/ui';
+import { Badge, Card, type BadgeVariant } from '@sureground/ui';
 import { formatCurrency, formatDate, formatAskingDifference } from '@/lib/format';
 import type { RealtorOffer, RealtorOfferStatus } from '@/types/realtor';
 

@@ -4,7 +4,15 @@ import { useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CalendarClock, Check, RotateCcw } from 'lucide-react-native';
-import { Button, Card, QueryState, Skeleton, Text, useTheme, useToast } from '@getrentos/ui-native';
+import {
+  Button,
+  Card,
+  QueryState,
+  Skeleton,
+  Text,
+  useTheme,
+  useToast,
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   LEAD_STAGES,

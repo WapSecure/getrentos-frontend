@@ -88,18 +88,20 @@ export const estateMarketplaceService = {
 
   /**
    * Find a property to bring in. Estate staff know their addresses but cannot
-   * guess a GetRentos property id, so this is what makes the attach flow usable.
+   * guess a Sureground property id, so this is what makes the attach flow usable.
    */
   listPropertyCandidates(
     estateId: string,
-    search?: string,
+    search?: string
   ): Promise<ApiResponse<EstatePropertyCandidate[]>> {
-    return safeCall(() => authFetch(`/estates/${estateId}/property-candidates${query({ search })}`));
+    return safeCall(() =>
+      authFetch(`/estates/${estateId}/property-candidates${query({ search })}`)
+    );
   },
 
   listAgreements(
     estateId: string,
-    filters: { status?: string } = {},
+    filters: { status?: string } = {}
   ): Promise<ApiResponse<EstateAgreement[]>> {
     return safeCall(() => authFetch(`/estates/${estateId}/agreements${query(filters)}`));
   },
@@ -110,7 +112,13 @@ export const estateMarketplaceService = {
    */
   listLeads(
     estateId: string,
-    filters: { market?: EstateLeadMarket; stage?: string; search?: string; page?: number; pageSize?: number } = {},
+    filters: {
+      market?: EstateLeadMarket;
+      stage?: string;
+      search?: string;
+      page?: number;
+      pageSize?: number;
+    } = {}
   ): Promise<ApiResponse<Paginated<EstateLead>>> {
     return safeCall(() => authFetch(`/estates/${estateId}/leads${query(filters)}`));
   },
@@ -118,19 +126,22 @@ export const estateMarketplaceService = {
   /** Brings the property into the estate and asks its owner for marketing rights. */
   requestAgreement(
     estateId: string,
-    input: { propertyId: string; note?: string },
+    input: { propertyId: string; note?: string }
   ): Promise<ApiResponse<EstateAgreement>> {
     return safeCall(() =>
       authFetch(`/estates/${estateId}/agreements`, {
         method: 'POST',
         body: JSON.stringify(input),
-      }),
+      })
     );
   },
 
-  detachProperty(estateId: string, propertyId: string): Promise<ApiResponse<{ detached: boolean }>> {
+  detachProperty(
+    estateId: string,
+    propertyId: string
+  ): Promise<ApiResponse<{ detached: boolean }>> {
     return safeCall(() =>
-      authFetch(`/estates/${estateId}/properties/${propertyId}`, { method: 'DELETE' }),
+      authFetch(`/estates/${estateId}/properties/${propertyId}`, { method: 'DELETE' })
     );
   },
 
@@ -145,7 +156,7 @@ export const estateMarketplaceService = {
   addListingMedia(
     estateId: string,
     listingId: string,
-    files: File[],
+    files: File[]
   ): Promise<ApiResponse<EstateListing>> {
     const formData = new FormData();
     files.forEach((file) => formData.append('files', file));
@@ -153,7 +164,7 @@ export const estateMarketplaceService = {
       authFetch(`/estates/${estateId}/listings/${listingId}/media`, {
         method: 'POST',
         body: formData,
-      }),
+      })
     );
   },
 
@@ -161,32 +172,37 @@ export const estateMarketplaceService = {
   removeListingMedia(
     estateId: string,
     listingId: string,
-    key: string,
+    key: string
   ): Promise<ApiResponse<EstateListing>> {
     return safeCall(() =>
       authFetch(`/estates/${estateId}/listings/${listingId}/media`, {
         method: 'DELETE',
         body: JSON.stringify({ key }),
-      }),
+      })
     );
   },
 
   listListings(
     estateId: string,
-    filters: { listingType?: EstateListingType; status?: string; page?: number; pageSize?: number } = {},
+    filters: {
+      listingType?: EstateListingType;
+      status?: string;
+      page?: number;
+      pageSize?: number;
+    } = {}
   ): Promise<ApiResponse<Paginated<EstateListing>>> {
     return safeCall(() => authFetch(`/estates/${estateId}/listings${query(filters)}`));
   },
 
   createListing(
     estateId: string,
-    input: CreateEstateListingInput,
+    input: CreateEstateListingInput
   ): Promise<ApiResponse<EstateListing>> {
     return safeCall(() =>
       authFetch(`/estates/${estateId}/listings`, {
         method: 'POST',
         body: JSON.stringify(input),
-      }),
+      })
     );
   },
 
@@ -194,26 +210,26 @@ export const estateMarketplaceService = {
   updateListing(
     estateId: string,
     listingId: string,
-    changes: { listingTitle?: string; price?: number; availableFrom?: string },
+    changes: { listingTitle?: string; price?: number; availableFrom?: string }
   ): Promise<ApiResponse<EstateListing>> {
     return safeCall(() =>
       authFetch(`/estates/${estateId}/listings/${listingId}`, {
         method: 'PATCH',
         body: JSON.stringify(changes),
-      }),
+      })
     );
   },
 
   setListingStatus(
     estateId: string,
     listingId: string,
-    status: 'PUBLISHED' | 'PAUSED' | 'CLOSED',
+    status: 'PUBLISHED' | 'PAUSED' | 'CLOSED'
   ): Promise<ApiResponse<EstateListing>> {
     return safeCall(() =>
       authFetch(`/estates/${estateId}/listings/${listingId}/status`, {
         method: 'PATCH',
         body: JSON.stringify({ status }),
-      }),
+      })
     );
   },
 
@@ -223,7 +239,7 @@ export const estateMarketplaceService = {
       authFetch(`/estates/${estateId}/listings/bulk-publish`, {
         method: 'POST',
         body: JSON.stringify({ listingIds }),
-      }),
+      })
     );
   },
 };
@@ -236,13 +252,13 @@ export const estateAgreementService = {
 
   approve(
     id: string,
-    input: { note?: string; expiresInDays?: number } = {},
+    input: { note?: string; expiresInDays?: number } = {}
   ): Promise<ApiResponse<EstateAgreement>> {
     return safeCall(() =>
       authFetch(`/estate-agreements/${id}/approve`, {
         method: 'POST',
         body: JSON.stringify(input),
-      }),
+      })
     );
   },
 
@@ -251,7 +267,7 @@ export const estateAgreementService = {
       authFetch(`/estate-agreements/${id}/decline`, {
         method: 'POST',
         body: JSON.stringify({ reason }),
-      }),
+      })
     );
   },
 
@@ -260,7 +276,7 @@ export const estateAgreementService = {
       authFetch(`/estate-agreements/${id}/revoke`, {
         method: 'POST',
         body: JSON.stringify({ reason }),
-      }),
+      })
     );
   },
 };
@@ -268,7 +284,13 @@ export const estateAgreementService = {
 /** Public storefront reads — no account needed, since a storefront is a share target. */
 export const estateStorefrontService = {
   directory(
-    filters: { search?: string; city?: string; state?: string; page?: number; pageSize?: number } = {},
+    filters: {
+      search?: string;
+      city?: string;
+      state?: string;
+      page?: number;
+      pageSize?: number;
+    } = {}
   ): Promise<ApiResponse<Paginated<EstateDirectoryEntry>>> {
     return safeCall(() => authFetch(`/estate-storefronts${query(filters)}`));
   },
@@ -280,7 +302,7 @@ export const estateStorefrontService = {
 
   listListings(
     slug: string,
-    filters: StorefrontListingFilters = {},
+    filters: StorefrontListingFilters = {}
   ): Promise<ApiResponse<Paginated<EstateStorefrontListing>>> {
     return safeCall(() => authFetch(`/estate-storefronts/${slug}/listings${query(filters)}`));
   },

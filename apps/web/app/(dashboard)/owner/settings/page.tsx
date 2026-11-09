@@ -10,7 +10,7 @@ import { SellerPayoutSettings } from '@/components/shared/payouts/SellerPayoutSe
 import { PreferencesSettings } from '@/components/owner/settings/PreferencesSettings';
 import { DataExport } from '@/components/shared/settings/DataExport';
 import { SecuritySettings } from '@/components/shared/security/SecuritySettings';
-import { PageHeader } from '@getrentos/ui';
+import { PageHeader } from '@sureground/ui';
 
 type SettingsTab = 'profile' | 'notifications' | 'payouts' | 'preferences' | 'security' | 'data';
 
@@ -39,7 +39,7 @@ export default function OwnerSettingsPage() {
         return <NotificationSettings />;
       case 'payouts':
         return (
-          <SellerPayoutSettings description="Where your marketplace sale money is sent once GetRentos pays it out to you: transfers run through Paystack." />
+          <SellerPayoutSettings description="Where your marketplace sale money is sent once Sureground pays it out to you: transfers run through Paystack." />
         );
       case 'preferences':
         return <PreferencesSettings />;

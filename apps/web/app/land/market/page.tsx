@@ -1,4 +1,4 @@
-import { Skeleton } from '@getrentos/ui';
+import { Skeleton } from '@sureground/ui';
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';

@@ -1,5 +1,5 @@
-import { authDownload, authFetch, safeCall, toQuery } from '@getrentos/shared';
-import type { ApiResponse } from '@getrentos/shared';
+import { authDownload, authFetch, safeCall, toQuery } from '@sureground/shared';
+import type { ApiResponse } from '@sureground/shared';
 import type { Paginated } from '@/services/adminService';
 import type {
   AdminExpense,

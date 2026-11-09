@@ -1,7 +1,7 @@
 import { emailSignupSchema, identifierSchema, phoneSignupSchema } from '@/lib/validation';
 
 describe('authentication validation', () => {
-  it.each(['tenant@getrentos.com', '+234 803 123 4567', '08031234567'])(
+  it.each(['tenant@getsureground.io', '+234 803 123 4567', '08031234567'])(
     'accepts a supported identifier: %s',
     (identifier) => {
       expect(identifierSchema.safeParse(identifier).success).toBe(true);
@@ -15,7 +15,7 @@ describe('authentication validation', () => {
   it('requires accepted terms for email signup', () => {
     const result = emailSignupSchema.safeParse({
       fullName: 'Ada Okafor',
-      email: 'ada@getrentos.com',
+      email: 'ada@getsureground.io',
       password: 'secure-password',
       confirmPassword: 'secure-password',
       acceptedTerms: false,
@@ -29,7 +29,7 @@ describe('authentication validation', () => {
   it('requires matching passwords for email signup', () => {
     const result = emailSignupSchema.safeParse({
       fullName: 'Ada Okafor',
-      email: 'ada@getrentos.com',
+      email: 'ada@getsureground.io',
       password: 'secure-password',
       confirmPassword: 'different-password',
       acceptedTerms: true,

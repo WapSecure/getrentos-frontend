@@ -13,7 +13,7 @@ import {
   Screen,
   Text,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { useCustody } from '@/lib/agency/custody';
 import {
@@ -164,7 +164,7 @@ function MandateCard({ mandate: m }: { mandate: Mandate }) {
       {m.status === 'PENDING_OPS' ? (
         <FormAlert
           tone="info"
-          message="Both sides have signed. A GetRentos officer still has to verify it before you can act."
+          message="Both sides have signed. A Sureground officer still has to verify it before you can act."
         />
       ) : null}
       <MandateActions mandate={m} />

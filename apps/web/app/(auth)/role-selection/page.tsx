@@ -6,7 +6,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { RoleCard } from '@/components/auth/RoleSelection/RoleCard';
 import { MultiRoleToggle } from '@/components/auth/RoleSelection/MultiRoleToggle';
 import { Logo } from '@/components/ui/Logo';
-import { Button, ThemeToggle } from '@getrentos/ui';
+import { Button, ThemeToggle } from '@sureground/ui';
 import { useSignup } from '@/hooks/useSignup';
 import { ROLES } from '@/lib/constants/auth';
 
@@ -90,7 +90,7 @@ export default function RoleSelectionPage() {
             </div>
             <h1 className="text-3xl font-bold text-foreground mb-2">Choose your role(s)</h1>
             <p className="text-lg text-muted-foreground">
-              Select how you&apos;ll use GetRentos to get a personalized experience
+              Select how you&apos;ll use Sureground to get a personalized experience
             </p>
             <p className="text-sm text-muted-foreground mt-2">
               You can add more roles later with supporting documents

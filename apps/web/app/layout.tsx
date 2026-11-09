@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from 'next';
 import { headers } from 'next/headers';
 import { Manrope } from 'next/font/google';
-import { ThemeProvider } from '@getrentos/ui/providers/ThemeProvider';
-import { QueryProvider } from '@getrentos/ui/providers/QueryProvider';
+import { ThemeProvider } from '@sureground/ui/providers/ThemeProvider';
+import { QueryProvider } from '@sureground/ui/providers/QueryProvider';
 import { LanguageProvider } from '@/lib/i18n/LanguageContext';
 import { StepUpDialog } from '@/components/shared/security/StepUpDialog';
 import {
@@ -14,7 +14,7 @@ import {
 } from '@/lib/site';
 import './globals.css';
 
-// Self-hosted at build time; @getrentos/ui reads --font-manrope into --font-ui.
+// Self-hosted at build time; @sureground/ui reads --font-manrope into --font-ui.
 const manrope = Manrope({ subsets: ['latin'], display: 'swap', variable: '--font-manrope' });
 
 export const metadata: Metadata = {

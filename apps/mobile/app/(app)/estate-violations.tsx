@@ -11,7 +11,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { HouseholdPicker } from '@/components/estate/HouseholdPicker';
 import { CloseSheet, QueueCard, QueueScreen, type QueueView } from '@/components/estate/Triage';
 import { Sheet } from '@/components/Sheet';

@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { Sparkles } from 'lucide-react';
-import { Badge, Skeleton, type BadgeVariant } from '@getrentos/ui';
+import { Badge, Skeleton, type BadgeVariant } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { renterService } from '@/services/renterService';

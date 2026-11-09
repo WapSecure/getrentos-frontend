@@ -23,11 +23,11 @@ export function PayoutHoldNotice({ holdUntil }: { holdUntil?: string | null }) {
           minute: '2-digit',
           hour12: true,
         })}
-        . If you didn’t make this change, contact GetRentos support now.
+        . If you didn’t make this change, contact Sureground support now.
       </span>
     </p>
   );
 }
 
 /** One line telling people, before they save, what a change does (same words on mobile). */
-export { PAYOUT_CHANGE_COOLDOWN_HINT } from '@getrentos/shared';
+export { PAYOUT_CHANGE_COOLDOWN_HINT } from '@sureground/shared';

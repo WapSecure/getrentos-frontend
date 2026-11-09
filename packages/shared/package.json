@@ -1,5 +1,5 @@
 {
-  "name": "@getrentos/shared",
+  "name": "@sureground/shared",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -47,8 +47,8 @@
     "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
-    "@getrentos/eslint-config": "workspace:*",
-    "@getrentos/typescript-config": "workspace:*",
+    "@sureground/eslint-config": "workspace:*",
+    "@sureground/typescript-config": "workspace:*",
     "@types/node": "^22.19.20",
     "date-fns": "^3.6.0",
     "typescript": "^5.4.5",

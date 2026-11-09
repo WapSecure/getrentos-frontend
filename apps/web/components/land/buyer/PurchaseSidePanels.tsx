@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Button, ConfirmDialog } from '@getrentos/ui';
+import { Button, ConfirmDialog } from '@sureground/ui';
 import { CreditCard, Download, FileText, XCircle } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { landBuyerService } from '@/services/landBuyerService';

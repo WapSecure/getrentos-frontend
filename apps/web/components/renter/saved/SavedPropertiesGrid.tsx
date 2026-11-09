@@ -2,7 +2,7 @@
 
 import { Heart, ArrowUpDown } from 'lucide-react';
 import { SavedPropertyCard } from './SavedPropertyCard';
-import { Button, EmptyState } from '@getrentos/ui';
+import { Button, EmptyState } from '@sureground/ui';
 import { ROUTES } from '@/lib/constants/auth';
 import { type SavedListingItem, type Wishlist } from '@/services/renterService';
 

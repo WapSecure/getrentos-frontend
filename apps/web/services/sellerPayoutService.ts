@@ -1,5 +1,5 @@
 import { authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
-import type { PayoutSentTo } from '@getrentos/shared';
+import type { PayoutSentTo } from '@sureground/shared';
 
 /**
  * Sale-proceeds payouts for anyone who sells on the marketplace — Property

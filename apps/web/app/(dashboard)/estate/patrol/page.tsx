@@ -3,7 +3,7 @@
 import { RedirectToEstateSetup } from '@/components/estate/shared/RedirectToEstateSetup';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { tierAtLeast } from '@getrentos/shared';
+import { tierAtLeast } from '@sureground/shared';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -12,7 +12,7 @@ import { EstateFeatureGate } from '@/components/estate/shared/EstateFeatureGate'
 import { CheckpointRegister } from '@/components/estate/patrol/CheckpointRegister';
 import { RoutePlanner } from '@/components/estate/patrol/RoutePlanner';
 import { RoundReport } from '@/components/estate/patrol/RoundReport';
-import { CardSkeleton, Tabs, TabsContent, TabsList, TabsTrigger, PageHeader } from '@getrentos/ui';
+import { CardSkeleton, Tabs, TabsContent, TabsList, TabsTrigger, PageHeader } from '@sureground/ui';
 
 const TABS = [
   { value: 'report', label: 'Did it happen' },

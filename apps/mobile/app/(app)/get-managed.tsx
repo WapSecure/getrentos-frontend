@@ -18,7 +18,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   END_REASON_MIN,
@@ -53,7 +53,7 @@ import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
 /**
- * Get a property managed: by GetRentos (request, site visit, proposal you
+ * Get a property managed: by Sureground (request, site visit, proposal you
  * accept) or by a vetted firm you appoint. Each property shows where it stands.
  */
 export default function GetManaged() {
@@ -89,7 +89,7 @@ export default function GetManaged() {
       <DetailScreenHeader
         eyebrow="Management"
         title="Get it managed"
-        subtitle="By GetRentos, or a vetted firm you choose"
+        subtitle="By Sureground, or a vetted firm you choose"
         onBack={() => goBack()}
       />
       <ScrollView
@@ -110,7 +110,7 @@ export default function GetManaged() {
         }
       >
         <Text variant="callout" color="mutedForeground">
-          Either way, GetRentos holds the money and keeps the record, so the property’s history
+          Either way, Sureground holds the money and keeps the record, so the property’s history
           stays with you.
         </Text>
         <PressableScale
@@ -122,7 +122,7 @@ export default function GetManaged() {
           </Text>
         </PressableScale>
 
-        <SectionTitle icon={Sparkles} title="Let GetRentos manage it" />
+        <SectionTitle icon={Sparkles} title="Let Sureground manage it" />
         <Text variant="callout" color="mutedForeground">
           One published fee card, a service commitment you can hold us to, and a portfolio manager.
           Ask below: we visit, then send a proposal to accept.
@@ -160,7 +160,7 @@ export default function GetManaged() {
 
         <SectionTitle icon={Briefcase} title="Vetted firms" />
         <Text variant="callout" color="mutedForeground">
-          Independent agencies on GetRentos, ranked by how they handle maintenance, then how much
+          Independent agencies on Sureground, ranked by how they handle maintenance, then how much
           they run. Appoint one and it goes to them to accept, then to our team to verify.
         </Text>
         {firms.isLoading ? (
@@ -184,7 +184,7 @@ export default function GetManaged() {
           <>
             <SectionTitle icon={Clock} title="Our service commitment" />
             <Text variant="callout" color="mutedForeground">
-              Every GetRentos-managed property follows the same targets for maintenance, by how
+              Every Sureground-managed property follows the same targets for maintenance, by how
               urgent the issue is.
             </Text>
             <Card padding="none">
@@ -218,7 +218,7 @@ export default function GetManaged() {
       <Sheet
         open={!!requestFor}
         onClose={() => setRequestFor(null)}
-        title={`Ask GetRentos to manage ${requestFor?.name ?? ''}`}
+        title={`Ask Sureground to manage ${requestFor?.name ?? ''}`}
       >
         {requestFor ? (
           <IntakeForm
@@ -344,12 +344,12 @@ function PropertyRow({
 
   const mandate = 'mandate' in state ? state.mandate : null;
   const notice = mandate?.noticeServedAt
-    ? `${mandate.managerIsGetRentos ? 'GetRentos' : (mandate.managerOrganizationName ?? 'Your manager')} served notice on ${formatDate(mandate.noticeServedAt)}; management ends ${formatDate(noticeEndsAt(mandate)!)}.`
+    ? `${mandate.managerIsSureground ? 'Sureground' : (mandate.managerOrganizationName ?? 'Your manager')} served notice on ${formatDate(mandate.noticeServedAt)}; management ends ${formatDate(noticeEndsAt(mandate)!)}.`
     : null;
   const intake =
     state.kind === 'requested'
       ? state.intake
-      : state.kind === 'getrentos'
+      : state.kind === 'sureground'
         ? state.settingUp
         : state.kind === 'firm'
           ? state.openIntake
@@ -364,14 +364,14 @@ function PropertyRow({
         </Text>
       </View>
 
-      {state.kind === 'getrentos' ? (
+      {state.kind === 'sureground' ? (
         <>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }}>
             {state.mandate.servicingTier ? (
               <Badge label={TIER_LABEL[state.mandate.servicingTier]} tone="neutral" />
             ) : null}
             {state.settingUp ? (
-              <Badge label="Being set up by GetRentos" tone="info" />
+              <Badge label="Being set up by Sureground" tone="info" />
             ) : (
               <Badge
                 label={MANDATE_STATUS[state.mandate.status].label}
@@ -422,18 +422,18 @@ function PropertyRow({
 
       {state.kind === 'none' && state.declined ? (
         <Text variant="caption" color="mutedForeground">
-          GetRentos declined your last request: {state.declined.declinedReason}
+          Sureground declined your last request: {state.declined.declinedReason}
         </Text>
       ) : null}
 
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
         {state.kind === 'none' ? (
-          <Button label="Ask GetRentos to manage" size="sm" onPress={onRequest} />
+          <Button label="Ask Sureground to manage" size="sm" onPress={onRequest} />
         ) : null}
         {state.kind === 'firm' && state.mandate.status === 'ACTIVE' && !state.openIntake ? (
-          <Button label="Move to GetRentos" size="sm" variant="secondary" onPress={onRequest} />
+          <Button label="Move to Sureground" size="sm" variant="secondary" onPress={onRequest} />
         ) : null}
-        {mandate && (state.kind === 'getrentos' || state.kind === 'firm') ? (
+        {mandate && (state.kind === 'sureground' || state.kind === 'firm') ? (
           <Button
             label={isPendingMandate(mandate) ? 'Cancel request' : 'End management'}
             size="sm"
@@ -478,7 +478,7 @@ function IntakePanel({ intake, onChanged }: { intake: ManagedIntake; onChanged: 
   const accept = useMutation({
     mutationFn: () => managedApi.acceptProposal(intake.id),
     onSuccess: () => {
-      toast.show('Accepted. GetRentos takes it from here.', 'success');
+      toast.show('Accepted. Sureground takes it from here.', 'success');
       onChanged();
     },
     onError: (e) => toast.show(errorMessage(e, 'Could not accept the proposal.'), 'error'),
@@ -521,7 +521,7 @@ function IntakePanel({ intake, onChanged }: { intake: ManagedIntake; onChanged: 
 
       {intake.status === 'SUBMITTED' ? (
         <Text variant="callout" color="mutedForeground">
-          We have your request. Next, GetRentos books a site visit. Indicative fee{' '}
+          We have your request. Next, Sureground books a site visit. Indicative fee{' '}
           {intake.indicativeFeePct}% of rent collected
           {intake.indicativeMonthlyFee !== null
             ? ` (about ${formatNaira(intake.indicativeMonthlyFee)} a month)`
@@ -530,7 +530,7 @@ function IntakePanel({ intake, onChanged }: { intake: ManagedIntake; onChanged: 
         </Text>
       ) : intake.status === 'ASSESSMENT_SCHEDULED' && intake.assessmentScheduledFor ? (
         <Text variant="callout" color="mutedForeground">
-          {intake.assessorName ?? 'A GetRentos assessor'} visits on{' '}
+          {intake.assessorName ?? 'A Sureground assessor'} visits on{' '}
           {formatDateTime(intake.assessmentScheduledFor)}.
         </Text>
       ) : intake.status === 'ASSESSED' ? (
@@ -539,7 +539,7 @@ function IntakePanel({ intake, onChanged }: { intake: ManagedIntake; onChanged: 
         </Text>
       ) : intake.status === 'ACCEPTED' ? (
         <Text variant="callout" color="mutedForeground">
-          You accepted on {formatDate(intake.acceptedAt ?? intake.createdAt)}. GetRentos assigns
+          You accepted on {formatDate(intake.acceptedAt ?? intake.createdAt)}. Sureground assigns
           your portfolio manager and takes over once the opening balances are confirmed.
         </Text>
       ) : null}
@@ -583,14 +583,14 @@ function IntakePanel({ intake, onChanged }: { intake: ManagedIntake; onChanged: 
           {intake.proposalExpired ? (
             <FormAlert
               tone="warning"
-              message="This proposal has lapsed. Contact GetRentos for a fresh one."
+              message="This proposal has lapsed. Contact Sureground for a fresh one."
             />
           ) : (
             <>
               <Checkbox
                 checked={agree}
                 onChange={setAgree}
-                label="I agree to GetRentos managing this property on these terms. Accepting signs the management agreement."
+                label="I agree to Sureground managing this property on these terms. Accepting signs the management agreement."
               />
               <Button
                 label="Accept and sign"
@@ -657,7 +657,7 @@ function IntakeForm({
         ...(notes.trim() ? { ownerNotes: notes.trim() } : {}),
       }),
     onSuccess: () => {
-      toast.show('Request sent. GetRentos books a site visit next.', 'success');
+      toast.show('Request sent. Sureground books a site visit next.', 'success');
       onDone();
     },
     onError: (e) => toast.show(errorMessage(e, 'Could not send your request.'), 'error'),
@@ -760,7 +760,7 @@ function EndForm({ mandate, onDone }: { mandate: Mandate; onDone: () => void }) 
   const breakFee = useQuery({
     queryKey: qk.managed.breakFee(mandate.id),
     queryFn: () => managedApi.breakFee(mandate.id),
-    enabled: !pending && mandate.managerIsGetRentos,
+    enabled: !pending && mandate.managerIsSureground,
     retry: false,
   });
   const end = useMutation({
@@ -778,7 +778,7 @@ function EndForm({ mandate, onDone }: { mandate: Mandate; onDone: () => void }) 
       <Text variant="callout" color="mutedForeground">
         {pending
           ? 'Withdraw this request. Nothing has started, so there is nothing to settle.'
-          : 'The manager’s access stops immediately. GetRentos then prepares your final statement with rent collected to date, fees and any break fee. You and the manager then exchange keys, balances and documents, and you confirm the handover here.'}
+          : 'The manager’s access stops immediately. Sureground then prepares your final statement with rent collected to date, fees and any break fee. You and the manager then exchange keys, balances and documents, and you confirm the handover here.'}
       </Text>
       {breakFee.data ? (
         <FormAlert
@@ -833,7 +833,7 @@ function FirmCard({
     onTime !== null
       ? `${onTime}% of repairs on time${f.maintenance.averageResolutionDays !== null ? ` · ~${f.maintenance.averageResolutionDays}d to resolve` : ''}`
       : 'No maintenance handled yet',
-    `On GetRentos since ${formatDate(f.since, 'short')}`,
+    `On Sureground since ${formatDate(f.since, 'short')}`,
   ];
   return (
     <Card padding={spacing.lg} style={{ gap: spacing.sm }}>
@@ -902,7 +902,7 @@ function AppointForm({
   return (
     <View style={{ gap: spacing.lg }}>
       <Text variant="callout" color="mutedForeground">
-        It goes to {firm.name} to accept, then to GetRentos to verify before anything turns on. You
+        It goes to {firm.name} to accept, then to Sureground to verify before anything turns on. You
         and the firm agree the terms.
       </Text>
       <ChipSelect

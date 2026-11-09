@@ -6,7 +6,7 @@ import { FeaturedProperty } from '@/components/sections/FeaturedProperty';
 import { Features } from '@/components/sections/Features';
 import { Roles } from '@/components/sections/Roles';
 import { HowItWorks } from '@/components/sections/HowItWorks';
-import { WhyGetRentos } from '@/components/sections/WhyGetRentos';
+import { WhySureground } from '@/components/sections/WhySureground';
 import { TrustSecurity } from '@/components/sections/TrustSecurity';
 import { CTA } from '@/components/sections/CTA';
 import { DownloadApp } from '@/components/sections/DownloadApp';
@@ -36,7 +36,7 @@ const organizationJsonLd = {
   sameAs: [],
   contactPoint: {
     '@type': 'ContactPoint',
-    email: 'support@getrentos.com',
+    email: 'support@getsureground.io',
     contactType: 'customer support',
   },
 };
@@ -61,7 +61,7 @@ export default function Home() {
       <main className="min-h-screen bg-white dark:bg-background transition-colors duration-300">
         <Navigation />
         <Hero />
-        <WhyGetRentos />
+        <WhySureground />
         <FeaturedProperty />
         <Features />
         <Roles />

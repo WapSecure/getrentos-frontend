@@ -1,12 +1,12 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
+import { LegacyInput } from '@sureground/ui';
 
 import { motion } from 'framer-motion';
 import { Camera, FileText } from 'lucide-react';
-import { Button } from '@getrentos/ui';
-import { Checkbox } from '@getrentos/ui';
-import { useToast } from '@getrentos/ui';
+import { Button } from '@sureground/ui';
+import { Checkbox } from '@sureground/ui';
+import { useToast } from '@sureground/ui';
 import { useEffect, useRef, useState } from 'react';
 import { renterService, type MoveInChecklistItem } from '@/services/renterService';
 import { printHtml, escapeHtml } from '@/lib/export';

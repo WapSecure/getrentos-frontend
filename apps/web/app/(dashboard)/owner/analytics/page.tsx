@@ -17,7 +17,7 @@ import {
   Skeleton,
   TableSkeleton,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { updateStoredUser } from '@/lib/authStorage';

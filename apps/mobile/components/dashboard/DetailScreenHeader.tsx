@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useTheme } from '@getrentos/ui-native';
+import { useTheme } from '@sureground/ui-native';
 import { DetailHeader } from './DetailHeader';
 
 type DetailScreenHeaderProps = React.ComponentProps<typeof DetailHeader>;

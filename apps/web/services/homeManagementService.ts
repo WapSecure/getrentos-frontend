@@ -254,7 +254,7 @@ export type HomeManagementInvoicePayoutStatus = 'PENDING' | 'PROCESSING' | 'PAID
 export interface HomeManagementInvoicePaymentPreview {
   invoiceId: string;
   invoiceTotal: number;
-  /** Paid from the money GetRentos holds for the owner. */
+  /** Paid from the money Sureground holds for the owner. */
   fromHeldFunds: number;
   /** The shortfall paid by card. */
   topUp: number;
@@ -804,7 +804,7 @@ export const homeManagementService = {
     ),
   /**
    * How paying an approved invoice would split, before anything is paid: what
-   * comes from the money GetRentos holds for the owner, and what a card top-up
+   * comes from the money Sureground holds for the owner, and what a card top-up
    * (with its fee, for `provider`) would cover. Whole naira. A preview: the
    * split is worked out again when the invoice is paid.
    */

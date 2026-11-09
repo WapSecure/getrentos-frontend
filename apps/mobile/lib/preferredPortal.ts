@@ -6,7 +6,7 @@ import type { Portal } from './roles';
  * owner who also rents property out, say). Per device, and cleared on sign-out
  * so the next person on the phone starts fresh.
  */
-const KEY = 'getrentos.preferredPortal';
+const KEY = 'sureground.preferredPortal';
 
 export async function readPreferredPortal(): Promise<Portal | null> {
   try {

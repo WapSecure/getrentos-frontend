@@ -51,23 +51,23 @@ export const reportService = {
 
   downloadRentRollCsv(): Promise<ApiResponse<void>> {
     return safeCall(() =>
-      download('/landlord/reports/rent-roll/export', 'getrentos-rent-roll.csv')
+      download('/landlord/reports/rent-roll/export', 'sureground-rent-roll.csv')
     );
   },
 
   downloadPnlCsv(params: { from?: string; to?: string } = {}): Promise<ApiResponse<void>> {
     return safeCall(() =>
-      download(`/landlord/reports/pnl/export${toQuery(params)}`, 'getrentos-income-expenses.csv')
+      download(`/landlord/reports/pnl/export${toQuery(params)}`, 'sureground-income-expenses.csv')
     );
   },
 
   downloadArrearsCsv(): Promise<ApiResponse<void>> {
-    return safeCall(() => download('/landlord/reports/arrears/export', 'getrentos-arrears.csv'));
+    return safeCall(() => download('/landlord/reports/arrears/export', 'sureground-arrears.csv'));
   },
 
   downloadStatementsCsv(): Promise<ApiResponse<void>> {
     return safeCall(() =>
-      download('/landlord/reports/statements/export', 'getrentos-statements.csv')
+      download('/landlord/reports/statements/export', 'sureground-statements.csv')
     );
   },
 };

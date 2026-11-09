@@ -11,7 +11,7 @@ const STARTERS = [
   'How does payment protection work?',
 ];
 
-/** Ask GetRentos for renters: rent, lease, applications, viewings and repairs. */
+/** Ask Sureground for renters: rent, lease, applications, viewings and repairs. */
 export const RenterAssistant = () => (
   <AssistantChat
     ask={(question, history, language) =>

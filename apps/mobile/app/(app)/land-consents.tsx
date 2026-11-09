@@ -15,14 +15,14 @@ import {
   useTheme,
   useToast,
   type BadgeTone,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import {
   LAND_CONSENT_LABELS,
   LAND_SELLER_CAPACITY_LABELS,
   LAND_SIGNATORY_ROLE_LABELS,
   type LandConsentRequest,
   type LandSignatoryConsent,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import { qk } from '@/lib/query/keys';
 import { landConsentsApi, MIN_OBJECTION } from '@/lib/api/landConsents';
 import { ApiError, errorMessage } from '@/lib/api/client';
@@ -71,7 +71,7 @@ export default function LandConsents() {
         <Card style={{ flexDirection: 'row', gap: spacing.sm, backgroundColor: colors.secondary }}>
           <ShieldCheck size={18} color={colors.primary} />
           <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
-            Consent only if you agree to the sale. If you object, the sale is paused and GetRentos
+            Consent only if you agree to the sale. If you object, the sale is paused and Sureground
             looks into it.
           </Text>
         </Card>
@@ -166,7 +166,7 @@ function ObjectionForm({ item, onDone }: { item: LandConsentRequest; onDone: () 
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: qk.landConsents });
       toast.show(
-        'Objection recorded. The sale is paused while GetRentos looks into it.',
+        'Objection recorded. The sale is paused while Sureground looks into it.',
         'success'
       );
       onDone();
@@ -177,8 +177,8 @@ function ObjectionForm({ item, onDone }: { item: LandConsentRequest; onDone: () 
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <View style={{ gap: spacing.md }}>
         <Text variant="callout" color="mutedForeground">
-          {item.seller} and GetRentos will see your reason. The sale of {item.property.title} is
-          paused until GetRentos resolves it.
+          {item.seller} and Sureground will see your reason. The sale of {item.property.title} is
+          paused until Sureground resolves it.
         </Text>
         <TextField
           label="Why you object"

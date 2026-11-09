@@ -2,8 +2,8 @@
 
 import { motion } from 'framer-motion';
 import { Gavel, Clock, Search, CheckCircle2, ArrowUpCircle } from 'lucide-react';
-import { Badge, type BadgeVariant } from '@getrentos/ui';
-import { formatCurrency, formatDate } from '@getrentos/shared';
+import { Badge, type BadgeVariant } from '@sureground/ui';
+import { formatCurrency, formatDate } from '@sureground/shared';
 import type { Dispute, DisputeStatus } from '@/types/admin';
 
 const statusConfig: Record<

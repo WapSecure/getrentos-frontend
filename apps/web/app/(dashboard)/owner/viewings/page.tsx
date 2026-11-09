@@ -17,7 +17,7 @@ import {
   ListSkeleton,
   Skeleton,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { ownerService, type OwnerViewing } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { ownerKeys } from '@/lib/queryKeys';

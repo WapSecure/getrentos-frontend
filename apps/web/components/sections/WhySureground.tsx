@@ -21,7 +21,7 @@ const reasons = [
   },
   {
     icon: Lock,
-    title: 'GetRentos holds the money',
+    title: 'Sureground holds the money',
     description:
       'Rent is released to the landlord on schedule. A sale deposit only reaches the seller once the buyer confirms receipt. A dispute keeps either one held.',
   },
@@ -33,11 +33,11 @@ const reasons = [
   },
 ];
 
-export const WhyGetRentos = () => (
+export const WhySureground = () => (
   <section className="bg-muted/50 px-4 py-20 dark:bg-background">
     <div className="mx-auto max-w-7xl">
       <SectionHeading
-        badge="WHY GETRENTOS"
+        badge="WHY SUREGROUND"
         title="Built for how property works here"
         description="A platform designed around the way renting, buying and managing property actually happens."
       />

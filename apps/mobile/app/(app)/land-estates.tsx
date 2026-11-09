@@ -14,7 +14,7 @@ import {
   Text,
   TextField,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { landBuyerApi, type EstateSummary } from '@/lib/api/landBuyer';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';

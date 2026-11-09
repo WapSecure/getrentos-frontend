@@ -4,11 +4,11 @@ import { useEffect, useId, useRef, useState } from 'react';
 import Link from 'next/link';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Search } from 'lucide-react';
-import { Button, Input, Skeleton, ToggleChip } from '@getrentos/ui';
-import { unwrap } from '@getrentos/shared';
+import { Button, Input, Skeleton, ToggleChip } from '@sureground/ui';
+import { unwrap } from '@sureground/shared';
 import { adminSearchService, type AdminSearchType } from '@/services/adminSearchService';
 
-const RECENT_KEY = 'getrentos-admin-recent-searches';
+const RECENT_KEY = 'sureground-admin-recent-searches';
 const typeLabel = (type: string) =>
   type.replace(/-/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
 

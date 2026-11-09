@@ -1,7 +1,7 @@
 'use client';
 
 import { ImageIcon } from 'lucide-react';
-import { Badge, Button } from '@getrentos/ui';
+import { Badge, Button } from '@sureground/ui';
 import type { Incident } from '@/types/estate';
 
 const statusVariant: Record<Incident['status'], 'warning' | 'info' | 'success' | 'neutral'> = {

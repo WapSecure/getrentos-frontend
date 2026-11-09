@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, View } from 'react-native';
-import { Button, Text, TextField, useTheme } from '@getrentos/ui-native';
+import { Button, Text, TextField, useTheme } from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 
 /** Ask for a short written reason before a rejection, void or cancellation (both platforms). */

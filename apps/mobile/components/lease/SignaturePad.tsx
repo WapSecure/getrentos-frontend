@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { PanResponder, View, type GestureResponderEvent } from 'react-native';
 import Svg, { Path, Rect } from 'react-native-svg';
-import { LinkButton, Text, useTheme } from '@getrentos/ui-native';
+import { LinkButton, Text, useTheme } from '@sureground/ui-native';
 
 const PAD_HEIGHT = 180;
 

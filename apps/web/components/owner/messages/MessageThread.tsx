@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Alert, Button, Input } from '@getrentos/ui';
+import { Alert, Button, Input } from '@sureground/ui';
 import { Send, MessageCircle, Check, CheckCheck } from 'lucide-react';
 import { getInitials } from '@/lib/format';
 import { format } from 'date-fns';

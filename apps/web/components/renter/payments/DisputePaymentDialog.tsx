@@ -9,7 +9,7 @@ import {
   DialogTitle,
   Field,
   Textarea,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 
 interface DisputePaymentDialogProps {
   open: boolean;

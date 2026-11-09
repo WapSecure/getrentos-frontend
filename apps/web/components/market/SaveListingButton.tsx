@@ -1,10 +1,10 @@
 'use client';
 
-import { IconButton } from '@getrentos/ui';
+import { IconButton } from '@sureground/ui';
 import { Heart } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useMarketSaved } from '@/hooks/useMarketSaved';
-import { cn } from '@getrentos/shared';
+import { cn } from '@sureground/shared';
 
 export function SaveListingButton({
   listingId,

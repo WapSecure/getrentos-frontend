@@ -17,7 +17,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { agentApi, type AgentWorkOrder, type AgentWorkOrderStatus } from '@/lib/api/agent';
 import { errorMessage } from '@/lib/api/client';

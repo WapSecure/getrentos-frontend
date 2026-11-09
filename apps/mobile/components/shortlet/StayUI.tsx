@@ -11,7 +11,7 @@ import {
   Zap,
   type LucideIcon,
 } from 'lucide-react-native';
-import { Card, Divider, Price, Text, useTheme } from '@getrentos/ui-native';
+import { Card, Divider, Price, Text, useTheme } from '@sureground/ui-native';
 import type { ShortletAvailability, ShortletListing } from '@/lib/api/shortlets';
 import {
   GUEST_PROMISE_TEXT,
@@ -235,7 +235,7 @@ export function PriceBreakdown({
       <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: spacing.xs }}>
         <Lock size={14} color={colors.success} style={{ marginTop: 2 }} />
         <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
-          GetRentos Payment Protection. {PAYMENT_PROTECTION_TEXT}
+          Sureground Payment Protection. {PAYMENT_PROTECTION_TEXT}
         </Text>
       </View>
     </View>
@@ -269,7 +269,7 @@ export function GuestPromiseCard({ children }: { children?: ReactNode }) {
           <ShieldCheck size={18} color={colors.success} />
         </View>
         <Text variant="subheading" style={{ flex: 1 }}>
-          GetRentos Guest Promise
+          Sureground Guest Promise
         </Text>
       </View>
       <Text variant="callout" style={{ color: colors.foreground }}>
@@ -323,7 +323,7 @@ function SupportAction({
 }
 
 /**
- * Call or WhatsApp a person at GetRentos. Renders nothing until the support
+ * Call or WhatsApp a person at Sureground. Renders nothing until the support
  * line is configured, so no screen ever shows a placeholder number.
  */
 export function SupportContact({ lead, context }: { lead?: string; context?: string }) {
@@ -332,7 +332,7 @@ export function SupportContact({ lead, context }: { lead?: string; context?: str
   return (
     <View style={{ gap: spacing.sm }}>
       <Text variant="callout" color="mutedForeground">
-        {lead ?? 'Need a hand? Talk to a person at GetRentos.'}
+        {lead ?? 'Need a hand? Talk to a person at Sureground.'}
       </Text>
       <View style={{ flexDirection: 'row', gap: spacing.sm }}>
         {SUPPORT.phone ? (

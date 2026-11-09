@@ -11,7 +11,7 @@ import {
   Field,
   Select,
   Textarea,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 
 import type { Lease } from '@/types/landlord';
 import type { LegalCaseKind } from '@/types/legal-case';

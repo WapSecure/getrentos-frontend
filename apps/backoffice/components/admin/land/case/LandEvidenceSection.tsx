@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { ConfirmDialog } from '@getrentos/ui';
-import { unwrap } from '@getrentos/shared';
+import { ConfirmDialog } from '@sureground/ui';
+import { unwrap } from '@sureground/shared';
 import { adminLandService } from '@/services/adminLandService';
 import type {
   AdminLandDiligenceDetail,

@@ -18,13 +18,13 @@ import {
   TabsTrigger,
   type Column,
   PageHeader,
-} from '@getrentos/ui';
-import { Badge, type BadgeVariant } from '@getrentos/ui';
-import { EmptyState } from '@getrentos/ui';
-import { Pagination } from '@getrentos/ui';
-import { formatDate } from '@getrentos/shared';
+} from '@sureground/ui';
+import { Badge, type BadgeVariant } from '@sureground/ui';
+import { EmptyState } from '@sureground/ui';
+import { Pagination } from '@sureground/ui';
+import { formatDate } from '@sureground/shared';
 import { adminService } from '@/services/adminService';
-import { unwrap } from '@getrentos/shared';
+import { unwrap } from '@sureground/shared';
 import { adminKeys } from '@/lib/queryKeys';
 import type { AuditLogEntry, AuditSeverity } from '@/types/admin';
 import { roleLabel } from '@/lib/roleLabels';

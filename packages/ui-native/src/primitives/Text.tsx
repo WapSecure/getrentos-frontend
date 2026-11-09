@@ -1,5 +1,5 @@
 import { Text as RNText, type TextProps as RNTextProps, type TextStyle } from 'react-native';
-import type { TypographyVariant } from '@getrentos/tokens';
+import type { TypographyVariant } from '@sureground/tokens';
 import { useTheme, withFont } from '../theme';
 
 type ColorToken =

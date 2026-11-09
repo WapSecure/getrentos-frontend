@@ -13,7 +13,7 @@ import { InviteRoommateModal } from '@/components/renter/roommates/InviteRoommat
 import { renterService, type RoommateExpense as Expense } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
-import { PageErrorState, PageLoadingState, useToast } from '@getrentos/ui';
+import { PageErrorState, PageLoadingState, useToast } from '@sureground/ui';
 
 export default function RoommatesPage() {
   const queryClient = useQueryClient();

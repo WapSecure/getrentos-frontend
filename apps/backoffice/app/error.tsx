@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
-import { AlertTriangle, RefreshCcw } from "lucide-react";
-import { Button, Logo } from "@getrentos/ui";
-import { ROUTES } from "@getrentos/shared";
+import { useEffect } from 'react';
+import { AlertTriangle, RefreshCcw } from 'lucide-react';
+import { Button, Logo } from '@sureground/ui';
+import { ROUTES } from '@sureground/shared';
 
 export default function ErrorPage({
   error,
@@ -13,7 +13,7 @@ export default function ErrorPage({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("Unhandled backoffice error", error);
+    console.error('Unhandled backoffice error', error);
   }, [error]);
 
   return (
@@ -35,11 +35,7 @@ export default function ErrorPage({
           </p>
         ) : null}
         <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-          <Button
-            variant="primary"
-            onClick={reset}
-            icon={<RefreshCcw className="h-4 w-4" />}
-          >
+          <Button variant="primary" onClick={reset} icon={<RefreshCcw className="h-4 w-4" />}>
             Try again
           </Button>
           <Button href={ROUTES.ADMIN_LOGIN} variant="outline">

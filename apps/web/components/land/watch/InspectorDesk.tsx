@@ -28,7 +28,7 @@ import {
   type ToastVariant,
   useToast,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import {
   LAND_BOUNDARY_LABELS,
   LAND_INSPECTION_KIND_LABELS,
@@ -36,7 +36,7 @@ import {
   type InspectorJob,
   type LandBoundaryCondition,
   describeDistance,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
 import { landKeys } from '@/lib/queryKeys';
@@ -87,7 +87,7 @@ const JobList = ({ onOpen }: { onOpen: (id: string) => void }) => {
     <>
       <PageHeader
         title="Land inspections"
-        description="Visits GetRentos has assigned to you. Capture photos on the land with your location on; anything taken away from the land is checked before the owner sees the report."
+        description="Visits Sureground has assigned to you. Capture photos on the land with your location on; anything taken away from the land is checked before the owner sees the report."
       />
       {jobs.isLoading ? (
         <Skeleton className="h-40 rounded-2xl" />
@@ -195,7 +195,7 @@ const JobDetail = ({
           }
         />
       </div>
-      {j.staffNote && <Alert variant="warning">GetRentos asks: {j.staffNote}</Alert>}
+      {j.staffNote && <Alert variant="warning">Sureground asks: {j.staffNote}</Alert>}
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <Card static className="space-y-3 p-5">
           <h2 className="font-semibold text-foreground">The visit</h2>
@@ -370,7 +370,7 @@ const ReportForm = ({
     },
     onSuccess: (updated) => {
       onFiled(updated);
-      notify('Report filed. GetRentos reviews it before the owner sees it.');
+      notify('Report filed. Sureground reviews it before the owner sees it.');
     },
     onError: (e) => notify(errorMessage(e, 'Could not file the report.'), 'error'),
   });

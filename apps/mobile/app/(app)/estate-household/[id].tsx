@@ -16,7 +16,7 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import {
   DueRow,
@@ -214,8 +214,8 @@ export default function EstateHousehold() {
                     )}
                     <Text variant="bodyStrong" style={{ flex: 1 }}>
                       {h.residentLinked
-                        ? 'GetRentos account linked'
-                        : 'No GetRentos account linked'}
+                        ? 'Sureground account linked'
+                        : 'No Sureground account linked'}
                     </Text>
                   </View>
                   <Text variant="caption" color="mutedForeground">

@@ -26,7 +26,7 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { RevenueTrendChart } from '@/components/landlord/RevenueTrendChart';
 import { isUpgradeError } from '@/components/host/HostUI';
@@ -110,7 +110,7 @@ export default function EstateFinancials() {
     setExporting(true);
     try {
       const { bytes } = await estateGovernanceApi.financialsExport(estateId);
-      await shareDownloadedFile(bytes, 'getrentos-estate-dues.csv', CSV_MIME, 'Estate dues');
+      await shareDownloadedFile(bytes, 'sureground-estate-dues.csv', CSV_MIME, 'Estate dues');
     } catch (e) {
       toast.show(errorMessage(e, 'Could not export the dues.'), 'error');
     } finally {

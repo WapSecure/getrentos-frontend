@@ -17,7 +17,7 @@ import {
   type BadgeVariant,
   useOptimisticMutation,
   useToast,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import {
   agencyClientService,
   AGENCY_CLIENT_STAGES,

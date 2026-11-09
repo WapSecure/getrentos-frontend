@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { Sparkles, TrendingUp, ArrowUpRight } from 'lucide-react';
-import { Card } from '@getrentos/ui';
+import { Card } from '@sureground/ui';
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';

@@ -3,12 +3,12 @@
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Settings, ChevronDown, ChevronUp } from 'lucide-react';
-import { Card, Checkbox, Switch } from '@getrentos/ui';
+import { Card, Checkbox, Switch } from '@sureground/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import type { NotificationPreference as FetchedPreference } from '@/services/renterService';
-import { categorySendsEmail } from '@getrentos/shared';
+import { categorySendsEmail } from '@sureground/shared';
 
 interface Preference {
   id: string;

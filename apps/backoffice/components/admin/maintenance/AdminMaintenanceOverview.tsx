@@ -26,8 +26,8 @@ import {
   PageHeader,
   StatCard,
   useToast,
-} from '@getrentos/ui';
-import { unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { unwrap } from '@sureground/shared';
 import { adminKeys } from '@/lib/queryKeys';
 import { adminMaintenanceService } from '@/services/adminMaintenanceService';
 import type { AdminMaintenanceOverview as OverviewData } from '@/types/maintenance';

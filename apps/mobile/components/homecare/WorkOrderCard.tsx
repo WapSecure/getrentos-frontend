@@ -1,8 +1,8 @@
 import { Pressable, View } from 'react-native';
-import { humaniseEnum } from '@getrentos/shared';
+import { humaniseEnum } from '@sureground/shared';
 import { router } from 'expo-router';
 import { AlertTriangle, ChevronRight, Clock, Siren, Wrench } from 'lucide-react-native';
-import { Badge, Card, Text, useTheme } from '@getrentos/ui-native';
+import { Badge, Card, Text, useTheme } from '@sureground/ui-native';
 import {
   STATUS_LABEL,
   categoryLabel,

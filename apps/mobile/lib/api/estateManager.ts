@@ -59,7 +59,7 @@ export interface Household {
   contactEmail?: string;
   status: HouseholdStatus;
   residentUserId?: string;
-  /** The resident has a GetRentos account tied to this household. */
+  /** The resident has a Sureground account tied to this household. */
   residentLinked: boolean;
   createdAt: string;
 }

@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { ShieldAlert, ShieldCheck, ShieldQuestion, Sparkles } from 'lucide-react';
-import { Card, Skeleton } from '@getrentos/ui';
+import { Card, Skeleton } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { renterService } from '@/services/renterService';
@@ -26,7 +26,7 @@ const LEVEL_STYLE: Record<
 };
 
 /**
- * "Should I rent this?" The level and every figure come from GetRentos data by
+ * "Should I rent this?" The level and every figure come from Sureground data by
  * rule; the wording may be automated. Never a verdict on the landlord.
  */
 export function ListingCheckCard({ listingId }: { listingId: string }) {
@@ -104,7 +104,7 @@ export function ListingCheckCard({ listingId }: { listingId: string }) {
 
       <p className="flex items-center gap-1 text-2xs text-muted-foreground">
         <Sparkles className="h-3 w-3" aria-hidden="true" />
-        Figures from GetRentos listings
+        Figures from Sureground listings
         {data.source === 'ai' ? '; wording is automated' : ''}. A guide, not a guarantee.
       </p>
     </Card>

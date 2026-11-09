@@ -149,7 +149,7 @@ export const authApi = {
     apiFetch<{ message: string }>('/auth/magic-link/send', {
       method: 'POST',
       anonymous: true,
-      body: { email, redirectTo: `${env.clientApp === 'mobile' ? 'getrentos://magic-link' : ''}` },
+      body: { email, redirectTo: `${env.clientApp === 'mobile' ? 'sureground://magic-link' : ''}` },
     }),
 
   verifyMagicLink: (token: string) =>
@@ -160,6 +160,6 @@ export const authApi = {
     }),
 
   // ---- OAuth ----------------------------------------------------------
-  /** Provider start URL; opened in an in-app browser, redirects back to getrentos://oauth. */
+  /** Provider start URL; opened in an in-app browser, redirects back to sureground://oauth. */
   oauthUrl: (provider: 'google' | 'apple') => `${env.apiUrl}/auth/oauth/${provider}?client=mobile`,
 };

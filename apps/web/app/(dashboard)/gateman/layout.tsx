@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { GatemanNavbar } from '@/components/gateman/GatemanNavbar';
 import { GateQueueSync } from '@/components/gateman/GateQueueSync';
 import { GatemanPostProvider } from '@/lib/gateman/GatemanPostProvider';
-import { PageLoadingState } from '@getrentos/ui';
+import { PageLoadingState } from '@sureground/ui';
 import {
   ROUTES,
   isAuthenticated,

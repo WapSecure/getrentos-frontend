@@ -13,7 +13,7 @@ import {
   Award,
   ClipboardCheck,
 } from 'lucide-react-native';
-import { Text, useTheme } from '@getrentos/ui-native';
+import { Text, useTheme } from '@sureground/ui-native';
 import type { TrustBadge, TrustProfile, VerificationItem } from '@/lib/api/buyerTrustProfile';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { HelpCircle, ChevronDown, ChevronUp } from 'lucide-react';
-import { Card, EmptyState } from '@getrentos/ui';
+import { Card, EmptyState } from '@sureground/ui';
 
 interface FAQ {
   id: string;
@@ -23,7 +23,7 @@ const helpFAQs: FAQ[] = [
     id: '2',
     question: 'How does payment protection work?',
     answer:
-      'Your rent goes to GetRentos, not straight to the landlord. It is released to your landlord when you confirm move-in, or automatically on its scheduled release date. If something is wrong, raise a dispute before then and the money stays held until it is resolved.',
+      'Your rent goes to Sureground, not straight to the landlord. It is released to your landlord when you confirm move-in, or automatically on its scheduled release date. If something is wrong, raise a dispute before then and the money stays held until it is resolved.',
     category: 'payments',
   },
   {
@@ -58,7 +58,7 @@ const helpFAQs: FAQ[] = [
     id: '7',
     question: 'How do I split rent with roommates?',
     answer:
-      'In the Roommates tab, add your roommates by email invite, then set up a split arrangement: equal or custom percentages. Each roommate pays their share directly through the platform, and each payment is held and tracked separately by GetRentos.',
+      'In the Roommates tab, add your roommates by email invite, then set up a split arrangement: equal or custom percentages. Each roommate pays their share directly through the platform, and each payment is held and tracked separately by Sureground.',
     category: 'account',
   },
   {

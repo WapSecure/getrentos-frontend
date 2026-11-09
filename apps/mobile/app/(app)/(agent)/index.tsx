@@ -22,7 +22,7 @@ import {
   Skeleton,
   Text,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { MetricGrid } from '@/components/dashboard/MetricGrid';
 import {
@@ -60,7 +60,7 @@ export default function AgentHome() {
       accessory={
         <IconButton
           onPress={() => router.push({ pathname: '/(app)/ask', params: { persona: 'agent' } })}
-          accessibilityLabel="Ask GetRentos"
+          accessibilityLabel="Ask Sureground"
           icon={<MessageCircleQuestion size={21} color={colors.foreground} />}
         />
       }

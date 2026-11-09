@@ -19,7 +19,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   EDITABLE_PLOT,
@@ -210,7 +210,7 @@ function Setup({
       </View>
       <Text variant="callout" color="mutedForeground">
         Set up an estate layout to sell plots carved from this parcel, on outright or instalment
-        plans. GetRentos holds buyers’ payments and pays you as each conveyance step is confirmed.
+        plans. Sureground holds buyers’ payments and pays you as each conveyance step is confirmed.
       </Text>
       {blocker ? (
         <>

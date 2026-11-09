@@ -1,7 +1,7 @@
 'use client';
 
 import { forwardRef, type InputHTMLAttributes, type ReactNode } from 'react';
-import { cn } from '@getrentos/shared';
+import { cn } from '@sureground/shared';
 import { controlShell, innerInputClass, type ControlSize } from './controlStyles';
 import { useFieldControl } from './fieldContext';
 

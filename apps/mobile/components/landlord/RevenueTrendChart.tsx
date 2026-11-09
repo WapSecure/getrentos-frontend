@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
-import { Text, useTheme } from '@getrentos/ui-native';
+import { Text, useTheme } from '@sureground/ui-native';
 import type { RevenuePoint } from '@/lib/api/landlord';
 import { formatNaira } from '@/lib/format';
 

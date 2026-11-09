@@ -13,7 +13,7 @@ import {
   Skeleton,
   useToast,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 import { useCustody } from '@/components/agency/CustodyProvider';
 import {
@@ -23,7 +23,7 @@ import {
 } from '@/services/portfolioImportService';
 
 /**
- * Bring an existing block's units onto GetRentos from a spreadsheet. Always a
+ * Bring an existing block's units onto Sureground from a spreadsheet. Always a
  * dry run first: you see exactly what would be added, skipped and why any row
  * is refused before anything is written. Importing is all-or-nothing.
  */
@@ -126,7 +126,7 @@ export function PortfolioImportView() {
               {csv && <span className="text-sm text-foreground">{csv.name}</span>}
               <a
                 href={template}
-                download="getrentos-units-template.csv"
+                download="sureground-units-template.csv"
                 className="flex items-center gap-1.5 text-sm text-primary hover:underline"
               >
                 <Download className="h-4 w-4" /> Template

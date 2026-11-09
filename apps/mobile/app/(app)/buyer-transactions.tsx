@@ -20,7 +20,7 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   buyerTransactionsApi,
@@ -48,13 +48,13 @@ const STAGES: { key: BuyerEscrowStatus; label: string; description: string }[] =
   {
     key: 'deposit_pending',
     label: 'Deposit',
-    description: 'Pay your deposit to GetRentos, which holds it safely until you confirm receipt.',
+    description: 'Pay your deposit to Sureground, which holds it safely until you confirm receipt.',
   },
   {
     key: 'funds_held',
     label: 'Funds held',
     description:
-      'Your payment is held safely by GetRentos. Once you have received the property and its documents, confirm receipt to release the funds to the seller.',
+      'Your payment is held safely by Sureground. Once you have received the property and its documents, confirm receipt to release the funds to the seller.',
   },
   {
     key: 'released',
@@ -82,7 +82,7 @@ const FILTERS: { value: Filter; label: string; match: (s: BuyerEscrowStatus) => 
 const ACTOR_LABEL: Record<string, string> = {
   buyer: 'You',
   owner: 'Seller',
-  system: 'GetRentos',
+  system: 'Sureground',
   compliance: 'Compliance',
 };
 

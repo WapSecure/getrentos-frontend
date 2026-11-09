@@ -1,5 +1,5 @@
 import { Users, ShieldCheck, Gavel, AlertTriangle, Landmark, TrendingUp } from 'lucide-react';
-import { StatCard, type StatCardAccent } from '@getrentos/ui';
+import { StatCard, type StatCardAccent } from '@sureground/ui';
 
 interface AdminStatsCardsProps {
   totalUsers: number;

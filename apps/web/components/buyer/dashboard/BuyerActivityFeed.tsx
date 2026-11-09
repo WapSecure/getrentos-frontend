@@ -1,7 +1,7 @@
 'use client';
 
 import { Handshake, CalendarClock, ShieldCheck, Heart } from 'lucide-react';
-import { Card, CardDescription, CardHeader, CardTitle, EmptyState } from '@getrentos/ui';
+import { Card, CardDescription, CardHeader, CardTitle, EmptyState } from '@sureground/ui';
 import { formatRelativeTime } from '@/lib/format';
 import type { BuyerDashboard } from '@/services/buyerService';
 

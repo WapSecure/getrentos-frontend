@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { Send, Paperclip, MessageCircle, Check, CheckCheck, X } from 'lucide-react';
-import { Button, Card, EmptyState, IconButton, Input } from '@getrentos/ui';
+import { Button, Card, EmptyState, IconButton, Input } from '@sureground/ui';
 import { getInitials } from '@/lib/format';
 import { format } from 'date-fns';
 

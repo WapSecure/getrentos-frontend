@@ -1,4 +1,4 @@
-import type { PayoutSentTo } from '@getrentos/shared';
+import type { PayoutSentTo } from '@sureground/shared';
 export type ClientRole = 'owner' | 'landlord';
 export type ClientStatus = 'active' | 'pending' | 'inactive';
 export type ListingCategory = 'sale' | 'rental';

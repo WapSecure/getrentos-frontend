@@ -1,7 +1,7 @@
 'use client';
 
 import { FileSignature, Handshake, Pause, Play, Send, ShieldCheck } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button } from '@sureground/ui';
 import type { ManagementMandateDto } from '@/services/mandateService';
 import type { ReasonAction, SimpleAction } from './useMandateActions';
 
@@ -99,7 +99,7 @@ export function MandateActionButtons({
           onClick={() => onReason(mandate, 'request-termination')}
         >
           <ShieldCheck className="mr-1.5 h-3.5 w-3.5" aria-hidden />
-          Ask GetRentos to end it
+          Ask Sureground to end it
         </Button>
       )}
       {permissions.canTerminate && (

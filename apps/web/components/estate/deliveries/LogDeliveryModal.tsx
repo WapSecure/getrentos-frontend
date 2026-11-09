@@ -16,7 +16,7 @@ import {
   Pagination,
   RadioGroup,
   Select,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { estateService } from '@/services/estateService';
 import { ApiError, unwrap } from '@/lib/apiHelpers';
 import type { DeliveryCodeScreen, Gate, Household } from '@/types/estate';

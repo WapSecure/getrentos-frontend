@@ -1,7 +1,7 @@
 'use client';
 
 import { FileText, Download, Plus } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button } from '@sureground/ui';
 import { ROUTES } from '@/lib/constants/auth';
 import { RenterPageHeader } from '../shared/RenterPageHeader';
 

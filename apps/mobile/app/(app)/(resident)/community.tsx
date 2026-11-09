@@ -13,7 +13,7 @@ import {
   Vote,
   Wrench,
 } from 'lucide-react-native';
-import { Card, Divider, Screen, Text, useTheme } from '@getrentos/ui-native';
+import { Card, Divider, Screen, Text, useTheme } from '@sureground/ui-native';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 
 const ROWS = [

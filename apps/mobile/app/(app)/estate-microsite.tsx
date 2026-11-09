@@ -25,7 +25,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { StatusPill, isUpgradeError } from '@/components/host/HostUI';
 import { ProUpsell } from '@/components/estate/governance/ProUpsell';
@@ -108,7 +108,7 @@ export default function EstateMicrosite() {
             title="The estate microsite is part of Pro"
             description="A public page showing off the estate, with one link to share."
             perks={[
-              'Your own link, e.g. getrentos.com/e/your-estate',
+              'Your own link, e.g. getsureground.io/e/your-estate',
               'A banner and a few words about life in the estate',
               'Homes for rent or sale in the estate, listed on it',
             ]}

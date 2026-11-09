@@ -21,7 +21,7 @@ import {
   Text,
   useReducedMotion,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { errorMessage } from '@/lib/api/client';
 import { useSignup } from '@/lib/auth/SignupContext';
 import { haptics } from '@/lib/haptics';
@@ -68,7 +68,7 @@ export default function SignUpRoles() {
   return (
     <AuthScaffold
       kicker="Almost there"
-      title="How will you use GetRentos?"
+      title="How will you use Sureground?"
       subtitle="Pick what fits today: you can add more roles later, with supporting documents."
       progress={1}
       progressLabel="Sign-up step 3 of 3"
@@ -79,7 +79,7 @@ export default function SignUpRoles() {
             haptic
             onPress={() => setMultiRole(!multiRole)}
             accessibilityRole="switch"
-            accessibilityLabel="Use GetRentos in more than one way"
+            accessibilityLabel="Use Sureground in more than one way"
             accessibilityState={{ checked: multiRole }}
             style={{
               flexDirection: 'row',

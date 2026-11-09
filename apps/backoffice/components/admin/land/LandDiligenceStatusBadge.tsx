@@ -9,7 +9,7 @@ import {
   PauseCircle,
   XCircle,
 } from 'lucide-react';
-import { Badge, type BadgeVariant } from '@getrentos/ui';
+import { Badge, type BadgeVariant } from '@sureground/ui';
 import type { LandDiligenceStatus } from '@/types/land';
 
 type StatusConfiguration = { label: string; variant: BadgeVariant; icon: LucideIcon };

@@ -3,17 +3,17 @@
 import { useMemo, useState, type FormEvent } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CheckCircle2, CircleAlert, Clock3, Plus, Settings2, ShieldCheck } from 'lucide-react';
-import { Badge, type BadgeVariant } from '@getrentos/ui';
-import { Button } from '@getrentos/ui';
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrentos/ui';
-import { EmptyState } from '@getrentos/ui';
-import { Skeleton } from '@getrentos/ui';
-import { Field } from '@getrentos/ui';
-import { NumberInput } from '@getrentos/ui';
-import { Pagination } from '@getrentos/ui';
-import { Select } from '@getrentos/ui';
-import { Switch } from '@getrentos/ui';
-import { useToast } from '@getrentos/ui';
+import { Badge, type BadgeVariant } from '@sureground/ui';
+import { Button } from '@sureground/ui';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@sureground/ui';
+import { EmptyState } from '@sureground/ui';
+import { Skeleton } from '@sureground/ui';
+import { Field } from '@sureground/ui';
+import { NumberInput } from '@sureground/ui';
+import { Pagination } from '@sureground/ui';
+import { Select } from '@sureground/ui';
+import { Switch } from '@sureground/ui';
+import { useToast } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { homeManagementKeys } from '@/lib/queryKeys';
 import {

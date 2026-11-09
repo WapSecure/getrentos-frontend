@@ -1,13 +1,13 @@
 import { MessageCircle, Phone } from 'lucide-react';
 import { SUPPORT, hasSupportLine, whatsappLink } from '@/lib/support';
-import { cn } from '@getrentos/shared';
+import { cn } from '@sureground/shared';
 
 /**
  * "Talk to a person" links: call and WhatsApp. Renders nothing until the
  * numbers are configured (see lib/support.ts), so no placeholder ever shows.
  */
 export function SupportContact({
-  lead = 'Need help? Talk to GetRentos support:',
+  lead = 'Need help? Talk to Sureground support:',
   context,
   className,
 }: {

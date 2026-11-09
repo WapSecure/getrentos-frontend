@@ -14,7 +14,7 @@ import {
   Text,
   TextField,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { hostShortletsApi, type HostConversation } from '@/lib/api/hostShortlets';
 import { relativeTime } from '@/lib/format';

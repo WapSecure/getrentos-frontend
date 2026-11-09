@@ -24,7 +24,7 @@ import {
   toISODate,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   OFFER_STATUS,
@@ -622,7 +622,7 @@ function InviteClientForm({
     return (
       <View style={{ gap: spacing.md }}>
         <Text variant="callout" color="mutedForeground">
-          Owners and landlords on GetRentos can let you represent their properties once you’re
+          Owners and landlords on Sureground can let you represent their properties once you’re
           verified.
         </Text>
         <VerificationGateNotice
@@ -636,7 +636,7 @@ function InviteClientForm({
   return (
     <View style={{ gap: spacing.md }}>
       <Text variant="callout" color="mutedForeground">
-        Owners and landlords on GetRentos can let you represent their properties. They approve your
+        Owners and landlords on Sureground can let you represent their properties. They approve your
         invite, then choose which properties you handle.
       </Text>
       <TextField
@@ -656,7 +656,7 @@ function InviteClientForm({
         !c.exists ? (
           <FormAlert
             tone="info"
-            message="No GetRentos account uses that email. Ask them to sign up as an owner or landlord first."
+            message="No Sureground account uses that email. Ask them to sign up as an owner or landlord first."
           />
         ) : !c.isEligible ? (
           <FormAlert

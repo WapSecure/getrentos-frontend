@@ -10,7 +10,7 @@ import {
   DialogDescription,
   DialogTitle,
   Textarea,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 
 interface AddNoteModalProps {
   isOpen: boolean;

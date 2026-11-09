@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { Badge } from '@getrentos/ui';
+import { Badge } from '@sureground/ui';
 import {
   boundaryTone,
   describeDistance,
@@ -9,7 +9,7 @@ import {
   LAND_INSPECTION_KIND_LABELS,
   LAND_INSPECTION_STATUS_LABELS,
   type LandWatchInspection,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import { formatDate } from '@/lib/format';
 
 interface InspectionReportCardProps {
@@ -26,7 +26,7 @@ interface InspectionReportCardProps {
  * was taken. Used by Land Watch and by a buyer's pre-purchase inspections;
  * each passes its own actions.
  *
- * The report appears only once GetRentos has accepted it; until then the card
+ * The report appears only once Sureground has accepted it; until then the card
  * shows where the inspection stands.
  */
 export const InspectionReportCard = ({
@@ -66,7 +66,7 @@ export const InspectionReportCard = ({
           )}
           <p className="mt-2 whitespace-pre-wrap text-sm text-foreground">{r.summary}</p>
           {r.staffNote && (
-            <p className="mt-1 text-xs text-muted-foreground">GetRentos: {r.staffNote}</p>
+            <p className="mt-1 text-xs text-muted-foreground">Sureground: {r.staffNote}</p>
           )}
           {r.evidence.length > 0 && (
             <ul className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4">

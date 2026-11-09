@@ -13,7 +13,7 @@ import {
   Select,
   Textarea,
   useToast,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { Scale } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';

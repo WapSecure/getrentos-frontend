@@ -1,6 +1,6 @@
 'use client';
 
-import { humaniseEnum } from '@getrentos/shared';
+import { humaniseEnum } from '@sureground/shared';
 import { AlertTriangle, RotateCcw, Search, ShieldCheck, ShieldAlert } from 'lucide-react';
 import {
   Dialog,
@@ -11,7 +11,7 @@ import {
   Skeleton,
   Badge,
   type BadgeVariant,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { EvidencePanel } from '@/components/shared/EvidencePanel';
 import type {
   FraudAlertAiSignal,

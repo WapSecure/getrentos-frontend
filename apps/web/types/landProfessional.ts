@@ -58,5 +58,5 @@ export const LAND_PROFESSIONAL_REGULATORS: Record<LandReviewerRole, string> = {
   SURVEYOR: 'SURCON',
   LAWYER: 'NBA',
   VALUER: 'ESVARBON',
-  INSPECTOR: 'GetRentos field certification',
+  INSPECTOR: 'Sureground field certification',
 };

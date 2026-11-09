@@ -9,7 +9,7 @@ import {
   SegmentedControl,
   Skeleton,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { useEffect, useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Handshake } from 'lucide-react';

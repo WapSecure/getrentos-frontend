@@ -1,4 +1,4 @@
-import { digitsFromSpeech, spokenGateOutcome as spokenOutcome } from '@getrentos/shared';
+import { digitsFromSpeech, spokenGateOutcome as spokenOutcome } from '@sureground/shared';
 
 jest.mock('expo-speech', () => ({
   speak: jest.fn(),

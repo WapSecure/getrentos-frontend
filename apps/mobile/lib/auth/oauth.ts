@@ -4,7 +4,7 @@ import { env } from '../env';
 WebBrowser.maybeCompleteAuthSession();
 
 /** Allowlisted on the backend — must match exactly. */
-const NATIVE_REDIRECT = 'getrentos://oauth';
+const NATIVE_REDIRECT = 'sureground://oauth';
 
 export type OAuthResult =
   | { kind: 'session'; accessToken: string; refreshToken: string }
@@ -20,7 +20,7 @@ export class OAuthCancelled extends Error {
 
 /**
  * Runs a provider sign-in in a secure system browser tab and returns the tokens
- * the backend hands back on the `getrentos://oauth#...` deep link.
+ * the backend hands back on the `sureground://oauth#...` deep link.
  */
 export async function startOAuth(provider: 'google'): Promise<OAuthResult> {
   const authUrl =
@@ -37,7 +37,7 @@ export async function startOAuth(provider: 'google'): Promise<OAuthResult> {
   }
 
   // Tokens come back in the URL fragment or query:
-  //   getrentos://oauth#access_token=…&refresh_token=…
+  //   sureground://oauth#access_token=…&refresh_token=…
   const { url } = result;
   const afterHash = url.includes('#') ? url.slice(url.indexOf('#') + 1) : '';
   const afterQuery = url.includes('?') ? url.slice(url.indexOf('?') + 1).split('#')[0] : '';

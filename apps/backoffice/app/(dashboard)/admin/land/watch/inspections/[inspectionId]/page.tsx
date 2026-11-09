@@ -26,7 +26,7 @@ import {
   DatePicker,
   Field,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import {
   boundaryTone,
   formatDate,
@@ -36,7 +36,7 @@ import {
   unwrap,
   type StaffInspection,
   describeDistance,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import { useAdminUser } from '../../../../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
 import { humaniseEnum, landQueryKeys, readLandApiError } from '@/lib/landDiligence';

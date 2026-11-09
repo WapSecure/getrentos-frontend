@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Calendar, Bell, Clock, AlertTriangle } from 'lucide-react';
-import { Badge, Button, Card } from '@getrentos/ui';
+import { Badge, Button, Card } from '@sureground/ui';
 
 interface PaymentReminder {
   id: string;

@@ -12,7 +12,7 @@ import {
   DialogTitle,
   DocumentPreviewButton,
   Skeleton,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { FileText, FolderOpen, Trash2, Upload } from 'lucide-react';
 import { formatDate } from '@/lib/format';
 import type { LandDocument, LandDocumentType } from '@/types/landDocument';

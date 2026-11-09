@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { AlertTriangle, ShieldCheck, Wallet } from 'lucide-react';
-import { Badge, Card, Skeleton } from '@getrentos/ui';
+import { Badge, Card, Skeleton } from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { agencyTrustService, AGENCY_TRUST_ENTRY_LABELS } from '@/services/agencyTrustService';

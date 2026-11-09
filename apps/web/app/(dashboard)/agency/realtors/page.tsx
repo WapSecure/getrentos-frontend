@@ -1,7 +1,7 @@
 'use client';
 
 import { ClientRealtorAccess } from '@/components/realtor/ClientRealtorAccess';
-import { PageHeader } from '@getrentos/ui';
+import { PageHeader } from '@sureground/ui';
 
 /**
  * Realtor access for the properties a manager operates on an owner's behalf.

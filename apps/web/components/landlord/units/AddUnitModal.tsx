@@ -12,7 +12,7 @@ import {
   Input,
   NumberInput,
   Select,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import type { Property, Unit } from '@/types/landlord';
 
 interface AddUnitModalProps {

@@ -14,7 +14,7 @@ import {
   RadioGroup,
   Select,
   Textarea,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import type { AgentTask, VerificationVisit } from '@/types/agent';
 
 interface NewVerificationModalProps {

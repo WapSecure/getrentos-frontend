@@ -19,7 +19,7 @@ import {
   CurrencyInput,
   type BadgeVariant,
   type PendingUpload,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { Plus, Camera, Share2, CheckCircle2 } from 'lucide-react';
 import {
   inspectionService,

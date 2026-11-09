@@ -3,7 +3,7 @@
 import { useBuyerUser } from '../layout';
 import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Card, PageHeader } from '@getrentos/ui';
+import { Card, PageHeader } from '@sureground/ui';
 import { User, Bell, Landmark, SlidersHorizontal, ShieldCheck, Lock, Download } from 'lucide-react';
 import { ProfileSettings } from '@/components/buyer/settings/ProfileSettings';
 import { NotificationSettings } from '@/components/buyer/settings/NotificationSettings';

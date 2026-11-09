@@ -1,6 +1,6 @@
 import { apiFetch } from './client';
 import { toQuery } from './query';
-import type { VideoStream } from '@getrentos/shared';
+import type { VideoStream } from '@sureground/shared';
 
 /** One rental listing as returned by `/renter/listings`. Mirrors `RenterPropertyDto`. */
 export interface RenterProperty {

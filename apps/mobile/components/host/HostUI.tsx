@@ -11,7 +11,7 @@ import {
   ReceiptText,
   Star,
 } from 'lucide-react-native';
-import { Card, Divider, Price, Text, useTheme } from '@getrentos/ui-native';
+import { Card, Divider, Price, Text, useTheme } from '@sureground/ui-native';
 import { ApiError } from '@/lib/api/client';
 import { qk } from '@/lib/query/keys';
 import {
@@ -186,7 +186,7 @@ export function StayCard({ b, compact }: { b: HostBooking; compact?: boolean }) 
   );
 }
 
-/** The guest at a glance, counted across GetRentos only. */
+/** The guest at a glance, counted across Sureground only. */
 export function GuestLine({ g }: { g: NonNullable<HostBooking['guestSummary']> }) {
   const { colors, spacing } = useTheme();
   const bits = [
@@ -365,7 +365,7 @@ export const isUpgradeError = (err: unknown) =>
   // A paid feature, or a free plan's cap (e.g. how many listings may be live).
   (err.status === 402 || err.code === 'PLAN_UPGRADE_REQUIRED' || err.code === 'PLAN_LIMIT_REACHED');
 
-/** What GetRentos takes from each stay. Quiet until the rate has loaded. */
+/** What Sureground takes from each stay. Quiet until the rate has loaded. */
 export function HostFeeNote() {
   const { colors, spacing } = useTheme();
   const fees = useQuery({

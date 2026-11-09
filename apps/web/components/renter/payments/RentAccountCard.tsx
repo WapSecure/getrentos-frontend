@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Wallet } from 'lucide-react';
-import { Alert, Button, Card, ConfirmDialog } from '@getrentos/ui';
+import { Alert, Button, Card, ConfirmDialog } from '@sureground/ui';
 import { CreditRefundHistory } from '@/components/shared/CreditRefundHistory';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { chargeLabel } from '@/lib/chargeCategory';
@@ -33,7 +33,7 @@ export const RentAccountCard = () => {
               text:
                 r.refundedAmount > 0
                   ? `${formatCurrency(r.refundedAmount)} is on its way back; the rest could not be refunded and stays as credit.`
-                  : 'The refund could not be made and your credit is unchanged. GetRentos finance sees failed refunds and follows up.',
+                  : 'The refund could not be made and your credit is unchanged. Sureground finance sees failed refunds and follows up.',
               ok: false,
             }
       );

@@ -14,8 +14,8 @@ import {
   DescriptionList,
   QueryState,
   useToast,
-} from '@getrentos/ui';
-import { formatRelativeTime, unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { formatRelativeTime, unwrap } from '@sureground/shared';
 import { accountSecurityService } from '@/services/accountSecurityService';
 import { adminKeys } from '@/lib/queryKeys';
 

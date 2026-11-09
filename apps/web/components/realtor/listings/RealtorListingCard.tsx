@@ -10,7 +10,7 @@ import {
   BedDouble,
   Bath,
 } from 'lucide-react';
-import { Badge, Card, type BadgeVariant } from '@getrentos/ui';
+import { Badge, Card, type BadgeVariant } from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 import type { RealtorListing, RealtorListingStatus } from '@/types/realtor';
 

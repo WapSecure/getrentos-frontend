@@ -1,7 +1,7 @@
 'use client';
 
 import { Lock, Ruler } from 'lucide-react';
-import { formatCurrency, formatDate } from '@getrentos/shared';
+import { formatCurrency, formatDate } from '@sureground/shared';
 import type { AdminLandDiligenceDetail } from '@/types/land';
 import { humaniseEnum } from '@/lib/landDiligence';
 import { Fact, LandCaseSection } from './shared';

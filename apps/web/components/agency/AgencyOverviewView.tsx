@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { Building2, Coins, Users, Wallet, Wrench } from 'lucide-react';
-import { Card, CardSkeleton, PageErrorState, PageHeader, StatGridSkeleton } from '@getrentos/ui';
+import { Card, CardSkeleton, PageErrorState, PageHeader, StatGridSkeleton } from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 import { AttentionFeed } from '@/components/shared/attention/AttentionFeed';
 import { agencyDashboardService, type AgencyDashboard } from '@/services/agencyDashboardService';

@@ -153,7 +153,7 @@ export function mapAgentTask(task: AgentTaskApi): AgentTask {
     type: lower(task.type),
     title: task.title,
     propertyAddress: property ? `${property.title}, ${property.address}` : 'No property assigned',
-    assignedBy: task.assignedBy.legalName || 'GetRentos',
+    assignedBy: task.assignedBy.legalName || 'Sureground',
     assignedByRole: role,
     priority: lower(task.priority),
     status: lower(task.status) as TaskStatus,

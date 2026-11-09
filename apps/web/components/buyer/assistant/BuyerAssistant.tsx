@@ -11,7 +11,7 @@ const STARTERS = [
   'When is my next viewing?',
 ];
 
-/** Ask GetRentos for property buyers: offers, purchases, viewings, saved homes and documents. */
+/** Ask Sureground for property buyers: offers, purchases, viewings, saved homes and documents. */
 export const BuyerAssistant = () => (
   <AssistantChat
     ask={(question, history, language) =>

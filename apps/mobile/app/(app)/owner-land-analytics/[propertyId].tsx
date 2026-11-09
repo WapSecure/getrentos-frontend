@@ -10,7 +10,7 @@ import {
   QueryState,
   Text,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { landLayoutApi, type SellerAnalytics } from '@/lib/api/landLayout';
 import { formatDate, formatNaira } from '@/lib/format';

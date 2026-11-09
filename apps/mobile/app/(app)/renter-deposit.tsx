@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { depositHolderText, noDeductionsText } from '@getrentos/shared';
+import { depositHolderText, noDeductionsText } from '@sureground/shared';
 import { CircleCheck, FileCheck2, PiggyBank, Scale, ShieldCheck } from 'lucide-react-native';
 import {
   Badge,
@@ -16,7 +16,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   DEDUCTION_STATUS,
@@ -129,11 +129,11 @@ function DepositCard({
             Your lease sets a deposit of {formatNaira(d.agreedAmount)}, but it is not recorded as
             held yet.
           </Text>
-          {d.paidThroughGetRentos?.paid ? (
+          {d.paidThroughSureground?.paid ? (
             <Text variant="callout" color="mutedForeground">
-              You paid it through GetRentos
-              {d.paidThroughGetRentos.paidDate
-                ? ` on ${formatDate(d.paidThroughGetRentos.paidDate, 'short')}`
+              You paid it through Sureground
+              {d.paidThroughSureground.paidDate
+                ? ` on ${formatDate(d.paidThroughSureground.paidDate, 'short')}`
                 : ''}
               .
             </Text>

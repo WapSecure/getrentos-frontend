@@ -1,6 +1,6 @@
 import { Pressable, View } from 'react-native';
 import type { LucideIcon } from 'lucide-react-native';
-import { Card, Skeleton, Text, useTheme } from '@getrentos/ui-native';
+import { Card, Skeleton, Text, useTheme } from '@sureground/ui-native';
 
 export type DashboardMetric = {
   label: string;

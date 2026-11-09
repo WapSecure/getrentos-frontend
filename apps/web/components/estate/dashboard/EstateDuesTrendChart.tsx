@@ -12,8 +12,8 @@ import {
 } from 'recharts';
 import { TrendingUp } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { formatTrend, monthTrend } from '@getrentos/shared';
-import { Badge, Card, EmptyState, Skeleton } from '@getrentos/ui';
+import { formatTrend, monthTrend } from '@sureground/shared';
+import { Badge, Card, EmptyState, Skeleton } from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';

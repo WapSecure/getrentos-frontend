@@ -3,10 +3,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { CalendarDays, FileText, ArrowRight, BadgeCheck } from 'lucide-react';
-import { Alert } from '@getrentos/ui';
-import { Button } from '@getrentos/ui';
-import { DescriptionList } from '@getrentos/ui';
-import { formatPercent } from '@getrentos/shared';
+import { Alert } from '@sureground/ui';
+import { Button } from '@sureground/ui';
+import { DescriptionList } from '@sureground/ui';
+import { formatPercent } from '@sureground/shared';
 import { ROUTES } from '@/lib/constants/auth';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';

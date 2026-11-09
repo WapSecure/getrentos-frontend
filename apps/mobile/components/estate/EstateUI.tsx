@@ -15,7 +15,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   DUE_STATUS,
@@ -72,7 +72,7 @@ export function HouseholdRow({ h }: { h: Household }) {
         router.push({ pathname: '/(app)/estate-household/[id]', params: { id: h.id } });
       }}
       accessibilityRole="button"
-      accessibilityLabel={`${h.unitLabel}, ${h.residentName}${inactive ? ', inactive' : ''}${h.residentLinked ? ', has a GetRentos account' : ''}`}
+      accessibilityLabel={`${h.unitLabel}, ${h.residentName}${inactive ? ', inactive' : ''}${h.residentLinked ? ', has a Sureground account' : ''}`}
     >
       {({ pressed }) => (
         <Card
@@ -393,7 +393,7 @@ function HouseholdForm({
   );
 }
 
-/** Tie a resident's GetRentos account to the household so they can pay and get passes. */
+/** Tie a resident's Sureground account to the household so they can pay and get passes. */
 export function LinkResidentSheet({
   open,
   onClose,
@@ -441,11 +441,11 @@ function LinkResidentForm({
   return (
     <View style={{ gap: spacing.md }}>
       <Text variant="callout" color="mutedForeground">
-        Enter the email {household.residentName} uses on GetRentos. Once linked, they see this
+        Enter the email {household.residentName} uses on Sureground. Once linked, they see this
         home’s dues, announcements and visitor passes in their own app.
       </Text>
       <TextField
-        label="Resident’s GetRentos email"
+        label="Resident’s Sureground email"
         required
         value={email}
         onChangeText={setEmail}

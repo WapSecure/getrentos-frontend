@@ -14,7 +14,7 @@ import {
   Input,
   ListSkeleton,
   Select,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { readWatchlistRefusal, type WatchlistRefusal } from '@/lib/gateman/watchlistRefusal';

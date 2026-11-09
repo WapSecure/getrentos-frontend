@@ -10,7 +10,7 @@ import {
   SwitchRow,
   Text,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   NOTIFICATION_CATEGORIES,
@@ -22,7 +22,7 @@ import {
 } from '@/lib/api/notificationPreferences';
 import { useOptimisticMutation } from '@/lib/query/optimistic';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
-import { categorySendsEmail } from '@getrentos/shared';
+import { categorySendsEmail } from '@sureground/shared';
 import { goBack } from '@/lib/goBack';
 
 const CHANNELS: { key: 'email' | 'push' | 'inApp'; label: string }[] = [

@@ -3,7 +3,7 @@ import { toQuery } from './query';
 import type { Paginated } from './properties';
 import type { ShortletAvailability, ShortletListing } from './shortlets';
 import { formatLandArea, LAND_TITLE_TYPE_LABEL, type LandListing } from './land';
-import { trustChainLabel, type TrustChainLike, type TrustLabelTone } from '@getrentos/shared';
+import { trustChainLabel, type TrustChainLike, type TrustLabelTone } from '@sureground/shared';
 
 /**
  * The public marketplace: what anyone can browse without an account, mirroring
@@ -576,7 +576,10 @@ export const publicMarketApi = {
           longitude: s.longitude,
           facts: [
             ...fact('Property type', humanise(s.propertyType)),
-            ...fact('Payment', 'Protected: GetRentos holds your deposit until you confirm receipt'),
+            ...fact(
+              'Payment',
+              'Protected: Sureground holds your deposit until you confirm receipt'
+            ),
           ],
         };
       }

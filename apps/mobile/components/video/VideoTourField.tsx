@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { ActivityIndicator, Alert, Platform, Pressable, View } from 'react-native';
 import { Play, Trash2, Video } from 'lucide-react-native';
-import { Card, Divider, Text, useTheme, useToast } from '@getrentos/ui-native';
+import { Card, Divider, Text, useTheme, useToast } from '@sureground/ui-native';
 import { ApiError } from '@/lib/api/client';
-import { videoProblem } from '@getrentos/shared';
+import { videoProblem } from '@sureground/shared';
 import { pickVideo, recordVideo, type PickedVideo } from '@/lib/filePicker';
 import { VideoTourSheet } from './VideoTourSheet';
 import { FilmedOnSite } from './FilmedOnSite';

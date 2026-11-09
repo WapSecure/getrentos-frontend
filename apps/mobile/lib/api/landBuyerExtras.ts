@@ -1,4 +1,4 @@
-import type { BadgeTone } from '@getrentos/ui-native';
+import type { BadgeTone } from '@sureground/ui-native';
 import { apiFetch } from './client';
 import type { BuyerPurchaseDetail } from './landBuyer';
 import type { Milestone } from './landSales';

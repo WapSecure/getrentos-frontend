@@ -16,7 +16,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { landlordApi, type MicrositeSettings } from '@/lib/api/landlord';
 import { errorMessage } from '@/lib/api/client';
@@ -209,7 +209,7 @@ function MicrositeForm({ initial }: { initial: MicrositeSettings }) {
         value={slug}
         onChangeText={setSlug}
         error={slug && !slugValid ? 'Lowercase words joined by hyphens' : null}
-        hint={`getrentos.com/${slug || 'your-name'}`}
+        hint={`getsureground.io/${slug || 'your-name'}`}
       />
 
       <TextField

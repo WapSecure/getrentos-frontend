@@ -3,11 +3,12 @@ import { Alert } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from 'expo-font';
+import { useLegacyStorageMigrated } from '@/lib/legacyStorage';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
-import { ThemeProvider, ToastProvider, useTheme } from '@getrentos/ui-native';
+import { ThemeProvider, ToastProvider, useTheme } from '@sureground/ui-native';
 import { queryClient, queryPersistenceOptions } from '@/lib/query/client';
 import { AuthProvider, useAuth } from '@/lib/auth/AuthProvider';
 import { useMagicLink } from '@/lib/auth/useMagicLink';
@@ -163,7 +164,9 @@ function RootLayout() {
   // the first frame is already in the brand face. If it fails to load, the
   // platform face stands in rather than holding the app.
   const [fontsLoaded, fontError] = useFonts(BRAND_FONT_SOURCES);
-  if (!fontsLoaded && !fontError) return null;
+  // Stored GetRentos-era keys move to their Sureground names before anything reads them.
+  const storageReady = useLegacyStorageMigrated();
+  if ((!fontsLoaded && !fontError) || !storageReady) return null;
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

@@ -16,7 +16,7 @@ import {
   Select,
   TableSkeleton,
   useToast,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { formatDate } from '@/lib/format';
 import { getStoredUser } from '@/lib/authStorage';
 import {

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { IconLink } from '@getrentos/ui';
+import { IconLink } from '@sureground/ui';
 import { Logo } from '@/components/ui/Logo';
 import { Mail, MapPin, MessageCircle, Phone, Twitter } from 'lucide-react';
 import { SUPPORT, whatsappLink } from '@/lib/support';

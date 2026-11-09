@@ -26,12 +26,12 @@ import {
   useTheme,
   useToast,
   SwitchRow,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { QrScannerSheet } from '@/components/gateman/QrScannerSheet';
 import { PostSwitcherSheet } from '@/components/gateman/PostSwitcherSheet';
 import { WalkInSheet } from '@/components/gateman/WalkInSheet';
 import { useGateVoice } from '@/components/gateman/useGateVoice';
-import { digitsFromSpeech } from '@getrentos/shared';
+import { digitsFromSpeech } from '@sureground/shared';
 import { useVoiceInput } from '@/lib/voice';
 import { IdDocumentSheet } from '@/components/gateman/IdDocumentSheet';
 import { WatchlistBlockedSheet } from '@/components/gateman/WatchlistBlockedSheet';

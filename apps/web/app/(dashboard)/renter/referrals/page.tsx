@@ -9,7 +9,7 @@ export default function RenterReferralsPage() {
         eyebrow="Rewards"
         icon={Gift}
         title="Refer & earn"
-        description="Invite friends to GetRentos and track the rewards earned from successful referrals."
+        description="Invite friends to Sureground and track the rewards earned from successful referrals."
       />
       <div className="max-w-2xl">
         <ReferralSummaryCard />

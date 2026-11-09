@@ -32,7 +32,7 @@ import {
   Skeleton,
   Text,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   isMarketKind,
@@ -441,13 +441,13 @@ function Body({ listing: p }: { listing: MarketDetail }) {
           </View>
           <View style={{ flex: 1 }}>
             <Text variant="caption" color="primary" uppercase>
-              GetRentos protection
+              Sureground protection
             </Text>
             <Text variant="bodyStrong">A safer way to transact</Text>
           </View>
         </View>
         <Text variant="callout" color="mutedForeground">
-          Pay only through GetRentos. {PROTECTION_LINE[p.kind]} We never ask you to send funds
+          Pay only through Sureground. {PROTECTION_LINE[p.kind]} We never ask you to send funds
           directly to a stranger.
         </Text>
       </Card>
@@ -585,7 +585,7 @@ function SimilarListings({ listing }: { listing: MarketDetail }) {
 
 /* -------------------------------- footer -------------------------------- */
 
-/** When money paid through GetRentos reaches the other side, per market. */
+/** When money paid through Sureground reaches the other side, per market. */
 const PROTECTION_LINE: Record<MarketKind, string> = {
   rent: 'We hold your rent and release it to the landlord on schedule, unless you raise a dispute.',
   sale: 'We hold your deposit and only release it to the seller once you confirm receipt.',

@@ -10,7 +10,7 @@ import {
   DialogTitle,
   Field,
   Input,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 
 interface InviteOwnerModalProps {
   isOpen: boolean;
@@ -54,7 +54,7 @@ export function InviteOwnerModal({
         <div className="space-y-3 p-4">
           <Field
             label="Owner email"
-            hint="They’ll get an email to join GetRentos (or sign in) and accept."
+            hint="They’ll get an email to join Sureground (or sign in) and accept."
             required
           >
             <Input

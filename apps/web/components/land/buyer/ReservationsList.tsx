@@ -10,7 +10,7 @@ import {
   PageErrorState,
   Skeleton,
   useToast,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { Hourglass, MapPinned } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';

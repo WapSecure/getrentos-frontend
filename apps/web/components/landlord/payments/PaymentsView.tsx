@@ -10,7 +10,7 @@ import {
   TableSkeleton,
   ToggleChip,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { RentCollectionStats } from '@/components/landlord/payments/RentCollectionStats';
 import { PaymentsTable } from '@/components/landlord/payments/PaymentsTable';
 import { PaymentDetailsModal } from '@/components/landlord/payments/PaymentDetailsModal';

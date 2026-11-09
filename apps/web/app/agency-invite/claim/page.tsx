@@ -7,7 +7,7 @@ import { isAuthenticated, getStoredUser } from '@/lib/authStorage';
 import { ROUTES, getDashboardRoute, BACKEND_ROLE_TO_ID } from '@/lib/constants/auth';
 import { agencyOwnerInviteService } from '@/services/agencyOwnerInviteService';
 import { Logo } from '@/components/ui/Logo';
-import { Button, Skeleton } from '@getrentos/ui';
+import { Button, Skeleton } from '@sureground/ui';
 import { currentPath, withNext } from '@/lib/nextPath';
 
 type Phase = 'loading' | 'needs-auth' | 'ready' | 'claiming' | 'done' | 'error';
@@ -131,7 +131,7 @@ function ClaimContent() {
               {firm} invited you to work with them
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              {firm} is a property management firm on GetRentos. If you accept, your account (
+              {firm} is a property management firm on Sureground. If you accept, your account (
               <strong>{email}</strong>) is connected to {firm}, and they can set up management of
               your property with you.
             </p>
@@ -156,7 +156,7 @@ function ClaimContent() {
           <>
             <UserPlus className="mx-auto mb-3 h-8 w-8 text-primary" />
             <h1 className="text-lg font-semibold text-foreground">
-              {firm} invited you to GetRentos
+              {firm} invited you to Sureground
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
               Create an account or sign in with <strong>{email}</strong>. You will come back here to

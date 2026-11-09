@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { Alert, Badge } from '@getrentos/ui';
+import { Alert, Badge } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { sellerPayoutKeys } from '@/lib/queryKeys';
@@ -31,7 +31,7 @@ const PAYMENT_STATUS = {
 } as const;
 
 /**
- * Buyer payments GetRentos holds, the shares released to the developer as
+ * Buyer payments Sureground holds, the shares released to the developer as
  * steps are confirmed, and whether each share has reached their bank.
  */
 export const PurchasePayments = ({

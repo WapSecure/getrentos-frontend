@@ -13,8 +13,8 @@ import {
   PageHeader,
   StatCard,
   type BadgeVariant,
-} from '@getrentos/ui';
-import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { formatCurrency, formatDate, unwrap } from '@sureground/shared';
 import {
   adminCollectionsReconciliationService,
   type CollectionLineKind,
@@ -57,7 +57,7 @@ const KIND: Record<
   REVERSED_AFTER_CONFIRMATION: {
     label: 'Reversed after we confirmed it',
     variant: 'danger',
-    help: 'The payment company now reports this payment as reversed, but GetRentos had already applied it, so the money is still credited and could be paid out. Hold any payout from it, confirm the reversal with that company, and record how it is recovered.',
+    help: 'The payment company now reports this payment as reversed, but Sureground had already applied it, so the money is still credited and could be paid out. Hold any payout from it, confirm the reversal with that company, and record how it is recovered.',
   },
   DUPLICATE_PAYOUT: {
     label: 'Paid out twice',
@@ -67,12 +67,12 @@ const KIND: Record<
   TRANSFER_UNKNOWN: {
     label: 'Transfer we did not send',
     variant: 'danger',
-    help: 'Paystack paid out a transfer GetRentos has no record of sending. Check who started it in the Paystack dashboard straight away.',
+    help: 'Paystack paid out a transfer Sureground has no record of sending. Check who started it in the Paystack dashboard straight away.',
   },
   TRANSFER_MISSING_AT_GATEWAY: {
     label: 'Payout not at Paystack',
     variant: 'warning',
-    help: 'GetRentos sent this payout over an hour ago and Paystack has no transfer for it. Check the payout before anyone retries it.',
+    help: 'Sureground sent this payout over an hour ago and Paystack has no transfer for it. Check the payout before anyone retries it.',
   },
   MISSING_AT_GATEWAY: {
     label: 'Not at the payment company',
@@ -167,7 +167,7 @@ export default function CollectionsReconciliationPage() {
               label="Payment company fees"
               value={report.totals.gatewayFees}
               isCurrency
-              subtitle="Kept by Paystack and Monnify, paid by GetRentos"
+              subtitle="Kept by Paystack and Monnify, paid by Sureground"
             />
             <StatCard
               icon={ArrowUpRight}
@@ -267,7 +267,7 @@ export default function CollectionsReconciliationPage() {
               <h2 className="mb-1 text-base font-semibold text-foreground">Paid out</h2>
               <p className="mb-3 text-xs text-muted-foreground">
                 Payouts to landlords, hosts, sellers and others through Paystack, matched to what
-                GetRentos sent.
+                Sureground sent.
               </p>
               <Card className="divide-y divide-border">
                 <div className="flex items-center justify-between gap-3 px-5 py-3">
@@ -295,7 +295,7 @@ export default function CollectionsReconciliationPage() {
           <section>
             <h2 className="mb-1 text-base font-semibold text-foreground">Paid into the bank</h2>
             <p className="mb-3 text-xs text-muted-foreground">
-              Paystack settlements to the GetRentos account. They run a day or so behind
+              Paystack settlements to the Sureground account. They run a day or so behind
               collections, so they will not equal what was collected in the same days.
             </p>
             {(report.settlements ?? []).length === 0 ? (

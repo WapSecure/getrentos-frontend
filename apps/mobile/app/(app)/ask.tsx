@@ -11,7 +11,7 @@ import { router, useLocalSearchParams, type Href } from 'expo-router';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ArrowRight, ChevronLeft, Mic, Send, Square, Volume2 } from 'lucide-react-native';
-import { Chip, Text, TextField, useTheme } from '@getrentos/ui-native';
+import { Chip, Text, TextField, useTheme } from '@sureground/ui-native';
 import {
   REPLY_LANGUAGES,
   languageLabel,
@@ -136,7 +136,7 @@ const COPY: Record<AssistantPersona, { starters: string[]; scope: string; placeh
   },
 };
 
-/** Ask GetRentos: read-only answers from the user's own account (renter or landlord). */
+/** Ask Sureground: read-only answers from the user's own account (renter or landlord). */
 export default function AskScreen() {
   const params = useLocalSearchParams<{ persona?: string; estateId?: string }>();
   const persona: AssistantPersona =
@@ -240,7 +240,7 @@ export default function AskScreen() {
           <ChevronLeft size={24} color={colors.foreground} />
         </Pressable>
         <View style={{ flex: 1 }}>
-          <Text variant="bodyStrong">Ask GetRentos</Text>
+          <Text variant="bodyStrong">Ask Sureground</Text>
           <Text variant="caption" color="mutedForeground" numberOfLines={2}>
             Answers come from your account. Nothing is changed for you.
           </Text>

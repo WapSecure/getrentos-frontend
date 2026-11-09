@@ -1,5 +1,5 @@
-import { authFetch, safeCall, toQuery } from '@getrentos/shared';
-import type { ApiResponse, LandBoundaryVersion } from '@getrentos/shared';
+import { authFetch, safeCall, toQuery } from '@sureground/shared';
+import type { ApiResponse, LandBoundaryVersion } from '@sureground/shared';
 import type { Paginated } from '@/services/adminService';
 import type {
   AdminLandDiligenceDetail,

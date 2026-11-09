@@ -1,10 +1,10 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { ThemeToggle } from '@getrentos/ui';
+import { ThemeToggle } from '@sureground/ui';
 import { ForgotPasswordLeftContent } from '@/components/auth/ForgotPassword/ForgotPasswordLeftContent';
 import { ForgotPasswordForm } from '@/components/auth/ForgotPassword/ForgotPasswordForm';
-import { useToast, type ToastVariant } from '@getrentos/ui';
+import { useToast, type ToastVariant } from '@sureground/ui';
 import { ROUTES } from '@/lib/constants/auth';
 
 export default function ForgotPasswordPage() {

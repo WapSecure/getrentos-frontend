@@ -321,7 +321,7 @@ export interface LandBoundaryStatus {
 export const BOUNDARY_SOURCE_LABEL: Record<LandBoundarySource, string> = {
   OWNER_DRAWN: 'Drawn on the map',
   SURVEY_COORDINATES: 'From survey plan coordinates',
-  STAFF: 'Set by GetRentos staff',
+  STAFF: 'Set by Sureground staff',
 };
 
 /** One line on what a surveyor said about an outline, for owners and buyers. */

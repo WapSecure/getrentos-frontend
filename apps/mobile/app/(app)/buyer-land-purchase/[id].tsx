@@ -18,7 +18,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   ALLOCATION_ISSUED,
@@ -191,7 +191,7 @@ export default function BuyerLandPurchase() {
             ) : tab === 'conveyance' ? (
               <View style={{ gap: spacing.md }}>
                 <CoApprovalCard deal={{ kind: 'purchase', id }} />
-                <HeldNote text="GetRentos holds your payments. Each step you confirm releases its share to the developer, never more than you have paid. Confirm in order, and only once you hold the document or have been shown the plot. Allocation, the deed and the survey in your name come after full payment." />
+                <HeldNote text="Sureground holds your payments. Each step you confirm releases its share to the developer, never more than you have paid. Confirm in order, and only once you hold the document or have been shown the plot. Allocation, the deed and the survey in your name come after full payment." />
                 <Card>
                   <BuyerMilestones
                     milestones={p.milestones}
@@ -291,7 +291,7 @@ function PayNext({ p, onPaid }: { p: BuyerPurchaseDetail; onPaid: () => void }) 
     onSuccess: async (init) => {
       closeSheet();
       if (init.authorizationUrl) {
-        // Wait for GetRentos to confirm it, then show how it went (amount, reference).
+        // Wait for Sureground to confirm it, then show how it went (amount, reference).
         await checkout(init.authorizationUrl, init.reference);
       } else {
         toast.show(`Payment of ${formatNaira(init.amount)} confirmed.`, 'success');

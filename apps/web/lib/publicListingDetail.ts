@@ -209,7 +209,7 @@ export async function fetchPublicListing(
       amenities: s.amenities ?? [],
       facts: [
         ...fact('Property type', humanise(s.propertyType)),
-        ...fact('Payment', 'Protected: GetRentos holds your deposit until you confirm receipt'),
+        ...fact('Payment', 'Protected: Sureground holds your deposit until you confirm receipt'),
       ],
     };
   }

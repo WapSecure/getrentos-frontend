@@ -10,13 +10,13 @@ import {
   Select,
   StatGridSkeleton,
   PageHeader,
-} from '@getrentos/ui';
-import { recentMonthOptions, unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { recentMonthOptions, unwrap } from '@sureground/shared';
 
 import { adminPmKpiService, type PmKpiScopeKind } from '@/services/adminManagedService';
 
 const SCOPE_OPTIONS: { value: PmKpiScopeKind; label: string }[] = [
-  { value: 'MANAGED', label: 'GetRentos Managed' },
+  { value: 'MANAGED', label: 'Sureground Managed' },
   { value: 'FIRM', label: 'One firm' },
   { value: 'ALL', label: 'Every managed property' },
 ];

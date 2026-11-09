@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { MapPin } from 'lucide-react-native';
-import { Button, Text, useTheme } from '@getrentos/ui-native';
+import { Button, Text, useTheme } from '@sureground/ui-native';
 import { PropertyMapView } from '@/components/property/PropertyMapView';
 import { geocodeApi, LAGOS_POINT, type MapPoint } from '@/lib/api/geocode';
 import { haptics } from '@/lib/haptics';

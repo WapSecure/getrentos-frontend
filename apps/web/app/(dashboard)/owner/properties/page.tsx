@@ -13,7 +13,7 @@ import {
   useToast,
   hasSessionDraft,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';

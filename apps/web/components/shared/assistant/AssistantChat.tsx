@@ -20,7 +20,7 @@ import {
   IconButton,
   Select,
   Textarea,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import type { AssistantLink, AssistantReply, AssistantTurn } from '@/types/assistant';
 import {
   REPLY_LANGUAGES,
@@ -57,7 +57,7 @@ export interface AssistantChatProps {
   placeholder: string;
 }
 
-/** "Ask GetRentos": read-only answers from the user's own account, opened from the navbar. */
+/** "Ask Sureground": read-only answers from the user's own account, opened from the navbar. */
 export const AssistantChat = ({ ask: askFn, starters, scope, placeholder }: AssistantChatProps) => {
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState('');
@@ -122,7 +122,7 @@ export const AssistantChat = ({ ask: askFn, starters, scope, placeholder }: Assi
   return (
     <>
       <IconButton
-        label="Ask GetRentos"
+        label="Ask Sureground"
         icon={<MessageCircleQuestion />}
         onClick={() => setOpen(true)}
         aria-haspopup="dialog"
@@ -136,7 +136,7 @@ export const AssistantChat = ({ ask: askFn, starters, scope, placeholder }: Assi
         >
           <div className="border-b border-border p-5 pr-12">
             <DialogTitle className="text-base font-semibold text-foreground">
-              Ask GetRentos
+              Ask Sureground
             </DialogTitle>
             <DialogDescription className="mt-1 text-sm text-muted-foreground">
               {scope} Answers come from your account, and nothing is changed for you.

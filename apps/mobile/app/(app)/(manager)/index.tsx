@@ -13,7 +13,7 @@ import {
   Skeleton,
   Text,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { useCustody } from '@/lib/agency/custody';
 import {
@@ -59,7 +59,7 @@ export default function AgencyHome() {
         accessory={
           <IconButton
             onPress={() => router.push({ pathname: '/(app)/ask', params: { persona: 'agency' } })}
-            accessibilityLabel="Ask GetRentos"
+            accessibilityLabel="Ask Sureground"
             icon={<MessageCircleQuestion size={21} color={colors.foreground} />}
           />
         }
@@ -115,7 +115,7 @@ function Workspace() {
       <Card style={{ gap: spacing.sm }}>
         <Text variant="bodyStrong">Nothing to act on yet</Text>
         <Text variant="callout" color="mutedForeground">
-          An engagement has to be signed by both sides and verified by GetRentos before you can act
+          An engagement has to be signed by both sides and verified by Sureground before you can act
           on the property.
         </Text>
         <Button

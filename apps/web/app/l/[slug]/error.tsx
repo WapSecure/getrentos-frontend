@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { PageErrorState } from '@getrentos/ui';
+import { PageErrorState } from '@sureground/ui';
 
 /** Segment error boundary for microsite (l/[slug]) pages. */
 export default function MicrositeError({

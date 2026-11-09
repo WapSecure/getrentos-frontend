@@ -8,10 +8,10 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@getrentos/ui/DropdownMenu';
+} from '@sureground/ui/DropdownMenu';
 import { ThemeSwitch } from '@/components/layout/ThemeSwitch';
 import { Logo } from '@/components/ui/Logo';
-import { Button, IconButton } from '@getrentos/ui';
+import { Button, IconButton } from '@sureground/ui';
 import { ChevronDown, Menu, X } from 'lucide-react';
 import { ROUTES, getDashboardRoute, getUserRole } from '@/lib/constants/auth';
 import { ESTATE_MARKETPLACE_ROUTES } from '@/lib/constants/auth';

@@ -2,13 +2,13 @@ import { useState } from 'react';
 import { View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { AlertOctagon, AlertTriangle, CheckCircle2, ClipboardCheck } from 'lucide-react-native';
-import { Button, Skeleton, Text, useTheme } from '@getrentos/ui-native';
+import { Button, Skeleton, Text, useTheme } from '@sureground/ui-native';
 import { homeCareApi } from '@/lib/api/homeCare';
 import { qk } from '@/lib/query/keys';
 
 /**
  * "Check this invoice" before approving on the phone: the checks worked out by
- * GetRentos and questions for the vendor. Loads only when asked; it never
+ * Sureground and questions for the vendor. Loads only when asked; it never
  * decides.
  */
 export function InvoiceCheckCard({ invoiceId }: { invoiceId: string }) {

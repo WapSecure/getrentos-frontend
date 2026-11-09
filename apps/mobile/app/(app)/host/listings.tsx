@@ -14,7 +14,7 @@ import {
   Skeleton,
   Text,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { hostShortletsApi, type HostListing } from '@/lib/api/hostShortlets';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';

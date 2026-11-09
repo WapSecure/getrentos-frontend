@@ -13,7 +13,7 @@ import {
   TableSkeleton,
   type BadgeVariant,
   type ToastVariant,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { agencyCommissionService } from '@/services/agencyCommissionService';
@@ -33,7 +33,7 @@ import {
   withdrawStepUpSummary,
   withStepUpSummary,
   type AccountLookup,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 
 const PAYOUT_STATUS: Record<string, { label: string; variant: BadgeVariant }> = {
   PENDING: { label: 'Processing', variant: 'info' },

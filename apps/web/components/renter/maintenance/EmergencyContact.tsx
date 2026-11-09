@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Phone, Mail, AlertTriangle, Clock, User, MessageCircle } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button } from '@sureground/ui';
 
 interface EmergencyContact {
   id: string;

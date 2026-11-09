@@ -29,7 +29,7 @@ import {
   Input,
   Select,
   Textarea,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 
 import { formatCurrency, formatDate } from '@/lib/format';
 import { LegalCaseStage } from './LegalCaseStage';

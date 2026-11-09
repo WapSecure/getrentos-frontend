@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-/** Languages GetRentos can answer in. pcm is Nigerian Pidgin. */
+/** Languages Sureground can answer in. pcm is Nigerian Pidgin. */
 export type ReplyLanguage = 'en' | 'pcm' | 'yo' | 'ha' | 'ig';
 
 export const REPLY_LANGUAGES: { value: ReplyLanguage; label: string }[] = [
@@ -14,7 +14,7 @@ export const REPLY_LANGUAGES: { value: ReplyLanguage; label: string }[] = [
 export const languageLabel = (code: ReplyLanguage) =>
   REPLY_LANGUAGES.find((l) => l.value === code)?.label ?? 'English';
 
-const KEY = 'getrentos.replyLanguage';
+const KEY = 'sureground.replyLanguage';
 
 /** The language this device last chose for answers; English when none. */
 export async function loadReplyLanguage(): Promise<ReplyLanguage> {

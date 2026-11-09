@@ -13,7 +13,7 @@ import {
   Field,
   Select,
   DatePicker,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import {
   LAND_REVIEWER_ROLES,
   type InviteLandReviewerInput,
@@ -22,7 +22,7 @@ import {
 } from '@/types/land';
 import { humaniseEnum } from '@/lib/landDiligence';
 import { fromDateInput, tomorrowDateInput } from './shared';
-import { unwrap } from '@getrentos/shared';
+import { unwrap } from '@sureground/shared';
 import {
   adminLandProfessionalService,
   landProfessionalKeys,

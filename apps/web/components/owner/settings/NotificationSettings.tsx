@@ -5,11 +5,11 @@ import { TextMessageConsentCard } from '@/components/shared/settings/TextMessage
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Handshake, ShieldCheck, FileText, MessageCircle, Star, Bell } from 'lucide-react';
-import { Button, ListSkeleton, Switch, useToast } from '@getrentos/ui';
+import { Button, ListSkeleton, Switch, useToast } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { ownerKeys } from '@/lib/queryKeys';
 import { ownerService, type OwnerNotificationPreference } from '@/services/ownerService';
-import { categorySendsEmail } from '@getrentos/shared';
+import { categorySendsEmail } from '@sureground/shared';
 
 const CATEGORY_META: Record<string, { label: string; icon: React.ElementType }> = {
   offers: { label: 'New offers & counters', icon: Handshake },

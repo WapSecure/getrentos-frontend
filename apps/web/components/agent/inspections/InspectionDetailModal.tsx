@@ -9,7 +9,7 @@ import {
   DialogDescription,
   DialogTitle,
   type BadgeVariant,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { formatDate } from '@/lib/format';
 import type { PropertyInspection, RoomCondition, InspectionType } from '@/types/agent';
 

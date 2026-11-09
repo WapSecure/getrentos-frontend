@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getInitials } from '@/lib/format';
-import { Button, Field, Input, useToast } from '@getrentos/ui';
+import { Button, Field, Input, useToast } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
 import { realtorService } from '@/services/realtorService';

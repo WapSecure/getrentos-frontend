@@ -19,7 +19,7 @@ export interface ContentSecurityPolicyOptions {
   nonce: string;
   /** `next dev`: allows 'unsafe-eval' (React/Next dev tooling needs it) and any localhost port. */
   dev: boolean;
-  /** The GetRentos API base URL (NEXT_PUBLIC_API_URL). Allowed for fetch, websockets, images, media and framed documents. */
+  /** The Sureground API base URL (NEXT_PUBLIC_API_URL). Allowed for fetch, websockets, images, media and framed documents. */
   apiUrl?: string | null;
   /** Upload storage / CDN origins when they differ from the API (e.g. the S3 host behind presigned URLs). */
   mediaOrigins?: readonly string[];

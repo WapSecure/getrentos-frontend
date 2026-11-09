@@ -2,7 +2,7 @@ import { ScrollView, View } from 'react-native';
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Card, QueryState, Skeleton, SwitchRow, Text, useTheme } from '@getrentos/ui-native';
+import { Card, QueryState, Skeleton, SwitchRow, Text, useTheme } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   buyerSettingsApi,
@@ -11,7 +11,7 @@ import {
 } from '@/lib/api/buyerSettings';
 import { useOptimisticMutation } from '@/lib/query/optimistic';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
-import { categorySendsEmail } from '@getrentos/shared';
+import { categorySendsEmail } from '@sureground/shared';
 import { goBack } from '@/lib/goBack';
 
 export default function BuyerNotificationSettings() {

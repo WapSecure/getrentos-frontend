@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getInitials } from '@/lib/format';
-import { Button, Field, Input, useToast } from '@getrentos/ui';
+import { Button, Field, Input, useToast } from '@sureground/ui';
 import { nameOnly } from '@/lib/validations/input';
 import { ChangeEmailButton } from '@/components/shared/security/ChangeEmailButton';
 import { agentService } from '@/services/agentService';

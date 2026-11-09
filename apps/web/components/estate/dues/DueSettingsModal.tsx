@@ -9,7 +9,7 @@ import {
   DialogTitle,
   Field,
   NumberInput,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 
 /** Mirrors MAX_GRACE_DAYS on the API, which rejects anything larger. */
 const MAX_GRACE_DAYS = 90;

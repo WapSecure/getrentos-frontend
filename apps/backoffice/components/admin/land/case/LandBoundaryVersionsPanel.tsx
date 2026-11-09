@@ -2,13 +2,13 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { Map as MapIcon } from 'lucide-react';
-import { Badge, ListSkeleton, type BadgeVariant } from '@getrentos/ui';
+import { Badge, ListSkeleton, type BadgeVariant } from '@sureground/ui';
 import {
   BOUNDARY_SOURCE_LABEL,
   formatDate,
   unwrap,
   type LandBoundarySignOffStatus,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import { adminLandService } from '@/services/adminLandService';
 import { landQueryKeys } from '@/lib/landDiligence';
 import { LandCaseSection, PanelMessage, type LandCasePanelProps } from './shared';

@@ -15,8 +15,8 @@ import {
   PageErrorState,
   Select,
   Textarea,
-} from '@getrentos/ui';
-import { unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { unwrap } from '@sureground/shared';
 import { Gavel, Inbox } from 'lucide-react';
 import { adminKeys } from '@/lib/queryKeys';
 import { hasAdminPermission } from '@/lib/adminAccess';

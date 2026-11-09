@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { ClipboardPaste, Plus, Trash2 } from 'lucide-react';
-import { Alert, Button, Field, IconButton, NumberInput, Select, Textarea } from '@getrentos/ui';
+import { Alert, Button, Field, IconButton, NumberInput, Select, Textarea } from '@sureground/ui';
 import {
   SUPPORTED_CRS,
   crsLabel,
@@ -10,7 +10,7 @@ import {
   toWgs84,
   type BoundaryCorner,
   type CrsCode,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import { ParcelBoundaryMap } from '@/components/maps/ParcelBoundaryMap';
 
 export interface SurveyRow {

@@ -14,8 +14,8 @@ import {
   useToast,
   PageHeader,
   Breadcrumbs,
-} from '@getrentos/ui';
-import { unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { unwrap } from '@sureground/shared';
 import { useAdminUser } from '../../../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
 import { landQueryKeys, readLandApiError } from '@/lib/landDiligence';

@@ -2,12 +2,12 @@
 
 import { useState } from 'react';
 import { KeyRound, RefreshCw } from 'lucide-react';
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@getrentos/ui';
-import { Alert, Button, IconButton } from '@getrentos/ui';
-import { Field } from '@getrentos/ui';
-import { Input } from '@getrentos/ui';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@sureground/ui';
+import { Alert, Button, IconButton } from '@sureground/ui';
+import { Field } from '@sureground/ui';
+import { Input } from '@sureground/ui';
 import { adminService } from '@/services/adminService';
-import { AUTH_CONSTANTS, ERROR_MESSAGES, unwrap } from '@getrentos/shared';
+import { AUTH_CONSTANTS, ERROR_MESSAGES, unwrap } from '@sureground/shared';
 import type { AdminStaffMember } from '@/types/admin';
 
 interface ResetPasswordModalProps {

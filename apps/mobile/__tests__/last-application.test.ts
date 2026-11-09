@@ -1,4 +1,4 @@
-import { applyLastApplication, type PrefillableApplicationFields } from '@getrentos/shared';
+import { applyLastApplication, type PrefillableApplicationFields } from '@sureground/shared';
 
 const empty: PrefillableApplicationFields = {
   phone: '',

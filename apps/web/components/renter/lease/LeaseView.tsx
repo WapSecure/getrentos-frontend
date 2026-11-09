@@ -15,7 +15,7 @@ import { UpcomingPaymentReminders } from '@/components/renter/lease/UpcomingPaym
 import { LeaseTerminationRequest } from '@/components/renter/lease/LeaseTerminationRequest';
 import { PendingLeaseCard } from '@/components/renter/lease/PendingLeaseCard';
 import { FileText } from 'lucide-react';
-import { EmptyState, PageErrorState, PageLoadingState, useToast } from '@getrentos/ui';
+import { EmptyState, PageErrorState, PageLoadingState, useToast } from '@sureground/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap, unwrapOptional } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
@@ -83,7 +83,7 @@ export const LeaseView = () => {
       queryClient.invalidateQueries({ queryKey: renterKeys.lease });
       toast.success(
         updated.status === 'awaiting_payment'
-          ? 'Signature recorded. The lease now depends on your first payment, which GetRentos holds until you have the keys.'
+          ? 'Signature recorded. The lease now depends on your first payment, which Sureground holds until you have the keys.'
           : 'Your signature was recorded.'
       );
     },

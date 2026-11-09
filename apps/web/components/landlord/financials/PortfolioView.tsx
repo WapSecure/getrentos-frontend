@@ -13,7 +13,7 @@ import {
   StatGridSkeleton,
   TableSkeleton,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { PropertyValueModal } from '@/components/landlord/properties/PropertyValueModal';
 import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
 import { usePlanTier } from '@/hooks/usePlanTier';

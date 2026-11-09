@@ -8,7 +8,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { visitToIso, VisitTimeField } from '@/components/landlord/maintenance/VisitTimeField';
 import type { LandlordMaintenanceRequest } from '@/types/landlord';
 

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { UserPlus } from 'lucide-react-native';
-import { Button, Card, Text, TextField, useTheme, useToast } from '@getrentos/ui-native';
+import { Button, Card, Text, TextField, useTheme, useToast } from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { WatchlistBlockedNotice } from '@/components/gateman/WatchlistBlockedNotice';
 import { WatchlistCheckResult } from '@/components/gateman/WatchlistCheckResult';

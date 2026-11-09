@@ -25,7 +25,15 @@ import {
   Landmark,
   MessageCircle,
 } from 'lucide-react-native';
-import { Avatar, Button, Divider, Screen, Text, ThemeToggle, useTheme } from '@getrentos/ui-native';
+import {
+  Avatar,
+  Button,
+  Divider,
+  Screen,
+  Text,
+  ThemeToggle,
+  useTheme,
+} from '@sureground/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useIdentityVerification } from '@/hooks/useIdentityVerification';
 import { useProSettings } from '@/hooks/useProSettings';
@@ -215,7 +223,7 @@ export default function RealtorAccount() {
         accessible
         accessibilityRole="header"
         accessibilityLabel={[
-          profile?.legalName ?? 'GetRentos realtor',
+          profile?.legalName ?? 'Sureground realtor',
           profile?.email,
           verified ? 'verified' : 'not verified',
         ]
@@ -225,7 +233,7 @@ export default function RealtorAccount() {
       >
         <Avatar name={profile?.legalName} size={76} />
         <Text variant="heading" style={{ marginTop: spacing.sm }}>
-          {profile?.legalName ?? 'GetRentos realtor'}
+          {profile?.legalName ?? 'Sureground realtor'}
         </Text>
         <Text variant="callout" color="mutedForeground">
           {profile?.email ?? profile?.phone ?? ''}
@@ -262,14 +270,14 @@ export default function RealtorAccount() {
         variant="outline"
         icon={<LogOut size={16} color={colors.foreground} />}
         onPress={() =>
-          Alert.alert('Sign out of GetRentos?', 'You can sign back in any time.', [
+          Alert.alert('Sign out of Sureground?', 'You can sign back in any time.', [
             { text: 'Cancel', style: 'cancel' },
             { text: 'Sign out', style: 'destructive', onPress: signOut },
           ])
         }
       />
       <Text variant="caption" color="mutedForeground" center style={{ marginBottom: spacing.lg }}>
-        GetRentos {Constants.expoConfig?.version ?? ''}
+        Sureground {Constants.expoConfig?.version ?? ''}
       </Text>
     </Screen>
   );

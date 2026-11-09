@@ -19,7 +19,7 @@ import {
   Skeleton,
   StatCard,
   StatGridSkeleton,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('en-NG', {

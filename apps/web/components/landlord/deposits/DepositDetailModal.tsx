@@ -15,7 +15,7 @@ import {
   Textarea,
   CurrencyInput,
   type BadgeVariant,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { Plus, Check, X, Undo2 } from 'lucide-react';
 import {
   depositService,

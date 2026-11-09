@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { CircleCheck, CircleAlert, HandCoins, Loader2, RotateCcw } from 'lucide-react';
-import { Button, ConfirmDialog, CurrencyInput, Field } from '@getrentos/ui';
-import { formatCurrency, formatDate } from '@getrentos/shared';
+import { Button, ConfirmDialog, CurrencyInput, Field } from '@sureground/ui';
+import { formatCurrency, formatDate } from '@sureground/shared';
 import type { LandPurchaseDetail, LandRefundStatus } from '@/types/landPurchase';
 
 const STATUS_COPY: Record<

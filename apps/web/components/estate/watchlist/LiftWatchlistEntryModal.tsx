@@ -10,7 +10,7 @@ import {
   DialogTitle,
   Field,
   Input,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 
 /** The API's floor. Kept in step so the form never allows what the server will reject. */
 const REASON_MIN_LENGTH = 10;

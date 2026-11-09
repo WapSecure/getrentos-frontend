@@ -22,7 +22,7 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   formatLandArea,
@@ -34,7 +34,7 @@ import {
   LAND_TITLE_TYPE_LABEL,
 } from '@/lib/api/land';
 import { PropertyMapView } from '@/components/property/PropertyMapView';
-import { boundaryCorners } from '@getrentos/shared';
+import { boundaryCorners } from '@sureground/shared';
 import { PropertyGallery, toGallery } from '@/components/property/PropertyGallery';
 import { formatDate } from '@/lib/format';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -192,7 +192,7 @@ export default function LandListingDetail() {
                       <Text variant="caption" color="mutedForeground">
                         {listing.diligence.reviewedAt
                           ? `Reviewed ${formatDate(listing.diligence.reviewedAt, 'medium')}`
-                          : 'Reviewed by GetRentos'}
+                          : 'Reviewed by Sureground'}
                         {listing.diligence.expiresAt
                           ? ` · valid to ${formatDate(listing.diligence.expiresAt, 'medium')}`
                           : ''}

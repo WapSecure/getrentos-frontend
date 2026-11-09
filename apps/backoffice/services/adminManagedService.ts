@@ -1,5 +1,5 @@
-import type { PmKpiReport } from '@getrentos/ui';
-import { authFetch, safeCall, type ApiResponse } from '@getrentos/shared';
+import type { PmKpiReport } from '@sureground/ui';
+import { authFetch, safeCall, type ApiResponse } from '@sureground/shared';
 
 export type ManagedServicingTier = 'COLLECT_ONLY' | 'COLLECT_MAINTAIN' | 'FULL_MANAGEMENT';
 
@@ -37,7 +37,7 @@ export type IntakeStatus =
   | 'DECLINED'
   | 'WITHDRAWN';
 
-/** An owner's GetRentos Managed request, as the intake pipeline sees it. */
+/** An owner's Sureground Managed request, as the intake pipeline sees it. */
 export interface ManagedIntake {
   id: string;
   status: IntakeStatus;
@@ -145,21 +145,21 @@ export interface PortfolioManagerOption {
   email: string | null;
 }
 
-/** Counts for the GetRentos Managed ops queues. */
+/** Counts for the Sureground Managed ops queues. */
 export interface ManagedQueueCounts {
   awaitingActivation: number;
   terminationRequests: number;
 }
 
 export const adminManagedService = {
-  /** GetRentos Managed opt-ins awaiting a portfolio manager and activation. */
+  /** Sureground Managed opt-ins awaiting a portfolio manager and activation. */
   listPending(): Promise<ApiResponse<ManagedMandate[]>> {
     return safeCall(() =>
       authFetch<ManagedMandate[]>('/admin/management-mandates/managed-pending')
     );
   },
 
-  /** Live GetRentos Managed engagements — the surface for reassigning a manager. */
+  /** Live Sureground Managed engagements — the surface for reassigning a manager. */
   listActive(): Promise<ApiResponse<ManagedMandate[]>> {
     return safeCall(() => authFetch<ManagedMandate[]>('/admin/management-mandates/managed-active'));
   },
@@ -176,7 +176,7 @@ export const adminManagedService = {
     return safeCall(() => authFetch<PartnerFirm[]>('/admin/management-mandates/partner-firms'));
   },
 
-  /** Counts for the GetRentos Managed ops queues — for the nav badge. */
+  /** Counts for the Sureground Managed ops queues — for the nav badge. */
   queueCounts(): Promise<ApiResponse<ManagedQueueCounts>> {
     return safeCall(() => authFetch<ManagedQueueCounts>('/admin/management-mandates/queue-counts'));
   },
@@ -304,7 +304,7 @@ export interface TerminationRequest {
   createdAt: string;
   propertyId: string;
   propertyTitle: string | null;
-  managerIsGetRentos: boolean;
+  managerIsSureground: boolean;
   ownerName: string | null;
   noticePeriodDays: number;
   noticeServedAt: string | null;

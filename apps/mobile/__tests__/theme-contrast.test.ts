@@ -1,4 +1,4 @@
-import { darkColors, lightColors, type Palette } from '@getrentos/tokens';
+import { darkColors, lightColors, type Palette } from '@sureground/tokens';
 
 function relativeLuminance(hex: string): number {
   const channels = hex

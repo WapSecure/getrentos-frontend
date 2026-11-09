@@ -13,7 +13,7 @@ import {
   Input,
   Select,
   Textarea,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import type { EmergencyKind } from '@/types/estate';
 
 /** The API's floor on a description, kept in step so the form cannot under-run it. */

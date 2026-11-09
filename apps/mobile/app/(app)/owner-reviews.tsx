@@ -3,7 +3,7 @@ import { RefreshControl, ScrollView, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Star } from 'lucide-react-native';
-import { Card, QueryState, Skeleton, Text, useTheme } from '@getrentos/ui-native';
+import { Card, QueryState, Skeleton, Text, useTheme } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { ownerApi } from '@/lib/api/owner';
 import { formatDate } from '@/lib/format';

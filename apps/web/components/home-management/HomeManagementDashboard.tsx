@@ -1,6 +1,6 @@
 'use client';
 import { useQuery } from '@tanstack/react-query';
-import { Alert, Card, Skeleton } from '@getrentos/ui';
+import { Alert, Card, Skeleton } from '@sureground/ui';
 import { Boxes, CalendarClock, ClipboardList, ShieldCheck, TriangleAlert } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { homeManagementKeys } from '@/lib/queryKeys';
@@ -23,7 +23,7 @@ export function HomeManagementDashboard() {
   return (
     <>
       <div className="mb-8">
-        <p className="text-sm font-medium text-primary">GetRentos Home Management</p>
+        <p className="text-sm font-medium text-primary">Sureground Home Management</p>
         <h1 className="mt-1 text-3xl font-semibold text-foreground">
           Operate every home with confidence.
         </h1>

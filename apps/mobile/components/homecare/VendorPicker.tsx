@@ -11,7 +11,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { qk } from '@/lib/query/keys';
 import { homeCareApi } from '@/lib/api/homeCare';

@@ -9,7 +9,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { OtpInput } from '@/components/auth/OtpInput';
 
 interface OTPModalProps {
@@ -125,11 +125,7 @@ export const OTPModal = ({
           {!canResend ? (
             <p className="text-sm text-muted-foreground">Resend code in {formatTime(timeLeft)}</p>
           ) : (
-            <Button
-              variant="link"
-              onClick={handleResend}
-              icon={<RefreshCw className="w-3 h-3" />}
-            >
+            <Button variant="link" onClick={handleResend} icon={<RefreshCw className="w-3 h-3" />}>
               Resend code
             </Button>
           )}

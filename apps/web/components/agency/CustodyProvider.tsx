@@ -39,7 +39,7 @@ import { describeAgencyError } from './agencyAccess';
  * through an edit which client the form was about.
  */
 
-const STORAGE_KEY = 'getrentos:agency:client';
+const STORAGE_KEY = 'sureground:agency:client';
 
 interface CustodyValue {
   /** Every mandate the caller manages, including ones not yet live. */

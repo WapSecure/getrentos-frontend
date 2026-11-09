@@ -8,7 +8,7 @@ import {
   saveAuthSession,
   setAuthToken,
   STORAGE_KEYS,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 
 /**
  * The shared web client keeps the access token in memory only (security gap

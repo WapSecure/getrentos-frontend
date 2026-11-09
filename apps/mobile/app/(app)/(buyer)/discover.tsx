@@ -15,7 +15,7 @@ import {
   Text,
   TextField,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { qk } from '@/lib/query/keys';
 import { buyerApi, type BuyerListing, type ListingFilters } from '@/lib/api/buyer';

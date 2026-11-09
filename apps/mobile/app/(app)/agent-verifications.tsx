@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BadgeCheck, CheckCircle, XCircle } from 'lucide-react-native';
-import { Badge, Card, Chip, QueryState, Skeleton, Text, useTheme } from '@getrentos/ui-native';
+import { Badge, Card, Chip, QueryState, Skeleton, Text, useTheme } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   agentApi,

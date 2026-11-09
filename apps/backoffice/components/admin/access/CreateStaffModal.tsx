@@ -2,13 +2,13 @@
 
 import { useState } from 'react';
 import { ShieldPlus } from 'lucide-react';
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@getrentos/ui';
-import { Alert, Button } from '@getrentos/ui';
-import { Field } from '@getrentos/ui';
-import { Input } from '@getrentos/ui';
-import { Select } from '@getrentos/ui';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@sureground/ui';
+import { Alert, Button } from '@sureground/ui';
+import { Field } from '@sureground/ui';
+import { Input } from '@sureground/ui';
+import { Select } from '@sureground/ui';
 import { adminService } from '@/services/adminService';
-import { AUTH_CONSTANTS, ERROR_MESSAGES, unwrap } from '@getrentos/shared';
+import { AUTH_CONSTANTS, ERROR_MESSAGES, unwrap } from '@sureground/shared';
 import { ADMIN_ROLE_DETAILS } from '@/lib/adminAccess';
 import type { AdminStaffRole } from '@/types/admin';
 
@@ -106,7 +106,7 @@ export const CreateStaffModal = ({
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="ada@getrentos.com"
+                placeholder="ada@getsureground.io"
                 autoComplete="off"
               />
             </Field>

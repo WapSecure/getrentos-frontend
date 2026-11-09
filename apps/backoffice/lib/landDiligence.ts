@@ -1,4 +1,4 @@
-import { ApiError } from '@getrentos/shared';
+import { ApiError } from '@sureground/shared';
 import type { LandDiligenceCheck, LandDiligenceChecklistStatus, LandRiskBand } from '@/types/land';
 
 /**
@@ -34,7 +34,7 @@ export const landQueryKeys = {
   fraudParcel: (propertyId: string) => ['admin', 'land', 'fraud', propertyId] as const,
 };
 
-export { humaniseEnum } from '@getrentos/shared';
+export { humaniseEnum } from '@sureground/shared';
 
 export interface SlaState {
   label: string;

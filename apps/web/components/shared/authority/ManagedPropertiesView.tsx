@@ -28,7 +28,7 @@ import {
   Textarea,
   type BadgeVariant,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { ReferenceCodeChip } from '@/components/shared/property/ReferenceCodeChip';
 import { AppealControl } from '@/components/shared/trust/AppealControl';
 import {

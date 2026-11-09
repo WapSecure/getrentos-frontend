@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     'Browse homes marketed by estates across Nigeria. See every property inside an estate: those its own team lists and those its residents own: and who is marketing each one.',
   alternates: { canonical: '/estates' },
   openGraph: {
-    title: 'Estates on GetRentos',
+    title: 'Estates on Sureground',
     description:
       'Browse homes marketed by estates across Nigeria, and see who is marketing each one.',
     url: '/estates',

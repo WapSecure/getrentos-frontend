@@ -3,7 +3,7 @@ import { routeForActionUrl, routeForNotification } from '@/lib/notificationRoute
 describe('notification routes', () => {
   it('maps web action paths onto native screens, tolerating host, query and /dashboard', () => {
     expect(routeForActionUrl('/renter/payments')).toBe('/(app)/payments');
-    expect(routeForActionUrl('https://getrentos.com/dashboard/renter/lease/?tab=docs')).toBe(
+    expect(routeForActionUrl('https://getsureground.io/dashboard/renter/lease/?tab=docs')).toBe(
       '/(app)/lease'
     );
     expect(routeForActionUrl('/renter/nowhere')).toBeNull();
@@ -110,7 +110,7 @@ describe('notification routes', () => {
 
   it('opens the owner screens web links point at', () => {
     expect(routeForActionUrl('/owner/trust-profile')).toBe('/(app)/owner-trust-profile');
-    expect(routeForActionUrl('https://app.getrentos.com/owner/documents?tab=shared')).toBe(
+    expect(routeForActionUrl('https://app.getsureground.io/owner/documents?tab=shared')).toBe(
       '/(app)/owner-documents'
     );
   });

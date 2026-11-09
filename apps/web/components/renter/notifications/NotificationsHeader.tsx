@@ -1,7 +1,7 @@
 'use client';
 
 import { Bell, BellOff, CheckCheck, Trash2 } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button } from '@sureground/ui';
 import { RenterPageHeader } from '../shared/RenterPageHeader';
 
 interface NotificationsHeaderProps {

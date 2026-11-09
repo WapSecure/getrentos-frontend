@@ -1,5 +1,5 @@
-import { authFetch, safeCall, toQuery } from '@getrentos/shared';
-import type { ApiResponse } from '@getrentos/shared';
+import { authFetch, safeCall, toQuery } from '@sureground/shared';
+import type { ApiResponse } from '@sureground/shared';
 import type { Paginated } from '@/services/adminService';
 import type {
   AdminRentalApplication,
@@ -73,9 +73,16 @@ export const adminRentalService = {
     return safeCall(() => authFetch<Paginated<AdminRentalUnit>>(`/admin/rentals/units${query}`));
   },
   searchTenantCandidates(search: string): Promise<ApiResponse<AdminTenantCandidate[]>> {
-    return safeCall(() => authFetch<AdminTenantCandidate[]>(`/admin/rentals/units/tenant-candidates${toQuery({ search })}`));
+    return safeCall(() =>
+      authFetch<AdminTenantCandidate[]>(
+        `/admin/rentals/units/tenant-candidates${toQuery({ search })}`
+      )
+    );
   },
-  assignUnitTenant(id: string, tenant: { tenantId: string } | { tenantName: string }): Promise<ApiResponse<void>> {
+  assignUnitTenant(
+    id: string,
+    tenant: { tenantId: string } | { tenantName: string }
+  ): Promise<ApiResponse<void>> {
     return post<void>(`units/${id}/tenant`, tenant);
   },
   removeUnitTenant(id: string): Promise<ApiResponse<void>> {
@@ -90,7 +97,15 @@ export const adminRentalService = {
   > {
     return post('units/bulk-pricing', { unitIds, askingRent, askingRentPeriod });
   },
-  bulkUnitCharges(input: { unitIds: string[]; amount: number; dueDate: string; category: string; billingCycle: string }): Promise<ApiResponse<{ requestedCount: number; createdCount: number; skippedUnitIds: string[] }>> {
+  bulkUnitCharges(input: {
+    unitIds: string[];
+    amount: number;
+    dueDate: string;
+    category: string;
+    billingCycle: string;
+  }): Promise<
+    ApiResponse<{ requestedCount: number; createdCount: number; skippedUnitIds: string[] }>
+  > {
     return post('units/bulk-charges', input);
   },
 
@@ -98,7 +113,9 @@ export const adminRentalService = {
     return listResource<AdminRentalListing>('listings', params);
   },
   listingDetail(listingId: string): Promise<ApiResponse<AdminRentalListingDetail>> {
-    return safeCall(() => authFetch<AdminRentalListingDetail>(`/admin/rentals/listings/${listingId}`));
+    return safeCall(() =>
+      authFetch<AdminRentalListingDetail>(`/admin/rentals/listings/${listingId}`)
+    );
   },
   pauseListing(listingId: string): Promise<ApiResponse<AdminRentalListing>> {
     return post<AdminRentalListing>(`listings/${listingId}/pause`);

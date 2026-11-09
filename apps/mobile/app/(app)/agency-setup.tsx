@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
-import type { VerifiedAddress } from '@getrentos/shared';
+import type { VerifiedAddress } from '@sureground/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FileText, Send } from 'lucide-react-native';
@@ -16,7 +16,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   agencyFirmApi,
@@ -60,7 +60,7 @@ export default function AgencySetup() {
         eyebrow="Agency"
         title={firm ? firm.name : 'Start your property management firm'}
         subtitle={
-          firm ? 'Firm details and verification' : 'GetRentos verifies your CAC registration'
+          firm ? 'Firm details and verification' : 'Sureground verifies your CAC registration'
         }
         onBack={() => goBack()}
       />
@@ -109,7 +109,7 @@ function Status({ firm }: { firm: Onboarding }) {
   const kyb = firm.profile.kybStatus;
   const [label, tone, text] =
     firm.status === 'SUSPENDED'
-      ? ['Suspended', 'danger', 'Your firm is suspended. Contact GetRentos support.']
+      ? ['Suspended', 'danger', 'Your firm is suspended. Contact Sureground support.']
       : firm.status === 'ACTIVE'
         ? ['Verified', 'success', 'Your firm is verified and active.']
         : kyb === 'SUBMITTED'
@@ -122,7 +122,7 @@ function Status({ firm }: { firm: Onboarding }) {
             ? [
                 'Not verified',
                 'danger',
-                `GetRentos said: ${firm.profile.kybDecisionNote ?? 'the details did not match.'} Fix them and submit again.`,
+                `Sureground said: ${firm.profile.kybDecisionNote ?? 'the details did not match.'} Fix them and submit again.`,
               ]
             : [
                 'Not submitted',
@@ -257,7 +257,7 @@ function Details({ firm }: { firm: Onboarding | null }) {
       ) : (
         <Text variant="caption" color="mutedForeground">
           {firm?.isOwner
-            ? 'Your details are with GetRentos for verification, so they can’t be changed now.'
+            ? 'Your details are with Sureground for verification, so they can’t be changed now.'
             : 'Only the firm’s principal can change these details.'}
         </Text>
       )}
@@ -285,7 +285,7 @@ function Verification({ firm }: { firm: Onboarding }) {
     mutationFn: agencyFirmApi.submitFirm,
     onSuccess: (updated) => {
       qc.setQueryData(qk.agency.onboarding, updated);
-      toast.show('Sent to GetRentos for verification.', 'success');
+      toast.show('Sent to Sureground for verification.', 'success');
     },
     onError: (e) => toast.show(errorMessage(e, 'Could not submit for verification.'), 'error'),
   });

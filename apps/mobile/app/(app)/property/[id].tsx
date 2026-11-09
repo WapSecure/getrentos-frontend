@@ -32,7 +32,7 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { useSavedListings } from '@/hooks/useSavedListings';
 import { qk } from '@/lib/query/keys';
 import { propertiesApi } from '@/lib/api/properties';
@@ -52,7 +52,7 @@ import { ListingCheckCard } from '@/components/property/ListingCheckCard';
 import { AffordabilityCard } from '@/components/property/AffordabilityCard';
 import { VideoTourSheet } from '@/components/video/VideoTourSheet';
 import { FilmedOnSite } from '@/components/video/FilmedOnSite';
-import { trustChainLabel } from '@getrentos/shared';
+import { trustChainLabel } from '@sureground/shared';
 
 export default function PropertyDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();

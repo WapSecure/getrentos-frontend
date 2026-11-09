@@ -3,7 +3,7 @@ import { Pressable, View } from 'react-native';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { Camera, X } from 'lucide-react-native';
-import { Button, Text, TextField, useTheme, useToast } from '@getrentos/ui-native';
+import { Button, Text, TextField, useTheme, useToast } from '@sureground/ui-native';
 import { LocationPicker } from '@/components/property/LocationPicker';
 import type { MapPoint } from '@/lib/api/geocode';
 import { Sheet } from '@/components/Sheet';

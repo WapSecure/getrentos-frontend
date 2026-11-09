@@ -8,7 +8,7 @@ export interface RenewalOption {
   basis: string[];
 }
 
-/** GET /landlord/leases/:id/renewal-advice. Every figure is worked out by GetRentos. */
+/** GET /landlord/leases/:id/renewal-advice. Every figure is worked out by Sureground. */
 export interface RenewalAdvice {
   leaseId: string;
   tenantName: string;

@@ -1,5 +1,5 @@
 import { Pressable, View, type StyleProp, type ViewStyle } from 'react-native';
-import { Badge, Text, useTheme } from '@getrentos/ui-native';
+import { Badge, Text, useTheme } from '@sureground/ui-native';
 
 type DashboardHeaderProps = {
   eyebrow: string;

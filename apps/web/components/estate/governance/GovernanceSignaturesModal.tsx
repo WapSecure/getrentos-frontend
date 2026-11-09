@@ -2,7 +2,14 @@
 
 import { PenLine } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { Badge, Dialog, DialogContent, DialogTitle, EmptyState, ListSkeleton } from '@getrentos/ui';
+import {
+  Badge,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  EmptyState,
+  ListSkeleton,
+} from '@sureground/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';

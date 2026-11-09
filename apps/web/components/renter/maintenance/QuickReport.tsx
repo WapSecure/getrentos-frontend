@@ -13,7 +13,7 @@ import {
   CheckCircle,
   type LucideIcon,
 } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button } from '@sureground/ui';
 import type { CreateMaintenanceRequestInput, MaintenanceCategory } from '@/types/maintenance';
 
 interface QuickReportProps {

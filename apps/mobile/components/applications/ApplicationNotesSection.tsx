@@ -13,7 +13,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { applicationsApi, type ApplicationNote } from '@/lib/api/applications';
 import { errorMessage } from '@/lib/api/client';

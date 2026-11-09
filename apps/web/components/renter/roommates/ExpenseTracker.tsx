@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Plus, ChevronDown, ChevronUp, ReceiptText } from 'lucide-react';
-import { NairaSign } from '@getrentos/ui/NairaSign';
+import { NairaSign } from '@sureground/ui/NairaSign';
 import {
   Alert,
   Badge,
@@ -15,7 +15,7 @@ import {
   Input,
   Select,
   type BadgeVariant,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 
 interface Expense {
   id: string;

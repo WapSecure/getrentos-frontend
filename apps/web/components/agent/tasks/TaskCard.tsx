@@ -10,7 +10,7 @@ import {
   CheckCircle2,
   XCircle,
 } from 'lucide-react';
-import { Badge, Button, Card } from '@getrentos/ui';
+import { Badge, Button, Card } from '@sureground/ui';
 import { formatDate } from '@/lib/format';
 import { taskStatusBadges } from '@/lib/statusBadge';
 import type { AgentTask, TaskType, TaskPriority } from '@/types/agent';

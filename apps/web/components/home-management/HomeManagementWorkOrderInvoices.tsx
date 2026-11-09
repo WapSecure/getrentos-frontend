@@ -18,16 +18,16 @@ import {
   Trash2,
   XCircle,
 } from 'lucide-react';
-import { Badge, type BadgeVariant } from '@getrentos/ui';
-import { Button } from '@getrentos/ui';
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrentos/ui';
-import { EmptyState } from '@getrentos/ui';
-import { Skeleton } from '@getrentos/ui';
-import { Field } from '@getrentos/ui';
-import { CurrencyInput, Input, NumberInput } from '@getrentos/ui';
-import { Pagination } from '@getrentos/ui';
-import { Textarea } from '@getrentos/ui';
-import { useToast } from '@getrentos/ui';
+import { Badge, type BadgeVariant } from '@sureground/ui';
+import { Button } from '@sureground/ui';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@sureground/ui';
+import { EmptyState } from '@sureground/ui';
+import { Skeleton } from '@sureground/ui';
+import { Field } from '@sureground/ui';
+import { CurrencyInput, Input, NumberInput } from '@sureground/ui';
+import { Pagination } from '@sureground/ui';
+import { Textarea } from '@sureground/ui';
+import { useToast } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { getStoredUser } from '@/lib/authStorage';
 import { formatCurrency, formatDate } from '@/lib/format';
@@ -188,7 +188,7 @@ const vendorPayCopy = (
     'If a top-up is needed, we send the vendor’s payment once it is confirmed. You’ll see it on this invoice.';
   if (preview.isLoading) {
     return {
-      note: 'Working out how much comes from the money GetRentos holds for you.',
+      note: 'Working out how much comes from the money Sureground holds for you.',
       buttonLabel: 'Working out the split…',
       disabled: true,
       protection: fallbackProtection,
@@ -198,8 +198,8 @@ const vendorPayCopy = (
   if (!split) {
     return {
       note: preview.isError
-        ? 'We couldn’t work out the split here. We pay the vendor from the money GetRentos holds for the owner first. If that doesn’t cover the invoice, you top up the rest by card, plus its card or bank fee, on the next page.'
-        : 'We pay the vendor from the money GetRentos holds for the owner first. A card top-up, with its card or bank fee, is only taken if that does not cover the invoice.',
+        ? 'We couldn’t work out the split here. We pay the vendor from the money Sureground holds for the owner first. If that doesn’t cover the invoice, you top up the rest by card, plus its card or bank fee, on the next page.'
+        : 'We pay the vendor from the money Sureground holds for the owner first. A card top-up, with its card or bank fee, is only taken if that does not cover the invoice.',
       buttonLabel: retry ? 'Retry payment' : 'Pay vendor',
       protection: fallbackProtection,
     };
@@ -213,11 +213,11 @@ const vendorPayCopy = (
       protection: undefined,
     };
   }
-  const held = { label: 'From money GetRentos holds for you', amount: split.fromHeldFunds };
+  const held = { label: 'From money Sureground holds for you', amount: split.fromHeldFunds };
   if (split.topUp <= 0) {
     return {
       parts: [held],
-      note: 'Paid in full from the money GetRentos holds for the owner. No card payment is needed. The amounts are checked again when you pay.',
+      note: 'Paid in full from the money Sureground holds for the owner. No card payment is needed. The amounts are checked again when you pay.',
       buttonLabel: `${retry ? 'Retry: pay' : 'Pay'} vendor ${formatCurrency(split.invoiceTotal)}`,
       secureLine: 'No card is charged.',
       protection: 'You’ll see the payment on this invoice.',
@@ -237,7 +237,7 @@ const vendorPayCopy = (
     ],
     note: `Your card is charged ${formatCurrency(split.topUpCharge)}. The vendor is paid the full ${formatCurrency(split.invoiceTotal)} once the top-up is confirmed. The amounts are checked again when you pay.`,
     buttonLabel: `Pay ${formatCurrency(split.topUp)}${fee} top-up and pay vendor`,
-    secureLine: `You finish the top-up on ${company}’s secure page: GetRentos never sees your card details.`,
+    secureLine: `You finish the top-up on ${company}’s secure page: Sureground never sees your card details.`,
     protection:
       'We send the vendor’s payment once the top-up is confirmed. You’ll see it on this invoice.',
   };

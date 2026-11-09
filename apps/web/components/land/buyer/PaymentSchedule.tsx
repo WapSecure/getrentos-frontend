@@ -1,4 +1,4 @@
-import { Alert } from '@getrentos/ui';
+import { Alert } from '@sureground/ui';
 import { AlertTriangle } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type { LandInstallment } from '@/types/landBuyer';

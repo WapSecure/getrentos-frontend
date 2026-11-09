@@ -1,7 +1,7 @@
 'use client';
 
 import { CreditCard, Building2, Wallet, Trash2 } from 'lucide-react';
-import { Alert, Card, IconButton } from '@getrentos/ui';
+import { Alert, Card, IconButton } from '@sureground/ui';
 
 interface PaymentMethod {
   id: string;
@@ -20,7 +20,7 @@ interface PaymentMethodsProps {
 
 /**
  * How paying works: the payer chooses card, bank transfer or USSD on Paystack's
- * or Monnify's secure page each time. GetRentos never takes or keeps card
+ * or Monnify's secure page each time. Sureground never takes or keeps card
  * details, so there is nothing to add here. Details saved here before are
  * listed only so they can be removed.
  */
@@ -45,7 +45,7 @@ export const PaymentMethods = ({ methods, onRemove }: PaymentMethodsProps) => {
       <div className="p-4">
         <Alert variant="info">
           You choose how to pay (card, bank transfer or USSD) on Paystack’s or Monnify’s secure page
-          each time you pay. GetRentos never sees or keeps your card details.
+          each time you pay. Sureground never sees or keeps your card details.
         </Alert>
       </div>
 

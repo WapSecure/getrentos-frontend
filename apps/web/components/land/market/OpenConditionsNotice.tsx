@@ -1,6 +1,6 @@
 'use client';
 
-import { Alert } from '@getrentos/ui';
+import { Alert } from '@sureground/ui';
 import { CircleDashed } from 'lucide-react';
 import { formatDate } from '@/lib/format';
 import type { LandOpenCondition } from '@/types/land';
@@ -22,7 +22,7 @@ export const OpenConditionsNotice = ({
   return (
     <Alert variant="info" icon={CircleDashed} title="Verified with conditions">
       <p>
-        GetRentos approved this land subject to the following. {capitalise(action)} open once they
+        Sureground approved this land subject to the following. {capitalise(action)} open once they
         are met.
       </p>
       <ul className="mt-2 list-disc space-y-1 pl-5">

@@ -2,7 +2,7 @@ import { apiFetch, apiUpload } from './client';
 import { toQuery } from './query';
 import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
-import type { BadgeTone } from '@getrentos/ui-native';
+import type { BadgeTone } from '@sureground/ui-native';
 
 /**
  * The property-control screens a landlord and an owner share with the web:
@@ -13,11 +13,11 @@ import type { BadgeTone } from '@getrentos/ui-native';
 
 /* ----------------------------- activity log ---------------------------- */
 
-export type ActivityActorKind = 'MANAGER' | 'GETRENTOS' | 'TENANT' | 'SYSTEM' | 'OTHER';
+export type ActivityActorKind = 'MANAGER' | 'SUREGROUND' | 'TENANT' | 'SYSTEM' | 'OTHER';
 
 export const ACTOR_KIND_LABEL: Record<ActivityActorKind, string> = {
   MANAGER: 'Manager',
-  GETRENTOS: 'GetRentos',
+  SUREGROUND: 'Sureground',
   TENANT: 'Tenant',
   SYSTEM: 'Automatic',
   OTHER: 'Other',
@@ -25,7 +25,7 @@ export const ACTOR_KIND_LABEL: Record<ActivityActorKind, string> = {
 
 export const ACTOR_KIND_TONE: Record<ActivityActorKind, BadgeTone> = {
   MANAGER: 'info',
-  GETRENTOS: 'success',
+  SUREGROUND: 'success',
   TENANT: 'neutral',
   SYSTEM: 'neutral',
   OTHER: 'neutral',
@@ -245,7 +245,7 @@ export interface DepositListItem {
   propertyTitle: string | null;
   amount: number;
   status: DepositStatus;
-  heldByGetRentos: boolean;
+  heldBySureground: boolean;
   returnable: number;
   createdAt: string;
 }

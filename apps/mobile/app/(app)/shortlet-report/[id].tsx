@@ -15,7 +15,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { SupportContact } from '@/components/shortlet/StayUI';
 import { useMyStays } from '@/components/shortlet/useMyStays';
@@ -260,7 +260,7 @@ export default function GuestPromiseReport() {
                 onPress={() => send.mutate()}
               />
               <Text variant="caption" color="mutedForeground" center>
-                A person at GetRentos reviews it with you and the host. If we uphold it, you get
+                A person at Sureground reviews it with you and the host. If we uphold it, you get
                 your money back.
               </Text>
             </View>

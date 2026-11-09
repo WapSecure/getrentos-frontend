@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
-import { useToast, type ToastVariant } from '@getrentos/ui';
+import { useToast, type ToastVariant } from '@sureground/ui';
 
 export type Notify = (message: string, variant?: ToastVariant) => void;
 

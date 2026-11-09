@@ -418,7 +418,7 @@ export function payoutHold(
     const threshold = s.release?.thresholdAtRequest;
     return {
       title: 'Waiting for a second check',
-      body: `${threshold ? `Payouts of ₦${Math.round(threshold).toLocaleString('en-NG')} or more` : 'Larger payouts'} are released by two people, so a second GetRentos officer checks this one before it is sent. Nothing has left the account.`,
+      body: `${threshold ? `Payouts of ₦${Math.round(threshold).toLocaleString('en-NG')} or more` : 'Larger payouts'} are released by two people, so a second Sureground officer checks this one before it is sent. Nothing has left the account.`,
       tone: 'info',
     };
   }

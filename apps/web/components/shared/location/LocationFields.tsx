@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Field, Select } from '@getrentos/ui';
+import { Field, Select } from '@sureground/ui';
 import { listLocations } from '@/services/locationsService';
 import { unwrap } from '@/lib/apiHelpers';
 import { getCitiesFor } from '@/lib/constants/locations';

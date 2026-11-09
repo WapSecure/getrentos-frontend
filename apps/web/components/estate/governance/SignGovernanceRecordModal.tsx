@@ -8,7 +8,7 @@ import {
   DialogDescription,
   DialogTitle,
   SignaturePad,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import type { GovernanceRecord } from '@/types/estate';
 
 interface SignGovernanceRecordModalProps {

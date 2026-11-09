@@ -1,4 +1,4 @@
-import { mapTiles } from '@getrentos/shared';
+import { mapTiles } from '@sureground/shared';
 
 describe('mapTiles', () => {
   it('falls back to OpenStreetMap without a token', () => {

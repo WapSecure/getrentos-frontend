@@ -5,7 +5,7 @@ import { confirmPayment } from '@/lib/paymentResult';
 
 /**
  * Opens a Paystack or Monnify checkout in the in-app browser and, once the
- * payer closes it, waits for GetRentos to confirm the payment (up to 60 s,
+ * payer closes it, waits for Sureground to confirm the payment (up to 60 s,
  * like web). How it went stays on screen in the payment result sheet, with
  * the amount, what it was for and the reference, until the payer closes it.
  *

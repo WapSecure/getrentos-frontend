@@ -23,7 +23,7 @@ export default function LandLayoutsPage() {
           </h1>
           <p className="mt-3 text-base text-muted-foreground">
             Every estate here sits on a master parcel whose ownership and diligence we have
-            verified. Reserve a plot free for a few hours, pay on a plan, and GetRentos holds your
+            verified. Reserve a plot free for a few hours, pay on a plan, and Sureground holds your
             money until you confirm each conveyance step was delivered.
           </p>
           <p className="mt-3 text-sm">

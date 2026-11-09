@@ -13,7 +13,7 @@ import {
   Select,
   Textarea,
   Toast,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { UserPlus } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
@@ -176,7 +176,7 @@ export const RepresentativesManager = () => {
             <UserPlus className="h-4 w-4 text-primary" aria-hidden /> Appoint someone
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            They need a GetRentos account, and must verify their identity before they can approve
+            They need a Sureground account, and must verify their identity before they can approve
             payments. They accept the appointment themselves.
           </p>
           <form
@@ -186,7 +186,7 @@ export const RepresentativesManager = () => {
               if (canSubmit) appoint.mutate();
             }}
           >
-            <Field label="Their email on GetRentos" htmlFor="rep-email">
+            <Field label="Their email on Sureground" htmlFor="rep-email">
               <Input
                 id="rep-email"
                 type="email"

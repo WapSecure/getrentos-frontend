@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { ArrowRight, ShieldCheck, ShieldAlert, ShieldX, HelpCircle } from 'lucide-react';
-import { Button, CardSkeleton } from '@getrentos/ui';
+import { Button, CardSkeleton } from '@sureground/ui';
 import { kycService } from '@/services/kycService';
 import { unwrap } from '@/lib/apiHelpers';
 import { IdentityDocumentFallback } from './IdentityDocumentFallback';

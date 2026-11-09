@@ -10,7 +10,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { qk } from '@/lib/query/keys';
 import { buyerOffersApi, type BuyerFinancingType } from '@/lib/api/buyerOffers';

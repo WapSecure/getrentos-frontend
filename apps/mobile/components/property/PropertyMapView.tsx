@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
-import { useTheme } from '@getrentos/ui-native';
+import { useTheme } from '@sureground/ui-native';
 import { buildMapHtml, readBoundaryMessage, type PropertyMapViewProps } from './propertyMapHtml';
 
 export type { PropertyMapMarker, PropertyMapViewProps } from './propertyMapHtml';

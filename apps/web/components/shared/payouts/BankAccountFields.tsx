@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { CheckCircle2, Landmark, Loader2 } from 'lucide-react';
-import { Field, NumberInput, Select } from '@getrentos/ui';
-import { toAccountLookup, type AccountLookup } from '@getrentos/shared';
+import { Field, NumberInput, Select } from '@sureground/ui';
+import { toAccountLookup, type AccountLookup } from '@sureground/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { NIGERIAN_BANKS } from '@/lib/banks';
 import { paymentKeys } from '@/lib/queryKeys';

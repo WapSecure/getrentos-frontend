@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { ToggleChip } from '@getrentos/ui';
+import { ToggleChip } from '@sureground/ui';
 import { LEGAL_RESOURCES, type LegalResourceCategory } from '@/lib/content/legalResources';
 import { LegalResourceCard } from './LegalResourceCard';
 

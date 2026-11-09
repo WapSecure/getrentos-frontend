@@ -1,6 +1,6 @@
 'use client';
 
-import { Badge } from '@getrentos/ui';
+import { Badge } from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type { LandInstallment } from '@/types/landDeveloper';
 import { INSTALLMENT_STATUS } from '../developer/labels';

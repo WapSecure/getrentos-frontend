@@ -2,7 +2,7 @@
 
 import { Filter, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
-import { Card, ToggleChip } from '@getrentos/ui';
+import { Card, ToggleChip } from '@sureground/ui';
 
 interface NotificationFiltersProps {
   filterType: string;

@@ -16,7 +16,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   CONTACT_KINDS,
@@ -37,7 +37,7 @@ import { goBack } from '@/lib/goBack';
 /**
  * Who really manages the tenant's home and how to spot an impostor: the
  * verified landlord and managers, a check for any number, email or account
- * someone used, and a report that reaches GetRentos and the real landlord.
+ * someone used, and a report that reaches Sureground and the real landlord.
  */
 export default function RenterHomeTeam() {
   const { colors, spacing } = useTheme();
@@ -80,7 +80,7 @@ export default function RenterHomeTeam() {
           <>
             <Text variant="callout" color="mutedForeground">
               These are the only people verified to act for your home. Anyone else claiming to be
-              your landlord, a new manager or GetRentos is not.
+              your landlord, a new manager or Sureground is not.
             </Text>
             {homes.map((h) => (
               <HomeCard key={h.leaseId} home={h} />
@@ -136,12 +136,12 @@ function PayRule() {
   const { colors, spacing } = useTheme();
   return (
     <Card style={{ gap: spacing.xs, borderColor: colors.primary, borderWidth: 1 }}>
-      <Text variant="bodyStrong">Pay rent only in GetRentos</Text>
+      <Text variant="bodyStrong">Pay rent only in Sureground</Text>
       <Text variant="callout" color="mutedForeground">
-        GetRentos never asks you to pay into a personal account, and a change of manager never
+        Sureground never asks you to pay into a personal account, and a change of manager never
         changes how you pay.
         {hasSupportLine()
-          ? ` GetRentos support only contacts you from ${[SUPPORT.phone, SUPPORT.whatsapp]
+          ? ` Sureground support only contacts you from ${[SUPPORT.phone, SUPPORT.whatsapp]
               .filter(Boolean)
               .join(' or ')}.`
           : ''}
@@ -245,14 +245,14 @@ function ImpostorReport({ homes }: { homes: HomeTeam[] }) {
     return (
       <FormAlert
         tone="success"
-        message="Thank you. GetRentos will look into it, and your landlord and manager have been warned (without your name). If you already paid, report it to your bank now too."
+        message="Thank you. Sureground will look into it, and your landlord and manager have been warned (without your name). If you already paid, report it to your bank now too."
       />
     );
   }
   if (!open) {
     return (
       <Button
-        label="Report someone posing as your landlord, manager or GetRentos"
+        label="Report someone posing as your landlord, manager or Sureground"
         variant="outline"
         onPress={() => setOpen(true)}
       />

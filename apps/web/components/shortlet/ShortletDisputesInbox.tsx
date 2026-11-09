@@ -10,9 +10,9 @@ import {
   Skeleton,
   useToast,
   type BadgeVariant,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { Gavel, Send } from 'lucide-react';
-import { cn } from '@getrentos/shared';
+import { cn } from '@sureground/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';

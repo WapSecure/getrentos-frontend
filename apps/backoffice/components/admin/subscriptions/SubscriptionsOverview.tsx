@@ -17,8 +17,8 @@ import {
   TableSkeleton,
   type BadgeVariant,
   PageHeader,
-} from '@getrentos/ui';
-import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { formatCurrency, formatDate, unwrap } from '@sureground/shared';
 import { adminSubscriptionService } from '@/services/adminSubscriptionService';
 import type {
   AdminSubscription,

@@ -10,7 +10,7 @@ import { ReferralCodeField } from '@/components/auth/SignupForm/ReferralCodeFiel
 import { SignupLeftContent } from '@/components/auth/SignupLeftContent';
 import { AuthMethodTabs } from '@/components/auth/AuthMethodTabs';
 import { Logo } from '@/components/ui/Logo';
-import { Alert, Button, ThemeToggle } from '@getrentos/ui';
+import { Alert, Button, ThemeToggle } from '@sureground/ui';
 import { useSignup } from '@/hooks/useSignup';
 import { SIGNUP_METHODS, SignupMethod, ROUTES } from '@/lib/constants/auth';
 import { rememberSignupNext, safeNextPath, withNext } from '@/lib/nextPath';
@@ -101,7 +101,7 @@ export default function SignupPage() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-primary">
-                  {step === 'signup' ? 'Join GetRentos' : 'One final step'}
+                  {step === 'signup' ? 'Join Sureground' : 'One final step'}
                 </p>
                 <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
                   {step === 'signup' ? 'Create an account' : 'Verify your identity'}

@@ -1,4 +1,4 @@
-import { videoCallState } from '@getrentos/shared';
+import { videoCallState } from '@sureground/shared';
 
 describe('videoCallState', () => {
   const at = '2026-10-20T10:00:00.000Z';

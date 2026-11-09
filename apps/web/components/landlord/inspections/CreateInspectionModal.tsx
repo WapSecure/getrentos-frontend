@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Dialog, DialogContent, Button, Field, Select, Textarea, DatePicker } from '@getrentos/ui';
+import { Dialog, DialogContent, Button, Field, Select, Textarea, DatePicker } from '@sureground/ui';
 import {
   INSPECTION_TYPES,
   INSPECTION_TYPE_LABELS,

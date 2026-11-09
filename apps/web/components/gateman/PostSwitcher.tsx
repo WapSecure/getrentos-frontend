@@ -8,7 +8,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
 
 /**

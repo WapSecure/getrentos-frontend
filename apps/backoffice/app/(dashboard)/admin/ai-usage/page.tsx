@@ -20,10 +20,10 @@ import {
   Skeleton,
   PageHeader,
   SegmentedControl,
-} from '@getrentos/ui';
-import { StatCard, type StatCardAccent } from '@getrentos/ui';
+} from '@sureground/ui';
+import { StatCard, type StatCardAccent } from '@sureground/ui';
 import { AiDailyChart, usd } from '@/components/admin/ai/AiDailyChart';
-import { unwrap } from '@getrentos/shared';
+import { unwrap } from '@sureground/shared';
 import { adminService } from '@/services/adminService';
 import { adminKeys } from '@/lib/queryKeys';
 import type { AiReviewCapabilitySummary } from '@/types/admin';
@@ -65,15 +65,15 @@ const CAPABILITY_LABELS: Record<string, string> = {
   'dispute-summary': 'Dispute summary',
   'offer-comparison': 'Offer comparison',
   'applicant-summary': 'Applicant summary',
-  'renter-assistant': 'Ask GetRentos (renter)',
-  'landlord-assistant': 'Ask GetRentos (landlord)',
-  'manager-assistant': 'Ask GetRentos (manager)',
-  'owner-assistant': 'Ask GetRentos (owner)',
-  'estate-assistant': 'Ask GetRentos (estate)',
-  'resident-assistant': 'Ask GetRentos (resident)',
-  'agent-assistant': 'Ask GetRentos (agent)',
-  'realtor-assistant': 'Ask GetRentos (realtor)',
-  'buyer-assistant': 'Ask GetRentos (buyer)',
+  'renter-assistant': 'Ask Sureground (renter)',
+  'landlord-assistant': 'Ask Sureground (landlord)',
+  'manager-assistant': 'Ask Sureground (manager)',
+  'owner-assistant': 'Ask Sureground (owner)',
+  'estate-assistant': 'Ask Sureground (estate)',
+  'resident-assistant': 'Ask Sureground (resident)',
+  'agent-assistant': 'Ask Sureground (agent)',
+  'realtor-assistant': 'Ask Sureground (realtor)',
+  'buyer-assistant': 'Ask Sureground (buyer)',
 };
 
 const PERIODS = [

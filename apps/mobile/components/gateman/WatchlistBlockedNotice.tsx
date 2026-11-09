@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { View } from 'react-native';
 import { ShieldAlert } from 'lucide-react-native';
-import { Button, Text, TextField, useTheme } from '@getrentos/ui-native';
+import { Button, Text, TextField, useTheme } from '@sureground/ui-native';
 import {
   OVERRIDE_REASON_MIN_LENGTH,
   type WatchlistMatch,

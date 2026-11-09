@@ -17,7 +17,7 @@ import {
   PopoverHeader,
   PopoverTrigger,
   useOptimisticMutation,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { authFetch, safeCall, unwrap } from '@/lib/apiHelpers';
 import { formatRelativeTime } from '@/lib/format';
 import { notificationHref, type NotificationPortal } from '@/lib/notificationHref';

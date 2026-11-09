@@ -9,7 +9,7 @@ import {
   toISODate,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { leaseApi } from '@/lib/api/lease';
 import { errorMessage } from '@/lib/api/client';

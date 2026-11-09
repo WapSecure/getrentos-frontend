@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Calendar, CheckCircle, Clock, AlertCircle } from 'lucide-react';
-import { Badge, Button, Card } from '@getrentos/ui';
+import { Badge, Button, Card } from '@sureground/ui';
 
 interface Payment {
   month: string;

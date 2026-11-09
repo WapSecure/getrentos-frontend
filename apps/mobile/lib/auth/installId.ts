@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Crypto from 'expo-crypto';
 
-const KEY = 'getrentos.installId';
+const KEY = 'sureground.installId';
 
 /**
  * A random id this install keeps for itself, sent with sign-ups so the API can

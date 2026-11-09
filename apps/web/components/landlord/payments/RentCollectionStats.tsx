@@ -1,7 +1,7 @@
 'use client';
 
 import { Wallet, AlertTriangle, Lock, CalendarClock } from 'lucide-react';
-import { StatCard } from '@getrentos/ui';
+import { StatCard } from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 
 interface RentCollectionStatsProps {
@@ -34,7 +34,7 @@ export const RentCollectionStats = ({
     },
     {
       icon: Lock,
-      label: 'Held by GetRentos',
+      label: 'Held by Sureground',
       value: formatCurrency(escrowPending, { compact: true }),
       subtitle: 'Awaiting release',
       accent: 'blue',

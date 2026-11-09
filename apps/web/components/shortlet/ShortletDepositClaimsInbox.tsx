@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Badge, EmptyState, Skeleton, type BadgeVariant } from '@getrentos/ui';
+import { Badge, EmptyState, Skeleton, type BadgeVariant } from '@sureground/ui';
 import { RotateCcw, ShieldAlert } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';

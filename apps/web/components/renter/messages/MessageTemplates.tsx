@@ -13,7 +13,7 @@ import {
   Select,
   Textarea,
   type BadgeVariant,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { renterService, type MessageTemplate } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';

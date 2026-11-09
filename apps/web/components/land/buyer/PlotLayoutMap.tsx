@@ -2,7 +2,7 @@
 
 import 'leaflet/dist/leaflet.css';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { boundaryCorners } from '@getrentos/shared';
+import { boundaryCorners } from '@sureground/shared';
 import { addBaseTiles } from '@/lib/mapTiles';
 import { LAND_PLOT_STATUS_LABELS, type LandPlot } from '@/types/landBuyer';
 import { PLOT_STATUS_STYLES, plotLabel } from './landSaleLogic';

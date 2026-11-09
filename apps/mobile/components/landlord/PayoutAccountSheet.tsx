@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { View } from 'react-native';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Button, FormAlert, Text, useTheme, useToast } from '@getrentos/ui-native';
+import { Button, FormAlert, Text, useTheme, useToast } from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { landlordApi, type PayoutAccount } from '@/lib/api/landlord';
 import {
@@ -10,7 +10,7 @@ import {
   payoutAccountStepUpSummary,
   saveAccountLabel,
   type AccountLookup,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import { BankAccountFields } from '@/components/forms/BankAccountFields';
 import { PayoutCooldownHint } from '@/components/payouts/PayoutHoldNotice';
 import { withStepUpSummary } from '@/lib/stepUp';

@@ -9,7 +9,7 @@ import type {
   ShortletDispute,
   ShortletSeason,
 } from './hostShortlets';
-import type { VideoStream } from '@getrentos/shared';
+import type { VideoStream } from '@sureground/shared';
 import { providerQuery, type PaymentProvider } from './paymentStatus';
 
 export type { DisputeMessage, ShortletDispute, ShortletSeason };

@@ -9,7 +9,7 @@ import {
   DialogTitle,
   Field,
   Textarea,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import type { LandMilestone, LandMilestoneDeliverInput } from '@/types/landDeveloper';
 import { LandDocumentPicker } from '../documents/LandDocumentPicker';
 

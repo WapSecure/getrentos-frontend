@@ -173,7 +173,7 @@ let refreshPromise: Promise<boolean> | null = null;
  * A Web Lock named for this app queues the refreshes of all its tabs, so each
  * one sends the cookie the previous one was given.
  */
-const REFRESH_LOCK = `getrentos-auth-refresh:${CLIENT_APP ?? 'web'}`;
+const REFRESH_LOCK = `sureground-auth-refresh:${CLIENT_APP ?? 'web'}`;
 
 /** Pause before the one retry of a refused refresh; see `refreshSession`. */
 const REFRESH_RETRY_DELAY_MS = 750;

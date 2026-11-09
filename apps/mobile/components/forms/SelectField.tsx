@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { Check, ChevronDown, Search } from 'lucide-react-native';
-import { Text, TextField, useTheme } from '@getrentos/ui-native';
+import { Text, TextField, useTheme } from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 
 export type SelectOption = { value: string; label: string };

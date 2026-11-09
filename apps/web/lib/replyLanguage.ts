@@ -1,7 +1,7 @@
 import { languageLabels, type Language } from '@/lib/i18n/translations';
 
 /**
- * Languages GetRentos can answer in: the app's own languages (English and
+ * Languages Sureground can answer in: the app's own languages (English and
  * Pidgin, from i18n) plus languages only the AI answers in so far.
  */
 export type ReplyLanguage = Language | 'yo' | 'ha' | 'ig';
@@ -17,7 +17,7 @@ export const REPLY_LANGUAGES: { value: ReplyLanguage; label: string }[] = [
 export const languageLabel = (code: ReplyLanguage) =>
   REPLY_LANGUAGES.find((l) => l.value === code)?.label ?? languageLabels.en;
 
-const KEY = 'getrentos.replyLanguage';
+const KEY = 'sureground.replyLanguage';
 
 /**
  * A reply language the person chose in the assistant, overriding the app's

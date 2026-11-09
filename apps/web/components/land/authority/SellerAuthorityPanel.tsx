@@ -26,7 +26,7 @@ import {
   Skeleton,
   Textarea,
   useToast,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import {
   describeCapacityRule,
   LAND_AUTHORITY_INSTRUMENT_LABELS,
@@ -43,7 +43,7 @@ import {
   type LandCapacityRule,
   type LandSellerCapacity,
   type LandSignatoryRole,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
 import { landKeys } from '@/lib/queryKeys';
@@ -62,7 +62,7 @@ const isClaim = (view: unknown): view is LandAuthorityView =>
 /**
  * The seller's authority to sell this land: the capacity they sell in, the
  * instrument it rests on, and everyone whose consent it needs. Land review
- * cannot be approved until GetRentos has verified it.
+ * cannot be approved until Sureground has verified it.
  */
 export const SellerAuthorityPanel = ({ propertyId }: SellerAuthorityPanelProps) => {
   const queryClient = useQueryClient();
@@ -143,8 +143,8 @@ const StatusCard = ({ view }: { view: LandAuthorityView | null }) => {
             <h2 className="font-semibold text-foreground">Show you can sell this land</h2>
             <p className="mt-1 text-sm text-muted-foreground">
               Buyers need to know the person selling has the right to. Tell us how you hold or
-              represent this land and what that rests on. GetRentos checks it before the land can be
-              approved for sale.
+              represent this land and what that rests on. Sureground checks it before the land can
+              be approved for sale.
             </p>
           </div>
         </div>
@@ -166,7 +166,7 @@ const StatusCard = ({ view }: { view: LandAuthorityView | null }) => {
       {authority.status === 'DISPUTED' && (
         <Alert variant="danger" icon={AlertTriangle} className="mt-3">
           Someone has objected to this sale. It is paused, and you cannot change the claim, until
-          GetRentos resolves the objection.
+          Sureground resolves the objection.
         </Alert>
       )}
       {authority.decision?.note && (
@@ -374,7 +374,7 @@ const SignatoriesCard = ({ propertyId, view, onSaved, onFailed }: CardProps) => 
       onSaved(
         updated,
         email.trim()
-          ? 'Added. If they have a GetRentos account with that email, we have asked them to answer.'
+          ? 'Added. If they have a Sureground account with that email, we have asked them to answer.'
           : 'Added.'
       );
     },
@@ -402,8 +402,9 @@ const SignatoriesCard = ({ propertyId, view, onSaved, onFailed }: CardProps) => 
         <h2 className="font-semibold text-foreground">Who must consent</h2>
       </div>
       <p className="mt-1 text-sm text-muted-foreground">
-        People with a GetRentos account answer from it. For anyone else, upload their signed consent
-        {requirements.witnessRequired ? ' and name a witness' : ''}; GetRentos checks it.
+        People with a Sureground account answer from it. For anyone else, upload their signed
+        consent
+        {requirements.witnessRequired ? ' and name a witness' : ''}; Sureground checks it.
       </p>
       {authority.signatories.length > 0 && (
         <ul className="mt-4 divide-y divide-border rounded-xl border border-border">
@@ -450,7 +451,7 @@ const SignatoriesCard = ({ propertyId, view, onSaved, onFailed }: CardProps) => 
                 maxLength={40}
               />
             </Field>
-            <Field label="GetRentos email" hint="So they can answer from their own account.">
+            <Field label="Sureground email" hint="So they can answer from their own account.">
               <Input
                 type="email"
                 value={email}
@@ -512,7 +513,7 @@ const SignatoryRow = ({
       ),
     onSuccess: (updated) => {
       setRecording(false);
-      onSaved(updated, 'Consent recorded. It counts once GetRentos has checked it.');
+      onSaved(updated, 'Consent recorded. It counts once Sureground has checked it.');
     },
     onError: (error) => onFailed(error, 'Could not record that consent.'),
   });

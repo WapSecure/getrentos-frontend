@@ -1,6 +1,6 @@
 import { router, type Href } from 'expo-router';
 import { CircleHelp, KeyRound, ShieldCheck } from 'lucide-react-native';
-import { Screen } from '@getrentos/ui-native';
+import { Screen } from '@sureground/ui-native';
 import { useIdentityVerification } from '@/hooks/useIdentityVerification';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
@@ -38,7 +38,7 @@ export default function ResidentAccount() {
 
   return (
     <Screen>
-      <AccountHeader role="Resident" fallbackName="GetRentos resident" />
+      <AccountHeader role="Resident" fallbackName="Sureground resident" />
       <WorkspaceSwitcher />
       <SettingsGroup title="Settings" items={settings} footer={<AppearanceFooter />} />
       <AccountFooter />

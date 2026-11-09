@@ -13,7 +13,7 @@ import {
   Handshake,
   FileText,
 } from 'lucide-react';
-import { NairaSign } from '@getrentos/ui/NairaSign';
+import { NairaSign } from '@sureground/ui/NairaSign';
 import {
   Badge,
   Button,
@@ -30,9 +30,9 @@ import {
   Select,
   type BadgeVariant,
   PageHeader,
-} from '@getrentos/ui';
-import { cn, humaniseEnum } from '@getrentos/shared';
-import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { cn, humaniseEnum } from '@sureground/shared';
+import { formatCurrency, formatDate, unwrap } from '@sureground/shared';
 import { adminMarketplaceService } from '@/services/adminMarketplaceService';
 import { useProfessionalActions, downloadBlob } from './useProfessionalActions';
 import type { AdminRealtor, AdminRealtorDetail, LicenseStatus } from '@/types/marketplace';

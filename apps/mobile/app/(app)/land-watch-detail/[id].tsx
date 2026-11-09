@@ -16,7 +16,7 @@ import {
   useTheme,
   useToast,
   type BadgeTone,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import {
   boundaryTone,
   LAND_BOUNDARY_LABELS,
@@ -26,7 +26,7 @@ import {
   LAND_INSPECTION_STATUS_LABELS,
   type LandWatchIncidentKind,
   describeDistance,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import { qk } from '@/lib/query/keys';
 import { landWatchApi } from '@/lib/api/landWatch';
 import { ApiError, errorMessage } from '@/lib/api/client';
@@ -177,7 +177,7 @@ export default function LandWatchDetail() {
                     {i.description}
                   </Text>
                   {i.resolutionNote ? (
-                    <Text variant="callout">GetRentos: {i.resolutionNote}</Text>
+                    <Text variant="callout">Sureground: {i.resolutionNote}</Text>
                   ) : null}
                 </Card>
               ))}

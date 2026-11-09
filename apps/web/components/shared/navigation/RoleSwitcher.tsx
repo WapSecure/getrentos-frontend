@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { Check, Plus } from 'lucide-react';
-import { DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '@getrentos/ui';
+import { DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '@sureground/ui';
 import { openAddRoleDialog } from './AddRoleDialog';
 import { BACKEND_ROLE_TO_ID, ROLES, getDashboardRoute } from '@/lib/constants/auth';
 import { getStoredUser, updateStoredUser } from '@/lib/authStorage';

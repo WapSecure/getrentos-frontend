@@ -3,7 +3,7 @@ import { Pressable, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CalendarDays, ChevronRight } from 'lucide-react-native';
-import { Button, FormAlert, Skeleton, Text, useTheme, useToast } from '@getrentos/ui-native';
+import { Button, FormAlert, Skeleton, Text, useTheme, useToast } from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { Stepper } from '@/components/host/HostUI';
 import { qk } from '@/lib/query/keys';
@@ -195,7 +195,7 @@ function BookForm({
         />
         <Text variant="caption" color="mutedForeground" center>
           {listing.instantBooking
-            ? 'Confirmed straight away. You pay next: held by GetRentos until you check in.'
+            ? 'Confirmed straight away. You pay next: held by Sureground until you check in.'
             : "The host confirms first. You won't pay anything until they accept."}
         </Text>
       </View>

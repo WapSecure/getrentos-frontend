@@ -12,7 +12,7 @@ import {
   Field,
   Input,
   NumberInput,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { authFetch } from '@/lib/apiHelpers';
 
 /**
@@ -76,11 +76,7 @@ export function ChangeEmailButton({ onChanged }: { onChanged?: (email: string) =
 
   return (
     <>
-      <Button
-        variant="link"
-        onClick={() => setOpen(true)}
-        className="mt-1 font-medium"
-      >
+      <Button variant="link" onClick={() => setOpen(true)} className="mt-1 font-medium">
         Change email
       </Button>
       <Dialog
@@ -91,7 +87,9 @@ export function ChangeEmailButton({ onChanged }: { onChanged?: (email: string) =
         }}
       >
         <DialogContent size="md">
-          <DialogTitle className="text-lg font-semibold text-foreground">Change your sign-in email</DialogTitle>
+          <DialogTitle className="text-lg font-semibold text-foreground">
+            Change your sign-in email
+          </DialogTitle>
           <DialogDescription className="mt-1 text-sm text-muted-foreground">
             {reference
               ? `Enter the 6-digit code we sent to ${sentTo}.`
@@ -134,7 +132,7 @@ export function ChangeEmailButton({ onChanged }: { onChanged?: (email: string) =
               <Button
                 type="submit"
                 isLoading={busy}
-                disabled={(reference ? code.length !== 6 : !newEmail.includes('@'))}
+                disabled={reference ? code.length !== 6 : !newEmail.includes('@')}
               >
                 {reference ? 'Confirm' : 'Send code'}
               </Button>

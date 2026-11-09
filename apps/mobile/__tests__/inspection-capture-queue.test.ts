@@ -79,7 +79,7 @@ const capture = (ref: string) => ({
   lng: 7.49,
   capturedOffline: true,
 });
-const stored = () => JSON.parse(mockStore.get('getrentos.land.inspection-captures') ?? '[]');
+const stored = () => JSON.parse(mockStore.get('sureground.land.inspection-captures') ?? '[]');
 
 describe('inspection capture queue', () => {
   beforeEach(async () => {

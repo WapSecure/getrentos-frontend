@@ -29,7 +29,7 @@ import {
   useToast,
   type BadgeVariant,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import {
   BarChart3,
   CalendarOff,

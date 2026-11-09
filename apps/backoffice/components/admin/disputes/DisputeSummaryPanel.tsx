@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Scale } from 'lucide-react';
-import { Button, Skeleton } from '@getrentos/ui';
-import { unwrap } from '@getrentos/shared';
+import { Button, Skeleton } from '@sureground/ui';
+import { unwrap } from '@sureground/shared';
 import { adminKeys } from '@/lib/queryKeys';
 import { adminService } from '@/services/adminService';
 
@@ -21,7 +21,7 @@ const List = ({ title, items }: { title: string; items: string[] }) =>
   ) : null;
 
 /**
- * "Summarise this case": the record worked out by GetRentos, each side's
+ * "Summarise this case": the record worked out by Sureground, each side's
  * position, what is agreed, what to verify and missing evidence. A neutral
  * reading for staff; it never decides. Loads only when asked.
  */

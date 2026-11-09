@@ -12,7 +12,7 @@ import { track } from './analytics';
  * push is an enhancement, so a failure is logged and never blocks sign-in.
  */
 
-const TOKEN_KEY = 'getrentos.pushToken';
+const TOKEN_KEY = 'sureground.pushToken';
 
 // While the app is open, still show the banner — the in-app bell updates too.
 Notifications.setNotificationHandler({

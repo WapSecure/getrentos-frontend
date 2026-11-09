@@ -1,4 +1,4 @@
-import type { LandWatchInspection } from '@getrentos/shared';
+import type { LandWatchInspection } from '@sureground/shared';
 
 /**
  * A buyer's pre-purchase inspection (blueprint §8.4, US-06): the shared

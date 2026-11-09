@@ -1,5 +1,5 @@
-import { authDownload, authFetch, safeCall, toQuery } from '@getrentos/shared';
-import type { ApiResponse } from '@getrentos/shared';
+import { authDownload, authFetch, safeCall, toQuery } from '@sureground/shared';
+import type { ApiResponse } from '@sureground/shared';
 import type {
   PlatformUser,
   PlanTier,
@@ -746,7 +746,7 @@ export const adminService = {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = 'getrentos-transactions.csv';
+      link.download = 'sureground-transactions.csv';
       document.body.appendChild(link);
       link.click();
       link.remove();

@@ -11,7 +11,7 @@ const STARTERS = [
   'Has a client approved my invitation?',
 ];
 
-/** Ask GetRentos for field agents: tasks, inspections, verifications, work orders and clients. */
+/** Ask Sureground for field agents: tasks, inspections, verifications, work orders and clients. */
 export const AgentAssistant = () => (
   <AssistantChat
     ask={(question, history, language) =>

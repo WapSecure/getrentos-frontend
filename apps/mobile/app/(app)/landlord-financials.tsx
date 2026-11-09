@@ -23,7 +23,7 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { landlordApi } from '@/lib/api/landlord';
 import { IncomeExpenseChart } from '@/components/landlord/IncomeExpenseChart';
@@ -44,7 +44,7 @@ export default function LandlordFinancials() {
     setExporting(true);
     try {
       const { bytes } = await landlordApi.financialsExport();
-      await shareDownloadedFile(bytes, 'getrentos-financials.csv', CSV_MIME, 'Financials');
+      await shareDownloadedFile(bytes, 'sureground-financials.csv', CSV_MIME, 'Financials');
     } catch (e) {
       toast.show(errorMessage(e, 'Could not export that.'), 'error');
     } finally {

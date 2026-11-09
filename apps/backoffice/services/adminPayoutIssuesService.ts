@@ -1,4 +1,4 @@
-import { authFetch, safeCall, type ApiResponse } from '@getrentos/shared';
+import { authFetch, safeCall, type ApiResponse } from '@sureground/shared';
 
 export type PayoutRail = 'shortlet' | 'realtor' | 'agency' | 'agent' | 'partner' | 'sale';
 

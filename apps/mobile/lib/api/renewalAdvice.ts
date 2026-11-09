@@ -9,7 +9,7 @@ export interface RenewalOption {
   basis: string[];
 }
 
-/** Renew or re-let for a lease nearing its end. Every figure is worked out by GetRentos. */
+/** Renew or re-let for a lease nearing its end. Every figure is worked out by Sureground. */
 export interface RenewalAdvice {
   leaseId: string;
   tenantName: string;

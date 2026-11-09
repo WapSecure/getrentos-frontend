@@ -18,7 +18,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   DEPOSIT_TREATMENT_LABEL,
@@ -73,7 +73,7 @@ export default function HandoverScreen() {
   const pack = h?.pack;
   const snap = pack?.snapshot;
   const outside = (snap?.leases ?? []).flatMap((l) =>
-    l.deposit && !l.deposit.heldByGetRentos
+    l.deposit && !l.deposit.heldBySureground
       ? [{ ...l.deposit, tenant: l.tenant, unit: l.unit }]
       : []
   );
@@ -101,7 +101,7 @@ export default function HandoverScreen() {
     mutationFn: () => managementTransfersApi.dispute(id, disputeText.trim()),
     onSuccess: (r) => {
       setShowDispute(false);
-      done(r, 'Handover disputed. GetRentos will settle it before sign-off resumes.');
+      done(r, 'Handover disputed. Sureground will settle it before sign-off resumes.');
     },
     onError: fail,
   });
@@ -167,9 +167,9 @@ export default function HandoverScreen() {
     { label: 'Rent owed by tenants', value: snap.totals.arrears },
     { label: 'Rent held for the owner', value: snap.totals.heldForOwner },
     { label: 'Tenant credit', value: snap.totals.credit },
-    { label: 'Deposits with GetRentos', value: snap.totals.depositsWithGetRentos },
-    { label: 'Deposits outside GetRentos', value: snap.totals.depositsOutside },
-    { label: 'Owner’s money with GetRentos', value: snap.ownerMoney.heldByGetRentos },
+    { label: 'Deposits with Sureground', value: snap.totals.depositsWithSureground },
+    { label: 'Deposits outside Sureground', value: snap.totals.depositsOutside },
+    { label: 'Owner’s money with Sureground', value: snap.ownerMoney.heldBySureground },
   ];
 
   return (
@@ -236,8 +236,8 @@ export default function HandoverScreen() {
                 title={`Disputed${pack.disputedAt ? ` ${formatDate(pack.disputedAt, 'short')}` : ''}`}
                 message={`${pack.disputeReason}\n${
                   pack.disputeResolution
-                    ? `Settled by GetRentos: ${pack.disputeResolution}`
-                    : 'GetRentos will settle it before sign-off resumes.'
+                    ? `Settled by Sureground: ${pack.disputeResolution}`
+                    : 'Sureground will settle it before sign-off resumes.'
                 }`}
               />
             ) : null}
@@ -271,7 +271,7 @@ export default function HandoverScreen() {
                   {formatNaira(l.heldForOwner)}
                   {l.deposit
                     ? ` · deposit ${formatNaira(l.deposit.amount)} ${
-                        l.deposit.heldByGetRentos ? 'with GetRentos' : 'outside GetRentos'
+                        l.deposit.heldBySureground ? 'with Sureground' : 'outside Sureground'
                       }`
                     : ''}
                 </Text>
@@ -338,7 +338,7 @@ export default function HandoverScreen() {
                   accessibilityRole="header"
                   style={{ marginTop: spacing.sm }}
                 >
-                  Deposits held outside GetRentos
+                  Deposits held outside Sureground
                 </Text>
                 {pack.depositAttestations.map((a) => (
                   <Text key={a.depositHoldId} variant="caption" color="mutedForeground">
@@ -358,7 +358,7 @@ export default function HandoverScreen() {
               {outside.map((d) => (
                 <View key={d.id} style={{ gap: spacing.sm }}>
                   <ChipSelect
-                    label={`Deposit of ${formatNaira(d.amount)} (${d.tenant}, ${d.unit}) you held outside GetRentos`}
+                    label={`Deposit of ${formatNaira(d.amount)} (${d.tenant}, ${d.unit}) you held outside Sureground`}
                     options={TREATMENTS}
                     value={deposits[d.id]?.treatment}
                     onChange={(treatment) =>

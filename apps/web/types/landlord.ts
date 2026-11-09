@@ -134,7 +134,7 @@ export interface Listing {
   askingRent: number;
   /** Cadence of `askingRent`. Yearly upfront is the Nigerian market default. */
   rentPeriod: RentPeriod;
-  /** Whether the landlord will accept the tenant repaying in monthly installments via GetRentos Flex, instead of the full amount upfront. Only meaningful when rentPeriod is 'year'. */
+  /** Whether the landlord will accept the tenant repaying in monthly installments via Sureground Flex, instead of the full amount upfront. Only meaningful when rentPeriod is 'year'. */
   allowsMonthlyPayment: boolean;
   securityDeposit?: number;
   amenities: string[];

@@ -12,7 +12,7 @@ import {
   Field,
   Textarea,
   TimePicker,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import type { RealtorLead, ViewingAppointment } from '@/types/realtor';
 import { PaginatedSelect } from '@/components/ui/PaginatedSelect';
 import { unwrap } from '@/lib/apiHelpers';

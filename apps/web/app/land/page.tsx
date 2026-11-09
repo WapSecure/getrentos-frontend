@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   alternates: { canonical: '/land' },
   openGraph: {
     title: 'Land: Reviewed Land Listings',
-    description: 'Browse land listings with a dated, scoped diligence review on GetRentos.',
+    description: 'Browse land listings with a dated, scoped diligence review on Sureground.',
     url: '/land',
     type: 'website',
   },

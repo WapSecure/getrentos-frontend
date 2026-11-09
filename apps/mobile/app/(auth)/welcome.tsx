@@ -11,7 +11,7 @@ import {
   ThemeToggle,
   useReducedMotion,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { resetOnboarding } from '@/lib/onboarding';
 
 export default function Welcome() {

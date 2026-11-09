@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Users, AlertCircle } from 'lucide-react';
-import { Switch } from '@getrentos/ui';
+import { Switch } from '@sureground/ui';
 
 interface MultiRoleToggleProps {
   enabled: boolean;

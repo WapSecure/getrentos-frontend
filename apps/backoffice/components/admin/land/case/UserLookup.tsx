@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Search, UserRound, X } from 'lucide-react';
-import { Button, Input, Skeleton } from '@getrentos/ui';
-import { unwrap } from '@getrentos/shared';
+import { Button, Input, Skeleton } from '@sureground/ui';
+import { unwrap } from '@sureground/shared';
 import { adminService } from '@/services/adminService';
 import type { PlatformUser } from '@/types/admin';
 

@@ -2,7 +2,7 @@ import { Pressable } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { Pin } from 'lucide-react-native';
-import { useTheme } from '@getrentos/ui-native';
+import { useTheme } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { buyerMessagesApi, type BuyerConversation } from '@/lib/api/buyerMessages';
 import type { Paginated } from '@/lib/api/buyer';

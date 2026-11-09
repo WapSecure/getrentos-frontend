@@ -1,4 +1,4 @@
-import { tierAtLeast } from '@getrentos/shared';
+import { tierAtLeast } from '@sureground/shared';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 
 /**

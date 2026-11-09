@@ -11,7 +11,7 @@ import {
   DialogTitle,
   Field,
   Input,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 import type { BuyerOffer, BuyerOfferMessage } from '@/types/buyer';
 

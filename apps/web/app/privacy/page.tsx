@@ -8,7 +8,7 @@ import { LegalPage } from '@/components/layout/LegalPage';
 export const metadata: Metadata = {
   title: 'Privacy Policy',
   description:
-    'What personal information GetRentos collects, why, who it is shared with, and the rights you have over it.',
+    'What personal information Sureground collects, why, who it is shared with, and the rights you have over it.',
   alternates: { canonical: '/privacy' },
 };
 
@@ -17,7 +17,7 @@ export default function PrivacyPage() {
     <LegalPage
       title="Privacy Policy"
       updated="21 September 2026"
-      intro="GetRentos helps people rent, buy and manage property. This page explains what personal information we collect, why we collect it, who sees it, and the choices you have."
+      intro="Sureground helps people rent, buy and manage property. This page explains what personal information we collect, why we collect it, who sees it, and the choices you have."
     >
       <h2 id="what-we-collect">What we collect</h2>
       <ul>
@@ -103,13 +103,13 @@ export default function PrivacyPage() {
         Under the Nigeria Data Protection Act 2023 you can ask to see the personal information we
         hold about you, correct it, have it deleted, limit or object to how we use it, receive a
         copy of it, and withdraw a consent you gave. To do any of these, email{' '}
-        <a href="mailto:support@getrentos.com">support@getrentos.com</a>. If you are unhappy with
-        our response, you can complain to the Nigeria Data Protection Commission.
+        <a href="mailto:support@getsureground.io">support@getsureground.io</a>. If you are unhappy
+        with our response, you can complain to the Nigeria Data Protection Commission.
       </p>
 
       <h2 id="children">Children</h2>
       <p>
-        GetRentos is for people aged 18 and over. We do not knowingly collect information from
+        Sureground is for people aged 18 and over. We do not knowingly collect information from
         children.
       </p>
 
@@ -121,7 +121,8 @@ export default function PrivacyPage() {
 
       <h2 id="contact">Contact us</h2>
       <p>
-        GetRentos, Lagos, Nigeria · <a href="mailto:support@getrentos.com">support@getrentos.com</a>
+        Sureground, Lagos, Nigeria ·{' '}
+        <a href="mailto:support@getsureground.io">support@getsureground.io</a>
       </p>
     </LegalPage>
   );

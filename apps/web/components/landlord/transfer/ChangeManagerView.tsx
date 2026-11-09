@@ -19,7 +19,7 @@ import {
   Skeleton,
   Textarea,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordService } from '@/services/landlordService';
@@ -29,7 +29,7 @@ import {
   type ManagementTransfer,
 } from '@/services/managementTransferService';
 
-type Incoming = { kind: 'GETRENTOS' } | { kind: 'FIRM'; id: string } | { kind: 'SELF' };
+type Incoming = { kind: 'SUREGROUND' } | { kind: 'FIRM'; id: string } | { kind: 'SELF' };
 
 const STATUS: Record<
   ManagementTransfer['status'],
@@ -47,7 +47,7 @@ const lagosToday = () => new Date(Date.now() + 60 * 60_000).toISOString().slice(
 
 /**
  * Changing who manages a property: from the current manager (or from managing
- * it yourself) to a verified firm, GetRentos Managed, or back to you, at a time
+ * it yourself) to a verified firm, Sureground Managed, or back to you, at a time
  * you choose. The current manager runs it until then; at that time their access
  * ends, the new manager's begins, and every tenant is told.
  */
@@ -55,7 +55,7 @@ export function ChangeManagerView() {
   const queryClient = useQueryClient();
   const [propertyId, setPropertyId] = useState('');
   const [fromMandateId, setFromMandateId] = useState<string>('');
-  const [incoming, setIncoming] = useState<Incoming>({ kind: 'GETRENTOS' });
+  const [incoming, setIncoming] = useState<Incoming>({ kind: 'SUREGROUND' });
   const [when, setWhen] = useState<'ASAP' | 'DATE'>('DATE');
   const [date, setDate] = useState('');
   const [reason, setReason] = useState('');
@@ -89,7 +89,7 @@ export function ChangeManagerView() {
         managementTransferService.request({
           propertyId,
           fromMandateId: fromMandateId || undefined,
-          incomingIsGetRentos: incoming.kind === 'GETRENTOS' || undefined,
+          incomingIsSureground: incoming.kind === 'SUREGROUND' || undefined,
           incomingOrganizationId: incoming.kind === 'FIRM' ? incoming.id : undefined,
           effectiveAt,
           reason: reason.trim() || undefined,
@@ -136,9 +136,9 @@ export function ChangeManagerView() {
         title="Change manager"
         description={
           <>
-            Move a property to a verified firm, to GetRentos Managed, or back to yourself. The
+            Move a property to a verified firm, to Sureground Managed, or back to yourself. The
             current manager runs it until the date you choose; then their access ends, the new
-            manager&apos;s begins, and every tenant is told. Rent keeps going through GetRentos
+            manager&apos;s begins, and every tenant is told. Rent keeps going through Sureground
             throughout.
           </>
         }
@@ -191,7 +191,7 @@ export function ChangeManagerView() {
                     onValueChange={(mandateId) => {
                       setFromMandateId(mandateId);
                       const r = p.running.find((item) => item.mandateId === mandateId);
-                      if (r?.managerIsGetRentos && incoming.kind === 'GETRENTOS')
+                      if (r?.managerIsSureground && incoming.kind === 'SUREGROUND')
                         setIncoming({ kind: 'FIRM', id: '' });
                     }}
                     options={p.running.map((r) => ({
@@ -218,10 +218,10 @@ export function ChangeManagerView() {
                   }
                   options={[
                     {
-                      value: 'GETRENTOS',
-                      label: 'GetRentos Managed',
+                      value: 'SUREGROUND',
+                      label: 'Sureground Managed',
                       // You cannot move a property to the manager you are ending.
-                      disabled: !!outgoing?.managerIsGetRentos,
+                      disabled: !!outgoing?.managerIsSureground,
                     },
                     { value: 'FIRM', label: 'A verified firm' },
                     { value: 'SELF', label: 'Me' },
@@ -277,8 +277,8 @@ export function ChangeManagerView() {
                 <p className="mt-2 text-xs text-warning">
                   This is before the end of {outgoing?.manager}&apos;s notice period (
                   {formatDate(outgoing!.noticeEndsAt)}).{' '}
-                  {outgoing?.managerIsGetRentos
-                    ? 'GetRentos charges notice in lieu for an early end.'
+                  {outgoing?.managerIsSureground
+                    ? 'Sureground charges notice in lieu for an early end.'
                     : 'Check your agreement with them for early-exit terms.'}
                 </p>
               )}

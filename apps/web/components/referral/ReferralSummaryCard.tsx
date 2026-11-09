@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Copy, Check, Gift, Users, Wallet, Mail, MessageCircle } from 'lucide-react';
-import { Alert, Button, Card, CardSkeleton } from '@getrentos/ui';
+import { Alert, Button, Card, CardSkeleton } from '@sureground/ui';
 import { referralService } from '@/services/referralService';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type { ReferralSummary } from '@/types/referral';
@@ -35,7 +35,7 @@ export const ReferralSummaryCard = () => {
 
   const shareUrl =
     typeof window !== 'undefined' ? `${window.location.origin}/signup?ref=${summary.code}` : '';
-  const shareMessage = `Join me on GetRentos! Use my referral code ${summary.code} when you sign up: ${shareUrl}`;
+  const shareMessage = `Join me on Sureground! Use my referral code ${summary.code} when you sign up: ${shareUrl}`;
 
   const handleCopyLink = async () => {
     await navigator.clipboard.writeText(shareUrl);
@@ -62,7 +62,7 @@ export const ReferralSummaryCard = () => {
       icon: Mail,
       color: 'bg-secondary text-foreground',
       action: () =>
-        (window.location.href = `mailto:?subject=${encodeURIComponent('Join me on GetRentos')}&body=${encodeURIComponent(shareMessage)}`),
+        (window.location.href = `mailto:?subject=${encodeURIComponent('Join me on Sureground')}&body=${encodeURIComponent(shareMessage)}`),
     },
   ];
 

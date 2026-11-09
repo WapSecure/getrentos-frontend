@@ -1,7 +1,7 @@
 'use client';
 
 import { Star, ShieldCheck, TrendingUp } from 'lucide-react';
-import { PageHeader } from '@getrentos/ui';
+import { PageHeader } from '@sureground/ui';
 import { useRenterUser } from '../layout';
 import { getStoredUser } from '@/lib/authStorage';
 import { ROUTES } from '@/lib/constants/auth';

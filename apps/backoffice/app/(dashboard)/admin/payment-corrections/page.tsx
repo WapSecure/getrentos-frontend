@@ -13,8 +13,8 @@ import {
   PageErrorState,
   PageHeader,
   useToast,
-} from '@getrentos/ui';
-import { formatCurrency, unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { formatCurrency, unwrap } from '@sureground/shared';
 import { useAdminUser } from '../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
 import {

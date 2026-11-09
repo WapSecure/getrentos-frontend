@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MessageSquareText } from 'lucide-react-native';
-import { ListSkeleton, QueryState, useTheme } from '@getrentos/ui-native';
+import { ListSkeleton, QueryState, useTheme } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { managementApi, type QuerySummary } from '@/lib/api/management';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';

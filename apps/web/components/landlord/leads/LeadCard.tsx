@@ -11,7 +11,7 @@ import {
   Flame,
   Send,
 } from 'lucide-react';
-import { Badge, Button, Checkbox } from '@getrentos/ui';
+import { Badge, Button, Checkbox } from '@sureground/ui';
 import { getInitials, formatDate, formatRelativeTime } from '@/lib/format';
 import { leadStageBadges } from '@/lib/statusBadge';
 import type { LandlordLead } from '@/types/landlord';

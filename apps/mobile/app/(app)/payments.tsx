@@ -17,7 +17,7 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   paymentsApi,
@@ -131,7 +131,7 @@ export default function Payments() {
       'Confirm move-in?',
       `This releases the ${
         payment.heldAmountNaira ? `${formatNaira(payment.heldAmountNaira)} ` : ''
-      }rent GetRentos is holding for ${payment.propertyName} to your landlord now. Only confirm once you've moved in — it can't be undone.`,
+      }rent Sureground is holding for ${payment.propertyName} to your landlord now. Only confirm once you've moved in — it can't be undone.`,
       [
         { text: 'Not yet', style: 'cancel' },
         {
@@ -267,12 +267,12 @@ export default function Payments() {
   );
 }
 
-/** What the renter owes across every charge, and what GetRentos is holding: the same figures as web. */
+/** What the renter owes across every charge, and what Sureground is holding: the same figures as web. */
 function PaymentsSummaryCard({ summary }: { summary: PaymentsSummary }) {
   const { spacing } = useTheme();
   const held =
     summary.totalHeldNaira > 0
-      ? `${formatNaira(summary.totalHeldNaira)} of your rent is held by GetRentos until it is released to your landlord.`
+      ? `${formatNaira(summary.totalHeldNaira)} of your rent is held by Sureground until it is released to your landlord.`
       : null;
 
   if (summary.openCount === 0) {
@@ -331,7 +331,7 @@ function PaymentRow({
   const { colors, spacing } = useTheme();
   const payable = p.status === 'pending' || p.status === 'overdue';
   const releasable = p.status === 'paid' && p.escrowStatus === 'held' && !p.disputeReason;
-  // Same rule as web and the API: only rent GetRentos is holding can be reported.
+  // Same rule as web and the API: only rent Sureground is holding can be reported.
   const disputable = p.status === 'paid' && p.escrowStatus === 'held' && !p.disputeReason;
   const left = p.outstanding ?? p.amount - (p.amountPaid ?? 0);
 
@@ -429,8 +429,8 @@ function PaymentRow({
         <Text variant="caption" color="mutedForeground" style={{ marginTop: spacing.sm }}>
           {p.heldAmountNaira ? `${formatNaira(p.heldAmountNaira)} held. ` : ''}
           {p.releaseDate
-            ? `Held under GetRentos Payment Protection — releases to your landlord automatically on ${formatDate(p.releaseDate, 'short')}, or sooner if you confirm move-in.`
-            : 'Held under GetRentos Payment Protection — confirm move-in to release it to your landlord.'}
+            ? `Held under Sureground Payment Protection — releases to your landlord automatically on ${formatDate(p.releaseDate, 'short')}, or sooner if you confirm move-in.`
+            : 'Held under Sureground Payment Protection — confirm move-in to release it to your landlord.'}
         </Text>
       ) : null}
 

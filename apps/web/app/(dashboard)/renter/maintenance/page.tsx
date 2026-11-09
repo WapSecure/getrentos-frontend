@@ -15,7 +15,13 @@ import {
   REPORT_MAINTENANCE_DRAFT_KEY,
   ReportMaintenanceModal,
 } from '@/components/renter/maintenance/ReportMaintenanceModal';
-import { ListSkeleton, PageErrorState, Pagination, hasSessionDraft, useToast } from '@getrentos/ui';
+import {
+  ListSkeleton,
+  PageErrorState,
+  Pagination,
+  hasSessionDraft,
+  useToast,
+} from '@sureground/ui';
 import type {
   CreateMaintenanceRequestInput,
   MaintenanceRequest,
@@ -176,7 +182,7 @@ export default function MaintenancePage() {
   };
 
   const handleMessage = () => {
-    // Keep the conversation on-platform (GetRentos messaging) rather than opening
+    // Keep the conversation on-platform (Sureground messaging) rather than opening
     // the device's email client: in-app messaging is the channel the rest of the
     // product points tenants to, and it keeps a record against the tenancy.
     router.push('/renter/messages');

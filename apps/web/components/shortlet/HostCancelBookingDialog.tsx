@@ -12,7 +12,7 @@ import {
   Field,
   Skeleton,
   Textarea,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { AlertTriangle } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletKeys } from '@/lib/queryKeys';

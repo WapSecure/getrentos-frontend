@@ -10,7 +10,7 @@ import {
   Skeleton,
   Text,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { useCustody } from '@/lib/agency/custody';
 import {
   grantsNothing,

@@ -16,8 +16,8 @@ import {
   TabsTrigger,
   Textarea,
   PageHeader,
-} from '@getrentos/ui';
-import { formatCurrency, unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { formatCurrency, unwrap } from '@sureground/shared';
 
 import {
   adminImpersonationService,
@@ -133,7 +133,7 @@ export default function ImpersonationReportsPage() {
     <div className="space-y-6">
       <PageHeader
         title="Impersonation reports"
-        description="Tenants reporting someone posing as their landlord, manager or GetRentos, usually to take rent outside the app. The property’s landlord and managers have already been warned."
+        description="Tenants reporting someone posing as their landlord, manager or Sureground, usually to take rent outside the app. The property’s landlord and managers have already been warned."
       />
       <Tabs value={filter} onValueChange={(v) => setFilter(v as Filter)}>
         <TabsList>

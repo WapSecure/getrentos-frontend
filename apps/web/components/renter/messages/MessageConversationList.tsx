@@ -1,7 +1,7 @@
 'use client';
 
 import { MessageCircle } from 'lucide-react';
-import { EmptyState } from '@getrentos/ui';
+import { EmptyState } from '@sureground/ui';
 import { ConversationItem } from './ConversationItem';
 import { Conversation } from '@/types/messages';
 

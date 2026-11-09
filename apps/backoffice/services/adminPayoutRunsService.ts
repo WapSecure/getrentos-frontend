@@ -1,4 +1,4 @@
-import { authFetch, safeCall, type ApiResponse } from '@getrentos/shared';
+import { authFetch, safeCall, type ApiResponse } from '@sureground/shared';
 import type { PayoutDestination } from './adminPayoutIssuesService';
 
 export interface PayoutRunSummary {

@@ -3,7 +3,7 @@
 import { Eye } from 'lucide-react';
 import type { WatchlistScreening } from '@/types/estate';
 import { describeWatchlistBasis } from '@/components/gateman/WatchlistBlockedNotice';
-import { Alert } from '@getrentos/ui';
+import { Alert } from '@sureground/ui';
 
 /**
  * The result of asking the estate's watch list about somebody, before anything

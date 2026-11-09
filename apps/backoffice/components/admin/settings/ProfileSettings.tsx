@@ -1,13 +1,13 @@
 'use client';
 
-import { Button, CardSkeleton, Field, Input, PageErrorState, useToast } from '@getrentos/ui';
+import { Button, CardSkeleton, Field, Input, PageErrorState, useToast } from '@sureground/ui';
 
 import { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getInitials } from '@getrentos/shared';
+import { getInitials } from '@sureground/shared';
 import { adminService } from '@/services/adminService';
-import { unwrap } from '@getrentos/shared';
+import { unwrap } from '@sureground/shared';
 import { adminKeys } from '@/lib/queryKeys';
 import type { AdminProfile } from '@/types/admin';
 

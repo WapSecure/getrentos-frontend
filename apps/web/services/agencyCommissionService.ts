@@ -1,5 +1,5 @@
 import { authFetch, safeCall, type ApiResponse } from '@/lib/apiHelpers';
-import type { PayoutSentTo } from '@getrentos/shared';
+import type { PayoutSentTo } from '@sureground/shared';
 
 export type AgencyCommissionType = 'LETTING' | 'RENEWAL';
 

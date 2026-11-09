@@ -7,7 +7,7 @@ import {
   LAND_BOUNDARY_LABELS,
   LAND_INSPECTION_STATUS_LABELS,
   boundaryTone,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import {
   Badge,
   Button,
@@ -20,7 +20,7 @@ import {
   useTheme,
   useToast,
   type BadgeTone,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   inspectionTextOk,
@@ -98,7 +98,7 @@ function InspectionCard({ inspection: i }: { inspection: PrePurchaseInspection }
       qc.invalidateQueries({ queryKey: qk.buyerLand.inspections });
       toast.show(
         mode === 'question'
-          ? 'Question sent. GetRentos will answer here.'
+          ? 'Question sent. Sureground will answer here.'
           : 'Reinspection requested.',
         'success'
       );
@@ -144,7 +144,7 @@ function InspectionCard({ inspection: i }: { inspection: PrePurchaseInspection }
           {r.summary ? <Text variant="callout">{r.summary}</Text> : null}
           {r.staffNote ? (
             <Text variant="caption" color="mutedForeground">
-              GetRentos: {r.staffNote}
+              Sureground: {r.staffNote}
             </Text>
           ) : null}
           {(r.evidence ?? []).filter((e) => e.mimeType.startsWith('image/')).length ? (
@@ -184,7 +184,7 @@ function InspectionCard({ inspection: i }: { inspection: PrePurchaseInspection }
           <Text variant="callout">You asked: {qn.question}</Text>
           <Text variant="caption" color="mutedForeground">
             {qn.answer
-              ? `GetRentos${qn.answeredAt ? ` (${formatDate(qn.answeredAt, 'short')})` : ''}: ${qn.answer}`
+              ? `Sureground${qn.answeredAt ? ` (${formatDate(qn.answeredAt, 'short')})` : ''}: ${qn.answer}`
               : 'Waiting for an answer.'}
           </Text>
         </View>

@@ -14,7 +14,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { estateAgreementsApi, MIN_REASON, type EstateAgreement } from '@/lib/api/estateAgreements';
 import { errorMessage } from '@/lib/api/client';

@@ -11,7 +11,7 @@ import {
   Skeleton,
   PageHeader,
   useToast,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { BuyerEscrowTransactionCard } from '@/components/buyer/transactions/BuyerEscrowTransactionCard';
 import { BuyerEscrowTransactionDetailModal } from '@/components/buyer/transactions/BuyerEscrowTransactionDetailModal';
 import { buyerService } from '@/services/buyerService';
@@ -108,7 +108,7 @@ export default function BuyerTransactionsPage() {
           isLoading ? (
             <Skeleton className="inline-block h-4 w-56 align-middle" />
           ) : (
-            `${total} purchase${total === 1 ? '' : 's'} protected by GetRentos`
+            `${total} purchase${total === 1 ? '' : 's'} protected by Sureground`
           )
         }
       />

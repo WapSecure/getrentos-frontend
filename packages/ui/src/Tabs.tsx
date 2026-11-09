@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useRef } from 'react';
 import * as RadixTabs from '@radix-ui/react-tabs';
-import { cn } from '@getrentos/shared';
+import { cn } from '@sureground/shared';
 
 export const Tabs = RadixTabs.Root;
 

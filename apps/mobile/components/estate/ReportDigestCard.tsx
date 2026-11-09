@@ -11,7 +11,7 @@ import {
   Text,
   useTheme,
   type BadgeTone,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { estateManagerApi, type ReportGroup } from '@/lib/api/estateManager';
 import { qk } from '@/lib/query/keys';
 import { AnnouncementSheet } from './EstateUI';

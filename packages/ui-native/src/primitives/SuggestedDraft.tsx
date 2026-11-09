@@ -20,7 +20,7 @@ export interface SuggestedDraftProps {
 /**
  * A drafted piece of text to read, use and edit before sending, with what to
  * check first. Nothing is sent from here. The web twin is SuggestedDraft in
- * @getrentos/ui.
+ * @sureground/ui.
  */
 export function SuggestedDraft({
   text,

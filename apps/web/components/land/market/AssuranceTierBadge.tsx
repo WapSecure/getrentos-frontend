@@ -1,4 +1,4 @@
-import { Badge } from '@getrentos/ui';
+import { Badge } from '@sureground/ui';
 import { ShieldCheck } from 'lucide-react';
 import { LAND_ASSURANCE_TIER_LABELS, type LandAssuranceTier } from '@/types/land';
 import { LAND_ASSURANCE_TIER_DESCRIPTIONS } from '@/types/landMarket';

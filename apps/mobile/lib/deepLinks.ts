@@ -1,4 +1,4 @@
-import appLinks from '@getrentos/shared/constants/app-links.json';
+import appLinks from '@sureground/shared/constants/app-links.json';
 import type { MarketKind } from './api/publicMarket';
 import { routeForActionUrl } from './notificationRoutes';
 
@@ -35,7 +35,7 @@ const isClaimed = (path: string) => appLinks.claimed.some((p) => startsWithSegme
 
 /** `/a/b?x=1#y` from any incoming URL or path, without a trailing slash. */
 function splitUrl(url: string): { path: string; query: string } {
-  // A website URL drops its origin; an app-scheme URL (getrentos://magic-link)
+  // A website URL drops its origin; an app-scheme URL (sureground://magic-link)
   // has no host, so what follows the scheme is already the path.
   const withoutOrigin = url
     .replace(/^https?:\/\/[^/?#]*/i, '')

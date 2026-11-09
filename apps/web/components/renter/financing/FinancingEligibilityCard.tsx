@@ -1,7 +1,7 @@
 'use client';
 
 import { Zap, ShieldCheck, Clock, TrendingUp, Lock } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button } from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 import { getFinancingPlanOptions, MIN_TRUST_SCORE_FOR_FINANCING } from '@/lib/financing';
 
@@ -17,7 +17,7 @@ const steps = [
     icon: Zap,
     title: 'We pay your landlord',
     description:
-      'GetRentos pays the full rent to your landlord. Your plan shows the date once the payment has been made.',
+      'Sureground pays the full rent to your landlord. Your plan shows the date once the payment has been made.',
   },
   {
     icon: Clock,
@@ -28,7 +28,7 @@ const steps = [
     icon: TrendingUp,
     title: 'Build your trust score',
     description:
-      'On-time instalments count toward your GetRentos Trust Score, just like rent payments.',
+      'On-time instalments count toward your Sureground Trust Score, just like rent payments.',
   },
 ];
 
@@ -48,14 +48,14 @@ export const FinancingEligibilityCard = ({
           <div className="flex items-center gap-2 mb-2">
             <Zap className="w-5 h-5 text-primary" />
             <span className="text-xs font-semibold uppercase tracking-wide text-primary">
-              GetRentos Flex
+              Sureground Flex
             </span>
           </div>
           <h1 className="text-2xl font-bold text-foreground">
             Stop scraping together a year of rent
           </h1>
           <p className="text-sm text-muted-foreground mt-2 max-w-lg">
-            Landlords in Nigeria often ask for 12 months upfront. GetRentos Flex pays them the full
+            Landlords in Nigeria often ask for 12 months upfront. Sureground Flex pays them the full
             amount today, and you repay us in smaller monthly instalments.
           </p>
         </div>
@@ -118,7 +118,7 @@ export const FinancingEligibilityCard = ({
       <div className="flex items-start gap-3 rounded-2xl border border-border/70 bg-secondary/50 p-4">
         <ShieldCheck className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
         <p className="text-xs text-muted-foreground">
-          GetRentos Flex is not a loan against your future income: it&apos;s a rent-specific
+          Sureground Flex is not a loan against your future income: it&apos;s a rent-specific
           instalment plan tied to your existing lease. Missed instalments affect your Trust Score
           the same way a missed rent payment would.
         </p>

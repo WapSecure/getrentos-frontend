@@ -1,4 +1,4 @@
-import type { BadgeTone } from '@getrentos/ui-native';
+import type { BadgeTone } from '@sureground/ui-native';
 import { ApiError, apiFetch } from './client';
 import type { LandAreaUnit } from './ownerLand';
 import { applyBps } from './landSales';

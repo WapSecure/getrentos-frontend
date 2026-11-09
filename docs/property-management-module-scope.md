@@ -1,7 +1,7 @@
 # Property Management Module — Comprehensive Scope
 
 **Status:** Draft for decision · **Owner:** Product + Eng · **Date:** 2026-10-10
-**Companion to:** `property-management-company-scope.md` (the PMC / GetRentos Managed engagement layer)
+**Companion to:** `property-management-company-scope.md` (the PMC / Sureground Managed engagement layer)
 
 > This document scopes the **full property-management product**, not just the manager-appointment layer already built. It is the case for turning what we have — a strong engagement + trust-accounting spine — into a complete module that wins three markets at once. Build-status flags reflect a code review of the current repo; anything marked 🟡 should be re-validated before estimation.
 
@@ -15,7 +15,7 @@ Property management is not one product. It is one **engine** — property ⇄ ow
 | ---------------------------- | ----------------------- | ----------------------------------------- | ---------------------------------------------------------------------------------------- |
 | **Self-Manage**              | Landlord                | Their _own_ units                         | Replace spreadsheets + WhatsApp; collect rent, handle maintenance, see the numbers       |
 | **Agency (Professional PM)** | Letting/managing agency | _Other people's_ portfolios under mandate | Run many owners' books with trust accounting, owner reporting, commissions — compliantly |
-| **GetRentos Managed**        | GetRentos itself        | Clients' properties as manager-of-record  | Hands-off management with a published fee card + SLA                                     |
+| **Sureground Managed**       | Sureground itself       | Clients' properties as manager-of-record  | Hands-off management with a published fee card + SLA                                     |
 
 The three share **>80% of the surface**. The differences are packaging, who-sees-what, who-gets-paid, and a few workflows (owner approvals, commissions, multi-owner ops). We have already built the hardest, most defensible part — the mandate/authority/trust spine. The opportunity is to complete the **operational toolkit** on top and package the **Agency edition**, which is today the least-built and highest-margin market.
 
@@ -31,7 +31,7 @@ Legend: ✅ built / deep · 🟡 partial · ⛔ gap
 
 - **Mandate / engagement layer** (`property-management`): mandates, **authority capabilities** (LIST / MANAGE / TRANSACT), **servicing tiers** (Collect 5% / Collect+Maintain 8% / Full 10%), published **fee card** + **SLA**, owner self-serve **opt-in**, ops **activation**, **reassign manager**, **suspend/resume**, **request → approve termination** (two-person maker/checker), **delivery partners** (hand-off), **vetted-firm directory + real-data ranking**.
 - **Trust / client-money accounting** (`trust`, `client-money`): segregated client accounts, **daily reconciliation**, **release approval** (above-threshold two-person), **payouts** (Paystack), **owner statements** (gross / fee / VAT / WHT / net) with **email + PDF** and **line-item disputes**, closing statement auto-generated on both termination paths.
-- **Backoffice ops** for GetRentos Managed: activation queue (bulk activate/reject, saved views, search), active-engagements (bulk reassign / pause / resume / request-end), termination-requests approval queue, **nav queue-count badge**, notice-position context.
+- **Backoffice ops** for Sureground Managed: activation queue (bulk activate/reject, saved views, search), active-engagements (bulk reassign / pause / resume / request-end), termination-requests approval queue, **nav queue-count badge**, notice-position context.
 - **Owner lifecycle notifications**: activated / suspended / resumed / manager-changed / ended (in-app + email), owner-exempt, best-effort.
 
 ### The toolkit — mixed
@@ -44,7 +44,7 @@ Legend: ✅ built / deep · 🟡 partial · ⛔ gap
 - **Owner experience** — ✅ owner statements, managed page (now shows portfolio manager + delivery partner). 🟡 owner approvals = only the client-money release threshold + TRANSACT gate; ⛔ **owner-facing "approve this expense / maintenance over cap / lease terms" workflow**, ⛔ **owner onboarding flow**.
 - **Compliance & legal** — ✅ statutory **notices**, **legal cases** (+ costs to owner). ⛔ **deposit protection** (deposit is a field, no lifecycle), ✅ **client-money protection** (reconciliation + segregation enforced; firm scheme-adherence attestations shipped 2026-10-10), ⛔ document-retention policy, agency licensing/registration.
 - **Agency operations (multi-owner)** — 🟡 the AGENCY org holds mandates + has members/roles. ⛔ **agency-wide dashboards across many owners**, ✅ **client (owner) CRM + invite/claim onboarding** (shipped 2026-10-10/11), ✅ **letting/renewal commission charging + payout settlement** (shipped 2026-10-10), ✅ **per-agent commission split** (attribution + tracking, shipped 2026-10-11; on-platform per-agent payout intentionally out of scope), ✅ per-owner trust-accounting views (shipped 2026-10-10) + ✅ protection attestations. **This was the biggest underbuilt market — now built.**
-- **Disbursements / reserves** — ✅ payout on statement issue. ✅ **recurring/scheduled owner disbursements** + ✅ **reserve/float per owner** (shipped 2026-10-11; daily cron sweeps `balance − reserve` on a weekly/fortnightly/monthly cadence, below-threshold auto-pays via the shared payout rail, at/above-threshold is HELD + owner notified for manual two-person approval; v1 covers GetRentos-held money (`organizationId = null`); owner self-serve via Financials → Auto Payouts).
+- **Disbursements / reserves** — ✅ payout on statement issue. ✅ **recurring/scheduled owner disbursements** + ✅ **reserve/float per owner** (shipped 2026-10-11; daily cron sweeps `balance − reserve` on a weekly/fortnightly/monthly cadence, below-threshold auto-pays via the shared payout rail, at/above-threshold is HELD + owner notified for manual two-person approval; v1 covers Sureground-held money (`organizationId = null`); owner self-serve via Financials → Auto Payouts).
 - **Communications & automation** — ✅ messaging, notifications, email dispatcher, some automations (reminders/overdue/lease-expiry), ✅ **bulk comms/templates** + ✅ **automation rules engine** (scheduled recurring tenant broadcasts, shipped 2026-10-11). ⛔ event-triggered rules generalizing the fixed financial automations (follow-up).
 - **Field / mobile** — ✅ mobile portal parity for dashboards, ✅ **field inspection on-site capture with real evidence photos** (native Expo + web agent portal, shipped 2026-10-11). ⛔ **field maintenance tooling** (agent updating work orders — needs a new agent↔work-order scoping primitive; follow-up).
 
@@ -87,16 +87,16 @@ Each area is shared across editions unless noted. Status is the _starting point_
 
 **P1 — the Agency edition (the margin market) — ✅ SHIPPED:** 6. ✅ **Multi-owner agency dashboards** _(shipped 2026-10-10: /agency/owners groups mandates by client; plus the manager home-management workspace at /agency/home-management shipped 2026-10-11)_. 7. ✅ **Client (owner) CRM + onboarding** for agencies _(CRM shipped 2026-10-10: /agency/owners/[id] contact card, stage, notes; invite/claim onboarding shipped 2026-10-11: AgencyOwnerInvite + email + public /agency-invite/claim page reusing signup/login)_. 8. ✅ **Commissions** — letting (10%) / renewal (5%) _(shipped 2026-10-10: auto-earned on managed let/renewal, per-firm rate card, /agency/commissions ledger, and payout settlement — the firm claims earned commissions into a Paystack batch payout with history; per-agent commission split (attribution + tracking) shipped 2026-10-11)_. 9. ✅ **Agency trust-accounting compliance** _(shipped 2026-10-10: per-owner client-money ledger on the client page + client-money-protection attestations register, surfaced on the owner's money view)_.
 
-**P2 — scale & depth:** 10. ✅ **Scheduled owner disbursements + reserves/float** _(shipped 2026-10-11)_. 11. ✅ **Preventive/scheduled maintenance** _(shipped 2026-10-11)_. 12. ✅ **Budgets vs actuals** _(shipped 2026-10-11)_. 13. 🟡 **Field/mobile inspection + maintenance app** _(inspection photo capture shipped 2026-10-11; field-maintenance a follow-up)_. 14. ✅ **Automation rules engine + bulk comms/templates** _(shipped 2026-10-11)_. 15. ✅ **GetRentos Managed partner commercials** — partner fee-split + partner payout settlement _(both shipped 2026-10-11/12)_.
+**P2 — scale & depth:** 10. ✅ **Scheduled owner disbursements + reserves/float** _(shipped 2026-10-11)_. 11. ✅ **Preventive/scheduled maintenance** _(shipped 2026-10-11)_. 12. ✅ **Budgets vs actuals** _(shipped 2026-10-11)_. 13. 🟡 **Field/mobile inspection + maintenance app** _(inspection photo capture shipped 2026-10-11; field-maintenance a follow-up)_. 14. ✅ **Automation rules engine + bulk comms/templates** _(shipped 2026-10-11)_. 15. ✅ **Sureground Managed partner commercials** — partner fee-split + partner payout settlement _(both shipped 2026-10-11/12)_.
 
 ---
 
 ## 5. Phased delivery
 
-- **Phase A — Spine (DONE):** mandates, authority, servicing tiers, trust accounting, owner statements, GetRentos Managed ops, owner lifecycle notifications.
+- **Phase A — Spine (DONE):** mandates, authority, servicing tiers, trust accounting, owner statements, Sureground Managed ops, owner lifecycle notifications.
 - **Phase B — Operational completeness (P0) — DONE (2026-10-10):** ✅ inspections, ✅ deposit lifecycle (both portals), ✅ late fees + arrears ladder, ✅ owner approvals, ✅ reporting/exports. _Outcome delivered: a credible self-manage + managed product._
 - **Phase C — Agency edition (P1) — SHIPPED (2026-10-10):** ✅ multi-owner dashboards, ✅ client CRM (invite/claim onboarding left), ✅ commissions (letting/renewal earning + rate card + ledger + **Paystack payout settlement** shipped 2026-10-10: the firm claims earned commissions into a batch payout to its own account, with step-up + trust-tier hardening on the payout account/withdraw added 2026-10-11), ✅ per-owner trust views + ✅ protection attestations, ✅ home-management PropertyAuthority rewire (managers operate assets/work-orders/vendors/quotes/invoices for managed properties; money = TRANSACT) + ✅ maintenance-spend owner approval (over-cap manager spend routed to the owner), ✅ owner invite/claim onboarding (shipped 2026-10-11), ✅ manager-facing home-management UI in the agency portal (shipped 2026-10-11: /agency/home-management reuses the home-management workspace for managed properties), ✅ per-agent commission split (attribution + tracking, shipped 2026-10-11). **Phase C fully shipped.** On-platform per-agent payout (splitting the firm's payout into N per-agent transfers) is intentionally out of scope. _Outcome delivered: a credible professional-agency edition._
-- **Phase D — Scale & depth (P2):** ✅ scheduled disbursements + reserves (shipped 2026-10-11: owner self-serve standing instruction in Financials → Auto Payouts; daily cron, below-threshold auto-pays, at/above-threshold HELD for manual approval; v1 GetRentos-held money only); ✅ preventive maintenance (shipped 2026-10-11: a daily scheduler auto-raises a work order when a plan falls due, advances the cycle, assigns the plan's vendor, dedupes against an open prior job, and links the work order back to the plan); ✅ budgets vs actuals (shipped 2026-10-11: a Budget model — property × optional category × period — + a service summing expenses and un-linked resolved work-order costs into the current period's actual/variance/utilisation; Financials → Budgets tab); ✅ automation rules engine + bulk comms/templates (shipped 2026-10-11: landlord Automations area — bulk tenant broadcast to an audience (all / by property / in arrears) with {{merge_field}} templates, fanned out as notifications→email; + a configurable AutomationRule that broadcasts on a recurring cadence via a daily cron; both scheduled broadcasts and event-triggered rules — a rule fires on rent-due-soon / overdue / lease-expiring and messages the specific tenant, hooked into the existing automation crons, shipped 2026-10-12); 🟡 field/mobile (shipped 2026-10-11: real evidence photos on the agent on-site inspection capture — AgentInspectionPhoto + agent-scoped multipart upload/signed read, wired into both the native Expo field app and the web agent portal; field-maintenance — an agent updating work orders — is a follow-up needing a new agent↔work-order scoping primitive); ✅ partner commercials (shipped 2026-10-11: a per-delivery-partner fee-split config + an immutable split record cut when an owner statement is issued — the manager's gross fee split into partner vs platform shares, snapshotted + idempotent; ops configures + reviews + pays out in backoffice; the partner payout batch settles through the shared transfer rail into the partner's agency payout account, with the webhook/reconciler finalising pending transfers). **Phase D (P2) complete** — one remaining follow-up: field-maintenance (an agent updating work orders).
+- **Phase D — Scale & depth (P2):** ✅ scheduled disbursements + reserves (shipped 2026-10-11: owner self-serve standing instruction in Financials → Auto Payouts; daily cron, below-threshold auto-pays, at/above-threshold HELD for manual approval; v1 Sureground-held money only); ✅ preventive maintenance (shipped 2026-10-11: a daily scheduler auto-raises a work order when a plan falls due, advances the cycle, assigns the plan's vendor, dedupes against an open prior job, and links the work order back to the plan); ✅ budgets vs actuals (shipped 2026-10-11: a Budget model — property × optional category × period — + a service summing expenses and un-linked resolved work-order costs into the current period's actual/variance/utilisation; Financials → Budgets tab); ✅ automation rules engine + bulk comms/templates (shipped 2026-10-11: landlord Automations area — bulk tenant broadcast to an audience (all / by property / in arrears) with {{merge_field}} templates, fanned out as notifications→email; + a configurable AutomationRule that broadcasts on a recurring cadence via a daily cron; both scheduled broadcasts and event-triggered rules — a rule fires on rent-due-soon / overdue / lease-expiring and messages the specific tenant, hooked into the existing automation crons, shipped 2026-10-12); 🟡 field/mobile (shipped 2026-10-11: real evidence photos on the agent on-site inspection capture — AgentInspectionPhoto + agent-scoped multipart upload/signed read, wired into both the native Expo field app and the web agent portal; field-maintenance — an agent updating work orders — is a follow-up needing a new agent↔work-order scoping primitive); ✅ partner commercials (shipped 2026-10-11: a per-delivery-partner fee-split config + an immutable split record cut when an owner statement is issued — the manager's gross fee split into partner vs platform shares, snapshotted + idempotent; ops configures + reviews + pays out in backoffice; the partner payout batch settles through the shared transfer rail into the partner's agency payout account, with the webhook/reconciler finalising pending transfers). **Phase D (P2) complete** — one remaining follow-up: field-maintenance (an agent updating work orders).
 
 Each phase ships in the established build→verify-live→commit slices, behind plan gating where it's a paid capability.
 
@@ -104,13 +104,13 @@ Each phase ships in the established build→verify-live→commit slices, behind 
 
 ## 6. Monetization across editions
 
-| Edition               | Model                                                | Notes                                                                                                             |
-| --------------------- | ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| **Self-Manage**       | Free / **Pro** SaaS (exists)                         | Gate advanced: analytics, automations, reporting, microsite.                                                      |
-| **Agency**            | Per-unit SaaS **or** platform % + SaaS               | Stickiest revenue; trust accounting + compliance are the lock-in. Agent-seat pricing optional.                    |
-| **GetRentos Managed** | Servicing fee **5/8/10%** + letting 10% / renewal 5% | Fee card built; letting/renewal **commission charging built (2026-10-10)**; **partner fee-split still to build.** |
+| Edition                | Model                                                | Notes                                                                                                             |
+| ---------------------- | ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| **Self-Manage**        | Free / **Pro** SaaS (exists)                         | Gate advanced: analytics, automations, reporting, microsite.                                                      |
+| **Agency**             | Per-unit SaaS **or** platform % + SaaS               | Stickiest revenue; trust accounting + compliance are the lock-in. Agent-seat pricing optional.                    |
+| **Sureground Managed** | Servicing fee **5/8/10%** + letting 10% / renewal 5% | Fee card built; letting/renewal **commission charging built (2026-10-10)**; **partner fee-split still to build.** |
 
-Cross-sell path: DIY landlord → outgrows self-manage → **GetRentos Managed** or **appoint a vetted agency** (both already modeled). The directory + ranking makes the agency marketplace a funnel.
+Cross-sell path: DIY landlord → outgrows self-manage → **Sureground Managed** or **appoint a vetted agency** (both already modeled). The directory + ranking makes the agency marketplace a funnel.
 
 ---
 
@@ -127,11 +127,11 @@ Cross-sell path: DIY landlord → outgrows self-manage → **GetRentos Managed**
 ## 8. Open decisions (need product/business calls)
 
 1. **Agency pricing** — per-unit SaaS vs % vs hybrid; agent-seat pricing.
-2. **Partner commercials** (GetRentos Managed hand-off) — ✅ partner's cut of the fee now on-platform + partner payout settlement (shipped 2026-10-11/12).
+2. **Partner commercials** (Sureground Managed hand-off) — ✅ partner's cut of the fee now on-platform + partner payout settlement (shipped 2026-10-11/12).
 3. **Deposit protection** — in-house held vs third-party scheme.
 4. **Credit-check provider + who pays** (already flagged open in tenant screening).
 5. **Coverage model** for "no local presence" → when to auto-suggest a delivery partner vs decline.
-6. **Owner-approval caps** — defaults and who sets them (owner vs agency vs GetRentos).
+6. **Owner-approval caps** — defaults and who sets them (owner vs agency vs Sureground).
 7. **Scope of the Agency MVP** — smallest set that lets a real agency run a book on us (recommend: multi-owner dashboard + client CRM + commissions + per-owner statements).
 
 ---
@@ -148,13 +148,13 @@ The spine is done and is the hard part. **Prioritize Phase B (operational comple
 
 ## S1. Segments & beachhead (land → expand)
 
-| Segment                        | Size signal                                                           | Pain / willingness-to-pay                                                     | Our play                                                                                       |
-| ------------------------------ | --------------------------------------------------------------------- | ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| **Diaspora / absentee owners** | Millions of Nigerians abroad with property at home; remittance-linked | **Highest** — can't self-manage, don't trust local agents, will pay a premium | **GetRentos Managed** (beachhead) — remote onboarding, protected money, English-language trust |
-| **Professional agencies**      | Fragmented, mostly on spreadsheets/WhatsApp                           | High — need trust accounting + owner reporting to scale & stay compliant      | **Agency edition** — margin + supplies the marketplace                                         |
-| **Self-managing landlords**    | Large, long tail                                                      | Low ARPU, high volume                                                         | **Self-Manage** (Free/Pro) — top of funnel, upsell to Managed/agency                           |
-| **Developers / estates**       | Bulk units, new builds                                                | Medium — lettings + service charges at scale                                  | Estate module + bulk onboarding (later)                                                        |
-| **Institutional / REIT-like**  | Emerging                                                              | High rigor                                                                    | Much later                                                                                     |
+| Segment                        | Size signal                                                           | Pain / willingness-to-pay                                                     | Our play                                                                                        |
+| ------------------------------ | --------------------------------------------------------------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| **Diaspora / absentee owners** | Millions of Nigerians abroad with property at home; remittance-linked | **Highest** — can't self-manage, don't trust local agents, will pay a premium | **Sureground Managed** (beachhead) — remote onboarding, protected money, English-language trust |
+| **Professional agencies**      | Fragmented, mostly on spreadsheets/WhatsApp                           | High — need trust accounting + owner reporting to scale & stay compliant      | **Agency edition** — margin + supplies the marketplace                                          |
+| **Self-managing landlords**    | Large, long tail                                                      | Low ARPU, high volume                                                         | **Self-Manage** (Free/Pro) — top of funnel, upsell to Managed/agency                            |
+| **Developers / estates**       | Bulk units, new builds                                                | Medium — lettings + service charges at scale                                  | Estate module + bulk onboarding (later)                                                         |
+| **Institutional / REIT-like**  | Emerging                                                              | High rigor                                                                    | Much later                                                                                      |
 
 **Beachhead: diaspora-owner _Managed_ + agencies, in parallel.** Diaspora owners are the segment that most needs what only we offer (hands-off + money protection) and pay the most; they showcase the trust spine. Agencies supply ranked managers and bring their owner books. Self-manage is the free funnel beneath both. Land there, expand down-market and into estates.
 
@@ -162,7 +162,7 @@ The spine is done and is the hard part. **Prioritize Phase B (operational comple
 
 - **Reference set:** local NG proptech (rent-collection / listing / management startups — mostly single-feature) and global benchmarks (AppFolio, Buildium, DoorLoop, Yardi, Hemlane). _(A real competitive scan is an action item — names here are the category, not a verified audit.)_
 - **Where most local tools stop:** rent collection + listings. Few offer **compliant trust accounting**, fewer offer **platform-as-manager**, essentially none offer a **vetted-manager marketplace**.
-- **Positioning:** _"The trust rail for Nigerian property management — the one place an owner can self-manage, hire a vetted manager, or have GetRentos manage it, with their money protected and their records portable."_
+- **Positioning:** _"The trust rail for Nigerian property management — the one place an owner can self-manage, hire a vetted manager, or have Sureground manage it, with their money protected and their records portable."_
 - **Must-reach parity (don't lose on):** payments UX, maintenance, reporting, mobile.
 - **Win on:** trust (held funds + protected deposits + dispute adjudication), the three-editions optionality, and NG-native rails below.
 
@@ -178,7 +178,7 @@ The spine is done and is the hard part. **Prioritize Phase B (operational comple
 1. **Dedicated virtual accounts per tenant/lease** (Paystack/Flutterwave) → **automatic reconciliation**, no "I already sent it" disputes. One of the highest-leverage, most defensible NG wedges — build early.
 2. **Diaspora product**: remote owner onboarding, Managed-by-default, remittance-friendly payouts, status visibility from abroad.
 3. **WhatsApp as a first-class channel** (rent nudges, maintenance updates, approvals) — not generic in-app messaging. It's where Nigerians actually are.
-4. **Trust deficit as the wedge**: "Held by GetRentos," protected deposits, ranked managers, line-item dispute adjudication — directly answers the #1 reason owners distrust agents.
+4. **Trust deficit as the wedge**: "Held by Sureground," protected deposits, ranked managers, line-item dispute adjudication — directly answers the #1 reason owners distrust agents.
 5. **Cash / annual-rent realities**: Flex installments (built) + flexible schedules address how NG rent actually flows.
 6. **Service charges & estate levies** via the Estate module — captures the managed-community money layer.
 
@@ -200,7 +200,7 @@ Beyond the per-edition table in Part I: **managed take-rate** (5/8/10%), **agenc
 ## S8. Execution & regulatory risk (the moat _and_ the threat)
 
 - **Client money at scale** is both the deepest moat and the biggest risk: protection-scheme posture, audits, segregation, and (likely) licensing must be invested in early, not bolted on. Get this right and it's very hard to catch us; get it wrong and it's existential.
-- **Ops scaling** for GetRentos Managed (portfolio-manager capacity), support, and field coverage gate how fast Managed can grow.
+- **Ops scaling** for Sureground Managed (portfolio-manager capacity), support, and field coverage gate how fast Managed can grow.
 - **Sequencing realism:** Part I's "mostly assembly" is true for the _engine_; the GTM, trust/regulatory, and supply (agency onboarding) work is its own lift.
 
 ## S9. The path to dominance (revised recommendation)

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useReducer } from 'react';
 import { PanResponder, View, type GestureResponderEvent } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { Eraser } from 'lucide-react-native';
-import { Button, Text, useTheme } from '@getrentos/ui-native';
+import { Button, Text, useTheme } from '@sureground/ui-native';
 
 export interface SignaturePadProps {
   width?: number;

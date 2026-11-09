@@ -14,7 +14,7 @@ import {
   Pagination,
   StatGridSkeleton,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 
 const PAGE_SIZE = 10;
 

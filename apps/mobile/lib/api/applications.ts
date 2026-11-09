@@ -1,6 +1,6 @@
 import { apiFetch } from './client';
 import type { Paginated } from './properties';
-import type { LastApplicationDetails } from '@getrentos/shared';
+import type { LastApplicationDetails } from '@sureground/shared';
 
 /** Mirrors the backend's `RentalApplicationStatus` enum, lowercased. */
 export const APPLICATION_STATUSES = ['pending', 'under_review', 'approved', 'rejected'] as const;

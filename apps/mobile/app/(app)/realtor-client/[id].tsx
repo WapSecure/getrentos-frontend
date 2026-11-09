@@ -15,7 +15,7 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { clientName, clientRole, realtorApi } from '@/lib/api/realtor';
 import { errorMessage } from '@/lib/api/client';
@@ -97,7 +97,7 @@ export default function RealtorClientDetail() {
               </View>
               <ContactActions phone={c.client.phone} email={c.client.email} name={clientName(c)} />
               <Button
-                label="Message on GetRentos"
+                label="Message on Sureground"
                 variant="secondary"
                 icon={<MessageCircle size={16} color={colors.foreground} />}
                 loading={message.isPending}

@@ -5,7 +5,7 @@ import {
   onStaffMfaRequired,
   registerStepUpHandler,
   rememberStepUpToken,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 
 /**
  * The shared authFetch the back office uses: a STAFF_MFA_REQUIRED refusal must

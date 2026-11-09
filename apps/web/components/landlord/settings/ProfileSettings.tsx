@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { SafeImage } from '@/components/shared/media/SafeImage';
 import { getInitials } from '@/lib/format';
-import { Button, Field, Input, SaveButton } from '@getrentos/ui';
+import { Button, Field, Input, SaveButton } from '@sureground/ui';
 import { landlordService } from '@/services/landlordService';
 import { nameOnly } from '@/lib/validations/input';
 import { ChangeEmailButton } from '@/components/shared/security/ChangeEmailButton';

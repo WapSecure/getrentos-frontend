@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Button } from '@getrentos/ui';
+import { Button } from '@sureground/ui';
 import { authService } from '@/services/authService';
 
 function GoogleMark() {

@@ -1,7 +1,7 @@
 'use client';
 
 import type { LucideIcon } from 'lucide-react';
-import { Button, EmptyState } from '@getrentos/ui';
+import { Button, EmptyState } from '@sureground/ui';
 import { ROUTES } from '@/lib/constants/auth';
 import { useGatemanUser } from '@/app/(dashboard)/gateman/layout';
 

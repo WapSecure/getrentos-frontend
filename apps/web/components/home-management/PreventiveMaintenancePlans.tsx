@@ -12,17 +12,17 @@ import {
   Repeat2,
   Wrench,
 } from 'lucide-react';
-import { Badge, type BadgeVariant } from '@getrentos/ui';
-import { Button } from '@getrentos/ui';
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrentos/ui';
-import { DatePicker } from '@getrentos/ui';
-import { EmptyState } from '@getrentos/ui';
-import { ListSkeleton } from '@getrentos/ui';
-import { Field } from '@getrentos/ui';
-import { Input, NumberInput } from '@getrentos/ui';
-import { Pagination } from '@getrentos/ui';
-import { Select } from '@getrentos/ui';
-import { useToast } from '@getrentos/ui';
+import { Badge, type BadgeVariant } from '@sureground/ui';
+import { Button } from '@sureground/ui';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@sureground/ui';
+import { DatePicker } from '@sureground/ui';
+import { EmptyState } from '@sureground/ui';
+import { ListSkeleton } from '@sureground/ui';
+import { Field } from '@sureground/ui';
+import { Input, NumberInput } from '@sureground/ui';
+import { Pagination } from '@sureground/ui';
+import { Select } from '@sureground/ui';
+import { useToast } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
 import { homeManagementKeys } from '@/lib/queryKeys';

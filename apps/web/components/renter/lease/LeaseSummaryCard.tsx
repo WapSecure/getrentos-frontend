@@ -1,6 +1,6 @@
 'use client';
 
-import { Card } from '@getrentos/ui';
+import { Card } from '@sureground/ui';
 import { motion } from 'framer-motion';
 import { leaseRentSuffix } from '@/lib/leaseTerm';
 import { MapPin, Building2 } from 'lucide-react';

@@ -1,5 +1,5 @@
 import { Image, Platform } from 'react-native';
-import { assessPhotoQuality, PHOTO_PROBLEM_COPY } from '@getrentos/shared';
+import { assessPhotoQuality, PHOTO_PROBLEM_COPY } from '@sureground/shared';
 import type { PickedFile } from '@/lib/api/documents';
 
 /** The longest side the check works on: enough to judge focus and light, quick to decode. */

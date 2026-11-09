@@ -12,7 +12,7 @@ import {
   Skeleton,
   Text,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import type { BuyerListing } from '@/lib/api/buyer';
 import { useBuyerSaved } from '@/hooks/useBuyerSaved';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';

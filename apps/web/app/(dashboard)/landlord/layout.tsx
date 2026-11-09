@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import { useRouter } from 'next/navigation';
 import { LandlordNavbar } from '@/components/landlord/navigation/LandlordNavbar';
 import { LandlordSidebar } from '@/components/landlord/dashboard/LandlordSidebar';
-import { PageLoadingState } from '@getrentos/ui';
+import { PageLoadingState } from '@sureground/ui';
 import {
   ROUTES,
   isAuthenticated,

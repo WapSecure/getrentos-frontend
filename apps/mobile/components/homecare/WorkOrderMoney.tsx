@@ -19,7 +19,7 @@ import {
   toISODate,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   homeCareApi,
@@ -39,7 +39,7 @@ import {
   payoutAccountStepUpSummary,
   saveAccountLabel,
   type AccountLookup,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { Sheet } from '@/components/Sheet';
@@ -74,12 +74,12 @@ function vendorPayCopy(
   protection?: string;
 } {
   const retry = invoice.payoutStatus === 'FAILED';
-  const fallbackSecure = `If a top-up is needed, you finish on ${company}’s secure page: GetRentos never sees your card details.`;
+  const fallbackSecure = `If a top-up is needed, you finish on ${company}’s secure page: Sureground never sees your card details.`;
   const fallbackProtection =
     'If a top-up is needed, we send the vendor’s payment once it is confirmed. You’ll see it on this invoice.';
   if (preview.isLoading) {
     return {
-      note: 'Working out how much comes from the money GetRentos holds for you.',
+      note: 'Working out how much comes from the money Sureground holds for you.',
       notReady: 'Working out the split…',
       secureLine: fallbackSecure,
       protection: fallbackProtection,
@@ -89,8 +89,8 @@ function vendorPayCopy(
   if (!split) {
     return {
       note: preview.isError
-        ? 'We couldn’t work out the split here. We pay the vendor from the money GetRentos holds for the owner first. If that doesn’t cover the invoice, you top up the rest by card, plus its card or bank fee, on the next page.'
-        : 'We pay the vendor from the money GetRentos holds for the owner first. A card top-up, with its card or bank fee, is only taken if that does not cover the invoice.',
+        ? 'We couldn’t work out the split here. We pay the vendor from the money Sureground holds for the owner first. If that doesn’t cover the invoice, you top up the rest by card, plus its card or bank fee, on the next page.'
+        : 'We pay the vendor from the money Sureground holds for the owner first. A card top-up, with its card or bank fee, is only taken if that does not cover the invoice.',
       buttonLabel: retry ? 'Retry payment' : 'Pay vendor',
       secureLine: fallbackSecure,
       protection: fallbackProtection,
@@ -104,11 +104,11 @@ function vendorPayCopy(
       secureLine: 'No card is charged.',
     };
   }
-  const held = { label: 'From money GetRentos holds for you', amount: split.fromHeldFunds };
+  const held = { label: 'From money Sureground holds for you', amount: split.fromHeldFunds };
   if (split.topUp <= 0) {
     return {
       parts: [held],
-      note: 'Paid in full from the money GetRentos holds for the owner. No card payment is needed. The amounts are checked again when you pay.',
+      note: 'Paid in full from the money Sureground holds for the owner. No card payment is needed. The amounts are checked again when you pay.',
       buttonLabel: `${retry ? 'Retry: pay' : 'Pay'} vendor ${naira(split.invoiceTotal)}`,
       secureLine: 'No card is charged.',
       protection: 'You’ll see the payment on this invoice.',
@@ -120,14 +120,17 @@ function vendorPayCopy(
       held,
       {
         label:
-          split.topUpFee > 0 ? `Card top-up (+ ${naira(split.topUpFee)} fee)` : 'Card top-up (no fee)',
+          split.topUpFee > 0
+            ? `Card top-up (+ ${naira(split.topUpFee)} fee)`
+            : 'Card top-up (no fee)',
         amount: split.topUp,
       },
     ],
     note: `Your card is charged ${naira(split.topUpCharge)}. The vendor is paid the full ${naira(split.invoiceTotal)} once the top-up is confirmed. The amounts are checked again when you pay.`,
     buttonLabel: `Pay ${naira(split.topUp)}${fee} top-up and pay vendor`,
-    secureLine: `You finish the top-up on ${company}’s secure page: GetRentos never sees your card details.`,
-    protection: 'We send the vendor’s payment once the top-up is confirmed. You’ll see it on this invoice.',
+    secureLine: `You finish the top-up on ${company}’s secure page: Sureground never sees your card details.`,
+    protection:
+      'We send the vendor’s payment once the top-up is confirmed. You’ll see it on this invoice.',
   };
 }
 

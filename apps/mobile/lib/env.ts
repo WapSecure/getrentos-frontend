@@ -29,7 +29,7 @@ function resolveApiUrl(): string {
 const API_URL = resolveApiUrl();
 
 /** The public website — legal pages and share links. */
-const WEB_URL = (process.env.EXPO_PUBLIC_WEB_URL || 'https://getrentos.com').replace(/\/$/, '');
+const WEB_URL = (process.env.EXPO_PUBLIC_WEB_URL || 'https://getsureground.io').replace(/\/$/, '');
 
 export const env = {
   apiUrl: API_URL,

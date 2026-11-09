@@ -10,9 +10,9 @@ import {
   ResponsiveContainer,
   TooltipProps,
 } from 'recharts';
-import { Badge, Card } from '@getrentos/ui';
+import { Badge, Card } from '@sureground/ui';
 import { TrendingUp } from 'lucide-react';
-import { formatCurrency } from '@getrentos/shared';
+import { formatCurrency } from '@sureground/shared';
 
 interface RevenuePoint {
   month: string;

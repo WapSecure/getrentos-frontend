@@ -5,7 +5,7 @@ import {
   type PlaceKind,
   type PlaceSuggestion,
   type VerifiedAddress,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 
 /** Google address search through our API: suggestions while typing, then the checked address. */
 export const placesService = {

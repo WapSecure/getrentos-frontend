@@ -20,7 +20,7 @@ import {
   subMonths,
   addDays,
 } from 'date-fns';
-import { cn } from '@getrentos/shared';
+import { cn } from '@sureground/shared';
 import { controlShell, type ControlSize } from './controlStyles';
 import { useFieldControl } from './fieldContext';
 

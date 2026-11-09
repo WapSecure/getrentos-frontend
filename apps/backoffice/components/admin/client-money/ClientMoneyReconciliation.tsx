@@ -26,8 +26,8 @@ import {
   TabsTrigger,
   useToast,
   type ToastVariant,
-} from '@getrentos/ui';
-import { unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { unwrap } from '@sureground/shared';
 import { adminKeys } from '@/lib/queryKeys';
 import { ReleaseQueue } from './ReleaseQueue';
 import { DisputeQueue } from './DisputeQueue';
@@ -106,7 +106,7 @@ export function ClientMoneyReconciliation() {
     mutationFn: () =>
       unwrap(
         adminClientMoneyService.recordBankBalance({
-          // `platform` is the GetRentos pool; the API takes that as a null holder.
+          // `platform` is the Sureground pool; the API takes that as a null holder.
           organizationId: holder === 'platform' ? null : holder,
           asOfDate,
           balance,
@@ -219,7 +219,7 @@ export function ClientMoneyReconciliation() {
                 value={holder}
                 onValueChange={setHolder}
                 options={[
-                  { value: 'platform', label: 'GetRentos itself (the platform pool)' },
+                  { value: 'platform', label: 'Sureground itself (the platform pool)' },
                   ...holders.map((option) => ({
                     value: option.id ?? 'platform',
                     label: option.name,
@@ -345,7 +345,7 @@ export function ClientMoneyReconciliation() {
 }
 
 function PoolCard({ row }: { row: ReconciliationRow }) {
-  const who = row.organizationName ?? (row.organizationId ? 'A firm' : 'GetRentos itself');
+  const who = row.organizationName ?? (row.organizationId ? 'A firm' : 'Sureground itself');
 
   return (
     <Card static className="p-4">

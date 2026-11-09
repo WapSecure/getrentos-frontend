@@ -14,7 +14,7 @@ import {
   MessageSquare,
   PlayCircle,
 } from 'lucide-react';
-import { Badge, Button, Dialog, DialogContent, DialogTitle, IconButton } from '@getrentos/ui';
+import { Badge, Button, Dialog, DialogContent, DialogTitle, IconButton } from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type { BuyerPropertyListing } from '@/types/buyer';
 import { DiligenceChecklist } from './DiligenceChecklist';
@@ -152,7 +152,7 @@ export const PropertyDetailModal = ({
               {listing.videoTourFilmedOnSite && (
                 <p className="flex items-center gap-1 text-xs font-medium text-success">
                   <MapPin className="w-3 h-3" aria-hidden />
-                  Filmed on site in the GetRentos app
+                  Filmed on site in the Sureground app
                 </p>
               )}
             </div>

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { ChevronDown, Scale } from 'lucide-react-native';
-import { Badge, Card, Skeleton, Text, useTheme, type BadgeTone } from '@getrentos/ui-native';
+import { Badge, Card, Skeleton, Text, useTheme, type BadgeTone } from '@sureground/ui-native';
 import { sellerOffers, type ComparedOffer, type OfferSide } from '@/lib/api/sellerOffers';
 
 const TURN: Record<ComparedOffer['turn'], { label: string; tone: BadgeTone }> = {

@@ -27,7 +27,7 @@ const mandate = (over: Partial<Mandate> = {}): Mandate => ({
   propertyTitle: 'Flat 1',
   ownerId: 'o1',
   ownerName: 'Ada',
-  managerIsGetRentos: false,
+  managerIsSureground: false,
   managerOrganizationName: 'Acme',
   scope: ['RENT'],
   capabilities: { canList: true, canManage: true, canTransact: false },

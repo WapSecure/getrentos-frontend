@@ -1,25 +1,27 @@
 {
   "expo": {
-    "name": "GetRentos",
+    "name": "Sureground",
     "slug": "getrentos",
     "version": "1.0.0",
-    "scheme": "getrentos",
+    "scheme": "sureground",
     "orientation": "portrait",
-    "icon": "./assets/icon-premium.png",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.getrentos.app",
+      "bundleIdentifier": "io.getsureground.app",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       },
       "usesAppleSignIn": true
     },
     "android": {
-      "package": "com.getrentos.app",
+      "package": "io.getsureground.app",
       "adaptiveIcon": {
-        "backgroundColor": "#F5FAFF",
-        "foregroundImage": "./assets/icon-premium.png"
+        "backgroundColor": "#0057D9",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false
     },
@@ -32,8 +34,8 @@
       [
         "expo-speech-recognition",
         {
-          "microphonePermission": "GetRentos uses the microphone when you speak a question to Ask GetRentos.",
-          "speechRecognitionPermission": "GetRentos turns what you say into text so you can check it before sending.",
+          "microphonePermission": "Sureground uses the microphone when you speak a question to Ask Sureground.",
+          "speechRecognitionPermission": "Sureground turns what you say into text so you can check it before sending.",
           "androidSpeechServicePackages": ["com.google.android.googlequicksearchbox"]
         }
       ],
@@ -43,19 +45,20 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "GetRentos needs access to your photos and videos to attach documents and add them to your listings.",
-          "cameraPermission": "GetRentos needs camera access to take a selfie for identity verification and to film property tours.",
-          "microphonePermission": "GetRentos needs the microphone to record sound with a property video tour."
+          "photosPermission": "Sureground needs access to your photos and videos to attach documents and add them to your listings.",
+          "cameraPermission": "Sureground needs camera access to take a selfie for identity verification and to film property tours.",
+          "microphonePermission": "Sureground needs the microphone to record sound with a property video tour."
         }
       ],
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#f6f7f9",
-          "image": "./assets/icon-premium.png",
-          "imageWidth": 160,
+          "backgroundColor": "#f7f7f8",
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 120,
           "dark": {
-            "backgroundColor": "#0a0c11"
+            "backgroundColor": "#000000",
+            "image": "./assets/splash-icon-dark.png"
           }
         }
       ],
@@ -63,7 +66,7 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "GetRentos uses the camera to scan a visitor's QR pass at the gate."
+          "cameraPermission": "Sureground uses the camera to scan a visitor's QR pass at the gate."
         }
       ],
       "@sentry/react-native",
@@ -77,7 +80,7 @@
       [
         "expo-local-authentication",
         {
-          "faceIDPermission": "GetRentos uses Face ID to unlock the app when you turn on the app lock."
+          "faceIDPermission": "Sureground uses Face ID to unlock the app when you turn on the app lock."
         }
       ],
       "expo-apple-authentication",
@@ -86,7 +89,7 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "GetRentos checks you are at the property when you film its video tour, so buyers and renters see it was filmed on site."
+          "locationWhenInUsePermission": "Sureground checks you are at the property when you film its video tour, so buyers and renters see it was filmed on site."
         }
       ],
       [

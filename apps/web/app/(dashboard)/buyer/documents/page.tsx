@@ -10,9 +10,9 @@ import {
   SearchInput,
   SegmentedControl,
   PageHeader,
-} from '@getrentos/ui';
-import { DocumentUploadDialog, type UploadedDocumentData } from '@getrentos/ui';
-import { DocumentPreviewButton } from '@getrentos/ui';
+} from '@sureground/ui';
+import { DocumentUploadDialog, type UploadedDocumentData } from '@sureground/ui';
+import { DocumentPreviewButton } from '@sureground/ui';
 import { formatDate } from '@/lib/format';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { buyerService } from '@/services/buyerService';

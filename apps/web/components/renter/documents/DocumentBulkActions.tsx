@@ -1,7 +1,7 @@
 'use client';
 
 import { Trash2, X } from 'lucide-react';
-import { IconButton } from '@getrentos/ui';
+import { IconButton } from '@sureground/ui';
 
 interface DocumentBulkActionsProps {
   selectedCount: number;

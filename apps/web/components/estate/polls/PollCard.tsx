@@ -1,6 +1,6 @@
 'use client';
 
-import { Badge, Button } from '@getrentos/ui';
+import { Badge, Button } from '@sureground/ui';
 import type { Poll } from '@/types/estate';
 
 const formatDate = (value: string) =>

@@ -1,7 +1,7 @@
 'use client';
 
 import { CircleCheck, OctagonAlert, RefreshCw, UsersRound } from 'lucide-react';
-import { Alert, Button } from '@getrentos/ui';
+import { Alert, Button } from '@sureground/ui';
 import type { AdminLandDiligenceDetail } from '@/types/land';
 
 /** Shown when the API refused a change because the case moved on (409). */
@@ -28,8 +28,8 @@ export const LandStaleCaseBanner = ({
       </Button>
     }
   >
-    Another reviewer recorded something first. Reload to see the case as it stands now and review
-    it again before deciding.
+    Another reviewer recorded something first. Reload to see the case as it stands now and review it
+    again before deciding.
   </Alert>
 );
 

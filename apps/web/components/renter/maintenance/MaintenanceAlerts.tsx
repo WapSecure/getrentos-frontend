@@ -10,7 +10,7 @@ import {
   PopoverContent,
   PopoverHeader,
   PopoverTrigger,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 
 interface Alert {
   id: string;

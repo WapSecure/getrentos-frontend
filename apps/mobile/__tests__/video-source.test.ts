@@ -1,4 +1,4 @@
-import { embeddedVideo, tourSource, videoSource } from '@getrentos/shared';
+import { embeddedVideo, tourSource, videoSource } from '@sureground/shared';
 
 describe('video and tour links', () => {
   it.each([
@@ -38,7 +38,9 @@ describe('video and tour links', () => {
     expect(tourSource('https://my.matterport.com/show/?m=abc123')).toMatchObject({
       host: 'matterport.com',
     });
-    expect(tourSource('https://kuula.co/share/collection/7abc')).toMatchObject({ host: 'kuula.co' });
+    expect(tourSource('https://kuula.co/share/collection/7abc')).toMatchObject({
+      host: 'kuula.co',
+    });
     expect(tourSource('https://evil.example/tour')).toBeNull();
     expect(tourSource('https://matterport.com.evil.example/x')).toBeNull();
   });

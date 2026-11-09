@@ -1,4 +1,4 @@
-import type { BadgeTone } from '@getrentos/ui-native';
+import type { BadgeTone } from '@sureground/ui-native';
 import { apiFetch } from './client';
 
 /**
@@ -32,7 +32,7 @@ export type MandateStatus =
 export const MANDATE_STATUS: Record<MandateStatus, { label: string; tone: BadgeTone }> = {
   DRAFT: { label: 'Draft', tone: 'neutral' },
   PENDING_OWNER: { label: 'Waiting for the owner’s signature', tone: 'info' },
-  PENDING_OPS: { label: 'Waiting for GetRentos to verify', tone: 'info' },
+  PENDING_OPS: { label: 'Waiting for Sureground to verify', tone: 'info' },
   ACTIVE: { label: 'Active', tone: 'success' },
   SUSPENDED: { label: 'Suspended', tone: 'warning' },
   TERMINATED: { label: 'Ended', tone: 'neutral' },
@@ -58,7 +58,7 @@ export interface Mandate {
   ownerId: string;
   ownerName?: string | null;
   managerOrganizationName?: string | null;
-  managerIsGetRentos: boolean;
+  managerIsSureground: boolean;
   managerName?: string | null;
   scope: MandateScope[];
   capabilities: { canList: boolean; canManage: boolean; canTransact: boolean };
@@ -138,8 +138,8 @@ export function noticeSummary(m: Mandate): string {
 }
 
 export const managerLabel = (m: Mandate) =>
-  m.managerIsGetRentos
-    ? 'GetRentos is the manager'
+  m.managerIsSureground
+    ? 'Sureground is the manager'
     : (m.managerOrganizationName ?? m.managerName ?? 'Manager');
 
 /**
@@ -215,9 +215,9 @@ export const ACTION_COPY: Record<
   resume: { label: 'Resume' },
   handover: { label: 'Record handover' },
   'request-termination': {
-    label: 'Ask GetRentos to end it',
+    label: 'Ask Sureground to end it',
     confirm: {
-      title: 'Ask GetRentos to end this engagement?',
+      title: 'Ask Sureground to end this engagement?',
       prompt: 'Why should this engagement end?',
     },
   },
@@ -253,7 +253,7 @@ export const ACTION_DONE: Record<MandateAction, string> = {
   suspend: 'Engagement paused.',
   resume: 'Engagement resumed.',
   handover: 'Handover recorded.',
-  'request-termination': 'Request sent to GetRentos.',
+  'request-termination': 'Request sent to Sureground.',
   terminate: 'Engagement ended.',
 };
 

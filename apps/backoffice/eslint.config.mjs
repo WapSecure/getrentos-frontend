@@ -16,7 +16,7 @@ const eslintConfig = defineConfig([
               name: "lucide-react",
               importNames: ["DollarSign", "BadgeDollarSign", "CircleDollarSign", "SquareDollarSign", "Receipt"],
               message:
-                "Draws a dollar sign. GetRentos is naira-only: use NairaSign from @getrentos/ui or ReceiptText.",
+                "Draws a dollar sign. Sureground is naira-only: use NairaSign from @sureground/ui or ReceiptText.",
             },
           ],
         },

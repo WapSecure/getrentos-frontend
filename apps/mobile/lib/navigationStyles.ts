@@ -1,5 +1,5 @@
 import { Platform } from 'react-native';
-import type { Palette } from '@getrentos/tokens';
+import type { Palette } from '@sureground/tokens';
 
 /** Consistent, comfortably sized bottom navigation across every portal. */
 export function premiumTabBarOptions(colors: Palette, bottomInset: number) {

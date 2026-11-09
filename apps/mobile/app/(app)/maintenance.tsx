@@ -18,7 +18,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { capturePhoto, pickPhoto } from '@/lib/filePicker';
 import type { PickedFile } from '@/lib/api/documents';

@@ -11,7 +11,7 @@ import {
   Text,
   useTheme,
   type BadgeTone,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import {
   rentDecisionApi,
   type Affordability,
@@ -28,7 +28,7 @@ const BAND: Record<Affordability['band'], { label: string; tone: BadgeTone } | n
 /**
  * "Can I afford it?" on the phone: rent against income (the same rule landlord
  * screening uses), cash to move in, and how long saving it takes. Worked out
- * by GetRentos; what is entered is used for this answer only.
+ * by Sureground; what is entered is used for this answer only.
  */
 export function AffordabilityCard({ listingId }: { listingId: string }) {
   const { colors, spacing, radius } = useTheme();

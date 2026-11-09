@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 
 /**
  * Shown on a sign-in screen when the user landed here because their session
- * could not be refreshed (see `onSessionExpired` in @getrentos/shared), so
+ * could not be refreshed (see `onSessionExpired` in @sureground/shared), so
  * "why am I back at the login page?" has an answer instead of looking like a
  * random logout.
  */

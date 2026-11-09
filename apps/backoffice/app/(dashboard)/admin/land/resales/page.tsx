@@ -12,8 +12,8 @@ import {
   type ToastVariant,
   Card,
   PageHeader,
-} from '@getrentos/ui';
-import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { formatCurrency, formatDate, unwrap } from '@sureground/shared';
 import { useAdminUser } from '../../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
 import { readLandApiError } from '@/lib/landDiligence';
@@ -186,7 +186,7 @@ export default function AdminLandResalesPage() {
     <>
       <PageHeader
         title="Land resale conditions"
-        description="Whole-parcel sales held in escrow with a condition still open or failed. The money is not released while any is open; a failed condition lets the buyer take a full refund. Decide a condition here when the buyer and seller disagree or a check needs GetRentos."
+        description="Whole-parcel sales held in escrow with a condition still open or failed. The money is not released while any is open; a failed condition lets the buyer take a full refund. Decide a condition here when the buyer and seller disagree or a check needs Sureground."
       />
       {query.isLoading ? (
         <div className="h-40 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />

@@ -13,11 +13,11 @@ import {
   Skeleton,
   Textarea,
   type BadgeVariant,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 
 import { useState } from 'react';
 import { CheckCircle2, ArrowUpCircle, Search, RotateCcw, Send } from 'lucide-react';
-import { cn, formatCurrency, humaniseEnum } from '@getrentos/shared';
+import { cn, formatCurrency, humaniseEnum } from '@sureground/shared';
 import { EvidencePanel } from '@/components/shared/EvidencePanel';
 import { DisputeSummaryPanel } from './DisputeSummaryPanel';
 import type { Dispute, DisputeDetail, DisputeMessage, DisputeResolveOutcome } from '@/types/admin';

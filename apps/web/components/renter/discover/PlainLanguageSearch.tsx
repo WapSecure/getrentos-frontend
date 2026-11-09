@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Sparkles } from 'lucide-react';
-import { Button, Input, useToast } from '@getrentos/ui';
+import { Button, Input, useToast } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterService } from '@/services/renterService';
 import type { RentalSearchParse } from '@/types/searchParse';

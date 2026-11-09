@@ -15,7 +15,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency } from '@/lib/format';
@@ -46,7 +46,7 @@ interface ManagedIntakeDialogProps {
 
 /**
  * The owner's ask: what the property is and what they need. The fee shown is
- * indicative — GetRentos visits first and the proposal is what binds — so it is
+ * indicative — Sureground visits first and the proposal is what binds — so it is
  * labelled that way rather than presented as a quote.
  */
 export const ManagedIntakeDialog = ({
@@ -104,7 +104,7 @@ export const ManagedIntakeDialog = ({
       <DialogContent className="max-h-[90vh] overflow-y-auto p-0">
         <div className="border-b border-border p-4">
           <DialogTitle className="font-semibold text-foreground">
-            Ask GetRentos to manage {property?.name}
+            Ask Sureground to manage {property?.name}
           </DialogTitle>
           <DialogDescription className="mt-0.5 text-xs text-muted-foreground">
             Tell us about the property. We visit, then send you a proposal to accept. Nothing is

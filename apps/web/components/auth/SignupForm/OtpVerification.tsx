@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Button } from '@getrentos/ui';
+import { Button } from '@sureground/ui';
 import { CheckCircle, RefreshCw, ArrowRight } from 'lucide-react';
 import { AUTH_CONSTANTS } from '@/lib/constants/auth';
 import { OtpInput } from '@/components/auth/OtpInput';
@@ -90,9 +90,7 @@ export const OtpVerification = ({
       {/* Timer & Resend */}
       <div className="text-center">
         {!canResend ? (
-          <p className="text-sm text-muted-foreground">
-            Resend code in {formatTime(timeLeft)}
-          </p>
+          <p className="text-sm text-muted-foreground">Resend code in {formatTime(timeLeft)}</p>
         ) : (
           <Button
             variant="link"

@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { useQueryClient, type QueryKey } from '@tanstack/react-query';
-import { ConfirmDialog, Toast } from '@getrentos/ui';
-import { ApiError, unwrap } from '@getrentos/shared';
-import type { ApiResponse } from '@getrentos/shared';
+import { ConfirmDialog, Toast } from '@sureground/ui';
+import { ApiError, unwrap } from '@sureground/shared';
+import type { ApiResponse } from '@sureground/shared';
 
 /**
  * One administrator-initiated change with a confirmation step and feedback.

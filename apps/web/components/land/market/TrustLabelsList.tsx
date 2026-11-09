@@ -7,7 +7,7 @@ import {
 } from '@/types/land';
 
 /**
- * What GetRentos checked on a parcel, one scoped label per claim (what, by
+ * What Sureground checked on a parcel, one scoped label per claim (what, by
  * whom, when), followed by what was not checked. Deliberately no single
  * "Verified" tick: a buyer sees the gaps alongside the passes.
  */
@@ -76,7 +76,7 @@ export const TrustLabelsList = ({
       )}
 
       <p className="text-xs text-muted-foreground">
-        These are checks GetRentos coordinated on the evidence available on the dates shown. They
+        These are checks Sureground coordinated on the evidence available on the dates shown. They
         are not a government guarantee of title; have your own lawyer confirm before you pay.
       </p>
     </div>

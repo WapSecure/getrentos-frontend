@@ -14,7 +14,7 @@ import {
   DialogTitle,
   Field,
   Textarea,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency } from '@/lib/format';
 import { landlordKeys } from '@/lib/queryKeys';

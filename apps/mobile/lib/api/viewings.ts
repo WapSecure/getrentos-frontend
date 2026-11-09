@@ -1,4 +1,4 @@
-import type { VideoCallJoin } from '@getrentos/shared';
+import type { VideoCallJoin } from '@sureground/shared';
 import { apiFetch } from './client';
 
 export const VIEWING_STATUSES = ['requested', 'confirmed', 'completed', 'cancelled'] as const;

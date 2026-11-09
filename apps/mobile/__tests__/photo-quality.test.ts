@@ -1,5 +1,5 @@
 /** Document photo checks run on the device before upload (step 3: fewer rejected photos). */
-import { assessPhotoQuality } from '@getrentos/shared';
+import { assessPhotoQuality } from '@sureground/shared';
 
 const W = 200;
 const H = 140;

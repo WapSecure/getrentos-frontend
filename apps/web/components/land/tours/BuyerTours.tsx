@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Button, EmptyState, Input, PageErrorState, Textarea, Toast } from '@getrentos/ui';
+import { Button, EmptyState, Input, PageErrorState, Textarea, Toast } from '@sureground/ui';
 import { Video } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { landSiteTourKeys, landSiteTourService } from '@/services/landSiteTourService';

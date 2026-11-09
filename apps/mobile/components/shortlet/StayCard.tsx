@@ -2,7 +2,7 @@ import { memo } from 'react';
 import { Pressable, View } from 'react-native';
 import { Image } from 'expo-image';
 import { Heart, ImageOff, Star, Zap } from 'lucide-react-native';
-import { Card, PressableScale, Price, Text, useTheme } from '@getrentos/ui-native';
+import { Card, PressableScale, Price, Text, useTheme } from '@sureground/ui-native';
 import type { ShortletListing } from '@/lib/api/shortlets';
 import { nightsLabel } from '@/lib/stays';
 import { TrustChips } from './StayUI';

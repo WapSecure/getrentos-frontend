@@ -1,4 +1,4 @@
-import { RadioGroup, type RadioOption } from '@getrentos/ui-native';
+import { RadioGroup, type RadioOption } from '@sureground/ui-native';
 import type { PaymentProviderChoice } from '@/hooks/usePaymentProviders';
 import type { PaymentProvider } from '@/lib/api/paymentStatus';
 
@@ -12,7 +12,7 @@ export const PROVIDER_METHODS: Record<PaymentProvider, string> = {
  * "Pay with: Paystack / Monnify", so a payer can switch when one company is
  * down. A company that cannot take payments right now is shown but cannot be
  * chosen, with why ("Monnify is switched off for now"). Renders nothing only
- * when GetRentos works with a single company: there is nothing to choose.
+ * when Sureground works with a single company: there is nothing to choose.
  */
 export function PaymentProviderPicker({
   choice,

@@ -4,14 +4,14 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { CircleAlert, UserCheck } from 'lucide-react';
-import { Badge, EmptyState, QueryState, Select, PageHeader } from '@getrentos/ui';
+import { Badge, EmptyState, QueryState, Select, PageHeader } from '@sureground/ui';
 import {
   formatDate,
   LAND_AUTHORITY_STATUS_LABELS,
   landAuthorityTone,
   unwrap,
   type LandAuthorityStatus,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import { useAdminUser } from '../../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
 import { landQueryKeys } from '@/lib/landDiligence';

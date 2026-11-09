@@ -2,8 +2,8 @@
 
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Select } from '@getrentos/ui';
-import { unwrap } from '@getrentos/shared';
+import { Select } from '@sureground/ui';
+import { unwrap } from '@sureground/shared';
 
 import { adminFieldService, type FieldAgentCandidate } from '@/services/adminManagedService';
 

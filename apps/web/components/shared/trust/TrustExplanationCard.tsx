@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { Sparkles, CheckCircle2, ArrowUpRight } from 'lucide-react';
-import { Card } from '@getrentos/ui';
+import { Card } from '@sureground/ui';
 import { trustService } from '@/services/trustService';
 import { unwrap } from '@/lib/apiHelpers';
 import { trustKeys } from '@/lib/queryKeys';

@@ -9,7 +9,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { securityApi } from '@/lib/api/security';
 import { errorMessage } from '@/lib/api/client';

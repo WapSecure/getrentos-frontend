@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { View } from 'react-native';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Button, NumberField, Text, TextField, useTheme, useToast } from '@getrentos/ui-native';
+import { Button, NumberField, Text, TextField, useTheme, useToast } from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { qk } from '@/lib/query/keys';
 import { buyerOffersApi, type BuyerOffer } from '@/lib/api/buyerOffers';

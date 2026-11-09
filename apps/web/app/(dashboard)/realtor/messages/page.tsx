@@ -13,7 +13,7 @@ import { cn } from '@/lib/cn';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
 import { realtorService } from '@/services/realtorService';
-import { Button, Pagination, useToast, PageHeader } from '@getrentos/ui';
+import { Button, Pagination, useToast, PageHeader } from '@sureground/ui';
 import { useOpenConversationFromUrl } from '@/hooks/useOpenConversationFromUrl';
 
 const PAGE_SIZE = 10;

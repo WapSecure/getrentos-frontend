@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { LogOut, KeyRound, Car, Package, Siren } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
 import { PostSwitcher } from '@/components/gateman/PostSwitcher';
-import { Button, ThemeToggle } from '@getrentos/ui';
+import { Button, ThemeToggle } from '@sureground/ui';
 import { ROUTES } from '@/lib/constants/auth';
 import { logoutSession } from '@/lib/apiClient';
 

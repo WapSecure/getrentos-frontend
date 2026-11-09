@@ -5,7 +5,7 @@ import { SafeImage } from '@/components/shared/media/SafeImage';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { ShieldCheck, Star, MessageCircle, BedDouble, Bath } from 'lucide-react';
-import { Button, CardSkeleton, Pagination, Skeleton } from '@getrentos/ui';
+import { Button, CardSkeleton, Pagination, Skeleton } from '@sureground/ui';
 import { micrositeService } from '@/services/micrositeService';
 import { renterService } from '@/services/renterService';
 import { unwrap, isAuthenticated, getStoredUser } from '@/lib/apiHelpers';

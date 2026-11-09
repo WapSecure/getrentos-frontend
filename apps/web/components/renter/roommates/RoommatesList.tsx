@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { Users, UserPlus } from 'lucide-react';
 import { RoommateCard } from './RoommateCard';
-import { Alert, Button, Card, EmptyState } from '@getrentos/ui';
+import { Alert, Button, Card, EmptyState } from '@sureground/ui';
 
 interface Roommate {
   id: string;

@@ -12,7 +12,7 @@ import {
   Text,
   useTheme,
   type BadgeTone,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import {
   collectionsApi,
   type CollectionPlanSource,

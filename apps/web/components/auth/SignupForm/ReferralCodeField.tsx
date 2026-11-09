@@ -3,7 +3,7 @@
 import { useEffect, useId } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Gift } from 'lucide-react';
-import { Input } from '@getrentos/ui';
+import { Input } from '@sureground/ui';
 import { useSignupStore } from '@/lib/store/signupStore';
 
 /** Reads ?ref=CODE off the signup URL once, and lets the user edit/type a code manually too. */

@@ -16,7 +16,7 @@ import {
   Textarea,
   Toast,
   type PendingUpload,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { BadgeCheck, FileText } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';

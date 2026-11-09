@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useTheme, type ThemePreference } from '@getrentos/ui-native';
+import { useTheme, type ThemePreference } from '@sureground/ui-native';
 
-const KEY = 'getrentos.themePreference';
+const KEY = 'sureground.themePreference';
 const VALID: ThemePreference[] = ['system', 'light', 'dark'];
 
 /** Persist an appearance choice. Pass to `<ThemeProvider onPreferenceChange>`. */

@@ -3,7 +3,7 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Star, MessageCircle, ShieldCheck, Clock } from 'lucide-react';
-import { Pagination, EmptyState, ListSkeleton, PageErrorState, PageHeader } from '@getrentos/ui';
+import { Pagination, EmptyState, ListSkeleton, PageErrorState, PageHeader } from '@sureground/ui';
 import { getInitials, formatDate } from '@/lib/format';
 import { ownerService, type OwnerReview } from '@/services/ownerService';
 import { ownerKeys } from '@/lib/queryKeys';

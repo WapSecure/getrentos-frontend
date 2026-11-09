@@ -2,8 +2,8 @@
 
 import { useRef, useState } from 'react';
 import { ExternalLink, FileText, ImageIcon, Paperclip, Trash2, Upload } from 'lucide-react';
-import { Badge, Button, DocumentPreviewButton, IconButton, Input } from '@getrentos/ui';
-import { cn, formatDate } from '@getrentos/shared';
+import { Badge, Button, DocumentPreviewButton, IconButton, Input } from '@sureground/ui';
+import { cn, formatDate } from '@sureground/shared';
 import type { EvidenceItem } from '@/types/admin';
 
 /**

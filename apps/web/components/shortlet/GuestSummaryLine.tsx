@@ -6,7 +6,7 @@ const memberSince = (iso: string) =>
 
 /**
  * The guest at a glance, for a host deciding on a request: counts across
- * GetRentos only, never other hosts' details.
+ * Sureground only, never other hosts' details.
  */
 export function GuestSummaryLine({ summary }: { summary: GuestSummary }) {
   const isNew = summary.completedStays === 0;

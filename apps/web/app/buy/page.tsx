@@ -13,11 +13,11 @@ import type { Paginated } from '@/lib/apiHelpers';
 export const metadata: Metadata = {
   title: 'Properties for Sale in Nigeria',
   description:
-    'Browse homes for sale across Nigeria. Verified properties, GetRentos Payment Protection, and results you can scope to a single estate.',
+    'Browse homes for sale across Nigeria. Verified properties, Sureground Payment Protection, and results you can scope to a single estate.',
   alternates: { canonical: '/buy' },
   openGraph: {
     title: 'Properties for Sale in Nigeria',
-    description: 'Browse homes for sale across Nigeria with GetRentos Payment Protection.',
+    description: 'Browse homes for sale across Nigeria with Sureground Payment Protection.',
     url: '/buy',
     type: 'website',
   },

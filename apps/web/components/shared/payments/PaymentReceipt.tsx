@@ -20,7 +20,7 @@ import {
   IconButton,
   PageErrorState,
   type DescriptionItem,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 import {
   FAILED_BODY,
@@ -336,7 +336,7 @@ export function PaymentStillPending({
           </Button>
         )}
         <Button href={back} variant="outline" className="w-full sm:flex-1">
-          Back to GetRentos
+          Back to Sureground
         </Button>
       </div>
     </Shell>
@@ -392,7 +392,7 @@ export function PaymentLookupFailed({
         />
       </Card>
       <Button href="/" variant="outline" className="w-full">
-        Back to GetRentos
+        Back to Sureground
       </Button>
     </Shell>
   );
@@ -409,7 +409,7 @@ export function PaymentNotFound() {
         />
       </div>
       <Button href="/" variant="outline" className="w-full">
-        Back to GetRentos
+        Back to Sureground
       </Button>
     </Shell>
   );
@@ -427,7 +427,7 @@ export function PaymentDoneElsewhere() {
         <StatusMark icon={Smartphone} tone="muted" />
         <Heading
           title="Go back to the app to see how it went"
-          body="Close this page and return to the GetRentos app. Your payment shows there once it's confirmed. If you were charged, please don't pay again."
+          body="Close this page and return to the Sureground app. Your payment shows there once it's confirmed. If you were charged, please don't pay again."
         />
       </div>
       <Button href={withNext(ROUTES.LOGIN, currentPath())} variant="outline" className="w-full">

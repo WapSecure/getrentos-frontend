@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { UserPlus, CalendarClock, Handshake, Wallet, Inbox } from 'lucide-react';
-import { Card, EmptyState, ListSkeleton } from '@getrentos/ui';
+import { Card, EmptyState, ListSkeleton } from '@sureground/ui';
 import { formatRelativeTime } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';

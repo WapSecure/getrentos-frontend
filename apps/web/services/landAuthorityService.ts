@@ -6,7 +6,7 @@ import type {
   LandConsentRequest,
   LandSellerCapacity,
   LandSignatoryRole,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 
 export interface DeclareLandAuthorityInput {
   capacity: LandSellerCapacity;
@@ -21,7 +21,7 @@ export interface AddLandSignatoryInput {
   role: LandSignatoryRole;
   fullName: string;
   phone?: string;
-  /** Their GetRentos email, so they can answer from their own account. */
+  /** Their Sureground email, so they can answer from their own account. */
   email?: string;
 }
 

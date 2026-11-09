@@ -7,7 +7,7 @@ import {
   Skeleton,
   ToggleChip,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { useMemo, useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Users } from 'lucide-react';

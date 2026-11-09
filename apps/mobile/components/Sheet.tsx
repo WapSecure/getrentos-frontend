@@ -11,7 +11,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Text, useReducedMotion, useTheme } from '@getrentos/ui-native';
+import { Text, useReducedMotion, useTheme } from '@sureground/ui-native';
 
 export interface SheetProps {
   open: boolean;

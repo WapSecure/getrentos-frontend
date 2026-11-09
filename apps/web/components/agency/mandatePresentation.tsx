@@ -1,4 +1,4 @@
-import { Badge } from '@getrentos/ui';
+import { Badge } from '@sureground/ui';
 import { MANDATE_STATUS_LABELS, type MandateStatus } from '@/services/mandateService';
 
 /**

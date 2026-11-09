@@ -17,9 +17,9 @@ import {
   Select,
   clearSessionDraft,
   useSessionExpiryDraft,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { AddressFields } from '@/components/shared/location/AddressFields';
-import type { VerifiedAddress } from '@getrentos/shared';
+import type { VerifiedAddress } from '@sureground/shared';
 import type { OwnerProperty } from '@/types/owner';
 import { PROPERTY_TYPE_OPTIONS } from '@/lib/propertyTypes';
 import type { LandOwnershipProofInput } from '@/types/land';

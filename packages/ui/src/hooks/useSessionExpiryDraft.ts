@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { onSessionExpired } from '@getrentos/shared';
+import { onSessionExpired } from '@sureground/shared';
 
 const PREFIX = 'gr_draft:';
 

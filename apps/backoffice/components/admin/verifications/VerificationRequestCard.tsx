@@ -10,8 +10,8 @@ import {
   CheckCircle2,
   XCircle,
 } from 'lucide-react';
-import { Badge, Button, Card } from '@getrentos/ui';
-import { formatDate } from '@getrentos/shared';
+import { Badge, Button, Card } from '@sureground/ui';
+import { formatDate } from '@sureground/shared';
 import type { VerificationRequest, VerificationRequestType } from '@/types/admin';
 
 const typeConfig: Record<VerificationRequestType, { icon: React.ElementType; label: string }> = {

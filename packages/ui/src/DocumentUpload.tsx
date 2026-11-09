@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from 'react';
 import { AlertTriangle, FileText, ImageIcon, Upload, X, Eye } from 'lucide-react';
-import { cn } from '@getrentos/shared';
+import { cn } from '@sureground/shared';
 import { FilePreviewDialog } from './FilePreviewDialog';
 import { useFieldControl } from './fieldContext';
 import { checkPhotoQuality } from './photoQuality';

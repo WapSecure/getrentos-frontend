@@ -21,7 +21,7 @@ import {
   ShieldCheck,
   Star,
 } from 'lucide-react-native';
-import { Card, Text, useTheme } from '@getrentos/ui-native';
+import { Card, Text, useTheme } from '@sureground/ui-native';
 
 /**
  * Onboarding illustrations. Each is a miniature of something the product
@@ -327,7 +327,7 @@ export function EscrowScene() {
       <Layer depth={1}>
         <EscrowNode
           icon={<ShieldCheck size={19} color={colors.primaryForeground} />}
-          label="Held by GetRentos"
+          label="Held by Sureground"
           caption="Neither side can touch it"
           emphasis
         />

@@ -2,7 +2,7 @@ import { ScrollView, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { boundarySignOffText } from '@getrentos/shared';
+import { boundarySignOffText } from '@sureground/shared';
 import {
   Badge,
   Card,
@@ -12,7 +12,7 @@ import {
   QueryState,
   Text,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   COST_STATUS,
@@ -121,7 +121,7 @@ export default function LandDossierScreen() {
                       {e.registeredAt ? ` · registered ${formatDate(e.registeredAt, 'short')}` : ''}
                     </Text>
                     <Badge
-                      label={e.verified ? 'Verified by GetRentos' : 'As stated by the owner'}
+                      label={e.verified ? 'Verified by Sureground' : 'As stated by the owner'}
                       tone={e.verified ? 'success' : 'neutral'}
                     />
                   </View>
@@ -130,7 +130,7 @@ export default function LandDossierScreen() {
             </Section>
             <Section title="Sources">
               <Text variant="callout" color="mutedForeground">
-                Documents GetRentos holds for this land (the files are not shared here):{' '}
+                Documents Sureground holds for this land (the files are not shared here):{' '}
                 {d.sourceIndex.length === 0
                   ? 'none on file.'
                   : d.sourceIndex

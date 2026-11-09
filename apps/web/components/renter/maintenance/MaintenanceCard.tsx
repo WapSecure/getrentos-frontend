@@ -13,7 +13,7 @@ import {
   XCircle,
   type LucideIcon,
 } from 'lucide-react';
-import { Badge, Button, type BadgeVariant } from '@getrentos/ui';
+import { Badge, Button, type BadgeVariant } from '@sureground/ui';
 import type { MaintenanceRequest } from '@/types/maintenance';
 
 interface MaintenanceCardProps {

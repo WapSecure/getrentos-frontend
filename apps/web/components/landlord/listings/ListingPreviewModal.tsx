@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Megaphone, MapPin, PawPrint, Sofa, CalendarClock, Check, Zap, Play } from 'lucide-react';
-import { Dialog, DialogContent, DialogTitle } from '@getrentos/ui';
+import { Dialog, DialogContent, DialogTitle } from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type { Listing } from '@/types/landlord';
 

@@ -8,7 +8,7 @@ import {
   Heart,
   ShieldCheck,
 } from 'lucide-react';
-import { StatCard, type StatCardAccent } from '@getrentos/ui';
+import { StatCard, type StatCardAccent } from '@sureground/ui';
 
 interface BuyerStatsCardsProps {
   savedProperties: number;

@@ -16,7 +16,7 @@ import {
   Textarea,
   clearSessionDraft,
   useSessionExpiryDraft,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import type { BuyerPropertyListing, FinancingType, BuyerOffer } from '@/types/buyer';
 import { PaginatedSelect } from '@/components/ui/PaginatedSelect';
 import { unwrap } from '@/lib/apiHelpers';
@@ -283,8 +283,8 @@ export const MakeOfferModal = ({
             hint={
               amount > 0
                 ? depositAmount
-                  ? `You pay ${formatCurrency(deposit)} into GetRentos Payment Protection once the seller accepts.`
-                  : `Left blank, the deposit is 10% of your offer: ${formatCurrency(deposit)}, held by GetRentos once the seller accepts.`
+                  ? `You pay ${formatCurrency(deposit)} into Sureground Payment Protection once the seller accepts.`
+                  : `Left blank, the deposit is 10% of your offer: ${formatCurrency(deposit)}, held by Sureground once the seller accepts.`
                 : 'Left blank, the deposit is 10% of your offer.'
             }
           >

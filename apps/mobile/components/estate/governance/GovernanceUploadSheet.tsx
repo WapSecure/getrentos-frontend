@@ -15,7 +15,7 @@ import {
   toISODate,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { isUpgradeError } from '@/components/host/HostUI';
 import type { PickedFile } from '@/lib/api/documents';

@@ -3,7 +3,7 @@
 import { HomeManagementWorkspace } from '@/components/home-management/HomeManagementWorkspace';
 import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
 import { useCustody } from '@/components/agency/CustodyProvider';
-import { PageHeader } from '@getrentos/ui';
+import { PageHeader } from '@sureground/ui';
 
 export default function AgencyHomeManagementPage() {
   // Acting for one client narrows the whole page to that client's home.

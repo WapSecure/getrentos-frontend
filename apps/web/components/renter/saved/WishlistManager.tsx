@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, X, FolderPlus, Trash2, Pencil, Check, Bookmark } from 'lucide-react';
-import { Button, Card, IconButton, Input, useOptimisticMutation, useToast } from '@getrentos/ui';
+import { Button, Card, IconButton, Input, useOptimisticMutation, useToast } from '@sureground/ui';
 import { renterService, type Wishlist } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';

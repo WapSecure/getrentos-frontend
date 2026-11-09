@@ -12,7 +12,7 @@ import {
   DocumentUpload,
   Field,
   Select,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import type { Property, VerificationStatus } from '@/types/landlord';
 import type { LandOwnershipProofInput } from '@/types/land';
 

@@ -4,14 +4,14 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button } from '@sureground/ui';
 import { RequestStep } from './steps/RequestStep';
 import { OtpStep } from './steps/OtpStep';
 import { ResetStep } from './steps/ResetStep';
 import { authService } from '@/services/authService';
 import { Logo } from '@/components/ui/Logo';
 import { useMutation } from '@tanstack/react-query';
-import { AUTH_CONSTANTS, ERROR_MESSAGES } from '@getrentos/shared';
+import { AUTH_CONSTANTS, ERROR_MESSAGES } from '@sureground/shared';
 
 interface ForgotPasswordFormProps {
   onSuccess: () => void;

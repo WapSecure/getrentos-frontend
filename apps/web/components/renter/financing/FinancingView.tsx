@@ -6,7 +6,7 @@ import { ApplyFinancingModal } from '@/components/renter/financing/ApplyFinancin
 import { ActiveFinancingPlanCard } from '@/components/renter/financing/ActiveFinancingPlanCard';
 import { FlexPausedCard } from '@/components/renter/financing/FlexPausedCard';
 import { PayDialog } from '@/components/shared/payments/PayDialog';
-import { CardSkeleton, PageErrorState, Skeleton, useToast } from '@getrentos/ui';
+import { CardSkeleton, PageErrorState, Skeleton, useToast } from '@sureground/ui';
 import { useState } from 'react';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';

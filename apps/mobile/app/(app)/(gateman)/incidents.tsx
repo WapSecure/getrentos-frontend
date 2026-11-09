@@ -16,7 +16,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
 import {
   gatemanApi,

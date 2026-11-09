@@ -21,8 +21,8 @@ import {
   TabsTrigger,
   Textarea,
   TimePicker,
-} from '@getrentos/ui';
-import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { formatCurrency, formatDate, unwrap } from '@sureground/shared';
 
 import {
   adminManagedIntakeService,
@@ -278,7 +278,7 @@ const IntakeCard = ({
       )}
       {s === 'ACCEPTED' && (
         <p className="text-sm text-muted-foreground">
-          Accepted and signed. Activate it from GetRentos Managed once the checklist is complete.
+          Accepted and signed. Activate it from Sureground Managed once the checklist is complete.
         </p>
       )}
       {s === 'DECLINED' && (
@@ -413,7 +413,7 @@ const IntakeCard = ({
             placeholder="Note to the owner (optional)"
           />
           <p className="mt-1 text-xs text-muted-foreground">
-            The fee is the published one for the tier. Sending this is GetRentos accepting the
+            The fee is the published one for the tier. Sending this is Sureground accepting the
             property operationally. The owner has 14 days to accept.
           </p>
           <Button
@@ -511,7 +511,7 @@ export default function AdminManagedIntakesPage() {
     <div className="space-y-6">
       <PageHeader
         title="Managed intake"
-        description="Owners asking GetRentos to manage their property. Book the visit, record the assessment, send the proposal and confirm the opening position. Nothing activates until all of it is on record."
+        description="Owners asking Sureground to manage their property. Book the visit, record the assessment, send the proposal and confirm the opening position. Nothing activates until all of it is on record."
       />
 
       <Tabs value={filter} onValueChange={(v) => setFilter(v as Filter)}>

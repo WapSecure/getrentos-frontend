@@ -18,7 +18,7 @@ import {
   Select,
   ToggleChip,
   useSessionExpiryDraft,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import type { Listing, RentPeriod, Unit } from '@/types/landlord';
 import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
 import { ROUTES } from '@/lib/constants/auth';
@@ -277,13 +277,13 @@ export const CreateListingModal = ({
                     label={
                       <span className="flex items-center gap-1.5 font-medium">
                         <Zap className="w-3.5 h-3.5 text-primary" />
-                        Allow monthly instalments via GetRentos Flex
+                        Allow monthly instalments via Sureground Flex
                       </span>
                     }
                     description={
                       flexOpen
-                        ? 'GetRentos pays you the full year upfront; the tenant repays us monthly. Leave unchecked to require the full year from the tenant directly.'
-                        : "GetRentos Flex isn't taking new plans right now. You can opt in now; renters can use it for this home once Flex reopens."
+                        ? 'Sureground pays you the full year upfront; the tenant repays us monthly. Leave unchecked to require the full year from the tenant directly.'
+                        : "Sureground Flex isn't taking new plans right now. You can opt in now; renters can use it for this home once Flex reopens."
                     }
                   />
                 </div>

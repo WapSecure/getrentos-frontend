@@ -11,7 +11,7 @@ import {
   type PlaceKind,
   type PlaceSuggestion,
   type VerifiedAddress,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import { controlShell, innerInputClass, type ControlSize } from './controlStyles';
 import { useFieldControl } from './fieldContext';
 

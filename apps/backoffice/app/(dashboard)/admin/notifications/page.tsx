@@ -11,8 +11,8 @@ import {
   Pagination,
   useOptimisticMutation,
   PageHeader,
-} from '@getrentos/ui';
-import { formatRelativeTime, unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { formatRelativeTime, unwrap } from '@sureground/shared';
 import { adminKeys } from '@/lib/queryKeys';
 import { adminService } from '@/services/adminService';
 

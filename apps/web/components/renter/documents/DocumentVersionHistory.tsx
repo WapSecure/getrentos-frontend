@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Clock, Download, FileText, RotateCcw, ChevronUp, ChevronDown } from 'lucide-react';
-import { Badge, Card, IconButton } from '@getrentos/ui';
+import { Badge, Card, IconButton } from '@sureground/ui';
 
 interface Version {
   id: string;

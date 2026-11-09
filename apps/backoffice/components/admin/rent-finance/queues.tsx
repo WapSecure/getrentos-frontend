@@ -17,8 +17,8 @@ import {
   Input,
   useToast,
   type BadgeVariant,
-} from '@getrentos/ui';
-import { ApiError, unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { ApiError, unwrap } from '@sureground/shared';
 import { adminRentFinanceService } from '@/services/adminRentFinanceService';
 import {
   RentFinanceQueuePage,

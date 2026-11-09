@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { AlertTriangle, CalendarClock, BadgeCheck } from 'lucide-react';
-import { Alert, Button, Card } from '@getrentos/ui';
-import { formatCurrency } from '@getrentos/shared';
+import { Alert, Button, Card } from '@sureground/ui';
+import { formatCurrency } from '@sureground/shared';
 import type { MyBilling } from '@/services/billingService';
 import { useCardUpdateLink, useManageSubscription } from '@/hooks/useBilling';
 

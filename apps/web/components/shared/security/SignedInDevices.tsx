@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { MonitorSmartphone } from 'lucide-react';
-import { Badge, Button, ConfirmDialog, Skeleton, useToast } from '@getrentos/ui';
-import { formatRelativeTime } from '@getrentos/shared';
+import { Badge, Button, ConfirmDialog, Skeleton, useToast } from '@sureground/ui';
+import { formatRelativeTime } from '@sureground/shared';
 import { accountSecurityService } from '@/services/accountSecurityService';
 import { unwrap } from '@/lib/apiHelpers';
 import { accountSecurityKeys } from '@/lib/queryKeys';

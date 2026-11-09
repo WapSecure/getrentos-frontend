@@ -18,7 +18,7 @@ import {
   toISODate,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { clientName, clientRole, realtorApi, type AssignedProperty } from '@/lib/api/realtor';
 import { ApiError } from '@/lib/api/client';

@@ -11,7 +11,7 @@ const STARTERS = [
   'Any work orders past their deadline?',
 ];
 
-/** Ask GetRentos for property managers: the firm's owners, occupancy, rent, arrears, maintenance and queries. */
+/** Ask Sureground for property managers: the firm's owners, occupancy, rent, arrears, maintenance and queries. */
 export const ManagerAssistant = () => (
   <AssistantChat
     ask={(question, history, language) =>

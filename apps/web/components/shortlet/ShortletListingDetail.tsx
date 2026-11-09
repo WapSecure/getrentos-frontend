@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { SafeImage } from '@/components/shared/media/SafeImage';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { isAuthenticated, tourSource, videoSource } from '@getrentos/shared';
+import { isAuthenticated, tourSource, videoSource } from '@sureground/shared';
 import {
   Badge,
   Button,
@@ -15,7 +15,7 @@ import {
   TabsList,
   TabsTrigger,
   useToast,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import {
   Armchair,
   BedDouble,
@@ -461,7 +461,7 @@ export function ShortletListingDetail({
                 ))}
               </div>
               <p className="mt-2 text-xs text-muted-foreground">
-                The host arranged this inspection. GetRentos checked the agent&rsquo;s licence and
+                The host arranged this inspection. Sureground checked the agent&rsquo;s licence and
                 identity, and only shows inspections from the last 12 months with no room rated
                 poor.
               </p>
@@ -692,7 +692,7 @@ export function ShortletListingDetail({
             <p className="mt-3 flex items-start gap-1.5 text-xs text-muted-foreground">
               <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
               <span>
-                <span className="font-medium text-foreground">GetRentos Guest Promise.</span>{' '}
+                <span className="font-medium text-foreground">Sureground Guest Promise.</span>{' '}
                 {GUEST_PROMISE_TEXT}
               </span>
             </p>
@@ -701,7 +701,7 @@ export function ShortletListingDetail({
                 <span className="font-medium">Fair price.</span> The typical rate for{' '}
                 {listing.fairPrice.bedrooms}-bedroom stays in {listing.fairPrice.city} is{' '}
                 {formatCurrency(listing.fairPrice.typicalNightly)}/night (
-                {listing.fairPrice.comparables} stays on GetRentos). This one is at or below it.
+                {listing.fairPrice.comparables} stays on Sureground). This one is at or below it.
               </p>
             )}
             <SupportContact className="mt-3" context={`Question about ${listing.title}`} />

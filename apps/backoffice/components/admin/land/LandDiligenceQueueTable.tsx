@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import { AlertTriangle, ShieldAlert, UserRound, UsersRound } from 'lucide-react';
-import { Badge, DataTable, type Column } from '@getrentos/ui';
-import { formatDate } from '@getrentos/shared';
+import { Badge, DataTable, type Column } from '@sureground/ui';
+import { formatDate } from '@sureground/shared';
 import type { LandDiligenceRecord } from '@/types/land';
 import { describeSla, riskBadgeVariant, riskBandFor } from '@/lib/landDiligence';
 import { LandDiligenceStatusBadge } from './LandDiligenceStatusBadge';

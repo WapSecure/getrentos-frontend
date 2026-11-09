@@ -15,7 +15,7 @@ import {
   TextField,
   useToast,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { residentApi, type MusterSelfAnswer } from '@/lib/api/resident';
 import { qk } from '@/lib/query/keys';
 import {

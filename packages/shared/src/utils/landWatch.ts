@@ -385,6 +385,6 @@ export const LAND_WATCH_JOB_STATUS_LABELS: Record<
   CANCELLED: { label: 'Cancelled', tone: 'neutral' },
 };
 
-/** Said wherever an owner accepts a quote: GetRentos arranges, the owner pays. */
+/** Said wherever an owner accepts a quote: Sureground arranges, the owner pays. */
 export const LAND_WATCH_JOB_PAYMENT_NOTE =
-  'You pay the vendor directly. GetRentos arranges the work and records proof of it, but does not hold or pass on this money.';
+  'You pay the vendor directly. Sureground arranges the work and records proof of it, but does not hold or pass on this money.';

@@ -52,7 +52,7 @@ export function useGatemanPost(): GatemanPost {
   return ctx;
 }
 
-const KEY = 'getrentos.gateman.post';
+const KEY = 'sureground.gateman.post';
 
 interface StoredPost {
   estateId?: string;

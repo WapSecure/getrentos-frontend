@@ -15,7 +15,7 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { ArrowRight, LayoutGrid } from 'lucide-react';
 import { unwrap, unwrapOptional } from '@/lib/apiHelpers';
 import { formatCurrency } from '@/lib/format';
@@ -97,7 +97,7 @@ const LayoutSetup = ({
           <h2 className="text-lg font-semibold text-foreground">Sell this land as plots</h2>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
             Set up an estate layout to sell plots carved from this parcel, on outright or instalment
-            plans. GetRentos holds buyers&apos; payments and pays you as each conveyance step is
+            plans. Sureground holds buyers&apos; payments and pays you as each conveyance step is
             confirmed.
           </p>
         </div>

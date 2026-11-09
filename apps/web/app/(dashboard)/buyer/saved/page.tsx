@@ -13,7 +13,7 @@ import {
   Skeleton,
   useOptimisticMutation,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { buyerService } from '@/services/buyerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { buyerKeys } from '@/lib/queryKeys';

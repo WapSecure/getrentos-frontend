@@ -1,8 +1,8 @@
 'use client';
 
 import { ShieldCheck } from 'lucide-react';
-import { Button, PageHeader } from '@getrentos/ui';
-import { ROUTES } from '@getrentos/shared';
+import { Button, PageHeader } from '@sureground/ui';
+import { ROUTES } from '@sureground/shared';
 import { useAdminCan } from '@/hooks/useAdminCan';
 
 interface AdminDashboardHeaderProps {

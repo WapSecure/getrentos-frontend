@@ -51,7 +51,7 @@ export interface DepositHoldListItem {
   propertyTitle: string | null;
   amount: number;
   status: DepositStatus;
-  heldByGetRentos: boolean;
+  heldBySureground: boolean;
   returnable: number;
   createdAt: string;
 }
@@ -68,7 +68,7 @@ export interface DepositHold extends DepositHoldListItem {
 export interface CreateDepositHoldInput {
   leaseId: string;
   amount?: number;
-  heldByGetRentos?: boolean;
+  heldBySureground?: boolean;
 }
 
 export interface ProposeDeductionInput {

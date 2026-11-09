@@ -11,7 +11,7 @@ import type {
 } from '@/types/owner';
 import type { TrustProfile } from '@/types/trust-score';
 import type { AssistantReply, AssistantTurn } from '@/types/assistant';
-import type { VideoCallJoin } from '@getrentos/shared';
+import type { VideoCallJoin } from '@sureground/shared';
 import { toApiPropertyType, toDisplayPropertyType } from '@/lib/propertyTypes';
 
 export interface OwnerDashboard {

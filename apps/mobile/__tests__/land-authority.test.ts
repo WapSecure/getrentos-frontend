@@ -1,4 +1,4 @@
-import { describeCapacityRule, signatoryRolesFor, type LandCapacityRule } from '@getrentos/shared';
+import { describeCapacityRule, signatoryRolesFor, type LandCapacityRule } from '@sureground/shared';
 import { declareBlocker, isClaim, isEditable } from '@/lib/api/landAuthority';
 
 const rule = (over: Partial<LandCapacityRule> = {}): LandCapacityRule => ({

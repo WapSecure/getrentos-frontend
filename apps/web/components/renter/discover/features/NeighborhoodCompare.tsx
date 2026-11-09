@@ -11,7 +11,7 @@ import {
   DialogTitle,
   EmptyState,
   Skeleton,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';

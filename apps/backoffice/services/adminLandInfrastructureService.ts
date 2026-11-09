@@ -1,4 +1,4 @@
-import { authFetch, safeCall } from '@getrentos/shared';
+import { authFetch, safeCall } from '@sureground/shared';
 
 export interface AdminEstateCommitmentUpdate {
   status: string;

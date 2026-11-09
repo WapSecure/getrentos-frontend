@@ -1,7 +1,7 @@
 'use client';
 
 import { Building2, Home, MessageSquare } from 'lucide-react';
-import { Badge, Button, Card, type BadgeVariant } from '@getrentos/ui';
+import { Badge, Button, Card, type BadgeVariant } from '@sureground/ui';
 import { getInitials, formatDate } from '@/lib/format';
 import type { RealtorClient } from '@/types/realtor';
 

@@ -1,4 +1,4 @@
-import { formatTrend, monthTrend } from '@getrentos/shared';
+import { formatTrend, monthTrend } from '@sureground/shared';
 
 const series = [
   { label: 'Aug', value: 0 },

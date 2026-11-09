@@ -13,7 +13,7 @@ import {
   useTheme,
   useToast,
   type BadgeTone,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { kycApi, type KycStatus } from '@/lib/api/kyc';
 import type { PickedFile } from '@/lib/api/documents';
 import { errorMessage } from '@/lib/api/client';

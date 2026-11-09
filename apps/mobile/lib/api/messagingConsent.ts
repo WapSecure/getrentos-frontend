@@ -1,6 +1,6 @@
 import { apiFetch } from './client';
 
-/** Whether GetRentos may text this person, and the WhatsApp chat number when it is set up. */
+/** Whether Sureground may text this person, and the WhatsApp chat number when it is set up. */
 export interface MessagingConsent {
   phoneEnding: string | null;
   phoneVerified: boolean;
@@ -9,7 +9,7 @@ export interface MessagingConsent {
   consentedAt: string | null;
   /** They agreed for an older number; texts stop until they agree for this one. */
   numberChanged: boolean;
-  /** The number to message for Ask GetRentos on WhatsApp; null until the chat is set up. */
+  /** The number to message for Ask Sureground on WhatsApp; null until the chat is set up. */
   whatsappChatNumber?: string | null;
 }
 

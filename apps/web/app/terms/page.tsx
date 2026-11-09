@@ -7,7 +7,7 @@ import { LegalPage } from '@/components/layout/LegalPage';
 
 export const metadata: Metadata = {
   title: 'Terms of Service',
-  description: 'The terms for using GetRentos to rent, buy, sell and manage property.',
+  description: 'The terms for using Sureground to rent, buy, sell and manage property.',
   alternates: { canonical: '/terms' },
 };
 
@@ -16,17 +16,17 @@ export default function TermsPage() {
     <LegalPage
       title="Terms of Service"
       updated="21 September 2026"
-      intro="These terms apply when you use GetRentos. By creating an account or using the platform you agree to them. If you don’t agree, please don’t use it."
+      intro="These terms apply when you use Sureground. By creating an account or using the platform you agree to them. If you don’t agree, please don’t use it."
     >
-      <h2 id="who-can-use-it">Who can use GetRentos</h2>
+      <h2 id="who-can-use-it">Who can use Sureground</h2>
       <p>
         You must be at least 18 and able to enter a binding agreement. You are responsible for the
         accuracy of what you give us and for keeping your sign-in details safe.
       </p>
 
-      <h2 id="what-we-are">What GetRentos is</h2>
+      <h2 id="what-we-are">What Sureground is</h2>
       <p>
-        GetRentos is a platform that connects renters, landlords, owners, buyers, realtors, agents
+        Sureground is a platform that connects renters, landlords, owners, buyers, realtors, agents
         and estate managers and provides tools for verification, payments and property management.
         We are not a party to a tenancy or a sale between users, and we do not guarantee that any
         listing, person or deal is as described, even where we have verified an identity or reviewed
@@ -48,7 +48,7 @@ export default function TermsPage() {
 
       <h2 id="payments">Payments and payment protection</h2>
       <p>
-        Payments are processed by Paystack. Where GetRentos holds a payment for you (payment
+        Payments are processed by Paystack. Where Sureground holds a payment for you (payment
         protection), it is paid out when the conditions for that transaction are met, or returned as
         our dispute process decides. Fees, if any, are shown before you pay. You agree to pay what
         you owe on time.
@@ -62,7 +62,7 @@ export default function TermsPage() {
 
       <h2 id="acceptable-use">Acceptable use</h2>
       <ul>
-        <li>Don&apos;t use GetRentos for fraud, harassment or anything unlawful.</li>
+        <li>Don&apos;t use Sureground for fraud, harassment or anything unlawful.</li>
         <li>Don&apos;t impersonate anyone or use someone else&apos;s identity or documents.</li>
         <li>Don&apos;t try to break, overload or gain unauthorised access to the platform.</li>
         <li>
@@ -79,7 +79,7 @@ export default function TermsPage() {
 
       <h2 id="liability">Our responsibility</h2>
       <p>
-        We work hard to keep GetRentos reliable and safe, but we provide it as it is. To the extent
+        We work hard to keep Sureground reliable and safe, but we provide it as it is. To the extent
         the law allows, we are not liable for losses that arise from another user&apos;s actions,
         from listings or documents we did not create, or from interruptions we could not reasonably
         prevent. Nothing in these terms limits liability that cannot lawfully be limited.
@@ -87,15 +87,15 @@ export default function TermsPage() {
 
       <h2 id="ending">Ending your account</h2>
       <p>
-        You can stop using GetRentos at any time. We may suspend or close an account that breaks
+        You can stop using Sureground at any time. We may suspend or close an account that breaks
         these terms or puts other users at risk. Amounts already owed remain payable, and payments
-        GetRentos is holding are handled as described above.
+        Sureground is holding are handled as described above.
       </p>
 
       <h2 id="changes">Changes</h2>
       <p>
         We may update these terms. If a change matters, we will tell you in the app or by email
-        before it applies. Continuing to use GetRentos after that means you accept the change.
+        before it applies. Continuing to use Sureground after that means you accept the change.
       </p>
 
       <h2 id="law">Governing law</h2>
@@ -103,9 +103,9 @@ export default function TermsPage() {
 
       <h2 id="contact">Contact</h2>
       <p>
-        GetRentos, Lagos, Nigeria · <a href="mailto:support@getrentos.com">support@getrentos.com</a>
-        . See also our <a href="/privacy">Privacy Policy</a> and{' '}
-        <a href="/cookies">Cookie Policy</a>.
+        Sureground, Lagos, Nigeria ·{' '}
+        <a href="mailto:support@getsureground.io">support@getsureground.io</a>. See also our{' '}
+        <a href="/privacy">Privacy Policy</a> and <a href="/cookies">Cookie Policy</a>.
       </p>
     </LegalPage>
   );

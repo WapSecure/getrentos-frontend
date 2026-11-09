@@ -1,6 +1,6 @@
 import { apiFetch } from './client';
 import { toQuery } from './query';
-import type { VideoStream } from '@getrentos/shared';
+import type { VideoStream } from '@sureground/shared';
 
 export interface BuyerDashboard {
   savedListings: number;

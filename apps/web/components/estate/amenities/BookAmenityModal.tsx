@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Button, Dialog, DialogContent, DialogTitle } from '@getrentos/ui';
+import { Button, Dialog, DialogContent, DialogTitle } from '@sureground/ui';
 import {
   DateTimeField,
   isCompleteDateTime,

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Card, PageHeader } from '@getrentos/ui';
+import { Card, PageHeader } from '@sureground/ui';
 import { useSearchParams } from 'next/navigation';
 import { useRealtorUser } from '../layout';
 import { User, Bell, Landmark, SlidersHorizontal, ShieldCheck, Lock, Download } from 'lucide-react';
@@ -48,7 +48,7 @@ export default function RealtorSettingsPage() {
         return <NotificationSettings />;
       case 'payouts':
         return (
-          <SellerPayoutSettings description="Where money from properties you sell on the marketplace is sent once GetRentos pays it out to you. Commission GetRentos settles on your deals has its own account, on the Commissions page." />
+          <SellerPayoutSettings description="Where money from properties you sell on the marketplace is sent once Sureground pays it out to you. Commission Sureground settles on your deals has its own account, on the Commissions page." />
         );
       case 'preferences':
         return <BusinessPreferencesSettings />;

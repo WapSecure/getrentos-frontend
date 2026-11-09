@@ -1,11 +1,11 @@
 import { View } from 'react-native';
-import { Text } from '@getrentos/ui-native';
+import { Text } from '@sureground/ui-native';
 import {
   PAYOUT_ARRIVAL_NOTE,
   PAYOUT_FAILED_NEXT_STEP,
   payoutSentToLabel,
   type PayoutSentTo,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import { formatDate } from '@/lib/format';
 
 /**

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Volume2, VolumeX, ChevronDown, ChevronUp } from 'lucide-react';
-import { Card, Field, Select, Switch } from '@getrentos/ui';
+import { Card, Field, Select, Switch } from '@sureground/ui';
 
 export const NotificationSound = () => {
   const [isEnabled, setIsEnabled] = useState(true);

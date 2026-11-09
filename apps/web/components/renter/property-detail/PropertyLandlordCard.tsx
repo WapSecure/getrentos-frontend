@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Clock, Star, Shield, MessageCircle } from 'lucide-react';
-import { Button, Card } from '@getrentos/ui';
+import { Button, Card } from '@sureground/ui';
 import type { Property } from '@/types/renter';
 import { ROUTES } from '@/lib/constants/auth';
 import { renterService } from '@/services/renterService';
@@ -17,7 +17,7 @@ interface PropertyLandlordCardProps {
 export const PropertyLandlordCard = ({ property }: PropertyLandlordCardProps) => {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const name = property.landlordName || 'GetRentos Landlord';
+  const name = property.landlordName || 'Sureground Landlord';
 
   const startConversationMutation = useMutation({
     mutationFn: (landlordId: string) =>
@@ -65,7 +65,7 @@ export const PropertyLandlordCard = ({ property }: PropertyLandlordCardProps) =>
       </div>
 
       {/* The landlord's direct email/phone are deliberately not shown to renters:
-          contact runs through in-app Messages so conversations stay on GetRentos. */}
+          contact runs through in-app Messages so conversations stay on Sureground. */}
       <div className="mt-3 space-y-1.5 text-xs text-muted-foreground">
         {typeof property.landlordResponseRate === 'number' && (
           <div className="flex items-center gap-1.5">

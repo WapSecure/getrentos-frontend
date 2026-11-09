@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { Check, Circle, BadgeCheck } from 'lucide-react-native';
-import { Card, Skeleton, Text, useTheme } from '@getrentos/ui-native';
+import { Card, Skeleton, Text, useTheme } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { applicationAssistantApi, type AssistantStep } from '@/lib/api/applicationAssistant';
 

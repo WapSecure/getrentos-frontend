@@ -10,7 +10,7 @@ import {
   ShieldCheck,
   type LucideIcon,
 } from 'lucide-react-native';
-import { Chip, Text, useTheme } from '@getrentos/ui-native';
+import { Chip, Text, useTheme } from '@sureground/ui-native';
 import { StayResults } from '@/components/shortlet/StayResults';
 import { SupportContact } from '@/components/shortlet/StayUI';
 import { peakWeek, seasonRange } from '@/lib/stays';
@@ -34,7 +34,7 @@ const PROMISES: { icon: LucideIcon; title: string; body: string }[] = [
   {
     icon: Lock,
     title: 'Your money waits until you arrive',
-    body: 'You pay GetRentos, not the host. The host is only paid after you check in.',
+    body: 'You pay Sureground, not the host. The host is only paid after you check in.',
   },
   {
     icon: ShieldCheck,

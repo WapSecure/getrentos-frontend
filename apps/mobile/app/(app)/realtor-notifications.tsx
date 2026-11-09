@@ -20,7 +20,7 @@ import {
   Skeleton,
   Text,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { realtorApi, type RealtorNotification } from '@/lib/api/realtor';
 import type { Paginated } from '@/lib/api/properties';

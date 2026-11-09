@@ -13,7 +13,7 @@ import {
   IconButton,
   Skeleton,
   useOptimisticMutation,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { BedDouble, Heart, MapPin } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';

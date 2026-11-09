@@ -15,7 +15,7 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { residentApi, type Amenity } from '@/lib/api/resident';
 import { errorMessage } from '@/lib/api/client';

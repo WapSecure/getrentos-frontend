@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Dialog, DialogContent, Button, Field, Select, CurrencyInput } from '@getrentos/ui';
+import { Dialog, DialogContent, Button, Field, Select, CurrencyInput } from '@sureground/ui';
 import type { CreateDepositHoldInput } from '@/services/depositService';
 
 export interface DepositLeaseOption {

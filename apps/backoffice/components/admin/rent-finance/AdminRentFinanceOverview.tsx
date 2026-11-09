@@ -13,8 +13,8 @@ import {
   ShieldAlert,
   Wallet,
 } from 'lucide-react';
-import { PageErrorState, PageLoadingState, StatCard, PageHeader } from '@getrentos/ui';
-import { unwrap } from '@getrentos/shared';
+import { PageErrorState, PageLoadingState, StatCard, PageHeader } from '@sureground/ui';
+import { unwrap } from '@sureground/shared';
 import { adminKeys } from '@/lib/queryKeys';
 import { adminRentFinanceService } from '@/services/adminRentFinanceService';
 import type { AdminRentFinanceOverview as OverviewData } from '@/types/rentFinance';

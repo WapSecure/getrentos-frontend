@@ -9,7 +9,7 @@ import {
   SearchInput,
   SegmentedControl,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';

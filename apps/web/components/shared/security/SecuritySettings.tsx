@@ -14,13 +14,13 @@ import {
   Skeleton,
   Switch,
   useToast,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import {
   cleanSecondFactorInput,
   isSecondFactorCode,
   SECOND_FACTOR_CODE_MAX_LENGTH,
   TRANSACTION_PIN_LENGTH,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import { accountSecurityService } from '@/services/accountSecurityService';
 import { unwrap } from '@/lib/apiHelpers';
 import { accountSecurityKeys } from '@/lib/queryKeys';
@@ -552,7 +552,7 @@ export const SecuritySettings = () => {
                     autoComplete="current-password"
                     value={pinPassword}
                     onChange={(e) => setPinPassword(e.target.value)}
-                    placeholder="Your GetRentos password"
+                    placeholder="Your Sureground password"
                   />
                 </Field>
               )}

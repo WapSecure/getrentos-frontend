@@ -1,6 +1,6 @@
 'use client';
 
-import { Alert, Badge, Button } from '@getrentos/ui';
+import { Alert, Badge, Button } from '@sureground/ui';
 import { CheckCircle2, Circle, Clock3, FileCheck2, PackageCheck, XCircle } from 'lucide-react';
 import { formatDate } from '@/lib/format';
 import type { LandMilestone, LandMilestoneStatus } from '@/types/landDeveloper';

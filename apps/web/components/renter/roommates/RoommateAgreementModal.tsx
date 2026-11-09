@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { FileText, Check, Users, Clock, Home } from 'lucide-react';
-import { NairaSign } from '@getrentos/ui/NairaSign';
+import { NairaSign } from '@sureground/ui/NairaSign';
 import {
   Alert,
   Button,
@@ -11,7 +11,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 
 interface Roommate {
   id: string;

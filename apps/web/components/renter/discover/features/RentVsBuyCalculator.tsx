@@ -12,7 +12,7 @@ import {
   Field,
   NumberInput,
   Select,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 
 const loanTermOptions = [
   { value: '15', label: '15 years' },

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Alert, Button } from '@getrentos/ui';
+import { Alert, Button } from '@sureground/ui';
 import type { SmileLivenessSession } from '@/services/trustService';
 
 type CaptureImage = { image: string; image_type_id: number };
@@ -21,9 +21,9 @@ export function liveCaptureBlocker(): string | null {
   if (typeof window === 'undefined') return null;
   if (!window.isSecureContext) return 'The live selfie needs a secure (https) connection.';
   if (!navigator.mediaDevices?.getUserMedia)
-    return 'This browser can’t use a camera. Try Chrome, Safari, Edge or Firefox, or use the GetRentos app.';
+    return 'This browser can’t use a camera. Try Chrome, Safari, Edge or Firefox, or use the Sureground app.';
   if (typeof WebAssembly === 'undefined')
-    return 'This browser can’t run the face check. Update it, or use the GetRentos app.';
+    return 'This browser can’t run the face check. Update it, or use the Sureground app.';
   return null;
 }
 
@@ -119,7 +119,7 @@ export function LiveSelfieCapture({
         if (cancelled) return;
         element = document.createElement('smart-camera-web');
         element.setAttribute('theme-color', '#0057d9');
-        element.setAttribute('partner-name', 'GetRentos');
+        element.setAttribute('partner-name', 'Sureground');
         element.setAttribute('policy-url', session.consent.noticePrivacyPolicyUrl);
         element.addEventListener('smart-camera-web.publish', (event) => {
           const detail = (event as CustomEvent<{ images: CaptureImage[] }>).detail;

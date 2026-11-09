@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
 import { Sun, Moon } from 'lucide-react';
-import { IconButton } from '@getrentos/ui';
+import { IconButton } from '@sureground/ui';
 
 const className =
   'h-10 w-10 rounded-full border border-border bg-secondary text-foreground backdrop-blur-sm hover:bg-foreground/[0.08] hover:text-foreground';

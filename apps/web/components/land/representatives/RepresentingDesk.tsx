@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Badge, Button, Card, EmptyState, PageErrorState, Toast } from '@getrentos/ui';
+import { Badge, Button, Card, EmptyState, PageErrorState, Toast } from '@sureground/ui';
 import { UsersRound } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency } from '@/lib/format';

@@ -1,4 +1,4 @@
-import { authFetch, safeCall } from '@getrentos/shared';
+import { authFetch, safeCall } from '@sureground/shared';
 import type {
   ApiResponse,
   LandInspectionStatus,
@@ -7,7 +7,7 @@ import type {
   StaffLandWatchJob,
   StaffInspection,
   StaffLandWatchIncident,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 
 const insp = (id: string) => `/admin/land/watch/inspections/${encodeURIComponent(id)}`;
 const job = (id: string) => `/admin/land/watch/jobs/${encodeURIComponent(id)}`;

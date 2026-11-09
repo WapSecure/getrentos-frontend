@@ -10,7 +10,7 @@ import {
   DialogDescription,
   DialogTitle,
   RadioGroup,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 import { getFinancingPlanOptions } from '@/lib/financing';
 import type { FinancingPlanLength } from '@/types/financing';
@@ -58,7 +58,7 @@ export const ApplyFinancingModal = ({
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground mt-0.5">
             {step === 'select'
-              ? `GetRentos pays your landlord ${formatCurrency(rentAmount, { compact: true })}; you repay monthly`
+              ? `Sureground pays your landlord ${formatCurrency(rentAmount, { compact: true })}; you repay monthly`
               : 'Confirm your repayment terms'}
           </DialogDescription>
         </div>
@@ -112,7 +112,7 @@ export const ApplyFinancingModal = ({
             <div className="flex items-start gap-2 p-3 rounded-lg bg-accent">
               <ShieldCheck className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
               <p className="text-xs text-muted-foreground">
-                GetRentos holds your rent like any other payment: financing just changes who fronts
+                Sureground holds your rent like any other payment: financing just changes who fronts
                 the cash and when your landlord gets paid.
               </p>
             </div>

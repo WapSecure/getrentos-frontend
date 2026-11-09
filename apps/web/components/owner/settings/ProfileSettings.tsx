@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Camera, User, Mail, Phone, Building2 } from 'lucide-react';
-import { Button, Field, IconButton, Input, useToast } from '@getrentos/ui';
+import { Button, Field, IconButton, Input, useToast } from '@sureground/ui';
 import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { ownerKeys } from '@/lib/queryKeys';

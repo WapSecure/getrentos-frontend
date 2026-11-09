@@ -1,7 +1,7 @@
 'use client';
 
 import { AlertCircle, CheckCircle } from 'lucide-react';
-import { Alert, Badge, Button } from '@getrentos/ui';
+import { Alert, Badge, Button } from '@sureground/ui';
 
 interface Document {
   id: string;

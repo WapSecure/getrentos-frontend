@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { View } from 'react-native';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Button, Text, TextField, useTheme, useToast } from '@getrentos/ui-native';
+import { Button, Text, TextField, useTheme, useToast } from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { StarRating } from '@/components/reviews/StarRating';
 import { qk } from '@/lib/query/keys';

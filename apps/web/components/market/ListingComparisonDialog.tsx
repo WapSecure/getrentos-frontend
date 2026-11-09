@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { BadgeCheck, Check, Minus, X } from 'lucide-react';
-import { Dialog, DialogContent, DialogDescription, DialogTitle, IconButton } from '@getrentos/ui';
+import { Dialog, DialogContent, DialogDescription, DialogTitle, IconButton } from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 import type { PublicListingCard, PublicMarket } from '@/services/publicMarketService';
 

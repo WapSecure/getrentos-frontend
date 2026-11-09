@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { keepPreviousData, useQuery, useMutation } from '@tanstack/react-query';
 import { Download, ClipboardList, AlertTriangle, FileBarChart } from 'lucide-react';
-import { Button, DatePicker, EmptyState, Field, TableSkeleton, useToast } from '@getrentos/ui';
+import { Button, DatePicker, EmptyState, Field, TableSkeleton, useToast } from '@sureground/ui';
 import { reportService } from '@/services/reportService';
 import { unwrap } from '@/lib/apiHelpers';
 

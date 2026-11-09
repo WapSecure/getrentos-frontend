@@ -18,7 +18,7 @@ import {
   Input,
   NumberInput,
   Select,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { chargeLabel } from '@/lib/chargeCategory';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { landlordService } from '@/services/landlordService';
@@ -88,7 +88,7 @@ export const RentScheduleModal = ({ lease, onClose }: RentScheduleModalProps) =>
           ? `${formatCurrency(r.refundedAmount)} refunded to the tenant, back the way they paid.`
           : r.refundedAmount > 0
             ? `${formatCurrency(r.refundedAmount)} refunded; the rest could not be and stays as credit.`
-            : 'The refund could not be made; the credit is unchanged. GetRentos finance sees failed refunds and follows up.'
+            : 'The refund could not be made; the credit is unchanged. Sureground finance sees failed refunds and follows up.'
       );
       account.refetch();
     },
@@ -233,7 +233,7 @@ export const RentScheduleModal = ({ lease, onClose }: RentScheduleModalProps) =>
                   </div>
                 ) : (
                   <p className="text-sm text-muted-foreground rounded-lg bg-secondary/50 p-3">
-                    This lease has no rent schedule. Start one and GetRentos raises each
+                    This lease has no rent schedule. Start one and Sureground raises each
                     period&apos;s invoice for you, before it falls due, until the lease ends.
                   </p>
                 )}

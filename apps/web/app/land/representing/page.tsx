@@ -1,5 +1,5 @@
 import { RepresentingDesk } from '@/components/land/representatives/RepresentingDesk';
-import { PageHeader } from '@getrentos/ui';
+import { PageHeader } from '@sureground/ui';
 
 export default function LandRepresentingPage() {
   return (

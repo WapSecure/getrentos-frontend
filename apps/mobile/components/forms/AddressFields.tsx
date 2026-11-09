@@ -1,4 +1,4 @@
-import type { AddressValue, PlaceKind, VerifiedAddress } from '@getrentos/shared';
+import type { AddressValue, PlaceKind, VerifiedAddress } from '@sureground/shared';
 import { AddressInput } from './AddressInput';
 import { LocationFields } from './LocationFields';
 

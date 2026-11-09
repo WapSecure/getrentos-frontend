@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { ScrollView, View } from 'react-native';
-import { Button, Checkbox, Chip, CurrencyField, Text, useTheme } from '@getrentos/ui-native';
+import { Button, Checkbox, Chip, CurrencyField, Text, useTheme } from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import {
   activeFilterCount,

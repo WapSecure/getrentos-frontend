@@ -15,7 +15,7 @@ import {
   Select,
   ToggleChip,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { ReceiptText, Search } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';

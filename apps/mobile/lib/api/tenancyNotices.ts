@@ -1,7 +1,7 @@
 import { apiFetch } from './client';
 import type { Paginated } from './properties';
 import type { LandlordPayment } from './landlord';
-import type { BadgeTone } from '@getrentos/ui-native';
+import type { BadgeTone } from '@sureground/ui-native';
 
 /**
  * Tenancy notices (the escalation ladder) and the arrears that start it.

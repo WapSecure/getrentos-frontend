@@ -14,7 +14,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import type { DisputeMessage, ShortletDispute } from '@/lib/api/hostShortlets';
 import type { Paginated } from '@/lib/api/properties';
 import { errorMessage } from '@/lib/api/client';

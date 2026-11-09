@@ -1,5 +1,5 @@
 import { View } from 'react-native';
-import { useTheme } from '@getrentos/ui-native';
+import { useTheme } from '@sureground/ui-native';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { SellerOffers } from '@/components/offers/SellerOffers';
 import { goBack } from '@/lib/goBack';

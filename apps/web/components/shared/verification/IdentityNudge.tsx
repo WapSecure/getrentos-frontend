@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { ShieldAlert } from 'lucide-react';
-import { Alert } from '@getrentos/ui';
+import { Alert } from '@sureground/ui';
 import { kycService } from '@/services/kycService';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';

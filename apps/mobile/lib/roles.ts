@@ -158,7 +158,7 @@ export const SIGNUP_ROLES: SignupRole[] = [
   {
     id: 'landlord',
     name: 'Landlord',
-    tagline: 'List properties, vet tenants, collect rent safely through GetRentos.',
+    tagline: 'List properties, vet tenants, collect rent safely through Sureground.',
     icon: 'Building2',
     requires: ['identity', 'property'],
   },

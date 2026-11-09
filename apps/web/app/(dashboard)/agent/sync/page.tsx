@@ -11,7 +11,7 @@ import {
   ListSkeleton,
   PageErrorState,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { formatRelativeTime } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { agentService } from '@/services/agentService';
@@ -101,7 +101,7 @@ export default function AgentSyncPage() {
         className="mb-6"
       >
         {isOnline
-          ? 'Queued records are removed from this device only after GetRentos confirms they were saved.'
+          ? 'Queued records are removed from this device only after Sureground confirms they were saved.'
           : 'Queued records remain saved on this device. Uploads will retry when you reconnect.'}
       </Alert>
       {Boolean(legacy.data) && (
@@ -117,7 +117,7 @@ export default function AgentSyncPage() {
       )}
       {sync.data && !syncError && sync.data.synced > 0 && (
         <Alert variant="success" className="mb-4">
-          {sync.data.synced} record{sync.data.synced === 1 ? '' : 's'} saved to GetRentos.
+          {sync.data.synced} record{sync.data.synced === 1 ? '' : 's'} saved to Sureground.
         </Alert>
       )}
 
@@ -165,13 +165,13 @@ export default function AgentSyncPage() {
         </ul>
       )}
 
-      <h2 className="mb-3 mt-8 text-lg font-semibold">Saved on GetRentos</h2>
+      <h2 className="mb-3 mt-8 text-lg font-semibold">Saved on Sureground</h2>
       {history.isPending ? (
         <ListSkeleton rows={3} label="Loading saved records" />
       ) : history.isError ? (
         <PageErrorState
           title="Saved records are unavailable"
-          description="Device uploads are shown above. Retry to load records already saved to GetRentos."
+          description="Device uploads are shown above. Retry to load records already saved to Sureground."
           onRetry={() => void history.refetch()}
           isRetrying={history.isFetching}
         />

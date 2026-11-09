@@ -15,7 +15,7 @@ import {
   StatCard,
   StatGridSkeleton,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { estateMarketplaceService } from '@/services/estateMarketplaceService';
 import { unwrap } from '@/lib/apiHelpers';

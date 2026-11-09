@@ -5,7 +5,7 @@ import { languageLabel, type ReplyLanguage } from '@/lib/replyLanguage';
 
 /**
  * Voice in and out in the browser, using the browser's own speech services.
- * GetRentos never receives audio: the browser turns speech into text (Chrome
+ * Sureground never receives audio: the browser turns speech into text (Chrome
  * does this with Google's service) and the person sends the text themselves.
  */
 

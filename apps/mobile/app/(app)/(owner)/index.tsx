@@ -16,7 +16,7 @@ import {
   Wallet,
   type LucideIcon,
 } from 'lucide-react-native';
-import { IconButton, QueryState, Screen, useTheme } from '@getrentos/ui-native';
+import { IconButton, QueryState, Screen, useTheme } from '@sureground/ui-native';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { MetricGrid } from '@/components/dashboard/MetricGrid';
 import {
@@ -70,7 +70,7 @@ export default function OwnerHome() {
         <View style={{ flexDirection: 'row', gap: 4 }}>
           <IconButton
             onPress={() => router.push({ pathname: '/(app)/ask', params: { persona: 'owner' } })}
-            accessibilityLabel="Ask GetRentos"
+            accessibilityLabel="Ask Sureground"
             icon={<MessageCircleQuestion size={21} color={colors.foreground} />}
           />
           <IconButton

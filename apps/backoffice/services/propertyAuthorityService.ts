@@ -1,4 +1,4 @@
-import { authFetch, safeCall, type ApiResponse } from '@getrentos/shared';
+import { authFetch, safeCall, type ApiResponse } from '@sureground/shared';
 
 /**
  * Property authority claims — the officer's side.
@@ -41,16 +41,16 @@ export const AUTHORITY_STATUSES: AuthorityStatus[] = [
 ];
 
 export const propertyAuthorityService = {
-  async list(query: { status?: string; propertyId?: string; userId?: string } = {}): Promise<
-    ApiResponse<PropertyAuthorityClaim[]>
-  > {
+  async list(
+    query: { status?: string; propertyId?: string; userId?: string } = {}
+  ): Promise<ApiResponse<PropertyAuthorityClaim[]>> {
     const params = new URLSearchParams();
     if (query.status) params.set('status', query.status);
     if (query.propertyId) params.set('propertyId', query.propertyId);
     if (query.userId) params.set('userId', query.userId);
     const suffix = params.toString() ? `?${params.toString()}` : '';
     return safeCall(() =>
-      authFetch<PropertyAuthorityClaim[]>(`/admin/property-authorities${suffix}`),
+      authFetch<PropertyAuthorityClaim[]>(`/admin/property-authorities${suffix}`)
     );
   },
 

@@ -1,9 +1,9 @@
-# GetRentos interface direction
+# Sureground interface direction
 
 Apple's [typography](https://developer.apple.com/design/human-interface-guidelines/typography),
 [layout](https://developer.apple.com/design/human-interface-guidelines/layout), and
 [materials](https://developer.apple.com/design/human-interface-guidelines/materials)
-guidance inform this system. GetRentos retains its name, mark, and property workflows.
+guidance inform this system. Sureground retains its name, mark, and property workflows.
 Use platform conventions where they help people complete a task; the website does
 not need to imitate an operating system.
 

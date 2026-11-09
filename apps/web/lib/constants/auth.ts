@@ -1,9 +1,9 @@
-export * from '@getrentos/shared';
+export * from '@sureground/shared';
 
 /**
  * Web-only routes for the estate marketplace.
  *
- * Kept here rather than in `@getrentos/shared`'s ROUTES because they only mean
+ * Kept here rather than in `@sureground/shared`'s ROUTES because they only mean
  * anything to this app — the backoffice and the native app have no estate
  * marketplace console. Move them into the shared map if that changes.
  */

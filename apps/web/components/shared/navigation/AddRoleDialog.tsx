@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Briefcase, Loader2, Plus } from 'lucide-react';
-import { Alert, Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrentos/ui';
+import { Alert, Dialog, DialogContent, DialogDescription, DialogTitle } from '@sureground/ui';
 import { BACKEND_ROLE_TO_ID, ROLES } from '@/lib/constants/auth';
 import { getStoredUser } from '@/lib/authStorage';
 import { useAddRole } from '@/hooks/useAddRole';
@@ -39,7 +39,7 @@ export const AddRoleDialog = ({
             Add a role
           </DialogTitle>
           <DialogDescription className="mt-0.5 text-xs text-muted-foreground">
-            Use the same account for more of GetRentos. You can switch between roles any time.
+            Use the same account for more of Sureground. You can switch between roles any time.
           </DialogDescription>
         </div>
         <div className="space-y-2 p-4">
@@ -72,7 +72,7 @@ export const AddRoleDialog = ({
             ))
           )}
           {!held.has('manager') && (
-            // A firm is not a role you add: it is a business GetRentos verifies,
+            // A firm is not a role you add: it is a business Sureground verifies,
             // so it has its own setup rather than a one-tap switch.
             <Link
               href="/agency/setup"
@@ -105,7 +105,7 @@ export const AddRoleDialog = ({
   );
 };
 
-const OPEN_EVENT = 'getrentos:add-role';
+const OPEN_EVENT = 'sureground:add-role';
 
 /**
  * Opens the add-role dialog from anywhere, such as a profile menu. The menu

@@ -14,7 +14,7 @@ import {
   Skeleton,
   Text,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { ownerApi, type OwnerEscrowStatus, type OwnerTransaction } from '@/lib/api/owner';
 import { formatDate } from '@/lib/format';
@@ -26,12 +26,12 @@ const STAGES: { key: OwnerEscrowStatus; label: string; now: string }[] = [
   {
     key: 'deposit_pending',
     label: 'Buyer’s deposit',
-    now: 'Waiting for the buyer to pay their deposit to GetRentos.',
+    now: 'Waiting for the buyer to pay their deposit to Sureground.',
   },
   {
     key: 'funds_held',
     label: 'Funds held',
-    now: 'The deposit is held safely by GetRentos. It is released to you when the buyer confirms receipt.',
+    now: 'The deposit is held safely by Sureground. It is released to you when the buyer confirms receipt.',
   },
   { key: 'released', label: 'Completed', now: 'The sale is complete.' },
 ];

@@ -8,7 +8,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
-import { BrandLogo, Text, useReducedMotion, useTheme } from '@getrentos/ui-native';
+import { BrandLogo, Text, useReducedMotion, useTheme } from '@sureground/ui-native';
 
 // Kept short: this sits between the native splash and a usable first screen,
 // so every millisecond here is launch time the user waits through.

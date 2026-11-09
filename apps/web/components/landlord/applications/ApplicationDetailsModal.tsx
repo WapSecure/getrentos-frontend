@@ -1,7 +1,7 @@
 'use client';
 
 import { Mail, Phone, ShieldCheck, Check, MessageSquareText } from 'lucide-react';
-import { Button, Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrentos/ui';
+import { Button, Dialog, DialogContent, DialogDescription, DialogTitle } from '@sureground/ui';
 import { formatDate, getInitials } from '@/lib/format';
 import { ScreeningPanel } from '@/components/landlord/applications/ScreeningPanel';
 import type { RentalApplication } from '@/types/landlord';

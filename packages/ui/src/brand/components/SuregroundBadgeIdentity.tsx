@@ -1,7 +1,7 @@
 import type { SVGProps } from 'react';
 
-/** Generated from getrentos-badge-identity.svg — GetRentos brand artifact. */
-export function GetRentosBadgeIdentity(props: SVGProps<SVGSVGElement>) {
+/** Generated from sureground-badge-identity.svg — Sureground brand artifact. */
+export function SuregroundBadgeIdentity(props: SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 250 52" {...props}>
       <rect x="1" y="1" width="248" height="50" rx="26" fill="#F5F9FF" stroke="#D8E8FF" />

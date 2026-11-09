@@ -1,5 +1,5 @@
 import { Text as RNText, type TextStyle } from 'react-native';
-import type { TypographyVariant } from '@getrentos/tokens';
+import type { TypographyVariant } from '@sureground/tokens';
 import { useTheme, withFont } from '../theme';
 
 type PricePeriod = 'month' | 'year' | 'night' | 'total' | null;

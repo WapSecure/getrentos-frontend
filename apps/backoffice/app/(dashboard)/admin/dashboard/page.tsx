@@ -7,9 +7,9 @@ import { AdminStatsCards } from '@/components/admin/dashboard/AdminStatsCards';
 import { AdminActivityFeed } from '@/components/admin/dashboard/AdminActivityFeed';
 import { AdminQuickActions } from '@/components/admin/dashboard/AdminQuickActions';
 import { adminService } from '@/services/adminService';
-import { unwrap } from '@getrentos/shared';
+import { unwrap } from '@sureground/shared';
 import { adminKeys } from '@/lib/queryKeys';
-import { PageErrorState, Skeleton, StatGridSkeleton } from '@getrentos/ui';
+import { PageErrorState, Skeleton, StatGridSkeleton } from '@sureground/ui';
 import { useAdminUser } from '../layout';
 
 // recharts is heavy: load it only when this dashboard mounts.

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { TrendingUp, TrendingDown, Minus, ChevronDown, ChevronUp } from 'lucide-react';
-import { Card } from '@getrentos/ui';
+import { Card } from '@sureground/ui';
 import { TrustScoreHistoryItem } from '@/types/trust-score';
 import { humanizeScoreReason } from '@/components/renter/trust-score/reasonLabels';
 

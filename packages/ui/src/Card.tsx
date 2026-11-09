@@ -1,5 +1,5 @@
 import type { HTMLAttributes, ReactNode } from 'react';
-import { cn } from '@getrentos/shared';
+import { cn } from '@sureground/shared';
 
 interface CardProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
   children: ReactNode;

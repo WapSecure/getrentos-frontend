@@ -1,4 +1,4 @@
-import { Badge, type BadgeVariant } from '@getrentos/ui';
+import { Badge, type BadgeVariant } from '@sureground/ui';
 import {
   LAND_INSTALLMENT_STATUS_LABELS,
   LAND_MILESTONE_STATUS_LABELS,

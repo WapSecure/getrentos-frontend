@@ -1,6 +1,6 @@
 'use client';
 
-import { humaniseEnum } from '@getrentos/shared';
+import { humaniseEnum } from '@sureground/shared';
 import { useState } from 'react';
 import {
   FileText,
@@ -27,7 +27,7 @@ import {
   DropdownMenuTrigger,
   IconButton,
   type BadgeVariant,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { DocumentPreviewModal } from './DocumentPreviewModal';
 
 interface Document {

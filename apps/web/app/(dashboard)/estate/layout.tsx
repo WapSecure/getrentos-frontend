@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { EstateNavbar } from '@/components/estate/navigation/EstateNavbar';
 import { EstateSidebar } from '@/components/estate/dashboard/EstateSidebar';
-import { PageLoadingState } from '@getrentos/ui';
+import { PageLoadingState } from '@sureground/ui';
 import {
   ROUTES,
   isAuthenticated,
@@ -28,7 +28,7 @@ const EstateUserContext = createContext<EstateUser | null>(null);
 /** Returns the signed-in estate manager's profile, populated once by the estate layout's auth check. */
 export const useEstateUser = () => useContext(EstateUserContext);
 
-const SELECTED_ESTATE_STORAGE_KEY = 'getrentos:selectedEstateId';
+const SELECTED_ESTATE_STORAGE_KEY = 'sureground:selectedEstateId';
 
 interface SelectedEstateValue {
   estate: Estate | null;

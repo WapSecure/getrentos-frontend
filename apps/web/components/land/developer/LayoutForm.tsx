@@ -1,7 +1,7 @@
 'use client';
 
 import { useId, useState, type FormEvent } from 'react';
-import { Button, CurrencyInput, Field, Input, NumberInput, Textarea } from '@getrentos/ui';
+import { Button, CurrencyInput, Field, Input, NumberInput, Textarea } from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 import type { LandLayoutInput, OwnerLandLayout } from '@/types/landDeveloper';
 import { LandDocumentPicker } from '../documents/LandDocumentPicker';

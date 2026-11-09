@@ -1,8 +1,8 @@
 'use client';
 
-import { boundarySignOffText } from '@getrentos/shared';
+import { boundarySignOffText } from '@sureground/shared';
 import { Printer } from 'lucide-react';
-import { Alert, Badge, Button, PageHeader } from '@getrentos/ui';
+import { Alert, Badge, Button, PageHeader } from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { LAND_TITLE_TYPE_LABELS, type LandTitleType } from '@/types/land';
 import type { AcquisitionCostItem, LandDossier } from '@/types/landDossier';
@@ -213,7 +213,7 @@ export const LandDossierView = ({ dossier }: { dossier: LandDossier }) => {
                   {event.registeredAt ? ` · registered ${formatDate(event.registeredAt)}` : ''}
                 </span>
                 <Badge variant={event.verified ? 'success' : 'neutral'}>
-                  {event.verified ? 'Verified by GetRentos' : 'As stated by the owner'}
+                  {event.verified ? 'Verified by Sureground' : 'As stated by the owner'}
                 </Badge>
               </li>
             ))}
@@ -223,7 +223,7 @@ export const LandDossierView = ({ dossier }: { dossier: LandDossier }) => {
 
       <Section title="Sources">
         <p className="text-sm text-muted-foreground">
-          Documents GetRentos holds for this land (the files are not shared here):
+          Documents Sureground holds for this land (the files are not shared here):
         </p>
         <ul className="mt-2 flex flex-wrap gap-2 text-sm">
           {dossier.sourceIndex.length === 0 ? (

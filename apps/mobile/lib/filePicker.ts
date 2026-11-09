@@ -1,6 +1,6 @@
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
-import { MAX_VIDEO_SECONDS } from '@getrentos/shared';
+import { MAX_VIDEO_SECONDS } from '@sureground/shared';
 import type { PickedFile } from './api/documents';
 
 const EXT_MIME: Record<string, string> = {

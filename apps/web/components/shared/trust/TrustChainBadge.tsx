@@ -1,5 +1,5 @@
 import { Clock, Shield, ShieldCheck } from 'lucide-react';
-import { trustChainLabel } from '@getrentos/shared';
+import { trustChainLabel } from '@sureground/shared';
 import type { PropertyTrustChain } from '@/types/renter';
 
 /**

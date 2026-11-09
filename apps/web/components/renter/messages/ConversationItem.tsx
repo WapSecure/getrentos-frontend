@@ -1,7 +1,7 @@
 'use client';
 
 import { Pin, PinOff, Archive, ArchiveRestore, Home } from 'lucide-react';
-import { Badge, IconButton, type BadgeVariant } from '@getrentos/ui';
+import { Badge, IconButton, type BadgeVariant } from '@sureground/ui';
 import { Conversation } from '@/types/messages';
 
 interface ConversationItemProps {

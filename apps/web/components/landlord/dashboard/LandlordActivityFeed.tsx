@@ -2,7 +2,7 @@
 
 import { CreditCard, Wrench, CalendarClock, UserPlus, ReceiptText } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { Card, EmptyState, Skeleton } from '@getrentos/ui';
+import { Card, EmptyState, Skeleton } from '@sureground/ui';
 import { formatRelativeTime } from '@/lib/format';
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';

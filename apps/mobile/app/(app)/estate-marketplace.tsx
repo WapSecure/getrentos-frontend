@@ -23,7 +23,7 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { MetricGrid } from '@/components/dashboard/MetricGrid';
 import { AddPropertySheet } from '@/components/estate/marketplace/AddPropertySheet';
@@ -213,7 +213,7 @@ export default function EstateMarketplace() {
         <>
           <Text variant="caption" color="mutedForeground">
             A property’s owner must agree before the estate can advertise it. They answer in their
-            own GetRentos app.
+            own Sureground app.
           </Text>
           {properties.length ? (
             <Button

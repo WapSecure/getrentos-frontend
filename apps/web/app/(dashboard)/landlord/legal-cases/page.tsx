@@ -11,7 +11,7 @@ import {
   useToast,
   type Column,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { LegalCaseDetail } from '@/components/landlord/legal-cases/LegalCaseDetail';
 import { LegalCaseStage } from '@/components/landlord/legal-cases/LegalCaseStage';
 import { OpenLegalCaseModal } from '@/components/landlord/legal-cases/OpenLegalCaseModal';

@@ -21,7 +21,7 @@ import {
   Pagination,
   Select,
   useToast,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { estateKeys } from '@/lib/queryKeys';
@@ -44,7 +44,7 @@ import {
   saveAccountLabel,
   withStepUpSummary,
   type AccountLookup,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 
 type GenerateForm = { periodStart: string; periodEnd: string };
 const initialForm: GenerateForm = { periodStart: '', periodEnd: '' };
@@ -114,7 +114,7 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
       void queryClient.invalidateQueries({ queryKey: estateKeys.statement(estateId, id) });
       if (result.payoutStatus === 'AWAITING_APPROVAL') {
         toast.success(
-          'Statement issued. The payout is held while a second GetRentos officer approves it. The estate\u2019s money is unaffected.'
+          'Statement issued. The payout is held while a second Sureground officer approves it. The estate\u2019s money is unaffected.'
         );
       } else if (result.payoutStatus === 'FAILED') {
         toast.error('Statement issued, but the payout failed: retry it below.');

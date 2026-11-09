@@ -1,4 +1,4 @@
-import { videoProblem } from '@getrentos/shared';
+import { videoProblem } from '@sureground/shared';
 
 /** The length of a local video file in seconds, or undefined if the browser can't read it. */
 function readDuration(file: File): Promise<number | undefined> {

@@ -77,7 +77,7 @@ export function usePaymentProviders() {
     provider,
     choose: setChosen,
     /**
-     * Show the choice when GetRentos works with more than one company, even if
+     * Show the choice when Sureground works with more than one company, even if
      * one is down right now: the payer sees it greyed out with why, rather than
      * wondering where it went. Hidden only when there is a single company.
      */

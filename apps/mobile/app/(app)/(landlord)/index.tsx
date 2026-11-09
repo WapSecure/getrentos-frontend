@@ -17,7 +17,7 @@ import {
   Wrench,
   type LucideIcon,
 } from 'lucide-react-native';
-import { IconButton, Price, QueryState, Screen, Text, useTheme } from '@getrentos/ui-native';
+import { IconButton, Price, QueryState, Screen, Text, useTheme } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { landlordApi, type LandlordActivity } from '@/lib/api/landlord';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -84,7 +84,7 @@ export default function LandlordOverview() {
         <View style={{ flexDirection: 'row', gap: 4 }}>
           <IconButton
             onPress={() => router.push({ pathname: '/(app)/ask', params: { persona: 'landlord' } })}
-            accessibilityLabel="Ask GetRentos"
+            accessibilityLabel="Ask Sureground"
             icon={<MessageCircleQuestion size={21} color={colors.foreground} />}
           />
           <IconButton

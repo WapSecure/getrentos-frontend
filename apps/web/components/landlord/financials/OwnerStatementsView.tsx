@@ -20,8 +20,8 @@ import {
   Select,
   useToast,
   PageHeader,
-} from '@getrentos/ui';
-import { formatCurrency, formatDate } from '@getrentos/shared';
+} from '@sureground/ui';
+import { formatCurrency, formatDate } from '@sureground/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import { landlordService, type OwnerStatement } from '@/services/landlordService';
@@ -110,7 +110,7 @@ export function OwnerStatementsView() {
       void queryClient.invalidateQueries({ queryKey: landlordKeys.ownerStatement(id) });
       if (result.payoutStatus === 'AWAITING_APPROVAL')
         toast.success(
-          'Statement issued. The payout is held while a second GetRentos officer approves it. Your money is unaffected.'
+          'Statement issued. The payout is held while a second Sureground officer approves it. Your money is unaffected.'
         );
       else if (result.payoutStatus === 'FAILED')
         toast.error('Statement issued, but the payout failed: retry it below.');
@@ -172,7 +172,7 @@ export function OwnerStatementsView() {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `GetRentos-statement-${periodEnd.slice(0, 10)}.pdf`;
+      link.download = `Sureground-statement-${periodEnd.slice(0, 10)}.pdf`;
       document.body.appendChild(link);
       link.click();
       link.remove();

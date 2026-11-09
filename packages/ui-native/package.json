@@ -1,5 +1,5 @@
 {
-  "name": "@getrentos/ui-native",
+  "name": "@sureground/ui-native",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -16,8 +16,8 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@getrentos/shared": "workspace:*",
-    "@getrentos/tokens": "workspace:*"
+    "@sureground/shared": "workspace:*",
+    "@sureground/tokens": "workspace:*"
   },
   "peerDependencies": {
     "expo-blur": "*",

@@ -1,6 +1,6 @@
 import { apiFetch } from './client';
 
-/** "Can I afford it?": every figure worked out by GetRentos. Income is never stored. */
+/** "Can I afford it?": every figure worked out by Sureground. Income is never stored. */
 export interface Affordability {
   listingId: string;
   monthlyIncome: number | null;

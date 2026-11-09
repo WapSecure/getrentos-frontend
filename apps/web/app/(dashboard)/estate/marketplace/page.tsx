@@ -34,7 +34,7 @@ import {
   StatGridSkeleton,
   useToast,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { ListingMediaPanel } from '@/components/estate/marketplace/ListingMediaPanel';
 import { estateMarketplaceService } from '@/services/estateMarketplaceService';
@@ -139,7 +139,7 @@ const AddPropertyPanel = ({ estateId, onDone }: { estateId: string; onDone: () =
             <ListSkeleton rows={2} label="Searching" />
           ) : (candidates.data ?? []).length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              No matching property. The owner needs to register it on GetRentos first.
+              No matching property. The owner needs to register it on Sureground first.
             </p>
           ) : (
             candidates.data!.map((candidate) => (

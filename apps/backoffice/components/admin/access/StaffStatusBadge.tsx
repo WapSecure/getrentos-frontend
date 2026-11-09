@@ -1,7 +1,7 @@
 'use client';
 
 import { Ban, CheckCircle2, Clock, ShieldAlert, type LucideIcon } from 'lucide-react';
-import { Badge, type BadgeVariant } from '@getrentos/ui';
+import { Badge, type BadgeVariant } from '@sureground/ui';
 import type { AdminStaffStatus } from '@/types/admin';
 
 const statusConfig: Record<

@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { PageHeader } from '@getrentos/ui';
+import { PageHeader } from '@sureground/ui';
 import { TrustOverviewView } from '@/components/shared/trust/TrustOverviewView';
 import { VerificationList } from '@/components/shared/trust/VerificationList';
 import { TrustBadges } from '@/components/shared/trust/TrustBadges';

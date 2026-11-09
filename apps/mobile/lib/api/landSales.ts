@@ -1,5 +1,5 @@
 import { apiDownload, apiFetch } from './client';
-import type { BadgeTone } from '@getrentos/ui-native';
+import type { BadgeTone } from '@sureground/ui-native';
 
 /**
  * Selling land: plot purchases on the owner's estates (the sales desk) and the
@@ -184,7 +184,7 @@ export const PERFECTION_STEP: Record<PerfectionStepStatus, { label: string; tone
 export const PERFECTION_OWNER: Record<string, string> = {
   DEVELOPER: 'Developer',
   BUYER_LAWYER: 'Buyer’s lawyer',
-  GETRENTOS: 'GetRentos',
+  SUREGROUND: 'Sureground',
 };
 
 export interface Perfection {

@@ -17,7 +17,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { hostShortletsApi, type CalendarFeed } from '@/lib/api/hostShortlets';
 import { errorMessage } from '@/lib/api/client';
@@ -100,7 +100,7 @@ export default function HostCalendarSync() {
           <>
             <View style={{ gap: spacing.sm }}>
               <Text variant="heading" headingLevel={2}>
-                1 · Your GetRentos calendar
+                1 · Your Sureground calendar
               </Text>
               <Card elevated style={{ gap: spacing.md }}>
                 <Text variant="callout" color="mutedForeground">
@@ -257,7 +257,7 @@ function FeedRow({
           <AlertTriangle size={15} color={colors.warning} style={{ marginTop: 1 }} />
           <Text variant="caption" style={{ flex: 1, color: colors.warning }}>
             {f.conflictCount} stay{f.conflictCount === 1 ? '' : 's'} on {f.name} overlap
-            {f.conflictCount === 1 ? 's' : ''} a GetRentos booking. Sort it out on {f.name} before
+            {f.conflictCount === 1 ? 's' : ''} a Sureground booking. Sort it out on {f.name} before
             the guests arrive.
           </Text>
         </View>

@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: ShortletDetailPageProps): Pro
 
   const description =
     listing.description ||
-    `Book ${listing.title} in ${listing.city}, ${listing.state} on GetRentos. Verified host, payments protected by GetRentos.`;
+    `Book ${listing.title} in ${listing.city}, ${listing.state} on Sureground. Verified host, payments protected by Sureground.`;
 
   return {
     title: `${listing.title}: ${listing.city}, ${listing.state}`,

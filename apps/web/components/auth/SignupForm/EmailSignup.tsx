@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Checkbox, Field, IconButton, Input } from '@getrentos/ui';
+import { Button, Checkbox, Field, IconButton, Input } from '@sureground/ui';
 
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -8,7 +8,7 @@ import { Eye, EyeOff, ArrowRight, User, Mail, Lock, CheckCircle } from 'lucide-r
 import { useState } from 'react';
 import { useSignupStore } from '@/lib/store/signupStore';
 import { emailSchema, EmailFormData } from '@/lib/validations/auth';
-import { AUTH_CONSTANTS } from '@getrentos/shared';
+import { AUTH_CONSTANTS } from '@sureground/shared';
 
 interface EmailSignupProps {
   onSubmit: (email: string) => Promise<void>;

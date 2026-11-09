@@ -20,7 +20,7 @@ export const GUEST_PROMISE_TEXT =
   "If the place isn't as described, you can't get in, or it's unsafe, tell us within 24 hours of check-in. We hold the host's payment while we check, and refund you if we uphold it.";
 
 export const PAYMENT_PROTECTION_TEXT =
-  'You pay GetRentos, not the host. We only pay the host after you check in.';
+  'You pay Sureground, not the host. We only pay the host after you check in.';
 
 export const PROBLEM_OPTIONS: { value: GuestPromiseProblem; label: string; hint: string }[] = [
   {
@@ -366,7 +366,7 @@ export function stayHeadline(b: ShortletBooking, today: string, now = new Date()
         pill: 'Cancelled',
         tone: 'neutral',
         title:
-          b.cancelledBy === 'ADMIN' ? 'GetRentos cancelled this stay' : 'You cancelled this stay',
+          b.cancelledBy === 'ADMIN' ? 'Sureground cancelled this stay' : 'You cancelled this stay',
         detail: refund
           ? `${refund} refunded under the ${b.cancellationPolicy.toLowerCase()} policy.`
           : undefined,
@@ -385,7 +385,7 @@ export function stayHeadline(b: ShortletBooking, today: string, now = new Date()
           pill: 'Awaiting payment',
           tone: 'warning',
           title: 'Confirmed: pay to secure it',
-          detail: 'Your money is held by GetRentos and only paid to the host after you check in.',
+          detail: 'Your money is held by Sureground and only paid to the host after you check in.',
           action: 'pay',
         };
       if (b.paymentStatus === 'PROCESSING')
@@ -420,8 +420,8 @@ export function stayHeadline(b: ShortletBooking, today: string, now = new Date()
                 : 'Enjoy your stay',
         detail:
           days > 0
-            ? 'Paid and held by GetRentos until you check in.'
-            : 'GetRentos releases your payment to the host after check-in.',
+            ? 'Paid and held by Sureground until you check in.'
+            : 'Sureground releases your payment to the host after check-in.',
       };
     }
     default:

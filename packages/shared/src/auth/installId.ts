@@ -1,4 +1,4 @@
-const KEY = 'getrentos.installId';
+const KEY = 'sureground.installId';
 
 /**
  * A random id this browser keeps for itself, sent with sign-ups so the API

@@ -4,8 +4,8 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { BadgeCheck, CircleAlert, ClipboardCheck } from 'lucide-react';
-import { Badge, EmptyState, Select, PageHeader } from '@getrentos/ui';
-import { formatDate, unwrap } from '@getrentos/shared';
+import { Badge, EmptyState, Select, PageHeader } from '@sureground/ui';
+import { formatDate, unwrap } from '@sureground/shared';
 import { useAdminUser } from '../../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
 import {

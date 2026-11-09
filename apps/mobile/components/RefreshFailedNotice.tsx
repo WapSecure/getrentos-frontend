@@ -1,6 +1,6 @@
 import { Pressable, View } from 'react-native';
 import { RotateCw } from 'lucide-react-native';
-import { Text, useTheme } from '@getrentos/ui-native';
+import { Text, useTheme } from '@sureground/ui-native';
 
 /**
  * A refresh failed but the screen still has what it loaded earlier (or what

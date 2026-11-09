@@ -14,9 +14,9 @@ import {
   DialogTitle,
   useToast,
   type BadgeVariant,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { Banknote, Wallet } from 'lucide-react';
-import { NairaSign } from '@getrentos/ui/NairaSign';
+import { NairaSign } from '@sureground/ui/NairaSign';
 import { unwrap, unwrapOptional } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';
@@ -39,7 +39,7 @@ import {
   withdrawStepUpSummary,
   withStepUpSummary,
   type AccountLookup,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 
 const PAYOUT_STATUS_VARIANT: Record<string, BadgeVariant> = {
   SUCCESS: 'success',

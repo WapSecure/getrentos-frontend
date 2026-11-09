@@ -17,7 +17,7 @@ import {
   TabsTrigger,
   Textarea,
   useToast,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import {
   formatDate,
   LAND_INCIDENT_KIND_LABELS,
@@ -26,7 +26,7 @@ import {
   unwrap,
   type LandInspectionStatus,
   type StaffLandWatchIncident,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import { useAdminUser } from '../../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
 import { humaniseEnum, landQueryKeys, readLandApiError } from '@/lib/landDiligence';

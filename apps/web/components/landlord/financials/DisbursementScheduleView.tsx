@@ -17,8 +17,8 @@ import {
   Switch,
   TableSkeleton,
   useToast,
-} from '@getrentos/ui';
-import { formatCurrency, formatDate } from '@getrentos/shared';
+} from '@sureground/ui';
+import { formatCurrency, formatDate } from '@sureground/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import { landlordService } from '@/services/landlordService';
@@ -103,7 +103,7 @@ export function DisbursementScheduleView() {
         <Card static className="p-5">
           <div className="flex items-center gap-2 text-muted-foreground">
             <Banknote className="h-4 w-4" />
-            <span className="text-sm">Held by GetRentos for you</span>
+            <span className="text-sm">Held by Sureground for you</span>
           </div>
           {isLoading ? (
             <Skeleton className="mt-2 h-8 w-32" />

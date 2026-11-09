@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 import { router, type Href } from 'expo-router';
 import { ShieldAlert } from 'lucide-react-native';
-import { Button, Text, useTheme } from '@getrentos/ui-native';
+import { Button, Text, useTheme } from '@sureground/ui-native';
 import { readGate } from '@/lib/verificationGate';
 
 /** Inline callout for a verification or trust-tier 403, with the way forward. */

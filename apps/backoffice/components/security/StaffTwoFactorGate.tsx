@@ -2,8 +2,8 @@
 
 import { useEffect, type ReactNode } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { PageHeader, PageLoadingState } from '@getrentos/ui';
-import { onStaffMfaRequired } from '@getrentos/shared';
+import { PageHeader, PageLoadingState } from '@sureground/ui';
+import { onStaffMfaRequired } from '@sureground/shared';
 import { adminKeys } from '@/lib/queryKeys';
 import {
   STAFF_TWO_FACTOR_EXPLAINER,

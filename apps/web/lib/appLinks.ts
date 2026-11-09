@@ -1,16 +1,16 @@
-import appLinks from '@getrentos/shared/constants/app-links.json';
+import appLinks from '@sureground/shared/constants/app-links.json';
 
 /**
- * The two files phones fetch from this site to let the GetRentos app open
+ * The two files phones fetch from this site to let the Sureground app open
  * links to it (iOS universal links, Android app links). The paths come from
  * packages/shared/src/constants/app-links.json, the same list the app's build
  * claims, so the site and the app never disagree.
  *
  * Configured by environment, because the IDs belong to the app store accounts:
- * - APPLE_TEAM_ID (required for iOS), IOS_BUNDLE_ID (default com.getrentos.app)
+ * - APPLE_TEAM_ID (required for iOS), IOS_BUNDLE_ID (default io.getsureground.app)
  * - ANDROID_CERT_SHA256: comma-separated SHA-256 signing-certificate
  *   fingerprints (required for Android; Play App Signing's key, plus the upload
- *   key for internal builds), ANDROID_PACKAGE (default com.getrentos.app)
+ *   key for internal builds), ANDROID_PACKAGE (default io.getsureground.app)
  * Without them the files are not served, and links simply open the website.
  */
 
@@ -24,8 +24,8 @@ export interface AppLinkEnv {
 export function appLinkEnv(env: NodeJS.ProcessEnv = process.env): AppLinkEnv {
   return {
     appleTeamId: env.APPLE_TEAM_ID?.trim(),
-    iosBundleId: env.IOS_BUNDLE_ID?.trim() || 'com.getrentos.app',
-    androidPackage: env.ANDROID_PACKAGE?.trim() || 'com.getrentos.app',
+    iosBundleId: env.IOS_BUNDLE_ID?.trim() || 'io.getsureground.app',
+    androidPackage: env.ANDROID_PACKAGE?.trim() || 'io.getsureground.app',
     androidCertSha256: env.ANDROID_CERT_SHA256?.trim(),
   };
 }

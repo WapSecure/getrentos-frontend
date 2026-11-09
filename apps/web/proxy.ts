@@ -8,7 +8,7 @@ import {
   isLocalHost,
   parseOriginList,
   cspReportUri,
-} from '@getrentos/shared/csp';
+} from '@sureground/shared/csp';
 
 /**
  * CSP rollout switch. This is the customer-facing app, with more third parties
@@ -30,7 +30,7 @@ const DEV = process.env.NODE_ENV !== 'production';
  *
  * Responsibility: apply hardening security headers to every response,
  * including a per-request nonce Content-Security-Policy (policy built in
- * @getrentos/shared/csp) and, in production over HTTPS, Strict-Transport-Security.
+ * @sureground/shared/csp) and, in production over HTTPS, Strict-Transport-Security.
  *
  * Nonce wiring: the policy is set on the response and also on the forwarded
  * request, because Next reads the nonce back out of the request's CSP header and

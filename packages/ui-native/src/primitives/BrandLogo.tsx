@@ -6,7 +6,7 @@ import { Text } from './Text';
 export interface BrandLogoProps {
   /** Height of the mark in px. Default 24. */
   size?: number;
-  /** Show the "GetRentos" wordmark next to the mark. Default true. */
+  /** Show the "Sureground" wordmark next to the mark. Default true. */
   showWordmark?: boolean;
   /** Show the brand tagline under the wordmark. Default false. */
   showTagline?: boolean;
@@ -14,7 +14,7 @@ export interface BrandLogoProps {
   style?: StyleProp<ViewStyle>;
 }
 
-/** The GetRentos logo — official mark + wordmark, theme-aware. */
+/** The Sureground logo — official mark + wordmark, theme-aware. */
 export function BrandLogo({
   size = 24,
   showWordmark = true,
@@ -30,13 +30,16 @@ export function BrandLogo({
       <BrandMark size={size} tone={tone} />
       {showWordmark ? (
         <View style={{ gap: 2 }}>
-          <Text style={{ fontSize: wordSize, lineHeight: wordSize * 1.05, fontWeight: '800' }}>
-            <Text style={{ color: colors.foreground, fontSize: wordSize, fontWeight: '800' }}>
-              Get
-            </Text>
-            <Text style={{ color: colors.primary, fontSize: wordSize, fontWeight: '800' }}>
-              Rentos
-            </Text>
+          <Text
+            style={{
+              color: colors.foreground,
+              fontSize: wordSize,
+              lineHeight: wordSize * 1.05,
+              fontWeight: '800',
+              letterSpacing: -0.025 * wordSize,
+            }}
+          >
+            Sureground
           </Text>
           {showTagline ? (
             <Text
@@ -65,20 +68,20 @@ export function BrandMark({
   tone?: 'brand' | 'mono';
 }) {
   const { colors } = useTheme();
-  const width = size * (128 / 144);
-  const fill = tone === 'mono' ? colors.foreground : colors.primary;
+  const stroke = tone === 'mono' ? colors.foreground : colors.primary;
 
+  // Home on firm ground: an open roof over a solid ground line.
   return (
-    <Svg width={width} height={size} viewBox="0 0 128 144">
+    <Svg width={size} height={size} viewBox="0 0 128 128">
       <Path
-        d="M18 122 64 24l46 98"
+        d="M28 82 64 22l36 60"
         fill="none"
-        stroke={fill}
-        strokeWidth={24}
+        stroke={stroke}
+        strokeWidth={16}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <Path d="M64 122V96" fill="none" stroke={fill} strokeWidth={16} strokeLinecap="round" />
+      <Path d="M12 108h104" fill="none" stroke={stroke} strokeWidth={16} strokeLinecap="round" />
     </Svg>
   );
 }

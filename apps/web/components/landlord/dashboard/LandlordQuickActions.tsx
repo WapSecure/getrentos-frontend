@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Building2, Megaphone, FileText, BellRing, ChevronRight } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardDescription } from '@getrentos/ui';
+import { Card, CardHeader, CardTitle, CardDescription } from '@sureground/ui';
 import { ROUTES } from '@/lib/constants/auth';
 
 const actions = [

@@ -20,7 +20,7 @@ import {
   Select,
   Skeleton,
   useToast,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import {
   ArrowUpDown,
   BadgeCheck,
@@ -51,7 +51,7 @@ import {
   LAND_TITLE_TYPE_LABELS,
   type PublicLandListing,
 } from '@/types/land';
-import { boundaryCorners } from '@getrentos/shared';
+import { boundaryCorners } from '@sureground/shared';
 import { ParcelBoundaryMap } from '@/components/maps/ParcelBoundaryMap';
 import { useAddRole } from '@/hooks/useAddRole';
 import Link from 'next/link';

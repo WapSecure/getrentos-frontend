@@ -4,7 +4,7 @@ This audit keeps the shared-component migration moving forward without mislabell
 
 ## Policy
 
-- Product-facing text, number, date, choice and multiline controls should use `@getrentos/ui` primitives.
+- Product-facing text, number, date, choice and multiline controls should use `@sureground/ui` primitives.
 - Raw browser inputs are acceptable only when they are an implementation bridge hidden behind a shared visible control, such as a file picker, or when they are encapsulated inside a specialized shared control such as `OtpInput`.
 - A specialized native control outside the shared package requires a path-specific rationale in the audit script. The current payment-plan radio is retained because its rich label includes an interactive terms disclosure; replacing it with the button-based shared radio would produce invalid nested controls.
 - Existing visible raw controls are recorded as `migration-backlog`, not permanent exceptions.

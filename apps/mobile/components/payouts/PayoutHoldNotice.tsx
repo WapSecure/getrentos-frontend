@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Text } from '@getrentos/ui-native';
-import { PAYOUT_CHANGE_COOLDOWN_HINT } from '@getrentos/shared';
+import { Text } from '@sureground/ui-native';
+import { PAYOUT_CHANGE_COOLDOWN_HINT } from '@sureground/shared';
 import { formatDateTime } from '@/lib/format';
 
 /**
@@ -15,7 +15,7 @@ export function PayoutHoldNotice({ holdUntil }: { holdUntil?: string | null }) {
   return (
     <Text variant="caption" color="warning">
       This account was changed recently. To protect you, payouts to it start{' '}
-      {formatDateTime(holdUntil)}. If you didn’t make this change, contact GetRentos support now.
+      {formatDateTime(holdUntil)}. If you didn’t make this change, contact Sureground support now.
     </Text>
   );
 }

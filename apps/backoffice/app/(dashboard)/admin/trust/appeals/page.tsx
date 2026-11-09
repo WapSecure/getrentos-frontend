@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Gavel } from 'lucide-react';
-import { CardSkeleton, EmptyState, PageErrorState, PageHeader } from '@getrentos/ui';
-import { unwrap } from '@getrentos/shared';
+import { CardSkeleton, EmptyState, PageErrorState, PageHeader } from '@sureground/ui';
+import { unwrap } from '@sureground/shared';
 import { AppealCard } from '@/components/admin/trust/AppealCard';
 import { AppealResolveModal } from '@/components/admin/trust/AppealResolveModal';
 import { trustService } from '@/services/trustService';

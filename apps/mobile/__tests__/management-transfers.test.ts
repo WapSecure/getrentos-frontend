@@ -19,7 +19,7 @@ const preview = (over: Partial<TransferPreview> = {}): TransferPreview => ({
 const running = {
   mandateId: 'm1',
   manager: 'Acme Lettings',
-  managerIsGetRentos: false,
+  managerIsSureground: false,
   scope: ['RENT'],
   noticePeriodDays: 30,
   noticeServedAt: null,
@@ -29,12 +29,12 @@ const running = {
 describe('transferBlocker', () => {
   const ok = {
     fromMandateId: '',
-    incoming: { kind: 'GETRENTOS' } as const,
+    incoming: { kind: 'SUREGROUND' } as const,
     effectiveAt: '2026-12-01T00:00:00+01:00',
     acknowledged: false,
   };
 
-  it('lets a self-managed property move to GetRentos', () => {
+  it('lets a self-managed property move to Sureground', () => {
     expect(transferBlocker({ ...ok, preview: preview() })).toBeNull();
   });
 

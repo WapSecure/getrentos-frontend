@@ -16,7 +16,7 @@ import {
   useTheme,
   useToast,
   type BadgeTone,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { useCustody } from '@/lib/agency/custody';
 import {
   canImport,
@@ -38,7 +38,7 @@ import { goBack } from '@/lib/goBack';
 
 type Kind = 'units' | 'tenancies';
 /**
- * Bring a managed property's units, then its tenants, onto GetRentos from a
+ * Bring a managed property's units, then its tenants, onto Sureground from a
  * spreadsheet. Always a dry run first; a file with any error imports nothing.
  */
 export default function AgencyImport() {
@@ -156,7 +156,7 @@ function Importer({
       <Text variant="callout" color="mutedForeground">
         {kind === 'units'
           ? 'Add a property’s units from a CSV. Units already on the property are skipped by name.'
-          : 'Taking over a property? Each row becomes a signed lease on a unit already on GetRentos. Deposits you hold are recorded as yours, arrears carry over as an opening balance, and rent is billed from the next due date.'}
+          : 'Taking over a property? Each row becomes a signed lease on a unit already on Sureground. Deposits you hold are recorded as yours, arrears carry over as an opening balance, and rent is billed from the next due date.'}
       </Text>
       <ChipSelect
         label="Property"
@@ -182,8 +182,8 @@ function Importer({
             shareTextFile(
               kind === 'units' ? UNITS_CSV_TEMPLATE : TENANCIES_CSV_TEMPLATE,
               kind === 'units'
-                ? 'getrentos-units-template.csv'
-                : 'getrentos-tenancies-template.csv',
+                ? 'sureground-units-template.csv'
+                : 'sureground-tenancies-template.csv',
               CSV_MIME,
               'CSV template'
             ).catch(() => toast.show('Could not open the template.', 'error'))

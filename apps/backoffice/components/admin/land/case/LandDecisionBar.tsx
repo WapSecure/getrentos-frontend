@@ -24,8 +24,8 @@ import {
   IconButton,
   Textarea,
   DatePicker,
-} from '@getrentos/ui';
-import { unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { unwrap } from '@sureground/shared';
 import { adminLandService } from '@/services/adminLandService';
 import type { AdminLandDiligenceDetail } from '@/types/land';
 import { gaveFirstApproval } from './LandApprovalBanner';

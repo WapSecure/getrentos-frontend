@@ -217,8 +217,8 @@ describe('microsite', () => {
   });
 
   it('builds the public address on the website', () => {
-    expect(micrositeUrl('https://getrentos.com/', 'sunrise')).toBe(
-      'https://getrentos.com/e/sunrise'
+    expect(micrositeUrl('https://getsureground.io/', 'sunrise')).toBe(
+      'https://getsureground.io/e/sunrise'
     );
   });
 });

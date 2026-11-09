@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { useToast } from '@getrentos/ui';
+import { useToast } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { maintenanceTriageService } from '@/services/maintenanceTriageService';
 import type { MaintenanceTriage, MaintenanceTriageDecision } from '@/types/maintenance';

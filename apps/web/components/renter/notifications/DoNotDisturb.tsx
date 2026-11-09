@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Moon, Clock, ChevronDown, ChevronUp } from 'lucide-react';
-import { Alert, Card, Field, Switch, TimePicker } from '@getrentos/ui';
+import { Alert, Card, Field, Switch, TimePicker } from '@sureground/ui';
 
 export const DoNotDisturb = () => {
   const [isEnabled, setIsEnabled] = useState(false);

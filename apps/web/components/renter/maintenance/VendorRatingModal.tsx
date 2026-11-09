@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Star } from 'lucide-react';
-import { Button, Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrentos/ui';
+import { Button, Dialog, DialogContent, DialogDescription, DialogTitle } from '@sureground/ui';
 
 interface VendorRatingModalProps {
   isOpen: boolean;

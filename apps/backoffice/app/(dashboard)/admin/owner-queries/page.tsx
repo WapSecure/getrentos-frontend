@@ -18,8 +18,8 @@ import {
   TabsTrigger,
   Textarea,
   PageHeader,
-} from '@getrentos/ui';
-import { unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { unwrap } from '@sureground/shared';
 
 import {
   adminOwnerQueryService,
@@ -221,7 +221,7 @@ export default function AdminOwnerQueriesPage() {
     <div className="space-y-6">
       <PageHeader
         title="Owner questions"
-        description="Questions from owners on GetRentos Managed properties. A first reply is owed within 24 hours; overdue ones are flagged and the owner can see it."
+        description="Questions from owners on Sureground Managed properties. A first reply is owed within 24 hours; overdue ones are flagged and the owner can see it."
       />
       {openId ? (
         <Thread id={openId} canOperate={canOperate} onBack={() => setOpenId(null)} />

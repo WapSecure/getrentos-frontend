@@ -19,7 +19,7 @@ export interface TransferPreview {
   running: {
     mandateId: string;
     manager: string;
-    managerIsGetRentos: boolean;
+    managerIsSureground: boolean;
     scope: string[];
     noticePeriodDays: number;
     noticeServedAt: string | null;
@@ -49,13 +49,13 @@ export interface RequestTransferInput {
   propertyId: string;
   fromMandateId?: string;
   incomingOrganizationId?: string;
-  incomingIsGetRentos?: boolean;
+  incomingIsSureground?: boolean;
   effectiveAt: string;
   reason?: string;
   acknowledgeOpenItems?: boolean;
 }
 
-export type DepositTreatment = 'HANDED_TO_INCOMING' | 'RETURNED_TO_TENANT' | 'PAID_TO_GETRENTOS';
+export type DepositTreatment = 'HANDED_TO_INCOMING' | 'RETURNED_TO_TENANT' | 'PAID_TO_SUREGROUND';
 
 export interface HandoverSnapshot {
   asOf: string;
@@ -73,16 +73,16 @@ export interface HandoverSnapshot {
     arrears: number;
     heldForOwner: number;
     credit: number;
-    deposit: { id: string; amount: number; status: string; heldByGetRentos: boolean } | null;
+    deposit: { id: string; amount: number; status: string; heldBySureground: boolean } | null;
   }[];
   totals: {
     arrears: number;
     heldForOwner: number;
     credit: number;
-    depositsWithGetRentos: number;
+    depositsWithSureground: number;
     depositsOutside: number;
   };
-  ownerMoney: { heldByGetRentos: number; heldByOutgoingFirm: number | null };
+  ownerMoney: { heldBySureground: number; heldByOutgoingFirm: number | null };
   openWork: { id: string; category: string; description: string; status: string }[];
   documents: { id: string; type: string; name: string | null }[];
   inspections: { id: string; type: string; status: string; date: string | null }[];

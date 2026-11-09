@@ -17,8 +17,8 @@ import {
   ListSkeleton,
   Select,
   useToast,
-} from '@getrentos/ui';
-import { formatCurrency } from '@getrentos/shared';
+} from '@sureground/ui';
+import { formatCurrency } from '@sureground/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import {

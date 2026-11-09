@@ -25,7 +25,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { homeCareApi, type Asset, type AssetStatus } from '@/lib/api/homeCare';
 import { errorMessage } from '@/lib/api/client';

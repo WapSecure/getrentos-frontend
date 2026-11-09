@@ -19,7 +19,7 @@ import { landWatchApi } from './api/landWatch';
  * flags one that syncs much later, so the owner's report is checked first.
  */
 
-const KEY = 'getrentos.land.inspection-captures';
+const KEY = 'sureground.land.inspection-captures';
 const DIR_NAME = 'inspection-captures';
 
 export interface QueuedCapture {

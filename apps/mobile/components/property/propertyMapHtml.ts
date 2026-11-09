@@ -1,4 +1,4 @@
-import { mapTiles, type BoundaryCorner } from '@getrentos/shared';
+import { mapTiles, type BoundaryCorner } from '@sureground/shared';
 import { env } from '@/lib/env';
 
 /**

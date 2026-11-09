@@ -1,6 +1,6 @@
 'use client';
 
-import { StatCard } from '@getrentos/ui';
+import { StatCard } from '@sureground/ui';
 import { Users, Megaphone, UserPlus, CalendarClock, Handshake, Wallet } from 'lucide-react';
 
 interface RealtorStatsCardsProps {

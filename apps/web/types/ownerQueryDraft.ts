@@ -4,7 +4,7 @@ export interface OwnerQueryDraft {
   reply: string;
   /** Points the records do not settle, to confirm before sending. */
   toCheck: string[];
-  /** The records the draft was written from, worded by GetRentos. */
+  /** The records the draft was written from, worded by Sureground. */
   facts: { title: string; lines: string[] }[];
   source: 'ai' | 'heuristic';
   disclaimer: string;

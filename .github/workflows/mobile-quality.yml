@@ -35,4 +35,4 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm quality:mobile
-      - run: pnpm --filter mobile exec expo export --platform web --output-dir /tmp/getrentos-mobile-web
+      - run: pnpm --filter mobile exec expo export --platform web --output-dir /tmp/sureground-mobile-web

@@ -10,7 +10,7 @@ import {
   Plus,
   type LucideIcon,
 } from 'lucide-react';
-import { Badge, Button, EmptyState, type BadgeVariant } from '@getrentos/ui';
+import { Badge, Button, EmptyState, type BadgeVariant } from '@sureground/ui';
 
 interface ScheduledMaintenance {
   id: string;

@@ -1,6 +1,6 @@
 'use client';
 
-import { DocumentUpload, Field, Select } from '@getrentos/ui';
+import { DocumentUpload, Field, Select } from '@sureground/ui';
 import type { LandDocumentType } from '@/types/landDocument';
 import {
   LAND_DOCUMENT_ACCEPT,

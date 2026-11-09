@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { ChevronDown, Mail, Phone, Clock, ScrollText } from 'lucide-react';
-import { Card, PageHeader } from '@getrentos/ui';
+import { Card, PageHeader } from '@sureground/ui';
 import { OPS_CONTACT, telLink } from '@/lib/opsContact';
 
 interface FAQItem {
@@ -44,7 +44,7 @@ export const HelpCenterContent = ({ messagesHref = '/admin/messages' }: HelpCent
     <>
       <PageHeader
         title="Staff Help Center"
-        description="Operating guidance and escalation paths for GetRentos backoffice staff"
+        description="Operating guidance and escalation paths for Sureground backoffice staff"
       />
 
       <div className="grid lg:grid-cols-3 gap-6">

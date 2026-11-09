@@ -16,11 +16,11 @@ import {
   TabsList,
   TabsTrigger,
   useToast,
-} from '@getrentos/ui';
-import { Pagination } from '@getrentos/ui';
-import { Select } from '@getrentos/ui';
+} from '@sureground/ui';
+import { Pagination } from '@sureground/ui';
+import { Select } from '@sureground/ui';
 import { adminService } from '@/services/adminService';
-import { unwrap } from '@getrentos/shared';
+import { unwrap } from '@sureground/shared';
 import { adminKeys } from '@/lib/queryKeys';
 import type {
   VerificationRequest,

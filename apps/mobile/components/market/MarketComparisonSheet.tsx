@@ -1,6 +1,6 @@
 import { ScrollView, View } from 'react-native';
 import { BadgeCheck, X } from 'lucide-react-native';
-import { Button, Card, IconButton, Price, Text, useTheme } from '@getrentos/ui-native';
+import { Button, Card, IconButton, Price, Text, useTheme } from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import type { MarketCard } from '@/lib/api/publicMarket';
 

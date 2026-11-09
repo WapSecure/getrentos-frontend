@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { Skeleton } from '@getrentos/ui';
+import { Skeleton } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import {
   estateInfrastructureKeys,
@@ -24,7 +24,7 @@ export const EstateCommitmentsSection = ({ layoutId }: { layoutId: string }) => 
           Infrastructure the developer promised
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Each promise shows where it stands. GetRentos checks the evidence before marking one
+          Each promise shows where it stands. Sureground checks the evidence before marking one
           verified, and buyers are asked before any date or scope changes.
         </p>
       </div>

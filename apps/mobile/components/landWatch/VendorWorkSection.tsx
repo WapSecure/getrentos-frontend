@@ -11,14 +11,14 @@ import {
   QueryState,
   Text,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import {
   LAND_WATCH_JOB_KIND_LABELS,
   LAND_WATCH_JOB_STATUS_LABELS,
   type LandWatchJob,
   type LandWatchStatus,
   type LandWatchTier,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import { qk } from '@/lib/query/keys';
 import { landWatchApi } from '@/lib/api/landWatch';
 
@@ -27,7 +27,7 @@ const OPEN = new Set<LandWatchJob['status']>(['REQUESTED', 'QUOTED', 'APPROVED',
 const MAX_OPEN = 5;
 
 /**
- * Vendor work on a watched parcel: fencing, clearing, beacons. GetRentos finds
+ * Vendor work on a watched parcel: fencing, clearing, beacons. Sureground finds
  * vendors and records the work; the owner pays the vendor. Managed only.
  */
 export function VendorWorkSection({

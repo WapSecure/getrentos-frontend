@@ -2,15 +2,8 @@
 
 import { useState } from 'react';
 import { Check, BadgeCheck } from 'lucide-react';
-import {
-  Badge,
-  Button,
-  Card,
-  CardSkeleton,
-  SegmentedControl,
-  type Segment,
-} from '@getrentos/ui';
-import { formatCurrency } from '@getrentos/shared';
+import { Badge, Button, Card, CardSkeleton, SegmentedControl, type Segment } from '@sureground/ui';
+import { formatCurrency } from '@sureground/shared';
 import type { BillingCycle, PlanPricing } from '@/services/subscriptionService';
 
 const naira = (kobo: number) => formatCurrency(kobo / 100);
@@ -62,7 +55,7 @@ export function ProPriceCard({
           <BadgeCheck className="h-5 w-5" />
         </div>
         <div>
-          <p className="font-semibold text-foreground">GetRentos Pro</p>
+          <p className="font-semibold text-foreground">Sureground Pro</p>
           <p className="text-xs text-muted-foreground">
             {trialAvailable
               ? `${pricing.trialDays}-day free trial · cancel anytime`
@@ -111,14 +104,14 @@ export function ProPriceCard({
               onClick={() => onUpgrade(cycle)}
             >
               {trialAvailable
-                  ? `Start ${pricing.trialDays}-day free trial`
-                  : `Subscribe: ${naira(amount)}/${per}`}
+                ? `Start ${pricing.trialDays}-day free trial`
+                : `Subscribe: ${naira(amount)}/${per}`}
             </Button>
           ) : (
             <Button
               variant="primary"
               fullWidth
-              href="mailto:hello@getrentos.com?subject=Upgrade%20to%20Pro"
+              href="mailto:hello@getsureground.io?subject=Upgrade%20to%20Pro"
             >
               Contact us to upgrade
             </Button>

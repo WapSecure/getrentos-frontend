@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { ShieldCheck, ShieldAlert, MessageSquare } from 'lucide-react';
-import { Badge, type BadgeVariant, Button, Card } from '@getrentos/ui';
+import { Badge, type BadgeVariant, Button, Card } from '@sureground/ui';
 import { getInitials, formatDate } from '@/lib/format';
 import type { BuyerLead, BuyerLeadStage } from '@/types/owner';
 

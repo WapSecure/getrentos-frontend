@@ -20,7 +20,7 @@ import {
   Pagination,
   useOptimisticMutation,
   useToast,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 
 export default function NotificationsPage() {
   const queryClient = useQueryClient();

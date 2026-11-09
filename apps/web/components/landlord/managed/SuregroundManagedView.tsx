@@ -29,7 +29,7 @@ import {
   Select,
   Textarea,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 
 import { landlordService } from '@/services/landlordService';
 import {
@@ -61,12 +61,12 @@ import { formatCurrency } from '@/lib/format';
 import { formatMoment } from '@/components/agency/mandatePresentation';
 
 /**
- * "Let GetRentos manage it": the owner-facing opt-in.
+ * "Let Sureground manage it": the owner-facing opt-in.
  *
- * GetRentos as a manager is an ordinary mandate under the hood, so this screen
+ * Sureground as a manager is an ordinary mandate under the hood, so this screen
  * does not invent a new flow — it shows the published fee card and, for each of
  * the owner's properties, either where its managed engagement stands or a way to
- * start one. Starting one is an intake, not an opt-in: GetRentos visits, sends
+ * start one. Starting one is an intake, not an opt-in: Sureground visits, sends
  * a proposal, and the owner's acceptance is what signs the mandate.
  */
 
@@ -76,8 +76,8 @@ const MANDATE_STATUS_BADGE: Record<
 > = {
   DRAFT: { variant: 'neutral', label: 'Draft' },
   PENDING_OWNER: { variant: 'warning', label: 'Awaiting your signature' },
-  PENDING_OPS: { variant: 'warning', label: 'With GetRentos for review' },
-  ACTIVE: { variant: 'success', label: 'Managed by GetRentos' },
+  PENDING_OPS: { variant: 'warning', label: 'With Sureground for review' },
+  ACTIVE: { variant: 'success', label: 'Managed by Sureground' },
   SUSPENDED: { variant: 'warning', label: 'Paused' },
   TERMINATED: { variant: 'neutral', label: 'Ended' },
   EXPIRED: { variant: 'neutral', label: 'Expired' },
@@ -189,7 +189,7 @@ function distinctLabels(
   return labels;
 }
 
-export const GetRentosManagedView = () => {
+export const SuregroundManagedView = () => {
   const queryClient = useQueryClient();
   const [intakeFor, setIntakeFor] = useState<{ id: string; name: string } | null>(null);
   const [firmPropertyByFirm, setFirmPropertyByFirm] = useState<Record<string, string>>({});
@@ -298,7 +298,7 @@ export const GetRentosManagedView = () => {
         title="Get your property managed"
         description={
           <>
-            Two ways to hand over the day-to-day. Either way, GetRentos holds the money and keeps
+            Two ways to hand over the day-to-day. Either way, Sureground holds the money and keeps
             the record, so the property&rsquo;s history stays with you.
           </>
         }
@@ -317,7 +317,7 @@ export const GetRentosManagedView = () => {
         <div className="rounded-2xl border border-primary/40 bg-primary/5 p-5">
           <h2 className="flex items-center gap-2 font-semibold text-foreground">
             <Sparkles className="h-5 w-5 text-primary" aria-hidden />
-            Let GetRentos manage it
+            Let Sureground manage it
           </h2>
           <p className="mt-1.5 text-sm text-muted-foreground">
             We become the manager of record, with one published fee card and a service commitment
@@ -332,12 +332,12 @@ export const GetRentosManagedView = () => {
           </h2>
           <p className="mt-1.5 text-sm text-muted-foreground">
             Appoint an independent agency you choose. You and the firm agree the terms; the
-            engagement still runs on GetRentos. See the firms further down.
+            engagement still runs on Sureground. See the firms further down.
           </p>
         </Card>
       </div>
 
-      {/* The GetRentos fee card */}
+      {/* The Sureground fee card */}
       {feeCard.isLoading ? (
         <div className="mb-8 grid gap-4 md:grid-cols-3">
           {[0, 1, 2].map((i) => (
@@ -365,7 +365,7 @@ export const GetRentosManagedView = () => {
             Our service commitment
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Every managed property follows the same GetRentos SLA, not a partner&rsquo;s. These are
+            Every managed property follows the same Sureground SLA, not a partner&rsquo;s. These are
             the targets for maintenance, by how urgent the issue is.
           </p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -411,21 +411,21 @@ export const GetRentosManagedView = () => {
         <EmptyState
           icon={Building2}
           title="No properties yet"
-          description="Add a property first, then you can place it under GetRentos management."
+          description="Add a property first, then you can place it under Sureground management."
         />
       ) : (
         <div className="space-y-3">
           {propertyList.map((property) => {
             const current = currentByProperty.get(property.id);
             const live = current && isLiveEngagement(current);
-            const managed = current && live && current.managerIsGetRentos ? current : undefined;
+            const managed = current && live && current.managerIsSureground ? current : undefined;
             const firmMandate =
-              current && live && !current.managerIsGetRentos ? current : undefined;
+              current && live && !current.managerIsSureground ? current : undefined;
             const windingDown = current && isWindingDown(current) ? current : undefined;
             const intake = intakeByProperty.get(property.id);
             const openIntake =
               intake && OPEN_INTAKE_STATUSES.includes(intake.status) ? intake : undefined;
-            // Accepted and signed, waiting on GetRentos to set it up and go live.
+            // Accepted and signed, waiting on Sureground to set it up and go live.
             const settingUp =
               managed && managed.status !== 'ACTIVE' && intake?.status === 'ACCEPTED'
                 ? intake
@@ -464,8 +464,8 @@ export const GetRentosManagedView = () => {
                       {activeMandate?.noticeServedAt && (
                         <p className="mt-0.5 flex items-center gap-1 text-sm text-warning">
                           <CalendarClock className="h-3.5 w-3.5" aria-hidden />
-                          {activeMandate.managerIsGetRentos
-                            ? 'GetRentos'
+                          {activeMandate.managerIsSureground
+                            ? 'Sureground'
                             : (activeMandate.managerOrganizationName ?? 'Your manager')}{' '}
                           served notice on {formatMoment(activeMandate.noticeServedAt)}; management
                           ends {formatMoment(noticeEndsAt(activeMandate))}.
@@ -488,7 +488,7 @@ export const GetRentosManagedView = () => {
                         </span>
                       )}
                       {settingUp ? (
-                        <Badge variant="info">Being set up by GetRentos</Badge>
+                        <Badge variant="info">Being set up by Sureground</Badge>
                       ) : (
                         <Badge variant={MANDATE_STATUS_BADGE[managed.status]?.variant ?? 'neutral'}>
                           {MANDATE_STATUS_BADGE[managed.status]?.label ?? managed.status}
@@ -531,7 +531,7 @@ export const GetRentosManagedView = () => {
                           className="text-primary"
                           onClick={() => setIntakeFor({ id: property.id, name: property.name })}
                         >
-                          Move to GetRentos
+                          Move to Sureground
                         </Button>
                       )}
                       <Button
@@ -571,7 +571,7 @@ export const GetRentosManagedView = () => {
                         icon={<ShieldCheck className="h-4 w-4" aria-hidden />}
                         onClick={() => setIntakeFor({ id: property.id, name: property.name })}
                       >
-                        Ask GetRentos to manage
+                        Ask Sureground to manage
                       </Button>
                     </div>
                   )}
@@ -585,7 +585,7 @@ export const GetRentosManagedView = () => {
                 )}
                 {declined && !openIntake && (
                   <p className="mt-3 border-t border-border pt-3 text-sm text-muted-foreground">
-                    GetRentos declined your last request: {declined.declinedReason}
+                    Sureground declined your last request: {declined.declinedReason}
                   </p>
                 )}
 
@@ -594,7 +594,7 @@ export const GetRentosManagedView = () => {
                     <p className="text-sm text-muted-foreground">
                       {isPendingMandate
                         ? 'Withdraw this request. Nothing has started, so there is nothing to settle.'
-                        : 'End this engagement. The manager’s access stops immediately. GetRentos then prepares your final statement with rent collected to date, fees and any break fee. During handover, you and the manager exchange keys, balances and documents, then confirm completion here. GetRentos does not need to approve it.'}
+                        : 'End this engagement. The manager’s access stops immediately. Sureground then prepares your final statement with rent collected to date, fees and any break fee. During handover, you and the manager exchange keys, balances and documents, then confirm completion here. Sureground does not need to approve it.'}
                     </p>
                     {!isPendingMandate && breakFeeQuery.data && (
                       <Alert
@@ -660,7 +660,7 @@ export const GetRentosManagedView = () => {
           Vetted firms
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Independent agencies on GetRentos, ranked by their track record for handling maintenance
+          Independent agencies on Sureground, ranked by their track record for handling maintenance
           on the properties they manage, then how much they run. Appoint one and it goes to them to
           accept, then to our team to verify before anything turns on.
         </p>
@@ -671,7 +671,7 @@ export const GetRentosManagedView = () => {
           <EmptyState
             icon={Briefcase}
             title="No vetted firms are listed yet"
-            description="GetRentos Managed above is available now."
+            description="Sureground Managed above is available now."
             size="compact"
             className="mt-3"
           />
@@ -734,7 +734,7 @@ export const GetRentosManagedView = () => {
                               }`
                             : 'No maintenance handled yet'}
                         </span>
-                        <span>On GetRentos since {since}</span>
+                        <span>On Sureground since {since}</span>
                       </p>
                     </div>
                   </div>

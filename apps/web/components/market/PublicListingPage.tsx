@@ -1,4 +1,4 @@
-import { Badge } from '@getrentos/ui';
+import { Badge } from '@sureground/ui';
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import Link from 'next/link';
@@ -37,11 +37,11 @@ const MARKET_NOUN: Record<PublicDetailMarket, string> = {
   land: 'Land',
 };
 
-/** When money paid through GetRentos reaches the other side, per market. */
+/** When money paid through Sureground reaches the other side, per market. */
 const PROTECTION_LINE: Record<PublicDetailMarket, string> = {
-  rent: 'Pay through GetRentos: we hold your rent and release it to the landlord on schedule, unless you raise a dispute.',
-  sale: 'Pay through GetRentos: we hold your deposit and only release it to the seller once you confirm receipt.',
-  land: 'Pay through GetRentos: we hold your money and only release it to the seller once the conveyance steps are confirmed.',
+  rent: 'Pay through Sureground: we hold your rent and release it to the landlord on schedule, unless you raise a dispute.',
+  sale: 'Pay through Sureground: we hold your deposit and only release it to the seller once you confirm receipt.',
+  land: 'Pay through Sureground: we hold your money and only release it to the seller once the conveyance steps are confirmed.',
 };
 
 /** Shared `generateMetadata` for the three public detail routes. */
@@ -54,7 +54,7 @@ export async function publicListingMetadata(
   const path = `${MARKET_PATH[market]}/${id}`;
   const description =
     listing.description?.slice(0, 160) ||
-    `${listing.title} in ${listing.location}: verified listing on GetRentos with payment protection.`;
+    `${listing.title} in ${listing.location}: verified listing on Sureground with payment protection.`;
   return {
     title: `${listing.title}: ${listing.location}`,
     description,
@@ -275,7 +275,7 @@ export async function PublicListingPage({
                 </p>
                 <p className="flex items-start gap-2">
                   <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-success" />
-                  Never pay outside GetRentos or share sensitive financial details.
+                  Never pay outside Sureground or share sensitive financial details.
                 </p>
               </div>
             </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Button, PageHeader, Tabs, TabsContent, TabsList, TabsTrigger } from '@getrentos/ui';
+import { Button, PageHeader, Tabs, TabsContent, TabsList, TabsTrigger } from '@sureground/ui';
 import { LayoutGrid, Gavel, ScanSearch, UsersRound, Video } from 'lucide-react';
 import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';
 import { PurchasesList } from './PurchasesList';

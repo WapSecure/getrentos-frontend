@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Card, FormAlert, ListSkeleton, QueryState, Text, useTheme } from '@getrentos/ui-native';
+import { Card, FormAlert, ListSkeleton, QueryState, Text, useTheme } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { agencyFirmApi, ARREARS_BUCKET, recentMonths, type KpiReport } from '@/lib/api/agencyFirm';
 import { formatNaira } from '@/lib/format';

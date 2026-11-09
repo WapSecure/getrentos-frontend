@@ -22,7 +22,7 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { DueRow, confirmPaid } from '@/components/estate/EstateUI';
 import { Stepper } from '@/components/host/HostUI';
 import { Sheet } from '@/components/Sheet';

@@ -10,7 +10,7 @@ import {
   Users,
   Wallet,
 } from 'lucide-react';
-import { IconButton, StatCard, type StatCardAccent } from '@getrentos/ui';
+import { IconButton, StatCard, type StatCardAccent } from '@sureground/ui';
 import { useMonetaryVisibility } from '@/hooks/useMonetaryVisibility';
 
 interface OwnerStatsCardsProps {

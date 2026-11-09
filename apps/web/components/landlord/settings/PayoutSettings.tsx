@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { CheckCircle2 } from 'lucide-react';
-import { Alert, Button, Card, SaveButton, useToast } from '@getrentos/ui';
+import { Alert, Button, Card, SaveButton, useToast } from '@sureground/ui';
 import { landlordService } from '@/services/landlordService';
 import {
   VerificationRequiredNotice,
@@ -22,7 +22,7 @@ import {
   saveAccountLabel,
   withStepUpSummary,
   type AccountLookup,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 
 export const PayoutSettings = () => {
   const [bankCode, setBankCode] = useState('');
@@ -95,7 +95,8 @@ export const PayoutSettings = () => {
     <div>
       <h2 className="text-xl font-semibold text-foreground mb-4">Payout account</h2>
       <p className="text-sm text-muted-foreground mb-6">
-        Where rent released by GetRentos Payment Protection is sent: transfers run through Paystack.
+        Where rent released by Sureground Payment Protection is sent: transfers run through
+        Paystack.
       </p>
 
       {loadFailed && (

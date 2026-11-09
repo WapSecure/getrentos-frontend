@@ -13,7 +13,7 @@ import {
   Field,
   Textarea,
   useToast,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { renterService, type PendingReview } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';

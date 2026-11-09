@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { SessionTimeoutGuard } from '@getrentos/ui';
+import { SessionTimeoutGuard } from '@sureground/ui';
 import { AddRoleDialogHost } from '@/components/shared/navigation/AddRoleDialog';
 import { SkipToMainLink } from '@/components/shared/navigation/SkipToMainLink';
 

@@ -1,8 +1,8 @@
 'use client';
 
 import { CalendarClock, CheckCircle2, ClipboardList, Wrench, type LucideIcon } from 'lucide-react';
-import { NairaSign } from '@getrentos/ui/NairaSign';
-import { Card, EmptyState, Skeleton } from '@getrentos/ui';
+import { NairaSign } from '@sureground/ui/NairaSign';
+import { Card, EmptyState, Skeleton } from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 import type { HomeManagementDashboard } from '@/services/homeManagementService';
 

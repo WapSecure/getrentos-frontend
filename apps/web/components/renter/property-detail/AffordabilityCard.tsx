@@ -11,7 +11,7 @@ import {
   Field,
   Skeleton,
   type BadgeVariant,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { renterService } from '@/services/renterService';
@@ -27,7 +27,7 @@ const BAND: Record<Affordability['band'], { label: string; variant: BadgeVariant
 /**
  * "Can I afford it?": rent against income by the same rule landlords' screening
  * uses, the cash needed to move in, and how long saving it takes. Worked out by
- * GetRentos, not AI. The figures entered are used for this answer only.
+ * Sureground, not AI. The figures entered are used for this answer only.
  */
 export function AffordabilityCard({ listingId }: { listingId: string }) {
   const [form, setForm] = useState<AffordabilityInput>({});
@@ -124,8 +124,8 @@ export function AffordabilityCard({ listingId }: { listingId: string }) {
         </ul>
       </div>
       <p className="text-2xs text-muted-foreground">
-        Worked out by GetRentos from the listing. What you enter is used for this answer only and is
-        not saved.
+        Worked out by Sureground from the listing. What you enter is used for this answer only and
+        is not saved.
       </p>
     </Card>
   );

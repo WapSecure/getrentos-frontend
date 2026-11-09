@@ -14,7 +14,7 @@ import {
   TabsTrigger,
   useToast,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { MaintenanceRequestCard } from '@/components/landlord/maintenance/MaintenanceRequestCard';
 import { AssignVendorModal } from '@/components/landlord/maintenance/AssignVendorModal';
 import { ScheduleVisitModal } from '@/components/landlord/maintenance/ScheduleVisitModal';

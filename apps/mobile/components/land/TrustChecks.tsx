@@ -7,12 +7,12 @@ import {
   type LandAssuranceTier,
   type LandNotVerifiedItem,
   type LandTrustLabel,
-} from '@getrentos/shared';
-import { Badge, Text, useTheme } from '@getrentos/ui-native';
+} from '@sureground/shared';
+import { Badge, Text, useTheme } from '@sureground/ui-native';
 import { formatDate } from '@/lib/format';
 
 /**
- * What GetRentos checked on a parcel, one scoped claim per line (what, by whom,
+ * What Sureground checked on a parcel, one scoped claim per line (what, by whom,
  * when), then what was not checked. Deliberately no single "Verified" tick: a
  * buyer sees the gaps beside the passes. Web: components/land/market/TrustLabelsList.
  */

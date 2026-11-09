@@ -5,7 +5,7 @@ import {
   Manrope_700Bold,
   Manrope_800ExtraBold,
 } from '@expo-google-fonts/manrope';
-import type { FontFamilies } from '@getrentos/ui-native';
+import type { FontFamilies } from '@sureground/ui-native';
 
 /**
  * The brand typeface, the same one the website uses. Static faces, one per

@@ -33,9 +33,9 @@ import {
   SearchInput,
   type BadgeVariant,
   PageHeader,
-} from '@getrentos/ui';
-import { cn, unwrap, humaniseEnum } from '@getrentos/shared';
-import { formatCurrency, formatDate } from '@getrentos/shared';
+} from '@sureground/ui';
+import { cn, unwrap, humaniseEnum } from '@sureground/shared';
+import { formatCurrency, formatDate } from '@sureground/shared';
 import { adminEstateService } from '@/services/adminEstateService';
 import { adminKeys } from '@/lib/queryKeys';
 import { useAdminSearchParam } from '@/lib/readAdminSearchParam';

@@ -1,5 +1,5 @@
-import { authFetch, safeCall } from '@getrentos/shared';
-import type { ApiResponse } from '@getrentos/shared';
+import { authFetch, safeCall } from '@sureground/shared';
+import type { ApiResponse } from '@sureground/shared';
 import type {
   StaffPasskey,
   StaffSession,

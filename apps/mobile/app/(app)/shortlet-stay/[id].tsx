@@ -30,7 +30,7 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { PropertyMapView } from '@/components/property/PropertyMapView';
 import { openDirections } from '@/lib/directions';
@@ -384,7 +384,7 @@ export default function StayDetail() {
             </View>
             <Text variant="caption" color={paid ? 'success' : 'mutedForeground'}>
               {b.paymentStatus === 'PAID'
-                ? `Paid${b.paidAt ? ` ${formatDate(b.paidAt, 'short')}` : ''} · held by GetRentos until you check in`
+                ? `Paid${b.paidAt ? ` ${formatDate(b.paidAt, 'short')}` : ''} · held by Sureground until you check in`
                 : b.paymentStatus === 'REFUNDED'
                   ? 'Refunded'
                   : b.paymentStatus === 'PROCESSING'
@@ -409,7 +409,7 @@ export default function StayDetail() {
                 {b.depositStatus === 'REFUNDED'
                   ? `Returned${b.depositRefundedAmount != null ? ` · ₦${b.depositRefundedAmount.toLocaleString('en-NG')}` : ''}${b.depositClaimDeducted ? ` after a ₦${b.depositClaimDeducted.toLocaleString('en-NG')} claim` : ''}`
                   : b.depositStatus === 'HELD'
-                    ? 'Held by GetRentos and returned after checkout, unless the host reports damage.'
+                    ? 'Held by Sureground and returned after checkout, unless the host reports damage.'
                     : 'Paid with your stay and returned after checkout.'}
               </Text>
               {b.depositClaimStatus === 'PENDING' ? (
@@ -491,7 +491,7 @@ export default function StayDetail() {
         amount={toPay}
         itemLabel={b.deposit ? 'Stay and deposit' : 'Stay'}
         receiverLine={`The fee goes to the payment company, so your host receives the full ${formatNaira(toPay)}.`}
-        protection="GetRentos holds your payment and only pays the host after check-in."
+        protection="Sureground holds your payment and only pays the host after check-in."
         providers={providers}
         providerError={providerError}
         busy={pay.isPending}

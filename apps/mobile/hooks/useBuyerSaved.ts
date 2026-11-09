@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import { useMutation, useMutationState, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useToast } from '@getrentos/ui-native';
+import { useToast } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { buyerSavedApi } from '@/lib/api/buyerSaved';
 import type { BuyerListing, Paginated } from '@/lib/api/buyer';

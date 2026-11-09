@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
-import { Dialog, DialogContent, DialogTitle, IconLink, ListSkeleton } from '@getrentos/ui';
+import { Dialog, DialogContent, DialogTitle, IconLink, ListSkeleton } from '@sureground/ui';
 
 interface GovernanceVersionsModalProps {
   estateId: string;

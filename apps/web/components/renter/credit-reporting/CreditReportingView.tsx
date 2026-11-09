@@ -1,5 +1,5 @@
 import { Building2, ShieldCheck } from 'lucide-react';
-import { Alert, Card } from '@getrentos/ui';
+import { Alert, Card } from '@sureground/ui';
 
 export const CreditReportingView = () => {
   return (
@@ -13,7 +13,7 @@ export const CreditReportingView = () => {
             Credit reporting is not available
           </h1>
           <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            GetRentos does not currently submit rent payments to a credit bureau. There is no
+            Sureground does not currently submit rent payments to a credit bureau. There is no
             enrollment to complete and no payment data will be shared for credit reporting.
           </p>
           <Alert variant="neutral" icon={ShieldCheck} className="mt-4">

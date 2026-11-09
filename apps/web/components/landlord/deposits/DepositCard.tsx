@@ -1,6 +1,6 @@
 'use client';
 
-import { Badge, type BadgeVariant } from '@getrentos/ui';
+import { Badge, type BadgeVariant } from '@sureground/ui';
 import { PiggyBank, ShieldCheck } from 'lucide-react';
 import {
   DEPOSIT_STATUS_LABELS,
@@ -51,10 +51,10 @@ export const DepositCard = ({ deposit, onOpen }: DepositCardProps) => (
       </div>
     </div>
 
-    {deposit.heldByGetRentos && (
+    {deposit.heldBySureground && (
       <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
         <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
-        Held by GetRentos
+        Held by Sureground
       </div>
     )}
   </button>

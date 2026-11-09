@@ -18,7 +18,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   IconButton,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { verificationBadges } from '@/lib/statusBadge';
 import { formatCurrency } from '@/lib/format';
 import { ReferenceCodeChip } from '@/components/shared/property/ReferenceCodeChip';

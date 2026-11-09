@@ -1,5 +1,5 @@
 import { View } from 'react-native';
-import { Chip, Text, useTheme } from '@getrentos/ui-native';
+import { Chip, Text, useTheme } from '@sureground/ui-native';
 
 interface Option<T extends string> {
   value: T;

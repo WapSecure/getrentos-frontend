@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ConfirmDialog, useToast } from '@getrentos/ui';
+import { ConfirmDialog, useToast } from '@sureground/ui';
 
 /** Triggers a browser download for an authenticated CSV blob. */
 export function downloadBlob(blob: Blob, filename: string) {

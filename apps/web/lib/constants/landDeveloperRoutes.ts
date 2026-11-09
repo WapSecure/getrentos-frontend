@@ -1,4 +1,4 @@
-import { ROUTES } from '@getrentos/shared';
+import { ROUTES } from '@sureground/shared';
 
 /**
  * Web-only routes for the owner's land sales tooling: a developer's estate

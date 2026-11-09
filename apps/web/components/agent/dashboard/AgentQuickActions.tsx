@@ -1,7 +1,7 @@
 'use client';
 
 import { ClipboardCheck, UserCheck, ClipboardList, RefreshCw } from 'lucide-react';
-import { Button, Card, CardHeader, CardTitle } from '@getrentos/ui';
+import { Button, Card, CardHeader, CardTitle } from '@sureground/ui';
 import { ROUTES } from '@/lib/constants/auth';
 
 const actions = [

@@ -11,7 +11,7 @@ import {
   rememberStepUpToken,
   TRANSACTION_PIN_LENGTH,
   type StepUpMethod,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import { Alert } from './Alert';
 import { Button } from './Button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from './Dialog';
@@ -167,7 +167,7 @@ export function StepUpDialog({
   const confirmWithPasskey = () =>
     run(async () => {
       if (!authenticateWithPasskey) {
-        throw new Error('Passkeys are not available here. Use the main GetRentos app to confirm.');
+        throw new Error('Passkeys are not available here. Use the main Sureground app to confirm.');
       }
       const options = await authFetch<unknown>('/users/me/security/step-up/passkey/options', {
         method: 'POST',

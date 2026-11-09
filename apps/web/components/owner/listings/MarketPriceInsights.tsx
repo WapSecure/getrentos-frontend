@@ -2,7 +2,7 @@
 
 import { TrendingUp, BadgeCheck } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { Button, Skeleton } from '@getrentos/ui';
+import { Button, Skeleton } from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';

@@ -1,7 +1,7 @@
 'use client';
 
 import { useId } from 'react';
-import { CurrencyInput } from '@getrentos/ui';
+import { CurrencyInput } from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 import type { LandPaymentPlanTerms } from '@/types/landDeveloper';
 import { priceExample } from './planPricing';

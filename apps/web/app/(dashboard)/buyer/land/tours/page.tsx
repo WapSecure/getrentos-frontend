@@ -1,5 +1,5 @@
 import { BuyerTours } from '@/components/land/tours/BuyerTours';
-import { PageHeader } from '@getrentos/ui';
+import { PageHeader } from '@sureground/ui';
 
 export default function BuyerLandToursPage() {
   return (

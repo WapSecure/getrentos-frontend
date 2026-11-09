@@ -2,7 +2,7 @@
 
 import { useId, type ReactNode } from 'react';
 import { Check, Minus } from 'lucide-react';
-import { cn } from '@getrentos/shared';
+import { cn } from '@sureground/shared';
 
 interface CheckboxProps {
   checked: boolean;

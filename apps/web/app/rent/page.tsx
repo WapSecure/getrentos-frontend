@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Homes to Rent in Nigeria',
     description:
-      'Browse rental homes across Nigeria with verified properties, verified landlords and GetRentos Payment Protection.',
+      'Browse rental homes across Nigeria with verified properties, verified landlords and Sureground Payment Protection.',
     url: '/rent',
     type: 'website',
   },

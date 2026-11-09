@@ -1,6 +1,6 @@
 import { Pressable, View } from 'react-native';
 import { Check } from 'lucide-react-native';
-import { Card, Progress, Text, useTheme } from '@getrentos/ui-native';
+import { Card, Progress, Text, useTheme } from '@sureground/ui-native';
 import type { MoveInChecklistItem } from '@/lib/api/renter';
 
 interface Props {

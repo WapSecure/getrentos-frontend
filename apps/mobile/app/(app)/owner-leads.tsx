@@ -14,7 +14,7 @@ import {
   Skeleton,
   Text,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { ownerApi, OWNER_LEAD_LABEL, type OwnerLead } from '@/lib/api/owner';
 import { formatDate } from '@/lib/format';

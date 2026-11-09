@@ -1,6 +1,6 @@
 'use client';
 
-import { IconButton, Input } from '@getrentos/ui';
+import { IconButton, Input } from '@sureground/ui';
 
 import { useState } from 'react';
 import { Send, MessageCircle, Check, CheckCheck } from 'lucide-react';

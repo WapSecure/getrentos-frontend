@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Briefcase } from 'lucide-react';
-import { Alert, Button, Card, Skeleton } from '@getrentos/ui';
+import { Alert, Button, Card, Skeleton } from '@sureground/ui';
 import { formatDate } from '@/lib/format';
 import { getStoredUser, updateStoredUser } from '@/lib/authStorage';
 import { agencyTeamService } from '@/services/agencyTeamService';

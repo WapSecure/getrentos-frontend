@@ -1,5 +1,5 @@
 import type { ElementType, ReactNode } from 'react';
-import { PageHeader } from '@getrentos/ui';
+import { PageHeader } from '@sureground/ui';
 
 interface RenterPageHeaderProps {
   eyebrow?: string;

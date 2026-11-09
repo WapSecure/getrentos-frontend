@@ -3,8 +3,8 @@
 import { RedirectToEstateSetup } from '@/components/estate/shared/RedirectToEstateSetup';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { tierAtLeast } from '@getrentos/shared';
-import { Alert, Button, CardSkeleton, PageHeader } from '@getrentos/ui';
+import { tierAtLeast } from '@sureground/shared';
+import { Alert, Button, CardSkeleton, PageHeader } from '@sureground/ui';
 import { Upload } from 'lucide-react';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';

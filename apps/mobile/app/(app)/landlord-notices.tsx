@@ -19,7 +19,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   JURISDICTIONS,
@@ -291,7 +291,7 @@ function PeriodRegister({ settings }: { settings: NoticePeriodSettings }) {
         <FormAlert
           tone="warning"
           title={`${missing.length} ${missing.length === 1 ? 'period is' : 'periods are'} still unrecorded`}
-          message="Any notice that runs for a statutory period is refused there until a number is recorded. GetRentos holds no day count of its own, so it will not guess one."
+          message="Any notice that runs for a statutory period is refused there until a number is recorded. Sureground holds no day count of its own, so it will not guess one."
         />
       ) : (
         <FormAlert

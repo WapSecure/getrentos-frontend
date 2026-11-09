@@ -1,7 +1,7 @@
 'use client';
 
 import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react';
-import { cn } from '@getrentos/shared';
+import { cn } from '@sureground/shared';
 
 export interface ToggleChipProps extends Omit<
   ButtonHTMLAttributes<HTMLButtonElement>,

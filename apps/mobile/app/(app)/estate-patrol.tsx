@@ -3,7 +3,7 @@ import { RefreshControl, ScrollView } from 'react-native';
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { SegmentedControl, useTheme } from '@getrentos/ui-native';
+import { SegmentedControl, useTheme } from '@sureground/ui-native';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { EnterpriseUpsell } from '@/components/estate/gate/GateUI';
 import { PatrolCheckpoints } from '@/components/estate/gate/PatrolCheckpoints';

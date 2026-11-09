@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { Check, ChevronDown, Copy, ListChecks } from 'lucide-react';
-import { Badge, Button, Card, Select, Skeleton, type BadgeVariant } from '@getrentos/ui';
+import { Badge, Button, Card, Select, Skeleton, type BadgeVariant } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys, landlordKeys } from '@/lib/queryKeys';
 import { estateService } from '@/services/estateService';

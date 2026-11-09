@@ -3,8 +3,8 @@
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 import { ShieldCheck, Sparkles, AlertTriangle, CheckCircle2 } from 'lucide-react';
-import { Alert, Button } from '@getrentos/ui';
-import { unwrap } from '@getrentos/shared';
+import { Alert, Button } from '@sureground/ui';
+import { unwrap } from '@sureground/shared';
 import { adminService } from '@/services/adminService';
 import type { OwnershipDocCheck, OwnershipProofRef } from '@/types/admin';
 

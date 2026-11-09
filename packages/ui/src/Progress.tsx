@@ -1,4 +1,4 @@
-import { cn } from '@getrentos/shared';
+import { cn } from '@sureground/shared';
 
 interface ProgressProps {
   /** 0–max. Values outside the range are clamped. */

@@ -13,7 +13,7 @@ import {
   SearchInput,
   Select,
   TimePicker,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { agentKeys } from '@/lib/queryKeys';
 import {

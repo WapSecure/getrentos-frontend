@@ -2,7 +2,7 @@
 
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { MapPin } from 'lucide-react';
-import { EmptyState, Skeleton } from '@getrentos/ui';
+import { EmptyState, Skeleton } from '@sureground/ui';
 import { PropertyMap, type MapMarker } from '@/components/maps/PropertyMap';
 import { formatPrice, type Property } from '@/types/renter';
 import { renterService } from '@/services/renterService';

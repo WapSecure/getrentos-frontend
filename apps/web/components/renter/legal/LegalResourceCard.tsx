@@ -1,6 +1,6 @@
 'use client';
 
-import { Card } from '@getrentos/ui';
+import { Card } from '@sureground/ui';
 import type { LegalResource } from '@/lib/content/legalResources';
 
 interface LegalResourceCardProps {

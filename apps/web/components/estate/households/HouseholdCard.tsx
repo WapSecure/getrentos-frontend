@@ -1,7 +1,7 @@
 'use client';
 
 import { Mail, Phone, Pencil, Trash2, UserPlus, UserMinus } from 'lucide-react';
-import { Badge, IconButton } from '@getrentos/ui';
+import { Badge, IconButton } from '@sureground/ui';
 import type { Household } from '@/types/estate';
 
 interface HouseholdCardProps {

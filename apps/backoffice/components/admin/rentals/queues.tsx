@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import type { ReactNode } from 'react';
-import { Badge, type BadgeVariant, Button, Select, type SelectOption } from '@getrentos/ui';
-import { unwrap, humaniseEnum } from '@getrentos/shared';
+import { Badge, type BadgeVariant, Button, Select, type SelectOption } from '@sureground/ui';
+import { unwrap, humaniseEnum } from '@sureground/shared';
 import type { LucideIcon } from 'lucide-react';
 import {
   Building2,

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { Badge, PageErrorState, Skeleton } from '@getrentos/ui';
+import { Badge, PageErrorState, Skeleton } from '@sureground/ui';
 import { ArrowLeft, BadgeCheck, FileCheck2, MapPin, ReceiptText } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency } from '@/lib/format';

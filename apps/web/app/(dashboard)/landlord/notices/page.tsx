@@ -19,7 +19,7 @@ import {
   useToast,
   type Column,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import {
   NoticeLadderTimeline,
   noticeKindLabel,

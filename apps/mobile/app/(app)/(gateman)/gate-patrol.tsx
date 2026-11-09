@@ -11,7 +11,7 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
 import { gatemanApi, type PatrolScanResult } from '@/lib/api/gateman';
 import { gateOfflineQueue, useGateQueue } from '@/lib/gateOfflineQueue';

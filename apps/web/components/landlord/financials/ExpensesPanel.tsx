@@ -19,8 +19,8 @@ import {
   Select,
   Pagination,
   useToast,
-} from '@getrentos/ui';
-import { formatCurrency, formatDate } from '@getrentos/shared';
+} from '@sureground/ui';
+import { formatCurrency, formatDate } from '@sureground/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import { landlordService, type Expense, type ExpenseCategory } from '@/services/landlordService';

@@ -13,7 +13,7 @@ import {
   useTheme,
   useToast,
   type BadgeTone,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { errorMessage } from '@/lib/api/client';
 import { followUpsApi, type FollowUp, type FollowUpStep } from '@/lib/api/followUps';
 import { whatsappLink } from '@/lib/api/realtor';

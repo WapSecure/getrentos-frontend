@@ -1,4 +1,4 @@
-import { PageLoadingState } from '@getrentos/ui';
+import { PageLoadingState } from '@sureground/ui';
 
 /** Dashboard-wide loading fallback while role data streams in. */
 export default function DashboardLoading() {

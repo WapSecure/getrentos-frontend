@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Linking, StyleSheet, View } from 'react-native';
 import { CameraView, useCameraPermissions, type BarcodeScanningResult } from 'expo-camera';
 import { ScanLine } from 'lucide-react-native';
-import { Button, Text, useTheme } from '@getrentos/ui-native';
+import { Button, Text, useTheme } from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { haptics } from '@/lib/haptics';
 
@@ -74,8 +74,8 @@ export function QrScannerSheet({ open, onClose, onScan }: QrScannerSheetProps) {
             </Text>
             <Text variant="caption" color="mutedForeground" center>
               {permission.canAskAgain
-                ? "GetRentos needs the camera to read a visitor's QR code. You can still check them in with their 6-digit PIN."
-                : 'Turn camera access on for GetRentos in Settings, or check the visitor in with their 6-digit PIN instead.'}
+                ? "Sureground needs the camera to read a visitor's QR code. You can still check them in with their 6-digit PIN."
+                : 'Turn camera access on for Sureground in Settings, or check the visitor in with their 6-digit PIN instead.'}
             </Text>
             <Button
               label={permission.canAskAgain ? 'Allow camera' : 'Open settings'}

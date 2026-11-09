@@ -3,7 +3,7 @@ import { Linking, Pressable, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ChevronDown, ChevronUp, Clock, Mail, MessageCircle, Phone } from 'lucide-react-native';
-import { Card, Divider, Text, useTheme } from '@getrentos/ui-native';
+import { Card, Divider, Text, useTheme } from '@sureground/ui-native';
 import { HelpFeedbackCard } from '@/components/help/HelpFeedbackCard';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
@@ -11,14 +11,14 @@ import { SUPPORT, telUrl } from '@/lib/support';
 
 const FAQS: { question: string; answer: string }[] = [
   {
-    question: 'How does GetRentos verify identities and properties?',
+    question: 'How does Sureground verify identities and properties?',
     answer:
       'Signing up is quick: you don\'t need to verify anything to start. Identity, licence and ownership checks are only asked for when something you do needs them, such as listing a property or collecting rent. Listings are reviewed before they go live; look for the green "Verified" badge.',
   },
   {
     question: 'How are payments protected?',
     answer:
-      "It depends on the payment. Rent is held by GetRentos and released to your landlord on schedule. A deposit on a home or land you're buying is held by GetRentos and only released to the seller once you confirm you've received it (for land, once the conveyance steps are confirmed); it is never released on a timer. If something is wrong, raise a dispute and the money stays held until it is resolved.",
+      "It depends on the payment. Rent is held by Sureground and released to your landlord on schedule. A deposit on a home or land you're buying is held by Sureground and only released to the seller once you confirm you've received it (for land, once the conveyance steps are confirmed); it is never released on a timer. If something is wrong, raise a dispute and the money stays held until it is resolved.",
   },
   {
     question: 'How do I contact someone about my account?',
@@ -44,7 +44,7 @@ export default function HelpCenter() {
       <DetailScreenHeader
         eyebrow="Help centre"
         title="Help"
-        subtitle="Answers and ways to reach the GetRentos team"
+        subtitle="Answers and ways to reach the Sureground team"
         onBack={() => goBack()}
       />
 

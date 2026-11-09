@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { authFetch, safeCall, unwrap } from '@/lib/apiHelpers';
 
 /**
- * Whether GetRentos Flex is taking new plans (FLEX_NEW_PLANS_ENABLED on the API).
+ * Whether Sureground Flex is taking new plans (FLEX_NEW_PLANS_ENABLED on the API).
  * Counts as paused until the API says otherwise, so a failed check never
  * offers a sign-up the API would refuse. Existing plans are unaffected.
  */

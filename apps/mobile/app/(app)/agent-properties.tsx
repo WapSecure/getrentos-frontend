@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Building2, ShieldCheck } from 'lucide-react-native';
-import { Card, QueryState, Skeleton, Text, useTheme } from '@getrentos/ui-native';
+import { Card, QueryState, Skeleton, Text, useTheme } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { agentApi, type AgentAssignedProperty } from '@/lib/api/agent';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';

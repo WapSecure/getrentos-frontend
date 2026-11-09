@@ -16,7 +16,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   OFFER_STATUS,
@@ -143,7 +143,7 @@ export default function RealtorOfferDetail() {
                   tone={o.status === 'ACCEPTED' ? 'success' : 'info'}
                   message={
                     o.status === 'ACCEPTED'
-                      ? 'Your client accepted this offer. The buyer pays the deposit to GetRentos, which holds it until the buyer confirms receipt.'
+                      ? 'Your client accepted this offer. The buyer pays the deposit to Sureground, which holds it until the buyer confirms receipt.'
                       : 'This offer is settled and can’t be countered.'
                   }
                 />

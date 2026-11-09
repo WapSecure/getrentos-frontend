@@ -18,7 +18,7 @@ import {
   type BadgeVariant,
   useToast,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { AgencyPayoutSection } from './AgencyPayoutSection';

@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { MessageSquare, Clock, AlertCircle, CheckCircle, ArrowRight } from 'lucide-react';
-import { Button, Skeleton } from '@getrentos/ui';
+import { Button, Skeleton } from '@sureground/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';

@@ -13,7 +13,7 @@ import {
   Input,
   NumberInput,
   Select,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import type { LandAreaUnit } from '@/types/land';
 import { LAND_AREA_UNIT_LABELS } from '@/types/land';
 import type { LandPlot, LandPlotInput, LandPlotUpdateInput } from '@/types/landDeveloper';

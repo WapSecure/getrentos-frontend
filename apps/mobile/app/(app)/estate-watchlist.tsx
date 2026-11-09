@@ -26,7 +26,7 @@ import {
   toISODate,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { ReasonSheet } from '@/components/homecare/ReasonSheet';
 import { StatusPill } from '@/components/host/HostUI';

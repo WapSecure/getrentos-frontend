@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { Briefcase } from 'lucide-react';
-import { Button, CardSkeleton, EmptyState, ThemeToggle } from '@getrentos/ui';
+import { Button, CardSkeleton, EmptyState, ThemeToggle } from '@sureground/ui';
 import { Logo } from '@/components/ui/Logo';
 import { AccountMenu } from '@/components/shared/navigation/AccountMenu';
 import { ROLES, getDashboardRoute, resolvePrimaryRoleId } from '@/lib/constants/auth';

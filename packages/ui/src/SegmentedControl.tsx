@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, type KeyboardEvent, type ReactNode } from 'react';
-import { cn } from '@getrentos/shared';
+import { cn } from '@sureground/shared';
 
 export interface Segment<T extends string> {
   value: T;

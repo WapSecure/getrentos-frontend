@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { Milestone } from 'lucide-react';
-import { Badge, Button, ConfirmDialog } from '@getrentos/ui';
-import { formatCurrency, formatDate } from '@getrentos/shared';
+import { Badge, Button, ConfirmDialog } from '@sureground/ui';
+import { formatCurrency, formatDate } from '@sureground/shared';
 import type { LandEscrowRelease, LandMilestone } from '@/types/landPurchase';
 import { bpsToPercent } from '@/lib/landDiligence';
 import { LandCaseSection, PanelMessage } from '@/components/admin/land/case/shared';

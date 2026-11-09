@@ -12,7 +12,7 @@ import {
   Select,
   Textarea,
   DatePicker,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import {
   LAND_TITLE_EVENT_KINDS,
   type LandTitleEventInput,

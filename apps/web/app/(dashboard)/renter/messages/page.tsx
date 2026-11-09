@@ -24,7 +24,7 @@ import {
   Pagination,
   useOptimisticMutation,
   useToast,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { useOpenConversationFromUrl } from '@/hooks/useOpenConversationFromUrl';
 
 export default function MessagesPage() {

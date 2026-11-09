@@ -8,7 +8,7 @@ export interface MessagingConsent {
   consentedAt: string | null;
   /** They agreed for an older number; texts stop until they agree for this one. */
   numberChanged: boolean;
-  /** The number to message for Ask GetRentos on WhatsApp; null until the chat is set up. */
+  /** The number to message for Ask Sureground on WhatsApp; null until the chat is set up. */
   whatsappChatNumber?: string | null;
 }
 

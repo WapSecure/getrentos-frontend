@@ -20,7 +20,7 @@ import {
   type BadgeVariant,
   useToast,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import {
@@ -127,7 +127,7 @@ export function AgencyProtectionView() {
               <Input
                 value={form.schemeName}
                 onChange={(e) => setForm((f) => ({ ...f, schemeName: e.target.value }))}
-                placeholder="e.g. GetRentos Client Money Protection"
+                placeholder="e.g. Sureground Client Money Protection"
               />
             </Field>
             <Field label="Membership / policy number">

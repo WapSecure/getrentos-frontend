@@ -13,7 +13,7 @@ import {
   Skeleton,
   Text,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { referralsApi, type ReferredUser } from '@/lib/api/referrals';
 import { formatDate } from '@/lib/format';
@@ -31,7 +31,7 @@ export default function Referrals() {
   const share = () => {
     if (!query.data) return;
     Share.share({
-      message: `Join me on GetRentos: the safer way to rent, buy and manage property. Use my code ${query.data.code} when you sign up.`,
+      message: `Join me on Sureground: the safer way to rent, buy and manage property. Use my code ${query.data.code} when you sign up.`,
     }).catch(() => undefined);
   };
 

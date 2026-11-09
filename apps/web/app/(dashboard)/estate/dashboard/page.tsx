@@ -28,7 +28,7 @@ import {
   StatCard,
   StatGridSkeleton,
   Skeleton,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { ROUTES } from '@/lib/constants/auth';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { estateService } from '@/services/estateService';

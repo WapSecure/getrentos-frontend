@@ -1,7 +1,7 @@
 'use client';
 
 import { Plus } from 'lucide-react';
-import { Button, PageHeader } from '@getrentos/ui';
+import { Button, PageHeader } from '@sureground/ui';
 import { ROUTES } from '@/lib/constants/auth';
 
 interface RealtorDashboardHeaderProps {

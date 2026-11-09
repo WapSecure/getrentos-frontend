@@ -1,7 +1,7 @@
 'use client';
 
 import { Users, UserCheck, UserX, UserPlus } from 'lucide-react';
-import { StatCard } from '@getrentos/ui';
+import { StatCard } from '@sureground/ui';
 
 interface Roommate {
   id: string;

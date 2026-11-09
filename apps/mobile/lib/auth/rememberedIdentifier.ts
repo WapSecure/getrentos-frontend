@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const KEY = 'getrentos.rememberedIdentifier';
+const KEY = 'sureground.rememberedIdentifier';
 
 export async function getRememberedIdentifier(): Promise<string> {
   try {

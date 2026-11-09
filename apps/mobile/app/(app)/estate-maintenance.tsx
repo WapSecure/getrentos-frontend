@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Wrench } from 'lucide-react-native';
-import { Button, useTheme, useToast } from '@getrentos/ui-native';
+import { Button, useTheme, useToast } from '@sureground/ui-native';
 import { CloseSheet, QueueCard, QueueScreen, type QueueView } from '@/components/estate/Triage';
 import { ReportDigestCard } from '@/components/estate/ReportDigestCard';
 import { useEstate } from '@/hooks/useEstate';

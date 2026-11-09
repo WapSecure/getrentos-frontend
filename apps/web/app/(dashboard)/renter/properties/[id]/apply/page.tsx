@@ -11,7 +11,7 @@ import {
   PageLoadingState,
   clearSessionDraft,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import {
   ApplicationWizard,
   applicationDraftKey,
@@ -23,7 +23,7 @@ import type { Property } from '@/types/renter';
 import { renterService } from '@/services/renterService';
 import { kycService } from '@/services/kycService';
 import { unwrap, unwrapOptional, ApiError } from '@/lib/apiHelpers';
-import { applyLastApplication } from '@getrentos/shared';
+import { applyLastApplication } from '@sureground/shared';
 import { renterKeys } from '@/lib/queryKeys';
 import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
 

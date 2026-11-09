@@ -12,7 +12,7 @@ import {
   Field,
   Input,
   Textarea,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 
 interface InviteRoommateModalProps {
   isOpen: boolean;
@@ -65,7 +65,7 @@ export const InviteRoommateModal = ({ isOpen, onClose, onInvite }: InviteRoommat
             <Textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="Hi! I'd like to invite you to join my household on GetRentos..."
+              placeholder="Hi! I'd like to invite you to join my household on Sureground..."
               rows={4}
             />
           </Field>

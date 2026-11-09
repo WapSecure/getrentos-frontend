@@ -7,7 +7,7 @@ import { RealtorStatsCards } from '@/components/realtor/dashboard/RealtorStatsCa
 import { RealtorActivityFeed } from '@/components/realtor/dashboard/RealtorActivityFeed';
 import { RealtorQuickActions } from '@/components/realtor/dashboard/RealtorQuickActions';
 import { useQuery } from '@tanstack/react-query';
-import { PageErrorState, Skeleton, StatGridSkeleton } from '@getrentos/ui';
+import { PageErrorState, Skeleton, StatGridSkeleton } from '@sureground/ui';
 import { realtorService } from '@/services/realtorService';
 import { realtorKeys } from '@/lib/queryKeys';
 import { unwrap } from '@/lib/apiHelpers';

@@ -1,7 +1,7 @@
 'use client';
 
 import { UserCheck, CheckCircle2, XCircle, CloudOff, Cloud } from 'lucide-react';
-import { Badge, Card } from '@getrentos/ui';
+import { Badge, Card } from '@sureground/ui';
 import { formatDate } from '@/lib/format';
 import type { VerificationVisit } from '@/types/agent';
 

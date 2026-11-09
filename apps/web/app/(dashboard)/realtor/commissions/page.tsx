@@ -14,7 +14,7 @@ import {
   TableSkeleton,
   type BadgeVariant,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorService } from '@/services/realtorService';
@@ -92,7 +92,7 @@ export default function RealtorCommissionsPage() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `getrentos-commissions-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.download = `sureground-commissions-${new Date().toISOString().slice(0, 10)}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

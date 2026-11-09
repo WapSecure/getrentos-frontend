@@ -1,8 +1,8 @@
 'use client';
 
 import { MessageSquare } from 'lucide-react';
-import { EmptyState, ListSkeleton, SearchInput } from '@getrentos/ui';
-import { getInitials, formatRelativeTime } from '@getrentos/shared';
+import { EmptyState, ListSkeleton, SearchInput } from '@sureground/ui';
+import { getInitials, formatRelativeTime } from '@sureground/shared';
 
 export interface Conversation {
   id: string;

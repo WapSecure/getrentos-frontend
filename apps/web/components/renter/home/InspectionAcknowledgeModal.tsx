@@ -12,7 +12,7 @@ import {
   Field,
   Textarea,
   type BadgeVariant,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 import type { RenterInspection, RenterRoomCondition } from '@/types/renter';
 

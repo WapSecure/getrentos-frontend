@@ -14,8 +14,8 @@ import {
   Input,
   Select,
   useToast,
-} from '@getrentos/ui';
-import { unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { unwrap } from '@sureground/shared';
 import { adminEstateService } from '@/services/adminEstateService';
 import type { AdminEstateHouseholdQueue, AdminEstateDueQueue } from '@/types/estate';
 

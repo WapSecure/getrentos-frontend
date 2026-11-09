@@ -25,14 +25,14 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import {
   LAND_BOUNDARY_LABELS,
   LAND_INSPECTION_KIND_LABELS,
   landPoint,
   type LandBoundaryCondition,
   describeDistance,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import { qk } from '@/lib/query/keys';
 import { landWatchApi } from '@/lib/api/landWatch';
 import { errorMessage } from '@/lib/api/client';
@@ -144,7 +144,7 @@ export default function LandInspectionJob() {
             <>
               {job.staffNote ? (
                 <Card style={{ backgroundColor: colors.secondary }}>
-                  <Text variant="callout">GetRentos asks: {job.staffNote}</Text>
+                  <Text variant="callout">Sureground asks: {job.staffNote}</Text>
                 </Card>
               ) : null}
               <Card elevated style={{ gap: spacing.sm }}>
@@ -286,7 +286,7 @@ function ReportForm({
       });
     },
     onSuccess: () => {
-      toast.show('Report filed. GetRentos reviews it before the owner sees it.', 'success');
+      toast.show('Report filed. Sureground reviews it before the owner sees it.', 'success');
       onFiled();
     },
     onError: (err) => toast.show(errorMessage(err, 'That didn’t go through. Try again.'), 'error'),

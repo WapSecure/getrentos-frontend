@@ -15,7 +15,7 @@ import {
   Skeleton,
   ToggleChip,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { ListState } from '@/components/shared/ListState';

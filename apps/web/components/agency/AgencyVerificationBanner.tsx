@@ -7,7 +7,7 @@ import { ShieldAlert } from 'lucide-react';
 import { agencyOnboardingService } from '@/services/agencyOnboardingService';
 
 /**
- * Says, on every agency screen, when GetRentos has not verified the firm yet:
+ * Says, on every agency screen, when Sureground has not verified the firm yet:
  * the firm can work, but payouts and the owners' directory wait on it.
  * Nothing shows for a verified firm, or for staff of a firm they do not own.
  */
@@ -26,11 +26,11 @@ export function AgencyVerificationBanner() {
   const kyb = data.profile?.kybStatus ?? 'NOT_SUBMITTED';
   const message =
     data.status === 'SUSPENDED'
-      ? 'GetRentos has suspended this firm. Contact support.'
+      ? 'Sureground has suspended this firm. Contact support.'
       : kyb === 'SUBMITTED'
-        ? 'GetRentos is verifying your firm. Payouts and the owners’ directory open once it’s approved.'
+        ? 'Sureground is verifying your firm. Payouts and the owners’ directory open once it’s approved.'
         : kyb === 'REJECTED'
-          ? 'Your verification needs changes before GetRentos can approve it.'
+          ? 'Your verification needs changes before Sureground can approve it.'
           : 'Finish your firm’s business verification to receive payouts and appear to owners.';
 
   return (

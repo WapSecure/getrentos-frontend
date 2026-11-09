@@ -1,4 +1,4 @@
-import type { StepUpMethod } from '@getrentos/shared';
+import type { StepUpMethod } from '@sureground/shared';
 
 /** The person's own sign-in security (backend /users/me/security), for every role. */
 export interface SecurityOverview {

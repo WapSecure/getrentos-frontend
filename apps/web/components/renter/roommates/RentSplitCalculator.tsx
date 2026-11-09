@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Calculator } from 'lucide-react';
-import { Card, CurrencyInput, Field, NumberInput, SegmentedControl } from '@getrentos/ui';
+import { Card, CurrencyInput, Field, NumberInput, SegmentedControl } from '@sureground/ui';
 
 interface Roommate {
   id: string;

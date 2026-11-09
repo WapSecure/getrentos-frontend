@@ -10,7 +10,7 @@ import {
   Pagination,
   StatGridSkeleton,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { getInitials, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { agentService } from '@/services/agentService';

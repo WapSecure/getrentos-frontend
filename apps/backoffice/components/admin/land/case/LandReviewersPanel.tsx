@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { ChevronDown, ChevronUp, UserRoundPlus, UsersRound } from 'lucide-react';
-import { Badge, Button, ConfirmDialog, ListSkeleton, type BadgeVariant } from '@getrentos/ui';
-import { formatDate, unwrap } from '@getrentos/shared';
+import { Badge, Button, ConfirmDialog, ListSkeleton, type BadgeVariant } from '@sureground/ui';
+import { formatDate, unwrap } from '@sureground/shared';
 import { adminLandService } from '@/services/adminLandService';
 import type { InviteLandReviewerInput, LandDiligenceCheck, LandReviewerSeat } from '@/types/land';
 import { humaniseEnum, landQueryKeys } from '@/lib/landDiligence';

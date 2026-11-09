@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { humaniseEnum } from '@getrentos/shared';
+import { humaniseEnum } from '@sureground/shared';
 import { Alert, Pressable, RefreshControl, View } from 'react-native';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -16,7 +16,7 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   landlordApi,

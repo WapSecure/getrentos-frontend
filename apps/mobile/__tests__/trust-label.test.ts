@@ -1,4 +1,4 @@
-import { tokenSubject, trustChainLabel } from '@getrentos/shared';
+import { tokenSubject, trustChainLabel } from '@sureground/shared';
 
 const chain = (met: Record<string, boolean>) => ({
   steps: ['owner', 'authority', 'property', 'payment'].map((id) => ({

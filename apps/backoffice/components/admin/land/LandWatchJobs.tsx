@@ -25,7 +25,7 @@ import {
   Textarea,
   useToast,
   type PendingUpload,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import {
   formatCurrency,
   formatDate,
@@ -35,7 +35,7 @@ import {
   type LandWatchJobQuote,
   type LandWatchJobStatus,
   type StaffLandWatchJob,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import { readLandApiError } from '@/lib/landDiligence';
 import { adminLandWatchService } from '@/services/adminLandWatchService';
 

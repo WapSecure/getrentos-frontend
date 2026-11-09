@@ -9,7 +9,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import {
   PropertyValueFields,
   toOptionalAmount,

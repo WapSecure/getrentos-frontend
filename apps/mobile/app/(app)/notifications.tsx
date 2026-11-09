@@ -25,7 +25,7 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { routeForActionUrl } from '@/lib/notificationRoutes';
 import { qk } from '@/lib/query/keys';
 import { useOptimisticMutation } from '@/lib/query/optimistic';

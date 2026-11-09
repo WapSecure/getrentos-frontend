@@ -1,7 +1,7 @@
 'use client';
 
 import { CreditCard, Download, Shield } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button } from '@sureground/ui';
 import { RenterPageHeader } from '../shared/RenterPageHeader';
 
 interface PaymentsHeaderProps {
@@ -32,7 +32,7 @@ export const PaymentsHeader = ({ onExport }: PaymentsHeaderProps) => {
         <div className="flex max-w-3xl items-start gap-2 text-sm text-muted-foreground">
           <Shield className="mt-0.5 h-4 w-4 shrink-0 text-success" aria-hidden="true" />
           <p>
-            GetRentos Payment Protection: on a new lease, your first rent is held until you confirm
+            Sureground Payment Protection: on a new lease, your first rent is held until you confirm
             move-in. Other payments are released to your landlord on the release date shown with
             each payment.
           </p>

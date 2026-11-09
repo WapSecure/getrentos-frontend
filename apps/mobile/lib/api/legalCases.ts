@@ -1,5 +1,5 @@
 import { apiFetch } from './client';
-import type { BadgeTone } from '@getrentos/ui-native';
+import type { BadgeTone } from '@sureground/ui-native';
 
 /**
  * Legal cases: eviction, rent and debt recovery, injunctions, title disputes.

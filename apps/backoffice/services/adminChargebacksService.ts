@@ -1,4 +1,4 @@
-import { authFetch, safeCall, type ApiResponse } from '@getrentos/shared';
+import { authFetch, safeCall, type ApiResponse } from '@sureground/shared';
 
 /** One card chargeback as finance sees it. Amounts are whole naira. */
 export interface Chargeback {
@@ -11,7 +11,7 @@ export interface Chargeback {
   status: 'OPEN' | 'WON' | 'LOST';
   providerStatus: string;
   dueAt: string | null;
-  /** HELD: GetRentos still held the money when it opened. RELEASED: it had gone to the receiver. */
+  /** HELD: Sureground still held the money when it opened. RELEASED: it had gone to the receiver. */
   moneyAtOpen: string;
   heldInBalanceOf: { ownerId: string; organizationId: string | null } | null;
   frozenCount: number;
@@ -38,7 +38,7 @@ export const adminChargebacksService = {
   list(status: 'OPEN' | 'DECIDED'): Promise<ApiResponse<Chargeback[]>> {
     return safeCall(() => authFetch<Chargeback[]>(`/admin/chargebacks?status=${status}`));
   },
-  /** Monnify does not notify GetRentos of card disputes. Needs step-up; the shared dialog asks for it. */
+  /** Monnify does not notify Sureground of card disputes. Needs step-up; the shared dialog asks for it. */
   recordMonnify(
     input: RecordMonnifyDisputeInput
   ): Promise<ApiResponse<{ id: string; moneyAtOpen: string }>> {

@@ -4,12 +4,12 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Send } from 'lucide-react-native';
-import { Button, RadioGroup, Text, TextField, useTheme, useToast } from '@getrentos/ui-native';
+import { Button, RadioGroup, Text, TextField, useTheme, useToast } from '@sureground/ui-native';
 import {
   LAND_WATCH_JOB_KIND_LABELS,
   LAND_WATCH_JOB_PAYMENT_NOTE,
   type LandWatchJobKind,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import { qk } from '@/lib/query/keys';
 import { landWatchApi } from '@/lib/api/landWatch';
 import { errorMessage } from '@/lib/api/client';
@@ -28,7 +28,7 @@ const KINDS: { value: LandWatchJobKind; description: string }[] = [
 const MIN = 10;
 const MAX = 2000;
 
-/** Ask GetRentos to find vendors for work on a Managed watch. */
+/** Ask Sureground to find vendors for work on a Managed watch. */
 export default function LandWatchJobNew() {
   const { watchId } = useLocalSearchParams<{ watchId: string }>();
   const { colors, spacing } = useTheme();

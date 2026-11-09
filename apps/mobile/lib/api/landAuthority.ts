@@ -4,14 +4,14 @@ import type {
   LandAuthorityView,
   LandSellerCapacity,
   LandSignatoryRole,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import { apiFetch } from './client';
 
 /**
  * The seller's authority to sell a land parcel: the capacity they sell in, the
  * instrument it rests on, and whose consent it needs. Land review cannot be
- * approved until GetRentos has verified it. Types and wording come from
- * @getrentos/shared so web and mobile read a claim the same way.
+ * approved until Sureground has verified it. Types and wording come from
+ * @sureground/shared so web and mobile read a claim the same way.
  */
 
 export interface DeclareAuthorityInput {
@@ -27,7 +27,7 @@ export interface AddSignatoryInput {
   role: LandSignatoryRole;
   fullName: string;
   phone?: string;
-  /** Their GetRentos email, so they can answer from their own account. */
+  /** Their Sureground email, so they can answer from their own account. */
   email?: string;
 }
 

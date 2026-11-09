@@ -11,7 +11,7 @@ import {
   ConfirmDialog,
   Pagination,
   type BadgeVariant,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { ROUTES } from '@/lib/constants/auth';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap, unwrapOptional } from '@/lib/apiHelpers';
@@ -39,7 +39,7 @@ import {
   withdrawStepUpSummary,
   withStepUpSummary,
   type AccountLookup,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 
 const PAGE_SIZE = 5;
 

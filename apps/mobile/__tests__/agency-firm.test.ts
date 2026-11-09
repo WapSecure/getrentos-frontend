@@ -143,7 +143,7 @@ describe('firm setup and joining', () => {
   });
 
   it('takes the token from a pasted link or the token itself', () => {
-    expect(tokenFrom('https://getrentos.com/agency/join?token=abc%2B1&x=2')).toBe('abc+1');
+    expect(tokenFrom('https://getsureground.io/agency/join?token=abc%2B1&x=2')).toBe('abc+1');
     expect(tokenFrom('  plain-token ')).toBe('plain-token');
   });
 });

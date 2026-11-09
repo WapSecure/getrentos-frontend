@@ -1,7 +1,7 @@
 'use client';
 
 import { Repeat } from 'lucide-react';
-import { Badge, Button } from '@getrentos/ui';
+import { Badge, Button } from '@sureground/ui';
 import type { Due } from '@/types/estate';
 
 const statusVariant: Record<Due['status'], 'success' | 'warning' | 'danger'> = {

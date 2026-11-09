@@ -13,7 +13,7 @@ import {
   RadioGroup,
   Textarea,
   TimePicker,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import type { BuyerPropertyListing } from '@/types/buyer';
 import { PaginatedSelect } from '@/components/ui/PaginatedSelect';
 import { unwrap } from '@/lib/apiHelpers';

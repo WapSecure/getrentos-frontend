@@ -12,7 +12,7 @@ import {
   DialogTitle,
   Field,
   Input,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { formatCurrency, getInitials } from '@/lib/format';
 import type { SaleOffer, OfferMessage } from '@/types/owner';
 

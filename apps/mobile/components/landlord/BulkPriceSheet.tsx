@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Check } from 'lucide-react-native';
-import { Button, NumberField, Text, useTheme, useToast } from '@getrentos/ui-native';
+import { Button, NumberField, Text, useTheme, useToast } from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { landlordApi, type LandlordUnit } from '@/lib/api/landlord';
 import { errorMessage } from '@/lib/api/client';

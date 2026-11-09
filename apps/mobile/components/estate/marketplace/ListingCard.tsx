@@ -1,7 +1,7 @@
 import { Pressable, View } from 'react-native';
 import { Image } from 'expo-image';
 import { ChevronRight, Home } from 'lucide-react-native';
-import { Card, Price, Text, useTheme } from '@getrentos/ui-native';
+import { Card, Price, Text, useTheme } from '@sureground/ui-native';
 import { StatusPill } from '@/components/host/HostUI';
 import {
   listingName,

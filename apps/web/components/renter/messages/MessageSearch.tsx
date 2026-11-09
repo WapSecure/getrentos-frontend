@@ -1,6 +1,6 @@
 'use client';
 
-import { SearchInput } from '@getrentos/ui';
+import { SearchInput } from '@sureground/ui';
 
 interface MessageSearchProps {
   searchTerm: string;

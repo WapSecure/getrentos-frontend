@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { View } from 'react-native';
-import { Button, Chip, Text, TextField, useTheme } from '@getrentos/ui-native';
+import { Button, Chip, Text, TextField, useTheme } from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import type { Roommate } from '@/lib/api/roommates';
 

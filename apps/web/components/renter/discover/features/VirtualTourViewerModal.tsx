@@ -11,7 +11,7 @@ import {
   DialogDescription,
   DialogTitle,
   EmptyState,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { DateTimeField, isFutureDateTime } from '@/components/shared/forms/DateTimeField';

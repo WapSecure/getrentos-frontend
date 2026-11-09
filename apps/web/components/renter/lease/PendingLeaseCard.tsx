@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { Clock, FileSignature, FileText, Lock, Wallet } from 'lucide-react';
-import { Alert, Button, Card, Checkbox, SignaturePad } from '@getrentos/ui';
-import { formatCurrency, formatDate } from '@getrentos/shared';
+import { Alert, Button, Card, Checkbox, SignaturePad } from '@sureground/ui';
+import { formatCurrency, formatDate } from '@sureground/shared';
 import { leaseRentLabel } from '@/lib/leaseTerm';
 import { renterService, type PendingLease } from '@/services/renterService';
 
@@ -42,7 +42,7 @@ export const PendingLeaseCard = ({ lease, onSign, isPending }: PendingLeaseCardP
     stage === 'awaiting_payment'
       ? 'Pay the first rent to keep your lease'
       : stage === 'awaiting_landlord'
-        ? 'Payment held by GetRentos'
+        ? 'Payment held by Sureground'
         : 'A lease is waiting for your signature';
 
   return (
@@ -102,21 +102,21 @@ export const PendingLeaseCard = ({ lease, onSign, isPending }: PendingLeaseCardP
         >
           <p className="text-xs">
             {lease.amountDue !== undefined
-              ? `${formatCurrency(lease.amountDue)} must be paid to GetRentos before the lease can proceed.`
-              : 'The first payment must be paid to GetRentos before the lease can proceed.'}
+              ? `${formatCurrency(lease.amountDue)} must be paid to Sureground before the lease can proceed.`
+              : 'The first payment must be paid to Sureground before the lease can proceed.'}
             {lease.paymentDueAt && ` Due by ${formatDeadline(lease.paymentDueAt)}.`} If it is not
             paid by then the lease lapses on its own and the property goes back on the market.
-            GetRentos holds your money and releases it to the landlord when you confirm move-in, or
+            Sureground holds your money and releases it to the landlord when you confirm move-in, or
             on its scheduled release date if you don&apos;t raise a dispute first.
           </p>
         </Alert>
       )}
 
       {stage === 'awaiting_landlord' && (
-        <Alert variant="success" className="mx-5 mt-5" title="GetRentos is holding your payment.">
+        <Alert variant="success" className="mx-5 mt-5" title="Sureground is holding your payment.">
           <p className="text-xs">
             The landlord has been asked to confirm handover. The lease becomes fully executed once
-            they do, and GetRentos keeps holding the money until after that.
+            they do, and Sureground keeps holding the money until after that.
           </p>
         </Alert>
       )}
@@ -125,7 +125,8 @@ export const PendingLeaseCard = ({ lease, onSign, isPending }: PendingLeaseCardP
         <Alert variant="neutral" icon={Clock} className="mx-5 mt-5">
           <p className="text-xs">
             Read the terms, then sign. Nothing is owed until your signature is on the lease: after
-            that, you pay the first rent to GetRentos, which holds it while the landlord hands over.
+            that, you pay the first rent to Sureground, which holds it while the landlord hands
+            over.
           </p>
         </Alert>
       )}

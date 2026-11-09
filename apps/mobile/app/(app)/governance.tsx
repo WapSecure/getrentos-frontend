@@ -15,7 +15,7 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { SignaturePad } from '@/components/SignaturePad';
 import { residentApi, type GovernanceRecord, type GovernanceRecordType } from '@/lib/api/resident';

@@ -11,7 +11,7 @@ import { HomeManagementPortfolioAnalytics } from '@/components/home-management/H
 import { HomeManagementRecordsPanel } from '@/components/home-management/HomeManagementRecordsPanel';
 import { HomeManagementTimeline } from '@/components/home-management/HomeManagementTimeline';
 import { HomeManagementVendorPerformance } from '@/components/home-management/HomeManagementVendorPerformance';
-import { EmptyState, Skeleton } from '@getrentos/ui';
+import { EmptyState, Skeleton } from '@sureground/ui';
 import dynamic from 'next/dynamic';
 import { unwrap } from '@/lib/apiHelpers';
 import { homeManagementKeys } from '@/lib/queryKeys';

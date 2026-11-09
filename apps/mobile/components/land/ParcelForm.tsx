@@ -13,7 +13,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   LAND_AREA_UNITS,
@@ -32,7 +32,7 @@ import {
   boundaryGeometry,
   boundarySignOffText,
   type BoundaryCorner,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 
 /** The parcel's facts and outline: what diligence reviews. */
 const orUndefined = (v: string) => (v.trim() ? v.trim() : undefined);

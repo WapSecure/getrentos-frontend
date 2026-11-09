@@ -13,7 +13,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   emailOk,
@@ -187,7 +187,7 @@ function AppointForm() {
     <Card style={{ gap: spacing.md }}>
       <Text variant="heading">Appoint someone</Text>
       <Text variant="caption" color="mutedForeground">
-        They need a GetRentos account, and must verify their identity before they can approve
+        They need a Sureground account, and must verify their identity before they can approve
         payments. They accept the appointment themselves.
       </Text>
       <TextField

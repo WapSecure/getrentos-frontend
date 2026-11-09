@@ -12,8 +12,8 @@ import {
   Skeleton,
   Text,
   useTheme,
-} from '@getrentos/ui-native';
-import { LAND_WATCH_TIER_LABELS } from '@getrentos/shared';
+} from '@sureground/ui-native';
+import { LAND_WATCH_TIER_LABELS } from '@sureground/shared';
 import { qk } from '@/lib/query/keys';
 import { landWatchApi } from '@/lib/api/landWatch';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';

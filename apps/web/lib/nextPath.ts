@@ -30,7 +30,7 @@ export function currentPath(): string {
 
 // Sign-up spans several pages (details, code, roles), so the return path is
 // kept for the tab while it runs.
-const SIGNUP_NEXT_KEY = 'getrentos:signup:next';
+const SIGNUP_NEXT_KEY = 'sureground:signup:next';
 
 export function rememberSignupNext(next: string | null | undefined) {
   if (typeof window === 'undefined') return;

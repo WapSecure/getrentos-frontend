@@ -1,6 +1,6 @@
 'use client';
 
-import { Badge, type BadgeVariant } from '@getrentos/ui';
+import { Badge, type BadgeVariant } from '@sureground/ui';
 import { ClipboardCheck, AlertTriangle } from 'lucide-react';
 import {
   INSPECTION_STATUS_LABELS,

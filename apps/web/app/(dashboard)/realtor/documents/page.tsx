@@ -17,7 +17,7 @@ import {
   TabsTrigger,
   useToast,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { formatDate } from '@/lib/format';
 import type { RealtorDocument } from '@/types/realtor';
 import { unwrap } from '@/lib/apiHelpers';

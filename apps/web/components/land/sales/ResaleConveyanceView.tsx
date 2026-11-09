@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Breadcrumbs, Card, PageErrorState, PageHeader, Skeleton } from '@getrentos/ui';
+import { Breadcrumbs, Card, PageErrorState, PageHeader, Skeleton } from '@sureground/ui';
 import { Info } from 'lucide-react';
-import { ROUTES } from '@getrentos/shared';
+import { ROUTES } from '@sureground/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { landDeveloperKeys } from '@/lib/landDeveloperQueryKeys';
 import { landDeveloperService } from '@/services/landDeveloperService';
@@ -101,7 +101,7 @@ export const ResaleConveyanceView = ({ txId }: { txId: string }) => {
           <h2 className="font-semibold text-foreground">Conditions of the sale</h2>
           <p className="mb-4 mt-1 text-sm text-muted-foreground">
             The payment is not released while any condition is open. Mark the ones you deliver as
-            met; GetRentos checked the rest against the record. A condition missed by its deadline
+            met; Sureground checked the rest against the record. A condition missed by its deadline
             lets the buyer cancel with a full refund.
           </p>
           <ConditionsPanel

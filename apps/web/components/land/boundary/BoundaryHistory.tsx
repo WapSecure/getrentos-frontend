@@ -13,14 +13,14 @@ import {
   EmptyState,
   ListSkeleton,
   PageErrorState,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import {
   BOUNDARY_SOURCE_LABEL,
   boundarySignOffText,
   type LandBoundarySignOff,
   type LandBoundaryStatus,
   type LandBoundaryVersion,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import { formatArea } from '@/components/maps/ParcelBoundaryMap';
 import { landKeys } from '@/lib/queryKeys';
 import { unwrap } from '@/lib/apiHelpers';

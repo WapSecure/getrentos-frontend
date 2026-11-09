@@ -14,7 +14,7 @@ import {
   TabsList,
   TabsTrigger,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 
 import { unwrap } from '@/lib/apiHelpers';
 import {
@@ -28,7 +28,7 @@ const KIND: Record<
   { label: string; icon: typeof Wrench; variant: 'info' | 'neutral' | 'success' | 'warning' }
 > = {
   MANAGER: { label: 'Manager', icon: Wrench, variant: 'info' },
-  GETRENTOS: { label: 'GetRentos', icon: ShieldCheck, variant: 'success' },
+  SUREGROUND: { label: 'Sureground', icon: ShieldCheck, variant: 'success' },
   TENANT: { label: 'Tenant', icon: UserRound, variant: 'neutral' },
   SYSTEM: { label: 'Automatic', icon: Bot, variant: 'neutral' },
   OTHER: { label: 'Other', icon: UserRound, variant: 'neutral' },
@@ -51,7 +51,7 @@ const timeOf = (iso: string) =>
   });
 
 /**
- * The owner's activity log: what managers, GetRentos, tenants and automatic
+ * The owner's activity log: what managers, Sureground, tenants and automatic
  * jobs have done on their properties, newest first. The owner's own actions are
  * left out, and nothing is shown beyond who, what, where and when.
  */
@@ -80,7 +80,7 @@ export const PropertyActivityLog = () => {
     <>
       <PageHeader
         title="Activity log"
-        description="What your managers, GetRentos, tenants and automatic jobs have done on your properties. Your own actions are not listed."
+        description="What your managers, Sureground, tenants and automatic jobs have done on your properties. Your own actions are not listed."
       />
 
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center">

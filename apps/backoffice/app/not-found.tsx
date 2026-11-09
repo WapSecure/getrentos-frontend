@@ -2,8 +2,8 @@
 
 import { ArrowLeft, LayoutDashboard, SearchX } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { Button, Logo } from '@getrentos/ui';
-import { ROUTES } from '@getrentos/shared';
+import { Button, Logo } from '@sureground/ui';
+import { ROUTES } from '@sureground/shared';
 
 export default function NotFound() {
   const router = useRouter();

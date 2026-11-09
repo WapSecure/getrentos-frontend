@@ -17,8 +17,8 @@ import {
   Textarea,
   useToast,
   PageHeader,
-} from '@getrentos/ui';
-import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { formatCurrency, formatDate, unwrap } from '@sureground/shared';
 import { useAdminUser } from '../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
 import {
@@ -44,7 +44,7 @@ const STATUS: Record<
 const REQUESTED_AS: Record<CreditRefund['requestedAs'], string> = {
   TENANT: 'the tenant',
   MANAGER: 'the owner or manager',
-  ADMIN: 'GetRentos',
+  ADMIN: 'Sureground',
 };
 
 /**

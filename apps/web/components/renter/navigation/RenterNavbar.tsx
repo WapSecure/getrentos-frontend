@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Menu, X } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
-import { IconButton, Input, ThemeToggle } from '@getrentos/ui';
+import { IconButton, Input, ThemeToggle } from '@sureground/ui';
 import { LanguageToggle } from '@/components/ui/LanguageToggle';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { RenterProfileDropdown } from './RenterProfileDropdown';

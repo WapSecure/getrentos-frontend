@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { Loader2, AlertCircle, ShieldCheck } from 'lucide-react';
-import { Button, Field, NumberInput } from '@getrentos/ui';
+import { Button, Field, NumberInput } from '@sureground/ui';
 import { saveAuthSession } from '@/lib/authStorage';
 import { ROUTES, getDashboardRoute, resolvePrimaryRoleId } from '@/lib/constants/auth';
 import { apiFetch } from '@/lib/apiClient';
@@ -180,7 +180,7 @@ function OAuthCallbackContent() {
             <Loader2 className="w-8 h-8 text-primary animate-spin motion-reduce:animate-none mx-auto mb-3" />
             <h1 className="text-lg font-semibold text-foreground">Completing sign-in…</h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Securely signing you into GetRentos.
+              Securely signing you into Sureground.
             </p>
           </div>
         )}

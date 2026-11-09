@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Pressable, StyleSheet, Text, useColorScheme, View } from 'react-native';
 import Constants from 'expo-constants';
 import type { ErrorBoundaryProps } from 'expo-router';
-import { getPalette } from '@getrentos/tokens';
+import { getPalette } from '@sureground/tokens';
 import { report } from '@/lib/analytics';
 
 /**
@@ -30,7 +30,7 @@ export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
         style={[styles.button, { backgroundColor: colors.primary }]}
         onPress={retry}
         accessibilityRole="button"
-        accessibilityLabel="Try loading GetRentos again"
+        accessibilityLabel="Try loading Sureground again"
       >
         <Text style={[styles.buttonText, { color: colors.primaryForeground }]}>Try again</Text>
       </Pressable>

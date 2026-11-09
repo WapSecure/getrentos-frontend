@@ -4,12 +4,12 @@ import { SITE_NAME } from '@/lib/site';
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: SITE_NAME,
-    short_name: 'GetRentos',
+    short_name: 'Sureground',
     description: 'Property services for renters, landlords, owners, buyers, realtors and agents.',
     start_url: '/',
     display: 'standalone',
     background_color: '#ffffff',
-    theme_color: '#0071e3',
+    theme_color: '#0057d9',
     icons: [
       {
         src: '/icon.svg',

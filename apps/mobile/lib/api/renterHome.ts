@@ -1,4 +1,4 @@
-import type { BadgeTone } from '@getrentos/ui-native';
+import type { BadgeTone } from '@sureground/ui-native';
 import { apiFetch } from './client';
 
 /** The tenant's deposit (web: components/renter/home/DepositSection.tsx). */
@@ -21,7 +21,7 @@ export interface DepositHold {
   id: string;
   amount: number;
   status: 'HELD' | 'PARTIALLY_RETURNED' | 'RETURNED';
-  heldByGetRentos: boolean;
+  heldBySureground: boolean;
   heldBy: string | null;
   takenAt: string;
   returnedAt: string | null;
@@ -41,7 +41,7 @@ export interface TenantDeposit {
   propertyTitle: string;
   unitName: string;
   agreedAmount: number;
-  paidThroughGetRentos: { amount: number; paid: boolean; paidDate: string | null } | null;
+  paidThroughSureground: { amount: number; paid: boolean; paidDate: string | null } | null;
   hold: DepositHold | null;
 }
 
@@ -107,13 +107,13 @@ export function verdictAlert(r: ContactVerdict): { tone: 'success' | 'error'; me
     case 'VERIFIED':
       return {
         tone: 'success',
-        message: `This is ${r.name}, ${r.role.toLowerCase()} for ${r.propertyTitle}. Even so, only pay rent in GetRentos.`,
+        message: `This is ${r.name}, ${r.role.toLowerCase()} for ${r.propertyTitle}. Even so, only pay rent in Sureground.`,
       };
     case 'NEVER_PAY_OUTSIDE':
       return {
         tone: 'error',
         message:
-          'Do not pay into any bank account, whoever asks. Your landlord and manager are paid by GetRentos; you pay only in GetRentos. If someone asked you to pay this account, report it below.',
+          'Do not pay into any bank account, whoever asks. Your landlord and manager are paid by Sureground; you pay only in Sureground. If someone asked you to pay this account, report it below.',
       };
     case 'INVALID':
       return { tone: 'error', message: r.message };
@@ -133,7 +133,7 @@ export const reportReady = (claimedToBe: string, description: string) =>
 export const DELETE_PHRASE = 'delete my account';
 export const deletePhraseOk = (typed: string) => typed.trim().toLowerCase() === DELETE_PHRASE;
 
-/** Getting a held deposit back, worked out by GetRentos (web: DepositSection's plan panel). */
+/** Getting a held deposit back, worked out by Sureground (web: DepositSection's plan panel). */
 export interface DepositPlan {
   leaseId: string;
   overview: string;

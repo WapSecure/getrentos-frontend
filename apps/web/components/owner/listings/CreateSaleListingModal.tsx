@@ -17,7 +17,7 @@ import {
   Input,
   NumberInput,
   Textarea,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { MarketPriceInsights } from '@/components/owner/listings/MarketPriceInsights';
 import type { OwnerProperty, SaleListing } from '@/types/owner';
 import { PaginatedSelect } from '@/components/ui/PaginatedSelect';

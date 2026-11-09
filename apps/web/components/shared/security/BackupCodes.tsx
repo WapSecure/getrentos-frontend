@@ -1,6 +1,6 @@
 'use client';
 
-import { Alert, Button, useToast } from '@getrentos/ui';
+import { Alert, Button, useToast } from '@sureground/ui';
 
 /**
  * Two-factor backup codes, shown once right after they are made. Each works a
@@ -21,13 +21,13 @@ export const BackupCodes = ({ codes, onDone }: { codes: string[]; onDone: () => 
 
   const download = () => {
     const url = URL.createObjectURL(
-      new Blob([`GetRentos two-factor backup codes\nEach code works once.\n\n${text}\n`], {
+      new Blob([`Sureground two-factor backup codes\nEach code works once.\n\n${text}\n`], {
         type: 'text/plain',
       })
     );
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'getrentos-backup-codes.txt';
+    link.download = 'sureground-backup-codes.txt';
     link.click();
     URL.revokeObjectURL(url);
   };

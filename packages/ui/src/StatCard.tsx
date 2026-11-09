@@ -1,6 +1,6 @@
 import { LucideIcon } from 'lucide-react';
-import { formatCurrency } from '@getrentos/shared';
-import { cn } from '@getrentos/shared';
+import { formatCurrency } from '@sureground/shared';
+import { cn } from '@sureground/shared';
 
 export type StatCardAccent = 'blue' | 'primary' | 'orange' | 'red' | 'purple' | 'emerald' | 'green';
 

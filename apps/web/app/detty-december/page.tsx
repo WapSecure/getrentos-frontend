@@ -8,10 +8,10 @@ import { SupportContact } from '@/components/shared/support/SupportContact';
 export const metadata: Metadata = {
   title: 'Detty December stays in Lagos, Abuja & beyond',
   description:
-    'Verified short stays for Detty December. GetRentos holds your payment until you arrive, shows the all-in price up front, and refunds you if the place is not as described.',
+    'Verified short stays for Detty December. Sureground holds your payment until you arrive, shows the all-in price up front, and refunds you if the place is not as described.',
   alternates: { canonical: '/detty-december' },
   openGraph: {
-    title: 'Detty December stays: booked safely on GetRentos',
+    title: 'Detty December stays: booked safely on Sureground',
     description:
       'Verified hosts, all-in prices, and your money held until you arrive. Book your December stay before the rush.',
     url: '/detty-december',
@@ -29,7 +29,7 @@ const PROMISES = [
   {
     icon: Lock,
     title: 'Your money is held until you arrive',
-    body: 'You pay GetRentos, not the host. The host is only paid after you check in.',
+    body: 'You pay Sureground, not the host. The host is only paid after you check in.',
   },
   {
     icon: ShieldCheck,

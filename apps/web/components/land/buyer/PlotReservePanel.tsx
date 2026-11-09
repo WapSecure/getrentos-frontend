@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Badge, Button, Checkbox } from '@getrentos/ui';
+import { Badge, Button, Checkbox } from '@sureground/ui';
 import {
   Clock,
   CornerDownRight,
@@ -265,7 +265,7 @@ export const PlotReservePanel = ({
         </li>
         <li className="flex gap-2">
           <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-success" aria-hidden />
-          GetRentos holds your payments and releases them to the developer only as you confirm each
+          Sureground holds your payments and releases them to the developer only as you confirm each
           conveyance step.
         </li>
       </ul>

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useSyncExternalStore } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const KEY = 'getrentos.onboardingSeen';
+const KEY = 'sureground.onboardingSeen';
 
 /*
  * One module-level value shared by every caller. Each screen used to keep its

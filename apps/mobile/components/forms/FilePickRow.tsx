@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { AlertTriangle, Check, FileText, type LucideIcon } from 'lucide-react-native';
-import { Text, useTheme } from '@getrentos/ui-native';
+import { Text, useTheme } from '@sureground/ui-native';
 import type { PickedFile } from '@/lib/api/documents';
 import { checkPickedPhoto } from '@/lib/photoQuality';
 

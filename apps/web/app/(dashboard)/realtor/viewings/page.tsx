@@ -15,7 +15,7 @@ import {
   Pagination,
   useToast,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import type { ViewingAppointment } from '@/types/realtor';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';

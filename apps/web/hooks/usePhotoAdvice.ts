@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { checkPhotoQuality } from '@getrentos/ui';
+import { checkPhotoQuality } from '@sureground/ui';
 
 /**
  * Retake advice for a picked photo of a document: blur, darkness, glare, size.

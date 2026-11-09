@@ -11,7 +11,7 @@ import {
   DialogTitle,
   Select,
   Textarea,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { landDisputeKeys, landDisputeService } from '@/services/landDisputeService';
 import { LAND_DISPUTE_KINDS, type LandDisputeKind } from '@/types/landDispute';

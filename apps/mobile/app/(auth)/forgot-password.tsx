@@ -18,7 +18,7 @@ import {
   useReducedMotion,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { ApiError, errorMessage } from '@/lib/api/client';
 import { authApi, type OtpMethod } from '@/lib/api/auth';
 import { haptics } from '@/lib/haptics';
@@ -29,7 +29,7 @@ import {
   resetPasswordSchema,
   type ResetPasswordValues,
 } from '@/lib/validation';
-import { AUTH_CONSTANTS } from '@getrentos/shared';
+import { AUTH_CONSTANTS } from '@sureground/shared';
 
 type Step = 'request' | 'otp' | 'reset';
 const RESEND_SECONDS = 60;

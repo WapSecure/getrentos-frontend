@@ -4,7 +4,7 @@ import { ScrollView, View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { X } from 'lucide-react-native';
-import type { AddressValue } from '@getrentos/shared';
+import type { AddressValue } from '@sureground/shared';
 import {
   Button,
   Card,
@@ -16,7 +16,7 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   buyerSettingsApi,

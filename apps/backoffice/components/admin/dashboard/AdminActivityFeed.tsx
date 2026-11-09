@@ -3,11 +3,11 @@
 import { ShieldCheck, Gavel, AlertTriangle, UserPlus, Bell } from 'lucide-react';
 import { useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { formatRelativeTime } from '@getrentos/shared';
+import { formatRelativeTime } from '@sureground/shared';
 import { adminService } from '@/services/adminService';
-import { unwrap } from '@getrentos/shared';
+import { unwrap } from '@sureground/shared';
 import { adminKeys } from '@/lib/queryKeys';
-import { Button, EmptyState, ListSkeleton, PageErrorState } from '@getrentos/ui';
+import { Button, EmptyState, ListSkeleton, PageErrorState } from '@sureground/ui';
 
 type ActivityType = 'verification' | 'dispute' | 'fraud' | 'signup';
 

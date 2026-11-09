@@ -10,7 +10,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import {
   estateStaffSetupApi,
@@ -65,7 +65,7 @@ export function StaffRow({
   );
 }
 
-/** Post someone with a GetRentos account to the estate's gates. */
+/** Post someone with a Sureground account to the estate's gates. */
 export function AddGatemanSheet({
   open,
   onClose,
@@ -116,11 +116,11 @@ function AddGatemanForm({
   return (
     <View style={{ gap: spacing.md }}>
       <Text variant="callout" color="mutedForeground">
-        Enter the email they use on GetRentos. Once added, they can verify visitor passes and log
+        Enter the email they use on Sureground. Once added, they can verify visitor passes and log
         arrivals{estateName ? ` at ${estateName}` : ''} from their own phone.
       </Text>
       <TextField
-        label="Their GetRentos email"
+        label="Their Sureground email"
         required
         value={email}
         onChangeText={setEmail}
@@ -135,7 +135,7 @@ function AddGatemanForm({
           if (valid && !add.isPending) add.mutate();
         }}
         error={typed && !valid ? 'That email doesn’t look right.' : undefined}
-        hint="They need a GetRentos account first. If they don’t have one, ask them to sign up."
+        hint="They need a Sureground account first. If they don’t have one, ask them to sign up."
       />
       {add.error ? (
         <FormAlert message={errorMessage(add.error, 'Could not add this gateman. Try again.')} />

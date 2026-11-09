@@ -1,7 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { Button, Dialog, DialogContent, DialogTitle, Field, Select, Textarea } from '@getrentos/ui';
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Field,
+  Select,
+  Textarea,
+} from '@sureground/ui';
 import type { Household } from '@/types/estate';
 
 interface ReportViolationModalProps {

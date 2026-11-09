@@ -1,7 +1,7 @@
 'use client';
 
 import { Pencil, Trash2 } from 'lucide-react';
-import { Badge, IconButton } from '@getrentos/ui';
+import { Badge, IconButton } from '@sureground/ui';
 import type { Announcement } from '@/types/estate';
 
 const formatDate = (value: string) =>

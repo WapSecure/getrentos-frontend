@@ -2,7 +2,13 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { Contact } from 'lucide-react';
-import { EmptyState, ListSkeleton, Switch, useOptimisticMutation, PageHeader } from '@getrentos/ui';
+import {
+  EmptyState,
+  ListSkeleton,
+  Switch,
+  useOptimisticMutation,
+  PageHeader,
+} from '@sureground/ui';
 import { estateResidentService } from '@/services/estateResidentService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateResidentKeys } from '@/lib/queryKeys';

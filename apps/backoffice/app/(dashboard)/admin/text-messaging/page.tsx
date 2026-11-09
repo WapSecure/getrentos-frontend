@@ -9,8 +9,8 @@ import {
   PageErrorState,
   StatGridSkeleton,
   PageHeader,
-} from '@getrentos/ui';
-import { authFetch, safeCall, unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { authFetch, safeCall, unwrap } from '@sureground/shared';
 
 interface TextSummary {
   providerConfigured: boolean;

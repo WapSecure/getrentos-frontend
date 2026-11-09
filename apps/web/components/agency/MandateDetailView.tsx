@@ -13,7 +13,7 @@ import {
   PageErrorState,
   PageHeader,
   Skeleton,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { mandateKeys } from '@/lib/queryKeys';
 import * as mandateService from '@/services/mandateService';
@@ -95,8 +95,8 @@ export function MandateDetailView() {
           <>
             {mandate.ownerName ?? 'the owner'}
             <span aria-hidden> · </span>
-            {mandate.managerIsGetRentos
-              ? 'GetRentos is the manager'
+            {mandate.managerIsSureground
+              ? 'Sureground is the manager'
               : (mandate.managerOrganizationName ?? mandate.managerName ?? 'the manager')}
             <span aria-hidden> · </span>
             {noticeSummary(mandate)}
@@ -120,8 +120,8 @@ export function MandateDetailView() {
           <Fact
             label="Acts as manager"
             value={
-              mandate.managerIsGetRentos
-                ? 'GetRentos'
+              mandate.managerIsSureground
+                ? 'Sureground'
                 : (mandate.managerOrganizationName ?? mandate.managerName ?? '—')
             }
           />
@@ -199,7 +199,7 @@ export function MandateDetailView() {
             missing="Not yet signed"
           />
           <Moment
-            label="Verified by GetRentos"
+            label="Verified by Sureground"
             at={mandate.decidedAt}
             note={mandate.decisionNote}
             missing={mandate.status === 'REJECTED' ? 'Refused' : 'Awaiting verification'}
@@ -225,8 +225,8 @@ export function MandateDetailView() {
         {mandate.status === 'PENDING_OPS' && (
           <p className="mt-4 flex items-start gap-1.5 text-xs text-muted-foreground">
             <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
-            Both sides have signed. A GetRentos officer still has to verify it before anyone can act
-            under it. Until then, it provides no access.
+            Both sides have signed. A Sureground officer still has to verify it before anyone can
+            act under it. Until then, it provides no access.
           </p>
         )}
       </Card>
@@ -239,7 +239,7 @@ export function MandateDetailView() {
               <li key={request.id} className="rounded-xl border border-border/60 p-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className="text-sm font-medium">
-                    {request.requestedByName ?? 'A GetRentos officer'}
+                    {request.requestedByName ?? 'A Sureground officer'}
                   </span>
                   <span className="text-xs text-muted-foreground">
                     {REQUEST_STATUS_LABEL[request.status]} · {formatMoment(request.createdAt)}
@@ -249,12 +249,12 @@ export function MandateDetailView() {
                 {request.status === 'PENDING' && (
                   <p className="mt-1 text-xs text-muted-foreground">
                     Still open. The engagement keeps running and access is unchanged until a second
-                    GetRentos officer approves it.
+                    Sureground officer approves it.
                   </p>
                 )}
                 {request.decidedAt && (
                   <p className="mt-1 text-xs text-muted-foreground">
-                    Decided by {request.decidedByName ?? 'a GetRentos officer'} on{' '}
+                    Decided by {request.decidedByName ?? 'a Sureground officer'} on{' '}
                     {formatMoment(request.decidedAt)}
                     {request.decisionNote ? ` — ${request.decisionNote}` : ''}
                   </p>

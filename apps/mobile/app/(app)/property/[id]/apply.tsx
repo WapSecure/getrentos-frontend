@@ -47,7 +47,7 @@ import {
   toISODate,
   useReducedMotion,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { qk } from '@/lib/query/keys';
 import { propertiesApi } from '@/lib/api/properties';
@@ -67,7 +67,7 @@ import {
   applyLastApplication,
   EMPLOYMENT_STATUSES,
   type LastApplicationDetails,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import { AddressInput } from '@/components/forms/AddressInput';
 
 interface FormState {

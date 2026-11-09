@@ -4,9 +4,9 @@ import { TextMessageConsentCard } from '@/components/shared/settings/TextMessage
 
 import { useState, useEffect } from 'react';
 import { CreditCard, FileText, Wrench, MessageCircle, Star } from 'lucide-react';
-import { SaveButton, Switch } from '@getrentos/ui';
+import { SaveButton, Switch } from '@sureground/ui';
 import { landlordService, type LandlordNotificationPreference } from '@/services/landlordService';
-import { categorySendsEmail } from '@getrentos/shared';
+import { categorySendsEmail } from '@sureground/shared';
 
 interface NotificationPreference extends LandlordNotificationPreference {
   label: string;

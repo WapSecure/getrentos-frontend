@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FileText, Upload, FolderOpen } from 'lucide-react';
-import { Button, PageHeader } from '@getrentos/ui';
+import { Button, PageHeader } from '@sureground/ui';
 import {
   EmptyState,
   ListSkeleton,
@@ -13,14 +13,14 @@ import {
   TabsList,
   TabsTrigger,
   useToast,
-} from '@getrentos/ui';
-import { DocumentUploadDialog, type UploadedDocumentData } from '@getrentos/ui';
-import { DocumentRowActions } from '@getrentos/ui';
-import { DocumentPreviewButton } from '@getrentos/ui';
-import { Pagination } from '@getrentos/ui';
-import { formatDate } from '@getrentos/shared';
+} from '@sureground/ui';
+import { DocumentUploadDialog, type UploadedDocumentData } from '@sureground/ui';
+import { DocumentRowActions } from '@sureground/ui';
+import { DocumentPreviewButton } from '@sureground/ui';
+import { Pagination } from '@sureground/ui';
+import { formatDate } from '@sureground/shared';
 import { adminService } from '@/services/adminService';
-import { unwrap } from '@getrentos/shared';
+import { unwrap } from '@sureground/shared';
 import { adminKeys } from '@/lib/queryKeys';
 import type { AdminDocument } from '@/types/admin';
 

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Briefcase, Landmark, Wallet } from 'lucide-react';
-import { Badge, Button, Card, Skeleton, useToast, type ToastVariant } from '@getrentos/ui';
+import { Badge, Button, Card, Skeleton, useToast, type ToastVariant } from '@sureground/ui';
 import { cn } from '@/lib/cn';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
@@ -22,7 +22,7 @@ import {
   saveAccountLabel,
   withStepUpSummary,
   type AccountLookup,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 
 /** The agent payout API sends its status in lower case ("success"); the firm's in upper. */
 function payoutState(status: string): 'paid' | 'failed' | 'pending' {

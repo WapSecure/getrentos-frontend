@@ -16,8 +16,8 @@ import {
   Skeleton,
   useToast,
   PageHeader,
-} from '@getrentos/ui';
-import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { formatCurrency, formatDate, unwrap } from '@sureground/shared';
 import { useAdminUser } from '../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
 import { payoutAccountLabel, payoutDestinationSentence } from '@/lib/payoutDestination';

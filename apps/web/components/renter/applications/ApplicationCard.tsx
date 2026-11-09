@@ -13,7 +13,7 @@ import {
   Star,
   Trash2,
 } from 'lucide-react';
-import { Badge, Button, IconButton } from '@getrentos/ui';
+import { Badge, Button, IconButton } from '@sureground/ui';
 import { applicationStatusBadges } from '@/lib/statusBadge';
 import { pluralize } from '@/lib/format';
 import { Application } from '@/types/renter';

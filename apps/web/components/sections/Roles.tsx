@@ -14,7 +14,7 @@ const roles = [
     name: 'Landlord',
     icon: Building2,
     description:
-      'List properties, vet tenants, collect rent safely through GetRentos, manage units and finance.',
+      'List properties, vet tenants, collect rent safely through Sureground, manage units and finance.',
   },
   {
     id: 'owner',

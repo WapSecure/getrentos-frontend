@@ -21,12 +21,12 @@ export interface TenantDeposit {
   propertyTitle: string;
   unitName: string;
   agreedAmount: number;
-  paidThroughGetRentos: { amount: number; paid: boolean; paidDate: string | null } | null;
+  paidThroughSureground: { amount: number; paid: boolean; paidDate: string | null } | null;
   hold: {
     id: string;
     amount: number;
     status: 'HELD' | 'PARTIALLY_RETURNED' | 'RETURNED';
-    heldByGetRentos: boolean;
+    heldBySureground: boolean;
     heldBy: string | null;
     takenAt: string;
     returnedAt: string | null;
@@ -57,7 +57,7 @@ export function disputeDeduction(
   );
 }
 
-/** GET /renter/deposits/plan: getting a held deposit back, worked out by GetRentos. */
+/** GET /renter/deposits/plan: getting a held deposit back, worked out by Sureground. */
 export interface DepositPlan {
   leaseId: string;
   overview: string;

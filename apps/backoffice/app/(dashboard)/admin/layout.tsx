@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import { useRouter } from 'next/navigation';
 import { AdminNavbar } from '@/components/admin/navigation/AdminNavbar';
 import { AdminSidebar, hasRouteAccess } from '@/components/admin/dashboard/AdminSidebar';
-import { EmptyState, PageLoadingState } from '@getrentos/ui';
+import { EmptyState, PageLoadingState } from '@sureground/ui';
 import { Lock } from 'lucide-react';
 import {
   ROUTES,
@@ -12,7 +12,7 @@ import {
   BACKEND_ROLE_TO_ID,
   getStoredUser,
   ensureValidSession,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import { hasStaffAccess } from '@/lib/adminAccess';
 import { StaffTwoFactorGate } from '@/components/security/StaffTwoFactorGate';
 import { usePathname } from 'next/navigation';

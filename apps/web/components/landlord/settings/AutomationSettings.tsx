@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { BellRing, AlertOctagon, CalendarClock, CalendarDays, Coins } from 'lucide-react';
-import { Field, NumberInput, Switch } from '@getrentos/ui';
+import { Field, NumberInput, Switch } from '@sureground/ui';
 import { landlordService, type LandlordAutomationSettings } from '@/services/landlordService';
 import { UpgradeToProModal } from '@/components/shared/subscription/UpgradeToProModal';
 import type { PlanGateReason } from '@/lib/planGate';
@@ -149,7 +149,7 @@ export const AutomationSettings = () => {
     <div>
       <h2 className="text-xl font-semibold text-foreground mb-4">Automation & reminders</h2>
       <p className="text-sm text-muted-foreground mb-6">
-        Let GetRentos handle routine communication with your tenants
+        Let Sureground handle routine communication with your tenants
       </p>
 
       <div className="space-y-3">

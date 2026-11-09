@@ -1,7 +1,7 @@
 import { Share, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { BookOpen, TriangleAlert } from 'lucide-react-native';
-import { Button, Card, Skeleton, Text, useTheme } from '@getrentos/ui-native';
+import { Button, Card, Skeleton, Text, useTheme } from '@sureground/ui-native';
 import { leaseGuideApi } from '@/lib/api/leaseGuide';
 import { qk } from '@/lib/query/keys';
 

@@ -1,8 +1,8 @@
 'use client';
 
 import { CheckCircle } from 'lucide-react';
-import { Input } from '@getrentos/ui';
-import { AUTH_CONSTANTS } from '@getrentos/shared';
+import { Input } from '@sureground/ui';
+import { AUTH_CONSTANTS } from '@sureground/shared';
 
 interface ResetStepProps {
   newPassword: string;

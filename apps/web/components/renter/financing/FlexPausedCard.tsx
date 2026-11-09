@@ -7,7 +7,7 @@ export const FlexPausedCard = () => (
       <div className="flex items-center gap-2 mb-2">
         <Zap className="w-5 h-5 text-primary" />
         <span className="text-xs font-semibold uppercase tracking-wide text-primary">
-          GetRentos Flex
+          Sureground Flex
         </span>
       </div>
       <h1 className="text-2xl font-bold text-foreground">Not taking new plans right now</h1>

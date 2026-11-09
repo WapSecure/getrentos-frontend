@@ -1,7 +1,14 @@
 'use client';
 
 import { ShieldCheck } from 'lucide-react';
-import { Alert, Badge, Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrentos/ui';
+import {
+  Alert,
+  Badge,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from '@sureground/ui';
 import { rentPayoutStatusBadges } from '@/lib/statusBadge';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type { RentPayment, EscrowStatus, RentPayoutStatus } from '@/types/landlord';
@@ -26,7 +33,7 @@ const payoutNote: Record<RentPayoutStatus, string> = {
   SENT: 'The transfer is with the bank. It usually lands within a working day.',
   PAID: 'This rent has been paid to your bank account.',
   FAILED:
-    'The transfer did not go through. Check your payout account details; GetRentos support can help send it again.',
+    'The transfer did not go through. Check your payout account details; Sureground support can help send it again.',
 };
 
 export const PaymentDetailsModal = ({ payment, onClose }: PaymentDetailsModalProps) => {
@@ -72,7 +79,7 @@ export const PaymentDetailsModal = ({ payment, onClose }: PaymentDetailsModalPro
           {payment.escrowStatus === 'frozen' ? (
             <Alert variant="danger" title="Funds frozen: dispute raised">
               {payment.disputeReason ||
-                'A dispute has been raised on this payment. Funds are frozen until the dispute is resolved by GetRentos support.'}
+                'A dispute has been raised on this payment. Funds are frozen until the dispute is resolved by Sureground support.'}
             </Alert>
           ) : (
             <div>
@@ -108,7 +115,7 @@ export const PaymentDetailsModal = ({ payment, onClose }: PaymentDetailsModalPro
           )}
 
           <Alert variant="neutral">
-            GetRentos holds the tenant’s rent and releases it to you on its scheduled release date,
+            Sureground holds the tenant’s rent and releases it to you on its scheduled release date,
             or sooner once the tenant confirms move-in. A dispute keeps it held until it is
             resolved. Landlords cannot pay it out early or skip this step.
           </Alert>

@@ -14,7 +14,7 @@ import type { AuthProfile } from '../api/auth';
  * Deliberately not in secure storage: a profile is identity, not a credential,
  * and this only ever mirrors what `/auth/me` already returned to this device.
  */
-const KEY = 'getrentos.profile';
+const KEY = 'sureground.profile';
 
 export async function readCachedProfile(): Promise<AuthProfile | null> {
   try {

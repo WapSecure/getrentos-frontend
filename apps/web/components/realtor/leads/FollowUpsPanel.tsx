@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, Copy, Mail, MessageCircle, Send } from 'lucide-react';
-import { Badge, Button, Card, Select, Skeleton, useToast, type BadgeVariant } from '@getrentos/ui';
+import { Badge, Button, Card, Select, Skeleton, useToast, type BadgeVariant } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
 import { REPLY_LANGUAGES, languageLabel, type ReplyLanguage } from '@/lib/replyLanguage';

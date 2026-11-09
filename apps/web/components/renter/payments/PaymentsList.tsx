@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { PaymentCard } from './PaymentCard';
 import { PaymentDetailsModal } from './PaymentDetailsModal';
 import { CreditCard } from 'lucide-react';
-import { Card, EmptyState, SearchInput } from '@getrentos/ui';
+import { Card, EmptyState, SearchInput } from '@sureground/ui';
 
 interface Payment {
   id: string;

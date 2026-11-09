@@ -16,8 +16,8 @@ import {
   Select,
   Textarea,
   DatePicker,
-} from '@getrentos/ui';
-import { formatDate, unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { formatDate, unwrap } from '@sureground/shared';
 import { adminLandService } from '@/services/adminLandService';
 import {
   LAND_ENCUMBRANCE_KINDS,

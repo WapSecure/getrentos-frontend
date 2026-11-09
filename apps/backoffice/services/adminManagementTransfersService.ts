@@ -1,4 +1,4 @@
-import { authFetch, safeCall, type ApiResponse } from '@getrentos/shared';
+import { authFetch, safeCall, type ApiResponse } from '@sureground/shared';
 
 export interface AdminManagementTransfer {
   id: string;
@@ -21,7 +21,7 @@ export interface AdminHandover {
   required: { outgoing: boolean; incoming: boolean };
   viewer?: { isOwner: boolean; isOutgoing: boolean; isIncoming: boolean };
   /** Where each attested deposit stands now (the pack itself is frozen). */
-  depositsNow?: { id: string; heldByGetRentos: boolean; status: string }[];
+  depositsNow?: { id: string; heldBySureground: boolean; status: string }[];
   pack: {
     hash: string;
     snapshot: {
@@ -31,14 +31,14 @@ export interface AdminHandover {
         arrears: number;
         heldForOwner: number;
         credit: number;
-        depositsWithGetRentos: number;
+        depositsWithSureground: number;
         depositsOutside: number;
       };
       leases: {
         leaseId: string;
         tenant: string;
         unit: string;
-        deposit: { id: string; amount: number; heldByGetRentos: boolean } | null;
+        deposit: { id: string; amount: number; heldBySureground: boolean } | null;
       }[];
     };
     keysDeclaration: string | null;

@@ -21,7 +21,7 @@ import {
   DialogDescription,
   DialogTitle,
   type BadgeVariant,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import type { MaintenanceRequest } from '@/types/maintenance';
 
 interface MaintenanceDetailsModalProps {

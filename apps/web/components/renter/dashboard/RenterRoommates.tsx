@@ -3,10 +3,10 @@
 import { motion } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { UserPlus, Mail, CheckCircle } from 'lucide-react';
-import { Button } from '@getrentos/ui';
-import { Field } from '@getrentos/ui';
-import { Input } from '@getrentos/ui';
-import { useToast } from '@getrentos/ui';
+import { Button } from '@sureground/ui';
+import { Field } from '@sureground/ui';
+import { Input } from '@sureground/ui';
+import { useToast } from '@sureground/ui';
 import { useState } from 'react';
 import { ROUTES } from '@/lib/constants/auth';
 import { renterService } from '@/services/renterService';

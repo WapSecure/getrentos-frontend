@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { CurrencyInput, Field, RadioGroup } from '@getrentos/ui';
+import { CurrencyInput, Field, RadioGroup } from '@sureground/ui';
 import { PayDialog } from '@/components/shared/payments/PayDialog';
 import type { PaymentProviderChoice } from '@/hooks/usePaymentProviders';
 import { formatCurrency } from '@/lib/format';

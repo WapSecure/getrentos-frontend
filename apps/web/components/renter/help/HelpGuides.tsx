@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { BookOpen, Clock, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
-import { Card, EmptyState } from '@getrentos/ui';
+import { Card, EmptyState } from '@sureground/ui';
 
 interface Guide {
   id: string;
@@ -50,7 +50,7 @@ const helpGuides: Guide[] = [
     duration: '4 min',
     steps: [
       'Select your payment method on the Payments tab',
-      'Your money goes to GetRentos to hold, not straight to the landlord',
+      'Your money goes to Sureground to hold, not straight to the landlord',
       'Confirm move-in and it is released to your landlord, otherwise it is released on its scheduled date',
       'Raise a dispute before then and the money stays held until it is resolved',
       'A receipt and transaction record is generated for your records',

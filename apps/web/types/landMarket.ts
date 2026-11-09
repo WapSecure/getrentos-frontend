@@ -77,4 +77,4 @@ export interface LandComparables {
 /** Assurance tiers from weakest to strongest, for "at least this tier" filters. */
 export const LAND_ASSURANCE_TIER_ORDER: LandAssuranceTier[] = ['BASIC', 'STANDARD', 'PREMIUM'];
 
-export { LAND_ASSURANCE_TIER_DESCRIPTIONS } from '@getrentos/shared';
+export { LAND_ASSURANCE_TIER_DESCRIPTIONS } from '@sureground/shared';

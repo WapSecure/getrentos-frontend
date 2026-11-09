@@ -1,7 +1,7 @@
 'use client';
 
 import { ChevronRight, Download, Shield, Calendar } from 'lucide-react';
-import { Badge, Button, IconButton } from '@getrentos/ui';
+import { Badge, Button, IconButton } from '@sureground/ui';
 import { formatCurrency, formatLagosDate } from '@/lib/format';
 import { paymentStatusBadges } from '@/lib/statusBadge';
 
@@ -36,7 +36,7 @@ interface PaymentCardProps {
 const escrowLabel = (status: Payment['escrowStatus']): string =>
   ({
     not_funded: 'not paid yet',
-    held: 'held by GetRentos',
+    held: 'held by Sureground',
     pending_review: 'under review',
     released: 'released to your landlord',
     frozen: 'on hold while a problem is reviewed',

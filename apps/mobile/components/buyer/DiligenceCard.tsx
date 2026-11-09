@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { AlertOctagon, CheckCircle2, Circle, ClipboardCheck, Clock } from 'lucide-react-native';
-import { Button, Card, Skeleton, Text, useTheme } from '@getrentos/ui-native';
+import { Button, Card, Skeleton, Text, useTheme } from '@sureground/ui-native';
 import { buyerApi, type BuyerDiligence } from '@/lib/api/buyer';
 import { qk } from '@/lib/query/keys';
 

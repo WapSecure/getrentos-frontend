@@ -12,8 +12,8 @@ import {
   XCircle,
   Clock,
 } from 'lucide-react';
-import { EmptyState } from '@getrentos/ui';
-import { IconButton } from '@getrentos/ui';
+import { EmptyState } from '@sureground/ui';
+import { IconButton } from '@sureground/ui';
 import type { CalendarEvent } from '@/types/calendar';
 
 interface CalendarEventListProps {

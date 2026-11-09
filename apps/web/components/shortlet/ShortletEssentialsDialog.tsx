@@ -14,7 +14,7 @@ import {
   Select,
   Textarea,
   useToast,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { Lock } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletKeys } from '@/lib/queryKeys';

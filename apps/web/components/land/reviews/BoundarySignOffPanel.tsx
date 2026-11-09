@@ -3,12 +3,12 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { ShieldCheck, Undo2 } from 'lucide-react';
-import { Alert, Button, Field, Textarea, useToast } from '@getrentos/ui';
+import { Alert, Button, Field, Textarea, useToast } from '@sureground/ui';
 import {
   BOUNDARY_SOURCE_LABEL,
   boundaryCorners,
   type LandBoundaryVersion,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import { ParcelBoundaryMap, formatArea } from '@/components/maps/ParcelBoundaryMap';
 import { SignOffBadge } from '@/components/land/boundary/BoundaryHistory';
 import { unwrap } from '@/lib/apiHelpers';

@@ -19,7 +19,7 @@ import {
   toISODate,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   AMOUNT_KINDS,
@@ -430,7 +430,7 @@ function ServeForm({
         onChange={setServiceDate}
         max={toISODate(new Date())}
         required
-        hint="The date you use to calculate expiry. GetRentos won't assume whether it is the service date or the next day."
+        hint="The date you use to calculate expiry. Sureground won't assume whether it is the service date or the next day."
       />
       <ChipSelect
         label="How it was delivered"

@@ -14,7 +14,7 @@ import {
   DialogTitle,
   Field,
   Textarea,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 
 interface LeaseTerminationRequestProps {
   leaseId: string;

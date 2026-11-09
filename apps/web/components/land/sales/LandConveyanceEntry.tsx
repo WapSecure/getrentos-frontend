@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { Button } from '@getrentos/ui';
+import { Button } from '@sureground/ui';
 import { ArrowRight, MapPinned } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { landDeveloperKeys } from '@/lib/landDeveloperQueryKeys';

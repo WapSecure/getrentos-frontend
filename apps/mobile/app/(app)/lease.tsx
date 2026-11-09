@@ -17,8 +17,8 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
-import { formatPercent } from '@getrentos/shared';
+} from '@sureground/ui-native';
+import { formatPercent } from '@sureground/shared';
 import { qk } from '@/lib/query/keys';
 import { leaseApi } from '@/lib/api/lease';
 import { ApiError, errorMessage } from '@/lib/api/client';

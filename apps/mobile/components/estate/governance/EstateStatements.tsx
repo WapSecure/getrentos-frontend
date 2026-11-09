@@ -15,7 +15,7 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { StatusPill } from '@/components/host/HostUI';
 import {
@@ -41,7 +41,7 @@ import {
   payoutAccountStepUpSummary,
   saveAccountLabel,
   type AccountLookup,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import { formatDate, formatNaira } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { errorMessage } from '@/lib/api/client';
@@ -550,7 +550,7 @@ function StatementBody({
             </Card>
           ))}
           <Text variant="caption" color="mutedForeground">
-            Queries are raised and answered on the GetRentos website.
+            Queries are raised and answered on the Sureground website.
           </Text>
         </View>
       ) : null}

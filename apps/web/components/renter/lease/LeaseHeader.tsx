@@ -1,7 +1,7 @@
 'use client';
 
 import { Download, Mail, CalendarDays, AlertCircle, CheckCircle, MapPin } from 'lucide-react';
-import { Alert, Badge, Button, type BadgeVariant } from '@getrentos/ui';
+import { Alert, Badge, Button, type BadgeVariant } from '@sureground/ui';
 import { useState } from 'react';
 import { renterService } from '@/services/renterService';
 import type { RenewalOffer } from '@/types/lease';

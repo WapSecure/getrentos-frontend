@@ -3,18 +3,18 @@
 import { useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, Inbox, X } from 'lucide-react';
-import { Button, ConfirmDialog, ListSkeleton, PageErrorState } from '@getrentos/ui';
-import { Badge } from '@getrentos/ui';
-import { Textarea } from '@getrentos/ui';
-import { EmptyState } from '@getrentos/ui';
-import { Pagination } from '@getrentos/ui';
+import { Button, ConfirmDialog, ListSkeleton, PageErrorState } from '@sureground/ui';
+import { Badge } from '@sureground/ui';
+import { Textarea } from '@sureground/ui';
+import { EmptyState } from '@sureground/ui';
+import { Pagination } from '@sureground/ui';
 import { adminService } from '@/services/adminService';
-import { unwrap } from '@getrentos/shared';
+import { unwrap } from '@sureground/shared';
 import { adminKeys } from '@/lib/queryKeys';
 import { ADMIN_ROLE_DETAILS } from '@/lib/adminAccess';
-import { formatRelativeTime, getInitials } from '@getrentos/shared';
+import { formatRelativeTime, getInitials } from '@sureground/shared';
 import type { AdminStaffApproval } from '@/types/admin';
-import type { ToastVariant } from '@getrentos/ui';
+import type { ToastVariant } from '@sureground/ui';
 
 interface StaffApprovalsPanelProps {
   notify: (message: string, variant: ToastVariant) => void;

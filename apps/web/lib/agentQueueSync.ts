@@ -121,7 +121,7 @@ export function syncAgentQueuedRecords(
   };
   const run = pending.then(async (): Promise<AgentSyncResult> => {
     if (typeof navigator !== 'undefined' && navigator.locks) {
-      return navigator.locks.request('getrentos-agent-upload', drain);
+      return navigator.locks.request('sureground-agent-upload', drain);
     }
     return drain();
   });

@@ -8,7 +8,7 @@ interface PropertyGalleryProps {
   images?: string[];
   /** Signed URL of the landlord's walkthrough video, when there is one. */
   videoTourUrl?: string;
-  /** The video was filmed in the GetRentos app at the property. */
+  /** The video was filmed in the Sureground app at the property. */
   filmedOnSite?: boolean;
   /** Fallback for older payloads that only carry a single cover URL. */
   fallbackImage?: string;

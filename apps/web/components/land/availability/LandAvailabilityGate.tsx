@@ -31,7 +31,7 @@ export const LandAvailabilityGate = ({
       <p className="mt-2 text-sm text-muted-foreground">
         {availability.mode === 'onboarding' && audience === 'marketplace'
           ? 'We are verifying parcels and estates before the land marketplace opens. Please check back soon.'
-          : 'This part of GetRentos is not open in your area yet. Please check back soon.'}
+          : 'This part of Sureground is not open in your area yet. Please check back soon.'}
       </p>
     </div>
   );

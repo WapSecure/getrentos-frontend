@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { View } from 'react-native';
-import { CurrencyField, RadioGroup, Text, useTheme } from '@getrentos/ui-native';
+import { CurrencyField, RadioGroup, Text, useTheme } from '@sureground/ui-native';
 import { PaySheet } from '@/components/payments/PaySheet';
 import type { PaymentProviderChoice } from '@/hooks/usePaymentProviders';
 import type { Payment } from '@/lib/api/payments';

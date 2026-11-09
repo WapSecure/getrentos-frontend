@@ -10,9 +10,9 @@ import {
   ConfirmDialog,
   EmptyState,
   PageErrorState,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { Inbox } from 'lucide-react';
-import { unwrap } from '@getrentos/shared';
+import { unwrap } from '@sureground/shared';
 import { adminKeys } from '@/lib/queryKeys';
 import { hasAdminPermission } from '@/lib/adminAccess';
 import { useAdminUser } from '@/app/(dashboard)/admin/layout';

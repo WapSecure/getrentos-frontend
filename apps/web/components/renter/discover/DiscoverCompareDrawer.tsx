@@ -3,7 +3,7 @@
 import { X, Bed, Bath, Square, MapPin, Star, Shield, ShieldCheck, GitCompare } from 'lucide-react';
 import { Property } from '@/types/renter';
 import { ShortlistComparison } from './ShortlistComparison';
-import { trustChainLabel } from '@getrentos/shared';
+import { trustChainLabel } from '@sureground/shared';
 import {
   Dialog,
   DialogContent,
@@ -11,7 +11,7 @@ import {
   DialogTitle,
   EmptyState,
   IconButton,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 
 interface DiscoverCompareDrawerProps {
   isOpen: boolean;

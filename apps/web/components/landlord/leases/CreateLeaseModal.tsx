@@ -16,7 +16,7 @@ import {
   Field,
   Input,
   Select,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import type { Lease, Unit } from '@/types/landlord';
 
 interface CreateLeaseModalProps {
@@ -185,7 +185,7 @@ export const CreateLeaseModal = ({
                 ) : selectedUnit ? (
                   <p className="mt-1.5 text-xs text-muted-foreground">
                     No approved applicant for this unit: the lease is recorded against this name
-                    only, and the tenant will not see it in a GetRentos account.
+                    only, and the tenant will not see it in a Sureground account.
                   </p>
                 ) : (
                   <p className="mt-1.5 text-xs text-muted-foreground">

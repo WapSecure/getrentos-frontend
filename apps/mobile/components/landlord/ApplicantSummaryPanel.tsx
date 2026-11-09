@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { ChevronDown } from 'lucide-react-native';
-import { LinkButton, Skeleton, Text, useTheme } from '@getrentos/ui-native';
+import { LinkButton, Skeleton, Text, useTheme } from '@sureground/ui-native';
 import { landlordApi } from '@/lib/api/landlord';
 
 /**

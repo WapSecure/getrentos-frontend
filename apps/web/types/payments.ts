@@ -11,7 +11,7 @@ export type PaymentKind =
 /** PENDING means not confirmed yet, never failed. */
 export type PaymentState = 'PENDING' | 'PAID' | 'FAILED';
 
-/** GET /payments/:reference/status — answered from GetRentos records, never the URL. */
+/** GET /payments/:reference/status — answered from Sureground records, never the URL. */
 export interface PaymentStatus {
   reference: string;
   kind: PaymentKind;

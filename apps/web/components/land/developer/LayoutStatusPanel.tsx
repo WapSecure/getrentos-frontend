@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Alert, Badge, Button, ConfirmDialog } from '@getrentos/ui';
+import { Alert, Badge, Button, ConfirmDialog } from '@sureground/ui';
 import { AlertTriangle, CheckCircle2, Circle, Pencil, Rocket, Square } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';

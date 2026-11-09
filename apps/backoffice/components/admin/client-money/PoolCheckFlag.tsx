@@ -1,6 +1,6 @@
 'use client';
 
-import { Badge, Card } from '@getrentos/ui';
+import { Badge, Card } from '@sureground/ui';
 import { AlertTriangle, CircleHelp, ShieldQuestion } from 'lucide-react';
 import type { ReconciliationRow } from '@/services/adminClientMoneyService';
 

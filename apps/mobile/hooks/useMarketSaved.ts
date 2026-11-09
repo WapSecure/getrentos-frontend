@@ -7,7 +7,7 @@ import type { MarketKind } from '@/lib/api/publicMarket';
 import { report, track } from '@/lib/analytics';
 import { rememberListing } from '@/lib/pendingListing';
 import { qk } from '@/lib/query/keys';
-import { useToast } from '@getrentos/ui-native';
+import { useToast } from '@sureground/ui-native';
 
 /** One saved-listing state for rent, sale, shortlet and land. */
 export function useMarketSaved(kind: MarketKind) {

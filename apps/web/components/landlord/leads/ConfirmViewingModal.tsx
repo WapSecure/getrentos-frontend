@@ -12,7 +12,7 @@ import {
   DialogTitle,
   Field,
   TimePicker,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import type { LandlordLead } from '@/types/landlord';
 
 interface ConfirmViewingModalProps {

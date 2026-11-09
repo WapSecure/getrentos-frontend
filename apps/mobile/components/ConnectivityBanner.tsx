@@ -4,7 +4,7 @@ import NetInfo from '@react-native-community/netinfo';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown, FadeOutUp } from 'react-native-reanimated';
 import { CircleCheck, WifiOff } from 'lucide-react-native';
-import { Text, useReducedMotion, useTheme } from '@getrentos/ui-native';
+import { Text, useReducedMotion, useTheme } from '@sureground/ui-native';
 
 /** A global, non-blocking explanation when requests are paused by connectivity. */
 export function ConnectivityBanner() {

@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { Footer } from '@/components/layout/Footer';
 import { Navigation } from '@/components/layout/Navigation';
-import { Button } from '@getrentos/ui';
+import { Button } from '@sureground/ui';
 import { ROUTES } from '@/lib/constants/auth';
 
 const workflows = [
@@ -118,7 +118,7 @@ const operatingPlans = [
 export const metadata: Metadata = {
   title: 'Home Management: assets, care, vendors',
   description:
-    'Track assets, schedule preventive care, and control work orders for your property with GetRentos home management.',
+    'Track assets, schedule preventive care, and control work orders for your property with Sureground home management.',
   alternates: { canonical: '/home-management' },
 };
 
@@ -132,7 +132,7 @@ export default function HomeManagementProductPage() {
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/5 px-3 py-1.5 text-sm font-medium text-primary">
               <Wrench className="h-4 w-4" />
-              GetRentos Home Management
+              Sureground Home Management
             </div>
             <h1 className="mt-6 max-w-3xl text-4xl font-semibold tracking-[-0.045em] sm:text-5xl lg:text-6xl">
               Operate every home with the care of a world-class property team.
@@ -151,7 +151,7 @@ export default function HomeManagementProductPage() {
               </Button>
             </div>
             <p className="mt-5 text-sm text-muted-foreground">
-              Built into GetRentos, with no separate spreadsheets, inboxes, or guest accounts.
+              Built into Sureground, with no separate spreadsheets, inboxes, or guest accounts.
             </p>
           </div>
 

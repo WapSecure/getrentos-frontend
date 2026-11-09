@@ -1,12 +1,12 @@
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { View } from 'react-native';
-import { Button, FormAlert, useTheme } from '@getrentos/ui-native';
+import { Button, FormAlert, useTheme } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { agencyFirmApi } from '@/lib/api/agencyFirm';
 
 /**
- * Until GetRentos verifies the firm it can set up but not be paid. Says where
+ * Until Sureground verifies the firm it can set up but not be paid. Says where
  * verification stands, and links to finish it unless it is out of the firm's
  * hands (submitted, or suspended).
  */
@@ -23,9 +23,9 @@ export function VerificationBanner() {
   const kyb = f.profile.kybStatus;
   const message =
     f.status === 'SUSPENDED'
-      ? 'Your firm is suspended. Contact GetRentos support.'
+      ? 'Your firm is suspended. Contact Sureground support.'
       : kyb === 'SUBMITTED'
-        ? 'Your firm’s verification is with GetRentos. Payouts start once it is approved.'
+        ? 'Your firm’s verification is with Sureground. Payouts start once it is approved.'
         : kyb === 'REJECTED'
           ? `Verification was not approved${f.profile.kybDecisionNote ? `: ${f.profile.kybDecisionNote}` : ''}. Fix the details and submit again.`
           : 'Your firm is not verified yet. Complete verification to receive payouts.';

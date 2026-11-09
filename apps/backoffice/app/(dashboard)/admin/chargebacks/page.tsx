@@ -16,8 +16,8 @@ import {
   TabsTrigger,
   useToast,
   type BadgeVariant,
-} from '@getrentos/ui';
-import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { formatCurrency, formatDate, unwrap } from '@sureground/shared';
 import { useAdminUser } from '../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
 import { adminChargebacksService, type Chargeback } from '@/services/adminChargebacksService';
@@ -56,15 +56,15 @@ function deadline(c: Chargeback): { label: string; variant: BadgeVariant } {
 
 /** Where the money stands, in finance's words. */
 function moneyLine(c: Chargeback): string {
-  if (c.frozenCount > 0) return 'GetRentos still holds it: frozen until this is decided.';
+  if (c.frozenCount > 0) return 'Sureground still holds it: frozen until this is decided.';
   if (c.heldInBalanceOf)
     return "Already in the receiver's balance: kept back from their payouts until this is decided.";
   if (c.moneyAtOpen === 'RELEASED')
     return 'Already paid out to the receiver: if lost, recover it from them.';
-  if (c.product === 'FLEX') return 'A Flex repayment to GetRentos: nothing to hold back.';
+  if (c.product === 'FLEX') return 'A Flex repayment to Sureground: nothing to hold back.';
   if (c.product === 'SHORTLET' || c.product === 'LAND')
     return 'Payouts skip it until this is decided.';
-  return 'No GetRentos record owns this payment.';
+  return 'No Sureground record owns this payment.';
 }
 
 /**
@@ -93,7 +93,7 @@ export default function ChargebacksPage() {
     <>
       <PageHeader
         title="Chargebacks"
-        description="Card payments a payer has asked their bank to reverse. Answer each on the payment company's dashboard with evidence (receipt, move-in or check-in confirmation, messages) before its deadline. The money is held back until it is decided. Monnify does not tell GetRentos about disputes, so record each Monnify one here from its dashboard."
+        description="Card payments a payer has asked their bank to reverse. Answer each on the payment company's dashboard with evidence (receipt, move-in or check-in confirmation, messages) before its deadline. The money is held back until it is decided. Monnify does not tell Sureground about disputes, so record each Monnify one here from its dashboard."
         actions={
           canAct ? (
             <Button variant="primary" onClick={() => setRecording(true)}>

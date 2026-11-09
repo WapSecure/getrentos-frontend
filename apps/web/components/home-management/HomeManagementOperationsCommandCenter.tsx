@@ -10,8 +10,8 @@ import {
   Wrench,
   type LucideIcon,
 } from 'lucide-react';
-import { NairaSign } from '@getrentos/ui/NairaSign';
-import { Badge, type BadgeVariant, Button, Card, Skeleton } from '@getrentos/ui';
+import { NairaSign } from '@sureground/ui/NairaSign';
+import { Badge, type BadgeVariant, Button, Card, Skeleton } from '@sureground/ui';
 import type { HomeManagementDashboard } from '@/services/homeManagementService';
 
 type HomeManagementOperationsRole = 'owner' | 'landlord' | 'manager';
@@ -279,10 +279,7 @@ export function HomeManagementOperationsCommandCenter({
               </ol>
             ) : (
               <div className="px-5 py-8 text-center">
-                <CheckCircle2
-                  className="mx-auto h-7 w-7 text-success"
-                  aria-hidden="true"
-                />
+                <CheckCircle2 className="mx-auto h-7 w-7 text-success" aria-hidden="true" />
                 <p className="mt-3 font-medium text-foreground">
                   {hasRecords
                     ? 'No current action items were found'

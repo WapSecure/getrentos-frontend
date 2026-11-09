@@ -1,8 +1,8 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { Field } from '@getrentos/ui';
-import type { AddressValue, PlaceKind, VerifiedAddress } from '@getrentos/shared';
+import { Field } from '@sureground/ui';
+import type { AddressValue, PlaceKind, VerifiedAddress } from '@sureground/shared';
 import { AddressInput } from './AddressInput';
 import { LocationFields } from './LocationFields';
 

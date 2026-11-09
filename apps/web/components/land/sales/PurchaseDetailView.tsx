@@ -12,7 +12,7 @@ import {
   PageHeader,
   Breadcrumbs,
   Skeleton,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { AlertTriangle, Ban, FileDown } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';

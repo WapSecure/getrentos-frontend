@@ -29,7 +29,7 @@ import {
   PageLoadingState,
   useOptimisticMutation,
   useToast,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { VirtualTourViewerModal } from '@/components/renter/discover/features/VirtualTourViewerModal';
 import { PropertyGallery } from '@/components/renter/property-detail/PropertyGallery';
 import { PropertyLandlordCard } from '@/components/renter/property-detail/PropertyLandlordCard';
@@ -48,7 +48,7 @@ import { ROUTES, buildRoute } from '@/lib/constants/auth';
 import { renterService, type SavedListingItem } from '@/services/renterService';
 import { unwrap, ApiError, type Paginated } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
-import { trustChainLabel } from '@getrentos/shared';
+import { trustChainLabel } from '@sureground/shared';
 import { useFlexAvailability } from '@/hooks/useFlexAvailability';
 
 const nairaFormatter = new Intl.NumberFormat('en-NG', {
@@ -402,7 +402,7 @@ export default function PropertyDetailPage() {
                   <Zap className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
                   <p className="text-muted-foreground">
                     This landlord accepts monthly instalments via{' '}
-                    <span className="text-foreground font-medium">GetRentos Flex</span>, but Flex
+                    <span className="text-foreground font-medium">Sureground Flex</span>, but Flex
                     isn&apos;t taking new plans right now. Coming back soon.
                   </p>
                 </div>
@@ -412,7 +412,7 @@ export default function PropertyDetailPage() {
                     <Zap className="w-4 h-4 text-primary shrink-0 mt-0.5" />
                     <p className="text-muted-foreground">
                       This landlord accepts monthly instalments via{' '}
-                      <span className="text-foreground font-medium">GetRentos Flex</span>: we pay
+                      <span className="text-foreground font-medium">Sureground Flex</span>: we pay
                       the full year upfront, you repay us monthly.
                     </p>
                   </div>

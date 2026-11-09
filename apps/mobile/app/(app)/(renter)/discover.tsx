@@ -25,7 +25,7 @@ import {
   Text,
   TextField,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { PropertyFilterSheet } from '@/components/property/PropertyFilterSheet';
 import { SaveSearchSheet } from '@/components/property/SaveSearchSheet';
 import { PropertyMapView, type PropertyMapMarker } from '@/components/property/PropertyMapView';

@@ -7,7 +7,7 @@ import { FileText, Upload, CheckCircle, ChevronDown, ChevronUp } from 'lucide-re
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
-import { Button, FilePreviewDialog, Skeleton, useToast } from '@getrentos/ui';
+import { Button, FilePreviewDialog, Skeleton, useToast } from '@sureground/ui';
 
 export const DocumentChecklist = () => {
   const queryClient = useQueryClient();

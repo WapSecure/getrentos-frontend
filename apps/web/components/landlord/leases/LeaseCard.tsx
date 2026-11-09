@@ -2,11 +2,11 @@
 
 import { motion } from 'framer-motion';
 import { CalendarClock, Clock, Download, FileCheck, PenLine, RefreshCcw, Send } from 'lucide-react';
-import { Badge } from '@getrentos/ui';
-import { Button } from '@getrentos/ui';
+import { Badge } from '@sureground/ui';
+import { Button } from '@sureground/ui';
 import { useState } from 'react';
 import { formatCurrency, formatDate } from '@/lib/format';
-import { formatPercent } from '@getrentos/shared';
+import { formatPercent } from '@sureground/shared';
 import { leaseRentLabel } from '@/lib/leaseTerm';
 import { leaseStatusBadges } from '@/lib/statusBadge';
 import { landlordService } from '@/services/landlordService';
@@ -94,7 +94,7 @@ export const LeaseCard = ({
         <p className="text-xs text-warning mt-3 rounded-xl bg-warning-subtle px-2.5 py-1.5 flex items-start gap-1.5">
           <Clock className="w-3.5 h-3.5 shrink-0 mt-0.5" />
           <span>
-            Tenant has signed. They haven’t paid the first rent to GetRentos yet
+            Tenant has signed. They haven’t paid the first rent to Sureground yet
             {lease.paymentDueAt
               ? `: due ${new Date(lease.paymentDueAt).toLocaleDateString('en-NG', {
                   day: 'numeric',
@@ -108,7 +108,7 @@ export const LeaseCard = ({
 
       {lease.status === 'awaiting_landlord' && (
         <p className="text-xs text-success mt-3 rounded-xl bg-success-subtle px-2.5 py-1.5">
-          GetRentos is holding the rent. Countersign to confirm you have handed over: the money is
+          Sureground is holding the rent. Countersign to confirm you have handed over: the money is
           paid to you after the confirmation period.
         </p>
       )}
@@ -129,7 +129,7 @@ export const LeaseCard = ({
         {lease.status === 'sent' && (
           <p className="text-xs text-muted-foreground py-2">
             Waiting for the tenant to sign. You countersign once they have paid the rent to
-            GetRentos.
+            Sureground.
           </p>
         )}
         {lease.status === 'awaiting_payment' && (

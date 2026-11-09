@@ -1,4 +1,4 @@
-import { BACKEND_ROLE_TO_ID, getStoredUser, isAuthenticated } from '@getrentos/shared';
+import { BACKEND_ROLE_TO_ID, getStoredUser, isAuthenticated } from '@sureground/shared';
 
 /**
  * The signed-in viewer's roles, as the client-side ids the UI reasons about

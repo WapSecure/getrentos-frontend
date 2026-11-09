@@ -5,7 +5,7 @@ import { OpenConditionsNotice } from './OpenConditionsNotice';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { BarChart3, MapPin, ScanSearch, ShieldCheck, Video } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency } from '@/lib/format';
 import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';

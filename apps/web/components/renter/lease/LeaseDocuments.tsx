@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FileText, Download, Eye, Clock } from 'lucide-react';
-import { Button, Card, FilePreviewDialog, IconButton } from '@getrentos/ui';
+import { Button, Card, FilePreviewDialog, IconButton } from '@sureground/ui';
 
 interface Document {
   name: string;

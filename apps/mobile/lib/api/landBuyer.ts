@@ -1,4 +1,4 @@
-import type { BadgeTone } from '@getrentos/ui-native';
+import type { BadgeTone } from '@sureground/ui-native';
 import { apiDownload, apiFetch } from './client';
 import {
   applyBps,
@@ -12,7 +12,7 @@ import { providerQuery, type PaymentProvider } from './paymentStatus';
 
 /**
  * The buyer's side of a land deal: plot purchases on developers' estates
- * (GetRentos holds every payment and releases it as the buyer confirms each
+ * (Sureground holds every payment and releases it as the buyer confirms each
  * conveyance step) and the conveyance of a single-parcel resale. Rules here
  * mirror the API and web's landSaleLogic so a button shown is one that works.
  */
@@ -252,7 +252,7 @@ export function refundSentence(
   }
   if (p.refundStatus === 'NEEDS_MANUAL') {
     const back = p.refundedAmount ?? 0;
-    return `${fmt(back)} of your ${fmt(due)} refund has been returned; GetRentos finance is paying the remaining ${fmt(due - back)} directly.`;
+    return `${fmt(back)} of your ${fmt(due)} refund has been returned; Sureground finance is paying the remaining ${fmt(due - back)} directly.`;
   }
   return `A refund of ${fmt(due)} is on its way to the card or account you paid with.`;
 }

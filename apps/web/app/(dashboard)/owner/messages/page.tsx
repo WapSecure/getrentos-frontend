@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, MessageCircle } from 'lucide-react';
-import { Button, Pagination, EmptyState, PageHeader } from '@getrentos/ui';
+import { Button, Pagination, EmptyState, PageHeader } from '@sureground/ui';
 import { ConversationList, type Conversation } from '@/components/owner/messages/ConversationList';
 import { MessageThread, type ThreadMessage } from '@/components/owner/messages/MessageThread';
 import { cn } from '@/lib/cn';

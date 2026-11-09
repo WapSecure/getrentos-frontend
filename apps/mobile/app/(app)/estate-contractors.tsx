@@ -27,7 +27,7 @@ import {
   toISODate,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { EnterpriseUpsell, OneTimeCode } from '@/components/estate/gate/GateUI';
 import { HouseholdPicker } from '@/components/estate/HouseholdPicker';

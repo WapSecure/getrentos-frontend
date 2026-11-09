@@ -1,13 +1,13 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { Badge, Card } from '@getrentos/ui';
+import { Badge, Card } from '@sureground/ui';
 import { CalendarClock, FileCheck2 } from 'lucide-react';
 import { formatDate } from '@/lib/format';
 import type { EstateCommitment } from '@/types/landEstateInfrastructure';
 import { CHANGE_KIND_LABELS, COMMITMENT_STATUS_LABELS, commitmentBadge } from './labels';
 
-const ROLE_LABELS = { DEVELOPER: 'Developer', BUYER: 'Buyer', STAFF: 'GetRentos' } as const;
+const ROLE_LABELS = { DEVELOPER: 'Developer', BUYER: 'Buyer', STAFF: 'Sureground' } as const;
 
 /**
  * One infrastructure promise, as every audience sees it: what, when, where it

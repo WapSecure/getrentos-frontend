@@ -11,7 +11,7 @@ import {
   PageErrorState,
   PageHeader,
   Toast,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { ArrowLeft } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { LAND_MILESTONE_STATUS_LABELS, type LandMilestone } from '@/types/landBuyer';

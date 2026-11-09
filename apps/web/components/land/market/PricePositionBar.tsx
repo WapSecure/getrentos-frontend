@@ -1,4 +1,4 @@
-import { percentileWords } from '@getrentos/shared';
+import { percentileWords } from '@sureground/shared';
 import { formatCurrency } from '@/lib/format';
 
 /** 1 → "1st", 22 → "22nd", 13 → "13th". */

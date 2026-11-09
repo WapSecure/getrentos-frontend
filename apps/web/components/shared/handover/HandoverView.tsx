@@ -17,7 +17,7 @@ import {
   PageHeader,
   Select,
   Textarea,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import {
@@ -29,7 +29,7 @@ import {
 const TREATMENT: Record<DepositTreatment, string> = {
   HANDED_TO_INCOMING: 'Handed to the incoming manager',
   RETURNED_TO_TENANT: 'Returned to the tenant',
-  PAID_TO_GETRENTOS: 'Paid to GetRentos',
+  PAID_TO_SUREGROUND: 'Paid to Sureground',
 };
 
 /**
@@ -69,7 +69,7 @@ export function HandoverView({ transferId }: { transferId: string }) {
   const pack = h?.pack;
   const snap = pack?.snapshot;
   const outside = (snap?.leases ?? []).flatMap((l) =>
-    l.deposit && !l.deposit.heldByGetRentos
+    l.deposit && !l.deposit.heldBySureground
       ? [{ ...l.deposit, tenant: l.tenant, unit: l.unit }]
       : []
   );
@@ -227,11 +227,11 @@ export function HandoverView({ transferId }: { transferId: string }) {
             </p>
             {pack.disputeResolution ? (
               <p className="mt-1 text-muted-foreground">
-                Settled by GetRentos: {pack.disputeResolution}
+                Settled by Sureground: {pack.disputeResolution}
               </p>
             ) : (
               <p className="mt-1 text-muted-foreground">
-                GetRentos ops will settle it before sign-off resumes.
+                Sureground ops will settle it before sign-off resumes.
               </p>
             )}
           </div>
@@ -256,21 +256,21 @@ export function HandoverView({ transferId }: { transferId: string }) {
             <dd className="font-medium text-foreground">{formatCurrency(snap.totals.credit)}</dd>
           </div>
           <div>
-            <dt className="text-xs text-muted-foreground">Deposits held by GetRentos</dt>
+            <dt className="text-xs text-muted-foreground">Deposits held by Sureground</dt>
             <dd className="font-medium text-foreground">
-              {formatCurrency(snap.totals.depositsWithGetRentos)}
+              {formatCurrency(snap.totals.depositsWithSureground)}
             </dd>
           </div>
           <div>
-            <dt className="text-xs text-muted-foreground">Deposits held outside GetRentos</dt>
+            <dt className="text-xs text-muted-foreground">Deposits held outside Sureground</dt>
             <dd className="font-medium text-foreground">
               {formatCurrency(snap.totals.depositsOutside)}
             </dd>
           </div>
           <div>
-            <dt className="text-xs text-muted-foreground">Owner&apos;s money with GetRentos</dt>
+            <dt className="text-xs text-muted-foreground">Owner&apos;s money with Sureground</dt>
             <dd className="font-medium text-foreground">
-              {formatCurrency(snap.ownerMoney.heldByGetRentos)}
+              {formatCurrency(snap.ownerMoney.heldBySureground)}
             </dd>
           </div>
         </dl>
@@ -303,7 +303,7 @@ export function HandoverView({ transferId }: { transferId: string }) {
                     {l.deposit ? formatCurrency(l.deposit.amount) : '—'}
                     {l.deposit && (
                       <span className="block text-xs text-muted-foreground">
-                        {l.deposit.heldByGetRentos ? 'with GetRentos' : 'outside GetRentos'}
+                        {l.deposit.heldBySureground ? 'with Sureground' : 'outside Sureground'}
                       </span>
                     )}
                   </td>
@@ -356,7 +356,7 @@ export function HandoverView({ transferId }: { transferId: string }) {
           {pack.depositAttestations && pack.depositAttestations.length > 0 && (
             <>
               <h2 className="mt-4 font-semibold text-foreground">
-                Deposits held outside GetRentos
+                Deposits held outside Sureground
               </h2>
               <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
                 {pack.depositAttestations.map((a) => (
@@ -377,7 +377,7 @@ export function HandoverView({ transferId }: { transferId: string }) {
           {outside.map((d) => (
             <div key={d.id} className="space-y-2">
               <Field
-                label={`Deposit of ${formatCurrency(d.amount)} (${d.tenant}, ${d.unit}) you held outside GetRentos`}
+                label={`Deposit of ${formatCurrency(d.amount)} (${d.tenant}, ${d.unit}) you held outside Sureground`}
               >
                 <Select
                   ariaLabel={`What happened to the ${formatCurrency(d.amount)} deposit`}

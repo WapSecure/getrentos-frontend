@@ -11,7 +11,7 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { landBuyerExtrasApi, type Deal } from '@/lib/api/landBuyerExtras';
 import { BUYER_MILESTONE_STATUS } from '@/lib/api/landBuyer';

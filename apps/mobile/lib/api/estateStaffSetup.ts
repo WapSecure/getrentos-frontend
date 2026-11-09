@@ -12,7 +12,7 @@ import type { Paginated } from './properties';
 
 /* ---------------------------------- types --------------------------------- */
 
-/** A gateman posted to the estate. They sign in with their own GetRentos account. */
+/** A gateman posted to the estate. They sign in with their own Sureground account. */
 export interface StaffMember {
   userId: string;
   name: string;
@@ -66,7 +66,7 @@ export const estateStaffSetupApi = {
     apiFetch<Paginated<StaffMember>>(
       `/estate/${estateId}/staff?page=${page}&pageSize=${STAFF_PAGE_SIZE}`
     ),
-  /** The person must already have a GetRentos account under this email. */
+  /** The person must already have a Sureground account under this email. */
   addGateman: (estateId: string, email: string) =>
     apiFetch<StaffMember>(`/estate/${estateId}/staff/gateman`, {
       method: 'POST',

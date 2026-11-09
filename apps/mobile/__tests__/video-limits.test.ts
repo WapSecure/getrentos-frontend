@@ -1,4 +1,4 @@
-import { MAX_VIDEO_BYTES, videoProblem } from '@getrentos/shared';
+import { MAX_VIDEO_BYTES, videoProblem } from '@sureground/shared';
 
 describe('videoProblem', () => {
   it('accepts a short, small tour and anything unmeasured', () => {

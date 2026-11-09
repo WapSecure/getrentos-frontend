@@ -7,11 +7,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation } from '@tanstack/react-query';
 import { Eye, EyeOff, Lock, ShieldCheck } from 'lucide-react';
-import { Alert, Checkbox, Field, IconButton, Input } from '@getrentos/ui';
-import { Button } from '@getrentos/ui';
-import { useToast } from '@getrentos/ui';
-import { SessionExpiredNotice } from '@getrentos/ui';
-import { Logo } from '@getrentos/ui';
+import { Alert, Checkbox, Field, IconButton, Input } from '@sureground/ui';
+import { Button } from '@sureground/ui';
+import { useToast } from '@sureground/ui';
+import { SessionExpiredNotice } from '@sureground/ui';
+import { Logo } from '@sureground/ui';
 import {
   BACKEND_ROLE_TO_ID,
   ROUTES,
@@ -21,14 +21,14 @@ import {
   cleanSecondFactorInput,
   isSecondFactorCode,
   SECOND_FACTOR_CODE_MAX_LENGTH,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import {
   saveAuthSession,
   getRememberedIdentifier,
   saveRememberedIdentifier,
-} from '@getrentos/shared';
-import { consumeSessionExpiredFlag } from '@getrentos/shared';
-import { authService } from '@getrentos/shared';
+} from '@sureground/shared';
+import { consumeSessionExpiredFlag } from '@sureground/shared';
+import { authService } from '@sureground/shared';
 
 const adminSchema = z.object({
   identifier: z.string().min(1, 'Email is required').email('Enter a valid email'),
@@ -157,7 +157,7 @@ export const AdminSignInForm = () => {
         <Logo href={ROUTES.ADMIN_LOGIN} size="lg" className="mx-auto mb-4 w-fit" />
         <h1 className="text-2xl font-bold text-foreground">Administrator Sign In</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Restricted access: for GetRentos staff only
+          Restricted access: for Sureground staff only
         </p>
       </div>
 
@@ -208,7 +208,7 @@ export const AdminSignInForm = () => {
                 type="email"
                 {...register('identifier')}
                 inputClassName="py-3"
-                placeholder="admin@getrentos.com"
+                placeholder="admin@getsureground.io"
               />
             </Field>
 

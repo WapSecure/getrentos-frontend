@@ -11,7 +11,7 @@ import {
   ShieldCheck,
   ShieldX,
 } from 'lucide-react-native';
-import { Button, Card, Chip, Skeleton, Text, useTheme, useToast } from '@getrentos/ui-native';
+import { Button, Card, Chip, Skeleton, Text, useTheme, useToast } from '@sureground/ui-native';
 import { pickDocument } from '@/lib/filePicker';
 import type { PickedFile } from '@/lib/api/documents';
 import {

@@ -2,7 +2,15 @@ import { useState } from 'react';
 import { View } from 'react-native';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Route as RouteIcon } from 'lucide-react-native';
-import { Card, Chip, EmptyState, QueryState, Skeleton, Text, useTheme } from '@getrentos/ui-native';
+import {
+  Card,
+  Chip,
+  EmptyState,
+  QueryState,
+  Skeleton,
+  Text,
+  useTheme,
+} from '@sureground/ui-native';
 import { StatTile } from '@/components/estate/gate/GateUI';
 import { StatusPill } from '@/components/host/HostUI';
 import {

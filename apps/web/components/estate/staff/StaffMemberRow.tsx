@@ -1,7 +1,7 @@
 'use client';
 
 import { Trash2 } from 'lucide-react';
-import { IconButton } from '@getrentos/ui';
+import { IconButton } from '@sureground/ui';
 import type { StaffMember } from '@/types/estate';
 
 interface StaffMemberRowProps {

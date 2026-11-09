@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Badge, Button, EmptyState, Input, Skeleton, useToast } from '@getrentos/ui';
+import { Badge, Button, EmptyState, Input, Skeleton, useToast } from '@sureground/ui';
 import { MessageSquare, Send, ShieldCheck } from 'lucide-react';
-import { cn } from '@getrentos/shared';
+import { cn } from '@sureground/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';
@@ -187,7 +187,7 @@ export function ShortletMessagesInbox({ role }: { role: 'guest' | 'host' }) {
                 </div>
                 <p className="mt-1.5 text-2xs text-muted-foreground">
                   Phone numbers, emails and chat links are hidden until the stay is booked and paid,
-                  so you’re both covered by GetRentos Payment Protection.
+                  so you’re both covered by Sureground Payment Protection.
                 </p>
               </div>
             </>

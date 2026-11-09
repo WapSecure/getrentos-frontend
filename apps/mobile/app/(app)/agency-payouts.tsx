@@ -11,7 +11,7 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   agencyFirmApi,
@@ -26,7 +26,7 @@ import { AccountForm, History, MyPayout } from '@/components/agency/AgentSelfPay
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 import { withStepUpSummary } from '@/lib/stepUp';
-import { PAYOUT_ARRIVAL_NOTE, payoutAccountLabel, withdrawStepUpSummary } from '@getrentos/shared';
+import { PAYOUT_ARRIVAL_NOTE, payoutAccountLabel, withdrawStepUpSummary } from '@sureground/shared';
 
 /**
  * Money out: the firm's own commission to its bank, agents' shares to theirs,

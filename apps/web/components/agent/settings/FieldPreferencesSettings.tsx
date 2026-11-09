@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
-import { Button, Field, NumberInput, Skeleton, ToggleChip, useToast } from '@getrentos/ui';
+import { Button, Field, NumberInput, Skeleton, ToggleChip, useToast } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { agentKeys } from '@/lib/queryKeys';
 import { AddressInput } from '@/components/shared/location/AddressInput';

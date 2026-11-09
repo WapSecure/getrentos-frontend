@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState, useSyncExternalStore } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { PageLoadingState } from '@getrentos/ui';
+import { PageLoadingState } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { paymentKeys } from '@/lib/queryKeys';
 import { viewerIsSignedIn } from '@/lib/viewer';
@@ -29,7 +29,7 @@ const noSubscription = () => () => {};
  * Where Paystack or Monnify sends every payer back to (rent, deposits, bookings, land,
  * Flex, dues; Pro has its own page).
  *
- * The outcome comes from GetRentos's records via the status endpoint, which
+ * The outcome comes from Sureground's records via the status endpoint, which
  * also asks the payment company directly while a payment is pending. The query string is
  * only used to find the reference, never as proof of payment.
  */

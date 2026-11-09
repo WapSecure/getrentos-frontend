@@ -21,7 +21,7 @@ import {
   SegmentedControl,
   useOptimisticMutation,
   useToast,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { Property } from '@/types/renter';
 import { renterService, type SavedListingItem } from '@/services/renterService';
 import { unwrap, type Paginated } from '@/lib/apiHelpers';

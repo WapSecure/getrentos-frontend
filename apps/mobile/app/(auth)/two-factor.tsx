@@ -10,8 +10,8 @@ import {
   OtpInput,
   TextField,
   useTheme,
-} from '@getrentos/ui-native';
-import { cleanSecondFactorInput, isSecondFactorCode } from '@getrentos/shared';
+} from '@sureground/ui-native';
+import { cleanSecondFactorInput, isSecondFactorCode } from '@sureground/shared';
 import { errorMessage } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { haptics } from '@/lib/haptics';
@@ -54,7 +54,7 @@ export default function TwoFactor() {
       subtitle={
         useBackupCode
           ? 'Enter one of the backup codes you saved when you turned on two-factor. Each works once.'
-          : 'Open your authenticator app and enter the 6-digit code for GetRentos.'
+          : 'Open your authenticator app and enter the 6-digit code for Sureground.'
       }
       onBack={() => {
         cancelTwoFactor();

@@ -2,7 +2,15 @@
 
 import { useState } from 'react';
 import { Clock, MessageSquarePlus } from 'lucide-react';
-import { Badge, type BadgeVariant, Button, Card, RadioGroup, type RadioOption, Textarea } from '@getrentos/ui';
+import {
+  Badge,
+  type BadgeVariant,
+  Button,
+  Card,
+  RadioGroup,
+  type RadioOption,
+  Textarea,
+} from '@sureground/ui';
 import type { MusterRollEntry, MusterRollState } from '@/types/estate';
 
 /**

@@ -32,7 +32,7 @@ import { ROUTES } from '@/lib/constants/auth';
 import { ESTATE_MARKETPLACE_ROUTES } from '@/lib/constants/auth';
 import { createRoleNavigation, GroupedSidebar } from '@/components/shared/dashboard/GroupedSidebar';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
-import { tierAtLeast, type PlanTier } from '@getrentos/shared';
+import { tierAtLeast, type PlanTier } from '@sureground/shared';
 
 interface NavItem {
   label: string;

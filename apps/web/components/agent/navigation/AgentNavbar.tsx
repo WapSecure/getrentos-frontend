@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Wifi, WifiOff } from 'lucide-react';
-import { Badge } from '@getrentos/ui';
+import { Badge } from '@sureground/ui';
 import { AgentProfileDropdown } from './AgentProfileDropdown';
 import { navGroups } from '../dashboard/AgentSidebar';
 import { WorkspaceNavbar } from '@/components/shared/navigation/WorkspaceNavbar';

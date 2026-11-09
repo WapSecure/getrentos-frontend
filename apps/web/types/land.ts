@@ -1,5 +1,5 @@
-import type { LandAssuranceTier, LandNotVerifiedItem, LandTrustLabel } from '@getrentos/shared';
-import type { CrsCode, LandBoundaryStatus } from '@getrentos/shared';
+import type { LandAssuranceTier, LandNotVerifiedItem, LandTrustLabel } from '@sureground/shared';
+import type { CrsCode, LandBoundaryStatus } from '@sureground/shared';
 export type LandAreaUnit = 'SQUARE_METERS' | 'ACRE' | 'HECTARE';
 
 export type LandDiligenceStatus =
@@ -73,7 +73,7 @@ export type LandOwnershipDocumentType =
 
 export type LandDiligenceCheckStatus = 'PENDING' | 'PASSED' | 'FLAGGED' | 'NOT_APPLICABLE';
 
-export type { LandAssuranceTier } from '@getrentos/shared';
+export type { LandAssuranceTier } from '@sureground/shared';
 
 /** One item of the diligence checklist seeded for the parcel's title type. */
 export interface LandDiligenceCheck {
@@ -307,7 +307,7 @@ export {
   LAND_TRUST_SOURCE_LABELS,
   type LandNotVerifiedItem,
   type LandTrustLabel,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 
 type PublicLandDiligence = Pick<
   LandDiligence,

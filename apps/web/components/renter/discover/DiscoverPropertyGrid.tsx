@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { EmptyState, Pagination, Skeleton } from '@getrentos/ui';
+import { EmptyState, Pagination, Skeleton } from '@sureground/ui';
 import { DiscoverPropertyCard } from './DiscoverPropertyCard';
 import { VirtualTourViewerModal } from './features/VirtualTourViewerModal';
 import { Property } from '@/types/renter';

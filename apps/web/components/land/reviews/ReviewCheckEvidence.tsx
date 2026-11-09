@@ -9,7 +9,7 @@ import {
   IconButton,
   Input,
   Select,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { Link2, Upload, X } from 'lucide-react';
 import { formatDate } from '@/lib/format';
 import type { LandDocumentType } from '@/types/landDocument';
@@ -30,7 +30,7 @@ export interface ReviewEvidenceActions {
   /** Which check (by key) has an evidence request in flight. */
   busyKey: string | null;
   /**
-   * The reviewer's own name, to tell their citations from GetRentos staff's: the
+   * The reviewer's own name, to tell their citations from Sureground staff's: the
    * case only says who cited a document by name. Null when unknown, in which
    * case Remove is offered and the API refuses anything not theirs.
    */

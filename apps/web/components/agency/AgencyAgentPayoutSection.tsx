@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Users } from 'lucide-react';
-import { Badge, Button, ListSkeleton, type ToastVariant } from '@getrentos/ui';
+import { Badge, Button, ListSkeleton, type ToastVariant } from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import {

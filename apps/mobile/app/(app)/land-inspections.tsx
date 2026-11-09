@@ -11,8 +11,8 @@ import {
   Text,
   useTheme,
   type BadgeTone,
-} from '@getrentos/ui-native';
-import { LAND_INSPECTION_KIND_LABELS, type LandInspectionStatus } from '@getrentos/shared';
+} from '@sureground/ui-native';
+import { LAND_INSPECTION_KIND_LABELS, type LandInspectionStatus } from '@sureground/shared';
 import { qk } from '@/lib/query/keys';
 import { landWatchApi } from '@/lib/api/landWatch';
 import { useCaptureQueue } from '@/lib/inspectionCaptureQueue';
@@ -29,7 +29,7 @@ const WORDS: Partial<Record<LandInspectionStatus, [string, BadgeTone]>> = {
   CANCELLED: ['Called off', 'neutral'],
 };
 
-/** Land inspections GetRentos has assigned to me. */
+/** Land inspections Sureground has assigned to me. */
 export default function LandInspections() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();

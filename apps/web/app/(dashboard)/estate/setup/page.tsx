@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Building2 } from 'lucide-react';
-import { Alert, Button, Card, Field, Input, NumberInput } from '@getrentos/ui';
+import { Alert, Button, Card, Field, Input, NumberInput } from '@sureground/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';

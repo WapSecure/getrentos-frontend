@@ -10,7 +10,7 @@ import {
   mapTiles,
   parseOriginList,
   websocketOrigin,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 
 /** Policy string → { directive: sources[] }. */
 function directives(policy: string): Record<string, string[]> {
@@ -23,7 +23,7 @@ function directives(policy: string): Record<string, string[]> {
 }
 
 describe('buildContentSecurityPolicy', () => {
-  const base = { nonce: 'abc123==', apiUrl: 'https://api.getrentos.com/v1' };
+  const base = { nonce: 'abc123==', apiUrl: 'https://api.getsureground.io/v1' };
 
   it('locks scripts to the nonce with strict-dynamic, without unsafe-eval in production', () => {
     const d = directives(buildContentSecurityPolicy({ ...base, dev: false }));
@@ -45,11 +45,11 @@ describe('buildContentSecurityPolicy', () => {
     const d = directives(buildContentSecurityPolicy({ ...base, dev: false }));
     expect(d['connect-src']).toEqual([
       "'self'",
-      'https://api.getrentos.com',
-      'wss://api.getrentos.com',
+      'https://api.getsureground.io',
+      'wss://api.getsureground.io',
     ]);
-    expect(d['img-src']).toEqual(["'self'", 'data:', 'blob:', 'https://api.getrentos.com']);
-    expect(d['frame-src']).toContain('https://api.getrentos.com');
+    expect(d['img-src']).toEqual(["'self'", 'data:', 'blob:', 'https://api.getsureground.io']);
+    expect(d['frame-src']).toContain('https://api.getsureground.io');
   });
 
   it('ignores a missing or malformed API URL', () => {
@@ -64,16 +64,16 @@ describe('buildContentSecurityPolicy', () => {
       buildContentSecurityPolicy({
         ...base,
         dev: false,
-        mediaOrigins: ['https://cdn.getrentos.com', 'https://api.getrentos.com'],
+        mediaOrigins: ['https://cdn.getsureground.io', 'https://api.getsureground.io'],
         imgSrc: MAP_TILE_ORIGINS,
         frameSrc: EMBED_FRAME_ORIGINS,
       })
     );
     expect(d['img-src']).toEqual(
-      expect.arrayContaining([...MAP_TILE_ORIGINS, 'https://cdn.getrentos.com'])
+      expect.arrayContaining([...MAP_TILE_ORIGINS, 'https://cdn.getsureground.io'])
     );
-    expect(d['img-src'].filter((s) => s === 'https://api.getrentos.com')).toHaveLength(1);
-    expect(d['media-src']).toContain('https://cdn.getrentos.com');
+    expect(d['img-src'].filter((s) => s === 'https://api.getsureground.io')).toHaveLength(1);
+    expect(d['media-src']).toContain('https://cdn.getsureground.io');
     expect(d['frame-src']).toEqual(
       expect.arrayContaining(['https://www.youtube-nocookie.com', 'https://*.matterport.com'])
     );
@@ -129,8 +129,8 @@ describe('csp helpers', () => {
     expect(isLocalHost('127.0.0.1:3000')).toBe(true);
     expect(isLocalHost('[::1]:3000')).toBe(true);
     expect(isLocalHost(null)).toBe(true);
-    expect(isLocalHost('app.getrentos.com')).toBe(false);
-    expect(isLocalHost('app.getrentos.com, localhost')).toBe(false);
+    expect(isLocalHost('app.getsureground.io')).toBe(false);
+    expect(isLocalHost('app.getsureground.io, localhost')).toBe(false);
   });
 
   it('covers both map tile providers', () => {
@@ -151,7 +151,7 @@ describe('csp helpers', () => {
   });
 
   describe('live selfie pages (Smile ID web capture)', () => {
-    const base = { nonce: 'abc', dev: false, apiUrl: 'https://api.getrentos.com' };
+    const base = { nonce: 'abc', dev: false, apiUrl: 'https://api.getsureground.io' };
     const directive = (policy: string, name: string) =>
       policy.split('; ').find((d) => d.startsWith(`${name} `)) ?? '';
 

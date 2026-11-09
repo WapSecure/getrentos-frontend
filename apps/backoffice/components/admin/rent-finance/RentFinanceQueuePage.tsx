@@ -15,9 +15,9 @@ import {
   useToast,
   type Column,
   PageHeader,
-} from '@getrentos/ui';
-import { unwrap } from '@getrentos/shared';
-import type { ApiResponse } from '@getrentos/shared';
+} from '@sureground/ui';
+import { unwrap } from '@sureground/shared';
+import type { ApiResponse } from '@sureground/shared';
 import { adminKeys } from '@/lib/queryKeys';
 import { useAdminSearchParam } from '@/lib/readAdminSearchParam';
 import type { Paginated } from '@/services/adminService';

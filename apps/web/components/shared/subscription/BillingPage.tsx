@@ -1,7 +1,7 @@
 'use client';
 
 import { BadgeCheck } from 'lucide-react';
-import { Alert, Card, TableSkeleton, PageHeader } from '@getrentos/ui';
+import { Alert, Card, TableSkeleton, PageHeader } from '@sureground/ui';
 import { usePlanTier } from '@/hooks/usePlanTier';
 import { usePlanPricing } from '@/hooks/usePlanPricing';
 import { useProCheckout } from '@/hooks/useProCheckout';

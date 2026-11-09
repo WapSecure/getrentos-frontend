@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { Badge, Card, Skeleton } from '@getrentos/ui';
+import { Badge, Card, Skeleton } from '@sureground/ui';
 import { ShieldAlert } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';

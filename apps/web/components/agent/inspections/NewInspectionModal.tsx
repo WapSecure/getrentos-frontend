@@ -13,7 +13,7 @@ import {
   IconButton,
   Input,
   Select,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { agentService } from '@/services/agentService';
 import { InspectionDraftPanel, applyDraftToRooms } from './InspectionDraftPanel';

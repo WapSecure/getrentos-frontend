@@ -14,7 +14,7 @@ import {
   TabsList,
   TabsTrigger,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import {
   landlordService,
   type FinancialStats as FinancialStatsData,

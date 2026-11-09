@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { EyeOff } from 'lucide-react-native';
-import { Button, Text, TextField, useTheme, useToast } from '@getrentos/ui-native';
+import { Button, Text, TextField, useTheme, useToast } from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { qk } from '@/lib/query/keys';
 import { shortletsApi, type ShortletListing } from '@/lib/api/shortlets';
@@ -75,7 +75,7 @@ function Inner({
         <View style={{ flexDirection: 'row', gap: spacing.sm }}>
           <EyeOff size={14} color={colors.mutedForeground} style={{ marginTop: 2 }} />
           <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
-            Phone numbers and emails stay hidden until a stay is paid. Book and pay on GetRentos so
+            Phone numbers and emails stay hidden until a stay is paid. Book and pay on Sureground so
             you&apos;re covered by Payment Protection and the Guest Promise.
           </Text>
         </View>

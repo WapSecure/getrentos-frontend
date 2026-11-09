@@ -2,13 +2,13 @@ import { useState } from 'react';
 import { View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Camera, CheckCircle2, Images, RefreshCw, ShieldAlert } from 'lucide-react-native';
-import { Button, Card, Chip, Text, useTheme, useToast } from '@getrentos/ui-native';
+import { Button, Card, Chip, Text, useTheme, useToast } from '@sureground/ui-native';
 import {
   ID_CHECK_NOT_ADMISSION_NOTICE,
   VISITOR_ID_DOCUMENT_LABELS,
   VISITOR_ID_DOCUMENT_ORDER,
   type VisitorIdDocumentType,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import { Sheet } from '@/components/Sheet';
 import { gatemanApi } from '@/lib/api/gateman';
 import { ApiError } from '@/lib/api/client';

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Button, RadioGroup, Text, TextField, useTheme, useToast } from '@getrentos/ui-native';
+import { Button, RadioGroup, Text, TextField, useTheme, useToast } from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { qk } from '@/lib/query/keys';
 import { shortletsApi, type ShortletBooking } from '@/lib/api/shortlets';
@@ -13,7 +13,7 @@ import { haptics } from '@/lib/haptics';
 
 const MIN_DESCRIPTION = 20;
 
-/** Ask GetRentos support to step in on a stay. The thread continues in Disputes. */
+/** Ask Sureground support to step in on a stay. The thread continues in Disputes. */
 export function OpenDisputeSheet(props: {
   open: boolean;
   onClose: () => void;
@@ -53,7 +53,7 @@ function Inner({
     onSuccess: (d) => {
       void haptics.success();
       qc.invalidateQueries({ queryKey: qk.shortlets.disputes });
-      toast.show('Sent to GetRentos support.', 'success');
+      toast.show('Sent to Sureground support.', 'success');
       onClose();
       router.push({ pathname: '/(app)/shortlet-dispute/[id]', params: { id: d.id } });
     },
@@ -77,7 +77,8 @@ function Inner({
     >
       <View style={{ gap: spacing.xl, paddingBottom: spacing.md }}>
         <Text variant="callout" color="mutedForeground">
-          A person at GetRentos reads every dispute and hears from you and the host before deciding.
+          A person at Sureground reads every dispute and hears from you and the host before
+          deciding.
         </Text>
 
         <View style={{ gap: spacing.sm }}>

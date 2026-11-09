@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, BadgeCheck } from 'lucide-react';
-import { Button, SegmentedControl, TableSkeleton, type Segment } from '@getrentos/ui';
+import { Button, SegmentedControl, TableSkeleton, type Segment } from '@sureground/ui';
 import { usePlanPricing } from '@/hooks/usePlanPricing';
 import { PlanComparisonTable } from '@/components/shared/subscription/PlanComparisonTable';
 import { ProPriceCard } from '@/components/shared/subscription/ProPriceCard';

@@ -13,7 +13,7 @@ import {
   Input,
   ListSkeleton,
   RadioGroup,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { readWatchlistRefusal, type WatchlistRefusal } from '@/lib/gateman/watchlistRefusal';
@@ -186,7 +186,9 @@ export const WalkInDialog = ({
   return (
     <Dialog open={isOpen} onOpenChange={(next) => !next && handleClose()}>
       <DialogContent size="md">
-        <DialogTitle className="text-lg font-semibold text-foreground">Visitor with no pass</DialogTitle>
+        <DialogTitle className="text-lg font-semibold text-foreground">
+          Visitor with no pass
+        </DialogTitle>
 
         <div className="mt-4 space-y-4">
           <Field label="Who have they come to see?">

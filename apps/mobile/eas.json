@@ -31,15 +31,15 @@
       "distribution": "internal",
       "channel": "preview",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://api-staging.getrentos.com"
+        "EXPO_PUBLIC_API_URL": "https://api-staging.getsureground.io"
       }
     },
     "production": {
       "channel": "production",
       "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://api.getrentos.com",
-        "APP_LINK_DOMAIN": "getrentos.com"
+        "EXPO_PUBLIC_API_URL": "https://api.getsureground.io",
+        "APP_LINK_DOMAIN": "getsureground.io"
       }
     }
   },

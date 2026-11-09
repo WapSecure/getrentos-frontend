@@ -17,8 +17,8 @@ import {
   IconButton,
   QueryState,
   useToast,
-} from '@getrentos/ui';
-import { formatDate, unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { formatDate, unwrap } from '@sureground/shared';
 import { accountSecurityService } from '@/services/accountSecurityService';
 import { adminKeys } from '@/lib/queryKeys';
 

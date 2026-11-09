@@ -15,7 +15,7 @@ beforeEach(async () => {
 
 describe('onboarding seen flag', () => {
   it('reads the stored value', async () => {
-    await AsyncStorage.setItem('getrentos.onboardingSeen', '1');
+    await AsyncStorage.setItem('sureground.onboardingSeen', '1');
     const { result } = await renderHook(() => useOnboardingSeen());
     await waitFor(() => expect(result.current.seen).toBe(true));
   });
@@ -30,7 +30,7 @@ describe('onboarding seen flag', () => {
 
     expect(root.result.current.seen).toBe(true);
     await waitFor(async () =>
-      expect(await AsyncStorage.getItem('getrentos.onboardingSeen')).toBe('1')
+      expect(await AsyncStorage.getItem('sureground.onboardingSeen')).toBe('1')
     );
   });
 });

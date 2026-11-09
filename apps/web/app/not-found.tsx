@@ -2,9 +2,9 @@
 
 import { ArrowLeft, Home, SearchX } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { Button } from '@getrentos/ui/Button';
-import { Logo } from '@getrentos/ui/Logo';
-import { ROUTES } from '@getrentos/shared';
+import { Button } from '@sureground/ui/Button';
+import { Logo } from '@sureground/ui/Logo';
+import { ROUTES } from '@sureground/shared';
 
 export default function NotFound() {
   const router = useRouter();
@@ -45,7 +45,7 @@ export default function NotFound() {
             className="min-w-40"
             icon={<Home className="h-4 w-4" />}
           >
-            Go to GetRentos
+            Go to Sureground
           </Button>
           <Button
             variant="outline"

@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { CalendarClock } from 'lucide-react';
-import { Button, ConfirmDialog } from '@getrentos/ui';
-import { formatCurrency, formatDate } from '@getrentos/shared';
+import { Button, ConfirmDialog } from '@sureground/ui';
+import { formatCurrency, formatDate } from '@sureground/shared';
 import type { LandInstallment } from '@/types/landPurchase';
 import { LandCaseSection, PanelMessage } from '@/components/admin/land/case/shared';
 import { LandLineStatusBadge } from './LandPurchaseStatusBadge';

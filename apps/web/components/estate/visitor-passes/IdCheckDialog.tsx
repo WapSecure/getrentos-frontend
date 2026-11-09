@@ -11,7 +11,7 @@ import {
   DialogDescription,
   DialogTitle,
   Skeleton,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { estateService } from '@/services/estateService';
 import { unwrapOptional } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';

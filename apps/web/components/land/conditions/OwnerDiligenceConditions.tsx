@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Alert, Badge, Button, Card, Field, Textarea } from '@getrentos/ui';
+import { Alert, Badge, Button, Card, Field, Textarea } from '@sureground/ui';
 import { CircleDashed, PauseCircle } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
@@ -41,7 +41,7 @@ const ConditionRow = ({
       void queryClient.invalidateQueries({ queryKey: landKeys.ownerDetail(propertyId) });
       void queryClient.invalidateQueries({ queryKey: landKeys.owner });
       setOpen(false);
-      notify('Evidence sent. GetRentos will check it and confirm the condition.');
+      notify('Evidence sent. Sureground will check it and confirm the condition.');
     },
     onError: (error) => notify(errorMessage(error), 'error'),
   });
@@ -59,7 +59,7 @@ const ConditionRow = ({
       </p>
       {condition.decisionNote && (
         <p className="mt-2 text-sm text-muted-foreground">
-          GetRentos{condition.decidedAt ? ` (${formatDate(condition.decidedAt)})` : ''}:{' '}
+          Sureground{condition.decidedAt ? ` (${formatDate(condition.decidedAt)})` : ''}:{' '}
           {condition.decisionNote}
         </p>
       )}
@@ -121,10 +121,10 @@ export const OwnerDiligenceConditions = ({
     return (
       <Alert variant="danger" icon={PauseCircle} title="Suspended" className="mt-4">
         {diligence.suspension?.reason ||
-          'GetRentos has taken this land off the market while it looks into an issue.'}{' '}
+          'Sureground has taken this land off the market while it looks into an issue.'}{' '}
         {diligence.suspension?.bySystem
           ? 'This happened automatically and lifts once the issue is resolved.'
-          : 'GetRentos will tell you when it is resumed.'}
+          : 'Sureground will tell you when it is resumed.'}
         {diligence.suspension?.at && ` Since ${formatDate(diligence.suspension.at)}.`}
       </Alert>
     );
@@ -139,7 +139,7 @@ export const OwnerDiligenceConditions = ({
           <h3 className="font-semibold text-foreground">Conditions to meet</h3>
           <p className="mt-1 text-sm text-muted-foreground">
             Your land is listed, and buyers see these conditions. Reservations and offers open once
-            GetRentos confirms each one.
+            Sureground confirms each one.
           </p>
         </div>
       </div>

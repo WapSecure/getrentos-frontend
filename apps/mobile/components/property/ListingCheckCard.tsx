@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { ShieldAlert, ShieldCheck, ShieldQuestion } from 'lucide-react-native';
-import { Card, Skeleton, Text, useTheme } from '@getrentos/ui-native';
+import { Card, Skeleton, Text, useTheme } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { listingCheckApi, type ListingCheckLevel } from '@/lib/api/listingCheck';
 
@@ -71,7 +71,7 @@ export function ListingCheckCard({ listingId }: { listingId: string }) {
           ))}
         </View>
         <Text variant="caption" color="mutedForeground">
-          Figures from GetRentos listings{d.source === 'ai' ? '; wording is automated' : ''}. A
+          Figures from Sureground listings{d.source === 'ai' ? '; wording is automated' : ''}. A
           guide, not a guarantee.
         </Text>
       </View>

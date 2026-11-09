@@ -12,7 +12,7 @@ import {
   Input,
   Select,
   Textarea,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import type {
   EstateChangeOrderInput,
   EstateChangeOrderKind,
@@ -175,7 +175,7 @@ export const ProgressDialog = ({
     <DialogShell
       {...props}
       title={`Update: ${commitment.title}`}
-      description="Buyers are told when you report delivery. GetRentos checks the evidence before it shows as verified."
+      description="Buyers are told when you report delivery. Sureground checks the evidence before it shows as verified."
       submitLabel="Post update"
       valid={valid}
       onSubmit={() =>
@@ -233,7 +233,7 @@ export const ChangeOrderDialog = ({
     <DialogShell
       {...props}
       title={`Change: ${commitment.title}`}
-      description="Buyers have 14 days to answer. Silence counts as acknowledged; any objection goes to GetRentos to decide. If no plot is sold yet, the change applies at once."
+      description="Buyers have 14 days to answer. Silence counts as acknowledged; any objection goes to Sureground to decide. If no plot is sold yet, the change applies at once."
       submitLabel="Send to buyers"
       valid={valid}
       onSubmit={() =>

@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient, type QueryKey } from '@tanstack/react-query';
-import { useToast } from '@getrentos/ui-native';
+import { useToast } from '@sureground/ui-native';
 import { ApiError } from '../api/client';
 
 export interface OptimisticPatch<TVars> {

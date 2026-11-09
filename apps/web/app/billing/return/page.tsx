@@ -6,7 +6,7 @@ import { CheckCircle2, Loader2, XCircle } from 'lucide-react';
 import { billingService, type MyBilling } from '@/services/billingService';
 import { unwrap } from '@/lib/apiHelpers';
 import { useProCheckout } from '@/hooks/useProCheckout';
-import { Button, Skeleton } from '@getrentos/ui';
+import { Button, Skeleton } from '@sureground/ui';
 
 /**
  * Where the payment gateway returns the customer.
@@ -78,7 +78,7 @@ function BillingReturnContent() {
               : 'Your Pro plan is active.'}
           </p>
           <Button href="/" className="mt-6">
-            Back to GetRentos
+            Back to Sureground
           </Button>
         </>
       )}
@@ -94,7 +94,7 @@ function BillingReturnContent() {
             don&apos;t need to pay again.
           </p>
           <Button href="/" variant="outline" className="mt-6">
-            Back to GetRentos
+            Back to Sureground
           </Button>
         </>
       )}

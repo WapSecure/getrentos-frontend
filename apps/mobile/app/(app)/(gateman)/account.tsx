@@ -12,7 +12,7 @@ import {
   Text,
   ThemeToggle,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useIdentityVerification } from '@/hooks/useIdentityVerification';
@@ -33,7 +33,7 @@ export default function GatemanAccount() {
       <Screen>
         <View style={{ alignItems: 'center', gap: spacing.sm, marginTop: spacing.xl }}>
           <Avatar name={profile?.legalName} size={72} />
-          <Text variant="heading">{profile?.legalName ?? 'GetRentos user'}</Text>
+          <Text variant="heading">{profile?.legalName ?? 'Sureground user'}</Text>
           <Text variant="callout" color="mutedForeground">
             {profile?.email ?? profile?.phone ?? ''}
           </Text>
@@ -125,7 +125,7 @@ export default function GatemanAccount() {
           <View style={{ padding: spacing.lg, gap: spacing.xs }}>
             <Text variant="bodyStrong">Appearance</Text>
             <Text variant="caption" color="mutedForeground">
-              Choose how GetRentos looks on this device.
+              Choose how Sureground looks on this device.
             </Text>
           </View>
           <Divider />

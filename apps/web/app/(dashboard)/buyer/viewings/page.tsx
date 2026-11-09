@@ -6,7 +6,7 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 import { Plus, CalendarClock } from 'lucide-react';
 import { ViewingRequestCard } from '@/components/buyer/viewings/ViewingRequestCard';
 import { RequestViewingModal } from '@/components/buyer/viewings/RequestViewingModal';
-import { Button, Pagination, QueryState, Skeleton, useToast, PageHeader } from '@getrentos/ui';
+import { Button, Pagination, QueryState, Skeleton, useToast, PageHeader } from '@sureground/ui';
 import { buyerService } from '@/services/buyerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { buyerKeys } from '@/lib/queryKeys';

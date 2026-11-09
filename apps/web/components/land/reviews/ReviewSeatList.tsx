@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Badge, EmptyState, PageErrorState, Pagination, Skeleton } from '@getrentos/ui';
+import { Badge, EmptyState, PageErrorState, Pagination, Skeleton } from '@sureground/ui';
 import { CalendarClock, ChevronRight, ClipboardCheck, MapPin } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
@@ -50,7 +50,7 @@ export const ReviewSeatList = () => {
       <EmptyState
         icon={ClipboardCheck}
         title="No reviews assigned to you"
-        description="When GetRentos engages you as a surveyor, lawyer, valuer or inspector on a land case, it appears here."
+        description="When Sureground engages you as a surveyor, lawyer, valuer or inspector on a land case, it appears here."
       />
     );
   }

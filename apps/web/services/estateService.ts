@@ -173,7 +173,7 @@ export const estateService = {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = 'getrentos-estate-financials.csv';
+      link.download = 'sureground-estate-financials.csv';
       document.body.appendChild(link);
       link.click();
       link.remove();

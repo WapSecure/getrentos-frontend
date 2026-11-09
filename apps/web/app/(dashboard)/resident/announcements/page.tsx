@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { Megaphone, Square, Volume2 } from 'lucide-react';
-import { Badge, EmptyState, IconButton, ListSkeleton, PageHeader } from '@getrentos/ui';
+import { Badge, EmptyState, IconButton, ListSkeleton, PageHeader } from '@sureground/ui';
 import { estateResidentService } from '@/services/estateResidentService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateResidentKeys } from '@/lib/queryKeys';

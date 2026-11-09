@@ -9,7 +9,7 @@ import {
   toISODate,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { landlordApi, type LandlordUnit } from '@/lib/api/landlord';
 import { errorMessage } from '@/lib/api/client';
@@ -27,7 +27,7 @@ const oneYearAfter = (iso: string) => {
 };
 
 /**
- * Records a tenancy that already exists, for someone with no GetRentos account.
+ * Records a tenancy that already exists, for someone with no Sureground account.
  * It creates a SIGNED lease, because the agreement is already in force — there
  * is nobody to send it to and nothing to draft.
  */
@@ -113,7 +113,7 @@ function RecordForm({
     <View style={{ gap: spacing.lg }}>
       <Text variant="body" color="mutedForeground">
         For someone already living in <Text variant="bodyStrong">{unit.unitName}</Text> at{' '}
-        {unit.propertyName} who will not use GetRentos. This creates a tenancy you can invoice and
+        {unit.propertyName} who will not use Sureground. This creates a tenancy you can invoice and
         track rent against. They will not be able to sign in, pay in-app, or carry a trust score.
       </Text>
 

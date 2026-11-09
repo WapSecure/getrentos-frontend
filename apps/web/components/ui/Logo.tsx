@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import { Logo as BaseLogo } from '@getrentos/ui/Logo';
+import { Logo as BaseLogo } from '@sureground/ui/Logo';
 import {
   ROUTES,
   STORAGE_KEYS,

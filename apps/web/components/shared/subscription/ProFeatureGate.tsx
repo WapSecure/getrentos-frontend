@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
 import { BadgeCheck } from 'lucide-react';
-import { Button, EmptyState } from '@getrentos/ui';
+import { Button, EmptyState } from '@sureground/ui';
 import { usePlanTier } from '@/hooks/usePlanTier';
 
 interface ProFeatureGateProps {
@@ -62,7 +62,7 @@ export function ProFeatureGate({
         action={
           <Button
             variant="primary"
-            href={href ?? 'mailto:hello@getrentos.com?subject=Upgrade%20to%20Pro'}
+            href={href ?? 'mailto:hello@getsureground.io?subject=Upgrade%20to%20Pro'}
           >
             {href ? 'Upgrade to Pro' : 'Contact us to upgrade'}
           </Button>

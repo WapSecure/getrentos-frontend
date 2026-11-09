@@ -26,8 +26,8 @@ import {
   DialogTitle,
   useToast,
   type BadgeVariant,
-} from '@getrentos/ui';
-import { unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { unwrap } from '@sureground/shared';
 import { adminEstateService } from '@/services/adminEstateService';
 import { EstateQueuePage, type EstateQueueConfig } from './EstateQueuePage';
 import { HouseholdEditorDialog, DueAmountDialog } from './EstateAdminDialogs';

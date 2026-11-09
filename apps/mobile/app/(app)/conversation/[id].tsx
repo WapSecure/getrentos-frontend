@@ -21,7 +21,7 @@ import {
   Text,
   TextField,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { messagesApi, type Message } from '@/lib/api/messages';
 import { ApiError } from '@/lib/api/client';

@@ -11,8 +11,8 @@ import {
   TimeField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
-import { storedAddressValue, type AddressValue } from '@getrentos/shared';
+} from '@sureground/ui-native';
+import { storedAddressValue, type AddressValue } from '@sureground/shared';
 import { Sheet } from '@/components/Sheet';
 import { AddressInput } from '@/components/forms/AddressInput';
 import { qk } from '@/lib/query/keys';

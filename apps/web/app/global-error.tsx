@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@getrentos/ui';
+import { Button } from '@sureground/ui';
 import { ROUTES } from '@/lib/constants/auth';
 
 export default function GlobalError({
@@ -21,7 +21,7 @@ export default function GlobalError({
           <p className="text-6xl font-bold text-primary">500</p>
           <h1 className="mt-3 text-2xl font-bold text-foreground">Something went wrong</h1>
           <p className="mt-2 text-sm text-muted-foreground max-w-sm">
-            GetRentos hit an unexpected error and couldn&apos;t load this page.
+            Sureground hit an unexpected error and couldn&apos;t load this page.
           </p>
 
           {(error.requestId || error.digest) && (

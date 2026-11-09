@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Clock, LocateFixed, MapPin, Navigation, Route } from 'lucide-react';
-import { Badge, Button, Card, Skeleton } from '@getrentos/ui';
+import { Badge, Button, Card, Skeleton } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { agentKeys } from '@/lib/queryKeys';
 import { agentService } from '@/services/agentService';

@@ -29,7 +29,7 @@ export type AgentOfflineOperation = {
     ownerId?: string;
   };
 }[AgentOfflineOperationType];
-const KEY = 'getrentos.agent.offline-queue';
+const KEY = 'sureground.agent.offline-queue';
 function readAll(): AgentOfflineOperation[] {
   const items = JSON.parse(localStorage.getItem(KEY) || '[]');
   if (!Array.isArray(items))

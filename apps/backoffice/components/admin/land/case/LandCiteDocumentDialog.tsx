@@ -11,7 +11,7 @@ import {
   Field,
   Input,
   Select,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import {
   citedKeysOf,
   type LandDiligenceCheck,

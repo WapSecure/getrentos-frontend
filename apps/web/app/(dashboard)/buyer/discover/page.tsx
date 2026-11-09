@@ -21,7 +21,7 @@ import {
   Skeleton,
   useOptimisticMutation,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 
 type SortOrder = 'default' | 'price_asc' | 'price_desc';
 

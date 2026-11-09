@@ -45,13 +45,13 @@ export const queryClient = new QueryClient({
 /** Disk cache so dashboards paint instantly on launch, then revalidate. */
 export const persister = createAsyncStoragePersister({
   storage: AsyncStorage,
-  key: 'getrentos.query-cache',
+  key: 'sureground.query-cache',
   throttleTime: 1000,
 });
 
 export const queryPersistenceOptions = {
   persister,
   maxAge: 1000 * 60 * 60 * 12,
-  buster: 'getrentos-mobile-v1',
+  buster: 'sureground-mobile-v1',
   dehydrateOptions: { shouldDehydrateQuery: shouldPersistQuery },
 };

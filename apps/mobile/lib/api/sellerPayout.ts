@@ -1,6 +1,6 @@
 import { apiFetch } from './client';
 import type { Paginated } from './properties';
-import type { PayoutSentTo } from '@getrentos/shared';
+import type { PayoutSentTo } from '@sureground/shared';
 
 /**
  * Where sale proceeds go. Owners, realtors and agents all sell through the

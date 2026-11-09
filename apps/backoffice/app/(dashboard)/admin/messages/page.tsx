@@ -11,12 +11,12 @@ import {
   useOptimisticMutation,
   useToast,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { ConversationList } from '@/components/admin/messages/ConversationList';
 import { MessageThread } from '@/components/admin/messages/MessageThread';
-import { cn } from '@getrentos/shared';
+import { cn } from '@sureground/shared';
 import { adminService } from '@/services/adminService';
-import { unwrap } from '@getrentos/shared';
+import { unwrap } from '@sureground/shared';
 import { adminKeys } from '@/lib/queryKeys';
 
 const PAGE_SIZE = 20;

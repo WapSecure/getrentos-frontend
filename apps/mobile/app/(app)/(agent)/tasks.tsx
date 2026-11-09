@@ -5,7 +5,7 @@ import { router } from 'expo-router';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ClipboardList } from 'lucide-react-native';
-import { Badge, Card, Chip, QueryState, Skeleton, Text, useTheme } from '@getrentos/ui-native';
+import { Badge, Card, Chip, QueryState, Skeleton, Text, useTheme } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   agentApi,

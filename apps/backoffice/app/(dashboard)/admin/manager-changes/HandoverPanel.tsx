@@ -2,17 +2,17 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Button, Select, Skeleton, Textarea } from '@getrentos/ui';
-import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
+import { Alert, Button, Select, Skeleton, Textarea } from '@sureground/ui';
+import { formatCurrency, formatDate, unwrap } from '@sureground/shared';
 import { adminManagementTransfersService } from '@/services/adminManagementTransfersService';
 
 const TREATMENTS = [
   ['HANDED_TO_INCOMING', 'Handed to the incoming manager'],
   ['RETURNED_TO_TENANT', 'Returned to the tenant'],
-  ['PAID_TO_GETRENTOS', 'Paid to GetRentos'],
+  ['PAID_TO_SUREGROUND', 'Paid to Sureground'],
 ] as const;
 
-/** A handover's sign-off from the GetRentos side: settle a dispute, or sign for the side GetRentos holds. */
+/** A handover's sign-off from the Sureground side: settle a dispute, or sign for the side Sureground holds. */
 export function HandoverPanel({
   transferId,
   canOperate,
@@ -56,7 +56,7 @@ export function HandoverPanel({
   const h = q.data;
   const pack = h?.pack;
   const outside = (pack?.snapshot.leases ?? []).flatMap((l) =>
-    l.deposit && !l.deposit.heldByGetRentos ? [{ ...l.deposit, tenant: l.tenant }] : []
+    l.deposit && !l.deposit.heldBySureground ? [{ ...l.deposit, tenant: l.tenant }] : []
   );
   const signOutgoing = useMutation({
     mutationFn: () =>
@@ -98,7 +98,7 @@ export function HandoverPanel({
     <div className="mt-3 space-y-3 border-t border-border pt-3 text-sm">
       <p className="text-xs text-muted-foreground">
         Pack {pack.hash.slice(0, 12)} · owed {formatCurrency(pack.snapshot.totals.arrears)} · held{' '}
-        {formatCurrency(pack.snapshot.totals.heldForOwner)} · deposits outside GetRentos{' '}
+        {formatCurrency(pack.snapshot.totals.heldForOwner)} · deposits outside Sureground{' '}
         {formatCurrency(pack.snapshot.totals.depositsOutside)}
       </p>
       <ul className="space-y-0.5 text-xs text-foreground">
@@ -112,7 +112,7 @@ export function HandoverPanel({
       </ul>
       {pack.depositAttestations?.map((a) => {
         const now = h.depositsNow?.find((d) => d.id === a.depositHoldId);
-        const awaiting = a.treatment === 'PAID_TO_GETRENTOS' && now && !now.heldByGetRentos;
+        const awaiting = a.treatment === 'PAID_TO_SUREGROUND' && now && !now.heldBySureground;
         return (
           <div
             key={a.depositHoldId}
@@ -121,7 +121,7 @@ export function HandoverPanel({
             <span>
               Deposit {formatCurrency(a.amount)}: {a.treatment.replace(/_/g, ' ').toLowerCase()}
               {a.note ? ` (${a.note})` : ''}
-              {a.treatment === 'PAID_TO_GETRENTOS' && now?.heldByGetRentos ? ' · received' : ''}
+              {a.treatment === 'PAID_TO_SUREGROUND' && now?.heldBySureground ? ' · received' : ''}
             </span>
             {awaiting && canOperate && (
               <Button
@@ -172,7 +172,7 @@ export function HandoverPanel({
 
       {canOperate && h.status === 'SWITCHED' && h.viewer?.isOutgoing && !pack.outgoingSignedAt && (
         <div className="space-y-2 rounded-lg border border-border p-3">
-          <p className="text-xs font-medium text-foreground">Sign for GetRentos (outgoing)</p>
+          <p className="text-xs font-medium text-foreground">Sign for Sureground (outgoing)</p>
           {outside.map((d) => (
             <Select
               key={d.id}
@@ -218,7 +218,7 @@ export function HandoverPanel({
             isLoading={accept.isPending}
             onClick={() => accept.mutate()}
           >
-            Accept for GetRentos
+            Accept for Sureground
           </Button>
         )}
       {error && <Alert variant="danger">{error}</Alert>}

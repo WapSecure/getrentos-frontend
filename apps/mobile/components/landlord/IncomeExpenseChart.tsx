@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
-import { Divider, Text, useTheme } from '@getrentos/ui-native';
+import { Divider, Text, useTheme } from '@sureground/ui-native';
 import type { FinancialsPoint } from '@/lib/api/landlord';
 import { formatNaira } from '@/lib/format';
 import { seriesColor } from './chartPalette';

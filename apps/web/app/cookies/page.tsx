@@ -6,7 +6,7 @@ import { LegalPage } from '@/components/layout/LegalPage';
 
 export const metadata: Metadata = {
   title: 'Cookie Policy',
-  description: 'The cookies and browser storage GetRentos uses, and why.',
+  description: 'The cookies and browser storage Sureground uses, and why.',
   alternates: { canonical: '/cookies' },
 };
 
@@ -15,7 +15,7 @@ export default function CookiesPage() {
     <LegalPage
       title="Cookie Policy"
       updated="21 September 2026"
-      intro="Cookies and similar browser storage are small pieces of data a website keeps on your device. This page lists what GetRentos uses today."
+      intro="Cookies and similar browser storage are small pieces of data a website keeps on your device. This page lists what Sureground uses today."
     >
       <h2 id="what-we-use">What we use</h2>
       <ul>
@@ -47,8 +47,8 @@ export default function CookiesPage() {
 
       <h2 id="contact">Questions</h2>
       <p>
-        Email <a href="mailto:support@getrentos.com">support@getrentos.com</a>. More about how we
-        handle personal information is in our <a href="/privacy">Privacy Policy</a>.
+        Email <a href="mailto:support@getsureground.io">support@getsureground.io</a>. More about how
+        we handle personal information is in our <a href="/privacy">Privacy Policy</a>.
       </p>
     </LegalPage>
   );

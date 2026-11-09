@@ -8,10 +8,10 @@ import {
   DialogDescription,
   DialogTitle,
   Input,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import type { Unit } from '@/types/landlord';
 
-/** What a landlord knows about an occupier who will not use GetRentos themselves. */
+/** What a landlord knows about an occupier who will not use Sureground themselves. */
 export interface OccupierRecord {
   tenantName: string;
   rentAmount: number;
@@ -36,7 +36,7 @@ interface RecordOccupierModalProps {
 }
 
 /**
- * Records a tenancy that already exists, for someone who has no GetRentos
+ * Records a tenancy that already exists, for someone who has no Sureground
  * account. It creates a signed lease, because the agreement is already in
  * force — there is nobody to send it to and nothing to draft.
  */
@@ -114,9 +114,9 @@ const RecordOccupierForm = ({
 
       <div className="space-y-3 p-4">
         <p className="text-xs text-muted-foreground">
-          For someone already living here who will not use GetRentos. This creates a tenancy you can
-          invoice and track rent against. They will not be able to sign in, pay in-app, or carry a
-          trust score.
+          For someone already living here who will not use Sureground. This creates a tenancy you
+          can invoice and track rent against. They will not be able to sign in, pay in-app, or carry
+          a trust score.
         </p>
 
         <div>

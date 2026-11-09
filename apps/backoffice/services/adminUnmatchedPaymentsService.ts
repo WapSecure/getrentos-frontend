@@ -1,4 +1,4 @@
-import { authFetch, safeCall, type ApiResponse } from '@getrentos/shared';
+import { authFetch, safeCall, type ApiResponse } from '@sureground/shared';
 
 /** Gateway-confirmed money whose amount did not match the charge it was for. */
 export interface UnmatchedPayment {

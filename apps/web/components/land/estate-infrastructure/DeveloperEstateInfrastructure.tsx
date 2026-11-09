@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Button, EmptyState, PageErrorState, Skeleton } from '@getrentos/ui';
+import { Button, EmptyState, PageErrorState, Skeleton } from '@sureground/ui';
 import { Construction, Plus } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import {
@@ -63,7 +63,7 @@ export const DeveloperEstateInfrastructure = ({
       saved(
         next,
         input.status === 'DELIVERED'
-          ? 'Delivery reported. Buyers are told and GetRentos will check the evidence.'
+          ? 'Delivery reported. Buyers are told and Sureground will check the evidence.'
           : 'Progress posted.'
       ),
     onError: fail,

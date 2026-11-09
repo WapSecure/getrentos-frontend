@@ -13,14 +13,14 @@ import {
   SegmentedControl,
   useToast,
   type Column,
-} from '@getrentos/ui';
-import { Badge, type BadgeVariant } from '@getrentos/ui';
-import { EmptyState } from '@getrentos/ui';
-import { Pagination } from '@getrentos/ui';
-import { Select } from '@getrentos/ui';
-import { getInitials, formatDate } from '@getrentos/shared';
+} from '@sureground/ui';
+import { Badge, type BadgeVariant } from '@sureground/ui';
+import { EmptyState } from '@sureground/ui';
+import { Pagination } from '@sureground/ui';
+import { Select } from '@sureground/ui';
+import { getInitials, formatDate } from '@sureground/shared';
 import { adminService } from '@/services/adminService';
-import { unwrap } from '@getrentos/shared';
+import { unwrap } from '@sureground/shared';
 import { adminKeys } from '@/lib/queryKeys';
 import { useAdminSearchParam } from '@/lib/readAdminSearchParam';
 import type { PlanTier, PlatformUser, UserAccountStatus, PlatformRole } from '@/types/admin';

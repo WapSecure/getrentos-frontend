@@ -15,10 +15,10 @@ import {
   TabsTrigger,
   useToast,
   PageHeader,
-} from '@getrentos/ui';
-import { DocumentUploadDialog } from '@getrentos/ui';
-import { DocumentRowActions } from '@getrentos/ui';
-import { FilePreviewDialog } from '@getrentos/ui';
+} from '@sureground/ui';
+import { DocumentUploadDialog } from '@sureground/ui';
+import { DocumentRowActions } from '@sureground/ui';
+import { FilePreviewDialog } from '@sureground/ui';
 import { formatDate } from '@/lib/format';
 import type { AgentDocument } from '@/types/agent';
 import { agentKeys } from '@/lib/queryKeys';

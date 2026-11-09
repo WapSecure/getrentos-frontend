@@ -3,12 +3,12 @@ import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
 import type { ShortletBookingStatus, ShortletCancellationPolicy } from './shortlets';
 import type { VideoOnSiteReport } from '../filmedOnSite';
-import type { PayoutSentTo } from '@getrentos/shared';
+import type { PayoutSentTo } from '@sureground/shared';
 
 /**
  * Hosting short stays: the host's side of /host/shortlets. Owners, landlords,
  * realtors and agents with a mandate all host through the same API, on any
- * plan. GetRentos takes a percentage of each stay from the host payout.
+ * plan. Sureground takes a percentage of each stay from the host payout.
  */
 
 export type PricingMode = 'PER_NIGHT' | 'FLAT_STAY';
@@ -382,7 +382,7 @@ export const BOOKING_VIEW_QUERY: Record<BookingView, string> = {
 const page = (p: number, size: number, extra = '') =>
   `?page=${p}&pageSize=${size}${extra ? `&${extra}` : ''}`;
 
-/** The GetRentos fee on a booking made now; taken from the host payout, never charged to guests. */
+/** The Sureground fee on a booking made now; taken from the host payout, never charged to guests. */
 export interface HostFees {
   commissionPct: number;
   standardCommissionPct: number;
@@ -396,8 +396,8 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 export function feeNote(f: HostFees): string {
   const now =
     f.commissionPct === 0
-      ? 'GetRentos takes no fee on new bookings right now'
-      : `GetRentos fee: ${f.commissionPct}% of each stay, taken from your payout`;
+      ? 'Sureground takes no fee on new bookings right now'
+      : `Sureground fee: ${f.commissionPct}% of each stay, taken from your payout`;
   let launch = '';
   if (f.introEndsAt && f.standardCommissionPct !== f.commissionPct) {
     // The launch rate ends at midnight Lagos (UTC+1, no DST); name the last day it applies.

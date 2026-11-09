@@ -15,8 +15,8 @@ import {
   Tabs,
   TabsList,
   TabsTrigger,
-} from '@getrentos/ui';
-import { unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { unwrap } from '@sureground/shared';
 import { useAdminUser } from '../../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
 import { adminLandService, type ListLandDiligenceParams } from '@/services/adminLandService';

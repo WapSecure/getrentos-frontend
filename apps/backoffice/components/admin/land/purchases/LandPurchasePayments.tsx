@@ -1,6 +1,6 @@
 import { Banknote, Check, RotateCcw } from 'lucide-react';
-import { Badge, Button } from '@getrentos/ui';
-import { formatCurrency, formatDate } from '@getrentos/shared';
+import { Badge, Button } from '@sureground/ui';
+import { formatCurrency, formatDate } from '@sureground/shared';
 import type {
   LandEscrowRelease,
   LandPurchasePayment,

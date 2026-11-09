@@ -1,6 +1,6 @@
 'use client';
 
-import { Skeleton } from '@getrentos/ui';
+import { Skeleton } from '@sureground/ui';
 import { Suspense } from 'react';
 import { useParams } from 'next/navigation';
 import { ResaleConveyanceView } from '@/components/land/sales/ResaleConveyanceView';

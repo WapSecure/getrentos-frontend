@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 import { Eye } from 'lucide-react-native';
-import { Text, useTheme } from '@getrentos/ui-native';
+import { Text, useTheme } from '@sureground/ui-native';
 
 /**
  * The estate's note about somebody it matched but did not refuse.

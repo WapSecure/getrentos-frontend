@@ -9,7 +9,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
   IconButton,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 
 interface BulkActionsWishlist {
   id: string;

@@ -1,5 +1,5 @@
 import { View } from 'react-native';
-import { Card, Price, Text, useTheme } from '@getrentos/ui-native';
+import { Card, Price, Text, useTheme } from '@sureground/ui-native';
 import type { Commission } from '@/lib/api/realtor';
 import { formatDate } from '@/lib/format';
 import { StatusPill } from '@/components/host/HostUI';

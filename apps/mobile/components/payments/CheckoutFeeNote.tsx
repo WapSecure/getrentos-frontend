@@ -1,4 +1,4 @@
-import { Text } from '@getrentos/ui-native';
+import { Text } from '@sureground/ui-native';
 import { useCheckoutFee } from '@/hooks/useCheckoutFee';
 import type { PaymentProvider } from '@/lib/api/paymentStatus';
 import { formatNaira } from '@/lib/format';

@@ -8,7 +8,7 @@ import {
   type PlaceKind,
   type PlaceSuggestion,
   type VerifiedAddress,
-} from '@getrentos/shared/address';
+} from '@sureground/shared/address';
 import { useTheme } from '../theme';
 import { Text } from './Text';
 import { TextField } from './TextField';
@@ -40,7 +40,7 @@ const DEBOUNCE_MS = 300;
 
 /**
  * Address search with Google Places suggestions, the native twin of
- * AddressSearch in @getrentos/ui. Suggestions show in a card under the field;
+ * AddressSearch in @sureground/ui. Suggestions show in a card under the field;
  * a pick becomes a checked address (street, area, LGA, state and map pin).
  * Put it in a ScrollView with keyboardShouldPersistTaps="handled" so a tap on
  * a suggestion is not swallowed by the keyboard closing.

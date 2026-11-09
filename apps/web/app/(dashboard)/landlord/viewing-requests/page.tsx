@@ -18,7 +18,7 @@ import {
   Skeleton,
   useToast,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { landlordService } from '@/services/landlordService';
 import { VideoCallButton } from '@/components/shared/VideoCallButton';
 import { unwrap } from '@/lib/apiHelpers';

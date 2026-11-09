@@ -11,7 +11,7 @@ import {
   EmptyState,
   IconButton,
   type BadgeVariant,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { Bed, Bath, UserPlus, DoorClosed, MoreVertical, ReceiptText } from 'lucide-react';
 import { formatCurrency } from '@/lib/format';
 import { rentSuffix } from '@/lib/leaseTerm';

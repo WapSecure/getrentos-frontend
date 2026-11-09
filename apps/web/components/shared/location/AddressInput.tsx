@@ -1,6 +1,6 @@
 'use client';
 
-import { AddressSearch, type AddressSearchProps } from '@getrentos/ui';
+import { AddressSearch, type AddressSearchProps } from '@sureground/ui';
 import { placesService } from '@/services/placesService';
 
 export type AddressInputProps = Omit<AddressSearchProps, 'search' | 'resolve'>;

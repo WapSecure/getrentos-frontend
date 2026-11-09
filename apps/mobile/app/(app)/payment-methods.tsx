@@ -11,7 +11,7 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   paymentsApi,
@@ -62,7 +62,7 @@ export default function PaymentMethods() {
       <DetailScreenHeader
         eyebrow="Payments"
         title="Payment methods"
-        subtitle="How paying works on GetRentos"
+        subtitle="How paying works on Sureground"
         onBack={() => goBack()}
       />
 
@@ -82,7 +82,7 @@ export default function PaymentMethods() {
       >
         <FormAlert
           tone="info"
-          message="You choose how to pay (card, bank transfer or USSD) on Paystack’s or Monnify’s secure page each time you pay. GetRentos never sees or keeps your card details, so there is nothing to add here."
+          message="You choose how to pay (card, bank transfer or USSD) on Paystack’s or Monnify’s secure page each time you pay. Sureground never sees or keeps your card details, so there is nothing to add here."
         />
 
         {methods.length > 0 ? (

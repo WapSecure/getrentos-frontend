@@ -22,7 +22,7 @@ import {
   Skeleton,
   Text,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { StatusPill, Thumb } from '@/components/host/HostUI';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { useMyStays } from '@/components/shortlet/useMyStays';

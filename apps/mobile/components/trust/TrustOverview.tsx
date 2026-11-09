@@ -14,7 +14,7 @@ import {
   Skeleton,
   Text,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   trustApi,
@@ -236,7 +236,7 @@ export function TrustOverview({
               <View style={{ padding: spacing.lg, paddingTop: 0, gap: spacing.md }}>
                 <Text variant="caption" color="mutedForeground">
                   Identity says who you are: your NIN checked against official records and a live
-                  selfie, checked by Smile ID. It is the same in every part of GetRentos.
+                  selfie, checked by Smile ID. It is the same in every part of Sureground.
                 </Text>
                 <Text variant="caption" color="mutedForeground">
                   Your trust score says how much history backs you. Checks that do not apply to you

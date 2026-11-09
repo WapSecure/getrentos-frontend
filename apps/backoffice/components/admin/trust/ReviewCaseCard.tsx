@@ -1,8 +1,8 @@
 'use client';
 
 import { ShieldCheck, UserRoundSearch } from 'lucide-react';
-import { Badge, Button, Card, type BadgeVariant } from '@getrentos/ui';
-import { formatDate } from '@getrentos/shared';
+import { Badge, Button, Card, type BadgeVariant } from '@sureground/ui';
+import { formatDate } from '@sureground/shared';
 import type {
   TrustReviewCasePriority,
   TrustReviewCaseStatus,

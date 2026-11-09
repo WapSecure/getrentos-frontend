@@ -1,7 +1,7 @@
 'use client';
 
 import * as RadixDropdown from '@radix-ui/react-dropdown-menu';
-import { cn } from '@getrentos/shared';
+import { cn } from '@sureground/shared';
 
 export const DropdownMenu = RadixDropdown.Root;
 export const DropdownMenuTrigger = RadixDropdown.Trigger;

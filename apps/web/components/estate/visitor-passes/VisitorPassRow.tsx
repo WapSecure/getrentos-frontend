@@ -1,6 +1,6 @@
 'use client';
 
-import { Badge, Button } from '@getrentos/ui';
+import { Badge, Button } from '@sureground/ui';
 import { IdCheckDialog } from '@/components/estate/visitor-passes/IdCheckDialog';
 import type { VisitorPass } from '@/types/estate';
 

@@ -3,10 +3,10 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { ClipboardCheck, CircleAlert, FileSearch, MapPin, UserRound } from 'lucide-react';
-import { Badge } from '@getrentos/ui';
-import { EmptyState } from '@getrentos/ui';
-import { ListSkeleton } from '@getrentos/ui';
-import { Pagination } from '@getrentos/ui';
+import { Badge } from '@sureground/ui';
+import { EmptyState } from '@sureground/ui';
+import { ListSkeleton } from '@sureground/ui';
+import { Pagination } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
 import { homeManagementKeys } from '@/lib/queryKeys';

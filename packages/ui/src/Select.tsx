@@ -3,7 +3,7 @@
 import { useId, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import * as RadixPopover from '@radix-ui/react-popover';
 import { Check, ChevronDown, Search, X } from 'lucide-react';
-import { cn } from '@getrentos/shared';
+import { cn } from '@sureground/shared';
 import { controlShell, type ControlSize } from './controlStyles';
 import { useFieldControl } from './fieldContext';
 
@@ -135,9 +135,7 @@ export function Select({
           // names it; a bare Select is named by its ariaLabel, or failing that
           // by the value it shows (as it was when it was a plain button).
           role="combobox"
-          aria-label={
-            ariaLabel && !field.labelId ? `${visibleLabel} ${ariaLabel}` : undefined
-          }
+          aria-label={ariaLabel && !field.labelId ? `${visibleLabel} ${ariaLabel}` : undefined}
           aria-labelledby={field.labelId ?? (ariaLabel ? undefined : valueId)}
           aria-haspopup="listbox"
           aria-expanded={open}

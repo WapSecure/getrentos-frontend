@@ -11,7 +11,7 @@ import {
   Skeleton,
   Text,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { realtorApi } from '@/lib/api/realtor';
 import { ApiError } from '@/lib/api/client';
@@ -20,7 +20,7 @@ import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { StatusPill } from '@/components/host/HostUI';
 import { CommissionRow } from '@/components/realtor/CommissionRow';
 import { goBack } from '@/lib/goBack';
-import { PAYOUT_ARRIVAL_NOTE, PAYOUT_FAILED_NEXT_STEP } from '@getrentos/shared';
+import { PAYOUT_ARRIVAL_NOTE, PAYOUT_FAILED_NEXT_STEP } from '@sureground/shared';
 
 const LABEL = {
   pending: { label: 'On its way', tone: 'info' },

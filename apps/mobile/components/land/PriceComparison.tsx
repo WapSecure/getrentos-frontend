@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
-import { percentileWords } from '@getrentos/shared';
-import { Card, Divider, PressableScale, Progress, Text, useTheme } from '@getrentos/ui-native';
+import { percentileWords } from '@sureground/shared';
+import { Card, Divider, PressableScale, Progress, Text, useTheme } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { landApi } from '@/lib/api/land';
 import { formatNaira } from '@/lib/format';
@@ -78,7 +78,7 @@ export function PriceComparison({ listingId }: { listingId: string }) {
         </PressableScale>
       ))}
       <Text variant="caption" color="mutedForeground">
-        Area-by-area land prices are on getrentos.com.
+        Area-by-area land prices are on getsureground.io.
       </Text>
     </Card>
   );

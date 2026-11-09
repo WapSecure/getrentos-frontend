@@ -1,5 +1,5 @@
 import { apiDownload, apiFetch } from './client';
-import type { BadgeTone } from '@getrentos/ui-native';
+import type { BadgeTone } from '@sureground/ui-native';
 
 /**
  * The landlord financials beyond the overview: budgets against actual spend,
@@ -104,7 +104,7 @@ export interface PayoutSchedule {
     enabled: boolean;
     nextRunAt: string;
   } | null;
-  /** Whole naira GetRentos holds for the landlord. */
+  /** Whole naira Sureground holds for the landlord. */
   balance: number;
   recent: PayoutRecord[];
 }
@@ -153,10 +153,10 @@ export function monthsAgo(n: number, from = new Date()): string {
 export type ReportExport = 'rent-roll' | 'pnl' | 'arrears' | 'statements';
 
 export const EXPORTS: Record<ReportExport, { label: string; file: string }> = {
-  'rent-roll': { label: 'Rent roll', file: 'getrentos-rent-roll.csv' },
-  pnl: { label: 'Income & expenses', file: 'getrentos-income-expenses.csv' },
-  arrears: { label: 'Arrears', file: 'getrentos-arrears.csv' },
-  statements: { label: 'Statement history', file: 'getrentos-statements.csv' },
+  'rent-roll': { label: 'Rent roll', file: 'sureground-rent-roll.csv' },
+  pnl: { label: 'Income & expenses', file: 'sureground-income-expenses.csv' },
+  arrears: { label: 'Arrears', file: 'sureground-arrears.csv' },
+  statements: { label: 'Statement history', file: 'sureground-statements.csv' },
 };
 
 export function exportPath(kind: ReportExport, range?: { from: string; to: string }) {

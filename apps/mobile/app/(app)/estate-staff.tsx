@@ -14,7 +14,7 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { AddGatemanSheet, StaffRow } from '@/components/estate/staff-setup/StaffUI';
 import { useEstate } from '@/hooks/useEstate';
@@ -147,7 +147,7 @@ export default function EstateStaff() {
                   style={{ marginBottom: spacing.md }}
                 >
                   Gatemen verify visitor passes and log arrivals at your gates using their own
-                  GetRentos account.
+                  Sureground account.
                 </Text>
               ) : null
             }
@@ -169,7 +169,7 @@ export default function EstateStaff() {
               <EmptyState
                 icon={<ShieldCheck size={34} color={colors.mutedForeground} />}
                 title="No gatemen yet"
-                description="Add the people who run your gates. They need a GetRentos account, then they can verify visitor passes from their phone."
+                description="Add the people who run your gates. They need a Sureground account, then they can verify visitor passes from their phone."
                 action={<Button label="Add a gateman" onPress={() => setAdding(true)} />}
               />
             }

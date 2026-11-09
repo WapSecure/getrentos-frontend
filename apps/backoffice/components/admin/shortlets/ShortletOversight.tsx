@@ -34,7 +34,7 @@ import {
   useToast,
   type BadgeVariant,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import {
   BedDouble,
   Ban,
@@ -56,8 +56,8 @@ import {
   Wallet,
   XCircle,
 } from 'lucide-react';
-import { NairaSign } from '@getrentos/ui/NairaSign';
-import { formatCurrency, formatDate, unwrap, humaniseEnum } from '@getrentos/shared';
+import { NairaSign } from '@sureground/ui/NairaSign';
+import { formatCurrency, formatDate, unwrap, humaniseEnum } from '@sureground/shared';
 import { adminShortletService } from '@/services/adminShortletService';
 import { HostCancellationFeesPanel } from './HostCancellationFeesPanel';
 import { GuestPromiseDecisionDialog } from './GuestPromiseDecisionDialog';
@@ -1990,7 +1990,7 @@ function DisputeThreadModal({
             <Textarea
               value={draft}
               onChange={(e) => onDraftChange(e.target.value)}
-              placeholder="Reply as GetRentos support…"
+              placeholder="Reply as Sureground support…"
               aria-label="Reply to the dispute"
               rows={2}
             />

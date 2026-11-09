@@ -54,7 +54,7 @@ export interface PasskeySummary {
 /** One device the person is signed in on ("Where you're signed in"). */
 export interface AccountSession {
   id: string;
-  /** Readable device, e.g. "GetRentos app on iPhone". */
+  /** Readable device, e.g. "Sureground app on iPhone". */
   device: string;
   ipAddress?: string;
   lastActiveAt: string;

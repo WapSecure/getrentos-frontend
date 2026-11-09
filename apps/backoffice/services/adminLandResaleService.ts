@@ -1,4 +1,4 @@
-import { authFetch, safeCall } from '@getrentos/shared';
+import { authFetch, safeCall } from '@sureground/shared';
 
 /** A condition precedent on a land resale (§9.3); mirrors the backend DTO. */
 export interface LandResaleCondition {

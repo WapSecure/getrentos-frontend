@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { CalendarCheck } from 'lucide-react';
-import { Badge, EmptyState, PageErrorState, PageLoadingState, Button } from '@getrentos/ui';
+import { Badge, EmptyState, PageErrorState, PageLoadingState, Button } from '@sureground/ui';
 import { renterService } from '@/services/renterService';
 import { VideoCallButton } from '@/components/shared/VideoCallButton';
 import { unwrap } from '@/lib/apiHelpers';

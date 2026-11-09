@@ -17,7 +17,7 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   FREQUENCIES,
@@ -35,7 +35,7 @@ import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
 /**
- * Automatic payouts: sweep the balance GetRentos holds to the landlord's bank
+ * Automatic payouts: sweep the balance Sureground holds to the landlord's bank
  * on a schedule, keeping a reserve back. Anything above the auto-payout limit
  * waits for approval on an owner statement.
  */
@@ -113,7 +113,7 @@ function Settings({ data }: { data: PayoutSchedule }) {
       <Card elevated style={{ gap: spacing.md }}>
         <View style={{ gap: 2 }}>
           <Text variant="caption" color="mutedForeground">
-            Held by GetRentos for you
+            Held by Sureground for you
           </Text>
           <Price amount={data.balance} variant="display" />
         </View>

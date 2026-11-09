@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 import { headers } from 'next/headers';
-import { ThemeProvider, QueryProvider } from '@getrentos/ui';
+import { ThemeProvider, QueryProvider } from '@sureground/ui';
 import { StepUpDialog } from '@/components/security/StepUpDialog';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'GetRentos Backoffice',
-  description: 'Internal operations console for GetRentos staff.',
+  title: 'Sureground Backoffice',
+  description: 'Internal operations console for Sureground staff.',
 };
 
 /** Reads the proxy's per-request CSP nonce (see proxy.ts) for the theme script; this makes every page dynamic. */

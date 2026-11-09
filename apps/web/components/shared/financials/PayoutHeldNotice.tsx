@@ -126,7 +126,7 @@ export function PayoutHeldNotice({
         <>
           <p className="text-xs text-muted-foreground">
             Payouts of {formatCurrency(release?.thresholdAtRequest ?? 0)} or more are released by
-            two people, so this one is waiting for a second GetRentos check before it is sent.
+            two people, so this one is waiting for a second Sureground check before it is sent.
           </p>
           <p className="text-xs text-muted-foreground">
             Your money is unaffected. Nothing has left the account, and nothing will until somebody

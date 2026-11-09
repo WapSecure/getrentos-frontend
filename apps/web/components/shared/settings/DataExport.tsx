@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Download, FileText, FileSpreadsheet, Check } from 'lucide-react';
-import { Alert, Button, RadioGroup } from '@getrentos/ui';
+import { Alert, Button, RadioGroup } from '@sureground/ui';
 import { authFetch, safeCall, unwrap } from '@/lib/apiHelpers';
 import { downloadCsv, printHtml, escapeHtml } from '@/lib/export';
 
@@ -50,11 +50,11 @@ export const DataExport = () => {
             rows.push([section, String(value)]);
           }
         }
-        downloadCsv(`getrentos-data-export-${date}.csv`, ['Section', 'Data'], rows);
+        downloadCsv(`sureground-data-export-${date}.csv`, ['Section', 'Data'], rows);
       } else {
         printHtml(
-          'GetRentos data export',
-          `<h1>GetRentos data export</h1><p class="meta">Exported on ${new Date().toLocaleDateString()}</p>${buildSectionsHtml(data ?? {})}`
+          'Sureground data export',
+          `<h1>Sureground data export</h1><p class="meta">Exported on ${new Date().toLocaleDateString()}</p>${buildSectionsHtml(data ?? {})}`
         );
       }
       setCompleted(true);

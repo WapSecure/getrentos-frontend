@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { ArrowRight, Building2, MapPin } from 'lucide-react';
-import { Badge, EmptyState, Pagination, SearchInput, Select, Skeleton } from '@getrentos/ui';
+import { Badge, EmptyState, Pagination, SearchInput, Select, Skeleton } from '@sureground/ui';
 import { estateStorefrontService } from '@/services/estateMarketplaceService';
 import { unwrap, type Paginated } from '@/lib/apiHelpers';
 import { ALL_NIGERIAN_CITIES } from '@/lib/constants/locations';
@@ -121,7 +121,7 @@ export const EstatesDirectoryBrowser = ({
     <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       <header className="max-w-2xl">
         <h1 className="text-3xl font-bold tracking-[-0.02em] text-foreground sm:text-4xl">
-          Estates on GetRentos
+          Estates on Sureground
         </h1>
         <p className="mt-3 text-muted-foreground">
           Browse the properties marketed by an estate: the ones its own team lists, and the ones its

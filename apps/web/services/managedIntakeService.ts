@@ -38,7 +38,7 @@ export interface ManagedProposal {
   expiresAt: string | null;
 }
 
-/** An owner's request for GetRentos Managed, from first ask to signed mandate. */
+/** An owner's request for Sureground Managed, from first ask to signed mandate. */
 export interface ManagedIntake {
   id: string;
   status: ManagedIntakeStatus;

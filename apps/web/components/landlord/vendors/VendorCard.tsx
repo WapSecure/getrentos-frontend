@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { CalendarClock, Pencil, Phone, Power, Trash2 } from 'lucide-react';
-import { Badge, IconButton } from '@getrentos/ui';
+import { Badge, IconButton } from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 import { StarRating } from '@/components/landlord/vendors/StarRating';
 import type { Vendor } from '@/types/landlord';

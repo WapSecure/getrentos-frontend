@@ -2,7 +2,7 @@ import { apiFetch, apiUpload } from './client';
 import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
 import type { TrustProfile } from './buyerTrustProfile';
-import type { VideoCallJoin } from '@getrentos/shared';
+import type { VideoCallJoin } from '@sureground/shared';
 import type { VideoOnSiteReport } from '../filmedOnSite';
 
 /**

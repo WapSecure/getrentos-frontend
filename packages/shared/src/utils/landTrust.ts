@@ -13,7 +13,7 @@ export const LAND_ASSURANCE_TIER_LABELS: Record<LandAssuranceTier, string> = {
 };
 
 export const LAND_ASSURANCE_TIER_DESCRIPTIONS: Record<LandAssuranceTier, string> = {
-  BASIC: 'GetRentos reviewed the ownership documents and the diligence checklist.',
+  BASIC: 'Sureground reviewed the ownership documents and the diligence checklist.',
   STANDARD: 'Includes an official registry search on the title.',
   PREMIUM: 'Registry-searched, with checks by an independent professional.',
 };
@@ -33,7 +33,7 @@ export interface LandTrustLabel {
   /** The checklist items the label rests on. */
   scope: string[];
   checkedAt: string;
-  /** GETRENTOS, or the outside professional's role (SURVEYOR, LAWYER, …). */
+  /** SUREGROUND, or the outside professional's role (SURVEYOR, LAWYER, …). */
   checkedBy: string[];
 }
 
@@ -45,14 +45,14 @@ export interface LandNotVerifiedItem {
 }
 
 export const LAND_TRUST_SOURCE_LABELS: Record<string, string> = {
-  GETRENTOS: 'GetRentos',
+  SUREGROUND: 'Sureground',
   SURVEYOR: 'an independent surveyor',
   LAWYER: 'an independent lawyer',
   VALUER: 'an independent valuer',
   INSPECTOR: 'an independent inspector',
 };
 
-/** "GetRentos and an independent surveyor" */
+/** "Sureground and an independent surveyor" */
 export const checkedByText = (checkedBy: string[]) =>
   checkedBy.map((source) => LAND_TRUST_SOURCE_LABELS[source] ?? source).join(' and ');
 

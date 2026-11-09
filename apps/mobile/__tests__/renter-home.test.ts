@@ -6,13 +6,13 @@ import {
   type DepositHold,
   type TenantDeposit,
 } from '@/lib/api/renterHome';
-import { depositHolderText, noDeductionsText } from '@getrentos/shared';
+import { depositHolderText, noDeductionsText } from '@sureground/shared';
 
 const hold = (over: Partial<DepositHold>): DepositHold => ({
   id: 'h',
   amount: 250000,
   status: 'HELD',
-  heldByGetRentos: false,
+  heldBySureground: false,
   heldBy: null,
   takenAt: '2026-10-31',
   returnedAt: null,
@@ -35,7 +35,7 @@ describe('renter home helpers', () => {
       propertyTitle: 'p',
       unitName: 'u',
       agreedAmount: 1,
-      paidThroughGetRentos: null,
+      paidThroughSureground: null,
     };
     const list: TenantDeposit[] = [
       { ...base, leaseId: 'a', hold: null },
@@ -56,13 +56,13 @@ describe('renter home helpers', () => {
   });
 
   it('names who holds the deposit without a capitalised "Your"', () => {
-    expect(depositHolderText({ heldByGetRentos: false, heldBy: 'Your landlord' })).toMatch(
+    expect(depositHolderText({ heldBySureground: false, heldBy: 'Your landlord' })).toMatch(
       /^Held by your landlord\./
     );
-    expect(depositHolderText({ heldByGetRentos: false, heldBy: 'Ada Homes Ltd' })).toMatch(
+    expect(depositHolderText({ heldBySureground: false, heldBy: 'Ada Homes Ltd' })).toMatch(
       /^Held by Ada Homes Ltd\./
     );
-    expect(depositHolderText({ heldByGetRentos: true })).toMatch(/^Held by GetRentos/);
+    expect(depositHolderText({ heldBySureground: true })).toMatch(/^Held by Sureground/);
   });
 
   it('speaks of a returned deposit in the past tense', () => {

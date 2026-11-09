@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Heart, ImageOff } from 'lucide-react-native';
-import { Card, ListSkeleton, Price, QueryState, Text, useTheme } from '@getrentos/ui-native';
+import { Card, ListSkeleton, Price, QueryState, Text, useTheme } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { useOptimisticMutation } from '@/lib/query/optimistic';
 import { shortletsApi, type ShortletListing } from '@/lib/api/shortlets';

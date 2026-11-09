@@ -1,7 +1,15 @@
 import { useState } from 'react';
 import { Switch, View } from 'react-native';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Badge, Button, Skeleton, Text, TextField, useTheme, useToast } from '@getrentos/ui-native';
+import {
+  Badge,
+  Button,
+  Skeleton,
+  Text,
+  TextField,
+  useTheme,
+  useToast,
+} from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { ApiError, errorMessage } from '@/lib/api/client';
 import { landlordApi, type LandlordMaintenance } from '@/lib/api/landlord';

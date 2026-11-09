@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 import { Eye } from 'lucide-react-native';
-import { Text, useTheme } from '@getrentos/ui-native';
+import { Text, useTheme } from '@sureground/ui-native';
 import { describeWatchlistBasis } from '@/components/gateman/WatchlistBlockedNotice';
 import type { WatchlistScreening } from '@/lib/gateman/watchlistRefusal';
 

@@ -12,7 +12,7 @@ import {
   DialogTitle,
   Field,
   Input,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorService } from '@/services/realtorService';
 import {
@@ -100,7 +100,7 @@ export const AddClientModal = ({
     checkState === 'ineligible'
       ? 'This account exists but is not registered as an owner or landlord.'
       : checkState === 'notfound'
-        ? 'No GetRentos account was found for that email. Ask the client to create an account first.'
+        ? 'No Sureground account was found for that email. Ask the client to create an account first.'
         : checkState === 'error'
           ? 'We couldn’t verify that email. Please try again.'
           : null;
@@ -121,7 +121,7 @@ export const AddClientModal = ({
         <div className="p-4 pr-12 border-b border-border">
           <DialogTitle className="font-semibold text-foreground">Add client</DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground mt-0.5">
-            Add an owner or landlord by their GetRentos account email
+            Add an owner or landlord by their Sureground account email
           </DialogDescription>
         </div>
 
@@ -168,7 +168,7 @@ export const AddClientModal = ({
           ) : (
             <p className="text-xs text-muted-foreground leading-relaxed">
               Enter the client’s email and we’ll verify their account before sending an invitation.
-              They must be registered as an owner or landlord on GetRentos.
+              They must be registered as an owner or landlord on Sureground.
             </p>
           )}
         </div>

@@ -1,9 +1,9 @@
 'use client';
 
 import { Ban, CheckCircle2, ShieldAlert, BadgeCheck } from 'lucide-react';
-import { Dialog, DialogContent, DialogTitle } from '@getrentos/ui';
-import { Badge, Button } from '@getrentos/ui';
-import { getInitials, formatDate, formatRelativeTime } from '@getrentos/shared';
+import { Dialog, DialogContent, DialogTitle } from '@sureground/ui';
+import { Badge, Button } from '@sureground/ui';
+import { getInitials, formatDate, formatRelativeTime } from '@sureground/shared';
 import type { PlanTier, PlatformUser, UserAccountStatus } from '@/types/admin';
 import { roleLabel } from '@/lib/roleLabels';
 import { UserSecurityActions } from './UserSecurityActions';

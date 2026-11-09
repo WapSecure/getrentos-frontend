@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { tierAtLeast } from '@getrentos/shared';
+import { tierAtLeast } from '@sureground/shared';
 import { subscriptionService } from '@/services/subscriptionService';
 import { unwrap } from '@/lib/apiHelpers';
 import { subscriptionKeys } from '@/lib/queryKeys';

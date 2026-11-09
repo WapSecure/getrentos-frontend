@@ -10,7 +10,7 @@ type ImageRemotePattern = {
 
 /**
  * Derive the image optimizer allowlist from the configured API origin.
- * Avatar/verification images are served by the GetRentos API, so the API
+ * Avatar/verification images are served by the Sureground API, so the API
  * host must be allowed for `next/image` to optimize them.
  */
 function imageRemotePatterns(): ImageRemotePattern[] {
@@ -37,7 +37,7 @@ function imageRemotePatterns(): ImageRemotePattern[] {
 
 const nextConfig: NextConfig = {
   distDir: process.env.NEXT_DIST_DIR ?? '.next',
-  transpilePackages: ['@getrentos/shared', '@getrentos/ui'],
+  transpilePackages: ['@sureground/shared', '@sureground/ui'],
   /**
    * Declares this app to the API as `x-client-app: backoffice`.
    *

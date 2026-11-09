@@ -1,6 +1,6 @@
 'use client';
 
-import { CurrencyInput, Field } from '@getrentos/ui';
+import { CurrencyInput, Field } from '@sureground/ui';
 
 interface PropertyValueFieldsProps {
   estimatedValue: string;

@@ -30,7 +30,7 @@ export interface LandClosingChecklistItem {
 export interface LandPerfectionStep {
   key: string;
   label: string;
-  owner: 'DEVELOPER' | 'BUYER_LAWYER' | 'GETRENTOS';
+  owner: 'DEVELOPER' | 'BUYER_LAWYER' | 'SUREGROUND';
   status: 'NOT_STARTED' | 'SUBMITTED' | 'APPROVED' | 'REJECTED' | 'NOT_APPLICABLE';
   dueDate?: string;
   submittedAt?: string;

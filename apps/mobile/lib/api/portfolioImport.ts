@@ -4,7 +4,7 @@ import { apiFetch } from './client';
 import type { PickedFile } from './documents';
 
 /**
- * Bringing a managed property's units and tenants onto GetRentos from a
+ * Bringing a managed property's units and tenants onto Sureground from a
  * spreadsheet (web: components/agency/PortfolioImportView, TenancyImportCard).
  * Always a dry run first; a file with any error imports nothing.
  */
@@ -47,7 +47,7 @@ export interface ImportedTenancyRow {
   depositAmount: number | null;
   arrearsAmount: number | null;
   nextDueDate: string | null;
-  /** LINKED: matched to the tenant's GetRentos account by email. */
+  /** LINKED: matched to the tenant's Sureground account by email. */
   tenantAccount: 'LINKED' | 'NAME_ONLY';
 }
 

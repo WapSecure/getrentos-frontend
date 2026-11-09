@@ -1,7 +1,7 @@
 # Property Management Company (PMC) — Enterprise Scope
 
 **Status:** Scope for review · **Date:** 2026-09-30
-**Goal:** Let a property-management firm (or GetRentos itself) take over the running of a
+**Goal:** Let a property-management firm (or Sureground itself) take over the running of a
 landlord's property — including rent collection, maintenance, compliance and legal
 proceedings — while the landlord keeps ownership, visibility and control.
 
@@ -36,7 +36,7 @@ What exists today:
 3. **No agency workspace.** The `/landlord/*` UI is a single-owner experience. There is no client switcher, no portfolio-of-portfolios, no org/team management UI.
 4. **No client-money model.** Grep for `trustAccount | clientAccount | clientMoney` returns **zero**. Statements exist; segregated client funds, ledger and reconciliation do not.
 5. **No engagement/agreement artefact.** There is no management-agreement document tying an owner to a firm (fees, term, scope, termination) — `EstatePropertyAgreement` is estate-specific. `POWER_OF_ATTORNEY` is only a _label_ on an authority row, with no document behind it.
-6. **GetRentos-as-manager** has no representation at all (no platform-agency organisation, no servicing product).
+6. **Sureground-as-manager** has no representation at all (no platform-agency organisation, no servicing product).
 7. **Legal work stops at eviction** — no rent recovery, no court/case tracking, no lawyer/advocate record, no costs tracking.
 
 ---
@@ -56,13 +56,13 @@ What exists today:
 | **Lawyer / advocate**             | Handles recovery, eviction, court                                    | **new**                                                                 |
 | **Tenant / resident**             | Occupies under a lease                                               | exists                                                                  |
 | **Buyer / renter**                | Prospective                                                          | exists                                                                  |
-| **GetRentos (as manager)**        | The platform itself as managing agent                                | **new servicing mode**                                                  |
-| **GetRentos ops**                 | Backoffice: approve mandates, adjudicate, audit                      | exists                                                                  |
+| **Sureground (as manager)**       | The platform itself as managing agent                                | **new servicing mode**                                                  |
+| **Sureground ops**                | Backoffice: approve mandates, adjudicate, audit                      | exists                                                                  |
 
 **Two operator modes must both work:**
 
 - **Mode A — Owner self-manages** (today's behaviour, must not regress).
-- **Mode B — Owner appoints a manager** (PMC _or_ GetRentos). Every landlord capability must work identically, but on someone else's asset, under a mandate, with the owner retaining read access and money visibility.
+- **Mode B — Owner appoints a manager** (PMC _or_ Sureground). Every landlord capability must work identically, but on someone else's asset, under a mandate, with the owner retaining read access and money visibility.
 
 ---
 
@@ -80,14 +80,14 @@ CustodyOrg (Organization AGENCY)   → the firm; authority rows attach to its me
 
 **Proposed model additions**
 
-| Model                                      | Purpose                                                                        | Key fields                                                                                                                                                                                                                                                                                                                                                                                   |
-| ------------------------------------------ | ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ManagementMandate`                        | The engagement between owner and manager (firm or GetRentos)                   | `propertyId`, `managerOrganizationId?`, `managerIsGetRentos Bool`, `ownerId`, `scope` (enum set: RENT, MAINTENANCE, LISTINGS, LEGAL, COMPLIANCE, FINANCE), `feeConfigId`, `startAt`, `endAt?`, `noticePeriodDays`, `status` (`DRAFT/PENDING_OWNER/PENDING_OPS/ACTIVE/SUSPENDED/TERMINATED/EXPIRED`), `signedByOwnerAt`, `signedByManagerAt`, `documentId`, `terminationReason`, `handoverAt` |
-| `MandateDocument` / reuse documents module | The signed agreement + POA + inventory                                         | links `ManagementMandate`, `POWER_OF_ATTORNEY` authority, `PropertyDocument`                                                                                                                                                                                                                                                                                                                 |
-| `ClientMoneyLedgerEntry`                   | Segregated ledger per owner per property (rent in, expenses out, fees, payout) | `ownerId`, `propertyId?`, `organizationId?`, `kind` (`RENT_RECEIVED/EXPENSE/ FEE/OWNER_PAYOUT/ADJUSTMENT/REFUND`), `amount`, `currency`, `refModel/refId`, `balanceAfter`, `statementId?`                                                                                                                                                                                                    |
-| `LegalCase`                                | Beyond eviction: recovery, injunction, title dispute, court tracking           | `propertyId`, `tenantId?`, `kind`, `court`, `suitNumber`, `status`, `advocateId?`, `filedAt`, `nextHearingAt`, `costs`, `outcome`                                                                                                                                                                                                                                                            |
-| `PropertyInspection`                       | Move-in/out + periodic condition reports (deposit disputes live or die here)   | `propertyId`, `unitId`, `kind` (`MOVE_IN/MOVE_OUT/PERIODIC`), `report`, `media[]`, `signedByTenantAt`                                                                                                                                                                                                                                                                                        |
-| `CashCollection`                           | Caretaker cash receipts pending reconciliation (very common in Lagos)          | `propertyId`, `collectedById`, `tenantId`, `amount`, `receivedAt`, `depositedAt?`, `status`                                                                                                                                                                                                                                                                                                  |
+| Model                                      | Purpose                                                                        | Key fields                                                                                                                                                                                                                                                                                                                                                                                    |
+| ------------------------------------------ | ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ManagementMandate`                        | The engagement between owner and manager (firm or Sureground)                  | `propertyId`, `managerOrganizationId?`, `managerIsSureground Bool`, `ownerId`, `scope` (enum set: RENT, MAINTENANCE, LISTINGS, LEGAL, COMPLIANCE, FINANCE), `feeConfigId`, `startAt`, `endAt?`, `noticePeriodDays`, `status` (`DRAFT/PENDING_OWNER/PENDING_OPS/ACTIVE/SUSPENDED/TERMINATED/EXPIRED`), `signedByOwnerAt`, `signedByManagerAt`, `documentId`, `terminationReason`, `handoverAt` |
+| `MandateDocument` / reuse documents module | The signed agreement + POA + inventory                                         | links `ManagementMandate`, `POWER_OF_ATTORNEY` authority, `PropertyDocument`                                                                                                                                                                                                                                                                                                                  |
+| `ClientMoneyLedgerEntry`                   | Segregated ledger per owner per property (rent in, expenses out, fees, payout) | `ownerId`, `propertyId?`, `organizationId?`, `kind` (`RENT_RECEIVED/EXPENSE/ FEE/OWNER_PAYOUT/ADJUSTMENT/REFUND`), `amount`, `currency`, `refModel/refId`, `balanceAfter`, `statementId?`                                                                                                                                                                                                     |
+| `LegalCase`                                | Beyond eviction: recovery, injunction, title dispute, court tracking           | `propertyId`, `tenantId?`, `kind`, `court`, `suitNumber`, `status`, `advocateId?`, `filedAt`, `nextHearingAt`, `costs`, `outcome`                                                                                                                                                                                                                                                             |
+| `PropertyInspection`                       | Move-in/out + periodic condition reports (deposit disputes live or die here)   | `propertyId`, `unitId`, `kind` (`MOVE_IN/MOVE_OUT/PERIODIC`), `report`, `media[]`, `signedByTenantAt`                                                                                                                                                                                                                                                                                         |
+| `CashCollection`                           | Caretaker cash receipts pending reconciliation (very common in Lagos)          | `propertyId`, `collectedById`, `tenantId`, `amount`, `receivedAt`, `depositedAt?`, `status`                                                                                                                                                                                                                                                                                                   |
 
 **Reuse, don't rebuild:** `ManagementFeeConfig` (fees), `OwnerStatement` (reporting/payout),
 `EvictionCase` (fold into `LegalCase` or keep and generalise), `Organization`,
@@ -123,7 +123,7 @@ today's `LIST | MANAGE | TRANSACT`.
 ## 4. End-to-end engagement lifecycle
 
 ```
-1. DISCOVER      Owner finds a firm (directory / invite) or opts into GetRentos Managed
+1. DISCOVER      Owner finds a firm (directory / invite) or opts into Sureground Managed
 2. EVALUATE      Firm profile: trust tier, track record, managed count, fees, reviews
 3. ENGAGE        Owner and firm agree scope + fees -> ManagementMandate (DRAFT)
 4. VERIFY        Firm KYC (CAC, ESVARBON/NIESV, insurance), owner KYC (NIN/BVN/title)
@@ -239,19 +239,19 @@ WHT treatment on management fees; minimum fee floors; fee on arrears recovered; 
 pro-ration on mid-month mandate start/end; fee disputes and credits. **Fees must never be
 silently netted** — every deduction appears as a line on the statement.
 
-### E11 — GetRentos as manager (the alternative)
+### E11 — Sureground as manager (the alternative)
 
 A distinct servicing product beside third-party firms:
 
-- Owner opts into **GetRentos Managed** (plan-gated as today's home-management is, but
+- Owner opts into **Sureground Managed** (plan-gated as today's home-management is, but
   positioned as full management).
-- Represented as a mandate with `managerIsGetRentos = true` (no `Organization` needed, or a
+- Represented as a mandate with `managerIsSureground = true` (no `Organization` needed, or a
   reserved platform org) so **every downstream feature is identical** — no forked logic.
 - Pricing tiers by service level (Collect-only / Collect+Maintain / Full incl. legal),
   published fee card, self-serve sign-up, ops-assigned portfolio manager, and SLA against
-  GetRentos rather than a partner.
-- Where GetRentos has no local presence, partner hand-off with the same mandate model.
-- Clear positioning in-product: "Hire a vetted manager" vs "Let GetRentos manage it".
+  Sureground rather than a partner.
+- Where Sureground has no local presence, partner hand-off with the same mandate model.
+- Clear positioning in-product: "Hire a vetted manager" vs "Let Sureground manage it".
 
 ### E12 — Trust, compliance & risk
 
@@ -278,7 +278,7 @@ timeline. Owner sees every message (no hidden side channels) — this is a trust
 Owner: net yield per property, occupancy, arrears trend, expense breakdown, capital
 history, statement archive. Manager: portfolio performance, vacant units, ageing arrears,
 SLA compliance, vendor spend, fee revenue, manager ranking, mandate churn, collection rate.
-GetRentos: verified-manager league, managed AUM, complaints, fee revenue, mandate funnel.
+Sureground: verified-manager league, managed AUM, complaints, fee revenue, mandate funnel.
 Export (CSV/PDF) and scheduled email delivery of statements.
 
 ### E15 — Backoffice / ops
@@ -313,7 +313,7 @@ regulatory reporting. Ops must be able to **take over a mandate** if a firm coll
 **Tenancy & rent realities** 18. Rent paid annually in advance (very common) — statement must smooth it monthly, not
 spike the month it lands. 19. Rent paid monthly/quarterly; part payments; "I'll pay next week" patterns. 20. Tenant pays rent to caretaker in cash with no receipt, then disputes it. 21. Tenant defaults; owner refuses to fund eviction; firm must decide and document. 22. Tenant absconds — unit re-entry, belongings, documentation. 23. Illegal occupant / squatter after lease expiry; change of locks. 24. Tenancy agreement never stamped/registered. 25. Statutory notice periods mis-served, invalidating a case. 26. Rent control / tribunal jurisdiction (Lagos: tenancy tribunal; states differ). 27. Service charge / levy arrears mixing with rent arrears. 28. Rent advance financed (rent-finance product exists) — who repays, who is landlord. 29. Subletting without consent. 30. Tenant improvements and compensation claims at exit. 31. Security deposit held by the _previous_ manager at handover. 32. Utilities in arrears (IKEDC/EKEDC, water) discovered at handover.
 
-**Legal & disputes** 33. Rent recovery action; judgment; enforcement. 34. Eviction (already modelled) at each stage: notice, tribunal, order, bailiff. 35. Title dispute where a third party claims the land — owner needs the firm's help. 36. Government acquisition/demolition notice affecting the property. 37. Insurance claim after fire/flood — manager as claimant. 38. Manager refuses/withholds funds; owner demands statements (adjudication). 39. Manager resigns mid-tenancy; urgent handover with a tenant in arrears. 40. Firm goes bankrupt/absconds — GetRentos intervenes, owner data must survive.
+**Legal & disputes** 33. Rent recovery action; judgment; enforcement. 34. Eviction (already modelled) at each stage: notice, tribunal, order, bailiff. 35. Title dispute where a third party claims the land — owner needs the firm's help. 36. Government acquisition/demolition notice affecting the property. 37. Insurance claim after fire/flood — manager as claimant. 38. Manager refuses/withholds funds; owner demands statements (adjudication). 39. Manager resigns mid-tenancy; urgent handover with a tenant in arrears. 40. Firm goes bankrupt/absconds — Sureground intervenes, owner data must survive.
 
 **Money & fees** 41. Per-collection fee vs monthly retainer vs hybrid; percentage on gross vs net. 42. Letting commission on a new tenant, renewal commission on retention. 43. Maintenance markup disclosed vs hidden (must be disclosed). 44. Expense incurred above the owner's approval threshold without consent. 45. Owner pays for a capital improvement — amortisation across statements. 46. Fees on recovered arrears (contingency) — a common Nigerian incentive. 47. VAT (7.5%) and WHT (10% company / 5% individual) on management fees. 48. Multi-currency owner (diaspora) receiving into a Nigerian account. 49. Refund of tenant deposit from a pooled account — who holds it, who pays interest. 50. Failed payout (wrong account, name mismatch) and retry.
 
@@ -410,7 +410,7 @@ because a drift nobody can act on is only half a control._
 `LegalCase` + advocate + costs, eviction generalisation, owner approval gates, enforcement
 tracking.
 
-**Phase 5 — GetRentos Managed.** Servicing tiers, published fee card, self-serve sign-up,
+**Phase 5 — Sureground Managed.** Servicing tiers, published fee card, self-serve sign-up,
 platform-as-manager mandate, ops portfolio assignment, SLA, positioning in-product.
 
 **Phase 6 — Scale & polish.** Bulk ops, saved views, exports, scheduled statement emails,
@@ -505,7 +505,7 @@ answering "who manages this property, to do what, from when to when, and who sig
 it". That object is now `ManagementMandate`.
 
 **1. The model.** `ManagementMandate` (migration `20260930160000_add_management_mandates`):
-`propertyId`, `ownerId`, `managerOrganizationId?`, `managerIsGetRentos`, `managerUserId?`,
+`propertyId`, `ownerId`, `managerOrganizationId?`, `managerIsSureground`, `managerUserId?`,
 `scope[]`, `feeConfigId?`, `startAt?`/`endAt?`, `noticePeriodDays`, `status`, agreement +
 PoA document ids, `signedByOwnerAt`/`signedByManagerAt`, submitted/decided/activated/
 notice/terminated/handover stamps and actors, `terminationReason`. Indexed on property,
@@ -550,7 +550,7 @@ grants and does not touch an agency's unrelated grants on other properties.
 - **The owner is never provisioned.** They already hold authority by owning the property;
   a revocable grant could be mistaken for a removed owner, and revoking it would revoke
   nothing.
-- **GetRentos staff accounts are excluded** (an org's `ACCOUNTANT` is not provisioned),
+- **Sureground staff accounts are excluded** (an org's `ACCOUNTANT` is not provisioned),
   keeping separation of duties between the firm's own books and a client's property.
 - **Managers owe notice; staff do not.** A non-staff manager ending early must serve the
   notice period or pass `force` with a ≥10-character reason. Staff end mandates on
@@ -592,10 +592,10 @@ is therefore unused; the behaviour it was written to guarantee is provided elsew
 Either wire it into the 5 owner-only services or delete it — leaving it implies a
 protection that isn't in the path.
 
-**(b) Staff can end a GetRentos-as-manager mandate instantly.** In `terminate()`,
+**(b) Staff can end a Sureground-as-manager mandate instantly.** In `terminate()`,
 `managerEndingEarly = isManagerSide && !isOwner && !isStaff`, so the notice rule does not
 apply to staff. For a third-party agency manager this is correct; for a mandate where
-GetRentos _is_ the manager it means any staff member can end the client's engagement with
+Sureground _is_ the manager it means any staff member can end the client's engagement with
 no notice and no second approver. That is a **policy decision, not a bug to fix quietly** —
 it needs a maker/checker gate or an explicit carve-out. Flagged, not changed.
 
@@ -639,7 +639,7 @@ following `LeaseTerminationRequest`'s precedent, so while it is open the mandate
 running and keeps its authority — a withdrawn request leaves nothing to undo, and no
 `PENDING_TERMINATION` status had to be added to the state machine.
 
-The notice rule is applied on approval **only when GetRentos is the manager**, because
+The notice rule is applied on approval **only when Sureground is the manager**, because
 there the notice period is our own commitment to the owner and skipping it needs `force`
 plus a reason of its own, exactly as it would for any other manager. For a third-party
 firm, ops may still end it at once: that is the collapsed-firm case the old bypass existed
@@ -1343,22 +1343,22 @@ purely how a business date is _rendered_ for a viewer outside the bank's timezon
 
 ## 10. Open decisions (need product/legal sign-off)
 
-1. **Fee defaults**: is GetRentos publishing standard rates (e.g. 10% of rent collected,
+1. **Fee defaults**: is Sureground publishing standard rates (e.g. 10% of rent collected,
    10% letting / 5% renewal), or leaving price to the market? Publishing constrains firms
    but hugely increases owner trust.
-2. ~~Is GetRentos a manager of record?~~ **DECIDED — YES (2026-09-30).** GetRentos will
+2. ~~Is Sureground a manager of record?~~ **DECIDED — YES (2026-09-30).** Sureground will
    act as managing agent, which means accepting the duties that come with it: state-level
    registration where required, a written client-money policy, complaints handling, and
    legal review of our standard management agreement and power of attorney **before** the
    first live mandate. Engineering consequence: the platform-as-manager must be a mandate
-   with `managerIsGetRentos = true` that reuses every third-party-manager code path —
+   with `managerIsSureground = true` that reuses every third-party-manager code path —
    no forked logic, no special casing.
 3. ~~Client money~~ **DECIDED (2026-09-30): pooled account + per-owner ledger + daily
    drift alert, documented as policy.** Funds are not segregated per owner at the bank;
    the ledger is the system of record and a daily reconciliation alerts ops on any drift.
    Because this is a policy commitment it must be written down and visible to owners —
    implemented is not the same as disclosed.
-4. **Who holds tenant deposits** — owner, manager, or GetRentos as escrow?
+4. **Who holds tenant deposits** — owner, manager, or Sureground as escrow?
 5. **Capability model**: do we ship the full `COLLECT/FINANCE/SETTLE/LEGAL` set in Phase 2
    or start with `LIST/MANAGE/TRANSACT`? **Partially answered (Phase 1):** shipped the
    three capabilities (`canList`/`canManage`/`canTransact`) with a scope→capability map and
@@ -1375,14 +1375,14 @@ purely how a business date is _rendered_ for a viewer outside the bank's timezon
 10. **Role naming**: `PROPERTY_MANAGER` vs reusing `ESTATE_MANAGER` — recommend a new role;
     `ESTATE_MANAGER` already means a gated-community manager and conflating them will
     confuse permissions. **DECIDED (Phase 0):** shipped a new `PROPERTY_MANAGER` role.
-11. **Who may end a mandate early** (raised by Phase 1, finding b): today any GetRentos
-    staff member can `terminate()` a mandate where GetRentos is the manager — no notice,
+11. **Who may end a mandate early** (raised by Phase 1, finding b): today any Sureground
+    staff member can `terminate()` a mandate where Sureground is the manager — no notice,
     no second approver. For a third-party firm that is correct. For _our own_ engagement
     with a client it means one person can end the relationship unilaterally. Decide:
     maker/checker, ops escalation, or accept it explicitly. **DECIDED — maker/checker.**
     Shipped in Phase 2: staff raise a request and a different staff member approves it,
-    and when GetRentos is the manager the agreed notice binds us too. Applied to all
-    staff-initiated terminations rather than only GetRentos-as-manager, so the rule is
+    and when Sureground is the manager the agreed notice binds us too. Applied to all
+    staff-initiated terminations rather than only Sureground-as-manager, so the rule is
     "no one person ends a client engagement" and not a special case to remember.
 12. **What may a manager write, not just read?** (raised by Phase 2). Reading a managed
     property is settled. Writing is not, and the current answers disagree:
@@ -1432,7 +1432,7 @@ purely how a business date is _rendered_ for a viewer outside the bank's timezon
 | Two systems of record (build beside `PropertyAuthority`)           | Divergent permissions, unexplainable behaviour                                                       | Extend existing models only                                                                   |
 | Money opacity (fees, expenses)                                     | The exact distrust that kills Nigerian PM relationships                                              | Ledger + line-item fees + immutable issued statements                                         |
 | Manager abandons portfolio                                         | Tenants and owners stranded                                                                          | Ops takeover flow; data survives mandate termination                                          |
-| Enabling GetRentos-as-manager without compliance work              | Regulatory and client-money exposure                                                                 | Treat as a business decision (decision #2) with legal review                                  |
+| Enabling Sureground-as-manager without compliance work             | Regulatory and client-money exposure                                                                 | Treat as a business decision (decision #2) with legal review                                  |
 | Notification noise / duplicates                                    | Already observed on dispute resolution (4 notifications for 1 event) — must not repeat at this scale | Single canonical notification path per event; audit before adding new ones                    |
 | Schema sprawl                                                      | 173 models already; adding more without pruning                                                      | Reuse `OwnerStatement`, `Expense`, `Due`, `Vendor`, `WorkOrder`; add only the 6 models listed |
 | Feature gating confusion (Pro plan vs full management)             | Owners misread what they bought                                                                      | Distinct product names, capability-based entitlements rather than a single "Pro" flag         |

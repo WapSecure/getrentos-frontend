@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { MessageCircle, FileCheck, ShieldCheck, Home } from 'lucide-react';
-import { Badge, Button } from '@getrentos/ui';
+import { Badge, Button } from '@sureground/ui';
 import { paymentStatusBadges } from '@/lib/statusBadge';
 import { formatDate, getInitials } from '@/lib/format';
 import type { Tenant, RentPaymentStatus } from '@/types/landlord';

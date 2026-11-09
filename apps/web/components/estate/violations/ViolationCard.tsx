@@ -1,6 +1,6 @@
 'use client';
 
-import { Badge, Button } from '@getrentos/ui';
+import { Badge, Button } from '@sureground/ui';
 import type { Violation } from '@/types/estate';
 
 const statusVariant: Record<Violation['status'], 'warning' | 'danger' | 'success' | 'neutral'> = {

@@ -1,7 +1,7 @@
 'use client';
 
 import { Wallet, AlertCircle, ReceiptText, Users } from 'lucide-react';
-import { StatCard } from '@getrentos/ui';
+import { StatCard } from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 
 interface EstateFinancialStatsProps {

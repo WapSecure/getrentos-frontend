@@ -7,10 +7,10 @@ import { paymentStatusApi, type PaymentState, type PaymentStatus } from '@/lib/a
  * toast that vanished in seconds, with a reference that could not be copied.
  */
 export interface PaymentResult {
-  /** `CONFIRMING` while GetRentos is still asking. */
+  /** `CONFIRMING` while Sureground is still asking. */
   phase: 'CONFIRMING' | PaymentState;
   reference: string;
-  /** The last answer from GetRentos, once there is one. */
+  /** The last answer from Sureground, once there is one. */
   payment: PaymentStatus | null;
 }
 
@@ -48,7 +48,7 @@ export function usePaymentResult(): PaymentResult | null {
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
- * Ask GetRentos about `reference` until it is paid or failed, or the wait is
+ * Ask Sureground about `reference` until it is paid or failed, or the wait is
  * up, showing each step in the result sheet. Returns the last known state.
  */
 export async function confirmPayment(reference: string): Promise<PaymentState> {

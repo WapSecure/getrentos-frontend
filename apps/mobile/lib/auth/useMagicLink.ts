@@ -1,12 +1,12 @@
 import { useEffect, useRef } from 'react';
 import * as Linking from 'expo-linking';
 import { router } from 'expo-router';
-import { useToast } from '@getrentos/ui-native';
+import { useToast } from '@sureground/ui-native';
 import { errorMessage } from '../api/client';
 import { useAuth } from './AuthProvider';
 
 /**
- * Catches an incoming magic-link deep link — `getrentos://magic-link?token=…`
+ * Catches an incoming magic-link deep link — `sureground://magic-link?token=…`
  * (or a universal link with the same query) — and exchanges it for a session.
  *
  * The listener is registered exactly once; the handler reads the latest

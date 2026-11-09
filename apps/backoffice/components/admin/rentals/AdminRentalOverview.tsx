@@ -13,8 +13,8 @@ import {
   Gavel,
   Landmark,
 } from 'lucide-react';
-import { Card, PageErrorState, PageHeader, PageLoadingState, StatCard } from '@getrentos/ui';
-import { unwrap } from '@getrentos/shared';
+import { Card, PageErrorState, PageHeader, PageLoadingState, StatCard } from '@sureground/ui';
+import { unwrap } from '@sureground/shared';
 import { adminKeys } from '@/lib/queryKeys';
 import { adminRentalService } from '@/services/adminRentalService';
 import type { AdminRentalOverview } from '@/types/rental';

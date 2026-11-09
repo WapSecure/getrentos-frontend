@@ -1,4 +1,4 @@
-import { VALIDATION_PATTERNS } from '@getrentos/shared';
+import { VALIDATION_PATTERNS } from '@sureground/shared';
 
 /**
  * Strips characters that are not allowed by a given shared pattern's "strip"

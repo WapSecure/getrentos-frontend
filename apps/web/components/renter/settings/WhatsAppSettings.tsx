@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { MessageCircle, Smartphone, CheckCircle2 } from 'lucide-react';
-import { Button, Field, Input, Switch, useToast } from '@getrentos/ui';
+import { Button, Field, Input, Switch, useToast } from '@sureground/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';

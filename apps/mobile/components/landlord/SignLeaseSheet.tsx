@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { View } from 'react-native';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Button, Text, useTheme, useToast } from '@getrentos/ui-native';
+import { Button, Text, useTheme, useToast } from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { SignaturePad } from '@/components/SignaturePad';
 import { landlordApi, type LandlordLease } from '@/lib/api/landlord';

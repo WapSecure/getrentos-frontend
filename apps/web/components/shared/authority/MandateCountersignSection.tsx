@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ShieldCheck, Check, X } from 'lucide-react';
-import { Badge, Button, Card, Input, useToast } from '@getrentos/ui';
+import { Badge, Button, Card, Input, useToast } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import {
   propertyAuthorityService,

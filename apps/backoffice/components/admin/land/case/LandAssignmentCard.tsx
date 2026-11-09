@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { AlarmClock, UserCheck, UserRoundPlus } from 'lucide-react';
-import { Button } from '@getrentos/ui';
-import { formatDate, unwrap } from '@getrentos/shared';
+import { Button } from '@sureground/ui';
+import { formatDate, unwrap } from '@sureground/shared';
 import { adminLandService } from '@/services/adminLandService';
 import type { AdminLandDiligenceDetail } from '@/types/land';
 import { describeSla } from '@/lib/landDiligence';

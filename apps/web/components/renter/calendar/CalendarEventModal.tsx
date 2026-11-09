@@ -16,7 +16,7 @@ import {
   Select,
   Textarea,
   TimePicker,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import type {
   CalendarEvent,
   CalendarEventFormData,

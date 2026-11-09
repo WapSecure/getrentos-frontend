@@ -11,7 +11,7 @@ const STARTERS = [
   'Any new announcements?',
 ];
 
-/** Ask GetRentos for estate residents: their own dues, visitors, deliveries, repairs and estate news. */
+/** Ask Sureground for estate residents: their own dues, visitors, deliveries, repairs and estate news. */
 export const ResidentAssistant = () => (
   <AssistantChat
     ask={(question, history, language) =>

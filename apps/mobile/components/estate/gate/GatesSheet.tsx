@@ -11,8 +11,8 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
-import type { AddressValue } from '@getrentos/shared';
+} from '@sureground/ui-native';
+import type { AddressValue } from '@sureground/shared';
 import { Sheet } from '@/components/Sheet';
 import { AddressInput } from '@/components/forms/AddressInput';
 import { estateGateApi, gateKeys, type Gate } from '@/lib/api/estateGate';

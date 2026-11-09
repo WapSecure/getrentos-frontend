@@ -14,7 +14,7 @@ const levelStyle: Record<
 };
 
 /**
- * A list of checks worked out by GetRentos, each marked fine, worth a look or
+ * A list of checks worked out by Sureground, each marked fine, worth a look or
  * a concern. Used by applicant screening and the vendor invoice check.
  */
 export function CheckList({ items }: { items: { level: CheckLevel; text: string }[] }) {

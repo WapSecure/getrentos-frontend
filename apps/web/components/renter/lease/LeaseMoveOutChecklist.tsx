@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { FileText, Camera } from 'lucide-react';
-import { Button, Card, Checkbox, useOptimisticMutation } from '@getrentos/ui';
+import { Button, Card, Checkbox, useOptimisticMutation } from '@sureground/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';

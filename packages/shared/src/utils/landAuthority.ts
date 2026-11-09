@@ -65,7 +65,7 @@ export interface LandAuthoritySignatory {
   fullName: string;
   consent: LandSignatoryConsent;
   respondedAt: string | null;
-  /** Answered from their own GetRentos account. */
+  /** Answered from their own Sureground account. */
   answeredFromAccount: boolean;
   evidenceDocumentId: string | null;
   witnessName: string | null;
@@ -212,7 +212,7 @@ export const describeCapacityRule = (rule: LandCapacityRule): string => {
     );
   }
   if (rule.witnessRequired) parts.push('a witness to each consent given on paper');
-  if (rule.legalInquiryRequired) parts.push('an independent legal inquiry by GetRentos');
+  if (rule.legalInquiryRequired) parts.push('an independent legal inquiry by Sureground');
   return parts.length
     ? `Needs ${parts.join(', ')}.`
     : 'Your title documents are enough; a reviewer confirms the name on them.';

@@ -23,7 +23,7 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   hostShortletsApi,
@@ -44,7 +44,7 @@ import {
   saveAccountLabel,
   withdrawStepUpSummary,
   type AccountLookup,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
@@ -440,7 +440,7 @@ function Performance() {
           </Text>
         </View>
         <Text variant="caption" color="mutedForeground">
-          {naira(e.grossEarned)} from guests − {naira(e.platformFees)} GetRentos fees
+          {naira(e.grossEarned)} from guests − {naira(e.platformFees)} Sureground fees
           {e.commissionPct ? ` (${e.commissionPct}%)` : ''}
         </Text>
         {points.length > 1 ? <RevenueTrendChart points={points} /> : null}

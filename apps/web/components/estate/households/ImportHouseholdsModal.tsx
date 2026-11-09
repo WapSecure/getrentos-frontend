@@ -9,7 +9,7 @@ import {
   DialogDescription,
   DialogTitle,
   DocumentUpload,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import type { ImportHouseholdsResult } from '@/types/estate';
 
 const TEMPLATE_CSV =

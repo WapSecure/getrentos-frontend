@@ -18,7 +18,7 @@ import {
   useToast,
   type BadgeVariant,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import {
   CalendarX,
   CreditCard,
@@ -510,7 +510,7 @@ export const GuestBookingsWorkspace = () => {
             : 'Stay'
         }
         receiverLine={`The fee goes to the payment company, so the full ${formatCurrency(payAmount)} goes to your booking.`}
-        protection={`GetRentos holds your payment and only pays the host after check-in.${
+        protection={`Sureground holds your payment and only pays the host after check-in.${
           payTarget?.deposit ? ' Your refundable deposit is returned after check-out.' : ''
         }`}
         providers={providers}

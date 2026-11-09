@@ -54,7 +54,7 @@ export interface Payment {
   feeNaira?: number;
   /** Amount plus fee: what the payer was charged in all. Sent with `feeNaira`. */
   totalChargedNaira?: number;
-  /** Naira GetRentos is holding for this charge right now (0 once released). */
+  /** Naira Sureground is holding for this charge right now (0 once released). */
   heldAmountNaira?: number;
 }
 

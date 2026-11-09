@@ -7,7 +7,7 @@ import {
   type ReactNode,
 } from 'react';
 import Link from 'next/link';
-import { cn } from '@getrentos/shared';
+import { cn } from '@sureground/shared';
 
 export interface IconButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
   /** Required: an icon alone has no name for a screen reader. Also shown as the tooltip. */
@@ -85,8 +85,10 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
 
 IconButton.displayName = 'IconButton';
 
-export interface IconLinkProps
-  extends Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'children' | 'href'> {
+export interface IconLinkProps extends Omit<
+  AnchorHTMLAttributes<HTMLAnchorElement>,
+  'children' | 'href'
+> {
   /** Required: an icon alone has no name for a screen reader. Also shown as the tooltip. */
   label: string;
   icon: ReactNode;
@@ -101,7 +103,22 @@ export interface IconLinkProps
  * or a new tab is a plain anchor. A new tab gets noopener by default.
  */
 export const IconLink = forwardRef<HTMLAnchorElement, IconLinkProps>(
-  ({ label, icon, href, variant = 'ghost', size = 'md', className, title, target, rel, download, ...rest }, ref) => {
+  (
+    {
+      label,
+      icon,
+      href,
+      variant = 'ghost',
+      size = 'md',
+      className,
+      title,
+      target,
+      rel,
+      download,
+      ...rest
+    },
+    ref
+  ) => {
     const classes = cn(
       'inline-flex shrink-0 items-center justify-center rounded-lg transition-[background-color,border-color,color] duration-150',
       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
@@ -121,7 +138,8 @@ export const IconLink = forwardRef<HTMLAnchorElement, IconLinkProps>(
       title: title ?? label,
       className: classes,
     };
-    const external = /^[a-z][a-z\d+.-]*:/i.test(href) || target === '_blank' || download !== undefined;
+    const external =
+      /^[a-z][a-z\d+.-]*:/i.test(href) || target === '_blank' || download !== undefined;
     if (!external) {
       return (
         <Link href={href} {...shared}>

@@ -9,12 +9,12 @@ import {
   PageErrorState,
   Switch,
   useToast,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 
 import { useEffect, useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { adminService } from '@/services/adminService';
-import { unwrap } from '@getrentos/shared';
+import { unwrap } from '@sureground/shared';
 import { adminKeys } from '@/lib/queryKeys';
 import type { PlatformConfig, PlatformConfigRole, RoleRequirement } from '@/types/admin';
 

@@ -29,7 +29,7 @@ import {
   Textarea,
   useToast,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import {
   formatDate,
   LAND_AUTHORITY_INSTRUMENT_LABELS,
@@ -40,7 +40,7 @@ import {
   unwrap,
   type LandAuthoritySignatory,
   type LandAuthorityView,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import { useAdminUser } from '../../../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
 import { landQueryKeys, readLandApiError } from '@/lib/landDiligence';

@@ -12,7 +12,7 @@ const STARTERS = [
   'How many visitors are on site?',
 ];
 
-/** Ask GetRentos for estate managers, about the estate selected in the switcher. */
+/** Ask Sureground for estate managers, about the estate selected in the switcher. */
 export const EstateAssistant = () => {
   const { estate } = useSelectedEstate();
   if (!estate) return null;

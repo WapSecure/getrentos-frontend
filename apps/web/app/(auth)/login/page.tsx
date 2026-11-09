@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ThemeToggle } from '@getrentos/ui';
+import { ThemeToggle } from '@sureground/ui';
 import { SignInLeftContent } from '@/components/auth/SignIn/SignInLeftContent';
 import { SignInRightContent } from '@/components/auth/SignIn/SignInRightContent';
 

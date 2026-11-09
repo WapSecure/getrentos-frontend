@@ -13,7 +13,7 @@ import {
   Field,
   Textarea,
   useToast,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import { landlordService } from '@/services/landlordService';
@@ -32,7 +32,7 @@ function draftFor(application: RentalApplication, summary: ApplicantSummary | un
 /**
  * "Request info": the landlord writes what they need, the applicant gets it as
  * a message they can reply to, and a pending application moves to under
- * review. Only applicants with a GetRentos account can be messaged.
+ * review. Only applicants with a Sureground account can be messaged.
  */
 export function RequestInfoDialog({
   application,
@@ -67,8 +67,8 @@ export function RequestInfoDialog({
             Ask {application.applicantName} for more information
           </DialogTitle>
           <DialogDescription className="mt-1 text-sm text-muted-foreground">
-            They get this as a message on GetRentos and can reply there. A pending application moves
-            to under review.
+            They get this as a message on Sureground and can reply there. A pending application
+            moves to under review.
           </DialogDescription>
           <div className="mt-4 space-y-3">
             <Field label="Your message" required>

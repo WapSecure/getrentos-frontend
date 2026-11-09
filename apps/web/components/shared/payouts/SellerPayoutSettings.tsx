@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CheckCircle2 } from 'lucide-react';
-import { Alert, Badge, Button, ListSkeleton, Pagination, type BadgeVariant } from '@getrentos/ui';
+import { Alert, Badge, Button, ListSkeleton, Pagination, type BadgeVariant } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
 import {
@@ -17,7 +17,7 @@ import {
   saveAccountLabel,
   withStepUpSummary,
   type AccountLookup,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import { BankAccountFields } from './BankAccountFields';
 import { PayoutHoldNotice } from './PayoutHoldNotice';
 import { sellerPayoutKeys } from '@/lib/queryKeys';
@@ -123,7 +123,7 @@ export const SellerPayoutSettings = ({ description }: SellerPayoutSettingsProps)
         </div>
       ) : (
         <p className="text-xs text-muted-foreground mb-6">
-          No payout account yet. Add one so sale money can be sent to you once GetRentos pays it
+          No payout account yet. Add one so sale money can be sent to you once Sureground pays it
           out.
         </p>
       )}
@@ -154,8 +154,8 @@ export const SellerPayoutSettings = ({ description }: SellerPayoutSettingsProps)
       <div className="mt-10 pt-6 border-t border-border">
         <h3 className="text-base font-semibold text-foreground">Sale payouts</h3>
         <p className="text-sm text-muted-foreground mt-1 mb-4">
-          Sales GetRentos has paid out, and whether the money has reached your account. Queued sales
-          are sent in the hourly payout run; a newly changed account waits 24 hours first.
+          Sales Sureground has paid out, and whether the money has reached your account. Queued
+          sales are sent in the hourly payout run; a newly changed account waits 24 hours first.
         </p>
 
         {payoutsLoading ? (

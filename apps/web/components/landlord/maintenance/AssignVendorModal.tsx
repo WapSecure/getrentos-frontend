@@ -12,7 +12,7 @@ import {
   EmptyState,
   ListSkeleton,
   Pagination,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { visitToIso, VisitTimeField } from '@/components/landlord/maintenance/VisitTimeField';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';

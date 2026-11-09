@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Download, FileText, FileSpreadsheet } from 'lucide-react';
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrentos/ui';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@sureground/ui';
 import { Property } from '@/types/renter';
 import { downloadCsv, escapeHtml, printHtml } from '@/lib/export';
 

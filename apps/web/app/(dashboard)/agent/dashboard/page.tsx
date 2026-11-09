@@ -13,7 +13,7 @@ import { AttentionFeed } from '@/components/shared/attention/AttentionFeed';
 import { IdentityNudge } from '@/components/shared/verification/IdentityNudge';
 import { unwrap } from '@/lib/apiHelpers';
 import { ROUTES } from '@/lib/constants/auth';
-import { PageErrorState, StatGridSkeleton } from '@getrentos/ui';
+import { PageErrorState, StatGridSkeleton } from '@sureground/ui';
 
 export default function AgentDashboardPage() {
   const user = useAgentUser();

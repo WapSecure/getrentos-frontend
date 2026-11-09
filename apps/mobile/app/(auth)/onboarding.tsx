@@ -22,7 +22,7 @@ import {
   Text,
   useReducedMotion,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import {
   EscrowScene,
   FindPropertiesScene,
@@ -43,8 +43,8 @@ const SLIDES = [
   {
     key: 'escrow',
     eyebrow: 'Protection',
-    title: 'GetRentos holds your money safely',
-    body: 'Rent is held by GetRentos and released to your landlord on schedule. A deposit on a home you’re buying is only released to the seller once you confirm receipt. A dispute keeps money held until it’s resolved.',
+    title: 'Sureground holds your money safely',
+    body: 'Rent is held by Sureground and released to your landlord on schedule. A deposit on a home you’re buying is only released to the seller once you confirm receipt. A dispute keeps money held until it’s resolved.',
     Scene: EscrowScene,
   },
   {
@@ -148,7 +148,7 @@ export default function Onboarding() {
           minHeight: insets.top + spacing.sm + 44,
         }}
       >
-        <View accessible accessibilityRole="image" accessibilityLabel="GetRentos">
+        <View accessible accessibilityRole="image" accessibilityLabel="Sureground">
           <BrandLogo size={22} />
         </View>
         {!isLast ? (

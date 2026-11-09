@@ -2,7 +2,7 @@
 
 import { AlertTriangle, Lock, RefreshCcw, WifiOff, type LucideIcon } from 'lucide-react';
 import { Button } from './Button';
-import { cn } from '@getrentos/shared';
+import { cn } from '@sureground/shared';
 
 interface PageErrorStateProps {
   title?: string;

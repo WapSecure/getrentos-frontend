@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Landmark } from 'lucide-react';
-import { Alert, Button, Field, Input, NumberInput, useToast } from '@getrentos/ui';
+import { Alert, Button, Field, Input, NumberInput, useToast } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { buyerKeys } from '@/lib/queryKeys';
 import { buyerService } from '@/services/buyerService';

@@ -41,7 +41,7 @@ export const PAYOUT_ARRIVAL_NOTE = 'We’ll show it here as soon as the bank con
  * support sends it again to the account on file, after any change hold.
  */
 export const PAYOUT_FAILED_NEXT_STEP =
-  'The money is still yours. Check your payout account details are right; GetRentos support sends failed payouts again to the account on file.';
+  'The money is still yours. Check your payout account details are right; Sureground support sends failed payouts again to the account on file.';
 
 /** Where the name check on a bank account stands (UX-28). */
 export type AccountLookupStatus =

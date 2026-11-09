@@ -26,7 +26,7 @@ export const COMMITMENT_STATUS_LABELS: Record<EstateCommitmentStatus, string> = 
   PLANNED: 'Planned',
   IN_PROGRESS: 'In progress',
   DELIVERED: 'Delivered, awaiting check',
-  VERIFIED: 'Verified by GetRentos',
+  VERIFIED: 'Verified by Sureground',
   DISPUTED: 'Disputed',
 };
 

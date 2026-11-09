@@ -1,7 +1,7 @@
 'use client';
 
-import { GetRentosManagedView } from '@/components/landlord/managed/GetRentosManagedView';
+import { SuregroundManagedView } from '@/components/landlord/managed/SuregroundManagedView';
 
 export default function LandlordManagedPage() {
-  return <GetRentosManagedView />;
+  return <SuregroundManagedView />;
 }

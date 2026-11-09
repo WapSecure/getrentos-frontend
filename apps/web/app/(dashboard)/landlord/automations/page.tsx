@@ -3,11 +3,11 @@
 import { Send, FileText, CalendarClock } from 'lucide-react';
 import { HubTabs, useHubTab, type HubTab } from '@/components/shared/navigation/HubTabs';
 import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
-import { ROUTES } from '@getrentos/shared';
+import { ROUTES } from '@sureground/shared';
 import { BroadcastComposer } from '@/components/landlord/automations/BroadcastComposer';
 import { TemplatesManager } from '@/components/landlord/automations/TemplatesManager';
 import { AutomationRulesManager } from '@/components/landlord/automations/AutomationRulesManager';
-import { PageHeader } from '@getrentos/ui';
+import { PageHeader } from '@sureground/ui';
 
 const TABS: HubTab[] = [
   { id: 'broadcast', label: 'Send', icon: Send },

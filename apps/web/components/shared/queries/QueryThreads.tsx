@@ -18,7 +18,7 @@ import {
   SuggestedDraft,
   Textarea,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 
 import { unwrap } from '@/lib/apiHelpers';
 import type { OwnerQueryDraft } from '@/types/ownerQueryDraft';

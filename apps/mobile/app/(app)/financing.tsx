@@ -16,7 +16,7 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   financingApi,
@@ -56,7 +56,7 @@ export default function Financing() {
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <DetailScreenHeader
         eyebrow="Flexible rent"
-        title="GetRentos Flex"
+        title="Sureground Flex"
         subtitle="Eligibility, plans and instalments"
         onBack={() => goBack()}
       />
@@ -119,7 +119,7 @@ function EligibilityCard({ overview }: { overview: FinancingOverview }) {
           <Text variant="heading">Split your rent into monthly payments</Text>
         </View>
         <Text variant="callout" color="mutedForeground" style={{ marginTop: spacing.sm }}>
-          GetRentos pays your landlord for {overview.propertyName} in full, and you repay us
+          Sureground pays your landlord for {overview.propertyName} in full, and you repay us
           monthly: building your trust score along the way.
         </Text>
 
@@ -143,7 +143,7 @@ function EligibilityCard({ overview }: { overview: FinancingOverview }) {
             <Lock size={16} color={colors.warning} />
             <Text variant="caption" color="warning" style={{ flex: 1 }}>
               Your trust score ({overview.trustScore}) needs to reach{' '}
-              {MIN_TRUST_SCORE_FOR_FINANCING} to unlock GetRentos Flex.
+              {MIN_TRUST_SCORE_FOR_FINANCING} to unlock Sureground Flex.
             </Text>
           </View>
         ) : (

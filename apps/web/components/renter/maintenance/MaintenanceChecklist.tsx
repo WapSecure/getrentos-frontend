@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FileText } from 'lucide-react';
-import { Alert, Checkbox } from '@getrentos/ui';
+import { Alert, Checkbox } from '@sureground/ui';
 
 interface ChecklistItem {
   id: string;

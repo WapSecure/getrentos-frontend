@@ -15,8 +15,8 @@ import {
   PageErrorState,
   useToast,
   PageHeader,
-} from '@getrentos/ui';
-import { formatCurrency, unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { formatCurrency, unwrap } from '@sureground/shared';
 import {
   adminPartnerCommercialsService,
   type PartnerCommercialRow,
@@ -69,7 +69,7 @@ export default function PartnerCommercialsPage() {
     <div className="space-y-6">
       <PageHeader
         title="Partner commercials"
-        description="For GetRentos-managed engagements handed to a delivery partner, set the partner’s share of the management fee. The platform keeps the rest. The split is recorded when each owner statement is issued."
+        description="For Sureground-managed engagements handed to a delivery partner, set the partner’s share of the management fee. The platform keeps the rest. The split is recorded when each owner statement is issued."
       />
 
       {isLoading ? (
@@ -81,7 +81,7 @@ export default function PartnerCommercialsPage() {
           <EmptyState
             icon={Handshake}
             title="No delivery partners yet"
-            description="When a GetRentos-managed engagement is handed to a partner firm, it appears here to set its commercials."
+            description="When a Sureground-managed engagement is handed to a partner firm, it appears here to set its commercials."
           />
         </Card>
       ) : (

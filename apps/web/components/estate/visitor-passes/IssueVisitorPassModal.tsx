@@ -12,7 +12,7 @@ import {
   ListSkeleton,
   Pagination,
   RadioGroup,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import type { Household } from '@/types/estate';
 
 interface IssueVisitorPassModalProps {

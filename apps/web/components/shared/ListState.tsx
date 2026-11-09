@@ -1,8 +1,8 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { cn } from '@getrentos/shared';
-import { PageErrorState, Skeleton } from '@getrentos/ui';
+import { cn } from '@sureground/shared';
+import { PageErrorState, Skeleton } from '@sureground/ui';
 
 interface AsyncState {
   isPending: boolean;

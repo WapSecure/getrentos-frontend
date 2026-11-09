@@ -13,7 +13,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { agencyFirmApi, tokenFrom } from '@/lib/api/agencyFirm';
 import { formatDay } from '@/lib/api/agency';
 import { ApiError, errorMessage } from '@/lib/api/client';

@@ -13,9 +13,9 @@ import {
   Wrench,
   type LucideIcon,
 } from 'lucide-react';
-import { Badge, type BadgeVariant } from '@getrentos/ui';
-import { EmptyState } from '@getrentos/ui';
-import { ListSkeleton } from '@getrentos/ui';
+import { Badge, type BadgeVariant } from '@sureground/ui';
+import { EmptyState } from '@sureground/ui';
+import { ListSkeleton } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate, formatRelativeTime } from '@/lib/format';
 import { homeManagementKeys } from '@/lib/queryKeys';

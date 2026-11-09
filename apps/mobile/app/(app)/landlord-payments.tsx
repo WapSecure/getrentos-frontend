@@ -17,7 +17,7 @@ import {
   Skeleton,
   Text,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   landlordApi,
@@ -101,7 +101,7 @@ export default function LandlordPayments() {
                 ) : (
                   <View style={{ flexDirection: 'row' }}>
                     <Figure label="Collected" amount={stats.data?.totalCollected ?? 0} />
-                    <Figure label="Held by GetRentos" amount={stats.data?.escrowPending ?? 0} />
+                    <Figure label="Held by Sureground" amount={stats.data?.escrowPending ?? 0} />
                     <Figure label="Outstanding" amount={stats.data?.outstandingBalance ?? 0} />
                   </View>
                 )}

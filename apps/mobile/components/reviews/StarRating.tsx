@@ -1,6 +1,6 @@
 import { Pressable, View } from 'react-native';
 import { Star } from 'lucide-react-native';
-import { useTheme } from '@getrentos/ui-native';
+import { useTheme } from '@sureground/ui-native';
 
 interface Props {
   value: number;

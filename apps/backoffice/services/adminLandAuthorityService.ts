@@ -1,5 +1,5 @@
-import { authFetch, safeCall } from '@getrentos/shared';
-import type { ApiResponse, LandAuthorityStatus, LandAuthorityView } from '@getrentos/shared';
+import { authFetch, safeCall } from '@sureground/shared';
+import type { ApiResponse, LandAuthorityStatus, LandAuthorityView } from '@sureground/shared';
 
 const base = (authorityId: string) => `/admin/land/authority/${encodeURIComponent(authorityId)}`;
 const post = (path: string, body?: object): Promise<ApiResponse<LandAuthorityView>> =>

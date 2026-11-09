@@ -12,7 +12,7 @@ import {
   Bath,
   Ruler,
 } from 'lucide-react';
-import { Badge, type BadgeVariant } from '@getrentos/ui';
+import { Badge, type BadgeVariant } from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 import type { SaleListing, SaleListingStatus } from '@/types/owner';
 

@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { ClipboardCheck } from 'lucide-react';
-import { Skeleton } from '@getrentos/ui';
+import { Skeleton } from '@sureground/ui';
 import { CheckList } from '@/components/shared/checks/CheckList';
 import { unwrap } from '@/lib/apiHelpers';
 import { homeManagementKeys } from '@/lib/queryKeys';

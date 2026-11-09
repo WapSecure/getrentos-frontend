@@ -11,7 +11,7 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import {
   agencyFirmApi,
   bankProblem,
@@ -35,7 +35,7 @@ import {
   payoutAccountStepUpSummary,
   saveAccountLabel,
   type AccountLookup,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 
 /** Upper-cases a payout status: an agent's own payouts arrive in lower case. */
 function payoutKey(status: string): 'PENDING' | 'SUCCESS' | 'FAILED' {

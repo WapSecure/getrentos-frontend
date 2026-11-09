@@ -16,7 +16,7 @@ import {
   Input,
   Select,
   useToast,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { AlertTriangle, Copy, RefreshCw, Trash2 } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletKeys } from '@/lib/queryKeys';
@@ -161,10 +161,10 @@ export function ShortletCalendarSyncDialog({
           ) : (
             <>
               <section className="space-y-2">
-                <h3 className="text-sm font-semibold">1. Send your GetRentos bookings out</h3>
+                <h3 className="text-sm font-semibold">1. Send your Sureground bookings out</h3>
                 <p className="text-xs text-muted-foreground">
                   Paste this link into the other site&rsquo;s &ldquo;Import calendar&rdquo; setting.
-                  It shows your GetRentos bookings and the dates you block by hand, without guest
+                  It shows your Sureground bookings and the dates you block by hand, without guest
                   names. Other sites usually re-read it every few hours.
                 </p>
                 <div className="flex gap-2">
@@ -173,7 +173,7 @@ export function ShortletCalendarSyncDialog({
                     value={data?.exportUrl ?? ''}
                     onFocus={(e) => e.currentTarget.select()}
                     className="font-mono text-xs"
-                    aria-label="GetRentos calendar link"
+                    aria-label="Sureground calendar link"
                   />
                   <IconButton
                     variant="outline"
@@ -280,7 +280,7 @@ export function ShortletCalendarSyncDialog({
                           <p className="mt-1 flex items-start gap-1.5 text-xs text-warning">
                             <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                             {feed.conflictCount} stay{feed.conflictCount === 1 ? '' : 's'} on{' '}
-                            {feed.name} overlap{feed.conflictCount === 1 ? 's' : ''} a GetRentos
+                            {feed.name} overlap{feed.conflictCount === 1 ? 's' : ''} a Sureground
                             booking. Check your bookings and cancel one of each pair.
                           </p>
                         )}

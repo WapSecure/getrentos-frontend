@@ -10,7 +10,7 @@ import {
   SwitchRow,
   Text,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { agentApi, type AgentNotificationPreference } from '@/lib/api/agent';
 import { useOptimisticMutation } from '@/lib/query/optimistic';
@@ -94,7 +94,7 @@ export default function AgentNotificationSettings() {
           </Card>
           <Text variant="caption" color="mutedForeground">
             Muted updates still appear in Notifications. If no push arrives at all, check that
-            notifications are allowed for GetRentos in your phone’s settings.
+            notifications are allowed for Sureground in your phone’s settings.
           </Text>
         </>
       </QueryState>

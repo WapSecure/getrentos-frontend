@@ -21,7 +21,7 @@ import {
   Eye,
   ClipboardList,
 } from 'lucide-react-native';
-import { Screen } from '@getrentos/ui-native';
+import { Screen } from '@sureground/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useIdentityVerification } from '@/hooks/useIdentityVerification';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
@@ -198,7 +198,7 @@ export default function BuyerAccount() {
 
   return (
     <Screen>
-      <AccountHeader role="Buyer" fallbackName="GetRentos buyer" />
+      <AccountHeader role="Buyer" fallbackName="Sureground buyer" />
       <WorkspaceSwitcher />
       <SettingsGroup title="Buying" items={buying} />
       <SettingsGroup title="Explore" items={explore} />

@@ -14,7 +14,7 @@ import {
   Field,
   Select,
   type PendingUpload,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { DateTimeField, isCompleteDateTime } from '@/components/shared/forms/DateTimeField';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';

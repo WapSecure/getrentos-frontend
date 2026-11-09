@@ -23,7 +23,7 @@ import {
   ToggleChip,
   useToast,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { PaginatedSelect } from '@/components/ui/PaginatedSelect';
 import { unwrap } from '@/lib/apiHelpers';
 import { nameOnly } from '@/lib/validations/input';

@@ -23,8 +23,8 @@ import {
   Textarea,
   TimePicker,
   ToggleChip,
-} from '@getrentos/ui';
-import { unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { unwrap } from '@sureground/shared';
 
 import {
   adminFieldService,
@@ -188,7 +188,7 @@ const VisitCard = ({
             Check in here
           </Button>
           <p className="mt-1 text-xs text-muted-foreground">
-            Uses this device&rsquo;s location once. GetRentos keeps only your distance from the
+            Uses this device&rsquo;s location once. Sureground keeps only your distance from the
             property and a position rounded to about 100 m.
           </p>
         </div>
@@ -307,7 +307,7 @@ const BookInspection = ({ staffOptions }: { staffOptions: { value: string; label
     <Card className="space-y-3 p-5">
       <h2 className="font-semibold text-foreground">Book an inspection</h2>
       <p className="text-sm text-muted-foreground">
-        For a property GetRentos manages now. Assessments for new requests are booked from Managed
+        For a property Sureground manages now. Assessments for new requests are booked from Managed
         intake.
       </p>
       <div className="grid gap-3 sm:grid-cols-2">
@@ -599,7 +599,7 @@ export default function FieldOperationsPage() {
     <div className="space-y-6">
       <PageHeader
         title="Field operations"
-        description="Site visits for GetRentos Managed: who is going where, proof they were there, and what is overdue."
+        description="Site visits for Sureground Managed: who is going where, proof they were there, and what is overdue."
       />
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)}>

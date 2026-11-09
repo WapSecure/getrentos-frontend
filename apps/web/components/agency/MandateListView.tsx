@@ -13,7 +13,7 @@ import {
   PageErrorState,
   PageHeader,
   Skeleton,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { mandateKeys } from '@/lib/queryKeys';
 import * as mandateService from '@/services/mandateService';
@@ -38,7 +38,7 @@ import { CapabilityChip } from './mandatePresentation';
  *
  * This screen exists because a mandate has a lifecycle and the API has eighteen
  * routes for it, and until now none of them had a face. The lifecycle is the point:
- * a mandate provisions nothing until BOTH parties have signed and GetRentos has
+ * a mandate provisions nothing until BOTH parties have signed and Sureground has
  * verified it, so "why can I not do anything yet" is the question this screen is
  * mostly answering.
  *
@@ -123,7 +123,7 @@ export function MandateListView() {
         <EmptyState
           icon={FileSignature}
           title="No client engagements yet"
-          description="An owner appoints you, or you ask to be appointed, and the engagement starts once both sides have signed and GetRentos has verified it."
+          description="An owner appoints you, or you ask to be appointed, and the engagement starts once both sides have signed and Sureground has verified it."
         />
       ) : (
         <ul className="space-y-4">
@@ -174,8 +174,8 @@ function MandateCard({
             <UserRound className="h-3.5 w-3.5" aria-hidden />
             {mandate.ownerName ?? 'the owner'}
             <span aria-hidden>·</span>
-            {mandate.managerIsGetRentos
-              ? 'GetRentos is the manager'
+            {mandate.managerIsSureground
+              ? 'Sureground is the manager'
               : (mandate.managerOrganizationName ?? mandate.managerName ?? 'the manager')}
             <span aria-hidden>·</span>
             {noticeSummary(mandate)}
@@ -222,7 +222,7 @@ function MandateCard({
       {mandate.status === 'PENDING_OPS' && (
         <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
           <ShieldCheck className="h-3.5 w-3.5" aria-hidden />
-          Both sides have signed. A GetRentos officer still has to verify it before you can act.
+          Both sides have signed. A Sureground officer still has to verify it before you can act.
         </p>
       )}
     </Card>

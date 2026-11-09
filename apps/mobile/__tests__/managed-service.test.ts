@@ -12,7 +12,7 @@ import {
 const mandate = (over: Partial<Mandate> = {}): Mandate => ({
   id: 'm1',
   propertyId: 'p1',
-  managerIsGetRentos: true,
+  managerIsSureground: true,
   servicingTier: 'FULL_MANAGEMENT',
   noticePeriodDays: 30,
   noticeServedAt: null,
@@ -43,18 +43,18 @@ const intake = (over: Partial<ManagedIntake> = {}): ManagedIntake => ({
 });
 
 describe('propertyState', () => {
-  it('reads a live GetRentos engagement, and one being set up after acceptance', () => {
-    expect(propertyState('p1', [mandate()], []).kind).toBe('getrentos');
+  it('reads a live Sureground engagement, and one being set up after acceptance', () => {
+    expect(propertyState('p1', [mandate()], []).kind).toBe('sureground');
     const s = propertyState(
       'p1',
       [mandate({ status: 'PENDING_OPS' })],
       [intake({ status: 'ACCEPTED' })]
     );
-    expect(s).toMatchObject({ kind: 'getrentos', settingUp: { status: 'ACCEPTED' } });
+    expect(s).toMatchObject({ kind: 'sureground', settingUp: { status: 'ACCEPTED' } });
   });
 
-  it('reads a firm, carrying an open request to move to GetRentos', () => {
-    const s = propertyState('p1', [mandate({ managerIsGetRentos: false })], [intake()]);
+  it('reads a firm, carrying an open request to move to Sureground', () => {
+    const s = propertyState('p1', [mandate({ managerIsSureground: false })], [intake()]);
     expect(s).toMatchObject({ kind: 'firm', openIntake: { id: 'i1' } });
   });
 

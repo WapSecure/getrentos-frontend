@@ -11,7 +11,7 @@ import type {
 import type { TrustProfile } from '@/types/trust-score';
 import type { AssistantReply, AssistantTurn } from '@/types/assistant';
 import { toDisplayPropertyType } from '@/lib/propertyTypes';
-import type { VideoCallJoin } from '@getrentos/shared';
+import type { VideoCallJoin } from '@sureground/shared';
 import { providerQuery } from '@/services/paymentStatusService';
 import type { PaymentProvider } from '@/types/payments';
 

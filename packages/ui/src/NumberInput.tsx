@@ -1,7 +1,7 @@
 'use client';
 
 import { forwardRef, type InputHTMLAttributes, type ReactNode } from 'react';
-import { cn, VALIDATION_PATTERNS } from '@getrentos/shared';
+import { cn, VALIDATION_PATTERNS } from '@sureground/shared';
 import { controlShell, innerInputClass } from './controlStyles';
 import { useFieldControl } from './fieldContext';
 

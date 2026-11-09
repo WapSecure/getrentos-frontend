@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Badge, Button, Field, RadioGroup, type RadioOption, Textarea } from '@getrentos/ui';
+import { Badge, Button, Field, RadioGroup, type RadioOption, Textarea } from '@sureground/ui';
 import { FileCheck2 } from 'lucide-react';
 import { formatDate } from '@/lib/format';
 import type { LandDiligenceCheckStatus } from '@/types/land';
@@ -64,7 +64,7 @@ export const ReviewCheckRow = ({
                   : 'Needs a cited document to pass'
                 : null,
               check.decidedAt
-                ? `Decided ${formatDate(check.decidedAt)}${check.decidedByMe ? ' by you' : ' by GetRentos'}`
+                ? `Decided ${formatDate(check.decidedAt)}${check.decidedByMe ? ' by you' : ' by Sureground'}`
                 : null,
             ]
               .filter(Boolean)

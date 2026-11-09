@@ -7,8 +7,8 @@ import { ProfileSettings } from '@/components/admin/settings/ProfileSettings';
 import { NotificationSettings } from '@/components/admin/settings/NotificationSettings';
 import { PlatformConfigSettings } from '@/components/admin/settings/PlatformConfigSettings';
 import { SecuritySettings } from '@/components/admin/settings/SecuritySettings';
-import { cn } from '@getrentos/shared';
-import { ConfirmDialog, PageHeader } from '@getrentos/ui';
+import { cn } from '@sureground/shared';
+import { ConfirmDialog, PageHeader } from '@sureground/ui';
 
 type SettingsTab = 'profile' | 'security' | 'notifications' | 'platform';
 

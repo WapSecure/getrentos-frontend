@@ -13,7 +13,7 @@ import {
   SegmentedControl,
   type UploadedDocumentData,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { useEffect, useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FileText, Upload, FolderOpen, Check } from 'lucide-react';

@@ -25,7 +25,7 @@ import {
   useTheme,
   useToast,
   type BadgeTone,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import {
   LAND_WATCH_JOB_KIND_LABELS,
   LAND_WATCH_JOB_PAYMENT_NOTE,
@@ -33,7 +33,7 @@ import {
   type LandWatchJob,
   type LandWatchJobQuote,
   type LandWatchJobQuoteStatus,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import { qk } from '@/lib/query/keys';
 import { landWatchApi } from '@/lib/api/landWatch';
 import { errorMessage } from '@/lib/api/client';
@@ -369,7 +369,7 @@ export default function LandWatchJobScreen() {
                       onPress={() => act.mutate({ type: 'check' })}
                     />
                     <Text variant="caption" color="mutedForeground">
-                      A GetRentos inspector, not the vendor, visits to confirm the work was done.
+                      A Sureground inspector, not the vendor, visits to confirm the work was done.
                     </Text>
                   </View>
                 )

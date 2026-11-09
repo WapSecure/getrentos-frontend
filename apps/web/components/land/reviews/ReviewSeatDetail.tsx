@@ -12,9 +12,9 @@ import {
   Skeleton,
   Textarea,
   useToast,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { ArrowLeft, CalendarClock, MapPin } from 'lucide-react';
-import { boundaryCorners } from '@getrentos/shared';
+import { boundaryCorners } from '@sureground/shared';
 import { ApiError, unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
 import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';
@@ -228,7 +228,7 @@ export const ReviewSeatDetail = ({ seatId }: { seatId: string }) => {
         />
         {data.seatStatus === 'REVOKED' && (
           <p className="rounded-xl bg-secondary p-3 text-sm text-foreground">
-            GetRentos has withdrawn this engagement. The case is shown for your records only.
+            Sureground has withdrawn this engagement. The case is shown for your records only.
           </p>
         )}
       </div>
@@ -251,7 +251,7 @@ export const ReviewSeatDetail = ({ seatId }: { seatId: string }) => {
                 {undeclared
                   ? 'Make your conflict declaration above to open your checks.'
                   : active
-                    ? `${data.checks.length - pending.length} of ${data.checks.length} decided. Your notes are visible to GetRentos reviewers, not to the owner or buyers.`
+                    ? `${data.checks.length - pending.length} of ${data.checks.length} decided. Your notes are visible to Sureground reviewers, not to the owner or buyers.`
                     : 'Decisions are closed on this seat.'}
               </p>
             </div>

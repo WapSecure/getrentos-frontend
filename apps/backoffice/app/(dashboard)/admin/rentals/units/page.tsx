@@ -25,9 +25,9 @@ import {
   Skeleton,
   useToast,
   PageHeader,
-} from '@getrentos/ui';
-import { ApiError, unwrap } from '@getrentos/shared';
-import type { ApiResponse } from '@getrentos/shared';
+} from '@sureground/ui';
+import { ApiError, unwrap } from '@sureground/shared';
+import type { ApiResponse } from '@sureground/shared';
 import { adminRentalService } from '@/services/adminRentalService';
 import type { AdminTenantCandidate } from '@/services/adminRentalService';
 import type { AdminRentalUnit, UnitOccupancyStatus } from '@/types/rental';

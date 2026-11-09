@@ -1,7 +1,7 @@
 import { Link, Stack } from 'expo-router';
 import { View } from 'react-native';
 import { Compass } from 'lucide-react-native';
-import { Screen, Text, useTheme } from '@getrentos/ui-native';
+import { Screen, Text, useTheme } from '@sureground/ui-native';
 
 export default function NotFound() {
   const { colors, spacing } = useTheme();

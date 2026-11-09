@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { View } from 'react-native';
 import { Check } from 'lucide-react-native';
-import { Button, Chip, NumberField, Text, useTheme } from '@getrentos/ui-native';
+import { Button, Chip, NumberField, Text, useTheme } from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import {
   PROPERTY_TYPES,
@@ -104,8 +104,7 @@ function FilterForm({
           </View>
         </View>
         <Text variant="caption" color="mutedForeground">
-          Homes are let by the year, so enter a yearly budget (₦50,000 a month is ₦600,000 a
-          year).
+          Homes are let by the year, so enter a yearly budget (₦50,000 a month is ₦600,000 a year).
         </Text>
       </Field>
 

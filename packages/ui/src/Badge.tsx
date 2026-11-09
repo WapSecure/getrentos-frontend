@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { cn } from '@getrentos/shared';
+import { cn } from '@sureground/shared';
 
 export type BadgeVariant =
   | 'success'

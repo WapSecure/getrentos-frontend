@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { ShieldAlert } from 'lucide-react';
-import { Alert } from '@getrentos/ui';
+import { Alert } from '@sureground/ui';
 import {
   VERIFICATION_REASONS,
   TRUST_WITHHELD_REASONS,

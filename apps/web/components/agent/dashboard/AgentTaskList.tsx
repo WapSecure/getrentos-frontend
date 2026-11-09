@@ -1,7 +1,7 @@
 'use client';
 
 import { ClipboardCheck, UserCheck, Home, FileText, Clock, AlertTriangle } from 'lucide-react';
-import { Card, CardDescription, CardHeader, CardTitle, EmptyState } from '@getrentos/ui';
+import { Card, CardDescription, CardHeader, CardTitle, EmptyState } from '@sureground/ui';
 import { formatDate } from '@/lib/format';
 import type { AgentTask, TaskType } from '@/types/agent';
 

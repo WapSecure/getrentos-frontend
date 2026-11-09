@@ -14,8 +14,8 @@ import {
   IconButton,
   Skeleton,
   useOptimisticMutation,
-} from '@getrentos/ui';
-import { formatRelativeTime, unwrap } from '@getrentos/shared';
+} from '@sureground/ui';
+import { formatRelativeTime, unwrap } from '@sureground/shared';
 import { adminKeys } from '@/lib/queryKeys';
 import { adminService } from '@/services/adminService';
 
@@ -54,12 +54,21 @@ export function AdminNotificationMenu() {
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
         <IconButton
-          label={query.isError ? 'Notifications unavailable' : `Notifications${unreadCount ? `, ${unreadCount} unread` : ''}`}
+          label={
+            query.isError
+              ? 'Notifications unavailable'
+              : `Notifications${unreadCount ? `, ${unreadCount} unread` : ''}`
+          }
           className="relative"
           icon={
             <>
               <Bell aria-hidden="true" />
-              {unreadCount > 0 && <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-destructive" aria-hidden="true" />}
+              {unreadCount > 0 && (
+                <span
+                  className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-destructive"
+                  aria-hidden="true"
+                />
+              )}
             </>
           }
         />
@@ -69,7 +78,10 @@ export function AdminNotificationMenu() {
           <DropdownMenuLabel className="px-0 py-1 font-semibold">Notifications</DropdownMenuLabel>
           {unreadCount > 0 && (
             <DropdownMenuItem
-              onSelect={(event) => { event.preventDefault(); markAll.mutate(undefined); }}
+              onSelect={(event) => {
+                event.preventDefault();
+                markAll.mutate(undefined);
+              }}
               className="text-xs text-primary"
             >
               Mark all read
@@ -86,33 +98,52 @@ export function AdminNotificationMenu() {
             </div>
           ) : query.isError && !query.data ? (
             <>
-              <p role="alert" className="px-3 py-2 text-sm text-destructive">Could not load notifications.</p>
-              <DropdownMenuItem onSelect={(event) => { event.preventDefault(); void query.refetch(); }}>Retry loading</DropdownMenuItem>
+              <p role="alert" className="px-3 py-2 text-sm text-destructive">
+                Could not load notifications.
+              </p>
+              <DropdownMenuItem
+                onSelect={(event) => {
+                  event.preventDefault();
+                  void query.refetch();
+                }}
+              >
+                Retry loading
+              </DropdownMenuItem>
             </>
           ) : notifications.length === 0 ? (
             <p className="px-3 py-4 text-center text-sm text-muted-foreground">No notifications</p>
-          ) : notifications.map((notification) => (
-            <DropdownMenuItem
-              key={notification.id}
-              onSelect={(event) => {
-                event.preventDefault();
-                if (!notification.read) markRead.mutate(notification.id);
-              }}
-              className={`block border-b border-border px-3 py-2.5 last:border-0 ${notification.read ? '' : 'bg-primary/5'}`}
-              aria-label={`${notification.title}. ${notification.body}${notification.read ? '' : '. Mark as read'}`}
-            >
-              <span className="flex items-start justify-between gap-3">
-                <span className="text-sm font-medium">{notification.title}</span>
-                <span className="shrink-0 text-xs text-muted-foreground">{formatRelativeTime(notification.createdAt)}</span>
-              </span>
-              <span className="mt-1 block text-xs text-muted-foreground">{notification.body}</span>
-              {!notification.read && <span className="mt-1 block text-xs font-medium text-primary">Mark as read</span>}
-            </DropdownMenuItem>
-          ))}
+          ) : (
+            notifications.map((notification) => (
+              <DropdownMenuItem
+                key={notification.id}
+                onSelect={(event) => {
+                  event.preventDefault();
+                  if (!notification.read) markRead.mutate(notification.id);
+                }}
+                className={`block border-b border-border px-3 py-2.5 last:border-0 ${notification.read ? '' : 'bg-primary/5'}`}
+                aria-label={`${notification.title}. ${notification.body}${notification.read ? '' : '. Mark as read'}`}
+              >
+                <span className="flex items-start justify-between gap-3">
+                  <span className="text-sm font-medium">{notification.title}</span>
+                  <span className="shrink-0 text-xs text-muted-foreground">
+                    {formatRelativeTime(notification.createdAt)}
+                  </span>
+                </span>
+                <span className="mt-1 block text-xs text-muted-foreground">
+                  {notification.body}
+                </span>
+                {!notification.read && (
+                  <span className="mt-1 block text-xs font-medium text-primary">Mark as read</span>
+                )}
+              </DropdownMenuItem>
+            ))
+          )}
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href="/admin/notifications" className="justify-center text-primary">View all notifications</Link>
+          <Link href="/admin/notifications" className="justify-center text-primary">
+            View all notifications
+          </Link>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

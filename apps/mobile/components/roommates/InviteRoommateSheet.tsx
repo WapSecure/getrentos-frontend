@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { View } from 'react-native';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Button, Text, TextField, useTheme, useToast } from '@getrentos/ui-native';
+import { Button, Text, TextField, useTheme, useToast } from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { qk } from '@/lib/query/keys';
 import { roommatesApi } from '@/lib/api/roommates';
@@ -66,7 +66,7 @@ function InviteRoommateForm({
       <TextField
         label="Personal message"
         optional
-        placeholder="Hey, join our flat on GetRentos"
+        placeholder="Hey, join our flat on Sureground"
         multiline
         numberOfLines={3}
         value={message}

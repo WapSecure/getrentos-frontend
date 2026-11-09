@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { RefreshCcw, Percent } from 'lucide-react';
-import { Button, Field, NumberInput, QueryState, Switch, useToast } from '@getrentos/ui';
+import { Button, Field, NumberInput, QueryState, Switch, useToast } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { ownerKeys } from '@/lib/queryKeys';
 import { ownerService } from '@/services/ownerService';

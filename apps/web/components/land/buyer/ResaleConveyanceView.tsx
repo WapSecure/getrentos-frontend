@@ -10,7 +10,7 @@ import {
   PageHeader,
   Skeleton,
   useToast,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { AlertTriangle, Lock, ScrollText } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { ROUTES } from '@/lib/constants/auth';
@@ -152,7 +152,7 @@ export const ResaleConveyanceView = ({ txId }: { txId: string }) => {
               </p>
               {failedCondition && (
                 <Alert variant="danger" icon={AlertTriangle} className="mb-4">
-                  A condition was not met. You may cancel and take a full refund of what GetRentos
+                  A condition was not met. You may cancel and take a full refund of what Sureground
                   holds from your transactions page, or keep the purchase.
                 </Alert>
               )}

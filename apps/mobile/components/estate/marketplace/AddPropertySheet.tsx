@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { View } from 'react-native';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Search } from 'lucide-react-native';
-import { Button, Skeleton, Text, TextField, useTheme, useToast } from '@getrentos/ui-native';
+import { Button, Skeleton, Text, TextField, useTheme, useToast } from '@sureground/ui-native';
 import { StatusPill } from '@/components/host/HostUI';
 import { Sheet } from '@/components/Sheet';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
@@ -92,7 +92,7 @@ function AddPropertyForm({ estateId, onDone }: { estateId: string; onDone: () =>
         </Text>
       ) : !candidates.data?.length ? (
         <Text variant="callout" color="mutedForeground">
-          No matching property. Its owner needs to add it to GetRentos first.
+          No matching property. Its owner needs to add it to Sureground first.
         </Text>
       ) : (
         <View style={{ gap: spacing.sm }}>

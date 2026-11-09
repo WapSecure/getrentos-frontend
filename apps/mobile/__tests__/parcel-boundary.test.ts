@@ -3,7 +3,7 @@ import {
   boundaryAreaSqm,
   boundaryCorners,
   boundaryGeometry,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 
 const square = [
   { latitude: 6.44, longitude: 3.47 },

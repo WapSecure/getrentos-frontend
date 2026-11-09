@@ -32,7 +32,7 @@ import {
   Text,
   TextField,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   activeFilterCount,
@@ -71,12 +71,12 @@ const INTRO: Record<Tab, { title: string; body: string; search: string }> = {
   },
   sale: {
     title: 'Homes for sale',
-    body: 'Make an offer once you sign in: GetRentos holds your deposit until you confirm receipt.',
+    body: 'Make an offer once you sign in: Sureground holds your deposit until you confirm receipt.',
     search: 'Search area, estate or title',
   },
   shortlet: {
     title: 'Shortlets',
-    body: 'Furnished short stays from verified hosts: GetRentos holds your payment until you arrive.',
+    body: 'Furnished short stays from verified hosts: Sureground holds your payment until you arrive.',
     search: 'Search area or city',
   },
   land: {
@@ -151,7 +151,7 @@ export default function Marketplace() {
                 icon={<ChevronLeft size={22} color={colors.foreground} />}
               />
             ) : null}
-            <View accessible accessibilityRole="image" accessibilityLabel="GetRentos">
+            <View accessible accessibilityRole="image" accessibilityLabel="Sureground">
               <BrandLogo size={22} />
             </View>
           </View>
@@ -814,7 +814,7 @@ function JoinBar() {
       >
         <ShieldCheck size={20} color={colors.primary} />
         <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
-          Create a free account to save homes, enquire, and pay safely through GetRentos.
+          Create a free account to save homes, enquire, and pay safely through Sureground.
         </Text>
         <Button
           label="Join free"

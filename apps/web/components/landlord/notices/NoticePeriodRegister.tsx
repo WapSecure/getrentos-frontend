@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Info } from 'lucide-react';
-import { Alert, Badge, Button, Card, Field, NumberInput, Select, Textarea } from '@getrentos/ui';
+import { Alert, Badge, Button, Card, Field, NumberInput, Select, Textarea } from '@sureground/ui';
 
 import { formatDate } from '@/lib/format';
 import type { NoticeKind, NoticePeriodSettings, UnconfiguredPeriod } from '@/types/tenancy-notice';

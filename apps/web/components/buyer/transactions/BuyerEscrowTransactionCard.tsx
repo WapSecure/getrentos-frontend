@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { ShieldCheck, ShieldAlert } from 'lucide-react';
-import { Badge } from '@getrentos/ui';
+import { Badge } from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type { BuyerEscrowTransaction, BuyerEscrowStatus } from '@/types/buyer';
 

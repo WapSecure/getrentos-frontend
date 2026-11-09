@@ -7,7 +7,7 @@
  *   NEXT_PUBLIC_OPS_ONCALL_HOURS   e.g. "24/7 for critical and fraud cases"
  */
 export const OPS_CONTACT = {
-  email: process.env.NEXT_PUBLIC_OPS_EMAIL?.trim() || 'support@getrentos.com',
+  email: process.env.NEXT_PUBLIC_OPS_EMAIL?.trim() || 'support@getsureground.io',
   phone: process.env.NEXT_PUBLIC_OPS_ONCALL_PHONE?.trim() || '',
   hours: process.env.NEXT_PUBLIC_OPS_ONCALL_HOURS?.trim() || '',
 };

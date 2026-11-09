@@ -52,18 +52,18 @@ importers:
 
   apps/backoffice:
     dependencies:
-      '@getrentos/shared':
-        specifier: workspace:*
-        version: link:../../packages/shared
-      '@getrentos/ui':
-        specifier: workspace:*
-        version: link:../../packages/ui
       '@hookform/resolvers':
         specifier: ^5.9.2
         version: 5.9.2(@sinclair/typebox@0.34.52)(react-hook-form@7.77.0(react@19.2.3))(zod@4.6.7)
       '@simplewebauthn/browser':
         specifier: 14.0.0
         version: 14.0.0
+      '@sureground/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+      '@sureground/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       '@tanstack/react-query':
         specifier: ^5.101.4
         version: 5.101.4(react@19.2.3)
@@ -95,10 +95,10 @@ importers:
         specifier: ^4.6.7
         version: 4.6.7
     devDependencies:
-      '@getrentos/eslint-config':
+      '@sureground/eslint-config':
         specifier: workspace:*
         version: link:../../tooling/eslint
-      '@getrentos/typescript-config':
+      '@sureground/typescript-config':
         specifier: workspace:*
         version: link:../../tooling/typescript
       '@tailwindcss/postcss':
@@ -140,15 +140,6 @@ importers:
       '@expo/metro-runtime':
         specifier: ~57.0.16
         version: 57.0.16(@expo/log-box@57.0.4)(expo@57.0.28)(react-dom@19.2.3(react@19.2.3))(react-native@0.86.3(@babel/core@7.29.7)(@react-native/jest-preset@0.86.3(@babel/core@7.29.7)(react@19.2.3))(@react-native/metro-config@0.86.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3)
-      '@getrentos/shared':
-        specifier: workspace:*
-        version: link:../../packages/shared
-      '@getrentos/tokens':
-        specifier: workspace:*
-        version: link:../../packages/tokens
-      '@getrentos/ui-native':
-        specifier: workspace:*
-        version: link:../../packages/ui-native
       '@gorhom/bottom-sheet':
         specifier: ^5.1.6
         version: 5.2.14(952b7cbc3a7d386aa27a3b63e41a63db)
@@ -176,6 +167,15 @@ importers:
       '@smileid/usesmileid_vision_face':
         specifier: ^12.4.0
         version: 12.4.0(expo-modules-core@57.0.22(react-native-worklets@0.10.1(@babel/core@7.29.7)(@react-native/metro-config@0.86.3(@babel/core@7.29.7))(react-native@0.86.3(@babel/core@7.29.7)(@react-native/jest-preset@0.86.3(@babel/core@7.29.7)(react@19.2.3))(@react-native/metro-config@0.86.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3))(react-native@0.86.3(@babel/core@7.29.7)(@react-native/jest-preset@0.86.3(@babel/core@7.29.7)(react@19.2.3))(@react-native/metro-config@0.86.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3))(expo@57.0.28)(react-native@0.86.3(@babel/core@7.29.7)(@react-native/jest-preset@0.86.3(@babel/core@7.29.7)(react@19.2.3))(@react-native/metro-config@0.86.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3)
+      '@sureground/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+      '@sureground/tokens':
+        specifier: workspace:*
+        version: link:../../packages/tokens
+      '@sureground/ui-native':
+        specifier: workspace:*
+        version: link:../../packages/ui-native
       '@tanstack/query-async-storage-persister':
         specifier: 5.102.8
         version: 5.102.8
@@ -375,12 +375,6 @@ importers:
 
   apps/web:
     dependencies:
-      '@getrentos/shared':
-        specifier: workspace:*
-        version: link:../../packages/shared
-      '@getrentos/ui':
-        specifier: workspace:*
-        version: link:../../packages/ui
       '@hookform/resolvers':
         specifier: ^5.9.2
         version: 5.9.2(@sinclair/typebox@0.34.52)(react-hook-form@7.77.0(react@19.2.3))(zod@4.6.7)
@@ -402,6 +396,12 @@ importers:
       '@smileid/web-sdk':
         specifier: 12.2.3
         version: 12.2.3
+      '@sureground/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+      '@sureground/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       '@tanstack/react-query':
         specifier: ^5.101.4
         version: 5.101.4(react@19.2.3)
@@ -454,10 +454,10 @@ importers:
         specifier: ^5.0.14
         version: 5.0.14(@types/react@19.2.17)(react@19.2.3)
     devDependencies:
-      '@getrentos/eslint-config':
+      '@sureground/eslint-config':
         specifier: workspace:*
         version: link:../../tooling/eslint
-      '@getrentos/typescript-config':
+      '@sureground/typescript-config':
         specifier: workspace:*
         version: link:../../tooling/typescript
       '@tailwindcss/postcss':
@@ -503,10 +503,10 @@ importers:
         specifier: ^3.6.0
         version: 3.6.0
     devDependencies:
-      '@getrentos/eslint-config':
+      '@sureground/eslint-config':
         specifier: workspace:*
         version: link:../../tooling/eslint
-      '@getrentos/typescript-config':
+      '@sureground/typescript-config':
         specifier: workspace:*
         version: link:../../tooling/typescript
       '@types/node':
@@ -530,9 +530,6 @@ importers:
 
   packages/ui:
     dependencies:
-      '@getrentos/shared':
-        specifier: workspace:*
-        version: link:../shared
       '@radix-ui/react-dialog':
         specifier: ^1.1.23
         version: 1.1.23(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -545,6 +542,9 @@ importers:
       '@radix-ui/react-tabs':
         specifier: ^1.1.21
         version: 1.1.21(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@sureground/shared':
+        specifier: workspace:*
+        version: link:../shared
       '@tanstack/react-query':
         specifier: ^5.101.4
         version: 5.101.4(react@19.2.3)
@@ -561,10 +561,10 @@ importers:
         specifier: ^0.4.6
         version: 0.4.6(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
     devDependencies:
-      '@getrentos/eslint-config':
+      '@sureground/eslint-config':
         specifier: workspace:*
         version: link:../../tooling/eslint
-      '@getrentos/typescript-config':
+      '@sureground/typescript-config':
         specifier: workspace:*
         version: link:../../tooling/typescript
       '@types/node':
@@ -591,10 +591,10 @@ importers:
 
   packages/ui-native:
     dependencies:
-      '@getrentos/shared':
+      '@sureground/shared':
         specifier: workspace:*
         version: link:../shared
-      '@getrentos/tokens':
+      '@sureground/tokens':
         specifier: workspace:*
         version: link:../tokens
     devDependencies:
@@ -8864,9 +8864,7 @@ snapshots:
       metro-runtime: 0.84.5
     transitivePeerDependencies:
       - '@babel/core'
-      - bufferutil
       - supports-color
-      - utf-8-validate
 
   '@react-native/normalize-colors@0.74.89': {}
 
@@ -10660,8 +10658,8 @@ snapshots:
       '@next/eslint-plugin-next': 16.4.5(eslint@9.39.4(jiti@2.7.0))
       eslint: 9.39.4(jiti@2.7.0)
       eslint-import-resolver-node: 0.3.10
-      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0))
-      eslint-plugin-import: 2.32.0(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0))
+      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0)(eslint@9.39.4(jiti@2.7.0))
+      eslint-plugin-import: 2.32.0(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4(jiti@2.7.0))
       eslint-plugin-jsx-a11y: 6.10.2(eslint@9.39.4(jiti@2.7.0))
       eslint-plugin-react: 7.37.5(eslint@9.39.4(jiti@2.7.0))
       eslint-plugin-react-hooks: 7.1.1(eslint@9.39.4(jiti@2.7.0))
@@ -10683,21 +10681,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0)):
-    dependencies:
-      '@nolyfill/is-core-module': 1.0.39
-      debug: 4.4.3
-      eslint: 9.39.4(jiti@2.7.0)
-      get-tsconfig: 4.14.0
-      is-bun-module: 2.0.0
-      stable-hash: 0.0.5
-      tinyglobby: 0.2.17
-      unrs-resolver: 1.12.2
-    optionalDependencies:
-      eslint-plugin-import: 2.32.0(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0))
-    transitivePeerDependencies:
-      - supports-color
-
   eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0)(eslint@9.39.4(jiti@2.7.0)):
     dependencies:
       '@nolyfill/is-core-module': 1.0.39
@@ -10709,7 +10692,7 @@ snapshots:
       tinyglobby: 0.2.17
       unrs-resolver: 1.12.2
     optionalDependencies:
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.60.1(eslint@9.39.4(jiti@2.7.0))(typescript@6.0.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4(jiti@2.7.0))
+      eslint-plugin-import: 2.32.0(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4(jiti@2.7.0))
     transitivePeerDependencies:
       - supports-color
 
@@ -10721,16 +10704,6 @@ snapshots:
       eslint: 9.39.4(jiti@2.7.0)
       eslint-import-resolver-node: 0.3.10
       eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0)(eslint@9.39.4(jiti@2.7.0))
-    transitivePeerDependencies:
-      - supports-color
-
-  eslint-module-utils@2.13.0(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0)):
-    dependencies:
-      debug: 3.2.7
-    optionalDependencies:
-      eslint: 9.39.4(jiti@2.7.0)
-      eslint-import-resolver-node: 0.3.10
-      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0))
     transitivePeerDependencies:
       - supports-color
 
@@ -10772,7 +10745,7 @@ snapshots:
       - eslint-import-resolver-webpack
       - supports-color
 
-  eslint-plugin-import@2.32.0(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0)):
+  eslint-plugin-import@2.32.0(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4(jiti@2.7.0)):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.9
@@ -10783,7 +10756,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 9.39.4(jiti@2.7.0)
       eslint-import-resolver-node: 0.3.10
-      eslint-module-utils: 2.13.0(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0))
+      eslint-module-utils: 2.13.0(@typescript-eslint/parser@8.60.1(eslint@9.39.4(jiti@2.7.0))(typescript@6.0.3))(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4(jiti@2.7.0))
       hasown: 2.0.4
       is-core-module: 2.16.2
       is-glob: 4.0.3

@@ -14,7 +14,7 @@ import {
   TabsTrigger,
   useToast,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { DepositCard } from '@/components/landlord/deposits/DepositCard';
 import { RecordDepositModal } from '@/components/landlord/deposits/RecordDepositModal';
 import { DepositDetailModal } from '@/components/landlord/deposits/DepositDetailModal';

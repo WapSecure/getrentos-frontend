@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { spokenGateOutcome, type GateOutcome } from '@getrentos/shared';
+import { spokenGateOutcome, type GateOutcome } from '@sureground/shared';
 import { speakNow } from '@/lib/voice';
 
 const KEY = 'gate.speakResults';

@@ -10,13 +10,13 @@ import {
   SwitchRow,
   Text,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { realtorApi, type RealtorNotificationPreference } from '@/lib/api/realtor';
 import { haptics } from '@/lib/haptics';
 import { useOptimisticMutation } from '@/lib/query/optimistic';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
-import { categorySendsEmail } from '@getrentos/shared';
+import { categorySendsEmail } from '@sureground/shared';
 import { goBack } from '@/lib/goBack';
 
 const COPY: Record<string, { label: string; hint: string }> = {
@@ -30,7 +30,7 @@ const COPY: Record<string, { label: string; hint: string }> = {
 /**
  * Which updates buzz the phone, and which are also emailed. Everything still
  * lands in Notifications; this only decides what interrupts. Email exists only
- * for the kinds GetRentos emails (offers and commission), so only those rows
+ * for the kinds Sureground emails (offers and commission), so only those rows
  * offer it.
  */
 export default function RealtorNotificationSettings() {
@@ -100,7 +100,7 @@ export default function RealtorNotificationSettings() {
           <Text variant="caption" color="mutedForeground">
             Muted updates still appear in Notifications. Email is sent only for offers and money,
             not for messages or reviews. If no push arrives at all, check that notifications are
-            allowed for GetRentos in your phone’s settings.
+            allowed for Sureground in your phone’s settings.
           </Text>
         </>
       </QueryState>

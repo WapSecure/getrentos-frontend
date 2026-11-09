@@ -1,8 +1,8 @@
-import { authFetch, safeCall, type ApiResponse } from '@getrentos/shared';
+import { authFetch, safeCall, type ApiResponse } from '@sureground/shared';
 
 export type PaymentProvider = 'PAYSTACK' | 'MONNIFY';
 
-/** One company GetRentos collects through, and whether payers can use it now. */
+/** One company Sureground collects through, and whether payers can use it now. */
 export interface PaymentProviderStatus {
   provider: PaymentProvider;
   label: string;

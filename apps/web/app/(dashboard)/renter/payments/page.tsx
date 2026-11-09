@@ -24,7 +24,7 @@ import {
   PageLoadingState,
   Pagination,
   useToast,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { FinancingView } from '@/components/renter/financing/FinancingView';
 import { usePaymentProviders } from '@/hooks/usePaymentProviders';
 import type { PaymentProvider } from '@/types/payments';
@@ -466,7 +466,7 @@ export default function PaymentsPage() {
                 confirmingMoveInPayment.heldAmountNaira
                   ? `${formatCurrency(confirmingMoveInPayment.heldAmountNaira)} `
                   : ''
-              }rent GetRentos is holding for ${confirmingMoveInPayment.propertyName} to your landlord now. Only confirm once you've moved in — it can't be undone.`
+              }rent Sureground is holding for ${confirmingMoveInPayment.propertyName} to your landlord now. Only confirm once you've moved in — it can't be undone.`
             : ''
         }
         confirmLabel="Yes, release to landlord"

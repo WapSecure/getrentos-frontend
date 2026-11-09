@@ -33,7 +33,7 @@ import {
   type ToastVariant,
   useToast,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import {
   LAND_INCIDENT_KIND_LABELS,
   LAND_INCIDENT_STATUS_LABELS,
@@ -44,7 +44,7 @@ import {
   type LandWatchInspection,
   type LandWatchReminderKind,
   type LandWatchTier,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { landKeys } from '@/lib/queryKeys';
@@ -557,7 +557,7 @@ const IncidentsCard = ({ watch, onSaved, onFailed }: SectionProps) => {
       setOpen(false);
       setKind('');
       setDescription('');
-      onSaved(d, 'Reported. GetRentos will look into it.');
+      onSaved(d, 'Reported. Sureground will look into it.');
     },
     onError: (e) => onFailed(e, 'Could not report that.'),
   });
@@ -590,7 +590,7 @@ const IncidentsCard = ({ watch, onSaved, onFailed }: SectionProps) => {
               </div>
               <p className="mt-1 text-muted-foreground">{i.description}</p>
               {i.resolutionNote && (
-                <p className="mt-1 text-foreground">GetRentos: {i.resolutionNote}</p>
+                <p className="mt-1 text-foreground">Sureground: {i.resolutionNote}</p>
               )}
               {i.disputeId && (
                 <Link

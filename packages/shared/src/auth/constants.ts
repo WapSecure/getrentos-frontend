@@ -58,7 +58,7 @@ export const ROLES = {
   LANDLORD: {
     id: 'landlord',
     name: 'Landlord',
-    description: 'List properties, vet tenants, collect rent safely through GetRentos.',
+    description: 'List properties, vet tenants, collect rent safely through Sureground.',
     icon: 'Building2',
     requiresVerification: ['identity', 'property'],
     canAddLater: true,
@@ -199,13 +199,13 @@ export const ERROR_MESSAGES = {
 } as const;
 
 export const STORAGE_KEYS = {
-  SIGNUP_DATA: 'getrentos_signup_data',
+  SIGNUP_DATA: 'sureground_signup_data',
   /** Legacy: tokens are no longer stored (AU-16); kept so old entries can be removed. */
-  AUTH_TOKEN: 'getrentos_auth_token',
+  AUTH_TOKEN: 'sureground_auth_token',
   /** Legacy: the refresh token is an httpOnly cookie; kept so old entries can be removed. */
-  REFRESH_TOKEN: 'getrentos_refresh_token',
-  USER: 'getrentos_user',
-  SELECTED_ROLES: 'getrentos_selected_roles',
+  REFRESH_TOKEN: 'sureground_refresh_token',
+  USER: 'sureground_user',
+  SELECTED_ROLES: 'sureground_selected_roles',
 } as const;
 
 // Main ROUTES constant

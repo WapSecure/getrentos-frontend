@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { CircleDashed } from 'lucide-react';
-import { Badge, Button, ConfirmDialog } from '@getrentos/ui';
-import { formatDate, unwrap } from '@getrentos/shared';
+import { Badge, Button, ConfirmDialog } from '@sureground/ui';
+import { formatDate, unwrap } from '@sureground/shared';
 import { adminLandService } from '@/services/adminLandService';
 import type { AdminLandDiligenceCondition, AdminLandDiligenceDetail } from '@/types/land';
 import {

@@ -15,12 +15,12 @@ import {
   Pagination,
   SearchInput,
   Switch,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { WalkInDialog } from '@/components/gateman/WalkInDialog';
 import { useGateVoice } from '@/components/gateman/useGateVoice';
-import { digitsFromSpeech } from '@getrentos/shared';
+import { digitsFromSpeech } from '@sureground/shared';
 import { useVoiceInput } from '@/lib/voice';
 import { WatchlistBlockedNotice } from '@/components/gateman/WatchlistBlockedNotice';
 import { WatchlistWarning } from '@/components/gateman/WatchlistWarning';

@@ -14,9 +14,9 @@ import {
   CreditCard,
   Users,
 } from 'lucide-react';
-import { Alert } from '@getrentos/ui';
-import { Button } from '@getrentos/ui';
-import { CardSkeleton } from '@getrentos/ui';
+import { Alert } from '@sureground/ui';
+import { Button } from '@sureground/ui';
+import { CardSkeleton } from '@sureground/ui';
 import { TrustScoreRing } from '@/components/renter/shared/TrustScoreRing';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { ROUTES } from '@/lib/constants/auth';

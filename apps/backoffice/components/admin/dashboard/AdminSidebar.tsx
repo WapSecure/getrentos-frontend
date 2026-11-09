@@ -56,8 +56,8 @@ import {
   MessageCircleQuestion,
   ChevronDown,
 } from 'lucide-react';
-import { ROUTES, unwrap } from '@getrentos/shared';
-import { SidebarRailToggle, useSidebarRail } from '@getrentos/ui';
+import { ROUTES, unwrap } from '@sureground/shared';
+import { SidebarRailToggle, useSidebarRail } from '@sureground/ui';
 import { hasAdminPermission, hasStaffAccess } from '@/lib/adminAccess';
 import type { AdminPermission } from '@/types/admin';
 
@@ -114,7 +114,7 @@ const navItems: NavItem[] = [
     permission: 'verifications.review',
   },
   {
-    label: 'GetRentos Managed',
+    label: 'Sureground Managed',
     href: '/admin/managed-mandates',
     icon: Sparkles,
     permission: 'managed.view',
@@ -549,7 +549,7 @@ function AdminNavigationGroup({
   const containsCurrentPage = items.some(
     (item) => pathname === item.href || pathname.startsWith(`${item.href}/`)
   );
-  const preferenceKey = `getrentos.admin-nav.expanded:${label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+  const preferenceKey = `sureground.admin-nav.expanded:${label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
   const expandedPreference = useSyncExternalStore(
     subscribeAdminNav,
     () => readAdminNavPreference(preferenceKey),

@@ -3,11 +3,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Check, XCircle, HelpCircle, FileText, Download } from 'lucide-react';
-import { Alert, Field, Skeleton, Textarea } from '@getrentos/ui';
-import { Dialog, DialogContent, DialogTitle } from '@getrentos/ui';
-import { Button, IconLink } from '@getrentos/ui';
-import { DocumentPreviewButton } from '@getrentos/ui';
-import { formatDate, unwrap } from '@getrentos/shared';
+import { Alert, Field, Skeleton, Textarea } from '@sureground/ui';
+import { Dialog, DialogContent, DialogTitle } from '@sureground/ui';
+import { Button, IconLink } from '@sureground/ui';
+import { DocumentPreviewButton } from '@sureground/ui';
+import { formatDate, unwrap } from '@sureground/shared';
 import { adminService } from '@/services/adminService';
 import { OwnershipDocCheckPanel } from '@/components/admin/verifications/OwnershipDocCheckPanel';
 import type { VerificationRequest } from '@/types/admin';

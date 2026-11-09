@@ -1,6 +1,6 @@
 import { memo, useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
-import { Button, Text, useTheme } from '@getrentos/ui-native';
+import { Button, Text, useTheme } from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { isoDay, shiftDay } from '@/lib/hostDates';
 import { nightsLabel } from '@/lib/stays';

@@ -54,7 +54,7 @@ import type {
 } from '@/types/tenancy-notice';
 import type { Conversation } from '@/components/landlord/messages/ConversationList';
 import type { ThreadMessage } from '@/components/landlord/messages/MessageThread';
-import type { VideoCallJoin } from '@getrentos/shared';
+import type { VideoCallJoin } from '@sureground/shared';
 import type { ListingDraft, ListingSelfCheck, ListingSelfCheckInput } from '@/types/listingDraft';
 import type { StatementExplanation } from '@/types/statementExplanation';
 import type { CollectionPlan } from '@/types/collectionPlan';
@@ -1061,7 +1061,7 @@ export const landlordService = {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = 'getrentos-financials.csv';
+      link.download = 'sureground-financials.csv';
       document.body.appendChild(link);
       link.click();
       link.remove();

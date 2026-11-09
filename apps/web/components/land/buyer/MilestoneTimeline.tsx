@@ -9,7 +9,7 @@ import {
   DialogDescription,
   DialogTitle,
   Textarea,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { CheckCircle2, Circle, CircleAlert, CircleDot, MinusCircle } from 'lucide-react';
 import { formatDate } from '@/lib/format';
 import type { LandMilestone } from '@/types/landBuyer';
@@ -225,7 +225,7 @@ export const MilestoneTimeline = ({
         title={`Confirm “${confirming?.label ?? ''}”?`}
         description={
           showRelease && confirming && confirming.releaseBps > 0
-            ? `Only confirm once you have it in hand. Confirming releases ${bpsToPercent(confirming.releaseBps)} of the price held by GetRentos to the developer, and cannot be undone.`
+            ? `Only confirm once you have it in hand. Confirming releases ${bpsToPercent(confirming.releaseBps)} of the price held by Sureground to the developer, and cannot be undone.`
             : 'Only confirm once you have it in hand. Confirming tells us the step is done and cannot be undone.'
         }
         confirmLabel="Confirm step"

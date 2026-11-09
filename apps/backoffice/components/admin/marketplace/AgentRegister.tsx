@@ -31,8 +31,8 @@ import {
   useToast,
   type BadgeVariant,
   PageHeader,
-} from '@getrentos/ui';
-import { formatDate, unwrap, humaniseEnum } from '@getrentos/shared';
+} from '@sureground/ui';
+import { formatDate, unwrap, humaniseEnum } from '@sureground/shared';
 import { adminMarketplaceService } from '@/services/adminMarketplaceService';
 import { useProfessionalActions, downloadBlob } from './useProfessionalActions';
 import type { AdminAgent, AdminAgentDetail, AdminAgentTask } from '@/types/marketplace';

@@ -11,8 +11,8 @@ import {
   TooltipProps,
 } from 'recharts';
 import { TrendingUp } from 'lucide-react';
-import { formatTrend, monthTrend } from '@getrentos/shared';
-import { Badge, Card, EmptyState, Skeleton } from '@getrentos/ui';
+import { formatTrend, monthTrend } from '@sureground/shared';
+import { Badge, Card, EmptyState, Skeleton } from '@sureground/ui';
 import { useQuery } from '@tanstack/react-query';
 import { formatCurrency } from '@/lib/format';
 import { ownerService } from '@/services/ownerService';

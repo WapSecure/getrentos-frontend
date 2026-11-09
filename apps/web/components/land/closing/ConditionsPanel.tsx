@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { CheckCircle2, CircleDashed, Clock, XCircle } from 'lucide-react';
-import { Badge, Button, Textarea } from '@getrentos/ui';
+import { Badge, Button, Textarea } from '@sureground/ui';
 import { formatDate } from '@/lib/format';
 import type { LandClosingChecklistItem, LandClosingCondition } from '@/types/landClosing';
 

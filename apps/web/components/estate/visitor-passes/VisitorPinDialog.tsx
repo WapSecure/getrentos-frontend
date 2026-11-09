@@ -1,7 +1,7 @@
 'use client';
 
 import { KeyRound } from 'lucide-react';
-import { Button, Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrentos/ui';
+import { Button, Dialog, DialogContent, DialogDescription, DialogTitle } from '@sureground/ui';
 import type { IssuedVisitorPass } from '@/types/estate';
 
 interface VisitorPinDialogProps {

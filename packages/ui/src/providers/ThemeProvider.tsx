@@ -1,6 +1,11 @@
 'use client';
 
 import { ThemeProvider as NextThemesProvider } from 'next-themes';
+import { migrateLegacyBrowserStorage } from '@sureground/shared';
+
+// Both apps load this provider first, so stored GetRentos-era keys move to
+// their Sureground names before anything else reads them.
+migrateLegacyBrowserStorage();
 
 /**
  * `nonce` is the request's Content-Security-Policy nonce: next-themes renders a

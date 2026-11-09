@@ -36,7 +36,15 @@ import {
   Wrench,
   MessageCircle,
 } from 'lucide-react-native';
-import { Avatar, Button, Divider, Screen, Text, ThemeToggle, useTheme } from '@getrentos/ui-native';
+import {
+  Avatar,
+  Button,
+  Divider,
+  Screen,
+  Text,
+  ThemeToggle,
+  useTheme,
+} from '@sureground/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useIdentityVerification } from '@/hooks/useIdentityVerification';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
@@ -183,14 +191,14 @@ export default function LandlordAccount() {
     {
       key: 'get-managed',
       label: 'Get it managed',
-      description: 'GetRentos Managed or a vetted firm',
+      description: 'Sureground Managed or a vetted firm',
       icon: UserCog,
       onPress: go('/(app)/get-managed'),
     },
     {
       key: 'change-manager',
       label: 'Change manager',
-      description: 'Hand a property to a firm, GetRentos or yourself',
+      description: 'Hand a property to a firm, Sureground or yourself',
       icon: ArrowRightLeft,
       onPress: go('/(app)/change-manager'),
     },
@@ -294,7 +302,7 @@ export default function LandlordAccount() {
         accessible
         accessibilityRole="header"
         accessibilityLabel={[
-          profile?.legalName ?? 'GetRentos landlord',
+          profile?.legalName ?? 'Sureground landlord',
           profile?.email,
           verified ? 'verified' : 'not verified',
         ]
@@ -304,7 +312,7 @@ export default function LandlordAccount() {
       >
         <Avatar name={profile?.legalName} size={76} />
         <Text variant="heading" style={{ marginTop: spacing.sm }}>
-          {profile?.legalName ?? 'GetRentos landlord'}
+          {profile?.legalName ?? 'Sureground landlord'}
         </Text>
         <Text variant="callout" color="mutedForeground">
           {profile?.email ?? profile?.phone ?? ''}
@@ -343,14 +351,14 @@ export default function LandlordAccount() {
         variant="outline"
         icon={<LogOut size={16} color={colors.foreground} />}
         onPress={() =>
-          Alert.alert('Sign out of GetRentos?', 'You can sign back in any time.', [
+          Alert.alert('Sign out of Sureground?', 'You can sign back in any time.', [
             { text: 'Cancel', style: 'cancel' },
             { text: 'Sign out', style: 'destructive', onPress: signOut },
           ])
         }
       />
       <Text variant="caption" color="mutedForeground" center style={{ marginBottom: spacing.lg }}>
-        GetRentos {Constants.expoConfig?.version ?? ''}
+        Sureground {Constants.expoConfig?.version ?? ''}
       </Text>
     </Screen>
   );

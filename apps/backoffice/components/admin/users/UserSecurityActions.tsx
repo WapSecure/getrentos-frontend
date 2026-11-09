@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { KeyRound, LogOut } from 'lucide-react';
-import { Button, ConfirmDialog, useToast } from '@getrentos/ui';
-import { unwrap } from '@getrentos/shared';
+import { Button, ConfirmDialog, useToast } from '@sureground/ui';
+import { unwrap } from '@sureground/shared';
 import { adminService } from '@/services/adminService';
 
 type Action = 'signOut' | 'resetTwoFactor';

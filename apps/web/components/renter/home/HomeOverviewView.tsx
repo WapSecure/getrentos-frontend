@@ -33,7 +33,7 @@ import {
   Skeleton,
   StatGridSkeleton,
   type BadgeVariant,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap, unwrapOptional } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
@@ -675,7 +675,7 @@ const PENDING_LEASE_NUDGE: Record<string, { title: string; body: string; cta: st
     cta: 'See what to pay',
   },
   awaiting_landlord: {
-    title: 'Your payment is held by GetRentos',
+    title: 'Your payment is held by Sureground',
     body: 'The landlord has been asked to confirm handover.',
     cta: 'View lease',
   },

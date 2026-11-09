@@ -10,7 +10,7 @@ type AuthSession = {
 const storages = () =>
   typeof window === 'undefined' ? [] : ([localStorage, sessionStorage] as const);
 
-const REMEMBERED_IDENTIFIER_KEY = 'getrentos_remembered_identifier';
+const REMEMBERED_IDENTIFIER_KEY = 'sureground_remembered_identifier';
 
 /**
  * The access token lives in this module and nowhere else (security gap AU-16).

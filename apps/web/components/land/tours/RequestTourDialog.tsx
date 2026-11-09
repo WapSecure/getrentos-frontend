@@ -13,7 +13,7 @@ import {
   Field,
   Select,
   Textarea,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import {
   landRepresentativeKeys,

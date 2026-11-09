@@ -1,7 +1,7 @@
 'use client';
 
 import { TrendingUp, Clock, CheckCircle } from 'lucide-react';
-import { Alert, Card } from '@getrentos/ui';
+import { Alert, Card } from '@sureground/ui';
 
 interface Notification {
   read: boolean;

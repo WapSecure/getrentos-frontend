@@ -1,7 +1,7 @@
 'use client';
 
 import { Tag } from 'lucide-react';
-import { Card } from '@getrentos/ui';
+import { Card } from '@sureground/ui';
 
 interface Label {
   id: string;

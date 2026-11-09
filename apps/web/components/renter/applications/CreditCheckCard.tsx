@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ShieldCheck } from 'lucide-react';
-import { Alert, Button, Checkbox, Field, NumberInput } from '@getrentos/ui';
+import { Alert, Button, Checkbox, Field, NumberInput } from '@sureground/ui';
 import { formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';

@@ -13,7 +13,7 @@ import {
   DocumentUpload,
   type PendingUpload,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { Footer } from '@/components/layout/Footer';
 import { Navigation } from '@/components/layout/Navigation';
 import { unwrap } from '@/lib/apiHelpers';
@@ -195,7 +195,7 @@ export default function LandDisputePage() {
                       </a>
                       <span className="text-muted-foreground">
                         {' '}
-                        · {item.source === 'ADMIN' ? 'GetRentos' : 'you'} ·{' '}
+                        · {item.source === 'ADMIN' ? 'Sureground' : 'you'} ·{' '}
                         {formatDate(item.createdAt)}
                       </span>
                       {item.note && <p className="text-muted-foreground">“{item.note}”</p>}

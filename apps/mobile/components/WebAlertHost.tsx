@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Platform, View } from 'react-native';
-import { Button, Text, useTheme } from '@getrentos/ui-native';
+import { Button, Text, useTheme } from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import {
   answerWebAlert,

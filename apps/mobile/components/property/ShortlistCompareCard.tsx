@@ -10,7 +10,7 @@ import {
   Text,
   useTheme,
   type BadgeTone,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { errorMessage } from '@/lib/api/client';
 import { rentDecisionApi, type ComparedHome } from '@/lib/api/rentDecision';
 

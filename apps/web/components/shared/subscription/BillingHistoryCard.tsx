@@ -1,8 +1,8 @@
 'use client';
 
 import { ReceiptText } from 'lucide-react';
-import { formatCurrency } from '@getrentos/shared';
-import { Badge, Card, CardSkeleton, type BadgeVariant } from '@getrentos/ui';
+import { formatCurrency } from '@sureground/shared';
+import { Badge, Card, CardSkeleton, type BadgeVariant } from '@sureground/ui';
 import { useInvoices } from '@/hooks/useBilling';
 import type { SubscriptionInvoice } from '@/services/billingService';
 

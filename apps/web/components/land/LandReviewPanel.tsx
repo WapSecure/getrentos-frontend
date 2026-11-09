@@ -1,6 +1,6 @@
 'use client';
 
-import { Alert, Button } from '@getrentos/ui';
+import { Alert, Button } from '@sureground/ui';
 import { AlertTriangle, CheckCircle2, Circle, Clock3, Send, XCircle } from 'lucide-react';
 import { formatDate } from '@/lib/format';
 import type { LandDiligenceCheck, OwnerLandRecord } from '@/types/land';

@@ -16,7 +16,7 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { CreateLeaseSheet } from '@/components/landlord/CreateLeaseSheet';
 import {
@@ -210,7 +210,7 @@ function LeaseCard({
         {LEASE_STATUS_NOTE[l.status] ? (
           <Text variant="caption" color="mutedForeground">
             {l.status === 'awaiting_payment' && l.paymentDueAt
-              ? `Tenant has signed. Their first rent is due by ${formatDate(l.paymentDueAt, 'short')}; you countersign once GetRentos holds it.`
+              ? `Tenant has signed. Their first rent is due by ${formatDate(l.paymentDueAt, 'short')}; you countersign once Sureground holds it.`
               : LEASE_STATUS_NOTE[l.status]}
           </Text>
         ) : null}
@@ -258,10 +258,10 @@ function LeaseCard({
 const SIGNABLE = new Set<LeaseStatus>(['awaiting_landlord']);
 
 const LEASE_STATUS_NOTE: Partial<Record<LeaseStatus, string>> = {
-  sent: 'Waiting for the tenant to sign. You countersign once they have paid the rent to GetRentos.',
+  sent: 'Waiting for the tenant to sign. You countersign once they have paid the rent to Sureground.',
   awaiting_payment:
-    'Tenant has signed. You countersign once their first rent is held by GetRentos.',
-  awaiting_landlord: 'GetRentos is holding the rent. Countersign to confirm you have handed over.',
+    'Tenant has signed. You countersign once their first rent is held by Sureground.',
+  awaiting_landlord: 'Sureground is holding the rent. Countersign to confirm you have handed over.',
   lapsed: 'This lease lapsed unpaid and the unit is back on the market.',
 };
 

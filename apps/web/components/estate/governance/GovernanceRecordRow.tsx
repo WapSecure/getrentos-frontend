@@ -1,7 +1,7 @@
 'use client';
 
 import { Download, Trash2, FileText, History, FilePlus2 } from 'lucide-react';
-import { Badge, IconButton, IconLink } from '@getrentos/ui';
+import { Badge, IconButton, IconLink } from '@sureground/ui';
 import type { GovernanceRecord } from '@/types/estate';
 
 const typeVariant: Record<GovernanceRecord['type'], 'info' | 'neutral'> = {

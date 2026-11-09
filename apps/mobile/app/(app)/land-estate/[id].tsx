@@ -16,7 +16,7 @@ import {
   Text,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   filterPlots,
@@ -464,7 +464,7 @@ function ReservePanel({
           />
           <Text variant="caption" color="mutedForeground">
             A reservation is free and holds the plot for {e.reservationHoldHours} hours while you
-            choose a plan. You can hold up to 3 plots at a time. GetRentos holds your payments and
+            choose a plan. You can hold up to 3 plots at a time. Sureground holds your payments and
             releases them to the developer only as you confirm each conveyance step.
           </Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>

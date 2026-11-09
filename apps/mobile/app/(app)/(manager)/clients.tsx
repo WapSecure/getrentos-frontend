@@ -18,7 +18,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { useCustody } from '@/lib/agency/custody';
 import {
@@ -181,7 +181,7 @@ function InviteRow({ invite: i }: { invite: OwnerInvite }) {
       </View>
       {i.status === 'PENDING' && i.hasAccount ? (
         <Text variant="caption" color="mutedForeground">
-          Has a GetRentos account
+          Has a Sureground account
         </Text>
       ) : null}
       {i.status === 'PENDING' ? (

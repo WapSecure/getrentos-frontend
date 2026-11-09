@@ -1,5 +1,5 @@
 import { RepresentativesManager } from '@/components/land/representatives/RepresentativesManager';
-import { PageHeader } from '@getrentos/ui';
+import { PageHeader } from '@sureground/ui';
 
 export default function BuyerLandRepresentativesPage() {
   return (

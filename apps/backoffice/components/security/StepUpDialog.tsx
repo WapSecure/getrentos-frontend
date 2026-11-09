@@ -1,6 +1,6 @@
 'use client';
 
-import { StepUpDialog as SharedStepUpDialog } from '@getrentos/ui';
+import { StepUpDialog as SharedStepUpDialog } from '@sureground/ui';
 import {
   startAuthentication,
   type PublicKeyCredentialRequestOptionsJSON,

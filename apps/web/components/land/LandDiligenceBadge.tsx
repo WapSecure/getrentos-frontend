@@ -1,4 +1,4 @@
-import { Badge } from '@getrentos/ui';
+import { Badge } from '@sureground/ui';
 import {
   AlertTriangle,
   CheckCircle2,

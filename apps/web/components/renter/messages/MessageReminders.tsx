@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Bell, BellOff, Plus, X, ChevronDown, ChevronUp } from 'lucide-react';
-import { Button, Card, DatePicker, Field, IconButton, Input, TimePicker } from '@getrentos/ui';
+import { Button, Card, DatePicker, Field, IconButton, Input, TimePicker } from '@sureground/ui';
 
 interface Reminder {
   id: string;

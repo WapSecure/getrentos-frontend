@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@getrentos/ui';
-import { Alert, Button, Field, Input, NumberInput, Select } from '@getrentos/ui';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@sureground/ui';
+import { Alert, Button, Field, Input, NumberInput, Select } from '@sureground/ui';
 import { ImagePlus, Play, Star, Video, X } from 'lucide-react';
 import { AddressFields, type AddressFieldsValue } from '@/components/shared/location/AddressFields';
 import { LocationPicker } from '@/components/maps/LocationPicker';

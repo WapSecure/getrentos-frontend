@@ -24,7 +24,7 @@ import {
   Price,
   Text,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import type { ShortletListing } from '@/lib/api/shortlets';
 import {
   CONDITION_LABEL,
@@ -70,8 +70,8 @@ export function HostBlock({
           >
             {listing.hostCancellations12m == null
               ? listing.hostVerified
-                ? 'Identity verified by GetRentos'
-                : 'New to hosting on GetRentos'
+                ? 'Identity verified by Sureground'
+                : 'New to hosting on Sureground'
               : cancels === 0
                 ? 'No cancelled stays in the last year'
                 : `Cancelled ${cancels} confirmed ${cancels === 1 ? 'stay' : 'stays'} in the last year`}
@@ -298,7 +298,7 @@ export function FairPriceNote({ listing }: { listing: ShortletListing }) {
         <Text variant="bodyStrong">Fair price</Text>
         <Text variant="callout" style={{ color: colors.foreground }}>
           {f.bedrooms}-bedroom stays in {f.city} typically go for ₦
-          {f.typicalNightly.toLocaleString('en-NG')} a night ({f.comparables} stays on GetRentos).
+          {f.typicalNightly.toLocaleString('en-NG')} a night ({f.comparables} stays on Sureground).
           This one is at or below that.
         </Text>
       </View>
@@ -338,7 +338,7 @@ export function InspectionBlock({ listing }: { listing: ShortletListing }) {
           </View>
         ))}
         <Text variant="caption" color="mutedForeground">
-          The host arranged this inspection. GetRentos checked the agent&apos;s licence and
+          The host arranged this inspection. Sureground checked the agent&apos;s licence and
           identity, and only shows inspections from the last 12 months with no room rated poor.
         </Text>
       </Card>

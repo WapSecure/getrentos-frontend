@@ -8,7 +8,7 @@ import {
   LayoutGrid,
   List,
 } from 'lucide-react';
-import { Button, IconButton, SegmentedControl } from '@getrentos/ui';
+import { Button, IconButton, SegmentedControl } from '@sureground/ui';
 import { format } from 'date-fns';
 import { RenterPageHeader } from '../shared/RenterPageHeader';
 

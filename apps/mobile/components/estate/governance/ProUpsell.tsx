@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 import { router } from 'expo-router';
 import { BadgeCheck, Sparkles } from 'lucide-react-native';
-import { Button, Card, Text, useTheme } from '@getrentos/ui-native';
+import { Button, Card, Text, useTheme } from '@sureground/ui-native';
 
 /**
  * What a Pro feature does, in place of the screen an estate on a lower plan

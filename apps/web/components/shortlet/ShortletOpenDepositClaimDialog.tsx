@@ -14,7 +14,7 @@ import {
   Textarea,
   useToast,
   type PendingUpload,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { ShieldAlert } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';

@@ -8,7 +8,7 @@ import {
   SearchInput,
   useOptimisticMutation,
   PageHeader,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { useMemo, useState } from 'react';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, HardHat } from 'lucide-react';

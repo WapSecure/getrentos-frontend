@@ -13,7 +13,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { hostShortletsApi, type BlockedRange, type HostBooking } from '@/lib/api/hostShortlets';
 import { errorMessage } from '@/lib/api/client';

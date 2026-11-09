@@ -1,8 +1,8 @@
-import { authFetch, safeCall, type ApiResponse } from '@getrentos/shared';
+import { authFetch, safeCall, type ApiResponse } from '@sureground/shared';
 
 export type PaymentEventStatus = 'RECEIVED' | 'PROCESSED' | 'FAILED' | 'IGNORED';
 
-/** One webhook the payment provider sent, and whether GetRentos applied it. */
+/** One webhook the payment provider sent, and whether Sureground applied it. */
 export interface PaymentEvent {
   id: string;
   provider: string;

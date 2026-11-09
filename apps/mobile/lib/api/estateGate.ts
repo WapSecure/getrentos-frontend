@@ -1,4 +1,4 @@
-import { tierAtLeast } from '@getrentos/shared';
+import { tierAtLeast } from '@sureground/shared';
 import { ApiError, apiFetch } from './client';
 import { toQuery } from './query';
 import type { PickedFile } from './documents';

@@ -17,7 +17,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { qk } from '@/lib/query/keys';
 import { supportApi, SUPPORT_CATEGORIES, type SupportThread } from '@/lib/api/support';
@@ -41,7 +41,7 @@ export default function Support() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <DetailScreenHeader
-        eyebrow="GetRentos care"
+        eyebrow="Sureground care"
         title="Support"
         subtitle="Track conversations with our support team"
         onBack={() => goBack()}

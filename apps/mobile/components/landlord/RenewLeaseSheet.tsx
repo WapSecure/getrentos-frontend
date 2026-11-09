@@ -10,7 +10,7 @@ import {
   TextField,
   useTheme,
   useToast,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { landlordApi, type LandlordLease, type RenewalCheck } from '@/lib/api/landlord';
 import { errorMessage } from '@/lib/api/client';

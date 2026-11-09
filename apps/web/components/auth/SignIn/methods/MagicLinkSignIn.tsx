@@ -1,14 +1,14 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
+import { LegacyInput } from '@sureground/ui';
 
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Fingerprint, CheckCircle, XCircle } from 'lucide-react';
-import { Button } from '@getrentos/ui';
-import { ToastVariant } from '@getrentos/ui';
+import { Button } from '@sureground/ui';
+import { ToastVariant } from '@sureground/ui';
 import { authService } from '@/services/authService';
 
 const magicLinkSchema = z.object({
@@ -56,9 +56,7 @@ export const MagicLinkSignIn = ({ isLoading, setIsLoading, showToast }: MagicLin
   return (
     <form method="post" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-foreground mb-1.5">
-          Email address
-        </label>
+        <label className="block text-sm font-medium text-foreground mb-1.5">Email address</label>
         <div className="relative">
           <LegacyInput
             type="email"

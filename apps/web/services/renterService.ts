@@ -3,7 +3,7 @@ import type { ReplyLanguage } from '@/lib/replyLanguage';
 import type { ChargeCategory } from '@/lib/chargeCategory';
 import { authDownload, authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
 import type { ApiResponse } from '@/lib/apiHelpers';
-import type { VideoCallJoin } from '@getrentos/shared';
+import type { VideoCallJoin } from '@sureground/shared';
 import type {
   Application,
   ApplicationStatus,
@@ -35,7 +35,7 @@ import type { RentalSearchParse } from '@/types/searchParse';
 import type { FinancingOverview, FinancingPlan, FinancingPlanLength } from '@/types/financing';
 import type { LeaseGuide } from '@/types/leaseGuide';
 import type { Affordability, AffordabilityInput, ShortlistComparison } from '@/types/rentDecision';
-import type { LastApplicationDetails } from '@getrentos/shared';
+import type { LastApplicationDetails } from '@sureground/shared';
 import { providerQuery } from '@/services/paymentStatusService';
 import type { PaymentProvider } from '@/types/payments';
 
@@ -217,7 +217,7 @@ export interface Payment {
   description: string;
   dueDate: string;
   escrowStatus: 'not_funded' | 'held' | 'pending_review' | 'released' | 'frozen';
-  /** Scheduled auto-release date (ISO) for funds held by GetRentos. Present only while held. */
+  /** Scheduled auto-release date (ISO) for funds held by Sureground. Present only while held. */
   releaseDate?: string;
   /** Short machine reason the money is held (e.g. 'rent_hold'). Present only while held. */
   heldReason?: string;
@@ -229,7 +229,7 @@ export interface Payment {
   feeNaira?: number;
   /** Amount plus fee: what the payer was charged in all. Sent with `feeNaira`. */
   totalChargedNaira?: number;
-  /** Naira GetRentos is holding for this charge right now (0 once released). */
+  /** Naira Sureground is holding for this charge right now (0 once released). */
   heldAmountNaira?: number;
   /** A checkout the tenant opened and closed, which they can go back to until `expiresAt`. */
   resumeCheckout?: { url: string; reference: string; expiresAt: string };

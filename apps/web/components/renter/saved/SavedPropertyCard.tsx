@@ -30,7 +30,7 @@ import {
   DropdownMenuTrigger,
   IconButton,
   type BadgeVariant,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 import { buildRoute } from '@/lib/constants/auth';
 import { renterService, type SavedListingItem, type Wishlist } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';

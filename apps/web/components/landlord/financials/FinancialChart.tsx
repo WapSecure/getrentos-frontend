@@ -10,7 +10,7 @@ import {
   ResponsiveContainer,
   TooltipProps,
 } from 'recharts';
-import { Card } from '@getrentos/ui';
+import { Card } from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 
 interface FinancialPoint {

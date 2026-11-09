@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Tabs, TabsList, TabsTrigger } from '@getrentos/ui';
+import { Tabs, TabsList, TabsTrigger } from '@sureground/ui';
 import { RealtorRegister } from '@/components/admin/marketplace/RealtorRegister';
 import { RealtorPayoutOversight } from '@/components/admin/marketplace/RealtorPayoutOversight';
 import { RealtorCommissionRates } from '@/components/admin/marketplace/RealtorCommissionRates';

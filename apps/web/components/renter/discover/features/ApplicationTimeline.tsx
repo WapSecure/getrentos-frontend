@@ -10,7 +10,7 @@ import {
   Key,
   CalendarDays,
 } from 'lucide-react';
-import { Alert, Badge } from '@getrentos/ui';
+import { Alert, Badge } from '@sureground/ui';
 
 interface ApplicationStep {
   id: string;

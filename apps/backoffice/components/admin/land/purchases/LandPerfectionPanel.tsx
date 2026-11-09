@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { FileCheck2 } from 'lucide-react';
-import { Badge, Button, Field, Input, Select, Textarea } from '@getrentos/ui';
-import { formatDate } from '@getrentos/shared';
+import { Badge, Button, Field, Input, Select, Textarea } from '@sureground/ui';
+import { formatDate } from '@sureground/shared';
 import type { LandPerfection, LandPerfectionStep } from '@/types/landPurchase';
 import { LandCaseSection, PanelMessage } from '@/components/admin/land/case/shared';
 

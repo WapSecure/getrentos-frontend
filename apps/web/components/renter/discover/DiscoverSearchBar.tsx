@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { SearchInput } from '@getrentos/ui';
+import { SearchInput } from '@sureground/ui';
 
 interface DiscoverSearchBarProps {
   initialQuery?: string;

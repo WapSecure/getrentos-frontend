@@ -1,7 +1,7 @@
 import { Tabs } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Car, KeyRound, Menu, Package, UserCheck } from 'lucide-react-native';
-import { useTheme } from '@getrentos/ui-native';
+import { useTheme } from '@sureground/ui-native';
 import { GateQueueSync } from '@/components/gateman/GateQueueSync';
 import { GatemanPostProvider } from '@/lib/gateman/GatemanPostProvider';
 import { premiumTabBarOptions } from '@/lib/navigationStyles';

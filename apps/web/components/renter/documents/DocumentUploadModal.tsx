@@ -12,7 +12,7 @@ import {
   FilePreviewDialog,
   Input,
   Select,
-} from '@getrentos/ui';
+} from '@sureground/ui';
 
 interface DocumentUploadModalProps {
   isOpen: boolean;

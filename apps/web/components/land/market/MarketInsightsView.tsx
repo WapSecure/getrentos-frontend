@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Button, PageErrorState, Select, Skeleton } from '@getrentos/ui';
+import { Button, PageErrorState, Select, Skeleton } from '@sureground/ui';
 import { AlertTriangle, BarChart3 } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency } from '@/lib/format';
@@ -267,7 +267,7 @@ export const MarketInsightsView = () => {
             </details>
           </section>
           <p className="text-xs text-muted-foreground">
-            Asking prices of verified, in-date land listings on GetRentos, not completed sale
+            Asking prices of verified, in-date land listings on Sureground, not completed sale
             prices. Updated {new Date(data.generatedAt).toLocaleString('en-NG')}.
           </p>
         </>

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Star, PenLine } from 'lucide-react';
-import { Button, Card, ListSkeleton, Pagination, QueryState, PageHeader } from '@getrentos/ui';
+import { Button, Card, ListSkeleton, Pagination, QueryState, PageHeader } from '@sureground/ui';
 import { getInitials, formatDate } from '@/lib/format';
 import { ROUTES } from '@/lib/constants/auth';
 import { buyerService, type BuyerReview } from '@/services/buyerService';
@@ -45,7 +45,7 @@ export default function BuyerReviewsPage() {
           <div>
             <p className="text-sm font-medium text-foreground">Recently completed a purchase?</p>
             <p className="text-xs text-muted-foreground">
-              Leave a review to help other buyers on GetRentos.
+              Leave a review to help other buyers on Sureground.
             </p>
           </div>
         </div>

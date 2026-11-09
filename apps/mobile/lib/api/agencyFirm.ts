@@ -1,7 +1,7 @@
-import type { BadgeTone } from '@getrentos/ui-native';
+import type { BadgeTone } from '@sureground/ui-native';
 import { apiFetch, apiUpload } from './client';
 import { appendFile, type PickedFile } from './documents';
-import type { PayoutSentTo } from '@getrentos/shared';
+import type { PayoutSentTo } from '@sureground/shared';
 
 /**
  * Running the firm itself: its team, commissions and payouts, client-money

@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { Building2, MapPin } from 'lucide-react';
-import { EmptyState, Skeleton } from '@getrentos/ui';
+import { EmptyState, Skeleton } from '@sureground/ui';
 import { SafeImage } from '@/components/shared/media/SafeImage';
 import { estateStorefrontService } from '@/services/estateMarketplaceService';
 import { EstateAvailableListings } from './EstateAvailableListings';

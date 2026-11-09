@@ -1,4 +1,4 @@
-import type { LandBoundaryVersion } from '@getrentos/shared';
+import type { LandBoundaryVersion } from '@sureground/shared';
 import type { LandDiligenceCheckStatus, LandTitleType } from '@/types/land';
 import type { LandDocumentType } from '@/types/landDocument';
 

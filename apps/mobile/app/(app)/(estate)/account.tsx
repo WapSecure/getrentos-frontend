@@ -22,7 +22,15 @@ import {
   WalletCards,
   Waves,
 } from 'lucide-react-native';
-import { Avatar, Button, Divider, Screen, Text, ThemeToggle, useTheme } from '@getrentos/ui-native';
+import {
+  Avatar,
+  Button,
+  Divider,
+  Screen,
+  Text,
+  ThemeToggle,
+  useTheme,
+} from '@sureground/ui-native';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
 import { EstateSwitcherSheet } from '@/components/estate/EstateUI';
@@ -222,14 +230,14 @@ export default function EstateAccount() {
         variant="outline"
         icon={<LogOut size={16} color={colors.foreground} />}
         onPress={() =>
-          Alert.alert('Sign out of GetRentos?', 'You can sign back in any time.', [
+          Alert.alert('Sign out of Sureground?', 'You can sign back in any time.', [
             { text: 'Cancel', style: 'cancel' },
             { text: 'Sign out', style: 'destructive', onPress: signOut },
           ])
         }
       />
       <Text variant="caption" color="mutedForeground" center style={{ marginBottom: spacing.lg }}>
-        GetRentos {Constants.expoConfig?.version ?? ''}
+        Sureground {Constants.expoConfig?.version ?? ''}
       </Text>
       <EstateSwitcherSheet
         open={switching}

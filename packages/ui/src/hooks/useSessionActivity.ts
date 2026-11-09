@@ -7,7 +7,7 @@ import {
   markSessionExpired,
   ROUTES,
   refreshSession,
-} from '@getrentos/shared';
+} from '@sureground/shared';
 
 /**
  * Total inactivity before the session ends: 30 minutes. The warning dialog

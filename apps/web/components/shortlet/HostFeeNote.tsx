@@ -13,7 +13,7 @@ const formatDay = (iso: string) =>
     timeZone: 'Africa/Lagos',
   });
 
-/** Tells hosts what GetRentos takes from each stay, and until when a launch rate runs. */
+/** Tells hosts what Sureground takes from each stay, and until when a launch rate runs. */
 export function HostFeeNote() {
   const { data } = useQuery({
     queryKey: shortletKeys.hostFees,
@@ -30,10 +30,10 @@ export function HostFeeNote() {
   return (
     <p className="mt-1 text-sm text-muted-foreground">
       {data.commissionPct === 0 ? (
-        <>GetRentos takes no fee on new bookings right now.</>
+        <>Sureground takes no fee on new bookings right now.</>
       ) : (
         <>
-          GetRentos fee: <span className="font-medium text-foreground">{data.commissionPct}%</span>{' '}
+          Sureground fee: <span className="font-medium text-foreground">{data.commissionPct}%</span>{' '}
           of each stay, taken from your payout
         </>
       )}

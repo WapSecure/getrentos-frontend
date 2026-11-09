@@ -14,7 +14,7 @@ import {
   Text,
   TextField,
   useTheme,
-} from '@getrentos/ui-native';
+} from '@sureground/ui-native';
 import { HouseholdRow, HouseholdSheet } from '@/components/estate/EstateUI';
 import { ImportHouseholdsSheet } from '@/components/estate/CsvImportSheets';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';

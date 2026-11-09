@@ -1,5 +1,5 @@
 import { ReferralSummaryCard } from '@/components/referral/ReferralSummaryCard';
-import { PageHeader } from '@getrentos/ui';
+import { PageHeader } from '@sureground/ui';
 
 export default function LandlordReferralsPage() {
   return (

@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 import { Building2 } from 'lucide-react-native';
-import { Button, Screen, Text, useTheme } from '@getrentos/ui-native';
+import { Button, Screen, Text, useTheme } from '@sureground/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
 const PORTAL_LABEL: Record<string, string> = {
@@ -34,8 +34,8 @@ export default function PortalUnavailable() {
         </Text>
         <Text variant="body" color="mutedForeground" center style={{ maxWidth: 320 }}>
           {isAdmin
-            ? 'Trust reviews, staff approvals and the fraud queue live in the backoffice. Sign in there on a desktop at getrentos.com.'
-            : 'Your portal is being built next: use the web app at getrentos.com in the meantime.'}
+            ? 'Trust reviews, staff approvals and the fraud queue live in the backoffice. Sign in there on a desktop at getsureground.io.'
+            : 'Your portal is being built next: use the web app at getsureground.io in the meantime.'}
         </Text>
         <Button
           label="Sign out"

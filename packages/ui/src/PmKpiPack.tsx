@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Building2, HandCoins, ShieldAlert, Users, Wallet, Wrench } from 'lucide-react';
-import { cn, formatCurrency } from '@getrentos/shared';
+import { cn, formatCurrency } from '@sureground/shared';
 import { Badge } from './Badge';
 import { Card } from './Card';
 import { StatCard } from './StatCard';

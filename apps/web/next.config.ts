@@ -10,7 +10,7 @@ type ImageRemotePattern = {
 
 /**
  * Derive the image optimizer allowlist from the configured API origin.
- * Listing/banner/avatar images are served by the GetRentos API, so the API
+ * Listing/banner/avatar images are served by the Sureground API, so the API
  * host must be allowed for `next/image` to optimize them. If uploads are
  * served from a dedicated CDN in production, add that hostname here too.
  */
@@ -41,10 +41,10 @@ function imageRemotePatterns(): ImageRemotePattern[] {
 
 const nextConfig: NextConfig = {
   distDir: process.env.NEXT_DIST_DIR ?? '.next',
-  transpilePackages: ['@getrentos/shared', '@getrentos/ui'],
+  transpilePackages: ['@sureground/shared', '@sureground/ui'],
   // Import only the modules a page uses from the shared UI barrel, so a page that
   // needs a dropdown doesn't also ship every animated component in the package.
-  experimental: { optimizePackageImports: ['@getrentos/ui'] },
+  experimental: { optimizePackageImports: ['@sureground/ui'] },
   images: {
     remotePatterns: imageRemotePatterns(),
     // Next 16 refuses to optimise remote images whose host resolves to a

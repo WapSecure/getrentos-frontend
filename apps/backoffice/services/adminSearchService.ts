@@ -1,4 +1,4 @@
-import { authFetch, safeCall, toQuery, type ApiResponse } from '@getrentos/shared';
+import { authFetch, safeCall, toQuery, type ApiResponse } from '@sureground/shared';
 
 export type AdminSearchType =
   | 'users'

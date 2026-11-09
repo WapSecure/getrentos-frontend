@@ -17,7 +17,7 @@ import {
   Wallet,
   FileSpreadsheet,
 } from 'lucide-react-native';
-import { Screen } from '@getrentos/ui-native';
+import { Screen } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { agencyApi } from '@/lib/api/agency';
 import { useIdentityVerification } from '@/hooks/useIdentityVerification';
@@ -48,7 +48,7 @@ export default function AgencyAccount() {
     },
     {
       key: 'ask',
-      label: 'Ask GetRentos',
+      label: 'Ask Sureground',
       description: 'About your clients, rent, arrears and repairs',
       icon: MessageCircleQuestion,
       onPress: () => router.push({ pathname: '/(app)/ask', params: { persona: 'agency' } }),
@@ -151,7 +151,7 @@ export default function AgencyAccount() {
     <Screen>
       <AccountHeader
         role="Property manager"
-        fallbackName="GetRentos manager"
+        fallbackName="Sureground manager"
         note={dashboard.data?.firmName}
       />
       <WorkspaceSwitcher />

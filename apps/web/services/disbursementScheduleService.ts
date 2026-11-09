@@ -23,7 +23,7 @@ export interface DisbursementSchedule {
     enabled: boolean;
     nextRunAt: string;
   } | null;
-  /** Whole naira GetRentos currently holds for the owner. */
+  /** Whole naira Sureground currently holds for the owner. */
   balance: number;
   recent: DisbursementRecord[];
 }
