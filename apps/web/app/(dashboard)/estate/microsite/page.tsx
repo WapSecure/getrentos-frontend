@@ -236,14 +236,21 @@ export default function EstateMicrositePage() {
   if (!estate) return <RedirectToEstateSetup />;
 
   if (!isPro) {
+    // Keep the page's heading on the upgrade screen, as the form has it.
     return (
-      <ProFeatureGate
-        entitled={isPro}
-        title="Microsite is a Pro feature"
-        description="Upgrade to Pro to get a public page showcasing your estate: one link to share with residents and prospective buyers."
-      >
-        <div />
-      </ProFeatureGate>
+      <div className="max-w-2xl">
+        <PageHeader
+          title="Microsite"
+          description="A public page showcasing your estate: share one link with prospective residents."
+        />
+        <ProFeatureGate
+          entitled={isPro}
+          title="Microsite is a Pro feature"
+          description="Upgrade to Pro to get a public page showcasing your estate: one link to share with residents and prospective buyers."
+        >
+          <div />
+        </ProFeatureGate>
+      </div>
     );
   }
 
