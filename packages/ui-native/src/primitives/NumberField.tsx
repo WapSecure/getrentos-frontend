@@ -1,5 +1,5 @@
 import { forwardRef } from 'react';
-import type { TextInput } from 'react-native';
+import type { TextInputInstance, TextInput } from 'react-native';
 import { Text } from './Text';
 import { TextField, type TextFieldProps } from './TextField';
 import { group, sanitizeNumber, wholeNumber } from './numberFormat';
@@ -20,7 +20,7 @@ export interface NumberFieldProps extends BaseProps {
   currency?: boolean | string;
 }
 
-export const NumberField = forwardRef<TextInput, NumberFieldProps>(function NumberField(
+export const NumberField = forwardRef<TextInputInstance, NumberFieldProps>(function NumberField(
   {
     value,
     onValueChange,
@@ -88,33 +88,32 @@ export interface CurrencyFieldProps extends BaseProps {
   max?: number;
 }
 
-export const CurrencyField = forwardRef<TextInput, CurrencyFieldProps>(function CurrencyField(
-  { value, onValueChange, symbol = '₦', max, leftIcon, ...rest },
-  ref
-) {
-  const display = value == null || Number.isNaN(value) ? '' : group(String(Math.trunc(value)));
-  return (
-    <TextField
-      ref={ref}
-      {...rest}
-      value={display}
-      onChangeText={(text) => {
-        const digits = text.replace(/\D/g, '').replace(/^0+(?=\d)/, '');
-        if (!digits) return onValueChange(null);
-        const next = Number(digits);
-        if (max != null && next > max) return;
-        onValueChange(next);
-      }}
-      keyboardType="number-pad"
-      inputMode="numeric"
-      autoCorrect={false}
-      leftIcon={
-        leftIcon ?? (
-          <Text variant="bodyStrong" color="mutedForeground">
-            {symbol}
-          </Text>
-        )
-      }
-    />
-  );
-});
+export const CurrencyField = forwardRef<TextInputInstance, CurrencyFieldProps>(
+  function CurrencyField({ value, onValueChange, symbol = '₦', max, leftIcon, ...rest }, ref) {
+    const display = value == null || Number.isNaN(value) ? '' : group(String(Math.trunc(value)));
+    return (
+      <TextField
+        ref={ref}
+        {...rest}
+        value={display}
+        onChangeText={(text) => {
+          const digits = text.replace(/\D/g, '').replace(/^0+(?=\d)/, '');
+          if (!digits) return onValueChange(null);
+          const next = Number(digits);
+          if (max != null && next > max) return;
+          onValueChange(next);
+        }}
+        keyboardType="number-pad"
+        inputMode="numeric"
+        autoCorrect={false}
+        leftIcon={
+          leftIcon ?? (
+            <Text variant="bodyStrong" color="mutedForeground">
+              {symbol}
+            </Text>
+          )
+        }
+      />
+    );
+  }
+);

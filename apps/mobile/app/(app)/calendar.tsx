@@ -89,7 +89,7 @@ export default function CalendarScreen() {
           refreshControl={
             <RefreshControl
               refreshing={query.isRefetching}
-              onRefresh={() => query.refetch()}
+              onRefresh={() => void query.refetch()}
               tintColor={colors.mutedForeground}
             />
           }

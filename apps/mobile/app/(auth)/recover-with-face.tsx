@@ -96,7 +96,7 @@ export default function RecoverWithFace() {
       onBack={() => router.back()}
       footer={
         step === 'reset' ? (
-          <Button label="Update password" loading={busy} onPress={doReset} />
+          <Button label="Update password" loading={busy} onPress={() => void doReset()} />
         ) : step === 'done' ? (
           <Button label="Sign in" onPress={() => router.replace('/(auth)/sign-in')} />
         ) : null
@@ -174,7 +174,7 @@ export default function RecoverWithFace() {
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
-                onSubmitEditing={doReset}
+                onSubmitEditing={() => void doReset()}
                 error={errors.confirmPassword?.message}
               />
             )}

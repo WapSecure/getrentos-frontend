@@ -7,6 +7,7 @@ import Animated, {
   interpolate,
   interpolateColor,
   useAnimatedReaction,
+  useAnimatedRef,
   useAnimatedScrollHandler,
   useAnimatedStyle,
   useDerivedValue,
@@ -64,7 +65,7 @@ export default function Onboarding() {
   const { width: screenWidth } = useWindowDimensions();
   const reduceMotion = useReducedMotion();
   const { markSeen } = useOnboardingSeen();
-  const scrollRef = useRef<Animated.ScrollView>(null);
+  const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const scrollX = useSharedValue(0);
   const [index, setIndex] = useState(0);
 
@@ -99,7 +100,7 @@ export default function Onboarding() {
     const page = Math.round(scrollX.get() / lastWidth.current);
     lastWidth.current = screenWidth;
     scrollRef.current?.scrollTo({ x: page * screenWidth, animated: false });
-  }, [screenWidth, scrollX]);
+  }, [screenWidth, scrollX, scrollRef]);
 
   const goTo = useCallback(
     (page: number) => {
@@ -107,7 +108,7 @@ export default function Onboarding() {
       // Without animation no scroll events are guaranteed on every platform.
       if (reduceMotion) setIndex(page);
     },
-    [reduceMotion, screenWidth]
+    [reduceMotion, screenWidth, scrollRef]
   );
 
   const leave = useCallback(

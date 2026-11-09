@@ -149,7 +149,7 @@ export function StayResults({
       refreshControl={
         <RefreshControl
           refreshing={query.isRefetching && !query.isFetchingNextPage && !query.isPlaceholderData}
-          onRefresh={() => query.refetch()}
+          onRefresh={() => void query.refetch()}
           tintColor={colors.mutedForeground}
         />
       }

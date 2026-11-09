@@ -152,7 +152,7 @@ export default function GatemanIncidents() {
   }
 
   return (
-    <Screen refreshing={openQuery.isRefetching} onRefresh={openQuery.refetch}>
+    <Screen refreshing={openQuery.isRefetching} onRefresh={() => void openQuery.refetch()}>
       <DashboardHeader
         eyebrow="Gate operations"
         title="Incidents"

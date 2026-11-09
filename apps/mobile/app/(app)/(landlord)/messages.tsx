@@ -21,7 +21,7 @@ export default function LandlordMessages() {
       loading={query.isPending}
       error={query.isError}
       refreshing={query.isRefetching}
-      onRefresh={() => query.refetch()}
+      onRefresh={() => void query.refetch()}
       onOpen={(c) =>
         router.push({
           pathname: '/(app)/landlord-conversation/[id]',

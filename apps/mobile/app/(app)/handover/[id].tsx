@@ -193,7 +193,7 @@ export default function HandoverScreen() {
           refreshControl={
             <RefreshControl
               refreshing={q.isRefetching}
-              onRefresh={() => q.refetch()}
+              onRefresh={() => void q.refetch()}
               tintColor={colors.mutedForeground}
             />
           }

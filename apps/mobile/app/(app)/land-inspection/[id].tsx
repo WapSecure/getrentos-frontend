@@ -118,7 +118,7 @@ export default function LandInspectionJob() {
         refreshControl={
           <RefreshControl
             refreshing={query.isRefetching}
-            onRefresh={() => query.refetch()}
+            onRefresh={() => void query.refetch()}
             tintColor={colors.mutedForeground}
           />
         }

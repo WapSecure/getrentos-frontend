@@ -87,7 +87,7 @@ export default function ResidentEmergency() {
         <Text variant="title">Roll call</Text>
       </View>
 
-      <Screen refreshing={query.isRefetching} onRefresh={query.refetch}>
+      <Screen refreshing={query.isRefetching} onRefresh={() => void query.refetch()}>
         {/* A failed load shows an error, never "not calling the roll": that is only
             for a loaded null. */}
         <QueryState

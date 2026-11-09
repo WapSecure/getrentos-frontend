@@ -80,7 +80,7 @@ export default function MyStays() {
         refreshControl={
           <RefreshControl
             refreshing={stays.isRefetching}
-            onRefresh={() => stays.refetch()}
+            onRefresh={() => void stays.refetch()}
             tintColor={colors.mutedForeground}
           />
         }

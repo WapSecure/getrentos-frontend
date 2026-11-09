@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { View, type TextInput } from 'react-native';
+import { type TextInputInstance, View } from 'react-native';
 import { router } from 'expo-router';
 import * as Linking from 'expo-linking';
 import { useForm, Controller, useWatch } from 'react-hook-form';
@@ -225,9 +225,9 @@ function SignInLink() {
 
 function EmailForm(props: Shared) {
   const { colors, spacing, startVerification, setFormError, formError, referral } = props;
-  const emailRef = useRef<TextInput>(null);
-  const pwRef = useRef<TextInput>(null);
-  const confirmRef = useRef<TextInput>(null);
+  const emailRef = useRef<TextInputInstance>(null);
+  const pwRef = useRef<TextInputInstance>(null);
+  const confirmRef = useRef<TextInputInstance>(null);
 
   const {
     control,
@@ -275,7 +275,7 @@ function EmailForm(props: Shared) {
       onBack={() => router.replace('/(auth)/welcome')}
       footer={
         <>
-          <Button label="Continue" loading={isSubmitting} onPress={submit} />
+          <Button label="Continue" loading={isSubmitting} onPress={() => void submit()} />
           <SignInLink />
         </>
       }
@@ -359,7 +359,7 @@ function EmailForm(props: Shared) {
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
-                onSubmitEditing={submit}
+                onSubmitEditing={() => void submit()}
                 error={errors.confirmPassword?.message}
                 hint={value.length > 0 && value === password ? 'Passwords match' : undefined}
               />
@@ -386,9 +386,9 @@ function EmailForm(props: Shared) {
 
 function PhoneForm(props: Shared) {
   const { colors, spacing, startVerification, setFormError, formError, referral } = props;
-  const phoneRef = useRef<TextInput>(null);
-  const pwRef = useRef<TextInput>(null);
-  const confirmRef = useRef<TextInput>(null);
+  const phoneRef = useRef<TextInputInstance>(null);
+  const pwRef = useRef<TextInputInstance>(null);
+  const confirmRef = useRef<TextInputInstance>(null);
 
   const {
     control,
@@ -436,7 +436,7 @@ function PhoneForm(props: Shared) {
       onBack={() => router.replace('/(auth)/welcome')}
       footer={
         <>
-          <Button label="Continue" loading={isSubmitting} onPress={submit} />
+          <Button label="Continue" loading={isSubmitting} onPress={() => void submit()} />
           <SignInLink />
         </>
       }
@@ -517,7 +517,7 @@ function PhoneForm(props: Shared) {
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
-                onSubmitEditing={submit}
+                onSubmitEditing={() => void submit()}
                 error={errors.confirmPassword?.message}
                 hint={value.length > 0 && value === password ? 'Passwords match' : undefined}
               />

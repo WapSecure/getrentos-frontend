@@ -122,7 +122,7 @@ function Leads({ onAdd }: { onAdd: () => void }) {
   const refresh = (
     <RefreshControl
       refreshing={query.isRefetching}
-      onRefresh={() => query.refetch()}
+      onRefresh={() => void query.refetch()}
       tintColor={colors.mutedForeground}
     />
   );
@@ -264,7 +264,7 @@ function Viewings({ onAdd }: { onAdd: () => void }) {
       refreshControl={
         <RefreshControl
           refreshing={query.isRefetching}
-          onRefresh={() => query.refetch()}
+          onRefresh={() => void query.refetch()}
           tintColor={colors.mutedForeground}
         />
       }

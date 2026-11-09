@@ -117,7 +117,7 @@ export default function LandlordAutomations() {
           tab === 'send' || locked ? undefined : (
             <RefreshControl
               refreshing={active.isRefetching}
-              onRefresh={() => active.refetch()}
+              onRefresh={() => void active.refetch()}
               tintColor={colors.mutedForeground}
             />
           )

@@ -43,6 +43,8 @@ export async function registerForPush(): Promise<PushRegistration> {
     if (Platform.OS === 'android') {
       await Notifications.setNotificationChannelAsync('default', {
         name: 'Updates',
+        // Exported at runtime; SDK 58 compiles the enum in a form import/namespace can't see.
+        // eslint-disable-next-line import/namespace
         importance: Notifications.AndroidImportance.HIGH,
         vibrationPattern: [0, 200, 120, 200],
       });

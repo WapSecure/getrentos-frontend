@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import {
+  type ScrollViewInstance,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -150,7 +151,7 @@ export default function AskScreen() {
   const copy = COPY[persona];
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<ScrollViewInstance>(null);
   const [text, setText] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [language, setLanguage] = useState<ReplyLanguage>('en');

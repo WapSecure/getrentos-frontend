@@ -71,7 +71,7 @@ export default function BuyerNotificationInbox() {
       loading={query.isPending}
       error={query.isError && !query.data}
       refreshing={query.isRefetching}
-      onRefresh={() => query.refetch()}
+      onRefresh={() => void query.refetch()}
       onOpen={(n) => {
         if (!n.read) readOne.mutate(n.id);
         const to = routeForNotification(

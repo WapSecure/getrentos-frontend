@@ -93,7 +93,7 @@ export default function BuyerReviews() {
           refreshControl={
             <RefreshControl
               refreshing={listQuery.isRefetching}
-              onRefresh={() => listQuery.refetch()}
+              onRefresh={() => void listQuery.refetch()}
               tintColor={colors.mutedForeground}
             />
           }

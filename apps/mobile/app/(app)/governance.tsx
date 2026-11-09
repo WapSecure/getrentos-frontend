@@ -61,7 +61,7 @@ export default function ResidentGovernance() {
         subtitle="Bylaws, minutes and required signatures"
         onBack={() => goBack()}
       />
-      <Screen refreshing={query.isRefetching} onRefresh={query.refetch}>
+      <Screen refreshing={query.isRefetching} onRefresh={() => void query.refetch()}>
         <QueryState
           query={query}
           skeleton={<ListSkeleton variant="card" rows={2} height={100} />}

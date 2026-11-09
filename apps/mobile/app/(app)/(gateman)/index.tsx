@@ -330,7 +330,7 @@ export default function GatemanCheckIn() {
   // A failed refresh with a posting already known leaves the console working.
   if (isError && !estate) {
     return (
-      <Screen refreshing={isRefetching} onRefresh={refetch}>
+      <Screen refreshing={isRefetching} onRefresh={() => void refetch()}>
         <ErrorState
           title="We couldn't load your gate assignment"
           description="Check your connection and try again. Offline check-ins already stored on this device remain safe."
@@ -371,7 +371,10 @@ export default function GatemanCheckIn() {
 
   return (
     <>
-      <Screen refreshing={checkInsQuery.isRefetching} onRefresh={checkInsQuery.refetch}>
+      <Screen
+        refreshing={checkInsQuery.isRefetching}
+        onRefresh={() => void checkInsQuery.refetch()}
+      >
         <DashboardHeader
           eyebrow="Gate operations"
           title={estate.name}

@@ -171,7 +171,7 @@ export default function ForgotPassword() {
             onPress={() => verify()}
           />
         ) : (
-          <Button label="Update password" loading={busy} onPress={doReset} />
+          <Button label="Update password" loading={busy} onPress={() => void doReset()} />
         )
       }
     >
@@ -325,7 +325,7 @@ export default function ForgotPassword() {
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
-                onSubmitEditing={doReset}
+                onSubmitEditing={() => void doReset()}
                 error={errors.confirmPassword?.message}
               />
             )}

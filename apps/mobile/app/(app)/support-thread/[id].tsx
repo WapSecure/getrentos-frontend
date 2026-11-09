@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  type ScrollViewInstance,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -39,7 +40,7 @@ export default function SupportThreadScreen() {
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();
   const toast = useToast();
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<ScrollViewInstance>(null);
   const [text, setText] = useState('');
 
   const threadsQuery = useQuery({

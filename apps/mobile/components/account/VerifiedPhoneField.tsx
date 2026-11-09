@@ -1,5 +1,5 @@
 import { forwardRef, useState } from 'react';
-import { View, type TextInput } from 'react-native';
+import { type TextInputInstance, View } from 'react-native';
 import { LinkButton, TextField, useTheme, type TextFieldProps } from '@sureground/ui-native';
 import { ChangePhoneSheet } from './ChangePhoneSheet';
 
@@ -11,7 +11,7 @@ interface Props extends Omit<TextFieldProps, 'value' | 'onChangeText'> {
 }
 
 // A saved number changes only through ChangePhoneSheet, because it can receive password reset codes.
-export const VerifiedPhoneField = forwardRef<TextInput, Props>(function VerifiedPhoneField(
+export const VerifiedPhoneField = forwardRef<TextInputInstance, Props>(function VerifiedPhoneField(
   { savedPhone, value, onChangeText, onChanged, hint, ...rest },
   ref
 ) {

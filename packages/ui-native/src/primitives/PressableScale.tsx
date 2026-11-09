@@ -3,7 +3,7 @@ import {
   Pressable,
   type GestureResponderEvent,
   type PressableProps,
-  type View,
+  type ViewInstance,
 } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
@@ -20,7 +20,7 @@ export interface PressableScaleProps extends PressableProps {
 }
 
 // The animated style must read only a shared value, never props, or it can loop re-renders on native.
-export const PressableScale = forwardRef<View, PressableScaleProps>(function PressableScale(
+export const PressableScale = forwardRef<ViewInstance, PressableScaleProps>(function PressableScale(
   {
     activeScale = 0.985,
     haptic = true,

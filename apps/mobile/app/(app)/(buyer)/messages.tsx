@@ -30,7 +30,7 @@ export default function BuyerMessages() {
       loading={query.isPending}
       error={query.isError}
       refreshing={query.isRefetching}
-      onRefresh={() => query.refetch()}
+      onRefresh={() => void query.refetch()}
       onOpen={(c) => router.push(`/(app)/buyer-conversation/${c.id}`)}
       emptyDescription="Message a seller or agent from a listing to start a conversation."
     />

@@ -166,7 +166,7 @@ export default function ResidentVisitorPasses() {
           />
         }
       />
-      <Screen refreshing={query.isRefetching} onRefresh={query.refetch}>
+      <Screen refreshing={query.isRefetching} onRefresh={() => void query.refetch()}>
         {awaiting.length > 0 ? (
           <View style={{ gap: spacing.md }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>

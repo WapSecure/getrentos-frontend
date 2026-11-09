@@ -25,7 +25,7 @@ export default function ResidentAnnouncements() {
   });
 
   return (
-    <Screen refreshing={query.isRefetching} onRefresh={query.refetch}>
+    <Screen refreshing={query.isRefetching} onRefresh={() => void query.refetch()}>
       <DashboardHeader
         eyebrow="Your community"
         title="Announcements"

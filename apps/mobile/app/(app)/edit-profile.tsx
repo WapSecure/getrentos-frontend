@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Pressable, ScrollView, View, type TextInput } from 'react-native';
+import { type TextInputInstance, Pressable, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -86,7 +86,7 @@ function ProfileForm({ profile }: { profile: RenterProfile }) {
   const [bio, setBio] = useState(profile.bio ?? '');
 
   const [emailOpen, setEmailOpen] = useState(false);
-  const phoneRef = useRef<TextInput>(null);
+  const phoneRef = useRef<TextInputInstance>(null);
 
   const saveMutation = useMutation({
     mutationFn: () =>

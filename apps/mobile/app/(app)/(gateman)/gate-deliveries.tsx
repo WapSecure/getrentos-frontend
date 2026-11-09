@@ -108,7 +108,7 @@ export default function GatemanDeliveries() {
   }
 
   return (
-    <Screen refreshing={awaitingQuery.isRefetching} onRefresh={awaitingQuery.refetch}>
+    <Screen refreshing={awaitingQuery.isRefetching} onRefresh={() => void awaitingQuery.refetch()}>
       <DashboardHeader
         eyebrow="Gate operations"
         title="Deliveries"

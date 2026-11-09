@@ -49,7 +49,7 @@ export default function BuyerLandTours() {
         refreshControl={
           <RefreshControl
             refreshing={q.isRefetching}
-            onRefresh={() => q.refetch()}
+            onRefresh={() => void q.refetch()}
             tintColor={colors.mutedForeground}
           />
         }

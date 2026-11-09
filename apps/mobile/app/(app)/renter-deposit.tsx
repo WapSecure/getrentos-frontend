@@ -62,7 +62,7 @@ export default function RenterDeposit() {
         refreshControl={
           <RefreshControl
             refreshing={q.isRefetching}
-            onRefresh={() => q.refetch()}
+            onRefresh={() => void q.refetch()}
             tintColor={colors.mutedForeground}
           />
         }

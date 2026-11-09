@@ -118,7 +118,7 @@ export default function ManagerQueryThread() {
             refreshControl={
               <RefreshControl
                 refreshing={thread.isRefetching}
-                onRefresh={() => thread.refetch()}
+                onRefresh={() => void thread.refetch()}
                 tintColor={colors.mutedForeground}
               />
             }

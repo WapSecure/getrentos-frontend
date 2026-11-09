@@ -1,5 +1,6 @@
 import { forwardRef, useState } from 'react';
 import {
+  type TextInputInstance,
   Platform,
   Pressable,
   StyleSheet,
@@ -30,7 +31,7 @@ export interface TextFieldProps extends Omit<TextInputProps, 'style'> {
   showCount?: boolean;
 }
 
-export const TextField = forwardRef<TextInput, TextFieldProps>(function TextField(
+export const TextField = forwardRef<TextInputInstance, TextFieldProps>(function TextField(
   {
     label,
     error,

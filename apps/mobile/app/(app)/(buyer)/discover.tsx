@@ -278,7 +278,7 @@ export default function BuyerDiscover() {
           refreshControl={
             <RefreshControl
               refreshing={query.isRefetching && !query.isFetchingNextPage}
-              onRefresh={() => query.refetch()}
+              onRefresh={() => void query.refetch()}
               tintColor={colors.mutedForeground}
             />
           }
