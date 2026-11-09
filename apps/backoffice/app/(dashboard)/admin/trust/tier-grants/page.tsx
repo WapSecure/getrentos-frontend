@@ -21,7 +21,7 @@ import {
   type BadgeVariant,
   PageHeader,
 } from '@sureground/ui';
-import { formatDate, unwrap } from '@sureground/shared';
+import { ApiError, formatDate, unwrap } from '@sureground/shared';
 import { trustService } from '@/services/trustService';
 import { adminKeys } from '@/lib/queryKeys';
 import type { TierGrant, TierGrantState } from '@/types/trust';
@@ -63,6 +63,8 @@ export default function TierGrantsPage() {
   const [reason, setReason] = useState('');
   const [expiresInDays, setExpiresInDays] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
+  // Set when the grant was recorded but waits for a second officer (AU-11).
+  const [awaiting, setAwaiting] = useState<string | null>(null);
   const [userIdError, setUserIdError] = useState<string | null>(null);
   const [reasonError, setReasonError] = useState<string | null>(null);
   const userIdRef = useRef<HTMLInputElement>(null);
@@ -105,14 +107,29 @@ export default function TierGrantsPage() {
       ),
     onSuccess: (result) => {
       setFormError(null);
+      setAwaiting(null);
       setGranted(result);
       setUserId('');
       setReason('');
       setExpiresInDays('');
       invalidate();
     },
-    onError: (error) =>
-      setFormError(error instanceof Error ? error.message : 'Unable to record the grant.'),
+    onError: (error) => {
+      // Not a failure: tier 3 needs a second officer, and this was the first.
+      if (
+        error instanceof ApiError &&
+        (error.details as { error?: string } | undefined)?.error === 'SECOND_APPROVAL_REQUIRED'
+      ) {
+        setFormError(null);
+        setGranted(null);
+        setAwaiting(
+          'Recorded. A second officer must grant tier 3 to this person too before it takes effect.'
+        );
+        return;
+      }
+      setAwaiting(null);
+      setFormError(error instanceof Error ? error.message : 'Unable to record the grant.');
+    },
   });
 
   const revokeMutation = useMutation({
@@ -158,7 +175,7 @@ export default function TierGrantsPage() {
     <>
       <PageHeader
         title="Tier 3 Grants"
-        description="Financial capability granted by hand, for hosts who cannot pass the automated bank name enquiry. A grant counts exactly like a passing bank check, so it is audited, can carry an expiry, and can be withdrawn at any time."
+        description="Financial capability granted by hand, for hosts who cannot pass the automated bank name enquiry. A grant counts exactly like a passing bank check, so it needs a second officer, is audited, can carry an expiry, and can be withdrawn at any time."
       />
 
       <Card static className="mb-6">
@@ -200,6 +217,11 @@ export default function TierGrantsPage() {
             </Field>
           </div>
 
+          {awaiting && !formError && (
+            <Alert variant="info" className="mt-3">
+              {awaiting}
+            </Alert>
+          )}
           {formError && (
             <Alert variant="danger" className="mt-3">
               {formError}
