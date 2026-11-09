@@ -62,7 +62,7 @@ export const ActiveFinancingPlanCard = ({
               value={formatCurrency(plan.rentAmount, { compact: true })}
             />
             <Stat
-              label="Monthly installment"
+              label="Monthly instalment"
               value={formatCurrency(plan.monthlyInstallment, { compact: true })}
             />
             <Stat label="Term" value={`${plan.planLengthMonths} months`} />
@@ -72,7 +72,7 @@ export const ActiveFinancingPlanCard = ({
           <div className="mb-6">
             <div className="flex items-center justify-between text-xs text-muted-foreground mb-1.5">
               <span>
-                {paidCount} of {plan.installments.length} installments paid
+                {paidCount} of {plan.installments.length} instalments paid
               </span>
               <span>{progressPct}%</span>
             </div>
@@ -104,7 +104,7 @@ export const ActiveFinancingPlanCard = ({
           )}
 
           <div>
-            <p className="text-sm font-medium text-foreground mb-3">Installment schedule</p>
+            <p className="text-sm font-medium text-foreground mb-3">Instalment schedule</p>
             <div className="rounded-xl border border-border divide-y divide-border overflow-hidden">
               {plan.installments.map((installment) => (
                 <InstallmentRow key={installment.id} installment={installment} />

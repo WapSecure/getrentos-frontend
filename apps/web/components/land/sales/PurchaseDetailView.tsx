@@ -344,7 +344,7 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
           </Section>
         )}
 
-        <Section title="Installment schedule">
+        <Section title="Instalment schedule">
           <InstallmentSchedule installments={data.installments} />
         </Section>
 
@@ -372,7 +372,7 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
         }, ${formatCurrency(refund.charge)} is forfeited (${formatBps(data.terms.revocationChargeBps)}) and about ${formatCurrency(refund.refund)} is refunded to the buyer. This cannot be undone.`}
         confirmLabel="Revoke purchase"
         promptLabel="Reason for revoking (kept on the purchase record)"
-        promptPlaceholder="e.g. Three installments unpaid despite reminders since March."
+        promptPlaceholder="e.g. Three instalments unpaid despite reminders since March."
         promptValue={reason}
         onPromptChange={setReason}
         promptRequired

@@ -13,27 +13,44 @@ interface Payment {
   amount: number;
   date: string;
   status: 'paid' | 'pending' | 'overdue' | 'processing';
-  method: 'card' | 'bank_transfer' | 'wallet';
+  method?: 'card' | 'bank_transfer' | 'wallet';
   receiptUrl?: string;
   description: string;
   dueDate: string;
   escrowStatus: 'not_funded' | 'held' | 'pending_review' | 'released' | 'frozen';
+  releaseDate?: string;
   amountPaid?: number;
+  outstanding?: number;
+  reference?: string;
+  resumeCheckout?: { url: string; reference: string; expiresAt: string };
   periodStart?: string;
   periodEnd?: string;
   lines?: { category: string; label: string; amount: number }[];
 }
 
+type StatusFilter = 'all' | Payment['status'];
+
 interface PaymentsListProps {
   payments: Payment[];
+  /** Every payment the renter has, across all pages (the list holds one page). */
+  total: number;
   onPayNow: (id: string) => void;
   onDownloadReceipt: (id: string) => void;
   onDispute: (id: string) => void;
   onConfirmMoveIn: (id: string) => void;
 }
 
+const statusOptions: { value: StatusFilter; label: string }[] = [
+  { value: 'all', label: 'All' },
+  { value: 'pending', label: 'Due' },
+  { value: 'overdue', label: 'Overdue' },
+  { value: 'processing', label: 'Processing' },
+  { value: 'paid', label: 'Paid' },
+];
+
 export const PaymentsList = ({
   payments,
+  total,
   onPayNow,
   onDownloadReceipt,
   onDispute,
@@ -42,9 +59,11 @@ export const PaymentsList = ({
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState<
-    'all' | 'paid' | 'pending' | 'overdue' | 'processing'
-  >('all');
+  const [filterStatus, setFilterStatus] = useState<StatusFilter>('all');
+
+  // The API pages the history and has no search or status filter, so both work
+  // on the payments shown here. Say so rather than miss older charges silently.
+  const pageOnly = total > payments.length;
 
   const filteredPayments = payments.filter((payment) => {
     const matchesSearch =
@@ -59,14 +78,6 @@ export const PaymentsList = ({
     setShowDetailsModal(true);
   };
 
-  const statusOptions = [
-    { value: 'all', label: 'All' },
-    { value: 'paid', label: 'Paid' },
-    { value: 'pending', label: 'Pending' },
-    { value: 'overdue', label: 'Overdue' },
-    { value: 'processing', label: 'Processing' },
-  ];
-
   return (
     <>
       <Card>
@@ -75,21 +86,19 @@ export const PaymentsList = ({
             <div>
               <h2 className="font-semibold text-foreground">Payment history</h2>
               <p className="text-xs text-muted-foreground mt-0.5">
-                {payments.length} payments total
+                {total === 1 ? '1 payment' : `${total} payments`}
               </p>
             </div>
 
-            {/* Search */}
             <SearchInput
               value={searchTerm}
               onValueChange={setSearchTerm}
-              placeholder="Search payments..."
-              label="Search payment history"
+              placeholder={pageOnly ? 'Search this page...' : 'Search payments...'}
+              label={pageOnly ? 'Search payments on this page' : 'Search payment history'}
               className="w-full sm:w-56"
             />
           </div>
 
-          {/* Status Filters */}
           <div
             role="group"
             aria-label="Payment status"
@@ -100,17 +109,19 @@ export const PaymentsList = ({
                 key={option.value}
                 type="button"
                 aria-pressed={filterStatus === option.value}
-                onClick={() =>
-                  setFilterStatus(
-                    option.value as 'all' | 'paid' | 'pending' | 'overdue' | 'processing'
-                  )
-                }
+                onClick={() => setFilterStatus(option.value)}
                 className="shrink-0 whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-medium text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-4 focus-visible:ring-primary/12 aria-pressed:bg-card aria-pressed:text-primary aria-pressed:shadow-sm"
               >
                 {option.label}
               </button>
             ))}
           </div>
+          {pageOnly && (
+            <p className="mt-2 text-xs text-muted-foreground">
+              Search and filters look at the {payments.length} payments on this page. Use the pages
+              below to see older ones.
+            </p>
+          )}
         </div>
 
         <div className="divide-y divide-border">
@@ -118,7 +129,11 @@ export const PaymentsList = ({
             <EmptyState
               icon={CreditCard}
               title="No payments found"
-              description="Try adjusting your search or payment-status filter."
+              description={
+                pageOnly
+                  ? 'Nothing on this page matches. Try another page, search or filter.'
+                  : 'Try adjusting your search or payment-status filter.'
+              }
               bare
             />
           ) : (
@@ -138,7 +153,6 @@ export const PaymentsList = ({
         </div>
       </Card>
 
-      {/* Payment Details Modal */}
       {selectedPayment && (
         <PaymentDetailsModal
           isOpen={showDetailsModal}

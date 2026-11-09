@@ -161,8 +161,10 @@ export interface PayoutRecord {
   id?: string;
   createdAt: string;
   amount: number;
-  status: 'PENDING' | 'SUCCESS' | 'FAILED';
+  /** The firm's payouts send upper case; an agent's own send lower case ("success"). */
+  status: string;
   failureReason: string | null;
+  paidAt?: string | null;
 }
 
 export interface PayableAgent {

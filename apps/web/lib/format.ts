@@ -37,6 +37,24 @@ export const formatDate = (
   return date.toLocaleDateString('en-GB', { month: 'short', day: 'numeric', year: 'numeric' });
 };
 
+/** Payment dates are read in Lagos time, whatever zone the browser is in. */
+export const APP_TIME_ZONE = 'Africa/Lagos';
+
+/**
+ * `formatDate` in Lagos time, so a payment made at 23:30 in Lagos does not show
+ * as the next day for someone paying from abroad.
+ */
+export const formatLagosDate = (dateString: string, style: 'short' | 'long' = 'short'): string => {
+  const date = new Date(dateString);
+  if (Number.isNaN(date.getTime())) return '—';
+  return date.toLocaleDateString('en-GB', {
+    month: style === 'long' ? 'long' : 'short',
+    day: 'numeric',
+    year: 'numeric',
+    timeZone: APP_TIME_ZONE,
+  });
+};
+
 export const formatRelativeTime = (dateString: string): string => {
   const date = new Date(dateString);
   const diffMs = Date.now() - date.getTime();

@@ -23,7 +23,6 @@ import {
   estateGovernanceApi,
   governanceKeys,
   lastMonthPeriod,
-  payoutAccountValid,
   payoutHold,
   payoutOutcome,
   statementBadge,
@@ -32,6 +31,17 @@ import {
   type EstateStatement,
 } from '@/lib/api/estateGovernance';
 import { BankAccountFields } from '@/components/forms/BankAccountFields';
+import { PayoutCooldownHint, PayoutHoldNotice } from '@/components/payouts/PayoutHoldNotice';
+import { withStepUpSummary } from '@/lib/stepUp';
+import {
+  INCOMPLETE_ACCOUNT_LOOKUP,
+  lookupAllowsSave,
+  maskAccountNumber,
+  payoutAccountLabel,
+  payoutAccountStepUpSummary,
+  saveAccountLabel,
+  type AccountLookup,
+} from '@getrentos/shared';
 import { formatDate, formatNaira } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { errorMessage } from '@/lib/api/client';
@@ -63,7 +73,7 @@ export function PayoutAccountCard({
         accessibilityRole="button"
         accessibilityLabel={
           has
-            ? `Payout account: ${account!.bankName}, ${account!.accountNumber}, ${account!.accountName}. ${account!.verified ? 'Verified' : 'Not verified yet'}. Change`
+            ? `Payout account: ${account!.bankName}, account ending ${maskAccountNumber(account!.accountNumber).replace(/\D/g, '')}, ${account!.accountName}. ${account!.verified ? 'Verified' : 'Not verified yet'}. Change`
             : 'No payout account yet. Add one'
         }
       >
@@ -84,8 +94,9 @@ export function PayoutAccountCard({
                 <>
                   <Text variant="bodyStrong">{account!.bankName}</Text>
                   <Text variant="caption" color="mutedForeground">
-                    {account!.accountNumber} · {account!.accountName}
+                    {maskAccountNumber(account!.accountNumber)} · {account!.accountName}
                   </Text>
+                  <PayoutHoldNotice holdUntil={account!.payoutHoldUntil} />
                 </>
               ) : (
                 <>
@@ -138,13 +149,23 @@ function PayoutAccountForm({
   const toast = useToast();
   const [bankCode, setBankCode] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
+  const [lookup, setLookup] = useState<AccountLookup>(INCOMPLETE_ACCOUNT_LOOKUP);
 
   const save = useMutation({
     mutationFn: () =>
-      estateGovernanceApi.updatePayoutAccount(estateId, {
-        bankCode: bankCode.trim(),
-        accountNumber: accountNumber.trim(),
-      }),
+      withStepUpSummary(
+        payoutAccountStepUpSummary({
+          bankName: lookup.bankName,
+          accountNumber,
+          accountName: lookup.accountName,
+          owner: 'the estate’s',
+        }),
+        () =>
+          estateGovernanceApi.updatePayoutAccount(estateId, {
+            bankCode: bankCode.trim(),
+            accountNumber: accountNumber.trim(),
+          })
+      ),
     onSuccess: (saved) => {
       void haptics.success();
       qc.setQueryData(governanceKeys.payoutAccount(estateId), saved);
@@ -171,19 +192,24 @@ function PayoutAccountForm({
         onBankCode={setBankCode}
         accountNumber={accountNumber}
         onAccountNumber={setAccountNumber}
+        onLookup={setLookup}
       />
       <Text variant="caption" color="mutedForeground">
         We check the name on the account with the bank. You’ll be asked to confirm it’s you: this
         decides where the estate’s money goes.
       </Text>
+      {account?.accountNumber ? <PayoutCooldownHint /> : null}
       {save.error ? (
         <FormAlert
           message={errorMessage(save.error, 'We couldn’t check that account. Try again.')}
         />
       ) : null}
       <Button
-        label={account?.accountNumber ? 'Update payout account' : 'Save payout account'}
-        disabled={!payoutAccountValid(bankCode, accountNumber)}
+        label={saveAccountLabel(
+          lookup,
+          account?.accountNumber ? 'Update payout account' : 'Save payout account'
+        )}
+        disabled={!lookupAllowsSave(lookup)}
         loading={save.isPending}
         onPress={() => save.mutate()}
       />
@@ -401,7 +427,7 @@ function StatementBody({
   const hold = payoutHold(s);
   const wht = s.whtAmount ?? 0;
   const where = account?.accountNumber
-    ? `${account.bankName} · ${account.accountNumber}`
+    ? payoutAccountLabel(account)
     : 'the estate’s payout account';
 
   return (

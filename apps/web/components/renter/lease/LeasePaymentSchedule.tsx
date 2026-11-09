@@ -35,8 +35,8 @@ export const LeasePaymentSchedule = ({ payments }: LeasePaymentScheduleProps) =>
         };
       case 'pending':
         return {
-          label: 'Pending',
-          variant: 'warning' as const,
+          label: 'Due',
+          variant: 'neutral' as const,
           icon: Clock,
         };
       case 'overdue':

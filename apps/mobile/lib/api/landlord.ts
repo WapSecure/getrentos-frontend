@@ -683,6 +683,8 @@ export interface PayoutAccount {
   accountNumber: string;
   accountName: string;
   verified: boolean;
+  /** While a recent change is on hold (24 hours). */
+  payoutHoldUntil?: string | null;
 }
 
 export interface AutomationSettings {

@@ -36,6 +36,11 @@ export interface StepUpDialogProps {
    * set-up-only token, so they can turn on two-factor next.
    */
   canSetPin?: boolean;
+  /**
+   * What is being authorised, e.g. "Withdraw ₦250,000 to GTBank ••••1234" (UX-30).
+   * A summary the request itself carries (`withStepUpSummary`) wins over this one.
+   */
+  summary?: string;
 }
 
 const COPY: Record<Exclude<StepUpMethod, 'setup_required'>, { label: string; hint: string }> = {
@@ -65,9 +70,11 @@ export function StepUpDialog({
   authenticateWithPasskey,
   description = 'This change affects where your money goes or how you sign in, so we check it’s really you.',
   canSetPin = true,
+  summary: summaryProp,
 }: StepUpDialogProps = {}) {
   const pending = useRef<Pending | null>(null);
   const [open, setOpen] = useState(false);
+  const [requestSummary, setRequestSummary] = useState<string | null>(null);
   const [method, setMethod] = useState<StepUpMethod | null>(null);
   const [hasPassword, setHasPassword] = useState(true);
   const [value, setValue] = useState('');
@@ -81,9 +88,10 @@ export function StepUpDialog({
 
   useEffect(() => {
     registerStepUpHandler(
-      ({ challengeId }) =>
+      ({ challengeId, summary: requested }) =>
         new Promise<string | null>((resolve) => {
           pending.current = { resolve, challengeId };
+          setRequestSummary(requested ?? null);
           setValue('');
           setPassword('');
           setPin('');
@@ -238,6 +246,8 @@ export function StepUpDialog({
     else void confirm();
   };
 
+  const summary = requestSummary ?? summaryProp ?? null;
+
   return (
     <Dialog open={open} onOpenChange={(next) => !next && finish(null)}>
       <DialogContent className="max-w-md p-6">
@@ -248,6 +258,12 @@ export function StepUpDialog({
         <DialogDescription className="mt-1 text-sm text-muted-foreground">
           {intro}
         </DialogDescription>
+        {summary ? (
+          <div className="mt-3 rounded-lg border border-border bg-secondary/40 px-3 py-2">
+            <p className="text-xs text-muted-foreground">You’re confirming</p>
+            <p className="text-sm font-medium text-foreground">{summary}</p>
+          </div>
+        ) : null}
 
         <form
           className="mt-4 space-y-3"

@@ -19,6 +19,7 @@ import {
 import { Info } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
+import { LAND_PROTECTION } from '@/lib/paymentCopy';
 import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';
 import { buyerLandKeys, landLayoutKeys } from '@/lib/landSalesQueryKeys';
 import { landBuyerService } from '@/services/landBuyerService';
@@ -34,6 +35,7 @@ import { CancelPurchaseCard, PayNextCard, PurchaseDocuments } from './PurchaseSi
 import {
   CONFIRMABLE_PURCHASE_STATUSES,
   bpsToPercent,
+  nextDueParts,
   plotLabel,
   summariseSchedule,
 } from './landSaleLogic';
@@ -293,7 +295,7 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
               <Line label="Plot price" value={formatCurrency(purchase.plotPrice)} />
               {purchase.priceUplift > 0 && (
                 <Line
-                  label={`Installment uplift (${bpsToPercent(purchase.terms.priceUpliftBps)})`}
+                  label={`Instalment premium (${bpsToPercent(purchase.terms.priceUpliftBps)})`}
                   value={formatCurrency(purchase.priceUplift)}
                 />
               )}
@@ -337,7 +339,7 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
             <TabsContent value="schedule" className="mt-4">
               <PaymentSchedule installments={purchase.installments} summary={summary} />
               <p className="mt-3 text-xs text-muted-foreground">
-                {purchase.terms.gracePeriodDays} days&apos; grace on each installment, then a{' '}
+                {purchase.terms.gracePeriodDays} days&apos; grace on each instalment, then a{' '}
                 {bpsToPercent(purchase.terms.lateFeeBps)} late fee. Default after{' '}
                 {purchase.terms.defaultAfterDays} days overdue.
               </p>
@@ -417,8 +419,9 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
         overdue={purchase.nextDue?.overdue}
         owed={purchase.nextDue?.amount ?? 0}
         itemLabel={purchase.nextDue?.overdue ? 'Land payment (late fee included)' : 'Land payment'}
+        itemParts={nextDueParts(purchase.nextDue, purchase.installments)}
         receiverLine={`The fee goes to the payment company, so the full ${formatCurrency(purchase.nextDue?.amount ?? 0)} is recorded against your purchase.`}
-        protection="GetRentos holds it until you confirm each conveyance step."
+        protection={LAND_PROTECTION}
         providers={providers}
         providerError={providerError}
         busy={pay.isPending}

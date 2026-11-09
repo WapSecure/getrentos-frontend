@@ -5,6 +5,7 @@ import { Badge, Button, Text, useTheme, type BadgeTone } from '@getrentos/ui-nat
 import { Sheet } from '@/components/Sheet';
 import type { PaymentStatus } from '@/lib/api/paymentStatus';
 import { formatDateTime, formatNaira } from '@/lib/format';
+import { FAILED_BODY, TRANSFER_SLOWER } from '@/lib/paymentCopy';
 import {
   closePaymentResult,
   confirmPayment,
@@ -43,12 +44,12 @@ const HEADING: Record<PaymentResult['phase'], { badge: string; tone: BadgeTone; 
   PENDING: {
     badge: 'Still confirming',
     tone: 'warning',
-    body: 'We haven’t had the result yet. Paid by bank transfer? It can take a few minutes. If you were charged it will show as paid, so please don’t pay again.',
+    body: `We haven’t had the result yet. ${TRANSFER_SLOWER} If you were charged it will show as paid, so please don’t pay again.`,
   },
   FAILED: {
     badge: 'Not paid',
     tone: 'danger',
-    body: 'That payment didn’t go through. If money left your account, contact support with the reference below.',
+    body: `That payment didn’t go through. ${FAILED_BODY}`,
   },
 };
 

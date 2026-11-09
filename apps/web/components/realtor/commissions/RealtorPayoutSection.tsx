@@ -24,6 +24,22 @@ import {
 import { payoutDestination } from '@/lib/payoutDestination';
 import type { RealtorPayoutStatus } from '@/types/realtor';
 import { BankAccountFields } from '@/components/shared/payouts/BankAccountFields';
+import {
+  PAYOUT_CHANGE_COOLDOWN_HINT,
+  PayoutHoldNotice,
+} from '@/components/shared/payouts/PayoutHoldNotice';
+import { PayoutRowDetails } from '@/components/shared/payouts/PayoutRowDetails';
+import {
+  INCOMPLETE_ACCOUNT_LOOKUP,
+  PAYOUT_ARRIVAL_NOTE,
+  lookupAllowsSave,
+  payoutAccountLabel,
+  payoutAccountStepUpSummary,
+  saveAccountLabel,
+  withdrawStepUpSummary,
+  withStepUpSummary,
+  type AccountLookup,
+} from '@getrentos/shared';
 
 const PAGE_SIZE = 5;
 
@@ -45,6 +61,7 @@ export const RealtorPayoutSection = () => {
   const queryClient = useQueryClient();
   const [bankCode, setBankCode] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
+  const [lookup, setLookup] = useState<AccountLookup>(INCOMPLETE_ACCOUNT_LOOKUP);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [justPaid, setJustPaid] = useState<number | null>(null);
@@ -70,7 +87,15 @@ export const RealtorPayoutSection = () => {
   });
 
   const save = useMutation({
-    mutationFn: () => unwrap(realtorService.savePayoutAccount({ bankCode, accountNumber })),
+    mutationFn: () =>
+      withStepUpSummary(
+        payoutAccountStepUpSummary({
+          bankName: lookup.bankName,
+          accountNumber,
+          accountName: lookup.accountName,
+        }),
+        () => unwrap(realtorService.savePayoutAccount({ bankCode, accountNumber }))
+      ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: realtorKeys.payoutAccount });
       queryClient.invalidateQueries({ queryKey: realtorKeys.payoutsSummary });
@@ -82,7 +107,11 @@ export const RealtorPayoutSection = () => {
   });
 
   const withdraw = useMutation({
-    mutationFn: () => unwrap(realtorService.requestPayout()),
+    mutationFn: () =>
+      withStepUpSummary(
+        withdrawStepUpSummary(formatCurrency(summary?.available ?? 0), account),
+        () => unwrap(realtorService.requestPayout())
+      ),
     onSuccess: (payout) => {
       setJustPaid(payout.amount);
       // Everything the money touches has to refresh, or the balance still shows
@@ -93,7 +122,8 @@ export const RealtorPayoutSection = () => {
     },
   });
 
-  const canSave = bankCode.trim().length >= 3 && accountNumber.trim().length === 10;
+  // The bank's name for the account comes back before saving (UX-28).
+  const canSave = lookupAllowsSave(lookup);
   const rows = payouts?.items ?? [];
   const total = payouts?.total ?? 0;
   const blocked = summary?.canWithdraw === false;
@@ -115,7 +145,7 @@ export const RealtorPayoutSection = () => {
         {account ? (
           <div className="rounded-lg border border-border p-3">
             <p className="text-sm font-medium text-foreground">
-              {account.bankName} · {account.accountNumber} · {account.accountName}
+              {payoutAccountLabel(account)} · {account.accountName}
             </p>
             <div className="flex items-center gap-2 mt-2">
               <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
@@ -123,6 +153,7 @@ export const RealtorPayoutSection = () => {
                 Commission for closed deals is paid into this account
               </p>
             </div>
+            <PayoutHoldNotice holdUntil={account.payoutHoldUntil} />
           </div>
         ) : (
           <p className="text-sm text-muted-foreground mb-4">
@@ -134,7 +165,7 @@ export const RealtorPayoutSection = () => {
         <div className={account ? 'mt-4' : ''}>
           {account && (
             <p className="text-xs text-muted-foreground mb-3">
-              Replace it by entering a new account below.
+              Replace it by entering a new account below. {PAYOUT_CHANGE_COOLDOWN_HINT}
             </p>
           )}
           <div className="space-y-3">
@@ -144,6 +175,7 @@ export const RealtorPayoutSection = () => {
               onBankCode={setBankCode}
               accountNumber={accountNumber}
               onAccountNumber={setAccountNumber}
+              onLookup={setLookup}
             />
             <Button
               onClick={() => save.mutate()}
@@ -152,7 +184,7 @@ export const RealtorPayoutSection = () => {
               disabled={!canSave}
               variant={account ? 'outline' : 'primary'}
             >
-              {account ? 'Replace' : 'Save account'}
+              {saveAccountLabel(lookup, account ? 'Replace' : 'Save account')}
             </Button>
           </div>
           {saveError && (
@@ -206,7 +238,7 @@ export const RealtorPayoutSection = () => {
 
         {justPaid != null && !withdraw.isPending && (
           <p className="text-xs text-success mt-3">
-            {formatCurrency(justPaid)} is on its way to your bank.
+            {formatCurrency(justPaid)} is on its way to your bank. {PAYOUT_ARRIVAL_NOTE}
           </p>
         )}
 
@@ -288,17 +320,23 @@ export const RealtorPayoutSection = () => {
                         {p.commissionCount}
                       </td>
                       <td className="p-4 font-medium text-foreground whitespace-nowrap">
-                        {formatCurrency(p.amount, { compact: true })}
+                        {formatCurrency(p.amount)}
                       </td>
-                      <td className="p-4 whitespace-nowrap">
+                      <td className="p-4 min-w-56">
                         <Badge variant={meta.variant}>{meta.label}</Badge>
-                        {/* A failed transfer is money the bank sent back, so say why
-                            rather than leaving the realtor to guess. */}
-                        {p.status === 'failed' && p.failureReason && (
-                          <span className="block text-xs text-muted-foreground mt-1">
-                            {p.failureReason}
-                          </span>
-                        )}
+                        {/* Paid date, reference for the bank, and for a failure why and what next. */}
+                        <PayoutRowDetails
+                          state={
+                            p.status === 'success'
+                              ? 'paid'
+                              : p.status === 'failed'
+                                ? 'failed'
+                                : 'pending'
+                          }
+                          paidAt={p.paidAt}
+                          transferRef={p.transferRef}
+                          failureReason={p.failureReason}
+                        />
                       </td>
                     </tr>
                   );

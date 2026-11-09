@@ -30,6 +30,7 @@ import {
   type BuyerTransaction,
 } from '@/lib/api/buyerTransactions';
 import { formatDate, formatNaira } from '@/lib/format';
+import { SALE_DEPOSIT_PROTECTION } from '@/lib/paymentCopy';
 import { errorMessage } from '@/lib/api/client';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
@@ -122,7 +123,9 @@ export default function BuyerTransactions() {
     onSuccess: async (tx) => {
       closeSheet();
       if (tx.authorizationUrl) await checkout(tx.authorizationUrl, tx.reference);
-      else toast.show('Deposit initiated.', 'success');
+      else if (tx.escrowStatus === 'funds_held')
+        toast.show(`Paid.${tx.reference ? ` Reference ${tx.reference}.` : ''}`, 'success');
+      else toast.show('We’re confirming your deposit. This purchase shows when it’s paid.', 'info');
       invalidate();
     },
     onError: (err, { provider }) => {
@@ -288,7 +291,7 @@ export default function BuyerTransactions() {
         amount={payTx ? (payTx.depositAmount ?? payTx.purchasePrice) : 0}
         itemLabel="Deposit"
         receiverLine={`The fee goes to the payment company, so the full ${formatNaira(payTx ? (payTx.depositAmount ?? payTx.purchasePrice) : 0)} is held for the seller.`}
-        protection="Your deposit is held by GetRentos and only released to the seller once you confirm receipt."
+        protection={SALE_DEPOSIT_PROTECTION}
         providers={providers}
         providerError={providerError}
         busy={depositMutation.isPending}

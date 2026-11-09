@@ -9,6 +9,7 @@ import {
   type Reservation,
   cancelDescription,
   milestoneAction,
+  nextDueParts,
   plotLabel,
   refundSentence,
   summariseSchedule,
@@ -139,6 +140,20 @@ describe('confirming steps', () => {
     expect(milestoneAction(steps, steps[2], { contractOpen: false }).canDispute).toBe(false);
   });
 
+  it('itemises a late fee only when the lines add up to what is due', () => {
+    const due = { installmentId: 'i', amount: 1100 };
+    expect(nextDueParts(due, [inst({ lateFee: 100 })])).toEqual([
+      { label: 'Land payment', amount: 1000 },
+      { label: 'Late fee', amount: 100 },
+    ]);
+    expect(nextDueParts({ installmentId: 'i', amount: 1000 }, [inst({})])).toBeUndefined();
+    expect(nextDueParts(due, [inst({ lateFee: 100, amountPaid: 50 })])).toBeUndefined();
+    expect(
+      nextDueParts({ installmentId: 'i', amount: 900 }, [inst({ lateFee: 100 })])
+    ).toBeUndefined();
+    expect(nextDueParts(null, [inst({ lateFee: 100 })])).toBeUndefined();
+  });
+
   it('labels plots', () => {
     expect(plotLabel({ plotNumber: '12', block: 'B' })).toBe('Block B, plot 12');
     expect(plotLabel({ plotNumber: '12' })).toBe('Plot 12');
@@ -225,10 +240,10 @@ describe('estates and reservations', () => {
 
   it('describes a plan’s terms', () => {
     expect(planTermsLine({ durationMonths: 0, initialDepositBps: 10000, priceUpliftBps: 0 })).toBe(
-      'Pay in full to start. No price uplift.'
+      'Pay in full to start. No instalment premium.'
     );
     expect(planTermsLine({ durationMonths: 6, initialDepositBps: 3000, priceUpliftBps: 500 })).toBe(
-      '30% deposit, then 6 monthly installments. 5% added to the plot price.'
+      '30% deposit, then 6 monthly instalments. 5% added to the plot price.'
     );
   });
 

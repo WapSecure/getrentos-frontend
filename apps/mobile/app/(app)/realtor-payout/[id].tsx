@@ -20,6 +20,7 @@ import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { StatusPill } from '@/components/host/HostUI';
 import { CommissionRow } from '@/components/realtor/CommissionRow';
 import { goBack } from '@/lib/goBack';
+import { PAYOUT_ARRIVAL_NOTE, PAYOUT_FAILED_NEXT_STEP } from '@getrentos/shared';
 
 const LABEL = {
   pending: { label: 'On its way', tone: 'info' },
@@ -75,17 +76,22 @@ export default function RealtorPayoutDetail() {
                   <StatusPill label={LABEL[p.status].label} tone={LABEL[p.status].tone} />
                 </View>
                 <Price amount={p.amount} variant="title" />
-                <Text variant="caption" color="mutedForeground">
+                <Text variant="caption" color="mutedForeground" selectable>
                   {p.paidAt
                     ? `Paid ${formatDate(p.paidAt, 'medium')}`
                     : `Requested ${formatDate(p.createdAt, 'medium')}`}
                   {p.transferRef ? ` · Ref ${p.transferRef}` : ''}
                 </Text>
+                {p.status === 'pending' ? (
+                  <Text variant="caption" color="mutedForeground">
+                    {PAYOUT_ARRIVAL_NOTE}
+                  </Text>
+                ) : null}
               </Card>
               {p.status === 'failed' ? (
                 <FormAlert
                   tone="warning"
-                  message={`${p.failureReason ?? 'The bank didn’t accept this transfer.'} This commission stays reserved for this payout, and support retries it to your account. If your bank details changed, update them first.`}
+                  message={`${p.failureReason ?? 'The bank didn’t accept this transfer.'} ${PAYOUT_FAILED_NEXT_STEP}`}
                 />
               ) : null}
               <Text variant="heading" headingLevel={2}>

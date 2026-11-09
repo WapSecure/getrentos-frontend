@@ -58,7 +58,7 @@ export default function Account() {
   const { verified, known: identityKnown, label: identityLabel } = useIdentityVerification();
   const flex = useQuery({ queryKey: qk.renter.financing, queryFn: financingApi.getOverview });
   const flexDescription = flex.data?.plan
-    ? 'Your plan and installments'
+    ? 'Your plan and instalments'
     : flex.data?.newPlansOpen
       ? 'Split yearly rent into monthly payments'
       : 'Not taking new plans right now';

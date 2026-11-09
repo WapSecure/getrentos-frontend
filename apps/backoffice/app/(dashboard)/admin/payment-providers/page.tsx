@@ -83,17 +83,26 @@ export default function PaymentProvidersPage() {
       queryClient.setQueryData(KEY, data);
       setConfirming(null);
       setNote('');
-      toast.success(
-        p.enabled
-          ? `${p.label} is switched off. Payers are offered the other company.`
-          : `${p.label} is switched back on.`
-      );
+      const othersOn = data.some((o) => o.provider !== p.provider && o.available);
+      if (p.enabled && !othersOn) {
+        toast.error(`${p.label} is switched off. No company can take payments now.`);
+      } else {
+        toast.success(
+          p.enabled
+            ? `${p.label} is switched off. Payers are offered the other company.`
+            : `${p.label} is switched back on.`
+        );
+      }
     },
     onError: (e: Error) => toast.error(e.message || 'Could not change the switch.'),
   });
 
   const providers = query.data ?? [];
   const anyOn = providers.filter((p) => p.available).length;
+  // Switching this one off leaves no company taking payments (UX-45).
+  const lastOneOn =
+    confirming?.enabled === true &&
+    !providers.some((p) => p.provider !== confirming.provider && p.available);
 
   return (
     <>
@@ -173,12 +182,20 @@ export default function PaymentProvidersPage() {
             : `Switch ${confirming?.label} back on?`
         }
         description={
-          confirming?.enabled
-            ? `Payers will no longer be offered ${confirming.label}; they are offered the other company instead. Payments already started with ${confirming.label} still complete.`
-            : `Payers can choose ${confirming?.label ?? ''} again straight away.`
+          lastOneOn
+            ? `No company will be able to take payments. Every payer is blocked until one is back on. Payments already started with ${confirming?.label ?? ''} still complete.`
+            : confirming?.enabled
+              ? `Payers will no longer be offered ${confirming.label}; they are offered the other company instead. Payments already started with ${confirming.label} still complete.`
+              : `Payers can choose ${confirming?.label ?? ''} again straight away.`
         }
         tone={confirming?.enabled ? 'danger' : 'primary'}
-        confirmLabel={confirming?.enabled ? 'Switch off' : 'Switch on'}
+        confirmLabel={
+          lastOneOn
+            ? 'Switch off and stop payments'
+            : confirming?.enabled
+              ? 'Switch off'
+              : 'Switch on'
+        }
         promptLabel="Why (shown to finance)"
         promptPlaceholder={
           confirming?.enabled
