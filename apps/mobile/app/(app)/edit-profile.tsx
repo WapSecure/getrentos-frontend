@@ -17,6 +17,7 @@ import {
 } from '@sureground/ui-native';
 import { Image } from 'expo-image';
 import { storedAddressValue, type AddressValue } from '@sureground/shared';
+import { VerifiedPhoneField } from '@/components/account/VerifiedPhoneField';
 import { AddressInput } from '@/components/forms/AddressInput';
 import { qk } from '@/lib/query/keys';
 import { profileApi, type RenterProfile } from '@/lib/api/profile';
@@ -183,13 +184,13 @@ function ProfileForm({ profile }: { profile: RenterProfile }) {
         <TextField label="Email" value={email} editable={false} />
         <LinkButton label="Change sign-in email" onPress={() => setEmailOpen(true)} />
       </View>
-      <TextField
+      <VerifiedPhoneField
         ref={phoneRef}
         label="Phone"
+        savedPhone={profile.phone}
         value={phone}
         // Digits and a leading '+' only.
         onChangeText={(t) => setPhone(t.replace(/[^\d+]/g, '').replace(/(?!^)\+/g, ''))}
-        keyboardType="phone-pad"
         returnKeyType="done"
       />
       <AddressInput

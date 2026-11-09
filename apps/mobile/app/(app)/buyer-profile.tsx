@@ -15,6 +15,7 @@ import {
   useTheme,
   useToast,
 } from '@sureground/ui-native';
+import { VerifiedPhoneField } from '@/components/account/VerifiedPhoneField';
 import { qk } from '@/lib/query/keys';
 import { buyerApi, type BuyerProfile as BuyerProfileData } from '@/lib/api/buyer';
 import { errorMessage } from '@/lib/api/client';
@@ -90,11 +91,11 @@ function ProfileForm({ data }: { data: BuyerProfileData }) {
 
       <Card elevated style={{ gap: spacing.md }}>
         <TextField label="Full name" value={legalName} onChangeText={setLegalName} required />
-        <TextField
+        <VerifiedPhoneField
           label="Phone"
+          savedPhone={data.phone}
           value={phone}
           onChangeText={(v) => setPhone(v.replace(/(?!^\+)\D/g, ''))}
-          keyboardType="phone-pad"
         />
       </Card>
 

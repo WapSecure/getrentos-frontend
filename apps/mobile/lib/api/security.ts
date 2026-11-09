@@ -202,4 +202,17 @@ export const securityApi = {
       method: 'POST',
       body: { reference, otp },
     }),
+
+  /** A number already on the account changes only after the new one proves itself with a code. */
+  startPhoneChange: (newPhone: string) =>
+    apiFetch<{ reference: string; sentTo: string }>('/users/me/security/phone', {
+      method: 'POST',
+      body: { newPhone },
+    }),
+
+  confirmPhoneChange: (reference: string, otp: string) =>
+    apiFetch<{ phone: string; phoneVerified: true }>('/users/me/security/phone/confirm', {
+      method: 'POST',
+      body: { reference, otp },
+    }),
 };

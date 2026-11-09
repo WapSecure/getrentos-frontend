@@ -7,6 +7,8 @@ import Image from 'next/image';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getInitials } from '@sureground/shared';
 import { adminService } from '@/services/adminService';
+import { ChangeEmailButton } from '@/components/security/ChangeEmailButton';
+import { ChangePhoneButton } from '@/components/security/ChangePhoneButton';
 import { unwrap } from '@sureground/shared';
 import { adminKeys } from '@/lib/queryKeys';
 import type { AdminProfile } from '@/types/admin';
@@ -63,12 +65,11 @@ const ProfileSettingsForm = ({
   const toast = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const isDirty =
-    fullName.trim() !== baseline.fullName ||
-    email.trim() !== baseline.email ||
-    phone.trim() !== (baseline.phone || '');
-  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
-  const isValid = fullName.trim().length >= 2 && emailValid;
+  // Email, and a phone number already on the account, change only through
+  // their verified flows (a code to the new address or number).
+  const hasPhone = !!baseline.phone;
+  const isDirty = fullName.trim() !== baseline.fullName || (!hasPhone && phone.trim() !== '');
+  const isValid = fullName.trim().length >= 2;
 
   useEffect(() => {
     onDirtyChange(isDirty);
@@ -80,8 +81,7 @@ const ProfileSettingsForm = ({
       unwrap(
         adminService.updateProfile({
           fullName: fullName.trim(),
-          email: email.trim(),
-          phone: phone.trim(),
+          ...(hasPhone ? {} : { phone: phone.trim() }),
         })
       ),
     onSuccess: (savedProfile) => {
@@ -164,15 +164,41 @@ const ProfileSettingsForm = ({
         >
           <Input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} />
         </Field>
-        <Field
-          label="Email Address"
-          error={!emailValid ? 'Enter a valid email address.' : undefined}
-        >
-          <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-        </Field>
-        <Field label="Phone Number">
-          <Input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
-        </Field>
+        <div>
+          <Field
+            label="Email Address"
+            hint="Your sign-in email. Changing it sends a code to the new address."
+          >
+            <Input type="email" value={email} readOnly />
+          </Field>
+          <ChangeEmailButton
+            onChanged={(next) => {
+              setEmail(next);
+              setBaseline((b) => ({ ...b, email: next }));
+            }}
+          />
+        </div>
+        <div>
+          <Field
+            label="Phone Number"
+            hint={hasPhone ? 'Changing it sends a code to the new number.' : undefined}
+          >
+            <Input
+              type="tel"
+              value={phone}
+              readOnly={hasPhone}
+              onChange={(e) => setPhone(e.target.value)}
+            />
+          </Field>
+          {hasPhone ? (
+            <ChangePhoneButton
+              onChanged={(next) => {
+                setPhone(next);
+                setBaseline((b) => ({ ...b, phone: next }));
+              }}
+            />
+          ) : null}
+        </div>
       </div>
 
       <Button

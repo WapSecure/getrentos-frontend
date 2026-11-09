@@ -9,6 +9,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { ownerKeys } from '@/lib/queryKeys';
 import { nameOnly } from '@/lib/validations/input';
 import { ChangeEmailButton } from '@/components/shared/security/ChangeEmailButton';
+import { ChangePhoneButton } from '@/components/shared/security/ChangePhoneButton';
 
 interface ProfileSettingsProps {
   user: { fullName: string; email: string; role?: string } | null;
@@ -115,14 +116,23 @@ const ProfileSettingsForm = ({
           <ChangeEmailButton onChanged={(email) => setFormData((f) => ({ ...f, email }))} />
         </div>
 
-        <Field label="Phone number">
-          <Input
-            type="tel"
-            value={formData.phone}
-            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-            leadingIcon={<Phone className="w-4 h-4" />}
-          />
-        </Field>
+        <div>
+          <Field
+            label="Phone number"
+            hint={!!initial.phone ? 'Changing it sends a code to the new number.' : undefined}
+          >
+            <Input
+              type="tel"
+              value={formData.phone}
+              readOnly={!!initial.phone}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              leadingIcon={<Phone className="w-4 h-4" />}
+            />
+          </Field>
+          {!!initial.phone ? (
+            <ChangePhoneButton onChanged={(phone) => setFormData((f) => ({ ...f, phone }))} />
+          ) : null}
+        </div>
 
         <Field label="Company / agency name">
           <Input

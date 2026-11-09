@@ -17,6 +17,7 @@ import {
   useTheme,
   useToast,
 } from '@sureground/ui-native';
+import { VerifiedPhoneField } from '@/components/account/VerifiedPhoneField';
 import { qk } from '@/lib/query/keys';
 import { realtorApi, type RealtorProfile } from '@/lib/api/realtor';
 import { errorMessage } from '@/lib/api/client';
@@ -160,19 +161,12 @@ function ProfileForm({ initial }: { initial: RealtorProfile }) {
           textContentType="organizationName"
           hint="Shown to clients alongside your name"
         />
-        <TextField
+        <VerifiedPhoneField
           label="Phone number"
+          savedPhone={initial.phone}
           value={phone}
           // Digits and one leading "+" only.
           onChangeText={(v) => setPhone(v.replace(/[^\d+]/g, '').replace(/(?!^)\+/g, ''))}
-          keyboardType="phone-pad"
-          autoComplete="tel"
-          textContentType="telephoneNumber"
-          hint={
-            phone.trim() !== (initial.phone ?? '')
-              ? 'You’ll verify the new number again.'
-              : undefined
-          }
         />
       </Card>
       <Card elevated style={{ gap: spacing.xs }}>

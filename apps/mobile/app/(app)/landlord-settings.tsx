@@ -18,6 +18,7 @@ import {
   useTheme,
   useToast,
 } from '@sureground/ui-native';
+import { VerifiedPhoneField } from '@/components/account/VerifiedPhoneField';
 import { qk } from '@/lib/query/keys';
 import {
   landlordApi,
@@ -253,10 +254,10 @@ function ProfileForm({ initial }: { initial: LandlordProfile }) {
       </Pressable>
 
       <TextField label="Full name" required value={fullName} onChangeText={setFullName} />
-      <TextField
+      <VerifiedPhoneField
         label="Phone"
         placeholder="+234 801 234 5678"
-        keyboardType="phone-pad"
+        savedPhone={initial.phone}
         value={phone}
         // Digits only, with an optional leading +.
         onChangeText={(v) => setPhone(v.replace(/(?!^\+)\D/g, ''))}
