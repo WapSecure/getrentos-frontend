@@ -79,11 +79,11 @@ export const WorkspaceNavbar = ({
       >
         <div className="px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between gap-3">
-            <Logo size="md" />
+            <Logo size="md" className="shrink-0 [&>span]:sr-only sm:[&>span]:not-sr-only" />
 
             <div className="hidden md:flex flex-1 max-w-md mx-4">{searchBox}</div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex shrink-0 items-center gap-1 sm:gap-3">
               {actions}
               <ThemeToggle />
               {assistant}
