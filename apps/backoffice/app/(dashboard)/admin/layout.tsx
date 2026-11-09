@@ -103,7 +103,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             <AdminSidebar roles={user?.roles} />
             {/* min-w-0: without it this flex item grows to its widest child (e.g. a
               tab strip) and the whole page scrolls sideways instead of that child. */}
-            <main className="min-w-0 flex-1 lg:ml-64 p-6 lg:p-8">
+            <main className="min-w-0 flex-1 workspace-main p-6 lg:p-8">
               <div className="max-w-7xl mx-auto">
                 {hasRouteAccess(user?.roles, pathname) ? (
                   children

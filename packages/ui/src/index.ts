@@ -62,6 +62,8 @@ export * from './RadioGroup';
 export * from './SearchInput';
 export * from './ToastProvider';
 export * from './hooks/useOptimisticMutation';
+export * from './hooks/useSidebarRail';
+export * from './SidebarRailToggle';
 export * from './Progress';
 export * from './SegmentedControl';
 export * from './ToggleChip';
