@@ -9,6 +9,8 @@ export function usePlanTier() {
   const { data, isLoading } = useQuery({
     queryKey: subscriptionKeys.mine,
     queryFn: () => unwrap(subscriptionService.getMine()),
+    // Read by the sidebar in every layout: thrown, a failed fetch took the whole page down.
+    throwOnError: false,
     staleTime: 5 * 60_000,
   });
 
