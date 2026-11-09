@@ -174,9 +174,14 @@ export default function AdminFraudPage() {
             : `${flaggedCount} alert${flaggedCount === 1 ? '' : 's'} awaiting triage`
         }
         actions={
-          <Button icon={<Plus />} onClick={() => setShowCreate(true)}>
-            New alert
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" href="/admin/fraud/risk">
+              Risk decisions
+            </Button>
+            <Button icon={<Plus />} onClick={() => setShowCreate(true)}>
+              New alert
+            </Button>
+          </div>
         }
       />
 
