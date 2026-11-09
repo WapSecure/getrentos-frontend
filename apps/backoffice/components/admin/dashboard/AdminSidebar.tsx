@@ -438,25 +438,100 @@ const navItems: NavItem[] = [
 ];
 
 /**
- * Each group starts at a named item, so adding an item to a group (the land
- * screens keep growing) cannot push its neighbours into the next group, as
- * fixed slice indices did.
+ * Groups by the job staff are doing, each listed by name. They used to be
+ * ranges ("from this item to the next group's first item"), and pages added in
+ * the middle drifted into the wrong group (payments under marketplace, land
+ * under risk and finance).
  */
-const startOf = (label: string) => navItems.findIndex((item) => item.label === label);
-const groupStarts: [group: string, firstItem: string][] = [
-  ['Overview', 'Dashboard'],
-  ['People and trust', 'Users'],
-  ['Marketplace operations', 'Property Authorities'],
-  ['Risk and finance', 'Land Diligence'],
-  ['Support and insights', 'Shortlets'],
-  ['Platform administration', 'Rent Finance'],
+const groupItems: [group: string, items: string[]][] = [
+  ['Overview', ['Dashboard', 'Reports', 'Automation Usage']],
+  [
+    'People and identity',
+    [
+      'Users',
+      'Verifications',
+      'Trust Reviews',
+      'Tier 3 Grants',
+      'Trust Appeals',
+      'Agencies',
+      'Realtors',
+      'Agents',
+      'Impersonation Reports',
+    ],
+  ],
+  [
+    'Properties and listings',
+    [
+      'Property Authorities',
+      'Marketplace',
+      'Rentals',
+      'Units & Tenants',
+      'Shortlets',
+      'Estates',
+      'Maintenance',
+    ],
+  ],
+  [
+    'Managed services',
+    [
+      'Sureground Managed',
+      'Managed Intake',
+      'Field Operations',
+      'Owner Questions',
+      'Managed P&L',
+      'Management KPIs',
+      'Manager Changes',
+      'Partner Commercials',
+    ],
+  ],
+  [
+    'Payments in',
+    [
+      'Unmatched Payments',
+      'Payment Events',
+      'Payment Corrections',
+      'Payment Providers',
+      'Chargebacks',
+      'Credit Refunds',
+      'Subscriptions',
+    ],
+  ],
+  [
+    'Payouts and ledgers',
+    [
+      'Payouts Needing Attention',
+      'Payout Runs',
+      'Collections Reconciliation',
+      'Rent Journal',
+      'Rent Reconciliation',
+      'Rent Finance',
+      'Escrow Oversight',
+      'Client Money',
+    ],
+  ],
+  [
+    'Land',
+    [
+      'Land Diligence',
+      'Land Purchases',
+      'Title Perfection',
+      'Land Resales',
+      'Inspection Questions',
+      'Estate Infrastructure',
+      'Land Disputes',
+      'Seller Authority',
+      'Land Professionals',
+      'Land Watch',
+      'Land Fraud Signals',
+    ],
+  ],
+  ['Risk and disputes', ['Disputes', 'Fraud & Risk', 'Audit Logs']],
+  ['Communications', ['Messages', 'Text Messaging', 'Documents']],
+  ['Platform', ['Settings', 'Access & Roles']],
 ];
-const baseNavGroups = groupStarts.map(([label, first], index) => ({
+const baseNavGroups = groupItems.map(([label, labels]) => ({
   label,
-  items: navItems.slice(
-    startOf(first),
-    index + 1 < groupStarts.length ? startOf(groupStarts[index + 1][1]) : undefined
-  ),
+  items: labels.flatMap((name) => navItems.filter((item) => item.label === name)),
 }));
 
 const primaryLabels = [

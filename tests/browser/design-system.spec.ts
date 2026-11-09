@@ -561,7 +561,7 @@ test('backoffice navigation keeps operations focused and permissions intact', as
   await expect(navigation.getByText('Operations', { exact: true })).toBeVisible();
   await expect(navigation.getByRole('link', { name: 'Dashboard' })).toBeVisible();
   await expect(navigation.getByRole('link', { name: 'Users' })).toBeVisible();
-  const marketplace = navigation.getByRole('button', { name: 'Marketplace operations' });
+  const marketplace = navigation.getByRole('button', { name: 'Properties and listings' });
   await expect(marketplace).toHaveAttribute('aria-expanded', 'false');
   await marketplace.click();
   await expect(navigation.getByRole('link', { name: 'Property Authorities' })).toBeVisible();
