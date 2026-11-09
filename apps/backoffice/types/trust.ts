@@ -30,6 +30,13 @@ export interface TrustReviewCaseSummary {
   verification?: TrustReviewCaseVerificationRef;
 }
 
+/** One thing a reviewer must check before deciding a case (security gap ID-09). */
+export interface TrustEvidenceItem {
+  code: string;
+  label: string;
+  stepType?: string;
+}
+
 export interface TrustReviewStep {
   id: string;
   stepType: string;
@@ -79,6 +86,8 @@ export interface TrustReviewCaseDetail {
     status: string;
     decision: string;
     createdAt: string;
+    /** What to confirm to approve, or name as failed to block. */
+    evidenceChecklist?: TrustEvidenceItem[];
     steps: TrustReviewStep[];
     decisions: TrustReviewDecisionRow[];
   };

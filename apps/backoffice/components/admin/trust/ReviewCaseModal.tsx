@@ -17,6 +17,7 @@ import {
   Badge,
   Button,
   CardSkeleton,
+  Checkbox,
   PageErrorState,
   Select,
   Textarea,
@@ -27,7 +28,7 @@ import { trustService } from '@/services/trustService';
 import { adminService } from '@/services/adminService';
 import { adminKeys } from '@/lib/queryKeys';
 import { useAdminUser } from '@/app/(dashboard)/admin/layout';
-import type { TrustReviewCaseSummary, TrustReviewDecision } from '@/types/trust';
+import type { TrustEvidenceItem, TrustReviewCaseSummary, TrustReviewDecision } from '@/types/trust';
 import {
   REVIEW_CASE_PRIORITY_META,
   REVIEW_CASE_STATUS_META,
@@ -118,6 +119,17 @@ const STEP_VARIANT: Record<string, BadgeVariant> = {
   WAITING_FOR_PROVIDER: 'info',
 };
 
+/** Shortest written reason that can stand in for naming failed items (matches the API). */
+const MIN_BLOCKING_NOTE_LENGTH = 15;
+
+/** "EVIDENCE_CONFIRMED:SELFIE_IS_LIVE" → "Confirmed: The selfie was taken live…". */
+const describeCode = (code: string, checklist: TrustEvidenceItem[]) => {
+  const [kind, item] = code.split(':');
+  if (!item || (kind !== 'EVIDENCE_CONFIRMED' && kind !== 'EVIDENCE_FAILED')) return code;
+  const label = checklist.find((entry) => entry.code === item)?.label ?? item;
+  return `${kind === 'EVIDENCE_CONFIRMED' ? 'Confirmed' : 'Did not pass'}: ${label}`;
+};
+
 /** Every final decision (pass included) is four-eyes: a second officer confirms it. */
 const FOUR_EYES_HINT =
   'Four-eyes: decisions are confirmed by a second officer: the reviewer assigned to this case cannot be the resolver.';
@@ -134,6 +146,9 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
   const [assigneeId, setAssigneeId] = useState('');
   const [decision, setDecision] = useState<TrustReviewDecision | ''>('');
   const [note, setNote] = useState('');
+  // The evidence checklist (ID-09): ticked items are confirmed for a pass, or
+  // named as failing for a blocking decision.
+  const [ticked, setTicked] = useState<string[]>([]);
   const [actionError, setActionError] = useState<string | null>(null);
 
   const id = caseItem?.id;
@@ -190,11 +205,13 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
         trustService.resolveReviewCase(id!, {
           decision: decision as TrustReviewDecision,
           note: note.trim() || undefined,
+          ...(decision === 'PASS' ? { confirmedEvidence: ticked } : { failedEvidence: ticked }),
         })
       ),
     onSuccess: () => {
       setActionError(null);
       setNote('');
+      setTicked([]);
       invalidateAll();
     },
     onError: (reason) =>
@@ -202,6 +219,12 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
   });
 
   const isBlocking = decision === 'REJECT' || decision === 'RESTRICT';
+  const checklist = detail?.verification.evidenceChecklist ?? [];
+  // Approving needs every item confirmed; blocking needs a failed item or a written reason.
+  const evidenceReady =
+    decision === 'PASS'
+      ? checklist.every((item) => ticked.includes(item.code))
+      : ticked.length > 0 || note.trim().length >= MIN_BLOCKING_NOTE_LENGTH;
   // The API refuses these outright; don't offer a decision the officer can't make.
   const myId = useAdminUser()?.id;
   const assignedToMe = Boolean(myId && detail?.assigneeId === myId);
@@ -218,6 +241,7 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
     setActionError(null);
     setNote('');
     setDecision('');
+    setTicked([]);
     onClose();
   };
 
@@ -384,7 +408,9 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
                               </p>
                               {d.reasonCodes.length > 0 && (
                                 <p className="mt-1 text-[11px] text-muted-foreground">
-                                  {nonScoreCodes(d.reasonCodes).join(', ')}
+                                  {nonScoreCodes(d.reasonCodes)
+                                    .map((code) => describeCode(code, checklist))
+                                    .join(' · ')}
                                 </p>
                               )}
                               <ScoreAtDecisionCodes reasonCodes={d.reasonCodes} />
@@ -497,6 +523,7 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
                           value={decision}
                           onValueChange={(value) => {
                             setDecision(value as TrustReviewDecision | '');
+                            setTicked([]);
                             setActionError(null);
                           }}
                           options={RESOLVE_OPTIONS}
@@ -506,11 +533,38 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
                           className="w-full"
                         />
                       )}
+                      {canDecide && decision && checklist.length > 0 && (
+                        <fieldset className="space-y-2 rounded-lg border border-border p-3">
+                          <legend className="px-1 text-sm font-medium text-foreground">
+                            {decision === 'PASS'
+                              ? 'Confirm each item before approving'
+                              : 'Tick what did not pass'}
+                          </legend>
+                          {checklist.map((item) => (
+                            <Checkbox
+                              key={item.code}
+                              label={item.label}
+                              checked={ticked.includes(item.code)}
+                              onCheckedChange={(on) =>
+                                setTicked((current) =>
+                                  on
+                                    ? [...current, item.code]
+                                    : current.filter((code) => code !== item.code)
+                                )
+                              }
+                            />
+                          ))}
+                        </fieldset>
+                      )}
                       <Textarea
                         value={note}
                         onChange={(e) => setNote(e.target.value)}
                         rows={2}
-                        placeholder="Note for the case record (optional)"
+                        placeholder={
+                          isBlocking
+                            ? 'Why it did not pass (needed if you tick nothing above)'
+                            : 'Note for the case record (optional)'
+                        }
                         aria-label="Case note"
                       />
                       {canDecide && decision && (
@@ -522,7 +576,7 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
                         {canDecide && (
                           <Button
                             size="sm"
-                            disabled={!decision || busy}
+                            disabled={!decision || !evidenceReady || busy}
                             isLoading={resolveMutation.isPending}
                             loadingText="Resolving…"
                             onClick={() => resolveMutation.mutate()}
