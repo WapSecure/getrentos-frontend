@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { Footer } from '@/components/layout/Footer';
 import { Navigation } from '@/components/layout/Navigation';
-import { Button } from '@sureground/ui';
+import { Badge, Button, type BadgeVariant } from '@sureground/ui';
 import { ROUTES } from '@/lib/constants/auth';
 
 const workflows = [
@@ -289,9 +289,9 @@ export default function HomeManagementProductPage() {
                 }`}
               >
                 {plan.featured && (
-                  <span className="absolute right-5 top-5 rounded-full bg-primary px-2.5 py-1 text-xs font-medium text-primary-foreground">
+                  <Badge variant="primary" className="absolute right-5 top-5">
                     Built for operators
-                  </span>
+                  </Badge>
                 )}
                 <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <plan.icon className="h-5 w-5" />
@@ -387,18 +387,16 @@ function Metric({
   value: string;
   tone: 'blue' | 'green' | 'amber' | 'violet';
 }) {
-  const styles = {
-    blue: 'bg-primary/10 text-primary',
-    green: 'bg-success-subtle text-success',
-    amber: 'bg-warning-subtle text-warning',
-    violet: 'bg-info-subtle text-info',
-  } as const;
+  const variants: Record<typeof tone, BadgeVariant> = {
+    blue: 'primary',
+    green: 'success',
+    amber: 'warning',
+    violet: 'info',
+  };
 
   return (
     <div className="rounded-2xl border border-border bg-background p-4">
-      <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${styles[tone]}`}>
-        {value}
-      </span>
+      <Badge variant={variants[tone]}>{value}</Badge>
       <p className="mt-3 text-sm font-medium text-foreground">{label}</p>
     </div>
   );

@@ -9,6 +9,7 @@ import {
   Card,
   CardSkeleton,
   CurrencyInput,
+  DataTable,
   DatePicker,
   EmptyState,
   Field,
@@ -21,6 +22,7 @@ import {
   TabsList,
   TabsTrigger,
   PageHeader,
+  type Column,
 } from '@sureground/ui';
 import { formatCurrency, formatDate, recentMonthOptions, unwrap } from '@sureground/shared';
 
@@ -29,6 +31,7 @@ import {
   adminManagedService,
   type ManagedCost,
   type ManagedCostCategory,
+  type ManagedPnl,
   type PnlFigures,
   type PnlGroupBy,
 } from '@/services/adminManagedService';
@@ -60,6 +63,71 @@ const MarginCell = ({ f }: { f: PnlFigures }) => (
     {f.marginPct !== null && <span className="ml-1 text-muted-foreground">({f.marginPct}%)</span>}
   </span>
 );
+
+type PnlRow = ManagedPnl['rows'][number];
+type PnlMonth = ManagedPnl['months'][number];
+
+const groupColumns = (groupBy: PnlGroupBy): Column<PnlRow>[] => [
+  {
+    key: 'label',
+    header: GROUP_LABEL[groupBy],
+    render: (r) => (
+      <>
+        <span className="text-foreground">{r.label}</span>
+        {r.detail && <span className="block text-xs text-muted-foreground">{r.detail}</span>}
+        {groupBy !== 'property' && (
+          <span className="block text-xs text-muted-foreground">
+            {r.engagements} engagement{r.engagements === 1 ? '' : 's'}
+          </span>
+        )}
+      </>
+    ),
+  },
+  {
+    key: 'revenue',
+    header: 'Revenue',
+    numeric: true,
+    render: (r) => <span className="text-foreground">{money(r.revenue)}</span>,
+  },
+  {
+    key: 'partnerShare',
+    header: 'Partner share',
+    numeric: true,
+    render: (r) => <span className="text-foreground">{money(r.partnerShare)}</span>,
+  },
+  {
+    key: 'directCosts',
+    header: 'Direct costs',
+    numeric: true,
+    render: (r) => <span className="text-foreground">{money(r.directCosts)}</span>,
+  },
+  { key: 'margin', header: 'Margin', numeric: true, render: (r) => <MarginCell f={r} /> },
+];
+
+const monthColumns = (months: { value: string; label: string }[]): Column<PnlMonth>[] => [
+  {
+    key: 'month',
+    header: 'Month',
+    render: (m) => (
+      <span className="text-foreground">
+        {months.find((x) => x.value === m.period)?.label ?? m.period}
+      </span>
+    ),
+  },
+  {
+    key: 'revenue',
+    header: 'Revenue',
+    numeric: true,
+    render: (m) => <span className="text-foreground">{money(m.revenue)}</span>,
+  },
+  {
+    key: 'costs',
+    header: 'Costs',
+    numeric: true,
+    render: (m) => <span className="text-foreground">{money(m.partnerShare + m.directCosts)}</span>,
+  },
+  { key: 'margin', header: 'Margin', numeric: true, render: (m) => <MarginCell f={m} /> },
+];
 
 const Tile = ({ label, value, note }: { label: string; value: string; note?: string }) => (
   <Card className="p-4">
@@ -333,80 +401,30 @@ export default function ManagedPnlPage() {
                 description="Managed revenue appears when an owner's statement pays out; costs when they are recorded."
               />
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[640px] text-sm">
-                  <thead>
-                    <tr className="border-b border-border text-left text-muted-foreground">
-                      <th className="py-2 pr-3 font-medium">{GROUP_LABEL[groupBy]}</th>
-                      <th className="py-2 pr-3 text-right font-medium">Revenue</th>
-                      <th className="py-2 pr-3 text-right font-medium">Partner share</th>
-                      <th className="py-2 pr-3 text-right font-medium">Direct costs</th>
-                      <th className="py-2 text-right font-medium">Margin</th>
-                    </tr>
-                  </thead>
-                  <tbody className="tabular-nums">
-                    {pnl.rows.map((r) => (
-                      <tr key={r.key} className="border-b border-border/60 last:border-0">
-                        <td className="py-2 pr-3">
-                          <span className="text-foreground">{r.label}</span>
-                          {r.detail && (
-                            <span className="block text-xs text-muted-foreground">{r.detail}</span>
-                          )}
-                          {groupBy !== 'property' && (
-                            <span className="block text-xs text-muted-foreground">
-                              {r.engagements} engagement{r.engagements === 1 ? '' : 's'}
-                            </span>
-                          )}
-                        </td>
-                        <td className="py-2 pr-3 text-right text-foreground">{money(r.revenue)}</td>
-                        <td className="py-2 pr-3 text-right text-foreground">
-                          {money(r.partnerShare)}
-                        </td>
-                        <td className="py-2 pr-3 text-right text-foreground">
-                          {money(r.directCosts)}
-                        </td>
-                        <td className="py-2 text-right">
-                          <MarginCell f={r} />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <DataTable
+                variant="bare"
+                minWidth="640px"
+                caption={`Managed revenue, costs and margin by ${GROUP_LABEL[groupBy].toLowerCase()}`}
+                density="compact"
+                columns={groupColumns(groupBy)}
+                data={pnl.rows}
+                getRowKey={(r) => r.key}
+              />
             )}
           </Card>
 
           {pnl.months.length > 0 && (
             <Card className="p-5">
               <h2 className="mb-3 font-semibold text-foreground">By month</h2>
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[560px] text-sm">
-                  <thead>
-                    <tr className="border-b border-border text-left text-muted-foreground">
-                      <th className="py-2 pr-3 font-medium">Month</th>
-                      <th className="py-2 pr-3 text-right font-medium">Revenue</th>
-                      <th className="py-2 pr-3 text-right font-medium">Costs</th>
-                      <th className="py-2 text-right font-medium">Margin</th>
-                    </tr>
-                  </thead>
-                  <tbody className="tabular-nums">
-                    {pnl.months.map((m) => (
-                      <tr key={m.period} className="border-b border-border/60 last:border-0">
-                        <td className="py-2 pr-3 text-foreground">
-                          {months.find((x) => x.value === m.period)?.label ?? m.period}
-                        </td>
-                        <td className="py-2 pr-3 text-right text-foreground">{money(m.revenue)}</td>
-                        <td className="py-2 pr-3 text-right text-foreground">
-                          {money(m.partnerShare + m.directCosts)}
-                        </td>
-                        <td className="py-2 text-right">
-                          <MarginCell f={m} />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <DataTable
+                variant="bare"
+                minWidth="560px"
+                caption="Managed revenue, costs and margin by month"
+                density="compact"
+                columns={monthColumns(months)}
+                data={pnl.months}
+                getRowKey={(m) => m.period}
+              />
             </Card>
           )}
         </>

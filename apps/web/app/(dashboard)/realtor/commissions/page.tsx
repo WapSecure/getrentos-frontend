@@ -6,13 +6,15 @@ import { Wallet, Clock, CheckCircle2, TrendingUp, FileSpreadsheet, Check } from 
 import {
   Badge,
   Button,
-  Card,
+  DataTable,
+  EmptyState,
   PageErrorState,
   Pagination,
   StatCard,
   StatGridSkeleton,
   TableSkeleton,
   type BadgeVariant,
+  type Column,
   PageHeader,
 } from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
@@ -21,7 +23,7 @@ import { realtorService } from '@/services/realtorService';
 import { realtorKeys } from '@/lib/queryKeys';
 import { RealtorPayoutSection } from '@/components/realtor/commissions/RealtorPayoutSection';
 import { AgencyAgentSelfPayout } from '@/components/agency/AgencyAgentSelfPayout';
-import type { CommissionSide, CommissionStatus } from '@/types/realtor';
+import type { Commission, CommissionSide, CommissionStatus } from '@/types/realtor';
 import { usePlanTier } from '@/hooks/usePlanTier';
 import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
 
@@ -37,6 +39,70 @@ const SIDE_LABEL: Record<CommissionSide, string> = {
   listing: 'Listing side',
   buyer: 'Buyer side',
 };
+
+const commissionColumns: Column<Commission>[] = [
+  {
+    key: 'property',
+    header: 'Property',
+    className: 'font-medium text-foreground whitespace-nowrap',
+    render: (c) => c.propertyTitle,
+  },
+  {
+    key: 'side',
+    header: 'Side',
+    className: 'text-muted-foreground whitespace-nowrap',
+    render: (c) => SIDE_LABEL[c.side],
+  },
+  {
+    key: 'client',
+    header: 'Client',
+    className: 'text-muted-foreground whitespace-nowrap',
+    render: (c) => c.clientName,
+  },
+  {
+    key: 'dealValue',
+    header: 'Deal value',
+    numeric: true,
+    className: 'text-muted-foreground whitespace-nowrap',
+    render: (c) => formatCurrency(c.dealValue, { compact: true }),
+  },
+  {
+    key: 'rate',
+    header: 'Rate',
+    numeric: true,
+    className: 'text-muted-foreground whitespace-nowrap',
+    render: (c) => `${c.ratePct}%`,
+  },
+  {
+    key: 'commission',
+    header: 'Commission',
+    numeric: true,
+    className: 'font-bold text-primary whitespace-nowrap',
+    render: (c) => formatCurrency(c.amount, { compact: true }),
+  },
+  {
+    key: 'status',
+    header: 'Status',
+    className: 'whitespace-nowrap',
+    render: (c) => {
+      const status = statusConfig[c.status];
+      return (
+        <>
+          <Badge variant={status.variant}>{status.label}</Badge>
+          {c.status === 'void' && c.voidReason && (
+            <span className="block text-xs text-muted-foreground mt-1">{c.voidReason}</span>
+          )}
+        </>
+      );
+    },
+  },
+  {
+    key: 'earned',
+    header: 'Earned',
+    className: 'text-muted-foreground whitespace-nowrap',
+    render: (c) => formatDate(c.earnedAt),
+  },
+];
 
 export default function RealtorCommissionsPage() {
   const [page, setPage] = useState(1);
@@ -183,74 +249,23 @@ export default function RealtorCommissionsPage() {
 
         <RealtorPayoutSection />
 
-        <Card>
-          <div className="px-5 pt-5">
-            <h3 className="text-sm font-semibold text-foreground">Earned commission</h3>
-          </div>
-          <div className="overflow-x-auto mt-3">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                  <th className="p-4 font-medium">Property</th>
-                  <th className="p-4 font-medium">Side</th>
-                  <th className="p-4 font-medium">Client</th>
-                  <th className="p-4 font-medium">Deal value</th>
-                  <th className="p-4 font-medium">Rate</th>
-                  <th className="p-4 font-medium">Commission</th>
-                  <th className="p-4 font-medium">Status</th>
-                  <th className="p-4 font-medium">Earned</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {commissions.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} className="p-10 text-center text-sm text-muted-foreground">
-                      No commission yet. It appears here once a sale you brokered settles and the
-                      buyer&apos;s money is released to the seller.
-                    </td>
-                  </tr>
-                ) : (
-                  commissions.map((c) => {
-                    const status = statusConfig[c.status];
-                    return (
-                      <tr key={c.id} className="hover:bg-secondary transition-colors">
-                        <td className="p-4 font-medium text-foreground whitespace-nowrap">
-                          {c.propertyTitle}
-                        </td>
-                        <td className="p-4 text-muted-foreground whitespace-nowrap">
-                          {SIDE_LABEL[c.side]}
-                        </td>
-                        <td className="p-4 text-muted-foreground whitespace-nowrap">
-                          {c.clientName}
-                        </td>
-                        <td className="p-4 text-muted-foreground whitespace-nowrap">
-                          {formatCurrency(c.dealValue, { compact: true })}
-                        </td>
-                        <td className="p-4 text-muted-foreground whitespace-nowrap">
-                          {c.ratePct}%
-                        </td>
-                        <td className="p-4 font-bold text-primary whitespace-nowrap">
-                          {formatCurrency(c.amount, { compact: true })}
-                        </td>
-                        <td className="p-4 whitespace-nowrap">
-                          <Badge variant={status.variant}>{status.label}</Badge>
-                          {c.status === 'void' && c.voidReason && (
-                            <span className="block text-xs text-muted-foreground mt-1">
-                              {c.voidReason}
-                            </span>
-                          )}
-                        </td>
-                        <td className="p-4 text-muted-foreground whitespace-nowrap">
-                          {formatDate(c.earnedAt)}
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
-        </Card>
+        <section>
+          <h3 className="mb-3 text-sm font-semibold text-foreground">Earned commission</h3>
+          <DataTable
+            caption="Earned commission"
+            columns={commissionColumns}
+            data={commissions}
+            getRowKey={(c) => c.id}
+            emptyState={
+              <EmptyState
+                icon={Wallet}
+                size="compact"
+                title="No commission yet"
+                description="It appears here once a sale you brokered settles and the buyer's money is released to the seller."
+              />
+            }
+          />
+        </section>
 
         {total > 0 && (
           <Pagination

@@ -8,15 +8,17 @@ import {
   Button,
   Card,
   ConfirmDialog,
+  DataTable,
   EmptyState,
   Skeleton,
   TableSkeleton,
   type BadgeVariant,
+  type Column,
   type ToastVariant,
 } from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
-import { agencyCommissionService } from '@/services/agencyCommissionService';
+import { agencyCommissionService, type AgencyPayout } from '@/services/agencyCommissionService';
 import {
   PAYOUT_CHANGE_COOLDOWN_HINT,
   PayoutHoldNotice,
@@ -40,6 +42,52 @@ const PAYOUT_STATUS: Record<string, { label: string; variant: BadgeVariant }> = 
   SUCCESS: { label: 'Paid', variant: 'success' },
   FAILED: { label: 'Failed', variant: 'danger' },
 };
+
+const PAYOUT_COLUMNS: Column<AgencyPayout>[] = [
+  {
+    key: 'requested',
+    header: 'Requested',
+    className: 'text-muted-foreground',
+    render: (p) => formatDate(p.createdAt),
+  },
+  {
+    key: 'commissions',
+    header: 'Commissions',
+    numeric: true,
+    className: 'text-muted-foreground',
+    render: (p) => p.commissions,
+  },
+  {
+    key: 'amount',
+    header: 'Amount',
+    numeric: true,
+    className: 'font-medium text-foreground',
+    render: (p) => formatCurrency(p.amount),
+  },
+  {
+    key: 'status',
+    header: 'Status',
+    className: 'min-w-56',
+    render: (p) => {
+      const pill = PAYOUT_STATUS[p.status] ?? {
+        label: p.status,
+        variant: 'neutral' as BadgeVariant,
+      };
+      return (
+        <>
+          <Badge variant={pill.variant}>{pill.label}</Badge>
+          <PayoutRowDetails
+            state={p.status === 'SUCCESS' ? 'paid' : p.status === 'FAILED' ? 'failed' : 'pending'}
+            paidAt={p.paidAt}
+            transferRef={p.transferRef}
+            failureReason={p.failureReason}
+            sentTo={p.sentTo}
+          />
+        </>
+      );
+    },
+  },
+];
 
 export function AgencyPayoutSection({
   onToast,
@@ -234,53 +282,13 @@ export function AgencyPayoutSection({
         ) : !payoutsQuery.data || payoutsQuery.data.length === 0 ? (
           <EmptyState icon={Banknote} title="No payouts yet." size="compact" />
         ) : (
-          <div className="overflow-x-auto rounded-2xl border border-border bg-card">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                  <th className="px-4 py-2.5 font-medium">Requested</th>
-                  <th className="px-4 py-2.5 font-medium">Commissions</th>
-                  <th className="px-4 py-2.5 text-right font-medium">Amount</th>
-                  <th className="px-4 py-2.5 font-medium">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/60">
-                {payoutsQuery.data.map((p) => {
-                  const pill = PAYOUT_STATUS[p.status] ?? {
-                    label: p.status,
-                    variant: 'neutral' as BadgeVariant,
-                  };
-                  return (
-                    <tr key={p.id}>
-                      <td className="px-4 py-2.5 text-muted-foreground">
-                        {formatDate(p.createdAt)}
-                      </td>
-                      <td className="px-4 py-2.5 text-muted-foreground">{p.commissions}</td>
-                      <td className="px-4 py-2.5 text-right font-medium text-foreground">
-                        {formatCurrency(p.amount)}
-                      </td>
-                      <td className="px-4 py-2.5 min-w-56">
-                        <Badge variant={pill.variant}>{pill.label}</Badge>
-                        <PayoutRowDetails
-                          state={
-                            p.status === 'SUCCESS'
-                              ? 'paid'
-                              : p.status === 'FAILED'
-                                ? 'failed'
-                                : 'pending'
-                          }
-                          paidAt={p.paidAt}
-                          transferRef={p.transferRef}
-                          failureReason={p.failureReason}
-                          sentTo={p.sentTo}
-                        />
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <DataTable
+            caption="Payout history"
+            density="compact"
+            columns={PAYOUT_COLUMNS}
+            data={payoutsQuery.data}
+            getRowKey={(p) => p.id}
+          />
         )}
       </div>
     </div>

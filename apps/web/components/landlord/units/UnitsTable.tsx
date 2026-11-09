@@ -4,6 +4,7 @@ import { useState } from 'react';
 import {
   Badge,
   ConfirmDialog,
+  DataTable,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -45,92 +46,110 @@ export const UnitsTable = ({
   }
 
   return (
-    <div className="bg-card rounded-2xl border border-border overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-border text-left">
-              <th className="px-4 py-3 font-medium text-muted-foreground">Unit</th>
-              <th className="px-4 py-3 font-medium text-muted-foreground">Property</th>
-              <th className="px-4 py-3 font-medium text-muted-foreground">Details</th>
-              <th className="px-4 py-3 font-medium text-muted-foreground">Rent</th>
-              <th className="px-4 py-3 font-medium text-muted-foreground">Status</th>
-              <th className="px-4 py-3 font-medium text-muted-foreground">Tenant</th>
-              <th className="px-4 py-3" />
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {units.map((unit) => {
+    <>
+      <DataTable
+        caption="Units"
+        data={units}
+        getRowKey={(unit) => unit.id}
+        columns={[
+          {
+            key: 'unit',
+            header: 'Unit',
+            className: 'font-medium text-foreground whitespace-nowrap',
+            render: (unit) => unit.unitName,
+          },
+          {
+            key: 'property',
+            header: 'Property',
+            className: 'text-muted-foreground whitespace-nowrap',
+            render: (unit) => unit.propertyName,
+          },
+          {
+            key: 'details',
+            header: 'Details',
+            className: 'text-muted-foreground whitespace-nowrap',
+            render: (unit) => (
+              <>
+                <span className="inline-flex items-center gap-1">
+                  <Bed className="w-3.5 h-3.5" />
+                  {unit.bedrooms}
+                </span>
+                <span className="inline-flex items-center gap-1 ml-3">
+                  <Bath className="w-3.5 h-3.5" />
+                  {unit.bathrooms}
+                </span>
+              </>
+            ),
+          },
+          {
+            key: 'rent',
+            header: 'Rent',
+            className: 'text-foreground font-medium whitespace-nowrap',
+            render: (unit) => (
+              <>
+                {unit.leaseRent !== undefined || unit.askingRent !== undefined
+                  ? formatCurrency((unit.leaseRent ?? unit.askingRent)!, {
+                      compact: true,
+                    })
+                  : '\u2014'}
+                {rentSuffix(unit.leaseRentPeriod ?? unit.askingRentPeriod)}
+              </>
+            ),
+          },
+          {
+            key: 'status',
+            header: 'Status',
+            render: (unit) => {
               const status = statusConfig[unit.occupancyStatus];
-              return (
-                <tr key={unit.id} className="hover:bg-secondary transition-colors">
-                  <td className="px-4 py-3 font-medium text-foreground whitespace-nowrap">
-                    {unit.unitName}
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
-                    {unit.propertyName}
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
-                    <span className="inline-flex items-center gap-1">
-                      <Bed className="w-3.5 h-3.5" />
-                      {unit.bedrooms}
-                    </span>
-                    <span className="inline-flex items-center gap-1 ml-3">
-                      <Bath className="w-3.5 h-3.5" />
-                      {unit.bathrooms}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-foreground font-medium whitespace-nowrap">
-                    {unit.leaseRent !== undefined || unit.askingRent !== undefined
-                      ? formatCurrency((unit.leaseRent ?? unit.askingRent)!, {
-                          compact: true,
-                        })
-                      : '\u2014'}
-                    {rentSuffix(unit.leaseRentPeriod ?? unit.askingRentPeriod)}
-                  </td>
-                  <td className="px-4 py-3">
-                    <Badge variant={status.variant}>{status.label}</Badge>
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
-                    {unit.tenantName || '—'}
-                  </td>
-                  <td className="px-4 py-3 relative">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <IconButton
-                          label={`Actions for ${unit.unitName}`}
-                          size="sm"
-                          icon={<MoreVertical />}
-                          isLoading={pendingUnitId === unit.id}
-                        />
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        {unit.occupancyStatus === 'occupied' && (
-                          <DropdownMenuItem onSelect={() => onChargeUnit(unit)}>
-                            <ReceiptText className="w-3.5 h-3.5" />
-                            Charge rent
-                          </DropdownMenuItem>
-                        )}
-                        {unit.occupancyStatus === 'vacant' ? (
-                          <DropdownMenuItem onSelect={() => onRecordOccupier(unit)}>
-                            <UserPlus className="w-3.5 h-3.5" />
-                            Record occupier
-                          </DropdownMenuItem>
-                        ) : (
-                          <DropdownMenuItem onSelect={() => setVacatingUnit(unit)}>
-                            <DoorClosed className="w-3.5 h-3.5" />
-                            Mark vacant
-                          </DropdownMenuItem>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+              return <Badge variant={status.variant}>{status.label}</Badge>;
+            },
+          },
+          {
+            key: 'tenant',
+            header: 'Tenant',
+            className: 'text-muted-foreground whitespace-nowrap',
+            render: (unit) => unit.tenantName || '—',
+          },
+          {
+            key: 'actions',
+            header: '',
+            srHeader: 'Actions',
+            align: 'right',
+            className: 'relative',
+            render: (unit) => (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <IconButton
+                    label={`Actions for ${unit.unitName}`}
+                    size="sm"
+                    icon={<MoreVertical />}
+                    isLoading={pendingUnitId === unit.id}
+                  />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {unit.occupancyStatus === 'occupied' && (
+                    <DropdownMenuItem onSelect={() => onChargeUnit(unit)}>
+                      <ReceiptText className="w-3.5 h-3.5" />
+                      Charge rent
+                    </DropdownMenuItem>
+                  )}
+                  {unit.occupancyStatus === 'vacant' ? (
+                    <DropdownMenuItem onSelect={() => onRecordOccupier(unit)}>
+                      <UserPlus className="w-3.5 h-3.5" />
+                      Record occupier
+                    </DropdownMenuItem>
+                  ) : (
+                    <DropdownMenuItem onSelect={() => setVacatingUnit(unit)}>
+                      <DoorClosed className="w-3.5 h-3.5" />
+                      Mark vacant
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ),
+          },
+        ]}
+      />
       <ConfirmDialog
         open={Boolean(vacatingUnit)}
         onOpenChange={(open) => !open && setVacatingUnit(null)}
@@ -148,6 +167,6 @@ export const UnitsTable = ({
           }
         }}
       />
-    </div>
+    </>
   );
 };

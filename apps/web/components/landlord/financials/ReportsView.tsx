@@ -3,7 +3,15 @@
 import { useState } from 'react';
 import { keepPreviousData, useQuery, useMutation } from '@tanstack/react-query';
 import { Download, ClipboardList, AlertTriangle, FileBarChart } from 'lucide-react';
-import { Button, DatePicker, EmptyState, Field, TableSkeleton, useToast } from '@sureground/ui';
+import {
+  Button,
+  DataTable,
+  DatePicker,
+  EmptyState,
+  Field,
+  TableSkeleton,
+  useToast,
+} from '@sureground/ui';
 import { reportService } from '@/services/reportService';
 import { unwrap } from '@/lib/apiHelpers';
 
@@ -65,48 +73,51 @@ export function ReportsView() {
         ) : (rentRoll ?? []).length === 0 ? (
           <EmptyState icon={ClipboardList} title="No units yet." size="compact" />
         ) : (
-          <div className="overflow-x-auto rounded-2xl border border-border bg-card">
-            <table className="w-full text-sm">
-              <thead className="border-b border-border text-left text-xs text-muted-foreground">
-                <tr>
-                  <th className="p-3 font-medium">Property</th>
-                  <th className="p-3 font-medium">Unit</th>
-                  <th className="p-3 font-medium">Tenant</th>
-                  <th className="p-3 font-medium">Rent</th>
-                  <th className="p-3 font-medium">Outstanding</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(rentRoll ?? []).map((r, i) => (
-                  <tr key={i} className="border-b border-border/50 last:border-0">
-                    <td className="p-3 text-foreground">{r.propertyTitle}</td>
-                    <td className="p-3 text-muted-foreground">{r.unitName}</td>
-                    <td className="p-3 text-muted-foreground">
-                      {r.occupied ? (
-                        r.tenantName || 'Tenant'
-                      ) : (
-                        <span className="italic">Vacant</span>
-                      )}
-                    </td>
-                    <td className="p-3 text-foreground">
-                      {r.rentAmount != null
-                        ? `${formatNaira(r.rentAmount)}${PERIOD_LABELS[r.rentPeriod ?? ''] ?? ''}`
-                        : '—'}
-                    </td>
-                    <td className="p-3">
-                      {r.outstanding > 0 ? (
-                        <span className="font-medium text-warning">
-                          {formatNaira(r.outstanding)}
-                        </span>
-                      ) : (
-                        <span className="text-muted-foreground">—</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <DataTable
+            caption="Rent roll"
+            data={rentRoll ?? []}
+            getRowKey={(_r, index) => String(index)}
+            columns={[
+              {
+                key: 'property',
+                header: 'Property',
+                className: 'text-foreground',
+                render: (r) => r.propertyTitle,
+              },
+              {
+                key: 'unit',
+                header: 'Unit',
+                className: 'text-muted-foreground',
+                render: (r) => r.unitName,
+              },
+              {
+                key: 'tenant',
+                header: 'Tenant',
+                className: 'text-muted-foreground',
+                render: (r) =>
+                  r.occupied ? r.tenantName || 'Tenant' : <span className="italic">Vacant</span>,
+              },
+              {
+                key: 'rent',
+                header: 'Rent',
+                className: 'text-foreground',
+                render: (r) =>
+                  r.rentAmount != null
+                    ? `${formatNaira(r.rentAmount)}${PERIOD_LABELS[r.rentPeriod ?? ''] ?? ''}`
+                    : '—',
+              },
+              {
+                key: 'outstanding',
+                header: 'Outstanding',
+                render: (r) =>
+                  r.outstanding > 0 ? (
+                    <span className="font-medium text-warning">{formatNaira(r.outstanding)}</span>
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  ),
+              },
+            ]}
+          />
         )}
       </section>
 
@@ -137,56 +148,62 @@ export function ReportsView() {
         {loadingPnl ? (
           <TableSkeleton rows={4} columns={4} />
         ) : (
-          <div className="overflow-x-auto rounded-2xl border border-border bg-card">
-            <table className="w-full text-sm">
-              <thead className="border-b border-border text-left text-xs text-muted-foreground">
-                <tr>
-                  <th className="p-3 font-medium">Property</th>
-                  <th className="p-3 text-right font-medium">Income</th>
-                  <th className="p-3 text-right font-medium">Expenses</th>
-                  <th className="p-3 text-right font-medium">Net</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(pnl?.rows ?? []).length === 0 ? (
-                  <tr>
-                    <td colSpan={4} className="p-6 text-center text-muted-foreground">
-                      No income or expenses in this period.
-                    </td>
-                  </tr>
-                ) : (
-                  (pnl?.rows ?? []).map((r) => (
-                    <tr key={r.propertyId} className="border-b border-border/50">
-                      <td className="p-3 text-foreground">{r.propertyTitle}</td>
-                      <td className="p-3 text-right text-foreground">{formatNaira(r.income)}</td>
-                      <td className="p-3 text-right text-foreground">{formatNaira(r.expenses)}</td>
-                      <td
-                        className={`p-3 text-right font-medium ${r.net >= 0 ? 'text-success' : 'text-destructive'}`}
-                      >
-                        {formatNaira(r.net)}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-              {pnl && pnl.rows.length > 0 && (
-                <tfoot>
-                  <tr className="border-t border-border font-semibold">
-                    <td className="p-3 text-foreground">Total</td>
-                    <td className="p-3 text-right text-foreground">
-                      {formatNaira(pnl.totals.income)}
-                    </td>
-                    <td className="p-3 text-right text-foreground">
-                      {formatNaira(pnl.totals.expenses)}
-                    </td>
-                    <td className="p-3 text-right text-foreground">
-                      {formatNaira(pnl.totals.net)}
-                    </td>
-                  </tr>
-                </tfoot>
-              )}
-            </table>
-          </div>
+          <DataTable
+            caption="Income and expenses by property"
+            data={pnl?.rows ?? []}
+            getRowKey={(r) => r.propertyId}
+            emptyState={
+              <EmptyState
+                icon={FileBarChart}
+                title="No income or expenses in this period."
+                size="compact"
+              />
+            }
+            totals={
+              pnl
+                ? {
+                    property: 'Total',
+                    income: formatNaira(pnl.totals.income),
+                    expenses: formatNaira(pnl.totals.expenses),
+                    net: formatNaira(pnl.totals.net),
+                  }
+                : undefined
+            }
+            columns={[
+              {
+                key: 'property',
+                header: 'Property',
+                className: 'text-foreground',
+                render: (r) => r.propertyTitle,
+              },
+              {
+                key: 'income',
+                header: 'Income',
+                numeric: true,
+                className: 'text-foreground',
+                render: (r) => formatNaira(r.income),
+              },
+              {
+                key: 'expenses',
+                header: 'Expenses',
+                numeric: true,
+                className: 'text-foreground',
+                render: (r) => formatNaira(r.expenses),
+              },
+              {
+                key: 'net',
+                header: 'Net',
+                numeric: true,
+                render: (r) => (
+                  <span
+                    className={`font-medium ${r.net >= 0 ? 'text-success' : 'text-destructive'}`}
+                  >
+                    {formatNaira(r.net)}
+                  </span>
+                ),
+              },
+            ]}
+          />
         )}
       </section>
 

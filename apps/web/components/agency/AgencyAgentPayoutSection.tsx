@@ -3,11 +3,19 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Users } from 'lucide-react';
-import { Badge, Button, ListSkeleton, type ToastVariant } from '@sureground/ui';
+import {
+  Badge,
+  Button,
+  DataTable,
+  ListSkeleton,
+  type Column,
+  type ToastVariant,
+} from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import {
   agencyCommissionService,
+  type AgentPayable,
   type AgentPayRunResult,
 } from '@/services/agencyCommissionService';
 import { AgencyAgentSelfPayout } from './AgencyAgentSelfPayout';
@@ -56,6 +64,36 @@ export function AgencyAgentPayoutSection({
   const summary = mySummaryQuery.data;
   const requiredTier = summary?.withdrawTierRequired ?? 3;
 
+  const columns: Column<AgentPayable>[] = [
+    {
+      key: 'agent',
+      header: 'Agent',
+      className: 'text-foreground',
+      render: (p) => p.agentName,
+    },
+    {
+      key: 'payable',
+      header: 'Unpaid share',
+      numeric: true,
+      className: 'font-medium text-foreground',
+      render: (p) => formatCurrency(p.payable),
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      render: (p) =>
+        p.ready ? (
+          <Badge variant="success">Ready</Badge>
+        ) : !p.accountSet ? (
+          <Badge variant="neutral">No payout account</Badge>
+        ) : p.payoutHeldUntil ? (
+          <Badge variant="warning">Account changed · on hold</Badge>
+        ) : (
+          <Badge variant="warning">Needs ID tier {requiredTier}</Badge>
+        ),
+    },
+  ];
+
   return (
     <div className="mt-8">
       <h2 className="mb-2 flex items-center gap-2 text-sm font-semibold text-foreground">
@@ -89,38 +127,14 @@ export function AgencyAgentPayoutSection({
             No agent has an unpaid share right now.
           </p>
         ) : (
-          <div className="mt-4 overflow-x-auto rounded-xl border border-border">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                  <th className="px-4 py-2.5 font-medium">Agent</th>
-                  <th className="px-4 py-2.5 text-right font-medium">Unpaid share</th>
-                  <th className="px-4 py-2.5 font-medium">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/60">
-                {payable.map((p) => (
-                  <tr key={p.agentUserId}>
-                    <td className="px-4 py-2.5 text-foreground">{p.agentName}</td>
-                    <td className="px-4 py-2.5 text-right font-medium text-foreground">
-                      {formatCurrency(p.payable)}
-                    </td>
-                    <td className="px-4 py-2.5">
-                      {p.ready ? (
-                        <Badge variant="success">Ready</Badge>
-                      ) : !p.accountSet ? (
-                        <Badge variant="neutral">No payout account</Badge>
-                      ) : p.payoutHeldUntil ? (
-                        <Badge variant="warning">Account changed · on hold</Badge>
-                      ) : (
-                        <Badge variant="warning">Needs ID tier {requiredTier}</Badge>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <DataTable
+            className="mt-4"
+            caption="Agents with an unpaid share"
+            density="compact"
+            columns={columns}
+            data={payable}
+            getRowKey={(p) => p.agentUserId}
+          />
         )}
 
         {lastRun && lastRun.skipped.length > 0 && (

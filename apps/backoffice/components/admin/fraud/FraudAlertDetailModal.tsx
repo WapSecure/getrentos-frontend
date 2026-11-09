@@ -93,10 +93,9 @@ export const FraudAlertDetailModal = ({
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <Badge variant={severity.variant}>{alert.severity}</Badge>
-              <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2.5 py-1 text-xs font-medium text-foreground">
-                <StatusIcon className="w-3.5 h-3.5" />
+              <Badge variant="neutral" icon={<StatusIcon className="w-3.5 h-3.5" />}>
                 {status.label}
-              </span>
+              </Badge>
             </div>
           </div>
         </div>

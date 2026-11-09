@@ -124,12 +124,12 @@ export const LeaseHeader = ({ lease, renewalOffer }: LeaseHeaderProps) => {
             {formatDate(lease.startDate)} - {formatDate(lease.endDate)}
           </span>
           {lease.status === 'active' && (
-            <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
+            <Badge variant="primary">
               {Math.ceil(
                 (new Date(lease.endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
               )}{' '}
               days remaining
-            </span>
+            </Badge>
           )}
           {lease.status === 'expiring' && renewalOffer && (
             <Badge variant="warning">Renewal offer available</Badge>

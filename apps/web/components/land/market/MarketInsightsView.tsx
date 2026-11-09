@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Button, PageErrorState, Select, Skeleton } from '@sureground/ui';
+import { Button, DataTable, PageErrorState, Select, Skeleton, type Column } from '@sureground/ui';
 import { AlertTriangle, BarChart3 } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency } from '@/lib/format';
@@ -17,7 +17,7 @@ import { landMarketKeys } from '@/lib/landSalesQueryKeys';
 import { estateStorefrontService } from '@/services/estateMarketplaceService';
 import { landMarketService } from '@/services/landMarketService';
 import { LAND_TITLE_TYPE_LABELS, type LandTitleType } from '@/types/land';
-import type { LandMarketInsightsParams } from '@/types/landMarket';
+import type { LandMarketInsightsParams, LandMarketTrendPoint } from '@/types/landMarket';
 import { DistributionStrip, TitleTypeBars, monthLabel } from './InsightsCharts';
 
 // The trend chart pulls in recharts; it loads after the rest of the page.
@@ -32,6 +32,17 @@ const TITLE_OPTIONS = [
     value: t,
     label: LAND_TITLE_TYPE_LABELS[t],
   })),
+];
+
+const trendColumns: Column<LandMarketTrendPoint>[] = [
+  { key: 'month', header: 'Month', render: (p) => monthLabel(p.month) },
+  { key: 'listings', header: 'Listings', numeric: true, render: (p) => p.count },
+  {
+    key: 'median',
+    header: 'Median ₦/m²',
+    numeric: true,
+    render: (p) => (p.medianPricePerSqm !== undefined ? formatCurrency(p.medianPricePerSqm) : '–'),
+  },
 ];
 
 const isTitleType = (v: string | null): v is LandTitleType => !!v && v in LAND_TITLE_TYPE_LABELS;
@@ -232,34 +243,14 @@ export const MarketInsightsView = () => {
               <summary className="cursor-pointer text-xs font-medium text-muted-foreground">
                 Show as a table
               </summary>
-              <table className="mt-2 w-full text-sm">
-                <thead className="text-left text-xs text-muted-foreground">
-                  <tr>
-                    <th scope="col" className="py-1 font-medium">
-                      Month
-                    </th>
-                    <th scope="col" className="py-1 text-right font-medium">
-                      Listings
-                    </th>
-                    <th scope="col" className="py-1 text-right font-medium">
-                      Median ₦/m²
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {data.trend.map((p) => (
-                    <tr key={p.month}>
-                      <td className="py-1">{monthLabel(p.month)}</td>
-                      <td className="py-1 text-right tabular-nums">{p.count}</td>
-                      <td className="py-1 text-right tabular-nums">
-                        {p.medianPricePerSqm !== undefined
-                          ? formatCurrency(p.medianPricePerSqm)
-                          : '–'}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <DataTable
+                className="mt-2"
+                caption="Median asking price per m² by month"
+                density="compact"
+                columns={trendColumns}
+                data={data.trend}
+                getRowKey={(p) => p.month}
+              />
             </details>
           </section>
           <p className="text-xs text-muted-foreground">

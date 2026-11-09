@@ -15,18 +15,21 @@ import {
   UserCheck,
 } from 'lucide-react';
 import {
+  DataTable,
+  EmptyState,
   PageErrorState,
   StatGridSkeleton,
   Skeleton,
   PageHeader,
   SegmentedControl,
+  type Column,
 } from '@sureground/ui';
 import { StatCard, type StatCardAccent } from '@sureground/ui';
 import { AiDailyChart, usd } from '@/components/admin/ai/AiDailyChart';
 import { unwrap } from '@sureground/shared';
 import { adminService } from '@/services/adminService';
 import { adminKeys } from '@/lib/queryKeys';
-import type { AiReviewCapabilitySummary } from '@/types/admin';
+import type { AiCapabilityUsage, AiReviewCapabilitySummary } from '@/types/admin';
 
 // Read-only: the AI controls are env-driven. Costs are Anthropic vendor spend, in USD.
 
@@ -84,6 +87,79 @@ const seconds = (ms: number | null) => (ms === null ? '—' : `${(ms / 1000).toF
 function labelFor(capability: string): string {
   return CAPABILITY_LABELS[capability] ?? capability;
 }
+
+const CAPABILITY_COLUMNS: Column<AiCapabilityUsage>[] = [
+  {
+    key: 'feature',
+    header: 'Feature',
+    render: (c) => <span className="font-medium text-foreground">{labelFor(c.capability)}</span>,
+  },
+  {
+    key: 'calls',
+    header: 'Calls',
+    numeric: true,
+    render: (c) => <span className="text-foreground">{c.calls}</span>,
+  },
+  {
+    key: 'spend',
+    header: 'Spend',
+    numeric: true,
+    render: (c) => <span className="text-foreground">{usd(c.costUsd)}</span>,
+  },
+  {
+    key: 'perCall',
+    header: 'Per call',
+    numeric: true,
+    render: (c) => (
+      <span className="text-muted-foreground">
+        {c.succeeded ? usd(c.costUsd / c.succeeded) : '—'}
+      </span>
+    ),
+  },
+  {
+    key: 'typical',
+    header: 'Typical time',
+    numeric: true,
+    render: (c) => <span className="text-foreground">{seconds(c.medianLatencyMs)}</span>,
+  },
+  {
+    key: 'p95',
+    header: 'Slowest 5%',
+    numeric: true,
+    render: (c) => <span className="text-muted-foreground">{seconds(c.p95LatencyMs)}</span>,
+  },
+  {
+    key: 'fellBack',
+    header: 'Rules answered',
+    numeric: true,
+    render: (c) => (
+      <span
+        className="text-foreground"
+        title={`${c.failed} failed, ${c.blocked} blocked before the model`}
+      >
+        {c.fellBack ? `${c.fellBack} (${share(c.fellBack, c.calls)})` : '0'}
+      </span>
+    ),
+  },
+  {
+    key: 'dropped',
+    header: 'Parts dropped',
+    numeric: true,
+    render: (c) => (
+      <span className="text-foreground">
+        {c.dropped}
+        {c.dropped > 0 && (
+          <span className="block text-xs text-muted-foreground">
+            {Object.entries(c.dropReasons)
+              .sort((a, b) => b[1] - a[1])
+              .map(([reason, n]) => `${reason} ${n}`)
+              .join(', ')}
+          </span>
+        )}
+      </span>
+    ),
+  },
+];
 
 export default function AdminAiUsagePage() {
   const [period, setPeriod] = useState<Period>('1');
@@ -198,73 +274,25 @@ export default function AdminAiUsagePage() {
 
       {data.days > 1 && <AiDailyChart daily={data.daily} />}
 
-      <div className="overflow-hidden rounded-xl border border-border/70 bg-card">
-        <div className="flex items-center gap-2 border-b border-border/70 px-5 py-4">
+      <section className="space-y-3">
+        <div className="flex items-center gap-2">
           <Cpu className="h-4 w-4 text-primary" aria-hidden="true" />
           <h2 className="font-semibold text-foreground">By feature ({periodLabel})</h2>
         </div>
-        {data.capabilities.length === 0 ? (
-          <p className="px-5 py-8 text-center text-sm text-muted-foreground">
-            No AI calls recorded {period === '1' ? 'today' : 'in this period'}.
-          </p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border/70 text-left text-xs uppercase tracking-wide text-muted-foreground">
-                  <th className="px-5 py-3 font-medium">Feature</th>
-                  <th className="px-5 py-3 text-right font-medium">Calls</th>
-                  <th className="px-5 py-3 text-right font-medium">Spend</th>
-                  <th className="px-5 py-3 text-right font-medium">Per call</th>
-                  <th className="px-5 py-3 text-right font-medium">Typical time</th>
-                  <th className="px-5 py-3 text-right font-medium">Slowest 5%</th>
-                  <th className="px-5 py-3 text-right font-medium">Rules answered</th>
-                  <th className="px-5 py-3 text-right font-medium">Parts dropped</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.capabilities.map((c) => (
-                  <tr key={c.capability} className="border-b border-border/40 last:border-0">
-                    <td className="px-5 py-3 font-medium text-foreground">
-                      {labelFor(c.capability)}
-                    </td>
-                    <td className="px-5 py-3 text-right tabular-nums text-foreground">{c.calls}</td>
-                    <td className="px-5 py-3 text-right tabular-nums text-foreground">
-                      {usd(c.costUsd)}
-                    </td>
-                    <td className="px-5 py-3 text-right tabular-nums text-muted-foreground">
-                      {c.succeeded ? usd(c.costUsd / c.succeeded) : '—'}
-                    </td>
-                    <td className="px-5 py-3 text-right tabular-nums text-foreground">
-                      {seconds(c.medianLatencyMs)}
-                    </td>
-                    <td className="px-5 py-3 text-right tabular-nums text-muted-foreground">
-                      {seconds(c.p95LatencyMs)}
-                    </td>
-                    <td
-                      className="px-5 py-3 text-right tabular-nums text-foreground"
-                      title={`${c.failed} failed, ${c.blocked} blocked before the model`}
-                    >
-                      {c.fellBack ? `${c.fellBack} (${share(c.fellBack, c.calls)})` : '0'}
-                    </td>
-                    <td className="px-5 py-3 text-right tabular-nums text-foreground">
-                      {c.dropped}
-                      {c.dropped > 0 && (
-                        <span className="block text-xs text-muted-foreground">
-                          {Object.entries(c.dropReasons)
-                            .sort((a, b) => b[1] - a[1])
-                            .map(([reason, n]) => `${reason} ${n}`)
-                            .join(', ')}
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+        <DataTable
+          caption="AI calls, spend and quality by feature"
+          columns={CAPABILITY_COLUMNS}
+          data={data.capabilities}
+          getRowKey={(c) => c.capability}
+          emptyState={
+            <EmptyState
+              icon={Cpu}
+              size="compact"
+              title={`No AI calls recorded ${period === '1' ? 'today' : 'in this period'}.`}
+            />
+          }
+        />
+      </section>
 
       <HumanReviewSection />
     </div>

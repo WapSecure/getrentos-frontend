@@ -8,6 +8,7 @@ import {
   Badge,
   Button,
   Card,
+  DataTable,
   EmptyState,
   Field,
   NumberInput,
@@ -16,6 +17,7 @@ import {
   PageLoadingState,
   PageErrorState,
   type BadgeVariant,
+  type Column,
   useToast,
   PageHeader,
 } from '@sureground/ui';
@@ -27,6 +29,7 @@ import { AgencyTeamSection } from './AgencyTeamSection';
 import {
   agencyCommissionService,
   AGENCY_COMMISSION_TYPE_LABELS,
+  type AgencyCommission,
   type AgencyCommissionType,
 } from '@/services/agencyCommissionService';
 
@@ -98,6 +101,83 @@ export function AgencyCommissionsView() {
       value: m.userId,
       label: m.name ?? m.email ?? 'Agent',
     })),
+  ];
+
+  const columns: Column<AgencyCommission>[] = [
+    {
+      key: 'earned',
+      header: 'Earned',
+      className: 'text-muted-foreground',
+      render: (c) => formatDate(c.earnedAt),
+    },
+    {
+      key: 'type',
+      header: 'Type',
+      render: (c) => AGENCY_COMMISSION_TYPE_LABELS[c.type as AgencyCommissionType] ?? c.type,
+    },
+    {
+      key: 'client',
+      header: 'Client · Property',
+      render: (c) => (
+        <>
+          <span className="block text-foreground">{c.ownerName ?? 'Owner'}</span>
+          <span className="block truncate text-xs text-muted-foreground">
+            {c.propertyTitle ?? 'Property'}
+          </span>
+        </>
+      ),
+    },
+    {
+      key: 'rent',
+      header: 'Rent',
+      numeric: true,
+      className: 'text-muted-foreground',
+      render: (c) => formatCurrency(c.baseAmount),
+    },
+    {
+      key: 'rate',
+      header: 'Rate',
+      numeric: true,
+      className: 'text-muted-foreground',
+      render: (c) => `${c.ratePct}%`,
+    },
+    {
+      key: 'commission',
+      header: 'Commission',
+      numeric: true,
+      className: 'font-medium text-foreground',
+      render: (c) => formatCurrency(c.amount),
+    },
+    {
+      key: 'agent',
+      header: 'Agent',
+      render: (c) => (
+        <>
+          <div className="w-40">
+            <Select
+              value={c.attributedUserId ?? ''}
+              onValueChange={(v) =>
+                assignMutation.mutate({ commissionId: c.id, agentUserId: v || null })
+              }
+              options={agentOptions}
+              ariaLabel="Credited agent"
+            />
+          </div>
+          {c.agentShareAmount != null && (
+            <span className="mt-0.5 block text-xs text-muted-foreground">
+              share {formatCurrency(c.agentShareAmount)}
+            </span>
+          )}
+        </>
+      ),
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      render: (c) => (
+        <Badge variant={STATUS_VARIANT[c.status] ?? 'neutral'}>{c.status.toLowerCase()}</Badge>
+      ),
+    },
   ];
 
   if (isLoading) return <PageLoadingState />;
@@ -227,67 +307,13 @@ export function AgencyCommissionsView() {
             description="They appear here automatically when you let or renew a managed tenancy."
           />
         ) : (
-          <div className="overflow-x-auto rounded-2xl border border-border bg-card">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                  <th className="px-4 py-2.5 font-medium">Earned</th>
-                  <th className="px-4 py-2.5 font-medium">Type</th>
-                  <th className="px-4 py-2.5 font-medium">Client · Property</th>
-                  <th className="px-4 py-2.5 text-right font-medium">Rent</th>
-                  <th className="px-4 py-2.5 text-right font-medium">Rate</th>
-                  <th className="px-4 py-2.5 text-right font-medium">Commission</th>
-                  <th className="px-4 py-2.5 font-medium">Agent</th>
-                  <th className="px-4 py-2.5 font-medium">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/60">
-                {data.commissions.map((c) => (
-                  <tr key={c.id}>
-                    <td className="px-4 py-2.5 text-muted-foreground">{formatDate(c.earnedAt)}</td>
-                    <td className="px-4 py-2.5">
-                      {AGENCY_COMMISSION_TYPE_LABELS[c.type as AgencyCommissionType] ?? c.type}
-                    </td>
-                    <td className="px-4 py-2.5">
-                      <span className="block text-foreground">{c.ownerName ?? 'Owner'}</span>
-                      <span className="block truncate text-xs text-muted-foreground">
-                        {c.propertyTitle ?? 'Property'}
-                      </span>
-                    </td>
-                    <td className="px-4 py-2.5 text-right text-muted-foreground">
-                      {formatCurrency(c.baseAmount)}
-                    </td>
-                    <td className="px-4 py-2.5 text-right text-muted-foreground">{c.ratePct}%</td>
-                    <td className="px-4 py-2.5 text-right font-medium text-foreground">
-                      {formatCurrency(c.amount)}
-                    </td>
-                    <td className="px-4 py-2.5">
-                      <div className="w-40">
-                        <Select
-                          value={c.attributedUserId ?? ''}
-                          onValueChange={(v) =>
-                            assignMutation.mutate({ commissionId: c.id, agentUserId: v || null })
-                          }
-                          options={agentOptions}
-                          ariaLabel="Credited agent"
-                        />
-                      </div>
-                      {c.agentShareAmount != null && (
-                        <span className="mt-0.5 block text-xs text-muted-foreground">
-                          share {formatCurrency(c.agentShareAmount)}
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-4 py-2.5">
-                      <Badge variant={STATUS_VARIANT[c.status] ?? 'neutral'}>
-                        {c.status.toLowerCase()}
-                      </Badge>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <DataTable
+            caption="Commission ledger"
+            density="compact"
+            columns={columns}
+            data={data.commissions}
+            getRowKey={(c) => c.id}
+          />
         )}
       </div>
 

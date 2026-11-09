@@ -6,6 +6,7 @@ import { Building2, Percent, PiggyBank, TrendingUp, Users } from 'lucide-react';
 import {
   Alert,
   Button,
+  DataTable,
   EmptyState,
   PageErrorState,
   Select,
@@ -170,22 +171,16 @@ export function PortfolioView() {
           </div>
         </div>
 
-        <div className="overflow-x-auto rounded-2xl border border-border bg-card">
-          <table className="w-full min-w-[820px] text-sm">
-            <thead>
-              <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
-                <th className="px-4 py-3 font-medium">Property</th>
-                <th className="px-3 py-3 text-right font-medium">Occupancy</th>
-                <th className="px-3 py-3 text-right font-medium">Rent collected</th>
-                <th className="px-3 py-3 text-right font-medium">Spent</th>
-                <th className="px-3 py-3 text-right font-medium">Net income</th>
-                <th className="px-3 py-3 text-right font-medium">Cap rate</th>
-                <th className="px-3 py-3 text-right font-medium">Yield on cost</th>
-                <th className="px-3 py-3 text-right font-medium">Appreciation</th>
-              </tr>
-            </thead>
-            <tbody className="tabular-nums">
-              {rows.map((row) => {
+        <DataTable
+          caption="Properties compared"
+          minWidth="820px"
+          data={rows}
+          getRowKey={(row) => row.propertyId}
+          columns={[
+            {
+              key: 'property',
+              header: 'Property',
+              render: (row) => {
                 const standing =
                   row.propertyId === summary?.bestCapRatePropertyId
                     ? 'Highest cap rate'
@@ -193,78 +188,111 @@ export function PortfolioView() {
                       ? 'Lowest cap rate'
                       : null;
                 return (
-                  <tr key={row.propertyId} className="border-b border-border last:border-0">
-                    <td className="px-4 py-3">
-                      <p className="font-medium text-foreground">{row.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {row.city}
-                        {standing && (
-                          <span className="ml-2 font-medium text-foreground">· {standing}</span>
-                        )}
-                      </p>
-                    </td>
-                    <td className="px-3 py-3 text-right">
-                      {percent(row.occupancyRate)}
-                      <p className="text-xs text-muted-foreground">
-                        {row.occupiedUnits}/{row.totalUnits} units
-                      </p>
-                    </td>
-                    <td className="px-3 py-3 text-right">{money(row.rentCollected)}</td>
-                    <td className="px-3 py-3 text-right">{money(row.operatingExpenses)}</td>
-                    <td
-                      className={`px-3 py-3 text-right font-medium ${
-                        row.netOperatingIncome < 0 ? 'text-destructive' : 'text-foreground'
-                      }`}
-                    >
-                      {money(row.netOperatingIncome)}
-                    </td>
-                    <td className="px-3 py-3 text-right">
-                      {row.capRate === null ? (
-                        <Button
-                          variant="link"
-                          onClick={() => setEditing(row)}
-                          className="text-xs font-medium"
-                        >
-                          Add value
-                        </Button>
-                      ) : (
-                        <>
-                          <span className="font-medium text-foreground">
-                            {percent(row.capRate)}
-                          </span>
-                          {row.capRateVsPortfolio !== null && (
-                            <p
-                              className={`text-xs ${
-                                row.capRateVsPortfolio < 0 ? 'text-destructive' : 'text-success'
-                              }`}
-                            >
-                              {row.capRateVsPortfolio > 0 ? '+' : ''}
-                              {row.capRateVsPortfolio.toFixed(1)} pts vs portfolio
-                            </p>
-                          )}
-                        </>
+                  <>
+                    <p className="font-medium text-foreground">{row.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {row.city}
+                      {standing && (
+                        <span className="ml-2 font-medium text-foreground">· {standing}</span>
                       )}
-                    </td>
-                    <td className="px-3 py-3 text-right">
-                      {row.yieldOnCost === null ? (
-                        <Button
-                          variant="link"
-                          onClick={() => setEditing(row)}
-                          className="text-xs font-medium"
-                        >
-                          Add price
-                        </Button>
-                      ) : (
-                        percent(row.yieldOnCost)
-                      )}
-                    </td>
-                    <td className="px-3 py-3 text-right">{percent(row.appreciation)}</td>
-                  </tr>
+                    </p>
+                  </>
                 );
-              })}
-            </tbody>
-          </table>
-        </div>
+              },
+            },
+            {
+              key: 'occupancy',
+              header: 'Occupancy',
+              numeric: true,
+              render: (row) => (
+                <>
+                  {percent(row.occupancyRate)}
+                  <p className="text-xs text-muted-foreground">
+                    {row.occupiedUnits}/{row.totalUnits} units
+                  </p>
+                </>
+              ),
+            },
+            {
+              key: 'rentCollected',
+              header: 'Rent collected',
+              numeric: true,
+              render: (row) => money(row.rentCollected),
+            },
+            {
+              key: 'spent',
+              header: 'Spent',
+              numeric: true,
+              render: (row) => money(row.operatingExpenses),
+            },
+            {
+              key: 'netIncome',
+              header: 'Net income',
+              numeric: true,
+              render: (row) => (
+                <span
+                  className={`font-medium ${
+                    row.netOperatingIncome < 0 ? 'text-destructive' : 'text-foreground'
+                  }`}
+                >
+                  {money(row.netOperatingIncome)}
+                </span>
+              ),
+            },
+            {
+              key: 'capRate',
+              header: 'Cap rate',
+              numeric: true,
+              render: (row) =>
+                row.capRate === null ? (
+                  <Button
+                    variant="link"
+                    onClick={() => setEditing(row)}
+                    className="text-xs font-medium"
+                  >
+                    Add value
+                  </Button>
+                ) : (
+                  <>
+                    <span className="font-medium text-foreground">{percent(row.capRate)}</span>
+                    {row.capRateVsPortfolio !== null && (
+                      <p
+                        className={`text-xs ${
+                          row.capRateVsPortfolio < 0 ? 'text-destructive' : 'text-success'
+                        }`}
+                      >
+                        {row.capRateVsPortfolio > 0 ? '+' : ''}
+                        {row.capRateVsPortfolio.toFixed(1)} pts vs portfolio
+                      </p>
+                    )}
+                  </>
+                ),
+            },
+            {
+              key: 'yieldOnCost',
+              header: 'Yield on cost',
+              numeric: true,
+              render: (row) =>
+                row.yieldOnCost === null ? (
+                  <Button
+                    variant="link"
+                    onClick={() => setEditing(row)}
+                    className="text-xs font-medium"
+                  >
+                    Add price
+                  </Button>
+                ) : (
+                  percent(row.yieldOnCost)
+                ),
+            },
+            {
+              key: 'appreciation',
+              header: 'Appreciation',
+              numeric: true,
+              render: (row) => percent(row.appreciation),
+            },
+          ]}
+        />
 
         <dl className="mt-6 grid gap-x-8 gap-y-2 text-sm sm:grid-cols-2">
           {DEFINITIONS.map((item) => (

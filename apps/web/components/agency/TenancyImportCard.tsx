@@ -1,9 +1,19 @@
 'use client';
 
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState, type ReactNode } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Download, Upload, Users } from 'lucide-react';
-import { Alert, Badge, Button, Card, Field, Select, useToast } from '@sureground/ui';
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  DataTable,
+  Field,
+  Select,
+  type Column,
+  useToast,
+} from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { useCustody } from '@/components/agency/CustodyProvider';
 import {
@@ -11,6 +21,32 @@ import {
   portfolioImportService,
   type TenancyImportResult,
 } from '@/services/portfolioImportService';
+
+interface PreviewRow {
+  line: number;
+  who: string;
+  rent: string;
+  money: string;
+  result: ReactNode;
+}
+
+const PREVIEW_COLUMNS: Column<PreviewRow>[] = [
+  { key: 'line', header: 'Line', className: 'text-muted-foreground', render: (r) => r.line },
+  { key: 'who', header: 'Unit · tenant', className: 'text-foreground', render: (r) => r.who },
+  {
+    key: 'rent',
+    header: 'Rent · term',
+    className: 'text-muted-foreground',
+    render: (r) => r.rent,
+  },
+  {
+    key: 'money',
+    header: 'Deposit · owed',
+    className: 'text-muted-foreground',
+    render: (r) => r.money,
+  },
+  { key: 'result', header: 'Result', render: (r) => r.result },
+];
 
 export function TenancyImportCard() {
   const { live, loading } = useCustody();
@@ -140,61 +176,40 @@ export function TenancyImportCard() {
                   {preview.errors.length} with errors
                 </Badge>
               </div>
-              <div className="mt-4 overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                      <th className="py-2 pr-3 font-medium">Line</th>
-                      <th className="py-2 pr-3 font-medium">Unit · tenant</th>
-                      <th className="py-2 pr-3 font-medium">Rent · term</th>
-                      <th className="py-2 pr-3 font-medium">Deposit · owed</th>
-                      <th className="py-2 font-medium">Result</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border/60">
-                    {[
-                      ...preview.toImport.map((r) => ({
-                        line: r.line,
-                        who: `${r.unitName} · ${r.tenantName}`,
-                        rent: `${formatCurrency(r.rentAmount)} ${r.rentPeriod === 'MONTHLY' ? 'monthly' : 'yearly'} · ${formatDate(r.leaseStart)} – ${formatDate(r.leaseEnd)}`,
-                        money: `${r.depositAmount ? formatCurrency(r.depositAmount) : '—'} · ${r.arrearsAmount ? formatCurrency(r.arrearsAmount) : '—'}`,
-                        result: (
-                          <span className="flex flex-wrap gap-1">
-                            <Badge variant="success">Import</Badge>
-                            <Badge variant={r.tenantAccount === 'LINKED' ? 'info' : 'neutral'}>
-                              {r.tenantAccount === 'LINKED' ? 'Account linked' : 'Name only'}
-                            </Badge>
-                            {r.nextDueDate && (
-                              <Badge variant="neutral">
-                                Billing from {formatDate(r.nextDueDate)}
-                              </Badge>
-                            )}
-                          </span>
-                        ),
-                      })),
-                      ...preview.errors.map((r) => ({
-                        line: r.line,
-                        who: r.unitName || '—',
-                        rent: '',
-                        money: '',
-                        result: (
-                          <span className="text-xs text-destructive">{r.errors.join('; ')}</span>
-                        ),
-                      })),
-                    ]
-                      .sort((a, b) => a.line - b.line)
-                      .map((r) => (
-                        <tr key={r.line}>
-                          <td className="py-2 pr-3 text-muted-foreground">{r.line}</td>
-                          <td className="py-2 pr-3 text-foreground">{r.who}</td>
-                          <td className="py-2 pr-3 text-muted-foreground">{r.rent}</td>
-                          <td className="py-2 pr-3 text-muted-foreground">{r.money}</td>
-                          <td className="py-2">{r.result}</td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
-              </div>
+              <DataTable<PreviewRow>
+                variant="bare"
+                className="mt-4"
+                caption="Dry-run result for each line of the file"
+                density="compact"
+                columns={PREVIEW_COLUMNS}
+                data={[
+                  ...preview.toImport.map((r) => ({
+                    line: r.line,
+                    who: `${r.unitName} · ${r.tenantName}`,
+                    rent: `${formatCurrency(r.rentAmount)} ${r.rentPeriod === 'MONTHLY' ? 'monthly' : 'yearly'} · ${formatDate(r.leaseStart)} – ${formatDate(r.leaseEnd)}`,
+                    money: `${r.depositAmount ? formatCurrency(r.depositAmount) : '—'} · ${r.arrearsAmount ? formatCurrency(r.arrearsAmount) : '—'}`,
+                    result: (
+                      <span className="flex flex-wrap gap-1">
+                        <Badge variant="success">Import</Badge>
+                        <Badge variant={r.tenantAccount === 'LINKED' ? 'info' : 'neutral'}>
+                          {r.tenantAccount === 'LINKED' ? 'Account linked' : 'Name only'}
+                        </Badge>
+                        {r.nextDueDate && (
+                          <Badge variant="neutral">Billing from {formatDate(r.nextDueDate)}</Badge>
+                        )}
+                      </span>
+                    ),
+                  })),
+                  ...preview.errors.map((r) => ({
+                    line: r.line,
+                    who: r.unitName || '—',
+                    rent: '',
+                    money: '',
+                    result: <span className="text-xs text-destructive">{r.errors.join('; ')}</span>,
+                  })),
+                ].sort((a, b) => a.line - b.line)}
+                getRowKey={(r) => String(r.line)}
+              />
               <Button
                 className="mt-4"
                 onClick={() => commit.mutate()}

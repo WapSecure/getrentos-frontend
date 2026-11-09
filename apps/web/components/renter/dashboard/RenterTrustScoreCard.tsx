@@ -14,7 +14,7 @@ import {
   CreditCard,
   Users,
 } from 'lucide-react';
-import { Alert } from '@sureground/ui';
+import { Alert, Badge } from '@sureground/ui';
 import { Button } from '@sureground/ui';
 import { CardSkeleton } from '@sureground/ui';
 import { TrustScoreRing } from '@/components/renter/shared/TrustScoreRing';
@@ -95,9 +95,9 @@ export const RenterTrustScoreCard = () => {
             <p className="mt-1 text-xs leading-5 text-muted-foreground">
               Complete your profile to make applications easier to review.
             </p>
-            <span className="mt-2 inline-flex rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
+            <Badge variant="primary" className="mt-2">
               {progress}% verified
-            </span>
+            </Badge>
           </div>
         </div>
 

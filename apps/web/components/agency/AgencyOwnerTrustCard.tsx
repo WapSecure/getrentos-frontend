@@ -3,10 +3,53 @@
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { AlertTriangle, ShieldCheck, Wallet } from 'lucide-react';
-import { Badge, Card, Skeleton } from '@sureground/ui';
+import { Badge, Card, DataTable, Skeleton, type Column } from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
-import { agencyTrustService, AGENCY_TRUST_ENTRY_LABELS } from '@/services/agencyTrustService';
+import {
+  agencyTrustService,
+  AGENCY_TRUST_ENTRY_LABELS,
+  type AgencyTrustEntry,
+} from '@/services/agencyTrustService';
+
+const columns: Column<AgencyTrustEntry>[] = [
+  {
+    key: 'date',
+    header: 'Date',
+    className: 'text-muted-foreground',
+    render: (e) => formatDate(e.occurredAt),
+  },
+  {
+    key: 'movement',
+    header: 'Movement',
+    render: (e) => AGENCY_TRUST_ENTRY_LABELS[e.entryType] ?? e.entryType,
+  },
+  {
+    key: 'property',
+    header: 'Property',
+    className: 'text-muted-foreground',
+    render: (e) => <span className="block max-w-[14rem] truncate">{e.propertyTitle ?? '—'}</span>,
+  },
+  {
+    key: 'amount',
+    header: 'Amount',
+    numeric: true,
+    className: 'font-medium',
+    render: (e) => (
+      <span className={e.amount >= 0 ? 'text-success' : 'text-foreground'}>
+        {e.amount >= 0 ? '+' : '−'}
+        {formatCurrency(Math.abs(e.amount))}
+      </span>
+    ),
+  },
+  {
+    key: 'balance',
+    header: 'Balance',
+    numeric: true,
+    className: 'text-muted-foreground',
+    render: (e) => formatCurrency(e.balanceAfter),
+  },
+];
 
 // When the stored balance disagrees with the sum of its entries the card says so, rather than show a figure the ledger can't back.
 export function AgencyOwnerTrustCard({ ownerId }: { ownerId: string }) {
@@ -74,47 +117,15 @@ export function AgencyOwnerTrustCard({ ownerId }: { ownerId: string }) {
             )}
 
             {data.entries.length > 0 && (
-              <div className="mt-4 overflow-x-auto rounded-xl border border-border">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                      <th className="px-3 py-2 font-medium">Date</th>
-                      <th className="px-3 py-2 font-medium">Movement</th>
-                      <th className="px-3 py-2 font-medium">Property</th>
-                      <th className="px-3 py-2 text-right font-medium">Amount</th>
-                      <th className="px-3 py-2 text-right font-medium">Balance</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border/60">
-                    {data.entries.map((e) => (
-                      <tr key={e.id}>
-                        <td className="px-3 py-2 text-muted-foreground">
-                          {formatDate(e.occurredAt)}
-                        </td>
-                        <td className="px-3 py-2">
-                          {AGENCY_TRUST_ENTRY_LABELS[e.entryType] ?? e.entryType}
-                        </td>
-                        <td className="px-3 py-2 text-muted-foreground">
-                          <span className="block max-w-[14rem] truncate">
-                            {e.propertyTitle ?? '—'}
-                          </span>
-                        </td>
-                        <td
-                          className={`px-3 py-2 text-right font-medium ${
-                            e.amount >= 0 ? 'text-success' : 'text-foreground'
-                          }`}
-                        >
-                          {e.amount >= 0 ? '+' : '−'}
-                          {formatCurrency(Math.abs(e.amount))}
-                        </td>
-                        <td className="px-3 py-2 text-right text-muted-foreground">
-                          {formatCurrency(e.balanceAfter)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <DataTable
+                variant="bare"
+                className="mt-4"
+                caption="Client money movements"
+                density="compact"
+                columns={columns}
+                data={data.entries}
+                getRowKey={(e) => e.id}
+              />
             )}
           </>
         )}

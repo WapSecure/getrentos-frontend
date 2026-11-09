@@ -10,6 +10,7 @@ import {
   Button,
   Card,
   CurrencyInput,
+  DataTable,
   EmptyState,
   Field,
   Select,
@@ -204,27 +205,39 @@ export function DisbursementScheduleView() {
             />
           </div>
         ) : (
-          <div className="mt-4 overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border text-left text-muted-foreground">
-                  <th className="p-3 font-medium">Date</th>
-                  <th className="p-3 font-medium text-right">Amount</th>
-                  <th className="p-3 font-medium text-right">Reserve kept</th>
-                  <th className="p-3 font-medium">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recent.map((r) => {
-                  const badge = STATUS_BADGE[r.status];
-                  return (
-                    <tr key={r.id} className="border-b border-border/60 last:border-0">
-                      <td className="p-3 text-foreground">{formatDate(r.paidAt ?? r.createdAt)}</td>
-                      <td className="p-3 text-right text-foreground">{formatCurrency(r.amount)}</td>
-                      <td className="p-3 text-right text-muted-foreground">
-                        {formatCurrency(r.reserveAmount)}
-                      </td>
-                      <td className="p-3">
+          <div className="mt-4">
+            <DataTable
+              caption="Recent automatic payouts"
+              data={recent}
+              getRowKey={(r) => r.id}
+              columns={[
+                {
+                  key: 'date',
+                  header: 'Date',
+                  className: 'text-foreground',
+                  render: (r) => formatDate(r.paidAt ?? r.createdAt),
+                },
+                {
+                  key: 'amount',
+                  header: 'Amount',
+                  numeric: true,
+                  className: 'text-foreground',
+                  render: (r) => formatCurrency(r.amount),
+                },
+                {
+                  key: 'reserve',
+                  header: 'Reserve kept',
+                  numeric: true,
+                  className: 'text-muted-foreground',
+                  render: (r) => formatCurrency(r.reserveAmount),
+                },
+                {
+                  key: 'status',
+                  header: 'Status',
+                  render: (r) => {
+                    const badge = STATUS_BADGE[r.status];
+                    return (
+                      <>
                         <Badge variant={badge.variant}>{badge.label}</Badge>
                         {r.status === 'HELD' && r.heldReason ? (
                           <p className="mt-1 max-w-xs text-xs text-muted-foreground">
@@ -236,12 +249,12 @@ export function DisbursementScheduleView() {
                             {r.failureReason}
                           </p>
                         ) : null}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                      </>
+                    );
+                  },
+                },
+              ]}
+            />
           </div>
         )}
       </Card>

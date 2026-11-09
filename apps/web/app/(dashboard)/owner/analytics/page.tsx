@@ -11,12 +11,14 @@ import {
   Button,
   Alert,
   Checkbox,
+  DataTable,
   Dialog,
   DialogContent,
   DialogTitle,
   Skeleton,
   TableSkeleton,
   PageHeader,
+  type Column,
 } from '@sureground/ui';
 import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -78,6 +80,89 @@ export default function OwnerAnalyticsPage() {
     : 0;
 
   const compareMetrics = metrics.filter((m) => compareIds.includes(m.propertyId));
+
+  const columns: Column<InvestmentMetrics>[] = [
+    ...(isComparing
+      ? [
+          {
+            key: 'compare',
+            header: '',
+            srHeader: 'Compare',
+            className: 'w-10',
+            render: (m: InvestmentMetrics) => (
+              <Checkbox
+                checked={compareIds.includes(m.propertyId)}
+                onCheckedChange={() => toggleCompare(m.propertyId)}
+                aria-label={`Compare ${m.propertyName}`}
+              />
+            ),
+          },
+        ]
+      : []),
+    {
+      key: 'property',
+      header: 'Property',
+      className: 'font-medium text-foreground whitespace-nowrap',
+      render: (m) => m.propertyName,
+    },
+    {
+      key: 'purchasePrice',
+      header: 'Purchase price',
+      numeric: true,
+      className: 'text-muted-foreground whitespace-nowrap',
+      render: (m) => formatCurrency(m.purchasePrice, { compact: true }),
+    },
+    {
+      key: 'currentValue',
+      header: 'Current value',
+      numeric: true,
+      className: 'text-muted-foreground whitespace-nowrap',
+      render: (m) => formatCurrency(m.currentValue, { compact: true }),
+    },
+    {
+      key: 'appreciation',
+      header: 'Appreciation',
+      numeric: true,
+      className: 'font-medium whitespace-nowrap',
+      render: (m) => (
+        <span className={m.appreciationRate >= 0 ? 'text-success' : 'text-destructive'}>
+          {m.appreciationRate >= 0 ? '+' : ''}
+          {m.appreciationRate.toFixed(1)}%
+        </span>
+      ),
+    },
+    {
+      key: 'rentalYield',
+      header: 'Rental yield',
+      numeric: true,
+      className: 'text-muted-foreground whitespace-nowrap',
+      render: (m) => (m.rentalYield !== undefined ? `${m.rentalYield.toFixed(1)}%` : '—'),
+    },
+    {
+      key: 'roi',
+      header: 'ROI',
+      numeric: true,
+      className: 'font-bold text-primary whitespace-nowrap',
+      render: (m) => `${m.roiPercentage.toFixed(1)}%`,
+    },
+    {
+      key: 'actions',
+      header: '',
+      srHeader: 'Actions',
+      align: 'right',
+      render: (m) => (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-muted-foreground"
+          onClick={() => setConvertingProperty(m)}
+          icon={<RefreshCcw className="w-3.5 h-3.5" />}
+        >
+          Rent it out
+        </Button>
+      ),
+    },
+  ];
 
   return (
     <>
@@ -164,71 +249,12 @@ export default function OwnerAnalyticsPage() {
         {isLoadingMetrics ? (
           <TableSkeleton rows={4} columns={6} />
         ) : (
-          <div className="bg-card rounded-2xl border border-border overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                    {isComparing && <th className="p-4 font-medium w-10"></th>}
-                    <th className="p-4 font-medium">Property</th>
-                    <th className="p-4 font-medium">Purchase price</th>
-                    <th className="p-4 font-medium">Current value</th>
-                    <th className="p-4 font-medium">Appreciation</th>
-                    <th className="p-4 font-medium">Rental yield</th>
-                    <th className="p-4 font-medium">ROI</th>
-                    <th className="p-4 font-medium text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {metrics.map((m) => (
-                    <tr key={m.propertyId} className="hover:bg-secondary transition-colors">
-                      {isComparing && (
-                        <td className="p-4">
-                          <Checkbox
-                            checked={compareIds.includes(m.propertyId)}
-                            onCheckedChange={() => toggleCompare(m.propertyId)}
-                            aria-label={`Compare ${m.propertyName}`}
-                          />
-                        </td>
-                      )}
-                      <td className="p-4 font-medium text-foreground whitespace-nowrap">
-                        {m.propertyName}
-                      </td>
-                      <td className="p-4 text-muted-foreground whitespace-nowrap">
-                        {formatCurrency(m.purchasePrice, { compact: true })}
-                      </td>
-                      <td className="p-4 text-muted-foreground whitespace-nowrap">
-                        {formatCurrency(m.currentValue, { compact: true })}
-                      </td>
-                      <td
-                        className={`p-4 font-medium whitespace-nowrap ${m.appreciationRate >= 0 ? 'text-success' : 'text-destructive'}`}
-                      >
-                        {m.appreciationRate >= 0 ? '+' : ''}
-                        {m.appreciationRate.toFixed(1)}%
-                      </td>
-                      <td className="p-4 text-muted-foreground whitespace-nowrap">
-                        {m.rentalYield !== undefined ? `${m.rentalYield.toFixed(1)}%` : '—'}
-                      </td>
-                      <td className="p-4 font-bold text-primary whitespace-nowrap">
-                        {m.roiPercentage.toFixed(1)}%
-                      </td>
-                      <td className="p-4 text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-muted-foreground"
-                          onClick={() => setConvertingProperty(m)}
-                          icon={<RefreshCcw className="w-3.5 h-3.5" />}
-                        >
-                          Rent it out
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <DataTable
+            caption="Investment performance by property"
+            columns={columns}
+            data={metrics}
+            getRowKey={(m) => m.propertyId}
+          />
         )}
 
         {convertingProperty && (

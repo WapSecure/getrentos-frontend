@@ -180,7 +180,12 @@ export const AdminSignInForm = () => {
               finish signing in.
             </Alert>
 
-            <Field label="Authentication code" hint="Lost your phone? Enter a backup code instead.">
+            {/* Its own key: otherwise React reuses the password input here, uncontrolled → controlled. */}
+            <Field
+              key="two-factor-code"
+              label="Authentication code"
+              hint="Lost your phone? Enter a backup code instead."
+            >
               <Input
                 autoComplete="one-time-code"
                 autoCapitalize="none"

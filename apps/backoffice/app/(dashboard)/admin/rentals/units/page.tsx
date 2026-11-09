@@ -9,6 +9,7 @@ import {
   Checkbox,
   ConfirmDialog,
   CurrencyInput,
+  DataTable,
   DatePicker,
   Dialog,
   DialogContent,
@@ -244,120 +245,138 @@ export default function AdminRentalUnitsPage() {
             description="Try another search or occupancy filter."
           />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[980px] text-sm">
-              <thead className="bg-secondary/40 text-left text-muted-foreground">
-                <tr>
-                  <th className="p-3">
-                    <Checkbox
-                      aria-label="Select all units on this page"
-                      checked={items.every((item) => selected.includes(item.id))}
-                      indeterminate={selectedItems.length > 0}
-                      onCheckedChange={(checked) =>
-                        setSelected(checked ? items.map((item) => item.id) : [])
+          <DataTable
+            variant="bare"
+            minWidth="980px"
+            caption="Rental units with their owner, tenant, rent and lease"
+            data={items}
+            getRowKey={(unit) => unit.id}
+            columns={[
+              {
+                key: 'select',
+                header: (
+                  <Checkbox
+                    aria-label="Select all units on this page"
+                    checked={items.every((item) => selected.includes(item.id))}
+                    indeterminate={selectedItems.length > 0}
+                    onCheckedChange={(checked) =>
+                      setSelected(checked ? items.map((item) => item.id) : [])
+                    }
+                  />
+                ),
+                render: (unit) => (
+                  <Checkbox
+                    aria-label={`Select ${unit.unitName}`}
+                    checked={selected.includes(unit.id)}
+                    onCheckedChange={(checked) =>
+                      setSelected((current) =>
+                        checked
+                          ? [...new Set([...current, unit.id])]
+                          : current.filter((id) => id !== unit.id)
+                      )
+                    }
+                  />
+                ),
+              },
+              {
+                key: 'unit',
+                header: 'Unit',
+                render: (unit) => (
+                  <>
+                    <p className="font-medium">{unit.unitName}</p>
+                    <p className="text-xs text-muted-foreground">{unit.propertyTitle}</p>
+                  </>
+                ),
+              },
+              { key: 'owner', header: 'Owner', render: (unit) => unit.ownerName },
+              {
+                key: 'tenant',
+                header: 'Tenant',
+                render: (unit) => (
+                  <>
+                    <p>{unit.tenantName ?? 'Unassigned'}</p>
+                    {unit.tenantName && (
+                      <p className="text-xs text-muted-foreground">
+                        {unit.tenantId ? 'Registered renter' : 'Manual record'}
+                      </p>
+                    )}
+                    <Badge
+                      variant={
+                        unit.occupancyStatus === 'VACANT'
+                          ? 'neutral'
+                          : unit.occupancyStatus === 'OCCUPIED'
+                            ? 'success'
+                            : 'warning'
                       }
-                    />
-                  </th>
-                  <th className="p-3">Unit</th>
-                  <th className="p-3">Owner</th>
-                  <th className="p-3">Tenant</th>
-                  <th className="p-3">Rent</th>
-                  <th className="p-3">Lease / charges</th>
-                  <th className="p-3 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {items.map((unit) => (
-                  <tr key={unit.id}>
-                    <td className="p-3">
-                      <Checkbox
-                        aria-label={`Select ${unit.unitName}`}
-                        checked={selected.includes(unit.id)}
-                        onCheckedChange={(checked) =>
-                          setSelected((current) =>
-                            checked
-                              ? [...new Set([...current, unit.id])]
-                              : current.filter((id) => id !== unit.id)
-                          )
-                        }
-                      />
-                    </td>
-                    <td className="p-3">
-                      <p className="font-medium">{unit.unitName}</p>
-                      <p className="text-xs text-muted-foreground">{unit.propertyTitle}</p>
-                    </td>
-                    <td className="p-3">{unit.ownerName}</td>
-                    <td className="p-3">
-                      <p>{unit.tenantName ?? 'Unassigned'}</p>
-                      {unit.tenantName && (
-                        <p className="text-xs text-muted-foreground">
-                          {unit.tenantId ? 'Registered renter' : 'Manual record'}
-                        </p>
-                      )}
-                      <Badge
-                        variant={
-                          unit.occupancyStatus === 'VACANT'
-                            ? 'neutral'
-                            : unit.occupancyStatus === 'OCCUPIED'
-                              ? 'success'
-                              : 'warning'
+                    >
+                      {unit.occupancyStatus.replaceAll('_', ' ')}
+                    </Badge>
+                  </>
+                ),
+              },
+              {
+                key: 'rent',
+                header: 'Rent',
+                render: (unit) =>
+                  unit.askingRent !== null
+                    ? `₦${unit.askingRent.toLocaleString()}${unit.askingRentPeriod === 'year' ? '/yr' : '/mo'}`
+                    : '—',
+              },
+              {
+                key: 'lease',
+                header: 'Lease / charges',
+                render: (unit) => (
+                  <>
+                    <p>{unit.activeLease ? 'Signed lease' : 'No signed lease'}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {unit.pendingChargeCount} pending charge(s)
+                    </p>
+                  </>
+                ),
+              },
+              {
+                key: 'actions',
+                header: 'Actions',
+                align: 'right',
+                render: (unit) => (
+                  <div className="flex justify-end gap-2">
+                    {unit.occupancyStatus === 'VACANT' ? (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() =>
+                          setEditor({
+                            kind: 'assign',
+                            unit,
+                            mode: 'registered',
+                            search: '',
+                            candidate: null,
+                            value: '',
+                          })
                         }
                       >
-                        {unit.occupancyStatus.replaceAll('_', ' ')}
-                      </Badge>
-                    </td>
-                    <td className="p-3">
-                      {unit.askingRent !== null
-                        ? `₦${unit.askingRent.toLocaleString()}${unit.askingRentPeriod === 'year' ? '/yr' : '/mo'}`
-                        : '—'}
-                    </td>
-                    <td className="p-3">
-                      <p>{unit.activeLease ? 'Signed lease' : 'No signed lease'}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {unit.pendingChargeCount} pending charge(s)
-                      </p>
-                    </td>
-                    <td className="p-3">
-                      <div className="flex justify-end gap-2">
-                        {unit.occupancyStatus === 'VACANT' ? (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() =>
-                              setEditor({
-                                kind: 'assign',
-                                unit,
-                                mode: 'registered',
-                                search: '',
-                                candidate: null,
-                                value: '',
-                              })
-                            }
-                          >
-                            Assign tenant
-                          </Button>
-                        ) : (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            disabled={unit.activeLease}
-                            title={
-                              unit.activeLease
-                                ? 'End or expire the signed lease before removing this tenant'
-                                : undefined
-                            }
-                            onClick={() => setRemoveUnit(unit)}
-                          >
-                            Remove tenant
-                          </Button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                        Assign tenant
+                      </Button>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={unit.activeLease}
+                        title={
+                          unit.activeLease
+                            ? 'End or expire the signed lease before removing this tenant'
+                            : undefined
+                        }
+                        onClick={() => setRemoveUnit(unit)}
+                      >
+                        Remove tenant
+                      </Button>
+                    )}
+                  </div>
+                ),
+              },
+            ]}
+          />
         )}
         <Pagination
           page={page}

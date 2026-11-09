@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { ShieldCheck, Undo2 } from 'lucide-react';
-import { Alert, Button, Field, Textarea, useToast } from '@sureground/ui';
+import { Alert, Button, DataTable, Field, Textarea, useToast, type Column } from '@sureground/ui';
 import {
   BOUNDARY_SOURCE_LABEL,
   boundaryCorners,
@@ -19,6 +19,29 @@ const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
 
 const MIN_REASON = 10;
+
+const beaconColumns: Column<{ number: number; x: number; y: number }>[] = [
+  {
+    key: 'number',
+    header: '#',
+    className: 'tabular-nums text-muted-foreground',
+    render: (beacon) => beacon.number,
+  },
+  {
+    key: 'easting',
+    header: 'Easting (m)',
+    numeric: true,
+    className: 'text-foreground',
+    render: (beacon) => beacon.x.toFixed(2),
+  },
+  {
+    key: 'northing',
+    header: 'Northing (m)',
+    numeric: true,
+    className: 'text-foreground',
+    render: (beacon) => beacon.y.toFixed(2),
+  },
+];
 
 // Survey-plan outlines show the beacons in the plan's own grid so they can be read against the plan.
 export function BoundarySignOffPanel({
@@ -87,35 +110,13 @@ export function BoundarySignOffPanel({
       {corners && <ParcelBoundaryMap corners={corners} height={240} />}
 
       {current.sourceCoordinates && current.sourceCoordinates.length > 0 && (
-        <div className="overflow-x-auto rounded-lg border border-border">
-          <table className="w-full text-sm tabular-nums">
-            <caption className="sr-only">
-              Beacons as entered from the survey plan, in {current.coordinateSystem.label}
-            </caption>
-            <thead className="bg-secondary/50 text-left text-xs text-muted-foreground">
-              <tr>
-                <th scope="col" className="px-3 py-2 font-medium">
-                  #
-                </th>
-                <th scope="col" className="px-3 py-2 font-medium">
-                  Easting (m)
-                </th>
-                <th scope="col" className="px-3 py-2 font-medium">
-                  Northing (m)
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {current.sourceCoordinates.map(([x, y], index) => (
-                <tr key={index}>
-                  <td className="px-3 py-1.5 text-muted-foreground">{index + 1}</td>
-                  <td className="px-3 py-1.5 text-foreground">{x.toFixed(2)}</td>
-                  <td className="px-3 py-1.5 text-foreground">{y.toFixed(2)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          caption={`Beacons as entered from the survey plan, in ${current.coordinateSystem.label}`}
+          density="compact"
+          columns={beaconColumns}
+          data={current.sourceCoordinates.map(([x, y], index) => ({ number: index + 1, x, y }))}
+          getRowKey={(beacon) => String(beacon.number)}
+        />
       )}
 
       {decided ? (

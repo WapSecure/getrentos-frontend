@@ -10,9 +10,11 @@ import {
   Badge,
   Button,
   Card,
+  DataTable,
   EmptyState,
   ListSkeleton,
   type BadgeVariant,
+  type Column,
   useToast,
   PageHeader,
 } from '@sureground/ui';
@@ -21,6 +23,7 @@ import { InviteOwnerModal } from './InviteOwnerModal';
 import { unwrap } from '@/lib/apiHelpers';
 import {
   agencyOwnerInviteService,
+  type AgencyOwnerInvite,
   type AgencyOwnerInviteStatus,
 } from '@/services/agencyOwnerInviteService';
 import {
@@ -113,6 +116,56 @@ export function AgencyOwnersView() {
     (i) => i.status === 'PENDING' || i.status === 'EXPIRED'
   );
 
+  const inviteColumns: Column<AgencyOwnerInvite>[] = [
+    {
+      key: 'owner',
+      header: 'Owner',
+      render: (invite) => (
+        <span className="flex items-center gap-2">
+          <Mail className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+          <span className="min-w-0">
+            <span className="block truncate text-foreground">{invite.name ?? invite.email}</span>
+            {invite.name && (
+              <span className="block truncate text-xs text-muted-foreground">{invite.email}</span>
+            )}
+          </span>
+        </span>
+      ),
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      render: (invite) => {
+        const pill = INVITE_STATUS[invite.status];
+        return (
+          <>
+            <Badge variant={pill.variant}>{pill.label}</Badge>
+            {invite.hasAccount && invite.status === 'PENDING' && (
+              <span className="ml-2 text-xs text-muted-foreground">has an account</span>
+            )}
+          </>
+        );
+      },
+    },
+    {
+      key: 'actions',
+      header: '',
+      srHeader: 'Actions',
+      align: 'right',
+      render: (invite) => (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => revokeMutation.mutate(invite.id)}
+          disabled={revokeMutation.isPending}
+          isLoading={revokeMutation.isPending && revokeMutation.variables === invite.id}
+        >
+          Withdraw
+        </Button>
+      ),
+    },
+  ];
+
   if (loading) {
     return (
       <div className="p-6">
@@ -201,53 +254,12 @@ export function AgencyOwnersView() {
       {outstandingInvites.length > 0 && (
         <div className="mt-8">
           <h2 className="mb-2 text-sm font-semibold text-foreground">Invited owners</h2>
-          <div className="overflow-x-auto rounded-2xl border border-border bg-card">
-            <table className="w-full text-sm">
-              <tbody className="divide-y divide-border/60">
-                {outstandingInvites.map((invite) => {
-                  const pill = INVITE_STATUS[invite.status];
-                  return (
-                    <tr key={invite.id}>
-                      <td className="px-4 py-3">
-                        <span className="flex items-center gap-2">
-                          <Mail className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
-                          <span className="min-w-0">
-                            <span className="block truncate text-foreground">
-                              {invite.name ?? invite.email}
-                            </span>
-                            {invite.name && (
-                              <span className="block truncate text-xs text-muted-foreground">
-                                {invite.email}
-                              </span>
-                            )}
-                          </span>
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <Badge variant={pill.variant}>{pill.label}</Badge>
-                        {invite.hasAccount && invite.status === 'PENDING' && (
-                          <span className="ml-2 text-xs text-muted-foreground">has an account</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => revokeMutation.mutate(invite.id)}
-                          disabled={revokeMutation.isPending}
-                          isLoading={
-                            revokeMutation.isPending && revokeMutation.variables === invite.id
-                          }
-                        >
-                          Withdraw
-                        </Button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <DataTable
+            caption="Owners you have invited"
+            columns={inviteColumns}
+            data={outstandingInvites}
+            getRowKey={(invite) => invite.id}
+          />
         </div>
       )}
 

@@ -126,9 +126,9 @@ export const PropertyCard = ({
           </DropdownMenuContent>
         </DropdownMenu>
         {property.archived && (
-          <div className="absolute bottom-3 left-3 inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-black/60 text-white">
-            Archived
-          </div>
+          <span className="absolute bottom-3 left-3">
+            <Badge variant="neutral">Archived</Badge>
+          </span>
         )}
       </div>
 
@@ -147,9 +147,9 @@ export const PropertyCard = ({
               property.name
             )}
           </h3>
-          <span className="shrink-0 rounded-full bg-secondary px-2 py-1 text-xs text-muted-foreground">
+          <Badge variant="neutral" className="shrink-0">
             {propertyTypeLabels[property.type]}
-          </span>
+          </Badge>
         </div>
         <p className="mt-2 flex items-center gap-1 text-sm text-muted-foreground">
           <MapPin className="w-3 h-3" />

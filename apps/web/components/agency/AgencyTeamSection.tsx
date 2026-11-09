@@ -2,9 +2,13 @@
 
 import { useState } from 'react';
 import { Users } from 'lucide-react';
-import { Button, ListSkeleton, NumberInput } from '@sureground/ui';
+import { Button, DataTable, ListSkeleton, NumberInput, type Column } from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
-import type { AgencyTeam } from '@/services/agencyCommissionService';
+import type { AgencyTeam, AgencyTeamMember } from '@/services/agencyCommissionService';
+
+type TeamRow =
+  | { kind: 'member'; member: AgencyTeamMember }
+  | { kind: 'unassigned'; deals: number; commissionTotal: number };
 
 export function AgencyTeamSection({
   team,
@@ -19,88 +23,106 @@ export function AgencyTeamSection({
 }) {
   const [edits, setEdits] = useState<Record<string, string>>({});
 
+  const columns: Column<TeamRow>[] = [
+    {
+      key: 'agent',
+      header: 'Agent',
+      render: (row) => {
+        if (row.kind === 'unassigned') {
+          return <span className="text-muted-foreground">Unassigned</span>;
+        }
+        const m = row.member;
+        return (
+          <>
+            <span className="block text-foreground">{m.name ?? m.email ?? 'Agent'}</span>
+            <span className="block text-xs text-muted-foreground">{m.role.toLowerCase()}</span>
+          </>
+        );
+      },
+    },
+    {
+      key: 'split',
+      header: 'Split %',
+      render: (row) => {
+        if (row.kind === 'unassigned') return null;
+        const m = row.member;
+        const edited = edits[m.userId];
+        const value = edited ?? String(m.splitPct);
+        const dirty = edited !== undefined && Number(edited) !== m.splitPct;
+        return (
+          <div className="flex items-center gap-2">
+            <NumberInput
+              value={value}
+              onValueChange={(v) => setEdits((e) => ({ ...e, [m.userId]: v }))}
+              className="w-20"
+              aria-label={`Split % for ${m.name ?? m.email ?? 'agent'}`}
+            />
+            {dirty && (
+              <Button
+                size="sm"
+                onClick={() => onSetSplit(m.userId, Number(value))}
+                isLoading={savingUserId === m.userId}
+              >
+                Save
+              </Button>
+            )}
+          </div>
+        );
+      },
+    },
+    {
+      key: 'deals',
+      header: 'Deals',
+      numeric: true,
+      className: 'text-muted-foreground',
+      render: (row) => (row.kind === 'member' ? row.member.deals : row.deals),
+    },
+    {
+      key: 'commission',
+      header: 'Commission',
+      numeric: true,
+      className: 'text-muted-foreground',
+      render: (row) =>
+        formatCurrency(row.kind === 'member' ? row.member.commissionTotal : row.commissionTotal),
+    },
+    {
+      key: 'share',
+      header: 'Their share',
+      numeric: true,
+      className: 'font-medium text-foreground',
+      render: (row) => (row.kind === 'member' ? formatCurrency(row.member.shareTotal) : null),
+    },
+  ];
+
   return (
     <div className="mt-6">
       <h2 className="mb-2 flex items-center gap-2 text-sm font-semibold text-foreground">
         <Users className="h-4 w-4 text-muted-foreground" />
         Team &amp; splits
       </h2>
-      <div className="overflow-x-auto rounded-2xl border border-border bg-card">
-        {isLoading ? (
-          <ListSkeleton rows={3} label="Loading your team" className="rounded-none border-0" />
-        ) : !team || team.members.length === 0 ? (
-          <p className="p-5 text-sm text-muted-foreground">No team members yet.</p>
-        ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                <th className="px-4 py-2.5 font-medium">Agent</th>
-                <th className="px-4 py-2.5 font-medium">Split %</th>
-                <th className="px-4 py-2.5 text-right font-medium">Deals</th>
-                <th className="px-4 py-2.5 text-right font-medium">Commission</th>
-                <th className="px-4 py-2.5 text-right font-medium">Their share</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/60">
-              {team.members.map((m) => {
-                const edited = edits[m.userId];
-                const value = edited ?? String(m.splitPct);
-                const dirty = edited !== undefined && Number(edited) !== m.splitPct;
-                return (
-                  <tr key={m.userId}>
-                    <td className="px-4 py-2.5">
-                      <span className="block text-foreground">{m.name ?? m.email ?? 'Agent'}</span>
-                      <span className="block text-xs text-muted-foreground">
-                        {m.role.toLowerCase()}
-                      </span>
-                    </td>
-                    <td className="px-4 py-2.5">
-                      <div className="flex items-center gap-2">
-                        <NumberInput
-                          value={value}
-                          onValueChange={(v) => setEdits((e) => ({ ...e, [m.userId]: v }))}
-                          className="w-20"
-                          aria-label={`Split % for ${m.name ?? m.email ?? 'agent'}`}
-                        />
-                        {dirty && (
-                          <Button
-                            size="sm"
-                            onClick={() => onSetSplit(m.userId, Number(value))}
-                            isLoading={savingUserId === m.userId}
-                          >
-                            Save
-                          </Button>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-4 py-2.5 text-right text-muted-foreground">{m.deals}</td>
-                    <td className="px-4 py-2.5 text-right text-muted-foreground">
-                      {formatCurrency(m.commissionTotal)}
-                    </td>
-                    <td className="px-4 py-2.5 text-right font-medium text-foreground">
-                      {formatCurrency(m.shareTotal)}
-                    </td>
-                  </tr>
-                );
-              })}
-              {team.unassigned.deals > 0 && (
-                <tr className="bg-muted/30">
-                  <td className="px-4 py-2.5 text-muted-foreground" colSpan={2}>
-                    Unassigned
-                  </td>
-                  <td className="px-4 py-2.5 text-right text-muted-foreground">
-                    {team.unassigned.deals}
-                  </td>
-                  <td className="px-4 py-2.5 text-right text-muted-foreground">
-                    {formatCurrency(team.unassigned.commissionTotal)}
-                  </td>
-                  <td className="px-4 py-2.5" />
-                </tr>
-              )}
-            </tbody>
-          </table>
-        )}
-      </div>
+      {isLoading || !team || team.members.length === 0 ? (
+        <div className="rounded-2xl border border-border bg-card">
+          {isLoading ? (
+            <ListSkeleton rows={3} label="Loading your team" className="rounded-none border-0" />
+          ) : (
+            <p className="p-5 text-sm text-muted-foreground">No team members yet.</p>
+          )}
+        </div>
+      ) : (
+        <DataTable
+          caption="Team members and their commission splits"
+          density="compact"
+          columns={columns}
+          data={[
+            ...team.members.map((member): TeamRow => ({ kind: 'member', member })),
+            ...(team.unassigned.deals > 0
+              ? [{ kind: 'unassigned', ...team.unassigned } satisfies TeamRow]
+              : []),
+          ]}
+          getRowKey={(row) => (row.kind === 'member' ? row.member.userId : 'unassigned')}
+          getRowClassName={(row) => (row.kind === 'unassigned' ? 'bg-muted/30' : undefined)}
+        />
+      )}
     </div>
   );
 }

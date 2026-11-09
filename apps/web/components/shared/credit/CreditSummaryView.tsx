@@ -1,22 +1,14 @@
 'use client';
 
+import { Badge, type BadgeVariant } from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 import type { CreditScoreBand, SharedCreditCheck } from '@/types/credit-check';
 
-const bandLabel: Record<CreditScoreBand, { text: string; className: string }> = {
-  POOR: { text: 'Poor', className: 'bg-destructive-subtle text-destructive' },
-  FAIR: {
-    text: 'Fair',
-    className: 'bg-warning-subtle text-warning',
-  },
-  GOOD: {
-    text: 'Good',
-    className: 'bg-success-subtle text-success',
-  },
-  EXCELLENT: {
-    text: 'Excellent',
-    className: 'bg-success-subtle text-success',
-  },
+const bandLabel: Record<CreditScoreBand, { text: string; variant: BadgeVariant }> = {
+  POOR: { text: 'Poor', variant: 'danger' },
+  FAIR: { text: 'Fair', variant: 'warning' },
+  GOOD: { text: 'Good', variant: 'success' },
+  EXCELLENT: { text: 'Excellent', variant: 'success' },
 };
 
 /** Sample data is always labelled as such. */
@@ -33,11 +25,9 @@ export const CreditSummaryView = ({ check }: { check: SharedCreditCheck }) => {
         <>
           <div className="flex items-center gap-2 text-sm">
             {summary.scoreBand && (
-              <span
-                className={`rounded-full px-2 py-0.5 text-xs font-medium ${bandLabel[summary.scoreBand].className}`}
-              >
+              <Badge variant={bandLabel[summary.scoreBand].variant}>
                 {bandLabel[summary.scoreBand].text}
-              </span>
+              </Badge>
             )}
             {summary.score !== null && (
               <span className="font-medium text-foreground tabular-nums">

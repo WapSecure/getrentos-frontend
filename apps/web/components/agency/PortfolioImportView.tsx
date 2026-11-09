@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState, type ReactNode } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Download, Upload } from 'lucide-react';
 import {
@@ -8,9 +8,11 @@ import {
   Badge,
   Button,
   Card,
+  DataTable,
   Field,
   Select,
   Skeleton,
+  type Column,
   useToast,
   PageHeader,
 } from '@sureground/ui';
@@ -21,6 +23,33 @@ import {
   portfolioImportService,
   type UnitImportResult,
 } from '@/services/portfolioImportService';
+
+interface PreviewRow {
+  line: number;
+  unit: string;
+  size: string;
+  rent: string;
+  result: ReactNode;
+}
+
+const PREVIEW_COLUMNS: Column<PreviewRow>[] = [
+  { key: 'line', header: 'Line', className: 'text-muted-foreground', render: (r) => r.line },
+  { key: 'unit', header: 'Unit', className: 'text-foreground', render: (r) => r.unit },
+  {
+    key: 'size',
+    header: 'Beds / baths',
+    className: 'text-muted-foreground',
+    render: (r) => r.size,
+  },
+  {
+    key: 'rent',
+    header: 'Asking rent',
+    numeric: true,
+    className: 'text-muted-foreground',
+    render: (r) => r.rent,
+  },
+  { key: 'result', header: 'Result', render: (r) => r.result },
+];
 
 export function PortfolioImportView() {
   const { live, loading } = useCustody();
@@ -157,59 +186,40 @@ export function PortfolioImportView() {
                   {preview.errors.length} with errors
                 </Badge>
               </div>
-              <div className="mt-4 overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                      <th className="py-2 pr-3 font-medium">Line</th>
-                      <th className="py-2 pr-3 font-medium">Unit</th>
-                      <th className="py-2 pr-3 font-medium">Beds / baths</th>
-                      <th className="py-2 pr-3 font-medium">Asking rent</th>
-                      <th className="py-2 font-medium">Result</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border/60">
-                    {[
-                      ...preview.toCreate.map((r) => ({
-                        line: r.line,
-                        unit: r.unitName,
-                        size: `${r.bedrooms} / ${r.bathrooms}`,
-                        rent:
-                          r.askingRent !== null
-                            ? `${formatCurrency(r.askingRent)} ${r.rentPeriod === 'MONTHLY' ? 'monthly' : 'yearly'}`
-                            : '—',
-                        result: <Badge variant="success">Add</Badge>,
-                      })),
-                      ...preview.skipped.map((r) => ({
-                        line: r.line,
-                        unit: r.unitName,
-                        size: '',
-                        rent: '',
-                        result: <span className="text-xs text-muted-foreground">{r.reason}</span>,
-                      })),
-                      ...preview.errors.map((r) => ({
-                        line: r.line,
-                        unit: r.unitName || '—',
-                        size: '',
-                        rent: '',
-                        result: (
-                          <span className="text-xs text-destructive">{r.errors.join('; ')}</span>
-                        ),
-                      })),
-                    ]
-                      .sort((a, b) => a.line - b.line)
-                      .map((r) => (
-                        <tr key={r.line}>
-                          <td className="py-2 pr-3 text-muted-foreground">{r.line}</td>
-                          <td className="py-2 pr-3 text-foreground">{r.unit}</td>
-                          <td className="py-2 pr-3 text-muted-foreground">{r.size}</td>
-                          <td className="py-2 pr-3 text-muted-foreground">{r.rent}</td>
-                          <td className="py-2">{r.result}</td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
-              </div>
+              <DataTable<PreviewRow>
+                variant="bare"
+                className="mt-4"
+                caption="Dry-run result for each line of the file"
+                density="compact"
+                columns={PREVIEW_COLUMNS}
+                data={[
+                  ...preview.toCreate.map((r) => ({
+                    line: r.line,
+                    unit: r.unitName,
+                    size: `${r.bedrooms} / ${r.bathrooms}`,
+                    rent:
+                      r.askingRent !== null
+                        ? `${formatCurrency(r.askingRent)} ${r.rentPeriod === 'MONTHLY' ? 'monthly' : 'yearly'}`
+                        : '—',
+                    result: <Badge variant="success">Add</Badge>,
+                  })),
+                  ...preview.skipped.map((r) => ({
+                    line: r.line,
+                    unit: r.unitName,
+                    size: '',
+                    rent: '',
+                    result: <span className="text-xs text-muted-foreground">{r.reason}</span>,
+                  })),
+                  ...preview.errors.map((r) => ({
+                    line: r.line,
+                    unit: r.unitName || '—',
+                    size: '',
+                    rent: '',
+                    result: <span className="text-xs text-destructive">{r.errors.join('; ')}</span>,
+                  })),
+                ].sort((a, b) => a.line - b.line)}
+                getRowKey={(r) => String(r.line)}
+              />
               <Button
                 className="mt-4"
                 onClick={() => commit.mutate()}

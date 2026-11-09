@@ -7,6 +7,7 @@ import {
   Badge,
   Button,
   Card,
+  DataTable,
   DatePicker,
   EmptyState,
   Field,
@@ -15,6 +16,7 @@ import {
   PageHeader,
   Select,
   TableSkeleton,
+  type Column,
   useToast,
 } from '@sureground/ui';
 import { formatDate } from '@/lib/format';
@@ -109,6 +111,112 @@ export function AgencyTeamView() {
       ),
     onError: fail,
   });
+
+  const columns: Column<AgencyMember>[] = [
+    {
+      key: 'name',
+      header: 'Name',
+      render: (m) => (
+        <>
+          <p className="text-foreground">{m.name}</p>
+          <p className="text-xs text-muted-foreground">{m.email}</p>
+        </>
+      ),
+    },
+    {
+      key: 'role',
+      header: 'Role',
+      render: (m) =>
+        isPrincipal && m.role !== 'OWNER' ? (
+          <Select
+            value={m.role}
+            onValueChange={(v) =>
+              update.mutate({ userId: m.userId, role: v as AssignableAgencyRole })
+            }
+            options={ASSIGNABLE_ROLE_OPTIONS.map((o) => ({
+              value: o.value,
+              label: o.label,
+            }))}
+            ariaLabel={`Role for ${m.name}`}
+          />
+        ) : (
+          m.roleLabel
+        ),
+    },
+    {
+      key: 'until',
+      header: 'Until',
+      className: 'text-muted-foreground',
+      render: (m) =>
+        isPrincipal && m.role !== 'OWNER' ? (
+          <DatePicker
+            value={m.expiresAt ? m.expiresAt.slice(0, 10) : ''}
+            onChange={(day) => update.mutate({ userId: m.userId, expiresAt: endOfDay(day) })}
+            ariaLabel={`Access end date for ${m.name}`}
+          />
+        ) : m.expiresAt ? (
+          formatDate(m.expiresAt)
+        ) : (
+          'No end date'
+        ),
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      render: (m) => (
+        <Badge
+          variant={
+            m.state === 'ACTIVE' ? 'success' : m.state === 'SUSPENDED' ? 'warning' : 'neutral'
+          }
+        >
+          {m.state === 'ACTIVE' ? 'Active' : m.state === 'SUSPENDED' ? 'Suspended' : 'Ended'}
+        </Badge>
+      ),
+    },
+    ...(isPrincipal
+      ? [
+          {
+            key: 'actions',
+            header: '',
+            srHeader: 'Actions',
+            align: 'right',
+            render: (m) =>
+              m.role !== 'OWNER' && (
+                <span className="flex justify-end gap-1">
+                  {m.state === 'SUSPENDED' ? (
+                    <Button
+                      variant="ghost"
+                      onClick={() => act.mutate({ userId: m.userId, action: 'reinstate' })}
+                    >
+                      Reinstate
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="ghost"
+                      onClick={() => act.mutate({ userId: m.userId, action: 'suspend' })}
+                    >
+                      Suspend
+                    </Button>
+                  )}
+                  <Button
+                    variant="ghost"
+                    className="text-destructive"
+                    onClick={() => {
+                      if (
+                        window.confirm(`Remove ${m.name} from the firm? Their access ends now.`)
+                      ) {
+                        act.mutate({ userId: m.userId, action: 'remove' });
+                      }
+                    }}
+                  >
+                    Remove
+                  </Button>
+                </span>
+              ),
+          } satisfies Column<AgencyMember>,
+        ]
+      : []),
+  ];
 
   if (members.isError && !members.data) {
     return (
@@ -212,121 +320,13 @@ export function AgencyTeamView() {
           description="Invite people to work with you."
         />
       ) : (
-        <Card className="overflow-x-auto p-0">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                <th className="px-4 py-2.5 font-medium">Name</th>
-                <th className="px-4 py-2.5 font-medium">Role</th>
-                <th className="px-4 py-2.5 font-medium">Until</th>
-                <th className="px-4 py-2.5 font-medium">Status</th>
-                {isPrincipal && <th className="px-4 py-2.5" />}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/60">
-              {(members.data ?? []).map((m: AgencyMember) => {
-                const editable = isPrincipal && m.role !== 'OWNER';
-                return (
-                  <tr key={m.userId}>
-                    <td className="px-4 py-2.5">
-                      <p className="text-foreground">{m.name}</p>
-                      <p className="text-xs text-muted-foreground">{m.email}</p>
-                    </td>
-                    <td className="px-4 py-2.5">
-                      {editable ? (
-                        <Select
-                          value={m.role}
-                          onValueChange={(v) =>
-                            update.mutate({ userId: m.userId, role: v as AssignableAgencyRole })
-                          }
-                          options={ASSIGNABLE_ROLE_OPTIONS.map((o) => ({
-                            value: o.value,
-                            label: o.label,
-                          }))}
-                          ariaLabel={`Role for ${m.name}`}
-                        />
-                      ) : (
-                        m.roleLabel
-                      )}
-                    </td>
-                    <td className="px-4 py-2.5 text-muted-foreground">
-                      {editable ? (
-                        <DatePicker
-                          value={m.expiresAt ? m.expiresAt.slice(0, 10) : ''}
-                          onChange={(day) =>
-                            update.mutate({ userId: m.userId, expiresAt: endOfDay(day) })
-                          }
-                          ariaLabel={`Access end date for ${m.name}`}
-                        />
-                      ) : m.expiresAt ? (
-                        formatDate(m.expiresAt)
-                      ) : (
-                        'No end date'
-                      )}
-                    </td>
-                    <td className="px-4 py-2.5">
-                      <Badge
-                        variant={
-                          m.state === 'ACTIVE'
-                            ? 'success'
-                            : m.state === 'SUSPENDED'
-                              ? 'warning'
-                              : 'neutral'
-                        }
-                      >
-                        {m.state === 'ACTIVE'
-                          ? 'Active'
-                          : m.state === 'SUSPENDED'
-                            ? 'Suspended'
-                            : 'Ended'}
-                      </Badge>
-                    </td>
-                    {isPrincipal && (
-                      <td className="px-4 py-2.5 text-right">
-                        {editable && (
-                          <span className="flex justify-end gap-1">
-                            {m.state === 'SUSPENDED' ? (
-                              <Button
-                                variant="ghost"
-                                onClick={() =>
-                                  act.mutate({ userId: m.userId, action: 'reinstate' })
-                                }
-                              >
-                                Reinstate
-                              </Button>
-                            ) : (
-                              <Button
-                                variant="ghost"
-                                onClick={() => act.mutate({ userId: m.userId, action: 'suspend' })}
-                              >
-                                Suspend
-                              </Button>
-                            )}
-                            <Button
-                              variant="ghost"
-                              className="text-destructive"
-                              onClick={() => {
-                                if (
-                                  window.confirm(
-                                    `Remove ${m.name} from the firm? Their access ends now.`
-                                  )
-                                ) {
-                                  act.mutate({ userId: m.userId, action: 'remove' });
-                                }
-                              }}
-                            >
-                              Remove
-                            </Button>
-                          </span>
-                        )}
-                      </td>
-                    )}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </Card>
+        <DataTable
+          caption="Your team members"
+          density="compact"
+          columns={columns}
+          data={members.data ?? []}
+          getRowKey={(m) => m.userId}
+        />
       )}
     </div>
   );

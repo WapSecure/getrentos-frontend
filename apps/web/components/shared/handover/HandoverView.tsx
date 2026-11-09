@@ -11,6 +11,7 @@ import {
   Button,
   Card,
   CardSkeleton,
+  DataTable,
   Field,
   Input,
   PageErrorState,
@@ -268,44 +269,56 @@ export function HandoverView({ transferId }: { transferId: string }) {
             </dd>
           </div>
         </dl>
-        <div className="mt-4 overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="text-left text-xs text-muted-foreground">
-              <tr>
-                <th className="py-1 pr-3 font-medium">Tenancy</th>
-                <th className="py-1 pr-3 text-right font-medium">Rent</th>
-                <th className="py-1 pr-3 text-right font-medium">Owed</th>
-                <th className="py-1 pr-3 text-right font-medium">Held</th>
-                <th className="py-1 text-right font-medium">Deposit</th>
-              </tr>
-            </thead>
-            <tbody>
-              {snap.leases.map((l) => (
-                <tr key={l.leaseId} className="border-t border-border">
-                  <td className="py-2 pr-3">
-                    {l.tenant}
+        <DataTable
+          variant="bare"
+          caption="Tenancies in this handover"
+          className="mt-4"
+          density="compact"
+          data={snap.leases}
+          getRowKey={(l) => l.leaseId}
+          columns={[
+            {
+              key: 'tenancy',
+              header: 'Tenancy',
+              render: (l) => (
+                <>
+                  {l.tenant}
+                  <span className="block text-xs text-muted-foreground">
+                    {l.unit} · {formatDate(l.start)} – {formatDate(l.end)}
+                  </span>
+                </>
+              ),
+            },
+            { key: 'rent', header: 'Rent', numeric: true, render: (l) => formatCurrency(l.rent) },
+            {
+              key: 'owed',
+              header: 'Owed',
+              numeric: true,
+              render: (l) => formatCurrency(l.arrears),
+            },
+            {
+              key: 'held',
+              header: 'Held',
+              numeric: true,
+              render: (l) => formatCurrency(l.heldForOwner),
+            },
+            {
+              key: 'deposit',
+              header: 'Deposit',
+              numeric: true,
+              render: (l) => (
+                <>
+                  {l.deposit ? formatCurrency(l.deposit.amount) : '—'}
+                  {l.deposit && (
                     <span className="block text-xs text-muted-foreground">
-                      {l.unit} · {formatDate(l.start)} – {formatDate(l.end)}
+                      {l.deposit.heldBySureground ? 'with Sureground' : 'outside Sureground'}
                     </span>
-                  </td>
-                  <td className="py-2 pr-3 text-right tabular-nums">{formatCurrency(l.rent)}</td>
-                  <td className="py-2 pr-3 text-right tabular-nums">{formatCurrency(l.arrears)}</td>
-                  <td className="py-2 pr-3 text-right tabular-nums">
-                    {formatCurrency(l.heldForOwner)}
-                  </td>
-                  <td className="py-2 text-right tabular-nums">
-                    {l.deposit ? formatCurrency(l.deposit.amount) : '—'}
-                    {l.deposit && (
-                      <span className="block text-xs text-muted-foreground">
-                        {l.deposit.heldBySureground ? 'with Sureground' : 'outside Sureground'}
-                      </span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                  )}
+                </>
+              ),
+            },
+          ]}
+        />
       </Card>
 
       <Card className="grid gap-5 p-5 sm:grid-cols-2">

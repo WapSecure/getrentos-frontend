@@ -179,7 +179,11 @@ export const PhoneSignIn = ({
             finish signing in.
           </Alert>
 
-          <Field label="Authentication code" hint="Lost your phone? Enter a backup code instead.">
+          <Field
+            key="two-factor-code"
+            label="Authentication code"
+            hint="Lost your phone? Enter a backup code instead."
+          >
             <Input
               autoComplete="one-time-code"
               autoCapitalize="none"

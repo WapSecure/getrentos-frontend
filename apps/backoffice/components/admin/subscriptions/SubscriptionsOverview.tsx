@@ -7,6 +7,7 @@ import {
   Badge,
   Button,
   Card,
+  DataTable,
   EmptyState,
   PageErrorState,
   Pagination,
@@ -16,6 +17,7 @@ import {
   StatGridSkeleton,
   TableSkeleton,
   type BadgeVariant,
+  type Column,
   PageHeader,
 } from '@sureground/ui';
 import { formatCurrency, formatDate, unwrap } from '@sureground/shared';
@@ -173,36 +175,17 @@ export const SubscriptionsOverview = () => {
           }
         />
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-border bg-card">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="border-b border-border">
-                  {['Customer', 'Plan', 'Status', 'Key date', 'Notes'].map((heading) => (
-                    <th
-                      key={heading}
-                      className="p-4 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground"
-                    >
-                      {heading}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {items.map((row) => (
-                  <SubscriptionRow
-                    key={row.userId}
-                    row={row}
-                    invoicesOpen={invoicesFor === row.userId}
-                    onToggleInvoices={() =>
-                      setInvoicesFor((current) => (current === row.userId ? null : row.userId))
-                    }
-                  />
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <DataTable
+          caption="Customer subscriptions"
+          columns={subscriptionColumns(invoicesFor, (userId) =>
+            setInvoicesFor((current) => (current === userId ? null : userId))
+          )}
+          data={items}
+          getRowKey={(row) => row.userId}
+          renderExpanded={(row) =>
+            invoicesFor === row.userId ? <CustomerInvoices userId={row.userId} /> : null
+          }
+        />
       )}
 
       {list.data && list.data.total > PAGE_SIZE && (
@@ -217,29 +200,26 @@ export const SubscriptionsOverview = () => {
   );
 };
 
-function SubscriptionRow({
-  row,
-  invoicesOpen,
-  onToggleInvoices,
-}: {
-  row: AdminSubscription;
-  invoicesOpen: boolean;
-  onToggleInvoices: () => void;
-}) {
-  // Only trialing, active and past-due rows have a meaningful next date.
-  const lapsed = row.status === 'NONE' || row.status === 'CANCELLED';
-  const keyDate = row.status === 'TRIALING' ? row.trialEndsAt : row.currentPeriodEnd;
-  const keyLabel =
-    row.status === 'TRIALING' ? 'Trial ends' : row.cancelAtPeriodEnd ? 'Ends' : 'Renews';
-
-  return (
-    <>
-      <tr>
-        <td className="p-4">
+function subscriptionColumns(
+  invoicesFor: string | null,
+  onToggleInvoices: (userId: string) => void
+): Column<AdminSubscription>[] {
+  return [
+    {
+      key: 'customer',
+      header: 'Customer',
+      render: (row) => (
+        <>
           <p className="text-sm font-medium text-foreground">{row.legalName ?? 'Unknown'}</p>
           <p className="text-xs text-muted-foreground">{row.email ?? '—'}</p>
-        </td>
-        <td className="p-4">
+        </>
+      ),
+    },
+    {
+      key: 'plan',
+      header: 'Plan',
+      render: (row) => (
+        <>
           <p className="text-sm text-foreground">
             {row.cycle === 'ANNUAL' ? 'Annual' : row.cycle === 'MONTHLY' ? 'Monthly' : '—'}
           </p>
@@ -251,63 +231,72 @@ function SubscriptionRow({
                 : '—'
               : `${naira(row.priceKobo)}/${row.cycle === 'ANNUAL' ? 'yr' : 'mo'}`}
           </p>
-        </td>
-        <td className="p-4">
+        </>
+      ),
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      render: (row) => (
+        <>
           <Badge variant={STATUS_VARIANT[row.status]}>{STATUS_LABEL[row.status]}</Badge>
           {/* A row can be past due and still have access, so show what the app does. */}
           {row.status === 'PAST_DUE' && row.isActive && (
             <p className="mt-1 text-xs text-muted-foreground">Access retained</p>
           )}
-        </td>
-        <td className="p-4">
-          {lapsed ? (
-            <p className="text-sm text-muted-foreground">—</p>
-          ) : keyDate ? (
-            <>
-              <p className="text-xs text-muted-foreground">{keyLabel}</p>
-              <p className="text-sm text-foreground">{formatDay(keyDate)}</p>
-            </>
-          ) : (
-            <p className="text-sm text-muted-foreground">No end date</p>
+        </>
+      ),
+    },
+    {
+      key: 'keyDate',
+      header: 'Key date',
+      render: (row) => {
+        // Only trialing, active and past-due rows have a meaningful next date.
+        const lapsed = row.status === 'NONE' || row.status === 'CANCELLED';
+        const keyDate = row.status === 'TRIALING' ? row.trialEndsAt : row.currentPeriodEnd;
+        const keyLabel =
+          row.status === 'TRIALING' ? 'Trial ends' : row.cancelAtPeriodEnd ? 'Ends' : 'Renews';
+        return lapsed ? (
+          <p className="text-sm text-muted-foreground">—</p>
+        ) : keyDate ? (
+          <>
+            <p className="text-xs text-muted-foreground">{keyLabel}</p>
+            <p className="text-sm text-foreground">{formatDay(keyDate)}</p>
+          </>
+        ) : (
+          <p className="text-sm text-muted-foreground">No end date</p>
+        );
+      },
+    },
+    {
+      key: 'notes',
+      header: 'Notes',
+      render: (row) => (
+        <div className="flex flex-col gap-1">
+          {row.cancelAtPeriodEnd && (
+            <span className="text-xs text-muted-foreground">Cancellation scheduled</span>
           )}
-        </td>
-        <td className="p-4">
-          <div className="flex flex-col gap-1">
-            {row.cancelAtPeriodEnd && (
-              <span className="text-xs text-muted-foreground">Cancellation scheduled</span>
-            )}
-            {row.captureRefundPending && (
-              <span className="text-xs font-medium text-warning">Card-capture refund pending</span>
-            )}
-            {row.latestReference && (
-              <span className="font-mono text-2xs text-muted-foreground">
-                {row.latestReference}
-              </span>
-            )}
-            {row.tier === 'PRO' && (
-              <Button
-                variant="link"
-                onClick={onToggleInvoices}
-                aria-expanded={invoicesOpen}
-                className="mt-1 gap-1 text-xs font-medium"
-              >
-                <ReceiptText className="h-3 w-3" />
-                {invoicesOpen ? 'Hide payments' : 'Payment history'}
-              </Button>
-            )}
-          </div>
-        </td>
-      </tr>
-
-      {invoicesOpen && (
-        <tr>
-          <td colSpan={5} className="bg-secondary/40 p-4">
-            <CustomerInvoices userId={row.userId} />
-          </td>
-        </tr>
-      )}
-    </>
-  );
+          {row.captureRefundPending && (
+            <span className="text-xs font-medium text-warning">Card-capture refund pending</span>
+          )}
+          {row.latestReference && (
+            <span className="font-mono text-2xs text-muted-foreground">{row.latestReference}</span>
+          )}
+          {row.tier === 'PRO' && (
+            <Button
+              variant="link"
+              onClick={() => onToggleInvoices(row.userId)}
+              aria-expanded={invoicesFor === row.userId}
+              className="mt-1 gap-1 text-xs font-medium"
+            >
+              <ReceiptText className="h-3 w-3" />
+              {invoicesFor === row.userId ? 'Hide payments' : 'Payment history'}
+            </Button>
+          )}
+        </div>
+      ),
+    },
+  ];
 }
 
 function CustomerInvoices({ userId }: { userId: string }) {
@@ -336,27 +325,14 @@ function CustomerInvoices({ userId }: { userId: string }) {
   }
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-border bg-card">
-      <table className="w-full text-left text-sm">
-        <thead>
-          <tr className="border-b border-border">
-            {['Date', 'Description', 'Invoice', 'Amount', 'Status'].map((heading) => (
-              <th
-                key={heading}
-                className="p-3 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground"
-              >
-                {heading}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-border">
-          {invoices.map((invoice) => (
-            <InvoiceRow key={invoice.id} invoice={invoice} />
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <DataTable
+      variant="bare"
+      caption="Payments charged on this account"
+      density="compact"
+      columns={INVOICE_COLUMNS}
+      data={invoices}
+      getRowKey={(invoice) => invoice.id}
+    />
   );
 }
 
@@ -372,34 +348,59 @@ const INVOICE_LABEL: Record<AdminSubscriptionInvoice['status'], string> = {
   FAILED: 'Failed',
 };
 
-function InvoiceRow({ invoice }: { invoice: AdminSubscriptionInvoice }) {
-  return (
-    <tr>
-      <td className="p-3 whitespace-nowrap text-muted-foreground">
-        {formatDay(invoice.paidAt ?? invoice.createdAt)}
-      </td>
-      <td className="p-3 text-foreground">
+const INVOICE_COLUMNS: Column<AdminSubscriptionInvoice>[] = [
+  {
+    key: 'date',
+    header: 'Date',
+    className: 'whitespace-nowrap text-muted-foreground',
+    render: (invoice) => formatDay(invoice.paidAt ?? invoice.createdAt),
+  },
+  {
+    key: 'description',
+    header: 'Description',
+    className: 'text-foreground',
+    render: (invoice) => (
+      <>
         {invoice.description}
         {invoice.periodStart && invoice.periodEnd && (
           <p className="text-xs text-muted-foreground">
             {formatDay(invoice.periodStart)} – {formatDay(invoice.periodEnd)}
           </p>
         )}
-      </td>
-      <td className="p-3 font-mono text-2xs text-muted-foreground">
+      </>
+    ),
+  },
+  {
+    key: 'invoice',
+    header: 'Invoice',
+    className: 'font-mono text-2xs text-muted-foreground',
+    render: (invoice) => (
+      <>
         {invoice.number}
         {invoice.providerReference && <span className="block">{invoice.providerReference}</span>}
-      </td>
-      <td className="p-3 whitespace-nowrap text-foreground">
+      </>
+    ),
+  },
+  {
+    key: 'amount',
+    header: 'Amount',
+    numeric: true,
+    className: 'whitespace-nowrap text-foreground',
+    render: (invoice) => (
+      <>
         {naira(invoice.amountKobo)}
         {/* An inferred amount came from reconciliation, not a confirmed charge: flag it before it is quoted to a customer. */}
         {invoice.inferred && (
           <span className="block text-xs text-warning">Inferred from provider</span>
         )}
-      </td>
-      <td className="p-3">
-        <Badge variant={INVOICE_VARIANT[invoice.status]}>{INVOICE_LABEL[invoice.status]}</Badge>
-      </td>
-    </tr>
-  );
-}
+      </>
+    ),
+  },
+  {
+    key: 'status',
+    header: 'Status',
+    render: (invoice) => (
+      <Badge variant={INVOICE_VARIANT[invoice.status]}>{INVOICE_LABEL[invoice.status]}</Badge>
+    ),
+  },
+];

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { AlertTriangle, CalendarClock, BadgeCheck } from 'lucide-react';
-import { Alert, Button, Card } from '@sureground/ui';
+import { Alert, Badge, Button, Card } from '@sureground/ui';
 import { formatCurrency } from '@sureground/shared';
 import type { MyBilling } from '@/services/billingService';
 import { useCardUpdateLink, useManageSubscription } from '@/hooks/useBilling';
@@ -94,8 +94,14 @@ export function ManageSubscriptionCard({ billing }: { billing?: MyBilling }) {
           <p className="font-semibold text-foreground">{headline}</p>
           <p className="mt-0.5 text-sm text-muted-foreground">{detail}</p>
           {billing.simulated && (
-            <p className="mt-2 inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-0.5 text-xs text-muted-foreground">
-              <BadgeCheck className="h-3 w-3" /> Test mode: no real payment is taken
+            <p className="mt-2">
+              <Badge
+                variant="neutral"
+                icon={<BadgeCheck className="h-3 w-3" />}
+                className="whitespace-normal"
+              >
+                Test mode: no real payment is taken
+              </Badge>
             </p>
           )}
         </div>

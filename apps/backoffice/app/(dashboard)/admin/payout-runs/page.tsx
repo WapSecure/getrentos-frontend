@@ -8,6 +8,7 @@ import {
   Button,
   Card,
   ConfirmDialog,
+  DataTable,
   EmptyState,
   Field,
   ListSkeleton,
@@ -16,6 +17,7 @@ import {
   Skeleton,
   useToast,
   PageHeader,
+  type Column,
 } from '@sureground/ui';
 import { formatCurrency, formatDate, unwrap } from '@sureground/shared';
 import { useAdminUser } from '../layout';
@@ -131,6 +133,80 @@ export default function PayoutRunsPage() {
   const toIssue = r?.items.filter((i) => i.status === 'DRAFTED') ?? [];
   const issueTotal = toIssue.reduce((sum, i) => sum + (i.netPayout ?? 0), 0);
 
+  const itemColumns: Column<PayoutRun['items'][number]>[] = [
+    {
+      key: 'owner',
+      header: 'Owner',
+      className: 'align-top',
+      render: (i) => (
+        <>
+          {i.ownerName}
+          {i.note && <span className="block text-xs text-muted-foreground">{i.note}</span>}
+          {i.destination !== undefined && i.status !== 'SKIPPED' && (
+            <span className="block text-xs text-muted-foreground">
+              {payoutAccountLabel(i.destination) ?? 'No payout account on file'}
+              {i.destination?.accountChanged && (
+                <Badge variant="warning" className="ml-2">
+                  Account changed
+                </Badge>
+              )}
+            </span>
+          )}
+        </>
+      ),
+    },
+    {
+      key: 'rent',
+      header: 'Rent',
+      numeric: true,
+      className: 'align-top',
+      render: (i) => (i.grossIncome != null ? formatCurrency(i.grossIncome) : '—'),
+    },
+    {
+      key: 'toPay',
+      header: 'To pay',
+      numeric: true,
+      className: 'align-top',
+      render: (i) => (i.netPayout != null ? formatCurrency(i.netPayout) : '—'),
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      className: 'align-top',
+      render: (i) => (
+        <Badge variant={ITEM_BADGE[i.status].variant}>{ITEM_BADGE[i.status].label}</Badge>
+      ),
+    },
+    {
+      key: 'actions',
+      header: '',
+      srHeader: 'Actions',
+      align: 'right',
+      className: 'align-top',
+      render: (i) =>
+        canAct &&
+        r?.status === 'ISSUED' &&
+        i.status === 'FAILED' && (
+          <Button
+            size="sm"
+            variant="ghost"
+            disabled={retry.isPending}
+            isLoading={retry.isPending && retry.variables?.itemId === i.id}
+            onClick={() =>
+              setConfirmingRetry({
+                itemId: i.id,
+                ownerName: i.ownerName,
+                amount: i.netPayout,
+                destination: i.destination,
+              })
+            }
+          >
+            Retry
+          </Button>
+        ),
+    },
+  ];
+
   return (
     <>
       <PageHeader
@@ -217,74 +293,14 @@ export default function PayoutRunsPage() {
               )}
               {openRun === s.id && r && (
                 <div className="mt-4 border-t border-border pt-4">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead className="text-left text-xs text-muted-foreground">
-                        <tr>
-                          <th className="py-1 pr-4 font-medium">Owner</th>
-                          <th className="py-1 pr-4 text-right font-medium">Rent</th>
-                          <th className="py-1 pr-4 text-right font-medium">To pay</th>
-                          <th className="py-1 pr-4 font-medium">Status</th>
-                          <th className="py-1 font-medium" />
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {r.items.map((i) => (
-                          <tr key={i.id} className="border-t border-border align-top">
-                            <td className="py-2 pr-4">
-                              {i.ownerName}
-                              {i.note && (
-                                <span className="block text-xs text-muted-foreground">
-                                  {i.note}
-                                </span>
-                              )}
-                              {i.destination !== undefined && i.status !== 'SKIPPED' && (
-                                <span className="block text-xs text-muted-foreground">
-                                  {payoutAccountLabel(i.destination) ?? 'No payout account on file'}
-                                  {i.destination?.accountChanged && (
-                                    <Badge variant="warning" className="ml-2">
-                                      Account changed
-                                    </Badge>
-                                  )}
-                                </span>
-                              )}
-                            </td>
-                            <td className="py-2 pr-4 text-right tabular-nums">
-                              {i.grossIncome != null ? formatCurrency(i.grossIncome) : '—'}
-                            </td>
-                            <td className="py-2 pr-4 text-right tabular-nums">
-                              {i.netPayout != null ? formatCurrency(i.netPayout) : '—'}
-                            </td>
-                            <td className="py-2 pr-4">
-                              <Badge variant={ITEM_BADGE[i.status].variant}>
-                                {ITEM_BADGE[i.status].label}
-                              </Badge>
-                            </td>
-                            <td className="py-2 text-right">
-                              {canAct && r.status === 'ISSUED' && i.status === 'FAILED' && (
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  disabled={retry.isPending}
-                                  isLoading={retry.isPending && retry.variables?.itemId === i.id}
-                                  onClick={() =>
-                                    setConfirmingRetry({
-                                      itemId: i.id,
-                                      ownerName: i.ownerName,
-                                      amount: i.netPayout,
-                                      destination: i.destination,
-                                    })
-                                  }
-                                >
-                                  Retry
-                                </Button>
-                              )}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                  <DataTable
+                    variant="bare"
+                    caption={`Owner statements in the ${monthLabel(r.period)} payout run`}
+                    density="compact"
+                    columns={itemColumns}
+                    data={r.items}
+                    getRowKey={(i) => i.id}
+                  />
                   {canAct && r.status === 'DRAFTED' && (
                     <div className="mt-4 flex flex-wrap items-center gap-3">
                       <Button

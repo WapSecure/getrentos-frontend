@@ -10,6 +10,7 @@ import {
   Card,
   Checkbox,
   CurrencyInput,
+  DataTable,
   DatePicker,
   EmptyState,
   Field,
@@ -18,6 +19,7 @@ import {
   PageLoadingState,
   PageErrorState,
   type BadgeVariant,
+  type Column,
   useToast,
   PageHeader,
 } from '@sureground/ui';
@@ -25,6 +27,7 @@ import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import {
   agencyProtectionService,
+  type ProtectionAttestation,
   type ProtectionAttestationStatus,
 } from '@/services/agencyProtectionService';
 
@@ -86,6 +89,67 @@ export function AgencyProtectionView() {
     },
     onError: (e: Error) => toast.error(e.message || 'Could not revoke.'),
   });
+
+  const columns: Column<ProtectionAttestation>[] = [
+    {
+      key: 'scheme',
+      header: 'Scheme',
+      render: (a) => (
+        <>
+          <span className="block text-foreground">{a.schemeName}</span>
+          {a.schemeReference && (
+            <span className="block text-xs text-muted-foreground">{a.schemeReference}</span>
+          )}
+        </>
+      ),
+    },
+    {
+      key: 'cover',
+      header: 'Cover',
+      numeric: true,
+      className: 'text-muted-foreground',
+      render: (a) => (a.coverageAmount != null ? formatCurrency(a.coverageAmount) : '—'),
+    },
+    {
+      key: 'segregated',
+      header: 'Segregated',
+      className: 'text-muted-foreground',
+      render: (a) => (a.segregationConfirmed ? 'Yes' : 'No'),
+    },
+    {
+      key: 'valid',
+      header: 'Valid',
+      className: 'text-muted-foreground',
+      render: (a) => (
+        <>
+          {formatDate(a.effectiveFrom)} – {a.effectiveTo ? formatDate(a.effectiveTo) : 'open'}
+        </>
+      ),
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      render: (a) => <Badge variant={STATUS_VARIANT[a.status]}>{a.status.toLowerCase()}</Badge>,
+    },
+    {
+      key: 'actions',
+      header: '',
+      srHeader: 'Actions',
+      align: 'right',
+      render: (a) =>
+        a.status === 'ACTIVE' && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => revokeMutation.mutate(a.id)}
+            disabled={revokeMutation.isPending}
+            isLoading={revokeMutation.isPending && revokeMutation.variables === a.id}
+          >
+            Revoke
+          </Button>
+        ),
+    },
+  ];
 
   if (isLoading) return <PageLoadingState />;
   if (!data) return <PageErrorState title="Couldn’t load attestations" onRetry={() => refetch()} />;
@@ -201,60 +265,13 @@ export function AgencyProtectionView() {
           description="Record how you protect client money before marketing your agency."
         />
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-border bg-card">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                <th className="px-4 py-2.5 font-medium">Scheme</th>
-                <th className="px-4 py-2.5 font-medium">Cover</th>
-                <th className="px-4 py-2.5 font-medium">Segregated</th>
-                <th className="px-4 py-2.5 font-medium">Valid</th>
-                <th className="px-4 py-2.5 font-medium">Status</th>
-                <th className="px-4 py-2.5" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/60">
-              {data.map((a) => (
-                <tr key={a.id}>
-                  <td className="px-4 py-2.5">
-                    <span className="block text-foreground">{a.schemeName}</span>
-                    {a.schemeReference && (
-                      <span className="block text-xs text-muted-foreground">
-                        {a.schemeReference}
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-2.5 text-muted-foreground">
-                    {a.coverageAmount != null ? formatCurrency(a.coverageAmount) : '—'}
-                  </td>
-                  <td className="px-4 py-2.5 text-muted-foreground">
-                    {a.segregationConfirmed ? 'Yes' : 'No'}
-                  </td>
-                  <td className="px-4 py-2.5 text-muted-foreground">
-                    {formatDate(a.effectiveFrom)} –{' '}
-                    {a.effectiveTo ? formatDate(a.effectiveTo) : 'open'}
-                  </td>
-                  <td className="px-4 py-2.5">
-                    <Badge variant={STATUS_VARIANT[a.status]}>{a.status.toLowerCase()}</Badge>
-                  </td>
-                  <td className="px-4 py-2.5 text-right">
-                    {a.status === 'ACTIVE' && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => revokeMutation.mutate(a.id)}
-                        disabled={revokeMutation.isPending}
-                        isLoading={revokeMutation.isPending && revokeMutation.variables === a.id}
-                      >
-                        Revoke
-                      </Button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          caption="Client-money protection attestations"
+          density="compact"
+          columns={columns}
+          data={data}
+          getRowKey={(a) => a.id}
+        />
       )}
     </div>
   );

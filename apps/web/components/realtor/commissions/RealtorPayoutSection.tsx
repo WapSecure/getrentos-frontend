@@ -9,8 +9,11 @@ import {
   Button,
   Card,
   ConfirmDialog,
+  DataTable,
+  EmptyState,
   Pagination,
   type BadgeVariant,
+  type Column,
 } from '@sureground/ui';
 import { ROUTES } from '@/lib/constants/auth';
 import { formatCurrency, formatDate } from '@/lib/format';
@@ -22,7 +25,7 @@ import {
   isVerificationGateError,
 } from '@/components/shared/verification/VerificationRequiredNotice';
 import { payoutDestination } from '@/lib/payoutDestination';
-import type { RealtorPayoutStatus } from '@/types/realtor';
+import type { RealtorPayout, RealtorPayoutStatus } from '@/types/realtor';
 import { BankAccountFields } from '@/components/shared/payouts/BankAccountFields';
 import {
   PAYOUT_CHANGE_COOLDOWN_HINT,
@@ -50,6 +53,49 @@ const PAYOUT_STATUS: Record<RealtorPayoutStatus, { label: string; variant: Badge
 };
 
 // The withdrawal block reason comes from the summary, not a 403: a dispute hold and missing evidence need different advice.
+const payoutColumns: Column<RealtorPayout>[] = [
+  {
+    key: 'requested',
+    header: 'Requested',
+    className: 'text-muted-foreground whitespace-nowrap',
+    render: (p) => formatDate(p.createdAt),
+  },
+  {
+    key: 'commissions',
+    header: 'Commissions',
+    numeric: true,
+    className: 'text-muted-foreground whitespace-nowrap',
+    render: (p) => p.commissionCount,
+  },
+  {
+    key: 'amount',
+    header: 'Amount',
+    numeric: true,
+    className: 'font-medium text-foreground whitespace-nowrap',
+    render: (p) => formatCurrency(p.amount),
+  },
+  {
+    key: 'status',
+    header: 'Status',
+    className: 'min-w-56',
+    render: (p) => {
+      const meta = PAYOUT_STATUS[p.status];
+      return (
+        <>
+          <Badge variant={meta.variant}>{meta.label}</Badge>
+          <PayoutRowDetails
+            state={p.status === 'success' ? 'paid' : p.status === 'failed' ? 'failed' : 'pending'}
+            paidAt={p.paidAt}
+            transferRef={p.transferRef}
+            failureReason={p.failureReason}
+            sentTo={p.sentTo}
+          />
+        </>
+      );
+    },
+  },
+];
+
 export const RealtorPayoutSection = () => {
   const queryClient = useQueryClient();
   const [bankCode, setBankCode] = useState('');
@@ -272,70 +318,30 @@ export const RealtorPayoutSection = () => {
         onConfirm={() => withdraw.mutate()}
       />
 
-      <Card>
-        <div className="px-5 pt-5">
-          <h3 className="text-sm font-semibold text-foreground">Payout history</h3>
-        </div>
-        <div className="overflow-x-auto mt-3">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                <th className="p-4 font-medium">Requested</th>
-                <th className="p-4 font-medium">Commissions</th>
-                <th className="p-4 font-medium">Amount</th>
-                <th className="p-4 font-medium">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {rows.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="p-8 text-center text-sm text-muted-foreground">
-                    No payouts yet. Withdrawing your available commission creates one.
-                  </td>
-                </tr>
-              ) : (
-                rows.map((p) => {
-                  const meta = PAYOUT_STATUS[p.status];
-                  return (
-                    <tr key={p.id} className="hover:bg-secondary transition-colors">
-                      <td className="p-4 text-muted-foreground whitespace-nowrap">
-                        {formatDate(p.createdAt)}
-                      </td>
-                      <td className="p-4 text-muted-foreground whitespace-nowrap">
-                        {p.commissionCount}
-                      </td>
-                      <td className="p-4 font-medium text-foreground whitespace-nowrap">
-                        {formatCurrency(p.amount)}
-                      </td>
-                      <td className="p-4 min-w-56">
-                        <Badge variant={meta.variant}>{meta.label}</Badge>
-                        <PayoutRowDetails
-                          state={
-                            p.status === 'success'
-                              ? 'paid'
-                              : p.status === 'failed'
-                                ? 'failed'
-                                : 'pending'
-                          }
-                          paidAt={p.paidAt}
-                          transferRef={p.transferRef}
-                          failureReason={p.failureReason}
-                          sentTo={p.sentTo}
-                        />
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-        {total > 0 && (
-          <div className="p-5">
-            <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPageChange={setPage} />
-          </div>
-        )}
-      </Card>
+      <section>
+        <h3 className="mb-3 text-sm font-semibold text-foreground">Payout history</h3>
+        <DataTable
+          caption="Payout history"
+          columns={payoutColumns}
+          data={rows}
+          getRowKey={(p) => p.id}
+          emptyState={
+            <EmptyState
+              icon={Banknote}
+              size="compact"
+              title="No payouts yet"
+              description="Withdrawing your available commission creates one."
+            />
+          }
+          footer={
+            total > 0 ? (
+              <div className="border-t border-border p-5">
+                <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPageChange={setPage} />
+              </div>
+            ) : undefined
+          }
+        />
+      </section>
     </div>
   );
 };

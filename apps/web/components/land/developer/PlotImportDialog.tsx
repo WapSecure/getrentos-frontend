@@ -4,11 +4,13 @@ import { useMemo, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import {
   Button,
+  DataTable,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogTitle,
   DocumentUpload,
+  type Column,
   type PendingUpload,
 } from '@sureground/ui';
 import { AlertTriangle, CheckCircle2, Download, FileSpreadsheet } from 'lucide-react';
@@ -25,7 +27,40 @@ import {
   PLOT_CSV_TEMPLATE_ROWS,
   parsePlotCsv,
   type ParsedPlotFile,
+  type ParsedPlotRow,
 } from './plotCsv';
+
+const previewColumns: Column<ParsedPlotRow>[] = [
+  {
+    key: 'plot',
+    header: 'Plot',
+    className: 'text-foreground',
+    render: (row) => (
+      <>
+        {row.plot.block ? `${row.plot.block} / ` : ''}
+        {row.plot.plotNumber}
+        {row.plot.isCorner ? ' · corner' : ''}
+      </>
+    ),
+  },
+  {
+    key: 'size',
+    header: 'Size',
+    className: 'text-muted-foreground',
+    render: (row) => (
+      <>
+        {row.plot.areaValue} {LAND_AREA_UNIT_LABELS[row.plot.areaUnit]}
+      </>
+    ),
+  },
+  {
+    key: 'price',
+    header: 'Price',
+    numeric: true,
+    className: 'text-foreground',
+    render: (row) => formatCurrency(row.plot.price),
+  },
+];
 
 interface PlotImportDialogProps {
   open: boolean;
@@ -212,39 +247,20 @@ const ImportBody = ({
       )}
 
       {canImport && flagged.length === 0 && preview.length > 0 && (
-        <div className="overflow-x-auto rounded-xl border border-border">
-          <table className="w-full text-sm">
-            <thead className="bg-muted/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
-              <tr>
-                <th className="px-3 py-2">Plot</th>
-                <th className="px-3 py-2">Size</th>
-                <th className="px-3 py-2 text-right">Price</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/60">
-              {preview.map((row) => (
-                <tr key={row.index}>
-                  <td className="px-3 py-2 text-foreground">
-                    {row.plot.block ? `${row.plot.block} / ` : ''}
-                    {row.plot.plotNumber}
-                    {row.plot.isCorner ? ' · corner' : ''}
-                  </td>
-                  <td className="px-3 py-2 text-muted-foreground">
-                    {row.plot.areaValue} {LAND_AREA_UNIT_LABELS[row.plot.areaUnit]}
-                  </td>
-                  <td className="px-3 py-2 text-right text-foreground">
-                    {formatCurrency(row.plot.price)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {parsed && parsed.rows.length > preview.length && (
-            <p className="border-t border-border px-3 py-2 text-xs text-muted-foreground">
-              and {parsed.rows.length - preview.length} more
-            </p>
-          )}
-        </div>
+        <DataTable
+          caption="Plots in the file"
+          density="compact"
+          columns={previewColumns}
+          data={preview}
+          getRowKey={(row) => String(row.index)}
+          footer={
+            parsed && parsed.rows.length > preview.length ? (
+              <p className="border-t border-border px-3 py-2 text-xs text-muted-foreground">
+                and {parsed.rows.length - preview.length} more
+              </p>
+            ) : undefined
+          }
+        />
       )}
 
       {canImport && !rejection && (

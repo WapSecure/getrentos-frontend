@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { CalendarClock } from 'lucide-react';
-import { Button, ConfirmDialog } from '@sureground/ui';
+import { Button, ConfirmDialog, DataTable, type Column } from '@sureground/ui';
 import { formatCurrency, formatDate } from '@sureground/shared';
 import type { LandInstallment } from '@/types/landPurchase';
 import { LandCaseSection, PanelMessage } from '@/components/admin/land/case/shared';
@@ -26,73 +26,97 @@ export const LandPurchaseSchedule = ({
   const [target, setTarget] = useState<LandInstallment | null>(null);
   const [reason, setReason] = useState('');
 
+  const columns: Column<LandInstallment>[] = [
+    {
+      key: 'sequence',
+      header: '#',
+      className: 'text-muted-foreground',
+      render: (installment) => installment.sequence,
+    },
+    {
+      key: 'due',
+      header: 'Due',
+      render: (installment) => (
+        <>
+          <p className="text-foreground">{installment.label}</p>
+          <p className="text-xs text-muted-foreground">
+            {formatDate(installment.dueDate)}
+            {installment.paidAt && ` · paid ${formatDate(installment.paidAt)}`}
+          </p>
+        </>
+      ),
+    },
+    {
+      key: 'amount',
+      header: 'Amount',
+      numeric: true,
+      render: (installment) => formatCurrency(installment.amount),
+    },
+    {
+      key: 'paid',
+      header: 'Paid',
+      numeric: true,
+      render: (installment) => formatCurrency(installment.amountPaid),
+    },
+    {
+      key: 'lateFee',
+      header: 'Late fee',
+      numeric: true,
+      render: (installment) => (
+        <span className={installment.lateFee > 0 ? 'text-destructive' : 'text-muted-foreground'}>
+          {formatCurrency(installment.lateFee)}
+        </span>
+      ),
+    },
+    {
+      key: 'outstanding',
+      header: 'Outstanding',
+      numeric: true,
+      className: 'font-medium',
+      render: (installment) => formatCurrency(installment.outstanding),
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      render: (installment) => <LandLineStatusBadge status={installment.status} />,
+    },
+    {
+      key: 'actions',
+      header: '',
+      srHeader: 'Actions',
+      align: 'right',
+      render: (installment) => {
+        const waivable =
+          canWaiveLateFee &&
+          !purchaseEnded &&
+          installment.lateFee > 0 &&
+          (installment.status === 'PENDING' || installment.status === 'OVERDUE');
+        return (
+          waivable && (
+            <Button variant="ghost" size="xs" onClick={() => setTarget(installment)}>
+              Waive late fee
+            </Button>
+          )
+        );
+      },
+    },
+  ];
+
   return (
     <LandCaseSection title="Payment schedule" icon={CalendarClock}>
       {installments.length === 0 ? (
         <PanelMessage>No installments on this contract.</PanelMessage>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border text-left text-xs uppercase tracking-[0.08em] text-muted-foreground">
-                <th className="py-2 pr-3">#</th>
-                <th className="py-2 pr-3">Due</th>
-                <th className="py-2 pr-3 text-right">Amount</th>
-                <th className="py-2 pr-3 text-right">Paid</th>
-                <th className="py-2 pr-3 text-right">Late fee</th>
-                <th className="py-2 pr-3 text-right">Outstanding</th>
-                <th className="py-2 pr-3">Status</th>
-                <th className="py-2" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/60">
-              {installments.map((installment) => {
-                const waivable =
-                  canWaiveLateFee &&
-                  !purchaseEnded &&
-                  installment.lateFee > 0 &&
-                  (installment.status === 'PENDING' || installment.status === 'OVERDUE');
-                return (
-                  <tr
-                    key={installment.id}
-                    className={installment.status === 'OVERDUE' ? 'bg-destructive/5' : undefined}
-                  >
-                    <td className="py-2 pr-3 text-muted-foreground">{installment.sequence}</td>
-                    <td className="py-2 pr-3">
-                      <p className="text-foreground">{installment.label}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {formatDate(installment.dueDate)}
-                        {installment.paidAt && ` · paid ${formatDate(installment.paidAt)}`}
-                      </p>
-                    </td>
-                    <td className="py-2 pr-3 text-right">{formatCurrency(installment.amount)}</td>
-                    <td className="py-2 pr-3 text-right">
-                      {formatCurrency(installment.amountPaid)}
-                    </td>
-                    <td
-                      className={`py-2 pr-3 text-right ${installment.lateFee > 0 ? 'text-destructive' : 'text-muted-foreground'}`}
-                    >
-                      {formatCurrency(installment.lateFee)}
-                    </td>
-                    <td className="py-2 pr-3 text-right font-medium">
-                      {formatCurrency(installment.outstanding)}
-                    </td>
-                    <td className="py-2 pr-3">
-                      <LandLineStatusBadge status={installment.status} />
-                    </td>
-                    <td className="py-2 text-right">
-                      {waivable && (
-                        <Button variant="ghost" size="xs" onClick={() => setTarget(installment)}>
-                          Waive late fee
-                        </Button>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          caption="Installments on this contract"
+          density="compact"
+          columns={columns}
+          data={installments}
+          getRowKey={(installment) => installment.id}
+          getRowClassName={(installment) =>
+            installment.status === 'OVERDUE' ? 'bg-destructive/5' : undefined
+          }
+        />
       )}
 
       <ConfirmDialog

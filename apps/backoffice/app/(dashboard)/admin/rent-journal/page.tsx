@@ -7,12 +7,14 @@ import {
   Badge,
   Button,
   Card,
+  DataTable,
   PageErrorState,
   Skeleton,
   TableSkeleton,
   Textarea,
   useToast,
   PageHeader,
+  type Column,
 } from '@sureground/ui';
 import { formatCurrency, formatDate, unwrap } from '@sureground/shared';
 import { useAdminUser } from '../layout';
@@ -21,6 +23,8 @@ import {
   adminJournalService,
   type JournalAccount,
   type JournalCheck,
+  type JournalMonth,
+  type TrialBalance,
 } from '@/services/adminJournalService';
 
 const ACCOUNT: Record<
@@ -146,6 +150,179 @@ export default function RentJournalPage() {
     onError: (e: Error) => toast.error(e.message || 'The check failed.'),
   });
 
+  const mismatchColumns: Column<JournalCheck['mismatches'][number]>[] = [
+    {
+      key: 'lease',
+      header: 'Lease',
+      className: 'font-mono text-xs',
+      render: (m) => m.leaseId.slice(0, 8),
+    },
+    {
+      key: 'account',
+      header: 'Account',
+      render: (m) => (
+        <>
+          {accountInfo(m.account).label}
+          {m.note ? <span className="block text-xs text-muted-foreground">{m.note}</span> : null}
+        </>
+      ),
+    },
+    {
+      key: 'journal',
+      header: 'Journal',
+      numeric: true,
+      render: (m) => formatCurrency(m.journal),
+    },
+    {
+      key: 'expected',
+      header: 'Rent records',
+      numeric: true,
+      render: (m) => formatCurrency(m.expected),
+    },
+    {
+      key: 'actions',
+      header: '',
+      srHeader: 'Actions',
+      align: 'right',
+      render: (m) => (
+        <Button size="sm" variant="ghost" onClick={() => setOpenLease(m.leaseId)}>
+          Postings
+        </Button>
+      ),
+    },
+  ];
+
+  const trialColumns: Column<TrialBalance['accounts'][number]>[] = [
+    {
+      key: 'account',
+      header: 'Account',
+      render: (a) => (
+        <>
+          <span className="text-foreground">{accountInfo(a.account).label}</span>
+          <span className="block text-xs text-muted-foreground">
+            {accountInfo(a.account).side} · {accountInfo(a.account).help}
+          </span>
+        </>
+      ),
+    },
+    {
+      key: 'debit',
+      header: 'Debits',
+      numeric: true,
+      render: (a) => formatCurrency(a.debit),
+    },
+    {
+      key: 'credit',
+      header: 'Credits',
+      numeric: true,
+      render: (a) => formatCurrency(a.credit),
+    },
+    {
+      key: 'balance',
+      header: 'Balance',
+      numeric: true,
+      className: 'font-medium',
+      render: (a) => formatCurrency(a.balance),
+    },
+  ];
+
+  const monthColumns: Column<JournalMonth>[] = [
+    {
+      key: 'month',
+      header: 'Month',
+      className: 'align-top font-medium text-foreground',
+      render: (m) => m.period,
+    },
+    {
+      key: 'entries',
+      header: 'Entries',
+      numeric: true,
+      className: 'align-top',
+      render: (m) => m.entries,
+    },
+    {
+      key: 'gateway',
+      header: 'Gateway',
+      className: 'align-top text-xs text-muted-foreground',
+      render: (m) =>
+        m.gatewayEntries === 0
+          ? 'No gateway money'
+          : !m.reconciliation
+            ? 'Not reconciled'
+            : m.reconciliation.status === 'RESOLVED'
+              ? 'Reconciled'
+              : `${m.reconciliation.openItems} open line${m.reconciliation.openItems === 1 ? '' : 's'}`,
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      className: 'align-top',
+      render: (m) => (
+        <>
+          <Badge variant={m.status === 'CLOSED' ? 'success' : 'neutral'}>
+            {m.status === 'CLOSED' ? 'Closed' : 'Open'}
+          </Badge>
+          {m.note && <span className="mt-1 block text-xs text-muted-foreground">{m.note}</span>}
+        </>
+      ),
+    },
+    {
+      key: 'actions',
+      header: '',
+      srHeader: 'Actions',
+      align: 'right',
+      className: 'align-top',
+      render: (m) =>
+        canRun &&
+        m.status === 'OPEN' && (
+          <div className="flex flex-col items-end gap-2">
+            <div className="flex flex-wrap justify-end gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={close.isPending}
+                isLoading={
+                  close.isPending &&
+                  close.variables?.period === m.period &&
+                  !close.variables?.reason
+                }
+                onClick={() => close.mutate({ period: m.period })}
+              >
+                Close month
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setOverrideFor(overrideFor === m.period ? null : m.period)}
+              >
+                Close with a reason
+              </Button>
+            </div>
+            {overrideFor === m.period && (
+              <div className="flex w-full max-w-72 flex-col gap-2 sm:w-72">
+                <Textarea
+                  rows={2}
+                  value={override}
+                  onChange={(e) => setOverride(e.target.value)}
+                  placeholder="Why it closes without a clean reconciliation (at least 10 characters)"
+                  aria-label={`Reason for closing ${m.period}`}
+                />
+                <Button
+                  size="sm"
+                  variant="primary"
+                  disabled={override.trim().length < 10 || close.isPending}
+                  isLoading={close.isPending && !!close.variables?.reason}
+                  onClick={() => close.mutate({ period: m.period, reason: override.trim() })}
+                >
+                  Close {m.period}
+                </Button>
+              </div>
+            )}
+          </div>
+        ),
+    },
+  ];
+
   const c = check.data;
   const t = trial.data;
 
@@ -195,43 +372,15 @@ export default function RentJournalPage() {
                 {c.mismatches.length} mismatch{c.mismatches.length === 1 ? '' : 'es'}
                 {!c.balanced ? ' and the books do not balance' : ''} · checked {formatDate(c.ranAt)}
               </p>
-              <div className="mt-3 overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="text-left text-xs text-muted-foreground">
-                    <tr>
-                      <th className="py-1 pr-4 font-medium">Lease</th>
-                      <th className="py-1 pr-4 font-medium">Account</th>
-                      <th className="py-1 pr-4 text-right font-medium">Journal</th>
-                      <th className="py-1 pr-4 text-right font-medium">Rent records</th>
-                      <th className="py-1 font-medium" />
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {c.mismatches.map((m) => (
-                      <tr key={`${m.leaseId}-${m.account}`} className="border-t border-border">
-                        <td className="py-2 pr-4 font-mono text-xs">{m.leaseId.slice(0, 8)}</td>
-                        <td className="py-2 pr-4">
-                          {accountInfo(m.account).label}
-                          {m.note ? (
-                            <span className="block text-xs text-muted-foreground">{m.note}</span>
-                          ) : null}
-                        </td>
-                        <td className="py-2 pr-4 text-right tabular-nums">
-                          {formatCurrency(m.journal)}
-                        </td>
-                        <td className="py-2 pr-4 text-right tabular-nums">
-                          {formatCurrency(m.expected)}
-                        </td>
-                        <td className="py-2 text-right">
-                          <Button size="sm" variant="ghost" onClick={() => setOpenLease(m.leaseId)}>
-                            Postings
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <DataTable
+                variant="bare"
+                className="mt-3"
+                caption="Leases where the journal and the rent records disagree"
+                density="compact"
+                columns={mismatchColumns}
+                data={c.mismatches}
+                getRowKey={(m) => `${m.leaseId}-${m.account}`}
+              />
             </div>
           )}
         </Card>
@@ -256,47 +405,19 @@ export default function RentJournalPage() {
           {!t ? (
             <TableSkeleton rows={5} columns={4} />
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="text-left text-xs text-muted-foreground">
-                  <tr>
-                    <th className="py-1 pr-4 font-medium">Account</th>
-                    <th className="py-1 pr-4 text-right font-medium">Debits</th>
-                    <th className="py-1 pr-4 text-right font-medium">Credits</th>
-                    <th className="py-1 text-right font-medium">Balance</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {t.accounts.map((a) => (
-                    <tr key={a.account} className="border-t border-border">
-                      <td className="py-2 pr-4">
-                        <span className="text-foreground">{accountInfo(a.account).label}</span>
-                        <span className="block text-xs text-muted-foreground">
-                          {accountInfo(a.account).side} · {accountInfo(a.account).help}
-                        </span>
-                      </td>
-                      <td className="py-2 pr-4 text-right tabular-nums">
-                        {formatCurrency(a.debit)}
-                      </td>
-                      <td className="py-2 pr-4 text-right tabular-nums">
-                        {formatCurrency(a.credit)}
-                      </td>
-                      <td className="py-2 text-right font-medium tabular-nums">
-                        {formatCurrency(a.balance)}
-                      </td>
-                    </tr>
-                  ))}
-                  <tr className="border-t border-border font-medium">
-                    <td className="py-2 pr-4">Total</td>
-                    <td className="py-2 pr-4 text-right tabular-nums">{formatCurrency(t.debit)}</td>
-                    <td className="py-2 pr-4 text-right tabular-nums">
-                      {formatCurrency(t.credit)}
-                    </td>
-                    <td />
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+            <DataTable
+              variant="bare"
+              caption="Trial balance by account"
+              density="compact"
+              columns={trialColumns}
+              data={t.accounts}
+              getRowKey={(a) => a.account}
+              totals={{
+                account: 'Total',
+                debit: formatCurrency(t.debit),
+                credit: formatCurrency(t.credit),
+              }}
+            />
           )}
         </Card>
       )}
@@ -319,96 +440,14 @@ export default function RentJournalPage() {
             className="min-h-0 py-10"
           />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="text-left text-xs text-muted-foreground">
-                <tr>
-                  <th className="py-1 pr-4 font-medium">Month</th>
-                  <th className="py-1 pr-4 text-right font-medium">Entries</th>
-                  <th className="py-1 pr-4 font-medium">Gateway</th>
-                  <th className="py-1 pr-4 font-medium">Status</th>
-                  <th className="py-1 font-medium" />
-                </tr>
-              </thead>
-              <tbody>
-                {(months.data ?? []).map((m) => (
-                  <tr key={m.period} className="border-t border-border align-top">
-                    <td className="py-2 pr-4 font-medium text-foreground">{m.period}</td>
-                    <td className="py-2 pr-4 text-right tabular-nums">{m.entries}</td>
-                    <td className="py-2 pr-4 text-xs text-muted-foreground">
-                      {m.gatewayEntries === 0
-                        ? 'No gateway money'
-                        : !m.reconciliation
-                          ? 'Not reconciled'
-                          : m.reconciliation.status === 'RESOLVED'
-                            ? 'Reconciled'
-                            : `${m.reconciliation.openItems} open line${m.reconciliation.openItems === 1 ? '' : 's'}`}
-                    </td>
-                    <td className="py-2 pr-4">
-                      <Badge variant={m.status === 'CLOSED' ? 'success' : 'neutral'}>
-                        {m.status === 'CLOSED' ? 'Closed' : 'Open'}
-                      </Badge>
-                      {m.note && (
-                        <span className="mt-1 block text-xs text-muted-foreground">{m.note}</span>
-                      )}
-                    </td>
-                    <td className="py-2 text-right">
-                      {canRun && m.status === 'OPEN' && (
-                        <div className="flex flex-col items-end gap-2">
-                          <div className="flex flex-wrap justify-end gap-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              disabled={close.isPending}
-                              isLoading={
-                                close.isPending &&
-                                close.variables?.period === m.period &&
-                                !close.variables?.reason
-                              }
-                              onClick={() => close.mutate({ period: m.period })}
-                            >
-                              Close month
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() =>
-                                setOverrideFor(overrideFor === m.period ? null : m.period)
-                              }
-                            >
-                              Close with a reason
-                            </Button>
-                          </div>
-                          {overrideFor === m.period && (
-                            <div className="flex w-full max-w-72 flex-col gap-2 sm:w-72">
-                              <Textarea
-                                rows={2}
-                                value={override}
-                                onChange={(e) => setOverride(e.target.value)}
-                                placeholder="Why it closes without a clean reconciliation (at least 10 characters)"
-                                aria-label={`Reason for closing ${m.period}`}
-                              />
-                              <Button
-                                size="sm"
-                                variant="primary"
-                                disabled={override.trim().length < 10 || close.isPending}
-                                isLoading={close.isPending && !!close.variables?.reason}
-                                onClick={() =>
-                                  close.mutate({ period: m.period, reason: override.trim() })
-                                }
-                              >
-                                Close {m.period}
-                              </Button>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <DataTable
+            variant="bare"
+            caption="Journal months and whether each is closed"
+            density="compact"
+            columns={monthColumns}
+            data={months.data ?? []}
+            getRowKey={(m) => m.period}
+          />
         )}
       </Card>
 

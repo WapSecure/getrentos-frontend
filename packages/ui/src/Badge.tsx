@@ -18,6 +18,7 @@ interface BadgeProps {
   dot?: boolean;
   title?: string;
   className?: string;
+  'aria-label'?: string;
 }
 
 const variants: Record<BadgeVariant, string> = {
@@ -37,10 +38,12 @@ export const Badge = ({
   dot = false,
   title,
   className,
+  'aria-label': ariaLabel,
 }: BadgeProps) => {
   return (
     <span
       title={title}
+      aria-label={ariaLabel}
       className={cn(
         'inline-flex items-center gap-1.5 whitespace-nowrap rounded-sm border px-2 py-0.5 text-xs font-medium tabular-nums tracking-[-0.005em]',
         variants[variant],

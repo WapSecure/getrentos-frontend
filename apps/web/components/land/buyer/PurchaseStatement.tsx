@@ -1,11 +1,12 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { Button, Skeleton } from '@sureground/ui';
+import { Button, DataTable, Skeleton, type Column } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { buyerLandKeys } from '@/lib/landSalesQueryKeys';
 import { landBuyerService } from '@/services/landBuyerService';
+import type { LandStatementEntry } from '@/types/landBuyer';
 
 const KIND_LABELS = {
   CHARGE: 'Charge',
@@ -21,6 +22,47 @@ const BalanceCell = ({ balance }: { balance: number }) =>
   ) : (
     <>{formatCurrency(balance)}</>
   );
+
+const columns: Column<LandStatementEntry>[] = [
+  {
+    key: 'date',
+    header: 'Date',
+    className: 'whitespace-nowrap text-muted-foreground',
+    render: (entry) => formatDate(entry.date),
+  },
+  {
+    key: 'entry',
+    header: 'Entry',
+    className: 'text-foreground',
+    render: (entry) => (
+      <>
+        <span className="mr-2 text-xs text-muted-foreground">{KIND_LABELS[entry.kind]}</span>
+        {entry.description}
+      </>
+    ),
+  },
+  {
+    key: 'charged',
+    header: 'Charged',
+    numeric: true,
+    className: 'text-foreground',
+    render: (entry) => (entry.debit ? formatCurrency(entry.debit) : '–'),
+  },
+  {
+    key: 'paid',
+    header: 'Paid',
+    numeric: true,
+    className: 'text-success',
+    render: (entry) => (entry.credit ? formatCurrency(entry.credit) : '–'),
+  },
+  {
+    key: 'balance',
+    header: 'Balance',
+    numeric: true,
+    className: 'text-foreground',
+    render: (entry) => <BalanceCell balance={entry.balance} />,
+  },
+];
 
 export const PurchaseStatement = ({ purchaseId }: { purchaseId: string }) => {
   const { data, isLoading, error, refetch } = useQuery({
@@ -60,54 +102,13 @@ export const PurchaseStatement = ({ purchaseId }: { purchaseId: string }) => {
       {data.entries.length === 0 ? (
         <p className="text-sm text-muted-foreground">Nothing has been charged or paid yet.</p>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-border">
-          <table className="w-full min-w-[560px] text-sm">
-            <caption className="sr-only">Statement for {data.reference}</caption>
-            <thead className="bg-secondary/60 text-left text-xs text-muted-foreground">
-              <tr>
-                <th scope="col" className="px-3 py-2 font-medium">
-                  Date
-                </th>
-                <th scope="col" className="px-3 py-2 font-medium">
-                  Entry
-                </th>
-                <th scope="col" className="px-3 py-2 text-right font-medium">
-                  Charged
-                </th>
-                <th scope="col" className="px-3 py-2 text-right font-medium">
-                  Paid
-                </th>
-                <th scope="col" className="px-3 py-2 text-right font-medium">
-                  Balance
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {data.entries.map((entry, index) => (
-                <tr key={`${entry.date}-${index}`}>
-                  <td className="whitespace-nowrap px-3 py-2 text-muted-foreground">
-                    {formatDate(entry.date)}
-                  </td>
-                  <td className="px-3 py-2 text-foreground">
-                    <span className="mr-2 text-xs text-muted-foreground">
-                      {KIND_LABELS[entry.kind]}
-                    </span>
-                    {entry.description}
-                  </td>
-                  <td className="px-3 py-2 text-right tabular-nums text-foreground">
-                    {entry.debit ? formatCurrency(entry.debit) : '–'}
-                  </td>
-                  <td className="px-3 py-2 text-right tabular-nums text-success">
-                    {entry.credit ? formatCurrency(entry.credit) : '–'}
-                  </td>
-                  <td className="px-3 py-2 text-right tabular-nums text-foreground">
-                    <BalanceCell balance={entry.balance} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          caption={`Statement for ${data.reference}`}
+          density="compact"
+          columns={columns}
+          data={data.entries}
+          getRowKey={(entry, index) => `${entry.date}-${index}`}
+        />
       )}
       <p className="text-xs text-muted-foreground">
         Balance is what you owe on instalments due so far; credit means you paid for an instalment

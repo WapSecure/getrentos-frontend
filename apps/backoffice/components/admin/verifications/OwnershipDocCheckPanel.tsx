@@ -3,19 +3,19 @@
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 import { ShieldCheck, Sparkles, AlertTriangle, CheckCircle2 } from 'lucide-react';
-import { Alert, Button } from '@sureground/ui';
+import { Alert, Badge, Button, type BadgeVariant } from '@sureground/ui';
 import { unwrap } from '@sureground/shared';
 import { adminService } from '@/services/adminService';
 import type { OwnershipDocCheck, OwnershipProofRef } from '@/types/admin';
 
 const NAME_MATCH_STYLE: Record<
   OwnershipDocCheck['nameMatch'],
-  { label: string; className: string }
+  { label: string; variant: BadgeVariant }
 > = {
-  MATCH: { label: 'Name matches', className: 'bg-green-500/15 text-green-600' },
-  PARTIAL: { label: 'Partial name match', className: 'bg-yellow-500/15 text-yellow-600' },
-  MISMATCH: { label: 'Name mismatch', className: 'bg-red-500/15 text-red-600' },
-  UNREADABLE: { label: 'Name unreadable', className: 'bg-muted text-muted-foreground' },
+  MATCH: { label: 'Name matches', variant: 'success' },
+  PARTIAL: { label: 'Partial name match', variant: 'warning' },
+  MISMATCH: { label: 'Name mismatch', variant: 'danger' },
+  UNREADABLE: { label: 'Name unreadable', variant: 'neutral' },
 };
 
 export const OwnershipDocCheckPanel = ({ proofs }: { proofs: OwnershipProofRef[] }) => {
@@ -84,24 +84,22 @@ const DocCheckResult = ({ result }: { result: OwnershipDocCheck }) => {
       ) : (
         <>
           <div className="flex flex-wrap gap-1.5">
-            <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${match.className}`}>
-              {match.label}
-            </span>
-            <span
-              className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+            <Badge variant={match.variant}>{match.label}</Badge>
+            <Badge
+              variant={
                 result.addressConsistent === false
-                  ? 'bg-red-500/15 text-red-600'
+                  ? 'danger'
                   : result.addressConsistent === true
-                    ? 'bg-green-500/15 text-green-600'
-                    : 'bg-muted text-muted-foreground'
-              }`}
+                    ? 'success'
+                    : 'neutral'
+              }
             >
               {result.addressConsistent === false
                 ? 'Address inconsistent'
                 : result.addressConsistent === true
                   ? 'Address consistent'
                   : 'Address not compared'}
-            </span>
+            </Badge>
           </div>
 
           <dl className="space-y-1 text-xs">

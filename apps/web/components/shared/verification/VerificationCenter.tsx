@@ -22,6 +22,7 @@ import {
 import Link from 'next/link';
 import {
   Alert,
+  Badge,
   Button,
   Dialog,
   DialogContent,
@@ -34,6 +35,7 @@ import {
   Progress,
   Select,
   Skeleton,
+  type BadgeVariant,
 } from '@sureground/ui';
 import { TIER_LABELS } from './trustTiers';
 import { LiveSelfieCapture, liveCaptureBlocker } from './LiveSelfieCapture';
@@ -774,25 +776,25 @@ export const VerificationCenter = ({
     null;
   const openKey = openStage ?? currentKey;
 
-  const overall = isVerified
-    ? { label: 'Verified', cls: 'bg-success-subtle text-success' }
+  const overall: { label: string; variant: BadgeVariant } = isVerified
+    ? { label: 'Verified', variant: 'success' }
     : kyc?.verificationStatus === 'REJECTED' || verification?.decision === 'REJECT'
-      ? { label: 'Rejected', cls: 'bg-destructive-subtle text-destructive' }
+      ? { label: 'Rejected', variant: 'danger' }
       : stages.some((s) => s.status === 'review')
-        ? { label: 'In review', cls: 'bg-warning-subtle text-warning' }
+        ? { label: 'In review', variant: 'warning' }
         : stages.some((s) => s.status === 'waiting')
-          ? { label: 'Checking…', cls: 'bg-info-subtle text-info' }
+          ? { label: 'Checking…', variant: 'info' }
           : doneCount === 0
-            ? { label: 'Not started', cls: 'bg-secondary text-muted-foreground' }
-            : { label: `${doneCount} of ${stages.length} done`, cls: 'bg-accent text-primary' };
+            ? { label: 'Not started', variant: 'neutral' }
+            : { label: `${doneCount} of ${stages.length} done`, variant: 'primary' };
 
-  const STAGE_CHIP: Record<StageStatus, { label: string; cls: string }> = {
-    done: { label: 'Done', cls: 'bg-success-subtle text-success' },
-    todo: { label: 'Needs you', cls: 'bg-accent text-primary' },
-    failed: { label: 'Did not pass', cls: 'bg-destructive-subtle text-destructive' },
-    review: { label: 'In review', cls: 'bg-warning-subtle text-warning' },
-    waiting: { label: 'Checking…', cls: 'bg-info-subtle text-info' },
-    pending: { label: '', cls: '' },
+  const STAGE_CHIP: Record<StageStatus, { label: string; variant: BadgeVariant }> = {
+    done: { label: 'Done', variant: 'success' },
+    todo: { label: 'Needs you', variant: 'primary' },
+    failed: { label: 'Did not pass', variant: 'danger' },
+    review: { label: 'In review', variant: 'warning' },
+    waiting: { label: 'Checking…', variant: 'info' },
+    pending: { label: '', variant: 'neutral' },
   };
 
   return (
@@ -821,16 +823,14 @@ export const VerificationCenter = ({
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <span className={cn('rounded-full px-3 py-1 text-xs font-semibold', overall.cls)}>
-              {overall.label}
-            </span>
+            <Badge variant={overall.variant}>{overall.label}</Badge>
             {kyc?.tier !== undefined && (
-              <span
-                className="rounded-full border border-primary/40 px-3 py-1 text-xs font-semibold text-primary"
+              <Badge
+                variant="primary"
                 title={`${TIER_LABELS[kyc.tier] ?? ''}${kyc.trustScore !== undefined ? ` · trust score ${kyc.trustScore}` : ''}`}
               >
                 Trust tier {kyc.tier}
-              </span>
+              </Badge>
             )}
           </div>
         </div>
@@ -934,14 +934,9 @@ export const VerificationCenter = ({
                     <span className="mt-0.5 block text-xs text-muted-foreground">{stage.hint}</span>
                   </span>
                   {chip.label && (
-                    <span
-                      className={cn(
-                        'shrink-0 rounded-full px-2.5 py-0.5 text-2xs font-semibold',
-                        chip.cls
-                      )}
-                    >
+                    <Badge variant={chip.variant} className="shrink-0">
                       {chip.label}
-                    </span>
+                    </Badge>
                   )}
                   <ChevronDown
                     className={cn(

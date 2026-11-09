@@ -2,7 +2,7 @@
 
 import { ReceiptText } from 'lucide-react';
 import { formatCurrency } from '@sureground/shared';
-import { Badge, Card, CardSkeleton, type BadgeVariant } from '@sureground/ui';
+import { Badge, Card, CardSkeleton, DataTable, type BadgeVariant } from '@sureground/ui';
 import { useInvoices } from '@/hooks/useBilling';
 import type { SubscriptionInvoice } from '@/services/billingService';
 
@@ -56,43 +56,54 @@ export function BillingHistoryCard() {
         </div>
       </div>
 
-      <div className="mt-5 overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
-              <th className="pb-2 font-medium">Date</th>
-              <th className="pb-2 font-medium">Description</th>
-              <th className="pb-2 font-medium">Invoice</th>
-              <th className="pb-2 text-right font-medium">Amount</th>
-              <th className="pb-2 text-right font-medium">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {invoices.items.map((invoice) => (
-              <tr key={invoice.id} className="border-b border-border/60 last:border-0">
-                <td className="py-3 whitespace-nowrap text-muted-foreground">
-                  {day(invoice.paidAt ?? invoice.createdAt)}
-                </td>
-                <td className="py-3">
-                  <p className="text-foreground">{invoice.description}</p>
-                  {invoice.periodStart && invoice.periodEnd && (
-                    <p className="text-xs text-muted-foreground">
-                      {day(invoice.periodStart)} – {day(invoice.periodEnd)}
-                    </p>
-                  )}
-                </td>
-                <td className="py-3 font-mono text-xs text-muted-foreground">{invoice.number}</td>
-                <td className="py-3 text-right whitespace-nowrap font-medium text-foreground">
-                  {naira(invoice.amountKobo)}
-                </td>
-                <td className="py-3 text-right">
-                  <StatusPill status={invoice.status} />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        variant="bare"
+        caption="Billing history"
+        className="mt-5"
+        data={invoices.items}
+        getRowKey={(invoice) => invoice.id}
+        columns={[
+          {
+            key: 'date',
+            header: 'Date',
+            className: 'whitespace-nowrap text-muted-foreground',
+            render: (invoice) => day(invoice.paidAt ?? invoice.createdAt),
+          },
+          {
+            key: 'description',
+            header: 'Description',
+            render: (invoice) => (
+              <>
+                <p className="text-foreground">{invoice.description}</p>
+                {invoice.periodStart && invoice.periodEnd && (
+                  <p className="text-xs text-muted-foreground">
+                    {day(invoice.periodStart)} – {day(invoice.periodEnd)}
+                  </p>
+                )}
+              </>
+            ),
+          },
+          {
+            key: 'invoice',
+            header: 'Invoice',
+            className: 'font-mono text-xs text-muted-foreground',
+            render: (invoice) => invoice.number,
+          },
+          {
+            key: 'amount',
+            header: 'Amount',
+            numeric: true,
+            className: 'whitespace-nowrap font-medium text-foreground',
+            render: (invoice) => naira(invoice.amountKobo),
+          },
+          {
+            key: 'status',
+            header: 'Status',
+            align: 'right',
+            render: (invoice) => <StatusPill status={invoice.status} />,
+          },
+        ]}
+      />
 
       <p className="mt-3 text-xs text-muted-foreground">
         Questions about a charge? Quote the invoice number and we can find it straight away.

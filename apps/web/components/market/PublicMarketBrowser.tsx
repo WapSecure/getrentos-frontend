@@ -40,6 +40,7 @@ import { PROPERTY_TYPE_OPTIONS } from '@/lib/propertyTypes';
 import { SaveListingButton } from './SaveListingButton';
 import { ListingComparisonDialog } from './ListingComparisonDialog';
 import { trustChainLabel } from '@sureground/shared';
+import { TRUST_TONE_VARIANT } from '@/components/shared/trust/TrustChainBadge';
 
 // Shared with the server component that pre-renders the first page, so both ask for the same page size.
 const PAGE_SIZE = PUBLIC_MARKET_PAGE_SIZE;
@@ -93,10 +94,18 @@ const ListingCard = ({
             title={listing.trustChain?.steps
               .map((s) => `${s.met ? '✓' : '○'} ${s.label}`)
               .join('\n')}
-            className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-white/40 bg-black/65 px-3 py-1.5 text-xs font-semibold text-white shadow-sm backdrop-blur-md"
+            className="absolute left-4 top-4"
           >
-            <BadgeCheck className="h-3.5 w-3.5" aria-hidden="true" />
-            {listing.trustChain ? trustChainLabel(listing.trustChain).label : 'Verified listing'}
+            <Badge
+              variant={
+                listing.trustChain
+                  ? TRUST_TONE_VARIANT[trustChainLabel(listing.trustChain).tone]
+                  : 'success'
+              }
+              icon={<BadgeCheck className="h-3.5 w-3.5" aria-hidden="true" />}
+            >
+              {listing.trustChain ? trustChainLabel(listing.trustChain).label : 'Verified listing'}
+            </Badge>
           </span>
         )}
         <SaveListingButton

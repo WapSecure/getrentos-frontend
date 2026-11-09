@@ -30,15 +30,14 @@ export function CapabilityChip({ on, label }: { on: boolean; label: string }) {
   const meaning = CAPABILITY_MEANING[label] ?? label;
   const description = `${meaning}: ${on ? 'allowed' : 'not allowed under this agreement'}`;
   return (
-    <span
+    <Badge
+      variant={on ? 'success' : 'neutral'}
       title={description}
       aria-label={description}
-      className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-        on ? 'bg-success-subtle text-success' : 'bg-muted text-muted-foreground line-through'
-      }`}
+      className={on ? undefined : 'line-through'}
     >
       {label}
-    </span>
+    </Badge>
   );
 }
 

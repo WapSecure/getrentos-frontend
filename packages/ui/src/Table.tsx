@@ -1,11 +1,12 @@
-import { ReactNode } from 'react';
+import { Fragment, type HTMLAttributes, type ReactNode } from 'react';
 import { cn } from '@sureground/shared';
 import { TableSkeleton } from './Skeleton';
 
 export interface Column<T> {
   key: string;
-  header: string;
-  render: (row: T) => ReactNode;
+  /** Usually text; a node allows a select-all checkbox. */
+  header: ReactNode;
+  render: (row: T, index: number) => ReactNode;
   className?: string;
   align?: 'left' | 'center' | 'right';
   /** Right-aligned with tabular figures, so amounts line up digit for digit. */
@@ -17,9 +18,15 @@ export interface Column<T> {
 interface DataTableProps<T> {
   columns: Column<T>[];
   data: T[];
-  getRowKey: (row: T) => string;
+  getRowKey: (row: T, index: number) => string;
   onRowClick?: (row: T) => void;
-  getRowClassName?: (row: T) => string | undefined;
+  getRowClassName?: (row: T, index: number) => string | undefined;
+  /** Extra attributes for a row, such as aria-current on the next instalment. */
+  getRowProps?: (row: T, index: number) => HTMLAttributes<HTMLTableRowElement>;
+  /** A full-width panel under the row (payment history, line items); return null to show none. */
+  renderExpanded?: (row: T, index: number) => ReactNode;
+  /** A totals row aligned under its columns, keyed by column key. */
+  totals?: Partial<Record<string, ReactNode>>;
   isLoading?: boolean;
   emptyState?: ReactNode;
   footer?: ReactNode;
@@ -27,7 +34,17 @@ interface DataTableProps<T> {
   /** Read by screen readers only: what the table lists. */
   caption?: string;
   density?: 'comfortable' | 'compact';
+  /** Below this width the table scrolls sideways instead of squeezing its columns. */
+  minWidth?: string;
+  /** `bare` sits inside a Card that already draws the frame. */
+  variant?: 'card' | 'bare';
 }
+
+const alignClass = (column: { align?: string; numeric?: boolean }) =>
+  cn(
+    column.align === 'center' && 'text-center',
+    (column.align === 'right' || column.numeric) && 'text-right tabular-nums'
+  );
 
 export function DataTable<T>({
   columns,
@@ -35,12 +52,17 @@ export function DataTable<T>({
   getRowKey,
   onRowClick,
   getRowClassName,
+  getRowProps,
+  renderExpanded,
+  totals,
   isLoading = false,
   emptyState,
   footer,
   className,
   caption,
   density = 'comfortable',
+  minWidth,
+  variant = 'card',
 }: DataTableProps<T>) {
   const cellY = density === 'compact' ? 'py-2.5' : 'py-3.5';
   if (isLoading) {
@@ -53,16 +75,20 @@ export function DataTable<T>({
 
   return (
     <div
-      className={cn('overflow-hidden rounded-xl border border-border bg-card shadow-xs', className)}
+      className={cn(
+        variant === 'card' && 'overflow-hidden rounded-xl border border-border bg-card shadow-xs',
+        className
+      )}
     >
       <div className="overflow-x-auto" tabIndex={0}>
-        <table className="w-full text-sm">
+        <table className="w-full text-sm" style={minWidth ? { minWidth } : undefined}>
           {caption && <caption className="sr-only">{caption}</caption>}
           <thead className="sticky top-0 z-10">
             <tr className="border-b border-border bg-secondary/40 text-left backdrop-blur-sm">
               {columns.map((column) => (
                 <th
                   key={column.key}
+                  scope="col"
                   className={cn(
                     'whitespace-nowrap px-4 py-2.5 text-xs font-medium tracking-[0.01em] text-muted-foreground first:pl-5 last:pr-5',
                     column.align === 'center' && 'text-center',
@@ -76,45 +102,72 @@ export function DataTable<T>({
             </tr>
           </thead>
           <tbody className="divide-y divide-border/60">
-            {data.map((row) => (
-              <tr
-                key={getRowKey(row)}
-                onClick={onRowClick ? () => onRowClick(row) : undefined}
-                tabIndex={onRowClick ? 0 : undefined}
-                onKeyDown={
-                  onRowClick
-                    ? (event) => {
-                        if (event.key === 'Enter' || event.key === ' ') {
-                          event.preventDefault();
-                          onRowClick(row);
-                        }
-                      }
-                    : undefined
-                }
-                className={cn(
-                  'transition-colors duration-150 hover:bg-secondary/40',
-                  onRowClick &&
-                    'cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring',
-                  getRowClassName?.(row)
-                )}
-              >
+            {data.map((row, index) => {
+              const expanded = renderExpanded?.(row, index);
+              return (
+                <Fragment key={getRowKey(row, index)}>
+                  <tr
+                    {...getRowProps?.(row, index)}
+                    onClick={onRowClick ? () => onRowClick(row) : undefined}
+                    tabIndex={onRowClick ? 0 : undefined}
+                    onKeyDown={
+                      onRowClick
+                        ? (event) => {
+                            // Only the row itself: Space on a button inside it must not open the row too.
+                            if (event.target !== event.currentTarget) return;
+                            if (event.key === 'Enter' || event.key === ' ') {
+                              event.preventDefault();
+                              onRowClick(row);
+                            }
+                          }
+                        : undefined
+                    }
+                    className={cn(
+                      'transition-colors duration-150 hover:bg-secondary/40',
+                      onRowClick &&
+                        'cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring',
+                      getRowClassName?.(row, index)
+                    )}
+                  >
+                    {columns.map((column) => (
+                      <td
+                        key={column.key}
+                        className={cn(
+                          'px-4 align-middle first:pl-5 last:pr-5',
+                          cellY,
+                          alignClass(column),
+                          column.className
+                        )}
+                      >
+                        {column.render(row, index)}
+                      </td>
+                    ))}
+                  </tr>
+                  {expanded ? (
+                    <tr className="bg-secondary/20">
+                      <td colSpan={columns.length} className="px-5 py-4">
+                        {expanded}
+                      </td>
+                    </tr>
+                  ) : null}
+                </Fragment>
+              );
+            })}
+          </tbody>
+          {totals && (
+            <tfoot>
+              <tr className="border-t border-border bg-secondary/30 font-semibold text-foreground">
                 {columns.map((column) => (
                   <td
                     key={column.key}
-                    className={cn(
-                      'px-4 align-middle first:pl-5 last:pr-5',
-                      cellY,
-                      column.align === 'center' && 'text-center',
-                      (column.align === 'right' || column.numeric) && 'text-right tabular-nums',
-                      column.className
-                    )}
+                    className={cn('px-4 first:pl-5 last:pr-5', cellY, alignClass(column))}
                   >
-                    {column.render(row)}
+                    {totals[column.key] ?? null}
                   </td>
                 ))}
               </tr>
-            ))}
-          </tbody>
+            </tfoot>
+          )}
         </table>
       </div>
       {footer}

@@ -1,9 +1,71 @@
 'use client';
 
-import { Badge } from '@sureground/ui';
+import { Badge, DataTable, type Column } from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type { LandInstallment } from '@/types/landDeveloper';
 import { INSTALLMENT_STATUS } from '../developer/labels';
+
+const columns: Column<LandInstallment>[] = [
+  {
+    key: 'label',
+    header: 'Instalment',
+    className: 'text-foreground',
+    render: (installment) => installment.label,
+  },
+  {
+    key: 'due',
+    header: 'Due',
+    className: 'whitespace-nowrap text-muted-foreground',
+    render: (installment) => formatDate(installment.dueDate),
+  },
+  {
+    key: 'amount',
+    header: 'Amount',
+    numeric: true,
+    className: 'whitespace-nowrap text-foreground',
+    render: (installment) => (
+      <>
+        {formatCurrency(installment.amount)}
+        {installment.lateFee > 0 && (
+          <span className="block text-xs text-destructive">
+            + {formatCurrency(installment.lateFee)} late fee
+          </span>
+        )}
+      </>
+    ),
+  },
+  {
+    key: 'paid',
+    header: 'Paid',
+    numeric: true,
+    className: 'whitespace-nowrap text-foreground',
+    render: (installment) => (
+      <>
+        {formatCurrency(installment.amountPaid)}
+        {installment.paidAt && (
+          <span className="block text-xs text-muted-foreground">
+            {formatDate(installment.paidAt)}
+          </span>
+        )}
+      </>
+    ),
+  },
+  {
+    key: 'owed',
+    header: 'Owed',
+    numeric: true,
+    className: 'whitespace-nowrap font-medium text-foreground',
+    render: (installment) => formatCurrency(installment.outstanding),
+  },
+  {
+    key: 'status',
+    header: 'Status',
+    render: (installment) => {
+      const status = INSTALLMENT_STATUS[installment.status] ?? INSTALLMENT_STATUS.PENDING;
+      return <Badge variant={status.variant}>{status.label}</Badge>;
+    },
+  },
+];
 
 export const InstallmentSchedule = ({ installments }: { installments: LandInstallment[] }) => {
   if (installments.length === 0) {
@@ -15,54 +77,12 @@ export const InstallmentSchedule = ({ installments }: { installments: LandInstal
   }
   const ordered = [...installments].sort((a, b) => a.sequence - b.sequence);
   return (
-    <div className="overflow-x-auto rounded-xl border border-border">
-      <table className="w-full text-sm">
-        <thead className="bg-muted/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
-          <tr>
-            <th className="px-4 py-2.5">Instalment</th>
-            <th className="px-4 py-2.5">Due</th>
-            <th className="px-4 py-2.5 text-right">Amount</th>
-            <th className="px-4 py-2.5 text-right">Paid</th>
-            <th className="px-4 py-2.5 text-right">Owed</th>
-            <th className="px-4 py-2.5">Status</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-border/60">
-          {ordered.map((installment) => {
-            const status = INSTALLMENT_STATUS[installment.status] ?? INSTALLMENT_STATUS.PENDING;
-            return (
-              <tr key={installment.id}>
-                <td className="px-4 py-2.5 text-foreground">{installment.label}</td>
-                <td className="whitespace-nowrap px-4 py-2.5 text-muted-foreground">
-                  {formatDate(installment.dueDate)}
-                </td>
-                <td className="whitespace-nowrap px-4 py-2.5 text-right text-foreground">
-                  {formatCurrency(installment.amount)}
-                  {installment.lateFee > 0 && (
-                    <span className="block text-xs text-destructive">
-                      + {formatCurrency(installment.lateFee)} late fee
-                    </span>
-                  )}
-                </td>
-                <td className="whitespace-nowrap px-4 py-2.5 text-right text-foreground">
-                  {formatCurrency(installment.amountPaid)}
-                  {installment.paidAt && (
-                    <span className="block text-xs text-muted-foreground">
-                      {formatDate(installment.paidAt)}
-                    </span>
-                  )}
-                </td>
-                <td className="whitespace-nowrap px-4 py-2.5 text-right font-medium text-foreground">
-                  {formatCurrency(installment.outstanding)}
-                </td>
-                <td className="px-4 py-2.5">
-                  <Badge variant={status.variant}>{status.label}</Badge>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
+    <DataTable
+      caption="Instalment schedule"
+      density="compact"
+      columns={columns}
+      data={ordered}
+      getRowKey={(installment) => installment.id}
+    />
   );
 };

@@ -137,9 +137,9 @@ export const DisputeCaseModal = ({
               <Badge variant={STATUS_VARIANT[dispute.status]} className="capitalize">
                 {dispute.status.replace('_', ' ')}
               </Badge>
-              <span className="rounded-full bg-accent px-2.5 py-1 text-xs font-medium text-muted-foreground capitalize">
+              <Badge variant="neutral" className="capitalize">
                 {dispute.category.replace('_', ' ')}
-              </span>
+              </Badge>
             </div>
           </div>
         </div>
@@ -222,9 +222,7 @@ export const DisputeCaseModal = ({
                 <p className="text-xs font-semibold text-foreground uppercase tracking-wide">
                   Escrow transaction
                 </p>
-                <span className="rounded-full bg-accent px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
-                  {ESCROW_LABEL[tx.escrowStatus] ?? tx.escrowStatus}
-                </span>
+                <Badge variant="neutral">{ESCROW_LABEL[tx.escrowStatus] ?? tx.escrowStatus}</Badge>
               </div>
               <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground">
                 {tx.property && (

@@ -1,4 +1,4 @@
-import { Alert } from '@sureground/ui';
+import { Alert, Badge, DataTable } from '@sureground/ui';
 import { AlertTriangle } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type { LandInstallment } from '@/types/landBuyer';
@@ -44,76 +44,82 @@ export const PaymentSchedule = ({
         </Alert>
       )}
 
-      <div className="overflow-x-auto rounded-xl border border-border">
-        <table className="w-full min-w-[560px] text-sm">
-          <caption className="sr-only">Payment schedule</caption>
-          <thead className="bg-secondary/60 text-left text-xs text-muted-foreground">
-            <tr>
-              <th scope="col" className="px-3 py-2 font-medium">
-                Instalment
-              </th>
-              <th scope="col" className="px-3 py-2 font-medium">
-                Due
-              </th>
-              <th scope="col" className="px-3 py-2 text-right font-medium">
-                Amount
-              </th>
-              <th scope="col" className="px-3 py-2 text-right font-medium">
-                Late fee
-              </th>
-              <th scope="col" className="px-3 py-2 text-right font-medium">
-                Owed
-              </th>
-              <th scope="col" className="px-3 py-2 font-medium">
-                Status
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {ordered.map((i) => {
-              const next = i.id === summary.nextInstallmentId;
-              return (
-                <tr
-                  key={i.id}
-                  className={
-                    i.status === 'OVERDUE' ? 'bg-destructive/5' : next ? 'bg-primary/5' : undefined
-                  }
-                  aria-current={next ? 'step' : undefined}
-                >
-                  <td className="px-3 py-2 text-foreground">
-                    {i.label}
-                    {next && (
-                      <span className="ml-2 rounded-full bg-primary px-2 py-0.5 text-2xs font-semibold uppercase text-primary-foreground">
-                        Next
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-3 py-2 text-muted-foreground">{formatDate(i.dueDate)}</td>
-                  <td className="px-3 py-2 text-right tabular-nums text-foreground">
-                    {formatCurrency(i.amount)}
-                  </td>
-                  <td
-                    className={`px-3 py-2 text-right tabular-nums ${i.lateFee > 0 ? 'text-destructive' : 'text-muted-foreground'}`}
-                  >
-                    {i.lateFee > 0 ? formatCurrency(i.lateFee) : '–'}
-                  </td>
-                  <td className="px-3 py-2 text-right tabular-nums text-foreground">
-                    {i.outstanding > 0 ? formatCurrency(i.outstanding) : '–'}
-                  </td>
-                  <td className="px-3 py-2">
-                    <InstallmentStatusBadge status={i.status} />
-                    {i.paidAt && (
-                      <span className="ml-2 text-xs text-muted-foreground">
-                        {formatDate(i.paidAt)}
-                      </span>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        caption="Payment schedule"
+        density="compact"
+        minWidth="560px"
+        data={ordered}
+        getRowKey={(i) => i.id}
+        getRowClassName={(i) =>
+          i.status === 'OVERDUE'
+            ? 'bg-destructive/5'
+            : i.id === summary.nextInstallmentId
+              ? 'bg-primary/5'
+              : undefined
+        }
+        getRowProps={(i) => ({
+          'aria-current': i.id === summary.nextInstallmentId ? 'step' : undefined,
+        })}
+        columns={[
+          {
+            key: 'instalment',
+            header: 'Instalment',
+            className: 'text-foreground',
+            render: (i) => (
+              <>
+                {i.label}
+                {i.id === summary.nextInstallmentId && (
+                  <Badge variant="primary" className="ml-2">
+                    Next
+                  </Badge>
+                )}
+              </>
+            ),
+          },
+          {
+            key: 'due',
+            header: 'Due',
+            className: 'text-muted-foreground',
+            render: (i) => formatDate(i.dueDate),
+          },
+          {
+            key: 'amount',
+            header: 'Amount',
+            numeric: true,
+            className: 'text-foreground',
+            render: (i) => formatCurrency(i.amount),
+          },
+          {
+            key: 'lateFee',
+            header: 'Late fee',
+            numeric: true,
+            render: (i) => (
+              <span className={i.lateFee > 0 ? 'text-destructive' : 'text-muted-foreground'}>
+                {i.lateFee > 0 ? formatCurrency(i.lateFee) : '–'}
+              </span>
+            ),
+          },
+          {
+            key: 'owed',
+            header: 'Owed',
+            numeric: true,
+            className: 'text-foreground',
+            render: (i) => (i.outstanding > 0 ? formatCurrency(i.outstanding) : '–'),
+          },
+          {
+            key: 'status',
+            header: 'Status',
+            render: (i) => (
+              <>
+                <InstallmentStatusBadge status={i.status} />
+                {i.paidAt && (
+                  <span className="ml-2 text-xs text-muted-foreground">{formatDate(i.paidAt)}</span>
+                )}
+              </>
+            ),
+          },
+        ]}
+      />
       {installments.length === 1 && installments[0].sequence === 0 && (
         <p className="text-xs text-muted-foreground">
           The monthly schedule is built when the deposit is paid; the first instalment falls a month

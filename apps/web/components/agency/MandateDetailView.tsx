@@ -119,13 +119,9 @@ export function MandateDetailView() {
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Scope</p>
           <div className="mt-1.5 flex flex-wrap gap-1.5">
             {mandate.scope.map((scope) => (
-              <span
-                key={scope}
-                title={MANDATE_SCOPE_LABELS[scope]}
-                className="rounded-full bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground"
-              >
+              <Badge key={scope} variant="primary" title={MANDATE_SCOPE_LABELS[scope]}>
                 {MANDATE_SCOPE_CHIP[scope]}
-              </span>
+              </Badge>
             ))}
             <span className="sr-only">Capabilities granted by this scope:</span>
             <CapabilityChip on={mandate.capabilities.canList} label="list" />
