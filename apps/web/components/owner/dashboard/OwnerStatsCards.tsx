@@ -3,6 +3,7 @@
 import { Eye, EyeOff } from '@sureground/icons';
 import { IconButton, StatGroup } from '@sureground/ui';
 import { useMonetaryVisibility } from '@/hooks/useMonetaryVisibility';
+import { usePlanTier } from '@/hooks/usePlanTier';
 import { formatCurrency } from '@/lib/format';
 import { ROUTES } from '@/lib/constants/auth';
 
@@ -24,6 +25,7 @@ export const OwnerStatsCards = ({
   completedSales,
 }: OwnerStatsCardsProps) => {
   const { visible, toggle } = useMonetaryVisibility();
+  const { isPro } = usePlanTier();
 
   return (
     <div className="mb-8 space-y-4">
@@ -43,7 +45,8 @@ export const OwnerStatsCards = ({
             label: 'Portfolio value',
             value: visible ? formatCurrency(totalPortfolioValue, { compact: true }) : '••••••',
             subtitle: 'Current estimate',
-            href: ROUTES.OWNER_ANALYTICS,
+            // Analytics is a Pro feature; on Free the figure would lead to an upgrade wall.
+            href: isPro ? ROUTES.OWNER_ANALYTICS : undefined,
           },
           {
             label: 'Properties',

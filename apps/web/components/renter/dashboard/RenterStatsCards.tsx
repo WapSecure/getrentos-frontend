@@ -46,7 +46,7 @@ export const RenterStatsCards = () => {
   return (
     <div className="space-y-4">
       <StatGroup
-        title="Your search"
+        title={t('dashboard.groups.your_search')}
         items={[
           {
             label: t('dashboard.stats.saved_properties'),
@@ -75,7 +75,7 @@ export const RenterStatsCards = () => {
         ]}
       />
       <StatGroup
-        title="Your home"
+        title={t('dashboard.groups.your_home')}
         items={[
           {
             label: t('dashboard.stats.current_lease'),

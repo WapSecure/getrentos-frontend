@@ -91,6 +91,8 @@ export type TranslationKey =
   | 'dashboard.stats.active_applications_subtitle'
   | 'dashboard.stats.unread_messages'
   | 'dashboard.stats.unread_messages_subtitle'
+  | 'dashboard.groups.your_search'
+  | 'dashboard.groups.your_home'
   | 'dashboard.stats.viewings_scheduled'
   | 'dashboard.stats.viewings_scheduled_subtitle'
   | 'dashboard.stats.current_lease'
@@ -192,6 +194,8 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     'dashboard.stats.active_applications_subtitle': 'In your pipeline',
     'dashboard.stats.unread_messages': 'Unread messages',
     'dashboard.stats.unread_messages_subtitle': 'Across conversations',
+    'dashboard.groups.your_search': 'Your search',
+    'dashboard.groups.your_home': 'Your home',
     'dashboard.stats.viewings_scheduled': 'Viewings scheduled',
     'dashboard.stats.viewings_scheduled_subtitle': 'This week',
     'dashboard.stats.current_lease': 'Current lease',
@@ -292,6 +296,8 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     'dashboard.stats.active_applications_subtitle': 'For house matter',
     'dashboard.stats.unread_messages': 'Message Wey I No Read',
     'dashboard.stats.unread_messages_subtitle': 'Across your conversations',
+    'dashboard.groups.your_search': 'Your house search',
+    'dashboard.groups.your_home': 'Your house',
     'dashboard.stats.viewings_scheduled': 'Viewing wey dey come',
     'dashboard.stats.viewings_scheduled_subtitle': 'Dis week',
     'dashboard.stats.current_lease': 'Agreement wey dey now',

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { SlidersHorizontal } from '@sureground/icons';
-import { Button, Card, CurrencyInput, useToast } from '@sureground/ui';
+import { Card, CurrencyInput, SaveButton, useToast } from '@sureground/ui';
 import { mine, type ManagementMandateDto } from '@/services/mandateService';
 import { spendApprovalService } from '@/services/spendApprovalService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -39,14 +39,11 @@ export function SpendCapSettings() {
 function CapRow({ mandate }: { mandate: ManagementMandateDto }) {
   const toast = useToast();
   const [cap, setCap] = useState<number>(mandate.maintenanceApprovalCap ?? 0);
-  const [saving, setSaving] = useState(false);
 
   const save = async () => {
-    setSaving(true);
     const res = await spendApprovalService.setMandateCap(mandate.id, cap > 0 ? cap : null);
-    setSaving(false);
-    if (res.success) toast.success('Approval limit saved.');
-    else toast.error(res.message || 'Could not save the limit.');
+    if (!res.success) toast.error(res.message || 'Could not save the limit.');
+    return res.success;
   };
 
   return (
@@ -63,9 +60,13 @@ function CapRow({ mandate }: { mandate: ManagementMandateDto }) {
             aria-label={`Approval limit for ${mandate.propertyTitle ?? 'property'}`}
           />
         </div>
-        <Button variant="secondary" size="sm" onClick={save} isLoading={saving}>
-          Save
-        </Button>
+        <SaveButton
+          label="Save"
+          variant="secondary"
+          size="sm"
+          onClick={save}
+          aria-label={`Save approval limit for ${mandate.propertyTitle ?? 'property'}`}
+        />
       </div>
     </div>
   );

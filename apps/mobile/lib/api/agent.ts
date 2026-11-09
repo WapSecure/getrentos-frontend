@@ -81,6 +81,7 @@ export interface AgentDashboard {
   assignedTasks: number;
   inProgressTasks: number;
   completedTasks: number;
+  completedThisWeek: number;
   overdueTasks: number;
   upcomingTasks: AgentTask[];
 }
