@@ -62,6 +62,11 @@ export const PaymentCard = ({
   // The tenant closed Paystack's page: they go back to the same checkout rather
   // than wait for it to lapse (or risk opening a second one).
   const resume = payment.status === 'processing' ? payment.resumeCheckout : undefined;
+  // A checkout left more than 30 minutes ago has no link to go back to. Without
+  // this the charge sat on "Processing" with nothing to press; paying again is
+  // safe because the API first asks Paystack about the earlier checkout and
+  // refuses if it was paid.
+  const staleCheckout = payment.status === 'processing' && !payment.resumeCheckout;
   const left = leftToPay(payment);
 
   return (
@@ -100,6 +105,12 @@ export const PaymentCard = ({
               </div>
             )}
           </div>
+          {staleCheckout && (
+            <p className="mt-2 text-sm text-muted-foreground">
+              Your last checkout wasn&apos;t finished. If you were charged, we&apos;ll find it and
+              you won&apos;t pay twice.
+            </p>
+          )}
         </div>
 
         <div className="flex flex-wrap items-center gap-4 sm:ml-auto">
@@ -140,6 +151,19 @@ export const PaymentCard = ({
                 className="whitespace-nowrap"
               >
                 Resume payment
+              </Button>
+            )}
+            {staleCheckout && (
+              <Button
+                size="sm"
+                variant="primary"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onPayNow();
+                }}
+                className="whitespace-nowrap"
+              >
+                Pay again
               </Button>
             )}
             {isHeld && (
