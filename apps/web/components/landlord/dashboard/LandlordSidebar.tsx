@@ -33,6 +33,8 @@ import {
   ShieldAlert,
   ClipboardCheck,
   PiggyBank,
+  ListChecks,
+  Workflow,
 } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n/translations';
@@ -61,63 +63,78 @@ const item = (labelKey: TranslationKey, href: string, icon: React.ElementType): 
 
 // Payments (+ Arrears), Maintenance (+ Home Management) and Financials
 // (+ Owner Statements) are tabbed hubs, so those folded entries have no row of their own.
+// Groups follow the landlord's jobs: letting a place, running the tenancy, the
+// money and records, the people who help, and growing the business.
 const baseNavGroups = [
   {
     label: 'Overview',
     items: [item('sidebar.dashboard', ROUTES.LANDLORD_DASHBOARD, LayoutDashboard)],
   },
   {
-    label: 'Portfolio and marketing',
+    label: 'Portfolio',
+    items: [item('sidebar.properties', ROUTES.LANDLORD_PROPERTIES, Building2)],
+  },
+  {
+    label: 'Lettings',
     items: [
-      item('sidebar.properties', ROUTES.LANDLORD_PROPERTIES, Building2),
-      item('sidebar.units', ROUTES.LANDLORD_UNITS, DoorOpen),
       item('sidebar.listings', ROUTES.LANDLORD_LISTINGS, Megaphone),
+      item('sidebar.viewing_requests', ROUTES.LANDLORD_VIEWING_REQUESTS, CalendarCheck),
+      item('sidebar.applications', ROUTES.LANDLORD_APPLICATIONS, FileText),
       item('sidebar.offers', ROUTES.LANDLORD_OFFERS, Handshake),
-      item('sidebar.shortlets', ROUTES.LANDLORD_SHORTLETS, BedDouble),
-      // Stays the landlord booked as a guest, apart from the ones they host above.
-      item('sidebar.shortlet_bookings', ROUTES.LANDLORD_BOOKINGS, Luggage),
       item('sidebar.landlord_leads', ROUTES.LANDLORD_LEADS, UsersRound),
+      item('sidebar.shortlets', ROUTES.LANDLORD_SHORTLETS, BedDouble),
       item('sidebar.microsite', ROUTES.LANDLORD_MICROSITE, Globe),
     ],
   },
   {
-    label: 'Tenancy operations',
+    label: 'Tenancies',
     items: [
-      item('sidebar.applications', ROUTES.LANDLORD_APPLICATIONS, FileText),
-      item('sidebar.viewing_requests', ROUTES.LANDLORD_VIEWING_REQUESTS, CalendarCheck),
       item('sidebar.tenants', ROUTES.LANDLORD_TENANTS, Users),
+      item('sidebar.units', ROUTES.LANDLORD_UNITS, DoorOpen),
       item('sidebar.leases', ROUTES.LANDLORD_LEASES, FileCheck),
       item('sidebar.inspections', ROUTES.LANDLORD_INSPECTIONS, ClipboardCheck),
       item('sidebar.deposits', ROUTES.LANDLORD_DEPOSITS, PiggyBank),
       item('sidebar.payments', ROUTES.LANDLORD_PAYMENTS, CreditCard),
       item('sidebar.maintenance', ROUTES.LANDLORD_MAINTENANCE, Wrench),
-      item('sidebar.vendors', ROUTES.LANDLORD_VENDORS, HardHat),
-    ],
-  },
-  {
-    label: 'Finance and compliance',
-    items: [
-      item('sidebar.financials', ROUTES.LANDLORD_FINANCIALS, PieChart),
       item('sidebar.notices', ROUTES.LANDLORD_NOTICES, ShieldAlert),
       item('sidebar.legal_cases', ROUTES.LANDLORD_LEGAL_CASES, Gavel),
-      item('sidebar.managed', ROUTES.LANDLORD_MANAGED, Sparkles),
-      item('sidebar.activity', ROUTES.LANDLORD_ACTIVITY, History),
-      item('sidebar.queries', ROUTES.LANDLORD_QUERIES, MessageSquareText),
-      item('sidebar.approvals', ROUTES.LANDLORD_APPROVALS, ShieldCheck),
-      item('sidebar.documents', ROUTES.LANDLORD_DOCUMENTS, FolderOpen),
     ],
   },
   {
-    label: 'Communication and account',
+    label: 'Money and records',
+    items: [
+      item('sidebar.financials', ROUTES.LANDLORD_FINANCIALS, PieChart),
+      item('sidebar.documents', ROUTES.LANDLORD_DOCUMENTS, FolderOpen),
+      item('sidebar.activity', ROUTES.LANDLORD_ACTIVITY, History),
+    ],
+  },
+  {
+    label: 'Team and partners',
     items: [
       item('sidebar.messages', ROUTES.LANDLORD_MESSAGES, MessageCircle),
-      item('sidebar.automations', ROUTES.LANDLORD_AUTOMATIONS, Megaphone),
+      item('sidebar.vendors', ROUTES.LANDLORD_VENDORS, HardHat),
       item('sidebar.realtor_access', ROUTES.LANDLORD_REALTORS, UserRoundCheck),
+      item('sidebar.managed', ROUTES.LANDLORD_MANAGED, Sparkles),
+      item('sidebar.queries', ROUTES.LANDLORD_QUERIES, MessageSquareText),
+      item('sidebar.approvals', ROUTES.LANDLORD_APPROVALS, ListChecks),
+    ],
+  },
+  {
+    label: 'Grow',
+    items: [
+      item('sidebar.automations', ROUTES.LANDLORD_AUTOMATIONS, Workflow),
       item('sidebar.reviews', ROUTES.LANDLORD_REVIEWS, Star),
       item('sidebar.referrals', ROUTES.LANDLORD_REFERRALS, Gift),
+    ],
+  },
+  {
+    label: 'Account',
+    items: [
       item('sidebar.settings', ROUTES.LANDLORD_SETTINGS, Settings),
       item('sidebar.billing', ROUTES.LANDLORD_BILLING, BadgeCheck),
       item('sidebar.verification', ROUTES.LANDLORD_VERIFICATION, ShieldCheck),
+      // Stays the landlord booked as a guest: their own account, not the portfolio.
+      item('sidebar.shortlet_bookings', ROUTES.LANDLORD_BOOKINGS, Luggage),
     ],
   },
 ];
@@ -132,7 +149,12 @@ export const navGroups = createRoleNavigation(
     ROUTES.LANDLORD_MAINTENANCE,
     ROUTES.LANDLORD_MESSAGES,
   ],
-  [ROUTES.LANDLORD_SETTINGS, ROUTES.LANDLORD_BILLING, ROUTES.LANDLORD_VERIFICATION]
+  [
+    ROUTES.LANDLORD_SETTINGS,
+    ROUTES.LANDLORD_BILLING,
+    ROUTES.LANDLORD_VERIFICATION,
+    ROUTES.LANDLORD_BOOKINGS,
+  ]
 );
 
 export const LandlordSidebar = () => {

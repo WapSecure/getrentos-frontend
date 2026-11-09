@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
@@ -54,25 +53,8 @@ export const OwnerNavbar = ({ user }: OwnerNavbarProps) => {
     <>
       <nav className={`workspace-navbar sticky top-0 z-50 ${isScrolled ? 'shadow-xs' : ''}`}>
         <div className="px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex h-16 items-center justify-between gap-3">
             <Logo size="md" />
-
-            {/* Tablet only: the sidebar is off-screen there and these two are the
-                workspace's front doors; wider screens have the sidebar itself. */}
-            <div className="hidden md:flex lg:hidden items-center gap-6">
-              <Link
-                href={ROUTES.OWNER_DASHBOARD}
-                className="text-muted-foreground hover:text-primary transition-colors"
-              >
-                Dashboard
-              </Link>
-              <Link
-                href={ROUTES.OWNER_PROPERTIES}
-                className="text-muted-foreground hover:text-primary transition-colors"
-              >
-                Properties
-              </Link>
-            </div>
 
             <div className="hidden md:flex flex-1 max-w-md mx-4">
               <SearchInput
@@ -131,7 +113,7 @@ export const OwnerNavbar = ({ user }: OwnerNavbarProps) => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-16 left-0 right-0 z-[60] bg-background border-b border-border lg:hidden max-h-[calc(100vh-4rem)] overflow-y-auto"
+            className="fixed top-16 left-0 right-0 z-[60] bg-background border-b border-border lg:hidden bottom-0 overflow-y-auto overscroll-contain"
           >
             <GroupedMobileNavigation
               ariaLabel="Property owner navigation"

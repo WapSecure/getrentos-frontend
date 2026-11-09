@@ -3,7 +3,14 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ChevronDown, Lock } from 'lucide-react';
-import { useCallback, useSyncExternalStore, type ElementType, type ReactNode } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useSyncExternalStore,
+  type ElementType,
+  type ReactNode,
+} from 'react';
 import { PLAN_TIER_LABELS, type PlanTier } from '@getrentos/shared';
 import { SidebarRailToggle, useSidebarRail } from '@getrentos/ui';
 
@@ -349,7 +356,7 @@ function MobilePrimaryNavigation({ ariaLabel, dashboardHref, groups }: GroupedSi
 
   return (
     <nav
-      className="mobile-primary-nav fixed inset-x-0 bottom-0 z-50 grid border-t border-border bg-card sm:hidden"
+      className="mobile-primary-nav fixed inset-x-0 bottom-0 z-50 grid border-t border-border bg-card lg:hidden"
       style={{ gridTemplateColumns: `repeat(${primaryItems.length}, minmax(0, 1fr))` }}
       aria-label={`${ariaLabel} primary`}
     >
@@ -437,6 +444,24 @@ export function GroupedMobileNavigation({
 }: GroupedMobileNavigationProps) {
   const pathname = usePathname();
   const activeHref = activeSidebarHref(pathname, groups, dashboardHref);
+  // The drawer is open while this is mounted. Escape closes it, and closing
+  // puts focus back on whatever opened it (the menu button), so keyboard and
+  // screen-reader users are not dropped at the top of the page.
+  const close = useRef(onNavigate);
+  useEffect(() => {
+    close.current = onNavigate;
+  });
+  useEffect(() => {
+    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') close.current();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      if (opener?.isConnected) opener.focus();
+    };
+  }, []);
   return (
     <nav className="space-y-4 p-4" aria-label={`${ariaLabel} mobile`}>
       {workspaceLabel && (

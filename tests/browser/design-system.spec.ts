@@ -517,7 +517,7 @@ test('role-aware navigation progressively reveals landlord workflows', async ({
   await expect(navigation.getByRole('link', { name: 'Properties' })).toBeVisible();
   await expect(navigation.getByRole('link', { name: 'Listings' })).toBeHidden();
 
-  const portfolio = navigation.getByRole('button', { name: 'Portfolio and marketing' });
+  const portfolio = navigation.getByRole('button', { name: 'Lettings' });
   await expect(portfolio).toHaveAttribute('aria-expanded', 'false');
   await portfolio.click();
   await expect(portfolio).toHaveAttribute('aria-expanded', 'true');
@@ -532,9 +532,10 @@ test('role-aware navigation progressively reveals landlord workflows', async ({
       ? 'Landlord navigation mobile'
       : 'Landlord navigation',
   });
-  await expect(
-    restoredNavigation.getByRole('button', { name: 'Portfolio and marketing' })
-  ).toHaveAttribute('aria-expanded', 'true');
+  await expect(restoredNavigation.getByRole('button', { name: 'Lettings' })).toHaveAttribute(
+    'aria-expanded',
+    'true'
+  );
 });
 
 test('backoffice navigation keeps operations focused and permissions intact', async ({

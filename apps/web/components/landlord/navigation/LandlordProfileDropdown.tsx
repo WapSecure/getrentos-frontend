@@ -1,6 +1,6 @@
 'use client';
 
-import { Building2, HelpCircle, Settings } from 'lucide-react';
+import { HelpCircle, Settings } from 'lucide-react';
 import { ROUTES } from '@/lib/constants/auth';
 import { AccountMenu } from '@/components/shared/navigation/AccountMenu';
 
@@ -10,7 +10,6 @@ interface LandlordProfileDropdownProps {
 
 const LINKS = [
   { href: ROUTES.LANDLORD_SETTINGS, label: 'Settings', icon: Settings },
-  { href: ROUTES.LANDLORD_PROPERTIES, label: 'My properties', icon: Building2 },
   { href: ROUTES.LANDLORD_HELP, label: 'Help centre', icon: HelpCircle },
 ];
 

@@ -394,19 +394,29 @@
     outline-offset: 2px;
   }
 
+  /* 36px rows for a pointer (the desktop sidebar), 44px wherever the primary
+     input is touch (tablets, the phone drawer), so a long sidebar is scannable
+     without scrolling and still easy to tap. */
   .sidebar-item {
     display: flex;
-    min-height: 2.75rem;
+    min-height: 2.25rem;
     align-items: center;
     gap: 0.75rem;
     border-radius: var(--radius-md);
-    padding: 0.625rem 0.75rem;
+    padding: 0.4375rem 0.75rem;
     color: var(--muted-foreground);
     font-size: 0.875rem;
     font-weight: 500;
     transition:
       background-color 150ms ease,
       color 150ms ease;
+  }
+
+  @media (pointer: coarse) {
+    .sidebar-item {
+      min-height: 2.75rem;
+      padding-block: 0.625rem;
+    }
   }
 
   .sidebar-item:hover {
@@ -532,9 +542,12 @@
     align-items: stretch;
     margin-bottom: 1.25rem;
   }
+}
 
-  /* The phone navigation is fixed; keep the final controls and content above
-     the home-indicator-safe navigation surface. */
+/* Phones and tablets share one model: a bottom bar for the role's main pages
+   and the menu button for the rest. The bar is fixed, so keep the last
+   controls and content above it and the home indicator. */
+@media (max-width: 1023.98px) {
   .mobile-primary-nav ~ main {
     padding-bottom: calc(5.75rem + env(safe-area-inset-bottom));
   }

@@ -185,7 +185,7 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed left-0 right-0 top-32 z-[60] max-h-[calc(100dvh-8rem)] overflow-y-auto border-b border-border bg-background md:top-16 md:max-h-[calc(100dvh-4rem)] lg:hidden"
+            className="fixed left-0 right-0 top-32 z-[60] bottom-0 overflow-y-auto border-b border-border bg-background md:top-16 lg:hidden"
           >
             <div className="px-4 pt-4">
               <div className="sm:hidden flex items-center justify-between px-4 py-2.5">

@@ -50,7 +50,7 @@ export const AccountMenu = ({ user, roleId, roleLabel, links = [] }: AccountMenu
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="group flex min-h-11 items-center gap-2 rounded-xl p-1.5 pr-1.5 transition-colors sm:gap-3 sm:pr-2 hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="group flex min-h-11 items-center gap-2 rounded-xl p-1.5 pr-1.5 transition-colors xl:gap-3 xl:pr-2 hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <span className="sr-only">Open account menu</span>
           <span
@@ -59,7 +59,7 @@ export const AccountMenu = ({ user, roleId, roleLabel, links = [] }: AccountMenu
           >
             {initials}
           </span>
-          <span className="hidden text-left sm:block">
+          <span className="hidden text-left xl:block">
             <span className="block text-sm font-medium text-foreground">{fullName}</span>
             <span className="block text-xs text-muted-foreground">{roleLabel}</span>
           </span>

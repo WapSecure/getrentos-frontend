@@ -66,7 +66,7 @@ export const EstateNavbar = ({ user }: EstateNavbarProps) => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-16 left-0 right-0 z-[60] bg-background border-b border-border lg:hidden max-h-[calc(100vh-4rem)] overflow-y-auto"
+            className="fixed top-16 left-0 right-0 z-[60] bg-background border-b border-border lg:hidden bottom-0 overflow-y-auto overscroll-contain"
           >
             <div className="flex items-center justify-between border-b border-border px-4 py-2 sm:hidden">
               <span className="text-sm text-muted-foreground">Theme</span>
