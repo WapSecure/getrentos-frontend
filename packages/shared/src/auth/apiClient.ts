@@ -1,5 +1,12 @@
-import { STORAGE_KEYS, resolvePrimaryRoleId } from './constants';
-import { clearAuthSession, getAuthToken, getStoredUser, saveAuthSession } from './authStorage';
+import { resolvePrimaryRoleId } from './constants';
+import {
+  clearAuthSession,
+  getAuthToken,
+  getStoredUser,
+  hasStoredSession,
+  isSessionRemembered,
+  saveAuthSession,
+} from './authStorage';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
@@ -159,6 +166,40 @@ async function readResponseBody<T>(response: Response): Promise<T | BackendError
 // one rotates the token; later ones would fail with the old token).
 let refreshPromise: Promise<boolean> | null = null;
 
+/**
+ * Tabs of one app share the refresh cookie, and every refresh rotates it. Two
+ * tabs refreshing with the same cookie at once means one is refused (the API
+ * treats reuse within 30 s as a race; later, as theft, ending every session).
+ * A Web Lock named for this app queues the refreshes of all its tabs, so each
+ * one sends the cookie the previous one was given.
+ */
+const REFRESH_LOCK = `getrentos-auth-refresh:${CLIENT_APP ?? 'web'}`;
+
+/** Pause before the one retry of a refused refresh; see `refreshSession`. */
+const REFRESH_RETRY_DELAY_MS = 750;
+
+/** After a 429 without Retry-After, how long to wait before refreshing again. */
+const REFRESH_RATE_LIMIT_PAUSE_MS = 30_000;
+let refreshBlockedUntil = 0;
+
+function withRefreshLock<T>(work: () => Promise<T>): Promise<T> {
+  const locks = typeof navigator !== 'undefined' ? navigator.locks : undefined;
+  // The lock is held until `work` settles; the DOM typings nest its promise.
+  return locks ? (locks.request(REFRESH_LOCK, work) as Promise<T>) : work();
+}
+
+function postRefresh(): Promise<Response> {
+  return fetch(`${API_BASE_URL}/auth/refresh`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(CLIENT_APP ? { 'x-client-app': CLIENT_APP } : {}),
+    },
+    body: JSON.stringify({}),
+  });
+}
+
 const SESSION_EXPIRED_KEY = 'gr_session_expired';
 
 type SessionExpiredListener = () => void;
@@ -200,27 +241,41 @@ export function consumeSessionExpiredFlag(): boolean {
 }
 
 /**
- * Exchanges the refresh-token cookie for a fresh access token. Single-flight:
- * concurrent callers share one in-flight refresh to avoid rotation races.
+ * Exchanges the refresh-token cookie for a fresh access token, kept in memory.
+ * Single-flight: concurrent callers in this tab share one in-flight refresh,
+ * and other tabs of the app queue behind it (`withRefreshLock`).
+ *
+ * A 401 is retried once after a short pause: in a browser without Web Locks,
+ * another tab may have rotated the cookie just before us, and its new cookie
+ * lands in the shared jar a moment later. The retry falls well inside the
+ * API's 30-second race window, so it can never be mistaken for theft.
  *
  * Returns true when the session is valid again, false when it could not be
- * refreshed (the session is cleared and the login screen shows a notice).
+ * refreshed (the session is cleared and the login screen shows a notice) or
+ * the API is rate limiting refreshes (the session is kept for a later try).
  */
 export async function refreshSession(): Promise<boolean> {
   if (typeof window === 'undefined') return false;
   if (refreshPromise) return refreshPromise;
+  if (Date.now() < refreshBlockedUntil) return false;
 
-  refreshPromise = (async () => {
+  refreshPromise = withRefreshLock(async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/auth/refresh`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(CLIENT_APP ? { 'x-client-app': CLIENT_APP } : {}),
-        },
-        body: JSON.stringify({}),
-      });
+      let res = await postRefresh();
+      if (res.status === 401) {
+        await new Promise((resolve) => setTimeout(resolve, REFRESH_RETRY_DELAY_MS));
+        res = await postRefresh();
+      }
+
+      // Rate limited: the cookie is still good, so this is no reason to sign
+      // the user out (every page load refreshes now, which makes it likelier).
+      // Hold off until the API allows another try instead of adding to the count.
+      if (res.status === 429) {
+        const retryAfter = Number(res.headers.get('retry-after'));
+        refreshBlockedUntil =
+          Date.now() + (retryAfter > 0 ? retryAfter * 1000 : REFRESH_RATE_LIMIT_PAUSE_MS);
+        return false;
+      }
 
       if (!res.ok) {
         clearAuthSession();
@@ -253,8 +308,8 @@ export async function refreshSession(): Promise<boolean> {
         return false;
       }
 
-      // remember-me sessions live in localStorage; ephemeral ones in sessionStorage.
-      const rememberMe = !!localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+      // A remembered session keeps its profile in localStorage; others in sessionStorage.
+      const rememberMe = isSessionRemembered();
       const user = storedUser ?? (await fetchSessionProfile(data.accessToken));
       saveAuthSession({ accessToken: data.accessToken, user }, rememberMe);
       return true;
@@ -262,10 +317,10 @@ export async function refreshSession(): Promise<boolean> {
       clearAuthSession();
       markSessionExpired();
       return false;
-    } finally {
-      refreshPromise = null;
     }
-  })();
+  }).finally(() => {
+    refreshPromise = null;
+  });
 
   return refreshPromise;
 }
@@ -354,11 +409,12 @@ function accessTokenExpiry(token: string): number | null {
 }
 
 /**
- * Makes sure the stored session is usable before the UI renders a protected
- * page. If the access token is missing/expired and a refresh cookie exists, it
- * is silently exchanged for a fresh access token (remember-me survives
- * restarts). If no session can be restored the storage is cleared so the
- * caller's `isAuthenticated()` check routes the user to the login page.
+ * Makes sure the session is usable before the UI renders a protected page.
+ * The access token lives in memory only, so after every page load it is
+ * missing and the refresh cookie is exchanged for one (remember-me decides
+ * whether that cookie survives a browser restart). If no session can be
+ * restored the profile is cleared so the caller's `isAuthenticated()` check
+ * routes the user to the login page.
  */
 export async function ensureValidSession(): Promise<boolean> {
   if (typeof window === 'undefined') return false;
@@ -413,7 +469,7 @@ export async function apiFetch<T>(
     response.status === 401 &&
     allowRefreshRetry &&
     !path.startsWith('/auth/') &&
-    Boolean(getAuthToken())
+    (Boolean(getAuthToken()) || hasStoredSession())
   ) {
     const refreshed = await refreshSession();
     if (refreshed) return apiFetch<T>(path, options, false);
@@ -431,6 +487,19 @@ export async function apiFetch<T>(
   }
 
   return body as T;
+}
+
+/**
+ * The access token for a request. After a page load the in-memory token is
+ * gone while the saved profile says there is a session: restore it first
+ * (single-flight) rather than sending an anonymous request just to collect a
+ * 401. Resolves to null for a visitor, or when the session cannot be restored.
+ */
+export async function currentAccessToken(): Promise<string | null> {
+  const token = getAuthToken();
+  if (token || !hasStoredSession()) return token;
+  await refreshSession();
+  return getAuthToken();
 }
 
 /** Fetches a binary response while preserving the same API error contract. */

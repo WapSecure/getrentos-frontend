@@ -20,6 +20,8 @@ export const qk = {
   accountName: (bankCode: string, accountNumber: string) =>
     ['payments', 'account-name', bankCode, accountNumber] as const,
   passkeys: ['me', 'security', 'passkeys'] as const,
+  /** Where you're signed in: one live session per device. */
+  sessions: ['me', 'security', 'sessions'] as const,
   representatives: {
     list: (kind: 'realtor' | 'agent') => ['representatives', kind] as const,
     assignable: (kind: 'realtor' | 'agent', id: string, search: string) =>
@@ -577,5 +579,6 @@ export const qk = {
     consents: ['trust', 'consents'] as const,
     verification: (id: string) => ['trust', 'verification', id] as const,
     appeals: ['trust', 'appeals', 'mine'] as const,
+    overview: (portal: string) => ['trust', 'overview', portal] as const,
   },
 } as const;

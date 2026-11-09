@@ -4,8 +4,8 @@ import { useRouter } from 'next/navigation';
 import { Check, Plus } from 'lucide-react';
 import { DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '@getrentos/ui';
 import { openAddRoleDialog } from './AddRoleDialog';
-import { BACKEND_ROLE_TO_ID, ROLES, STORAGE_KEYS, getDashboardRoute } from '@/lib/constants/auth';
-import { getStoredUser } from '@/lib/authStorage';
+import { BACKEND_ROLE_TO_ID, ROLES, getDashboardRoute } from '@/lib/constants/auth';
+import { getStoredUser, updateStoredUser } from '@/lib/authStorage';
 
 interface RoleSwitcherProps {
   currentRoleId?: string;
@@ -29,11 +29,7 @@ export const RoleSwitcher = ({ currentRoleId }: RoleSwitcherProps) => {
     .filter((r): r is (typeof roleDefs)[number] => Boolean(r));
 
   const handleSwitchRole = (roleId: string) => {
-    const parsed = getStoredUser<Record<string, unknown>>();
-    if (parsed) {
-      const storage = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN) ? localStorage : sessionStorage;
-      storage.setItem(STORAGE_KEYS.USER, JSON.stringify({ ...parsed, role: roleId }));
-    }
+    updateStoredUser({ role: roleId });
     router.push(getDashboardRoute(roleId));
   };
 

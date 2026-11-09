@@ -34,10 +34,11 @@ import {
   type TrustConsent,
   type TrustIdType,
   type TrustPurpose,
+  type SmileLivenessSession,
 } from '@/lib/api/trust';
-import type { PickedFile } from '@/lib/api/documents';
-import { errorMessage } from '@/lib/api/client';
-import { captureSelfie } from '@/lib/filePicker';
+import { liveSelfieSupported } from '@/lib/smileid/liveSelfie';
+import { LiveSelfieCheck } from './LiveSelfieCheck';
+import { ApiError, errorMessage } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
 import { BankAccountFields, accountNumberOk } from '@/components/forms/BankAccountFields';
@@ -76,6 +77,9 @@ export function VerificationChecklist({
     queryKey: qk.trust.verification(verificationId ?? ''),
     queryFn: () => trustApi.verification(verificationId!),
     enabled: !!verificationId,
+    // A live selfie is decided by Smile on the server a little later; look again until it lands.
+    refetchInterval: (q) =>
+      q.state.data?.steps?.some((st) => st.status === 'WAITING_FOR_PROVIDER') ? 5000 : false,
   });
   const consents = useQuery({ queryKey: qk.trust.consents, queryFn: trustApi.consents });
   const refresh = () => {
@@ -450,42 +454,60 @@ function PhoneForm({ verificationId, onDone }: FormProps) {
 function SelfieForm({ verificationId, onDone }: FormProps) {
   const { spacing } = useTheme();
   const toast = useToast();
-  const [selfie, setSelfie] = useState<PickedFile | null>(null);
-  const run = useMutation({
-    mutationFn: () => trustApi.biometrics(verificationId, selfie!),
-    onSuccess: () => {
-      toast.show('Selfie checked.', 'success');
-      setSelfie(null);
-      onDone();
+  // Smile ID's live check needs its native code (a development or store build).
+  // There is no photo fallback: a photo cannot show someone is present (ID-08).
+  const supported = liveSelfieSupported;
+  const [unavailable, setUnavailable] = useState(false);
+  const [session, setSession] = useState<SmileLivenessSession | null>(null);
+  const startLive = useMutation({
+    mutationFn: () => trustApi.livenessSession(verificationId),
+    onSuccess: setSession,
+    onError: (e) => {
+      if (e instanceof ApiError && e.code === 'LIVENESS_UNAVAILABLE') setUnavailable(true);
+      toast.show(errorMessage(e, 'Could not start the live selfie check.'), 'error');
     },
-    onError: (e) => toast.show(errorMessage(e, 'Could not check your selfie.'), 'error'),
   });
+
+  if (!supported) {
+    return (
+      <Text variant="caption" color="mutedForeground">
+        The live selfie needs the GetRentos app from the App Store or Google Play. It can&apos;t run
+        here.
+      </Text>
+    );
+  }
+  if (unavailable) {
+    return (
+      <Text variant="caption" color="mutedForeground">
+        Live selfie checks are temporarily unavailable. Please try again later.
+      </Text>
+    );
+  }
+
   return (
     <View style={{ gap: spacing.sm }}>
       <Text variant="caption" color="mutedForeground">
-        Face the camera in good light, without glasses or a hat. One photo runs the selfie, liveness
-        and face-match checks.
+        A short live selfie: face the camera in good light and turn your head when asked. It
+        confirms you are really there and matches your face to your ID.
       </Text>
-      <View style={{ flexDirection: 'row', gap: spacing.sm, flexWrap: 'wrap' }}>
-        <Button
-          label={selfie ? 'Retake' : 'Open the camera'}
-          size="sm"
-          variant="secondary"
-          icon={<Camera size={16} />}
-          onPress={async () => {
-            const shot = await captureSelfie();
-            if (shot) setSelfie(shot);
+      <Button
+        label="Start live selfie"
+        size="sm"
+        icon={<Camera size={16} />}
+        loading={startLive.isPending}
+        onPress={() => startLive.mutate()}
+        style={{ alignSelf: 'flex-start' }}
+      />
+      {session ? (
+        <LiveSelfieCheck
+          session={session}
+          onClose={(outcome) => {
+            setSession(null);
+            if (outcome) toast.show(outcome.text, outcome.tone);
+            if (outcome?.submitted) onDone();
           }}
         />
-        {selfie ? (
-          <Button
-            label="Check my selfie"
-            size="sm"
-            loading={run.isPending}
-            onPress={() => run.mutate()}
-          />
-        ) : null}
-      </View>
+      ) : null}
     </View>
   );
 }

@@ -74,6 +74,7 @@ function UploadDocumentForm({
   return (
     <View style={{ gap: spacing.lg }}>
       <FilePickRow
+        checkPhotoQuality
         label="File"
         file={file}
         emptyText="Choose a file"

@@ -1,3 +1,4 @@
+import type { FaceCheckStatus, SmileLivenessSession } from './trust';
 import { apiFetch } from './client';
 
 export interface TwoFactorStatus {
@@ -25,13 +26,38 @@ export interface SecurityOverview {
   stepUpMethod: StepUpMethod;
 }
 
-export type StepUpMethod = 'passkey' | 'totp' | 'transaction_pin' | 'password' | 'email_code';
+/**
+ * A password alone never confirms anything: an account with no factor gets
+ * `setup_required` and must add a PIN or a passkey first.
+ */
+export type StepUpMethod = 'passkey' | 'totp' | 'transaction_pin' | 'setup_required';
+
+export interface SetTransactionPinInput {
+  currentPassword?: string;
+  pin: string;
+  currentPin?: string;
+  reference?: string;
+  code?: string;
+  /** An approved face check, instead of the emailed code. */
+  faceCheckId?: string;
+}
 
 export interface PasskeySummary {
   id: string;
   deviceName: string | null;
   createdAt: string;
   lastUsedAt: string | null;
+}
+
+/** One device the person is signed in on ("Where you're signed in"). */
+export interface AccountSession {
+  id: string;
+  /** Readable device, e.g. "GetRentos app on iPhone". */
+  device: string;
+  ipAddress?: string;
+  lastActiveAt: string;
+  /** The device making this request. */
+  current: boolean;
 }
 
 /** Account security for every role — the person's, not a portal's. */
@@ -85,17 +111,35 @@ export const securityApi = {
     code?: string;
     reference?: string;
     passkeyResponse?: unknown;
+    /** Binds the token to the request that asked for it (security gap AU-02). */
+    challengeId?: string;
   }) =>
     apiFetch<{ stepUpToken: string; expiresIn: number }>('/users/me/security/step-up', {
       method: 'POST',
       body: input,
     }),
 
-  /** Set or change the transaction PIN, confirmed with the current password. */
-  setTransactionPin: (currentPassword: string, pin: string) =>
+  /**
+   * Set, change or reset the 6-digit transaction PIN. Changing one takes the
+   * current password and PIN; a first PIN or a forgotten one takes the
+   * password and an emailed code (`sendStepUpCode`). Accounts with no password
+   * leave it out.
+   */
+  /** A face check to reset a forgotten PIN, instead of the emailed code (mobile). */
+  startPinFaceCheck: () =>
+    apiFetch<{ faceCheckId: string; session: SmileLivenessSession }>(
+      '/users/me/security/transaction-pin/face',
+      { method: 'POST' }
+    ),
+  pinFaceCheckStatus: (faceCheckId: string) =>
+    apiFetch<{ status: FaceCheckStatus }>('/users/me/security/transaction-pin/face/status', {
+      method: 'POST',
+      body: { faceCheckId },
+    }),
+  setTransactionPin: (input: SetTransactionPinInput) =>
     apiFetch<{ hasTransactionPin: true }>('/users/me/security/transaction-pin', {
       method: 'POST',
-      body: { currentPassword, pin },
+      body: input,
     }),
 
   // ---- Passkeys (WebAuthn) ----
@@ -116,6 +160,19 @@ export const securityApi = {
 
   removePasskey: (id: string) =>
     apiFetch<{ removed: true }>(`/users/me/security/passkey/${id}`, { method: 'DELETE' }),
+
+  // ---- Where you're signed in ----
+  listSessions: () => apiFetch<AccountSession[]>('/users/me/security/sessions'),
+
+  /** That device is signed out at its next refresh (within 15 minutes). */
+  signOutSession: (id: string) =>
+    apiFetch<{ revoked: true }>(`/users/me/security/sessions/${id}`, { method: 'DELETE' }),
+
+  /** Keeps this phone; behind step-up, which apiFetch prompts for. */
+  signOutOtherSessions: () =>
+    apiFetch<{ revoked: number }>('/users/me/security/sessions/sign-out-others', {
+      method: 'POST',
+    }),
 
   /** WebAuthn request options (the step-up challenge) to hand to Passkey.get(). */
   startPasskeyStepUp: () =>

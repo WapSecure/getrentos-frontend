@@ -1,5 +1,23 @@
 import { authFetch, safeCall, type ApiResponse } from '@/lib/apiHelpers';
-import type { TrustExplanation } from '@/types/trust-score';
+import type { TrustExplanation, TrustOverview, TrustPortal } from '@/types/trust-score';
+
+/** What the browser needs to run Smile ID's live selfie capture and submit it. */
+export interface SmileLivenessSession {
+  token: string;
+  partnerId: string;
+  userId: string;
+  useSandbox: boolean;
+  consent: {
+    granted: true;
+    grantedAt: string;
+    noticeLanguage: string;
+    noticePrivacyPolicyUrl: string;
+  };
+  userDetails: { givenNames: string; lastName: string; email?: string; phoneNumber?: string };
+  /** Smile's v3 API for this environment. */
+  apiUrl: string;
+  callbackUrl?: string;
+}
 
 /** Client types mirroring the backend trust API. */
 export type TrustSubjectType =
@@ -117,6 +135,11 @@ export const trustService = {
     return safeCall(() => authFetch<TrustVerificationDetailDto>(`/trust/verifications/${id}`));
   },
 
+  /** Identity status, the portal's requirements, tier and score (self-only). */
+  async getOverview(portal: TrustPortal): Promise<ApiResponse<TrustOverview>> {
+    return safeCall(() => authFetch<TrustOverview>(`/trust/overview?portal=${portal}`));
+  },
+
   /** Plain-language explanation of the caller's own trust score (self-only). */
   async getExplanation(): Promise<ApiResponse<TrustExplanation>> {
     return safeCall(() => authFetch<TrustExplanation>('/trust-score/explanation'));
@@ -185,19 +208,32 @@ export const trustService = {
     );
   },
 
-  /** Submits a selfie (multipart) to run selfie/liveness/face-match steps. */
-  async submitBiometrics(
-    verificationId: string,
-    selfie: File
-  ): Promise<ApiResponse<TrustVerificationDto>> {
-    return safeCall(async () => {
-      const form = new FormData();
-      form.append('selfie', selfie);
-      return authFetch<TrustVerificationDto>(`/trust/verifications/${verificationId}/biometrics`, {
+  /**
+   * Starts a Smile ID live selfie for the liveness step. The token is bound on
+   * the server to this user, our webhook and the recorded consent.
+   */
+  async startLivenessSession(verificationId: string): Promise<ApiResponse<SmileLivenessSession>> {
+    return safeCall(() =>
+      authFetch<SmileLivenessSession>(`/trust/verifications/${verificationId}/liveness/session`, {
         method: 'POST',
-        body: form,
-      });
-    });
+      })
+    );
+  },
+
+  /**
+   * Asks the server to check a submitted live selfie with Smile ID, for when the
+   * webhook is late. The server queries Smile itself; this only names the job.
+   */
+  async checkLiveness(
+    verificationId: string,
+    jobId: string
+  ): Promise<ApiResponse<{ status: 'pending' | 'applied' | 'settled' }>> {
+    return safeCall(() =>
+      authFetch<{ status: 'pending' | 'applied' | 'settled' }>(
+        `/trust/verifications/${verificationId}/liveness/check`,
+        { method: 'POST', body: JSON.stringify({ jobId }) }
+      )
+    );
   },
 
   /** Runs a bank-account name-enquiry check (BANK_ACCOUNT_CHECK step). */

@@ -5,11 +5,11 @@ import { TrustProfileView } from '@/components/trust/TrustProfileView';
 export default function BuyerTrustProfile() {
   return (
     <TrustProfileView
+      portal="buyer"
+      audience="owners and realtors"
       queryKey={qk.buyer.trustProfile}
       queryFn={buyerTrustProfileApi.get}
       eyebrow="Buyer reputation"
-      subtitle="Identity checks, activity and earned badges"
-      peers="buyer"
     />
   );
 }

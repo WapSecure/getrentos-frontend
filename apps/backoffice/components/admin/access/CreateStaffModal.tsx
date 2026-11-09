@@ -8,7 +8,7 @@ import { Field } from '@getrentos/ui';
 import { Input } from '@getrentos/ui';
 import { Select } from '@getrentos/ui';
 import { adminService } from '@/services/adminService';
-import { unwrap } from '@getrentos/shared';
+import { AUTH_CONSTANTS, ERROR_MESSAGES, unwrap } from '@getrentos/shared';
 import { ADMIN_ROLE_DETAILS } from '@/lib/adminAccess';
 import type { AdminStaffRole } from '@/types/admin';
 
@@ -45,8 +45,8 @@ export const CreateStaffModal = ({
       setError('Please enter a valid email address.');
       return;
     }
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters.');
+    if (password.length < AUTH_CONSTANTS.PASSWORD_MIN_LENGTH) {
+      setError(ERROR_MESSAGES.PASSWORD_TOO_SHORT);
       return;
     }
 
@@ -124,7 +124,7 @@ export const CreateStaffModal = ({
               label="Temporary password"
               htmlFor="staff-password"
               required
-              hint="At least 8 characters. The member changes it after first sign-in."
+              hint={`At least ${AUTH_CONSTANTS.PASSWORD_MIN_LENGTH} characters. The member changes it after first sign-in.`}
             >
               <Input
                 id="staff-password"

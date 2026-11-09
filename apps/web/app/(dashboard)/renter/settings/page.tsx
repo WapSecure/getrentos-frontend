@@ -7,7 +7,7 @@ import { ProfileSettings } from '@/components/renter/settings/ProfileSettings';
 import { AccountSettings } from '@/components/renter/settings/AccountSettings';
 import { NotificationSettings } from '@/components/renter/settings/NotificationSettings';
 import { PrivacySettings } from '@/components/renter/settings/PrivacySettings';
-import { SecuritySettings } from '@/components/renter/settings/SecuritySettings';
+import { SecuritySettings } from '@/components/shared/security/SecuritySettings';
 import { PaymentSettings } from '@/components/renter/settings/PaymentSettings';
 import { ThemeSettings } from '@/components/renter/settings/ThemeSettings';
 import { LanguageSettings } from '@/components/renter/settings/LanguageSettings';
@@ -70,7 +70,10 @@ export default function SettingsPage() {
         return <AccountSettings user={user} />;
       case 'verification':
         return (
-          <IdentityVerificationSettings description="Verify your identity to unlock submitting rental applications." />
+          <IdentityVerificationSettings
+            description="Verify your identity to unlock submitting rental applications."
+            verificationHref="/renter/trust-score?tab=verification"
+          />
         );
       case 'notifications':
         return <NotificationSettings />;

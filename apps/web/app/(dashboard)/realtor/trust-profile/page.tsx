@@ -7,10 +7,12 @@ import { realtorKeys } from '@/lib/queryKeys';
 export default function RealtorTrustProfilePage() {
   return (
     <TrustProfileView
+      portal="realtor"
+      audience="clients and leads"
       queryKey={realtorKeys.trustProfile}
       queryFn={() => realtorService.getTrustProfile()}
       title="Trust & Verification Profile"
-      subtitle="What clients and leads see about your credibility on GetRentos"
+      subtitle="Your identity, what you need here, and your trust score."
     />
   );
 }

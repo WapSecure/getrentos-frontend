@@ -169,6 +169,8 @@ export interface VerificationRequest {
   media?: VerificationDocument[];
   /** Ownership proofs on a property request — each can be AI cross-checked. */
   ownershipProofs?: OwnershipProofRef[];
+  /** Property requests: why approving needs a second officer, if it does (security gap ID-15). */
+  approvalRisk?: { reasons: string[]; secondOfficerRequired: boolean };
 }
 
 export interface OwnershipProofRef {
@@ -364,7 +366,10 @@ export interface PlatformEscrowTransaction {
   propertyTitle: string;
   buyerName: string;
   sellerName: string;
+  /** Sale price, naira. */
   amount: number;
+  /** What escrow holds (the buyer's deposit), naira: what a release or refund moves. */
+  heldAmount: number;
   status: PlatformEscrowStatus;
   createdAt: string;
   flagged: boolean;
@@ -461,6 +466,44 @@ export interface AdminProfile {
   email: string;
   phone?: string;
   avatarUrl?: string;
+}
+
+/** Whether the signed-in account has an authenticator app (GET /users/me/security/2fa). */
+export interface TwoFactorStatus {
+  /** A secret is stored but may not be confirmed yet. */
+  enrolled: boolean;
+  /** Confirmed with a code: sign-in asks for it, and admin routes open. */
+  enabled: boolean;
+  /**
+   * Whether the API refuses this account's admin tools until two-factor is on.
+   * False for a local backend run with STAFF_MFA_REQUIRED=false. Treated as
+   * true when an older API leaves it out.
+   */
+  requiredForAdminTools?: boolean;
+}
+
+/** A fresh authenticator secret to scan or type in (POST /users/me/security/2fa/enroll). */
+export interface TwoFactorEnrollment {
+  secret: string;
+  otpauthUrl: string;
+  /** The QR code as a data URL. */
+  qrDataUrl: string;
+}
+
+/** One device the staff member is signed in on ("Where you're signed in"). */
+export interface StaffSession {
+  id: string;
+  device: string;
+  ipAddress?: string;
+  lastActiveAt: string;
+  current: boolean;
+}
+
+export interface StaffPasskey {
+  id: string;
+  deviceName: string | null;
+  createdAt: string;
+  lastUsedAt: string | null;
 }
 
 /** AI governance — today's spend/volume + live control state (GET /admin/ai/usage). */

@@ -2,21 +2,23 @@
 
 import { useLandlordUser } from '../layout';
 import { useState } from 'react';
-import { User, Bell, Landmark, Zap, Download } from 'lucide-react';
+import { User, Bell, Landmark, Zap, Lock, Download } from 'lucide-react';
 import { Card, PageHeader } from '@getrentos/ui';
 import { ProfileSettings } from '@/components/landlord/settings/ProfileSettings';
 import { NotificationSettings } from '@/components/landlord/settings/NotificationSettings';
 import { PayoutSettings } from '@/components/landlord/settings/PayoutSettings';
 import { AutomationSettings } from '@/components/landlord/settings/AutomationSettings';
 import { DataExport } from '@/components/shared/settings/DataExport';
+import { SecuritySettings } from '@/components/shared/security/SecuritySettings';
 
-type SettingsTab = 'profile' | 'notifications' | 'payouts' | 'automation' | 'data';
+type SettingsTab = 'profile' | 'notifications' | 'payouts' | 'automation' | 'security' | 'data';
 
 const tabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
   { id: 'profile', label: 'Profile', icon: User },
   { id: 'notifications', label: 'Notifications', icon: Bell },
   { id: 'payouts', label: 'Payout account', icon: Landmark },
   { id: 'automation', label: 'Automation', icon: Zap },
+  { id: 'security', label: 'Security', icon: Lock },
   { id: 'data', label: 'Your data', icon: Download },
 ];
 
@@ -34,6 +36,8 @@ export default function LandlordSettingsPage() {
         return <PayoutSettings />;
       case 'automation':
         return <AutomationSettings />;
+      case 'security':
+        return <SecuritySettings />;
       case 'data':
         return <DataExport />;
       default:

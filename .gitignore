@@ -63,3 +63,7 @@ test-results
 
 # Local test-account credentials (contains the shared fixture password)
 LOCAL-TEST-ACCOUNTS.md
+.env.production
+.env.development
+.env*.local
+!.env.example

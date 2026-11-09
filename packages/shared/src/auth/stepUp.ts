@@ -8,12 +8,35 @@
 
 export const STEP_UP_HEADER = 'x-step-up-token';
 export const STEP_UP_REQUIRED = 'STEP_UP_REQUIRED';
+/**
+ * A staff account without an authenticator app. Every admin route answers this
+ * until two-factor is on, and so does any other route handed the narrow
+ * enrolment-only step-up token such an account gets from its password.
+ */
+export const STAFF_MFA_REQUIRED = 'STAFF_MFA_REQUIRED';
 
-/** How the account proves it's the holder: its strongest factor wins. */
-export type StepUpMethod = 'passkey' | 'totp' | 'transaction_pin' | 'password' | 'email_code';
+/**
+ * How the account proves it's the holder: its strongest factor wins. A
+ * password alone never confirms anything, so an account with no factor gets
+ * `setup_required`: its password and an emailed code earn a set-up-only token
+ * that opens just the routes that add a factor.
+ */
+export type StepUpMethod = 'passkey' | 'totp' | 'transaction_pin' | 'setup_required';
 
-/** Told what the request being confirmed does, when the caller said (UX-30). */
-type Handler = (summary: string | null) => Promise<string | null>;
+/** A refusal from a route handed the set-up-only token: add a factor first. */
+export const FACTOR_SETUP_REQUIRED = 'FACTOR_SETUP_REQUIRED';
+
+/** A new transaction PIN is six digits; older accounts may still confirm with four. */
+export const TRANSACTION_PIN_LENGTH = 6;
+
+/** What the confirm dialog is asked for: the challenge the API raised, when there was one. */
+export interface StepUpRequest {
+  challengeId?: string;
+  /** What the request being confirmed does, when the caller said (UX-30). */
+  summary?: string | null;
+}
+
+type Handler = (request: StepUpRequest) => Promise<string | null>;
 
 let handler: Handler | null = null;
 let summaries: string[] = [];
@@ -41,15 +64,41 @@ export function clearStepUpToken() {
   cached = null;
 }
 
-/** Prompts once even if several requests hit the wall together. */
-export async function obtainStepUpToken(): Promise<string | null> {
+/**
+ * Gets a confirmation for a refused request. With a `challengeId` (the API
+ * now always sends one, security gap AU-02) the token approves exactly that
+ * request, once, so it is never cached and never shared: prompts for
+ * different requests queue one after another. Without one (an older API, or
+ * the staff enrolment flow) it falls back to the cached, shared token.
+ */
+export async function obtainStepUpToken(challengeId?: string): Promise<string | null> {
+  if (!handler) return null;
+  if (challengeId) {
+    const ask = handler;
+    // Captured now: by the time a queued prompt opens, other requests may have
+    // pushed their own summaries.
+    const summary = currentStepUpSummary();
+    const turn = (inFlight ?? Promise.resolve(null))
+      .catch(() => null)
+      .then(() => ask({ challengeId, summary }));
+    inFlight = turn.finally(() => {
+      if (inFlight === turn) inFlight = null;
+    });
+    return turn;
+  }
   const existing = currentStepUpToken();
   if (existing) return existing;
-  if (!handler) return null;
-  inFlight ??= handler(currentStepUpSummary()).finally(() => {
+  const ask = handler;
+  inFlight ??= ask({ summary: currentStepUpSummary() }).finally(() => {
     inFlight = null;
   });
   return inFlight;
+}
+
+/** The challenge id a STEP_UP_REQUIRED refusal carries (in the API error's details). */
+export function stepUpChallengeId(err: unknown): string | undefined {
+  const details = (err as { details?: { challengeId?: unknown } } | null)?.details;
+  return typeof details?.challengeId === 'string' ? details.challengeId : undefined;
 }
 
 /** The newest summary set by `withStepUpSummary`, or null. */
@@ -79,4 +128,45 @@ export function isStepUpRequired(err: unknown): boolean {
     (err as { status?: number }).status === 403 &&
     (err as { code?: string }).code === STEP_UP_REQUIRED
   );
+}
+
+export function isStaffMfaRequired(err: unknown): boolean {
+  return (
+    typeof err === 'object' &&
+    err !== null &&
+    (err as { status?: number }).status === 403 &&
+    (err as { code?: string }).code === STAFF_MFA_REQUIRED
+  );
+}
+
+type StaffMfaListener = () => void;
+const staffMfaListeners = new Set<StaffMfaListener>();
+
+/**
+ * Subscribes to "the API refused this because staff two-factor is off". The
+ * back office uses it to swap the page for the two-factor set-up screen
+ * instead of leaving a wall of failing requests. Returns an unsubscribe.
+ */
+export function onStaffMfaRequired(listener: StaffMfaListener): () => void {
+  staffMfaListeners.add(listener);
+  return () => {
+    staffMfaListeners.delete(listener);
+  };
+}
+
+/**
+ * Called by authFetch on a STAFF_MFA_REQUIRED refusal. The cached step-up
+ * token goes first: it is the enrolment-only kind, and replaying it would only
+ * earn the same refusal.
+ */
+export function notifyStaffMfaRequired() {
+  clearStepUpToken();
+  // One listener throwing must not stop the others hearing about it.
+  for (const listener of staffMfaListeners) {
+    try {
+      listener();
+    } catch {
+      // ignored on purpose
+    }
+  }
 }

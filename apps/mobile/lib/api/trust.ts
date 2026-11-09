@@ -1,6 +1,5 @@
 import type { BadgeTone } from '@getrentos/ui-native';
-import { apiFetch, apiUpload } from './client';
-import { appendFile, type PickedFile } from './documents';
+import { apiFetch } from './client';
 import type { Portal } from '../roles';
 
 /**
@@ -180,6 +179,97 @@ export function checkKinds(steps: TrustStep[]): CheckKind[] {
   return out;
 }
 
+/** Where a face check (recovery or PIN reset) stands; the server decides. */
+export type FaceCheckStatus = 'PENDING' | 'APPROVED' | 'FAILED';
+
+/** What the app needs to run Smile ID's live selfie capture (see trustApi.livenessSession). */
+export interface SmileLivenessSession {
+  token: string;
+  partnerId: string;
+  userId: string;
+  useSandbox: boolean;
+  consent: {
+    granted: true;
+    grantedAt: string;
+    noticeLanguage: string;
+    noticePrivacyPolicyUrl: string;
+  };
+  userDetails: { givenNames: string; lastName: string; email?: string; phoneNumber?: string };
+  /** Smile's v3 API for this environment. */
+  apiUrl: string;
+  callbackUrl?: string;
+}
+
+/** One status vocabulary for identity and every requirement (GET /trust/overview). */
+export type TrustStatus =
+  | 'NOT_STARTED'
+  | 'ACTION_REQUIRED'
+  | 'IN_PROGRESS'
+  | 'PENDING_PROVIDER'
+  | 'PENDING_REVIEW'
+  | 'VERIFIED'
+  | 'FAILED'
+  | 'REJECTED'
+  | 'EXPIRED'
+  | 'REVERIFICATION_REQUIRED'
+  | 'UNAVAILABLE';
+
+export type TrustRequirementKey =
+  | 'EMAIL'
+  | 'PHONE'
+  | 'ID_NUMBER'
+  | 'LIVE_SELFIE'
+  | 'BANK_ACCOUNT'
+  | 'PROFESSIONAL_LICENCE'
+  | 'BUSINESS_REGISTRATION'
+  | 'PROPERTY_OWNERSHIP';
+
+export type TrustPortal =
+  | 'renter'
+  | 'buyer'
+  | 'landlord'
+  | 'owner'
+  | 'agent'
+  | 'realtor'
+  | 'manager';
+
+export interface TrustOverview {
+  portal: TrustPortal;
+  identity: { status: TrustStatus; detail: string; dueBy?: string };
+  requirements: {
+    key: TrustRequirementKey;
+    label: string;
+    status: TrustStatus;
+    detail: string;
+    why: string;
+    updatedAt?: string;
+    dueBy?: string;
+  }[];
+  tier: { level: number; label: string };
+  /** Null while scoring is switched off: no number is shown in its place. */
+  score: {
+    total: number;
+    penalty: number;
+    stage?: { label: string };
+    dimensions: { id: string; label: string; earned: number; weight: number }[];
+  } | null;
+  nextAction: { key: TrustRequirementKey; label: string } | null;
+}
+
+export const TRUST_STATUS: Record<TrustStatus, { label: string; tone: BadgeTone }> = {
+  VERIFIED: { label: 'Verified', tone: 'success' },
+  IN_PROGRESS: { label: 'In progress', tone: 'info' },
+  PENDING_PROVIDER: { label: 'Checking', tone: 'info' },
+  PENDING_REVIEW: { label: 'In review', tone: 'info' },
+  ACTION_REQUIRED: { label: 'Action needed', tone: 'warning' },
+  REVERIFICATION_REQUIRED: { label: 'Action needed', tone: 'warning' },
+  NOT_STARTED: { label: 'Not started', tone: 'neutral' },
+  FAILED: { label: 'Did not pass', tone: 'danger' },
+  REJECTED: { label: 'Not approved', tone: 'danger' },
+  EXPIRED: { label: 'Expired', tone: 'warning' },
+  UNAVAILABLE: { label: 'Unavailable', tone: 'neutral' },
+};
+
 export type CheckState = 'done' | 'todo' | 'failed' | 'review' | 'waiting';
 
 /**
@@ -228,6 +318,8 @@ export function idNumberOk(type: TrustIdType, value: string): boolean {
 }
 
 export const trustApi = {
+  /** Identity status, this portal's requirements, tier and score (self-only). */
+  overview: (portal: TrustPortal) => apiFetch<TrustOverview>(`/trust/overview?portal=${portal}`),
   /** Starts or resumes the signed-in user's verification (idempotent). */
   start: (subjectId: string, purpose: TrustPurpose) =>
     apiFetch<TrustVerification>('/trust/verifications', {
@@ -262,11 +354,15 @@ export const trustApi = {
       method: 'POST',
       body: { reference, code },
     }),
-  biometrics: (id: string, selfie: PickedFile) => {
-    const form = new FormData();
-    appendFile(form, 'selfie', selfie);
-    return apiUpload<TrustVerification>(`/trust/verifications/${id}/biometrics`, form);
-  },
+  /**
+   * A Smile ID live selfie session for the liveness step. The token is bound on
+   * the server to this user, our webhook and the recorded consent; the result
+   * reaches the server from Smile, never from the app.
+   */
+  livenessSession: (id: string) =>
+    apiFetch<SmileLivenessSession>(`/trust/verifications/${id}/liveness/session`, {
+      method: 'POST',
+    }),
   bank: (id: string, body: { accountNumber: string; accountName?: string; bankCode?: string }) =>
     apiFetch<{ status: string }>(`/trust/verifications/${id}/bank`, {
       method: 'POST',

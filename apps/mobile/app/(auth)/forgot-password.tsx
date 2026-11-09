@@ -29,6 +29,7 @@ import {
   resetPasswordSchema,
   type ResetPasswordValues,
 } from '@/lib/validation';
+import { AUTH_CONSTANTS } from '@getrentos/shared';
 
 type Step = 'request' | 'otp' | 'reset';
 const RESEND_SECONDS = 60;
@@ -232,6 +233,10 @@ export default function ForgotPassword() {
             onSubmitEditing={sendCode}
           />
           <FormAlert message={error} />
+          <LinkButton
+            label="Lost access to your email or phone? Recover with your face"
+            onPress={() => router.push('/(auth)/recover-with-face')}
+          />
         </Animated.View>
       ) : step === 'otp' ? (
         <Animated.View
@@ -296,7 +301,7 @@ export default function ForgotPassword() {
             render={({ field: { onChange, onBlur, value } }) => (
               <PasswordField
                 label="New password"
-                placeholder="At least 8 characters"
+                placeholder={`At least ${AUTH_CONSTANTS.PASSWORD_MIN_LENGTH} characters`}
                 showStrength
                 autoComplete="new-password"
                 textContentType="newPassword"

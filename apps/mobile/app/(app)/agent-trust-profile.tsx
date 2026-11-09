@@ -5,11 +5,11 @@ import { TrustProfileView } from '@/components/trust/TrustProfileView';
 export default function AgentTrustProfile() {
   return (
     <TrustProfileView
+      portal="agent"
+      audience="clients and admins"
       queryKey={qk.agent.trustProfile}
       queryFn={agentTrustProfileApi.get}
       eyebrow="Professional reputation"
-      subtitle="Credentials, performance and earned badges"
-      peers="agent"
     />
   );
 }

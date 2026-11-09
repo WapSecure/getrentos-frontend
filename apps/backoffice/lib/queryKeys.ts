@@ -133,6 +133,10 @@ export const adminKeys = {
   revenueSeries: (months: number) => ['admin', 'revenueSeries', months] as const,
   gmvBreakdown: ['admin', 'gmvBreakdown'] as const,
   profile: ['admin', 'profile'] as const,
+  /** The signed-in staff member's own two-factor status; drives the set-up gate. */
+  twoFactor: ['admin', 'security', 'twoFactor'] as const,
+  passkeys: ['admin', 'security', 'passkeys'] as const,
+  sessions: ['admin', 'security', 'sessions'] as const,
   notificationPreferences: ['admin', 'notificationPreferences'] as const,
   platformConfig: ['admin', 'platformConfig'] as const,
   staff: ['admin', 'staff'] as const,

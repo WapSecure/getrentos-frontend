@@ -1,23 +1,36 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { User, Bell, SlidersHorizontal } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import { User, Bell, SlidersHorizontal, ShieldCheck } from 'lucide-react';
 import { ProfileSettings } from '@/components/admin/settings/ProfileSettings';
 import { NotificationSettings } from '@/components/admin/settings/NotificationSettings';
 import { PlatformConfigSettings } from '@/components/admin/settings/PlatformConfigSettings';
+import { SecuritySettings } from '@/components/admin/settings/SecuritySettings';
 import { cn } from '@getrentos/shared';
 import { ConfirmDialog, PageHeader } from '@getrentos/ui';
 
-type SettingsTab = 'profile' | 'notifications' | 'platform';
+type SettingsTab = 'profile' | 'security' | 'notifications' | 'platform';
 
 const tabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
   { id: 'profile', label: 'Profile', icon: User },
+  { id: 'security', label: 'Security', icon: ShieldCheck },
   { id: 'notifications', label: 'Notifications', icon: Bell },
   { id: 'platform', label: 'Platform Configuration', icon: SlidersHorizontal },
 ];
 
+const tabFromUrl = (value: string | null): SettingsTab =>
+  tabs.find((tab) => tab.id === value)?.id ?? 'profile';
+
 export default function AdminSettingsPage() {
-  const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
+  // `?tab=security` opens straight on a tab (e.g. from the two-factor prompt).
+  const urlTab = tabFromUrl(useSearchParams().get('tab'));
+  const [activeTab, setActiveTab] = useState<SettingsTab>(urlTab);
+  const [seenUrlTab, setSeenUrlTab] = useState(urlTab);
+  if (urlTab !== seenUrlTab) {
+    setSeenUrlTab(urlTab);
+    setActiveTab(urlTab);
+  }
   const [isDirty, setIsDirty] = useState(false);
   const [pendingTab, setPendingTab] = useState<SettingsTab | null>(null);
 
@@ -40,6 +53,8 @@ export default function AdminSettingsPage() {
     switch (activeTab) {
       case 'profile':
         return <ProfileSettings onDirtyChange={setIsDirty} />;
+      case 'security':
+        return <SecuritySettings />;
       case 'notifications':
         return <NotificationSettings onDirtyChange={setIsDirty} />;
       case 'platform':

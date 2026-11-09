@@ -420,7 +420,8 @@ export interface RoommateExpense {
 
 export interface TrustScoreOverview {
   trustScore: number;
-  averageScore: number;
+  /** No longer sent: an all-account average is not a fair comparison. */
+  averageScore?: number;
   verifications: VerificationItem[];
   history: TrustScoreHistoryItem[];
   badges: Badge[];
@@ -1574,18 +1575,6 @@ export const renterService = {
     );
   },
 
-  async updatePassword(
-    currentPassword: string,
-    newPassword: string
-  ): Promise<ApiResponse<{ message: string }>> {
-    return safeCall(() =>
-      authFetch('/renter/settings/password', {
-        method: 'PUT',
-        body: JSON.stringify({ currentPassword, newPassword }),
-      })
-    );
-  },
-
   async getSettingsPreferences(): Promise<ApiResponse<Record<string, unknown>>> {
     return safeCall(() => authFetch('/renter/settings/preferences'));
   },
@@ -1601,34 +1590,6 @@ export const renterService = {
     );
   },
 
-  async getTwoFactorStatus(): Promise<ApiResponse<{ enrolled: boolean; enabled: boolean }>> {
-    return safeCall(() => authFetch('/renter/settings/2fa'));
-  },
-
-  async enrollTwoFactor(): Promise<
-    ApiResponse<{ secret: string; otpauthUrl: string; qrDataUrl: string }>
-  > {
-    return safeCall(() => authFetch('/renter/settings/2fa/enroll', { method: 'POST' }));
-  },
-
-  async enableTwoFactor(token: string): Promise<ApiResponse<{ enabled: boolean }>> {
-    return safeCall(() =>
-      authFetch('/renter/settings/2fa/enable', {
-        method: 'POST',
-        body: JSON.stringify({ token }),
-      })
-    );
-  },
-
-  async disableTwoFactor(token: string): Promise<ApiResponse<{ enabled: boolean }>> {
-    return safeCall(() =>
-      authFetch('/renter/settings/2fa/disable', {
-        method: 'POST',
-        body: JSON.stringify({ token }),
-      })
-    );
-  },
-
   async deleteAccount(password: string): Promise<ApiResponse<{ message: string }>> {
     return safeCall(() =>
       authFetch('/renter/settings/account', {
@@ -1636,71 +1597,6 @@ export const renterService = {
         body: JSON.stringify({ password }),
       })
     );
-  },
-
-  // ---- Transaction PIN (global account-security surface) ----
-  /** Whether a transaction PIN / passkey is set, and which factor step-up asks for. */
-  async getSecurityOverview(): Promise<
-    ApiResponse<{
-      hasPassword: boolean;
-      hasTransactionPin: boolean;
-      hasPasskey: boolean;
-      stepUpMethod: string;
-    }>
-  > {
-    return safeCall(() => authFetch('/users/me/security'));
-  },
-
-  /** Set or change the transaction PIN, confirmed with the current password. */
-  async setTransactionPin(
-    currentPassword: string,
-    pin: string
-  ): Promise<ApiResponse<{ hasTransactionPin: true }>> {
-    return safeCall(() =>
-      authFetch('/users/me/security/transaction-pin', {
-        method: 'POST',
-        body: JSON.stringify({ currentPassword, pin }),
-      })
-    );
-  },
-
-  // ---- Passkeys (WebAuthn) ----
-  async listPasskeys(): Promise<
-    ApiResponse<{
-      hasPasskey: boolean;
-      passkeys: {
-        id: string;
-        deviceName: string | null;
-        createdAt: string;
-        lastUsedAt: string | null;
-      }[];
-    }>
-  > {
-    return safeCall(() => authFetch('/users/me/security/passkey'));
-  },
-
-  /** WebAuthn creation options to pass to the browser's startRegistration(). */
-  async startPasskeyRegistration(): Promise<ApiResponse<Record<string, unknown>>> {
-    return safeCall(() =>
-      authFetch('/users/me/security/passkey/register/options', { method: 'POST' })
-    );
-  },
-
-  /** Complete registration with the authenticator's attestation response. */
-  async finishPasskeyRegistration(
-    response: unknown,
-    deviceName?: string
-  ): Promise<ApiResponse<{ hasPasskey: true }>> {
-    return safeCall(() =>
-      authFetch('/users/me/security/passkey/register/verify', {
-        method: 'POST',
-        body: JSON.stringify({ response, deviceName }),
-      })
-    );
-  },
-
-  async removePasskey(id: string): Promise<ApiResponse<{ removed: true }>> {
-    return safeCall(() => authFetch(`/users/me/security/passkey/${id}`, { method: 'DELETE' }));
   },
 
   // ---- Saved searches ----

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { SafeImage } from '@/components/shared/media/SafeImage';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getAuthToken, tourSource, videoSource } from '@getrentos/shared';
+import { isAuthenticated, tourSource, videoSource } from '@getrentos/shared';
 import {
   Badge,
   Button,
@@ -89,7 +89,6 @@ const hasRules = (l: ShortletListing) =>
   Boolean(l.houseRules);
 
 const subscribeToNothing = () => () => {};
-const hasAuthToken = () => Boolean(getAuthToken());
 
 export function ShortletListingDetail({
   listingId,
@@ -101,12 +100,12 @@ export function ShortletListingDetail({
 }) {
   const router = useRouter();
   const queryClient = useQueryClient();
-  // A token is only readable on the client. useSyncExternalStore serves the
+  // The session is only readable on the client. useSyncExternalStore serves the
   // server snapshot (signed-out) during SSR and the hydration render, then
-  // switches to the real token value after hydration commits — so the first
+  // switches to the real value after hydration commits — so the first
   // client render matches the server HTML and there is no mismatch (DEF-216).
   // Mirrors ListingCallToAction on the same pages; avoids setState-in-effect.
-  const isSignedIn = useSyncExternalStore(subscribeToNothing, hasAuthToken, () => false);
+  const isSignedIn = useSyncExternalStore(subscribeToNothing, isAuthenticated, () => false);
   const wishlist = useShortletWishlist();
   const [bookingOpen, setBookingOpen] = useState(false);
   const [createdBooking, setCreatedBooking] = useState<ShortletBooking | null>(null);

@@ -160,9 +160,6 @@ export const renterKeys = {
   savedSearches: ['renter', 'savedSearches'] as const,
   settingsPreferences: ['renter', 'settings', 'preferences'] as const,
   profile: ['renter', 'profile'] as const,
-  twoFactor: ['renter', 'settings', 'twoFactor'] as const,
-  securityOverview: ['renter', 'settings', 'securityOverview'] as const,
-  passkeys: ['renter', 'settings', 'passkeys'] as const,
   inspections: ['renter', 'inspections'] as const,
 };
 
@@ -550,6 +547,22 @@ export const attentionKeys = {
 /** Offers on a seller's listings, compared side by side (owners, landlords and managers). */
 export const sellerOfferKeys = {
   comparison: ['seller', 'offers', 'compare'] as const,
+};
+
+/** The signed-in person's own trust records, shared by every portal. */
+/** The person's own sign-in security, the same for every role. */
+export const accountSecurityKeys = {
+  all: ['account-security'] as const,
+  overview: ['account-security', 'overview'] as const,
+  twoFactor: ['account-security', 'two-factor'] as const,
+  passkeys: ['account-security', 'passkeys'] as const,
+  sessions: ['account-security', 'sessions'] as const,
+};
+
+export const trustKeys = {
+  all: ['trust'] as const,
+  overview: (portal: string) => ['trust', 'overview', portal] as const,
+  explanation: ['trust', 'explanation'] as const,
 };
 
 /** One payment's confirmation state, polled by the return page. */

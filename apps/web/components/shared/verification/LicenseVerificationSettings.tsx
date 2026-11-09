@@ -107,6 +107,7 @@ export const LicenseVerificationSettings = () => {
               License document <span className="text-muted-foreground font-normal">(optional)</span>
             </label>
             <DocumentUpload
+              checkPhotoQuality
               value={document ? [{ id: 'document', file: document }] : []}
               onChange={(items) => setDocument(items[0]?.file ?? null)}
               accept=".pdf,.jpg,.jpeg,.png,.webp"

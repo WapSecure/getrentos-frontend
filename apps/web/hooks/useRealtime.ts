@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect } from 'react';
+import type { Socket } from 'socket.io-client';
+import { currentAccessToken } from '@/lib/apiClient';
 import { getRealtimeSocket } from '@/lib/realtime/socket';
 
 /**
@@ -10,12 +12,18 @@ import { getRealtimeSocket } from '@/lib/realtime/socket';
  */
 export function useRealtimeEvent(event: string, handler: (payload: unknown) => void): void {
   useEffect(() => {
-    const socket = getRealtimeSocket();
-    if (!socket) return;
-
-    socket.on(event, handler);
+    let socket: Socket | null = null;
+    let cancelled = false;
+    // The access token is in memory only, so straight after a page load it may
+    // still be on its way back from the refresh cookie: wait for it.
+    void currentAccessToken().then(() => {
+      if (cancelled) return;
+      socket = getRealtimeSocket();
+      socket?.on(event, handler);
+    });
     return () => {
-      socket.off(event, handler);
+      cancelled = true;
+      socket?.off(event, handler);
     };
   }, [event, handler]);
 }

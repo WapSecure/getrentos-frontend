@@ -5,6 +5,7 @@ import { Sparkles, CheckCircle2, ArrowUpRight } from 'lucide-react';
 import { Card } from '@getrentos/ui';
 import { trustService } from '@/services/trustService';
 import { unwrap } from '@/lib/apiHelpers';
+import { trustKeys } from '@/lib/queryKeys';
 
 /**
  * Plain-language narrative of the caller's own trust score (GET /trust-score/
@@ -13,7 +14,7 @@ import { unwrap } from '@/lib/apiHelpers';
  */
 export const TrustExplanationCard = () => {
   const query = useQuery({
-    queryKey: ['trust', 'explanation'] as const,
+    queryKey: trustKeys.explanation,
     queryFn: () => unwrap(trustService.getExplanation()),
     staleTime: 5 * 60 * 1000,
     retry: false,

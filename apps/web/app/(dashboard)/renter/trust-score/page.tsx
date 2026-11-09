@@ -29,12 +29,11 @@ export default function RenterStandingPage() {
           subjectId={subjectId}
           purpose="RENTER_ONBOARDING"
           description="Verify your identity to submit rental applications, sign leases and access higher trust limits."
-          documentsHref="/renter/settings?tab=verification"
           trustScoreHref={ROUTES.RENTER_TRUST_SCORE}
         />
       )}
       {activeTab === 'credit' && <CreditReportingView />}
-      {activeTab === 'trust' && <TrustScoreView />}
+      {activeTab === 'trust' && <TrustScoreView onVerify={() => setTab('verification')} />}
     </>
   );
 }

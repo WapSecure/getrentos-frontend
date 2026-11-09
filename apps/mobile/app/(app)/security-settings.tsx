@@ -1,4 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { FaceCheckButton } from '@/components/trust/FaceCheckButton';
+import { liveSelfieSupported } from '@/lib/smileid/liveSelfie';
 import { Alert, Image, Pressable, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -9,6 +11,7 @@ import {
   Fingerprint,
   KeyRound,
   Mail,
+  MonitorSmartphone,
   Phone,
   ScanFace,
   ShieldCheck,
@@ -19,6 +22,7 @@ import {
   Button,
   Card,
   Divider,
+  LinkButton,
   QueryState,
   NumberField,
   PasswordField,
@@ -31,6 +35,7 @@ import {
 import { qk } from '@/lib/query/keys';
 import {
   securityApi,
+  type AccountSession,
   type PasskeySummary,
   type SecurityOverview,
   type TwoFactorEnrollment,
@@ -38,6 +43,14 @@ import {
 import { errorMessage } from '@/lib/api/client';
 import { isPasskeySupported, registerPasskey } from '@/lib/passkey';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import {
+  PIN_LENGTH,
+  emailedProofReady,
+  isCurrentPin,
+  newPinReady,
+  pinsMismatch,
+  transactionPinBody,
+} from '@/lib/stepUpSetup';
 import {
   biometricSupport,
   unlockWithBiometrics,
@@ -47,6 +60,7 @@ import {
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { ChangeEmailSheet } from '@/components/account/ChangeEmailSheet';
 import { goBack } from '@/lib/goBack';
+import { AUTH_CONSTANTS, formatRelativeTime } from '@getrentos/shared';
 
 export default function SecuritySettings() {
   const { colors, spacing } = useTheme();
@@ -80,10 +94,9 @@ export default function SecuritySettings() {
               <PhoneVerificationSection overview={overview.data} />
               <PasskeySection />
               <TwoFactorSection overview={overview.data} />
-              {overview.data.hasPassword ? (
-                <TransactionPinSection overview={overview.data} />
-              ) : null}
+              <TransactionPinSection overview={overview.data} />
               {overview.data.hasPassword ? <PasswordSection /> : <SocialOnlyNote />}
+              <SignedInDevicesSection />
               {isRenter ? <DataExportSection /> : null}
               {overview.data.hasPassword ? <DangerSection /> : null}
             </>
@@ -386,40 +399,80 @@ function TwoFactorSection({ overview }: { overview: SecurityOverview }) {
 }
 
 /**
- * A transaction PIN: a separate secret from the login password, required to
- * step up money actions. Shown only for accounts that have a password, since
- * setting the PIN is confirmed with it.
+ * A transaction PIN: a separate secret from the login password, used to
+ * confirm money actions. Changing one takes the password and the current PIN;
+ * a first PIN, or a forgotten one, takes the password and an emailed code.
+ * Accounts with no password (Google / Apple only) use the emailed code alone.
  */
 function TransactionPinSection({ overview }: { overview: SecurityOverview }) {
   const { colors, spacing } = useTheme();
   const toast = useToast();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [forgot, setForgot] = useState(false);
   const [password, setPassword] = useState('');
+  const [currentPin, setCurrentPin] = useState('');
+  const [reference, setReference] = useState<string | null>(null);
+  const [sentTo, setSentTo] = useState<string | null>(null);
+  const [code, setCode] = useState('');
+  const [faceCheckId, setFaceCheckId] = useState<string | null>(null);
   const [pin, setPin] = useState('');
   const [confirm, setConfirm] = useState('');
+  // A face check can stand in for the emailed code where Smile's capture is built in.
+  const faceCheckAvailable = useMemo(() => liveSelfieSupported(), []);
 
   const reset = () => {
     setOpen(false);
+    setForgot(false);
     setPassword('');
+    setCurrentPin('');
+    setReference(null);
+    setSentTo(null);
+    setCode('');
+    setFaceCheckId(null);
     setPin('');
     setConfirm('');
   };
 
+  // With a PIN already set the current one proves it, unless it's forgotten.
+  const useCurrentPin = overview.hasTransactionPin && !forgot;
+
+  const sendCode = useMutation({
+    mutationFn: securityApi.sendStepUpCode,
+    onSuccess: (res) => {
+      setReference(res.reference);
+      setSentTo(res.sentTo);
+    },
+    onError: (err) => toast.show(errorMessage(err, 'Could not send a code right now.'), 'error'),
+  });
+
   const mutation = useMutation({
-    mutationFn: () => securityApi.setTransactionPin(password, pin),
+    mutationFn: () =>
+      securityApi.setTransactionPin(
+        transactionPinBody({
+          password: overview.hasPassword ? password : undefined,
+          pin,
+          ...(useCurrentPin ? { currentPin } : faceCheckId ? { faceCheckId } : { reference, code }),
+        })
+      ),
     onSuccess: () => {
       qc.setQueryData<SecurityOverview>(qk.security, (old) =>
         old ? { ...old, hasTransactionPin: true } : old
       );
+      qc.invalidateQueries({ queryKey: qk.security });
       reset();
       toast.show('Transaction PIN saved.', 'success');
     },
     onError: (err) => toast.show(errorMessage(err, 'Could not save your PIN.'), 'error'),
   });
 
-  const mismatch = confirm.length === 4 && pin !== confirm;
-  const ready = password.length > 0 && pin.length === 4 && pin === confirm;
+  const mismatch = pinsMismatch(pin, confirm);
+  const proofReady = useCurrentPin
+    ? (!overview.hasPassword || password.length > 0) && isCurrentPin(currentPin)
+    : faceCheckId
+      ? !overview.hasPassword || password.length > 0
+      : emailedProofReady({ needsPassword: overview.hasPassword, password, reference, code });
+  const ready = proofReady && newPinReady(pin, confirm);
 
   return (
     <Card elevated>
@@ -436,7 +489,7 @@ function TransactionPinSection({ overview }: { overview: SecurityOverview }) {
           <Text variant="callout" color="mutedForeground" style={{ flex: 1 }}>
             {overview.hasTransactionPin
               ? 'Required to release or refund money — a separate secret from your password.'
-              : 'Set a 4-digit PIN to confirm money actions, so your password alone isn’t enough.'}
+              : 'Set a 6-digit PIN to confirm money actions, so your password alone isn’t enough.'}
           </Text>
           <Button
             label={overview.hasTransactionPin ? 'Change' : 'Set PIN'}
@@ -447,26 +500,79 @@ function TransactionPinSection({ overview }: { overview: SecurityOverview }) {
         </View>
       ) : (
         <View style={{ gap: spacing.sm }}>
-          <PasswordField label="Current password" value={password} onChangeText={setPassword} />
+          {overview.hasPassword ? (
+            <PasswordField label="Current password" value={password} onChangeText={setPassword} />
+          ) : null}
+          {useCurrentPin ? (
+            <>
+              <NumberField
+                code
+                label="Current PIN"
+                value={currentPin}
+                onValueChange={setCurrentPin}
+                maxLength={PIN_LENGTH}
+                secureTextEntry
+              />
+              <LinkButton label="Forgot your PIN?" onPress={() => setForgot(true)} />
+            </>
+          ) : faceCheckId ? (
+            <Text variant="caption" color="mutedForeground">
+              Face confirmed. Choose your new PIN.
+            </Text>
+          ) : reference ? (
+            <NumberField
+              code
+              label="6-digit code"
+              hint={sentTo ? `We sent a code to ${sentTo}.` : undefined}
+              value={code}
+              onValueChange={setCode}
+              maxLength={6}
+              textContentType="oneTimeCode"
+            />
+          ) : (
+            <View style={{ gap: spacing.xs }}>
+              <Text variant="caption" color="mutedForeground">
+                {forgot
+                  ? 'We’ll email you a code so you can choose a new PIN.'
+                  : 'We’ll email you a code to confirm it’s you.'}
+              </Text>
+              <Button
+                label="Email me a code"
+                size="sm"
+                variant="secondary"
+                loading={sendCode.isPending}
+                onPress={() => sendCode.mutate()}
+              />
+              {forgot && faceCheckAvailable ? (
+                <FaceCheckButton
+                  label="Use a face check instead"
+                  start={async () => {
+                    const r = await securityApi.startPinFaceCheck();
+                    return { id: r.faceCheckId, session: r.session };
+                  }}
+                  status={securityApi.pinFaceCheckStatus}
+                  onApproved={setFaceCheckId}
+                />
+              ) : null}
+            </View>
+          )}
           <NumberField
             code
-            label="New 4-digit PIN"
+            label="New 6-digit PIN"
             value={pin}
             onValueChange={setPin}
-            maxLength={4}
+            maxLength={PIN_LENGTH}
+            secureTextEntry
           />
           <NumberField
             code
             label="Confirm PIN"
             value={confirm}
             onValueChange={setConfirm}
-            maxLength={4}
+            maxLength={PIN_LENGTH}
+            secureTextEntry
+            error={mismatch ? 'Those PINs don’t match.' : null}
           />
-          {mismatch ? (
-            <Text variant="caption" color="destructive">
-              Those PINs don’t match.
-            </Text>
-          ) : null}
           <View style={{ flexDirection: 'row', gap: spacing.sm }}>
             <Button label="Cancel" variant="ghost" style={{ flex: 1 }} onPress={reset} />
             <Button
@@ -579,6 +685,114 @@ function PasskeySection() {
   );
 }
 
+/**
+ * Where you're signed in: every device with a live session, this phone first.
+ * A signed-out device loses access at its next refresh, within 15 minutes.
+ */
+function SignedInDevicesSection() {
+  const { colors, spacing } = useTheme();
+  const toast = useToast();
+  const qc = useQueryClient();
+  const sessions = useQuery({ queryKey: qk.sessions, queryFn: securityApi.listSessions });
+
+  const signOutOne = useMutation({
+    mutationFn: (id: string) => securityApi.signOutSession(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: qk.sessions });
+      toast.show('Signed out. That device loses access within 15 minutes.', 'success');
+    },
+    onError: (err) => toast.show(errorMessage(err, 'Could not sign that device out.'), 'error'),
+  });
+
+  const signOutOthers = useMutation({
+    mutationFn: securityApi.signOutOtherSessions,
+    onSuccess: (res) => {
+      qc.invalidateQueries({ queryKey: qk.sessions });
+      toast.show(
+        res.revoked === 1
+          ? 'Signed out 1 other device.'
+          : `Signed out ${res.revoked} other devices.`,
+        'success'
+      );
+    },
+    onError: (err) =>
+      toast.show(errorMessage(err, 'Could not sign the other devices out.'), 'error'),
+  });
+
+  const others = sessions.data?.filter((s) => !s.current) ?? [];
+
+  const confirmSignOutOthers = () =>
+    Alert.alert(
+      'Sign out other devices?',
+      `This keeps you signed in here and signs out ${
+        others.length === 1 ? '1 other device' : `${others.length} other devices`
+      } within 15 minutes.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Sign out', style: 'destructive', onPress: () => signOutOthers.mutate() },
+      ]
+    );
+
+  return (
+    <Card elevated>
+      <SectionHeader
+        icon={<MonitorSmartphone size={16} color={colors.primary} />}
+        title="Where you’re signed in"
+      />
+      <Text variant="caption" color="mutedForeground">
+        If you don’t recognise a device, sign it out and change your password.
+      </Text>
+      <QueryState query={sessions} skeleton={<Skeleton height={96} />}>
+        <View style={{ gap: spacing.sm, marginTop: spacing.md }}>
+          {(sessions.data ?? []).map((session: AccountSession) => (
+            <View
+              key={session.id}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: spacing.sm,
+              }}
+            >
+              <View style={{ flex: 1, gap: spacing.xs }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                  <Text variant="callout" style={{ flexShrink: 1 }}>
+                    {session.device}
+                  </Text>
+                  {session.current ? <Badge label="This phone" tone="success" /> : null}
+                </View>
+                <Text variant="caption" color="mutedForeground">
+                  {session.current
+                    ? 'Active now'
+                    : `Last active ${formatRelativeTime(session.lastActiveAt).toLowerCase()}`}
+                  {session.ipAddress ? ` · ${session.ipAddress}` : ''}
+                </Text>
+              </View>
+              {session.current ? null : (
+                <LinkButton
+                  label="Sign out"
+                  onPress={() => signOutOne.mutate(session.id)}
+                  disabled={signOutOne.isPending}
+                />
+              )}
+            </View>
+          ))}
+        </View>
+      </QueryState>
+      {others.length > 0 ? (
+        <Button
+          label="Sign out other devices"
+          variant="outline"
+          size="sm"
+          style={{ marginTop: spacing.md }}
+          loading={signOutOthers.isPending}
+          onPress={confirmSignOutOthers}
+        />
+      ) : null}
+    </Card>
+  );
+}
+
 function PasswordSection() {
   const { colors, spacing } = useTheme();
   const toast = useToast();
@@ -604,11 +818,16 @@ function PasswordSection() {
           value={currentPassword}
           onChangeText={setCurrentPassword}
         />
-        <PasswordField label="New password" value={newPassword} onChangeText={setNewPassword} />
+        <PasswordField
+          label="New password"
+          placeholder={`At least ${AUTH_CONSTANTS.PASSWORD_MIN_LENGTH} characters`}
+          value={newPassword}
+          onChangeText={setNewPassword}
+        />
         <Button
           label="Update password"
           loading={mutation.isPending}
-          disabled={!currentPassword || newPassword.length < 8}
+          disabled={!currentPassword || newPassword.length < AUTH_CONSTANTS.PASSWORD_MIN_LENGTH}
           onPress={() => mutation.mutate()}
         />
       </View>

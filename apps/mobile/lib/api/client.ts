@@ -188,7 +188,10 @@ export async function apiFetch<T>(path: string, options: ApiRequest = {}): Promi
     // A sensitive change: confirm it's the account holder, then replay once.
     if (err instanceof ApiError && err.code === STEP_UP_REQUIRED && !_stepUp) {
       clearStepUpToken();
-      const fresh = await obtainStepUpToken();
+      // The token approves this exact request, once (security gap AU-02).
+      const challengeId =
+        typeof err.details?.challengeId === 'string' ? err.details.challengeId : undefined;
+      const fresh = await obtainStepUpToken(challengeId);
       if (fresh) {
         return apiFetch<T>(path, {
           ...options,

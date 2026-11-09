@@ -8,6 +8,7 @@ import { Eye, EyeOff, ArrowRight, User, Mail, Lock, CheckCircle } from 'lucide-r
 import { useState } from 'react';
 import { useSignupStore } from '@/lib/store/signupStore';
 import { emailSchema, EmailFormData } from '@/lib/validations/auth';
+import { AUTH_CONSTANTS } from '@getrentos/shared';
 
 interface EmailSignupProps {
   onSubmit: (email: string) => Promise<void>;
@@ -53,7 +54,7 @@ export const EmailSignup = ({ onSubmit, isLoading }: EmailSignupProps) => {
 
   const passwordStrength = (pass: string) => {
     let strength = 0;
-    if (pass.length >= 8) strength++;
+    if (pass.length >= AUTH_CONSTANTS.PASSWORD_MIN_LENGTH) strength++;
     if (pass.match(/[a-z]/) && pass.match(/[A-Z]/)) strength++;
     if (pass.match(/[0-9]/)) strength++;
     if (pass.match(/[^a-zA-Z0-9]/)) strength++;

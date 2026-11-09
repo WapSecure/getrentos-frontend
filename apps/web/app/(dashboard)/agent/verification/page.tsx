@@ -12,7 +12,6 @@ export default function AgentVerificationPage() {
       subjectId={subjectId}
       purpose="AGENT_ONBOARDING"
       description="Verify your identity to manage clients and run verification visits."
-      documentsHref={ROUTES.AGENT_DOCUMENTS}
       trustScoreHref={ROUTES.AGENT_TRUST_PROFILE}
     />
   );

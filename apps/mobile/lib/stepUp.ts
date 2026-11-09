@@ -8,8 +8,14 @@
 export const STEP_UP_HEADER = 'x-step-up-token';
 export const STEP_UP_REQUIRED = 'STEP_UP_REQUIRED';
 
-/** Told what the request being confirmed does, when the caller said (UX-30). */
-type Prompt = (summary: string | null) => Promise<string | null>;
+/** What the sheet is asked for: the challenge the API raised, when there was one. */
+export interface StepUpRequest {
+  challengeId?: string;
+  /** What the request being confirmed does, when the caller said (UX-30). */
+  summary?: string | null;
+}
+
+type Prompt = (request: StepUpRequest) => Promise<string | null>;
 
 let prompt: Prompt | null = null;
 let summaries: string[] = [];
@@ -35,12 +41,31 @@ export function clearStepUpToken() {
   cached = null;
 }
 
-/** Prompts once even if several requests hit the wall at the same time. */
-export async function obtainStepUpToken(): Promise<string | null> {
+/**
+ * Gets a confirmation for a refused request. With a `challengeId` (security
+ * gap AU-02) the token approves exactly that request, once, so it is never
+ * cached or shared: prompts for different requests queue. Without one it
+ * falls back to the cached, shared token.
+ */
+export async function obtainStepUpToken(challengeId?: string): Promise<string | null> {
+  if (!prompt) return null;
+  if (challengeId) {
+    const ask = prompt;
+    // Captured now: by the time a queued prompt opens, other requests may have
+    // pushed their own summaries.
+    const summary = currentStepUpSummary();
+    const turn = (inFlight ?? Promise.resolve(null))
+      .catch(() => null)
+      .then(() => ask({ challengeId, summary }));
+    inFlight = turn.finally(() => {
+      if (inFlight === turn) inFlight = null;
+    });
+    return turn;
+  }
   const existing = currentStepUpToken();
   if (existing) return existing;
-  if (!prompt) return null;
-  inFlight ??= prompt(currentStepUpSummary()).finally(() => {
+  const ask = prompt;
+  inFlight ??= ask({ summary: currentStepUpSummary() }).finally(() => {
     inFlight = null;
   });
   return inFlight;

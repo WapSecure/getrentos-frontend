@@ -14,20 +14,23 @@ import {
   Switch,
   useToast,
 } from '@getrentos/ui';
-import { renterService } from '@/services/renterService';
+import { TRANSACTION_PIN_LENGTH } from '@getrentos/shared';
+import { accountSecurityService } from '@/services/accountSecurityService';
 import { unwrap } from '@/lib/apiHelpers';
-import { renterKeys } from '@/lib/queryKeys';
-
-interface TwoFactorEnroll {
-  secret: string;
-  otpauthUrl: string;
-  qrDataUrl: string;
-}
+import { accountSecurityKeys } from '@/lib/queryKeys';
+import type { TwoFactorEnrollment } from '@/types/accountSecurity';
+import { ChangePasswordCard } from './ChangePasswordCard';
+import { SignedInDevices } from './SignedInDevices';
 
 type TwoFactorStep = 'idle' | 'setup' | 'disable';
 
 const TWO_FACTOR_SWITCH_ID = 'two-factor-switch';
 
+/**
+ * Security settings for every role: password, passkeys, authenticator app,
+ * transaction PIN and where you're signed in. All of it is the person's, not
+ * a portal's, so it reads /users/me/security.
+ */
 export const SecuritySettings = () => {
   const queryClient = useQueryClient();
   const toast = useToast();
@@ -38,8 +41,8 @@ export const SecuritySettings = () => {
     isFetching: twoFactorFetching,
     refetch: refetchTwoFactor,
   } = useQuery({
-    queryKey: renterKeys.twoFactor,
-    queryFn: () => unwrap(renterService.getTwoFactorStatus()),
+    queryKey: accountSecurityKeys.twoFactor,
+    queryFn: () => unwrap(accountSecurityService.getTwoFactorStatus()),
     throwOnError: false,
   });
 
@@ -49,58 +52,96 @@ export const SecuritySettings = () => {
     isFetching: securityFetching,
     refetch: refetchSecurity,
   } = useQuery({
-    queryKey: renterKeys.securityOverview,
-    queryFn: () => unwrap(renterService.getSecurityOverview()),
+    queryKey: accountSecurityKeys.overview,
+    queryFn: () => unwrap(accountSecurityService.getOverview()),
     throwOnError: false,
   });
 
   const [pinOpen, setPinOpen] = useState(false);
+  const [pinForgot, setPinForgot] = useState(false);
   const [pinPassword, setPinPassword] = useState('');
+  const [currentPin, setCurrentPin] = useState('');
+  const [pinReference, setPinReference] = useState<string | null>(null);
+  const [pinSentTo, setPinSentTo] = useState<string | null>(null);
+  const [pinCode, setPinCode] = useState('');
   const [pin, setPin] = useState('');
   const [pinConfirm, setPinConfirm] = useState('');
 
   const resetPin = () => {
     setPinOpen(false);
+    setPinForgot(false);
     setPinPassword('');
+    setCurrentPin('');
+    setPinReference(null);
+    setPinSentTo(null);
+    setPinCode('');
     setPin('');
     setPinConfirm('');
   };
 
+  const hasPin = !!security?.hasTransactionPin;
+  // Accounts that only sign in with Google or Apple have no password to give.
+  const needsPassword = security?.hasPassword !== false;
+  // With a PIN already set the current one proves it, unless it's forgotten.
+  const useCurrentPin = hasPin && !pinForgot;
+
+  const sendPinCodeMutation = useMutation({
+    mutationFn: () => unwrap(accountSecurityService.sendSecurityCode()),
+    onSuccess: (res) => {
+      setPinReference(res.reference);
+      setPinSentTo(res.sentTo);
+    },
+    onError: (err: Error) => toast.error(err.message || 'Could not send a code right now'),
+  });
+
   const setPinMutation = useMutation({
-    mutationFn: () => unwrap(renterService.setTransactionPin(pinPassword, pin)),
+    mutationFn: () =>
+      unwrap(
+        accountSecurityService.setTransactionPin({
+          ...(needsPassword ? { currentPassword: pinPassword } : {}),
+          pin,
+          ...(useCurrentPin
+            ? { currentPin }
+            : { reference: pinReference ?? undefined, code: pinCode }),
+        })
+      ),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: renterKeys.securityOverview });
+      queryClient.invalidateQueries({ queryKey: accountSecurityKeys.overview });
       resetPin();
       toast.success('Transaction PIN saved');
     },
     onError: (err: Error) => toast.error(err.message || 'Could not save your PIN'),
   });
 
-  const hasPin = !!security?.hasTransactionPin;
-  const pinMismatch = pinConfirm.length === 4 && pin !== pinConfirm;
-  const pinReady = pinPassword.length > 0 && pin.length === 4 && pin === pinConfirm;
+  const pinMismatch = pinConfirm.length === TRANSACTION_PIN_LENGTH && pin !== pinConfirm;
+  const pinProofReady =
+    (!needsPassword || pinPassword.length > 0) &&
+    (useCurrentPin
+      ? /^(\d{4}|\d{6})$/.test(currentPin)
+      : !!pinReference && /^\d{6}$/.test(pinCode));
+  const pinReady = pinProofReady && /^\d{6}$/.test(pin) && pin === pinConfirm;
 
   // ---- Passkeys ----
   const { data: passkeyData } = useQuery({
-    queryKey: renterKeys.passkeys,
-    queryFn: () => unwrap(renterService.listPasskeys()),
+    queryKey: accountSecurityKeys.passkeys,
+    queryFn: () => unwrap(accountSecurityService.listPasskeys()),
   });
   const passkeys = passkeyData?.passkeys ?? [];
 
   const addPasskeyMutation = useMutation({
     mutationFn: async () => {
-      const options = await unwrap(renterService.startPasskeyRegistration());
+      const options = await unwrap(accountSecurityService.startPasskeyRegistration());
       // Browser prompts for Face ID / fingerprint / security key here.
       const attestation = await startRegistration({ optionsJSON: options as never });
       const label =
         typeof navigator !== 'undefined' && /iPhone|iPad|Android/i.test(navigator.userAgent)
           ? 'This phone'
           : 'This device';
-      return unwrap(renterService.finishPasskeyRegistration(attestation, label));
+      return unwrap(accountSecurityService.finishPasskeyRegistration(attestation, label));
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: renterKeys.passkeys });
-      queryClient.invalidateQueries({ queryKey: renterKeys.securityOverview });
+      queryClient.invalidateQueries({ queryKey: accountSecurityKeys.passkeys });
+      queryClient.invalidateQueries({ queryKey: accountSecurityKeys.overview });
       toast.success('Passkey added');
     },
     onError: (err: Error) => {
@@ -111,17 +152,17 @@ export const SecuritySettings = () => {
   });
 
   const removePasskeyMutation = useMutation({
-    mutationFn: (id: string) => unwrap(renterService.removePasskey(id)),
+    mutationFn: (id: string) => unwrap(accountSecurityService.removePasskey(id)),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: renterKeys.passkeys });
-      queryClient.invalidateQueries({ queryKey: renterKeys.securityOverview });
+      queryClient.invalidateQueries({ queryKey: accountSecurityKeys.passkeys });
+      queryClient.invalidateQueries({ queryKey: accountSecurityKeys.overview });
       toast.success('Passkey removed');
     },
     onError: (err: Error) => toast.error(err.message || 'Could not remove that passkey'),
   });
 
   const [step, setStep] = useState<TwoFactorStep>('idle');
-  const [enroll, setEnroll] = useState<TwoFactorEnroll | null>(null);
+  const [enroll, setEnroll] = useState<TwoFactorEnrollment | null>(null);
   const [code, setCode] = useState('');
   const [codeError, setCodeError] = useState<string | null>(null);
 
@@ -139,7 +180,7 @@ export const SecuritySettings = () => {
   };
 
   const enrollMutation = useMutation({
-    mutationFn: () => unwrap(renterService.enrollTwoFactor()),
+    mutationFn: () => unwrap(accountSecurityService.enrollTwoFactor()),
     onSuccess: (data) => {
       setEnroll(data);
       setStep('setup');
@@ -157,9 +198,9 @@ export const SecuritySettings = () => {
   });
 
   const enableMutation = useMutation({
-    mutationFn: (token: string) => unwrap(renterService.enableTwoFactor(token)),
+    mutationFn: (token: string) => unwrap(accountSecurityService.enableTwoFactor(token)),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: renterKeys.twoFactor });
+      queryClient.invalidateQueries({ queryKey: accountSecurityKeys.twoFactor });
       resetSetup();
       toast.success('Two-factor authentication enabled');
     },
@@ -167,9 +208,9 @@ export const SecuritySettings = () => {
   });
 
   const disableMutation = useMutation({
-    mutationFn: (token: string) => unwrap(renterService.disableTwoFactor(token)),
+    mutationFn: (token: string) => unwrap(accountSecurityService.disableTwoFactor(token)),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: renterKeys.twoFactor });
+      queryClient.invalidateQueries({ queryKey: accountSecurityKeys.twoFactor });
       resetSetup();
       toast.success('Two-factor authentication disabled');
     },
@@ -186,10 +227,12 @@ export const SecuritySettings = () => {
     <div>
       <h2 className="text-xl font-semibold text-foreground mb-4">Security settings</h2>
       <p className="text-sm text-muted-foreground mb-6">
-        Manage your account security and authentication methods
+        How you sign in, how you confirm payments, and where you&apos;re signed in
       </p>
 
       <div className="space-y-6">
+        {security?.hasPassword && <ChangePasswordCard />}
+
         {/* Passkey — the strongest factor */}
         <div className="p-4 rounded-lg border border-border">
           <div className="flex items-center justify-between gap-3">
@@ -413,7 +456,7 @@ export const SecuritySettings = () => {
                       : 'Checking your PIN…'
                     : hasPin
                       ? 'Required to release or refund money — a separate secret from your password'
-                      : 'Set a 4-digit PIN to confirm money actions, so your password alone isn’t enough'}
+                      : 'Set a 6-digit PIN to confirm money actions, so your password alone isn’t enough'}
                 </p>
               </div>
             </div>
@@ -440,43 +483,92 @@ export const SecuritySettings = () => {
             <div className="mt-4 p-4 rounded-lg bg-muted/50 border border-border space-y-3">
               <div className="flex items-center justify-between">
                 <h4 className="font-medium text-foreground">
-                  {hasPin ? 'Change your PIN' : 'Set your PIN'}
+                  {pinForgot ? 'Reset your PIN' : hasPin ? 'Change your PIN' : 'Set your PIN'}
                 </h4>
                 <IconButton size="sm" label="Cancel" onClick={resetPin} icon={<X />} />
               </div>
-              <label className="block space-y-1">
-                <span className="text-sm font-medium">Current password</span>
-                <Input
-                  type="password"
-                  autoComplete="current-password"
-                  value={pinPassword}
-                  onChange={(e) => setPinPassword(e.target.value)}
-                  placeholder="Your GetRentos password"
-                />
-              </label>
-              <label className="block space-y-1">
-                <span className="text-sm font-medium">New 4-digit PIN</span>
+              {needsPassword && (
+                <Field label="Current password">
+                  <Input
+                    type="password"
+                    autoComplete="current-password"
+                    value={pinPassword}
+                    onChange={(e) => setPinPassword(e.target.value)}
+                    placeholder="Your GetRentos password"
+                  />
+                </Field>
+              )}
+              {useCurrentPin ? (
+                <Field
+                  label="Current PIN"
+                  labelAside={
+                    <Button variant="link" onClick={() => setPinForgot(true)}>
+                      Forgot your PIN?
+                    </Button>
+                  }
+                >
+                  <NumberInput
+                    masked
+                    value={currentPin}
+                    onValueChange={setCurrentPin}
+                    placeholder="Your current PIN"
+                    maxLength={TRANSACTION_PIN_LENGTH}
+                    autoComplete="off"
+                  />
+                </Field>
+              ) : pinReference ? (
+                <Field
+                  label="Code from your email"
+                  hint={pinSentTo ? `We sent a code to ${pinSentTo}.` : undefined}
+                >
+                  <NumberInput
+                    value={pinCode}
+                    onValueChange={setPinCode}
+                    placeholder="6-digit code"
+                    maxLength={6}
+                    autoComplete="one-time-code"
+                  />
+                </Field>
+              ) : (
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-sm text-muted-foreground">
+                    {pinForgot
+                      ? 'We’ll email you a code so you can choose a new PIN.'
+                      : 'We’ll email you a code to confirm it’s you.'}
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => sendPinCodeMutation.mutate()}
+                    isLoading={sendPinCodeMutation.isPending}
+                  >
+                    Email me a code
+                  </Button>
+                </div>
+              )}
+              <Field label="New 6-digit PIN">
                 <NumberInput
-                  aria-label="New transaction PIN"
+                  masked
                   value={pin}
-                  onValueChange={(value) => setPin(value.slice(0, 4))}
-                  placeholder="4-digit PIN"
-                  maxLength={4}
+                  onValueChange={setPin}
+                  placeholder="6-digit PIN"
+                  maxLength={TRANSACTION_PIN_LENGTH}
                   autoComplete="off"
                 />
-              </label>
-              <label className="block space-y-1">
-                <span className="text-sm font-medium">Confirm PIN</span>
+              </Field>
+              <Field
+                label="Confirm PIN"
+                error={pinMismatch ? 'Those PINs don’t match.' : undefined}
+              >
                 <NumberInput
-                  aria-label="Confirm transaction PIN"
+                  masked
                   value={pinConfirm}
-                  onValueChange={(value) => setPinConfirm(value.slice(0, 4))}
+                  onValueChange={setPinConfirm}
                   placeholder="Re-enter PIN"
-                  maxLength={4}
+                  maxLength={TRANSACTION_PIN_LENGTH}
                   autoComplete="off"
                 />
-              </label>
-              {pinMismatch && <p className="text-sm text-destructive">Those PINs don’t match.</p>}
+              </Field>
               <div className="flex justify-end gap-2">
                 <Button variant="ghost" onClick={resetPin}>
                   Cancel
@@ -493,6 +585,8 @@ export const SecuritySettings = () => {
             </div>
           )}
         </div>
+
+        <SignedInDevices />
       </div>
     </div>
   );

@@ -111,6 +111,7 @@ export default function LicenseVerification() {
                 autoCapitalize="characters"
               />
               <FilePickRow
+                checkPhotoQuality
                 label="Licence document (optional)"
                 file={document}
                 emptyText="PDF or photo: tap to add"

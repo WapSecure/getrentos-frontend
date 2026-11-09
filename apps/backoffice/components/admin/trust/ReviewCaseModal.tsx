@@ -26,6 +26,7 @@ import { formatDate, unwrap } from '@getrentos/shared';
 import { trustService } from '@/services/trustService';
 import { adminService } from '@/services/adminService';
 import { adminKeys } from '@/lib/queryKeys';
+import { useAdminUser } from '@/app/(dashboard)/admin/layout';
 import type { TrustReviewCaseSummary, TrustReviewDecision } from '@/types/trust';
 import {
   REVIEW_CASE_PRIORITY_META,
@@ -117,6 +118,10 @@ const STEP_VARIANT: Record<string, BadgeVariant> = {
   WAITING_FOR_PROVIDER: 'info',
 };
 
+/** Every final decision (pass included) is four-eyes: a second officer confirms it. */
+const FOUR_EYES_HINT =
+  'Four-eyes: decisions are confirmed by a second officer: the reviewer assigned to this case cannot be the resolver.';
+
 const shortId = (id?: string | null) => (id ? `${id.slice(0, 8)}…` : '—');
 
 interface ReviewCaseModalProps {
@@ -197,6 +202,14 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
   });
 
   const isBlocking = decision === 'REJECT' || decision === 'RESTRICT';
+  // The API refuses these outright; don't offer a decision the officer can't make.
+  const myId = useAdminUser()?.id;
+  const assignedToMe = Boolean(myId && detail?.assigneeId === myId);
+  const aboutMe = Boolean(
+    myId && detail?.verification.subjectType === 'PERSON' && detail.verification.subjectId === myId
+  );
+  const unassigned = Boolean(detail && !detail.assigneeId);
+  const canDecide = !assignedToMe && !aboutMe && !unassigned;
   const isResolved = detail?.status === 'RESOLVED' || detail?.status === 'CLOSED';
   const busy = assignMutation.isPending || escalateMutation.isPending || resolveMutation.isPending;
 
@@ -465,18 +478,34 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
 
                     {/* Resolve */}
                     <div className="mt-4 space-y-2">
-                      <Select
-                        value={decision}
-                        onValueChange={(value) => {
-                          setDecision(value as TrustReviewDecision | '');
-                          setActionError(null);
-                        }}
-                        options={RESOLVE_OPTIONS}
-                        placeholder="Select a decision…"
-                        ariaLabel="Decision"
-                        searchable={false}
-                        className="w-full"
-                      />
+                      {aboutMe ? (
+                        <Alert variant="warning" icon={ShieldAlert}>
+                          This case is about your own account, so another officer resolves it.
+                        </Alert>
+                      ) : assignedToMe ? (
+                        <Alert variant="warning" icon={ShieldAlert}>
+                          {FOUR_EYES_HINT} You are the assigned reviewer, so another officer
+                          confirms the decision.
+                        </Alert>
+                      ) : unassigned ? (
+                        <Alert variant="info" icon={ShieldAlert}>
+                          Assign a reviewer first. {FOUR_EYES_HINT}
+                        </Alert>
+                      ) : null}
+                      {canDecide && (
+                        <Select
+                          value={decision}
+                          onValueChange={(value) => {
+                            setDecision(value as TrustReviewDecision | '');
+                            setActionError(null);
+                          }}
+                          options={RESOLVE_OPTIONS}
+                          placeholder="Select a decision…"
+                          ariaLabel="Decision"
+                          searchable={false}
+                          className="w-full"
+                        />
+                      )}
                       <Textarea
                         value={note}
                         onChange={(e) => setNote(e.target.value)}
@@ -484,22 +513,23 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
                         placeholder="Note for the case record (optional)"
                         aria-label="Case note"
                       />
-                      {isBlocking && (
+                      {canDecide && decision && (
                         <Alert variant="warning" icon={ShieldAlert}>
-                          Four-eyes: blocking decisions are confirmed by a second officer: the
-                          reviewer assigned to this case cannot be the resolver.
+                          {FOUR_EYES_HINT}
                         </Alert>
                       )}
                       <div className="flex flex-wrap items-center gap-2 pt-1">
-                        <Button
-                          size="sm"
-                          disabled={!decision || busy}
-                          isLoading={resolveMutation.isPending}
-                          loadingText="Resolving…"
-                          onClick={() => resolveMutation.mutate()}
-                        >
-                          {isBlocking ? 'Confirm blocking decision' : 'Approve (pass)'}
-                        </Button>
+                        {canDecide && (
+                          <Button
+                            size="sm"
+                            disabled={!decision || busy}
+                            isLoading={resolveMutation.isPending}
+                            loadingText="Resolving…"
+                            onClick={() => resolveMutation.mutate()}
+                          >
+                            {isBlocking ? 'Confirm blocking decision' : 'Approve (pass)'}
+                          </Button>
+                        )}
                         <Button
                           variant="outline"
                           size="sm"

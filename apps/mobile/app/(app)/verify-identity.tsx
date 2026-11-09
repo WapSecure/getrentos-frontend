@@ -4,7 +4,6 @@ import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
-  Camera,
   ChevronLeft,
   FileText,
   HelpCircle,
@@ -12,17 +11,8 @@ import {
   ShieldCheck,
   ShieldX,
 } from 'lucide-react-native';
-import {
-  Badge,
-  Button,
-  Card,
-  Chip,
-  Skeleton,
-  Text,
-  useTheme,
-  useToast,
-} from '@getrentos/ui-native';
-import { pickDocument, captureSelfie } from '@/lib/filePicker';
+import { Button, Card, Chip, Skeleton, Text, useTheme, useToast } from '@getrentos/ui-native';
+import { pickDocument } from '@/lib/filePicker';
 import type { PickedFile } from '@/lib/api/documents';
 import {
   kycApi,
@@ -68,7 +58,6 @@ export default function VerifyIdentity() {
 
   const [documentType, setDocumentType] = useState<IdentityDocumentType>('NATIONAL_ID');
   const [document, setDocument] = useState<PickedFile | null>(null);
-  const [selfie, setSelfie] = useState<PickedFile | null>(null);
 
   const statusQuery = useQuery({ queryKey: ['kyc-status'], queryFn: kycApi.getStatus });
   const identity = statusQuery.data?.identity;
@@ -84,11 +73,12 @@ export default function VerifyIdentity() {
   const submitMutation = useMutation({
     mutationFn: () => {
       if (!document) throw new Error('Choose your document first');
-      return kycApi.submitIdentity({ documentType, document, selfie: selfie ?? undefined });
+      // Document only: an uploaded photo is not a liveness check (ID-08). The
+      // live selfie is still required on top of an approved document (ID-16).
+      return kycApi.submitIdentity({ documentType, document });
     },
     onSuccess: () => {
       setDocument(null);
-      setSelfie(null);
       qc.invalidateQueries({ queryKey: ['kyc-status'] });
       toast.show('Submitted for review. We’ll notify you once it’s decided.', 'success');
     },
@@ -131,7 +121,7 @@ export default function VerifyIdentity() {
         <Text variant="body" color="mutedForeground">
           {verified
             ? 'Your identity is verified.'
-            : 'Run the instant checks below, or upload an ID document for a person to review.'}
+            : 'Verify with your NIN and a live selfie. It usually takes a few minutes.'}
         </Text>
 
         {statusQuery.isLoading ? (
@@ -160,22 +150,17 @@ export default function VerifyIdentity() {
           </Card>
         ) : null}
 
-        {statusQuery.data ? (
-          <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-            <Badge label={`Trust score ${statusQuery.data.trustScore}`} tone="neutral" />
-            {statusQuery.data.tier !== undefined ? (
-              <Badge label={`Tier ${statusQuery.data.tier}`} tone="info" />
-            ) : null}
-          </View>
-        ) : null}
-
         {statusQuery.data && !verified && profile?.id ? (
           <VerificationChecklist subjectId={profile.id} purpose={purposeFor(usablePortal)} />
         ) : null}
 
         {canSubmit ? (
           <View style={{ gap: spacing.lg }}>
-            <Text variant="heading">Or upload an ID document</Text>
+            <Text variant="heading">Can&apos;t use your NIN?</Text>
+            <Text variant="caption" color="mutedForeground">
+              Upload an ID document for our team to check by hand. You will still need to take a
+              live selfie: a document alone does not verify you.
+            </Text>
             <View style={{ gap: spacing.sm }}>
               <Text variant="callout" color="mutedForeground" style={{ fontWeight: '600' }}>
                 Document type
@@ -193,6 +178,7 @@ export default function VerifyIdentity() {
             </View>
 
             <FilePickRow
+              checkPhotoQuality
               label="Document photo"
               file={document}
               icon={FileText}
@@ -200,16 +186,8 @@ export default function VerifyIdentity() {
               onClear={() => setDocument(null)}
             />
 
-            <FilePickRow
-              label="Selfie (speeds up automatic approval)"
-              file={selfie}
-              icon={Camera}
-              onPick={async () => setSelfie(await captureSelfie())}
-              onClear={() => setSelfie(null)}
-            />
-
             <Button
-              label="Submit for verification"
+              label="Submit document for review"
               loadingLabel="Submitting…"
               disabled={!document}
               loading={submitMutation.isPending}

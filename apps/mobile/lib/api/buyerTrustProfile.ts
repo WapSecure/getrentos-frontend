@@ -31,7 +31,8 @@ export interface TrustProfileStat {
 
 export interface TrustProfile {
   trustScore: number;
-  averageScore: number;
+  /** No longer sent. */
+  averageScore?: number;
   verifications: VerificationItem[];
   history: TrustScoreHistoryItem[];
   badges: TrustBadge[];

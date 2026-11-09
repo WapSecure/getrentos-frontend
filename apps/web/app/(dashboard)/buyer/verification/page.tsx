@@ -12,7 +12,6 @@ export default function BuyerVerificationPage() {
       subjectId={subjectId}
       purpose="RENTER_ONBOARDING"
       description="Verify your identity to make offers, sign documents and transact safely."
-      documentsHref={ROUTES.BUYER_DOCUMENTS}
       trustScoreHref={ROUTES.BUYER_TRUST_PROFILE}
     />
   );

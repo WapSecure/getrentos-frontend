@@ -2,8 +2,8 @@
 
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { STORAGE_KEYS, getDashboardRoute } from '@/lib/constants/auth';
-import { getStoredUser, updateStoredUser } from '@/lib/authStorage';
+import { getDashboardRoute } from '@/lib/constants/auth';
+import { updateStoredUser } from '@/lib/authStorage';
 import { unwrap } from '@/lib/apiHelpers';
 import { accountRolesService, type AddableRoleId } from '@/services/accountRolesService';
 
@@ -18,14 +18,7 @@ export function useAddRole() {
     mutationFn: ({ role }: { role: AddableRoleId; to?: string }) =>
       unwrap(accountRolesService.addRole(role)),
     onSuccess: (result, { role, to }) => {
-      updateStoredUser({ roles: result.roles });
-      const user = getStoredUser<Record<string, unknown>>();
-      if (user) {
-        const storage = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN)
-          ? localStorage
-          : sessionStorage;
-        storage.setItem(STORAGE_KEYS.USER, JSON.stringify({ ...user, role }));
-      }
+      updateStoredUser({ roles: result.roles, role });
       router.push(to ?? getDashboardRoute(role));
     },
   });

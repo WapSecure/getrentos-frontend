@@ -38,6 +38,12 @@ export interface KycStatus {
    * flow and stays PENDING for someone verified by NIN.
    */
   identityVerified?: boolean;
+  /**
+   * ISO date the identity grace period ends. Set while an unverified account
+   * keeps its listing and payout capability: verify identity before then or
+   * listings, payout accounts and withdrawals stop working.
+   */
+  identityGraceEndsAt?: string;
   identity?: IdentityKyc;
   license?: LicenseKyc;
   ownershipProofs?: OwnershipProofKyc[];

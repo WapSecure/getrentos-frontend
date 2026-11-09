@@ -7,7 +7,7 @@ import { Alert, Button, IconButton } from '@getrentos/ui';
 import { Field } from '@getrentos/ui';
 import { Input } from '@getrentos/ui';
 import { adminService } from '@/services/adminService';
-import { unwrap } from '@getrentos/shared';
+import { AUTH_CONSTANTS, ERROR_MESSAGES, unwrap } from '@getrentos/shared';
 import type { AdminStaffMember } from '@/types/admin';
 
 interface ResetPasswordModalProps {
@@ -38,8 +38,8 @@ export const ResetPasswordModal = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!staff) return;
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters.');
+    if (password.length < AUTH_CONSTANTS.PASSWORD_MIN_LENGTH) {
+      setError(ERROR_MESSAGES.PASSWORD_TOO_SHORT);
       return;
     }
 
@@ -70,11 +70,7 @@ export const ResetPasswordModal = ({
           </DialogDescription>
 
           <form onSubmit={handleSubmit} className="mt-5 space-y-4">
-            <Field
-              label="New password"
-              required
-              hint="Use the generated one, or type your own."
-            >
+            <Field label="New password" required hint="Use the generated one, or type your own.">
               <Input
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}

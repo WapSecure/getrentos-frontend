@@ -2,6 +2,7 @@
 
 import { CheckCircle } from 'lucide-react';
 import { Input } from '@getrentos/ui';
+import { AUTH_CONSTANTS } from '@getrentos/shared';
 
 interface ResetStepProps {
   newPassword: string;
@@ -19,9 +20,7 @@ export const ResetStep = ({
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-foreground mb-1.5">
-          New password
-        </label>
+        <label className="block text-sm font-medium text-foreground mb-1.5">New password</label>
         <Input
           type="password"
           value={newPassword}
@@ -32,9 +31,7 @@ export const ResetStep = ({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-foreground mb-1.5">
-          Confirm password
-        </label>
+        <label className="block text-sm font-medium text-foreground mb-1.5">Confirm password</label>
         <Input
           type="password"
           value={confirmPassword}
@@ -46,7 +43,9 @@ export const ResetStep = ({
 
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <CheckCircle className="w-4 h-4 text-primary" />
-        <span>Password must be at least 8 characters</span>
+        <span>
+          At least {AUTH_CONSTANTS.PASSWORD_MIN_LENGTH} characters, and not one used on another site
+        </span>
       </div>
     </div>
   );
