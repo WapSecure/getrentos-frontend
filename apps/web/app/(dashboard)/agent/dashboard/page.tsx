@@ -54,7 +54,7 @@ export default function AgentDashboardPage() {
       ) : (
         <AgentStatsCards
           todaysTasks={dashboard?.assignedTasks ?? 0}
-          completedThisWeek={dashboard?.completedTasks ?? 0}
+          completedThisWeek={dashboard?.completedThisWeek ?? 0}
           inProgress={dashboard?.inProgressTasks ?? 0}
           overdueTasks={dashboard?.overdueTasks ?? 0}
         />

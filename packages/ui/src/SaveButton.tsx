@@ -13,6 +13,10 @@ interface SaveButtonProps {
   onClick?: () => unknown;
   disabled?: boolean;
   isLoading?: boolean;
+  /** `secondary` + `sm` for a save inside a row, where a full primary button would shout. */
+  variant?: 'primary' | 'secondary' | 'outline';
+  size?: 'sm' | 'md';
+  'aria-label'?: string;
 }
 
 const isPromise = (value: unknown): value is Promise<unknown> =>
@@ -26,6 +30,9 @@ export const SaveButton = ({
   onClick,
   disabled,
   isLoading,
+  variant = 'primary',
+  size,
+  'aria-label': ariaLabel,
 }: SaveButtonProps) => {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -53,7 +60,9 @@ export const SaveButton = ({
   return (
     <Button
       type={type}
-      variant="primary"
+      variant={variant}
+      size={size}
+      aria-label={saved ? undefined : ariaLabel}
       fullWidth={fullWidth}
       className={className ? `gap-1.5 ${className}` : 'gap-1.5'}
       onClick={() => void handleClick()}

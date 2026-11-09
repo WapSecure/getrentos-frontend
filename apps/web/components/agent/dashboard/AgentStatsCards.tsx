@@ -45,7 +45,7 @@ export const AgentStatsCards = ({
         {
           label: 'Completed',
           value: completedThisWeek,
-          subtitle: 'All time',
+          subtitle: 'Last 7 days',
           href: ROUTES.AGENT_TASKS,
         },
       ]}

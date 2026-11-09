@@ -96,8 +96,8 @@ export default function AgentHome() {
           },
           {
             label: 'Completed',
-            value: d.completedTasks,
-            subtitle: 'All time',
+            value: d.completedThisWeek ?? 0,
+            subtitle: 'Last 7 days',
             onPress: toTasks,
           },
         ]}
