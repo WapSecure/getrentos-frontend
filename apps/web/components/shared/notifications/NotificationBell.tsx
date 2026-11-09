@@ -102,6 +102,8 @@ export function NotificationBell(props: NotificationBellProps) {
     queryKey,
     queryFn: () => fetchNotifications({ page, pageSize }),
     placeholderData: paginate ? keepPreviousData : undefined,
+    // The bell sits in the layout: thrown, a failed fetch took down the whole page.
+    throwOnError: false,
   });
   const notifications = (Array.isArray(data) ? data : data?.items) ?? [];
   const total = (Array.isArray(data) ? data.length : data?.total) ?? 0;

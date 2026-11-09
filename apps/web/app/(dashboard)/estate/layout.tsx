@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { EstateNavbar } from '@/components/estate/navigation/EstateNavbar';
 import { EstateSidebar } from '@/components/estate/dashboard/EstateSidebar';
-import { PageLoadingState } from '@sureground/ui';
+import { PageErrorState, PageLoadingState } from '@sureground/ui';
 import {
   ROUTES,
   isAuthenticated,
@@ -33,6 +33,8 @@ interface SelectedEstateValue {
   estate: Estate | null;
   estates: Estate[];
   isLoading: boolean;
+  loadFailed: boolean;
+  retry: () => void;
   selectEstate: (id: string) => void;
 }
 
@@ -46,10 +48,18 @@ export const useSelectedEstate = () => {
 };
 
 function SelectedEstateProvider({ children }: { children: ReactNode }) {
-  const { data: estates, isLoading } = useQuery({
+  const {
+    data: estates,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
     queryKey: estateKeys.myEstates,
     queryFn: () => unwrap(estateService.listMyEstates()),
+    // Thrown, this took down the whole layout, top bar and sidebar included.
+    throwOnError: false,
   });
+  const loadFailed = isError && !estates;
   const [selectedId, setSelectedId] = useState<string | null>(() => {
     if (typeof window === 'undefined') return null;
     try {
@@ -85,10 +95,26 @@ function SelectedEstateProvider({ children }: { children: ReactNode }) {
   if (guardsOnly) return <PageLoadingState />;
 
   return (
-    <SelectedEstateContext.Provider value={{ estate, estates: managed, isLoading, selectEstate }}>
+    <SelectedEstateContext.Provider
+      value={{
+        estate,
+        estates: managed,
+        isLoading,
+        loadFailed,
+        retry: () => void refetch(),
+        selectEstate,
+      }}
+    >
       {children}
     </SelectedEstateContext.Provider>
   );
+}
+
+// Without the estate list a page would read "no estate" and send the manager to setup.
+function EstateContent({ children }: { children: ReactNode }) {
+  const { loadFailed, retry } = useSelectedEstate();
+  if (loadFailed) return <PageErrorState title="Couldn’t load your estates" onRetry={retry} />;
+  return <>{children}</>;
 }
 
 export default function EstateLayout({ children }: { children: ReactNode }) {
@@ -145,7 +171,9 @@ export default function EstateLayout({ children }: { children: ReactNode }) {
               tabIndex={-1}
               className="min-w-0 flex-1 workspace-main p-4 sm:p-6 lg:p-8"
             >
-              <div className="max-w-7xl mx-auto">{children}</div>
+              <div className="max-w-7xl mx-auto">
+                <EstateContent>{children}</EstateContent>
+              </div>
             </main>
           </div>
         </div>
