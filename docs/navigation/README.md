@@ -106,18 +106,26 @@ global search, there is no evidence it is needed.
 
 ## 4. Before and after
 
-| Measure                                        | Before                                             | After                          | How measured                |
-| ---------------------------------------------- | -------------------------------------------------- | ------------------------------ | --------------------------- |
-| Landlord first-level items visible             | 34                                                 | 6 + 5 group headings + account | Count in rendered sidebar   |
-| Landlord sidebar, all groups open              | 2,177px                                            | 1,897px                        | `scrollHeight`, 1440px wide |
-| Desktop row height                             | 44px                                               | 36px (44px on touch)           | `getBoundingClientRect`     |
-| Pages per account menu that repeat the sidebar | 1 (landlord, owner, realtor, agent, buyer, estate) | 0                              | Route audit                 |
-| Tablet (820px) access to all pages             | None                                               | Bottom bar + menu              | Landlord, in browser        |
-| Messages in phone bar                          | Missing for 4 roles                                | All roles that have it         | Code and browser            |
+Landlord, Applications page, 1440px wide, light mode. "Before" is `994aa79c^` (the commit
+before the redesign started), run from a separate worktree against the same API and data.
+"After" is `dev` after the Sureground rename.
 
-Screenshots: before-and-after captures are pending. The "before" set needs a worktree at
-`994aa79c^`. Both sets should be taken after the Sureground rename and the new text
-sizes (`1bc27cbd`), or they would show an out-of-date look.
+| Before                                             | After                                            |
+| -------------------------------------------------- | ------------------------------------------------ |
+| ![Before](screenshots/before-landlord-desktop.png) | ![After](screenshots/after-landlord-desktop.png) |
+
+| Measure                                | Before              | After                                 | How measured                  |
+| -------------------------------------- | ------------------- | ------------------------------------- | ----------------------------- |
+| Landlord sidebar links visible on load | 34 of 34            | 13 of 34 (6 primary + the open group) | Visible `.sidebar-item` links |
+| Landlord sidebar height on load        | 1,924px             | 1,059px                               | `scrollHeight`, 1440px wide   |
+| Landlord sidebar, every group opened   | 1,924px             | 1,899px                               | Same, all groups open         |
+| Desktop row height                     | 44px                | 36px (44px on touch)                  | `getBoundingClientRect`       |
+| Account menus repeating a sidebar page | 6 roles             | 0                                     | Route audit                   |
+| Tablet (820px) access to all pages     | None                | Bottom bar + menu                     | Landlord, in the browser      |
+| Messages in the phone bar              | Missing for 4 roles | Every role that has it                | Code and browser              |
+| Moving along the lettings pipeline     | Sidebar only        | Tabs under the page title             | Screenshots above             |
+
+Also in `screenshots/`: the after version with every group opened (before had nothing folded, so its screenshot is the same as above).
 
 ## 5. What changed and why
 
@@ -189,7 +197,7 @@ sizes (`1bc27cbd`), or they would show an out-of-date look.
 ## 10. Remaining issues and recommendations
 
 1. **Backoffice:** sign in with a two-factor-enabled admin, then review the sidebar and icon rail against the brief's administrator priorities.
-2. **Screenshots:** take before-and-after screenshots once the Sureground rename lands.
+2. **More screenshots:** phone and tablet before-and-after (desktop is in section 4).
 3. **Not tested yet:**
    - tablet top bars for renter and estate
    - orientation change
