@@ -16,6 +16,7 @@ import {
   SearchInput,
 } from '@getrentos/ui';
 import { formatCurrency, formatLagosDate } from '@/lib/format';
+import { chargeTitle, type ChargeCategory } from '@/lib/chargeCategory';
 
 interface Receipt {
   id: string;
@@ -25,7 +26,19 @@ interface Receipt {
   date: string;
   fileName: string;
   url: string;
+  category?: ChargeCategory;
+  periodStart?: string;
+  periodEnd?: string;
+  reference?: string;
 }
+
+/** "Rent · 1 Aug 2026 – 31 Aug 2026", or just the charge when no period is known. */
+const receiptLabel = (receipt: Receipt): string | null => {
+  if (!receipt.category && !receipt.periodStart) return null;
+  const what = chargeTitle(receipt.category);
+  if (!receipt.periodStart || !receipt.periodEnd) return what;
+  return `${what} · ${formatLagosDate(receipt.periodStart)} – ${formatLagosDate(receipt.periodEnd)}`;
+};
 
 interface PaymentReceiptsGalleryProps {
   receipts: Receipt[];
@@ -46,11 +59,13 @@ export const PaymentReceiptsGallery = ({
   const formatDate = (dateString: string) => formatLagosDate(dateString);
   const pageOnly = total > receipts.length;
 
-  // People look a receipt up by home, amount or date, not by its file name.
+  // People look a receipt up by home, amount, date, charge or reference, not by its file name.
   const filteredReceipts = receipts.filter((receipt) => {
     const term = searchTerm.toLowerCase();
     return (
       receipt.propertyName.toLowerCase().includes(term) ||
+      (receiptLabel(receipt) ?? '').toLowerCase().includes(term) ||
+      (receipt.reference ?? '').toLowerCase().includes(term) ||
       formatDate(receipt.date).toLowerCase().includes(term) ||
       formatCurrency(receipt.amount).toLowerCase().includes(term)
     );
@@ -76,7 +91,9 @@ export const PaymentReceiptsGallery = ({
             <SearchInput
               value={searchTerm}
               onValueChange={setSearchTerm}
-              placeholder={pageOnly ? 'Search this page...' : 'Search by home, amount or date...'}
+              placeholder={
+                pageOnly ? 'Search this page...' : 'Search by home, amount, date or reference...'
+              }
               label={pageOnly ? 'Search receipts on this page' : 'Search receipts'}
               className="w-full sm:w-56"
             />
@@ -105,6 +122,11 @@ export const PaymentReceiptsGallery = ({
                     <span className="block text-sm font-medium text-foreground truncate">
                       {receipt.propertyName}
                     </span>
+                    {receiptLabel(receipt) && (
+                      <span className="block truncate text-xs text-foreground">
+                        {receiptLabel(receipt)}
+                      </span>
+                    )}
                     <span className="block text-xs text-muted-foreground">
                       Paid {formatDate(receipt.date)}
                     </span>
@@ -162,9 +184,17 @@ export const PaymentReceiptsGallery = ({
                   <p className="text-2xl font-bold text-primary">
                     {formatCurrency(selectedReceipt.amount)}
                   </p>
+                  {receiptLabel(selectedReceipt) && (
+                    <p className="mt-1 text-xs text-foreground">{receiptLabel(selectedReceipt)}</p>
+                  )}
                   <p className="text-xs text-muted-foreground mt-1">
                     {formatDate(selectedReceipt.date)}
                   </p>
+                  {selectedReceipt.reference && (
+                    <p className="mt-1 select-all font-mono text-xs text-muted-foreground">
+                      {selectedReceipt.reference}
+                    </p>
+                  )}
                 </div>
               </div>
 

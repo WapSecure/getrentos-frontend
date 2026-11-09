@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { PaymentsHeader } from '@/components/renter/payments/PaymentsHeader';
 import { PaymentsSummary } from '@/components/renter/payments/PaymentsSummary';
-import { PaymentsList } from '@/components/renter/payments/PaymentsList';
+import { PaymentsList, type PaymentStatusFilter } from '@/components/renter/payments/PaymentsList';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { PaymentMethods } from '@/components/renter/payments/PaymentMethods';
 import { PayAmountDialog } from '@/components/renter/payments/PayAmountDialog';
 import { RentAccountCard } from '@/components/renter/payments/RentAccountCard';
@@ -38,7 +39,11 @@ const TABS: HubTab[] = [
 
 const PAGE_SIZE = 10;
 const RECEIPTS_PAGE_SIZE = 12;
-/** The API's largest page. Open charges are few; if there are more, the summary says "at least". */
+/**
+ * The API's largest page. The summary's figures come from the API's own
+ * account-wide summary; only an older API without one leaves the summary to sum
+ * this page, saying "at least" when there are more.
+ */
 const MAX_PAGE_SIZE = 100;
 
 /** Real gateway checkout redirect: pulled out of component scope so it reads as an
@@ -80,9 +85,17 @@ export default function PaymentsPage() {
 
   const [page, setPage] = useState(1);
   const [receiptsPage, setReceiptsPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState<PaymentStatusFilter>('all');
+  const search = useDebouncedValue(searchTerm.trim());
+  const listFilters = {
+    status: filterStatus === 'all' ? undefined : filterStatus,
+    search: search || undefined,
+  };
   const paymentsQuery = useQuery({
-    queryKey: [...renterKeys.payments, { page, pageSize: PAGE_SIZE }],
-    queryFn: () => unwrap(renterService.listPayments({ page, pageSize: PAGE_SIZE })),
+    queryKey: [...renterKeys.payments, { page, pageSize: PAGE_SIZE, ...listFilters }],
+    queryFn: () =>
+      unwrap(renterService.listPayments({ page, pageSize: PAGE_SIZE, ...listFilters })),
     placeholderData: keepPreviousData,
   });
   // Every open charge across all pages, soonest due first: what the renter owes,
@@ -119,6 +132,9 @@ export default function PaymentsPage() {
   const openCharges = openChargesQuery.data?.items ?? [];
   const openCount = openChargesQuery.data?.total ?? 0;
   const nextCharge = openCharges[0] ?? null;
+  // Account-wide figures from the server. An older API sends none, and the
+  // summary then works them out from the open charges it holds.
+  const summary = paymentsQuery.data?.summary ?? openChargesQuery.data?.summary;
 
   // Outcomes are transient toasts, as on other pages: an in-page "inbox" held in
   // component state looked persistent but emptied on every reload (UX-18).
@@ -392,6 +408,7 @@ export default function PaymentsPage() {
       <PaymentsSummary
         openCharges={openCharges}
         openCount={openCount}
+        summary={summary}
         onPay={() => nextCharge && setPayingPaymentId(nextCharge.id)}
         isPaying={payNowMutation.isPending}
       />
@@ -403,6 +420,17 @@ export default function PaymentsPage() {
         onDownloadReceipt={handleDownloadReceipt}
         onDispute={handleDispute}
         onConfirmMoveIn={handleConfirmMoveIn}
+        searchTerm={searchTerm}
+        onSearchChange={(value) => {
+          setSearchTerm(value);
+          setPage(1);
+        }}
+        filterStatus={filterStatus}
+        onFilterChange={(value) => {
+          setFilterStatus(value);
+          setPage(1);
+        }}
+        serverFiltered={!!paymentsQuery.data?.summary}
       />
 
       {total > PAGE_SIZE && (
@@ -434,7 +462,11 @@ export default function PaymentsPage() {
         title="Confirm move-in?"
         description={
           confirmingMoveInPayment
-            ? `This releases the rent GetRentos is holding for ${confirmingMoveInPayment.propertyName} to your landlord now. Only confirm once you've moved in — it can't be undone.`
+            ? `This releases the ${
+                confirmingMoveInPayment.heldAmountNaira
+                  ? `${formatCurrency(confirmingMoveInPayment.heldAmountNaira)} `
+                  : ''
+              }rent GetRentos is holding for ${confirmingMoveInPayment.propertyName} to your landlord now. Only confirm once you've moved in — it can't be undone.`
             : ''
         }
         confirmLabel="Yes, release to landlord"

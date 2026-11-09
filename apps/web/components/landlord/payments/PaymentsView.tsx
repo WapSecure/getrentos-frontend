@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import {
   PageErrorState,
@@ -20,6 +20,7 @@ import {
 } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import type { RentPayment, RentPaymentStatus } from '@/types/landlord';
 
 const EMPTY_STATS: RentCollectionStatsData = {
@@ -44,10 +45,18 @@ export function PaymentsView() {
   const [filter, setFilter] = useState<'all' | RentPaymentStatus>('all');
   const [selectedPayment, setSelectedPayment] = useState<RentPayment | null>(null);
 
+  // The server searches every page (tenant, property, reference), so the term
+  // is sent once typing pauses rather than on every keystroke.
+  const search = useDebouncedValue(searchQuery.trim());
   const paymentsQuery = useQuery({
     queryKey: [
       ...landlordKeys.payments(),
-      { page, pageSize: PAGE_SIZE, status: filter === 'all' ? undefined : filter },
+      {
+        page,
+        pageSize: PAGE_SIZE,
+        status: filter === 'all' ? undefined : filter,
+        search: search || undefined,
+      },
     ],
     queryFn: () =>
       unwrap(
@@ -55,15 +64,13 @@ export function PaymentsView() {
           status: filter === 'all' ? undefined : filter,
           page,
           pageSize: PAGE_SIZE,
+          search: search || undefined,
         })
       ),
     placeholderData: keepPreviousData,
   });
   const { data } = paymentsQuery;
-  // Memoised so the filter below has a stable dependency. A bare `?? []` fallback
-  // is a new array on every render, which made `filteredPayments` recompute every
-  // render: the cost the memo existed to avoid.
-  const payments = useMemo(() => data?.items ?? [], [data]);
+  const payments = data?.items ?? [];
   const total = data?.total ?? 0;
 
   const statsQuery = useQuery({
@@ -73,18 +80,6 @@ export function PaymentsView() {
   const stats = statsQuery.data ?? EMPTY_STATS;
 
   const { totalCollected, outstandingBalance, escrowPending, upcomingPayments } = stats;
-
-  // The server filters by status; search stays client-side on this page (the API
-  // has no search parameter), and the view says so while a search is typed.
-  const filteredPayments = useMemo(
-    () =>
-      payments.filter(
-        (p) =>
-          p.tenantName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.propertyName.toLowerCase().includes(searchQuery.toLowerCase())
-      ),
-    [payments, searchQuery]
-  );
 
   return (
     <>
@@ -110,9 +105,12 @@ export function PaymentsView() {
         <SearchInput
           className="flex-1 max-w-sm"
           value={searchQuery}
-          onValueChange={setSearchQuery}
-          placeholder="Search this page by tenant or property..."
-          label="Search this page by tenant or property"
+          onValueChange={(value) => {
+            setSearchQuery(value);
+            setPage(1);
+          }}
+          placeholder="Search by tenant, property or reference..."
+          label="Search payments by tenant, property or reference"
         />
         <div
           className="flex max-w-full gap-1 overflow-x-auto pb-1"
@@ -135,10 +133,9 @@ export function PaymentsView() {
         </div>
       </div>
 
-      {searchQuery.trim() && total > payments.length && (
+      {search && data && (
         <p className="-mt-3 mb-4 text-xs text-muted-foreground" role="status">
-          Searching the {payments.length} payments on this page only, of {total}. Go to another page
-          to search the rest.
+          {total === 1 ? '1 payment matches' : `${total} payments match`} &ldquo;{search}&rdquo;.
         </p>
       )}
 
@@ -155,7 +152,7 @@ export function PaymentsView() {
           isRetrying={paymentsQuery.isFetching || statsQuery.isFetching}
         />
       ) : (
-        <PaymentsTable payments={filteredPayments} onViewDetails={setSelectedPayment} />
+        <PaymentsTable payments={payments} onViewDetails={setSelectedPayment} />
       )}
 
       {total > 0 && (

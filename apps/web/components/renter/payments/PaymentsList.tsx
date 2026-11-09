@@ -22,13 +22,17 @@ interface Payment {
   amountPaid?: number;
   outstanding?: number;
   reference?: string;
+  feeNaira?: number;
+  totalChargedNaira?: number;
+  heldAmountNaira?: number;
   resumeCheckout?: { url: string; reference: string; expiresAt: string };
   periodStart?: string;
   periodEnd?: string;
   lines?: { category: string; label: string; amount: number }[];
 }
 
-type StatusFilter = 'all' | Payment['status'];
+export type PaymentStatusFilter = 'all' | Payment['status'];
+type StatusFilter = PaymentStatusFilter;
 
 interface PaymentsListProps {
   payments: Payment[];
@@ -38,6 +42,15 @@ interface PaymentsListProps {
   onDownloadReceipt: (id: string) => void;
   onDispute: (id: string) => void;
   onConfirmMoveIn: (id: string) => void;
+  searchTerm: string;
+  onSearchChange: (value: string) => void;
+  filterStatus: StatusFilter;
+  onFilterChange: (value: StatusFilter) => void;
+  /**
+   * True when the API searched and filtered every payment itself. An older API
+   * ignores both, so the list falls back to filtering the page it holds.
+   */
+  serverFiltered: boolean;
 }
 
 const statusOptions: { value: StatusFilter; label: string }[] = [
@@ -55,23 +68,29 @@ export const PaymentsList = ({
   onDownloadReceipt,
   onDispute,
   onConfirmMoveIn,
+  searchTerm,
+  onSearchChange,
+  filterStatus,
+  onFilterChange,
+  serverFiltered,
 }: PaymentsListProps) => {
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState<StatusFilter>('all');
 
-  // The API pages the history and has no search or status filter, so both work
-  // on the payments shown here. Say so rather than miss older charges silently.
-  const pageOnly = total > payments.length;
+  // An older API pages the history without searching or filtering it, so both
+  // work on the payments shown here; say so rather than miss older charges.
+  const pageOnly = !serverFiltered && total > payments.length;
+  const filtering = searchTerm.trim() !== '' || filterStatus !== 'all';
 
-  const filteredPayments = payments.filter((payment) => {
-    const matchesSearch =
-      payment.propertyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      payment.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = filterStatus === 'all' || payment.status === filterStatus;
-    return matchesSearch && matchesStatus;
-  });
+  const filteredPayments = serverFiltered
+    ? payments
+    : payments.filter((payment) => {
+        const matchesSearch =
+          payment.propertyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          payment.description.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesStatus = filterStatus === 'all' || payment.status === filterStatus;
+        return matchesSearch && matchesStatus;
+      });
 
   const handleViewDetails = (payment: Payment) => {
     setSelectedPayment(payment);
@@ -86,15 +105,25 @@ export const PaymentsList = ({
             <div>
               <h2 className="font-semibold text-foreground">Payment history</h2>
               <p className="text-xs text-muted-foreground mt-0.5">
-                {total === 1 ? '1 payment' : `${total} payments`}
+                {serverFiltered && filtering
+                  ? total === 1
+                    ? '1 payment matches'
+                    : `${total} payments match`
+                  : total === 1
+                    ? '1 payment'
+                    : `${total} payments`}
               </p>
             </div>
 
             <SearchInput
               value={searchTerm}
-              onValueChange={setSearchTerm}
-              placeholder={pageOnly ? 'Search this page...' : 'Search payments...'}
-              label={pageOnly ? 'Search payments on this page' : 'Search payment history'}
+              onValueChange={onSearchChange}
+              placeholder={pageOnly ? 'Search this page...' : 'Search property or reference...'}
+              label={
+                pageOnly
+                  ? 'Search payments on this page'
+                  : 'Search payments by property or reference'
+              }
               className="w-full sm:w-56"
             />
           </div>
@@ -109,7 +138,7 @@ export const PaymentsList = ({
                 key={option.value}
                 type="button"
                 aria-pressed={filterStatus === option.value}
-                onClick={() => setFilterStatus(option.value)}
+                onClick={() => onFilterChange(option.value)}
                 className="shrink-0 whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-medium text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-4 focus-visible:ring-primary/12 aria-pressed:bg-card aria-pressed:text-primary aria-pressed:shadow-sm"
               >
                 {option.label}

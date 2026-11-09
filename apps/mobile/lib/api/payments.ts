@@ -50,7 +50,38 @@ export interface Payment {
   outstanding?: number;
   /** Naira paid against this charge so far (part-payments and credit). */
   amountPaid?: number;
+  /** Card or bank fee the payer covered on top of the charge, when the API knows it. */
+  feeNaira?: number;
+  /** Amount plus fee: what the payer was charged in all. Sent with `feeNaira`. */
+  totalChargedNaira?: number;
+  /** Naira GetRentos is holding for this charge right now (0 once released). */
+  heldAmountNaira?: number;
 }
+
+/** Account-wide payment figures, over every charge (not one page). */
+export interface PaymentsSummary {
+  amountOwedNaira: number;
+  openCount: number;
+  overdueCount: number;
+  nextDueDate: string | null;
+  totalPaidNaira: number;
+  totalHeldNaira: number;
+}
+
+export interface PaymentsPage extends Paginated<Payment> {
+  /** Older APIs leave it out. */
+  summary?: PaymentsSummary;
+}
+
+export type ChargeCategory = 'RENT' | 'SERVICE_CHARGE' | 'DEPOSIT' | 'LEVY' | 'LATE_FEE';
+
+export const CHARGE_CATEGORY_LABEL: Record<ChargeCategory, string> = {
+  RENT: 'Rent',
+  SERVICE_CHARGE: 'Service charge',
+  DEPOSIT: 'Deposit',
+  LEVY: 'Levy',
+  LATE_FEE: 'Late fee',
+};
 
 export interface Receipt {
   id: string;
@@ -60,6 +91,13 @@ export interface Receipt {
   date: string;
   fileName: string;
   url: string;
+  /** What the charge was for. Older APIs leave it out. */
+  category?: ChargeCategory;
+  /** The period billed, when the charge came from a rent schedule. */
+  periodStart?: string;
+  periodEnd?: string;
+  /** Gateway reference of the payment. */
+  reference?: string;
 }
 
 /** A card, bank account or wallet the renter has saved for rent payments. */
@@ -87,7 +125,7 @@ export const PAYMENT_METHOD_TYPE_LABEL: Record<SavedPaymentMethod['type'], strin
 
 export const paymentsApi = {
   list: (page = 1, pageSize = 20) =>
-    apiFetch<Paginated<Payment>>(`/renter/payments?page=${page}&pageSize=${pageSize}`),
+    apiFetch<PaymentsPage>(`/renter/payments?page=${page}&pageSize=${pageSize}`),
 
   listReceipts: (page = 1, pageSize = 20) =>
     apiFetch<Paginated<Receipt>>(`/renter/payments/receipts?page=${page}&pageSize=${pageSize}`),

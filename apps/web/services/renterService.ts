@@ -223,8 +223,14 @@ export interface Payment {
   heldReason?: string;
   /** Present when the payment is initialized with a real gateway (redirect here to complete checkout). */
   authorizationUrl?: string;
-  /** Gateway reference for the payment currently being processed. */
+  /** Gateway reference: the checkout in flight while processing, the one that paid it once paid. */
   reference?: string;
+  /** Card or bank fee the payer covered on top of the charge, when the API knows it. */
+  feeNaira?: number;
+  /** Amount plus fee: what the payer was charged in all. Sent with `feeNaira`. */
+  totalChargedNaira?: number;
+  /** Naira GetRentos is holding for this charge right now (0 once released). */
+  heldAmountNaira?: number;
   /** A checkout the tenant opened and closed, which they can go back to until `expiresAt`. */
   resumeCheckout?: { url: string; reference: string; expiresAt: string };
   /** Naira paid against this charge so far (part-payments and credit). */
@@ -292,6 +298,30 @@ export interface Receipt {
   date: string;
   fileName: string;
   url: string;
+  /** What the charge was for. Older APIs leave it out. */
+  category?: ChargeCategory;
+  /** The period billed, when the charge came from a rent schedule. */
+  periodStart?: string;
+  periodEnd?: string;
+  /** Gateway reference of the payment. */
+  reference?: string;
+}
+
+/** Account-wide payment figures, over every charge (not one page). */
+export interface PaymentsSummary {
+  amountOwedNaira: number;
+  openCount: number;
+  overdueCount: number;
+  nextDueDate: string | null;
+  totalPaidNaira: number;
+  totalHeldNaira: number;
+}
+
+export type PaymentStatusFilter = Payment['status'];
+
+export interface PaymentsPage extends Paginated<Payment> {
+  /** Older APIs leave it out. */
+  summary?: PaymentsSummary;
 }
 
 export interface PaymentMethod {
@@ -1267,13 +1297,19 @@ export const renterService = {
 
   // ---- Payments ----
   async listPayments(
-    params: { page?: number; pageSize?: number; open?: boolean } = {}
-  ): Promise<ApiResponse<Paginated<Payment>>> {
-    return safeCall(() => authFetch<Paginated<Payment>>(`/renter/payments${toQuery(params)}`));
+    params: {
+      page?: number;
+      pageSize?: number;
+      open?: boolean;
+      status?: PaymentStatusFilter;
+      search?: string;
+    } = {}
+  ): Promise<ApiResponse<PaymentsPage>> {
+    return safeCall(() => authFetch<PaymentsPage>(`/renter/payments${toQuery(params)}`));
   },
 
   async listReceipts(
-    params: { page?: number; pageSize?: number } = {}
+    params: { page?: number; pageSize?: number; search?: string } = {}
   ): Promise<ApiResponse<Paginated<Receipt>>> {
     return safeCall(() =>
       authFetch<Paginated<Receipt>>(`/renter/payments/receipts${toQuery(params)}`)
