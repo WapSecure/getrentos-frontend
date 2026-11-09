@@ -134,4 +134,6 @@ export interface TrustOverview {
   score: TrustScoreBreakdown | null;
   nextAction: { key: TrustRequirementKey; label: string } | null;
   lastUpdatedAt?: string;
+  /** Checks no provider we use can do yet; never a requirement. Absent from older APIs. */
+  notOffered?: { key: string; label: string; detail: string }[];
 }

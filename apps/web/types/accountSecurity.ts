@@ -43,3 +43,18 @@ export interface SetTransactionPinInput {
   reference?: string;
   code?: string;
 }
+
+export interface RecentSignIn {
+  id: string;
+  at: string;
+  device: string;
+  newDevice: boolean;
+}
+
+export interface PayoutHold {
+  id: string;
+  createdAt: string;
+  signals: { rule: string; outcome: string; reason: string }[];
+  appealNote: string | null;
+  appealedAt: string | null;
+}

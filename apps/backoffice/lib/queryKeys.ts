@@ -75,8 +75,8 @@ export const adminKeys = {
       params?.pageSize ?? 20,
     ] as const,
   fraudAlertDetail: (id: string) => ['admin', 'fraudAlerts', id] as const,
-  riskDecisions: (params: { event: string; flaggedOnly: boolean; page: number }) =>
-    ['admin', 'riskDecisions', params.event, params.flaggedOnly, params.page] as const,
+  riskDecisions: (params: { event: string; view: string; page: number }) =>
+    ['admin', 'riskDecisions', params.event, params.view, params.page] as const,
   riskSummary: ['admin', 'riskDecisions', 'summary'] as const,
   escrowTransactions: (params?: {
     search?: string;

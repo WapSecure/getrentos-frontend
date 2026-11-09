@@ -491,6 +491,8 @@ export const accountSecurityKeys = {
   twoFactor: ['account-security', 'two-factor'] as const,
   passkeys: ['account-security', 'passkeys'] as const,
   sessions: ['account-security', 'sessions'] as const,
+  signIns: ['account-security', 'sign-ins'] as const,
+  payoutHolds: ['account-security', 'payout-holds'] as const,
 };
 
 export const trustKeys = {

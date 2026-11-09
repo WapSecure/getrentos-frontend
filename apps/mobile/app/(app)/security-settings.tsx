@@ -10,8 +10,10 @@ import {
   Database,
   Fingerprint,
   KeyRound,
+  LogIn,
   Mail,
   MonitorSmartphone,
+  PauseCircle,
   Phone,
   ScanFace,
   ShieldCheck,
@@ -102,7 +104,9 @@ export default function SecuritySettings() {
               <TwoFactorSection overview={overview.data} />
               <TransactionPinSection overview={overview.data} />
               {overview.data.hasPassword ? <PasswordSection /> : <SocialOnlyNote />}
+              <PayoutHoldsSection />
               <SignedInDevicesSection />
+              <RecentSignInsSection />
               {isRenter ? <DataExportSection /> : null}
               {overview.data.hasPassword ? <DangerSection /> : null}
             </>
@@ -867,6 +871,122 @@ function SignedInDevicesSection() {
           onPress={confirmSignOutOthers}
         />
       ) : null}
+    </Card>
+  );
+}
+
+function RecentSignInsSection() {
+  const { colors, spacing } = useTheme();
+  const signIns = useQuery({ queryKey: qk.signIns, queryFn: securityApi.listRecentSignIns });
+  return (
+    <Card elevated>
+      <SectionHeader icon={<LogIn size={16} color={colors.primary} />} title="Recent sign-ins" />
+      <Text variant="caption" color="mutedForeground">
+        We email you when a new device signs in. If one here wasn’t you, change your password.
+      </Text>
+      <QueryState query={signIns} skeleton={<Skeleton height={72} />}>
+        <View style={{ gap: spacing.sm, marginTop: spacing.md }}>
+          {(signIns.data ?? []).length === 0 ? (
+            <Text variant="caption" color="mutedForeground">
+              No sign-ins recorded yet.
+            </Text>
+          ) : (
+            (signIns.data ?? []).map((signIn) => (
+              <View
+                key={signIn.id}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: spacing.sm,
+                }}
+              >
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: spacing.sm,
+                    flexShrink: 1,
+                  }}
+                >
+                  <Text variant="callout" style={{ flexShrink: 1 }}>
+                    {signIn.device}
+                  </Text>
+                  {signIn.newDevice ? <Badge label="New device" tone="warning" /> : null}
+                </View>
+                <Text variant="caption" color="mutedForeground">
+                  {formatRelativeTime(signIn.at)}
+                </Text>
+              </View>
+            ))
+          )}
+        </View>
+      </QueryState>
+    </Card>
+  );
+}
+
+/** Shown only while a payout is paused for a check. */
+function PayoutHoldsSection() {
+  const { colors, spacing } = useTheme();
+  const toast = useToast();
+  const qc = useQueryClient();
+  const holds = useQuery({ queryKey: qk.payoutHolds, queryFn: securityApi.listPayoutHolds });
+  const [notes, setNotes] = useState<Record<string, string>>({});
+  const appeal = useMutation({
+    mutationFn: (id: string) => securityApi.appealPayoutHold(id, (notes[id] ?? '').trim()),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: qk.payoutHolds });
+      toast.show('Sent. The team will see it with your payout.', 'success');
+    },
+    onError: (err) => toast.show(errorMessage(err, 'That didn’t send. Try again.'), 'error'),
+  });
+  if (!holds.data || holds.data.length === 0) return null;
+  return (
+    <Card elevated>
+      <SectionHeader
+        icon={<PauseCircle size={16} color={colors.warning} />}
+        title="Paused payouts"
+      />
+      <Text variant="caption" color="mutedForeground">
+        Our team is checking {holds.data.length === 1 ? 'a payout' : `${holds.data.length} payouts`}
+        . Most checks finish within one working day; we’ll email you.
+      </Text>
+      <View style={{ gap: spacing.md, marginTop: spacing.md }}>
+        {holds.data.map((hold) => (
+          <View key={hold.id} style={{ gap: spacing.xs }}>
+            {hold.signals.map((signal) => (
+              <Text key={signal.rule} variant="callout">
+                • {signal.reason}
+              </Text>
+            ))}
+            {hold.appealedAt ? (
+              <Text variant="caption" color="mutedForeground">
+                You told us: {hold.appealNote}
+              </Text>
+            ) : (
+              <>
+                <TextField
+                  label="Tell us your side"
+                  hint="For example, why your bank account changed. You can send this once."
+                  multiline
+                  value={notes[hold.id] ?? ''}
+                  onChangeText={(v) => setNotes((n) => ({ ...n, [hold.id]: v }))}
+                  maxLength={2000}
+                />
+                <Button
+                  label="Send to the team"
+                  variant="outline"
+                  size="sm"
+                  loading={appeal.isPending && appeal.variables === hold.id}
+                  disabled={(notes[hold.id] ?? '').trim().length < 10}
+                  onPress={() => appeal.mutate(hold.id)}
+                />
+              </>
+            )}
+          </View>
+        ))}
+      </View>
     </Card>
   );
 }

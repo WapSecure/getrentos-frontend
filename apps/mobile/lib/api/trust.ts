@@ -245,6 +245,8 @@ export interface TrustOverview {
     dimensions: { id: string; label: string; earned: number; weight: number }[];
   } | null;
   nextAction: { key: TrustRequirementKey; label: string } | null;
+  /** Checks no provider we use can do yet; never a requirement. Absent from older APIs. */
+  notOffered?: { key: string; label: string; detail: string }[];
 }
 
 export const TRUST_STATUS: Record<TrustStatus, { label: string; tone: BadgeTone }> = {

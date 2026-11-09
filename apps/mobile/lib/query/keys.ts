@@ -13,6 +13,8 @@ export const qk = {
     ['payments', 'account-name', bankCode, accountNumber] as const,
   passkeys: ['me', 'security', 'passkeys'] as const,
   sessions: ['me', 'security', 'sessions'] as const,
+  signIns: ['me', 'security', 'sign-ins'] as const,
+  payoutHolds: ['me', 'security', 'payout-holds'] as const,
   representatives: {
     list: (kind: 'realtor' | 'agent') => ['representatives', kind] as const,
     assignable: (kind: 'realtor' | 'agent', id: string, search: string) =>

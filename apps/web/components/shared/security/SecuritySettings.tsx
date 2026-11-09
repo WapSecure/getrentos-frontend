@@ -28,6 +28,8 @@ import type { TwoFactorEnrollment } from '@/types/accountSecurity';
 import { BackupCodes } from './BackupCodes';
 import { ChangePasswordCard } from './ChangePasswordCard';
 import { SignedInDevices } from './SignedInDevices';
+import { PayoutHolds } from './PayoutHolds';
+import { RecentSignIns } from './RecentSignIns';
 
 type TwoFactorStep = 'idle' | 'setup' | 'disable';
 
@@ -632,7 +634,9 @@ export const SecuritySettings = () => {
           )}
         </div>
 
+        <PayoutHolds />
         <SignedInDevices />
+        <RecentSignIns />
       </div>
     </div>
   );
