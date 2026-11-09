@@ -6,6 +6,7 @@ import { Badge, Button } from '@getrentos/ui';
 import { getInitials, formatDate, formatRelativeTime } from '@getrentos/shared';
 import type { PlanTier, PlatformUser, UserAccountStatus } from '@/types/admin';
 import { roleLabel } from '@/lib/roleLabels';
+import { UserSecurityActions } from './UserSecurityActions';
 
 interface UserDetailModalProps {
   user: PlatformUser | null;
@@ -94,6 +95,8 @@ export const UserDetailModal = ({
               </div>
             </div>
           </div>
+
+          <UserSecurityActions userId={user.id} />
 
           <div className="p-4 border-t border-border flex gap-2">
             {/* Opening a profile lands on Close, not on a billing or account action. */}
