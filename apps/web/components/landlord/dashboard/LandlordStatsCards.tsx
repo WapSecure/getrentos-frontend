@@ -1,17 +1,9 @@
 'use client';
 
-import {
-  AlertTriangle,
-  Banknote,
-  Building2,
-  Clock,
-  DoorClosed,
-  DoorOpen,
-  Wrench,
-  type LucideIcon,
-} from 'lucide-react';
-import { StatCard, type StatCardAccent } from '@sureground/ui';
+import { SegmentedBar, StatGroup } from '@sureground/ui';
 import { useMonetaryVisibility } from '@/hooks/useMonetaryVisibility';
+import { formatCurrency } from '@/lib/format';
+import { ROUTES } from '@/lib/constants/auth';
 
 interface LandlordStatsCardsProps {
   totalProperties: number;
@@ -24,6 +16,8 @@ interface LandlordStatsCardsProps {
   activeMaintenanceRequests: number;
 }
 
+const HIDDEN = '••••••';
+
 export const LandlordStatsCards = ({
   totalProperties,
   occupiedUnits,
@@ -35,84 +29,75 @@ export const LandlordStatsCards = ({
   activeMaintenanceRequests,
 }: LandlordStatsCardsProps) => {
   const { visible: moneyVisible } = useMonetaryVisibility();
-  const stats: {
-    icon: LucideIcon;
-    label: string;
-    value: number | string;
-    subtitle: string;
-    accent: StatCardAccent;
-    isCurrency?: boolean;
-  }[] = [
-    {
-      icon: Building2,
-      label: 'Total properties',
-      value: totalProperties,
-      subtitle: 'Across your portfolio',
-      accent: 'blue',
-    },
-    {
-      icon: DoorOpen,
-      label: 'Occupied units',
-      value: occupiedUnits,
-      subtitle: 'Signed and let',
-      accent: 'green',
-    },
-    {
-      icon: Clock,
-      label: 'Reserved units',
-      value: reservedUnits,
-      // Off the market but not let (awaiting signature or first payment), so not counted as rented.
-      subtitle: 'Awaiting signature or payment',
-      accent: 'orange',
-    },
-    {
-      icon: DoorClosed,
-      label: 'Vacant units',
-      value: vacantUnits,
-      subtitle: 'Available now',
-      accent: 'blue',
-    },
-    {
-      icon: Banknote,
-      label: 'Annual rent roll',
-      // Rent is contracted and paid yearly, so this is an annual figure, not monthly revenue.
-      value: moneyVisible ? annualRentRoll : '••••••',
-      subtitle: 'Contracted across let units, per year',
-      accent: 'green',
-      isCurrency: true,
-    },
-    {
-      icon: AlertTriangle,
-      label: 'Outstanding rent',
-      value: moneyVisible ? outstandingAmount : '••••••',
-      subtitle:
-        outstandingPayments === 1
-          ? 'Across 1 unpaid charge'
-          : `Across ${outstandingPayments} unpaid charges`,
-      accent: 'red',
-      isCurrency: true,
-    },
-    {
-      icon: Wrench,
-      label: 'Active maintenance',
-      value: activeMaintenanceRequests,
-      subtitle: 'Open tickets',
-      accent: 'orange',
-    },
-  ];
+  const totalUnits = occupiedUnits + reservedUnits + vacantUnits;
 
   return (
-    <section aria-label="Portfolio overview" className="mb-8 space-y-4">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        {stats.slice(4).map((stat) => (
-          <StatCard key={stat.label} {...stat} />
-        ))}
-      </div>
-      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-        {stats.slice(0, 4).map((stat) => (
-          <StatCard key={stat.label} {...stat} compact />
-        ))}
-      </div>
-    </section>
+    <div className="mb-8 space-y-4">
+      <StatGroup
+        title="Rent and operations"
+        items={[
+          {
+            label: 'Annual rent roll',
+            // Rent is contracted and paid yearly, so this is an annual figure, not monthly revenue.
+            value: moneyVisible ? formatCurrency(annualRentRoll, { compact: true }) : HIDDEN,
+            subtitle: 'Contracted across let units, per year',
+            href: ROUTES.LANDLORD_FINANCIALS,
+          },
+          {
+            label: 'Outstanding rent',
+            value: moneyVisible ? formatCurrency(outstandingAmount, { compact: true }) : HIDDEN,
+            subtitle:
+              outstandingPayments === 1
+                ? 'Across 1 unpaid charge'
+                : `Across ${outstandingPayments} unpaid charges`,
+            attention: outstandingPayments > 0,
+            href: ROUTES.LANDLORD_PAYMENTS,
+          },
+          {
+            label: 'Active maintenance',
+            value: activeMaintenanceRequests,
+            subtitle: activeMaintenanceRequests === 1 ? 'Open ticket' : 'Open tickets',
+            attention: activeMaintenanceRequests > 0,
+            href: ROUTES.LANDLORD_MAINTENANCE,
+          },
+        ]}
+      />
+      <StatGroup
+        title="Portfolio"
+        items={[
+          {
+            label: 'Properties',
+            value: totalProperties,
+            subtitle: `${totalUnits} ${totalUnits === 1 ? 'unit' : 'units'} in total`,
+            href: ROUTES.LANDLORD_PROPERTIES,
+          },
+          { label: 'Occupied', value: occupiedUnits, subtitle: 'Signed and let' },
+          {
+            label: 'Reserved',
+            value: reservedUnits,
+            // Off the market but not let (awaiting signature or first payment), so not counted as rented.
+            subtitle: 'Awaiting signature or payment',
+          },
+          {
+            label: 'Vacant',
+            value: vacantUnits,
+            subtitle: 'Available now',
+            href: ROUTES.LANDLORD_UNITS,
+          },
+        ]}
+        footer={
+          totalUnits > 0 ? (
+            <SegmentedBar
+              label="Units by status"
+              segments={[
+                { label: 'Occupied', value: occupiedUnits, tone: 'success' },
+                { label: 'Reserved', value: reservedUnits, tone: 'warning' },
+                { label: 'Vacant', value: vacantUnits, tone: 'neutral' },
+              ]}
+            />
+          ) : undefined
+        }
+      />
+    </div>
   );
 };

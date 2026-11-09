@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, BadgeCheck, BarChart3, CircleAlert, FileText, Gavel } from 'lucide-react';
+import { BadgeCheck, BarChart3, CircleAlert, FileText, Gavel } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -129,13 +129,11 @@ export default function AdminLandProfessionalPage() {
 
   return (
     <div className="space-y-6">
-      <Link
-        href="/admin/land/professionals"
-        className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="h-4 w-4" aria-hidden /> Land professionals
-      </Link>
       <PageHeader
+        breadcrumbs={[
+          { label: 'Land professionals', href: '/admin/land/professionals' },
+          { label: p.name },
+        ]}
         title={p.name}
         meta={
           <div className="flex flex-wrap items-center gap-2">

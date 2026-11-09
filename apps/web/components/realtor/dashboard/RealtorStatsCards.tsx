@@ -1,7 +1,8 @@
 'use client';
 
-import { StatCard } from '@sureground/ui';
-import { Users, Megaphone, UserPlus, CalendarClock, Handshake, Wallet } from 'lucide-react';
+import { StatGroup } from '@sureground/ui';
+import { formatCurrency } from '@/lib/format';
+import { ROUTES } from '@/lib/constants/auth';
 
 interface RealtorStatsCardsProps {
   activeClients: number;
@@ -20,64 +21,53 @@ export const RealtorStatsCards = ({
   upcomingViewings,
   pendingOffers,
   commissionYtd,
-}: RealtorStatsCardsProps) => {
-  const stats = [
-    {
-      icon: Users,
-      label: 'Active clients',
-      value: activeClients,
-      subtitle: 'Owners & landlords',
-      accent: 'blue',
-      delay: 0,
-    },
-    {
-      icon: Megaphone,
-      label: 'Active listings',
-      value: activeListings,
-      subtitle: 'Published on your behalf',
-      accent: 'orange',
-      delay: 0.05,
-    },
-    {
-      icon: UserPlus,
-      label: 'Active leads',
-      value: activeLeads,
-      subtitle: 'In your pipeline',
-      accent: 'purple',
-      delay: 0.1,
-    },
-    {
-      icon: CalendarClock,
-      label: 'Upcoming viewings',
-      value: upcomingViewings,
-      subtitle: 'Scheduled tours',
-      accent: 'primary',
-      delay: 0.15,
-    },
-    {
-      icon: Handshake,
-      label: 'Pending offers',
-      value: pendingOffers,
-      subtitle: 'Awaiting response',
-      accent: 'green',
-      delay: 0.2,
-    },
-    {
-      icon: Wallet,
-      label: 'Commission YTD',
-      value: commissionYtd ?? 'Pro',
-      subtitle: commissionYtd === null ? 'Upgrade to unlock' : 'Year to date',
-      accent: 'emerald',
-      delay: 0.25,
-      isCurrency: true,
-    },
-  ] as const;
-
-  return (
-    <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
-      {stats.map((stat) => (
-        <StatCard key={stat.label} {...stat} />
-      ))}
-    </div>
-  );
-};
+}: RealtorStatsCardsProps) => (
+  <div className="mb-8 space-y-4">
+    <StatGroup
+      title="Business"
+      items={[
+        {
+          label: 'Commission YTD',
+          value: commissionYtd === null ? 'Pro' : formatCurrency(commissionYtd, { compact: true }),
+          subtitle: commissionYtd === null ? 'Upgrade to unlock' : 'Year to date',
+          href: commissionYtd === null ? ROUTES.REALTOR_BILLING : ROUTES.REALTOR_COMMISSIONS,
+        },
+        {
+          label: 'Active clients',
+          value: activeClients,
+          subtitle: 'Owners & landlords',
+          href: ROUTES.REALTOR_CLIENTS,
+        },
+        {
+          label: 'Active listings',
+          value: activeListings,
+          subtitle: 'Published on your behalf',
+          href: ROUTES.REALTOR_LISTINGS,
+        },
+      ]}
+    />
+    <StatGroup
+      title="Pipeline"
+      items={[
+        {
+          label: 'Active leads',
+          value: activeLeads,
+          subtitle: 'In your pipeline',
+          href: ROUTES.REALTOR_LEADS,
+        },
+        {
+          label: 'Upcoming viewings',
+          value: upcomingViewings,
+          subtitle: 'Scheduled tours',
+          href: ROUTES.REALTOR_VIEWINGS,
+        },
+        {
+          label: 'Pending offers',
+          value: pendingOffers,
+          subtitle: 'Awaiting response',
+          href: ROUTES.REALTOR_OFFERS,
+        },
+      ]}
+    />
+  </div>
+);

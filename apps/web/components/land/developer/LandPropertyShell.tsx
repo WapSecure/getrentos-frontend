@@ -1,10 +1,9 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { PageErrorState, PageHeader, Skeleton } from '@sureground/ui';
-import { ArrowLeft, MapPin } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { landKeys } from '@/lib/queryKeys';
 import { LAND_DEVELOPER_ROUTES } from '@/lib/constants/landDeveloperRoutes';
@@ -49,15 +48,11 @@ export const LandPropertyShell = ({ propertyId, section, children }: LandPropert
   return (
     <>
       <div className="mb-5">
-        <Link
-          href={LAND_DEVELOPER_ROUTES.portfolio()}
-          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-          Land portfolio
-        </Link>
         <PageHeader
-          className="mt-2"
+          breadcrumbs={[
+            { label: 'Land portfolio', href: LAND_DEVELOPER_ROUTES.portfolio() },
+            { label: data.property.title || 'Land parcel' },
+          ]}
           title={data.property.title || 'Land parcel'}
           description={
             <span className="flex items-center gap-1">

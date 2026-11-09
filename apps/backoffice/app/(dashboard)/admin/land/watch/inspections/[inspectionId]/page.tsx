@@ -1,18 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  ArrowLeft,
-  Camera,
-  CircleAlert,
-  ClipboardCheck,
-  MapPin,
-  ShieldAlert,
-  UserPlus,
-} from 'lucide-react';
+import { Camera, CircleAlert, ClipboardCheck, MapPin, ShieldAlert, UserPlus } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -113,13 +104,8 @@ export default function AdminLandInspectionPage() {
 
   return (
     <>
-      <Link
-        href="/admin/land/watch"
-        className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="h-4 w-4" /> Land Watch
-      </Link>
       <PageHeader
+        breadcrumbs={[{ label: 'Land Watch', href: '/admin/land/watch' }, { label: i.land.label }]}
         title={i.land.label}
         description={
           <>

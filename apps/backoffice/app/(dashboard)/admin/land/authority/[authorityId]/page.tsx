@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  ArrowLeft,
   CircleAlert,
   Clock,
   FileSignature,
@@ -125,14 +124,11 @@ export default function AdminLandAuthorityPage() {
 
   return (
     <>
-      <Link
-        href="/admin/land/authority"
-        className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="h-4 w-4" /> Seller authority
-      </Link>
-
       <PageHeader
+        breadcrumbs={[
+          { label: 'Seller authority', href: '/admin/land/authority' },
+          { label: authority.property.title },
+        ]}
         title={authority.property.title}
         description={
           <>

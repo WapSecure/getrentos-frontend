@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { cn } from '@sureground/shared';
+import { Breadcrumbs, type BreadcrumbItem } from './Breadcrumbs';
 
 export interface PageHeaderProps {
   title: ReactNode;
@@ -7,6 +8,8 @@ export interface PageHeaderProps {
   eyebrow?: string;
   actions?: ReactNode;
   meta?: ReactNode;
+  /** Where this page sits; the last item is the page itself. */
+  breadcrumbs?: BreadcrumbItem[];
   className?: string;
 }
 
@@ -16,11 +19,15 @@ export function PageHeader({
   eyebrow,
   actions,
   meta,
+  breadcrumbs,
   className,
 }: PageHeaderProps) {
   return (
     <header className={cn('page-header', className)}>
       <div className="min-w-0">
+        {breadcrumbs && breadcrumbs.length > 1 ? (
+          <Breadcrumbs items={breadcrumbs} className="mb-3" />
+        ) : null}
         {eyebrow ? (
           <p className="mb-2 text-sm font-medium text-muted-foreground">{eyebrow}</p>
         ) : null}

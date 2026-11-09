@@ -8,16 +8,13 @@ import {
   BookOpen,
   Building2,
   Car,
-  Hammer,
   KeyRound,
   Megaphone,
   Package,
   ReceiptText,
   ShieldCheck,
-  Siren,
   TriangleAlert,
   Users,
-  Wallet,
 } from 'lucide-react';
 import {
   Alert,
@@ -25,8 +22,8 @@ import {
   Card,
   CardSkeleton,
   PageHeader,
-  StatCard,
   StatGridSkeleton,
+  StatGroup,
   Skeleton,
 } from '@sureground/ui';
 import { ROUTES } from '@/lib/constants/auth';
@@ -172,38 +169,54 @@ export default function EstateDashboardPage() {
         {isStatsLoading ? (
           <StatGridSkeleton count={6} className="lg:grid-cols-3 xl:grid-cols-6" />
         ) : (
-          <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-            <StatCard icon={Users} label="Households" value={stats?.totalHouseholds ?? '—'} />
-            <StatCard
-              icon={Wallet}
-              accent="emerald"
-              label="Collected this month"
-              value={stats ? formatCurrency(stats.duesCollectedThisMonth, { compact: true }) : '—'}
+          <div className="space-y-4">
+            <StatGroup
+              title="Dues"
+              items={[
+                {
+                  label: 'Collected this month',
+                  value: stats
+                    ? formatCurrency(stats.duesCollectedThisMonth, { compact: true })
+                    : '—',
+                  href: ROUTES.ESTATE_DUES,
+                },
+                {
+                  label: 'Outstanding',
+                  value: stats ? formatCurrency(stats.duesOutstanding, { compact: true }) : '—',
+                  attention: (stats?.duesOutstanding ?? 0) > 0,
+                  href: ROUTES.ESTATE_DUES,
+                },
+              ]}
             />
-            <StatCard
-              icon={ReceiptText}
-              accent="orange"
-              label="Dues outstanding"
-              value={stats ? formatCurrency(stats.duesOutstanding, { compact: true }) : '—'}
+            <StatGroup
+              title="Estate"
+              items={[
+                {
+                  label: 'Households',
+                  value: stats?.totalHouseholds ?? '—',
+                  href: ROUTES.ESTATE_HOUSEHOLDS,
+                },
+                {
+                  label: 'Open incidents',
+                  value: stats?.openIncidents ?? '—',
+                  attention: (stats?.openIncidents ?? 0) > 0,
+                  href: ROUTES.ESTATE_INCIDENTS,
+                },
+                {
+                  label: 'Open maintenance',
+                  value: stats?.openMaintenanceTickets ?? '—',
+                  attention: (stats?.openMaintenanceTickets ?? 0) > 0,
+                  href: ROUTES.ESTATE_MAINTENANCE,
+                },
+                {
+                  label: 'Pending violations',
+                  value: stats?.pendingViolations ?? '—',
+                  attention: (stats?.pendingViolations ?? 0) > 0,
+                  href: ROUTES.ESTATE_VIOLATIONS,
+                },
+              ]}
             />
-            <StatCard
-              icon={Siren}
-              accent="red"
-              label="Open incidents"
-              value={stats?.openIncidents ?? '—'}
-            />
-            <StatCard
-              icon={Hammer}
-              label="Open maintenance"
-              value={stats?.openMaintenanceTickets ?? '—'}
-            />
-            <StatCard
-              icon={TriangleAlert}
-              accent="orange"
-              label="Pending violations"
-              value={stats?.pendingViolations ?? '—'}
-            />
-          </section>
+          </div>
         )}
 
         <EstateDuesTrendChart estateId={estate.id} />

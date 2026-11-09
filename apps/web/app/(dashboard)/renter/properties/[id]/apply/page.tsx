@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, CheckCircle2, Search } from 'lucide-react';
+import { CheckCircle2, Search } from 'lucide-react';
 import {
   Button,
   EmptyState,
@@ -200,17 +200,11 @@ export default function PropertyApplyPage() {
 
   return (
     <>
-      <Button
-        variant="ghost"
-        size="sm"
-        href={buildRoute.renterPropertyDetail(property.id)}
-        icon={<ArrowLeft className="w-4 h-4" />}
-        className="mb-4"
-      >
-        Back to property
-      </Button>
-
       <PageHeader
+        breadcrumbs={[
+          { label: property.title, href: buildRoute.renterPropertyDetail(property.id) },
+          { label: 'Apply to rent' },
+        ]}
         title="Apply to rent"
         description={
           <>

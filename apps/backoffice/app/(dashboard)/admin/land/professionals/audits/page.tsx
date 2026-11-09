@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, CircleAlert, ClipboardCheck } from 'lucide-react';
+import { CircleAlert, ClipboardCheck } from 'lucide-react';
 import {
   Button,
   EmptyState,
@@ -135,13 +135,11 @@ export default function AdminLandReviewAuditsPage() {
   const items = query.data ?? [];
   return (
     <>
-      <Link
-        href="/admin/land/professionals"
-        className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="h-4 w-4" aria-hidden /> Land professionals
-      </Link>
       <PageHeader
+        breadcrumbs={[
+          { label: 'Land professionals', href: '/admin/land/professionals' },
+          { label: 'Review audits' },
+        ]}
         title="Review audits"
         description="About one in five completed reports is picked for a second look. Re-check the sources the professional relied on; repeated findings or a failure are grounds to suspend."
       />

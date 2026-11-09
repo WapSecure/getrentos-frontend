@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, CircleAlert, Gauge, RefreshCw, ShieldAlert } from 'lucide-react';
+import { CircleAlert, Gauge, RefreshCw, ShieldAlert } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -76,13 +76,11 @@ export default function AdminLandFraudParcelPage() {
 
   return (
     <>
-      <Link
-        href="/admin/land/fraud"
-        className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="h-4 w-4" /> Land fraud signals
-      </Link>
       <PageHeader
+        breadcrumbs={[
+          { label: 'Land fraud signals', href: '/admin/land/fraud' },
+          { label: a.title },
+        ]}
         title={a.title}
         description={
           <>

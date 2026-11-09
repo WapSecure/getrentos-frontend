@@ -66,5 +66,7 @@ export * from './hooks/useSidebarRail';
 export * from './SidebarRailToggle';
 export * from './Progress';
 export * from './SegmentedControl';
+export * from './SegmentedBar';
+export * from './StatGroup';
 export * from './ToggleChip';
 export * from './photoQuality';

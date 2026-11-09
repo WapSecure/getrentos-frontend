@@ -1,9 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Plus, ShieldCheck } from 'lucide-react';
+import { Plus, ShieldCheck } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -158,15 +157,11 @@ export function AgencyProtectionView() {
 
   return (
     <div className="mx-auto max-w-4xl p-6">
-      <Link
-        href="/agency/owners"
-        className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        All clients
-      </Link>
-
       <PageHeader
+        breadcrumbs={[
+          { label: 'Clients', href: '/agency/owners' },
+          { label: 'Client-money protection' },
+        ]}
         title="Client-money protection"
         description="How your firm protects the money it holds for clients. Clients see this on their money view."
         actions={

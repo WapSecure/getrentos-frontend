@@ -1,9 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Coins, ReceiptText, Percent, Settings2 } from 'lucide-react';
+import { Coins, ReceiptText, Percent, Settings2 } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -205,15 +204,8 @@ export function AgencyCommissionsView() {
 
   return (
     <div className="mx-auto max-w-4xl p-6">
-      <Link
-        href="/agency/owners"
-        className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        All clients
-      </Link>
-
       <PageHeader
+        breadcrumbs={[{ label: 'Clients', href: '/agency/owners' }, { label: 'Commissions' }]}
         title="Commissions"
         description="What your firm has earned letting and renewing your clients’ tenancies."
       />

@@ -67,21 +67,27 @@ export default function LandDisputePage() {
     <>
       <Navigation />
       <main className="mx-auto max-w-3xl space-y-6 px-4 pb-16 pt-24">
-        <Link
-          href="/land/disputes"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4" /> Land disputes
-        </Link>
         {query.isLoading ? (
           <div className="h-48 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />
         ) : !d ? (
-          <p className="text-sm text-destructive">
-            {query.error instanceof Error ? query.error.message : 'Case not found.'}
-          </p>
+          <>
+            <Link
+              href="/land/disputes"
+              className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+            >
+              <ArrowLeft className="h-4 w-4" /> Land disputes
+            </Link>
+            <p className="text-sm text-destructive">
+              {query.error instanceof Error ? query.error.message : 'Case not found.'}
+            </p>
+          </>
         ) : (
           <>
             <PageHeader
+              breadcrumbs={[
+                { label: 'Land disputes', href: '/land/disputes' },
+                { label: d.reference },
+              ]}
               title={<span className="font-mono">{d.reference}</span>}
               description={
                 <>

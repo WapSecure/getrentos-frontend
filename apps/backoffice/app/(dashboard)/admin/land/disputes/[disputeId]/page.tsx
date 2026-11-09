@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  ArrowLeft,
   CircleAlert,
   FileText,
   Gavel,
@@ -161,14 +160,11 @@ export default function AdminLandDisputePage() {
       {toast && (
         <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
-      <Link
-        href="/admin/land/disputes"
-        className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="h-4 w-4" /> Land disputes
-      </Link>
-
       <PageHeader
+        breadcrumbs={[
+          { label: 'Land disputes', href: '/admin/land/disputes' },
+          { label: d.reference },
+        ]}
         title={<span className="font-mono">{d.reference}</span>}
         description={
           <>

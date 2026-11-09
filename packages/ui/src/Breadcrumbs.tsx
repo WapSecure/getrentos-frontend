@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
+import { cn } from '@sureground/shared';
 
 export interface BreadcrumbItem {
   label: string;
@@ -16,7 +17,7 @@ export function Breadcrumbs({
   ariaLabel?: string;
 }) {
   return (
-    <nav aria-label={ariaLabel} className={`mb-4 ${className}`}>
+    <nav aria-label={ariaLabel} className={cn('mb-4', className)}>
       <ol className="flex min-w-0 flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
         {items.map((item, index) => {
           const current = index === items.length - 1;

@@ -1,17 +1,10 @@
 'use client';
 
-import {
-  Building2,
-  CheckCircle2,
-  Eye,
-  EyeOff,
-  Handshake,
-  Megaphone,
-  Users,
-  Wallet,
-} from 'lucide-react';
-import { IconButton, StatCard, type StatCardAccent } from '@sureground/ui';
+import { Eye, EyeOff } from 'lucide-react';
+import { IconButton, StatGroup } from '@sureground/ui';
 import { useMonetaryVisibility } from '@/hooks/useMonetaryVisibility';
+import { formatCurrency } from '@/lib/format';
+import { ROUTES } from '@/lib/constants/auth';
 
 interface OwnerStatsCardsProps {
   totalProperties: number;
@@ -31,75 +24,65 @@ export const OwnerStatsCards = ({
   completedSales,
 }: OwnerStatsCardsProps) => {
   const { visible, toggle } = useMonetaryVisibility();
-  const stats: Array<{
-    icon: typeof Building2;
-    label: string;
-    value: number | string;
-    subtitle: string;
-    accent: StatCardAccent;
-    isCurrency?: boolean;
-  }> = [
-    {
-      icon: Building2,
-      label: 'Properties',
-      value: totalProperties,
-      subtitle: 'Across your portfolio',
-      accent: 'blue',
-    },
-    {
-      icon: Megaphone,
-      label: 'Active listings',
-      value: activeSaleListings,
-      subtitle: 'Published for sale',
-      accent: 'orange',
-    },
-    {
-      icon: Users,
-      label: 'Buyer enquiries',
-      value: buyerInquiries,
-      subtitle: 'Recent buyer activity',
-      accent: 'primary',
-    },
-    {
-      icon: Handshake,
-      label: 'Pending offers',
-      value: pendingOffers,
-      subtitle: 'Awaiting a response',
-      accent: 'orange',
-    },
-    {
-      icon: Wallet,
-      label: 'Portfolio value',
-      value: visible ? totalPortfolioValue : '••••••',
-      subtitle: 'Current estimate',
-      accent: 'green',
-      isCurrency: true,
-    },
-    {
-      icon: CheckCircle2,
-      label: 'Completed sales',
-      value: completedSales,
-      subtitle: 'Lifetime',
-      accent: 'green',
-    },
-  ];
 
   return (
-    <section aria-label="Portfolio overview" className="mb-8">
-      <div className="mb-3 flex justify-end">
-        <IconButton
-          label={visible ? 'Hide monetary values' : 'Show monetary values'}
-          icon={visible ? <EyeOff /> : <Eye />}
-          onClick={toggle}
-          size="sm"
-          variant="ghost"
-        />
-      </div>
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-6">
-        {stats.map((stat) => (
-          <StatCard key={stat.label} {...stat} compact />
-        ))}
-      </div>
-    </section>
+    <div className="mb-8 space-y-4">
+      <StatGroup
+        title="Portfolio"
+        action={
+          <IconButton
+            label={visible ? 'Hide monetary values' : 'Show monetary values'}
+            icon={visible ? <EyeOff /> : <Eye />}
+            onClick={toggle}
+            size="sm"
+            variant="ghost"
+          />
+        }
+        items={[
+          {
+            label: 'Portfolio value',
+            value: visible ? formatCurrency(totalPortfolioValue, { compact: true }) : '••••••',
+            subtitle: 'Current estimate',
+            href: ROUTES.OWNER_ANALYTICS,
+          },
+          {
+            label: 'Properties',
+            value: totalProperties,
+            subtitle: 'Across your portfolio',
+            href: ROUTES.OWNER_PROPERTIES,
+          },
+          {
+            label: 'Completed sales',
+            value: completedSales,
+            subtitle: 'Lifetime',
+            href: ROUTES.OWNER_TRANSACTIONS,
+          },
+        ]}
+      />
+      <StatGroup
+        title="Sales activity"
+        items={[
+          {
+            label: 'Active listings',
+            value: activeSaleListings,
+            subtitle: 'Published for sale',
+            href: ROUTES.OWNER_LISTINGS,
+          },
+          {
+            label: 'Buyer enquiries',
+            value: buyerInquiries,
+            subtitle: 'Recent buyer activity',
+            href: ROUTES.OWNER_LEADS,
+          },
+          {
+            label: 'Pending offers',
+            value: pendingOffers,
+            subtitle: 'Awaiting a response',
+            attention: pendingOffers > 0,
+            href: ROUTES.OWNER_OFFERS,
+          },
+        ]}
+      />
+    </div>
   );
 };

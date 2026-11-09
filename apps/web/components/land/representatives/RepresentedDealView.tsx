@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Badge,
@@ -12,7 +11,6 @@ import {
   PageHeader,
   Toast,
 } from '@sureground/ui';
-import { ArrowLeft } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { LAND_MILESTONE_STATUS_LABELS, type LandMilestone } from '@/types/landBuyer';
 import {
@@ -80,13 +78,11 @@ export const RepresentedDealView = ({ deal }: { deal: LandDealRef }) => {
 
   return (
     <div className="space-y-6">
-      <Link
-        href="/land/representing"
-        className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="h-4 w-4" aria-hidden /> Buyers I represent
-      </Link>
       <PageHeader
+        breadcrumbs={[
+          { label: 'Buyers I represent', href: '/land/representing' },
+          { label: detail.data.title },
+        ]}
         title={detail.data.title}
         description={
           detail.data.reference ? (

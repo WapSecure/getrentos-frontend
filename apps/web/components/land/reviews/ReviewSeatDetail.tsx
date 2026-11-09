@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Badge,
@@ -13,7 +12,7 @@ import {
   Textarea,
   useToast,
 } from '@sureground/ui';
-import { ArrowLeft, CalendarClock, MapPin } from 'lucide-react';
+import { CalendarClock, MapPin } from 'lucide-react';
 import { boundaryCorners } from '@sureground/shared';
 import { ApiError, unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
@@ -175,15 +174,12 @@ export const ReviewSeatDetail = ({ seatId }: { seatId: string }) => {
 
   return (
     <div className="space-y-8">
-      <Link
-        href={LAND_BUYER_ROUTES.REVIEWS}
-        className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="h-4 w-4" aria-hidden /> My reviews
-      </Link>
-
       <div className="space-y-2">
         <PageHeader
+          breadcrumbs={[
+            { label: 'My land reviews', href: LAND_BUYER_ROUTES.REVIEWS },
+            { label: data.propertyTitle },
+          ]}
           title={data.propertyTitle}
           description={
             <span className="flex flex-wrap items-center gap-x-4 gap-y-1">
