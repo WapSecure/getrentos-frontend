@@ -178,7 +178,7 @@ export const LandParcelEditor = ({
 
   return (
     <div className="space-y-6">
-      <section className="rounded-2xl border border-border bg-card p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+      <section className="rounded-2xl border border-border bg-card p-5 shadow-xs">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
@@ -220,7 +220,7 @@ export const LandParcelEditor = ({
         </div>
       </section>
 
-      <section className="rounded-2xl border border-border bg-card p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+      <section className="rounded-2xl border border-border bg-card p-5 shadow-xs">
         <div className="mb-5">
           <h3 className="font-semibold text-foreground">Parcel and title record</h3>
           <p className="mt-1 text-sm text-muted-foreground">

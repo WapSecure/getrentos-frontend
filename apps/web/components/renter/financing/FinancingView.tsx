@@ -96,7 +96,7 @@ export const FinancingView = () => {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <Skeleton className="h-48 w-full rounded-[1.75rem]" />
+        <Skeleton className="h-48 w-full rounded-2xl" />
         <CardSkeleton lines={5} />
       </div>
     );

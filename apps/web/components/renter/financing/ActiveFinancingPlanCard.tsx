@@ -32,7 +32,7 @@ export const ActiveFinancingPlanCard = ({
 
   return (
     <div className="space-y-6">
-      <div className="overflow-hidden rounded-[1.75rem] border border-border/70 bg-card shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm">
         <div className="bg-primary/5 p-6 sm:p-7">
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div>

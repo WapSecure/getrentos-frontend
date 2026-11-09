@@ -45,7 +45,7 @@ export function SimilarListings({
         <Skeleton className="h-7 w-48" />
         <div className="mt-5 grid gap-5 md:grid-cols-3">
           {[0, 1, 2].map((item) => (
-            <Skeleton key={item} className="h-72 rounded-3xl" />
+            <Skeleton key={item} className="h-72 rounded-2xl" />
           ))}
         </div>
       </section>
@@ -68,7 +68,7 @@ export function SimilarListings({
           return (
             <article
               key={listing.id}
-              className="group relative overflow-hidden rounded-3xl border border-border bg-card shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+              className="group relative overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
             >
               <Link href={href} tabIndex={-1} aria-hidden="true">
                 {listing.image ? (

@@ -307,7 +307,7 @@ export function HomeAssetRegistry({
               return (
                 <article
                   key={asset.id}
-                  className="rounded-2xl border border-border bg-card p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
+                  className="rounded-2xl border border-border bg-card p-5 shadow-xs"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">

@@ -131,7 +131,7 @@ export const LayoutsBrowser = () => {
             <li key={layout.id}>
               <Link
                 href={LAND_BUYER_ROUTES.layout(layout.id)}
-                className="block h-full rounded-2xl border border-border bg-card p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                className="block h-full rounded-2xl border border-border bg-card p-5 shadow-xs transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               >
                 <Badge variant="success" icon={<BadgeCheck className="h-3.5 w-3.5" />}>
                   Verified parcel

@@ -43,7 +43,7 @@ export const FinancingEligibilityCard = ({
 
   return (
     <div className="space-y-6">
-      <div className="overflow-hidden rounded-[1.75rem] border border-border/70 bg-card shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm">
         <div className="border-b border-border bg-muted/30 p-6 sm:p-7">
           <div className="flex items-center gap-2 mb-2">
             <Zap className="w-5 h-5 text-primary" />

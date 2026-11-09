@@ -28,7 +28,7 @@ export const PopoverContent = ({
       align={align}
       collisionPadding={collisionPadding}
       className={cn(
-        'z-[70] w-[min(22rem,calc(100vw-2rem))] max-h-[min(32rem,var(--radix-popover-content-available-height))] rounded-2xl border border-border bg-card shadow-[0_16px_40px_rgba(0,0,0,0.16)] focus:outline-none',
+        'z-[70] w-[min(22rem,calc(100vw-2rem))] max-h-[min(32rem,var(--radix-popover-content-available-height))] rounded-2xl border border-border bg-card shadow-lg focus:outline-none',
         layout === 'sections' ? 'flex flex-col overflow-hidden' : 'overflow-y-auto',
         className
       )}

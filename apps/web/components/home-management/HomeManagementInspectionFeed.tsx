@@ -70,7 +70,7 @@ export function HomeManagementInspectionFeed({ propertyId }: { propertyId?: stri
             description="Submitted inspection reports from your assigned field Agents will appear here."
           />
         ) : (
-          <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+          <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-xs">
             <div className="divide-y divide-border">
               {inspections.map((inspection) => {
                 const submittedAt = inspection.submittedAt ?? inspection.createdAt;

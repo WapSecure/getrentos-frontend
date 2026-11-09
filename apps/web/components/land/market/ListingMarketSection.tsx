@@ -46,7 +46,7 @@ export const ListingMarketSection = ({ listingId }: { listingId: string }) => {
   const items = data?.comparables ?? [];
 
   if (comparables.isLoading && listing.isLoading) {
-    return <div className="mt-12 h-48 animate-pulse rounded-3xl bg-secondary" aria-busy="true" />;
+    return <div className="mt-12 h-48 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
   }
   const labels = listing.data?.diligence?.labels ?? [];
   const notVerified = listing.data?.diligence?.notVerified ?? [];

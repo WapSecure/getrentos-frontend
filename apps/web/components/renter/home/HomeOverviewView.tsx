@@ -525,7 +525,7 @@ export function HomeOverviewView() {
               <Link
                 key={action.href}
                 href={action.href}
-                className="group rounded-2xl border border-border bg-card p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md"
+                className="group rounded-2xl border border-border bg-card p-5 shadow-xs transition-all hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md"
               >
                 <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-primary transition-transform group-hover:scale-105">
                   <Icon className="h-5 w-5" />

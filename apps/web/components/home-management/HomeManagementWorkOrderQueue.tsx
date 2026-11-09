@@ -598,7 +598,7 @@ export function HomeManagementWorkOrderQueue({
             }
           />
         ) : (
-          <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+          <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-xs">
             <div className="divide-y divide-border">
               {workOrders.map((workOrder) => {
                 const status = statusMeta[workOrder.status];

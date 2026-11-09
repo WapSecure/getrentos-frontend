@@ -61,7 +61,7 @@ function MagicLinkVerifyContent() {
       <div className="mb-8">
         <Logo size="lg" />
       </div>
-      <div className="bg-card rounded-2xl border border-border p-8 max-w-sm w-full text-center shadow-[0_16px_40px_rgba(0,0,0,0.08)]">
+      <div className="bg-card rounded-2xl border border-border p-8 max-w-sm w-full text-center shadow-lg">
         {error ? (
           <>
             <AlertCircle className="w-8 h-8 text-destructive mx-auto mb-3" />

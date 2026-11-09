@@ -279,7 +279,7 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
           />
         </div>
 
-        <div className="mb-3 grid gap-3 rounded-2xl border border-border bg-card p-3 shadow-[0_1px_2px_rgba(0,0,0,0.04)] sm:grid-cols-2 lg:grid-cols-[1.2fr_1.2fr_0.8fr_0.8fr_0.8fr]">
+        <div className="mb-3 grid gap-3 rounded-2xl border border-border bg-card p-3 shadow-xs sm:grid-cols-2 lg:grid-cols-[1.2fr_1.2fr_0.8fr_0.8fr_0.8fr]">
           <Select
             value={state}
             onValueChange={(value) => {
@@ -407,7 +407,7 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
               return (
                 <article
                   key={listing.id}
-                  className="group overflow-hidden rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all hover:-translate-y-1 hover:shadow-[0_18px_38px_rgba(0,0,0,0.12)]"
+                  className="group overflow-hidden rounded-2xl border border-border bg-card shadow-xs transition-all hover:-translate-y-1 hover:shadow-lg"
                 >
                   <div className="relative flex h-44 items-center justify-center overflow-hidden bg-muted">
                     <Trees className="h-12 w-12 text-primary/60" />

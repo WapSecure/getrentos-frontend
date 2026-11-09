@@ -23,7 +23,7 @@ function ConsentScreen() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-6">
-      <div className="bg-card rounded-2xl border border-border p-8 max-w-sm w-full shadow-[0_16px_40px_rgba(0,0,0,0.08)]">
+      <div className="bg-card rounded-2xl border border-border p-8 max-w-sm w-full shadow-lg">
         <div className="flex items-center justify-center gap-2 mb-5">
           <Chrome className="w-7 h-7 text-primary" />
           <span className="text-xl font-semibold text-foreground">Sign in with Google</span>

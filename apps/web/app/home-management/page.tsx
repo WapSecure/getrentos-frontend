@@ -282,7 +282,7 @@ export default function HomeManagementProductPage() {
             {operatingPlans.map((plan) => (
               <article
                 key={plan.name}
-                className={`relative flex flex-col rounded-3xl border p-6 ${
+                className={`relative flex flex-col rounded-2xl border p-6 ${
                   plan.featured
                     ? 'border-primary/35 bg-primary/[0.035] shadow-[0_18px_50px_rgba(15,23,42,0.08)]'
                     : 'border-border bg-background'
@@ -331,7 +331,7 @@ export default function HomeManagementProductPage() {
       </section>
 
       <section className="px-4 pb-20 sm:px-6 lg:px-8">
-        <div className="mx-auto grid max-w-7xl gap-8 rounded-3xl border border-border bg-secondary/55 p-7 sm:p-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+        <div className="mx-auto grid max-w-7xl gap-8 rounded-2xl border border-border bg-secondary/55 p-7 sm:p-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
           <div>
             <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-foreground text-background">
               <BadgeCheck className="h-6 w-6" />

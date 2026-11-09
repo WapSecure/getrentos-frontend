@@ -270,7 +270,7 @@ export const OwnerLandWorkspace = () => {
                   onClick={() => setSelectedPropertyId(record.property.id)}
                   className={`w-full rounded-2xl border p-4 text-left transition-all ${
                     active
-                      ? 'border-primary bg-accent shadow-[0_12px_32px_rgba(0,0,0,0.08)]'
+                      ? 'border-primary bg-accent shadow-lg'
                       : 'border-border bg-card hover:border-foreground/20 hover:bg-secondary/35'
                   }`}
                 >

@@ -94,7 +94,7 @@ function ClaimContent() {
       <div className="mb-8">
         <Logo size="lg" />
       </div>
-      <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-8 text-center shadow-[0_16px_40px_rgba(0,0,0,0.08)]">
+      <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-8 text-center shadow-lg">
         {phase === 'loading' ? (
           <div role="status" aria-live="polite" aria-label="Loading your invitation">
             <Skeleton className="mx-auto mb-3 h-8 w-8 rounded-full" />

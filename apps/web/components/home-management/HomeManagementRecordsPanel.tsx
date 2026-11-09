@@ -106,7 +106,7 @@ export function HomeManagementRecordsPanel({ role }: HomeManagementRecordsPanelP
         </Button>
       </div>
 
-      <div className="mt-5 overflow-hidden rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+      <div className="mt-5 overflow-hidden rounded-2xl border border-border bg-card shadow-xs">
         {isLoading ? (
           <ListSkeleton rows={3} className="rounded-none border-0" />
         ) : error && records.length === 0 ? (

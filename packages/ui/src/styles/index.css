@@ -18,19 +18,20 @@
     sans-serif
   );
   --radius: 0.75rem;
-  --shadow-xs: 0 1px 3px rgb(29 29 31 / 0.03);
-  --shadow-sm: 0 2px 8px -2px rgb(29 29 31 / 0.06);
-  --shadow-md: 0 4px 16px -4px rgb(29 29 31 / 0.08), 0 12px 32px -12px rgb(29 29 31 / 0.08);
-  --shadow-lg: 0 12px 40px -12px rgb(29 29 31 / 0.16);
-  --shadow-xl: 0 24px 80px -20px rgb(29 29 31 / 0.24);
+  /* Three levels: xs/sm resting cards, md/lg raised menus and popovers, xl dialogs. */
+  --shadow-xs: 0 1px 2px rgb(29 29 31 / 0.04);
+  --shadow-sm: 0 1px 2px rgb(29 29 31 / 0.04), 0 1px 3px rgb(29 29 31 / 0.03);
+  --shadow-md: 0 2px 4px -2px rgb(29 29 31 / 0.05), 0 8px 20px -6px rgb(29 29 31 / 0.10);
+  --shadow-lg: 0 2px 4px -2px rgb(29 29 31 / 0.05), 0 12px 28px -8px rgb(29 29 31 / 0.12);
+  --shadow-xl: 0 8px 16px -8px rgb(29 29 31 / 0.08), 0 24px 56px -12px rgb(29 29 31 / 0.20);
 }
 
 .dark {
-  --shadow-xs: 0 1px 3px rgb(0 0 0 / 0.12);
-  --shadow-sm: 0 2px 8px -2px rgb(0 0 0 / 0.2);
-  --shadow-md: 0 8px 24px -6px rgb(0 0 0 / 0.3);
-  --shadow-lg: 0 16px 48px -12px rgb(0 0 0 / 0.4);
-  --shadow-xl: 0 24px 80px -20px rgb(0 0 0 / 0.5);
+  --shadow-xs: 0 1px 2px rgb(0 0 0 / 0.3);
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3), 0 1px 3px rgb(0 0 0 / 0.2);
+  --shadow-md: 0 8px 20px -6px rgb(0 0 0 / 0.45);
+  --shadow-lg: 0 12px 28px -8px rgb(0 0 0 / 0.5);
+  --shadow-xl: 0 24px 56px -12px rgb(0 0 0 / 0.6);
 }
 
 @theme inline {

@@ -42,7 +42,7 @@ export const Badge = ({
     <span
       title={title}
       className={cn(
-        'inline-flex items-center gap-1.5 whitespace-nowrap rounded-md border px-2 py-0.5 text-xs font-medium tabular-nums tracking-[-0.005em]',
+        'inline-flex items-center gap-1.5 whitespace-nowrap rounded-sm border px-2 py-0.5 text-xs font-medium tabular-nums tracking-[-0.005em]',
         variants[variant],
         className
       )}

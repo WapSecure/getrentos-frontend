@@ -111,7 +111,7 @@ function OAuthCallbackContent() {
             e.preventDefault();
             void verifyCode();
           }}
-          className="bg-card rounded-2xl border border-border p-8 max-w-sm w-full shadow-[0_16px_40px_rgba(0,0,0,0.08)] space-y-4"
+          className="bg-card rounded-2xl border border-border p-8 max-w-sm w-full shadow-lg space-y-4"
         >
           <div className="text-center">
             <ShieldCheck className="w-8 h-8 text-primary mx-auto mb-3" />
@@ -155,7 +155,7 @@ function OAuthCallbackContent() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-6">
-      <div className="bg-card rounded-2xl border border-border p-8 max-w-sm w-full text-center shadow-[0_16px_40px_rgba(0,0,0,0.08)]">
+      <div className="bg-card rounded-2xl border border-border p-8 max-w-sm w-full text-center shadow-lg">
         {error ? (
           <>
             <AlertCircle className="w-8 h-8 text-destructive mx-auto mb-3" />
