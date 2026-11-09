@@ -947,6 +947,8 @@ export const landlordService = {
       sort?: 'due_date_asc' | 'due_date_desc';
       page?: number;
       pageSize?: number;
+      /** Tenant name, property title or payment reference, across every page. */
+      search?: string;
     } = {}
   ): Promise<ApiResponse<Paginated<RentPayment>>> {
     return safeCall(() =>

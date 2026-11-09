@@ -33,6 +33,9 @@ interface Payment {
   releaseDate?: string;
   heldReason?: string;
   reference?: string;
+  feeNaira?: number;
+  totalChargedNaira?: number;
+  heldAmountNaira?: number;
   resumeCheckout?: { url: string; reference: string; expiresAt: string };
   periodStart?: string;
   periodEnd?: string;
@@ -82,6 +85,21 @@ export const PaymentDetailsModal = ({
     ...(isPaid ? [{ label: 'Paid on', value: formatLagosDate(payment.date, 'long') }] : []),
     ...(isPaid && payment.method
       ? [{ label: 'Paid with', value: METHOD_LABEL[payment.method] ?? 'Other payment method' }]
+      : []),
+    ...(isPaid && payment.feeNaira !== undefined
+      ? [
+          {
+            label: 'Card or bank fee',
+            value: formatCurrency(payment.feeNaira),
+            hint: 'Charged by the payment company and paid on top, so your landlord gets the full amount.',
+          },
+        ]
+      : []),
+    ...(isPaid && payment.totalChargedNaira !== undefined
+      ? [{ label: 'Total charged', value: formatCurrency(payment.totalChargedNaira) }]
+      : []),
+    ...(payment.heldAmountNaira
+      ? [{ label: 'Held by GetRentos', value: formatCurrency(payment.heldAmountNaira) }]
       : []),
     ...(reference
       ? [

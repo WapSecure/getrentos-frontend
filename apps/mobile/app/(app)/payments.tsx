@@ -24,6 +24,7 @@ import {
   PAYMENT_STATUS_LABEL,
   PAYMENT_STATUS_TONE,
   type Payment,
+  type PaymentsSummary,
 } from '@/lib/api/payments';
 import { errorMessage } from '@/lib/api/client';
 import { formatDate, formatNaira } from '@/lib/format';
@@ -73,6 +74,8 @@ export default function Payments() {
     getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
   });
   const items = useMemo(() => query.data?.pages.flatMap((p) => p.items) ?? [], [query.data]);
+  // Account-wide figures from the API (every charge, not the pages loaded). Older APIs send none.
+  const summary = query.data?.pages[0]?.summary;
   const refreshPayments = () => qc.invalidateQueries({ queryKey: qk.renter.paymentsAll });
 
   const payMutation = useMutation({
@@ -126,7 +129,9 @@ export default function Payments() {
   const confirmMoveIn = (payment: Payment) => {
     Alert.alert(
       'Confirm move-in?',
-      `This releases the rent GetRentos is holding for ${payment.propertyName} to your landlord now. Only confirm once you've moved in — it can't be undone.`,
+      `This releases the ${
+        payment.heldAmountNaira ? `${formatNaira(payment.heldAmountNaira)} ` : ''
+      }rent GetRentos is holding for ${payment.propertyName} to your landlord now. Only confirm once you've moved in — it can't be undone.`,
       [
         { text: 'Not yet', style: 'cancel' },
         {
@@ -200,6 +205,13 @@ export default function Payments() {
               />
             </View>
           )}
+          ListHeaderComponent={
+            summary ? (
+              <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
+                <PaymentsSummaryCard summary={summary} />
+              </View>
+            ) : null
+          }
           contentContainerStyle={{ paddingTop: spacing.sm, paddingBottom: spacing['3xl'] }}
           onEndReached={() => {
             if (query.hasNextPage && !query.isFetchingNextPage) void query.fetchNextPage();
@@ -252,6 +264,49 @@ export default function Payments() {
         payment={disputePayment}
       />
     </View>
+  );
+}
+
+/** What the renter owes across every charge, and what GetRentos is holding: the same figures as web. */
+function PaymentsSummaryCard({ summary }: { summary: PaymentsSummary }) {
+  const { spacing } = useTheme();
+  const held =
+    summary.totalHeldNaira > 0
+      ? `${formatNaira(summary.totalHeldNaira)} of your rent is held by GetRentos until it is released to your landlord.`
+      : null;
+
+  if (summary.openCount === 0) {
+    return (
+      <Card elevated>
+        <Text variant="bodyStrong">You&apos;re up to date</Text>
+        <Text variant="caption" color="mutedForeground">
+          Nothing is due right now.{held ? ` ${held}` : ''}
+        </Text>
+      </Card>
+    );
+  }
+
+  return (
+    <Card elevated>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+        <Text variant="caption" color="mutedForeground">
+          You owe
+        </Text>
+        {summary.overdueCount > 0 ? (
+          <Badge label={`${summary.overdueCount} overdue`} tone="danger" />
+        ) : null}
+      </View>
+      <Price amount={summary.amountOwedNaira} variant="heading" />
+      <Text variant="caption" color="mutedForeground">
+        {summary.openCount === 1 ? '1 charge to pay' : `${summary.openCount} charges to pay`}
+        {summary.nextDueDate ? ` · next due ${formatDate(summary.nextDueDate, 'short')}` : ''}
+      </Text>
+      {held ? (
+        <Text variant="caption" color="mutedForeground" style={{ marginTop: spacing.xs }}>
+          {held}
+        </Text>
+      ) : null}
+    </Card>
   );
 }
 
@@ -355,8 +410,24 @@ function PaymentRow({
         ) : null}
       </View>
 
+      {p.status === 'paid' && (p.feeNaira !== undefined || p.reference) ? (
+        <View style={{ marginTop: spacing.sm, gap: 2 }}>
+          {p.feeNaira !== undefined && p.totalChargedNaira !== undefined ? (
+            <Text variant="caption" color="mutedForeground">
+              {`Charged ${formatNaira(p.totalChargedNaira)}, including a ${formatNaira(p.feeNaira)} card or bank fee`}
+            </Text>
+          ) : null}
+          {p.reference ? (
+            <Text variant="caption" color="mutedForeground" selectable>
+              {`Reference ${p.reference}`}
+            </Text>
+          ) : null}
+        </View>
+      ) : null}
+
       {releasable ? (
         <Text variant="caption" color="mutedForeground" style={{ marginTop: spacing.sm }}>
+          {p.heldAmountNaira ? `${formatNaira(p.heldAmountNaira)} held. ` : ''}
           {p.releaseDate
             ? `Held under GetRentos Payment Protection — releases to your landlord automatically on ${formatDate(p.releaseDate, 'short')}, or sooner if you confirm move-in.`
             : 'Held under GetRentos Payment Protection — confirm move-in to release it to your landlord.'}

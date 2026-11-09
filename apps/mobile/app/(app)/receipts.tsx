@@ -7,10 +7,18 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ChevronRight, FileStack } from 'lucide-react-native';
 import { Card, Price, QueryState, Skeleton, Text, useTheme } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
-import { paymentsApi, type Receipt } from '@/lib/api/payments';
+import { CHARGE_CATEGORY_LABEL, paymentsApi, type Receipt } from '@/lib/api/payments';
 import { formatDate } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
+
+/** "Rent · 1 Aug – 31 Aug", or just the charge when no period is known (same as web). */
+function receiptLabel(receipt: Receipt): string | null {
+  if (!receipt.category && !receipt.periodStart) return null;
+  const what = (receipt.category && CHARGE_CATEGORY_LABEL[receipt.category]) || 'Rent';
+  if (!receipt.periodStart || !receipt.periodEnd) return what;
+  return `${what} · ${formatDate(receipt.periodStart, 'short')} – ${formatDate(receipt.periodEnd, 'short')}`;
+}
 
 export default function Receipts() {
   const { colors, spacing, radius } = useTheme();
@@ -78,9 +86,19 @@ export default function Receipts() {
                       <Text variant="bodyStrong" numberOfLines={1}>
                         {item.propertyName}
                       </Text>
+                      {receiptLabel(item) ? (
+                        <Text variant="caption" numberOfLines={1}>
+                          {receiptLabel(item)}
+                        </Text>
+                      ) : null}
                       <Text variant="caption" color="mutedForeground">
                         Paid {formatDate(item.date, 'short')}
                       </Text>
+                      {item.reference ? (
+                        <Text variant="caption" color="mutedForeground" numberOfLines={1}>
+                          {`Ref ${item.reference}`}
+                        </Text>
+                      ) : null}
                     </View>
                     <Price amount={item.amount} variant="callout" />
                     <ChevronRight size={16} color={colors.mutedForeground} />
