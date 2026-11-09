@@ -166,7 +166,9 @@ export function AgencyAgentSelfPayout({
                   <PayoutRowDetails
                     state={state}
                     paidAt={p.paidAt}
+                    transferRef={p.transferRef}
                     failureReason={p.failureReason}
+                    sentTo={p.sentTo}
                   />
                 </li>
               );

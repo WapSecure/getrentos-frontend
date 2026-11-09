@@ -1,4 +1,5 @@
 import { authFetch, safeCall, type ApiResponse } from '@/lib/apiHelpers';
+import type { PayoutSentTo } from '@getrentos/shared';
 
 export type AgencyCommissionType = 'LETTING' | 'RENEWAL';
 
@@ -67,6 +68,10 @@ export interface AgencyPayout {
   status: string;
   commissions: number;
   failureReason: string | null;
+  /** The transfer reference to quote to the bank. */
+  transferRef?: string | null;
+  /** Where it went (bank + last four digits), only when the API can prove it. */
+  sentTo?: PayoutSentTo | null;
   paidAt: string | null;
   createdAt: string;
 }
@@ -207,6 +212,10 @@ export interface AgentPayout {
   status: string;
   commissions: number;
   failureReason: string | null;
+  /** The transfer reference to quote to the bank. */
+  transferRef?: string | null;
+  /** Where it went (bank + last four digits), only when the API can prove it. */
+  sentTo?: PayoutSentTo | null;
   paidAt: string | null;
   createdAt: string;
 }

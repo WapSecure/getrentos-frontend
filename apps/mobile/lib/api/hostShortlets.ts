@@ -3,6 +3,7 @@ import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
 import type { ShortletBookingStatus, ShortletCancellationPolicy } from './shortlets';
 import type { VideoOnSiteReport } from '../filmedOnSite';
+import type { PayoutSentTo } from '@getrentos/shared';
 
 /**
  * Hosting short stays: the host's side of /host/shortlets. Owners, landlords,
@@ -286,6 +287,8 @@ export interface HostPayout {
   transferRef?: string;
   paidAt?: string;
   bookingCount: number;
+  /** Where it went (bank + last four digits), only when the API can prove it. */
+  sentTo?: PayoutSentTo | null;
   createdAt: string;
 }
 

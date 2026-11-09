@@ -1,5 +1,6 @@
 import { apiFetch } from './client';
 import type { Paginated } from './properties';
+import type { PayoutSentTo } from '@getrentos/shared';
 
 /**
  * Where sale proceeds go. Owners, realtors and agents all sell through the
@@ -24,6 +25,8 @@ export interface SellerSalePayout {
   paidAt?: string;
   propertyTitle?: string;
   releasedAt?: string;
+  /** Where it went (bank + last four digits), only when the API can prove it. */
+  sentTo?: PayoutSentTo | null;
 }
 
 /**

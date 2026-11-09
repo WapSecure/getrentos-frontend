@@ -29,6 +29,7 @@ import { withStepUpSummary } from '@/lib/stepUp';
 import {
   INCOMPLETE_ACCOUNT_LOOKUP,
   PAYOUT_FAILED_NEXT_STEP,
+  payoutSentToLabel,
   lookupAllowsSave,
   maskAccountNumber,
   payoutAccountStepUpSummary,
@@ -213,6 +214,7 @@ function PayoutRow({ p }: { p: SellerSalePayout }) {
       : p.releasedAt
         ? `Released ${formatDate(p.releasedAt, 'medium')}`
         : 'Released';
+  const sentTo = payoutSentToLabel(p.sentTo);
   return (
     <Card elevated style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
       <View style={{ flex: 1, gap: 2 }}>
@@ -222,6 +224,11 @@ function PayoutRow({ p }: { p: SellerSalePayout }) {
         <Text variant="caption" color="mutedForeground">
           {when}
         </Text>
+        {sentTo ? (
+          <Text variant="caption" color="mutedForeground">
+            {sentTo}
+          </Text>
+        ) : null}
         {p.payoutStatus === 'FAILED' ? (
           <Text variant="caption" color="mutedForeground">
             {PAYOUT_FAILED_NEXT_STEP}

@@ -336,6 +336,7 @@ export const RealtorPayoutSection = () => {
                           paidAt={p.paidAt}
                           transferRef={p.transferRef}
                           failureReason={p.failureReason}
+                          sentTo={p.sentTo}
                         />
                       </td>
                     </tr>

@@ -199,6 +199,7 @@ export default function HostEarnings() {
                             }
                             paidAt={p.paidAt}
                             transferRef={p.transferRef}
+                            sentTo={p.sentTo}
                           />
                         </View>
                         <View style={{ alignItems: 'flex-end', gap: 4 }}>

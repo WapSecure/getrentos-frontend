@@ -3,7 +3,12 @@
 import { useState } from 'react';
 import { Check, Copy } from 'lucide-react';
 import { IconButton } from '@getrentos/ui';
-import { PAYOUT_ARRIVAL_NOTE, PAYOUT_FAILED_NEXT_STEP } from '@getrentos/shared';
+import {
+  PAYOUT_ARRIVAL_NOTE,
+  PAYOUT_FAILED_NEXT_STEP,
+  payoutSentToLabel,
+  type PayoutSentTo,
+} from '@getrentos/shared';
 import { formatDate } from '@/lib/format';
 
 /**
@@ -16,12 +21,16 @@ export function PayoutRowDetails({
   paidAt,
   transferRef,
   failureReason,
+  sentTo,
 }: {
   state: 'pending' | 'paid' | 'failed';
   paidAt?: string | null;
   transferRef?: string | null;
   failureReason?: string | null;
+  /** Where it went, only when the API can prove it. */
+  sentTo?: PayoutSentTo | null;
 }) {
+  const sentToLabel = payoutSentToLabel(sentTo);
   const [copied, setCopied] = useState(false);
   const copy = async () => {
     if (!transferRef) return;
@@ -37,6 +46,7 @@ export function PayoutRowDetails({
   return (
     <div className="mt-1 space-y-0.5 text-xs text-muted-foreground">
       {state === 'paid' && paidAt && <p>Paid {formatDate(paidAt)}</p>}
+      {sentToLabel && <p>{sentToLabel}</p>}
       {state === 'pending' && <p>{PAYOUT_ARRIVAL_NOTE}</p>}
       {transferRef && (
         <p className="flex items-center gap-1">

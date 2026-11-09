@@ -1,3 +1,4 @@
+import type { PayoutSentTo } from '@getrentos/shared';
 export type ShortletPricingMode = 'PER_NIGHT' | 'FLAT_STAY';
 export type ShortletDiscountType = 'WEEKLY' | 'TWO_WEEK' | 'MONTHLY' | 'LAST_MINUTE';
 
@@ -396,6 +397,8 @@ export interface ShortletPayout {
   transferRef?: string;
   paidAt?: string;
   bookingCount: number;
+  /** Where it went (bank + last four digits), only when the API can prove it. */
+  sentTo?: PayoutSentTo | null;
   createdAt: string;
 }
 

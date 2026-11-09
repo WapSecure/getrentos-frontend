@@ -302,6 +302,8 @@ export type VendorPayoutAccount = {
   accountNumber: string;
   accountName: string;
   verified: boolean;
+  /** Set while payouts wait after a change of bank details (ISO); null when none is held. */
+  payoutHoldUntil?: string | null;
 };
 
 export type CreateHomeManagementWorkOrderInvoiceInput = {
