@@ -1,6 +1,6 @@
 'use client';
 
-import { ClipboardList, Wrench } from 'lucide-react';
+import { ClipboardList, Wrench } from '@sureground/icons';
 import { HubTabs, useHubTab, type HubTab } from '@/components/shared/navigation/HubTabs';
 import { MaintenanceRequestsView } from '@/components/landlord/maintenance/MaintenanceRequestsView';
 import dynamic from 'next/dynamic';

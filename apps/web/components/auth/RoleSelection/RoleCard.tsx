@@ -11,7 +11,7 @@ import {
   UserCheck,
   Shield,
   Briefcase,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { ROLES } from '@/lib/constants/auth';
 
 const iconMap = {
@@ -71,9 +71,7 @@ export const RoleCard = ({ role, isSelected, onSelect, onDeselect, disabled }: R
           isSelected ? 'bg-primary/20' : ''
         }`}
       >
-        <Icon
-          className={`w-6 h-6 ${isSelected ? 'text-primary' : 'text-muted-foreground'}`}
-        />
+        <Icon className={`w-6 h-6 ${isSelected ? 'text-primary' : 'text-muted-foreground'}`} />
       </div>
 
       <h3

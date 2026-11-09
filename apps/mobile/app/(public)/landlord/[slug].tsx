@@ -4,7 +4,7 @@ import { useInfiniteQuery, useMutation, useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
-import { MessageCircle, ShieldCheck, Star } from 'lucide-react-native';
+import { MessageCircle, ShieldCheck, Star } from '@sureground/icons/native';
 import {
   Avatar,
   Button,

@@ -1,6 +1,6 @@
 'use client';
 
-import { Globe } from 'lucide-react';
+import { Globe } from '@sureground/icons';
 import { RadioGroup } from '@sureground/ui';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 

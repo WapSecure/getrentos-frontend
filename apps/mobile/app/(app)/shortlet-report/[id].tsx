@@ -4,7 +4,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
-import { Camera, Clock, ImagePlus, X } from 'lucide-react-native';
+import { Camera, Clock, ImagePlus, X } from '@sureground/icons/native';
 import {
   Button,
   EmptyState,

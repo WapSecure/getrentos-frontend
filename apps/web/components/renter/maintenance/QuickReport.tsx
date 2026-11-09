@@ -11,8 +11,8 @@ import {
   Plus,
   ChevronRight,
   CheckCircle,
-  type LucideIcon,
-} from 'lucide-react';
+  type SgIcon,
+} from '@sureground/icons';
 import { Button } from '@sureground/ui';
 import type { CreateMaintenanceRequestInput, MaintenanceCategory } from '@/types/maintenance';
 
@@ -23,7 +23,7 @@ interface QuickReportProps {
 
 const quickOptions: {
   id: string;
-  icon: LucideIcon;
+  icon: SgIcon;
   label: string;
   category: MaintenanceCategory;
   description: string;

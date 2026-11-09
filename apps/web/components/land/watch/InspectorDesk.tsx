@@ -11,7 +11,7 @@ import {
   MapPin,
   Navigation,
   Send,
-} from 'lucide-react';
+} from '@sureground/icons';
 import {
   Alert,
   Badge,

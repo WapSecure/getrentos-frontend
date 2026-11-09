@@ -3,7 +3,7 @@
 import { Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, CalendarClock } from 'lucide-react';
+import { Plus, CalendarClock } from '@sureground/icons';
 import { ViewingRequestCard } from '@/components/buyer/viewings/ViewingRequestCard';
 import { RequestViewingModal } from '@/components/buyer/viewings/RequestViewingModal';
 import { Button, Pagination, QueryState, Skeleton, useToast, PageHeader } from '@sureground/ui';

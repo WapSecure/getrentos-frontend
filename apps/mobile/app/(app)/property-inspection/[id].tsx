@@ -4,7 +4,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { Image } from 'expo-image';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Camera, CheckCircle2, Plus, Send } from 'lucide-react-native';
+import { Camera, CheckCircle2, Plus, Send } from '@sureground/icons/native';
 import {
   Badge,
   Button,

@@ -12,7 +12,7 @@ import {
   User,
   Star,
   Trash2,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { Badge, Button, IconButton } from '@sureground/ui';
 import { applicationStatusBadges } from '@/lib/statusBadge';
 import { pluralize } from '@/lib/format';

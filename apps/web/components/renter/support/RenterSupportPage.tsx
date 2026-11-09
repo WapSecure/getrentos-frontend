@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, MessageCircle, Send } from 'lucide-react';
+import { ArrowLeft, MessageCircle, Send } from '@sureground/icons';
 import {
   Alert,
   Badge,

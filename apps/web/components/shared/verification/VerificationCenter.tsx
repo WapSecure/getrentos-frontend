@@ -18,7 +18,7 @@ import {
   ShieldCheck,
   Smartphone,
   XCircle,
-} from 'lucide-react';
+} from '@sureground/icons';
 import Link from 'next/link';
 import {
   Alert,

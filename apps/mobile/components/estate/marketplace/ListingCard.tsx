@@ -1,6 +1,6 @@
 import { Pressable, View } from 'react-native';
 import { Image } from 'expo-image';
-import { ChevronRight, Home } from 'lucide-react-native';
+import { ChevronRight, Home } from '@sureground/icons/native';
 import { Card, Price, Text, useTheme } from '@sureground/ui-native';
 import { StatusPill } from '@/components/host/HostUI';
 import {

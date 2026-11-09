@@ -4,7 +4,7 @@ import { Image } from 'expo-image';
 import { useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Camera, ChevronLeft, ImagePlus, Trash2, X } from 'lucide-react-native';
+import { Camera, ChevronLeft, ImagePlus, Trash2, X } from '@sureground/icons/native';
 import { Button, Card, Chip, Text, TextField, useTheme, useToast } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {

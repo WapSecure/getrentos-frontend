@@ -12,7 +12,7 @@ import {
   Plus,
   ShieldCheck,
   Store,
-} from 'lucide-react-native';
+} from '@sureground/icons/native';
 import {
   Button,
   EmptyState,

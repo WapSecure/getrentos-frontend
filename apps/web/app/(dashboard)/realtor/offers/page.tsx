@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Handshake } from 'lucide-react';
+import { Handshake } from '@sureground/icons';
 import { RealtorOfferCard } from '@/components/realtor/offers/RealtorOfferCard';
 import { RealtorOfferNegotiationModal } from '@/components/realtor/offers/RealtorOfferNegotiationModal';
 import type { RealtorOfferStatus } from '@/types/realtor';

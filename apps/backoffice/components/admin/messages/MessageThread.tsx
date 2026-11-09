@@ -3,7 +3,7 @@
 import { Alert, Badge, Button, IconButton, Input, Skeleton } from '@sureground/ui';
 
 import { useState } from 'react';
-import { Send, MessageCircle, Check, CheckCheck } from 'lucide-react';
+import { Send, MessageCircle, Check, CheckCheck } from '@sureground/icons';
 import { getInitials } from '@sureground/shared';
 import { format } from 'date-fns';
 

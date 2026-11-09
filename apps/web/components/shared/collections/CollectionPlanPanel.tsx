@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { Check, ChevronDown, Copy, ListChecks } from 'lucide-react';
+import { Check, ChevronDown, Copy, ListChecks } from '@sureground/icons';
 import { Badge, Button, Card, Select, Skeleton, type BadgeVariant } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys, landlordKeys } from '@/lib/queryKeys';

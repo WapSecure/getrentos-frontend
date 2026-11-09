@@ -3,7 +3,7 @@ import { RefreshControl, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { CheckCircle, CloudOff, RefreshCw } from 'lucide-react-native';
+import { CheckCircle, CloudOff, RefreshCw } from '@sureground/icons/native';
 import { Badge, Card, QueryState, Skeleton, Text, useTheme } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { agentSyncApi, type AgentSyncItem } from '@/lib/api/agentSync';

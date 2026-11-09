@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { CircleAlert, UserCheck } from 'lucide-react';
+import { CircleAlert, UserCheck } from '@sureground/icons';
 import { Badge, EmptyState, QueryState, Select, PageHeader } from '@sureground/ui';
 import {
   formatDate,

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, Copy } from 'lucide-react';
+import { Check, Copy } from '@sureground/icons';
 
 export const ReferenceCodeChip = ({
   code,

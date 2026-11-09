@@ -5,7 +5,7 @@ import nextTs from "eslint-config-next/typescript";
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
-  // Naira-only product: no icon that draws a dollar sign.
+  // Icons come from @sureground/icons (our own set, naira-only: it has no dollar icons).
   {
     rules: {
       "no-restricted-imports": [
@@ -14,9 +14,7 @@ const eslintConfig = defineConfig([
           paths: [
             {
               name: "lucide-react",
-              importNames: ["DollarSign", "BadgeDollarSign", "CircleDollarSign", "SquareDollarSign", "Receipt"],
-              message:
-                "Draws a dollar sign. Sureground is naira-only: use NairaSign from @sureground/ui or ReceiptText.",
+              message: "Use @sureground/icons (same icon names). Run pnpm icons:migrate to move a file over.",
             },
           ],
         },

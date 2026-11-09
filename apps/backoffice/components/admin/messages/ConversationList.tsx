@@ -1,6 +1,6 @@
 'use client';
 
-import { MessageSquare } from 'lucide-react';
+import { MessageSquare } from '@sureground/icons';
 import { EmptyState, ListSkeleton, SearchInput } from '@sureground/ui';
 import { getInitials, formatRelativeTime } from '@sureground/shared';
 

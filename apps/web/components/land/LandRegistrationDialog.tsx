@@ -15,7 +15,7 @@ import {
   NumberInput,
   Select,
 } from '@sureground/ui';
-import { MapPinned } from 'lucide-react';
+import { MapPinned } from '@sureground/icons';
 import type { OwnerProperty } from '@/types/owner';
 import {
   LAND_AREA_UNIT_LABELS,

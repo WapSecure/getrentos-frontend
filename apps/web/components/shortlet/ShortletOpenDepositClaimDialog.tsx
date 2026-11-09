@@ -15,7 +15,7 @@ import {
   useToast,
   type PendingUpload,
 } from '@sureground/ui';
-import { ShieldAlert } from 'lucide-react';
+import { ShieldAlert } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
 import { formatCurrency } from '@/lib/format';

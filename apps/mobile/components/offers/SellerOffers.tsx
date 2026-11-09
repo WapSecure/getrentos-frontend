@@ -4,7 +4,7 @@ import { FlashList } from '@shopify/flash-list';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { FileSignature } from 'lucide-react-native';
+import { FileSignature } from '@sureground/icons/native';
 import {
   Badge,
   Card,

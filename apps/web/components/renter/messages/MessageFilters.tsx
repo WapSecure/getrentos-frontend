@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Filter, ChevronDown, ChevronUp } from 'lucide-react';
+import { Filter, ChevronDown, ChevronUp } from '@sureground/icons';
 import { Card, Field, Select } from '@sureground/ui';
 
 interface FilterState {

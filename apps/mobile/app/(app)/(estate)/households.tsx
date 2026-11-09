@@ -3,7 +3,7 @@ import { Pressable, RefreshControl, View } from 'react-native';
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Plus, Search, Upload, Users, X } from 'lucide-react-native';
+import { Plus, Search, Upload, Users, X } from '@sureground/icons/native';
 import {
   Button,
   Chip,

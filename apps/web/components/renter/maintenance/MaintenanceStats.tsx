@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Wrench, Clock, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Wrench, Clock, CheckCircle, AlertTriangle } from '@sureground/icons';
 import type { MaintenanceSummary } from '@/types/maintenance';
 
 interface MaintenanceStatsProps {

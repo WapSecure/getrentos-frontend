@@ -1,6 +1,6 @@
 'use client';
 
-import { Eye } from 'lucide-react';
+import { Eye } from '@sureground/icons';
 import type { WatchlistScreening } from '@/types/estate';
 import { describeWatchlistBasis } from '@/components/gateman/WatchlistBlockedNotice';
 import { Alert } from '@sureground/ui';

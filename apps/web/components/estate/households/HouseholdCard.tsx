@@ -1,6 +1,6 @@
 'use client';
 
-import { Mail, Phone, Pencil, Trash2, UserPlus, UserMinus } from 'lucide-react';
+import { Mail, Phone, Pencil, Trash2, UserPlus, UserMinus } from '@sureground/icons';
 import { Badge, IconButton } from '@sureground/ui';
 import type { Household } from '@/types/estate';
 

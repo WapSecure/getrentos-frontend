@@ -10,7 +10,7 @@ import {
   Input,
   Select,
 } from '@sureground/ui';
-import { Link2, Upload, X } from 'lucide-react';
+import { Link2, Upload, X } from '@sureground/icons';
 import { formatDate } from '@/lib/format';
 import type { LandDocumentType } from '@/types/landDocument';
 import type {

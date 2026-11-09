@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Button, ConfirmDialog } from '@sureground/ui';
-import { CreditCard, Download, FileText, XCircle } from 'lucide-react';
+import { CreditCard, Download, FileText, XCircle } from '@sureground/icons';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { landBuyerService } from '@/services/landBuyerService';
 import {

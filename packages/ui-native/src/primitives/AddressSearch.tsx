@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, View } from 'react-native';
-import { AlertCircle, MapPin, PencilLine, ShieldCheck, X } from 'lucide-react-native';
+import { AlertCircle, MapPin, PencilLine, ShieldCheck, X } from '@sureground/icons/native';
 import {
   highlightParts,
   newPlacesSession,

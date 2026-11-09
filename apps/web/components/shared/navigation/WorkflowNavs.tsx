@@ -9,7 +9,7 @@ import {
   ShieldCheck,
   Users,
   UsersRound,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { ROUTES } from '@/lib/constants/auth';
 import { SectionNav } from './SectionNav';

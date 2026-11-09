@@ -11,7 +11,7 @@ import {
   useToast,
   type BadgeVariant,
 } from '@sureground/ui';
-import { Gavel, Send } from 'lucide-react';
+import { Gavel, Send } from '@sureground/icons';
 import { cn } from '@sureground/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';

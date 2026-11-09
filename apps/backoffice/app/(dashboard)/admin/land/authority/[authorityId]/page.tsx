@@ -13,7 +13,7 @@ import {
   Scale,
   ShieldAlert,
   Users,
-} from 'lucide-react';
+} from '@sureground/icons';
 import {
   Alert,
   Badge,

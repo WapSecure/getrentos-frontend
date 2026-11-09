@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Star, PenLine } from 'lucide-react';
+import { Star, PenLine } from '@sureground/icons';
 import { Button, Card, ListSkeleton, Pagination, QueryState, PageHeader } from '@sureground/ui';
 import { getInitials, formatDate } from '@/lib/format';
 import { ROUTES } from '@/lib/constants/auth';

@@ -3,7 +3,7 @@ import { FlatList, KeyboardAvoidingView, Platform, StyleSheet, View } from 'reac
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AlertCircle, ChevronLeft, EyeOff, Send } from 'lucide-react-native';
+import { AlertCircle, ChevronLeft, EyeOff, Send } from '@sureground/icons/native';
 import {
   Avatar,
   IconButton,

@@ -16,7 +16,7 @@ import {
   Scroll,
   ShieldAlert,
   Wrench,
-} from 'lucide-react';
+} from '@sureground/icons';
 import {
   Button,
   Card,

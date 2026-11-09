@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { ShieldAlert, Gavel, ShieldCheck, AlertTriangle, MessageCircle } from 'lucide-react';
+import { ShieldAlert, Gavel, ShieldCheck, AlertTriangle, MessageCircle } from '@sureground/icons';
 import { CardSkeleton, PageErrorState, SaveButton, Switch, useToast } from '@sureground/ui';
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@sureground/shared';

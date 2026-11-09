@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { UserPlus, CalendarClock, Handshake, Wallet, Inbox } from 'lucide-react';
+import { UserPlus, CalendarClock, Handshake, Wallet, Inbox } from '@sureground/icons';
 import { Card, EmptyState, ListSkeleton } from '@sureground/ui';
 import { formatRelativeTime } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';

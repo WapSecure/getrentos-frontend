@@ -1,6 +1,6 @@
 'use client';
 
-import { TrendingUp, BadgeCheck } from 'lucide-react';
+import { TrendingUp, BadgeCheck } from '@sureground/icons';
 import { useQuery } from '@tanstack/react-query';
 import { Button, Skeleton } from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';

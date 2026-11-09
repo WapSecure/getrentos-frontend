@@ -33,7 +33,7 @@ import {
   Ruler,
   ShieldCheck,
   Trees,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { landMarketService } from '@/services/landMarketService';
 import { buyerService } from '@/services/buyerService';
 import { unwrap } from '@/lib/apiHelpers';

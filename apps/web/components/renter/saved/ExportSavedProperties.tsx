@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Download, FileText, FileSpreadsheet } from 'lucide-react';
+import { Download, FileText, FileSpreadsheet } from '@sureground/icons';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@sureground/ui';
 import { Property } from '@/types/renter';
 import { downloadCsv, escapeHtml, printHtml } from '@/lib/export';

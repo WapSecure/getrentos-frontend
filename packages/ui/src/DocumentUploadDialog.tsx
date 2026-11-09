@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { AlertTriangle, Upload as UploadIcon, FileText } from 'lucide-react';
+import { AlertTriangle, Upload as UploadIcon, FileText } from '@sureground/icons';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from './Dialog';
 import { Button } from './Button';
 import { Field } from './Field';

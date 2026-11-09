@@ -3,7 +3,7 @@ import { ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Briefcase } from 'lucide-react-native';
+import { Briefcase } from '@sureground/icons/native';
 import {
   Button,
   Card,

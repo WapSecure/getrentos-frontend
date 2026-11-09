@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { Badge, Card } from '@sureground/ui';
-import { CalendarClock, FileCheck2 } from 'lucide-react';
+import { CalendarClock, FileCheck2 } from '@sureground/icons';
 import { formatDate } from '@/lib/format';
 import type { EstateCommitment } from '@/types/landEstateInfrastructure';
 import { CHANGE_KIND_LABELS, COMMITMENT_STATUS_LABELS, commitmentBadge } from './labels';

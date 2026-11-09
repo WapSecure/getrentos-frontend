@@ -4,7 +4,7 @@ import { Skeleton } from '@sureground/ui';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useEffect, useRef, useState } from 'react';
-import { MapPin } from 'lucide-react';
+import { MapPin } from '@sureground/icons';
 import { cn } from '@/lib/cn';
 import 'leaflet/dist/leaflet.css';
 import { addBaseTiles } from '@/lib/mapTiles';

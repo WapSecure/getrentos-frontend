@@ -1,6 +1,6 @@
 'use client';
 
-import { Lock, Ruler } from 'lucide-react';
+import { Lock, Ruler } from '@sureground/icons';
 import { formatCurrency, formatDate } from '@sureground/shared';
 import type { AdminLandDiligenceDetail } from '@/types/land';
 import { humaniseEnum } from '@/lib/landDiligence';

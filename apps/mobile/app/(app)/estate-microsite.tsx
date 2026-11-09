@@ -13,7 +13,7 @@ import * as WebBrowser from 'expo-web-browser';
 import { Image } from 'expo-image';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Camera, ExternalLink, Globe, ImageIcon, Share2 } from 'lucide-react-native';
+import { Camera, ExternalLink, Globe, ImageIcon, Share2 } from '@sureground/icons/native';
 import {
   Button,
   Card,

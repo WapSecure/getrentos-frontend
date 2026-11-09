@@ -4,7 +4,7 @@ import { TextMessageConsentCard } from '@/components/shared/settings/TextMessage
 
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Bell, ShieldCheck } from 'lucide-react';
+import { Bell, ShieldCheck } from '@sureground/icons';
 import { SaveButton, Switch, useToast } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { agentKeys } from '@/lib/queryKeys';

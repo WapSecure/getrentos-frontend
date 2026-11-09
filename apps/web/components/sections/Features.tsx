@@ -7,7 +7,7 @@ import {
   BarChart3,
   Users2,
   Smartphone,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { MarketingCard, SectionHeading } from './primitives';
 
 // Each line says what the platform does, not a grade or a licence.

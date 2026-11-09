@@ -2,7 +2,14 @@ import { useState } from 'react';
 import { Linking, Pressable, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronDown, ChevronUp, Clock, Mail, MessageCircle, Phone } from 'lucide-react-native';
+import {
+  ChevronDown,
+  ChevronUp,
+  Clock,
+  Mail,
+  MessageCircle,
+  Phone,
+} from '@sureground/icons/native';
 import { Card, Divider, Text, useTheme } from '@sureground/ui-native';
 import { HelpFeedbackCard } from '@/components/help/HelpFeedbackCard';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';

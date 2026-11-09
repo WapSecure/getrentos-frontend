@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Linking, ScrollView, Share, View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { MessageCircle, Send, Share2 } from 'lucide-react-native';
+import { MessageCircle, Send, Share2 } from '@sureground/icons/native';
 import {
   Badge,
   Button,

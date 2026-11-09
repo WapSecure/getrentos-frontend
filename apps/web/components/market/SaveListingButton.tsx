@@ -1,7 +1,7 @@
 'use client';
 
 import { IconButton } from '@sureground/ui';
-import { Heart } from 'lucide-react';
+import { Heart } from '@sureground/icons';
 import { useRouter } from 'next/navigation';
 import { useMarketSaved } from '@/hooks/useMarketSaved';
 import { cn } from '@sureground/shared';

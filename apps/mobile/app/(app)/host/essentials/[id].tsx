@@ -3,7 +3,7 @@ import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Lock } from 'lucide-react-native';
+import { Lock } from '@sureground/icons/native';
 import {
   Button,
   Card,

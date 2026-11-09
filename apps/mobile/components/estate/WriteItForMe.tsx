@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { View } from 'react-native';
-import { Sparkles } from 'lucide-react-native';
+import { Sparkles } from '@sureground/icons/native';
 import { Button, FormAlert, TextField, useTheme } from '@sureground/ui-native';
 
 interface Props {

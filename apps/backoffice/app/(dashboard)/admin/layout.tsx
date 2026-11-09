@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { AdminNavbar } from '@/components/admin/navigation/AdminNavbar';
 import { AdminSidebar, hasRouteAccess } from '@/components/admin/dashboard/AdminSidebar';
 import { EmptyState, PageLoadingState } from '@sureground/ui';
-import { Lock } from 'lucide-react';
+import { Lock } from '@sureground/icons';
 import {
   ROUTES,
   isAuthenticated,

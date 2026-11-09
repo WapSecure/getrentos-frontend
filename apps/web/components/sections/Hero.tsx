@@ -1,4 +1,4 @@
-import { ArrowRight, Shield, Lock, FileCheck, Eye } from 'lucide-react';
+import { ArrowRight, Shield, Lock, FileCheck, Eye } from '@sureground/icons';
 import { LinkButton } from './primitives';
 import { ROUTES } from '@/lib/constants/auth';
 

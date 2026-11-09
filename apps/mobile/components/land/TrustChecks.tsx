@@ -1,5 +1,5 @@
 import { View } from 'react-native';
-import { AlertTriangle, CircleDashed, ShieldCheck } from 'lucide-react-native';
+import { AlertTriangle, CircleDashed, ShieldCheck } from '@sureground/icons/native';
 import {
   checkedByText,
   LAND_ASSURANCE_TIER_DESCRIPTIONS,

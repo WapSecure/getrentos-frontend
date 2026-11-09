@@ -56,7 +56,7 @@ import {
   Trash2,
   Wallet,
   XCircle,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { NairaSign } from '@sureground/ui/NairaSign';
 import { formatCurrency, formatDate, unwrap, humaniseEnum } from '@sureground/shared';
 import { adminShortletService } from '@/services/adminShortletService';

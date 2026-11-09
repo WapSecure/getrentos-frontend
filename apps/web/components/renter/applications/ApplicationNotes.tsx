@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Edit2, Trash2, Clock, StickyNote } from 'lucide-react';
+import { Plus, Edit2, Trash2, Clock, StickyNote } from '@sureground/icons';
 import { Alert, Button, EmptyState, IconButton, Textarea } from '@sureground/ui';
 
 interface Note {

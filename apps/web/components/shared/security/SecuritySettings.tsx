@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Fingerprint, KeyRound, Shield, Trash2, X } from 'lucide-react';
+import { Fingerprint, KeyRound, Shield, Trash2, X } from '@sureground/icons';
 import { startRegistration } from '@simplewebauthn/browser';
 import {
   Button,

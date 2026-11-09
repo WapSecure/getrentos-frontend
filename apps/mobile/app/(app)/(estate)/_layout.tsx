@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Home, ShieldAlert, User, Users, WalletCards } from 'lucide-react-native';
+import { Home, ShieldAlert, User, Users, WalletCards } from '@sureground/icons/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@sureground/ui-native';
 import { premiumTabBarOptions } from '@/lib/navigationStyles';

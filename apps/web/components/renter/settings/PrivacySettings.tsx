@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Eye, User, Users, Globe, Lock, Phone, History } from 'lucide-react';
+import { Eye, User, Users, Globe, Lock, Phone, History } from '@sureground/icons';
 import { RadioGroup, SaveButton, Switch, useOptimisticMutation, useToast } from '@sureground/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';

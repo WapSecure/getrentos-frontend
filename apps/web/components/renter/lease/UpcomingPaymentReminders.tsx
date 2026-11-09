@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Calendar, Bell, Clock, AlertTriangle } from 'lucide-react';
+import { Calendar, Bell, Clock, AlertTriangle } from '@sureground/icons';
 import { Badge, Button, Card } from '@sureground/ui';
 
 interface PaymentReminder {

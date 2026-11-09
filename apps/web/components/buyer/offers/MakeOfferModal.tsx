@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Send } from 'lucide-react';
+import { Send } from '@sureground/icons';
 import {
   Alert,
   Button,

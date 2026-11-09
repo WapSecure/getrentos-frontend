@@ -1,7 +1,7 @@
 'use client';
 
 import { forwardRef, useRef, type KeyboardEvent } from 'react';
-import { Search, X } from 'lucide-react';
+import { Search, X } from '@sureground/icons';
 import { Input, type InputProps } from './Input';
 
 interface SearchInputProps extends Omit<

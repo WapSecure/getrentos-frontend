@@ -1,7 +1,7 @@
 'use client';
 
 import { useSyncExternalStore } from 'react';
-import { WifiOff } from 'lucide-react';
+import { WifiOff } from '@sureground/icons';
 
 export function NetworkStatus() {
   const isOnline = useSyncExternalStore(

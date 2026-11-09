@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { RefreshCw, Cloud, CloudOff, Wifi, WifiOff } from 'lucide-react';
+import { RefreshCw, Cloud, CloudOff, Wifi, WifiOff } from '@sureground/icons';
 import {
   Alert,
   Badge,

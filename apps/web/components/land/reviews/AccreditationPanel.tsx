@@ -18,7 +18,7 @@ import {
   Toast,
   type PendingUpload,
 } from '@sureground/ui';
-import { BadgeCheck, FileText } from 'lucide-react';
+import { BadgeCheck, FileText } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
 import { NIGERIA_STATES } from '@/lib/constants/locations';

@@ -1,6 +1,6 @@
 'use client';
 
-import { Handshake, CalendarClock, ShieldCheck, Heart } from 'lucide-react';
+import { Handshake, CalendarClock, ShieldCheck, Heart } from '@sureground/icons';
 import { Card, CardDescription, CardHeader, CardTitle, EmptyState } from '@sureground/ui';
 import { formatRelativeTime } from '@/lib/format';
 import type { BuyerDashboard } from '@/services/buyerService';

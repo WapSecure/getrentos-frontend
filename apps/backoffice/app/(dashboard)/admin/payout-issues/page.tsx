@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { HandCoins } from 'lucide-react';
+import { HandCoins } from '@sureground/icons';
 import {
   Badge,
   Button,

@@ -12,7 +12,7 @@ import {
   Textarea,
   useToast,
 } from '@sureground/ui';
-import { CalendarClock, MapPin } from 'lucide-react';
+import { CalendarClock, MapPin } from '@sureground/icons';
 import { boundaryCorners } from '@sureground/shared';
 import { ApiError, unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';

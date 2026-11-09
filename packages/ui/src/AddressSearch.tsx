@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react';
 import * as RadixPopover from '@radix-ui/react-popover';
-import { AlertCircle, Loader2, MapPin, PencilLine, ShieldCheck, X } from 'lucide-react';
+import { AlertCircle, Loader2, MapPin, PencilLine, ShieldCheck, X } from '@sureground/icons';
 import {
   cn,
   highlightParts,

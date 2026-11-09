@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { BellRing, AlertOctagon, CalendarClock, CalendarDays, Coins } from 'lucide-react';
+import { BellRing, AlertOctagon, CalendarClock, CalendarDays, Coins } from '@sureground/icons';
 import { Field, NumberInput, Switch } from '@sureground/ui';
 import { landlordService, type LandlordAutomationSettings } from '@/services/landlordService';
 import { UpgradeToProModal } from '@/components/shared/subscription/UpgradeToProModal';

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
-import { Bot, Building2, ShieldCheck, UserRound, Wrench } from 'lucide-react';
+import { Bot, Building2, ShieldCheck, UserRound, Wrench } from '@sureground/icons';
 import {
   Badge,
   Button,

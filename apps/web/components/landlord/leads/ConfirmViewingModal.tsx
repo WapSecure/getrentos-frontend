@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { CalendarClock } from 'lucide-react';
+import { CalendarClock } from '@sureground/icons';
 import {
   Alert,
   Button,

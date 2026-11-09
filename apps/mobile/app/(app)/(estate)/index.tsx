@@ -13,8 +13,8 @@ import {
   Sparkles,
   UserPlus,
   WalletCards,
-  type LucideIcon,
-} from 'lucide-react-native';
+  type SgIcon,
+} from '@sureground/icons/native';
 import {
   Button,
   Card,
@@ -379,7 +379,7 @@ function QuickAction({
   onPress,
 }: {
   label: string;
-  Icon: LucideIcon;
+  Icon: SgIcon;
   onPress: () => void;
 }) {
   const { colors, spacing, radius } = useTheme();

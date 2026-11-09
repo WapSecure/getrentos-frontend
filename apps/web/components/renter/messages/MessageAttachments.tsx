@@ -1,7 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { FileText, Image as ImageIcon, Link as LinkIcon, Download, Eye, X } from 'lucide-react';
+import {
+  FileText,
+  Image as ImageIcon,
+  Link as LinkIcon,
+  Download,
+  Eye,
+  X,
+} from '@sureground/icons';
 import { FilePreviewDialog, IconButton } from '@sureground/ui';
 
 interface Attachment {

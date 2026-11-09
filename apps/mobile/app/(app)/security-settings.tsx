@@ -16,7 +16,7 @@ import {
   ScanFace,
   ShieldCheck,
   Trash2,
-} from 'lucide-react-native';
+} from '@sureground/icons/native';
 import {
   Badge,
   Button,

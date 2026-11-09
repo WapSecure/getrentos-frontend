@@ -20,7 +20,7 @@ import {
   Search,
   ShieldCheck,
   Star,
-} from 'lucide-react-native';
+} from '@sureground/icons/native';
 import { Card, Text, useTheme } from '@sureground/ui-native';
 
 type SceneMotion = {

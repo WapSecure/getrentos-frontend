@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckCircle2, Circle, ClipboardList, Clock, ShieldAlert } from 'lucide-react';
+import { CheckCircle2, Circle, ClipboardList, Clock, ShieldAlert } from '@sureground/icons';
 import { Alert, Badge, EmptyState, type BadgeVariant } from '@sureground/ui';
 
 import { formatDate } from '@/lib/format';

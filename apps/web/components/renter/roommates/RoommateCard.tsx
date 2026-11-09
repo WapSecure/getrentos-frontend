@@ -14,7 +14,7 @@ import {
   MoreVertical,
   X,
   Check,
-} from 'lucide-react';
+} from '@sureground/icons';
 import {
   Badge,
   DropdownMenu,

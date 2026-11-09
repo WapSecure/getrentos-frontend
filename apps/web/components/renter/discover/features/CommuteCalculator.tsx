@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, Car, Bus, Train, Clock, Navigation } from 'lucide-react';
+import { MapPin, Car, Bus, Train, Clock, Navigation } from '@sureground/icons';
 import {
   Alert,
   Button,

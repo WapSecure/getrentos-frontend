@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { CircleAlert, FileCheck2 } from 'lucide-react';
+import { CircleAlert, FileCheck2 } from '@sureground/icons';
 import { Badge, EmptyState, QueryState, PageHeader } from '@sureground/ui';
 import { formatDate, unwrap } from '@sureground/shared';
 import { useAdminUser } from '../../layout';

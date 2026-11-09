@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { RefreshControl, SectionList, View } from 'react-native';
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { History } from 'lucide-react-native';
+import { History } from '@sureground/icons/native';
 import {
   Badge,
   Button,

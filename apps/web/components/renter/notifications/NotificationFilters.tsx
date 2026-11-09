@@ -1,6 +1,6 @@
 'use client';
 
-import { Filter, ChevronDown, ChevronUp } from 'lucide-react';
+import { Filter, ChevronDown, ChevronUp } from '@sureground/icons';
 import { useState } from 'react';
 import { Card, ToggleChip } from '@sureground/ui';
 

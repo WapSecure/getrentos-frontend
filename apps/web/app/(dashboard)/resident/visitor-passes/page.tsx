@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Clock, KeyRound, Plus, UserPlus } from 'lucide-react';
+import { Clock, KeyRound, Plus, UserPlus } from '@sureground/icons';
 import {
   Alert,
   Badge,

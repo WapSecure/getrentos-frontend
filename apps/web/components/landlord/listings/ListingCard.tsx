@@ -11,7 +11,7 @@ import {
   Pause,
   Eye,
   Zap,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { Badge, Button } from '@sureground/ui';
 import { listingStatusBadges } from '@/lib/statusBadge';
 import { formatCurrency, formatDate } from '@/lib/format';

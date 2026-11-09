@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Pressable, View } from 'react-native';
-import { AlertTriangle, Check, FileText, type LucideIcon } from 'lucide-react-native';
+import { AlertTriangle, Check, FileText, type SgIcon } from '@sureground/icons/native';
 import { Text, useTheme } from '@sureground/ui-native';
 import type { PickedFile } from '@/lib/api/documents';
 import { checkPickedPhoto } from '@/lib/photoQuality';
@@ -18,7 +18,7 @@ export function FilePickRow({
   file: PickedFile | null;
   onPick: () => void;
   onClear?: () => void;
-  icon?: LucideIcon;
+  icon?: SgIcon;
   emptyText?: string;
   checkPhotoQuality?: boolean;
 }) {

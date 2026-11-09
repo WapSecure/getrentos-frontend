@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckCircle2, Clock, AlertCircle, ShieldCheck, Zap } from 'lucide-react';
+import { CheckCircle2, Clock, AlertCircle, ShieldCheck, Zap } from '@sureground/icons';
 import { Badge, Button, type BadgeVariant } from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type { FinancingInstallment, FinancingPlan, InstallmentStatus } from '@/types/financing';

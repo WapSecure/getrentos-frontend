@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { View } from 'react-native';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Car, Footprints, MapPinned, TrainFront } from 'lucide-react-native';
+import { Car, Footprints, MapPinned, TrainFront } from '@sureground/icons/native';
 import type { AddressValue } from '@sureground/shared';
 import { Button, Card, Chip, Skeleton, Text, useTheme } from '@sureground/ui-native';
 import { AddressInput } from '@/components/forms/AddressInput';

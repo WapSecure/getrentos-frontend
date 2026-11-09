@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { Badge, Card, EmptyState, Skeleton } from '@sureground/ui';
-import { ShieldAlert, ShieldCheck } from 'lucide-react';
+import { ShieldAlert, ShieldCheck } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
 import { landDeveloperKeys } from '@/lib/landDeveloperQueryKeys';

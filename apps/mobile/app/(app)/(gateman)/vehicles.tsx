@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Car, ImagePlus, LogOut, X } from 'lucide-react-native';
+import { Car, ImagePlus, LogOut, X } from '@sureground/icons/native';
 import {
   Button,
   Card,

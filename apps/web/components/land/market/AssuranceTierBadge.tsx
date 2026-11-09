@@ -1,5 +1,5 @@
 import { Badge } from '@sureground/ui';
-import { ShieldCheck } from 'lucide-react';
+import { ShieldCheck } from '@sureground/icons';
 import { LAND_ASSURANCE_TIER_LABELS, type LandAssuranceTier } from '@/types/land';
 import { LAND_ASSURANCE_TIER_DESCRIPTIONS } from '@/types/landMarket';
 

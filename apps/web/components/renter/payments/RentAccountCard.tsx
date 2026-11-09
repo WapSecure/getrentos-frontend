@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Wallet } from 'lucide-react';
+import { Wallet } from '@sureground/icons';
 import { Alert, Button, Card, ConfirmDialog } from '@sureground/ui';
 import { CreditRefundHistory } from '@/components/shared/CreditRefundHistory';
 import { formatCurrency, formatDate } from '@/lib/format';

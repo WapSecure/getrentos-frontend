@@ -15,7 +15,7 @@ import {
   Textarea,
   useToast,
 } from '@sureground/ui';
-import { Lock } from 'lucide-react';
+import { Lock } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletKeys } from '@/lib/queryKeys';
 import { shortletService } from '@/services/shortletService';

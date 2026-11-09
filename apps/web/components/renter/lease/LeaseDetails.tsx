@@ -2,7 +2,7 @@
 
 import { Card } from '@sureground/ui';
 import { motion } from 'framer-motion';
-import { Calendar, FileText, Mail, Phone, MapPin } from 'lucide-react';
+import { Calendar, FileText, Mail, Phone, MapPin } from '@sureground/icons';
 import { NairaSign } from '@sureground/ui/NairaSign';
 import { leaseRentLabel } from '@/lib/leaseTerm';
 import type { Lease } from '@/services/renterService';

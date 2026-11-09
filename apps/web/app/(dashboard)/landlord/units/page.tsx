@@ -12,7 +12,7 @@ import {
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, ReceiptText, Tag, DoorClosed } from 'lucide-react';
+import { Plus, ReceiptText, Tag, DoorClosed } from '@sureground/icons';
 import { UnitsTable } from '@/components/landlord/units/UnitsTable';
 import {
   RecordOccupierModal,

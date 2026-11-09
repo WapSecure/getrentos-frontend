@@ -2,7 +2,7 @@
 
 import { useId, useMemo, useState } from 'react';
 import { Button, DocumentPreviewButton, Field, IconButton, Select } from '@sureground/ui';
-import { Upload, X } from 'lucide-react';
+import { Upload, X } from '@sureground/icons';
 import { formatDate } from '@/lib/format';
 import type { LandDocumentType } from '@/types/landDocument';
 import { errorMessage } from '../developer/feedback';

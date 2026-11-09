@@ -1,6 +1,6 @@
 'use client';
 
-import { Megaphone, Pause, Play, XCircle } from 'lucide-react';
+import { Megaphone, Pause, Play, XCircle } from '@sureground/icons';
 import {
   Button,
   DescriptionList,

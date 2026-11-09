@@ -1,6 +1,6 @@
 'use client';
 
-import { Star, Users } from 'lucide-react';
+import { Star, Users } from '@sureground/icons';
 import { Badge, Card, EmptyState, Skeleton } from '@sureground/ui';
 import type { HomeManagementVendor } from '@/services/homeManagementService';
 

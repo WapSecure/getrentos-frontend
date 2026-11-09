@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { Alert, Skeleton, StatCard } from '@sureground/ui';
-import { AlertTriangle, Banknote, Landmark, Lock, Wallet } from 'lucide-react';
+import { AlertTriangle, Banknote, Landmark, Lock, Wallet } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { landDeveloperKeys } from '@/lib/landDeveloperQueryKeys';
 import { landDeveloperService } from '@/services/landDeveloperService';

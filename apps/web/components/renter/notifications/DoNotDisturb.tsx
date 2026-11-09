@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Moon, Clock, ChevronDown, ChevronUp } from 'lucide-react';
+import { Moon, Clock, ChevronDown, ChevronUp } from '@sureground/icons';
 import { Alert, Card, Field, Switch, TimePicker } from '@sureground/ui';
 
 export const DoNotDisturb = () => {

@@ -1,6 +1,6 @@
 'use client';
 
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff } from '@sureground/icons';
 import { IconButton, StatGroup } from '@sureground/ui';
 import { useMonetaryVisibility } from '@/hooks/useMonetaryVisibility';
 import { formatCurrency } from '@/lib/format';

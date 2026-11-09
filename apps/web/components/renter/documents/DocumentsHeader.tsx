@@ -1,6 +1,6 @@
 'use client';
 
-import { Upload, Shield } from 'lucide-react';
+import { Upload, Shield } from '@sureground/icons';
 import { Button } from '@sureground/ui';
 import { RenterPageHeader } from '../shared/RenterPageHeader';
 

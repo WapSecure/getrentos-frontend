@@ -1,6 +1,6 @@
 'use client';
 
-import { LayoutGrid, List, FileText } from 'lucide-react';
+import { LayoutGrid, List, FileText } from '@sureground/icons';
 import { DocumentCard } from './DocumentCard';
 import { Card, Checkbox, EmptyState, SegmentedControl, Select } from '@sureground/ui';
 

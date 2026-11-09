@@ -8,7 +8,7 @@ import {
   type NativeSyntheticEvent,
 } from 'react-native';
 import { Image } from 'expo-image';
-import { ImageOff } from 'lucide-react-native';
+import { ImageOff } from '@sureground/icons/native';
 import { Text, useTheme } from '@sureground/ui-native';
 
 export interface PropertyGalleryProps {

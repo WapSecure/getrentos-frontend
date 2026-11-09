@@ -1,8 +1,8 @@
 import { forwardRef } from 'react';
-import type { LucideProps } from 'lucide-react';
+import type { SgIconProps } from '@sureground/icons';
 
-// Lucide ships no naira glyph, so this matches its icon props and works wherever a LucideIcon does.
-export const NairaSign = forwardRef<SVGSVGElement, LucideProps>(
+// Lucide ships no naira glyph, so this matches its icon props and works wherever a SgIcon does.
+export const NairaSign = forwardRef<SVGSVGElement, SgIconProps>(
   ({ size = 24, color = 'currentColor', strokeWidth = 2, className, ...props }, ref) => (
     <svg
       ref={ref}

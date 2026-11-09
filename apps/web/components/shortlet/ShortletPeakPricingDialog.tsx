@@ -19,7 +19,7 @@ import {
   Skeleton,
   useToast,
 } from '@sureground/ui';
-import { CalendarRange, PartyPopper, Trash2 } from 'lucide-react';
+import { CalendarRange, PartyPopper, Trash2 } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletKeys } from '@/lib/queryKeys';
 import { shortletService } from '@/services/shortletService';

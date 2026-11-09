@@ -3,7 +3,7 @@ import { Pressable, View } from 'react-native';
 import { router } from 'expo-router';
 import * as DocumentPicker from 'expo-document-picker';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { FileText, Lock, Paperclip } from 'lucide-react-native';
+import { FileText, Lock, Paperclip } from '@sureground/icons/native';
 import {
   Button,
   Checkbox,

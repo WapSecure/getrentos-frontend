@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { PageErrorState, PageHeader, Skeleton } from '@sureground/ui';
-import { MapPin } from 'lucide-react';
+import { MapPin } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { landKeys } from '@/lib/queryKeys';
 import { LAND_DEVELOPER_ROUTES } from '@/lib/constants/landDeveloperRoutes';

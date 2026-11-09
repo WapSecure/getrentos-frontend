@@ -1,6 +1,6 @@
 'use client';
 
-import { Check } from 'lucide-react';
+import { Check } from '@sureground/icons';
 import { Card } from '@sureground/ui';
 import type { MusterTally } from '@/types/estate';
 

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Alert, Badge, Button, Card, Field, Textarea } from '@sureground/ui';
-import { CircleDashed, PauseCircle } from 'lucide-react';
+import { CircleDashed, PauseCircle } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
 import { landKeys } from '@/lib/queryKeys';

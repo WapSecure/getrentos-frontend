@@ -3,7 +3,7 @@
 import { useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { FileText, Upload, CheckCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { FileText, Upload, CheckCircle, ChevronDown, ChevronUp } from '@sureground/icons';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';

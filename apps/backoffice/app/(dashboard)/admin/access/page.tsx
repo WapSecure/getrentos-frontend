@@ -9,7 +9,7 @@ import {
   ShieldAlert,
   CheckCircle2,
   UserRoundPlus,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { useAdminUser } from '../layout';
 import { CreateStaffModal } from '@/components/admin/access/CreateStaffModal';
 import { ResetPasswordModal } from '@/components/admin/access/ResetPasswordModal';

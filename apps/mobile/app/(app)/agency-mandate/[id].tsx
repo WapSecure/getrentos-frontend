@@ -2,7 +2,7 @@ import { RefreshControl, ScrollView, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { CheckCircle2, Circle } from 'lucide-react-native';
+import { CheckCircle2, Circle } from '@sureground/icons/native';
 import { Badge, Card, DetailSkeleton, QueryState, Text, useTheme } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {

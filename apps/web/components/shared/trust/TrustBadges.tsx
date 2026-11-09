@@ -13,7 +13,7 @@ import {
   BadgeCheck,
   Lock,
   Users,
-} from 'lucide-react';
+} from '@sureground/icons';
 import type { Badge } from '@/types/trust-score';
 
 const iconMap: Record<string, React.ElementType> = {

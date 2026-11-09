@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, CheckCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle } from '@sureground/icons';
 import { motion } from 'framer-motion';
 import { Button } from '@sureground/ui';
 import { OtpInput } from '@/components/auth/OtpInput';

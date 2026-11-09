@@ -16,7 +16,7 @@ import {
   Users,
   Wallet,
   FileSpreadsheet,
-} from 'lucide-react-native';
+} from '@sureground/icons/native';
 import { Screen } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { agencyApi } from '@/lib/api/agency';

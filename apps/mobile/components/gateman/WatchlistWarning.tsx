@@ -1,5 +1,5 @@
 import { View } from 'react-native';
-import { Eye } from 'lucide-react-native';
+import { Eye } from '@sureground/icons/native';
 import { Text, useTheme } from '@sureground/ui-native';
 
 // Deliberately not the red refusal notice or an error: a WATCH entry admits the visitor on purpose.

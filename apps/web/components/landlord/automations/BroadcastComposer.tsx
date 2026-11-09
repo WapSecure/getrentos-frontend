@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Send } from 'lucide-react';
+import { Send } from '@sureground/icons';
 import { Button, Card, Field, Input, Select, Textarea, useToast } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';

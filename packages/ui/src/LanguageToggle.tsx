@@ -1,6 +1,6 @@
 'use client';
 
-import { Globe, Check } from 'lucide-react';
+import { Globe, Check } from '@sureground/icons';
 import { motion } from 'framer-motion';
 import {
   DropdownMenu,

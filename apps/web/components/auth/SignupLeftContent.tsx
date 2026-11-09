@@ -10,7 +10,7 @@ import {
   Users,
   CheckCircle,
   BadgeCheck,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { Logo } from '@/components/ui/Logo';
 
 const trustFeatures = [

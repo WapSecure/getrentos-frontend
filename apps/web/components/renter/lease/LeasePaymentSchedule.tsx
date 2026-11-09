@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Calendar, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { Calendar, CheckCircle, Clock, AlertCircle } from '@sureground/icons';
 import { Badge, Button, Card } from '@sureground/ui';
 
 interface Payment {

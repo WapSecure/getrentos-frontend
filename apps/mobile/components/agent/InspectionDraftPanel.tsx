@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 import { useMutation } from '@tanstack/react-query';
-import { Sparkles } from 'lucide-react-native';
+import { Sparkles } from '@sureground/icons/native';
 import { Badge, Button, Card, Text, useTheme, type BadgeTone } from '@sureground/ui-native';
 import type { AgentInspectionType, RoomCondition } from '@/lib/api/agent';
 import { errorMessage } from '@/lib/api/client';

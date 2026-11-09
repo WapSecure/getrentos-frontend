@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Camera, CheckCircle2, Gavel } from 'lucide-react-native';
+import { Camera, CheckCircle2, Gavel } from '@sureground/icons/native';
 import {
   Badge,
   Button,

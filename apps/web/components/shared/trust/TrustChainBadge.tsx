@@ -1,4 +1,4 @@
-import { Clock, Shield, ShieldCheck } from 'lucide-react';
+import { Clock, Shield, ShieldCheck } from '@sureground/icons';
 import { Badge, type BadgeVariant } from '@sureground/ui';
 import { trustChainLabel, type TrustLabelTone } from '@sureground/shared';
 import type { PropertyTrustChain } from '@/types/renter';

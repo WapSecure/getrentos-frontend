@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ShieldCheck, Siren, TriangleAlert } from 'lucide-react';
+import { ShieldCheck, Siren, TriangleAlert } from '@sureground/icons';
 import { NotAssignedToEstate } from '@/components/gateman/NotAssignedToEstate';
 import {
   Alert,

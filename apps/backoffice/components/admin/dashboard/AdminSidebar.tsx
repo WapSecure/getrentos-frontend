@@ -55,7 +55,7 @@ import {
   FileCheck2,
   MessageCircleQuestion,
   ChevronDown,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { ROUTES, unwrap } from '@sureground/shared';
 import { SidebarRailToggle, useSidebarRail } from '@sureground/ui';
 import { hasAdminPermission, hasStaffAccess } from '@/lib/adminAccess';

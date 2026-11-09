@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
-import { ChevronDown, ChevronUp } from 'lucide-react-native';
+import { ChevronDown, ChevronUp } from '@sureground/icons/native';
 import {
   Badge,
   Button,

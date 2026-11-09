@@ -2,7 +2,7 @@ import { Pressable, Share, View } from 'react-native';
 
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Gift, Share2, Users } from 'lucide-react-native';
+import { Gift, Share2, Users } from '@sureground/icons/native';
 import {
   Card,
   Divider,

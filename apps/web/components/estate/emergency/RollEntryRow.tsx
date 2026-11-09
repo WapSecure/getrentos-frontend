@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Clock, MessageSquarePlus } from 'lucide-react';
+import { Clock, MessageSquarePlus } from '@sureground/icons';
 import {
   Badge,
   type BadgeVariant,

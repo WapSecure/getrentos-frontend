@@ -1,7 +1,7 @@
 'use client';
 import { useQuery } from '@tanstack/react-query';
 import { Alert, Card, Skeleton } from '@sureground/ui';
-import { Boxes, CalendarClock, ClipboardList, ShieldCheck, TriangleAlert } from 'lucide-react';
+import { Boxes, CalendarClock, ClipboardList, ShieldCheck, TriangleAlert } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { homeManagementKeys } from '@/lib/queryKeys';
 import { homeManagementService } from '@/services/homeManagementService';

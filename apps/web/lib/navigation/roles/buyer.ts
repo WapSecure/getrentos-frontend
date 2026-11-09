@@ -13,7 +13,7 @@ import {
   Settings,
   ShieldCheck,
   Star,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { ROUTES } from '@/lib/constants/auth';
 import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';
 import { defineRoleNavigation } from '../resolve';

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { X, Camera, AlertTriangle, FileText, Sparkles } from 'lucide-react';
+import { X, Camera, AlertTriangle, FileText, Sparkles } from '@sureground/icons';
 import {
   Alert,
   Button,

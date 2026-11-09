@@ -1,7 +1,7 @@
 'use client';
 
 import { useBuyerUser } from '../layout';
-import { Search } from 'lucide-react';
+import { Search } from '@sureground/icons';
 import { useQuery } from '@tanstack/react-query';
 import { BuyerDashboardHeader } from '@/components/buyer/dashboard/BuyerDashboardHeader';
 import { BuyerStatsCards } from '@/components/buyer/dashboard/BuyerStatsCards';

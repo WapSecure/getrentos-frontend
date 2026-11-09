@@ -3,7 +3,7 @@ import { KeyboardAvoidingView, Platform, RefreshControl, ScrollView, View } from
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ShieldCheck, Trees } from 'lucide-react-native';
+import { ShieldCheck, Trees } from '@sureground/icons/native';
 import {
   Badge,
   Button,

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { FileText, Camera } from 'lucide-react';
+import { FileText, Camera } from '@sureground/icons';
 import { Button, Card, Checkbox, useOptimisticMutation } from '@sureground/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';

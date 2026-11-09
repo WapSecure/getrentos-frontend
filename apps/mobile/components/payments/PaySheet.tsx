@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { View } from 'react-native';
-import { Lock, ShieldCheck } from 'lucide-react-native';
+import { Lock, ShieldCheck } from '@sureground/icons/native';
 import { Badge, Button, FormAlert, Text, useTheme } from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { PaymentProviderPicker } from '@/components/payments/PaymentProviderPicker';

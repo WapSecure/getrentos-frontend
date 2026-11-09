@@ -4,7 +4,7 @@ import { RefreshControl, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronRight, MessageSquareWarning, Plus, Wallet } from 'lucide-react-native';
+import { ChevronRight, MessageSquareWarning, Plus, Wallet } from '@sureground/icons/native';
 import { router } from 'expo-router';
 import {
   Badge,

@@ -10,7 +10,7 @@ import {
   FileText,
   MessageCircle,
   ShieldCheck,
-} from 'lucide-react-native';
+} from '@sureground/icons/native';
 import {
   Badge,
   Button,

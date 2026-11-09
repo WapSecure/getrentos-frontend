@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ChevronDown, User, Settings, HelpCircle, LogOut, Shield, Users } from 'lucide-react';
+import { ChevronDown, User, Settings, HelpCircle, LogOut, Shield, Users } from '@sureground/icons';
 import {
   DropdownMenu,
   DropdownMenuTrigger,

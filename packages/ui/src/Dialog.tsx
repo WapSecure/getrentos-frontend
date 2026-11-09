@@ -11,7 +11,7 @@ import {
 } from 'react';
 import * as RadixDialog from '@radix-ui/react-dialog';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { X } from 'lucide-react';
+import { X } from '@sureground/icons';
 import { cn } from '@sureground/shared';
 
 interface DialogProps {

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { UserRoundPlus } from 'lucide-react';
+import { UserRoundPlus } from '@sureground/icons';
 import {
   Button,
   Checkbox,

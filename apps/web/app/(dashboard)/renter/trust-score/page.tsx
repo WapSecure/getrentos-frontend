@@ -1,6 +1,6 @@
 'use client';
 
-import { Star, ShieldCheck, TrendingUp } from 'lucide-react';
+import { Star, ShieldCheck, TrendingUp } from '@sureground/icons';
 import { PageHeader } from '@sureground/ui';
 import { useRenterUser } from '../layout';
 import { getStoredUser } from '@/lib/authStorage';

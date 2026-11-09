@@ -10,7 +10,7 @@ import {
 } from 'react';
 import { Animated, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { CheckCircle2, Info, XCircle, AlertTriangle } from 'lucide-react-native';
+import { CheckCircle2, Info, XCircle, AlertTriangle } from '@sureground/icons/native';
 import { useTheme } from '../theme';
 import { Text } from '../primitives/Text';
 import { useReducedMotion } from '../accessibility';

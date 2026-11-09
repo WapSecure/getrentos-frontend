@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { FileCheck2 } from 'lucide-react';
+import { FileCheck2 } from '@sureground/icons';
 import { Badge, Button, Field, Input, Select, Textarea } from '@sureground/ui';
 import { formatDate } from '@sureground/shared';
 import type { LandPerfection, LandPerfectionStep } from '@/types/landPurchase';

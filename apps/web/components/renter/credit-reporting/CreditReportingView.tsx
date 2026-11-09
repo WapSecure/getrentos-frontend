@@ -1,4 +1,4 @@
-import { Building2, ShieldCheck } from 'lucide-react';
+import { Building2, ShieldCheck } from '@sureground/icons';
 import { Alert, Card } from '@sureground/ui';
 
 export const CreditReportingView = () => {

@@ -34,6 +34,7 @@
     "@smileid/usesmileid": "^12.4.0",
     "@smileid/usesmileid_mlkit_face": "^12.4.0",
     "@smileid/usesmileid_vision_face": "^12.4.0",
+    "@sureground/icons": "workspace:*",
     "@sureground/shared": "workspace:*",
     "@sureground/tokens": "workspace:*",
     "@sureground/ui-native": "workspace:*",
@@ -78,7 +79,6 @@
     "expo-web-browser": "~58.0.7",
     "jpeg-js": "0.4.4",
     "lottie-react-native": "~7.5.0",
-    "lucide-react-native": "^1.39.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "react-hook-form": "^7.54.2",
@@ -104,7 +104,8 @@
       "^@/(.*)$": "<rootDir>/$1",
       "^@sureground/shared$": "<rootDir>/../../packages/shared/src/index.ts",
       "^@sureground/tokens$": "<rootDir>/../../packages/tokens/src/index.ts",
-      "^@sureground/ui-native$": "<rootDir>/../../packages/ui-native/src/index.ts"
+      "^@sureground/ui-native$": "<rootDir>/../../packages/ui-native/src/index.ts",
+      "^@sureground/icons/native$": "<rootDir>/../../packages/icons/src/native.ts"
     },
     "transformIgnorePatterns": [
       "node_modules/(?!(.pnpm|(jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|expo-router|standard-navigation|react-navigation|@react-navigation/.*|@sentry/react-native|native-base|react-native-svg))"

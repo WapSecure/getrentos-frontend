@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Gavel } from 'lucide-react';
+import { Gavel } from '@sureground/icons';
 import { CardSkeleton, EmptyState, PageErrorState, PageHeader } from '@sureground/ui';
 import { unwrap } from '@sureground/shared';
 import { AppealCard } from '@/components/admin/trust/AppealCard';

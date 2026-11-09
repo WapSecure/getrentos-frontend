@@ -37,7 +37,7 @@ import {
   Video,
   Wifi,
   Zap,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { unwrap, VerificationRequiredError } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';

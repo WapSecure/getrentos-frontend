@@ -1,6 +1,6 @@
 'use client';
 
-import { ShieldCheck, Gavel, AlertTriangle, UserPlus, Bell } from 'lucide-react';
+import { ShieldCheck, Gavel, AlertTriangle, UserPlus, Bell } from '@sureground/icons';
 import { useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { formatRelativeTime } from '@sureground/shared';

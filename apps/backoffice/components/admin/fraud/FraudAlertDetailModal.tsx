@@ -1,7 +1,7 @@
 'use client';
 
 import { humaniseEnum } from '@sureground/shared';
-import { AlertTriangle, RotateCcw, Search, ShieldCheck, ShieldAlert } from 'lucide-react';
+import { AlertTriangle, RotateCcw, Search, ShieldCheck, ShieldAlert } from '@sureground/icons';
 import {
   Dialog,
   DialogContent,

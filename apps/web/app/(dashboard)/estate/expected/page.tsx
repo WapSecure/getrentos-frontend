@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { tierAtLeast } from '@sureground/shared';
 import { Alert, Button, CardSkeleton, PageHeader } from '@sureground/ui';
-import { Upload } from 'lucide-react';
+import { Upload } from '@sureground/icons';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';

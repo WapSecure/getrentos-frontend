@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { View } from 'react-native';
-import { ChevronRight, type LucideIcon } from 'lucide-react-native';
+import { ChevronRight, type SgIcon } from '@sureground/icons/native';
 import {
   Card,
   ErrorState,
@@ -31,7 +31,7 @@ export function AttentionCard({
   onPress,
   accessibilityLabel,
 }: {
-  Icon: LucideIcon;
+  Icon: SgIcon;
   title: string;
   detail?: ReactNode;
   tone?: AttentionTone;
@@ -139,7 +139,7 @@ export function PortfolioCard({
 
 export type QuickActionItem = {
   label: string;
-  Icon: LucideIcon;
+  Icon: SgIcon;
   onPress: () => void;
   badge?: number;
 };
@@ -189,7 +189,7 @@ export function QuickActions({ actions }: { actions: QuickActionItem[] }) {
 
 export type ActivityItem = {
   id: string;
-  Icon: LucideIcon;
+  Icon: SgIcon;
   title: string;
   detail?: string;
   timestamp: string;

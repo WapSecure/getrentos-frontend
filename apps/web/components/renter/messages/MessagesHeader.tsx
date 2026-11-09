@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, MessageCircle } from 'lucide-react';
+import { Bell, MessageCircle } from '@sureground/icons';
 import { RenterPageHeader } from '../shared/RenterPageHeader';
 
 interface MessagesHeaderProps {

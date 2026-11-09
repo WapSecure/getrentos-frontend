@@ -3,7 +3,7 @@
 import { useId, useRef, useState, type KeyboardEvent } from 'react';
 import * as RadixPopover from '@radix-ui/react-popover';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Clock } from 'lucide-react';
+import { Clock } from '@sureground/icons';
 import { format, parse } from 'date-fns';
 import { cn } from '@sureground/shared';
 import { controlShell, type ControlSize } from './controlStyles';

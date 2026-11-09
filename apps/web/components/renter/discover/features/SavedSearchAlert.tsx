@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Bell, X, Save } from 'lucide-react';
+import { Bell, X, Save } from '@sureground/icons';
 import {
   Button,
   Dialog,

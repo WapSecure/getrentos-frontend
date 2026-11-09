@@ -33,8 +33,8 @@ function imageRemotePatterns(): ImageRemotePattern[] {
 
 const nextConfig: NextConfig = {
   distDir: process.env.NEXT_DIST_DIR ?? '.next',
-  transpilePackages: ['@sureground/shared', '@sureground/ui'],
-  experimental: { optimizePackageImports: ['@sureground/ui'] },
+  transpilePackages: ['@sureground/shared', '@sureground/ui', '@sureground/icons'],
+  experimental: { optimizePackageImports: ['@sureground/ui', '@sureground/icons'] },
   images: {
     remotePatterns: imageRemotePatterns(),
     // Next 16 blocks remote images on private IPs (SSRF guard); relaxed in dev only, for MinIO on localhost.

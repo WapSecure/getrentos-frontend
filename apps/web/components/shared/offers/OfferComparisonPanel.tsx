@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { Scale } from 'lucide-react';
+import { Scale } from '@sureground/icons';
 import { Alert, Badge, Card, Skeleton, type BadgeVariant } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { sellerOfferKeys } from '@/lib/queryKeys';

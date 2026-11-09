@@ -1,4 +1,4 @@
-import type { LucideIcon } from 'lucide-react';
+import type { SgIcon } from '@sureground/icons';
 import {
   AlertCircle,
   Lock,
@@ -13,7 +13,7 @@ import {
   ShieldAlert,
   ShieldCheck,
   ShieldX,
-} from 'lucide-react';
+} from '@sureground/icons';
 import type { BadgeVariant } from '@sureground/ui';
 import type {
   RentPaymentStatus,
@@ -34,7 +34,7 @@ import type { LegalCaseStatus } from '@/types/legal-case';
 export interface StatusBadgeEntry {
   label: string;
   variant: BadgeVariant;
-  icon?: LucideIcon;
+  icon?: SgIcon;
 }
 
 // `pending` reads "Due": "Pending" would suggest money already sent. Mobile uses the same words (apps/mobile/lib/api/payments.ts).

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { Lock } from 'lucide-react';
+import { Lock } from '@sureground/icons';
 import { Button, Field, Input, useToast } from '@sureground/ui';
 import { AUTH_CONSTANTS } from '@sureground/shared';
 import { accountSecurityService } from '@/services/accountSecurityService';

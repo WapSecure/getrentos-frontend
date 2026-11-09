@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Check } from 'lucide-react';
+import { Check } from '@sureground/icons';
 import {
   Button,
   CurrencyInput,

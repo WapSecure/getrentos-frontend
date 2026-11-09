@@ -18,7 +18,7 @@ import {
   TreePine,
   UtensilsCrossed,
   Wallet,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { PropertyMap, type MapMarker } from '@/components/maps/PropertyMap';
 import { Badge } from '@sureground/ui';
 import { Button } from '@sureground/ui';

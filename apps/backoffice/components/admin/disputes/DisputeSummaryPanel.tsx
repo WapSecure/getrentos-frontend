@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Scale } from 'lucide-react';
+import { Scale } from '@sureground/icons';
 import { Button, Skeleton } from '@sureground/ui';
 import { unwrap } from '@sureground/shared';
 import { adminKeys } from '@/lib/queryKeys';

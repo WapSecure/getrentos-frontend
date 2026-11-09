@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Wrench, Camera, Check, Play } from 'lucide-react';
+import { Wrench, Camera, Check, Play } from '@sureground/icons';
 import {
   Badge,
   Button,

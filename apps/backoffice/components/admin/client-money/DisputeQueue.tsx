@@ -17,7 +17,7 @@ import {
   Textarea,
 } from '@sureground/ui';
 import { unwrap } from '@sureground/shared';
-import { Gavel, Inbox } from 'lucide-react';
+import { Gavel, Inbox } from '@sureground/icons';
 import { adminKeys } from '@/lib/queryKeys';
 import { hasAdminPermission } from '@/lib/adminAccess';
 import { useAdminUser } from '@/app/(dashboard)/admin/layout';

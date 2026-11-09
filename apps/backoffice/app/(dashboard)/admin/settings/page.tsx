@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { User, Bell, SlidersHorizontal, ShieldCheck } from 'lucide-react';
+import { User, Bell, SlidersHorizontal, ShieldCheck } from '@sureground/icons';
 import { ProfileSettings } from '@/components/admin/settings/ProfileSettings';
 import { NotificationSettings } from '@/components/admin/settings/NotificationSettings';
 import { PlatformConfigSettings } from '@/components/admin/settings/PlatformConfigSettings';

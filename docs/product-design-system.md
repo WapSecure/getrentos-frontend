@@ -27,6 +27,25 @@ not need to imitate an operating system.
 - Every control needs a keyboard path, visible focus, and a useful accessible
   name. Reduced motion must also cover JavaScript animations, not only CSS.
 
+## Icons
+
+Sureground draws its own icons (`packages/icons`, `@sureground/icons` on web and
+`@sureground/icons/native` on mobile). Lucide is no longer used and lint rejects it.
+
+- 24px grid, 1.75 stroke, round caps. One tinted body per icon (16% of the icon
+  colour), so an icon takes the colour of whatever it sits on.
+- Signature details: arrows trail a pixel and a dash (data on the move); container
+  circles are live rings with a gap and diamond at the upper right; box shapes have
+  their top-right corner cut at 45 degrees; small live details are square pixels.
+- Names match the Lucide names screens already used (`ArrowRight`, `ShieldCheck`,
+  `CheckCircle2`, ...). The component type is `SgIcon` (props `SgIconProps`).
+- Props: `size`, `color`, `strokeWidth`, `absoluteStrokeWidth`, `fill` (a colour
+  paints the body solid, e.g. a saved heart), `tint` (body opacity).
+- A branch that still imports Lucide after rebasing runs `pnpm icons:migrate`;
+  `pnpm icons:check` fails while any Lucide import is left.
+- A missing icon is drawn in the same style and added to the set; do not pull in
+  another icon library. The set is naira-only: there are no dollar icons.
+
 ## Shared source and checks
 
 `packages/tokens/src/index.ts` owns both palettes and corner sizes. `pnpm tokens:sync`

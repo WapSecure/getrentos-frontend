@@ -1,6 +1,6 @@
 'use client';
 
-import { Search, CalendarClock, Handshake, FileUp } from 'lucide-react';
+import { Search, CalendarClock, Handshake, FileUp } from '@sureground/icons';
 import { Button, Card, CardHeader, CardTitle } from '@sureground/ui';
 import { ROUTES } from '@/lib/constants/auth';
 

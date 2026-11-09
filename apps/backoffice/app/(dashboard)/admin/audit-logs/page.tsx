@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { ScrollText } from 'lucide-react';
+import { ScrollText } from '@sureground/icons';
 import {
   Button,
   DataTable,

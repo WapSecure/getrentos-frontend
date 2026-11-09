@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Check, ShieldCheck, SlidersHorizontal, X } from 'lucide-react-native';
+import { Check, ShieldCheck, SlidersHorizontal, X } from '@sureground/icons/native';
 import {
   Badge,
   Button,

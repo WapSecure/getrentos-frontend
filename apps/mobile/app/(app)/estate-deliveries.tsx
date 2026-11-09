@@ -11,7 +11,7 @@ import {
 } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { CheckCircle2, Package, Plus, Settings2 } from 'lucide-react-native';
+import { CheckCircle2, Package, Plus, Settings2 } from '@sureground/icons/native';
 import {
   Button,
   Card,

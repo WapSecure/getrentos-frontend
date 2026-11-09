@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import type { LucideIcon } from 'lucide-react';
+import type { SgIcon } from '@sureground/icons';
 import { DataTable, PageHeader, type Column } from '@sureground/ui';
 import { EmptyState, PageErrorState, Pagination, SearchInput, Select } from '@sureground/ui';
 import { unwrap } from '@sureground/shared';
@@ -17,7 +17,7 @@ export interface RentalQueueConfig<T> {
   eyebrow: string;
   title: string;
   description?: string;
-  icon: LucideIcon;
+  icon: SgIcon;
   statusOptions: { value: string; label: string }[];
   listFn: (params: RentalListParams) => Promise<ApiResponse<Paginated<T>>>;
   getRowKey: (row: T) => string;

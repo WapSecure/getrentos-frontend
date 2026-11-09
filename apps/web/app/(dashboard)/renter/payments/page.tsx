@@ -13,7 +13,7 @@ import { PaymentReceiptsGallery } from '@/components/renter/payments/PaymentRece
 import { PaymentExport } from '@/components/renter/payments/PaymentExport';
 import { DisputePaymentDialog } from '@/components/renter/payments/DisputePaymentDialog';
 import { leftToPay } from '@/components/renter/payments/PaymentCard';
-import { CreditCard, FileText, Wallet, Zap } from 'lucide-react';
+import { CreditCard, FileText, Wallet, Zap } from '@sureground/icons';
 import { renterService, type Payment } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';

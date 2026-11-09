@@ -3,7 +3,7 @@ import { RefreshControl, ScrollView, View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { depositHolderText, noDeductionsText } from '@sureground/shared';
-import { CircleCheck, FileCheck2, PiggyBank, Scale, ShieldCheck } from 'lucide-react-native';
+import { CircleCheck, FileCheck2, PiggyBank, Scale, ShieldCheck } from '@sureground/icons/native';
 import {
   Badge,
   Button,

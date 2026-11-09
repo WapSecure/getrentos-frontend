@@ -11,7 +11,7 @@ import {
   TooltipProps,
 } from 'recharts';
 import { Badge, Card } from '@sureground/ui';
-import { TrendingUp } from 'lucide-react';
+import { TrendingUp } from '@sureground/icons';
 import { formatCurrency } from '@sureground/shared';
 
 interface RevenuePoint {

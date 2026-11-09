@@ -8,7 +8,7 @@ import {
   Star,
   UserPlus,
   Wrench,
-} from 'lucide-react-native';
+} from '@sureground/icons/native';
 import { qk } from '@/lib/query/keys';
 import { routeForNotification } from '@/lib/notificationRoutes';
 import { landlordApi, type LandlordNotification } from '@/lib/api/landlord';

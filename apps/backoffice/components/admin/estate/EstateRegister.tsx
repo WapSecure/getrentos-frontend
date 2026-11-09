@@ -15,7 +15,7 @@ import {
   Users,
   Building2,
   FileText,
-} from 'lucide-react';
+} from '@sureground/icons';
 import {
   Alert,
   Badge,

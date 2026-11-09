@@ -1,6 +1,6 @@
 'use client';
 
-import { CalendarClock, CheckCircle2, ClipboardList, Wrench, type LucideIcon } from 'lucide-react';
+import { CalendarClock, CheckCircle2, ClipboardList, Wrench, type SgIcon } from '@sureground/icons';
 import { NairaSign } from '@sureground/ui/NairaSign';
 import { Card, EmptyState, Skeleton } from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
@@ -11,7 +11,7 @@ type PortfolioMetric = {
   label: string;
   value: string;
   subtext: string;
-  icon: LucideIcon;
+  icon: SgIcon;
 };
 
 interface HomeManagementPortfolioAnalyticsProps {

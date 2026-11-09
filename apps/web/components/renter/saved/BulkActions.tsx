@@ -1,6 +1,6 @@
 'use client';
 
-import { Trash2, BookmarkPlus, X } from 'lucide-react';
+import { Trash2, BookmarkPlus, X } from '@sureground/icons';
 import {
   Button,
   DropdownMenu,

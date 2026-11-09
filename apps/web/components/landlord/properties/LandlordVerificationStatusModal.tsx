@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ShieldCheck, ShieldAlert, ShieldX } from 'lucide-react';
+import { ShieldCheck, ShieldAlert, ShieldX } from '@sureground/icons';
 import {
   Alert,
   Button,

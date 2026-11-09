@@ -1,6 +1,6 @@
 'use client';
 
-import { FileSignature, Handshake, Pause, Play, Send, ShieldCheck } from 'lucide-react';
+import { FileSignature, Handshake, Pause, Play, Send, ShieldCheck } from '@sureground/icons';
 import { Button } from '@sureground/ui';
 import type { ManagementMandateDto } from '@/services/mandateService';
 import type { ReasonAction, SimpleAction } from './useMandateActions';

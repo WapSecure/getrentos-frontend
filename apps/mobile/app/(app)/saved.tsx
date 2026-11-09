@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Heart, MoreHorizontal, Settings2 } from 'lucide-react-native';
+import { Heart, MoreHorizontal, Settings2 } from '@sureground/icons/native';
 import {
   Chip,
   IconButton,

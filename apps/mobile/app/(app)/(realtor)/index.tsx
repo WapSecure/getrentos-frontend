@@ -13,8 +13,8 @@ import {
   UserPlus,
   Users,
   Wallet,
-  type LucideIcon,
-} from 'lucide-react-native';
+  type SgIcon,
+} from '@sureground/icons/native';
 import {
   Card,
   IconButton,
@@ -53,7 +53,7 @@ import { IdentityNudge } from '@/components/trust/IdentityNudge';
 
 type SheetKind = 'lead' | 'viewing' | 'invite' | null;
 
-const ACTIVITY_ICON: Record<string, LucideIcon> = {
+const ACTIVITY_ICON: Record<string, SgIcon> = {
   lead: UserPlus,
   viewing: CalendarClock,
   offer: FileSignature,
@@ -174,7 +174,7 @@ export default function RealtorHome() {
     </>
   ) : null;
 
-  type Nudge = { key: string; Icon: LucideIcon; title: string; body: string; go: () => void };
+  type Nudge = { key: string; Icon: SgIcon; title: string; body: string; go: () => void };
   const nudges = (
     [
       newOffers

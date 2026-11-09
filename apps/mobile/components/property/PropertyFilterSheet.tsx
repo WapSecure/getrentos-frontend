@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { View } from 'react-native';
-import { Check } from 'lucide-react-native';
+import { Check } from '@sureground/icons/native';
 import { Button, Chip, NumberField, Text, useTheme } from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import {

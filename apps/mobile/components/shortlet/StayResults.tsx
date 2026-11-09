@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { BedDouble } from 'lucide-react-native';
+import { BedDouble } from '@sureground/icons/native';
 import { EmptyState, QueryState, Skeleton, Text, useTheme } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { useOptimisticMutation } from '@/lib/query/optimistic';

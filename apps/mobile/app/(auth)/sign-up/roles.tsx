@@ -11,8 +11,8 @@ import {
   UserCheck,
   Briefcase,
   Check,
-  type LucideIcon,
-} from 'lucide-react-native';
+  type SgIcon,
+} from '@sureground/icons/native';
 import {
   AuthScaffold,
   Button,
@@ -28,7 +28,7 @@ import { haptics } from '@/lib/haptics';
 import { SIGNUP_ROLES, VERIFICATION_LABEL, type SignupRoleId } from '@/lib/roles';
 import { goBack } from '@/lib/goBack';
 
-const ICONS: Record<string, LucideIcon> = {
+const ICONS: Record<string, SgIcon> = {
   Home,
   Building2,
   TrendingUp,

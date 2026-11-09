@@ -1,6 +1,6 @@
 'use client';
 
-import { ClipboardCheck, UserCheck, ClipboardList, RefreshCw } from 'lucide-react';
+import { ClipboardCheck, UserCheck, ClipboardList, RefreshCw } from '@sureground/icons';
 import { Button, Card, CardHeader, CardTitle } from '@sureground/ui';
 import { ROUTES } from '@/lib/constants/auth';
 

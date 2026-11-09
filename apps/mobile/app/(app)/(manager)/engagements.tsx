@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowRightLeft, ChevronRight, FileSignature } from 'lucide-react-native';
+import { ArrowRightLeft, ChevronRight, FileSignature } from '@sureground/icons/native';
 import {
   Badge,
   Card,

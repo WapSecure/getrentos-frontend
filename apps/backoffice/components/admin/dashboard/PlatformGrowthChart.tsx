@@ -10,7 +10,7 @@ import {
   ResponsiveContainer,
   TooltipProps,
 } from 'recharts';
-import { RefreshCcw, TrendingUp } from 'lucide-react';
+import { RefreshCcw, TrendingUp } from '@sureground/icons';
 import { useQuery } from '@tanstack/react-query';
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@sureground/shared';

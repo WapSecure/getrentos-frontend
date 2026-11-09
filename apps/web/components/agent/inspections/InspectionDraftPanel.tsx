@@ -1,7 +1,7 @@
 'use client';
 
 import { useMutation } from '@tanstack/react-query';
-import { Sparkles } from 'lucide-react';
+import { Sparkles } from '@sureground/icons';
 import { Badge, Button, Card, type BadgeVariant } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { agentService } from '@/services/agentService';

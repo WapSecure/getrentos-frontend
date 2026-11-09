@@ -11,7 +11,7 @@ import type { TourModalMode } from '@/types/virtual-tour';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
-import { Home } from 'lucide-react';
+import { Home } from '@sureground/icons';
 import { buildRoute } from '@/lib/constants/auth';
 
 interface DiscoverPropertyGridProps {

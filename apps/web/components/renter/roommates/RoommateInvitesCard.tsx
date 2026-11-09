@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Check, X } from 'lucide-react';
+import { Mail, Check, X } from '@sureground/icons';
 import { Button } from '@sureground/ui';
 import type { Roommate } from '@/services/renterService';
 

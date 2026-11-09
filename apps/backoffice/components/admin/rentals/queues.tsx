@@ -4,7 +4,7 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { Badge, type BadgeVariant, Button, Select, type SelectOption } from '@sureground/ui';
 import { unwrap, humaniseEnum } from '@sureground/shared';
-import type { LucideIcon } from 'lucide-react';
+import type { SgIcon } from '@sureground/icons';
 import {
   Building2,
   ClipboardList,
@@ -13,7 +13,7 @@ import {
   RefreshCw,
   FileX2,
   Gavel,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { adminRentalService } from '@/services/adminRentalService';
 import { useAdminAction } from '@/hooks/useAdminAction';
 import { RentalQueuePage, type RentalQueueConfig } from './RentalQueuePage';
@@ -931,7 +931,7 @@ export function EvictionsQueue() {
   );
 }
 
-export const rentalModuleIcons: Record<string, LucideIcon> = {
+export const rentalModuleIcons: Record<string, SgIcon> = {
   listings: Building2,
   applications: ClipboardList,
   viewings: CalendarClock,

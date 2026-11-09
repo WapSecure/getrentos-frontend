@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Banknote, CheckCircle2, Landmark } from 'lucide-react';
+import { Banknote, CheckCircle2, Landmark } from '@sureground/icons';
 import {
   Alert,
   Badge,

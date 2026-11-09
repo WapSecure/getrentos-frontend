@@ -3,7 +3,7 @@ import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Send } from 'lucide-react-native';
+import { Send } from '@sureground/icons/native';
 import { Button, RadioGroup, Text, TextField, useTheme, useToast } from '@sureground/ui-native';
 import {
   LAND_WATCH_JOB_KIND_LABELS,

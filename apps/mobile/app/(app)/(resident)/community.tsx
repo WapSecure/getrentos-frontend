@@ -12,7 +12,7 @@ import {
   TriangleAlert,
   Vote,
   Wrench,
-} from 'lucide-react-native';
+} from '@sureground/icons/native';
 import { Card, Divider, Screen, Text, useTheme } from '@sureground/ui-native';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useId } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Gift } from 'lucide-react';
+import { Gift } from '@sureground/icons';
 import { Input } from '@sureground/ui';
 import { useSignupStore } from '@/lib/store/signupStore';
 

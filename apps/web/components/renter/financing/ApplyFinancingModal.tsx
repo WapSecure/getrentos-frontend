@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ShieldCheck, Zap } from 'lucide-react';
+import { ShieldCheck, Zap } from '@sureground/icons';
 import {
   Button,
   Checkbox,

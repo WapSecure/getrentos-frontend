@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { Settings, ChevronDown, ChevronUp } from 'lucide-react';
+import { Settings, ChevronDown, ChevronUp } from '@sureground/icons';
 import { Card, Checkbox, Switch } from '@sureground/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';

@@ -1,6 +1,6 @@
 'use client';
 
-import { TrendingUp, AlertCircle, Wrench, PiggyBank } from 'lucide-react';
+import { TrendingUp, AlertCircle, Wrench, PiggyBank } from '@sureground/icons';
 import { StatCard } from '@sureground/ui';
 
 interface FinancialStatsProps {

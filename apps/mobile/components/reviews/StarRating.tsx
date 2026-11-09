@@ -1,5 +1,5 @@
 import { Pressable, View } from 'react-native';
-import { Star } from 'lucide-react-native';
+import { Star } from '@sureground/icons/native';
 import { useTheme } from '@sureground/ui-native';
 
 interface Props {

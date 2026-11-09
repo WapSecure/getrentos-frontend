@@ -11,8 +11,8 @@ import {
   FileText,
   MapPin,
   Wrench,
-  type LucideIcon,
-} from 'lucide-react';
+  type SgIcon,
+} from '@sureground/icons';
 import { Badge, type BadgeVariant } from '@sureground/ui';
 import { EmptyState } from '@sureground/ui';
 import { ListSkeleton } from '@sureground/ui';
@@ -28,7 +28,7 @@ const DEFAULT_TIMELINE_LIMIT = 8;
 const MAX_TIMELINE_LIMIT = 20;
 
 type TimelineEventMeta = {
-  icon: LucideIcon;
+  icon: SgIcon;
   iconClassName: string;
 };
 

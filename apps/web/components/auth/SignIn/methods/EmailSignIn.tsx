@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Eye, EyeOff, LogIn, ShieldCheck, CheckCircle, XCircle } from 'lucide-react';
+import { Eye, EyeOff, LogIn, ShieldCheck, CheckCircle, XCircle } from '@sureground/icons';
 import { Alert, Button, Checkbox, Field, IconButton, Input } from '@sureground/ui';
 import {
   cleanSecondFactorInput,

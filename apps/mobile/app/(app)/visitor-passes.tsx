@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Image, View } from 'react-native';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Clock, KeyRound, Plus, UserPlus } from 'lucide-react-native';
+import { Clock, KeyRound, Plus, UserPlus } from '@sureground/icons/native';
 import {
   Badge,
   type BadgeTone,

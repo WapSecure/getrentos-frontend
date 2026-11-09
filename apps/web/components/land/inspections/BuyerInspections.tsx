@@ -11,7 +11,7 @@ import {
   Textarea,
   Toast,
 } from '@sureground/ui';
-import { ScanSearch } from 'lucide-react';
+import { ScanSearch } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
 import {

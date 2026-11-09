@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { Badge, Card, EmptyState, Skeleton } from '@sureground/ui';
-import { BarChart3, Bookmark, CalendarCheck, Eye, Handshake, TrendingUp } from 'lucide-react';
+import { BarChart3, Bookmark, CalendarCheck, Eye, Handshake, TrendingUp } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { landDeveloperKeys } from '@/lib/landDeveloperQueryKeys';

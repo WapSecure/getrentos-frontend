@@ -1,4 +1,4 @@
-import { AlertOctagon, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { AlertOctagon, AlertTriangle, CheckCircle2 } from '@sureground/icons';
 
 export type CheckLevel = 'ok' | 'watch' | 'concern';
 

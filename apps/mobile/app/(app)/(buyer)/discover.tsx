@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { Image } from 'expo-image';
-import { Heart, ImageOff, Search } from 'lucide-react-native';
+import { Heart, ImageOff, Search } from '@sureground/icons/native';
 import {
   Card,
   Chip,

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Building2, ArrowUpDown } from 'lucide-react';
+import { Building2, ArrowUpDown } from '@sureground/icons';
 import { PropertyListingCard } from '@/components/buyer/discover/PropertyListingCard';
 import { PropertyDetailModal } from '@/components/buyer/discover/PropertyDetailModal';
 import { buyerService } from '@/services/buyerService';

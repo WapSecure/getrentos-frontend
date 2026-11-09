@@ -16,7 +16,7 @@ import {
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Building2 } from 'lucide-react';
+import { Plus, Building2 } from '@sureground/icons';
 import { PropertyCard } from '@/components/landlord/properties/PropertyCard';
 import {
   ADD_PROPERTY_DRAFT_KEY,

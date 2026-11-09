@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@sureground/ui';
 import { Alert, Button, Field, Input, NumberInput, Select } from '@sureground/ui';
-import { ImagePlus, Play, Star, Video, X } from 'lucide-react';
+import { ImagePlus, Play, Star, Video, X } from '@sureground/icons';
 import { AddressFields, type AddressFieldsValue } from '@/components/shared/location/AddressFields';
 import { LocationPicker } from '@/components/maps/LocationPicker';
 import type { MapPoint } from '@/services/geocodeService';

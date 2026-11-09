@@ -21,7 +21,7 @@ import {
   type BadgeVariant,
   type PendingUpload,
 } from '@sureground/ui';
-import { Plus, Camera, Share2, CheckCircle2, ClipboardList } from 'lucide-react';
+import { Plus, Camera, Share2, CheckCircle2, ClipboardList } from '@sureground/icons';
 import {
   inspectionService,
   INSPECTION_CONDITIONS,

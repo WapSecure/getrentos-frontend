@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Clock, LocateFixed, MapPin, Navigation, Route } from 'lucide-react';
+import { Clock, LocateFixed, MapPin, Navigation, Route } from '@sureground/icons';
 import { Badge, Button, Card, Skeleton } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { agentKeys } from '@/lib/queryKeys';

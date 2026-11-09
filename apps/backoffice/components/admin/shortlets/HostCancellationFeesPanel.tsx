@@ -20,7 +20,7 @@ import {
   useToast,
   type BadgeVariant,
 } from '@sureground/ui';
-import { CalendarX } from 'lucide-react';
+import { CalendarX } from '@sureground/icons';
 import { formatCurrency, formatDate, unwrap } from '@sureground/shared';
 import { adminShortletService } from '@/services/adminShortletService';
 import type { AdminHostPenalty, AdminHostPenaltyStatus } from '@/types/shortlet';

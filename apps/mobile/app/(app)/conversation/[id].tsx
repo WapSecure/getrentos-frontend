@@ -12,7 +12,7 @@ import {
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AlertCircle, ChevronLeft, FileText, Paperclip, Send, X } from 'lucide-react-native';
+import { AlertCircle, ChevronLeft, FileText, Paperclip, Send, X } from '@sureground/icons/native';
 import {
   Avatar,
   IconButton,

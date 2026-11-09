@@ -1,4 +1,4 @@
-import { Clock, Zap } from 'lucide-react';
+import { Clock, Zap } from '@sureground/icons';
 
 export const FlexPausedCard = () => (
   <div className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm">

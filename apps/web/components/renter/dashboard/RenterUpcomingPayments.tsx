@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Calendar, Home, AlertCircle, ArrowRight } from 'lucide-react';
+import { Calendar, Home, AlertCircle, ArrowRight } from '@sureground/icons';
 import { Badge } from '@sureground/ui';
 import { Button } from '@sureground/ui';
 import { ROUTES } from '@/lib/constants/auth';

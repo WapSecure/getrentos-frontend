@@ -4,7 +4,7 @@ import { ActivityIndicator, Linking, Pressable, RefreshControl, View } from 'rea
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronRight, FileStack } from 'lucide-react-native';
+import { ChevronRight, FileStack } from '@sureground/icons/native';
 import { Card, Price, QueryState, Skeleton, Text, useTheme } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { CHARGE_CATEGORY_LABEL, paymentsApi, type Receipt } from '@/lib/api/payments';

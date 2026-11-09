@@ -3,7 +3,7 @@ import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, Star } from 'lucide-react-native';
+import { ChevronLeft, Star } from '@sureground/icons/native';
 import {
   Badge,
   Button,

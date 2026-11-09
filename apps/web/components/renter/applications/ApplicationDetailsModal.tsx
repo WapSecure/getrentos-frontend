@@ -18,7 +18,7 @@ import {
   MessageCircle,
   Trash2,
   Shield,
-} from 'lucide-react';
+} from '@sureground/icons';
 import {
   Badge,
   Button,

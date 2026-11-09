@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { MapPin, Navigation, Plus, X } from 'lucide-react';
+import { MapPin, Navigation, Plus, X } from '@sureground/icons';
 import {
   Alert,
   Badge,

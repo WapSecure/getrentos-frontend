@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FileText } from 'lucide-react';
+import { FileText } from '@sureground/icons';
 import { Alert, Checkbox } from '@sureground/ui';
 
 interface ChecklistItem {

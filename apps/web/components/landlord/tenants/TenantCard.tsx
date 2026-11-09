@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { MessageCircle, FileCheck, ShieldCheck, Home } from 'lucide-react';
+import { MessageCircle, FileCheck, ShieldCheck, Home } from '@sureground/icons';
 import { Badge, Button } from '@sureground/ui';
 import { paymentStatusBadges } from '@/lib/statusBadge';
 import { formatDate, getInitials } from '@/lib/format';

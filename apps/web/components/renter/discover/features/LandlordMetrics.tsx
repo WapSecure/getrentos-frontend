@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { MessageCircle, Star, Shield, TrendingUp } from 'lucide-react';
+import { MessageCircle, Star, Shield, TrendingUp } from '@sureground/icons';
 
 interface LandlordMetricsProps {
   responseRate?: number;

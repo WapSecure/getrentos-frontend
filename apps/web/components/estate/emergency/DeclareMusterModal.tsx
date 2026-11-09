@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Siren } from 'lucide-react';
+import { Siren } from '@sureground/icons';
 import {
   Alert,
   Button,

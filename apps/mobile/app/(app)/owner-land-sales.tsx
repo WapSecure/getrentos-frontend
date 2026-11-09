@@ -4,7 +4,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ReceiptText, Search } from 'lucide-react-native';
+import { ReceiptText, Search } from '@sureground/icons/native';
 import {
   Badge,
   Card,

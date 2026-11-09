@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { MonitorSmartphone } from 'lucide-react';
+import { MonitorSmartphone } from '@sureground/icons';
 import { Badge, Button, ConfirmDialog, Skeleton, useToast } from '@sureground/ui';
 import { formatRelativeTime } from '@sureground/shared';
 import { accountSecurityService } from '@/services/accountSecurityService';

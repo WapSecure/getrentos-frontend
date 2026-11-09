@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Building2, Percent, PiggyBank, TrendingUp, Users } from 'lucide-react';
+import { Building2, Percent, PiggyBank, TrendingUp, Users } from '@sureground/icons';
 import {
   Alert,
   Button,

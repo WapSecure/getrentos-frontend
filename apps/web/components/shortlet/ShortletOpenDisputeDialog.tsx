@@ -14,7 +14,7 @@ import {
   Textarea,
   useToast,
 } from '@sureground/ui';
-import { Scale } from 'lucide-react';
+import { Scale } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
 import type { ShortletBooking, ShortletDisputeCategory } from '@/types/shortlet';

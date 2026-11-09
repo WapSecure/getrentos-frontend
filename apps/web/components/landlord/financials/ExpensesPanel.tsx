@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, ReceiptText, Trash2 } from 'lucide-react';
+import { Plus, ReceiptText, Trash2 } from '@sureground/icons';
 import {
   Button,
   CurrencyInput,

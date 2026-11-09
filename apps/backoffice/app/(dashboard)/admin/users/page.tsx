@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Users, CheckCircle2, Clock, ShieldAlert, Ban } from 'lucide-react';
+import { Users, CheckCircle2, Clock, ShieldAlert, Ban } from '@sureground/icons';
 import { UserDetailModal } from '@/components/admin/users/UserDetailModal';
 import {
   ConfirmDialog,

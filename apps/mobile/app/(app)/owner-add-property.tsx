@@ -11,7 +11,7 @@ import {
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { FileText, Upload, X } from 'lucide-react-native';
+import { FileText, Upload, X } from '@sureground/icons/native';
 import {
   Button,
   Chip,

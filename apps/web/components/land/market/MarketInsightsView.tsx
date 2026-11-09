@@ -13,7 +13,7 @@ import {
   Skeleton,
   type Column,
 } from '@sureground/ui';
-import { AlertTriangle, BarChart3 } from 'lucide-react';
+import { AlertTriangle, BarChart3 } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency } from '@/lib/format';
 import {

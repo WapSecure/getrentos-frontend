@@ -31,7 +31,7 @@ function imageRemotePatterns(): ImageRemotePattern[] {
 
 const nextConfig: NextConfig = {
   distDir: process.env.NEXT_DIST_DIR ?? '.next',
-  transpilePackages: ['@sureground/shared', '@sureground/ui'],
+  transpilePackages: ['@sureground/shared', '@sureground/ui', '@sureground/icons'],
   // The API namespaces its refresh cookie per app: the back office and web app share a host, so without this they rotated each other's session.
   // It also makes the API refuse a non-staff account at staff sign-in. Set here because .env.local is gitignored.
   env: {

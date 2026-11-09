@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { HardHat } from 'lucide-react-native';
+import { HardHat } from '@sureground/icons/native';
 import {
   Badge,
   Button,

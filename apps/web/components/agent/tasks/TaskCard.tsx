@@ -9,7 +9,7 @@ import {
   PlayCircle,
   CheckCircle2,
   XCircle,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { Badge, Button, Card } from '@sureground/ui';
 import { formatDate } from '@/lib/format';
 import { taskStatusBadges } from '@/lib/statusBadge';

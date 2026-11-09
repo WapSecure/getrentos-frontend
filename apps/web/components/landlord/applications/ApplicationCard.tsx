@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ShieldCheck, ShieldAlert, Eye, Check, X, MessageSquareText } from 'lucide-react';
+import { ShieldCheck, ShieldAlert, Eye, Check, X, MessageSquareText } from '@sureground/icons';
 import { Badge, Button, IconButton } from '@sureground/ui';
 import { applicationStatusBadges } from '@/lib/statusBadge';
 import { formatCurrency, formatDate, getInitials } from '@/lib/format';

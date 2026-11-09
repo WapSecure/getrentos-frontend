@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Fingerprint, ScanFace } from 'lucide-react-native';
+import { Fingerprint, ScanFace } from '@sureground/icons/native';
 import { BrandLogo, Button, LinkButton, Text, useTheme } from '@sureground/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { biometricSupport, unlockWithBiometrics, useAppLockEnabled } from '@/lib/appLock';

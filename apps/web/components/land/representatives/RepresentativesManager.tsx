@@ -15,7 +15,7 @@ import {
   Textarea,
   Toast,
 } from '@sureground/ui';
-import { UserPlus } from 'lucide-react';
+import { UserPlus } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
 import {

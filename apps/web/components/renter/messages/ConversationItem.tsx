@@ -1,6 +1,6 @@
 'use client';
 
-import { Pin, PinOff, Archive, ArchiveRestore, Home } from 'lucide-react';
+import { Pin, PinOff, Archive, ArchiveRestore, Home } from '@sureground/icons';
 import { Badge, IconButton, type BadgeVariant } from '@sureground/ui';
 import { Conversation } from '@/types/messages';
 

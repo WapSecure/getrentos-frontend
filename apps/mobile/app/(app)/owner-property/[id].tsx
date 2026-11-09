@@ -3,7 +3,7 @@ import { Alert, ScrollView, useWindowDimensions, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AlertTriangle, MapPin } from 'lucide-react-native';
+import { AlertTriangle, MapPin } from '@sureground/icons/native';
 import {
   Badge,
   Button,

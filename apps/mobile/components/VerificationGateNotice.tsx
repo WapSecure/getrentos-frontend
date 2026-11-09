@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 import { router, type Href } from 'expo-router';
-import { ShieldAlert } from 'lucide-react-native';
+import { ShieldAlert } from '@sureground/icons/native';
 import { Button, Text, useTheme } from '@sureground/ui-native';
 import { readGate } from '@/lib/verificationGate';
 

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Alert, View } from 'react-native';
-import { CheckCircle2, Circle, CircleDashed, Clock3, XCircle } from 'lucide-react-native';
+import { CheckCircle2, Circle, CircleDashed, Clock3, XCircle } from '@sureground/icons/native';
 import { Badge, Button, FormAlert, Text, TextField, useTheme } from '@sureground/ui-native';
 import {
   CONDITION_STATUS,

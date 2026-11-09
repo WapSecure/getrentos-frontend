@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button, EmptyState, PageErrorState, Skeleton } from '@sureground/ui';
-import { Construction, Plus } from 'lucide-react';
+import { Construction, Plus } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import {
   estateInfrastructureKeys,

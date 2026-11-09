@@ -20,7 +20,7 @@ import {
   UserCheck,
   Eye,
   ClipboardList,
-} from 'lucide-react-native';
+} from '@sureground/icons/native';
 import { Screen } from '@sureground/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useIdentityVerification } from '@/hooks/useIdentityVerification';

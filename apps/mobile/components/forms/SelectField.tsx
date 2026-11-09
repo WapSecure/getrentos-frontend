@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
-import { Check, ChevronDown, Search } from 'lucide-react-native';
+import { Check, ChevronDown, Search } from '@sureground/icons/native';
 import { Text, TextField, useTheme } from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 

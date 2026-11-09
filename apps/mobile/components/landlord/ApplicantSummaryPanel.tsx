@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
-import { ChevronDown } from 'lucide-react-native';
+import { ChevronDown } from '@sureground/icons/native';
 import { LinkButton, Skeleton, Text, useTheme } from '@sureground/ui-native';
 import { landlordApi } from '@/lib/api/landlord';
 

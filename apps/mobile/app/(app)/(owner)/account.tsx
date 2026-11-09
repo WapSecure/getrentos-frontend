@@ -29,7 +29,7 @@ import {
   Eye,
   ClipboardList,
   MessageCircle,
-} from 'lucide-react-native';
+} from '@sureground/icons/native';
 import {
   Avatar,
   Button,

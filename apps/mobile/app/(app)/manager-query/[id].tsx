@@ -3,7 +3,7 @@ import { KeyboardAvoidingView, Platform, RefreshControl, ScrollView, View } from
 import { useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Clock } from 'lucide-react-native';
+import { Clock } from '@sureground/icons/native';
 import {
   Badge,
   Button,

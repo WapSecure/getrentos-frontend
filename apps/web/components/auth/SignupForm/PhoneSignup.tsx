@@ -4,7 +4,7 @@ import { Button, Checkbox, Field, IconButton, Input } from '@sureground/ui';
 
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Eye, EyeOff, ArrowRight, User, Phone, Lock, CheckCircle } from 'lucide-react';
+import { Eye, EyeOff, ArrowRight, User, Phone, Lock, CheckCircle } from '@sureground/icons';
 import { useState } from 'react';
 import { useSignupStore } from '@/lib/store/signupStore';
 import { phoneSchema, PhoneFormData } from '@/lib/validations/auth';

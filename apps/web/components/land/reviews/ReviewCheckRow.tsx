@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Badge, Button, Field, RadioGroup, type RadioOption, Textarea } from '@sureground/ui';
-import { FileCheck2 } from 'lucide-react';
+import { FileCheck2 } from '@sureground/icons';
 import { formatDate } from '@/lib/format';
 import type { LandDiligenceCheckStatus } from '@/types/land';
 import type { LandReviewCheck, LandReviewDocument } from '@/types/landReviewer';

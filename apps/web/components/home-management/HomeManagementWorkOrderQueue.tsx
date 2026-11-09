@@ -11,7 +11,7 @@ import {
   Sparkles,
   UserRound,
   Wrench,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { NairaSign } from '@sureground/ui/NairaSign';
 import { Badge, type BadgeVariant } from '@sureground/ui';
 import { Button } from '@sureground/ui';

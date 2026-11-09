@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { RefreshCcw, Percent } from 'lucide-react';
+import { RefreshCcw, Percent } from '@sureground/icons';
 import { Field, NumberInput, QueryState, SaveButton, Switch, useToast } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { ownerKeys } from '@/lib/queryKeys';

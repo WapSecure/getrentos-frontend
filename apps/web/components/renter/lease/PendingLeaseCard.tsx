@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Clock, FileSignature, FileText, Lock, Wallet } from 'lucide-react';
+import { Clock, FileSignature, FileText, Lock, Wallet } from '@sureground/icons';
 import { Alert, Button, Card, Checkbox, SignaturePad } from '@sureground/ui';
 import { formatCurrency, formatDate } from '@sureground/shared';
 import { leaseRentLabel } from '@/lib/leaseTerm';

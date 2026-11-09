@@ -2,7 +2,7 @@
 
 import 'leaflet/dist/leaflet.css';
 import { useEffect, useRef, useState } from 'react';
-import { MapPin } from 'lucide-react';
+import { MapPin } from '@sureground/icons';
 import { Button } from '@sureground/ui';
 import { geocodeService, LAGOS_POINT, type MapPoint } from '@/services/geocodeService';
 import { addBaseTiles } from '@/lib/mapTiles';

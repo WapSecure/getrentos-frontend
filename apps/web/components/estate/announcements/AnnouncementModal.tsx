@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { Sparkles } from 'lucide-react';
+import { Sparkles } from '@sureground/icons';
 import {
   Alert,
   Button,

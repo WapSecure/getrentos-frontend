@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown, Info } from 'lucide-react';
+import { ChevronDown, Info } from '@sureground/icons';
 import { cn } from '@/lib/cn';
 import { formatCurrency } from '@/lib/format';
 

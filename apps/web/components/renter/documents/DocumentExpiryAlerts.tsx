@@ -1,6 +1,6 @@
 'use client';
 
-import { AlertCircle, CheckCircle } from 'lucide-react';
+import { AlertCircle, CheckCircle } from '@sureground/icons';
 import { Alert, Badge, Button } from '@sureground/ui';
 
 interface Document {

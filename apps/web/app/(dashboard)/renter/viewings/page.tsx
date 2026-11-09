@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { CalendarCheck } from 'lucide-react';
+import { CalendarCheck } from '@sureground/icons';
 import { Badge, EmptyState, PageErrorState, PageLoadingState, Button } from '@sureground/ui';
 import { renterService } from '@/services/renterService';
 import { VideoCallButton } from '@/components/shared/VideoCallButton';

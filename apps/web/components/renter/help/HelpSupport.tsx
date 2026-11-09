@@ -1,6 +1,6 @@
 'use client';
 
-import { MessageCircle, Mail, Clock, ArrowRight, LifeBuoy } from 'lucide-react';
+import { MessageCircle, Mail, Clock, ArrowRight, LifeBuoy } from '@sureground/icons';
 import { useRouter } from 'next/navigation';
 import { Button, Card } from '@sureground/ui';
 import { ROUTES } from '@/lib/constants/auth';

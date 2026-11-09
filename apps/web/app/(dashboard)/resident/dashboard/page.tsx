@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { KeyRound, Megaphone, Package, ReceiptText, TriangleAlert } from 'lucide-react';
+import { KeyRound, Megaphone, Package, ReceiptText, TriangleAlert } from '@sureground/icons';
 import Link from 'next/link';
 import { estateResidentService } from '@/services/estateResidentService';
 import { unwrap } from '@/lib/apiHelpers';

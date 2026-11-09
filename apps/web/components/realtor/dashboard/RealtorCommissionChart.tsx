@@ -11,7 +11,7 @@ import {
   TooltipProps,
 } from 'recharts';
 import { useQuery } from '@tanstack/react-query';
-import { TrendingUp } from 'lucide-react';
+import { TrendingUp } from '@sureground/icons';
 import { Badge, Card } from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';

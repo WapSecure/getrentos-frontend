@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Download, FileText, Star, StarOff } from 'lucide-react';
+import { X, Download, FileText, Star, StarOff } from '@sureground/icons';
 import {
   Badge,
   Button,

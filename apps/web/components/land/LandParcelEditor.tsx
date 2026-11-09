@@ -13,7 +13,7 @@ import {
   Switch,
   Textarea,
 } from '@sureground/ui';
-import { FileUp, Save, ShieldCheck } from 'lucide-react';
+import { FileUp, Save, ShieldCheck } from '@sureground/icons';
 import {
   boundaryAreaMismatch,
   boundaryCorners,

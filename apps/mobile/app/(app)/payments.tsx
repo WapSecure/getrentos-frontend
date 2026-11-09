@@ -4,7 +4,12 @@ import { ActivityIndicator, Alert, Linking, Pressable, RefreshControl, View } fr
 import { router } from 'expo-router';
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
-import { AlertTriangle, FileStack, ReceiptText as ReceiptIcon, Wallet } from 'lucide-react-native';
+import {
+  AlertTriangle,
+  FileStack,
+  ReceiptText as ReceiptIcon,
+  Wallet,
+} from '@sureground/icons/native';
 import {
   Badge,
   Button,

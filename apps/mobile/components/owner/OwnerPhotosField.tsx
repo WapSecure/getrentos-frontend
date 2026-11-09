@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, View } from 'react-native';
 import { Image } from 'expo-image';
-import { ImagePlus, Star, X } from 'lucide-react-native';
+import { ImagePlus, Star, X } from '@sureground/icons/native';
 import { Text, useTheme, useToast } from '@sureground/ui-native';
 import { errorMessage } from '@/lib/api/client';
 import { ownerApi, type OwnerProperty } from '@/lib/api/owner';

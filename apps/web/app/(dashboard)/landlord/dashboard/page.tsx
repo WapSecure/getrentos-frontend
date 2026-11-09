@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import { useLandlordUser } from '../layout';
 import { useQuery } from '@tanstack/react-query';
-import { Building2 } from 'lucide-react';
+import { Building2 } from '@sureground/icons';
 import { LandlordDashboardHeader } from '@/components/landlord/dashboard/LandlordDashboardHeader';
 import { LandlordStatsCards } from '@/components/landlord/dashboard/LandlordStatsCards';
 import { LandlordActivityFeed } from '@/components/landlord/dashboard/LandlordActivityFeed';

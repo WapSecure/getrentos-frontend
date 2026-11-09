@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { UserPlus, Mail, CheckCircle } from 'lucide-react';
+import { UserPlus, Mail, CheckCircle } from '@sureground/icons';
 import { Button } from '@sureground/ui';
 import { Field } from '@sureground/ui';
 import { Input } from '@sureground/ui';

@@ -11,7 +11,7 @@ import {
   Textarea,
   useToast,
 } from '@sureground/ui';
-import { Send } from 'lucide-react';
+import { Send } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
 import type { ShortletListing } from '@/types/shortlet';

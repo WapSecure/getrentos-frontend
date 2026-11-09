@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, ShieldCheck } from 'lucide-react';
+import { Plus, ShieldCheck } from '@sureground/icons';
 import {
   Badge,
   Button,

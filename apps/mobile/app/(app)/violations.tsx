@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 
 import { useQuery } from '@tanstack/react-query';
-import { TriangleAlert } from 'lucide-react-native';
+import { TriangleAlert } from '@sureground/icons/native';
 import {
   Badge,
   type BadgeTone,

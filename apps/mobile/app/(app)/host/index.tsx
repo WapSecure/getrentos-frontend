@@ -10,8 +10,8 @@ import {
   MessageCircle,
   Plus,
   Wallet,
-  type LucideIcon,
-} from 'lucide-react-native';
+  type SgIcon,
+} from '@sureground/icons/native';
 import {
   Button,
   Card,
@@ -294,7 +294,7 @@ function Tile({
   onPress,
   badge,
 }: {
-  Icon: LucideIcon;
+  Icon: SgIcon;
   label: string;
   hint: string;
   onPress: () => void;

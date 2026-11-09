@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CreditCard } from 'lucide-react';
+import { CreditCard } from '@sureground/icons';
 import {
   Badge,
   Card,

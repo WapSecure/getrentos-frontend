@@ -2,7 +2,7 @@
 
 import { useTheme } from 'next-themes';
 import { motion } from 'framer-motion';
-import { Sun, Moon } from 'lucide-react';
+import { Sun, Moon } from '@sureground/icons';
 import { useEffect, useState } from 'react';
 
 export const ThemeToggle = () => {

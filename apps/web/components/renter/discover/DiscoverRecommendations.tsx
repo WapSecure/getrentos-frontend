@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { BadgeCheck, ChevronRight, MapPin, Bed, Bath } from 'lucide-react';
+import { BadgeCheck, ChevronRight, MapPin, Bed, Bath } from '@sureground/icons';
 import Link from 'next/link';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';

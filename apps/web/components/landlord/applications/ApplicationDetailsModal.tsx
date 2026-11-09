@@ -1,6 +1,6 @@
 'use client';
 
-import { Mail, Phone, ShieldCheck, Check, MessageSquareText } from 'lucide-react';
+import { Mail, Phone, ShieldCheck, Check, MessageSquareText } from '@sureground/icons';
 import { Button, Dialog, DialogContent, DialogDescription, DialogTitle } from '@sureground/ui';
 import { formatDate, getInitials } from '@/lib/format';
 import { ScreeningPanel } from '@/components/landlord/applications/ScreeningPanel';

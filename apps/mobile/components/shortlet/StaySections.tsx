@@ -13,7 +13,7 @@ import {
   Wifi,
   X,
   Zap,
-} from 'lucide-react-native';
+} from '@sureground/icons/native';
 import {
   Avatar,
   Button,

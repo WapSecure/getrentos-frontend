@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { SafeImage } from '@/components/shared/media/SafeImage';
-import { Copy, Check, Globe, ExternalLink } from 'lucide-react';
+import { Copy, Check, Globe, ExternalLink } from '@sureground/icons';
 import {
   Button,
   Card,

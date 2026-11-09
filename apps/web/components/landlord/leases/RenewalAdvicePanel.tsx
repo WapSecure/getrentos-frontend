@@ -1,6 +1,6 @@
 'use client';
 
-import { Scale } from 'lucide-react';
+import { Scale } from '@sureground/icons';
 import { Alert, Badge, Button, Select, Skeleton } from '@sureground/ui';
 import { REPLY_LANGUAGES, type ReplyLanguage } from '@/lib/replyLanguage';
 import type { RenewalAdvice } from '@/types/renewalAdvice';

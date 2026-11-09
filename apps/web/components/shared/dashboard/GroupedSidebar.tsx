@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ChevronDown, Lock } from 'lucide-react';
+import { ChevronDown, Lock } from '@sureground/icons';
 import { useCallback, useEffect, useRef, useSyncExternalStore } from 'react';
 import { PLAN_TIER_LABELS } from '@sureground/shared';
 import { SidebarRailToggle, useSidebarRail } from '@sureground/ui';

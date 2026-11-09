@@ -7,7 +7,7 @@ import {
   MessageCircle,
   ShieldCheck,
   Wallet,
-} from 'lucide-react-native';
+} from '@sureground/icons/native';
 import { qk } from '@/lib/query/keys';
 import { routeForNotification } from '@/lib/notificationRoutes';
 import { buyerSettingsApi, type BuyerNotification } from '@/lib/api/buyerSettings';

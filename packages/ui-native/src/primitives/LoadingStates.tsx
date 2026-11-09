@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { View, type StyleProp, type ViewStyle } from 'react-native';
-import { CloudOff } from 'lucide-react-native';
+import { CloudOff } from '@sureground/icons/native';
 import { useTheme } from '../theme';
 import { Text } from './Text';
 import { EmptyState, ErrorState, Skeleton } from './misc';

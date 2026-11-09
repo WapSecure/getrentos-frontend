@@ -12,7 +12,7 @@ import { useLocalSearchParams } from 'expo-router';
 import NetInfo from '@react-native-community/netinfo';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Camera, CloudOff, MapPin, Navigation, Trash2 } from 'lucide-react-native';
+import { Camera, CloudOff, MapPin, Navigation, Trash2 } from '@sureground/icons/native';
 import {
   Badge,
   Button,

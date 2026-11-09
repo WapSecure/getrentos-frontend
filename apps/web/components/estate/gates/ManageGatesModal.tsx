@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { DoorOpen, Trash2 } from 'lucide-react';
+import { DoorOpen, Trash2 } from '@sureground/icons';
 import {
   Button,
   Dialog,

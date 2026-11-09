@@ -10,8 +10,8 @@ import {
   Pencil,
   ShieldCheck,
   Tags,
-  type LucideIcon,
-} from 'lucide-react-native';
+  type SgIcon,
+} from '@sureground/icons/native';
 import {
   Button,
   Card,
@@ -323,7 +323,7 @@ function ToolRow({
   hint,
   onPress,
 }: {
-  Icon: LucideIcon;
+  Icon: SgIcon;
   label: string;
   hint: string;
   onPress: () => void;

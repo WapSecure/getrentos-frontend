@@ -13,7 +13,7 @@ import {
   Network,
   ShieldCheck,
   Wrench,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { Footer } from '@/components/layout/Footer';
 import { Navigation } from '@/components/layout/Navigation';
 import { Badge, Button, type BadgeVariant } from '@sureground/ui';

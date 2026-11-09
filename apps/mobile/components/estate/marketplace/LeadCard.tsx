@@ -1,5 +1,5 @@
 import { Linking, View } from 'react-native';
-import { BadgeCheck, Home, Mail, MessageCircle, Phone } from 'lucide-react-native';
+import { BadgeCheck, Home, Mail, MessageCircle, Phone } from '@sureground/icons/native';
 import { Card, IconButton, Price, Text, useTheme } from '@sureground/ui-native';
 import { StatusPill } from '@/components/host/HostUI';
 import {

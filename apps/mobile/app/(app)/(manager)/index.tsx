@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
-import { AlertTriangle, Building2, Info, MessageCircleQuestion } from 'lucide-react-native';
+import { AlertTriangle, Building2, Info, MessageCircleQuestion } from '@sureground/icons/native';
 import {
   Button,
   Card,

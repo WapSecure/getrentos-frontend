@@ -2,7 +2,7 @@
 
 import { useId, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import * as RadixPopover from '@radix-ui/react-popover';
-import { Check, ChevronDown, Search, X } from 'lucide-react';
+import { Check, ChevronDown, Search, X } from '@sureground/icons';
 import { cn } from '@sureground/shared';
 import { controlShell, type ControlSize } from './controlStyles';
 import { useFieldControl } from './fieldContext';

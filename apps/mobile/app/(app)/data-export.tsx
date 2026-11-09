@@ -1,7 +1,7 @@
 import { Share, View } from 'react-native';
 
 import { useQuery } from '@tanstack/react-query';
-import { Database, Download } from 'lucide-react-native';
+import { Database, Download } from '@sureground/icons/native';
 import {
   Button,
   Card,

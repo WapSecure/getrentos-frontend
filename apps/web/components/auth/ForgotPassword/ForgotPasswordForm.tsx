@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from '@sureground/icons';
 import { Button } from '@sureground/ui';
 import { RequestStep } from './steps/RequestStep';
 import { OtpStep } from './steps/OtpStep';

@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import { keepPreviousData, useQuery, useMutation } from '@tanstack/react-query';
-import { FileSpreadsheet, Check } from 'lucide-react';
+import { FileSpreadsheet, Check } from '@sureground/icons';
 import { FinancialStats } from '@/components/landlord/financials/FinancialStats';
 import { ExpensesPanel } from '@/components/landlord/financials/ExpensesPanel';
 import {

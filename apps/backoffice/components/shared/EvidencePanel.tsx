@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { ExternalLink, FileText, ImageIcon, Paperclip, Trash2, Upload } from 'lucide-react';
+import { ExternalLink, FileText, ImageIcon, Paperclip, Trash2, Upload } from '@sureground/icons';
 import { Badge, Button, DocumentPreviewButton, IconButton, Input } from '@sureground/ui';
 import { cn, formatDate } from '@sureground/shared';
 import type { EvidenceItem } from '@/types/admin';

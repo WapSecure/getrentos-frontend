@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { FileText, Check, Users, Clock, Home } from 'lucide-react';
+import { FileText, Check, Users, Clock, Home } from '@sureground/icons';
 import { NairaSign } from '@sureground/ui/NairaSign';
 import {
   Alert,

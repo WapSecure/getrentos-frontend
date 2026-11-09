@@ -17,7 +17,7 @@ import {
   Landmark,
   Wallet,
   MessageCircle,
-} from 'lucide-react-native';
+} from '@sureground/icons/native';
 import { Screen } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { agentApi } from '@/lib/api/agent';

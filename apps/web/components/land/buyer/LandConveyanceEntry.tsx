@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { ChevronRight, ScrollText } from 'lucide-react';
+import { ChevronRight, ScrollText } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';
 import { buyerLandKeys } from '@/lib/landSalesQueryKeys';

@@ -1,6 +1,6 @@
 'use client';
 
-import { FileText, Eye, ThumbsUp, ChevronRight } from 'lucide-react';
+import { FileText, Eye, ThumbsUp, ChevronRight } from '@sureground/icons';
 import { Card, EmptyState } from '@sureground/ui';
 
 interface Article {

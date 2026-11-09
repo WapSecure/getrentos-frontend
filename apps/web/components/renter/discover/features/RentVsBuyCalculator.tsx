@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Calculator, Info, TrendingUp, Home, Wallet } from 'lucide-react';
+import { Calculator, Info, TrendingUp, Home, Wallet } from '@sureground/icons';
 import {
   Button,
   CurrencyInput,

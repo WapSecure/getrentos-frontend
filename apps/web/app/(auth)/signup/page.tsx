@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Phone, MessageCircle, CheckCircle, ArrowLeft, RefreshCw } from 'lucide-react';
+import { Mail, Phone, MessageCircle, CheckCircle, ArrowLeft, RefreshCw } from '@sureground/icons';
 import { EmailSignup } from '@/components/auth/SignupForm/EmailSignup';
 import { PhoneSignup } from '@/components/auth/SignupForm/PhoneSignup';
 import { OtpVerification } from '@/components/auth/SignupForm/OtpVerification';

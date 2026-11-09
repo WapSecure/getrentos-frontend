@@ -13,8 +13,8 @@ import {
   Siren,
   Timer,
   Wrench,
-  type LucideIcon,
-} from 'lucide-react-native';
+  type SgIcon,
+} from '@sureground/icons/native';
 import {
   IconButton,
   Price,
@@ -210,7 +210,7 @@ function Tile({
   hint,
   onPress,
 }: {
-  Icon: LucideIcon;
+  Icon: SgIcon;
   label: string;
   hint: string;
   onPress: () => void;

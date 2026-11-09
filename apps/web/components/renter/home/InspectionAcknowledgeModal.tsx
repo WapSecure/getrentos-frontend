@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Camera, UserCheck } from 'lucide-react';
+import { Camera, UserCheck } from '@sureground/icons';
 import {
   Badge,
   Button,

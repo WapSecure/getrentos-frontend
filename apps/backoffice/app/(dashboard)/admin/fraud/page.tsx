@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, ShieldAlert } from 'lucide-react';
+import { Plus, ShieldAlert } from '@sureground/icons';
 import { FraudAlertCard } from '@/components/admin/fraud/FraudAlertCard';
 import { FraudAlertDetailModal } from '@/components/admin/fraud/FraudAlertDetailModal';
 import { NewFraudAlertModal } from '@/components/admin/fraud/NewFraudAlertModal';

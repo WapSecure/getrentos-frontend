@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle } from '@sureground/icons';
 import { Input } from '@sureground/ui';
 import { AUTH_CONSTANTS } from '@sureground/shared';
 

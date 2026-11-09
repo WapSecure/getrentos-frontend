@@ -18,7 +18,7 @@ import {
   Search,
   Zap,
   Lock,
-} from 'lucide-react';
+} from '@sureground/icons';
 import {
   Badge,
   Button,

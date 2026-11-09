@@ -14,8 +14,8 @@ import {
   PenLine,
   Plus,
   Trash2,
-  type LucideIcon,
-} from 'lucide-react-native';
+  type SgIcon,
+} from '@sureground/icons/native';
 import {
   Badge,
   Button,
@@ -312,7 +312,7 @@ function Action({
   onPress,
   destructive,
 }: {
-  Icon: LucideIcon;
+  Icon: SgIcon;
   label: string;
   onPress: () => void;
   destructive?: boolean;

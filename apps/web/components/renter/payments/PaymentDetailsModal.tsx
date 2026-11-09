@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckCircle, Shield, Download, MessageCircle } from 'lucide-react';
+import { CheckCircle, Shield, Download, MessageCircle } from '@sureground/icons';
 import {
   Alert,
   Badge,

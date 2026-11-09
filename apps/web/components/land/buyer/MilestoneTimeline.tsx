@@ -18,7 +18,7 @@ import {
   CircleDot,
   ListChecks,
   MinusCircle,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { formatDate } from '@/lib/format';
 import type { LandMilestone } from '@/types/landBuyer';
 import { MilestoneStatusBadge } from './LandSaleBadges';

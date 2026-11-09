@@ -11,8 +11,8 @@ import {
   ReceiptText,
   Users,
   Wallet,
-  type LucideIcon,
-} from 'lucide-react-native';
+  type SgIcon,
+} from '@sureground/icons/native';
 import {
   Button,
   Card,
@@ -325,7 +325,7 @@ function Tile({
   amount,
   count,
 }: {
-  Icon: LucideIcon;
+  Icon: SgIcon;
   tint: string;
   label: string;
   amount?: number;

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Download } from 'lucide-react-native';
+import { Download } from '@sureground/icons/native';
 import {
   Button,
   Card,

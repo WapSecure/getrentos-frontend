@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { HardHat, Loader2, Star } from 'lucide-react';
+import { HardHat, Loader2, Star } from '@sureground/icons';
 import {
   Alert,
   Dialog,

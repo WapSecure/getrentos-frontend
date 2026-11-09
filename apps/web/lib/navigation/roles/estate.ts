@@ -25,7 +25,7 @@ import {
   UserCheck,
   Users,
   Vote,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { ESTATE_MARKETPLACE_ROUTES, ROUTES } from '@/lib/constants/auth';
 import { defineRoleNavigation } from '../resolve';
 

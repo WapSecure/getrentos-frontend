@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Check, Search } from 'lucide-react-native';
+import { Check, Search } from '@sureground/icons/native';
 import { Skeleton, Text, TextField, useTheme } from '@sureground/ui-native';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { estateManagerApi, type Household } from '@/lib/api/estateManager';

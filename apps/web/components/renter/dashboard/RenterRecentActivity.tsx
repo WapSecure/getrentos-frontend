@@ -14,7 +14,7 @@ import {
   MessageCircle,
   Wrench,
   Bell,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { Button } from '@sureground/ui';
 import { ROUTES } from '@/lib/constants/auth';
 import { renterService } from '@/services/renterService';

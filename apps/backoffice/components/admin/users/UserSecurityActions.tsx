@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { KeyRound, LogOut } from 'lucide-react';
+import { KeyRound, LogOut } from '@sureground/icons';
 import { Button, ConfirmDialog, useToast } from '@sureground/ui';
 import { unwrap } from '@sureground/shared';
 import { adminService } from '@/services/adminService';

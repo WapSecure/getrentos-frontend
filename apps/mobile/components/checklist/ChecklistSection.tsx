@@ -1,5 +1,5 @@
 import { Pressable, View } from 'react-native';
-import { Check } from 'lucide-react-native';
+import { Check } from '@sureground/icons/native';
 import { Card, Progress, Text, useTheme } from '@sureground/ui-native';
 import type { MoveInChecklistItem } from '@/lib/api/renter';
 

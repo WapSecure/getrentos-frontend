@@ -1,14 +1,14 @@
 import type { ReactNode } from 'react';
 import { Pressable, View } from 'react-native';
-import type { LucideIcon } from 'lucide-react-native';
-import { ChevronRight } from 'lucide-react-native';
+import type { SgIcon } from '@sureground/icons/native';
+import { ChevronRight } from '@sureground/icons/native';
 import { Card, Text, useTheme } from '@sureground/ui-native';
 
 export interface SettingsItem {
   key: string;
   label: string;
   description?: string;
-  icon: LucideIcon;
+  icon: SgIcon;
   onPress: () => void;
   value?: string;
   tone?: 'default' | 'success' | 'warning';

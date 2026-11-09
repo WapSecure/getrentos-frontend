@@ -1,7 +1,7 @@
 import { Share, View } from 'react-native';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { BadgeCheck, Camera, KeyRound, Share2, Sparkles } from 'lucide-react-native';
+import { BadgeCheck, Camera, KeyRound, Share2, Sparkles } from '@sureground/icons/native';
 import { PLAN_TIER_LABELS } from '@sureground/shared';
 import { Button, Card, Chip, Text, useTheme } from '@sureground/ui-native';
 import type { PickedFile } from '@/lib/api/documents';

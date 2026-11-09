@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Landmark, Flag, Send, Undo2 } from 'lucide-react';
+import { Landmark, Flag, Send, Undo2 } from '@sureground/icons';
 import {
   DataTable,
   IconButton,

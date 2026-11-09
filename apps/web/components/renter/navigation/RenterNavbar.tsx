@@ -4,7 +4,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Menu, X } from 'lucide-react';
+import { Search, Menu, X } from '@sureground/icons';
 import { Logo } from '@/components/ui/Logo';
 import { IconButton, Input, ThemeToggle } from '@sureground/ui';
 import { LanguageToggle } from '@/components/ui/LanguageToggle';

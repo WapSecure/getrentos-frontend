@@ -12,7 +12,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
-import { Eye, EyeOff } from 'lucide-react-native';
+import { Eye, EyeOff } from '@sureground/icons/native';
 import { useTheme } from '../theme';
 import { useReducedMotion } from '../accessibility';
 import { Text } from './Text';

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
-import { CheckCircle2 } from 'lucide-react-native';
+import { CheckCircle2 } from '@sureground/icons/native';
 import { Chip, NumberField, Text, useTheme } from '@sureground/ui-native';
 import { toAccountLookup, type AccountLookup } from '@sureground/shared';
 import { SelectField } from '@/components/forms/SelectField';

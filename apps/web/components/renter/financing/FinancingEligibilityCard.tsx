@@ -1,6 +1,6 @@
 'use client';
 
-import { Zap, ShieldCheck, Clock, TrendingUp, Lock } from 'lucide-react';
+import { Zap, ShieldCheck, Clock, TrendingUp, Lock } from '@sureground/icons';
 import { Button } from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 import { getFinancingPlanOptions, MIN_TRUST_SCORE_FOR_FINANCING } from '@/lib/financing';

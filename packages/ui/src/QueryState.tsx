@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import type { LucideIcon } from 'lucide-react';
+import type { SgIcon } from '@sureground/icons';
 import { EmptyState } from './EmptyState';
 import { PageErrorState } from './PageState';
 import { ListSkeleton } from './Skeleton';
@@ -15,7 +15,7 @@ interface QueryStateProps {
   errorDescription?: string;
   isEmpty?: boolean;
   empty?: {
-    icon: LucideIcon;
+    icon: SgIcon;
     title: string;
     description?: ReactNode;
     action?: ReactNode;

@@ -1,6 +1,6 @@
 import { Alert, View } from 'react-native';
 import Constants from 'expo-constants';
-import { LogOut } from 'lucide-react-native';
+import { LogOut } from '@sureground/icons/native';
 import { Avatar, Button, Divider, Text, ThemeToggle, useTheme } from '@sureground/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useIdentityVerification } from '@/hooks/useIdentityVerification';

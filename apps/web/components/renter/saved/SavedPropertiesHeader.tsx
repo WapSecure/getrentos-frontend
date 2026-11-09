@@ -1,6 +1,6 @@
 'use client';
 
-import { Heart, Bookmark, Download } from 'lucide-react';
+import { Heart, Bookmark, Download } from '@sureground/icons';
 import { Button } from '@sureground/ui';
 import { RenterPageHeader } from '../shared/RenterPageHeader';
 

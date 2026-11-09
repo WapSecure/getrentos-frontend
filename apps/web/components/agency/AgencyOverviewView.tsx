@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { Building2, Coins, Users, Wallet, Wrench } from 'lucide-react';
+import { Building2, Coins, Users, Wallet, Wrench } from '@sureground/icons';
 import { Card, CardSkeleton, PageErrorState, PageHeader, StatGridSkeleton } from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 import { AttentionFeed } from '@/components/shared/attention/AttentionFeed';

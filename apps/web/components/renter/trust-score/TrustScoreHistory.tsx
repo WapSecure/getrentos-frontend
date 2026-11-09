@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { TrendingUp, TrendingDown, Minus, ChevronDown, ChevronUp } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, ChevronDown, ChevronUp } from '@sureground/icons';
 import { Card } from '@sureground/ui';
 import { TrustScoreHistoryItem } from '@/types/trust-score';
 import { humanizeScoreReason } from '@/components/renter/trust-score/reasonLabels';

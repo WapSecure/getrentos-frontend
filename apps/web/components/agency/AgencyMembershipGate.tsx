@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { Briefcase } from 'lucide-react';
+import { Briefcase } from '@sureground/icons';
 import { Button, CardSkeleton, EmptyState, ThemeToggle } from '@sureground/ui';
 import { Logo } from '@/components/ui/Logo';
 import { AccountMenu } from '@/components/shared/navigation/AccountMenu';

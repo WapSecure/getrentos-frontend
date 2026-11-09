@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Alert, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ChevronRight, UserPlus, Users } from 'lucide-react-native';
+import { ChevronRight, UserPlus, Users } from '@sureground/icons/native';
 import {
   Badge,
   Divider,

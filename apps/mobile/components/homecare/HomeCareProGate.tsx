@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 import { router } from 'expo-router';
-import { BadgeCheck, Wrench } from 'lucide-react-native';
+import { BadgeCheck, Wrench } from '@sureground/icons/native';
 import { Button, Card, Text, useTheme } from '@sureground/ui-native';
 
 export function HomeCareProGate() {

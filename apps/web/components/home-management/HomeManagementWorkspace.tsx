@@ -2,7 +2,7 @@
 
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
-import { CircleAlert } from 'lucide-react';
+import { CircleAlert } from '@sureground/icons';
 import { HomeAssetRegistry } from '@/components/home-management/HomeAssetRegistry';
 import { HomeManagementDashboard } from '@/components/home-management/HomeManagementDashboard';
 import { HomeManagementInspectionFeed } from '@/components/home-management/HomeManagementInspectionFeed';

@@ -10,7 +10,7 @@ import {
   X,
   Flame,
   Send,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { Badge, Button, Checkbox } from '@sureground/ui';
 import { getInitials, formatDate, formatRelativeTime } from '@/lib/format';
 import { leadStageBadges } from '@/lib/statusBadge';

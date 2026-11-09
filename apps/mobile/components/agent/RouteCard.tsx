@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Linking, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import * as Location from 'expo-location';
-import { LocateFixed, Navigation, Route } from 'lucide-react-native';
+import { LocateFixed, Navigation, Route } from '@sureground/icons/native';
 import {
   Badge,
   Button,

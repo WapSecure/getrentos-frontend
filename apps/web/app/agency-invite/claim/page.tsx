@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { AlertCircle, Building2, CheckCircle2, Loader2, UserPlus } from 'lucide-react';
+import { AlertCircle, Building2, CheckCircle2, Loader2, UserPlus } from '@sureground/icons';
 import { isAuthenticated, getStoredUser } from '@/lib/authStorage';
 import { ROUTES, getDashboardRoute, BACKEND_ROLE_TO_ID } from '@/lib/constants/auth';
 import { agencyOwnerInviteService } from '@/services/agencyOwnerInviteService';

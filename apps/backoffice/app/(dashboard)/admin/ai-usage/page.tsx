@@ -13,7 +13,7 @@ import {
   ShieldCheck,
   Undo2,
   UserCheck,
-} from 'lucide-react';
+} from '@sureground/icons';
 import {
   DataTable,
   EmptyState,

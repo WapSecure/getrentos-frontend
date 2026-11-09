@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { Building2, MapPin } from 'lucide-react';
+import { Building2, MapPin } from '@sureground/icons';
 import { EmptyState, Skeleton } from '@sureground/ui';
 import { SafeImage } from '@/components/shared/media/SafeImage';
 import { estateStorefrontService } from '@/services/estateMarketplaceService';

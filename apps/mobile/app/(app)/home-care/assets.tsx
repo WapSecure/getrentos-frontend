@@ -10,7 +10,7 @@ import {
 import { router } from 'expo-router';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Boxes, ChevronRight, Plus, ShieldAlert } from 'lucide-react-native';
+import { Boxes, ChevronRight, Plus, ShieldAlert } from '@sureground/icons/native';
 import {
   Button,
   Card,

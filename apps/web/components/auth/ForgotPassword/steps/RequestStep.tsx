@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Mail, Phone, MessageCircle, CheckCircle, XCircle } from 'lucide-react';
+import { Mail, Phone, MessageCircle, CheckCircle, XCircle } from '@sureground/icons';
 import { VALIDATION_PATTERNS } from '@/lib/constants/auth';
 import { Field, Input, SegmentedControl, type Segment } from '@sureground/ui';
 

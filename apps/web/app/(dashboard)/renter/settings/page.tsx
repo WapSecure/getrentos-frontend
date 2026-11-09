@@ -26,7 +26,7 @@ import {
   Globe,
   Download,
   Trash2,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { RenterPageHeader } from '@/components/renter/shared/RenterPageHeader';
 
 type SettingsTab =

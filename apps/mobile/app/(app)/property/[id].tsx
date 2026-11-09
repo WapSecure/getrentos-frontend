@@ -17,7 +17,7 @@ import {
   Share2,
   ShieldCheck,
   Search,
-} from 'lucide-react-native';
+} from '@sureground/icons/native';
 import {
   Badge,
   Button,

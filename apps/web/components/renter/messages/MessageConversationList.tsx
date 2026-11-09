@@ -1,6 +1,6 @@
 'use client';
 
-import { MessageCircle } from 'lucide-react';
+import { MessageCircle } from '@sureground/icons';
 import { EmptyState } from '@sureground/ui';
 import { ConversationItem } from './ConversationItem';
 import { Conversation } from '@/types/messages';

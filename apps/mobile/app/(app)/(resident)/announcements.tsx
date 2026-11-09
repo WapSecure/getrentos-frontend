@@ -1,6 +1,6 @@
 import { Pressable, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
-import { Megaphone, Square, Volume2 } from 'lucide-react-native';
+import { Megaphone, Square, Volume2 } from '@sureground/icons/native';
 import {
   Badge,
   Card,

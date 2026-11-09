@@ -13,7 +13,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
-import { FileText, Phone, SearchCheck } from 'lucide-react-native';
+import { FileText, Phone, SearchCheck } from '@sureground/icons/native';
 import {
   Badge,
   Button,

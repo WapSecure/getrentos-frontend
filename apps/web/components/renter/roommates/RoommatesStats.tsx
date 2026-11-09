@@ -1,6 +1,6 @@
 'use client';
 
-import { Users, UserCheck, UserX, UserPlus } from 'lucide-react';
+import { Users, UserCheck, UserX, UserPlus } from '@sureground/icons';
 import { StatCard } from '@sureground/ui';
 
 interface Roommate {

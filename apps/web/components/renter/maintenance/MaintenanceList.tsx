@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Wrench } from 'lucide-react';
+import { Wrench } from '@sureground/icons';
 import { Card, EmptyState, SearchInput, Select } from '@sureground/ui';
 import { MaintenanceCard } from './MaintenanceCard';
 import { MaintenanceDetailsModal } from './MaintenanceDetailsModal';

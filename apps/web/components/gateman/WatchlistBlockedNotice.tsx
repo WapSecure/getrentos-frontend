@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ShieldAlert } from 'lucide-react';
+import { ShieldAlert } from '@sureground/icons';
 import { Button, Field, Input } from '@sureground/ui';
 import type { WatchlistMatch, WatchlistMatchedOn } from '@/types/estate';
 

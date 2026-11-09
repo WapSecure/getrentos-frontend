@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { GitCompareArrows } from 'lucide-react';
+import { GitCompareArrows } from '@sureground/icons';
 import {
   Badge,
   Button,

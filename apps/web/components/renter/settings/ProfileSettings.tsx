@@ -4,7 +4,7 @@ import { SafeImage } from '@/components/shared/media/SafeImage';
 
 import { useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Camera, User, Mail, Phone, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { Camera, User, Mail, Phone, ShieldCheck, CheckCircle2 } from '@sureground/icons';
 import { Badge, Button, Field, IconButton, Input, SaveButton, Textarea } from '@sureground/ui';
 import { OTPModal } from '@/components/auth/OTPModal';
 import { renterService } from '@/services/renterService';

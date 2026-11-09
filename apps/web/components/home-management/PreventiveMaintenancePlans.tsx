@@ -11,7 +11,7 @@ import {
   PauseCircle,
   Repeat2,
   Wrench,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { Badge, type BadgeVariant } from '@sureground/ui';
 import { Button } from '@sureground/ui';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@sureground/ui';

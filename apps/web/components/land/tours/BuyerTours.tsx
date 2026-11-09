@@ -11,7 +11,7 @@ import {
   Textarea,
   Toast,
 } from '@sureground/ui';
-import { Video } from 'lucide-react';
+import { Video } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { landSiteTourKeys, landSiteTourService } from '@/services/landSiteTourService';
 import type { LandSiteTour } from '@/types/landSiteTour';

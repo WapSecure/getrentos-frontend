@@ -1,7 +1,7 @@
 'use client';
 
 import { FormEvent, useId, useState } from 'react';
-import { Clipboard, Circle, Plus, ChevronDown, ChevronUp } from 'lucide-react';
+import { Clipboard, Circle, Plus, ChevronDown, ChevronUp } from '@sureground/icons';
 import { Card, EmptyState, IconButton, Input, Select, useToast } from '@sureground/ui';
 
 interface Roommate {

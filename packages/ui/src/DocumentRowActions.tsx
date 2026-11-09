@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Share2, Download, Check } from 'lucide-react';
+import { Share2, Download, Check } from '@sureground/icons';
 import { cn } from '@sureground/shared';
 
 interface DocumentRowActionsProps {

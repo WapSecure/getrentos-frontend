@@ -1,6 +1,6 @@
 import { Link, Stack } from 'expo-router';
 import { View } from 'react-native';
-import { Compass } from 'lucide-react-native';
+import { Compass } from '@sureground/icons/native';
 import { Screen, Text, useTheme } from '@sureground/ui-native';
 
 export default function NotFound() {

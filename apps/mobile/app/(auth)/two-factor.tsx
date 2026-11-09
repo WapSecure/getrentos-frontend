@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
-import { ShieldCheck } from 'lucide-react-native';
+import { ShieldCheck } from '@sureground/icons/native';
 import {
   AuthScaffold,
   Button,

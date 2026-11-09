@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Copy, Check, Gift, Users, Wallet, Mail, MessageCircle } from 'lucide-react';
+import { Copy, Check, Gift, Users, Wallet, Mail, MessageCircle } from '@sureground/icons';
 import { Alert, Button, Card, CardSkeleton } from '@sureground/ui';
 import { referralService } from '@/services/referralService';
 import { formatCurrency, formatDate } from '@/lib/format';

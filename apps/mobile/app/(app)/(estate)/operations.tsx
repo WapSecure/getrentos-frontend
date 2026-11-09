@@ -16,8 +16,8 @@ import {
   Siren,
   Ticket,
   Wrench,
-  type LucideIcon,
-} from 'lucide-react-native';
+  type SgIcon,
+} from '@sureground/icons/native';
 import {
   Card,
   EmptyState,
@@ -259,7 +259,7 @@ function Row({
   urgent,
   href,
 }: {
-  Icon: LucideIcon;
+  Icon: SgIcon;
   label: string;
   count?: number;
   countLabel?: string;

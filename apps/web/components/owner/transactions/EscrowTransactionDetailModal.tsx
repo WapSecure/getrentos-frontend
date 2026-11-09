@@ -15,8 +15,8 @@ import {
   Clock,
   Banknote,
   XCircle,
-  type LucideIcon,
-} from 'lucide-react';
+  type SgIcon,
+} from '@sureground/icons';
 import {
   Alert,
   type AlertVariant,
@@ -72,7 +72,7 @@ const escrowSteps: { key: SaleEscrowStatus; label: string; description: string }
 
 const payoutStatusMeta: Record<
   NonNullable<EscrowSaleTransaction['sellerPayoutStatus']>,
-  { title: string; description: string; icon: LucideIcon; variant: AlertVariant }
+  { title: string; description: string; icon: SgIcon; variant: AlertVariant }
 > = {
   PENDING: {
     title: 'Payout pending',

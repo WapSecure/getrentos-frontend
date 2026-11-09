@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { Sparkles, TrendingUp, ArrowUpRight } from 'lucide-react';
+import { Sparkles, TrendingUp, ArrowUpRight } from '@sureground/icons';
 import { Card, CardSkeleton } from '@sureground/ui';
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';

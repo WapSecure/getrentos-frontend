@@ -1,6 +1,6 @@
 'use client';
 
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2 } from '@sureground/icons';
 import { Badge, IconButton } from '@sureground/ui';
 import type { Announcement } from '@/types/estate';
 

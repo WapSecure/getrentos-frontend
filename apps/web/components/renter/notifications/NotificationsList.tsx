@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { BellOff } from 'lucide-react';
+import { BellOff } from '@sureground/icons';
 import { Card, EmptyState } from '@sureground/ui';
 import { NotificationCard } from './NotificationCard';
 

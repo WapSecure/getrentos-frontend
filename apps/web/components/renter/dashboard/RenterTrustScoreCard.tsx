@@ -13,7 +13,7 @@ import {
   FileText,
   CreditCard,
   Users,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { Alert, Badge } from '@sureground/ui';
 import { Button } from '@sureground/ui';
 import { CardSkeleton } from '@sureground/ui';

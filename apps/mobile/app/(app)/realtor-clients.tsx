@@ -3,7 +3,7 @@ import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronRight, Handshake, UserPlus } from 'lucide-react-native';
+import { ChevronRight, Handshake, UserPlus } from '@sureground/icons/native';
 import {
   Avatar,
   Button,

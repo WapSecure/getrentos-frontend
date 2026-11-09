@@ -11,7 +11,7 @@ import {
   Droplets,
   CalendarClock,
   Sparkles,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { Badge, Button } from '@sureground/ui';
 import { formatRelativeTime } from '@/lib/format';
 import { maintenancePriorityBadges, maintenanceStatusBadges } from '@/lib/statusBadge';

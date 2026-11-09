@@ -11,7 +11,7 @@ import {
   Skeleton,
   useToast,
 } from '@sureground/ui';
-import { AlertTriangle, Lock, ScrollText } from 'lucide-react';
+import { AlertTriangle, Lock, ScrollText } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { ROUTES } from '@/lib/constants/auth';
 import { buyerLandKeys } from '@/lib/landSalesQueryKeys';

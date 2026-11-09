@@ -4,7 +4,7 @@ import { RedirectToEstateSetup } from '@/components/estate/shared/RedirectToEsta
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
-import { FileSpreadsheet, Check } from 'lucide-react';
+import { FileSpreadsheet, Check } from '@sureground/icons';
 import { Button, CardSkeleton, SegmentedControl, PageHeader, Skeleton } from '@sureground/ui';
 import { EstateFinancialStats } from '@/components/estate/financials/EstateFinancialStats';
 import {

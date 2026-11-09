@@ -11,8 +11,8 @@ import {
   Plus,
   Users,
   Wallet,
-  type LucideIcon,
-} from 'lucide-react-native';
+  type SgIcon,
+} from '@sureground/icons/native';
 import {
   IconButton,
   QueryState,
@@ -37,7 +37,7 @@ import { useAuth } from '@/lib/auth/AuthProvider';
 import { firstName } from '@/lib/format';
 import { IdentityNudge } from '@/components/trust/IdentityNudge';
 
-const ACTIVITY_ICON: Record<string, LucideIcon> = {
+const ACTIVITY_ICON: Record<string, SgIcon> = {
   offer: FileSignature,
   transaction: Wallet,
   viewing: DoorOpen,

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import type { LucideIcon } from 'lucide-react';
+import type { SgIcon } from '@sureground/icons';
 import {
   Button,
   DataTable,
@@ -32,7 +32,7 @@ export interface MaintenanceQueueConfig<T> {
   eyebrow: string;
   title: string;
   description?: string;
-  icon: LucideIcon;
+  icon: SgIcon;
   filters?: MaintenanceQueueFilter[];
   listFn: (params: MaintenanceQuery) => Promise<ApiResponse<Paginated<T>>>;
   getRowKey: (row: T) => string;

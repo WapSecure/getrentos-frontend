@@ -1,6 +1,13 @@
 'use client';
 
-import { Folder, FolderOpen, FileText, ReceiptText, ClipboardCheck, Shield } from 'lucide-react';
+import {
+  Folder,
+  FolderOpen,
+  FileText,
+  ReceiptText,
+  ClipboardCheck,
+  Shield,
+} from '@sureground/icons';
 
 interface DocumentCategoriesProps {
   categories: Record<string, number>;

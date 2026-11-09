@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ArrowUpRight, Building2, Sparkles, TrendingUp } from 'lucide-react-native';
+import { ArrowUpRight, Building2, Sparkles, TrendingUp } from '@sureground/icons/native';
 import {
   Button,
   Card,

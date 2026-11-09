@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Send, Paperclip } from 'lucide-react';
+import { Send, Paperclip } from '@sureground/icons';
 import { Button, IconButton, Textarea } from '@sureground/ui';
 import { MessageAttachments } from './MessageAttachments';
 

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { BarChart3, Eye, FileText, LayoutGrid, ReceiptText, ShieldCheck } from 'lucide-react';
+import { BarChart3, Eye, FileText, LayoutGrid, ReceiptText, ShieldCheck } from '@sureground/icons';
 import { cn } from '@/lib/cn';
 import { LAND_DEVELOPER_ROUTES } from '@/lib/constants/landDeveloperRoutes';
 

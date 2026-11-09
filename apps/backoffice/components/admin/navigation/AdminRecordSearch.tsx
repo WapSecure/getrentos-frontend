@@ -3,7 +3,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import Link from 'next/link';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Search } from 'lucide-react';
+import { Search } from '@sureground/icons';
 import { Button, Input, Skeleton, ToggleChip } from '@sureground/ui';
 import { unwrap } from '@sureground/shared';
 import { adminSearchService, type AdminSearchType } from '@/services/adminSearchService';

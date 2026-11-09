@@ -1,6 +1,16 @@
 'use client';
 
-import { X, Bed, Bath, Square, MapPin, Star, Shield, ShieldCheck, GitCompare } from 'lucide-react';
+import {
+  X,
+  Bed,
+  Bath,
+  Square,
+  MapPin,
+  Star,
+  Shield,
+  ShieldCheck,
+  GitCompare,
+} from '@sureground/icons';
 import { Property } from '@/types/renter';
 import { ShortlistComparison } from './ShortlistComparison';
 import { trustChainLabel } from '@sureground/shared';

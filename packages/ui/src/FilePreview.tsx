@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Download, FileText, Maximize2, Minus, Plus, RotateCw } from 'lucide-react';
+import { Download, FileText, Maximize2, Minus, Plus, RotateCw } from '@sureground/icons';
 import { cn } from '@sureground/shared';
 
 interface FilePreviewProps {

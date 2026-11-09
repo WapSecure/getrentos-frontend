@@ -1,5 +1,5 @@
 import { ScrollView, View } from 'react-native';
-import { Scale } from 'lucide-react-native';
+import { Scale } from '@sureground/icons/native';
 import {
   Badge,
   Button,

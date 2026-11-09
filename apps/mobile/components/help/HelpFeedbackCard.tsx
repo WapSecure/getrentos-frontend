@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { View } from 'react-native';
 import { useMutation } from '@tanstack/react-query';
-import { Star } from 'lucide-react-native';
+import { Star } from '@sureground/icons/native';
 import { Button, Card, Text, TextField, useTheme, useToast } from '@sureground/ui-native';
 import { StarRating } from '@/components/reviews/StarRating';
 import { feedbackApi } from '@/lib/api/feedback';

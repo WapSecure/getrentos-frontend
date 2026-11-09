@@ -1,5 +1,5 @@
 import { View } from 'react-native';
-import { Unlink } from 'lucide-react-native';
+import { Unlink } from '@sureground/icons/native';
 import { Card, IconButton, Text, useTheme } from '@sureground/ui-native';
 import { StatusPill } from '@/components/host/HostUI';
 import { AGREEMENT_STATUS, type MarketingAgreement } from '@/lib/api/estateMarketplace';

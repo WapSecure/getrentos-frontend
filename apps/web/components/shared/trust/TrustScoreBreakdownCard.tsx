@@ -1,6 +1,6 @@
 'use client';
 
-import { Layers } from 'lucide-react';
+import { Layers } from '@sureground/icons';
 import type { TrustScoreBreakdown } from '@/types/trust-score';
 
 interface TrustScoreBreakdownCardProps {

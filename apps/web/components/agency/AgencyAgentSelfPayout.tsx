@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Briefcase, Landmark, Wallet } from 'lucide-react';
+import { Briefcase, Landmark, Wallet } from '@sureground/icons';
 import { Badge, Button, Card, Skeleton, useToast, type ToastVariant } from '@sureground/ui';
 import { cn } from '@/lib/cn';
 import { formatCurrency, formatDate } from '@/lib/format';

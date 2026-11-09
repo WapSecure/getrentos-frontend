@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@sureground/ui';
 import { Alert, Button, CurrencyInput, Field, Input, Select } from '@sureground/ui';
-import { Camera, Trash2, Video } from 'lucide-react';
+import { Camera, Trash2, Video } from '@sureground/icons';
 import type { OwnerProperty } from '@/types/owner';
 import { AddressFields, type AddressFieldsValue } from '@/components/shared/location/AddressFields';
 import { LocationPicker } from '@/components/maps/LocationPicker';

@@ -1,7 +1,7 @@
 'use client';
 
 import { Alert, Button } from '@sureground/ui';
-import { AlertTriangle, CheckCircle2, Circle, Clock3, Send, XCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Circle, Clock3, Send, XCircle } from '@sureground/icons';
 import { formatDate } from '@/lib/format';
 import type { LandDiligenceCheck, OwnerLandRecord } from '@/types/land';
 import { LAND_ASSURANCE_TIER_LABELS } from '@/types/land';

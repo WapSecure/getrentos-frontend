@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react';
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { FileText, Lock, ShieldCheck, UserRound } from 'lucide-react';
+import { FileText, Lock, ShieldCheck, UserRound } from '@sureground/icons';
 import {
   Alert,
   Badge,

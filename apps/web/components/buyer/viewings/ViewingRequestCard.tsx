@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { CalendarClock, Clock, CheckCircle2, XCircle, X } from 'lucide-react';
+import { CalendarClock, Clock, CheckCircle2, XCircle, X } from '@sureground/icons';
 import { Badge, Button, type BadgeVariant } from '@sureground/ui';
 import { formatDate } from '@/lib/format';
 import type { ViewingRequest, ViewingRequestStatus } from '@/types/buyer';

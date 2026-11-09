@@ -3,7 +3,7 @@ import { Alert, Pressable, RefreshControl, ScrollView, View } from 'react-native
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Check, ChevronRight, Search, Siren, UserPlus } from 'lucide-react-native';
+import { Check, ChevronRight, Search, Siren, UserPlus } from '@sureground/icons/native';
 import {
   Button,
   Card,

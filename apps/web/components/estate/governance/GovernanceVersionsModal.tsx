@@ -1,6 +1,6 @@
 'use client';
 
-import { Download, FileText } from 'lucide-react';
+import { Download, FileText } from '@sureground/icons';
 import { useQuery } from '@tanstack/react-query';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';

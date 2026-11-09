@@ -1,7 +1,7 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowRightLeft } from 'lucide-react';
+import { ArrowRightLeft } from '@sureground/icons';
 import {
   Badge,
   Button,

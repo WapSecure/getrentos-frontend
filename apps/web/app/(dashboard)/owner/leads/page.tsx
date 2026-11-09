@@ -13,7 +13,7 @@ import {
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Users } from 'lucide-react';
+import { Users } from '@sureground/icons';
 import { BuyerLeadCard } from '@/components/owner/leads/BuyerLeadCard';
 import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';

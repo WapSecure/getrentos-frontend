@@ -3,7 +3,7 @@ import { RefreshControl, SectionList, View } from 'react-native';
 
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { History } from 'lucide-react-native';
+import { History } from '@sureground/icons/native';
 import { EmptyState, ListSkeleton, QueryState, Text, useTheme } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { homeCareApi, type TimelineEvent } from '@/lib/api/homeCare';

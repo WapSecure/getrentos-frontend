@@ -7,7 +7,7 @@ import {
   Calendar as CalendarIcon,
   LayoutGrid,
   List,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { Button, IconButton, SegmentedControl } from '@sureground/ui';
 import { format } from 'date-fns';
 import { RenterPageHeader } from '../shared/RenterPageHeader';

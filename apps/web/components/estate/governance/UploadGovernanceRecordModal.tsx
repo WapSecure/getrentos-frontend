@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Lock } from 'lucide-react';
+import { Lock } from '@sureground/icons';
 import {
   Button,
   Checkbox,

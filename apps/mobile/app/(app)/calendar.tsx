@@ -3,7 +3,7 @@ import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Calendar as CalendarIcon, MapPin, Plus } from 'lucide-react-native';
+import { Calendar as CalendarIcon, MapPin, Plus } from '@sureground/icons/native';
 import {
   Badge,
   Card,

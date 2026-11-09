@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Info, Percent } from 'lucide-react';
+import { Info, Percent } from '@sureground/icons';
 import {
   Alert,
   Button,

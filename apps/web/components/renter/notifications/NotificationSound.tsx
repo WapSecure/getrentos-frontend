@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Volume2, VolumeX, ChevronDown, ChevronUp } from 'lucide-react';
+import { Volume2, VolumeX, ChevronDown, ChevronUp } from '@sureground/icons';
 import { Card, Field, Select, Switch } from '@sureground/ui';
 
 export const NotificationSound = () => {

@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { Download, RefreshCcw, BarChart3, Check } from 'lucide-react';
+import { Download, RefreshCcw, BarChart3, Check } from '@sureground/icons';
 import { InvestmentStatsCards } from '@/components/owner/analytics/InvestmentStatsCards';
 import {
   Button,

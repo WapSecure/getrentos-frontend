@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { CreditCard, ReceiptText, TriangleAlert, TrendingUp } from 'lucide-react';
+import { CreditCard, ReceiptText, TriangleAlert, TrendingUp } from '@sureground/icons';
 import {
   Badge,
   Button,

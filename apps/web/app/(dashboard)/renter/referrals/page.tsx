@@ -1,5 +1,5 @@
 import { ReferralSummaryCard } from '@/components/referral/ReferralSummaryCard';
-import { Gift } from 'lucide-react';
+import { Gift } from '@sureground/icons';
 import { RenterPageHeader } from '@/components/renter/shared/RenterPageHeader';
 
 export default function RenterReferralsPage() {

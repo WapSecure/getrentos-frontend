@@ -10,7 +10,7 @@ import {
   Heart,
   MessageSquare,
   Star,
-} from 'lucide-react-native';
+} from '@sureground/icons/native';
 import {
   Button,
   Card,

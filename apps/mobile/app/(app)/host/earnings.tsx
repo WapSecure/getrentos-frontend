@@ -10,7 +10,7 @@ import {
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Eye, Landmark } from 'lucide-react-native';
+import { Eye, Landmark } from '@sureground/icons/native';
 import {
   Badge,
   Button,

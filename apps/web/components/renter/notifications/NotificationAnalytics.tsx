@@ -1,6 +1,6 @@
 'use client';
 
-import { TrendingUp, Clock, CheckCircle } from 'lucide-react';
+import { TrendingUp, Clock, CheckCircle } from '@sureground/icons';
 import { Alert, Card } from '@sureground/ui';
 
 interface Notification {

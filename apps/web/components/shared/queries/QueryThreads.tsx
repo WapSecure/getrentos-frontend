@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Clock, MessageSquareText, Plus, Sparkles } from 'lucide-react';
+import { ArrowLeft, Clock, MessageSquareText, Plus, Sparkles } from '@sureground/icons';
 import {
   Alert,
   Badge,

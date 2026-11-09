@@ -10,7 +10,7 @@ import {
   ResponsiveContainer,
   TooltipProps,
 } from 'recharts';
-import { TrendingUp } from 'lucide-react';
+import { TrendingUp } from '@sureground/icons';
 import { useQuery } from '@tanstack/react-query';
 import { formatCurrency } from '@/lib/format';
 import { estateService } from '@/services/estateService';

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { Badge, PageErrorState, Skeleton } from '@sureground/ui';
-import { ArrowLeft, BadgeCheck, FileCheck2, MapPin, ReceiptText } from 'lucide-react';
+import { ArrowLeft, BadgeCheck, FileCheck2, MapPin, ReceiptText } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency } from '@/lib/format';
 import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';

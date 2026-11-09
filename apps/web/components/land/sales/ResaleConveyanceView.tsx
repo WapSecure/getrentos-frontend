@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Breadcrumbs, Card, PageErrorState, PageHeader, Skeleton } from '@sureground/ui';
-import { Info } from 'lucide-react';
+import { Info } from '@sureground/icons';
 import { ROUTES } from '@sureground/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { landDeveloperKeys } from '@/lib/landDeveloperQueryKeys';

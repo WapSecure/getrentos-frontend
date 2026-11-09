@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Copy, Check, Mail, Facebook, Twitter, MessageCircle } from 'lucide-react';
+import { Copy, Check, Mail, Facebook, Twitter, MessageCircle } from '@sureground/icons';
 import { Button, Dialog, DialogContent, DialogDescription, DialogTitle } from '@sureground/ui';
 import { Property } from '@/types/renter';
 

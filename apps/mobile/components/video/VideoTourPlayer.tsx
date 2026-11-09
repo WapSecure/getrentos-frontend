@@ -3,7 +3,7 @@ import { Platform, View } from 'react-native';
 import { Image } from 'expo-image';
 import { useEvent } from 'expo';
 import { useVideoPlayer, VideoView } from 'expo-video';
-import { VideoOff } from 'lucide-react-native';
+import { VideoOff } from '@sureground/icons/native';
 import { Text, useTheme } from '@sureground/ui-native';
 import { videoSource, type VideoStream } from '@sureground/shared';
 import { EmbedFrame } from './EmbedFrame';

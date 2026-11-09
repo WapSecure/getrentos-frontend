@@ -1,7 +1,7 @@
 'use client';
 
 import { Badge, type BadgeVariant } from '@sureground/ui';
-import { ClipboardCheck, AlertTriangle } from 'lucide-react';
+import { ClipboardCheck, AlertTriangle } from '@sureground/icons';
 import {
   INSPECTION_STATUS_LABELS,
   INSPECTION_TYPE_LABELS,

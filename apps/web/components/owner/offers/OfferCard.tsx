@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Wallet, CreditCard, Banknote } from 'lucide-react';
+import { Wallet, CreditCard, Banknote } from '@sureground/icons';
 import { Badge, Button } from '@sureground/ui';
 import { formatAskingDifference, formatCurrency, formatDate, getInitials } from '@/lib/format';
 import { offerStatusBadges } from '@/lib/statusBadge';

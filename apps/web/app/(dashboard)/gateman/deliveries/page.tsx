@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Package, Plus } from 'lucide-react';
+import { Package, Plus } from '@sureground/icons';
 import { NotAssignedToEstate } from '@/components/gateman/NotAssignedToEstate';
 import { Button, CardSkeleton, ListSkeleton } from '@sureground/ui';
 import { estateService } from '@/services/estateService';

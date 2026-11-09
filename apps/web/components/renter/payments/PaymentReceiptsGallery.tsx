@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FileText, Download, Eye } from 'lucide-react';
+import { FileText, Download, Eye } from '@sureground/icons';
 import {
   Button,
   Card,

@@ -1,7 +1,7 @@
 'use client';
 
 import { useId, type ReactNode } from 'react';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle } from '@sureground/icons';
 import { cn } from '@sureground/shared';
 import { FieldContext } from './fieldContext';
 

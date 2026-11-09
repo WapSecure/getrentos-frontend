@@ -13,7 +13,7 @@ import {
   ShieldAlert,
   Wallet,
   Wrench,
-} from 'lucide-react';
+} from '@sureground/icons';
 import {
   Alert,
   Badge,

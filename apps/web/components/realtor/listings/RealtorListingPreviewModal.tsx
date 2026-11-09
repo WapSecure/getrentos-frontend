@@ -10,7 +10,7 @@ import {
   ShieldAlert,
   Pause,
   XCircle,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { Badge, Dialog, DialogContent, DialogTitle, type BadgeVariant } from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 import type { RealtorListing, RealtorListingStatus } from '@/types/realtor';

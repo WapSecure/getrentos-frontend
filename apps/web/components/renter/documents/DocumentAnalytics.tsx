@@ -1,6 +1,6 @@
 'use client';
 
-import { BarChart3, TrendingUp, FileText, Database, PieChart } from 'lucide-react';
+import { BarChart3, TrendingUp, FileText, Database, PieChart } from '@sureground/icons';
 import { Alert, Badge, Card } from '@sureground/ui';
 
 interface DocumentAnalyticsProps {

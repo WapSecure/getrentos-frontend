@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ShieldPlus } from 'lucide-react';
+import { ShieldPlus } from '@sureground/icons';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@sureground/ui';
 import { Alert, Button } from '@sureground/ui';
 import { Field } from '@sureground/ui';

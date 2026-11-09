@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { CheckCircle2, ShieldAlert, XCircle } from 'lucide-react';
+import { CheckCircle2, ShieldAlert, XCircle } from '@sureground/icons';
 import { Badge, Button, ConfirmDialog, ListSkeleton, type BadgeVariant } from '@sureground/ui';
 import { formatDate, unwrap } from '@sureground/shared';
 import { adminLandService } from '@/services/adminLandService';

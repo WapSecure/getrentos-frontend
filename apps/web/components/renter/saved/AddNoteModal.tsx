@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Save } from 'lucide-react';
+import { Save } from '@sureground/icons';
 import {
   Alert,
   Button,

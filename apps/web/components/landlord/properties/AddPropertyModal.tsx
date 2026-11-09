@@ -26,7 +26,7 @@ import {
   ShieldCheck,
   Trash2,
   AlertTriangle,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { Button } from '@sureground/ui';
 import { AddressFields } from '@/components/shared/location/AddressFields';
 import type { VerifiedAddress } from '@sureground/shared';

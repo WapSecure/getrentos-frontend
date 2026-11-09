@@ -1,4 +1,4 @@
-import { Banknote, Layers, Lock, BadgeCheck } from 'lucide-react';
+import { Banknote, Layers, Lock, BadgeCheck } from '@sureground/icons';
 import { MarketingCard, SectionHeading } from './primitives';
 
 const reasons = [

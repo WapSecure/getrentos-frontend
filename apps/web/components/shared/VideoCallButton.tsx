@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Video } from 'lucide-react';
+import { Video } from '@sureground/icons';
 import { Button } from '@sureground/ui';
 import { videoCallState, type VideoCallJoin } from '@sureground/shared';
 import { unwrap, type ApiResponse } from '@/lib/apiHelpers';

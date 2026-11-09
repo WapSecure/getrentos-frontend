@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Bell, BellOff, Plus, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { Bell, BellOff, Plus, X, ChevronDown, ChevronUp } from '@sureground/icons';
 import { Button, Card, DatePicker, Field, IconButton, Input, TimePicker } from '@sureground/ui';
 
 interface Reminder {

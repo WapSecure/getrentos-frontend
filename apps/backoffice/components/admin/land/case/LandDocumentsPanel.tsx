@@ -1,6 +1,6 @@
 'use client';
 
-import { FileLock2, Link2, Unlink, Upload } from 'lucide-react';
+import { FileLock2, Link2, Unlink, Upload } from '@sureground/icons';
 import { Badge, Button } from '@sureground/ui';
 import { formatDate } from '@sureground/shared';
 import type {

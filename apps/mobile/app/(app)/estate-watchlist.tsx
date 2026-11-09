@@ -10,7 +10,7 @@ import {
 } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Camera, Car, Plus, ShieldBan, UserRound } from 'lucide-react-native';
+import { Camera, Car, Plus, ShieldBan, UserRound } from '@sureground/icons/native';
 import {
   Button,
   Card,

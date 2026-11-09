@@ -13,7 +13,7 @@ import {
   DocumentPreviewButton,
   Skeleton,
 } from '@sureground/ui';
-import { FileText, FolderOpen, Trash2, Upload } from 'lucide-react';
+import { FileText, FolderOpen, Trash2, Upload } from '@sureground/icons';
 import { formatDate } from '@/lib/format';
 import type { LandDocument, LandDocumentType } from '@/types/landDocument';
 import { errorMessage, type Notify } from '../developer/feedback';

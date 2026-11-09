@@ -12,7 +12,7 @@ import {
   Repeat,
   Target,
   Wallet,
-} from 'lucide-react-native';
+} from '@sureground/icons/native';
 import {
   Card,
   Divider,

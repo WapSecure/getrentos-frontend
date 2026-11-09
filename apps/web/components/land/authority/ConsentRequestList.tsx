@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CheckCircle2, CircleAlert, Inbox, MapPin, XCircle } from 'lucide-react';
+import { CheckCircle2, CircleAlert, Inbox, MapPin, XCircle } from '@sureground/icons';
 import { Badge, Button, Card, EmptyState, Skeleton, Textarea, useToast } from '@sureground/ui';
 import {
   LAND_CONSENT_LABELS,

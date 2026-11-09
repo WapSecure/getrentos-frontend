@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ClipboardList, Plus } from 'lucide-react-native';
+import { ClipboardList, Plus } from '@sureground/icons/native';
 import {
   Badge,
   Button,

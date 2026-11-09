@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Shield, Lock, CheckCircle, TrendingUp } from 'lucide-react';
+import { Shield, Lock, CheckCircle, TrendingUp } from '@sureground/icons';
 
 const trustFeatures = [
   {

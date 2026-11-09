@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Animated, { FadeIn, SlideInRight } from 'react-native-reanimated';
-import { AtSign, KeyRound, MessageCircle, Phone } from 'lucide-react-native';
+import { AtSign, KeyRound, MessageCircle, Phone } from '@sureground/icons/native';
 import {
   AuthScaffold,
   Button,

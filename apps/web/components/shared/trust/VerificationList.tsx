@@ -11,7 +11,7 @@ import {
   IdCard,
   Award,
   CreditCard,
-} from 'lucide-react';
+} from '@sureground/icons';
 import type { VerificationItem } from '@/types/trust-score';
 
 const iconMap: Record<string, React.ElementType> = {

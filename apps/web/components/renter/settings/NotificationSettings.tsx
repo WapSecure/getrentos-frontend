@@ -4,7 +4,7 @@ import { TextMessageConsentCard } from '@/components/shared/settings/TextMessage
 
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { Bell, MessageCircle, FileText, CreditCard, Wrench, Home } from 'lucide-react';
+import { Bell, MessageCircle, FileText, CreditCard, Wrench, Home } from '@sureground/icons';
 import { Checkbox, SaveButton, Switch, useToast } from '@sureground/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';

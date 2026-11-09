@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { CheckCircle, Circle, Clock, AlertCircle, Home, UserCheck } from 'lucide-react';
+import { CheckCircle, Circle, Clock, AlertCircle, Home, UserCheck } from '@sureground/icons';
 import { Alert } from '@sureground/ui';
 
 interface TimelineStep {

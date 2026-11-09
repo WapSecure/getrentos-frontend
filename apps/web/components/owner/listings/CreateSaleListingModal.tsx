@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from 'react';
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Check, FileCheck2, Loader2, Upload, Image as ImageIcon, Video } from 'lucide-react';
+import { Check, FileCheck2, Loader2, Upload, Image as ImageIcon, Video } from '@sureground/icons';
 import {
   Alert,
   Button,

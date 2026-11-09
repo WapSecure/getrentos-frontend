@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, MessageCircle } from 'lucide-react';
+import { ArrowLeft, MessageCircle } from '@sureground/icons';
 import { Button, Pagination, EmptyState, PageHeader } from '@sureground/ui';
 import { ConversationList, type Conversation } from '@/components/owner/messages/ConversationList';
 import { MessageThread, type ThreadMessage } from '@/components/owner/messages/MessageThread';

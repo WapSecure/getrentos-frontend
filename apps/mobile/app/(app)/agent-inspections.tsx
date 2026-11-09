@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ClipboardCheck } from 'lucide-react-native';
+import { ClipboardCheck } from '@sureground/icons/native';
 import { Badge, Card, Chip, QueryState, Skeleton, Text, useTheme } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { agentApi, type AgentInspection } from '@/lib/api/agent';

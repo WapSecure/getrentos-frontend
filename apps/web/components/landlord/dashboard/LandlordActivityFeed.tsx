@@ -1,6 +1,6 @@
 'use client';
 
-import { CreditCard, Wrench, CalendarClock, UserPlus, ReceiptText } from 'lucide-react';
+import { CreditCard, Wrench, CalendarClock, UserPlus, ReceiptText } from '@sureground/icons';
 import { useQuery } from '@tanstack/react-query';
 import { Card, EmptyState, Skeleton } from '@sureground/ui';
 import { formatRelativeTime } from '@/lib/format';

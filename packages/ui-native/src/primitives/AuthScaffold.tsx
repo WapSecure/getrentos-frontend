@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
-import { ChevronLeft } from 'lucide-react-native';
+import { ChevronLeft } from '@sureground/icons/native';
 import { useTheme } from '../theme';
 import { Text } from './Text';
 import { Progress } from './Progress';

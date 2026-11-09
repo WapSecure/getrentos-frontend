@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Milestone } from 'lucide-react';
+import { Milestone } from '@sureground/icons';
 import { Badge, Button, ConfirmDialog } from '@sureground/ui';
 import { formatCurrency, formatDate } from '@sureground/shared';
 import type { LandEscrowRelease, LandMilestone } from '@/types/landPurchase';

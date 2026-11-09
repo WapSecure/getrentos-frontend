@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { AlertTriangle, RefreshCcw } from 'lucide-react';
+import { AlertTriangle, RefreshCcw } from '@sureground/icons';
 import { Button } from '@sureground/ui';
 
 export default function AdminDashboardError({

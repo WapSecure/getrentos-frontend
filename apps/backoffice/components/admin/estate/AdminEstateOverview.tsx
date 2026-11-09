@@ -18,7 +18,7 @@ import {
   Users,
   Wallet,
   Wrench,
-} from 'lucide-react';
+} from '@sureground/icons';
 import {
   Button,
   ConfirmDialog,

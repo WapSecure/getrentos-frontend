@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { LifeBuoy, Scale } from 'lucide-react';
+import { LifeBuoy, Scale } from '@sureground/icons';
 import { HelpHeader } from '@/components/renter/help/HelpHeader';
 import { HelpCategories } from '@/components/renter/help/HelpCategories';
 import { HelpArticles } from '@/components/renter/help/HelpArticles';

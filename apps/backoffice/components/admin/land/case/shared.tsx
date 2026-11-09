@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import type { LucideIcon } from 'lucide-react';
+import type { SgIcon } from '@sureground/icons';
 import { DocumentPreviewButton } from '@sureground/ui';
 import { landQueryKeys } from '@/lib/landDiligence';
 import type { LandDiligenceDocument } from '@/types/land';
@@ -31,7 +31,7 @@ export const LandCaseSection = ({
 }: {
   title: string;
   description?: ReactNode;
-  icon?: LucideIcon;
+  icon?: SgIcon;
   actions?: ReactNode;
   children: ReactNode;
   id?: string;

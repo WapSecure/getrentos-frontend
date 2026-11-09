@@ -15,7 +15,7 @@ import Animated, {
   type SharedValue,
 } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
-import { ArrowRight } from 'lucide-react-native';
+import { ArrowRight } from '@sureground/icons/native';
 import {
   BrandLogo,
   Button,

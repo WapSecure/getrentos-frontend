@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { Siren } from 'lucide-react';
+import { Siren } from '@sureground/icons';
 import { estateResidentService } from '@/services/estateResidentService';
 import { unwrapOptional } from '@/lib/apiHelpers';
 import { estateResidentKeys } from '@/lib/queryKeys';

@@ -5,14 +5,14 @@ import {
   FileClock,
   CircleDashed,
   HelpCircle,
-  type LucideIcon,
+  type SgIcon,
   PauseCircle,
   XCircle,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { Badge, type BadgeVariant } from '@sureground/ui';
 import type { LandDiligenceStatus } from '@/types/land';
 
-type StatusConfiguration = { label: string; variant: BadgeVariant; icon: LucideIcon };
+type StatusConfiguration = { label: string; variant: BadgeVariant; icon: SgIcon };
 
 const statusConfiguration: Record<LandDiligenceStatus, StatusConfiguration> = {
   NOT_STARTED: { label: 'Not started', variant: 'neutral', icon: FileClock },

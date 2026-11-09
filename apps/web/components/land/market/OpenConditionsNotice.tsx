@@ -1,7 +1,7 @@
 'use client';
 
 import { Alert } from '@sureground/ui';
-import { CircleDashed } from 'lucide-react';
+import { CircleDashed } from '@sureground/icons';
 import { formatDate } from '@/lib/format';
 import type { LandOpenCondition } from '@/types/land';
 

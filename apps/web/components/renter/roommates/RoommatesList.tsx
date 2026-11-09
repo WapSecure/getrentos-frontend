@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Users, UserPlus } from 'lucide-react';
+import { Users, UserPlus } from '@sureground/icons';
 import { RoommateCard } from './RoommateCard';
 import { Alert, Button, Card, EmptyState } from '@sureground/ui';
 

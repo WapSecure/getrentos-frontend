@@ -9,7 +9,7 @@ import {
   UserCheck,
   Key,
   CalendarDays,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { Alert, Badge } from '@sureground/ui';
 
 interface ApplicationStep {

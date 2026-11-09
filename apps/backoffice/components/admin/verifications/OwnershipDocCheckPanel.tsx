@@ -2,7 +2,7 @@
 
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
-import { ShieldCheck, Sparkles, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, Sparkles, AlertTriangle, CheckCircle2 } from '@sureground/icons';
 import { Alert, Badge, Button, type BadgeVariant } from '@sureground/ui';
 import { unwrap } from '@sureground/shared';
 import { adminService } from '@/services/adminService';

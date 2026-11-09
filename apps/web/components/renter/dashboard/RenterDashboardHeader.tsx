@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Search } from 'lucide-react';
+import { Search } from '@sureground/icons';
 import { Button } from '@sureground/ui';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { ROUTES } from '@/lib/constants/auth';

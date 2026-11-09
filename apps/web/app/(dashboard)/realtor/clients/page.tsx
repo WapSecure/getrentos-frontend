@@ -4,7 +4,7 @@ import { isVerificationGateError } from '@/components/shared/verification/Verifi
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, Users } from 'lucide-react';
+import { Plus, Users } from '@sureground/icons';
 import { ClientCard } from '@/components/realtor/clients/ClientCard';
 import { AddClientModal } from '@/components/realtor/clients/AddClientModal';
 import {

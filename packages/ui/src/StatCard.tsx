@@ -1,4 +1,4 @@
-import { LucideIcon } from 'lucide-react';
+import { SgIcon } from '@sureground/icons';
 import { formatCurrency } from '@sureground/shared';
 import { cn } from '@sureground/shared';
 
@@ -29,7 +29,7 @@ const accentClasses: Record<StatCardAccent, { icon: string }> = {
 };
 
 interface StatCardProps {
-  icon: LucideIcon;
+  icon: SgIcon;
   label: string;
   value: number | string;
   subtitle?: string;

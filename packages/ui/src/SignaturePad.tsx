@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useId, useRef, useState } from 'react';
-import { Eraser, PenLine, Upload } from 'lucide-react';
+import { Eraser, PenLine, Upload } from '@sureground/icons';
 import { cn } from '@sureground/shared';
 
 interface SignaturePadProps {

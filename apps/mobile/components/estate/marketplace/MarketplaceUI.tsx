@@ -1,7 +1,7 @@
 import { Alert, Pressable, View } from 'react-native';
 import { router } from 'expo-router';
 import type { InfiniteData, QueryClient } from '@tanstack/react-query';
-import { Sparkles } from 'lucide-react-native';
+import { Sparkles } from '@sureground/icons/native';
 import { Button, FormAlert, Text, useTheme, type useToast } from '@sureground/ui-native';
 import { marketplaceKeys, planGate, type EstateListing } from '@/lib/api/estateMarketplace';
 import type { Paginated } from '@/lib/api/properties';

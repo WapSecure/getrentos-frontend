@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, ClipboardCheck } from 'lucide-react';
+import { Plus, ClipboardCheck } from '@sureground/icons';
 import {
   Button,
   CardSkeleton,

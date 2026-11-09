@@ -3,7 +3,7 @@ import { Alert, RefreshControl, ScrollView, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Check, Plus, Undo2, X } from 'lucide-react-native';
+import { Check, Plus, Undo2, X } from '@sureground/icons/native';
 import {
   Badge,
   Button,

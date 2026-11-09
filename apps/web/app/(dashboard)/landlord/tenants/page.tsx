@@ -10,7 +10,7 @@ import {
 } from '@sureground/ui';
 import { useMemo, useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Users } from 'lucide-react';
+import { Users } from '@sureground/icons';
 import { TenantCard } from '@/components/landlord/tenants/TenantCard';
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';

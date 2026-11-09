@@ -2,7 +2,7 @@
 
 import { useParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, CircleAlert, HandCoins, RefreshCw } from 'lucide-react';
+import { ArrowLeft, CircleAlert, HandCoins, RefreshCw } from '@sureground/icons';
 import {
   Alert,
   Button,

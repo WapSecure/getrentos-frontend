@@ -12,7 +12,7 @@ import {
   Textarea,
   useToast,
 } from '@sureground/ui';
-import { Star } from 'lucide-react';
+import { Star } from '@sureground/icons';
 import { cn } from '@sureground/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';

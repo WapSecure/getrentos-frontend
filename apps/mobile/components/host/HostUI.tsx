@@ -10,7 +10,7 @@ import {
   Plus,
   ReceiptText,
   Star,
-} from 'lucide-react-native';
+} from '@sureground/icons/native';
 import { Card, Divider, Price, Text, useTheme } from '@sureground/ui-native';
 import { ApiError } from '@/lib/api/client';
 import { qk } from '@/lib/query/keys';

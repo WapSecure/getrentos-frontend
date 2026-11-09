@@ -1,7 +1,7 @@
 'use client';
 
 import { boundarySignOffText } from '@sureground/shared';
-import { History, Printer } from 'lucide-react';
+import { History, Printer } from '@sureground/icons';
 import { Alert, Badge, Button, EmptyState, PageHeader } from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { LAND_TITLE_TYPE_LABELS, type LandTitleType } from '@/types/land';

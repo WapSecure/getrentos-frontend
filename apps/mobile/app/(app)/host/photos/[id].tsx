@@ -4,7 +4,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
-import { ImagePlus, Star, X } from 'lucide-react-native';
+import { ImagePlus, Star, X } from '@sureground/icons/native';
 import {
   Button,
   Divider,

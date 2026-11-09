@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Contact } from 'lucide-react-native';
+import { Contact } from '@sureground/icons/native';
 import {
   Avatar,
   Card,

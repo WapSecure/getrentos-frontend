@@ -1,6 +1,6 @@
 'use client';
 
-import { ImageIcon, ShieldAlert, ShieldCheck, Undo2 } from 'lucide-react';
+import { ImageIcon, ShieldAlert, ShieldCheck, Undo2 } from '@sureground/icons';
 import { Badge, Button, IconLink } from '@sureground/ui';
 import type { WatchlistEntry } from '@/types/estate';
 

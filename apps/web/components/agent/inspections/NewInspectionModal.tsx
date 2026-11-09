@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { X, Plus, Trash2, Camera, Check } from 'lucide-react';
+import { X, Plus, Trash2, Camera, Check } from '@sureground/icons';
 import {
   Alert,
   Button,

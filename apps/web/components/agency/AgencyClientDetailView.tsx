@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Building2, Mail, NotebookPen, Phone, ShieldCheck, UserRound } from 'lucide-react';
+import { Building2, Mail, NotebookPen, Phone, ShieldCheck, UserRound } from '@sureground/icons';
 import {
   Badge,
   Breadcrumbs,

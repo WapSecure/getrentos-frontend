@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { AlertOctagon, CheckCircle2, Circle, ClipboardCheck, Clock } from 'lucide-react';
+import { AlertOctagon, CheckCircle2, Circle, ClipboardCheck, Clock } from '@sureground/icons';
 import { Button, Skeleton } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { buyerKeys } from '@/lib/queryKeys';

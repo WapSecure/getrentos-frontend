@@ -1,6 +1,6 @@
 'use client';
 
-import { ClipboardList } from 'lucide-react';
+import { ClipboardList } from '@sureground/icons';
 import { Button, PageHeader } from '@sureground/ui';
 import { ROUTES } from '@/lib/constants/auth';
 

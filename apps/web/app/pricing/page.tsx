@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, BadgeCheck } from 'lucide-react';
+import { ArrowLeft, BadgeCheck } from '@sureground/icons';
 import { Button, SegmentedControl, TableSkeleton, type Segment } from '@sureground/ui';
 import { usePlanPricing } from '@/hooks/usePlanPricing';
 import { PlanComparisonTable } from '@/components/shared/subscription/PlanComparisonTable';

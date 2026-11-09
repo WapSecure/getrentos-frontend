@@ -1,6 +1,6 @@
 'use client';
 
-import { ClipboardCheck, UserCheck, Home, FileText, Clock, AlertTriangle } from 'lucide-react';
+import { ClipboardCheck, UserCheck, Home, FileText, Clock, AlertTriangle } from '@sureground/icons';
 import { Card, CardDescription, CardHeader, CardTitle, EmptyState } from '@sureground/ui';
 import { formatDate } from '@/lib/format';
 import type { AgentTask, TaskType } from '@/types/agent';

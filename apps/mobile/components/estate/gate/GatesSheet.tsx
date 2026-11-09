@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Alert, View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { DoorOpen, Trash2 } from 'lucide-react-native';
+import { DoorOpen, Trash2 } from '@sureground/icons/native';
 import {
   Button,
   FormAlert,

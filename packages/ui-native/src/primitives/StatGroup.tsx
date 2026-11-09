@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Pressable, View, type StyleProp, type ViewStyle } from 'react-native';
-import { ChevronRight } from 'lucide-react-native';
+import { ChevronRight } from '@sureground/icons/native';
 import { useTheme } from '../theme';
 import { Text } from './Text';
 import { Card } from './Card';

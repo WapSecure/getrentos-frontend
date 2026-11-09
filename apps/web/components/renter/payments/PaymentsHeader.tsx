@@ -1,6 +1,6 @@
 'use client';
 
-import { CreditCard, Download, Shield } from 'lucide-react';
+import { CreditCard, Download, Shield } from '@sureground/icons';
 import { Button } from '@sureground/ui';
 import { RenterPageHeader } from '../shared/RenterPageHeader';
 

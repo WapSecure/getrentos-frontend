@@ -3,7 +3,7 @@ import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronRight, LandPlot, Plus, ReceiptText, Video } from 'lucide-react-native';
+import { ChevronRight, LandPlot, Plus, ReceiptText, Video } from '@sureground/icons/native';
 import {
   Badge,
   Button,

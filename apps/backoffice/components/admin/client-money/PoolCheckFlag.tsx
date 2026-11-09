@@ -1,7 +1,7 @@
 'use client';
 
 import { Badge, Card } from '@sureground/ui';
-import { AlertTriangle, CircleHelp, ShieldQuestion } from 'lucide-react';
+import { AlertTriangle, CircleHelp, ShieldQuestion } from '@sureground/icons';
 import type { ReconciliationRow } from '@/services/adminClientMoneyService';
 
 const naira = (value: number) => `₦${value.toLocaleString('en-NG')}`;

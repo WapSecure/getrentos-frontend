@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Camera, Home, MapPin, Play } from 'lucide-react';
+import { Camera, Home, MapPin, Play } from '@sureground/icons';
 
 interface PropertyGalleryProps {
   images?: string[];

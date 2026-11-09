@@ -17,7 +17,7 @@ import {
   Select,
   useToast,
 } from '@sureground/ui';
-import { AlertTriangle, Copy, RefreshCw, Trash2 } from 'lucide-react';
+import { AlertTriangle, Copy, RefreshCw, Trash2 } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletKeys } from '@/lib/queryKeys';
 import { formatRelativeTime } from '@/lib/format';

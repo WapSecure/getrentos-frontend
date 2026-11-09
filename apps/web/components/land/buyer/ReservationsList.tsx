@@ -11,7 +11,7 @@ import {
   Skeleton,
   useToast,
 } from '@sureground/ui';
-import { Hourglass, MapPinned } from 'lucide-react';
+import { Hourglass, MapPinned } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';

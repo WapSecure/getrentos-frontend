@@ -3,7 +3,7 @@ import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
-import { ChevronLeft, LandPlot, LayoutGrid, Search, ShieldCheck } from 'lucide-react-native';
+import { ChevronLeft, LandPlot, LayoutGrid, Search, ShieldCheck } from '@sureground/icons/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Badge,

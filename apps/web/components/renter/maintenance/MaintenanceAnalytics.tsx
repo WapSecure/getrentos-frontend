@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Clock, CheckCircle, AlertCircle, BarChart3 } from 'lucide-react';
+import { Clock, CheckCircle, AlertCircle, BarChart3 } from '@sureground/icons';
 import { Alert } from '@sureground/ui';
 import type { MaintenanceSummary } from '@/types/maintenance';
 

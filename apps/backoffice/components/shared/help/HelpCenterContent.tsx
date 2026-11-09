@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown, Mail, Phone, Clock, ScrollText } from 'lucide-react';
+import { ChevronDown, Mail, Phone, Clock, ScrollText } from '@sureground/icons';
 import { Card, PageHeader } from '@sureground/ui';
 import { OPS_CONTACT, telLink } from '@/lib/opsContact';
 

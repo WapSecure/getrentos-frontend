@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { CheckCircle2, Search } from 'lucide-react';
+import { CheckCircle2, Search } from '@sureground/icons';
 import {
   Button,
   EmptyState,

@@ -11,7 +11,7 @@ import {
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, Send } from 'lucide-react-native';
+import { ChevronLeft, Send } from '@sureground/icons/native';
 import {
   Badge,
   LinkButton,

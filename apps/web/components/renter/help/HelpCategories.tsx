@@ -9,7 +9,7 @@ import {
   Users,
   Settings,
   Shield,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { Card } from '@sureground/ui';
 
 interface Category {

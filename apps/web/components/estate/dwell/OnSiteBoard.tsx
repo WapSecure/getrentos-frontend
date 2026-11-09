@@ -1,6 +1,6 @@
 'use client';
 
-import { Clock, MapPin, Siren } from 'lucide-react';
+import { Clock, MapPin, Siren } from '@sureground/icons';
 import { Card, EmptyState, ListSkeleton } from '@sureground/ui';
 import type { OnSiteBoard as OnSiteBoardData } from '@/types/estate';
 

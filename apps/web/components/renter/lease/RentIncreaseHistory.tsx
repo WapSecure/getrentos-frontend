@@ -2,7 +2,7 @@
 
 import { Badge, Card } from '@sureground/ui';
 import { motion } from 'framer-motion';
-import { TrendingUp, Calendar } from 'lucide-react';
+import { TrendingUp, Calendar } from '@sureground/icons';
 import { NairaSign } from '@sureground/ui/NairaSign';
 import { formatPercent } from '@sureground/shared';
 

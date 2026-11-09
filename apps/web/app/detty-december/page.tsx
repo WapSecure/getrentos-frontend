@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { ClipboardCheck, Lock, ReceiptText, ShieldCheck } from 'lucide-react';
+import { ClipboardCheck, Lock, ReceiptText, ShieldCheck } from '@sureground/icons';
 import { Footer } from '@/components/layout/Footer';
 import { Navigation } from '@/components/layout/Navigation';
 import { ShortletMarketplaceBrowser } from '@/components/shortlet/ShortletMarketplaceBrowser';
