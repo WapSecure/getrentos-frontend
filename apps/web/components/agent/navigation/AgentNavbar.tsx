@@ -1,20 +1,17 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Wifi, WifiOff } from 'lucide-react';
-import { Logo } from '@/components/ui/Logo';
-import { Badge, IconButton, SearchInput, ThemeToggle } from '@getrentos/ui';
+import { Wifi, WifiOff } from 'lucide-react';
+import { Badge } from '@getrentos/ui';
 import { AgentProfileDropdown } from './AgentProfileDropdown';
 import { navGroups } from '../dashboard/AgentSidebar';
-import { GroupedMobileNavigation } from '@/components/shared/dashboard/GroupedSidebar';
+import { WorkspaceNavbar } from '@/components/shared/navigation/WorkspaceNavbar';
 import { ROUTES } from '@/lib/constants/auth';
-import { useLanguage } from '@/lib/i18n/LanguageContext';
+import { NotificationBell } from '@/components/shared/notifications/NotificationBell';
 import { unwrap } from '@/lib/apiHelpers';
 import { agentKeys } from '@/lib/queryKeys';
 import { agentService } from '@/services/agentService';
-import { NotificationBell } from '@/components/shared/notifications/NotificationBell';
 import { AgentAssistant } from '../assistant/AgentAssistant';
 
 interface AgentNavbarProps {
@@ -23,31 +20,7 @@ interface AgentNavbarProps {
 
 export const AgentNavbar = ({ user }: AgentNavbarProps) => {
   const router = useRouter();
-  const { t } = useLanguage();
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && searchQuery.trim()) {
-      router.push(`${ROUTES.AGENT_TASKS}?q=${encodeURIComponent(searchQuery.trim())}`);
-    }
-  };
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
-  useEffect(() => {
-    if (!isMobileMenuOpen) return;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setIsMobileMenuOpen(false);
-    };
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, [isMobileMenuOpen]);
-
-  useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 10);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   useEffect(() => {
     const updateStatus = () => setIsOnline(navigator.onLine);
@@ -61,94 +34,40 @@ export const AgentNavbar = ({ user }: AgentNavbarProps) => {
   }, []);
 
   return (
-    <>
-      <nav className={`workspace-navbar sticky top-0 z-50 ${isScrolled ? 'shadow-xs' : ''}`}>
-        <div className="px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between gap-3">
-            <Logo size="md" />
-
-            <div className="hidden md:flex flex-1 max-w-md mx-4">
-              <SearchInput
-                value={searchQuery}
-                onValueChange={setSearchQuery}
-                onKeyDown={handleSearchSubmit}
-                placeholder="Search tasks, properties..."
-                label="Search tasks and properties"
-                className="w-full"
-              />
-            </div>
-
-            <div className="flex items-center gap-3">
-              <Badge
-                variant={isOnline ? 'success' : 'warning'}
-                icon={isOnline ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
-                className="hidden sm:inline-flex"
-              >
-                {isOnline ? 'Online' : 'Offline'}
-              </Badge>
-
-              <ThemeToggle />
-
-              <AgentAssistant />
-
-              <NotificationBell
-                portal="agent"
-                queryKey={agentKeys.notifications}
-                fetchNotifications={() => unwrap(agentService.getNotifications())}
-                markRead={(id) => unwrap(agentService.markNotificationRead(id))}
-                markAllRead={() => unwrap(agentService.markAllNotificationsRead())}
-                viewAllHref={ROUTES.AGENT_TASKS}
-                viewAllLabel="View all tasks"
-              />
-
-              <AgentProfileDropdown user={user} />
-
-              <IconButton
-                label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
-                aria-expanded={isMobileMenuOpen}
-                icon={isMobileMenuOpen ? <X /> : <Menu />}
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="lg:hidden"
-              />
-            </div>
-          </div>
-
-          <div className="md:hidden py-3">
-            <SearchInput
-              value={searchQuery}
-              onValueChange={setSearchQuery}
-              onKeyDown={handleSearchSubmit}
-              placeholder="Search tasks, properties..."
-              label="Search tasks and properties"
-            />
-          </div>
-        </div>
-      </nav>
-
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="fixed top-16 left-0 right-0 z-[60] bg-background border-b border-border lg:hidden bottom-0 overflow-y-auto overscroll-contain"
-          >
-            <GroupedMobileNavigation
-              ariaLabel="Agent navigation"
-              workspaceLabel="Field operations"
-              dashboardHref={ROUTES.AGENT_DASHBOARD}
-              onNavigate={() => setIsMobileMenuOpen(false)}
-              groups={navGroups.map((group) => ({
-                ...group,
-                items: group.items.map((item) => ({
-                  ...item,
-                  label: item.labelKey ? t(item.labelKey) : item.label,
-                })),
-              }))}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
+    <WorkspaceNavbar
+      search={{
+        placeholder: 'Search tasks, properties...',
+        label: 'Search tasks and properties',
+        onSearch: (query) => router.push(`${ROUTES.AGENT_TASKS}?q=${encodeURIComponent(query)}`),
+      }}
+      actions={
+        <Badge
+          variant={isOnline ? 'success' : 'warning'}
+          icon={isOnline ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
+          className="hidden sm:inline-flex"
+        >
+          {isOnline ? 'Online' : 'Offline'}
+        </Badge>
+      }
+      assistant={<AgentAssistant />}
+      notifications={
+        <NotificationBell
+          portal="agent"
+          queryKey={agentKeys.notifications}
+          fetchNotifications={() => unwrap(agentService.getNotifications())}
+          markRead={(id) => unwrap(agentService.markNotificationRead(id))}
+          markAllRead={() => unwrap(agentService.markAllNotificationsRead())}
+          viewAllHref={ROUTES.AGENT_TASKS}
+          viewAllLabel="View all tasks"
+        />
+      }
+      profileMenu={<AgentProfileDropdown user={user} />}
+      navigation={{
+        ariaLabel: 'Agent navigation',
+        workspaceLabel: 'Field operations',
+        dashboardHref: ROUTES.AGENT_DASHBOARD,
+        groups: navGroups,
+      }}
+    />
   );
 };

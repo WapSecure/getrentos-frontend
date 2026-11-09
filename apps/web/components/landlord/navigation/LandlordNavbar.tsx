@@ -1,19 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X } from 'lucide-react';
-import { Logo } from '@/components/ui/Logo';
-import { IconButton, SearchInput, ThemeToggle } from '@getrentos/ui';
 import { LandlordProfileDropdown } from './LandlordProfileDropdown';
 import { navGroups } from '../dashboard/LandlordSidebar';
-import { GroupedMobileNavigation } from '@/components/shared/dashboard/GroupedSidebar';
+import { WorkspaceNavbar } from '@/components/shared/navigation/WorkspaceNavbar';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import { landlordService } from '@/services/landlordService';
 import { ROUTES } from '@/lib/constants/auth';
-import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { NotificationBell } from '@/components/shared/notifications/NotificationBell';
 import { LandlordAssistant } from '../assistant/LandlordAssistant';
 import { ManagerAssistant } from '@/components/agency/assistant/ManagerAssistant';
@@ -31,104 +25,34 @@ export const LandlordNavbar = ({ user }: LandlordNavbarProps) => {
   const asManager =
     pathname?.startsWith('/agency') ||
     (roles.includes('PROPERTY_MANAGER') && !roles.includes('LANDLORD'));
-  const { t } = useLanguage();
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && searchQuery.trim()) {
-      router.push(`${ROUTES.LANDLORD_PROPERTIES}?q=${encodeURIComponent(searchQuery.trim())}`);
-    }
-  };
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 10);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   return (
-    <>
-      <nav className={`workspace-navbar sticky top-0 z-50 ${isScrolled ? 'shadow-xs' : ''}`}>
-        <div className="px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between gap-3">
-            <Logo size="md" />
-
-            <div className="hidden md:flex flex-1 max-w-md mx-4">
-              <SearchInput
-                className="w-full"
-                value={searchQuery}
-                onValueChange={setSearchQuery}
-                onKeyDown={handleSearchSubmit}
-                placeholder="Search properties, tenants..."
-                label="Search properties and tenants"
-              />
-            </div>
-
-            <div className="flex items-center gap-3">
-              <ThemeToggle />
-
-              {asManager ? <ManagerAssistant /> : <LandlordAssistant />}
-
-              <NotificationBell
-                portal="landlord"
-                queryKey={landlordKeys.notifications}
-                fetchNotifications={() => unwrap(landlordService.getNotifications())}
-                markRead={(id) => unwrap(landlordService.markNotificationRead(id))}
-                markAllRead={() => unwrap(landlordService.markAllNotificationsRead())}
-                refetchAfterMarking
-                viewAllHref={ROUTES.LANDLORD_DASHBOARD}
-              />
-
-              <LandlordProfileDropdown user={user} />
-
-              <IconButton
-                label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
-                aria-expanded={isMobileMenuOpen}
-                className="lg:hidden"
-                icon={isMobileMenuOpen ? <X /> : <Menu />}
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              />
-            </div>
-          </div>
-
-          <div className="md:hidden py-3">
-            <SearchInput
-              value={searchQuery}
-              onValueChange={setSearchQuery}
-              onKeyDown={handleSearchSubmit}
-              placeholder="Search properties, tenants..."
-              label="Search properties and tenants"
-            />
-          </div>
-        </div>
-      </nav>
-
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="fixed top-16 left-0 right-0 z-[60] bg-background border-b border-border lg:hidden bottom-0 overflow-y-auto overscroll-contain"
-          >
-            <GroupedMobileNavigation
-              ariaLabel="Landlord navigation"
-              workspaceLabel="Property management"
-              dashboardHref={ROUTES.LANDLORD_DASHBOARD}
-              onNavigate={() => setIsMobileMenuOpen(false)}
-              groups={navGroups.map((group) => ({
-                ...group,
-                items: group.items.map((item) => ({
-                  ...item,
-                  label: t(item.labelKey),
-                })),
-              }))}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
+    <WorkspaceNavbar
+      search={{
+        placeholder: 'Search properties, tenants...',
+        label: 'Search properties and tenants',
+        onSearch: (query) =>
+          router.push(`${ROUTES.LANDLORD_PROPERTIES}?q=${encodeURIComponent(query)}`),
+      }}
+      assistant={asManager ? <ManagerAssistant /> : <LandlordAssistant />}
+      notifications={
+        <NotificationBell
+          portal="landlord"
+          queryKey={landlordKeys.notifications}
+          fetchNotifications={() => unwrap(landlordService.getNotifications())}
+          markRead={(id) => unwrap(landlordService.markNotificationRead(id))}
+          markAllRead={() => unwrap(landlordService.markAllNotificationsRead())}
+          refetchAfterMarking
+          viewAllHref={ROUTES.LANDLORD_DASHBOARD}
+        />
+      }
+      profileMenu={<LandlordProfileDropdown user={user} />}
+      navigation={{
+        ariaLabel: 'Landlord navigation',
+        workspaceLabel: 'Property management',
+        dashboardHref: ROUTES.LANDLORD_DASHBOARD,
+        groups: navGroups,
+      }}
+    />
   );
 };
