@@ -205,7 +205,9 @@ function SidebarLink({
       className="sidebar-item"
     >
       <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-      <span className="sidebar-item-label min-w-0 flex-1 truncate">{item.label}</span>
+      <span className="sidebar-item-label min-w-0 flex-1 line-clamp-2 leading-snug break-words">
+        {item.label}
+      </span>
       {item.locked && (
         <Lock
           className="sidebar-item-extra h-3.5 w-3.5 shrink-0 text-muted-foreground/70"

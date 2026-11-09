@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { MutationCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MotionConfig } from 'framer-motion';
 import { ApiError, onSessionExpired } from '@getrentos/shared';
 import { ToastProvider, useToast, type ToastApi } from '../ToastProvider';
 
@@ -26,10 +27,15 @@ interface QueryProviderProps {
 }
 
 export function QueryProvider(props: QueryProviderProps) {
+  // Framer Motion animates in JavaScript, so the CSS reduced-motion rule in
+  // styles/index.css does not reach it (drawers, sheets, toasts). This makes
+  // every Framer animation in the app follow the system setting.
   return (
-    <ToastProvider>
-      <QueryClientHost {...props} />
-    </ToastProvider>
+    <MotionConfig reducedMotion="user">
+      <ToastProvider>
+        <QueryClientHost {...props} />
+      </ToastProvider>
+    </MotionConfig>
   );
 }
 
