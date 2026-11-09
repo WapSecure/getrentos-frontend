@@ -12,8 +12,8 @@ import {
   Plus,
   TriangleAlert,
   Wrench,
-  type LucideIcon,
-} from 'lucide-react-native';
+  type SgIcon,
+} from '@sureground/icons/native';
 import {
   IconButton,
   Price,
@@ -42,7 +42,7 @@ import {
 import { IdentityNudge } from '@/components/trust/IdentityNudge';
 import { useMonetaryVisibility } from '@/hooks/useMonetaryVisibility';
 
-const ACTIVITY_ICON: Record<LandlordActivity['type'], LucideIcon> = {
+const ACTIVITY_ICON: Record<LandlordActivity['type'], SgIcon> = {
   payment: Banknote,
   application: FileText,
   maintenance: Wrench,

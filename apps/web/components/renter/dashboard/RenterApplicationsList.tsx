@@ -3,7 +3,17 @@
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { MapPin, Bed, Bath, Square, Clock, Eye, Home, CalendarDays, Building2 } from 'lucide-react';
+import {
+  MapPin,
+  Bed,
+  Bath,
+  Square,
+  Clock,
+  Eye,
+  Home,
+  CalendarDays,
+  Building2,
+} from '@sureground/icons';
 import { Badge, type BadgeVariant } from '@sureground/ui';
 import { Button } from '@sureground/ui';
 import { ListSkeleton } from '@sureground/ui';
@@ -73,7 +83,7 @@ const formatPrice = (price: number, period: PeriodType) => {
   return `${formatter.format(price)}${periodMap[period]}`;
 };
 
-import { CheckCircle, XCircle } from 'lucide-react';
+import { CheckCircle, XCircle } from '@sureground/icons';
 import { ROUTES } from '@/lib/constants/auth';
 
 export const RenterApplicationsList = () => {

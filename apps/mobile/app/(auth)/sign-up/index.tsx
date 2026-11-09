@@ -5,7 +5,7 @@ import * as Linking from 'expo-linking';
 import { useForm, Controller, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import { AtSign, Phone, MessageCircle, User, ChevronDown, Gift } from 'lucide-react-native';
+import { AtSign, Phone, MessageCircle, User, ChevronDown, Gift } from '@sureground/icons/native';
 import {
   AuthScaffold,
   Button,

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, XCircle, RefreshCcw } from 'lucide-react';
+import { Check, XCircle, RefreshCcw } from '@sureground/icons';
 import {
   Button,
   CurrencyInput,

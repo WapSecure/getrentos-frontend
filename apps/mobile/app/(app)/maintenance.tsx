@@ -3,7 +3,7 @@ import { Image, Pressable, View } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Camera, ChevronLeft, Images, Plus, Wrench, X } from 'lucide-react-native';
+import { Camera, ChevronLeft, Images, Plus, Wrench, X } from '@sureground/icons/native';
 import {
   Badge,
   type BadgeTone,

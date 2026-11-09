@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { AlertTriangle, CheckCircle2, Info, OctagonAlert, X, type LucideIcon } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Info, OctagonAlert, X, type SgIcon } from '@sureground/icons';
 import { cn } from '@sureground/shared';
 
 export type AlertVariant = 'info' | 'success' | 'warning' | 'danger' | 'neutral';
@@ -10,13 +10,13 @@ interface AlertProps {
   variant?: AlertVariant;
   title?: ReactNode;
   children?: ReactNode;
-  icon?: LucideIcon | null;
+  icon?: SgIcon | null;
   action?: ReactNode;
   onDismiss?: () => void;
   className?: string;
 }
 
-const TONES: Record<AlertVariant, { box: string; icon: string; Icon: LucideIcon }> = {
+const TONES: Record<AlertVariant, { box: string; icon: string; Icon: SgIcon }> = {
   info: { box: 'border-info/20 bg-info-subtle', icon: 'text-info', Icon: Info },
   success: { box: 'border-success/20 bg-success-subtle', icon: 'text-success', Icon: CheckCircle2 },
   warning: {

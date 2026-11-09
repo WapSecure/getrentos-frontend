@@ -1,11 +1,11 @@
 'use client';
 
-import type { LucideIcon } from 'lucide-react';
+import type { SgIcon } from '@sureground/icons';
 
 interface AuthMethodTab<T extends string> {
   value: T;
   label: string;
-  icon: LucideIcon;
+  icon: SgIcon;
 }
 
 interface AuthMethodTabsProps<T extends string> {

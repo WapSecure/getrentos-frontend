@@ -14,7 +14,7 @@ import {
   ScanSearch,
   UserPlus,
   Video,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency } from '@/lib/format';
 import { LAND_BUYER_ROUTES, signInThen } from '@/lib/constants/landBuyerRoutes';

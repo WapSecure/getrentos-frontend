@@ -28,7 +28,7 @@ import {
   Users,
   Wallet,
   Wrench,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { ESTATE_MARKETPLACE_ROUTES, ROUTES } from '@/lib/constants/auth';
 import { OWNER_LAND_SALES_ROUTE } from '@/lib/constants/landDeveloperRoutes';
 import { defineRoleNavigation } from '../resolve';

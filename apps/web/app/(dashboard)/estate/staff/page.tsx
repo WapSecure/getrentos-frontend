@@ -3,7 +3,7 @@
 import { RedirectToEstateSetup } from '@/components/estate/shared/RedirectToEstateSetup';
 import { useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ShieldCheck, Plus } from 'lucide-react';
+import { ShieldCheck, Plus } from '@sureground/icons';
 import {
   Button,
   CardSkeleton,

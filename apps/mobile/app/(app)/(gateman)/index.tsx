@@ -12,7 +12,7 @@ import {
   ScanLine,
   UserPlus,
   XCircle,
-} from 'lucide-react-native';
+} from '@sureground/icons/native';
 import {
   Button,
   Card,

@@ -3,7 +3,7 @@ import { RefreshControl, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Building2, ShieldCheck } from 'lucide-react-native';
+import { Building2, ShieldCheck } from '@sureground/icons/native';
 import { Card, QueryState, Skeleton, Text, useTheme } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { agentApi, type AgentAssignedProperty } from '@/lib/api/agent';

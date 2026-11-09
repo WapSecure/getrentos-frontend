@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Eye, Loader2 } from 'lucide-react';
+import { Eye, Loader2 } from '@sureground/icons';
 import { cn } from '@sureground/shared';
 import { FilePreviewDialog } from './FilePreviewDialog';
 

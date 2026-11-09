@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Building2, HandCoins, ShieldAlert, Users, Wallet, Wrench } from 'lucide-react';
+import { Building2, HandCoins, ShieldAlert, Users, Wallet, Wrench } from '@sureground/icons';
 import { cn, formatCurrency } from '@sureground/shared';
 import { Badge } from './Badge';
 import { Card } from './Card';

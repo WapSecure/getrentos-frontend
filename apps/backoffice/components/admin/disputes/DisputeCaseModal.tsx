@@ -16,7 +16,7 @@ import {
 } from '@sureground/ui';
 
 import { useState } from 'react';
-import { CheckCircle2, ArrowUpCircle, Search, RotateCcw, Send } from 'lucide-react';
+import { CheckCircle2, ArrowUpCircle, Search, RotateCcw, Send } from '@sureground/icons';
 import { cn, formatCurrency, humaniseEnum } from '@sureground/shared';
 import { EvidencePanel } from '@/components/shared/EvidencePanel';
 import { DisputeSummaryPanel } from './DisputeSummaryPanel';

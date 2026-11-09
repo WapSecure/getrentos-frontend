@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Check } from 'lucide-react-native';
+import { Check } from '@sureground/icons/native';
 import { useTheme } from '../theme';
 import { Button, type ButtonProps } from './Button';
 

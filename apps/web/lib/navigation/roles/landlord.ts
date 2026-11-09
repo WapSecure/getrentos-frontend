@@ -33,7 +33,7 @@ import {
   UsersRound,
   Workflow,
   Wrench,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { ROUTES } from '@/lib/constants/auth';
 import { defineRoleNavigation } from '../resolve';
 

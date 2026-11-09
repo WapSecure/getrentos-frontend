@@ -16,7 +16,7 @@ import {
   CurrencyInput,
   type BadgeVariant,
 } from '@sureground/ui';
-import { Plus, Check, X, Undo2 } from 'lucide-react';
+import { Plus, Check, X, Undo2 } from '@sureground/icons';
 import {
   depositService,
   DEDUCTION_STATUS_LABELS,

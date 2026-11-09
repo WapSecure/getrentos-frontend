@@ -11,7 +11,7 @@ import {
   EmptyState,
   PageErrorState,
 } from '@sureground/ui';
-import { Inbox } from 'lucide-react';
+import { Inbox } from '@sureground/icons';
 import { unwrap } from '@sureground/shared';
 import { adminKeys } from '@/lib/queryKeys';
 import { hasAdminPermission } from '@/lib/adminAccess';

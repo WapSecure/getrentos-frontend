@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { MapPinned } from 'lucide-react';
+import { MapPinned } from '@sureground/icons';
 import { useLandAvailability } from '@/hooks/useLandAvailability';
 
 export const LandAvailabilityGate = ({

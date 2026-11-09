@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { Bell } from 'lucide-react';
+import { Bell } from '@sureground/icons';
 import {
   DropdownMenu,
   DropdownMenuContent,

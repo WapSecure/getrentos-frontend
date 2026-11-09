@@ -1,6 +1,6 @@
 'use client';
 
-import { Search } from 'lucide-react';
+import { Search } from '@sureground/icons';
 import { Input, Pagination, Select } from '@sureground/ui';
 
 interface PaginatedSelectProps<T> {

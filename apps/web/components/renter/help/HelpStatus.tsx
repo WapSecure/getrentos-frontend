@@ -1,6 +1,6 @@
 'use client';
 
-import { Activity } from 'lucide-react';
+import { Activity } from '@sureground/icons';
 import { Alert } from '@sureground/ui';
 
 export const HelpStatus = () => {

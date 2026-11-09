@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Building2, Megaphone, FileText, BellRing, ChevronRight } from 'lucide-react';
+import { Building2, Megaphone, FileText, BellRing, ChevronRight } from '@sureground/icons';
 import { Card, CardHeader, CardTitle, CardDescription } from '@sureground/ui';
 import { ROUTES } from '@/lib/constants/auth';
 

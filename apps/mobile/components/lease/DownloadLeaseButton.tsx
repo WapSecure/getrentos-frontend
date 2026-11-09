@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Alert } from 'react-native';
 import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
-import { Download } from 'lucide-react-native';
+import { Download } from '@sureground/icons/native';
 import { Button, useTheme, useToast } from '@sureground/ui-native';
 import { leaseApi } from '@/lib/api/lease';
 import { errorMessage } from '@/lib/api/client';

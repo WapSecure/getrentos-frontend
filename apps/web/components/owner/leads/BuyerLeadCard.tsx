@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ShieldCheck, ShieldAlert, MessageSquare } from 'lucide-react';
+import { ShieldCheck, ShieldAlert, MessageSquare } from '@sureground/icons';
 import { Badge, type BadgeVariant, Button, Card } from '@sureground/ui';
 import { getInitials, formatDate } from '@/lib/format';
 import type { BuyerLead, BuyerLeadStage } from '@/types/owner';

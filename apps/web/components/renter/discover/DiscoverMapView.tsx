@@ -1,7 +1,7 @@
 'use client';
 
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { MapPin } from 'lucide-react';
+import { MapPin } from '@sureground/icons';
 import { EmptyState, Skeleton } from '@sureground/ui';
 import { PropertyMap, type MapMarker } from '@/components/maps/PropertyMap';
 import { formatPrice, type Property } from '@/types/renter';

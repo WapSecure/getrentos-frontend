@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ChevronDown, Check, Plus, Building2 } from 'lucide-react';
+import { ChevronDown, Check, Plus, Building2 } from '@sureground/icons';
 import {
   DropdownMenu,
   DropdownMenuContent,

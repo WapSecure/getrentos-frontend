@@ -10,7 +10,7 @@ import {
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { CalendarClock, CheckCircle2, Plus } from 'lucide-react-native';
+import { CalendarClock, CheckCircle2, Plus } from '@sureground/icons/native';
 import {
   Button,
   Card,

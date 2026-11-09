@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { ArrowUpRight, CircleAlert, FileText, FolderOpen, Wrench } from 'lucide-react';
+import { ArrowUpRight, CircleAlert, FileText, FolderOpen, Wrench } from '@sureground/icons';
 import { Badge } from '@sureground/ui';
 import { Button } from '@sureground/ui';
 import { EmptyState } from '@sureground/ui';

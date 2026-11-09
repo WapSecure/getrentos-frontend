@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowRightLeft } from 'lucide-react';
+import { ArrowRightLeft } from '@sureground/icons';
 import { Badge, Card } from '@sureground/ui';
 import { formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';

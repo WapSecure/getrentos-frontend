@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ActivityIndicator, Alert, Platform, Pressable, View } from 'react-native';
-import { Play, Trash2, Video } from 'lucide-react-native';
+import { Play, Trash2, Video } from '@sureground/icons/native';
 import { Card, Divider, Text, useTheme, useToast } from '@sureground/ui-native';
 import { ApiError } from '@/lib/api/client';
 import { videoProblem } from '@sureground/shared';

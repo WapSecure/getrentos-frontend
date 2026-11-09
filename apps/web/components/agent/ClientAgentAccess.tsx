@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { UserCheck } from 'lucide-react';
+import { UserCheck } from '@sureground/icons';
 import { Button, Card, EmptyState, ListSkeleton, Pagination, useToast } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { agentKeys } from '@/lib/queryKeys';

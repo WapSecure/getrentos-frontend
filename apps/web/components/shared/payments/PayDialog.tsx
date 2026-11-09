@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { Lock, ShieldCheck } from 'lucide-react';
+import { Lock, ShieldCheck } from '@sureground/icons';
 import {
   Alert,
   Badge,

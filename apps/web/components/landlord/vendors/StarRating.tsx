@@ -1,6 +1,6 @@
 'use client';
 
-import { Star } from 'lucide-react';
+import { Star } from '@sureground/icons';
 
 interface StarRatingProps {
   value: number;

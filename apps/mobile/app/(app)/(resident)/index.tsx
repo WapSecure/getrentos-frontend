@@ -15,7 +15,7 @@ import {
   TriangleAlert,
   Vote,
   Wrench,
-} from 'lucide-react-native';
+} from '@sureground/icons/native';
 import {
   Badge,
   Button,

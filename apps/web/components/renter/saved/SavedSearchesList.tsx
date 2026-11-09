@@ -13,7 +13,7 @@ import {
   MapPin,
   Bed,
   Wallet,
-} from 'lucide-react';
+} from '@sureground/icons';
 import {
   Badge,
   Button,

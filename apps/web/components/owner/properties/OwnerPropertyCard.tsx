@@ -11,7 +11,7 @@ import {
   MoreVertical,
   Pencil,
   Trash2,
-} from 'lucide-react';
+} from '@sureground/icons';
 import {
   Badge,
   type BadgeVariant,

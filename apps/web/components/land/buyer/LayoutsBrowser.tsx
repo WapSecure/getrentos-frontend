@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Alert, Badge, Input, Pagination, Select, Skeleton } from '@sureground/ui';
-import { BadgeCheck, LayoutGrid, MapPin, Search } from 'lucide-react';
+import { BadgeCheck, LayoutGrid, MapPin, Search } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency } from '@/lib/format';
 import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';

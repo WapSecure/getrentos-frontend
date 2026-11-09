@@ -1,6 +1,6 @@
 'use client';
 
-import { ReceiptText } from 'lucide-react';
+import { ReceiptText } from '@sureground/icons';
 import { formatCurrency } from '@sureground/shared';
 import { Badge, Card, CardSkeleton, DataTable, type BadgeVariant } from '@sureground/ui';
 import { useInvoices } from '@/hooks/useBilling';

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Banknote, CalendarClock, Repeat } from 'lucide-react';
+import { Banknote, CalendarClock, Repeat } from '@sureground/icons';
 import {
   Alert,
   Badge,

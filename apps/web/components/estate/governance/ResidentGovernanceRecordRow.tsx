@@ -1,6 +1,6 @@
 'use client';
 
-import { Download, FileText, PenLine } from 'lucide-react';
+import { Download, FileText, PenLine } from '@sureground/icons';
 import { Badge, Button, IconLink } from '@sureground/ui';
 import type { GovernanceRecord } from '@/types/estate';
 

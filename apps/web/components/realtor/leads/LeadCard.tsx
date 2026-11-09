@@ -1,6 +1,6 @@
 'use client';
 
-import { Mail, CalendarClock, CheckCircle2, XCircle } from 'lucide-react';
+import { Mail, CalendarClock, CheckCircle2, XCircle } from '@sureground/icons';
 import { Badge, Card, IconButton, type BadgeVariant } from '@sureground/ui';
 import { getInitials, formatDate } from '@/lib/format';
 import type { RealtorLead, LeadStage } from '@/types/realtor';

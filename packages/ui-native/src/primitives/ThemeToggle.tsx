@@ -1,6 +1,6 @@
 import { Platform, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { Moon, Sun, SunMedium } from 'lucide-react-native';
+import { Moon, Sun, SunMedium } from '@sureground/icons/native';
 import { useTheme, type ThemePreference } from '../theme';
 import { Text } from './Text';
 import { PressableScale } from './PressableScale';

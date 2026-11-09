@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { Loader2, AlertCircle } from '@sureground/icons';
 import { saveAuthSession } from '@/lib/authStorage';
 import { ROUTES, getDashboardRoute, resolvePrimaryRoleId } from '@/lib/constants/auth';
 import { authService } from '@/services/authService';

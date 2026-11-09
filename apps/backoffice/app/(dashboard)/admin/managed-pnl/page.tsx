@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { TrendingUp } from 'lucide-react';
+import { TrendingUp } from '@sureground/icons';
 import {
   Badge,
   Button,

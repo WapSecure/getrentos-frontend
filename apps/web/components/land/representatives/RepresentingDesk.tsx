@@ -12,7 +12,7 @@ import {
   PageErrorState,
   Toast,
 } from '@sureground/ui';
-import { LandPlot, UsersRound } from 'lucide-react';
+import { LandPlot, UsersRound } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency } from '@/lib/format';
 import {

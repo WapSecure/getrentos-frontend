@@ -1,6 +1,6 @@
 'use client';
 
-import { ImageIcon } from 'lucide-react';
+import { ImageIcon } from '@sureground/icons';
 import { Badge, Button } from '@sureground/ui';
 import type { MaintenanceTicket } from '@/types/estate';
 

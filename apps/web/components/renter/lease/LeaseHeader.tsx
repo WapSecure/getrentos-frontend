@@ -1,6 +1,6 @@
 'use client';
 
-import { Download, Mail, CalendarDays, AlertCircle, CheckCircle, MapPin } from 'lucide-react';
+import { Download, Mail, CalendarDays, AlertCircle, CheckCircle, MapPin } from '@sureground/icons';
 import { Alert, Badge, Button, type BadgeVariant } from '@sureground/ui';
 import { useState } from 'react';
 import { renterService } from '@/services/renterService';

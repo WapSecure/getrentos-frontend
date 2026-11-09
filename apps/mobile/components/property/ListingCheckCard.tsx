@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
-import { ShieldAlert, ShieldCheck, ShieldQuestion } from 'lucide-react-native';
+import { ShieldAlert, ShieldCheck, ShieldQuestion } from '@sureground/icons/native';
 import { Card, Skeleton, Text, useTheme } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { listingCheckApi, type ListingCheckLevel } from '@/lib/api/listingCheck';

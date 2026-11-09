@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Check, Inbox, X } from 'lucide-react';
+import { Check, Inbox, X } from '@sureground/icons';
 import { Button, ConfirmDialog, ListSkeleton, PageErrorState } from '@sureground/ui';
 import { Badge } from '@sureground/ui';
 import { Textarea } from '@sureground/ui';

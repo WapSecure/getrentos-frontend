@@ -1,6 +1,6 @@
 'use client';
 
-import { BadgeCheck } from 'lucide-react';
+import { BadgeCheck } from '@sureground/icons';
 import { Button, Dialog, DialogContent, DialogDescription, DialogTitle } from '@sureground/ui';
 import type { PlanGateReason } from '@/lib/planGate';
 

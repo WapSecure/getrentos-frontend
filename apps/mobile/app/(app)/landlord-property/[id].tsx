@@ -19,7 +19,7 @@ import {
   Plus,
   Trash2,
   UserPlus,
-} from 'lucide-react-native';
+} from '@sureground/icons/native';
 import {
   Badge,
   Card,

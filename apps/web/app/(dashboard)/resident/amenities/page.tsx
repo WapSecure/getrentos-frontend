@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CalendarCheck } from 'lucide-react';
+import { CalendarCheck } from '@sureground/icons';
 import { Button, EmptyState, ListSkeleton, PageHeader } from '@sureground/ui';
 import { estateResidentService } from '@/services/estateResidentService';
 import { unwrap } from '@/lib/apiHelpers';

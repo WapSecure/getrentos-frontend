@@ -10,7 +10,7 @@ import {
   CheckCircle2,
   XCircle,
   Archive,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { Badge, type BadgeVariant } from '@sureground/ui';
 import { formatCurrency, formatDate, formatAskingDifference } from '@/lib/format';
 import type { BuyerOffer, BuyerOfferStatus, FinancingType } from '@/types/buyer';

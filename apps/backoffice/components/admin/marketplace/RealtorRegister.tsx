@@ -12,7 +12,7 @@ import {
   BadgeCheck,
   Handshake,
   FileText,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { NairaSign } from '@sureground/ui/NairaSign';
 import {
   Badge,

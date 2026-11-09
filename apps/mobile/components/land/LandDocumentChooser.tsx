@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Upload } from 'lucide-react-native';
+import { Upload } from '@sureground/icons/native';
 import { Button, Text, useTheme, useToast } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { documentTypeLabel, ownerLandApi } from '@/lib/api/ownerLand';

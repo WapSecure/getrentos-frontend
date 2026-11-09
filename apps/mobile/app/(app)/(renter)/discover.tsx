@@ -13,7 +13,7 @@ import {
   Search,
   SlidersHorizontal,
   X,
-} from 'lucide-react-native';
+} from '@sureground/icons/native';
 import {
   Button,
   Chip,

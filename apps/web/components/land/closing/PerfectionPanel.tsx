@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { AlertTriangle, CheckCircle2, CircleDashed, Send } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, CircleDashed, Send } from '@sureground/icons';
 import { Alert, Badge, Button, Input } from '@sureground/ui';
 import { formatDate } from '@/lib/format';
 import type { LandPerfection, LandPerfectionStep } from '@/types/landClosing';

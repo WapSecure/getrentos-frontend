@@ -15,7 +15,7 @@ import {
   ShieldCheck,
   Unlink,
   X,
-} from 'lucide-react';
+} from '@sureground/icons';
 import {
   Alert,
   Badge,

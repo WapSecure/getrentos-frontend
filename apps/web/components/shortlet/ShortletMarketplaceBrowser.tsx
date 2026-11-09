@@ -22,7 +22,15 @@ import {
   Skeleton,
   ToggleChip,
 } from '@sureground/ui';
-import { BedDouble, CalendarCheck, ClipboardCheck, Heart, MapPin, Star, Zap } from 'lucide-react';
+import {
+  BedDouble,
+  CalendarCheck,
+  ClipboardCheck,
+  Heart,
+  MapPin,
+  Star,
+  Zap,
+} from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { SHORTLET_AMENITIES } from '@/lib/shortlet/essentials';
 import { shortletService } from '@/services/shortletService';

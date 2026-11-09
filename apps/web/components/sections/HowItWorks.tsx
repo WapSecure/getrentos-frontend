@@ -7,7 +7,7 @@ import {
   Coins,
   CheckCircle,
   Star,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { MarketingCard, SectionHeading } from './primitives';
 
 const steps = [

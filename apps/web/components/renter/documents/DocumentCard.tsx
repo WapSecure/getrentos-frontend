@@ -16,7 +16,7 @@ import {
   FileCheck,
   Shield,
   Users,
-} from 'lucide-react';
+} from '@sureground/icons';
 import {
   Badge,
   Card,

@@ -1,6 +1,6 @@
 'use client';
 
-import { Send, FileText, CalendarClock } from 'lucide-react';
+import { Send, FileText, CalendarClock } from '@sureground/icons';
 import { HubTabs, useHubTab, type HubTab } from '@/components/shared/navigation/HubTabs';
 import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
 import { ROUTES } from '@sureground/shared';

@@ -12,7 +12,7 @@ import {
   FileX2,
   Gavel,
   Landmark,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { Card, PageErrorState, PageHeader, PageLoadingState, StatCard } from '@sureground/ui';
 import { unwrap } from '@sureground/shared';
 import { adminKeys } from '@/lib/queryKeys';

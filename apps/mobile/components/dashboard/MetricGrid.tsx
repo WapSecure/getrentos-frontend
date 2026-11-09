@@ -1,11 +1,11 @@
 import { Pressable, View } from 'react-native';
-import type { LucideIcon } from 'lucide-react-native';
+import type { SgIcon } from '@sureground/icons/native';
 import { Card, Skeleton, Text, useTheme } from '@sureground/ui-native';
 
 export type DashboardMetric = {
   label: string;
   value: string | number;
-  Icon: LucideIcon;
+  Icon: SgIcon;
   onPress?: () => void;
 };
 

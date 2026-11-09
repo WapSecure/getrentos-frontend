@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { BedDouble, Plus } from 'lucide-react-native';
+import { BedDouble, Plus } from '@sureground/icons/native';
 import {
   Button,
   Chip,

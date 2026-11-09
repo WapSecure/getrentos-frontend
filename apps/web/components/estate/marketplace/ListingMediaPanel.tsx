@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ImagePlus, Trash2 } from 'lucide-react';
+import { ImagePlus, Trash2 } from '@sureground/icons';
 import { Button, IconButton } from '@sureground/ui';
 import { estateMarketplaceService } from '@/services/estateMarketplaceService';
 import { unwrap } from '@/lib/apiHelpers';

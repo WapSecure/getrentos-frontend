@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ChevronDown, LogOut, type LucideIcon } from 'lucide-react';
+import { ChevronDown, LogOut, type SgIcon } from '@sureground/icons';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,7 +19,7 @@ import { RoleSwitcher } from './RoleSwitcher';
 export interface AccountMenuLink {
   href: string;
   label: string;
-  icon: LucideIcon;
+  icon: SgIcon;
 }
 
 interface AccountMenuProps {

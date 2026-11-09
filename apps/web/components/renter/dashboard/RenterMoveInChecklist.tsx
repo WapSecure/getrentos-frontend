@@ -3,7 +3,7 @@
 import { LegacyInput } from '@sureground/ui';
 
 import { motion } from 'framer-motion';
-import { Camera, FileText } from 'lucide-react';
+import { Camera, FileText } from '@sureground/icons';
 import { Button } from '@sureground/ui';
 import { Checkbox } from '@sureground/ui';
 import { useToast } from '@sureground/ui';

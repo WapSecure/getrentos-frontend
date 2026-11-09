@@ -1,6 +1,6 @@
 'use client';
 
-import { LayoutGrid, List } from 'lucide-react';
+import { LayoutGrid, List } from '@sureground/icons';
 import { SegmentedControl, Select } from '@sureground/ui';
 
 interface ApplicationsFilterSortProps {

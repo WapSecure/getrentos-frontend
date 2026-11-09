@@ -11,7 +11,7 @@ import {
   CheckCircle,
   XCircle,
   Clock,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { EmptyState } from '@sureground/ui';
 import { IconButton } from '@sureground/ui';
 import type { CalendarEvent } from '@/types/calendar';

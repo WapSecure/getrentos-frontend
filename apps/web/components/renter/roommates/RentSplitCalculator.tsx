@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Calculator } from 'lucide-react';
+import { Calculator } from '@sureground/icons';
 import { Card, CurrencyInput, Field, NumberInput, SegmentedControl } from '@sureground/ui';
 
 interface Roommate {

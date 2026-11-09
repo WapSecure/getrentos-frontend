@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Badge, Button, EmptyState, Input, Skeleton, useToast } from '@sureground/ui';
-import { MessageSquare, Send, ShieldCheck } from 'lucide-react';
+import { MessageSquare, Send, ShieldCheck } from '@sureground/icons';
 import { cn } from '@sureground/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';

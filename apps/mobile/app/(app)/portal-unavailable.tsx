@@ -1,5 +1,5 @@
 import { View } from 'react-native';
-import { Building2 } from 'lucide-react-native';
+import { Building2 } from '@sureground/icons/native';
 import { Button, Screen, Text, useTheme } from '@sureground/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
 

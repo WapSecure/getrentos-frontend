@@ -2,7 +2,7 @@ import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Bell, CheckCheck, type LucideIcon } from 'lucide-react-native';
+import { Bell, CheckCheck, type SgIcon } from '@sureground/icons/native';
 import { Card, EmptyState, ErrorState, Skeleton, Text, useTheme } from '@sureground/ui-native';
 import { relativeTime } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
@@ -41,7 +41,7 @@ export function NotificationsInbox({
   onOpen: (n: InboxNotification) => void;
   onReadAll: () => void;
   readingAll: boolean;
-  iconFor: (type: string) => LucideIcon;
+  iconFor: (type: string) => SgIcon;
   emptyDescription: string;
 }) {
   const { colors, spacing, radius } = useTheme();

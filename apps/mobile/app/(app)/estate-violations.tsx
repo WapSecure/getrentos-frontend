@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Alert, View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Gavel, Plus } from 'lucide-react-native';
+import { Gavel, Plus } from '@sureground/icons/native';
 import {
   Button,
   Chip,

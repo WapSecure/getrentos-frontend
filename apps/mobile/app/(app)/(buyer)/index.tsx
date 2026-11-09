@@ -13,8 +13,8 @@ import {
   LandPlot,
   Search,
   Wallet,
-  type LucideIcon,
-} from 'lucide-react-native';
+  type SgIcon,
+} from '@sureground/icons/native';
 import {
   Card,
   EmptyState,
@@ -42,7 +42,7 @@ import { buyerSettingsApi } from '@/lib/api/buyerSettings';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { firstName } from '@/lib/format';
 
-const ACTIVITY_ICON: Record<string, LucideIcon> = {
+const ACTIVITY_ICON: Record<string, SgIcon> = {
   offer: FileSignature,
   transaction: Wallet,
   escrow: Wallet,

@@ -11,7 +11,7 @@ import {
   BedDouble,
   Bath,
   Ruler,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { Badge, type BadgeVariant } from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 import type { SaleListing, SaleListingStatus } from '@/types/owner';

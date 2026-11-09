@@ -3,7 +3,7 @@
 import { useOwnerUser } from '../layout';
 import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { User, Bell, Landmark, SlidersHorizontal, Lock, Download } from 'lucide-react';
+import { User, Bell, Landmark, SlidersHorizontal, Lock, Download } from '@sureground/icons';
 import { ProfileSettings } from '@/components/owner/settings/ProfileSettings';
 import { NotificationSettings } from '@/components/owner/settings/NotificationSettings';
 import { SellerPayoutSettings } from '@/components/shared/payouts/SellerPayoutSettings';

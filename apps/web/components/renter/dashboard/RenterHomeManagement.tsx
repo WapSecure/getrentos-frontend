@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { ArrowRight, FileText, House, Wrench } from 'lucide-react';
+import { ArrowRight, FileText, House, Wrench } from '@sureground/icons';
 import { Button } from '@sureground/ui';
 import { Badge } from '@sureground/ui';
 import { Card } from '@sureground/ui';

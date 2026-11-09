@@ -5,7 +5,7 @@ import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Check, ChevronDown, ChevronUp, Lock, ShieldAlert, Wallet } from 'lucide-react-native';
+import { Check, ChevronDown, ChevronUp, Lock, ShieldAlert, Wallet } from '@sureground/icons/native';
 import {
   Badge,
   Button,

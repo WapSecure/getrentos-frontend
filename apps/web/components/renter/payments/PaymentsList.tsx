@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { PaymentCard } from './PaymentCard';
 import { PaymentDetailsModal } from './PaymentDetailsModal';
-import { CreditCard } from 'lucide-react';
+import { CreditCard } from '@sureground/icons';
 import { Card, EmptyState, SearchInput } from '@sureground/ui';
 
 interface Payment {

@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, CheckCheck } from 'lucide-react';
+import { Check, CheckCheck } from '@sureground/icons';
 import { format } from 'date-fns';
 
 interface Attachment {

@@ -12,7 +12,7 @@ import {
   MoreVertical,
   ReceiptText,
   ShieldAlert,
-} from 'lucide-react';
+} from '@sureground/icons';
 import {
   Button,
   CurrencyInput,

@@ -1,6 +1,6 @@
 'use client';
 
-import { Wallet, AlertTriangle, Lock, CalendarClock } from 'lucide-react';
+import { Wallet, AlertTriangle, Lock, CalendarClock } from '@sureground/icons';
 import { StatCard } from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 

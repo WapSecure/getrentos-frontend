@@ -43,7 +43,7 @@ import {
   Star,
   Tags,
   Zap,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { unwrap, VerificationRequiredError } from '@/lib/apiHelpers';
 import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
 import { ROUTES } from '@/lib/constants/auth';

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Pressable, ScrollView, Share, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
-import { ChevronDown, ListChecks, Send } from 'lucide-react-native';
+import { ChevronDown, ListChecks, Send } from '@sureground/icons/native';
 import {
   Badge,
   Button,

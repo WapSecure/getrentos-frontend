@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronDown, Mail, Phone, MessageCircle, Clock, ArrowRight } from 'lucide-react';
+import { ChevronDown, Mail, Phone, MessageCircle, Clock, ArrowRight } from '@sureground/icons';
 import { Button, Card, PageHeader } from '@sureground/ui';
 import { SUPPORT, hasSupportLine, telLink, whatsappLink } from '@/lib/support';
 

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
-import { ChevronDown, Scale } from 'lucide-react-native';
+import { ChevronDown, Scale } from '@sureground/icons/native';
 import { Badge, Card, Skeleton, Text, useTheme, type BadgeTone } from '@sureground/ui-native';
 import { sellerOffers, type ComparedOffer, type OfferSide } from '@/lib/api/sellerOffers';
 

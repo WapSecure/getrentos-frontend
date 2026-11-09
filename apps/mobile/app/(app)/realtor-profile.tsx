@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
-import { Camera } from 'lucide-react-native';
+import { Camera } from '@sureground/icons/native';
 import {
   Avatar,
   Card,

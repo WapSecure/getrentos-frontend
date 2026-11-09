@@ -1,5 +1,5 @@
 import { View } from 'react-native';
-import { MapPin } from 'lucide-react-native';
+import { MapPin } from '@sureground/icons/native';
 import { Text, useTheme } from '@sureground/ui-native';
 
 export function FilmedOnSite() {

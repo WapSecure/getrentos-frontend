@@ -22,7 +22,7 @@ import {
   ReceiptText,
   ShieldCheck,
   Wrench,
-} from 'lucide-react';
+} from '@sureground/icons';
 import {
   Alert,
   Badge,

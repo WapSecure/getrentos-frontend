@@ -5,7 +5,7 @@ import { Application } from '@/types/renter';
 import { ApplicationCard } from './ApplicationCard';
 import { ApplicationDetailsModal } from './ApplicationDetailsModal';
 import { ApplicationWithdrawModal } from './ApplicationWithdrawModal';
-import { FileText } from 'lucide-react';
+import { FileText } from '@sureground/icons';
 import { EmptyState } from '@sureground/ui';
 
 interface Note {

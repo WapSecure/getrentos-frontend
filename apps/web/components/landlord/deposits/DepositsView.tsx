@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, PiggyBank } from 'lucide-react';
+import { Plus, PiggyBank } from '@sureground/icons';
 import {
   Button,
   CardSkeleton,

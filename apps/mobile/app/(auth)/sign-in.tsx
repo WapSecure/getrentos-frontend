@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import { AtSign, BadgeCheck, Lock, ShieldCheck } from 'lucide-react-native';
+import { AtSign, BadgeCheck, Lock, ShieldCheck } from '@sureground/icons/native';
 import {
   AuthScaffold,
   Button,

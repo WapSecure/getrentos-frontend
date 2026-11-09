@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight } from '@sureground/icons';
 import { cn } from '@sureground/shared';
 
 export interface StatGroupItem {

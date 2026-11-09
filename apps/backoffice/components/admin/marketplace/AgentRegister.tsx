@@ -11,7 +11,7 @@ import {
   BadgeCheck,
   ClipboardCheck,
   ShieldCheck,
-} from 'lucide-react';
+} from '@sureground/icons';
 import {
   Badge,
   Button,

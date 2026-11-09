@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { CheckCircle2, Loader2, XCircle } from 'lucide-react';
+import { CheckCircle2, Loader2, XCircle } from '@sureground/icons';
 import { billingService, type MyBilling } from '@/services/billingService';
 import { unwrap } from '@/lib/apiHelpers';
 import { useProCheckout } from '@/hooks/useProCheckout';

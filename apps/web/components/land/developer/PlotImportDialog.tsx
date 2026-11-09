@@ -13,7 +13,7 @@ import {
   type Column,
   type PendingUpload,
 } from '@sureground/ui';
-import { AlertTriangle, CheckCircle2, Download, FileSpreadsheet } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Download, FileSpreadsheet } from '@sureground/icons';
 import { ApiError, unwrap } from '@/lib/apiHelpers';
 import { downloadCsv } from '@/lib/export';
 import { formatCurrency } from '@/lib/format';

@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { CreditCard, Building2, Wallet, Trash2 } from 'lucide-react';
+import { CreditCard, Building2, Wallet, Trash2 } from '@sureground/icons';
 import { Alert, IconButton, ListSkeleton, PageErrorState, useToast } from '@sureground/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';

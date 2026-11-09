@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Linking, StyleSheet, View } from 'react-native';
 import { CameraView, useCameraPermissions, type BarcodeScanningResult } from 'expo-camera';
-import { ScanLine } from 'lucide-react-native';
+import { ScanLine } from '@sureground/icons/native';
 import { Button, Text, useTheme } from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { haptics } from '@/lib/haptics';

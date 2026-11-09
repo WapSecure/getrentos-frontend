@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Building2, FileSignature, Lock, ShieldCheck, UserRound } from 'lucide-react';
+import { Building2, FileSignature, Lock, ShieldCheck, UserRound } from '@sureground/icons';
 import {
   Alert,
   Badge,

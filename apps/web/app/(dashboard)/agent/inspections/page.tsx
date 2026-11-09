@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Plus, ClipboardCheck } from 'lucide-react';
+import { Plus, ClipboardCheck } from '@sureground/icons';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { InspectionCard } from '@/components/agent/inspections/InspectionCard';
 import { NewInspectionModal } from '@/components/agent/inspections/NewInspectionModal';

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Activity } from 'lucide-react';
+import { Activity } from '@sureground/icons';
 import {
   Badge,
   Card,

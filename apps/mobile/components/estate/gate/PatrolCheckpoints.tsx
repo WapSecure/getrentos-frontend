@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Alert, View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { MapPin, Plus } from 'lucide-react-native';
+import { MapPin, Plus } from '@sureground/icons/native';
 import {
   Button,
   Card,

@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Users, AlertCircle } from 'lucide-react';
+import { Users, AlertCircle } from '@sureground/icons';
 import { Switch } from '@sureground/ui';
 
 interface MultiRoleToggleProps {

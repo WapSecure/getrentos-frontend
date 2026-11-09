@@ -1,6 +1,6 @@
 'use client';
 
-import { Building2, Megaphone, Handshake, FileUp } from 'lucide-react';
+import { Building2, Megaphone, Handshake, FileUp } from '@sureground/icons';
 import { Button, Card, CardHeader, CardTitle } from '@sureground/ui';
 import { ROUTES } from '@/lib/constants/auth';
 

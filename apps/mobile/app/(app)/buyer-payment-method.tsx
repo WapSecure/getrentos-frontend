@@ -3,7 +3,7 @@ import { ScrollView, View } from 'react-native';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ShieldCheck } from 'lucide-react-native';
+import { ShieldCheck } from '@sureground/icons/native';
 import {
   Card,
   NumberField,

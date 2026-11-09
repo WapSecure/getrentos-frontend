@@ -2,7 +2,7 @@
 
 import { Card } from '@sureground/ui';
 import { motion } from 'framer-motion';
-import { CheckCircle, Calendar } from 'lucide-react';
+import { CheckCircle, Calendar } from '@sureground/icons';
 
 interface Lease {
   timeline: {

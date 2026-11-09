@@ -1,6 +1,6 @@
 'use client';
 
-import { Building2, Home, MessageSquare } from 'lucide-react';
+import { Building2, Home, MessageSquare } from '@sureground/icons';
 import { Badge, Button, Card, type BadgeVariant } from '@sureground/ui';
 import { getInitials, formatDate } from '@/lib/format';
 import type { RealtorClient } from '@/types/realtor';

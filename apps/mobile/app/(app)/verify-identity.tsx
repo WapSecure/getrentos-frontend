@@ -10,7 +10,7 @@ import {
   ShieldAlert,
   ShieldCheck,
   ShieldX,
-} from 'lucide-react-native';
+} from '@sureground/icons/native';
 import { Button, Card, Chip, Skeleton, Text, useTheme, useToast } from '@sureground/ui-native';
 import { pickDocument } from '@/lib/filePicker';
 import type { PickedFile } from '@/lib/api/documents';

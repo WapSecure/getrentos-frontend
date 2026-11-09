@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Clock, Star, Shield, MessageCircle } from 'lucide-react';
+import { Clock, Star, Shield, MessageCircle } from '@sureground/icons';
 import { Button, Card } from '@sureground/ui';
 import type { Property } from '@/types/renter';
 import { ROUTES } from '@/lib/constants/auth';

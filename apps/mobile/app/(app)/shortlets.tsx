@@ -13,7 +13,7 @@ import {
   SlidersHorizontal,
   BadgeCheck,
   Users,
-} from 'lucide-react-native';
+} from '@sureground/icons/native';
 import { Chip, Divider, IconButton, Text, TextField, useTheme } from '@sureground/ui-native';
 import type { ShortletFilters } from '@/lib/api/shortlets';
 import { guestsLabel, isDettySeason, seasonRange } from '@/lib/stays';

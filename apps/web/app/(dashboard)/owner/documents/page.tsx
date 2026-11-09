@@ -16,7 +16,7 @@ import {
 } from '@sureground/ui';
 import { useEffect, useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { FileText, Upload, FolderOpen, Check } from 'lucide-react';
+import { FileText, Upload, FolderOpen, Check } from '@sureground/icons';
 import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { ownerKeys } from '@/lib/queryKeys';

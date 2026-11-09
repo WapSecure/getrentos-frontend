@@ -1,6 +1,6 @@
 'use client';
 
-import { Download } from 'lucide-react';
+import { Download } from '@sureground/icons';
 import { Dialog, DialogContent, DialogTitle } from './Dialog';
 import { FilePreview } from './FilePreview';
 import { Button } from './Button';

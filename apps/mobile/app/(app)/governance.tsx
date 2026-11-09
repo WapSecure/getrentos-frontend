@@ -3,7 +3,7 @@ import { View } from 'react-native';
 
 import * as WebBrowser from 'expo-web-browser';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { BookOpen, Check, FileText } from 'lucide-react-native';
+import { BookOpen, Check, FileText } from '@sureground/icons/native';
 import {
   Badge,
   type BadgeTone,

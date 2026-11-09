@@ -15,7 +15,7 @@ import {
   useToast,
   type BadgeVariant,
 } from '@sureground/ui';
-import { Banknote, Wallet } from 'lucide-react';
+import { Banknote, Wallet } from '@sureground/icons';
 import { NairaSign } from '@sureground/ui/NairaSign';
 import { unwrap, unwrapOptional } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';

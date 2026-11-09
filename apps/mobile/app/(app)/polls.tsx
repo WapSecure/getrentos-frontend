@@ -1,7 +1,7 @@
 import { Pressable, View } from 'react-native';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Check, Vote } from 'lucide-react-native';
+import { Check, Vote } from '@sureground/icons/native';
 import {
   Badge,
   Card,

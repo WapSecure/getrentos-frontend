@@ -1,7 +1,7 @@
 'use client';
 
 import { useId, useRef } from 'react';
-import { AlertTriangle, CircleCheck } from 'lucide-react';
+import { AlertTriangle, CircleCheck } from '@sureground/icons';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from './Dialog';
 import { Button } from './Button';
 import { Textarea } from './Textarea';

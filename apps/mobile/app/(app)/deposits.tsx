@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { PiggyBank, Plus } from 'lucide-react-native';
+import { PiggyBank, Plus } from '@sureground/icons/native';
 import {
   Badge,
   Button,

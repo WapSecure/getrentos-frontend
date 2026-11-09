@@ -3,7 +3,7 @@ import { Pressable, ScrollView, View } from 'react-native';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Globe, Lock, Users } from 'lucide-react-native';
+import { Globe, Lock, Users } from '@sureground/icons/native';
 import {
   Card,
   Divider,

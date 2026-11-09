@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { CheckCircle, RefreshCw, ArrowRight } from 'lucide-react';
+import { CheckCircle, RefreshCw, ArrowRight } from '@sureground/icons';
 import {
   Alert,
   Button,

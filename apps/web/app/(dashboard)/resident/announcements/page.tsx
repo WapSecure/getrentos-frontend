@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { Megaphone, Square, Volume2 } from 'lucide-react';
+import { Megaphone, Square, Volume2 } from '@sureground/icons';
 import { Badge, EmptyState, IconButton, ListSkeleton, PageHeader } from '@sureground/ui';
 import { estateResidentService } from '@/services/estateResidentService';
 import { unwrap } from '@/lib/apiHelpers';

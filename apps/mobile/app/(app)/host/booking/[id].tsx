@@ -18,7 +18,7 @@ import {
   MessageCircle,
   Star,
   Users,
-} from 'lucide-react-native';
+} from '@sureground/icons/native';
 import {
   Button,
   Card,

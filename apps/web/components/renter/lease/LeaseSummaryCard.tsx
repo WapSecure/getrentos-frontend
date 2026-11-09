@@ -3,7 +3,7 @@
 import { Card } from '@sureground/ui';
 import { motion } from 'framer-motion';
 import { leaseRentSuffix } from '@/lib/leaseTerm';
-import { MapPin, Building2 } from 'lucide-react';
+import { MapPin, Building2 } from '@sureground/icons';
 import type { Lease } from '@/services/renterService';
 
 interface LeaseSummaryCardProps {

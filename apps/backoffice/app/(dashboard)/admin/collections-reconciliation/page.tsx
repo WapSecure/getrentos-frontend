@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { ArrowDownLeft, ArrowUpRight, CheckCircle2, ReceiptText, Scale } from 'lucide-react';
+import { ArrowDownLeft, ArrowUpRight, CheckCircle2, ReceiptText, Scale } from '@sureground/icons';
 import {
   Badge,
   Card,

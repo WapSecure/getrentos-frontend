@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Mail, Phone } from 'lucide-react';
+import { Mail, Phone } from '@sureground/icons';
 import { Button, Field, Input } from '@sureground/ui';
 import { ChangeEmailButton } from '@/components/shared/security/ChangeEmailButton';
 import { ChangePhoneButton } from '@/components/shared/security/ChangePhoneButton';

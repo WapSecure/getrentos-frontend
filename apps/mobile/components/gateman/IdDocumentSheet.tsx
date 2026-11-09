@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Camera, CheckCircle2, Images, RefreshCw, ShieldAlert } from 'lucide-react-native';
+import { Camera, CheckCircle2, Images, RefreshCw, ShieldAlert } from '@sureground/icons/native';
 import { Button, Card, Chip, Text, useTheme, useToast } from '@sureground/ui-native';
 import {
   ID_CHECK_NOT_ADMISSION_NOTICE,

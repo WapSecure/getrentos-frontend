@@ -4,7 +4,7 @@ import { TextMessageConsentCard } from '@/components/shared/settings/TextMessage
 
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { UserPlus, Handshake, CalendarClock, MessageCircle, Wallet, Star } from 'lucide-react';
+import { UserPlus, Handshake, CalendarClock, MessageCircle, Wallet, Star } from '@sureground/icons';
 import { SaveButton, Switch, useToast } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';

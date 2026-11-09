@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Clock, Download, FileText, RotateCcw, ChevronUp, ChevronDown } from 'lucide-react';
+import { Clock, Download, FileText, RotateCcw, ChevronUp, ChevronDown } from '@sureground/icons';
 import { Badge, Card, IconButton } from '@sureground/ui';
 
 interface Version {

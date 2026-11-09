@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { Check } from 'lucide-react';
+import { Check } from '@sureground/icons';
 import { Alert, Button, Checkbox } from '@sureground/ui';
 
 import { unwrap } from '@/lib/apiHelpers';

@@ -1,6 +1,6 @@
 'use client';
 
-import { ShieldCheck, UserRoundSearch } from 'lucide-react';
+import { ShieldCheck, UserRoundSearch } from '@sureground/icons';
 import { Badge, Button, Card, type BadgeVariant } from '@sureground/ui';
 import { formatDate } from '@sureground/shared';
 import type {

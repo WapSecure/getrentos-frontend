@@ -1,6 +1,6 @@
 'use client';
 
-import { LayoutGrid, List } from 'lucide-react';
+import { LayoutGrid, List } from '@sureground/icons';
 import { SegmentedControl, Select, ToggleChip } from '@sureground/ui';
 
 interface SavedPropertiesFiltersProps {

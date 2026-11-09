@@ -2,7 +2,7 @@
 
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
-import { Star, MessageCircle, Home, Clock } from 'lucide-react';
+import { Star, MessageCircle, Home, Clock } from '@sureground/icons';
 import { Pagination, EmptyState, ListSkeleton, PageErrorState, PageHeader } from '@sureground/ui';
 import { getInitials, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';

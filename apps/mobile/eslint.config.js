@@ -3,7 +3,7 @@ const expoConfig = require('eslint-config-expo/flat');
 
 module.exports = defineConfig([
   expoConfig,
-  // Naira-only product: no icon that draws a dollar sign.
+  // Icons come from @sureground/icons/native (our own set, naira-only: it has no dollar icons).
   {
     rules: {
       'no-restricted-imports': [
@@ -12,15 +12,8 @@ module.exports = defineConfig([
           paths: [
             {
               name: 'lucide-react-native',
-              importNames: [
-                'DollarSign',
-                'BadgeDollarSign',
-                'CircleDollarSign',
-                'SquareDollarSign',
-                'Receipt',
-              ],
               message:
-                'Draws a dollar sign. Sureground is naira-only: use NairaSign from @sureground/ui or ReceiptText.',
+                'Use @sureground/icons/native (same icon names). Run pnpm icons:migrate to move a file over.',
             },
           ],
         },

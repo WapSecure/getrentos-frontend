@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { CalendarRange, Repeat } from 'lucide-react';
+import { CalendarRange, Repeat } from '@sureground/icons';
 import { Badge, type BadgeVariant, Card, EmptyState, ListSkeleton, Switch } from '@sureground/ui';
 import type { AuthorisationDwellReport } from '@/types/estate';
 

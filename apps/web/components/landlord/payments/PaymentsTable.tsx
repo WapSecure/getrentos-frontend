@@ -1,6 +1,6 @@
 'use client';
 
-import { ReceiptText } from 'lucide-react';
+import { ReceiptText } from '@sureground/icons';
 import { Badge, Button, DataTable, EmptyState, type Column } from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { escrowStatusBadges, paymentStatusBadges, rentPayoutStatusBadges } from '@/lib/statusBadge';

@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from '@sureground/icons';
 import { RoleCard } from '@/components/auth/RoleSelection/RoleCard';
 import { MultiRoleToggle } from '@/components/auth/RoleSelection/MultiRoleToggle';
 import { Logo } from '@/components/ui/Logo';

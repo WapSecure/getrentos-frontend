@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@sureground/ui';
-import { ArrowRight, MapPinned } from 'lucide-react';
+import { ArrowRight, MapPinned } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { landDeveloperKeys } from '@/lib/landDeveloperQueryKeys';
 import { LAND_DEVELOPER_ROUTES } from '@/lib/constants/landDeveloperRoutes';

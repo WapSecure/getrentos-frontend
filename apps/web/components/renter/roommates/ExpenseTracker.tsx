@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, ChevronDown, ChevronUp, ReceiptText } from 'lucide-react';
+import { Plus, ChevronDown, ChevronUp, ReceiptText } from '@sureground/icons';
 import { NairaSign } from '@sureground/ui/NairaSign';
 import {
   Alert,

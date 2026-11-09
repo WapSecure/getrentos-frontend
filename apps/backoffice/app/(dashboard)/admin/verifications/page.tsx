@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ShieldCheck } from 'lucide-react';
+import { ShieldCheck } from '@sureground/icons';
 import { VerificationRequestCard } from '@/components/admin/verifications/VerificationRequestCard';
 import { ReviewVerificationModal } from '@/components/admin/verifications/ReviewVerificationModal';
 import {

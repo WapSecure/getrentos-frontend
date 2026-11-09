@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { KeyRound, Car, Package, Siren } from 'lucide-react';
+import { KeyRound, Car, Package, Siren } from '@sureground/icons';
 import { Logo } from '@/components/ui/Logo';
 import { PostSwitcher } from '@/components/gateman/PostSwitcher';
 import { ThemeToggle } from '@sureground/ui';

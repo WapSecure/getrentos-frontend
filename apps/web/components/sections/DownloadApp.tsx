@@ -1,4 +1,4 @@
-import { Smartphone } from 'lucide-react';
+import { Smartphone } from '@sureground/icons';
 
 export const DownloadApp = () => (
   <section id="download" className="px-4 py-20">

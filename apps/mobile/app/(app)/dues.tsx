@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { View } from 'react-native';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ReceiptText, Repeat } from 'lucide-react-native';
+import { ReceiptText, Repeat } from '@sureground/icons/native';
 import {
   Badge,
   type BadgeTone,

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ClipboardList } from 'lucide-react';
+import { ClipboardList } from '@sureground/icons';
 import {
   Alert,
   Button,

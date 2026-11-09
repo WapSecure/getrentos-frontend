@@ -14,7 +14,7 @@ import {
   FileText,
   BadgeCheck,
   Eye,
-} from 'lucide-react';
+} from '@sureground/icons';
 import {
   Alert,
   Badge,

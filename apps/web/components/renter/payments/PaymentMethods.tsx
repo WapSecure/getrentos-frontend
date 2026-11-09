@@ -1,6 +1,6 @@
 'use client';
 
-import { CreditCard, Building2, Wallet, Trash2 } from 'lucide-react';
+import { CreditCard, Building2, Wallet, Trash2 } from '@sureground/icons';
 import { Alert, Card, IconButton } from '@sureground/ui';
 
 interface PaymentMethod {

@@ -2,7 +2,7 @@ import { RefreshControl, View } from 'react-native';
 
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
-import { Calendar } from 'lucide-react-native';
+import { Calendar } from '@sureground/icons/native';
 import { Badge, QueryState, Skeleton, Text, useTheme } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {

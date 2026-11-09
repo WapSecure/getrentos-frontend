@@ -14,7 +14,7 @@ import {
   Ruler,
   ShieldCheck,
   Star,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { Footer } from '@/components/layout/Footer';
 import { Navigation } from '@/components/layout/Navigation';
 import { JsonLd } from '@/components/seo/JsonLd';

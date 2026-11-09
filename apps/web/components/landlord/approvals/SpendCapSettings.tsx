@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { SlidersHorizontal } from 'lucide-react';
+import { SlidersHorizontal } from '@sureground/icons';
 import { Button, Card, CurrencyInput, useToast } from '@sureground/ui';
 import { mine, type ManagementMandateDto } from '@/services/mandateService';
 import { spendApprovalService } from '@/services/spendApprovalService';

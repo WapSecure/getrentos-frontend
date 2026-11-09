@@ -16,7 +16,7 @@ import {
   ToggleChip,
   PageHeader,
 } from '@sureground/ui';
-import { ReceiptText, Search } from 'lucide-react';
+import { ReceiptText, Search } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { landDeveloperKeys } from '@/lib/landDeveloperQueryKeys';

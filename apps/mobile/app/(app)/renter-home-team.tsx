@@ -3,7 +3,7 @@ import { RefreshControl, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { BadgeCheck, Users } from 'lucide-react-native';
+import { BadgeCheck, Users } from '@sureground/icons/native';
 import {
   Button,
   Card,

@@ -11,7 +11,7 @@ import {
 } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Plus, Share2, Ticket } from 'lucide-react-native';
+import { Plus, Share2, Ticket } from '@sureground/icons/native';
 import {
   Button,
   Card,

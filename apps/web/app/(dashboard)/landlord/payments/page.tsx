@@ -1,6 +1,6 @@
 'use client';
 
-import { AlertTriangle, CreditCard } from 'lucide-react';
+import { AlertTriangle, CreditCard } from '@sureground/icons';
 import { HubTabs, useHubTab, type HubTab } from '@/components/shared/navigation/HubTabs';
 import { PaymentsView } from '@/components/landlord/payments/PaymentsView';
 import { ArrearsView } from '@/components/landlord/payments/ArrearsView';

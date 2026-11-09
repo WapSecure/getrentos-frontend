@@ -1,6 +1,6 @@
 'use client';
 
-import { ShieldCheck } from 'lucide-react';
+import { ShieldCheck } from '@sureground/icons';
 import { Button, PageHeader } from '@sureground/ui';
 import { ROUTES } from '@sureground/shared';
 import { useAdminCan } from '@/hooks/useAdminCan';

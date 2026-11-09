@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, UserPlus, User, Mail, Phone } from 'lucide-react';
+import { Plus, UserPlus, User, Mail, Phone } from '@sureground/icons';
 import { LeadCard } from '@/components/realtor/leads/LeadCard';
 import { FollowUpsPanel } from '@/components/realtor/leads/FollowUpsPanel';
 import type { LeadStage } from '@/types/realtor';

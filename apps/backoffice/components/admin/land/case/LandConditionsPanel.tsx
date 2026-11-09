@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { CircleDashed } from 'lucide-react';
+import { CircleDashed } from '@sureground/icons';
 import { Badge, Button, ConfirmDialog } from '@sureground/ui';
 import { formatDate, unwrap } from '@sureground/shared';
 import { adminLandService } from '@/services/adminLandService';

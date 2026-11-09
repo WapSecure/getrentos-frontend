@@ -1,5 +1,5 @@
 import { Pressable, View } from 'react-native';
-import { Building2, Check, MapPin } from 'lucide-react-native';
+import { Building2, Check, MapPin } from '@sureground/icons/native';
 import { Button, Card, Text, useTheme } from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';

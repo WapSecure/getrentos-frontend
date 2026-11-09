@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
-import { ShieldAlert } from 'lucide-react-native';
+import { ShieldAlert } from '@sureground/icons/native';
 import { kycApi } from '@/lib/api/kyc';
 import { AttentionCard } from '@/components/dashboard/DashboardParts';
 import { identityNudgeCopy } from '@/lib/identityNudge';

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Fingerprint } from 'lucide-react';
+import { Fingerprint } from '@sureground/icons';
 import { ReviewCaseCard } from '@/components/admin/trust/ReviewCaseCard';
 import { ReviewCaseModal } from '@/components/admin/trust/ReviewCaseModal';
 import {

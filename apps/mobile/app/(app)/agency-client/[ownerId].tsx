@@ -3,7 +3,7 @@ import { Linking, RefreshControl, ScrollView, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Mail, Phone } from 'lucide-react-native';
+import { Mail, Phone } from '@sureground/icons/native';
 import {
   Badge,
   Button,

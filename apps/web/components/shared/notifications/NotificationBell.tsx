@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { keepPreviousData, useQuery, useQueryClient, type QueryKey } from '@tanstack/react-query';
-import { Bell } from 'lucide-react';
+import { Bell } from '@sureground/icons';
 import {
   Button,
   EmptyState,

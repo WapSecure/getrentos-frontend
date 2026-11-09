@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { ArrowRight, Building2, MapPin } from 'lucide-react';
+import { ArrowRight, Building2, MapPin } from '@sureground/icons';
 import { Badge, EmptyState, Pagination, SearchInput, Select, Skeleton } from '@sureground/ui';
 import { estateStorefrontService } from '@/services/estateMarketplaceService';
 import { unwrap, type Paginated } from '@/lib/apiHelpers';

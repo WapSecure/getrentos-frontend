@@ -1,12 +1,12 @@
 'use client';
 
-import { Check, FileCheck, Home, ShieldCheck, UserCheck, type LucideIcon } from 'lucide-react';
+import { Check, FileCheck, Home, ShieldCheck, UserCheck, type SgIcon } from '@sureground/icons';
 import { trustChainLabel } from '@sureground/shared';
 import type { Property, PropertyTrustStepId } from '@/types/renter';
 
 // Renders nothing when the payload has no chain (older listings, or the browse list where it is omitted).
 
-const STEP_ICON: Record<PropertyTrustStepId, LucideIcon> = {
+const STEP_ICON: Record<PropertyTrustStepId, SgIcon> = {
   owner: UserCheck,
   authority: FileCheck,
   property: Home,

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { ArrowLeftRight, Briefcase, Check } from 'lucide-react-native';
+import { ArrowLeftRight, Briefcase, Check } from '@sureground/icons/native';
 import {
   Badge,
   Button,

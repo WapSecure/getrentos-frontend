@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { FileText, Pencil, Trash2 } from 'lucide-react';
+import { FileText, Pencil, Trash2 } from '@sureground/icons';
 import {
   Button,
   Card,

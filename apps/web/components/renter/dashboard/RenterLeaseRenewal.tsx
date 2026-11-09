@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { CalendarDays, FileText, ArrowRight, BadgeCheck } from 'lucide-react';
+import { CalendarDays, FileText, ArrowRight, BadgeCheck } from '@sureground/icons';
 import { Alert } from '@sureground/ui';
 import { Button } from '@sureground/ui';
 import { DescriptionList } from '@sureground/ui';

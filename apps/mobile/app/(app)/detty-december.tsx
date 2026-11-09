@@ -8,8 +8,8 @@ import {
   Lock,
   ReceiptText,
   ShieldCheck,
-  type LucideIcon,
-} from 'lucide-react-native';
+  type SgIcon,
+} from '@sureground/icons/native';
 import { Chip, Text, useTheme } from '@sureground/ui-native';
 import { StayResults } from '@/components/shortlet/StayResults';
 import { SupportContact } from '@/components/shortlet/StayUI';
@@ -26,7 +26,7 @@ const NIGHT = {
   glass: 'rgba(255,255,255,0.1)',
 };
 
-const PROMISES: { icon: LucideIcon; title: string; body: string }[] = [
+const PROMISES: { icon: SgIcon; title: string; body: string }[] = [
   {
     icon: Lock,
     title: 'Your money waits until you arrive',

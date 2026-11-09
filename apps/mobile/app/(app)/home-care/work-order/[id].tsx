@@ -11,7 +11,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
-import { AlertTriangle, Clock, Siren } from 'lucide-react-native';
+import { AlertTriangle, Clock, Siren } from '@sureground/icons/native';
 import {
   Button,
   Card,

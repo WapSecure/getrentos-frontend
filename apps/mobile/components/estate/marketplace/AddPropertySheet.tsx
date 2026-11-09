@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { View } from 'react-native';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Search } from 'lucide-react-native';
+import { Search } from '@sureground/icons/native';
 import { Button, Skeleton, Text, TextField, useTheme, useToast } from '@sureground/ui-native';
 import { StatusPill } from '@/components/host/HostUI';
 import { Sheet } from '@/components/Sheet';

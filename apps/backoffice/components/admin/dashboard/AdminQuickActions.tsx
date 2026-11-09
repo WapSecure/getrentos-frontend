@@ -1,6 +1,6 @@
 'use client';
 
-import { ShieldCheck, Gavel, AlertTriangle, Users } from 'lucide-react';
+import { ShieldCheck, Gavel, AlertTriangle, Users } from '@sureground/icons';
 import { Button, Card, CardHeader, CardTitle } from '@sureground/ui';
 import { ROUTES } from '@sureground/shared';
 import { useAdminUser } from '@/app/(dashboard)/admin/layout';

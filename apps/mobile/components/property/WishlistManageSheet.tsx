@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Pencil, Plus, Trash2 } from 'lucide-react-native';
+import { Pencil, Plus, Trash2 } from '@sureground/icons/native';
 import {
   Button,
   Divider,

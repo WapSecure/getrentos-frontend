@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
-import { ScanFace } from 'lucide-react-native';
+import { ScanFace } from '@sureground/icons/native';
 import { Button, Text, useTheme, useToast } from '@sureground/ui-native';
 import type { FaceCheckStatus, SmileLivenessSession } from '@/lib/api/trust';
 import { errorMessage } from '@/lib/api/client';

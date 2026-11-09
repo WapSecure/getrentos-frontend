@@ -1,4 +1,4 @@
-import { MapPin, Bed, Bath, Square, Building2 } from 'lucide-react';
+import { MapPin, Bed, Bath, Square, Building2 } from '@sureground/icons';
 import { LinkButton } from './primitives';
 import { ROUTES } from '@/lib/constants/auth';
 

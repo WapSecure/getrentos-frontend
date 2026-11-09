@@ -7,7 +7,7 @@ import {
   FileSearch,
   PauseCircle,
   XCircle,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { LAND_DILIGENCE_LABELS, type LandDiligenceStatus } from '@/types/land';
 
 const STATUS_CONFIG: Record<

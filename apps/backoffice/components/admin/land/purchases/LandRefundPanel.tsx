@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { CircleCheck, CircleAlert, HandCoins, Loader2, RotateCcw } from 'lucide-react';
+import { CircleCheck, CircleAlert, HandCoins, Loader2, RotateCcw } from '@sureground/icons';
 import { Button, ConfirmDialog, CurrencyInput, Field } from '@sureground/ui';
 import { formatCurrency, formatDate } from '@sureground/shared';
 import type { LandPurchaseDetail, LandRefundStatus } from '@/types/landPurchase';

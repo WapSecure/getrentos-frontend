@@ -1,6 +1,13 @@
 'use client';
 
-import { Building2, FileBarChart, PieChart, ClipboardList, Repeat, Target } from 'lucide-react';
+import {
+  Building2,
+  FileBarChart,
+  PieChart,
+  ClipboardList,
+  Repeat,
+  Target,
+} from '@sureground/icons';
 import { HubTabs, useHubTab, type HubTab } from '@/components/shared/navigation/HubTabs';
 import { FinancialsOverviewView } from '@/components/landlord/financials/FinancialsOverviewView';
 import { OwnerStatementsView } from '@/components/landlord/financials/OwnerStatementsView';

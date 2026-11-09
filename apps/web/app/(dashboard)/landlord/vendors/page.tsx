@@ -11,7 +11,7 @@ import {
 } from '@sureground/ui';
 import { useMemo, useState } from 'react';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, HardHat } from 'lucide-react';
+import { Plus, HardHat } from '@sureground/icons';
 import { VendorCard } from '@/components/landlord/vendors/VendorCard';
 import { VendorFormModal } from '@/components/landlord/vendors/VendorFormModal';
 import { VendorDetailModal } from '@/components/landlord/vendors/VendorDetailModal';

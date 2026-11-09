@@ -31,7 +31,7 @@ import {
   ShieldAlert,
   ShieldCheck,
   Star,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';

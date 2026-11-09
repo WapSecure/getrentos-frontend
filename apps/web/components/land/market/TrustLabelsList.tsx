@@ -1,4 +1,4 @@
-import { AlertTriangle, CircleDashed, ShieldCheck } from 'lucide-react';
+import { AlertTriangle, CircleDashed, ShieldCheck } from '@sureground/icons';
 import { formatDate } from '@/lib/format';
 import {
   LAND_TRUST_SOURCE_LABELS,

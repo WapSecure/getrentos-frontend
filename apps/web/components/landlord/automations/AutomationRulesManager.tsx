@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CalendarClock, Pencil, Play, Trash2 } from 'lucide-react';
+import { CalendarClock, Pencil, Play, Trash2 } from '@sureground/icons';
 import {
   Badge,
   Button,

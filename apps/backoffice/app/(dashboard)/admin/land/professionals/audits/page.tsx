@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CircleAlert, ClipboardCheck } from 'lucide-react';
+import { CircleAlert, ClipboardCheck } from '@sureground/icons';
 import {
   Button,
   EmptyState,

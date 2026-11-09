@@ -3,7 +3,7 @@ import { Pressable, RefreshControl, View } from 'react-native';
 import { router } from 'expo-router';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Heart } from 'lucide-react-native';
+import { Heart } from '@sureground/icons/native';
 import {
   Card,
   EmptyState,

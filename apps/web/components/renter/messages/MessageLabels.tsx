@@ -1,6 +1,6 @@
 'use client';
 
-import { Tag } from 'lucide-react';
+import { Tag } from '@sureground/icons';
 import { Card } from '@sureground/ui';
 
 interface Label {

@@ -9,7 +9,7 @@ import {
   FileText,
   CheckCircle2,
   XCircle,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { Badge, Button, Card } from '@sureground/ui';
 import { formatDate } from '@sureground/shared';
 import type { VerificationRequest, VerificationRequestType } from '@/types/admin';

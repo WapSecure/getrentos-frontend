@@ -12,7 +12,7 @@ import {
   CheckCircle,
   Trash2,
   ChevronRight,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { format } from 'date-fns';
 import { Button, IconButton } from '@sureground/ui';
 import { notificationHref } from '@/lib/notificationHref';

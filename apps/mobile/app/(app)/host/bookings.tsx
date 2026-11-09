@@ -4,7 +4,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { CalendarDays } from 'lucide-react-native';
+import { CalendarDays } from '@sureground/icons/native';
 import {
   EmptyState,
   QueryState,

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
-import { Briefcase, Lock, Package, UserCheck } from 'lucide-react-native';
+import { Briefcase, Lock, Package, UserCheck } from '@sureground/icons/native';
 import {
   Card,
   EmptyState,

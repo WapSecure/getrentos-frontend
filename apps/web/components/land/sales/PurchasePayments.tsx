@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { Alert, Badge, EmptyState } from '@sureground/ui';
-import { Wallet } from 'lucide-react';
+import { Wallet } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { sellerPayoutKeys } from '@/lib/queryKeys';

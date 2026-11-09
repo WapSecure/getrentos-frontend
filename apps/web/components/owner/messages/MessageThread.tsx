@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Alert, Button, Input } from '@sureground/ui';
-import { Send, MessageCircle, Check, CheckCheck } from 'lucide-react';
+import { Send, MessageCircle, Check, CheckCheck } from '@sureground/icons';
 import { getInitials } from '@/lib/format';
 import { format } from 'date-fns';
 

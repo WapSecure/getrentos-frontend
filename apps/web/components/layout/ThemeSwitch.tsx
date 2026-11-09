@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
-import { Sun, Moon } from 'lucide-react';
+import { Sun, Moon } from '@sureground/icons';
 import { IconButton } from '@sureground/ui';
 
 const className =

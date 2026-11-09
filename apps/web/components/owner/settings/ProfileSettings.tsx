@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Camera, User, Mail, Phone, Building2 } from 'lucide-react';
+import { Camera, User, Mail, Phone, Building2 } from '@sureground/icons';
 import { Field, IconButton, Input, SaveButton } from '@sureground/ui';
 import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';

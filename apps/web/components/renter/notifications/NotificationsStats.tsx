@@ -8,7 +8,7 @@ import {
   Wrench,
   FileCheck,
   AlertCircle,
-} from 'lucide-react';
+} from '@sureground/icons';
 
 interface Notification {
   type: string;

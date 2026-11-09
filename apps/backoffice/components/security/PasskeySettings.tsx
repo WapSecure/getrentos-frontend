@@ -1,7 +1,7 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Trash2 } from 'lucide-react';
+import { Trash2 } from '@sureground/icons';
 import {
   startRegistration,
   type PublicKeyCredentialCreationOptionsJSON,

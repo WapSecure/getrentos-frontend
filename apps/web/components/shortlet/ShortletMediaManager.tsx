@@ -4,7 +4,7 @@ import { useMemo, useRef, useState } from 'react';
 import { SafeImage } from '@/components/shared/media/SafeImage';
 import { useMutation } from '@tanstack/react-query';
 import { Badge, Button, Field, IconButton, Input, useToast } from '@sureground/ui';
-import { ImagePlus, Link2, Map as MapIcon, Star, Trash2, Video } from 'lucide-react';
+import { ImagePlus, Link2, Map as MapIcon, Star, Trash2, Video } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
 import { videoFileProblem } from '@/lib/videoFile';

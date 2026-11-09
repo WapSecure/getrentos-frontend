@@ -1,4 +1,4 @@
-import { AlertTriangle, BadgeCheck, CalendarX, Home, ShieldAlert, Star } from 'lucide-react';
+import { AlertTriangle, BadgeCheck, CalendarX, Home, ShieldAlert, Star } from '@sureground/icons';
 import type { GuestSummary } from '@/types/shortlet';
 
 const memberSince = (iso: string) =>

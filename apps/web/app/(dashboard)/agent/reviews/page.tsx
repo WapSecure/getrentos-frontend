@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Star, MessageCircle } from 'lucide-react';
+import { Star, MessageCircle } from '@sureground/icons';
 import {
   Card,
   EmptyState,

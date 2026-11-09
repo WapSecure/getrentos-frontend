@@ -13,7 +13,7 @@ import {
   Megaphone,
   Plus,
   UserPlus,
-} from 'lucide-react-native';
+} from '@sureground/icons/native';
 import {
   Button,
   Card,

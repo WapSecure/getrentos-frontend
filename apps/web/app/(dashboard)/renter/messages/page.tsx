@@ -11,7 +11,7 @@ import { QuickReplies } from '@/components/renter/messages/QuickReplies';
 import { MessageTemplates } from '@/components/renter/messages/MessageTemplates';
 import { MessageFilters } from '@/components/renter/messages/MessageFilters';
 import { MessageReminders } from '@/components/renter/messages/MessageReminders';
-import { MessageCircle } from 'lucide-react';
+import { MessageCircle } from '@sureground/icons';
 import { Conversation, Message, FilterState, Reminder } from '@/types/messages';
 import { renterService } from '@/services/renterService';
 import { unwrap, type Paginated } from '@/lib/apiHelpers';

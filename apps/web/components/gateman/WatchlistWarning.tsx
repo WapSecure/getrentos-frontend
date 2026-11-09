@@ -1,6 +1,6 @@
 'use client';
 
-import { Eye } from 'lucide-react';
+import { Eye } from '@sureground/icons';
 import { Alert } from '@sureground/ui';
 
 // Shown after a successful write: a WATCH entry admits the visitor on purpose, so this is deliberately not an error.

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Megaphone } from 'lucide-react';
+import { Plus, Megaphone } from '@sureground/icons';
 import { ListingCard } from '@/components/landlord/listings/ListingCard';
 import {
   CREATE_LISTING_DRAFT_KEY,

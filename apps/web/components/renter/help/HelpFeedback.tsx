@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { Star, Send } from 'lucide-react';
+import { Star, Send } from '@sureground/icons';
 import { Alert, Button, Card, Field, Textarea } from '@sureground/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';

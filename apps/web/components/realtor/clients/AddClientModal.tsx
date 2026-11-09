@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { UserPlus, Mail, CheckCircle2 } from 'lucide-react';
+import { UserPlus, Mail, CheckCircle2 } from '@sureground/icons';
 import {
   Alert,
   Button,

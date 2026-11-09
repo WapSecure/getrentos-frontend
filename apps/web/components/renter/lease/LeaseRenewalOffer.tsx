@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { Mail, CheckCircle, XCircle, Calendar, TrendingUp } from 'lucide-react';
+import { Mail, CheckCircle, XCircle, Calendar, TrendingUp } from '@sureground/icons';
 import { NairaSign } from '@sureground/ui/NairaSign';
 import { Alert, Button, Card } from '@sureground/ui';
 import { ROUTES } from '@/lib/constants/auth';

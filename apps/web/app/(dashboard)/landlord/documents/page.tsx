@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
-import { FileText, Upload, FolderOpen } from 'lucide-react';
+import { FileText, Upload, FolderOpen } from '@sureground/icons';
 import {
   Button,
   Pagination,

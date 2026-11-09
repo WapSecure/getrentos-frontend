@@ -3,7 +3,7 @@ import { Alert, RefreshControl, ScrollView, View } from 'react-native';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { CalendarClock, Plus, Trash2, Waves } from 'lucide-react-native';
+import { CalendarClock, Plus, Trash2, Waves } from '@sureground/icons/native';
 import {
   Button,
   Card,

@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { Map as MapIcon } from 'lucide-react';
+import { Map as MapIcon } from '@sureground/icons';
 import { Badge, ListSkeleton, type BadgeVariant } from '@sureground/ui';
 import {
   BOUNDARY_SOURCE_LABEL,

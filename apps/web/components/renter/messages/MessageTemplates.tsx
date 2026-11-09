@@ -2,7 +2,16 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { FileText, Plus, Edit2, Trash2, Copy, Check, ChevronDown, ChevronUp } from 'lucide-react';
+import {
+  FileText,
+  Plus,
+  Edit2,
+  Trash2,
+  Copy,
+  Check,
+  ChevronDown,
+  ChevronUp,
+} from '@sureground/icons';
 import {
   Badge,
   Button,

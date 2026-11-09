@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { CircleAlert, Gavel, PauseCircle } from 'lucide-react';
+import { CircleAlert, Gavel, PauseCircle } from '@sureground/icons';
 import {
   Badge,
   Checkbox,

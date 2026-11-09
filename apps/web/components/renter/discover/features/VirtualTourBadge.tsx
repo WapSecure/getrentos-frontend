@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Camera, Play } from 'lucide-react';
+import { Camera, Play } from '@sureground/icons';
 
 interface VirtualTourBadgeProps {
   hasTour: boolean;

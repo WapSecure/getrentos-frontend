@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { BookOpen, Clock, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
+import { BookOpen, Clock, CheckCircle2, ChevronDown, ChevronUp } from '@sureground/icons';
 import { Card, EmptyState } from '@sureground/ui';
 
 interface Guide {

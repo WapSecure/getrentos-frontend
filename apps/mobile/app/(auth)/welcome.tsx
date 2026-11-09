@@ -2,7 +2,7 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
-import { ArrowRight, BadgeCheck, Building2, Search, ShieldCheck } from 'lucide-react-native';
+import { ArrowRight, BadgeCheck, Building2, Search, ShieldCheck } from '@sureground/icons/native';
 import {
   BrandLogo,
   Button,

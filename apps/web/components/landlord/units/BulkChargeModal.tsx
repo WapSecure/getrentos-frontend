@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ReceiptText } from 'lucide-react';
+import { ReceiptText } from '@sureground/icons';
 import {
   Button,
   Checkbox,

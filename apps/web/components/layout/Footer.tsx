@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { IconLink } from '@sureground/ui';
 import { Logo } from '@/components/ui/Logo';
-import { Mail, MapPin, MessageCircle, Phone, Twitter } from 'lucide-react';
+import { Mail, MapPin, MessageCircle, Phone, Twitter } from '@sureground/icons';
 import { SUPPORT, whatsappLink } from '@/lib/support';
 import { ROUTES } from '@/lib/constants/auth';
 import { SITE_NAME, SITE_TWITTER_HANDLE } from '@/lib/site';

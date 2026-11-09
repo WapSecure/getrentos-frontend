@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { KeyRound, RefreshCw } from 'lucide-react';
+import { KeyRound, RefreshCw } from '@sureground/icons';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@sureground/ui';
 import { Alert, Button, IconButton } from '@sureground/ui';
 import { Field } from '@sureground/ui';

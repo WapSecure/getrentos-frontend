@@ -11,7 +11,7 @@ import {
 import { router, useLocalSearchParams, type Href } from 'expo-router';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ArrowRight, ChevronLeft, Mic, Send, Square, Volume2 } from 'lucide-react-native';
+import { ArrowRight, ChevronLeft, Mic, Send, Square, Volume2 } from '@sureground/icons/native';
 import { Chip, Text, TextField, useTheme } from '@sureground/ui-native';
 import {
   REPLY_LANGUAGES,

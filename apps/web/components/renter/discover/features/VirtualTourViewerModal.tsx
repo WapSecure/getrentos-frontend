@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
-import { CalendarCheck, Video } from 'lucide-react';
+import { CalendarCheck, Video } from '@sureground/icons';
 import {
   Button,
   Dialog,

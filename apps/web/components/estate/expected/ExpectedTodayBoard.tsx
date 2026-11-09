@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Briefcase, Package, UserCheck } from 'lucide-react';
+import { Briefcase, Package, UserCheck } from '@sureground/icons';
 import { Badge, Card, EmptyState, ListSkeleton } from '@sureground/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';

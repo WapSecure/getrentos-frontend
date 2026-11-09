@@ -1,7 +1,7 @@
 'use client';
 
 import { EmptyState, SearchInput } from '@sureground/ui';
-import { MessageCircle } from 'lucide-react';
+import { MessageCircle } from '@sureground/icons';
 import { getInitials, formatRelativeTime } from '@/lib/format';
 
 export interface Conversation {

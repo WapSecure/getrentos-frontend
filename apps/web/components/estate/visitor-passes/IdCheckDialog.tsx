@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { IdCard, ShieldAlert } from 'lucide-react';
+import { IdCard, ShieldAlert } from '@sureground/icons';
 import {
   Alert,
   Button,

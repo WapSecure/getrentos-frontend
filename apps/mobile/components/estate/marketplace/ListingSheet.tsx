@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
 import { Image } from 'expo-image';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ImagePlus, X } from 'lucide-react-native';
+import { ImagePlus, X } from '@sureground/icons/native';
 import {
   Button,
   DateField,

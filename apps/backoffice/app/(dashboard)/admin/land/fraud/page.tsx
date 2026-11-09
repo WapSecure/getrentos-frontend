@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { CircleAlert, ShieldAlert, ShieldCheck } from 'lucide-react';
+import { CircleAlert, ShieldAlert, ShieldCheck } from '@sureground/icons';
 import { Badge, EmptyState, QueryState, PageHeader } from '@sureground/ui';
 import { unwrap } from '@sureground/shared';
 import { useAdminUser } from '../../layout';

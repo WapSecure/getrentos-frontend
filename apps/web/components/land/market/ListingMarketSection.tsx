@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { OpenConditionsNotice } from './OpenConditionsNotice';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { BarChart3, MapPin, ScanSearch, ShieldCheck, Video } from 'lucide-react';
+import { BarChart3, MapPin, ScanSearch, ShieldCheck, Video } from '@sureground/icons';
 import { Button, CardSkeleton } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency } from '@/lib/format';

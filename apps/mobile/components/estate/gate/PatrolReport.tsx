@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { View } from 'react-native';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Route as RouteIcon } from 'lucide-react-native';
+import { Route as RouteIcon } from '@sureground/icons/native';
 import {
   Card,
   Chip,

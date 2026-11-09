@@ -1,6 +1,6 @@
 'use client';
 
-import { BadgeCheck } from 'lucide-react';
+import { BadgeCheck } from '@sureground/icons';
 import { Alert, Card, TableSkeleton, PageHeader } from '@sureground/ui';
 import { usePlanTier } from '@/hooks/usePlanTier';
 import { usePlanPricing } from '@/hooks/usePlanPricing';

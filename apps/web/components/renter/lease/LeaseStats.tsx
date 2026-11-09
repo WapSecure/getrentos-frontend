@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Home, Calendar, FileText } from 'lucide-react';
+import { Home, Calendar, FileText } from '@sureground/icons';
 import { NairaSign } from '@sureground/ui/NairaSign';
 import { leaseRentLabel } from '@/lib/leaseTerm';
 import type { Lease } from '@/services/renterService';

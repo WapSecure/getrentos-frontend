@@ -11,7 +11,7 @@ import {
 import { router } from 'expo-router';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { BadgeCheck, ChevronRight, Landmark, Sparkles, Wallet } from 'lucide-react-native';
+import { BadgeCheck, ChevronRight, Landmark, Sparkles, Wallet } from '@sureground/icons/native';
 import {
   Button,
   Card,

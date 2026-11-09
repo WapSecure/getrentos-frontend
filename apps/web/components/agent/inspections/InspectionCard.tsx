@@ -1,6 +1,6 @@
 'use client';
 
-import { ClipboardCheck, CloudOff, Cloud, Camera, UserCheck } from 'lucide-react';
+import { ClipboardCheck, CloudOff, Cloud, Camera, UserCheck } from '@sureground/icons';
 import { Badge, Card, type BadgeVariant } from '@sureground/ui';
 import { formatDate } from '@/lib/format';
 import type { PropertyInspection, RoomCondition, InspectionType } from '@/types/agent';

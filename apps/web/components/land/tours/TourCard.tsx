@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { Badge, Card } from '@sureground/ui';
-import { CalendarClock, Video } from 'lucide-react';
+import { CalendarClock, Video } from '@sureground/icons';
 import {
   LAND_SITE_TOUR_STATUS_LABELS,
   LAND_SITE_TOUR_STATUS_VARIANT,

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { ShieldAlert } from 'lucide-react';
+import { ShieldAlert } from '@sureground/icons';
 import { Alert } from '@sureground/ui';
 import { kycService } from '@/services/kycService';
 import { unwrap } from '@/lib/apiHelpers';

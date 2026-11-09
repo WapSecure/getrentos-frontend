@@ -14,7 +14,7 @@ import { RentIncreaseHistory } from '@/components/renter/lease/RentIncreaseHisto
 import { UpcomingPaymentReminders } from '@/components/renter/lease/UpcomingPaymentReminders';
 import { LeaseTerminationRequest } from '@/components/renter/lease/LeaseTerminationRequest';
 import { PendingLeaseCard } from '@/components/renter/lease/PendingLeaseCard';
-import { FileText } from 'lucide-react';
+import { FileText } from '@sureground/icons';
 import { EmptyState, PageErrorState, PageLoadingState, useToast } from '@sureground/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap, unwrapOptional } from '@/lib/apiHelpers';

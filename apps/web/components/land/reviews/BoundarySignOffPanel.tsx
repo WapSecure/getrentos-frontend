@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { ShieldCheck, Undo2 } from 'lucide-react';
+import { ShieldCheck, Undo2 } from '@sureground/icons';
 import { Alert, Button, DataTable, Field, Textarea, useToast, type Column } from '@sureground/ui';
 import {
   BOUNDARY_SOURCE_LABEL,

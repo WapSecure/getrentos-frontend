@@ -1,6 +1,6 @@
 'use client';
 
-import { Users, UserPlus } from 'lucide-react';
+import { Users, UserPlus } from '@sureground/icons';
 import { Button } from '@sureground/ui';
 import { RenterPageHeader } from '../shared/RenterPageHeader';
 

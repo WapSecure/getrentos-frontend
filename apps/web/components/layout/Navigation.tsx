@@ -12,7 +12,7 @@ import {
 import { ThemeSwitch } from '@/components/layout/ThemeSwitch';
 import { Logo } from '@/components/ui/Logo';
 import { Button, IconButton } from '@sureground/ui';
-import { ChevronDown, Menu, X } from 'lucide-react';
+import { ChevronDown, Menu, X } from '@sureground/icons';
 import { ROUTES, getDashboardRoute, getUserRole } from '@/lib/constants/auth';
 import { ESTATE_MARKETPLACE_ROUTES } from '@/lib/constants/auth';
 import { useAuthStore } from '@/lib/store/authStore';

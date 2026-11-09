@@ -1,5 +1,5 @@
 import { Pressable, View } from 'react-native';
-import { ChevronRight } from 'lucide-react-native';
+import { ChevronRight } from '@sureground/icons/native';
 import { useTheme } from '../theme';
 import { Text } from './Text';
 

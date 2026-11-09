@@ -1,4 +1,4 @@
-import { Home, Building2, TrendingUp, Search, Users, UserCheck } from 'lucide-react';
+import { Home, Building2, TrendingUp, Search, Users, UserCheck } from '@sureground/icons';
 import { MarketingCard, SectionHeading } from './primitives';
 
 const roles = [

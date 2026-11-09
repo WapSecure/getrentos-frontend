@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, X } from 'lucide-react';
+import { Check, X } from '@sureground/icons';
 import type { PlanEntitlementRow } from '@/services/subscriptionService';
 
 function Cell({ value }: { value: boolean | string }) {

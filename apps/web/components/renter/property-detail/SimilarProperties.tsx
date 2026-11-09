@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { MapPin } from 'lucide-react';
+import { MapPin } from '@sureground/icons';
 import { formatPrice, type Property } from '@/types/renter';
 import { buildRoute } from '@/lib/constants/auth';
 import { renterService } from '@/services/renterService';

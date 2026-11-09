@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown, FadeOutUp } from 'react-native-reanimated';
-import { CircleCheck, WifiOff } from 'lucide-react-native';
+import { CircleCheck, WifiOff } from '@sureground/icons/native';
 import { Text, useReducedMotion, useTheme } from '@sureground/ui-native';
 
 export function ConnectivityBanner() {

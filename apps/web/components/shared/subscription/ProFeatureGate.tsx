@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
-import { BadgeCheck } from 'lucide-react';
+import { BadgeCheck } from '@sureground/icons';
 import { Button, EmptyState } from '@sureground/ui';
 import { usePlanTier } from '@/hooks/usePlanTier';
 

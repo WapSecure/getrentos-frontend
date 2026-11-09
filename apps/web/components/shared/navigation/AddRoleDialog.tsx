@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Briefcase, Loader2, Plus } from 'lucide-react';
+import { Briefcase, Loader2, Plus } from '@sureground/icons';
 import { Alert, Dialog, DialogContent, DialogDescription, DialogTitle } from '@sureground/ui';
 import { BACKEND_ROLE_TO_ID, ROLES } from '@/lib/constants/auth';
 import { getStoredUser } from '@/lib/authStorage';

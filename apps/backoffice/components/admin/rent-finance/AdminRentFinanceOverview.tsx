@@ -12,7 +12,7 @@ import {
   ReceiptText,
   ShieldAlert,
   Wallet,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { PageErrorState, PageLoadingState, StatCard, PageHeader } from '@sureground/ui';
 import { unwrap } from '@sureground/shared';
 import { adminKeys } from '@/lib/queryKeys';

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { SafeImage } from '@/components/shared/media/SafeImage';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { ShieldCheck, Star, MessageCircle, BedDouble, Bath } from 'lucide-react';
+import { ShieldCheck, Star, MessageCircle, BedDouble, Bath } from '@sureground/icons';
 import { Button, CardSkeleton, Pagination, Skeleton } from '@sureground/ui';
 import { micrositeService } from '@/services/micrositeService';
 import { renterService } from '@/services/renterService';

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@sureground/ui';
 import { Alert, Button, CurrencyInput, DatePicker, Field, Select } from '@sureground/ui';
-import { ReceiptText } from 'lucide-react';
+import { ReceiptText } from '@sureground/icons';
 import type { Unit } from '@/types/landlord';
 
 export interface ChargeUnitInput {

@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Download } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import { Download } from '@sureground/icons';
+import type { SgIcon } from '@sureground/icons';
 import {
   Button,
   DataTable,
@@ -34,7 +34,7 @@ export interface RentFinanceQueueConfig<T> {
   eyebrow: string;
   title: string;
   description?: string;
-  icon: LucideIcon;
+  icon: SgIcon;
   filters?: RentFinanceQueueFilter[];
   listFn: (params: RentFinanceQuery) => Promise<ApiResponse<Paginated<T>>>;
   exportFn?: (params: RentFinanceQuery) => Promise<Blob>;

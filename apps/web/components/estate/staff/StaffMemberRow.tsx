@@ -1,6 +1,6 @@
 'use client';
 
-import { Trash2 } from 'lucide-react';
+import { Trash2 } from '@sureground/icons';
 import { IconButton } from '@sureground/ui';
 import type { StaffMember } from '@/types/estate';
 

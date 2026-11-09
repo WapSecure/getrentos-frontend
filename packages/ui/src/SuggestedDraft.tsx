@@ -1,6 +1,6 @@
 'use client';
 
-import { Sparkles } from 'lucide-react';
+import { Sparkles } from '@sureground/icons';
 import { Alert } from './Alert';
 import { Button } from './Button';
 

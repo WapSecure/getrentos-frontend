@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CalendarCheck } from 'lucide-react';
+import { CalendarCheck } from '@sureground/icons';
 import {
   Badge,
   Button,

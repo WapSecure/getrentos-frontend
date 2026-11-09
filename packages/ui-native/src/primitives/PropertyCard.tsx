@@ -11,7 +11,7 @@ import {
   Columns3,
   Clock,
   ImageOff,
-} from 'lucide-react-native';
+} from '@sureground/icons/native';
 import { useTheme } from '../theme';
 import { Text } from './Text';
 import { Price } from './Price';

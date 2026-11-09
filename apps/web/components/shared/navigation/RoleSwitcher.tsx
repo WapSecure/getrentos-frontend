@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Check, Plus } from 'lucide-react';
+import { Check, Plus } from '@sureground/icons';
 import { DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '@sureground/ui';
 import { openAddRoleDialog } from './AddRoleDialog';
 import { BACKEND_ROLE_TO_ID, ROLES, getDashboardRoute } from '@/lib/constants/auth';

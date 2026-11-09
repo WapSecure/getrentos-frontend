@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Users } from 'lucide-react';
+import { Users } from '@sureground/icons';
 import {
   Button,
   DataTable,

@@ -4,7 +4,7 @@ import { Alert, RefreshControl, View } from 'react-native';
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Megaphone, Plus } from 'lucide-react-native';
+import { Megaphone, Plus } from '@sureground/icons/native';
 import {
   Button,
   Card,

@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Fingerprint, CheckCircle, XCircle } from 'lucide-react';
+import { Fingerprint, CheckCircle, XCircle } from '@sureground/icons';
 import { Button } from '@sureground/ui';
 import { ToastVariant } from '@sureground/ui';
 import { authService } from '@/services/authService';

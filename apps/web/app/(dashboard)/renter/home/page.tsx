@@ -1,6 +1,6 @@
 'use client';
 
-import { House, FileCheck, FileText, ClipboardCheck, PiggyBank } from 'lucide-react';
+import { House, FileCheck, FileText, ClipboardCheck, PiggyBank } from '@sureground/icons';
 import { HomeOverviewView } from '@/components/renter/home/HomeOverviewView';
 import { LeaseView } from '@/components/renter/lease/LeaseView';
 import { DocumentsView } from '@/components/renter/documents/DocumentsView';

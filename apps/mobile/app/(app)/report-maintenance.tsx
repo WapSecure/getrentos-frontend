@@ -3,7 +3,7 @@ import { Image, Pressable, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AlertTriangle, ChevronLeft, Plus, Sparkles, X } from 'lucide-react-native';
+import { AlertTriangle, ChevronLeft, Plus, Sparkles, X } from '@sureground/icons/native';
 import {
   Button,
   Card,

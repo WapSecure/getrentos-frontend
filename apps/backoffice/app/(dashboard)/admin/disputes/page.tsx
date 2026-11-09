@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Gavel } from 'lucide-react';
+import { Gavel } from '@sureground/icons';
 import { DisputeCard } from '@/components/admin/disputes/DisputeCard';
 import { DisputeCaseModal } from '@/components/admin/disputes/DisputeCaseModal';
 import {

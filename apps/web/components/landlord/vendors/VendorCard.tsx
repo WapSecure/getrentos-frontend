@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { CalendarClock, Pencil, Phone, Power, Trash2 } from 'lucide-react';
+import { CalendarClock, Pencil, Phone, Power, Trash2 } from '@sureground/icons';
 import { Badge, IconButton } from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 import { StarRating } from '@/components/landlord/vendors/StarRating';

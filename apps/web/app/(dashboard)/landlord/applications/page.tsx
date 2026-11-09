@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ROUTES } from '@/lib/constants/auth';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { FileText } from 'lucide-react';
+import { FileText } from '@sureground/icons';
 import { Pagination, EmptyState, ToggleChip, useToast, PageHeader } from '@sureground/ui';
 import { ApplicationCard } from '@/components/landlord/applications/ApplicationCard';
 import { ApplicationDetailsModal } from '@/components/landlord/applications/ApplicationDetailsModal';

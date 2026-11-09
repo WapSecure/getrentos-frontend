@@ -2,7 +2,7 @@
 
 import { useLandlordUser } from '../layout';
 import { useState } from 'react';
-import { User, Bell, Landmark, Zap, Lock, Download } from 'lucide-react';
+import { User, Bell, Landmark, Zap, Lock, Download } from '@sureground/icons';
 import { Card, PageHeader } from '@sureground/ui';
 import { ProfileSettings } from '@/components/landlord/settings/ProfileSettings';
 import { NotificationSettings } from '@/components/landlord/settings/NotificationSettings';

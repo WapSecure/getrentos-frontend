@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { useOwnerUser } from '../layout';
-import { Building2 } from 'lucide-react';
+import { Building2 } from '@sureground/icons';
 import { useQuery } from '@tanstack/react-query';
 import { OwnerDashboardHeader } from '@/components/owner/dashboard/OwnerDashboardHeader';
 import { OwnerStatsCards } from '@/components/owner/dashboard/OwnerStatsCards';

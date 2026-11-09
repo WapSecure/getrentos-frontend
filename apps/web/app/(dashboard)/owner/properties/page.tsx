@@ -17,7 +17,7 @@ import {
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, Building2 } from 'lucide-react';
+import { Plus, Building2 } from '@sureground/icons';
 import { OwnerPropertyCard } from '@/components/owner/properties/OwnerPropertyCard';
 import {
   ADD_OWNER_PROPERTY_DRAFT_KEY,

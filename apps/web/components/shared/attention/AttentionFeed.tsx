@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { AlertCircle, ArrowRight, Bell, Clock } from 'lucide-react';
+import { AlertCircle, ArrowRight, Bell, Clock } from '@sureground/icons';
 import { Card, Skeleton } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { attentionKeys } from '@/lib/queryKeys';

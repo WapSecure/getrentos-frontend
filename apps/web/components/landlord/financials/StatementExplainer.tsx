@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { AlertCircle, Bell, Clock, MessageCircleQuestion, Sparkles } from 'lucide-react';
+import { AlertCircle, Bell, Clock, MessageCircleQuestion, Sparkles } from '@sureground/icons';
 import { Card, Skeleton } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';

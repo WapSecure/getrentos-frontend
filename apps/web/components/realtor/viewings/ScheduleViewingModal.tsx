@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { CalendarClock } from 'lucide-react';
+import { CalendarClock } from '@sureground/icons';
 import {
   Button,
   DatePicker,

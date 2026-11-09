@@ -1,12 +1,12 @@
 'use client';
 
-import { Ban, CheckCircle2, Clock, ShieldAlert, type LucideIcon } from 'lucide-react';
+import { Ban, CheckCircle2, Clock, ShieldAlert, type SgIcon } from '@sureground/icons';
 import { Badge, type BadgeVariant } from '@sureground/ui';
 import type { AdminStaffStatus } from '@/types/admin';
 
 const statusConfig: Record<
   AdminStaffStatus,
-  { label: string; variant: BadgeVariant; icon: LucideIcon }
+  { label: string; variant: BadgeVariant; icon: SgIcon }
 > = {
   active: { label: 'Active', variant: 'success', icon: CheckCircle2 },
   pending: { label: 'Pending', variant: 'warning', icon: Clock },

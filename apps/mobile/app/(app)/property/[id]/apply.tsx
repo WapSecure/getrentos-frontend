@@ -32,7 +32,7 @@ import {
   ShieldAlert,
   Upload,
   X,
-} from 'lucide-react-native';
+} from '@sureground/icons/native';
 import {
   Button,
   Card,

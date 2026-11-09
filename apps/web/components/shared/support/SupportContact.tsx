@@ -1,4 +1,4 @@
-import { MessageCircle, Phone } from 'lucide-react';
+import { MessageCircle, Phone } from '@sureground/icons';
 import { SUPPORT, hasSupportLine, whatsappLink } from '@/lib/support';
 import { cn } from '@sureground/shared';
 

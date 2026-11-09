@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { GitCompare, MapPin } from 'lucide-react';
+import { GitCompare, MapPin } from '@sureground/icons';
 import {
   Button,
   Dialog,

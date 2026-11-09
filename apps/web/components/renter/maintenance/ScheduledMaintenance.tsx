@@ -8,8 +8,8 @@ import {
   CheckCircle,
   AlertCircle,
   Plus,
-  type LucideIcon,
-} from 'lucide-react';
+  type SgIcon,
+} from '@sureground/icons';
 import { Badge, Button, EmptyState, type BadgeVariant } from '@sureground/ui';
 
 interface ScheduledMaintenance {
@@ -30,7 +30,7 @@ interface ScheduledMaintenanceProps {
 
 const statusConfig: Record<
   ScheduledMaintenance['status'],
-  { label: string; variant: BadgeVariant; icon: LucideIcon }
+  { label: string; variant: BadgeVariant; icon: SgIcon }
 > = {
   scheduled: { label: 'Scheduled', variant: 'info', icon: Clock },
   in_progress: { label: 'In progress', variant: 'warning', icon: Wrench },

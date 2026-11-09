@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { CalendarClock } from 'lucide-react';
+import { CalendarClock } from '@sureground/icons';
 import { Button, ConfirmDialog, DataTable, type Column } from '@sureground/ui';
 import { formatCurrency, formatDate } from '@sureground/shared';
 import type { LandInstallment } from '@/types/landPurchase';

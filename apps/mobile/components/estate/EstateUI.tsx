@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Alert, Pressable, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { BadgeCheck, Check, ChevronRight, Megaphone, Plus } from 'lucide-react-native';
+import { BadgeCheck, Check, ChevronRight, Megaphone, Plus } from '@sureground/icons/native';
 import {
   Avatar,
   Button,

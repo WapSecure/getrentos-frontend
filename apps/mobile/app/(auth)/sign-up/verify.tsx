@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
 import Animated, { ZoomIn } from 'react-native-reanimated';
-import { MailCheck, MessageCircle, Smartphone } from 'lucide-react-native';
+import { MailCheck, MessageCircle, Smartphone } from '@sureground/icons/native';
 import {
   AuthScaffold,
   Button,

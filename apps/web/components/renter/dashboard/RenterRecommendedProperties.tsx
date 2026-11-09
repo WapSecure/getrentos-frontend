@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { MapPin, Bed, Bath, Square, Heart, Eye, Star, Home } from 'lucide-react';
+import { MapPin, Bed, Bath, Square, Heart, Eye, Star, Home } from '@sureground/icons';
 import { Badge } from '@sureground/ui';
 import { Button } from '@sureground/ui';
 import { IconButton } from '@sureground/ui';

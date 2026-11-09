@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { Users, ShieldCheck, TrendingUp, FileSpreadsheet, Check } from 'lucide-react';
+import { Users, ShieldCheck, TrendingUp, FileSpreadsheet, Check } from '@sureground/icons';
 import { NairaSign } from '@sureground/ui/NairaSign';
 import {
   Button,

@@ -5,7 +5,7 @@ import { usePaymentProviders } from '@/hooks/usePaymentProviders';
 import type { PaymentProvider } from '@/types/payments';
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ReceiptText, Repeat } from 'lucide-react';
+import { ReceiptText, Repeat } from '@sureground/icons';
 import { Badge, Button, EmptyState, ListSkeleton, PageHeader } from '@sureground/ui';
 import { estateResidentService } from '@/services/estateResidentService';
 import { unwrap } from '@/lib/apiHelpers';

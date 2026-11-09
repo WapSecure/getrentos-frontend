@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CircleCheck, FileCheck2, PiggyBank, Scale, ShieldCheck } from 'lucide-react';
+import { CircleCheck, FileCheck2, PiggyBank, Scale, ShieldCheck } from '@sureground/icons';
 import { Alert, Badge, Button, Card, CardSkeleton, EmptyState, Textarea } from '@sureground/ui';
 
 import { depositHolderText, noDeductionsText } from '@sureground/shared';

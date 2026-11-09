@@ -1,6 +1,6 @@
 'use client';
 
-import { Heart, ArrowUpDown } from 'lucide-react';
+import { Heart, ArrowUpDown } from '@sureground/icons';
 import { SavedPropertyCard } from './SavedPropertyCard';
 import { Button, EmptyState } from '@sureground/ui';
 import { ROUTES } from '@/lib/constants/auth';

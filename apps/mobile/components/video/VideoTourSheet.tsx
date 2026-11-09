@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Modal, Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { X } from 'lucide-react-native';
+import { X } from '@sureground/icons/native';
 import { Chip, Text } from '@sureground/ui-native';
 import { tourSource, type VideoStream } from '@sureground/shared';
 import { EmbedFrame } from './EmbedFrame';

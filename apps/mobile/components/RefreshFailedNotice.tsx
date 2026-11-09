@@ -1,5 +1,5 @@
 import { Pressable, View } from 'react-native';
-import { RotateCw } from 'lucide-react-native';
+import { RotateCw } from '@sureground/icons/native';
 import { Text, useTheme } from '@sureground/ui-native';
 
 export function RefreshFailedNotice({

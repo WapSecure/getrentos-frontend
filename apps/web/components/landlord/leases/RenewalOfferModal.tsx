@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { RefreshCcw, TriangleAlert } from 'lucide-react';
+import { RefreshCcw, TriangleAlert } from '@sureground/icons';
 import {
   Alert,
   Button,

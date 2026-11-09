@@ -9,7 +9,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
-import { AlertCircle, Check, CheckCircle2, Info, TriangleAlert } from 'lucide-react-native';
+import { AlertCircle, Check, CheckCircle2, Info, TriangleAlert } from '@sureground/icons/native';
 import { useTheme } from '../theme';
 import { useReducedMotion } from '../accessibility';
 import { Text } from './Text';

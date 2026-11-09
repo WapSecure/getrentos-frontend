@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckCircle, Wallet } from 'lucide-react';
+import { CheckCircle, Wallet } from '@sureground/icons';
 import { Badge, Button, Card } from '@sureground/ui';
 import { formatCurrency, formatLagosDate } from '@/lib/format';
 import type { PaymentsSummary as AccountSummary } from '@/services/renterService';

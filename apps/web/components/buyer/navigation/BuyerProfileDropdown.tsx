@@ -1,6 +1,6 @@
 'use client';
 
-import { HelpCircle, Settings, Shield } from 'lucide-react';
+import { HelpCircle, Settings, Shield } from '@sureground/icons';
 import { ROUTES } from '@/lib/constants/auth';
 import { AccountMenu } from '@/components/shared/navigation/AccountMenu';
 

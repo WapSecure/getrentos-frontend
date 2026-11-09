@@ -14,7 +14,7 @@ import {
   Skeleton,
   useOptimisticMutation,
 } from '@sureground/ui';
-import { BedDouble, Heart, MapPin } from 'lucide-react';
+import { BedDouble, Heart, MapPin } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';

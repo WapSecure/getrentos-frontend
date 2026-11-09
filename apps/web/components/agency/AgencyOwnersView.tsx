@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { UserRound, Building2, ArrowRight, Mail, UserPlus } from 'lucide-react';
+import { UserRound, Building2, ArrowRight, Mail, UserPlus } from '@sureground/icons';
 import {
   Alert,
   Badge,

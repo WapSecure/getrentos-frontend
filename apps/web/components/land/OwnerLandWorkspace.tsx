@@ -25,7 +25,7 @@ import {
   ShieldCheck,
   Gavel,
   Video,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { formatCurrency } from '@/lib/format';
 import { landKeys } from '@/lib/queryKeys';
 import { unwrap } from '@/lib/apiHelpers';

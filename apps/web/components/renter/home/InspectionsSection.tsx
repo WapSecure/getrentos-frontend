@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ClipboardCheck, UserCheck, ChevronRight } from 'lucide-react';
+import { ClipboardCheck, UserCheck, ChevronRight } from '@sureground/icons';
 import { Badge, Card, EmptyState, ListSkeleton, PageErrorState } from '@sureground/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';

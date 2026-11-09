@@ -4,7 +4,7 @@ import { FlashList } from '@shopify/flash-list';
 import { router } from 'expo-router';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ClipboardList } from 'lucide-react-native';
+import { ClipboardList } from '@sureground/icons/native';
 import { Badge, Card, Chip, QueryState, Skeleton, Text, useTheme } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import {

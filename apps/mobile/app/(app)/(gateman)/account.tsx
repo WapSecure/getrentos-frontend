@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 import { useState } from 'react';
 import { router } from 'expo-router';
-import { Footprints, KeyRound, LogOut, MapPin, ShieldCheck, Siren } from 'lucide-react-native';
+import { Footprints, KeyRound, LogOut, MapPin, ShieldCheck, Siren } from '@sureground/icons/native';
 import {
   Avatar,
   Button,

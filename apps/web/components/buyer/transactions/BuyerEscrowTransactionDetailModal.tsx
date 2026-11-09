@@ -15,7 +15,7 @@ import {
   ShieldCheck,
   Cog,
   Wallet,
-} from 'lucide-react';
+} from '@sureground/icons';
 import {
   Alert,
   Button,

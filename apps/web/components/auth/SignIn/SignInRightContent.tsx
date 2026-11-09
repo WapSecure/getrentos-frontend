@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Mail, Phone, Fingerprint } from 'lucide-react';
+import { ArrowLeft, Mail, Phone, Fingerprint } from '@sureground/icons';
 import { Logo } from '@/components/ui/Logo';
 import { EmailSignIn } from './methods/EmailSignIn';
 import { PhoneSignIn } from './methods/PhoneSignIn';

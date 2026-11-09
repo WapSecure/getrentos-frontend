@@ -1,9 +1,9 @@
 import { ReactNode } from 'react';
-import { LucideIcon } from 'lucide-react';
+import { SgIcon } from '@sureground/icons';
 import { cn } from '@sureground/shared';
 
 interface EmptyStateProps {
-  icon: LucideIcon;
+  icon: SgIcon;
   title: string;
   description?: ReactNode;
   action?: ReactNode;

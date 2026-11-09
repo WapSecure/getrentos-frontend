@@ -16,7 +16,7 @@ import {
   ListChecks,
   Clock,
   ExternalLink,
-} from 'lucide-react';
+} from '@sureground/icons';
 import {
   Badge,
   Button,

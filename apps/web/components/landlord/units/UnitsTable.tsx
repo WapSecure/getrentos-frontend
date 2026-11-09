@@ -13,7 +13,7 @@ import {
   IconButton,
   type BadgeVariant,
 } from '@sureground/ui';
-import { Bed, Bath, UserPlus, DoorClosed, MoreVertical, ReceiptText } from 'lucide-react';
+import { Bed, Bath, UserPlus, DoorClosed, MoreVertical, ReceiptText } from '@sureground/icons';
 import { formatCurrency } from '@/lib/format';
 import { rentSuffix } from '@/lib/leaseTerm';
 import type { Unit, UnitOccupancyStatus } from '@/types/landlord';

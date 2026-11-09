@@ -1,6 +1,6 @@
 'use client';
 
-import { Search } from 'lucide-react';
+import { Search } from '@sureground/icons';
 import { Button, PageHeader } from '@sureground/ui';
 import { ROUTES } from '@/lib/constants/auth';
 

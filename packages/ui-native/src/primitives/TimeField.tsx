@@ -8,7 +8,7 @@ import {
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
-import { Clock } from 'lucide-react-native';
+import { Clock } from '@sureground/icons/native';
 import { useTheme } from '../theme';
 import { useReducedMotion } from '../accessibility';
 import { Text } from './Text';

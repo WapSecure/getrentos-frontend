@@ -1,6 +1,6 @@
 'use client';
 
-import { Clock } from 'lucide-react';
+import { Clock } from '@sureground/icons';
 
 // The backend refuses payouts to a recently changed account until `holdUntil`; saying so lets someone who didn't make the change act.
 export function PayoutHoldNotice({ holdUntil }: { holdUntil?: string | null }) {

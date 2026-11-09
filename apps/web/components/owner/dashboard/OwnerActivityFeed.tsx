@@ -1,6 +1,6 @@
 'use client';
 
-import { Users, Handshake, ShieldCheck, FileCheck } from 'lucide-react';
+import { Users, Handshake, ShieldCheck, FileCheck } from '@sureground/icons';
 import { Card, EmptyState } from '@sureground/ui';
 import { formatRelativeTime } from '@/lib/format';
 import type { OwnerDashboard } from '@/services/ownerService';

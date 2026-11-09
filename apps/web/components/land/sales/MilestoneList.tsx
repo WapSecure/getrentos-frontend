@@ -1,7 +1,7 @@
 'use client';
 
 import { Alert, Badge, Button } from '@sureground/ui';
-import { CheckCircle2, Circle, Clock3, FileCheck2, PackageCheck, XCircle } from 'lucide-react';
+import { CheckCircle2, Circle, Clock3, FileCheck2, PackageCheck, XCircle } from '@sureground/icons';
 import { formatDate } from '@/lib/format';
 import type { LandMilestone, LandMilestoneStatus } from '@/types/landDeveloper';
 import { MILESTONE_STATUS } from '../developer/labels';

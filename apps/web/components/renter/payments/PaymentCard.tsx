@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronRight, Download, Shield, Calendar } from 'lucide-react';
+import { ChevronRight, Download, Shield, Calendar } from '@sureground/icons';
 import { Badge, Button, IconButton } from '@sureground/ui';
 import { formatCurrency, formatLagosDate } from '@/lib/format';
 import { paymentStatusBadges } from '@/lib/statusBadge';

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, BadgeCheck } from 'lucide-react';
+import { Check, BadgeCheck } from '@sureground/icons';
 import { Badge, Button, Card, CardSkeleton, SegmentedControl, type Segment } from '@sureground/ui';
 import { formatCurrency } from '@sureground/shared';
 import type { BillingCycle, PlanPricing } from '@/services/subscriptionService';

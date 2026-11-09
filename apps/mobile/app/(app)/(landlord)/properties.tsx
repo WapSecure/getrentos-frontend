@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
-import { Building2, MapPin, Plus } from 'lucide-react-native';
+import { Building2, MapPin, Plus } from '@sureground/icons/native';
 import {
   Badge,
   Button,

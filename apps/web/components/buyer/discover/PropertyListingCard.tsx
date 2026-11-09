@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { MapPin, BedDouble, Bath, Ruler, Heart, ShieldCheck, Building2 } from 'lucide-react';
+import { MapPin, BedDouble, Bath, Ruler, Heart, ShieldCheck, Building2 } from '@sureground/icons';
 import { Badge, Button, IconButton } from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 import type { BuyerPropertyListing } from '@/types/buyer';

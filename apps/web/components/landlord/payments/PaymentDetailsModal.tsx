@@ -1,6 +1,6 @@
 'use client';
 
-import { ShieldCheck } from 'lucide-react';
+import { ShieldCheck } from '@sureground/icons';
 import {
   Alert,
   Badge,

@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { Send, Paperclip, MessageCircle, Check, CheckCheck } from 'lucide-react';
+import { Send, Paperclip, MessageCircle, Check, CheckCheck } from '@sureground/icons';
 import { Alert, Button, Card, EmptyState, IconButton, Input } from '@sureground/ui';
 import { getInitials } from '@/lib/format';
 import { format } from 'date-fns';

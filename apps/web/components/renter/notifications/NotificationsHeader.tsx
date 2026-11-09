@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, BellOff, CheckCheck, Trash2 } from 'lucide-react';
+import { Bell, BellOff, CheckCheck, Trash2 } from '@sureground/icons';
 import { Button } from '@sureground/ui';
 import { RenterPageHeader } from '../shared/RenterPageHeader';
 

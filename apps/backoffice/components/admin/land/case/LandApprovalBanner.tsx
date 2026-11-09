@@ -1,6 +1,6 @@
 'use client';
 
-import { CircleCheck, OctagonAlert, RefreshCw, UsersRound } from 'lucide-react';
+import { CircleCheck, OctagonAlert, RefreshCw, UsersRound } from '@sureground/icons';
 import { Alert, Button } from '@sureground/ui';
 import type { AdminLandDiligenceDetail } from '@/types/land';
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useId, useRef, useState } from 'react';
-import { AlertTriangle, FileText, ImageIcon, Upload, X, Eye } from 'lucide-react';
+import { AlertTriangle, FileText, ImageIcon, Upload, X, Eye } from '@sureground/icons';
 import { cn } from '@sureground/shared';
 import { FilePreviewDialog } from './FilePreviewDialog';
 import { useFieldControl } from './fieldContext';

@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { CheckCircle, BadgeCheck } from 'lucide-react';
+import { CheckCircle, BadgeCheck } from '@sureground/icons';
 import { Logo } from '@/components/ui/Logo';
 import { SignInTrustFeatures } from './SignInTrustFeatures';
 import { SignInStats } from './SignInStats';

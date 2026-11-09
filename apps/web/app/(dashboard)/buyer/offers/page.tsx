@@ -3,7 +3,7 @@
 import { Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, Handshake } from 'lucide-react';
+import { Plus, Handshake } from '@sureground/icons';
 import { BuyerOfferCard } from '@/components/buyer/offers/BuyerOfferCard';
 import { MAKE_OFFER_DRAFT_KEY, MakeOfferModal } from '@/components/buyer/offers/MakeOfferModal';
 import { BuyerOfferNegotiationModal } from '@/components/buyer/offers/BuyerOfferNegotiationModal';

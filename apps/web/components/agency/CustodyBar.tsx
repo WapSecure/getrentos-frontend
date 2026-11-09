@@ -16,7 +16,7 @@ import {
   Users,
   Wrench,
   MessageSquareText,
-} from 'lucide-react';
+} from '@sureground/icons';
 import {
   Badge,
   Button,

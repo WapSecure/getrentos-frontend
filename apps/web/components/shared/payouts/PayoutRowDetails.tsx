@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, Copy } from 'lucide-react';
+import { Check, Copy } from '@sureground/icons';
 import { IconButton } from '@sureground/ui';
 import {
   PAYOUT_ARRIVAL_NOTE,

@@ -1,6 +1,6 @@
 'use client';
 
-import { Clock, CalendarClock, CheckCircle2, XCircle, Check, X } from 'lucide-react';
+import { Clock, CalendarClock, CheckCircle2, XCircle, Check, X } from '@sureground/icons';
 import { Badge, Button, Card, type BadgeVariant } from '@sureground/ui';
 import { formatDate } from '@/lib/format';
 import type { ViewingAppointment, ViewingStatus } from '@/types/realtor';

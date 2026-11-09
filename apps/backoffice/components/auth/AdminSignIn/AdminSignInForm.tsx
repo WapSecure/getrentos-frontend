@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation } from '@tanstack/react-query';
-import { Eye, EyeOff, Lock, ShieldCheck } from 'lucide-react';
+import { Eye, EyeOff, Lock, ShieldCheck } from '@sureground/icons';
 import { Alert, Checkbox, Field, IconButton, Input } from '@sureground/ui';
 import { Button } from '@sureground/ui';
 import { useToast } from '@sureground/ui';

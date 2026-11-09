@@ -1,4 +1,4 @@
-import { Eye, EyeOff } from 'lucide-react-native';
+import { Eye, EyeOff } from '@sureground/icons/native';
 import { IconButton, useTheme } from '@sureground/ui-native';
 
 export function BalanceVisibilityButton({

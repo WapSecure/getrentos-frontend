@@ -1,5 +1,5 @@
 import { router, type Href } from 'expo-router';
-import { CircleHelp, KeyRound, ShieldCheck } from 'lucide-react-native';
+import { CircleHelp, KeyRound, ShieldCheck } from '@sureground/icons/native';
 import { Screen } from '@sureground/ui-native';
 import { useIdentityVerification } from '@/hooks/useIdentityVerification';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';

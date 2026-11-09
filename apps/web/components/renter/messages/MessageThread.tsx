@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useEffect } from 'react';
-import { Home } from 'lucide-react';
+import { Home } from '@sureground/icons';
 import { MessageBubble } from './MessageBubble';
 import { MessageInput } from './MessageInput';
 import { Conversation } from '@/types/messages';

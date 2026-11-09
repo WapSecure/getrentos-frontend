@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Pressable, RefreshControl, View } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { MessageCircle, Pin, Search, X } from 'lucide-react-native';
+import { MessageCircle, Pin, Search, X } from '@sureground/icons/native';
 import {
   Avatar,
   EmptyState,

@@ -5,7 +5,7 @@ import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-qu
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
-import { MapPin } from 'lucide-react-native';
+import { MapPin } from '@sureground/icons/native';
 import {
   DetailSkeleton,
   PropertyCard,

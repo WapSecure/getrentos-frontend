@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Star, Star as StarOutline, MapPin } from 'lucide-react';
+import { Star, Star as StarOutline, MapPin } from '@sureground/icons';
 import {
   Button,
   Dialog,

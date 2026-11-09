@@ -3,7 +3,14 @@ import { Alert, Pressable, RefreshControl, ScrollView, View } from 'react-native
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { BellRing, ChevronLeft, MessageSquareText, Plus, Trash2, Zap } from 'lucide-react-native';
+import {
+  BellRing,
+  ChevronLeft,
+  MessageSquareText,
+  Plus,
+  Trash2,
+  Zap,
+} from '@sureground/icons/native';
 import {
   Badge,
   Card,

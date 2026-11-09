@@ -10,7 +10,7 @@ import {
   Layers,
   ShieldAlert,
   UserRoundCheck,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { Dialog, DialogContent, DialogTitle } from '@sureground/ui';
 import {
   Alert,

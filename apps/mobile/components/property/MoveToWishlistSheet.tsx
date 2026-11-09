@@ -1,6 +1,6 @@
 import { Pressable, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
-import { Check } from 'lucide-react-native';
+import { Check } from '@sureground/icons/native';
 import { Divider, Text, useTheme } from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { qk } from '@/lib/query/keys';

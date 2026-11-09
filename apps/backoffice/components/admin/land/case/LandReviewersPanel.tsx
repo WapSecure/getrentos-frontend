@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { ChevronDown, ChevronUp, UserRoundPlus, UsersRound } from 'lucide-react';
+import { ChevronDown, ChevronUp, UserRoundPlus, UsersRound } from '@sureground/icons';
 import { Badge, Button, ConfirmDialog, ListSkeleton, type BadgeVariant } from '@sureground/ui';
 import { formatDate, unwrap } from '@sureground/shared';
 import { adminLandService } from '@/services/adminLandService';

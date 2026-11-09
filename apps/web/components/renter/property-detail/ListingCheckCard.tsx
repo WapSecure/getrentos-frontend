@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { ShieldAlert, ShieldCheck, ShieldQuestion, Sparkles } from 'lucide-react';
+import { ShieldAlert, ShieldCheck, ShieldQuestion, Sparkles } from '@sureground/icons';
 import { Card, Skeleton } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';

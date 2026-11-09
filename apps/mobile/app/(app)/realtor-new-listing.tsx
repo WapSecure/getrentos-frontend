@@ -3,7 +3,7 @@ import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'rea
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Building2, Check, ChevronRight } from 'lucide-react-native';
+import { Building2, Check, ChevronRight } from '@sureground/icons/native';
 import {
   Avatar,
   Button,

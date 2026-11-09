@@ -3,7 +3,7 @@
 import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import * as RadixPopover from '@radix-ui/react-popover';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight } from '@sureground/icons';
 import {
   addMonths,
   eachDayOfInterval,

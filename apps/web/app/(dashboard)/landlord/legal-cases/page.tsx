@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Scale } from 'lucide-react';
+import { Plus, Scale } from '@sureground/icons';
 import {
   Button,
   DataTable,

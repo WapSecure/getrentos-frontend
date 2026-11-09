@@ -9,7 +9,7 @@ import {
   XCircle,
   BedDouble,
   Bath,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { Badge, Card, type BadgeVariant } from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 import type { RealtorListing, RealtorListingStatus } from '@/types/realtor';

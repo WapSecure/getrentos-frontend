@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Alert, ScrollView, View } from 'react-native';
 import { useMutation } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Trash2 } from 'lucide-react-native';
+import { Trash2 } from '@sureground/icons/native';
 import { Button, FormAlert, Text, TextField, useTheme } from '@sureground/ui-native';
 import { DELETE_PHRASE, deletePhraseOk, renterHomeApi } from '@/lib/api/renterHome';
 import { errorMessage } from '@/lib/api/client';

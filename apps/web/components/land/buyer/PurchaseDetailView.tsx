@@ -16,7 +16,7 @@ import {
   TabsTrigger,
   useToast,
 } from '@sureground/ui';
-import { Info } from 'lucide-react';
+import { Info } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { LAND_PROTECTION } from '@/lib/paymentCopy';

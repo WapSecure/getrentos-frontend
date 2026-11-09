@@ -10,8 +10,8 @@ import {
   CheckCircle,
   Wrench,
   XCircle,
-  type LucideIcon,
-} from 'lucide-react';
+  type SgIcon,
+} from '@sureground/icons';
 import {
   Alert,
   Badge,
@@ -31,7 +31,7 @@ interface MaintenanceDetailsModalProps {
   onUpdateStatus: (id: string, status: MaintenanceRequest['status']) => void;
 }
 
-type BadgeConfig = { label: string; variant: BadgeVariant; icon: LucideIcon };
+type BadgeConfig = { label: string; variant: BadgeVariant; icon: SgIcon };
 
 const priorityConfig: Record<MaintenanceRequest['priority'], BadgeConfig> = {
   low: { label: 'Low', variant: 'neutral', icon: AlertCircle },

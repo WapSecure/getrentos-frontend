@@ -17,8 +17,8 @@ import {
   Star,
   Users,
   XCircle,
-  type LucideIcon,
-} from 'lucide-react-native';
+  type SgIcon,
+} from '@sureground/icons/native';
 import {
   Button,
   Card,
@@ -520,7 +520,7 @@ function PressableRow({
   onPress,
   destructive,
 }: {
-  icon: LucideIcon;
+  icon: SgIcon;
   title: string;
   detail?: string;
   onPress: () => void;

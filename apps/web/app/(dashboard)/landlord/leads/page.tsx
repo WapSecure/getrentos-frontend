@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { UsersRound, Flame, X } from 'lucide-react';
+import { UsersRound, Flame, X } from '@sureground/icons';
 import {
   Button,
   EmptyState,

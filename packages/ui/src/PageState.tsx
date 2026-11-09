@@ -1,6 +1,6 @@
 'use client';
 
-import { AlertTriangle, Lock, RefreshCcw, WifiOff, type LucideIcon } from 'lucide-react';
+import { AlertTriangle, Lock, RefreshCcw, WifiOff, type SgIcon } from '@sureground/icons';
 import { Button } from './Button';
 import { cn } from '@sureground/shared';
 
@@ -29,7 +29,7 @@ export function PageErrorState({
   error,
 }: PageErrorStateProps) {
   const forbidden = isForbidden(error);
-  const Icon: LucideIcon = forbidden ? Lock : isOffline ? WifiOff : AlertTriangle;
+  const Icon: SgIcon = forbidden ? Lock : isOffline ? WifiOff : AlertTriangle;
   const resolvedTitle = forbidden
     ? 'You do not have access to this'
     : (title ?? (isOffline ? 'You are offline' : 'We could not load this page'));

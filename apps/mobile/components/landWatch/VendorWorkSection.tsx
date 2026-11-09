@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
-import { ChevronRight, Hammer } from 'lucide-react-native';
+import { ChevronRight, Hammer } from '@sureground/icons/native';
 import {
   Badge,
   Button,

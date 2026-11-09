@@ -3,7 +3,7 @@
 import { TextMessageConsentCard } from '@/components/shared/settings/TextMessageConsentCard';
 
 import { useState, useEffect } from 'react';
-import { CreditCard, FileText, Wrench, MessageCircle, Star } from 'lucide-react';
+import { CreditCard, FileText, Wrench, MessageCircle, Star } from '@sureground/icons';
 import { SaveButton, Switch } from '@sureground/ui';
 import { landlordService, type LandlordNotificationPreference } from '@/services/landlordService';
 import { categorySendsEmail } from '@sureground/shared';

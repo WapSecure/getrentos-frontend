@@ -1,5 +1,5 @@
 import { Alert, Badge, DataTable } from '@sureground/ui';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle } from '@sureground/icons';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type { LandInstallment } from '@/types/landBuyer';
 import { InstallmentStatusBadge } from './LandSaleBadges';

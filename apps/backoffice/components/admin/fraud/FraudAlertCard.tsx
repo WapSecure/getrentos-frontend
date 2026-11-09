@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { AlertTriangle, Search, ShieldCheck, ShieldAlert } from 'lucide-react';
+import { AlertTriangle, Search, ShieldCheck, ShieldAlert } from '@sureground/icons';
 import { Badge, Button, type BadgeVariant } from '@sureground/ui';
 import { cn, formatRelativeTime } from '@sureground/shared';
 import type { FraudAlert, FraudAlertSeverity, FraudAlertStatus } from '@/types/admin';

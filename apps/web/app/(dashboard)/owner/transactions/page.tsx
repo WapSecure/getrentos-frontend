@@ -12,7 +12,7 @@ import {
 } from '@sureground/ui';
 import { useEffect, useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { ShieldCheck } from 'lucide-react';
+import { ShieldCheck } from '@sureground/icons';
 import { EscrowTransactionCard } from '@/components/owner/transactions/EscrowTransactionCard';
 import { EscrowTransactionDetailModal } from '@/components/owner/transactions/EscrowTransactionDetailModal';
 import { ownerService } from '@/services/ownerService';

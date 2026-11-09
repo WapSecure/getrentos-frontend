@@ -10,7 +10,7 @@ import {
   DialogTitle,
   Skeleton,
 } from '@sureground/ui';
-import { BedDouble, CalendarCheck, Eye, TrendingUp, Wallet } from 'lucide-react';
+import { BedDouble, CalendarCheck, Eye, TrendingUp, Wallet } from '@sureground/icons';
 import { NairaSign } from '@sureground/ui/NairaSign';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';

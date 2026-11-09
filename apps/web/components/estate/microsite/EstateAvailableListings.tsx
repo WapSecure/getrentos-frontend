@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Bath, BedDouble, Building2, CalendarClock, Home, MapPin } from 'lucide-react';
+import { Bath, BedDouble, Building2, CalendarClock, Home, MapPin } from '@sureground/icons';
 import { Badge, EmptyState, Skeleton, ToggleChip } from '@sureground/ui';
 import { SafeImage } from '@/components/shared/media/SafeImage';
 import { estateStorefrontService } from '@/services/estateMarketplaceService';

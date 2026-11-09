@@ -13,7 +13,7 @@ import {
   Handshake,
   MessageSquare,
   PlayCircle,
-} from 'lucide-react';
+} from '@sureground/icons';
 import { Badge, Button, Dialog, DialogContent, DialogTitle, IconButton } from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type { BuyerPropertyListing } from '@/types/buyer';

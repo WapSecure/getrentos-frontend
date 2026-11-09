@@ -12,7 +12,7 @@ import {
   Users,
   Award,
   ClipboardCheck,
-} from 'lucide-react-native';
+} from '@sureground/icons/native';
 import { Text, useTheme } from '@sureground/ui-native';
 import type { TrustBadge, TrustProfile, VerificationItem } from '@/lib/api/buyerTrustProfile';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';

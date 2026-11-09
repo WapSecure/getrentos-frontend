@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, Coins, Landmark, ReceiptText, Wallet } from 'lucide-react';
+import { AlertTriangle, Coins, Landmark, ReceiptText, Wallet } from '@sureground/icons';
 import {
   Badge,
   Button,

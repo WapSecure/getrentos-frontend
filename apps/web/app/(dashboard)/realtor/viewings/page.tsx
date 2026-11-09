@@ -3,7 +3,7 @@
 import { Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, CalendarClock } from 'lucide-react';
+import { Plus, CalendarClock } from '@sureground/icons';
 import { ViewingCard } from '@/components/realtor/viewings/ViewingCard';
 import { ScheduleViewingModal } from '@/components/realtor/viewings/ScheduleViewingModal';
 import type { CreateViewingInput } from '@/components/realtor/viewings/ScheduleViewingModal';

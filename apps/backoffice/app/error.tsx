@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { AlertTriangle, RefreshCcw } from 'lucide-react';
+import { AlertTriangle, RefreshCcw } from '@sureground/icons';
 import { Button, Logo } from '@sureground/ui';
 import { ROUTES } from '@sureground/shared';
 

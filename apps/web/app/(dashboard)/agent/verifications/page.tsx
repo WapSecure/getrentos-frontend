@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Plus, UserCheck } from 'lucide-react';
+import { Plus, UserCheck } from '@sureground/icons';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { VerificationCard } from '@/components/agent/verifications/VerificationCard';
 import { NewVerificationModal } from '@/components/agent/verifications/NewVerificationModal';

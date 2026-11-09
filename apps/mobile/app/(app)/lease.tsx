@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Alert, Linking, Pressable, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Calendar, ChevronRight, FileText, Home, ShieldCheck } from 'lucide-react-native';
+import { Calendar, ChevronRight, FileText, Home, ShieldCheck } from '@sureground/icons/native';
 import {
   Checkbox,
   Badge,

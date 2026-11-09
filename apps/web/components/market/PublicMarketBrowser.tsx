@@ -15,7 +15,7 @@ import {
   Ruler,
   SlidersHorizontal,
   ImageOff,
-} from 'lucide-react';
+} from '@sureground/icons';
 import {
   Alert,
   Badge,

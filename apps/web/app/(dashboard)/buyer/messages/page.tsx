@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from '@sureground/icons';
 import { Button, Pagination, useOptimisticMutation, PageHeader } from '@sureground/ui';
 import { ConversationList, type Conversation } from '@/components/buyer/messages/ConversationList';
 import { MessageThread, type ThreadMessage } from '@/components/buyer/messages/MessageThread';

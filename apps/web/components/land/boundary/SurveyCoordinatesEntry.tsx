@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { ClipboardPaste, Plus, Trash2 } from 'lucide-react';
+import { ClipboardPaste, Plus, Trash2 } from '@sureground/icons';
 import { Alert, Button, Field, IconButton, NumberInput, Select, Textarea } from '@sureground/ui';
 import {
   SUPPORTED_CRS,

@@ -11,8 +11,8 @@ import {
   ChevronRight,
   AlertTriangle,
   XCircle,
-  type LucideIcon,
-} from 'lucide-react';
+  type SgIcon,
+} from '@sureground/icons';
 import { Badge, Button, type BadgeVariant } from '@sureground/ui';
 import type { MaintenanceRequest } from '@/types/maintenance';
 
@@ -23,7 +23,7 @@ interface MaintenanceCardProps {
   onUpdateStatus?: (id: string, status: MaintenanceRequest['status']) => void;
 }
 
-type BadgeConfig = { label: string; variant: BadgeVariant; icon: LucideIcon };
+type BadgeConfig = { label: string; variant: BadgeVariant; icon: SgIcon };
 
 const priorityConfig: Record<MaintenanceRequest['priority'], BadgeConfig> = {
   low: {

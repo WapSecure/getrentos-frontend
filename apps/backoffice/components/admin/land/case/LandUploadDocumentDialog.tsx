@@ -1,7 +1,7 @@
 'use client';
 
 import { useId, useState } from 'react';
-import { Upload } from 'lucide-react';
+import { Upload } from '@sureground/icons';
 import {
   Button,
   Dialog,

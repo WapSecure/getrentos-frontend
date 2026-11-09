@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { AlertTriangle, BookOpen, Check, Copy } from 'lucide-react';
+import { AlertTriangle, BookOpen, Check, Copy } from '@sureground/icons';
 import { Button, Card, Skeleton } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';

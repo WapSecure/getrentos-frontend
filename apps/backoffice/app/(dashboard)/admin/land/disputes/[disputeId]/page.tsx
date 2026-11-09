@@ -13,7 +13,7 @@ import {
   PlayCircle,
   RefreshCw,
   Upload,
-} from 'lucide-react';
+} from '@sureground/icons';
 import {
   Badge,
   Button,

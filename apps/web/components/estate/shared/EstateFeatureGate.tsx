@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { BadgeCheck } from 'lucide-react';
+import { BadgeCheck } from '@sureground/icons';
 import { Button } from '@sureground/ui';
 import { PlanGateError } from '@sureground/shared';
 import { tierAtLeast, type PlanTier } from '@sureground/shared';

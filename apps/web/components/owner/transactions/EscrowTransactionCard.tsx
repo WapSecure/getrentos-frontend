@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ShieldCheck, ShieldAlert } from 'lucide-react';
+import { ShieldCheck, ShieldAlert } from '@sureground/icons';
 import { Badge, Card } from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type { EscrowSaleTransaction, SaleEscrowStatus } from '@/types/owner';

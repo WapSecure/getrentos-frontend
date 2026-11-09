@@ -2,7 +2,7 @@ import { Alert, Pressable, RefreshControl, ScrollView, View } from 'react-native
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Building2, CreditCard, Trash2, Wallet as WalletIcon } from 'lucide-react-native';
+import { Building2, CreditCard, Trash2, Wallet as WalletIcon } from '@sureground/icons/native';
 import {
   Card,
   FormAlert,

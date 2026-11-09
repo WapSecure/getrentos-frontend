@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CheckCircle2, CloudOff, LogOut, Mic, QrCode, UserPlus, XCircle } from 'lucide-react';
+import { CheckCircle2, CloudOff, LogOut, Mic, QrCode, UserPlus, XCircle } from '@sureground/icons';
 import { NotAssignedToEstate } from '@/components/gateman/NotAssignedToEstate';
 import {
   Alert,

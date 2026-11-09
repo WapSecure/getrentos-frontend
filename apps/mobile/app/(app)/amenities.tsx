@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { View } from 'react-native';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CalendarCheck } from 'lucide-react-native';
+import { CalendarCheck } from '@sureground/icons/native';
 import {
   Badge,
   Button,

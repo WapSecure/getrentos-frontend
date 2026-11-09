@@ -8,8 +8,8 @@ import {
   ClipboardList,
   ShieldAlert,
   Wrench,
-  type LucideIcon,
-} from 'lucide-react';
+  type SgIcon,
+} from '@sureground/icons';
 import { NairaSign } from '@sureground/ui/NairaSign';
 import { Badge, type BadgeVariant, Button, Card, Skeleton } from '@sureground/ui';
 import type { HomeManagementDashboard } from '@/services/homeManagementService';
@@ -22,7 +22,7 @@ type AttentionMetric = {
   label: string;
   emptyLabel: string;
   value: number;
-  icon: LucideIcon;
+  icon: SgIcon;
   target: ActionTarget;
   urgent?: boolean;
 };

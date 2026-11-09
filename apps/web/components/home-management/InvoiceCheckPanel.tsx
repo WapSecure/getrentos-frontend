@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { ClipboardCheck } from 'lucide-react';
+import { ClipboardCheck } from '@sureground/icons';
 import { Skeleton } from '@sureground/ui';
 import { CheckList } from '@/components/shared/checks/CheckList';
 import { unwrap } from '@/lib/apiHelpers';

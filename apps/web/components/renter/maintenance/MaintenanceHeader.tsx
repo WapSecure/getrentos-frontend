@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { motion } from 'framer-motion';
-import { Wrench, Plus, Clock } from 'lucide-react';
+import { Wrench, Plus, Clock } from '@sureground/icons';
 import { Button } from '@sureground/ui';
 import { RenterPageHeader } from '../shared/RenterPageHeader';
 

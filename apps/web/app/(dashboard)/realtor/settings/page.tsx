@@ -4,7 +4,15 @@ import { useState } from 'react';
 import { Card, PageHeader } from '@sureground/ui';
 import { useSearchParams } from 'next/navigation';
 import { useRealtorUser } from '../layout';
-import { User, Bell, Landmark, SlidersHorizontal, ShieldCheck, Lock, Download } from 'lucide-react';
+import {
+  User,
+  Bell,
+  Landmark,
+  SlidersHorizontal,
+  ShieldCheck,
+  Lock,
+  Download,
+} from '@sureground/icons';
 import { ProfileSettings } from '@/components/realtor/settings/ProfileSettings';
 import { NotificationSettings } from '@/components/realtor/settings/NotificationSettings';
 import { SellerPayoutSettings } from '@/components/shared/payouts/SellerPayoutSettings';

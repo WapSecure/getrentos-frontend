@@ -14,7 +14,7 @@ import {
 } from '@sureground/ui';
 import { useEffect, useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, Megaphone } from 'lucide-react';
+import { Plus, Megaphone } from '@sureground/icons';
 import { SaleListingCard } from '@/components/owner/listings/SaleListingCard';
 import { CreateSaleListingModal } from '@/components/owner/listings/CreateSaleListingModal';
 import { ManageListingModal } from '@/components/owner/listings/ManageListingModal';

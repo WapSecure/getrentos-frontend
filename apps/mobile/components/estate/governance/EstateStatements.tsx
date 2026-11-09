@@ -1,7 +1,14 @@
 import { useState } from 'react';
 import { Alert, Pressable, View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { BadgeCheck, ChevronRight, Info, Landmark, RotateCcw, Send } from 'lucide-react-native';
+import {
+  BadgeCheck,
+  ChevronRight,
+  Info,
+  Landmark,
+  RotateCcw,
+  Send,
+} from '@sureground/icons/native';
 import {
   Badge,
   Button,

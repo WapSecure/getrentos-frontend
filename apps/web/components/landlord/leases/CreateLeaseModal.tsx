@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { addYears, subDays, format } from 'date-fns';
-import { BadgeCheck, DoorOpen } from 'lucide-react';
+import { BadgeCheck, DoorOpen } from '@sureground/icons';
 import {
   Alert,
   Button,

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, Pencil, Sparkles, UserCog, X } from 'lucide-react';
+import { Check, Pencil, Sparkles, UserCog, X } from '@sureground/icons';
 import {
   Badge,
   Button,

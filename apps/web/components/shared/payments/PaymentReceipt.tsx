@@ -11,8 +11,8 @@ import {
   ShieldCheck,
   Smartphone,
   XCircle,
-  type LucideIcon,
-} from 'lucide-react';
+  type SgIcon,
+} from '@sureground/icons';
 import {
   Button,
   Card,
@@ -111,7 +111,7 @@ function StatusMark({
   tone,
   spin,
 }: {
-  icon: LucideIcon;
+  icon: SgIcon;
   tone: 'success' | 'warning' | 'danger' | 'muted';
   spin?: boolean;
 }) {

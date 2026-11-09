@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, View } from 'react-native';
-import { ShieldCheck } from 'lucide-react-native';
+import { ShieldCheck } from '@sureground/icons/native';
 import {
   Button,
   FormAlert,

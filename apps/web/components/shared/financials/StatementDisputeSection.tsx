@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Badge, Button, Field, Select, Textarea } from '@sureground/ui';
-import { Gavel, Undo2 } from 'lucide-react';
+import { Gavel, Undo2 } from '@sureground/icons';
 import { formatCurrency, formatDate } from '@/lib/format';
 
 // An issued statement is never rewritten: an upheld query shows as a correction on the next one. `moneyEffect` is rendered, not derived.

@@ -3,7 +3,7 @@ import { RefreshControl, ScrollView, View } from 'react-native';
 
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Clock, MapPin, Repeat, Siren } from 'lucide-react-native';
+import { Clock, MapPin, Repeat, Siren } from '@sureground/icons/native';
 import {
   Card,
   Chip,

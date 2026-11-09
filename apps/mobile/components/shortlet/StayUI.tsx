@@ -9,8 +9,8 @@ import {
   Scale,
   ShieldCheck,
   Zap,
-  type LucideIcon,
-} from 'lucide-react-native';
+  type SgIcon,
+} from '@sureground/icons/native';
 import { Card, Divider, Price, Text, useTheme } from '@sureground/ui-native';
 import type { ShortletAvailability, ShortletListing } from '@/lib/api/shortlets';
 import {
@@ -29,7 +29,7 @@ export function TrustChip({
   label,
   tone = 'neutral',
 }: {
-  icon: LucideIcon;
+  icon: SgIcon;
   label: string;
   tone?: ChipTone;
 }) {
@@ -131,7 +131,7 @@ export function InfoRow({
   muted,
   trailing,
 }: {
-  icon: LucideIcon;
+  icon: SgIcon;
   title: string;
   detail?: string | null;
   muted?: boolean;
@@ -262,15 +262,7 @@ export function GuestPromiseCard({ children }: { children?: ReactNode }) {
   );
 }
 
-function SupportAction({
-  icon: Icon,
-  label,
-  url,
-}: {
-  icon: LucideIcon;
-  label: string;
-  url: string;
-}) {
+function SupportAction({ icon: Icon, label, url }: { icon: SgIcon; label: string; url: string }) {
   const { colors, radius } = useTheme();
   return (
     <Pressable

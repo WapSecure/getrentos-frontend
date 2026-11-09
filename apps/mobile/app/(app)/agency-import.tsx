@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { FileSpreadsheet } from 'lucide-react-native';
+import { FileSpreadsheet } from '@sureground/icons/native';
 import {
   Badge,
   Button,

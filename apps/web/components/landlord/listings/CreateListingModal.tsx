@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { DoorOpen, Zap } from 'lucide-react';
+import { DoorOpen, Zap } from '@sureground/icons';
 import {
   Button,
   Checkbox,

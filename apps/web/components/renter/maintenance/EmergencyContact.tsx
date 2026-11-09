@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Phone, Mail, AlertTriangle, Clock, User, MessageCircle } from 'lucide-react';
+import { Phone, Mail, AlertTriangle, Clock, User, MessageCircle } from '@sureground/icons';
 import { Button } from '@sureground/ui';
 
 interface EmergencyContact {

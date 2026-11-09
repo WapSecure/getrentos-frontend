@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, ChevronDown, DoorOpen, MapPin } from 'lucide-react';
+import { Check, ChevronDown, DoorOpen, MapPin } from '@sureground/icons';
 import {
   DropdownMenu,
   DropdownMenuContent,

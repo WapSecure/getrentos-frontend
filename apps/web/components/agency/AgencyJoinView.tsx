@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Briefcase } from 'lucide-react';
+import { Briefcase } from '@sureground/icons';
 import { Alert, Button, Card, Skeleton } from '@sureground/ui';
 import { formatDate } from '@/lib/format';
 import { getStoredUser, updateStoredUser } from '@/lib/authStorage';

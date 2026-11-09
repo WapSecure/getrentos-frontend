@@ -1,6 +1,6 @@
 'use client';
 
-import { Gavel, Building2, Fingerprint } from 'lucide-react';
+import { Gavel, Building2, Fingerprint } from '@sureground/icons';
 import { Badge, Button, Card, type BadgeVariant } from '@sureground/ui';
 import { formatDate } from '@sureground/shared';
 import type { TrustAppeal, TrustAppealStatus, TrustAppealTargetType } from '@/types/trust';

@@ -120,7 +120,7 @@ export interface SignupRole {
   id: SignupRoleId;
   name: string;
   tagline: string;
-  /** lucide-react-native icon name */
+  /** @sureground/icons/native icon name */
   icon: 'Home' | 'Building2' | 'TrendingUp' | 'Search' | 'Users' | 'UserCheck' | 'Briefcase';
   requires: VerificationReq[];
 }

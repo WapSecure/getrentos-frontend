@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Bell, Repeat } from 'lucide-react';
+import { Bell, Repeat } from '@sureground/icons';
 import {
   Alert,
   Button,

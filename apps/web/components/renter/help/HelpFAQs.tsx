@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { HelpCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { HelpCircle, ChevronDown, ChevronUp } from '@sureground/icons';
 import { Card, EmptyState } from '@sureground/ui';
 
 interface FAQ {

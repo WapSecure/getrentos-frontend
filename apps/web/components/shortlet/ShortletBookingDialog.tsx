@@ -16,7 +16,7 @@ import {
   Field,
   NumberInput,
 } from '@sureground/ui';
-import { CreditCard, MapPin } from 'lucide-react';
+import { CreditCard, MapPin } from '@sureground/icons';
 import { unwrap, VerificationRequiredError } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';

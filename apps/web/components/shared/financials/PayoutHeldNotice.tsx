@@ -1,6 +1,6 @@
 'use client';
 
-import { Clock, Gavel, ShieldAlert } from 'lucide-react';
+import { Clock, Gavel, ShieldAlert } from '@sureground/icons';
 import type { ReactNode } from 'react';
 import { formatCurrency, formatDate } from '@/lib/format';
 

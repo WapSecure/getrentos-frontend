@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Info } from 'lucide-react';
+import { Info } from '@sureground/icons';
 import { Alert, Badge, Button, Card, Field, NumberInput, Select, Textarea } from '@sureground/ui';
 
 import { formatDate } from '@/lib/format';

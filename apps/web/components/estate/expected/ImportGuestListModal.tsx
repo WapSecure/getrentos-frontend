@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Upload } from 'lucide-react';
+import { Upload } from '@sureground/icons';
 import {
   Alert,
   Button,

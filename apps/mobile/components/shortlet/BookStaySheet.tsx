@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CalendarDays, ChevronRight } from 'lucide-react-native';
+import { CalendarDays, ChevronRight } from '@sureground/icons/native';
 import { Button, FormAlert, Skeleton, Text, useTheme, useToast } from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { Stepper } from '@/components/host/HostUI';

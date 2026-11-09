@@ -51,6 +51,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @sureground/shared build
       - run: pnpm tokens:check
+      - run: pnpm icons:check
       - run: pnpm --filter web type-check
       - run: pnpm --filter backoffice type-check
       - run: pnpm --filter mobile type-check

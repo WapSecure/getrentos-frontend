@@ -2,7 +2,7 @@ import { usePaystackCheckout } from '@/hooks/usePaystackCheckout';
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, Trash2 } from 'lucide-react-native';
+import { Plus, Trash2 } from '@sureground/icons/native';
 import {
   Button,
   Card,

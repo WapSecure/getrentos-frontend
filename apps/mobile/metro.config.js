@@ -13,6 +13,7 @@ config.watchFolders = [
   path.resolve(workspaceRoot, 'packages/tokens'),
   path.resolve(workspaceRoot, 'packages/ui-native'),
   path.resolve(workspaceRoot, 'packages/shared'),
+  path.resolve(workspaceRoot, 'packages/icons'),
   path.resolve(workspaceRoot, 'node_modules'),
 ];
 

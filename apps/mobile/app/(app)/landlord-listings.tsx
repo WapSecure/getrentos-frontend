@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
-import { Pause, Play, Tag, Video, Plus } from 'lucide-react-native';
+import { Pause, Play, Tag, Video, Plus } from '@sureground/icons/native';
 import {
   Badge,
   Card,

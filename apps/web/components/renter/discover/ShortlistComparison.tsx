@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { Sparkles } from 'lucide-react';
+import { Sparkles } from '@sureground/icons';
 import { Badge, Skeleton, type BadgeVariant } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';

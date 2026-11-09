@@ -1,5 +1,5 @@
 import { View } from 'react-native';
-import { Sparkles } from 'lucide-react-native';
+import { Sparkles } from '@sureground/icons/native';
 import { useTheme } from '../theme';
 import { Button } from './Button';
 import { FormAlert } from './FormControls';

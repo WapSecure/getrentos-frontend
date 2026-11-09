@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Badge, EmptyState, PageErrorState, Pagination, Skeleton } from '@sureground/ui';
-import { CalendarClock, ChevronRight, ClipboardCheck, MapPin } from 'lucide-react';
+import { CalendarClock, ChevronRight, ClipboardCheck, MapPin } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
 import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';

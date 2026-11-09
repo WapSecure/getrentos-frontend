@@ -12,7 +12,7 @@ import {
   ShieldCheck,
   Trash2,
   XCircle,
-} from 'lucide-react';
+} from '@sureground/icons';
 import {
   Button,
   ConfirmDialog,

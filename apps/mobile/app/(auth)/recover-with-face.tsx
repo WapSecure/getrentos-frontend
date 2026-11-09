@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { router } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AtSign, ShieldCheck } from 'lucide-react-native';
+import { AtSign, ShieldCheck } from '@sureground/icons/native';
 import {
   AuthScaffold,
   Button,

@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { ChevronRight, PiggyBank, ShieldCheck } from 'lucide-react';
+import { ChevronRight, PiggyBank, ShieldCheck } from '@sureground/icons';
 import { Button, Card } from '@sureground/ui';
 import { renterService } from '@/services/renterService';
 import { myDeposits } from '@/services/renterDepositService';

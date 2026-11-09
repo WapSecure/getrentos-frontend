@@ -1,6 +1,6 @@
 'use client';
 
-import { Filter } from 'lucide-react';
+import { Filter } from '@sureground/icons';
 import { useState } from 'react';
 import { Button, IconButton, SearchInput, Select } from '@sureground/ui';
 

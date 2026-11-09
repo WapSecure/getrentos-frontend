@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
-import { AlertCircle, Bell, Clock } from 'lucide-react-native';
+import { AlertCircle, Bell, Clock } from '@sureground/icons/native';
 import { QueryState, Skeleton, Text, useTheme } from '@sureground/ui-native';
 import type { StatementExplanation } from '@/lib/api/landlord';
 import { landlordApi } from '@/lib/api/landlord';

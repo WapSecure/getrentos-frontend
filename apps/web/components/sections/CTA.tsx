@@ -1,5 +1,5 @@
 import { LinkButton } from './primitives';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight } from '@sureground/icons';
 import { ROUTES } from '@/lib/constants/auth';
 
 export const CTA = () => (

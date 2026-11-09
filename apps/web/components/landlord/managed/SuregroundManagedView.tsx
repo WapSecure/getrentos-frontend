@@ -17,7 +17,7 @@ import {
   UserRound,
   Users,
   Wrench,
-} from 'lucide-react';
+} from '@sureground/icons';
 import {
   Alert,
   Badge,

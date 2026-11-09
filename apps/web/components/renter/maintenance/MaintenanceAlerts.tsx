@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, BellOff, AlertCircle, Clock, Wrench, User } from 'lucide-react';
+import { Bell, BellOff, AlertCircle, Clock, Wrench, User } from '@sureground/icons';
 import {
   Button,
   EmptyState,

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
-import { MapPin } from 'lucide-react-native';
+import { MapPin } from '@sureground/icons/native';
 import { Button, Text, useTheme } from '@sureground/ui-native';
 import { PropertyMapView } from '@/components/property/PropertyMapView';
 import { geocodeApi, LAGOS_POINT, type MapPoint } from '@/lib/api/geocode';

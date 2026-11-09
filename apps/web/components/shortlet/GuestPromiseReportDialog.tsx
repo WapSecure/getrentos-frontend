@@ -15,7 +15,7 @@ import {
   Textarea,
   type PendingUpload,
 } from '@sureground/ui';
-import { ShieldCheck } from 'lucide-react';
+import { ShieldCheck } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletKeys } from '@/lib/queryKeys';
 import { shortletService } from '@/services/shortletService';

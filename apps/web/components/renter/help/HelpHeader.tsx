@@ -1,6 +1,6 @@
 'use client';
 
-import { Search } from 'lucide-react';
+import { Search } from '@sureground/icons';
 import { SearchInput } from '@sureground/ui';
 import { RenterPageHeader } from '../shared/RenterPageHeader';
 

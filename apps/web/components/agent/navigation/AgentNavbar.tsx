@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Wifi, WifiOff } from 'lucide-react';
+import { Wifi, WifiOff } from '@sureground/icons';
 import { Badge } from '@sureground/ui';
 import { AgentProfileDropdown } from './AgentProfileDropdown';
 import { WorkspaceNavbar } from '@/components/shared/navigation/WorkspaceNavbar';

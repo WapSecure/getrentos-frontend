@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, type ReactNode } from 'react';
-import { Home } from 'lucide-react';
+import { Home } from '@sureground/icons';
 
 interface PropertyPhotoProps {
   src: string | undefined;

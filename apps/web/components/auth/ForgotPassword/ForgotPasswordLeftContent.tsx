@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Key, Lock, CheckCircle, BadgeCheck } from 'lucide-react';
+import { Key, Lock, CheckCircle, BadgeCheck } from '@sureground/icons';
 import { Logo } from '@/components/ui/Logo';
 
 export const ForgotPasswordLeftContent = () => {

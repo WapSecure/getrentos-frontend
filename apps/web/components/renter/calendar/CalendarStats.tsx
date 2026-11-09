@@ -1,6 +1,6 @@
 'use client';
 
-import { Calendar, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { Calendar, CheckCircle, Clock, AlertCircle } from '@sureground/icons';
 import type { CalendarEvent } from '@/types/calendar';
 
 interface CalendarStatsProps {

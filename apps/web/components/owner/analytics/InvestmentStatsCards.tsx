@@ -1,6 +1,6 @@
 'use client';
 
-import { Wallet, TrendingUp, LineChart, Percent } from 'lucide-react';
+import { Wallet, TrendingUp, LineChart, Percent } from '@sureground/icons';
 import { StatCard } from '@sureground/ui';
 
 interface InvestmentStatsCardsProps {

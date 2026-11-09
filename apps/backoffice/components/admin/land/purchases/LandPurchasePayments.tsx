@@ -1,4 +1,4 @@
-import { Banknote, Check, RotateCcw, Wallet } from 'lucide-react';
+import { Banknote, Check, RotateCcw, Wallet } from '@sureground/icons';
 import { Badge, Button, EmptyState } from '@sureground/ui';
 import { formatCurrency, formatDate } from '@sureground/shared';
 import type {

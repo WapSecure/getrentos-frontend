@@ -1,7 +1,7 @@
 'use client';
 
 import { Badge, type BadgeVariant } from '@sureground/ui';
-import { PiggyBank, ShieldCheck } from 'lucide-react';
+import { PiggyBank, ShieldCheck } from '@sureground/icons';
 import {
   DEPOSIT_STATUS_LABELS,
   type DepositHoldListItem,

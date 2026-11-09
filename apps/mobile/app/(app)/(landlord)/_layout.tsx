@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Building2, Home, MessageCircle, User, Users } from 'lucide-react-native';
+import { Building2, Home, MessageCircle, User, Users } from '@sureground/icons/native';
 import { useTheme } from '@sureground/ui-native';
 import { premiumTabBarOptions } from '@/lib/navigationStyles';
 

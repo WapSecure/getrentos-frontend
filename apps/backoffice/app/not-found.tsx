@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeft, LayoutDashboard, SearchX } from 'lucide-react';
+import { ArrowLeft, LayoutDashboard, SearchX } from '@sureground/icons';
 import { useRouter } from 'next/navigation';
 import { Button, Logo } from '@sureground/ui';
 import { ROUTES } from '@sureground/shared';

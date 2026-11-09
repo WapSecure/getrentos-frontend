@@ -10,7 +10,7 @@ import {
   SendHorizontal,
   Square,
   Volume2,
-} from 'lucide-react';
+} from '@sureground/icons';
 import {
   Button,
   Dialog,

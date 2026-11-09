@@ -16,8 +16,8 @@ import {
   ShieldCheck,
   SlidersHorizontal,
   X,
-  type LucideIcon,
-} from 'lucide-react-native';
+  type SgIcon,
+} from '@sureground/icons/native';
 import {
   BrandLogo,
   Button,
@@ -55,7 +55,7 @@ import { MarketComparisonSheet } from '@/components/market/MarketComparisonSheet
 
 type Tab = MarketKind | 'estates';
 
-const TABS: { value: Tab; label: string; Icon: LucideIcon }[] = [
+const TABS: { value: Tab; label: string; Icon: SgIcon }[] = [
   { value: 'rent', label: MARKET_LABEL.rent, Icon: KeyRound },
   { value: 'sale', label: MARKET_LABEL.sale, Icon: Home },
   { value: 'shortlet', label: MARKET_LABEL.shortlet, Icon: BedDouble },

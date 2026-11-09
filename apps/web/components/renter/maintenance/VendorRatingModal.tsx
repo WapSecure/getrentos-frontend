@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Star } from 'lucide-react';
+import { Star } from '@sureground/icons';
 import { Button, Dialog, DialogContent, DialogDescription, DialogTitle } from '@sureground/ui';
 
 interface VendorRatingModalProps {

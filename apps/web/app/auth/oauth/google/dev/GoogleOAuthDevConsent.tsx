@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Chrome } from 'lucide-react';
+import { Chrome } from '@sureground/icons';
 import { Button } from '@sureground/ui';
 import { ROUTES } from '@/lib/constants/auth';
 

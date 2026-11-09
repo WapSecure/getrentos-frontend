@@ -12,7 +12,7 @@ import {
   Trash2,
   UserPlus,
   Users,
-} from 'lucide-react';
+} from '@sureground/icons';
 import {
   Alert,
   Badge,

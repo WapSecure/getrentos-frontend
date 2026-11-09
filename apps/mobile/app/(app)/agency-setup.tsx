@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import type { VerifiedAddress } from '@sureground/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { FileText, Send } from 'lucide-react-native';
+import { FileText, Send } from '@sureground/icons/native';
 import {
   Badge,
   Button,

@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { Sparkles } from 'lucide-react';
+import { Sparkles } from '@sureground/icons';
 import { Button, Input, useToast } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterService } from '@/services/renterService';

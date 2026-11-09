@@ -1,7 +1,7 @@
 'use client';
 
 import { DocumentPreviewButton } from '@sureground/ui';
-import { ExternalLink, FileText, Link2 } from 'lucide-react';
+import { ExternalLink, FileText, Link2 } from '@sureground/icons';
 import { formatDate } from '@/lib/format';
 import type { LandReviewCheck, LandReviewDocument } from '@/types/landReviewer';
 

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Shield, Lock, CreditCard, FileCheck, Eye, Users } from 'lucide-react';
+import { Shield, Lock, CreditCard, FileCheck, Eye, Users } from '@sureground/icons';
 import { MarketingCard, SectionHeading } from './primitives';
 
 // No grade or licence claims ("bank-grade", "regulated", "AI-powered", "24/7"): they can't be shown.

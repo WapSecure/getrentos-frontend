@@ -1,6 +1,6 @@
 'use client';
 
-import { Ban, CheckCircle2, ShieldAlert, BadgeCheck } from 'lucide-react';
+import { Ban, CheckCircle2, ShieldAlert, BadgeCheck } from '@sureground/icons';
 import { Dialog, DialogContent, DialogTitle } from '@sureground/ui';
 import { Badge, Button } from '@sureground/ui';
 import { getInitials, formatDate, formatRelativeTime } from '@sureground/shared';

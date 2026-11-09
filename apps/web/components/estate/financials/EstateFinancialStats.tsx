@@ -1,6 +1,6 @@
 'use client';
 
-import { Wallet, AlertCircle, ReceiptText, Users } from 'lucide-react';
+import { Wallet, AlertCircle, ReceiptText, Users } from '@sureground/icons';
 import { StatCard } from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 

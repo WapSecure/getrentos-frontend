@@ -4,7 +4,7 @@ import { RefreshControl, View } from 'react-native';
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Inbox, Search, ShieldCheck } from 'lucide-react-native';
+import { Inbox, Search, ShieldCheck } from '@sureground/icons/native';
 import {
   EmptyState,
   QueryState,

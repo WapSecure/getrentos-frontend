@@ -1,6 +1,6 @@
 'use client';
 
-import { FileText, FileCheck, Clock, AlertCircle, Database, Star, Share2 } from 'lucide-react';
+import { FileText, FileCheck, Clock, AlertCircle, Database, Star, Share2 } from '@sureground/icons';
 
 interface DocumentsStatsProps {
   summary?: {

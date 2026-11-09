@@ -3,7 +3,7 @@ import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, View } fr
 import { useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { PartyPopper, Plus, Trash2 } from 'lucide-react-native';
+import { PartyPopper, Plus, Trash2 } from '@sureground/icons/native';
 import {
   Button,
   Card,

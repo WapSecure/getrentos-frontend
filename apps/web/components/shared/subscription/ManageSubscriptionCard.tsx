@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { AlertTriangle, CalendarClock, BadgeCheck } from 'lucide-react';
+import { AlertTriangle, CalendarClock, BadgeCheck } from '@sureground/icons';
 import { Alert, Badge, Button, Card } from '@sureground/ui';
 import { formatCurrency } from '@sureground/shared';
 import type { MyBilling } from '@/services/billingService';

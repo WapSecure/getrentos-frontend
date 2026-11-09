@@ -15,7 +15,7 @@ import {
   ShieldCheck,
   TriangleAlert,
   Users,
-} from 'lucide-react';
+} from '@sureground/icons';
 import {
   Alert,
   Button,

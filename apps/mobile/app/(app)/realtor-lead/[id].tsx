@@ -3,7 +3,7 @@ import { Alert, RefreshControl, ScrollView, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { CalendarClock, Check, RotateCcw } from 'lucide-react-native';
+import { CalendarClock, Check, RotateCcw } from '@sureground/icons/native';
 import {
   Button,
   Card,

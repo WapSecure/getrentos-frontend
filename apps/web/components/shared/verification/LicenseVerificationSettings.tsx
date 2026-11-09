@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ShieldCheck, ShieldAlert, ShieldX, HelpCircle } from 'lucide-react';
+import { ShieldCheck, ShieldAlert, ShieldX, HelpCircle } from '@sureground/icons';
 import { Alert, Button, CardSkeleton, DocumentUpload, Field, Input } from '@sureground/ui';
 import { kycService } from '@/services/kycService';
 import { unwrap } from '@/lib/apiHelpers';

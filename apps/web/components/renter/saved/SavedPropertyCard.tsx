@@ -17,7 +17,7 @@ import {
   MoreHorizontal,
   CheckSquare,
   StickyNote,
-} from 'lucide-react';
+} from '@sureground/icons';
 import {
   Badge,
   Button,

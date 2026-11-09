@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2 } from '@sureground/icons';
 import { Alert, Button, Card, SaveButton, useToast } from '@sureground/ui';
 import { landlordService } from '@/services/landlordService';
 import {

@@ -1,6 +1,6 @@
 'use client';
 
-import { Repeat } from 'lucide-react';
+import { Repeat } from '@sureground/icons';
 import { Badge, Button } from '@sureground/ui';
 import type { Due } from '@/types/estate';
 

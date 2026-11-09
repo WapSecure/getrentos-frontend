@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Landmark } from 'lucide-react';
+import { Landmark } from '@sureground/icons';
 import { Alert, Field, Input, NumberInput, SaveButton, useToast } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { buyerKeys } from '@/lib/queryKeys';

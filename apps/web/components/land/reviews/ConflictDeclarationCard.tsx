@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Button, Card, Field, Textarea } from '@sureground/ui';
-import { ShieldAlert } from 'lucide-react';
+import { ShieldAlert } from '@sureground/icons';
 
 // Declaring a conflict withdraws them from the case; it is recorded, not penalised.
 export const ConflictDeclarationCard = ({

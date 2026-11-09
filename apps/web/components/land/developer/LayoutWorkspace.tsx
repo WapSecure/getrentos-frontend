@@ -16,7 +16,7 @@ import {
   TabsList,
   TabsTrigger,
 } from '@sureground/ui';
-import { ArrowRight, LayoutGrid } from 'lucide-react';
+import { ArrowRight, LayoutGrid } from '@sureground/icons';
 import { unwrap, unwrapOptional } from '@/lib/apiHelpers';
 import { formatCurrency } from '@/lib/format';
 import { landDeveloperKeys } from '@/lib/landDeveloperQueryKeys';

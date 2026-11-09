@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ShieldAlert } from 'lucide-react';
+import { ShieldAlert } from '@sureground/icons';
 import { Alert } from '@sureground/ui';
 import {
   VERIFICATION_REASONS,

@@ -1,7 +1,7 @@
 'use client';
 
 import { useId, type ReactNode } from 'react';
-import { Check, Minus } from 'lucide-react';
+import { Check, Minus } from '@sureground/icons';
 import { cn } from '@sureground/shared';
 
 interface CheckboxProps {

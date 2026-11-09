@@ -27,7 +27,7 @@ import { renterService, type SavedListingItem } from '@/services/renterService';
 import { unwrap, type Paginated } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
-import { LayoutGrid, Map, Search } from 'lucide-react';
+import { LayoutGrid, Map, Search } from '@sureground/icons';
 import { RenterPageHeader } from '@/components/renter/shared/RenterPageHeader';
 
 export default function DiscoverPage() {

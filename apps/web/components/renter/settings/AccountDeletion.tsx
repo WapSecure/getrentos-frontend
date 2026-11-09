@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
-import { Trash2, Check } from 'lucide-react';
+import { Trash2, Check } from '@sureground/icons';
 import { Alert, Button, Field, Input } from '@sureground/ui';
 import { renterService } from '@/services/renterService';
 import { ROUTES } from '@/lib/constants/auth';

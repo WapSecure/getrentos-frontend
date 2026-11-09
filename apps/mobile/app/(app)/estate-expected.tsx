@@ -3,7 +3,7 @@ import { RefreshControl, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { BadgeCheck, CalendarCheck, Sparkles, Upload } from 'lucide-react-native';
+import { BadgeCheck, CalendarCheck, Sparkles, Upload } from '@sureground/icons/native';
 import { Button, Card, QueryState, Skeleton, Text, useTheme } from '@sureground/ui-native';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { isUpgradeError } from '@/components/host/HostUI';

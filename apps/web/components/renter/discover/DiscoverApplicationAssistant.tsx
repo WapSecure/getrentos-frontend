@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { MessageSquare, Clock, AlertCircle, CheckCircle, ArrowRight } from 'lucide-react';
+import { MessageSquare, Clock, AlertCircle, CheckCircle, ArrowRight } from '@sureground/icons';
 import { Button, Skeleton } from '@sureground/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';

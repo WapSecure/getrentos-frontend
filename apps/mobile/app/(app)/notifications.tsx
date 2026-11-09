@@ -16,7 +16,7 @@ import {
   ShieldAlert,
   Trash2,
   Wrench,
-} from 'lucide-react-native';
+} from '@sureground/icons/native';
 import {
   Card,
   EmptyState,

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { FileText } from 'lucide-react-native';
+import { FileText } from '@sureground/icons/native';
 import {
   Button,
   DateField,

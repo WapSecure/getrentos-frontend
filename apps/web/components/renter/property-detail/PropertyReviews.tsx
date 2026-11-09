@@ -1,4 +1,4 @@
-import { Star } from 'lucide-react';
+import { Star } from '@sureground/icons';
 import type { PropertyReview } from '@/types/renter';
 
 interface PropertyReviewsProps {

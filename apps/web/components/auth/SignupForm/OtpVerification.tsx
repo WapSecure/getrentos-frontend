@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@sureground/ui';
-import { CheckCircle, RefreshCw, ArrowRight } from 'lucide-react';
+import { CheckCircle, RefreshCw, ArrowRight } from '@sureground/icons';
 import { AUTH_CONSTANTS } from '@/lib/constants/auth';
 import { OtpInput } from '@/components/auth/OtpInput';
 

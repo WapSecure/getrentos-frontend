@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { AlertTriangle, ShieldCheck, Wallet } from 'lucide-react';
+import { AlertTriangle, ShieldCheck, Wallet } from '@sureground/icons';
 import { Badge, Card, DataTable, Skeleton, type Column } from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';

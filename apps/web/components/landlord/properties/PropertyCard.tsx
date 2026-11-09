@@ -10,7 +10,7 @@ import {
   Archive,
   ArchiveRestore,
   Trash2,
-} from 'lucide-react';
+} from '@sureground/icons';
 import {
   Badge,
   DropdownMenu,

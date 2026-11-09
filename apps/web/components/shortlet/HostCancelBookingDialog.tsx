@@ -13,7 +13,7 @@ import {
   Skeleton,
   Textarea,
 } from '@sureground/ui';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletKeys } from '@/lib/queryKeys';
 import { formatCurrency, formatDate } from '@/lib/format';

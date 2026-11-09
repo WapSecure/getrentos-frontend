@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight } from '@sureground/icons';
 import {
   Badge,
   Button,

@@ -1,7 +1,16 @@
 'use client';
 
 import { useState } from 'react';
-import { Megaphone, MapPin, PawPrint, Sofa, CalendarClock, Check, Zap, Play } from 'lucide-react';
+import {
+  Megaphone,
+  MapPin,
+  PawPrint,
+  Sofa,
+  CalendarClock,
+  Check,
+  Zap,
+  Play,
+} from '@sureground/icons';
 import { Dialog, DialogContent, DialogTitle } from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type { Listing } from '@/types/landlord';

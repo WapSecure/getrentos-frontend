@@ -1,7 +1,7 @@
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Wallet } from 'lucide-react-native';
+import { Wallet } from '@sureground/icons/native';
 import { QueryState, Skeleton, useTheme } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { agencyFirmApi } from '@/lib/api/agencyFirm';

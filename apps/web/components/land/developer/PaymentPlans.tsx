@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Badge, Button, Card, ConfirmDialog, EmptyState } from '@sureground/ui';
-import { CalendarClock, Pencil, Plus, Power, PowerOff } from 'lucide-react';
+import { CalendarClock, Pencil, Plus, Power, PowerOff } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency } from '@/lib/format';
 import { landDeveloperKeys } from '@/lib/landDeveloperQueryKeys';

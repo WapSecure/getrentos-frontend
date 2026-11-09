@@ -5,7 +5,7 @@ import {
   MessageSquareText,
   PiggyBank,
   ShieldCheck,
-} from 'lucide-react-native';
+} from '@sureground/icons/native';
 import type { SettingsItem } from './SettingsList';
 
 export const managementItems = (): SettingsItem[] => [

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Copy, KeyRound, MapPin, Plus, RotateCcw, ShieldOff, ShieldCheck } from 'lucide-react';
+import { Copy, KeyRound, MapPin, Plus, RotateCcw, ShieldOff, ShieldCheck } from '@sureground/icons';
 import {
   Alert,
   Badge,
