@@ -6,6 +6,7 @@ import { Fingerprint, KeyRound, Shield, Trash2, X } from 'lucide-react';
 import { startRegistration } from '@simplewebauthn/browser';
 import {
   Button,
+  ConfirmDialog,
   Field,
   IconButton,
   Input,
@@ -14,11 +15,17 @@ import {
   Switch,
   useToast,
 } from '@getrentos/ui';
-import { TRANSACTION_PIN_LENGTH } from '@getrentos/shared';
+import {
+  cleanSecondFactorInput,
+  isSecondFactorCode,
+  SECOND_FACTOR_CODE_MAX_LENGTH,
+  TRANSACTION_PIN_LENGTH,
+} from '@getrentos/shared';
 import { accountSecurityService } from '@/services/accountSecurityService';
 import { unwrap } from '@/lib/apiHelpers';
 import { accountSecurityKeys } from '@/lib/queryKeys';
 import type { TwoFactorEnrollment } from '@/types/accountSecurity';
+import { BackupCodes } from './BackupCodes';
 import { ChangePasswordCard } from './ChangePasswordCard';
 import { SignedInDevices } from './SignedInDevices';
 
@@ -165,6 +172,9 @@ export const SecuritySettings = () => {
   const [enroll, setEnroll] = useState<TwoFactorEnrollment | null>(null);
   const [code, setCode] = useState('');
   const [codeError, setCodeError] = useState<string | null>(null);
+  // Backup codes are shown once, right after they are made (AU-07).
+  const [freshCodes, setFreshCodes] = useState<string[] | null>(null);
+  const [confirmNewCodes, setConfirmNewCodes] = useState(false);
 
   const resetSetup = () => {
     setStep('idle');
@@ -199,9 +209,10 @@ export const SecuritySettings = () => {
 
   const enableMutation = useMutation({
     mutationFn: (token: string) => unwrap(accountSecurityService.enableTwoFactor(token)),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: accountSecurityKeys.twoFactor });
       resetSetup();
+      setFreshCodes(data.recoveryCodes);
       toast.success('Two-factor authentication enabled');
     },
     onError: (err: Error) => setCodeError(err.message || 'The code is invalid or has expired'),
@@ -217,7 +228,18 @@ export const SecuritySettings = () => {
     onError: (err: Error) => setCodeError(err.message || 'The code is invalid or has expired'),
   });
 
+  const newCodesMutation = useMutation({
+    mutationFn: () => unwrap(accountSecurityService.regenerateRecoveryCodes()),
+    onSuccess: (data) => {
+      setConfirmNewCodes(false);
+      setFreshCodes(data.recoveryCodes);
+      queryClient.invalidateQueries({ queryKey: accountSecurityKeys.twoFactor });
+    },
+    onError: (err: Error) => toast.error(err.message || 'Could not make new backup codes'),
+  });
+
   const enabled = !!twoFactor?.enabled;
+  const codesLeft = twoFactor?.recoveryCodesLeft ?? 0;
   // Until the real status is known the switch must not read as "off": a user
   // who has 2FA would see it disabled, and flipping it would start enrolment.
   const twoFactorKnown = twoFactor !== undefined;
@@ -403,25 +425,32 @@ export const SecuritySettings = () => {
                 <IconButton size="sm" label="Cancel disable" onClick={cancelSetup} icon={<X />} />
               </div>
               <p className="text-sm text-muted-foreground mb-4">
-                Enter a current code from your authenticator app to confirm.
+                Enter a current code from your authenticator app, or a backup code if you no longer
+                have your phone.
               </p>
               <form
                 className="flex flex-col sm:flex-row sm:items-start gap-2"
                 onSubmit={(e) => {
                   e.preventDefault();
-                  if (code.length === 6) disableMutation.mutate(code);
+                  if (isSecondFactorCode(code)) disableMutation.mutate(code);
                 }}
               >
-                <Field label="Authenticator code" error={codeError || undefined} className="flex-1">
-                  <NumberInput
+                <Field
+                  label="Authenticator or backup code"
+                  error={codeError || undefined}
+                  className="flex-1"
+                >
+                  <Input
                     value={code}
-                    onValueChange={(value) => {
-                      setCode(value.slice(0, 6));
+                    onChange={(e) => {
+                      setCode(cleanSecondFactorInput(e.target.value));
                       setCodeError(null);
                     }}
-                    placeholder="6-digit code"
-                    maxLength={6}
+                    placeholder="123456"
+                    maxLength={SECOND_FACTOR_CODE_MAX_LENGTH}
                     autoComplete="one-time-code"
+                    autoCapitalize="none"
+                    spellCheck={false}
                   />
                 </Field>
                 <Button
@@ -429,13 +458,42 @@ export const SecuritySettings = () => {
                   variant="danger"
                   className="sm:mt-6"
                   isLoading={disableMutation.isPending}
-                  disabled={code.length !== 6}
+                  disabled={!isSecondFactorCode(code)}
                 >
                   Disable 2FA
                 </Button>
               </form>
             </div>
           )}
+
+          {freshCodes ? (
+            <BackupCodes codes={freshCodes} onDone={() => setFreshCodes(null)} />
+          ) : enabled && step === 'idle' ? (
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
+              <p className="text-sm text-muted-foreground">
+                {codesLeft === 0
+                  ? 'No backup codes left. Get new ones so a lost phone can’t lock you out.'
+                  : `${codesLeft} backup code${codesLeft === 1 ? '' : 's'} left for when you don’t have your phone.`}
+              </p>
+              <Button
+                variant={codesLeft <= 2 ? 'primary' : 'outline'}
+                size="sm"
+                onClick={() => setConfirmNewCodes(true)}
+              >
+                Get new backup codes
+              </Button>
+            </div>
+          ) : null}
+          <ConfirmDialog
+            open={confirmNewCodes}
+            onOpenChange={setConfirmNewCodes}
+            title="Get new backup codes?"
+            description="Your current backup codes will stop working. You'll be asked to confirm it's you."
+            confirmLabel="Get new codes"
+            tone="primary"
+            onConfirm={() => newCodesMutation.mutate()}
+            isLoading={newCodesMutation.isPending}
+          />
         </div>
         {/* Transaction PIN */}
         <div className="p-4 rounded-lg border border-border">

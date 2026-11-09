@@ -24,9 +24,12 @@ export const accountSecurityService = {
     );
   },
 
-  async enableTwoFactor(token: string): Promise<ApiResponse<{ enabled: boolean }>> {
+  /** Turns two-factor on; the backup codes come back this once only. */
+  async enableTwoFactor(
+    token: string
+  ): Promise<ApiResponse<{ enabled: boolean; recoveryCodes: string[] }>> {
     return safeCall(() =>
-      authFetch<{ enabled: boolean }>('/users/me/security/2fa/enable', {
+      authFetch<{ enabled: boolean; recoveryCodes: string[] }>('/users/me/security/2fa/enable', {
         method: 'POST',
         body: JSON.stringify({ token }),
       })
@@ -67,6 +70,15 @@ export const accountSecurityService = {
 
   async removePasskey(id: string): Promise<ApiResponse<{ removed: true }>> {
     return safeCall(() => authFetch(`/users/me/security/passkey/${id}`, { method: 'DELETE' }));
+  },
+
+  /** New backup codes; the old ones stop working (asks the person to confirm it's them). */
+  async regenerateRecoveryCodes(): Promise<ApiResponse<{ recoveryCodes: string[] }>> {
+    return safeCall(() =>
+      authFetch<{ recoveryCodes: string[] }>('/users/me/security/2fa/recovery-codes', {
+        method: 'POST',
+      })
+    );
   },
 
   async listSessions(): Promise<ApiResponse<StaffSession[]>> {

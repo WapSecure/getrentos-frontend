@@ -474,6 +474,8 @@ export interface TwoFactorStatus {
   enrolled: boolean;
   /** Confirmed with a code: sign-in asks for it, and admin routes open. */
   enabled: boolean;
+  /** Unused one-time backup codes (0 while two-factor is off). */
+  recoveryCodesLeft?: number;
   /**
    * Whether the API refuses this account's admin tools until two-factor is on.
    * False for a local backend run with STAFF_MFA_REQUIRED=false. Treated as

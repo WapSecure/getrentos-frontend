@@ -6,7 +6,12 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Eye, EyeOff, LogIn, ShieldCheck, CheckCircle, XCircle } from 'lucide-react';
-import { Alert, Button, Checkbox, Field, IconButton, Input, NumberInput } from '@getrentos/ui';
+import { Alert, Button, Checkbox, Field, IconButton, Input } from '@getrentos/ui';
+import {
+  cleanSecondFactorInput,
+  isSecondFactorCode,
+  SECOND_FACTOR_CODE_MAX_LENGTH,
+} from '@getrentos/shared';
 import {
   resolvePrimaryRoleId,
   ROUTES,
@@ -93,7 +98,7 @@ export const PhoneSignIn = ({
     typeof result.challengeToken === 'string';
 
   const completeTwoFactorLogin = async () => {
-    if (!pendingChallenge || twoFactorCode.length !== 6) return;
+    if (!pendingChallenge || !isSecondFactorCode(twoFactorCode)) return;
 
     setIsVerifying2fa(true);
     const response = await authService.completeTwoFactorLogin(
@@ -177,17 +182,20 @@ export const PhoneSignIn = ({
         /* Two-factor authentication step */
         <div className="space-y-4">
           <Alert variant="info" icon={ShieldCheck} title="Two-factor authentication">
-            Enter the 6-digit code from your authenticator app to finish signing in.
+            Enter the 6-digit code from your authenticator app, or one of your backup codes, to
+            finish signing in.
           </Alert>
 
-          <Field label="Authentication code">
-            <NumberInput
+          <Field label="Authentication code" hint="Lost your phone? Enter a backup code instead.">
+            <Input
               autoComplete="one-time-code"
-              maxLength={6}
+              autoCapitalize="none"
+              spellCheck={false}
+              maxLength={SECOND_FACTOR_CODE_MAX_LENGTH}
               value={twoFactorCode}
-              onValueChange={setTwoFactorCode}
-              inputClassName="py-3 text-center tracking-[0.5em] font-mono"
-              placeholder="••••••"
+              onChange={(e) => setTwoFactorCode(cleanSecondFactorInput(e.target.value))}
+              className="py-3 text-center font-mono tracking-widest"
+              placeholder="123456"
             />
           </Field>
 
@@ -196,7 +204,7 @@ export const PhoneSignIn = ({
             variant="primary"
             size="lg"
             fullWidth
-            disabled={twoFactorCode.length !== 6 || isVerifying2fa}
+            disabled={!isSecondFactorCode(twoFactorCode) || isVerifying2fa}
             isLoading={isVerifying2fa}
             onClick={completeTwoFactorLogin}
           >
@@ -215,7 +223,9 @@ export const PhoneSignIn = ({
               type="tel"
               autoComplete="tel"
               {...register('identifier')}
-              className={touchedFields.identifier && !errors.identifier ? 'border-success' : undefined}
+              className={
+                touchedFields.identifier && !errors.identifier ? 'border-success' : undefined
+              }
               inputClassName="py-3"
               placeholder="+1 234 567 8900"
               trailingIcon={
@@ -257,11 +267,7 @@ export const PhoneSignIn = ({
             />
           </Field>
 
-          <Checkbox
-            label="Remember me"
-            checked={rememberMe}
-            onCheckedChange={setRememberMe}
-          />
+          <Checkbox label="Remember me" checked={rememberMe} onCheckedChange={setRememberMe} />
 
           <Button
             type="submit"

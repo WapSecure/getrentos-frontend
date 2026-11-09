@@ -2,7 +2,16 @@ import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
 import { ShieldCheck } from 'lucide-react-native';
-import { AuthScaffold, Button, FormAlert, OtpInput, useTheme } from '@getrentos/ui-native';
+import {
+  AuthScaffold,
+  Button,
+  FormAlert,
+  LinkButton,
+  OtpInput,
+  TextField,
+  useTheme,
+} from '@getrentos/ui-native';
+import { cleanSecondFactorInput, isSecondFactorCode } from '@getrentos/shared';
 import { errorMessage } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { haptics } from '@/lib/haptics';
@@ -13,6 +22,8 @@ export default function TwoFactor() {
   const [code, setCode] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  // Without the phone, a one-time backup code stands in (AU-07).
+  const [useBackupCode, setUseBackupCode] = useState(false);
 
   useEffect(() => {
     if (!pendingTwoFactor) router.replace('/(auth)/sign-in');
@@ -21,7 +32,7 @@ export default function TwoFactor() {
   if (!pendingTwoFactor) return null;
 
   const submit = async (value = code) => {
-    if (value.length !== 6 || submitting) return;
+    if (!isSecondFactorCode(value) || submitting) return;
     setSubmitting(true);
     setError(null);
     try {
@@ -40,7 +51,11 @@ export default function TwoFactor() {
     <AuthScaffold
       kicker="Two-factor authentication"
       title="Enter your code"
-      subtitle="Open your authenticator app and enter the 6-digit code for GetRentos."
+      subtitle={
+        useBackupCode
+          ? 'Enter one of the backup codes you saved when you turned on two-factor. Each works once.'
+          : 'Open your authenticator app and enter the 6-digit code for GetRentos.'
+      }
       onBack={() => {
         cancelTwoFactor();
         router.replace('/(auth)/sign-in');
@@ -48,7 +63,7 @@ export default function TwoFactor() {
       footer={
         <Button
           label="Verify & sign in"
-          disabled={code.length !== 6}
+          disabled={!isSecondFactorCode(code)}
           loading={submitting}
           onPress={() => submit()}
         />
@@ -70,17 +85,41 @@ export default function TwoFactor() {
           <ShieldCheck size={26} color={colors.primary} />
         </View>
 
-        <View style={{ alignSelf: 'stretch' }}>
-          <OtpInput
-            value={code}
-            onChange={(v) => {
-              setCode(v);
-              if (error) setError(null);
+        <View style={{ alignSelf: 'stretch', gap: spacing.md }}>
+          {useBackupCode ? (
+            <TextField
+              label="Backup code"
+              value={code}
+              onChangeText={(v) => {
+                setCode(cleanSecondFactorInput(v));
+                if (error) setError(null);
+              }}
+              placeholder="abcde-fghij"
+              autoCapitalize="none"
+              autoCorrect={false}
+              autoFocus
+              onSubmitEditing={() => submit()}
+            />
+          ) : (
+            <OtpInput
+              value={code}
+              onChange={(v) => {
+                setCode(v);
+                if (error) setError(null);
+              }}
+              onComplete={submit}
+              invalid={!!error}
+              disabled={submitting}
+              autoFocus
+            />
+          )}
+          <LinkButton
+            label={useBackupCode ? 'Use my authenticator app' : 'Use a backup code instead'}
+            onPress={() => {
+              setUseBackupCode((on) => !on);
+              setCode('');
+              setError(null);
             }}
-            onComplete={submit}
-            invalid={!!error}
-            disabled={submitting}
-            autoFocus
           />
         </View>
 

@@ -4,6 +4,8 @@ import { apiFetch } from './client';
 export interface TwoFactorStatus {
   enrolled: boolean;
   enabled: boolean;
+  /** Unused one-time backup codes (0 while two-factor is off). */
+  recoveryCodesLeft?: number;
 }
 
 export interface TwoFactorEnrollment {
@@ -88,12 +90,20 @@ export const securityApi = {
   enrollTwoFactor: () =>
     apiFetch<TwoFactorEnrollment>('/users/me/security/2fa/enroll', { method: 'POST' }),
 
+  /** The backup codes come back this once only. */
   enableTwoFactor: (token: string) =>
-    apiFetch<{ enabled: boolean }>('/users/me/security/2fa/enable', {
+    apiFetch<{ enabled: boolean; recoveryCodes: string[] }>('/users/me/security/2fa/enable', {
       method: 'POST',
       body: { token },
     }),
 
+  /** New backup codes; the old ones stop working. Behind step-up, which apiFetch prompts for. */
+  regenerateRecoveryCodes: () =>
+    apiFetch<{ recoveryCodes: string[] }>('/users/me/security/2fa/recovery-codes', {
+      method: 'POST',
+    }),
+
+  /** Takes an authenticator code or a backup code. */
   disableTwoFactor: (token: string) =>
     apiFetch<{ enabled: boolean }>('/users/me/security/2fa/disable', {
       method: 'POST',
