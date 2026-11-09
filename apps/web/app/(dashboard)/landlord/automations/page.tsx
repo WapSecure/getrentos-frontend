@@ -21,24 +21,28 @@ export default function LandlordAutomationsPage() {
     TABS.map((tab) => tab.id)
   );
 
+  // The header sits outside the gate, so the page keeps its heading (and its
+  // name for screen readers) on the upgrade screen too, as Microsite does.
   return (
-    <ProFeatureGate
-      title="Automations is a Pro feature"
-      description="Upgrade to Pro to broadcast announcements to your tenants, save templates, and schedule recurring messages."
-      upgradeHref={ROUTES.LANDLORD_BILLING}
-    >
+    <>
       <PageHeader
         title="Automations"
         description="Reach your tenants with a one-off broadcast, saved templates or a recurring schedule."
       />
-      <HubTabs tabs={TABS} activeTab={activeTab} onChange={setTab} />
-      {activeTab === 'templates' ? (
-        <TemplatesManager />
-      ) : activeTab === 'rules' ? (
-        <AutomationRulesManager />
-      ) : (
-        <BroadcastComposer />
-      )}
-    </ProFeatureGate>
+      <ProFeatureGate
+        title="Automations is a Pro feature"
+        description="Upgrade to Pro to broadcast announcements to your tenants, save templates, and schedule recurring messages."
+        upgradeHref={ROUTES.LANDLORD_BILLING}
+      >
+        <HubTabs tabs={TABS} activeTab={activeTab} onChange={setTab} />
+        {activeTab === 'templates' ? (
+          <TemplatesManager />
+        ) : activeTab === 'rules' ? (
+          <AutomationRulesManager />
+        ) : (
+          <BroadcastComposer />
+        )}
+      </ProFeatureGate>
+    </>
   );
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { Star, ShieldCheck, TrendingUp } from 'lucide-react';
+import { PageHeader } from '@getrentos/ui';
 import { useRenterUser } from '../layout';
 import { getStoredUser } from '@/lib/authStorage';
 import { ROUTES } from '@/lib/constants/auth';
@@ -22,6 +23,20 @@ export default function RenterStandingPage() {
 
   return (
     <>
+      {/* Verification brings its own page header; the other two tabs need one,
+          so the page always has a name for screen readers and a clear title. */}
+      {activeTab === 'trust' && (
+        <PageHeader
+          title="Trust score"
+          description="Your score, the checks behind it and what to do next."
+        />
+      )}
+      {activeTab === 'credit' && (
+        <PageHeader
+          title="Credit report"
+          description="Whether your rent is reported to a credit bureau."
+        />
+      )}
       <HubTabs tabs={TABS} activeTab={activeTab} onChange={setTab} />
 
       {activeTab === 'verification' && (
