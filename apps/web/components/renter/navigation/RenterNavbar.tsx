@@ -64,9 +64,9 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
       >
         <div className="px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between gap-4">
-            <Logo size="md" />
+            <Logo size="md" className="shrink-0 [&>span]:sr-only sm:[&>span]:not-sr-only" />
 
-            <div className="hidden items-center gap-1 rounded-xl bg-secondary/60 p-1 md:flex">
+            <div className="hidden items-center gap-1 rounded-xl bg-secondary/60 p-1 xl:flex">
               <Link
                 href={ROUTES.RENTER_DASHBOARD}
                 aria-current={pathname === ROUTES.RENTER_DASHBOARD ? 'page' : undefined}
@@ -92,7 +92,7 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
             </div>
 
             <form
-              className="mx-4 hidden max-w-md flex-1 md:flex"
+              className="mx-4 hidden max-w-md flex-1 lg:flex"
               role="search"
               onSubmit={handleSearch}
             >
@@ -115,7 +115,7 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
               />
             </form>
 
-            <div className="flex items-center gap-3">
+            <div className="flex shrink-0 items-center gap-1 sm:gap-3">
               <div className="hidden sm:block">
                 <LanguageToggle />
               </div>
@@ -149,7 +149,7 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
             </div>
           </div>
 
-          <form className="py-3 md:hidden" role="search" onSubmit={handleSearch}>
+          <form className="py-3 lg:hidden" role="search" onSubmit={handleSearch}>
             <Input
               type="text"
               value={searchQuery}
@@ -177,7 +177,7 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed left-0 right-0 top-32 z-[60] bottom-0 overflow-y-auto border-b border-border bg-background md:top-16 lg:hidden"
+            className="fixed left-0 right-0 top-32 z-[60] bottom-0 overflow-y-auto border-b border-border bg-background lg:hidden"
           >
             <div className="px-4 pt-4">
               <div className="sm:hidden flex items-center justify-between px-4 py-2.5">
