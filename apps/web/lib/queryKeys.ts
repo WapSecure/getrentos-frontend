@@ -230,6 +230,8 @@ export const homeManagementKeys = {
   workOrderQuotes: (workOrderId: string) =>
     ['home-management', 'work-orders', workOrderId, 'quotes'] as const,
   invoiceCheck: (invoiceId: string) => ['home-management', 'invoices', invoiceId, 'check'] as const,
+  invoicePaymentPreview: (invoiceId: string, provider?: string) =>
+    ['home-management', 'invoices', invoiceId, 'payment-preview', provider ?? 'default'] as const,
   workOrderInvoices: (workOrderId: string) =>
     ['home-management', 'work-orders', workOrderId, 'invoices'] as const,
   inspections: ['home-management', 'inspections'] as const,

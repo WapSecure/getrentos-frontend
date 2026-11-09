@@ -30,11 +30,12 @@ import { Textarea } from '@getrentos/ui';
 import { useToast } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { getStoredUser } from '@/lib/authStorage';
-import { formatDate } from '@/lib/format';
+import { formatCurrency, formatDate } from '@/lib/format';
 import { homeManagementKeys } from '@/lib/queryKeys';
 import {
   homeManagementService,
   type CreateHomeManagementWorkOrderInvoiceInput,
+  type HomeManagementInvoicePaymentPreview,
   type HomeManagementWorkOrder,
   type HomeManagementWorkOrderInvoice,
   type HomeManagementWorkOrderInvoiceStatus,
@@ -170,6 +171,76 @@ const canVoidInvoice = (invoice: HomeManagementWorkOrderInvoice) =>
 const canPayInvoice = (invoice: HomeManagementWorkOrderInvoice) =>
   invoice.status === 'APPROVED' &&
   (invoice.payoutStatus === 'PENDING' || invoice.payoutStatus === 'FAILED');
+
+/**
+ * What the pay dialog says about how an invoice is paid (audit UX-16): the
+ * split between held money and a card top-up, and a button that says exactly
+ * what pressing it does. Without a preview (still loading, or it failed) it
+ * falls back to describing the rule, not an amount it does not know.
+ */
+const vendorPayCopy = (
+  invoice: HomeManagementWorkOrderInvoice,
+  preview: { data?: HomeManagementInvoicePaymentPreview; isLoading: boolean; isError: boolean },
+  company: string
+) => {
+  const retry = invoice.payoutStatus === 'FAILED';
+  const fallbackProtection =
+    'If a top-up is needed, we send the vendor’s payment once it is confirmed. You’ll see it on this invoice.';
+  if (preview.isLoading) {
+    return {
+      note: 'Working out how much comes from the money GetRentos holds for you.',
+      buttonLabel: 'Working out the split…',
+      disabled: true,
+      protection: fallbackProtection,
+    };
+  }
+  const split = preview.data;
+  if (!split) {
+    return {
+      note: preview.isError
+        ? 'We couldn’t work out the split here. We pay the vendor from the money GetRentos holds for the owner first. If that doesn’t cover the invoice, you top up the rest by card, plus its card or bank fee, on the next page.'
+        : 'We pay the vendor from the money GetRentos holds for the owner first. A card top-up, with its card or bank fee, is only taken if that does not cover the invoice.',
+      buttonLabel: retry ? 'Retry payment' : 'Pay vendor',
+      protection: fallbackProtection,
+    };
+  }
+  if (!split.canPay) {
+    return {
+      note: 'Nothing has been paid.',
+      buttonLabel: 'Can’t pay this invoice yet',
+      disabled: true,
+      error: split.reason ?? 'This invoice can’t be paid right now.',
+      protection: undefined,
+    };
+  }
+  const held = { label: 'From money GetRentos holds for you', amount: split.fromHeldFunds };
+  if (split.topUp <= 0) {
+    return {
+      parts: [held],
+      note: 'Paid in full from the money GetRentos holds for the owner. No card payment is needed. The amounts are checked again when you pay.',
+      buttonLabel: `${retry ? 'Retry: pay' : 'Pay'} vendor ${formatCurrency(split.invoiceTotal)}`,
+      secureLine: 'No card is charged.',
+      protection: 'You’ll see the payment on this invoice.',
+    };
+  }
+  const fee = split.topUpFee > 0 ? ` + ${formatCurrency(split.topUpFee)} fee` : '';
+  return {
+    parts: [
+      held,
+      {
+        label:
+          split.topUpFee > 0
+            ? `Card top-up (+ ${formatCurrency(split.topUpFee)} fee)`
+            : 'Card top-up (no fee)',
+        amount: split.topUp,
+      },
+    ],
+    note: `Your card is charged ${formatCurrency(split.topUpCharge)}. The vendor is paid the full ${formatCurrency(split.invoiceTotal)} once the top-up is confirmed. The amounts are checked again when you pay.`,
+    buttonLabel: `Pay ${formatCurrency(split.topUp)}${fee} top-up and pay vendor`,
+    secureLine: `You finish the top-up on ${company}’s secure page: GetRentos never sees your card details.`,
+    protection: 'We send the vendor’s payment once the top-up is confirmed. You’ll see it on this invoice.',
+  };
+};
 
 const isActiveInvoice = (invoice: HomeManagementWorkOrderInvoice) =>
   ['DRAFT', 'SUBMITTED', 'APPROVED'].includes(invoice.status);
@@ -362,6 +433,24 @@ export function HomeManagementWorkOrderInvoices({
   // The invoice open in the pay dialog, and why its chosen company could not take a top-up.
   const [payTarget, setPayTarget] = useState<HomeManagementWorkOrderInvoice | null>(null);
   const [providerError, setProviderError] = useState<string | null>(null);
+  // How paying splits between held money and a card top-up, shown before Pay.
+  const paymentPreview = useQuery({
+    queryKey: homeManagementKeys.invoicePaymentPreview(payTarget?.id ?? '', providers.provider),
+    queryFn: () =>
+      unwrap(
+        homeManagementService.getWorkOrderInvoicePaymentPreview(payTarget!.id, providers.provider)
+      ),
+    enabled: !!payTarget,
+    retry: false,
+  });
+  const payCopy = payTarget
+    ? vendorPayCopy(
+        payTarget,
+        paymentPreview,
+        providers.options.find((o) => o.provider === providers.provider)?.label ??
+          'the payment company'
+      )
+    : null;
   const payInvoice = useMutation<
     { invoiceId: string; payoutStatus: string; topUp?: { authorizationUrl: string } },
     Error,
@@ -1208,14 +1297,18 @@ export function HomeManagementWorkOrderInvoices({
         owed={payTarget?.totalAmount ?? 0}
         owedLabel="invoice"
         itemLabel="Invoice"
+        itemParts={payCopy?.parts}
         receiverLine={null}
         topUpOnly={{
-          note: 'We pay the vendor from the rent GetRentos holds for the owner first. A card top-up, with its card or bank fee, is only taken if that does not cover the invoice.',
-          buttonLabel: payTarget?.payoutStatus === 'FAILED' ? 'Retry payment' : 'Pay vendor',
+          note: payCopy?.note,
+          buttonLabel: payCopy?.buttonLabel ?? 'Pay vendor',
+          disabled: payCopy?.disabled,
+          secureLine: payCopy?.secureLine,
         }}
-        protection="If a top-up is needed, we send the vendor’s payment once it is confirmed. You’ll see it on this invoice."
+        protection={payCopy?.protection}
         providers={providers}
         providerError={providerError}
+        error={payCopy?.error}
         busy={payInvoice.isPending}
         onPay={() =>
           payTarget && payInvoice.mutate({ invoiceId: payTarget.id, provider: providers.provider })

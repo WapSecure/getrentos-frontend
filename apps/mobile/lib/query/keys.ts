@@ -157,6 +157,8 @@ export const qk = {
   },
   homeCare: {
     invoiceCheck: (invoiceId: string) => ['home-care', 'invoice-check', invoiceId] as const,
+    invoicePaymentPreview: (invoiceId: string, provider?: string) =>
+      ['home-care', 'invoice-payment-preview', invoiceId, provider ?? 'default'] as const,
     dashboard: ['home-care', 'dashboard'] as const,
     workOrders: (view: string) => ['home-care', 'work-orders', view] as const,
     /** Paged resolved/cancelled lists; never shares a key with the open list. */

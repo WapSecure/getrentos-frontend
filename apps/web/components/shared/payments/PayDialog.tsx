@@ -57,11 +57,19 @@ export interface PayDialogProps {
   /** The button when `amount` is 0. */
   notReadyLabel?: string;
   /**
-   * When the card is only charged for a shortfall that is not known here (a
-   * vendor invoice paid from held rent first): no fee or total is shown, this
-   * note says when a card top-up is taken, and the button reads `buttonLabel`.
+   * When the card is only charged for a shortfall (a vendor invoice paid from
+   * held rent first): no fee or total row is added, `itemParts` may show the
+   * split, this note says when a card top-up is taken, and the button reads
+   * `buttonLabel`. `disabled` holds the button (the split is still being worked
+   * out, or it cannot be paid); `secureLine` replaces the secure-page sentence
+   * once it is known whether a card is needed at all.
    */
-  topUpOnly?: { note: ReactNode; buttonLabel: string };
+  topUpOnly?: {
+    note: ReactNode;
+    buttonLabel: string;
+    disabled?: boolean;
+    secureLine?: ReactNode;
+  };
 }
 
 const lagosDate = (iso: string) =>
@@ -245,7 +253,7 @@ export const PayDialog = ({
               variant="primary"
               fullWidth
               size="lg"
-              disabled={!ready || feeLoading}
+              disabled={!ready || feeLoading || !!topUpOnly?.disabled}
               isLoading={busy || feeLoading}
               loadingText={!busy && feeLoading ? 'Working out the fee…' : undefined}
               onClick={onPay}
@@ -262,8 +270,13 @@ export const PayDialog = ({
             <p className="flex items-start gap-2 text-xs text-muted-foreground">
               <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-success" />
               <span>
-                {topUpOnly ? 'If a top-up is needed, you finish' : 'You finish'} on {company}’s
-                secure page: GetRentos never sees your card details. {protection}
+                {topUpOnly?.secureLine ?? (
+                  <>
+                    {topUpOnly ? 'If a top-up is needed, you finish' : 'You finish'} on {company}’s
+                    secure page: GetRentos never sees your card details.
+                  </>
+                )}{' '}
+                {protection}
               </span>
             </p>
           </div>
