@@ -47,7 +47,7 @@ export const navItems: NavItem[] = [
 const baseNavGroups = [
   { label: 'Overview', items: navItems.slice(0, 1) },
   { label: 'Field operations', items: navItems.slice(1, 6) },
-  { label: 'Communication', items: navItems.slice(6, 8) },
+  { label: 'Messages and documents', items: navItems.slice(6, 8) },
   { label: 'Trust and account', items: navItems.slice(8) },
 ];
 

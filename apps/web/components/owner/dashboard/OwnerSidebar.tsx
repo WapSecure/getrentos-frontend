@@ -26,6 +26,10 @@ import {
   ClipboardCheck,
   PiggyBank,
   ReceiptText,
+  ListChecks,
+  Wallet,
+  IdCard,
+  Landmark,
 } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n/translations';
@@ -72,7 +76,7 @@ export const navItems: NavItem[] = [
   { labelKey: 'sidebar.vendors', href: ROUTES.OWNER_VENDORS, icon: HardHat },
   { labelKey: 'sidebar.inspections', href: ROUTES.OWNER_INSPECTIONS, icon: ClipboardCheck },
   { labelKey: 'sidebar.deposits', href: ROUTES.OWNER_DEPOSITS, icon: PiggyBank },
-  { labelKey: 'sidebar.approvals', href: ROUTES.OWNER_APPROVALS, icon: ShieldCheck },
+  { labelKey: 'sidebar.approvals', href: ROUTES.OWNER_APPROVALS, icon: ListChecks },
   { labelKey: 'sidebar.documents', href: ROUTES.OWNER_DOCUMENTS, icon: FolderOpen },
   { labelKey: 'sidebar.messages', href: ROUTES.OWNER_MESSAGES, icon: MessageCircle },
   { labelKey: 'sidebar.realtor_access', href: ROUTES.OWNER_REALTORS, icon: UserRoundCheck },
@@ -86,19 +90,72 @@ export const navItems: NavItem[] = [
   {
     label: 'Estate requests',
     href: ESTATE_MARKETPLACE_ROUTES.OWNER_ESTATE_AGREEMENTS,
-    icon: Building2,
+    icon: Landmark,
   },
   { labelKey: 'sidebar.settings', href: ROUTES.OWNER_SETTINGS, icon: Settings },
-  { label: 'Billing', href: ROUTES.OWNER_BILLING, icon: BadgeCheck },
-  { label: 'Verification', href: '/owner/verification', icon: ShieldCheck },
+  { label: 'Billing', href: ROUTES.OWNER_BILLING, icon: Wallet },
+  { label: 'Verification', href: '/owner/verification', icon: IdCard },
 ];
 
+/** Picks items by route, so a group can never drift from its label as items are added. */
+const pick = (...hrefs: string[]) =>
+  hrefs.flatMap((href) => navItems.filter((item) => item.href === href));
+
+// Groups follow the owner's jobs: selling, land, short stays, looking after the
+// property, money and records, the people who manage it, and the account.
 const baseNavGroups = [
-  { label: 'Overview', items: navItems.slice(0, 1) },
-  { label: 'Portfolio and listings', items: navItems.slice(1, 7) },
-  { label: 'Sales and investment', items: navItems.slice(7, 16) },
-  { label: 'Communication', items: navItems.slice(16, 19) },
-  { label: 'Trust and account', items: navItems.slice(19) },
+  { label: 'Overview', items: pick(ROUTES.OWNER_DASHBOARD, ROUTES.OWNER_PROPERTIES) },
+  {
+    label: 'Selling',
+    items: pick(
+      ROUTES.OWNER_LISTINGS,
+      ROUTES.OWNER_LEADS,
+      ROUTES.OWNER_VIEWINGS,
+      ROUTES.OWNER_OFFERS,
+      ROUTES.OWNER_TRANSACTIONS,
+      ROUTES.OWNER_REALTORS
+    ),
+  },
+  { label: 'Land', items: pick(ROUTES.OWNER_LAND, OWNER_LAND_SALES_ROUTE) },
+  { label: 'Short stays', items: pick(ROUTES.OWNER_SHORTLETS) },
+  {
+    label: 'Property care',
+    items: pick(
+      ROUTES.OWNER_HOME_MANAGEMENT,
+      ROUTES.OWNER_VENDORS,
+      ROUTES.OWNER_INSPECTIONS,
+      ROUTES.OWNER_DEPOSITS
+    ),
+  },
+  {
+    label: 'Money and records',
+    items: pick(
+      ROUTES.OWNER_ANALYTICS,
+      ROUTES.OWNER_DOCUMENTS,
+      ROUTES.OWNER_APPROVALS,
+      ROUTES.OWNER_ACTIVITY
+    ),
+  },
+  {
+    label: 'Managers and partners',
+    items: pick(
+      ROUTES.OWNER_MESSAGES,
+      ROUTES.OWNER_MANAGED,
+      ROUTES.OWNER_QUERIES,
+      ESTATE_MARKETPLACE_ROUTES.OWNER_ESTATE_AGREEMENTS,
+      ROUTES.OWNER_REVIEWS
+    ),
+  },
+  {
+    label: 'Account',
+    items: pick(
+      ROUTES.OWNER_SETTINGS,
+      ROUTES.OWNER_BILLING,
+      '/owner/verification',
+      ROUTES.OWNER_TRUST_PROFILE,
+      ROUTES.OWNER_BOOKINGS
+    ),
+  },
 ];
 
 export const navGroups = createRoleNavigation(
@@ -111,7 +168,13 @@ export const navGroups = createRoleNavigation(
     ROUTES.OWNER_TRANSACTIONS,
     ROUTES.OWNER_MESSAGES,
   ],
-  [ROUTES.OWNER_SETTINGS, ROUTES.OWNER_BILLING, '/owner/verification']
+  [
+    ROUTES.OWNER_SETTINGS,
+    ROUTES.OWNER_BILLING,
+    '/owner/verification',
+    ROUTES.OWNER_TRUST_PROFILE,
+    ROUTES.OWNER_BOOKINGS,
+  ]
 );
 
 export const OwnerSidebar = () => {

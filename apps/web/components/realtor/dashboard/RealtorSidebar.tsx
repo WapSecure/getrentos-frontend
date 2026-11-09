@@ -55,7 +55,7 @@ const baseNavGroups = [
   { label: 'Overview', items: navItems.slice(0, 1) },
   { label: 'Business development', items: navItems.slice(1, 4) },
   { label: 'Transactions', items: navItems.slice(4, 7) },
-  { label: 'Communication', items: navItems.slice(7, 9) },
+  { label: 'Messages and documents', items: navItems.slice(7, 9) },
   { label: 'Trust and account', items: navItems.slice(9) },
 ];
 
