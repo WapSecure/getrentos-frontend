@@ -159,7 +159,6 @@ const SaleConditions = ({
   );
 };
 
-/** Land resales held in escrow whose conditions precedent are open or failed (§9.3). */
 export default function AdminLandResalesPage() {
   const user = useAdminUser();
   const canView = hasAdminPermission(user?.roles, 'sales.view');

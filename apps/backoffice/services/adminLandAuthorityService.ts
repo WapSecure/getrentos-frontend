@@ -10,13 +10,7 @@ const post = (path: string, body?: object): Promise<ApiResponse<LandAuthorityVie
     })
   );
 
-/**
- * Sellers' claims of authority to sell land. Reading and checking evidence
- * needs `verifications.review`; decisions, waivers and resolving objections
- * need `verifications.approve`.
- */
 export const adminLandAuthorityService = {
-  /** Under review and disputed claims by default, oldest first. */
   queue: (status?: LandAuthorityStatus): Promise<ApiResponse<LandAuthorityView[]>> =>
     safeCall(() =>
       authFetch(`/admin/land/authority${status ? `?status=${encodeURIComponent(status)}` : ''}`)

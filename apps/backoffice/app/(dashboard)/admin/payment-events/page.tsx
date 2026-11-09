@@ -41,7 +41,6 @@ const STATUS: Record<
   IGNORED: { label: 'Not acted on', variant: 'neutral' },
 };
 
-/** What replaying an event of this kind does, in plain words (UX-46). */
 function replayEffect(event: string): string {
   if (event === 'charge.success' || event === 'SUCCESSFUL_TRANSACTION') {
     return 'It marks this payment as paid and credits whoever it was for, if that has not happened yet.';
@@ -59,14 +58,6 @@ function replayEffect(event: string): string {
   return 'It runs the same handling as when the payment company first sent it.';
 }
 
-/**
- * Every webhook the payment provider sent, and whether it was applied.
- *
- * Before this, a webhook was processed and forgotten. Now finance can find any
- * reference, see whether it landed and why one failed, and replay a failed one
- * once the cause is fixed. Replaying runs the same handling as a delivery and
- * never applies money twice.
- */
 export default function PaymentEventsPage() {
   const queryClient = useQueryClient();
   const user = useAdminUser();

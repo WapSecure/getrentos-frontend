@@ -46,20 +46,10 @@ const STATUS_META: Record<AuthorityStatus, { label: string; variant: BadgeVarian
   EXPIRED: { label: 'Expired', variant: 'neutral' },
 };
 
-/** A mandate opens a property up, so "why" is recorded with every decision. */
+// A mandate opens up someone else's property, so a reason is recorded with every decision.
 const MIN_REASON_LENGTH = 10;
 
-/**
- * Property authority claims: the officer's queue.
- *
- * Approving grants a mandate over someone else's property, which is why it
- * lives behind the same verification permissions as the rest of the trust
- * decisions, and why the three capabilities are offered separately: `canList`
- * lets them advertise the property, `canManage` additionally lets them run its
- * tenancy, and `canTransact` additionally lets them act on its money. Each is a
- * materially bigger decision than the last, so they are explicit choices rather
- * than implied ones.
- */
+// canList, canManage and canTransact are separate, escalating grants over someone else's property, so each stays an explicit choice.
 export default function PropertyAuthoritiesPage() {
   const queryClient = useQueryClient();
   const [status, setStatus] = useState<StatusFilter>('PENDING');
@@ -85,11 +75,7 @@ export default function PropertyAuthoritiesPage() {
   const invalidate = () =>
     queryClient.invalidateQueries({ queryKey: adminKeys.authorityClaims({ status }) });
 
-  /**
-   * Shared tail for every decision. Deliberately a plain function: `useMutation`
-   * may only be called from the component body, so the three mutations are
-   * declared below and delegate their result here.
-   */
+  // A plain function, not a hook: useMutation may only be called from the component body.
   const settle = (
     action: 'approve' | 'reject' | 'revoke',
     response: ApiResponse<PropertyAuthorityClaim>,
@@ -116,9 +102,7 @@ export default function PropertyAuthoritiesPage() {
     void invalidate();
   };
 
-  // NumberInput hands back the sanitised numeric *string*, so a typed "30" is
-  // '30', not 30. Parsing it is what makes the field work: the previous
-  // number-only check quietly dropped it, granting a mandate with no expiry.
+  // NumberInput returns a numeric string, so parse it; a number-only check silently granted mandates with no expiry.
   const expiryDays = Number.parseInt(String(expiresInDays), 10);
   const hasExpiry = Number.isSafeInteger(expiryDays) && expiryDays > 0;
   const reportMutationError = (mutationError: unknown) =>
@@ -128,9 +112,7 @@ export default function PropertyAuthoritiesPage() {
         : 'The decision could not be recorded. Your inputs have been preserved.'
     );
 
-  // One mutation per action keeps the pending state (and the disabled logic that
-  // reads it) independent, which matters when an officer acts on several claims
-  // in a row.
+  // One mutation per action keeps each pending state independent when an officer acts on several claims in a row.
   const approve = useMutation({
     mutationFn: (claim: PropertyAuthorityClaim) =>
       propertyAuthorityService.approve(claim.id, {

@@ -9,7 +9,6 @@ import { useAdminUser } from '../../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
 import { adminLandPurchaseService } from '@/services/adminLandPurchaseService';
 
-/** Open title perfection cases, exceptions first (§9.5). */
 export default function AdminLandPerfectionPage() {
   const user = useAdminUser();
   const canView = hasAdminPermission(user?.roles, 'sales.view');

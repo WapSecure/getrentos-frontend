@@ -26,25 +26,7 @@ import {
   type StatementLineDisputeRow,
 } from '@/services/adminClientMoneyService';
 
-/**
- * The adjudication queue.
- *
- * These are owners disagreeing with a figure on a statement they have already
- * been given, and the platform decides them: the scope puts owner-manager
- * disputes here, and a firm that could close its own case would be marking its own
- * homework. So this screen is where a complaint about money actually ends.
- *
- * The two things it refuses to blur:
- *
- * - **What is at stake depends on where the payout is.** `moneyEffect` is
- *   rendered, not derived. Upheld against a payout that has not left reverses the
- *   line and the correction rides the next statement; upheld against one already
- *   sent is the same correction with no hold to lift. Telling an officer "held"
- *   while a transfer is with the bank would have them looking for money to
- *   unfreeze that was never frozen.
- * - **The statement is not edited.** Upholding writes an adjustment. The wrong
- *   figure stays on the record it appeared on, which is the point.
- */
+// `moneyEffect` is rendered from the API, not derived: whether the payout is held or already sent changes what upholding does.
 export function DisputeQueue({
   notify,
 }: {
@@ -71,8 +53,7 @@ export function DisputeQueue({
       unwrap(adminClientMoneyService.resolveDispute(input.id, input.outcome, input.note)),
     onSuccess: (result, input) => {
       void queryClient.invalidateQueries({ queryKey: adminKeys.clientMoneyDisputes });
-      // A decided query frees a held payout and writes a ledger correction, so
-      // both of the other tabs are now stale.
+      // A decision frees a held payout and writes a ledger correction, so both other tabs go stale.
       void queryClient.invalidateQueries({ queryKey: adminKeys.clientMoneyReleases });
       void queryClient.invalidateQueries({ queryKey: adminKeys.clientMoneyReconciliation });
       setNote('');
@@ -231,11 +212,6 @@ export function DisputeQueue({
                 </Field>
               </div>
 
-              {/*
-                What the outcome will actually do, said before it is done. An
-                officer should not discover the difference between holding and
-                reversing from the toast afterwards.
-              */}
               <p className="mt-3 rounded-lg border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
                 {outcome === 'UPHELD'
                   ? 'The statement is NOT changed. The owner is credited on their next statement as a correction, so the wrong figure stays visible where it appeared.'

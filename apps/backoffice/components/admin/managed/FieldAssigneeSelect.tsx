@@ -13,11 +13,6 @@ const describe = (c: FieldAgentCandidate) => {
   return `${c.name ?? 'Agent'} · ${c.covers ? 'covers this area' : 'outside their area'} · ${load}`;
 };
 
-/**
- * Who goes to a property. With a field team set up, the team is offered best
- * first (covering the area, with room, least loaded) and the top pick is
- * marked; without one, any staff member can be chosen.
- */
 export const FieldAssigneeSelect = ({
   propertyId,
   value,

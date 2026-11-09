@@ -10,7 +10,6 @@ import { LandLineStatusBadge } from './LandPurchaseStatusBadge';
 
 const MIN_REASON = 5;
 
-/** The installment schedule, with late-fee waivers for finance (`escrow.approve`). */
 export const LandPurchaseSchedule = ({
   installments,
   canWaiveLateFee,

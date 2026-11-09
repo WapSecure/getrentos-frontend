@@ -91,12 +91,10 @@ type MarketplaceAction = {
   title: string;
   description: string;
   label?: string;
-  /** When set, the confirm dialog collects a reason and passes it to run(). */
   needsReason?: boolean;
   run: (reason: string) => Promise<unknown>;
 };
 
-/** Confirm-dialog + toast wiring for marketplace moderation actions, mirroring the estate queues' pattern. */
 function useMarketplaceActions() {
   const client = useQueryClient();
   const [action, setAction] = useState<MarketplaceAction | null>(null);
@@ -236,9 +234,7 @@ function MarketplaceOverviewView({
               label="Closed deals"
               value={data.closedDeals}
               accent="red"
-              // The figure is the gross value of the closed deals, not money
-              // released to sellers — only the held deposit is ever released
-              // (DEF-002), so "released" overstated it (DEF-238).
+              // Gross value of closed deals, not money released to sellers: only the held deposit is ever released.
               subtitle={`${formatCurrency(data.totalDealValue, { compact: true })} total value`}
             />
           </div>

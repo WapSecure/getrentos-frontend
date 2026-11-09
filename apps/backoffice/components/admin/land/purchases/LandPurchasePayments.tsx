@@ -20,11 +20,6 @@ const PAYOUT_STATUS: Record<
   FAILED: { label: 'Payout failed', variant: 'danger' },
 };
 
-/**
- * Money in (buyer payments) and money out (releases to the developer, and
- * whether each has reached their bank). Finance approves large payouts and
- * retries failed ones here.
- */
 export const LandPurchasePayments = ({
   payments,
   releases,
@@ -35,7 +30,6 @@ export const LandPurchasePayments = ({
 }: {
   payments: LandPurchasePayment[];
   releases: LandEscrowRelease[];
-  /** Holds `escrow.approve`. */
   canAct?: boolean;
   busyReleaseId?: string | null;
   onApprove?: (releaseId: string) => void;

@@ -39,14 +39,12 @@ const MONTH_NAMES = [
   'December',
 ];
 
-/** "2026-10" as "October 2026"; anything else as given. */
 function monthLabel(period: string): string {
   const m = /^(\d{4})-(\d{2})$/.exec(period);
   const name = m ? MONTH_NAMES[Number(m[2]) - 1] : undefined;
   return m && name ? `${name} ${m[1]}` : period;
 }
 
-/** The last 12 months that have ended (Lagos), newest first, as YYYY-MM (UX-48). */
 function endedMonths(count = 12): { value: string; label: string }[] {
   const lagos = new Date(Date.now() + 60 * 60_000);
   return Array.from({ length: count }, (_, i) => {
@@ -66,12 +64,6 @@ const ITEM_BADGE: Record<
   FAILED: { label: 'Failed', variant: 'danger' },
 };
 
-/**
- * A month's owner payouts, done together. Drafting writes, for every owner with
- * released rent not yet paid out, the same statement the owner could write
- * themselves; a second person issues them, and each pays out (or waits for
- * approval) exactly as an owner-issued statement does.
- */
 export default function PayoutRunsPage() {
   const queryClient = useQueryClient();
   const user = useAdminUser();
@@ -136,7 +128,6 @@ export default function PayoutRunsPage() {
   });
 
   const r = run.data;
-  // What issuing pays: every drafted owner statement in the open run.
   const toIssue = r?.items.filter((i) => i.status === 'DRAFTED') ?? [];
   const issueTotal = toIssue.reduce((sum, i) => sum + (i.netPayout ?? 0), 0);
 

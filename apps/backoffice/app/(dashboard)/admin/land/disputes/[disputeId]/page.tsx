@@ -44,7 +44,6 @@ import { Fact, LandCaseSection, PanelMessage } from '@/components/admin/land/cas
 
 const LIVE = new Set(['OPEN', 'UNDER_INVESTIGATION', 'APPEALED']);
 
-/** One land dispute in full: hold, decision, evidence and the case timeline. */
 export default function AdminLandDisputePage() {
   const params = useParams<{ disputeId: string }>();
   const disputeId = decodeURIComponent(params.disputeId);

@@ -17,22 +17,10 @@ import {
 import { unwrap } from '@sureground/shared';
 import { adminMarketplaceService } from '@/services/adminMarketplaceService';
 
-/**
- * The platform's commission split.
- *
- * Two rates, because two realtors can stand on one deal: whoever listed the
- * property and whoever represented the buyer. A side that has no realtor on it
- * is simply not paid, so a zero buyer-side rate is a valid, common setting.
- *
- * This is the *platform* split, not a realtor's own default rate on their
- * business settings: that one only pre-fills their own paperwork.
- */
+// The platform split, not a realtor's own default rate; a zero buyer-side rate is valid, since a side with no realtor isn't paid.
 export const RealtorCommissionRates = () => {
   const client = useQueryClient();
-  // The form is a draft that falls back to the stored split, rather than state
-  // mirrored from it in an effect: an effect that setState's on every fetch
-  // cascades renders, and can briefly show one value while the inputs hold
-  // another. `null` means "not edited yet, show what the server says".
+  // A draft over the stored split rather than state synced in an effect, which would cascade renders; `null` means not edited yet.
   const [draft, setDraft] = useState<{ listing: string; buyer: string } | null>(null);
   const toast = useToast();
 
@@ -54,7 +42,6 @@ export const RealtorCommissionRates = () => {
       ),
     onSuccess: async () => {
       toast.success('Commission split updated and audited.');
-      // Drop the draft so the inputs follow the value the server now holds.
       setDraft(null);
       await client.invalidateQueries({ queryKey: ['admin', 'realtor-commission-rates'] });
     },

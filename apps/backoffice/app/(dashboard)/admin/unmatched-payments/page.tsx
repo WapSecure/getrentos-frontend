@@ -42,13 +42,6 @@ const KIND_LABEL: Record<string, string> = {
   UNKNOWN: 'Unknown reference',
 };
 
-/**
- * Money the gateway confirmed, for an amount that did not match its charge.
- *
- * These used to be logged and dropped: the payer had paid and nothing on
- * Sureground recorded it. Each one now waits here until finance refunds it or
- * applies it by hand, and records what was done.
- */
 export default function UnmatchedPaymentsPage() {
   const queryClient = useQueryClient();
   const user = useAdminUser();

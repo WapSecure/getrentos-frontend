@@ -29,7 +29,7 @@ import type { TierGrant, TierGrantState } from '@/types/trust';
 type StateFilter = 'all' | TierGrantState;
 
 const PAGE_SIZE = 12;
-/** Mirrors the server DTO floor: a grant moves money, so "why" is mandatory. */
+// Mirrors the server DTO minimum: a grant moves money, so a reason is mandatory.
 const MIN_REASON_LENGTH = 10;
 
 const STATE_OPTIONS: { value: StateFilter; label: string }[] = [
@@ -45,15 +45,7 @@ const STATE_META: Record<TierGrantState, { label: string; variant: BadgeVariant 
   REVOKED: { label: 'Revoked', variant: 'danger' },
 };
 
-/**
- * Manual tier-3 (financial capability) grants.
- *
- * A grant is the backoffice answer for a host who cannot pass the automated bank
- * name enquiry (offline statement, unlisted bank). It confers the SAME
- * capability as a passing bank check, so every grant requires a reason, is
- * audited, and can be withdrawn: a revoked grant drops the user back to the
- * tier their other evidence supports.
- */
+// A grant confers the same capability as a passing bank check, so it needs a reason, is audited and can be revoked.
 export default function TierGrantsPage() {
   const queryClient = useQueryClient();
   const [stateFilter, setStateFilter] = useState<StateFilter>('all');
@@ -63,7 +55,6 @@ export default function TierGrantsPage() {
   const [reason, setReason] = useState('');
   const [expiresInDays, setExpiresInDays] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
-  // Set when the grant was recorded but waits for a second officer (AU-11).
   const [awaiting, setAwaiting] = useState<string | null>(null);
   const [userIdError, setUserIdError] = useState<string | null>(null);
   const [reasonError, setReasonError] = useState<string | null>(null);
@@ -144,8 +135,6 @@ export default function TierGrantsPage() {
       setFormError(error instanceof Error ? error.message : 'Unable to revoke the grant.'),
   });
 
-  // Each problem is reported on its own field (announced, and linked to the
-  // control), and focus goes to the first one so it can be fixed straight away.
   const submitGrant = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (grantMutation.isPending) return;

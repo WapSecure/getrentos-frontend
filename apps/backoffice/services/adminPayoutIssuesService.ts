@@ -2,11 +2,7 @@ import { authFetch, safeCall, type ApiResponse } from '@sureground/shared';
 
 export type PayoutRail = 'shortlet' | 'realtor' | 'agency' | 'agent' | 'partner' | 'sale';
 
-/**
- * Where a payout goes: the holder's current account. Only the last four digits
- * of the number are ever sent. `accountChanged` is true when that is not the
- * account the payout was first sent to, null when the first attempt is unknown.
- */
+// Only the last four digits are sent. accountChanged is null when the first attempt is unknown.
 export interface PayoutDestination {
   bankName: string | null;
   accountLast4: string | null;
@@ -14,7 +10,7 @@ export interface PayoutDestination {
   accountChanged: boolean | null;
 }
 
-/** One payout that needs a person. Amounts are whole naira. */
+// Amounts are whole naira.
 export interface PayoutIssue {
   rail: PayoutRail;
   id: string;
@@ -22,19 +18,14 @@ export interface PayoutIssue {
   beneficiary: string;
   failureReason: string | null;
   createdAt: string;
-  /** A payout limit stopped it before anything was sent; approval releases NEEDS_APPROVAL ones. */
   held?: {
     code: string;
     message: string;
     needsApproval: boolean;
-    /** An unused approval covering this amount and the account a retry pays now is on file: Retry is all it needs. */
     approved?: boolean;
   };
-  /** The reference it was last tried under. */
   transferRef?: string | null;
-  /** Where a retry would send it; null when the holder has no payout account. */
   destination?: PayoutDestination | null;
-  /** Stuck only: the oldest record it claimed, and how many it claimed. Null when none. */
   source?: PayoutSource | null;
 }
 
@@ -50,10 +41,8 @@ export interface PayoutSource {
   count: number;
 }
 
-/** Every way money leaves, including those retried elsewhere. */
 export type PayoutKind = PayoutRail | 'statement' | 'disbursement' | 'vendor' | 'land';
 
-/** Sent to the bank more than a day ago and not settled yet. */
 export interface WaitingPayout {
   kind: PayoutKind;
   id: string;
@@ -64,11 +53,8 @@ export interface WaitingPayout {
 }
 
 export interface PayoutIssues {
-  /** Refused or reversed by the bank: can be retried. */
   failed: PayoutIssue[];
-  /** Stopped before a transfer reference was saved: no money was sent. */
   stuck: PayoutIssue[];
-  /** Sent more than a day ago, still unsettled: check it with Paystack before doing anything. */
   waiting: WaitingPayout[];
 }
 
@@ -76,7 +62,7 @@ export const adminPayoutIssuesService = {
   list(): Promise<ApiResponse<PayoutIssues>> {
     return safeCall(() => authFetch<PayoutIssues>('/admin/payout-retries'));
   },
-  /** A second officer approves a held payout of ₦5m or more; then Retry sends it. Needs step-up. */
+  // Payouts of ₦5m or more need a second officer's approval before Retry sends them.
   approve(
     reference: string,
     note?: string
@@ -88,7 +74,6 @@ export const adminPayoutIssuesService = {
       })
     );
   },
-  /** Needs step-up; the shared dialog asks for it. */
   retry(rail: PayoutRail, id: string): Promise<ApiResponse<{ id: string; status: string }>> {
     return safeCall(() =>
       authFetch<{ id: string; status: string }>(`/admin/payout-retries/${rail}/${id}`, {

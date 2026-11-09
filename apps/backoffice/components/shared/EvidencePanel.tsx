@@ -6,11 +6,7 @@ import { Badge, Button, DocumentPreviewButton, IconButton, Input } from '@suregr
 import { cn, formatDate } from '@sureground/shared';
 import type { EvidenceItem } from '@/types/admin';
 
-/**
- * Mirrors the backend's evidence allow-list and size cap so a reviewer gets an
- * immediate answer instead of a round trip that ends in a 400. Kept in step
- * with `src/shared/evidence/evidence.constants.ts`.
- */
+// Mirrors the backend's evidence allow-list and size cap; keep in step with `src/shared/evidence/evidence.constants.ts`.
 export const EVIDENCE_ACCEPT =
   'image/png,image/jpeg,image/webp,image/gif,image/heic,image/avif,application/pdf,video/mp4,video/quicktime,video/webm,text/plain,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 export const EVIDENCE_MAX_BYTES = 25 * 1024 * 1024;
@@ -28,51 +24,19 @@ const isImageEvidence = (evidence: EvidenceItem) =>
 
 interface EvidencePanelProps {
   evidence: EvidenceItem[];
-  /** Enables the attach affordance. Omit both to render the list read-only. */
   onAttach?: (file: File, note?: string) => void;
   canAttach?: boolean;
   isAttaching?: boolean;
-  /**
-   * Re-signs a stored file's URL. Signed links are short-lived by design, so a
-   * viewer left open past the expiry asks for a fresh one rather than showing a
-   * broken file.
-   */
   onResolveUrl?: (evidenceId: string) => Promise<string | null | undefined>;
-  /**
-   * Detaches a file that should not be on this record. Only offered where
-   * removing a mis-attach is legitimate: an approver should not be able to
-   * quietly drop evidence from a case.
-   */
+  /** Only offer where removing a mis-attach is legitimate: an approver must not quietly drop evidence from a case. */
   onRemove?: (evidenceId: string) => void;
   removingId?: string | null;
-  /**
-   * What removing an item does here. Most cases detach a mis-attached file;
-   * a land review withdraws its reliance on a document without touching the
-   * owner's file.
-   */
   removeTitle?: string;
-  /**
-   * What the panel lists and its attach button offer. Most cases call these
-   * files evidence; a vendor's paperwork reads better as documents.
-   */
   heading?: string;
-  /** Shown when the case has no files yet. */
   emptyHint?: string;
   className?: string;
 }
 
-/**
- * The evidence on a case, as a reviewer needs to see it.
- *
- * Shared by every case family that can carry attachments, so a dispute, a fraud
- * alert and a vendor invoice all present evidence: and the warning that an
- * external link is not ours: the same way.
- *
- * Files we hold open in the in-app viewer through a short-lived signed URL.
- * Links recorded before uploads existed are separated out, labelled as not held
- * by us, and show their host, because a reviewer should be able to see where a
- * link goes before opening it.
- */
 export const EvidencePanel = ({
   evidence,
   onAttach,
@@ -100,7 +64,6 @@ export const EvidencePanel = ({
     if (inputRef.current) inputRef.current.value = '';
   };
 
-  /** Same checks the endpoint makes, so the reviewer finds out before uploading. */
   const pick = (next: File | undefined) => {
     if (!next) return;
     if (next.size > EVIDENCE_MAX_BYTES) {

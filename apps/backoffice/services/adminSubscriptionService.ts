@@ -8,7 +8,6 @@ import type {
 } from '@/types/subscription';
 
 export interface SubscriptionQuery {
-  /** Customer email or name — the handle support actually has. */
   search?: string;
   status?: string;
   page?: number;
@@ -31,10 +30,6 @@ export const adminSubscriptionService = {
       )
     ),
 
-  /**
-   * A customer's payment history — the same rows they see on their own billing
-   * page. Answers "what were you charged, and when" without opening Paystack.
-   */
   listInvoices: (
     userId: string,
     params: { page?: number; pageSize?: number } = {}

@@ -1,5 +1,3 @@
-/** Land professional accreditation for staff (blueprint §19.1); mirrors the backend. */
-
 export type LandProfessionalRole = 'SURVEYOR' | 'LAWYER' | 'VALUER' | 'INSPECTOR';
 export type LandProfessionalStatus =
   | 'APPLIED'

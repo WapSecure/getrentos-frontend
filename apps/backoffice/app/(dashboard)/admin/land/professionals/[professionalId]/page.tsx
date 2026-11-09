@@ -67,7 +67,6 @@ const actionsFor = (p: AdminLandProfessional): Action[] =>
           ? ['reinstate']
           : [];
 
-/** One professional: credential, decision, engagements and audit record. */
 export default function AdminLandProfessionalPage() {
   const params = useParams<{ professionalId: string }>();
   const id = decodeURIComponent(params.professionalId);

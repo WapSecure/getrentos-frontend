@@ -178,19 +178,16 @@ const readUrlState = (): { tab: Tab; bookingId: string; search: string } => {
 
 export const ShortletOversight = () => {
   const queryClient = useQueryClient();
-  // Deep links (?tab=bookings&bookingId=…&search=…) are read once, when the screen
-  // opens, rather than copied into state from an effect after it has rendered.
+  // Deep links are read once on open, not copied into state from an effect after render.
   const [fromUrl] = useState(readUrlState);
   const [tab, setTab] = useState<Tab>(fromUrl.tab);
   const [bookingId] = useState(fromUrl.bookingId);
   const toast = useToast();
 
-  // Listings filters
   const [search, setSearch] = useState(fromUrl.search);
   const [listingStatus, setListingStatus] = useState<'all' | ShortletListingStatus>('all');
   const [listingsPage, setListingsPage] = useState(1);
 
-  // Bookings filters
   const [bookingStatus, setBookingStatus] = useState<'all' | ShortletBookingStatus>('all');
   const [bookingsPage, setBookingsPage] = useState(1);
   const [payoutsPage, setPayoutsPage] = useState(1);
@@ -200,7 +197,6 @@ export const ShortletOversight = () => {
   const [promiseTarget, setPromiseTarget] = useState<AdminShortletDispute | null>(null);
   const [threadDraft, setThreadDraft] = useState('');
 
-  // Deposit claim filters
   const [claimsPage, setClaimsPage] = useState(1);
   const [claimStatus, setClaimStatus] = useState<'all' | AdminShortletDepositClaimStatus>('all');
   const [claimSearch, setClaimSearch] = useState('');
@@ -228,7 +224,6 @@ export const ShortletOversight = () => {
   );
   const [disputeResolution, setDisputeResolution] = useState('');
 
-  // Payout accounts register
   const [payoutAccountsSearch, setPayoutAccountsSearch] = useState('');
   const [payoutAccountsPage, setPayoutAccountsPage] = useState(1);
   const [activePayout, setActivePayout] = useState<AdminShortletPayout | null>(null);
@@ -237,13 +232,11 @@ export const ShortletOversight = () => {
     null
   );
 
-  // Booking interventions (decline/cancel/refund/complete)
   const [pendingIntervention, setPendingIntervention] = useState<{
     booking: AdminShortletBooking;
     action: BookingIntervention;
   } | null>(null);
 
-  // Review moderation queues (guest reviews of stays + host reviews of guests)
   const [reviewKind, setReviewKind] = useState<'guest' | 'host'>('guest');
   const [reviewsSearch, setReviewsSearch] = useState('');
   const [reviewsRating, setReviewsRating] = useState<'all' | number>('all');
@@ -667,7 +660,6 @@ export const ShortletOversight = () => {
         description="Platform-wide view of shortlet listings and bookings."
       />
 
-      {/* Overview cards */}
       {overviewError && !overview ? (
         <PageErrorState
           title="Could not load shortlet totals"
@@ -715,7 +707,6 @@ export const ShortletOversight = () => {
         <StatGridSkeleton count={6} className="grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6" />
       ) : null}
 
-      {/* Tabs */}
       <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)}>
         <TabsList className="max-w-full">
           {(
@@ -1387,7 +1378,6 @@ function ListingRow({
 }: {
   listing: AdminShortletListing;
   busy: boolean;
-  /** Read-only roles see the listing without actions the API would refuse. */
   canModerate: boolean;
   onModerate: (action: 'pause' | 'resume' | 'close' | 'flag' | 'approve') => void;
 }) {
@@ -2274,7 +2264,6 @@ function AdjudicateClaimModal({
   );
 }
 
-/** Last Lagos day a launch rate applies to, from the instant it ends (`YYYY-MM-DD`). */
 const lastLaunchDay = (endsAt?: string) =>
   endsAt
     ? new Date(new Date(endsAt).getTime() - 1).toLocaleDateString('en-CA', {
@@ -2282,7 +2271,7 @@ const lastLaunchDay = (endsAt?: string) =>
       })
     : '';
 
-/** The launch rate runs through the whole of `day` in Lagos, so it ends at the next midnight there. */
+/** The rate runs through the whole of `day` in Lagos, so it ends at the next Lagos midnight. */
 const launchEndsAfter = (day: string) => {
   const next = new Date(`${day}T00:00:00Z`);
   next.setUTCDate(next.getUTCDate() + 1);
@@ -2322,13 +2311,13 @@ function FeeConfigForm({
   const nextInput: AdminShortletFeeConfigInput = {
     commissionPct,
     taxName: taxName.trim() || undefined,
-    // Up to two decimals, as the API allows (Nigeria's VAT is 7.5%).
+    // Up to two decimals, as the API allows.
     taxPct: Math.round(Math.min(100, Math.max(0, Number(taxPct) || 0)) * 100) / 100,
     introCommissionPct: introValue,
     introEndsAt: hasIntro && introLastDay ? launchEndsAfter(introLastDay) : null,
     depositClaimWindowHours: Math.max(
       1,
-      // Mirrors the API's 1..30-day rule so the form can't submit something it will reject.
+      // Mirrors the API's 1..30-day rule.
       Math.min(720, Number(depositWindow) || feeConfig.depositClaimWindowHours)
     ),
   };

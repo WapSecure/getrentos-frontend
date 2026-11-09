@@ -56,11 +56,6 @@ function lastEndedMonth(): string {
   return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
 }
 
-/**
- * Rent money as the gateway reports it, matched reference by reference with
- * the rent journal for a month. Every line that does not match needs a person
- * to record what it was before the month can close.
- */
 export default function RentReconciliationPage() {
   const queryClient = useQueryClient();
   const user = useAdminUser();

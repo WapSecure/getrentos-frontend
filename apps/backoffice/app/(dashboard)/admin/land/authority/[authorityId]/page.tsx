@@ -51,10 +51,7 @@ import { Fact, LandCaseSection, PanelMessage } from '@/components/admin/land/cas
 
 const CLOSED = new Set(['REJECTED', 'REVOKED']);
 
-/**
- * What the recorded decision was. A claim can move on while keeping it: an
- * objection disputes a verified claim, and an appeal reopens a rejected one.
- */
+// The decision can outlive the status: an objection disputes a verified claim, and an appeal reopens a rejected one.
 const lastDecisionLabel = (status: LandAuthorityView['authority']['status']) =>
   status === 'DISPUTED'
     ? 'Verified before the objection'
@@ -62,7 +59,6 @@ const lastDecisionLabel = (status: LandAuthorityView['authority']['status']) =>
       ? 'Not accepted, then appealed'
       : LAND_AUTHORITY_STATUS_LABELS[status];
 
-/** One seller's claim of authority to sell: evidence, consents, objections and the decision. */
 export default function AdminLandAuthorityPage() {
   const params = useParams<{ authorityId: string }>();
   const authorityId = decodeURIComponent(params.authorityId);
@@ -80,7 +76,6 @@ export default function AdminLandAuthorityPage() {
     enabled: canView,
   });
   const propertyId = detail.data?.authority.propertyId;
-  // The property's documents with signed links, to open the instrument and consents.
   const documents = useQuery({
     queryKey: landQueryKeys.case(propertyId ?? ''),
     queryFn: () => unwrap(adminLandService.getDiligenceDetail(propertyId as string)),

@@ -37,12 +37,6 @@ import { LandReviewersPanel } from '@/components/admin/land/case/LandReviewersPa
 import { LandRiskPanel } from '@/components/admin/land/case/LandRiskPanel';
 import { LandTitleHistoryPanel } from '@/components/admin/land/case/LandTitleHistoryPanel';
 
-/**
- * One land diligence case in full: the parcel, what blocks approval, the
- * checklist and its evidence, integrity registers, outside reviewers, risk,
- * and the decision. Every decision carries the case version; when the API
- * says the case moved on (409) the page asks for a reload before anything else.
- */
 export default function AdminLandDiligenceCasePage() {
   const params = useParams<{ propertyId: string }>();
   const propertyId = decodeURIComponent(params.propertyId);

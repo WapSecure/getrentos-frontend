@@ -710,14 +710,7 @@ type OpenDocuments = {
   documents: EvidenceItem[];
 };
 
-/**
- * Documents on a quote or an invoice, and the mutations that change them.
- *
- * Shared by both queues so the two records behave identically. The open
- * record's files are held locally and updated from each mutation's result, so
- * the dialog reflects the change immediately; the queue behind it is
- * invalidated so the row's own copy catches up.
- */
+// The open record's files are held locally from each mutation result so the dialog updates at once; the queue is invalidated so its row catches up.
 function useRecordDocuments() {
   const client = useQueryClient();
   const [open, setOpen] = useState<(OpenDocuments & { id: string }) | null>(null);
@@ -771,7 +764,6 @@ function useRecordDocuments() {
   });
 
   return {
-    /** Opens the dialog for a quote or an invoice row. */
     open: (
       kind: 'quote' | 'invoice',
       record: { id: string; label: string; subtitle: string; documents?: EvidenceItem[] }

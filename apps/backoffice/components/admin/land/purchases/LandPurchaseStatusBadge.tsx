@@ -26,7 +26,6 @@ const lineVariants: Record<string, BadgeVariant> = {
   FAILED: 'danger',
 };
 
-/** Installment, payment and milestone statuses share one palette. */
 export const LandLineStatusBadge = ({ status }: { status: string }) => (
   <Badge variant={lineVariants[status] ?? 'neutral'}>{humaniseEnum(status)}</Badge>
 );

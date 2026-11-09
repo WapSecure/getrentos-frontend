@@ -10,7 +10,6 @@ export interface CorrectionItem {
   label: string;
 }
 
-/** What one correction category would write, record by record. */
 export interface CorrectionPreview {
   category: CorrectionCategory;
   treatment: string;
@@ -22,7 +21,6 @@ export const adminPaymentCorrectionsService = {
   preview(): Promise<ApiResponse<CorrectionPreview[]>> {
     return safeCall(() => authFetch<CorrectionPreview[]>('/admin/payment-corrections'));
   },
-  /** Needs step-up; the shared dialog asks for it. */
   apply(
     category: CorrectionCategory
   ): Promise<ApiResponse<{ applied: number; totalNaira: number }>> {

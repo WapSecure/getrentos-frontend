@@ -48,13 +48,7 @@ interface DisputeCaseModalProps {
   onEscalate: (id: string) => void;
   onResolve: (id: string, resolution: string | undefined, outcome: DisputeResolveOutcome) => void;
   onSendMessage: (id: string, text: string) => Promise<boolean>;
-  /** Uploads the file as this case's evidence. Gated by `canAttachEvidence`. */
   onAttachEvidence?: (id: string, file: File, note?: string) => void;
-  /**
-   * Re-signs a stored file's URL. Signed links are short-lived by design, so a
-   * viewer left open past the expiry asks for a fresh one instead of showing a
-   * broken file.
-   */
   onResolveEvidenceUrl?: (evidenceId: string) => Promise<string | null | undefined>;
   canAttachEvidence?: boolean;
   isResolving?: boolean;

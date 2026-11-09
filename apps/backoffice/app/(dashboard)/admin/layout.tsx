@@ -27,7 +27,6 @@ export type AdminUser = {
 
 const AdminUserContext = createContext<AdminUser | null>(null);
 
-/** Returns the signed-in admin's profile, populated once by the admin layout's auth check. */
 export const useAdminUser = () => useContext(AdminUserContext);
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
@@ -39,7 +38,6 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   useEffect(() => {
     let cancelled = false;
     const checkAuth = async () => {
-      // The dedicated admin sign-in page is exempt from the auth gate.
       if (pathname === ROUTES.ADMIN_LOGIN) {
         setIsLoading(false);
         return;
@@ -52,22 +50,13 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         (role) => BACKEND_ROLE_TO_ID[role] === 'admin'
       );
 
-      // Signed out, signed in as someone without a back-office role, or holding
-      // only an identity-less session: the refresh cookie is not port-scoped, so
-      // this app can silently restore a session from the main app's cookie and
-      // end up with no profile at all. All three are treated as "not an admin".
-      //
-      // They go to the admin sign-in rather than getDashboardRoute(), which
-      // returns main-app paths such as /renter/dashboard: those do not exist here
-      // and dropped the visitor on a 404.
+      // The refresh cookie is not port-scoped, so a session restored from the main app may have no admin profile; send it to the admin sign-in, since getDashboardRoute() returns main-app paths that 404 here.
       if (!isAuthenticated() || !parsedUser || !isAdmin) {
         router.replace(ROUTES.ADMIN_LOGIN);
         return;
       }
 
       const needsStaffAccess = pathname === ROUTES.ADMIN_ACCESS;
-      // Anyone who can manage, create, or approve staff may open the page;
-      // the sections render according to what they are allowed to do.
       if (needsStaffAccess && !hasStaffAccess(parsedUser.roles)) {
         router.replace(ROUTES.ADMIN_DASHBOARD);
         return;
@@ -83,7 +72,6 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     };
   }, [pathname, router]);
 
-  // The admin sign-in page renders without the auth gate or the admin chrome.
   if (pathname === ROUTES.ADMIN_LOGIN) {
     return <>{children}</>;
   }
@@ -96,13 +84,11 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     <AdminUserContext.Provider value={user}>
       <div className="min-h-screen bg-background">
         <AdminNavbar user={user} />
-        {/* Without two-factor every admin route is refused, so the set-up screen
-            stands in for the sidebar and page until it is on. */}
+        {/* Without two-factor every admin route is refused, so the set-up screen stands in for the page. */}
         <StaffTwoFactorGate>
           <div className="flex">
             <AdminSidebar roles={user?.roles} />
-            {/* min-w-0: without it this flex item grows to its widest child (e.g. a
-              tab strip) and the whole page scrolls sideways instead of that child. */}
+            {/* min-w-0 stops this flex item growing to its widest child and scrolling the whole page sideways. */}
             <main className="min-w-0 flex-1 workspace-main p-6 lg:p-8">
               <div className="max-w-7xl mx-auto">
                 {hasRouteAccess(user?.roles, pathname) ? (

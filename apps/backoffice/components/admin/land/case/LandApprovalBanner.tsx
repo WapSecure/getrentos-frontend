@@ -4,7 +4,6 @@ import { CircleCheck, OctagonAlert, RefreshCw, UsersRound } from 'lucide-react';
 import { Alert, Button } from '@sureground/ui';
 import type { AdminLandDiligenceDetail } from '@/types/land';
 
-/** Shown when the API refused a change because the case moved on (409). */
 export const LandStaleCaseBanner = ({
   onReload,
   isReloading,
@@ -33,10 +32,7 @@ export const LandStaleCaseBanner = ({
   </Alert>
 );
 
-/**
- * Why the case cannot be approved yet, and where dual control stands. The
- * blockers come from the API itself, so the screen never second-guesses them.
- */
+// Blockers come from the API; never second-guess them here.
 export const LandApprovalBanner = ({
   detail,
   currentUserName,
@@ -99,7 +95,6 @@ export const LandApprovalBanner = ({
   );
 };
 
-/** True when the signed-in reviewer appears to have given the first of two approvals. */
 export const gaveFirstApproval = (detail: AdminLandDiligenceDetail, currentUserName?: string) =>
   Boolean(
     detail.diligence.awaitingSecondApproval &&

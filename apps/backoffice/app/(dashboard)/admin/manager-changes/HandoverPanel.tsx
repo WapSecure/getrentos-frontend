@@ -12,7 +12,6 @@ const TREATMENTS = [
   ['PAID_TO_SUREGROUND', 'Paid to Sureground'],
 ] as const;
 
-/** A handover's sign-off from the Sureground side: settle a dispute, or sign for the side Sureground holds. */
 export function HandoverPanel({
   transferId,
   canOperate,

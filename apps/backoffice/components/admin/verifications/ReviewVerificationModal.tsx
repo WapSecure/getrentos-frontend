@@ -35,17 +35,13 @@ export const ReviewVerificationModal = ({
   isRejecting = false,
   isRequestingClarification = false,
 }: ReviewVerificationModalProps) => {
-  // Approve and reject are a separate permission from reviewing; a reviewer
-  // without it can still ask the applicant for more information.
+  // Approve and reject need a separate permission; a reviewer without it can still ask for more information.
   const canDecide = useAdminCan('verifications.approve');
   const [mode, setMode] = useState<'view' | 'reject' | 'clarify'>('view');
   const [reason, setReason] = useState('');
   const isSubmitting = isApproving || isRejecting || isRequestingClarification;
-  // A decided request can still be opened to read its documents, not re-decided.
   const decided = request?.status === 'approved' || request?.status === 'rejected';
 
-  // Fetch the real submitted documents (signed preview URLs) for the request
-  // being reviewed so the reviewer can inspect the actual files.
   const {
     data: detail,
     isLoading: detailLoading,
@@ -68,9 +64,7 @@ export const ReviewVerificationModal = ({
     onClose();
   };
 
-  // The mutations own success/failure feedback and close the modal
-  // themselves on success, so a failed request leaves it open with the
-  // entered reason intact rather than closing blindly.
+  // The mutations close the modal only on success, so a failed request keeps the entered reason.
   const handleApprove = () => {
     if (!request) return;
     onApprove(request.id);

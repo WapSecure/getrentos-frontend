@@ -44,10 +44,7 @@ export interface ListRealtorsParams extends ListProfessionalsParams {
   licenseStatus?: string;
 }
 
-/** Backoffice sales-domain oversight (marketplace sales + realtor/agent registers). */
 export const adminMarketplaceService = {
-  // ---------------- Marketplace sales ----------------
-
   overview(): Promise<ApiResponse<AdminMarketplaceOverview>> {
     return safeCall(() => authFetch<AdminMarketplaceOverview>('/admin/marketplace/overview'));
   },
@@ -124,8 +121,6 @@ export const adminMarketplaceService = {
     );
   },
 
-  // ---------------- Realtor register ----------------
-
   listRealtors(params: ListRealtorsParams = {}): Promise<ApiResponse<Paginated<AdminRealtor>>> {
     const query = toQuery({
       search: params.search,
@@ -174,12 +169,7 @@ export const adminMarketplaceService = {
     return authDownload(`/admin/realtors/export${query}`);
   },
 
-  // ---------------- Realtor commission payouts ----------------
-
-  /**
-   * Every realtor's payouts. `status` is the stored enum value (uppercase) —
-   * the list response lowercases it, which is why the two differ.
-   */
+  // `status` takes the stored uppercase enum; the list response lowercases it.
   listRealtorPayouts(
     params: {
       status?: RealtorPayoutFilterStatus;
@@ -199,11 +189,7 @@ export const adminMarketplaceService = {
     );
   },
 
-  /**
-   * Sends a failed payout again. This is the only way its money moves: a failed
-   * payout keeps its claim on the commissions, so a fresh withdrawal cannot
-   * touch them.
-   */
+  // The only way a failed payout's money moves: it keeps its claim on the commissions, so a fresh withdrawal cannot touch them.
   retryRealtorPayout(id: string) {
     return safeCall(() =>
       authFetch<AdminRealtorCommissionPayout>(`/admin/realtors/payouts/${id}/retry`, {
@@ -212,15 +198,11 @@ export const adminMarketplaceService = {
     );
   },
 
-  /** The split applied to every sale that closes from now on. */
   getRealtorCommissionRates(): Promise<ApiResponse<RealtorCommissionRates>> {
     return safeCall(() => authFetch<RealtorCommissionRates>('/admin/realtors/commission-rates'));
   },
 
-  /**
-   * Changes the split for future sales only. Commissions already earned keep
-   * the rate they were earned at, so this never restates money already owed.
-   */
+  // Future sales only: commissions already earned keep their rate.
   setRealtorCommissionRates(
     input: RealtorCommissionRates
   ): Promise<ApiResponse<RealtorCommissionRates>> {
@@ -231,8 +213,6 @@ export const adminMarketplaceService = {
       })
     );
   },
-
-  // ---------------- Agent register ----------------
 
   listAgents(params: ListProfessionalsParams = {}): Promise<ApiResponse<Paginated<AdminAgent>>> {
     const query = toQuery({

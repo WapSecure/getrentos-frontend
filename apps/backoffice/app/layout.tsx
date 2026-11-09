@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description: 'Internal operations console for Sureground staff.',
 };
 
-/** Reads the proxy's per-request CSP nonce (see proxy.ts) for the theme script; this makes every page dynamic. */
+// Reads the proxy's per-request CSP nonce for the theme script; this makes every page dynamic.
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const nonce = (await headers()).get('x-nonce') ?? undefined;
   return (

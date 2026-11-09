@@ -41,7 +41,6 @@ const PRODUCT: Record<string, string> = {
 
 const DAY_MS = 86_400_000;
 
-/** How urgent the evidence deadline is. */
 function deadline(c: Chargeback): { label: string; variant: BadgeVariant } {
   if (!c.dueAt) return { label: 'No deadline given', variant: 'neutral' };
   const left = new Date(c.dueAt).getTime() - Date.now();
@@ -54,7 +53,6 @@ function deadline(c: Chargeback): { label: string; variant: BadgeVariant } {
   };
 }
 
-/** Where the money stands, in finance's words. */
 function moneyLine(c: Chargeback): string {
   if (c.frozenCount > 0) return 'Sureground still holds it: frozen until this is decided.';
   if (c.heldInBalanceOf)
@@ -67,12 +65,6 @@ function moneyLine(c: Chargeback): string {
   return 'No Sureground record owns this payment.';
 }
 
-/**
- * Card chargebacks (D-5): a payer asked their bank to reverse a card payment.
- * Answer each with evidence before its deadline. While one is open the money it
- * brought in is held back; a lost one is clawed back from the receiver's balance,
- * or listed here to recover by hand when it had already been paid out.
- */
 export default function ChargebacksPage() {
   const [view, setView] = useState<View>('OPEN');
   const queryClient = useQueryClient();

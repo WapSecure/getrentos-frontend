@@ -47,11 +47,6 @@ const FILTERS: { value: 'all' | AdminHostPenaltyStatus; label: string }[] = [
   { value: 'all', label: 'All fees' },
 ];
 
-/**
- * Fees hosts owe for cancelling paid, confirmed stays. They come out of the
- * host's payouts automatically; support can waive what is left for genuine
- * emergencies.
- */
 export function HostCancellationFeesPanel({ canWaive }: { canWaive: boolean }) {
   const queryClient = useQueryClient();
   const [status, setStatus] = useState<'all' | AdminHostPenaltyStatus>('OUTSTANDING');

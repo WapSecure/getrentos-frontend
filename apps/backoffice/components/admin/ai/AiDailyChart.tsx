@@ -13,7 +13,7 @@ import {
 import { Card } from '@sureground/ui';
 import type { AiUsageDay } from '@/types/admin';
 
-/** "6 Nov" from a Lagos YYYY-MM-DD day, without the viewer's time zone shifting it. */
+// Formatted without the viewer's time zone, which would shift the Lagos day.
 export function shortDay(day: string): string {
   const [y, m, d] = day.split('-').map(Number);
   return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString('en-GB', {
@@ -23,12 +23,12 @@ export function shortDay(day: string): string {
   });
 }
 
-/** USD vendor spend, labelled as USD (the product itself shows only Naira). */
+// Vendor spend is in USD and labelled so; the rest of the product shows only Naira.
 export function usd(amount: number): string {
   return `USD ${amount.toFixed(amount < 1 ? 4 : 2)}`;
 }
 
-/** Axis steps for small sums need more places, or 0.005 and 0.015 both read 0.01. */
+// Small sums need more decimal places, or 0.005 and 0.015 both read 0.01.
 const axisUsd = (v: number) => (v === 0 ? '0' : v.toFixed(v < 0.1 ? 3 : v < 1 ? 2 : 0));
 
 const DayTooltip = ({ active, payload }: TooltipProps<number, string>) => {
@@ -46,7 +46,6 @@ const DayTooltip = ({ active, payload }: TooltipProps<number, string>) => {
   );
 };
 
-/** Spend per Lagos day over the chosen period; the tooltip carries the day's calls, fallbacks and drops. */
 export function AiDailyChart({ daily }: { daily: AiUsageDay[] }) {
   const total = daily.reduce((n, d) => n + d.costUsd, 0);
   const busiest = daily.reduce<AiUsageDay | null>(

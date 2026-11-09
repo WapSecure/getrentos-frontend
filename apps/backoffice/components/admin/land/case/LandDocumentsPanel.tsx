@@ -17,18 +17,12 @@ interface LandDocumentsPanelProps {
   canReview: boolean;
   onCite: (documentId: string) => void;
   onStopCiting: (document: LandDiligenceDocument, link: LandDiligenceDocumentLink) => void;
-  /** Opens the staff upload (e.g. a registry search report). */
   onUpload: () => void;
   /** `documentId:checklistKey` of the citation being withdrawn. */
   unlinkingId: string | null;
   onResolveUrl?: (documentId: string) => Promise<string | null | undefined>;
 }
 
-/**
- * Every document on the property, cited or not. Files open through
- * short-lived signed links; citing records which checks a document backs —
- * one title deed can back several.
- */
 export const LandDocumentsPanel = ({
   documents,
   checks,

@@ -37,11 +37,6 @@ const adminSchema = z.object({
 
 type AdminFormData = z.infer<typeof adminSchema>;
 
-/**
- * Dedicated administrator sign-in. Uses the same credential store as the
- * public login, but only accounts that hold an admin role are allowed to
- * proceed: a hardened surface separate from end-user authentication.
- */
 export const AdminSignInForm = () => {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
@@ -69,7 +64,6 @@ export const AdminSignInForm = () => {
     mode: 'onChange',
   });
 
-  // Prefill the identifier if it was remembered, and explain an expired session.
   useEffect(() => {
     // Mount-time sync with persisted storage: intentional synchronous setState.
     /* eslint-disable react-hooks/set-state-in-effect */

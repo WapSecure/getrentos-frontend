@@ -34,7 +34,6 @@ const actions: {
   { label: 'Manage users', href: ROUTES.ADMIN_USERS, icon: Users, permission: 'users.view' },
 ];
 
-/** Shortcuts into the queues — only the ones the signed-in role can work. */
 export const AdminQuickActions = () => {
   const user = useAdminUser();
   const available = actions.filter((action) => hasAdminPermission(user?.roles, action.permission));

@@ -10,14 +10,7 @@ export type RentalViewingStatus = 'REQUESTED' | 'CONFIRMED' | 'COMPLETED' | 'CAN
 export type RentalLeaseStatus = 'DRAFT' | 'SENT' | 'SIGNED' | 'EXPIRED';
 export type RentalRenewalStatus = 'PENDING' | 'ACCEPTED' | 'DECLINED';
 export type RentalTerminationStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
-/**
- * Case statuses.
- *
- * `DECIDED` is deliberately not here. Every other status is a position in a
- * workflow an officer can correct; a decision is a statement about what a court
- * did, which needs an outcome, so the API refuses it and the control must not
- * offer it.
- */
+// DECIDED is deliberately absent: the API refuses it without a court outcome, so the control must not offer it.
 export type RentalEvictionStatus = 'OPEN' | 'FILED' | 'CLOSED' | 'WITHDRAWN';
 
 export interface AdminRentalOverview {
@@ -39,7 +32,7 @@ export interface AdminRentalUnit {
   ownerId: string;
   ownerName: string;
   unitName: string;
-  /** The unit's asking rent and its cadence — annual unless stated. */
+  // Annual unless stated.
   askingRent: number | null;
   askingRentPeriod: 'year' | 'month';
   occupancyStatus: UnitOccupancyStatus;
@@ -96,7 +89,6 @@ export interface AdminRentalApplication {
   status: RentalApplicationStatus;
   verificationStatus: string;
   trustScore: number;
-  /** The unit applied for, priced as the unit is advertised. */
   unitAskingRent: number | null;
   unitAskingRentPeriod: 'year' | 'month' | null;
   noteCount: number;
@@ -165,13 +157,6 @@ export interface AdminRentalTermination {
   createdAt: string;
 }
 
-/**
- * An eviction, which is now a legal case of `kind = 'EVICTION'`.
- *
- * `noticeIssuedAt` and `cureDeadline` are gone: the old model computed a cure
- * deadline from a number typed by hand with no basis recorded, and the tenancy's
- * notice ladder owns that now. A case is about the court instead.
- */
 export interface AdminRentalEviction {
   id: string;
   status: RentalEvictionStatus;

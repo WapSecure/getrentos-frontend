@@ -115,7 +115,6 @@ function useQueueActions() {
   return useAdminAction({ invalidateKeys: [['admin', 'rentals']] });
 }
 
-/** Inline status editor used for lease and eviction lifecycle correction. */
 function StatusCell({
   current,
   options,
@@ -193,11 +192,7 @@ const terminationStatusOptions = [
   { value: 'APPROVED', label: 'Approved' },
   { value: 'REJECTED', label: 'Rejected' },
 ];
-/**
- * No `DECIDED`: deciding a case needs an outcome, so it goes through the
- * decision route rather than a status correction. An officer can reposition a
- * case between steps; they cannot say what a court decided.
- */
+// No DECIDED: deciding needs an outcome, so it goes through the decision route, not a status correction.
 const evictionStatusOptions = [
   { value: 'OPEN', label: 'Open' },
   { value: 'FILED', label: 'Filed' },
@@ -936,7 +931,6 @@ export function EvictionsQueue() {
   );
 }
 
-/** Icons exported for the overview module grid. */
 export const rentalModuleIcons: Record<string, LucideIcon> = {
   listings: Building2,
   applications: ClipboardList,

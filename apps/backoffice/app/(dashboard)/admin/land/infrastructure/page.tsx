@@ -64,7 +64,6 @@ const ACTION_COPY = {
   },
 } as const;
 
-/** Estate infrastructure: delivery claims to check and change orders buyers objected to (LND-11). */
 export default function AdminLandInfrastructurePage() {
   const user = useAdminUser();
   const queryClient = useQueryClient();

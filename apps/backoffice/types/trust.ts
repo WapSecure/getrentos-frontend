@@ -1,5 +1,3 @@
-/** Trust & verification review-case types (mirror backend /admin/trust/review-cases). */
-
 export type TrustReviewCaseStatus = 'OPEN' | 'ASSIGNED' | 'ESCALATED' | 'RESOLVED' | 'CLOSED';
 export type TrustReviewCasePriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 export type TrustReviewDecision = 'PASS' | 'REJECT' | 'RESTRICT';
@@ -30,7 +28,6 @@ export interface TrustReviewCaseSummary {
   verification?: TrustReviewCaseVerificationRef;
 }
 
-/** One thing a reviewer must check before deciding a case (security gap ID-09). */
 export interface TrustEvidenceItem {
   code: string;
   label: string;
@@ -86,7 +83,6 @@ export interface TrustReviewCaseDetail {
     status: string;
     decision: string;
     createdAt: string;
-    /** What to confirm to approve, or name as failed to block. */
     evidenceChecklist?: TrustEvidenceItem[];
     steps: TrustReviewStep[];
     decisions: TrustReviewDecisionRow[];
@@ -94,7 +90,6 @@ export interface TrustReviewCaseDetail {
   actions: TrustReviewAction[];
 }
 
-/** Standard server-side paginated envelope. */
 export interface Paginated<T> {
   items: T[];
   total: number;
@@ -103,7 +98,6 @@ export interface Paginated<T> {
   totalPages: number;
 }
 
-/** Manual tier-3 (financial capability) grant. */
 export type TierGrantState = 'ACTIVE' | 'REVOKED' | 'EXPIRED';
 
 export interface TierGrant {
@@ -121,11 +115,9 @@ export interface TierGrant {
   revokedByName?: string | null;
   revokedAt?: string | null;
   revocationReason?: string | null;
-  /** Whether this grant is the one the tier resolver currently counts. */
   effective: boolean;
 }
 
-/** Trust appeal (TG-06) — a subject contesting a rejected trust decision. */
 export type TrustAppealTargetType = 'PROPERTY_AUTHORITY' | 'TRUST_VERIFICATION';
 export type TrustAppealStatus = 'OPEN' | 'UNDER_REVIEW' | 'UPHELD' | 'OVERTURNED' | 'CLOSED';
 export type TrustAppealDecision = 'UPHELD' | 'OVERTURNED';
@@ -143,7 +135,6 @@ export interface TrustAppeal {
   createdAt: string;
   updatedAt: string;
   resolvedAt?: string | null;
-  /** Readable fields the backend resolves so reviewers don't see raw UUIDs. */
   subjectName?: string | null;
   subjectEmail?: string | null;
   originalDeciderName?: string | null;

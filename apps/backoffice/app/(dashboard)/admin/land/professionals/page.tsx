@@ -29,7 +29,6 @@ const ROLE_OPTIONS = [
   ...Object.entries(LAND_PROFESSIONAL_ROLE_LABELS).map(([value, label]) => ({ value, label })),
 ];
 
-/** Accreditation queue: applications first, then the network (§19.1). */
 export default function AdminLandProfessionalsPage() {
   const user = useAdminUser();
   const canView = hasAdminPermission(user?.roles, 'verifications.review');

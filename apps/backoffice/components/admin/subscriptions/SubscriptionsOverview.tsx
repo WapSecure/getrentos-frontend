@@ -48,19 +48,10 @@ const naira = (kobo: number | null) => (kobo == null ? '—' : formatCurrency(ko
 
 const formatDay = (iso: string | null) => (iso ? formatDate(iso) : '—');
 
-/**
- * The Pro subscription book.
- *
- * Built because billing used to be write-only from here: an admin could change
- * a tier and nothing else, so there was no answer to "I paid and I'm still on
- * Free" and no sight of who is failing to pay.
- */
 export const SubscriptionsOverview = () => {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('');
   const [page, setPage] = useState(1);
-  // Which customer's payment history is open. One at a time: support is
-  // answering a question about one person, not comparing two.
   const [invoicesFor, setInvoicesFor] = useState<string | null>(null);
 
   const overview = useQuery({
@@ -235,8 +226,7 @@ function SubscriptionRow({
   invoicesOpen: boolean;
   onToggleInvoices: () => void;
 }) {
-  // Only trialing/active/past-due have a meaningful next date. A row that never
-  // started, or has ended, should not claim it is about to renew.
+  // Only trialing, active and past-due rows have a meaningful next date.
   const lapsed = row.status === 'NONE' || row.status === 'CANCELLED';
   const keyDate = row.status === 'TRIALING' ? row.trialEndsAt : row.currentPeriodEnd;
   const keyLabel =
@@ -255,8 +245,7 @@ function SubscriptionRow({
           </p>
           <p className="text-xs text-muted-foreground">
             {row.priceKobo == null
-              ? // No cycle/price means the plan was granted rather than bought:
-                // it should not be counted as revenue, and this makes that visible.
+              ? // No cycle or price means the plan was granted, not bought, so it is not revenue.
                 row.tier === 'PRO'
                 ? 'Granted'
                 : '—'
@@ -265,7 +254,7 @@ function SubscriptionRow({
         </td>
         <td className="p-4">
           <Badge variant={STATUS_VARIANT[row.status]}>{STATUS_LABEL[row.status]}</Badge>
-          {/* A row can be past due and still have access: show what the app does, not just the label. */}
+          {/* A row can be past due and still have access, so show what the app does. */}
           {row.status === 'PAST_DUE' && row.isActive && (
             <p className="mt-1 text-xs text-muted-foreground">Access retained</p>
           )}
@@ -321,12 +310,6 @@ function SubscriptionRow({
   );
 }
 
-/**
- * A customer's charges, exactly as they see them.
- *
- * Support's usual question is "what were you actually charged", and the answer
- * has to be the customer's own history rather than a second opinion.
- */
 function CustomerInvoices({ userId }: { userId: string }) {
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['admin', 'subscriptions', 'invoices', userId],
@@ -409,8 +392,7 @@ function InvoiceRow({ invoice }: { invoice: AdminSubscriptionInvoice }) {
       </td>
       <td className="p-3 whitespace-nowrap text-foreground">
         {naira(invoice.amountKobo)}
-        {/* An inferred amount came from our reconciliation, not a confirmed
-            charge: worth flagging before it is quoted back to a customer. */}
+        {/* An inferred amount came from reconciliation, not a confirmed charge: flag it before it is quoted to a customer. */}
         {invoice.inferred && (
           <span className="block text-xs text-warning">Inferred from provider</span>
         )}

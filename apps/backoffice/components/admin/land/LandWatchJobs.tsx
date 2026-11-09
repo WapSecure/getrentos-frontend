@@ -72,7 +72,6 @@ function JobStatusBadge({ status }: { status: LandWatchJobStatus }) {
   return <Badge variant={tone}>{label}</Badge>;
 }
 
-/** Vendor jobs owners asked for on Managed watches: post quotes, track the work, record proof. */
 export function LandWatchJobs() {
   const [filter, setFilter] = useState<Filter>('open');
   const [openId, setOpenId] = useState<string | null>(null);
@@ -369,7 +368,7 @@ function JobDetail({ job, onMode }: { job: StaffLandWatchJob; onMode: (mode: Mod
           </Button>
         )}
         {canQuote && (
-          // The next step for staff, not "Cancel job", is where the keyboard lands.
+          // Focus lands on the next step for staff, not on "Cancel job".
           <Button variant="outline" autoFocus onClick={() => onMode('quote')}>
             Add a quote
           </Button>

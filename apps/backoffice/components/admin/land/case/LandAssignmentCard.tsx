@@ -11,7 +11,6 @@ import { describeSla } from '@/lib/landDiligence';
 import { LandCaseSection, useInvalidateLandCase, type LandCasePanelProps } from './shared';
 import { UserLookup, type PickedUser } from './UserLookup';
 
-/** Who holds the case, when it is owed, and claiming or handing it over. */
 export const LandAssignmentCard = ({
   detail,
   canReview,

@@ -49,7 +49,6 @@ export interface LandFraudQueueRow extends LandFraudBase {
 
 const base = '/admin/land/fraud';
 
-/** Land fraud signals for staff (`fraud.review`). */
 export const adminLandFraudService = {
   queue: (): Promise<ApiResponse<LandFraudQueueRow[]>> => safeCall(() => authFetch(base)),
   assessment: (propertyId: string): Promise<ApiResponse<LandFraudAssessment>> =>
@@ -82,7 +81,6 @@ export const LAND_FRAUD_SIGNAL_LABELS: Record<LandFraudSignalCode, string> = {
   CONFLICTING_CLAIM: 'Another seller’s parcel claims the same ground',
 };
 
-/** What a REPRESENTATIVE_LINKED signal found, as one sentence. */
 export function representativeLinkText(detail: Record<string, unknown>): string {
   const name = String(detail.representativeName ?? 'The representative');
   const buyers = Array.isArray(detail.buyers) ? detail.buyers.join(', ') : 'the buyer';

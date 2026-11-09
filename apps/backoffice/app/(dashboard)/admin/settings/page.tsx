@@ -23,7 +23,6 @@ const tabFromUrl = (value: string | null): SettingsTab =>
   tabs.find((tab) => tab.id === value)?.id ?? 'profile';
 
 export default function AdminSettingsPage() {
-  // `?tab=security` opens straight on a tab (e.g. from the two-factor prompt).
   const urlTab = tabFromUrl(useSearchParams().get('tab'));
   const [activeTab, setActiveTab] = useState<SettingsTab>(urlTab);
   const [seenUrlTab, setSeenUrlTab] = useState(urlTab);

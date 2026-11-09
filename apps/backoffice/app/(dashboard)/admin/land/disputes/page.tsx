@@ -26,7 +26,6 @@ const statusOptions = [
   ...LAND_DISPUTE_STATUSES.map((status) => ({ value: status, label: humaniseEnum(status) })),
 ];
 
-/** Land disputes, held cases first then by priority and age. */
 export default function AdminLandDisputesPage() {
   const user = useAdminUser();
   const canView = hasAdminPermission(user?.roles, 'verifications.review');

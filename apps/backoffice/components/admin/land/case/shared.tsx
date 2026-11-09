@@ -7,26 +7,15 @@ import { DocumentPreviewButton } from '@sureground/ui';
 import { landQueryKeys } from '@/lib/landDiligence';
 import type { LandDiligenceDocument } from '@/types/land';
 
-/** What every panel on the case page needs from the page. */
 export interface LandCasePanelProps {
   propertyId: string;
-  /** `verifications.review`: record checks, cite, assign, record entries, invite. */
   canReview: boolean;
-  /** `verifications.approve`: decide, resolve conflicts, discharge encumbrances. */
   canApprove: boolean;
-  /**
-   * Reports a failed mutation. For a `versioned` call (a decision or a check),
-   * a 409 means the case moved on and flags it as stale; elsewhere a 409 is an
-   * ordinary refusal (e.g. a reviewer already seated) and is only reported.
-   */
+  /** For a `versioned` call a 409 means the case moved on and flags it stale; elsewhere a 409 is an ordinary refusal. */
   onError: (error: unknown, fallback: string, options?: { versioned?: boolean }) => void;
   onSuccess: (message: string) => void;
 }
 
-/**
- * Invalidates every diligence query: the case, its sections and the queue
- * all reflect a change on the case (version, counts, blockers).
- */
 export function useInvalidateLandCase() {
   const queryClient = useQueryClient();
   return () => queryClient.invalidateQueries({ queryKey: landQueryKeys.diligenceRoot });
@@ -77,7 +66,6 @@ export const Fact = ({ label, value }: { label: string; value: ReactNode }) => (
   </div>
 );
 
-/** Opens a property document through its signed URL, re-signing when it has expired. */
 export const LandDocumentPreview = ({
   document,
   onResolveUrl,
@@ -92,14 +80,11 @@ export const LandDocumentPreview = ({
   />
 );
 
-/** Native date input value from an ISO timestamp. */
 export const toDateInput = (value: string | null | undefined) =>
   value ? new Date(value).toISOString().slice(0, 10) : '';
 
-/** ISO timestamp (UTC midnight) from a native date input value. */
 export const fromDateInput = (value: string) =>
   value ? new Date(`${value}T00:00:00.000Z`).toISOString() : undefined;
 
-/** Tomorrow as a native date input value: the earliest future date a form may take. */
 export const tomorrowDateInput = () =>
   new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10);

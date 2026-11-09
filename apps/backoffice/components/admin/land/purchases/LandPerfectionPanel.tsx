@@ -15,11 +15,6 @@ const STEP_VARIANT: Record<string, 'success' | 'info' | 'neutral' | 'danger'> = 
   NOT_APPLICABLE: 'neutral',
 };
 
-/**
- * Title perfection (§9.5) for staff: open the case, name the accountable
- * professional, record each step's submission or approval (with its
- * reference), and complete with the final instrument and a legal review.
- */
 export const LandPerfectionPanel = ({
   perfection,
   canAct,

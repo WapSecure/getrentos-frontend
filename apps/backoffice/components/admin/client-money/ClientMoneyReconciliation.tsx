@@ -43,19 +43,7 @@ import {
   type ReconciliationStatus,
 } from '@/services/adminClientMoneyService';
 
-/**
- * Client money: what we hold, and whether it is still there.
- *
- * The whole point of this screen is the difference between three states that are
- * easy to render identically and must not be: the bank agrees, the bank does not,
- * and nobody has checked. Only the first is reassuring; the third is the one a
- * dashboard quietly renders as a green tick, and it is the reason `UNATTESTED`
- * exists as a status rather than as a null drift.
- *
- * The money figures are shown as a two-sided comparison — what owners are owed
- * against what the account holds — because the useful question is not "is there
- * a number" but "which direction is it out, and by how much".
- */
+// UNATTESTED (nobody has checked) must never render like a match; that is why it is a status rather than a null drift.
 export function ClientMoneyReconciliation() {
   const queryClient = useQueryClient();
   const user = useAdminUser();
@@ -77,20 +65,16 @@ export function ClientMoneyReconciliation() {
     queryFn: () => unwrap(adminClientMoneyService.overview()),
   });
 
-  /**
-   * The same query the queue tab runs, so React Query serves one cache entry to
-   * both — the count on the tab cannot disagree with the list behind it.
-   */
+  // Same query as the queue tab, so both share one cache entry and the count can't disagree with the list.
   const releases = useQuery({
     queryKey: adminKeys.clientMoneyReleases,
     queryFn: () => unwrap(adminClientMoneyService.pendingReleases()),
-    // Read is gated on the same permission as deciding, because the queue exists
-    // only to be worked through. A tab that could only be looked at is a taunt.
+    // Read is gated on the deciding permission: the queue exists only to be worked through.
     enabled: canRelease,
   });
   const waitingCount = releases.data?.length ?? 0;
 
-  /** The same cache entry the disputes tab renders, so the count cannot disagree. */
+  // Same cache entry as the disputes tab.
   const disputes = useQuery({
     queryKey: adminKeys.clientMoneyDisputes,
     queryFn: () => unwrap(adminClientMoneyService.pendingDisputes()),
@@ -143,15 +127,13 @@ export function ClientMoneyReconciliation() {
     (row) => row.status === 'DRIFT' || row.status === 'INTEGRITY_FAILED'
   ).length;
 
-  /** The holders a balance can be recorded against, de-duplicated across dates. */
   const holders = [...new Map(rows.map((row) => [row.organizationId, row])).entries()]
     .filter(([id]) => id !== null)
     .map(([id, row]) => ({ id, name: row.organizationName ?? `Firm ${String(id).slice(0, 8)}…` }));
 
   const poolsPanel = (
     <>
-      {/* Staleness is stated rather than alerted on: an absent process is not an
-      incident, but it must not be invisible either. */}
+      {/* Staleness is stated rather than alerted on: an absent process isn't an incident, but must not be invisible. */}
       <Card static className="p-4">
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
           <span className="flex items-center gap-1.5">
@@ -210,10 +192,7 @@ export function ClientMoneyReconciliation() {
             account actually holds, not what we think it should.
           </DialogDescription>
           <div className="mt-4 space-y-3">
-            {/* Drawn from the report rather than a separate holders endpoint:
-            every pool the reconciliation knows about is already in it, and
-            a second source of truth for "which pools exist" is how the two
-            come to disagree. */}
+            {/* From the report rather than a holders endpoint, so there is one source of truth for which pools exist. */}
             <Field label="Which pool" required>
               <Select
                 value={holder}
@@ -298,10 +277,6 @@ export function ClientMoneyReconciliation() {
         }
       />
 
-      {/* Two jobs in one domain — checking the pool still holds what we say, and
-          letting an owner's held payout out — worked by the same people at
-          different moments. Tabs rather than one long page, and the count is on
-          the tab because a queue nobody notices is a payout nobody releases. */}
       {canRelease ? (
         <Tabs
           value={tab}
@@ -360,11 +335,7 @@ function PoolCard({ row }: { row: ReconciliationRow }) {
         </div>
         <p className="text-xs text-muted-foreground">
           {row.accountsChecked} account(s)
-          {/*
-            `alertedAt` is history and survives the fix, so it must not read as
-            "an alert is open" next to a green badge — a resolved incident and a
-            live one look identical otherwise.
-          */}
+          {/* `alertedAt` survives the fix, so it must not read as an open alert next to a green badge. */}
           {row.alertedAt
             ? isFailing(row.status)
               ? ' · staff alerted, unresolved'
@@ -375,8 +346,7 @@ function PoolCard({ row }: { row: ReconciliationRow }) {
 
       <dl className="mt-3 grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-3">
         <Money label="Owners are owed" value={row.ledgerTotal} />
-        {/* Null is stated as "not recorded" rather than rendered as ₦0, which
-            would read as a bank holding nothing. */}
+        {/* Null reads "not recorded", not ₦0, which would look like a bank holding nothing. */}
         <div>
           <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             The account holds
@@ -434,12 +404,10 @@ function Money({ label, value }: { label: string; value: number }) {
   );
 }
 
-/** Whole naira, as every amount in this system is. */
 function naira(value: number): string {
   return `₦${value.toLocaleString('en-NG')}`;
 }
 
-/** The two statuses that mean something is wrong and somebody should be looking. */
 function isFailing(status: ReconciliationStatus): boolean {
   return status === 'DRIFT' || status === 'INTEGRITY_FAILED';
 }

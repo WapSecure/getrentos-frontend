@@ -45,7 +45,6 @@ const RAIL: Record<PayoutKind, string> = {
   land: 'Land sale release',
 };
 
-/** Where staff find the record a stuck payout came from (UX-49). */
 const SOURCE: Partial<Record<PayoutRail, { href: string; label: string }>> = {
   shortlet: { href: '/admin/shortlets', label: 'Open short-lets' },
   realtor: { href: '/admin/realtors', label: 'Open realtors' },
@@ -61,25 +60,14 @@ const SOURCE_NOUN: Record<PayoutSource['kind'], string> = {
   partnerCommission: 'partner share',
 };
 
-/** A direct link to the claimed record, where the console can open one. */
 const sourceHref = (s: PayoutSource): string | null =>
   s.kind === 'booking'
     ? `/admin/shortlets?tab=bookings&bookingId=${encodeURIComponent(s.id)}`
     : null;
 
-/** "booking 1a2b… and 2 more" */
 const sourceText = (s: PayoutSource): string =>
   `${SOURCE_NOUN[s.kind]} ${s.id}${s.count > 1 ? ` and ${s.count - 1} more` : ''}`;
 
-/**
- * Payouts that need a person, on every rail in one place.
- *
- * Failed: the bank refused or reversed the transfer. Retrying sends it again
- * under a fresh reference; the recipient's account must still be usable and
- * outside its change hold, and only one retry can go through.
- * Stuck: stopped before a transfer reference was saved, so no money was sent.
- * These need sorting out by hand.
- */
 export default function PayoutIssuesPage() {
   const queryClient = useQueryClient();
   const user = useAdminUser();
@@ -88,7 +76,6 @@ export default function PayoutIssuesPage() {
   const [view, setView] = useState<View>('failed');
   const [confirming, setConfirming] = useState<PayoutIssue | null>(null);
   const [approving, setApproving] = useState<PayoutIssue | null>(null);
-  // Held payouts approved on this page: they now need only Retry (UX-43).
   const [approvedRefs, setApprovedRefs] = useState<ReadonlySet<string>>(() => new Set());
 
   const query = useQuery({
@@ -125,7 +112,6 @@ export default function PayoutIssuesPage() {
     onError: (e: Error) => toast.error(e.message || 'Could not approve this payout.'),
   });
 
-  // Approved here, or reported approved by the API (UX-43): Retry is all it needs.
   const isApproved = (p: PayoutIssue) =>
     p.held?.approved === true || Boolean(p.transferRef && approvedRefs.has(p.transferRef));
 

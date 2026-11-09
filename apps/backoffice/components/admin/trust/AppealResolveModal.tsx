@@ -26,12 +26,7 @@ interface AppealResolveModalProps {
   onClose: () => void;
 }
 
-/**
- * Resolve a trust appeal (TG-06). The reviewer upholds the original decision or
- * overturns it; overturning reopens the target for a fresh review. The backend
- * refuses a reviewer who was the original decision-maker, so the UI surfaces that
- * error rather than pre-judging it.
- */
+// The backend refuses a reviewer who made the original decision; surface that error rather than pre-judging it.
 export const AppealResolveModal = ({ appeal, onClose }: AppealResolveModalProps) => {
   const queryClient = useQueryClient();
   const [decision, setDecision] = useState<TrustAppealDecision | ''>('');

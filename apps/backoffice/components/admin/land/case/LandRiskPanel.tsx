@@ -13,10 +13,7 @@ import {
   type LandCasePanelProps,
 } from './shared';
 
-/**
- * The live risk breakdown, beside what is stored on the case. Refresh
- * recomputes and stores it, which is what the queue and buyers see.
- */
+// Refresh recomputes and stores the score, which is what the queue and buyers see.
 export const LandRiskPanel = ({
   propertyId,
   canReview,

@@ -28,10 +28,7 @@ const kindLabel: Record<string, string> = {
   BOUNDARY_OVERLAP: 'Overlapping boundary',
 };
 
-/**
- * Duplicate-title, duplicate-survey and overlapping-boundary clashes with
- * other parcels. A resolution applies to both parcels, so it needs a reason.
- */
+// A resolution applies to both parcels, so it needs a reason.
 export const LandConflictsPanel = ({
   propertyId,
   canApprove,

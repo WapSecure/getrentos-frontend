@@ -81,7 +81,6 @@ const KIND: Record<
   },
 };
 
-/** A YYYY-MM-DD Lagos day, `daysAgo` days before today. */
 function lagosDay(daysAgo: number): string {
   const lagosNow = new Date(Date.now() + 60 * 60_000);
   return new Date(lagosNow.getTime() - daysAgo * 86_400_000).toISOString().slice(0, 10);
@@ -91,13 +90,6 @@ const PROVIDER: Record<PaymentProvider, string> = { PAYSTACK: 'Paystack', MONNIF
 
 const amountOrDash = (n: number | null) => (n === null ? '—' : formatCurrency(n));
 
-/**
- * Every Paystack and Monnify collection checked against the record it paid for, on every
- * product: rent, sale deposits, short-lets, land, Flex, estate dues, vendor
- * top-ups and subscriptions. The same check runs every night for the day
- * before and flags new problems in the audit log; this page runs it for any
- * range up to 31 days. It only reads.
- */
 export default function CollectionsReconciliationPage() {
   const [from, setFrom] = useState(() => lagosDay(1));
   const [to, setTo] = useState(() => lagosDay(1));

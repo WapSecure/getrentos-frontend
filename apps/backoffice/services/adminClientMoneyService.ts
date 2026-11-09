@@ -1,26 +1,14 @@
 import { authFetch, safeCall, type ApiResponse } from '@sureground/shared';
 
-/**
- * Client money — the officer's side.
- *
- * The ledger says how much of a pooled account belongs to each owner. This is the
- * surface for the two things that keep that claim honest: recording what the bank
- * actually holds, and reading the daily verdict on whether the two agree.
- *
- * The status vocabulary is deliberately not binary. `UNATTESTED` is not a
- * synonym for "fine" — it means nobody counted the money that day, and a screen
- * that renders it as a green tick is worse than one that shows nothing.
- */
+// UNATTESTED means nobody counted the money that day; never render it as fine.
 
 export type ReconciliationStatus = 'MATCHED' | 'DRIFT' | 'INTEGRITY_FAILED' | 'UNATTESTED';
 
-/** An account whose stored balance did not equal the sum of its own entries. */
 export interface IntegrityFinding {
   accountId: string;
   ownerId: string;
-  /** What the account row claims the owner is owed. */
   stored: number;
-  /** What its entries add up to. This is the truth. */
+  // What its entries add up to; this is the truth.
   computed: number;
   difference: number;
 }
@@ -32,24 +20,22 @@ export interface ReconciliationRow {
   organizationName: string | null;
   currency: string;
   asOfDate: string;
-  /** Sum of every owner's balance for this holder. */
   ledgerTotal: number;
-  /** What the bank said. Null means nobody told us — not zero. */
+  // Null means nobody told us, not zero.
   bankBalance: number | null;
-  /** `bankBalance - ledgerTotal`. Null exactly when `bankBalance` is. */
+  // Null exactly when bankBalance is.
   drift: number | null;
   status: ReconciliationStatus;
   integrityOk: boolean;
   integrityFindings: IntegrityFinding[];
   accountsChecked: number;
   ranAt: string;
-  /** When this condition was alerted on, if it ever was. */
   alertedAt: string | null;
 }
 
 export interface AttestationStatus {
   latestAsOfDate: string | null;
-  /** Days since anybody counted the money. Null when nobody ever has. */
+  // Null when nobody ever has.
   daysSince: number | null;
 }
 
@@ -67,14 +53,7 @@ export interface RecordBankBalanceInput {
   note?: string;
 }
 
-/**
- * The status vocabulary, in words somebody can act on.
- *
- * Written here rather than derived from the status string in the component,
- * because the words ARE the meaning: "Bank agrees" and "Not checked" must not be
- * able to drift into looking alike, which is what gave this file its reason to
- * exist.
- */
+// Written out, not derived: "Bank agrees" and "Not checked" must never drift into looking alike.
 export const STATUS_LABELS: Record<ReconciliationStatus, string> = {
   MATCHED: 'Bank agrees',
   DRIFT: 'Drift',
@@ -93,7 +72,6 @@ export const STATUS_VARIANT: Record<
   UNATTESTED: 'neutral',
 };
 
-/** Which way the pool is out. Two different incidents, two different remedies. */
 export function driftDirection(drift: number): 'SURPLUS' | 'SHORTFALL' {
   return drift > 0 ? 'SURPLUS' : 'SHORTFALL';
 }
@@ -112,13 +90,7 @@ export function driftSentence(row: ReconciliationRow): string {
     : 'The bank holds more than owners are owed.';
 }
 
-/**
- * A payout held for a second person.
- *
- * `thresholdAtRequest` is the threshold in force when it was raised, not the
- * current one — a policy that has since changed must not rewrite why this
- * particular release needed approving.
- */
+// thresholdAtRequest is the threshold when raised; a later policy change must not rewrite why this needed approving.
 export interface ReleaseRequestRow {
   id: string;
   statementId: string;
@@ -134,11 +106,7 @@ export interface ReleaseRequestRow {
   transferRef: string | null;
   thresholdAtRequest: number;
   createdAt: string;
-  /**
-   * Whether the person reading this raised it. Answered by the server because
-   * the backoffice cannot work it out for itself: `AdminUser` carries no `id`,
-   * and `requestedByName` is a display name, not an identity.
-   */
+  // Answered by the server: AdminUser has no id, and requestedByName is a display name.
   requestedByMe: boolean;
   ownerId: string;
   ownerName: string | null;
@@ -148,14 +116,7 @@ export interface ReleaseRequestRow {
   periodEnd: string;
 }
 
-/**
- * An owner's query about one line of an issued statement.
- *
- * The statement's own figure never changes: an upheld query is corrected by a
- * ledger adjustment that appears on the NEXT statement. `adjustmentEntryId` is
- * set when that happened, and `moneyEffect` says whether the payout behind it
- * could still be stopped when the query arrived.
- */
+// The statement figure never changes: an upheld query is corrected by a ledger adjustment on the next statement.
 export interface StatementLineDisputeRow {
   id: string;
   statementId: string;
@@ -167,13 +128,11 @@ export interface StatementLineDisputeRow {
   raisedById: string;
   raisedByName: string | null;
   raisedByMe: boolean;
-  /** What the managing firm said, when it replied on its own route. */
   firmResponse: string | null;
   firmRespondedByName: string | null;
   firmRespondedAt: string | null;
   resolvedByName: string | null;
   resolvedAt: string | null;
-  /** What the owner is told, and the reason the field is required. */
   outcomeNote: string | null;
   adjustmentEntryId: string | null;
   createdAt: string;
@@ -193,11 +152,7 @@ export const adminClientMoneyService = {
     );
   },
 
-  /**
-   * Record what the bank holds. Does not run the reconciliation — attesting a
-   * balance and judging the pool are separate acts, so the verdict never depends
-   * on who happened to be typing.
-   */
+  // Does not run the reconciliation: attesting a balance and judging the pool stay separate acts.
   async recordBankBalance(
     input: RecordBankBalanceInput
   ): Promise<ApiResponse<{ id: string; asOfDate: string; balance: number }>> {
@@ -217,20 +172,12 @@ export const adminClientMoneyService = {
       })
     );
   },
-  /**
-   * Owner payouts held for a second approver, oldest first.
-   *
-   * Ordered by the API rather than here, because the order is a decision: an
-   * owner is waiting on the oldest one, so that is what somebody should pick up.
-   */
+  // Ordered by the API, oldest first: that is the owner waiting longest.
   async pendingReleases(): Promise<ApiResponse<ReleaseRequestRow[]>> {
     return safeCall(() => authFetch<ReleaseRequestRow[]>('/admin/client-money/releases'));
   },
 
-  /**
-   * Send the money. The note is required: a checker who records nothing is a
-   * rubber stamp, and the record is the point of having two people.
-   */
+  // The note is required: a checker who records nothing is a rubber stamp.
   async approveRelease(id: string, note: string): Promise<ApiResponse<ReleaseRequestRow>> {
     return safeCall(() =>
       authFetch<ReleaseRequestRow>(`/admin/client-money/releases/${id}/approve`, {
@@ -240,7 +187,7 @@ export const adminClientMoneyService = {
     );
   },
 
-  /** Refuse the release. The statement is issued either way; the debt stands. */
+  // The statement is issued either way; the debt stands.
   async rejectRelease(id: string, note: string): Promise<ApiResponse<ReleaseRequestRow>> {
     return safeCall(() =>
       authFetch<ReleaseRequestRow>(`/admin/client-money/releases/${id}/reject`, {
@@ -250,24 +197,12 @@ export const adminClientMoneyService = {
     );
   },
 
-  /**
-   * An owner saying a line on an issued statement is wrong.
-   *
-   * `moneyEffect` is the field to read before deciding anything: `HELD` means the
-   * payout can still be stopped, `IN_FLIGHT` and `PAID` mean it cannot, and only
-   * the first is something a person can still act on.
-   */
+  // Read moneyEffect first: only a HELD payout can still be stopped.
   async pendingDisputes(): Promise<ApiResponse<StatementLineDisputeRow[]>> {
     return safeCall(() => authFetch<StatementLineDisputeRow[]>('/admin/client-money/disputes'));
   },
 
-  /**
-   * Decide a dispute.
-   *
-   * Upholding it reverses the disputed line as an ADJUSTMENT ledger entry, which
-   * lands on the owner's next statement — the statement itself is never edited.
-   * Rejecting it lets a held payout proceed.
-   */
+  // Upholding adds an ADJUSTMENT entry to the next statement (the statement is never edited); rejecting lets a held payout proceed.
   async resolveDispute(
     id: string,
     outcome: 'UPHELD' | 'REJECTED',

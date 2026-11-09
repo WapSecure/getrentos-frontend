@@ -32,10 +32,7 @@ import type { AdminStaffMember, AdminStaffRole } from '@/types/admin';
 
 const PAGE_SIZE = 10;
 
-/**
- * The staff role the role picker edits. A member can also hold a marketplace
- * role (e.g. property_owner) listed first, which the picker has no option for.
- */
+// A member may also hold a marketplace role, listed first, that the picker has no option for.
 function staffRoleOf(member: AdminStaffMember): AdminStaffRole | undefined {
   return member.roles.find(({ role }) => role in ADMIN_ROLE_DETAILS)?.role as
     | AdminStaffRole

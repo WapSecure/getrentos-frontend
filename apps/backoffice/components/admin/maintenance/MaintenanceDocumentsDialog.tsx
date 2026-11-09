@@ -5,9 +5,7 @@ import { EvidencePanel } from '@/components/shared/EvidencePanel';
 import type { EvidenceItem } from '@/types/admin';
 
 interface MaintenanceDocumentsDialogProps {
-  /** e.g. "Vendor quote" or "Vendor invoice": names what the files belong to. */
   recordLabel: string;
-  /** What the record is, shown under the title so the file has context. */
   subtitle: string;
   documents: EvidenceItem[];
   canManage: boolean;
@@ -18,14 +16,6 @@ interface MaintenanceDocumentsDialogProps {
   onClose: () => void;
 }
 
-/**
- * The paperwork behind a figure on a quote or an invoice.
- *
- * A quote or invoice is an amount. Without the document attached, whoever
- * approves it is taking the number on trust, and there is no record of who
- * supplied what: so this is the place an approver checks the file before
- * deciding, and attaches it when it arrives by some other route.
- */
 export const MaintenanceDocumentsDialog = ({
   recordLabel,
   subtitle,

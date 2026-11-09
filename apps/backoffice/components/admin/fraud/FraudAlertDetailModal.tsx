@@ -49,11 +49,9 @@ interface FraudAlertDetailModalProps {
   onStatusChange: (id: string, status: 'investigating' | 'cleared' | 'confirmed') => void;
   onReopen: (id: string) => void;
   isUpdating?: boolean;
-  /** Uploads a file the investigator is working from. Gated by `canAttachEvidence`. */
   onAttachEvidence?: (file: File, note?: string) => void;
   canAttachEvidence?: boolean;
   isAttachingEvidence?: boolean;
-  /** Re-signs a stored file's URL, so a long-open viewer does not break. */
   onResolveEvidenceUrl?: (evidenceId: string) => Promise<string | null | undefined>;
 }
 
@@ -246,7 +244,6 @@ const COVERAGE_LABELS: Record<string, string> = {
   imageAnalysis: 'Photo content',
 };
 
-/** The evidence behind an AI-opened alert, so the decision rests on it rather than on a summary. */
 function AiScanPanel({ signal }: { signal: FraudAlertAiSignal }) {
   const missed = Object.entries(signal.coverage).filter(([, checked]) => !checked);
   return (

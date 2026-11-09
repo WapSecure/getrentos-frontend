@@ -238,7 +238,6 @@ const formatValue = (value: unknown) =>
       ? value
       : JSON.stringify(value);
 
-/** The fields an action changed: before and after, side by side. */
 function changedFields(oldValues: unknown, newValues: unknown) {
   const asRecord = (value: unknown): Record<string, unknown> =>
     value && typeof value === 'object' && !Array.isArray(value)

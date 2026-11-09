@@ -19,18 +19,13 @@ export interface PickedUser {
 interface UserLookupProps {
   value: PickedUser | null;
   onChange: (user: PickedUser | null) => void;
-  /** Only offer platform staff (the API maps every staff role to `admin`). */
+  /** The API maps every staff role to `admin`. */
   staffOnly?: boolean;
-  /** `users.view`: without it, only a pasted user id can be used. */
   canSearch: boolean;
   placeholder?: string;
   ariaLabel: string;
 }
 
-/**
- * Finds a user by name or email through the admin users search, or accepts a
- * pasted user id. The API still decides whether the person may be used.
- */
 export const UserLookup = ({
   value,
   onChange,

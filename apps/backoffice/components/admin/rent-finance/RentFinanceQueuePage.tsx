@@ -24,14 +24,12 @@ import type { Paginated } from '@/services/adminService';
 import type { RentFinanceQuery } from '@/services/adminRentFinanceService';
 
 export interface RentFinanceQueueFilter {
-  /** Query param the select maps to (status / escrowStatus / category / verified). */
   key: 'status' | 'escrowStatus' | 'category' | 'verified';
   label: string;
   options: { value: string; label: string }[];
 }
 
 export interface RentFinanceQueueConfig<T> {
-  /** API + query-key resource segment, e.g. 'payments'. */
   resource: string;
   eyebrow: string;
   title: string;
@@ -44,13 +42,11 @@ export interface RentFinanceQueueConfig<T> {
   getRowKey: (row: T) => string;
   columns: Column<T>[];
   actions?: (row: T) => ReactNode;
-  /** Extra control rendered in the header, before the export button (e.g. "Generate statement"). */
   headerActions?: ReactNode;
 }
 
 const PAGE_SIZE = 10;
 
-/** Triggers a browser download for an authenticated CSV blob. */
 export function downloadBlob(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement('a');

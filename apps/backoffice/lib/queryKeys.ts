@@ -2,11 +2,8 @@ export const adminKeys = {
   dashboardStats: ['admin', 'dashboardStats'] as const,
   dashboardActivity: ['admin', 'dashboardActivity'] as const,
   userGrowth: ['admin', 'userGrowth'] as const,
-  /** Client-money reconciliations: the daily verdict on the pooled accounts. */
   clientMoneyReconciliation: ['admin', 'clientMoney', 'reconciliation'] as const,
-  /** Owner payouts held for a second approver. */
   clientMoneyReleases: ['admin', 'clientMoney', 'releases'] as const,
-  /** Owner queries about statement lines, waiting to be decided. */
   clientMoneyDisputes: ['admin', 'clientMoney', 'disputes'] as const,
   notifications: ['admin', 'notifications'] as const,
   notificationPage: (page: number) => ['admin', 'notifications', 'page', page] as const,
@@ -133,7 +130,6 @@ export const adminKeys = {
   revenueSeries: (months: number) => ['admin', 'revenueSeries', months] as const,
   gmvBreakdown: ['admin', 'gmvBreakdown'] as const,
   profile: ['admin', 'profile'] as const,
-  /** The signed-in staff member's own two-factor status; drives the set-up gate. */
   twoFactor: ['admin', 'security', 'twoFactor'] as const,
   passkeys: ['admin', 'security', 'passkeys'] as const,
   sessions: ['admin', 'security', 'sessions'] as const,

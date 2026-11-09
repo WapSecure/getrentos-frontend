@@ -45,10 +45,6 @@ const emptyForm = {
   documentId: '',
 };
 
-/**
- * The encumbrance register: caveats, mortgages, suits and acquisitions found
- * on the title. An active one blocks approval until it is discharged.
- */
 export const LandEncumbrancesPanel = ({
   propertyId,
   documents,

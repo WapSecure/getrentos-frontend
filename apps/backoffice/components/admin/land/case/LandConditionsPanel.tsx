@@ -23,10 +23,6 @@ const STATUS: Record<
   WAIVED: { label: 'Waived', variant: 'neutral' },
 };
 
-/**
- * The conditions of a conditional approval: what the owner sent for each, and
- * meeting or waiving it. The case turns VERIFIED when the last one is settled.
- */
 export const LandConditionsPanel = ({
   detail,
   canApprove,

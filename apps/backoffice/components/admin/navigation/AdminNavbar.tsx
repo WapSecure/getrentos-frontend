@@ -47,8 +47,7 @@ export const AdminNavbar = ({ user }: AdminNavbarProps) => {
               </Link>
             </div>
 
-            {/* Below lg the compact search row underneath takes over; showing
-                both squeezed the header past the viewport at tablet widths. */}
+            {/* Below lg the compact search row takes over; showing both squeezes the header past the viewport on tablets. */}
             <div className="hidden lg:flex flex-1 max-w-md mx-4">
               <AdminRecordSearch />
             </div>

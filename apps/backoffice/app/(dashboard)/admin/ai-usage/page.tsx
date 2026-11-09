@@ -28,13 +28,7 @@ import { adminService } from '@/services/adminService';
 import { adminKeys } from '@/lib/queryKeys';
 import type { AiReviewCapabilitySummary } from '@/types/admin';
 
-/**
- * AI governance dashboard over today, 7 or 30 Lagos days: spend per day, and per
- * feature the calls, spend, response times, how often the rules answered instead
- * of the model, and how often a safety check dropped part of an answer. Plus the
- * live control state (kill switches, daily budget). Read-only: the controls are
- * env-driven. Costs are the Anthropic vendor spend, in USD.
- */
+// Read-only: the AI controls are env-driven. Costs are Anthropic vendor spend, in USD.
 
 const CAPABILITY_LABELS: Record<string, string> = {
   'listing-fraud': 'Listing fraud scan',
@@ -139,7 +133,6 @@ export default function AdminAiUsagePage() {
         size="sm"
       />
 
-      {/* Control state */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <ControlPill
           icon={data.globallyEnabled ? Power : ShieldAlert}
@@ -174,7 +167,6 @@ export default function AdminAiUsagePage() {
         </div>
       )}
 
-      {/* Headline stats */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard icon={Activity} label="Calls" value={`${data.totalCalls}`} accent="primary" />
         <StatCard
@@ -206,7 +198,6 @@ export default function AdminAiUsagePage() {
 
       {data.days > 1 && <AiDailyChart daily={data.daily} />}
 
-      {/* Per-capability breakdown */}
       <div className="overflow-hidden rounded-xl border border-border/70 bg-card">
         <div className="flex items-center gap-2 border-b border-border/70 px-5 py-4">
           <Cpu className="h-4 w-4 text-primary" aria-hidden="true" />
@@ -288,11 +279,6 @@ const duration = (minutes: number | null) => {
   return `${Math.round(minutes / 1440)} days`;
 };
 
-/**
- * The P1/P2 gate evidence: AI proposes, a person decides. Fraud precision comes
- * from reviewers clearing or confirming the alerts the scan opened; triage
- * acceptance from landlords and managers accepting, editing or rejecting.
- */
 function HumanReviewSection() {
   const { data, isLoading, isError } = useQuery({
     queryKey: adminKeys.aiReviews,

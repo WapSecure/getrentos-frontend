@@ -24,7 +24,6 @@ import { PoolCheckFlag } from './PoolCheckFlag';
 
 const naira = (value: number) => `₦${value.toLocaleString('en-NG')}`;
 
-/** Matches the date style used across the backoffice's queues. */
 const date = (value?: string | null) =>
   value
     ? new Date(value).toLocaleDateString('en-GB', {
@@ -34,19 +33,7 @@ const date = (value?: string | null) =>
       })
     : '—';
 
-/**
- * Owner payouts that a second person has to release.
- *
- * This is the queue the maker/checker control produces, and the reason it is a
- * screen rather than a table somebody queries: an owner's money is sitting still
- * until somebody works through it, so it has to be visible without being looked
- * for.
- *
- * Two things the screen refuses to do. It does not offer approval to the person
- * who raised the release — the API refuses it too, so the button would be a lie —
- * and it does not hide a release the viewer raised, because a queue that silently
- * omits rows is one nobody trusts the count of. It marks them instead.
- */
+// The viewer's own releases are marked rather than hidden: a queue that silently omits rows is one nobody trusts.
 export function ReleaseQueue({
   notify,
 }: {
@@ -67,15 +54,7 @@ export function ReleaseQueue({
     queryFn: () => unwrap(adminClientMoneyService.pendingReleases()),
   });
 
-  /**
-   * The pool verdicts, joined onto the rows by holder.
-   *
-   * Read from the reconciliation endpoint rather than added to the release DTO,
-   * so there is one definition of "is this pool where it should be" and the two
-   * tabs cannot come to disagree about the same money. The release row already
-   * names the holder (`organizationId`, null for the platform pool), which is the
-   * same key these rows are grouped by.
-   */
+  // Read from the reconciliation endpoint, not the release DTO, so both tabs share one definition of pool health.
   const pools = useQuery({
     queryKey: adminKeys.clientMoneyReconciliation,
     queryFn: () => unwrap(adminClientMoneyService.overview()),
@@ -83,15 +62,7 @@ export function ReleaseQueue({
   const poolFor = (organizationId: string | null) =>
     pools.data?.rows.find((pool) => pool.organizationId === organizationId);
 
-  /**
-   * The pool's condition as a sentence, for the confirmation step.
-   *
-   * `ConfirmDialog` takes its description as a string, so the row above carries
-   * the styling and this carries the words. The words are the part that matters:
-   * the approver commits here, and the phrase ends by saying outright that this is
-   * a flag rather than a block — otherwise an officer reads "the pool is short" at
-   * the moment of signing off and goes looking for a permission they already have.
-   */
+  // ConfirmDialog takes a plain string; it must say this is a flag, not a block, or approvers go looking for a permission they already have.
   const poolClause = (organizationId: string | null): string => {
     const pool = poolFor(organizationId);
     if (!pool) {
@@ -166,8 +137,7 @@ export function ReleaseQueue({
       ) : (
         <ul className="space-y-3">
           {rows.map((row) => {
-            // The server answers this. Deriving it here would need the caller's
-            // user id, which the backoffice session does not carry.
+            // The server answers this; the backoffice session has no user id to derive it from.
             const mine = row.requestedByMe;
             return (
               <li key={row.id}>
@@ -198,11 +168,6 @@ export function ReleaseQueue({
                         </p>
                       )}
 
-                      {/*
-                        The pool this money would leave from. Flag-only, on the
-                        decision the approver is about to make — which is the
-                        moment it is worth anything.
-                      */}
                       <PoolCheckFlag pool={poolFor(row.organizationId)} />
                     </div>
 

@@ -72,7 +72,6 @@ const lagosDateTime = (iso: string) =>
     timeStyle: 'short',
   });
 
-/** One action form, with its own pending/error state. */
 const useIntakeAction = <T,>(fn: (input: T) => Promise<unknown>) => {
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
@@ -95,7 +94,6 @@ const Section = ({ title, children }: { title: string; children: React.ReactNode
   </div>
 );
 
-/** What the assessor's check-in proved, if they checked in at all. */
 const PresenceLine = ({ visit }: { visit: NonNullable<ManagedIntake['visit']> }) => {
   if (visit.status === 'CANCELLED') return null;
   if (!visit.checkedInAt) {

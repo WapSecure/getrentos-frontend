@@ -24,7 +24,6 @@ const householdStatusOptions = [
   { value: 'INACTIVE', label: 'Inactive' },
 ];
 
-/** Corrects household membership/contact data, or unlinks a resident account. */
 export function HouseholdEditorDialog({
   household,
   onClose,
@@ -130,7 +129,6 @@ export function HouseholdEditorDialog({
   );
 }
 
-/** Corrects a due's amount: only ever offered while it's still pending/overdue. */
 export function DueAmountDialog({
   due,
   onClose,

@@ -36,12 +36,7 @@ const statusConfig: Record<PlatformEscrowStatus, { label: string; variant: Badge
   refunded: { label: 'Refunded', variant: 'warning' },
 };
 
-/**
- * Where the platform is actually holding the buyer's money, so release/refund have
- * something to move. Mirrors `HOLDABLE_ESCROW_STATUSES` on the API: a deposit that
- * has not been paid cannot be released or refunded, and offering the button for it
- * would only produce a rejection.
- */
+// Only these statuses hold money (mirrors HOLDABLE_ESCROW_STATUSES on the API); offering release or refund on others only earns a rejection.
 const SETTLEABLE_STATUSES: PlatformEscrowStatus[] = ['funds_held', 'verification', 'final_payment'];
 
 type StatusFilter = 'all' | PlatformEscrowStatus;
@@ -157,7 +152,7 @@ export default function AdminEscrowPage() {
         const settling = SETTLEABLE_STATUSES.includes(t.status);
         const busy = actions.processingKey !== null;
         const amount = formatCurrency(t.amount, { compact: true });
-        // Release and refund move the deposit escrow holds, not the sale price (PM-09).
+        // Release and refund move the deposit escrow holds, not the sale price.
         const held = formatCurrency(t.heldAmount, { compact: true });
         return (
           <div className="flex items-center justify-end gap-1">

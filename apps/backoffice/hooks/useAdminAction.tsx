@@ -6,24 +6,13 @@ import { ConfirmDialog, Toast } from '@sureground/ui';
 import { ApiError, unwrap } from '@sureground/shared';
 import type { ApiResponse } from '@sureground/shared';
 
-/**
- * One administrator-initiated change with a confirmation step and feedback.
- *
- * The back office has a lot of these (correct a lifecycle state, release escrow,
- * decide an invoice…) and they all need the same four things: a description of
- * what is about to happen, a reason for the audit trail, a single in-flight guard
- * so a double-click cannot fire twice, and a visible outcome. Owning that in one
- * place stops each screen from losing a different one of them — an action that
- * fails silently makes an admin click it again.
- */
+// One place for the confirmation, audit reason, in-flight guard and visible outcome, so no admin action fails silently or fires twice.
 export interface AdminAction {
-  /** Identifies the row being acted on, so only that row shows a pending state. */
   key: string;
   title: string;
   description: string;
   confirmLabel: string;
   successMessage: string;
-  /** Ask for a reason and require at least `reasonMinLength` characters. */
   reasonRequired?: boolean;
   reasonMinLength?: number;
   run: (reason?: string) => Promise<ApiResponse<unknown>>;

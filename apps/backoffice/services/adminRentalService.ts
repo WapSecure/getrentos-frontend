@@ -56,7 +56,6 @@ const post = <T>(path: string, body?: unknown): Promise<ApiResponse<T>> =>
     })
   );
 
-/** Backoffice oversight for the long-term rental vertical (listings → evictions). */
 export const adminRentalService = {
   overview(): Promise<ApiResponse<AdminRentalOverview>> {
     return safeCall(() => authFetch<AdminRentalOverview>('/admin/rentals/overview'));

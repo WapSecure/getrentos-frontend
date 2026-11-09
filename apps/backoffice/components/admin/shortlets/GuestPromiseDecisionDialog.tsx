@@ -36,7 +36,6 @@ const OUTCOMES: { value: AdminGuestPromiseOutcome; label: string; hint: string }
   },
 ];
 
-/** Support's money decision on a Guest Promise report. */
 export function GuestPromiseDecisionDialog({
   dispute,
   onClose,

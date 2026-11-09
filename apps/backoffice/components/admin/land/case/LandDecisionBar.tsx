@@ -41,11 +41,7 @@ type DecisionMode = 'approve' | 'reject' | 'clarify';
 
 const OPEN_STATUSES = new Set(['IN_REVIEW', 'ACTION_REQUIRED']);
 
-/**
- * Approve, request clarification or reject. Every decision carries the case
- * version the reviewer loaded, so a decision taken on a stale view is refused
- * (409) instead of silently overwriting someone else's.
- */
+// Every decision carries the loaded case version, so a stale view gets a 409 instead of overwriting someone else's.
 export const LandDecisionBar = ({
   detail,
   canReview,

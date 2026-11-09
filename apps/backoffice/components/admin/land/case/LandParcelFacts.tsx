@@ -10,11 +10,7 @@ const notSupplied = 'Not supplied';
 const yesNo = (value: boolean | null | undefined) =>
   value === null || value === undefined ? notSupplied : value ? 'Yes' : 'No';
 
-/**
- * The parcel as staff see it. Title number, survey number and registry are
- * private to the back office and are marked as such, so nobody copies them
- * into a message to the owner or a buyer.
- */
+// Title number, survey number and registry are private to the back office; they are marked so nobody copies them to the owner or a buyer.
 export const LandParcelFacts = ({ detail }: { detail: AdminLandDiligenceDetail }) => {
   const { parcel, diligence } = detail;
   const boundaryCorners = (() => {

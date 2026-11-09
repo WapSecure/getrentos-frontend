@@ -40,7 +40,6 @@ const STATUS_META: Record<string, { label: string; variant: BadgeVariant }> = {
   PENDING_OPS: { label: 'Signed, awaiting ops', variant: 'warning' },
 };
 
-/** Opt-ins sitting this long are worth chasing — the "Stale" saved view. */
 const STALE_DAYS = 7;
 const isStale = (m: ManagedMandate) =>
   Date.now() - new Date(m.createdAt).getTime() > STALE_DAYS * 86_400_000;
@@ -195,7 +194,6 @@ const ManagedMandateCard = ({
   );
 };
 
-/** The "Active engagements" mode: reassign the portfolio manager, in bulk. */
 const ActiveEngagements = ({
   staffOptions,
 }: {
@@ -371,7 +369,6 @@ const ActiveEngagements = ({
             </Button>
           </div>
         </div>
-        {/* Pause / resume the selection — pausing needs a reason, kept on each. */}
         {selectedVisible.length > 0 && (
           <div className="flex flex-col gap-2 border-t border-border pt-3 sm:flex-row sm:items-center sm:justify-end">
             <Input
@@ -399,8 +396,7 @@ const ActiveEngagements = ({
             </Button>
           </div>
         )}
-        {/* Raise a termination request — the maker half. A second staff member
-            approves it under "Termination requests"; nothing ends here. */}
+        {/* Maker half only: a second staff member approves it under "Termination requests". */}
         {selectedVisible.length > 0 && (
           <div className="flex flex-col gap-2 border-t border-border pt-3 sm:flex-row sm:items-center sm:justify-end">
             <Input
@@ -492,7 +488,6 @@ const ActiveEngagements = ({
   );
 };
 
-/** The "Termination requests" mode: the checker half — bulk-approve open asks. */
 const TerminationRequests = () => {
   const queryClient = useQueryClient();
   const requests = useQuery({
@@ -518,8 +513,7 @@ const TerminationRequests = () => {
     );
   }, [all, search]);
 
-  // Selection keys off the mandate id, which the approve endpoint takes and which
-  // is unique here (only one open request per mandate).
+  // Keyed by mandate id, which the approve endpoint takes and which is unique here (one open request per mandate).
   const visibleIds = useMemo(() => new Set(filtered.map((r) => r.mandateId)), [filtered]);
   const selectedVisible = useMemo(
     () => selected.filter((id) => visibleIds.has(id)),
@@ -655,9 +649,7 @@ const TerminationRequests = () => {
                       · {formatDate(request.createdAt)}
                     </p>
                     <p className="mt-0.5 text-sm text-foreground">“{request.reason}”</p>
-                    {/* The notice position the approver is deciding against: when
-                        Sureground is the manager, the agreed period binds us, and
-                        approving an unserved one ends it immediately. */}
+                    {/* When Sureground is the manager the agreed notice period binds us, and approving an unserved one ends it immediately. */}
                     {request.managerIsSureground && (
                       <div className="mt-1.5 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                         {request.noticeServedAt ? (
@@ -744,8 +736,7 @@ export default function AdminManagedMandatesPage() {
       );
   }, [all, view, tier, search]);
 
-  // Keep the selection to what is actually on screen, so a hidden row is never
-  // activated by a bulk action the operator cannot see.
+  // Keep the selection to visible rows, so a bulk action never touches a row the operator cannot see.
   const visibleIds = useMemo(() => new Set(filtered.map((m) => m.id)), [filtered]);
   const selectedVisible = useMemo(
     () => selected.filter((id) => visibleIds.has(id)),
@@ -853,7 +844,6 @@ export default function AdminManagedMandatesPage() {
         />
       ) : (
         <>
-          {/* Saved views + tier filter */}
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <Tabs value={view} onValueChange={(v) => setView(v as View)}>
               <TabsList>
@@ -887,7 +877,6 @@ export default function AdminManagedMandatesPage() {
             </div>
           </div>
 
-          {/* Bulk action bar */}
           <div className="mb-3 flex flex-col gap-3 rounded-xl border border-border bg-card p-3">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <Checkbox
@@ -927,7 +916,6 @@ export default function AdminManagedMandatesPage() {
                 </Button>
               </div>
             </div>
-            {/* Refuse the selection — a reason is required and kept on each. */}
             {selectedVisible.length > 0 && (
               <div className="flex flex-col gap-2 border-t border-border pt-3 sm:flex-row sm:items-center sm:justify-end">
                 <Input

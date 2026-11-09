@@ -3,8 +3,7 @@
 import { ThemeToggle } from '@sureground/ui';
 import { AdminSignInForm } from '@/components/auth/AdminSignIn/AdminSignInForm';
 
-// The customer app is a separate origin (its own app in the monorepo), so this
-// is a cross-origin link rather than a Next.js <Link>.
+// The customer app is a separate origin, so this is a plain cross-origin link, not a Next <Link>.
 const WEB_APP_URL = process.env.NEXT_PUBLIC_WEB_APP_URL || 'http://localhost:3000';
 
 export default function AdminLoginPage() {

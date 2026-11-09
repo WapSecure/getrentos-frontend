@@ -23,10 +23,9 @@ export interface LandDisputeEvidence {
   fileName: string;
   mimeType?: string;
   sizeBytes: number;
-  /** SHA-256 of the file as submitted. */
   fileHash: string;
   source: 'PARTY' | 'ADMIN';
-  /** Signed for this request only. */
+  // Signed for this request only.
   url: string;
   uploadedByName?: string;
   note?: string;
@@ -42,7 +41,6 @@ export interface LandDisputeEvent {
   createdAt: string;
 }
 
-/** A land dispute as staff see it: reporter, every piece of evidence, staff notes. */
 export interface AdminLandDispute {
   id: string;
   reference: string;

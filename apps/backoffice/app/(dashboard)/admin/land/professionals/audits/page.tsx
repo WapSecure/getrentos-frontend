@@ -98,7 +98,6 @@ const AuditItem = ({
   );
 };
 
-/** Completed outside reviews picked at random for a staff quality audit (§19.1). */
 export default function AdminLandReviewAuditsPage() {
   const user = useAdminUser();
   const queryClient = useQueryClient();

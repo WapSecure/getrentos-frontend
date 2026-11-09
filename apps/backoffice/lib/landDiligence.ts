@@ -1,14 +1,8 @@
 import { ApiError } from '@sureground/shared';
 import type { LandDiligenceCheck, LandDiligenceChecklistStatus, LandRiskBand } from '@/types/land';
 
-/**
- * Pure helpers for the land diligence screens: SLA wording, risk bands, check
- * validation that mirrors the API's own rules, and reading a refusal.
- */
-
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-/** React Query keys for the land screens; `diligenceRoot` invalidates every diligence query. */
 export const landQueryKeys = {
   diligenceRoot: ['admin', 'land', 'diligence'] as const,
   queue: (params: object) => ['admin', 'land', 'diligence', 'queue', params] as const,
@@ -41,11 +35,7 @@ export interface SlaState {
   tone: 'overdue' | 'soon' | 'ok' | 'none';
 }
 
-/**
- * How an SLA due date reads in the queue. The API's own `overdue` flag wins
- * (it only applies to cases still in review); otherwise the date is judged
- * against `now`, with anything due inside two days marked as due soon.
- */
+// The API's own overdue flag wins (it only applies to cases still in review).
 export function describeSla(
   slaDueAt: string | null | undefined,
   overdue: boolean | undefined,
@@ -70,7 +60,7 @@ export function describeSla(
   };
 }
 
-/** Same thresholds as the API's risk model: <25 low, <50 moderate, otherwise high. */
+// Same thresholds as the API's risk model.
 export function riskBandFor(score: number | null | undefined): LandRiskBand | null {
   if (score === null || score === undefined || Number.isNaN(score)) return null;
   if (score < 25) return 'LOW';
@@ -87,11 +77,7 @@ export const riskBadgeVariant = (band: LandRiskBand | null) =>
         ? 'success'
         : 'neutral';
 
-/**
- * Why a check decision would be refused, before it is sent. Mirrors the API:
- * PASSED on a document-backed check needs a citation first; FLAGGED, or
- * NOT_APPLICABLE on a required check, needs a note. Null when it may go.
- */
+// Mirrors the API's refusal rules for check decisions.
 export function checkDecisionProblem(
   check: Pick<LandDiligenceCheck, 'label' | 'required' | 'requiresDocument' | 'hasEvidence'>,
   status: LandDiligenceChecklistStatus,
@@ -108,14 +94,11 @@ export function checkDecisionProblem(
 
 export interface LandApiErrorInfo {
   message: string;
-  /** The case changed since it was loaded (409): the reviewer must reload. */
   stale: boolean;
   status: number | null;
-  /** Approval blockers, when the API sent them. */
   blockers: string[];
 }
 
-/** Reads a thrown mutation error into what the screen needs to show. */
 export function readLandApiError(error: unknown, fallback: string): LandApiErrorInfo {
   if (error instanceof ApiError) {
     const details = (error.details ?? {}) as { blockers?: unknown };
@@ -137,9 +120,7 @@ export function readLandApiError(error: unknown, fallback: string): LandApiError
   };
 }
 
-/** Purchase statuses after which money may be owed back to the buyer. */
 export const isRefundableTermination = (status: string) =>
   status === 'REVOKED' || status === 'CANCELLED';
 
-/** Basis points as a percentage label: 1250 → "12.5%". */
 export const bpsToPercent = (bps: number) => `${Number((bps / 100).toFixed(2))}%`;

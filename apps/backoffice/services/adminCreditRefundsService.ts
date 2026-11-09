@@ -2,11 +2,10 @@ import { authFetch, safeCall, type ApiResponse } from '@sureground/shared';
 
 export type CreditRefundStatus = 'PROCESSING' | 'REFUNDED' | 'PARTLY_REFUNDED' | 'FAILED';
 
-/** Lease credit (a tenant's overpayment) paid back the way it was paid. */
 export interface CreditRefund {
   id: string;
   leaseId: string;
-  /** Naira. */
+  // Naira.
   amount: number;
   refundedAmount: number;
   status: CreditRefundStatus;

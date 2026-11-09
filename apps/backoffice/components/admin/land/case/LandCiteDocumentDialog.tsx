@@ -29,20 +29,15 @@ export interface CiteTarget {
 interface LandCiteDocumentDialogProps {
   target: CiteTarget | null;
   onClose: () => void;
-  /** Every document on the property; one already cited can back another check. */
   documents: LandDiligenceDocument[];
   checks: LandDiligenceCheck[];
   onSubmit: (input: LandDiligenceDocumentLinkInput) => void;
   isPending: boolean;
   onResolveUrl?: (documentId: string) => Promise<string | null | undefined>;
-  /** Switches to uploading a new document, cited on the chosen check. */
   onUploadInstead?: (checkKey?: string) => void;
 }
 
-/**
- * Cite a property document against a check. Keyed by the page on the target,
- * so the initial state always reflects what was clicked.
- */
+// Keyed by the page on the target, so the initial state always reflects what was clicked.
 export const LandCiteDocumentDialog = ({
   target,
   onClose,
@@ -57,7 +52,6 @@ export const LandCiteDocumentDialog = ({
   const [checkKey, setCheckKey] = useState(target?.checkKey ?? '');
   const [note, setNote] = useState('');
   const selected = documents.find((document) => document.id === documentId);
-  // A document backs each check once: offer only the pairs not yet cited.
   const available = documents.filter((document) => !citedKeysOf(document).includes(checkKey));
   const selectedKeys = selected ? citedKeysOf(selected) : [];
   const alreadyCited = Boolean(selected) && selectedKeys.includes(checkKey);

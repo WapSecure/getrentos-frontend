@@ -13,7 +13,6 @@ import type { Paginated } from '@/services/adminService';
 import type { RentalListParams } from '@/services/adminRentalService';
 
 export interface RentalQueueConfig<T> {
-  /** API + query-key resource segment, e.g. 'listings'. */
   resource: string;
   eyebrow: string;
   title: string;

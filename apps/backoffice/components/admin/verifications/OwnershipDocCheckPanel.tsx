@@ -18,11 +18,6 @@ const NAME_MATCH_STYLE: Record<
   UNREADABLE: { label: 'Name unreadable', className: 'bg-muted text-muted-foreground' },
 };
 
-/**
- * Runs the AI ownership-document cross-check per proof and shows the result:
- * the owner/address read from the document vs what's on file, with reasons. A
- * decision aid for the reviewer — it never approves or rejects the proof.
- */
 export const OwnershipDocCheckPanel = ({ proofs }: { proofs: OwnershipProofRef[] }) => {
   const [results, setResults] = useState<Record<string, OwnershipDocCheck>>({});
   const mutation = useMutation({

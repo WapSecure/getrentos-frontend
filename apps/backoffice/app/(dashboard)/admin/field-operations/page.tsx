@@ -62,7 +62,6 @@ const useInvalidate = () => {
   };
 };
 
-/** Where a check-in put the agent, in words. */
 const presence = (v: FieldVisit) => {
   if (!v.checkedInAt) return null;
   if (v.checkInDistanceM === null)
@@ -72,7 +71,6 @@ const presence = (v: FieldVisit) => {
   }.`;
 };
 
-/** The browser's best position fix, as a promise. */
 const currentPosition = () =>
   new Promise<GeolocationPosition>((resolve, reject) => {
     if (!navigator.geolocation) {
@@ -365,7 +363,6 @@ const AgentRow = ({ agent, canOperate }: { agent: FieldAgent; canOperate: boolea
       .map((s) => s.trim())
       .filter(Boolean);
   const areaList = split(areas);
-  /** Adds a typed area, or the area picked from the suggestions, then clears the box. */
   const addArea = (name = newArea) => {
     const area = name.trim();
     if (area.length < 2) return;

@@ -1,6 +1,5 @@
 import { authFetch, safeCall, type ApiResponse } from '@sureground/shared';
 
-/** A managed delivery partner and what it has earned. */
 export interface PartnerCommercialRow {
   organizationId: string;
   name: string;

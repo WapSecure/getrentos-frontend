@@ -27,7 +27,6 @@ export interface EstateQueueFilter {
 }
 
 export interface EstateQueueConfig<T> {
-  /** API + query-key resource segment, e.g. 'households'. */
   resource: string;
   eyebrow: string;
   title: string;

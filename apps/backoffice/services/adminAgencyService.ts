@@ -18,7 +18,7 @@ export interface AdminAgency {
   createdAt: string;
   teamSize: number;
   activeEngagements: number;
-  /** Registry, name and director checks; anything not clean needs a reason and a second officer. */
+  // Anything not clean needs a reason and a second officer.
   kybChecks: {
     registryConfirmed: boolean;
     registryNameMatches: boolean | null;
@@ -38,7 +38,6 @@ export interface AdminAgency {
     kybSubmittedAt: string | null;
     kybDecidedAt: string | null;
     kybDecisionNote: string | null;
-    /** CAC legal name the automated lookup confirmed at submission, if any. */
     verifiedLegalName: string | null;
     cacVerifiedAt: string | null;
   } | null;

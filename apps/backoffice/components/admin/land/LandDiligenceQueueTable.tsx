@@ -137,7 +137,6 @@ interface LandDiligenceQueueTableProps {
   footer?: React.ReactNode;
 }
 
-/** The diligence work queue: one row per case, opened into the full case page. */
 export const LandDiligenceQueueTable = ({
   records,
   onOpen,

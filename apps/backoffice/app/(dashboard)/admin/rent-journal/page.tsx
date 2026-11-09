@@ -84,7 +84,6 @@ const ACCOUNT: Record<
   },
 };
 
-/** Labels for accounts; an account added later reads as its code rather than breaking the page. */
 const accountInfo = (account: string) =>
   ACCOUNT[account as JournalAccount] ?? {
     label: account.replace(/_/g, ' ').toLowerCase(),
@@ -92,12 +91,6 @@ const accountInfo = (account: string) =>
     side: 'Liability' as const,
   };
 
-/**
- * The rent journal: double-entry books kept alongside the rent tables. The
- * agreement check runs every hour; a mismatch means money changed somewhere
- * outside the rent flows (a charge edited or deleted by hand) and needs a
- * person to find out why.
- */
 export default function RentJournalPage() {
   const queryClient = useQueryClient();
   const user = useAdminUser();

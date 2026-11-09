@@ -10,7 +10,6 @@ import { hasAdminPermission } from '@/lib/adminAccess';
 import { landQueryKeys } from '@/lib/landDiligence';
 import { adminLandFraudService, bandTone } from '@/services/adminLandFraudService';
 
-/** Land with fraud signals that still count, worst first. */
 export default function AdminLandFraudPage() {
   const user = useAdminUser();
   const canView = hasAdminPermission(user?.roles, 'fraud.review');

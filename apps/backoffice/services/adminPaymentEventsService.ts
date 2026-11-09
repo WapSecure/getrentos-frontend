@@ -2,16 +2,13 @@ import { authFetch, safeCall, type ApiResponse } from '@sureground/shared';
 
 export type PaymentEventStatus = 'RECEIVED' | 'PROCESSED' | 'FAILED' | 'IGNORED';
 
-/** One webhook the payment provider sent, and whether Sureground applied it. */
 export interface PaymentEvent {
   id: string;
   provider: string;
   event: string;
   reference: string | null;
   status: PaymentEventStatus;
-  /** How many times the provider sent it. */
   deliveries: number;
-  /** How many times processing was tried, by delivery or replay. */
   attempts: number;
   lastError: string | null;
   receivedAt: string;
@@ -42,7 +39,6 @@ export const adminPaymentEventsService = {
       authFetch<PaymentEventPage>(`/admin/payment-events?${params.toString()}`)
     );
   },
-  /** Runs the event through the same handling again. Needs step-up; the shared dialog asks for it. */
   replay(id: string): Promise<ApiResponse<PaymentEvent>> {
     return safeCall(() =>
       authFetch<PaymentEvent>(`/admin/payment-events/${id}/replay`, { method: 'POST' })

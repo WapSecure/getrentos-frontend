@@ -379,9 +379,7 @@ const navItems: NavItem[] = [
     permission: 'escrow.view',
   },
   {
-    // Beside escrow because it is the same question asked from the other end:
-    // escrow is money moving, this is whether money we already hold is still
-    // there. Gated on the same permission for that reason.
+    // Gated like escrow: the same question from the other end, whether money we hold is still there.
     label: 'Client Money',
     href: '/admin/client-money',
     icon: Landmark,
@@ -437,12 +435,7 @@ const navItems: NavItem[] = [
   },
 ];
 
-/**
- * Groups by the job staff are doing, each listed by name. They used to be
- * ranges ("from this item to the next group's first item"), and pages added in
- * the middle drifted into the wrong group (payments under marketplace, land
- * under risk and finance).
- */
+// Groups list their pages by name; ranges let newly added pages drift into the wrong group.
 const groupItems: [group: string, items: string[]][] = [
   ['Overview', ['Dashboard', 'Reports', 'Automation Usage']],
   [
@@ -570,13 +563,7 @@ const hasAccess = (roles: string[] | undefined, item: NavItem) =>
     ? hasStaffAccess(roles)
     : hasAdminPermission(roles, item.permission);
 
-/**
- * Whether the signed-in staff member may open `pathname`, judged by the most
- * specific sidebar entry that covers it. Typing the URL of a screen the role
- * cannot use should say so, rather than load the screen and present the API's
- * 403 as an outage. Paths no entry covers are left to the page; Settings is
- * open to everyone because it holds the person's own profile.
- */
+// Paths no entry covers are left to the page; Settings is open to everyone because it holds the person's own profile.
 export function hasRouteAccess(roles: string[] | undefined, pathname: string): boolean {
   if (pathname === ROUTES.ADMIN_SETTINGS || pathname.startsWith(`${ROUTES.ADMIN_SETTINGS}/`)) {
     return true;
@@ -698,9 +685,6 @@ function AdminNavigationGroup({
 export const AdminSidebar = ({ roles }: { roles?: string[] }) => {
   const pathname = usePathname();
 
-  // The managed queues drive a "work waiting" badge. Only fetched for staff who
-  // can act on them, and polled gently so the badge stays roughly current
-  // without the sidebar hammering the API.
   const canSeeManaged = hasAdminPermission(roles, 'managed.view');
   const queueCounts = useQuery({
     queryKey: ['admin', 'managed-queue-counts'],
@@ -716,8 +700,6 @@ export const AdminSidebar = ({ roles }: { roles?: string[] }) => {
   const primaryItems = navGroups[0].items.filter((item) => hasAccess(roles, item));
   const mobilePrimaryItems = primaryItems.slice(0, 5);
   const { rail, setRail } = useSidebarRail();
-  // Folded to a rail: the primary queues, plus the current page when it lives
-  // deeper, so "where am I" survives the fold. Everything else is behind Expand.
   const isCurrent = (item: NavItem) =>
     pathname === item.href ||
     (item.href !== ROUTES.ADMIN_DASHBOARD && pathname.startsWith(`${item.href}/`));

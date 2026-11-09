@@ -127,15 +127,11 @@ export default function AdminFraudPage() {
     onSuccess: (_created, { id }) => {
       queryClient.invalidateQueries({ queryKey: adminKeys.fraudAlertDetail(id) });
       invalidateFraudAlerts();
-      // The new file lands in the audit log with everything else on the alert.
       queryClient.invalidateQueries({ queryKey: ['admin', 'audit-log'] });
     },
   });
 
-  /**
-   * Signed evidence links expire, so a viewer left open past the deadline asks
-   * for a fresh one rather than failing.
-   */
+  // Signed evidence links expire, so a viewer left open past the deadline asks for a fresh one.
   const resolveEvidenceUrl = async (evidenceId: string) => {
     if (!activeAlertId) return null;
     const fresh = await unwrap(adminService.getFraudAlertDetail(activeAlertId));

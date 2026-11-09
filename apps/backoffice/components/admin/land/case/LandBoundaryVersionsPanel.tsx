@@ -21,11 +21,6 @@ const signOffBadge: Record<LandBoundarySignOffStatus, { variant: BadgeVariant; l
 
 const sqm = (value: number) => `${Math.round(value).toLocaleString('en-NG')} m²`;
 
-/**
- * The parcel's outline history: every redraw, what it was entered from
- * (map or survey-plan coordinates, and in which grid) and what the case's
- * surveyor said about each version.
- */
 export const LandBoundaryVersionsPanel = ({
   propertyId,
 }: Pick<LandCasePanelProps, 'propertyId'>) => {

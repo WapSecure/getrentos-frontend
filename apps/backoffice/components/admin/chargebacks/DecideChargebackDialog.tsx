@@ -18,10 +18,7 @@ import {
   type ChargebackOutcome,
 } from '@/services/adminChargebacksService';
 
-/**
- * Monnify disputes, and Paystack ones Paystack archived with no resolution,
- * never get an outcome from the payment company, so finance records it here.
- */
+// Monnify disputes, and Paystack ones archived without a resolution, never get an outcome from the gateway, so finance records it here.
 export function canDecideByHand(c: Chargeback): boolean {
   return (
     c.status === 'OPEN' &&

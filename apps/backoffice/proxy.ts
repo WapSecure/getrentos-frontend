@@ -9,49 +9,20 @@ import {
 
 const DEV = process.env.NODE_ENV !== 'production';
 
-/**
- * Next 16 proxy (formerly known as middleware). Runs on the Node.js runtime
- * for every matching request.
- *
- * Responsibility: apply hardening security headers to every response,
- * including a per-request nonce Content-Security-Policy (policy built in
- * @sureground/shared/csp) and, in production over HTTPS, Strict-Transport-Security.
- * The policy is enforced here from the start: the back office is staff-only and
- * loads nothing third-party beyond the API and its uploads. (The customer web
- * app starts in Report-Only; see apps/web/proxy.ts.)
- *
- * Nonce wiring: the policy is set on the response and also on the forwarded
- * request, because Next reads the nonce back out of the request's CSP header and
- * stamps it on every script it renders. `x-nonce` carries it to the root layout
- * for the theme script (next-themes). A fresh nonce per request means pages must
- * render dynamically: a prerendered page would carry no nonce and its scripts
- * would be blocked, which is why the root layout reads `x-nonce`.
- *
- * It does NOT gate auth. The session lives in two places the proxy cannot see:
- * the access token is held in page memory only (never in web storage), and the refresh
- * token is an httpOnly cookie (`gr_refresh`) set by the API on a different
- * origin (localhost:4000 in dev) and scoped `Path=/auth` — so it is never
- * attached to a request for a page route on this origin. Auth is enforced
- * client-side by the admin layout (`ensureValidSession()` + `isAuthenticated()`).
- * A server-side gate only becomes possible once the app and API share an origin
- * and the refresh cookie is path-`/`; revisit this then.
- */
+// Security headers plus a per-request nonce CSP, enforced from the start (staff-only, nothing third-party).
+// The nonce also goes on the forwarded request because Next stamps rendered scripts from it, so pages must render dynamically.
+// Not an auth gate: the access token lives in page memory and the httpOnly gr_refresh cookie belongs to the API origin with Path=/auth, so no page request carries a session.
 export default function proxy(request: NextRequest) {
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
-  // HTTPS-only behaviour (HSTS, upgrade-insecure-requests) stays off in dev and
-  // for `next start` on localhost. `nextUrl.hostname` is the server's own bind
-  // host, so read the public host the request was addressed to.
+  // HTTPS-only headers stay off on localhost; nextUrl.hostname is the bind host, so read the host the request was addressed to.
   const host = request.headers.get('x-forwarded-host') ?? request.headers.get('host');
   const secure = !DEV && !isLocalHost(host);
   const policy = buildContentSecurityPolicy({
     nonce,
     dev: DEV,
     apiUrl: process.env.NEXT_PUBLIC_API_URL,
-    // Upload storage/CDN origins when they differ from the API (comma
-    // separated; server-only, read at runtime).
     mediaOrigins: parseOriginList(process.env.CSP_MEDIA_ORIGINS),
     upgradeInsecureRequests: secure,
-    // CSP_REPORT_URI, or the API's /security/csp-report receiver by default.
     reportUri: cspReportUri(process.env.CSP_REPORT_URI, process.env.NEXT_PUBLIC_API_URL),
   });
 
@@ -72,6 +43,5 @@ export default function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Everything except Next internals and static assets.
   matcher: ['/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|.*\\.[\\w]+$).*)'],
 };

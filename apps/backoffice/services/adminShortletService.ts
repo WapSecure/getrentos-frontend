@@ -50,7 +50,6 @@ export interface ListShortletReviewsParams {
   pageSize?: number;
 }
 
-/** Backoffice-only oversight for the Shortlets v1 marketplace. */
 export const adminShortletService = {
   overview(): Promise<ApiResponse<AdminShortletOverview>> {
     return safeCall(() => authFetch<AdminShortletOverview>('/admin/shortlets/overview'));

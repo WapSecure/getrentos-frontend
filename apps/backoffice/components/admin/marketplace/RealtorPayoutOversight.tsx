@@ -44,16 +44,9 @@ const FILTER_LABEL: Record<RealtorPayoutFilterStatus, string> = {
   FAILED: 'Failed',
 };
 
-/** Failed first: a payout the bank sent back is the one that needs attention. */
 const FILTER_ORDER: RealtorPayoutFilterStatus[] = ['FAILED', 'PENDING', 'SUCCESS'];
 
-/**
- * Commission money leaving the platform to realtors.
- *
- * A failed payout is the reason this screen exists: the bank sent the money
- * back, but the payout keeps its claim on those commissions, so only a retry
- * releases them. Nothing else can pay them again.
- */
+// A failed payout keeps its claim on the commissions, so only a retry releases them.
 export const RealtorPayoutOversight = () => {
   const client = useQueryClient();
   const [status, setStatus] = useState<StatusFilter>('all');
@@ -140,7 +133,6 @@ export const RealtorPayoutOversight = () => {
                     {formatDate(p.createdAt)} · {p.commissionCount} commission
                     {p.commissionCount === 1 ? '' : 's'} settled
                   </p>
-                  {/* A failure is the bank sending money back: say why. */}
                   {p.status === 'failed' && p.failureReason && (
                     <p className="mt-0.5 text-sm text-destructive">{p.failureReason}</p>
                   )}

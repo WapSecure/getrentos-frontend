@@ -51,12 +51,6 @@ interface LandRefundPanelProps {
   onSettle: (amount: number, note: string) => Promise<unknown>;
 }
 
-/**
- * Where a terminated purchase's refund stands, and the two things finance can
- * do about it. Refunds normally go back on their own; this panel exists for
- * the share that cannot (escrow already paid the developer) or that the
- * gateway refused.
- */
 export const LandRefundPanel = ({
   purchase,
   canAct,

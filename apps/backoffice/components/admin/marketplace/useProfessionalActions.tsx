@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ConfirmDialog, useToast } from '@sureground/ui';
 
-/** Triggers a browser download for an authenticated CSV blob. */
 export function downloadBlob(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement('a');
@@ -23,11 +22,6 @@ type ProfessionalAction = {
   run: (reason: string) => Promise<unknown>;
 };
 
-/**
- * Confirm-dialog + toast wiring for realtor/agent professional-standing
- * actions (suspend/restore/revoke/reassign), shared by both registers so
- * the two files don't duplicate the same mutation plumbing.
- */
 export function useProfessionalActions(invalidateKey: 'realtors' | 'agents') {
   const client = useQueryClient();
   const [action, setAction] = useState<ProfessionalAction | null>(null);

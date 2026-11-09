@@ -25,7 +25,6 @@ import {
 
 const KEY = ['admin', 'payment-providers'] as const;
 
-/** What payers see for each company, in three states. */
 function statusOf(p: PaymentProviderStatus): {
   label: string;
   variant: BadgeVariant;
@@ -56,12 +55,6 @@ function statusOf(p: PaymentProviderStatus): {
   };
 }
 
-/**
- * Finance's switch for each payment company (Paystack, Monnify). Switching
- * one off stops it being offered to payers at once; payments already started
- * with it still complete. A company that keeps failing is taken out of the
- * list automatically for five minutes, shown here as resting.
- */
 export default function PaymentProvidersPage() {
   const queryClient = useQueryClient();
   const user = useAdminUser();
@@ -99,7 +92,6 @@ export default function PaymentProvidersPage() {
 
   const providers = query.data ?? [];
   const anyOn = providers.filter((p) => p.available).length;
-  // Switching this one off leaves no company taking payments (UX-45).
   const lastOneOn =
     confirming?.enabled === true &&
     !providers.some((p) => p.provider !== confirming.provider && p.available);

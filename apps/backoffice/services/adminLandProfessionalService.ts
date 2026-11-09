@@ -23,10 +23,6 @@ const decision = (path: string, note: string): Promise<ApiResponse<AdminLandProf
     authFetch<AdminLandProfessional>(path, { method: 'POST', body: JSON.stringify({ note }) })
   );
 
-/**
- * Land professionals for staff: reading needs `verifications.review`;
- * decisions and audits need `verifications.approve`.
- */
 export const adminLandProfessionalService = {
   list: (params: { status?: LandProfessionalStatus; role?: LandProfessionalRole } = {}) =>
     safeCall(() =>

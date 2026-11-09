@@ -11,13 +11,7 @@ import type {
   TrustReviewDecision,
 } from '@/types/trust';
 
-/**
- * Trust review-case queue API (backend /admin/trust/review-cases).
- * Four-eyes note: every final resolution (PASS, REJECT, RESTRICT) requires a
- * second officer distinct from the assigned reviewer, and nobody may resolve a
- * case about their own account — enforced server-side. ReviewCaseModal hides
- * the decision for the assigned reviewer and surfaces any refusal message.
- */
+// Four-eyes: every final resolution needs a second officer, and nobody resolves a case about their own account (enforced server-side).
 export const trustService = {
   async listReviewCases(params: {
     status?: string;
@@ -70,9 +64,7 @@ export const trustService = {
       decision: TrustReviewDecision;
       reasonCodes?: string[];
       note?: string;
-      /** Checklist items confirmed (all of them, to approve). */
       confirmedEvidence?: string[];
-      /** Checklist items that did not pass (to reject or restrict). */
       failedEvidence?: string[];
     }
   ): Promise<ApiResponse<TrustReviewCaseSummary & { decision: string }>> {
@@ -90,12 +82,6 @@ export const trustService = {
     );
   },
 
-  /**
-   * Manual tier-3 (financial capability) grants. A grant is the backoffice's
-   * answer for a host who cannot pass the automated bank name enquiry; it is
-   * carried as a real PASS-decided verification, so it can be listed, expired
-   * and revoked like any other evidence.
-   */
   async listTierGrants(params: {
     userId?: string;
     state?: TierGrantState;
@@ -141,12 +127,7 @@ export const trustService = {
     );
   },
 
-  /**
-   * Trust appeals (TG-06). A subject contests a rejected property-authority claim
-   * or a failed verification; the queue is everything still awaiting a decision.
-   * The resolver must not be the original decision-maker — enforced server-side,
-   * the UI surfaces the resulting error. Overturning reopens the target.
-   */
+  // The resolver must not be the original decision-maker (enforced server-side).
   async listAppeals(): Promise<ApiResponse<TrustAppeal[]>> {
     return safeCall(() => authFetch<TrustAppeal[]>('/admin/trust/appeals'));
   },

@@ -20,16 +20,11 @@ import { adminChargebacksService } from '@/services/adminChargebacksService';
 const REFERENCE = /^[A-Za-z0-9_.|-]{4,100}$/;
 const MAX_AMOUNT = 1_000_000_000;
 
-/** Today in Lagos, as YYYY-MM-DD. */
 function lagosToday(): string {
   return new Date(Date.now() + 60 * 60_000).toISOString().slice(0, 10);
 }
 
-/**
- * Monnify does not tell Sureground when a payer disputes a card payment, so
- * finance copies each one in from Monnify's dashboard (audit GW-11). Recording
- * it holds the money back exactly as a Paystack dispute does.
- */
+// Monnify doesn't tell Sureground about card disputes, so finance copies each one in from its dashboard; recording it holds the money as a Paystack dispute does.
 export function RecordMonnifyDisputeDialog({
   onClose,
   onRecorded,

@@ -31,7 +31,6 @@ import {
 } from '@/services/adminLandFraudService';
 import { LandCaseSection, PanelMessage } from '@/components/admin/land/case/shared';
 
-/** One parcel's fraud picture: the score, what made it up, and each signal to decide. */
 export default function AdminLandFraudParcelPage() {
   const params = useParams<{ propertyId: string }>();
   const propertyId = decodeURIComponent(params.propertyId);

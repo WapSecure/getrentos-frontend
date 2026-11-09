@@ -11,11 +11,7 @@ import { LandLineStatusBadge } from './LandPurchaseStatusBadge';
 
 const MIN_REASON = 5;
 
-/**
- * Conveyance steps in sequence, each releasing a share of the price from
- * escrow. Waiving one (`verifications.approve`) counts it as satisfied for
- * sequence, escrow release and completion, so it is behind a confirmation.
- */
+// A waived milestone counts as satisfied for sequence, escrow release and completion, so waiving is behind a confirmation.
 export const LandPurchaseMilestones = ({
   milestones,
   releases,

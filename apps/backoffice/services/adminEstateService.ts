@@ -78,7 +78,6 @@ const mutate = <T>(
     })
   );
 
-/** Backoffice estate/community oversight (register, queues, access, governance). */
 export const adminEstateService = {
   overview(): Promise<ApiResponse<AdminEstateOverview>> {
     return safeCall(() => authFetch<AdminEstateOverview>('/admin/estates/overview'));
@@ -99,7 +98,6 @@ export const adminEstateService = {
     return safeCall(() => authFetch<AdminEstateDetail>(`/admin/estates/${estateId}`));
   },
 
-  // 11b community-ops queues
   listHouseholds(
     params: EstateQuery = {}
   ): Promise<ApiResponse<Paginated<AdminEstateHouseholdQueue>>> {
@@ -132,7 +130,6 @@ export const adminEstateService = {
     return listResource<AdminEstateAnnouncementQueue>('announcements', params);
   },
 
-  // 11c access + governance + scan
   listStaff(params: EstateQuery = {}): Promise<ApiResponse<Paginated<AdminEstateStaffMember>>> {
     return listResource<AdminEstateStaffMember>('staff', params);
   },

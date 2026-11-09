@@ -3,7 +3,6 @@ import { authFetch, safeCall, type ApiResponse } from '@sureground/shared';
 
 export type ManagedServicingTier = 'COLLECT_ONLY' | 'COLLECT_MAINTAIN' | 'FULL_MANAGEMENT';
 
-/** The subset of a management mandate the ops activation queue needs. */
 export interface ManagedMandate {
   id: string;
   propertyId: string;
@@ -16,7 +15,6 @@ export interface ManagedMandate {
   deliveryPartnerName: string | null;
   status: string;
   createdAt: string;
-  /** What still stands between this engagement and going live. */
   activationChecklist?: ActivationCheck[];
   intakeId?: string | null;
 }
@@ -37,7 +35,6 @@ export type IntakeStatus =
   | 'DECLINED'
   | 'WITHDRAWN';
 
-/** An owner's Sureground Managed request, as the intake pipeline sees it. */
 export interface ManagedIntake {
   id: string;
   status: IntakeStatus;
@@ -66,7 +63,6 @@ export interface ManagedIntake {
   findings: string | null;
   eligible: boolean | null;
   recommendedTier: ManagedServicingTier | null;
-  /** The latest field visit for the assessment, with its proof of presence. */
   visit: {
     id: string;
     status: FieldVisitStatus;
@@ -132,40 +128,33 @@ export const adminManagedIntakeService = {
   },
 };
 
-/** A vetted firm a managed engagement can be handed to for local delivery. */
 export interface PartnerFirm {
   id: string;
   name: string;
 }
 
-/** A staff member who can be named portfolio manager. */
 export interface PortfolioManagerOption {
   id: string;
   name: string;
   email: string | null;
 }
 
-/** Counts for the Sureground Managed ops queues. */
 export interface ManagedQueueCounts {
   awaitingActivation: number;
   terminationRequests: number;
 }
 
 export const adminManagedService = {
-  /** Sureground Managed opt-ins awaiting a portfolio manager and activation. */
   listPending(): Promise<ApiResponse<ManagedMandate[]>> {
     return safeCall(() =>
       authFetch<ManagedMandate[]>('/admin/management-mandates/managed-pending')
     );
   },
 
-  /** Live Sureground Managed engagements — the surface for reassigning a manager. */
   listActive(): Promise<ApiResponse<ManagedMandate[]>> {
     return safeCall(() => authFetch<ManagedMandate[]>('/admin/management-mandates/managed-active'));
   },
 
-  /** Vetted firms ops can designate as a delivery partner. */
-  /** Staff who can run a managed engagement — readable by every managed-ops role. */
   listPortfolioManagers(): Promise<ApiResponse<PortfolioManagerOption[]>> {
     return safeCall(() =>
       authFetch<PortfolioManagerOption[]>('/admin/management-mandates/portfolio-managers')
@@ -176,12 +165,10 @@ export const adminManagedService = {
     return safeCall(() => authFetch<PartnerFirm[]>('/admin/management-mandates/partner-firms'));
   },
 
-  /** Counts for the Sureground Managed ops queues — for the nav badge. */
   queueCounts(): Promise<ApiResponse<ManagedQueueCounts>> {
     return safeCall(() => authFetch<ManagedQueueCounts>('/admin/management-mandates/queue-counts'));
   },
 
-  /** Assign the portfolio manager (and optionally a delivery partner) and turn the engagement on. */
   activate(
     id: string,
     managerUserId: string,
@@ -198,7 +185,6 @@ export const adminManagedService = {
     );
   },
 
-  /** Assign one manager (and optional delivery partner) to several opt-ins at once. */
   activateBulk(
     mandateIds: string[],
     managerUserId: string,
@@ -216,7 +202,6 @@ export const adminManagedService = {
     );
   },
 
-  /** Refuse several opt-ins in one pass, under one shared reason. */
   rejectBulk(mandateIds: string[], reason: string): Promise<ApiResponse<BulkRejectResult>> {
     return safeCall(() =>
       authFetch<BulkRejectResult>('/admin/management-mandates/reject-managed-bulk', {
@@ -226,7 +211,6 @@ export const adminManagedService = {
     );
   },
 
-  /** Move several live engagements to the same new portfolio manager. */
   reassignBulk(
     mandateIds: string[],
     managerUserId: string
@@ -239,7 +223,6 @@ export const adminManagedService = {
     );
   },
 
-  /** Pause several live engagements in one pass, under one shared reason. */
   suspendBulk(mandateIds: string[], reason: string): Promise<ApiResponse<BulkSuspendResult>> {
     return safeCall(() =>
       authFetch<BulkSuspendResult>('/admin/management-mandates/suspend-managed-bulk', {
@@ -249,7 +232,6 @@ export const adminManagedService = {
     );
   },
 
-  /** Resume several paused engagements in one pass. */
   resumeBulk(mandateIds: string[]): Promise<ApiResponse<BulkResumeResult>> {
     return safeCall(() =>
       authFetch<BulkResumeResult>('/admin/management-mandates/resume-managed-bulk', {
@@ -259,7 +241,6 @@ export const adminManagedService = {
     );
   },
 
-  /** Raise a termination request against several engagements, under one shared reason. */
   requestTerminationBulk(
     mandateIds: string[],
     reason: string
@@ -272,14 +253,12 @@ export const adminManagedService = {
     );
   },
 
-  /** Termination requests awaiting a second staff approver. */
   listTerminationRequests(): Promise<ApiResponse<TerminationRequest[]>> {
     return safeCall(() =>
       authFetch<TerminationRequest[]>('/admin/management-mandates/termination-requests')
     );
   },
 
-  /** Approve several open termination requests — the checker half. */
   approveTerminationBulk(
     mandateIds: string[],
     decisionNote: string
@@ -293,7 +272,6 @@ export const adminManagedService = {
   },
 };
 
-/** An open ask to end an engagement, awaiting a second staff approver. */
 export interface TerminationRequest {
   id: string;
   mandateId: string;
@@ -310,49 +288,42 @@ export interface TerminationRequest {
   noticeServedAt: string | null;
 }
 
-/** The outcome of a bulk activation: a partial-success summary. */
 export interface BulkActivateResult {
   requested: number;
   activated: number;
   skipped: { id: string; reason: string }[];
 }
 
-/** The outcome of a bulk rejection: a partial-success summary. */
 export interface BulkRejectResult {
   requested: number;
   rejected: number;
   skipped: { id: string; reason: string }[];
 }
 
-/** The outcome of a bulk reassignment: a partial-success summary. */
 export interface BulkReassignResult {
   requested: number;
   reassigned: number;
   skipped: { id: string; reason: string }[];
 }
 
-/** The outcome of a bulk suspend: a partial-success summary. */
 export interface BulkSuspendResult {
   requested: number;
   suspended: number;
   skipped: { id: string; reason: string }[];
 }
 
-/** The outcome of a bulk resume: a partial-success summary. */
 export interface BulkResumeResult {
   requested: number;
   resumed: number;
   skipped: { id: string; reason: string }[];
 }
 
-/** The outcome of a bulk termination request: a partial-success summary. */
 export interface BulkRequestTerminationResult {
   requested: number;
   raised: number;
   skipped: { id: string; reason: string }[];
 }
 
-/** The outcome of a bulk termination approval: a partial-success summary. */
 export interface BulkApproveTerminationResult {
   requested: number;
   approved: number;
@@ -361,7 +332,6 @@ export interface BulkApproveTerminationResult {
 
 export type FieldVisitStatus = 'SCHEDULED' | 'CHECKED_IN' | 'DONE' | 'CANCELLED';
 
-/** One trip by a field agent to a property. */
 export interface FieldVisit {
   id: string;
   kind: 'ASSESSMENT' | 'INSPECTION';
@@ -397,7 +367,6 @@ export interface FieldAgent {
   openVisits: number;
 }
 
-/** A field agent ranked for a property: covering it and with room come first. */
 export interface FieldAgentCandidate {
   userId: string;
   name: string | null;

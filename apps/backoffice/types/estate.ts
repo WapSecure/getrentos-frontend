@@ -1,4 +1,3 @@
-// ---- Estate/community enums ----
 export type HouseholdStatus = 'ACTIVE' | 'INACTIVE';
 export type DueStatus = 'PENDING' | 'PAID' | 'OVERDUE' | 'PROCESSING' | 'WAIVED';
 export type EstateIncidentStatus = 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'DISMISSED';
@@ -19,7 +18,6 @@ export type WorkspaceRole = 'GATEMAN' | 'RESIDENT';
 export type GovernanceRecordType = 'BYLAWS' | 'MEETING_MINUTES' | 'OTHER';
 export type GovernanceRecordStatus = 'PUBLISHED' | 'PENDING_SIGNATURES' | 'APPROVED';
 
-// ---- Overview ----
 export interface AdminEstateOverview {
   estateOrganizationCount: number;
   totalEstates: number;
@@ -35,7 +33,6 @@ export interface AdminEstateOverview {
   activeMicrositeCount: number;
 }
 
-// ---- Register row + detail ----
 export interface AdminEstate {
   id: string;
   name: string;
@@ -175,7 +172,6 @@ export interface AdminEstateDetail {
   recentDues: AdminEstateDue[];
 }
 
-// ---- Community-ops queue rows ----
 export interface AdminEstateHouseholdQueue {
   id: string;
   estateId: string;
@@ -264,7 +260,6 @@ export interface AdminEstateAnnouncementQueue {
   createdAt: string;
 }
 
-// ---- Access register + governance ----
 export interface AdminEstateAccessEstate {
   id: string;
   name: string;

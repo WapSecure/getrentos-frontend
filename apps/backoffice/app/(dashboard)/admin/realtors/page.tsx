@@ -14,13 +14,6 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'rates', label: 'Commission split' },
 ];
 
-/**
- * Realtor oversight, in three views.
- *
- * The register answers "who is this realtor"; the other two answer "where did
- * the money go" and "what do we pay from now on", which are different jobs and
- * were previously only visible as read-only figures on a realtor's card.
- */
 export default function AdminRealtorsPage() {
   const [tab, setTab] = useState<Tab>('register');
 

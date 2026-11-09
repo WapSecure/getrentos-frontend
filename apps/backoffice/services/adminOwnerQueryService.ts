@@ -28,7 +28,6 @@ export interface AdminQueryThread extends AdminQuerySummary {
   }[];
 }
 
-/** A drafted reply from the property's records; ops edit and send it. */
 export interface AdminOwnerQueryDraft {
   queryId: string;
   reply: string;

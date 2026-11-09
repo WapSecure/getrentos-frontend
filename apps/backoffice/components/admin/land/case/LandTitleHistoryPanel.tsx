@@ -48,10 +48,6 @@ const emptyForm = {
   verified: true,
 };
 
-/**
- * The chain of title, oldest first. Owners can record links themselves; a
- * reviewer verifies each against the registry before relying on it.
- */
 export const LandTitleHistoryPanel = ({
   propertyId,
   documents,

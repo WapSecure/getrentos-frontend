@@ -1,6 +1,5 @@
 import { authFetch, safeCall } from '@sureground/shared';
 
-/** A condition precedent on a land resale (§9.3); mirrors the backend DTO. */
 export interface LandResaleCondition {
   key: string;
   label: string;
@@ -40,7 +39,6 @@ export const landResaleKeys = {
 const conditionsPath = (txId: string) =>
   `/admin/land/transactions/${encodeURIComponent(txId)}/conditions`;
 
-/** Reading needs `sales.view`; deciding a condition needs `verifications.approve`. */
 export const adminLandResaleService = {
   queue: () => safeCall(() => authFetch<LandResaleQueueItem[]>('/admin/land/resales/conditions')),
   conditions: (txId: string) =>

@@ -14,7 +14,6 @@ export const landInspectionQuestionKeys = {
   open: ['admin', 'land', 'inspection-questions'] as const,
 };
 
-/** Buyers' questions about pre-purchase inspection reports (`verifications.review`). */
 export const adminLandInspectionQuestionService = {
   open: () =>
     safeCall(() => authFetch<LandInspectionQuestion[]>('/admin/land/inspection-questions')),

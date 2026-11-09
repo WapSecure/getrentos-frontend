@@ -34,16 +34,13 @@ interface LandInviteReviewerDialogProps {
   open: boolean;
   onClose: () => void;
   checks: LandDiligenceCheck[];
-  /** No longer used: professionals come from the accredited list, not the user search. */
+  /** @deprecated Professionals come from the accredited list, not the user search. */
   canSearchUsers?: boolean;
   isPending: boolean;
   onSubmit: (input: InviteLandReviewerInput) => void;
 }
 
-/**
- * Seats an outside professional on named checks of the case. Rendered only
- * while open, so every invitation starts from an empty form.
- */
+// Rendered only while open, so every invitation starts from an empty form.
 export const LandInviteReviewerDialog = ({
   open,
   onClose,
@@ -53,8 +50,7 @@ export const LandInviteReviewerDialog = ({
 }: LandInviteReviewerDialogProps) => {
   const [userId, setUserId] = useState('');
   const [role, setRole] = useState<LandReviewerRole>('SURVEYOR');
-  // Only accredited professionals of the chosen role can be engaged, so offer
-  // just those rather than every platform user (the API refuses anyone else).
+  // Only accredited professionals of the chosen role can be engaged; the API refuses anyone else.
   const professionals = useQuery({
     queryKey: landProfessionalKeys.list('ACCREDITED', role),
     queryFn: () => unwrap(adminLandProfessionalService.list({ status: 'ACCREDITED', role })),

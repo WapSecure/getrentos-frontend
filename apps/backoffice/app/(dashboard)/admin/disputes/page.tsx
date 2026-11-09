@@ -183,17 +183,13 @@ export default function AdminDisputesPage() {
     onSuccess: (_created, { id }) => {
       queryClient.invalidateQueries({ queryKey: adminKeys.disputeDetail(id) });
       invalidateDisputes();
-      // The new file lands in the audit log with everything else on the case.
       queryClient.invalidateQueries({ queryKey: ['admin', 'audit-log'] });
     },
   });
   const handleAttachEvidence = (id: string, file: File, note?: string) =>
     attachEvidenceMutation.mutate({ id, file, note });
 
-  /**
-   * Signed evidence links expire, so a preview that sits open past the deadline
-   * asks for a fresh one rather than failing.
-   */
+  // Signed evidence links expire, so a preview left open past the deadline asks for a fresh one.
   const handleResolveEvidenceUrl = async (evidenceId: string) => {
     if (!activeDisputeId) return null;
     const fresh = await unwrap(adminService.getDisputeDetail(activeDisputeId));

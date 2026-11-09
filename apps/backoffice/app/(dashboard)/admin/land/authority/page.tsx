@@ -26,7 +26,6 @@ const FILTERS: { value: 'open' | LandAuthorityStatus; label: string }[] = [
   { value: 'DRAFT', label: 'Drafts' },
 ];
 
-/** Sellers' claims of authority to sell land: disputed and under-review first. */
 export default function AdminLandAuthorityQueuePage() {
   const user = useAdminUser();
   const canView = hasAdminPermission(user?.roles, 'verifications.review');

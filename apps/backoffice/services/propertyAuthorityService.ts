@@ -1,14 +1,5 @@
 import { authFetch, safeCall, type ApiResponse } from '@sureground/shared';
 
-/**
- * Property authority claims — the officer's side.
- *
- * Approving one lets someone publish (and optionally move money on) a property
- * they do not own, so this reuses the verification permission model rather than
- * inventing a parallel one. The two capabilities are granted explicitly and
- * separately, and every decision is audited.
- */
-
 export type AuthorityStatus = 'PENDING' | 'ACTIVE' | 'REJECTED' | 'REVOKED' | 'EXPIRED';
 
 export interface PropertyAuthorityClaim {
@@ -28,7 +19,6 @@ export interface PropertyAuthorityClaim {
   decisionNote?: string | null;
   expiresAt?: string | null;
   createdAt: string;
-  /** Whether the publication gate would count this claim right now. */
   effective: boolean;
 }
 
@@ -54,12 +44,7 @@ export const propertyAuthorityService = {
     );
   },
 
-  /**
-   * Grant the mandate. `canList` is required by the API; `canManage` is the
-   * separate permission to run the tenancy, and `canTransact` the separate
-   * permission to act on money — so a manager can be trusted to run a property
-   * without being trusted with its payouts.
-   */
+  // canManage and canTransact are separate grants, so a manager can run a property without being trusted with its payouts.
   async approve(
     id: string,
     input: {
@@ -87,10 +72,7 @@ export const propertyAuthorityService = {
     );
   },
 
-  /**
-   * Revoke takes effect immediately for the publication gate — the evidence
-   * simply stops counting.
-   */
+  // Takes effect immediately for the publication gate.
   async revoke(id: string, reason: string): Promise<ApiResponse<PropertyAuthorityClaim>> {
     return safeCall(() =>
       authFetch<PropertyAuthorityClaim>(`/admin/property-authorities/${id}/revoke`, {

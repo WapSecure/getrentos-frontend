@@ -1,6 +1,5 @@
 import type { PlatformRole } from '@/types/admin';
 
-/** Display names for the role ids the admin API returns. */
 export const ROLE_LABELS: Record<PlatformRole, string> = {
   renter: 'Renter',
   landlord: 'Landlord',

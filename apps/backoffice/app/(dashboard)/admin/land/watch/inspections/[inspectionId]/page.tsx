@@ -46,7 +46,6 @@ import { Fact, LandCaseSection, PanelMessage } from '@/components/admin/land/cas
 
 const AWAITING_STAFF = new Set(['SUBMITTED', 'ESCALATED']);
 
-/** One inspection: who, when, where they stood, what they captured, and the decision. */
 export default function AdminLandInspectionPage() {
   const params = useParams<{ inspectionId: string }>();
   const id = decodeURIComponent(params.inspectionId);

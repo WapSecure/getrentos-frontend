@@ -43,7 +43,6 @@ const STATUS_FILTERS: { value: 'open' | LandInspectionStatus; label: string }[] 
   { value: 'ACCEPTED', label: 'Accepted' },
 ];
 
-/** Land Watch operations: inspections to assign and review, incidents to decide. */
 export default function AdminLandWatchPage() {
   const user = useAdminUser();
   const canView = hasAdminPermission(user?.roles, 'verifications.review');

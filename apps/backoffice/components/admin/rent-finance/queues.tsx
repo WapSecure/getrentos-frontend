@@ -225,11 +225,7 @@ export function PaymentsQueue() {
         },
       }[pendingAction.type]
     : null;
-  /**
-   * A reason is optional when opening a review and required when closing one or
-   * releasing funds: the two actions that hand a payment back to (or past) the
-   * automatic settlement path.
-   */
+  /** Required when closing a review or releasing funds: both hand the payment back to (or past) automatic settlement. */
   const promptRequired = pendingAction !== null && pendingAction.type !== 'flag';
   const filters: RentFinanceQueueFilter[] = [
     { key: 'status', label: 'Status', options: paymentStatusOptions },

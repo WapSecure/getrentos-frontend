@@ -24,11 +24,6 @@ const COPY: Record<Action, { title: string; description: string; confirm: string
   },
 };
 
-/**
- * Account takeover response (see docs/security/runbooks.md): sign a person out
- * everywhere, or remove an authenticator an attacker may have added. Both ask
- * the officer to confirm it's them, and the reason goes to the audit log.
- */
 export const UserSecurityActions = ({ userId }: { userId: string }) => {
   const toast = useToast();
   const [action, setAction] = useState<Action | null>(null);

@@ -7,7 +7,6 @@ import {
   type VerifiedAddress,
 } from '@sureground/shared';
 
-/** Google address search through our API: suggestions while typing, then the checked address. */
 export const placesService = {
   async search(
     query: string,

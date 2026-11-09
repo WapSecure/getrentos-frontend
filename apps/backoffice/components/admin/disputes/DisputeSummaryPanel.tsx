@@ -20,11 +20,6 @@ const List = ({ title, items }: { title: string; items: string[] }) =>
     </div>
   ) : null;
 
-/**
- * "Summarise this case": the record worked out by Sureground, each side's
- * position, what is agreed, what to verify and missing evidence. A neutral
- * reading for staff; it never decides. Loads only when asked.
- */
 export function DisputeSummaryPanel({ disputeId }: { disputeId: string }) {
   const [asked, setAsked] = useState(false);
   const { data, isLoading, isError } = useQuery({

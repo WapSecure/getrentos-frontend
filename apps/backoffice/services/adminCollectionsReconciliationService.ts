@@ -22,13 +22,12 @@ export type CollectionLineKind =
   | 'DUPLICATE_PAYOUT'
   | 'REVERSED_AFTER_CONFIRMATION';
 
-/** One payment that does not line up. Amounts are whole naira. */
+// Amounts are whole naira.
 export type PaymentProvider = 'PAYSTACK' | 'MONNIFY';
 
 export interface CollectionLine {
   kind: CollectionLineKind;
   product: CollectionProduct | null;
-  /** The company that took it. */
   provider?: PaymentProvider;
   reference: string;
   gatewayAmount: number | null;
@@ -47,11 +46,9 @@ export interface CollectionsReport {
     matched: number;
     exceptions: number;
   };
-  /** Keyed by product, or UNKNOWN for a reference no product knows. */
+  // UNKNOWN is a reference no product knows.
   byProduct: Record<string, { count: number; amount: number }>;
-  /** Collections and the company's fees, per payment company. */
   byProvider?: Partial<Record<PaymentProvider, { count: number; amount: number; fees: number }>>;
-  /** What the payment companies paid into the Sureground bank account in the window. */
   settlements?: {
     provider: PaymentProvider;
     id: string;
@@ -62,12 +59,12 @@ export interface CollectionsReport {
   }[];
   exceptions: CollectionLine[];
   refunds: { reference: string; product: CollectionProduct | null; amount: number }[];
-  /** Payouts sent through Paystack in the window, and the Paystack balance now (naira). */
+  // In naira.
   transfersOut?: { count: number; amount: number; failed: number; balance: number | null };
 }
 
 export const adminCollectionsReconciliationService = {
-  /** `from` and `to` are Lagos days, YYYY-MM-DD, both included; at most 31 days. */
+  // Lagos days, YYYY-MM-DD, both included; at most 31 days.
   report(from: string, to: string): Promise<ApiResponse<CollectionsReport>> {
     return safeCall(() =>
       authFetch<CollectionsReport>(

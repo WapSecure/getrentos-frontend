@@ -17,7 +17,7 @@ import {
 import { humaniseEnum } from '@/lib/landDiligence';
 import { LAND_DOCUMENT_TYPES, type LandDiligenceCheck, type LandDocumentType } from '@/types/land';
 
-/** The API's limits for a land document (file-upload.policy.ts). */
+// Must match the API's land document limits (file-upload.policy.ts).
 const MAX_BYTES = 20 * 1024 * 1024;
 const MIME_TYPES = [
   'application/pdf',
@@ -43,13 +43,11 @@ const TYPE_OPTIONS = LAND_DOCUMENT_TYPES.map((value) => ({ value, label: humanis
 export interface LandUploadDocumentInput {
   documentType: LandDocumentType;
   file: File;
-  /** Cite the upload on this check straight away. */
   checklistKey?: string;
   note?: string;
 }
 
 interface LandUploadDocumentDialogProps {
-  /** Open when set; `checkKey` preselects the check to cite the upload on. */
   target: { checkKey?: string } | null;
   onClose: () => void;
   checks: LandDiligenceCheck[];
@@ -57,11 +55,7 @@ interface LandUploadDocumentDialogProps {
   isPending: boolean;
 }
 
-/**
- * Upload staff evidence onto the property (a registry search, a charting
- * report), optionally citing it on a check in the same step. Keyed by the
- * page on the target, so its state starts fresh each time it opens.
- */
+// Keyed by the page on the target, so its state starts fresh each time it opens.
 export const LandUploadDocumentDialog = ({
   target,
   onClose,

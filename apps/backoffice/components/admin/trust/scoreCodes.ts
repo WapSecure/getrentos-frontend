@@ -1,14 +1,3 @@
-/**
- * Reads a `TrustDecision.reasonCodes` array back into the score breakdown that
- * produced the decision.
- *
- * The decision payload deliberately carries the breakdown as flat codes
- * (`SCORE_V2:TOTAL:50`, `SCORE_V2:IDENTITY:21/35`) so the audit trail needs no
- * extra table. A reviewer looking at a decision therefore has the numbers in
- * hand — they just need decoding, which is all this does. It returns null when
- * the decision predates the dimension engine, so callers can render nothing
- * rather than a misleading empty state.
- */
 export interface ParsedScoreDimension {
   id: string;
   earned: number;
@@ -24,7 +13,7 @@ export interface ParsedScore {
 
 const SCORE_PREFIX = 'SCORE_V2:';
 
-/** Dimension ids the payload can carry (kept in sync with score.dimensions.ts). */
+// Keep in sync with score.dimensions.ts.
 const DIMENSION_IDS = ['IDENTITY', 'FINANCIAL', 'ROLE', 'CONTACT', 'ACTIVITY'];
 
 export function parseScoreCodes(reasonCodes: string[] | undefined): ParsedScore | null {
@@ -64,12 +53,10 @@ export function parseScoreCodes(reasonCodes: string[] | undefined): ParsedScore 
   return parsed.dimensions.length === 0 && parsed.total === undefined ? null : parsed;
 }
 
-/** The codes that are NOT part of the score, i.e. the domain reason codes. */
 export function nonScoreCodes(reasonCodes: string[] | undefined): string[] {
   return (reasonCodes ?? []).filter((code) => !code.startsWith(SCORE_PREFIX));
 }
 
-/** Human labels for the dimension ids (the payload carries ids, not labels). */
 export const DIMENSION_LABELS: Record<string, string> = {
   IDENTITY: 'Identity',
   FINANCIAL: 'Financial',

@@ -28,24 +28,17 @@ const statusBadge: Record<string, { label: string; variant: BadgeVariant }> = {
 
 interface LandChecksPanelProps {
   checks: LandDiligenceCheck[];
-  /** Checks can only be recorded while the case is in review or awaiting the owner. */
   editable: boolean;
   canReview: boolean;
   savingKey: string | null;
   /** Resolves true once saved, so a refused decision keeps the reviewer's draft. */
   onSave: (key: string, status: LandDiligenceChecklistStatus, note: string) => Promise<boolean>;
   onCite: (checkKey: string) => void;
-  /** Checklist version and the state pack behind it, for the reviewer's context. */
   templateVersion?: string | null;
   policyPack?: LandPolicyPack | null;
 }
 
-/**
- * The structured checklist. Each check is decided on its own, against the
- * case version the reviewer loaded, and the screen enforces the same rules as
- * the API before sending: evidence first, and a reason for a flag or a
- * required check set aside.
- */
+// Mirrors the API's rules before sending: evidence first, and a reason for a flag or a required check set aside.
 export const LandChecksPanel = ({
   checks,
   editable,

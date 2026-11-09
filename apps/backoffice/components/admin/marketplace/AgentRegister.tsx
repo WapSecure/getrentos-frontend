@@ -486,7 +486,6 @@ function TaskReassignDialog({
   const [reason, setReason] = useState('');
   const toast = useToast();
 
-  // Staff pick the new agent by name or email; nobody should have to dig a user ID out of a URL.
   const { data: candidates, isFetching: searching } = useQuery({
     queryKey: ['admin', 'agents', 'reassign-picker', search.trim()],
     queryFn: () =>

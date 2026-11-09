@@ -67,9 +67,8 @@ export interface AdminShortletPayout {
   id: string;
   hostId: string;
   hostName?: string;
-  /** Sent to the bank, after any cancellation fees. */
+  // After any cancellation fees.
   amount: number;
-  /** Host cancellation fees taken out of this payout. */
   penaltyDeducted?: number;
   status: 'PENDING' | 'SUCCESS' | 'FAILED';
   transferRef?: string;
@@ -78,7 +77,6 @@ export interface AdminShortletPayout {
   createdAt: string;
 }
 
-/** A host payout bank account on the admin register (account number masked). */
 export interface AdminShortletPayoutAccount {
   id: string;
   hostId: string;
@@ -92,7 +90,6 @@ export interface AdminShortletPayoutAccount {
   createdAt: string;
 }
 
-/** A booking covered by a payout (payout detail view). */
 export interface AdminShortletPayoutBooking {
   id: string;
   listingTitle?: string;
@@ -103,14 +100,12 @@ export interface AdminShortletPayoutBooking {
   createdAt: string;
 }
 
-/** Full payout detail: host + account + the bookings it covered. */
 export interface AdminShortletPayoutDetail extends AdminShortletPayout {
   hostEmail?: string;
   account?: AdminShortletPayoutAccount;
   bookings?: AdminShortletPayoutBooking[];
 }
 
-/** Result of a booking intervention (decline/cancel/refund/complete). */
 export interface AdminShortletBookingDetail {
   id: string;
   listingId: string;
@@ -133,7 +128,6 @@ export interface AdminShortletBookingDetail {
   createdAt: string;
 }
 
-/** Admin review-moderation row for a guest's review of a stay. */
 export interface AdminShortletReview {
   id: string;
   bookingId: string;
@@ -148,7 +142,6 @@ export interface AdminShortletReview {
   createdAt: string;
 }
 
-/** Admin review-moderation row for a host's review of a guest. */
 export type AdminShortletGuestReview = AdminShortletReview;
 
 export type AdminShortletDisputeCategory =
@@ -175,7 +168,6 @@ export interface AdminShortletDispute {
   resolution?: string;
   createdAt: string;
   resolvedAt?: string;
-  /** A Guest Promise report: decided with a money outcome, not a plain resolve. */
   guestPromise?: boolean;
   problemType?: string;
   evidenceUrls?: string[];
@@ -202,19 +194,17 @@ export interface AdminShortletDepositClaim {
   listingTitle?: string;
   claimedBy: string;
   guestName: string;
-  /** First night of the stay the claim is against. */
   checkIn?: string;
-  /** Checkout of the stay the claim is against — a claim can only be filed after this. */
+  // A claim can only be filed after this.
   checkOut?: string;
   amount: number;
   reason: string;
   evidence: string[];
-  /** Signed preview URLs of the evidence photos (returned on the admin list). */
   evidenceUrls?: string[];
   status: AdminShortletDepositClaimStatus;
-  /** Naira withheld from the guest refund by this claim (resolved claims only). */
+  // Resolved claims only.
   deductedAmount?: number;
-  /** Naira refunded to the guest = deposit - deducted (resolved claims only). */
+  // deposit - deducted; resolved claims only.
   refundedAmount?: number;
   resolution?: string;
   createdAt: string;
@@ -222,16 +212,13 @@ export interface AdminShortletDepositClaim {
 }
 
 export interface AdminShortletFeeConfig {
-  /** Standard commission percent. */
   commissionPct: number;
-  /** Launch rate used instead, for bookings made before introEndsAt. */
+  // Used instead for bookings made before introEndsAt.
   introCommissionPct?: number;
   introEndsAt?: string;
-  /** What a booking made right now pays. */
   currentCommissionPct: number;
   taxName?: string;
   taxPct: number;
-  /** Platform default hours after check-out that a held deposit stays claimable. */
   depositClaimWindowHours: number;
   updatedAt: string;
 }
@@ -247,7 +234,6 @@ export interface AdminShortletFeeConfigInput {
 
 export type AdminHostPenaltyStatus = 'OUTSTANDING' | 'SETTLED' | 'WAIVED';
 
-/** A fee a host owes for cancelling a paid, confirmed stay; taken from their payouts. */
 export interface AdminHostPenalty {
   id: string;
   hostId: string;

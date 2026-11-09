@@ -28,7 +28,6 @@ export interface MaintenanceQueueFilter {
 }
 
 export interface MaintenanceQueueConfig<T> {
-  /** API + query-key resource segment, e.g. 'work-orders'. */
   resource: string;
   eyebrow: string;
   title: string;

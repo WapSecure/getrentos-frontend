@@ -53,7 +53,6 @@ const post = (path: string, body: unknown) =>
     })
   );
 
-/** Delivery claims to check and contested change orders (`verifications.review` / `.approve`). */
 export const adminLandInfrastructureService = {
   queue: () => safeCall(() => authFetch<AdminInfrastructureQueue>('/admin/land/infrastructure')),
   verify: (commitmentId: string, note: string) =>

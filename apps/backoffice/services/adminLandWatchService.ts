@@ -14,11 +14,6 @@ const job = (id: string) => `/admin/land/watch/jobs/${encodeURIComponent(id)}`;
 const post = <T>(path: string, body?: object): Promise<ApiResponse<T>> =>
   safeCall(() => authFetch<T>(path, { method: 'POST', body: JSON.stringify(body ?? {}) }));
 
-/**
- * Land Watch for staff. Reading, assigning and querying need
- * `verifications.review`; accepting, cancelling and incident decisions need
- * `verifications.approve`.
- */
 export const adminLandWatchService = {
   inspections: (status?: LandInspectionStatus) =>
     safeCall(() =>
@@ -42,7 +37,6 @@ export const adminLandWatchService = {
   subscriptions: () =>
     safeCall(() => authFetch<LandWatchSummary[]>('/admin/land/watch/subscriptions')),
 
-  /** Vendor jobs: without a status, the open ones, oldest first. */
   jobs: (status?: LandWatchJobStatus) =>
     safeCall(() =>
       authFetch<StaffLandWatchJob[]>(

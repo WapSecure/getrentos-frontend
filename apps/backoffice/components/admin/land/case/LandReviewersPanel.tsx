@@ -22,7 +22,6 @@ const seatVariant: Record<string, BadgeVariant> = {
   REVOKED: 'neutral',
 };
 
-/** Outside professionals seated on the case: who, on which checks, and their reports. */
 export const LandReviewersPanel = ({
   propertyId,
   checks,

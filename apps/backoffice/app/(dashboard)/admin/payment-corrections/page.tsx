@@ -30,16 +30,8 @@ const TITLE: Record<CorrectionCategory, string> = {
   K4: 'Seller overpayments to write off',
 };
 
-/** How many records to list per category before "and N more". */
 const SHOWN = 10;
 
-/**
- * Corrections to records the old payout behaviour left wrong, as the owner
- * decided them (docs/payments/corrections.md). Each category shows exactly what
- * applying writes. Applying needs rent-finance approval and step-up, writes
- * each correction once, and tells every owner affected before it shows on
- * their statement.
- */
 export default function PaymentCorrectionsPage() {
   const queryClient = useQueryClient();
   const user = useAdminUser();

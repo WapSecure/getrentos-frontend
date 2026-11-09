@@ -86,7 +86,6 @@ const QuestionItem = ({
   );
 };
 
-/** Buyers' questions about their pre-purchase inspection reports (§8.4, US-06). */
 export default function AdminLandInspectionQuestionsPage() {
   const user = useAdminUser();
   const queryClient = useQueryClient();

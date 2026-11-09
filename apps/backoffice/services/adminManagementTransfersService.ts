@@ -20,7 +20,7 @@ export interface AdminHandover {
   status: AdminManagementTransfer['status'];
   required: { outgoing: boolean; incoming: boolean };
   viewer?: { isOwner: boolean; isOutgoing: boolean; isIncoming: boolean };
-  /** Where each attested deposit stands now (the pack itself is frozen). */
+  // The pack itself is frozen.
   depositsNow?: { id: string; heldBySureground: boolean; status: string }[];
   pack: {
     hash: string;

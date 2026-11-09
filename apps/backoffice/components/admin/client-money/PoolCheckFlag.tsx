@@ -4,36 +4,11 @@ import { Badge, Card } from '@sureground/ui';
 import { AlertTriangle, CircleHelp, ShieldQuestion } from 'lucide-react';
 import type { ReconciliationRow } from '@/services/adminClientMoneyService';
 
-/** Matches how the rest of this app writes money and dates. */
 const naira = (value: number) => `₦${value.toLocaleString('en-NG')}`;
 const date = (value: string) =>
   new Date(value).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 
-/**
- * What the pool this payout leaves from is currently doing.
- *
- * Confirmed as **flag-only**: the approver sees it and still decides. A drift is
- * often nothing more than a bank feed that arrived late, and blocking on it would
- * deadlock every payout on the platform the first time a statement was slow. So
- * this states the fact and makes no claim about whether to proceed — copy that
- * implied a gate would have an officer hunting for a permission they already
- * have.
- *
- * The one thing it will not do is stay quiet about a problem or shout about an
- * absence:
- *
- * - `MATCHED` renders **nothing**. A green tick on every row is noise, and the
- *   absence of a flag is the signal.
- * - `DRIFT` and `INTEGRITY_FAILED` are red, and they are told apart. One means
- *   the bank holds less than we say owners are owed; the other means **our own
- *   records disagree with themselves**, and an officer sent to the bank over the
- *   second one is being sent to the wrong place.
- * - `UNATTESTED` is neutral, never red and never green. Nobody has counted this
- *   pool, which is not an incident — it is the absence of a process, and the 3e
- *   decision that it must never render as agreement is why it says so plainly.
- * - A pool with **no verdict at all** is its own sentence. It is the one reading
- *   that could be mistaken for "fine", so it never renders as nothing.
- */
+// Flag-only: a drift is often just a late bank feed, and blocking on it would deadlock every payout. No verdict at all must never render as nothing, since that reads as fine.
 export function PoolCheckFlag({ pool }: { pool: ReconciliationRow | null | undefined }) {
   if (!pool) {
     return (
@@ -46,7 +21,7 @@ export function PoolCheckFlag({ pool }: { pool: ReconciliationRow | null | undef
     );
   }
 
-  // The agreement case says nothing at all. See the note above.
+  // MATCHED renders nothing: the absence of a flag is the signal.
   if (pool.status === 'MATCHED') return null;
 
   if (pool.status === 'INTEGRITY_FAILED') {
@@ -98,7 +73,6 @@ export function PoolCheckFlag({ pool }: { pool: ReconciliationRow | null | undef
   );
 }
 
-/** The shell, so the four readings cannot drift apart visually. */
 function Flag({
   tone,
   Icon,
@@ -125,7 +99,6 @@ function Flag({
         <div className="min-w-0 space-y-0.5">
           <div className="flex flex-wrap items-center gap-2">
             <p className="text-xs font-medium">{title}</p>
-            {/* Stated, because the absence of a gate is the whole decision. */}
             <Badge variant="neutral">Does not block this release</Badge>
           </div>
           <p className="text-xs text-muted-foreground">{detail}</p>

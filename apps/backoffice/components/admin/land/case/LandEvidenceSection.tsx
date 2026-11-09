@@ -20,10 +20,6 @@ import { useInvalidateLandCase, type LandCasePanelProps } from './shared';
 
 const EDITABLE_STATUSES = new Set(['IN_REVIEW', 'ACTION_REQUIRED']);
 
-/**
- * The checklist and the documents it rests on, side by side in one place so
- * citing a document and passing the check it backs is one flow.
- */
 export const LandEvidenceSection = ({
   detail,
   canReview,
@@ -65,8 +61,7 @@ export const LandEvidenceSection = ({
     onError: (error) => onError(error, 'Unable to cite that document.'),
   });
 
-  // Upload, then cite when a check was chosen. A failed citation leaves the
-  // upload in place (it is on the property) and says so.
+  // A failed citation leaves the upload in place (it is on the property) and says so.
   const upload = useMutation({
     mutationFn: async ({ checklistKey, note, ...file }: LandUploadDocumentInput) => {
       const document = await unwrap(adminLandService.uploadDocument(propertyId, file));

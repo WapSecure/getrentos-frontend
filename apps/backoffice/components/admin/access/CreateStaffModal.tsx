@@ -15,7 +15,6 @@ import type { AdminStaffRole } from '@/types/admin';
 interface CreateStaffModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** Roles the signed-in admin is allowed to create (all for SUPER_ADMIN, otherwise subordinate). */
   creatableRoles: AdminStaffRole[];
   onCreated: (approvalStatus: 'APPROVED' | 'PENDING') => void;
 }

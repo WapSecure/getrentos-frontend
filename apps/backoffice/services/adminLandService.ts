@@ -26,11 +26,8 @@ import type {
 export interface ListLandDiligenceParams {
   search?: string;
   status?: LandDiligenceStatus;
-  /** `me`: cases assigned to the caller; `unassigned`: unclaimed cases. */
   assigned?: 'me' | 'unassigned';
-  /** Only cases in review past their SLA. */
   overdue?: boolean;
-  /** `sla`: oldest-owed first (the work-queue order). */
   sort?: 'sla' | 'updated';
   page?: number;
   pageSize?: number;
@@ -46,15 +43,7 @@ const post = <T>(path: string, body?: unknown): Promise<ApiResponse<T>> =>
     })
   );
 
-/**
- * Backoffice-only Land diligence endpoints. The queue carries metadata only;
- * the detail view returns the property's documents with short-lived signed URLs
- * and the state of each document's link to the review.
- *
- * Every decision (approve, reject, clarification, a check) should carry the
- * case `version` the reviewer loaded as `expectedVersion`: the API answers a
- * stale one with 409 so two reviewers acting at once cannot both win.
- */
+// Send the loaded case version as expectedVersion on every decision: a stale one gets 409, so two reviewers acting at once cannot both win.
 export const adminLandService = {
   listDiligence(
     params: ListLandDiligenceParams = {}
@@ -71,11 +60,6 @@ export const adminLandService = {
     return safeCall(() => authFetch(`/admin/land/diligence${query}`));
   },
 
-  /**
-   * The case with every document on the property and whether the review cites
-   * it. Files come back behind short-lived signed URLs.
-   */
-  /** Every outline the parcel has had, newest first, with each one's surveyor sign-off. */
   listBoundaryVersions(propertyId: string): Promise<ApiResponse<LandBoundaryVersion[]>> {
     return safeCall(() => authFetch(`${base(propertyId)}/boundary/versions`));
   },
@@ -94,7 +78,7 @@ export const adminLandService = {
     return post(`${base(propertyId)}/approve`, data);
   },
 
-  /** Settle one condition of a conditional approval; the last one turns the case VERIFIED. */
+  // The last condition settled turns the case VERIFIED.
   settleCondition(
     propertyId: string,
     conditionId: string,
@@ -107,7 +91,6 @@ export const adminLandService = {
     });
   },
 
-  /** Take a verified or conditional approval off the market, with a reason the owner sees. */
   suspendDiligence(
     propertyId: string,
     data: { reason: string; expectedVersion?: number }
@@ -115,7 +98,7 @@ export const adminLandService = {
     return post(`${base(propertyId)}/suspend`, { ...data, reason: data.reason.trim() });
   },
 
-  /** End a suspension; refused while a hold, encumbrance or conflict remains. */
+  // Refused while a hold, encumbrance or conflict remains.
   resumeDiligence(
     propertyId: string,
     data: { note: string; expectedVersion?: number }
@@ -137,7 +120,7 @@ export const adminLandService = {
     return post(`${base(propertyId)}/request-clarification`, data);
   },
 
-  /** Assigns the case to a staff member; omitting `assigneeId` claims it for the caller. */
+  // Omitting assigneeId claims it for the caller.
   assignDiligence(
     propertyId: string,
     assigneeId?: string
@@ -145,11 +128,6 @@ export const adminLandService = {
     return post(`${base(propertyId)}/assign`, assigneeId ? { assigneeId } : {});
   },
 
-  /**
-   * Records one checklist decision. PASSED on a check that requires a document
-   * needs one cited against its key first; FLAGGED, or NOT_APPLICABLE on a
-   * required check, needs a note.
-   */
   recordCheck(
     propertyId: string,
     key: string,
@@ -163,11 +141,7 @@ export const adminLandService = {
     );
   },
 
-  /**
-   * Records that a check was decided on a particular document. The document must
-   * already belong to this property — the API rejects one that does not, so a
-   * review cannot be justified by another parcel's paperwork.
-   */
+  // The API rejects a document from another property.
   linkDiligenceDocument(
     propertyId: string,
     data: LandDiligenceDocumentLinkInput
@@ -175,12 +149,7 @@ export const adminLandService = {
     return post(`${base(propertyId)}/documents`, data);
   },
 
-  /**
-   * Stops citing a document on one check. The owner's file is left untouched —
-   * only the review's reliance on it is withdrawn. `checklistKey` names the
-   * check (null: the citation tied to no check); leave it out to remove the
-   * document's only citation.
-   */
+  // Leaves the owner's file untouched. A null checklistKey is a citation tied to no check; omit it to remove the document's only citation.
   unlinkDiligenceDocument(
     propertyId: string,
     documentId: string,
@@ -195,10 +164,7 @@ export const adminLandService = {
     );
   },
 
-  /**
-   * Puts staff evidence (e.g. a registry search report) on the property so it
-   * can be cited. Multipart: the browser sets the boundary, so no Content-Type.
-   */
+  // Multipart: the browser sets the boundary, so no Content-Type.
   uploadDocument(
     propertyId: string,
     input: LandDocumentUploadInput
@@ -214,13 +180,11 @@ export const adminLandService = {
     );
   },
 
-  // ---- Integrity ----
-
   listConflicts(propertyId: string): Promise<ApiResponse<LandConflict[]>> {
     return safeCall(() => authFetch(`${base(propertyId)}/conflicts`));
   },
 
-  /** Dismiss or confirm a conflict; the resolution applies to both parcels. */
+  // The resolution applies to both parcels.
   resolveConflict(
     propertyId: string,
     conflictId: string,
@@ -251,7 +215,6 @@ export const adminLandService = {
     );
   },
 
-  /** The chain of title, oldest first. */
   listTitleHistory(propertyId: string): Promise<ApiResponse<LandTitleEvent[]>> {
     return safeCall(() => authFetch(`${base(propertyId)}/title-history`));
   },
@@ -263,12 +226,9 @@ export const adminLandService = {
     return post(`${base(propertyId)}/title-history`, data);
   },
 
-  /** Marks an owner-recorded title event as verified. */
   verifyTitleEvent(propertyId: string, eventId: string): Promise<ApiResponse<LandTitleEvent[]>> {
     return post(`${base(propertyId)}/title-history/${encodeURIComponent(eventId)}/verify`);
   },
-
-  // ---- Outside reviewers ----
 
   listReviewers(propertyId: string): Promise<ApiResponse<LandReviewerSeat[]>> {
     return safeCall(() => authFetch(`${base(propertyId)}/reviewers`));
@@ -292,13 +252,10 @@ export const adminLandService = {
     );
   },
 
-  // ---- Risk ----
-
   getRisk(propertyId: string): Promise<ApiResponse<LandRiskAssessment>> {
     return safeCall(() => authFetch(`${base(propertyId)}/risk`));
   },
 
-  /** Recomputes and stores the risk score and assurance tier on the case. */
   refreshRisk(propertyId: string): Promise<ApiResponse<LandRiskAssessment>> {
     return post(`${base(propertyId)}/risk/refresh`);
   },

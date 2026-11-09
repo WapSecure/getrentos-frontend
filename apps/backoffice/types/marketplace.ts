@@ -1,7 +1,5 @@
 import type { ShortletListingStatus } from './shortlet';
 
-/** Marketplace (sale) domain admin types. */
-
 export type SaleListingStatus = ShortletListingStatus;
 
 export type SaleOfferStatus =
@@ -13,16 +11,8 @@ export type SaleOfferStatus =
   | 'EXPIRED'
   | 'CLOSED';
 
-// deposit → held → released, with FROZEN (a dispute is open) and REFUNDED as
-// terminal branches. The Prisma enum also has VERIFICATION_PENDING /
-// SETTLEMENT_PENDING / DISPUTED, but no service writes them (a dispute sets
-// FROZEN), so the admin UI does not surface them (DEF-240).
-export type EscrowState =
-  | 'DEPOSIT_PENDING'
-  | 'FUNDS_HELD'
-  | 'RELEASED'
-  | 'FROZEN'
-  | 'REFUNDED';
+// The Prisma enum also has VERIFICATION_PENDING, SETTLEMENT_PENDING and DISPUTED, but no service writes them (a dispute sets FROZEN), so they are left out.
+export type EscrowState = 'DEPOSIT_PENDING' | 'FUNDS_HELD' | 'RELEASED' | 'FROZEN' | 'REFUNDED';
 
 export interface AdminMarketplaceOverview {
   totalListings: number;
@@ -138,8 +128,6 @@ export interface AdminMarketplaceOfferDetail {
   transaction?: AdminMarketplaceEscrow;
 }
 
-/** Realtor professional register types. */
-
 export type LicenseStatus =
   | 'PENDING_REVIEW'
   | 'NEEDS_CLARIFICATION'
@@ -224,30 +212,22 @@ export interface AdminRealtorReviewSummary {
   reviewCount: number;
 }
 
-/** A commission payout on its way to a realtor's bank. */
 export interface AdminRealtorCommissionPayout {
   id: string;
   realtorId: string;
   realtorName?: string;
   amount: number;
-  /**
-   * Lowercased by the API, unlike the list filter, which takes the stored enum
-   * value. The two deliberately differ because the filter is validated against
-   * the enum while the response is shaped for display.
-   */
+  // Lowercased by the API, unlike the list filter, which takes the stored enum value.
   status: 'pending' | 'success' | 'failed';
   transferRef?: string | null;
   paidAt?: string | null;
   failureReason?: string | null;
-  /** How many commission rows this batch settled. */
   commissionCount: number;
   createdAt: string;
 }
 
-/** The status filter, in the form the API validates. */
 export type RealtorPayoutFilterStatus = 'PENDING' | 'SUCCESS' | 'FAILED';
 
-/** The split the platform pays on a sale that closes. */
 export interface RealtorCommissionRates {
   listingSidePct: number;
   buyerSidePct: number;
@@ -279,8 +259,6 @@ export interface AdminRealtorDetail {
   commissions?: AdminRealtorCommissionSummary;
   reviews?: AdminRealtorReviewSummary;
 }
-
-/** Agent professional register types. */
 
 export interface AdminAgent {
   id: string;

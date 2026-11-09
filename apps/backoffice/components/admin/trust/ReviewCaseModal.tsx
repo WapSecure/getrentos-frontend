@@ -37,12 +37,6 @@ import {
 import { REVIEW_CASE_PRIORITY_VARIANT, REVIEW_CASE_STATUS_VARIANT } from './ReviewCaseCard';
 import { DIMENSION_LABELS, nonScoreCodes, parseScoreCodes } from './scoreCodes';
 
-/**
- * The dimension.v1 score as it stood when this decision was taken, decoded from
- * the decision payload's own codes. A reviewer who can see that a rejection
- * happened at score 50: with the financial dimension at 25/25: reads the case
- * very differently from one who sees only the verdict.
- */
 const ScoreAtDecisionCodes = ({ reasonCodes }: { reasonCodes: string[] }) => {
   const score = parseScoreCodes(reasonCodes);
   if (!score) return null;
@@ -119,10 +113,9 @@ const STEP_VARIANT: Record<string, BadgeVariant> = {
   WAITING_FOR_PROVIDER: 'info',
 };
 
-/** Shortest written reason that can stand in for naming failed items (matches the API). */
+// Must match the API's minimum.
 const MIN_BLOCKING_NOTE_LENGTH = 15;
 
-/** "EVIDENCE_CONFIRMED:SELFIE_IS_LIVE" → "Confirmed: The selfie was taken live…". */
 const describeCode = (code: string, checklist: TrustEvidenceItem[]) => {
   const [kind, item] = code.split(':');
   if (!item || (kind !== 'EVIDENCE_CONFIRMED' && kind !== 'EVIDENCE_FAILED')) return code;
@@ -130,7 +123,7 @@ const describeCode = (code: string, checklist: TrustEvidenceItem[]) => {
   return `${kind === 'EVIDENCE_CONFIRMED' ? 'Confirmed' : 'Did not pass'}: ${label}`;
 };
 
-/** Every final decision (pass included) is four-eyes: a second officer confirms it. */
+// Every final decision, pass included, needs a second officer to confirm it.
 const FOUR_EYES_HINT =
   'Four-eyes: decisions are confirmed by a second officer: the reviewer assigned to this case cannot be the resolver.';
 
@@ -146,8 +139,6 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
   const [assigneeId, setAssigneeId] = useState('');
   const [decision, setDecision] = useState<TrustReviewDecision | ''>('');
   const [note, setNote] = useState('');
-  // The evidence checklist (ID-09): ticked items are confirmed for a pass, or
-  // named as failing for a blocking decision.
   const [ticked, setTicked] = useState<string[]>([]);
   const [actionError, setActionError] = useState<string | null>(null);
 
@@ -285,7 +276,6 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
               </div>
             ) : detail ? (
               <div className="space-y-5 p-4">
-                {/* Subject */}
                 <div className="rounded-xl border border-border p-4">
                   <p className="text-2xs font-semibold uppercase tracking-wide text-muted-foreground">
                     Subject
@@ -331,7 +321,6 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
                   </div>
                 </div>
 
-                {/* Step timeline */}
                 <div className="rounded-xl border border-border p-4">
                   <p className="flex items-center gap-1.5 text-2xs font-semibold uppercase tracking-wide text-muted-foreground">
                     <Layers className="h-3.5 w-3.5" /> Step timeline
@@ -381,7 +370,6 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
                   )}
                 </div>
 
-                {/* Decision history */}
                 <div className="rounded-xl border border-border p-4">
                   <p className="flex items-center gap-1.5 text-2xs font-semibold uppercase tracking-wide text-muted-foreground">
                     <CheckCircle2 className="h-3.5 w-3.5" /> Verification decisions
@@ -425,7 +413,6 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
                   )}
                 </div>
 
-                {/* History */}
                 <div className="rounded-xl border border-border p-4">
                   <p className="flex items-center gap-1.5 text-2xs font-semibold uppercase tracking-wide text-muted-foreground">
                     <History className="h-3.5 w-3.5" /> Case activity
@@ -465,14 +452,12 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
                   </Alert>
                 )}
 
-                {/* Actions */}
                 {!isResolved && (
                   <div className="rounded-xl border border-primary/30 bg-primary/5 p-4">
                     <p className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
                       <Eye className="h-4 w-4 text-primary" /> Decision & handling
                     </p>
 
-                    {/* Assign */}
                     <div className="mt-3 grid gap-2 sm:grid-cols-[1fr_auto] sm:items-center">
                       <Select
                         value={assigneeId}
@@ -502,7 +487,6 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
                       </Button>
                     </div>
 
-                    {/* Resolve */}
                     <div className="mt-4 space-y-2">
                       {aboutMe ? (
                         <Alert variant="warning" icon={ShieldAlert}>

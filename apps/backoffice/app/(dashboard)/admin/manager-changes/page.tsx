@@ -32,10 +32,6 @@ const STATUS: Record<
   DISPUTED: { label: 'Disputed', variant: 'danger' },
 };
 
-/**
- * Every change of manager: who it moves from and to, when, and exactly what
- * the switch did. A failed step is listed for a person to finish by hand.
- */
 export default function ManagerChangesPage() {
   const queryClient = useQueryClient();
   const user = useAdminUser();

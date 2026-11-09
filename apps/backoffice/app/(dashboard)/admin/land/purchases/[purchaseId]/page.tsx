@@ -35,7 +35,6 @@ import { LandPerfectionPanel } from '@/components/admin/land/purchases/LandPerfe
 
 const ENDED = new Set(['REVOKED', 'CANCELLED', 'COMPLETED']);
 
-/** One plot purchase in full, with the two exceptions staff can grant. */
 export default function AdminLandPurchaseDetailPage() {
   const params = useParams<{ purchaseId: string }>();
   const purchaseId = decodeURIComponent(params.purchaseId);

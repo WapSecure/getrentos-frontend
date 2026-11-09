@@ -20,11 +20,6 @@ const ICON = {
   BLOCKED: <XCircle className="h-4 w-4 text-destructive" aria-hidden />,
 };
 
-/**
- * Conditions precedent and the closing checklist. Staff with
- * `verifications.approve` can decide a condition met or not met; a failure
- * lets the buyer cancel with everything refunded.
- */
 export const LandPurchaseConditions = ({
   conditions,
   checklist,

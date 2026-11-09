@@ -73,7 +73,6 @@ export interface AdminStaffMember {
   accountStatus: AdminStaffStatus;
   lastLoginAt: string | null;
   roles: { role: AdminStaffRole }[];
-  /** Present when this account was created pending approval. */
   staffApproval?: {
     id: string;
     status: ApprovalStatus;
@@ -163,13 +162,9 @@ export interface VerificationRequest {
   submittedAt: string;
   documentCount: number;
   rejectionReason?: string;
-  /** Real submitted documents (signed preview URLs) — present on the detail endpoint. */
   documents?: VerificationDocument[];
-  /** Property cover, gallery, and video-tour previews on property requests. */
   media?: VerificationDocument[];
-  /** Ownership proofs on a property request — each can be AI cross-checked. */
   ownershipProofs?: OwnershipProofRef[];
-  /** Property requests: why approving needs a second officer, if it does (security gap ID-15). */
   approvalRisk?: { reasons: string[]; secondOfficerRequired: boolean };
 }
 
@@ -179,7 +174,6 @@ export interface OwnershipProofRef {
   status: string;
 }
 
-/** Result of the AI ownership-document cross-check (POST /ai/ownership-proofs/:id/doc-check). */
 export interface OwnershipDocCheck {
   proofId: string;
   claimedOwnerName: string;
@@ -230,33 +224,21 @@ export interface DisputeParty {
   email?: string;
 }
 
-/**
- * A piece of evidence on a case.
- *
- * Shared by every case family that can carry attachments — a dispute is not
- * allowed to present evidence differently from a fraud alert just because it is
- * a dispute.
- *
- * `STORED` files were uploaded to us, so we can show the actual content through
- * a short-lived signed URL. `EXTERNAL` entries are links recorded before uploads
- * existed — we never received those files, so the UI must label them as someone
- * else's word rather than present them as evidence we hold.
- */
+// EXTERNAL entries are links recorded before uploads existed; we never held those files, so label them as someone else's word.
 export interface EvidenceItem {
   id: string;
   kind: 'STORED' | 'EXTERNAL';
   name: string;
   mimeType: string | null;
   url: string;
-  /** Where an external link actually points, so it can be judged before opening. */
   host?: string | null;
   sizeBytes?: number | null;
   source: 'PARTY' | 'ADMIN';
-  /** Absent for legacy links: the old field never recorded who sent which one. */
+  // Absent for legacy links.
   uploadedBy?: DisputeParty | null;
   note?: string | null;
   uploadedAt: string;
-  /** How long `url` stays valid; null when the URL is not ours to expire. */
+  // Null when the URL is not ours to expire.
   urlExpiresInSeconds?: number | null;
 }
 
@@ -288,7 +270,6 @@ export interface DisputeDetail {
   priority: 'low' | 'medium' | 'high';
   status: DisputeStatus;
   description: string;
-  /** Uploaded files first, then leftover external links from before uploads. */
   evidence?: EvidenceItem[];
   createdAt: string;
   updatedAt: string;
@@ -332,9 +313,7 @@ export interface FraudAlertDetail {
   relatedEntityId?: string;
   resolvedBy?: { id: string; legalName: string };
   resolvedAt?: string;
-  /** Files the investigator is working from — a reason is a claim, this is not. */
   evidence?: EvidenceItem[];
-  /** The AI listing scan that opened this alert, when one did. A signal, not a verdict. */
   aiSignal?: FraudAlertAiSignal;
 }
 
@@ -366,14 +345,13 @@ export interface PlatformEscrowTransaction {
   propertyTitle: string;
   buyerName: string;
   sellerName: string;
-  /** Sale price, naira. */
+  // Naira.
   amount: number;
-  /** What escrow holds (the buyer's deposit), naira: what a release or refund moves. */
+  // The buyer's deposit, in naira: what a release or refund moves.
   heldAmount: number;
   status: PlatformEscrowStatus;
   createdAt: string;
   flagged: boolean;
-  /** Why it is flagged, e.g. a sale the buyer has not confirmed past the hold period. */
   flaggedReason?: string;
 }
 
@@ -388,9 +366,7 @@ export interface AuditLogEntry {
   ipAddress?: string;
   entityType?: string;
   entityId?: string;
-  /** What the audited record held before the action, as recorded. */
   oldValues?: unknown;
-  /** What it held afterwards. */
   newValues?: unknown;
 }
 
@@ -468,31 +444,20 @@ export interface AdminProfile {
   avatarUrl?: string;
 }
 
-/** Whether the signed-in account has an authenticator app (GET /users/me/security/2fa). */
 export interface TwoFactorStatus {
-  /** A secret is stored but may not be confirmed yet. */
   enrolled: boolean;
-  /** Confirmed with a code: sign-in asks for it, and admin routes open. */
   enabled: boolean;
-  /** Unused one-time backup codes (0 while two-factor is off). */
   recoveryCodesLeft?: number;
-  /**
-   * Whether the API refuses this account's admin tools until two-factor is on.
-   * False for a local backend run with STAFF_MFA_REQUIRED=false. Treated as
-   * true when an older API leaves it out.
-   */
+  // False when the backend runs with STAFF_MFA_REQUIRED=false; treat a missing value as true.
   requiredForAdminTools?: boolean;
 }
 
-/** A fresh authenticator secret to scan or type in (POST /users/me/security/2fa/enroll). */
 export interface TwoFactorEnrollment {
   secret: string;
   otpauthUrl: string;
-  /** The QR code as a data URL. */
   qrDataUrl: string;
 }
 
-/** One device the staff member is signed in on ("Where you're signed in"). */
 export interface StaffSession {
   id: string;
   device: string;
@@ -508,28 +473,22 @@ export interface StaffPasskey {
   lastUsedAt: string | null;
 }
 
-/** AI governance — today's spend/volume + live control state (GET /admin/ai/usage). */
 export interface AiCapabilityUsage {
   capability: string;
   calls: number;
   costUsd: number;
   succeeded: number;
   failed: number;
-  /** Calls refused before the model (kill switch, budget, no key). */
   blocked: number;
-  /** Calls where the rules answered instead of the model (failed + blocked). */
   fellBack: number;
-  /** Parts of model answers a safety check threw away, and why. */
   dropped: number;
   dropReasons: Record<string, number>;
-  /** Response time of successful calls, in milliseconds. */
   medianLatencyMs: number | null;
   p95LatencyMs: number | null;
 }
 
-/** One Lagos day of AI use. */
 export interface AiUsageDay {
-  /** YYYY-MM-DD, Lagos. */
+  // YYYY-MM-DD, Lagos.
   day: string;
   calls: number;
   costUsd: number;
@@ -544,7 +503,6 @@ export interface AiBudgetStatus {
   exceeded: boolean;
 }
 
-/** One capability's human-review record: what the AI proposed and what people decided. */
 export interface AiReviewCapabilitySummary {
   capability: string;
   total: number;
@@ -553,15 +511,13 @@ export interface AiReviewCapabilitySummary {
     'PENDING' | 'CONFIRMED' | 'CLEARED' | 'ACCEPTED' | 'EDITED' | 'REJECTED',
     number
   >;
-  /** Fraud: confirmed / (confirmed + cleared), as a percentage. Null until a reviewer decides one. */
+  // confirmed / (confirmed + cleared), as a percentage; null until a reviewer decides one.
   precision: number | null;
   alertsOpened: number;
   alertsDecided: number;
-  /** Triage: accepted or edited / decided, as a percentage. */
+  // (accepted + edited) / decided, as a percentage.
   acceptanceRate: number | null;
-  /** Median minutes from the AI output to a person's decision. */
   medianMinutesToDecision: number | null;
-  /** Triage: median minutes from the request being reported to the triage decision. */
   medianMinutesReportedToDecision: number | null;
 }
 
@@ -574,21 +530,17 @@ export interface AiUsageSummary {
   globallyEnabled: boolean;
   disabledCapabilities: string[];
   budget: AiBudgetStatus;
-  /** The period in Lagos days (1 = today) and when it started. */
   days: number;
   since: string;
   totalCalls: number;
   totalCostUsd: number;
   daily: AiUsageDay[];
   capabilities: AiCapabilityUsage[];
-  /** Whether an ANTHROPIC_API_KEY is configured (live calls possible). */
   keyConfigured: boolean;
 }
 
-/** GET /admin/disputes/:id/summary: a neutral reading of the case for staff. */
 export interface DisputeSummary {
   disputeId: string;
-  /** The record, worked out by Sureground. */
   facts: string[];
   summary: string;
   buyerSays: string | null;

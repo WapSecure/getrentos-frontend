@@ -56,7 +56,6 @@ const download = (resource: string, params: RentFinanceQuery = {}): Promise<Blob
     })}`
   );
 
-/** Backoffice finance oversight for the long-term rental money flow. */
 export const adminRentFinanceService = {
   overview(): Promise<ApiResponse<AdminRentFinanceOverview>> {
     return safeCall(() => authFetch<AdminRentFinanceOverview>('/admin/rent-finance/overview'));
@@ -68,10 +67,7 @@ export const adminRentFinanceService = {
   flagPayment(paymentId: string, reason?: string): Promise<ApiResponse<AdminRentPayment>> {
     return post<AdminRentPayment>(`payments/${paymentId}/flag`, reason ? { reason } : undefined);
   },
-  /**
-   * Clearing a hold and releasing funds both need a stated reason, which the
-   * audit trail keeps — so `reason` is required here rather than optional.
-   */
+  // reason is required: the audit trail keeps it.
   unflagPayment(paymentId: string, reason: string): Promise<ApiResponse<AdminRentPayment>> {
     return post<AdminRentPayment>(`payments/${paymentId}/unflag`, { reason });
   },

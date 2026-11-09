@@ -44,11 +44,6 @@ const TYPE_LABEL = {
   INCORPORATED_TRUSTEES: 'Incorporated trustees',
 } as const;
 
-/**
- * Property management firms' business verification (KYB). A firm can set up
- * while pending, but cannot receive payouts or appear to owners until approved.
- * The reviewer checks the CAC certificate against the registered name and number.
- */
 export default function AdminAgenciesPage() {
   const queryClient = useQueryClient();
   const user = useAdminUser();
@@ -356,7 +351,6 @@ function Row({ label, value }: { label: string; value: string }) {
   );
 }
 
-/** Plain-language reasons a firm's checks are not clean (security gap ID-14). */
 function kybCheckProblems(checks: AdminAgency['kybChecks']): string[] {
   const problems: string[] = [];
   if (!checks.registryConfirmed)

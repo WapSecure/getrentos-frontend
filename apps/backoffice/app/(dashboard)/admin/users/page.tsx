@@ -89,8 +89,7 @@ export default function AdminUsersPage() {
         })
       ),
     placeholderData: keepPreviousData,
-    // This screen shows its own error and retry in place, so a failure must
-    // not escalate to the route error boundary and take the page with it.
+    // This screen shows its own error and retry, so a failure must not escalate to the route error boundary.
     throwOnError: false,
   });
   const users = data?.items ?? [];
@@ -169,7 +168,6 @@ export default function AdminUsersPage() {
       header: 'Roles',
       render: (u) => (
         <div className="flex flex-wrap gap-1">
-          {/* Several staff roles all read as one "Staff" badge. */}
           {[...new Set(u.roles)].map((role) => (
             <Badge key={role} variant="neutral">
               {roleLabel(role)}
@@ -332,8 +330,7 @@ export default function AdminUsersPage() {
               : 'Reactivate account'
         }
         isLoading={changeStatusMutation.isPending}
-        // Awaited, so the dialog stays open and disabled until the request
-        // settles: a second press cannot send the action twice.
+        // Awaited so the dialog stays disabled until the request settles: a second press cannot send the action twice.
         onConfirm={() =>
           pendingStatus && !changeStatusMutation.isPending
             ? changeStatusMutation.mutateAsync({

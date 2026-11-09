@@ -1,7 +1,4 @@
-/**
- * Developer plot purchases as the back office sees them. Money is whole naira
- * as a JSON number; rates are basis points (1% = 100).
- */
+// Money is whole naira as a JSON number; rates are basis points (1% = 100).
 
 export const LAND_PURCHASE_STATUSES = [
   'PENDING_DEPOSIT',
@@ -19,7 +16,7 @@ export interface LandNextDue {
   sequence: number;
   label: string;
   dueDate: string;
-  /** Amount to pay now, late fee included. */
+  // Late fee included.
   amount: number;
   overdue: boolean;
 }
@@ -44,13 +41,10 @@ export interface LandPurchaseSummary {
   amountPaid: number;
   lateFeesAccrued: number;
   releasedToSeller: number;
-  /** Unpaid installments plus unpaid late fees. */
   outstandingBalance: number;
-  /** What the buyer is owed back after a revocation or cancellation. */
   refundDue?: number;
-  /** Where returning refundDue stands; NEEDS_MANUAL means finance must finish it. */
+  // NEEDS_MANUAL means finance must finish it.
   refundStatus?: LandRefundStatus;
-  /** What has actually gone back to the buyer, naira. */
   refundedAmount?: number;
   refundSettledAt?: string;
   nextDue?: LandNextDue;
@@ -81,7 +75,7 @@ export interface LandInstallment {
   amount: number;
   amountPaid: number;
   lateFee: number;
-  /** Still owed on this installment, late fee included. */
+  // Late fee included.
   outstanding: number;
   status: 'PENDING' | 'PAID' | 'OVERDUE' | 'WAIVED' | string;
   paidAt?: string;
@@ -104,7 +98,7 @@ export interface LandMilestone {
   label: string;
   sequence: number;
   required: boolean;
-  /** Share of the contract price this step releases, in basis points. */
+  // Basis points.
   releaseBps: number;
   status: 'PENDING' | 'DELIVERED' | 'CONFIRMED' | 'DISPUTED' | 'WAIVED' | string;
   deliveredAt?: string;
@@ -120,7 +114,6 @@ export interface LandEscrowRelease {
   amount: number;
   reason: string;
   createdAt: string;
-  /** Where the payout of this release to the developer's bank stands. */
   payoutStatus?: LandReleasePayoutStatus;
   paidAt?: string;
   approvedAt?: string;
@@ -133,7 +126,6 @@ export type LandReleasePayoutStatus =
   | 'PAID'
   | 'FAILED';
 
-/** A condition precedent on a plot purchase (blueprint §9.3). */
 export interface LandClosingCondition {
   key: string;
   label: string;

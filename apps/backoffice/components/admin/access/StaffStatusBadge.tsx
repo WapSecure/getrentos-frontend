@@ -14,7 +14,6 @@ const statusConfig: Record<
   banned: { label: 'Banned', variant: 'danger', icon: Ban },
 };
 
-/** Renders an internal staff account status badge (backend enums are uppercase). */
 export const StaffStatusBadge = ({ status }: { status: string }) => {
   const config = statusConfig[status.toLowerCase() as AdminStaffStatus] ?? statusConfig.pending;
   const Icon = config.icon;

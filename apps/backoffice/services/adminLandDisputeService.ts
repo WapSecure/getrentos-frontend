@@ -19,10 +19,6 @@ const post = (path: string, body?: object): Promise<ApiResponse<AdminLandDispute
     })
   );
 
-/**
- * Land disputes for staff: reading needs `verifications.review`; holds and
- * decisions need `verifications.approve`.
- */
 export const adminLandDisputeService = {
   list(
     params: ListAdminLandDisputesParams = {}
@@ -47,7 +43,7 @@ export const adminLandDisputeService = {
   liftHold: (disputeId: string, note: string) => post(`${base(disputeId)}/hold/lift`, { note }),
   decide: (disputeId: string, outcome: LandDisputeOutcome, decision: string) =>
     post(`${base(disputeId)}/decide`, { outcome, decision }),
-  /** Staff evidence (e.g. a registry search). Multipart: the browser sets the boundary. */
+  // Multipart: the browser sets the boundary.
   addEvidence(
     disputeId: string,
     file: File,

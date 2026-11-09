@@ -180,8 +180,7 @@ export const ADMIN_ROLE_DETAILS: Record<
       'shortlet.view',
       'maintenance.view',
       'estate.view',
-      // Support is who gets asked "I paid and I'm still on Free", so they need
-      // to see billing state — read-only.
+      // Support needs read-only billing state to answer "I paid and I'm still on Free".
       'subscriptions.view',
     ],
   },
@@ -203,10 +202,7 @@ export function getAdminStaffRole(roles: string[] = []): AdminStaffRole {
   return roles.map((role) => BACKEND_STAFF_ROLE_MAP[role]).find(Boolean) ?? 'backoffice_admin';
 }
 
-/**
- * Mirrors the backend: a staff member holding several roles has every
- * permission any of them grants.
- */
+// Mirrors the backend: several roles grant the union of their permissions.
 export function hasAdminPermission(roles: string[] | undefined, permission: AdminPermission) {
   const staffRoles = (roles ?? [])
     .map((role) => BACKEND_STAFF_ROLE_MAP[role])
@@ -215,10 +211,7 @@ export function hasAdminPermission(roles: string[] | undefined, permission: Admi
   return effective.some((role) => ADMIN_ROLE_DETAILS[role].permissions.includes(permission));
 }
 
-/**
- * Supervisory hierarchy for internal staff roles, mirroring the backend
- * `staff.constants.ts`. Lower number = more senior.
- */
+// Mirrors the backend staff.constants.ts; a lower number is more senior.
 export const STAFF_ROLE_LEVELS: Partial<Record<AdminStaffRole, number>> = {
   super_admin: 0,
   backoffice_admin: 1,
@@ -231,7 +224,6 @@ export const STAFF_ROLE_LEVELS: Partial<Record<AdminStaffRole, number>> = {
   support_agent: 4,
 };
 
-/** The actor's most-senior admin level (lowest number among their admin roles). */
 export function minAdminLevel(roles: AdminStaffRole[]): number {
   const levels = roles
     .map((role) => STAFF_ROLE_LEVELS[role])
@@ -239,23 +231,16 @@ export function minAdminLevel(roles: AdminStaffRole[]): number {
   return levels.length > 0 ? Math.min(...levels) : Number.POSITIVE_INFINITY;
 }
 
-/** True when `role` is strictly subordinate to the actor's most-senior admin role. */
 export function isSubordinateRole(actorRoles: AdminStaffRole[], role: AdminStaffRole): boolean {
   const actorLevel = minAdminLevel(actorRoles);
   const targetLevel = STAFF_ROLE_LEVELS[role];
   return targetLevel !== undefined && targetLevel > actorLevel;
 }
 
-/** True when the actor holds SUPER_ADMIN. */
 export function isSuperAdmin(roles: string[] = []): boolean {
   return getAdminStaffRole(roles) === 'super_admin';
 }
 
-/**
- * Roles the signed-in admin is allowed to create: every staff role for a
- * SUPER_ADMIN, otherwise only roles strictly subordinate to their own
- * most-senior admin role.
- */
 export function creatableStaffRoles(actorRoles: string[] = []): AdminStaffRole[] {
   const staffRoles = Object.keys(ADMIN_ROLE_DETAILS) as AdminStaffRole[];
   const own = actorRoles
@@ -266,7 +251,6 @@ export function creatableStaffRoles(actorRoles: string[] = []): AdminStaffRole[]
   return staffRoles.filter((role) => isSubordinateRole(own, role));
 }
 
-/** Whether the user may access the Access & Roles area (manage, create, or approve staff). */
 export function hasStaffAccess(roles: string[] | undefined): boolean {
   return (
     hasAdminPermission(roles, 'staff.manage') ||

@@ -47,12 +47,6 @@ const REQUESTED_AS: Record<CreditRefund['requestedAs'], string> = {
   ADMIN: 'Sureground',
 };
 
-/**
- * Lease credit — a tenant's overpayment — paid back the way it was paid. Most
- * refunds complete on their own; the ones here that failed (the gateway
- * refused, often because the payment is too old to refund) went back into
- * the tenant's credit, and need a person to retry or settle by hand.
- */
 export default function CreditRefundsPage() {
   const queryClient = useQueryClient();
   const user = useAdminUser();

@@ -79,7 +79,6 @@ const Thread = ({
     },
     onError: (err: Error) => setError(err.message),
   });
-  // A drafted reply from the property's records.
   const [draft, setDraft] = useState<AdminOwnerQueryDraft | null>(null);
   const drafting = useMutation({
     mutationFn: () => unwrap(adminOwnerQueryService.draftReply(id)),

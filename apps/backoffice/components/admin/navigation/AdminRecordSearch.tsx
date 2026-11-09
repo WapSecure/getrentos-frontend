@@ -17,8 +17,7 @@ export function AdminRecordSearch({ compact = false }: { compact?: boolean }) {
   const [debounced, setDebounced] = useState('');
   const [focused, setFocused] = useState(false);
   const [active, setActive] = useState(0);
-  // Seeded lazily from storage: reading it in an effect would render an empty
-  // list first, then immediately re-render with the saved searches.
+  // Seeded lazily from storage; an effect would render an empty list first.
   const [recent, setRecent] = useState<string[]>(() => {
     if (typeof window === 'undefined') return [];
     try {

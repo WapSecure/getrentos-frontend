@@ -62,7 +62,6 @@ export interface AdminNotification {
 
 export type AdminNotificationPage = Paginated<AdminNotification> & { unreadTotal: number };
 
-/** Standard server-side paginated envelope ({ items, total, page, pageSize, totalPages }). */
 export interface Paginated<T> {
   items: T[];
   total: number;
@@ -71,7 +70,7 @@ export interface Paginated<T> {
   totalPages: number;
 }
 
-/** Raw staff rows as returned by the backend (enums are uppercase). */
+// The backend returns enums in uppercase.
 interface RawStaffRow {
   id: string;
   legalName: string;
@@ -101,7 +100,6 @@ interface RawApprovalRow {
   };
 }
 
-/** Maps a backend staff row to the lowercase shape the UI consumes. */
 function normalizeStaffRow(row: RawStaffRow): AdminStaffMember {
   return {
     ...row,
@@ -126,10 +124,6 @@ function normalizeApprovalRow(row: RawApprovalRow): AdminStaffApproval {
   };
 }
 
-/**
- * Evidence is attached the same way on every case family: multipart, one file,
- * an optional note. Kept in one place so a new case cannot invent a variant.
- */
 const postCaseEvidence = (
   path: string,
   file: File,
@@ -142,7 +136,6 @@ const postCaseEvidence = (
 };
 
 export const adminService = {
-  // ---- Staff access ----
   async listStaff(
     params: { page?: number; pageSize?: number } = {}
   ): Promise<ApiResponse<Paginated<AdminStaffMember>>> {
@@ -156,7 +149,6 @@ export const adminService = {
     });
   },
 
-  /** Active staff for assignment pickers; readable by any staff role. */
   async listStaffDirectory(
     params: { page?: number; pageSize?: number } = {}
   ): Promise<
@@ -301,7 +293,6 @@ export const adminService = {
     return safeCall(() => authFetch('/admin/notifications/read-all', { method: 'POST' }));
   },
 
-  // ---- Users ----
   async listUsers(
     params: {
       search?: string;
@@ -333,7 +324,6 @@ export const adminService = {
     );
   },
 
-  /** Ends every session the user has (account takeover response). Asks the officer to confirm it's them. */
   async signOutUserEverywhere(
     userId: string,
     reason: string
@@ -346,7 +336,6 @@ export const adminService = {
     );
   },
 
-  /** Removes the user's authenticator and backup codes and ends every session. */
   async resetUserTwoFactor(
     userId: string,
     reason: string
@@ -368,7 +357,6 @@ export const adminService = {
     );
   },
 
-  // ---- Verifications ----
   async listVerifications(
     params: {
       search?: string;
@@ -392,12 +380,10 @@ export const adminService = {
     return safeCall(() => authFetch(`/admin/verifications/${id}/approve`, { method: 'POST' }));
   },
 
-  /** Full detail incl. the real submitted documents (signed preview URLs) for a verification request. */
   async getVerificationDetail(id: string): Promise<ApiResponse<VerificationRequest>> {
     return safeCall(() => authFetch(`/admin/verifications/${id}`));
   },
 
-  /** Run the AI cross-check on one ownership proof (reads the document, compares owner + address). */
   async crossCheckOwnershipDoc(proofId: string): Promise<ApiResponse<OwnershipDocCheck>> {
     return safeCall(() =>
       authFetch(`/ai/ownership-proofs/${proofId}/doc-check`, { method: 'POST' })
@@ -422,7 +408,6 @@ export const adminService = {
     );
   },
 
-  // ---- Disputes ----
   async listDisputes(
     params: {
       search?: string;
@@ -468,7 +453,6 @@ export const adminService = {
     );
   },
 
-  /** A neutral reading of the case: each side's position, what to verify. Never a decision. */
   async getDisputeSummary(disputeId: string): Promise<ApiResponse<DisputeSummary>> {
     return safeCall(() => authFetch<DisputeSummary>(`/admin/disputes/${disputeId}/summary`));
   },
@@ -477,11 +461,6 @@ export const adminService = {
     return safeCall(() => authFetch(`/admin/disputes/${disputeId}`));
   },
 
-  /**
-   * Attach an administrator's own file to a case. The backend owns the file and
-   * serves it back through a short-lived signed URL, so nothing here holds a
-   * link that outlives the case.
-   */
   async addDisputeEvidence(
     disputeId: string,
     file: File,
@@ -504,7 +483,6 @@ export const adminService = {
     return safeCall(() => authFetch(`/admin/disputes/${disputeId}/escalate`, { method: 'POST' }));
   },
 
-  // ---- Fraud alerts ----
   async listFraudAlerts(
     params: {
       search?: string;
@@ -571,10 +549,6 @@ export const adminService = {
     return safeCall(() => authFetch(`/admin/fraud-alerts/${id}/reopen`, { method: 'POST' }));
   },
 
-  /**
-   * Attach a file an investigator is working from. An alert's reason is a
-   * claim; this is what lets somebody else check it.
-   */
   async addFraudEvidence(
     alertId: string,
     file: File,
@@ -583,7 +557,6 @@ export const adminService = {
     return postCaseEvidence(`/admin/fraud-alerts/${alertId}/evidence`, file, note);
   },
 
-  // ---- Escrow oversight ----
   async listEscrowTransactions(
     params: {
       search?: string;
@@ -616,17 +589,14 @@ export const adminService = {
     );
   },
 
-  /** Hands the held funds to the seller. Only valid once the buyer's money is held. */
   async releaseEscrow(id: string): Promise<ApiResponse<PlatformEscrowTransaction>> {
     return safeCall(() => authFetch(`/admin/escrow/${id}/release`, { method: 'POST' }));
   },
 
-  /** Returns the held funds to the buyer. Only valid once the buyer's money is held. */
   async refundEscrow(id: string): Promise<ApiResponse<PlatformEscrowTransaction>> {
     return safeCall(() => authFetch(`/admin/escrow/${id}/refund`, { method: 'POST' }));
   },
 
-  // ---- Audit logs ----
   async listAuditLogs(
     params: {
       search?: string;
@@ -648,7 +618,6 @@ export const adminService = {
     return safeCall(() => authFetch(`/admin/audit-logs${query}`));
   },
 
-  // ---- Documents ----
   async listDocuments(
     params: { search?: string; category?: string; page?: number; pageSize?: number } = {}
   ): Promise<ApiResponse<Paginated<AdminDocument>>> {
@@ -677,7 +646,6 @@ export const adminService = {
     return safeCall(() => authFetch(`/admin/documents/${id}/download`));
   },
 
-  // ---- Messages ----
   async listConversations(
     params: { search?: string; page?: number; pageSize?: number } = {}
   ): Promise<ApiResponse<Paginated<Conversation>>> {
@@ -719,7 +687,6 @@ export const adminService = {
     );
   },
 
-  // ---- Reports ----
   async getReportsStats(): Promise<
     ApiResponse<{
       gmvYtd: number;
@@ -739,7 +706,6 @@ export const adminService = {
     return safeCall(() => authFetch('/admin/reports/gmv-breakdown'));
   },
 
-  /** Triggers a browser download of the transactions CSV export. */
   async exportReportsCsv(): Promise<ApiResponse<void>> {
     return safeCall(async () => {
       const blob = await authDownload('/admin/reports/export');
@@ -754,7 +720,6 @@ export const adminService = {
     });
   },
 
-  // ---- Settings ----
   async getProfile(): Promise<ApiResponse<AdminProfile>> {
     return safeCall(() => authFetch('/admin/profile'));
   },
@@ -796,7 +761,6 @@ export const adminService = {
     return safeCall(() => authFetch(`/admin/ai/usage?days=${days}`));
   },
 
-  /** Gate evidence: how reviewers decided on AI fraud signals and triage proposals. */
   async getAiReviews(days?: number): Promise<ApiResponse<AiReviewsSummary>> {
     return safeCall(() => authFetch(`/admin/ai/reviews${days ? `?days=${days}` : ''}`));
   },
