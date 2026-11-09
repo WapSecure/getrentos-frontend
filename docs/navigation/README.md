@@ -139,7 +139,7 @@ sizes (`1bc27cbd`), or they would show an out-of-date look.
 
 ## 6. Responsive validation
 
-- **Desktop at 1440px:** sidebar expanded, all groups open, icon rail on, then off again. Checked in the browser for landlord, owner, estate, realtor and agent.
+- **Desktop at 1440px:** sidebar expanded, all groups open, icon rail on, then off again. Checked in the browser for landlord, owner, estate, realtor and agent. Realtor after its regroup: the group holding the current page opens, there is one current link, and the phone bar reads Dashboard, Listings, Clients, Leads, Messages.
 - **Phone at 390px:** bottom bar and drawer for landlord. Checked in the browser.
 - **Tablet at 820px:** landlord checked in the browser (bar, menu button, drawer, Escape, no overflow). Owner, realtor, agent and buyer share the same top bar and shell code. Renter and estate have their own top bars and were reviewed in code only: the bridge would not render below about 1025px wide later in the session.
 - **Not tested:** orientation change, safe-area insets on a real device, and browser back while the drawer is open.
@@ -196,7 +196,7 @@ sizes (`1bc27cbd`), or they would show an out-of-date look.
    - role and workspace switching
    - screen readers (VoiceOver on Safari, NVDA on Chrome)
    - contrast after the new text colours
-4. **Top bars:** five of eight top bars now share `WorkspaceNavbar` (39b895cd). Renter (form search, inline links, language toggle), estate (switcher, no search) and resident keep their own layouts on purpose. The shared top bar has not been opened in the browser yet.
+4. **Top bars:** five of eight top bars now share `WorkspaceNavbar` (39b895cd). Renter (form search, inline links, language toggle), estate (switcher, no search) and resident keep their own layouts on purpose. Checked in the browser as a realtor: search with Enter goes to `/realtor/listings?q=test`, as before.
 5. **Agent and renter groups:** they still use list slices. Moving them to `pick(...)` would protect them from drift.
 6. **Pipeline tabs:** add them elsewhere only where a real sequence exists, such as landlord tenancies (Leases → Inspections → Deposits → Notices).
 7. **CI:** none of this has been through CI; run the browser tests once GitHub billing is fixed.
