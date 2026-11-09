@@ -248,7 +248,7 @@ function SidebarGroups({
         if (group.items.length === 0) return null;
         if (group.kind === 'primary') {
           return (
-            <section key={group.label} aria-label={group.label} className="space-y-1">
+            <div key={group.label} role="group" aria-label={group.label} className="space-y-1">
               {group.items.map((item) => (
                 <SidebarLink
                   key={item.href}
@@ -257,7 +257,7 @@ function SidebarGroups({
                   onNavigate={onNavigate}
                 />
               ))}
-            </section>
+            </div>
           );
         }
         if (group.items.length === 1 && group.kind !== 'utility') {
@@ -274,8 +274,9 @@ function SidebarGroups({
         const holdsPage = group.items.some((i) => i.href === activeHref);
         const open = holdsPage || !collapsed.includes(group.label);
         return (
-          <section
+          <div
             key={group.label}
+            role="group"
             aria-labelledby={`${id}-label`}
             className={group.kind === 'utility' ? 'border-t border-border pt-4' : undefined}
           >
@@ -305,7 +306,7 @@ function SidebarGroups({
                 />
               ))}
             </div>
-          </section>
+          </div>
         );
       })}
     </>

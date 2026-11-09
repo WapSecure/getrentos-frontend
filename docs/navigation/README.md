@@ -193,9 +193,8 @@ sizes (`1bc27cbd`), or they would show an out-of-date look.
 3. **Not tested yet:**
    - tablet top bars for renter and estate
    - orientation change
-   - role and workspace switching
+   - workspace switching with two estates
    - screen readers (VoiceOver on Safari, NVDA on Chrome)
-   - contrast after the new text colours
 4. **Top bars:** five of eight top bars now share `WorkspaceNavbar` (39b895cd). Renter (form search, inline links, language toggle), estate (switcher, no search) and resident keep their own layouts on purpose. Checked in the browser as a realtor: search with Enter goes to `/realtor/listings?q=test`, as before.
 5. **Agent and renter groups:** they still use list slices. Moving them to `pick(...)` would protect them from drift.
 6. **Pipeline tabs:** add them elsewhere only where a real sequence exists, such as landlord tenancies (Leases → Inspections → Deposits → Notices).

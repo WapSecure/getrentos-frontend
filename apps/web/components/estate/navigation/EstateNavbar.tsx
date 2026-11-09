@@ -29,7 +29,10 @@ export const EstateNavbar = ({ user }: EstateNavbarProps) => {
 
   return (
     <>
-      <nav className={`workspace-navbar sticky top-0 z-50 ${isScrolled ? 'shadow-xs' : ''}`}>
+      <nav
+        aria-label="Top bar"
+        className={`workspace-navbar sticky top-0 z-50 ${isScrolled ? 'shadow-xs' : ''}`}
+      >
         <div className="px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center gap-2 h-16">
             {/* Phone widths: the wordmark collapses to the mark (still named for

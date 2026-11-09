@@ -83,7 +83,10 @@ export const WorkspaceNavbar = ({
 
   return (
     <>
-      <nav className={`workspace-navbar sticky top-0 z-50 ${isScrolled ? 'shadow-xs' : ''}`}>
+      <nav
+        aria-label="Top bar"
+        className={`workspace-navbar sticky top-0 z-50 ${isScrolled ? 'shadow-xs' : ''}`}
+      >
         <div className="px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between gap-3">
             <Logo size="md" />

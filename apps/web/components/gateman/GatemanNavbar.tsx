@@ -1,13 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { LogOut, KeyRound, Car, Package, Siren } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { KeyRound, Car, Package, Siren } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
 import { PostSwitcher } from '@/components/gateman/PostSwitcher';
-import { Button, ThemeToggle } from '@sureground/ui';
+import { ThemeToggle } from '@sureground/ui';
 import { ROUTES } from '@/lib/constants/auth';
-import { logoutSession } from '@/lib/apiClient';
+import { AccountMenu } from '@/components/shared/navigation/AccountMenu';
 
 interface GatemanNavbarProps {
   user: { fullName: string; email: string } | null;
@@ -21,13 +21,7 @@ const navItems = [
 ];
 
 export const GatemanNavbar = ({ user }: GatemanNavbarProps) => {
-  const router = useRouter();
   const pathname = usePathname();
-
-  const handleSignOut = async () => {
-    await logoutSession();
-    router.push(ROUTES.LOGIN);
-  };
 
   const links = (compact: boolean) =>
     navItems.map((item) => {
@@ -58,19 +52,9 @@ export const GatemanNavbar = ({ user }: GatemanNavbarProps) => {
           <Logo size="md" className="shrink-0 [&>span]:sr-only sm:[&>span]:not-sr-only" />
           <div className="flex min-w-0 items-center gap-1 lg:gap-3">
             <div className="hidden lg:flex items-center gap-1">{links(false)}</div>
-            <span className="hidden lg:block text-sm text-muted-foreground">{user?.fullName}</span>
             <PostSwitcher />
             <ThemeToggle />
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleSignOut}
-              aria-label="Sign out"
-              icon={<LogOut className="w-4 h-4" aria-hidden="true" />}
-              className="min-h-11 min-w-11 shrink-0 text-destructive hover:bg-destructive-subtle hover:text-destructive"
-            >
-              <span className="hidden lg:inline">Sign out</span>
-            </Button>
+            <AccountMenu user={user} roleId="gateman" roleLabel="Gate" />
           </div>
         </div>
         {/* Below desktop the four gate tasks get a row of their own, so the bar
