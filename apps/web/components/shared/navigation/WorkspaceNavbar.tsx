@@ -5,17 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
 import { IconButton, SearchInput, ThemeToggle } from '@sureground/ui';
-import {
-  GroupedMobileNavigation,
-  type GroupedSidebarGroup,
-  type GroupedSidebarItem,
-} from '@/components/shared/dashboard/GroupedSidebar';
-import { useLanguage } from '@/lib/i18n/LanguageContext';
-import type { TranslationKey } from '@/lib/i18n/translations';
-
-export interface WorkspaceNavbarGroup extends Omit<GroupedSidebarGroup, 'items'> {
-  items: (GroupedSidebarItem & { labelKey?: TranslationKey })[];
-}
+import { RoleMobileNavigation } from '@/components/shared/dashboard/GroupedSidebar';
+import type { RoleNavigationConfig } from '@/lib/navigation/types';
 
 interface WorkspaceNavbarProps {
   search: {
@@ -27,12 +18,7 @@ interface WorkspaceNavbarProps {
   assistant: ReactNode;
   notifications: ReactNode;
   profileMenu: ReactNode;
-  navigation: {
-    ariaLabel: string;
-    workspaceLabel: string;
-    dashboardHref: string;
-    groups: WorkspaceNavbarGroup[];
-  };
+  navigation: RoleNavigationConfig;
 }
 
 export const WorkspaceNavbar = ({
@@ -43,7 +29,6 @@ export const WorkspaceNavbar = ({
   profileMenu,
   navigation,
 }: WorkspaceNavbarProps) => {
-  const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -112,18 +97,9 @@ export const WorkspaceNavbar = ({
             exit={{ opacity: 0, y: -20 }}
             className="fixed top-16 left-0 right-0 z-[60] bg-background border-b border-border lg:hidden bottom-0 overflow-y-auto overscroll-contain"
           >
-            <GroupedMobileNavigation
-              ariaLabel={navigation.ariaLabel}
-              workspaceLabel={navigation.workspaceLabel}
-              dashboardHref={navigation.dashboardHref}
+            <RoleMobileNavigation
+              config={navigation}
               onNavigate={() => setIsMobileMenuOpen(false)}
-              groups={navigation.groups.map((group) => ({
-                ...group,
-                items: group.items.map((item) => ({
-                  ...item,
-                  label: item.labelKey ? t(item.labelKey) : item.label,
-                })),
-              }))}
             />
           </motion.div>
         )}

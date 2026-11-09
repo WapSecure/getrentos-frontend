@@ -2,8 +2,8 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import { LandlordProfileDropdown } from './LandlordProfileDropdown';
-import { navGroups } from '../dashboard/LandlordSidebar';
 import { WorkspaceNavbar } from '@/components/shared/navigation/WorkspaceNavbar';
+import { landlordNavigation } from '@/lib/navigation/roles/landlord';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import { landlordService } from '@/services/landlordService';
@@ -47,12 +47,7 @@ export const LandlordNavbar = ({ user }: LandlordNavbarProps) => {
         />
       }
       profileMenu={<LandlordProfileDropdown user={user} />}
-      navigation={{
-        ariaLabel: 'Landlord navigation',
-        workspaceLabel: 'Property management',
-        dashboardHref: ROUTES.LANDLORD_DASHBOARD,
-        groups: navGroups,
-      }}
+      navigation={landlordNavigation}
     />
   );
 };

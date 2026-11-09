@@ -7,9 +7,8 @@ import { Logo } from '@/components/ui/Logo';
 import { IconButton, ThemeToggle } from '@sureground/ui';
 import { ResidentProfileDropdown } from './ResidentProfileDropdown';
 import { NotificationBell } from '@/components/shared/notifications/NotificationBell';
-import { residentNavGroups } from './ResidentSidebar';
-import { GroupedMobileNavigation } from '@/components/shared/dashboard/GroupedSidebar';
-import { ROUTES } from '@/lib/constants/auth';
+import { RoleMobileNavigation } from '@/components/shared/dashboard/GroupedSidebar';
+import { residentNavigation } from '@/lib/navigation/roles/resident';
 import { ResidentAssistant } from './ResidentAssistant';
 
 interface ResidentNavbarProps {
@@ -65,11 +64,8 @@ export const ResidentNavbar = ({ user }: ResidentNavbarProps) => {
             exit={{ opacity: 0, y: -20 }}
             className="fixed top-16 left-0 right-0 z-[60] bg-background border-b border-border lg:hidden bottom-0 overflow-y-auto overscroll-contain"
           >
-            <GroupedMobileNavigation
-              ariaLabel="Resident navigation"
-              workspaceLabel="Resident"
-              dashboardHref={ROUTES.RESIDENT_DASHBOARD}
-              groups={residentNavGroups}
+            <RoleMobileNavigation
+              config={residentNavigation}
               onNavigate={() => setIsMobileMenuOpen(false)}
             />
           </motion.div>

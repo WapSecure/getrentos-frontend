@@ -10,8 +10,8 @@ import { IconButton, Input, ThemeToggle } from '@sureground/ui';
 import { LanguageToggle } from '@/components/ui/LanguageToggle';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { RenterProfileDropdown } from './RenterProfileDropdown';
-import { navGroups } from '../dashboard/RenterSidebar';
-import { GroupedMobileNavigation } from '@/components/shared/dashboard/GroupedSidebar';
+import { RoleMobileNavigation } from '@/components/shared/dashboard/GroupedSidebar';
+import { renterNavigation } from '@/lib/navigation/roles/renter';
 import { ROUTES } from '@/lib/constants/auth';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -187,18 +187,9 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
                 <LanguageToggle />
               </div>
             </div>
-            <GroupedMobileNavigation
-              ariaLabel="Renter navigation"
-              workspaceLabel="Renter"
-              dashboardHref={ROUTES.RENTER_DASHBOARD}
+            <RoleMobileNavigation
+              config={renterNavigation}
               onNavigate={() => setIsMobileMenuOpen(false)}
-              groups={navGroups.map((group) => ({
-                ...group,
-                items: group.items.map((item) => ({
-                  ...item,
-                  label: item.labelKey ? t(item.labelKey) : item.label,
-                })),
-              }))}
             />
           </motion.div>
         )}

@@ -3,71 +3,17 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ChevronDown, Lock } from 'lucide-react';
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useSyncExternalStore,
-  type ElementType,
-  type ReactNode,
-} from 'react';
-import { PLAN_TIER_LABELS, type PlanTier } from '@sureground/shared';
+import { useCallback, useEffect, useRef, useSyncExternalStore } from 'react';
+import { PLAN_TIER_LABELS } from '@sureground/shared';
 import { SidebarRailToggle, useSidebarRail } from '@sureground/ui';
-
-export interface GroupedSidebarItem {
-  label?: ReactNode;
-  href: string;
-  icon: ElementType;
-  locked?: boolean;
-  /** Defaults to Pro; pass it for any other plan, or the badge announces the wrong plan to screen readers. */
-  lockedPlan?: PlanTier;
-  badge?: ReactNode;
-}
-
-export interface GroupedSidebarGroup {
-  label: string;
-  items: GroupedSidebarItem[];
-  kind?: 'primary' | 'contextual' | 'utility';
-  defaultExpanded?: boolean;
-}
-
-export function createRoleNavigation<TGroup extends GroupedSidebarGroup>(
-  groups: TGroup[],
-  primaryHrefs: readonly string[],
-  utilityHrefs: readonly string[] = []
-): TGroup[] {
-  const allItems = groups.flatMap((group) => group.items);
-  const findItems = (hrefs: readonly string[]) =>
-    hrefs.flatMap((href) => {
-      const match = allItems.find((item) => item.href === href);
-      return match ? [match] : [];
-    });
-  const promoted = new Set([...primaryHrefs, ...utilityHrefs]);
-  const contextual = groups
-    .map((group) => ({
-      ...group,
-      kind: 'contextual' as const,
-      defaultExpanded: false,
-      items: group.items.filter((item) => !promoted.has(item.href)),
-    }))
-    .filter((group) => group.items.length > 0);
-  const utilities = findItems(utilityHrefs);
-
-  return [
-    { label: 'Primary', kind: 'primary', items: findItems(primaryHrefs) },
-    ...contextual,
-    ...(utilities.length
-      ? [
-          {
-            label: 'Account and preferences',
-            kind: 'utility' as const,
-            defaultExpanded: false,
-            items: utilities,
-          },
-        ]
-      : []),
-  ] as TGroup[];
-}
+import { useLanguage } from '@/lib/i18n/LanguageContext';
+import { resolveRoleNavigation } from '@/lib/navigation/resolve';
+import type {
+  GroupedSidebarGroup,
+  GroupedSidebarItem,
+  NavigationGates,
+  RoleNavigationConfig,
+} from '@/lib/navigation/types';
 
 interface GroupedSidebarProps {
   ariaLabel: string;
@@ -451,5 +397,45 @@ export function GroupedMobileNavigation({
         onNavigate={onNavigate}
       />
     </nav>
+  );
+}
+
+export function RoleSidebar({
+  config,
+  gates,
+  workspaceLabel = config.workspaceLabel,
+}: {
+  config: RoleNavigationConfig;
+  gates?: NavigationGates;
+  workspaceLabel?: string;
+}) {
+  const { t } = useLanguage();
+  return (
+    <GroupedSidebar
+      ariaLabel={config.ariaLabel}
+      workspaceLabel={workspaceLabel}
+      dashboardHref={config.dashboardHref}
+      groups={resolveRoleNavigation(config, t, gates)}
+    />
+  );
+}
+
+/** The phone drawer: ungated, as it has always been, so locked and flagged pages still appear here. */
+export function RoleMobileNavigation({
+  config,
+  onNavigate,
+}: {
+  config: RoleNavigationConfig;
+  onNavigate: () => void;
+}) {
+  const { t } = useLanguage();
+  return (
+    <GroupedMobileNavigation
+      ariaLabel={config.ariaLabel}
+      workspaceLabel={config.workspaceLabel}
+      dashboardHref={config.dashboardHref}
+      groups={resolveRoleNavigation(config, t)}
+      onNavigate={onNavigate}
+    />
   );
 }

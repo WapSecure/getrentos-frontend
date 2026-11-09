@@ -2,8 +2,8 @@
 
 import { useRouter } from 'next/navigation';
 import { RealtorProfileDropdown } from './RealtorProfileDropdown';
-import { navGroups } from '../dashboard/RealtorSidebar';
 import { WorkspaceNavbar } from '@/components/shared/navigation/WorkspaceNavbar';
+import { realtorNavigation } from '@/lib/navigation/roles/realtor';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
 import { realtorService } from '@/services/realtorService';
@@ -46,12 +46,7 @@ export const RealtorNavbar = ({ user }: RealtorNavbarProps) => {
         />
       }
       profileMenu={<RealtorProfileDropdown user={user} />}
-      navigation={{
-        ariaLabel: 'Realtor navigation',
-        workspaceLabel: 'Realtor',
-        dashboardHref: ROUTES.REALTOR_DASHBOARD,
-        groups: navGroups,
-      }}
+      navigation={realtorNavigation}
     />
   );
 };

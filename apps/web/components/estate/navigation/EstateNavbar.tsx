@@ -9,9 +9,8 @@ import { EstateProfileDropdown } from './EstateProfileDropdown';
 import { NotificationBell } from '@/components/shared/notifications/NotificationBell';
 import { EstateSwitcher } from './EstateSwitcher';
 import { EstateAssistant } from '../assistant/EstateAssistant';
-import { navGroups } from '../dashboard/EstateSidebar';
-import { GroupedMobileNavigation } from '@/components/shared/dashboard/GroupedSidebar';
-import { ROUTES } from '@/lib/constants/auth';
+import { RoleMobileNavigation } from '@/components/shared/dashboard/GroupedSidebar';
+import { estateNavigation } from '@/lib/navigation/roles/estate';
 
 interface EstateNavbarProps {
   user: { fullName: string; email: string } | null;
@@ -72,11 +71,8 @@ export const EstateNavbar = ({ user }: EstateNavbarProps) => {
               <span className="text-sm text-muted-foreground">Theme</span>
               <ThemeToggle />
             </div>
-            <GroupedMobileNavigation
-              ariaLabel="Estate administration navigation"
-              workspaceLabel="Estate administration"
-              dashboardHref={ROUTES.ESTATE_DASHBOARD}
-              groups={navGroups}
+            <RoleMobileNavigation
+              config={estateNavigation}
               onNavigate={() => setIsMobileMenuOpen(false)}
             />
           </motion.div>

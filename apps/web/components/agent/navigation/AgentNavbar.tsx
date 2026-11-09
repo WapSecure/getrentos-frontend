@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 import { Wifi, WifiOff } from 'lucide-react';
 import { Badge } from '@sureground/ui';
 import { AgentProfileDropdown } from './AgentProfileDropdown';
-import { navGroups } from '../dashboard/AgentSidebar';
 import { WorkspaceNavbar } from '@/components/shared/navigation/WorkspaceNavbar';
+import { agentNavigation } from '@/lib/navigation/roles/agent';
 import { ROUTES } from '@/lib/constants/auth';
 import { NotificationBell } from '@/components/shared/notifications/NotificationBell';
 import { unwrap } from '@/lib/apiHelpers';
@@ -62,12 +62,7 @@ export const AgentNavbar = ({ user }: AgentNavbarProps) => {
         />
       }
       profileMenu={<AgentProfileDropdown user={user} />}
-      navigation={{
-        ariaLabel: 'Agent navigation',
-        workspaceLabel: 'Field operations',
-        dashboardHref: ROUTES.AGENT_DASHBOARD,
-        groups: navGroups,
-      }}
+      navigation={agentNavigation}
     />
   );
 };

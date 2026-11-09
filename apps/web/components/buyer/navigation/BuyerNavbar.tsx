@@ -2,8 +2,8 @@
 
 import { useRouter } from 'next/navigation';
 import { BuyerProfileDropdown } from './BuyerProfileDropdown';
-import { navGroups } from '../dashboard/BuyerSidebar';
 import { WorkspaceNavbar } from '@/components/shared/navigation/WorkspaceNavbar';
+import { buyerNavigation } from '@/lib/navigation/roles/buyer';
 import { unwrap } from '@/lib/apiHelpers';
 import { buyerKeys } from '@/lib/queryKeys';
 import { buyerService } from '@/services/buyerService';
@@ -41,12 +41,7 @@ export const BuyerNavbar = ({ user }: BuyerNavbarProps) => {
         />
       }
       profileMenu={<BuyerProfileDropdown user={user} />}
-      navigation={{
-        ariaLabel: 'Buyer navigation',
-        workspaceLabel: 'Buyer',
-        dashboardHref: ROUTES.BUYER_DASHBOARD,
-        groups: navGroups,
-      }}
+      navigation={buyerNavigation}
     />
   );
 };

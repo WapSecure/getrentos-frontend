@@ -2,8 +2,8 @@
 
 import { useRouter } from 'next/navigation';
 import { OwnerProfileDropdown } from './OwnerProfileDropdown';
-import { navGroups } from '../dashboard/OwnerSidebar';
 import { WorkspaceNavbar } from '@/components/shared/navigation/WorkspaceNavbar';
+import { ownerNavigation } from '@/lib/navigation/roles/owner';
 import { unwrap } from '@/lib/apiHelpers';
 import { ownerKeys } from '@/lib/queryKeys';
 import { ownerService } from '@/services/ownerService';
@@ -41,12 +41,7 @@ export const OwnerNavbar = ({ user }: OwnerNavbarProps) => {
         />
       }
       profileMenu={<OwnerProfileDropdown user={user} />}
-      navigation={{
-        ariaLabel: 'Property owner navigation',
-        workspaceLabel: 'Property owner',
-        dashboardHref: ROUTES.OWNER_DASHBOARD,
-        groups: navGroups,
-      }}
+      navigation={ownerNavigation}
     />
   );
 };
