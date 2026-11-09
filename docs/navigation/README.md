@@ -167,8 +167,9 @@ The VS Code browser renders at 0.8 zoom, so a 390px screen needs a 312px viewpor
 
 Phone and tablet screenshots: `screenshots/after-agent-phone.png`, `screenshots/after-agent-tablet.png`.
 Bottom-bar labels cut off at 390px for long names ("Inspectio…", "Verificati…"); readable via the
-accessible name, but shorter labels would help. Not tested: orientation change, safe-area insets on a
-real device, browser back while the drawer is open.
+accessible name, but shorter labels would help. Browser back with the drawer open (landlord, 390px): returns to the previous page with the drawer
+closed. Not tested on a real device: rotation and safe-area insets. Rotation changes only the width,
+which the table above covers.
 
 ## 7. Accessibility results (target WCAG 2.2 AA)
 
