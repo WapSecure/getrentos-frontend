@@ -38,16 +38,17 @@ page loaded at that URL, exactly one sidebar link was current and was that page,
 link's group was open, the page had one h1, and there were no console errors (Next.js
 dev overlay messages excluded).
 
-| Role           | Account             | Sidebar pages | Result       |
-| -------------- | ------------------- | ------------: | ------------ |
-| Landlord       | seed-landlord       |            34 | All pass     |
-| Property owner | seed-owner          |            29 | All pass     |
-| Renter         | seed-renter         |            16 | All pass     |
-| Realtor        | seed-realtor        |            16 | All pass     |
-| Field agent    | aisha.suleiman.test |            14 | All pass     |
-| Buyer          | seed-buyer          |            15 | All pass     |
-| Estate manager | qa-audit-estate     |            26 | All pass     |
-| **Total**      |                     |       **150** | **All pass** |
+| Role                                 | Account                                                                     |                                                                                                                                                                                                                                                                             Sidebar pages | Result       |
+| ------------------------------------ | --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | ------------ |
+| Landlord                             | seed-landlord                                                               |                                                                                                                                                                                                                                                                                        34 | All pass     |
+| Property owner                       | seed-owner                                                                  |                                                                                                                                                                                                                                                                                        29 | All pass     |
+| Renter                               | seed-renter                                                                 |                                                                                                                                                                                                                                                                                        16 | All pass     |
+| Realtor                              | seed-realtor                                                                |                                                                                                                                                                                                                                                                                        16 | All pass     |
+| Field agent                          | aisha.suleiman.test                                                         |                                                                                                                                                                                                                                                                                        14 | All pass     |
+| Buyer                                | seed-buyer                                                                  |                                                                                                                                                                                                                                                                                        15 | All pass     |
+| Estate manager                       | qa-audit-estate                                                             |                                                                                                                                                                                                                                                                                        26 | All pass     |
+| Backoffice (61 pages, by permission) | Dashboard, Users, Verifications, Unmatched Payments, Disputes, Fraud & Risk | Overview · People and identity · Properties and listings · Managed services · Payments in · Payouts and ledgers · Land · Risk and disputes · Communications · Platform (89c728bb: the groups had drifted, with payments under "Marketplace operations" and land under "Risk and finance") |
+| **Total**                            |                                                                             |                                                                                                                                                                                                                                                                                   **150** | **All pass** |
 
 The run found and fixed:
 
