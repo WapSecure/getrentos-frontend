@@ -1,6 +1,7 @@
 import type { BadgeTone } from '@getrentos/ui-native';
 import { apiFetch, apiUpload } from './client';
 import { appendFile, type PickedFile } from './documents';
+import type { PayoutSentTo } from '@getrentos/shared';
 
 /**
  * Running the firm itself: its team, commissions and payouts, client-money
@@ -165,6 +166,10 @@ export interface PayoutRecord {
   status: string;
   failureReason: string | null;
   paidAt?: string | null;
+  /** The transfer reference to quote to the bank. */
+  transferRef?: string | null;
+  /** Where it went (bank + last four digits), only when the API can prove it. */
+  sentTo?: PayoutSentTo | null;
 }
 
 export interface PayableAgent {

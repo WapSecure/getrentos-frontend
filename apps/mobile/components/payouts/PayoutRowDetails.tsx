@@ -1,6 +1,11 @@
 import { View } from 'react-native';
 import { Text } from '@getrentos/ui-native';
-import { PAYOUT_ARRIVAL_NOTE, PAYOUT_FAILED_NEXT_STEP } from '@getrentos/shared';
+import {
+  PAYOUT_ARRIVAL_NOTE,
+  PAYOUT_FAILED_NEXT_STEP,
+  payoutSentToLabel,
+  type PayoutSentTo,
+} from '@getrentos/shared';
 import { formatDate } from '@/lib/format';
 
 /**
@@ -14,17 +19,26 @@ export function PayoutRowDetails({
   paidAt,
   transferRef,
   failureReason,
+  sentTo,
 }: {
   state: 'pending' | 'paid' | 'failed';
   paidAt?: string | null;
   transferRef?: string | null;
   failureReason?: string | null;
+  /** Where it went, only when the API can prove it. */
+  sentTo?: PayoutSentTo | null;
 }) {
+  const sentToLabel = payoutSentToLabel(sentTo);
   return (
     <View style={{ gap: 2 }}>
       {state === 'paid' && paidAt ? (
         <Text variant="caption" color="mutedForeground">
           Paid {formatDate(paidAt, 'medium')}
+        </Text>
+      ) : null}
+      {sentToLabel ? (
+        <Text variant="caption" color="mutedForeground">
+          {sentToLabel}
         </Text>
       ) : null}
       {state === 'pending' ? (

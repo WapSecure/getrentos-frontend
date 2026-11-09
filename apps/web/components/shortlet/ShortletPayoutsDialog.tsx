@@ -349,6 +349,7 @@ export function ShortletPayoutsDialog({
                         }
                         paidAt={p.paidAt}
                         transferRef={p.transferRef}
+                        sentTo={p.sentTo}
                       />
                     </div>
                     <p className="font-semibold">{formatCurrency(p.amount)}</p>

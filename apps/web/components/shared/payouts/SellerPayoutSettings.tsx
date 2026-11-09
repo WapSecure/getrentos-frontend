@@ -10,6 +10,7 @@ import {
   INCOMPLETE_ACCOUNT_LOOKUP,
   PAYOUT_CHANGE_COOLDOWN_HINT,
   PAYOUT_FAILED_NEXT_STEP,
+  payoutSentToLabel,
   lookupAllowsSave,
   payoutAccountLabel,
   payoutAccountStepUpSummary,
@@ -182,6 +183,11 @@ export const SellerPayoutSettings = ({ description }: SellerPayoutSettingsProps)
                           ? `Released ${formatDate(sale.releasedAt)}`
                           : 'Released'}
                     </p>
+                    {payoutSentToLabel(sale.sentTo) && (
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {payoutSentToLabel(sale.sentTo)}
+                      </p>
+                    )}
                     {/* The API sends no reason for a failed sale payout; say what
                         happens next so the seller is not left guessing (UX-36). */}
                     {sale.payoutStatus === 'FAILED' && (

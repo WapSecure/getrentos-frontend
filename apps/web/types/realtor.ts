@@ -1,3 +1,4 @@
+import type { PayoutSentTo } from '@getrentos/shared';
 export type ClientRole = 'owner' | 'landlord';
 export type ClientStatus = 'active' | 'pending' | 'inactive';
 export type ListingCategory = 'sale' | 'rental';
@@ -162,6 +163,8 @@ export interface RealtorPayout {
   paidAt?: string | null;
   failureReason?: string | null;
   /** How many commission rows this batch settled. */
+  /** Where it went (bank + last four digits), only when the API can prove it. */
+  sentTo?: PayoutSentTo | null;
   commissionCount: number;
   createdAt: string;
 }

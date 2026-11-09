@@ -24,6 +24,7 @@ import { StarRating } from '@/components/landlord/vendors/StarRating';
 import { formatVisit } from '@/components/landlord/vendors/VendorCard';
 import type { Vendor, VendorJob } from '@/types/landlord';
 import { BankAccountFields } from '@/components/shared/payouts/BankAccountFields';
+import { PayoutHoldNotice } from '@/components/shared/payouts/PayoutHoldNotice';
 import {
   INCOMPLETE_ACCOUNT_LOOKUP,
   PAYOUT_CHANGE_COOLDOWN_HINT,
@@ -260,6 +261,7 @@ export const VendorDetailModal = ({ vendor, onClose }: VendorDetailModalProps) =
                       Not yet verified: save it again to resolve it against the bank.
                     </p>
                   )}
+                  <PayoutHoldNotice holdUntil={payoutAccount.payoutHoldUntil} />
                   <p className="mt-2 text-xs text-muted-foreground">
                     {PAYOUT_CHANGE_COOLDOWN_HINT}
                   </p>

@@ -1,4 +1,5 @@
 import { authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
+import type { PayoutSentTo } from '@getrentos/shared';
 
 /**
  * Sale-proceeds payouts for anyone who sells on the marketplace — Property
@@ -24,6 +25,8 @@ export interface SellerSalePayout {
   paidAt?: string;
   propertyTitle?: string;
   releasedAt?: string;
+  /** Where it went (bank + last four digits), only when the API can prove it. */
+  sentTo?: PayoutSentTo | null;
 }
 
 export const sellerPayoutService = {

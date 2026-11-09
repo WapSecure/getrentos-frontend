@@ -64,7 +64,9 @@ export function History({ items }: { items: PayoutRecord[] }) {
             <PayoutRowDetails
               state={key === 'SUCCESS' ? 'paid' : key === 'FAILED' ? 'failed' : 'pending'}
               paidAt={p.paidAt}
+              transferRef={p.transferRef}
               failureReason={p.failureReason}
+              sentTo={p.sentTo}
             />
           </View>
         );

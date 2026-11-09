@@ -3,6 +3,7 @@ import { toQuery } from './query';
 import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
 import type { TrustProfile } from './agentTrustProfile';
+import type { PayoutSentTo } from '@getrentos/shared';
 
 /**
  * The realtor's side of /realtor: clients who let them represent a property,
@@ -202,6 +203,8 @@ export interface RealtorPayout {
   paidAt?: string | null;
   failureReason?: string | null;
   commissionCount: number;
+  /** Where it went (bank + last four digits), only when the API can prove it. */
+  sentTo?: PayoutSentTo | null;
   createdAt: string;
 }
 

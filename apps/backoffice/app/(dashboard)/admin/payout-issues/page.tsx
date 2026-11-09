@@ -27,6 +27,7 @@ import {
   type PayoutIssue,
   type PayoutKind,
   type PayoutRail,
+  type PayoutSource,
 } from '@/services/adminPayoutIssuesService';
 
 type View = 'failed' | 'stuck' | 'waiting';
@@ -52,6 +53,23 @@ const SOURCE: Partial<Record<PayoutRail, { href: string; label: string }>> = {
   agent: { href: '/admin/agents', label: 'Open agents' },
   partner: { href: '/admin/partner-commercials', label: 'Open partner commercials' },
 };
+
+const SOURCE_NOUN: Record<PayoutSource['kind'], string> = {
+  booking: 'booking',
+  realtorCommission: 'commission',
+  agencyCommission: 'commission',
+  partnerCommission: 'partner share',
+};
+
+/** A direct link to the claimed record, where the console can open one. */
+const sourceHref = (s: PayoutSource): string | null =>
+  s.kind === 'booking'
+    ? `/admin/shortlets?tab=bookings&bookingId=${encodeURIComponent(s.id)}`
+    : null;
+
+/** "booking 1a2b… and 2 more" */
+const sourceText = (s: PayoutSource): string =>
+  `${SOURCE_NOUN[s.kind]} ${s.id}${s.count > 1 ? ` and ${s.count - 1} more` : ''}`;
 
 /**
  * Payouts that need a person, on every rail in one place.
@@ -106,6 +124,10 @@ export default function PayoutIssuesPage() {
     },
     onError: (e: Error) => toast.error(e.message || 'Could not approve this payout.'),
   });
+
+  // Approved here, or reported approved by the API (UX-43): Retry is all it needs.
+  const isApproved = (p: PayoutIssue) =>
+    p.held?.approved === true || Boolean(p.transferRef && approvedRefs.has(p.transferRef));
 
   const items =
     (view === 'failed' ? query.data?.failed : view === 'stuck' ? query.data?.stuck : []) ?? [];
@@ -202,10 +224,22 @@ export default function PayoutIssuesPage() {
                     </p>
                   )}
                 </div>
-                <Badge variant={p.held ? 'warning' : view === 'failed' ? 'danger' : 'warning'}>
+                <Badge
+                  variant={
+                    p.held?.needsApproval && isApproved(p)
+                      ? 'success'
+                      : p.held
+                        ? 'warning'
+                        : view === 'failed'
+                          ? 'danger'
+                          : 'warning'
+                  }
+                >
                   {p.held
                     ? p.held.needsApproval
-                      ? 'Needs approval'
+                      ? isApproved(p)
+                        ? 'Approved, ready to retry'
+                        : 'Needs approval'
                       : 'Held by a limit'
                     : view === 'failed'
                       ? 'Failed'
@@ -229,27 +263,34 @@ export default function PayoutIssuesPage() {
                   <p>No money was sent, so nothing can be paid twice. To sort it out:</p>
                   <ol className="list-decimal space-y-1 pl-5">
                     <li>
-                      Find the record it came from using payout {p.id} and check the amount is still
-                      owed.
+                      {p.source
+                        ? `It claimed ${sourceText(p.source)}. Check the amount is still owed.`
+                        : `Find the record it came from using payout ${p.id} and check the amount is still owed.`}
                     </li>
                     <li>
                       If it is owed, pay it by hand and note the bank reference on the record. If it
                       is not, release what it claimed so it can be paid again later.
                     </li>
                   </ol>
-                  {SOURCE[p.rail] && (
+                  {p.source && sourceHref(p.source) ? (
                     <Link
-                      href={SOURCE[p.rail]!.href}
+                      href={sourceHref(p.source)!}
                       className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
                     >
-                      {SOURCE[p.rail]!.label}
+                      Open the {SOURCE_NOUN[p.source.kind]}
                     </Link>
+                  ) : (
+                    SOURCE[p.rail] && (
+                      <Link
+                        href={SOURCE[p.rail]!.href}
+                        className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+                      >
+                        {SOURCE[p.rail]!.label}
+                      </Link>
+                    )
                   )}
                 </div>
-              ) : canRetry &&
-                p.held?.needsApproval &&
-                p.transferRef &&
-                !approvedRefs.has(p.transferRef) ? (
+              ) : canRetry && p.held?.needsApproval && p.transferRef && !isApproved(p) ? (
                 <Button className="mt-4" variant="primary" onClick={() => setApproving(p)}>
                   Approve
                 </Button>

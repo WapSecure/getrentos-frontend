@@ -23,11 +23,31 @@ export interface PayoutIssue {
   failureReason: string | null;
   createdAt: string;
   /** A payout limit stopped it before anything was sent; approval releases NEEDS_APPROVAL ones. */
-  held?: { code: string; message: string; needsApproval: boolean };
+  held?: {
+    code: string;
+    message: string;
+    needsApproval: boolean;
+    /** An unused approval covering this amount and the account a retry pays now is on file: Retry is all it needs. */
+    approved?: boolean;
+  };
   /** The reference it was last tried under. */
   transferRef?: string | null;
   /** Where a retry would send it; null when the holder has no payout account. */
   destination?: PayoutDestination | null;
+  /** Stuck only: the oldest record it claimed, and how many it claimed. Null when none. */
+  source?: PayoutSource | null;
+}
+
+export type PayoutSourceKind =
+  | 'booking'
+  | 'realtorCommission'
+  | 'agencyCommission'
+  | 'partnerCommission';
+
+export interface PayoutSource {
+  kind: PayoutSourceKind;
+  id: string;
+  count: number;
 }
 
 /** Every way money leaves, including those retried elsewhere. */

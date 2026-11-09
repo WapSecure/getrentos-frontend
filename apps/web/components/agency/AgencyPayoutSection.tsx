@@ -279,7 +279,9 @@ export function AgencyPayoutSection({
                                 : 'pending'
                           }
                           paidAt={p.paidAt}
+                          transferRef={p.transferRef}
                           failureReason={p.failureReason}
+                          sentTo={p.sentTo}
                         />
                       </td>
                     </tr>

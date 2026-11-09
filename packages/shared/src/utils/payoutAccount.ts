@@ -17,6 +17,18 @@ export function payoutAccountLabel(account: {
   return [account.bankName, maskAccountNumber(account.accountNumber)].filter(Boolean).join(' ');
 }
 
+/** Where a payout that went out was sent, as the API proves it: the bank and last four digits only. */
+export interface PayoutSentTo {
+  bankName: string | null;
+  accountLast4: string;
+}
+
+/** "To GTBank ••••1234", or null when the API could not prove where it went. */
+export function payoutSentToLabel(sentTo?: PayoutSentTo | null): string | null {
+  if (!sentTo?.accountLast4) return null;
+  return `To ${[sentTo.bankName, `••••${sentTo.accountLast4}`].filter(Boolean).join(' ')}`;
+}
+
 /** Said before a change is saved (UX-29). */
 export const PAYOUT_CHANGE_COOLDOWN_HINT =
   'Changing your bank details pauses payouts to the new account for 24 hours, and we’ll email you about it.';
