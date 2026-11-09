@@ -1,4 +1,5 @@
 import { resolvePrimaryRoleId } from './constants';
+import { installIdHeader } from './installId';
 import {
   clearAuthSession,
   getAuthToken,
@@ -144,6 +145,7 @@ function postRefresh(): Promise<Response> {
     headers: {
       'Content-Type': 'application/json',
       ...(CLIENT_APP ? { 'x-client-app': CLIENT_APP } : {}),
+      ...installIdHeader(),
     },
     body: JSON.stringify({}),
   });
@@ -350,6 +352,7 @@ export async function apiFetch<T>(
       credentials: 'include',
       headers: {
         ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
+        ...installIdHeader(),
         ...options.headers,
       },
     });
