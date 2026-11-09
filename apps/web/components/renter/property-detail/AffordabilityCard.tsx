@@ -123,7 +123,7 @@ export function AffordabilityCard({ listingId }: { listingId: string }) {
           ))}
         </ul>
       </div>
-      <p className="text-[11px] text-muted-foreground">
+      <p className="text-2xs text-muted-foreground">
         Worked out by GetRentos from the listing. What you enter is used for this answer only and is
         not saved.
       </p>

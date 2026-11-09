@@ -191,7 +191,7 @@ export function DocumentUpload({
           <span className="text-primary font-medium">Click to browse</span> or drag &amp; drop
           {multiple ? ' files' : ' a file'}
         </p>
-        {hint && <p className="mt-1 text-[11px] text-muted-foreground">{hint}</p>}
+        {hint && <p className="mt-1 text-2xs text-muted-foreground">{hint}</p>}
         <input
           ref={inputRef}
           type="file"
@@ -236,7 +236,7 @@ export function DocumentUpload({
             )}
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium text-foreground">{item.file.name}</p>
-              <p className="text-[11px] text-muted-foreground">
+              <p className="text-2xs text-muted-foreground">
                 {formatBytes(item.file.size)}
                 {isVideo ? ' · video' : ''}
               </p>

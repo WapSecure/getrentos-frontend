@@ -2191,7 +2191,7 @@ function AdjudicateClaimModal({
                         unoptimized
                         className="object-cover"
                       />
-                      <span className="absolute inset-0 flex items-center justify-center bg-black/0 text-[10px] font-medium text-white opacity-0 transition-opacity group-hover:bg-black/40 group-hover:opacity-100 group-focus-visible:bg-black/40 group-focus-visible:opacity-100">
+                      <span className="absolute inset-0 flex items-center justify-center bg-black/0 text-2xs font-medium text-white opacity-0 transition-opacity group-hover:bg-black/40 group-hover:opacity-100 group-focus-visible:bg-black/40 group-focus-visible:opacity-100">
                         View
                       </span>
                     </button>

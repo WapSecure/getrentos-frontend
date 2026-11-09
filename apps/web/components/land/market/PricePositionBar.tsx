@@ -35,7 +35,7 @@ export const PricePositionBar = ({
           style={{ left: `${clamped}%` }}
         />
       </div>
-      <div className="flex justify-between text-[11px] text-muted-foreground" aria-hidden>
+      <div className="flex justify-between text-2xs text-muted-foreground" aria-hidden>
         <span>Cheaper</span>
         <span>Median{medianPricePerSqm ? ` ${formatCurrency(medianPricePerSqm)}/m²` : ''}</span>
         <span>Dearer</span>

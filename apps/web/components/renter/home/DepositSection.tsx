@@ -157,7 +157,7 @@ const DepositPlanPanel = ({ plan, disclaimer }: { plan: DepositPlan; disclaimer:
         );
       })}
     </ul>
-    <p className="text-[11px] text-muted-foreground">{disclaimer}</p>
+    <p className="text-2xs text-muted-foreground">{disclaimer}</p>
   </section>
 );
 

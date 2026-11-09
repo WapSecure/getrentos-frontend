@@ -73,7 +73,7 @@ export function LegalCaseStage({
               <span
                 aria-hidden
                 className={cn(
-                  'flex h-5 w-5 items-center justify-center rounded-full border text-[10px] font-semibold',
+                  'flex h-5 w-5 items-center justify-center rounded-full border text-2xs font-semibold',
                   reached
                     ? 'border-primary bg-primary text-primary-foreground'
                     : 'border-border bg-card text-muted-foreground'

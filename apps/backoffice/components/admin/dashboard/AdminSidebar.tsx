@@ -675,7 +675,7 @@ export const AdminSidebar = ({ roles }: { roles?: string[] }) => {
         ) : (
           <nav className="space-y-5 px-3 py-4" aria-label="Administration navigation">
             <div className="px-3 pb-1">
-              <p className="text-[0.6875rem] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+              <p className="text-2xs font-medium uppercase tracking-[0.08em] text-muted-foreground">
                 Workspace
               </p>
               <p className="mt-1 truncate text-sm font-semibold text-foreground">Operations</p>

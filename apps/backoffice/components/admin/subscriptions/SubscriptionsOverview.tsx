@@ -291,7 +291,7 @@ function SubscriptionRow({
               <span className="text-xs font-medium text-warning">Card-capture refund pending</span>
             )}
             {row.latestReference && (
-              <span className="font-mono text-[11px] text-muted-foreground">
+              <span className="font-mono text-2xs text-muted-foreground">
                 {row.latestReference}
               </span>
             )}
@@ -403,7 +403,7 @@ function InvoiceRow({ invoice }: { invoice: AdminSubscriptionInvoice }) {
           </p>
         )}
       </td>
-      <td className="p-3 font-mono text-[11px] text-muted-foreground">
+      <td className="p-3 font-mono text-2xs text-muted-foreground">
         {invoice.number}
         {invoice.providerReference && <span className="block">{invoice.providerReference}</span>}
       </td>

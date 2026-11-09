@@ -72,7 +72,7 @@ export const ReviewCaseCard = ({ caseItem, delay, onReview }: ReviewCaseCardProp
           {caseItem.reasonCodes.map((code) => (
             <span
               key={code}
-              className="rounded-md bg-secondary px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground"
+              className="rounded-md bg-secondary px-1.5 py-0.5 font-mono text-2xs text-muted-foreground"
             >
               {code}
             </span>

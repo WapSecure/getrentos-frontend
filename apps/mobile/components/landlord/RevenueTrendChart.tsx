@@ -77,7 +77,7 @@ export function RevenueTrendChart({ points }: Props) {
       <View style={{ flexDirection: 'row', gap: 2 }}>
         {points.map((p, i) => (
           <View key={`${p.label}-label-${i}`} style={{ flex: 1, alignItems: 'center' }}>
-            <Text variant="caption" color="mutedForeground" style={{ fontSize: 10 }}>
+            <Text variant="caption" color="mutedForeground" style={{ fontSize: 12 }}>
               {p.label}
             </Text>
           </View>

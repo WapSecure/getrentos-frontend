@@ -396,7 +396,7 @@ function ConversationRow({
                 <Text
                   variant="caption"
                   maxFontSizeMultiplier={1.4}
-                  style={{ color: colors.primaryForeground, fontWeight: '700', fontSize: 11 }}
+                  style={{ color: colors.primaryForeground, fontWeight: '700', fontSize: 12 }}
                 >
                   {c.unreadCount > 99 ? '99+' : c.unreadCount}
                 </Text>

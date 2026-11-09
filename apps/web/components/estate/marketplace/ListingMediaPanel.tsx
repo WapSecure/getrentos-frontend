@@ -127,7 +127,7 @@ export const ListingMediaPanel = ({
                 className="h-20 w-24 rounded-lg object-cover"
               />
               {index === 0 && (
-                <span className="absolute left-1 top-1 rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-medium text-white">
+                <span className="absolute left-1 top-1 rounded bg-black/70 px-1.5 py-0.5 text-2xs font-medium text-white">
                   Cover
                 </span>
               )}

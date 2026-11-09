@@ -293,7 +293,7 @@ const EditPropertyForm = ({
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={photo.url} alt="" className="h-full w-full object-cover" />
                 {photo.id === coverId && (
-                  <span className="absolute left-1 top-1 rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-medium text-white">
+                  <span className="absolute left-1 top-1 rounded bg-black/70 px-1.5 py-0.5 text-2xs font-medium text-white">
                     Cover
                   </span>
                 )}
@@ -335,7 +335,7 @@ const EditPropertyForm = ({
                   }}
                 />
                 <ImagePlus className="h-4 w-4" />
-                <span className="text-[10px]">Add photos</span>
+                <span className="text-2xs">Add photos</span>
               </label>
             )}
           </div>

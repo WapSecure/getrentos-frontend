@@ -180,10 +180,10 @@ export const RenterSupportPage = () => {
                 <p className="mt-1 truncate text-xs text-muted-foreground">
                   {thread.lastMessage ?? 'No messages yet'}
                 </p>
-                <div className="mt-1 flex items-center justify-between text-[11px] text-muted-foreground">
+                <div className="mt-1 flex items-center justify-between text-2xs text-muted-foreground">
                   <span>{fmt(thread.lastMessageAt) || fmt(thread.createdAt)}</span>
                   {thread.unreadCount > 0 && (
-                    <span className="rounded-full bg-primary px-1.5 text-[10px] font-semibold text-primary-foreground">
+                    <span className="rounded-full bg-primary px-1.5 text-2xs font-semibold text-primary-foreground">
                       {thread.unreadCount} new
                     </span>
                   )}
@@ -301,7 +301,7 @@ export const RenterSupportPage = () => {
                       }`}
                     >
                       <p className="whitespace-pre-wrap break-words">{m.text}</p>
-                      <p className="mt-1 text-right text-[10px] opacity-70">{fmt(m.createdAt)}</p>
+                      <p className="mt-1 text-right text-2xs opacity-70">{fmt(m.createdAt)}</p>
                     </div>
                   </div>
                 ))}
@@ -337,7 +337,7 @@ export const RenterSupportPage = () => {
                     icon={<Send />}
                   />
                 </div>
-                <p className="mt-1 text-right text-[10px] text-muted-foreground">Enter to send</p>
+                <p className="mt-1 text-right text-2xs text-muted-foreground">Enter to send</p>
               </div>
             </Card>
           )}

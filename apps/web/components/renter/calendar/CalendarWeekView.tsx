@@ -47,12 +47,7 @@ export const CalendarWeekView = ({ events, currentDate, onEventClick }: Calendar
           <div className="grid grid-cols-8 border-b border-border">
             <div className="p-2 text-center text-xs font-medium text-muted-foreground w-16" />
             {days.map((day, index) => (
-              <div
-                key={index}
-                className={`p-2 text-center ${
-                  isToday(day) ? 'bg-accent/70' : ''
-                }`}
-              >
+              <div key={index} className={`p-2 text-center ${isToday(day) ? 'bg-accent/70' : ''}`}>
                 <div className="text-xs font-medium text-muted-foreground">
                   {format(day, 'EEE')}
                 </div>
@@ -70,11 +65,10 @@ export const CalendarWeekView = ({ events, currentDate, onEventClick }: Calendar
           {/* Time Grid */}
           <div className="relative">
             {HOURS.map((hour) => (
-              <div
-                key={hour}
-                className="grid grid-cols-8 border-b border-border"
-              >
-                <div className="p-1 text-right text-xs text-muted-foreground pr-2 w-16">{hour}:00</div>
+              <div key={hour} className="grid grid-cols-8 border-b border-border">
+                <div className="p-1 text-right text-xs text-muted-foreground pr-2 w-16">
+                  {hour}:00
+                </div>
                 {days.map((day, dayIndex) => {
                   const dayEvents = getEventsForDay(day);
                   const dayEventsAtHour = dayEvents.filter((event) => {
@@ -83,10 +77,7 @@ export const CalendarWeekView = ({ events, currentDate, onEventClick }: Calendar
                   });
 
                   return (
-                    <div
-                      key={dayIndex}
-                      className="h-12 relative border-l border-border"
-                    >
+                    <div key={dayIndex} className="h-12 relative border-l border-border">
                       {dayEventsAtHour.map((event) => {
                         const position = getEventPosition(event);
                         return (
@@ -94,7 +85,7 @@ export const CalendarWeekView = ({ events, currentDate, onEventClick }: Calendar
                             type="button"
                             key={event.id}
                             onClick={() => onEventClick(event)}
-                            className="absolute left-0 right-0 mx-0.5 truncate rounded px-1 py-0.5 text-left text-[10px] text-white cursor-pointer hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                            className="absolute left-0 right-0 mx-0.5 truncate rounded px-1 py-0.5 text-left text-2xs text-white cursor-pointer hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                             style={{
                               top: position.top,
                               height: position.height,

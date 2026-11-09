@@ -269,7 +269,7 @@ export const DisputeCaseModal = ({
               </div>
               {tx.events && tx.events.length > 0 && (
                 <div className="border-t border-border/60 pt-2 space-y-1">
-                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">
+                  <p className="text-2xs font-semibold text-muted-foreground uppercase tracking-wide">
                     Timeline
                   </p>
                   {tx.events.map((event, i) => (
@@ -311,7 +311,7 @@ export const DisputeCaseModal = ({
                           : 'bg-secondary text-secondary-foreground'
                       )}
                     >
-                      <p className="text-[10px] uppercase tracking-wide opacity-70 mb-0.5">
+                      <p className="text-2xs uppercase tracking-wide opacity-70 mb-0.5">
                         {msg.senderName}
                       </p>
                       <p className="text-sm whitespace-pre-wrap break-words">{msg.text}</p>

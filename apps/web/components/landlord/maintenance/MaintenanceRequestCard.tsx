@@ -139,7 +139,7 @@ export const MaintenanceRequestCard = ({
       )}
 
       {!isClosed && (
-        <div className="flex gap-2 mt-4 pt-4 border-t border-border">
+        <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border pt-4">
           <Button
             variant="outline"
             size="sm"
@@ -154,7 +154,6 @@ export const MaintenanceRequestCard = ({
           <Button
             variant="outline"
             size="sm"
-            fullWidth
             className="gap-1.5"
             onClick={() => onAssignVendor(request)}
             disabled={isBusy}
@@ -162,43 +161,47 @@ export const MaintenanceRequestCard = ({
             <UserCog className="w-3.5 h-3.5" />
             {request.assignedVendorName ? 'Reassign' : 'Assign vendor'}
           </Button>
-          {request.assignedVendorName && (
+          {/* Quick actions sit together at the end, and drop to their own
+              line rather than squeezing the labelled buttons. */}
+          <div className="ml-auto flex shrink-0 items-center gap-2">
+            {request.assignedVendorName && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="shrink-0 px-2.5"
+                title={request.scheduledFor ? 'Move visit' : 'Book visit'}
+                aria-label={request.scheduledFor ? 'Move visit' : 'Book visit'}
+                onClick={() => onScheduleVisit(request)}
+                disabled={isBusy}
+              >
+                <CalendarClock className="w-3.5 h-3.5" />
+              </Button>
+            )}
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
-              className="px-2.5"
-              title={request.scheduledFor ? 'Move visit' : 'Book visit'}
-              aria-label={request.scheduledFor ? 'Move visit' : 'Book visit'}
-              onClick={() => onScheduleVisit(request)}
+              className="shrink-0 px-2.5 text-warning hover:text-warning/80"
+              title="Escalate"
+              aria-label="Escalate"
+              onClick={() => onEscalate(request.id)}
+              isLoading={isEscalating}
               disabled={isBusy}
             >
-              <CalendarClock className="w-3.5 h-3.5" />
+              <ArrowUpCircle className="w-4 h-4" />
             </Button>
-          )}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="px-2.5 text-warning hover:text-warning/80"
-            title="Escalate"
-            aria-label="Escalate"
-            onClick={() => onEscalate(request.id)}
-            isLoading={isEscalating}
-            disabled={isBusy}
-          >
-            <ArrowUpCircle className="w-4 h-4" />
-          </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            className="px-2.5"
-            title="Mark resolved"
-            aria-label="Mark resolved"
-            onClick={() => onMarkResolved(request.id)}
-            isLoading={isMarkingResolved}
-            disabled={isBusy}
-          >
-            <CheckCircle2 className="w-4 h-4" />
-          </Button>
+            <Button
+              variant="primary"
+              size="sm"
+              className="shrink-0 px-2.5"
+              title="Mark resolved"
+              aria-label="Mark resolved"
+              onClick={() => onMarkResolved(request.id)}
+              isLoading={isMarkingResolved}
+              disabled={isBusy}
+            >
+              <CheckCircle2 className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       )}
     </article>

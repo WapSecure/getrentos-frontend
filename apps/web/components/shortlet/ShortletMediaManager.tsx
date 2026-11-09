@@ -220,7 +220,7 @@ export function ShortletMediaManager({
                       loading="lazy"
                     />
                     {added && (
-                      <span className="absolute inset-0 flex items-center justify-center bg-black/50 text-[10px] font-semibold text-white">
+                      <span className="absolute inset-0 flex items-center justify-center bg-black/50 text-2xs font-semibold text-white">
                         Added
                       </span>
                     )}

@@ -137,7 +137,7 @@ export function RenewalAdvicePanel({
         </div>
       </div>
 
-      <p className="text-[11px] text-muted-foreground">{advice.disclaimer}</p>
+      <p className="text-2xs text-muted-foreground">{advice.disclaimer}</p>
     </section>
   );
 }

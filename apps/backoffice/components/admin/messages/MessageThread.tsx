@@ -144,7 +144,7 @@ export const MessageThread = ({
                     className={`flex items-center gap-1 mt-1 ${isAdmin ? 'justify-end' : 'justify-start'}`}
                   >
                     <span
-                      className={`text-[10px] ${isAdmin ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}
+                      className={`text-2xs ${isAdmin ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}
                     >
                       {format(new Date(message.timestamp), 'h:mm a')}
                     </span>

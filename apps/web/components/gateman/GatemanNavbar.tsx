@@ -38,7 +38,7 @@ export const GatemanNavbar = ({ user }: GatemanNavbarProps) => {
           href={item.href}
           aria-current={isActive ? 'page' : undefined}
           className={`flex min-h-11 min-w-11 items-center justify-center rounded-lg font-medium transition-colors ${
-            compact ? 'flex-col gap-0.5 px-1 py-1.5 text-[11px]' : 'gap-1.5 px-2.5 py-2 text-sm'
+            compact ? 'flex-col gap-0.5 px-1 py-1.5 text-2xs' : 'gap-1.5 px-2.5 py-2 text-sm'
           } ${
             isActive
               ? 'bg-accent text-primary'

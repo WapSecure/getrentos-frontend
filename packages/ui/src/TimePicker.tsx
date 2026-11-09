@@ -115,7 +115,9 @@ export const TimePicker = ({
           aria-expanded={open}
           aria-controls={open ? listboxId : undefined}
           aria-label={
-            ariaLabel && !field.labelId ? `${ariaLabel}: ${selectedLabel ?? placeholder}` : undefined
+            ariaLabel && !field.labelId
+              ? `${ariaLabel}: ${selectedLabel ?? placeholder}`
+              : undefined
           }
           aria-labelledby={field.labelId ?? (ariaLabel ? undefined : valueId)}
           onKeyDown={(event) => {
@@ -165,7 +167,7 @@ export const TimePicker = ({
                 className="z-[70] w-52 overflow-hidden rounded-2xl border border-border bg-card shadow-lg focus:outline-none"
               >
                 <div className="border-b border-border bg-secondary/55 px-3 py-2.5">
-                  <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+                  <p className="text-2xs font-medium uppercase tracking-[0.08em] text-muted-foreground">
                     Time
                   </p>
                   <p

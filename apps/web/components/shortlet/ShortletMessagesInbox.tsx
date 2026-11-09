@@ -99,11 +99,11 @@ export function ShortletMessagesInbox({ role }: { role: 'guest' | 'host' }) {
                   </div>
                   <div className="flex flex-col items-end gap-1">
                     {c.unreadCount > 0 && (
-                      <Badge variant="info" className="h-4 min-w-4 px-1 text-[10px]">
+                      <Badge variant="info" className="h-4 min-w-4 px-1 text-2xs">
                         {c.unreadCount}
                       </Badge>
                     )}
-                    <span className="text-[10px] text-muted-foreground">
+                    <span className="text-2xs text-muted-foreground">
                       {formatDate(c.lastMessageAt, 'short')}
                     </span>
                   </div>
@@ -140,7 +140,7 @@ export function ShortletMessagesInbox({ role }: { role: 'guest' | 'host' }) {
                       {m.contactMasked && (
                         <p
                           className={cn(
-                            'mt-1 flex items-center gap-1 text-[11px] italic',
+                            'mt-1 flex items-center gap-1 text-2xs italic',
                             mine ? 'text-primary-foreground/80' : 'text-muted-foreground'
                           )}
                         >
@@ -150,7 +150,7 @@ export function ShortletMessagesInbox({ role }: { role: 'guest' | 'host' }) {
                       )}
                       <p
                         className={cn(
-                          'mt-0.5 text-[10px]',
+                          'mt-0.5 text-2xs',
                           mine ? 'text-primary-foreground/70' : 'text-muted-foreground'
                         )}
                       >
@@ -185,7 +185,7 @@ export function ShortletMessagesInbox({ role }: { role: 'guest' | 'host' }) {
                     <Send className="h-4 w-4" />
                   </Button>
                 </div>
-                <p className="mt-1.5 text-[11px] text-muted-foreground">
+                <p className="mt-1.5 text-2xs text-muted-foreground">
                   Phone numbers, emails and chat links are hidden until the stay is booked and paid,
                   so you’re both covered by GetRentos Payment Protection.
                 </p>

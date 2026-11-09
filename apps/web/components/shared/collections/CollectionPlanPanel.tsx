@@ -197,7 +197,7 @@ export function CollectionPlanPanel({
           );
         })}
       </ol>
-      <p className="mt-3 text-[11px] text-muted-foreground">{data.disclaimer}</p>
+      <p className="mt-3 text-2xs text-muted-foreground">{data.disclaimer}</p>
     </Card>
   );
 }

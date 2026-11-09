@@ -49,7 +49,7 @@ export const AppealCard = ({ appeal, delay, onReview }: AppealCardProps) => {
           </span>
           <div className="min-w-0">
             <p className="text-sm font-semibold text-foreground">{target.label}</p>
-            <p className="truncate text-[11px] text-muted-foreground">
+            <p className="truncate text-2xs text-muted-foreground">
               {appeal.targetReference ?? appeal.targetLabel ?? `#${shortId(appeal.targetId)}`}
             </p>
           </div>
@@ -62,7 +62,7 @@ export const AppealCard = ({ appeal, delay, onReview }: AppealCardProps) => {
       <p className="mt-3 line-clamp-3 text-sm text-muted-foreground">{appeal.reason}</p>
 
       <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3">
-        <span className="text-[11px] text-muted-foreground">
+        <span className="text-2xs text-muted-foreground">
           Filed {formatDate(appeal.createdAt)} · by{' '}
           {appeal.subjectName ?? shortId(appeal.subjectUserId)}
         </span>

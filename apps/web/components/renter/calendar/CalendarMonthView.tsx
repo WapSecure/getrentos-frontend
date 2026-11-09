@@ -83,7 +83,7 @@ export const CalendarMonthView = ({
                         e.stopPropagation();
                         onEventClick(event);
                       }}
-                      className="block w-full text-left text-[10px] px-1 py-0.5 rounded truncate text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                      className="block w-full text-left text-2xs px-1 py-0.5 rounded truncate text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                       style={{
                         backgroundColor: event.color || typeColors[event.type] || 'var(--primary)',
                       }}
@@ -92,7 +92,7 @@ export const CalendarMonthView = ({
                     </button>
                   ))}
                   {dayEvents.length > 3 && (
-                    <div className="text-[10px] text-muted-foreground px-1">
+                    <div className="text-2xs text-muted-foreground px-1">
                       +{dayEvents.length - 3} more
                     </div>
                   )}

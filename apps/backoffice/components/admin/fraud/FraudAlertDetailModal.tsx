@@ -114,7 +114,7 @@ export const FraudAlertDetailModal = ({
           ) : (
             <>
               <div>
-                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">
+                <p className="text-2xs font-semibold text-muted-foreground uppercase tracking-wide">
                   Reason
                 </p>
                 <p className="text-sm text-foreground mt-0.5">{alert.reason}</p>
@@ -252,7 +252,7 @@ function AiScanPanel({ signal }: { signal: FraudAlertAiSignal }) {
   return (
     <section className="space-y-3 rounded-lg border border-border/70 p-3">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">
+        <p className="text-2xs font-semibold text-muted-foreground uppercase tracking-wide">
           Automated scan · {signal.source === 'ai' ? 'model' : 'rule-based check'}
         </p>
         <p className="text-sm font-semibold tabular-nums text-foreground">

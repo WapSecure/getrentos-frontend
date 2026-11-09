@@ -57,7 +57,7 @@ export const ListingCard = ({
           </div>
         )}
         {listing.videoTourUrl && (
-          <span className="absolute bottom-3 right-3 inline-flex items-center gap-1 rounded-full bg-black/60 px-2 py-1 text-[11px] font-medium text-white backdrop-blur-sm">
+          <span className="absolute bottom-3 right-3 inline-flex items-center gap-1 rounded-full bg-black/60 px-2 py-1 text-2xs font-medium text-white backdrop-blur-sm">
             <Play className="w-3 h-3" /> Video tour
           </span>
         )}

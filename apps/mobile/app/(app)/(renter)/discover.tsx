@@ -460,7 +460,7 @@ function FilterButton({ count, onPress }: { count: number; onPress: () => void }
           <Text
             variant="caption"
             maxFontSizeMultiplier={1.4}
-            style={{ fontSize: 10, fontWeight: '800', color: colors.primaryForeground }}
+            style={{ fontSize: 12, fontWeight: '800', color: colors.primaryForeground }}
           >
             {count}
           </Text>

@@ -86,7 +86,7 @@ export const InspectionReportCard = ({
                       </span>
                     )}
                   </a>
-                  <p className="mt-1 text-[11px] leading-tight text-muted-foreground">
+                  <p className="mt-1 text-2xs leading-tight text-muted-foreground">
                     {formatDate(e.capturedAt)}
                     {e.distanceM != null && ` · ${describeDistance(e.distanceM)}`}
                     {e.capturedOffline && ' · captured offline'}

@@ -102,7 +102,7 @@ function TracePanel({ item }: { item: StatementLineItem }) {
       {item.ledgerEntryId && (
         <div className="flex items-center justify-between gap-3">
           <dt className="text-muted-foreground">Ledger entry</dt>
-          <dd className="font-mono text-[11px] text-foreground" title={item.ledgerEntryId}>
+          <dd className="font-mono text-2xs text-foreground" title={item.ledgerEntryId}>
             {shortRef(item.ledgerEntryId)}
           </dd>
         </div>
@@ -110,7 +110,7 @@ function TracePanel({ item }: { item: StatementLineItem }) {
       {item.sourceId && (
         <div className="flex items-center justify-between gap-3">
           <dt className="text-muted-foreground">Document</dt>
-          <dd className="font-mono text-[11px] text-foreground" title={item.sourceId}>
+          <dd className="font-mono text-2xs text-foreground" title={item.sourceId}>
             {shortRef(item.sourceId)}
           </dd>
         </div>

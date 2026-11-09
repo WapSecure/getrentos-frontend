@@ -62,9 +62,9 @@ export function IconButton({
             position: 'absolute',
             top: -2,
             right: -2,
-            minWidth: 18,
-            height: 18,
-            borderRadius: 9,
+            minWidth: 20,
+            height: 20,
+            borderRadius: 10,
             paddingHorizontal: 4,
             alignItems: 'center',
             justifyContent: 'center',
@@ -78,7 +78,7 @@ export function IconButton({
             maxFontSizeMultiplier={1.4}
             style={{
               color: colors.destructiveForeground,
-              fontSize: 10,
+              fontSize: 12,
               lineHeight: 12,
               fontWeight: '800',
             }}

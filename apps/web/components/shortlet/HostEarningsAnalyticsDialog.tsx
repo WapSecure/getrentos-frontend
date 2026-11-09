@@ -136,9 +136,7 @@ export function HostEarningsAnalyticsDialog({ onClose }: { onClose: () => void }
                             style={{ height: `${Math.max(4, (m.earned / maxMonthly) * 100)}%` }}
                           />
                         </div>
-                        <span className="text-[10px] text-muted-foreground">
-                          {m.month.slice(5)}
-                        </span>
+                        <span className="text-2xs text-muted-foreground">{m.month.slice(5)}</span>
                       </div>
                     ))}
                   </div>

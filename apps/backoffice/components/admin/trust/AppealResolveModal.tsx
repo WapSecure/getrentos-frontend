@@ -87,7 +87,7 @@ export const AppealResolveModal = ({ appeal, onClose }: AppealResolveModalProps)
 
           <div className="max-h-[70vh] space-y-4 overflow-y-auto p-4">
             <div className="rounded-xl border border-border p-4">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              <p className="text-2xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Contested decision
               </p>
               <div className="mt-2 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
@@ -122,7 +122,7 @@ export const AppealResolveModal = ({ appeal, onClose }: AppealResolveModalProps)
             </div>
 
             <div className="rounded-xl border border-border p-4">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              <p className="text-2xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Why they are appealing
               </p>
               <p className="mt-2 whitespace-pre-wrap text-sm text-foreground">{appeal.reason}</p>

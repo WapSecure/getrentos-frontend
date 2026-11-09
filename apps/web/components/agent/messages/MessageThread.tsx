@@ -95,7 +95,7 @@ export const MessageThread = ({
                     className={`flex items-center gap-1 mt-1 ${isAgent ? 'justify-end' : 'justify-start'}`}
                   >
                     <span
-                      className={`text-[10px] ${isAgent ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}
+                      className={`text-2xs ${isAgent ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}
                     >
                       {format(new Date(message.timestamp), 'h:mm a')}
                     </span>

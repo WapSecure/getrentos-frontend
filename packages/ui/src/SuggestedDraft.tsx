@@ -81,7 +81,7 @@ export function SuggestedDraft({
           </Button>
         )}
       </div>
-      {disclaimer && <p className="text-[11px] text-muted-foreground">{disclaimer}</p>}
+      {disclaimer && <p className="text-2xs text-muted-foreground">{disclaimer}</p>}
     </section>
   );
 }

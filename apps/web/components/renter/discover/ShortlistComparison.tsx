@@ -77,7 +77,7 @@ export function ShortlistComparison({ listingIds }: { listingIds: string[] }) {
           </div>
         ))}
       </div>
-      <p className="text-[11px] text-muted-foreground">{data.disclaimer}</p>
+      <p className="text-2xs text-muted-foreground">{data.disclaimer}</p>
     </section>
   );
 }

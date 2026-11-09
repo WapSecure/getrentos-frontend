@@ -70,7 +70,7 @@ export const PropertyGallery = ({
         )}
 
         {photos.length > 1 && (
-          <span className="absolute bottom-3 right-3 rounded-full bg-black/65 px-2 py-0.5 text-[11px] font-medium text-white backdrop-blur-sm">
+          <span className="absolute bottom-3 right-3 rounded-full bg-black/65 px-2 py-0.5 text-2xs font-medium text-white backdrop-blur-sm">
             {activeIndex + 1} / {photos.length}
           </span>
         )}

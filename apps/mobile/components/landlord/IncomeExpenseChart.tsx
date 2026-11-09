@@ -98,7 +98,7 @@ export function IncomeExpenseChart({ points }: Props) {
       <View style={{ flexDirection: 'row', gap: 6 }}>
         {points.map((p, i) => (
           <View key={`${p.period}-l-${i}`} style={{ flex: 1, alignItems: 'center' }}>
-            <Text variant="caption" color="mutedForeground" style={{ fontSize: 10 }}>
+            <Text variant="caption" color="mutedForeground" style={{ fontSize: 12 }}>
               {p.period}
             </Text>
           </View>

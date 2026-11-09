@@ -123,7 +123,7 @@ export const LandChecksPanel = ({
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-foreground">{check.label}</p>
-                    <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px]">
+                    <div className="mt-1 flex flex-wrap items-center gap-1.5 text-2xs">
                       {check.required && <Badge variant="warning">Required</Badge>}
                       {check.requiresDocument &&
                         (check.hasEvidence ? (

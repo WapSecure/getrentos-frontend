@@ -118,7 +118,7 @@ export function LiveSelfieCapture({
       .then(() => {
         if (cancelled) return;
         element = document.createElement('smart-camera-web');
-        element.setAttribute('theme-color', '#0066cc');
+        element.setAttribute('theme-color', '#0057d9');
         element.setAttribute('partner-name', 'GetRentos');
         element.setAttribute('policy-url', session.consent.noticePrivacyPolicyUrl);
         element.addEventListener('smart-camera-web.publish', (event) => {

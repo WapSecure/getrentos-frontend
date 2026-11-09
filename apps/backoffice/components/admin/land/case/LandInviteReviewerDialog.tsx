@@ -138,7 +138,7 @@ export const LandInviteReviewerDialog = ({
                           aria-label={check.label}
                         />
                         <span className="min-w-0 flex-1">{check.label}</span>
-                        <span className="text-[11px] text-muted-foreground">
+                        <span className="text-2xs text-muted-foreground">
                           {humaniseEnum(check.status)}
                         </span>
                       </label>

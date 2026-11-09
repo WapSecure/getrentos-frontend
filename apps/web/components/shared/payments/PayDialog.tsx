@@ -85,7 +85,7 @@ function Step({ n, children }: { n?: number; children: ReactNode }) {
   return (
     <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
       {n !== undefined && (
-        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-muted text-[11px] text-foreground">
+        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-muted text-2xs text-foreground">
           {n}
         </span>
       )}

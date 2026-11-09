@@ -963,7 +963,7 @@ export const VerificationCenter = ({
                   {chip.label && (
                     <span
                       className={cn(
-                        'shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold',
+                        'shrink-0 rounded-full px-2.5 py-0.5 text-2xs font-semibold',
                         chip.cls
                       )}
                     >

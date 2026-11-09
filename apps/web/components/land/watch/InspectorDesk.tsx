@@ -300,9 +300,7 @@ const Captures = ({
                   </span>
                 )}
               </a>
-              <p className="mt-1 text-[11px] text-muted-foreground">
-                {describeDistance(e.distanceM)}
-              </p>
+              <p className="mt-1 text-2xs text-muted-foreground">{describeDistance(e.distanceM)}</p>
             </li>
           ))}
         </ul>

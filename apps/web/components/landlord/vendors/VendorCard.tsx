@@ -111,7 +111,7 @@ export const VendorCard = ({
         {stats.map((stat) => (
           <div key={stat.label}>
             <dd className="text-sm font-semibold text-foreground">{stat.value}</dd>
-            <dt className="text-[11px] text-muted-foreground">{stat.label}</dt>
+            <dt className="text-2xs text-muted-foreground">{stat.label}</dt>
           </div>
         ))}
       </dl>

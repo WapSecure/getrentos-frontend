@@ -112,7 +112,7 @@ export function LeaseGuideCard() {
         </section>
       )}
 
-      <p className="text-[11px] text-muted-foreground">
+      <p className="text-2xs text-muted-foreground">
         {g.disclaimer}
         {g.source === 'ai' ? ' Wording is automated from your lease details.' : ''}
       </p>

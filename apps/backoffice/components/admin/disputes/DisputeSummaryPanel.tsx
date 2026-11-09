@@ -91,7 +91,7 @@ export function DisputeSummaryPanel({ disputeId }: { disputeId: string }) {
       <List title="To verify" items={data.toVerify} />
       <List title="Missing evidence" items={data.missingEvidence} />
       <List title="The record" items={data.facts} />
-      <p className="text-[11px] text-muted-foreground">{data.disclaimer}</p>
+      <p className="text-2xs text-muted-foreground">{data.disclaimer}</p>
     </section>
   );
 }

@@ -49,7 +49,7 @@ const ScoreAtDecisionCodes = ({ reasonCodes }: { reasonCodes: string[] }) => {
 
   return (
     <div className="mt-2 rounded-lg bg-secondary/50 px-3 py-2">
-      <p className="text-[11px] font-medium text-foreground">
+      <p className="text-2xs font-medium text-foreground">
         Trust score at decision: {score.total ?? '—'}
         {score.version ? ` (${score.version})` : ''}
         {score.penalty ? ` · penalty −${score.penalty}` : ''}
@@ -58,7 +58,7 @@ const ScoreAtDecisionCodes = ({ reasonCodes }: { reasonCodes: string[] }) => {
         <ul className="mt-1.5 space-y-1">
           {score.dimensions.map((dimension) => (
             <li key={dimension.id} className="flex items-center gap-2">
-              <span className="w-32 shrink-0 text-[11px] text-muted-foreground">
+              <span className="w-32 shrink-0 text-2xs text-muted-foreground">
                 {DIMENSION_LABELS[dimension.id] ?? dimension.id}
               </span>
               <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-border">
@@ -69,7 +69,7 @@ const ScoreAtDecisionCodes = ({ reasonCodes }: { reasonCodes: string[] }) => {
                   }}
                 />
               </span>
-              <span className="w-14 shrink-0 text-right text-[11px] tabular-nums text-muted-foreground">
+              <span className="w-14 shrink-0 text-right text-2xs tabular-nums text-muted-foreground">
                 {dimension.earned}/{dimension.weight}
               </span>
             </li>
@@ -287,7 +287,7 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
               <div className="space-y-5 p-4">
                 {/* Subject */}
                 <div className="rounded-xl border border-border p-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  <p className="text-2xs font-semibold uppercase tracking-wide text-muted-foreground">
                     Subject
                   </p>
                   <div className="mt-2 grid sm:grid-cols-2 gap-2 text-sm">
@@ -333,7 +333,7 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
 
                 {/* Step timeline */}
                 <div className="rounded-xl border border-border p-4">
-                  <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  <p className="flex items-center gap-1.5 text-2xs font-semibold uppercase tracking-wide text-muted-foreground">
                     <Layers className="h-3.5 w-3.5" /> Step timeline
                   </p>
                   {detail.verification.steps.length === 0 ? (
@@ -357,7 +357,7 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
                                 <p className="text-sm font-medium text-foreground">
                                   {STEP_TYPE_LABEL[step.stepType] ?? step.stepType}
                                 </p>
-                                <p className="text-[11px] text-muted-foreground">
+                                <p className="text-2xs text-muted-foreground">
                                   {step.provider ? `${step.provider} · ` : ''}
                                   {step.attempts} attempt{step.attempts === 1 ? '' : 's'}
                                 </p>
@@ -370,7 +370,7 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
                               </Badge>
                             </div>
                             {resultText && (
-                              <pre className="mt-1.5 max-h-24 overflow-auto rounded-md bg-muted/60 px-2 py-1 font-mono text-[10px] leading-snug text-muted-foreground">
+                              <pre className="mt-1.5 max-h-24 overflow-auto rounded-md bg-muted/60 px-2 py-1 font-mono text-2xs leading-snug text-muted-foreground">
                                 {resultText}
                               </pre>
                             )}
@@ -383,7 +383,7 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
 
                 {/* Decision history */}
                 <div className="rounded-xl border border-border p-4">
-                  <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  <p className="flex items-center gap-1.5 text-2xs font-semibold uppercase tracking-wide text-muted-foreground">
                     <CheckCircle2 className="h-3.5 w-3.5" /> Verification decisions
                   </p>
                   {detail.verification.decisions.length === 0 ? (
@@ -407,14 +407,14 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
                                 )}
                               </p>
                               {d.reasonCodes.length > 0 && (
-                                <p className="mt-1 text-[11px] text-muted-foreground">
+                                <p className="mt-1 text-2xs text-muted-foreground">
                                   {nonScoreCodes(d.reasonCodes)
                                     .map((code) => describeCode(code, checklist))
                                     .join(' · ')}
                                 </p>
                               )}
                               <ScoreAtDecisionCodes reasonCodes={d.reasonCodes} />
-                              <p className="text-[11px] text-muted-foreground">
+                              <p className="text-2xs text-muted-foreground">
                                 {formatDate(d.createdAt)}
                               </p>
                             </div>
@@ -427,7 +427,7 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
 
                 {/* History */}
                 <div className="rounded-xl border border-border p-4">
-                  <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  <p className="flex items-center gap-1.5 text-2xs font-semibold uppercase tracking-wide text-muted-foreground">
                     <History className="h-3.5 w-3.5" /> Case activity
                   </p>
                   <div className="mt-3 space-y-2">
@@ -449,7 +449,7 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
                             {action.note && (
                               <p className="text-xs text-muted-foreground">{action.note}</p>
                             )}
-                            <p className="text-[11px] text-muted-foreground">
+                            <p className="text-2xs text-muted-foreground">
                               {formatDate(action.createdAt)}
                             </p>
                           </div>

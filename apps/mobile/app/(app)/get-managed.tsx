@@ -508,7 +508,7 @@ function IntakePanel({ intake, onChanged }: { intake: ManagedIntake; onChanged: 
             <Text
               variant="caption"
               style={{
-                fontSize: 10,
+                fontSize: 12,
                 color: i === current ? colors.foreground : colors.mutedForeground,
               }}
               numberOfLines={1}

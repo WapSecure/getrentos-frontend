@@ -102,7 +102,7 @@ export function ListingCheckCard({ listingId }: { listingId: string }) {
         </ol>
       </div>
 
-      <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
+      <p className="flex items-center gap-1 text-2xs text-muted-foreground">
         <Sparkles className="h-3 w-3" aria-hidden="true" />
         Figures from GetRentos listings
         {data.source === 'ai' ? '; wording is automated' : ''}. A guide, not a guarantee.

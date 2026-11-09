@@ -105,7 +105,7 @@ const ListingPreview = ({ listing }: { listing: Listing }) => {
       )}
 
       <div className="p-4">
-        <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1">
+        <p className="text-2xs uppercase tracking-wide text-muted-foreground mb-1">
           Renter-facing preview
         </p>
         <DialogTitle className="text-lg font-semibold text-foreground">

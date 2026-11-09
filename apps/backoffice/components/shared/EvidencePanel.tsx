@@ -180,7 +180,7 @@ export const EvidencePanel = ({
             aria-label="Note for the record"
           />
           {error && <p className="text-xs text-destructive">{error}</p>}
-          <p className="text-[11px] text-muted-foreground">
+          <p className="text-2xs text-muted-foreground">
             Stored on our side and opened through a short-lived link, so access can be revoked.
             Images, PDFs, video and office documents up to 25 MB.
           </p>
@@ -247,12 +247,12 @@ export const EvidencePanel = ({
                     </Badge>
                   </div>
                   {meta.length > 0 && (
-                    <p className="mt-0.5 text-[11px] text-muted-foreground break-all">
+                    <p className="mt-0.5 text-2xs text-muted-foreground break-all">
                       {meta.join(' · ')}
                     </p>
                   )}
                   {!isStored && (
-                    <p className="mt-0.5 text-[11px] text-warning">
+                    <p className="mt-0.5 text-2xs text-warning">
                       External link recorded before uploads were supported: we did not receive this
                       file.
                     </p>

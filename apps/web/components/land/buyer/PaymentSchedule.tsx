@@ -87,7 +87,7 @@ export const PaymentSchedule = ({
                   <td className="px-3 py-2 text-foreground">
                     {i.label}
                     {next && (
-                      <span className="ml-2 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase text-primary-foreground">
+                      <span className="ml-2 rounded-full bg-primary px-2 py-0.5 text-2xs font-semibold uppercase text-primary-foreground">
                         Next
                       </span>
                     )}

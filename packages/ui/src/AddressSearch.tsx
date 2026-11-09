@@ -368,7 +368,7 @@ export function AddressSearch({
                 </span>
               </button>
             )}
-            <p className="px-3 pb-1 pt-2 text-right text-[11px] text-muted-foreground">
+            <p className="px-3 pb-1 pt-2 text-right text-2xs text-muted-foreground">
               Powered by Google
             </p>
           </RadixPopover.Content>

@@ -118,7 +118,7 @@ export const RealtorOfferNegotiationModal = ({
                       : 'bg-secondary text-foreground'
                   }`}
                 >
-                  <p className="text-[10px] uppercase tracking-wide opacity-70 mb-0.5">
+                  <p className="text-2xs uppercase tracking-wide opacity-70 mb-0.5">
                     {msg.senderName}
                   </p>
                   <p className="text-sm whitespace-pre-wrap break-words">{msg.text}</p>

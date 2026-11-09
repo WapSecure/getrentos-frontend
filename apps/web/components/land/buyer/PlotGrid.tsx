@@ -110,7 +110,7 @@ export const PlotGrid = ({
                     {plot.isCorner ? ' · corner' : ''}
                   </span>
                   <span className="mt-1 block font-medium">{formatCurrency(plot.price)}</span>
-                  <span className="mt-1 block text-[11px] uppercase tracking-wide">
+                  <span className="mt-1 block text-2xs uppercase tracking-wide">
                     {LAND_PLOT_STATUS_LABELS[plot.status]}
                   </span>
                 </button>

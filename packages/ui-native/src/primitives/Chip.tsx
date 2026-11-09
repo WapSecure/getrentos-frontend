@@ -73,7 +73,7 @@ export function Chip({
           <Text
             variant="caption"
             style={{
-              fontSize: 10.5,
+              fontSize: 12,
               fontWeight: '700',
               color: selected ? colors.primaryForeground : colors.mutedForeground,
             }}

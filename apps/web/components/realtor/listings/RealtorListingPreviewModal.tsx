@@ -56,7 +56,7 @@ export const RealtorListingPreviewModal = ({
             </div>
 
             <div className="p-4">
-              <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1">
+              <p className="text-2xs uppercase tracking-wide text-muted-foreground mb-1">
                 Listing preview
               </p>
               <DialogTitle className="text-lg font-semibold text-foreground">

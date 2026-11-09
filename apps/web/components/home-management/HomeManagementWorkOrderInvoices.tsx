@@ -238,7 +238,8 @@ const vendorPayCopy = (
     note: `Your card is charged ${formatCurrency(split.topUpCharge)}. The vendor is paid the full ${formatCurrency(split.invoiceTotal)} once the top-up is confirmed. The amounts are checked again when you pay.`,
     buttonLabel: `Pay ${formatCurrency(split.topUp)}${fee} top-up and pay vendor`,
     secureLine: `You finish the top-up on ${company}’s secure page: GetRentos never sees your card details.`,
-    protection: 'We send the vendor’s payment once the top-up is confirmed. You’ll see it on this invoice.',
+    protection:
+      'We send the vendor’s payment once the top-up is confirmed. You’ll see it on this invoice.',
   };
 };
 
@@ -763,7 +764,7 @@ export function HomeManagementWorkOrderInvoices({
 
                         {invoice.lineItems.length > 0 && (
                           <div className="mt-4 overflow-hidden rounded-xl border border-border/80">
-                            <div className="grid grid-cols-[minmax(0,1fr)_auto_auto] gap-x-3 bg-secondary/60 px-3 py-2 text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+                            <div className="grid grid-cols-[minmax(0,1fr)_auto_auto] gap-x-3 bg-secondary/60 px-3 py-2 text-2xs font-medium uppercase tracking-[0.08em] text-muted-foreground">
                               <span>Description</span>
                               <span>Qty</span>
                               <span className="text-right">Amount</span>

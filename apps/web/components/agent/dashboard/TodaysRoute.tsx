@@ -146,7 +146,7 @@ export function TodaysRoute() {
           </ul>
         </div>
       )}
-      <p className="text-[11px] text-muted-foreground">{data.note}</p>
+      <p className="text-2xs text-muted-foreground">{data.note}</p>
     </Card>
   );
 }

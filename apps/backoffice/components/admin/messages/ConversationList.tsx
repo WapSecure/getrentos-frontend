@@ -78,7 +78,7 @@ export const ConversationList = ({
               </div>
               {conversation.unreadCount > 0 && (
                 <span
-                  className="shrink-0 min-w-5 h-5 rounded-full bg-primary px-1 text-primary-foreground text-[10px] font-bold flex items-center justify-center"
+                  className="shrink-0 min-w-5 h-5 rounded-full bg-primary px-1 text-primary-foreground text-2xs font-bold flex items-center justify-center"
                   aria-label={`${conversation.unreadCount} unread messages`}
                 >
                   {conversation.unreadCount}
