@@ -3,7 +3,15 @@
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, X } from 'lucide-react';
-import { Button, CurrencyInput, Field, Switch, ToggleChip, useToast } from '@sureground/ui';
+import {
+  Button,
+  CurrencyInput,
+  Field,
+  SaveButton,
+  Switch,
+  ToggleChip,
+  useToast,
+} from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { buyerKeys } from '@/lib/queryKeys';
 import { buyerService } from '@/services/buyerService';
@@ -75,7 +83,6 @@ export const SearchPreferencesSettings = () => {
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: buyerKeys.searchPreferences });
-      toast.success('Search preferences saved.');
     },
     onError: (error) => toast.error(error.message || 'Failed to save search preferences.'),
   });
@@ -182,15 +189,7 @@ export const SearchPreferencesSettings = () => {
         </div>
       </div>
 
-      <Button
-        variant="primary"
-        className="mt-6 gap-1.5"
-        isLoading={save.isPending}
-        disabled={save.isPending}
-        onClick={() => save.mutate()}
-      >
-        Save preferences
-      </Button>
+      <SaveButton label="Save preferences" className="mt-6" onClick={() => save.mutateAsync()} />
     </div>
   );
 };

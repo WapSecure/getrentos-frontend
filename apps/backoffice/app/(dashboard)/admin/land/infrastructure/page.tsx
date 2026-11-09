@@ -9,6 +9,7 @@ import {
   Card,
   ConfirmDialog,
   EmptyState,
+  ListSkeleton,
   Toast,
   type ToastVariant,
   PageHeader,
@@ -118,7 +119,7 @@ export default function AdminLandInfrastructurePage() {
         description="Developers' delivery claims waiting for a check, and changes to promises that buyers objected to. Nothing shows as verified, and no objected change applies, until you decide."
       />
       {query.isLoading ? (
-        <div className="h-40 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />
+        <ListSkeleton rows={3} variant="cards" label="Loading reviews" />
       ) : commitments.length === 0 && orders.length === 0 ? (
         <EmptyState
           icon={Construction}

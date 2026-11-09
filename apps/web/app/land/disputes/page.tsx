@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { Badge, PageHeader } from '@sureground/ui';
+import { Badge, ListSkeleton, PageHeader } from '@sureground/ui';
 import { Footer } from '@/components/layout/Footer';
 import { Navigation } from '@/components/layout/Navigation';
 import { unwrap } from '@/lib/apiHelpers';
@@ -27,7 +27,7 @@ export default function MyLandDisputesPage() {
           description="Cases you raised, cases about your land, and cases on your plot purchases."
         />
         {query.isLoading ? (
-          <div className="mt-6 h-40 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />
+          <ListSkeleton rows={4} label="Loading your cases" className="mt-6" />
         ) : query.isError ? (
           <p className="mt-6 text-sm text-destructive">
             {query.error instanceof Error ? query.error.message : 'Could not load your cases.'}

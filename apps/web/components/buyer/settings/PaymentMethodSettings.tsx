@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Landmark } from 'lucide-react';
-import { Alert, Button, Field, Input, NumberInput, useToast } from '@sureground/ui';
+import { Alert, Field, Input, NumberInput, SaveButton, useToast } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { buyerKeys } from '@/lib/queryKeys';
 import { buyerService } from '@/services/buyerService';
@@ -40,11 +40,6 @@ export const PaymentMethodSettings = () => {
     onSuccess: (result) => {
       setVerified(result.verified);
       queryClient.invalidateQueries({ queryKey: buyerKeys.paymentMethod });
-      toast.success(
-        result.verified
-          ? 'Payment method updated and verified.'
-          : 'Payment method saved. Verification is still pending.'
-      );
     },
     onError: (error) => toast.error(error.message || 'Unable to update your payment method.'),
   });
@@ -92,15 +87,12 @@ export const PaymentMethodSettings = () => {
         </Field>
       </div>
 
-      <Button
-        variant="primary"
-        className="mt-6 gap-1.5"
-        isLoading={save.isPending}
-        disabled={!bankName || !accountNumber || !accountName || save.isPending}
-        onClick={() => save.mutate()}
-      >
-        Update payment method
-      </Button>
+      <SaveButton
+        label="Update payment method"
+        className="mt-6"
+        disabled={!bankName || !accountNumber || !accountName}
+        onClick={() => save.mutateAsync()}
+      />
     </div>
   );
 };

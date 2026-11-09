@@ -11,6 +11,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
+  EmptyState,
   Field,
   IconButton,
   Input,
@@ -18,7 +19,7 @@ import {
   Skeleton,
   useToast,
 } from '@sureground/ui';
-import { PartyPopper, Trash2 } from 'lucide-react';
+import { CalendarRange, PartyPopper, Trash2 } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletKeys } from '@/lib/queryKeys';
 import { shortletService } from '@/services/shortletService';
@@ -220,7 +221,12 @@ export function ShortletPeakPricingDialog({
                 })}
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">No seasons yet.</p>
+              <EmptyState
+                icon={CalendarRange}
+                title="No seasons yet"
+                description="Add a season below to set different terms for busy dates."
+                size="compact"
+              />
             )}
 
             <div className="space-y-3 rounded-lg border border-dashed border-border p-3">

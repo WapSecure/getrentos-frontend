@@ -13,7 +13,7 @@ import { AttentionFeed } from '@/components/shared/attention/AttentionFeed';
 import { IdentityNudge } from '@/components/shared/verification/IdentityNudge';
 import { unwrap } from '@/lib/apiHelpers';
 import { ROUTES } from '@/lib/constants/auth';
-import { PageErrorState, StatGridSkeleton } from '@sureground/ui';
+import { PageErrorState, StatGroupSkeleton } from '@sureground/ui';
 
 export default function AgentDashboardPage() {
   const user = useAgentUser();
@@ -44,7 +44,7 @@ export default function AgentDashboardPage() {
       <AttentionFeed persona="agent" />
 
       {dashboardLoading ? (
-        <StatGridSkeleton count={4} />
+        <StatGroupSkeleton groups={[4]} />
       ) : dashboardError && !dashboard ? (
         <PageErrorState
           headingLevel="h2"

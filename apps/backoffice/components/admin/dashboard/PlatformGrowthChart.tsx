@@ -15,7 +15,7 @@ import { useQuery } from '@tanstack/react-query';
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@sureground/shared';
 import { adminKeys } from '@/lib/queryKeys';
-import { Badge, Button, Card, Skeleton } from '@sureground/ui';
+import { Badge, Button, Card, EmptyState, Skeleton } from '@sureground/ui';
 
 interface GrowthPoint {
   month: string;
@@ -89,12 +89,13 @@ export const PlatformGrowthChart = () => {
         </div>
       ) : !hasData ? (
         <div className="h-56 flex items-center justify-center">
-          <div className="text-center">
-            <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-secondary flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-muted-foreground" />
-            </div>
-            <p className="text-sm text-muted-foreground">No user growth data yet</p>
-          </div>
+          <EmptyState
+            icon={TrendingUp}
+            title="No user growth data yet"
+            description="New registrations over the last six months will be charted here."
+            size="compact"
+            bare
+          />
         </div>
       ) : (
         <div

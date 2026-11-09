@@ -3,7 +3,7 @@
 import { RedirectToEstateSetup } from '@/components/estate/shared/RedirectToEstateSetup';
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CalendarCheck, Plus, Trash2 } from 'lucide-react';
+import { CalendarCheck, Dumbbell, Plus, Trash2 } from 'lucide-react';
 import {
   Button,
   CardSkeleton,
@@ -92,7 +92,14 @@ export default function EstateAmenitiesPage() {
         {isAmenitiesLoading ? (
           <Skeleton className="h-12 w-full" />
         ) : !amenities || amenities.length === 0 ? (
-          <p className="text-sm text-muted-foreground mb-3">No amenities configured yet.</p>
+          <EmptyState
+            icon={Dumbbell}
+            title="No amenities yet"
+            description="Add a facility below, such as a gym or hall, so residents can book it."
+            size="compact"
+            bare
+            className="mb-3"
+          />
         ) : (
           <div className="divide-y divide-border mb-3">
             {amenities.map((amenity) => (

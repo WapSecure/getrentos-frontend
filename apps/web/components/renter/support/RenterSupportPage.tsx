@@ -284,7 +284,13 @@ export const RenterSupportPage = () => {
                   </Alert>
                 )}
                 {!messagesQuery.isLoading && !messagesQuery.isError && messages.length === 0 && (
-                  <p className="text-sm text-muted-foreground">No messages yet.</p>
+                  <EmptyState
+                    icon={MessageCircle}
+                    title="No messages yet"
+                    description="Messages between you and our support team will appear here."
+                    size="compact"
+                    bare
+                  />
                 )}
                 {messages.map((m) => (
                   <div

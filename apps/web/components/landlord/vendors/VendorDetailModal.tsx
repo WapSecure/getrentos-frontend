@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CalendarClock, CheckCircle2, Phone } from 'lucide-react';
+import { CalendarClock, CheckCircle2, Phone, Wrench } from 'lucide-react';
 import {
   Alert,
   Card,
@@ -10,6 +10,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
+  EmptyState,
   ListSkeleton,
   SaveButton,
 } from '@sureground/ui';
@@ -220,10 +221,12 @@ export const VendorDetailModal = ({ vendor, onClose }: VendorDetailModalProps) =
                 <section>
                   <h4 className="text-sm font-semibold text-foreground mb-1">Job history</h4>
                   {data.recentJobs.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">
-                      No jobs yet. Assign this vendor to a maintenance request to start their
-                      record.
-                    </p>
+                    <EmptyState
+                      icon={Wrench}
+                      title="No jobs yet"
+                      description="Assign this vendor to a maintenance request to start their record."
+                      size="compact"
+                    />
                   ) : (
                     <ul>
                       {data.recentJobs.map((job) => (

@@ -12,6 +12,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
+  EmptyState,
   Field,
   Input,
   Select,
@@ -118,7 +119,13 @@ export const LandTitleHistoryPanel = ({
           {history.error instanceof Error ? history.error.message : 'Title history is unavailable.'}
         </PanelMessage>
       ) : events.length === 0 ? (
-        <PanelMessage>No link in the chain of title has been recorded yet.</PanelMessage>
+        <EmptyState
+          icon={History}
+          title="No chain of title yet"
+          description="Each transfer or registration on this land will be listed here once recorded."
+          size="compact"
+          bare
+        />
       ) : (
         <ol className="relative space-y-3 border-l border-border pl-4">
           {events.map((event) => (

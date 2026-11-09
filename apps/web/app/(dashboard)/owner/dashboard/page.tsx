@@ -14,7 +14,7 @@ import {
   CardSkeleton,
   PageErrorState,
   Skeleton,
-  StatGridSkeleton,
+  StatGroupSkeleton,
 } from '@sureground/ui';
 import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -66,7 +66,7 @@ export default function OwnerDashboardPage() {
 
       {isLoading ? (
         <div className="space-y-6">
-          <StatGridSkeleton count={6} className="lg:grid-cols-3 xl:grid-cols-6" />
+          <StatGroupSkeleton groups={[3, 3]} />
           <div className="grid lg:grid-cols-3 gap-6">
             <Skeleton className="h-64 rounded-xl lg:col-span-2" />
             <CardSkeleton lines={4} />

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getInitials } from '@/lib/format';
-import { Button, Field, Input, useToast } from '@sureground/ui';
+import { Button, Field, Input, SaveButton, useToast } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
 import { realtorService } from '@/services/realtorService';
@@ -56,7 +56,6 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: realtorKeys.settingsProfile });
-      toast.success('Profile updated.');
     },
     onError: (error) => toast.error(error.message || 'Unable to update your profile.'),
   });
@@ -152,14 +151,7 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
         </Field>
       </div>
 
-      <Button
-        variant="primary"
-        className="mt-6"
-        isLoading={save.isPending}
-        onClick={() => save.mutate()}
-      >
-        Save changes
-      </Button>
+      <SaveButton className="mt-6" onClick={() => save.mutateAsync()} />
     </div>
   );
 };

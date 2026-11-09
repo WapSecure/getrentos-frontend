@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { StatGridSkeleton, StatGroup } from '@sureground/ui';
+import { StatGroup, StatGroupSkeleton } from '@sureground/ui';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -40,9 +40,7 @@ export const RenterStatsCards = () => {
     .reduce((sum, p) => sum + p.amount, 0);
 
   if (statsLoading) {
-    return (
-      <StatGridSkeleton count={6} className="gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3" />
-    );
+    return <StatGroupSkeleton groups={[4, 2]} />;
   }
 
   return (

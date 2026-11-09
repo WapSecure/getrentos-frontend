@@ -7,8 +7,10 @@ import {
   Button,
   Card,
   ConfirmDialog,
+  ListSkeleton,
   PageErrorState,
   PageHeader,
+  Skeleton,
   Toast,
 } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
@@ -61,8 +63,14 @@ export const RepresentedDealView = ({ deal }: { deal: LandDealRef }) => {
     onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
   });
 
-  if (detail.isLoading)
-    return <div className="h-48 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
+  if (detail.isLoading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-7 w-56" />
+        <ListSkeleton rows={4} variant="cards" label="Loading deal" />
+      </div>
+    );
+  }
   if (detail.isError || !detail.data) {
     return (
       <PageErrorState

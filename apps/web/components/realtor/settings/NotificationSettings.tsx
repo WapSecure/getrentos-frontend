@@ -5,7 +5,7 @@ import { TextMessageConsentCard } from '@/components/shared/settings/TextMessage
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { UserPlus, Handshake, CalendarClock, MessageCircle, Wallet, Star } from 'lucide-react';
-import { Button, Switch, useToast } from '@sureground/ui';
+import { SaveButton, Switch, useToast } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
 import { realtorService } from '@/services/realtorService';
@@ -65,7 +65,6 @@ export const NotificationSettings = () => {
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: realtorKeys.settingsNotifications });
-      toast.success('Notification preferences saved.');
     },
     onError: (error) =>
       toast.error(error.message || 'Unable to save your notification preferences.'),
@@ -122,15 +121,12 @@ export const NotificationSettings = () => {
         })}
       </div>
 
-      <Button
-        variant="primary"
+      <SaveButton
+        label="Save preferences"
         className="mt-6"
-        isLoading={save.isPending}
         disabled={preferences.length === 0}
-        onClick={() => save.mutate()}
-      >
-        Save preferences
-      </Button>
+        onClick={() => save.mutateAsync()}
+      />
     </div>
   );
 };

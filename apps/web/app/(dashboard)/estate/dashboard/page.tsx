@@ -22,7 +22,7 @@ import {
   Card,
   CardSkeleton,
   PageHeader,
-  StatGridSkeleton,
+  StatGroupSkeleton,
   StatGroup,
   Skeleton,
 } from '@sureground/ui';
@@ -113,7 +113,7 @@ export default function EstateDashboardPage() {
     return (
       <div className="space-y-6">
         <CardSkeleton />
-        <StatGridSkeleton count={6} className="lg:grid-cols-3 xl:grid-cols-6" />
+        <StatGroupSkeleton groups={[2, 4]} />
       </div>
     );
   }
@@ -167,7 +167,7 @@ export default function EstateDashboardPage() {
         description="Upgrade to Pro to see collection stats and a 6-month dues trend for this estate."
       >
         {isStatsLoading ? (
-          <StatGridSkeleton count={6} className="lg:grid-cols-3 xl:grid-cols-6" />
+          <StatGroupSkeleton groups={[2, 4]} />
         ) : (
           <div className="space-y-4">
             <StatGroup

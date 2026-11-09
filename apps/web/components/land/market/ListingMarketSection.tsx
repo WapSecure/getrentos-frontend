@@ -5,7 +5,7 @@ import { OpenConditionsNotice } from './OpenConditionsNotice';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { BarChart3, MapPin, ScanSearch, ShieldCheck, Video } from 'lucide-react';
-import { Button } from '@sureground/ui';
+import { Button, CardSkeleton } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency } from '@/lib/format';
 import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';
@@ -46,7 +46,7 @@ export const ListingMarketSection = ({ listingId }: { listingId: string }) => {
   const items = data?.comparables ?? [];
 
   if (comparables.isLoading && listing.isLoading) {
-    return <div className="mt-12 h-48 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
+    return <CardSkeleton lines={4} className="mt-12" />;
   }
   const labels = listing.data?.diligence?.labels ?? [];
   const notVerified = listing.data?.diligence?.notVerified ?? [];

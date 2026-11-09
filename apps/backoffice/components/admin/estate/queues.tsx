@@ -24,6 +24,7 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
+  EmptyState,
   useToast,
   type BadgeVariant,
 } from '@sureground/ui';
@@ -1114,7 +1115,12 @@ function GovernanceDetail({
             <ScrollText className="h-4 w-4" /> Committee signatures
           </p>
           {detail.signatures.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No signatures recorded yet.</p>
+            <EmptyState
+              icon={ScrollText}
+              title="No signatures recorded yet"
+              description="Committee members who sign this record will appear here."
+              size="compact"
+            />
           ) : (
             <div className="space-y-2">
               {detail.signatures.map((s) => (

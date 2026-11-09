@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { ShieldAlert, Gavel, ShieldCheck, AlertTriangle, MessageCircle } from 'lucide-react';
-import { Button, CardSkeleton, PageErrorState, Switch, useToast } from '@sureground/ui';
+import { CardSkeleton, PageErrorState, SaveButton, Switch, useToast } from '@sureground/ui';
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@sureground/shared';
 import { adminKeys } from '@/lib/queryKeys';
@@ -105,13 +105,12 @@ const NotificationSettingsForm = ({
       const next = buildPreferences(savedPreferences);
       setPreferences(next);
       setBaseline(next);
-      toast.success('Notification preferences saved.');
     },
     onError: (error: Error) =>
       toast.error(error.message || 'Notification preferences could not be saved.'),
   });
 
-  const handleSave = () => saveMutation.mutate();
+  const handleSave = () => saveMutation.mutateAsync();
 
   return (
     <div>
@@ -156,15 +155,12 @@ const NotificationSettingsForm = ({
         ))}
       </div>
 
-      <Button
-        variant="primary"
+      <SaveButton
+        label="Save preferences"
         className="mt-6"
         onClick={handleSave}
-        disabled={!isDirty || saveMutation.isPending}
-        isLoading={saveMutation.isPending}
-      >
-        Save Preferences
-      </Button>
+        disabled={!isDirty}
+      />
     </div>
   );
 };

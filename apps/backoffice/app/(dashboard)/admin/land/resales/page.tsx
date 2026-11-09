@@ -7,6 +7,7 @@ import {
   Badge,
   Button,
   EmptyState,
+  ListSkeleton,
   Textarea,
   Toast,
   type ToastVariant,
@@ -134,8 +135,7 @@ const SaleConditions = ({
     queryKey: key,
     queryFn: () => unwrap(adminLandResaleService.conditions(sale.transactionId)),
   });
-  if (query.isLoading)
-    return <div className="h-24 animate-pulse rounded-xl bg-secondary" aria-busy="true" />;
+  if (query.isLoading) return <ListSkeleton rows={2} variant="cards" label="Loading conditions" />;
   const conditions = query.data ?? [];
   return (
     <div className="space-y-2">
@@ -188,7 +188,7 @@ export default function AdminLandResalesPage() {
         description="Whole-parcel sales held in escrow with a condition still open or failed. The money is not released while any is open; a failed condition lets the buyer take a full refund. Decide a condition here when the buyer and seller disagree or a check needs Sureground."
       />
       {query.isLoading ? (
-        <div className="h-40 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />
+        <ListSkeleton rows={3} variant="cards" label="Loading resales" />
       ) : items.length === 0 ? (
         <EmptyState
           icon={ScrollText}

@@ -45,11 +45,11 @@ export function PageErrorState({
     <div
       role="alert"
       className={cn(
-        'flex min-h-[50vh] flex-col items-center justify-center rounded-2xl border border-border bg-card px-6 py-12 text-center',
+        'flex min-h-[50vh] flex-col items-center justify-center rounded-xl border border-border bg-card px-6 py-12 text-center shadow-xs',
         className
       )}
     >
-      <span className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-destructive-subtle text-destructive">
+      <span className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-destructive-subtle text-destructive">
         <Icon className="h-7 w-7" aria-hidden="true" />
       </span>
       <Heading className="text-xl font-semibold text-foreground">{resolvedTitle}</Heading>

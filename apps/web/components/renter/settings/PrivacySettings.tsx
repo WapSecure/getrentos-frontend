@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Eye, User, Users, Globe, Lock, Phone, History } from 'lucide-react';
-import { Button, RadioGroup, Switch, useOptimisticMutation, useToast } from '@sureground/ui';
+import { RadioGroup, SaveButton, Switch, useOptimisticMutation, useToast } from '@sureground/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
@@ -47,7 +47,6 @@ export const PrivacySettings = () => {
     mutationFn: () => unwrap(renterService.updateSettingsPreferences({ privacy })),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: renterKeys.settingsPreferences });
-      toast.success('Privacy settings saved');
     },
     onError: (err: Error) => toast.error(err.message || 'Failed to save privacy settings'),
   });
@@ -133,14 +132,11 @@ export const PrivacySettings = () => {
           </div>
         </div>
 
-        <Button
-          variant="primary"
-          className="w-full"
-          onClick={() => saveMutation.mutate()}
-          isLoading={saveMutation.isPending}
-        >
-          Save privacy settings
-        </Button>
+        <SaveButton
+          label="Save privacy settings"
+          fullWidth
+          onClick={() => saveMutation.mutateAsync()}
+        />
       </div>
     </div>
   );

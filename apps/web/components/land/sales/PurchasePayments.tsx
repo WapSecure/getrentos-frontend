@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { Alert, Badge } from '@sureground/ui';
+import { Alert, Badge, EmptyState } from '@sureground/ui';
+import { Wallet } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { sellerPayoutKeys } from '@/lib/queryKeys';
@@ -51,7 +52,13 @@ export const PurchasePayments = ({
       <div>
         <h3 className="text-sm font-semibold text-foreground">Payments from the buyer</h3>
         {payments.length === 0 ? (
-          <p className="mt-2 text-sm text-muted-foreground">No payments yet.</p>
+          <EmptyState
+            icon={Wallet}
+            title="No payments yet"
+            description="Payments the buyer makes on this purchase will appear here."
+            size="compact"
+            className="mt-2"
+          />
         ) : (
           <ul className="mt-2 divide-y divide-border/60 rounded-xl border border-border">
             {payments.map((payment) => {

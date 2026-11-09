@@ -7,7 +7,7 @@ import { RealtorStatsCards } from '@/components/realtor/dashboard/RealtorStatsCa
 import { RealtorActivityFeed } from '@/components/realtor/dashboard/RealtorActivityFeed';
 import { RealtorQuickActions } from '@/components/realtor/dashboard/RealtorQuickActions';
 import { useQuery } from '@tanstack/react-query';
-import { PageErrorState, Skeleton, StatGridSkeleton } from '@sureground/ui';
+import { PageErrorState, Skeleton, StatGroupSkeleton } from '@sureground/ui';
 import { realtorService } from '@/services/realtorService';
 import { realtorKeys } from '@/lib/queryKeys';
 import { unwrap } from '@/lib/apiHelpers';
@@ -70,7 +70,7 @@ export default function RealtorDashboardPage() {
       <AttentionFeed persona="realtor" />
 
       {statsLoading ? (
-        <StatGridSkeleton count={6} className="mb-8" />
+        <StatGroupSkeleton groups={[3, 3]} className="mb-8" />
       ) : statsError && !stats ? (
         <PageErrorState
           headingLevel="h2"

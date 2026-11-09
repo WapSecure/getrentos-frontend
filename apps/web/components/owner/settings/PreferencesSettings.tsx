@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { RefreshCcw, Percent } from 'lucide-react';
-import { Button, Field, NumberInput, QueryState, Switch, useToast } from '@sureground/ui';
+import { Field, NumberInput, QueryState, SaveButton, Switch, useToast } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { ownerKeys } from '@/lib/queryKeys';
 import { ownerService } from '@/services/ownerService';
@@ -48,7 +48,6 @@ export const PreferencesSettings = () => {
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ownerKeys.preferences });
-      toast.success('Preferences saved.');
     },
     onError: (error) => toast.error(error.message || 'Failed to save preferences.'),
   });
@@ -101,15 +100,12 @@ export const PreferencesSettings = () => {
           </div>
         </div>
 
-        <Button
-          variant="primary"
+        <SaveButton
+          label="Save preferences"
           className="mt-6"
-          isLoading={save.isPending}
           disabled={!minOfferPct}
-          onClick={() => save.mutate()}
-        >
-          Save preferences
-        </Button>
+          onClick={() => save.mutateAsync()}
+        />
       </QueryState>
     </div>
   );

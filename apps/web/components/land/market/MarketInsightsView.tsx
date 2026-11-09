@@ -4,7 +4,15 @@ import { useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Button, DataTable, PageErrorState, Select, Skeleton, type Column } from '@sureground/ui';
+import {
+  Button,
+  DataTable,
+  EmptyState,
+  PageErrorState,
+  Select,
+  Skeleton,
+  type Column,
+} from '@sureground/ui';
 import { AlertTriangle, BarChart3 } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency } from '@/lib/format';
@@ -159,13 +167,22 @@ export const MarketInsightsView = () => {
           isRetrying={insights.isRefetching}
         />
       ) : data.count === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border bg-card px-6 py-14 text-center">
-          <BarChart3 className="mx-auto h-9 w-9 text-primary" aria-hidden />
-          <h2 className="mt-4 text-lg font-semibold text-foreground">No verified land here yet</h2>
-          <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-            Figures cover only verified, in-date listings. Try a wider area.
-          </p>
-        </div>
+        <EmptyState
+          icon={BarChart3}
+          title={filtered ? 'No verified land matches these filters' : 'No verified land here yet'}
+          description="Figures cover only verified, in-date listings. Try a wider area."
+          action={
+            filtered ? (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => router.replace(pathname, { scroll: false })}
+              >
+                Clear filters
+              </Button>
+            ) : undefined
+          }
+        />
       ) : (
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

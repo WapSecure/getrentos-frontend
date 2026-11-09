@@ -11,6 +11,7 @@ import {
   Button,
   Badge,
   CardSkeleton,
+  EmptyState,
   Field,
   PageErrorState,
   Select,
@@ -20,7 +21,7 @@ import {
   type BadgeVariant,
   type PendingUpload,
 } from '@sureground/ui';
-import { Plus, Camera, Share2, CheckCircle2 } from 'lucide-react';
+import { Plus, Camera, Share2, CheckCircle2, ClipboardList } from 'lucide-react';
 import {
   inspectionService,
   INSPECTION_CONDITIONS,
@@ -200,7 +201,16 @@ export const InspectionDetailModal = ({
 
               <div className="space-y-3">
                 {inspection.items.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">No areas recorded yet.</p>
+                  <EmptyState
+                    icon={ClipboardList}
+                    title="No areas recorded yet"
+                    description={
+                      isDraft
+                        ? 'Add each room or area below with its condition.'
+                        : 'Rooms and areas checked in this inspection will appear here.'
+                    }
+                    size="compact"
+                  />
                 ) : (
                   inspection.items.map((item) => (
                     <div key={item.id} className="rounded-xl border border-border p-4">

@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { Sparkles, TrendingUp, ArrowUpRight } from 'lucide-react';
-import { Card } from '@sureground/ui';
+import { Card, CardSkeleton } from '@sureground/ui';
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
@@ -17,15 +17,7 @@ export const PortfolioBriefingCard = () => {
   });
 
   if (query.isLoading) {
-    return (
-      <Card className="p-5 mb-6">
-        <div className="animate-pulse space-y-2" aria-hidden="true">
-          <div className="h-4 w-48 rounded bg-secondary" />
-          <div className="h-3 w-full rounded bg-secondary" />
-          <div className="h-3 w-5/6 rounded bg-secondary" />
-        </div>
-      </Card>
-    );
+    return <CardSkeleton lines={2} className="mb-6" />;
   }
 
   const data = query.data;

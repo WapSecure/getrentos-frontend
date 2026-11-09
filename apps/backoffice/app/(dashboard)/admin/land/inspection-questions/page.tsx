@@ -9,6 +9,7 @@ import {
   Card,
   EmptyState,
   Field,
+  ListSkeleton,
   Textarea,
   Toast,
   type ToastVariant,
@@ -114,7 +115,7 @@ export default function AdminLandInspectionQuestionsPage() {
         description="Buyers asking about a pre-purchase inspection report. Answer from the report, or query the inspector on the inspection and answer once they reply."
       />
       {query.isLoading ? (
-        <div className="h-40 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />
+        <ListSkeleton rows={3} variant="cards" label="Loading questions" />
       ) : items.length === 0 ? (
         <EmptyState
           icon={MessageCircleQuestion}

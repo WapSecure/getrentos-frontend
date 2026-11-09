@@ -14,7 +14,7 @@ import {
   EmptyState,
   PageErrorState,
   Skeleton,
-  StatGridSkeleton,
+  StatGroupSkeleton,
 } from '@sureground/ui';
 import { landlordService, type LandlordDashboardStats } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -82,7 +82,7 @@ export default function LandlordDashboardPage() {
 
       {isLoading ? (
         <div className="space-y-6">
-          <StatGridSkeleton count={4} />
+          <StatGroupSkeleton groups={[3, 4]} />
           <div className="grid lg:grid-cols-3 gap-6">
             <Skeleton className="h-64 rounded-xl lg:col-span-2" />
             <CardSkeleton lines={4} />

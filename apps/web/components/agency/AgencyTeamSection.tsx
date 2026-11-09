@@ -2,7 +2,14 @@
 
 import { useState } from 'react';
 import { Users } from 'lucide-react';
-import { Button, DataTable, ListSkeleton, NumberInput, type Column } from '@sureground/ui';
+import {
+  Button,
+  DataTable,
+  EmptyState,
+  ListSkeleton,
+  NumberInput,
+  type Column,
+} from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 import type { AgencyTeam, AgencyTeamMember } from '@/services/agencyCommissionService';
 
@@ -105,7 +112,13 @@ export function AgencyTeamSection({
           {isLoading ? (
             <ListSkeleton rows={3} label="Loading your team" className="rounded-none border-0" />
           ) : (
-            <p className="p-5 text-sm text-muted-foreground">No team members yet.</p>
+            <EmptyState
+              icon={Users}
+              title="No team members yet"
+              description="Your agency's members and their commission splits will appear here."
+              size="compact"
+              bare
+            />
           )}
         </div>
       ) : (

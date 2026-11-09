@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, FileText, Hammer } from 'lucide-react';
+import { ArrowLeft, Camera, FileText, Hammer, ReceiptText } from 'lucide-react';
 import {
   Alert,
   Badge,
@@ -16,6 +16,7 @@ import {
   DialogDescription,
   DialogTitle,
   DocumentUpload,
+  EmptyState,
   Field,
   Input,
   ListSkeleton,
@@ -284,7 +285,13 @@ function JobDetail({ job, onMode }: { job: StaffLandWatchJob; onMode: (mode: Mod
       <section className="mt-5">
         <h3 className="text-sm font-semibold text-foreground">Quotes</h3>
         {job.quotes.length === 0 ? (
-          <p className="mt-1 text-sm text-muted-foreground">No quotes posted yet.</p>
+          <EmptyState
+            icon={ReceiptText}
+            title="No quotes posted yet"
+            description="Quotes from vendors for this job will appear here."
+            size="compact"
+            className="mt-2"
+          />
         ) : (
           <ul className="mt-2 space-y-2">
             {job.quotes.map((q) => (
@@ -326,7 +333,13 @@ function JobDetail({ job, onMode }: { job: StaffLandWatchJob; onMode: (mode: Mod
       <section className="mt-5">
         <h3 className="text-sm font-semibold text-foreground">Proof of work</h3>
         {noProof ? (
-          <p className="mt-1 text-sm text-muted-foreground">No proof uploaded yet.</p>
+          <EmptyState
+            icon={Camera}
+            title="No proof uploaded yet"
+            description="Photos and files showing the finished work will appear here."
+            size="compact"
+            className="mt-2"
+          />
         ) : (
           <ul className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
             {job.proof.map((p) => (

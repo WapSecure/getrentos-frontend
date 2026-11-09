@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { Sparkles, CheckCircle2, ArrowUpRight } from 'lucide-react';
-import { Card } from '@sureground/ui';
+import { Card, CardSkeleton } from '@sureground/ui';
 import { trustService } from '@/services/trustService';
 import { unwrap } from '@/lib/apiHelpers';
 import { trustKeys } from '@/lib/queryKeys';
@@ -16,15 +16,7 @@ export const TrustExplanationCard = () => {
   });
 
   if (query.isLoading) {
-    return (
-      <Card className="p-4">
-        <div className="animate-pulse space-y-2" aria-hidden="true">
-          <div className="h-4 w-40 rounded bg-secondary" />
-          <div className="h-3 w-full rounded bg-secondary" />
-          <div className="h-3 w-5/6 rounded bg-secondary" />
-        </div>
-      </Card>
-    );
+    return <CardSkeleton lines={2} className="p-4" />;
   }
 
   const data = query.data;

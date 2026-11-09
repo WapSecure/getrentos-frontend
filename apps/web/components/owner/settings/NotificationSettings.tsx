@@ -5,7 +5,7 @@ import { TextMessageConsentCard } from '@/components/shared/settings/TextMessage
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Handshake, ShieldCheck, FileText, MessageCircle, Star, Bell } from 'lucide-react';
-import { Button, ListSkeleton, Switch, useToast } from '@sureground/ui';
+import { ListSkeleton, SaveButton, Switch, useToast } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { ownerKeys } from '@/lib/queryKeys';
 import { ownerService, type OwnerNotificationPreference } from '@/services/ownerService';
@@ -43,7 +43,6 @@ export const NotificationSettings = () => {
     mutationFn: () => unwrap(ownerService.updateNotificationPreferences(preferences)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ownerKeys.notificationPrefs });
-      toast.success('Notification preferences saved.');
     },
     onError: (error) => toast.error(error.message || 'Failed to save notification preferences.'),
   });
@@ -99,15 +98,12 @@ export const NotificationSettings = () => {
         })}
       </div>
 
-      <Button
-        variant="primary"
-        className="mt-6 gap-1.5"
-        isLoading={save.isPending}
+      <SaveButton
+        label="Save preferences"
+        className="mt-6"
         disabled={preferences.length === 0}
-        onClick={() => save.mutate()}
-      >
-        Save preferences
-      </Button>
+        onClick={() => save.mutateAsync()}
+      />
     </div>
   );
 };

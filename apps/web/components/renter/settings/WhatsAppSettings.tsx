@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { MessageCircle, Smartphone, CheckCircle2 } from 'lucide-react';
-import { Button, Field, Input, Switch, useToast } from '@sureground/ui';
+import { Button, Field, Input, SaveButton, Switch, useToast } from '@sureground/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
@@ -62,7 +62,6 @@ export const WhatsAppSettings = () => {
       unwrap(renterService.updateSettingsPreferences({ whatsapp: next })),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: renterKeys.settingsPreferences });
-      toast.success('WhatsApp settings saved');
     },
     onError: (err: Error) => toast.error(err.message || 'Failed to save WhatsApp settings'),
   });
@@ -75,11 +74,17 @@ export const WhatsAppSettings = () => {
 
   const handleConnect = () => {
     if (!state.phone.trim()) return;
-    saveMutation.mutate({ ...state, connected: true });
+    saveMutation.mutate(
+      { ...state, connected: true },
+      { onSuccess: () => toast.success('WhatsApp settings saved') }
+    );
   };
 
   const handleDisconnect = () => {
-    saveMutation.mutate({ connected: false, phone: '', preferences: state.preferences });
+    saveMutation.mutate(
+      { connected: false, phone: '', preferences: state.preferences },
+      { onSuccess: () => toast.success('WhatsApp settings saved') }
+    );
   };
 
   return (
@@ -157,14 +162,11 @@ export const WhatsAppSettings = () => {
             ))}
           </div>
 
-          <Button
-            variant="primary"
-            className="w-full"
-            onClick={() => saveMutation.mutate(state)}
-            isLoading={saveMutation.isPending}
-          >
-            Save WhatsApp settings
-          </Button>
+          <SaveButton
+            label="Save WhatsApp settings"
+            fullWidth
+            onClick={() => saveMutation.mutateAsync(state)}
+          />
         </div>
       )}
     </div>

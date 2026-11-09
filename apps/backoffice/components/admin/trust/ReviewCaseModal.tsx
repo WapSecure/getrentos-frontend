@@ -18,6 +18,7 @@ import {
   Button,
   CardSkeleton,
   Checkbox,
+  EmptyState,
   PageErrorState,
   Select,
   Textarea,
@@ -375,7 +376,13 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
                     <CheckCircle2 className="h-3.5 w-3.5" /> Verification decisions
                   </p>
                   {detail.verification.decisions.length === 0 ? (
-                    <p className="mt-2 text-sm text-muted-foreground">No decisions recorded yet.</p>
+                    <EmptyState
+                      icon={CheckCircle2}
+                      title="No decisions recorded yet"
+                      description="Each decision taken on this verification will appear here."
+                      size="compact"
+                      bare
+                    />
                   ) : (
                     <div className="mt-3 space-y-2">
                       {detail.verification.decisions.map((d) => {
@@ -419,7 +426,13 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
                   </p>
                   <div className="mt-3 space-y-2">
                     {detail.actions.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">No activity yet.</p>
+                      <EmptyState
+                        icon={History}
+                        title="No activity yet"
+                        description="Every action staff take on this case will be logged here."
+                        size="compact"
+                        bare
+                      />
                     ) : (
                       detail.actions.map((action) => (
                         <div key={action.id} className="flex items-start gap-2 text-sm">

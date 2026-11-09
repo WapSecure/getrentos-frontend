@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getInitials } from '@/lib/format';
-import { Button, Field, Input, useToast } from '@sureground/ui';
+import { Field, Input, SaveButton, useToast } from '@sureground/ui';
 import { nameOnly } from '@/lib/validations/input';
 import { ChangeEmailButton } from '@/components/shared/security/ChangeEmailButton';
 import { ChangePhoneButton } from '@/components/shared/security/ChangePhoneButton';
@@ -49,7 +49,6 @@ const ProfileForm = ({
       unwrap(agentService.updateProfile({ fullName: fullName.trim(), phone: phone.trim() })),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: agentKeys.profile });
-      toast.success('Profile saved.');
     },
     onError: (error: Error) => toast.error(error.message || 'Could not save your profile.'),
   });
@@ -97,14 +96,11 @@ const ProfileForm = ({
         </div>
       </div>
 
-      <Button
+      <SaveButton
         className="mt-6"
-        onClick={() => save.mutate()}
+        onClick={() => save.mutateAsync()}
         disabled={!dirty || fullName.trim().length < 2}
-        isLoading={save.isPending}
-      >
-        Save changes
-      </Button>
+      />
     </div>
   );
 };

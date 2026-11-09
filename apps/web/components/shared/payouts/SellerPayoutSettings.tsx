@@ -2,8 +2,16 @@
 
 import { useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CheckCircle2 } from 'lucide-react';
-import { Alert, Badge, Button, ListSkeleton, Pagination, type BadgeVariant } from '@sureground/ui';
+import { Banknote, CheckCircle2 } from 'lucide-react';
+import {
+  Alert,
+  Badge,
+  EmptyState,
+  ListSkeleton,
+  Pagination,
+  SaveButton,
+  type BadgeVariant,
+} from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
 import {
@@ -132,14 +140,11 @@ export const SellerPayoutSettings = ({ description }: SellerPayoutSettingsProps)
 
       <div className="mt-6 space-y-3">
         {error && <Alert variant="danger">{error}</Alert>}
-        <Button
-          variant="primary"
-          isLoading={save.isPending}
+        <SaveButton
+          label={saveAccountLabel(lookup, 'Update payout account')}
           disabled={!canSave}
-          onClick={() => save.mutate()}
-        >
-          {saveAccountLabel(lookup, 'Update payout account')}
-        </Button>
+          onClick={() => save.mutateAsync()}
+        />
       </div>
 
       <div className="mt-10 pt-6 border-t border-border">
@@ -152,7 +157,12 @@ export const SellerPayoutSettings = ({ description }: SellerPayoutSettingsProps)
         {payoutsLoading ? (
           <ListSkeleton rows={3} />
         ) : sales.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No released sales yet.</p>
+          <EmptyState
+            icon={Banknote}
+            title="No released sales yet"
+            description="Once Sureground pays out a sale, it will appear here with its payout status."
+            size="compact"
+          />
         ) : (
           <ul className="divide-y divide-border rounded-lg border border-border">
             {sales.map((sale: SellerSalePayout) => {

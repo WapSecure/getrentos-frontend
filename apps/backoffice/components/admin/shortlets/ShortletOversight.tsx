@@ -44,6 +44,7 @@ import {
   Clock3,
   Gavel,
   MapPin,
+  MessageSquare,
   Pause,
   Percent,
   Play,
@@ -1960,7 +1961,12 @@ function DisputeThreadModal({
                 The dispute messages could not be loaded.
               </Alert>
             ) : messages.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No messages yet.</p>
+              <EmptyState
+                icon={MessageSquare}
+                title="No messages yet"
+                description="Messages between the guest, the host and staff on this dispute will appear here."
+                size="compact"
+              />
             ) : (
               messages.map((m) => (
                 <div key={m.id} className="rounded-lg border border-border p-3">

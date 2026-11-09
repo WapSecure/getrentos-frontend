@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Camera, User, Mail, Phone, Building2 } from 'lucide-react';
-import { Button, Field, IconButton, Input, useToast } from '@sureground/ui';
+import { Field, IconButton, Input, SaveButton } from '@sureground/ui';
 import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { ownerKeys } from '@/lib/queryKeys';
@@ -39,7 +39,6 @@ const ProfileSettingsForm = ({
   user: { fullName: string; email: string; role?: string } | null;
 }) => {
   const queryClient = useQueryClient();
-  const toast = useToast();
   const [formData, setFormData] = useState(initial);
 
   const updateMutation = useMutation({
@@ -53,14 +52,8 @@ const ProfileSettingsForm = ({
       ),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ownerKeys.profile });
-      toast.success('Saved');
     },
   });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    updateMutation.mutate();
-  };
 
   return (
     <div>
@@ -69,7 +62,7 @@ const ProfileSettingsForm = ({
         Update your personal information and profile photo
       </p>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
         <div className="flex items-center gap-6">
           <div className="relative">
             <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-2xl font-semibold">
@@ -143,9 +136,8 @@ const ProfileSettingsForm = ({
           />
         </Field>
 
-        <Button type="submit" variant="primary" isLoading={updateMutation.isPending}>
-          Save changes
-        </Button>
+        {/* Enter in a field clicks this submit button, so the save runs from onClick alone. */}
+        <SaveButton type="submit" onClick={() => updateMutation.mutateAsync()} />
       </form>
     </div>
   );

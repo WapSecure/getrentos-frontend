@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { BadgeCheck, CircleAlert, ClipboardCheck } from 'lucide-react';
-import { Badge, EmptyState, Select, PageHeader } from '@sureground/ui';
+import { Badge, EmptyState, ListSkeleton, Select, PageHeader } from '@sureground/ui';
 import { formatDate, unwrap } from '@sureground/shared';
 import { useAdminUser } from '../../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
@@ -84,7 +84,7 @@ export default function AdminLandProfessionalsPage() {
         </div>
       </div>
       {query.isLoading ? (
-        <div className="h-40 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />
+        <ListSkeleton rows={5} label="Loading professionals" />
       ) : items.length === 0 ? (
         <EmptyState
           icon={BadgeCheck}

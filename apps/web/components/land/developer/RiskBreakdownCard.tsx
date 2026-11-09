@@ -1,8 +1,8 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { Badge, Card, Skeleton } from '@sureground/ui';
-import { ShieldAlert } from 'lucide-react';
+import { Badge, Card, EmptyState, Skeleton } from '@sureground/ui';
+import { ShieldAlert, ShieldCheck } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
 import { landDeveloperKeys } from '@/lib/landDeveloperQueryKeys';
@@ -84,7 +84,13 @@ export const RiskBreakdownCard = ({
         <>
           <h3 className="mt-5 text-sm font-medium text-foreground">What drives the score</h3>
           {factors.length === 0 ? (
-            <p className="mt-2 text-sm text-muted-foreground">No risk factors found.</p>
+            <EmptyState
+              icon={ShieldCheck}
+              title="No risk factors found"
+              description="Anything that raises or lowers this score will be listed here."
+              size="compact"
+              bare
+            />
           ) : (
             <ul className="mt-2 divide-y divide-border/60 rounded-xl border border-border">
               {factors.map((factor) => (

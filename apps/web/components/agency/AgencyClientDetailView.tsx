@@ -3,12 +3,13 @@
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Building2, Mail, Phone, ShieldCheck, UserRound } from 'lucide-react';
+import { Building2, Mail, NotebookPen, Phone, ShieldCheck, UserRound } from 'lucide-react';
 import {
   Badge,
   Breadcrumbs,
   Button,
   Card,
+  EmptyState,
   Field,
   PageErrorState,
   PageLoadingState,
@@ -182,7 +183,13 @@ export function AgencyClientDetailView() {
           </div>
           <div className="mt-4 space-y-3">
             {client.notes.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No notes yet.</p>
+              <EmptyState
+                icon={NotebookPen}
+                title="No notes yet"
+                description="Notes your team adds about this client will appear here."
+                size="compact"
+                bare
+              />
             ) : (
               client.notes.map((n) => (
                 <div key={n.id} className="border-b border-border/50 pb-3 last:border-0 last:pb-0">

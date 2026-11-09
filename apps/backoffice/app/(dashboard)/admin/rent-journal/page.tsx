@@ -2,12 +2,13 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CheckCircle2, TriangleAlert } from 'lucide-react';
+import { CheckCircle2, Scale, TriangleAlert } from 'lucide-react';
 import {
   Badge,
   Button,
   Card,
   DataTable,
+  EmptyState,
   PageErrorState,
   Skeleton,
   TableSkeleton,
@@ -357,7 +358,13 @@ export default function RentJournalPage() {
             check.isLoading ? (
               <Skeleton className="h-5 w-2/3" />
             ) : (
-              <p className="text-sm text-muted-foreground">No check has run yet.</p>
+              <EmptyState
+                icon={Scale}
+                title="No check has run yet"
+                description="The result of the hourly check against the rent records will appear here."
+                size="compact"
+                bare
+              />
             )
           ) : c.mismatches.length === 0 && c.balanced ? (
             <p className="flex items-center gap-2 text-sm text-foreground">

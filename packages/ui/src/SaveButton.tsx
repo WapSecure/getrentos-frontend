@@ -19,7 +19,7 @@ const isPromise = (value: unknown): value is Promise<unknown> =>
   !!value && typeof (value as Promise<unknown>).then === 'function';
 
 export const SaveButton = ({
-  label = 'Save Changes',
+  label = 'Save changes',
   type = 'button',
   fullWidth,
   className,
@@ -60,7 +60,7 @@ export const SaveButton = ({
       disabled={disabled}
       isLoading={saving || isLoading}
     >
-      {saved && <Check className="w-4 h-4" />}
+      {saved && <Check className="h-4 w-4" aria-hidden="true" />}
       {saved ? 'Saved' : label}
     </Button>
   );

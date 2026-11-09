@@ -2,7 +2,15 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Button, EmptyState, Input, PageErrorState, Textarea, Toast } from '@sureground/ui';
+import {
+  Button,
+  EmptyState,
+  Input,
+  ListSkeleton,
+  PageErrorState,
+  Textarea,
+  Toast,
+} from '@sureground/ui';
 import { Video } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import {
@@ -172,8 +180,7 @@ export const HostTours = () => {
   });
   const notify: Notify = (message, variant = 'success') => setToast({ message, variant });
 
-  if (list.isLoading)
-    return <div className="h-40 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
+  if (list.isLoading) return <ListSkeleton rows={3} variant="cards" label="Loading tours" />;
   if (list.isError) {
     return (
       <PageErrorState

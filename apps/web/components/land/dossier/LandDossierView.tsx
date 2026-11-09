@@ -1,8 +1,8 @@
 'use client';
 
 import { boundarySignOffText } from '@sureground/shared';
-import { Printer } from 'lucide-react';
-import { Alert, Badge, Button, PageHeader } from '@sureground/ui';
+import { History, Printer } from 'lucide-react';
+import { Alert, Badge, Button, EmptyState, PageHeader } from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { LAND_TITLE_TYPE_LABELS, type LandTitleType } from '@/types/land';
 import type { AcquisitionCostItem, LandDossier } from '@/types/landDossier';
@@ -198,7 +198,13 @@ export const LandDossierView = ({ dossier }: { dossier: LandDossier }) => {
 
       <Section title="Title chronology">
         {dossier.titleChronology.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No chain of title has been recorded yet.</p>
+          <EmptyState
+            icon={History}
+            title="No chain of title yet"
+            description="Transfers and registrations on this land will be listed here once recorded."
+            size="compact"
+            bare
+          />
         ) : (
           <ol className="space-y-2 text-sm">
             {dossier.titleChronology.map((event, index) => (

@@ -3,8 +3,16 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Badge, Button, Card, EmptyState, PageErrorState, Toast } from '@sureground/ui';
-import { UsersRound } from 'lucide-react';
+import {
+  Badge,
+  Button,
+  Card,
+  EmptyState,
+  ListSkeleton,
+  PageErrorState,
+  Toast,
+} from '@sureground/ui';
+import { LandPlot, UsersRound } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency } from '@/lib/format';
 import {
@@ -31,11 +39,18 @@ const PrincipalDeals = ({ appointment }: { appointment: LandRepresentativeAppoin
       </p>
     );
   }
-  if (deals.isLoading)
-    return <div className="h-16 animate-pulse rounded-xl bg-secondary" aria-busy="true" />;
+  if (deals.isLoading) return <ListSkeleton rows={2} label="Loading deals" bare />;
   const data = deals.data;
   if (!data || (data.purchases.length === 0 && data.resales.length === 0)) {
-    return <p className="text-sm text-muted-foreground">No land deals yet.</p>;
+    return (
+      <EmptyState
+        icon={LandPlot}
+        title="No land deals yet"
+        description="Purchases and resales this buyer starts will appear here."
+        size="compact"
+        bare
+      />
+    );
   }
   return (
     <ul className="divide-y divide-border">
@@ -122,8 +137,7 @@ export const RepresentingDesk = () => {
     onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
   });
 
-  if (list.isLoading)
-    return <div className="h-40 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
+  if (list.isLoading) return <ListSkeleton rows={3} variant="cards" label="Loading appointments" />;
   if (list.isError) {
     return (
       <PageErrorState

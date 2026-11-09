@@ -1,12 +1,12 @@
-import { Banknote, Check, RotateCcw } from 'lucide-react';
-import { Badge, Button } from '@sureground/ui';
+import { Banknote, Check, RotateCcw, Wallet } from 'lucide-react';
+import { Badge, Button, EmptyState } from '@sureground/ui';
 import { formatCurrency, formatDate } from '@sureground/shared';
 import type {
   LandEscrowRelease,
   LandPurchasePayment,
   LandReleasePayoutStatus,
 } from '@/types/landPurchase';
-import { LandCaseSection, PanelMessage } from '@/components/admin/land/case/shared';
+import { LandCaseSection } from '@/components/admin/land/case/shared';
 import { LandLineStatusBadge } from './LandPurchaseStatusBadge';
 
 const PAYOUT_STATUS: Record<
@@ -40,7 +40,12 @@ export const LandPurchasePayments = ({
       Buyer payments
     </h3>
     {payments.length === 0 ? (
-      <PanelMessage>No payments yet.</PanelMessage>
+      <EmptyState
+        icon={Wallet}
+        title="No payments yet"
+        description="Payments the buyer makes on this contract will appear here."
+        size="compact"
+      />
     ) : (
       <ul className="divide-y divide-border rounded-xl border border-border">
         {payments.map((payment) => (
@@ -67,7 +72,12 @@ export const LandPurchasePayments = ({
       Releases to the developer
     </h3>
     {releases.length === 0 ? (
-      <PanelMessage>Nothing has been released to the developer.</PanelMessage>
+      <EmptyState
+        icon={Banknote}
+        title="Nothing released yet"
+        description="Money released from escrow to the developer will appear here."
+        size="compact"
+      />
     ) : (
       <ul className="divide-y divide-border rounded-xl border border-border">
         {releases.map((release) => {

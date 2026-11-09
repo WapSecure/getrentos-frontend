@@ -9,6 +9,7 @@ import {
   Checkbox,
   Field,
   Input,
+  ListSkeleton,
   PageErrorState,
   Select,
   Textarea,
@@ -243,7 +244,7 @@ export const RepresentativesManager = () => {
           Your representatives
         </h2>
         {list.isLoading ? (
-          <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />
+          <ListSkeleton rows={2} variant="cards" label="Loading representatives" />
         ) : list.isError ? (
           <PageErrorState
             description={list.error instanceof Error ? list.error.message : undefined}

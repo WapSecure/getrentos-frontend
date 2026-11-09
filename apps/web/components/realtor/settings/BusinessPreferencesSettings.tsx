@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Button, Field, NumberInput, ToggleChip, useToast } from '@sureground/ui';
+import { Field, NumberInput, SaveButton, ToggleChip, useToast } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
 import { realtorService } from '@/services/realtorService';
@@ -62,7 +62,6 @@ export const BusinessPreferencesSettings = () => {
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: realtorKeys.settingsPreferences });
-      toast.success('Business preferences saved.');
     },
     onError: (error) => toast.error(error.message || 'Unable to save your business preferences.'),
   });
@@ -130,14 +129,7 @@ export const BusinessPreferencesSettings = () => {
         </div>
       </div>
 
-      <Button
-        variant="primary"
-        className="mt-6"
-        isLoading={save.isPending}
-        onClick={() => save.mutate()}
-      >
-        Save preferences
-      </Button>
+      <SaveButton label="Save preferences" className="mt-6" onClick={() => save.mutateAsync()} />
     </div>
   );
 };

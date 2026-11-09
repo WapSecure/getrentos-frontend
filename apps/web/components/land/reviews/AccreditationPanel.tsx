@@ -6,6 +6,7 @@ import {
   Badge,
   Button,
   Card,
+  CardSkeleton,
   Checkbox,
   DatePicker,
   DocumentUpload,
@@ -223,8 +224,7 @@ export const AccreditationPanel = () => {
     onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
   });
 
-  if (mine.isLoading)
-    return <div className="h-48 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
+  if (mine.isLoading) return <CardSkeleton lines={4} />;
   if (mine.isError) {
     return (
       <PageErrorState

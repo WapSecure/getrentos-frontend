@@ -1,6 +1,14 @@
 'use client';
 
-import { Button, CardSkeleton, Field, Input, PageErrorState, useToast } from '@sureground/ui';
+import {
+  Button,
+  CardSkeleton,
+  Field,
+  Input,
+  PageErrorState,
+  SaveButton,
+  useToast,
+} from '@sureground/ui';
 
 import { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
@@ -85,13 +93,12 @@ const ProfileSettingsForm = ({
       ),
     onSuccess: (savedProfile) => {
       setBaseline(savedProfile);
-      toast.success('Profile changes saved.');
       queryClient.setQueryData(adminKeys.profile, savedProfile);
     },
     onError: (error: Error) => toast.error(error.message || 'Profile changes could not be saved.'),
   });
 
-  const handleSave = () => saveMutation.mutate();
+  const handleSave = () => saveMutation.mutateAsync();
 
   const uploadAvatarMutation = useMutation({
     mutationFn: (file: File) => unwrap(adminService.uploadAvatar(file)),
@@ -199,15 +206,7 @@ const ProfileSettingsForm = ({
         </div>
       </div>
 
-      <Button
-        variant="primary"
-        className="mt-6"
-        onClick={handleSave}
-        disabled={!isDirty || !isValid || saveMutation.isPending}
-        isLoading={saveMutation.isPending}
-      >
-        Save Changes
-      </Button>
+      <SaveButton className="mt-6" onClick={handleSave} disabled={!isDirty || !isValid} />
     </div>
   );
 };

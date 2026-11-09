@@ -9,7 +9,7 @@ import { AdminQuickActions } from '@/components/admin/dashboard/AdminQuickAction
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@sureground/shared';
 import { adminKeys } from '@/lib/queryKeys';
-import { PageErrorState, Skeleton, StatGridSkeleton } from '@sureground/ui';
+import { PageErrorState, Skeleton, StatGroupSkeleton } from '@sureground/ui';
 import { useAdminUser } from '../layout';
 
 // recharts is heavy: load it only when this dashboard mounts.
@@ -42,7 +42,7 @@ export default function AdminDashboardPage() {
       <AdminDashboardHeader greeting={greeting} firstName={firstName} />
 
       {statsQuery.isLoading ? (
-        <StatGridSkeleton count={6} className="grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6" />
+        <StatGroupSkeleton groups={[3, 3]} />
       ) : statsQuery.isError || !statsQuery.data ? (
         <PageErrorState
           title="Platform statistics unavailable"

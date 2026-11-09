@@ -8,11 +8,14 @@ import { ArrowLeft, FileText, PauseCircle, Upload } from 'lucide-react';
 import {
   Badge,
   Button,
+  CardSkeleton,
   Input,
   Textarea,
   DocumentUpload,
+  EmptyState,
   type PendingUpload,
   PageHeader,
+  Skeleton,
 } from '@sureground/ui';
 import { Footer } from '@/components/layout/Footer';
 import { Navigation } from '@/components/layout/Navigation';
@@ -68,7 +71,13 @@ export default function LandDisputePage() {
       <Navigation />
       <main className="mx-auto max-w-3xl space-y-6 px-4 pb-16 pt-24">
         {query.isLoading ? (
-          <div className="h-48 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />
+          <>
+            <div className="space-y-2.5">
+              <Skeleton className="h-7 w-48" />
+              <Skeleton className="h-4 w-80 max-w-[90%]" />
+            </div>
+            <CardSkeleton lines={3} />
+          </>
         ) : !d ? (
           <>
             <Link
@@ -185,7 +194,13 @@ export default function LandDisputePage() {
                 Your own files and our team&apos;s. Files cannot be removed once added.
               </p>
               {d.evidence.length === 0 ? (
-                <p className="mt-3 text-sm text-muted-foreground">No evidence yet.</p>
+                <EmptyState
+                  icon={FileText}
+                  title="No evidence yet"
+                  description="Files you or our team add to this dispute will appear here."
+                  size="compact"
+                  bare
+                />
               ) : (
                 <ul className="mt-3 space-y-2">
                   {d.evidence.map((item) => (

@@ -3,7 +3,15 @@
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
-import { Button, Field, NumberInput, Skeleton, ToggleChip, useToast } from '@sureground/ui';
+import {
+  Button,
+  Field,
+  NumberInput,
+  SaveButton,
+  Skeleton,
+  ToggleChip,
+  useToast,
+} from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { agentKeys } from '@/lib/queryKeys';
 import { AddressInput } from '@/components/shared/location/AddressInput';
@@ -52,7 +60,6 @@ export const FieldPreferencesSettings = () => {
       unwrap(agentService.updateFieldPreferences(prefs)),
     onSuccess: (saved) => {
       queryClient.setQueryData(agentKeys.settingsFieldPreferences, saved);
-      toast.success('Field preferences saved.');
     },
     onError: (error) => toast.error(error.message || 'Unable to save your field preferences.'),
   });
@@ -186,21 +193,18 @@ export const FieldPreferencesSettings = () => {
             </Field>
           </div>
 
-          <Button
-            variant="primary"
+          <SaveButton
+            label="Save preferences"
             className="mt-6"
-            isLoading={save.isPending}
             disabled={capInvalid}
             onClick={() =>
-              save.mutate({
+              save.mutateAsync({
                 serviceAreas: areas,
                 workingDays: AGENT_WORKING_DAYS.filter((d) => days.includes(d)),
                 maxTasksPerDay: capNumber,
               })
             }
-          >
-            Save preferences
-          </Button>
+          />
         </>
       )}
     </div>

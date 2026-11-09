@@ -4,7 +4,15 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { CircleAlert, Gavel, PauseCircle } from 'lucide-react';
-import { Badge, Checkbox, EmptyState, Pagination, Select, PageHeader } from '@sureground/ui';
+import {
+  Badge,
+  Checkbox,
+  EmptyState,
+  ListSkeleton,
+  Pagination,
+  Select,
+  PageHeader,
+} from '@sureground/ui';
 import { formatDate, unwrap } from '@sureground/shared';
 import { useAdminUser } from '../../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
@@ -89,7 +97,7 @@ export default function AdminLandDisputesPage() {
       </div>
 
       {query.isLoading ? (
-        <div className="h-48 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />
+        <ListSkeleton rows={5} label="Loading disputes" />
       ) : query.isError ? (
         <EmptyState
           icon={CircleAlert}

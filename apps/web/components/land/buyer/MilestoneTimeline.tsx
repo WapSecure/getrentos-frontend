@@ -8,9 +8,17 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
+  EmptyState,
   Textarea,
 } from '@sureground/ui';
-import { CheckCircle2, Circle, CircleAlert, CircleDot, MinusCircle } from 'lucide-react';
+import {
+  CheckCircle2,
+  Circle,
+  CircleAlert,
+  CircleDot,
+  ListChecks,
+  MinusCircle,
+} from 'lucide-react';
 import { formatDate } from '@/lib/format';
 import type { LandMilestone } from '@/types/landBuyer';
 import { MilestoneStatusBadge } from './LandSaleBadges';
@@ -137,7 +145,13 @@ export const MilestoneTimeline = ({
 
   if (ordered.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground">No conveyance steps have been set up yet.</p>
+      <EmptyState
+        icon={ListChecks}
+        title="No conveyance steps yet"
+        description="The steps to transfer this land, and their progress, will appear here once set up."
+        size="compact"
+        bare
+      />
     );
   }
 

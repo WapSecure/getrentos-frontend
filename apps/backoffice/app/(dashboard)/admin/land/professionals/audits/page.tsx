@@ -7,6 +7,7 @@ import { CircleAlert, ClipboardCheck } from 'lucide-react';
 import {
   Button,
   EmptyState,
+  ListSkeleton,
   Select,
   Textarea,
   Toast,
@@ -144,7 +145,7 @@ export default function AdminLandReviewAuditsPage() {
         description="About one in five completed reports is picked for a second look. Re-check the sources the professional relied on; repeated findings or a failure are grounds to suspend."
       />
       {query.isLoading ? (
-        <div className="h-40 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />
+        <ListSkeleton rows={3} variant="cards" label="Loading audits" />
       ) : items.length === 0 ? (
         <EmptyState
           icon={ClipboardCheck}
