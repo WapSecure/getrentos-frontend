@@ -122,7 +122,7 @@ export default function BuyerSaved() {
           refreshControl={
             <RefreshControl
               refreshing={isRefetching}
-              onRefresh={() => refetch()}
+              onRefresh={() => void refetch()}
               tintColor={colors.mutedForeground}
             />
           }

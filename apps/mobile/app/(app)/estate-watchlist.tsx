@@ -90,7 +90,7 @@ export default function EstateWatchlist() {
   const refresh = (
     <RefreshControl
       refreshing={query.isRefetching && !query.isFetchingNextPage}
-      onRefresh={() => query.refetch()}
+      onRefresh={() => void query.refetch()}
       tintColor={colors.mutedForeground}
     />
   );

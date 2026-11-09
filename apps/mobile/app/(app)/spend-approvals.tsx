@@ -72,7 +72,7 @@ export default function SpendApprovals() {
         refreshControl={
           <RefreshControl
             refreshing={list.isRefetching}
-            onRefresh={() => list.refetch()}
+            onRefresh={() => void list.refetch()}
             tintColor={colors.mutedForeground}
           />
         }

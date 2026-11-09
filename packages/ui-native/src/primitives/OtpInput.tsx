@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { StyleSheet, TextInput, View } from 'react-native';
+import { StyleSheet, TextInput, type TextInputInstance, View } from 'react-native';
 import { useTheme } from '../theme';
 
 export interface OtpInputProps {
@@ -22,7 +22,7 @@ export function OtpInput({
   onComplete,
 }: OtpInputProps) {
   const { colors, radius } = useTheme();
-  const inputs = useRef<Array<TextInput | null>>([]);
+  const inputs = useRef<Array<TextInputInstance | null>>([]);
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
   const digits = value.replace(/\D/g, '').slice(0, length).split('');
 

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { View, type TextInput } from 'react-native';
+import { type TextInputInstance, View } from 'react-native';
 import { router } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -63,7 +63,7 @@ export default function SignIn() {
   const { colors, spacing, scheme } = useTheme();
   const reduceMotion = useReducedMotion();
   const toast = useToast();
-  const passwordRef = useRef<TextInput>(null);
+  const passwordRef = useRef<TextInputInstance>(null);
   const [method, setMethod] = useState<Method>('password');
   const [formError, setFormError] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
@@ -201,7 +201,12 @@ export default function SignIn() {
       footer={
         method === 'password' ? (
           <>
-            <Button label="Sign in" loading={isSubmitting} disabled={locked} onPress={onSubmit} />
+            <Button
+              label="Sign in"
+              loading={isSubmitting}
+              disabled={locked}
+              onPress={() => void onSubmit()}
+            />
             <Row>
               <Text variant="callout" color="mutedForeground">
                 New to Sureground?{' '}
@@ -299,7 +304,7 @@ export default function SignIn() {
                   value={value}
                   onChangeText={onChange}
                   onBlur={onBlur}
-                  onSubmitEditing={onSubmit}
+                  onSubmitEditing={() => void onSubmit()}
                   error={errors.password?.message}
                 />
               )}

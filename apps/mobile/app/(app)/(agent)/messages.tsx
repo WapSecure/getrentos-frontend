@@ -33,7 +33,7 @@ export default function AgentMessages() {
       loading={query.isPending}
       error={query.isError}
       refreshing={query.isRefetching}
-      onRefresh={() => query.refetch()}
+      onRefresh={() => void query.refetch()}
       onOpen={(c) => router.push(`/(app)/agent-conversation/${c.id}`)}
       emptyDescription="Conversations with your clients will appear here."
     />

@@ -59,7 +59,7 @@ export default function HostDisputes() {
       refreshControl={
         <RefreshControl
           refreshing={active.isRefetching}
-          onRefresh={() => active.refetch()}
+          onRefresh={() => void active.refetch()}
           tintColor={colors.mutedForeground}
         />
       }

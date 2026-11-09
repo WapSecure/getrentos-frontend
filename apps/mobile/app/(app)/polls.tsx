@@ -132,7 +132,7 @@ export default function ResidentPolls() {
         subtitle="Vote on decisions that affect your estate"
         onBack={() => goBack()}
       />
-      <Screen refreshing={query.isRefetching} onRefresh={query.refetch}>
+      <Screen refreshing={query.isRefetching} onRefresh={() => void query.refetch()}>
         <QueryState
           query={query}
           skeleton={

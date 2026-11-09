@@ -117,7 +117,7 @@ export default function PropertyActivity() {
           refreshControl={
             <RefreshControl
               refreshing={feed.isRefetching && !feed.isFetchingNextPage}
-              onRefresh={() => feed.refetch()}
+              onRefresh={() => void feed.refetch()}
               tintColor={colors.mutedForeground}
             />
           }
@@ -138,7 +138,7 @@ export default function PropertyActivity() {
                 onPress={() => feed.fetchNextPage()}
                 style={{ marginTop: spacing.md }}
               />
-            ) : null
+            ) : undefined
           }
         />
       </QueryState>

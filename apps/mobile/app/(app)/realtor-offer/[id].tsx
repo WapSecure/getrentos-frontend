@@ -51,7 +51,7 @@ export default function RealtorOfferDetail() {
         refreshControl={
           <RefreshControl
             refreshing={offers.isRefetching}
-            onRefresh={() => offers.refetch()}
+            onRefresh={() => void offers.refetch()}
             tintColor={colors.mutedForeground}
           />
         }

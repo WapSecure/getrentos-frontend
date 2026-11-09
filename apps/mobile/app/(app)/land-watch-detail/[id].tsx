@@ -70,7 +70,7 @@ export default function LandWatchDetail() {
         refreshControl={
           <RefreshControl
             refreshing={query.isRefetching}
-            onRefresh={() => qc.invalidateQueries({ queryKey: qk.landWatch(id) })}
+            onRefresh={() => void qc.invalidateQueries({ queryKey: qk.landWatch(id) })}
             tintColor={colors.mutedForeground}
           />
         }

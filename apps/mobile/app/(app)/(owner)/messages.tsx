@@ -17,7 +17,7 @@ export default function OwnerMessages() {
       loading={query.isPending}
       error={query.isError}
       refreshing={query.isRefetching}
-      onRefresh={() => query.refetch()}
+      onRefresh={() => void query.refetch()}
       onOpen={(c) => router.push(`/(app)/owner-conversation/${c.id}`)}
       emptyDescription="Buyers who ask about your listings will appear here."
     />

@@ -148,7 +148,7 @@ export default function GatemanVehicles() {
   }
 
   return (
-    <Screen refreshing={insideQuery.isRefetching} onRefresh={insideQuery.refetch}>
+    <Screen refreshing={insideQuery.isRefetching} onRefresh={() => void insideQuery.refetch()}>
       <DashboardHeader
         eyebrow="Gate operations"
         title="Vehicle log"

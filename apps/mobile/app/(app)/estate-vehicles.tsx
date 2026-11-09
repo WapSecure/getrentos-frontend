@@ -92,7 +92,7 @@ export default function EstateVehicles() {
   const refresh = (
     <RefreshControl
       refreshing={query.isRefetching && !query.isFetchingNextPage}
-      onRefresh={() => query.refetch()}
+      onRefresh={() => void query.refetch()}
       tintColor={colors.mutedForeground}
     />
   );

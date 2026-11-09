@@ -84,7 +84,7 @@ export default function LandEstates() {
           refreshControl={
             <RefreshControl
               refreshing={list.isRefetching && !list.isFetchingNextPage}
-              onRefresh={() => list.refetch()}
+              onRefresh={() => void list.refetch()}
               tintColor={colors.mutedForeground}
             />
           }

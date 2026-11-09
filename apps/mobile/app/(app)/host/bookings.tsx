@@ -46,7 +46,7 @@ export default function HostBookings() {
   const refresh = (
     <RefreshControl
       refreshing={query.isRefetching && !query.isFetchingNextPage && !query.isPlaceholderData}
-      onRefresh={() => query.refetch()}
+      onRefresh={() => void query.refetch()}
       tintColor={colors.mutedForeground}
     />
   );

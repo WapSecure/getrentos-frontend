@@ -63,7 +63,7 @@ export default function WorkOrders() {
   const refresh = (
     <RefreshControl
       refreshing={active.isRefetching && !active.isPlaceholderData}
-      onRefresh={() => active.refetch()}
+      onRefresh={() => void active.refetch()}
       tintColor={colors.mutedForeground}
     />
   );

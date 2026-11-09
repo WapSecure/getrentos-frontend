@@ -116,7 +116,7 @@ export default function AgentHome() {
   );
 
   return (
-    <Screen refreshing={dashboard.isRefetching} onRefresh={() => dashboard.refetch()}>
+    <Screen refreshing={dashboard.isRefetching} onRefresh={() => void dashboard.refetch()}>
       {header}
 
       <QueryState

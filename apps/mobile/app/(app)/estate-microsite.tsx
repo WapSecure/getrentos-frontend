@@ -73,7 +73,7 @@ export default function EstateMicrosite() {
           locked ? undefined : (
             <RefreshControl
               refreshing={query.isRefetching}
-              onRefresh={() => query.refetch()}
+              onRefresh={() => void query.refetch()}
               tintColor={colors.mutedForeground}
             />
           )

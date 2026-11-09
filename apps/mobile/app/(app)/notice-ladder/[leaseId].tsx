@@ -91,7 +91,7 @@ export default function NoticeLadderScreen() {
             refreshControl={
               <RefreshControl
                 refreshing={ladder.isRefetching}
-                onRefresh={() => ladder.refetch()}
+                onRefresh={() => void ladder.refetch()}
                 tintColor={colors.mutedForeground}
               />
             }

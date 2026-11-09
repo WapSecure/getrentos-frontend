@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
+  type TextInputInstance,
   Alert,
   KeyboardAvoidingView,
   Linking,
@@ -8,9 +9,8 @@ import {
   ScrollView,
   StyleSheet,
   View,
-  type TextInput,
 } from 'react-native';
-import { router, useLocalSearchParams, useNavigation } from 'expo-router';
+import { router, useLocalSearchParams, usePreventRemove } from 'expo-router';
 import { Image } from 'expo-image';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { VerificationGateNotice } from '@/components/VerificationGateNotice';
@@ -349,24 +349,21 @@ export default function ApplyToRent() {
   });
 
   // Leaving mid-application (swipe back, Android back, header back) would discard everything typed: ask first.
-  const navigation = useNavigation();
   const dirty = step > 0 || !!data.currentAddress || !!data.employer || !!data.monthlyIncome;
-  useEffect(
-    () =>
-      navigation.addListener('beforeRemove', (e) => {
-        if (!dirty || submitted || submitMutation.isPending) return;
-        e.preventDefault();
-        Alert.alert('Discard your application?', 'What you have filled in so far will be lost.', [
-          { text: 'Keep editing', style: 'cancel' },
-          {
-            text: 'Discard',
-            style: 'destructive',
-            onPress: () => navigation.dispatch(e.data.action),
-          },
-        ]);
-      }),
-    [navigation, dirty, submitted, submitMutation.isPending]
-  );
+  const [discarded, setDiscarded] = useState(false);
+  usePreventRemove(dirty && !submitted && !submitMutation.isPending && !discarded, ({ repeat }) => {
+    Alert.alert('Discard your application?', 'What you have filled in so far will be lost.', [
+      { text: 'Keep editing', style: 'cancel' },
+      {
+        text: 'Discard',
+        style: 'destructive',
+        onPress: () => {
+          setDiscarded(true);
+          repeat();
+        },
+      },
+    ]);
+  });
 
   const stepErrors = useMemo(() => validateStep(step, data), [step, data]);
   const canAdvance = Object.keys(stepErrors).length === 0;
@@ -585,8 +582,8 @@ function PersonalStep({
   errors: FieldErrors;
 }) {
   const { spacing } = useTheme();
-  const emailRef = useRef<TextInput>(null);
-  const phoneRef = useRef<TextInput>(null);
+  const emailRef = useRef<TextInputInstance>(null);
+  const phoneRef = useRef<TextInputInstance>(null);
 
   return (
     <View style={{ gap: spacing.lg }}>
@@ -697,7 +694,7 @@ function IncomeStep({
   errors: FieldErrors;
 }) {
   const { spacing } = useTheme();
-  const incomeRef = useRef<TextInput>(null);
+  const incomeRef = useRef<TextInputInstance>(null);
 
   return (
     <View style={{ gap: spacing.lg }}>
@@ -752,10 +749,10 @@ function ReferencesStep({
   errors: FieldErrors;
 }) {
   const { spacing } = useTheme();
-  const kinPhoneRef = useRef<TextInput>(null);
-  const kinRelRef = useRef<TextInput>(null);
-  const refPhoneRef = useRef<TextInput>(null);
-  const refRelRef = useRef<TextInput>(null);
+  const kinPhoneRef = useRef<TextInputInstance>(null);
+  const kinRelRef = useRef<TextInputInstance>(null);
+  const refPhoneRef = useRef<TextInputInstance>(null);
+  const refRelRef = useRef<TextInputInstance>(null);
 
   return (
     <View style={{ gap: spacing['2xl'] }}>

@@ -45,7 +45,7 @@ export default function RealtorPayoutDetail() {
       refreshControl={
         <RefreshControl
           refreshing={payout.isRefetching}
-          onRefresh={() => payout.refetch()}
+          onRefresh={() => void payout.refetch()}
           tintColor={colors.mutedForeground}
         />
       }

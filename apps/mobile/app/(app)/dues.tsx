@@ -103,7 +103,7 @@ export default function ResidentDues() {
         subtitle="Charges, payments and recurring obligations"
         onBack={() => goBack()}
       />
-      <Screen refreshing={query.isRefetching} onRefresh={query.refetch}>
+      <Screen refreshing={query.isRefetching} onRefresh={() => void query.refetch()}>
         <QueryState
           query={query}
           skeleton={<ListSkeleton variant="card" rows={2} height={90} />}

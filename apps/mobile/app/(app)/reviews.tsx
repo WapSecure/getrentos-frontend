@@ -133,7 +133,7 @@ export default function Reviews() {
         refreshControl={
           <RefreshControl
             refreshing={active.isRefetching}
-            onRefresh={() => active.refetch()}
+            onRefresh={() => void active.refetch()}
             tintColor={colors.mutedForeground}
           />
         }

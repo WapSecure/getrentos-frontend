@@ -130,7 +130,7 @@ export default function ResidentMaintenance() {
           />
         }
       />
-      <Screen refreshing={query.isRefetching} onRefresh={query.refetch}>
+      <Screen refreshing={query.isRefetching} onRefresh={() => void query.refetch()}>
         <QueryState
           query={query}
           skeleton={

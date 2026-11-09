@@ -1,10 +1,29 @@
-import { useEffect, useMemo, useRef } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import { useEffect, useMemo, useRef, type ComponentType, type Ref } from 'react';
+import { Platform, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
 import { useTheme } from '@sureground/ui-native';
 import { buildMapHtml, readBoundaryMessage, type PropertyMapViewProps } from './propertyMapHtml';
 
 export type { PropertyMapMarker, PropertyMapViewProps } from './propertyMapHtml';
+
+// The part of the WebView handle this map uses.
+interface MapWebViewHandle {
+  postMessage: (message: string) => void;
+}
+
+// react-native-webview 14 combines its iOS, Android and Windows prop types, which
+// React Native 0.88's types reduce to `never`. These are the props this map passes.
+const MapWebView = WebView as unknown as ComponentType<{
+  ref?: Ref<MapWebViewHandle>;
+  source: { html: string };
+  style?: StyleProp<ViewStyle>;
+  onMessage?: (event: WebViewMessageEvent) => void;
+  onLoadEnd?: () => void;
+  originWhitelist?: string[];
+  nestedScrollEnabled?: boolean;
+  showsHorizontalScrollIndicator?: boolean;
+  showsVerticalScrollIndicator?: boolean;
+}>;
 
 export function PropertyMapView({
   markers,
@@ -22,7 +41,7 @@ export function PropertyMapView({
   style,
 }: PropertyMapViewProps) {
   const { scheme, colors } = useTheme();
-  const webRef = useRef<WebView>(null);
+  const webRef = useRef<MapWebViewHandle>(null);
   const loadedRef = useRef(false);
 
   const html = useMemo(
@@ -80,7 +99,7 @@ export function PropertyMapView({
         style,
       ]}
     >
-      <WebView
+      <MapWebView
         ref={webRef}
         source={{ html }}
         style={StyleSheet.absoluteFill}

@@ -1,5 +1,5 @@
 import { forwardRef, useMemo } from 'react';
-import { StyleSheet, View, type TextInput } from 'react-native';
+import { type TextInputInstance, StyleSheet, View, type TextInput } from 'react-native';
 import { useTheme } from '../theme';
 import { Text } from './Text';
 import { AUTH_CONSTANTS } from '@sureground/shared';
@@ -20,40 +20,39 @@ export interface PasswordFieldProps extends Omit<TextFieldProps, 'secure'> {
   showStrength?: boolean;
 }
 
-export const PasswordField = forwardRef<TextInput, PasswordFieldProps>(function PasswordField(
-  { showStrength = false, value = '', ...rest },
-  ref
-) {
-  const { colors } = useTheme();
-  const score = useMemo(() => passwordStrength(String(value)), [value]);
-  const meterColor = [colors.destructive, colors.warning, colors.primary, colors.success][
-    Math.max(0, score - 1)
-  ];
+export const PasswordField = forwardRef<TextInputInstance, PasswordFieldProps>(
+  function PasswordField({ showStrength = false, value = '', ...rest }, ref) {
+    const { colors } = useTheme();
+    const score = useMemo(() => passwordStrength(String(value)), [value]);
+    const meterColor = [colors.destructive, colors.warning, colors.primary, colors.success][
+      Math.max(0, score - 1)
+    ];
 
-  return (
-    <View style={{ gap: 6 }}>
-      <TextField ref={ref} secure value={value} autoCapitalize="none" {...rest} />
-      {showStrength && String(value).length > 0 ? (
-        <View style={{ gap: 4 }}>
-          <View style={styles.bars}>
-            {[1, 2, 3, 4].map((lvl) => (
-              <View
-                key={lvl}
-                style={[
-                  styles.bar,
-                  { backgroundColor: score >= lvl ? meterColor : colors.secondary },
-                ]}
-              />
-            ))}
+    return (
+      <View style={{ gap: 6 }}>
+        <TextField ref={ref} secure value={value} autoCapitalize="none" {...rest} />
+        {showStrength && String(value).length > 0 ? (
+          <View style={{ gap: 4 }}>
+            <View style={styles.bars}>
+              {[1, 2, 3, 4].map((lvl) => (
+                <View
+                  key={lvl}
+                  style={[
+                    styles.bar,
+                    { backgroundColor: score >= lvl ? meterColor : colors.secondary },
+                  ]}
+                />
+              ))}
+            </View>
+            <Text variant="caption" color="mutedForeground">
+              Password strength: {LABELS[Math.max(0, score - 1)]}
+            </Text>
           </View>
-          <Text variant="caption" color="mutedForeground">
-            Password strength: {LABELS[Math.max(0, score - 1)]}
-          </Text>
-        </View>
-      ) : null}
-    </View>
-  );
-});
+        ) : null}
+      </View>
+    );
+  }
+);
 
 const styles = StyleSheet.create({
   bars: { flexDirection: 'row', gap: 4 },
