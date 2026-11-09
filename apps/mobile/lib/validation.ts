@@ -28,7 +28,7 @@ export const emailSignupSchema = z
     password: passwordRules,
     confirmPassword: z.string(),
     acceptedTerms: z.literal(true, {
-      errorMap: () => ({ message: 'Accept the terms to continue' }),
+      error: 'Accept the terms to continue',
     }),
   })
   .refine((d) => d.password === d.confirmPassword, {
@@ -44,7 +44,7 @@ export const phoneSignupSchema = z
     password: passwordRules,
     confirmPassword: z.string(),
     acceptedTerms: z.literal(true, {
-      errorMap: () => ({ message: 'Accept the terms to continue' }),
+      error: 'Accept the terms to continue',
     }),
   })
   .refine((d) => d.password === d.confirmPassword, {
