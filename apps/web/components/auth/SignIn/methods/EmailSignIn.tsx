@@ -234,6 +234,7 @@ export const EmailSignIn = ({
 
           <Field
             label="Password"
+            error={errors.password?.message}
             labelAside={
               <a
                 href={ROUTES.FORGOT_PASSWORD}
