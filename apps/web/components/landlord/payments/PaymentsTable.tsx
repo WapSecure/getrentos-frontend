@@ -1,7 +1,7 @@
 'use client';
 
 import { ReceiptText } from 'lucide-react';
-import { Badge, Button, EmptyState } from '@sureground/ui';
+import { Badge, Button, DataTable, EmptyState, type Column } from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { escrowStatusBadges, paymentStatusBadges, rentPayoutStatusBadges } from '@/lib/statusBadge';
 import type { RentPayment } from '@/types/landlord';
@@ -12,95 +12,113 @@ interface PaymentsTableProps {
 }
 
 export const PaymentsTable = ({ payments, onViewDetails }: PaymentsTableProps) => {
-  if (payments.length === 0) {
-    return <EmptyState icon={ReceiptText} title="No payments found" />;
-  }
+  const columns: Column<RentPayment>[] = [
+    {
+      key: 'tenant',
+      header: 'Tenant',
+      render: (payment) => (
+        <span className="whitespace-nowrap font-medium text-foreground">{payment.tenantName}</span>
+      ),
+    },
+    {
+      // Property and unit on two lines, so the row fits a laptop screen.
+      key: 'property',
+      header: 'Property',
+      render: (payment) => (
+        <>
+          <span className="block text-foreground">{payment.propertyName}</span>
+          <span className="block text-xs text-muted-foreground">{payment.unitName}</span>
+        </>
+      ),
+    },
+    {
+      key: 'amount',
+      header: 'Amount',
+      numeric: true,
+      render: (payment) => (
+        <span className="whitespace-nowrap font-medium text-foreground">
+          {formatCurrency(payment.amount)}
+          {payment.status !== 'paid' && (payment.amountPaid ?? 0) > 0 && (
+            <span className="block text-xs font-normal text-success">
+              {formatCurrency(payment.amountPaid ?? 0)} paid
+            </span>
+          )}
+        </span>
+      ),
+    },
+    {
+      key: 'due',
+      header: 'Due date',
+      render: (payment) => (
+        <span className="whitespace-nowrap tabular-nums text-muted-foreground">
+          {formatDate(payment.dueDate)}
+        </span>
+      ),
+    },
+    {
+      key: 'status',
+      header: 'Payment status',
+      render: (payment) => {
+        const status = paymentStatusBadges[payment.status];
+        return (
+          <Badge variant={status.variant} dot>
+            {status.label}
+          </Badge>
+        );
+      },
+    },
+    {
+      key: 'protection',
+      header: 'Payment Protection',
+      render: (payment) => {
+        const escrow = escrowStatusBadges[payment.escrowStatus];
+        return (
+          <Badge variant={escrow.variant} icon={escrow.icon && <escrow.icon className="h-3 w-3" />}>
+            {escrow.label}
+          </Badge>
+        );
+      },
+    },
+    {
+      key: 'payout',
+      header: 'Payout',
+      render: (payment) => {
+        const payout = payment.payoutStatus ? rentPayoutStatusBadges[payment.payoutStatus] : null;
+        return payout ? (
+          <Badge variant={payout.variant} icon={payout.icon && <payout.icon className="h-3 w-3" />}>
+            {payout.label}
+          </Badge>
+        ) : (
+          <span className="text-muted-foreground">—</span>
+        );
+      },
+    },
+    {
+      key: 'actions',
+      header: '',
+      srHeader: 'Actions',
+      align: 'right',
+      render: (payment) => (
+        <Button
+          variant="ghost"
+          size="xs"
+          className="text-primary"
+          onClick={() => onViewDetails(payment)}
+          aria-label={`View details for ${payment.tenantName}`}
+        >
+          View details
+        </Button>
+      ),
+    },
+  ];
 
   return (
-    <div className="bg-card rounded-2xl border border-border overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-border text-left">
-              <th className="px-4 py-3 font-medium text-muted-foreground">Tenant</th>
-              <th className="px-4 py-3 font-medium text-muted-foreground">Property</th>
-              <th className="px-4 py-3 font-medium text-muted-foreground">Amount</th>
-              <th className="px-4 py-3 font-medium text-muted-foreground">Due date</th>
-              <th className="px-4 py-3 font-medium text-muted-foreground">Payment status</th>
-              <th className="px-4 py-3 font-medium text-muted-foreground">Payment Protection</th>
-              <th className="px-4 py-3 font-medium text-muted-foreground">Payout</th>
-              <th className="px-4 py-3" />
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {payments.map((payment) => {
-              const escrow = escrowStatusBadges[payment.escrowStatus];
-              const status = paymentStatusBadges[payment.status];
-              const payout = payment.payoutStatus
-                ? rentPayoutStatusBadges[payment.payoutStatus]
-                : null;
-              return (
-                <tr key={payment.id} className="hover:bg-secondary transition-colors">
-                  <td className="px-4 py-3 font-medium text-foreground whitespace-nowrap">
-                    {payment.tenantName}
-                  </td>
-                  {/* Property and unit on two lines, so the row fits a laptop screen
-                      without scrolling sideways to reach View details. */}
-                  <td className="px-4 py-3 text-muted-foreground">
-                    <span className="block text-foreground">{payment.propertyName}</span>
-                    <span className="block text-xs">{payment.unitName}</span>
-                  </td>
-                  <td className="px-4 py-3 text-foreground font-medium whitespace-nowrap">
-                    {formatCurrency(payment.amount)}
-                    {payment.status !== 'paid' && (payment.amountPaid ?? 0) > 0 && (
-                      <span className="block text-xs font-normal text-success">
-                        {formatCurrency(payment.amountPaid ?? 0)} paid
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
-                    {formatDate(payment.dueDate)}
-                  </td>
-                  <td className="px-4 py-3">
-                    <Badge variant={status.variant}>{status.label}</Badge>
-                  </td>
-                  <td className="px-4 py-3">
-                    <Badge
-                      variant={escrow.variant}
-                      icon={escrow.icon && <escrow.icon className="w-3 h-3" />}
-                    >
-                      {escrow.label}
-                    </Badge>
-                  </td>
-                  <td className="px-4 py-3">
-                    {payout ? (
-                      <Badge
-                        variant={payout.variant}
-                        icon={payout.icon && <payout.icon className="w-3 h-3" />}
-                      >
-                        {payout.label}
-                      </Badge>
-                    ) : (
-                      <span className="text-muted-foreground">—</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <Button
-                      variant="ghost"
-                      size="xs"
-                      className="text-primary"
-                      onClick={() => onViewDetails(payment)}
-                      aria-label={`View details for ${payment.tenantName}`}
-                    >
-                      View details
-                    </Button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <DataTable
+      caption="Rent payments"
+      columns={columns}
+      data={payments}
+      getRowKey={(payment) => payment.id}
+      emptyState={<EmptyState icon={ReceiptText} title="No payments found" />}
+    />
   );
 };

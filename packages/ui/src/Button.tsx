@@ -62,24 +62,27 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseStyles =
-      'relative inline-flex items-center justify-center gap-2 whitespace-nowrap font-semibold tracking-[-0.01em] transition-[background-color,border-color,box-shadow,color] duration-150 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50';
+      'relative inline-flex items-center justify-center gap-2 whitespace-nowrap font-semibold tracking-[-0.01em] transition-[background-color,border-color,box-shadow,color,transform] duration-150 select-none active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50';
 
     const variants = {
-      primary: 'bg-primary text-primary-foreground shadow-xs hover:bg-primary-hover',
+      primary:
+        'bg-primary text-primary-foreground shadow-[inset_0_1px_0_rgb(255_255_255/0.14),0_1px_2px_rgb(0_0_0/0.10)] hover:bg-primary-hover',
       secondary:
         'bg-secondary text-secondary-foreground border border-transparent hover:bg-foreground/[0.08]',
       outline:
         'bg-card text-foreground border border-border shadow-xs hover:border-foreground/25 hover:bg-secondary/60 hover:shadow-sm',
-      ghost: 'bg-transparent text-muted-foreground hover:bg-secondary hover:text-foreground',
-      danger: 'bg-destructive text-destructive-foreground shadow-xs hover:brightness-95',
+      ghost: 'bg-transparent text-foreground/75 hover:bg-secondary hover:text-foreground',
+      danger:
+        'bg-destructive text-destructive-foreground shadow-[inset_0_1px_0_rgb(255_255_255/0.12),0_1px_2px_rgb(0_0_0/0.10)] hover:brightness-95',
       link: 'bg-transparent text-primary underline-offset-4 hover:underline',
     };
 
     const sizes = {
-      xs: 'min-h-8 px-2.5 py-1 text-xs',
-      sm: 'min-h-9 px-3 py-1.5 text-sm',
-      md: 'min-h-11 px-4 py-2.5 text-sm',
-      lg: 'min-h-12 px-5 py-3 text-base',
+      // Desktop is pointer-driven and denser; phones keep 44px touch targets.
+      xs: 'min-h-8 px-2.5 py-1 text-xs sm:min-h-7',
+      sm: 'min-h-9 px-3 py-1.5 text-sm sm:min-h-8',
+      md: 'min-h-11 px-4 py-2 text-sm sm:min-h-10',
+      lg: 'min-h-12 px-5 py-2.5 text-base sm:min-h-11',
       xl: 'min-h-12 px-6 py-3 text-base',
     };
 

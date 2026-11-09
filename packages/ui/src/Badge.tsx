@@ -14,6 +14,8 @@ interface BadgeProps {
   children: ReactNode;
   variant?: BadgeVariant;
   icon?: ReactNode;
+  /** A small status dot before the label, in the badge's own colour. */
+  dot?: boolean;
   title?: string;
   className?: string;
 }
@@ -28,16 +30,24 @@ const variants: Record<BadgeVariant, string> = {
   purple: 'bg-purple-subtle text-purple border-purple/20 ring-purple/10',
 };
 
-export const Badge = ({ children, variant = 'neutral', icon, title, className }: BadgeProps) => {
+export const Badge = ({
+  children,
+  variant = 'neutral',
+  icon,
+  dot = false,
+  title,
+  className,
+}: BadgeProps) => {
   return (
     <span
       title={title}
       className={cn(
-        'inline-flex items-center gap-1 whitespace-nowrap rounded-md border px-2 py-0.5 text-xs font-medium tracking-[-0.005em]',
+        'inline-flex items-center gap-1.5 whitespace-nowrap rounded-md border px-2 py-0.5 text-xs font-medium tabular-nums tracking-[-0.005em]',
         variants[variant],
         className
       )}
     >
+      {dot && <span aria-hidden="true" className="h-1.5 w-1.5 shrink-0 rounded-full bg-current" />}
       {icon}
       {children}
     </span>

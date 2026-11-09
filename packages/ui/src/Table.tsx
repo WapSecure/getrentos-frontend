@@ -8,6 +8,10 @@ export interface Column<T> {
   render: (row: T) => ReactNode;
   className?: string;
   align?: 'left' | 'center' | 'right';
+  /** Right-aligned with tabular figures, so amounts line up digit for digit. */
+  numeric?: boolean;
+  /** Visible header text is optional (an actions column); this still names it for screen readers. */
+  srHeader?: string;
 }
 
 interface DataTableProps<T> {
@@ -20,6 +24,9 @@ interface DataTableProps<T> {
   emptyState?: ReactNode;
   footer?: ReactNode;
   className?: string;
+  /** Read by screen readers only: what the table lists. */
+  caption?: string;
+  density?: 'comfortable' | 'compact';
 }
 
 export function DataTable<T>({
@@ -32,7 +39,10 @@ export function DataTable<T>({
   emptyState,
   footer,
   className,
+  caption,
+  density = 'comfortable',
 }: DataTableProps<T>) {
+  const cellY = density === 'compact' ? 'py-2.5' : 'py-3.5';
   if (isLoading) {
     return <TableSkeleton columns={columns.length} />;
   }
@@ -47,18 +57,20 @@ export function DataTable<T>({
     >
       <div className="overflow-x-auto" tabIndex={0}>
         <table className="w-full text-sm">
+          {caption && <caption className="sr-only">{caption}</caption>}
           <thead className="sticky top-0 z-10">
-            <tr className="border-b border-border bg-secondary/50 text-left">
+            <tr className="border-b border-border bg-secondary/40 text-left backdrop-blur-sm">
               {columns.map((column) => (
                 <th
                   key={column.key}
                   className={cn(
-                    'whitespace-nowrap px-5 py-3.5 text-[13px] font-medium text-muted-foreground',
+                    'whitespace-nowrap px-4 py-2.5 text-xs font-medium tracking-[0.01em] text-muted-foreground first:pl-5 last:pr-5',
                     column.align === 'center' && 'text-center',
-                    column.align === 'right' && 'text-right'
+                    (column.align === 'right' || column.numeric) && 'text-right'
                   )}
                 >
-                  {column.header}
+                  {column.header ||
+                    (column.srHeader && <span className="sr-only">{column.srHeader}</span>)}
                 </th>
               ))}
             </tr>
@@ -80,9 +92,9 @@ export function DataTable<T>({
                     : undefined
                 }
                 className={cn(
-                  'transition-colors duration-150',
+                  'transition-colors duration-150 hover:bg-secondary/40',
                   onRowClick &&
-                    'cursor-pointer hover:bg-secondary/60 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring',
+                    'cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring',
                   getRowClassName?.(row)
                 )}
               >
@@ -90,9 +102,10 @@ export function DataTable<T>({
                   <td
                     key={column.key}
                     className={cn(
-                      'px-5 py-4 align-middle',
+                      'px-4 align-middle first:pl-5 last:pr-5',
+                      cellY,
                       column.align === 'center' && 'text-center',
-                      column.align === 'right' && 'text-right tabular-nums',
+                      (column.align === 'right' || column.numeric) && 'text-right tabular-nums',
                       column.className
                     )}
                   >

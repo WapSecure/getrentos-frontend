@@ -3,8 +3,8 @@ import { cn } from '@sureground/shared';
 export type ControlSize = 'sm' | 'md';
 
 const SIZE: Record<ControlSize, string> = {
-  sm: 'min-h-9 px-3 text-sm',
-  md: 'min-h-11 px-3.5 text-sm',
+  sm: 'min-h-9 px-3 text-sm sm:min-h-8',
+  md: 'min-h-11 px-3.5 text-sm sm:min-h-10',
 };
 
 // Written out in full: Tailwind only generates classes it finds as literals.
