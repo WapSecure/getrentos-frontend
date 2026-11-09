@@ -16,6 +16,7 @@ import { PaymentProviderPicker } from '@/components/shared/payments/PaymentProvi
 import { useCheckoutFee } from '@/hooks/useCheckoutFee';
 import type { PaymentProviderChoice } from '@/hooks/usePaymentProviders';
 import { formatCurrency } from '@/lib/format';
+import { transferNote } from '@/lib/paymentCopy';
 
 export interface PayDialogProps {
   open: boolean;
@@ -35,6 +36,11 @@ export interface PayDialogProps {
   amount?: number;
   /** The breakdown's first row: "Rent", "Instalment", "Dues", "Deposit", "Stay"… */
   itemLabel: string;
+  /**
+   * When what is paid is made of separate amounts (a land payment and its late
+   * fee), the rows that add up to it, shown in place of the single item row.
+   */
+  itemParts?: { label: string; amount: number }[];
   /** One line under the breakdown, shown when there is a fee: who receives the full amount. */
   receiverLine: ReactNode;
   /** The flow's own protection sentence, after the secure-page reassurance. */
@@ -96,6 +102,7 @@ export const PayDialog = ({
   owedLabel = 'owed',
   amount,
   itemLabel,
+  itemParts,
   receiverLine,
   protection,
   amountStep,
@@ -123,6 +130,14 @@ export const PayDialog = ({
   // Never promise a total that leaves the fee out: wait for it, or say it comes next.
   const feeLoading = !topUpOnly && ready && feeState === 'loading';
   const feeUnknown = !topUpOnly && ready && feeState === 'unknown';
+  const itemRows =
+    itemParts && itemParts.length > 0
+      ? itemParts.map((part) => ({ label: part.label, value: formatCurrency(part.amount) }))
+      : [{ label: itemLabel, value: formatCurrency(paying) }];
+  const howTransfer = transferNote(
+    providers.provider,
+    topUpOnly || total == null ? null : formatCurrency(total)
+  );
 
   return (
     <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
@@ -155,9 +170,11 @@ export const PayDialog = ({
               <Step n={amountStep ? 2 : undefined}>Pay with</Step>
               {providerError && <Alert variant="warning">{providerError}</Alert>}
               <PaymentProviderPicker choice={providers} variant="card" hideLabel disabled={busy} />
+              {ready && <p className="text-xs text-muted-foreground">{howTransfer}</p>}
             </div>
           )}
           {!steps && providerError && <Alert variant="warning">{providerError}</Alert>}
+          {!steps && ready && <p className="text-xs text-muted-foreground">{howTransfer}</p>}
 
           {ready && (
             <div className="rounded-xl border border-border bg-muted/30 px-4 py-1">
@@ -165,26 +182,28 @@ export const PayDialog = ({
                 layout="rows"
                 items={
                   topUpOnly
-                    ? [{ label: itemLabel, value: formatCurrency(paying) }]
+                    ? itemRows
                     : [
-                        { label: itemLabel, value: formatCurrency(paying) },
+                        ...itemRows,
                         {
                           label: 'Card or bank fee',
-                          value: feeUnknown
-                            ? 'Shown on the next page'
-                            : fee == null
-                              ? 'Working it out…'
-                              : fee > 0
-                                ? formatCurrency(fee)
-                                : 'None',
+                          value: feeUnknown ? (
+                            'Shown on the next page'
+                          ) : fee == null ? (
+                            <span aria-label="Working out the fee">Working it out…</span>
+                          ) : fee > 0 ? (
+                            formatCurrency(fee)
+                          ) : (
+                            'None'
+                          ),
                         },
                         {
                           label: <span className="font-medium text-foreground">You pay</span>,
                           value: (
-                            <span className="text-base">
+                            <span className="text-base" aria-live="polite" aria-atomic="true">
                               {total != null
                                 ? formatCurrency(total)
-                                : `${formatCurrency(paying)} + fee`}
+                                : `${formatCurrency(paying)} plus the fee`}
                             </span>
                           ),
                         },

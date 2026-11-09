@@ -277,7 +277,7 @@ export const CreateListingModal = ({
                     label={
                       <span className="flex items-center gap-1.5 font-medium">
                         <Zap className="w-3.5 h-3.5 text-primary" />
-                        Allow monthly installments via GetRentos Flex
+                        Allow monthly instalments via GetRentos Flex
                       </span>
                     }
                     description={

@@ -322,7 +322,33 @@
     background-color: var(--card);
   }
 
+  /* The desktop sidebar's width, read by the sidebar and by the page beside it
+     (`.workspace-main`). useSidebarRail sets data-sidebar="rail" on <html>. */
+  :root {
+    --workspace-sidebar-width: 16rem;
+  }
+
+  :root[data-sidebar='rail'] {
+    --workspace-sidebar-width: 4.5rem;
+  }
+
+  @media (min-width: 64rem) {
+    .workspace-main {
+      margin-left: var(--workspace-sidebar-width);
+    }
+  }
+
+  @media (min-width: 64rem) and (prefers-reduced-motion: no-preference) {
+    .workspace-main,
+    .workspace-sidebar {
+      transition:
+        margin-left 180ms ease,
+        width 180ms ease;
+    }
+  }
+
   .workspace-sidebar {
+    width: var(--workspace-sidebar-width);
     background-color: var(--background);
     /* The list is longer than most screens: fade the bottom edge so a cut-off
        item reads as "more below", not as the end. Extra padding lets the last
@@ -393,6 +419,57 @@
     color: var(--accent-foreground);
     font-weight: 600;
     box-shadow: inset 2px 0 0 var(--primary);
+  }
+
+  /* Icon rail: each row is its icon, and its name appears beside it on hover
+     or keyboard focus. The name stays in the link (only faded), so screen
+     readers and the accessible name are unchanged. The rail lists few rows, so
+     it does not scroll; that lets the names show outside its edge. */
+  .workspace-sidebar[data-rail] {
+    overflow: visible;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  [data-rail] .sidebar-item {
+    position: relative;
+    justify-content: center;
+    padding-inline: 0;
+  }
+
+  [data-rail] .sidebar-item-label {
+    position: absolute;
+    left: calc(100% + 0.75rem);
+    top: 50%;
+    z-index: 40;
+    width: max-content;
+    max-width: 16rem;
+    flex: none;
+    transform: translateY(-50%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background-color: var(--card);
+    padding: 0.375rem 0.625rem;
+    color: var(--foreground);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.12);
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  [data-rail] .sidebar-item:hover .sidebar-item-label,
+  [data-rail] .sidebar-item:focus-visible .sidebar-item-label {
+    opacity: 1;
+  }
+
+  [data-rail] .sidebar-item-extra {
+    display: none;
+  }
+
+  .sidebar-rail-separator {
+    margin: 0.5rem 0.75rem;
+    border-top: 1px solid var(--border);
   }
 
   .mobile-primary-nav {

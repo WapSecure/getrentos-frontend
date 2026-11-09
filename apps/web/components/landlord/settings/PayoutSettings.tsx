@@ -14,10 +14,20 @@ import {
   PayoutHoldNotice,
 } from '@/components/shared/payouts/PayoutHoldNotice';
 import { BankAccountFields } from '@/components/shared/payouts/BankAccountFields';
+import {
+  INCOMPLETE_ACCOUNT_LOOKUP,
+  lookupAllowsSave,
+  payoutAccountLabel,
+  payoutAccountStepUpSummary,
+  saveAccountLabel,
+  withStepUpSummary,
+  type AccountLookup,
+} from '@getrentos/shared';
 
 export const PayoutSettings = () => {
   const [bankCode, setBankCode] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
+  const [lookup, setLookup] = useState<AccountLookup>(INCOMPLETE_ACCOUNT_LOOKUP);
   const [savedBankName, setSavedBankName] = useState('');
   const [savedAccountNumber, setSavedAccountNumber] = useState('');
   const [savedAccountName, setSavedAccountName] = useState('');
@@ -45,13 +55,21 @@ export const PayoutSettings = () => {
     fetchPayoutAccount();
   }, [reloads]);
 
-  const canSave = bankCode.trim().length >= 3 && accountNumber.trim().length === 10;
+  // The bank's name for the account comes back before saving (UX-28).
+  const canSave = lookupAllowsSave(lookup);
 
   // Resolves true only when the account was saved, so the button says "Saved" only then.
   const handleSave = async (): Promise<boolean> => {
     if (!canSave) return false;
     setSubmitError(null);
-    const response = await landlordService.updatePayoutAccount({ bankCode, accountNumber });
+    const response = await withStepUpSummary(
+      payoutAccountStepUpSummary({
+        bankName: lookup.bankName,
+        accountNumber,
+        accountName: lookup.accountName,
+      }),
+      () => landlordService.updatePayoutAccount({ bankCode, accountNumber })
+    );
     if (response.success && response.data) {
       setSavedBankName(response.data.bankName);
       setSavedAccountNumber(response.data.accountNumber);
@@ -97,7 +115,8 @@ export const PayoutSettings = () => {
       {savedAccountNumber && (
         <Card className="p-3 mb-6">
           <p className="text-sm font-medium text-foreground">
-            {savedBankName} · {savedAccountNumber} · {savedAccountName}
+            {payoutAccountLabel({ bankName: savedBankName, accountNumber: savedAccountNumber })} ·{' '}
+            {savedAccountName}
           </p>
           {verified ? (
             <div className="flex items-center gap-2 mt-2">
@@ -127,6 +146,7 @@ export const PayoutSettings = () => {
           onBankCode={setBankCode}
           accountNumber={accountNumber}
           onAccountNumber={setAccountNumber}
+          onLookup={setLookup}
         />
       </div>
 
@@ -137,7 +157,11 @@ export const PayoutSettings = () => {
           verificationHref={ROUTES.LANDLORD_VERIFICATION}
         />
         {saveFailedMessage && <Alert variant="danger">{saveFailedMessage}</Alert>}
-        <SaveButton label="Update payout account" onClick={handleSave} disabled={!canSave} />
+        <SaveButton
+          label={saveAccountLabel(lookup, 'Update payout account')}
+          onClick={handleSave}
+          disabled={!canSave}
+        />
       </div>
     </div>
   );

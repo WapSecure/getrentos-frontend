@@ -73,7 +73,7 @@ export const CollectionsSummaryCards = ({ layoutId }: { layoutId?: string }) => 
         accent={data.overdueAmount > 0 ? 'red' : 'green'}
         subtitle={
           data.overdueInstallments > 0
-            ? `${data.overdueInstallments} installment${data.overdueInstallments === 1 ? '' : 's'}${
+            ? `${data.overdueInstallments} instalment${data.overdueInstallments === 1 ? '' : 's'}${
                 data.defaultedCount > 0 ? `, ${data.defaultedCount} defaulted` : ''
               }`
             : 'Nothing overdue'

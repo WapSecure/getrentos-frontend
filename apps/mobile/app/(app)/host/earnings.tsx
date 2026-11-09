@@ -25,10 +25,27 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
-import { hostShortletsApi, type PayoutSummary } from '@/lib/api/hostShortlets';
+import {
+  hostShortletsApi,
+  type HostPayoutAccount,
+  type PayoutSummary,
+} from '@/lib/api/hostShortlets';
 import { errorMessage } from '@/lib/api/client';
-import { BankAccountFields, accountNumberOk } from '@/components/forms/BankAccountFields';
-import { formatDate, formatDateTime } from '@/lib/format';
+import { BankAccountFields } from '@/components/forms/BankAccountFields';
+import { PayoutCooldownHint, PayoutHoldNotice } from '@/components/payouts/PayoutHoldNotice';
+import { PayoutRowDetails } from '@/components/payouts/PayoutRowDetails';
+import { withStepUpSummary } from '@/lib/stepUp';
+import {
+  INCOMPLETE_ACCOUNT_LOOKUP,
+  PAYOUT_ARRIVAL_NOTE,
+  lookupAllowsSave,
+  maskAccountNumber,
+  payoutAccountStepUpSummary,
+  saveAccountLabel,
+  withdrawStepUpSummary,
+  type AccountLookup,
+} from '@getrentos/shared';
+import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { Sheet } from '@/components/Sheet';
@@ -115,15 +132,9 @@ export default function HostEarnings() {
                     <>
                       <Text variant="bodyStrong">{account.data.bankName}</Text>
                       <Text variant="caption" color="mutedForeground">
-                        {account.data.accountNumber} · {account.data.accountName}
+                        {maskAccountNumber(account.data.accountNumber)} · {account.data.accountName}
                       </Text>
-                      {account.data.payoutHoldUntil ? (
-                        <Text variant="caption" color="warning">
-                          This account was changed recently. To protect you, payouts to it start{' '}
-                          {formatDateTime(account.data.payoutHoldUntil)}. If you didn’t make this
-                          change, contact GetRentos support now.
-                        </Text>
-                      ) : null}
+                      <PayoutHoldNotice holdUntil={account.data.payoutHoldUntil} />
                     </>
                   ) : account.isPending ? (
                     <View style={{ gap: 6 }}>
@@ -172,12 +183,23 @@ export default function HostEarnings() {
                       >
                         <View style={{ flex: 1 }}>
                           <Text variant="callout" style={{ fontWeight: '600' }}>
-                            {formatDate(p.paidAt ?? p.createdAt, 'medium')}
+                            Requested {formatDate(p.createdAt, 'medium')}
                           </Text>
                           <Text variant="caption" color="mutedForeground">
                             {p.bookingCount} stay{p.bookingCount === 1 ? '' : 's'}
                             {p.penaltyDeducted ? ` · ${naira(p.penaltyDeducted)} fees taken` : ''}
                           </Text>
+                          <PayoutRowDetails
+                            state={
+                              p.status === 'SUCCESS'
+                                ? 'paid'
+                                : p.status === 'FAILED'
+                                  ? 'failed'
+                                  : 'pending'
+                            }
+                            paidAt={p.paidAt}
+                            transferRef={p.transferRef}
+                          />
                         </View>
                         <View style={{ alignItems: 'flex-end', gap: 4 }}>
                           <Price amount={p.amount} variant="callout" />
@@ -276,11 +298,21 @@ function Withdraw({
   const qc = useQueryClient();
   const toast = useToast();
   const withdraw = useMutation({
-    mutationFn: hostShortletsApi.requestPayout,
+    mutationFn: () =>
+      withStepUpSummary(
+        withdrawStepUpSummary(
+          naira(s.available),
+          qc.getQueryData<HostPayoutAccount | null>(qk.host.payoutAccount)
+        ),
+        () => hostShortletsApi.requestPayout()
+      ),
     onSuccess: (p) => {
       void haptics.success();
       qc.invalidateQueries({ queryKey: ['host'] });
-      toast.show(`${naira(p.amount)} is on its way to your bank.`, 'success');
+      toast.show(
+        `${naira(p.amount)} is on its way to your bank. ${PAYOUT_ARRIVAL_NOTE}`,
+        'success'
+      );
     },
     onError: (e) => {
       void haptics.error();
@@ -296,7 +328,7 @@ function Withdraw({
   const confirm = () =>
     Alert.alert(
       `Withdraw ${naira(s.available)}?`,
-      `${s.penaltiesOutstanding ? `${naira(s.penaltiesOutstanding)} in cancellation fees comes off first. ` : ''}It usually lands the same day.`,
+      `${s.penaltiesOutstanding ? `${naira(s.penaltiesOutstanding)} in cancellation fees comes off first. ` : ''}${PAYOUT_ARRIVAL_NOTE}`,
       [
         { text: 'Not now', style: 'cancel' },
         { text: 'Withdraw', onPress: () => withdraw.mutate() },
@@ -353,7 +385,7 @@ function Breakdown({ s }: { s: PayoutSummary }) {
     ],
     ['Sent to your bank', s.inTransit, 'Waiting for the bank to confirm'],
     ['Held by a dispute', s.frozen, 'Released when the dispute closes'],
-    ['In a failed payout', s.inFailedPayout, 'Support will retry it'],
+    ['In a failed payout', s.inFailedPayout, 'Support sends it again to your account'],
     ['Fees owed', s.penaltiesOutstanding, 'Taken from your next withdrawals'],
   ];
   const shown = rows.filter(([, v]) => v > 0);
@@ -473,9 +505,18 @@ function AccountForm({ onDone }: { onDone: () => void }) {
   const toast = useToast();
   const [bankCode, setBankCode] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
+  const [lookup, setLookup] = useState<AccountLookup>(INCOMPLETE_ACCOUNT_LOOKUP);
   // Behind "confirm it's you": apiFetch prompts for it automatically.
   const save = useMutation({
-    mutationFn: () => hostShortletsApi.savePayoutAccount(bankCode, accountNumber),
+    mutationFn: () =>
+      withStepUpSummary(
+        payoutAccountStepUpSummary({
+          bankName: lookup.bankName,
+          accountNumber,
+          accountName: lookup.accountName,
+        }),
+        () => hostShortletsApi.savePayoutAccount(bankCode, accountNumber)
+      ),
     onSuccess: (a) => {
       void haptics.success();
       qc.setQueryData(qk.host.payoutAccount, a);
@@ -492,13 +533,15 @@ function AccountForm({ onDone }: { onDone: () => void }) {
           onBankCode={setBankCode}
           accountNumber={accountNumber}
           onAccountNumber={setAccountNumber}
+          onLookup={setLookup}
         />
+        <PayoutCooldownHint />
         {save.error ? (
           <FormAlert message={errorMessage(save.error, 'We couldn’t check that account.')} />
         ) : null}
         <Button
-          label="Save payout account"
-          disabled={!bankCode || !accountNumberOk(accountNumber)}
+          label={saveAccountLabel(lookup, 'Save payout account')}
+          disabled={!lookupAllowsSave(lookup)}
           loading={save.isPending}
           onPress={() => save.mutate()}
         />

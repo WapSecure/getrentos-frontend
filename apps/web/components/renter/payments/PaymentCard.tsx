@@ -1,27 +1,18 @@
 'use client';
 
-import {
-  CheckCircle,
-  Clock,
-  AlertCircle,
-  CreditCard,
-  Building2,
-  Wallet,
-  ChevronRight,
-  Download,
-  Shield,
-  Calendar,
-} from 'lucide-react';
-import { Badge, Button, IconButton, type BadgeVariant } from '@getrentos/ui';
+import { ChevronRight, Download, Shield, Calendar } from 'lucide-react';
+import { Badge, Button, IconButton } from '@getrentos/ui';
+import { formatCurrency, formatLagosDate } from '@/lib/format';
+import { paymentStatusBadges } from '@/lib/statusBadge';
 
 interface Payment {
   id: string;
   propertyName: string;
   amount: number;
   amountPaid?: number;
+  outstanding?: number;
   date: string;
   status: 'paid' | 'pending' | 'overdue' | 'processing';
-  method: 'card' | 'bank_transfer' | 'wallet';
   receiptUrl?: string;
   description: string;
   dueDate: string;
@@ -41,21 +32,19 @@ interface PaymentCardProps {
   onConfirmMoveIn: () => void;
 }
 
-const methodIcons: Record<Payment['method'], typeof CreditCard> = {
-  card: CreditCard,
-  bank_transfer: Building2,
-  wallet: Wallet,
-};
-
-/** Plain-language escrow state for collected funds. */
+/** Plain-language state of money that has been collected. */
 const escrowLabel = (status: Payment['escrowStatus']): string =>
   ({
-    not_funded: 'not funded yet',
+    not_funded: 'not paid yet',
     held: 'held by GetRentos',
     pending_review: 'under review',
     released: 'released to your landlord',
-    frozen: 'frozen',
+    frozen: 'on hold while a problem is reviewed',
   })[status] ?? status;
+
+/** What is still to pay on a charge, after part-payments and credit. */
+export const leftToPay = (p: { amount: number; amountPaid?: number; outstanding?: number }) =>
+  p.outstanding ?? p.amount - (p.amountPaid ?? 0);
 
 export const PaymentCard = ({
   payment,
@@ -65,99 +54,47 @@ export const PaymentCard = ({
   onDispute,
   onConfirmMoveIn,
 }: PaymentCardProps) => {
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-NG', {
-      style: 'currency',
-      currency: 'NGN',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-GB', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  };
-
-  const getStatusConfig = () => {
-    switch (payment.status) {
-      case 'paid':
-        return {
-          label: 'Paid',
-          variant: 'success' as BadgeVariant,
-          icon: CheckCircle,
-        };
-      case 'pending':
-        return {
-          label: 'Pending',
-          variant: 'warning' as BadgeVariant,
-          icon: Clock,
-        };
-      case 'overdue':
-        return {
-          label: 'Overdue',
-          variant: 'danger' as BadgeVariant,
-          icon: AlertCircle,
-        };
-      case 'processing':
-        return {
-          label: 'Processing',
-          variant: 'info' as BadgeVariant,
-          icon: Clock,
-        };
-      default:
-        return {
-          label: 'Unknown',
-          variant: 'neutral' as BadgeVariant,
-          icon: Clock,
-        };
-    }
-  };
-
-  const statusConfig = getStatusConfig();
-  const StatusIcon = statusConfig.icon;
-  const MethodIcon = methodIcons[payment.method] ?? CreditCard;
+  const status = paymentStatusBadges[payment.status];
+  const StatusIcon = status.icon ?? Calendar;
 
   const isPayable = payment.status === 'pending' || payment.status === 'overdue';
+  const isHeld = payment.status === 'paid' && payment.escrowStatus === 'held';
   // The tenant closed Paystack's page: they go back to the same checkout rather
   // than wait for it to lapse (or risk opening a second one).
   const resume = payment.status === 'processing' ? payment.resumeCheckout : undefined;
+  const left = leftToPay(payment);
 
   return (
     <article className="group p-4 transition-colors hover:bg-secondary/50 sm:p-5">
       <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center">
-        {/* Status Icon */}
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
           <StatusIcon className="h-5 w-5" aria-hidden="true" />
         </div>
 
-        {/* Payment Info */}
         <div className="min-w-0 flex-1 sm:min-w-[16rem]">
           <div className="flex flex-wrap items-center gap-2">
-            <h4 className="font-semibold text-foreground">{payment.propertyName}</h4>
-            <Badge variant={statusConfig.variant} icon={<StatusIcon className="h-3 w-3" />}>
-              {statusConfig.label}
-            </Badge>
-            <Badge variant="neutral" icon={<MethodIcon className="w-3 h-3" />}>
-              {payment.method.replace('_', ' ')}
+            <h3 className="font-semibold text-foreground">{payment.propertyName}</h3>
+            <Badge variant={status.variant} icon={<StatusIcon className="h-3 w-3" />}>
+              {status.label}
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground mt-0.5">{payment.description}</p>
           <div className="flex flex-wrap items-center gap-3 mt-1 text-xs text-muted-foreground">
             <div className="flex items-center gap-1">
-              <Calendar className="w-3 h-3" />
-              <span>Due {formatDate(payment.dueDate)}</span>
+              <Calendar className="w-3 h-3" aria-hidden="true" />
+              <span>
+                {payment.status === 'paid'
+                  ? `Paid ${formatLagosDate(payment.date)}`
+                  : `Due ${formatLagosDate(payment.dueDate)}`}
+              </span>
             </div>
             {payment.status === 'paid' && (
               <div className="flex items-start gap-1">
                 <Shield className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
                 <span>
                   Your money: {escrowLabel(payment.escrowStatus)}
-                  {payment.escrowStatus === 'held' && payment.releaseDate
-                    ? ` · releases to your landlord on ${formatDate(payment.releaseDate)}`
+                  {isHeld && payment.releaseDate
+                    ? ` · releases to your landlord on ${formatLagosDate(payment.releaseDate)}`
                     : ''}
                 </span>
               </div>
@@ -165,17 +102,16 @@ export const PaymentCard = ({
           </div>
         </div>
 
-        {/* Amount & Actions */}
         <div className="flex flex-wrap items-center gap-4 sm:ml-auto">
+          {/* Headline is what is still to pay on an open charge, the same as mobile. */}
           <div className="text-right">
-            <p className="text-lg font-bold text-primary">{formatCurrency(payment.amount)}</p>
-            {payment.status !== 'paid' && (payment.amountPaid ?? 0) > 0 ? (
-              <p className="text-xs text-success">
-                {formatCurrency(payment.amountPaid ?? 0)} paid ·{' '}
-                {formatCurrency(payment.amount - (payment.amountPaid ?? 0))} left
+            <p className="text-lg font-bold text-primary">
+              {formatCurrency(isPayable ? left : payment.amount)}
+            </p>
+            {isPayable && left !== payment.amount && (
+              <p className="text-xs text-muted-foreground">
+                left of {formatCurrency(payment.amount)}
               </p>
-            ) : (
-              <p className="text-xs text-muted-foreground">{formatDate(payment.date)}</p>
             )}
           </div>
 
@@ -206,7 +142,7 @@ export const PaymentCard = ({
                 Resume payment
               </Button>
             )}
-            {payment.status === 'paid' && payment.escrowStatus === 'held' && (
+            {isHeld && (
               <Button
                 size="sm"
                 variant="primary"
@@ -219,7 +155,7 @@ export const PaymentCard = ({
                 Confirm move-in
               </Button>
             )}
-            {payment.status === 'paid' && payment.escrowStatus === 'held' && (
+            {isHeld && (
               <Button
                 size="sm"
                 variant="ghost"
@@ -229,7 +165,7 @@ export const PaymentCard = ({
                 }}
                 className="text-muted-foreground"
               >
-                Report issue
+                Report a problem
               </Button>
             )}
             {payment.receiptUrl && (

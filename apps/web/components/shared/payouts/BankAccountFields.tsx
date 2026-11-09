@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { CheckCircle2, Landmark, Loader2 } from 'lucide-react';
 import { Field, NumberInput, Select } from '@getrentos/ui';
+import { toAccountLookup, type AccountLookup } from '@getrentos/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { NIGERIAN_BANKS } from '@/lib/banks';
 import { paymentKeys } from '@/lib/queryKeys';
@@ -24,6 +25,11 @@ interface BankAccountFieldsProps {
   idPrefix: string;
   /** Told the account holder's name once it is found, and null while it is not. */
   onAccountName?: (name: string | null) => void;
+  /**
+   * Told where the name check stands. Callers keep save disabled until
+   * `lookupAllowsSave` (UX-28): the name is found, or honestly could not be checked.
+   */
+  onLookup?: (lookup: AccountLookup) => void;
 }
 
 /**
@@ -38,6 +44,7 @@ export function BankAccountFields({
   onAccountNumber,
   idPrefix,
   onAccountName,
+  onLookup,
 }: BankAccountFieldsProps) {
   const { data: bankList } = useQuery({
     queryKey: paymentKeys.banks,
@@ -75,6 +82,21 @@ export function BankAccountFields({
     onAccountName?.(accountName);
   }, [accountName, onAccountName]);
 
+  const bankName = banks.find((b) => b.code === bankCode)?.name ?? null;
+  const lookupError =
+    ready && lookup.isError ? (lookup.error as Error & { status?: number }) : null;
+  const state = toAccountLookup({
+    ready,
+    checking: ready && lookup.isFetching,
+    accountName,
+    bankName,
+    error: lookupError ? { status: lookupError.status, message: lookupError.message } : null,
+  });
+  const { status: stateStatus, message: stateMessage } = state;
+  useEffect(() => {
+    onLookup?.({ status: stateStatus, accountName, bankName, message: stateMessage });
+  }, [stateStatus, accountName, bankName, stateMessage, onLookup]);
+
   const lengthError =
     accountNumber.length > 0 && accountNumber.length < 10
       ? 'Account numbers are 10 digits (NUBAN).'
@@ -88,11 +110,19 @@ export function BankAccountFields({
       </span>
     );
   } else if (accountName) {
+    // The bank's name for the account, not a verification: the person checks it is right.
     nameLine = (
-      <span className="inline-flex items-center gap-1.5 text-success font-medium">
-        <CheckCircle2 className="w-3.5 h-3.5 shrink-0" /> {accountName}
+      <span className="block">
+        <span className="inline-flex items-center gap-1.5 text-success font-medium">
+          <CheckCircle2 className="w-3.5 h-3.5 shrink-0" /> {accountName}
+        </span>
+        <span className="block text-muted-foreground">
+          The name your bank has for this account. Check it’s the right person before you save.
+        </span>
       </span>
     );
+  } else if (state.status === 'unchecked') {
+    nameLine = <span className="text-warning">{state.message}</span>;
   }
 
   return (
@@ -132,7 +162,9 @@ export function BankAccountFields({
         label="Account number"
         htmlFor={`${idPrefix}-account-number`}
         hint={nameLine}
-        error={lengthError ?? (ready && lookup.isError ? lookup.error.message : undefined)}
+        error={
+          lengthError ?? (state.status === 'not_found' ? (state.message ?? undefined) : undefined)
+        }
       >
         <NumberInput
           id={`${idPrefix}-account-number`}

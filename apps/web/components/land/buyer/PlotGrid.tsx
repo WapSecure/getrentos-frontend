@@ -11,7 +11,7 @@ const STATUS_FILTERS: { value: string; label: string }[] = [
   { value: 'AVAILABLE', label: 'Available only' },
   { value: '', label: 'All plots' },
   { value: 'RESERVED', label: 'Reserved' },
-  { value: 'TAKEN', label: 'Sold or under installment' },
+  { value: 'TAKEN', label: 'Sold or under instalment' },
 ];
 
 const TAKEN: LandPlotStatus[] = ['UNDER_INSTALLMENT', 'SOLD', 'ALLOCATED'];

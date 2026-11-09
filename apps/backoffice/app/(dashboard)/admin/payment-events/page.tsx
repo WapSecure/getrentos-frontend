@@ -7,6 +7,7 @@ import {
   Badge,
   Button,
   Card,
+  ConfirmDialog,
   EmptyState,
   ListSkeleton,
   PageErrorState,
@@ -40,6 +41,24 @@ const STATUS: Record<
   IGNORED: { label: 'Not acted on', variant: 'neutral' },
 };
 
+/** What replaying an event of this kind does, in plain words (UX-46). */
+function replayEffect(event: string): string {
+  if (event === 'charge.success' || event === 'SUCCESSFUL_TRANSACTION') {
+    return 'It marks this payment as paid and credits whoever it was for, if that has not happened yet.';
+  }
+  if (event === 'transfer.success') return 'It marks this payout as paid.';
+  if (event === 'transfer.failed' || event === 'transfer.reversed') {
+    return 'It marks this payout as failed, so it shows on Payouts needing attention for a retry.';
+  }
+  if (event.startsWith('refund.') || event === 'SUCCESSFUL_REFUND') {
+    return 'It updates the refund on this payment to what the payment company reported.';
+  }
+  if (event.startsWith('charge.dispute.')) {
+    return 'It updates the card dispute on this payment, which can hold money back from the receiver.';
+  }
+  return 'It runs the same handling as when the payment company first sent it.';
+}
+
 /**
  * Every webhook the payment provider sent, and whether it was applied.
  *
@@ -56,6 +75,7 @@ export default function PaymentEventsPage() {
   const [filter, setFilter] = useState<Filter>('FAILED');
   const [reference, setReference] = useState('');
   const [page, setPage] = useState(1);
+  const [confirming, setConfirming] = useState<PaymentEvent | null>(null);
 
   const query = useQuery({
     queryKey: ['admin', 'payment-events', filter, reference, page],
@@ -75,6 +95,7 @@ export default function PaymentEventsPage() {
     mutationFn: (id: string) => unwrap(adminPaymentEventsService.replay(id)),
     onSuccess: (event) => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'payment-events'] });
+      setConfirming(null);
       if (event.status === 'PROCESSED') toast.success('Applied.');
       else toast.error(event.lastError || 'It failed again.');
     },
@@ -163,7 +184,7 @@ export default function PaymentEventsPage() {
                   <Button
                     className="mt-4"
                     variant="outline"
-                    onClick={() => replay.mutate(e.id)}
+                    onClick={() => setConfirming(e)}
                     isLoading={replay.isPending && replay.variables === e.id}
                     disabled={replay.isPending}
                   >
@@ -188,6 +209,25 @@ export default function PaymentEventsPage() {
           className="mt-7"
         />
       ) : null}
+
+      <ConfirmDialog
+        open={confirming !== null}
+        onOpenChange={(open) => !open && setConfirming(null)}
+        title="Replay this payment event?"
+        description={
+          confirming
+            ? `${confirming.event} from ${confirming.provider}${
+                confirming.reference ? `, reference ${confirming.reference}` : ', no reference'
+              }, received ${formatDate(confirming.receivedAt)}. ${replayEffect(
+                confirming.event
+              )} Money is never applied twice: anything already applied is left as it is.`
+            : ''
+        }
+        tone="primary"
+        confirmLabel="Replay"
+        isLoading={replay.isPending}
+        onConfirm={() => confirming && replay.mutate(confirming.id)}
+      />
     </>
   );
 }

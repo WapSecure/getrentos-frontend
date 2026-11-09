@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { ChevronDown, Lock } from 'lucide-react';
 import { useCallback, useSyncExternalStore, type ElementType, type ReactNode } from 'react';
 import { PLAN_TIER_LABELS, type PlanTier } from '@getrentos/shared';
+import { SidebarRailToggle, useSidebarRail } from '@getrentos/ui';
 
 export interface GroupedSidebarItem {
   label?: ReactNode;
@@ -197,14 +198,14 @@ function SidebarLink({
       className="sidebar-item"
     >
       <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-      <span className="min-w-0 flex-1 truncate">{item.label}</span>
+      <span className="sidebar-item-label min-w-0 flex-1 truncate">{item.label}</span>
       {item.locked && (
         <Lock
-          className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70"
+          className="sidebar-item-extra h-3.5 w-3.5 shrink-0 text-muted-foreground/70"
           aria-label={`${PLAN_TIER_LABELS[item.lockedPlan ?? 'PRO']} plan feature`}
         />
       )}
-      {item.badge}
+      {item.badge && <span className="sidebar-item-extra contents">{item.badge}</span>}
     </Link>
   );
 }
@@ -302,6 +303,43 @@ function SidebarGroups({
   );
 }
 
+/**
+ * The folded sidebar: the role's primary destinations as icons, plus the
+ * current page when it lives deeper, so "where am I" survives the fold. The
+ * rest is one click away behind Expand, not a column of 25 unlabelled icons.
+ */
+function SidebarRail({
+  ariaLabel,
+  groups,
+  activeHref,
+  onExpand,
+}: {
+  ariaLabel: string;
+  groups: GroupedSidebarGroup[];
+  activeHref?: string;
+  onExpand: () => void;
+}) {
+  const primary = groups.find((group) => group.kind === 'primary')?.items ?? groups[0]?.items ?? [];
+  const current = primary.some((item) => item.href === activeHref)
+    ? undefined
+    : groups.flatMap((group) => group.items).find((item) => item.href === activeHref);
+  return (
+    <nav className="space-y-1 px-3 py-4" aria-label={ariaLabel}>
+      {primary.map((item) => (
+        <SidebarLink key={item.href} item={item} active={item.href === activeHref} />
+      ))}
+      {current && (
+        <>
+          <div className="sidebar-rail-separator" aria-hidden="true" />
+          <SidebarLink item={current} active />
+        </>
+      )}
+      <div className="sidebar-rail-separator" aria-hidden="true" />
+      <SidebarRailToggle rail onToggle={() => onExpand()} />
+    </nav>
+  );
+}
+
 function MobilePrimaryNavigation({ ariaLabel, dashboardHref, groups }: GroupedSidebarProps) {
   const pathname = usePathname();
   const primaryItems = groups.find((group) => group.kind === 'primary')?.items.slice(0, 5) ?? [];
@@ -342,28 +380,44 @@ export function GroupedSidebar({
 }: GroupedSidebarProps) {
   const pathname = usePathname();
   const activeHref = activeSidebarHref(pathname, groups, dashboardHref);
+  const { rail, setRail } = useSidebarRail();
 
   return (
     <>
-      <aside className="workspace-sidebar fixed bottom-0 left-0 top-16 z-30 hidden w-64 overflow-y-auto border-r border-border lg:block">
-        <nav className="space-y-5 px-3 py-4" aria-label={ariaLabel}>
-          {workspaceLabel && (
-            <div className="px-3 pb-1">
-              <p className="text-[0.6875rem] font-medium uppercase tracking-[0.08em] text-muted-foreground">
-                Workspace
-              </p>
-              <p className="mt-1 truncate text-sm font-semibold text-foreground">
-                {workspaceLabel}
-              </p>
-            </div>
-          )}
-          <SidebarGroups
-            scope={ariaLabel}
-            idPrefix="sidebar"
+      <aside
+        data-rail={rail || undefined}
+        className={`workspace-sidebar fixed bottom-0 left-0 top-16 z-30 hidden border-r border-border lg:block ${rail ? '' : 'overflow-y-auto'}`}
+      >
+        {rail ? (
+          <SidebarRail
+            ariaLabel={ariaLabel}
             groups={groups}
             activeHref={activeHref}
+            onExpand={() => setRail(false)}
           />
-        </nav>
+        ) : (
+          <nav className="space-y-5 px-3 py-4" aria-label={ariaLabel}>
+            {workspaceLabel && (
+              <div className="px-3 pb-1">
+                <p className="text-[0.6875rem] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+                  Workspace
+                </p>
+                <p className="mt-1 truncate text-sm font-semibold text-foreground">
+                  {workspaceLabel}
+                </p>
+              </div>
+            )}
+            <SidebarGroups
+              scope={ariaLabel}
+              idPrefix="sidebar"
+              groups={groups}
+              activeHref={activeHref}
+            />
+            <div className="border-t border-border pt-3">
+              <SidebarRailToggle rail={false} onToggle={setRail} />
+            </div>
+          </nav>
+        )}
       </aside>
       <MobilePrimaryNavigation
         ariaLabel={ariaLabel}

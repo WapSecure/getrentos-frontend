@@ -13,7 +13,7 @@ type Labelled = { label: string; variant: BadgeVariant };
 export const PLOT_STATUS: Record<LandPlotStatus, Labelled> = {
   AVAILABLE: { label: 'Available', variant: 'success' },
   RESERVED: { label: 'Reserved', variant: 'info' },
-  UNDER_INSTALLMENT: { label: 'Under installment', variant: 'warning' },
+  UNDER_INSTALLMENT: { label: 'Under instalment', variant: 'warning' },
   SOLD: { label: 'Sold', variant: 'neutral' },
   ALLOCATED: { label: 'Allocated', variant: 'neutral' },
   WITHHELD: { label: 'Withheld', variant: 'danger' },

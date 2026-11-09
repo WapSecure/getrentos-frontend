@@ -11,11 +11,14 @@ export const STEP_UP_REQUIRED = 'STEP_UP_REQUIRED';
 /** What the sheet is asked for: the challenge the API raised, when there was one. */
 export interface StepUpRequest {
   challengeId?: string;
+  /** What the request being confirmed does, when the caller said (UX-30). */
+  summary?: string | null;
 }
 
 type Prompt = (request: StepUpRequest) => Promise<string | null>;
 
 let prompt: Prompt | null = null;
+let summaries: string[] = [];
 let cached: { token: string; expiresAt: number } | null = null;
 let inFlight: Promise<string | null> | null = null;
 
@@ -48,9 +51,12 @@ export async function obtainStepUpToken(challengeId?: string): Promise<string | 
   if (!prompt) return null;
   if (challengeId) {
     const ask = prompt;
+    // Captured now: by the time a queued prompt opens, other requests may have
+    // pushed their own summaries.
+    const summary = currentStepUpSummary();
     const turn = (inFlight ?? Promise.resolve(null))
       .catch(() => null)
-      .then(() => ask({ challengeId }));
+      .then(() => ask({ challengeId, summary }));
     inFlight = turn.finally(() => {
       if (inFlight === turn) inFlight = null;
     });
@@ -59,8 +65,28 @@ export async function obtainStepUpToken(challengeId?: string): Promise<string | 
   const existing = currentStepUpToken();
   if (existing) return existing;
   const ask = prompt;
-  inFlight ??= ask({}).finally(() => {
+  inFlight ??= ask({ summary: currentStepUpSummary() }).finally(() => {
     inFlight = null;
   });
   return inFlight;
+}
+
+/** The newest summary set by `withStepUpSummary`, or null. */
+export function currentStepUpSummary(): string | null {
+  return summaries.length ? summaries[summaries.length - 1] : null;
+}
+
+/**
+ * Runs a sensitive request with a one-line summary of what it does, e.g.
+ * "Withdraw ₦250,000 to GTBank ••••1234", so the StepUpSheet it triggers says
+ * what is being authorised rather than only that something is.
+ */
+export async function withStepUpSummary<T>(summary: string, fn: () => Promise<T>): Promise<T> {
+  summaries = [...summaries, summary];
+  try {
+    return await fn();
+  } finally {
+    const i = summaries.lastIndexOf(summary);
+    if (i >= 0) summaries = [...summaries.slice(0, i), ...summaries.slice(i + 1)];
+  }
 }

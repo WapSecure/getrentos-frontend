@@ -272,3 +272,23 @@ export const PLOT_STATUS_STYLES: Record<
 
 export const plotLabel = (plot: { plotNumber: string; block?: string }) =>
   plot.block ? `Block ${plot.block}, plot ${plot.plotNumber}` : `Plot ${plot.plotNumber}`;
+
+/**
+ * The next payment as the lines it is made of, so a late fee is never folded
+ * into one number: "Land payment ₦X", "Late fee ₦Y". Only when the instalment
+ * is untouched and the lines add up to what is due; otherwise undefined and
+ * the pay dialog shows the single amount.
+ */
+export function nextDueParts(
+  nextDue: Pick<LandNextDue, 'installmentId' | 'amount'> | null | undefined,
+  installments: Pick<LandInstallment, 'id' | 'amount' | 'amountPaid' | 'lateFee'>[]
+): { label: string; amount: number }[] | undefined {
+  if (!nextDue?.installmentId) return undefined;
+  const due = installments.find((i) => i.id === nextDue.installmentId);
+  if (!due || due.lateFee <= 0 || due.amountPaid > 0) return undefined;
+  if (due.amount + due.lateFee !== nextDue.amount) return undefined;
+  return [
+    { label: 'Land payment', amount: due.amount },
+    { label: 'Late fee', amount: due.lateFee },
+  ];
+}

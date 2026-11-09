@@ -38,7 +38,7 @@ export const PURCHASE_STATUSES: PurchaseStatus[] = [
 
 export const BUYER_PURCHASE_STATUS: Record<PurchaseStatus, { label: string; tone: BadgeTone }> = {
   PENDING_DEPOSIT: { label: 'Awaiting deposit', tone: 'warning' },
-  ACTIVE: { label: 'Paying installments', tone: 'info' },
+  ACTIVE: { label: 'Paying instalments', tone: 'info' },
   PAID_IN_FULL: { label: 'Paid in full', tone: 'success' },
   COMPLETED: { label: 'Completed', tone: 'success' },
   DEFAULTED: { label: 'In default', tone: 'danger' },
@@ -288,7 +288,7 @@ export type PlotStatus =
 export const PLOT_STATUS_LABEL: Record<PlotStatus, string> = {
   AVAILABLE: 'Available',
   RESERVED: 'Reserved',
-  UNDER_INSTALLMENT: 'Under installment',
+  UNDER_INSTALLMENT: 'Under instalment',
   SOLD: 'Sold',
   ALLOCATED: 'Allocated',
   WITHHELD: 'Withheld',
@@ -448,12 +448,12 @@ export function filterPlots(
 export function planTermsLine(
   plan: Pick<EstatePlan, 'durationMonths' | 'initialDepositBps' | 'priceUpliftBps'>
 ) {
-  if (plan.durationMonths === 0) return 'Pay in full to start. No price uplift.';
+  if (plan.durationMonths === 0) return 'Pay in full to start. No instalment premium.';
   const uplift =
     plan.priceUpliftBps > 0
       ? `${formatBps(plan.priceUpliftBps)} added to the plot price.`
-      : 'No price uplift.';
-  return `${formatBps(plan.initialDepositBps)} deposit, then ${plan.durationMonths} monthly installments. ${uplift}`;
+      : 'No instalment premium.';
+  return `${formatBps(plan.initialDepositBps)} deposit, then ${plan.durationMonths} monthly instalments. ${uplift}`;
 }
 
 /** Live holds first (soonest to run out), then the past ones. */
@@ -527,3 +527,23 @@ export const landBuyerApi = {
   inspections: () =>
     apiFetch<{ id: string; plotId?: string | null; status: string }[]>('/buyer/land/inspections'),
 };
+
+/**
+ * The next payment as the lines it is made of, so a late fee is never folded
+ * into one number: "Land payment ₦X", "Late fee ₦Y". Only when the instalment
+ * is untouched and the lines add up to what is due; otherwise undefined and
+ * the pay sheet shows the single amount. Same rule as web.
+ */
+export function nextDueParts(
+  nextDue: Pick<NextDue, 'installmentId' | 'amount'> | null | undefined,
+  installments: Pick<BuyerInstallment, 'id' | 'amount' | 'amountPaid' | 'lateFee'>[]
+): { label: string; amount: number }[] | undefined {
+  if (!nextDue?.installmentId) return undefined;
+  const due = installments.find((i) => i.id === nextDue.installmentId);
+  if (!due || due.lateFee <= 0 || due.amountPaid > 0) return undefined;
+  if (due.amount + due.lateFee !== nextDue.amount) return undefined;
+  return [
+    { label: 'Land payment', amount: due.amount },
+    { label: 'Late fee', amount: due.lateFee },
+  ];
+}

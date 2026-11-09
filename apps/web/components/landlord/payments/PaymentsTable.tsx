@@ -48,10 +48,10 @@ export const PaymentsTable = ({ payments, onViewDetails }: PaymentsTableProps) =
                     {payment.propertyName} • {payment.unitName}
                   </td>
                   <td className="px-4 py-3 text-foreground font-medium whitespace-nowrap">
-                    {formatCurrency(payment.amount, { compact: true })}
+                    {formatCurrency(payment.amount)}
                     {payment.status !== 'paid' && (payment.amountPaid ?? 0) > 0 && (
                       <span className="block text-xs font-normal text-success">
-                        {formatCurrency(payment.amountPaid ?? 0, { compact: true })} paid
+                        {formatCurrency(payment.amountPaid ?? 0)} paid
                       </span>
                     )}
                   </td>

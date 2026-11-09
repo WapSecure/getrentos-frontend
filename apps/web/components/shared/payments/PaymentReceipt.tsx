@@ -13,8 +13,22 @@ import {
   XCircle,
   type LucideIcon,
 } from 'lucide-react';
-import { Button, Card, DescriptionList, IconButton, type DescriptionItem } from '@getrentos/ui';
+import {
+  Button,
+  Card,
+  DescriptionList,
+  IconButton,
+  PageErrorState,
+  type DescriptionItem,
+} from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
+import {
+  FAILED_BODY,
+  LAND_NEXT,
+  RENT_NEXT,
+  SALE_DEPOSIT_NEXT,
+  TRANSFER_SLOWER,
+} from '@/lib/paymentCopy';
 import { ROUTES } from '@/lib/constants/auth';
 import { currentPath, withNext } from '@/lib/nextPath';
 import type { PaymentKind, PaymentProvider, PaymentStatus } from '@/types/payments';
@@ -42,22 +56,13 @@ const FALLBACK_TITLE: Record<PaymentKind, string> = {
 
 /** What happens to the money now, in the payer's words. */
 const NEXT: Record<PaymentKind, { title: string; body: string }> = {
-  RENT: {
-    title: 'Your money is protected',
-    body: 'GetRentos holds this rent until you confirm move-in, then releases it to your landlord. If something is wrong with the home, report it before then.',
-  },
-  ESCROW: {
-    title: 'Held safely until completion',
-    body: 'Your deposit stays with GetRentos and is only released to the seller when the sale completes. If it does not go ahead, you are refunded under the sale terms.',
-  },
+  RENT: RENT_NEXT,
+  ESCROW: SALE_DEPOSIT_NEXT,
   SHORTLET: {
     title: 'Your stay is booked',
     body: 'Your host has been told. Any refundable security deposit comes back to you after check-out, minus any agreed damage.',
   },
-  LAND: {
-    title: 'Recorded against your purchase',
-    body: 'This payment counts towards your land purchase. You can follow every step and document from your purchase page.',
-  },
+  LAND: LAND_NEXT,
   FLEX: {
     title: 'Instalment recorded',
     body: 'This instalment is applied to your Flex plan. We will remind you before the next one is due.',
@@ -68,7 +73,7 @@ const NEXT: Record<PaymentKind, { title: string; body: string }> = {
   },
   VENDOR_TOP_UP: {
     title: 'The vendor is paid next',
-    body: 'Your top-up covers the shortfall on this invoice. The vendor is paid automatically within a few minutes.',
+    body: 'Your top-up covers the shortfall on this invoice. We send the vendor’s payment next; you’ll see it on the invoice.',
   },
 };
 
@@ -154,11 +159,14 @@ function Reference({ value }: { value: string }) {
       </span>
       <IconButton
         label={copied ? 'Copied' : 'Copy reference'}
-        icon={copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+        icon={copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
         variant="ghost"
-        size="sm"
+        size="md"
         onClick={copy}
       />
+      <span role="status" className="sr-only">
+        {copied ? 'Reference copied' : ''}
+      </span>
     </span>
   );
 }
@@ -290,14 +298,25 @@ export function PaymentConfirming({ kind }: { kind?: PaymentKind }) {
         <Heading
           eyebrow="Almost there"
           title={`Confirming your ${kind ? WHAT[kind] : 'payment'}`}
-          body="This usually takes a few seconds. You can leave this page: it won't affect your payment, and you won't be charged twice."
+          body={`This usually takes a few seconds. ${TRANSFER_SLOWER} You can leave this page: it won't affect your payment, and you won't be charged twice.`}
         />
       </div>
     </Shell>
   );
 }
 
-export function PaymentStillPending({ payment, back }: { payment: PaymentStatus; back: string }) {
+export function PaymentStillPending({
+  payment,
+  back,
+  onCheckAgain,
+  checking,
+}: {
+  payment: PaymentStatus;
+  back: string;
+  /** Ask again after the page has stopped asking on its own. */
+  onCheckAgain?: () => void;
+  checking?: boolean;
+}) {
   const kind = payment.kind;
   return (
     <Shell>
@@ -306,13 +325,20 @@ export function PaymentStillPending({ payment, back }: { payment: PaymentStatus;
         <Heading
           eyebrow="Still confirming"
           title="Your bank hasn't confirmed this yet"
-          body={`If you were charged, your ${WHAT[kind]} will show as paid automatically and we'll let you know. Please don't pay again.`}
+          body={`${TRANSFER_SLOWER} If you were charged, your ${WHAT[kind]} will show as paid automatically and we'll let you know. Please don't pay again.`}
         />
       </div>
       <AttemptSummary payment={payment} />
-      <Button href={back} variant="outline" className="w-full">
-        Back to GetRentos
-      </Button>
+      <div className="flex flex-col gap-2 sm:flex-row">
+        {onCheckAgain && (
+          <Button onClick={onCheckAgain} isLoading={checking} className="w-full sm:flex-1">
+            Check again
+          </Button>
+        )}
+        <Button href={back} variant="outline" className="w-full sm:flex-1">
+          Back to GetRentos
+        </Button>
+      </div>
     </Shell>
   );
 }
@@ -325,12 +351,48 @@ export function PaymentFailed({ payment, back }: { payment: PaymentStatus; back:
         <Heading
           eyebrow="Payment not completed"
           title="This payment didn't go through"
-          body="Nothing was taken for this attempt. You can try again, or choose another way to pay."
+          body={FAILED_BODY}
         />
       </div>
       <AttemptSummary payment={payment} />
       <Button href={back} className="w-full">
         Try again
+      </Button>
+    </Shell>
+  );
+}
+
+/**
+ * The status could not be fetched (often a flaky connection on the way back
+ * from the bank): not the same as "no such payment", so offer a retry and
+ * show the reference to quote.
+ */
+export function PaymentLookupFailed({
+  reference,
+  onRetry,
+  retrying,
+}: {
+  reference: string;
+  onRetry: () => void;
+  retrying?: boolean;
+}) {
+  return (
+    <Shell>
+      <PageErrorState
+        className="min-h-0"
+        title="We couldn't check this payment"
+        description="Check your connection and try again. If you were charged, it will show on your account once it's confirmed, so please don't pay again."
+        onRetry={onRetry}
+        isRetrying={retrying}
+      />
+      <Card className="px-5 py-1">
+        <DescriptionList
+          layout="rows"
+          items={[{ label: 'Reference', value: <Reference value={reference} /> }]}
+        />
+      </Card>
+      <Button href="/" variant="outline" className="w-full">
+        Back to GetRentos
       </Button>
     </Shell>
   );

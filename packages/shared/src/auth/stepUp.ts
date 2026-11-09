@@ -32,11 +32,14 @@ export const TRANSACTION_PIN_LENGTH = 6;
 /** What the confirm dialog is asked for: the challenge the API raised, when there was one. */
 export interface StepUpRequest {
   challengeId?: string;
+  /** What the request being confirmed does, when the caller said (UX-30). */
+  summary?: string | null;
 }
 
 type Handler = (request: StepUpRequest) => Promise<string | null>;
 
 let handler: Handler | null = null;
+let summaries: string[] = [];
 let cached: { token: string; expiresAt: number } | null = null;
 let inFlight: Promise<string | null> | null = null;
 
@@ -72,9 +75,12 @@ export async function obtainStepUpToken(challengeId?: string): Promise<string | 
   if (!handler) return null;
   if (challengeId) {
     const ask = handler;
+    // Captured now: by the time a queued prompt opens, other requests may have
+    // pushed their own summaries.
+    const summary = currentStepUpSummary();
     const turn = (inFlight ?? Promise.resolve(null))
       .catch(() => null)
-      .then(() => ask({ challengeId }));
+      .then(() => ask({ challengeId, summary }));
     inFlight = turn.finally(() => {
       if (inFlight === turn) inFlight = null;
     });
@@ -83,7 +89,7 @@ export async function obtainStepUpToken(challengeId?: string): Promise<string | 
   const existing = currentStepUpToken();
   if (existing) return existing;
   const ask = handler;
-  inFlight ??= ask({}).finally(() => {
+  inFlight ??= ask({ summary: currentStepUpSummary() }).finally(() => {
     inFlight = null;
   });
   return inFlight;
@@ -93,6 +99,26 @@ export async function obtainStepUpToken(challengeId?: string): Promise<string | 
 export function stepUpChallengeId(err: unknown): string | undefined {
   const details = (err as { details?: { challengeId?: unknown } } | null)?.details;
   return typeof details?.challengeId === 'string' ? details.challengeId : undefined;
+}
+
+/** The newest summary set by `withStepUpSummary`, or null. */
+export function currentStepUpSummary(): string | null {
+  return summaries.length ? summaries[summaries.length - 1] : null;
+}
+
+/**
+ * Runs a sensitive request with a one-line summary of what it does, e.g.
+ * "Withdraw ₦250,000 to GTBank ••••1234", so a "Confirm it's you" prompt it
+ * triggers can say what is being authorised rather than only that something is.
+ */
+export async function withStepUpSummary<T>(summary: string, fn: () => Promise<T>): Promise<T> {
+  summaries = [...summaries, summary];
+  try {
+    return await fn();
+  } finally {
+    const i = summaries.lastIndexOf(summary);
+    if (i >= 0) summaries = [...summaries.slice(0, i), ...summaries.slice(i + 1)];
+  }
 }
 
 export function isStepUpRequired(err: unknown): boolean {

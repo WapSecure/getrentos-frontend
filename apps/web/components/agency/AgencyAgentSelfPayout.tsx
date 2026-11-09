@@ -13,6 +13,22 @@ import {
   PayoutHoldNotice,
 } from '@/components/shared/payouts/PayoutHoldNotice';
 import { BankAccountFields } from '@/components/shared/payouts/BankAccountFields';
+import { PayoutRowDetails } from '@/components/shared/payouts/PayoutRowDetails';
+import {
+  INCOMPLETE_ACCOUNT_LOOKUP,
+  lookupAllowsSave,
+  payoutAccountLabel,
+  payoutAccountStepUpSummary,
+  saveAccountLabel,
+  withStepUpSummary,
+  type AccountLookup,
+} from '@getrentos/shared';
+
+/** The agent payout API sends its status in lower case ("success"); the firm's in upper. */
+function payoutState(status: string): 'paid' | 'failed' | 'pending' {
+  const s = status.toUpperCase();
+  return s === 'SUCCESS' ? 'paid' : s === 'FAILED' ? 'failed' : 'pending';
+}
 
 /**
  * An agency agent's own side of per-agent payouts: what they've earned from the
@@ -36,6 +52,7 @@ export function AgencyAgentSelfPayout({
   const [editingAccount, setEditingAccount] = useState(false);
   const [bankCode, setBankCode] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
+  const [lookup, setLookup] = useState<AccountLookup>(INCOMPLETE_ACCOUNT_LOOKUP);
   const toast = useToast();
   const notify =
     onToast ?? ((message: string, variant: ToastVariant) => toast.show(message, variant));
@@ -55,7 +72,14 @@ export function AgencyAgentSelfPayout({
 
   const saveAccount = useMutation({
     mutationFn: () =>
-      unwrap(agencyCommissionService.saveMyAgentAccount({ bankCode, accountNumber })),
+      withStepUpSummary(
+        payoutAccountStepUpSummary({
+          bankName: lookup.bankName,
+          accountNumber,
+          accountName: lookup.accountName,
+        }),
+        () => unwrap(agencyCommissionService.saveMyAgentAccount({ bankCode, accountNumber }))
+      ),
     onSuccess: () => {
       setEditingAccount(false);
       setBankCode('');
@@ -71,7 +95,8 @@ export function AgencyAgentSelfPayout({
   const account = myAccountQuery.data;
   const summary = mySummaryQuery.data;
   const myPayouts = (myPayoutsQuery.data ?? []).slice(0, 5);
-  const canSave = bankCode.trim().length >= 3 && accountNumber.trim().length === 10;
+  // The bank's name for the account comes back before saving (UX-28).
+  const canSave = lookupAllowsSave(lookup);
 
   // Outside the agency portal, only agency members (or agents still owed a share) see this.
   if (standalone && !(summary?.agencyName || (summary?.earned ?? 0) > 0)) return null;
@@ -117,29 +142,35 @@ export function AgencyAgentSelfPayout({
         )}
         {myPayouts.length > 0 && (
           <ul className="mt-4 divide-y divide-border/60 border-t border-border/60 text-sm">
-            {myPayouts.map((p) => (
-              <li key={p.id} className="flex items-center justify-between gap-3 py-2">
-                <span className="text-muted-foreground">{formatDate(p.paidAt ?? p.createdAt)}</span>
-                <span className="flex items-center gap-2">
-                  <span className="font-medium text-foreground">{formatCurrency(p.amount)}</span>
-                  <Badge
-                    variant={
-                      p.status === 'SUCCESS'
-                        ? 'success'
-                        : p.status === 'FAILED'
-                          ? 'danger'
-                          : 'neutral'
-                    }
-                  >
-                    {p.status === 'SUCCESS'
-                      ? 'Paid'
-                      : p.status === 'FAILED'
-                        ? 'Failed'
-                        : 'Processing'}
-                  </Badge>
-                </span>
-              </li>
-            ))}
+            {myPayouts.map((p) => {
+              const state = payoutState(p.status);
+              return (
+                <li key={p.id} className="py-2">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-muted-foreground">
+                      Requested {formatDate(p.createdAt)}
+                    </span>
+                    <span className="flex items-center gap-2">
+                      <span className="font-medium text-foreground">
+                        {formatCurrency(p.amount)}
+                      </span>
+                      <Badge
+                        variant={
+                          state === 'paid' ? 'success' : state === 'failed' ? 'danger' : 'neutral'
+                        }
+                      >
+                        {state === 'paid' ? 'Paid' : state === 'failed' ? 'Failed' : 'Processing'}
+                      </Badge>
+                    </span>
+                  </div>
+                  <PayoutRowDetails
+                    state={state}
+                    paidAt={p.paidAt}
+                    failureReason={p.failureReason}
+                  />
+                </li>
+              );
+            })}
           </ul>
         )}
       </Card>
@@ -157,7 +188,7 @@ export function AgencyAgentSelfPayout({
         ) : !editingAccount && account?.verified ? (
           <div className="mt-3">
             <p className="text-sm text-foreground">
-              {account.bankName || 'Bank'} · {account.accountNumber}
+              {payoutAccountLabel({ ...account, bankName: account.bankName || 'Bank' })}
             </p>
             {account.accountName && (
               <p className="text-xs text-muted-foreground">{account.accountName}</p>
@@ -176,14 +207,18 @@ export function AgencyAgentSelfPayout({
               onBankCode={setBankCode}
               accountNumber={accountNumber}
               onAccountNumber={setAccountNumber}
+              onLookup={setLookup}
             />
+            {account?.verified && (
+              <p className="text-xs text-muted-foreground">{PAYOUT_CHANGE_COOLDOWN_HINT}</p>
+            )}
             <div className="flex gap-2">
               <Button
                 onClick={() => saveAccount.mutate()}
                 disabled={!canSave}
                 isLoading={saveAccount.isPending}
               >
-                Save account
+                {saveAccountLabel(lookup, 'Save account')}
               </Button>
               {account?.verified && (
                 <Button

@@ -28,7 +28,7 @@ const steps = [
     icon: TrendingUp,
     title: 'Build your trust score',
     description:
-      'On-time installments count toward your GetRentos Trust Score, just like rent payments.',
+      'On-time instalments count toward your GetRentos Trust Score, just like rent payments.',
   },
 ];
 
@@ -56,7 +56,7 @@ export const FinancingEligibilityCard = ({
           </h1>
           <p className="text-sm text-muted-foreground mt-2 max-w-lg">
             Landlords in Nigeria often ask for 12 months upfront. GetRentos Flex pays them the full
-            amount today, and you repay us in smaller monthly installments.
+            amount today, and you repay us in smaller monthly instalments.
           </p>
         </div>
 
@@ -119,7 +119,7 @@ export const FinancingEligibilityCard = ({
         <ShieldCheck className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
         <p className="text-xs text-muted-foreground">
           GetRentos Flex is not a loan against your future income: it&apos;s a rent-specific
-          installment plan tied to your existing lease. Missed installments affect your Trust Score
+          instalment plan tied to your existing lease. Missed instalments affect your Trust Score
           the same way a missed rent payment would.
         </p>
       </div>

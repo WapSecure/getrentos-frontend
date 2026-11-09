@@ -43,7 +43,7 @@ export const PaymentSchedule = ({
 
       {summary.overdueCount > 0 && (
         <Alert variant="danger" icon={AlertTriangle}>
-          {summary.overdueCount} installment{summary.overdueCount === 1 ? ' is' : 's are'} overdue:{' '}
+          {summary.overdueCount} instalment{summary.overdueCount === 1 ? ' is' : 's are'} overdue:{' '}
           {formatCurrency(summary.overdueAmount)} including late fees. Pay now to avoid default.
         </Alert>
       )}
@@ -54,7 +54,7 @@ export const PaymentSchedule = ({
           <thead className="bg-secondary/60 text-left text-xs text-muted-foreground">
             <tr>
               <th scope="col" className="px-3 py-2 font-medium">
-                Installment
+                Instalment
               </th>
               <th scope="col" className="px-3 py-2 font-medium">
                 Due
@@ -120,8 +120,8 @@ export const PaymentSchedule = ({
       </div>
       {installments.length === 1 && installments[0].sequence === 0 && (
         <p className="text-xs text-muted-foreground">
-          The monthly schedule is built when the deposit is paid; the first installment falls a
-          month later.
+          The monthly schedule is built when the deposit is paid; the first instalment falls a month
+          later.
         </p>
       )}
     </div>

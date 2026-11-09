@@ -24,6 +24,16 @@ import { StarRating } from '@/components/landlord/vendors/StarRating';
 import { formatVisit } from '@/components/landlord/vendors/VendorCard';
 import type { Vendor, VendorJob } from '@/types/landlord';
 import { BankAccountFields } from '@/components/shared/payouts/BankAccountFields';
+import {
+  INCOMPLETE_ACCOUNT_LOOKUP,
+  PAYOUT_CHANGE_COOLDOWN_HINT,
+  lookupAllowsSave,
+  payoutAccountLabel,
+  payoutAccountStepUpSummary,
+  saveAccountLabel,
+  withStepUpSummary,
+  type AccountLookup,
+} from '@getrentos/shared';
 
 interface VendorDetailModalProps {
   vendor: Vendor | null;
@@ -62,6 +72,7 @@ export const VendorDetailModal = ({ vendor, onClose }: VendorDetailModalProps) =
   const planGate = usePlanGateModal();
   const [bankCode, setBankCode] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
+  const [lookup, setLookup] = useState<AccountLookup>(INCOMPLETE_ACCOUNT_LOOKUP);
   const [payoutError, setPayoutError] = useState<string | null>(null);
 
   const { data, isPending, isError } = useQuery({
@@ -78,11 +89,20 @@ export const VendorDetailModal = ({ vendor, onClose }: VendorDetailModalProps) =
 
   const savePayoutAccount = useMutation({
     mutationFn: () =>
-      unwrap(
-        homeManagementService.updateVendorPayoutAccount(vendor?.id ?? '', {
-          bankCode,
+      withStepUpSummary(
+        payoutAccountStepUpSummary({
+          bankName: lookup.bankName,
           accountNumber,
-        })
+          accountName: lookup.accountName,
+          owner: vendor?.name ? `${vendor.name}’s` : 'this vendor’s',
+        }),
+        () =>
+          unwrap(
+            homeManagementService.updateVendorPayoutAccount(vendor?.id ?? '', {
+              bankCode,
+              accountNumber,
+            })
+          )
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -99,7 +119,8 @@ export const VendorDetailModal = ({ vendor, onClose }: VendorDetailModalProps) =
 
   if (!vendor) return null;
   const current = data?.vendor ?? vendor;
-  const canSavePayoutAccount = bankCode.trim().length >= 3 && accountNumber.trim().length === 10;
+  // The bank's name for the account comes back before saving (UX-28).
+  const canSavePayoutAccount = lookupAllowsSave(lookup);
 
   const stats = [
     { label: 'Jobs completed', value: String(current.jobsCompleted) },
@@ -225,8 +246,7 @@ export const VendorDetailModal = ({ vendor, onClose }: VendorDetailModalProps) =
               {payoutAccount?.accountNumber && (
                 <Card className="p-3 mb-3">
                   <p className="text-sm font-medium text-foreground">
-                    {payoutAccount.bankName} · {payoutAccount.accountNumber} ·{' '}
-                    {payoutAccount.accountName}
+                    {payoutAccountLabel(payoutAccount)} · {payoutAccount.accountName}
                   </p>
                   {payoutAccount.verified ? (
                     <div className="flex items-center gap-2 mt-2">
@@ -240,6 +260,9 @@ export const VendorDetailModal = ({ vendor, onClose }: VendorDetailModalProps) =
                       Not yet verified: save it again to resolve it against the bank.
                     </p>
                   )}
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    {PAYOUT_CHANGE_COOLDOWN_HINT}
+                  </p>
                 </Card>
               )}
 
@@ -250,13 +273,14 @@ export const VendorDetailModal = ({ vendor, onClose }: VendorDetailModalProps) =
                   onBankCode={setBankCode}
                   accountNumber={accountNumber}
                   onAccountNumber={setAccountNumber}
+                  onLookup={setLookup}
                 />
               </div>
 
               <div className="mt-3 space-y-2">
                 {payoutError && <Alert variant="danger">{payoutError}</Alert>}
                 <SaveButton
-                  label="Save payout account"
+                  label={saveAccountLabel(lookup, 'Save payout account')}
                   disabled={!canSavePayoutAccount}
                   onClick={() => (canSavePayoutAccount ? savePayoutAccount.mutateAsync() : false)}
                 />

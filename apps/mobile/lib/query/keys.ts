@@ -226,6 +226,10 @@ export const qk = {
     applications: ['renter', 'applications'] as const,
     lease: ['renter', 'lease'] as const,
     payments: (page = 1, pageSize = 20) => ['renter', 'payments', { page, pageSize }] as const,
+    /** Every renter payment-list query: invalidating it refreshes paged and endless lists alike. */
+    paymentsAll: ['renter', 'payments'] as const,
+    /** The payments screen's endless history, loaded page by page. */
+    paymentsHistory: ['renter', 'payments', 'history'] as const,
     notifications: (page = 1, pageSize = 20) =>
       ['renter', 'notifications', { page, pageSize }] as const,
     recommended: ['renter', 'recommended'] as const,

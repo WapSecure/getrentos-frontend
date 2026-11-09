@@ -24,17 +24,34 @@ import {
 import { formatDay } from '@/lib/api/agency';
 import { errorMessage } from '@/lib/api/client';
 import { BankAccountFields } from '@/components/forms/BankAccountFields';
+import { PayoutCooldownHint, PayoutHoldNotice } from '@/components/payouts/PayoutHoldNotice';
+import { PayoutRowDetails } from '@/components/payouts/PayoutRowDetails';
 import { formatNaira } from '@/lib/format';
+import { withStepUpSummary } from '@/lib/stepUp';
+import {
+  INCOMPLETE_ACCOUNT_LOOKUP,
+  lookupAllowsSave,
+  payoutAccountLabel,
+  payoutAccountStepUpSummary,
+  saveAccountLabel,
+  type AccountLookup,
+} from '@getrentos/shared';
 
+/** Upper-cases a payout status: an agent's own payouts arrive in lower case. */
+function payoutKey(status: string): 'PENDING' | 'SUCCESS' | 'FAILED' {
+  const s = status.toUpperCase();
+  return s === 'SUCCESS' || s === 'FAILED' ? s : 'PENDING';
+}
 
 /** Recent payouts, newest first. */
 export function History({ items }: { items: PayoutRecord[] }) {
-  const { colors, spacing } = useTheme();
+  const { spacing } = useTheme();
   if (!items.length) return null;
   return (
     <View style={{ gap: spacing.sm }}>
       {items.map((p, i) => {
-        const s = PAYOUT_STATUS[p.status] ?? PAYOUT_STATUS.PENDING;
+        const key = payoutKey(p.status);
+        const s = PAYOUT_STATUS[key];
         return (
           <View key={p.id ?? `${p.createdAt}-${i}`} style={{ gap: 2 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
@@ -42,13 +59,13 @@ export function History({ items }: { items: PayoutRecord[] }) {
               <Badge label={s.label} tone={s.tone} />
             </View>
             <Text variant="caption" color="mutedForeground">
-              {formatDay(p.createdAt)}
+              Requested {formatDay(p.createdAt)}
             </Text>
-            {p.status === 'FAILED' && p.failureReason ? (
-              <Text variant="caption" style={{ color: colors.destructive }}>
-                {p.failureReason}
-              </Text>
-            ) : null}
+            <PayoutRowDetails
+              state={key === 'SUCCESS' ? 'paid' : key === 'FAILED' ? 'failed' : 'pending'}
+              paidAt={p.paidAt}
+              failureReason={p.failureReason}
+            />
           </View>
         );
       })}
@@ -63,28 +80,24 @@ export function AccountForm({
   saving,
 }: {
   account: PayoutAccount | null;
-  onSave: (bankCode: string, accountNumber: string) => void;
+  /** `summary` says what the "confirm it's you" step authorises; run the save inside it. */
+  onSave: (bankCode: string, accountNumber: string, summary: string) => void;
   saving: boolean;
 }) {
   const { spacing } = useTheme();
   const [editing, setEditing] = useState(!hasAccount(account));
-  // Captured once: render must not read the clock.
-  const [now] = useState(() => Date.now());
   const [bankCode, setBankCode] = useState(account?.bankCode ?? '');
   const [accountNumber, setAccountNumber] = useState('');
+  const [lookup, setLookup] = useState<AccountLookup>(INCOMPLETE_ACCOUNT_LOOKUP);
   const problem = bankProblem(bankCode, accountNumber);
   if (!editing && account) {
     return (
       <View style={{ gap: spacing.xs }}>
         <Text variant="callout">
-          {account.bankName ?? account.bankCode} · {account.accountNumber}
+          {payoutAccountLabel({ ...account, bankName: account.bankName ?? account.bankCode })}
           {account.accountName ? ` · ${account.accountName}` : ''}
         </Text>
-        {account.payoutHoldUntil && Date.parse(account.payoutHoldUntil) > now ? (
-          <Text variant="caption" color="mutedForeground">
-            New details: payouts to this account start after {formatDay(account.payoutHoldUntil)}.
-          </Text>
-        ) : null}
+        <PayoutHoldNotice holdUntil={account.payoutHoldUntil} />
         <Button
           label="Change account"
           size="sm"
@@ -102,22 +115,30 @@ export function AccountForm({
         onBankCode={setBankCode}
         accountNumber={accountNumber}
         onAccountNumber={setAccountNumber}
+        onLookup={setLookup}
       />
-      <Text variant="caption" color="mutedForeground">
-        Changing your bank details pauses payouts to the new account for 24 hours, and we’ll email
-        you about it.
-      </Text>
+      <PayoutCooldownHint />
       {problem && (bankCode || accountNumber) ? (
         <Text variant="caption" color="mutedForeground">
           {problem}
         </Text>
       ) : null}
       <Button
-        label="Save account"
+        label={saveAccountLabel(lookup, 'Save account')}
         size="sm"
         loading={saving}
-        disabled={!!problem || saving}
-        onPress={() => onSave(bankCode.trim(), accountNumber.trim())}
+        disabled={!!problem || !lookupAllowsSave(lookup) || saving}
+        onPress={() =>
+          onSave(
+            bankCode.trim(),
+            accountNumber.trim(),
+            payoutAccountStepUpSummary({
+              bankName: lookup.bankName,
+              accountNumber,
+              accountName: lookup.accountName,
+            })
+          )
+        }
       />
     </View>
   );
@@ -142,8 +163,16 @@ export function MyPayout({
   const { spacing } = useTheme();
   const toast = useToast();
   const save = useMutation({
-    mutationFn: ({ bankCode, accountNumber }: { bankCode: string; accountNumber: string }) =>
-      agencyFirmApi.setMyPayoutAccount(bankCode, accountNumber),
+    mutationFn: ({
+      bankCode,
+      accountNumber,
+      summary,
+    }: {
+      bankCode: string;
+      accountNumber: string;
+      summary: string;
+    }) =>
+      withStepUpSummary(summary, () => agencyFirmApi.setMyPayoutAccount(bankCode, accountNumber)),
     onSuccess: () => {
       onChanged();
       toast.show('Your payout account is saved.', 'success');
@@ -176,7 +205,9 @@ export function MyPayout({
         key={account?.accountNumber ?? 'none'}
         account={hasAccount(account) ? account : null}
         saving={save.isPending}
-        onSave={(bankCode, accountNumber) => save.mutate({ bankCode, accountNumber })}
+        onSave={(bankCode, accountNumber, summary) =>
+          save.mutate({ bankCode, accountNumber, summary })
+        }
       />
       <History items={history.slice(0, 5)} />
     </Card>

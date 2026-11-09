@@ -32,6 +32,19 @@ import { PayoutHeldNotice } from '@/components/shared/financials/PayoutHeldNotic
 import { StatementDisputeSection } from '@/components/shared/financials/StatementDisputeSection';
 import type { EstateStatement } from '@/types/estate';
 import { BankAccountFields } from '@/components/shared/payouts/BankAccountFields';
+import {
+  PAYOUT_CHANGE_COOLDOWN_HINT,
+  PayoutHoldNotice,
+} from '@/components/shared/payouts/PayoutHoldNotice';
+import {
+  INCOMPLETE_ACCOUNT_LOOKUP,
+  lookupAllowsSave,
+  payoutAccountLabel,
+  payoutAccountStepUpSummary,
+  saveAccountLabel,
+  withStepUpSummary,
+  type AccountLookup,
+} from '@getrentos/shared';
 
 type GenerateForm = { periodStart: string; periodEnd: string };
 const initialForm: GenerateForm = { periodStart: '', periodEnd: '' };
@@ -401,6 +414,7 @@ export function EstatePayoutAccountCard({ estateId }: { estateId: string }) {
   const toast = useToast();
   const [bankCode, setBankCode] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
+  const [lookup, setLookup] = useState<AccountLookup>(INCOMPLETE_ACCOUNT_LOOKUP);
   const [registrationNumber, setRegistrationNumber] = useState('');
   const [businessType, setBusinessType] = useState<AgencyBusinessType | ''>('');
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -410,17 +424,26 @@ export function EstatePayoutAccountCard({ estateId }: { estateId: string }) {
     queryFn: () => unwrap(estateService.getPayoutAccount(estateId)),
   });
 
-  const canSave = bankCode.trim().length >= 3 && accountNumber.trim().length === 10;
+  // The bank's name for the account comes back before saving (UX-28).
+  const canSave = lookupAllowsSave(lookup);
 
   const save = useMutation({
     mutationFn: () =>
-      unwrap(
-        estateService.updatePayoutAccount(estateId, {
-          bankCode,
+      withStepUpSummary(
+        payoutAccountStepUpSummary({
+          bankName: lookup.bankName,
           accountNumber,
-          registrationNumber: registrationNumber.trim() || undefined,
-          businessType: businessType || undefined,
-        })
+          accountName: lookup.accountName,
+        }),
+        () =>
+          unwrap(
+            estateService.updatePayoutAccount(estateId, {
+              bankCode,
+              accountNumber,
+              registrationNumber: registrationNumber.trim() || undefined,
+              businessType: businessType || undefined,
+            })
+          )
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: estateKeys.payoutAccount(estateId) });
@@ -446,7 +469,7 @@ export function EstatePayoutAccountCard({ estateId }: { estateId: string }) {
       {account?.accountNumber && (
         <div className="rounded-lg border border-border p-3 mb-4">
           <p className="text-sm font-medium text-foreground">
-            {account.bankName} · {account.accountNumber} · {account.accountName}
+            {payoutAccountLabel(account)} · {account.accountName}
           </p>
           {account.verified ? (
             <Badge variant="success" className="mt-2">
@@ -457,6 +480,10 @@ export function EstatePayoutAccountCard({ estateId }: { estateId: string }) {
               Not yet verified: save it again to resolve it against the bank.
             </p>
           )}
+          <PayoutHoldNotice holdUntil={account.payoutHoldUntil} />
+          <p className="mt-2 text-xs text-muted-foreground">
+            To change it, enter new details below and save. {PAYOUT_CHANGE_COOLDOWN_HINT}
+          </p>
         </div>
       )}
 
@@ -467,6 +494,7 @@ export function EstatePayoutAccountCard({ estateId }: { estateId: string }) {
           onBankCode={setBankCode}
           accountNumber={accountNumber}
           onAccountNumber={setAccountNumber}
+          onLookup={setLookup}
         />
         <Field
           label="CAC number"
@@ -504,7 +532,7 @@ export function EstatePayoutAccountCard({ estateId }: { estateId: string }) {
           loadingText="Saving…"
           onClick={() => save.mutate()}
         >
-          Update payout account
+          {saveAccountLabel(lookup, 'Update payout account')}
         </Button>
       </div>
     </Card>

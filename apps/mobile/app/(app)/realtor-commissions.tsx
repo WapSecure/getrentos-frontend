@@ -25,9 +25,27 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
-import { realtorApi, type RealtorPayout, type RealtorPayoutSummary } from '@/lib/api/realtor';
+import {
+  realtorApi,
+  type RealtorPayout,
+  type RealtorPayoutAccount,
+  type RealtorPayoutSummary,
+} from '@/lib/api/realtor';
 import { errorMessage } from '@/lib/api/client';
-import { BankAccountFields, accountNumberOk } from '@/components/forms/BankAccountFields';
+import { BankAccountFields } from '@/components/forms/BankAccountFields';
+import { PayoutCooldownHint, PayoutHoldNotice } from '@/components/payouts/PayoutHoldNotice';
+import { withStepUpSummary } from '@/lib/stepUp';
+import {
+  INCOMPLETE_ACCOUNT_LOOKUP,
+  PAYOUT_ARRIVAL_NOTE,
+  PAYOUT_FAILED_NEXT_STEP,
+  lookupAllowsSave,
+  maskAccountNumber,
+  payoutAccountStepUpSummary,
+  saveAccountLabel,
+  withdrawStepUpSummary,
+  type AccountLookup,
+} from '@getrentos/shared';
 import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { withdrawBlocker } from '@/lib/withdrawal';
@@ -142,7 +160,7 @@ export default function RealtorCommissions() {
                     accessibilityRole="button"
                     accessibilityLabel={
                       account.data
-                        ? `${account.data.bankName}, ${account.data.accountNumber}, ${account.data.accountName}. Change`
+                        ? `${account.data.bankName}, account ending ${maskAccountNumber(account.data.accountNumber).replace(/\D/g, '')}, ${account.data.accountName}. Change`
                         : 'Add a payout account'
                     }
                   >
@@ -158,8 +176,10 @@ export default function RealtorCommissions() {
                           <>
                             <Text variant="bodyStrong">{account.data.bankName}</Text>
                             <Text variant="caption" color="mutedForeground">
-                              {account.data.accountNumber} · {account.data.accountName}
+                              {maskAccountNumber(account.data.accountNumber)} ·{' '}
+                              {account.data.accountName}
                             </Text>
+                            <PayoutHoldNotice holdUntil={account.data.payoutHoldUntil} />
                           </>
                         ) : (
                           <Text variant="bodyStrong">Add where commission is paid</Text>
@@ -241,14 +261,21 @@ function Withdraw({ s, onSetAccount }: { s: RealtorPayoutSummary; onSetAccount: 
   const qc = useQueryClient();
   const toast = useToast();
   const withdraw = useMutation({
-    mutationFn: realtorApi.withdraw,
+    mutationFn: () =>
+      withStepUpSummary(
+        withdrawStepUpSummary(
+          naira(s.available),
+          qc.getQueryData<RealtorPayoutAccount | null>(qk.realtor.payoutAccount)
+        ),
+        () => realtorApi.withdraw()
+      ),
     onSuccess: (p) => {
       void haptics.success();
       qc.invalidateQueries({ queryKey: ['realtor'] });
       toast.show(
         p.status === 'failed'
-          ? 'The bank didn’t accept that payout. Support will retry it to your account.'
-          : `${naira(p.amount)} is on its way to your bank.`,
+          ? `The bank didn’t accept that payout. ${PAYOUT_FAILED_NEXT_STEP}`
+          : `${naira(p.amount)} is on its way to your bank. ${PAYOUT_ARRIVAL_NOTE}`,
         p.status === 'failed' ? 'error' : 'success'
       );
     },
@@ -291,7 +318,7 @@ function Withdraw({ s, onSetAccount }: { s: RealtorPayoutSummary; onSetAccount: 
           disabled={s.available <= 0}
           loading={withdraw.isPending}
           onPress={() =>
-            Alert.alert(`Withdraw ${naira(s.available)}?`, 'It usually lands the same day.', [
+            Alert.alert(`Withdraw ${naira(s.available)}?`, PAYOUT_ARRIVAL_NOTE, [
               { text: 'Not now', style: 'cancel' },
               { text: 'Withdraw', onPress: () => withdraw.mutate() },
             ])
@@ -390,9 +417,18 @@ function AccountForm({ onDone }: { onDone: () => void }) {
   const toast = useToast();
   const [bankCode, setBankCode] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
+  const [lookup, setLookup] = useState<AccountLookup>(INCOMPLETE_ACCOUNT_LOOKUP);
   // Behind "confirm it's you": apiFetch prompts for it automatically.
   const save = useMutation({
-    mutationFn: () => realtorApi.savePayoutAccount(bankCode, accountNumber),
+    mutationFn: () =>
+      withStepUpSummary(
+        payoutAccountStepUpSummary({
+          bankName: lookup.bankName,
+          accountNumber,
+          accountName: lookup.accountName,
+        }),
+        () => realtorApi.savePayoutAccount(bankCode, accountNumber)
+      ),
     onSuccess: (a) => {
       void haptics.success();
       qc.setQueryData(qk.realtor.payoutAccount, a);
@@ -408,16 +444,15 @@ function AccountForm({ onDone }: { onDone: () => void }) {
         onBankCode={setBankCode}
         accountNumber={accountNumber}
         onAccountNumber={setAccountNumber}
+        onLookup={setLookup}
       />
-      <Text variant="caption" color="mutedForeground">
-        We check the name on the account with your bank
-      </Text>
+      <PayoutCooldownHint />
       {save.error ? (
         <FormAlert message={errorMessage(save.error, 'We couldn’t check that account.')} />
       ) : null}
       <Button
-        label="Save payout account"
-        disabled={!bankCode || !accountNumberOk(accountNumber)}
+        label={saveAccountLabel(lookup, 'Save payout account')}
+        disabled={!lookupAllowsSave(lookup)}
         loading={save.isPending}
         onPress={() => save.mutate()}
       />

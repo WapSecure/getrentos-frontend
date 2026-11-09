@@ -38,7 +38,7 @@ interface MakeOfferModalProps {
 const financingOptions: { value: FinancingType; label: string }[] = [
   { value: 'cash', label: 'Cash' },
   { value: 'mortgage', label: 'Mortgage' },
-  { value: 'installment', label: 'Installment' },
+  { value: 'installment', label: 'Instalment' },
 ];
 const LISTING_PAGE_SIZE = 10;
 /** Matches the backend default when the buyer leaves the deposit blank. */

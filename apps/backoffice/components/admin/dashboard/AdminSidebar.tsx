@@ -57,6 +57,7 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import { ROUTES, unwrap } from '@getrentos/shared';
+import { SidebarRailToggle, useSidebarRail } from '@getrentos/ui';
 import { hasAdminPermission, hasStaffAccess } from '@/lib/adminAccess';
 import type { AdminPermission } from '@/types/admin';
 
@@ -571,10 +572,10 @@ function AdminNavigationGroup({
             className="sidebar-item"
           >
             <item.icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-            <span className="min-w-0 truncate">{item.label}</span>
+            <span className="sidebar-item-label min-w-0 truncate">{item.label}</span>
             {item.href === MANAGED_HREF && managedWaiting > 0 && (
               <span
-                className="ml-auto inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground"
+                className="sidebar-item-extra ml-auto inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground"
                 aria-label={`${managedWaiting} waiting`}
               >
                 {managedWaiting}
@@ -637,35 +638,67 @@ export const AdminSidebar = ({ roles }: { roles?: string[] }) => {
   });
   const managedWaiting =
     (queueCounts.data?.awaitingActivation ?? 0) + (queueCounts.data?.terminationRequests ?? 0);
-  const mobilePrimaryItems = navGroups[0].items
-    .filter((item) => hasAccess(roles, item))
-    .slice(0, 5);
+  const primaryItems = navGroups[0].items.filter((item) => hasAccess(roles, item));
+  const mobilePrimaryItems = primaryItems.slice(0, 5);
+  const { rail, setRail } = useSidebarRail();
+  // Folded to a rail: the primary queues, plus the current page when it lives
+  // deeper, so "where am I" survives the fold. Everything else is behind Expand.
+  const isCurrent = (item: NavItem) =>
+    pathname === item.href ||
+    (item.href !== ROUTES.ADMIN_DASHBOARD && pathname.startsWith(`${item.href}/`));
+  const railCurrent = primaryItems.some(isCurrent)
+    ? undefined
+    : navGroups
+        .slice(1)
+        .flatMap((group) => group.items)
+        .filter((item) => hasAccess(roles, item) && isCurrent(item))
+        .sort((a, b) => b.href.length - a.href.length)[0];
 
   return (
     <>
-      <aside className="workspace-sidebar fixed bottom-0 left-0 top-16 z-30 hidden w-64 overflow-y-auto border-r border-border lg:block">
-        <nav className="space-y-5 px-3 py-4" aria-label="Administration navigation">
-          <div className="px-3 pb-1">
-            <p className="text-[0.6875rem] font-medium uppercase tracking-[0.08em] text-muted-foreground">
-              Workspace
-            </p>
-            <p className="mt-1 truncate text-sm font-semibold text-foreground">Operations</p>
-          </div>
-          {navGroups.map((group) => {
-            const visibleItems = group.items.filter((item) => hasAccess(roles, item));
-            if (visibleItems.length === 0) return null;
-            return (
-              <AdminNavigationGroup
-                key={group.label}
-                label={group.label}
-                kind={group.kind}
-                items={visibleItems}
-                pathname={pathname}
-                managedWaiting={managedWaiting}
-              />
-            );
-          })}
-        </nav>
+      <aside
+        data-rail={rail || undefined}
+        className={`workspace-sidebar fixed bottom-0 left-0 top-16 z-30 hidden border-r border-border lg:block ${rail ? '' : 'overflow-y-auto'}`}
+      >
+        {rail ? (
+          <nav className="space-y-1 px-3 py-4" aria-label="Administration navigation">
+            <AdminNavigationGroup
+              label="Primary"
+              kind="primary"
+              items={railCurrent ? [...primaryItems, railCurrent] : primaryItems}
+              pathname={pathname}
+              managedWaiting={managedWaiting}
+            />
+            <div className="sidebar-rail-separator" aria-hidden="true" />
+            <SidebarRailToggle rail onToggle={setRail} />
+          </nav>
+        ) : (
+          <nav className="space-y-5 px-3 py-4" aria-label="Administration navigation">
+            <div className="px-3 pb-1">
+              <p className="text-[0.6875rem] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+                Workspace
+              </p>
+              <p className="mt-1 truncate text-sm font-semibold text-foreground">Operations</p>
+            </div>
+            {navGroups.map((group) => {
+              const visibleItems = group.items.filter((item) => hasAccess(roles, item));
+              if (visibleItems.length === 0) return null;
+              return (
+                <AdminNavigationGroup
+                  key={group.label}
+                  label={group.label}
+                  kind={group.kind}
+                  items={visibleItems}
+                  pathname={pathname}
+                  managedWaiting={managedWaiting}
+                />
+              );
+            })}
+            <div className="border-t border-border pt-3">
+              <SidebarRailToggle rail={false} onToggle={setRail} />
+            </div>
+          </nav>
+        )}
       </aside>
       {mobilePrimaryItems.length > 0 && (
         <nav

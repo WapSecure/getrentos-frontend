@@ -17,7 +17,7 @@ const rentStatusConfig = paymentStatusBadges;
  */
 const RENT_LABEL: Record<RentPaymentStatus, string> = {
   paid: 'Rent paid',
-  pending: 'Rent pending',
+  pending: 'Rent due',
   overdue: 'Rent overdue',
   processing: 'Processing',
 };

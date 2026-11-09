@@ -4,6 +4,8 @@ import {
   registerStepUpPrompt,
   rememberStepUpToken,
   currentStepUpToken,
+  currentStepUpSummary,
+  withStepUpSummary,
 } from '@/lib/stepUp';
 
 jest.mock('@/lib/env', () => ({ env: { apiUrl: 'https://api.test', clientApp: 'mobile' } }));
@@ -60,6 +62,21 @@ describe('step-up', () => {
     expect(prompt).not.toHaveBeenCalled();
   });
 
+  it('tells the prompt what is being authorised, then forgets it', async () => {
+    fetchMock
+      .mockResolvedValueOnce(reply(403, { message: 'Confirm it’s you', error: 'STEP_UP_REQUIRED' }))
+      .mockResolvedValueOnce(reply(200, { ok: true }));
+    const prompt = jest.fn().mockResolvedValue('tok-2');
+    registerStepUpPrompt(prompt);
+    await withStepUpSummary('Withdraw ₦250,000 to GTBank ••••1234', () =>
+      apiFetch('/realtor/payouts/request', { method: 'POST' })
+    );
+    expect(prompt).toHaveBeenCalledWith(
+      expect.objectContaining({ summary: 'Withdraw ₦250,000 to GTBank ••••1234' })
+    );
+    expect(currentStepUpSummary()).toBeNull();
+  });
+
   it('forgets a token shortly before it expires', () => {
     rememberStepUpToken('t', 600, 0);
     expect(currentStepUpToken(569_000)).toBe('t');
@@ -82,7 +99,7 @@ describe('step-up', () => {
 
       await apiFetch('/host/shortlets/payouts/request', { method: 'POST', body: {} });
 
-      expect(prompt).toHaveBeenCalledWith({ challengeId: 'ch-1' });
+      expect(prompt).toHaveBeenCalledWith(expect.objectContaining({ challengeId: 'ch-1' }));
       const replay = fetchMock.mock.calls[1][1] as { headers: Record<string, string> };
       expect(replay.headers['x-step-up-token']).toBe('bound-tok');
       // Single-use: nothing cached for the next sensitive request.
@@ -101,7 +118,7 @@ describe('step-up', () => {
       await apiFetch('/a', { method: 'POST', body: { amount: 1 } });
       await apiFetch('/b', { method: 'POST', body: { amount: 2 } });
 
-      expect(prompt.mock.calls).toEqual([[{ challengeId: 'ch-1' }], [{ challengeId: 'ch-2' }]]);
+      expect(prompt.mock.calls.map(([request]) => request.challengeId)).toEqual(['ch-1', 'ch-2']);
     });
   });
 });

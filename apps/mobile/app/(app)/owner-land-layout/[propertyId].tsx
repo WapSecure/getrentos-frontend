@@ -209,7 +209,7 @@ function Setup({
         <Text variant="heading">Sell this land as plots</Text>
       </View>
       <Text variant="callout" color="mutedForeground">
-        Set up an estate layout to sell plots carved from this parcel, on outright or installment
+        Set up an estate layout to sell plots carved from this parcel, on outright or instalment
         plans. GetRentos holds buyers’ payments and pays you as each conveyance step is confirmed.
       </Text>
       {blocker ? (

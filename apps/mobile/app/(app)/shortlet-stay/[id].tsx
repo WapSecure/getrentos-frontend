@@ -94,8 +94,11 @@ export default function StayDetail() {
       closePay();
       if (res.authorizationUrl) {
         await checkout(res.authorizationUrl, res.reference);
+      } else if (res.paymentStatus === 'PAID') {
+        toast.show(`Paid.${res.reference ? ` Reference ${res.reference}.` : ''}`, 'success');
       } else {
-        toast.show('Payment started.', 'success');
+        // Nothing is confirmed yet: say where to look rather than sound like it worked.
+        toast.show('We’re confirming your payment. This booking shows when it’s paid.', 'info');
       }
       refresh();
     },

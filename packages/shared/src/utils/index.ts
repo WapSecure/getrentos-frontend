@@ -19,3 +19,4 @@ export * from './lastApplication';
 export * from './address';
 export * from './csp';
 export * from './photoQuality';
+export * from './payoutAccount';

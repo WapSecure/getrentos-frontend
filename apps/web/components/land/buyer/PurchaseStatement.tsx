@@ -114,8 +114,8 @@ export const PurchaseStatement = ({ purchaseId }: { purchaseId: string }) => {
         </div>
       )}
       <p className="text-xs text-muted-foreground">
-        Balance is what you owe on installments due so far; credit means you paid for an installment
-        before it fell due. Future installments are charged as they fall due. Generated{' '}
+        Balance is what you owe on instalments due so far; credit means you paid for an instalment
+        before it fell due. Future instalments are charged as they fall due. Generated{' '}
         {formatDate(data.generatedAt)}.
       </p>
     </div>

@@ -12,11 +12,11 @@ const Row = ({ label, value, strong }: { label: string; value: string; strong?: 
 /** The plan's terms in plain words. */
 export const planTermsLine = (plan: PublicLandPaymentPlan) =>
   plan.durationMonths === 0
-    ? 'Pay in full to start. No price uplift.'
-    : `${bpsToPercent(plan.initialDepositBps)} deposit, then ${plan.durationMonths} monthly installments. ${
+    ? 'Pay in full to start. No instalment premium.'
+    : `${bpsToPercent(plan.initialDepositBps)} deposit, then ${plan.durationMonths} monthly instalments. ${
         plan.priceUpliftBps
           ? `${bpsToPercent(plan.priceUpliftBps)} added to the plot price.`
-          : 'No price uplift.'
+          : 'No instalment premium.'
       }`;
 
 /**
@@ -47,7 +47,7 @@ export const PaymentPlanCard = ({
           <dl className="mt-1 divide-y divide-border/60 text-sm">
             <Row label="Plot price" value={formatCurrency(worked.plotPrice)} />
             {worked.priceUplift > 0 && (
-              <Row label="Installment uplift" value={formatCurrency(worked.priceUplift)} />
+              <Row label="Instalment premium" value={formatCurrency(worked.priceUplift)} />
             )}
             <Row label="Fees" value={formatCurrency(worked.fees)} />
             <Row label="Total price" value={formatCurrency(worked.totalPrice)} strong />
@@ -73,7 +73,7 @@ export const PaymentPlanCard = ({
         <ul className="mt-2 list-disc space-y-1 pl-4">
           <li>
             {plan.gracePeriodDays} days&apos; grace, then a one-off late fee of{' '}
-            {bpsToPercent(plan.lateFeeBps)} of that installment.
+            {bpsToPercent(plan.lateFeeBps)} of that instalment.
           </li>
           <li>
             {plan.defaultAfterDays} days overdue puts the purchase in default and the developer may

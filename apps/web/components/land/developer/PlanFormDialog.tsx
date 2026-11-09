@@ -68,7 +68,7 @@ const SPECS: NumberSpec[] = [
   },
   {
     key: 'upliftPercent',
-    label: 'Installment premium',
+    label: 'Instalment premium',
     hint: 'Added to the price for paying over time.',
     min: 0,
     max: 100,
@@ -87,7 +87,7 @@ const SPECS: NumberSpec[] = [
   {
     key: 'lateFeePercent',
     label: 'Late fee',
-    hint: 'Charged once on a late installment.',
+    hint: 'Charged once on a late instalment.',
     min: 0,
     max: 20,
     integer: false,

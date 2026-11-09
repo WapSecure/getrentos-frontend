@@ -4,8 +4,16 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button, FormAlert, Text, useTheme, useToast } from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { landlordApi, type PayoutAccount } from '@/lib/api/landlord';
-import { payoutAccountValid } from '@/lib/api/estateGovernance';
+import {
+  INCOMPLETE_ACCOUNT_LOOKUP,
+  lookupAllowsSave,
+  payoutAccountStepUpSummary,
+  saveAccountLabel,
+  type AccountLookup,
+} from '@getrentos/shared';
 import { BankAccountFields } from '@/components/forms/BankAccountFields';
+import { PayoutCooldownHint } from '@/components/payouts/PayoutHoldNotice';
+import { withStepUpSummary } from '@/lib/stepUp';
 import { qk } from '@/lib/query/keys';
 import { haptics } from '@/lib/haptics';
 import { errorMessage } from '@/lib/api/client';
@@ -38,13 +46,22 @@ function PayoutAccountForm({ account, onDone }: { account?: PayoutAccount; onDon
   const toast = useToast();
   const [bankCode, setBankCode] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
+  const [lookup, setLookup] = useState<AccountLookup>(INCOMPLETE_ACCOUNT_LOOKUP);
 
   const save = useMutation({
     mutationFn: () =>
-      landlordApi.updatePayoutAccount({
-        bankCode: bankCode.trim(),
-        accountNumber: accountNumber.trim(),
-      }),
+      withStepUpSummary(
+        payoutAccountStepUpSummary({
+          bankName: lookup.bankName,
+          accountNumber,
+          accountName: lookup.accountName,
+        }),
+        () =>
+          landlordApi.updatePayoutAccount({
+            bankCode: bankCode.trim(),
+            accountNumber: accountNumber.trim(),
+          })
+      ),
     onSuccess: (saved) => {
       void haptics.success();
       qc.setQueryData(qk.landlord.payout, saved);
@@ -71,7 +88,9 @@ function PayoutAccountForm({ account, onDone }: { account?: PayoutAccount; onDon
         onBankCode={setBankCode}
         accountNumber={accountNumber}
         onAccountNumber={setAccountNumber}
+        onLookup={setLookup}
       />
+      {account?.accountNumber ? <PayoutCooldownHint /> : null}
       <Text variant="caption" color="mutedForeground">
         We check the name on the account with the bank. You’ll be asked to confirm it’s you: this
         decides where your rent goes.
@@ -82,8 +101,11 @@ function PayoutAccountForm({ account, onDone }: { account?: PayoutAccount; onDon
         />
       ) : null}
       <Button
-        label={account?.accountNumber ? 'Update payout account' : 'Save payout account'}
-        disabled={!payoutAccountValid(bankCode, accountNumber)}
+        label={saveAccountLabel(
+          lookup,
+          account?.accountNumber ? 'Update payout account' : 'Save payout account'
+        )}
+        disabled={!lookupAllowsSave(lookup)}
         loading={save.isPending}
         onPress={() => save.mutate()}
       />

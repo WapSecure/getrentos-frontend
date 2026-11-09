@@ -23,6 +23,17 @@ import {
 } from '@/components/shared/payouts/PayoutHoldNotice';
 import { BankAccountFields } from '@/components/shared/payouts/BankAccountFields';
 import { payoutDestination } from '@/lib/payoutDestination';
+import { PayoutRowDetails } from '@/components/shared/payouts/PayoutRowDetails';
+import {
+  INCOMPLETE_ACCOUNT_LOOKUP,
+  lookupAllowsSave,
+  payoutAccountLabel,
+  payoutAccountStepUpSummary,
+  saveAccountLabel,
+  withdrawStepUpSummary,
+  withStepUpSummary,
+  type AccountLookup,
+} from '@getrentos/shared';
 
 const PAYOUT_STATUS: Record<string, { label: string; variant: BadgeVariant }> = {
   PENDING: { label: 'Processing', variant: 'info' },
@@ -44,6 +55,7 @@ export function AgencyPayoutSection({
   const [editingAccount, setEditingAccount] = useState(false);
   const [bankCode, setBankCode] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
+  const [lookup, setLookup] = useState<AccountLookup>(INCOMPLETE_ACCOUNT_LOOKUP);
   // Money moves only after the amount and the account it goes to are confirmed.
   const [confirmingWithdraw, setConfirmingWithdraw] = useState(false);
 
@@ -69,7 +81,14 @@ export function AgencyPayoutSection({
 
   const saveAccount = useMutation({
     mutationFn: () =>
-      unwrap(agencyCommissionService.savePayoutAccount({ bankCode, accountNumber })),
+      withStepUpSummary(
+        payoutAccountStepUpSummary({
+          bankName: lookup.bankName,
+          accountNumber,
+          accountName: lookup.accountName,
+        }),
+        () => unwrap(agencyCommissionService.savePayoutAccount({ bankCode, accountNumber }))
+      ),
     onSuccess: () => {
       setEditingAccount(false);
       setBankCode('');
@@ -81,7 +100,11 @@ export function AgencyPayoutSection({
   });
 
   const withdraw = useMutation({
-    mutationFn: () => unwrap(agencyCommissionService.requestPayout()),
+    mutationFn: () =>
+      withStepUpSummary(
+        withdrawStepUpSummary(formatCurrency(summaryQuery.data?.available ?? 0), accountQuery.data),
+        () => unwrap(agencyCommissionService.requestPayout())
+      ),
     onSuccess: () => {
       refresh();
       onToast('Payout requested.', 'success');
@@ -91,7 +114,8 @@ export function AgencyPayoutSection({
 
   const account = accountQuery.data;
   const summary = summaryQuery.data;
-  const canSave = bankCode.trim().length >= 3 && accountNumber.trim().length === 10;
+  // The bank's name for the account comes back before saving (UX-28).
+  const canSave = lookupAllowsSave(lookup);
   const canWithdraw = Boolean(summary?.accountSet) && (summary?.available ?? 0) > 0;
 
   return (
@@ -116,7 +140,7 @@ export function AgencyPayoutSection({
           ) : !editingAccount && account?.verified ? (
             <div className="mt-3">
               <p className="text-sm text-foreground">
-                {account.bankName || 'Bank'} · {account.accountNumber}
+                {payoutAccountLabel({ ...account, bankName: account.bankName || 'Bank' })}
               </p>
               {account.accountName && (
                 <p className="text-xs text-muted-foreground">{account.accountName}</p>
@@ -135,14 +159,18 @@ export function AgencyPayoutSection({
                 onBankCode={setBankCode}
                 accountNumber={accountNumber}
                 onAccountNumber={setAccountNumber}
+                onLookup={setLookup}
               />
+              {account?.verified && (
+                <p className="text-xs text-muted-foreground">{PAYOUT_CHANGE_COOLDOWN_HINT}</p>
+              )}
               <div className="flex gap-2">
                 <Button
                   onClick={() => saveAccount.mutate()}
                   disabled={!canSave}
                   isLoading={saveAccount.isPending}
                 >
-                  Save account
+                  {saveAccountLabel(lookup, 'Save account')}
                 </Button>
                 {account?.verified && (
                   <Button
@@ -240,13 +268,19 @@ export function AgencyPayoutSection({
                       <td className="px-4 py-2.5 text-right font-medium text-foreground">
                         {formatCurrency(p.amount)}
                       </td>
-                      <td className="px-4 py-2.5">
+                      <td className="px-4 py-2.5 min-w-56">
                         <Badge variant={pill.variant}>{pill.label}</Badge>
-                        {p.failureReason && (
-                          <span className="ml-2 text-xs text-muted-foreground">
-                            {p.failureReason}
-                          </span>
-                        )}
+                        <PayoutRowDetails
+                          state={
+                            p.status === 'SUCCESS'
+                              ? 'paid'
+                              : p.status === 'FAILED'
+                                ? 'failed'
+                                : 'pending'
+                          }
+                          paidAt={p.paidAt}
+                          failureReason={p.failureReason}
+                        />
                       </td>
                     </tr>
                   );

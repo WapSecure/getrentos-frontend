@@ -190,6 +190,8 @@ export interface RealtorPayoutAccount {
   /** Masked: only the last four digits are ever returned. */
   accountNumber: string;
   accountName: string;
+  /** While a recent change is on hold; not sent by the API yet, shown once it is. */
+  payoutHoldUntil?: string | null;
 }
 
 export interface RealtorPayout {

@@ -78,7 +78,7 @@ describe('staff two-factor refusal', () => {
 
     await authFetch('/admin/escrow/tx-1/release', { method: 'POST', body: '{}' });
 
-    expect(handler).toHaveBeenCalledWith({ challengeId: 'ch-9' });
+    expect(handler).toHaveBeenCalledWith(expect.objectContaining({ challengeId: 'ch-9' }));
     expect(currentStepUpToken()).toBeNull();
   });
 });

@@ -1,8 +1,8 @@
 import { usePaystackCheckout } from '@/hooks/usePaystackCheckout';
-import { useState } from 'react';
-import { Alert, Linking, Pressable, RefreshControl, View } from 'react-native';
+import { useMemo, useState } from 'react';
+import { ActivityIndicator, Alert, Linking, Pressable, RefreshControl, View } from 'react-native';
 import { router } from 'expo-router';
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { AlertTriangle, FileStack, ReceiptText as ReceiptIcon, Wallet } from 'lucide-react-native';
 import {
@@ -26,13 +26,32 @@ import {
   type Payment,
 } from '@/lib/api/payments';
 import { errorMessage } from '@/lib/api/client';
-import { formatDate } from '@/lib/format';
+import { formatDate, formatNaira } from '@/lib/format';
 import { DisputePaymentSheet } from '@/components/payments/DisputePaymentSheet';
 import { PayAmountSheet } from '@/components/payments/PayAmountSheet';
 import { usePaymentProviders } from '@/hooks/usePaymentProviders';
 import type { PaymentProvider } from '@/lib/api/paymentStatus';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
+
+const PAGE_SIZE = 20;
+
+/** The toast for a payment the API settled without a checkout, worded from its real status. */
+function paidOutcome(p: Payment): [string, 'success' | 'info'] {
+  if (p.status === 'paid')
+    return [p.reference ? `Paid. Reference ${p.reference}` : 'Paid.', 'success'];
+  if (p.status === 'processing')
+    return [
+      `Your payment for ${p.propertyName} is being confirmed. It shows as Processing until it clears.`,
+      'info',
+    ];
+  if ((p.amountPaid ?? 0) > 0)
+    return [
+      `Part-payment received for ${p.propertyName}. ${formatNaira(p.outstanding ?? 0)} is still owed on this charge.`,
+      'success',
+    ];
+  return [`${p.propertyName}: this charge is not paid yet.`, 'info'];
+}
 
 export default function Payments() {
   const { colors, spacing, radius } = useTheme();
@@ -45,12 +64,16 @@ export default function Payments() {
   const providers = usePaymentProviders();
   const [providerError, setProviderError] = useState<string | null>(null);
 
-  const query = useQuery({
-    queryKey: qk.renter.payments(1, 50),
-    queryFn: () => paymentsApi.list(1, 50),
-    placeholderData: keepPreviousData,
+  // The whole history, a page at a time as the renter scrolls: a fixed first 50
+  // used to drop older records with no way to reach them.
+  const query = useInfiniteQuery({
+    queryKey: qk.renter.paymentsHistory,
+    queryFn: ({ pageParam }) => paymentsApi.list(pageParam, PAGE_SIZE),
+    initialPageParam: 1,
+    getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
   });
-  const items = query.data?.items ?? [];
+  const items = useMemo(() => query.data?.pages.flatMap((p) => p.items) ?? [], [query.data]);
+  const refreshPayments = () => qc.invalidateQueries({ queryKey: qk.renter.paymentsAll });
 
   const payMutation = useMutation({
     mutationFn: ({
@@ -64,12 +87,16 @@ export default function Payments() {
       payment: Payment;
     }) => paymentsApi.payNow(id, 'card', amount, provider),
     onSuccess: async (payment) => {
+      // The sheet stayed open while the payment started; the checkout or result takes over.
+      setPayPayment(null);
+      setProviderError(null);
       if (payment.authorizationUrl) {
         await checkout(payment.authorizationUrl, payment.reference);
       } else {
-        toast.show('Payment successful.', 'success');
+        // Say "Paid" only when the API says the charge is paid (same words as web).
+        toast.show(...paidOutcome(payment));
       }
-      qc.invalidateQueries({ queryKey: qk.renter.payments(1, 50) });
+      refreshPayments();
       qc.invalidateQueries({ queryKey: qk.renter.lease });
       qc.invalidateQueries({ queryKey: qk.renter.dashboardStats });
     },
@@ -78,9 +105,9 @@ export default function Payments() {
       const unavailable = providers.recover(err, variables.provider);
       if (unavailable) {
         setProviderError(unavailable);
-        setPayPayment(variables.payment);
         return;
       }
+      setPayPayment(null);
       toast.show(errorMessage(err, 'Could not process the payment.'), 'error');
     },
   });
@@ -89,7 +116,7 @@ export default function Payments() {
     mutationFn: (id: string) => paymentsApi.confirmMoveIn(id),
     onSuccess: () => {
       toast.show('Move-in confirmed — rent released to your landlord.', 'success');
-      qc.invalidateQueries({ queryKey: qk.renter.payments(1, 50) });
+      refreshPayments();
       qc.invalidateQueries({ queryKey: qk.renter.lease });
       qc.invalidateQueries({ queryKey: qk.renter.dashboardStats });
     },
@@ -99,7 +126,7 @@ export default function Payments() {
   const confirmMoveIn = (payment: Payment) => {
     Alert.alert(
       'Confirm move-in?',
-      `This releases ₦${payment.amount.toLocaleString()} for ${payment.propertyName} to your landlord now. Only confirm once you've moved in — it can't be undone.`,
+      `This releases the rent GetRentos is holding for ${payment.propertyName} to your landlord now. Only confirm once you've moved in — it can't be undone.`,
       [
         { text: 'Not yet', style: 'cancel' },
         {
@@ -166,7 +193,7 @@ export default function Payments() {
                 onResume={async () => {
                   if (!item.resumeCheckout) return;
                   await checkout(item.resumeCheckout.url, item.resumeCheckout.reference);
-                  qc.invalidateQueries({ queryKey: qk.renter.payments(1, 50) });
+                  refreshPayments();
                 }}
                 onDispute={() => setDisputePayment(item)}
                 onConfirmMoveIn={() => confirmMoveIn(item)}
@@ -174,6 +201,19 @@ export default function Payments() {
             </View>
           )}
           contentContainerStyle={{ paddingTop: spacing.sm, paddingBottom: spacing['3xl'] }}
+          onEndReached={() => {
+            if (query.hasNextPage && !query.isFetchingNextPage) void query.fetchNextPage();
+          }}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={
+            query.isFetchingNextPage ? (
+              <ActivityIndicator
+                color={colors.mutedForeground}
+                accessibilityLabel="Loading older payments"
+                style={{ paddingVertical: spacing.md }}
+              />
+            ) : null
+          }
           refreshControl={
             <RefreshControl
               refreshing={query.isRefetching}
@@ -187,20 +227,21 @@ export default function Payments() {
       <PayAmountSheet
         payment={payPayment}
         onClose={() => {
+          if (payMutation.isPending) return;
           setPayPayment(null);
           setProviderError(null);
         }}
         onPay={(amount) => {
-          if (payPayment)
-            payMutation.mutate({
-              id: payPayment.id,
-              amount,
-              provider: providers.provider,
-              payment: payPayment,
-            });
-          setPayPayment(null);
+          if (!payPayment) return;
           setProviderError(null);
+          payMutation.mutate({
+            id: payPayment.id,
+            amount,
+            provider: providers.provider,
+            payment: payPayment,
+          });
         }}
+        busy={payMutation.isPending}
         providers={providers}
         providerError={providerError}
       />
@@ -235,7 +276,9 @@ function PaymentRow({
   const { colors, spacing } = useTheme();
   const payable = p.status === 'pending' || p.status === 'overdue';
   const releasable = p.status === 'paid' && p.escrowStatus === 'held' && !p.disputeReason;
-  const disputable = (p.status === 'paid' || p.status === 'overdue') && !p.disputeReason;
+  // Same rule as web and the API: only rent GetRentos is holding can be reported.
+  const disputable = p.status === 'paid' && p.escrowStatus === 'held' && !p.disputeReason;
+  const left = p.outstanding ?? p.amount - (p.amountPaid ?? 0);
 
   return (
     <Card elevated>
@@ -268,7 +311,15 @@ function PaymentRow({
           marginTop: spacing.md,
         }}
       >
-        <Price amount={payable ? (p.outstanding ?? p.amount) : p.amount} variant="heading" />
+        {/* Headline is what is still to pay on an open charge, the same as web. */}
+        <View>
+          <Price amount={payable ? left : p.amount} variant="heading" />
+          {payable && left !== p.amount ? (
+            <Text variant="caption" color="mutedForeground">
+              left of {formatNaira(p.amount)}
+            </Text>
+          ) : null}
+        </View>
         {payable ? (
           <Button
             label="Pay now"
@@ -321,7 +372,7 @@ function PaymentRow({
         </View>
       ) : disputable ? (
         <LinkButton
-          label="Dispute this payment"
+          label="Report a problem"
           tone="muted"
           onPress={onDispute}
           style={{ marginTop: spacing.xs, alignSelf: 'flex-start' }}
