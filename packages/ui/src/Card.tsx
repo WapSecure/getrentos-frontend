@@ -5,15 +5,11 @@ interface CardProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
   children: ReactNode;
   className?: string;
   hover?: boolean;
-  /**
-   * The whole card is one target (it holds a stretched link or button): adds
-   * the hover lift and a focus ring when the control inside has keyboard focus.
-   */
+  /** For a card holding a stretched link or button. */
   interactive?: boolean;
-  /** Set for a card that is selected or current, e.g. the chosen plan. */
   selected?: boolean;
   delay?: number;
-  /** Set for dense dashboard/admin contexts: skips the scroll-in + hover-lift animation meant for marketing pages. */
+  /** Skips the scroll-in and hover-lift animation, for dense dashboard and admin screens. */
   static?: boolean;
 }
 
@@ -49,7 +45,6 @@ interface PartProps {
   className?: string;
 }
 
-/** Title row of a card: title and description on the left, an action on the right. */
 export const CardHeader = ({ children, action, className }: PartProps & { action?: ReactNode }) => (
   <div className={cn('flex items-start justify-between gap-4 px-5 pt-5', className)}>
     <div className="min-w-0 flex-1 space-y-1">{children}</div>
@@ -80,7 +75,6 @@ export const CardContent = ({ children, className }: PartProps) => (
   <div className={cn('px-5 py-5', className)}>{children}</div>
 );
 
-/** Actions at the foot of a card, separated by a hairline; right-aligned, wrapping on phones. */
 export const CardFooter = ({ children, className }: PartProps) => (
   <div
     className={cn(

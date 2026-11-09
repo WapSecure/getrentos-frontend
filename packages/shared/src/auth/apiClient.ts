@@ -10,17 +10,8 @@ import {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
-/**
- * Which app this bundle is, sent as `x-client-app`.
- *
- * The API namespaces the refresh cookie per app, because cookies are neither
- * port- nor app-scoped: several front ends on one host share a single cookie
- * jar. Without this, signing into one app rotated the cookie for all of them and
- * the others silently picked up the wrong identity. Declaring the app also lets
- * the API refuse a non-staff account at staff sign-in.
- *
- * Unset means the main web app — its cookie name is unchanged.
- */
+// Sent as `x-client-app`: apps on one host share a cookie jar, so the API namespaces the refresh
+// cookie per app, and it lets the API refuse non-staff accounts at staff sign-in. Unset = main web app.
 export const CLIENT_APP = process.env.NEXT_PUBLIC_CLIENT_APP || undefined;
 
 if (process.env.NODE_ENV === 'production' && !API_BASE_URL.startsWith('https://')) {
@@ -71,55 +62,24 @@ function fallbackMessage(status: number): string {
   return 'We could not complete your request. Please try again.';
 }
 
-/**
- * Known backend error codes that always get this exact copy, regardless of
- * whatever `message` the body happens to carry — keeps wording consistent
- * across every call site, including ones that don't render a dedicated
- * upsell component for the code (see VerificationRequiredNotice/
- * UpgradeToProModal, which read the structured `error`/`reason` fields
- * directly and are unaffected by this — this only reshapes the plain-text
- * fallback every other call site shows via `err.message`).
- */
+// Known codes always get this copy, whatever message the body carries.
 const FRIENDLY_ERROR_CODES: Record<string, string> = {
-  // PLAN_UPGRADE_REQUIRED is deliberately NOT in this table.
-  //
-  // A fixed sentence here read "This feature requires the Pro plan", and it
-  // overrode whatever the backend sent. That was survivable while Pro was the
-  // only paid tier; it is now wrong for every Enterprise gate, where it told an
-  // estate on Pro to buy the plan they already had. The backend composes this
-  // one per feature and names the tier it needs — "Contractor passes is an
-  // Enterprise feature. Upgrade to Enterprise to use it." — so the body's own
-  // message is the good copy, and the table entry was only ever hiding it.
+  // PLAN_UPGRADE_REQUIRED is deliberately absent: the backend's message names the tier the
+  // feature needs, and a fixed sentence here would hide it.
   PLAN_LIMIT_REACHED:
     "You've reached the limit for your current plan. Upgrade to Pro to remove it.",
 };
 
-/**
- * Catches raw technical text that shouldn't reach an end user even when it
- * arrived as a normal single-string `message` (an unhandled exception's own
- * message/name leaking through in a non-production environment, a stray
- * Prisma error code, a JS TypeError from a bug — see http-exception.filter.ts
- * for what's already sanitized server-side; this is the client-side backstop).
- */
+// Client-side backstop for raw technical text (exception names, Prisma codes, stack frames).
 const TECHNICAL_MESSAGE_PATTERN =
   /Exception\b|Cannot read propert|undefined is not|is not a function|^P\d{4}\b|ECONNREFUSED|ENOTFOUND|Unexpected token|SyntaxError|null is not an object|at\s+\w+\s+\(/i;
 
-/**
- * Resolves the single user-facing string for a failed response. Priority:
- * a known error code's fixed copy, then a generic message for validation
- * failures (class-validator's auto-generated messages use raw camelCase
- * field names like "fullName should not be empty" — never join those
- * verbatim), then the body's own message IF it doesn't look like raw
- * technical text, then a friendly per-status fallback.
- */
 function resolveFriendlyMessage(status: number, body: BackendErrorBody | undefined): string {
   const code = body?.error;
   if (code && FRIENDLY_ERROR_CODES[code]) return FRIENDLY_ERROR_CODES[code];
 
   if (Array.isArray(body?.message)) {
-    // class-validator's raw field messages ("documents.0.property url should not
-    // exist") are unhelpful to users, but they are the only clue when a request
-    // shape drifts from the DTO — surface them to developers, never to users.
+    // Raw class-validator messages reveal DTO drift to developers but mean nothing to users.
     if (process.env.NODE_ENV !== 'production') {
       console.warn('[api] validation rejected the request:', body.message);
     }
@@ -158,33 +118,22 @@ async function readResponseBody<T>(response: Response): Promise<T | BackendError
   }
 }
 
-// ---- Silent session refresh (remember-me) -----------------------------------
-// The refresh token lives in an httpOnly cookie (set by the backend), so it is
-// invisible to JavaScript and immune to XSS. Refreshing just calls the backend
-// with credentials so the cookie is sent automatically. Rotation is enabled on
-// the backend, so concurrent 401s MUST share a single refresh call (the first
-// one rotates the token; later ones would fail with the old token).
+// Refresh rotates the cookie, so concurrent 401s must share one refresh call or the later ones
+// fail with the old token.
 let refreshPromise: Promise<boolean> | null = null;
 
-/**
- * Tabs of one app share the refresh cookie, and every refresh rotates it. Two
- * tabs refreshing with the same cookie at once means one is refused (the API
- * treats reuse within 30 s as a race; later, as theft, ending every session).
- * A Web Lock named for this app queues the refreshes of all its tabs, so each
- * one sends the cookie the previous one was given.
- */
+// Tabs share the cookie and the API treats reuse as a race (or, after 30 s, theft that ends every
+// session), so a per-app Web Lock queues refreshes across tabs.
 const REFRESH_LOCK = `sureground-auth-refresh:${CLIENT_APP ?? 'web'}`;
 
-/** Pause before the one retry of a refused refresh; see `refreshSession`. */
 const REFRESH_RETRY_DELAY_MS = 750;
 
-/** After a 429 without Retry-After, how long to wait before refreshing again. */
 const REFRESH_RATE_LIMIT_PAUSE_MS = 30_000;
 let refreshBlockedUntil = 0;
 
 function withRefreshLock<T>(work: () => Promise<T>): Promise<T> {
   const locks = typeof navigator !== 'undefined' ? navigator.locks : undefined;
-  // The lock is held until `work` settles; the DOM typings nest its promise.
+  // The DOM typings nest the promise, hence the cast.
   return locks ? (locks.request(REFRESH_LOCK, work) as Promise<T>) : work();
 }
 
@@ -205,12 +154,6 @@ const SESSION_EXPIRED_KEY = 'gr_session_expired';
 type SessionExpiredListener = () => void;
 const sessionExpiredListeners = new Set<SessionExpiredListener>();
 
-/**
- * Subscribes to "the session could not be restored". Fires after the access
- * token has been cleared, so listeners can send the user to sign in rather
- * than leaving them on a page that quietly renders empty data forever.
- * Returns an unsubscribe function.
- */
 export function onSessionExpired(listener: SessionExpiredListener): () => void {
   sessionExpiredListeners.add(listener);
   return () => {
@@ -218,12 +161,10 @@ export function onSessionExpired(listener: SessionExpiredListener): () => void {
   };
 }
 
-/** Marks that the session could not be restored (shown on the login screen). */
 export function markSessionExpired() {
   if (typeof window === 'undefined') return;
   sessionStorage.setItem(SESSION_EXPIRED_KEY, '1');
-  // A listener must never break the others, or a throwing one would silently
-  // stop every later subscriber from being told.
+  // One throwing listener must not stop the rest being told.
   for (const listener of sessionExpiredListeners) {
     try {
       listener();
@@ -240,20 +181,8 @@ export function consumeSessionExpiredFlag(): boolean {
   return expired;
 }
 
-/**
- * Exchanges the refresh-token cookie for a fresh access token, kept in memory.
- * Single-flight: concurrent callers in this tab share one in-flight refresh,
- * and other tabs of the app queue behind it (`withRefreshLock`).
- *
- * A 401 is retried once after a short pause: in a browser without Web Locks,
- * another tab may have rotated the cookie just before us, and its new cookie
- * lands in the shared jar a moment later. The retry falls well inside the
- * API's 30-second race window, so it can never be mistaken for theft.
- *
- * Returns true when the session is valid again, false when it could not be
- * refreshed (the session is cleared and the login screen shows a notice) or
- * the API is rate limiting refreshes (the session is kept for a later try).
- */
+// A refused refresh is retried once: without Web Locks another tab may have just rotated the
+// cookie, and the retry stays inside the API's 30-second race window so it is never taken for theft.
 export async function refreshSession(): Promise<boolean> {
   if (typeof window === 'undefined') return false;
   if (refreshPromise) return refreshPromise;
@@ -267,9 +196,7 @@ export async function refreshSession(): Promise<boolean> {
         res = await postRefresh();
       }
 
-      // Rate limited: the cookie is still good, so this is no reason to sign
-      // the user out (every page load refreshes now, which makes it likelier).
-      // Hold off until the API allows another try instead of adding to the count.
+      // Rate limited: the cookie is still good, so keep the session and wait before trying again.
       if (res.status === 429) {
         const retryAfter = Number(res.headers.get('retry-after'));
         refreshBlockedUntil =
@@ -290,11 +217,8 @@ export async function refreshSession(): Promise<boolean> {
         return false;
       }
 
-      // The refresh cookie is shared by every app on this host, so it can belong
-      // to someone else: whoever last signed in, in another tab or on another
-      // port. Keeping our stored profile on their token showed one person's name
-      // over another's session (and their role's pages refused it). End the
-      // session instead, so the right person signs in again.
+      // The cookie is shared by every app on this host, so it may belong to someone else; end the
+      // session rather than show one person's profile over another's token.
       const storedUser = getStoredUser<Record<string, unknown>>();
       const refreshedUserId = tokenSubject(data.accessToken);
       if (
@@ -308,7 +232,6 @@ export async function refreshSession(): Promise<boolean> {
         return false;
       }
 
-      // A remembered session keeps its profile in localStorage; others in sessionStorage.
       const rememberMe = isSessionRemembered();
       const user = storedUser ?? (await fetchSessionProfile(data.accessToken));
       saveAuthSession({ accessToken: data.accessToken, user }, rememberMe);
@@ -325,17 +248,8 @@ export async function refreshSession(): Promise<boolean> {
   return refreshPromise;
 }
 
-/**
- * Rebuilds the profile for a session that was restored from the refresh cookie
- * while nothing was in storage.
- *
- * The refresh cookie is not port-scoped, so a sibling app on another port can
- * hand us a session this app knows nothing about. Writing `{}` as the profile
- * still marks the session as authenticated, but every role check then reads it
- * as "signed in with no roles" — which is how a visitor ends up on a dashboard
- * for a role they do not have. Falls back to `{}` when the profile cannot be
- * read, so the session behaves exactly as it did before.
- */
+// The cookie is not port-scoped, so a sibling app can hand us a session with no stored profile;
+// writing `{}` instead would read as "signed in with no roles".
 async function fetchSessionProfile(accessToken: string): Promise<Record<string, unknown>> {
   try {
     const res = await fetch(`${API_BASE_URL}/auth/me`, {
@@ -345,8 +259,7 @@ async function fetchSessionProfile(accessToken: string): Promise<Record<string, 
     if (!res.ok) return {};
     const me = await res.json();
     if (!me?.id) return {};
-    // Mirrors the shape saved at sign-in: the profile plus the client-side
-    // `fullName`/`role` fields the shared helpers read.
+    // Must match the shape saved at sign-in.
     return {
       ...me,
       fullName: me.legalName,
@@ -357,10 +270,6 @@ async function fetchSessionProfile(accessToken: string): Promise<Record<string, 
   }
 }
 
-/**
- * Signs out on both sides: revokes the refresh token on the backend (via the
- * httpOnly cookie) and clears all client-side session state. Always resolves.
- */
 export async function logoutSession(): Promise<void> {
   if (typeof window !== 'undefined') {
     try {
@@ -382,7 +291,6 @@ export async function logoutSession(): Promise<void> {
   }
 }
 
-/** Reads a JWT's payload (base64url). Returns null when unreadable. */
 function tokenPayload(token: string): Record<string, unknown> | null {
   try {
     const part = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
@@ -392,13 +300,11 @@ function tokenPayload(token: string): Record<string, unknown> | null {
   }
 }
 
-/** The user a JWT was issued to (its `sub`), or null when unreadable. */
 export function tokenSubject(token: string): string | null {
   const sub = tokenPayload(token)?.sub;
   return typeof sub === 'string' ? sub : null;
 }
 
-/** Decodes a JWT's exp claim (seconds). Returns null when unreadable. */
 function accessTokenExpiry(token: string): number | null {
   try {
     const payload = JSON.parse(atob(token.split('.')[1]));
@@ -408,25 +314,15 @@ function accessTokenExpiry(token: string): number | null {
   }
 }
 
-/**
- * Makes sure the session is usable before the UI renders a protected page.
- * The access token lives in memory only, so after every page load it is
- * missing and the refresh cookie is exchanged for one (remember-me decides
- * whether that cookie survives a browser restart). If no session can be
- * restored the profile is cleared so the caller's `isAuthenticated()` check
- * routes the user to the login page.
- */
 export async function ensureValidSession(): Promise<boolean> {
   if (typeof window === 'undefined') return false;
   const token = getAuthToken();
   const exp = token ? accessTokenExpiry(token) : null;
 
   if (token && exp !== null && exp > Date.now() + 30_000) {
-    // Valid (or still far enough from expiry) — nothing to do.
     return true;
   }
 
-  // Missing or expired access token — try the refresh cookie.
   return refreshSession();
 }
 
@@ -435,8 +331,7 @@ export async function apiFetch<T>(
   options: RequestInit = {},
   allowRefreshRetry = true
 ): Promise<T> {
-  // Don't set Content-Type for FormData bodies — the browser must set it
-  // itself (including the multipart boundary).
+  // The browser must set the multipart Content-Type itself, including the boundary.
   const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
 
   let response: Response;
@@ -450,21 +345,13 @@ export async function apiFetch<T>(
       },
     });
   } catch (error) {
-    // Preserve cancellation semantics for query libraries and route changes.
+    // Rethrow aborts so query libraries still see a cancellation.
     if (error instanceof Error && error.name === 'AbortError') throw error;
     throw new ApiError(0, 'Unable to reach the server. Please check your connection.');
   }
 
-  // The access token is deliberately short-lived, so a 401 usually just means
-  // it lapsed while the user was working — not that the session is over. Spend
-  // the refresh cookie on it and replay the request once before treating the
-  // user as signed out.
-  //
-  // Only when there is a local session to save: a 401 on a *public* page (an
-  // anonymous visitor, or one whose token has gone stale) must not trigger a
-  // refresh at all, because a failed refresh clears the session and fires the
-  // expired listeners — which would bounce someone browsing the marketplace to
-  // the sign-in screen. `/auth/*` is exempt too; a 401 there is the real thing.
+  // Only refresh when there is a local session: on a public page a failed refresh would fire the
+  // expired listeners and bounce the visitor to sign-in. A 401 from /auth/* is real.
   if (
     response.status === 401 &&
     allowRefreshRetry &&
@@ -489,12 +376,6 @@ export async function apiFetch<T>(
   return body as T;
 }
 
-/**
- * The access token for a request. After a page load the in-memory token is
- * gone while the saved profile says there is a session: restore it first
- * (single-flight) rather than sending an anonymous request just to collect a
- * 401. Resolves to null for a visitor, or when the session cannot be restored.
- */
 export async function currentAccessToken(): Promise<string | null> {
   const token = getAuthToken();
   if (token || !hasStoredSession()) return token;
@@ -502,7 +383,6 @@ export async function currentAccessToken(): Promise<string | null> {
   return getAuthToken();
 }
 
-/** Fetches a binary response while preserving the same API error contract. */
 export async function apiDownload(path: string, options: RequestInit = {}): Promise<Blob> {
   let response: Response;
   try {

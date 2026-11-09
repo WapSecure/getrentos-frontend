@@ -11,11 +11,7 @@ import {
 } from './stepUp';
 import { getAuthToken, getStoredUser, hasStoredSession } from './authStorage';
 
-/**
- * Machine-readable codes the backend attaches to a 403 when an action is gated
- * on verification or trust — the ActionVerificationGuard codes plus the trust
- * guard's TRUST_TIER_REQUIRED (which carries required + current tier).
- */
+// Must match the backend's ActionVerificationGuard codes plus the trust guard's TRUST_TIER_REQUIRED.
 export const VERIFICATION_REASONS = [
   'IDENTITY_REQUIRED',
   'LICENSE_REQUIRED',
@@ -24,18 +20,8 @@ export const VERIFICATION_REASONS = [
 ] as const;
 export type VerificationReason = (typeof VERIFICATION_REASONS)[number];
 
-/**
- * Why a satisfied tier requirement was still refused. Sent as `reason`
- * alongside a TRUST_TIER_REQUIRED 403: the user DOES hold the evidence for the
- * tier, but something other than missing evidence is holding it back — an open
- * dispute against them, an unresolved review case, a failed check, a restricted
- * account, or the trust score floor.
- *
- * Kept separate from VERIFICATION_REASONS on purpose — that list is the
- * `error` code, this is the explanation. Telling someone who is already
- * financially verified to go and get financially verified is a dead end, so
- * the UI has to be able to tell the two apart.
- */
+// The user holds the tier's evidence but something else withholds it. Kept apart from
+// VERIFICATION_REASONS so the UI never tells a verified user to go and get verified.
 export const TRUST_WITHHELD_REASONS = [
   'SCORE_BELOW_TIER3_MIN',
   'OPEN_DISPUTE_AS_SUBJECT',
@@ -45,11 +31,7 @@ export const TRUST_WITHHELD_REASONS = [
 ] as const;
 export type TrustWithheldReason = (typeof TRUST_WITHHELD_REASONS)[number];
 
-/**
- * Machine-readable codes the backend attaches to a 403 when an action or a
- * Free-tier usage cap requires the Pro plan — PlanTierGuard's
- * PLAN_UPGRADE_REQUIRED and assertUnderPlanLimit's PLAN_LIMIT_REACHED.
- */
+// Must match PlanTierGuard's PLAN_UPGRADE_REQUIRED and assertUnderPlanLimit's PLAN_LIMIT_REACHED.
 export const PLAN_GATE_REASONS = ['PLAN_UPGRADE_REQUIRED', 'PLAN_LIMIT_REACHED'] as const;
 export type PlanGateReason = (typeof PLAN_GATE_REASONS)[number];
 
@@ -60,41 +42,18 @@ export interface ApiResponse<T = unknown> {
   message?: string;
   status?: number;
   requestId?: string;
-  /**
-   * The backend's machine-readable code (`body.error`), when there was one.
-   *
-   * `error` below is a *sentence* — `ApiError.message`, already softened for a
-   * human — so it cannot be branched on. A caller that has to act on a refusal
-   * rather than print it needs the code.
-   */
+  // `error` is a softened sentence and can't be branched on; act on this code instead.
   code?: string;
-  /**
-   * The error body as the API sent it.
-   *
-   * Carried through `unwrap` so a refusal that ships structured detail survives
-   * the trip. An estate's watch list answers 403 with the entries that fired and
-   * the reason on file, and a guard can only judge whether to override it if
-   * they can see them.
-   */
+  // Carried through `unwrap` so structured refusal detail survives (a guard needs the watch-list
+  // entries that fired to decide whether to override).
   details?: unknown;
-  /** Set when a 403 was rejected by a verification/trust guard — see VERIFICATION_REASONS. */
   reason?: VerificationReason;
-  /** TRUST_TIER_REQUIRED only: the minimum tier the action requires (backend `required`). */
   tierRequired?: number;
-  /** TRUST_TIER_REQUIRED only: the caller's current trust tier (backend `tier`). */
   currentTier?: number;
-  /**
-   * TRUST_TIER_REQUIRED only: set when the tier requirement is satisfied on
-   * evidence but withheld by a low trust score — see TRUST_WITHHELD_REASONS.
-   */
   withheldReason?: TrustWithheldReason;
-  /** Set when a 403 was rejected by a Pro-plan gate/limit — see PLAN_GATE_REASONS. */
   planGateReason?: PlanGateReason;
-  /** PLAN_UPGRADE_REQUIRED: the tier the action requires (backend `required`). */
   planGateRequired?: string;
-  /** Both reasons: the caller's current tier, or their current usage count for a limit. */
   planGateCurrent?: string | number;
-  /** PLAN_LIMIT_REACHED only: the Free-tier cap that was hit (backend `limit`). */
   planGateLimit?: number;
 }
 
@@ -103,11 +62,6 @@ export interface TrustTierMeta {
   currentTier?: number;
 }
 
-/**
- * Thrown by unwrap() when a request 403s because an action-level verification
- * or trust-tier requirement wasn't met. Carries the tier numbers for
- * TRUST_TIER_REQUIRED so the UI can upsell to the Verification Center.
- */
 export class VerificationRequiredError extends Error {
   reason: VerificationReason;
   tierRequired?: number;
@@ -127,12 +81,6 @@ export class VerificationRequiredError extends Error {
   }
 }
 
-/**
- * Thrown by unwrap() when a request 403s because a route (or a Free-tier
- * usage cap) requires the Pro plan. Carries whatever the backend attached —
- * `required`/`current` tier for PLAN_UPGRADE_REQUIRED, `current`/`limit`
- * count for PLAN_LIMIT_REACHED — so the upgrade modal can tailor its copy.
- */
 export class PlanGateError extends Error {
   reason: PlanGateReason;
   required?: string;
@@ -159,13 +107,11 @@ function extractReason(details: unknown): VerificationReason | undefined {
     : undefined;
 }
 
-/** Reads the tier numbers off a TRUST_TIER_REQUIRED 403 body. */
 function extractTierMeta(details: unknown): TrustTierMeta {
   const body = (details ?? {}) as { required?: number; tier?: number };
   return { tierRequired: body.required, currentTier: body.tier };
 }
 
-/** Reads the withheld-score explanation off a TRUST_TIER_REQUIRED 403 body. */
 function extractWithheldReason(details: unknown): TrustWithheldReason | undefined {
   const code = (details as { reason?: string } | undefined)?.reason;
   return (TRUST_WITHHELD_REASONS as readonly string[]).includes(code ?? '')
@@ -180,7 +126,6 @@ function extractPlanGateReason(details: unknown): PlanGateReason | undefined {
     : undefined;
 }
 
-/** Reads the required/current tier (or current/limit count) off a plan-gate 403 body. */
 function extractPlanGateMeta(details: unknown): {
   required?: string;
   current?: string | number;
@@ -228,10 +173,7 @@ export async function safeCall<T>(fn: () => Promise<T>): Promise<ApiResponse<T>>
   }
 }
 
-/**
- * Fetch with the Bearer token, refreshing on 401 once. When supplied,
- * expectedUserId pins a deferred write to its original account through retries.
- */
+// expectedUserId pins a deferred write to its original account through retries.
 export async function authFetch<T>(
   path: string,
   options: RequestInit = {},
@@ -242,8 +184,7 @@ export async function authFetch<T>(
       throw new ApiError(409, 'Your account changed. Sign in again before retrying this action.');
     }
   };
-  // The refresh-and-replay on 401 happens here, once; apiFetch's own retry is
-  // switched off so a single request can't fan out into several attempts.
+  // apiFetch's own retry is off so one request can't fan out into several attempts.
   const doFetch = (token: string | null, stepUp: string | null = currentStepUpToken()) => {
     assertAccount();
     return apiFetch<T>(
@@ -260,17 +201,16 @@ export async function authFetch<T>(
     );
   };
 
-  // After a page load the token is restored from the refresh cookie before the
-  // first request; that refresh then stands in for the one a 401 would trigger.
+  // After a page load the token is restored before the first request; that refresh stands in for
+  // the one a 401 would trigger.
   const restoredFirst = !getAuthToken() && hasStoredSession();
   try {
     return await doFetch(await currentAccessToken());
   } catch (err) {
     assertAccount();
-    // A sensitive change: confirm it's the account holder, then replay once.
     if (isStepUpRequired(err)) {
       clearStepUpToken();
-      // The token approves this exact request, once (security gap AU-02).
+      // The step-up token approves this exact request, once.
       const stepUp = await obtainStepUpToken(stepUpChallengeId(err));
       if (stepUp) {
         try {
@@ -281,11 +221,7 @@ export async function authFetch<T>(
         }
       }
     }
-    // A staff account with two-factor off: let the app show the set-up screen.
     if (isStaffMfaRequired(err)) notifyStaffMfaRequired();
-    // The access token expired — exchange the refresh token for a fresh pair
-    // and retry the request once. Single-flight refresh prevents the rotation
-    // race when many requests 401 at the same moment.
     if (
       err instanceof ApiError &&
       err.status === 401 &&
@@ -300,7 +236,6 @@ export async function authFetch<T>(
   }
 }
 
-/** Downloads an authenticated binary response, refreshing an expired session once. */
 export async function authDownload(path: string, options: RequestInit = {}): Promise<Blob> {
   const doDownload = (token: string | null) =>
     apiDownload(path, {
@@ -339,10 +274,7 @@ export async function unwrap<T>(promise: Promise<ApiResponse<T>>): Promise<T> {
         current: response.planGateCurrent,
         limit: response.planGateLimit,
       });
-    // The API's own body where there was one, rather than a two-field stub: the
-    // code and any structured detail are what let a caller tell a refusal it can
-    // act on from a failure it can only report. Falling back to the stub keeps
-    // the old shape for the errors that never had a body.
+    // Throw the API's own body where there was one, so callers can act on its code and detail.
     throw new ApiError(
       response.status ?? 0,
       message,
@@ -355,29 +287,16 @@ export async function unwrap<T>(promise: Promise<ApiResponse<T>>): Promise<T> {
   return response.data as T;
 }
 
-/**
- * For resources that legitimately may not exist yet.
- *
- * A renter with a lease still awaiting signature has no active lease, no renewal
- * offer, no rent increases and no payment reminders, and the API answers each of
- * those with 404. Treating that as a failure hid the very screen that lets them
- * sign, so a 404 resolves to the supplied empty value and every other error
- * still throws.
- */
+// A 404 resolves to the empty value: a renter whose lease awaits signature gets 404s for lease
+// data, and failing on them hid the screen that lets them sign.
 export async function unwrapOptional<T>(
   promise: Promise<ApiResponse<T>>,
   whenMissing: T
 ): Promise<T> {
   try {
     const value = await unwrap(promise);
-    // An empty *success* means the same thing as a 404 here. Nest sends no body
-    // at all (200, `content-length: 0`) when a handler returns `null`, and
-    // `GET /renter/lease/pending` does exactly that whenever the tenant has no
-    // lease awaiting signature. Axios yields `undefined` for that empty body
-    // and `unwrap`'s `as T` cast hides it, so the caller's type says
-    // "PendingLease | null" while the runtime value is `undefined` — which
-    // react-query rejects outright with "Query data cannot be undefined",
-    // replacing the whole renter Lease tab with an error state.
+    // Nest sends an empty 200 when a handler returns null; it arrives as undefined, which
+    // react-query rejects.
     return value ?? whenMissing;
   } catch (error) {
     if (error instanceof ApiError && error.status === 404) return whenMissing;

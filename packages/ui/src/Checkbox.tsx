@@ -10,11 +10,8 @@ interface CheckboxProps {
   disabled?: boolean;
   id?: string;
   className?: string;
-  /** Visible label. With it the whole row is clickable. */
   label?: ReactNode;
-  /** Supporting line under the label. */
   description?: ReactNode;
-  /** "Some selected" state for a select-all box. Clicking it selects all. */
   indeterminate?: boolean;
   invalid?: boolean;
   required?: boolean;
@@ -81,7 +78,6 @@ export function Checkbox({
     <div className={cn('flex items-start gap-3', className)}>
       <span className="flex h-5 items-center pt-px">{box}</span>
       <div className="min-w-0 flex-1">
-        {/* A label element would not forward clicks to a button, so the text toggles directly. */}
         <span
           id={labelId}
           onClick={() => !disabled && onCheckedChange(mixed ? true : !checked)}

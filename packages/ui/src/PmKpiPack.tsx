@@ -5,7 +5,7 @@ import { Badge } from './Badge';
 import { Card } from './Card';
 import { StatCard } from './StatCard';
 
-/** `GET /admin/pm-kpis` and `GET /agency/kpis`. Rates are percentages to one decimal, null when unmeasured. */
+/** `GET /admin/pm-kpis` and `GET /agency/kpis`. Rates are percentages, null when unmeasured. */
 export interface PmKpiReport {
   scope: { kind: 'MANAGED' | 'FIRM' | 'ALL'; name: string };
   from: string;
@@ -149,12 +149,7 @@ const Row = ({
   </div>
 );
 
-/**
- * The property-management KPI pack: headline tiles, then rent, maintenance,
- * owners and trust gates. Presentational only; the page fetches the report and
- * owns the scope and month pickers. Today's figures (arrears, occupancy, open
- * breaches) are badged so they are not read as belonging to the months chosen.
- */
+// Today's figures are badged so they are not read as belonging to the months chosen.
 export const PmKpiPack = ({
   report,
   marginAction,

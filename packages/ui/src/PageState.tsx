@@ -11,12 +11,7 @@ interface PageErrorStateProps {
   isRetrying?: boolean;
   isOffline?: boolean;
   className?: string;
-  /** h1 for a whole page; h2 when the error sits in a section of a page. */
   headingLevel?: 'h1' | 'h2';
-  /**
-   * The failure itself. A 403 is not an outage: it is shown as "no access",
-   * without a retry that can never succeed.
-   */
   error?: unknown;
 }
 

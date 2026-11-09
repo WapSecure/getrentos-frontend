@@ -11,17 +11,11 @@ export interface ToggleChipProps extends Omit<
   pressed: boolean;
   onPressedChange: (pressed: boolean) => void;
   icon?: ReactNode;
-  /** A number after the label ("Open 4"), read out with it. */
   count?: number;
   size?: 'sm' | 'md';
 }
 
-/**
- * An on/off chip: filters ("Corner plots"), multi-select options (property
- * types, days of the week) and single-choice chip rows that scroll. Several
- * chips in a row sit in a container with `role="group"` and an aria-label.
- * For two to four mutually exclusive views, use SegmentedControl.
- */
+// Put several in a container with `role="group"` and an aria-label.
 export const ToggleChip = forwardRef<HTMLButtonElement, ToggleChipProps>(
   (
     { children, pressed, onPressedChange, icon, count, size = 'md', className, disabled, ...rest },

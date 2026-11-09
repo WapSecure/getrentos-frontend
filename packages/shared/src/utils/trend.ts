@@ -1,21 +1,14 @@
-/**
- * Month-on-month change for a dashboard trend badge.
- *
- * The last point in a monthly series is usually the month we are in, and a
- * month that has only just started looks like a collapse next to a full one
- * (−100% on the 5th). So the badge compares the last two complete months and
- * says nothing until it has two of them, or when the earlier one is zero.
- */
+// Compares the last two complete months: the current month has only just started and would read
+// as a collapse (−100% on the 5th).
 export interface TrendPoint {
-  /** Short month name as the API labels it, e.g. "Oct". */
   label: string;
   value: number;
 }
 
 export interface MonthTrend {
-  /** Percentage change, e.g. 12.5 or -4. */
+  // Percentage, e.g. 12.5 or -4.
   change: number;
-  /** The two months compared, oldest first, e.g. ["Sep", "Oct"]. */
+  // Oldest first.
   months: [string, string];
 }
 
@@ -37,11 +30,8 @@ export function monthTrend(points: TrendPoint[], now = new Date()): MonthTrend |
   };
 }
 
-/** "+12.5%" / "−4.0%" for a trend badge. */
 export const formatTrend = (change: number) => {
   const size = Math.abs(change);
-  // One decimal keeps moves honest ("+12.3%"); a whole number reads better
-  // without it ("−100%", not "−100.0%").
   const digits = Number.isInteger(size) ? 0 : 1;
   return `${change >= 0 ? '+' : '−'}${size.toFixed(digits)}%`;
 };

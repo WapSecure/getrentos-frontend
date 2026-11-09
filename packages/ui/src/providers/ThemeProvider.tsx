@@ -3,15 +3,10 @@
 import { ThemeProvider as NextThemesProvider } from 'next-themes';
 import { migrateLegacyBrowserStorage } from '@sureground/shared';
 
-// Both apps load this provider first, so stored GetRentos-era keys move to
-// their Sureground names before anything else reads them.
+// Runs first, so GetRentos-era storage keys move to their Sureground names before anything reads them.
 migrateLegacyBrowserStorage();
 
-/**
- * `nonce` is the request's Content-Security-Policy nonce: next-themes renders a
- * small inline script that applies the saved theme before paint, and under the
- * apps' nonce-based CSP it only runs when it carries that nonce.
- */
+// Under the apps' nonce-based CSP, next-themes' inline script only runs with the request's nonce.
 export function ThemeProvider({ children, nonce }: { children: React.ReactNode; nonce?: string }) {
   return (
     <NextThemesProvider

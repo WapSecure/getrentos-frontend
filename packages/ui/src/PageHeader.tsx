@@ -10,11 +10,6 @@ export interface PageHeaderProps {
   className?: string;
 }
 
-/**
- * Application page hierarchy shared by dashboards, queues and detail screens.
- * It deliberately allows one action area rather than encouraging rows of
- * equally prominent buttons.
- */
 export function PageHeader({
   title,
   description,

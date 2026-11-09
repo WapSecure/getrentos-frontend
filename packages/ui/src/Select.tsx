@@ -10,7 +10,7 @@ import { useFieldControl } from './fieldContext';
 export interface SelectOption {
   value: string;
   label: ReactNode;
-  /** Searchable text for rich/non-string labels. Falls back to the label or value. */
+  /** For rich/non-string labels. */
   searchText?: string;
   disabled?: boolean;
 }
@@ -25,13 +25,10 @@ interface SelectProps {
   className?: string;
   searchable?: boolean;
   searchPlaceholder?: string;
-  /** Id for the trigger; inside a Field the field supplies it. */
   id?: string;
   invalid?: boolean;
   required?: boolean;
-  /** Show a clear button once something is chosen; clearing calls onValueChange(''). */
   clearable?: boolean;
-  /** Shown when a search matches nothing. */
   emptyText?: string;
   controlSize?: ControlSize;
 }
@@ -104,7 +101,6 @@ export function Select({
     const buttons = optionButtons();
     if (buttons.length) buttons[(index + buttons.length) % buttons.length].focus();
   };
-  // Arrow keys move through the options; Home/End jump; Up from the first returns to search.
   const onListKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     const buttons = optionButtons();
     const current = buttons.indexOf(document.activeElement as HTMLButtonElement);
@@ -130,10 +126,7 @@ export function Select({
         <button
           type="button"
           id={field.id}
-          // A combobox (not a plain button) so the required/invalid state the
-          // Field passes down is valid ARIA. Inside a Field the visible label
-          // names it; a bare Select is named by its ariaLabel, or failing that
-          // by the value it shows (as it was when it was a plain button).
+          // A combobox, not a plain button, so the required/invalid state from a Field is valid ARIA.
           role="combobox"
           aria-label={ariaLabel && !field.labelId ? `${visibleLabel} ${ariaLabel}` : undefined}
           aria-labelledby={field.labelId ?? (ariaLabel ? undefined : valueId)}

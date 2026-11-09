@@ -1,10 +1,5 @@
-/**
- * GetRentos became Sureground. Browser storage written before the rename uses
- * keys that start with "getrentos" (getrentos.sidebar.rail, getrentos_user,
- * getrentos:signup:next, …). Move each one to its "sureground" key once, so
- * nobody is signed out or loses a preference. A value already saved under the
- * new key wins. Safe to call more than once; does nothing on the server.
- */
+// Moves pre-rename "getrentos" storage keys to their "sureground" key once, so nobody is signed
+// out; a value already under the new key wins.
 const LEGACY_PREFIX = 'getrentos';
 const NEW_PREFIX = 'sureground';
 

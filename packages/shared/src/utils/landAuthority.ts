@@ -1,10 +1,3 @@
-/**
- * A land seller's authority to sell, as the API returns it
- * (src/modules/land/services/land-seller-authority.service.ts), with the words
- * every app uses for it. Web, backoffice and mobile share this so a claim
- * reads the same wherever it is shown.
- */
-
 export const LAND_SELLER_CAPACITIES = [
   'REGISTERED_HOLDER',
   'CO_OWNER',
@@ -65,14 +58,12 @@ export interface LandAuthoritySignatory {
   fullName: string;
   consent: LandSignatoryConsent;
   respondedAt: string | null;
-  /** Answered from their own Sureground account. */
   answeredFromAccount: boolean;
   evidenceDocumentId: string | null;
   witnessName: string | null;
   objectionReason: string | null;
   checkedByStaff: boolean;
   waivedReason: string | null;
-  /** Whether this consent counts towards the claim's requirements now. */
   counts: boolean;
 }
 
@@ -96,24 +87,20 @@ export interface LandAuthorityClaim {
   signatories: LandAuthoritySignatory[];
 }
 
-/** A claim with what its capacity requires and what is still missing. */
 export interface LandAuthorityView {
   authority: LandAuthorityClaim;
   requirements: LandCapacityRule;
   gaps: string[];
   matrixVersion: string;
-  /** Every capacity's rules, so a seller changing capacity sees what it would need. */
   rules: Record<LandSellerCapacity, LandCapacityRule>;
 }
 
-/** Before any claim exists: the rules for every capacity, to choose from. */
 export interface LandAuthorityEmptyView {
   authority: null;
   matrixVersion: string;
   rules: Record<LandSellerCapacity, LandCapacityRule>;
 }
 
-/** A consent request addressed to the signed-in account. */
 export interface LandConsentRequest {
   signatoryId: string;
   role: LandSignatoryRole;
@@ -187,13 +174,11 @@ export const landAuthorityTone = (status: LandAuthorityStatus): LandAuthorityTon
           ? 'warning'
           : 'neutral';
 
-/** Roles a seller may list for a capacity: the ones its rule counts, then anyone else relevant. */
 export const signatoryRolesFor = (rule: LandCapacityRule): LandSignatoryRole[] => {
   const extra: LandSignatoryRole[] = ['BENEFICIARY'];
   return [...rule.consentRoles, ...extra.filter((role) => !rule.consentRoles.includes(role))];
 };
 
-/** One sentence on what the capacity needs, for the seller choosing it. */
 export const describeCapacityRule = (rule: LandCapacityRule): string => {
   const parts: string[] = [];
   if (rule.instruments.length) {

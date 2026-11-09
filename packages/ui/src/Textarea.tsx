@@ -7,11 +7,9 @@ import { useFieldControl } from './fieldContext';
 
 export interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   invalid?: boolean;
-  /** Show "120 / 2000" under the box when a maxLength is set. */
   showCount?: boolean;
 }
 
-/** Multi-line text. Reads its id, description and invalid state from a surrounding Field. */
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
   (
     {
@@ -39,10 +37,8 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
       'aria-describedby': describedBy,
       'aria-invalid': ariaInvalid,
     });
-    // Uncontrolled boxes have no value prop, so count what has been typed.
     const [typed, setTyped] = useState(() => String(defaultValue ?? '').length);
     const length = typeof value === 'string' ? value.length : typed;
-    // Announce the count only near the limit, not on every keystroke.
     const nearLimit = maxLength ? length >= maxLength * 0.9 : false;
     const box = (
       <textarea

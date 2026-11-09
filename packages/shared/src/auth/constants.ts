@@ -2,37 +2,24 @@ export const AUTH_CONSTANTS = {
   OTP_LENGTH: 6,
   OTP_EXPIRY_MINUTES: 5,
   RESEND_OTP_DELAY_SECONDS: 30,
-  /** Matches the API's rule (security gap AU-15): 12 to 128, not in a known breach. */
+  // Matches the API's rule: 12 to 128, not in a known breach.
   PASSWORD_MIN_LENGTH: 12,
   PASSWORD_MAX_LENGTH: 128,
 } as const;
 
-/** Shared client-side validation patterns. Keep these centralized so every
- * surface accepts the same input format. */
 export const VALIDATION_PATTERNS = {
   EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
   PHONE: /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,6}[-\s.]?[0-9]{1,6}$/,
-  /** Whole numbers only (allows empty string while typing). */
   DIGITS_ONLY: /^\d*$/,
-  /** Strips anything that is not a digit. */
   NON_DIGITS: /\D/g,
-  /** Whole numbers with at least one digit. */
   INTEGER: /^\d+$/,
-  /** Decimal numbers (allows empty string while typing, at most one dot). */
   DECIMAL: /^\d*(\.\d*)?$/,
-  /** Strips anything that is not a digit or a single decimal point. */
   NON_NUMERIC: /[^\d.]/g,
-  /** Person / entity names: letters with spaces, apostrophes, dots and hyphens. */
   NAME: /^[A-Za-z][A-Za-z\s.'-]{0,}$/,
-  /** Strips characters not allowed in a name. */
   NON_NAME: /[^A-Za-z\s.'-]/g,
-  /** Alphanumeric only. */
   ALPHANUMERIC: /^[A-Za-z0-9]*$/,
-  /** Alphanumeric with common address punctuation. */
   ALPHANUMERIC_SPACES: /^[A-Za-z0-9\s.,#'/-]*$/,
-  /** Strips characters not allowed in an alphanumeric-with-punctuation field. */
   NON_ALPHANUMERIC_SPACES: /[^A-Za-z0-9\s.,#'/-]/g,
-  /** Plot / unit numbers like "24B", "5A" (letters allowed but at least one digit). */
   PLOT_NUMBER: /^[A-Za-z0-9-]{1,10}$/,
 } as const;
 
@@ -200,17 +187,15 @@ export const ERROR_MESSAGES = {
 
 export const STORAGE_KEYS = {
   SIGNUP_DATA: 'sureground_signup_data',
-  /** Legacy: tokens are no longer stored (AU-16); kept so old entries can be removed. */
+  // Legacy: no longer written; kept so old entries can be removed.
   AUTH_TOKEN: 'sureground_auth_token',
-  /** Legacy: the refresh token is an httpOnly cookie; kept so old entries can be removed. */
+  // Legacy: no longer written; kept so old entries can be removed.
   REFRESH_TOKEN: 'sureground_refresh_token',
   USER: 'sureground_user',
   SELECTED_ROLES: 'sureground_selected_roles',
 } as const;
 
-// Main ROUTES constant
 export const ROUTES = {
-  // Public routes
   HOME: '/',
   SIGNUP: '/signup',
   LOGIN: '/login',
@@ -222,10 +207,8 @@ export const ROUTES = {
   SHORTLET_MARKETPLACE: '/shortlets',
   PRICING: '/pricing',
 
-  // Dashboard base routes
   DASHBOARD: '/dashboard',
 
-  // Role-specific dashboards
   RENTER_DASHBOARD: '/renter/dashboard',
   LANDLORD_DASHBOARD: '/landlord/dashboard',
   AGENCY_DASHBOARD: '/agency',
@@ -244,46 +227,13 @@ export const ROUTES = {
   ESTATE_VIOLATIONS: '/estate/violations',
   ESTATE_GOVERNANCE: '/estate/governance',
   ESTATE_VEHICLES: '/estate/vehicles',
-  /** The estate's do-not-admit list, screened at every way in. */
   ESTATE_WATCHLIST: '/estate/watchlist',
-  /**
-   * Standing authorisations for people who keep arriving: a cleaner on
-   * Tuesdays, a contractor on site for six weeks. Enterprise-gated.
-   */
   ESTATE_CONTRACTORS: '/estate/contractors',
-  /**
-   * Raising the alarm and calling the roll.
-   *
-   * Free on every plan, and deliberately so: an estate that has to pay to find
-   * out whether the people in its building are safe is an estate that will not
-   * find out. Nothing here is a convenience on top of something already bought.
-   */
+  // Free on every plan, deliberately: an estate must never have to pay to learn whether its people are safe.
   ESTATE_EMERGENCY: '/estate/emergency',
-  /**
-   * How long visits run, and who never left. Enterprise: the only gate feature
-   * whose absence makes an estate slower rather than unsafe, which is what makes
-   * it the one that is paid for.
-   */
   ESTATE_DWELL: '/estate/dwell',
   ESTATE_DELIVERIES: '/estate/deliveries',
-  /**
-   * Whether the rounds an estate set up actually happen.
-   *
-   * Enterprise like dwell, and for the same reason: an estate without it makes a
-   * slower decision rather than an unsafe one. The GUARD's scan is deliberately
-   * not gated: see `docs/estate-gate-programme.md`: so this is the office's
-   * screen, not the checkpoint's.
-   */
   ESTATE_PATROL: '/estate/patrol',
-  /**
-   * Who the estate expects today, and a guest list entered once.
-   *
-   * Enterprise, and the gate is on the office rather than the gate. The board
-   * replaces a phone call: a guard without it still checks anybody in by PIN, so
-   * nothing is stranded by its absence — which is the same test dwell and patrol
-   * pass. It also reads the office's own guest-list entry, so the two halves are
-   * one purchase rather than a feature and its upgrade.
-   */
   ESTATE_EXPECTED: '/estate/expected',
   ESTATE_INCIDENTS: '/estate/incidents',
   ESTATE_MAINTENANCE: '/estate/maintenance',
@@ -302,12 +252,6 @@ export const ROUTES = {
   RESIDENT_ANNOUNCEMENTS: '/resident/announcements',
   RESIDENT_VISITOR_PASSES: '/resident/visitor-passes',
   RESIDENT_VIOLATIONS: '/resident/violations',
-  /**
-   * Where a resident answers the estate's roll call.
-   *
-   * Reached from a banner rather than browsed to, because an emergency screen
-   * that is only found by looking for it is one that is not found at all.
-   */
   RESIDENT_EMERGENCY: '/resident/emergency',
   RESIDENT_DELIVERIES: '/resident/deliveries',
   RESIDENT_DIRECTORY: '/resident/directory',
@@ -317,7 +261,6 @@ export const ROUTES = {
   RESIDENT_COMMITTEE: '/resident/committee',
   RESIDENT_GOVERNANCE: '/resident/governance',
 
-  // Renter specific routes
   RENTER_DISCOVER: '/renter/discover',
   RENTER_SAVED: '/renter/saved',
   RENTER_APPLICATIONS: '/renter/applications',
@@ -341,7 +284,6 @@ export const ROUTES = {
   RENTER_BOOKINGS: '/renter/bookings',
   RENTER_REFERRALS: '/renter/referrals',
 
-  // Landlord specific routes
   LANDLORD_PROPERTIES: '/landlord/properties',
   LANDLORD_UNITS: '/landlord/units',
   LANDLORD_LISTINGS: '/landlord/listings',
@@ -381,7 +323,6 @@ export const ROUTES = {
   LANDLORD_HELP: '/landlord/help',
   LANDLORD_HOME_MANAGEMENT: '/landlord/home-management',
 
-  // Property Owner specific routes
   OWNER_PROPERTIES: '/owner/properties',
   OWNER_LISTINGS: '/owner/listings',
   OWNER_LEADS: '/owner/leads',
@@ -393,7 +334,6 @@ export const ROUTES = {
   OWNER_MESSAGES: '/owner/messages',
   OWNER_REVIEWS: '/owner/reviews',
   OWNER_TRUST_PROFILE: '/owner/trust-profile',
-  /** Properties this owner may act for under someone else's authority. */
   OWNER_MANAGED: '/owner/managed',
   OWNER_ACTIVITY: '/owner/activity',
   OWNER_QUERIES: '/owner/queries',
@@ -411,7 +351,6 @@ export const ROUTES = {
   OWNER_SHORTLETS: '/owner/shortlets',
   OWNER_BILLING: '/owner/billing',
 
-  // Buyer specific routes
   BUYER_DISCOVER: '/buyer/discover',
   BUYER_SAVED: '/buyer/saved',
   BUYER_VIEWINGS: '/buyer/viewings',
@@ -427,7 +366,6 @@ export const ROUTES = {
   BUYER_BOOKINGS: '/buyer/bookings',
   BUYER_VERIFICATION: '/buyer/verification',
 
-  // Realtor specific routes
   REALTOR_CLIENTS: '/realtor/clients',
   REALTOR_LISTINGS: '/realtor/listings',
   REALTOR_LEADS: '/realtor/leads',
@@ -438,7 +376,6 @@ export const ROUTES = {
   REALTOR_MESSAGES: '/realtor/messages',
   REALTOR_REVIEWS: '/realtor/reviews',
   REALTOR_TRUST_PROFILE: '/realtor/trust-profile',
-  /** Properties this realtor may act for under a granted mandate. */
   REALTOR_MANAGED: '/realtor/managed',
   REALTOR_SETTINGS: '/realtor/settings',
   REALTOR_BILLING: '/realtor/billing',
@@ -446,7 +383,6 @@ export const ROUTES = {
   REALTOR_VERIFICATION: '/realtor/verification',
   REALTOR_BOOKINGS: '/realtor/bookings',
 
-  // Agent specific routes
   AGENT_TASKS: '/agent/tasks',
   AGENT_INSPECTIONS: '/agent/inspections',
   AGENT_VERIFICATIONS: '/agent/verifications',
@@ -455,7 +391,6 @@ export const ROUTES = {
   AGENT_MESSAGES: '/agent/messages',
   AGENT_REVIEWS: '/agent/reviews',
   AGENT_TRUST_PROFILE: '/agent/trust-profile',
-  /** Properties this agent may act for under a granted mandate. */
   AGENT_MANAGED: '/agent/managed',
   AGENT_HOME_MANAGEMENT: '/agent/home-management',
   AGENT_SETTINGS: '/agent/settings',
@@ -463,7 +398,6 @@ export const ROUTES = {
   AGENT_BOOKINGS: '/agent/bookings',
   AGENT_HELP: '/agent/help',
 
-  // Admin / BackOffice specific routes
   ADMIN_USERS: '/admin/users',
   ADMIN_SUBSCRIPTIONS: '/admin/subscriptions',
   ADMIN_VERIFICATIONS: '/admin/verifications',
@@ -482,7 +416,6 @@ export const ROUTES = {
 
 export type Routes = (typeof ROUTES)[keyof typeof ROUTES];
 
-// Dynamic routes need param interpolation, so they're helpers rather than plain constants.
 export const buildRoute = {
   renterPropertyDetail: (id: string) => `/renter/properties/${id}`,
   renterPropertyApply: (id: string) => `/renter/properties/${id}/apply`,
@@ -541,28 +474,20 @@ export const getDashboardRoute = (roleId: string): string => {
   return roleMap[roleId] || ROUTES.DASHBOARD;
 };
 
-/** Roles granted by invitation (never at sign-up) that decide where an account lands. */
 const INVITED_ROLE_PRECEDENCE: readonly string[] = ['GATEMAN'];
 
-/**
- * The portal a signed-in account lands in: its first role the web app has a
- * portal for. Taking roles[0] blindly sent an account whose first role had no
- * mapping to the renter fallback, and a non-renter then bounced between the
- * renter guard and that same fallback forever.
- */
+// Takes the first role the web app has a portal for: an unmapped roles[0] fell back to renter and
+// a non-renter then looped between the renter guard and that fallback.
 export const resolvePrimaryRoleId = (
   backendRoles: readonly string[] | undefined | null
 ): string => {
   const roles = backendRoles ?? [];
-  // A role only an estate can grant outranks the public role the person signed
-  // up with: a gate guard's account always also holds a sign-up role, and the
-  // gate console is the device's whole job.
+  // An estate-granted role outranks the sign-up role every gate guard also holds.
   const invited = INVITED_ROLE_PRECEDENCE.find((role) => roles.includes(role));
   if (invited) return BACKEND_ROLE_TO_ID[invited];
   return roles.map((r) => BACKEND_ROLE_TO_ID[r]).find(Boolean) ?? 'renter';
 };
 
-// Helper function to get role from stored user
 export const getUserRole = (): string | null => {
   if (typeof window === 'undefined') return null;
   const storedUser =
@@ -578,16 +503,9 @@ export const getUserRole = (): string | null => {
   return null;
 };
 
-// `isAuthenticated` lives in authStorage, next to the in-memory access token.
-
-/**
- * Two-factor codes: a 6-digit authenticator code, or a one-time backup code
- * like "k7m2p-x9q4t" for someone without their phone (security gap AU-07).
- * Matches the API's rule.
- */
+// A 6-digit authenticator code or a backup code like "k7m2p-x9q4t"; must match the API's rule.
 export const SECOND_FACTOR_CODE_MAX_LENGTH = 11;
 export const isSecondFactorCode = (value: string): boolean =>
   /^(\d{6}|[A-Za-z0-9]{5}[- ]?[A-Za-z0-9]{5})$/.test(value.trim());
-/** Keeps only what a code can contain, so pasted text with spaces still works. */
 export const cleanSecondFactorInput = (value: string): string =>
   value.replace(/[^A-Za-z0-9-]/g, '').slice(0, SECOND_FACTOR_CODE_MAX_LENGTH);

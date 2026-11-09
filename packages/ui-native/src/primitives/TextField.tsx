@@ -24,18 +24,12 @@ export interface TextFieldProps extends Omit<TextInputProps, 'style'> {
   containerStyle?: StyleProp<ViewStyle>;
   leftIcon?: React.ReactNode;
   rightAccessory?: React.ReactNode;
-  /** Adds an asterisk to the label and tells screen readers the field is required. */
   required?: boolean;
-  /** Shows "Optional" beside the label, for forms where most fields are required. */
   optional?: boolean;
-  /** Shows "120 / 500" under the field. Needs `maxLength`. */
+  /** Needs `maxLength`. */
   showCount?: boolean;
 }
 
-/**
- * Filled input with an animated focus state and a spring-in error line.
- * `forwardRef` for react-hook-form Controller + focus chaining.
- */
 export const TextField = forwardRef<TextInput, TextFieldProps>(function TextField(
   {
     label,
@@ -103,7 +97,6 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
         {leftIcon ? <View style={styles.left}>{leftIcon}</View> : null}
         <TextInput
           ref={ref}
-          // The visible label is a sibling, so screen readers need it on the input itself.
           accessibilityLabel={required && a11yLabel ? `${a11yLabel}, required` : a11yLabel}
           accessibilityHint={error ? `Error: ${error}` : (accessibilityHint ?? hint)}
           accessibilityState={{ disabled: rest.editable === false }}
@@ -200,7 +193,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  // The field's border shows focus, so the browser's own outline is removed on web.
   input: {
     flex: 1,
     fontSize: 16,

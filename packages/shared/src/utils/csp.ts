@@ -1,51 +1,24 @@
-/**
- * Content-Security-Policy and Strict-Transport-Security for the Next.js apps.
- *
- * Both proxies (apps/web/proxy.ts, apps/backoffice/proxy.ts) build their policy
- * here so the two stay in step; each passes only the third parties it really
- * loads. Pure string building, no Next or Node imports, so it is safe to import
- * from the proxy and testable from the mobile jest suite.
- *
- * Scripts are locked down with a per-request nonce plus 'strict-dynamic': Next
- * stamps the nonce on its own <script> tags (it reads it back from the request's
- * Content-Security-Policy header), and scripts those load are trusted in turn.
- * A host allowlist for scripts is deliberately absent; with 'strict-dynamic'
- * browsers ignore it anyway.
- */
+// Both proxies (apps/web, apps/backoffice) build their policy here so they stay in step; no Next or
+// Node imports so the mobile jest suite can test it. Scripts use a per-request nonce plus
+// 'strict-dynamic', so a script host allowlist is deliberately absent (browsers ignore it).
 import { TOUR_HOSTS } from './videoSource';
 
 export interface ContentSecurityPolicyOptions {
-  /** Fresh per request; base64. */
   nonce: string;
-  /** `next dev`: allows 'unsafe-eval' (React/Next dev tooling needs it) and any localhost port. */
   dev: boolean;
-  /** The Sureground API base URL (NEXT_PUBLIC_API_URL). Allowed for fetch, websockets, images, media and framed documents. */
   apiUrl?: string | null;
-  /** Upload storage / CDN origins when they differ from the API (e.g. the S3 host behind presigned URLs). */
   mediaOrigins?: readonly string[];
-  /** Extra origins per directive, for the third parties an app actually uses. */
   connectSrc?: readonly string[];
   imgSrc?: readonly string[];
   mediaSrc?: readonly string[];
   frameSrc?: readonly string[];
-  /**
-   * Adds `upgrade-insecure-requests`. Only for production over HTTPS: on
-   * http://localhost it would rewrite the page's own assets to https and break
-   * it, and browsers ignore it in a Report-Only policy.
-   */
+  // Production HTTPS only: on http://localhost it rewrites the page's own assets to https and breaks it.
   upgradeInsecureRequests?: boolean;
-  /** Where browsers POST violation reports (`report-uri`). */
   reportUri?: string | null;
-  /**
-   * Pages that run Smile ID's live selfie capture (@smileid/web-sdk): its face
-   * tracker is WebAssembly with models from Smile's model host, it may run in
-   * blob workers, its instruction animations fetch a player from jsDelivr or
-   * unpkg, and the capture is sent straight to Smile's API. Only those pages.
-   */
+  // Only for pages running Smile ID's live selfie capture.
   liveCapture?: boolean;
 }
 
-/** Everything Smile ID's browser capture contacts (see `liveCapture`). */
 export const SMILE_LIVE_CAPTURE_ORIGINS = [
   'https://web-models.smileidentity.com',
   'https://api.smileidentity.com',
@@ -54,31 +27,24 @@ export const SMILE_LIVE_CAPTURE_ORIGINS = [
   'https://unpkg.com',
 ] as const;
 
-/** Sent only in production over HTTPS; never on localhost (it would pin the dev host to HTTPS). */
+// Never on localhost: it would pin the dev host to HTTPS.
 export const STRICT_TRANSPORT_SECURITY = 'max-age=31536000; includeSubDomains';
 
-/**
- * Listing video players (see videoSource.ts) and 360° tour providers, which
- * the shortlet detail page frames. Tour hosts match their subdomains too, as
- * `tourSource` does.
- */
+// Tour hosts match their subdomains too, as `tourSource` does.
 export const EMBED_FRAME_ORIGINS: readonly string[] = [
   'https://www.youtube-nocookie.com',
   'https://player.vimeo.com',
   ...TOUR_HOSTS.flatMap((host) => [`https://${host}`, `https://*.${host}`]),
 ];
 
-/** Hosts the Leaflet tiles in mapTiles.ts load from (Mapbox with a token, OpenStreetMap without). */
 export const MAP_TILE_ORIGINS: readonly string[] = [
   'https://api.mapbox.com',
   'https://*.tile.openstreetmap.org',
 ];
 
-/** Same-machine origins `next dev` talks to: the API, MinIO uploads and HMR on any port. */
 const DEV_LOCAL_ORIGINS = ['http://localhost:*', 'http://127.0.0.1:*'];
 const DEV_LOCAL_SOCKETS = ['ws://localhost:*', 'ws://127.0.0.1:*'];
 
-/** `https://api.x.com/v1` → `https://api.x.com`; null for anything that is not an http(s) URL. */
 export function httpOrigin(url: string | null | undefined): string | null {
   if (!url) return null;
   try {
@@ -90,13 +56,11 @@ export function httpOrigin(url: string | null | undefined): string | null {
   }
 }
 
-/** The websocket origin matching an http(s) URL: `https://api.x.com` → `wss://api.x.com`. */
 export function websocketOrigin(url: string | null | undefined): string | null {
   const origin = httpOrigin(url);
   return origin ? origin.replace(/^http/, 'ws') : null;
 }
 
-/** Splits a comma/space separated env value into valid origins, dropping the rest. */
 export function parseOriginList(raw: string | null | undefined): string[] {
   if (!raw) return [];
   return raw
@@ -105,11 +69,7 @@ export function parseOriginList(raw: string | null | undefined): string[] {
     .filter((origin): origin is string => origin !== null);
 }
 
-/**
- * True when a Host / X-Forwarded-Host value (port allowed, e.g. `localhost:3100`,
- * `[::1]:3000`) names this machine, which only ever serves plain-HTTP local
- * development. Null/empty counts as local, so HTTPS-only headers fail closed.
- */
+// Null/empty counts as local, so HTTPS-only headers fail closed.
 export function isLocalHost(hostHeader: string | null | undefined): boolean {
   const first = hostHeader?.split(',')[0]?.trim().toLowerCase();
   if (!first) return true;
@@ -119,11 +79,6 @@ export function isLocalHost(hostHeader: string | null | undefined): boolean {
   );
 }
 
-/**
- * Where violation reports go: CSP_REPORT_URI when set, otherwise the API's
- * receiver (POST /security/csp-report), so a report-only rollout collects
- * data without extra configuration.
- */
 export function cspReportUri(
   configured: string | null | undefined,
   apiUrl: string | null | undefined
@@ -133,7 +88,6 @@ export function cspReportUri(
   return api && httpOrigin(api) ? `${api}/security/csp-report` : null;
 }
 
-/** Header name for an enforced or a watch-only policy. */
 export function cspHeaderName(
   enforce: boolean
 ): 'Content-Security-Policy' | 'Content-Security-Policy-Report-Only' {
@@ -150,7 +104,6 @@ function sourceList(...groups: ReadonlyArray<readonly (string | null | undefined
   return [...seen].join(' ');
 }
 
-/** The full policy string for one response. */
 export function buildContentSecurityPolicy(options: ContentSecurityPolicyOptions): string {
   const { nonce, dev } = options;
   const api = httpOrigin(options.apiUrl);
@@ -169,10 +122,8 @@ export function buildContentSecurityPolicy(options: ContentSecurityPolicyOptions
         options.liveCapture ? ["'wasm-unsafe-eval'"] : []
       ),
     ],
-    // 'unsafe-inline' for styles: React `style={…}` props, Leaflet and the
-    // animation libraries all write inline styles, and Next injects <style>
-    // tags for next/font. Inline styles cannot run code; scripts stay nonce-only.
-    // (No nonce here: a nonce would make browsers ignore 'unsafe-inline'.)
+    // Inline styles (React style props, Leaflet, next/font) cannot run code. No nonce: it would make
+    // browsers ignore 'unsafe-inline'.
     ['style-src', "'self' 'unsafe-inline'"],
     ['img-src', sourceList(["'self'", 'data:', 'blob:', api], media, local, options.imgSrc ?? [])],
     ['font-src', "'self' data:"],

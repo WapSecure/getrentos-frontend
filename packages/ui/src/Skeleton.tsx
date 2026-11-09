@@ -1,10 +1,6 @@
 import { cn } from '@sureground/shared';
 
-/**
- * A placeholder block. A span (displayed as a block) rather than a div, so it
- * is also valid inside a paragraph or heading, e.g. "{count} listings" while
- * the count loads.
- */
+// A span, not a div, so it is valid inside a paragraph or heading.
 export const Skeleton = ({ className }: { className?: string }) => {
   return (
     <span
@@ -17,10 +13,6 @@ export const Skeleton = ({ className }: { className?: string }) => {
   );
 };
 
-/**
- * Whole-page placeholder for route loading: a title, a row of stat tiles and
- * a list, so the page fills in where the content will be instead of spinning.
- */
 export const PageLoadingState = () => {
   return (
     <div
@@ -79,7 +71,6 @@ export const TableSkeleton = ({ rows = 6, columns = 5 }: { rows?: number; column
   );
 };
 
-/** Placeholder for a stack of cards or list rows while a list loads. */
 export const ListSkeleton = ({
   rows = 4,
   variant = 'rows',
@@ -88,10 +79,8 @@ export const ListSkeleton = ({
   className,
 }: {
   rows?: number;
-  /** `rows`: avatar + two lines in one bordered list. `cards`: separate cards. */
   variant?: 'rows' | 'cards';
   label?: string;
-  /** Drop the outer border and background, for a list placed inside a Card. */
   bare?: boolean;
   className?: string;
 }) => (
@@ -120,7 +109,6 @@ export const ListSkeleton = ({
       >
         <Skeleton className="h-10 w-10 shrink-0 rounded-lg" />
         <div className="min-w-0 flex-1 space-y-2">
-          {/* Varied widths read as text, not as a barcode. */}
           <Skeleton
             className={cn('h-3.5', index % 3 === 0 ? 'w-2/5' : index % 3 === 1 ? 'w-1/2' : 'w-1/3')}
           />
@@ -132,7 +120,6 @@ export const ListSkeleton = ({
   </div>
 );
 
-/** Placeholder for a row of stat cards. */
 export const StatGridSkeleton = ({
   count = 4,
   className,
@@ -157,7 +144,6 @@ export const StatGridSkeleton = ({
   </div>
 );
 
-/** Placeholder for a detail card: a heading and a few label/value lines. */
 export const CardSkeleton = ({ lines = 3, className }: { lines?: number; className?: string }) => (
   <div
     role="status"

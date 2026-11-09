@@ -6,8 +6,6 @@ import { Text } from './Text';
 import { EmptyState, ErrorState, Skeleton } from './misc';
 import { LinkButton } from './FormControls';
 
-/* ------------------------------- Skeletons ------------------------------- */
-
 function Group({ children, style }: { children: ReactNode; style?: StyleProp<ViewStyle> }) {
   return (
     <View
@@ -22,19 +20,15 @@ function Group({ children, style }: { children: ReactNode; style?: StyleProp<Vie
   );
 }
 
-// Varied widths read as text rather than a barcode.
 const LINE_WIDTHS = ['62%', '48%', '70%', '54%'] as const;
 
 export interface ListSkeletonProps {
   rows?: number;
-  /** `row`: avatar and two lines, for lists. `card`: a block per item, for card feeds. */
   variant?: 'row' | 'card';
-  /** Card height for the `card` variant. */
   height?: number;
   style?: StyleProp<ViewStyle>;
 }
 
-/** Stand-in for a list while it first loads, shaped like the rows that will replace it. */
 export function ListSkeleton({
   rows = 4,
   variant = 'row',
@@ -88,7 +82,6 @@ export function ListSkeleton({
   );
 }
 
-/** Stand-in for a row of stat tiles (two per line). */
 export function StatSkeleton({
   count = 4,
   style,
@@ -121,7 +114,6 @@ export function StatSkeleton({
   );
 }
 
-/** Stand-in for a detail screen: a title block, then label and value lines. */
 export function DetailSkeleton({
   lines = 5,
   style,
@@ -149,9 +141,6 @@ export function DetailSkeleton({
   );
 }
 
-/* ------------------------------- QueryState ------------------------------- */
-
-/** The parts of a TanStack Query result this needs; pass the query itself. */
 export interface QueryLike {
   data?: unknown;
   isPending?: boolean;
@@ -162,25 +151,16 @@ export interface QueryLike {
 
 export interface QueryStateProps {
   query: QueryLike;
-  /** Shown only on the very first load. Defaults to a list skeleton. */
   skeleton?: ReactNode;
-  /** True when the data loaded and there is nothing to show. */
   isEmpty?: boolean;
   empty?: { icon?: ReactNode; title: string; description?: string; action?: ReactNode };
   errorTitle?: string;
   errorDescription?: string;
-  /** Wraps the skeleton, error and empty states, e.g. to match the screen's side padding. */
   style?: StyleProp<ViewStyle>;
   children: ReactNode;
 }
 
-/**
- * Loading, failed, empty or loaded, the same way on every screen.
- *
- * Stale-while-revalidate: once a screen has data (fresh or from the disk
- * cache) it keeps showing it while refreshing, and a failed refresh leaves it
- * in place with a quiet notice instead of swapping in an error page.
- */
+// A failed refresh keeps the data on screen with a quiet notice rather than an error page.
 export function QueryState({
   query,
   skeleton,

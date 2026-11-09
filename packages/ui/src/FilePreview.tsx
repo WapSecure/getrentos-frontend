@@ -19,10 +19,8 @@ const isVideo = (mimeType: string | null | undefined, name: string) =>
   mimeType?.startsWith('video/') || /\\.(mp4|webm|mov|m4v|ogg)$/i.test(name);
 const isTextCsv = (mimeType: string | null | undefined, name: string) =>
   mimeType === 'text/csv' || mimeType === 'application/csv' || /\.csv$/i.test(name);
-/** Only directly-embeddable URLs can be previewed (http(s) or blob object URLs). */
 const isPreviewableUrl = (url: string | undefined) => !!url && /^(https?:\/\/|blob:)/i.test(url);
 
-/** Secure in-app viewer for user-provided image, PDF and video URLs. */
 export function FilePreview({ url, name, mimeType, className }: FilePreviewProps) {
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);

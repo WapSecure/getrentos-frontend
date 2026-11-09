@@ -12,10 +12,6 @@ interface ConfirmDialogProps {
   title: string;
   description: string;
   confirmLabel?: string;
-  /**
-   * `danger` (the default) for deleting, revoking, suspending; `primary` for a
-   * commitment that is not destructive, such as accepting a quote.
-   */
   tone?: 'danger' | 'primary';
   onConfirm: () => unknown | Promise<unknown>;
   isLoading?: boolean;
@@ -44,8 +40,7 @@ export const ConfirmDialog = ({
   promptMinLength = 1,
 }: ConfirmDialogProps) => {
   const promptId = useId();
-  // Set synchronously on the first press, so a double click cannot run the
-  // action twice before `isLoading` has re-rendered the button as disabled.
+  // Synchronous, so a double click can't run the action twice before the button re-renders disabled.
   const inFlight = useRef(false);
   const promptInvalid = promptRequired && promptValue.trim().length < promptMinLength;
 
@@ -108,7 +103,6 @@ export const ConfirmDialog = ({
               onClick={async () => {
                 if (inFlight.current) return;
                 inFlight.current = true;
-                // A refused action leaves the dialog open, so the person can retry or cancel.
                 try {
                   await onConfirm();
                 } catch {

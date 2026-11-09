@@ -12,11 +12,9 @@ export interface SegmentedControlProps<T extends string> {
   options: SegmentOption<T>[];
   value: T;
   onChange: (value: T) => void;
-  /** Names the group for screen readers, e.g. "Sign-in method". */
   accessibilityLabel?: string;
 }
 
-/** iOS-style segmented control — used for the auth method switchers. */
 export function SegmentedControl<T extends string>({
   options,
   value,

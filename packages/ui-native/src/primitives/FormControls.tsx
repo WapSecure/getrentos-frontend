@@ -14,12 +14,9 @@ import { useTheme } from '../theme';
 import { useReducedMotion } from '../accessibility';
 import { Text } from './Text';
 
-/* -------------------------------- Checkbox -------------------------------- */
-
 export interface CheckboxProps {
   checked: boolean;
   onChange: (checked: boolean) => void;
-  /** Visible label; also what screen readers announce unless overridden. */
   label: ReactNode;
   accessibilityLabel?: string;
   error?: string;
@@ -27,7 +24,6 @@ export interface CheckboxProps {
   style?: StyleProp<ViewStyle>;
 }
 
-/** A checkbox whose whole row is a 44-point target. */
 export function Checkbox({
   checked,
   onChange,
@@ -87,8 +83,6 @@ export function Checkbox({
   );
 }
 
-/* -------------------------------- FormAlert -------------------------------- */
-
 export type FormAlertTone = 'error' | 'warning' | 'success' | 'info';
 
 export interface FormAlertProps {
@@ -97,10 +91,6 @@ export interface FormAlertProps {
   title?: string;
 }
 
-/**
- * Inline status for a form: announced to screen readers the moment it appears
- * or changes, so a failed submit is never silent for VoiceOver/TalkBack users.
- */
 export function FormAlert({ message, tone = 'error', title }: FormAlertProps) {
   const { colors, spacing, radius } = useTheme();
   const reduceMotion = useReducedMotion();
@@ -150,13 +140,9 @@ export function FormAlert({ message, tone = 'error', title }: FormAlertProps) {
   );
 }
 
-/* -------------------------------- LinkButton -------------------------------- */
-
 export interface LinkButtonProps {
   label: string;
-  /** Small icon before the label (e.g. a map pin for "Directions"). */
   icon?: ReactNode;
-  /** Spoken name when the visible label needs context ("Edit address"). */
   accessibilityLabel?: string;
   onPress: () => void;
   tone?: 'primary' | 'muted' | 'destructive';
@@ -166,7 +152,6 @@ export interface LinkButtonProps {
   style?: StyleProp<ViewStyle>;
 }
 
-/** A text-only action ("Forgot password?", "Resend code") with a full 44-point target. */
 export function LinkButton({
   label,
   icon,

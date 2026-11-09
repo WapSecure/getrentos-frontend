@@ -1,9 +1,3 @@
-/**
- * Land Watch and field inspections, as the API returns them
- * (src/modules/land/services/land-watch.service.ts, land-inspection.service.ts),
- * with the words every app uses for them.
- */
-
 export type LandWatchTier = 'ESSENTIAL' | 'PROTECTED' | 'MANAGED';
 export type LandWatchStatus = 'ACTIVE' | 'PAUSED' | 'CANCELLED';
 export type LandInspectionKind =
@@ -36,7 +30,7 @@ export type LandWatchReminderKind =
   | 'PERFECTION_STEP'
   | 'OTHER';
 
-/** [lng, lat] points, as GeoJSON has them. */
+// [lng, lat], as GeoJSON has them.
 export type LandLocation = { ring: [number, number][] } | { pin: [number, number] } | null;
 
 export interface LandInspectionEvidence {
@@ -54,7 +48,6 @@ export interface LandInspectionEvidence {
   note: string | null;
 }
 
-/** An inspection as the owner sees it: the report only once staff accepted it. */
 export interface LandWatchInspection {
   id: string;
   reference: string;
@@ -129,20 +122,15 @@ export interface LandWatchTerms {
   routineIntervalDays: Record<LandWatchTier, number | null>;
 }
 
-/** Land an account can put under watch (GET /land/watch/options). */
 export interface LandWatchOption {
   kind: 'PARCEL' | 'PLOT';
-  /** Set for a land property the account owns. */
   propertyId: string | null;
-  /** Set for a plot the account bought. */
   landPlotId: string | null;
   label: string;
   place: string;
-  /** The watch already on this land, if any. */
   watchId: string | null;
 }
 
-/** An inspection on the inspector's desk. */
 export interface InspectorJob {
   id: string;
   reference: string;
@@ -151,7 +139,6 @@ export interface InspectorJob {
   instructions: string | null;
   dueBy: string | null;
   assignedAt: string | null;
-  /** Staff's questions when the report was sent back. */
   staffNote: string | null;
   land: {
     propertyId: string;
@@ -180,7 +167,6 @@ export interface InspectionIntegrityFlag {
   evidenceId?: string;
 }
 
-/** An inspection as staff see it. */
 export interface StaffInspection extends Omit<InspectorJob, 'report' | 'staffNote'> {
   subscriptionId: string | null;
   requestedById: string;
@@ -277,25 +263,20 @@ export const boundaryTone = (c: LandBoundaryCondition | null): LandWatchTone =>
         ? 'warning'
         : 'neutral';
 
-/** A point to centre a map or navigation on: the first boundary corner, or the pin. */
 export const landPoint = (location: LandLocation): { lat: number; lng: number } | null => {
   if (!location) return null;
   const [lng, lat] = 'ring' in location ? location.ring[0] : location.pin;
   return { lat, lng };
 };
 
-/** "80 m" up to a kilometre, then "1.2 km" / "499 km". */
 export const formatDistance = (metres: number): string => {
   if (metres < 1000) return `${Math.round(metres)} m`;
   const km = metres / 1000;
   return `${km < 10 ? km.toFixed(1) : Math.round(km)} km`;
 };
 
-/** Where a capture was taken, relative to the land. */
 export const describeDistance = (metres: number | null): string =>
   metres == null ? 'no location' : metres === 0 ? 'on the land' : `${formatDistance(metres)} away`;
-
-// ─── Vendor coordination (Managed tier) ─────────────────────────────────────
 
 export type LandWatchJobKind =
   | 'FENCING'
@@ -331,11 +312,9 @@ export interface LandWatchJobProof {
   mimeType: string;
   note: string | null;
   createdAt: string;
-  /** Short-lived signed link. */
   url: string;
 }
 
-/** A job as the owner sees it (GET /land/watch/:id/jobs). */
 export interface LandWatchJob {
   id: string;
   reference: string;
@@ -350,13 +329,11 @@ export interface LandWatchJob {
   completionNote: string | null;
   cancelledAt: string | null;
   cancelReason: string | null;
-  /** The independent inspection of the finished work, once booked. */
   checkInspectionId: string | null;
   quotes: LandWatchJobQuote[];
   proof: LandWatchJobProof[];
 }
 
-/** A job as staff see it (GET /admin/land/watch/jobs). */
 export interface StaffLandWatchJob extends LandWatchJob {
   tier: LandWatchTier;
   land: { label: string; city: string; state: string; propertyId: string };
@@ -372,7 +349,6 @@ export const LAND_WATCH_JOB_KIND_LABELS: Record<LandWatchJobKind, string> = {
   OTHER: 'Other work',
 };
 
-/** What each status means to the owner. */
 export const LAND_WATCH_JOB_STATUS_LABELS: Record<
   LandWatchJobStatus,
   { label: string; tone: 'neutral' | 'info' | 'warning' | 'success' | 'danger' }
@@ -385,6 +361,5 @@ export const LAND_WATCH_JOB_STATUS_LABELS: Record<
   CANCELLED: { label: 'Cancelled', tone: 'neutral' },
 };
 
-/** Said wherever an owner accepts a quote: Sureground arranges, the owner pays. */
 export const LAND_WATCH_JOB_PAYMENT_NOTE =
   'You pay the vendor directly. Sureground arranges the work and records proof of it, but does not hold or pass on this money.';

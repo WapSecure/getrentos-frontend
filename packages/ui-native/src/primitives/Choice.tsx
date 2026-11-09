@@ -3,27 +3,18 @@ import { Pressable, Switch, View, type StyleProp, type ViewStyle } from 'react-n
 import { useTheme } from '../theme';
 import { Text } from './Text';
 
-/* -------------------------------- SwitchRow -------------------------------- */
-
 export interface SwitchRowProps {
   label: string;
   description?: string;
-  /** Spoken name when the visible label needs context ("Email for rent reminders"). */
   accessibilityLabel?: string;
   value: boolean;
   onValueChange: (value: boolean) => void;
   disabled?: boolean;
-  /** Shown left of the text, e.g. a channel icon. */
   icon?: ReactNode;
-  /** `destructive` turns the track red when on, for switches like "Emergency". */
   tone?: 'default' | 'destructive';
   style?: StyleProp<ViewStyle>;
 }
 
-/**
- * A settings row with a switch. The whole row toggles and is one element for
- * screen readers ("Push notifications, switch, on"), with a 52-point target.
- */
 export function SwitchRow({
   label,
   description,
@@ -70,15 +61,13 @@ export function SwitchRow({
         value={value}
         onValueChange={onValueChange}
         disabled={disabled}
-        // The row carries the semantics; the switch itself would be announced twice.
         accessibilityElementsHidden
         importantForAccessibility="no-hide-descendants"
         trackColor={{
           true: tone === 'destructive' ? colors.destructive : colors.primary,
           false: colors.border,
         }}
-        // White in both themes, like the platform switch; a card-coloured thumb
-        // disappears into a dark track.
+        // A card-coloured thumb disappears into a dark track.
         thumbColor={colors.primaryForeground}
         ios_backgroundColor={colors.border}
         // react-native-web paints the on thumb with its own teal unless told otherwise.
@@ -88,13 +77,10 @@ export function SwitchRow({
   );
 }
 
-/* -------------------------------- RadioGroup -------------------------------- */
-
 export interface RadioOption<T extends string = string> {
   value: T;
   label: string;
   description?: string;
-  /** Right-aligned detail: a price, a count. */
   aside?: string;
   disabled?: boolean;
 }
@@ -103,16 +89,13 @@ export interface RadioGroupProps<T extends string> {
   value: T | null | undefined;
   onChange: (value: T) => void;
   options: readonly RadioOption<T>[];
-  /** `list`: compact rows. `card`: each option a bordered, selectable tile. */
   variant?: 'list' | 'card';
   label?: string;
-  /** Spoken group name when the screen shows its own heading instead of `label`. */
   accessibilityLabel?: string;
   error?: string;
   style?: StyleProp<ViewStyle>;
 }
 
-/** Choose one of a few options that should all be visible at once. */
 export function RadioGroup<T extends string>({
   value,
   onChange,
@@ -172,7 +155,6 @@ export function RadioGroup<T extends string>({
                       ? colors.destructive
                       : colors.border,
                   backgroundColor: colors.card,
-                  // Keep the content still when the border thickens.
                   margin: selected ? 0 : 1,
                 },
               ]}

@@ -8,16 +8,10 @@ export interface OtpInputProps {
   length?: number;
   disabled?: boolean;
   autoFocus?: boolean;
-  /** Paints every cell in the error colour, e.g. after a rejected code. */
   invalid?: boolean;
   onComplete?: (value: string) => void;
 }
 
-/**
- * Segmented one-time-code entry. A single logical value, rendered as `length`
- * boxes; taps focus the right cell, backspace steps back, and OS SMS
- * autofill drops the whole code into the first box.
- */
 export function OtpInput({
   value,
   onChange,
@@ -35,7 +29,6 @@ export function OtpInput({
   const setAt = (index: number, raw: string) => {
     const incoming = raw.replace(/\D/g, '');
     if (!incoming) {
-      // deletion
       const next = digits.slice();
       next[index] = '';
       const joined = next.join('').slice(0, length);

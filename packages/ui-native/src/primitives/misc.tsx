@@ -5,16 +5,12 @@ import { useTheme } from '../theme';
 import { Text } from './Text';
 import { useReducedMotion } from '../accessibility';
 
-/* ------------------------------- Divider ---------------------------------- */
-
 export function Divider({ style }: { style?: ViewProps['style'] }) {
   const { colors } = useTheme();
   return (
     <View style={[{ height: StyleSheet.hairlineWidth, backgroundColor: colors.border }, style]} />
   );
 }
-
-/* -------------------------------- Badge ---------------------------------- */
 
 export type BadgeTone = 'neutral' | 'info' | 'success' | 'warning' | 'danger';
 
@@ -45,8 +41,6 @@ export function Badge({ label, tone = 'neutral' }: { label: string; tone?: Badge
   );
 }
 
-/* -------------------------------- Avatar -------------------------------- */
-
 export function Avatar({ name, size = 40 }: { name?: string | null; size?: number }) {
   const { colors } = useTheme();
   const initials = (name ?? '')
@@ -72,8 +66,6 @@ export function Avatar({ name, size = 40 }: { name?: string | null; size?: numbe
     </View>
   );
 }
-
-/* ------------------------------- Skeleton ------------------------------- */
 
 export function Skeleton({
   height = 16,
@@ -119,8 +111,6 @@ export function Skeleton({
   );
 }
 
-/* ------------------------------ EmptyState ------------------------------ */
-
 export function EmptyState({
   icon,
   title,
@@ -151,8 +141,6 @@ export function EmptyState({
     </View>
   );
 }
-
-/* ------------------------------ ErrorState ----------------------------- */
 
 export function ErrorState({
   title = 'Something went wrong',

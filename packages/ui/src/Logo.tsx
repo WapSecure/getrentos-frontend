@@ -29,7 +29,6 @@ export const Logo = ({ href = '/', className = '', size = 'md', showText = true 
           currentSize.mark
         )}
       >
-        {/* Home on firm ground: an open roof over a solid ground line. */}
         <g
           fill="none"
           stroke="currentColor"

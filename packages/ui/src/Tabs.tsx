@@ -6,11 +6,6 @@ import { cn } from '@sureground/shared';
 
 export const Tabs = RadixTabs.Root;
 
-/**
- * `pill` (the default) is a compact switcher on a tinted track. `underline`
- * is for page-level sections that sit on a card's top edge, where a pill
- * track would read as a second card.
- */
 export type TabsVariant = 'pill' | 'underline';
 
 const VariantContext = createContext<TabsVariant>('pill');
@@ -33,14 +28,7 @@ export const TabsList = ({ className, variant = 'pill', ...props }: TabsListProp
   </VariantContext.Provider>
 );
 
-/**
- * Radix points every trigger's `aria-controls` at its panel. Many screens use
- * tabs purely as a filter strip with no panels, and Radix only mounts the
- * active panel anyway, so that reference is often to an id that is not in the
- * document — an invalid ARIA value. Keep the reference only while its panel
- * exists. Runs after every render because panels mount and unmount with the
- * selection.
- */
+// Radix's aria-controls often names an unmounted panel (invalid ARIA); runs every render as panels mount and unmount.
 function useValidAriaControls() {
   const ref = useRef<HTMLButtonElement>(null);
   const target = useRef<string | null>(null);
@@ -74,7 +62,6 @@ export const TabsTrigger = ({ className, ...props }: RadixTabs.TabsTriggerProps)
               'data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm'
             )
           : cn(
-              // A bar on the list's bottom border marks the open section.
               '-mb-px border-b-2 border-transparent px-0.5 pb-2.5 pt-1 text-sm font-medium whitespace-nowrap transition-colors outline-none',
               'rounded-t-sm text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring',
               'data-[state=active]:border-primary data-[state=active]:text-foreground'

@@ -4,20 +4,13 @@ import type { HTMLAttributes } from 'react';
 import * as RadixPopover from '@radix-ui/react-popover';
 import { cn } from '@sureground/shared';
 
-/**
- * A panel anchored to a trigger (notification lists, quick filters): it closes
- * on Escape and on a click outside, moves focus in when it opens and back to
- * the trigger when it closes. For a list of actions, use DropdownMenu instead.
- */
+// For a list of actions, use DropdownMenu instead.
 export const Popover = RadixPopover.Root;
 export const PopoverTrigger = RadixPopover.Trigger;
 export const PopoverClose = RadixPopover.Close;
 
 interface PopoverContentProps extends RadixPopover.PopoverContentProps {
-  /**
-   * `sections`: compose PopoverHeader, PopoverBody and PopoverFooter; only
-   * the body scrolls, so a title and a "View all" link stay in view.
-   */
+  /** `sections`: compose PopoverHeader, PopoverBody and PopoverFooter; only the body scrolls. */
   layout?: 'scroll' | 'sections';
 }
 

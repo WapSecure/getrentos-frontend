@@ -13,16 +13,9 @@ interface SignaturePadProps {
 
 type Mode = 'draw' | 'upload';
 
-/** The longest edge we keep for an uploaded signature image. Normalising to a
- * bounded PNG keeps the payload small and the format consistent with the drawn
- * signature, whatever the user uploaded. */
 const MAX_UPLOAD_EDGE = 800;
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 
-/** Native canvas signature capture — no third-party signing library. Signs by
- * drawing (mouse, touch, or pen via unified pointer events) OR by uploading an
- * image of a signature, for anyone who cannot draw one. Either way it reports
- * the signature as a PNG data URL (or null once cleared/empty). */
 export function SignaturePad({
   onChange,
   width = 480,
@@ -111,8 +104,7 @@ export function SignaturePad({
     reader.onload = () => {
       const img = new Image();
       img.onload = () => {
-        // Normalise to a bounded PNG so the stored signature stays small and
-        // consistent with the drawn one.
+        // A bounded PNG keeps the stored signature small and consistent with a drawn one.
         const scale = Math.min(1, MAX_UPLOAD_EDGE / Math.max(img.width, img.height));
         const canvas = document.createElement('canvas');
         canvas.width = Math.round(img.width * scale);
@@ -143,8 +135,7 @@ export function SignaturePad({
 
   const switchMode = (next: Mode) => {
     if (next === mode) return;
-    // Switching input methods clears the pending signature so the two can't
-    // disagree about what was signed.
+    // Cleared so the two input methods can't disagree about what was signed.
     if (mode === 'draw') handleClearDrawing();
     else handleClearUpload();
     setMode(next);

@@ -6,9 +6,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  /* The brand face, set as --font-manrope by next/font on <html> (self-hosted,
-     with a size-matched fallback so nothing shifts). Where no app sets it, the
-     platform UI face. */
+  /* --font-manrope is set by next/font on <html>; without it, the platform UI face. */
   --font-ui: var(
     --font-manrope,
     -apple-system,
@@ -70,11 +68,8 @@
   --shadow-xl: var(--shadow-xl);
 }
 
-/* Readable type scale. Small text (labels, metadata, chips) is 13px and
-   regular UI text 15px, one step above Tailwind's defaults: at 12/14px the
-   app read as small and faint. Nothing in the product goes below 12px. */
+/* One step above Tailwind's defaults: at 12/14px the app read as small and faint. */
 @theme {
-  /* The floor: counters, calendar cells and dense badges. */
   --text-2xs: 0.75rem;
   --text-2xs--line-height: calc(1 / 0.75);
   --text-xs: 0.8125rem;
@@ -84,8 +79,7 @@
 }
 
 @layer base {
-  /* Small text is set in medium weight: at 13px Manrope's regular is too
-     thin to read comfortably. An explicit font-* utility still wins. */
+  /* At 13px Manrope's regular weight is too thin to read. */
   .text-2xs,
   .text-xs {
     font-weight: 500;
@@ -122,18 +116,13 @@
     letter-spacing: inherit;
   }
 
-  /* Every real CTA gets a pointer cursor by default — components only need to
-     opt out (disabled/aria-disabled), never opt in. Fixes the long tail of
-     hand-rolled icon buttons and menu triggers that never set this themselves. */
+  /* Components opt out of the pointer cursor (disabled/aria-disabled), never opt in. */
   button:not(:disabled):not([aria-disabled='true']),
   [role='button']:not([aria-disabled='true']):not([data-disabled]) {
     cursor: pointer;
   }
 
-  /* A single visual baseline for legacy form markup while screens are migrated to
-     the composable controls in components/ui. The browser fields remain fully
-     semantic (important for password managers and mobile keyboards), but no
-     longer carry the platform's unstyled default presentation. */
+  /* Baseline for legacy form markup until screens move to the composable controls. */
   input:not([type='checkbox']):not([type='radio']):not([type='file']),
   select,
   textarea {
@@ -199,7 +188,6 @@
     color: var(--color-foreground);
   }
 
-  /* Refined native scrollbars (WebKit) that respect the current theme. */
   * {
     scrollbar-width: thin;
     scrollbar-color: var(--color-border) transparent;
@@ -221,7 +209,6 @@
     background: transparent;
   }
 
-  /* Consistent keyboard-only focus baseline (components may override with ring utilities). */
   :focus-visible {
     outline: 2px solid var(--ring);
     outline-offset: 2px;
@@ -233,7 +220,6 @@
 }
 
 @layer components {
-  /* Reusable San Francisco type styles modelled after Apple's UI hierarchy. */
   .type-display {
     font-size: clamp(2rem, 4vw, 3rem);
     font-weight: 700;
@@ -315,8 +301,6 @@
     font-size: 0.75rem;
   }
 
-  /* Shared application composition. New and migrated screens use these instead
-     of inventing their own widths, gutters and heading rhythm. */
   .app-page {
     width: 100%;
     max-width: 90rem;
@@ -336,14 +320,12 @@
     margin-bottom: 2rem;
   }
 
-  /* Navigation is the translucent layer; working surfaces stay opaque. */
   .workspace-navbar {
     border-bottom: 1px solid var(--border);
     background-color: var(--card);
   }
 
-  /* The desktop sidebar's width, read by the sidebar and by the page beside it
-     (`.workspace-main`). useSidebarRail sets data-sidebar="rail" on <html>. */
+  /* useSidebarRail sets data-sidebar="rail" on <html>. */
   :root {
     --workspace-sidebar-width: 16rem;
   }
@@ -370,9 +352,7 @@
   .workspace-sidebar {
     width: var(--workspace-sidebar-width);
     background-color: var(--background);
-    /* The list is longer than most screens: fade the bottom edge so a cut-off
-       item reads as "more below", not as the end. Extra padding lets the last
-       item scroll clear of the fade. */
+    /* The fade makes a cut-off item read as "more below"; the padding lets the last item clear it. */
     padding-bottom: 3rem;
     -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 2.5rem), transparent);
     mask-image: linear-gradient(to bottom, #000 calc(100% - 2.5rem), transparent);
@@ -388,7 +368,6 @@
     letter-spacing: 0;
   }
 
-  /* A group heading that folds its links: the label itself is the control. */
   .sidebar-group-toggle {
     display: flex;
     min-height: 2rem;
@@ -414,9 +393,6 @@
     outline-offset: 2px;
   }
 
-  /* 36px rows for a pointer (the desktop sidebar), 44px wherever the primary
-     input is touch (tablets, the phone drawer), so a long sidebar is scannable
-     without scrolling and still easy to tap. */
   .sidebar-item {
     display: flex;
     min-height: 2.25rem;
@@ -451,10 +427,8 @@
     box-shadow: inset 2px 0 0 var(--primary);
   }
 
-  /* Icon rail: each row is its icon, and its name appears beside it on hover
-     or keyboard focus. The name stays in the link (only faded), so screen
-     readers and the accessible name are unchanged. The rail lists few rows, so
-     it does not scroll; that lets the names show outside its edge. */
+  /* The name stays in the link (only faded) so the accessible name is unchanged;
+     the rail doesn't scroll, which lets names show outside its edge. */
   .workspace-sidebar[data-rail] {
     overflow: visible;
     -webkit-mask-image: none;
@@ -564,9 +538,7 @@
   }
 }
 
-/* Phones and tablets share one model: a bottom bar for the role's main pages
-   and the menu button for the rest. The bar is fixed, so keep the last
-   controls and content above it and the home indicator. */
+/* The bottom bar is fixed: keep the last controls above it and the home indicator. */
 @media (max-width: 1023.98px) {
   .mobile-primary-nav ~ main {
     padding-bottom: calc(5.75rem + env(safe-area-inset-bottom));
@@ -593,8 +565,7 @@
   }
 }
 
-/* The app headers are sticky: keep anything scrolled or tabbed to clear of
-   them. Below lg they carry a search row under the top bar. */
+/* The headers are sticky (with a search row below lg): keep scrolled-to content clear of them. */
 html {
   scroll-padding-top: 9rem;
 }

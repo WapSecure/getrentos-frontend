@@ -12,26 +12,16 @@ export interface PreviewFile {
 }
 
 interface DocumentPreviewButtonProps {
-  /** Document whose URL is already known (e.g. a signed URL on the row). */
   file?: PreviewFile | null;
-  /** Async resolver for the document URL (used when rows only carry ids/keys). */
   resolveUrl?: () => Promise<string | null | undefined>;
-  /** Shown in the viewer header; falls back to `file?.name`. */
   name?: string;
   mimeType?: string;
-  /** Visible label; when omitted renders an icon-only action button. */
   label?: string;
   title?: string;
   className?: string;
   disabled?: boolean;
 }
 
-/**
- * Action that opens any document (stored or freshly uploaded) in the in-app
- * viewer (FilePreviewDialog) so reviewers can zoom/rotate/paginate the actual
- * file instead of only seeing its name. URL can be provided directly or
- * resolved asynchronously from an id/key.
- */
 export function DocumentPreviewButton({
   file,
   resolveUrl,

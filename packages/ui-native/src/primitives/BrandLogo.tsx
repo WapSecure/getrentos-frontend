@@ -4,17 +4,13 @@ import { useTheme } from '../theme';
 import { Text } from './Text';
 
 export interface BrandLogoProps {
-  /** Height of the mark in px. Default 24. */
   size?: number;
-  /** Show the "Sureground" wordmark next to the mark. Default true. */
   showWordmark?: boolean;
-  /** Show the brand tagline under the wordmark. Default false. */
   showTagline?: boolean;
   tone?: 'brand' | 'mono';
   style?: StyleProp<ViewStyle>;
 }
 
-/** The Sureground logo — official mark + wordmark, theme-aware. */
 export function BrandLogo({
   size = 24,
   showWordmark = true,
@@ -59,7 +55,6 @@ export function BrandLogo({
   );
 }
 
-/** Just the mark, no wordmark. */
 export function BrandMark({
   size = 24,
   tone = 'brand',
@@ -70,7 +65,6 @@ export function BrandMark({
   const { colors } = useTheme();
   const stroke = tone === 'mono' ? colors.foreground : colors.primary;
 
-  // Home on firm ground: an open roof over a solid ground line.
   return (
     <Svg width={size} height={size} viewBox="0 0 128 128">
       <Path

@@ -33,23 +33,16 @@ const ACCEPTED_TYPES: Record<string, boolean> = {
 };
 
 interface DocumentUploadProps {
-  /** Controlled list of files the user has picked but not yet submitted. */
   value: PendingUpload[];
   onChange: (next: PendingUpload[]) => void;
   accept?: string;
   multiple?: boolean;
-  /** Per-file size cap in MB (default 10). */
   maxSizeMB?: number;
   label?: string;
   hint?: string;
   disabled?: boolean;
-  /** Opens the camera straight away on phones, e.g. `environment` for a photo of a fault. */
   capture?: 'user' | 'environment';
-  /**
-   * For photos of documents (IDs, titles, certificates): check each picked image
-   * for blur, darkness, glare and size, and say how to retake it. Advice only:
-   * the file can still be sent.
-   */
+  /** Advice only: a photo that fails the check can still be sent. */
   checkPhotoQuality?: boolean;
   id?: string;
   className?: string;
@@ -67,11 +60,6 @@ const isPdfFile = (file: File) => file.type === 'application/pdf' || /\.pdf$/i.t
 const isVideoFile = (file: File) =>
   file.type.startsWith('video/') || /\.(mp4|webm|mov)$/i.test(file.name);
 
-/**
- * Inline file picker with a good upload UX: drag & drop, a per-file thumbnail,
- * size/type checks and — most importantly — a live "Preview" button per file so
- * the user inspects the actual content (zoom/rotate/paginate) BEFORE submitting.
- */
 export function DocumentUpload({
   value,
   onChange,
@@ -86,18 +74,14 @@ export function DocumentUpload({
   id,
   className,
 }: DocumentUploadProps) {
-  // Inside a Field, the drop zone is named by the Field's label and its own
-  // prompt, and carries the Field's hint and error.
   const field = useFieldControl({ id });
   const promptId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragActive, setDragActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [previewItem, setPreviewItem] = useState<PendingUpload | null>(null);
-  // Live object URLs so preview/thumbnail work before any upload happens.
   const [objectUrls, setObjectUrls] = useState<Record<string, string>>({});
-  // Retake advice per picked photo, keyed by the file itself: callers may
-  // rebuild their items with their own ids.
+  // Keyed by the file itself: callers may rebuild their items with their own ids.
   const [advice, setAdvice] = useState<Record<string, string[]>>({});
 
   useEffect(() => {

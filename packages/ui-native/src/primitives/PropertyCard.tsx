@@ -21,25 +21,16 @@ export interface PropertyCardData {
   title: string;
   location: string;
   price: number;
-  /** `total` = the whole price for chosen dates (the tag says what it covers). */
   period?: 'month' | 'year' | 'night' | 'total' | null;
   bedrooms?: number;
   bathrooms?: number;
-  /** Floor area in m². */
+  /** m². */
   size?: number;
   image?: string | null;
   verified?: boolean;
-  /**
-   * Where the listing's verification stands, in words ("Fully verified",
-   * "Verified · ownership pending", "Verification in progress"). Shown in place
-   * of the plain "Verified" chip when present.
-   */
   trustLabel?: { label: string; tone: 'verified' | 'partial' | 'pending' };
-  /** Match/quality score 0–100, shown as a ring when present. */
   score?: number | null;
-  /** One short secondary fact, e.g. "600 sqm · C of O" or "Instant book". */
   tag?: string;
-  /** Short trust signals shown over the photo, e.g. "Inspected", "Fair price". */
   badges?: string[];
 }
 
@@ -50,7 +41,6 @@ const SPOKEN_PERIOD = {
   total: 'in total',
 } as const;
 
-/** What a screen reader hears for a card: price in naira, not a bare number. */
 export function describeProperty(p: PropertyCardData): string {
   const price = `${Math.round(p.price).toLocaleString('en-NG')} naira${p.period ? ` ${SPOKEN_PERIOD[p.period]}` : ''}`;
   return [
@@ -72,14 +62,11 @@ export function describeProperty(p: PropertyCardData): string {
 export interface PropertyCardProps {
   property: PropertyCardData;
   onPress?: (id: string) => void;
-  /** Renders the save heart when provided. */
   onToggleSave?: (id: string) => void;
   saved?: boolean;
-  /** Renders a comparison action below the card when provided. */
   onToggleCompare?: (id: string) => void;
   compared?: boolean;
   compareDisabled?: boolean;
-  /** `full` = image on top (default). `row` = compact horizontal (saved list, map). */
   layout?: 'full' | 'row';
 }
 
@@ -159,7 +146,6 @@ function PropertyCardBase({
     <View
       style={{
         width: row ? 116 : '100%',
-        // A photo gets a photo's height; "no photo yet" gets a short strip.
         height: row ? 116 : property.image ? 196 : 96,
         backgroundColor: colors.secondary,
       }}
@@ -173,13 +159,11 @@ function PropertyCardBase({
           transition={200}
           recyclingKey={property.id}
           accessible={false}
-          // Decorative on the web build: the card's title names the home.
           alt=""
           style={StyleSheet.absoluteFill}
         />
       ) : (
-        // No photo: a quiet themed tile, not the light blur placeholder, which
-        // glared as a pale block in dark mode.
+        // Not the blur placeholder: it glares as a pale block in dark mode.
         <View
           style={[
             StyleSheet.absoluteFill,

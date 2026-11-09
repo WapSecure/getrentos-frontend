@@ -1,20 +1,11 @@
-/**
- * One plain-words label for a listing's trust chain, in place of a count like
- * "3/4 trust": renters should not have to work out what a number means.
- *
- * Payment protection is a platform guarantee, so the label turns on the three
- * checks that can actually be outstanding. All done: "Fully verified". One
- * left: say which ("Verified · ownership pending"). More than one: the honest
- * "Verification in progress". Web and mobile both use this, so a listing reads
- * the same everywhere.
- */
+// Payment protection is a platform guarantee, so the label turns only on the three checks that can
+// be outstanding.
 export type TrustLabelTone = 'verified' | 'partial' | 'pending';
 
 export interface TrustChainLike {
   steps: { id: string; met: boolean }[];
 }
 
-/** What each outstanding check is called in the label. */
 const PENDING_NAME: Record<string, string> = {
   owner: 'owner ID pending',
   authority: 'ownership pending',

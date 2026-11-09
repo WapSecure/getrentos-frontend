@@ -2,10 +2,6 @@
 
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 
-/**
- * The control at the foot of a workspace sidebar that folds it to an icon rail
- * and back. Styled as a sidebar row so it sits with the links it affects.
- */
 export function SidebarRailToggle({
   rail,
   onToggle,

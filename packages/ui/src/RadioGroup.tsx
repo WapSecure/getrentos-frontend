@@ -8,14 +8,9 @@ export interface RadioOption<T extends string = string> {
   value: T;
   label: ReactNode;
   description?: ReactNode;
-  /** Shown at the right of a card option: a price, a count, a badge. */
   aside?: ReactNode;
   icon?: ReactNode;
   disabled?: boolean;
-  /**
-   * The colour of this option once chosen, when the choice itself carries
-   * meaning: Pass in success, Flag in destructive. Defaults to primary.
-   */
   tone?: RadioTone;
 }
 
@@ -53,17 +48,11 @@ interface RadioGroupProps<T extends string> {
   value: T | '' | undefined;
   onValueChange: (value: T) => void;
   options: readonly RadioOption<T>[];
-  /** `list`: compact dots. `card`: each option is a bordered, selectable tile. */
   variant?: 'list' | 'card';
   orientation?: 'vertical' | 'horizontal';
-  /** Columns for the card variant on wider screens. */
   columns?: 1 | 2 | 3;
   disabled?: boolean;
-  /**
-   * `automatic` (native radio behaviour): arrow keys move and choose.
-   * `manual`: arrow keys only move focus; Space or Enter chooses. Use it when
-   * choosing saves straight away, so arrowing past an option does not send it.
-   */
+  /** Use `manual` when choosing saves straight away, so arrowing past an option doesn't send it. */
   activation?: 'automatic' | 'manual';
   id?: string;
   invalid?: boolean;
@@ -74,11 +63,6 @@ interface RadioGroupProps<T extends string> {
 
 const COLUMNS = { 1: '', 2: 'sm:grid-cols-2', 3: 'sm:grid-cols-2 lg:grid-cols-3' } as const;
 
-/**
- * Pick one of a few options, all visible at once. Arrow keys move and select,
- * as with native radios; Tab enters and leaves the group as one stop.
- * Inside a Field, the field's label names the group.
- */
 export function RadioGroup<T extends string>({
   value,
   onValueChange,

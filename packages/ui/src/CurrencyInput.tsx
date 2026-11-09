@@ -9,25 +9,16 @@ export interface CurrencyInputProps extends Omit<
   InputHTMLAttributes<HTMLInputElement>,
   'type' | 'value' | 'onChange' | 'defaultValue' | 'prefix'
 > {
-  /** The raw numeric value (submitted to the backend). Accepts number or numeric string. */
   value: number | string;
-  /** Called with the raw numeric value (no formatting). */
   onValueChange: (value: number) => void;
-  /** Currency symbol shown before the number, e.g. "₦". */
   prefix?: string;
-  /** Show 0 as "0" rather than an empty box. Off by default, so a fresh form shows its placeholder. */
+  /** Off by default, so a fresh form shows its placeholder rather than "0". */
   allowZero?: boolean;
-  /** Typing past this is ignored. */
   maxValue?: number;
-  /** Marks the control invalid. Inside a Field, its `error` does this for you. */
+  /** Inside a Field, its `error` sets this for you. */
   invalid?: boolean;
 }
 
-/**
- * Money input: digits only (letters, signs and decimals cannot be typed or
- * pasted), shown with thousands separators as the user types (1,500,000) while
- * the raw whole number goes to the form.
- */
 export const CurrencyInput = forwardRef<HTMLInputElement, CurrencyInputProps>(
   (
     {

@@ -42,7 +42,6 @@ export const DocumentUploadDialog = ({
   const [error, setError] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
-  // Retake advice for a picked photo of a document (blur, dark, glare, too small).
   const [advice, setAdvice] = useState<{ file: File; problems: string[] } | null>(null);
 
   useEffect(() => {
@@ -57,7 +56,6 @@ export const DocumentUploadDialog = ({
   }, [file]);
   const photoAdvice = advice && advice.file === file ? advice.problems : [];
 
-  // Object URL for a live preview of the selected file (images / PDFs).
   useEffect(() => {
     if (!file || (!isImageFile(file) && !isPdfFile(file))) {
       setPreviewUrl(null);

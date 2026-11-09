@@ -6,10 +6,8 @@ import { FormAlert } from './FormControls';
 import { Text } from './Text';
 
 export interface SuggestedDraftProps {
-  /** The drafted text. */
   text: string;
   title?: string;
-  /** Points to confirm before sending. */
   toCheck?: string[];
   disclaimer?: string;
   useLabel?: string;
@@ -17,11 +15,6 @@ export interface SuggestedDraftProps {
   onDismiss?: () => void;
 }
 
-/**
- * A drafted piece of text to read, use and edit before sending, with what to
- * check first. Nothing is sent from here. The web twin is SuggestedDraft in
- * @sureground/ui.
- */
 export function SuggestedDraft({
   text,
   title = 'Suggested reply',

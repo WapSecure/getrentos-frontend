@@ -15,17 +15,11 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 const SPRING = { mass: 0.5, damping: 14, stiffness: 220 };
 
 export interface PressableScaleProps extends PressableProps {
-  /** Scale at the bottom of the press. Kept subtle so controls feel stable. */
   activeScale?: number;
-  /** Light selection haptic on press-in (native only). Default true. */
   haptic?: boolean;
 }
 
-/**
- * The tap target for the whole app: springs down on press, back on release,
- * plus a light selection haptic. The animated style reads ONLY a shared value
- * (never React props) so it can't trigger re-render loops on native.
- */
+// The animated style must read only a shared value, never props, or it can loop re-renders on native.
 export const PressableScale = forwardRef<View, PressableScaleProps>(function PressableScale(
   {
     activeScale = 0.985,

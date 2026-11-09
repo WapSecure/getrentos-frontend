@@ -13,7 +13,7 @@ import { AnimatePresence } from 'framer-motion';
 import { Toast, type ToastVariant } from './Toast';
 
 export interface ToastOptions {
-  /** Milliseconds before it closes; null keeps it until dismissed. Defaults by variant. */
+  /** Null keeps it until dismissed. */
   duration?: number | null;
   action?: { label: string; onClick: () => void };
 }
@@ -25,7 +25,6 @@ interface ToastItem extends ToastOptions {
 }
 
 export interface ToastApi {
-  /** Show a toast; returns its id so it can be dismissed early. */
   show: (message: string, variant?: ToastVariant, options?: ToastOptions) => number;
   success: (message: string, options?: ToastOptions) => number;
   error: (message: string, options?: ToastOptions) => number;
@@ -36,15 +35,8 @@ export interface ToastApi {
 
 const ToastContext = createContext<ToastApi | null>(null);
 
-/** At most this many on screen; the oldest goes when another arrives. */
 const MAX_VISIBLE = 3;
 
-/**
- * One place that shows toasts for the whole app, stacked top right (top on
- * phones). Screens call `useToast()` instead of each keeping its own toast
- * state and rendering its own <Toast>. The same message twice in a row is
- * shown once, so a double-click does not stack duplicates.
- */
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<ToastItem[]>([]);
   const nextId = useRef(1);
@@ -101,7 +93,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   );
 }
 
-/** The app's toasts. Must be under ToastProvider (QueryProvider includes one). */
+// Must be under ToastProvider (QueryProvider includes one).
 export function useToast(): ToastApi {
   const api = useContext(ToastContext);
   if (!api)

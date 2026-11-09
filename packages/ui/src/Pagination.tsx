@@ -8,15 +8,7 @@ interface PaginationProps {
   pageSize: number;
   total: number;
   onPageChange: (page: number) => void;
-  /**
-   * True while the count is still unknown — normally React Query's `isPending`,
-   * not `isLoading`: `isPending` is also true during SSR and the hydration gap,
-   * which is exactly when `total` is still 0 for want of an answer.
-   *
-   * Without it a list that passes `total={data?.total ?? 0}` announces
-   * "No results" underneath its own loading skeletons, and a slow request looks
-   * like an empty one.
-   */
+  /** Pass React Query's `isPending`, not `isLoading`: only it covers SSR and hydration, when `total` is still 0. */
   isLoading?: boolean;
   className?: string;
 }

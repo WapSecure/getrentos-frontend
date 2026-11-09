@@ -7,11 +7,8 @@ interface EmptyStateProps {
   title: string;
   description?: ReactNode;
   action?: ReactNode;
-  /** A quieter second action, e.g. "Learn more" beside "Add a property". */
   secondaryAction?: ReactNode;
-  /** `compact` sits inside a card or panel; `default` fills a page section. */
   size?: 'default' | 'compact';
-  /** Drop the frame when the parent already draws one. */
   bare?: boolean;
   className?: string;
 }

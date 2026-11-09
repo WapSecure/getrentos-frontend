@@ -8,27 +8,16 @@ import { FieldContext } from './fieldContext';
 interface FieldProps {
   label: ReactNode;
   children: ReactNode;
-  /** The control's id. Omit it: the Field makes one and hands it to the control. */
+  /** Omit it: the Field makes one and hands it to the control. */
   htmlFor?: string;
   hint?: ReactNode;
-  /** Shown instead of the hint, marks the control invalid and is announced. */
   error?: ReactNode;
   required?: boolean;
-  /** Shown beside the label for fields that are not required, e.g. "Optional". */
   optionalLabel?: ReactNode;
-  /** Extra content on the label row, e.g. a "Forgot password?" link or a counter. */
   labelAside?: ReactNode;
   className?: string;
 }
 
-/**
- * A labelled form control with its hint or error.
- *
- * The label, hint and error are tied to the control inside through
- * FieldContext: every input in this package picks up the id, `aria-describedby`,
- * `aria-invalid` and `aria-required`, so a screen reader announces the label,
- * the hint and any error when the control is focused.
- */
 export function Field({
   label,
   children,

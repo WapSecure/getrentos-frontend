@@ -16,22 +16,11 @@ export interface TextProps extends RNTextProps {
   variant?: TypographyVariant;
   color?: ColorToken;
   center?: boolean;
-  /** Uppercases and applies label tracking — for eyebrows / section labels. */
   uppercase?: boolean;
-  /**
-   * Marks this string as a heading at a specific level.
-   *
-   * `accessibilityRole="header"` alone renders as an <h1> on web, so every
-   * section title on a screen became a top-level heading — four h1s and no h2
-   * in between. Screens state the level instead and get a real outline.
-   */
+  /** `accessibilityRole="header"` alone renders an <h1> on web, so state the level. */
   headingLevel?: 1 | 2 | 3 | 4 | 5 | 6;
 }
 
-/**
- * The only text component screens should use. Locks every string to the type
- * ramp and the theme palette; never hard-code font sizes or hex values.
- */
 export function Text({
   variant = 'body',
   color = 'foreground',
@@ -47,7 +36,6 @@ export function Text({
 
   return (
     <RNText
-      // Respect the user's Dynamic Type setting but keep layouts sane.
       maxFontSizeMultiplier={2}
       accessibilityRole={headingLevel ? 'header' : rest.accessibilityRole}
       {...(headingLevel ? { 'aria-level': headingLevel } : {})}

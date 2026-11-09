@@ -18,10 +18,6 @@ export const formatCurrency = (amount: number, options?: { compact?: boolean }):
   }).format(amount);
 };
 
-/**
- * A percentage with at most one decimal and no trailing ".0" — so a computed
- * rent increase reads "8.3%" or "10%", never "8.333333333333332%".
- */
 export const formatPercent = (value: number): string => {
   const rounded = Math.round(value * 10) / 10;
   return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
@@ -67,7 +63,6 @@ export const getInitials = (fullName: string): string => {
   return `${first}${last}`.toUpperCase() || 'U';
 };
 
-/** Sentence case for an enum value: `UNDER_REVIEW` → "Under review". Never show the raw code. */
 export const humaniseEnum = (value: string | null | undefined): string =>
   value
     ? value

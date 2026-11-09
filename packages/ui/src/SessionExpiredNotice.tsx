@@ -2,17 +2,10 @@
 
 import { useEffect, useState } from 'react';
 
-/**
- * Shown on a sign-in screen when the user landed here because their session
- * could not be refreshed (see `onSessionExpired` in @sureground/shared), so
- * "why am I back at the login page?" has an answer instead of looking like a
- * random logout.
- */
 export function SessionExpiredNotice() {
   const [expired, setExpired] = useState(false);
 
-  // Read from the URL in an effect rather than useSearchParams(), which would
-  // force these pages to opt into a Suspense boundary.
+  // Not useSearchParams(), which would force these pages into a Suspense boundary.
   useEffect(() => {
     const reason = new URLSearchParams(window.location.search).get('reason');
     setExpired(reason === 'session_expired');

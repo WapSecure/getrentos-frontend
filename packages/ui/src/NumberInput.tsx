@@ -9,29 +9,19 @@ export interface NumberInputProps extends Omit<
   InputHTMLAttributes<HTMLInputElement>,
   'type' | 'value' | 'onChange' | 'defaultValue'
 > {
-  /** Raw numeric string (or number) held by the form state. */
   value: string | number;
-  /** Called with the sanitized numeric string (no thousand separators). */
   onValueChange: (value: string) => void;
-  /** When true (default) only whole numbers are allowed; set false to allow decimals. */
   integer?: boolean;
   leadingIcon?: ReactNode;
   trailingIcon?: ReactNode;
-  /** Extra classes for the native input rather than its visual shell. */
   inputClassName?: string;
-  /** Marks the control invalid. Inside a Field, its `error` does this for you. */
+  /** Inside a Field, its `error` sets this for you. */
   invalid?: boolean;
-  /**
-   * Hides the digits as they are typed (PINs), keeping the numeric keypad and
-   * digit-only filtering. Not for one-time codes, which people copy from email.
-   */
+  /** For PINs; not for one-time codes, which people copy from email. */
   masked?: boolean;
 }
 
-/**
- * Shell classes that LegacyInput strips (border/rounded/bg/shadow/focus) so a
- * legacy-style className does not double up against the NumberInput shell.
- */
+// Same classes LegacyInput strips, so a legacy className doesn't double up against this shell.
 const SHELL_CLASS_RE =
   /^(?:border(?:-[a-zA-Z0-9/%-]+)?|rounded(?:-[a-zA-Z0-9/%-]+)?|bg(?:-[a-zA-Z0-9/%-]+)?|shadow(?:-[a-zA-Z0-9/%-]+)?|outline-none|focus:outline-none|focus:ring(?:-[a-zA-Z0-9/%-]+)?|focus:border(?:-[a-zA-Z0-9/%-]+)?)$/;
 
@@ -41,11 +31,6 @@ const stripShellClasses = (className?: string): string =>
     .filter((cls) => cls && !SHELL_CLASS_RE.test(cls))
     .join(' ');
 
-/**
- * Numeric-only text input. Letters (and any non-digit character) are stripped
- * as the user types, so numbers can never contain alphabets — regardless of
- * keyboard, paste, or autofill. Use `integer={false}` for decimals.
- */
 export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
   (
     {
@@ -83,14 +68,12 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
         ''
       );
       if (!integer) {
-        // Keep only the first decimal point.
         const firstDot = cleaned.indexOf('.');
         if (firstDot !== -1) {
           cleaned = cleaned.slice(0, firstDot + 1) + cleaned.slice(firstDot + 1).replace(/\./g, '');
         }
       }
-      // The limit counts digits, so a pasted "0123-456-789" keeps all ten; a
-      // native maxLength would cut the pasted text before it is cleaned.
+      // Counts digits: a native maxLength would cut pasted text before it is cleaned.
       onValueChange(maxLength && maxLength > 0 ? cleaned.slice(0, maxLength) : cleaned);
     };
 

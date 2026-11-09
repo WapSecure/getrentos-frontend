@@ -14,20 +14,10 @@ interface BadgeProps {
   children: ReactNode;
   variant?: BadgeVariant;
   icon?: ReactNode;
-  /** Tooltip, e.g. what a capability chip allows. */
   title?: string;
   className?: string;
 }
 
-/*
-  Built on the tokens in styles/index.css rather than a Tailwind palette.
-
-  The previous values hand-rolled a light/dark pair per variant, which meant every
-  consumer that wanted a status chip either copied those strings or invented its
-  own — and the card components did exactly that, so the same four statuses were
-  drawn four different ways. One definition, and a variant that changes with the
-  theme for free.
-*/
 const variants: Record<BadgeVariant, string> = {
   success: 'bg-success-subtle text-success border-success/20 ring-success/10',
   warning: 'bg-warning-subtle text-warning border-warning/20 ring-warning/10',

@@ -7,10 +7,6 @@ import { cn } from '@sureground/shared';
 
 export type ToastVariant = 'success' | 'error' | 'info' | 'warning';
 
-/**
- * How long a toast stays before it closes itself. An acknowledged action can go
- * quickly; an error is worth reading, so it lingers longer.
- */
 const DEFAULT_DURATION_MS: Record<ToastVariant, number> = {
   success: 4_000,
   info: 4_000,
@@ -22,21 +18,13 @@ interface ToastProps {
   message: string;
   variant: ToastVariant;
   onClose: () => void;
-  /**
-   * Milliseconds before it closes itself. Pass null to keep it until dismissed,
-   * for a message the user has to act on.
-   */
+  /** Null keeps it until dismissed. */
   duration?: number | null;
-  /** A follow-up such as "Undo" or "View". Clicking it also closes the toast. */
   action?: { label: string; onClick: () => void };
-  /**
-   * `fixed` (default) pins a lone toast to the top right. `stack` leaves
-   * positioning to a container: ToastProvider uses it to stack several.
-   */
+  /** `stack` leaves positioning to a container such as ToastProvider. */
   placement?: 'fixed' | 'stack';
 }
 
-// Design tokens, so the toast follows the theme like every other surface.
 const variantStyles = {
   success: { icon: CheckCircle, tone: 'bg-success-subtle text-success', bar: 'bg-success' },
   error: { icon: XCircle, tone: 'bg-destructive-subtle text-destructive', bar: 'bg-destructive' },
@@ -55,11 +43,9 @@ export const Toast = ({
   const styles = variantStyles[variant];
   const Icon = styles.icon;
   const closeAfter = duration === undefined ? DEFAULT_DURATION_MS[variant] : duration;
-  // Reading a toast should not be raced by its own timer.
   const [held, setHeld] = useState(false);
 
-  // Callers pass a fresh arrow for onClose on every render, so keeping it in a
-  // ref stops the timer being torn down and restarted before it can ever fire.
+  // Callers pass a fresh onClose each render; a ref stops the timer restarting before it can fire.
   const onCloseRef = useRef(onClose);
   useEffect(() => {
     onCloseRef.current = onClose;

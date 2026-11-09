@@ -7,7 +7,6 @@ export interface Column<T> {
   header: string;
   render: (row: T) => ReactNode;
   className?: string;
-  /** Align amounts, counts and actions without each table inventing its own rules. */
   align?: 'left' | 'center' | 'right';
 }
 
@@ -19,7 +18,6 @@ interface DataTableProps<T> {
   getRowClassName?: (row: T) => string | undefined;
   isLoading?: boolean;
   emptyState?: ReactNode;
-  /** Rendered inside the same card, below the rows (e.g. a Pagination control). */
   footer?: ReactNode;
   className?: string;
 }

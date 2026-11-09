@@ -1,8 +1,4 @@
-/**
- * The last `count` calendar months as YYYY-MM options, newest first, in Lagos
- * time (UTC+1 all year) — the month a report means is the one people in Lagos
- * are living in, not the browser's.
- */
+// Lagos time (UTC+1 all year): the month a report means is the one Lagos is living in, not the browser's.
 export function recentMonthOptions(count = 18): { value: string; label: string }[] {
   const now = new Date(Date.now() + 3_600_000);
   const out: { value: string; label: string }[] = [];

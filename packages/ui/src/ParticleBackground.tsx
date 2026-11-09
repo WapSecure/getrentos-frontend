@@ -12,7 +12,6 @@ interface Particle {
   opacity: number;
 }
 
-/** Upper bound so marketing pages never spawn hundreds of animated nodes. */
 const MAX_PARTICLES = 30;
 
 export const ParticleBackground = ({ count = 20, color = '#2c5583', className = '' }) => {
@@ -38,11 +37,9 @@ export const ParticleBackground = ({ count = 20, color = '#2c5583', className = 
   }, []);
 
   useEffect(() => {
-    // Use a ref to prevent multiple initializations
     if (dimensions.width > 0 && dimensions.height > 0 && !initialized.current) {
       initialized.current = true;
 
-      // Use requestAnimationFrame to defer state update
       requestAnimationFrame(() => {
         const newParticles = Array.from({ length: particleCount }).map(() => ({
           x: Math.random() * dimensions.width,

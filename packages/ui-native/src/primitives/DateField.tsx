@@ -24,26 +24,21 @@ const MONTHS = [
 const SHORT_MONTHS = MONTHS.map((m) => m.slice(0, 3));
 
 export interface DateFieldProps {
-  /** ISO calendar date, `yyyy-MM-dd`. */
+  /** `yyyy-MM-dd`. */
   value?: string;
   onChange: (value: string) => void;
   label?: string;
   placeholder?: string;
-  /** Earliest selectable date, `yyyy-MM-dd`. */
   min?: string;
-  /** Latest selectable date, `yyyy-MM-dd`. */
   max?: string;
   error?: string | null;
   hint?: string;
-  /** Adds an asterisk to the label and tells screen readers the field is required. */
   required?: boolean;
   disabled?: boolean;
   containerStyle?: StyleProp<ViewStyle>;
 }
 
-/* ------------------------------ date helpers ----------------------------- */
-
-/** Parses `yyyy-MM-dd` as a *local* date, so a day never shifts across timezones. */
+// Parsed as a local date, so a day never shifts across timezones.
 function parseISODate(value?: string): Date | undefined {
   if (!value) return undefined;
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
@@ -52,7 +47,6 @@ function parseISODate(value?: string): Date | undefined {
   return Number.isNaN(d.getTime()) ? undefined : d;
 }
 
-/** Formats a `Date` as a local `yyyy-MM-dd` string. */
 export function toISODate(d: Date): string {
   const month = `${d.getMonth() + 1}`.padStart(2, '0');
   const day = `${d.getDate()}`.padStart(2, '0');
@@ -75,10 +69,7 @@ function formatDisplay(d: Date): string {
   return `${SHORT_MONTHS[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
 }
 
-/**
- * Date input with a calendar popover, matching the web `DatePicker`:
- * same `yyyy-MM-dd` value contract, month grid, min/max limits and Today shortcut.
- */
+// Keep the value contract in step with the web DatePicker.
 export function DateField({
   value,
   onChange,

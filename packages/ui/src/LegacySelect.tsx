@@ -5,8 +5,7 @@ import { Select, type SelectOption } from './Select';
 
 interface LegacySelectProps {
   value?: string | number;
-  // `any` preserves compatibility with existing React.ChangeEvent handlers;
-  // the adapter supplies the only field these handlers use: target.value.
+  // `any` keeps existing React.ChangeEvent handlers compiling; only target.value is supplied.
   onChange?: (event: any) => void;
   children: ReactNode;
   className?: string;
@@ -14,11 +13,6 @@ interface LegacySelectProps {
   'aria-label'?: string;
 }
 
-/**
- * Migration adapter for option-based form controls. It intentionally accepts
- * native-option children and an onChange callback, while rendering the custom
- * popover Select so legacy forms can be modernized without altering business logic.
- */
 export function LegacySelect({
   value,
   onChange,

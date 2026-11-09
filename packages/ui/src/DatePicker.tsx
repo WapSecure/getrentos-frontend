@@ -33,18 +33,12 @@ interface DatePickerProps {
   min?: string;
   max?: string;
   disabled?: boolean;
-  /**
-   * Individual days to grey out, as `YYYY-MM-DD` (the same shape the API uses
-   * for the shortlet booking calendar). Lets a picker show what is actually
-   * takeable instead of accepting a date that only fails on submit.
-   */
+  /** `YYYY-MM-DD`, the shape the API uses for the shortlet booking calendar. */
   disabledDates?: readonly string[];
   className?: string;
-  /** Trigger id; inside a Field the field supplies it. */
   id?: string;
   invalid?: boolean;
   required?: boolean;
-  /** Offer a "Clear" action once a date is chosen; clearing calls onChange(''). */
   clearable?: boolean;
   ariaLabel?: string;
   controlSize?: ControlSize;
@@ -78,8 +72,6 @@ export const DatePicker = ({
   const maxDate = toDate(max);
   const [viewMonth, setViewMonth] = useState(() => selected ?? new Date());
 
-  // With nothing chosen yet, open on the first month that can be picked (e.g.
-  // a check-out picker opens on the check-in month, not today's).
   useEffect(() => {
     if (!open || selected || !minDate) return;
     if (isAfter(startOfMonth(minDate), startOfMonth(new Date())))
@@ -105,8 +97,6 @@ export const DatePicker = ({
     setOpen(false);
   };
 
-  // The day that takes focus on open: the chosen one, else today, else the
-  // first pickable day when today is out of range.
   const initialDay = () => {
     if (selected) return selected;
     const now = new Date();
@@ -120,7 +110,6 @@ export const DatePicker = ({
       ?.querySelector<HTMLButtonElement>(`[data-day="${format(day, 'yyyy-MM-dd')}"]`)
       ?.focus();
 
-  // Keyboard: arrows move a day/week (crossing months), Home/End go to the week's ends.
   // The first focus on open happens in onOpenAutoFocus, once the portaled grid exists.
   useEffect(() => {
     if (!open || !focusDay) return;
@@ -150,9 +139,7 @@ export const DatePicker = ({
   return (
     <RadixPopover.Root
       open={open}
-      // Modal, so Tab stays inside the calendar (it is portaled, and would
-      // otherwise jump to the next field and close it) and Escape or a pick
-      // returns focus to the trigger.
+      // Portaled, so without modal Tab would jump to the next field and close it.
       modal
       onOpenChange={(next) => {
         setOpen(next);
@@ -168,7 +155,6 @@ export const DatePicker = ({
           type="button"
           id={field.id}
           disabled={disabled}
-          // A combobox, so the required/invalid state from a Field is valid ARIA.
           role="combobox"
           aria-haspopup="dialog"
           aria-expanded={open}

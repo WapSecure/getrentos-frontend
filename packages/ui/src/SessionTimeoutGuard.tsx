@@ -7,11 +7,9 @@ import { Button } from './Button';
 import { useSessionActivity } from './hooks/useSessionActivity';
 
 interface SessionTimeoutGuardProps {
-  /** Total inactivity before the session ends, dialog included. Defaults to 30 minutes. */
+  /** Total inactivity before the session ends, dialog included. */
   idleMs?: number;
-  /** How long before that the dialog opens (time to answer it). Defaults to 2 minutes. */
   warningMs?: number;
-  /** Where to send the user once the session ends. Defaults to the app login. */
   redirectTo?: string;
   className?: string;
 }
@@ -22,16 +20,7 @@ const formatCountdown = (totalSeconds: number) => {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 };
 
-/**
- * Mounted once per signed-in area. Replaces the old silent logout: instead of
- * dropping the user mid-task, it asks whether they are still there and extends
- * the session (via the refresh-token cookie) if they say yes.
- *
- * The dialog is deliberately not dismissible — no Escape, no click-outside —
- * because the only two legitimate outcomes are "keep me signed in" and "sign me
- * out", and losing work to a stray keypress is exactly the behaviour this
- * component exists to remove.
- */
+// Deliberately not dismissible: the only outcomes are "keep me signed in" and "sign me out".
 export function SessionTimeoutGuard({
   idleMs,
   warningMs,

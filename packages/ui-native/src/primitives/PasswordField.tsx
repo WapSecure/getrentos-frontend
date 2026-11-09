@@ -17,11 +17,9 @@ export function passwordStrength(pw: string): 0 | 1 | 2 | 3 | 4 {
 const LABELS = ['Weak', 'Fair', 'Good', 'Strong'] as const;
 
 export interface PasswordFieldProps extends Omit<TextFieldProps, 'secure'> {
-  /** Show the 4-bar strength meter under the field. */
   showStrength?: boolean;
 }
 
-/** Secure text field with a reveal toggle and an optional strength meter. */
 export const PasswordField = forwardRef<TextInput, PasswordFieldProps>(function PasswordField(
   { showStrength = false, value = '', ...rest },
   ref

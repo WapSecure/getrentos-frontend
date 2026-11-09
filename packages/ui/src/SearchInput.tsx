@@ -10,14 +10,10 @@ interface SearchInputProps extends Omit<
 > {
   value: string;
   onValueChange: (value: string) => void;
-  /** Read out as the input's name when there is no visible label. */
   label?: string;
 }
 
-/**
- * Search box: a search icon, a clear button once there is text, and Escape to
- * clear. Debounce in the caller if each keystroke triggers a request.
- */
+// Debounce in the caller if each keystroke triggers a request.
 export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
   (
     { value, onValueChange, label = 'Search', placeholder = 'Search', onKeyDown, ...props },

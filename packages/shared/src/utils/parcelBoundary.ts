@@ -1,8 +1,4 @@
-/**
- * A land plot's outline as the apps handle it: an ordered list of corners.
- * The API stores it as a GeoJSON Polygon with one closed ring of
- * [longitude, latitude] pairs; these helpers convert both ways.
- */
+// The API stores a GeoJSON Polygon with one closed ring of [longitude, latitude] pairs.
 export interface BoundaryCorner {
   latitude: number;
   longitude: number;
@@ -13,7 +9,6 @@ export interface ParcelBoundaryGeometry {
   coordinates: [number, number][][];
 }
 
-/** The corners of a stored outline (without the repeated closing corner); null if unusable. */
 export function boundaryCorners(geometry: unknown): BoundaryCorner[] | null {
   const g = geometry as { type?: unknown; geometry?: unknown; coordinates?: unknown } | null;
   const polygon = g?.type === 'Feature' ? (g.geometry as typeof g) : g;
@@ -39,7 +34,6 @@ export function boundaryCorners(geometry: unknown): BoundaryCorner[] | null {
   return corners.length >= 3 ? corners : null;
 }
 
-/** The outline to send to the API; null when there are too few corners to make a plot. */
 export function boundaryGeometry(corners: BoundaryCorner[]): ParcelBoundaryGeometry | null {
   if (corners.length < 3) return null;
   const ring = corners.map((c) => [c.longitude, c.latitude] as [number, number]);
@@ -49,15 +43,9 @@ export function boundaryGeometry(corners: BoundaryCorner[]): ParcelBoundaryGeome
 const WGS84_A = 6_378_137;
 const WGS84_E2 = 0.00669437999014;
 
-/**
- * Approximate area enclosed by the corners, in square metres. Plots are small
- * enough that projecting onto a plane at their mean latitude is accurate to
- * well under 1%.
- */
 export function boundaryAreaSqm(corners: BoundaryCorner[]): number {
   if (corners.length < 3) return 0;
-  // Metres per degree on the WGS 84 ellipsoid at the plot's latitude (the
-  // API's ringAreaSqm does the same), so both report the same area.
+  // Same method as the API's ringAreaSqm, so both report the same area.
   const meanLat = corners.reduce((sum, c) => sum + c.latitude, 0) / corners.length;
   const phi = (meanLat * Math.PI) / 180;
   const w = 1 - WGS84_E2 * Math.sin(phi) ** 2;
@@ -80,13 +68,7 @@ export function boundaryAreaSqm(corners: BoundaryCorner[]): number {
 
 const SQM_PER_UNIT = { SQUARE_METERS: 1, ACRE: 4046.8564224, HECTARE: 10_000 } as const;
 
-/**
- * How far the drawn outline is from the area the owner typed, when far enough
- * to say so. Buyers see both, so a 600 sqm plot outlined as two hectares (a
- * corner dropped in the wrong street, or the wrong unit picked) would read as
- * a misrepresentation. Null when there is nothing to compare or they agree
- * within the tolerance: hand-drawn outlines are rarely exact.
- */
+// Null when they agree within the tolerance: hand-drawn outlines are rarely exact.
 export function boundaryAreaMismatch(
   corners: BoundaryCorner[],
   statedValue: number,

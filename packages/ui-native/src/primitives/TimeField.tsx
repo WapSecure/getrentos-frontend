@@ -14,20 +14,17 @@ import { useReducedMotion } from '../accessibility';
 import { Text } from './Text';
 
 export interface TimeFieldProps {
-  /** 24-hour time, `HH:mm`. */
+  /** 24-hour `HH:mm`. */
   value?: string;
   onChange: (value: string) => void;
   label?: string;
   placeholder?: string;
-  /** Minutes between slots (default 30). */
   stepMinutes?: number;
-  /** First selectable hour, inclusive (default 8). */
   startHour?: number;
-  /** Last selectable hour, exclusive (default 20). */
+  /** Exclusive. */
   endHour?: number;
   error?: string | null;
   hint?: string;
-  /** Adds an asterisk to the label and tells screen readers the field is required. */
   required?: boolean;
   disabled?: boolean;
   containerStyle?: StyleProp<ViewStyle>;
@@ -43,7 +40,6 @@ function buildSlots(startHour: number, endHour: number, step: number): string[] 
   return slots;
 }
 
-/** Renders `HH:mm` as a 12-hour label, e.g. `14:30` → `2:30 PM`. */
 export function formatTimeLabel(value: string): string {
   const [h, m] = value.split(':').map(Number);
   if (Number.isNaN(h) || Number.isNaN(m)) return value;
@@ -52,7 +48,6 @@ export function formatTimeLabel(value: string): string {
   return `${hour12}:${`${m}`.padStart(2, '0')} ${period}`;
 }
 
-/** Time input that opens a grid of bookable slots, styled to match `DateField`. */
 export function TimeField({
   value,
   onChange,

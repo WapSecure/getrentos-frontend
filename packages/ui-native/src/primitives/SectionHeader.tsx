@@ -10,7 +10,6 @@ export interface SectionHeaderProps {
   onAction?: () => void;
 }
 
-/** Shared section hierarchy for dashboards, lists, and detail screens. */
 export function SectionHeader({ title, description, actionLabel, onAction }: SectionHeaderProps) {
   const { colors, spacing } = useTheme();
   return (

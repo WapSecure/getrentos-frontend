@@ -13,21 +13,14 @@ import { useTheme } from '../theme';
 
 export interface ScreenProps {
   children: ReactNode;
-  /** Wrap content in a ScrollView (default) or render it flush for custom lists. */
   scroll?: boolean;
   refreshing?: boolean;
   onRefresh?: () => void;
-  /** Horizontal gutter. Set 0 for edge-to-edge lists. */
   padded?: boolean;
   contentContainerStyle?: ScrollViewProps['contentContainerStyle'];
-  /** Sticky footer (e.g. a primary action) that clears the home indicator. */
   footer?: ReactNode;
 }
 
-/**
- * Every screen's outermost element. Handles safe-area insets, the keyboard,
- * pull-to-refresh, and the themed background so screens never re-solve it.
- */
 export function Screen({
   children,
   scroll = true,

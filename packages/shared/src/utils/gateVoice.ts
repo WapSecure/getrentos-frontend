@@ -1,8 +1,3 @@
-/**
- * Voice at the estate gate, shared by web and mobile: reading a PIN someone
- * says, and the line the gate device speaks for an outcome.
- */
-
 // Number words only: homophones such as "to" and "for" would turn ordinary words into digits.
 const DIGIT_WORDS: Record<string, string> = {
   zero: '0',
@@ -19,10 +14,6 @@ const DIGIT_WORDS: Record<string, string> = {
   nine: '9',
 };
 
-/**
- * The digits in what someone said, for a PIN read out at the gate:
- * "four oh nine, double two one" → "409221". Words and figures both count.
- */
 export function digitsFromSpeech(text: string): string {
   const out: string[] = [];
   const tokens = text
@@ -49,7 +40,6 @@ export interface GateOutcome {
   requested?: string;
 }
 
-/** What the gate device says for an outcome: a refusal or warning first, then who and where. */
 export function spokenGateOutcome(
   result: GateOutcome | null,
   refusal: string | null

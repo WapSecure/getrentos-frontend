@@ -1,24 +1,6 @@
-/**
- * Mirror of the API's src/shared/geo/crs.ts, so the boundary editor can preview
- * survey-plan coordinates on the map before saving. The API converts again and
- * is the authority; keep the two files in step.
- */
-/**
- * Coordinate reference systems used on Nigerian survey plans, and the maths to
- * turn their eastings and northings into the WGS 84 longitude/latitude the
- * apps store and draw.
- *
- * Survey plans in Nigeria give beacon coordinates on the Minna datum, either
- * on a UTM zone (31N west of 6°E, 32N east of it) or on one of the national
- * Transverse Mercator belts (West, Mid, East). A surveyor reading those
- * numbers into a form that expects latitude and longitude produces points in
- * the ocean, so the boundary parser asks which system the numbers are in and
- * converts them here.
- *
- * The Minna to WGS 84 shift is the published three-parameter transformation
- * (EPSG:1167, about ±15 m). That is enough to place and compare plots; the
- * surveyor's sign-off, not this conversion, is what vouches for a boundary.
- */
+// Mirror of the API's src/shared/geo/crs.ts for map previews; the API converts again and is the
+// authority, so keep the two in step. The Minna shift (EPSG:1167, about ±15 m) only places plots;
+// the surveyor's sign-off is what vouches for a boundary.
 
 export type CrsCode =
   | 'EPSG:4326'
@@ -36,9 +18,8 @@ interface Ellipsoid {
 }
 
 const WGS84: Ellipsoid = { a: 6378137, f: 1 / 298.257223563 };
-/** Clarke 1880 (RGS), the ellipsoid of the Minna datum. */
 const CLARKE_1880: Ellipsoid = { a: 6378249.145, f: 1 / 293.465 };
-/** Minna to WGS 84, EPSG:1167 (Nigeria onshore), metres. */
+// EPSG:1167 (Nigeria onshore), metres.
 const MINNA_TO_WGS84 = { dx: -92, dy: -93, dz: 122 };
 
 interface TransverseMercator {
@@ -91,7 +72,6 @@ const PROJECTED: readonly ProjectedCrs[] = [
   { code: 'EPSG:32632', label: 'WGS 84 / UTM zone 32N', datum: 'WGS84', projection: utm(32) },
 ];
 
-/** Every system a boundary can be entered in, for forms and validation. */
 export const SUPPORTED_CRS: readonly { code: CrsCode; label: string }[] = [
   { code: 'EPSG:4326', label: 'Latitude and longitude (WGS 84, GPS)' },
   ...PROJECTED.map(({ code, label }) => ({ code, label })),
@@ -234,11 +214,7 @@ function shiftMinna(lng: number, lat: number, sign: 1 | -1): [number, number] {
 
 const projected = (code: CrsCode) => PROJECTED.find((c) => c.code === code);
 
-/**
- * One coordinate pair in `crs` as WGS 84 [longitude, latitude]. Projected
- * systems take [easting, northing]; EPSG:4326 takes [longitude, latitude] and
- * is returned unchanged.
- */
+// Projected systems take [easting, northing]; EPSG:4326 is returned unchanged.
 export function toWgs84([x, y]: [number, number], crs: CrsCode): [number, number] {
   const def = projected(crs);
   if (!def) return [x, y];
@@ -247,7 +223,6 @@ export function toWgs84([x, y]: [number, number], crs: CrsCode): [number, number
   return def.datum === 'MINNA' ? shiftMinna(lng, lat, 1) : [lng, lat];
 }
 
-/** WGS 84 [longitude, latitude] into `crs`: for tests and for showing a plan's own numbers. */
 export function fromWgs84([lng, lat]: [number, number], crs: CrsCode): [number, number] {
   const def = projected(crs);
   if (!def) return [lng, lat];
@@ -256,7 +231,7 @@ export function fromWgs84([lng, lat]: [number, number], crs: CrsCode): [number, 
   return forwardTm(l, p, def.projection, ellipsoid);
 }
 
-/** Roughly Nigeria's extent, generous at the edges; the precise test lives in property-location. */
+// Deliberately generous; the precise test lives in property-location.
 const inNigeriaBox = ([lng, lat]: [number, number]) =>
   lat >= 4 && lat <= 14 && lng >= 2.6 && lng <= 14.7;
 
@@ -266,12 +241,6 @@ export type CoordinateDiagnosis =
   | { kind: 'projected'; candidates: CrsCode[] }
   | { kind: 'unknown' };
 
-/**
- * Why corners that should be longitude/latitude are not plausible, so the
- * person entering them can be told how to fix it: numbers the size of
- * eastings and northings (a survey plan read as if it were GPS), or latitude
- * and longitude the wrong way round.
- */
 export function diagnoseCoordinates(points: [number, number][]): CoordinateDiagnosis {
   if (points.length === 0) return { kind: 'unknown' };
   if (points.every(inNigeriaBox)) return { kind: 'ok' };
@@ -324,7 +293,6 @@ export const BOUNDARY_SOURCE_LABEL: Record<LandBoundarySource, string> = {
   STAFF: 'Set by Sureground staff',
 };
 
-/** One line on what a surveyor said about an outline, for owners and buyers. */
 export function boundarySignOffText(signOff: Pick<LandBoundarySignOff, 'status'>): string {
   switch (signOff.status) {
     case 'SIGNED_OFF':

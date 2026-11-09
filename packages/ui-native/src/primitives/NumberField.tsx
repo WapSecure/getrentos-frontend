@@ -9,31 +9,17 @@ export { sanitizeNumber };
 type BaseProps = Omit<TextFieldProps, 'value' | 'onChangeText' | 'keyboardType' | 'secure'>;
 
 export interface NumberFieldProps extends BaseProps {
-  /** The raw string held by the form ("1250", "12.5"), never formatted. */
+  /** Raw, never formatted. */
   value: string;
   onValueChange: (value: string) => void;
-  /** Decimal places allowed. 0 (default) means whole numbers only. */
   decimals?: number;
-  /** Shows 1,250,000 while typing; the value passed back stays unformatted. */
   grouped?: boolean;
-  /** Unit shown at the end of the field, e.g. "m²", "units", "%". */
   unit?: string;
-  /**
-   * Codes made of digits (account numbers, OTPs, bank codes) keep leading
-   * zeros and are never grouped. Set this for them.
-   */
+  /** For digit codes (account numbers, OTPs): keeps leading zeros, never grouped. */
   code?: boolean;
-  /**
-   * An amount of money held as a string: whole numbers, grouped, with the
-   * symbol in front ("₦" by default, or pass another).
-   */
   currency?: boolean | string;
 }
 
-/**
- * A number-only field. Use it for any count, measurement or numeric code so
- * that a pasted or hardware-keyboard letter can never reach the form.
- */
 export const NumberField = forwardRef<TextInput, NumberFieldProps>(function NumberField(
   {
     value,
@@ -59,13 +45,9 @@ export const NumberField = forwardRef<TextInput, NumberFieldProps>(function Numb
       {...rest}
       value={display}
       onChangeText={(text) => {
-        // Codes strip every non-digit; amounts and counts stop at a decimal point.
         const clean = places > 0 || code ? sanitizeNumber(text, places) : wholeNumber(text);
-        // Amounts drop leading zeros ("007" is 7); codes keep them.
         const next = symbol ? clean.replace(/^0+(?=\d)/, '') : clean;
-        // The limit counts digits, not the dashes or spaces in a pasted
-        // "0123-456-789" or the commas shown in a grouped amount, so it is
-        // applied here rather than as the native maxLength.
+        // Applied here, not as the native maxLength, so pasted dashes and grouping commas don't count.
         onValueChange(maxLength ? next.slice(0, maxLength) : next);
       }}
       keyboardType={places > 0 ? 'decimal-pad' : 'number-pad'}
@@ -99,19 +81,13 @@ function groupDisplay(value: string) {
 }
 
 export interface CurrencyFieldProps extends BaseProps {
-  /** Whole naira. null or undefined shows an empty field rather than "0". */
+  /** Whole naira. */
   value: number | null | undefined;
   onValueChange: (value: number | null) => void;
-  /** Currency symbol shown before the amount. */
   symbol?: string;
-  /** Largest amount accepted; typing past it is ignored. */
   max?: number;
 }
 
-/**
- * Money in whole naira, shown grouped (₦ 1,250,000). Leading zeros and
- * anything that is not a digit are dropped; clearing the field gives null.
- */
 export const CurrencyField = forwardRef<TextInput, CurrencyFieldProps>(function CurrencyField(
   { value, onValueChange, symbol = '₦', max, leftIcon, ...rest },
   ref

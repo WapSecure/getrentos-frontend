@@ -9,12 +9,10 @@ import { ListSkeleton } from './Skeleton';
 interface QueryStateProps {
   isLoading: boolean;
   isError?: boolean;
-  /** Retry for the error state, usually the query's refetch. */
   onRetry?: () => void;
   isRetrying?: boolean;
   errorTitle?: string;
   errorDescription?: string;
-  /** True when the data loaded but there is nothing to show. */
   isEmpty?: boolean;
   empty?: {
     icon: LucideIcon;
@@ -22,18 +20,11 @@ interface QueryStateProps {
     description?: ReactNode;
     action?: ReactNode;
   };
-  /** Custom placeholder; defaults to a list skeleton. */
   loading?: ReactNode;
-  /** `section` for a panel inside a page (compact states), `page` for a whole page. */
   scope?: 'section' | 'page';
   children: ReactNode;
 }
 
-/**
- * The four states of loaded data in one place — loading, failed, empty, and
- * the content — so every list shows the same skeleton, the same retry and the
- * same empty message instead of each screen inventing its own.
- */
 export function QueryState({
   isLoading,
   isError,

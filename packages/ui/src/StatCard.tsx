@@ -36,7 +36,6 @@ interface StatCardProps {
   accent?: StatCardAccent;
   delay?: number;
   isCurrency?: boolean;
-  /** Quieter portfolio counts beneath the primary financial summary. */
   compact?: boolean;
 }
 

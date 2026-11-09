@@ -1,12 +1,7 @@
 import { forwardRef } from 'react';
 import type { LucideProps } from 'lucide-react';
 
-/**
- * The naira sign (₦), drawn like the lucide icons so it can stand wherever a
- * currency icon is wanted: the same size, stroke and colour props, and usable
- * anywhere a `LucideIcon` is expected. lucide ships no naira glyph, and its
- * DollarSign is the wrong currency for this market.
- */
+// Lucide ships no naira glyph, so this matches its icon props and works wherever a LucideIcon does.
 export const NairaSign = forwardRef<SVGSVGElement, LucideProps>(
   ({ size = 24, color = 'currentColor', strokeWidth = 2, className, ...props }, ref) => (
     <svg

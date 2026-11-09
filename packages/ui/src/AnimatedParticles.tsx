@@ -12,7 +12,6 @@ interface Particle {
   delay: number;
 }
 
-/** Upper bound so auth/marketing pages never spawn hundreds of animated nodes. */
 const MAX_PARTICLES = 30;
 
 export const AnimatedParticles = ({ count = 20, color = 'rgba(44, 85, 131, 0.2)' }) => {

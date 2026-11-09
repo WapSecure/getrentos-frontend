@@ -4,18 +4,14 @@ import { cn } from '@sureground/shared';
 export interface DescriptionItem {
   label: ReactNode;
   value: ReactNode;
-  /** Small text under the value. */
   hint?: ReactNode;
-  /** Take the full row in a multi-column list (an address, a note). */
   wide?: boolean;
 }
 
 interface DescriptionListProps {
   items: readonly DescriptionItem[];
-  /** `stacked`: label above value, in a grid. `rows`: label left, value right, one per line. */
   layout?: 'stacked' | 'rows';
   columns?: 1 | 2 | 3;
-  /** Shown for a null, undefined or empty value, so a gap never looks like a bug. */
   emptyValue?: ReactNode;
   className?: string;
 }
@@ -25,7 +21,6 @@ const WIDE = { 1: '', 2: 'sm:col-span-2', 3: 'sm:col-span-2 lg:col-span-3' } as 
 
 const isEmpty = (value: ReactNode) => value === null || value === undefined || value === '';
 
-/** Read-only facts about a record: label and value pairs. */
 export function DescriptionList({
   items,
   layout = 'stacked',

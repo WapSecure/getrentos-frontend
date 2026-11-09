@@ -10,9 +10,7 @@ interface AlertProps {
   variant?: AlertVariant;
   title?: ReactNode;
   children?: ReactNode;
-  /** Replaces the variant's icon; pass null for none. */
   icon?: LucideIcon | null;
-  /** Buttons or links, placed under the text (or to the right on wide screens). */
   action?: ReactNode;
   onDismiss?: () => void;
   className?: string;
@@ -34,11 +32,6 @@ const TONES: Record<AlertVariant, { box: string; icon: string; Icon: LucideIcon 
   neutral: { box: 'border-border bg-secondary/60', icon: 'text-muted-foreground', Icon: Info },
 };
 
-/**
- * An inline message inside a page or form: what happened, or what to know
- * before acting. Danger interrupts screen readers; the others are read in
- * order. For something that comes and goes after an action, use a toast.
- */
 export function Alert({
   variant = 'info',
   title,

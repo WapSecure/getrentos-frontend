@@ -9,7 +9,6 @@ interface SwitchProps {
   disabled?: boolean;
   id?: string;
   className?: string;
-  /** Visible label, shown to the left of the switch as a settings row. */
   label?: ReactNode;
   description?: ReactNode;
   size?: 'sm' | 'md';

@@ -18,21 +18,14 @@ import { useFieldControl } from './fieldContext';
 export interface AddressSearchProps {
   value: AddressValue | null;
   onChange: (value: AddressValue | null) => void;
-  /** Suggestions for what has been typed (the app's /geo/places/suggest). */
   search: (query: string, opts: { session: string; kind: PlaceKind }) => Promise<PlaceSuggestion[]>;
-  /** The checked address for a picked suggestion (the app's /geo/places/:placeId). */
   resolve: (placeId: string, session: string) => Promise<VerifiedAddress>;
-  /** A full address (default), an area such as a neighbourhood or town, or either. */
   kind?: PlaceKind;
-  /**
-   * Let the person keep an address Google cannot find. It is saved as typed and
-   * shown as unchecked. Leave off where the address must be real.
-   */
+  /** Leave off where the address must be real: a manual one is saved unchecked. */
   allowManual?: boolean;
   placeholder?: string;
   controlSize?: ControlSize;
   disabled?: boolean;
-  /** Called with the checked address after a pick, e.g. to move a map pin. */
   onResolved?: (address: VerifiedAddress) => void;
   id?: string;
   invalid?: boolean;
@@ -47,12 +40,6 @@ type Status = 'idle' | 'loading' | 'ready' | 'error' | 'resolving';
 const MIN_CHARS: Record<PlaceKind, number> = { address: 3, area: 2, any: 2 };
 const DEBOUNCE_MS = 250;
 
-/**
- * Address search with Google Places suggestions. Type, pick a suggestion, and
- * the field holds a checked address (street, area, LGA, state and map pin).
- * Built as an ARIA combobox: arrow keys move through suggestions, Enter picks,
- * Escape closes. The person never has to pick a state or city separately.
- */
 export function AddressSearch({
   value,
   onChange,
@@ -81,7 +68,6 @@ export function AddressSearch({
   const session = useRef<string | null>(null);
   const request = useRef(0);
 
-  // A new value from outside (a reset, a prefill) replaces the text, unless the person is mid-edit.
   const lastValueText = useRef(value?.text ?? '');
   useEffect(() => {
     const next = value?.text ?? '';
@@ -158,7 +144,6 @@ export function AddressSearch({
     setText(next);
     setProblem(null);
     if (!open) setOpen(true);
-    // An edited checked address is no longer the checked one.
     if (value?.placeId) {
       lastValueText.current = allowManual ? next : '';
       onChange(allowManual && next.trim() ? { text: next } : null);

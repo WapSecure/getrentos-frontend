@@ -1,9 +1,3 @@
-/**
- * How land diligence is described to a buyer, shared by web and mobile so a
- * parcel reads the same everywhere: what was checked and by whom, what was
- * not, the review level, and where its price per m² sits among comparables.
- */
-
 export type LandAssuranceTier = 'BASIC' | 'STANDARD' | 'PREMIUM';
 
 export const LAND_ASSURANCE_TIER_LABELS: Record<LandAssuranceTier, string> = {
@@ -18,7 +12,6 @@ export const LAND_ASSURANCE_TIER_DESCRIPTIONS: Record<LandAssuranceTier, string>
   PREMIUM: 'Registry-searched, with checks by an independent professional.',
 };
 
-/** One scoped public claim about a parcel: what was checked, by whom, when. */
 export interface LandTrustLabel {
   kind:
     | 'OWNERSHIP_DOCUMENTS'
@@ -30,7 +23,6 @@ export interface LandTrustLabel {
     | 'PLANNING'
     | 'COMMUNITY';
   title: string;
-  /** The checklist items the label rests on. */
   scope: string[];
   checkedAt: string;
   /** SUREGROUND, or the outside professional's role (SURVEYOR, LAWYER, …). */
@@ -52,11 +44,9 @@ export const LAND_TRUST_SOURCE_LABELS: Record<string, string> = {
   INSPECTOR: 'an independent inspector',
 };
 
-/** "Sureground and an independent surveyor" */
 export const checkedByText = (checkedBy: string[]) =>
   checkedBy.map((source) => LAND_TRUST_SOURCE_LABELS[source] ?? source).join(' and ');
 
-/** "cheaper than most", "around the middle" … for a 0-100 percentile. */
 export const percentileWords = (percentile: number) =>
   percentile <= 20
     ? 'cheaper per m² than most comparable land'

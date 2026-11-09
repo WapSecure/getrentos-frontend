@@ -1,11 +1,6 @@
 const KEY = 'sureground.installId';
 
-/**
- * A random id this browser keeps for itself, sent with sign-ups so the API
- * can notice many new accounts coming from one device. It identifies the
- * install, not the person, and carries nothing about them. Undefined when
- * storage isn't available (server render, private mode).
- */
+// Lets the API notice many sign-ups from one device; identifies the install, not the person.
 export function getInstallId(): string | undefined {
   if (typeof window === 'undefined') return undefined;
   try {

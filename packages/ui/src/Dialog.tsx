@@ -22,14 +22,10 @@ interface DialogProps {
 
 const useIsomorphicLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
 
-/** The element focused when the dialog opened, so closing can hand focus back. */
 const ReturnFocusContext = createContext<MutableRefObject<HTMLElement | null> | null>(null);
 
 export const Dialog = ({ open, onOpenChange, children }: DialogProps) => {
-  // These dialogs are opened from state, not through a Radix trigger, so Radix
-  // has nothing to return focus to and drops it on <body>. Remember whatever
-  // was focused as the dialog opens (this runs before the content moves focus
-  // inside) and give it back on close.
+  // Opened from state, not a Radix trigger, so Radix would drop focus on <body> when it closes.
   const returnTo = useRef<HTMLElement | null>(null);
   useIsomorphicLayoutEffect(() => {
     if (open) {
@@ -51,15 +47,9 @@ interface DialogContentProps {
   children: ReactNode;
   className?: string;
   showClose?: boolean;
-  /** Width on larger screens; phones always get a full-width bottom sheet. */
   size?: 'sm' | 'md' | 'lg' | 'xl';
-  /** Set false for full-bleed content (image previews, sectioned layouts). */
   padded?: boolean;
-  /**
-   * Whether a click outside closes the dialog. By default it does until the
-   * user types into it; after that a stray click cannot throw away a half-
-   * filled form (Escape and the close button still work).
-   */
+  /** By default only until the user types, so a stray click can't throw away a half-filled form. */
   closeOnOutsideClick?: boolean | 'until-edited';
 }
 
@@ -82,8 +72,7 @@ export const DialogContent = ({
   const edited = useRef(false);
   const reduceMotion = useReducedMotion();
   const returnTo = useContext(ReturnFocusContext);
-  // A caller's own `max-w-*` is the width they meant; the size default would
-  // otherwise win on sm+ screens because it carries the `sm:` prefix.
+  // Otherwise the size default would win on sm+ screens because it carries the `sm:` prefix.
   const ownWidth = /(^|\s)max-w-/.test(className ?? '');
   return (
     <RadixDialog.Portal forceMount>
@@ -122,9 +111,6 @@ export const DialogContent = ({
             edited.current = true;
           }}
           className={cn(
-            // p-6 is the default so a modal is never flush to the edge; a full-bleed
-            // modal (image preview, section layout with full-width dividers) opts out
-            // with `p-0`, and tailwind-merge lets that — or any p-* — win over this.
             'fixed bottom-0 left-0 right-0 z-50 max-h-[92dvh] w-full overflow-y-auto rounded-t-2xl border border-border bg-card shadow-xl focus:outline-none sm:bottom-auto sm:left-1/2 sm:right-auto sm:top-1/2 sm:w-[calc(100%-2rem)] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl',
             !ownWidth && DIALOG_WIDTH[size],
             padded && 'px-6 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:p-7',

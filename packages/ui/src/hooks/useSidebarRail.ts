@@ -2,15 +2,7 @@
 
 import { useCallback, useEffect, useSyncExternalStore } from 'react';
 
-/**
- * Whether the desktop sidebar is folded to an icon rail, remembered in this
- * browser and shared by every workspace (a person who wants more room wants it
- * everywhere). The page offset follows through `--workspace-sidebar-width`,
- * set from `data-sidebar` on <html>, so layouts only need `.workspace-main`.
- *
- * Browser state goes through an external store, not setState in an effect:
- * the React Compiler lint forbids the latter.
- */
+// An external store, not setState in an effect: the React Compiler lint forbids the latter.
 const KEY = 'sureground.sidebar.rail';
 const listeners = new Set<() => void>();
 let cached: boolean | undefined;
@@ -53,8 +45,7 @@ const subscribe = (onChange: () => void) => {
 export function useSidebarRail() {
   const rail = useSyncExternalStore(subscribe, read, () => false);
 
-  // Tell the page shell how wide the sidebar is; cleared when the sidebar
-  // leaves (sign-out, public pages) so nothing else is offset.
+  // Cleared when the sidebar unmounts (sign-out, public pages) so nothing else is offset.
   useEffect(() => {
     const root = document.documentElement;
     if (rail) root.dataset.sidebar = 'rail';

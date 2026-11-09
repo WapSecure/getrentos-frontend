@@ -22,27 +22,15 @@ import { NumberInput } from './NumberInput';
 type Pending = { resolve: (token: string | null) => void; challengeId?: string };
 type StepUpToken = { stepUpToken: string; expiresIn: number };
 
-/**
- * Runs the browser passkey ceremony for the given request options and returns
- * the assertion. Injected by each app (it owns the WebAuthn dependency).
- */
 export type PasskeyAuthenticator = (options: unknown) => Promise<unknown>;
 
 export interface StepUpDialogProps {
   /** Without it, an account whose strongest factor is a passkey can't confirm here. */
   authenticateWithPasskey?: PasskeyAuthenticator;
-  /** Overrides the sentence under the title. */
   description?: string;
-  /**
-   * Whether an account with no factor sets a transaction PIN here (members).
-   * Staff can't use a PIN: for them the password and an emailed code earn a
-   * set-up-only token, so they can turn on two-factor next.
-   */
+  /** False for staff: they can't use a PIN and earn a set-up-only token for two-factor instead. */
   canSetPin?: boolean;
-  /**
-   * What is being authorised, e.g. "Withdraw ₦250,000 to GTBank ••••1234" (UX-30).
-   * A summary the request itself carries (`withStepUpSummary`) wins over this one.
-   */
+  /** A summary the request itself carries (`withStepUpSummary`) wins over this one. */
   summary?: string;
 }
 
@@ -63,15 +51,7 @@ const isNewPin = (v: string) => /^\d{6}$/.test(v);
 /** Older accounts may still have a 4-digit PIN. */
 const isCurrentPin = (v: string) => /^(\d{4}|\d{6})$/.test(v);
 
-/**
- * Mounted once at the root. When the API asks for confirmation before a
- * sensitive change, this asks the account holder for their strongest factor
- * and hands the resulting token back to authFetch, which retries the request.
- *
- * A password alone confirms nothing, so an account with no factor first sets
- * one up here (`setup_required`): a member sets a transaction PIN and confirms
- * with it; a staff account earns a set-up-only token for two-factor enrolment.
- */
+// A password alone confirms nothing, so an account with no factor sets one up here first.
 export function StepUpDialog({
   authenticateWithPasskey,
   description = 'This change affects where your money goes or how you sign in, so we check it’s really you.',
@@ -124,8 +104,7 @@ export function StepUpDialog({
     return () => registerStepUpHandler(null);
   }, []);
 
-  // A token bound to a challenge approves one request only, so it isn't kept
-  // for later ones (security gap AU-02).
+  // A challenge-bound token approves one request only, so it must not be kept for later ones.
   const remember = (res: StepUpToken) => {
     if (!pending.current?.challengeId) rememberStepUpToken(res.stepUpToken, res.expiresIn);
   };
@@ -190,7 +169,6 @@ export function StepUpDialog({
   const confirm = () =>
     run(() => confirmWith(method === 'transaction_pin' ? { pin: value } : { code: value }));
 
-  /** A member with no factor: set the PIN with the emailed code, then confirm with it. */
   const setPinAndConfirm = () =>
     run(async () => {
       await authFetch('/users/me/security/transaction-pin', {
@@ -208,11 +186,7 @@ export function StepUpDialog({
       await confirmWith({ pin });
     });
 
-  /**
-   * Staff with no factor: the password and the emailed code earn a token that
-   * only opens two-factor (and passkey) set-up. It isn't bound to a challenge,
-   * so it is kept for the enrol and enable calls that follow.
-   */
+  // This set-up-only token isn't bound to a challenge, so it is kept for the enrol and enable calls that follow.
   const confirmForSetup = () =>
     run(async () => {
       const res = await stepUp({

@@ -1,7 +1,4 @@
-/**
- * When a confirmed video viewing can be joined: from 15 minutes before the
- * booked time to 2 hours after it. Mirrors the API, which enforces it.
- */
+// Mirrors the API, which enforces the join window.
 export const VIDEO_CALL_OPENS_BEFORE_MS = 15 * 60 * 1000;
 export const VIDEO_CALL_CLOSES_AFTER_MS = 2 * 60 * 60 * 1000;
 
@@ -26,7 +23,6 @@ export function videoCallState(
   return { state: 'open' };
 }
 
-/** What the API hands back to join a call. */
 export interface VideoCallJoin {
   joinUrl: string;
   roomUrl: string;

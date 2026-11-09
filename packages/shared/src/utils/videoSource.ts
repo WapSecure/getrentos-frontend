@@ -1,11 +1,5 @@
-/**
- * What a listing's video or tour link is, and how to show it.
- *
- * Hosts paste links (YouTube, Vimeo, Matterport…) as well as uploading files.
- * A pasted page URL cannot play in a <video> element, and an arbitrary URL
- * must never be framed, so every link is read through here: known providers
- * become their official embed URL, anything else is refused.
- */
+// An arbitrary URL must never be framed: known providers become their official embed URL,
+// anything else is refused.
 export type VideoSource =
   | { kind: 'file'; url: string }
   | { kind: 'youtube'; id: string; embedUrl: string }
@@ -13,10 +7,6 @@ export type VideoSource =
 
 export type TourSource = { kind: 'tour'; host: string; embedUrl: string };
 
-/**
- * An uploaded video re-encoded for streaming (Mux), when the API has one.
- * Phones play the adaptive stream; anything that cannot plays the original.
- */
 export interface VideoStream {
   hlsUrl: string;
   posterUrl: string;
@@ -34,7 +24,6 @@ function parse(raw: string): URL | null {
   }
 }
 
-/** A YouTube or Vimeo page link as an embeddable player; null for anything else. */
 export function embeddedVideo(raw: string | null | undefined): VideoSource | null {
   if (!raw) return null;
   const url = parse(raw);
@@ -68,10 +57,6 @@ export function embeddedVideo(raw: string | null | undefined): VideoSource | nul
   return null;
 }
 
-/**
- * A listing's video as something playable: an embedded YouTube/Vimeo player
- * for a pasted link, or the file itself for an uploaded one.
- */
 export function videoSource(url: string | null | undefined): VideoSource | null {
   if (!url) return null;
   const embedded = embeddedVideo(url);
@@ -89,7 +74,6 @@ export const TOUR_HOSTS = [
   'momento360.com',
 ];
 
-/** A 360° tour link as an embeddable page; null for an unknown or unsafe link. */
 export function tourSource(raw: string | null | undefined): TourSource | null {
   if (!raw) return null;
   const url = parse(raw);

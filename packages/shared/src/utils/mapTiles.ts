@@ -1,9 +1,5 @@
-/**
- * Which map tiles the apps draw. With a Mapbox public token (pk.…) the maps
- * use Mapbox's streets and dark styles, which are licensed for production
- * traffic; without one they fall back to the OpenStreetMap community tiles,
- * which are fine for development but not for heavy production use.
- */
+// The OpenStreetMap community tiles are only the no-token fallback: fine for development, not for
+// heavy production traffic.
 export interface MapTiles {
   provider: 'mapbox' | 'osm';
   url: string;

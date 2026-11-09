@@ -9,15 +9,9 @@ interface SaveButtonProps {
   type?: 'button' | 'submit';
   fullWidth?: boolean;
   className?: string;
-  /**
-   * Return the save's promise: the button shows it working, then "Saved" only
-   * once it resolves. Resolving to `false` (nothing was saved, e.g. the form
-   * was not ready) or rejecting shows no "Saved": the caller shows why.
-   * Returning anything else (or no handler) never shows "Saved".
-   */
+  /** Return the save's promise; "Saved" shows only once it resolves to something other than `false`. */
   onClick?: () => unknown;
   disabled?: boolean;
-  /** Busy from outside, e.g. a form's mutation that a submit button starts. */
   isLoading?: boolean;
 }
 

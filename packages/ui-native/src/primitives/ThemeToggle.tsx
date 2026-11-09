@@ -13,16 +13,10 @@ const META: Record<ThemePreference, { label: string; Icon: typeof Sun }> = {
 };
 
 export interface ThemeToggleProps {
-  /** `pill` = one compact button that cycles; `segmented` = three options. */
   variant?: 'pill' | 'segmented';
-  /** Hide the text label on the pill (icon only). */
   compact?: boolean;
 }
 
-/**
- * Appearance control backed by the theme context. `pill` suits a screen header
- * (tap to cycle Auto → Light → Dark); `segmented` suits a settings row.
- */
 export function ThemeToggle({ variant = 'pill', compact = false }: ThemeToggleProps) {
   const { colors, radius, preference, setPreference } = useTheme();
 

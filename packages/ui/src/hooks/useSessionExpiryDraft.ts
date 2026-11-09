@@ -5,7 +5,6 @@ import { onSessionExpired } from '@sureground/shared';
 
 const PREFIX = 'gr_draft:';
 
-/** True when a form left a draft behind as the session ended (e.g. to reopen its dialog). */
 export function hasSessionDraft(key: string): boolean {
   if (typeof window === 'undefined') return false;
   try {
@@ -15,7 +14,6 @@ export function hasSessionDraft(key: string): boolean {
   }
 }
 
-/** Drops a saved draft, e.g. once the form it belonged to was submitted. */
 export function clearSessionDraft(key: string): void {
   try {
     window.sessionStorage.removeItem(PREFIX + key);
@@ -24,16 +22,6 @@ export function clearSessionDraft(key: string): void {
   }
 }
 
-/**
- * Keeps what someone typed when their session runs out mid-form. The moment
- * the app gives up on the session (just before it sends them to sign in), the
- * form's current values are written to this tab's sessionStorage; when the form
- * mounts again after sign-in they are handed back once and removed.
- *
- * `snapshot` returns the values worth keeping, or null when there is nothing.
- * `restore` puts them back. Returns true while a restored draft is showing, so
- * the form can say so.
- */
 export function useSessionExpiryDraft<T>(
   key: string,
   snapshot: () => T | null,

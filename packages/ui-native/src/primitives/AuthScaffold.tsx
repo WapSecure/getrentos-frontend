@@ -14,22 +14,14 @@ export interface AuthScaffoldProps {
   children: ReactNode;
   title: string;
   subtitle?: string;
-  /** Eyebrow above the title. */
   kicker?: string;
   onBack?: () => void;
-  /** 0…1 — renders a progress bar under the header when set. */
+  /** 0…1. */
   progress?: number;
-  /** Spoken with the progress bar, e.g. "Step 2 of 3". */
   progressLabel?: string;
-  /** Sticky footer (primary action) above the home indicator. */
   footer?: ReactNode;
 }
 
-/**
- * The shared shell for every onboarding screen: safe-area, keyboard handling,
- * a 44-point back affordance, an optional step progress bar, a large title
- * that animates in, and a sticky footer for the primary action.
- */
 export function AuthScaffold({
   children,
   title,
@@ -47,8 +39,7 @@ export function AuthScaffold({
   return (
     <KeyboardAvoidingView
       style={[styles.flex, { backgroundColor: colors.background }]}
-      // Android runs edge-to-edge, so the window no longer resizes for the
-      // keyboard — pad on both platforms or the sticky footer ends up under it.
+      // Android runs edge-to-edge and no longer resizes for the keyboard, so pad on both platforms.
       behavior={Platform.OS === 'web' ? undefined : 'padding'}
     >
       <View style={{ paddingTop: insets.top + spacing.sm, paddingHorizontal: spacing.xl }}>

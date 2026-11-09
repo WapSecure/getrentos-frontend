@@ -14,13 +14,11 @@ interface TimePickerProps {
   onChange: (value: string) => void;
   placeholder?: string;
   step?: number;
-  /** Earliest hour to offer (0–24). Defaults to 0 (midnight). */
   minHour?: number;
-  /** Latest hour to offer, exclusive (0–24). Defaults to 24 (whole day). */
+  /** Exclusive. */
   maxHour?: number;
   disabled?: boolean;
   className?: string;
-  /** Trigger id; inside a Field the field supplies it. */
   id?: string;
   invalid?: boolean;
   required?: boolean;
@@ -66,7 +64,6 @@ export const TimePicker = ({
   const listboxId = `${baseId}-listbox`;
   const hasSelected = options.some((option) => option.value === value);
 
-  // Open on the chosen time (or the first slot) with focus on it, so arrows work at once.
   // Runs from onOpenAutoFocus: the list is portaled and only exists by then.
   const focusInitialOption = () => {
     const list = listRef.current;
@@ -101,15 +98,13 @@ export const TimePicker = ({
   };
 
   return (
-    // Modal, so Tab stays in the list (it is portaled) and a pick or Escape
-    // returns focus to the trigger.
+    // Modal, so Tab stays in the portaled list.
     <RadixPopover.Root open={open} onOpenChange={setOpen} modal>
       <RadixPopover.Trigger asChild>
         <button
           type="button"
           id={field.id}
           disabled={disabled}
-          // A combobox, so the required/invalid state from a Field is valid ARIA.
           role="combobox"
           aria-haspopup="listbox"
           aria-expanded={open}

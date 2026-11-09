@@ -91,8 +91,7 @@ function ToastView({ toast, onDismiss }: { toast: ToastState; onDismiss: () => v
       <Pressable
         onPress={onDismiss}
         accessibilityRole="alert"
-        // Messages arrive already punctuated ("Payment successful."), so adding
-        // another full stop read out as "successful.. Double tap".
+        // Messages arrive punctuated; another full stop would read out as "successful.. Double tap".
         accessibilityLabel={`${toast.tone}: ${toast.message.replace(/[.!?]+$/, '')}. Double tap to dismiss.`}
         accessibilityLiveRegion="polite"
         style={[

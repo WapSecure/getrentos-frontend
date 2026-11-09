@@ -1,13 +1,5 @@
-/**
- * Is this photo of a document good enough to read? Checked on the device right
- * after the photo is taken or picked, so a blurry or dark shot is retaken on the
- * spot instead of being rejected by a reviewer days later. It only advises: the
- * person can still send it, since some borderline photos are readable.
- *
- * Platform-neutral: callers decode the image and shrink it (longest side about
- * 640 px) first. The browser does that with a canvas, the app with
- * expo-image-manipulator.
- */
+// Advisory only: some borderline photos are readable. Callers decode and shrink the image (longest
+// side about 640 px) first.
 export type PhotoProblem = 'TOO_SMALL' | 'TOO_DARK' | 'GLARE' | 'BLURRY';
 
 export interface PhotoPixels {
@@ -21,7 +13,6 @@ export interface PhotoPixels {
   originalHeight: number;
 }
 
-/** The shorter side a document photo needs for its print to stay legible. */
 export const MIN_DOCUMENT_PHOTO_SIDE = 600;
 const DARK_MEAN = 50;
 const GLARE_LEVEL = 253;
@@ -29,7 +20,6 @@ const GLARE_SHARE = 0.2;
 /** Edge sharpness (variance of the Laplacian) below which text is smeared. */
 const BLUR_VARIANCE = 40;
 
-/** Plain-language fixes, shown under the photo. */
 export const PHOTO_PROBLEM_COPY: Record<PhotoProblem, string> = {
   TOO_SMALL:
     'This photo is too small to read. Retake it closer, with the document filling the frame.',
@@ -61,9 +51,7 @@ export function assessPhotoQuality(photo: PhotoPixels): PhotoProblem[] {
   if (sum / pixels < DARK_MEAN) problems.push('TOO_DARK');
   if (bright / pixels > GLARE_SHARE) problems.push('GLARE');
 
-  // Variance of the 4-neighbour Laplacian: sharp edges (print, borders) give a
-  // high variance, a smeared photo a low one. Skipped when the photo is dark,
-  // since that is the problem to fix first.
+  // Skipped when the photo is dark, since that is the problem to fix first.
   if (!problems.includes('TOO_DARK') && width > 2 && height > 2) {
     let lapSum = 0;
     let lapSq = 0;

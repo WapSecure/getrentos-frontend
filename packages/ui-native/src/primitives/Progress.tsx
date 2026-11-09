@@ -8,20 +8,17 @@ export interface ProgressProps {
   /** 0…1 */
   value: number;
   height?: number;
-  /** Spoken by screen readers, e.g. "Sign-up progress". */
   accessibilityLabel?: string;
 }
 
 const SPRING = { damping: 20, stiffness: 140 };
 
-/** Slim spring-animated progress bar for multi-step flows. */
 export function Progress({ value, height = 4, accessibilityLabel }: ProgressProps) {
   const { colors, radius } = useTheme();
   const reduceMotion = useReducedMotion();
   const clamped = Math.max(0, Math.min(1, value));
   const width = useSharedValue(clamped);
 
-  // Animate on the shared value itself so the style worklet stays a pure read.
   useEffect(() => {
     width.set(reduceMotion ? clamped : withSpring(clamped, SPRING));
   }, [clamped, reduceMotion, width]);

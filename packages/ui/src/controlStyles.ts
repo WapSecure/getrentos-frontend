@@ -1,11 +1,5 @@
 import { cn } from '@sureground/shared';
 
-/**
- * The one look every text-like control shares (Input, Textarea, NumberInput,
- * CurrencyInput, Select, DatePicker, TimePicker), so a form never mixes three
- * radii and two focus rings. States: hover, focus (ring), invalid
- * (destructive border and ring), disabled, read-only.
- */
 export type ControlSize = 'sm' | 'md';
 
 const SIZE: Record<ControlSize, string> = {
@@ -34,7 +28,6 @@ export function controlShell(opts: {
   invalid?: boolean;
   disabled?: boolean;
   readOnly?: boolean;
-  /** The shell wraps the native control (focus-within) or is the control itself (focus-visible). */
   wraps?: boolean;
   className?: string;
 }) {
@@ -49,6 +42,5 @@ export function controlShell(opts: {
   );
 }
 
-/** The bare native input inside a wrapping shell. */
 export const innerInputClass =
   'min-w-0 flex-1 border-0 bg-transparent py-2 text-sm text-foreground shadow-none outline-none placeholder:text-muted-foreground focus:shadow-none disabled:cursor-not-allowed';

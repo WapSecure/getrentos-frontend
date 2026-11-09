@@ -12,30 +12,18 @@ const PERIOD_LABEL: Record<Exclude<PricePeriod, null>, string> = {
 };
 
 export interface PriceProps {
-  /**
-   * Major-unit Naira. (Backend money is major-unit today — see mobile
-   * lib/format.) Optional on purpose: a unit can exist without an asking rent
-   * yet, and the API then omits the field entirely.
-   */
+  /** Major-unit naira. Optional: the API omits it when a unit has no asking rent yet. */
   amount?: number | null;
-  /** Rate suffix, rendered muted after the figure. `total` / null = no suffix. */
   period?: PricePeriod;
-  /** ₦2.4M / ₦950K instead of the full grouped figure. */
   compact?: boolean;
-  /** Type-ramp size for the figure. Default `subheading`. */
   variant?: TypographyVariant;
-  /** Figure colour. Default `foreground`. */
   color?: 'foreground' | 'primary' | 'success' | 'destructive';
-  /** Suffix colour override — for use over photos/dark scrims where `mutedForeground` has no contrast. */
+  /** For use over photos, where `mutedForeground` has no contrast. */
   periodColor?: string;
   style?: TextStyle;
 }
 
-/**
- * A missing amount renders as an em-dash. Without this guard an unset figure
- * (a unit with no asking rent, an empty rent roll) printed the literal text
- * "₦NaN" to the screen.
- */
+// Without this guard an unset figure rendered as "₦NaN".
 const isAmount = (amount: number | null | undefined): amount is number =>
   typeof amount === 'number' && Number.isFinite(amount);
 
@@ -50,11 +38,6 @@ function formatFigure(amount: number, compact: boolean): string {
 
 const trimZero = (s: string) => (s.endsWith('.0') ? s.slice(0, -2) : s);
 
-/**
- * The single money renderer. Locks every price to ₦, grouped digits and
- * tabular figures (so lists don't jitter as amounts change), with the rate
- * period in muted text.
- */
 export function Price({
   amount,
   period = null,

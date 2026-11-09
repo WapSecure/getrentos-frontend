@@ -35,7 +35,6 @@ const SIZES = {
   lg: 'h-11 w-11 [&_svg]:h-5 [&_svg]:w-5',
 } as const;
 
-/** A square, icon-only button: close, more, edit, delete in a row. */
 export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
   (
     {
@@ -97,11 +96,6 @@ export interface IconLinkProps extends Omit<
   size?: IconButtonProps['size'];
 }
 
-/**
- * IconButton's look for a link: download a file, open a document in a new
- * tab. In-app paths go through next/link; anything with a scheme, a download
- * or a new tab is a plain anchor. A new tab gets noopener by default.
- */
 export const IconLink = forwardRef<HTMLAnchorElement, IconLinkProps>(
   (
     {

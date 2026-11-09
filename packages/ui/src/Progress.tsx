@@ -1,12 +1,9 @@
 import { cn } from '@sureground/shared';
 
 interface ProgressProps {
-  /** 0–max. Values outside the range are clamped. */
   value: number;
   max?: number;
-  /** Read out with the value, e.g. "Profile complete". */
   label: string;
-  /** Shows "3 of 5" or "60%" beside the label. */
   showValue?: boolean | 'percent' | 'fraction';
   tone?: 'primary' | 'success' | 'warning' | 'danger';
   size?: 'sm' | 'md';
@@ -20,7 +17,6 @@ const TONES = {
   danger: 'bg-destructive',
 } as const;
 
-/** A labelled progress bar: verification steps, profile completeness, quota used. */
 export function Progress({
   value,
   max = 100,

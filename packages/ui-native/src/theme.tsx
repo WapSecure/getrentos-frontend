@@ -10,14 +10,9 @@ import {
   type Palette,
 } from '@sureground/tokens';
 
-/** The weights the type ramp and screens ask for. */
 export type FontWeight = '400' | '500' | '600' | '700' | '800';
 
-/**
- * The font family the app has loaded for each weight: static faces, one file
- * per weight (e.g. `{ '600': 'Manrope_600SemiBold' }`). Empty means the
- * platform's own UI face, with weight applied the usual way.
- */
+/** One static face per weight; empty means the platform UI face. */
 export type FontFamilies = Partial<Record<FontWeight, string>>;
 
 export interface Theme {
@@ -28,11 +23,7 @@ export interface Theme {
   typography: typeof typography;
   shadows: typeof shadows;
   fonts: FontFamilies;
-  /**
-   * The family and weight to render text of this weight in. With a loaded
-   * static face the weight is reset to normal: the face already carries it,
-   * and iOS, Android and the browser would otherwise embolden it a second time.
-   */
+  /** With a loaded static face the weight resets to normal, or platforms embolden it a second time. */
   font: (weight: TextStyle['fontWeight']) => Pick<TextStyle, 'fontFamily' | 'fontWeight'>;
 }
 
@@ -66,7 +57,6 @@ function normalizeWeight(weight: TextStyle['fontWeight']): FontWeight {
   return (weight && named[String(weight).toLowerCase()]) || '400';
 }
 
-/** The loaded family for this weight: the exact one, else the nearest below, else the nearest above. */
 export function resolveFontFamily(
   fonts: FontFamilies,
   weight: TextStyle['fontWeight']
@@ -81,10 +71,6 @@ export function resolveFontFamily(
   return (below && fonts[below]) || (above && fonts[above]) || undefined;
 }
 
-/**
- * Appends the theme's font to a text style so whatever weight the caller set
- * (in the ramp or an inline `fontWeight`) renders in the loaded face.
- */
 export function withFont(
   theme: Pick<Theme, 'font'>,
   style: StyleProp<TextStyle>
@@ -110,11 +96,7 @@ function buildTheme(scheme: ColorScheme, fonts: FontFamilies): Theme {
   };
 }
 
-/**
- * App-wide theme. Follows the OS appearance by default; `setPreference` lets a
- * settings screen pin light or dark. Persisting the choice is the app's job —
- * pass `initialPreference` after reading it back from storage.
- */
+// Persisting the preference is the app's job: pass initialPreference after reading it back.
 export function ThemeProvider({
   children,
   initialPreference = 'system',
@@ -123,9 +105,7 @@ export function ThemeProvider({
 }: {
   children: ReactNode;
   initialPreference?: ThemePreference;
-  /** Fired whenever the preference changes — use it to persist the choice. */
   onPreferenceChange?: (preference: ThemePreference) => void;
-  /** The brand typeface, by weight, once the app has loaded it; omit for the platform face. */
   fonts?: FontFamilies;
 }) {
   const rawScheme = useColorScheme();
@@ -155,10 +135,6 @@ export function useTheme(): ThemeContextValue {
   return ctx;
 }
 
-/**
- * Build a StyleSheet from the current theme. Keeps screens declarative:
- *   const styles = useThemedStyles((t) => ({ box: { backgroundColor: t.colors.card } }));
- */
 export function useThemedStyles<T extends Record<string, object>>(factory: (theme: Theme) => T): T {
   const theme = useTheme();
   return useMemo(() => factory(theme), [theme, factory]);

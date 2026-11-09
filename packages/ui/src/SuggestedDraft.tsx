@@ -5,12 +5,9 @@ import { Alert } from './Alert';
 import { Button } from './Button';
 
 export interface SuggestedDraftProps {
-  /** The drafted text. */
   text: string;
   title?: string;
-  /** Points to confirm before sending. */
   toCheck?: string[];
-  /** What the draft was written from, in titled groups of lines. */
   sources?: { title: string; lines: string[] }[];
   sourcesLabel?: string;
   disclaimer?: string;
@@ -19,11 +16,6 @@ export interface SuggestedDraftProps {
   onDismiss?: () => void;
 }
 
-/**
- * A drafted piece of text for the person to read, use and edit before
- * sending: the draft, what to check first, and what it was written from.
- * Nothing is sent from here.
- */
 export function SuggestedDraft({
   text,
   title = 'Suggested reply',

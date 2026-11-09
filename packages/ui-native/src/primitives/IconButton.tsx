@@ -8,14 +8,11 @@ export interface IconButtonProps extends Omit<PressableScaleProps, 'children' | 
   icon: React.ReactNode;
   badge?: number;
   selected?: boolean;
-  /** `ghost` drops the circle and border, for inline icons (back chevrons, row actions). */
   variant?: 'outline' | 'ghost';
-  /** Shows a spinner in place of the icon and blocks presses. */
   loading?: boolean;
   style?: StyleProp<ViewStyle>;
 }
 
-/** A consistent 44-point icon target with an optional, screen-reader-aware badge. */
 export function IconButton({
   accessibilityLabel,
   icon,

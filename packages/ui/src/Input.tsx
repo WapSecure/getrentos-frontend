@@ -8,17 +8,12 @@ import { useFieldControl } from './fieldContext';
 export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> {
   leadingIcon?: ReactNode;
   trailingIcon?: ReactNode;
-  /** Styles for the native input rather than its visual shell. */
   inputClassName?: string;
-  /** Marks the control invalid. Inside a Field, its `error` does this for you. */
+  /** Inside a Field, its `error` sets this for you. */
   invalid?: boolean;
   controlSize?: ControlSize;
 }
 
-/**
- * Single-line text input. Inside a `Field` it takes its id, description and
- * invalid state from the field; outside one, pass `id` / `invalid` yourself.
- */
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   (
     {

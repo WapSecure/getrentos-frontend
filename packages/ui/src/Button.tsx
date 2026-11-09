@@ -9,13 +9,9 @@ export interface ButtonProps extends Omit<
   'children' | 'type' | 'onClick'
 > {
   children: ReactNode;
-  /** With `href`: open in a new tab ("_blank") and the link's rel. External tabs get noopener by default. */
+  /** With `href`; a new tab gets noopener by default. */
   target?: string;
   rel?: string;
-  /**
-   * `link` is an inline text action ("Resend code", "Dispute this") that sits
-   * in a sentence or a dense row: no box, no minimum height, underlined on hover.
-   */
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'link';
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
@@ -24,10 +20,7 @@ export interface ButtonProps extends Omit<
   disabled?: boolean;
   type?: 'button' | 'submit' | 'reset';
   isLoading?: boolean;
-  /**
-   * Shown beside the spinner while loading ("Saving…"). Without it the label
-   * stays in place, hidden, so the button keeps its width and nothing shifts.
-   */
+  /** Without it the label stays in place, hidden, so the button keeps its width. */
   loadingText?: string;
   icon?: ReactNode;
   iconPosition?: 'left' | 'right';
@@ -35,19 +28,9 @@ export interface ButtonProps extends Omit<
   rounded?: 'none' | 'sm' | 'md' | 'lg' | 'full';
   shadow?: boolean;
   title?: string;
-  /**
-   * Focus the button as soon as it mounts. Used by dialogs whose primary
-   * action should be the keyboard's default landing spot, so pressing Enter
-   * accepts the dialog rather than the destructive alternative next to it.
-   */
+  /** For dialogs, so Enter accepts the primary action rather than the destructive one beside it. */
   autoFocus?: boolean;
-  /**
-   * Accessible name, overriding the visible text.
-   *
-   * Needed wherever the same button repeats down a list — "Manage", "View",
-   * "Edit" — because a screen reader then hears a column of identical labels
-   * with no way to tell which row each one belongs to.
-   */
+  /** Needed where the same label repeats down a list, so screen readers can tell the rows apart. */
   'aria-label'?: string;
 }
 
@@ -111,7 +94,6 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const combinedClassName = cn(
       baseStyles,
       variants[variant],
-      // A text link keeps the line's height: no padding box around it.
       variant === 'link' ? 'min-h-0 p-0 text-sm' : sizes[size],
       roundedStyles[rounded],
       fullWidth && 'w-full',

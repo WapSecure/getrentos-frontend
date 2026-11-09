@@ -14,7 +14,6 @@ export interface ButtonProps extends Omit<PressableScaleProps, 'style' | 'childr
   variant?: ButtonVariant;
   size?: ButtonSize;
   loading?: boolean;
-  /** Shown beside the spinner while loading ("Saving…"). Without it the label keeps its space, hidden. */
   loadingLabel?: string;
   fullWidth?: boolean;
   icon?: React.ReactNode;
@@ -66,8 +65,7 @@ export function Button({
   };
   const textVariant = size === 'sm' ? 'callout' : 'bodyStrong';
 
-  // While loading, the label stays laid out (invisible) under the spinner so the
-  // button keeps its size. A loading label replaces it instead, since it may be longer.
+  // The hidden label keeps the button's size; a loading label replaces it, since it may be longer.
   const content = (
     <View style={[styles.content, loading && styles.hidden]}>
       {icon}

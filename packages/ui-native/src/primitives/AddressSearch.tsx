@@ -16,12 +16,10 @@ import { TextField } from './TextField';
 export interface AddressSearchProps {
   value: AddressValue | null;
   onChange: (value: AddressValue | null) => void;
-  /** Suggestions for what has been typed (the app's /geo/places/suggest). */
   search: (query: string, opts: { session: string; kind: PlaceKind }) => Promise<PlaceSuggestion[]>;
-  /** The checked address for a picked suggestion (the app's /geo/places/:placeId). */
   resolve: (placeId: string, session: string) => Promise<VerifiedAddress>;
   kind?: PlaceKind;
-  /** Let the person keep an address Google cannot find; saved as typed and shown as unchecked. */
+  /** Leave off where the address must be real: a manual one is saved unchecked. */
   allowManual?: boolean;
   label?: string;
   hint?: string;
@@ -29,7 +27,6 @@ export interface AddressSearchProps {
   required?: boolean;
   placeholder?: string;
   editable?: boolean;
-  /** Called with the checked address after a pick, e.g. to move a map pin. */
   onResolved?: (address: VerifiedAddress) => void;
 }
 
@@ -38,13 +35,7 @@ type Status = 'idle' | 'loading' | 'ready' | 'error' | 'resolving';
 const MIN_CHARS: Record<PlaceKind, number> = { address: 3, area: 2, any: 2 };
 const DEBOUNCE_MS = 300;
 
-/**
- * Address search with Google Places suggestions, the native twin of
- * AddressSearch in @sureground/ui. Suggestions show in a card under the field;
- * a pick becomes a checked address (street, area, LGA, state and map pin).
- * Put it in a ScrollView with keyboardShouldPersistTaps="handled" so a tap on
- * a suggestion is not swallowed by the keyboard closing.
- */
+// Put it in a ScrollView with keyboardShouldPersistTaps="handled", or closing the keyboard swallows a tap on a suggestion.
 export function AddressSearch({
   value,
   onChange,

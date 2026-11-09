@@ -5,22 +5,14 @@ import { Text } from './Text';
 
 export interface ChipProps {
   label: string;
-  /** Filled/tinted when true. */
   selected?: boolean;
-  /** Tappable when provided; otherwise a static tag. */
   onPress?: () => void;
   leadingIcon?: ReactNode;
-  /** Small trailing count, e.g. active-filter total. */
   count?: number;
   disabled?: boolean;
   size?: 'sm' | 'md';
 }
 
-/**
- * A pill for filters, sorts, specs and amenities. Selected chips take the
- * primary tint; unselected ones are a bordered surface. Static (no `onPress`)
- * chips render as plain tags.
- */
 export function Chip({
   label,
   selected = false,

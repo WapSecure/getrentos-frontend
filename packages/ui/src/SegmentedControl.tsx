@@ -5,13 +5,11 @@ import { cn } from '@sureground/shared';
 
 export interface Segment<T extends string> {
   value: T;
-  /** Visible text. For icon-only segments pass `icon` and still give a label: it is read out. */
+  /** Still required for icon-only segments: it is read out. */
   label: string;
   icon?: ReactNode;
   disabled?: boolean;
-  /** A number after the label ("Periods 3"); hidden when undefined. */
   count?: number;
-  /** `warning` marks a count that needs attention (unconfigured, overdue). */
   countTone?: 'neutral' | 'warning';
 }
 
@@ -19,19 +17,12 @@ interface SegmentedControlProps<T extends string> {
   value: T;
   onValueChange: (value: T) => void;
   segments: readonly Segment<T>[];
-  /** Names the group for screen readers, e.g. "View". */
   'aria-label': string;
-  /** Hide the text and show only icons (the label is still read out). */
   iconOnly?: boolean;
   size?: 'sm' | 'md';
   className?: string;
 }
 
-/**
- * A small set of mutually exclusive views or modes: grid/list, month/week/day.
- * Arrow keys move between segments; Tab enters and leaves the group as one stop.
- * For switching page sections with their own content, use Tabs instead.
- */
 export function SegmentedControl<T extends string>({
   value,
   onValueChange,
