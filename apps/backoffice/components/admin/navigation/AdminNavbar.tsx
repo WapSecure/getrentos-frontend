@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import { IconButton, Logo, ThemeToggle } from '@sureground/ui';
@@ -27,25 +26,13 @@ export const AdminNavbar = ({ user }: AdminNavbarProps) => {
 
   return (
     <>
-      <nav className={`workspace-navbar sticky top-0 z-50 ${isScrolled ? 'shadow-xs' : ''}`}>
+      <nav
+        aria-label="Top bar"
+        className={`workspace-navbar sticky top-0 z-50 ${isScrolled ? 'shadow-xs' : ''}`}
+      >
         <div className="px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex h-16 items-center justify-between gap-3">
             <Logo href={ROUTES.ADMIN_DASHBOARD} size="md" />
-
-            <div className="hidden md:flex items-center gap-6">
-              <Link
-                href={ROUTES.ADMIN_DASHBOARD}
-                className="text-foreground font-medium hover:text-primary transition-colors"
-              >
-                Dashboard
-              </Link>
-              <Link
-                href={ROUTES.ADMIN_USERS}
-                className="text-muted-foreground hover:text-primary transition-colors"
-              >
-                Users
-              </Link>
-            </div>
 
             {/* Below lg the compact search row takes over; showing both squeezes the header past the viewport on tablets. */}
             <div className="hidden lg:flex flex-1 max-w-md mx-4">

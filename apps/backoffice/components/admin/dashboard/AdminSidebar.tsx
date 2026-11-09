@@ -437,7 +437,7 @@ const navItems: NavItem[] = [
 
 // Groups list their pages by name; ranges let newly added pages drift into the wrong group.
 const groupItems: [group: string, items: string[]][] = [
-  ['Overview', ['Dashboard', 'Reports', 'Automation Usage']],
+  ['Reports', ['Dashboard', 'Reports', 'Automation Usage']],
   [
     'People and identity',
     [
@@ -563,6 +563,17 @@ const hasAccess = (roles: string[] | undefined, item: NavItem) =>
     ? hasStaffAccess(roles)
     : hasAdminPermission(roles, item.permission);
 
+// The one link for this page: the most specific match, so a page nested under
+// another (/admin/rentals/units under /admin/rentals) does not light up both.
+const activeAdminHref = (pathname: string): string | undefined =>
+  navItems
+    .map((item) => item.href)
+    .filter(
+      (href) =>
+        pathname === href || (href !== ROUTES.ADMIN_DASHBOARD && pathname.startsWith(`${href}/`))
+    )
+    .sort((a, b) => b.length - a.length)[0];
+
 // Paths no entry covers are left to the page; Settings is open to everyone because it holds the person's own profile.
 export function hasRouteAccess(roles: string[] | undefined, pathname: string): boolean {
   if (pathname === ROUTES.ADMIN_SETTINGS || pathname.startsWith(`${ROUTES.ADMIN_SETTINGS}/`)) {
@@ -608,9 +619,8 @@ function AdminNavigationGroup({
   managedWaiting?: number;
   onNavigate?: () => void;
 }) {
-  const containsCurrentPage = items.some(
-    (item) => pathname === item.href || pathname.startsWith(`${item.href}/`)
-  );
+  const activeHref = activeAdminHref(pathname);
+  const containsCurrentPage = items.some((item) => item.href === activeHref);
   const preferenceKey = `sureground.admin-nav.expanded:${label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
   const expandedPreference = useSyncExternalStore(
     subscribeAdminNav,
@@ -622,9 +632,7 @@ function AdminNavigationGroup({
   const links = (
     <div className="space-y-1">
       {items.map((item) => {
-        const isActive =
-          pathname === item.href ||
-          (item.href !== ROUTES.ADMIN_DASHBOARD && pathname.startsWith(`${item.href}/`));
+        const isActive = item.href === activeHref;
         return (
           <Link
             key={item.href}
@@ -700,9 +708,8 @@ export const AdminSidebar = ({ roles }: { roles?: string[] }) => {
   const primaryItems = navGroups[0].items.filter((item) => hasAccess(roles, item));
   const mobilePrimaryItems = primaryItems.slice(0, 5);
   const { rail, setRail } = useSidebarRail();
-  const isCurrent = (item: NavItem) =>
-    pathname === item.href ||
-    (item.href !== ROUTES.ADMIN_DASHBOARD && pathname.startsWith(`${item.href}/`));
+  const currentHref = activeAdminHref(pathname);
+  const isCurrent = (item: NavItem) => item.href === currentHref;
   const railCurrent = primaryItems.some(isCurrent)
     ? undefined
     : navGroups
@@ -764,9 +771,7 @@ export const AdminSidebar = ({ roles }: { roles?: string[] }) => {
           aria-label="Administration primary navigation"
         >
           {mobilePrimaryItems.map((item) => {
-            const active =
-              pathname === item.href ||
-              (item.href !== ROUTES.ADMIN_DASHBOARD && pathname.startsWith(`${item.href}/`));
+            const active = item.href === currentHref;
             return (
               <Link
                 key={item.href}

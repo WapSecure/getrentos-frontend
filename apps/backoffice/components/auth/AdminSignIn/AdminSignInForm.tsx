@@ -157,7 +157,22 @@ export const AdminSignInForm = () => {
 
       <SessionExpiredNotice />
 
-      <form method="post" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form
+        method="post"
+        onSubmit={(event) => {
+          // On the code step, Enter in the code box verifies the code. Without
+          // this it re-ran the password sign-in and quietly issued a new challenge.
+          if (pendingChallenge) {
+            event.preventDefault();
+            if (isSecondFactorCode(twoFactorCode) && !twoFactorMutation.isPending) {
+              void completeTwoFactorSignIn();
+            }
+            return;
+          }
+          void handleSubmit(onSubmit)(event);
+        }}
+        className="space-y-4"
+      >
         {pendingChallenge ? (
           <>
             <Alert variant="info" icon={ShieldCheck} title="Two-factor authentication">
