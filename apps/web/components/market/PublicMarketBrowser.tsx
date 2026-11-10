@@ -83,8 +83,8 @@ const MarketListingCard = ({
       imageAlt={listing.title}
       eager={eager}
       status={market === 'rent' ? 'For rent' : 'For sale'}
+      // One trust signal: the chain pill already says "Verified" when there is no chain.
       badges={<TrustChainBadge chain={listing.trustChain} fallbackVerified={listing.verified} />}
-      verified={listing.verified}
       facts={{
         beds: listing.bedrooms,
         baths: listing.bathrooms,

@@ -3,7 +3,7 @@
 import { forwardRef, useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { BadgeCheck, ImageOff } from '@sureground/icons';
-import { cn, formatCurrency } from '@sureground/shared';
+import { cn, formatCurrency, tidyPlace } from '@sureground/shared';
 import { Badge, type BadgeVariant } from './Badge';
 import { IconButton, type IconButtonProps } from './IconButton';
 
@@ -235,7 +235,9 @@ export const ListingCard = ({
 
   const details = (
     <>
-      {location && <p className="mt-0.5 line-clamp-1 text-sm text-muted-foreground">{location}</p>}
+      {location && (
+        <p className="mt-0.5 line-clamp-1 text-sm text-muted-foreground">{tidyPlace(location)}</p>
+      )}
       {factsLine.length > 0 && (
         <p
           className={cn(

@@ -152,3 +152,15 @@ test('rental: stated fees join the move-in total; a zero is stated, not missing'
   assert.equal(l.costs.total?.amount, 4950000);
   assert.deepEqual(l.costs.notStated, []);
 });
+
+test('repeated place names collapse', () => {
+  assert.equal(fromRental({ ...rental, location: 'Lagos, Lagos' }).location, 'Lagos');
+  assert.equal(
+    fromSale({ id: 's', title: 'x', price: 1, city: 'Abuja', state: 'abuja' }).location,
+    'Abuja'
+  );
+  assert.equal(
+    fromRental({ ...rental, location: 'Lekki Phase 1, Lagos' }).location,
+    'Lekki Phase 1, Lagos'
+  );
+});

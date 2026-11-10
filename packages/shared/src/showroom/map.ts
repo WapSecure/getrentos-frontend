@@ -9,6 +9,7 @@ import type {
   ShowroomListing,
 } from './types';
 import { LAND_DILIGENCE_LABELS, LAND_TITLE_TYPE_LABELS } from '../utils/landTrust';
+import { tidyPlace } from '../utils/address';
 
 const money = (v: unknown) => {
   const n = typeof v === 'string' ? Number(v) : (v as number);
@@ -16,7 +17,7 @@ const money = (v: unknown) => {
 };
 // Falsy on purpose: "0 bed" reads as a claim about the property, not a gap in the data.
 const positive = (n?: number) => (n && n > 0 ? n : undefined);
-const place = (...parts: (string | undefined)[]) => parts.filter(Boolean).join(', ');
+const place = (...parts: (string | undefined)[]) => tidyPlace(parts.filter(Boolean).join(', '));
 const humanise = (v?: string) =>
   v
     ? v
@@ -118,7 +119,7 @@ export function fromRental(r: PublicRentalDto): ShowroomListing {
     id: r.id,
     market: 'rent',
     title: r.title,
-    location: r.location,
+    location: tidyPlace(r.location),
     address: r.address,
     price,
     priceUnit: r.period,
