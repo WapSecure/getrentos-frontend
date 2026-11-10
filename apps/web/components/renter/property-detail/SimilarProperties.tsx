@@ -1,12 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { MapPin } from '@sureground/icons';
-import { formatPrice, type Property } from '@/types/renter';
+import { ListingCard } from '@sureground/ui';
+import type { Property } from '@/types/renter';
 import { buildRoute } from '@/lib/constants/auth';
 import { renterService } from '@/services/renterService';
-import { PropertyPhoto } from '@/components/renter/shared/PropertyPhoto';
 
 interface SimilarPropertiesProps {
   currentId: string;
@@ -30,25 +28,21 @@ export const SimilarProperties = ({ currentId }: SimilarPropertiesProps) => {
   return (
     <div>
       <h3 className="text-sm font-semibold text-foreground mb-3">Similar properties</h3>
-      <div className="grid sm:grid-cols-3 gap-3">
+      <div className="grid gap-x-4 gap-y-6 sm:grid-cols-3">
         {similar.map((property) => (
-          <Link
+          <ListingCard
             key={property.id}
+            headingLevel="h4"
             href={buildRoute.renterPropertyDetail(property.id)}
-            className="block rounded-lg border border-border overflow-hidden hover:shadow-md transition-shadow"
-          >
-            <PropertyPhoto src={property.image} alt={property.title} className="h-24" />
-            <div className="p-2.5">
-              <p className="text-sm font-medium text-foreground truncate">{property.title}</p>
-              <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
-                <MapPin className="w-3 h-3 shrink-0" />
-                <span className="truncate">{property.location}</span>
-              </div>
-              <p className="text-sm font-semibold text-primary mt-1">
-                {formatPrice(property.price, property.period)}
-              </p>
-            </div>
-          </Link>
+            title={property.title}
+            location={property.location}
+            price={property.price}
+            priceUnit={property.period}
+            priceCompact
+            image={property.image}
+            imageAlt={property.title}
+            facts={{ beds: property.bedrooms, baths: property.bathrooms }}
+          />
         ))}
       </div>
     </div>

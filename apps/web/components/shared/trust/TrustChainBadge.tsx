@@ -9,7 +9,6 @@ export const TRUST_TONE_VARIANT: Record<TrustLabelTone, BadgeVariant> = {
   pending: 'neutral',
 };
 
-// Absolutely positioned, so its parent needs a positioning context.
 export const TrustChainBadge = ({
   chain,
   fallbackVerified,
@@ -20,11 +19,9 @@ export const TrustChainBadge = ({
   if (!chain || chain.steps.length === 0) {
     if (!fallbackVerified) return null;
     return (
-      <div className="absolute top-3 left-3 z-10">
-        <Badge variant="success" icon={<Shield className="h-3 w-3" />}>
-          Verified
-        </Badge>
-      </div>
+      <Badge variant="success" icon={<Shield className="h-3 w-3" />} className="shadow-xs">
+        Verified
+      </Badge>
     );
   }
 
@@ -36,12 +33,12 @@ export const TrustChainBadge = ({
     <div
       title={title}
       aria-label={`${label}. ${chain.steps.map((s) => `${s.label}: ${s.met ? 'done' : 'pending'}`).join(', ')}`}
-      className="absolute top-3 left-3 z-10 flex max-w-[calc(100%-4.5rem)]"
+      className="flex min-w-0 max-w-full"
     >
       <Badge
         variant={TRUST_TONE_VARIANT[tone]}
         icon={<Icon className="h-3 w-3 shrink-0" />}
-        className="max-w-full"
+        className="max-w-full shadow-xs"
       >
         <span className="truncate">{label}</span>
       </Badge>

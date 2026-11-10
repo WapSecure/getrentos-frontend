@@ -1,20 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import {
-  MapPin,
-  Bed,
-  Bath,
-  Square,
-  Heart,
-  Star,
-  GitCompare,
-  Calendar,
-  Home,
-} from '@sureground/icons';
-import { Button, IconButton } from '@sureground/ui';
-import { Property } from '@/types/renter';
-import { formatCurrency } from '@/lib/format';
+import { Calendar, GitCompare, Heart, Star } from '@sureground/icons';
+import { Button, IconButton, ListingCard, ListingCardAction } from '@sureground/ui';
+import { Property, monthlyEquivalent } from '@/types/renter';
 import { VirtualTourBadge } from './features/VirtualTourBadge';
 import { PropertyScore } from './features/PropertyScore';
 import { TrustChainBadge } from '@/components/shared/trust/TrustChainBadge';
@@ -22,196 +10,114 @@ import { LandlordMetrics } from './features/LandlordMetrics';
 
 interface DiscoverPropertyCardProps {
   property: Property;
+  href: string;
+  eager?: boolean;
   isSaved: boolean;
   onSave: () => void;
   onCompare: () => void;
-  onViewDetails: () => void;
+  onOpen: () => void;
   onScheduleViewing: () => void;
   onApply: () => void;
   onOpenTour: () => void;
 }
 
-// Missing detail shows as an em dash: "0 beds" would read as a real measurement.
-function listingDetail(value: number | null | undefined, singular: string, plural: string): string {
-  if (!value) return '—';
-  return `${value} ${value === 1 ? singular : plural}`;
-}
-
 export const DiscoverPropertyCard = ({
   property,
+  href,
+  eager,
   isSaved,
   onSave,
   onCompare,
-  onViewDetails,
+  onOpen,
   onScheduleViewing,
   onApply,
   onOpenTour,
 }: DiscoverPropertyCardProps) => {
-  const [imageFailed, setImageFailed] = useState(false);
-
-  const formatPrice = () => {
-    const formatter = new Intl.NumberFormat('en-NG', {
-      style: 'currency',
-      currency: 'NGN',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    });
-    return `${formatter.format(property.price)}${property.period === 'month' ? '/mo' : property.period === 'year' ? '/yr' : '/wk'}`;
-  };
-
-  const handleSaveClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onSave();
-  };
-
   const letOut = property.acceptingApplications === false;
-
-  const handleScheduleViewingClick = () => {
-    onScheduleViewing();
-  };
-
-  const handleCompareClick = () => {
-    onCompare();
-  };
+  const monthly = property.price > 0 ? monthlyEquivalent(property.price, property.period) : null;
 
   return (
-    <article className="group relative overflow-hidden rounded-xl border border-border bg-card shadow-xs transition-[border-color,box-shadow] duration-150 hover:border-foreground/15 hover:shadow-sm">
-      <div className="relative h-48 bg-muted">
-        {property.image && !imageFailed ? (
-          // Signed MinIO URLs, so plain <img> rather than next/image.
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={property.image}
-            alt={property.title}
-            loading="lazy"
-            onError={() => setImageFailed(true)}
-            className="absolute inset-0 h-full w-full object-cover"
+    <ListingCard
+      href={href}
+      onOpen={onOpen}
+      title={property.title}
+      location={property.location}
+      price={property.price}
+      priceUnit={property.period}
+      priceNote={property.period === 'year' ? monthly : undefined}
+      image={property.image}
+      imageAlt={property.title}
+      eager={eager}
+      status={letOut ? 'Let' : 'For rent'}
+      badges={<TrustChainBadge chain={property.trustChain} fallbackVerified={property.verified} />}
+      facts={{
+        beds: property.bedrooms,
+        baths: property.bathrooms,
+        size: property.size,
+      }}
+      actions={
+        <>
+          <VirtualTourBadge hasTour={Boolean(property.videoTourUrl)} onOpenTour={onOpenTour} />
+          <ListingCardAction
+            onClick={onSave}
+            // Icon-only and repeated on every card, so the label names the property and the saved state.
+            label={
+              isSaved
+                ? `Remove ${property.title} from your shortlist`
+                : `Save ${property.title} to your shortlist`
+            }
+            title={isSaved ? 'Remove from shortlist' : 'Save to shortlist'}
+            aria-pressed={isSaved}
+            icon={<Heart fill={isSaved ? 'currentColor' : 'none'} />}
           />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Home className="w-12 h-12 text-muted-foreground/60" />
-          </div>
-        )}
-
-        <VirtualTourBadge hasTour={Boolean(property.videoTourUrl)} onOpenTour={onOpenTour} />
-
-        <TrustChainBadge chain={property.trustChain} fallbackVerified={property.verified} />
-
-        <IconButton
-          onClick={handleSaveClick}
-          // Icon-only and repeated on every card, so the label names the property and the saved state.
-          label={
-            isSaved
-              ? `Remove ${property.title} from your shortlist`
-              : `Save ${property.title} to your shortlist`
-          }
-          title={isSaved ? 'Remove from shortlist' : 'Save to shortlist'}
-          size="sm"
-          className="absolute right-3 top-3 z-10 h-9 w-9 bg-card/95 text-foreground shadow-sm hover:bg-card"
-          icon={
-            isSaved ? (
-              <Heart className="w-4 h-4 text-destructive fill-destructive" />
-            ) : (
-              <Heart className="w-4 h-4 text-muted-foreground" />
-            )
-          }
-        />
-
-        <div className="absolute bottom-3 left-3 z-10 rounded-md bg-card/95 px-2.5 py-1.5 text-sm font-semibold text-foreground shadow-sm backdrop-blur-sm">
-          {formatPrice()}
-          {property.period === 'year' && property.price > 0 && (
-            <span className="block text-xs font-normal text-muted-foreground">
-              ≈ {formatCurrency(Math.round(property.price / 12))}/mo
-            </span>
+        </>
+      }
+      meta={
+        <div className="space-y-2.5">
+          {(property.rating > 0 || property.score !== undefined) && (
+            <div className="flex items-center gap-3">
+              {property.rating > 0 && (
+                <span className="inline-flex items-center gap-1">
+                  <Star className="h-3.5 w-3.5 fill-warning text-warning" aria-hidden="true" />
+                  <span className="data-value text-foreground">{property.rating}</span>
+                  <span className="sr-only">rating</span>
+                </span>
+              )}
+              <PropertyScore score={property.score} size="sm" />
+            </div>
           )}
+          <LandlordMetrics
+            rating={property.landlordRating}
+            totalReviews={property.landlordReviews}
+            verifiedBadge={property.landlordVerified || false}
+          />
         </div>
-
-        {/* No reviews yet reads as "New", not as a zero-star home. */}
-        <div className="absolute bottom-3 right-3 z-10 flex items-center gap-1 rounded-md bg-card/95 px-2 py-1 text-foreground shadow-sm">
-          {property.rating > 0 ? (
-            <>
-              <Star className="w-3 h-3 fill-primary text-primary" />
-              <span className="text-xs font-medium text-foreground">{property.rating}</span>
-            </>
-          ) : (
-            <span className="text-xs font-medium text-foreground">New</span>
-          )}
-        </div>
-      </div>
-
-      <div className="p-4">
-        <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-1">
-          {property.title}
-        </h3>
-        <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
-          <MapPin className="w-3 h-3" />
-          <span className="text-xs line-clamp-1">{property.location}</span>
-        </div>
-
-        <div className="mt-2">
-          <PropertyScore score={property.score} size="sm" />
-        </div>
-
-        <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground">
-          <div className="flex items-center gap-1">
-            <Bed className="w-3 h-3" />
-            <span>{listingDetail(property.bedrooms, 'bed', 'beds')}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Bath className="w-3 h-3" />
-            <span>{listingDetail(property.bathrooms, 'bath', 'baths')}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Square className="w-3 h-3" />
-            <span>{property.size ? `${property.size} sqm` : '—'}</span>
-          </div>
-        </div>
-
-        <LandlordMetrics
-          rating={property.landlordRating}
-          totalReviews={property.landlordReviews}
-          verifiedBadge={property.landlordVerified || false}
-        />
-
-        <div
-          className={`mt-4 grid ${letOut ? 'grid-cols-[minmax(0,1fr)_auto]' : 'grid-cols-[minmax(0,1fr)_auto_auto]'} gap-2 border-t border-border pt-4`}
-        >
-          <Button size="sm" variant="primary" onClick={onViewDetails}>
-            View property
+      }
+      footer={
+        <div className="flex items-center gap-2 border-t border-border/70 pt-4">
+          <Button variant="primary" onClick={onApply} disabled={letOut} className="min-w-0 flex-1">
+            {letOut ? 'Let, not accepting applications' : 'Apply for this property'}
           </Button>
-          {letOut ? null : (
+          {!letOut && (
             <IconButton
-              size="sm"
               variant="outline"
-              onClick={handleScheduleViewingClick}
+              className="h-11 w-11 sm:h-10 sm:w-10"
+              onClick={onScheduleViewing}
               label={`Schedule a viewing for ${property.title}`}
               title="Schedule a viewing"
               icon={<Calendar />}
             />
           )}
           <IconButton
-            size="sm"
             variant="outline"
-            onClick={handleCompareClick}
+            className="h-11 w-11 sm:h-10 sm:w-10"
+            onClick={onCompare}
             label={`Compare ${property.title} with another property`}
             title="Compare with another property"
             icon={<GitCompare />}
           />
         </div>
-
-        <Button
-          size="sm"
-          variant="secondary"
-          onClick={onApply}
-          disabled={property.acceptingApplications === false}
-          fullWidth
-          className="mt-3"
-        >
-          {property.acceptingApplications === false
-            ? 'Let — not accepting applications'
-            : 'Apply for this property'}
-        </Button>
-      </div>
-    </article>
+      }
+    />
   );
 };
