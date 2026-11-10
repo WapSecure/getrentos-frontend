@@ -16,7 +16,14 @@ import {
 import { authFetch } from '@/lib/apiHelpers';
 
 /** Changes only after the new number is verified by code; the API also asks for step-up, signs out other devices and emails an alert. */
-export function ChangePhoneButton({ onChanged }: { onChanged?: (phone: string) => void }) {
+export function ChangePhoneButton({
+  onChanged,
+  adding = false,
+}: {
+  onChanged?: (phone: string) => void;
+  /** The account has no phone yet. */
+  adding?: boolean;
+}) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [newPhone, setNewPhone] = useState('');
@@ -74,9 +81,15 @@ export function ChangePhoneButton({ onChanged }: { onChanged?: (phone: string) =
 
   return (
     <>
-      <Button variant="link" onClick={() => setOpen(true)} className="mt-1 font-medium">
-        Change phone number
-      </Button>
+      {adding ? (
+        <Button size="sm" variant="outline" onClick={() => setOpen(true)}>
+          Add your phone number
+        </Button>
+      ) : (
+        <Button variant="link" onClick={() => setOpen(true)} className="mt-1 font-medium">
+          Change phone number
+        </Button>
+      )}
       <Dialog
         open={open}
         onOpenChange={(next) => {
@@ -86,12 +99,12 @@ export function ChangePhoneButton({ onChanged }: { onChanged?: (phone: string) =
       >
         <DialogContent size="md">
           <DialogTitle className="text-lg font-semibold text-foreground">
-            Change your phone number
+            {adding ? 'Add your phone number' : 'Change your phone number'}
           </DialogTitle>
           <DialogDescription className="mt-1 text-sm text-muted-foreground">
             {reference
               ? `Enter the 6-digit code we sent to ${sentTo}.`
-              : 'We’ll text a code to the new number to make sure it’s yours.'}
+              : 'We’ll text a code to the number to make sure it’s yours.'}
           </DialogDescription>
           <form
             className="mt-4 space-y-3"
@@ -111,7 +124,7 @@ export function ChangePhoneButton({ onChanged }: { onChanged?: (phone: string) =
                 />
               </Field>
             ) : (
-              <Field label="New phone number">
+              <Field label={adding ? 'Phone number' : 'New phone number'}>
                 <Input
                   autoFocus
                   type="tel"

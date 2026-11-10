@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Building2,
@@ -42,6 +43,13 @@ import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
 import type { EstateAgreement, EstateListing, EstateListingType } from '@/types/estate-marketplace';
 import { useEstatePlan } from '@/hooks/useEstatePlan';
+import type { ApiError } from '@sureground/shared';
+
+// Publishing needs a verified identity; point the manager at the page that gives one.
+const identityAction = (err: Error, router: { push: (href: string) => void }) =>
+  (err as Partial<ApiError>).code === 'IDENTITY_REQUIRED' || /approved identity/i.test(err.message)
+    ? { action: { label: 'Verify identity', onClick: () => router.push('/estate/verification') } }
+    : undefined;
 
 const statusBadge = (status: EstateAgreement['status']) => {
   switch (status) {
@@ -195,6 +203,7 @@ const NewListingPanel = ({
   const [minNights, setMinNights] = useState<number | string>(1);
   const [cleaningFee, setCleaningFee] = useState<number | string>('');
   const toast = useToast();
+  const router = useRouter();
 
   const marketable = agreements.filter((a) => a.effective);
   const needsAgreement = marketable.length === 0;
@@ -239,7 +248,8 @@ const NewListingPanel = ({
       setPrice('');
       onDone();
     },
-    onError: (err: Error) => toast.error(err.message || 'That listing could not be created.'),
+    onError: (err: Error) =>
+      toast.error(err.message || 'That listing could not be created.', identityAction(err, router)),
   });
 
   if (needsAgreement) {
@@ -418,6 +428,7 @@ export default function EstateMarketplacePage() {
   const [showAdd, setShowAdd] = useState(false);
   const [showNewListing, setShowNewListing] = useState(false);
   const toast = useToast();
+  const router = useRouter();
   const [mediaListingId, setMediaListingId] = useState<string | null>(null);
   const [editListingId, setEditListingId] = useState<string | null>(null);
 
@@ -456,7 +467,7 @@ export default function EstateMarketplacePage() {
       );
       refresh();
     },
-    onError: (err: Error) => toast.error(err.message),
+    onError: (err: Error) => toast.error(err.message, identityAction(err, router)),
   });
 
   const detach = useMutation({

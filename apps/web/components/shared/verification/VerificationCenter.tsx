@@ -1,10 +1,10 @@
 'use client';
 
+import { ChangePhoneButton } from '@/components/shared/security/ChangePhoneButton';
 import { trustKeys } from '@/lib/queryKeys';
 import { IdentityDocumentFallback } from './IdentityDocumentFallback';
 import { useEffect, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { usePathname } from 'next/navigation';
 import { NIGERIAN_BANKS } from '@/lib/banks';
 import {
   BadgeCheck,
@@ -70,7 +70,6 @@ export const VerificationCenter = ({
   trustScoreHref,
 }: VerificationCenterProps) => {
   const queryClient = useQueryClient();
-  const portal = usePathname().split('/')[1] || 'renter';
   const [verificationId, setVerificationId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [chosenIdType, setIdType] = useState<TrustIdType>('NIN');
@@ -864,9 +863,7 @@ export const VerificationCenter = ({
           icon={ShieldAlert}
           action={
             /phone number/i.test(error) ? (
-              <Button size="sm" variant="outline" href={`/${portal}/settings?tab=profile`}>
-                Add your phone number
-              </Button>
+              <ChangePhoneButton adding onChanged={() => setError(null)} />
             ) : undefined
           }
         >
