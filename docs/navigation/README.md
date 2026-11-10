@@ -289,7 +289,7 @@ Drawer gating for owner, realtor and buyer is covered by the config equivalence 
 1. **Backoffice:**
    - Done: groups fixed in code (89c728bb), and the test admin `qa-audit-staff-backoffice-admin` now has two-factor.
    - Done in the browser: sign-in with two-factor, rail, keyboard and resilience (see the second pass above).
-   - Still to do: Title Case labels ("Trust Reviews") against the sentence-case rule. Those labels are also lookup keys in the sidebar code, so change them together.
+   - Done: labels in sentence case (8dc931a4), with the group lists renamed in step; brand names and acronyms keep their capitals.
 2. **More screenshots:** phone and tablet before-and-after (desktop is in section 4).
 3. **Not tested yet:**
    - orientation change
