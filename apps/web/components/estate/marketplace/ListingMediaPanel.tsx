@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
+import type { MediaRoom } from '@sureground/shared/showroom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ImagePlus, Trash2 } from '@sureground/icons';
 import { Button, IconButton } from '@sureground/ui';
@@ -8,6 +9,14 @@ import { estateMarketplaceService } from '@/services/estateMarketplaceService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
 import type { EstateListing } from '@/types/estate-marketplace';
+import { PhotoDetailFields } from '@/components/shared/media/PropertyPhotoEditor';
+
+type Details = Record<string, { room?: MediaRoom; caption?: string }>;
+
+const detailsOf = (listing: EstateListing): Details =>
+  Object.fromEntries(
+    (listing.media ?? []).map((m) => [m.key, { room: m.room, caption: m.caption }])
+  );
 
 // Must match MAX_LISTING_MEDIA on the server.
 const MAX_PHOTOS = 12;
@@ -51,8 +60,38 @@ export const ListingMediaPanel = ({
       setStatus({ text: error.message || 'Could not remove that photo.', failed: true }),
   });
 
+  const [details, setDetails] = useState<Details>(() => detailsOf(listing));
+  const [detailsDirty, setDetailsDirty] = useState(false);
+  const saveDetails = useMutation({
+    mutationFn: () => {
+      const payload = Object.fromEntries(
+        (listing.media ?? []).flatMap((m) => {
+          const room = details[m.key]?.room;
+          const caption = details[m.key]?.caption?.trim();
+          return room || caption
+            ? [[m.key, { ...(room ? { room } : {}), ...(caption ? { caption } : {}) }]]
+            : [];
+        })
+      );
+      return unwrap(
+        estateMarketplaceService.updateListingMediaDetails(
+          estateId,
+          listing.id,
+          Object.keys(payload).length ? payload : null
+        )
+      );
+    },
+    onSuccess: () => {
+      setDetailsDirty(false);
+      refresh();
+      setStatus({ text: 'Photo details saved.', failed: false });
+    },
+    onError: (error: Error) =>
+      setStatus({ text: error.message || 'Could not save the photo details.', failed: true }),
+  });
+
   const media = listing.media ?? [];
-  const busy = upload.isPending || remove.isPending;
+  const busy = upload.isPending || remove.isPending || saveDetails.isPending;
   const atCap = media.length >= MAX_PHOTOS;
 
   const pick = (files: FileList | null) => {
@@ -106,14 +145,14 @@ export const ListingMediaPanel = ({
             : 'No photos from you yet, and the property has none of its own: this listing has no image.'}
         </p>
       ) : (
-        <div className="mt-3 flex flex-wrap gap-2">
+        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
           {media.map((photo, index) => (
-            <div key={photo.key} className="relative">
+            <div key={photo.key} className="relative space-y-2">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={photo.url}
                 alt={`Listing photo ${index + 1}`}
-                className="h-20 w-24 rounded-lg object-cover"
+                className="aspect-video w-full rounded-lg object-cover"
               />
               {index === 0 && (
                 <span className="absolute left-1 top-1 rounded bg-black/70 px-1.5 py-0.5 text-2xs font-medium text-white">
@@ -132,8 +171,37 @@ export const ListingMediaPanel = ({
                 }}
                 className="absolute -right-1.5 -top-1.5 h-6 w-6 rounded-full bg-background text-foreground shadow ring-1 ring-border hover:text-destructive [&_svg]:h-3.5 [&_svg]:w-3.5"
               />
+              <PhotoDetailFields
+                index={index}
+                room={details[photo.key]?.room}
+                caption={details[photo.key]?.caption}
+                onChange={(patch) => {
+                  setDetails((current) => ({
+                    ...current,
+                    [photo.key]: { ...current[photo.key], ...patch },
+                  }));
+                  setDetailsDirty(true);
+                }}
+              />
             </div>
           ))}
+        </div>
+      )}
+
+      {media.length > 0 && (
+        <div className="mt-3 flex justify-end">
+          <Button
+            variant={detailsDirty ? 'primary' : 'outline'}
+            size="sm"
+            disabled={!detailsDirty || busy}
+            isLoading={saveDetails.isPending}
+            onClick={() => {
+              setStatus(null);
+              saveDetails.mutate();
+            }}
+          >
+            Save photo details
+          </Button>
         </div>
       )}
 

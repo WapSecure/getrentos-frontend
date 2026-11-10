@@ -1,3 +1,4 @@
+import type { PropertyMediaDetails } from '@/types/landlord';
 import { authFetch, safeCall, type ApiResponse } from '@/lib/apiHelpers';
 import type { Paginated } from '@/lib/apiHelpers';
 import type {
@@ -143,6 +144,20 @@ export const estateMarketplaceService = {
       authFetch(`/estates/${estateId}/listings/${listingId}/media`, {
         method: 'POST',
         body: formData,
+      })
+    );
+  },
+
+  /** Replaces this listing's photo details; `null` clears them. Keys are this listing's own photos. */
+  updateListingMediaDetails(
+    estateId: string,
+    listingId: string,
+    mediaDetails: PropertyMediaDetails | null
+  ): Promise<ApiResponse<EstateListing>> {
+    return safeCall(() =>
+      authFetch(`/estates/${estateId}/listings/${listingId}/media`, {
+        method: 'PATCH',
+        body: JSON.stringify({ mediaDetails }),
       })
     );
   },

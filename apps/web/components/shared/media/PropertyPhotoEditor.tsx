@@ -55,6 +55,38 @@ export const mediaDetailsFor = (
   return entries.length ? Object.fromEntries(entries) : null;
 };
 
+/** Room and caption inputs for one photo; also used where photos save one by one. */
+export function PhotoDetailFields({
+  index,
+  room,
+  caption,
+  onChange,
+}: {
+  index: number;
+  room?: MediaRoom;
+  caption?: string;
+  onChange: (patch: { room?: MediaRoom; caption?: string }) => void;
+}) {
+  return (
+    <>
+      <Select
+        value={room ?? ''}
+        onValueChange={(value) => onChange({ room: (value || undefined) as MediaRoom | undefined })}
+        options={ROOM_OPTIONS}
+        ariaLabel={`Room for photo ${index + 1}`}
+      />
+      <Input
+        type="text"
+        value={caption ?? ''}
+        maxLength={CAPTION_MAX}
+        onChange={(e) => onChange({ caption: e.target.value })}
+        placeholder="Caption (optional)"
+        aria-label={`Caption for photo ${index + 1}`}
+      />
+    </>
+  );
+}
+
 interface PropertyPhotoEditorProps {
   photos: EditablePhoto[];
   onChange: (next: EditablePhoto[]) => void;
@@ -157,21 +189,11 @@ export function PropertyPhotoEditor({
                 </button>
               </div>
             </div>
-            <Select
-              value={photo.room ?? ''}
-              onValueChange={(value) =>
-                update(photo.id, { room: (value || undefined) as MediaRoom | undefined })
-              }
-              options={ROOM_OPTIONS}
-              ariaLabel={`Room for photo ${index + 1}`}
-            />
-            <Input
-              type="text"
-              value={photo.caption ?? ''}
-              maxLength={CAPTION_MAX}
-              onChange={(e) => update(photo.id, { caption: e.target.value })}
-              placeholder="Caption (optional)"
-              aria-label={`Caption for photo ${index + 1}`}
+            <PhotoDetailFields
+              index={index}
+              room={photo.room}
+              caption={photo.caption}
+              onChange={(patch) => update(photo.id, patch)}
             />
           </div>
         ))}
