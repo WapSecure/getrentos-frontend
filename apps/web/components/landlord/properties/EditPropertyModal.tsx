@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@sureground/ui';
 import { Alert, Button, Field, Input, NumberInput, Select } from '@sureground/ui';
-import { ImagePlus, Play, Star, Video, X } from '@sureground/icons';
+import { ChevronLeft, ChevronRight, ImagePlus, Play, Star, Video, X } from '@sureground/icons';
+import { MEDIA_ROOM_NAME, tourSource, type MediaRoom } from '@sureground/shared';
 import { AddressFields, type AddressFieldsValue } from '@/components/shared/location/AddressFields';
 import { LocationPicker } from '@/components/maps/LocationPicker';
 import type { MapPoint } from '@/services/geocodeService';
@@ -21,13 +22,30 @@ type Photo = {
   key?: string;
   url: string;
   file?: File;
+  room?: MediaRoom;
+  caption?: string;
 };
+
+const CAPTION_MAX = 140;
+const ROOM_OPTIONS = [
+  { value: '', label: 'Room (optional)' },
+  ...(Object.keys(MEDIA_ROOM_NAME) as MediaRoom[]).map((room) => ({
+    value: room,
+    label: MEDIA_ROOM_NAME[room],
+  })),
+];
 
 /** Cover first, then the rest: mirrors how the API orders `galleryImageKeys`. */
 const photosFromProperty = (property: Property): Photo[] => {
   const keys = property.galleryImageKeys ?? [];
   const urls = property.galleryImages ?? [];
-  return keys.map((key, index) => ({ id: key, key, url: urls[index] ?? '' }));
+  return keys.map((key, index) => ({
+    id: key,
+    key,
+    url: urls[index] ?? '',
+    room: property.mediaDetails?.[key]?.room,
+    caption: property.mediaDetails?.[key]?.caption,
+  }));
 };
 
 interface EditPropertyModalProps {
@@ -100,6 +118,8 @@ const EditPropertyForm = ({
   const [videoPreviewUrl, setVideoPreviewUrl] = useState<string | undefined>(undefined);
   const [videoKey, setVideoKey] = useState<string | undefined>(property.videoTourKey);
   const [videoCleared, setVideoCleared] = useState(false);
+  const [tourUrl, setTourUrl] = useState(property.tourUrl ?? '');
+  const tourInvalid = tourUrl.trim() !== '' && !tourSource(tourUrl.trim());
   const [saving, setSaving] = useState(false);
   const [mediaError, setMediaError] = useState<string | null>(null);
   const objectUrls = useRef<string[]>([]);
@@ -145,6 +165,19 @@ const EditPropertyForm = ({
 
   const removePhoto = (id: string) => setPhotos((current) => current.filter((p) => p.id !== id));
 
+  const updatePhoto = (id: string, patch: Partial<Pick<Photo, 'room' | 'caption'>>) =>
+    setPhotos((current) => current.map((p) => (p.id === id ? { ...p, ...patch } : p)));
+
+  const movePhoto = (id: string, by: -1 | 1) =>
+    setPhotos((current) => {
+      const from = current.findIndex((p) => p.id === id);
+      const to = from + by;
+      if (from < 0 || to < 0 || to >= current.length) return current;
+      const next = [...current];
+      [next[from], next[to]] = [next[to]!, next[from]!];
+      return next;
+    });
+
   const makeCover = (id: string) =>
     setPhotos((current) => {
       const target = current.find((p) => p.id === id);
@@ -165,6 +198,16 @@ const EditPropertyForm = ({
         })
       );
       const galleryImageKeys = uploaded.filter((key): key is string => !!key);
+      const mediaDetails = Object.fromEntries(
+        photos.flatMap((photo, i) => {
+          const key = uploaded[i];
+          const caption = photo.caption?.trim();
+          if (!key || (!photo.room && !caption)) return [];
+          return [
+            [key, { ...(photo.room ? { room: photo.room } : {}), ...(caption ? { caption } : {}) }],
+          ];
+        })
+      );
 
       let nextVideoKey: string | null = videoCleared ? null : (videoKey ?? null);
       if (videoFile) {
@@ -187,6 +230,8 @@ const EditPropertyForm = ({
         coverImageKey: galleryImageKeys[0] ?? null,
         galleryImageKeys,
         videoTourKey: nextVideoKey,
+        tourUrl: tourUrl.trim() || null,
+        mediaDetails: Object.keys(mediaDetails).length ? mediaDetails : null,
       });
 
       // Detached blobs are left to the backend's GC: its DELETE refuses keys still attached, so deleting here would race the PATCH.
@@ -272,45 +317,81 @@ const EditPropertyForm = ({
           <div>
             <p className="text-sm font-medium text-foreground">Photos &amp; video</p>
             <p className="text-xs text-muted-foreground mt-0.5">
-              The first photo is the cover renters see on your listing.
+              The first photo is the cover renters see. Tagging rooms groups the gallery for
+              renters; a short caption says what a photo shows.
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-            {photos.map((photo) => (
-              <div
-                key={photo.id}
-                className="relative aspect-video overflow-hidden rounded-lg border border-border bg-muted"
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={photo.url} alt="" className="h-full w-full object-cover" />
-                {photo.id === coverId && (
-                  <span className="absolute left-1 top-1 rounded bg-black/70 px-1.5 py-0.5 text-2xs font-medium text-white">
-                    Cover
-                  </span>
-                )}
-                <div className="absolute right-1 top-1 flex gap-1">
-                  {photo.id !== coverId && (
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {photos.map((photo, index) => (
+              <div key={photo.id} className="space-y-2">
+                <div className="relative aspect-video overflow-hidden rounded-lg border border-border bg-muted">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={photo.url} alt="" className="h-full w-full object-cover" />
+                  {photo.id === coverId && (
+                    <span className="absolute left-1 top-1 rounded bg-black/70 px-1.5 py-0.5 text-2xs font-medium text-white">
+                      Cover
+                    </span>
+                  )}
+                  <div className="absolute right-1 top-1 flex gap-1">
+                    {photo.id !== coverId && (
+                      <button
+                        type="button"
+                        aria-label="Make cover photo"
+                        title="Make cover photo"
+                        onClick={() => makeCover(photo.id)}
+                        className="rounded bg-black/70 p-1 text-white hover:bg-black/90"
+                      >
+                        <Star className="h-3 w-3" />
+                      </button>
+                    )}
                     <button
                       type="button"
-                      aria-label="Make cover photo"
-                      title="Make cover photo"
-                      onClick={() => makeCover(photo.id)}
-                      className="rounded bg-black/70 p-1 text-white hover:bg-black/90"
+                      aria-label="Remove photo"
+                      title="Remove photo"
+                      onClick={() => removePhoto(photo.id)}
+                      className="rounded bg-black/70 p-1 text-white hover:bg-destructive"
                     >
-                      <Star className="h-3 w-3" />
+                      <X className="h-3 w-3" />
                     </button>
-                  )}
-                  <button
-                    type="button"
-                    aria-label="Remove photo"
-                    title="Remove photo"
-                    onClick={() => removePhoto(photo.id)}
-                    className="rounded bg-black/70 p-1 text-white hover:bg-destructive"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
+                  </div>
+                  <div className="absolute bottom-1 right-1 flex gap-1">
+                    <button
+                      type="button"
+                      aria-label={`Move photo ${index + 1} earlier`}
+                      disabled={index === 0}
+                      onClick={() => movePhoto(photo.id, -1)}
+                      className="rounded bg-black/70 p-1 text-white hover:bg-black/90 disabled:opacity-40"
+                    >
+                      <ChevronLeft className="h-3 w-3" />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label={`Move photo ${index + 1} later`}
+                      disabled={index === photos.length - 1}
+                      onClick={() => movePhoto(photo.id, 1)}
+                      className="rounded bg-black/70 p-1 text-white hover:bg-black/90 disabled:opacity-40"
+                    >
+                      <ChevronRight className="h-3 w-3" />
+                    </button>
+                  </div>
                 </div>
+                <Select
+                  value={photo.room ?? ''}
+                  onValueChange={(value) =>
+                    updatePhoto(photo.id, { room: (value || undefined) as MediaRoom | undefined })
+                  }
+                  options={ROOM_OPTIONS}
+                  ariaLabel={`Room for photo ${index + 1}`}
+                />
+                <Input
+                  type="text"
+                  value={photo.caption ?? ''}
+                  maxLength={CAPTION_MAX}
+                  onChange={(e) => updatePhoto(photo.id, { caption: e.target.value })}
+                  placeholder="Caption (optional)"
+                  aria-label={`Caption for photo ${index + 1}`}
+                />
               </div>
             ))}
 
@@ -389,6 +470,20 @@ const EditPropertyForm = ({
             />
           )}
 
+          <Field
+            label="360 tour link"
+            hint="Matterport, Kuula, CloudPano, Theasys or Momento360. Renters load it only when they tap it."
+            error={tourInvalid ? 'Use a link from one of the tour sites listed.' : undefined}
+          >
+            <Input
+              type="url"
+              inputMode="url"
+              value={tourUrl}
+              onChange={(e) => setTourUrl(e.target.value)}
+              placeholder="https://kuula.co/share/…"
+            />
+          </Field>
+
           {mediaError && <Alert variant="danger">{mediaError}</Alert>}
         </div>
 
@@ -396,7 +491,7 @@ const EditPropertyForm = ({
           variant="primary"
           fullWidth
           onClick={handleSave}
-          disabled={!name.trim() || !address.trim()}
+          disabled={!name.trim() || !address.trim() || tourInvalid}
           isLoading={saving}
           loadingText="Saving…"
         >

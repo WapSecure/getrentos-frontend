@@ -24,6 +24,12 @@ import { VerificationRequiredNotice } from '@/components/shared/verification/Ver
 import { ROUTES } from '@/lib/constants/auth';
 import { DraftAssist, SelfCheckPanel } from './ListingAssist';
 import { useFlexAvailability } from '@/hooks/useFlexAvailability';
+import {
+  EMPTY_FEES,
+  feesToPayload,
+  ListingFeeFields,
+  type ListingFeeValues,
+} from './ListingFeeFields';
 
 interface CreateListingModalProps {
   isOpen: boolean;
@@ -43,6 +49,7 @@ interface ListingDraft {
   rentPeriod: RentPeriod;
   allowsMonthlyPayment: boolean;
   securityDeposit: string;
+  fees?: ListingFeeValues;
   availabilityDate: string;
   amenities: string[];
   allowPets: boolean;
@@ -67,6 +74,7 @@ export const CreateListingModal = ({
   const [allowsMonthlyPayment, setAllowsMonthlyPayment] = useState(false);
   const { newPlansOpen: flexOpen } = useFlexAvailability();
   const [securityDeposit, setSecurityDeposit] = useState('');
+  const [fees, setFees] = useState<ListingFeeValues>(EMPTY_FEES);
   const [availabilityDate, setAvailabilityDate] = useState('');
   const [amenities, setAmenities] = useState<string[]>([]);
   const [allowPets, setAllowPets] = useState(false);
@@ -84,6 +92,7 @@ export const CreateListingModal = ({
             rentPeriod,
             allowsMonthlyPayment,
             securityDeposit,
+            fees,
             availabilityDate,
             amenities,
             allowPets,
@@ -98,6 +107,7 @@ export const CreateListingModal = ({
       setRentPeriod(draft.rentPeriod);
       setAllowsMonthlyPayment(draft.allowsMonthlyPayment);
       setSecurityDeposit(draft.securityDeposit);
+      setFees(draft.fees ?? EMPTY_FEES);
       setAvailabilityDate(draft.availabilityDate);
       setAmenities(draft.amenities ?? []);
       setAllowPets(draft.allowPets);
@@ -129,6 +139,7 @@ export const CreateListingModal = ({
     setRentPeriod('year');
     setAllowsMonthlyPayment(false);
     setSecurityDeposit('');
+    setFees(EMPTY_FEES);
     setAvailabilityDate('');
     setAmenities([]);
     setAllowPets(false);
@@ -162,6 +173,7 @@ export const CreateListingModal = ({
       rentPeriod,
       allowsMonthlyPayment: rentPeriod === 'year' ? allowsMonthlyPayment : false,
       securityDeposit: securityDeposit ? Number(securityDeposit) : undefined,
+      ...feesToPayload(fees),
       amenities,
       availabilityDate,
       allowPets,
@@ -263,6 +275,16 @@ export const CreateListingModal = ({
                   />
                 </Field>
               </div>
+
+              <ListingFeeFields
+                value={fees}
+                onChange={setFees}
+                annualRent={
+                  Number(askingRent) > 0
+                    ? Number(askingRent) * (rentPeriod === 'month' ? 12 : 1)
+                    : undefined
+                }
+              />
 
               {rentPeriod === 'year' && (
                 <div className="p-3 rounded-lg bg-accent border border-primary/20">

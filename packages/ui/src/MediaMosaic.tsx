@@ -13,6 +13,16 @@ interface MediaMosaicProps {
   className?: string;
 }
 
+// Fills the 4×2 grid whatever the photo count, so no empty slot shows.
+const tileSpan = (index: number, count: number) => {
+  if (count < 2) return '';
+  if (index === 0) return 'sm:col-span-2 sm:row-span-2';
+  if (count === 2) return 'sm:col-span-2 sm:row-span-2';
+  if (count === 3) return 'sm:col-span-2';
+  if (count === 4 && index === 3) return 'sm:col-span-2';
+  return '';
+};
+
 const chip =
   'inline-flex min-h-9 items-center gap-1.5 rounded-full bg-black/65 px-3.5 py-2 text-xs font-semibold text-white ring-1 ring-white/25 transition-colors hover:bg-black/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-white';
 
@@ -94,7 +104,7 @@ export function MediaMosaic({
             className={cn(
               'group relative overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary',
               'hidden sm:block',
-              i === 0 && tiles.length > 1 && 'sm:col-span-2 sm:row-span-2'
+              tileSpan(i, tiles.length)
             )}
           >
             <Tile item={m} eager={i === 0} />

@@ -11,6 +11,7 @@ import {
   Pause,
   Eye,
   Zap,
+  Banknote,
 } from '@sureground/icons';
 import { Badge, Button } from '@sureground/ui';
 import { listingStatusBadges } from '@/lib/statusBadge';
@@ -23,6 +24,7 @@ interface ListingCardProps {
   listing: Listing;
   onTogglePause: (id: string) => void;
   onPreview: (listing: Listing) => void;
+  onEditFees?: (listing: Listing) => void;
   isUpdating?: boolean;
 }
 
@@ -30,6 +32,7 @@ export const ListingCard = ({
   listing,
   onTogglePause,
   onPreview,
+  onEditFees,
   isUpdating = false,
 }: ListingCardProps) => {
   const status = statusConfig[listing.status];
@@ -119,6 +122,18 @@ export const ListingCard = ({
             <Eye className="w-3.5 h-3.5" />
             Preview
           </Button>
+          {onEditFees && (
+            <Button
+              variant="outline"
+              size="sm"
+              fullWidth
+              className="gap-1.5"
+              onClick={() => onEditFees(listing)}
+            >
+              <Banknote className="w-3.5 h-3.5" />
+              Fees
+            </Button>
+          )}
           {(listing.status === 'published' || listing.status === 'paused') && (
             <Button
               variant={listing.status === 'paused' ? 'primary' : 'outline'}
