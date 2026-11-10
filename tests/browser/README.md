@@ -51,6 +51,21 @@ Besides the role accounts above, it reads `E2E_LANDLORD_PIN`, `E2E_API_URL`, `E2
 npx playwright test tests/browser/security-flows.web.spec.ts --project=web-desktop
 ```
 
+## Payout holds and staff review
+
+`tests/browser/security-holds.backoffice.spec.ts` covers the review loop. It runs on the `backoffice` project:
+
+- **Release:** a payout rule holds a payout; the owner appeals from the Security Centre; staff see the appeal on Risk decisions → Needs review and release it with a reason and an authenticator step-up; the case shows Released and the owner gets the "check is done" email.
+- **Confirm:** release and confirm stay disabled until a 10-character reason is typed; confirming opens a HIGH fraud alert under Fraud & Risk.
+
+It needs an API started with `RISK_ENFORCE_PAYOUT_RULES=true` and, outside production, `TRUST_TIER_GATE_DISABLED_CAPS=payouts`, plus these settings:
+
+- `E2E_API_URL`, `E2E_WEB_URL`, `E2E_BACKOFFICE_URL`, `E2E_MAILHOG_URL`
+- `E2E_HOLD_RELEASE_EMAIL` and `E2E_HOLD_CONFIRM_EMAIL`: two different host-role accounts
+- `E2E_ADMIN_EMAIL` and `E2E_ADMIN_TOTP_SECRET`
+
+Each run sets those accounts' PIN to a test value through the normal password-plus-code flow. A released account isn't held again for 72 hours, so a re-run inside that window skips the release test; use another account.
+
 ## Visual QA campaign
 
 The dedicated visual configuration reviews web and backoffice at 390×844,
