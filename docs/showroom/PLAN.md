@@ -277,3 +277,18 @@ The product owner added reference images. We take their structure; the palette a
   - a funnel page in the backoffice
   - instrument shortlets, land and Discover cards
   - M7 media infrastructure
+
+## Real photos, resized copies and shortlets (2026-11-10)
+
+- **Photos:** every visible listing in local dev now has real housing photos: 57 CC0 or public-domain images, each checked by eye, attached through the app as each listing's own owner, with rooms tagged. The sources are in the agent's `housing/manifest.json`.
+- **M7 resized copies (backend #136):** WebP at 320, 960 and 1600px, made on upload. A backfill run made copies for the remaining 30 of 72 photos, with 0 failures. Pages pick the copy that fits: 960px on desktop cards and tiles, 320px on viewer thumbnails.
+- **Shortlets:** on the showroom media. Backend #137 sends their `media` list, using the shared `shortletMedia()`.
+- **Estate photo panel:** checked live on Journey Gardens Estate. Rooms and captions load back and save (200).
+  - The estate listing itself can't be published until the estate manager's identity is verified (`IDENTITY_REQUIRED`).
+- **Found, not yet fixed: expired photo links on cached pages.**
+  - Listing pages are cached for 60 seconds, and Next serves a stale copy once while it refreshes.
+  - Photo URLs are signed for 15 minutes.
+  - So the first visitor after more than 15 minutes without traffic gets dead photo links until they reload.
+  - Proposed fix:
+    - sign public listing photos for longer (for example 2 hours);
+    - cap how stale a cached page may be (Next `expireTime`) below that, so an older copy is rebuilt rather than served.
