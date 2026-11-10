@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Compass, ImageOff, Images, Play } from '@sureground/icons';
-import { cn, MEDIA_ROOM_LABEL, type MediaItem, type MediaRoom } from '@sureground/shared';
+import { cn, MEDIA_ROOM_LABEL, srcSetOf, type MediaItem, type MediaRoom } from '@sureground/shared';
 import { Button } from './Button';
 import { MediaViewer, type MediaEvent } from './MediaViewer';
 
@@ -95,7 +95,7 @@ export function MediaMosaic({
               aria-label={`Open ${m.alt ?? `photo ${i + 1}`}`}
               className="group relative h-full w-full shrink-0 snap-center overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
             >
-              <Tile item={m} eager={i === 0} load={Math.abs(i - phoneAt) <= 1} />
+              <Tile item={m} eager={i === 0} load={Math.abs(i - phoneAt) <= 1} sizes="100vw" />
             </button>
           ))}
         </div>
@@ -114,7 +114,11 @@ export function MediaMosaic({
               tileSpan(i, tiles.length)
             )}
           >
-            <Tile item={m} eager={i === 0} />
+            <Tile
+              item={m}
+              eager={i === 0}
+              sizes={i === 0 ? '(min-width: 640px) 50vw, 100vw' : '25vw'}
+            />
           </button>
         ))}
 
@@ -189,7 +193,17 @@ export function MediaMosaic({
 }
 
 // `load={false}` keeps a plain tile: browsers fetch lazy images well before they scroll into view.
-function Tile({ item, eager, load = true }: { item: MediaItem; eager: boolean; load?: boolean }) {
+function Tile({
+  item,
+  eager,
+  load = true,
+  sizes,
+}: {
+  item: MediaItem;
+  eager: boolean;
+  load?: boolean;
+  sizes?: string;
+}) {
   const [broken, setBroken] = useState(false);
   const src = item.kind === 'image' ? item.url : item.posterUrl;
   if (!load) return <span className="block h-full w-full bg-muted" aria-hidden="true" />;
@@ -204,6 +218,8 @@ function Tile({ item, eager, load = true }: { item: MediaItem; eager: boolean; l
     // eslint-disable-next-line @next/next/no-img-element -- signed storage URL
     <img
       src={src}
+      srcSet={item.kind === 'image' ? srcSetOf(item.variants) : undefined}
+      sizes={sizes}
       alt=""
       width={item.width}
       height={item.height}

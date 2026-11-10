@@ -1,5 +1,6 @@
 import type {
   CostLine,
+  ImageVariant,
   MediaItem,
   MediaRoom,
   PublicLandDto,
@@ -34,6 +35,17 @@ const day = (iso?: string) => {
   return Number.isNaN(d.getTime())
     ? undefined
     : d.toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
+};
+
+/** `srcset` for an image's resized copies; undefined when there are none, so the original is used. */
+export const srcSetOf = (variants?: ImageVariant[]) =>
+  variants?.length ? variants.map((v) => `${v.url} ${v.width}w`).join(', ') : undefined;
+
+/** The smallest copy at least `min` px wide, or the largest there is, or the original. */
+export const variantAtLeast = (url: string, variants: ImageVariant[] | undefined, min: number) => {
+  if (!variants?.length) return url;
+  const sorted = [...variants].sort((a, b) => a.width - b.width);
+  return (sorted.find((v) => v.width >= min) ?? sorted[sorted.length - 1]!).url;
 };
 
 export const MEDIA_ROOM_LABEL: Record<MediaRoom, string> = {

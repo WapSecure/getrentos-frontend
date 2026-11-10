@@ -33,6 +33,8 @@ export interface ListingCardProps {
   priceCompact?: boolean;
   priceNote?: ReactNode;
   image?: string | null;
+  /** `srcset` of resized copies; the browser picks one for the card's width. */
+  imageSrcSet?: string;
   imageAlt?: string;
   /** For the first row above the fold. */
   eager?: boolean;
@@ -105,11 +107,13 @@ export const listingFactsLine = (facts?: ListingCardFacts): string[] => {
 
 const ListingImage = ({
   src,
+  srcSet,
   alt,
   eager,
   compact,
 }: {
   src?: string | null;
+  srcSet?: string;
   alt: string;
   eager?: boolean;
   compact?: boolean;
@@ -127,6 +131,8 @@ const ListingImage = ({
     // eslint-disable-next-line @next/next/no-img-element -- signed storage URLs
     <img
       src={src}
+      srcSet={srcSet}
+      sizes={compact ? '160px' : '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw'}
       alt={alt}
       width={800}
       height={600}
@@ -174,6 +180,7 @@ export const ListingCard = ({
   priceCompact = false,
   priceNote,
   image,
+  imageSrcSet,
   imageAlt,
   eager = false,
   status,
@@ -305,7 +312,13 @@ export const ListingCard = ({
         )}
       >
         <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-muted">
-          <ListingImage key={image ?? ''} src={image} alt={imageAlt ?? ''} eager={eager} />
+          <ListingImage
+            key={image ?? ''}
+            src={image}
+            srcSet={imageSrcSet}
+            alt={imageAlt ?? ''}
+            eager={eager}
+          />
         </div>
         <div className="flex flex-1 flex-col px-0.5 pt-3.5">
           <div className="flex items-baseline justify-between gap-3">
@@ -343,7 +356,14 @@ export const ListingCard = ({
           isMap ? 'h-16 w-20' : 'aspect-[4/3] w-20 self-start @[22rem]:w-28 @[34rem]:w-40'
         )}
       >
-        <ListingImage key={image ?? ''} src={image} alt={imageAlt ?? ''} eager={eager} compact />
+        <ListingImage
+          key={image ?? ''}
+          src={image}
+          srcSet={imageSrcSet}
+          alt={imageAlt ?? ''}
+          eager={eager}
+          compact
+        />
         {!isMap && statusBadges && (
           <div className="absolute left-2 top-2 hidden @[22rem]:block">{statusBadges}</div>
         )}

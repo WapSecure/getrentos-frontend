@@ -13,6 +13,12 @@ export type MediaRoom =
   | 'neighbourhood'
   | 'other';
 
+/** A WebP copy at one width; only copies that exist are listed. */
+export interface ImageVariant {
+  width: number;
+  url: string;
+}
+
 export interface MediaItem {
   id: string;
   kind: 'image' | 'video' | 'tour';
@@ -20,6 +26,7 @@ export interface MediaItem {
   posterUrl?: string;
   width?: number;
   height?: number;
+  variants?: ImageVariant[];
   durationSeconds?: number;
   alt?: string;
   caption?: string;

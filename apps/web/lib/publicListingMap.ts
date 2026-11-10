@@ -1,4 +1,5 @@
-// No runtime imports: server components pre-render `/rent` and `/buy` with it, and the api helpers reach for localStorage.
+// Pure imports only: server components pre-render `/rent` and `/buy` with it, and the api helpers reach for localStorage.
+import { srcSetOf, type ImageVariant } from '@sureground/shared/showroom';
 
 // Type-only import, so the module stays server-safe.
 import type { PropertyTrustChain } from '@/types/renter';
@@ -18,6 +19,7 @@ export interface PublicListingCard {
   size?: number;
   verified: boolean;
   image?: string;
+  imageSrcSet?: string;
 }
 
 export type PublicMarket = 'rent' | 'sale';
@@ -56,6 +58,7 @@ export interface RentApiItem {
   size?: number;
   verified: boolean;
   image?: string;
+  imageVariants?: ImageVariant[];
 }
 
 export interface SaleApiItem {
@@ -69,6 +72,7 @@ export interface SaleApiItem {
   bathrooms?: number;
   isVerified?: boolean;
   coverImageUrl?: string;
+  imageVariants?: ImageVariant[];
 }
 
 // Must match the browser's default, or the server-rendered first page describes a different query.
@@ -95,6 +99,7 @@ export const rentToCard = (item: RentApiItem): PublicListingCard => ({
   verified: Boolean(item.verified),
   trustChain: item.trustChain,
   image: item.image || undefined,
+  imageSrcSet: srcSetOf(item.imageVariants),
 });
 
 export const saleToCard = (item: SaleApiItem): PublicListingCard => ({
@@ -107,6 +112,7 @@ export const saleToCard = (item: SaleApiItem): PublicListingCard => ({
   bathrooms: item.bathrooms,
   verified: Boolean(item.isVerified),
   image: item.coverImageUrl || undefined,
+  imageSrcSet: srcSetOf(item.imageVariants),
 });
 
 // Only the parameters each endpoint declares: the global whitelist rejects extras.

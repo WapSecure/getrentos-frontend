@@ -19,6 +19,8 @@ import {
   cn,
   MEDIA_ROOM_LABEL,
   MEDIA_ROOM_NAME,
+  srcSetOf,
+  variantAtLeast,
   type MediaItem,
   type MediaRoom,
 } from '@sureground/shared';
@@ -315,6 +317,8 @@ function ViewerBody({
                   <img
                     key={item.id}
                     src={item.url}
+                    srcSet={srcSetOf(item.variants)}
+                    sizes="100vw"
                     alt={item.alt ?? ''}
                     width={item.width}
                     height={item.height}
@@ -508,7 +512,11 @@ function ViewerBody({
 
 function Thumb({ item, load = true }: { item: MediaItem; load?: boolean }) {
   const [broken, setBroken] = useState(false);
-  const src = load ? (item.kind === 'image' ? item.url : item.posterUrl) : undefined;
+  const src = load
+    ? item.kind === 'image'
+      ? variantAtLeast(item.url, item.variants, 320)
+      : item.posterUrl
+    : undefined;
   return (
     <>
       {src && !broken ? (
