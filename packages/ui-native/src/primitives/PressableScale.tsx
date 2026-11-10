@@ -17,6 +17,8 @@ const SPRING = { mass: 0.5, damping: 14, stiffness: 220 };
 export interface PressableScaleProps extends PressableProps {
   activeScale?: number;
   haptic?: boolean;
+  /** Fade to half opacity when disabled. Off for controls that draw their own disabled state. */
+  dimWhenDisabled?: boolean;
 }
 
 // The animated style must read only a shared value, never props, or it can loop re-renders on native.
@@ -24,6 +26,7 @@ export const PressableScale = forwardRef<ViewInstance, PressableScaleProps>(func
   {
     activeScale = 0.985,
     haptic = true,
+    dimWhenDisabled = true,
     onPressIn,
     onPressOut,
     style,
@@ -58,7 +61,7 @@ export const PressableScale = forwardRef<ViewInstance, PressableScaleProps>(func
         scale.set(reduceMotion ? 1 : withSpring(1, SPRING));
         onPressOut?.(e);
       }}
-      style={[animatedStyle, style as object, { opacity: disabled ? 0.5 : 1 }]}
+      style={[animatedStyle, style as object, { opacity: disabled && dimWhenDisabled ? 0.5 : 1 }]}
       {...rest}
     >
       {children as React.ReactNode}

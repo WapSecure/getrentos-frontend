@@ -42,7 +42,14 @@ export function Button({
   const reduceMotion = useReducedMotion();
   const isDisabled = disabled || loading;
 
+  // A disabled filled button gets a flat muted look in both themes. Fading the brand colour
+  // reads as broken on dark backgrounds and as still tappable on light ones.
+  const flatDisabled = disabled && !loading && variant !== 'ghost' && variant !== 'outline';
+
   const palette = useMemo(() => {
+    if (flatDisabled) {
+      return { bg: colors.muted, fg: colors.mutedForeground, border: colors.border };
+    }
     switch (variant) {
       case 'secondary':
         return { bg: colors.secondary, fg: colors.secondaryForeground, border: 'transparent' };
@@ -55,7 +62,7 @@ export function Button({
       default:
         return { bg: colors.primary, fg: colors.primaryForeground, border: 'transparent' };
     }
-  }, [variant, colors]);
+  }, [variant, colors, flatDisabled]);
 
   const textStyle = {
     color: palette.fg,
@@ -108,7 +115,7 @@ export function Button({
       borderRadius: radius.md,
       alignSelf: fullWidth ? 'stretch' : 'flex-start',
       borderColor: palette.border,
-      borderWidth: variant === 'outline' ? StyleSheet.hairlineWidth * 2 : 0,
+      borderWidth: variant === 'outline' || flatDisabled ? StyleSheet.hairlineWidth * 2 : 0,
     },
     { backgroundColor: palette.bg },
     style,
@@ -120,6 +127,7 @@ export function Button({
       accessibilityLabel={loading && loadingLabel ? loadingLabel : (accessibilityLabel ?? label)}
       accessibilityState={{ disabled: isDisabled, busy: loading }}
       disabled={isDisabled}
+      dimWhenDisabled={!flatDisabled}
       hitSlop={6}
       haptic={variant === 'primary' || variant === 'destructive'}
       style={frame}

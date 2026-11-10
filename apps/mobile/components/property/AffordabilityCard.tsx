@@ -55,7 +55,7 @@ export function AffordabilityCard({ listingId }: { listingId: string }) {
         <Text variant="callout">{d.verdict}</Text>
         {d.incomeSource === 'last_application' ? (
           <Text variant="caption" color="mutedForeground">
-            Using the monthly income from your last application.
+            Using the monthly income from your last application. Change it below to check again.
           </Text>
         ) : null}
         <Text variant="caption" color="mutedForeground">
@@ -66,7 +66,14 @@ export function AffordabilityCard({ listingId }: { listingId: string }) {
 
         <CurrencyField
           label="Monthly income"
-          value={form.monthlyIncome ?? null}
+          // Show the income the answer used, so the field never looks empty while the text relies on it.
+          value={
+            form.monthlyIncome !== undefined
+              ? form.monthlyIncome
+              : d.incomeSource === 'last_application'
+                ? d.monthlyIncome
+                : null
+          }
           onValueChange={(v) => setForm((f) => ({ ...f, monthlyIncome: v }))}
         />
         <CurrencyField
