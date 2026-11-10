@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { rentReleaseActions } from '@sureground/shared';
 import { PaymentCard } from './PaymentCard';
 import { PaymentDetailsModal } from './PaymentDetailsModal';
 import { CreditCard } from '@sureground/icons';
@@ -18,6 +19,7 @@ interface Payment {
   description: string;
   dueDate: string;
   escrowStatus: 'not_funded' | 'held' | 'pending_review' | 'released' | 'frozen';
+  moveInConfirmed?: boolean;
   releaseDate?: string;
   amountPaid?: number;
   outstanding?: number;
@@ -71,6 +73,8 @@ export const PaymentsList = ({
   serverFiltered,
 }: PaymentsListProps) => {
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
+  // Over every payment on the page, not just the filtered ones: move-in is asked once per home.
+  const releaseActions = useMemo(() => rentReleaseActions(payments), [payments]);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   const pageOnly = !serverFiltered && total > payments.length;
@@ -169,6 +173,7 @@ export const PaymentsList = ({
                   onDownloadReceipt={() => onDownloadReceipt(payment.id)}
                   onDispute={() => onDispute(payment.id)}
                   onConfirmMoveIn={() => onConfirmMoveIn(payment.id)}
+                  releaseAction={releaseActions.get(payment.id)}
                 />
               </div>
             ))
@@ -184,6 +189,7 @@ export const PaymentsList = ({
           onDownloadReceipt={onDownloadReceipt}
           onDispute={onDispute}
           onConfirmMoveIn={onConfirmMoveIn}
+          releaseAction={releaseActions.get(selectedPayment.id)}
         />
       )}
     </>

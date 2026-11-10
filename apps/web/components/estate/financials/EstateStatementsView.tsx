@@ -523,7 +523,10 @@ export function EstatePayoutAccountCard({ estateId }: { estateId: string }) {
           loadingText="Saving…"
           onClick={() => save.mutate()}
         >
-          {saveAccountLabel(lookup, 'Update payout account')}
+          {saveAccountLabel(
+            lookup,
+            account?.accountNumber ? 'Update payout account' : 'Save payout account'
+          )}
         </Button>
       </div>
     </Card>

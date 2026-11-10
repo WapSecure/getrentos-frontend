@@ -114,3 +114,18 @@ export function withdrawStepUpSummary(
   const where = account ? payoutAccountLabel(account) : '';
   return `Withdraw ${amount} to ${where || 'your payout account'}`;
 }
+
+/** Quick picks shown under the bank list, most-used first. Codes are the CBN/NIBSS codes Paystack lists. */
+export const COMMON_BANKS = [
+  { code: '058', name: 'GTBank' },
+  { code: '044', name: 'Access' },
+  { code: '057', name: 'Zenith' },
+  { code: '011', name: 'First Bank' },
+  { code: '033', name: 'UBA' },
+  { code: '070', name: 'Fidelity' },
+  { code: '232', name: 'Sterling' },
+  { code: '035', name: 'Wema' },
+  { code: '50211', name: 'Kuda' },
+  { code: '999992', name: 'OPay' },
+  { code: '50515', name: 'Moniepoint' },
+] as const;

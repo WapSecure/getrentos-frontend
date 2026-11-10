@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { rentReleaseActions } from '@sureground/shared';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { PaymentsHeader } from '@/components/renter/payments/PaymentsHeader';
 import { PaymentsSummary } from '@/components/renter/payments/PaymentsSummary';
@@ -17,7 +18,7 @@ import { CreditCard, FileText, Wallet, Zap } from '@sureground/icons';
 import { renterService, type Payment } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
-import { formatCurrency } from '@/lib/format';
+import { formatCurrency, formatLagosDate } from '@/lib/format';
 import {
   ConfirmDialog,
   PageErrorState,
@@ -256,13 +257,14 @@ export default function PaymentsPage() {
   };
 
   const confirmMoveInMutation = useMutation({
-    mutationFn: (paymentId: string) => unwrap(renterService.confirmMoveIn(paymentId)),
-    onSuccess: (updated) => {
+    mutationFn: ({ paymentId }: { paymentId: string; early: boolean }) =>
+      unwrap(renterService.confirmMoveIn(paymentId)),
+    onSuccess: (updated, { early }) => {
       queryClient.invalidateQueries({ queryKey: renterKeys.payments });
       queryClient.invalidateQueries({ queryKey: ['renter', 'rent-accounts'] });
       pushNotification({
         type: 'success',
-        title: 'Move-in confirmed',
+        title: early ? 'Rent released' : 'Move-in confirmed',
         message: `Your rent for ${updated.propertyName} has been released to your landlord.`,
       });
     },
@@ -276,6 +278,13 @@ export default function PaymentsPage() {
   });
 
   const confirmingMoveInPayment = payments.find((p) => p.id === confirmingMoveInId) ?? null;
+  const releaseActions = rentReleaseActions(payments);
+  // After move-in the same release is an early payout of rent that would release on its own date.
+  const releasingEarly =
+    !!confirmingMoveInId && releaseActions.get(confirmingMoveInId) === 'release-now';
+  const heldFigure = confirmingMoveInPayment?.heldAmountNaira
+    ? `${formatCurrency(confirmingMoveInPayment.heldAmountNaira)} `
+    : '';
 
   const invalidatePaymentMethods = () =>
     queryClient.invalidateQueries({ queryKey: renterKeys.paymentMethods });
@@ -438,19 +447,22 @@ export default function PaymentsPage() {
       <ConfirmDialog
         open={!!confirmingMoveInId}
         onOpenChange={(open) => !open && setConfirmingMoveInId(null)}
-        title="Confirm move-in?"
+        title={releasingEarly ? 'Release this rent now?' : 'Confirm move-in?'}
         description={
-          confirmingMoveInPayment
-            ? `This releases the ${
-                confirmingMoveInPayment.heldAmountNaira
-                  ? `${formatCurrency(confirmingMoveInPayment.heldAmountNaira)} `
-                  : ''
-              }rent Sureground is holding for ${confirmingMoveInPayment.propertyName} to your landlord now. Only confirm once you've moved in — it can't be undone.`
-            : ''
+          !confirmingMoveInPayment
+            ? ''
+            : releasingEarly
+              ? `This releases the ${heldFigure}rent Sureground is holding for ${confirmingMoveInPayment.propertyName} to your landlord now${
+                  confirmingMoveInPayment.releaseDate
+                    ? `, instead of on ${formatLagosDate(confirmingMoveInPayment.releaseDate)}`
+                    : ''
+                }. It can't be undone.`
+              : `This releases the ${heldFigure}rent Sureground is holding for ${confirmingMoveInPayment.propertyName} to your landlord now. Only confirm once you've moved in — it can't be undone.`
         }
         confirmLabel="Yes, release to landlord"
         onConfirm={() => {
-          if (confirmingMoveInId) confirmMoveInMutation.mutate(confirmingMoveInId);
+          if (confirmingMoveInId)
+            confirmMoveInMutation.mutate({ paymentId: confirmingMoveInId, early: releasingEarly });
           setConfirmingMoveInId(null);
         }}
       />
