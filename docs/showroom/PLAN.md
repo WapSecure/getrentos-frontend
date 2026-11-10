@@ -1,0 +1,188 @@
+# Property showroom: assessment, architecture and first milestone
+
+This plan rests on the [audit](AUDIT.md). Section 21 of the brief asks for it before any major code change, so the work stops here for approval.
+
+Decisions already made by the product owner (2026-11-10):
+
+- **Phase 1:** the showroom page plus the data behind it.
+- **Enquiries:** sign-in stays required.
+- **Visual style:** stay inside the design system. Sections 9 and 13 of the brief are met through real media, layout and restrained motion, not a new visual language.
+
+## 1. The customer experience today
+
+**What works**
+
+- The public listing pages are server-rendered, quick to first paint and indexable, with Offer JSON-LD.
+- Shortlets already have the strongest journey: photos, video and 360 tabs, house rules, utilities, a public price quote and booking.
+- Land has real substance: parcel boundary, title, assurance tier, comparables and dossiers.
+- Trust is honest. The listing check computes its facts in code and the AI only words them, and verified badges follow backend status (5b6acb09).
+
+**What a customer actually meets on `/rent/[id]`, `/buy/[id]` and `/land/[id]`**
+
+- **Gallery:** one cover photo and four thumbnails. No fullscreen, zoom, swipe or captions, and no video or tour even when one exists.
+- **Facts:** a flat list. The rental deposit, lease length, furnished and pets are stored but never sent to the page.
+- **Neighbourhood, trust and listing check:** all built, but shown only to signed-in renters on a second, different detail page.
+- **Costs:** the rent alone. There is no way to see the total cost of moving in.
+- **Next steps:**
+  - Rent gives "Enquire", which sends you to sign in. Sale and land give "Make an offer".
+  - There is no share and no viewing request on the public page.
+  - The signed-in "compare" button only shows a toast.
+- **Phone users:** full-size original photos download over mobile data.
+
+**Verdict:** the parts of a showroom exist but are scattered over two pages, three apps and eight cards. The public page, where every journey starts, shows the least.
+
+## 2. The ten highest-impact opportunities
+
+| #   | Opportunity                                                                                                                                      | Classification                       |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------ |
+| 1   | One showroom page for every listing type, built from shared parts                                                                                | Existing, needs improvement          |
+| 2   | Fullscreen media viewer: keyboard, swipe, zoom, captions, video and 360                                                                          | New and feasible now                 |
+| 3   | Show the stored facts the public page drops (deposit, lease, furnished, pets, availability, property type)                                       | Depends on backend (small, additive) |
+| 4   | True rental cost: service charge, agency, legal and caution fees, and the total to move in                                                       | Depends on backend (new fields)      |
+| 5   | Neighbourhood, trust chain and listing check on the public page                                                                                  | Existing and reusable                |
+| 6   | Context-specific next steps: viewing and apply for rent, inspection and offer for sale, booking for shortlets; share (WhatsApp) and real compare | Mostly existing, needs improvement   |
+| 7   | One listing card with variants, replacing 8                                                                                                      | Existing, needs improvement          |
+| 8   | Media captured with meaning: room tags, captions, order, tour links for rent and sale, and later floor plans                                     | Depends on backend, then forms       |
+| 9   | Responsive images: resized versions, a CDN and blur placeholders, for phones on mobile data                                                      | Depends on infrastructure            |
+| 10  | Funnel tracking from card impression to enquiry, to prove any of this works                                                                      | Depends on backend (new endpoint)    |
+
+**Later:**
+
+- map-area search and a public map
+- floor plans
+- commercial and off-plan pages
+- grounded property Q&A
+- 3D, only when real scan data exists
+
+Classified as future enhancements or dependent on providers.
+
+## 3. Future customer journey
+
+1. **Discover:** a card shows the real photo, price with its unit, area, key facts, freshness and a verified badge only when the backend says so. Save, compare and share are one tap.
+2. **Arrive:** a hero with the best photo, title, location, price and availability, plus one primary action for the listing type.
+3. **Explore:** "Show all photos" opens the media viewer, grouped by room once tags are captured. Video and the 360 tour sit beside the photos, never faked.
+4. **Understand:** facts, then a cost breakdown (rent and fees to total move-in; asking price and fees; nightly quote to total), then neighbourhood places, travel times and walkability with their source named.
+5. **Trust:** the trust chain, the listing check, and media dates such as "Filmed on site, Oct 2026". Unverified and estimated data are labelled as such.
+6. **Act:** a sticky phone bar with the primary action:
+   - rent: request viewing, then apply
+   - sale: request inspection, then make offer
+   - land: request site tour, then offer
+   - shortlet: check dates, then book
+
+   Sign-in happens inline and returns to the same step.
+
+7. **Return:** saved listings, compare (up to 4, real), recently viewed and saved-search alerts.
+
+## 4. Target architecture
+
+The showroom is a product capability, not a page.
+
+```
+packages/shared/src/showroom/        property information model + mappers (web and mobile)
+  types.ts                           ShowroomListing, MediaItem, CostLine, Fact, TrustSummary
+  fromRental.ts fromSale.ts fromLand.ts fromShortlet.ts
+packages/ui/src/media/               design-system primitives (web)
+  MediaViewer.tsx                    fullscreen viewer on our Dialog: keys, swipe, zoom, captions
+  MediaMosaic.tsx                    hero grid: 1 large + 4, "Show all n"
+  VideoPlayer.tsx                    poster first; HLS natively on Safari, hls.js loaded on play elsewhere
+  TourEmbed.tsx                      the 360 iframe now inside ShortletListingDetail, made shared
+apps/web/components/showroom/        composition (server first, client islands only where needed)
+  ShowroomPage.tsx                   picks sections per listing type
+  ShowroomHero.tsx ShowroomFacts.tsx ShowroomCosts.tsx ShowroomTrust.tsx
+  ShowroomNeighbourhood.tsx          reuses maps/GeoInsightsPanel + PropertyMap
+  ShowroomActions.tsx                reuses ListingCallToAction, SaveListingButton; adds Share
+packages/ui-native (later)           MediaViewer for mobile on the same MediaItem contract
+```
+
+**Rules:**
+
+- **Model and mappers:** in `@sureground/shared`. Web and mobile stop mapping the same responses twice (today `apps/web/lib/publicListingDetail.ts` and `apps/mobile/lib/api/publicMarket.ts`).
+- **Primitives:** in `@sureground/ui`, so landlord previews, realtor tools and the backoffice reuse them.
+- **Composition:** in `apps/web/components/showroom`. URLs (`/rent/[id]`, `/buy/[id]`, `/land/[id]`, `/shortlets/[id]`) and metadata stay exactly the same.
+- **Rendering:** the page stays a server component. The viewer, video, map and actions load as client islands; hls.js loads only when a video plays.
+- **Rollout:** the repo has no feature-flag system. `NEXT_PUBLIC_SHOWROOM=on` switches each route from `PublicListingPage` to `ShowroomPage`, so we can compare and roll back.
+
+**Media contract** (added to public detail responses next to today's fields, so nothing breaks):
+
+```ts
+interface MediaItem {
+  id: string;
+  kind: 'image' | 'video' | 'tour';
+  url: string; // signed or public URL; never a storage key or credential
+  posterUrl?: string;
+  width?: number;
+  height?: number; // filled once processing exists
+  durationSeconds?: number;
+  alt?: string;
+  caption?: string;
+  room?:
+    | 'living'
+    | 'bedroom'
+    | 'bathroom'
+    | 'kitchen'
+    | 'exterior'
+    | 'amenity'
+    | 'floor_plan'
+    | 'neighbourhood'
+    | 'other';
+  order: number;
+  capturedAt?: string;
+  filmedOnSite?: boolean;
+  source?: 'owner' | 'agent' | 'inspection' | 'render';
+  tourHost?: string; // for kind 'tour', from the existing allow-list
+}
+```
+
+## 5. Delivery roadmap
+
+| Milestone                                          | Contents                                                                                                                                                                   | Depends on                      |
+| -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| **M1 Showroom foundation**                         | Shared model; media viewer, mosaic, video and tour primitives; showroom page for rent, sale and land behind the flag; hidden rental facts and `media[]` exposed (additive) | Small backend PR, no migration  |
+| M2 Real costs and media meaning                    | Fee fields and total move-in cost; tour link for rent and sale; room tag, caption and order on photos; capture in the landlord, owner and estate forms with reorder        | Migration (backup first), forms |
+| M3 One card, real compare                          | Unified `ListingCard` (editorial, compact, map, shortlet, development variants) across the 8 places; compare fixed; share                                                  | M1 model                        |
+| M4 Measurement                                     | Event endpoint and schema (impression to offer), no personal data; dashboard baseline                                                                                      | Backend endpoint                |
+| M5 Shortlets and mobile                            | Shortlet detail on the showroom parts; mobile viewer on `ui-native`; mobile uses the shared mappers                                                                        | M1 to M3                        |
+| M6 Discovery                                       | Public map with map-area search; similar listings on the server; collections                                                                                               | Backend geo query               |
+| M7 Media infrastructure                            | Resized versions and WebP/AVIF, CDN, dimensions, blur placeholders, upload progress                                                                                        | Infrastructure decision         |
+| M8 Floor plans, commercial, off-plan, grounded Q&A | As data and providers allow                                                                                                                                                | Data model and providers        |
+
+Every milestone ends with browser checks in the VS Code bridge (rent, sale, land fixtures; phone, tablet and desktop; keyboard; reduced motion; dark mode; missing and broken media) and a measured performance comparison against today's page.
+
+## 6. First milestone (M1): exact files
+
+**Backend** (`getrentos-backend`, branch `feat/showroom-m1`; additive, no migration):
+
+- `src/modules/renter/dto/public-rental-listing.dto.ts` and the service mapping the public rental: add `securityDeposit`, `minimumLeaseMonths`, `furnished`, `petsAllowed`, `availableFrom`, `availableUntil`, `propertyType`.
+- Public detail responses for rent (`public-rentals.controller.ts`), sale (`marketplace.controller.ts`) and land (`public-land.controller.ts`): add `media: MediaItem[]`, built from the existing cover and gallery keys, the Mux stream with poster, and filmed-on-site. Old fields stay.
+- One shared builder: `src/shared/media/public-media.ts`, with a spec.
+
+**Frontend:**
+
+- New: `packages/shared/src/showroom/{types,fromRental,fromSale,fromLand,index}.ts`, plus `*.test.ts` run with `node --test` (no new test dependency).
+- New: `packages/ui/src/media/{MediaViewer,MediaMosaic,VideoPlayer,TourEmbed}.tsx`, exported from `packages/ui/src/index.ts`.
+- New: `apps/web/components/showroom/{ShowroomPage,ShowroomHero,ShowroomFacts,ShowroomCosts,ShowroomTrust,ShowroomNeighbourhood,ShowroomActions}.tsx`.
+- Changed:
+  - `apps/web/lib/publicListingDetail.ts`: fetch only; mapping moves to shared.
+  - `apps/web/app/{rent,buy,land}/[id]/page.tsx`: flag switch.
+  - `apps/web/components/shortlet/ShortletListingDetail.tsx`: uses `TourEmbed`.
+- New dependency: `hls.js` in `packages/ui`, loaded on play only. Our Mux stream is not playable in Chrome or Android browsers without it.
+- Tests:
+  - `tests/browser/showroom.web.spec.ts` with fixtures for rent, sale and land: full media, one photo, no photos, a broken image URL, 40 photos, video, tour.
+  - Keyboard and focus checks in the viewer.
+  - Run singly, not the full suite.
+
+**Acceptance for M1:**
+
+- **Unchanged:** existing URLs, metadata and JSON-LD.
+- **Viewer:** works by mouse, touch and keyboard; Escape returns focus; reduced motion is respected.
+- **Facts:** the rent page shows the stored deposit, lease and availability.
+- **Honest media:** no video or tour section appears without real media; nothing is labelled verified without backend status.
+- **Phones:** the hero image is the LCP element and has its dimensions set; CLS ≤ 0.1, measured in the bridge at a 390px width.
+
+## 7. Decisions needed from the product owner
+
+1. **Fee fields (M2):** store service charge, agency, legal and caution fees as naira amounts set by the landlord, or as percentages of rent (agency and legal fees are often 10% each)? I recommend naira amounts, with percentage helpers in the form, so the page never shows a computed guess as a fact.
+2. **Media infrastructure (M7):** add a CDN with an image resizer (for example CloudFront with an image handler, or imgproxy beside our S3-compatible bucket), or generate fixed sizes at upload? This needs an infrastructure owner.
+3. **hls.js** as one new web dependency (about 60 KB, loaded only on play), so listing videos play in Chrome and Android browsers.
+4. **Analytics (M4):** our own event endpoint, or an existing product-analytics service?
+5. **Flag rollout:** turn the showroom on for everyone once M1 passes, or run an A/B split once M4 tracking exists?
