@@ -12,6 +12,8 @@ import {
 import { translations, type Language, type TranslationKey } from './translations';
 
 const STORAGE_KEY = 'sureground_language';
+// Off until every screen is translated; while off everyone reads English and the switches are hidden.
+export const LANGUAGE_CHOICE_ENABLED = false;
 /** Mirrored to a cookie too, so other tabs and the API can see the choice. */
 export const LANGUAGE_COOKIE_KEY = 'sureground_language';
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
@@ -37,11 +39,13 @@ export const LanguageProvider = ({
   children: ReactNode;
   initialLanguage?: Language;
 }) => {
-  const [language, setLanguageState] = useState<Language>(initialLanguage);
+  const [language, setLanguageState] = useState<Language>(
+    LANGUAGE_CHOICE_ENABLED ? initialLanguage : 'en'
+  );
 
   // The server renders English (reading the cookie would make every page uncacheable), so a saved preference is restored after first paint.
   useEffect(() => {
-    if (initialLanguage !== 'en') return;
+    if (!LANGUAGE_CHOICE_ENABLED || initialLanguage !== 'en') return;
     const fromCookie = document.cookie
       .split('; ')
       .find((entry) => entry.startsWith(`${LANGUAGE_COOKIE_KEY}=`))

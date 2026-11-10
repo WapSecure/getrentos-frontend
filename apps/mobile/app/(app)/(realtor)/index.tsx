@@ -169,6 +169,13 @@ export default function RealtorHome() {
             onPress: () =>
               router.push({ pathname: '/(app)/(realtor)/pipeline', params: { tab: 'viewings' } }),
           },
+          {
+            label: 'Pending offers',
+            value: d.offerCount,
+            subtitle: 'Awaiting a response',
+            attention: d.offerCount > 0,
+            onPress: () => router.push('/(app)/realtor-offers'),
+          },
         ]}
       />
     </>
@@ -285,7 +292,7 @@ export default function RealtorHome() {
 
       <QueryState
         query={dashboard}
-        skeleton={<StatGroupSkeleton groups={[2, 2]} />}
+        skeleton={<StatGroupSkeleton groups={[2, 3]} />}
         errorTitle="We couldn't load your dashboard"
         errorDescription="Check your connection and try again."
       >

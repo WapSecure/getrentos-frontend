@@ -45,6 +45,12 @@ export default function OwnerDashboardPage() {
     queryKey: ownerKeys.dashboard,
     queryFn: () => unwrap(ownerService.getDashboard()),
   });
+  // The leads list's own total: buyers deduplicated across viewings, offers and realtor enquiries.
+  const { data: leadsTotal } = useQuery({
+    queryKey: [...ownerKeys.leads, 'total'],
+    queryFn: () => unwrap(ownerService.listLeads({ page: 1, pageSize: 1 })),
+    select: (page) => page.total,
+  });
 
   const firstName = user?.fullName?.split(' ')[0] || 'User';
   const currentHour = new Date().getHours();
@@ -95,10 +101,7 @@ export default function OwnerDashboardPage() {
           <OwnerStatsCards
             totalProperties={dashboard?.totalProperties ?? 0}
             activeSaleListings={dashboard?.activeListings ?? 0}
-            buyerInquiries={
-              dashboard?.recentActivity.filter((a) => a.type === 'offer' || a.type === 'viewing')
-                .length ?? 0
-            }
+            buyerInquiries={leadsTotal ?? 0}
             pendingOffers={dashboard?.pendingOffers ?? 0}
             totalPortfolioValue={dashboard?.portfolioValue ?? 0}
             completedSales={dashboard?.completedSales ?? 0}

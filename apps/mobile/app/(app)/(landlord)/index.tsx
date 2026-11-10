@@ -28,7 +28,7 @@ import {
 import { qk } from '@/lib/query/keys';
 import { landlordApi, type LandlordActivity } from '@/lib/api/landlord';
 import { useAuth } from '@/lib/auth/AuthProvider';
-import { firstName, formatNaira } from '@/lib/format';
+import { firstName } from '@/lib/format';
 import { RevenueTrendChart } from '@/components/landlord/RevenueTrendChart';
 import { CreatePropertySheet } from '@/components/landlord/CreatePropertySheet';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
@@ -106,30 +106,9 @@ export default function LandlordOverview() {
   const units = s ? s.occupiedUnits + s.vacantUnits + s.reservedUnits : 0;
   const occupancy = s && units > 0 ? Math.round((s.occupiedUnits / units) * 100) : 0;
 
+  // Outstanding rent and open repairs live in the attention cards above, shown only when they need action.
   const statGroups = s ? (
     <>
-      <StatGroup
-        title="Rent and operations"
-        items={[
-          {
-            label: 'Outstanding rent',
-            value: showMoney ? formatNaira(s.outstandingAmount, { compact: true }) : '••••••',
-            subtitle:
-              s.outstandingPayments === 1
-                ? 'Across 1 unpaid charge'
-                : `Across ${s.outstandingPayments} unpaid charges`,
-            attention: s.outstandingPayments > 0,
-            onPress: () => router.push('/(app)/landlord-payments'),
-          },
-          {
-            label: 'Open repairs',
-            value: s.activeMaintenanceRequests,
-            subtitle: s.activeMaintenanceRequests === 1 ? 'Open ticket' : 'Open tickets',
-            attention: s.activeMaintenanceRequests > 0,
-            onPress: () => router.push('/(app)/landlord-maintenance'),
-          },
-        ]}
-      />
       <StatGroup
         title="Portfolio"
         items={[
@@ -214,7 +193,7 @@ export default function LandlordOverview() {
               visible={showMoney}
               onToggle={toggleMoney}
             />
-            <StatGroupSkeleton groups={[2, 4]} />
+            <StatGroupSkeleton groups={[4]} />
             {quickActions}
           </View>
         }

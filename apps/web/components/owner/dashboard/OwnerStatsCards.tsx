@@ -72,9 +72,9 @@ export const OwnerStatsCards = ({
             href: ROUTES.OWNER_LISTINGS,
           },
           {
-            label: 'Buyer enquiries',
+            label: 'Buyer leads',
             value: buyerInquiries,
-            subtitle: 'Recent buyer activity',
+            subtitle: 'Viewings, offers and enquiries',
             href: ROUTES.OWNER_LEADS,
           },
           {

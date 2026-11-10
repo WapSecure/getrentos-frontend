@@ -11,6 +11,7 @@ import { SecuritySettings } from '@/components/shared/security/SecuritySettings'
 import { PaymentSettings } from '@/components/renter/settings/PaymentSettings';
 import { ThemeSettings } from '@/components/renter/settings/ThemeSettings';
 import { LanguageSettings } from '@/components/renter/settings/LanguageSettings';
+import { LANGUAGE_CHOICE_ENABLED } from '@/lib/i18n/LanguageContext';
 import { DataExport } from '@/components/shared/settings/DataExport';
 import { AccountDeletion } from '@/components/renter/settings/AccountDeletion';
 import { IdentityVerificationSettings } from '@/components/shared/verification/IdentityVerificationSettings';
@@ -42,7 +43,7 @@ type SettingsTab =
   | 'export'
   | 'delete';
 
-const tabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
+const allTabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
   { id: 'profile', label: 'Profile', icon: User },
   { id: 'account', label: 'Account', icon: Settings },
   { id: 'verification', label: 'Verification', icon: ShieldCheck },
@@ -55,11 +56,14 @@ const tabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
   { id: 'export', label: 'Data export', icon: Download },
   { id: 'delete', label: 'Delete account', icon: Trash2 },
 ];
+const tabs = allTabs.filter((tab) => tab.id !== 'language' || LANGUAGE_CHOICE_ENABLED);
 
 export default function SettingsPage() {
   const user = useRenterUser();
   const searchParams = useSearchParams();
-  const initialTab = (searchParams.get('tab') as SettingsTab | null) ?? 'profile';
+  const requestedTab = searchParams.get('tab') as SettingsTab | null;
+  const initialTab =
+    requestedTab && tabs.some((tab) => tab.id === requestedTab) ? requestedTab : 'profile';
   const [activeTab, setActiveTab] = useState<SettingsTab>(initialTab);
 
   const renderContent = () => {

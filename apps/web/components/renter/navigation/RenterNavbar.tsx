@@ -8,7 +8,7 @@ import { Search, Menu, X } from '@sureground/icons';
 import { Logo } from '@/components/ui/Logo';
 import { IconButton, Input, ThemeToggle } from '@sureground/ui';
 import { LanguageToggle } from '@/components/ui/LanguageToggle';
-import { useLanguage } from '@/lib/i18n/LanguageContext';
+import { LANGUAGE_CHOICE_ENABLED, useLanguage } from '@/lib/i18n/LanguageContext';
 import { RenterProfileDropdown } from './RenterProfileDropdown';
 import { RoleMobileNavigation } from '@/components/shared/dashboard/GroupedSidebar';
 import { renterNavigation } from '@/lib/navigation/roles/renter';
@@ -116,9 +116,11 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
             </form>
 
             <div className="flex shrink-0 items-center gap-1 sm:gap-3">
-              <div className="hidden sm:block">
-                <LanguageToggle />
-              </div>
+              {LANGUAGE_CHOICE_ENABLED && (
+                <div className="hidden sm:block">
+                  <LanguageToggle />
+                </div>
+              )}
               <ThemeToggle />
 
               <RenterAssistant />
@@ -179,14 +181,16 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
             exit={{ opacity: 0, y: -20 }}
             className="fixed left-0 right-0 top-32 z-[60] bottom-0 overflow-y-auto border-b border-border bg-background lg:hidden"
           >
-            <div className="px-4 pt-4">
-              <div className="sm:hidden flex items-center justify-between px-4 py-2.5">
-                <span className="text-sm font-medium text-muted-foreground">
-                  {t('language.switch_language')}
-                </span>
-                <LanguageToggle />
+            {LANGUAGE_CHOICE_ENABLED && (
+              <div className="px-4 pt-4">
+                <div className="sm:hidden flex items-center justify-between px-4 py-2.5">
+                  <span className="text-sm font-medium text-muted-foreground">
+                    {t('language.switch_language')}
+                  </span>
+                  <LanguageToggle />
+                </div>
               </div>
-            </div>
+            )}
             <RoleMobileNavigation
               config={renterNavigation}
               onNavigate={() => setIsMobileMenuOpen(false)}

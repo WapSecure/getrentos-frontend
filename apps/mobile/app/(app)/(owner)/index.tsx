@@ -49,6 +49,8 @@ export default function OwnerHome() {
   const { visible: showMoney, toggle: toggleMoney } = useMonetaryVisibility();
   const dashboard = useQuery({ queryKey: qk.owner.dashboard, queryFn: ownerApi.dashboard });
   const d = dashboard.data;
+  // Same query as the leads screen, so the figure and the list it opens always agree.
+  const leads = useQuery({ queryKey: qk.owner.leads, queryFn: () => ownerApi.leads() });
   // Pro only: a Free plan's upgrade error is final, so don't retry it.
   const trend = useQuery({
     queryKey: qk.owner.portfolioTrend,
@@ -125,6 +127,12 @@ export default function OwnerHome() {
             attention: d.pendingOffers > 0,
             onPress: () => router.push('/(app)/(owner)/offers'),
           },
+          {
+            label: 'Buyer leads',
+            value: leads.data?.total ?? '—',
+            subtitle: 'Viewings, offers and enquiries',
+            onPress: () => router.push('/(app)/owner-leads'),
+          },
         ]}
       />
     </>
@@ -155,7 +163,13 @@ export default function OwnerHome() {
   );
 
   return (
-    <Screen refreshing={dashboard.isRefetching} onRefresh={() => void dashboard.refetch()}>
+    <Screen
+      refreshing={dashboard.isRefetching}
+      onRefresh={() => {
+        void dashboard.refetch();
+        void leads.refetch();
+      }}
+    >
       {header}
 
       <QueryState
@@ -170,7 +184,7 @@ export default function OwnerHome() {
               visible={showMoney}
               onToggle={toggleMoney}
             />
-            <StatGroupSkeleton groups={[3, 2]} />
+            <StatGroupSkeleton groups={[3, 3]} />
             {quickActions}
           </View>
         }
