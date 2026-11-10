@@ -1,3 +1,4 @@
+import { startOAuth } from '@/lib/auth/oauth';
 // The app's test types are Jest's only (no @types/node), so Node's crypto is typed here for the two calls used.
 type NodeCrypto = {
   createHash(alg: 'sha256'): {
@@ -6,7 +7,6 @@ type NodeCrypto = {
   randomBytes(size: number): { toString(enc: 'base64url'): string };
 };
 const { createHash, randomBytes } = jest.requireActual<NodeCrypto>('crypto');
-import { startOAuth } from '@/lib/auth/oauth';
 
 jest.mock('@/lib/env', () => ({ env: { apiUrl: 'https://api.test', clientApp: 'mobile' } }));
 jest.mock('expo-crypto', () => {
