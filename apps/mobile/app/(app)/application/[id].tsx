@@ -280,7 +280,7 @@ export default function ApplicationDetail() {
         accessibilityLabel="Back"
         style={[styles.back, { top: insets.top + 8 }]}
       >
-        <ChevronLeft size={22} color={colors.primaryForeground} />
+        <ChevronLeft size={22} color="#ffffff" />
       </Pressable>
 
       {canWithdraw ? (

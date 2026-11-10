@@ -199,7 +199,7 @@ function Gallery({ listing: l }: { listing: HostListing }) {
                       justifyContent: 'center',
                     }}
                   >
-                    <ActivityIndicator color={colors.primaryForeground} />
+                    <ActivityIndicator color="#ffffff" />
                   </View>
                 ) : null}
                 {p.failed ? (
@@ -260,7 +260,7 @@ function Gallery({ listing: l }: { listing: HostListing }) {
                   justifyContent: 'center',
                 }}
               >
-                <X size={15} color={colors.primaryForeground} />
+                <X size={15} color="#ffffff" />
               </Pressable>
             </View>
           ))}

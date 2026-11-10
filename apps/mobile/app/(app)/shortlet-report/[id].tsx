@@ -217,7 +217,7 @@ export default function GuestPromiseReport() {
                         backgroundColor: 'rgba(0,0,0,0.6)',
                       }}
                     >
-                      <X size={14} color={colors.primaryForeground} />
+                      <X size={14} color="#ffffff" />
                     </Pressable>
                   </View>
                 ))}

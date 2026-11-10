@@ -116,11 +116,7 @@ export default function ShortletWishlist() {
                         backgroundColor: 'rgba(0,0,0,0.35)',
                       }}
                     >
-                      <Heart
-                        size={19}
-                        color={colors.primaryForeground}
-                        fill={colors.primaryForeground}
-                      />
+                      <Heart size={19} color="#ffffff" fill="#ffffff" />
                     </Pressable>
                   </View>
                   <View style={{ padding: spacing.lg, gap: 2 }}>
