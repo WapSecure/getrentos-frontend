@@ -566,7 +566,7 @@ export const SecuritySettings = () => {
                 </Field>
               ) : pinReference ? (
                 <Field
-                  label="Code from your email"
+                  label="Code we sent you"
                   hint={pinSentTo ? `We sent a code to ${pinSentTo}.` : undefined}
                 >
                   <NumberInput
@@ -581,8 +581,8 @@ export const SecuritySettings = () => {
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="text-sm text-muted-foreground">
                     {pinForgot
-                      ? 'We’ll email you a code so you can choose a new PIN.'
-                      : 'We’ll email you a code to confirm it’s you.'}
+                      ? 'We’ll send you a code so you can choose a new PIN.'
+                      : 'We’ll send you a code to confirm it’s you.'}
                   </p>
                   <Button
                     variant="outline"
@@ -590,7 +590,7 @@ export const SecuritySettings = () => {
                     onClick={() => sendPinCodeMutation.mutate()}
                     isLoading={sendPinCodeMutation.isPending}
                   >
-                    Email me a code
+                    Send me a code
                   </Button>
                 </div>
               )}

@@ -278,8 +278,8 @@ export function StepUpSheet({
           ) : needsCode ? (
             <Text variant="callout">
               {hasPassword
-                ? 'We’ll email you a 6-digit code to enter with your password.'
-                : 'We’ll email you a 6-digit code.'}
+                ? 'We’ll send you a 6-digit code to enter with your password.'
+                : 'We’ll send you a 6-digit code.'}
             </Text>
           ) : isSetup ? (
             <>
