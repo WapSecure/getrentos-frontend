@@ -2,13 +2,12 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { BadgeCheck, ChevronRight, MapPin, Bed, Bath } from '@sureground/icons';
-import Link from 'next/link';
+import { BadgeCheck } from '@sureground/icons';
+import { ListingCard } from '@sureground/ui';
 import { buildRoute } from '@/lib/constants/auth';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
-import { formatPrice } from '@/types/renter';
 
 export const SavedRecommendations = () => {
   const { data: recommendations = [] } = useQuery({
@@ -29,35 +28,23 @@ export const SavedRecommendations = () => {
         <h2 className="text-sm font-semibold text-foreground">Recommendations</h2>
       </div>
 
-      <div className="divide-y divide-border">
+      <div className="space-y-2.5 p-3">
         {recommendations.slice(0, 3).map((rec) => (
-          <div key={rec.id} className="p-3 hover:bg-secondary transition-colors">
-            <Link href={buildRoute.renterPropertyDetail(rec.id)} className="block">
-              <div className="flex justify-between items-start">
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-medium text-foreground truncate hover:text-primary">
-                    {rec.title}
-                  </h3>
-                  <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
-                    <MapPin className="w-3 h-3" />
-                    {rec.location}
-                  </p>
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground mt-1">
-                    <span className="font-semibold text-primary">
-                      {formatPrice(rec.price, rec.period)}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Bed className="w-3 h-3" /> {rec.bedrooms} bd
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Bath className="w-3 h-3" /> {rec.bathrooms} ba
-                    </span>
-                  </div>
-                </div>
-                <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 mt-1" />
-              </div>
-            </Link>
-          </div>
+          <ListingCard
+            key={rec.id}
+            variant="compact"
+            headingLevel="h3"
+            href={buildRoute.renterPropertyDetail(rec.id)}
+            title={rec.title}
+            location={rec.location}
+            price={rec.price}
+            priceUnit={rec.period}
+            priceCompact
+            image={rec.image}
+            imageAlt=""
+            verified={rec.verified}
+            facts={{ beds: rec.bedrooms, baths: rec.bathrooms }}
+          />
         ))}
       </div>
     </motion.div>

@@ -3,11 +3,8 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { MapPin, Bed, Bath, Square, Heart, Eye, Star, Home } from '@sureground/icons';
-import { Badge } from '@sureground/ui';
-import { Button } from '@sureground/ui';
-import { IconButton } from '@sureground/ui';
-import { formatPrice } from '@/types/renter';
+import { Heart, Eye, Star } from '@sureground/icons';
+import { Button, ListingCard, ListingCardAction } from '@sureground/ui';
 import { ROUTES, buildRoute } from '@/lib/constants/auth';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -28,7 +25,6 @@ export const RenterRecommendedProperties = () => {
   });
   const savedListings = savedListingsData?.items ?? [];
   const savedIds = savedListings.map((p) => p.id);
-  const [failedImages, setFailedImages] = useState<string[]>([]);
   // Optimistic until the request settles, so a failed save falls back to the server's list.
   const [pendingSaved, setPendingSaved] = useState<Record<string, boolean>>({});
   const isSaved = (propertyId: string) => pendingSaved[propertyId] ?? savedIds.includes(propertyId);
@@ -80,99 +76,37 @@ export const RenterRecommendedProperties = () => {
       </div>
 
       <div className="p-5">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {recommendedProperties.map((property, index) => (
-            <motion.div
+        <div className="grid grid-cols-1 gap-x-5 gap-y-8 md:grid-cols-2 xl:grid-cols-3">
+          {recommendedProperties.map((property) => (
+            <ListingCard
               key={property.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.35 + index * 0.05, duration: 0.3 }}
-              className="overflow-hidden rounded-2xl border border-border/70 bg-background transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md"
-            >
-              <div className="relative h-40 bg-muted">
-                {property.image && !failedImages.includes(property.id) ? (
-                  // Signed MinIO URLs, so plain <img> rather than next/image.
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={property.image}
-                    alt={property.title}
-                    loading="lazy"
-                    onError={() => setFailedImages((prev) => [...prev, property.id])}
-                    className="absolute inset-0 h-full w-full object-cover"
-                  />
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center mx-auto">
-                        <Home className="w-6 h-6 text-primary" />
-                      </div>
-                      <p className="mt-2 text-xs text-foreground/75">No photo yet</p>
-                    </div>
-                  </div>
-                )}
-                {property.verified && (
-                  <Badge variant="success" className="absolute top-2 left-2">
-                    Verified
-                  </Badge>
-                )}
-                <IconButton
+              href={buildRoute.renterPropertyDetail(property.id)}
+              title={property.title}
+              location={property.location}
+              price={property.price}
+              priceUnit={property.period}
+              image={property.image}
+              imageAlt={property.title}
+              verified={property.verified}
+              facts={{ beds: property.bedrooms, baths: property.bathrooms, size: property.size }}
+              meta={
+                property.rating > 0 ? (
+                  <span className="inline-flex items-center gap-1">
+                    <Star className="h-3.5 w-3.5 fill-warning text-warning" aria-hidden="true" />
+                    <span className="data-value text-foreground">{property.rating}</span>
+                    <span className="sr-only">rating</span>
+                  </span>
+                ) : undefined
+              }
+              actions={
+                <ListingCardAction
                   label={isSaved(property.id) ? 'Remove from saved' : 'Save property'}
                   aria-pressed={isSaved(property.id)}
-                  size="sm"
                   onClick={() => toggleSave(property.id)}
-                  className="absolute top-2 right-2 rounded-full bg-card/90 hover:bg-card"
-                  icon={
-                    <Heart
-                      className={
-                        isSaved(property.id) ? 'fill-destructive text-destructive' : undefined
-                      }
-                    />
-                  }
+                  icon={<Heart fill={isSaved(property.id) ? 'currentColor' : 'none'} />}
                 />
-              </div>
-
-              <div className="p-3">
-                <div className="flex justify-between items-start gap-2 mb-1">
-                  <h3 className="min-w-0 font-semibold text-foreground text-sm">
-                    {property.title}
-                  </h3>
-                  <div className="flex items-center gap-0.5">
-                    <Star className="w-3 h-3 fill-primary text-primary" />
-                    <span className="text-xs text-muted-foreground">{property.rating}</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
-                  <MapPin className="w-3 h-3" />
-                  <span>{property.location}</span>
-                </div>
-                <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3">
-                  <div className="flex items-center gap-1">
-                    <Bed className="w-3 h-3" />
-                    <span>{property.bedrooms}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Bath className="w-3 h-3" />
-                    <span>{property.bathrooms}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Square className="w-3 h-3" />
-                    <span>{property.size} sqm</span>
-                  </div>
-                </div>
-                <div className="flex flex-wrap justify-between items-center gap-2">
-                  <span className="text-lg font-bold text-primary">
-                    {formatPrice(property.price, property.period)}
-                  </span>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    href={buildRoute.renterPropertyDetail(property.id)}
-                  >
-                    View details
-                  </Button>
-                </div>
-              </div>
-            </motion.div>
+              }
+            />
           ))}
         </div>
       </div>

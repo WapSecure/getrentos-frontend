@@ -4,12 +4,12 @@ import { useState } from 'react';
 import { SafeImage } from '@/components/shared/media/SafeImage';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { ShieldCheck, Star, MessageCircle, BedDouble, Bath } from '@sureground/icons';
-import { Button, CardSkeleton, Pagination, Skeleton } from '@sureground/ui';
+import { ShieldCheck, Star, MessageCircle } from '@sureground/icons';
+import { Button, CardSkeleton, ListingCard, Pagination, Skeleton } from '@sureground/ui';
 import { micrositeService } from '@/services/micrositeService';
 import { renterService } from '@/services/renterService';
 import { unwrap, isAuthenticated, getStoredUser } from '@/lib/apiHelpers';
-import { formatCurrency, getInitials } from '@/lib/format';
+import { getInitials } from '@/lib/format';
 import { ROUTES } from '@/lib/constants/auth';
 import type { MicrositeProfile } from '@/types/microsite';
 import { TrustChainBadge } from '@/components/shared/trust/TrustChainBadge';
@@ -146,43 +146,23 @@ export const MicrositePageClient = ({ slug, initialProfile }: MicrositePageClien
             No active listings right now.
           </div>
         ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-5 gap-y-8">
             {listings.map((listing) => (
-              <div
+              <ListingCard
                 key={listing.id}
-                className="bg-card rounded-2xl border border-border overflow-hidden"
-              >
-                <div className="relative h-40 bg-secondary">
-                  <SafeImage
-                    src={listing.image}
-                    alt={listing.title}
-                    fill
-                    sizes="(max-width: 640px) 100vw, 33vw"
-                    className="object-cover"
-                    loading="lazy"
-                  />
+                href={`/rent/${listing.id}`}
+                title={listing.title}
+                location={listing.location}
+                price={listing.price}
+                priceUnit={listing.period}
+                image={listing.image}
+                imageAlt={listing.title}
+                status="For rent"
+                badges={
                   <TrustChainBadge chain={listing.trustChain} fallbackVerified={listing.verified} />
-                </div>
-                <div className="p-4">
-                  <h3 className="font-semibold text-foreground truncate">{listing.title}</h3>
-                  <p className="text-xs text-muted-foreground truncate mt-0.5">
-                    {listing.location}
-                  </p>
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground mt-2">
-                    <span className="flex items-center gap-1">
-                      <BedDouble className="w-3.5 h-3.5" />
-                      {listing.bedrooms}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Bath className="w-3.5 h-3.5" />
-                      {listing.bathrooms}
-                    </span>
-                  </div>
-                  <p className="text-sm font-bold text-primary mt-2">
-                    {formatCurrency(listing.price)}/{listing.period}
-                  </p>
-                </div>
-              </div>
+                }
+                facts={{ beds: listing.bedrooms, baths: listing.bathrooms }}
+              />
             ))}
           </div>
         )}

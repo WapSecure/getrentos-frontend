@@ -220,7 +220,7 @@ export default function BuyerDiscoverPage() {
           </div>
         }
       >
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
           {listings.map((listing, index) => (
             <PropertyListingCard
               key={listing.id}
@@ -228,7 +228,7 @@ export default function BuyerDiscoverPage() {
               isSaved={savedIds.includes(listing.id)}
               onToggleSave={() => toggleSave(listing)}
               onViewDetails={() => setActiveListing(listing)}
-              delay={index * 0.05}
+              eager={index < 3}
             />
           ))}
         </div>

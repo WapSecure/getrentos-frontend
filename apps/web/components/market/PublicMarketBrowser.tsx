@@ -4,25 +4,14 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'next/navigation';
-import {
-  BadgeCheck,
-  Bath,
-  BedDouble,
-  Home,
-  ArrowUpRight,
-  Columns3,
-  MapPin,
-  Ruler,
-  SlidersHorizontal,
-  ImageOff,
-} from '@sureground/icons';
+import { Columns3, Home, SlidersHorizontal } from '@sureground/icons';
 import {
   Alert,
-  Badge,
   Button,
   Checkbox,
   CurrencyInput,
   EmptyState,
+  ListingCard,
   Pagination,
   SearchInput,
   Select,
@@ -35,12 +24,10 @@ import {
 } from '@/services/publicMarketService';
 import { unwrap, type Paginated } from '@/lib/apiHelpers';
 import { PUBLIC_MARKET_PAGE_SIZE } from '@/lib/publicListingMap';
-import { formatCurrency } from '@/lib/format';
 import { PROPERTY_TYPE_OPTIONS } from '@/lib/propertyTypes';
 import { SaveListingButton } from './SaveListingButton';
 import { ListingComparisonDialog } from './ListingComparisonDialog';
-import { trustChainLabel } from '@sureground/shared';
-import { TRUST_TONE_VARIANT } from '@/components/shared/trust/TrustChainBadge';
+import { TrustChainBadge } from '@/components/shared/trust/TrustChainBadge';
 
 // Shared with the server component that pre-renders the first page, so both ask for the same page size.
 const PAGE_SIZE = PUBLIC_MARKET_PAGE_SIZE;
@@ -69,152 +56,59 @@ const NOUNS: Record<PublicMarket, { one: string; many: string }> = {
 const detailHref = (market: PublicMarket, id: string) =>
   `${market === 'rent' ? '/rent' : '/buy'}/${id}`;
 
-const ListingCard = ({
+const MarketListingCard = ({
   listing,
   market,
+  eager,
   compared,
   compareDisabled,
   onCompare,
 }: {
   listing: PublicListingCard;
   market: PublicMarket;
+  eager: boolean;
   compared: boolean;
   compareDisabled: boolean;
   onCompare: (listing: PublicListingCard) => void;
 }) => {
   const href = detailHref(market, listing.id);
   return (
-    <article className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-xs transition-[border-color,box-shadow] duration-150 hover:border-foreground/15 hover:shadow-sm">
-      <div className="relative overflow-hidden">
-        <Link href={href} tabIndex={-1} aria-hidden="true">
-          {mapMedia(listing)}
-        </Link>
-        {(listing.trustChain || listing.verified) && (
-          <span
-            title={listing.trustChain?.steps
-              .map((s) => `${s.met ? '✓' : '○'} ${s.label}`)
-              .join('\n')}
-            className="absolute left-4 top-4"
-          >
-            <Badge
-              variant={
-                listing.trustChain
-                  ? TRUST_TONE_VARIANT[trustChainLabel(listing.trustChain).tone]
-                  : 'success'
-              }
-              icon={<BadgeCheck className="h-3.5 w-3.5" aria-hidden="true" />}
-            >
-              {listing.trustChain ? trustChainLabel(listing.trustChain).label : 'Verified listing'}
-            </Badge>
-          </span>
-        )}
-        <SaveListingButton
-          listingId={listing.id}
-          returnPath={href}
-          className="absolute right-4 top-4"
-        />
-      </div>
-
-      <div className="flex flex-1 flex-col p-5">
-        <div className="flex items-start justify-between gap-2">
-          <h3 className="text-base font-semibold tracking-[-0.015em] text-foreground">
-            <Link
-              href={href}
-              className="rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-            >
-              {listing.title}
-            </Link>
-          </h3>
-          {listing.verified && (
-            <BadgeCheck
-              className="mt-0.5 h-4 w-4 shrink-0 text-primary"
-              aria-label="Verified listing"
-            />
-          )}
-        </div>
-
-        <p className="mt-1 flex items-start gap-1 text-sm text-muted-foreground">
-          <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-          <span>{listing.location}</span>
-        </p>
-
-        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-          {/* Falsy, not nullish: many listings have no bedroom or size data, and "0 bed" reads as a claim. */}
-          {listing.bedrooms ? (
-            <span className="flex items-center gap-1">
-              <BedDouble className="h-3.5 w-3.5" />
-              {listing.bedrooms} bed
-            </span>
-          ) : null}
-          {listing.bathrooms ? (
-            <span className="flex items-center gap-1">
-              <Bath className="h-3.5 w-3.5" />
-              {listing.bathrooms} bath
-            </span>
-          ) : null}
-          {listing.size ? (
-            <span className="flex items-center gap-1">
-              <Ruler className="h-3.5 w-3.5" />
-              {listing.size} sqm
-            </span>
-          ) : null}
-          {listing.propertyType && (
-            <Badge variant="neutral">{listing.propertyType.toLowerCase()}</Badge>
-          )}
-        </div>
-
-        <div className="mt-auto flex items-end justify-between gap-2 pt-4">
-          <p className="data-value text-lg font-semibold text-foreground">
-            {formatCurrency(listing.price)}
-            {listing.priceUnit && (
-              <span className="text-sm font-normal text-muted-foreground">
-                /{listing.priceUnit}
-              </span>
-            )}
-          </p>
-          <Link
-            href={href}
-            className="inline-flex items-center gap-1 rounded-sm text-sm font-semibold text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-          >
-            View details
-            <ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-          </Link>
-        </div>
+    <ListingCard
+      href={href}
+      title={listing.title}
+      location={listing.location}
+      price={listing.price}
+      priceUnit={listing.priceUnit}
+      image={listing.image}
+      imageAlt={listing.title}
+      eager={eager}
+      status={market === 'rent' ? 'For rent' : 'For sale'}
+      badges={<TrustChainBadge chain={listing.trustChain} fallbackVerified={listing.verified} />}
+      verified={listing.verified}
+      facts={{
+        beds: listing.bedrooms,
+        baths: listing.bathrooms,
+        size: listing.size,
+        type: listing.propertyType,
+      }}
+      actions={<SaveListingButton listingId={listing.id} returnPath={href} appearance="card" />}
+      footer={
         <Button
           variant="outline"
           rounded="md"
           size="sm"
-          className="mt-4 self-start"
           disabled={compareDisabled}
           aria-pressed={compared}
+          aria-label={`${compared ? 'Remove from compare' : 'Add to compare'}: ${listing.title}`}
           icon={<Columns3 className="h-4 w-4" aria-hidden="true" />}
           onClick={() => onCompare(listing)}
         >
           {compared ? 'Remove from compare' : 'Add to compare'}
         </Button>
-      </div>
-    </article>
+      }
+    />
   );
 };
-
-function mapMedia(listing: PublicListingCard) {
-  if (listing.image) {
-    return (
-      <div
-        className="h-52 w-full bg-cover bg-center transition-transform duration-500 group-hover:scale-[1.02]"
-        style={{ backgroundImage: `url(${listing.image})` }}
-        role="img"
-        aria-label={listing.title}
-      />
-    );
-  }
-  return (
-    <div className="flex h-24 w-full items-center justify-center gap-2 bg-muted text-sm text-muted-foreground">
-      <ImageOff className="h-4 w-4" aria-hidden />
-      No photos yet
-    </div>
-  );
-}
 
 interface Refinements {
   minPrice: string;
@@ -563,11 +457,12 @@ export const PublicMarketBrowser = ({
             </div>
             <p className="text-sm text-muted-foreground">Select a listing to see full details</p>
           </div>
-          <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {listings.map((listing) => (
-              <ListingCard
+          <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 md:grid-cols-2 lg:grid-cols-3">
+            {listings.map((listing, index) => (
+              <MarketListingCard
                 key={listing.id}
                 listing={listing}
+                eager={index < 3}
                 market={market}
                 compared={compared.some((item) => item.id === listing.id)}
                 compareDisabled={

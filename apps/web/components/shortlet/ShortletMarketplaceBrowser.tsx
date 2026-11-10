@@ -1,10 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { SafeImage } from '@/components/shared/media/SafeImage';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { isAuthenticated } from '@sureground/shared';
 import {
   Alert,
   Badge,
@@ -13,7 +11,8 @@ import {
   CurrencyInput,
   DatePicker,
   EmptyState,
-  IconButton,
+  ListingCard,
+  ListingCardAction,
   NumberInput,
   PageErrorState,
   Pagination,
@@ -22,15 +21,7 @@ import {
   Skeleton,
   ToggleChip,
 } from '@sureground/ui';
-import {
-  BedDouble,
-  CalendarCheck,
-  ClipboardCheck,
-  Heart,
-  MapPin,
-  Star,
-  Zap,
-} from '@sureground/icons';
+import { BedDouble, ClipboardCheck, Heart, Star, Zap } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { SHORTLET_AMENITIES } from '@/lib/shortlet/essentials';
 import { shortletService } from '@/services/shortletService';
@@ -38,7 +29,6 @@ import { shortletKeys } from '@/lib/queryKeys';
 import { ALL_NIGERIAN_CITIES } from '@/lib/constants/locations';
 import { useShortletWishlist } from '@/hooks/useShortletWishlist';
 import { formatCurrency } from '@/lib/format';
-import type { ShortletListing } from '@/types/shortlet';
 
 const PAGE_SIZE = 9;
 type Sort = 'newest' | 'price_asc' | 'price_desc';
@@ -54,7 +44,6 @@ export const ShortletMarketplaceBrowser = ({
   hideHeader?: boolean;
 } = {}) => {
   const router = useRouter();
-  const [isSignedIn] = useState(() => isAuthenticated());
   const wishlist = useShortletWishlist();
 
   const [search, setSearch] = useState('');
@@ -131,10 +120,6 @@ export const ShortletMarketplaceBrowser = ({
   const updateFilter = (setter: (v: string) => void, value: string) => {
     setter(value);
     setPage(1);
-  };
-
-  const openListing = (listing: ShortletListing) => {
-    router.push(`/shortlets/${listing.id}`);
   };
 
   return (
@@ -339,158 +324,100 @@ export const ShortletMarketplaceBrowser = ({
           description="Try adjusting your filters."
         />
       ) : (
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {listings.map((listing) => (
-            <div
-              key={listing.id}
-              role="button"
-              tabIndex={0}
-              onClick={() => openListing(listing)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  openListing(listing);
+        <div className="grid grid-cols-1 gap-x-6 gap-y-10 md:grid-cols-2 lg:grid-cols-3">
+          {listings.map((listing, index) => {
+            const quote = listing.stayQuote?.bookable ? listing.stayQuote.quote : undefined;
+            const saved = wishlist.isSaved(listing.id);
+            return (
+              <ListingCard
+                key={listing.id}
+                href={`/shortlets/${listing.id}`}
+                title={listing.title}
+                location={`${listing.city}, ${listing.state}`}
+                price={quote ? quote.total : listing.nightlyRate}
+                priceUnit={
+                  quote ? 'total' : listing.pricingMode === 'PER_NIGHT' ? 'night' : undefined
                 }
-              }}
-              className="group cursor-pointer overflow-hidden rounded-xl border border-border bg-card text-left shadow-sm transition hover:shadow-md"
-            >
-              <div className="relative flex h-40 items-center justify-center bg-secondary/60">
-                <SafeImage
-                  src={listing.coverImageUrl}
-                  alt={listing.title}
-                  fill
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  className="object-cover"
-                  loading="lazy"
-                  fallback={<BedDouble className="h-10 w-10 text-muted-foreground" />}
-                />
-                <div className="absolute left-3 top-3 flex gap-2">
-                  {listing.instantBooking && (
-                    <Badge
-                      className="bg-primary text-primary-foreground"
-                      icon={<Zap className="h-3 w-3" />}
-                    >
-                      Instant
-                    </Badge>
-                  )}
-                  {listing.isVerified && <Badge variant="info">Verified host</Badge>}
-                  {listing.fairPrice && (
-                    <span
-                      title={`Typical for ${listing.fairPrice.bedrooms}-bedroom stays in ${listing.fairPrice.city}: ${formatCurrency(listing.fairPrice.typicalNightly)}/night (${listing.fairPrice.comparables} stays)`}
-                    >
-                      <Badge variant="info">Fair price</Badge>
-                    </span>
-                  )}
-                  {listing.inspection && (
-                    <Badge variant="success" icon={<ClipboardCheck className="h-3 w-3" />}>
-                      Inspected
-                    </Badge>
-                  )}
-                </div>
-                {wishlist.canUseWishlist && (
-                  <IconButton
-                    label={wishlist.isSaved(listing.id) ? 'Remove from saved' : 'Save listing'}
-                    aria-pressed={wishlist.isSaved(listing.id)}
-                    size="sm"
-                    icon={
-                      <Heart
-                        className={
-                          wishlist.isSaved(listing.id)
-                            ? 'fill-destructive text-destructive'
-                            : 'text-muted-foreground'
-                        }
-                      />
-                    }
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      wishlist.toggle.mutate(listing.id);
-                    }}
-                    className="absolute right-3 top-3 rounded-full bg-background/80 shadow-sm backdrop-blur hover:bg-background"
-                  />
-                )}
-              </div>
-              <div className="p-4">
-                <h3 className="font-medium leading-snug">{listing.title}</h3>
-                <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
-                  <MapPin className="h-3.5 w-3.5" /> {listing.city}, {listing.state}
-                  {listing.reviewCount > 0 && listing.ratingAverage != null && (
-                    <span className="ml-1 flex items-center gap-0.5">
-                      <Star className="h-3.5 w-3.5 fill-warning text-warning" />
-                      {listing.ratingAverage.toFixed(1)}
-                      <span className="text-muted-foreground/70">({listing.reviewCount})</span>
-                    </span>
-                  )}
-                </p>
-                <div className="mt-3 flex items-end justify-between">
-                  <div>
-                    {listing.stayQuote?.bookable && listing.stayQuote.quote ? (
-                      <>
-                        <p className="text-lg font-semibold">
-                          {formatCurrency(listing.stayQuote.quote.total)}
-                          <span className="text-xs font-normal text-muted-foreground"> total</span>
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {listing.stayQuote.quote.nights} night
-                          {listing.stayQuote.quote.nights === 1 ? '' : 's'}, incl. cleaning
-                          {listing.stayQuote.quote.taxName
-                            ? ` & ${listing.stayQuote.quote.taxName}`
-                            : ''}
-                          {' · '}
-                          {formatCurrency(listing.stayQuote.quote.perNight)}/night avg
-                          {listing.stayQuote.quote.deposit
-                            ? ` · + ${formatCurrency(listing.stayQuote.quote.deposit)} refundable deposit`
-                            : ''}
-                        </p>
-                      </>
-                    ) : listing.stayQuote && !listing.stayQuote.bookable ? (
-                      <>
-                        <p className="text-lg font-semibold">
-                          {listing.nightlyRate != null ? formatCurrency(listing.nightlyRate) : '—'}
-                          <span className="text-xs font-normal text-muted-foreground">
-                            {' '}
-                            / night
-                          </span>
-                        </p>
-                        <p className="text-xs text-warning">{listing.stayQuote.reason}</p>
-                      </>
-                    ) : (
-                      <>
-                        <p className="text-lg font-semibold">
-                          {listing.nightlyRate != null ? formatCurrency(listing.nightlyRate) : '—'}
-                          {listing.pricingMode === 'PER_NIGHT' && (
-                            <span className="text-xs font-normal text-muted-foreground">
-                              {' '}
-                              / night
-                            </span>
-                          )}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {listing.pricingMode === 'FLAT_STAY'
-                            ? 'Flat per stay'
-                            : `min ${listing.minNights} night${listing.minNights > 1 ? 's' : ''}`}
-                          {' · '}
-                          up to {listing.maxGuests} guests
-                          {listing.deposit ? ` · ${formatCurrency(listing.deposit)} deposit` : ''}
-                          {' · pick dates to see the total'}
-                        </p>
-                      </>
+                image={listing.coverImageUrl}
+                imageAlt={listing.title}
+                eager={index < 3}
+                status="Shortlet"
+                badges={
+                  <>
+                    {listing.instantBooking && (
+                      <Badge variant="primary" icon={<Zap className="h-3 w-3" />}>
+                        Instant
+                      </Badge>
                     )}
-                  </div>
-                  <Button
-                    size="sm"
-                    className="opacity-90 group-hover:opacity-100"
-                    icon={<CalendarCheck className="h-4 w-4" />}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openListing(listing);
-                    }}
-                  >
-                    {isSignedIn ? 'Book' : 'View details'}
-                  </Button>
-                </div>
-              </div>
-            </div>
-          ))}
+                    {listing.isVerified && <Badge variant="info">Verified host</Badge>}
+                    {listing.fairPrice && (
+                      <span
+                        title={`Typical for ${listing.fairPrice.bedrooms}-bedroom stays in ${listing.fairPrice.city}: ${formatCurrency(listing.fairPrice.typicalNightly)}/night (${listing.fairPrice.comparables} stays)`}
+                      >
+                        <Badge variant="info">Fair price</Badge>
+                      </span>
+                    )}
+                    {listing.inspection && (
+                      <Badge variant="success" icon={<ClipboardCheck className="h-3 w-3" />}>
+                        Inspected
+                      </Badge>
+                    )}
+                  </>
+                }
+                facts={{
+                  beds: listing.bedrooms,
+                  baths: listing.bathrooms,
+                  extra: [`Up to ${listing.maxGuests} guests`],
+                }}
+                priceNote={
+                  quote ? (
+                    <>
+                      {quote.nights} night{quote.nights === 1 ? '' : 's'}, incl. cleaning
+                      {quote.taxName ? ` & ${quote.taxName}` : ''}
+                      {' · '}
+                      {formatCurrency(quote.perNight)}/night avg
+                      {quote.deposit
+                        ? ` · + ${formatCurrency(quote.deposit)} refundable deposit`
+                        : ''}
+                    </>
+                  ) : listing.stayQuote && !listing.stayQuote.bookable ? (
+                    <span className="text-warning">{listing.stayQuote.reason}</span>
+                  ) : (
+                    <>
+                      {listing.pricingMode === 'FLAT_STAY'
+                        ? 'Flat per stay'
+                        : `Min ${listing.minNights} night${listing.minNights > 1 ? 's' : ''}`}
+                      {listing.deposit ? ` · ${formatCurrency(listing.deposit)} deposit` : ''}
+                      {' · pick dates to see the total'}
+                    </>
+                  )
+                }
+                meta={
+                  listing.reviewCount > 0 && listing.ratingAverage != null ? (
+                    <span className="inline-flex items-center gap-1">
+                      <Star className="h-3.5 w-3.5 fill-warning text-warning" aria-hidden="true" />
+                      <span className="data-value text-foreground">
+                        {listing.ratingAverage.toFixed(1)}
+                      </span>
+                      <span>
+                        ({listing.reviewCount} review{listing.reviewCount === 1 ? '' : 's'})
+                      </span>
+                    </span>
+                  ) : undefined
+                }
+                actions={
+                  wishlist.canUseWishlist ? (
+                    <ListingCardAction
+                      label={saved ? 'Remove from saved' : 'Save listing'}
+                      aria-pressed={saved}
+                      icon={<Heart fill={saved ? 'currentColor' : 'none'} />}
+                      onClick={() => wishlist.toggle.mutate(listing.id)}
+                    />
+                  ) : undefined
+                }
+              />
+            );
+          })}
         </div>
       )}
 

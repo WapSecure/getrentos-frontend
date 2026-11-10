@@ -70,6 +70,7 @@ export * from './SegmentedBar';
 export * from './StatGroup';
 export * from './ToggleChip';
 export * from './photoQuality';
+export * from './ListingCard';
 export * from './MediaMosaic';
 export * from './MediaViewer';
 export * from './TourEmbed';
