@@ -123,7 +123,7 @@ export default function AdminAccessPage() {
   return (
     <>
       <PageHeader
-        title="Access & Roles"
+        title="Access & roles"
         description="Manage internal staff, their roles, and the approval workflow."
         actions={
           canCreate ? (

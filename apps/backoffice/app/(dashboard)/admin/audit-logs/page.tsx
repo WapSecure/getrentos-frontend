@@ -142,7 +142,7 @@ export default function AdminAuditLogsPage() {
   return (
     <>
       <PageHeader
-        title="Audit Logs"
+        title="Audit logs"
         description="A record of sensitive actions taken across the platform"
       />
 

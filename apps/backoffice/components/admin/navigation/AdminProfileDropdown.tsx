@@ -69,7 +69,7 @@ export const AdminProfileDropdown = ({ user }: AdminProfileDropdownProps) => {
         <DropdownMenuItem asChild>
           <Link href={ROUTES.ADMIN_AUDIT_LOGS}>
             <Shield className="w-4 h-4" />
-            Audit Logs
+            Audit logs
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>

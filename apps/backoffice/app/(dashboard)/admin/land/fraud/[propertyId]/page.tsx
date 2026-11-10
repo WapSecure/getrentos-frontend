@@ -239,7 +239,7 @@ function SignalItem({
         )}
         <p className="mt-1 text-xs">
           First seen {formatDate(s.firstSeenAt)} · last seen {formatDate(s.lastSeenAt)}
-          {s.fraudAlertId && ' · in Fraud & Risk'}
+          {s.fraudAlertId && ' · in Fraud & risk'}
         </p>
         {s.resolutionNote && <p className="mt-1 text-foreground">“{s.resolutionNote}”</p>}
       </div>
