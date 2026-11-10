@@ -55,6 +55,13 @@ import {
   WATER_SUPPLY_LABEL,
 } from '@/lib/shortlet/essentials';
 import { ShortletBookingDialog } from './ShortletBookingDialog';
+import { track } from '@/lib/analytics';
+
+const shortletEvent = (listingId: string) => ({
+  listingId,
+  market: 'shortlet' as const,
+  surface: 'listing_page',
+});
 import { usePaymentProviders } from '@/hooks/usePaymentProviders';
 import type { PaymentProvider } from '@/types/payments';
 import { ShortletMessageHostDialog } from './ShortletMessageHostDialog';
@@ -118,6 +125,7 @@ export function ShortletListingDetail({
     if (viewRecorded.current || !listingId) return;
     viewRecorded.current = true;
     shortletService.recordView(listingId).catch(() => undefined);
+    track({ name: 'property_detail_view', ...shortletEvent(listingId) });
   }, [listingId]);
 
   const { data: listing, isLoading } = useQuery({
@@ -181,6 +189,11 @@ export function ShortletListingDetail({
   });
 
   const openBooking = () => {
+    track({
+      name: 'booking_start',
+      ...shortletEvent(listingId),
+      props: { variant: isSignedIn ? 'signed_in' : 'signed_out' },
+    });
     if (!isSignedIn) {
       router.push(ROUTES.LOGIN);
       return;
@@ -261,9 +274,15 @@ export function ShortletListingDetail({
             src={listing.videoStream?.hlsUrl ?? listing.videoUrl ?? ''}
             poster={listing.videoStream?.posterUrl}
             title={`${listing.title} video tour`}
+            onStart={() => track({ name: 'video_start', ...shortletEvent(listingId) })}
+            onComplete={() => track({ name: 'video_complete', ...shortletEvent(listingId) })}
           />
         ) : tab === 'tour' && tour ? (
-          <TourEmbed url={listing.tourUrl ?? ''} title={`${listing.title} 360° tour`} />
+          <TourEmbed
+            url={listing.tourUrl ?? ''}
+            title={`${listing.title} 360° tour`}
+            onOpen={() => track({ name: 'tour_start', ...shortletEvent(listingId) })}
+          />
         ) : listing.images.length > 0 ? (
           <>
             <div className="relative aspect-[16/9] w-full bg-secondary/50">

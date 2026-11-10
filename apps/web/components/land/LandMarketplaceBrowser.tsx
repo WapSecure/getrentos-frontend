@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { track } from '@/lib/analytics';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Alert,
@@ -408,7 +409,25 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
                 <ListingCard
                   key={listing.id}
                   headingLevel="h2"
-                  onOpen={() => setActiveListing(listing)}
+                  onVisible={() =>
+                    track({
+                      name: 'property_impression',
+                      listingId: listing.id,
+                      market: 'land',
+                      surface: `land_${mode}`,
+                      props: { position: index },
+                    })
+                  }
+                  onOpen={() => {
+                    track({
+                      name: 'property_card_click',
+                      listingId: listing.id,
+                      market: 'land',
+                      surface: `land_${mode}`,
+                      props: { position: index },
+                    });
+                    setActiveListing(listing);
+                  }}
                   title={listing.title}
                   location={`${listing.city}, ${listing.state}`}
                   price={listing.askingPrice}

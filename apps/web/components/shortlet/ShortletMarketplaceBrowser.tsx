@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { track } from '@/lib/analytics';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import {
@@ -332,6 +333,24 @@ export const ShortletMarketplaceBrowser = ({
               <ListingCard
                 key={listing.id}
                 href={`/shortlets/${listing.id}`}
+                onVisible={() =>
+                  track({
+                    name: 'property_impression',
+                    listingId: listing.id,
+                    market: 'shortlet',
+                    surface: 'shortlet_list',
+                    props: { position: index },
+                  })
+                }
+                onOpen={() =>
+                  track({
+                    name: 'property_card_click',
+                    listingId: listing.id,
+                    market: 'shortlet',
+                    surface: 'shortlet_list',
+                    props: { position: index },
+                  })
+                }
                 title={listing.title}
                 location={`${listing.city}, ${listing.state}`}
                 price={quote ? quote.total : listing.nightlyRate}

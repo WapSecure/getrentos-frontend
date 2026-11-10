@@ -1,6 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { track } from '@/lib/analytics';
+
+const event = (listingId: string, position: number) => ({
+  listingId,
+  market: 'rent' as const,
+  surface: 'discover',
+  props: { position },
+});
 import { useRouter } from 'next/navigation';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { EmptyState, Pagination, Skeleton } from '@sureground/ui';
@@ -131,10 +139,24 @@ export const DiscoverPropertyGrid = ({
             href={buildRoute.renterPropertyDetail(property.id)}
             eager={index < 2}
             isSaved={savedProperties.includes(property.id)}
-            onSave={() => onSave(property.id)}
-            onCompare={() => onCompare(property)}
-            onOpen={() => recordView(property)}
-            onScheduleViewing={() => handleScheduleViewing(property)}
+            onSave={() => {
+              if (!savedProperties.includes(property.id))
+                track({ name: 'property_save', ...event(property.id, index) });
+              onSave(property.id);
+            }}
+            onCompare={() => {
+              track({ name: 'property_compare', ...event(property.id, index) });
+              onCompare(property);
+            }}
+            onOpen={() => {
+              track({ name: 'property_card_click', ...event(property.id, index) });
+              recordView(property);
+            }}
+            onVisible={() => track({ name: 'property_impression', ...event(property.id, index) })}
+            onScheduleViewing={() => {
+              track({ name: 'inspection_request_start', ...event(property.id, index) });
+              handleScheduleViewing(property);
+            }}
             onApply={() => handleApply(property.id)}
             onOpenTour={() => handleOpenTour(property)}
           />

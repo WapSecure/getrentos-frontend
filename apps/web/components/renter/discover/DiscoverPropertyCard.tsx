@@ -19,6 +19,8 @@ interface DiscoverPropertyCardProps {
   onScheduleViewing: () => void;
   onApply: () => void;
   onOpenTour: () => void;
+  /** Once, when the card is half on screen. */
+  onVisible?: () => void;
 }
 
 export const DiscoverPropertyCard = ({
@@ -32,6 +34,7 @@ export const DiscoverPropertyCard = ({
   onScheduleViewing,
   onApply,
   onOpenTour,
+  onVisible,
 }: DiscoverPropertyCardProps) => {
   const letOut = property.acceptingApplications === false;
   const monthly = property.price > 0 ? monthlyEquivalent(property.price, property.period) : null;
@@ -40,6 +43,7 @@ export const DiscoverPropertyCard = ({
     <ListingCard
       href={href}
       onOpen={onOpen}
+      onVisible={onVisible}
       title={property.title}
       location={property.location}
       price={property.price}
