@@ -32,6 +32,8 @@ function imageRemotePatterns(): ImageRemotePattern[] {
 }
 
 const nextConfig: NextConfig = {
+  // Cached listing pages carry 2-hour signed photo links; past an hour Next re-renders before serving.
+  expireTime: 3600,
   distDir: process.env.NEXT_DIST_DIR ?? '.next',
   transpilePackages: ['@sureground/shared', '@sureground/ui', '@sureground/icons'],
   experimental: { optimizePackageImports: ['@sureground/ui', '@sureground/icons'] },

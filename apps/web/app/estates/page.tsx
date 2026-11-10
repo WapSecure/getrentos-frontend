@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Footer } from '@/components/layout/Footer';
+import { publicFetchInit } from '@/lib/publicFetch';
 import { Navigation } from '@/components/layout/Navigation';
 import { EstatesDirectoryBrowser } from '@/components/estate/EstatesDirectoryBrowser';
 import type { EstateDirectoryEntry } from '@/types/estate-marketplace';
@@ -24,9 +25,10 @@ const FIRST_PAGE_SIZE = 12;
 async function fetchFirstPage(): Promise<Paginated<EstateDirectoryEntry> | null> {
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-    const res = await fetch(`${apiUrl}/estate-storefronts?page=1&pageSize=${FIRST_PAGE_SIZE}`, {
-      next: { revalidate: 60 },
-    });
+    const res = await fetch(
+      `${apiUrl}/estate-storefronts?page=1&pageSize=${FIRST_PAGE_SIZE}`,
+      publicFetchInit()
+    );
     if (!res.ok) return null;
     return (await res.json()) as Paginated<EstateDirectoryEntry>;
   } catch {

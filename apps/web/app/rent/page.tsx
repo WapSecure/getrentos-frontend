@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Footer } from '@/components/layout/Footer';
+import { publicFetchInit } from '@/lib/publicFetch';
 import { Navigation } from '@/components/layout/Navigation';
 import { PublicMarketBrowser } from '@/components/market/PublicMarketBrowser';
 import {
@@ -27,7 +28,7 @@ export const metadata: Metadata = {
 async function fetchFirstPage(): Promise<Paginated<PublicListingCard> | null> {
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-    const res = await fetch(`${apiUrl}${firstPagePath('rent')}`, { next: { revalidate: 60 } });
+    const res = await fetch(`${apiUrl}${firstPagePath('rent')}`, publicFetchInit());
     if (!res.ok) return null;
     const data = (await res.json()) as Paginated<RentApiItem>;
     return { ...data, items: data.items.map(rentToCard) };

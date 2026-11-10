@@ -1,17 +1,17 @@
 import type { Metadata } from 'next';
 import { ShortletListingDetail } from '@/components/shortlet/ShortletListingDetail';
+import { publicFetchInit } from '@/lib/publicFetch';
 import { SITE_URL } from '@/lib/site';
 import type { ShortletListing } from '@/types/shortlet';
 
-export const revalidate = 3600;
+// Must be a literal for Next to read it; matches PUBLIC_REVALIDATE.
+export const revalidate = 60;
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
 async function fetchListing(id: string): Promise<ShortletListing | null> {
   try {
-    const res = await fetch(`${API_BASE_URL}/shortlets/${id}`, {
-      next: { revalidate },
-    });
+    const res = await fetch(`${API_BASE_URL}/shortlets/${id}`, publicFetchInit());
     if (!res.ok) return null;
     return (await res.json()) as ShortletListing;
   } catch {

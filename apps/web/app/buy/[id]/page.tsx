@@ -3,7 +3,7 @@ import { PublicListingPage, publicListingMetadata } from '@/components/market/Pu
 import { ShowroomPage } from '@/components/showroom/ShowroomPage';
 import { showroomEnabled } from '@/lib/showroom';
 
-// Must be a literal for Next to read it; matches PUBLIC_DETAIL_REVALIDATE.
+// Must be a literal for Next to read it; matches PUBLIC_REVALIDATE.
 export const revalidate = 60;
 
 interface Props {

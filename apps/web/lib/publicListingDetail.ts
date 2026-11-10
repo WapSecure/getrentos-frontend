@@ -10,6 +10,7 @@ import {
   type ShowroomListing,
   type ShowroomMarket,
 } from '@sureground/shared/showroom';
+import { publicFetchInit } from '@/lib/publicFetch';
 
 export type PublicDetailMarket = ShowroomMarket;
 export type PublicListingFact = ShowroomFact;
@@ -17,12 +18,10 @@ export type PublicListingDetail = ShowroomListing;
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
-export const PUBLIC_DETAIL_REVALIDATE = 60;
-
 async function get<T>(path: string): Promise<T | null> {
   let res: Response;
   try {
-    res = await fetch(`${API}${path}`, { next: { revalidate: PUBLIC_DETAIL_REVALIDATE } });
+    res = await fetch(`${API}${path}`, publicFetchInit());
   } catch (cause) {
     // Unreachable API: throw so the error boundary offers a retry, rather than a 404 telling search engines the listing is gone.
     throw new Error(`Public listing request failed: ${path}`, { cause });
