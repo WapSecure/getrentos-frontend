@@ -3,8 +3,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@sureground/ui';
 import { Alert, Button, Field, Input, NumberInput, Select } from '@sureground/ui';
-import { ChevronLeft, ChevronRight, ImagePlus, Play, Star, Video, X } from '@sureground/icons';
-import { MEDIA_ROOM_NAME, tourSource, type MediaRoom } from '@sureground/shared';
+import { Play, Video } from '@sureground/icons';
+import { tourSource } from '@sureground/shared';
+import {
+  mediaDetailsFor,
+  photosFromKeys,
+  PropertyPhotoEditor,
+  type EditablePhoto,
+} from '@/components/shared/media/PropertyPhotoEditor';
 import { AddressFields, type AddressFieldsValue } from '@/components/shared/location/AddressFields';
 import { LocationPicker } from '@/components/maps/LocationPicker';
 import type { MapPoint } from '@/services/geocodeService';
@@ -16,37 +22,6 @@ import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import type { Property, PropertyType, PropertyUpdatePayload } from '@/types/landlord';
 import { videoFileProblem } from '@/lib/videoFile';
-
-type Photo = {
-  id: string;
-  key?: string;
-  url: string;
-  file?: File;
-  room?: MediaRoom;
-  caption?: string;
-};
-
-const CAPTION_MAX = 140;
-const ROOM_OPTIONS = [
-  { value: '', label: 'Room (optional)' },
-  ...(Object.keys(MEDIA_ROOM_NAME) as MediaRoom[]).map((room) => ({
-    value: room,
-    label: MEDIA_ROOM_NAME[room],
-  })),
-];
-
-/** Cover first, then the rest: mirrors how the API orders `galleryImageKeys`. */
-const photosFromProperty = (property: Property): Photo[] => {
-  const keys = property.galleryImageKeys ?? [];
-  const urls = property.galleryImages ?? [];
-  return keys.map((key, index) => ({
-    id: key,
-    key,
-    url: urls[index] ?? '',
-    room: property.mediaDetails?.[key]?.room,
-    caption: property.mediaDetails?.[key]?.caption,
-  }));
-};
 
 interface EditPropertyModalProps {
   property: Property | null;
@@ -113,7 +88,13 @@ const EditPropertyForm = ({
     property.purchasePrice ? String(property.purchasePrice) : ''
   );
 
-  const [photos, setPhotos] = useState<Photo[]>(() => photosFromProperty(property));
+  const [photos, setPhotos] = useState<EditablePhoto[]>(() =>
+    photosFromKeys(
+      property.galleryImageKeys ?? [],
+      property.galleryImages ?? [],
+      property.mediaDetails
+    )
+  );
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoPreviewUrl, setVideoPreviewUrl] = useState<string | undefined>(undefined);
   const [videoKey, setVideoKey] = useState<string | undefined>(property.videoTourKey);
@@ -151,40 +132,6 @@ const EditPropertyForm = ({
     setVideoCleared(true);
   };
 
-  const addPhotos = (files: FileList | null) => {
-    if (!files?.length) return;
-    const additions: Photo[] = Array.from(files)
-      .slice(0, Math.max(0, 12 - photos.length))
-      .map((file) => {
-        const url = URL.createObjectURL(file);
-        objectUrls.current.push(url);
-        return { id: `${file.name}-${file.lastModified}-${url}`, url, file };
-      });
-    if (additions.length) setPhotos((current) => [...current, ...additions]);
-  };
-
-  const removePhoto = (id: string) => setPhotos((current) => current.filter((p) => p.id !== id));
-
-  const updatePhoto = (id: string, patch: Partial<Pick<Photo, 'room' | 'caption'>>) =>
-    setPhotos((current) => current.map((p) => (p.id === id ? { ...p, ...patch } : p)));
-
-  const movePhoto = (id: string, by: -1 | 1) =>
-    setPhotos((current) => {
-      const from = current.findIndex((p) => p.id === id);
-      const to = from + by;
-      if (from < 0 || to < 0 || to >= current.length) return current;
-      const next = [...current];
-      [next[from], next[to]] = [next[to]!, next[from]!];
-      return next;
-    });
-
-  const makeCover = (id: string) =>
-    setPhotos((current) => {
-      const target = current.find((p) => p.id === id);
-      if (!target) return current;
-      return [target, ...current.filter((p) => p.id !== id)];
-    });
-
   const handleSave = async () => {
     setSaving(true);
     setMediaError(null);
@@ -198,16 +145,7 @@ const EditPropertyForm = ({
         })
       );
       const galleryImageKeys = uploaded.filter((key): key is string => !!key);
-      const mediaDetails = Object.fromEntries(
-        photos.flatMap((photo, i) => {
-          const key = uploaded[i];
-          const caption = photo.caption?.trim();
-          if (!key || (!photo.room && !caption)) return [];
-          return [
-            [key, { ...(photo.room ? { room: photo.room } : {}), ...(caption ? { caption } : {}) }],
-          ];
-        })
-      );
+      const mediaDetails = mediaDetailsFor(photos, uploaded);
 
       let nextVideoKey: string | null = videoCleared ? null : (videoKey ?? null);
       if (videoFile) {
@@ -231,7 +169,7 @@ const EditPropertyForm = ({
         galleryImageKeys,
         videoTourKey: nextVideoKey,
         tourUrl: tourUrl.trim() || null,
-        mediaDetails: Object.keys(mediaDetails).length ? mediaDetails : null,
+        mediaDetails,
       });
 
       // Detached blobs are left to the backend's GC: its DELETE refuses keys still attached, so deleting here would race the PATCH.
@@ -244,8 +182,6 @@ const EditPropertyForm = ({
       setSaving(false);
     }
   };
-
-  const coverId = photos[0]?.id;
 
   return (
     <>
@@ -322,102 +258,7 @@ const EditPropertyForm = ({
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {photos.map((photo, index) => (
-              <div key={photo.id} className="space-y-2">
-                <div className="relative aspect-video overflow-hidden rounded-lg border border-border bg-muted">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={photo.url} alt="" className="h-full w-full object-cover" />
-                  {photo.id === coverId && (
-                    <span className="absolute left-1 top-1 rounded bg-black/70 px-1.5 py-0.5 text-2xs font-medium text-white">
-                      Cover
-                    </span>
-                  )}
-                  <div className="absolute right-1 top-1 flex gap-1">
-                    {photo.id !== coverId && (
-                      <button
-                        type="button"
-                        aria-label="Make cover photo"
-                        title="Make cover photo"
-                        onClick={() => makeCover(photo.id)}
-                        className="rounded bg-black/70 p-1 text-white hover:bg-black/90"
-                      >
-                        <Star className="h-3 w-3" />
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      aria-label="Remove photo"
-                      title="Remove photo"
-                      onClick={() => removePhoto(photo.id)}
-                      className="rounded bg-black/70 p-1 text-white hover:bg-destructive"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </div>
-                  <div className="absolute bottom-1 right-1 flex gap-1">
-                    <button
-                      type="button"
-                      aria-label={`Move photo ${index + 1} earlier`}
-                      disabled={index === 0}
-                      onClick={() => movePhoto(photo.id, -1)}
-                      className="rounded bg-black/70 p-1 text-white hover:bg-black/90 disabled:opacity-40"
-                    >
-                      <ChevronLeft className="h-3 w-3" />
-                    </button>
-                    <button
-                      type="button"
-                      aria-label={`Move photo ${index + 1} later`}
-                      disabled={index === photos.length - 1}
-                      onClick={() => movePhoto(photo.id, 1)}
-                      className="rounded bg-black/70 p-1 text-white hover:bg-black/90 disabled:opacity-40"
-                    >
-                      <ChevronRight className="h-3 w-3" />
-                    </button>
-                  </div>
-                </div>
-                <Select
-                  value={photo.room ?? ''}
-                  onValueChange={(value) =>
-                    updatePhoto(photo.id, { room: (value || undefined) as MediaRoom | undefined })
-                  }
-                  options={ROOM_OPTIONS}
-                  ariaLabel={`Room for photo ${index + 1}`}
-                />
-                <Input
-                  type="text"
-                  value={photo.caption ?? ''}
-                  maxLength={CAPTION_MAX}
-                  onChange={(e) => updatePhoto(photo.id, { caption: e.target.value })}
-                  placeholder="Caption (optional)"
-                  aria-label={`Caption for photo ${index + 1}`}
-                />
-              </div>
-            ))}
-
-            {photos.length < 12 && (
-              <label className="flex aspect-video cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-border text-muted-foreground transition-colors hover:border-primary hover:text-primary focus-within:ring-2 focus-within:ring-ring">
-                <input
-                  type="file"
-                  multiple
-                  accept="image/jpeg,image/png,image/webp"
-                  className="sr-only"
-                  onChange={(event) => {
-                    addPhotos(event.target.files);
-                    event.target.value = '';
-                  }}
-                />
-                <ImagePlus className="h-4 w-4" />
-                <span className="text-2xs">Add photos</span>
-              </label>
-            )}
-          </div>
-
-          {photos.length === 0 && (
-            <p className="text-xs text-warning">
-              Without a photo your listing card shows a placeholder instead of the property.
-            </p>
-          )}
+          <PropertyPhotoEditor photos={photos} onChange={setPhotos} />
 
           <div className="flex items-center justify-between gap-2 rounded-lg border border-border p-2">
             <div className="flex min-w-0 items-center gap-2">
