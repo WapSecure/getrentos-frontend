@@ -42,7 +42,8 @@ function flush(useBeacon = false) {
   const body = JSON.stringify({ events: batch });
   try {
     if (useBeacon && navigator.sendBeacon) {
-      navigator.sendBeacon(ENDPOINT, new Blob([body], { type: 'application/json' }));
+      // text/plain needs no CORS preflight, which a beacon can't make; the API accepts it on this route.
+      navigator.sendBeacon(ENDPOINT, new Blob([body], { type: 'text/plain' }));
     } else {
       void fetch(ENDPOINT, {
         method: 'POST',
