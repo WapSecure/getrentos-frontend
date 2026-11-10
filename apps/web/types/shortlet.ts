@@ -1,3 +1,4 @@
+import type { MediaItem } from '@sureground/shared/showroom';
 import type { PayoutSentTo } from '@sureground/shared';
 export type ShortletPricingMode = 'PER_NIGHT' | 'FLAT_STAY';
 export type ShortletDiscountType = 'WEEKLY' | 'TWO_WEEK' | 'MONTHLY' | 'LAST_MINUTE';
@@ -54,6 +55,8 @@ export interface ShortletListing {
   /** Once ready; its poster is used here. */
   videoStream?: { hlsUrl: string; posterUrl: string; durationSeconds?: number };
   tourUrl?: string;
+  /** Photos (with resized copies), then the video, then the 360 tour; absent from older API builds. */
+  media?: MediaItem[];
   cancellationPolicy: ShortletCancellationPolicy;
   deposit?: number;
   /** Absent means the platform default from the admin Fees tab applies. */
