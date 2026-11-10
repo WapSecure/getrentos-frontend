@@ -1,8 +1,7 @@
 'use client';
 
 import { Users, Handshake, ShieldCheck, FileCheck } from '@sureground/icons';
-import { Card, EmptyState } from '@sureground/ui';
-import { formatRelativeTime } from '@/lib/format';
+import { ActivityFeedCard } from '@/components/shared/dashboard/ActivityFeedCard';
 import type { OwnerDashboard } from '@/services/ownerService';
 
 type ActivityType = 'inquiry' | 'offer' | 'escrow' | 'document';
@@ -50,41 +49,17 @@ interface OwnerActivityFeedProps {
 
 export const OwnerActivityFeed = ({ activity }: OwnerActivityFeedProps) => {
   return (
-    <Card>
-      <div className="p-4 border-b border-border">
-        <h3 className="font-semibold text-foreground">Recent activity</h3>
-        <p className="text-xs text-muted-foreground mt-0.5">
-          Buyer inquiries, offers, payments, and document updates
-        </p>
-      </div>
-
-      <div className="divide-y divide-border">
-        {activity.length === 0 ? (
-          <EmptyState icon={ShieldCheck} title="No activity yet" size="compact" bare />
-        ) : (
-          activity.map((item) => {
-            const type = typeFor(item.type);
-            const Icon = typeConfig[type];
-            return (
-              <div
-                key={item.id}
-                className="p-4 flex items-start gap-3 hover:bg-secondary transition-colors"
-              >
-                <div className="shrink-0 rounded-full bg-secondary p-2 text-muted-foreground">
-                  <Icon className="h-4 w-4" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-foreground">{titleFor(item.type)}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{item.message}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {formatRelativeTime(item.timestamp)}
-                  </p>
-                </div>
-              </div>
-            );
-          })
-        )}
-      </div>
-    </Card>
+    <ActivityFeedCard
+      description="Buyer inquiries, offers, payments, and document updates"
+      emptyIcon={ShieldCheck}
+      viewAllHref="/owner/activity"
+      items={activity.map((item) => ({
+        id: item.id,
+        icon: typeConfig[typeFor(item.type)],
+        title: titleFor(item.type),
+        detail: item.message,
+        at: item.timestamp,
+      }))}
+    />
   );
 };

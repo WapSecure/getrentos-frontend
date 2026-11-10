@@ -2,8 +2,7 @@
 
 import { CreditCard, Wrench, CalendarClock, UserPlus, ReceiptText } from '@sureground/icons';
 import { useQuery } from '@tanstack/react-query';
-import { Card, EmptyState, Skeleton } from '@sureground/ui';
-import { formatRelativeTime } from '@/lib/format';
+import { ActivityFeedCard } from '@/components/shared/dashboard/ActivityFeedCard';
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
@@ -42,54 +41,18 @@ export const LandlordActivityFeed = () => {
   });
 
   return (
-    <Card>
-      <div className="border-b border-border px-6 py-5">
-        <h2 className="text-base font-semibold tracking-[-0.015em] text-foreground">
-          Recent activity
-        </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Payments, maintenance, and lease updates
-        </p>
-      </div>
-
-      <div className="divide-y divide-border">
-        {isPending ? (
-          <div role="status" aria-label="Loading">
-            {[0, 1, 2].map((row) => (
-              <div key={row} className="flex items-start gap-3 px-6 py-4">
-                <Skeleton className="h-9 w-9 shrink-0 rounded-full" />
-                <div className="min-w-0 flex-1 space-y-2">
-                  <Skeleton className="h-3.5 w-2/5" />
-                  <Skeleton className="h-3 w-3/5" />
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : activity.length === 0 ? (
-          <EmptyState icon={CreditCard} title="No activity yet" size="compact" bare />
-        ) : (
-          activity.map((item) => {
-            const Icon = typeConfig[typeFor(item.type)];
-            return (
-              <div
-                key={item.id}
-                className="flex items-start gap-3 px-6 py-4 transition-colors hover:bg-secondary/60"
-              >
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary text-muted-foreground">
-                  <Icon className="h-4 w-4" aria-hidden="true" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-foreground">{item.title}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {formatRelativeTime(item.timestamp)}
-                  </p>
-                </div>
-              </div>
-            );
-          })
-        )}
-      </div>
-    </Card>
+    <ActivityFeedCard
+      description="Payments, maintenance, and lease updates"
+      isLoading={isPending}
+      emptyIcon={CreditCard}
+      viewAllHref="/landlord/activity"
+      items={activity.map((item) => ({
+        id: item.id,
+        icon: typeConfig[typeFor(item.type)],
+        title: item.title,
+        detail: item.description,
+        at: item.timestamp,
+      }))}
+    />
   );
 };
