@@ -1,8 +1,7 @@
 'use client';
 
 import { Handshake, CalendarClock, ShieldCheck, Heart } from '@sureground/icons';
-import { Card, CardDescription, CardHeader, CardTitle, EmptyState } from '@sureground/ui';
-import { formatRelativeTime } from '@/lib/format';
+import { ActivityFeedCard } from '@/components/shared/dashboard/ActivityFeedCard';
 import type { BuyerDashboard } from '@/services/buyerService';
 
 type ActivityType = 'offer' | 'viewing' | 'escrow' | 'saved';
@@ -46,38 +45,16 @@ interface BuyerActivityFeedProps {
 
 export const BuyerActivityFeed = ({ activity }: BuyerActivityFeedProps) => {
   return (
-    <Card>
-      <CardHeader className="border-b border-border pb-4">
-        <CardTitle as="h3">Recent activity</CardTitle>
-        <CardDescription>Offers, viewings, payments, and saved property updates</CardDescription>
-      </CardHeader>
-
-      <div className="divide-y divide-border">
-        {activity.length === 0 ? (
-          <EmptyState icon={Heart} title="No activity yet" size="compact" bare />
-        ) : (
-          activity.map((item) => {
-            const Icon = typeConfig[typeFor(item.type)];
-            return (
-              <div
-                key={item.id}
-                className="p-4 flex items-start gap-3 hover:bg-secondary transition-colors"
-              >
-                <div className="shrink-0 rounded-full bg-secondary p-2 text-muted-foreground">
-                  <Icon className="h-4 w-4" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-foreground">{titleFor(item.type)}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{item.message}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {formatRelativeTime(item.timestamp)}
-                  </p>
-                </div>
-              </div>
-            );
-          })
-        )}
-      </div>
-    </Card>
+    <ActivityFeedCard
+      description="Offers, viewings, payments, and saved property updates"
+      emptyIcon={Heart}
+      items={activity.map((item) => ({
+        id: item.id,
+        icon: typeConfig[typeFor(item.type)],
+        title: titleFor(item.type),
+        detail: item.message,
+        at: item.timestamp,
+      }))}
+    />
   );
 };

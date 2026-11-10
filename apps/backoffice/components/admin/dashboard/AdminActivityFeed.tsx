@@ -33,7 +33,8 @@ const typeFor = (type: string): ActivityType => {
   }
 };
 
-const PAGE = 12;
+// Six recent events keep the dashboard a glance; staff load older ones on request.
+const PAGE = 6;
 /** The API returns at most this many events. */
 const MAX = 48;
 
@@ -83,18 +84,23 @@ export const AdminActivityFeed = () => {
             return (
               <div
                 key={item.id}
-                className="p-4 flex items-start gap-3 hover:bg-secondary transition-colors"
+                className="flex items-center gap-3 px-4 py-2.5 hover:bg-secondary transition-colors"
               >
                 <div className={`p-2 rounded-lg ${config.bg} shrink-0`}>
                   <Icon className={`w-4 h-4 ${config.color}`} />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-foreground">{item.title}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {formatRelativeTime(item.timestamp)}
+                  <p className="truncate text-sm font-medium text-foreground">{item.title}</p>
+                  <p className="truncate text-xs text-muted-foreground" title={item.description}>
+                    {item.description}
                   </p>
                 </div>
+                <time
+                  dateTime={item.timestamp}
+                  className="shrink-0 text-xs text-muted-foreground tabular-nums"
+                >
+                  {formatRelativeTime(item.timestamp)}
+                </time>
               </div>
             );
           })

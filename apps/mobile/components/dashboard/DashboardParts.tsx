@@ -1,9 +1,10 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { View } from 'react-native';
 import { ChevronRight, type SgIcon } from '@sureground/icons/native';
 import {
   Card,
   ErrorState,
+  LinkButton,
   PressableScale,
   Price,
   SectionHeader,
@@ -195,6 +196,8 @@ export type ActivityItem = {
   timestamp: string;
 };
 
+const ACTIVITY_INITIAL_COUNT = 5;
+
 export function ActivityFeed({
   items,
   loading,
@@ -211,6 +214,10 @@ export function ActivityFeed({
   description?: string;
 }) {
   const { colors, spacing, radius } = useTheme();
+  // A home screen is a glance: the latest few, the rest on request.
+  const [expanded, setExpanded] = useState(false);
+  const shown = expanded ? items : items.slice(0, ACTIVITY_INITIAL_COUNT);
+  const hidden = items.length - shown.length;
   return (
     <View style={{ gap: spacing.md }}>
       <SectionHeader title="Recent activity" description={description} />
@@ -232,17 +239,17 @@ export function ActivityFeed({
         </Text>
       ) : (
         <Card elevated padding="none">
-          {items.map((a, i) => (
+          {shown.map((a, i) => (
             <View
               key={a.id}
               accessible
               accessibilityLabel={`${a.title}${a.detail ? `. ${a.detail}` : ''}, ${relativeTime(a.timestamp)}`}
               style={{
                 flexDirection: 'row',
-                alignItems: 'flex-start',
+                alignItems: 'center',
                 gap: spacing.md,
                 paddingHorizontal: spacing.lg,
-                paddingVertical: spacing.md,
+                paddingVertical: spacing.sm,
                 borderTopWidth: i ? 1 : 0,
                 borderTopColor: colors.border,
               }}
@@ -260,20 +267,37 @@ export function ActivityFeed({
                 <a.Icon size={15} color={colors.foreground} />
               </View>
               <View style={{ flex: 1, gap: 2 }}>
-                <Text variant="callout" style={{ fontWeight: '600' }}>
-                  {a.title}
-                </Text>
-                {a.detail ? (
+                <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm }}>
+                  <Text variant="callout" numberOfLines={1} style={{ flex: 1, fontWeight: '600' }}>
+                    {a.title}
+                  </Text>
                   <Text variant="caption" color="mutedForeground">
+                    {relativeTime(a.timestamp)}
+                  </Text>
+                </View>
+                {a.detail ? (
+                  <Text variant="caption" color="mutedForeground" numberOfLines={1}>
                     {a.detail}
                   </Text>
                 ) : null}
-                <Text variant="caption" color="mutedForeground">
-                  {relativeTime(a.timestamp)}
-                </Text>
               </View>
             </View>
           ))}
+          {hidden > 0 || expanded ? (
+            <View
+              style={{
+                borderTopWidth: 1,
+                borderTopColor: colors.border,
+                paddingHorizontal: spacing.lg,
+                paddingVertical: spacing.sm,
+              }}
+            >
+              <LinkButton
+                label={expanded ? 'Show less' : `Show ${hidden} more`}
+                onPress={() => setExpanded((v) => !v)}
+              />
+            </View>
+          ) : null}
         </Card>
       )}
     </View>
