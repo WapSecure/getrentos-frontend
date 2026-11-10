@@ -73,7 +73,8 @@ export interface LandlordProperty {
   archived: boolean;
 }
 
-export type RentStatus = 'paid' | 'due' | 'overdue' | 'partial';
+/** `pending` is what the API sends when nothing is overdue yet but not everything is paid. */
+export type RentStatus = 'paid' | 'pending' | 'due' | 'overdue' | 'partial';
 
 export interface LandlordTenant {
   id: string;
@@ -93,6 +94,7 @@ export interface LandlordTenant {
 
 export const RENT_STATUS_LABEL: Record<RentStatus, string> = {
   paid: 'Paid',
+  pending: 'Up to date',
   due: 'Due',
   overdue: 'Overdue',
   partial: 'Part paid',
@@ -100,6 +102,7 @@ export const RENT_STATUS_LABEL: Record<RentStatus, string> = {
 
 export const RENT_STATUS_TONE: Record<RentStatus, 'success' | 'warning' | 'danger' | 'info'> = {
   paid: 'success',
+  pending: 'info',
   due: 'warning',
   overdue: 'danger',
   partial: 'info',
@@ -224,7 +227,28 @@ export interface LandlordLease {
   paymentDueAt?: string;
   tenantSigned: boolean;
   landlordSigned: boolean;
+  /** How often the rent amount is charged. Older APIs leave it out. */
+  rentPeriod?: 'month' | 'year';
   createdAt: string;
+}
+
+/** Signed in a way that leaves no e-signature records: imported, paper or pre-launch leases. */
+const SIGNED_STATUSES = new Set<LeaseStatus>(['signed', 'active', 'expired', 'terminated']);
+/** The tenant has already signed by the time a lease reaches these. */
+const TENANT_SIGNED_STATUSES = new Set<LeaseStatus>(['awaiting_payment', 'awaiting_landlord']);
+
+/** Who has signed, trusting the lease status over the e-signature records. */
+export function leaseSignatures(
+  l: Pick<LandlordLease, 'status' | 'tenantSigned' | 'landlordSigned'>
+): {
+  tenant: boolean;
+  landlord: boolean;
+} {
+  const done = SIGNED_STATUSES.has(l.status);
+  return {
+    tenant: done || TENANT_SIGNED_STATUSES.has(l.status) || l.tenantSigned,
+    landlord: done || l.landlordSigned,
+  };
 }
 
 export const LEASE_STATUS_TONE: Record<
@@ -255,12 +279,15 @@ export const LEASE_STATUS_LABEL: Record<LeaseStatus, string> = {
 };
 
 export type MaintenancePriority = 'low' | 'medium' | 'high' | 'urgent';
-export type MaintenanceStatus =
-  | 'pending'
-  | 'acknowledged'
-  | 'in_progress'
-  | 'resolved'
-  | 'cancelled';
+/** Mirrors the backend's `MaintenanceRequestStatus`, lowercased. */
+export type MaintenanceStatus = 'submitted' | 'assigned' | 'in_progress' | 'resolved' | 'cancelled';
+
+/** Still waiting on the landlord or a vendor. */
+export const OPEN_MAINTENANCE_STATUSES: readonly MaintenanceStatus[] = [
+  'submitted',
+  'assigned',
+  'in_progress',
+];
 
 export interface LandlordMaintenance {
   id: string;
@@ -283,8 +310,8 @@ export interface LandlordMaintenance {
 }
 
 export const MAINTENANCE_STATUS_LABEL: Record<MaintenanceStatus, string> = {
-  pending: 'Pending',
-  acknowledged: 'Acknowledged',
+  submitted: 'New',
+  assigned: 'Vendor assigned',
   in_progress: 'In progress',
   resolved: 'Resolved',
   cancelled: 'Cancelled',
@@ -294,8 +321,8 @@ export const MAINTENANCE_STATUS_TONE: Record<
   MaintenanceStatus,
   'success' | 'warning' | 'danger' | 'info' | 'neutral'
 > = {
-  pending: 'warning',
-  acknowledged: 'info',
+  submitted: 'warning',
+  assigned: 'info',
   in_progress: 'info',
   resolved: 'success',
   cancelled: 'neutral',

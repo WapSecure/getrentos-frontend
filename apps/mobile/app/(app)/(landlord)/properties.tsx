@@ -112,7 +112,6 @@ export default function LandlordProperties() {
 
 function PropertyRow({ property: p }: { property: LandlordProperty }) {
   const { colors, spacing, radius, shadows } = useTheme();
-  const occupancy = p.totalUnits > 0 ? Math.round((p.occupiedUnits / p.totalUnits) * 100) : 0;
   const units = `${p.occupiedUnits} of ${p.totalUnits} ${p.totalUnits === 1 ? 'unit' : 'units'} occupied`;
 
   return (
@@ -173,10 +172,7 @@ function PropertyRow({ property: p }: { property: LandlordProperty }) {
             label={VERIFICATION_LABEL[p.verificationStatus]}
             tone={VERIFICATION_TONE[p.verificationStatus]}
           />
-          <Badge
-            label={p.totalUnits > 0 ? `${occupancy}% occupied` : 'No units yet'}
-            tone="neutral"
-          />
+          <Badge label={occupancyLabel(p.occupiedUnits, p.totalUnits)} tone="neutral" />
         </View>
         {p.annualRentRoll > 0 ? (
           <Price amount={p.annualRentRoll} period="year" variant="callout" />
@@ -184,4 +180,11 @@ function PropertyRow({ property: p }: { property: LandlordProperty }) {
       </View>
     </PressableScale>
   );
+}
+
+/** "1 of 4 let" rather than "25% occupied"; "0% occupied" on every empty home read as a warning. */
+function occupancyLabel(occupied: number, total: number): string {
+  if (total === 0) return 'No units yet';
+  if (occupied === 0) return total === 1 ? 'Vacant' : `All ${total} vacant`;
+  return `${occupied} of ${total} let`;
 }

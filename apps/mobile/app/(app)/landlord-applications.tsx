@@ -201,24 +201,29 @@ function ApplicationCard({
 
         <View
           style={{
-            flexDirection: 'row',
             gap: spacing.sm,
             padding: spacing.md,
             borderRadius: radius.md,
             backgroundColor: colors.secondary,
           }}
         >
-          <Detail label="Income">
-            <Price amount={a.monthlyIncome} period="month" variant="caption" compact />
-          </Detail>
+          <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+            <Detail label="Income">
+              <Price amount={a.monthlyIncome} period="month" variant="caption" compact />
+            </Detail>
+            <Detail label="Trust">
+              {/* 0 only means no rental history yet; a bare 0 reads as a red flag. */}
+              <Text variant="caption">{a.trustScore > 0 ? a.trustScore : 'New to Sureground'}</Text>
+            </Detail>
+          </View>
+          {/* Full width: in a third of the card, "Self-employed — Consultant" broke over three lines. */}
           <Detail label="Employment">
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-              <Briefcase size={11} color={colors.mutedForeground} />
-              <Text variant="caption">{a.employmentStatus}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Briefcase size={12} color={colors.mutedForeground} />
+              <Text variant="caption" style={{ flex: 1 }}>
+                {employmentLabel(a.employmentStatus)}
+              </Text>
             </View>
-          </Detail>
-          <Detail label="Trust">
-            <Text variant="caption">{a.trustScore}</Text>
           </Detail>
         </View>
 
@@ -266,4 +271,16 @@ function Detail({ label, children }: { label: string; children: React.ReactNode 
       {children}
     </View>
   );
+}
+
+// Known status words only, so an employer written in capitals ("IBM contractor") stays as written.
+const EMPLOYMENT_ENUM =
+  /^(EMPLOYED|SELF_EMPLOYED|UNEMPLOYED|FULL_TIME|PART_TIME|CONTRACT|STUDENT|RETIRED)\b/;
+
+/** The status part sometimes arrives as a raw enum ("EMPLOYED — Zenith Bank"); show it in sentence case. */
+function employmentLabel(value: string): string {
+  return value.replace(EMPLOYMENT_ENUM, (word) => {
+    const spaced = word.replace(/_/g, ' ').toLowerCase();
+    return spaced.charAt(0).toUpperCase() + spaced.slice(1);
+  });
 }

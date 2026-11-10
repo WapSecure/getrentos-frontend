@@ -16,6 +16,8 @@ export type BadgeTone = 'neutral' | 'info' | 'success' | 'warning' | 'danger';
 
 export function Badge({ label, tone = 'neutral' }: { label: string; tone?: BadgeTone }) {
   const { colors, radius } = useTheme();
+  // An unmapped status gives an empty label; render nothing rather than a blank pill.
+  if (!label) return null;
   const map: Record<BadgeTone, { bg: string; fg: string }> = {
     neutral: { bg: colors.secondary, fg: colors.secondaryForeground },
     info: { bg: colors.infoSubtle, fg: colors.accentForeground },

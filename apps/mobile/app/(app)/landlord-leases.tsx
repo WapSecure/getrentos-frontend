@@ -23,6 +23,7 @@ import {
   landlordApi,
   LEASE_STATUS_LABEL,
   LEASE_STATUS_TONE,
+  leaseSignatures,
   type LandlordLease,
   type LeaseStatus,
 } from '@/lib/api/landlord';
@@ -76,7 +77,12 @@ export default function LandlordLeases() {
   });
 
   const items = query.data?.items ?? [];
-  const awaitingSignature = items.filter((l) => !l.tenantSigned || !l.landlordSigned).length;
+  // Drafts haven't gone out and lapsed or ended leases won't be signed, so neither is "awaiting".
+  const awaitingSignature = items.filter((l) => {
+    if (!AWAITING_STATUSES.has(l.status)) return false;
+    const signed = leaseSignatures(l);
+    return !signed.tenant || !signed.landlord;
+  }).length;
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -175,6 +181,7 @@ function LeaseCard({
   onDownload: () => void;
 }) {
   const { colors, spacing } = useTheme();
+  const signatures = leaseSignatures(l);
 
   return (
     <Card padding={spacing.lg} style={{ marginBottom: spacing.sm }}>
@@ -198,12 +205,13 @@ function LeaseCard({
           <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
             {formatDate(l.leaseStart, 'short')} – {formatDate(l.leaseEnd, 'short')}
           </Text>
-          <Price amount={l.rentAmount} period="year" variant="callout" />
+          {/* Older leases have no stored period: show the amount alone rather than guess. */}
+          <Price amount={l.rentAmount} period={l.rentPeriod} variant="callout" />
         </View>
 
         <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-          <SignatureChip label="Landlord" signed={l.landlordSigned} />
-          <SignatureChip label="Tenant" signed={l.tenantSigned} />
+          <SignatureChip label="Landlord" signed={signatures.landlord} />
+          <SignatureChip label="Tenant" signed={signatures.tenant} />
         </View>
 
         {LEASE_STATUS_NOTE[l.status] ? (
@@ -224,7 +232,7 @@ function LeaseCard({
               filled
             />
           ) : null}
-          {!l.landlordSigned && SIGNABLE.has(l.status) ? (
+          {!signatures.landlord && SIGNABLE.has(l.status) ? (
             <LeaseAction
               icon={<PenLine size={13} color={colors.primaryForeground} />}
               label="Countersign"
@@ -255,6 +263,7 @@ function LeaseCard({
 
 /** The landlord countersigns only once the tenant's rent is held. */
 const SIGNABLE = new Set<LeaseStatus>(['awaiting_landlord']);
+const AWAITING_STATUSES = new Set<LeaseStatus>(['sent', 'awaiting_payment', 'awaiting_landlord']);
 
 const LEASE_STATUS_NOTE: Partial<Record<LeaseStatus, string>> = {
   sent: 'Waiting for the tenant to sign. You countersign once they have paid the rent to Sureground.',
