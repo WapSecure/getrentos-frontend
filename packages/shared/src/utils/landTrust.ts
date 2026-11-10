@@ -57,3 +57,47 @@ export const percentileWords = (percentile: number) =>
         : percentile < 80
           ? 'above the middle of comparable land per m²'
           : 'dearer per m² than most comparable land';
+
+export type LandDiligenceStatus =
+  | 'NOT_STARTED'
+  | 'IN_REVIEW'
+  | 'ACTION_REQUIRED'
+  | 'VERIFIED'
+  | 'REJECTED'
+  | 'EXPIRED'
+  /** Approved subject to conditions: public, but not open to reservations or offers yet. */
+  | 'CONDITIONAL'
+  /** Paused by staff or the system (a dispute hold, an encumbrance): off the market. */
+  | 'SUSPENDED';
+
+export type LandTitleType =
+  | 'CERTIFICATE_OF_OCCUPANCY'
+  | 'DEED_OF_ASSIGNMENT'
+  | 'GOVERNOR_CONSENT'
+  | 'ALLOCATION_LETTER'
+  | 'EXCISION_GAZETTE'
+  | 'REGISTERED_CONVEYANCE'
+  | 'SURVEY_PLAN'
+  | 'OTHER';
+
+export const LAND_DILIGENCE_LABELS: Record<LandDiligenceStatus, string> = {
+  NOT_STARTED: 'Not started',
+  IN_REVIEW: 'In review',
+  ACTION_REQUIRED: 'Action required',
+  VERIFIED: 'Verified',
+  REJECTED: 'Not verified',
+  EXPIRED: 'Expired',
+  CONDITIONAL: 'Verified with conditions',
+  SUSPENDED: 'Suspended',
+};
+
+export const LAND_TITLE_TYPE_LABELS: Record<LandTitleType, string> = {
+  CERTIFICATE_OF_OCCUPANCY: 'Certificate of Occupancy',
+  DEED_OF_ASSIGNMENT: 'Deed of Assignment',
+  GOVERNOR_CONSENT: "Governor's Consent",
+  ALLOCATION_LETTER: 'Allocation Letter',
+  EXCISION_GAZETTE: 'Excision Gazette',
+  REGISTERED_CONVEYANCE: 'Registered Conveyance',
+  SURVEY_PLAN: 'Survey Plan',
+  OTHER: 'Other title record',
+};
