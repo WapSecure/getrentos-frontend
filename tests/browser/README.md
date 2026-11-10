@@ -35,6 +35,22 @@ Use `E2E_<ROLE>_PASSWORD` when accounts do not share a password. Override
 environment. Missing role credentials skip only that role's protected checks;
 the public login checks still run.
 
+## Security flows
+
+`tests/browser/security-flows.web.spec.ts` walks the security features end to end against a running local stack, on desktop web only:
+
+- A sign-in from a new device emails the owner and shows in Recent sign-ins.
+- Changing the sign-in email needs the PIN (a wrong one is refused) and a code sent to the new address. The test changes it back afterwards.
+- Changing the payout bank account without step-up is refused (`STEP_UP_REQUIRED`).
+- The trust page shows real statuses and what isn't offered yet.
+- Staff see the new-device decision in Risk decisions.
+
+Besides the role accounts above, it reads `E2E_LANDLORD_PIN`, `E2E_API_URL`, `E2E_MAILHOG_URL` (emailed codes and alerts are read from MailHog) and, for the staff check, `E2E_ADMIN_TOTP_SECRET`. A test whose settings are missing is skipped. Seeded test accounts only; no real personal data.
+
+```sh
+npx playwright test tests/browser/security-flows.web.spec.ts --project=web-desktop
+```
+
 ## Visual QA campaign
 
 The dedicated visual configuration reviews web and backoffice at 390×844,

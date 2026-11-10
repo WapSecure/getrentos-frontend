@@ -239,6 +239,16 @@ export function TrustOverview({
                     {r.label}: {r.why}
                   </Text>
                 ))}
+                {(d.notOffered ?? []).length > 0 ? (
+                  <View style={{ gap: 4 }}>
+                    <Text variant="caption">Not offered yet</Text>
+                    {(d.notOffered ?? []).map((check) => (
+                      <Text key={check.key} variant="caption" color="mutedForeground">
+                        {check.label}: {check.detail}
+                      </Text>
+                    ))}
+                  </View>
+                ) : null}
                 {d.score ? (
                   <View style={{ gap: spacing.sm }}>
                     {d.score.dimensions.map((dim) => (

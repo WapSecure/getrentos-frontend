@@ -1,6 +1,8 @@
 import { authFetch, safeCall, type ApiResponse } from '@/lib/apiHelpers';
 import type {
   AccountSession,
+  PayoutHold,
+  RecentSignIn,
   Passkey,
   SecurityOverview,
   SetTransactionPinInput,
@@ -103,6 +105,23 @@ export const accountSecurityService = {
 
   async removePasskey(id: string): Promise<ApiResponse<{ removed: true }>> {
     return safeCall(() => authFetch(`/users/me/security/passkey/${id}`, { method: 'DELETE' }));
+  },
+
+  async listRecentSignIns(): Promise<ApiResponse<RecentSignIn[]>> {
+    return safeCall(() => authFetch('/users/me/security/sign-ins'));
+  },
+
+  async listPayoutHolds(): Promise<ApiResponse<PayoutHold[]>> {
+    return safeCall(() => authFetch('/users/me/security/payout-holds'));
+  },
+
+  async appealPayoutHold(id: string, note: string): Promise<ApiResponse<{ appealed: true }>> {
+    return safeCall(() =>
+      authFetch(`/users/me/security/payout-holds/${id}/appeal`, {
+        method: 'POST',
+        body: JSON.stringify({ note }),
+      })
+    );
   },
 
   async listSessions(): Promise<ApiResponse<AccountSession[]>> {

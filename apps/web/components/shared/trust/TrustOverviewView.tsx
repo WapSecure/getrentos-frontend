@@ -78,7 +78,7 @@ export function TrustOverviewView({ portal, onAction, moreDetails }: TrustOvervi
     );
   }
 
-  const { identity, requirements, score, nextAction } = query.data;
+  const { identity, requirements, score, nextAction, notOffered = [] } = query.data;
   const done = requirements.filter((r) => r.status === 'VERIFIED').length;
 
   return (
@@ -209,6 +209,16 @@ export function TrustOverviewView({ portal, onAction, moreDetails }: TrustOvervi
               <span className="font-medium text-foreground">{r.label}:</span> {r.why}
             </p>
           ))}
+          {notOffered.length > 0 && (
+            <div className="space-y-1">
+              <p className="font-medium text-foreground">Not offered yet</p>
+              {notOffered.map((check) => (
+                <p key={check.key}>
+                  <span className="text-foreground">{check.label}:</span> {check.detail}
+                </p>
+              ))}
+            </div>
+          )}
           {score && <TrustScoreBreakdownCard breakdown={score} />}
           {score && <TrustExplanationCard />}
           {moreDetails}

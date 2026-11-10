@@ -1,10 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Activity } from '@sureground/icons';
 import {
+  Alert,
   Badge,
+  Button,
   Card,
   EmptyState,
   ListSkeleton,
@@ -14,10 +16,13 @@ import {
   Tabs,
   TabsList,
   TabsTrigger,
+  Textarea,
 } from '@sureground/ui';
 import { unwrap } from '@sureground/shared';
 import { adminKeys } from '@/lib/queryKeys';
+import { hasAdminPermission } from '@/lib/adminAccess';
 import { adminRiskService, type RiskDecision, type RiskEvent } from '@/services/adminRiskService';
+import { useAdminUser } from '../../layout';
 
 const PAGE_SIZE = 20;
 
@@ -26,6 +31,7 @@ const RULE: Record<string, string> = {
   PAYOUT_SOON_AFTER_BANK_CHANGE: 'Payout soon after a bank change',
   PAYOUT_FROM_NEW_DEVICE: 'Payout from a new device',
   PAYOUT_VELOCITY: 'Many payout requests in a day',
+  REPEATED_STEP_UP_FAILURE: 'Repeated failed confirmations',
 };
 
 const OUTCOME: Record<string, string> = {
@@ -36,7 +42,87 @@ const OUTCOME: Record<string, string> = {
   DENY: 'Refuse',
 };
 
-const EVENT: Record<RiskEvent, string> = { SIGN_IN: 'Sign-in', PAYOUT_REQUEST: 'Payout request' };
+const EVENT: Record<RiskEvent, string> = {
+  SIGN_IN: 'Sign-in',
+  PAYOUT_REQUEST: 'Payout request',
+  STEP_UP_FAILURES: 'Confirming it’s them',
+};
+
+const REVIEW: Record<string, string> = {
+  OPEN: 'Waiting for review',
+  RELEASED: 'Released',
+  CONFIRMED: 'Confirmed: fraud alert opened',
+};
+
+const ReviewPanel = ({ decision, canAct }: { decision: RiskDecision; canAct: boolean }) => {
+  const queryClient = useQueryClient();
+  const [note, setNote] = useState('');
+  const review = useMutation({
+    mutationFn: (action: 'release' | 'confirm') =>
+      unwrap(adminRiskService.review(decision.id, action, note.trim())),
+    onSuccess: () => {
+      setNote('');
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'riskDecisions'] });
+    },
+  });
+  const r = decision.review!;
+  return (
+    <div className="space-y-2 border-t border-border pt-3">
+      {r.appealNote && (
+        <p className="text-sm text-muted-foreground">
+          The user says: <span className="text-foreground">{r.appealNote}</span>
+        </p>
+      )}
+      {r.status !== 'OPEN' ? (
+        <p className="text-sm text-muted-foreground">
+          {REVIEW[r.status]}
+          {r.reviewedAt && <> · {lagos(r.reviewedAt)}</>}
+          {r.note && (
+            <>
+              {' '}
+              · <span className="text-foreground">{r.note}</span>
+            </>
+          )}
+        </p>
+      ) : canAct ? (
+        <>
+          <Textarea
+            rows={2}
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder="What you checked: called the user, matched the bank name, …"
+          />
+          <div className="flex flex-wrap gap-2">
+            <Button
+              isLoading={review.isPending && review.variables === 'release'}
+              disabled={note.trim().length < 10}
+              onClick={() => review.mutate('release')}
+            >
+              Release payout
+            </Button>
+            <Button
+              variant="outline"
+              isLoading={review.isPending && review.variables === 'confirm'}
+              disabled={note.trim().length < 10}
+              onClick={() => review.mutate('confirm')}
+            >
+              Confirm and open a fraud alert
+            </Button>
+          </div>
+          <p className="text-2xs text-muted-foreground">
+            Releasing lets this user’s payouts through for 72 hours. You’ll be asked to confirm it’s
+            you.
+          </p>
+          {review.error && <Alert variant="danger">{(review.error as Error).message}</Alert>}
+        </>
+      ) : (
+        <p className="text-sm text-muted-foreground">
+          {REVIEW.OPEN}. Releasing needs fraud.freeze.
+        </p>
+      )}
+    </div>
+  );
+};
 
 const lagos = (iso: string) =>
   new Date(iso).toLocaleString('en-NG', {
@@ -45,7 +131,7 @@ const lagos = (iso: string) =>
     timeStyle: 'short',
   });
 
-const DecisionRow = ({ decision }: { decision: RiskDecision }) => (
+const DecisionRow = ({ decision, canAct }: { decision: RiskDecision; canAct: boolean }) => (
   <Card className="space-y-2 p-5">
     <div className="flex items-start justify-between gap-3">
       <div className="min-w-0">
@@ -60,6 +146,11 @@ const DecisionRow = ({ decision }: { decision: RiskDecision }) => (
           {OUTCOME[decision.outcome] ?? decision.outcome}
         </Badge>
         {!decision.enforced && <Badge variant="neutral">Shadow: not acted on</Badge>}
+        {decision.review && (
+          <Badge variant={decision.review.status === 'OPEN' ? 'danger' : 'neutral'}>
+            {REVIEW[decision.review.status]}
+          </Badge>
+        )}
       </div>
     </div>
     {decision.signals.length > 0 ? (
@@ -73,6 +164,7 @@ const DecisionRow = ({ decision }: { decision: RiskDecision }) => (
     ) : (
       <p className="text-sm text-muted-foreground">No rule fired.</p>
     )}
+    {decision.review && <ReviewPanel decision={decision} canAct={canAct} />}
   </Card>
 );
 
@@ -80,7 +172,9 @@ type EventFilter = RiskEvent | 'all';
 
 export default function RiskDecisionsPage() {
   const [event, setEvent] = useState<EventFilter>('all');
-  const [flaggedOnly, setFlaggedOnly] = useState(true);
+  const [view, setView] = useState<'flagged' | 'review' | 'every'>('flagged');
+  const adminUser = useAdminUser();
+  const canAct = hasAdminPermission(adminUser?.roles, 'fraud.freeze');
   const [page, setPage] = useState(1);
 
   const summary = useQuery({
@@ -88,12 +182,13 @@ export default function RiskDecisionsPage() {
     queryFn: () => unwrap(adminRiskService.summary()),
   });
   const list = useQuery({
-    queryKey: adminKeys.riskDecisions({ event, flaggedOnly, page }),
+    queryKey: adminKeys.riskDecisions({ event, view, page }),
     queryFn: () =>
       unwrap(
         adminRiskService.list({
           event: event === 'all' ? undefined : event,
-          flaggedOnly,
+          flaggedOnly: view !== 'every',
+          reviewStatus: view === 'review' ? 'OPEN' : undefined,
           page,
           pageSize: PAGE_SIZE,
         })
@@ -153,17 +248,19 @@ export default function RiskDecisionsPage() {
             <TabsTrigger value="all">All</TabsTrigger>
             <TabsTrigger value="SIGN_IN">Sign-ins</TabsTrigger>
             <TabsTrigger value="PAYOUT_REQUEST">Payout requests</TabsTrigger>
+            <TabsTrigger value="STEP_UP_FAILURES">Confirmations</TabsTrigger>
           </TabsList>
         </Tabs>
         <Tabs
-          value={flaggedOnly ? 'flagged' : 'every'}
+          value={view}
           onValueChange={(v) => {
-            setFlaggedOnly(v === 'flagged');
+            setView(v as typeof view);
             setPage(1);
           }}
         >
           <TabsList>
             <TabsTrigger value="flagged">Flagged</TabsTrigger>
+            <TabsTrigger value="review">Needs review</TabsTrigger>
             <TabsTrigger value="every">Every decision</TabsTrigger>
           </TabsList>
         </Tabs>
@@ -176,18 +273,26 @@ export default function RiskDecisionsPage() {
       ) : list.data && list.data.items.length === 0 ? (
         <EmptyState
           icon={Activity}
-          title={flaggedOnly ? 'Nothing flagged' : 'No decisions yet'}
+          title={
+            view === 'review'
+              ? 'Nothing waiting for review'
+              : view === 'flagged'
+                ? 'Nothing flagged'
+                : 'No decisions yet'
+          }
           description={
-            flaggedOnly
-              ? 'When a rule fires on a sign-in or payout request, it shows up here with the reason.'
-              : 'Decisions appear as people sign in and request payouts.'
+            view === 'review'
+              ? 'Payouts held by an enforced rule appear here for release or confirmation.'
+              : view === 'flagged'
+                ? 'When a rule fires on a sign-in or payout request, it shows up here with the reason.'
+                : 'Decisions appear as people sign in and request payouts.'
           }
         />
       ) : (
         <>
           <div className="space-y-3">
             {list.data?.items.map((decision) => (
-              <DecisionRow key={decision.id} decision={decision} />
+              <DecisionRow key={decision.id} decision={decision} canAct={canAct} />
             ))}
           </div>
           <Pagination

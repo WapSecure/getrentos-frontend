@@ -158,6 +158,28 @@ export const securityApi = {
 
   listSessions: () => apiFetch<AccountSession[]>('/users/me/security/sessions'),
 
+  listRecentSignIns: () =>
+    apiFetch<{ id: string; at: string; device: string; newDevice: boolean }[]>(
+      '/users/me/security/sign-ins'
+    ),
+
+  listPayoutHolds: () =>
+    apiFetch<
+      {
+        id: string;
+        createdAt: string;
+        signals: { rule: string; outcome: string; reason: string }[];
+        appealNote: string | null;
+        appealedAt: string | null;
+      }[]
+    >('/users/me/security/payout-holds'),
+
+  appealPayoutHold: (id: string, note: string) =>
+    apiFetch<{ appealed: true }>(`/users/me/security/payout-holds/${id}/appeal`, {
+      method: 'POST',
+      body: { note },
+    }),
+
   /** That device is signed out at its next refresh (within 15 minutes). */
   signOutSession: (id: string) =>
     apiFetch<{ revoked: true }>(`/users/me/security/sessions/${id}`, { method: 'DELETE' }),
