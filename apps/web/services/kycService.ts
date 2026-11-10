@@ -66,12 +66,15 @@ export const kycService = {
     selfie?: File;
     documentType: IdentityDocumentType;
     note?: string;
+    /** The person ticked the consent box; the API refuses the upload without it. */
+    consent: true;
   }): Promise<ApiResponse<IdentityKyc>> {
     return safeCall(async () => {
       const form = new FormData();
       form.append('document', params.document);
       if (params.selfie) form.append('selfie', params.selfie);
       form.append('documentType', params.documentType);
+      form.append('consent', String(params.consent));
       if (params.note) form.append('note', params.note);
       return authFetch<IdentityKyc>('/users/me/kyc/identity', {
         method: 'POST',

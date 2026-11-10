@@ -11,7 +11,16 @@ import {
   ShieldCheck,
   ShieldX,
 } from '@sureground/icons/native';
-import { Button, Card, Chip, Skeleton, Text, useTheme, useToast } from '@sureground/ui-native';
+import {
+  Button,
+  Card,
+  Checkbox,
+  Chip,
+  Skeleton,
+  Text,
+  useTheme,
+  useToast,
+} from '@sureground/ui-native';
 import { pickDocument } from '@/lib/filePicker';
 import type { PickedFile } from '@/lib/api/documents';
 import {
@@ -58,6 +67,7 @@ export default function VerifyIdentity() {
 
   const [documentType, setDocumentType] = useState<IdentityDocumentType>('NATIONAL_ID');
   const [document, setDocument] = useState<PickedFile | null>(null);
+  const [consent, setConsent] = useState(false);
 
   const statusQuery = useQuery({ queryKey: ['kyc-status'], queryFn: kycApi.getStatus });
   const identity = statusQuery.data?.identity;
@@ -74,7 +84,7 @@ export default function VerifyIdentity() {
     mutationFn: () => {
       if (!document) throw new Error('Choose your document first');
       // Document only: an uploaded photo is not a liveness check, and the live selfie is still required on top.
-      return kycApi.submitIdentity({ documentType, document });
+      return kycApi.submitIdentity({ documentType, document, consent: true });
     },
     onSuccess: () => {
       setDocument(null);
@@ -185,10 +195,16 @@ export default function VerifyIdentity() {
               onClear={() => setDocument(null)}
             />
 
+            <Checkbox
+              checked={consent}
+              onChange={setConsent}
+              label="I agree to Sureground storing this document and our team checking it to verify my identity. We keep it only as long as our privacy notice says, and you can ask us to delete it."
+            />
+
             <Button
               label="Submit document for review"
               loadingLabel="Submitting…"
-              disabled={!document}
+              disabled={!document || !consent}
               loading={submitMutation.isPending}
               onPress={() => submitMutation.mutate()}
             />
