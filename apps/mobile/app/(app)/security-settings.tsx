@@ -622,11 +622,11 @@ function TransactionPinSection({ overview }: { overview: SecurityOverview }) {
             <View style={{ gap: spacing.xs }}>
               <Text variant="caption" color="mutedForeground">
                 {forgot
-                  ? 'We’ll email you a code so you can choose a new PIN.'
-                  : 'We’ll email you a code to confirm it’s you.'}
+                  ? 'We’ll send you a code so you can choose a new PIN.'
+                  : 'We’ll send you a code to confirm it’s you.'}
               </Text>
               <Button
-                label="Email me a code"
+                label="Send me a code"
                 size="sm"
                 variant="secondary"
                 loading={sendCode.isPending}

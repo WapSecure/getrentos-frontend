@@ -217,7 +217,7 @@ export function StepUpDialog({
     ? description
     : canSetPin
       ? 'Set a transaction PIN to continue — you’ll use it to confirm payments and other sensitive changes.'
-      : 'Confirm with your password and a code we email you, then set up two-factor authentication to continue.';
+      : 'Confirm with your password and a code we send you, then set up two-factor authentication to continue.';
 
   const submit = () => {
     if (isPasskey) void confirmWithPasskey();
@@ -261,8 +261,8 @@ export function StepUpDialog({
           ) : needsCode ? (
             <p className="text-sm text-muted-foreground">
               {hasPassword
-                ? 'We’ll email you a 6-digit code to enter with your password.'
-                : 'We’ll email you a 6-digit code.'}
+                ? 'We’ll send you a 6-digit code to enter with your password.'
+                : 'We’ll send you a 6-digit code.'}
             </p>
           ) : isSetup ? (
             <>
@@ -278,7 +278,7 @@ export function StepUpDialog({
                   />
                 </Field>
               ) : null}
-              <Field label="Code from your email" hint={`We sent a code to ${sentTo}.`}>
+              <Field label="Code we sent you" hint={`We sent a code to ${sentTo}.`}>
                 <NumberInput
                   autoFocus={!hasPassword}
                   autoComplete="one-time-code"
@@ -352,7 +352,7 @@ export function StepUpDialog({
               {isPasskey
                 ? 'Use passkey'
                 : needsCode
-                  ? 'Email me a code'
+                  ? 'Send me a code'
                   : isSetup && canSetPin
                     ? 'Set PIN and confirm'
                     : 'Confirm'}
