@@ -7,7 +7,6 @@ import {
   Bell,
   CheckSquare,
   ChevronRight,
-  FileCheck2,
   FileSignature,
   Heart,
   MapPin,
@@ -15,15 +14,14 @@ import {
   Search,
   ShieldCheck,
   Clock,
-  ImageOff,
   Wrench,
 } from '@sureground/icons/native';
 import {
-  Badge,
   Button,
   Card,
   describeProperty,
   IconButton,
+  ListingPlaceholder,
   Price,
   Progress,
   PropertyCard,
@@ -35,6 +33,7 @@ import {
   Text,
   useTheme,
 } from '@sureground/ui-native';
+import { RenterPriorityCard, pickRenterPriority } from '@/components/dashboard/RenterPriorityCard';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { RefreshFailedNotice } from '@/components/RefreshFailedNotice';
 import { QuickActions, dashboardGreeting } from '@/components/dashboard/DashboardParts';
@@ -43,11 +42,7 @@ import { renterApi, type RenterDashboardStats } from '@/lib/api/renter';
 import { leaseApi } from '@/lib/api/lease';
 import { paymentsApi } from '@/lib/api/payments';
 import type { RenterProperty } from '@/lib/api/properties';
-import {
-  applicationsApi,
-  APPLICATION_STATUS_LABEL,
-  APPLICATION_STATUS_TONE,
-} from '@/lib/api/applications';
+import { applicationsApi } from '@/lib/api/applications';
 import { IdentityNudge, useIdentityVerified } from '@/components/trust/IdentityNudge';
 import { notificationsApi } from '@/lib/api/notifications';
 import { useSavedListings } from '@/hooks/useSavedListings';
@@ -74,7 +69,6 @@ const ON_SCRIM = {
   partial: '#4ade80',
   pending: '#ffb454',
   button: 'rgba(10,14,22,0.6)',
-  noPhoto: '#1b2433',
 };
 
 export default function RenterHome() {
@@ -100,9 +94,6 @@ export default function RenterHome() {
     queryKey: qk.renter.applications,
     queryFn: () => applicationsApi.list(1, 10),
   });
-  const activeApplication = applications.data?.items.find(
-    (a) => a.status === 'pending' || a.status === 'under_review'
-  );
 
   const qc = useQueryClient();
   const showVerifyNudge = useIdentityVerified() === false;
@@ -136,6 +127,24 @@ export default function RenterHome() {
     (firstPage?.items ?? [])
       .filter((p) => p.status === 'paid')
       .reduce((sum, p) => sum + p.amount, 0);
+
+  const renewalOffer = useQuery({
+    queryKey: qk.renter.renewalOffer,
+    queryFn: leaseApi.getRenewalOffer,
+    retry: false,
+  });
+  // Wait for every input: picking early shows a lower item, then swaps it when payments load.
+  const priorityReady =
+    !payments.isPending && !renewalOffer.isPending && !applications.isPending && !stats.isPending;
+  const priority =
+    priorityReady &&
+    pickRenterPriority({
+      summary: firstPage?.summary,
+      payments: firstPage?.items ?? [],
+      renewalOffer: renewalOffer.data,
+      applications: applications.data?.items ?? [],
+      upcomingViewings: stats.data?.upcomingViewingsCount ?? 0,
+    });
 
   const METRICS: Metric[] = [
     {
@@ -212,42 +221,8 @@ export default function RenterHome() {
 
       {showVerifyNudge ? (
         <IdentityNudge unlocks="applications and offers" />
-      ) : activeApplication ? (
-        <Pressable
-          onPress={() => router.push(`/(app)/application/${activeApplication.id}`)}
-          accessibilityRole="button"
-          accessibilityLabel={`Open application ${activeApplication.title}`}
-        >
-          <Card elevated padding="none">
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: spacing.md,
-                padding: spacing.lg,
-              }}
-            >
-              <FileCheck2 size={20} color={colors.primary} />
-              <View style={{ flex: 1, gap: 3 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-                  <Text variant="bodyStrong" numberOfLines={1} style={{ flexShrink: 1 }}>
-                    {activeApplication.title}
-                  </Text>
-                  <Badge
-                    label={APPLICATION_STATUS_LABEL[activeApplication.status]}
-                    tone={APPLICATION_STATUS_TONE[activeApplication.status]}
-                  />
-                </View>
-                <Price
-                  amount={activeApplication.price}
-                  period={activeApplication.period}
-                  variant="callout"
-                />
-              </View>
-              <ChevronRight size={18} color={colors.mutedForeground} />
-            </View>
-          </Card>
-        </Pressable>
+      ) : priority ? (
+        <RenterPriorityCard priority={priority} />
       ) : null}
 
       {moveInItems.length > 0 ? (
@@ -297,7 +272,9 @@ export default function RenterHome() {
       ) : (
         <StatGroup
           title="Your search"
-          items={METRICS.map(({ key, ...item }) => ({ ...item, value: stats.data?.[key] ?? 0 }))}
+          items={visibleMetrics(
+            METRICS.map(({ key, ...item }) => ({ ...item, value: stats.data?.[key] ?? 0 }))
+          )}
         />
       )}
 
@@ -437,15 +414,8 @@ function HeroCard({
             style={StyleSheet.absoluteFill}
           />
         ) : (
-          // No photo: a fixed deep slate in both themes, so the white text reads and it doesn't look like a grey slab.
-          <View
-            style={[
-              StyleSheet.absoluteFill,
-              { backgroundColor: ON_SCRIM.noPhoto, alignItems: 'center', justifyContent: 'center' },
-            ]}
-          >
-            <ImageOff size={30} color="rgba(255,255,255,0.28)" />
-          </View>
+          // No photo: the branded placeholder on a fixed deep slate, so the white text reads in both themes.
+          <ListingPlaceholder size="hero" tone="onDark" style={{ paddingBottom: 56 }} />
         )}
         {property.image ? (
           <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.42)' }]} />
@@ -545,4 +515,10 @@ function HeroCard({
       </Pressable>
     </View>
   );
+}
+
+/** Tiles reading 0 crowd out the ones that matter; a brand-new renter still sees all four. */
+function visibleMetrics<T extends { value: number }>(items: T[]): T[] {
+  const nonZero = items.filter((i) => i.value > 0);
+  return nonZero.length > 0 ? nonZero : items;
 }

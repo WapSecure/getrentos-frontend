@@ -11,6 +11,7 @@ import {
   Button,
   Chip,
   EmptyState,
+  ListingPlaceholder,
   Price,
   QueryState,
   Skeleton,
@@ -196,7 +197,9 @@ function ApplicationRow({ application: a }: { application: RenterApplication }) 
             accessible={false}
             style={{ flex: 1 }}
           />
-        ) : null}
+        ) : (
+          <ListingPlaceholder size="thumb" />
+        )}
       </View>
       <View style={{ flex: 1, gap: 4 }}>
         <View
@@ -221,15 +224,22 @@ function ApplicationRow({ application: a }: { application: RenterApplication }) 
             {a.address}
           </Text>
         </View>
-        <View
-          style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
-        >
-          <Price amount={a.price} period={a.period} variant="callout" />
-          <Text variant="caption" color="mutedForeground">
-            Applied {formatDate(a.applicationDate)}
-          </Text>
-        </View>
+        <Price amount={a.price} period={a.period} variant="callout" />
+        <Text variant="caption" color="mutedForeground" numberOfLines={2}>
+          {applicationNextStep(a)} · Applied {formatDate(a.applicationDate)}
+        </Text>
       </View>
     </Pressable>
   );
+}
+
+/** One line on where the application stands, so "Pending" is never the only clue. */
+function applicationNextStep(a: RenterApplication): string {
+  const missing = (a.documents ?? []).filter((d) => d.required && !d.uploaded).length;
+  if (a.status === 'approved') return 'Approved. Next, sign your lease';
+  if (a.status === 'rejected') return 'Not successful this time';
+  if (missing > 0)
+    return missing === 1 ? '1 document still needed' : `${missing} documents still needed`;
+  if (a.status === 'under_review') return 'The landlord is reviewing it';
+  return 'Sent. Waiting for the landlord to review';
 }

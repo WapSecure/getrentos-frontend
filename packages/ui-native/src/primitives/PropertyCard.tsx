@@ -10,11 +10,11 @@ import {
   Heart,
   Columns3,
   Clock,
-  ImageOff,
 } from '@sureground/icons/native';
 import { useTheme } from '../theme';
 import { Text } from './Text';
 import { Price } from './Price';
+import { ListingPlaceholder } from './ListingPlaceholder';
 
 export interface PropertyCardData {
   id: string;
@@ -40,6 +40,13 @@ const SPOKEN_PERIOD = {
   night: 'per night',
   total: 'in total',
 } as const;
+
+/** The neighbourhood for a no-photo placeholder: "2-Bed · Lekki Phase 1" gives "Lekki Phase 1". */
+export function listingArea(p: Pick<PropertyCardData, 'title' | 'location'>): string | null {
+  const fromTitle = p.title.split('·').slice(1).join('·').trim();
+  if (fromTitle) return fromTitle;
+  return p.location.split(',')[0]?.trim() || null;
+}
 
 export function describeProperty(p: PropertyCardData): string {
   const price = `${Math.round(p.price).toLocaleString('en-NG')} naira${p.period ? ` ${SPOKEN_PERIOD[p.period]}` : ''}`;
@@ -163,21 +170,12 @@ function PropertyCardBase({
           style={StyleSheet.absoluteFill}
         />
       ) : (
-        // Not the blur placeholder: it glares as a pale block in dark mode.
-        <View
-          style={[
-            StyleSheet.absoluteFill,
-            // Pushed below the top badges so the placeholder never sits under them.
-            { alignItems: 'center', justifyContent: 'center', gap: 6, paddingTop: 28 },
-          ]}
-        >
-          <ImageOff size={row ? 20 : 26} color={colors.mutedForeground} />
-          {!row ? (
-            <Text variant="caption" color="mutedForeground">
-              No photo yet
-            </Text>
-          ) : null}
-        </View>
+        <ListingPlaceholder
+          size={row ? 'thumb' : 'card'}
+          area={listingArea(property)}
+          // Pushed below the top badges so the placeholder never sits under them.
+          topInset={row ? 0 : 28}
+        />
       )}
       {property.trustLabel ? (
         <View style={styles.badgeSlot} pointerEvents="none">
@@ -256,7 +254,7 @@ function PropertyCardBase({
                 period={property.period ?? undefined}
                 variant="subheading"
               />
-              <Text variant="bodyStrong" numberOfLines={1}>
+              <Text variant="bodyStrong" numberOfLines={2}>
                 {property.title}
               </Text>
             </View>
@@ -285,11 +283,22 @@ function PropertyCardBase({
             saved ? `Remove ${property.title} from saved` : `Save ${property.title}`
           }
           accessibilityState={{ selected: saved }}
-          style={styles.heart}
+          // Over a photo the heart sits on dark glass; over the placeholder it is a surface
+          // button, since a white glyph on grey disappears in light mode.
+          style={[
+            styles.heart,
+            property.image
+              ? { backgroundColor: OVERLAY.glass }
+              : {
+                  backgroundColor: colors.card,
+                  borderWidth: StyleSheet.hairlineWidth * 2,
+                  borderColor: colors.border,
+                },
+          ]}
         >
           <Heart
             size={16}
-            color={saved ? colors.destructive : OVERLAY.text}
+            color={saved ? colors.destructive : property.image ? OVERLAY.text : colors.foreground}
             fill={saved ? colors.destructive : 'transparent'}
           />
         </Pressable>
@@ -385,7 +394,6 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(9,32,66,0.4)',
   },
 });
 

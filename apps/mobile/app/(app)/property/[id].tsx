@@ -26,6 +26,7 @@ import {
   Divider,
   IconButton,
   LinkButton,
+  listingArea,
   Price,
   QueryState,
   Skeleton,
@@ -35,6 +36,7 @@ import {
 } from '@sureground/ui-native';
 import { useSavedListings } from '@/hooks/useSavedListings';
 import { qk } from '@/lib/query/keys';
+import { leaseApi } from '@/lib/api/lease';
 import { propertiesApi } from '@/lib/api/properties';
 import { messagesApi } from '@/lib/api/messages';
 import { errorMessage, ApiError } from '@/lib/api/client';
@@ -63,6 +65,8 @@ export default function PropertyDetail() {
   const [viewingSheetOpen, setViewingSheetOpen] = useState(false);
   const [descriptionOpen, setDescriptionOpen] = useState(false);
   const [touring, setTouring] = useState(false);
+  // Past the gallery the back and share buttons get a solid bar, so they never sit on text.
+  const [scrolled, setScrolled] = useState(false);
 
   const query = useQuery({
     queryKey: qk.listings.detail(id),
@@ -97,6 +101,14 @@ export default function PropertyDetail() {
 
   const saved = savedIds.has(id);
   const p = query.data;
+  // Only asked when the home is let: it might be the one this renter lives in.
+  const lease = useQuery({
+    queryKey: qk.renter.lease,
+    queryFn: leaseApi.getLease,
+    retry: false,
+    enabled: p?.acceptingApplications === false,
+  });
+  const isMyHome = !!p && !!lease.data && lease.data.propertyId === p.propertyId;
   const actionStyle = { width: 52, height: 52, borderRadius: 14, backgroundColor: 'transparent' };
 
   return (
@@ -105,10 +117,19 @@ export default function PropertyDetail() {
         // A tap on a commute-destination suggestion must not just close the keyboard.
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
+        scrollEventThrottle={32}
+        onScroll={(e) => {
+          const past = e.nativeEvent.contentOffset.y > 180;
+          if (past !== scrolled) setScrolled(past);
+        }}
         contentContainerStyle={{ paddingBottom: insets.bottom + 120 }}
       >
         {query.data === null ? null : (
-          <PropertyGallery images={toGallery(p?.image, p?.images)} height={300} />
+          <PropertyGallery
+            images={toGallery(p?.image, p?.images)}
+            height={300}
+            area={p ? listingArea({ title: p.title, location: p.location ?? '' }) : null}
+          />
         )}
 
         <View style={{ padding: spacing.xl, gap: spacing.lg }}>
@@ -376,11 +397,17 @@ export default function PropertyDetail() {
         pointerEvents="box-none"
         style={{
           position: 'absolute',
-          top: insets.top + spacing.sm,
-          left: spacing.lg,
-          right: spacing.lg,
+          top: 0,
+          left: 0,
+          right: 0,
+          paddingTop: insets.top + spacing.sm,
+          paddingBottom: spacing.sm,
+          paddingHorizontal: spacing.lg,
           flexDirection: 'row',
           justifyContent: 'space-between',
+          backgroundColor: scrolled ? colors.background : 'transparent',
+          borderBottomWidth: scrolled ? StyleSheet.hairlineWidth : 0,
+          borderBottomColor: colors.border,
         }}
       >
         <IconButton
@@ -451,15 +478,20 @@ export default function PropertyDetail() {
             />
           ) : null}
           <View style={{ flex: 1 }}>
-            <Button
-              label={
-                p.acceptingApplications === false
-                  ? 'Let · not accepting applications'
-                  : 'Apply to rent'
-              }
-              disabled={p.acceptingApplications === false}
-              onPress={() => router.push(`/(app)/property/${id}/apply`)}
-            />
+            {p.acceptingApplications !== false ? (
+              <Button
+                label="Apply to rent"
+                onPress={() => router.push(`/(app)/property/${id}/apply`)}
+              />
+            ) : isMyHome ? (
+              <Button label="View my lease" onPress={() => router.push('/(app)/lease')} />
+            ) : (
+              <Button
+                label="Already let · find similar homes"
+                variant="secondary"
+                onPress={() => router.push('/(app)/(renter)/discover')}
+              />
+            )}
           </View>
         </View>
       ) : null}
