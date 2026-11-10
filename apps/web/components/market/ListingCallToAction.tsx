@@ -3,6 +3,7 @@
 import { useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { viewerIsSignedIn } from '@/lib/viewer';
+import { track } from '@/lib/analytics';
 import type { PublicDetailMarket } from '@/lib/publicListingDetail';
 
 const SIGNED_OUT: Record<PublicDetailMarket, string> = {
@@ -42,6 +43,14 @@ export function ListingCallToAction({
   compact?: boolean;
 }) {
   const signedIn = useSyncExternalStore(subscribeToNothing, viewerIsSignedIn, () => false);
+  const recordStart = () =>
+    track({
+      name: market === 'rent' ? 'inquiry_start' : 'offer_start',
+      listingId: id,
+      market,
+      surface: compact ? 'sticky_bar' : 'listing_page',
+      props: { variant: signedIn ? 'signed_in' : 'signed_out' },
+    });
 
   if (underOffer) {
     return (
@@ -57,7 +66,7 @@ export function ListingCallToAction({
 
   if (signedIn) {
     return (
-      <Link href={signedInHref(market, id)} className={PRIMARY}>
+      <Link href={signedInHref(market, id)} className={PRIMARY} onClick={recordStart}>
         {SIGNED_IN[market]}
       </Link>
     );
@@ -66,7 +75,7 @@ export function ListingCallToAction({
   const next = encodeURIComponent(returnPath);
   return (
     <>
-      <Link href={`/login?next=${next}`} className={PRIMARY}>
+      <Link href={`/login?next=${next}`} className={PRIMARY} onClick={recordStart}>
         {SIGNED_OUT[market]}
       </Link>
       {!compact && (

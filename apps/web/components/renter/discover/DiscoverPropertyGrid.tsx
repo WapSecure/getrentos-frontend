@@ -71,9 +71,8 @@ export const DiscoverPropertyGrid = ({
   const properties = data?.items ?? [];
   const total = data?.total ?? 0;
 
-  const handleViewDetails = (property: Property) => {
+  const recordView = (property: Property) => {
     renterService.recordListingView(property.id).catch(() => {});
-    router.push(buildRoute.renterPropertyDetail(property.id));
   };
 
   const handleScheduleViewing = (property: Property) => {
@@ -124,15 +123,17 @@ export const DiscoverPropertyGrid = ({
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-        {properties.map((property) => (
+      <div className="grid grid-cols-1 gap-x-6 gap-y-10 md:grid-cols-2">
+        {properties.map((property, index) => (
           <DiscoverPropertyCard
             key={property.id}
             property={property}
+            href={buildRoute.renterPropertyDetail(property.id)}
+            eager={index < 2}
             isSaved={savedProperties.includes(property.id)}
             onSave={() => onSave(property.id)}
             onCompare={() => onCompare(property)}
-            onViewDetails={() => handleViewDetails(property)}
+            onOpen={() => recordView(property)}
             onScheduleViewing={() => handleScheduleViewing(property)}
             onApply={() => handleApply(property.id)}
             onOpenTour={() => handleOpenTour(property)}

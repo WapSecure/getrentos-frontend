@@ -2,11 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useRouter } from 'next/navigation';
 import {
-  MapPin,
-  Bed,
-  Bath,
   Square,
   Heart,
   Star,
@@ -19,9 +15,7 @@ import {
   StickyNote,
 } from '@sureground/icons';
 import {
-  Badge,
   Button,
-  Card,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -29,16 +23,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   IconButton,
+  ListingCard,
+  ListingCardAction,
   type BadgeVariant,
 } from '@sureground/ui';
 import { buildRoute } from '@/lib/constants/auth';
 import { renterService, type SavedListingItem, type Wishlist } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
-import { pluralize } from '@/lib/format';
 import { AddNoteModal } from './AddNoteModal';
-import { SharePropertyModal } from './SharePropertyModal';
-import { PropertyPhoto } from '@/components/renter/shared/PropertyPhoto';
+import { ShareDialog } from '@/components/shared/share/ShareDialog';
 
 interface SavedPropertyCardProps {
   property: SavedListingItem;
@@ -67,7 +61,6 @@ export const SavedPropertyCard = ({
   isSelected,
   onSelect,
 }: SavedPropertyCardProps) => {
-  const router = useRouter();
   const queryClient = useQueryClient();
   const [showNoteModal, setShowNoteModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
@@ -80,18 +73,6 @@ export const SavedPropertyCard = ({
       queryClient.invalidateQueries({ queryKey: renterKeys.savedListings });
     },
   });
-
-  const formatPrice = () => {
-    const formatter = new Intl.NumberFormat('en-NG', {
-      style: 'currency',
-      currency: 'NGN',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    });
-    return `${formatter.format(property.price)}${
-      property.period === 'month' ? '/mo' : property.period === 'year' ? '/yr' : '/wk'
-    }`;
-  };
 
   const handleSaveNote = async (newNote: string) => {
     try {
@@ -126,43 +107,17 @@ export const SavedPropertyCard = ({
     ? getStatusConfig(property.applicationStatus)
     : null;
 
-  const selectButton = onSelect && (
-    <button
-      type="button"
-      role="checkbox"
-      aria-checked={!!isSelected}
-      aria-label={`Select ${property.title}`}
-      onClick={(e) => {
-        e.stopPropagation();
-        onSelect();
-      }}
-      className="absolute top-2 left-2 z-20 p-1 bg-card/90 rounded-full hover:bg-card transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
-    >
-      {isSelected ? (
-        <CheckSquare className="w-4 h-4 text-primary" aria-hidden="true" />
-      ) : (
-        <Square className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
-      )}
-    </button>
-  );
-
-  const actionsMenu = (includeNote: boolean) => (
+  const actionsMenu = (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <IconButton
           variant="outline"
-          size="sm"
+          className="h-11 w-11 sm:h-10 sm:w-10"
           label={`More actions for ${property.title}`}
           icon={<MoreHorizontal />}
         />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
-        {includeNote && (
-          <DropdownMenuItem onSelect={() => setShowNoteModal(true)}>
-            <BookmarkPlus className="w-3 h-3" aria-hidden="true" />
-            Add note
-          </DropdownMenuItem>
-        )}
         <DropdownMenuItem onSelect={() => setShowShareModal(true)}>
           <ExternalLink className="w-3 h-3" aria-hidden="true" />
           Share property
@@ -195,172 +150,85 @@ export const SavedPropertyCard = ({
         initialNote={note}
         propertyTitle={property.title}
       />
-      <SharePropertyModal
-        isOpen={showShareModal}
-        onClose={() => setShowShareModal(false)}
-        property={property}
+      <ShareDialog
+        open={showShareModal}
+        onOpenChange={setShowShareModal}
+        title={property.title}
+        path={`/renter/properties/${property.id}`}
       />
     </>
   );
 
-  if (viewMode === 'list') {
-    return (
-      <>
-        <Card hover>
-          <div className="flex flex-col sm:flex-row">
-            <PropertyPhoto
-              src={property.image}
-              alt={property.title}
-              className="w-full sm:w-48 h-40 shrink-0"
-            >
-              {selectButton}
-
-              {statusConfig && (
-                <Badge variant={statusConfig.variant} className="absolute bottom-2 left-2 z-10">
-                  {statusConfig.label}
-                </Badge>
-              )}
-            </PropertyPhoto>
-
-            <div className="min-w-0 flex-1 p-4">
-              <div className="flex flex-wrap justify-between gap-2">
-                <div className="min-w-0">
-                  <h3 className="font-semibold text-foreground hover:text-primary transition-colors">
-                    {property.title}
-                  </h3>
-                  <div className="flex items-center gap-1 text-sm text-muted-foreground mt-0.5">
-                    <MapPin className="w-3 h-3" />
-                    <span className="text-xs">{property.location}</span>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-lg font-bold text-primary">{formatPrice()}</p>
-                  <div className="flex items-center gap-1 mt-0.5">
-                    <Star className="w-3 h-3 fill-primary text-primary" />
-                    <span className="text-xs text-muted-foreground">{property.rating}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <Bed className="w-3 h-3" />
-                  <span>{pluralize(property.bedrooms, 'bed')}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Bath className="w-3 h-3" />
-                  <span>{pluralize(property.bathrooms, 'bath')}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Square className="w-3 h-3" />
-                  <span>{property.size} sqm</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Clock className="w-3 h-3" />
-                  <span>Saved {formatTimeAgo(property.savedAt)}</span>
-                </div>
-              </div>
-
-              {note && (
-                <div className="mt-2 flex items-start gap-1.5 p-2 bg-secondary/60 rounded-lg text-xs text-muted-foreground">
-                  <StickyNote className="w-3 h-3 mt-0.5 shrink-0" aria-hidden="true" />
-                  <span className="min-w-0">{note}</span>
-                </div>
-              )}
-
-              <div className="flex flex-wrap gap-2 mt-3">
-                <Button
-                  size="sm"
-                  variant="primary"
-                  onClick={() => router.push(buildRoute.renterPropertyDetail(property.id))}
-                >
-                  View details
-                </Button>
-                <Button size="sm" variant="outline" onClick={() => setShowNoteModal(true)}>
-                  Add note
-                </Button>
-                {actionsMenu(false)}
-              </div>
-            </div>
-          </div>
-        </Card>
-        {modals}
-      </>
-    );
-  }
-
   return (
     <>
-      <Card hover className="group relative">
-        <PropertyPhoto src={property.image} alt={property.title} className="h-48">
-          {selectButton}
-
-          <IconButton
-            size="sm"
-            label="Remove from saved"
-            onClick={() => onRemove(property.id)}
-            className="absolute top-2 right-2 z-10 rounded-full bg-card/90 hover:bg-card"
-            icon={<Heart className="text-destructive fill-destructive" />}
-          />
-
-          <div className="absolute bottom-2 left-2 bg-primary text-primary-foreground px-2 py-1 rounded-lg text-sm font-bold z-10">
-            {formatPrice()}
+      <ListingCard
+        variant={viewMode === 'list' ? 'compact' : 'grid'}
+        href={buildRoute.renterPropertyDetail(property.id)}
+        title={property.title}
+        location={property.location}
+        price={property.price}
+        priceUnit={property.period}
+        image={property.image}
+        imageAlt={property.title}
+        selected={isSelected}
+        status={statusConfig?.label}
+        statusVariant={statusConfig?.variant}
+        facts={{ beds: property.bedrooms, baths: property.bathrooms, size: property.size }}
+        actions={
+          <>
+            {onSelect && (
+              <ListingCardAction
+                role="checkbox"
+                aria-checked={!!isSelected}
+                label={`Select ${property.title}`}
+                onClick={onSelect}
+                icon={isSelected ? <CheckSquare className="text-primary" /> : <Square />}
+              />
+            )}
+            <ListingCardAction
+              label={`Remove ${property.title} from saved`}
+              aria-pressed
+              onClick={() => onRemove(property.id)}
+              icon={<Heart fill="currentColor" />}
+            />
+          </>
+        }
+        meta={
+          <div className="space-y-2">
+            <p className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <span className="inline-flex items-center gap-1">
+                <Clock className="h-3.5 w-3.5" aria-hidden="true" />
+                Saved {formatTimeAgo(property.savedAt).toLowerCase()}
+              </span>
+              {property.rating > 0 && (
+                <span className="inline-flex items-center gap-1">
+                  <Star className="h-3.5 w-3.5 fill-warning text-warning" aria-hidden="true" />
+                  <span className="data-value text-foreground">{property.rating}</span>
+                  <span className="sr-only">rating</span>
+                </span>
+              )}
+            </p>
+            {note && (
+              <p className="flex items-start gap-1.5 rounded-lg bg-secondary/60 p-2">
+                <StickyNote className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                <span className="min-w-0 line-clamp-2">{note}</span>
+              </p>
+            )}
           </div>
-
-          {statusConfig && (
-            <Badge
-              variant={statusConfig.variant}
-              className={`absolute top-2 z-10 ${onSelect ? 'left-11' : 'left-2'}`}
-            >
-              {statusConfig.label}
-            </Badge>
-          )}
-        </PropertyPhoto>
-
-        <div className="p-4">
-          <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-1">
-            {property.title}
-          </h3>
-          <div className="flex items-center gap-1 text-sm text-muted-foreground mt-0.5">
-            <MapPin className="w-3 h-3" />
-            <span className="text-xs line-clamp-1">{property.location}</span>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3 mt-3 text-xs text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <Bed className="w-3 h-3" />
-              <span>{pluralize(property.bedrooms, 'bed')}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Bath className="w-3 h-3" />
-              <span>{pluralize(property.bathrooms, 'bath')}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Square className="w-3 h-3" />
-              <span>{property.size} sqm</span>
-            </div>
-          </div>
-
-          {note && (
-            <div className="mt-2 flex items-start gap-1.5 p-2 bg-secondary/60 rounded-lg text-xs text-muted-foreground">
-              <StickyNote className="w-3 h-3 mt-0.5 shrink-0" aria-hidden="true" />
-              <span className="min-w-0 line-clamp-2">{note}</span>
-            </div>
-          )}
-
-          <div className="flex gap-2 mt-3">
+        }
+        footer={
+          <div className="flex items-center gap-2">
             <Button
-              size="sm"
-              variant="primary"
-              onClick={() => router.push(buildRoute.renterPropertyDetail(property.id))}
-              className="flex-1"
+              variant="outline"
+              icon={<BookmarkPlus className="h-4 w-4" aria-hidden="true" />}
+              onClick={() => setShowNoteModal(true)}
             >
-              View details
+              {note ? 'Edit note' : 'Add note'}
             </Button>
-            {actionsMenu(true)}
+            {actionsMenu}
           </div>
-        </div>
-      </Card>
+        }
+      />
       {modals}
     </>
   );

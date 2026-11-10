@@ -3,7 +3,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@sureground/ui';
 import { Alert, Button, CurrencyInput, Field, Input, Select } from '@sureground/ui';
-import { Camera, Trash2, Video } from '@sureground/icons';
+import { Trash2, Video } from '@sureground/icons';
+import { tourSource } from '@sureground/shared';
+import {
+  mediaDetailsFor,
+  photosFromKeys,
+  PropertyPhotoEditor,
+  type EditablePhoto,
+} from '@/components/shared/media/PropertyPhotoEditor';
 import type { OwnerProperty } from '@/types/owner';
 import { AddressFields, type AddressFieldsValue } from '@/components/shared/location/AddressFields';
 import { LocationPicker } from '@/components/maps/LocationPicker';
@@ -24,7 +31,10 @@ type OwnerPropertyUpdates = Pick<
   | 'placeId'
   | 'estimatedValue'
   | 'coverImageKey'
+  | 'galleryImageKeys'
   | 'videoTourKey'
+  | 'tourUrl'
+  | 'mediaDetails'
   | 'latitude'
   | 'longitude'
 >;
@@ -85,12 +95,26 @@ const EditOwnerPropertyForm = ({
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Staged first and attached on save, as the API binds the upload's key through `coverImageKey`.
-  const [coverKey, setCoverKey] = useState(property.coverImageKey);
-  const [previewUrl, setPreviewUrl] = useState(property.coverImageUrl);
-  const [isUploading, setIsUploading] = useState(false);
-  const [photoError, setPhotoError] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  // The API lists the cover first among the gallery keys.
+  const [photos, setPhotos] = useState<EditablePhoto[]>(() =>
+    property.galleryImageKeys?.length
+      ? photosFromKeys(
+          property.galleryImageKeys,
+          property.galleryImageUrls ?? [],
+          property.mediaDetails
+        )
+      : property.coverImageKey
+        ? photosFromKeys(
+            [property.coverImageKey],
+            [property.coverImageUrl ?? ''],
+            property.mediaDetails
+          )
+        : []
+  );
+  // Media is only sent once edited, or a stale set would overwrite photos changed elsewhere.
+  const [photosTouched, setPhotosTouched] = useState(false);
+  const [tourUrl, setTourUrl] = useState(property.tourUrl ?? '');
+  const tourInvalid = tourUrl.trim() !== '' && !tourSource(tourUrl.trim());
 
   const [videoKey, setVideoKey] = useState<string | null>(property.videoTourKey ?? null);
   const [videoPreview, setVideoPreview] = useState(property.videoTourUrl);
@@ -119,30 +143,36 @@ const EditOwnerPropertyForm = ({
     }
   };
 
-  useEffect(() => {
-    if (!previewUrl?.startsWith('blob:')) return;
-    return () => URL.revokeObjectURL(previewUrl);
-  }, [previewUrl]);
-
-  const handlePhotoSelected = async (file: File) => {
-    setPhotoError(null);
-    setIsUploading(true);
-    try {
-      // `unwrap` must be awaited: destructuring the promise itself yields undefined.
-      const { key } = await unwrap(ownerService.uploadPropertyMedia(file));
-      setCoverKey(key);
-      setPreviewUrl(URL.createObjectURL(file));
-    } catch (reason) {
-      setPhotoError(reason instanceof Error ? reason.message : 'Unable to upload that photo.');
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
   const handleSave = async () => {
     setIsSaving(true);
     setError(null);
+    let media = {};
+    try {
+      if (photosTouched) {
+        const keys = await Promise.all(
+          photos.map(
+            async (photo) =>
+              photo.key ??
+              (photo.file
+                ? (await unwrap(ownerService.uploadPropertyMedia(photo.file))).key
+                : undefined)
+          )
+        );
+        const galleryImageKeys = keys.filter((key): key is string => !!key);
+        media = {
+          coverImageKey: galleryImageKeys[0] ?? null,
+          galleryImageKeys,
+          mediaDetails: mediaDetailsFor(photos, keys),
+        };
+      }
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : 'Unable to upload those photos.');
+      setIsSaving(false);
+      return;
+    }
     const payload = {
+      ...media,
+      ...(tourUrl.trim() !== (property.tourUrl ?? '') ? { tourUrl: tourUrl.trim() || null } : {}),
       name,
       propertyType,
       address,
@@ -151,8 +181,6 @@ const EditOwnerPropertyForm = ({
       country,
       ...(location.placeId ? { placeId: location.placeId } : {}),
       estimatedValue: Number(estimatedValue) || property.estimatedValue,
-      // Only send the cover when it changed, or a stale key overwrites a photo edited elsewhere.
-      ...(coverKey !== property.coverImageKey ? { coverImageKey: coverKey } : {}),
       ...(videoKey !== (property.videoTourKey ?? null) ? { videoTourKey: videoKey } : {}),
       // Only a pin the owner moved, so saving other details doesn't re-confirm a location nobody looked at.
       ...(pinMoved && pin ? { latitude: pin.latitude, longitude: pin.longitude } : {}),
@@ -223,50 +251,18 @@ const EditOwnerPropertyForm = ({
         </Field>
 
         <div>
-          <p className="mb-1 text-sm font-medium text-foreground">Property photo</p>
-          <div className="flex items-center gap-3">
-            <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-lg border border-border bg-secondary">
-              {previewUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={previewUrl} alt="Property photo" className="h-full w-full object-cover" />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center">
-                  <Camera className="h-6 w-6 text-muted-foreground/50" />
-                </div>
-              )}
-            </div>
-            <div className="min-w-0">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => fileInputRef.current?.click()}
-                isLoading={isUploading}
-                loadingText="Uploading…"
-              >
-                {previewUrl ? 'Change photo' : 'Upload photo'}
-              </Button>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Shown on your listings and any estate page featuring this property.
-              </p>
-            </div>
-          </div>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(event) => {
-              const file = event.target.files?.[0];
-              // Reset so re-picking the same file still fires a change event.
-              event.target.value = '';
-              if (file) void handlePhotoSelected(file);
+          <p className="text-sm font-medium text-foreground">Photos</p>
+          <p className="mb-2 mt-0.5 text-xs text-muted-foreground">
+            The first photo is the cover on your listings and any estate page featuring this
+            property. Tag rooms and add short captions so buyers know what they are looking at.
+          </p>
+          <PropertyPhotoEditor
+            photos={photos}
+            onChange={(next) => {
+              setPhotos(next);
+              setPhotosTouched(true);
             }}
           />
-          {photoError && (
-            <Alert variant="danger" className="mt-2">
-              {photoError}
-            </Alert>
-          )}
         </div>
 
         <div>
@@ -326,11 +322,25 @@ const EditOwnerPropertyForm = ({
           )}
         </div>
 
+        <Field
+          label="360 tour link"
+          hint="Matterport, Kuula, CloudPano, Theasys or Momento360. Buyers load it only when they tap it."
+          error={tourInvalid ? 'Use a link from one of the tour sites listed.' : undefined}
+        >
+          <Input
+            type="url"
+            inputMode="url"
+            value={tourUrl}
+            onChange={(e) => setTourUrl(e.target.value)}
+            placeholder="https://kuula.co/share/…"
+          />
+        </Field>
+
         <Button
           variant="primary"
           fullWidth
           onClick={handleSave}
-          disabled={!name.trim() || !address.trim() || isUploading || isUploadingVideo}
+          disabled={!name.trim() || !address.trim() || isUploadingVideo || tourInvalid}
           isLoading={isSaving}
           loadingText="Saving…"
         >

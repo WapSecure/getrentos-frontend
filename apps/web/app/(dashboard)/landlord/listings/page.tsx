@@ -9,6 +9,7 @@ import {
   CreateListingModal,
 } from '@/components/landlord/listings/CreateListingModal';
 import { ListingPreviewModal } from '@/components/landlord/listings/ListingPreviewModal';
+import { EditListingFeesDialog } from '@/components/landlord/listings/EditListingFeesDialog';
 import {
   Button,
   EmptyState,
@@ -43,6 +44,7 @@ export default function LandlordListingsPage() {
     hasSessionDraft(CREATE_LISTING_DRAFT_KEY)
   );
   const [previewListing, setPreviewListing] = useState<Listing | null>(null);
+  const [feesListing, setFeesListing] = useState<Listing | null>(null);
   const toast = useToast();
 
   const {
@@ -69,6 +71,9 @@ export default function LandlordListingsPage() {
         rentPeriod,
         allowsMonthlyPayment,
         securityDeposit,
+        serviceCharge,
+        agencyFee,
+        legalFee,
         amenities,
         availabilityDate,
         allowPets,
@@ -83,6 +88,9 @@ export default function LandlordListingsPage() {
           rentPeriod,
           allowsMonthlyPayment,
           securityDeposit,
+          serviceCharge,
+          agencyFee,
+          legalFee,
           amenities,
           availabilityDate,
           allowPets,
@@ -225,6 +233,7 @@ export default function LandlordListingsPage() {
               listing={listing}
               onTogglePause={handleTogglePause}
               onPreview={setPreviewListing}
+              onEditFees={setFeesListing}
             />
           ))}
         </div>
@@ -240,6 +249,7 @@ export default function LandlordListingsPage() {
       />
 
       <ListingPreviewModal listing={previewListing} onClose={() => setPreviewListing(null)} />
+      <EditListingFeesDialog listing={feesListing} onClose={() => setFeesListing(null)} />
     </>
   );
 }

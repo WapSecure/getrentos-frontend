@@ -60,11 +60,14 @@ export const kycApi = {
     document: PickedFile;
     selfie?: PickedFile;
     note?: string;
+    /** The person ticked the consent box; the API refuses the upload without it. */
+    consent: true;
   }) => {
     const form = new FormData();
     appendFile(form, 'document', params.document);
     if (params.selfie) appendFile(form, 'selfie', params.selfie);
     form.append('documentType', params.documentType);
+    form.append('consent', String(params.consent));
     if (params.note) form.append('note', params.note);
     return apiUpload<IdentityKyc>('/users/me/kyc/identity', form);
   },

@@ -1,11 +1,9 @@
 'use client';
 
-import Link from 'next/link';
 import { useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Bath, BedDouble, Building2, CalendarClock, Home, MapPin } from '@sureground/icons';
-import { Badge, EmptyState, Skeleton, ToggleChip } from '@sureground/ui';
-import { SafeImage } from '@/components/shared/media/SafeImage';
+import { Home } from '@sureground/icons';
+import { EmptyState, ListingCard, Skeleton, ToggleChip } from '@sureground/ui';
 import { estateStorefrontService } from '@/services/estateMarketplaceService';
 import { unwrap } from '@/lib/apiHelpers';
 import type { EstateListingType, EstateStorefrontListing } from '@/types/estate-marketplace';
@@ -17,9 +15,6 @@ const TABS: { key: EstateListingType | 'ALL'; label: string }[] = [
   { key: 'SHORTLET', label: 'Short stays' },
 ];
 
-const formatNaira = (amount: number) =>
-  `₦${amount.toLocaleString('en-NG', { maximumFractionDigits: 0 })}`;
-
 const marketHref = (listing: EstateStorefrontListing, slug: string) => {
   const estate = encodeURIComponent(slug);
   if (listing.listingType === 'SHORTLET') return `/shortlets?estate=${estate}`;
@@ -27,94 +22,52 @@ const marketHref = (listing: EstateStorefrontListing, slug: string) => {
   return `/rent?estate=${estate}`;
 };
 
-const ListingCard = ({ listing, slug }: { listing: EstateStorefrontListing; slug: string }) => (
-  <Link
+const STATUS: Record<EstateListingType, string> = {
+  RENT: 'For rent',
+  SALE: 'For sale',
+  SHORTLET: 'Shortlet',
+};
+
+const EstateListingCard = ({
+  listing,
+  slug,
+}: {
+  listing: EstateStorefrontListing;
+  slug: string;
+}) => (
+  <ListingCard
     href={marketHref(listing, slug)}
-    className="group block bg-card rounded-2xl border border-border overflow-hidden hover:border-primary/40 transition-colors"
-  >
-    <div className="relative h-40 bg-secondary">
-      <SafeImage
-        src={listing.coverImageUrl}
-        alt=""
-        fill
-        sizes="(max-width: 640px) 100vw, 320px"
-        className="object-cover group-hover:scale-[1.02] transition-transform"
-        fallback={
-          <div className="w-full h-full flex items-center justify-center">
-            <Home className="w-8 h-8 text-muted-foreground/40" />
-          </div>
-        }
-      />
-      <div className="absolute top-3 left-3 flex gap-2">
-        <Badge variant="info">
-          {listing.listingType === 'RENT'
-            ? 'For rent'
-            : listing.listingType === 'SALE'
-              ? 'For sale'
-              : 'Short stay'}
-        </Badge>
-      </div>
-    </div>
-
-    <div className="p-4">
-      <p className="font-semibold text-foreground truncate">{listing.title}</p>
-      <p className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-        <MapPin className="w-3 h-3 shrink-0" />
-        <span className="truncate">
-          {[listing.address, listing.city].filter(Boolean).join(', ')}
-        </span>
-      </p>
-
-      <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground">
-        {listing.bedrooms ? (
-          <span className="flex items-center gap-1">
-            <BedDouble className="w-3.5 h-3.5" />
-            {listing.bedrooms}
-          </span>
-        ) : null}
-        {listing.bathrooms ? (
-          <span className="flex items-center gap-1">
-            <Bath className="w-3.5 h-3.5" />
-            {listing.bathrooms}
-          </span>
-        ) : null}
-        <span className="flex items-center gap-1">
-          <Building2 className="w-3.5 h-3.5" />
-          {listing.propertyType.toLowerCase().replace(/_/g, ' ')}
-        </span>
-      </div>
-
-      <div className="flex items-end justify-between gap-2 mt-4">
-        <div>
-          <p className="text-base font-bold text-foreground">{formatNaira(listing.price)}</p>
-          {listing.listingType === 'SHORTLET' && (
-            <p className="text-xs text-muted-foreground">per night</p>
-          )}
-        </div>
-        {listing.availableFrom && (
-          <span className="flex items-center gap-1 text-xs text-muted-foreground">
-            <CalendarClock className="w-3.5 h-3.5" />
-            {new Date(listing.availableFrom).toLocaleDateString(undefined, {
+    title={listing.title}
+    location={[listing.address, listing.city].filter(Boolean).join(', ')}
+    price={listing.price}
+    priceUnit={listing.listingType === 'SHORTLET' ? 'night' : undefined}
+    image={listing.coverImageUrl}
+    status={STATUS[listing.listingType]}
+    facts={{
+      beds: listing.bedrooms,
+      baths: listing.bathrooms,
+      type: listing.propertyType,
+      extra: [
+        listing.availableFrom
+          ? `Available ${new Date(listing.availableFrom).toLocaleDateString(undefined, {
               month: 'short',
               day: 'numeric',
-            })}
-          </span>
-        )}
-      </div>
-
-      <p className="text-xs text-muted-foreground mt-3 pt-3 border-t border-border">
-        {listing.listedByEstate ? (
-          <>
-            Marketed by <span className="text-foreground font-medium">this estate</span>
-          </>
-        ) : (
-          <>
-            Listed by <span className="text-foreground font-medium">{listing.ownerName}</span>
-          </>
-        )}
-      </p>
-    </div>
-  </Link>
+            })}`
+          : null,
+      ],
+    }}
+    meta={
+      listing.listedByEstate ? (
+        <>
+          Marketed by <span className="font-medium text-foreground">this estate</span>
+        </>
+      ) : (
+        <>
+          Listed by <span className="font-medium text-foreground">{listing.ownerName}</span>
+        </>
+      )
+    }
+  />
 );
 
 export const EstateAvailableListings = ({
@@ -202,9 +155,9 @@ export const EstateAvailableListings = ({
           />
         </div>
       ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-5">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-5 gap-y-8 mt-5">
           {listings.map((listing) => (
-            <ListingCard key={listing.listingId} listing={listing} slug={slug} />
+            <EstateListingCard key={listing.listingId} listing={listing} slug={slug} />
           ))}
         </div>
       )}

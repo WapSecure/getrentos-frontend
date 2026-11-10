@@ -1,3 +1,4 @@
+import type { PropertyMediaDetails } from '@/types/landlord';
 export type OwnershipVerificationStatus =
   | 'pending_review'
   | 'verified'
@@ -62,6 +63,10 @@ export interface OwnerProperty {
   galleryImageKeys?: string[];
   coverImageUrl?: string;
   galleryImageUrls?: string[];
+  /** A 360 tour link on an allowed host; null on an update clears it. */
+  tourUrl?: string | null;
+  /** Room and caption per photo, keyed by storage key; null on an update clears it. */
+  mediaDetails?: PropertyMediaDetails | null;
   /** Storage key of the video tour; null on an update removes it. */
   videoTourKey?: string | null;
   /** Valid for a few hours. */

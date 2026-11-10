@@ -13,7 +13,8 @@ import {
   DialogDescription,
   DialogTitle,
   EmptyState,
-  IconButton,
+  ListingCard,
+  ListingCardAction,
   PageErrorState,
   Pagination,
   SearchInput,
@@ -30,7 +31,6 @@ import {
   LayoutGrid,
   MapPin,
   MessageSquare,
-  Ruler,
   ShieldCheck,
   Trees,
 } from '@sureground/icons';
@@ -401,72 +401,49 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
             description="Try another city or a wider price range. Only parcels that meet our ownership and diligence gates appear here."
           />
         ) : (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {listings.map((listing) => {
+          <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+            {listings.map((listing, index) => {
               const isSaved = savedListingIds.includes(listing.id);
               return (
-                <article
+                <ListingCard
                   key={listing.id}
-                  className="group overflow-hidden rounded-2xl border border-border bg-card shadow-xs transition-all hover:-translate-y-1 hover:shadow-lg"
-                >
-                  <div className="relative flex h-44 items-center justify-center overflow-hidden bg-muted">
-                    <Trees className="h-12 w-12 text-primary/60" />
-                    <div className="absolute left-3 top-3 flex flex-col items-start gap-1.5">
+                  headingLevel="h2"
+                  onOpen={() => setActiveListing(listing)}
+                  title={listing.title}
+                  location={`${listing.city}, ${listing.state}`}
+                  price={listing.askingPrice}
+                  priceCompact
+                  image={listing.coverImageUrl}
+                  imageAlt={listing.title}
+                  eager={index < 3}
+                  status="Land"
+                  badges={
+                    <>
                       <Badge variant="success" icon={<ShieldCheck className="h-3.5 w-3.5" />}>
                         Diligence verified
                       </Badge>
                       <AssuranceTierBadge tier={listing.diligence?.assuranceTier} />
-                    </div>
-                    {mode === 'buyer' && (
-                      <IconButton
+                    </>
+                  }
+                  facts={{
+                    size: areaLabel(listing),
+                    extra: [
+                      listing.parcel.zoning,
+                      listing.parcel.roadAccess ? 'Road access' : null,
+                    ],
+                  }}
+                  meta={parcelTitle(listing) || undefined}
+                  actions={
+                    mode === 'buyer' ? (
+                      <ListingCardAction
                         label={isSaved ? 'Remove from saved listings' : 'Save land listing'}
                         aria-pressed={isSaved}
-                        size="sm"
-                        icon={
-                          <Heart className={isSaved ? 'fill-destructive text-destructive' : ''} />
-                        }
+                        icon={<Heart fill={isSaved ? 'currentColor' : 'none'} />}
                         onClick={() => toggleSaved(listing.id)}
-                        className="absolute right-3 top-3 rounded-xl bg-card/90 text-foreground shadow-sm backdrop-blur hover:bg-card"
                       />
-                    )}
-                    <div className="absolute bottom-3 left-3 rounded-xl bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground shadow-sm">
-                      {formatCurrency(listing.askingPrice, { compact: true })}
-                    </div>
-                  </div>
-                  <div className="p-4">
-                    <p className="text-xs font-medium uppercase tracking-[0.12em] text-primary">
-                      Land for sale
-                    </p>
-                    <h2 className="mt-1 truncate font-semibold text-foreground">{listing.title}</h2>
-                    <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-                      <MapPin className="h-3.5 w-3.5" />
-                      {listing.city}, {listing.state}
-                    </p>
-                    {parcelTitle(listing) && (
-                      <p className="mt-2 truncate text-xs text-muted-foreground">
-                        {parcelTitle(listing)}
-                      </p>
-                    )}
-                    <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 border-t border-border pt-3 text-xs text-muted-foreground">
-                      <span className="inline-flex items-center gap-1">
-                        <Ruler className="h-3.5 w-3.5" />
-                        {areaLabel(listing)}
-                      </span>
-                      {listing.parcel.zoning && <span>{listing.parcel.zoning}</span>}
-                      {listing.parcel.roadAccess && <span>Road access</span>}
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      rounded="lg"
-                      fullWidth
-                      className="mt-4"
-                      onClick={() => setActiveListing(listing)}
-                    >
-                      Inspect parcel
-                    </Button>
-                  </div>
-                </article>
+                    ) : undefined
+                  }
+                />
               );
             })}
           </div>

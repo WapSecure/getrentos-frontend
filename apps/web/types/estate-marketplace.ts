@@ -1,3 +1,4 @@
+import type { MediaRoom } from '@sureground/shared/showroom';
 /** The estate's view and the owner's view are typed separately on purpose. */
 
 export type EstateAgreementStatus = 'PENDING' | 'ACTIVE' | 'DECLINED' | 'REVOKED';
@@ -29,6 +30,8 @@ export type EstateListingType = 'RENT' | 'SALE' | 'SHORTLET';
 export interface EstateListingMedia {
   key: string;
   url: string;
+  room?: MediaRoom;
+  caption?: string;
 }
 
 export interface EstateListing {

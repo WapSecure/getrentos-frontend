@@ -92,3 +92,14 @@ export function addressPrecisionLabel(p: VerifiedAddress['precision']): string {
         ? 'Area'
         : 'City';
 }
+
+/** "Lagos, Lagos" → "Lagos": seed and imported listings often repeat the city as the state. */
+export function tidyPlace(place: string): string {
+  const parts = place
+    .split(',')
+    .map((p) => p.trim())
+    .filter(Boolean);
+  return parts
+    .filter((p, i) => i === 0 || p.toLowerCase() !== parts[i - 1]!.toLowerCase())
+    .join(', ');
+}

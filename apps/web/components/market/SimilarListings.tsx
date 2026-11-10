@@ -1,11 +1,8 @@
 'use client';
 
-import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowUpRight, Home, MapPin } from '@sureground/icons';
-import { Skeleton } from '@sureground/ui';
+import { ListingCard, Skeleton } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
-import { formatCurrency } from '@/lib/format';
 import { publicMarketService, type PublicMarket } from '@/services/publicMarketService';
 import { SaveListingButton } from './SaveListingButton';
 
@@ -62,62 +59,31 @@ export function SimilarListings({
       <p className="mt-1 text-sm text-muted-foreground">
         Comparable options in the same area and price range.
       </p>
-      <div className="mt-6 grid gap-5 md:grid-cols-3">
+      <div className="mt-6 grid gap-x-5 gap-y-8 md:grid-cols-3">
         {listings.map((listing) => {
           const href = `${market === 'rent' ? '/rent' : '/buy'}/${listing.id}`;
           return (
-            <article
+            <ListingCard
               key={listing.id}
-              className="group relative overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
-            >
-              <Link href={href} tabIndex={-1} aria-hidden="true">
-                {listing.image ? (
-                  <div
-                    role="img"
-                    aria-label={listing.title}
-                    className="h-44 bg-cover bg-center transition duration-500 group-hover:scale-[1.02]"
-                    style={{ backgroundImage: `url(${listing.image})` }}
-                  />
-                ) : (
-                  <div className="flex h-44 items-center justify-center bg-muted">
-                    <Home className="h-7 w-7 text-primary/40" />
-                  </div>
-                )}
-              </Link>
-              <SaveListingButton
-                listingId={listing.id}
-                returnPath={href}
-                className="absolute right-3 top-3"
-              />
-              <div className="p-5">
-                <p className="font-bold text-foreground">
-                  {formatCurrency(listing.price)}
-                  {listing.priceUnit ? (
-                    <span className="text-xs font-normal text-muted-foreground">
-                      /{listing.priceUnit}
-                    </span>
-                  ) : null}
-                </p>
-                <h3 className="mt-1 font-semibold text-foreground">
-                  <Link
-                    href={href}
-                    className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                  >
-                    {listing.title}
-                  </Link>
-                </h3>
-                <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
-                  <MapPin className="h-3.5 w-3.5" />
-                  <span className="truncate">{listing.location}</span>
-                </p>
-                <Link
-                  href={href}
-                  className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary"
-                >
-                  View details <ArrowUpRight className="h-4 w-4" />
-                </Link>
-              </div>
-            </article>
+              href={href}
+              title={listing.title}
+              location={listing.location}
+              price={listing.price}
+              priceUnit={listing.priceUnit}
+              image={listing.image}
+              imageAlt={listing.title}
+              status={market === 'rent' ? 'For rent' : 'For sale'}
+              verified={listing.verified}
+              facts={{
+                beds: listing.bedrooms,
+                baths: listing.bathrooms,
+                size: listing.size,
+                type: listing.propertyType,
+              }}
+              actions={
+                <SaveListingButton listingId={listing.id} returnPath={href} appearance="card" />
+              }
+            />
           );
         })}
       </div>

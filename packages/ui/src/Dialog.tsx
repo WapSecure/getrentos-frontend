@@ -47,7 +47,7 @@ interface DialogContentProps {
   children: ReactNode;
   className?: string;
   showClose?: boolean;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
   padded?: boolean;
   /** By default only until the user types, so a stray click can't throw away a half-filled form. */
   closeOnOutsideClick?: boolean | 'until-edited';
@@ -59,7 +59,11 @@ const DIALOG_WIDTH = {
   md: 'sm:max-w-md',
   lg: 'sm:max-w-2xl',
   xl: 'sm:max-w-4xl',
+  full: '',
 } as const;
+
+const FULLSCREEN =
+  'fixed inset-0 z-50 flex h-dvh w-full flex-col overflow-hidden bg-black text-white focus:outline-none';
 
 export const DialogContent = ({
   children,
@@ -74,6 +78,7 @@ export const DialogContent = ({
   const returnTo = useContext(ReturnFocusContext);
   // Otherwise the size default would win on sm+ screens because it carries the `sm:` prefix.
   const ownWidth = /(^|\s)max-w-/.test(className ?? '');
+  const full = size === 'full';
   return (
     <RadixDialog.Portal forceMount>
       <RadixDialog.Overlay asChild forceMount>
@@ -104,16 +109,26 @@ export const DialogContent = ({
         }}
       >
         <motion.div
-          initial={{ opacity: 0, scale: reduceMotion ? 1 : 0.98, y: reduceMotion ? 0 : 8 }}
+          initial={{
+            opacity: 0,
+            scale: reduceMotion || full ? 1 : 0.98,
+            y: reduceMotion || full ? 0 : 8,
+          }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: reduceMotion ? 1 : 0.98, y: reduceMotion ? 0 : 8 }}
+          exit={{
+            opacity: 0,
+            scale: reduceMotion || full ? 1 : 0.98,
+            y: reduceMotion || full ? 0 : 8,
+          }}
           onInputCapture={() => {
             edited.current = true;
           }}
           className={cn(
-            'fixed bottom-0 left-0 right-0 z-50 max-h-[92dvh] w-full overflow-y-auto rounded-t-2xl border border-border bg-card shadow-xl focus:outline-none sm:bottom-auto sm:left-1/2 sm:right-auto sm:top-1/2 sm:w-[calc(100%-2rem)] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl',
-            !ownWidth && DIALOG_WIDTH[size],
-            padded && 'px-6 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:p-7',
+            full
+              ? FULLSCREEN
+              : 'fixed bottom-0 left-0 right-0 z-50 max-h-[92dvh] w-full overflow-y-auto rounded-t-2xl border border-border bg-card shadow-xl focus:outline-none sm:bottom-auto sm:left-1/2 sm:right-auto sm:top-1/2 sm:w-[calc(100%-2rem)] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl',
+            !full && !ownWidth && DIALOG_WIDTH[size],
+            !full && padded && 'px-6 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:p-7',
             className
           )}
         >

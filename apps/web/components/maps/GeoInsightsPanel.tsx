@@ -25,9 +25,10 @@ import { Button } from '@sureground/ui';
 import { Field } from '@sureground/ui';
 import { Skeleton } from '@sureground/ui';
 import { renterService } from '@/services/renterService';
+import { publicMarketService } from '@/services/publicMarketService';
 import { AddressInput } from '@/components/shared/location/AddressInput';
 import { unwrap } from '@/lib/apiHelpers';
-import { renterKeys } from '@/lib/queryKeys';
+import { publicMarketKeys, renterKeys } from '@/lib/queryKeys';
 import { pluralize } from '@/lib/format';
 import { formatPrice } from '@/types/renter';
 import type { NearbyPlace, TravelModeResult } from '@/types/renter';
@@ -59,12 +60,15 @@ interface GeoInsightsPanelProps {
   listingId: string;
   title?: string;
   defaultDestination?: string;
+  /** `public` reads the open endpoint, for listing pages that don't require sign-in. */
+  audience?: 'renter' | 'public';
 }
 
 export const GeoInsightsPanel = ({
   listingId,
   title,
   defaultDestination = 'Lagos Island',
+  audience = 'renter',
 }: GeoInsightsPanelProps) => {
   const [destinationDraft, setDestinationDraft] = useState(defaultDestination);
   const [destination, setDestination] = useState(defaultDestination);
@@ -74,8 +78,20 @@ export const GeoInsightsPanel = ({
     isLoading,
     isError,
   } = useQuery({
-    queryKey: [...renterKeys.geoInsights(listingId), destination || 'default'],
-    queryFn: () => unwrap(renterService.getGeoInsights(listingId, destination || undefined)),
+    queryKey: [
+      ...(audience === 'public'
+        ? publicMarketKeys.geoInsights(listingId)
+        : renterKeys.geoInsights(listingId)),
+      destination || 'default',
+    ],
+    queryFn: () =>
+      unwrap(
+        audience === 'public'
+          ? publicMarketService.geoInsights(listingId, destination || undefined)
+          : renterService.getGeoInsights(listingId, destination || undefined)
+      ),
+    // A side panel: its own message below, never the page's error screen.
+    throwOnError: false,
   });
 
   const hasRealData =
@@ -104,7 +120,7 @@ export const GeoInsightsPanel = ({
         <div className="rounded-xl bg-accent p-2 text-primary">
           <MapPin className="h-4 w-4" />
         </div>
-        <h2 className="type-heading">Location & Insights</h2>
+        <h2 className="type-heading">Location and neighbourhood</h2>
       </div>
 
       {isLoading ? (
@@ -116,7 +132,7 @@ export const GeoInsightsPanel = ({
         <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-border bg-card p-8 text-center">
           <MapPin className="h-8 w-8 text-muted-foreground" />
           <p className="text-sm font-medium text-foreground">
-            {title ? `${title}: map & insights pending` : 'Map & insights pending'}
+            {title ? `${title}: map and insights pending` : 'Map and insights pending'}
           </p>
           <p className="max-w-sm text-xs text-muted-foreground">
             {isError

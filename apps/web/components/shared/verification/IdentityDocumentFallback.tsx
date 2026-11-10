@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Button, DocumentUpload, Field, Select } from '@sureground/ui';
+import { Alert, Button, Checkbox, DocumentUpload, Field, Select } from '@sureground/ui';
 import {
   kycService,
   IDENTITY_DOCUMENT_TYPES,
@@ -26,6 +26,7 @@ export function IdentityDocumentFallback() {
   const [documentType, setDocumentType] = useState<IdentityDocumentType>('NATIONAL_ID');
   const [document, setDocument] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [consent, setConsent] = useState(false);
 
   const { data: status } = useQuery({
     queryKey: ['kyc-status'],
@@ -33,7 +34,8 @@ export function IdentityDocumentFallback() {
   });
 
   const submit = useMutation({
-    mutationFn: () => unwrap(kycService.submitIdentity({ documentType, document: document! })),
+    mutationFn: () =>
+      unwrap(kycService.submitIdentity({ documentType, document: document!, consent: true })),
     onSuccess: () => {
       setDocument(null);
       setError(null);
@@ -88,11 +90,17 @@ export function IdentityDocumentFallback() {
             hint="PDF or image: preview before submitting"
           />
         </div>
+        <Checkbox
+          checked={consent}
+          onCheckedChange={setConsent}
+          label="I agree to Sureground storing this document and our team checking it to verify my identity."
+          description="We keep it only as long as our privacy notice says, and you can ask us to delete it."
+        />
         {error && <Alert variant="danger">{error}</Alert>}
         <Button
           variant="secondary"
           onClick={() => submit.mutate()}
-          disabled={!document}
+          disabled={!document || !consent}
           isLoading={submit.isPending}
           loadingText="Submitting…"
         >

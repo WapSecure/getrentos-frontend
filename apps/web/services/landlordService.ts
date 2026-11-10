@@ -494,6 +494,9 @@ export const landlordService = {
       | 'rentPeriod'
       | 'allowsMonthlyPayment'
       | 'securityDeposit'
+      | 'serviceCharge'
+      | 'agencyFee'
+      | 'legalFee'
       | 'amenities'
       | 'availabilityDate'
       | 'allowPets'
@@ -503,6 +506,16 @@ export const landlordService = {
   ): Promise<ApiResponse<Listing>> {
     return safeCall(() =>
       authFetch('/landlord/listings', { method: 'POST', body: JSON.stringify(data) })
+    );
+  },
+
+  /** `null` clears a fee; an omitted fee is left as it is. */
+  async updateListingFees(
+    id: string,
+    fees: { serviceCharge?: number | null; agencyFee?: number | null; legalFee?: number | null }
+  ): Promise<ApiResponse<Listing>> {
+    return safeCall(() =>
+      authFetch(`/landlord/listings/${id}/fees`, { method: 'PATCH', body: JSON.stringify(fees) })
     );
   },
 

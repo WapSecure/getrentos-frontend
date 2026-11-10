@@ -26,6 +26,10 @@
       "import": "./src/utils/index.ts",
       "types": "./src/utils/index.ts"
     },
+    "./showroom": {
+      "import": "./src/showroom/index.ts",
+      "types": "./src/showroom/index.ts"
+    },
     "./csp": {
       "import": "./src/utils/csp.ts",
       "types": "./src/utils/csp.ts"
@@ -40,6 +44,7 @@
     "build": "echo 'No build step yet'",
     "dev": "echo 'No dev step yet'",
     "type-check": "tsc --noEmit",
+    "test": "node --experimental-strip-types --no-warnings --import ./test/register.mjs --test test/*.test.ts",
     "lint": "eslint ."
   },
   "dependencies": {

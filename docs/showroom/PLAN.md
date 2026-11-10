@@ -81,10 +81,10 @@ The showroom is a product capability, not a page.
 packages/shared/src/showroom/        property information model + mappers (web and mobile)
   types.ts                           ShowroomListing, MediaItem, CostLine, Fact, TrustSummary
   fromRental.ts fromSale.ts fromLand.ts fromShortlet.ts
-packages/ui/src/media/               design-system primitives (web)
+packages/ui/src/                     design-system primitives (web), flat like the rest of the package
   MediaViewer.tsx                    fullscreen viewer on our Dialog: keys, swipe, zoom, captions
   MediaMosaic.tsx                    hero grid: 1 large + 4, "Show all n"
-  VideoPlayer.tsx                    poster first; HLS natively on Safari, hls.js loaded on play elsewhere
+  VideoPlayer.tsx                    poster first; hls.js loaded on play, native HLS only without MSE (iPhone)
   TourEmbed.tsx                      the 360 iframe now inside ShortletListingDetail, made shared
 apps/web/components/showroom/        composition (server first, client islands only where needed)
   ShowroomPage.tsx                   picks sections per listing type
@@ -100,7 +100,7 @@ packages/ui-native (later)           MediaViewer for mobile on the same MediaIte
 - **Primitives:** in `@sureground/ui`, so landlord previews, realtor tools and the backoffice reuse them.
 - **Composition:** in `apps/web/components/showroom`. URLs (`/rent/[id]`, `/buy/[id]`, `/land/[id]`, `/shortlets/[id]`) and metadata stay exactly the same.
 - **Rendering:** the page stays a server component. The viewer, video, map and actions load as client islands; hls.js loads only when a video plays.
-- **Rollout:** the repo has no feature-flag system. `NEXT_PUBLIC_SHOWROOM=on` switches each route from `PublicListingPage` to `ShowroomPage`, so we can compare and roll back.
+- **Rollout:** the repo has no feature-flag system. `SHOWROOM_ENABLED=on` (server-only, read per render, so no rebuild) switches each route from `PublicListingPage` to `ShowroomPage`, so we can compare and roll back.
 
 **Media contract** (added to public detail responses next to today's fields, so nothing breaks):
 
@@ -159,7 +159,7 @@ Every milestone ends with browser checks in the VS Code bridge (rent, sale, land
 **Frontend:**
 
 - New: `packages/shared/src/showroom/{types,fromRental,fromSale,fromLand,index}.ts`, plus `*.test.ts` run with `node --test` (no new test dependency).
-- New: `packages/ui/src/media/{MediaViewer,MediaMosaic,VideoPlayer,TourEmbed}.tsx`, exported from `packages/ui/src/index.ts`.
+- New: `packages/ui/src/{MediaViewer,MediaMosaic,VideoPlayer,TourEmbed}.tsx`, exported from `packages/ui/src/index.ts`.
 - New: `apps/web/components/showroom/{ShowroomPage,ShowroomHero,ShowroomFacts,ShowroomCosts,ShowroomTrust,ShowroomNeighbourhood,ShowroomActions}.tsx`.
 - Changed:
   - `apps/web/lib/publicListingDetail.ts`: fetch only; mapping moves to shared.
@@ -167,7 +167,7 @@ Every milestone ends with browser checks in the VS Code bridge (rent, sale, land
   - `apps/web/components/shortlet/ShortletListingDetail.tsx`: uses `TourEmbed`.
 - New dependency: `hls.js` in `packages/ui`, loaded on play only. Our Mux stream is not playable in Chrome or Android browsers without it.
 - Tests:
-  - `tests/browser/showroom.web.spec.ts` with fixtures for rent, sale and land: full media, one photo, no photos, a broken image URL, 40 photos, video, tour.
+  - `tests/browser/showroom/` (fixture API plus check scripts; see M1 status) with fixtures for rent, sale and land: full media, one photo, no photos, a broken image URL, 40 photos, video, tour.
   - Keyboard and focus checks in the viewer.
   - Run singly, not the full suite.
 
@@ -186,3 +186,94 @@ Every milestone ends with browser checks in the VS Code bridge (rent, sale, land
 3. **hls.js** as one new web dependency (about 60 KB, loaded only on play), so listing videos play in Chrome and Android browsers.
 4. **Analytics (M4):** our own event endpoint, or an existing product-analytics service?
 5. **Flag rollout:** turn the showroom on for everyone once M1 passes, or run an A/B split once M4 tracking exists?
+
+## M1 status (2026-11-10)
+
+Built and checked in the browser; behind `SHOWROOM_ENABLED=on`, off by default.
+
+**Frontend:**
+
+- Shared listing model and mappers in `@sureground/shared/showroom`. 9 unit tests (`pnpm --filter @sureground/shared test`).
+- `MediaViewer`, `MediaMosaic`, `VideoPlayer` and `TourEmbed` in `@sureground/ui`, plus `Dialog size="full"`.
+- Showroom page for rent, sale and land, which adds:
+  - share, WhatsApp first
+  - the stored facts, and costs with the fees the listing doesn't state
+  - neighbourhood from the public endpoint, now on rent and sale
+  - a plain "what has been checked" section
+- Shortlets use the shared player and tour embed.
+
+**Backend:** PR #129 (additive, no migration). Specs pass; `tsc -p tsconfig.build.json` is clean. Not merged.
+
+**Checks** (`tests/browser/showroom/`):
+
+- Fixture API on :4300 serving `fx-*` listings and proxying everything else. `check.mjs` passes 37/37:
+  - viewer keys, swipe, zoom, grid, focus trap and return
+  - broken, empty, 40-photo and older-API listings
+  - sale and land
+  - phone layout: no sideways scroll, CLS ≤ 0.1, 44px controls
+- `video-chrome.mjs` plays the HLS stream in Google Chrome.
+
+**Found while testing:**
+
+- **Chrome:** it reports native HLS support, but playback stalled at 0:00, so hls.js comes first.
+- **VS Code's built-in browser:** it has no H.264, VP9 or AV1 decoder. The player says the browser can't play the video, not "check your connection".
+- **Thumbnails:** the strip downloads full-size photos, so it loads only the 9 nearest until resized images exist (M7).
+
+**Not done in M1:**
+
+- Mobile app (M5).
+- Room grouping and captions: need data, M2.
+- Playwright wiring into CI (billing).
+- Screen-reader pass.
+
+## Reference designs (2026-11-10)
+
+The product owner added reference images. We take their structure; the palette and type stay ours: no cream or terracotta, no serif display, per the no-AI-look rule.
+
+| Idea                                                                                              | Milestone                        |
+| ------------------------------------------------------------------------------------------------- | -------------------------------- |
+| Full-bleed viewer with room rail, control bar, thumbnail strip                                    | M1 (room rail shows once tagged) |
+| Swipe the hero on phones with a "3 / 8" counter                                                   | M1                               |
+| Key facts in one divided row                                                                      | M1                               |
+| Sticky price with one primary action on phones                                                    | M1 (existing bar)                |
+| Room name over the photo, media tabs (exterior, amenities…)                                       | M2 (needs room tags)             |
+| Listing grid: status badge, title and price on one line, facts line, result count, one filter bar | M3 (single ListingCard)          |
+| Map-first search with price pins and a drawn area                                                 | M6                               |
+| Floor plan beside the photos with level arrows                                                    | M2 capture, M8 display           |
+| Labelled callouts on a photo                                                                      | Later; needs lister annotations  |
+| Like and view counts                                                                              | Only after M4 measures them      |
+| "3D tour" call to action                                                                          | M8, real scan data only          |
+
+## M2 and M3 status (2026-11-10)
+
+**M2, real costs and media meaning:**
+
+- **Done for landlords:**
+  - Backend #132 adds service charge, agency and legal fees on listings (naira), a 360 tour link and per-photo room and caption on properties. The migration was applied after a backup.
+  - On the web, the landlord publish form and a Fees dialog take the fees; `PropertyPhotoEditor` handles rooms, captions, order, cover and the tour link.
+  - Checked end to end on the seed landlord's Ikoyi house: the public page shows the fees, totals, room shortcuts, the room names over photos and the 360 tour.
+- **In progress:** the same for owners and estate managers. Their backend endpoints don't accept the fields yet.
+
+**M3, one card:** done, frontend #105. One `ListingCard` (grid, compact, map) now serves rent, buy, shortlets, land, microsites, estate storefronts, renter Discover and Saved, buyer pages and similar listings. The renter compare button now really adds to the comparison.
+
+**Follow-ups done:**
+
+- One trust signal per card: the trust pill, with no extra tick.
+- Repeated place names collapse ("Lagos, Lagos" shows as "Lagos").
+
+## Rollout and measurement (2026-11-10)
+
+- **Showroom:** on for everyone. `SHOWROOM_ENABLED=off` brings back the old page without a rebuild.
+- **M2 for owners and estates:**
+  - Owners: backend #133 plus the owner editor. Checked live: rooms, caption and tour show on `/buy`.
+  - Estates: backend #135 stores details on the listing (`Listing.mediaDetails`), so a landlord or owner save can't wipe them, plus the estate media panel. Not checked live, because no seeded estate listing has an owner agreement.
+- **M4, our own analytics (backend #134):**
+  - **Intake:** `POST /analytics/events` takes 16 allow-listed event names. It stores no user id, IP or user agent, and drops unknown fields such as `email`.
+  - **Report:** `GET /admin/analytics/showroom-funnel` (`reports.view`) gives session funnels and media engagement by market, plus outcomes from existing records.
+  - **Retention:** nightly, 400 days.
+  - **Web:** `lib/analytics.ts` batches events and sends a `text/plain` beacon when the page is hidden. It skips sending under Do Not Track.
+  - **Checked live:** a test journey showed up in the funnel report.
+- **Next:**
+  - a funnel page in the backoffice
+  - instrument shortlets, land and Discover cards
+  - M7 media infrastructure

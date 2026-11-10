@@ -3,7 +3,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@sureground/ui';
 import { Alert, Button, Field, Input, NumberInput, Select } from '@sureground/ui';
-import { ImagePlus, Play, Star, Video, X } from '@sureground/icons';
+import { Play, Video } from '@sureground/icons';
+import { tourSource } from '@sureground/shared';
+import {
+  mediaDetailsFor,
+  photosFromKeys,
+  PropertyPhotoEditor,
+  type EditablePhoto,
+} from '@/components/shared/media/PropertyPhotoEditor';
 import { AddressFields, type AddressFieldsValue } from '@/components/shared/location/AddressFields';
 import { LocationPicker } from '@/components/maps/LocationPicker';
 import type { MapPoint } from '@/services/geocodeService';
@@ -15,20 +22,6 @@ import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import type { Property, PropertyType, PropertyUpdatePayload } from '@/types/landlord';
 import { videoFileProblem } from '@/lib/videoFile';
-
-type Photo = {
-  id: string;
-  key?: string;
-  url: string;
-  file?: File;
-};
-
-/** Cover first, then the rest: mirrors how the API orders `galleryImageKeys`. */
-const photosFromProperty = (property: Property): Photo[] => {
-  const keys = property.galleryImageKeys ?? [];
-  const urls = property.galleryImages ?? [];
-  return keys.map((key, index) => ({ id: key, key, url: urls[index] ?? '' }));
-};
 
 interface EditPropertyModalProps {
   property: Property | null;
@@ -95,11 +88,19 @@ const EditPropertyForm = ({
     property.purchasePrice ? String(property.purchasePrice) : ''
   );
 
-  const [photos, setPhotos] = useState<Photo[]>(() => photosFromProperty(property));
+  const [photos, setPhotos] = useState<EditablePhoto[]>(() =>
+    photosFromKeys(
+      property.galleryImageKeys ?? [],
+      property.galleryImages ?? [],
+      property.mediaDetails
+    )
+  );
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoPreviewUrl, setVideoPreviewUrl] = useState<string | undefined>(undefined);
   const [videoKey, setVideoKey] = useState<string | undefined>(property.videoTourKey);
   const [videoCleared, setVideoCleared] = useState(false);
+  const [tourUrl, setTourUrl] = useState(property.tourUrl ?? '');
+  const tourInvalid = tourUrl.trim() !== '' && !tourSource(tourUrl.trim());
   const [saving, setSaving] = useState(false);
   const [mediaError, setMediaError] = useState<string | null>(null);
   const objectUrls = useRef<string[]>([]);
@@ -131,27 +132,6 @@ const EditPropertyForm = ({
     setVideoCleared(true);
   };
 
-  const addPhotos = (files: FileList | null) => {
-    if (!files?.length) return;
-    const additions: Photo[] = Array.from(files)
-      .slice(0, Math.max(0, 12 - photos.length))
-      .map((file) => {
-        const url = URL.createObjectURL(file);
-        objectUrls.current.push(url);
-        return { id: `${file.name}-${file.lastModified}-${url}`, url, file };
-      });
-    if (additions.length) setPhotos((current) => [...current, ...additions]);
-  };
-
-  const removePhoto = (id: string) => setPhotos((current) => current.filter((p) => p.id !== id));
-
-  const makeCover = (id: string) =>
-    setPhotos((current) => {
-      const target = current.find((p) => p.id === id);
-      if (!target) return current;
-      return [target, ...current.filter((p) => p.id !== id)];
-    });
-
   const handleSave = async () => {
     setSaving(true);
     setMediaError(null);
@@ -165,6 +145,7 @@ const EditPropertyForm = ({
         })
       );
       const galleryImageKeys = uploaded.filter((key): key is string => !!key);
+      const mediaDetails = mediaDetailsFor(photos, uploaded);
 
       let nextVideoKey: string | null = videoCleared ? null : (videoKey ?? null);
       if (videoFile) {
@@ -187,6 +168,8 @@ const EditPropertyForm = ({
         coverImageKey: galleryImageKeys[0] ?? null,
         galleryImageKeys,
         videoTourKey: nextVideoKey,
+        tourUrl: tourUrl.trim() || null,
+        mediaDetails,
       });
 
       // Detached blobs are left to the backend's GC: its DELETE refuses keys still attached, so deleting here would race the PATCH.
@@ -199,8 +182,6 @@ const EditPropertyForm = ({
       setSaving(false);
     }
   };
-
-  const coverId = photos[0]?.id;
 
   return (
     <>
@@ -272,71 +253,12 @@ const EditPropertyForm = ({
           <div>
             <p className="text-sm font-medium text-foreground">Photos &amp; video</p>
             <p className="text-xs text-muted-foreground mt-0.5">
-              The first photo is the cover renters see on your listing.
+              The first photo is the cover renters see. Tagging rooms groups the gallery for
+              renters; a short caption says what a photo shows.
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-            {photos.map((photo) => (
-              <div
-                key={photo.id}
-                className="relative aspect-video overflow-hidden rounded-lg border border-border bg-muted"
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={photo.url} alt="" className="h-full w-full object-cover" />
-                {photo.id === coverId && (
-                  <span className="absolute left-1 top-1 rounded bg-black/70 px-1.5 py-0.5 text-2xs font-medium text-white">
-                    Cover
-                  </span>
-                )}
-                <div className="absolute right-1 top-1 flex gap-1">
-                  {photo.id !== coverId && (
-                    <button
-                      type="button"
-                      aria-label="Make cover photo"
-                      title="Make cover photo"
-                      onClick={() => makeCover(photo.id)}
-                      className="rounded bg-black/70 p-1 text-white hover:bg-black/90"
-                    >
-                      <Star className="h-3 w-3" />
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    aria-label="Remove photo"
-                    title="Remove photo"
-                    onClick={() => removePhoto(photo.id)}
-                    className="rounded bg-black/70 p-1 text-white hover:bg-destructive"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              </div>
-            ))}
-
-            {photos.length < 12 && (
-              <label className="flex aspect-video cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-border text-muted-foreground transition-colors hover:border-primary hover:text-primary focus-within:ring-2 focus-within:ring-ring">
-                <input
-                  type="file"
-                  multiple
-                  accept="image/jpeg,image/png,image/webp"
-                  className="sr-only"
-                  onChange={(event) => {
-                    addPhotos(event.target.files);
-                    event.target.value = '';
-                  }}
-                />
-                <ImagePlus className="h-4 w-4" />
-                <span className="text-2xs">Add photos</span>
-              </label>
-            )}
-          </div>
-
-          {photos.length === 0 && (
-            <p className="text-xs text-warning">
-              Without a photo your listing card shows a placeholder instead of the property.
-            </p>
-          )}
+          <PropertyPhotoEditor photos={photos} onChange={setPhotos} />
 
           <div className="flex items-center justify-between gap-2 rounded-lg border border-border p-2">
             <div className="flex min-w-0 items-center gap-2">
@@ -389,6 +311,20 @@ const EditPropertyForm = ({
             />
           )}
 
+          <Field
+            label="360 tour link"
+            hint="Matterport, Kuula, CloudPano, Theasys or Momento360. Renters load it only when they tap it."
+            error={tourInvalid ? 'Use a link from one of the tour sites listed.' : undefined}
+          >
+            <Input
+              type="url"
+              inputMode="url"
+              value={tourUrl}
+              onChange={(e) => setTourUrl(e.target.value)}
+              placeholder="https://kuula.co/share/…"
+            />
+          </Field>
+
           {mediaError && <Alert variant="danger">{mediaError}</Alert>}
         </div>
 
@@ -396,7 +332,7 @@ const EditPropertyForm = ({
           variant="primary"
           fullWidth
           onClick={handleSave}
-          disabled={!name.trim() || !address.trim()}
+          disabled={!name.trim() || !address.trim() || tourInvalid}
           isLoading={saving}
           loadingText="Saving…"
         >

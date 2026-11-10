@@ -337,7 +337,7 @@ function Gallery({ listing }: { listing: PublicListingDetail }) {
   );
 }
 
-function offerJsonLd(listing: PublicListingDetail) {
+export function offerJsonLd(listing: PublicListingDetail) {
   return {
     '@context': 'https://schema.org',
     '@type': 'Offer',

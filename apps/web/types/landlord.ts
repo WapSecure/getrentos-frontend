@@ -1,3 +1,4 @@
+import type { MediaRoom } from '@sureground/shared/showroom';
 import type { ChargeCategory } from '@/lib/chargeCategory';
 import type { SharedCreditCheck } from '@/types/credit-check';
 import type {
@@ -50,6 +51,10 @@ export interface Property {
   galleryImageKeys?: string[];
   videoTourUrl?: string;
   videoTourKey?: string;
+  /** A 360 tour link on an allowed host. */
+  tourUrl?: string;
+  /** Room and caption per photo, keyed by storage key. */
+  mediaDetails?: PropertyMediaDetails;
   verificationStatus: VerificationStatus;
   totalUnits: number;
   occupiedUnits: number;
@@ -91,7 +96,13 @@ export type PropertyUpdatePayload = Partial<
   coverImageKey?: string | null;
   /** `null` clears the video tour; omit to leave it untouched. */
   videoTourKey?: string | null;
+  /** `null` or '' clears it. */
+  tourUrl?: string | null;
+  /** Replaces the whole map; `null` clears it. Keys must be this property's photos. */
+  mediaDetails?: PropertyMediaDetails | null;
 };
+
+export type PropertyMediaDetails = Record<string, { room?: MediaRoom; caption?: string }>;
 
 export interface Unit {
   id: string;
@@ -129,6 +140,10 @@ export interface Listing {
   /** Only meaningful when rentPeriod is 'year'. */
   allowsMonthlyPayment: boolean;
   securityDeposit?: number;
+  /** Naira. Absent = not stated; 0 = none. */
+  serviceCharge?: number;
+  agencyFee?: number;
+  legalFee?: number;
   amenities: string[];
   availabilityDate: string;
   allowPets: boolean;
