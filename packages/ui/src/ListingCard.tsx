@@ -1,6 +1,6 @@
 'use client';
 
-import { forwardRef, useState, type ReactNode } from 'react';
+import { forwardRef, useEffect, useRef, useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { BadgeCheck, ImageOff } from '@sureground/icons';
 import { cn, formatCurrency, tidyPlace } from '@sureground/shared';
@@ -25,6 +25,8 @@ export interface ListingCardProps {
   href?: string;
   /** Runs on open: alongside navigation when `href` is set, instead of it otherwise. */
   onOpen?: () => void;
+  /** Runs once, when half the card has been on screen (for impression counts). */
+  onVisible?: () => void;
   location?: string | null;
   price?: number | null;
   priceUnit?: ListingPriceUnit;
@@ -137,10 +139,35 @@ const ListingImage = ({
   );
 };
 
+function useVisibleOnce(onVisible?: () => void) {
+  const handler = useRef(onVisible);
+  const [element, setElement] = useState<HTMLElement | null>(null);
+  const wanted = Boolean(onVisible);
+  useEffect(() => {
+    handler.current = onVisible;
+  });
+  useEffect(() => {
+    if (!element || !wanted || typeof IntersectionObserver === 'undefined') return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          handler.current?.();
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.5 }
+    );
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [element, wanted]);
+  return setElement;
+}
+
 export const ListingCard = ({
   title,
   href,
   onOpen,
+  onVisible,
   location,
   price,
   priceUnit,
@@ -164,6 +191,7 @@ export const ListingCard = ({
 }: ListingCardProps) => {
   const isGrid = variant === 'grid';
   const isMap = variant === 'map';
+  const visibleRef = useVisibleOnce(onVisible);
   const factsLine = listingFactsLine(facts);
   const hasPrice = typeof price === 'number' && Number.isFinite(price);
 
@@ -268,6 +296,7 @@ export const ListingCard = ({
   if (isGrid) {
     return (
       <article
+        ref={visibleRef}
         className={cn(
           'group relative flex min-w-0 flex-col rounded-xl',
           selected && 'ring-2 ring-primary ring-offset-4 ring-offset-background',
@@ -299,6 +328,7 @@ export const ListingCard = ({
 
   return (
     <article
+      ref={visibleRef}
       className={cn(
         '@container group relative flex min-w-0 gap-3 overflow-hidden rounded-xl border bg-card p-2.5 text-card-foreground shadow-xs transition-[border-color,box-shadow] duration-150 hover:border-foreground/15 hover:shadow-sm',
         selected ? 'border-primary shadow-[inset_0_0_0_1px_var(--primary)]' : 'border-border',

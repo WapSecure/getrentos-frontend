@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { ArrowLeft, BadgeCheck, Bath, BedDouble, Check, MapPin, Ruler } from '@sureground/icons';
-import { Badge, DescriptionList, MediaMosaic } from '@sureground/ui';
+import { Badge, DescriptionList } from '@sureground/ui';
 import { Footer } from '@/components/layout/Footer';
 import { Navigation } from '@/components/layout/Navigation';
 import { JsonLd } from '@/components/seo/JsonLd';
@@ -20,6 +20,7 @@ import { ShowroomAside } from './ShowroomAside';
 import { ShowroomNeighbourhood } from './ShowroomNeighbourhood';
 import { ShowroomShareButton } from './ShowroomShareButton';
 import { ShowroomTrust } from './ShowroomTrust';
+import { ShowroomMedia, TrackDetailView } from './ShowroomTracking';
 
 const MARKET_NOUN: Record<PublicDetailMarket, string> = {
   rent: 'Rentals',
@@ -71,7 +72,10 @@ export async function ShowroomPage({
           {MARKET_NOUN[market]}
         </Link>
 
-        <MediaMosaic
+        <TrackDetailView listingId={listing.id} market={market} />
+        <ShowroomMedia
+          listingId={listing.id}
+          market={market}
           items={listing.media}
           title={listing.title}
           className="-mx-4 mt-3 rounded-none shadow-none sm:mx-0 sm:rounded-2xl sm:shadow-sm"
@@ -90,7 +94,7 @@ export async function ShowroomPage({
                   {listing.title}
                 </h1>
                 <div className="flex shrink-0 gap-2">
-                  <ShowroomShareButton title={listing.title} path={path} />
+                  <ShowroomShareButton listingId={listing.id} title={listing.title} path={path} />
                   <SaveListingButton
                     listingId={listing.id}
                     returnPath={path}

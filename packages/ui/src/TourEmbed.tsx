@@ -8,10 +8,11 @@ interface TourEmbedProps {
   url: string;
   title: string;
   className?: string;
+  onOpen?: () => void;
 }
 
 /** Loads the provider only on request: a 360 tour is heavy on mobile data. */
-export function TourEmbed({ url, title, className }: TourEmbedProps) {
+export function TourEmbed({ url, title, className, onOpen }: TourEmbedProps) {
   const [open, setOpen] = useState(false);
   const tour = tourSource(url);
   if (!tour) return null;
@@ -31,7 +32,10 @@ export function TourEmbed({ url, title, className }: TourEmbedProps) {
       ) : (
         <button
           type="button"
-          onClick={() => setOpen(true)}
+          onClick={() => {
+            setOpen(true);
+            onOpen?.();
+          }}
           className="flex h-full w-full flex-col items-center justify-center gap-3 p-6 text-center text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white"
         >
           <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/30">

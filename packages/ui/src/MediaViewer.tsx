@@ -26,6 +26,12 @@ import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } fr
 import { TourEmbed } from './TourEmbed';
 import { VideoPlayer } from './VideoPlayer';
 
+export interface MediaEvent {
+  type: 'gallery_open' | 'media_category_select' | 'video_start' | 'video_complete' | 'tour_start';
+  mediaIndex?: number;
+  room?: MediaRoom;
+}
+
 interface MediaViewerProps {
   items: MediaItem[];
   open: boolean;
@@ -33,6 +39,8 @@ interface MediaViewerProps {
   /** Index into `items` to show first. */
   startIndex?: number;
   title: string;
+  /** For measurement; the viewer itself never sends anything. */
+  onMediaEvent?: (event: MediaEvent) => void;
 }
 
 const MAX_ZOOM = 4;
@@ -55,6 +63,7 @@ export function MediaViewer({
   onOpenChange,
   startIndex = 0,
   title,
+  onMediaEvent,
 }: MediaViewerProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -64,6 +73,7 @@ export function MediaViewer({
             items={items}
             startIndex={clamp(startIndex, 0, items.length - 1)}
             title={title}
+            onMediaEvent={onMediaEvent}
           />
         </DialogContent>
       )}
@@ -75,10 +85,12 @@ function ViewerBody({
   items,
   startIndex,
   title,
+  onMediaEvent,
 }: {
   items: MediaItem[];
   startIndex: number;
   title: string;
+  onMediaEvent?: (event: MediaEvent) => void;
 }) {
   const [index, setIndex] = useState(startIndex);
   const [grid, setGrid] = useState(false);
@@ -282,6 +294,8 @@ function ViewerBody({
                     poster={item.posterUrl}
                     title={`${title}, video tour`}
                     className="max-h-full"
+                    onStart={() => onMediaEvent?.({ type: 'video_start', mediaIndex: index })}
+                    onComplete={() => onMediaEvent?.({ type: 'video_complete', mediaIndex: index })}
                   />
                 ) : item.kind === 'tour' ? (
                   <TourEmbed
@@ -289,6 +303,7 @@ function ViewerBody({
                     url={item.url}
                     title={`${title}, 360 tour`}
                     className="max-h-full"
+                    onOpen={() => onMediaEvent?.({ type: 'tour_start', mediaIndex: index })}
                   />
                 ) : failed.has(item.id) ? (
                   <div className="flex flex-col items-center gap-2 text-sm text-white/70">
@@ -365,7 +380,10 @@ function ViewerBody({
                 <button
                   key={room}
                   type="button"
-                  onClick={() => go(first)}
+                  onClick={() => {
+                    go(first);
+                    onMediaEvent?.({ type: 'media_category_select', room, mediaIndex: first });
+                  }}
                   aria-current={current ? 'true' : undefined}
                   className={cn(
                     'relative h-28 shrink-0 overflow-hidden rounded-xl text-left ring-2 focus:outline-none focus-visible:ring-white',

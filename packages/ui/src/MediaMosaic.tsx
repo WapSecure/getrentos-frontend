@@ -4,13 +4,14 @@ import { useState } from 'react';
 import { Compass, ImageOff, Images, Play } from '@sureground/icons';
 import { cn, MEDIA_ROOM_LABEL, type MediaItem, type MediaRoom } from '@sureground/shared';
 import { Button } from './Button';
-import { MediaViewer } from './MediaViewer';
+import { MediaViewer, type MediaEvent } from './MediaViewer';
 
 interface MediaMosaicProps {
   items: MediaItem[];
   title: string;
   emptyLabel?: string;
   className?: string;
+  onMediaEvent?: (event: MediaEvent) => void;
 }
 
 // Fills the 4×2 grid whatever the photo count, so no empty slot shows.
@@ -32,8 +33,14 @@ export function MediaMosaic({
   title,
   emptyLabel = 'Photos are being prepared for this listing',
   className,
+  onMediaEvent,
 }: MediaMosaicProps) {
-  const [openAt, setOpenAt] = useState<number | null>(null);
+  const [openAt, setOpenAtState] = useState<number | null>(null);
+  const setOpenAt = (index: number | null) => {
+    if (index !== null && openAt === null)
+      onMediaEvent?.({ type: 'gallery_open', mediaIndex: index });
+    setOpenAtState(index);
+  };
   const [phoneAt, setPhoneAt] = useState(0);
   const photos = items.filter((m) => m.kind === 'image');
   const videoAt = items.findIndex((m) => m.kind === 'video');
@@ -157,7 +164,10 @@ export function MediaMosaic({
               variant="secondary"
               size="sm"
               className="shrink-0"
-              onClick={() => setOpenAt(first)}
+              onClick={() => {
+                setOpenAt(first);
+                onMediaEvent?.({ type: 'media_category_select', room, mediaIndex: first });
+              }}
             >
               {MEDIA_ROOM_LABEL[room]}
               <span className="data-value text-muted-foreground">{count}</span>
@@ -172,6 +182,7 @@ export function MediaMosaic({
         startIndex={openAt ?? 0}
         onOpenChange={(open) => !open && setOpenAt(null)}
         title={title}
+        onMediaEvent={onMediaEvent}
       />
     </>
   );

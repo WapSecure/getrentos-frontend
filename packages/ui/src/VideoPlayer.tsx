@@ -12,6 +12,8 @@ interface VideoPlayerProps {
   poster?: string;
   title: string;
   className?: string;
+  onStart?: () => void;
+  onComplete?: () => void;
 }
 
 const isHls = (src: string) => /\.m3u8(\?|$)/i.test(src);
@@ -25,7 +27,14 @@ const canDecodeH264 = (video: HTMLVideoElement) =>
   video.canPlayType('video/mp4; codecs="avc1.42E01E"') !== '';
 
 /** Nothing downloads until the viewer presses play, so a page with a video costs no extra data. */
-export function VideoPlayer({ src, poster, title, className }: VideoPlayerProps) {
+export function VideoPlayer({
+  src,
+  poster,
+  title,
+  className,
+  onStart,
+  onComplete,
+}: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<HlsInstance | null>(null);
   const [started, setStarted] = useState(false);
@@ -43,6 +52,7 @@ export function VideoPlayer({ src, poster, title, className }: VideoPlayerProps)
 
   const start = async () => {
     setFailed(null);
+    if (!started) onStart?.();
     setStarted(true);
     if (embed) return;
     const video = videoRef.current;
@@ -96,6 +106,7 @@ export function VideoPlayer({ src, poster, title, className }: VideoPlayerProps)
           playsInline
           preload="none"
           aria-label={title}
+          onEnded={onComplete}
           onError={(event) =>
             started &&
             setFailed(

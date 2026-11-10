@@ -5,6 +5,7 @@ import { Heart } from '@sureground/icons';
 import { useRouter } from 'next/navigation';
 import { useMarketSaved } from '@/hooks/useMarketSaved';
 import { cn } from '@sureground/shared';
+import { track } from '@/lib/analytics';
 
 export function SaveListingButton({
   listingId,
@@ -32,6 +33,7 @@ export function SaveListingButton({
         router.push(`/login?next=${encodeURIComponent(returnPath)}`);
         return;
       }
+      if (!saved) track({ name: 'property_save', listingId });
       toggle.mutate({ listingId, next: !saved });
     },
   };

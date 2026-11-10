@@ -28,6 +28,7 @@ import { PROPERTY_TYPE_OPTIONS } from '@/lib/propertyTypes';
 import { SaveListingButton } from './SaveListingButton';
 import { ListingComparisonDialog } from './ListingComparisonDialog';
 import { TrustChainBadge } from '@/components/shared/trust/TrustChainBadge';
+import { track } from '@/lib/analytics';
 
 // Shared with the server component that pre-renders the first page, so both ask for the same page size.
 const PAGE_SIZE = PUBLIC_MARKET_PAGE_SIZE;
@@ -60,6 +61,7 @@ const MarketListingCard = ({
   listing,
   market,
   eager,
+  position,
   compared,
   compareDisabled,
   onCompare,
@@ -67,14 +69,18 @@ const MarketListingCard = ({
   listing: PublicListingCard;
   market: PublicMarket;
   eager: boolean;
+  position: number;
   compared: boolean;
   compareDisabled: boolean;
   onCompare: (listing: PublicListingCard) => void;
 }) => {
   const href = detailHref(market, listing.id);
+  const event = { listingId: listing.id, market, surface: `${market}_list`, props: { position } };
   return (
     <ListingCard
       href={href}
+      onVisible={() => track({ name: 'property_impression', ...event })}
+      onOpen={() => track({ name: 'property_card_click', ...event })}
       title={listing.title}
       location={listing.location}
       price={listing.price}
@@ -463,6 +469,7 @@ export const PublicMarketBrowser = ({
                 key={listing.id}
                 listing={listing}
                 eager={index < 3}
+                position={index}
                 market={market}
                 compared={compared.some((item) => item.id === listing.id)}
                 compareDisabled={
