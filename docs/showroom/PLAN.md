@@ -260,3 +260,20 @@ The product owner added reference images. We take their structure; the palette a
 
 - One trust signal per card: the trust pill, with no extra tick.
 - Repeated place names collapse ("Lagos, Lagos" shows as "Lagos").
+
+## Rollout and measurement (2026-11-10)
+
+- **Showroom:** on for everyone. `SHOWROOM_ENABLED=off` brings back the old page without a rebuild.
+- **M2 for owners and estates:**
+  - Owners: backend #133 plus the owner editor. Checked live: rooms, caption and tour show on `/buy`.
+  - Estates: backend #135 stores details on the listing (`Listing.mediaDetails`), so a landlord or owner save can't wipe them, plus the estate media panel. Not checked live, because no seeded estate listing has an owner agreement.
+- **M4, our own analytics (backend #134):**
+  - **Intake:** `POST /analytics/events` takes 16 allow-listed event names. It stores no user id, IP or user agent, and drops unknown fields such as `email`.
+  - **Report:** `GET /admin/analytics/showroom-funnel` (`reports.view`) gives session funnels and media engagement by market, plus outcomes from existing records.
+  - **Retention:** nightly, 400 days.
+  - **Web:** `lib/analytics.ts` batches events and sends a `text/plain` beacon when the page is hidden. It skips sending under Do Not Track.
+  - **Checked live:** a test journey showed up in the funnel report.
+- **Next:**
+  - a funnel page in the backoffice
+  - instrument shortlets, land and Discover cards
+  - M7 media infrastructure
