@@ -6,6 +6,7 @@ import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Heart, MoreHorizontal, Settings2 } from '@sureground/icons/native';
 import {
+  Button,
   Chip,
   IconButton,
   PropertyCard,
@@ -155,6 +156,14 @@ export default function Saved() {
           description: activeWishlistId
             ? 'Move a saved home here from its card menu.'
             : 'Tap the heart on any listing to keep it here for later.',
+          action: activeWishlistId ? undefined : (
+            <Button
+              label="Browse homes"
+              size="sm"
+              fullWidth={false}
+              onPress={() => router.push('/(app)/(renter)/discover')}
+            />
+          ),
         }}
       >
         <FlashList

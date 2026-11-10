@@ -8,19 +8,21 @@ import {
   type NativeSyntheticEvent,
 } from 'react-native';
 import { Image } from 'expo-image';
-import { ImageOff } from '@sureground/icons/native';
-import { Text, useTheme } from '@sureground/ui-native';
+import { ListingPlaceholder, useTheme } from '@sureground/ui-native';
 
 export interface PropertyGalleryProps {
   images: string[];
   height?: number;
   emptyLabel?: string;
+  /** Neighbourhood named on the no-photo placeholder. */
+  area?: string | null;
 }
 
 export function PropertyGallery({
   images,
   height = 260,
-  emptyLabel = 'No photos for this listing yet',
+  emptyLabel = 'Photos coming soon',
+  area,
 }: PropertyGalleryProps) {
   const { colors, spacing } = useTheme();
   const window = useWindowDimensions();
@@ -40,20 +42,10 @@ export function PropertyGallery({
   };
 
   if (images.length === 0) {
+    // Shorter than a real gallery: an empty state should not take half the screen.
     return (
-      <View
-        style={{
-          height,
-          backgroundColor: colors.secondary,
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: spacing.xs,
-        }}
-      >
-        <ImageOff size={26} color={colors.mutedForeground} />
-        <Text variant="caption" color="mutedForeground">
-          {emptyLabel}
-        </Text>
+      <View style={{ height: Math.min(height, 220) }}>
+        <ListingPlaceholder size="hero" area={area} caption={emptyLabel} topInset={spacing.lg} />
       </View>
     );
   }

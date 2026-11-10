@@ -2,7 +2,7 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { Image } from 'expo-image';
 import { useQuery } from '@tanstack/react-query';
-import { Text, useTheme } from '@sureground/ui-native';
+import { ListingPlaceholder, Text, useTheme } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { recentlyViewedApi } from '@/lib/api/recentlyViewed';
 import { formatNaira } from '@/lib/format';
@@ -46,7 +46,9 @@ export function RecentlyViewedStrip() {
                   accessible={false}
                   style={{ flex: 1 }}
                 />
-              ) : null}
+              ) : (
+                <ListingPlaceholder size="thumb" />
+              )}
             </View>
             <Text variant="caption" numberOfLines={1} style={{ marginTop: 4, fontWeight: '600' }}>
               {p.title}

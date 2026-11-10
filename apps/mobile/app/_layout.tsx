@@ -14,7 +14,7 @@ import { AuthProvider, useAuth } from '@/lib/auth/AuthProvider';
 import { useMagicLink } from '@/lib/auth/useMagicLink';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useOverTheAirUpdates } from '@/hooks/useOverTheAirUpdates';
-import { portalHref } from '@/lib/roles';
+import { portalHref, samePortalScreenHref } from '@/lib/roles';
 import { LISTING_AUDIENCE, portalForPendingListing, takeListingIntent } from '@/lib/pendingListing';
 import { HydrateThemePreference, persistThemePreference } from '@/lib/theme/preference';
 import { BRAND_FONT_SOURCES, BRAND_FONTS } from '@/lib/theme/fonts';
@@ -74,7 +74,9 @@ function useProtectedRoute(onboardingSeen: boolean | null) {
         if (group !== 'portal-unavailable') target = '/(app)/portal-unavailable';
       } else if (usablePortal && group?.startsWith('(') && group !== `(${usablePortal})`) {
         // Group segments are invisible in URLs, so a deep link can resolve into another portal's same-named screen; only re-route on a portal group marker.
-        target = portalHref(usablePortal);
+        // Open that screen in the user's own portal when it has one, else its home.
+        target =
+          samePortalScreenHref(usablePortal, (segments as string[])[2]) ?? portalHref(usablePortal);
       }
     }
 

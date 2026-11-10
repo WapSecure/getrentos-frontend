@@ -182,3 +182,31 @@ export const SIGNUP_ROLES: SignupRole[] = [
     requires: ['identity'],
   },
 ];
+
+/**
+ * Tab screens that several portals define under the same name. Group segments are not
+ * in URLs, so a link to "/messages" can resolve into another portal's group; we then
+ * open the same screen in the user's own portal instead of dropping them on its home.
+ * Keep in step with app/(app)/(<portal>)/<screen>.tsx.
+ */
+const SHARED_TAB_SCREENS: Record<string, readonly Portal[]> = {
+  discover: ['buyer', 'renter'],
+  messages: ['agent', 'buyer', 'landlord', 'owner', 'realtor', 'renter'],
+  account: [
+    'agent',
+    'buyer',
+    'estate',
+    'gateman',
+    'landlord',
+    'manager',
+    'owner',
+    'realtor',
+    'renter',
+    'resident',
+  ],
+};
+
+export function samePortalScreenHref(portal: Portal, screen: string | undefined): string | null {
+  if (!screen) return null;
+  return SHARED_TAB_SCREENS[screen]?.includes(portal) ? `${portalHref(portal)}/${screen}` : null;
+}
