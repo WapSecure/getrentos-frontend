@@ -209,7 +209,7 @@ export function StepUpSheet({
   const submitLabel = isPasskey
     ? 'Use passkey'
     : needsCode
-      ? 'Email me a code'
+      ? 'Send me a code'
       : isSetup
         ? usePasskeySetup
           ? `Add ${biometricLabel} and confirm`

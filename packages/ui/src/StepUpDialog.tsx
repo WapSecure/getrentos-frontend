@@ -352,7 +352,7 @@ export function StepUpDialog({
               {isPasskey
                 ? 'Use passkey'
                 : needsCode
-                  ? 'Email me a code'
+                  ? 'Send me a code'
                   : isSetup && canSetPin
                     ? 'Set PIN and confirm'
                     : 'Confirm'}
