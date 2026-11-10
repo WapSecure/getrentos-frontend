@@ -2,6 +2,7 @@
 
 import { ChevronRight, Download, Shield, Calendar } from '@sureground/icons';
 import { Badge, Button, IconButton } from '@sureground/ui';
+import type { RentReleaseAction } from '@sureground/shared';
 import { formatCurrency, formatLagosDate } from '@/lib/format';
 import { paymentStatusBadges } from '@/lib/statusBadge';
 
@@ -29,6 +30,8 @@ interface PaymentCardProps {
   onDownloadReceipt: () => void;
   onDispute: () => void;
   onConfirmMoveIn: () => void;
+  /** Set only on held rent: move-in is asked once per lease, then held rent can be released early. */
+  releaseAction?: RentReleaseAction;
 }
 
 const escrowLabel = (status: Payment['escrowStatus']): string =>
@@ -50,6 +53,7 @@ export const PaymentCard = ({
   onDownloadReceipt,
   onDispute,
   onConfirmMoveIn,
+  releaseAction,
 }: PaymentCardProps) => {
   const status = paymentStatusBadges[payment.status];
   const StatusIcon = status.icon ?? Calendar;
@@ -162,17 +166,17 @@ export const PaymentCard = ({
                 Pay again
               </Button>
             )}
-            {isHeld && (
+            {isHeld && releaseAction && (
               <Button
                 size="sm"
-                variant="primary"
+                variant={releaseAction === 'confirm-move-in' ? 'primary' : 'outline'}
                 onClick={(event) => {
                   event.stopPropagation();
                   onConfirmMoveIn();
                 }}
                 className="whitespace-nowrap"
               >
-                Confirm move-in
+                {releaseAction === 'confirm-move-in' ? 'Confirm move-in' : 'Release now'}
               </Button>
             )}
             {isHeld && (

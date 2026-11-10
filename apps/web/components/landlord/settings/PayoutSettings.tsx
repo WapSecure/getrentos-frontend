@@ -156,7 +156,10 @@ export const PayoutSettings = () => {
         />
         {saveFailedMessage && <Alert variant="danger">{saveFailedMessage}</Alert>}
         <SaveButton
-          label={saveAccountLabel(lookup, 'Update payout account')}
+          label={saveAccountLabel(
+            lookup,
+            savedAccountNumber ? 'Update payout account' : 'Save payout account'
+          )}
           onClick={handleSave}
           disabled={!canSave}
         />

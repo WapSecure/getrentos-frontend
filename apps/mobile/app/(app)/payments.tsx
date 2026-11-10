@@ -24,6 +24,7 @@ import {
   useToast,
 } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
+import { rentReleaseActions, type RentReleaseAction } from '@sureground/shared';
 import {
   paymentsApi,
   PAYMENT_STATUS_LABEL,
@@ -118,9 +119,14 @@ export default function Payments() {
   });
 
   const confirmMoveInMutation = useMutation({
-    mutationFn: (id: string) => paymentsApi.confirmMoveIn(id),
-    onSuccess: () => {
-      toast.show('Move-in confirmed — rent released to your landlord.', 'success');
+    mutationFn: ({ id }: { id: string; early: boolean }) => paymentsApi.confirmMoveIn(id),
+    onSuccess: (_data, { early }) => {
+      toast.show(
+        early
+          ? 'Rent released to your landlord.'
+          : 'Move-in confirmed — rent released to your landlord.',
+        'success'
+      );
       refreshPayments();
       qc.invalidateQueries({ queryKey: qk.renter.lease });
       qc.invalidateQueries({ queryKey: qk.renter.dashboardStats });
@@ -128,18 +134,25 @@ export default function Payments() {
     onError: (err) => toast.show(errorMessage(err, 'Could not release this payment.'), 'error'),
   });
 
+  // Over every loaded payment: move-in is asked once per home, then held rent can be released early.
+  const releaseActions = useMemo(() => rentReleaseActions(items), [items]);
+
   const confirmMoveIn = (payment: Payment) => {
+    const early = releaseActions.get(payment.id) === 'release-now';
+    const held = payment.heldAmountNaira ? `${formatNaira(payment.heldAmountNaira)} ` : '';
     Alert.alert(
-      'Confirm move-in?',
-      `This releases the ${
-        payment.heldAmountNaira ? `${formatNaira(payment.heldAmountNaira)} ` : ''
-      }rent Sureground is holding for ${payment.propertyName} to your landlord now. Only confirm once you've moved in — it can't be undone.`,
+      early ? 'Release this rent now?' : 'Confirm move-in?',
+      early
+        ? `This releases the ${held}rent Sureground is holding for ${payment.propertyName} to your landlord now${
+            payment.releaseDate ? `, instead of on ${formatDate(payment.releaseDate, 'short')}` : ''
+          }. It can't be undone.`
+        : `This releases the ${held}rent Sureground is holding for ${payment.propertyName} to your landlord now. Only confirm once you've moved in — it can't be undone.`,
       [
         { text: 'Not yet', style: 'cancel' },
         {
           text: 'Release to landlord',
           style: 'destructive',
-          onPress: () => confirmMoveInMutation.mutate(payment.id),
+          onPress: () => confirmMoveInMutation.mutate({ id: payment.id, early }),
         },
       ]
     );
@@ -194,8 +207,9 @@ export default function Payments() {
                 payment={item}
                 paying={payMutation.isPending && payMutation.variables?.id === item.id}
                 releasing={
-                  confirmMoveInMutation.isPending && confirmMoveInMutation.variables === item.id
+                  confirmMoveInMutation.isPending && confirmMoveInMutation.variables?.id === item.id
                 }
+                releaseAction={releaseActions.get(item.id)}
                 onPay={() => setPayPayment(item)}
                 onResume={async () => {
                   if (!item.resumeCheckout) return;
@@ -319,10 +333,12 @@ function PaymentRow({
   onResume,
   onDispute,
   onConfirmMoveIn,
+  releaseAction,
 }: {
   payment: Payment;
   paying: boolean;
   releasing: boolean;
+  releaseAction?: RentReleaseAction;
   onPay: () => void;
   onResume: () => void;
   onDispute: () => void;
@@ -390,9 +406,10 @@ function PaymentRow({
           // The checkout was left too long ago to resume. Paying again is safe:
           // the API asks Paystack about the earlier one and refuses if it was paid.
           <Button label="Pay again" size="sm" fullWidth={false} loading={paying} onPress={onPay} />
-        ) : releasable ? (
+        ) : releasable && releaseAction ? (
           <Button
-            label="Confirm move-in"
+            label={releaseAction === 'confirm-move-in' ? 'Confirm move-in' : 'Release now'}
+            variant={releaseAction === 'confirm-move-in' ? 'primary' : 'outline'}
             size="sm"
             fullWidth={false}
             loading={releasing}
@@ -432,9 +449,15 @@ function PaymentRow({
       {releasable ? (
         <Text variant="caption" color="mutedForeground" style={{ marginTop: spacing.sm }}>
           {p.heldAmountNaira ? `${formatNaira(p.heldAmountNaira)} held. ` : ''}
-          {p.releaseDate
-            ? `Held under Sureground Payment Protection — releases to your landlord automatically on ${formatDate(p.releaseDate, 'short')}, or sooner if you confirm move-in.`
-            : 'Held under Sureground Payment Protection — confirm move-in to release it to your landlord.'}
+          {releaseAction === 'release-now'
+            ? p.releaseDate
+              ? `Held under Sureground Payment Protection — releases to your landlord automatically on ${formatDate(p.releaseDate, 'short')}, or now if you choose.`
+              : 'Held under Sureground Payment Protection — release it to your landlord when you are ready.'
+            : releaseAction === 'confirm-move-in'
+              ? p.releaseDate
+                ? `Held under Sureground Payment Protection — releases to your landlord automatically on ${formatDate(p.releaseDate, 'short')}, or sooner if you confirm move-in.`
+                : 'Held under Sureground Payment Protection — confirm move-in to release it to your landlord.'
+              : 'Held under Sureground Payment Protection until you confirm move-in.'}
         </Text>
       ) : null}
 

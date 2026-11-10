@@ -226,6 +226,8 @@ export interface Payment {
   totalChargedNaira?: number;
   /** 0 once released. */
   heldAmountNaira?: number;
+  /** The tenant has the keys: held rent is then released early, not "on move-in". */
+  moveInConfirmed?: boolean;
   /** Reopenable until `expiresAt`. */
   resumeCheckout?: { url: string; reference: string; expiresAt: string };
   /** Includes part-payments and credit. */

@@ -20,4 +20,5 @@ export * from './address';
 export * from './csp';
 export * from './photoQuality';
 export * from './payoutAccount';
+export * from './rentRelease';
 export * from './legacyStorage';

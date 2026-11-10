@@ -141,7 +141,10 @@ export const SellerPayoutSettings = ({ description }: SellerPayoutSettingsProps)
       <div className="mt-6 space-y-3">
         {error && <Alert variant="danger">{error}</Alert>}
         <SaveButton
-          label={saveAccountLabel(lookup, 'Update payout account')}
+          label={saveAccountLabel(
+            lookup,
+            account?.accountNumber ? 'Update payout account' : 'Save payout account'
+          )}
           disabled={!canSave}
           onClick={() => save.mutateAsync()}
         />

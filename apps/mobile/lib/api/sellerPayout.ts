@@ -26,19 +26,7 @@ export interface SellerSalePayout {
 }
 
 /** "Other bank" still takes any code; the API resolves the account against the bank either way. */
-export const COMMON_BANKS = [
-  { code: '058', name: 'GTBank' },
-  { code: '044', name: 'Access' },
-  { code: '057', name: 'Zenith' },
-  { code: '011', name: 'First Bank' },
-  { code: '033', name: 'UBA' },
-  { code: '070', name: 'Fidelity' },
-  { code: '232', name: 'Sterling' },
-  { code: '035', name: 'Wema' },
-  { code: '50211', name: 'Kuda' },
-  { code: '999992', name: 'OPay' },
-  { code: '50515', name: 'Moniepoint' },
-] as const;
+export { COMMON_BANKS } from '@sureground/shared';
 
 export const sellerPayoutApi = {
   account: () => apiFetch<SellerPayoutAccount>('/marketplace/seller/payout-account'),

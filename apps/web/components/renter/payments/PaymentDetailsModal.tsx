@@ -16,6 +16,8 @@ import { escrowStatusBadges, paymentStatusBadges } from '@/lib/statusBadge';
 import { formatCurrency, formatLagosDate } from '@/lib/format';
 import { InvoiceLines, type InvoiceLine } from '@/components/shared/InvoiceLines';
 import { leftToPay } from './PaymentCard';
+import type { RentReleaseAction } from '@sureground/shared';
+import { CopyableReference } from '@/components/shared/payments/CopyableReference';
 
 interface Payment {
   id: string;
@@ -49,6 +51,7 @@ interface PaymentDetailsModalProps {
   onDownloadReceipt: (id: string) => void;
   onDispute: (id: string) => void;
   onConfirmMoveIn: (id: string) => void;
+  releaseAction?: RentReleaseAction;
 }
 
 // "Wallet" is not a Sureground balance, so it is not called one.
@@ -65,6 +68,7 @@ export const PaymentDetailsModal = ({
   onDownloadReceipt,
   onDispute,
   onConfirmMoveIn,
+  releaseAction,
 }: PaymentDetailsModalProps) => {
   const status = paymentStatusBadges[payment.status];
   const isPaid = payment.status === 'paid';
@@ -105,7 +109,7 @@ export const PaymentDetailsModal = ({
       ? [
           {
             label: 'Payment reference',
-            value: <span className="select-all font-mono text-xs">{reference}</span>,
+            value: <CopyableReference value={reference} />,
             hint: 'Quote this if you contact support.',
           },
         ]
@@ -148,14 +152,27 @@ export const PaymentDetailsModal = ({
               {escrowStatusBadges[payment.escrowStatus]?.label ?? payment.escrowStatus}
               {payment.escrowStatus === 'held' && (
                 <p className="text-xs mt-1">
-                  Held under Sureground Payment Protection so you have the home in hand first.{' '}
-                  {payment.releaseDate ? (
-                    <>
-                      It releases to your landlord on {formatLagosDate(payment.releaseDate)}, or
-                      sooner — the moment you confirm you&apos;ve moved in.
-                    </>
+                  {releaseAction === 'release-now' ? (
+                    payment.releaseDate ? (
+                      <>
+                        Held under Sureground Payment Protection. It releases to your landlord on{' '}
+                        {formatLagosDate(payment.releaseDate)}, or now if you choose to release it.
+                      </>
+                    ) : (
+                      <>Held under Sureground Payment Protection until you release it.</>
+                    )
                   ) : (
-                    <>It stays held until you confirm you&apos;ve moved in.</>
+                    <>
+                      Held under Sureground Payment Protection so you have the home in hand first.{' '}
+                      {payment.releaseDate ? (
+                        <>
+                          It releases to your landlord on {formatLagosDate(payment.releaseDate)}, or
+                          sooner — the moment you confirm you&apos;ve moved in.
+                        </>
+                      ) : (
+                        <>It stays held until you confirm you&apos;ve moved in.</>
+                      )}
+                    </>
                   )}
                 </p>
               )}
@@ -164,14 +181,14 @@ export const PaymentDetailsModal = ({
 
           {(isHeld || payment.receiptUrl) && (
             <div className="flex flex-wrap gap-2 pt-2">
-              {isHeld && (
+              {isHeld && releaseAction && (
                 <Button
-                  variant="primary"
+                  variant={releaseAction === 'confirm-move-in' ? 'primary' : 'outline'}
                   className="flex-1"
                   icon={<CheckCircle className="w-4 h-4" />}
                   onClick={() => onConfirmMoveIn(payment.id)}
                 >
-                  Confirm move-in
+                  {releaseAction === 'confirm-move-in' ? 'Confirm move-in' : 'Release now'}
                 </Button>
               )}
               {payment.receiptUrl && (

@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { CheckCircle2, Landmark, Loader2 } from '@sureground/icons';
-import { Field, NumberInput, Select } from '@sureground/ui';
-import { toAccountLookup, type AccountLookup } from '@sureground/shared';
+import { Field, NumberInput, Select, ToggleChip } from '@sureground/ui';
+import { COMMON_BANKS, toAccountLookup, type AccountLookup } from '@sureground/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { NIGERIAN_BANKS } from '@/lib/banks';
 import { paymentKeys } from '@/lib/queryKeys';
@@ -133,6 +133,21 @@ export function BankAccountFields({
           searchPlaceholder="Search banks"
         />
       </Field>
+      <div role="group" aria-label="Common banks" className="-mt-2 flex flex-wrap gap-2">
+        {COMMON_BANKS.map((b) => (
+          <ToggleChip
+            key={b.code}
+            size="sm"
+            pressed={!showOther && bankCode === b.code}
+            onPressedChange={() => {
+              setOther(false);
+              onBankCode(b.code);
+            }}
+          >
+            {b.name}
+          </ToggleChip>
+        ))}
+      </div>
       {showOther && (
         <Field label="Bank code" htmlFor={`${idPrefix}-bank-code`} hint="e.g. 058 for GTBank">
           <NumberInput

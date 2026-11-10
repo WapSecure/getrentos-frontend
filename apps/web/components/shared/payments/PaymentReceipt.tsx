@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { type ReactNode } from 'react';
+import { CopyableReference } from './CopyableReference';
 import {
-  Check,
   CheckCircle2,
   Clock,
-  Copy,
   Home,
   Loader2,
   ShieldCheck,
@@ -17,7 +16,6 @@ import {
   Button,
   Card,
   DescriptionList,
-  IconButton,
   PageErrorState,
   type DescriptionItem,
 } from '@sureground/ui';
@@ -138,36 +136,6 @@ function StatusMark({
   );
 }
 
-function Reference({ value }: { value: string }) {
-  const [copied, setCopied] = useState(false);
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(value);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // Clipboard access can be refused; the reference is on screen to read.
-    }
-  };
-  return (
-    <span className="inline-flex max-w-full items-center gap-1.5">
-      <span className="truncate font-mono text-xs" title={value}>
-        {value}
-      </span>
-      <IconButton
-        label={copied ? 'Copied' : 'Copy reference'}
-        icon={copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-        variant="ghost"
-        size="md"
-        onClick={copy}
-      />
-      <span role="status" className="sr-only">
-        {copied ? 'Reference copied' : ''}
-      </span>
-    </span>
-  );
-}
-
 function Shell({ children }: { children: ReactNode }) {
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-lg flex-col justify-center gap-6 px-4 py-10">
@@ -229,7 +197,7 @@ export function PaymentSuccess({ payment, back }: { payment: PaymentStatus; back
           },
         ]
       : []),
-    { label: 'Reference', value: <Reference value={payment.reference} /> },
+    { label: 'Reference', value: <CopyableReference value={payment.reference} /> },
   ];
 
   return (
@@ -277,7 +245,7 @@ function AttemptSummary({ payment }: { payment: PaymentStatus }) {
         items={[
           { label: 'For', value: payment.title || FALLBACK_TITLE[payment.kind] },
           { label: 'Amount', value: formatCurrency(payment.amount) },
-          { label: 'Reference', value: <Reference value={payment.reference} /> },
+          { label: 'Reference', value: <CopyableReference value={payment.reference} /> },
         ]}
       />
     </Card>
@@ -377,7 +345,7 @@ export function PaymentLookupFailed({
       <Card className="px-5 py-1">
         <DescriptionList
           layout="rows"
-          items={[{ label: 'Reference', value: <Reference value={reference} /> }]}
+          items={[{ label: 'Reference', value: <CopyableReference value={reference} /> }]}
         />
       </Card>
       <Button href="/" variant="outline" className="w-full">
