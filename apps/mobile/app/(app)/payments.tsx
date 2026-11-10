@@ -224,7 +224,10 @@ export default function Payments() {
           ListHeaderComponent={
             summary ? (
               <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
-                <PaymentsSummaryCard summary={summary} />
+                <PaymentsSummaryCard
+                  summary={summary}
+                  processingCount={items.filter((i) => i.status === 'processing').length}
+                />
               </View>
             ) : null
           }
@@ -283,12 +286,35 @@ export default function Payments() {
   );
 }
 
-function PaymentsSummaryCard({ summary }: { summary: PaymentsSummary }) {
+function PaymentsSummaryCard({
+  summary,
+  processingCount,
+}: {
+  summary: PaymentsSummary;
+  processingCount: number;
+}) {
   const { spacing } = useTheme();
   const held =
     summary.totalHeldNaira > 0
       ? `${formatNaira(summary.totalHeldNaira)} of your rent is held by Sureground until it is released to your landlord.`
       : null;
+
+  // A charge in processing is not owed yet, but saying "up to date" above it reads as a contradiction.
+  if (summary.openCount === 0 && processingCount > 0) {
+    return (
+      <Card elevated>
+        <Text variant="bodyStrong">
+          {processingCount === 1
+            ? '1 payment is still processing'
+            : `${processingCount} payments are still processing`}
+        </Text>
+        <Text variant="caption" color="mutedForeground">
+          Nothing else is due. We&apos;ll update this as soon as your bank confirms.
+          {held ? ` ${held}` : ''}
+        </Text>
+      </Card>
+    );
+  }
 
   if (summary.openCount === 0) {
     return (
@@ -405,7 +431,14 @@ function PaymentRow({
         ) : p.status === 'processing' ? (
           // The checkout was left too long ago to resume. Paying again is safe:
           // the API asks Paystack about the earlier one and refuses if it was paid.
-          <Button label="Pay again" size="sm" fullWidth={false} loading={paying} onPress={onPay} />
+          <Button
+            label="Pay again"
+            variant="outline"
+            size="sm"
+            fullWidth={false}
+            loading={paying}
+            onPress={onPay}
+          />
         ) : releasable && releaseAction ? (
           <Button
             label={releaseAction === 'confirm-move-in' ? 'Confirm move-in' : 'Release now'}
@@ -431,6 +464,13 @@ function PaymentRow({
         ) : null}
       </View>
 
+      {p.status === 'processing' && !p.resumeCheckout ? (
+        <Text variant="caption" color="mutedForeground" style={{ marginTop: spacing.sm }}>
+          This payment didn&apos;t finish. If you pay again, we check the first attempt so
+          you&apos;re never charged twice.
+        </Text>
+      ) : null}
+
       {p.status === 'paid' && (p.feeNaira !== undefined || p.reference) ? (
         <View style={{ marginTop: spacing.sm, gap: 2 }}>
           {p.feeNaira !== undefined && p.totalChargedNaira !== undefined ? (
@@ -439,7 +479,13 @@ function PaymentRow({
             </Text>
           ) : null}
           {p.reference ? (
-            <Text variant="caption" color="mutedForeground" selectable>
+            <Text
+              variant="caption"
+              color="mutedForeground"
+              selectable
+              numberOfLines={1}
+              ellipsizeMode="middle"
+            >
               {`Reference ${p.reference}`}
             </Text>
           ) : null}

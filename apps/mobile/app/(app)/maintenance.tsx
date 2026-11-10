@@ -143,7 +143,7 @@ export default function ResidentMaintenance() {
           empty={{
             icon: <Wrench size={34} color={colors.mutedForeground} />,
             title: 'No maintenance tickets',
-            description: 'Report an issue and your estate manager will be notified.',
+            description: 'Report an issue and your landlord or property manager will be notified.',
             action: <Button label="Report issue" onPress={() => setReportOpen(true)} />,
           }}
         >

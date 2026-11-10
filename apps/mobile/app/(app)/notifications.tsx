@@ -140,78 +140,83 @@ export default function Notifications() {
   const renderItem = ({ item }: { item: RenterNotification }) => {
     const Icon = CATEGORY_ICON[item.type] ?? Bell;
     const route = routeForActionUrl(item.action?.url);
+    // The remove button sits beside the card's press target, not inside it, so a tap on
+    // the bin never also opens the notification (and web gets no button inside a button).
     return (
-      <Pressable
-        onPress={() => open(item)}
-        accessibilityRole="button"
-        accessibilityLabel={item.title}
-        style={{ marginBottom: spacing.sm }}
-      >
-        <Card padding={spacing.lg}>
-          <View style={{ flexDirection: 'row', gap: spacing.md }}>
-            <View
-              style={{
-                width: 38,
-                height: 38,
-                borderRadius: radius.md,
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: item.read ? colors.secondary : colors.primary + '1f',
-              }}
-            >
-              <Icon size={18} color={item.read ? colors.mutedForeground : colors.primary} />
-            </View>
-
-            <View style={{ flex: 1, gap: 2 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-                <Text variant="bodyStrong" style={{ flex: 1 }}>
-                  {item.title}
-                </Text>
-                {item.read ? null : (
-                  <View
-                    style={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: 4,
-                      backgroundColor: colors.primary,
-                    }}
-                  />
-                )}
-              </View>
-
-              <Text variant="callout" color="mutedForeground">
-                {item.message}
-              </Text>
-
+      <View style={{ marginBottom: spacing.sm }}>
+        <Pressable
+          onPress={() => open(item)}
+          accessibilityRole="button"
+          accessibilityLabel={item.title}
+        >
+          <Card padding={spacing.lg}>
+            <View style={{ flexDirection: 'row', gap: spacing.md }}>
               <View
                 style={{
-                  flexDirection: 'row',
+                  width: 38,
+                  height: 38,
+                  borderRadius: radius.md,
                   alignItems: 'center',
-                  gap: spacing.md,
-                  marginTop: 4,
+                  justifyContent: 'center',
+                  backgroundColor: item.read ? colors.secondary : colors.primary + '1f',
                 }}
               >
-                <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
-                  {relativeTime(item.createdAt)}
-                </Text>
-                {route && item.action ? (
-                  <Text variant="caption" color="primary" style={{ fontWeight: '600' }}>
-                    {item.action.label}
+                <Icon size={18} color={item.read ? colors.mutedForeground : colors.primary} />
+              </View>
+
+              <View style={{ flex: 1, gap: 2 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                  <Text variant="bodyStrong" style={{ flex: 1 }}>
+                    {item.title}
                   </Text>
-                ) : null}
-                <Pressable
-                  onPress={() => removeOne.mutate(item.id)}
-                  accessibilityRole="button"
-                  accessibilityLabel={`Remove ${item.title}`}
-                  hitSlop={10}
+                  {item.read ? null : (
+                    <View
+                      style={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: 4,
+                        backgroundColor: colors.primary,
+                      }}
+                    />
+                  )}
+                </View>
+
+                <Text variant="callout" color="mutedForeground">
+                  {item.message}
+                </Text>
+
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: spacing.md,
+                    marginTop: 4,
+                  }}
                 >
-                  <Trash2 size={15} color={colors.mutedForeground} />
-                </Pressable>
+                  <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
+                    {relativeTime(item.createdAt)}
+                  </Text>
+                  {route && item.action ? (
+                    <Text variant="caption" color="primary" style={{ fontWeight: '600' }}>
+                      {item.action.label}
+                    </Text>
+                  ) : null}
+                  <View style={{ width: 15 }} />
+                </View>
               </View>
             </View>
-          </View>
-        </Card>
-      </Pressable>
+          </Card>
+        </Pressable>
+        <Pressable
+          onPress={() => removeOne.mutate(item.id)}
+          accessibilityRole="button"
+          accessibilityLabel={`Remove ${item.title}`}
+          hitSlop={10}
+          style={{ position: 'absolute', right: spacing.lg, bottom: spacing.lg }}
+        >
+          <Trash2 size={15} color={colors.mutedForeground} />
+        </Pressable>
+      </View>
     );
   };
 
