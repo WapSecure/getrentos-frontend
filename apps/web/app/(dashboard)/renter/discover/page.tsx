@@ -28,6 +28,7 @@ import { unwrap, type Paginated } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
 import { LayoutGrid, Map, Search } from '@sureground/icons';
+import { useRenterCompare } from '@/hooks/useRenterCompare';
 import { RenterPageHeader } from '@/components/renter/shared/RenterPageHeader';
 
 export default function DiscoverPage() {
@@ -36,8 +37,10 @@ export default function DiscoverPage() {
   const queryFromUrl = searchParams.get('q')?.trim() ?? '';
   const estateFromUrl = searchParams.get('estate')?.trim() ?? '';
   const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
-  const [compareList, setCompareList] = useState<Property[]>([]);
-  const [showCompareDrawer, setShowCompareDrawer] = useState(false);
+  const compare = useRenterCompare();
+  const [showCompareDrawer, setShowCompareDrawer] = useState(
+    () => searchParams.get('compare') === 'open'
+  );
   const [filterOptions, setFilterOptions] = useState(() => ({
     location: searchParams.get('location')?.trim() ?? '',
     minPrice: searchParams.get('minPrice')?.trim() ?? '',
@@ -100,14 +103,11 @@ export default function DiscoverPage() {
   };
 
   const handleCompare = (property: Property) => {
-    setCompareList((current) => {
-      if (current.some((item) => item.id === property.id)) {
-        return current.filter((item) => item.id !== property.id);
-      }
-      if (current.length >= 4) return current;
-      setShowCompareDrawer(true);
-      return [...current, property];
-    });
+    if (compare.has(property.id)) {
+      compare.remove(property.id);
+      return;
+    }
+    if (compare.add(property)) setShowCompareDrawer(true);
   };
 
   const handleApplyFilters = (newFilters: Omit<typeof filters, 'search'>) => {
@@ -224,8 +224,8 @@ export default function DiscoverPage() {
       <DiscoverCompareDrawer
         isOpen={showCompareDrawer}
         onClose={() => setShowCompareDrawer(false)}
-        properties={compareList}
-        onRemove={(propertyId) => setCompareList(compareList.filter((p) => p.id !== propertyId))}
+        properties={compare.list}
+        onRemove={compare.remove}
       />
     </>
   );

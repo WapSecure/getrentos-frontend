@@ -50,6 +50,7 @@ import { unwrap, ApiError, type Paginated } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { trustChainLabel } from '@sureground/shared';
 import { useFlexAvailability } from '@/hooks/useFlexAvailability';
+import { RENTER_COMPARE_MAX, useRenterCompare } from '@/hooks/useRenterCompare';
 
 const nairaFormatter = new Intl.NumberFormat('en-NG', {
   style: 'currency',
@@ -65,6 +66,7 @@ export default function PropertyDetailPage() {
   const [tourOpen, setTourOpen] = useState(false);
   const [tourMode, setTourMode] = useState<TourModalMode>('tour');
   const toast = useToast();
+  const compare = useRenterCompare();
   const { newPlansOpen: flexOpen } = useFlexAvailability();
 
   const propertyQuery = useQuery({
@@ -147,7 +149,13 @@ export default function PropertyDetailPage() {
   const handleToggleSave = () => saveMutation.mutate(!isSaved);
 
   const handleCompare = () => {
-    toast.info('Added to comparison: open Discover to view your comparison list');
+    if (!compare.add(property)) {
+      toast.info(
+        `You can compare up to ${RENTER_COMPARE_MAX} properties. Remove one in Discover first.`
+      );
+      return;
+    }
+    router.push(`${ROUTES.RENTER_DISCOVER}?compare=open`);
   };
 
   const openTour = (mode: TourModalMode) => {
@@ -297,7 +305,7 @@ export default function PropertyDetailPage() {
               />
               <IconButton
                 variant="outline"
-                label="Add to comparison"
+                label={compare.has(property.id) ? 'Open comparison' : 'Add to comparison'}
                 onClick={handleCompare}
                 icon={<GitCompare />}
               />
