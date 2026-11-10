@@ -11,6 +11,7 @@ import type {
 } from './types';
 import { LAND_DILIGENCE_LABELS, LAND_TITLE_TYPE_LABELS } from '../utils/landTrust';
 import { tidyPlace } from '../utils/address';
+import { tourSource } from '../utils/videoSource';
 
 const money = (v: unknown) => {
   const n = typeof v === 'string' ? Number(v) : (v as number);
@@ -237,4 +238,45 @@ export function fromLand(l: PublicLandDto): ShowroomListing {
       notStated: ['Survey fee', 'Documentation fee', 'Legal fee'],
     },
   };
+}
+
+export interface ShortletMediaSource {
+  title: string;
+  images?: string[];
+  coverImageUrl?: string;
+  media?: MediaItem[];
+  videoUrl?: string;
+  videoStream?: { hlsUrl: string; posterUrl: string; durationSeconds?: number };
+  tourUrl?: string;
+}
+
+/** Photos, then the video tour, then the 360 tour, from the shortlet response's own fields. */
+export function shortletMedia(s: ShortletMediaSource): MediaItem[] {
+  if (s.media?.length) return showroomMedia(s.title, s.media, []);
+  const photos = showroomMedia(s.title, undefined, [s.coverImageUrl, ...(s.images ?? [])]);
+  const items: MediaItem[] = [...photos];
+  const videoUrl = s.videoStream?.hlsUrl ?? s.videoUrl;
+  if (videoUrl) {
+    items.push({
+      id: 'video-0',
+      kind: 'video',
+      url: videoUrl,
+      posterUrl: s.videoStream?.posterUrl,
+      durationSeconds: s.videoStream?.durationSeconds,
+      order: items.length,
+      alt: `${s.title}, video tour`,
+    });
+  }
+  const tour = tourSource(s.tourUrl);
+  if (tour) {
+    items.push({
+      id: 'tour-0',
+      kind: 'tour',
+      url: tour.embedUrl,
+      tourHost: tour.host,
+      order: items.length,
+      alt: `${s.title}, virtual tour`,
+    });
+  }
+  return items;
 }

@@ -1,23 +1,10 @@
 'use client';
 
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
-import { SafeImage } from '@/components/shared/media/SafeImage';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { isAuthenticated, tourSource, videoSource } from '@sureground/shared';
-import {
-  Badge,
-  Button,
-  Card,
-  EmptyState,
-  Skeleton,
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TourEmbed,
-  useToast,
-  VideoPlayer,
-} from '@sureground/ui';
+import { isAuthenticated } from '@sureground/shared';
+import { Badge, Button, Card, EmptyState, Skeleton, useToast } from '@sureground/ui';
 import {
   Armchair,
   BedDouble,
@@ -27,8 +14,6 @@ import {
   Droplets,
   Clock,
   Heart,
-  Image as ImageIcon,
-  Map as MapIcon,
   MapPin,
   MessageSquare,
   PlayCircle,
@@ -36,7 +21,6 @@ import {
   ShieldCheck,
   Star,
   Users,
-  Video,
   Wifi,
   Zap,
 } from '@sureground/icons';
@@ -55,6 +39,8 @@ import {
   WATER_SUPPLY_LABEL,
 } from '@/lib/shortlet/essentials';
 import { ShortletBookingDialog } from './ShortletBookingDialog';
+import { ShowroomMedia } from '@/components/showroom/ShowroomTracking';
+import { shortletMedia } from '@sureground/shared/showroom';
 import { track } from '@/lib/analytics';
 
 const shortletEvent = (listingId: string) => ({
@@ -70,8 +56,6 @@ import type {
   ShortletCancellationPolicy,
   ShortletListing,
 } from '@/types/shortlet';
-
-type MediaTab = 'photos' | 'video' | 'tour';
 
 const CANCELLATION_RULE: Record<ShortletCancellationPolicy, string> = {
   FLEXIBLE: 'Full refund up to 1 day before check-in.',
@@ -117,8 +101,6 @@ export function ShortletListingDetail({
   const [providerError, setProviderError] = useState<string | null>(null);
   const [messageOpen, setMessageOpen] = useState(false);
   const toast = useToast();
-  const [activeImage, setActiveImage] = useState(0);
-  const [mediaTab, setMediaTab] = useState<MediaTab>('photos');
 
   const viewRecorded = useRef(false);
   useEffect(() => {
@@ -226,130 +208,19 @@ export function ShortletListingDetail({
     );
   }
 
-  const video = videoSource(listing.videoUrl);
-  const tour = tourSource(listing.tourUrl);
-  const hasVideo = Boolean(video);
-  const hasTour = Boolean(tour);
-  const tab: MediaTab =
-    mediaTab === 'video' && !hasVideo
-      ? 'photos'
-      : mediaTab === 'tour' && !hasTour
-        ? 'photos'
-        : mediaTab;
-  const showTabs = hasVideo || hasTour;
-
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <Button variant="ghost" size="sm" onClick={() => router.back()} className="mb-4">
         ← Back
       </Button>
 
-      <div className="overflow-hidden rounded-xl border border-border bg-secondary/40">
-        {showTabs && (
-          <Tabs
-            value={tab}
-            onValueChange={(value) => setMediaTab(value as MediaTab)}
-            className="border-b border-border bg-card p-2"
-          >
-            <TabsList className="max-w-full">
-              <TabsTrigger value="photos" className="flex items-center gap-1.5 text-sm">
-                <ImageIcon className="h-4 w-4" /> Photos
-              </TabsTrigger>
-              {hasVideo && (
-                <TabsTrigger value="video" className="flex items-center gap-1.5 text-sm">
-                  <Video className="h-4 w-4" /> Video
-                </TabsTrigger>
-              )}
-              {hasTour && (
-                <TabsTrigger value="tour" className="flex items-center gap-1.5 text-sm">
-                  <MapIcon className="h-4 w-4" /> 360 Tour
-                </TabsTrigger>
-              )}
-            </TabsList>
-          </Tabs>
-        )}
-
-        {tab === 'video' && video ? (
-          <VideoPlayer
-            src={listing.videoStream?.hlsUrl ?? listing.videoUrl ?? ''}
-            poster={listing.videoStream?.posterUrl}
-            title={`${listing.title} video tour`}
-            onStart={() => track({ name: 'video_start', ...shortletEvent(listingId) })}
-            onComplete={() => track({ name: 'video_complete', ...shortletEvent(listingId) })}
-          />
-        ) : tab === 'tour' && tour ? (
-          <TourEmbed
-            url={listing.tourUrl ?? ''}
-            title={`${listing.title} 360° tour`}
-            onOpen={() => track({ name: 'tour_start', ...shortletEvent(listingId) })}
-          />
-        ) : listing.images.length > 0 ? (
-          <>
-            <div className="relative aspect-[16/9] w-full bg-secondary/50">
-              <SafeImage
-                src={listing.images[activeImage]}
-                alt={listing.title}
-                fill
-                sizes="(max-width: 768px) 100vw, 66vw"
-                className="object-cover"
-                priority={activeImage === 0}
-                fallback={
-                  <div className="flex h-full w-full items-center justify-center">
-                    <BedDouble className="h-16 w-16 text-muted-foreground" />
-                  </div>
-                }
-              />
-              <div className="absolute left-3 top-3 flex gap-2">
-                {listing.instantBooking && (
-                  <Badge
-                    icon={<Zap className="h-3 w-3" />}
-                    className="bg-primary text-primary-foreground"
-                  >
-                    Instant
-                  </Badge>
-                )}
-                {listing.isVerified && <Badge variant="info">Verified host</Badge>}
-              </div>
-              {listing.images.length > 1 && (
-                <div className="absolute bottom-3 right-3 rounded-full bg-black/60 px-2.5 py-1 text-xs text-white">
-                  {activeImage + 1} / {listing.images.length}
-                </div>
-              )}
-            </div>
-            {listing.images.length > 1 && (
-              <div className="flex gap-2 overflow-x-auto p-2">
-                {listing.images.map((url, i) => (
-                  <button
-                    key={url}
-                    type="button"
-                    onClick={() => setActiveImage(i)}
-                    aria-label={`Show photo ${i + 1}`}
-                    aria-pressed={i === activeImage}
-                    className={`relative h-16 w-24 shrink-0 overflow-hidden rounded-lg border-2 transition ${
-                      i === activeImage
-                        ? 'border-primary'
-                        : 'border-transparent opacity-70 hover:opacity-100'
-                    }`}
-                  >
-                    <SafeImage
-                      src={url}
-                      alt=""
-                      fill
-                      sizes="96px"
-                      className="object-cover"
-                      loading="lazy"
-                    />
-                  </button>
-                ))}
-              </div>
-            )}
-          </>
-        ) : (
-          <div className="flex aspect-[16/9] w-full items-center justify-center bg-secondary/50">
-            <BedDouble className="h-16 w-16 text-muted-foreground" />
-          </div>
-        )}
-      </div>
+      <ShowroomMedia
+        listingId={listingId}
+        market="shortlet"
+        items={shortletMedia(listing)}
+        title={listing.title}
+        className="-mx-4 rounded-none shadow-none sm:mx-0 sm:rounded-2xl sm:shadow-sm"
+      />
 
       <div className="mt-6 grid gap-6 md:grid-cols-3">
         <div className="space-y-6 md:col-span-2">

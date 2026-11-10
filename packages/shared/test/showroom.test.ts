@@ -1,6 +1,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { fromLand, fromRental, fromSale, showroomMedia } from '../src/showroom/map.ts';
+import {
+  fromLand,
+  fromRental,
+  fromSale,
+  shortletMedia,
+  showroomMedia,
+} from '../src/showroom/map.ts';
 import type { MediaItem } from '../src/showroom/types.ts';
 
 const rental = {
@@ -162,5 +168,42 @@ test('repeated place names collapse', () => {
   assert.equal(
     fromRental({ ...rental, location: 'Lekki Phase 1, Lagos' }).location,
     'Lekki Phase 1, Lagos'
+  );
+});
+
+test('shortlet media: photos, then stream video, then an allowed 360 tour', () => {
+  const items = shortletMedia({
+    title: 'Studio',
+    coverImageUrl: 'https://cdn.test/c.jpg',
+    images: ['https://cdn.test/c.jpg', 'https://cdn.test/d.jpg'],
+    videoUrl: 'https://cdn.test/v.mp4',
+    videoStream: {
+      hlsUrl: 'https://stream.mux.com/x.m3u8',
+      posterUrl: 'https://image.mux.com/x.jpg',
+    },
+    tourUrl: 'https://kuula.co/share/collection/abc',
+  });
+  assert.deepEqual(
+    items.map((m) => [m.kind, m.order]),
+    [
+      ['image', 0],
+      ['image', 1],
+      ['video', 2],
+      ['tour', 3],
+    ]
+  );
+  assert.equal(items[2]!.url, 'https://stream.mux.com/x.m3u8');
+  assert.equal(items[3]!.tourHost, 'kuula.co');
+});
+
+test('shortlet media: a tour link on an unknown host is dropped, not framed', () => {
+  const items = shortletMedia({
+    title: 'Studio',
+    images: ['https://cdn.test/a.jpg'],
+    tourUrl: 'https://evil.test/tour',
+  });
+  assert.deepEqual(
+    items.map((m) => m.kind),
+    ['image']
   );
 });

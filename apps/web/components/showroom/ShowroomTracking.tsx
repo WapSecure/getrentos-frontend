@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { MediaMosaic, type MediaEvent } from '@sureground/ui';
-import type { MediaItem, ShowroomMarket } from '@sureground/shared/showroom';
+import type { MediaItem, ShowroomEventMarket, ShowroomMarket } from '@sureground/shared/showroom';
 import { track } from '@/lib/analytics';
 
 export function TrackDetailView({
@@ -27,7 +27,7 @@ export function ShowroomMedia({
   className,
 }: {
   listingId: string;
-  market: ShowroomMarket;
+  market: ShowroomEventMarket;
   items: MediaItem[];
   title: string;
   className?: string;
