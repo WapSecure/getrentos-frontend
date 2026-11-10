@@ -243,3 +243,20 @@ The product owner added reference images. We take their structure; the palette a
 | Labelled callouts on a photo                                                                      | Later; needs lister annotations  |
 | Like and view counts                                                                              | Only after M4 measures them      |
 | "3D tour" call to action                                                                          | M8, real scan data only          |
+
+## M2 and M3 status (2026-11-10)
+
+**M2, real costs and media meaning:**
+
+- **Done for landlords:**
+  - Backend #132 adds service charge, agency and legal fees on listings (naira), a 360 tour link and per-photo room and caption on properties. The migration was applied after a backup.
+  - On the web, the landlord publish form and a Fees dialog take the fees; `PropertyPhotoEditor` handles rooms, captions, order, cover and the tour link.
+  - Checked end to end on the seed landlord's Ikoyi house: the public page shows the fees, totals, room shortcuts, the room names over photos and the 360 tour.
+- **In progress:** the same for owners and estate managers. Their backend endpoints don't accept the fields yet.
+
+**M3, one card:** done, frontend #105. One `ListingCard` (grid, compact, map) now serves rent, buy, shortlets, land, microsites, estate storefronts, renter Discover and Saved, buyer pages and similar listings. The renter compare button now really adds to the comparison.
+
+**Follow-ups done:**
+
+- One trust signal per card: the trust pill, with no extra tick.
+- Repeated place names collapse ("Lagos, Lagos" shows as "Lagos").
