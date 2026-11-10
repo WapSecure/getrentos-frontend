@@ -14,7 +14,9 @@ import {
   Tabs,
   TabsList,
   TabsTrigger,
+  TourEmbed,
   useToast,
+  VideoPlayer,
 } from '@sureground/ui';
 import {
   Armchair,
@@ -255,37 +257,13 @@ export function ShortletListingDetail({
         )}
 
         {tab === 'video' && video ? (
-          video.kind === 'file' ? (
-            <video
-              src={video.url}
-              poster={listing.videoStream?.posterUrl}
-              controls
-              playsInline
-              preload="metadata"
-              className="aspect-video w-full bg-black"
-            />
-          ) : (
-            // A pasted YouTube or Vimeo link needs that provider's player: a <video> element can't play a web page.
-            <iframe
-              src={video.embedUrl}
-              title={`${listing.title} video tour`}
-              className="aspect-video w-full bg-black"
-              allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
-              allowFullScreen
-              loading="lazy"
-            />
-          )
-        ) : tab === 'tour' && tour ? (
-          // Only known 360° providers are framed: their scripts run but can't reach our page.
-          <iframe
-            src={tour.embedUrl}
-            title={`${listing.title} 360° tour`}
-            className="aspect-video w-full"
-            sandbox="allow-scripts allow-same-origin allow-popups allow-presentation"
-            allow="fullscreen; xr-spatial-tracking; gyroscope; accelerometer"
-            allowFullScreen
-            loading="lazy"
+          <VideoPlayer
+            src={listing.videoStream?.hlsUrl ?? listing.videoUrl ?? ''}
+            poster={listing.videoStream?.posterUrl}
+            title={`${listing.title} video tour`}
           />
+        ) : tab === 'tour' && tour ? (
+          <TourEmbed url={listing.tourUrl ?? ''} title={`${listing.title} 360° tour`} />
         ) : listing.images.length > 0 ? (
           <>
             <div className="relative aspect-[16/9] w-full bg-secondary/50">

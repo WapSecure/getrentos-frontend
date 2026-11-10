@@ -37,7 +37,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { pluralize } from '@/lib/format';
 import { AddNoteModal } from './AddNoteModal';
-import { SharePropertyModal } from './SharePropertyModal';
+import { ShareDialog } from '@/components/shared/share/ShareDialog';
 import { PropertyPhoto } from '@/components/renter/shared/PropertyPhoto';
 
 interface SavedPropertyCardProps {
@@ -195,10 +195,11 @@ export const SavedPropertyCard = ({
         initialNote={note}
         propertyTitle={property.title}
       />
-      <SharePropertyModal
-        isOpen={showShareModal}
-        onClose={() => setShowShareModal(false)}
-        property={property}
+      <ShareDialog
+        open={showShareModal}
+        onOpenChange={setShowShareModal}
+        title={property.title}
+        path={`/renter/properties/${property.id}`}
       />
     </>
   );

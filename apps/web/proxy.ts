@@ -33,6 +33,9 @@ export default function proxy(request: NextRequest) {
     // Server-only, read at runtime.
     mediaOrigins: parseOriginList(process.env.CSP_MEDIA_ORIGINS),
     imgSrc: [...MAP_TILE_ORIGINS, 'https://image.mux.com'],
+    // Listing video tours stream from Mux: playlists and segments over fetch, played from a blob: source.
+    connectSrc: ['https://*.mux.com'],
+    mediaSrc: ['https://*.mux.com'],
     frameSrc: EMBED_FRAME_ORIGINS,
     // Browsers ignore it in a Report-Only policy (and warn), so only when enforcing.
     upgradeInsecureRequests: secure && ENFORCE_CSP,

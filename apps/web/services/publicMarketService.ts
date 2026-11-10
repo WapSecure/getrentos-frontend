@@ -1,4 +1,5 @@
 import { authFetch, safeCall, type ApiResponse } from '@/lib/apiHelpers';
+import type { GeoInsights } from '@/types/renter';
 import type { Paginated } from '@/lib/apiHelpers';
 import {
   rentToCard,
@@ -18,6 +19,16 @@ import {
 export type { PublicListingCard, PublicMarket, PublicMarketFilters } from '@/lib/publicListingMap';
 
 export const publicMarketService = {
+  /** Public, so anyone viewing a published listing sees the neighbourhood, not only signed-in renters. */
+  geoInsights: (id: string, destination?: string) =>
+    safeCall(() =>
+      authFetch<GeoInsights>(
+        `/marketplace/listings/${encodeURIComponent(id)}/geo-insights${
+          destination ? `?destination=${encodeURIComponent(destination)}` : ''
+        }`
+      )
+    ),
+
   savedListingIds: () => safeCall(() => authFetch<string[]>('/marketplace/saved-listing-ids')),
 
   saveListing: (listingId: string) =>

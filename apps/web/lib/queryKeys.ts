@@ -82,6 +82,10 @@ export const landlordKeys = {
     ['landlord', 'applicationScreening', applicationId, 'summary'] as const,
 };
 
+export const publicMarketKeys = {
+  geoInsights: (id: string) => ['public-market', 'listing', id, 'geo-insights'] as const,
+};
+
 export const renterKeys = {
   lastApplicationDetails: ['renter', 'applications', 'last-details'] as const,
   deposits: ['renter', 'deposits'] as const,
