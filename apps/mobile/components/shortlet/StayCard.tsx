@@ -168,7 +168,7 @@ export const StayCard = memo(function StayCard({
       >
         <Heart
           size={20}
-          color={colors.primaryForeground}
+          color="#ffffff"
           fill={saved ? colors.destructive : 'transparent'}
           strokeWidth={saved ? 0 : 2}
         />

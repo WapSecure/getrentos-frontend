@@ -14,6 +14,8 @@ import {
   MessageCircleQuestion,
   Search,
   ShieldCheck,
+  Clock,
+  ImageOff,
   Wrench,
 } from '@sureground/icons/native';
 import {
@@ -62,8 +64,18 @@ interface Metric {
 }
 
 const CARD_WIDTH = 200;
-// Fixed colours: the badge sits on a fixed navy scrim in both themes, where the theme's success green is too dark.
-const ON_SCRIM = { bg: 'rgba(9,32,66,0.72)', partial: '#4ade80' };
+// Fixed colours: the hero text and badge sit on a photo under a dark scrim in both themes. Theme tokens such as
+// primaryForeground turn near-black in dark mode and vanish there.
+const ON_SCRIM = {
+  text: '#ffffff',
+  glass: 'rgba(10,14,22,0.74)',
+  glassEdge: 'rgba(255,255,255,0.16)',
+  verified: '#0b7a3e',
+  partial: '#4ade80',
+  pending: '#ffb454',
+  button: 'rgba(10,14,22,0.6)',
+  noPhoto: '#1b2433',
+};
 
 export default function RenterHome() {
   const { profile } = useAuth();
@@ -425,9 +437,19 @@ function HeroCard({
             style={StyleSheet.absoluteFill}
           />
         ) : (
-          <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.muted }]} />
+          // No photo: a fixed deep slate in both themes, so the white text reads and it doesn't look like a grey slab.
+          <View
+            style={[
+              StyleSheet.absoluteFill,
+              { backgroundColor: ON_SCRIM.noPhoto, alignItems: 'center', justifyContent: 'center' },
+            ]}
+          >
+            <ImageOff size={30} color="rgba(255,255,255,0.28)" />
+          </View>
         )}
-        <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.42)' }]} />
+        {property.image ? (
+          <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.42)' }]} />
+        ) : null}
 
         <View
           style={{
@@ -448,18 +470,24 @@ function HeroCard({
                 paddingVertical: 6,
                 paddingHorizontal: 10,
                 borderRadius: radius.full,
-                backgroundColor: trust?.tone === 'verified' ? colors.success : ON_SCRIM.bg,
+                backgroundColor: trust?.tone === 'verified' ? ON_SCRIM.verified : ON_SCRIM.glass,
+                borderWidth: trust?.tone === 'verified' ? 0 : StyleSheet.hairlineWidth,
+                borderColor: ON_SCRIM.glassEdge,
                 flexShrink: 1,
               }}
             >
-              <ShieldCheck
-                size={12}
-                color={trust?.tone === 'partial' ? ON_SCRIM.partial : colors.primaryForeground}
-              />
+              {trust?.tone === 'pending' ? (
+                <Clock size={12} color={ON_SCRIM.pending} />
+              ) : (
+                <ShieldCheck
+                  size={12}
+                  color={trust?.tone === 'partial' ? ON_SCRIM.partial : ON_SCRIM.text}
+                />
+              )}
               <Text
                 variant="caption"
                 numberOfLines={1}
-                style={{ color: colors.primaryForeground, fontWeight: '700', flexShrink: 1 }}
+                style={{ color: ON_SCRIM.text, fontWeight: '700', flexShrink: 1 }}
               >
                 {badgeText}
               </Text>
@@ -471,7 +499,7 @@ function HeroCard({
         </View>
 
         <View style={{ position: 'absolute', left: 16, right: 16, bottom: 14, gap: 3 }}>
-          <Text variant="bodyStrong" numberOfLines={1} style={{ color: colors.primaryForeground }}>
+          <Text variant="bodyStrong" numberOfLines={1} style={{ color: ON_SCRIM.text }}>
             {property.title}
           </Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
@@ -484,7 +512,7 @@ function HeroCard({
             amount={property.price}
             period={property.period}
             variant="callout"
-            style={{ color: colors.primaryForeground, fontWeight: '700' }}
+            style={{ color: ON_SCRIM.text, fontWeight: '700' }}
             periodColor="rgba(255,255,255,0.75)"
           />
         </View>
@@ -506,12 +534,12 @@ function HeroCard({
           borderRadius: 18,
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: 'rgba(9,32,66,0.54)',
+          backgroundColor: ON_SCRIM.button,
         }}
       >
         <Heart
           size={16}
-          color={saved ? colors.destructive : colors.primaryForeground}
+          color={saved ? colors.destructive : ON_SCRIM.text}
           fill={saved ? colors.destructive : 'transparent'}
         />
       </Pressable>

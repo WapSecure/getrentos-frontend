@@ -167,7 +167,8 @@ function PropertyCardBase({
         <View
           style={[
             StyleSheet.absoluteFill,
-            { alignItems: 'center', justifyContent: 'center', gap: 6 },
+            // Pushed below the top badges so the placeholder never sits under them.
+            { alignItems: 'center', justifyContent: 'center', gap: 6, paddingTop: 28 },
           ]}
         >
           <ImageOff size={row ? 20 : 26} color={colors.mutedForeground} />
@@ -179,38 +180,35 @@ function PropertyCardBase({
         </View>
       )}
       {property.trustLabel ? (
-        <View
-          style={[
-            styles.badge,
-            {
-              backgroundColor:
-                property.trustLabel.tone === 'verified' ? colors.success : 'rgba(9,32,66,0.78)',
-              maxWidth: row ? 108 : '72%',
-            },
-          ]}
-        >
-          {property.trustLabel.tone === 'pending' ? (
-            <Clock size={12} color={colors.primaryForeground} />
-          ) : (
-            <ShieldCheck
-              size={12}
-              color={property.trustLabel.tone === 'partial' ? '#4ade80' : colors.primaryForeground}
-            />
-          )}
-          <Text
-            variant="caption"
-            numberOfLines={1}
-            style={{ color: colors.primaryForeground, fontWeight: '700', flexShrink: 1 }}
+        <View style={styles.badgeSlot} pointerEvents="none">
+          <View
+            style={[
+              styles.badge,
+              property.trustLabel.tone === 'verified' ? styles.badgeVerified : styles.badgeGlass,
+            ]}
           >
-            {property.trustLabel.label}
-          </Text>
+            {property.trustLabel.tone === 'pending' ? (
+              <Clock size={12} color={OVERLAY.pending} />
+            ) : (
+              <ShieldCheck
+                size={12}
+                color={property.trustLabel.tone === 'partial' ? OVERLAY.partial : OVERLAY.text}
+              />
+            )}
+            <Text variant="caption" numberOfLines={1} style={styles.badgeText}>
+              {/* The full wording stays in the card's accessibility label; the badge has a narrow lane. */}
+              {property.trustLabel.tone === 'pending' ? 'Verifying' : property.trustLabel.label}
+            </Text>
+          </View>
         </View>
       ) : property.verified ? (
-        <View style={[styles.badge, { backgroundColor: 'rgba(9,32,66,0.72)' }]}>
-          <ShieldCheck size={12} color={colors.primaryForeground} />
-          <Text variant="caption" style={{ color: colors.primaryForeground, fontWeight: '700' }}>
-            Verified
-          </Text>
+        <View style={styles.badgeSlot} pointerEvents="none">
+          <View style={[styles.badge, styles.badgeVerified]}>
+            <ShieldCheck size={12} color={OVERLAY.text} />
+            <Text variant="caption" style={styles.badgeText}>
+              Verified
+            </Text>
+          </View>
         </View>
       ) : null}
       {!row && property.badges?.length ? (
@@ -291,7 +289,7 @@ function PropertyCardBase({
         >
           <Heart
             size={16}
-            color={saved ? colors.destructive : colors.primaryForeground}
+            color={saved ? colors.destructive : OVERLAY.text}
             fill={saved ? colors.destructive : 'transparent'}
           />
         </Pressable>
@@ -327,11 +325,35 @@ function PropertyCardBase({
   );
 }
 
+// Badges sit on photos, so their colours are fixed rather than themed: theme tokens such as
+// primaryForeground turn near-black in dark mode and vanish on the dark overlay.
+const OVERLAY = {
+  text: '#ffffff',
+  glass: 'rgba(10,14,22,0.74)',
+  glassEdge: 'rgba(255,255,255,0.16)',
+  verified: '#0b7a3e',
+  partial: '#4ade80',
+  pending: '#ffb454',
+} as const;
+
 const styles = StyleSheet.create({
-  badge: {
+  badgeGlass: {
+    backgroundColor: OVERLAY.glass,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: OVERLAY.glassEdge,
+  },
+  badgeVerified: { backgroundColor: OVERLAY.verified },
+  badgeText: { color: OVERLAY.text, fontWeight: '700', flexShrink: 1 },
+  // Ends before the save heart (44 wide, 4 from the edge) so the two never overlap.
+  badgeSlot: {
     position: 'absolute',
     top: 10,
     left: 10,
+    right: 56,
+    flexDirection: 'row',
+  },
+  badge: {
+    flexShrink: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
