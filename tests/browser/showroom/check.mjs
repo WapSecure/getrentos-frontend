@@ -11,9 +11,12 @@ const check = (name, ok, detail = '') => results.push({ name, ok: !!ok, detail }
 const desc = (page) => page.locator('[role="dialog"] p[aria-live="polite"]').textContent();
 
 const browser = await chromium.launch();
+// Test runs must not count as real traffic in the listing funnel.
+const blockAnalytics = (ctx) => ctx.route('**/analytics/events', (route) => route.abort());
 try {
   // Desktop
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  await blockAnalytics(ctx);
   const page = await ctx.newPage();
   const consoleErrors = [];
   page.on('console', (m) => m.type() === 'error' && consoleErrors.push(m.text().slice(0, 140)));
@@ -263,6 +266,7 @@ try {
     isMobile: true,
     reducedMotion: 'reduce',
   });
+  await blockAnalytics(phone);
   const p = await phone.newPage();
   await p.addInitScript(() => {
     window.__cls = 0;

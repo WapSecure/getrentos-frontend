@@ -416,6 +416,12 @@ const navItems: NavItem[] = [
     permission: 'reports.view',
   },
   {
+    label: 'Listing funnel',
+    href: '/admin/showroom-funnel',
+    icon: TrendingUp,
+    permission: 'reports.view',
+  },
+  {
     label: 'Automation usage',
     href: '/admin/ai-usage',
     icon: Cpu,
@@ -437,7 +443,7 @@ const navItems: NavItem[] = [
 
 // Groups list their pages by name; ranges let newly added pages drift into the wrong group.
 const groupItems: [group: string, items: string[]][] = [
-  ['Reports', ['Dashboard', 'Reports', 'Automation usage']],
+  ['Reports', ['Dashboard', 'Reports', 'Listing funnel', 'Automation usage']],
   [
     'People and identity',
     [

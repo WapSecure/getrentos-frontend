@@ -5,6 +5,7 @@ const BASE = process.env.SHOWROOM_BASE_URL ?? 'http://localhost:3000';
 const browser = await chromium.launch({ channel: 'chrome' });
 try {
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  await page.route('**/analytics/events', (route) => route.abort());
   await page.goto(`${BASE}/rent/fx-rent-full`, { waitUntil: 'networkidle' });
   await page.getByRole('button', { name: 'Video tour' }).click();
   await page.locator('[role="dialog"] button[aria-label$="video tour"]').click();

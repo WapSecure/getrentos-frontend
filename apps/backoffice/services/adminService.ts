@@ -1,3 +1,4 @@
+import type { ShowroomFunnelReport } from '@/types/showroomFunnel';
 import { authDownload, authFetch, safeCall, toQuery } from '@sureground/shared';
 import type { ApiResponse } from '@sureground/shared';
 import type {
@@ -685,6 +686,14 @@ export const adminService = {
     return safeCall(() =>
       authFetch(`/admin/messages/conversations/${conversationId}/resolve`, { method: 'POST' })
     );
+  },
+
+  getShowroomFunnel(params: {
+    from: string;
+    to: string;
+  }): Promise<ApiResponse<ShowroomFunnelReport>> {
+    const query = new URLSearchParams(params).toString();
+    return safeCall(() => authFetch(`/admin/analytics/showroom-funnel?${query}`));
   },
 
   async getReportsStats(): Promise<

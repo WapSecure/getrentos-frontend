@@ -1,4 +1,5 @@
 export const adminKeys = {
+  showroomFunnel: (from: string, to: string) => ['admin', 'showroomFunnel', from, to] as const,
   dashboardStats: ['admin', 'dashboardStats'] as const,
   dashboardActivity: ['admin', 'dashboardActivity'] as const,
   userGrowth: ['admin', 'userGrowth'] as const,
