@@ -106,8 +106,9 @@ try {
       : null;
   });
   check(
-    'video: HLS stream plays via hls.js',
-    vid && vid.ready >= 2 && vid.src === 'blob:',
+    // Bundled Chromium has no H.264: this proves hls.js attached; video-chrome.mjs checks playback.
+    'video: hls.js attaches the stream',
+    vid && vid.src === 'blob:',
     JSON.stringify(vid)
   );
   await page.screenshot({ path: OUT + 'd-video.png' });
@@ -245,7 +246,22 @@ try {
     await p.locator('header p.data-value').isVisible()
   );
   await p.screenshot({ path: OUT + 'm-page.png' });
-  await p.locator('main button[aria-label^="Open gallery"]').tap();
+  const strip = p.locator('main [aria-label="Photos"]');
+  await strip.evaluate((el) => el.scrollTo({ left: el.clientWidth * 2 }));
+  await p.waitForTimeout(500);
+  check(
+    'phone: swipe strip counter follows',
+    /3 \/ 8/.test(await p.getByRole('button', { name: 'Show all 8 photos' }).innerText())
+  );
+  await p.getByRole('button', { name: 'Show all 8 photos' }).tap();
+  await p.waitForTimeout(400);
+  check(
+    'phone: viewer opens on the photo in view',
+    (await p.locator('[role="dialog"] p[aria-live="polite"]').textContent()) === 'Photo 3 of 9'
+  );
+  await p.keyboard.press('Escape');
+  await p.waitForTimeout(300);
+  await strip.locator('button').first().tap();
   await p.waitForTimeout(400);
   const boxes = await p.evaluate(() =>
     [...document.querySelectorAll('[role="toolbar"] button')]

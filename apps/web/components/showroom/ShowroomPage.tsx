@@ -114,12 +114,12 @@ export async function ShowroomPage({
                 )}
               </p>
               {keyFacts.length > 0 && (
-                <ul className="flex flex-wrap gap-3 pt-1 text-sm text-foreground">
+                <ul
+                  aria-label="Key facts"
+                  className="flex flex-wrap items-center gap-y-2 divide-x divide-border pt-1 text-sm font-medium text-foreground"
+                >
                   {keyFacts.map(({ icon: Icon, label }) => (
-                    <li
-                      key={label}
-                      className="flex items-center gap-2 rounded-lg bg-secondary px-3.5 py-2"
-                    >
+                    <li key={label} className="flex items-center gap-2 px-4 first:pl-0">
                       <Icon className="h-4 w-4 text-muted-foreground" aria-hidden="true" /> {label}
                     </li>
                   ))}

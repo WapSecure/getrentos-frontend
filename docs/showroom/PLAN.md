@@ -225,3 +225,21 @@ Built and checked in the browser; behind `SHOWROOM_ENABLED=on`, off by default.
 - Room grouping and captions: need data, M2.
 - Playwright wiring into CI (billing).
 - Screen-reader pass.
+
+## Reference designs (2026-11-10)
+
+The product owner added reference images. We take their structure; the palette and type stay ours: no cream or terracotta, no serif display, per the no-AI-look rule.
+
+| Idea                                                                                              | Milestone                        |
+| ------------------------------------------------------------------------------------------------- | -------------------------------- |
+| Full-bleed viewer with room rail, control bar, thumbnail strip                                    | M1 (room rail shows once tagged) |
+| Swipe the hero on phones with a "3 / 8" counter                                                   | M1                               |
+| Key facts in one divided row                                                                      | M1                               |
+| Sticky price with one primary action on phones                                                    | M1 (existing bar)                |
+| Room name over the photo, media tabs (exterior, amenities…)                                       | M2 (needs room tags)             |
+| Listing grid: status badge, title and price on one line, facts line, result count, one filter bar | M3 (single ListingCard)          |
+| Map-first search with price pins and a drawn area                                                 | M6                               |
+| Floor plan beside the photos with level arrows                                                    | M2 capture, M8 display           |
+| Labelled callouts on a photo                                                                      | Later; needs lister annotations  |
+| Like and view counts                                                                              | Only after M4 measures them      |
+| "3D tour" call to action                                                                          | M8, real scan data only          |

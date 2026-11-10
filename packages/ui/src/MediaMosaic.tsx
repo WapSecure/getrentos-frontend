@@ -23,6 +23,7 @@ export function MediaMosaic({
   className,
 }: MediaMosaicProps) {
   const [openAt, setOpenAt] = useState<number | null>(null);
+  const [phoneAt, setPhoneAt] = useState(0);
   const photos = items.filter((m) => m.kind === 'image');
   const videoAt = items.findIndex((m) => m.kind === 'video');
   const tourAt = items.findIndex((m) => m.kind === 'tour');
@@ -53,6 +54,28 @@ export function MediaMosaic({
           className
         )}
       >
+        {/* Phones swipe through the photos in place; larger screens get the mosaic. */}
+        <div
+          className="flex snap-x snap-mandatory overflow-x-auto [scrollbar-width:none] sm:hidden [&::-webkit-scrollbar]:hidden"
+          onScroll={(event) => {
+            const el = event.currentTarget;
+            setPhoneAt(Math.round(el.scrollLeft / Math.max(el.clientWidth, 1)));
+          }}
+          aria-label="Photos"
+        >
+          {(photos.length ? photos : items).map((m, i) => (
+            <button
+              key={m.id}
+              type="button"
+              onClick={() => setOpenAt(indexOf(m))}
+              aria-label={`Open ${m.alt ?? `photo ${i + 1}`}`}
+              className="group relative h-full w-full shrink-0 snap-center overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
+            >
+              <Tile item={m} eager={i === 0} />
+            </button>
+          ))}
+        </div>
+
         {tiles.map((m, i) => (
           <button
             key={m.id}
@@ -63,7 +86,8 @@ export function MediaMosaic({
             }
             className={cn(
               'group relative overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary',
-              i === 0 ? (tiles.length > 1 ? 'sm:col-span-2 sm:row-span-2' : '') : 'hidden sm:block'
+              'hidden sm:block',
+              i === 0 && tiles.length > 1 && 'sm:col-span-2 sm:row-span-2'
             )}
           >
             <Tile item={m} eager={i === 0} />
@@ -85,14 +109,18 @@ export function MediaMosaic({
           </div>
           <button
             type="button"
-            onClick={() => setOpenAt(0)}
+            onClick={() =>
+              setOpenAt(photos.length ? indexOf(photos[Math.min(phoneAt, photos.length - 1)]!) : 0)
+            }
             aria-label={photos.length > 1 ? `Show all ${photos.length} photos` : undefined}
             className={cn(chip, 'pointer-events-auto')}
           >
             <Images className="h-3.5 w-3.5" aria-hidden="true" />
             {photos.length > 1 ? (
               <>
-                <span className="sm:hidden">{photos.length} photos</span>
+                <span className="data-value sm:hidden">
+                  {Math.min(phoneAt + 1, photos.length)} / {photos.length}
+                </span>
                 <span className="hidden sm:inline">Show all {photos.length} photos</span>
               </>
             ) : photos.length === 1 ? (
