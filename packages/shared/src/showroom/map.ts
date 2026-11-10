@@ -47,6 +47,19 @@ export const MEDIA_ROOM_LABEL: Record<MediaRoom, string> = {
   other: 'Other',
 };
 
+/** One photo's room, for a label on that photo. */
+export const MEDIA_ROOM_NAME: Record<MediaRoom, string> = {
+  living: 'Living room',
+  bedroom: 'Bedroom',
+  bathroom: 'Bathroom',
+  kitchen: 'Kitchen',
+  exterior: 'Exterior',
+  amenity: 'Amenity',
+  floor_plan: 'Floor plan',
+  neighbourhood: 'Neighbourhood',
+  other: 'Other',
+};
+
 const AREA_UNIT = { SQUARE_METERS: 'sqm', ACRE: 'acres', HECTARE: 'hectares' } as const;
 
 /** Uses the API's media list when it sends one; otherwise builds images from the older URL fields. */
@@ -82,16 +95,25 @@ const imageUrls = (media: MediaItem[]) => media.filter((m) => m.kind === 'image'
 
 export function fromRental(r: PublicRentalDto): ShowroomListing {
   const price = money(r.price);
-  const deposit = positive(money(r.securityDeposit));
   const media = showroomMedia(r.title, r.media, [r.image, ...(r.images ?? [])]);
   const rentLine: CostLine = {
     label: r.period === 'year' ? 'Rent for the first year' : 'Rent for the first month',
     amount: price,
   };
-  const lines: CostLine[] = [
-    rentLine,
-    ...(deposit ? [{ label: 'Security deposit', amount: deposit }] : []),
+  const fees: [label: string, value: unknown][] = [
+    ['Service charge', r.serviceCharge],
+    ['Agency fee', r.agencyFee],
+    ['Legal fee', r.legalFee],
+    ['Security deposit', r.securityDeposit],
   ];
+  const lines: CostLine[] = [rentLine];
+  const notStated: string[] = [];
+  for (const [label, value] of fees) {
+    const amount = positive(money(value));
+    if (amount) lines.push({ label, amount });
+    // A zero the landlord entered is a stated "none", not a gap.
+    else if (value === undefined || value === null) notStated.push(label);
+  }
   return {
     id: r.id,
     market: 'rent',
@@ -132,9 +154,7 @@ export function fromRental(r: PublicRentalDto): ShowroomListing {
     costs: {
       lines,
       total: { label: 'Stated costs to move in', amount: lines.reduce((s, l) => s + l.amount, 0) },
-      notStated: deposit
-        ? ['Agency fee', 'Legal fee', 'Service charge']
-        : ['Security deposit', 'Agency fee', 'Legal fee', 'Service charge'],
+      notStated,
     },
   };
 }

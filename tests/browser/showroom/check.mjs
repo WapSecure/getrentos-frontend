@@ -34,7 +34,7 @@ try {
   );
   check(
     'desktop: fees not stated are named',
-    /Not stated in this listing: agency fee, legal fee and service charge/.test(
+    /Not stated in this listing: service charge, agency fee and legal fee/.test(
       await page.locator('aside').innerText()
     )
   );
@@ -146,6 +146,54 @@ try {
   check('broken: can move past it', (await desc(page)) === 'Photo 4 of 5');
   await page.keyboard.press('Escape');
 
+  await page.goto(`${BASE}/rent/fx-rent-tagged`, { waitUntil: 'networkidle' });
+  const aside = await page.locator('aside').innerText();
+  check(
+    'tagged: fees listed and totalled (₦6,140,000)',
+    /Service charge\s*₦600,000/.test(aside) &&
+      /Agency fee\s*₦420,000/.test(aside) &&
+      /Legal fee\s*₦420,000/.test(aside) &&
+      /Stated costs to move in\s*₦6,140,000/.test(aside),
+    aside.slice(0, 300)
+  );
+  check('tagged: nothing listed as not stated', !/Not stated in this listing/.test(aside));
+  check(
+    'tagged: room shortcuts under the hero',
+    (await page.locator('nav[aria-label="Photos by room"] button').count()) === 5
+  );
+  await page.locator('nav[aria-label="Photos by room"] button', { hasText: 'Kitchen' }).click();
+  await page.waitForTimeout(500);
+  check(
+    'tagged: room shortcut opens on the kitchen',
+    (await desc(page)) === 'Photo 3 of 10 · Kitchen',
+    await desc(page)
+  );
+  const overlay = await page.locator('[role="dialog"]').innerText();
+  check(
+    'tagged: room name and caption over the photo',
+    /Kitchen/.test(overlay) && /Open kitchen with a gas hob/.test(overlay)
+  );
+  check(
+    'tagged: room rail lists the rooms',
+    (await page.locator('[role="dialog"] nav[aria-label="Rooms"] button').count()) === 5
+  );
+  await page.keyboard.press('End');
+  check('tagged: 360 tour is last', (await desc(page)) === '360 tour 10 of 10', await desc(page));
+  check(
+    'tagged: tour asks before loading',
+    (await page.locator('[role="dialog"] iframe').count()) === 0 &&
+      (await page.getByRole('button', { name: /Open the 360 tour/ }).count()) === 1
+  );
+  await page.getByRole('button', { name: /Open the 360 tour/ }).click();
+  check(
+    'tagged: tour frame from the allowed host',
+    /^https:\/\/kuula\.co\//.test(
+      (await page.locator('[role="dialog"] iframe').getAttribute('src')) ?? ''
+    )
+  );
+  await page.screenshot({ path: OUT + 'd-tagged.png' });
+  await page.keyboard.press('Escape');
+
   await page.goto(`${BASE}/rent/fx-rent-empty`, { waitUntil: 'networkidle' });
   check(
     'empty: placeholder, no viewer button',
@@ -154,7 +202,7 @@ try {
   );
   check(
     'empty: deposit listed as not stated',
-    /Not stated in this listing: security deposit, agency fee/.test(
+    /Not stated in this listing: service charge, agency fee, legal fee and security deposit/.test(
       await page.locator('aside').innerText()
     )
   );

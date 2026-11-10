@@ -15,7 +15,13 @@ import {
   Video,
   X,
 } from '@sureground/icons';
-import { cn, MEDIA_ROOM_LABEL, type MediaItem, type MediaRoom } from '@sureground/shared';
+import {
+  cn,
+  MEDIA_ROOM_LABEL,
+  MEDIA_ROOM_NAME,
+  type MediaItem,
+  type MediaRoom,
+} from '@sureground/shared';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from './Dialog';
 import { TourEmbed } from './TourEmbed';
 import { VideoPlayer } from './VideoPlayer';
@@ -217,7 +223,8 @@ function ViewerBody({
     else void el.requestFullscreen?.().catch(() => {});
   };
 
-  const position = `${kindLabel(item)} ${index + 1} of ${items.length}`;
+  const roomName = item.room && item.room !== 'other' ? MEDIA_ROOM_NAME[item.room] : null;
+  const position = `${kindLabel(item)} ${index + 1} of ${items.length}${roomName ? ` · ${roomName}` : ''}`;
 
   return (
     <div ref={rootRef} onKeyDown={onKeyDown} className="flex h-full min-h-0 flex-col bg-black">
@@ -332,6 +339,11 @@ function ViewerBody({
             </>
           )}
 
+          {roomName && isImage && !grid && (
+            <p className="pointer-events-none absolute bottom-4 left-4 rounded-lg bg-black/55 px-3 py-1.5 text-xl font-semibold tracking-tight text-white sm:text-2xl">
+              {roomName}
+            </p>
+          )}
           {(item.caption || item.filmedOnSite) && !grid && (
             <p className="pointer-events-none absolute left-4 top-4 max-w-[70%] rounded-lg bg-black/60 px-3 py-1.5 text-xs font-medium text-white">
               {item.caption}

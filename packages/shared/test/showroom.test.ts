@@ -41,7 +41,7 @@ test('rental: stated costs add the deposit and never claim the fees', () => {
     { label: 'Security deposit', amount: 500000 },
   ]);
   assert.equal(l.costs.total?.amount, 4000000);
-  assert.deepEqual(l.costs.notStated, ['Agency fee', 'Legal fee', 'Service charge']);
+  assert.deepEqual(l.costs.notStated, ['Service charge', 'Agency fee', 'Legal fee']);
 });
 
 test('rental: without a deposit the deposit is listed as not stated', () => {
@@ -130,4 +130,25 @@ test('land: parcel facts with units; missing parcel gives no area', () => {
     fromLand({ id: 'l', title: 'x', price: 1 }).facts.find((f) => f.label === 'Area'),
     undefined
   );
+});
+
+test('rental: stated fees join the move-in total; a zero is stated, not missing', () => {
+  const l = fromRental({
+    ...rental,
+    serviceCharge: '600000',
+    agencyFee: 350000,
+    legalFee: 0,
+    securityDeposit: 500000,
+  });
+  assert.deepEqual(
+    l.costs.lines.map((c) => [c.label, c.amount]),
+    [
+      ['Rent for the first year', 3500000],
+      ['Service charge', 600000],
+      ['Agency fee', 350000],
+      ['Security deposit', 500000],
+    ]
+  );
+  assert.equal(l.costs.total?.amount, 4950000);
+  assert.deepEqual(l.costs.notStated, []);
 });

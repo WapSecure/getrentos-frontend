@@ -105,6 +105,9 @@ export interface PublicRentalDto {
   availableFrom?: string;
   availableUntil?: string;
   securityDeposit?: number | string;
+  serviceCharge?: number | string;
+  agencyFee?: number | string;
+  legalFee?: number | string;
   minimumLeaseMonths?: number;
   furnished?: boolean;
   petsAllowed?: boolean;

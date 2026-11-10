@@ -2,7 +2,7 @@
 import http from 'node:http';
 
 const UPSTREAM = 'http://localhost:4000';
-const PORT = 4300;
+const PORT = Number(process.env.FIXTURE_PORT ?? 4300);
 const photo = (n, w = 1600, h = 1067) => `https://picsum.photos/id/${n}/${w}/${h}`;
 const PHOTO_IDS = [
   1018, 1015, 1016, 1019, 1020, 1021, 1022, 1024, 1025, 1026, 1027, 1028, 1029, 1031, 1032, 1033,
@@ -71,6 +71,38 @@ const FIXTURES = {
     ...rentBase,
     id: 'fx-rent-full',
     media: [...images(8), video(8)],
+  },
+  '/rentals/fx-rent-tagged': {
+    ...rentBase,
+    id: 'fx-rent-tagged',
+    title: 'Test fixture · tagged rooms, fees and a 360 tour',
+    serviceCharge: 600000,
+    agencyFee: 420000,
+    legalFee: 420000,
+    media: [
+      ...images(8).map((m, i) => ({
+        ...m,
+        room: [
+          'living',
+          'living',
+          'kitchen',
+          'bedroom',
+          'bedroom',
+          'bathroom',
+          'exterior',
+          'exterior',
+        ][i],
+        ...(i === 2 ? { caption: 'Open kitchen with a gas hob and a pantry' } : {}),
+      })),
+      video(8),
+      {
+        id: 'fx_tour_1',
+        kind: 'tour',
+        url: 'https://kuula.co/share/collection/fixture',
+        tourHost: 'kuula.co',
+        order: 9,
+      },
+    ],
   },
   '/rentals/fx-rent-empty': {
     ...rentBase,

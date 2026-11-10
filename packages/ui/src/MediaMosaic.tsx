@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { Compass, ImageOff, Images, Play } from '@sureground/icons';
-import { cn, type MediaItem } from '@sureground/shared';
+import { cn, MEDIA_ROOM_LABEL, type MediaItem, type MediaRoom } from '@sureground/shared';
+import { Button } from './Button';
 import { MediaViewer } from './MediaViewer';
 
 interface MediaMosaicProps {
@@ -27,6 +28,12 @@ export function MediaMosaic({
   const photos = items.filter((m) => m.kind === 'image');
   const videoAt = items.findIndex((m) => m.kind === 'video');
   const tourAt = items.findIndex((m) => m.kind === 'tour');
+  const rooms = new Map<MediaRoom, { first: number; count: number }>();
+  items.forEach((m, i) => {
+    if (!m.room || m.room === 'other') return;
+    const seen = rooms.get(m.room);
+    rooms.set(m.room, seen ? { ...seen, count: seen.count + 1 } : { first: i, count: 1 });
+  });
 
   if (items.length === 0) {
     return (
@@ -71,7 +78,7 @@ export function MediaMosaic({
               aria-label={`Open ${m.alt ?? `photo ${i + 1}`}`}
               className="group relative h-full w-full shrink-0 snap-center overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
             >
-              <Tile item={m} eager={i === 0} />
+              <Tile item={m} eager={i === 0} load={Math.abs(i - phoneAt) <= 1} />
             </button>
           ))}
         </div>
@@ -132,6 +139,23 @@ export function MediaMosaic({
         </div>
       </div>
 
+      {rooms.size > 1 && (
+        <nav aria-label="Photos by room" className="mt-3 flex gap-2 overflow-x-auto pb-1">
+          {[...rooms].map(([room, { first, count }]) => (
+            <Button
+              key={room}
+              variant="secondary"
+              size="sm"
+              className="shrink-0"
+              onClick={() => setOpenAt(first)}
+            >
+              {MEDIA_ROOM_LABEL[room]}
+              <span className="data-value text-muted-foreground">{count}</span>
+            </Button>
+          ))}
+        </nav>
+      )}
+
       <MediaViewer
         items={items}
         open={openAt !== null}
@@ -143,9 +167,11 @@ export function MediaMosaic({
   );
 }
 
-function Tile({ item, eager }: { item: MediaItem; eager: boolean }) {
+// `load={false}` keeps a plain tile: browsers fetch lazy images well before they scroll into view.
+function Tile({ item, eager, load = true }: { item: MediaItem; eager: boolean; load?: boolean }) {
   const [broken, setBroken] = useState(false);
   const src = item.kind === 'image' ? item.url : item.posterUrl;
+  if (!load) return <span className="block h-full w-full bg-muted" aria-hidden="true" />;
   if (!src || broken) {
     return (
       <span className="flex h-full w-full items-center justify-center bg-muted text-muted-foreground">
