@@ -160,7 +160,7 @@ export default function EstateMarketplace() {
         <StatGroupSkeleton groups={[4]} />
       ) : (
         <StatGroup
-          title="Marketplace"
+          title="Homes in your estate"
           items={[
             {
               label: 'Properties',
