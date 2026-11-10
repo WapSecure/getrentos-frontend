@@ -115,7 +115,8 @@ function TenantRow({ tenant: t }: { tenant: LandlordTenant }) {
           </Text>
 
           <Text variant="caption" color="mutedForeground">
-            Moved in {formatDate(t.moveInDate, 'short')} · trust {t.trustScore}
+            Moved in {formatDate(t.moveInDate, 'short')} ·{' '}
+            {t.trustScore > 0 ? `trust ${t.trustScore}` : 'new to Sureground'}
           </Text>
         </View>
       </View>

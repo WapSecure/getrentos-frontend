@@ -158,6 +158,7 @@ export default function LandlordUnits() {
                   ]}
                   value={propertyId}
                   onChange={setPropertyId}
+                  scroll
                 />
               ) : null}
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>

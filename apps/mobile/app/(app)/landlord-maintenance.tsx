@@ -21,6 +21,7 @@ import { qk } from '@/lib/query/keys';
 import {
   landlordApi,
   MAINTENANCE_STATUS_LABEL,
+  OPEN_MAINTENANCE_STATUSES,
   MAINTENANCE_STATUS_TONE,
   PRIORITY_TONE,
   type LandlordMaintenance,
@@ -31,8 +32,6 @@ import { AssignVendorSheet } from '@/components/landlord/AssignVendorSheet';
 import { TriageSheet } from '@/components/landlord/TriageSheet';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
-
-const OPEN = ['pending', 'acknowledged', 'in_progress'];
 
 export default function LandlordMaintenanceScreen() {
   const { colors, spacing, radius } = useTheme();
@@ -78,7 +77,7 @@ export default function LandlordMaintenanceScreen() {
   });
 
   const items = query.data?.items ?? [];
-  const openCount = items.filter((m) => OPEN.includes(m.status)).length;
+  const openCount = items.filter((m) => OPEN_MAINTENANCE_STATUSES.includes(m.status)).length;
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -182,7 +181,7 @@ function RequestCard({
   onTriage: () => void;
 }) {
   const { colors, spacing } = useTheme();
-  const actionable = OPEN.includes(m.status);
+  const actionable = OPEN_MAINTENANCE_STATUSES.includes(m.status);
 
   return (
     <Card padding={spacing.lg} style={{ marginBottom: spacing.sm }}>

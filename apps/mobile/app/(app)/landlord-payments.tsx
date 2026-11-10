@@ -25,7 +25,7 @@ import {
   LANDLORD_PAYMENT_TONE,
   type LandlordPayment,
 } from '@/lib/api/landlord';
-import { formatDate } from '@/lib/format';
+import { formatDate, formatNaira } from '@/lib/format';
 import { ChargeRentSheet } from '@/components/landlord/ChargeRentSheet';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
@@ -48,6 +48,13 @@ export default function LandlordPayments() {
     queryKey: qk.landlord.arrearsSummary,
     queryFn: landlordApi.arrearsSummary,
   });
+
+  const processing = (query.data?.items ?? [])
+    .filter((p) => p.status === 'processing')
+    .reduce((acc, p) => ({ count: acc.count + 1, total: acc.total + p.amount }), {
+      count: 0,
+      total: 0,
+    });
 
   // Disputed payments are frozen until resolved, so they lead the list.
   const items = [...(query.data?.items ?? [])].sort(
@@ -105,6 +112,12 @@ export default function LandlordPayments() {
                     <Figure label="Outstanding" amount={stats.data?.outstandingBalance ?? 0} />
                   </View>
                 )}
+                {processing.count > 0 ? (
+                  // Not yet collected or owed: the tenant paid and the bank hasn't confirmed.
+                  <Text variant="caption" color="mutedForeground" style={{ marginTop: spacing.sm }}>
+                    {`${formatNaira(processing.total)} more is processing (${processing.count === 1 ? '1 payment' : `${processing.count} payments`}). It counts once the bank confirms.`}
+                  </Text>
+                ) : null}
               </Card>
 
               {(arrears.data?.overdueCount ?? 0) > 0 ? (

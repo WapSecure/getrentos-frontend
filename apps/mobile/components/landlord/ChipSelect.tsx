@@ -1,4 +1,4 @@
-import { View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { Chip, Text, useTheme } from '@sureground/ui-native';
 
 interface Option<T extends string> {
@@ -13,6 +13,8 @@ interface Props<T extends string> {
   onChange: (value: T) => void;
   emptyText?: string;
   disabled?: boolean;
+  /** One scrolling row instead of wrapping, for long lists such as property names. */
+  scroll?: boolean;
 }
 
 export function ChipSelect<T extends string>({
@@ -22,8 +24,18 @@ export function ChipSelect<T extends string>({
   onChange,
   emptyText,
   disabled = false,
+  scroll = false,
 }: Props<T>) {
   const { spacing } = useTheme();
+  const chips = options.map((o) => (
+    <Chip
+      key={o.value}
+      label={o.label}
+      selected={o.value === value}
+      onPress={() => onChange(o.value)}
+      disabled={disabled}
+    />
+  ));
 
   return (
     <View style={{ gap: spacing.sm }}>
@@ -37,21 +49,17 @@ export function ChipSelect<T extends string>({
         <Text variant="caption" color="mutedForeground" style={{ marginLeft: 4 }}>
           {emptyText}
         </Text>
+      ) : scroll ? (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ gap: spacing.sm }}
+          accessibilityLabel={label}
+        >
+          {chips}
+        </ScrollView>
       ) : (
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
-          {options.map((o) => {
-            const selected = o.value === value;
-            return (
-              <Chip
-                key={o.value}
-                label={o.label}
-                selected={selected}
-                onPress={() => onChange(o.value)}
-                disabled={disabled}
-              />
-            );
-          })}
-        </View>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>{chips}</View>
       )}
     </View>
   );

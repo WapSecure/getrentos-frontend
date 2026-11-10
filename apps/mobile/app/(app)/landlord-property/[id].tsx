@@ -37,6 +37,7 @@ import {
   landlordApi,
   OCCUPANCY_LABEL,
   OCCUPANCY_TONE,
+  VERIFICATION_LABEL,
   VERIFICATION_TONE,
   type LandlordUnit,
 } from '@/lib/api/landlord';
@@ -174,7 +175,8 @@ export default function LandlordPropertyDetail() {
           icon={<ChevronLeft size={22} color={colors.foreground} />}
         />
         <View style={{ flex: 1 }}>
-          <Text variant="title" numberOfLines={1}>
+          {/* Two action buttons share this row, so long names wrap instead of cutting to a few letters. */}
+          <Text variant="heading" numberOfLines={2}>
             {p?.name ?? 'Property'}
           </Text>
         </View>
@@ -245,7 +247,7 @@ export default function LandlordPropertyDetail() {
             <View style={{ gap: spacing.sm }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
                 <Badge
-                  label={p.verificationStatus}
+                  label={VERIFICATION_LABEL[p.verificationStatus]}
                   tone={VERIFICATION_TONE[p.verificationStatus]}
                 />
                 {p.archived ? <Badge label="Archived" tone="neutral" /> : null}

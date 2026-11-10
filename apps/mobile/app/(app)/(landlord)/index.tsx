@@ -124,11 +124,16 @@ export default function LandlordOverview() {
             subtitle: `${occupancy}% of units`,
             onPress: () => router.push('/(app)/(landlord)/tenants'),
           },
-          {
-            label: 'Reserved',
-            value: s.reservedUnits,
-            subtitle: 'Awaiting signature or payment',
-          },
+          // Only while a unit is actually held: a permanent "Reserved 0" was the one tile you couldn't tap.
+          ...(s.reservedUnits > 0
+            ? [
+                {
+                  label: 'Reserved',
+                  value: s.reservedUnits,
+                  subtitle: 'Awaiting signature or payment',
+                },
+              ]
+            : []),
           {
             label: 'Vacant',
             value: s.vacantUnits,
