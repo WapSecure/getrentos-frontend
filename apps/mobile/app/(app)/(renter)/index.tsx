@@ -1,7 +1,7 @@
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 import { Image } from 'expo-image';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Banknote,
   Bell,
@@ -38,6 +38,8 @@ import { RefreshFailedNotice } from '@/components/RefreshFailedNotice';
 import { QuickActions, dashboardGreeting } from '@/components/dashboard/DashboardParts';
 import { qk } from '@/lib/query/keys';
 import { renterApi, type RenterDashboardStats } from '@/lib/api/renter';
+import { leaseApi } from '@/lib/api/lease';
+import { paymentsApi } from '@/lib/api/payments';
 import type { RenterProperty } from '@/lib/api/properties';
 import {
   applicationsApi,
@@ -48,7 +50,7 @@ import { IdentityNudge, useIdentityVerified } from '@/components/trust/IdentityN
 import { notificationsApi } from '@/lib/api/notifications';
 import { useSavedListings } from '@/hooks/useSavedListings';
 import { useAuth } from '@/lib/auth/AuthProvider';
-import { firstName } from '@/lib/format';
+import { APP_TIME_ZONE, firstName, formatNaira } from '@/lib/format';
 import { withTrustLabel } from '@/lib/trustLabel';
 import { trustChainLabel } from '@sureground/shared';
 
@@ -100,6 +102,29 @@ export default function RenterHome() {
   const moveInItems = moveInChecklist.data ?? [];
   const moveInDone = moveInItems.filter((i) => i.completed).length;
 
+  // Same key and options as the lease screen, so the two share one cache entry.
+  const lease = useQuery({ queryKey: qk.renter.lease, queryFn: leaseApi.getLease, retry: false });
+  const leaseStatus = lease.data
+    ? lease.data.status.charAt(0).toUpperCase() + lease.data.status.slice(1)
+    : '—';
+  const leaseEndLabel = lease.data?.endDate
+    ? `Ends ${new Date(lease.data.endDate).toLocaleDateString('en-GB', { month: 'short', year: 'numeric', timeZone: APP_TIME_ZONE })}`
+    : 'Active lease';
+
+  // Shares the payments screen's paged query; its summary is account-wide, the loaded page is the fallback for older APIs.
+  const payments = useInfiniteQuery({
+    queryKey: qk.renter.paymentsHistory,
+    queryFn: ({ pageParam }) => paymentsApi.list(pageParam, 20),
+    initialPageParam: 1,
+    getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
+  });
+  const firstPage = payments.data?.pages[0];
+  const totalRentPaid =
+    firstPage?.summary?.totalPaidNaira ??
+    (firstPage?.items ?? [])
+      .filter((p) => p.status === 'paid')
+      .reduce((sum, p) => sum + p.amount, 0);
+
   const METRICS: Metric[] = [
     {
       key: 'savedPropertiesCount',
@@ -133,6 +158,8 @@ export default function RenterHome() {
     applications.refetch();
     moveInChecklist.refetch();
     notifications.refetch();
+    lease.refetch();
+    payments.refetch();
     qc.invalidateQueries({ queryKey: ['kyc-status'] });
   };
   const staleQueries = [stats, listings, applications, moveInChecklist].filter(
@@ -254,11 +281,33 @@ export default function RenterHome() {
           />
         </Card>
       ) : stats.isPending ? (
-        <StatGroupSkeleton groups={[4]} />
+        <StatGroupSkeleton groups={[4, 2]} />
       ) : (
         <StatGroup
           title="Your search"
           items={METRICS.map(({ key, ...item }) => ({ ...item, value: stats.data?.[key] ?? 0 }))}
+        />
+      )}
+
+      {stats.isPending ? null : lease.isPending || payments.isPending ? (
+        <StatGroupSkeleton groups={[2]} />
+      ) : (
+        <StatGroup
+          title="Your home"
+          items={[
+            {
+              label: 'Current lease',
+              value: leaseStatus,
+              subtitle: leaseEndLabel,
+              onPress: () => router.push('/(app)/lease'),
+            },
+            {
+              label: 'Total rent paid',
+              value: formatNaira(totalRentPaid, { compact: true }),
+              subtitle: 'Lifetime',
+              onPress: () => router.push('/(app)/payments'),
+            },
+          ]}
         />
       )}
 

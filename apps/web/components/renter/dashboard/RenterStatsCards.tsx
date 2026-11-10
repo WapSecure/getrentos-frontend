@@ -34,10 +34,12 @@ export const RenterStatsCards = () => {
     queryKey: [...renterKeys.payments, { page: 1, pageSize: 100 }],
     queryFn: () => unwrap(renterService.listPayments({ page: 1, pageSize: 100 })),
   });
-  const payments = paymentsData?.items ?? [];
-  const totalRentPaid = payments
-    .filter((p) => p.status === 'paid')
-    .reduce((sum, p) => sum + p.amount, 0);
+  // The summary covers every charge; older APIs leave it out, so fall back to this page.
+  const totalRentPaid =
+    paymentsData?.summary?.totalPaidNaira ??
+    (paymentsData?.items ?? [])
+      .filter((p) => p.status === 'paid')
+      .reduce((sum, p) => sum + p.amount, 0);
 
   if (statsLoading) {
     return <StatGroupSkeleton groups={[4, 2]} />;

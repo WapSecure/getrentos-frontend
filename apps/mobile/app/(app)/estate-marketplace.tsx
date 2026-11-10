@@ -4,15 +4,7 @@ import { Alert, RefreshControl, View } from 'react-native';
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
-  Building2,
-  CheckCircle2,
-  Clock,
-  Home,
-  Plus,
-  ShieldCheck,
-  Store,
-} from '@sureground/icons/native';
+import { Building2, CheckCircle2, Home, Plus, Store } from '@sureground/icons/native';
 import {
   Button,
   EmptyState,
@@ -20,12 +12,13 @@ import {
   SegmentedControl,
   QueryState,
   Skeleton,
+  StatGroup,
+  StatGroupSkeleton,
   Text,
   useTheme,
   useToast,
 } from '@sureground/ui-native';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
-import { MetricGrid } from '@/components/dashboard/MetricGrid';
 import { AddPropertySheet } from '@/components/estate/marketplace/AddPropertySheet';
 import { AgreementCard } from '@/components/estate/marketplace/AgreementCard';
 import { ListingCard } from '@/components/estate/marketplace/ListingCard';
@@ -163,35 +156,35 @@ export default function EstateMarketplace() {
 
   const header = (
     <View style={{ gap: spacing.md, paddingBottom: spacing.md }}>
-      <MetricGrid
-        loading={inventory.isPending}
-        metrics={[
-          {
-            label: 'Properties',
-            value: inv?.properties ?? 0,
-            Icon: Building2,
-            onPress: () => setTab('properties'),
-          },
-          {
-            label: 'Awaiting owner',
-            value: inv?.agreementsPending ?? 0,
-            Icon: Clock,
-            onPress: () => setTab('properties'),
-          },
-          {
-            label: 'Cleared to market',
-            value: inv?.agreementsActive ?? 0,
-            Icon: ShieldCheck,
-            onPress: () => setTab('properties'),
-          },
-          {
-            label: 'Live listings',
-            value: inv?.listingsPublished ?? 0,
-            Icon: Home,
-            onPress: () => setTab('listings'),
-          },
-        ]}
-      />
+      {inventory.isPending ? (
+        <StatGroupSkeleton groups={[4]} />
+      ) : (
+        <StatGroup
+          title="Marketplace"
+          items={[
+            {
+              label: 'Properties',
+              value: inv?.properties ?? 0,
+              onPress: () => setTab('properties'),
+            },
+            {
+              label: 'Awaiting owner',
+              value: inv?.agreementsPending ?? 0,
+              onPress: () => setTab('properties'),
+            },
+            {
+              label: 'Cleared to market',
+              value: inv?.agreementsActive ?? 0,
+              onPress: () => setTab('properties'),
+            },
+            {
+              label: 'Live listings',
+              value: inv?.listingsPublished ?? 0,
+              onPress: () => setTab('listings'),
+            },
+          ]}
+        />
+      )}
       {isFreeEstate(estate) ? <FreePlanNote /> : null}
       {tab === 'listings' ? (
         canBulk ? (

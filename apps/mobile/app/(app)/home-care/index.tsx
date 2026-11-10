@@ -3,14 +3,11 @@ import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
-  AlertTriangle,
-  BadgeCheck,
   Boxes,
   CalendarClock,
   ChevronRight,
   History,
   Plus,
-  Siren,
   Timer,
   Wrench,
   type SgIcon,
@@ -20,14 +17,14 @@ import {
   Price,
   QueryState,
   Skeleton,
-  StatSkeleton,
+  StatGroup,
+  StatGroupSkeleton,
   Text,
   useTheme,
 } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { homeCareApi } from '@/lib/api/homeCare';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
-import { MetricGrid } from '@/components/dashboard/MetricGrid';
 import { isUpgradeError } from '@/components/host/HostUI';
 import { WorkOrderCard } from '@/components/homecare/WorkOrderCard';
 import { HomeCareProGate } from '@/components/homecare/HomeCareProGate';
@@ -103,39 +100,38 @@ export default function HomeCare() {
           query={dashboard}
           skeleton={
             <View style={{ gap: spacing.xl }}>
-              <StatSkeleton />
+              <StatGroupSkeleton groups={[4]} />
               <Skeleton height={120} radius={radius.lg} />
             </View>
           }
         >
           {d ? (
             <>
-              <MetricGrid
-                loading={false}
-                metrics={[
+              <StatGroup
+                title="Jobs"
+                items={[
                   {
-                    label: 'Open jobs',
+                    label: 'Open',
                     value: d.openWorkOrders,
-                    Icon: Wrench,
                     onPress: () => router.push('/(app)/home-care/work-orders'),
                   },
                   {
                     label: 'Overdue',
                     value: d.overdue,
-                    Icon: AlertTriangle,
                     onPress: () => router.push('/(app)/home-care/work-orders'),
+                    attention: d.overdue > 0,
                   },
                   {
                     label: 'Awaiting approval',
                     value: d.approvalQueue,
-                    Icon: BadgeCheck,
                     onPress: () => router.push('/(app)/home-care/work-orders'),
+                    attention: d.approvalQueue > 0,
                   },
                   {
                     label: 'Emergencies',
                     value: d.unacknowledgedEmergencies,
-                    Icon: Siren,
                     onPress: () => router.push('/(app)/home-care/work-orders'),
+                    attention: d.unacknowledgedEmergencies > 0,
                   },
                 ]}
               />

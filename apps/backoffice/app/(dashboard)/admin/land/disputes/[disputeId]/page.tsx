@@ -221,13 +221,9 @@ export default function AdminLandDisputePage() {
             description="Kept permanently with its SHA-256; nothing here can be removed."
           >
             {d.evidence.length === 0 ? (
-              <EmptyState
-                icon={FileText}
-                title="No evidence yet"
-                description="Files the parties or staff add to this dispute will appear here."
-                size="compact"
-                bare
-              />
+              <PanelMessage>
+                No evidence yet. Files the parties or staff add to this dispute appear here.
+              </PanelMessage>
             ) : (
               <ul className="space-y-2">
                 {d.evidence.map((item) => (

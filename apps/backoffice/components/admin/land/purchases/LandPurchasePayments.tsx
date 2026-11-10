@@ -1,5 +1,6 @@
-import { Banknote, Check, RotateCcw, Wallet } from '@sureground/icons';
-import { Badge, Button, EmptyState } from '@sureground/ui';
+import { Banknote, Check, RotateCcw } from '@sureground/icons';
+import { Badge, Button } from '@sureground/ui';
+import { PanelMessage } from '@/components/admin/land/case/shared';
 import { formatCurrency, formatDate } from '@sureground/shared';
 import type {
   LandEscrowRelease,
@@ -40,12 +41,9 @@ export const LandPurchasePayments = ({
       Buyer payments
     </h3>
     {payments.length === 0 ? (
-      <EmptyState
-        icon={Wallet}
-        title="No payments yet"
-        description="Payments the buyer makes on this contract will appear here."
-        size="compact"
-      />
+      <PanelMessage>
+        No payments yet. Payments the buyer makes on this contract appear here.
+      </PanelMessage>
     ) : (
       <ul className="divide-y divide-border rounded-xl border border-border">
         {payments.map((payment) => (
@@ -72,12 +70,9 @@ export const LandPurchasePayments = ({
       Releases to the developer
     </h3>
     {releases.length === 0 ? (
-      <EmptyState
-        icon={Banknote}
-        title="Nothing released yet"
-        description="Money released from escrow to the developer will appear here."
-        size="compact"
-      />
+      <PanelMessage>
+        Nothing released yet. Money released from escrow to the developer appears here.
+      </PanelMessage>
     ) : (
       <ul className="divide-y divide-border rounded-xl border border-border">
         {releases.map((release) => {

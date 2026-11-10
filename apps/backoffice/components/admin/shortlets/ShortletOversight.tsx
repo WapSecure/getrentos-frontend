@@ -780,8 +780,16 @@ export const ShortletOversight = () => {
           ) : listings.length === 0 ? (
             <EmptyState
               icon={BedDouble}
-              title="No shortlet listings"
-              description="Try adjusting filters."
+              title={
+                search.trim() || listingStatus !== 'all'
+                  ? 'No listings match these filters'
+                  : 'No shortlet listings yet'
+              }
+              description={
+                search.trim() || listingStatus !== 'all'
+                  ? 'Change the search or status to see more.'
+                  : 'Listings hosts publish appear here for moderation.'
+              }
             />
           ) : (
             <div className="divide-y divide-border">
@@ -827,8 +835,16 @@ export const ShortletOversight = () => {
           ) : bookings.length === 0 ? (
             <EmptyState
               icon={CalendarCheck}
-              title="No shortlet bookings"
-              description="Try adjusting filters."
+              title={
+                bookingId || bookingStatus !== 'all'
+                  ? 'No bookings match these filters'
+                  : 'No shortlet bookings yet'
+              }
+              description={
+                bookingId || bookingStatus !== 'all'
+                  ? 'Change the status or open the full list to see more.'
+                  : 'Guest bookings appear here once made.'
+              }
             />
           ) : (
             <div className="divide-y divide-border">
@@ -991,7 +1007,19 @@ export const ShortletOversight = () => {
               retrying={reviewsFetching}
             />
           ) : reviews.length === 0 ? (
-            <EmptyState icon={Star} title="No reviews yet" description="Try adjusting filters." />
+            <EmptyState
+              icon={Star}
+              title={
+                reviewsSearch.trim() || reviewsRating !== 'all'
+                  ? 'No reviews match these filters'
+                  : 'No reviews yet'
+              }
+              description={
+                reviewsSearch.trim() || reviewsRating !== 'all'
+                  ? 'Change the search or rating to see more.'
+                  : 'Reviews guests and hosts leave after a stay appear here.'
+              }
+            />
           ) : (
             <div className="divide-y divide-border">
               {reviews.map((r) => (
