@@ -1,6 +1,6 @@
 # Sureground Diaspora Invest: assessment, requirements and plan
 
-Status: **M0 (discovery and architecture), awaiting owner decisions** · Started 2026-11-11
+Status: **M0 done; M1 in progress** · Started 2026-11-11
 
 This is the working document for the Diaspora Invest programme. It records what the code already
 does (checked in the code, not taken from older docs), what is missing, the decisions only the
@@ -164,7 +164,7 @@ or approval in section 9 first.
 | DIA-01 | Public Diaspora Invest page: offer, how it works, what is checked and by whom, what Payment Protection does and does not cover, Managed service, fees, risks, FAQ, book a consultation. No invented statistics or case studies | MVP                                            |
 | DIA-02 | Transparency centre page: Sureground's role, third-party responsibilities, fees and referral arrangements, verification limits, refund rules, complaints, privacy, conflicts of interest                                       | MVP (copy needs legal review before launch)    |
 | DIA-03 | Investor profile: country of residence, nationality, time zone, intended use, budget band, property types, horizon, ownership structure. Collected only where needed; retention per trust policy                               | MVP                                            |
-| DIA-04 | Times shown in the viewer's time zone next to Lagos time for viewings, tours, calls and deadlines; business dates stay Lagos                                                                                                   | MVP (needs D2)                                 |
+| DIA-04 | Times shown in the viewer's time zone next to Lagos time for viewings, tours, calls and deadlines; business dates stay Lagos                                                                                                   | MVP                                            |
 | DIA-05 | Indicative amounts in GBP/USD/EUR/CAD next to the naira figure, with rate source, timestamp and "indicative only"                                                                                                              | **Blocked (D1)**                               |
 | DIA-06 | Identity verification by passport or foreign ID, with liveness, through a production provider                                                                                                                                  | **Blocked (D3)**                               |
 | DIA-07 | Source of funds and source of wealth above a value threshold, with staff review                                                                                                                                                | MVP for capture and review; threshold needs D4 |
@@ -277,18 +277,18 @@ Verification (listing):   SUBMITTED → UNDER_REVIEW → EVIDENCE_VERIFIED → C
 
 ## 9. Decisions needed from the business
 
-| ID  | Decision                                                                                                                                   | Why it matters                                                                                | Blocks                           |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------- | -------------------------------- |
-| D1  | May we show **indicative** foreign-currency figures (GBP/USD/EUR/CAD) next to naira, given the naira-only rule? If yes, which rate source? | REQ-MONEY-01 forbids it today; the brief wants it                                             | DIA-05, currency views in DIA-19 |
-| D2  | May times show in the investor's own time zone next to Lagos time? (Business dates stay Lagos.)                                            | REQ-MONEY-07 and Lagos-only notifications                                                     | DIA-04, DIA-32                   |
-| D3  | Production identity provider for passports and foreign IDs (Smile, QoreID, Prembly), and who pays per check                                | The Smile adapter is a stub; foreigners and many diaspora users cannot verify                 | DIA-06; persona F                |
-| D4  | Source-of-funds threshold and which documents count                                                                                        | Needs a compliance owner                                                                      | DIA-07 threshold                 |
-| D5  | Foreign payouts and foreign-currency collections: which licensed partner (IMTO, bank, payment provider)?                                   | Paystack payouts are Nigerian banks only; non-NGN charges are refused                         | DIA-24, foreign funding          |
-| D6  | Payments D-1 (separate client-money account, counsel opinion, provider approval)                                                           | Already open; no new product may add to the pool                                              | DIA-17                           |
-| D7  | Fee card for Verified Acquisition (diligence fee, coordination fee, who pays professionals)                                                | Must be shown before commitment                                                               | DIA-01, DIA-15                   |
-| D8  | Eligibility of non-Nigerian buyers (state Governor's consent, ownership structures, tax)                                                   | Needs a written legal opinion                                                                 | Persona F                        |
-| D9  | Marketing to UK/US/Canada residents: financial-promotion rules                                                                             | Positioning as property services, not investments, likely avoids them, but needs confirmation | DIA-01 copy                      |
-| D10 | Is "Diaspora Invest" the public name, with Sureground Managed as one of its offerings?                                                     | Avoids two competing names                                                                    | DIA-01                           |
+| ID  | Decision                                                                                                                                                                             | Why it matters                                                                                | Blocks                     |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------- | -------------------------- |
+| D1  | **Decided 2026-11-11: yes, indicative only.** Naira stays the price and payment currency; GBP/USD/EUR/CAD shown as "about", with rate source and time. Still open: which rate source | REQ-MONEY-01 amended for indicative display only                                              | DIA-05 needs a rate source |
+| D2  | **Decided 2026-11-11: yes.** Viewer's time zone shown next to Lagos time; business dates stay Lagos                                                                                  | REQ-MONEY-07 unchanged for business dates                                                     | —                          |
+| D3  | Production identity provider for passports and foreign IDs (Smile, QoreID, Prembly), and who pays per check                                                                          | The Smile adapter is a stub; foreigners and many diaspora users cannot verify                 | DIA-06; persona F          |
+| D4  | Source-of-funds threshold and which documents count                                                                                                                                  | Needs a compliance owner                                                                      | DIA-07 threshold           |
+| D5  | Foreign payouts and foreign-currency collections: which licensed partner (IMTO, bank, payment provider)?                                                                             | Paystack payouts are Nigerian banks only; non-NGN charges are refused                         | DIA-24, foreign funding    |
+| D6  | Payments D-1 (separate client-money account, counsel opinion, provider approval)                                                                                                     | Already open; no new product may add to the pool                                              | DIA-17                     |
+| D7  | Fee card for Verified Acquisition (diligence fee, coordination fee, who pays professionals)                                                                                          | Must be shown before commitment                                                               | DIA-01, DIA-15             |
+| D8  | Eligibility of non-Nigerian buyers (state Governor's consent, ownership structures, tax)                                                                                             | Needs a written legal opinion                                                                 | Persona F                  |
+| D9  | Marketing to UK/US/Canada residents: financial-promotion rules                                                                                                                       | Positioning as property services, not investments, likely avoids them, but needs confirmation | DIA-01 copy                |
+| D10 | **Decided 2026-11-11:** public name is Sureground Diaspora Invest, an umbrella over Verified Acquisition, Sureground Managed (name kept) and the investor workspace                  | —                                                                                             | —                          |
 
 ### Compliance register (launch-blocking unless marked)
 
@@ -348,6 +348,7 @@ timeliness, repeat investment. None is optimised at the expense of investor prot
 
 ## 12. Progress log
 
-| Date       | Milestone | What changed                                                     | Evidence      |
-| ---------- | --------- | ---------------------------------------------------------------- | ------------- |
-| 2026-11-11 | M0        | Assessment, requirements, architecture and decision list written | This document |
+| Date       | Milestone | What changed                                                                                        | Evidence                 |
+| ---------- | --------- | --------------------------------------------------------------------------------------------------- | ------------------------ |
+| 2026-11-11 | M0        | Assessment, requirements, architecture and decision list written                                    | This document            |
+| 2026-11-11 | M0        | Owner decided D1 (indicative currency only), D2 (both time zones), D10 (umbrella name); M1 approved | Owner answers in session |
