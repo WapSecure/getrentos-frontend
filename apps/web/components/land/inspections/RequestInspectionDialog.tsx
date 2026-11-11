@@ -6,6 +6,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Button,
   Checkbox,
+  CheckboxGroup,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -26,6 +27,7 @@ import {
 
 export const BUYER_INSPECTIONS_ROUTE = '/buyer/land/inspections';
 const FOCUS = Object.keys(INSPECTION_FOCUS_LABELS) as InspectionFocus[];
+const FOCUS_OPTIONS = FOCUS.map((key) => ({ value: key, label: INSPECTION_FOCUS_LABELS[key] }));
 
 export const RequestInspectionDialog = ({
   open,
@@ -71,21 +73,12 @@ export const RequestInspectionDialog = ({
             timestamped, and Sureground checks the report before you see it.
           </DialogDescription>
         </div>
-        <fieldset className="space-y-2">
-          <legend className="text-sm font-medium text-foreground">Ask the inspector to</legend>
-          {FOCUS.map((key) => (
-            <label key={key} className="flex items-start gap-2 text-sm text-foreground">
-              <Checkbox
-                checked={focus.includes(key)}
-                onCheckedChange={(on) =>
-                  setFocus((current) => (on ? [...current, key] : current.filter((f) => f !== key)))
-                }
-                aria-label={INSPECTION_FOCUS_LABELS[key]}
-              />
-              {INSPECTION_FOCUS_LABELS[key]}
-            </label>
-          ))}
-        </fieldset>
+        <CheckboxGroup
+          legend="Ask the inspector to"
+          value={focus}
+          onValueChange={setFocus}
+          options={FOCUS_OPTIONS}
+        />
         <Field label="Anything else (optional)" htmlFor="inspection-notes">
           <Textarea
             id="inspection-notes"

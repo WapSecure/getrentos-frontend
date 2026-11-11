@@ -7,7 +7,7 @@ import {
   Button,
   Card,
   CardSkeleton,
-  Checkbox,
+  CheckboxGroup,
   DatePicker,
   DocumentUpload,
   Field,
@@ -32,6 +32,7 @@ import {
 } from '@/types/landProfessional';
 
 const ROLES = Object.keys(LAND_REVIEWER_ROLE_LABELS) as LandReviewerRole[];
+const STATE_OPTIONS = NIGERIA_STATES.map((state) => ({ value: state, label: state }));
 
 const STATUS_VARIANT: Record<LandProfessionalStatus, 'success' | 'warning' | 'danger' | 'neutral'> =
   {
@@ -343,27 +344,14 @@ export const AccreditationPanel = () => {
                   placeholder="Pick the expiry date"
                 />
               </Field>
-              <fieldset className="sm:col-span-2">
-                <legend className="text-sm font-medium text-foreground">
-                  States you cover{states.length ? ` (${states.length})` : ''}
-                </legend>
-                <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-3 lg:grid-cols-4">
-                  {NIGERIA_STATES.map((state) => (
-                    <label key={state} className="flex items-center gap-2 text-sm text-foreground">
-                      <Checkbox
-                        checked={states.includes(state)}
-                        onCheckedChange={(on) =>
-                          setStates((current) =>
-                            on ? [...current, state] : current.filter((s) => s !== state)
-                          )
-                        }
-                        aria-label={state}
-                      />
-                      {state}
-                    </label>
-                  ))}
-                </div>
-              </fieldset>
+              <CheckboxGroup
+                legend={`States you cover${states.length ? ` (${states.length})` : ''}`}
+                columns={4}
+                value={states}
+                onValueChange={setStates}
+                options={STATE_OPTIONS}
+                className="sm:col-span-2"
+              />
               <div className="sm:col-span-2">
                 <Button type="submit" disabled={!canSubmit} isLoading={apply.isPending}>
                   Send application
