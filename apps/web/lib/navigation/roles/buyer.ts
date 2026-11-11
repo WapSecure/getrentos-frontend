@@ -2,6 +2,7 @@ import {
   BedDouble,
   CalendarClock,
   FolderOpen,
+  Globe,
   Handshake,
   Heart,
   Landmark,
@@ -14,6 +15,7 @@ import {
   Star,
 } from '@sureground/icons';
 import { ROUTES } from '@/lib/constants/auth';
+import { DIASPORA_ROUTES } from '@/lib/constants/diasporaRoutes';
 import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';
 import { defineRoleNavigation } from '../resolve';
 
@@ -64,6 +66,13 @@ export const buyerNavigation = defineRoleNavigation({
       flag: 'landMarketplace',
     },
     {
+      id: 'invest',
+      labelKey: 'sidebar.diaspora_invest',
+      href: DIASPORA_ROUTES.BUYER_WORKSPACE,
+      icon: Globe,
+      flag: 'diasporaInvest',
+    },
+    {
       id: 'documents',
       labelKey: 'sidebar.documents',
       href: ROUTES.BUYER_DOCUMENTS,
@@ -87,7 +96,7 @@ export const buyerNavigation = defineRoleNavigation({
   groups: [
     { label: 'Overview', items: ['dashboard'] },
     { label: 'Find property', items: ['discover', 'saved', 'land'] },
-    { label: 'Buying', items: ['viewings', 'offers', 'transactions', 'landPurchases'] },
+    { label: 'Buying', items: ['viewings', 'offers', 'transactions', 'landPurchases', 'invest'] },
     { label: 'Messages and documents', items: ['messages', 'documents'] },
     {
       label: 'Trust and account',

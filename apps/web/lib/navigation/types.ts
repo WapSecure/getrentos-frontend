@@ -3,7 +3,7 @@ import type { PlanTier } from '@sureground/shared';
 import type { TranslationKey } from '@/lib/i18n/translations';
 
 export type NavPlan = Extract<PlanTier, 'PRO' | 'ENTERPRISE'>;
-export type NavFlag = 'landOwners' | 'landMarketplace';
+export type NavFlag = 'landOwners' | 'landMarketplace' | 'diasporaInvest';
 
 type NavLabel = { labelKey: TranslationKey; label?: never } | { label: string; labelKey?: never };
 
