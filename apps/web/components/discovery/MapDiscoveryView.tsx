@@ -70,6 +70,8 @@ interface MapDiscoveryViewProps<T extends { id: string } & MapPoint> {
   renderCard: (item: T, state: { selected: boolean; position: number }) => ReactNode;
   area?: MapArea;
   onSearchArea: (area: MapArea) => void;
+  /** Clears a searched or drawn area from the map itself. */
+  onClearArea?: () => void;
   selectedId?: string;
   onSelect: (id: string | undefined) => void;
   /** Pagination and anything else under the list. */
@@ -90,6 +92,7 @@ export function MapDiscoveryView<T extends { id: string } & MapPoint>({
   renderCard,
   area,
   onSearchArea,
+  onClearArea,
   selectedId,
   onSelect,
   footer,
@@ -162,6 +165,7 @@ export function MapDiscoveryView<T extends { id: string } & MapPoint>({
           highlightedId={highlightedId}
           onSelect={(id) => onSelect(id === selectedId ? undefined : id)}
           onSearchArea={onSearchArea}
+          onClearArea={onClearArea}
         />
       </div>
     </div>

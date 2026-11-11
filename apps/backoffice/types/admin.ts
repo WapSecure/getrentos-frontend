@@ -60,7 +60,8 @@ export type AdminPermission =
   | 'subscriptions.manage'
   | 'managed.view'
   | 'managed.operate'
-  | 'ai.observe';
+  | 'ai.observe'
+  | 'collections.manage';
 
 export type AdminStaffStatus = 'active' | 'pending' | 'suspended' | 'banned';
 

@@ -8,6 +8,7 @@ import { estateStorefrontService } from '@/services/estateMarketplaceService';
 import { EstateAvailableListings } from './EstateAvailableListings';
 import { unwrap } from '@/lib/apiHelpers';
 import type { EstateStorefront } from '@/types/estate-marketplace';
+import { CollectionsStrip } from '@/components/collections/CollectionsStrip';
 
 interface EstateMicrositePageClientProps {
   slug: string;
@@ -81,6 +82,13 @@ export const EstateMicrositePageClient = ({
           <p className="text-sm text-muted-foreground mt-6 max-w-2xl">{profile.bio}</p>
         )}
       </div>
+
+      <CollectionsStrip
+        estate={slug}
+        title={`Collections from ${profile.name}`}
+        description="Sets of homes this estate has picked from its own listings."
+        className="mt-10 px-2"
+      />
 
       <EstateAvailableListings
         slug={slug}

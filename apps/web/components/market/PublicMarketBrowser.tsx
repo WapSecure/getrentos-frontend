@@ -36,6 +36,7 @@ import {
 } from '@/components/discovery/MapDiscoveryView';
 import { formatAreaParam, parseAreaParam, parseView, type MapArea } from '@/lib/mapArea';
 import { urlParam, useSyncUrlState } from '@/hooks/useUrlState';
+import { CollectionsStrip } from '@/components/collections/CollectionsStrip';
 
 // Shared with the server component that pre-renders the first page, so both ask for the same page size.
 const PAGE_SIZE = PUBLIC_MARKET_PAGE_SIZE;
@@ -358,6 +359,8 @@ export const PublicMarketBrowser = ({
         </p>
       </header>
 
+      {!estateFromUrl && <CollectionsStrip market={market} className="mb-8" />}
+
       {estateFromUrl && (
         <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-secondary/60 px-4 py-3">
           <p className="text-sm text-muted-foreground">
@@ -558,6 +561,7 @@ export const PublicMarketBrowser = ({
             price={(l) => l.price}
             area={area}
             onSearchArea={searchArea}
+            onClearArea={clearArea}
             selectedId={selectedId}
             onSelect={setSelectedId}
             empty={

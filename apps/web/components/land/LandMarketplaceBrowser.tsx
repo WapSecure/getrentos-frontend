@@ -68,6 +68,7 @@ import { AssuranceTierBadge } from '@/components/land/market/AssuranceTierBadge'
 import { TrustLabelsList } from '@/components/land/market/TrustLabelsList';
 import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';
 import type { LandAssuranceTier } from '@/types/land';
+import { CollectionsStrip } from '@/components/collections/CollectionsStrip';
 
 type MarketplaceMode = 'public' | 'buyer';
 type Sort = 'newest' | 'price_asc' | 'price_desc';
@@ -153,6 +154,10 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
   const [area, setArea] = useState<MapArea | undefined>(() =>
     parseAreaParam(searchParams.get('area'))
   );
+  const clearArea = () => {
+    setArea(undefined);
+    setPage(1);
+  };
   const [selectedId, setSelectedId] = useState<string | undefined>(
     () => searchParams.get('selected') || undefined
   );
@@ -380,6 +385,8 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
           </div>
         </div>
 
+        {mode === 'public' && <CollectionsStrip market="land" className="mb-8" />}
+
         <div className="mb-3">
           <SearchInput
             id="land-search"
@@ -504,12 +511,7 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
         </div>
         {area && (
           <div className="mb-4">
-            <MapAreaNotice
-              onClear={() => {
-                setArea(undefined);
-                setPage(1);
-              }}
-            />
+            <MapAreaNotice onClear={clearArea} />
           </div>
         )}
 
@@ -539,6 +541,7 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
               setPage(1);
               setSelectedId(undefined);
             }}
+            onClearArea={clearArea}
             selectedId={selectedId}
             onSelect={setSelectedId}
             empty={

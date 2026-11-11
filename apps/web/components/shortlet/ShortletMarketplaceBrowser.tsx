@@ -38,6 +38,7 @@ import {
 } from '@/components/discovery/MapDiscoveryView';
 import { formatAreaParam, parseAreaParam, parseView, type MapArea } from '@/lib/mapArea';
 import { urlParam, useSyncUrlState } from '@/hooks/useUrlState';
+import { CollectionsStrip } from '@/components/collections/CollectionsStrip';
 
 const PAGE_SIZE = 9;
 const MAP_PAGE_SIZE = 24;
@@ -315,6 +316,8 @@ export const ShortletMarketplaceBrowser = ({
         </div>
       )}
 
+      {!hideHeader && !estateFromUrl && <CollectionsStrip market="shortlet" className="mb-8" />}
+
       <div className="mb-3">
         <SearchInput
           id="shortlet-search"
@@ -520,6 +523,7 @@ export const ShortletMarketplaceBrowser = ({
             setPage(1);
             setSelectedId(undefined);
           }}
+          onClearArea={clearArea}
           selectedId={selectedId}
           onSelect={setSelectedId}
           empty={

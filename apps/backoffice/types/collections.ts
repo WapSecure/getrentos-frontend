@@ -1,0 +1,97 @@
+export type CardMarket = 'rent' | 'sale' | 'land' | 'shortlet';
+export type CollectionStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+
+/** Enough of a listing card to pick and order it; each market's card is mapped by cardSummary. */
+export interface MarketCard {
+  id: string;
+  title: string;
+  location: string;
+  price?: number;
+}
+
+export interface ManagedCollectionItem {
+  listingId: string;
+  position: number;
+  note: string | null;
+  visible: boolean;
+  card: unknown | null;
+}
+
+export interface ManagedCollection {
+  id: string;
+  slug: string;
+  title: string;
+  description: string | null;
+  market: CardMarket;
+  curatorType: 'STAFF' | 'ESTATE' | 'AGENCY' | 'REALTOR';
+  curatorId: string | null;
+  curatorName: string;
+  status: CollectionStatus;
+  sponsored: boolean;
+  coverListingId: string | null;
+  publishedAt: string | null;
+  startsAt: string | null;
+  endsAt: string | null;
+  itemCount: number;
+  updatedAt: string;
+  items?: ManagedCollectionItem[];
+}
+
+export interface CollectionInput {
+  title: string;
+  description?: string | null;
+  market?: CardMarket;
+  startsAt?: string | null;
+  endsAt?: string | null;
+  coverListingId?: string | null;
+  sponsored?: boolean;
+}
+
+export const COLLECTION_MARKET_LABEL: Record<CardMarket, string> = {
+  rent: 'Homes to rent',
+  sale: 'Homes for sale',
+  shortlet: 'Shortlets',
+  land: 'Land',
+};
+
+export const COLLECTION_STATUS_LABEL: Record<CollectionStatus, string> = {
+  DRAFT: 'Draft',
+  PUBLISHED: 'Published',
+  ARCHIVED: 'Archived',
+};
+
+export const CURATOR_LABEL: Record<ManagedCollection['curatorType'], string> = {
+  STAFF: 'Sureground',
+  ESTATE: 'Estate',
+  AGENCY: 'Agency',
+  REALTOR: 'Realtor',
+};
+
+export const COLLECTION_TITLE_MAX = 80;
+export const COLLECTION_DESCRIPTION_MAX = 600;
+export const COLLECTION_NOTE_MAX = 200;
+export const COLLECTION_MAX_ITEMS = 24;
+
+const WEB_APP_URL = process.env.NEXT_PUBLIC_WEB_APP_URL || 'http://localhost:3000';
+export const collectionPath = (slug: string) =>
+  `${WEB_APP_URL}/collections/${encodeURIComponent(slug)}`;
+
+const num = (v: unknown) => {
+  const n = typeof v === 'string' ? Number(v) : (v as number);
+  return Number.isFinite(n) ? n : undefined;
+};
+
+/** Rent cards carry `location`; sale, land and shortlet cards carry city and state. */
+export function cardSummary(market: CardMarket, raw: unknown): MarketCard {
+  const r = (raw ?? {}) as Record<string, unknown>;
+  const place =
+    typeof r.location === 'string'
+      ? r.location
+      : [r.city, r.state].filter((v) => typeof v === 'string' && v).join(', ');
+  return {
+    id: String(r.id ?? ''),
+    title: String(r.title ?? 'Listing'),
+    location: place,
+    price: num(market === 'shortlet' ? r.nightlyRate : r.price),
+  };
+}

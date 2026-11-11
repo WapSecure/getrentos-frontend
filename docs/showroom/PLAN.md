@@ -351,7 +351,7 @@ Shortlets were already on the showroom parts on the web. This milestone brings t
 - `GET /rentals/:id/similar`, `/marketplace/listings/:id/similar`, `/shortlets/:id/similar` and `/land/listings/:id/similar`, with `limit` from 1 to 12 (default 6).
 - **Rules:**
   - Same market, in the same city or within 15 km.
-  - Price within 1.6 times either way: rent per year, sale and land on the asking price, shortlets on the nightly rate.
+  - Price within 2 times either way (`SIMILAR_PRICE_FACTOR`; 1.6 until the 2026-11-11 decision): rent per year, sale and land on the asking price, shortlets on the nightly rate.
   - At most one bedroom apart.
   - Land matches land.
 - Best match first: distance rounded to the kilometre, then price, then bedrooms.
@@ -378,10 +378,10 @@ Shortlets were already on the showroom parts on the web. This milestone brings t
 
 **Not done:**
 
-- **Freehand drawn areas:** the reference design draws a shape, but that needs a drawing library (for example leaflet-draw), which the "no new map library" rule rules out. The searched box is drawn instead.
+- **Freehand drawn areas:** built after the 2026-11-11 decision approved leaflet-draw; see below.
 - **Mobile:** belongs to M5.
 
-### Collections: a product decision, not built
+### Collections: a product decision (decided and built 2026-11-11, see below)
 
 There is no data source for curated collections; the only related field is `Listing.isFeatured`, an admin flag on rentals with no title or grouping. So nothing was invented. Building collections needs these decisions:
 
@@ -397,3 +397,97 @@ There is no data source for curated collections; the only related field is `List
    - a collection never implies verification or a ranking the backend didn't make;
    - sponsored placement, if ever allowed, is labelled.
 4. **Where they show:** the market landing pages, estate storefronts, and a `/collections/[slug]` page with its own metadata.
+
+## Owner decisions and what was built (2026-11-11)
+
+Three decisions from the product owner, built on `feat/showroom-collections` in both repos.
+
+### 1. Similar listings: a wider price band
+
+- The price band is now **2 times either way**, up from 1.6. It is the named constant `SIMILAR_PRICE_FACTOR` in `src/shared/listings/similar-listings.ts`.
+- Unchanged: within 15 km or the same city, at most one bedroom apart, land matches land.
+- The spec now tests the edges at 2x (₦1.5M and ₦6M around ₦3M in; ₦1.4M and ₦6.1M out).
+
+### 2. Drawn search areas (leaflet-draw approved)
+
+**Backend (additive, no migration):**
+
+- `GET /rentals`, `/marketplace/listings`, `/shortlets` and `/land` take an optional `polygon`: flat `lat,lng,lat,lng,...` pairs.
+  - 3 to 50 points. A repeated closing point and consecutive duplicates are dropped; coordinates are clamped to the world.
+  - Refused with a 400: anything that is not a plain number (no exponents, words or empty parts), an odd count, more than 50 points, a shape with no size (all points on one line), text over 2,000 characters.
+  - No self-intersection check, as decided.
+  - **Any of the four bounds together with `polygon` is a 400.**
+- **Matching:** the database prefilter is the polygon's bounding box padded by the 500 m blur. Then a point-in-polygon check runs on the same displayed (blurred) point M6 uses, so drawing a tight shape cannot reveal an unverified listing's door.
+
+**Web:**
+
+- `leaflet-draw@1.0.4` with `@types/leaflet-draw@1.0.13`, pinned. It is imported inside `DiscoveryMap`, which only loads through `next/dynamic` when the map view opens, so it is never in the first bundle.
+- The map has **Draw area** (polygon), **Draw box** (rectangle) and, while an area is searched, **Clear area**. While drawing, a hint and **Cancel drawing** show. Our buttons replace leaflet-draw's own toolbar.
+- The shape stays in the URL: `area=` holds four numbers for a box or six or more (`lat,lng` pairs, 5 decimals) for a drawn shape. A shape with more than 50 corners is thinned evenly before it is sent.
+- The drawn shape is drawn back on the map, dashed like the M6 box.
+- Keyboard users keep **Search this area**; drawing itself needs a pointer.
+- `showArea` is off: leaflet-draw 1.0.4 throws while measuring area on Leaflet 1.9.
+
+### 3. Collections: both curator types
+
+**Data model** (migration `prisma/migrations/20261111180000_showroom_collections/migration.sql`, hand-written, additive, **not run**):
+
+- `Collection`: slug (fixed at creation), title, description, market (`RENT`, `SALE`, `SHORTLET`, `LAND`), `curatorType` (`STAFF`, `ESTATE`, `AGENCY`, `REALTOR`) and `curatorId`, status (draft, published, archived), `sponsored`, `coverListingId`, `publishedAt`, optional `startsAt` and `endsAt`, `createdById`.
+- `CollectionItem`: position, note, `addedBy`, `addedAt`; unique per collection and listing; removed with its listing.
+- **Cover:** a chosen item's photo rather than an uploaded image, so there is no new upload path and the photo link is signed like any card's. With no choice, the first item still public is the cover.
+
+**Who curates:**
+
+- **Staff**, in the backoffice, across all owners, behind the new permission **`collections.manage`** (Super admin and Backoffice admin have it).
+- **Estates, agencies and realtors**, from their own stock only. Checked on the server every time items are saved:
+  - estate: listings on properties in the estate (`Property.estateId`, set only once the owner agreed to the estate marketing it, so the same set the storefront shows);
+  - agency: properties the firm holds, or holds an active mandate over whose scope includes listing (not `FINANCE`);
+  - realtor: properties they own or hold a live `canList` grant for.
+  - Staff editing someone else's collection are held to that curator's stock too.
+- Every item must also be in the collection's market ("sale" means buildings; land is its own market).
+
+**Honesty rules, enforced on the server:**
+
+- Titles, descriptions and notes may not claim a check or a ranking: "verified", "vetted", "certified", "guaranteed", "best", "top 10", "#1", "ranked" and similar are refused with a reason. Each card still shows its own verification flag from the backend.
+- Public lists are newest first only, never ranked.
+- `sponsored` can only be set by staff, and only on a Sureground collection. Staff can clear it on anyone's.
+- Wherever a collection shows (strip tile, collection page and its title metadata, dashboards), a sponsored one carries **Sponsored**.
+- Items show only while their listing is still public (the same predicate each market's browse uses). A collection with nothing left to show is hidden, and its page is a 404.
+
+**Endpoints:**
+
+- Public:
+  - `GET /collections?market=rent|sale|shortlet|land&estate=<storefront slug>&limit=1..12`: published and inside the optional window.
+  - `GET /collections/:slug`: the collection with its still-public items, each as the market's own public card.
+- Staff (`collections.manage`): `/admin/collections`, with `GET`, `POST`, `GET :id`, `PATCH :id`, `PUT :id/items`, `POST :id/publish`, `POST :id/archive` and `GET candidates?market=&search=`.
+- Curators, the same shape:
+  - estate: `/estates/:estateId/collections` (estate managers of that estate);
+  - agency: `/agency/collections` (owner, staff, portfolio manager and leasing agent seats);
+  - realtor: `/realtor/collections` (realtor role).
+- Every change is audit-logged (`COLLECTION_CREATED`, `_UPDATED`, `_ITEMS_SET`, `_PUBLISHED`, `_ARCHIVED`).
+
+**Web:**
+
+- `/collections/[slug]`: its own title, description, canonical URL and Open Graph image. M3 `ListingCard`s in the curator's order, with the curator's note on each, who picked it, the Sponsored label, and a line that a collection is not a ranking or a check.
+- A collections strip on `/rent`, `/buy`, `/shortlets` and `/land` below the heading, shown only when published collections exist (hidden when the browse is scoped to an estate).
+- Estate storefronts (`/e/[slug]`) show the estate's own collections.
+- Curator editor (a list plus an editor: details, add from own live listings, reorder with up and down buttons, notes, cover, publish, archive):
+  - estate: `/estate/collections` (sidebar);
+  - agency: `/agency/collections` (link in the agency bar);
+  - realtor: `/realtor/collections` (sidebar).
+- Backoffice: `/admin/showroom-collections` (sidebar, `collections.manage`), the same editor plus the Sponsored switch and the curator of each collection.
+- **Analytics:** `property_impression` and `property_card_click` with surface `{market}_collection`. No new event names.
+
+**Product decisions still open:**
+
+- **Consent for staff curation across owners:** staff can feature any public listing. The plan asked for a rule on consent and fair placement; none is enforced beyond the listing being public.
+- **Realtor display name:** a realtor's collections show their company name, or their legal name when they have none.
+- **The honesty word list** is deliberately strict ("best" and "inspected" are refused); loosen it if curators find it in the way.
+- **Rule-based collections** (a saved filter instead of items) are not built.
+- **Sponsored:** there is no billing or contract record behind the flag; it is a label only.
+
+**Checks:**
+
+- Backend: see the PR for spec counts; `tsc -p tsconfig.build.json` and eslint on changed files are clean. The app wiring spec resolves every provider (run with `PAYMENTS_SIMULATED=true`, as there is no `.env` in a worktree).
+- Web and backoffice: `tsc` and eslint clean on changed files; `audit:ui-controls` and `tokens:check` pass. Not yet checked in a browser, including drawing on a touch screen.
+

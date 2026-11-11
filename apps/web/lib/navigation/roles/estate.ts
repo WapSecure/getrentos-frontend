@@ -12,6 +12,7 @@ import {
   KeyRound,
   Landmark,
   LayoutDashboard,
+  LayoutGrid,
   Megaphone,
   OctagonAlert,
   Package,
@@ -43,6 +44,12 @@ export const estateNavigation = defineRoleNavigation({
       icon: Building2,
     },
     { id: 'leads', label: 'Enquiries', href: ESTATE_MARKETPLACE_ROUTES.ESTATE_LEADS, icon: Inbox },
+    {
+      id: 'collections',
+      label: 'Collections',
+      href: ESTATE_MARKETPLACE_ROUTES.ESTATE_COLLECTIONS,
+      icon: LayoutGrid,
+    },
     {
       id: 'announcements',
       label: 'Announcements',

@@ -7,6 +7,7 @@ import { useSyncExternalStore } from 'react';
 import { adminManagedService } from '@/services/adminManagedService';
 import {
   LayoutDashboard,
+  LayoutGrid,
   Webhook,
   HandCoins,
   Scale,
@@ -427,6 +428,12 @@ const navItems: NavItem[] = [
     href: '/admin/showroom-funnel',
     icon: TrendingUp,
     permission: 'reports.view',
+  },
+  {
+    label: 'Showroom collections',
+    href: '/admin/showroom-collections',
+    icon: LayoutGrid,
+    permission: 'collections.manage',
   },
   {
     label: 'Automation usage',

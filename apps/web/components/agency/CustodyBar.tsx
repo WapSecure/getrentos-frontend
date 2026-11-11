@@ -8,6 +8,7 @@ import {
   Check,
   ChevronDown,
   Gauge,
+  LayoutGrid,
   Coins,
   Lock,
   ShieldCheck,
@@ -173,6 +174,16 @@ export function CustodyBar() {
         icon={<ShieldCheck className="h-4 w-4" aria-hidden />}
       >
         Protection
+      </Button>
+
+      <Button
+        href="/agency/collections"
+        variant="outline"
+        size="xs"
+        rounded="sm"
+        icon={<LayoutGrid className="h-4 w-4" aria-hidden />}
+      >
+        Collections
       </Button>
 
       <Button
