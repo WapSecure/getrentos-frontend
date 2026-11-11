@@ -1,7 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  buildAgenda,
   buildAttentionQueue,
   greetingFor,
   identityProgress,
@@ -214,26 +213,6 @@ test('with purchases listed, active sales come from their stages and representat
   });
   assert.equal(figures.activePurchases, 1);
   assert.equal(figures.representing, 1);
-});
-
-test('the agenda lists booked tours and inspection reports still to come, soonest first', () => {
-  const now = new Date('2026-11-11T12:00:00Z');
-  const agenda = buildAgenda(
-    [
-      { id: 't1', status: 'SCHEDULED', land: 'Plot 4', scheduledAt: '2026-11-15T10:00:00Z' },
-      { id: 't2', status: 'SCHEDULED', land: 'Plot 5', scheduledAt: '2026-11-01T10:00:00Z' },
-      { id: 't3', status: 'PROPOSED', land: 'Plot 6' },
-    ],
-    [
-      { id: 'i1', status: 'ASSIGNED', land: 'House, Ikeja', dueBy: '2026-11-12T17:00:00Z' },
-      { id: 'i2', status: 'ACCEPTED', land: 'Plot 7', dueBy: '2026-11-13T17:00:00Z' },
-    ],
-    now
-  );
-  assert.deepEqual(
-    agenda.map((e) => e.key),
-    ['inspection-i1', 'tour-t1']
-  );
 });
 
 test('identity progress counts approvals and names the next check', () => {

@@ -1,19 +1,7 @@
 'use client';
 
-import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import {
-  CalendarClock,
-  ChevronRight,
-  ClipboardCheck,
-  FolderOpen,
-  Globe,
-  MessageCircle,
-  Settings2,
-  ShieldCheck,
-  Video,
-  type SgIcon,
-} from '@sureground/icons';
+import { Globe, Settings2, ShieldCheck } from '@sureground/icons';
 import {
   Badge,
   Button,
@@ -25,7 +13,6 @@ import {
   CardTitle,
   DescriptionList,
   Disclosure,
-  EmptyState,
   Progress,
   Timeline,
   type DescriptionItem,
@@ -35,7 +22,7 @@ import {
 import { countryName } from '@/lib/constants/countries';
 import { DIASPORA_ROUTES, type InvestorPortal } from '@/lib/constants/diasporaRoutes';
 import { formatDualTime, formatLagosDate, getInitials } from '@/lib/format';
-import { identityProgress, type AgendaEntry, type IdentityStep } from '@/lib/investorWorkspace';
+import { identityProgress, type IdentityStep } from '@/lib/investorWorkspace';
 import { investorKeys } from '@/lib/queryKeys';
 import { foreignCheckBadges } from '@/lib/statusBadge';
 import { investorService } from '@/services/investorService';
@@ -212,125 +199,3 @@ export const IdentityProgressCard = ({
     </Card>
   );
 };
-
-/** Booked tours and inspection reports still to come, each in Lagos time and the investor's own. */
-export const AgendaCard = ({
-  entries,
-  timeZone,
-  toursHref,
-  inspectionsHref,
-}: {
-  entries: AgendaEntry[];
-  timeZone?: string | null;
-  toursHref?: string;
-  inspectionsHref?: string;
-}) => {
-  const items: TimelineItem[] = entries.map((entry) => {
-    const Icon = entry.kind === 'tour' ? Video : ClipboardCheck;
-    const href = entry.kind === 'tour' ? toursHref : inspectionsHref;
-    return {
-      id: entry.key,
-      state: 'pending',
-      icon: <Icon className="h-3.5 w-3.5" aria-hidden="true" />,
-      title: href ? (
-        <Link href={href} className="hover:text-primary hover:underline">
-          {entry.title}
-        </Link>
-      ) : (
-        entry.title
-      ),
-      description: (
-        <>
-          <span className="block">{entry.place}</span>
-          <time dateTime={entry.at} className="block tabular-nums">
-            {dualMoment(entry.at, timeZone)}
-          </time>
-        </>
-      ),
-    };
-  });
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle as="h2">Coming up</CardTitle>
-        <CardDescription>Video tours and inspection reports.</CardDescription>
-      </CardHeader>
-      {items.length ? (
-        <CardContent>
-          <Timeline
-            items={items}
-            variant="feed"
-            aria-label="Coming up"
-            stateLabels={{ pending: 'Upcoming' }}
-          />
-        </CardContent>
-      ) : (
-        <EmptyState
-          icon={CalendarClock}
-          title="Nothing booked"
-          description="Tour a property by video from wherever you are, with a Sureground host on site."
-          action={
-            toursHref ? (
-              <Button href={toursHref} variant="outline">
-                Your video tours
-              </Button>
-            ) : undefined
-          }
-          size="compact"
-          bare
-        />
-      )}
-    </Card>
-  );
-};
-
-export interface ShortcutRow {
-  key: string;
-  icon: SgIcon;
-  label: string;
-  hint?: string;
-  href: string;
-  /** Shown as a badge, e.g. unread messages. */
-  count?: number;
-}
-
-/** Documents, messages and checks abroad as a compact list with counts. */
-export const ShortcutsCard = ({ rows }: { rows: ShortcutRow[] }) => (
-  <Card>
-    <CardHeader className="pb-3">
-      <CardTitle as="h2">Documents and messages</CardTitle>
-    </CardHeader>
-    <ul className="divide-y divide-border border-t border-border">
-      {rows.map((row) => {
-        const Icon = row.icon;
-        return (
-          <li key={row.key}>
-            <Link
-              href={row.href}
-              className="group flex min-h-14 items-center gap-3 px-5 py-3 transition-colors hover:bg-secondary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
-            >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-secondary">
-                <Icon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block text-sm font-medium text-foreground">{row.label}</span>
-                {row.hint && (
-                  <span className="block truncate text-xs text-muted-foreground">{row.hint}</span>
-                )}
-              </span>
-              {typeof row.count === 'number' && row.count > 0 && (
-                <Badge variant="primary">{row.count}</Badge>
-              )}
-              <ChevronRight
-                className="h-4 w-4 shrink-0 text-muted-foreground/60 transition-transform group-hover:translate-x-0.5"
-                aria-hidden="true"
-              />
-            </Link>
-          </li>
-        );
-      })}
-    </ul>
-  </Card>
-);
-
-export const SHORTCUT_ICONS = { documents: FolderOpen, messages: MessageCircle, abroad: Globe };

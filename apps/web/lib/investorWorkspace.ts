@@ -339,53 +339,6 @@ export const portfolioFigures = (
   };
 };
 
-export interface AgendaEntry {
-  key: string;
-  kind: 'tour' | 'inspection';
-  title: string;
-  place: string;
-  at: string;
-}
-
-/** Booked video tours and inspection reports still to come, soonest first. */
-export const buildAgenda = (
-  tours: TourLike[] | undefined,
-  inspections: InspectionLike[] | undefined,
-  now: Date,
-  limit = 5
-): AgendaEntry[] => {
-  const entries: AgendaEntry[] = [];
-  for (const tour of tours ?? []) {
-    if (tour.status === 'SCHEDULED' && tour.scheduledAt) {
-      entries.push({
-        key: `tour-${tour.id}`,
-        kind: 'tour',
-        title: 'Video tour',
-        place: tour.land,
-        at: tour.scheduledAt,
-      });
-    }
-  }
-  for (const inspection of inspections ?? []) {
-    if (inspection.dueBy && inspection.status !== 'ACCEPTED' && inspection.status !== 'CANCELLED') {
-      entries.push({
-        key: `inspection-${inspection.id}`,
-        kind: 'inspection',
-        title: 'Inspection report due',
-        place: inspection.land,
-        at: inspection.dueBy,
-      });
-    }
-  }
-  return entries
-    .filter((e) => {
-      const t = new Date(e.at).getTime();
-      return !Number.isNaN(t) && t >= now.getTime();
-    })
-    .sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime())
-    .slice(0, limit);
-};
-
 export interface IdentityStep {
   key: 'passport' | 'address' | 'bankStatement';
   label: string;
