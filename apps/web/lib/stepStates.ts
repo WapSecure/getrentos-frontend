@@ -21,3 +21,22 @@ export function stepStates(
         : 'pending'
   );
 }
+
+type MilestoneStatus = 'PENDING' | 'DELIVERED' | 'CONFIRMED' | 'DISPUTED' | 'WAIVED';
+
+/**
+ * Land conveyance steps in sequence order. Only one is current: the earliest delivered step
+ * awaiting the buyer's confirmation, otherwise the first not yet delivered. Other delivered
+ * steps show as pending; their status badge still says they await confirmation.
+ */
+export function milestoneStates(statuses: readonly MilestoneStatus[]): TimelineState[] {
+  const delivered = statuses.indexOf('DELIVERED');
+  const current = delivered >= 0 ? delivered : statuses.indexOf('PENDING');
+  return statuses.map((status, index) => {
+    if (index === current) return 'current';
+    if (status === 'CONFIRMED') return 'done';
+    if (status === 'DISPUTED') return 'blocked';
+    if (status === 'WAIVED') return 'skipped';
+    return 'pending';
+  });
+}

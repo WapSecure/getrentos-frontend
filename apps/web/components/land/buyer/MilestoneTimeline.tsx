@@ -1,30 +1,16 @@
 'use client';
 
 import { useState } from 'react';
-import {
-  Button,
-  ConfirmDialog,
-  EmptyState,
-  ReasonDialog,
-  Timeline,
-  type TimelineState,
-} from '@sureground/ui';
+import { Button, ConfirmDialog, EmptyState, ReasonDialog, Timeline } from '@sureground/ui';
 import { ListChecks } from '@sureground/icons';
 import { formatDate } from '@/lib/format';
+import { milestoneStates } from '@/lib/stepStates';
 import type { LandMilestone } from '@/types/landBuyer';
 import { MilestoneStatusBadge } from './LandSaleBadges';
 import { bpsToPercent, milestoneAction } from './landSaleLogic';
 
 const REASON_MIN = 5;
 const REASON_MAX = 2000;
-
-const STATE: Record<LandMilestone['status'], TimelineState> = {
-  PENDING: 'pending',
-  DELIVERED: 'current',
-  CONFIRMED: 'done',
-  DISPUTED: 'blocked',
-  WAIVED: 'skipped',
-};
 
 // Developer purchases release a share of escrow per confirmation; resales release once every required step is confirmed.
 export const MilestoneTimeline = ({
@@ -48,6 +34,8 @@ export const MilestoneTimeline = ({
   const [confirming, setConfirming] = useState<LandMilestone | null>(null);
   const [disputing, setDisputing] = useState<LandMilestone | null>(null);
   const ordered = [...milestones].sort((a, b) => a.sequence - b.sequence);
+  // One current step: the earliest awaiting confirmation, else the next to be delivered.
+  const states = milestoneStates(ordered.map((m) => m.status));
 
   if (ordered.length === 0) {
     return (
@@ -66,12 +54,12 @@ export const MilestoneTimeline = ({
       <Timeline
         titleAs="h3"
         aria-label="Conveyance steps"
-        items={ordered.map((m) => {
+        items={ordered.map((m, index) => {
           const action = milestoneAction(ordered, m, { requiredOnly, contractOpen });
           return {
             id: m.key,
             title: m.label,
-            state: STATE[m.status],
+            state: states[index],
             badge: (
               <>
                 <MilestoneStatusBadge status={m.status} />

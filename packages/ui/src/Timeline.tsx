@@ -1,11 +1,12 @@
 import type { ReactNode } from 'react';
 import { Check, Minus, X } from '@sureground/icons';
 import { cn } from '@sureground/shared';
+import { singleCurrent, type TimelineState } from './timelineStates';
 
 // Presentational and hook-free, so it renders on the server. Nothing fades in: a list that
 // only appears after JavaScript runs is invisible to a slow first paint and to reduced motion.
 
-export type TimelineState = 'done' | 'current' | 'pending' | 'blocked' | 'skipped';
+export type { TimelineState };
 
 export interface TimelineItem {
   id: string;
@@ -87,7 +88,7 @@ function Glyph({
 }
 
 export function Timeline({
-  items,
+  items: passed,
   variant = 'steps',
   orientation = 'vertical',
   titleAs: Title = 'p',
@@ -96,6 +97,14 @@ export function Timeline({
   'aria-labelledby': labelledBy,
   className,
 }: TimelineProps) {
+  // One step is current at a time; more than one is a caller bug, shown as pending.
+  const items = singleCurrent(passed, (count) => {
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn(
+        `Timeline: ${count} items have state "current"; only the first is treated as current.`
+      );
+    }
+  });
   const label = (state: TimelineState) => stateLabels?.[state] ?? STATE_LABEL[state];
   // A feed of things that happened says nothing extra for an ordinary past event.
   const spoken = (state: TimelineState) =>
