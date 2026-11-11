@@ -277,6 +277,14 @@ export const ownerKeys = {
   offerThread: (offerId: string) => ['owner', 'offers', offerId, 'thread'] as const,
 };
 
+export const investorKeys = {
+  all: ['investor'] as const,
+  availability: ['investor', 'availability'] as const,
+  profile: ['investor', 'profile'] as const,
+  riskDeclaration: ['investor', 'declarations', 'risk'] as const,
+  overview: ['investor', 'overview'] as const,
+};
+
 export const landKeys = {
   owner: ['land', 'owner'] as const,
   ownerDetail: (propertyId: string) => ['land', 'owner', propertyId] as const,

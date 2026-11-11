@@ -4,6 +4,7 @@ import {
   CalendarClock,
   ClipboardCheck,
   FolderOpen,
+  Globe,
   Handshake,
   HardHat,
   History,
@@ -28,6 +29,7 @@ import {
   Wrench,
 } from '@sureground/icons';
 import { ESTATE_MARKETPLACE_ROUTES, ROUTES } from '@/lib/constants/auth';
+import { DIASPORA_ROUTES } from '@/lib/constants/diasporaRoutes';
 import { OWNER_LAND_SALES_ROUTE } from '@/lib/constants/landDeveloperRoutes';
 import { defineRoleNavigation } from '../resolve';
 
@@ -144,6 +146,13 @@ export const ownerNavigation = defineRoleNavigation({
     },
     // Literal label: a mandate holder is not necessarily the owner.
     { id: 'managed', label: 'Managed properties', href: ROUTES.OWNER_MANAGED, icon: KeyRound },
+    {
+      id: 'invest',
+      labelKey: 'sidebar.diaspora_invest',
+      href: DIASPORA_ROUTES.OWNER_WORKSPACE,
+      icon: Globe,
+      flag: 'diasporaInvest',
+    },
     { id: 'activity', labelKey: 'sidebar.activity', href: ROUTES.OWNER_ACTIVITY, icon: History },
     {
       id: 'queries',
@@ -169,7 +178,10 @@ export const ownerNavigation = defineRoleNavigation({
     { label: 'Land', items: ['land', 'landSales'] },
     { label: 'Short stays', items: ['shortlets'] },
     { label: 'Property care', items: ['homeManagement', 'vendors', 'inspections', 'deposits'] },
-    { label: 'Money and records', items: ['analytics', 'documents', 'approvals', 'activity'] },
+    {
+      label: 'Money and records',
+      items: ['analytics', 'invest', 'documents', 'approvals', 'activity'],
+    },
     {
       label: 'Managers and partners',
       items: ['messages', 'managed', 'queries', 'estateRequests', 'reviews'],

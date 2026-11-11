@@ -17,6 +17,8 @@ import { ROUTES, getDashboardRoute, getUserRole } from '@/lib/constants/auth';
 import { ESTATE_MARKETPLACE_ROUTES } from '@/lib/constants/auth';
 import { useAuthStore } from '@/lib/store/authStore';
 import { useLandAvailability } from '@/hooks/useLandAvailability';
+import { useDiasporaAvailability } from '@/hooks/useDiasporaAvailability';
+import { DIASPORA_ROUTES } from '@/lib/constants/diasporaRoutes';
 
 interface NavLink {
   label: string;
@@ -57,6 +59,14 @@ export const Navigation = () => {
   const marketplaceLinks = land.marketplace
     ? MARKETPLACE_LINKS
     : MARKETPLACE_LINKS.filter((link) => link.href !== ROUTES.LAND_MARKETPLACE);
+  const diaspora = useDiasporaAvailability();
+  const pageLinks = diaspora.enabled
+    ? [
+        PAGE_LINKS[0],
+        { label: 'Diaspora Invest', href: DIASPORA_ROUTES.PUBLIC },
+        ...PAGE_LINKS.slice(1),
+      ]
+    : PAGE_LINKS;
   const router = useRouter();
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
@@ -132,7 +142,7 @@ export const Navigation = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {PAGE_LINKS.map((link) => (
+              {pageLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
@@ -204,7 +214,7 @@ export const Navigation = () => {
             ))}
 
             <div className="my-2 h-px bg-border" />
-            {PAGE_LINKS.map((link) => (
+            {pageLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}

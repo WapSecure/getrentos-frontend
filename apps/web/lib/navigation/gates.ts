@@ -3,6 +3,7 @@
 import { tierAtLeast, type PlanTier } from '@sureground/shared';
 import { usePlanTier } from '@/hooks/usePlanTier';
 import { useLandAvailability } from '@/hooks/useLandAvailability';
+import { useDiasporaAvailability } from '@/hooks/useDiasporaAvailability';
 import type { NavFlag, NavPlan } from './types';
 
 /** Locks against the viewer's own plan; while it loads the viewer counts as Free. */
@@ -17,5 +18,10 @@ export const estatePlanLock = (planTier: PlanTier | undefined) => (plan: NavPlan
 
 export const useNavigationFlags = (): Record<NavFlag, boolean> => {
   const land = useLandAvailability();
-  return { landOwners: land.owners, landMarketplace: land.marketplace };
+  const diaspora = useDiasporaAvailability();
+  return {
+    landOwners: land.owners,
+    landMarketplace: land.marketplace,
+    diasporaInvest: diaspora.enabled,
+  };
 };
