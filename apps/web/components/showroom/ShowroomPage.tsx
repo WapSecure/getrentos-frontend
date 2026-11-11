@@ -88,7 +88,14 @@ export async function ShowroomPage({
               {/* With a summary, its status replaces the old "Verified" tick so the two never disagree. */}
               {listing.verificationSummary
                 ? listing.verificationSummary.status !== 'NOT_STARTED' && (
-                    <VerificationSummaryBadge summary={listing.verificationSummary} />
+                    // The badge never stands alone: it leads to what was checked and what it does not cover.
+                    <a
+                      href="#trust"
+                      className="inline-flex rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      aria-label="See what was checked and what it does not cover"
+                    >
+                      <VerificationSummaryBadge summary={listing.verificationSummary} />
+                    </a>
                   )
                 : listing.verified && (
                     <Badge variant="success" icon={<BadgeCheck className="h-3.5 w-3.5" />}>
