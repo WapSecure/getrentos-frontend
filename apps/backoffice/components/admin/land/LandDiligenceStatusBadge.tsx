@@ -9,39 +9,33 @@ import {
   PauseCircle,
   XCircle,
 } from '@sureground/icons';
-import { Badge, type BadgeVariant } from '@sureground/ui';
-import type { LandDiligenceStatus } from '@/types/land';
+import {
+  LAND_DILIGENCE_STATUS,
+  normalizeLandDiligenceStatus,
+  type LandDiligenceStatus,
+} from '@sureground/shared';
+import { Badge } from '@sureground/ui';
 
-type StatusConfiguration = { label: string; variant: BadgeVariant; icon: SgIcon };
-
-const statusConfiguration: Record<LandDiligenceStatus, StatusConfiguration> = {
-  NOT_STARTED: { label: 'Not started', variant: 'neutral', icon: FileClock },
-  IN_REVIEW: { label: 'In review', variant: 'info', icon: Clock3 },
-  ACTION_REQUIRED: { label: 'Action required', variant: 'warning', icon: HelpCircle },
-  VERIFIED: { label: 'Verified', variant: 'success', icon: CheckCircle2 },
-  REJECTED: { label: 'Rejected', variant: 'danger', icon: XCircle },
-  EXPIRED: { label: 'Expired', variant: 'warning', icon: AlertCircle },
-  CONDITIONAL: { label: 'Verified with conditions', variant: 'info', icon: CircleDashed },
-  SUSPENDED: { label: 'Suspended', variant: 'danger', icon: PauseCircle },
+// Labels and colours are shared with web (@sureground/shared); only the icons are backoffice's.
+const statusIcons: Record<LandDiligenceStatus, SgIcon> = {
+  NOT_STARTED: FileClock,
+  IN_REVIEW: Clock3,
+  ACTION_REQUIRED: HelpCircle,
+  VERIFIED: CheckCircle2,
+  REJECTED: XCircle,
+  EXPIRED: AlertCircle,
+  CONDITIONAL: CircleDashed,
+  SUSPENDED: PauseCircle,
 };
 
-export function normalizeLandDiligenceStatus(
-  value: string | undefined | null
-): LandDiligenceStatus {
-  const normalized = value
-    ?.trim()
-    .toUpperCase()
-    .replace(/[-\s]+/g, '_') as LandDiligenceStatus;
-  return normalized in statusConfiguration ? normalized : 'NOT_STARTED';
-}
-
 export const LandDiligenceStatusBadge = ({ status }: { status: string | undefined | null }) => {
-  const config = statusConfiguration[normalizeLandDiligenceStatus(status)];
-  const Icon = config.icon;
+  const normalized = normalizeLandDiligenceStatus(status);
+  const { label, tone } = LAND_DILIGENCE_STATUS[normalized];
+  const Icon = statusIcons[normalized];
 
   return (
-    <Badge variant={config.variant} icon={<Icon className="h-3 w-3" />}>
-      {config.label}
+    <Badge variant={tone} icon={<Icon className="h-3 w-3" />}>
+      {label}
     </Badge>
   );
 };

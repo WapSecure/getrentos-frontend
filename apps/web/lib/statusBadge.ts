@@ -13,7 +13,13 @@ import {
   ShieldAlert,
   ShieldCheck,
   ShieldX,
+  AlertTriangle,
+  CircleDashed,
+  Clock3,
+  FileSearch,
+  FileCheck,
 } from '@sureground/icons';
+import { LAND_DILIGENCE_STATUS, VERIFICATION_SUMMARY_STATUS } from '@sureground/shared';
 import type { BadgeVariant } from '@sureground/ui';
 import type {
   RentPaymentStatus,
@@ -164,3 +170,38 @@ export const taskStatusBadges: Record<TaskStatus, StatusBadgeEntry> = {
   overdue: { label: 'Overdue', variant: 'danger' },
   cancelled: { label: 'Cancelled', variant: 'neutral' },
 };
+
+/** A status map from @sureground/shared (shared with backoffice) plus web's icons. */
+const withIcons = <S extends string>(
+  shared: Record<S, { label: string; tone: BadgeVariant }>,
+  icons: Record<S, SgIcon>
+) =>
+  Object.fromEntries(
+    (Object.keys(shared) as S[]).map((status) => [
+      status,
+      { label: shared[status].label, variant: shared[status].tone, icon: icons[status] },
+    ])
+  ) as Record<S, StatusBadgeEntry>;
+
+export const landDiligenceBadges = withIcons(LAND_DILIGENCE_STATUS, {
+  NOT_STARTED: Clock3,
+  IN_REVIEW: FileSearch,
+  ACTION_REQUIRED: AlertTriangle,
+  VERIFIED: CheckCircle2,
+  REJECTED: XCircle,
+  EXPIRED: Clock3,
+  CONDITIONAL: CircleDashed,
+  SUSPENDED: PauseCircle,
+});
+
+// A listing's verification summary (DIA-11). "Investment eligible" never stands alone: the card shows its limits.
+export const verificationSummaryBadges = withIcons(VERIFICATION_SUMMARY_STATUS, {
+  NOT_STARTED: CircleDashed,
+  SUBMITTED: FileCheck,
+  UNDER_REVIEW: FileSearch,
+  EVIDENCE_VERIFIED: ShieldCheck,
+  CONDITIONALLY_APPROVED: ShieldAlert,
+  INVESTMENT_ELIGIBLE: ShieldCheck,
+  REJECTED: ShieldX,
+  VERIFICATION_EXPIRED: Clock3,
+});

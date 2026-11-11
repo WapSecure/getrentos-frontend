@@ -20,7 +20,7 @@ import {
 } from '@/types/land';
 import { LAND_ASSURANCE_TIER_DESCRIPTIONS } from '@/types/landMarket';
 import { AssuranceTierBadge } from './AssuranceTierBadge';
-import { TrustLabelsList } from './TrustLabelsList';
+import { TrustLabelsList } from '@/components/shared/trust/TrustLabelsList';
 import { PricePositionBar } from './PricePositionBar';
 import { ReportLandProblemDialog } from '../disputes/ReportLandProblemDialog';
 import { RequestTourDialog } from '../tours/RequestTourDialog';
