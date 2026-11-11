@@ -491,3 +491,43 @@ Three decisions from the product owner, built on `feat/showroom-collections` in 
 - Backend: see the PR for spec counts; `tsc -p tsconfig.build.json` and eslint on changed files are clean. The app wiring spec resolves every provider (run with `PAYMENTS_SIMULATED=true`, as there is no `.env` in a worktree).
 - Web and backoffice: `tsc` and eslint clean on changed files; `audit:ui-controls` and `tokens:check` pass. Not yet checked in a browser, including drawing on a touch screen.
 
+
+## M7 status (2026-11-11)
+
+M7 is built: resized copies (earlier, backend #136), the CDN, blurred placeholders with photo sizes, and upload progress.
+
+**CDN (backend #151):** listing photos and their resized copies are served from `PUBLIC_MEDIA_CDN_URL` on public listing responses only. Everything else keeps signed links. The boundary is `src/shared/media/public-media-cdn.ts`.
+
+**Blurred placeholders and sizes (backend, on `feat/showroom-m7-placeholders`):**
+
+- When the resized copies are made, a 16px blurred WebP is made too and stored as a `data:` URI on `ImageVariantSet.placeholder`. A typical one is about 130 characters; anything over 1 KB is dropped.
+- Migration `prisma/migrations/20261111200000_image_variant_placeholder/migration.sql`: one nullable column, hand-written, additive, **not run**. Deploy it before the code: until it exists, photo lookups fail softly and pages fall back to the original photos.
+- The API sends (all optional):
+  - on each image in `media`: `width`, `height` (already there) and the new `placeholder`;
+  - on rent, sale, land and shortlet list cards: `imagePreview { width, height, placeholder? }` for the cover.
+- `npm run media:backfill-variants` now also fills placeholders. Photos with all their copies but no placeholder only get the placeholder; their copies are not rewritten. Re-running is safe. Use `--dry-run` first to see the counts.
+
+**Web:**
+
+- `ProgressiveImg` in `@sureground/ui` shows the placeholder behind a photo and fades the photo in once it loads. No fade with reduced motion. The server HTML keeps the photo visible, so nothing depends on JavaScript.
+- Used on listing cards (rent, buy, land, shortlets, similar, collections), the mosaic and phone strip, and viewer thumbnails. The full-screen viewer draws the placeholder where the photo will sit. Unloaded phone slides and thumbnails show it too.
+- Cards use the cover's real size for the image's `width` and `height`; their box stays 4:3.
+- Land and shortlet browse cards now also use the resized copies (`srcset`); they were missing them.
+- Only an inline base64 image is accepted as a placeholder (`placeholderOf`). Without one, or with an older API, every image renders exactly as before.
+
+**Mobile:** expo-image `placeholder` on the showroom hero, the viewer and its thumbnails. The hero's fade now respects reduced motion.
+
+**Upload progress (web):**
+
+- Landlord and owner photo editors (`PropertyPhotoEditor`) upload each photo as soon as it is added, instead of all at once on Save. Each photo shows a bar with its percent and Cancel; then "Processing" until the server answers.
+- A failed photo shows "Upload failed" with the reason, Retry and Remove. The others carry on. Save waits until every photo is in.
+- Estate listing photos (`ListingMediaPanel`) send one photo per request, in turn, with a row per file: progress, Cancel, and Retry when one fails. One at a time because the server checks the 12-photo limit before it adds.
+- Uploads go over XHR (`authUpload` in `@sureground/shared`) for progress events. The API contract is unchanged; uploads are multipart posts to the API, not presigned URLs.
+
+**Follow-ups:**
+
+- Mobile listing photo upload (landlord property screen) sends one photo at a time over fetch, with no progress. Adding it needs an XHR upload in the mobile client.
+- Video tour uploads still show only a spinner.
+- Photos closed without saving after uploading are left to the backend's clean-up of unattached uploads, as before.
+
+**Checks:** backend: media specs (121 pass) and the four card services' specs pass except two shortlet availability tests that already fail on `dev` (their dates are now in the past); `tsc -p tsconfig.build.json` and eslint on changed files clean. Web: `tsc` clean in web and mobile, eslint clean on changed files, shared tests 25 pass, `audit:ui-controls` and `tokens:check` pass. Not yet checked in a browser.
