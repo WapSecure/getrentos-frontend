@@ -4,6 +4,8 @@ import {
   fromLand,
   fromRental,
   fromSale,
+  imagePreviewOf,
+  placeholderOf,
   shortletMedia,
   showroomMedia,
 } from '../src/showroom/map.ts';
@@ -212,4 +214,30 @@ test('shortlet media: a tour link on an unknown host is dropped, not framed', ()
     items.map((m) => m.kind),
     ['image']
   );
+});
+
+test('accepts only a small inline image as a photo placeholder', () => {
+  const ok = 'data:image/webp;base64,UklGRkAAAABXRUJQVlA4IDQAAAA=';
+  assert.equal(placeholderOf(ok), ok);
+  assert.equal(placeholderOf(undefined), undefined);
+  assert.equal(placeholderOf('https://example.com/a.webp'), undefined);
+  assert.equal(placeholderOf('data:image/svg+xml;base64,PHN2Zz4='), undefined);
+  assert.equal(placeholderOf('data:image/webp;base64,AA")};body{x:url("'), undefined);
+  assert.equal(placeholderOf(`data:image/webp;base64,${'A'.repeat(4000)}`), undefined);
+});
+
+test('reads a card cover preview, and nothing from an older or malformed API', () => {
+  const placeholder = 'data:image/webp;base64,UklGR';
+  assert.deepEqual(imagePreviewOf({ width: 1600, height: 1067, placeholder }), {
+    width: 1600,
+    height: 1067,
+    placeholder,
+  });
+  assert.deepEqual(imagePreviewOf({ width: 300, height: 200, placeholder: 'javascript:x' }), {
+    width: 300,
+    height: 200,
+  });
+  assert.equal(imagePreviewOf(undefined), undefined);
+  assert.equal(imagePreviewOf({ width: 0, height: 10 }), undefined);
+  assert.equal(imagePreviewOf({ placeholder }), undefined);
 });

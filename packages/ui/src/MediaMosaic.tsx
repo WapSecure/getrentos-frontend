@@ -2,9 +2,17 @@
 
 import { useState } from 'react';
 import { Compass, ImageOff, Images, Play } from '@sureground/icons';
-import { cn, MEDIA_ROOM_LABEL, srcSetOf, type MediaItem, type MediaRoom } from '@sureground/shared';
+import {
+  cn,
+  MEDIA_ROOM_LABEL,
+  placeholderOf,
+  srcSetOf,
+  type MediaItem,
+  type MediaRoom,
+} from '@sureground/shared';
 import { Button } from './Button';
 import { MediaViewer, type MediaEvent } from './MediaViewer';
+import { ProgressiveImg } from './ProgressiveImg';
 
 interface MediaMosaicProps {
   items: MediaItem[];
@@ -192,6 +200,12 @@ export function MediaMosaic({
   );
 }
 
+// A phone slide not loaded yet still shows its blurred placeholder, when there is one.
+const placeholderStyle = (item: MediaItem) => {
+  const blur = item.kind === 'image' ? placeholderOf(item.placeholder) : undefined;
+  return blur ? { backgroundImage: `url("${blur}")` } : undefined;
+};
+
 // `load={false}` keeps a plain tile: browsers fetch lazy images well before they scroll into view.
 function Tile({
   item,
@@ -206,7 +220,14 @@ function Tile({
 }) {
   const [broken, setBroken] = useState(false);
   const src = item.kind === 'image' ? item.url : item.posterUrl;
-  if (!load) return <span className="block h-full w-full bg-muted" aria-hidden="true" />;
+  if (!load)
+    return (
+      <span
+        className="block h-full w-full bg-muted bg-cover bg-center"
+        style={placeholderStyle(item)}
+        aria-hidden="true"
+      />
+    );
   if (!src || broken) {
     return (
       <span className="flex h-full w-full items-center justify-center bg-muted text-muted-foreground">
@@ -215,12 +236,12 @@ function Tile({
     );
   }
   return (
-    // eslint-disable-next-line @next/next/no-img-element -- signed storage URL
-    <img
+    <ProgressiveImg
       src={src}
       srcSet={item.kind === 'image' ? srcSetOf(item.variants) : undefined}
       sizes={sizes}
       alt=""
+      placeholder={item.kind === 'image' ? item.placeholder : undefined}
       width={item.width}
       height={item.height}
       loading={eager ? 'eager' : 'lazy'}
