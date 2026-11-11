@@ -57,6 +57,7 @@ import {
 import { unwrap } from '@/lib/apiHelpers';
 import { ManagedIntakeDialog } from './ManagedIntakeDialog';
 import { ManagedIntakePanel } from './ManagedIntakePanel';
+import { FeeAmendmentPanel } from '@/components/shared/fee-amendments/FeeAmendmentPanel';
 import { formatCurrency } from '@/lib/format';
 import { formatMoment } from '@/components/agency/mandatePresentation';
 
@@ -554,6 +555,12 @@ export const SuregroundManagedView = () => {
                     </div>
                   )}
                 </div>
+
+                {activeMandate && ['ACTIVE', 'SUSPENDED'].includes(activeMandate.status) && (
+                  <div className="mt-3 border-t border-border pt-3">
+                    <FeeAmendmentPanel mandateId={activeMandate.id} />
+                  </div>
+                )}
 
                 {(openIntake ?? settingUp) && (
                   <ManagedIntakePanel
