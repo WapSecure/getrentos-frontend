@@ -1,5 +1,5 @@
 import { ArrowRight, Shield, Lock, FileCheck, Eye } from '@sureground/icons';
-import { LinkButton } from './primitives';
+import { LinkButton, TrustStrip } from './primitives';
 import { ROUTES } from '@/lib/constants/auth';
 
 // No grade or licence claims ("bank-grade", "regulated") that nobody has awarded.
@@ -39,17 +39,10 @@ export const Hero = () => (
         </LinkButton>
       </div>
 
-      <ul className="mx-auto mt-4 flex max-w-3xl flex-wrap items-center justify-center gap-2.5 border-t border-border/70 pt-8">
-        {trustItems.map((item) => (
-          <li
-            key={item.text}
-            className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-card/70 px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm backdrop-blur"
-          >
-            <item.icon className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
-            {item.text}
-          </li>
-        ))}
-      </ul>
+      <TrustStrip
+        items={trustItems}
+        className="mx-auto mt-4 max-w-3xl border-t border-border/70 pt-8"
+      />
     </div>
 
     <div className="absolute bottom-8 left-1/2 -translate-x-1/2" aria-hidden="true">

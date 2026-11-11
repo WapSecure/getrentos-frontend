@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Button,
-  EmptyState,
+  DescriptionList,
+  Field,
   Input,
   ListSkeleton,
   PageErrorState,
@@ -12,14 +13,18 @@ import {
   Textarea,
   Toast,
 } from '@sureground/ui';
-import { Video } from '@sureground/icons';
+import { CalendarClock } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
+import { ROUTES } from '@/lib/constants/auth';
+import { tourNextStep } from '@/lib/siteTours';
 import { lagosLocalToIso, siteTourKeys, siteTourService } from '@/services/siteTourService';
 import { videoCallAvailabilityQuery, videoCallService } from '@/services/videoCallService';
-import { formatDualTime } from '@/lib/format';
+import { formatDualTime, formatLagosDate } from '@/lib/format';
 import { tourPlace, type SiteTour, type TourScope } from '@/types/siteTour';
 import { DateTimeField } from '@/components/shared/forms/DateTimeField';
+import { StarRating } from '@/components/landlord/vendors/StarRating';
 import { TourCard } from './TourCard';
+import { TourList } from './TourList';
 import { TourRecordingConsent } from './TourRecordingConsent';
 
 /** Starts from 08:00 to 16:30 Lagos time, as the API requires. */
@@ -41,7 +46,7 @@ const PLACE_COPY = {
 
 type CallChoice = 'builtIn' | 'link';
 
-const HostActions = ({
+const HostTourRow = ({
   tour,
   scope,
   canUseBuiltIn,
@@ -65,6 +70,8 @@ const HostActions = ({
   const [notes, setNotes] = useState('');
   const [reason, setReason] = useState('');
   const [cancelling, setCancelling] = useState(false);
+  // A new request opens on the times form; once times are offered it folds away until asked for.
+  const [offering, setOffering] = useState(tour.status === 'REQUESTED');
   const key = siteTourKeys.host(scope);
   const update = (updated: SiteTour, message: string) => {
     queryClient.setQueryData<SiteTour[]>(key, (list) =>
@@ -73,7 +80,11 @@ const HostActions = ({
     void queryClient.invalidateQueries({ queryKey: key });
     notify(message);
   };
-  const done = (message: string) => (updated: SiteTour) => update(updated, message);
+  const done = (message: string) => (updated: SiteTour) => {
+    update(updated, message);
+    setOffering(false);
+    setCancelling(false);
+  };
   const fail = (e: Error) => notify(e.message, 'error');
   const isoSlots = slots
     .map((s) => (s ? lagosLocalToIso(s) : null))
@@ -102,14 +113,51 @@ const HostActions = ({
     onError: fail,
   });
   const started = tour.scheduledAt ? now >= new Date(tour.scheduledAt).getTime() : false;
+  const open = ['REQUESTED', 'PROPOSED', 'SCHEDULED'].includes(tour.status);
+  const canOffer = tour.status === 'REQUESTED' || tour.status === 'PROPOSED';
+  const recording = tour.status === 'SCHEDULED' && started;
+  const idBase = `host-tour-${tour.id}`;
 
-  return (
-    <div className="mt-3 space-y-3">
-      {(tour.status === 'REQUESTED' || tour.status === 'PROPOSED') && (
-        <div className="space-y-2 rounded-xl border border-border p-3">
-          <p className="text-sm font-medium text-foreground">
+  const body = cancelling ? (
+    <Field label="Why you are cancelling" htmlFor={`${idBase}-reason`}>
+      <Input
+        id={`${idBase}-reason`}
+        value={reason}
+        maxLength={500}
+        onChange={(e) => setReason(e.target.value)}
+        placeholder="A short reason; the buyer sees it"
+      />
+    </Field>
+  ) : (
+    <>
+      {tour.status === 'PROPOSED' && tour.proposedSlots.length > 0 && (
+        <DescriptionList
+          columns={1}
+          items={[
+            {
+              label: 'Times you offered',
+              value: (
+                <ul className="space-y-1">
+                  {tour.proposedSlots.map((s) => (
+                    <li key={s.at} className="flex items-center gap-1.5">
+                      <CalendarClock
+                        className="h-4 w-4 shrink-0 text-muted-foreground"
+                        aria-hidden="true"
+                      />
+                      {formatLagosDate(s.at)} · {formatDualTime(s.at, tour.buyerTimeZone)}
+                    </li>
+                  ))}
+                </ul>
+              ),
+            },
+          ]}
+        />
+      )}
+      {canOffer && offering && (
+        <fieldset className="space-y-3">
+          <legend className="text-sm font-medium text-foreground">
             {tour.status === 'PROPOSED' ? 'Offer different times' : 'Offer up to three times'}
-          </p>
+          </legend>
           <p className="text-xs text-muted-foreground">
             Lagos time, between 08:00 and 16:30 so there is daylight {copy.where}. The buyer is in{' '}
             {tour.buyerTimeZone} and sees them in their own time.
@@ -146,96 +194,117 @@ const HostActions = ({
             />
           )}
           {!builtIn && (
-            <Input
-              type="url"
-              value={link}
-              maxLength={500}
-              onChange={(e) => setLink(e.target.value)}
-              aria-label="Video call link"
-              placeholder="https:// link to the video call"
-            />
+            <Field label="Video call link" htmlFor={`${idBase}-link`}>
+              <Input
+                id={`${idBase}-link`}
+                type="url"
+                value={link}
+                maxLength={500}
+                onChange={(e) => setLink(e.target.value)}
+                placeholder="https://"
+              />
+            </Field>
           )}
-          <Button
-            size="sm"
-            disabled={
-              isoSlots.length === 0 ||
-              (!builtIn && !link.startsWith('https://')) ||
-              propose.isPending
-            }
-            isLoading={propose.isPending}
-            onClick={() => propose.mutate()}
-          >
-            Send times
-          </Button>
-        </div>
+        </fieldset>
       )}
-      {tour.status === 'PROPOSED' && (
-        <ul className="text-sm text-muted-foreground">
-          {tour.proposedSlots.map((s) => (
-            <li key={s.at}>
-              Offered: {s.local} ({formatDualTime(s.at, tour.buyerTimeZone)})
-            </li>
-          ))}
-        </ul>
-      )}
-      {tour.status === 'SCHEDULED' && started && (
-        <div className="space-y-2">
+      {recording && (
+        <Field label="What you showed" htmlFor={`${idBase}-notes`}>
           <Textarea
+            id={`${idBase}-notes`}
             rows={3}
             maxLength={4000}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            aria-label="What you showed"
             placeholder={copy.notes}
           />
-          <Button
-            size="sm"
-            disabled={notes.trim().length < 10 || complete.isPending}
-            isLoading={complete.isPending}
-            onClick={() => complete.mutate()}
-          >
-            Record the tour
-          </Button>
-        </div>
+        </Field>
       )}
-      {['REQUESTED', 'PROPOSED', 'SCHEDULED'].includes(tour.status) &&
-        (cancelling ? (
-          <div className="flex flex-wrap gap-2">
-            <Input
-              value={reason}
-              maxLength={500}
-              onChange={(e) => setReason(e.target.value)}
-              aria-label="Why you are cancelling"
-              placeholder="Why you are cancelling"
-            />
-            <Button
-              size="sm"
-              variant="danger"
-              disabled={reason.trim().length < 3 || cancel.isPending}
-              isLoading={cancel.isPending}
-              onClick={() => cancel.mutate()}
-            >
-              Cancel tour
-            </Button>
-          </div>
-        ) : (
-          <Button size="sm" variant="ghost" onClick={() => setCancelling(true)}>
-            Cancel
-          </Button>
-        ))}
-      <TourRecordingConsent
-        tour={tour}
-        scope={scope}
-        side="owner"
-        onUpdated={update}
-        onError={fail}
-      />
       {tour.buyerRating && (
-        <p className="text-sm text-muted-foreground">
-          Buyer rated it {tour.buyerRating}/5{tour.buyerFeedback ? `: “${tour.buyerFeedback}”` : ''}
+        <p className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+          Buyer rated it <StarRating value={tour.buyerRating} label="Buyer’s rating" />
+          {tour.buyerFeedback ? <span>“{tour.buyerFeedback}”</span> : null}
         </p>
       )}
-    </div>
+    </>
+  );
+
+  const actions = cancelling ? (
+    <>
+      <Button variant="ghost" onClick={() => setCancelling(false)}>
+        Back
+      </Button>
+      <Button
+        variant="danger"
+        disabled={reason.trim().length < 3 || cancel.isPending}
+        isLoading={cancel.isPending}
+        onClick={() => cancel.mutate()}
+      >
+        Cancel tour
+      </Button>
+    </>
+  ) : (
+    <>
+      {open && (
+        <Button
+          variant="danger-ghost"
+          onClick={() => setCancelling(true)}
+          aria-label={`Cancel the tour of ${tour.land}`}
+        >
+          Cancel
+        </Button>
+      )}
+      {canOffer && !offering && (
+        <Button variant="outline" onClick={() => setOffering(true)}>
+          Offer different times
+        </Button>
+      )}
+      {canOffer && offering && tour.status === 'PROPOSED' && (
+        <Button variant="ghost" onClick={() => setOffering(false)}>
+          Keep my times
+        </Button>
+      )}
+      {canOffer && offering && (
+        <Button
+          disabled={
+            isoSlots.length === 0 || (!builtIn && !link.startsWith('https://')) || propose.isPending
+          }
+          isLoading={propose.isPending}
+          onClick={() => propose.mutate()}
+        >
+          Send times
+        </Button>
+      )}
+      {recording && (
+        <Button
+          disabled={notes.trim().length < 10 || complete.isPending}
+          isLoading={complete.isPending}
+          onClick={() => complete.mutate()}
+        >
+          Record the tour
+        </Button>
+      )}
+    </>
+  );
+
+  return (
+    <TourCard
+      tour={tour}
+      who={`Buyer: ${tour.buyerName}`}
+      join={() => siteTourService.join(scope, 'owner', tour.id)}
+      nextStep={tourNextStep(tour, 'host', started)}
+      aside={
+        <TourRecordingConsent
+          tour={tour}
+          scope={scope}
+          side="owner"
+          onUpdated={update}
+          onError={fail}
+        />
+      }
+      actions={actions}
+    >
+      {body}
+    </TourCard>
   );
 };
 
@@ -265,38 +334,34 @@ export const HostTours = ({ scope }: { scope: TourScope }) => {
       />
     );
   }
-  const tours = list.data ?? [];
   return (
     <>
-      {tours.length === 0 ? (
-        <EmptyState
-          icon={Video}
-          title="No tour requests"
-          description={
-            scope === 'land'
-              ? 'When a buyer asks for a live video tour of your land, it appears here.'
-              : 'When a buyer asks for a live video tour of your home or land for sale, it appears here.'
-          }
-        />
-      ) : (
-        <ul className="space-y-4">
-          {tours.map((tour) => (
-            <TourCard
-              key={tour.id}
-              tour={tour}
-              who={`Buyer: ${tour.buyerName}`}
-              join={() => siteTourService.join(scope, 'owner', tour.id)}
+      <TourList
+        tours={list.data ?? []}
+        viewer="host"
+        empty={{
+          title: 'No tour requests yet',
+          description:
+            'When a buyer asks for a video tour, it appears here for you to offer times.',
+          action: (
+            <Button
+              href={scope === 'land' ? ROUTES.OWNER_LAND : ROUTES.OWNER_LISTINGS}
+              variant="outline"
             >
-              <HostActions
-                tour={tour}
-                scope={scope}
-                canUseBuiltIn={canUseBuiltIn}
-                notify={notify}
-              />
-            </TourCard>
-          ))}
-        </ul>
-      )}
+              {scope === 'land' ? 'Go to your land' : 'Go to your listings'}
+            </Button>
+          ),
+        }}
+        renderTour={(tour) => (
+          <HostTourRow
+            key={tour.id}
+            tour={tour}
+            scope={scope}
+            canUseBuiltIn={canUseBuiltIn}
+            notify={notify}
+          />
+        )}
+      />
       {toast && (
         <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}

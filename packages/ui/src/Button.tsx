@@ -12,7 +12,8 @@ export interface ButtonProps extends Omit<
   /** With `href`; a new tab gets noopener by default. */
   target?: string;
   rel?: string;
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'link';
+  /** `danger-ghost`: a quiet destructive action (Cancel, Remove) beside a primary one. */
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'danger-ghost' | 'link';
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
@@ -74,6 +75,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       ghost: 'bg-transparent text-foreground/75 hover:bg-secondary hover:text-foreground',
       danger:
         'bg-destructive text-destructive-foreground shadow-[inset_0_1px_0_rgb(255_255_255/0.12),0_1px_2px_rgb(0_0_0/0.10)] hover:brightness-95',
+      'danger-ghost': 'bg-transparent text-destructive hover:bg-destructive-subtle',
       link: 'bg-transparent text-primary underline-offset-4 hover:underline',
     };
 

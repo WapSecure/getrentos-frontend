@@ -1,17 +1,13 @@
 import {
   BadgeCheck,
-  ClipboardCheck,
   FileSearch,
-  Handshake,
   KeyRound,
   LayoutDashboard,
   Lock,
   ShieldCheck,
   UserCheck,
-  UserPlus,
   Users,
   Video,
-  Wallet,
   type SgIcon,
 } from '@sureground/icons';
 
@@ -71,41 +67,47 @@ export const QUESTIONS: IconCopy[] = [
   },
 ];
 
-export const STEPS: IconCopy[] = [
+export interface JourneyStep extends IconCopy {
+  points: string[];
+}
+
+/** Four stages, from sign-up to looking after the property. */
+export const JOURNEY: JourneyStep[] = [
   {
-    icon: UserPlus,
-    title: 'Create your account',
-    body: 'Sign up and verify your identity. Checks currently use Nigerian identity numbers; passports and foreign ID are reviewed by our team and can take longer.',
+    icon: UserCheck,
+    title: 'Verify',
+    body: 'Create your account, verify your identity and tell us your plans.',
+    points: [
+      'Nigerian identity numbers are checked online; passports are reviewed by our team',
+      'Set your time zone and accept the risk statement',
+    ],
   },
   {
-    icon: ClipboardCheck,
-    title: 'Tell us your plans',
-    body: 'Where you live, your time zone, what you want to buy and why. Then read and accept the risk statement.',
-  },
-  {
-    icon: FileSearch,
-    title: 'Find and check a property',
-    body: 'Browse verified listings and land with a dated review. Book a video viewing or a site tour, and bring your own lawyer if you wish.',
-  },
-  {
-    icon: Handshake,
-    title: 'Agree terms',
-    body: 'Make an offer, negotiate and agree the price with the seller through Sureground.',
+    icon: Video,
+    title: 'Tour and inspect',
+    body: 'See the property without travelling, and have it checked.',
+    points: [
+      'Video tours at a time shown in your own time zone',
+      'Independent inspections with geotagged, timestamped photos',
+    ],
   },
   {
     icon: ShieldCheck,
-    title: 'Pay with protection',
-    body: 'Your deposit, or each land stage, is held by Sureground Payment Protection and released on evidence and your confirmation.',
+    title: 'Buy with protection',
+    body: 'Agree terms and pay through Sureground Payment Protection.',
+    points: [
+      'A home’s deposit is released when you confirm',
+      'Land payments are released stage by stage, on evidence',
+    ],
   },
   {
-    icon: UserCheck,
-    title: 'Complete and hand over',
-    body: 'Documents stay in your workspace. Registration and consent with the state can take months after you pay.',
-  },
-  {
-    icon: Wallet,
-    title: 'Look after it',
-    body: 'If you want, hand the property to Sureground Managed and follow rent, spending and statements from abroad.',
+    icon: KeyRound,
+    title: 'Manage',
+    body: 'Hand the property to Sureground Managed, if you wish.',
+    points: [
+      'Spending above your limit waits for your approval',
+      'A monthly statement of rent, fees and expenses',
+    ],
   },
 ];
 

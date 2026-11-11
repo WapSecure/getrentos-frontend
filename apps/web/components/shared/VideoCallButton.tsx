@@ -10,10 +10,15 @@ export const VideoCallButton = ({
   viewing,
   join,
   label = 'Join video call',
+  size = 'sm',
+  opensAtLabel,
 }: {
   viewing: { mode?: string; status: string; scheduledAt?: string | null };
   join: () => Promise<ApiResponse<VideoCallJoin>>;
   label?: string;
+  size?: 'sm' | 'md';
+  /** How to word the time the call opens, e.g. Lagos time next to the viewer's. */
+  opensAtLabel?: (opensAt: Date) => string;
 }) => {
   const [now, setNow] = useState(() => new Date());
   const [joining, setJoining] = useState(false);
@@ -30,9 +35,11 @@ export const VideoCallButton = ({
   if (call.state === 'upcoming') {
     return (
       <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-        <Video className="h-3.5 w-3.5" />
+        <Video className="h-3.5 w-3.5" aria-hidden="true" />
         Video call opens{' '}
-        {call.opensAt.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}
+        {opensAtLabel
+          ? opensAtLabel(call.opensAt)
+          : call.opensAt.toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' })}
       </p>
     );
   }
@@ -62,8 +69,8 @@ export const VideoCallButton = ({
     <div className="space-y-1">
       <Button
         variant="primary"
-        size="sm"
-        icon={<Video className="h-4 w-4" />}
+        size={size}
+        icon={<Video className="h-4 w-4" aria-hidden="true" />}
         isLoading={joining}
         onClick={() => void open()}
       >
