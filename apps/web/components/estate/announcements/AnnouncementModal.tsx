@@ -6,7 +6,7 @@ import { Sparkles } from '@sureground/icons';
 import {
   Alert,
   Button,
-  Checkbox,
+  CheckboxGroup,
   Dialog,
   DialogContent,
   DialogTitle,
@@ -19,6 +19,13 @@ import { unwrap } from '@/lib/apiHelpers';
 import { REPLY_LANGUAGES, type ReplyLanguage } from '@/lib/replyLanguage';
 import { estateService } from '@/services/estateService';
 import type { Announcement } from '@/types/estate';
+
+type DeliveryChannel = 'SMS' | 'WHATSAPP';
+
+const DELIVERY_CHANNEL_OPTIONS: { value: DeliveryChannel; label: string }[] = [
+  { value: 'SMS', label: 'SMS' },
+  { value: 'WHATSAPP', label: 'WhatsApp' },
+];
 
 interface AnnouncementModalProps {
   estateId?: string;
@@ -64,12 +71,10 @@ export const AnnouncementModal = ({
       setPriority(d.priority);
     },
   });
-  const [sendSms, setSendSms] = useState(false);
-  const [sendWhatsApp, setSendWhatsApp] = useState(false);
+  const [extraChannels, setExtraChannels] = useState<DeliveryChannel[]>([]);
 
   const handleClose = () => {
-    setSendSms(false);
-    setSendWhatsApp(false);
+    setExtraChannels([]);
     onClose();
   };
 
@@ -152,24 +157,15 @@ export const AnnouncementModal = ({
           </Field>
 
           {!announcement && (
-            <fieldset>
-              <legend className="block text-sm font-medium text-foreground mb-2">
-                Also deliver via{' '}
-                <span className="text-muted-foreground font-normal">(optional)</span>
-              </legend>
-              <div className="flex flex-wrap gap-4">
-                <Checkbox checked={sendSms} onCheckedChange={setSendSms} label="SMS" />
-                <Checkbox
-                  checked={sendWhatsApp}
-                  onCheckedChange={setSendWhatsApp}
-                  label="WhatsApp"
-                />
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Residents always get an in-app notification. These add SMS/WhatsApp to households
-                with a phone number on file.
-              </p>
-            </fieldset>
+            <CheckboxGroup
+              legend="Also deliver via"
+              optionalLabel="(optional)"
+              orientation="horizontal"
+              value={extraChannels}
+              onValueChange={setExtraChannels}
+              options={DELIVERY_CHANNEL_OPTIONS}
+              hint="Residents always get an in-app notification. These add SMS/WhatsApp to households with a phone number on file."
+            />
           )}
         </div>
 
@@ -183,9 +179,9 @@ export const AnnouncementModal = ({
             isLoading={isSubmitting}
             loadingText="Saving…"
             onClick={() => {
-              const deliveryChannels: ('SMS' | 'WHATSAPP')[] = [];
-              if (sendSms) deliveryChannels.push('SMS');
-              if (sendWhatsApp) deliveryChannels.push('WHATSAPP');
+              const deliveryChannels = DELIVERY_CHANNEL_OPTIONS.map((o) => o.value).filter(
+                (channel) => extraChannels.includes(channel)
+              );
               onSubmit({
                 title: title.trim(),
                 body: body.trim(),

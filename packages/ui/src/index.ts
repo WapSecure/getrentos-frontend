@@ -4,6 +4,7 @@ export * from './Badge';
 export * from './Button';
 export * from './Card';
 export * from './Checkbox';
+export * from './CheckboxGroup';
 export * from './ConfirmDialog';
 export * from './CurrencyInput';
 export * from './DatePicker';
