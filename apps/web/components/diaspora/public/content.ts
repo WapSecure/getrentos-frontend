@@ -124,7 +124,7 @@ export const LIMITS: string[] = [
 ];
 
 export const PROTECTION_DOES: string[] = [
-  'Holds your money with Sureground’s licensed payment providers instead of passing it straight to the seller.',
+  'Holds your money with our payment providers, Paystack and Monnify, instead of passing it straight to the seller.',
   'Releases a house or flat deposit when you confirm, and each land stage when it is evidenced.',
   'Keeps money held while a dispute is reviewed.',
   'Records every payment and release so you can see where your money is.',
@@ -158,7 +158,7 @@ export const TRANSPARENCY: TransparencyItem[] = [
   },
   {
     title: 'Third parties',
-    body: 'Accredited lawyers, surveyors, valuers and inspectors carry out checks within their stated scope and are responsible for their own work. Payments are processed by licensed payment providers.',
+    body: 'Accredited lawyers, surveyors, valuers and inspectors carry out checks within their stated scope and are responsible for their own work. Payments are processed by Paystack and Monnify.',
   },
   {
     title: 'Conflicts of interest',
