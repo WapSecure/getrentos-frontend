@@ -2,8 +2,9 @@
 
 import { motion } from 'framer-motion';
 import { ShieldCheck, ShieldAlert } from '@sureground/icons';
-import { Badge } from '@sureground/ui';
+import { Badge, Timeline } from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
+import { stepStates } from '@/lib/stepStates';
 import type { BuyerEscrowTransaction, BuyerEscrowStatus } from '@/types/buyer';
 
 // VERIFICATION_PENDING and SETTLEMENT_PENDING exist in the enum but no transaction ever enters them, so they are not shown as steps.
@@ -32,10 +33,13 @@ export const BuyerEscrowTransactionCard = ({
   onClick,
   delay = 0,
 }: BuyerEscrowTransactionCardProps) => {
-  const stepIndex = escrowSteps.findIndex((s) => s.key === transaction.escrowStatus);
   const isFrozen = transaction.escrowStatus === 'frozen';
   const isRefunded = transaction.escrowStatus === 'refunded';
-  const progressPct = isFrozen || isRefunded ? 0 : ((stepIndex + 1) / escrowSteps.length) * 100;
+  const states = stepStates(
+    escrowSteps.map((s) => s.key),
+    transaction.escrowStatus,
+    isFrozen ? 'blocked' : isRefunded ? 'skipped' : null
+  );
 
   return (
     <motion.div
@@ -85,14 +89,15 @@ export const BuyerEscrowTransactionCard = ({
       </p>
 
       <div className="mt-3">
-        <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
-          <div
-            className={`h-full rounded-full transition-all duration-500 ${
-              isFrozen ? 'bg-destructive' : isRefunded ? 'bg-muted-foreground' : 'bg-primary'
-            }`}
-            style={{ width: `${progressPct}%` }}
-          />
-        </div>
+        <Timeline
+          orientation="horizontal"
+          aria-label="Payment progress"
+          items={escrowSteps.map((step, index) => ({
+            id: step.key,
+            title: step.label,
+            state: states[index],
+          }))}
+        />
         <p className="text-xs text-muted-foreground mt-1.5">
           Opened {formatDate(transaction.createdAt)}
         </p>

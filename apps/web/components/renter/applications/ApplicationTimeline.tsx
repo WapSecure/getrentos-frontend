@@ -1,8 +1,8 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { CheckCircle, Circle, Clock, AlertCircle, Home, UserCheck } from '@sureground/icons';
-import { Alert } from '@sureground/ui';
+import { CheckCircle, Clock, AlertCircle, Home, UserCheck } from '@sureground/icons';
+import { Alert, Timeline } from '@sureground/ui';
 
 interface TimelineStep {
   stage: string;
@@ -56,6 +56,9 @@ export const ApplicationTimeline = ({ timeline, currentStatus }: ApplicationTime
   const StatusIcon = statusIconMap[currentStatus] || Clock;
   const statusColor = statusColorMap[currentStatus] || 'text-muted-foreground';
   const statusLabel = getStatusLabel(currentStatus);
+  // While the landlord is still deciding, the first unfinished step is the one in progress.
+  const inReview = currentStatus === 'pending' || currentStatus === 'under_review';
+  const firstOpen = timeline.findIndex((step) => !step.completed);
 
   return (
     <div className="space-y-6">
@@ -78,49 +81,16 @@ export const ApplicationTimeline = ({ timeline, currentStatus }: ApplicationTime
         />
       </div>
 
-      <div className="relative">
-        <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-border" />
-
-        <div className="space-y-6">
-          {timeline.map((step, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="relative pl-10"
-            >
-              <div
-                className={`absolute left-0 w-8 h-8 rounded-full flex items-center justify-center ${
-                  step.completed ? 'bg-success-subtle' : 'bg-secondary'
-                }`}
-              >
-                {step.completed ? (
-                  <CheckCircle className="w-4 h-4 text-success" />
-                ) : (
-                  <Circle className="w-4 h-4 text-muted-foreground" />
-                )}
-              </div>
-
-              <div>
-                <div className="flex items-center gap-2">
-                  <h4
-                    className={`text-sm font-medium ${
-                      step.completed ? 'text-foreground' : 'text-muted-foreground'
-                    }`}
-                  >
-                    {step.stage}
-                  </h4>
-                  {step.completed && <span className="text-xs text-success">✓</span>}
-                </div>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  {step.date === 'Pending' ? 'Awaiting confirmation' : step.date}
-                </p>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
+      <Timeline
+        titleAs="h4"
+        aria-label="Application steps"
+        items={timeline.map((step, index) => ({
+          id: `${index}`,
+          title: step.stage,
+          description: step.date === 'Pending' ? 'Awaiting confirmation' : step.date,
+          state: step.completed ? 'done' : index === firstOpen && inReview ? 'current' : 'pending',
+        }))}
+      />
 
       {currentStatus === 'approved' && (
         <Alert variant="success" icon={Home} title="Congratulations!">

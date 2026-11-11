@@ -5,7 +5,6 @@ import type { PaymentProviderChoice } from '@/hooks/usePaymentProviders';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  Check,
   Lock,
   ShieldAlert,
   LifeBuoy,
@@ -23,8 +22,10 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
+  Timeline,
 } from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
+import { stepStates } from '@/lib/stepStates';
 import { SALE_DEPOSIT_PROTECTION } from '@/lib/paymentCopy';
 import type {
   BuyerEscrowTransaction,
@@ -95,10 +96,69 @@ export const BuyerEscrowTransactionDetailModal = ({
 
   const isFrozen = transaction.escrowStatus === 'frozen';
   const isRefunded = transaction.escrowStatus === 'refunded';
-  const activeIndex = escrowSteps.findIndex((s) => s.key === transaction.escrowStatus);
+  const states = stepStates(
+    escrowSteps.map((s) => s.key),
+    transaction.escrowStatus
+  );
   const canDeposit = transaction.escrowStatus === 'deposit_pending';
   const canRelease = transaction.escrowStatus === 'funds_held';
   const depositAmount = transaction.depositAmount ?? transaction.purchasePrice;
+
+  const stepAction = (key: BuyerEscrowStatus) => {
+    if (key === 'deposit_pending' && canDeposit) {
+      return (
+        <Button
+          variant="primary"
+          size="sm"
+          icon={<Wallet className="w-3.5 h-3.5" />}
+          isLoading={isPaying}
+          onClick={() => setPayOpen(true)}
+        >
+          Make deposit payment
+        </Button>
+      );
+    }
+    if (key === 'funds_held' && canRelease) {
+      return confirmingRelease ? (
+        <div className="space-y-2">
+          <Alert variant="warning" icon={ShieldAlert}>
+            Releasing pays the held funds to {transaction.ownerName} and cannot be undone. Only
+            release once you have received the property and the documents you paid for. If something
+            is wrong, contact support instead.
+          </Alert>
+          <div className="flex gap-2">
+            <Button
+              variant="primary"
+              size="sm"
+              icon={<ShieldCheck className="w-3.5 h-3.5" />}
+              isLoading={isPaying}
+              onClick={() => onMakePayment(transaction.id, 'release')}
+            >
+              Yes, release to seller
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={isPaying}
+              onClick={() => setConfirmingRelease(false)}
+            >
+              Not yet
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <Button
+          variant="primary"
+          size="sm"
+          icon={<ShieldCheck className="w-3.5 h-3.5" />}
+          onClick={() => setConfirmingRelease(true)}
+        >
+          Confirm receipt &amp; release to seller
+        </Button>
+      );
+    }
+    return undefined;
+  };
 
   return (
     <Dialog open onOpenChange={(next) => !next && handleClose()}>
@@ -132,103 +192,16 @@ export const BuyerEscrowTransactionDetailModal = ({
           ) : (
             <div>
               <h4 className="text-sm font-medium text-foreground mb-3">Payment progress</h4>
-              <div className="space-y-0">
-                {escrowSteps.map((step, index) => {
-                  const isDone = index < activeIndex || transaction.escrowStatus === 'released';
-                  const isActive = index === activeIndex && transaction.escrowStatus !== 'released';
-                  const isLast = index === escrowSteps.length - 1;
-                  return (
-                    <div key={step.key} className="flex gap-3">
-                      <div className="flex flex-col items-center">
-                        <div
-                          className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
-                            isDone
-                              ? 'bg-primary text-primary-foreground'
-                              : isActive
-                                ? 'bg-primary/20 text-primary ring-2 ring-primary'
-                                : 'bg-secondary text-muted-foreground'
-                          }`}
-                        >
-                          {isDone ? (
-                            <Check className="w-3.5 h-3.5" />
-                          ) : (
-                            <span className="text-xs font-semibold">{index + 1}</span>
-                          )}
-                        </div>
-                        {!isLast && (
-                          <div
-                            className={`w-0.5 flex-1 min-h-6 ${isDone ? 'bg-primary' : 'bg-border'}`}
-                          />
-                        )}
-                      </div>
-                      <div className="pb-5 flex-1">
-                        <p
-                          className={`text-sm font-medium ${
-                            isDone || isActive ? 'text-foreground' : 'text-muted-foreground'
-                          }`}
-                        >
-                          {step.label}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-0.5">{step.description}</p>
-                        {isActive && step.key === 'deposit_pending' && canDeposit && (
-                          <Button
-                            variant="primary"
-                            size="sm"
-                            className="mt-2"
-                            icon={<Wallet className="w-3.5 h-3.5" />}
-                            isLoading={isPaying}
-                            onClick={() => setPayOpen(true)}
-                          >
-                            Make deposit payment
-                          </Button>
-                        )}
-                        {isActive &&
-                          step.key === 'funds_held' &&
-                          canRelease &&
-                          (confirmingRelease ? (
-                            <div className="mt-2 space-y-2">
-                              <Alert variant="warning" icon={ShieldAlert}>
-                                Releasing pays the held funds to {transaction.ownerName} and cannot
-                                be undone. Only release once you have received the property and the
-                                documents you paid for. If something is wrong, contact support
-                                instead.
-                              </Alert>
-                              <div className="flex gap-2">
-                                <Button
-                                  variant="primary"
-                                  size="sm"
-                                  icon={<ShieldCheck className="w-3.5 h-3.5" />}
-                                  isLoading={isPaying}
-                                  onClick={() => onMakePayment(transaction.id, 'release')}
-                                >
-                                  Yes, release to seller
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  disabled={isPaying}
-                                  onClick={() => setConfirmingRelease(false)}
-                                >
-                                  Not yet
-                                </Button>
-                              </div>
-                            </div>
-                          ) : (
-                            <Button
-                              variant="primary"
-                              size="sm"
-                              className="mt-2"
-                              icon={<ShieldCheck className="w-3.5 h-3.5" />}
-                              onClick={() => setConfirmingRelease(true)}
-                            >
-                              Confirm receipt &amp; release to seller
-                            </Button>
-                          ))}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+              <Timeline
+                aria-label="Payment progress"
+                items={escrowSteps.map((step, index) => ({
+                  id: step.key,
+                  title: step.label,
+                  description: step.description,
+                  state: states[index],
+                  actions: states[index] === 'current' ? stepAction(step.key) : undefined,
+                }))}
+              />
             </div>
           )}
 

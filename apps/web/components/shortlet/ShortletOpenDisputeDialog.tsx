@@ -1,19 +1,7 @@
 'use client';
 
-import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import {
-  Button,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-  Field,
-  Input,
-  Select,
-  Textarea,
-  useToast,
-} from '@sureground/ui';
+import { ReasonDialog, useToast } from '@sureground/ui';
 import { Scale } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
@@ -36,81 +24,44 @@ export function ShortletOpenDisputeDialog({
   onClose: () => void;
   onOpened: () => void;
 }) {
-  const [title, setTitle] = useState('');
-  const [category, setCategory] = useState<ShortletDisputeCategory>('SERVICE_QUALITY');
-  const [description, setDescription] = useState('');
   const toast = useToast();
 
   const open = useMutation({
-    mutationFn: () =>
-      unwrap(
-        shortletService.openDispute(booking.id, {
-          title: title.trim(),
-          category,
-          description: description.trim(),
-        })
-      ),
+    mutationFn: (input: {
+      title: string;
+      category: ShortletDisputeCategory;
+      description: string;
+    }) => unwrap(shortletService.openDispute(booking.id, input)),
     onSuccess: () => onOpened(),
     onError: (reason: Error) => toast.error(reason.message),
   });
 
-  const canSubmit = title.trim().length >= 3 && description.trim().length >= 10;
-
   return (
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-lg p-0">
-        <div className="p-5">
-          <DialogTitle>Open a dispute</DialogTitle>
-          <DialogDescription>
-            Raise an issue about this stay at {booking.propertyTitle}. The other party will be
-            notified and admins will review the thread.
-          </DialogDescription>
-        </div>
-        <div className="max-h-[70vh] space-y-4 overflow-y-auto border-t border-border p-5">
-          <Field label="What went wrong?">
-            <Input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. The unit was not as described"
-              maxLength={120}
-            />
-          </Field>
-          <Field label="Category">
-            <Select
-              value={category}
-              onValueChange={(v) => setCategory(v as ShortletDisputeCategory)}
-              options={CATEGORY_OPTIONS.map((c) => ({ value: c.value, label: c.label }))}
-            />
-          </Field>
-          <Field
-            label="Details"
-            hint="Be specific: include dates, amounts, and anything that helps admins decide."
-          >
-            <Textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe what happened…"
-              rows={5}
-              maxLength={2000}
-              showCount
-            />
-          </Field>
-          <div className="flex justify-end gap-2 pt-1">
-            <Button variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button
-              onClick={() => open.mutate()}
-              isLoading={open.isPending}
-              loadingText="Opening…"
-              disabled={!canSubmit}
-              icon={<Scale className="h-4 w-4" />}
-            >
-              Open dispute
-            </Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+    <ReasonDialog<ShortletDisputeCategory>
+      open
+      onOpenChange={(o) => !o && onClose()}
+      title="Open a dispute"
+      description={`Raise an issue about this stay at ${booking.propertyTitle}. The other party will be notified and admins will review the thread.`}
+      subject={{
+        label: 'What went wrong?',
+        placeholder: 'e.g. The unit was not as described',
+        minLength: 3,
+        maxLength: 120,
+      }}
+      categories={{ label: 'Category', options: CATEGORY_OPTIONS, defaultValue: 'SERVICE_QUALITY' }}
+      reasonLabel="Details"
+      reasonHint="Be specific: include dates, amounts, and anything that helps admins decide."
+      reasonPlaceholder="Describe what happened…"
+      rows={5}
+      minLength={10}
+      maxLength={2000}
+      showCount
+      confirmLabel="Open dispute"
+      confirmIcon={<Scale className="h-4 w-4" />}
+      loadingText="Opening…"
+      onSubmit={({ subject = '', category = 'SERVICE_QUALITY', reason }) =>
+        open.mutateAsync({ title: subject, category, description: reason })
+      }
+    />
   );
 }

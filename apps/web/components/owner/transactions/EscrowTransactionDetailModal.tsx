@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  Check,
   Lock,
   ShieldAlert,
   LifeBuoy,
@@ -25,8 +24,10 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
+  Timeline,
 } from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
+import { stepStates } from '@/lib/stepStates';
 import type {
   EscrowSaleTransaction,
   SaleEscrowStatus,
@@ -112,7 +113,10 @@ export const EscrowTransactionDetailModal = ({
 
   const isFrozen = transaction.escrowStatus === 'frozen';
   const isRefunded = transaction.escrowStatus === 'refunded';
-  const activeIndex = escrowSteps.findIndex((s) => s.key === transaction.escrowStatus);
+  const states = stepStates(
+    escrowSteps.map((s) => s.key),
+    transaction.escrowStatus
+  );
   const payout = transaction.sellerPayoutStatus
     ? payoutStatusMeta[transaction.sellerPayoutStatus]
     : null;
@@ -149,49 +153,15 @@ export const EscrowTransactionDetailModal = ({
           ) : (
             <div>
               <h4 className="mb-3 text-sm font-medium text-foreground">Payment progress</h4>
-              <ol className="space-y-0">
-                {escrowSteps.map((step, index) => {
-                  const isDone = index < activeIndex || transaction.escrowStatus === 'released';
-                  const isActive = index === activeIndex && transaction.escrowStatus !== 'released';
-                  const isLast = index === escrowSteps.length - 1;
-                  return (
-                    <li key={step.key} className="flex gap-3">
-                      <div className="flex flex-col items-center">
-                        <div
-                          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${
-                            isDone || (isActive && transaction.escrowStatus === 'released')
-                              ? 'bg-primary text-primary-foreground'
-                              : isActive
-                                ? 'bg-primary/20 text-primary ring-2 ring-primary'
-                                : 'bg-secondary text-muted-foreground'
-                          }`}
-                        >
-                          {isDone ? (
-                            <Check className="h-3.5 w-3.5" />
-                          ) : (
-                            <span className="text-xs font-semibold">{index + 1}</span>
-                          )}
-                        </div>
-                        {!isLast && (
-                          <div
-                            className={`min-h-6 w-0.5 flex-1 ${isDone ? 'bg-primary' : 'bg-border'}`}
-                          />
-                        )}
-                      </div>
-                      <div className="pb-5">
-                        <p
-                          className={`text-sm font-medium ${
-                            isDone || isActive ? 'text-foreground' : 'text-muted-foreground'
-                          }`}
-                        >
-                          {step.label}
-                        </p>
-                        <p className="mt-0.5 text-xs text-muted-foreground">{step.description}</p>
-                      </div>
-                    </li>
-                  );
-                })}
-              </ol>
+              <Timeline
+                aria-label="Payment progress"
+                items={escrowSteps.map((step, index) => ({
+                  id: step.key,
+                  title: step.label,
+                  description: step.description,
+                  state: states[index],
+                }))}
+              />
             </div>
           )}
 
