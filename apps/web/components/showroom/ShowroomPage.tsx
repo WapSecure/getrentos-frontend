@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { ArrowLeft, BadgeCheck, Bath, BedDouble, Check, MapPin, Ruler } from '@sureground/icons';
 import { Badge, DescriptionList } from '@sureground/ui';
@@ -12,8 +11,9 @@ import { SimilarListings } from '@/components/market/SimilarListings';
 import { StickyListingCta } from '@/components/market/StickyListingCta';
 import { formatCurrency } from '@/lib/format';
 import {
-  fetchPublicListing,
   MARKET_PATH,
+  publicListingPath,
+  resolvePublicListing,
   type PublicDetailMarket,
 } from '@/lib/publicListingDetail';
 import { ShowroomAside } from './ShowroomAside';
@@ -49,11 +49,10 @@ export async function ShowroomPage({
   id: string;
   extra?: ReactNode;
 }) {
-  const listing = await fetchPublicListing(market, id);
-  if (!listing) notFound();
+  const listing = await resolvePublicListing(market, id);
 
   const back = MARKET_PATH[market];
-  const path = `${back}/${id}`;
+  const path = publicListingPath(listing);
   const keyFacts = [
     listing.bedrooms ? { icon: BedDouble, label: `${listing.bedrooms} bed` } : null,
     listing.bathrooms ? { icon: Bath, label: `${listing.bathrooms} bath` } : null,

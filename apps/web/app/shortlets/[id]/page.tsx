@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
+import { permanentRedirect } from 'next/navigation';
 import { ShortletListingDetail } from '@/components/shortlet/ShortletListingDetail';
 import { publicFetchInit } from '@/lib/publicFetch';
 import { SITE_URL } from '@/lib/site';
+import { listingIdFromSegment, listingPath, listingSegment } from '@/lib/listingSlug';
 import type { ShortletListing } from '@/types/shortlet';
 
 // Must be a literal for Next to read it; matches PUBLIC_REVALIDATE.
@@ -24,8 +26,8 @@ interface ShortletDetailPageProps {
 }
 
 export async function generateMetadata({ params }: ShortletDetailPageProps): Promise<Metadata> {
-  const { id } = await params;
-  const listing = await fetchListing(id);
+  const { id: segment } = await params;
+  const listing = await fetchListing(listingIdFromSegment(segment));
 
   if (!listing) {
     return { title: 'Shortlet not found' };
@@ -38,11 +40,11 @@ export async function generateMetadata({ params }: ShortletDetailPageProps): Pro
   return {
     title: `${listing.title}: ${listing.city}, ${listing.state}`,
     description,
-    alternates: { canonical: `/shortlets/${id}` },
+    alternates: { canonical: listingPath('shortlet', listing.id, listing.title) },
     openGraph: {
       title: `${listing.title}: ${listing.city}, ${listing.state}`,
       description,
-      url: `${SITE_URL}/shortlets/${id}`,
+      url: `${SITE_URL}${listingPath('shortlet', listing.id, listing.title)}`,
       type: 'website',
       images: listing.coverImageUrl ? [listing.coverImageUrl] : undefined,
     },
@@ -50,7 +52,21 @@ export async function generateMetadata({ params }: ShortletDetailPageProps): Pro
 }
 
 export default async function ShortletDetailPage({ params }: ShortletDetailPageProps) {
-  const { id } = await params;
+  const { id: segment } = await params;
+  const id = listingIdFromSegment(segment);
   const listing = await fetchListing(id);
-  return <ShortletListingDetail listingId={id} initialListing={listing ?? undefined} />;
+  // Not loaded on the server (missing or API down): the client view shows the right state and retries.
+  if (!listing) return <ShortletListingDetail listingId={id} />;
+  if (decodeSafe(segment) !== listingSegment(listing.id, listing.title)) {
+    permanentRedirect(listingPath('shortlet', listing.id, listing.title));
+  }
+  return <ShortletListingDetail listingId={listing.id} initialListing={listing} />;
+}
+
+function decodeSafe(segment: string): string {
+  try {
+    return decodeURIComponent(segment);
+  } catch {
+    return segment;
+  }
 }

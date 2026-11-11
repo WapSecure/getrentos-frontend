@@ -6,6 +6,7 @@ import { BadgeCheck, Check, Minus, X } from '@sureground/icons';
 import { Dialog, DialogContent, DialogDescription, DialogTitle, IconButton } from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 import type { PublicListingCard, PublicMarket } from '@/services/publicMarketService';
+import { listingPath } from '@/lib/listingSlug';
 
 const value = (content: ReactNode) =>
   content ?? <Minus className="mx-auto h-4 w-4 text-muted-foreground" aria-label="Not provided" />;
@@ -23,7 +24,6 @@ export function ListingComparisonDialog({
   onOpenChange: (open: boolean) => void;
   onRemove: (id: string) => void;
 }) {
-  const detailPath = market === 'rent' ? '/rent' : '/buy';
   const rows: { label: string; render: (listing: PublicListingCard) => ReactNode }[] = [
     {
       label: 'Price',
@@ -112,7 +112,7 @@ export function ListingComparisonDialog({
                 {listings.map((listing) => (
                   <td key={listing.id} className="p-3 text-center">
                     <Link
-                      href={`${detailPath}/${listing.id}`}
+                      href={listingPath(market, listing.id, listing.title)}
                       className="inline-flex h-10 items-center justify-center rounded-xl bg-primary px-4 font-semibold text-primary-foreground hover:bg-primary/90"
                     >
                       View listing

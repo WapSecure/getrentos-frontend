@@ -37,6 +37,7 @@ import {
 import { formatAreaParam, parseAreaParam, parseView, type MapArea } from '@/lib/mapArea';
 import { urlParam, useSyncUrlState } from '@/hooks/useUrlState';
 import { CollectionsStrip } from '@/components/collections/CollectionsStrip';
+import { listingPath } from '@/lib/listingSlug';
 
 // Shared with the server component that pre-renders the first page, so both ask for the same page size.
 const PAGE_SIZE = PUBLIC_MARKET_PAGE_SIZE;
@@ -64,8 +65,8 @@ const NOUNS: Record<PublicMarket, { one: string; many: string }> = {
   sale: { one: 'property', many: 'properties' },
 };
 
-const detailHref = (market: PublicMarket, id: string) =>
-  `${market === 'rent' ? '/rent' : '/buy'}/${id}`;
+const detailHref = (market: PublicMarket, id: string, title: string) =>
+  listingPath(market, id, title);
 
 const MarketListingCard = ({
   listing,
@@ -88,7 +89,7 @@ const MarketListingCard = ({
   onMap?: boolean;
   selected?: boolean;
 }) => {
-  const href = detailHref(market, listing.id);
+  const href = detailHref(market, listing.id, listing.title);
   const event = {
     listingId: listing.id,
     market,

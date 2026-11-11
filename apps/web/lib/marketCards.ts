@@ -14,6 +14,7 @@ import {
   type RentApiItem,
   type SaleApiItem,
 } from '@/lib/publicListingMap';
+import { LISTING_BASE } from '@/lib/listingSlug';
 
 export type CardMarket = 'rent' | 'sale' | 'land' | 'shortlet';
 
@@ -36,12 +37,7 @@ export interface MarketCard {
   type?: string;
 }
 
-export const DETAIL_PATH: Record<CardMarket, string> = {
-  rent: '/rent',
-  sale: '/buy',
-  land: '/land',
-  shortlet: '/shortlets',
-};
+export const DETAIL_PATH: Record<CardMarket, string> = LISTING_BASE;
 
 export const MARKET_STATUS: Record<CardMarket, string> = {
   rent: 'For rent',

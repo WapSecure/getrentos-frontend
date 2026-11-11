@@ -3,9 +3,10 @@
 import { ListingCard } from '@sureground/ui';
 import type { ShowroomEventMarket } from '@sureground/shared/showroom';
 import { track } from '@/lib/analytics';
-import { DETAIL_PATH, MARKET_STATUS, type CardMarket, type MarketCard } from '@/lib/marketCards';
+import { MARKET_STATUS, type CardMarket, type MarketCard } from '@/lib/marketCards';
 import { SaveListingButton } from './SaveListingButton';
 import { TrustChainBadge } from '@/components/shared/trust/TrustChainBadge';
+import { listingPath } from '@/lib/listingSlug';
 
 /** One public listing card in any market, counted under `surface` (e.g. "rent_similar"). */
 export function MarketListingCard({
@@ -23,7 +24,7 @@ export function MarketListingCard({
   meta?: React.ReactNode;
   eager?: boolean;
 }) {
-  const href = `${DETAIL_PATH[market]}/${listing.id}`;
+  const href = listingPath(market, listing.id, listing.title);
   const event = {
     listingId: listing.id,
     market: market as ShowroomEventMarket,
