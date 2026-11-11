@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
+import { formatDate } from '@/lib/format';
 import { trustService } from '@/services/trustService';
 
 export type TrustConsentType =
@@ -78,7 +79,7 @@ export function TrustConsentPrompt({
 
   return isActive(type) && consent ? (
     <p className="text-xs text-muted-foreground">
-      Consent given {new Date(consent.grantedAt).toLocaleDateString()} ·{' '}
+      Consent given {formatDate(consent.grantedAt)} ·{' '}
       <button
         type="button"
         className="underline hover:no-underline"
