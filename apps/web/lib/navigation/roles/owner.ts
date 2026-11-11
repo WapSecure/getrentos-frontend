@@ -191,7 +191,7 @@ export const ownerNavigation = defineRoleNavigation({
     },
     {
       label: 'Managers and partners',
-      items: ['messages', 'managed', 'queries', 'estateRequests', 'reviews'],
+      items: ['messages', 'management', 'managed', 'queries', 'estateRequests', 'reviews'],
     },
     {
       label: 'Account',
