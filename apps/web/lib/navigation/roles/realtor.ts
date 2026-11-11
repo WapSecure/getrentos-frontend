@@ -6,6 +6,7 @@ import {
   Handshake,
   KeyRound,
   LayoutDashboard,
+  LayoutGrid,
   Luggage,
   Megaphone,
   MessageCircle,
@@ -36,6 +37,7 @@ export const realtorNavigation = defineRoleNavigation({
       href: ROUTES.REALTOR_LISTINGS,
       icon: Megaphone,
     },
+    { id: 'collections', label: 'Collections', href: '/realtor/collections', icon: LayoutGrid },
     { id: 'leads', labelKey: 'sidebar.leads', href: ROUTES.REALTOR_LEADS, icon: UserPlus },
     {
       id: 'viewings',
