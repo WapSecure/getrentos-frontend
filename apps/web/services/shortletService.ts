@@ -1,3 +1,4 @@
+import { uploadVideoDirect } from '@/lib/videoUpload';
 import {
   authFetch,
   safeCall,
@@ -322,6 +323,8 @@ export const shortletService = {
     ),
 
   uploadMedia: (kind: 'image' | 'video', file: File) => {
+    // Videos go straight to storage, so a large video never passes through the API.
+    if (kind === 'video') return safeCall(() => uploadVideoDirect('/host/shortlets', file));
     const fd = new FormData();
     fd.append('file', file);
     fd.append('kind', kind);
