@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { tidyPlace } from '@sureground/shared';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
@@ -208,7 +209,7 @@ export default function ShortletDetail() {
                     {listing.title}
                   </Text>
                   <Text variant="body" color="mutedForeground">
-                    {listing.city}, {listing.state} · sleeps {listing.maxGuests}
+                    {tidyPlace(`${listing.city}, ${listing.state}`)} · sleeps {listing.maxGuests}
                     {listing.bedrooms
                       ? ` · ${listing.bedrooms} bed${listing.bedrooms === 1 ? '' : 's'}`
                       : ''}
@@ -318,7 +319,7 @@ export default function ShortletDetail() {
                 {listing.latitude != null && listing.longitude != null ? (
                   <Section
                     title="Where you'll be"
-                    caption={`${listing.city}, ${listing.state} · exact address after you book`}
+                    caption={`${tidyPlace(`${listing.city}, ${listing.state}`)} · exact address after you book`}
                   >
                     <PropertyMapView
                       markers={[

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { tidyPlace } from '@sureground/shared';
 import { ScrollView, Share, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -232,7 +233,7 @@ function Body({ listing: p }: { listing: MarketDetail }) {
         <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 6 }}>
           <MapPin size={15} color={colors.mutedForeground} style={{ marginTop: 2 }} />
           <Text variant="callout" color="mutedForeground" style={{ flex: 1 }}>
-            {p.address ? `${p.address}, ${p.location}` : p.location}
+            {tidyPlace(p.address ? `${p.address}, ${p.location}` : p.location)}
           </Text>
         </View>
         <Card

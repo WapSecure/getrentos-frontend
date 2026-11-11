@@ -59,7 +59,7 @@ import { ListingCheckCard } from '@/components/property/ListingCheckCard';
 import { AffordabilityCard } from '@/components/property/AffordabilityCard';
 import { VideoTourSheet } from '@/components/video/VideoTourSheet';
 import { FilmedOnSite } from '@/components/video/FilmedOnSite';
-import { trustChainLabel } from '@sureground/shared';
+import { tidyPlace, trustChainLabel } from '@sureground/shared';
 
 export default function PropertyDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -194,7 +194,7 @@ export default function PropertyDetail() {
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                     <MapPin size={13} color={colors.mutedForeground} />
                     <Text variant="callout" color="mutedForeground">
-                      {p.address ? `${p.address}, ${p.location}` : p.location}
+                      {tidyPlace(p.address ? `${p.address}, ${p.location}` : p.location)}
                     </Text>
                   </View>
                   {p.addressHidden ? (

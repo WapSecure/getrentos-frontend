@@ -3,7 +3,12 @@ import { toQuery } from './query';
 import type { Paginated } from './properties';
 import type { ShortletAvailability, ShortletListing } from './shortlets';
 import { formatLandArea, LAND_TITLE_TYPE_LABEL, type LandListing } from './land';
-import { trustChainLabel, type TrustChainLike, type TrustLabelTone } from '@sureground/shared';
+import {
+  tidyPlace,
+  trustChainLabel,
+  type TrustChainLike,
+  type TrustLabelTone,
+} from '@sureground/shared';
 import {
   fromLand,
   fromRental,
@@ -190,7 +195,8 @@ const money = (v: unknown) => {
   const n = typeof v === 'string' ? Number(v) : (v as number);
   return Number.isFinite(n) ? n : 0;
 };
-const place = (...parts: (string | undefined)[]) => parts.filter(Boolean).join(', ');
+// "Lagos, Lagos" reads as "Lagos", as on the web.
+const place = (...parts: (string | undefined)[]) => tidyPlace(parts.filter(Boolean).join(', '));
 // Falsy, not nullish: listings without bedroom data come back as 0, and "0 bed"
 // reads as a claim about the property rather than a missing field.
 const positive = (n?: number) => (n && n > 0 ? n : undefined);
@@ -209,7 +215,7 @@ const rentToCard = (r: RentalDto): MarketCard => ({
   id: r.id,
   kind: 'rent',
   title: r.title,
-  location: r.location,
+  location: tidyPlace(r.location),
   price: money(r.price),
   period: r.period,
   bedrooms: positive(r.bedrooms),

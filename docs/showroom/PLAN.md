@@ -303,12 +303,15 @@ Shortlets were already on the showroom parts on the web. This milestone brings t
   - Sale: `/buyer/listings/:id` sends no media list, verified flag or offer status, so the screen also reads the public `/marketplace/listings/:id`.
   - Land facts gained block, frontage and depth in the shared mapper, so the web shows them too.
 - **Mobile media viewer** (`apps/mobile/components/showroom/MediaViewer.tsx`):
-  - full screen, swipe between items, "3 / 8" counter
+  - full screen, swipe between items
+  - a counter of photos only ("3 / 7"), matching the hero; a video or tour page shows "Video tour" or "360 tour" instead
+  - arrow keys page through on Expo web
   - pinch and double-tap zoom (gesture handler and Reanimated, already in the app)
   - room chips once photos are tagged, room name and caption under the photo, thumbnail strip
   - video and 360 tour pages only when the listing has them; nothing loads until the viewer taps play or start
   - reduced motion respected
 - **Phone hero** (`ShowroomHero`): swipeable, with a counter, the room name on the photo, and Video and 360 tour pills only for real media.
+- **Place names:** repeated ones collapse ("Lagos, Lagos" shows as "Lagos") with the shared `tidyPlace`, as on the web.
 - **Key facts** in one divided row; **costs card** with stated fees, the move-in total and the fees not stated.
 - **Sticky price bar with one primary action:** rent: request viewing; sale: request inspection; land: request inspection (or add a buyer account); shortlet: check dates or book. Apply (rent) and make an offer (sale, land) sit with the costs.
 - **Resized copies:** 960px in the hero, a copy matching the screen's pixel width (up to 1600px) in the viewer, 320px for thumbnails. The original is used when there are none.

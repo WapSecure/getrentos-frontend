@@ -3,6 +3,7 @@ import {
   FlatList,
   Modal,
   PixelRatio,
+  Platform,
   Pressable,
   ScrollView,
   View,
@@ -43,6 +44,10 @@ const INK = {
 };
 const MAX_ZOOM = 4;
 const THUMB = 56;
+const THUMB_GAP = 6;
+const THUMB_PAD = 16;
+
+const ThumbGap = () => <View style={{ width: THUMB_GAP }} />;
 
 const kindLabel = (m: MediaItem) =>
   m.kind === 'video' ? 'Video tour' : m.kind === 'tour' ? '360 tour' : 'Photo';
@@ -105,7 +110,11 @@ function ViewerBody({
   onVideoExpired?: () => void;
 }) {
   const insets = useSafeAreaInsets();
-  const { width } = useWindowDimensions();
+  const screen = useWindowDimensions();
+  // The stage is measured, not assumed: a page sized from the window (or left to flex) can
+  // collapse to zero height inside a horizontal list on the web, and is wrong in split screen.
+  const [stage, setStage] = useState<{ width: number; height: number } | null>(null);
+  const width = stage?.width ?? screen.width;
   const reduced = useReducedMotion();
   const [index, setIndex] = useState(startIndex);
   const [zoomed, setZoomed] = useState(false);
@@ -124,18 +133,39 @@ function ViewerBody({
     return [...seen.entries()];
   }, [items]);
 
+  // Photos are counted on their own, as on the hero; a video or tour page is named instead.
+  const photoCount = items.filter((m) => m.kind === 'image').length;
+  const photoNumber = items.slice(0, index + 1).filter((m) => m.kind === 'image').length;
+  const position = item.kind === 'image' ? `${photoNumber} / ${photoCount}` : kindLabel(item);
+
+  // The active thumbnail sits in the middle of the strip, or at its padded start.
   useEffect(() => {
-    if (items.length > 1) {
-      thumbs.current?.scrollToIndex({ index, viewPosition: 0.5, animated: !reduced });
-    }
-  }, [index, items.length, reduced]);
+    if (items.length < 2) return;
+    const centre = THUMB_PAD + index * (THUMB + THUMB_GAP) + THUMB / 2;
+    thumbs.current?.scrollToOffset({
+      offset: Math.max(0, centre - width / 2),
+      animated: !reduced,
+    });
+  }, [index, items.length, reduced, width]);
 
   const go = (next: number) => {
-    setIndex(next);
+    const to = Math.min(Math.max(0, next), items.length - 1);
+    setIndex(to);
     setActive(null);
     setZoomed(false);
-    pager.current?.scrollToIndex({ index: next, animated: !reduced });
+    pager.current?.scrollToOffset({ offset: to * width, animated: !reduced });
   };
+
+  // Expo web: the arrow keys page through, as in the web viewer. Re-bound each render, so it sees the current page.
+  useEffect(() => {
+    if (Platform.OS !== 'web') return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowRight') go(index + 1);
+      else if (e.key === 'ArrowLeft') go(index - 1);
+    };
+    globalThis.addEventListener?.('keydown', onKey);
+    return () => globalThis.removeEventListener?.('keydown', onKey);
+  });
 
   const onPage = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const next = Math.round(e.nativeEvent.contentOffset.x / width);
@@ -180,10 +210,12 @@ function ViewerBody({
         <Text
           variant="callout"
           accessibilityLiveRegion="polite"
-          accessibilityLabel={`${kindLabel(item)} ${index + 1} of ${items.length}`}
+          accessibilityLabel={
+            item.kind === 'image' ? `Photo ${photoNumber} of ${photoCount}` : kindLabel(item)
+          }
           style={{ color: INK.fg, fontVariant: ['tabular-nums'], paddingHorizontal: 8 }}
         >
-          {index + 1} / {items.length}
+          {position}
         </Text>
       </View>
 
@@ -191,6 +223,8 @@ function ViewerBody({
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
+          // A ScrollView grows by default; this one is only as tall as its chips.
+          style={{ flexGrow: 0, flexShrink: 0 }}
           contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingVertical: 8 }}
           accessibilityLabel="Rooms"
         >
@@ -209,68 +243,89 @@ function ViewerBody({
         </ScrollView>
       ) : null}
 
-      <FlatList
-        ref={pager}
-        data={items}
-        keyExtractor={(m) => m.id}
-        horizontal
-        pagingEnabled
-        scrollEnabled={!zoomed}
-        showsHorizontalScrollIndicator={false}
-        initialScrollIndex={startIndex}
-        getItemLayout={(_, i) => ({ length: width, offset: width * i, index: i })}
-        onMomentumScrollEnd={onPage}
-        // Neighbours only: a 40-photo listing must not decode 40 full-size images at once.
-        initialNumToRender={1}
-        windowSize={3}
-        maxToRenderPerBatch={2}
-        style={{ flex: 1 }}
-        renderItem={({ item: m, index: i }) => (
-          <View style={{ width, flex: 1, justifyContent: 'center' }}>
-            {m.kind === 'image' ? (
-              <ZoomableImage
-                uri={variantAtLeast(m.url, m.variants, pixelWidth)}
-                alt={m.alt ?? `Photo ${i + 1}`}
-                reduced={reduced}
-                current={i === index}
-                zoomed={i === index && zoomed}
-                onZoomChange={setZoomed}
-              />
-            ) : m.kind === 'video' ? (
-              active === m.id ? (
-                <VideoTourPlayer
-                  url={m.url}
-                  title={title}
-                  onExpired={onVideoExpired}
-                  onEnded={() => onMediaEvent?.({ type: 'video_complete', mediaIndex: i })}
-                />
-              ) : (
-                <StartCard
-                  label="Play the video tour"
-                  icon={<Play size={28} color={INK.fg} />}
-                  posterUrl={m.posterUrl}
-                  onStart={() => {
-                    onMediaEvent?.({ type: 'video_start', mediaIndex: i });
-                    setActive(m.id);
-                  }}
-                />
-              )
-            ) : active === m.id ? (
-              <EmbedFrame url={m.url} title={`${title} 360 tour`} fill />
-            ) : (
-              <StartCard
-                label="Start the 360 tour"
-                detail={m.tourHost ? `Opens the tour from ${m.tourHost}` : undefined}
-                icon={<Compass size={28} color={INK.fg} />}
-                onStart={() => {
-                  onMediaEvent?.({ type: 'tour_start', mediaIndex: i });
-                  setActive(m.id);
-                }}
-              />
+      <View
+        style={{ flex: 1, minHeight: 0 }}
+        onLayout={(e) => {
+          const { width: w, height: h } = e.nativeEvent.layout;
+          const next = { width: Math.round(w), height: Math.round(h) };
+          if (
+            next.width > 0 &&
+            next.height > 0 &&
+            (next.width !== stage?.width || next.height !== stage?.height)
+          ) {
+            setStage(next);
+          }
+        }}
+      >
+        {stage ? (
+          <FlatList
+            ref={pager}
+            data={items}
+            keyExtractor={(m) => m.id}
+            horizontal
+            pagingEnabled
+            scrollEnabled={!zoomed}
+            showsHorizontalScrollIndicator={false}
+            initialScrollIndex={index}
+            // Keeps the starting page when the stage is resized (rotation, split screen).
+            key={`${stage!.width}x${stage!.height}`}
+            getItemLayout={(_, i) => ({ length: width, offset: width * i, index: i })}
+            onMomentumScrollEnd={onPage}
+            // Neighbours only: a 40-photo listing must not decode 40 full-size images at once.
+            initialNumToRender={1}
+            windowSize={3}
+            maxToRenderPerBatch={2}
+            style={{ width: stage!.width, height: stage!.height }}
+            renderItem={({ item: m, index: i }) => (
+              <View
+                style={{ width: stage!.width, height: stage!.height, justifyContent: 'center' }}
+              >
+                {m.kind === 'image' ? (
+                  <ZoomableImage
+                    uri={variantAtLeast(m.url, m.variants, pixelWidth)}
+                    alt={m.alt ?? `Photo ${i + 1}`}
+                    reduced={reduced}
+                    current={i === index}
+                    zoomed={i === index && zoomed}
+                    onZoomChange={setZoomed}
+                  />
+                ) : m.kind === 'video' ? (
+                  active === m.id ? (
+                    <VideoTourPlayer
+                      url={m.url}
+                      title={title}
+                      onExpired={onVideoExpired}
+                      onEnded={() => onMediaEvent?.({ type: 'video_complete', mediaIndex: i })}
+                    />
+                  ) : (
+                    <StartCard
+                      label="Play the video tour"
+                      icon={<Play size={28} color={INK.fg} />}
+                      posterUrl={m.posterUrl}
+                      onStart={() => {
+                        onMediaEvent?.({ type: 'video_start', mediaIndex: i });
+                        setActive(m.id);
+                      }}
+                    />
+                  )
+                ) : active === m.id ? (
+                  <EmbedFrame url={m.url} title={`${title} 360 tour`} fill />
+                ) : (
+                  <StartCard
+                    label="Start the 360 tour"
+                    detail={m.tourHost ? `Opens the tour from ${m.tourHost}` : undefined}
+                    icon={<Compass size={28} color={INK.fg} />}
+                    onStart={() => {
+                      onMediaEvent?.({ type: 'tour_start', mediaIndex: i });
+                      setActive(m.id);
+                    }}
+                  />
+                )}
+              </View>
             )}
-          </View>
-        )}
-      />
+          />
+        ) : null}
+      </View>
 
       <View style={{ paddingBottom: insets.bottom + 8, gap: 8 }}>
         {item.room || item.caption ? (
@@ -295,18 +350,18 @@ function ViewerBody({
             keyExtractor={(m) => `thumb-${m.id}`}
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ gap: 6, paddingHorizontal: 16 }}
-            getItemLayout={(_, i) => ({
-              length: THUMB + 6,
-              offset: 16 + (THUMB + 6) * i,
-              index: i,
-            })}
-            onScrollToIndexFailed={() => undefined}
+            style={{ flexGrow: 0, flexShrink: 0 }}
+            contentContainerStyle={{ paddingHorizontal: THUMB_PAD }}
+            ItemSeparatorComponent={ThumbGap}
             renderItem={({ item: m, index: i }) => (
               <Pressable
                 onPress={() => go(i)}
                 accessibilityRole="button"
-                accessibilityLabel={`Show ${kindLabel(m).toLowerCase()} ${i + 1}`}
+                accessibilityLabel={
+                  m.kind === 'image'
+                    ? `Show photo ${items.slice(0, i + 1).filter((x) => x.kind === 'image').length}`
+                    : `Show the ${kindLabel(m).toLowerCase()}`
+                }
                 accessibilityState={{ selected: i === index }}
                 style={{
                   width: THUMB,

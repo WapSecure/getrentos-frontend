@@ -33,7 +33,7 @@ import {
   LAND_ENCUMBRANCE_TONE,
 } from '@/lib/api/land';
 import { PropertyMapView } from '@/components/property/PropertyMapView';
-import { boundaryCorners } from '@sureground/shared';
+import { boundaryCorners, tidyPlace } from '@sureground/shared';
 import { ShowroomMedia, useTrackDetailView } from '@/components/showroom/ShowroomMedia';
 import {
   ShowroomCostsCard,
@@ -138,7 +138,9 @@ export default function LandListingDetail() {
                 <View style={{ gap: 4 }}>
                   <Price amount={listing.price} variant="display" />
                   <Text variant="callout" color="mutedForeground">
-                    {[listing.address, listing.city, listing.state].filter(Boolean).join(', ')}
+                    {tidyPlace(
+                      [listing.address, listing.city, listing.state].filter(Boolean).join(', ')
+                    )}
                   </Text>
                   {listing.addressHidden ? (
                     <Text variant="caption" color="mutedForeground">
