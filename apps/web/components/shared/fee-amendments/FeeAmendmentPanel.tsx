@@ -66,6 +66,43 @@ export function formatLagosDay(value: string | null | undefined): string {
 }
 
 /** The first day of each month from `earliest`, the only days a new fee may start on. */
+/** Today as a Lagos date, YYYY-MM-DD, to compare with a version's effective date. */
+function lagosToday(): string {
+  return new Date().toLocaleDateString('en-CA', { timeZone: 'Africa/Lagos' });
+}
+
+/** The day before a YYYY-MM-DD date, as a Lagos day for people to read. */
+function dayBefore(day: string): string {
+  const date = new Date(`${day}T12:00:00+01:00`);
+  date.setUTCDate(date.getUTCDate() - 1);
+  return formatLagosDay(date.toISOString());
+}
+
+/**
+ * The fee in force today, and an agreed change that has not started yet. The agreement's fee row moves on acceptance,
+ * so `currentFee` alone would announce the new fee weeks early; the versions say what applies when.
+ */
+export function feeHeadline(data: Pick<FeeAmendmentOverview, 'currentFee' | 'versions'>): string {
+  const today = lagosToday();
+  const upcoming = data.versions
+    .filter((v) => v.effectiveFrom > today && v.fee)
+    .sort((a, b) => a.version - b.version)[0];
+  const inForce = data.versions
+    .filter((v) => v.effectiveFrom <= today)
+    .sort((a, b) => b.version - a.version)[0];
+  if (upcoming?.fee) {
+    // Before version 1's date, version 1 applies, as the statements read it.
+    const now = inForce ?? [...data.versions].sort((a, b) => a.version - b.version)[0];
+    if (now?.fee && now.version !== upcoming.version) {
+      return `Fee: ${now.fee.label} until ${dayBefore(upcoming.effectiveFrom)}, then ${upcoming.fee.label} from ${formatLagosDay(upcoming.effectiveFrom)}`;
+    }
+  }
+  if (inForce?.fee) return `Agreed fee: ${inForce.fee.label}`;
+  return data.currentFee
+    ? `Agreed fee: ${data.currentFee.label}`
+    : 'No fee recorded on this agreement.';
+}
+
 function effectiveDateOptions(earliest: string): { value: string; label: string }[] {
   const [year, month] = earliest.split('-').map(Number);
   return Array.from({ length: MONTHS_AHEAD }, (_, i) => {
@@ -117,11 +154,7 @@ export function FeeAmendmentPanel({ mandateId }: { mandateId: string }) {
             <Percent className="h-4 w-4 text-muted-foreground" aria-hidden />
             Management fee
           </h3>
-          <p className="mt-0.5 text-sm text-muted-foreground">
-            {data.currentFee
-              ? `Agreed fee: ${data.currentFee.label}`
-              : 'No fee recorded on this agreement.'}
-          </p>
+          <p className="mt-0.5 text-sm text-muted-foreground">{feeHeadline(data)}</p>
         </div>
         {data.canPropose && !proposing && (
           <Button variant="outline" size="sm" onClick={() => setProposing(true)}>
