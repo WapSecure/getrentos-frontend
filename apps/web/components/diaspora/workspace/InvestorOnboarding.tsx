@@ -3,7 +3,7 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ShieldCheck } from '@sureground/icons';
+import { Clock, Globe, Settings2, ShieldCheck, type SgIcon } from '@sureground/icons';
 import {
   Alert,
   Button,
@@ -16,11 +16,11 @@ import {
   CheckboxGroup,
   Field,
   PageHeader,
-  Progress,
   QueryState,
   RadioGroup,
   Select,
   CardSkeleton,
+  Timeline,
   type SelectOption,
 } from '@sureground/ui';
 import { ApiError, unwrap } from '@/lib/apiHelpers';
@@ -61,6 +61,30 @@ const STEPS: { id: Step; title: string }[] = [
   { id: 'about', title: 'About you' },
   { id: 'plans', title: 'Your plans' },
   { id: 'risk', title: 'Risk statement' },
+];
+
+/** The side panel: what the answers are for, in plain words. */
+const WHY_WE_ASK: { icon: SgIcon; title: string; body: string }[] = [
+  {
+    icon: Globe,
+    title: 'Where you live and your nationality',
+    body: 'They decide which identity checks apply to you. Your chosen currency is shown beside naira as a guide only; you always pay in naira.',
+  },
+  {
+    icon: Clock,
+    title: 'Your time zone',
+    body: 'Tours and deadlines show Lagos time next to yours. Payment and contract dates stay Lagos dates.',
+  },
+  {
+    icon: ShieldCheck,
+    title: 'The risk statement',
+    body: 'Sets out what Sureground checks and what it cannot promise, before your first offer or purchase.',
+  },
+  {
+    icon: Settings2,
+    title: 'Change them any time',
+    body: 'Edit your answers from your workspace whenever your plans change.',
+  },
 ];
 
 const messageOf = (error: unknown, fallback = 'Something went wrong. Please try again.') =>
@@ -478,7 +502,7 @@ export const InvestorOnboarding = ({ portal }: { portal: InvestorPortal }) => {
   }, [step]);
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="space-y-6">
       <PageHeader
         eyebrow="Sureground Diaspora Invest"
         title={onboarded ? 'Your investor profile' : 'Set up your investor profile'}
@@ -488,30 +512,66 @@ export const InvestorOnboarding = ({ portal }: { portal: InvestorPortal }) => {
           { label: 'Profile' },
         ]}
       />
-      <Progress
-        value={index + 1}
-        max={STEPS.length}
-        label={`Step ${index + 1} of ${STEPS.length}: ${STEPS[index].title}`}
-        size="sm"
-      />
-      <QueryState
-        isLoading={profile.isLoading}
-        isError={profile.isError}
-        onRetry={() => profile.refetch()}
-        isRetrying={profile.isFetching}
-        loading={<CardSkeleton lines={6} />}
-      >
-        {step === 'risk' ? (
-          <RiskStep portal={portal} onBack={() => setStep('plans')} />
-        ) : (
-          <ProfileForm
-            initial={profile.data ?? null}
-            step={step}
-            onStep={setStep}
-            onSaved={(saved) => setStep(saved === 'about' ? 'plans' : 'risk')}
-          />
-        )}
-      </QueryState>
+      <div className="grid gap-6 lg:grid-cols-12">
+        <div className="min-w-0 space-y-6 lg:col-span-8">
+          <Card>
+            <CardContent className="space-y-4 py-4">
+              <p className="text-sm font-medium text-foreground">
+                {`Step ${index + 1} of ${STEPS.length}: ${STEPS[index].title}`}
+              </p>
+              <Timeline
+                orientation="horizontal"
+                aria-label="Profile steps"
+                items={STEPS.map((item, i) => ({
+                  id: item.id,
+                  title: item.title,
+                  state: i < index ? 'done' : i === index ? 'current' : 'pending',
+                }))}
+              />
+            </CardContent>
+          </Card>
+          <QueryState
+            isLoading={profile.isLoading}
+            isError={profile.isError}
+            onRetry={() => profile.refetch()}
+            isRetrying={profile.isFetching}
+            loading={<CardSkeleton lines={6} />}
+          >
+            {step === 'risk' ? (
+              <RiskStep portal={portal} onBack={() => setStep('plans')} />
+            ) : (
+              <ProfileForm
+                initial={profile.data ?? null}
+                step={step}
+                onStep={setStep}
+                onSaved={(saved) => setStep(saved === 'about' ? 'plans' : 'risk')}
+              />
+            )}
+          </QueryState>
+        </div>
+        <aside className="min-w-0 space-y-6 lg:col-span-4" aria-label="About these questions">
+          <Card>
+            <CardHeader>
+              <CardTitle as="h2">Why we ask</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-3">
+              <ul className="space-y-4">
+                {WHY_WE_ASK.map(({ icon: Icon, title, body }) => (
+                  <li key={title} className="flex gap-3">
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-secondary">
+                      <Icon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block text-sm font-medium text-foreground">{title}</span>
+                      <span className="mt-0.5 block text-sm text-muted-foreground">{body}</span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        </aside>
+      </div>
     </div>
   );
 };

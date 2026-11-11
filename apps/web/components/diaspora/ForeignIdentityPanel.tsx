@@ -55,7 +55,8 @@ const errorText = (reason: unknown, fallback: string) =>
   reason instanceof Error ? reason.message : fallback;
 const errorCode = (reason: unknown) => (reason as { code?: string } | null)?.code;
 
-const useForeignIdentityStatus = () =>
+/** The investor's checks abroad; shared by the trust tab and the investor workspace. */
+export const useForeignIdentityStatus = () =>
   useQuery({
     queryKey: foreignIdentityKeys.status,
     queryFn: () => unwrap(foreignIdentityService.getStatus()),

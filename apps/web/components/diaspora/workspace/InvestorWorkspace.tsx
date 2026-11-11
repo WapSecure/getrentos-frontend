@@ -2,20 +2,36 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { FolderOpen, Globe, MessageCircle, Settings2, ShieldCheck } from '@sureground/icons';
 import {
-  Alert,
+  AlertCircle,
+  Building2,
+  CalendarClock,
+  Clock,
+  Globe,
+  Handshake,
+  KeyRound,
+  Search,
+  ShieldCheck,
+  Video,
+  Wallet,
+  type SgIcon,
+} from '@sureground/icons';
+import {
+  Badge,
   Button,
   Card,
-  CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
+  CardSkeleton,
   CardTitle,
   DescriptionList,
+  EmptyState,
   PageHeader,
   QueryState,
   StatGroup,
   StatGroupSkeleton,
+  type BadgeVariant,
   type DescriptionItem,
   type StatGroupItem,
 } from '@sureground/ui';
@@ -26,9 +42,19 @@ import { countryName } from '@/lib/constants/countries';
 import { DIASPORA_ROUTES, type InvestorPortal } from '@/lib/constants/diasporaRoutes';
 import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';
 import { VISIT_ROUTES } from '@/lib/constants/visitRoutes';
-import { formatCurrency, formatDualTime, formatLagosDate } from '@/lib/format';
-import { investorKeys } from '@/lib/queryKeys';
+import { formatCurrency, formatDualTime, formatLagosDate, timeZoneCity } from '@/lib/format';
+import {
+  buildAgenda,
+  buildAttentionQueue,
+  greetingFor,
+  identityProgress,
+  portfolioFigures,
+  type InvestorAttentionKind,
+} from '@/lib/investorWorkspace';
+import { buyerKeys, investorKeys, ownerKeys } from '@/lib/queryKeys';
+import { buyerService } from '@/services/buyerService';
 import { investorService } from '@/services/investorService';
+import { ownerService } from '@/services/ownerService';
 import { siteTourKeys, siteTourService } from '@/services/siteTourService';
 import {
   prePurchaseInspectionKeys,
@@ -38,22 +64,31 @@ import { SITE_TOUR_STATUS_LABELS } from '@/types/siteTour';
 import { LAND_INSPECTION_STATUS_LABELS } from '@sureground/shared';
 import {
   FOREIGN_IDENTITY_TAB_ID,
-  useForeignIdentityEligible,
+  useForeignIdentityStatus,
 } from '@/components/diaspora/ForeignIdentityPanel';
-import type { InvestorOverview, InvestorProfile, InvestorStatusCounts } from '@/types/investor';
+import { AttentionList, type AttentionListItem } from '@/components/shared/attention/AttentionList';
+import { BuyerActivityFeed } from '@/components/buyer/dashboard/BuyerActivityFeed';
+import { OwnerActivityFeed } from '@/components/owner/dashboard/OwnerActivityFeed';
+import { IndicativeAmount } from '@/components/shared/money/IndicativeAmount';
+import { PurchaseSummaryList } from '@/components/shared/purchases/PurchaseSummaryList';
+import type { ForeignIdentityStatus } from '@/types/foreignIdentity';
+import type { InvestorOverview, InvestorStatusCounts } from '@/types/investor';
 import {
-  BUDGET_BAND_LABELS,
-  HORIZON_LABELS,
-  INTENDED_USE_LABELS,
   LAND_PURCHASE_STATUS_LABELS,
   OFFER_STATUS_LABELS,
-  OWNERSHIP_LABELS,
   PROTECTED_PAYMENT_STATUS_LABELS,
   STATEMENT_PAYOUT_LABELS,
-  PROPERTY_TYPE_LABELS,
   humaniseStatus,
-  listLabels,
 } from '../labels';
+import {
+  AgendaCard,
+  IdentityProgressCard,
+  ProfileSummaryCard,
+  SHORTCUT_ICONS,
+  ShortcutsCard,
+  dualMoment,
+  type ShortcutRow,
+} from './InvestorWorkspaceRail';
 
 /** "Held by Sureground: 2 · Released: 1": the non-zero statuses, largest first. */
 const breakdown = (counts: InvestorStatusCounts, labels: Record<string, string>) =>
@@ -84,24 +119,31 @@ const useNow = () => {
   return now;
 };
 
+/** Enough rows to total the deposits held; a longer history shows the count only. */
+const LIST_PAGE = 50;
+
 /**
  * Purchases live in the buyer portal and managed property in the owner portal. Link across only
  * when the viewer holds that role, since the other portal turns everyone else away.
  */
 const usePortalLinks = (portal: InvestorPortal) => {
-  const roles = useMemo(() => {
-    const stored = getStoredUser<{ roles?: string[] }>()?.roles ?? [];
-    return new Set(stored.map((role) => BACKEND_ROLE_TO_ID[role]));
-  }, []);
+  const user = useMemo(() => getStoredUser<{ roles?: string[]; fullName?: string }>(), []);
+  const roles = useMemo(
+    () => new Set((user?.roles ?? []).map((role) => BACKEND_ROLE_TO_ID[role])),
+    [user]
+  );
   const buyer = portal === 'buyer' || roles.has('buyer');
   const owner = portal === 'owner' || roles.has('owner');
   return {
+    fullName: user?.fullName?.trim() || undefined,
+    discover: buyer ? ROUTES.BUYER_DISCOVER : undefined,
     offers: buyer ? ROUTES.BUYER_OFFERS : undefined,
     transactions: buyer ? ROUTES.BUYER_TRANSACTIONS : undefined,
     landPurchases: buyer ? LAND_BUYER_ROUTES.HUB : undefined,
     tours: buyer ? VISIT_ROUTES.BUYER_TOURS : undefined,
     inspections: buyer ? VISIT_ROUTES.BUYER_INSPECTIONS : undefined,
-    managed: owner ? ROUTES.OWNER_MANAGED : undefined,
+    // The owner's own agreements with Sureground Managed (OWNER_MANAGED is the reverse).
+    managed: owner ? ROUTES.OWNER_MANAGEMENT : undefined,
     approvals: owner ? ROUTES.OWNER_APPROVALS : undefined,
     documents: portal === 'buyer' ? ROUTES.BUYER_DOCUMENTS : ROUTES.OWNER_DOCUMENTS,
     identityAbroad: `${portal === 'buyer' ? ROUTES.BUYER_TRUST_PROFILE : ROUTES.OWNER_TRUST_PROFILE}?tab=${FOREIGN_IDENTITY_TAB_ID}`,
@@ -109,85 +151,127 @@ const usePortalLinks = (portal: InvestorPortal) => {
   };
 };
 
-const ProfileCard = ({
-  summary,
-  risk,
-  portal,
-}: {
-  summary: NonNullable<InvestorOverview['profile']>;
-  risk: InvestorOverview['riskDeclaration'];
-  portal: InvestorPortal;
-}) => {
-  const now = useNow();
-  // The overview carries only the zone and country; the rest of the profile comes from its own call.
-  const full = useQuery({
-    queryKey: investorKeys.profile,
-    queryFn: () => investorService.getProfile(),
-  });
-  const profile: Partial<InvestorProfile> = { ...summary, ...(full.data ?? {}) };
-  const items: DescriptionItem[] = [
-    {
-      label: 'Time now',
-      value: formatDualTime(now, profile.timeZone),
-      hint: 'Payment and contract deadlines are Lagos dates.',
-      wide: true,
-    },
-    {
-      label: 'Lives in',
-      value: countryName(profile.countryOfResidence) ?? profile.countryOfResidence,
-    },
-    { label: 'Nationality', value: countryName(profile.nationality) ?? profile.nationality },
-    { label: 'Time zone', value: profile.timeZone },
-    {
-      label: 'Ownership',
-      value: profile.ownershipStructure ? OWNERSHIP_LABELS[profile.ownershipStructure] : null,
-    },
-    { label: 'Looking for', value: listLabels(profile.intendedUses, INTENDED_USE_LABELS) },
-    { label: 'Property types', value: listLabels(profile.propertyTypes, PROPERTY_TYPE_LABELS) },
-    {
-      label: 'Budget',
-      value: profile.budgetBand ? BUDGET_BAND_LABELS[profile.budgetBand] : null,
-    },
-    { label: 'Horizon', value: profile.horizon ? HORIZON_LABELS[profile.horizon] : null },
-  ];
-  if (risk) {
-    items.push({
-      label: 'Risk statement',
-      value:
-        risk.accepted && risk.acceptedAt
-          ? `Accepted ${formatLagosDate(risk.acceptedAt, 'long')}`
-          : 'Not accepted yet',
-      hint: risk.version ? `Version ${risk.version}` : undefined,
-      wide: true,
-    });
-  }
-  return (
-    <Card>
-      <CardHeader
+type PortalLinks = ReturnType<typeof usePortalLinks>;
+
+const KIND_ICON: Record<InvestorAttentionKind, SgIcon> = {
+  risk: AlertCircle,
+  deposit: ShieldCheck,
+  approval: Handshake,
+  purchase: Building2,
+  tour: Video,
+  spending: Wallet,
+  identity: Globe,
+};
+
+/** The trust chip in the header: how far the checks abroad have got. */
+const identityChip = (
+  status: ForeignIdentityStatus | undefined
+): { label: string; variant: BadgeVariant } | null => {
+  if (!status?.eligible) return null;
+  const { steps, approved } = identityProgress(status);
+  if (approved === steps.length) return { label: 'Identity verified', variant: 'success' };
+  if (steps.some((s) => s.state === 'REJECTED'))
+    return { label: 'Identity check needs you', variant: 'danger' };
+  if (status.passport.state === 'APPROVED') return { label: 'Passport verified', variant: 'info' };
+  if (steps.some((s) => s.state === 'IN_REVIEW' || s.state === 'CHECKING'))
+    return { label: 'Identity checks in review', variant: 'warning' };
+  return { label: 'Identity not verified yet', variant: 'neutral' };
+};
+
+/** Shaped like the loaded page: queue, figures and purchases on the left, the rail on the right. */
+const WorkspaceSkeleton = () => (
+  <div className="grid gap-6 lg:grid-cols-12">
+    <div className="min-w-0 space-y-6 lg:col-span-8">
+      <CardSkeleton lines={3} />
+      <StatGroupSkeleton groups={[4]} />
+      <CardSkeleton lines={6} />
+    </div>
+    <div className="min-w-0 space-y-6 lg:col-span-4">
+      <CardSkeleton lines={4} />
+      <CardSkeleton lines={3} />
+      <CardSkeleton lines={3} />
+    </div>
+  </div>
+);
+
+/** Managed property: agreements, spending waiting for approval and the latest statement. */
+const PropertyCareCard = ({ data, links }: { data: InvestorOverview; links: PortalLinks }) => {
+  const managed = data.activeManagedProperties ?? 0;
+  const spend = data.pendingSpendApprovals;
+  const statement = data.latestStatement ?? null;
+
+  if (managed === 0 && !statement && !spend?.count) {
+    return (
+      <EmptyState
+        icon={KeyRound}
+        title="Let Sureground look after your property"
+        description="With Sureground Managed we find tenants, collect rent, arrange repairs and send you a monthly statement. Spending above your limit waits for your approval."
         action={
-          <Button
-            href={DIASPORA_ROUTES.onboarding(portal)}
-            variant="secondary"
-            size="sm"
-            icon={<Settings2 className="h-4 w-4" aria-hidden="true" />}
-          >
-            Edit profile
+          <Button href={links.managed ?? DIASPORA_ROUTES.PUBLIC}>
+            {links.managed ? 'Set up Sureground Managed' : 'How Sureground Managed works'}
           </Button>
         }
-      >
-        <CardTitle as="h2">Your profile</CardTitle>
-        <CardDescription>Used to tailor your workspace and the checks you need.</CardDescription>
+      />
+    );
+  }
+
+  const spendAmount = Number(spend?.totalAmount);
+  const net = statement ? Number(statement.netAmount) : NaN;
+  const rows: DescriptionItem[] = [
+    { label: 'Active agreements', value: managed },
+    {
+      label: 'Spending awaiting your approval',
+      value: spend?.count
+        ? Number.isFinite(spendAmount)
+          ? `${spend.count}, ${formatCurrency(spendAmount)} in total`
+          : spend.count
+        : 'None',
+    },
+    {
+      label: 'Latest statement',
+      value: statement
+        ? Number.isFinite(net)
+          ? `${formatCurrency(net)} net to you`
+          : 'Issued'
+        : 'None yet',
+      hint: statement
+        ? `${lagosDay(statement.periodStart)} to ${lagosDay(statement.periodEnd)} · ${
+            STATEMENT_PAYOUT_LABELS[statement.payoutStatus] ??
+            humaniseStatus(statement.payoutStatus)
+          }`
+        : undefined,
+    },
+  ];
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle as="h2">Property care</CardTitle>
+        <CardDescription>Your homes under Sureground Managed.</CardDescription>
       </CardHeader>
-      <CardContent>
-        <DescriptionList items={items} columns={2} />
-      </CardContent>
+      <div className="px-5 pb-2">
+        <DescriptionList layout="rows" items={rows} />
+      </div>
+      {(links.managed || (links.approvals && spend?.count)) && (
+        <CardFooter className="justify-start">
+          {links.approvals && spend?.count ? (
+            <Button href={links.approvals}>Review spending</Button>
+          ) : null}
+          {links.managed && (
+            <Button href={links.managed} variant="outline">
+              Your agreements
+            </Button>
+          )}
+        </CardFooter>
+      )}
     </Card>
   );
 };
 
 export const InvestorWorkspace = ({ portal }: { portal: InvestorPortal }) => {
+  const now = useNow();
   const links = usePortalLinks(portal);
-  const identityAbroad = useForeignIdentityEligible();
+  const identity = useForeignIdentityStatus();
   const overview = useQuery({
     queryKey: investorKeys.overview,
     queryFn: () => unwrap(investorService.getOverview()),
@@ -205,103 +289,274 @@ export const InvestorWorkspace = ({ portal }: { portal: InvestorPortal }) => {
     enabled: Boolean(links.inspections),
     retry: false,
   });
+  // Deposit amounts: the overview counts purchases but does not total what is held.
+  const transactions = useQuery({
+    queryKey: [...buyerKeys.transactions, { investor: true, pageSize: LIST_PAGE }],
+    queryFn: () => unwrap(buyerService.listTransactions({ page: 1, pageSize: LIST_PAGE })),
+    enabled: Boolean(links.transactions),
+    retry: false,
+  });
+  // Recent activity and the documents count come from the portal's own dashboard.
+  const buyerDashboard = useQuery({
+    queryKey: buyerKeys.dashboard,
+    queryFn: () => unwrap(buyerService.getDashboard()),
+    enabled: portal === 'buyer',
+    retry: false,
+  });
+  const ownerDashboard = useQuery({
+    queryKey: ownerKeys.dashboard,
+    queryFn: () => unwrap(ownerService.getDashboard()),
+    enabled: portal === 'owner',
+    retry: false,
+  });
+  const conversations = useQuery({
+    queryKey: [
+      ...(portal === 'buyer' ? buyerKeys.conversations : ownerKeys.conversations),
+      { investor: true, pageSize: LIST_PAGE },
+    ],
+    queryFn: () =>
+      unwrap(
+        portal === 'buyer'
+          ? buyerService.listConversations({ page: 1, pageSize: LIST_PAGE })
+          : ownerService.listConversations({ page: 1, pageSize: LIST_PAGE })
+      ),
+    retry: false,
+  });
+
   const data = overview.data;
   const profile = data?.profile ?? null;
-  // Complete profile; the risk statement may still be owed, which the alert below asks for.
+  // Complete profile; the risk statement may still be owed, which the queue asks for.
   const profileComplete = Boolean(profile) && (profile?.missingFields ?? []).length === 0;
   const risk = data?.riskDeclaration ?? null;
+  const timeZone = profile?.timeZone ?? null;
+  const currency = profile?.displayCurrency ?? 'NGN';
+  const firstName = links.fullName?.split(/\s+/)[0];
 
-  const purchases: StatGroupItem[] = [];
-  if (data?.offers) {
-    purchases.push({
-      label: 'Offers',
-      value: data.offers.total,
-      subtitle: breakdown(data.offers, OFFER_STATUS_LABELS),
-      href: links.offers,
-    });
-  }
-  if (data?.protectedPurchases) {
-    purchases.push({
-      label: 'Protected purchases',
-      value: data.protectedPurchases.total,
-      subtitle: breakdown(data.protectedPurchases, PROTECTED_PAYMENT_STATUS_LABELS),
+  const txList = transactions.data;
+  const attention: AttentionListItem[] = buildAttentionQueue({
+    riskAccepted: risk ? risk.accepted : undefined,
+    purchases: data?.purchases,
+    depositsDue: txList?.items
+      .filter((t) => t.escrowStatus === 'deposit_pending')
+      .map((t) => ({ id: t.id, propertyTitle: t.propertyTitle, depositAmount: t.depositAmount })),
+    tours: tours.data,
+    spendApprovals: data?.pendingSpendApprovals,
+    identity: identity.data,
+    links: {
+      risk: `${DIASPORA_ROUTES.onboarding(portal)}?step=risk`,
+      tours: links.tours,
+      approvals: links.approvals,
+      identity: links.identityAbroad,
+    },
+  }).map((item) => ({
+    ...item,
+    icon: KIND_ICON[item.kind],
+    due: item.dueAt
+      ? `${item.dueLabel ? `${item.dueLabel}: ` : ''}${dualMoment(item.dueAt, timeZone)}`
+      : undefined,
+  }));
+
+  const figures = portfolioFigures(
+    data,
+    txList ? { items: txList.items, complete: txList.total <= txList.items.length } : undefined
+  );
+  const agenda = buildAgenda(tours.data, inspections.data, now);
+
+  const portfolio: StatGroupItem[] = [];
+  if (figures.activePurchases !== null) {
+    portfolio.push({
+      icon: Handshake,
+      label: 'Active purchases',
+      value: figures.activePurchases,
+      subtitle: figures.representing
+        ? `Plus ${figures.representing} you represent`
+        : 'Homes and land in progress',
       href: links.transactions,
     });
   }
-  if (data?.landPurchases) {
-    purchases.push({
-      label: 'Land purchases',
-      value: data.landPurchases.total,
-      subtitle: breakdown(data.landPurchases, LAND_PURCHASE_STATUS_LABELS),
-      href: links.landPurchases,
-    });
-  }
-
-  if (tours.data) {
-    const counts = countByStatus(tours.data);
-    purchases.push({
-      label: 'Video tours',
-      value: counts.total,
-      subtitle: breakdown(counts, SITE_TOUR_STATUS_LABELS),
-      href: links.tours,
-    });
-  }
-  if (inspections.data) {
-    const counts = countByStatus(inspections.data);
-    purchases.push({
-      label: 'Inspections',
-      value: counts.total,
-      subtitle: breakdown(counts, LAND_INSPECTION_STATUS_LABELS),
-      href: links.inspections,
-    });
-  }
-
-  const care: StatGroupItem[] = [];
-  if (typeof data?.activeManagedProperties === 'number') {
-    care.push({
-      label: 'Sureground Managed',
-      value: data.activeManagedProperties,
-      subtitle: 'Properties under an active agreement',
-      href: links.managed,
-    });
-  }
-  if (data?.pendingSpendApprovals) {
-    const { count, totalAmount } = data.pendingSpendApprovals;
-    const amount = Number(totalAmount);
-    care.push({
-      label: 'Awaiting your approval',
-      value: count,
+  if (figures.depositsHeldCount !== null) {
+    const amount = figures.depositsHeldAmount;
+    portfolio.push({
+      icon: ShieldCheck,
+      label: 'Deposits protected',
+      value: amount !== null ? formatCurrency(amount) : figures.depositsHeldCount,
       subtitle:
-        count > 0 && Number.isFinite(amount)
-          ? `${formatCurrency(amount)} of spending`
-          : 'Spending above your limit',
-      href: links.approvals,
-      attention: count > 0,
+        amount !== null
+          ? `${figures.depositsHeldCount} under Payment Protection`
+          : 'Under Payment Protection',
+      supplement: amount ? (
+        <IndicativeAmount naira={amount} currency={currency} labelDisplay="popover" />
+      ) : undefined,
+      href: links.transactions,
+    });
+  }
+  if (figures.managedProperties !== null) {
+    portfolio.push({
+      icon: KeyRound,
+      label: 'Properties managed',
+      value: figures.managedProperties,
+      subtitle: 'Under Sureground Managed',
+      href: links.managed,
     });
   }
   if (data && 'latestStatement' in data) {
     const statement = data.latestStatement;
-    const net = statement ? Number(statement.netAmount) : NaN;
-    care.push({
+    const net = figures.latestStatementNet;
+    portfolio.push({
+      icon: Wallet,
       label: 'Latest statement',
-      value: statement && Number.isFinite(net) ? formatCurrency(net) : 'None yet',
+      value: net !== null ? formatCurrency(net) : 'None yet',
       subtitle: statement
-        ? [
-            `Net to you, ${lagosDay(statement.periodStart)} to ${lagosDay(statement.periodEnd)}`,
-            STATEMENT_PAYOUT_LABELS[statement.payoutStatus] ??
-              humaniseStatus(statement.payoutStatus),
-          ].join(' · ')
-        : undefined,
+        ? `Net to you, ${lagosDay(statement.periodStart)} to ${lagosDay(statement.periodEnd)}`
+        : 'Monthly, once a property is managed',
+      supplement: net ? (
+        <IndicativeAmount naira={net} currency={currency} labelDisplay="popover" />
+      ) : undefined,
       href: statement ? links.managed : undefined,
     });
   }
+
+  // An older API without `purchases`: the counts the workspace showed before.
+  const purchaseCounts: StatGroupItem[] = [];
+  if (data && !data.purchases) {
+    if (data.offers) {
+      purchaseCounts.push({
+        label: 'Offers',
+        value: data.offers.total,
+        subtitle: breakdown(data.offers, OFFER_STATUS_LABELS),
+        href: links.offers,
+      });
+    }
+    if (data.protectedPurchases) {
+      purchaseCounts.push({
+        label: 'Protected purchases',
+        value: data.protectedPurchases.total,
+        subtitle: breakdown(data.protectedPurchases, PROTECTED_PAYMENT_STATUS_LABELS),
+        href: links.transactions,
+      });
+    }
+    if (data.landPurchases) {
+      purchaseCounts.push({
+        label: 'Land purchases',
+        value: data.landPurchases.total,
+        subtitle: breakdown(data.landPurchases, LAND_PURCHASE_STATUS_LABELS),
+        href: links.landPurchases,
+      });
+    }
+    if (tours.data) {
+      const counts = countByStatus(tours.data);
+      purchaseCounts.push({
+        label: 'Video tours',
+        value: counts.total,
+        subtitle: breakdown(counts, SITE_TOUR_STATUS_LABELS),
+        href: links.tours,
+      });
+    }
+    if (inspections.data) {
+      const counts = countByStatus(inspections.data);
+      purchaseCounts.push({
+        label: 'Inspections',
+        value: counts.total,
+        subtitle: breakdown(counts, LAND_INSPECTION_STATUS_LABELS),
+        href: links.inspections,
+      });
+    }
+  }
+
+  const conversationPage = conversations.data;
+  const unread = conversationPage?.items.filter((c) => c.unreadCount > 0).length ?? 0;
+  const unreadComplete = conversationPage
+    ? conversationPage.total <= conversationPage.items.length
+    : false;
+  const documentsCount = buyerDashboard.data?.documentsUploaded;
+  const shortcuts: ShortcutRow[] = [
+    {
+      key: 'documents',
+      icon: SHORTCUT_ICONS.documents,
+      label: 'Documents',
+      hint:
+        typeof documentsCount === 'number'
+          ? `${documentsCount} uploaded · contracts, receipts and reports`
+          : 'Contracts, receipts and reports',
+      href: links.documents,
+    },
+    {
+      key: 'messages',
+      icon: SHORTCUT_ICONS.messages,
+      label: 'Messages',
+      hint: unread
+        ? `${unread}${unreadComplete ? '' : '+'} conversation${unread === 1 ? '' : 's'} with new messages`
+        : 'Sellers, managers and Sureground',
+      count: unread || undefined,
+      href: links.messages,
+    },
+  ];
+  if (identity.data?.eligible) {
+    shortcuts.push({
+      key: 'abroad',
+      icon: SHORTCUT_ICONS.abroad,
+      label: 'Passport and address abroad',
+      hint: 'Your identity checks for Diaspora Invest',
+      href: links.identityAbroad,
+    });
+  }
+
+  const livesIn = countryName(profile?.countryOfResidence) ?? profile?.countryOfResidence;
+  const chip = identityChip(identity.data);
+  const purchases = data?.purchases;
 
   return (
     <div className="space-y-6">
       <PageHeader
         eyebrow="Sureground Diaspora Invest"
-        title="Your investor workspace"
-        description="Your purchases and managed property in one place, with your own time shown next to Lagos time."
+        title={`${greetingFor(now, timeZone)}${firstName ? `, ${firstName}` : ''}`}
+        description="Your purchases, property care and next steps in one place. Deadlines are Lagos dates; times show Lagos and yours."
+        meta={
+          <ul className="flex flex-wrap items-center gap-2" aria-label="At a glance">
+            {(livesIn || timeZone) && (
+              <li>
+                <Badge icon={<Globe className="h-3.5 w-3.5" aria-hidden="true" />}>
+                  {[livesIn, timeZone ? `${timeZoneCity(timeZone)} time` : null]
+                    .filter(Boolean)
+                    .join(' · ')}
+                </Badge>
+              </li>
+            )}
+            <li>
+              <Badge icon={<Clock className="h-3.5 w-3.5" aria-hidden="true" />}>
+                <time dateTime={now.toISOString()}>{formatDualTime(now, timeZone)}</time>
+              </Badge>
+            </li>
+            {chip && (
+              <li>
+                <Badge variant={chip.variant} dot>
+                  {chip.label}
+                </Badge>
+              </li>
+            )}
+          </ul>
+        }
+        actions={
+          <>
+            {links.tours && (
+              <Button
+                href={links.tours}
+                variant="outline"
+                icon={<CalendarClock className="h-4 w-4" aria-hidden="true" />}
+              >
+                Book a video tour
+              </Button>
+            )}
+            {links.discover && (
+              <Button
+                href={links.discover}
+                icon={<Search className="h-4 w-4" aria-hidden="true" />}
+              >
+                Find a property
+              </Button>
+            )}
+          </>
+        }
       />
 
       <QueryState
@@ -309,7 +564,7 @@ export const InvestorWorkspace = ({ portal }: { portal: InvestorPortal }) => {
         isError={overview.isError}
         onRetry={() => overview.refetch()}
         isRetrying={overview.isFetching}
-        loading={<StatGroupSkeleton groups={[3, 3]} />}
+        loading={<WorkspaceSkeleton />}
         isEmpty={!profileComplete}
         empty={{
           icon: Globe,
@@ -319,61 +574,106 @@ export const InvestorWorkspace = ({ portal }: { portal: InvestorPortal }) => {
           action: <Button href={DIASPORA_ROUTES.onboarding(portal)}>Get started</Button>,
         }}
       >
-        <div className="space-y-6">
-          {risk && !risk.accepted && (
-            <Alert
-              variant="warning"
-              title="Accept the risk statement before your first offer or purchase"
-              action={
-                <Button href={`${DIASPORA_ROUTES.onboarding(portal)}?step=risk`} size="sm">
-                  Read the statement
-                </Button>
-              }
-            >
-              It sets out what Sureground checks, what it cannot promise and the risks of buying
-              property from abroad.
-            </Alert>
-          )}
+        <div className="grid gap-6 lg:grid-cols-12">
+          <div className="min-w-0 space-y-6 lg:col-span-8">
+            <AttentionList
+              items={attention}
+              description="Deposits, approvals, tour times and checks waiting for you, most pressing first."
+              empty={{
+                title: 'You’re all caught up',
+                description:
+                  'Nothing needs you right now. Deposits, approvals and tour times will appear here as they come up.',
+              }}
+            />
 
-          {profile && <ProfileCard summary={profile} risk={risk} portal={portal} />}
+            {portfolio.length > 0 && (
+              <StatGroup
+                title="Portfolio"
+                items={portfolio}
+                footer={
+                  <p className="text-sm text-muted-foreground">
+                    Payment Protection covers deposits only. The rest of the price goes to the
+                    seller’s lawyer or the seller at each stage, and Sureground tracks and checks
+                    each payment.
+                  </p>
+                }
+              />
+            )}
 
-          {purchases.length > 0 && <StatGroup title="Purchases" items={purchases} />}
-          {care.length > 0 && <StatGroup title="Property care" items={care} />}
+            {purchases ? (
+              <Card>
+                <CardHeader>
+                  <CardTitle as="h2">Your purchases</CardTitle>
+                  <CardDescription>
+                    Progress, deposit and legal transfer are tracked separately. A released deposit
+                    does not mean the property is legally yours.
+                  </CardDescription>
+                </CardHeader>
+                {purchases.length ? (
+                  <div className="mt-4 border-t border-border">
+                    <PurchaseSummaryList purchases={purchases} />
+                  </div>
+                ) : (
+                  <EmptyState
+                    icon={Building2}
+                    title="No purchases yet"
+                    description="When an offer is accepted, the purchase appears here with its progress, deposit and legal status."
+                    action={
+                      links.discover ? (
+                        <Button href={links.discover} variant="outline">
+                          Find a property
+                        </Button>
+                      ) : undefined
+                    }
+                    size="compact"
+                    bare
+                  />
+                )}
+                {purchases.length > 0 && links.transactions && (
+                  <CardFooter className="justify-start">
+                    <Button href={links.transactions} variant="link">
+                      All purchases
+                    </Button>
+                  </CardFooter>
+                )}
+              </Card>
+            ) : (
+              purchaseCounts.length > 0 && <StatGroup title="Purchases" items={purchaseCounts} />
+            )}
 
-          <Card>
-            <CardHeader>
-              <CardTitle as="h2">Documents and messages</CardTitle>
-              <CardDescription>
-                Contracts, receipts and reports for your purchases, and your conversations with
-                sellers, managers and Sureground.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-wrap gap-3">
-              <Button
-                href={links.documents}
-                variant="secondary"
-                icon={<FolderOpen className="h-4 w-4" aria-hidden="true" />}
-              >
-                Documents
-              </Button>
-              <Button
-                href={links.messages}
-                variant="secondary"
-                icon={<MessageCircle className="h-4 w-4" aria-hidden="true" />}
-              >
-                Messages
-              </Button>
-              {identityAbroad && (
-                <Button
-                  href={links.identityAbroad}
-                  variant="secondary"
-                  icon={<ShieldCheck className="h-4 w-4" aria-hidden="true" />}
-                >
-                  Passport and address abroad
-                </Button>
-              )}
-            </CardContent>
-          </Card>
+            {data && <PropertyCareCard data={data} links={links} />}
+          </div>
+
+          <aside className="min-w-0 space-y-6 lg:col-span-4" aria-label="Profile and diary">
+            {profile && (
+              <ProfileSummaryCard
+                summary={profile}
+                risk={risk}
+                portal={portal}
+                fullName={links.fullName}
+              />
+            )}
+            {identity.data?.eligible && (
+              <IdentityProgressCard status={identity.data} href={links.identityAbroad} />
+            )}
+            {(links.tours || links.inspections) && (
+              <AgendaCard
+                entries={agenda}
+                timeZone={timeZone}
+                toursHref={links.tours}
+                inspectionsHref={links.inspections}
+              />
+            )}
+            {portal === 'buyer' && buyerDashboard.isLoading && <CardSkeleton lines={4} />}
+            {portal === 'buyer' && buyerDashboard.data && (
+              <BuyerActivityFeed activity={buyerDashboard.data.recentActivity ?? []} />
+            )}
+            {portal === 'owner' && ownerDashboard.isLoading && <CardSkeleton lines={4} />}
+            {portal === 'owner' && ownerDashboard.data && (
+              <OwnerActivityFeed activity={ownerDashboard.data.recentActivity ?? []} />
+            )}
+            <ShortcutsCard rows={shortcuts} />
+          </aside>
         </div>
       </QueryState>
     </div>

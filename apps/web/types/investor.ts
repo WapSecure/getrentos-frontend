@@ -1,5 +1,7 @@
 // Sureground Diaspora Invest: the investor profile, risk acknowledgement and workspace overview.
 
+import type { PurchaseSummary } from './transactionWorkspace';
+
 export const DISPLAY_CURRENCIES = ['NGN', 'GBP', 'USD', 'EUR', 'CAD'] as const;
 export type DisplayCurrency = (typeof DISPLAY_CURRENCIES)[number];
 
@@ -120,4 +122,6 @@ export interface InvestorOverview {
   activeManagedProperties?: number;
   pendingSpendApprovals?: { count: number; totalAmount: string };
   latestStatement?: InvestorStatementSummary | null;
+  /** My purchases with their three statuses, then those I see as a representative. */
+  purchases?: PurchaseSummary[];
 }
