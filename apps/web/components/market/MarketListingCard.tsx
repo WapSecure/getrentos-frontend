@@ -5,6 +5,7 @@ import type { ShowroomEventMarket } from '@sureground/shared/showroom';
 import { track } from '@/lib/analytics';
 import { DETAIL_PATH, MARKET_STATUS, type CardMarket, type MarketCard } from '@/lib/marketCards';
 import { SaveListingButton } from './SaveListingButton';
+import { TrustChainBadge } from '@/components/shared/trust/TrustChainBadge';
 
 /** One public listing card in any market, counted under `surface` (e.g. "rent_similar"). */
 export function MarketListingCard({
@@ -45,7 +46,9 @@ export function MarketListingCard({
       imageAlt={listing.title}
       eager={eager}
       status={MARKET_STATUS[market]}
-      verified={listing.verified}
+      // One trust signal, the same as the browse grid: the chain pill says "Verified" only when
+      // every check is met, so a passed property check alone never reads as fully verified.
+      badges={<TrustChainBadge chain={listing.trustChain} fallbackVerified={listing.verified} />}
       facts={{ beds: listing.beds, baths: listing.baths, size: listing.size, type: listing.type }}
       meta={meta}
       actions={
