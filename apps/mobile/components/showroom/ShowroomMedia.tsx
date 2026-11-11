@@ -40,8 +40,9 @@ export function ShowroomMedia({
         height={height}
         area={area}
         emptyLabel={emptyLabel}
-        onOpen={(index) => {
+        onOpen={(index, room) => {
           onMediaEvent({ type: 'gallery_open', mediaIndex: index });
+          if (room) onMediaEvent({ type: 'media_category_select', room, mediaIndex: index });
           setOpenAt(index);
         }}
       />

@@ -91,6 +91,37 @@ export const MEDIA_ROOM_NAME: Record<MediaRoom, string> = {
   other: 'Other',
 };
 
+/** A photo the lister tagged as a floor plan: a line drawing, shown whole on a light background. */
+export const isFloorPlan = (m: MediaItem) => m.kind === 'image' && m.room === 'floor_plan';
+
+export interface FloorPlanLevel {
+  /** Index into the media list. */
+  index: number;
+  /** The lister's caption exactly as written ("Ground floor"), or a plain fallback. */
+  label: string;
+}
+
+/**
+ * Every floor plan in display order, one per level. The caption is the level name and is never
+ * parsed: a plan is only an image, so nothing here reads or claims a measurement.
+ */
+export function floorPlanLevels(items: MediaItem[]): FloorPlanLevel[] {
+  const plans = items.flatMap((m, index) => (isFloorPlan(m) ? [{ m, index }] : []));
+  return plans.map(({ m, index }, i) => ({
+    index,
+    label: m.caption?.trim() ? m.caption : plans.length > 1 ? `Floor plan ${i + 1}` : 'Floor plan',
+  }));
+}
+
+/**
+ * Photos for a hero or mosaic, cover first. Floor plans go after every other photo, so a line
+ * drawing never becomes the cover; they lead only when the listing has nothing else.
+ */
+export function heroPhotos(items: MediaItem[]): MediaItem[] {
+  const photos = items.filter((m) => m.kind === 'image');
+  return [...photos.filter((m) => !isFloorPlan(m)), ...photos.filter(isFloorPlan)];
+}
+
 const AREA_UNIT = { SQUARE_METERS: 'sqm', ACRE: 'acres', HECTARE: 'hectares' } as const;
 
 /** Uses the API's media list when it sends one; otherwise builds images from the older URL fields. */
@@ -122,7 +153,8 @@ export function showroomMedia(
   }));
 }
 
-const imageUrls = (media: MediaItem[]) => media.filter((m) => m.kind === 'image').map((m) => m.url);
+// The first URL is the page's share and search image, so a floor plan never leads.
+const imageUrls = (media: MediaItem[]) => heroPhotos(media).map((m) => m.url);
 
 export function fromRental(r: PublicRentalDto): ShowroomListing {
   const price = money(r.price);

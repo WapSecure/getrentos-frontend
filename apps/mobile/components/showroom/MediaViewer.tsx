@@ -16,9 +16,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
-import { Compass, ImageOff, Play, X } from '@sureground/icons/native';
+import { ChevronLeft, ChevronRight, Compass, ImageOff, Play, X } from '@sureground/icons/native';
 import { Button, Chip, Text, useReducedMotion } from '@sureground/ui-native';
 import {
+  floorPlanLevels,
+  isFloorPlan,
   MEDIA_ROOM_LABEL,
   MEDIA_ROOM_NAME,
   placeholderOf,
@@ -42,6 +44,8 @@ const INK = {
   fg: '#fff',
   dim: 'rgba(255,255,255,0.72)',
   tile: 'rgba(255,255,255,0.12)',
+  // Floor plans are line drawings: they read on a light page, shown whole.
+  paper: '#fff',
 };
 const MAX_ZOOM = 4;
 const THUMB = 56;
@@ -143,6 +147,11 @@ function ViewerBody({
     return [...seen.entries()];
   }, [items]);
 
+  // Floor plans are a tab of their own, one level per plan, named by the lister's caption.
+  const levels = useMemo(() => floorPlanLevels(items), [items]);
+  const levelAt = levels.findIndex((l) => l.index === index);
+  const onPlan = levelAt >= 0;
+
   // Photos are counted on their own, as on the hero; a video or tour page is named instead.
   const photoCount = items.filter((m) => m.kind === 'image').length;
   const photoNumber = items.slice(0, index + 1).filter((m) => m.kind === 'image').length;
@@ -229,7 +238,7 @@ function ViewerBody({
         </Text>
       </View>
 
-      {rooms.length > 1 ? (
+      {rooms.length > 1 || levels.length > 0 ? (
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -251,6 +260,44 @@ function ViewerBody({
             />
           ))}
         </ScrollView>
+      ) : null}
+
+      {onPlan && levels.length > 1 ? (
+        <View
+          style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 4 }}
+          accessibilityLabel="Floor plan levels"
+        >
+          <LevelArrow
+            label="Previous level"
+            disabled={levelAt === 0}
+            onPress={() => go(levels[levelAt - 1]!.index)}
+          >
+            <ChevronLeft size={22} color={INK.fg} />
+          </LevelArrow>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={{ flex: 1, flexGrow: 1 }}
+            contentContainerStyle={{ gap: 8, paddingVertical: 4 }}
+          >
+            {levels.map((level, i) => (
+              <Chip
+                key={level.index}
+                size="sm"
+                label={level.label}
+                selected={i === levelAt}
+                onPress={() => go(level.index)}
+              />
+            ))}
+          </ScrollView>
+          <LevelArrow
+            label="Next level"
+            disabled={levelAt === levels.length - 1}
+            onPress={() => go(levels[levelAt + 1]!.index)}
+          >
+            <ChevronRight size={22} color={INK.fg} />
+          </LevelArrow>
+        </View>
       ) : null}
 
       <View
@@ -288,7 +335,12 @@ function ViewerBody({
             style={{ width: stage!.width, height: stage!.height }}
             renderItem={({ item: m, index: i }) => (
               <View
-                style={{ width: stage!.width, height: stage!.height, justifyContent: 'center' }}
+                style={{
+                  width: stage!.width,
+                  height: stage!.height,
+                  justifyContent: 'center',
+                  backgroundColor: isFloorPlan(m) ? INK.paper : undefined,
+                }}
               >
                 {m.kind === 'image' ? (
                   <ZoomableImage
@@ -341,12 +393,17 @@ function ViewerBody({
       <View style={{ paddingBottom: insets.bottom + 8, gap: 8 }}>
         {item.room || item.caption ? (
           <View style={{ paddingHorizontal: 16, gap: 2 }}>
-            {item.room ? (
+            {onPlan ? (
+              // The level name is the lister's caption as written: a plan claims no sizes.
+              <Text variant="bodyStrong" style={{ color: INK.fg }}>
+                {levels[levelAt]!.label}
+              </Text>
+            ) : item.room ? (
               <Text variant="bodyStrong" style={{ color: INK.fg }}>
                 {MEDIA_ROOM_NAME[item.room]}
               </Text>
             ) : null}
-            {item.caption ? (
+            {item.caption && !onPlan ? (
               <Text variant="callout" style={{ color: INK.dim }} numberOfLines={3}>
                 {item.caption}
               </Text>
@@ -382,7 +439,7 @@ function ViewerBody({
                   borderWidth: 2,
                   borderColor: i === index ? INK.fg : 'transparent',
                   opacity: i === index ? 1 : 0.6,
-                  backgroundColor: INK.tile,
+                  backgroundColor: isFloorPlan(m) ? INK.paper : INK.tile,
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}
@@ -393,7 +450,8 @@ function ViewerBody({
                       uri:
                         m.kind === 'image' ? variantAtLeast(m.url, m.variants, 320) : m.posterUrl,
                     }}
-                    contentFit="cover"
+                    // A plan is never cropped, even as a thumbnail.
+                    contentFit={isFloorPlan(m) ? 'contain' : 'cover'}
                     cachePolicy="memory-disk"
                     recyclingKey={m.id}
                     placeholder={thumbPlaceholder(m)}
@@ -417,6 +475,37 @@ function ViewerBody({
         ) : null}
       </View>
     </View>
+  );
+}
+
+function LevelArrow({
+  label,
+  disabled,
+  onPress,
+  children,
+}: {
+  label: string;
+  disabled: boolean;
+  onPress: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={disabled}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ disabled }}
+      style={{
+        width: 44,
+        height: 44,
+        alignItems: 'center',
+        justifyContent: 'center',
+        opacity: disabled ? 0.35 : 1,
+      }}
+    >
+      {children}
+    </Pressable>
   );
 }
 

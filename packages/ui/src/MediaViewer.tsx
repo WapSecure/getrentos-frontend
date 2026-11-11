@@ -6,6 +6,7 @@ import {
   ChevronRight,
   Compass,
   ImageOff,
+  Layers,
   LayoutGrid,
   Maximize2,
   Minus,
@@ -17,6 +18,8 @@ import {
 } from '@sureground/icons';
 import {
   cn,
+  floorPlanLevels,
+  isFloorPlan,
   MEDIA_ROOM_LABEL,
   MEDIA_ROOM_NAME,
   placeholderOf,
@@ -126,6 +129,11 @@ function ViewerBody({
     });
     return [...seen.entries()];
   }, [items]);
+
+  // Floor plans are a tab of their own, one level per plan, named by the lister's caption.
+  const levels = useMemo(() => floorPlanLevels(items), [items]);
+  const levelAt = levels.findIndex((l) => l.index === index);
+  const onPlan = levelAt >= 0;
 
   const go = (next: number) => {
     setIndex(((next % items.length) + items.length) % items.length);
@@ -239,8 +247,20 @@ function ViewerBody({
     else void el.requestFullscreen?.().catch(() => {});
   };
 
-  const roomName = item.room && item.room !== 'other' ? MEDIA_ROOM_NAME[item.room] : null;
-  const position = `${kindLabel(item)} ${index + 1} of ${items.length}${roomName ? ` · ${roomName}` : ''}`;
+  const openFloorPlans = () => {
+    const first = levels[0]!.index;
+    go(first);
+    onMediaEvent?.({ type: 'media_category_select', room: 'floor_plan', mediaIndex: first });
+  };
+
+  // A plan is named by its level ("Ground floor"), as the lister wrote it.
+  const roomName = onPlan
+    ? levels[levelAt]!.label
+    : item.room && item.room !== 'other'
+      ? MEDIA_ROOM_NAME[item.room]
+      : null;
+  const announced = onPlan && item.caption?.trim() ? `Floor plan, ${roomName}` : roomName;
+  const position = `${kindLabel(item)} ${index + 1} of ${items.length}${announced ? ` · ${announced}` : ''}`;
 
   return (
     <div ref={rootRef} onKeyDown={onKeyDown} className="flex h-full min-h-0 flex-col bg-black">
@@ -251,13 +271,29 @@ function ViewerBody({
             {position}
           </DialogDescription>
         </div>
+        {/* Phones and tablets have no room rail, so floor plans get a button of their own. */}
+        {levels.length > 0 && !onPlan && (
+          <button
+            type="button"
+            onClick={openFloorPlans}
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-white/10 px-4 text-sm font-semibold text-white transition-colors hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white lg:hidden"
+          >
+            <Layers className="h-4 w-4" aria-hidden="true" /> Floor plans
+          </button>
+        )}
         <DialogClose className={control} aria-label="Close gallery">
           <X className="h-5 w-5" aria-hidden="true" />
         </DialogClose>
       </header>
 
       <div className="relative flex min-h-0 flex-1 gap-4 px-[max(1rem,env(safe-area-inset-left))]">
-        <div className="relative min-h-0 min-w-0 flex-1 overflow-hidden rounded-2xl bg-white/5">
+        <div
+          className={cn(
+            'relative min-h-0 min-w-0 flex-1 overflow-hidden rounded-2xl',
+            // Line drawings read on a light page; photos stay on the dark stage.
+            onPlan && !grid ? 'bg-white' : 'bg-white/5'
+          )}
+        >
           {grid ? (
             <ul
               className="grid h-full auto-rows-[8rem] grid-cols-2 gap-2 overflow-y-auto p-2 sm:grid-cols-3 lg:grid-cols-4"
@@ -367,7 +403,48 @@ function ViewerBody({
               {roomName}
             </p>
           )}
-          {(item.caption || item.filmedOnSite) && !grid && (
+          {onPlan && levels.length > 1 && !grid && (
+            <nav
+              aria-label="Floor plan levels"
+              className="absolute inset-x-3 top-3 flex justify-center"
+            >
+              <div className="flex max-w-full items-center gap-1 overflow-x-auto rounded-full bg-black/70 p-1">
+                <button
+                  type="button"
+                  onClick={() => go(levels[levelAt - 1]!.index)}
+                  disabled={levelAt === 0}
+                  className={cn(control, 'shrink-0')}
+                  aria-label="Previous level"
+                >
+                  <ChevronLeft className="h-5 w-5" aria-hidden="true" />
+                </button>
+                {levels.map((level, i) => (
+                  <button
+                    key={level.index}
+                    type="button"
+                    onClick={() => go(level.index)}
+                    aria-current={i === levelAt ? 'true' : undefined}
+                    className={cn(
+                      'min-h-11 shrink-0 rounded-full px-4 text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white',
+                      i === levelAt ? 'bg-white text-black' : 'text-white hover:bg-white/15'
+                    )}
+                  >
+                    {level.label}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => go(levels[levelAt + 1]!.index)}
+                  disabled={levelAt === levels.length - 1}
+                  className={cn(control, 'shrink-0')}
+                  aria-label="Next level"
+                >
+                  <ChevronRight className="h-5 w-5" aria-hidden="true" />
+                </button>
+              </div>
+            </nav>
+          )}
+          {(item.caption || item.filmedOnSite) && !onPlan && !grid && (
             <p className="pointer-events-none absolute left-4 top-4 max-w-[70%] rounded-lg bg-black/60 px-3 py-1.5 text-xs font-medium text-white">
               {item.caption}
               {item.caption && item.filmedOnSite ? ' · ' : ''}
@@ -377,7 +454,7 @@ function ViewerBody({
           )}
         </div>
 
-        {rooms.length > 1 && (
+        {(rooms.length > 1 || levels.length > 0) && (
           <nav
             aria-label="Rooms"
             className="hidden w-44 shrink-0 flex-col gap-2 overflow-y-auto pb-2 lg:flex"
@@ -553,7 +630,11 @@ function Thumb({ item, load = true }: { item: MediaItem; load?: boolean }) {
           loading="lazy"
           decoding="async"
           onError={() => setBroken(true)}
-          className="h-full w-full object-cover"
+          // A plan is never cropped, even as a thumbnail.
+          className={cn(
+            'h-full w-full',
+            isFloorPlan(item) ? 'bg-white object-contain' : 'object-cover'
+          )}
         />
       ) : (
         <span className="flex h-full w-full items-center justify-center bg-white/10 text-white/70">

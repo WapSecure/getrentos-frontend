@@ -78,3 +78,38 @@ This is groundwork for showroom milestone M8 (see [PLAN.md](PLAN.md)). It was wr
      - the directors' identities
      - the title to the site (C of O or Governor's consent, the same checks as a land listing)
      - the building plan approval (in Lagos, the LASPPPA permit)
+
+## M8a status (2026-11-11)
+
+Built on the web and in the mobile app from photos already tagged "Floor plan". No data change, no migration.
+
+**Shared (`@sureground/shared/showroom`):**
+
+- `floorPlanLevels(media)`: every photo tagged `floor_plan`, in order, named by its caption exactly as the lister wrote it ("Ground floor"). Without a caption: "Floor plan", or "Floor plan 1", "Floor plan 2" when there are several. Captions are never parsed, so numbers in one are shown as written.
+- `heroPhotos(media)`: photos for a hero or mosaic, with floor plans after every other photo. A plan leads only when the listing has nothing else.
+- The listing's `images` (share and search image) use the same order, so a plan is never the preview either. The viewer keeps the lister's order.
+
+**Web:**
+
+- **Mosaic:** the cover and first tiles come from photos that are not plans. A plan that does reach a tile, or the phone strip, is shown whole on white. The room shortcuts under the mosaic show "Floor plans" whenever a plan exists, even if it is the only tagged room.
+- **Showroom page:** a "Floor plan" or "Floor plans (n)" button next to the key facts opens the viewer on the first plan. The viewer is shared with the mosaic through a small client context (`ShowroomGallery`).
+- **Viewer:**
+  - The room rail (wide screens) has a "Floor plans" entry; narrower screens get a "Floor plans" button in the header.
+  - A plan sits on a white stage with `contain` fit; zoom, pinch and pan work as on photos.
+  - With more than one plan, level chips with previous and next level arrows sit over the plan.
+  - The level name replaces the room name on the plan, and thumbnails of plans are not cropped.
+
+**Mobile:**
+
+- **Hero:** plans come after the other photos, show whole on white, and are named by level. A "Floor plans" pill opens the viewer on the first plan.
+- **Viewer:** the "Floor plans" room chip shows whenever a plan exists. Plan pages are white with `contain` fit and keep pinch and double-tap zoom. More than one plan adds level chips with previous and next arrows, and plan thumbnails are not cropped.
+
+**Honesty:** no dimensions or measurements anywhere; a plan is only an image.
+
+**Analytics:** no new event names. Opening floor plans (shortcut, rail, chip, header button or hero pill) sends `media_category_select` with room `floor_plan`, and `gallery_open` when it opens the viewer. Moving between levels sends nothing.
+
+**Checks:** `tsc --noEmit` clean in apps/web, apps/mobile, packages/ui and packages/shared; eslint clean on changed files; shared tests 28 pass (3 new: levels and captions as written, fallback names, the cover never a plan); `audit:ui-controls` and `tokens:check` pass. Not checked in a browser or on a device.
+
+**Demo data:** no seed listing has a photo tagged `floor_plan`, and none was added to the shared database. A browser check needs one listing with one or two floor-plan photos (for example captioned "Ground floor" and "First floor"), tagged in the landlord or owner photo editor.
+
+**Follow-up:** list cards use the API's cover photo, which the lister chooses. If a lister makes a plan the cover, cards still show it; the photo editor could warn, or the backend could skip plans when picking a cover.
