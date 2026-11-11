@@ -23,6 +23,7 @@ import {
 import { qk } from '@/lib/query/keys';
 import {
   END_REASON_MIN,
+  hasFeeTerms,
   humanizeMinutes,
   indicativeMonthly,
   INTAKE_STEPS,
@@ -52,11 +53,16 @@ import { Sheet } from '@/components/Sheet';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
+import { useAuth } from '@/lib/auth/AuthProvider';
+import { FeeChangePanel } from '@/components/management/FeeChangePanel';
 
 export default function GetManaged() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();
+  // Owners reach this as their management agreements; changing manager is a landlord flow for now.
+  const { usablePortal } = useAuth();
+  const forOwner = usablePortal === 'owner';
   const [requestFor, setRequestFor] = useState<MyHome | null>(null);
   const [ending, setEnding] = useState<Mandate | null>(null);
   const [appointing, setAppointing] = useState<VettedFirm | null>(null);
@@ -84,7 +90,7 @@ export default function GetManaged() {
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <DetailScreenHeader
         eyebrow="Management"
-        title="Get it managed"
+        title={forOwner ? 'Management agreements' : 'Get it managed'}
         subtitle="By Sureground, or a vetted firm you choose"
         onBack={() => goBack()}
       />
@@ -109,14 +115,16 @@ export default function GetManaged() {
           Either way, Sureground holds the money and keeps the record, so the property’s history
           stays with you.
         </Text>
-        <PressableScale
-          onPress={() => router.push('/(app)/change-manager')}
-          accessibilityRole="link"
-        >
-          <Text variant="callout" style={{ color: colors.primary, fontWeight: '600' }}>
-            Already managed and want someone else? Change manager →
-          </Text>
-        </PressableScale>
+        {forOwner ? null : (
+          <PressableScale
+            onPress={() => router.push('/(app)/change-manager')}
+            accessibilityRole="link"
+          >
+            <Text variant="callout" style={{ color: colors.primary, fontWeight: '600' }}>
+              Already managed and want someone else? Change manager →
+            </Text>
+          </PressableScale>
+        )}
 
         <SectionTitle icon={Sparkles} title="Let Sureground manage it" />
         <Text variant="callout" color="mutedForeground">
@@ -341,6 +349,14 @@ function PropertyRow({
     },
     onError: (e) => toast.show(errorMessage(e, 'Could not record the handover.'), 'error'),
   });
+  const sign = useMutation({
+    mutationFn: (id: string) => managedApi.sign(id),
+    onSuccess: () => {
+      toast.show('Agreement signed.', 'success');
+      onChanged();
+    },
+    onError: (e) => toast.show(errorMessage(e, 'Could not sign the agreement.'), 'error'),
+  });
 
   const mandate = 'mandate' in state ? state.mandate : null;
   const notice = mandate?.noticeServedAt
@@ -395,11 +411,13 @@ function PropertyRow({
           <Badge label={state.mandate.managerOrganizationName ?? 'A firm'} tone="neutral" />
           <Badge
             label={
-              state.mandate.status !== 'ACTIVE'
-                ? 'Firm pending'
-                : state.mandate.noticeServedAt
-                  ? 'Under notice'
-                  : 'Managed by firm'
+              state.mandate.permissions?.canSign
+                ? 'Waiting for your signature'
+                : state.mandate.status !== 'ACTIVE'
+                  ? 'Firm pending'
+                  : state.mandate.noticeServedAt
+                    ? 'Under notice'
+                    : 'Managed by firm'
             }
             tone={
               state.mandate.status === 'ACTIVE' && !state.mandate.noticeServedAt
@@ -420,6 +438,10 @@ function PropertyRow({
 
       {intake ? <IntakePanel intake={intake} onChanged={onChanged} /> : null}
 
+      {mandate && (state.kind === 'sureground' || state.kind === 'firm') && hasFeeTerms(mandate) ? (
+        <FeeChangePanel mandateId={mandate.id} />
+      ) : null}
+
       {state.kind === 'none' && state.declined ? (
         <Text variant="caption" color="mutedForeground">
           Sureground declined your last request: {state.declined.declinedReason}
@@ -429,6 +451,14 @@ function PropertyRow({
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
         {state.kind === 'none' ? (
           <Button label="Ask Sureground to manage" size="sm" onPress={onRequest} />
+        ) : null}
+        {mandate?.permissions?.canSign && (state.kind === 'sureground' || state.kind === 'firm') ? (
+          <Button
+            label="Sign agreement"
+            size="sm"
+            loading={sign.isPending}
+            onPress={() => sign.mutate(mandate.id)}
+          />
         ) : null}
         {state.kind === 'firm' && state.mandate.status === 'ACTIVE' && !state.openIntake ? (
           <Button label="Move to Sureground" size="sm" variant="secondary" onPress={onRequest} />

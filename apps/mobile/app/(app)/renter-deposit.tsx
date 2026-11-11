@@ -30,12 +30,14 @@ import {
 import { errorMessage } from '@/lib/api/client';
 import { formatDate, formatNaira } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { TenantEndOfTenancy } from '@/components/deposits/TenantEndOfTenancy';
 import { goBack } from '@/lib/goBack';
 
 /** The deposit is not returned until the owner has answered any dispute. */
 export default function RenterDeposit() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
+  const qc = useQueryClient();
   const q = useQuery({ queryKey: qk.renter.deposits, queryFn: renterHomeApi.deposits });
   // Hidden if it fails: the deposit itself is shown either way.
   const plans = useQuery({
@@ -62,7 +64,7 @@ export default function RenterDeposit() {
         refreshControl={
           <RefreshControl
             refreshing={q.isRefetching}
-            onRefresh={() => void q.refetch()}
+            onRefresh={() => void qc.invalidateQueries({ queryKey: qk.renter.deposits })}
             tintColor={colors.mutedForeground}
           />
         }
@@ -181,6 +183,7 @@ function DepositCard({
               />
             ))
           )}
+          <TenantEndOfTenancy holdId={hold.id} leaseStatus={d.leaseStatus} leaseEnd={d.leaseEnd} />
         </>
       )}
       {plan ? <DepositPlanBlock plan={plan} disclaimer={disclaimer} /> : null}
