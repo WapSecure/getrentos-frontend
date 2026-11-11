@@ -1,4 +1,12 @@
-import { apiDownload, apiFetch, ApiError, currentAccessToken, refreshSession } from './apiClient';
+import {
+  apiDownload,
+  apiFetch,
+  ApiError,
+  apiUpload,
+  currentAccessToken,
+  refreshSession,
+  type UploadOptions,
+} from './apiClient';
 import {
   clearStepUpToken,
   currentStepUpToken,
@@ -231,6 +239,29 @@ export async function authFetch<T>(
     ) {
       const refreshed = await refreshSession();
       if (refreshed) return doFetch(getAuthToken());
+    }
+    throw err;
+  }
+}
+
+/**
+ * `authFetch` for a multipart POST that reports upload progress and can be cancelled.
+ * Same bearer and one refresh-and-retry on a 401 (progress restarts from 0); no step-up, which no upload route asks for.
+ */
+export async function authUpload<T>(
+  path: string,
+  body: FormData,
+  options: UploadOptions = {}
+): Promise<T> {
+  const send = (token: string | null) =>
+    apiUpload<T>(path, body, token ? { Authorization: `Bearer ${token}` } : {}, options);
+  const restoredFirst = !getAuthToken() && hasStoredSession();
+  try {
+    return await send(await currentAccessToken());
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 401 && !restoredFirst) {
+      const refreshed = await refreshSession();
+      if (refreshed) return send(getAuthToken());
     }
     throw err;
   }
