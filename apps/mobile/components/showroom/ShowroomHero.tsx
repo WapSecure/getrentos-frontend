@@ -9,9 +9,12 @@ import {
   type NativeSyntheticEvent,
 } from 'react-native';
 import { Image } from 'expo-image';
-import { Compass, Play } from '@sureground/icons/native';
+import { Compass, Layers, Play } from '@sureground/icons/native';
 import { ListingPlaceholder, Text, useReducedMotion, useTheme } from '@sureground/ui-native';
 import {
+  floorPlanLevels,
+  heroPhotos,
+  isFloorPlan,
   MEDIA_ROOM_NAME,
   placeholderOf,
   variantAtLeast,
@@ -20,6 +23,8 @@ import {
 
 // Over a photo the pills keep a fixed dark backing, so they read on any image in either theme.
 const PILL = { bg: 'rgba(0,0,0,0.6)', fg: '#fff' };
+// Floor plans are line drawings: shown whole on a light page.
+const PAPER = '#fff';
 // A phone-width hero; the 1600px copy is for the full-screen viewer.
 const HERO_PX = 960;
 
@@ -45,8 +50,8 @@ export function ShowroomHero({
   emptyLabel?: string;
   /** Neighbourhood named on the no-photo placeholder. */
   area?: string | null;
-  /** Index into `items`. */
-  onOpen: (index: number) => void;
+  /** Index into `items`; `room` is set when a room shortcut (floor plans) opened it. */
+  onOpen: (index: number, room?: 'floor_plan') => void;
 }) {
   const { spacing } = useTheme();
   const reduced = useReducedMotion();
@@ -56,7 +61,9 @@ export function ShowroomHero({
   const [measured, setMeasured] = useState<number | null>(null);
   const width = measured ?? window.width;
 
-  const photos = items.map((m, index) => ({ m, index })).filter(({ m }) => m.kind === 'image');
+  // Cover first; floor plans come after every other photo, so a line drawing is never the cover.
+  const photos = heroPhotos(items).map((m) => ({ m, index: items.indexOf(m) }));
+  const levels = floorPlanLevels(items);
   const videoAt = items.findIndex((m) => m.kind === 'video');
   const tourAt = items.findIndex((m) => m.kind === 'tour');
   const current = photos[Math.min(page, photos.length - 1)]?.m;
@@ -86,6 +93,14 @@ export function ShowroomHero({
           icon={<Compass size={13} color={PILL.fg} />}
           onPress={() => onOpen(tourAt)}
           a11y="Open the 360 tour"
+        />
+      ) : null}
+      {levels.length > 0 ? (
+        <Pill
+          label={levels.length > 1 ? 'Floor plans' : 'Floor plan'}
+          icon={<Layers size={13} color={PILL.fg} />}
+          onPress={() => onOpen(levels[0]!.index, 'floor_plan')}
+          a11y={levels.length > 1 ? `Show the ${levels.length} floor plans` : 'Show the floor plan'}
         />
       ) : null}
     </>
@@ -132,7 +147,7 @@ export function ShowroomHero({
           >
             <Image
               source={{ uri: variantAtLeast(m.url, m.variants, HERO_PX) }}
-              contentFit="cover"
+              contentFit={isFloorPlan(m) ? 'contain' : 'cover'}
               cachePolicy="memory-disk"
               recyclingKey={m.id}
               placeholder={blurSource(m)}
@@ -142,7 +157,7 @@ export function ShowroomHero({
               alt={m.alt ?? `Photo ${i + 1} of ${photos.length}`}
               // Only the first photo loads at once; the rest wait until they are near.
               priority={i === 0 ? 'high' : 'normal'}
-              style={{ width, height }}
+              style={{ width, height, backgroundColor: isFloorPlan(m) ? PAPER : undefined }}
             />
           </Pressable>
         ))}
@@ -161,7 +176,11 @@ export function ShowroomHero({
         }}
       >
         <View style={{ flex: 1, alignItems: 'flex-start' }} pointerEvents="none">
-          {current?.room ? <Pill label={MEDIA_ROOM_NAME[current.room]} /> : null}
+          {current && isFloorPlan(current) ? (
+            <Pill label={levels.find((l) => l.index === items.indexOf(current))?.label ?? ''} />
+          ) : current?.room ? (
+            <Pill label={MEDIA_ROOM_NAME[current.room]} />
+          ) : null}
         </View>
         {mediaPills}
         <Pill

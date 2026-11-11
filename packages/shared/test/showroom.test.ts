@@ -4,7 +4,10 @@ import {
   fromLand,
   fromRental,
   fromSale,
+  floorPlanLevels,
+  heroPhotos,
   imagePreviewOf,
+  isFloorPlan,
   placeholderOf,
   shortletMedia,
   showroomMedia,
@@ -240,6 +243,63 @@ test('reads a card cover preview, and nothing from an older or malformed API', (
   assert.equal(imagePreviewOf(undefined), undefined);
   assert.equal(imagePreviewOf({ width: 0, height: 10 }), undefined);
   assert.equal(imagePreviewOf({ placeholder }), undefined);
+});
+
+const photo = (id: string, order: number, extra: Partial<MediaItem> = {}): MediaItem => ({
+  id,
+  kind: 'image',
+  url: `https://cdn.test/${id}.jpg`,
+  order,
+  ...extra,
+});
+
+test('floor plans: one level per tagged photo, named by the caption exactly as written', () => {
+  const items: MediaItem[] = [
+    photo('plan-g', 0, { room: 'floor_plan', caption: 'Ground floor' }),
+    photo('living', 1, { room: 'living' }),
+    photo('plan-1', 2, { room: 'floor_plan', caption: 'First floor, 120 sqm (approx.)' }),
+    { id: 'v', kind: 'video', url: 'https://cdn.test/v.m3u8', order: 3, room: 'floor_plan' },
+  ];
+  assert.deepEqual(floorPlanLevels(items), [
+    { index: 0, label: 'Ground floor' },
+    // Numbers in a caption are the lister's words: shown as written, never parsed.
+    { index: 2, label: 'First floor, 120 sqm (approx.)' },
+  ]);
+  assert.equal(isFloorPlan(items[3]!), false, 'only photos are plans');
+});
+
+test('floor plans: a missing or blank caption gets a plain name, numbered only when there are several', () => {
+  assert.deepEqual(floorPlanLevels([photo('p', 0, { room: 'floor_plan' })]), [
+    { index: 0, label: 'Floor plan' },
+  ]);
+  assert.deepEqual(
+    floorPlanLevels([
+      photo('a', 0, { room: 'floor_plan', caption: '  ' }),
+      photo('b', 1, { room: 'floor_plan', caption: 'Roof' }),
+    ]).map((l) => l.label),
+    ['Floor plan 1', 'Roof']
+  );
+  assert.deepEqual(floorPlanLevels([photo('x', 0, { room: 'living' })]), []);
+});
+
+test('floor plans never become the cover, unless they are all there is', () => {
+  const items: MediaItem[] = [
+    photo('plan', 0, { room: 'floor_plan' }),
+    { id: 't', kind: 'tour', url: 'https://tour.test/x', order: 1 },
+    photo('front', 2, { room: 'exterior' }),
+    photo('kitchen', 3, { room: 'kitchen' }),
+  ];
+  assert.deepEqual(
+    heroPhotos(items).map((m) => m.id),
+    ['front', 'kitchen', 'plan']
+  );
+  assert.deepEqual(
+    heroPhotos([photo('only-plan', 0, { room: 'floor_plan' })]).map((m) => m.id),
+    ['only-plan']
+  );
+  const l = fromRental({ ...rental, media: items });
+  assert.equal(l.images[0], 'https://cdn.test/front.jpg', 'share image is a photo, not a plan');
+  assert.equal(l.media[0]!.id, 'plan', 'the viewer keeps the lister order');
 });
 
 test('verification summary: sale and land carry it through, checked', () => {

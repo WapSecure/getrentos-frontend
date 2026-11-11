@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { Compass, ImageOff, Images, Play } from '@sureground/icons';
 import {
   cn,
+  heroPhotos,
+  isFloorPlan,
   MEDIA_ROOM_LABEL,
   placeholderOf,
   srcSetOf,
@@ -20,6 +22,12 @@ interface MediaMosaicProps {
   emptyLabel?: string;
   className?: string;
   onMediaEvent?: (event: MediaEvent) => void;
+  /**
+   * Optional control of the viewer, so a button elsewhere on the page (the floor plans shortcut)
+   * can open it. Index into `items`; null is closed. Without these the mosaic keeps its own state.
+   */
+  openIndex?: number | null;
+  onOpenIndexChange?: (index: number | null) => void;
 }
 
 // Fills the 4×2 grid whatever the photo count, so no empty slot shows.
@@ -42,15 +50,21 @@ export function MediaMosaic({
   emptyLabel = 'Photos are being prepared for this listing',
   className,
   onMediaEvent,
+  openIndex,
+  onOpenIndexChange,
 }: MediaMosaicProps) {
-  const [openAt, setOpenAtState] = useState<number | null>(null);
+  const [ownOpenAt, setOwnOpenAt] = useState<number | null>(null);
+  const controlled = openIndex !== undefined;
+  const openAt = controlled ? openIndex : ownOpenAt;
   const setOpenAt = (index: number | null) => {
     if (index !== null && openAt === null)
       onMediaEvent?.({ type: 'gallery_open', mediaIndex: index });
-    setOpenAtState(index);
+    if (!controlled) setOwnOpenAt(index);
+    onOpenIndexChange?.(index);
   };
   const [phoneAt, setPhoneAt] = useState(0);
-  const photos = items.filter((m) => m.kind === 'image');
+  // Cover first; floor plans come after every other photo, so a line drawing is never the cover.
+  const photos = heroPhotos(items);
   const videoAt = items.findIndex((m) => m.kind === 'video');
   const tourAt = items.findIndex((m) => m.kind === 'tour');
   const rooms = new Map<MediaRoom, { first: number; count: number }>();
@@ -168,7 +182,7 @@ export function MediaMosaic({
         </div>
       </div>
 
-      {rooms.size > 1 && (
+      {(rooms.size > 1 || rooms.has('floor_plan')) && (
         <nav aria-label="Photos by room" className="mt-3 flex gap-2 overflow-x-auto pb-1">
           {[...rooms].map(([room, { first, count }]) => (
             <Button
@@ -248,7 +262,13 @@ function Tile({
       fetchPriority={eager ? 'high' : 'auto'}
       decoding="async"
       onError={() => setBroken(true)}
-      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02] motion-reduce:transition-none"
+      className={cn(
+        'h-full w-full',
+        // A plan is shown whole on a light background, never cropped.
+        isFloorPlan(item)
+          ? 'bg-white object-contain'
+          : 'object-cover transition-transform duration-500 group-hover:scale-[1.02] motion-reduce:transition-none'
+      )}
     />
   );
 }

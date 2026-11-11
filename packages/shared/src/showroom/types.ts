@@ -86,7 +86,7 @@ export interface ShowroomListing {
   size?: number;
   verified: boolean;
   media: MediaItem[];
-  /** Image URLs in display order, for metadata, structured data and older callers. */
+  /** Image URLs in display order with floor plans last, for metadata, structured data and older callers. */
   images: string[];
   description?: string;
   amenities: string[];
