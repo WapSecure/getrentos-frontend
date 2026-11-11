@@ -8,7 +8,7 @@ import {
   Users2,
   Smartphone,
 } from '@sureground/icons';
-import { MarketingCard, SectionHeading } from './primitives';
+import { MarketingCard, MarketingIconTile, SectionHeading } from './primitives';
 
 // Each line says what the platform does, not a grade or a licence.
 const features = [
@@ -67,9 +67,7 @@ export const Features = () => (
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {features.map((feature) => (
           <MarketingCard key={feature.title} className="p-6 text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-secondary">
-              <feature.icon className="h-6 w-6 text-primary" />
-            </div>
+            <MarketingIconTile icon={feature.icon} size="lg" className="mx-auto mb-4" />
             <h3 className="mb-2 text-lg font-semibold text-foreground">{feature.title}</h3>
             <p className="text-sm text-muted-foreground">{feature.description}</p>
           </MarketingCard>

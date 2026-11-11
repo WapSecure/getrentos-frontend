@@ -1,8 +1,21 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { ArrowRight, CheckCircle2, ChevronDown, Info, XCircle } from '@sureground/icons';
-import { Card, CardContent, CardHeader, CardTitle } from '@sureground/ui';
-import { LinkButton, MarketingCard, SectionHeading } from '@/components/sections/primitives';
+import { ArrowRight, CheckCircle2, Info, XCircle } from '@sureground/icons';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  DescriptionList,
+  DisclosureList,
+} from '@sureground/ui';
+import { CTA } from '@/components/sections/CTA';
+import {
+  LinkButton,
+  MarketingCard,
+  MarketingIconTile,
+  SectionHeading,
+} from '@/components/sections/primitives';
 import { ROUTES } from '@/lib/constants/auth';
 import { signInThen } from '@/lib/constants/landBuyerRoutes';
 import { DIASPORA_ROUTES } from '@/lib/constants/diasporaRoutes';
@@ -26,9 +39,7 @@ const WORKSPACE_SIGN_IN = signInThen(DIASPORA_ROUTES.BUYER_WORKSPACE);
 
 const IconCard = ({ item }: { item: IconCopy }) => (
   <MarketingCard className="p-6">
-    <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-secondary">
-      <item.icon className="h-5 w-5 text-primary" aria-hidden="true" />
-    </div>
+    <MarketingIconTile icon={item.icon} className="mb-4" />
     <h3 className="mb-2 text-lg font-semibold text-foreground">{item.title}</h3>
     <p className="text-sm leading-relaxed text-muted-foreground">{item.body}</p>
   </MarketingCard>
@@ -134,9 +145,7 @@ export const DiasporaInvestLanding = () => (
           <li key={step.title}>
             <MarketingCard className="h-full p-6">
               <p className="mb-3 text-sm font-semibold text-muted-foreground">Step {index + 1}</p>
-              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-secondary">
-                <step.icon className="h-5 w-5 text-primary" aria-hidden="true" />
-              </div>
+              <MarketingIconTile icon={step.icon} className="mb-3" />
               <h3 className="mb-2 text-lg font-semibold text-foreground">{step.title}</h3>
               <p className="text-sm leading-relaxed text-muted-foreground">{step.body}</p>
             </MarketingCard>
@@ -224,14 +233,11 @@ export const DiasporaInvestLanding = () => (
           <CardTitle as="h3">Summary</CardTitle>
         </CardHeader>
         <CardContent>
-          <dl className="space-y-5">
-            {TRANSPARENCY.map((item) => (
-              <div key={item.title}>
-                <dt className="text-sm font-semibold text-foreground">{item.title}</dt>
-                <dd className="mt-1 text-sm leading-relaxed text-muted-foreground">{item.body}</dd>
-              </div>
-            ))}
-          </dl>
+          <DescriptionList
+            columns={1}
+            className="gap-y-5"
+            items={TRANSPARENCY.map((item) => ({ label: item.title, value: item.body }))}
+          />
           <p className="mt-6 text-sm text-muted-foreground">
             Read the{' '}
             <Link href="/terms" className="font-medium text-primary hover:underline">
@@ -250,43 +256,21 @@ export const DiasporaInvestLanding = () => (
     <Section id="faq" narrow>
       <SectionHeading title="Questions people ask" />
       <Card>
-        <div className="divide-y divide-border">
-          {FAQS.map((faq) => (
-            <details key={faq.question} className="group">
-              <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-left text-base font-medium text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
-                {faq.question}
-                <ChevronDown
-                  className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180 motion-reduce:transition-none"
-                  aria-hidden="true"
-                />
-              </summary>
-              <p className="px-5 pb-5 text-sm leading-relaxed text-muted-foreground">
-                {faq.answer}
-              </p>
-            </details>
-          ))}
-        </div>
+        <DisclosureList
+          items={FAQS.map((faq) => ({
+            id: faq.question,
+            summary: faq.question,
+            content: faq.answer,
+          }))}
+        />
       </Card>
     </Section>
 
-    <Section narrow>
-      <Card>
-        <CardContent className="p-8 text-center md:p-12">
-          <h2 className="text-2xl font-bold tracking-[-0.02em] text-foreground md:text-3xl">
-            Start with your investor profile
-          </h2>
-          <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
-            It takes a few minutes. Tell us where you live and what you are looking for, and your
-            workspace will show your time next to Lagos time.
-          </p>
-          <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <LinkButton href={ROUTES.SIGNUP}>Create your account</LinkButton>
-            <LinkButton href={WORKSPACE_SIGN_IN} variant="secondary">
-              Sign in to your workspace
-            </LinkButton>
-          </div>
-        </CardContent>
-      </Card>
-    </Section>
+    <CTA
+      title="Start with your investor profile"
+      description="It takes a few minutes. Tell us where you live and what you are looking for, and your workspace will show your time next to Lagos time."
+      primaryAction={{ label: 'Create your account', href: ROUTES.SIGNUP }}
+      secondaryAction={{ label: 'Sign in to your workspace', href: WORKSPACE_SIGN_IN }}
+    />
   </>
 );

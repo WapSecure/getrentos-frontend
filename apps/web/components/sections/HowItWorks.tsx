@@ -8,7 +8,7 @@ import {
   CheckCircle,
   Star,
 } from '@sureground/icons';
-import { MarketingCard, SectionHeading } from './primitives';
+import { MarketingCard, MarketingIconTile, SectionHeading } from './primitives';
 
 const steps = [
   {
@@ -72,9 +72,7 @@ export const HowItWorks = () => (
             <div className="mb-3 text-4xl font-bold text-muted-foreground/75" aria-hidden="true">
               {step.number}
             </div>
-            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-secondary">
-              <step.icon className="h-5 w-5 text-primary" />
-            </div>
+            <MarketingIconTile icon={step.icon} className="mb-3" />
             <h3 className="mb-2 text-lg font-semibold text-foreground">{step.title}</h3>
             <p className="text-sm text-muted-foreground">{step.description}</p>
           </MarketingCard>

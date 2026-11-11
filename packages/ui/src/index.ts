@@ -56,6 +56,7 @@ export * from './Toast';
 export * from './brand';
 export * from './Alert';
 export * from './DescriptionList';
+export * from './Disclosure';
 export * from './IconButton';
 export * from './QueryState';
 export * from './RadioGroup';

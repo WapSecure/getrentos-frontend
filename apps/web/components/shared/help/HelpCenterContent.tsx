@@ -1,9 +1,8 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronDown, Mail, Phone, MessageCircle, Clock, ArrowRight } from '@sureground/icons';
-import { Button, Card, PageHeader } from '@sureground/ui';
+import { Mail, Phone, MessageCircle, Clock, ArrowRight } from '@sureground/icons';
+import { Button, Card, DisclosureList, PageHeader } from '@sureground/ui';
 import { SUPPORT, hasSupportLine, telLink, whatsappLink } from '@/lib/support';
 
 interface FAQItem {
@@ -41,7 +40,6 @@ interface HelpCenterContentProps {
 
 export const HelpCenterContent = ({ roleLabel, messagesHref }: HelpCenterContentProps) => {
   const router = useRouter();
-  const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
     <>
@@ -53,31 +51,17 @@ export const HelpCenterContent = ({ roleLabel, messagesHref }: HelpCenterContent
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-3">
           <h2 className="text-sm font-semibold text-foreground mb-1">Frequently asked questions</h2>
-          {faqs.map((faq, index) => {
-            const isOpen = openIndex === index;
-            return (
-              <Card key={faq.question}>
-                <button
-                  type="button"
-                  aria-expanded={isOpen}
-                  onClick={() => setOpenIndex(isOpen ? null : index)}
-                  className="w-full flex items-center justify-between gap-3 p-4 text-left focus-visible:outline-none focus-visible:bg-secondary/60"
-                >
-                  <span className="text-sm font-medium text-foreground">{faq.question}</span>
-                  <ChevronDown
-                    className={`w-4 h-4 text-muted-foreground shrink-0 transition-transform ${
-                      isOpen ? 'rotate-180' : ''
-                    }`}
-                  />
-                </button>
-                {isOpen && (
-                  <p className="px-4 pb-4 text-sm text-muted-foreground leading-relaxed">
-                    {faq.answer}
-                  </p>
-                )}
-              </Card>
-            );
-          })}
+          <Card>
+            <DisclosureList
+              name="help-centre-faqs"
+              defaultOpenIndex={0}
+              items={faqs.map((faq) => ({
+                id: faq.question,
+                summary: faq.question,
+                content: faq.answer,
+              }))}
+            />
+          </Card>
         </div>
 
         <div className="space-y-4">
