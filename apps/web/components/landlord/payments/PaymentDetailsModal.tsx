@@ -1,6 +1,5 @@
 'use client';
 
-import { ShieldCheck } from '@sureground/icons';
 import {
   Alert,
   Badge,
@@ -8,9 +7,11 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
+  Timeline,
 } from '@sureground/ui';
 import { rentPayoutStatusBadges } from '@/lib/statusBadge';
 import { formatCurrency, formatDate } from '@/lib/format';
+import { stepStates } from '@/lib/stepStates';
 import type { RentPayment, EscrowStatus, RentPayoutStatus } from '@/types/landlord';
 import { InvoiceLines } from '@/components/shared/InvoiceLines';
 
@@ -25,8 +26,6 @@ const escrowSteps: { key: EscrowStatus; label: string }[] = [
   { key: 'released', label: 'Released from escrow' },
 ];
 
-const stepOrder: EscrowStatus[] = ['held', 'pending_review', 'released'];
-
 const payoutNote: Record<RentPayoutStatus, string> = {
   QUEUED: 'This rent is on an owner statement and waits to be sent to your bank.',
   SENT: 'The transfer is with the bank. It usually lands within a working day.',
@@ -38,8 +37,11 @@ const payoutNote: Record<RentPayoutStatus, string> = {
 export const PaymentDetailsModal = ({ payment, onClose }: PaymentDetailsModalProps) => {
   if (!payment) return null;
 
-  const currentIndex =
-    payment.escrowStatus === 'frozen' ? -1 : stepOrder.indexOf(payment.escrowStatus);
+  // Each status names a step already reached ("Funds held" is done once the rent is held).
+  const states = stepStates(
+    escrowSteps.map((s) => s.key),
+    payment.escrowStatus
+  ).map((state) => (state === 'current' ? 'done' : state));
 
   return (
     <Dialog open={!!payment} onOpenChange={(next) => !next && onClose()}>
@@ -81,36 +83,15 @@ export const PaymentDetailsModal = ({ payment, onClose }: PaymentDetailsModalPro
                 'A dispute has been raised on this payment. Funds are frozen until the dispute is resolved by Sureground support.'}
             </Alert>
           ) : (
-            <div>
-              <div className="flex items-center justify-between">
-                {escrowSteps.map((step, index) => {
-                  const isComplete = index <= currentIndex;
-                  return (
-                    <div key={step.key} className="flex-1 flex flex-col items-center relative">
-                      {index > 0 && (
-                        <div
-                          className={`absolute right-1/2 top-2.5 w-full h-0.5 ${
-                            index <= currentIndex ? 'bg-primary' : 'bg-border'
-                          }`}
-                        />
-                      )}
-                      <div
-                        className={`relative z-10 w-5 h-5 rounded-full flex items-center justify-center ${
-                          isComplete ? 'bg-primary' : 'bg-border'
-                        }`}
-                      >
-                        {isComplete && <ShieldCheck className="w-3 h-3 text-primary-foreground" />}
-                      </div>
-                      <p
-                        className={`text-xs mt-2 text-center ${isComplete ? 'text-foreground font-medium' : 'text-muted-foreground'}`}
-                      >
-                        {step.label}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+            <Timeline
+              orientation="horizontal"
+              aria-label="Escrow progress"
+              items={escrowSteps.map((step, index) => ({
+                id: step.key,
+                title: step.label,
+                state: states[index],
+              }))}
+            />
           )}
 
           <Alert variant="neutral">
