@@ -15,12 +15,10 @@ import {
   LandPlot,
   BadgeCheck,
   Trees,
-  Gauge,
   KeyRound,
   LogOut,
   CalendarCheck,
   Search,
-  ShieldCheck,
   SlidersHorizontal,
   Star,
   Users,
@@ -41,6 +39,7 @@ import {
 } from '@sureground/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useIdentityVerification } from '@/hooks/useIdentityVerification';
+import { useTrustItems } from '@/components/account/useTrustItems';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
 import { managementItems } from '@/components/account/managementItems';
@@ -50,7 +49,8 @@ const go = (href: Href) => () => router.push(href);
 export default function OwnerAccount() {
   const { profile, signOut } = useAuth();
   const { colors, spacing } = useTheme();
-  const { verified, known: identityKnown, label: identityLabel } = useIdentityVerification();
+  const { verified } = useIdentityVerification();
+  const trustItems = useTrustItems('owner', { audience: 'buyers' });
 
   const selling: SettingsItem[] = [
     {
@@ -168,22 +168,7 @@ export default function OwnerAccount() {
   ];
 
   const trust: SettingsItem[] = [
-    {
-      key: 'trust',
-      label: 'Trust profile',
-      description: 'Your score and what buyers see',
-      icon: Gauge,
-      value: profile ? String(profile.trustScore) : undefined,
-      onPress: go('/(app)/owner-trust-profile'),
-    },
-    {
-      key: 'identity',
-      label: 'Identity verification',
-      icon: ShieldCheck,
-      value: identityLabel,
-      tone: verified ? 'success' : identityKnown ? 'warning' : undefined,
-      onPress: go('/(app)/verify-identity'),
-    },
+    ...trustItems,
     {
       key: 'reviews',
       label: 'Reviews',

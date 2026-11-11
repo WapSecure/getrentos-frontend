@@ -114,6 +114,8 @@ export default function AppLayout() {
         <Stack.Screen name="payment-methods" options={DETAIL_OPTIONS} />
         <Stack.Screen name="receipts" options={DETAIL_OPTIONS} />
         <Stack.Screen name="trust-score" options={DETAIL_OPTIONS} />
+        <Stack.Screen name="landlord-trust-profile" options={DETAIL_OPTIONS} />
+        <Stack.Screen name="estate-trust-profile" options={DETAIL_OPTIONS} />
         <Stack.Screen name="conversation/[id]" options={DETAIL_OPTIONS} />
         <Stack.Screen name="verify-identity" options={DETAIL_OPTIONS} />
         <Stack.Screen name="violations" options={DETAIL_OPTIONS} />

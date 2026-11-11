@@ -1,15 +1,17 @@
 import { realtorApi } from '@/lib/api/realtor';
 import { qk } from '@/lib/query/keys';
-import { TrustProfileView } from '@/components/trust/TrustProfileView';
+import { TrustScreen } from '@/components/trust/TrustScreen';
 
 export default function RealtorTrustProfile() {
   return (
-    <TrustProfileView
+    <TrustScreen
       portal="realtor"
-      audience="clients and leads"
-      queryKey={qk.realtor.trustProfile}
-      queryFn={realtorApi.trustProfile}
       eyebrow="Professional reputation"
+      profile={{
+        audience: 'clients and leads',
+        queryKey: qk.realtor.trustProfile,
+        queryFn: realtorApi.trustProfile,
+      }}
     />
   );
 }

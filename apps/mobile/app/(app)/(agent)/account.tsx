@@ -6,10 +6,8 @@ import {
   CircleHelp,
   ClipboardCheck,
   FileStack,
-  Gauge,
   KeyRound,
   RefreshCw,
-  ShieldCheck,
   Star,
   Wrench,
   ClipboardList,
@@ -21,8 +19,7 @@ import {
 import { Screen } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { agentApi } from '@/lib/api/agent';
-import { useAuth } from '@/lib/auth/AuthProvider';
-import { useIdentityVerification } from '@/hooks/useIdentityVerification';
+import { useTrustItems } from '@/components/account/useTrustItems';
 import { useProSettings } from '@/hooks/useProSettings';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
@@ -31,9 +28,8 @@ import { AccountFooter, AccountHeader, AppearanceFooter } from '@/components/acc
 const go = (href: Href) => () => router.push(href);
 
 export default function AgentAccount() {
-  const { profile } = useAuth();
   const agent = useQuery({ queryKey: qk.agent.profile, queryFn: agentApi.profile }).data;
-  const { verified, known: identityKnown, label: identityLabel } = useIdentityVerification();
+  const trustItems = useTrustItems('agent', { audience: 'clients' });
   const { licenseLabel, inAgency } = useProSettings();
 
   const work: SettingsItem[] = [
@@ -89,23 +85,7 @@ export default function AgentAccount() {
   ];
 
   const trust: SettingsItem[] = [
-    {
-      key: 'trust',
-      label: 'Trust profile',
-      description: 'Your score and badges',
-      icon: Gauge,
-      value: profile ? String(profile.trustScore) : undefined,
-      onPress: go('/(app)/agent-trust-profile'),
-    },
-    {
-      key: 'identity',
-      label: 'Identity verification',
-      description: verified ? undefined : 'Verify your ID and licence',
-      icon: ShieldCheck,
-      value: identityLabel,
-      tone: verified ? 'success' : identityKnown ? 'warning' : undefined,
-      onPress: go('/(app)/verify-identity'),
-    },
+    ...trustItems,
     {
       key: 'license',
       label: 'Licence',

@@ -1,15 +1,17 @@
 import { agentTrustProfileApi } from '@/lib/api/agentTrustProfile';
 import { qk } from '@/lib/query/keys';
-import { TrustProfileView } from '@/components/trust/TrustProfileView';
+import { TrustScreen } from '@/components/trust/TrustScreen';
 
 export default function AgentTrustProfile() {
   return (
-    <TrustProfileView
+    <TrustScreen
       portal="agent"
-      audience="clients and admins"
-      queryKey={qk.agent.trustProfile}
-      queryFn={agentTrustProfileApi.get}
       eyebrow="Professional reputation"
+      profile={{
+        audience: 'clients and admins',
+        queryKey: qk.agent.trustProfile,
+        queryFn: agentTrustProfileApi.get,
+      }}
     />
   );
 }
