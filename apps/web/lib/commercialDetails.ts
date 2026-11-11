@@ -56,6 +56,27 @@ export const COMMERCIAL_LIMITS = {
 /** Lease lengths offered as chips, in years. */
 export const LEASE_TERM_CHOICES = [1, 2, 3, 5, 7, 10, 15, 20, 25];
 
+/** The API's limits on lease terms: whole years from 1 to 99, no repeats, at most 10. */
+export const LEASE_TERM_LIMITS = { min: 1, max: 99, count: 10 } as const;
+
+const WHOLE = /^\d+$/;
+
+/** Adds a lease length typed into the "Other" box, or says why it can't be added. */
+export function addLeaseTerm(
+  current: number[],
+  raw: string
+): { years: number[]; error?: undefined } | { error: string } {
+  const typed = raw.trim();
+  if (typed === '') return { error: 'Enter a number of years.' };
+  const years = Number(typed);
+  if (!WHOLE.test(typed) || years < LEASE_TERM_LIMITS.min || years > LEASE_TERM_LIMITS.max)
+    return { error: 'A lease term must be a whole number of years from 1 to 99.' };
+  if (current.includes(years)) return { error: 'That lease term is already on the list.' };
+  if (current.length >= LEASE_TERM_LIMITS.count)
+    return { error: 'You can offer at most 10 lease terms.' };
+  return { years: [...current, years].sort((a, b) => a - b) };
+}
+
 const toStated = (v?: boolean): Stated => (v === undefined ? '' : v ? 'yes' : 'no');
 const fromStated = (v: Stated) => (v === '' ? undefined : v === 'yes');
 const num = (v: string) => (v.trim() === '' ? undefined : Number(v));
@@ -127,6 +148,15 @@ const TWO_DECIMALS = /^\d+(?:\.\d{0,2})?$/;
 
 /** The first problem in the form, in the API's words; null when it can be saved. */
 export function commercialError(v: CommercialValues): string | null {
+  const terms = v.leaseTermOptionsYears;
+  if (
+    terms.some(
+      (y) => !Number.isInteger(y) || y < LEASE_TERM_LIMITS.min || y > LEASE_TERM_LIMITS.max
+    )
+  )
+    return 'A lease term must be a whole number of years from 1 to 99.';
+  if (new Set(terms).size !== terms.length) return 'Each lease term can be listed once.';
+  if (terms.length > LEASE_TERM_LIMITS.count) return 'You can offer at most 10 lease terms.';
   const area = num(v.lettableAreaSqm);
   if (area !== undefined && !(area >= 1 && area <= COMMERCIAL_LIMITS.maxAreaSqm))
     return 'Lettable area must be between 1 and 1,000,000 m².';

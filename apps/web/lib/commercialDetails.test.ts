@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   EMPTY_COMMERCIAL,
+  addLeaseTerm,
   commercialError,
   commercialFromDetails,
   commercialToCreatePayload,
@@ -66,4 +67,26 @@ test('form errors match the API limits', () => {
   assert.match(commercialError({ ...EMPTY_COMMERCIAL, publicSupplyHoursStated: '25' }) ?? '', /24/);
   assert.match(commercialError({ ...EMPTY_COMMERCIAL, vatStatedPct: '101' }) ?? '', /100%/);
   assert.match(commercialError({ ...EMPTY_COMMERCIAL, parkingSpaces: '10001' }) ?? '', /10,000/);
+});
+
+test('an "Other" lease term is a whole number of years from 1 to 99, once, at most 10', () => {
+  assert.deepEqual(addLeaseTerm([5, 2], '4'), { years: [2, 4, 5] });
+  assert.deepEqual(addLeaseTerm([], ' 99 '), { years: [99] });
+  assert.match(addLeaseTerm([], '').error ?? '', /Enter/);
+  assert.match(addLeaseTerm([], '0').error ?? '', /1 to 99/);
+  assert.match(addLeaseTerm([], '100').error ?? '', /1 to 99/);
+  assert.match(addLeaseTerm([], '2.5').error ?? '', /whole/);
+  assert.match(addLeaseTerm([4], '4').error ?? '', /already/);
+  const ten = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+  assert.match(addLeaseTerm(ten, '11').error ?? '', /at most 10/);
+});
+
+test('form errors catch lease terms the API would refuse', () => {
+  const terms = (leaseTermOptionsYears: number[]) =>
+    commercialError({ ...EMPTY_COMMERCIAL, leaseTermOptionsYears });
+  assert.equal(terms([1, 4, 99]), null);
+  assert.match(terms([0]) ?? '', /1 to 99/);
+  assert.match(terms([100]) ?? '', /1 to 99/);
+  assert.match(terms([3, 3]) ?? '', /once/);
+  assert.match(terms([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]) ?? '', /at most 10/);
 });

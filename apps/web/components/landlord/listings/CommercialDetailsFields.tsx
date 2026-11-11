@@ -1,6 +1,8 @@
 'use client';
 
+import { useState, type KeyboardEvent } from 'react';
 import {
+  Button,
   Field,
   Input,
   NumberInput,
@@ -18,6 +20,8 @@ import {
 import {
   COMMERCIAL_LIMITS,
   LEASE_TERM_CHOICES,
+  LEASE_TERM_LIMITS,
+  addLeaseTerm,
   type CommercialValues,
 } from '@/lib/commercialDetails';
 
@@ -52,13 +56,38 @@ interface CommercialDetailsFieldsProps {
 export function CommercialDetailsFields({ value, onChange }: CommercialDetailsFieldsProps) {
   const set = <K extends keyof CommercialValues>(key: K, next: CommercialValues[K]) =>
     onChange({ ...value, [key]: next });
-  const toggleTerm = (years: number) =>
+  const [otherTerm, setOtherTerm] = useState('');
+  const [otherTermError, setOtherTermError] = useState<string | null>(null);
+  const terms = value.leaseTermOptionsYears;
+  const atTermLimit = terms.length >= LEASE_TERM_LIMITS.count;
+  // The usual lengths, plus any other length already on the listing, so it can be removed too.
+  const termChips = [...new Set([...LEASE_TERM_CHOICES, ...terms])].sort((a, b) => a - b);
+  const toggleTerm = (years: number) => {
+    setOtherTermError(null);
     set(
       'leaseTermOptionsYears',
-      value.leaseTermOptionsYears.includes(years)
-        ? value.leaseTermOptionsYears.filter((y) => y !== years)
-        : [...value.leaseTermOptionsYears, years]
+      terms.includes(years)
+        ? terms.filter((y) => y !== years)
+        : [...terms, years].sort((a, b) => a - b)
     );
+  };
+  const addOtherTerm = () => {
+    const result = addLeaseTerm(terms, otherTerm);
+    if (result.error !== undefined) {
+      setOtherTermError(result.error);
+      return;
+    }
+    setOtherTermError(null);
+    setOtherTerm('');
+    set('leaseTermOptionsYears', result.years);
+  };
+  const onOtherTermKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    // Enter adds the term instead of submitting the listing form.
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addOtherTerm();
+    }
+  };
 
   return (
     <fieldset className="space-y-3">
@@ -188,20 +217,58 @@ export function CommercialDetailsFields({ value, onChange }: CommercialDetailsFi
         </Field>
       )}
 
-      <div>
-        <p className="mb-1.5 block text-sm font-medium text-foreground">Lease terms on offer</p>
+      <div className="space-y-2">
+        <p className="block text-sm font-medium text-foreground">Lease terms on offer</p>
         <div role="group" aria-label="Lease terms on offer" className="flex flex-wrap gap-2">
-          {LEASE_TERM_CHOICES.map((years) => (
-            <ToggleChip
-              key={years}
-              size="sm"
-              pressed={value.leaseTermOptionsYears.includes(years)}
-              onPressedChange={() => toggleTerm(years)}
-            >
-              {years === 1 ? '1 year' : `${years} years`}
-            </ToggleChip>
-          ))}
+          {termChips.map((years) => {
+            const pressed = terms.includes(years);
+            return (
+              <ToggleChip
+                key={years}
+                size="sm"
+                pressed={pressed}
+                disabled={!pressed && atTermLimit}
+                onPressedChange={() => toggleTerm(years)}
+              >
+                {years === 1 ? '1 year' : `${years} years`}
+              </ToggleChip>
+            );
+          })}
         </div>
+        <Field
+          label="Other (years)"
+          hint={
+            atTermLimit
+              ? 'That is the most you can offer: 10 lease terms.'
+              : 'A whole number of years from 1 to 99. Up to 10 lease terms in total.'
+          }
+          error={otherTermError}
+        >
+          <div className="flex max-w-xs gap-2">
+            <NumberInput
+              value={otherTerm}
+              onValueChange={(v) => {
+                setOtherTerm(v);
+                setOtherTermError(null);
+              }}
+              onKeyDown={onOtherTermKeyDown}
+              placeholder="For example, 4"
+              inputMode="numeric"
+              maxLength={2}
+              disabled={atTermLimit}
+              invalid={!!otherTermError}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={addOtherTerm}
+              disabled={atTermLimit || otherTerm.trim() === ''}
+            >
+              Add
+            </Button>
+          </div>
+        </Field>
       </div>
 
       <Field label="Rent review" hint="As written in your lease.">

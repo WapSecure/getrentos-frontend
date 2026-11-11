@@ -18,6 +18,8 @@ import {
   type PublicDetailMarket,
 } from '@/lib/publicListingDetail';
 import { ShowroomAside } from './ShowroomAside';
+import { ShowroomCommercial } from './ShowroomCommercial';
+import { ShowroomSection as Section } from './ShowroomSection';
 import { ShowroomNeighbourhood } from './ShowroomNeighbourhood';
 import { ShowroomShareButton } from './ShowroomShareButton';
 import { ShowroomTrust } from './ShowroomTrust';
@@ -34,17 +36,6 @@ const MARKET_NOUN: Record<PublicDetailMarket, string> = {
   sale: 'Homes for sale',
   land: 'Land',
 };
-
-function Section({ id, title, children }: { id: string; title: string; children: ReactNode }) {
-  return (
-    <section aria-labelledby={id} className="border-t border-border/70 pt-8">
-      <h2 id={id} className="text-xl font-semibold tracking-tight text-foreground">
-        {title}
-      </h2>
-      <div className="mt-4">{children}</div>
-    </section>
-  );
-}
 
 export async function ShowroomPage({
   market,
@@ -164,6 +155,11 @@ export async function ShowroomPage({
                 )}
               </header>
 
+              {/* Commercial: the lease and the space come before the description. */}
+              {listing.commercial && (
+                <ShowroomCommercial commercial={listing.commercial} market={market} />
+              )}
+
               {listing.description && (
                 <Section id="about" title={`About this ${market === 'land' ? 'parcel' : 'place'}`}>
                   <p className="max-w-3xl whitespace-pre-line leading-7 text-muted-foreground">
@@ -218,6 +214,7 @@ export async function ShowroomPage({
                 market={market}
                 id={listing.id}
                 returnPath={path}
+                commercial={!!listing.commercial}
               />
             </>
           )}
