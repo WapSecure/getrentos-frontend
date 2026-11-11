@@ -199,6 +199,7 @@ export default function HostEarnings() {
                             }
                             paidAt={p.paidAt}
                             transferRef={p.transferRef}
+                            failureReason={p.failureReason}
                             sentTo={p.sentTo}
                           />
                         </View>

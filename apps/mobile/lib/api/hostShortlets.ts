@@ -281,6 +281,8 @@ export interface HostPayout {
   paidAt?: string;
   bookingCount: number;
   /** Where it went (bank + last four digits), only when the API can prove it. */
+  /** Why the last transfer did not complete, while FAILED. */
+  failureReason?: string | null;
   sentTo?: PayoutSentTo | null;
   createdAt: string;
 }

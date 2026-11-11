@@ -228,6 +228,11 @@ function PayoutRow({ p }: { p: SellerSalePayout }) {
             {sentTo}
           </Text>
         ) : null}
+        {p.payoutStatus === 'FAILED' && p.failureReason ? (
+          <Text variant="caption" color="destructive">
+            {p.failureReason}
+          </Text>
+        ) : null}
         {p.payoutStatus === 'FAILED' ? (
           <Text variant="caption" color="mutedForeground">
             {PAYOUT_FAILED_NEXT_STEP}

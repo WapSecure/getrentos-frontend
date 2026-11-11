@@ -391,6 +391,8 @@ export interface ShortletPayout {
   status: 'PENDING' | 'SUCCESS' | 'FAILED';
   transferRef?: string;
   paidAt?: string;
+  /** Why the last transfer did not complete, while FAILED. */
+  failureReason?: string | null;
   bookingCount: number;
   /** Bank + last four digits, only when the API can prove it. */
   sentTo?: PayoutSentTo | null;
