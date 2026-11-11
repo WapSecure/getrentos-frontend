@@ -53,6 +53,10 @@ export interface DepositHoldListItem {
   heldBySureground: boolean;
   returnable: number;
   createdAt: string;
+  /** D-6 end-of-tenancy stage; older API responses may leave it out. */
+  endStage?: DepositEndStage;
+  moveOutAt?: string | null;
+  claimBy?: string | null;
 }
 
 export interface DepositHold extends DepositHoldListItem {
@@ -157,4 +161,129 @@ export const depositService = {
   returnDeposit(id: string): Promise<ApiResponse<DepositHold>> {
     return safeCall(() => authFetch<DepositHold>(`/deposits/${id}/return`, { method: 'POST' }));
   },
+
+  endOfTenancy(id: string): Promise<ApiResponse<DepositEndView>> {
+    return safeCall(() => authFetch<DepositEndView>(`/deposits/${id}/end-of-tenancy`));
+  },
+
+  recordMoveOut(id: string, moveOutAt?: string): Promise<ApiResponse<DepositEndView>> {
+    return safeCall(() =>
+      authFetch<DepositEndView>(`/deposits/${id}/move-out`, {
+        method: 'POST',
+        body: JSON.stringify(moveOutAt ? { moveOutAt } : {}),
+      })
+    );
+  },
+
+  uploadClaimEvidence(id: string, file: File): Promise<ApiResponse<{ key: string }>> {
+    const form = new FormData();
+    form.append('file', file);
+    return safeCall(() =>
+      authFetch<{ key: string }>(`/deposits/${id}/claim-evidence`, { method: 'POST', body: form })
+    );
+  },
+
+  fileClaim(id: string, items: DepositClaimItemInput[]): Promise<ApiResponse<DepositEndView>> {
+    return safeCall(() =>
+      authFetch<DepositEndView>(`/deposits/${id}/claim`, {
+        method: 'POST',
+        body: JSON.stringify({ items }),
+      })
+    );
+  },
+};
+
+/** Mirrors the backend's `DepositEndStage` (D-6). */
+export type DepositEndStage =
+  | 'TENANCY'
+  | 'AWAITING_CLAIM'
+  | 'AWAITING_TENANT'
+  | 'IN_MEDIATION'
+  | 'SETTLED';
+
+export const DEPOSIT_END_STAGE_LABELS: Record<DepositEndStage, string> = {
+  TENANCY: 'Tenancy running',
+  AWAITING_CLAIM: 'Claim window open',
+  AWAITING_TENANT: 'Waiting for the tenant',
+  IN_MEDIATION: 'With Sureground to decide',
+  SETTLED: 'Settled',
+};
+
+export type DepositRefundStatus = 'NOT_NEEDED' | 'REFUNDED' | 'CONFIRMING' | 'NEEDS_FINANCE';
+
+export const DEPOSIT_REFUND_STATUS_LABELS: Record<DepositRefundStatus, string> = {
+  NOT_NEEDED: 'Nothing to refund',
+  REFUNDED: 'Refund sent',
+  CONFIRMING: 'Refund being confirmed',
+  NEEDS_FINANCE: 'Refund with finance',
+};
+
+export interface DepositEvidenceFile {
+  name: string;
+  mimeType: string | null;
+  url: string;
+}
+
+export interface DepositClaimItem {
+  id: string;
+  reason: string;
+  amount: number;
+  inspectionId: string | null;
+  evidence: DepositEvidenceFile[];
+}
+
+export interface DepositClaim {
+  id: string;
+  amount: number;
+  status: 'AWAITING_TENANT' | 'ACCEPTED' | 'DISPUTED' | 'DECIDED';
+  respondBy: string;
+  respondedAt: string | null;
+  acceptedByDefault: boolean;
+  disputeReason: string | null;
+  decidedAmount: number | null;
+  decidedAt: string | null;
+  resolution: string | null;
+  createdAt: string;
+  items: DepositClaimItem[];
+}
+
+/** The deposit in the D-6 end-of-tenancy flow, as landlord, tenant and Sureground staff see it. */
+export interface DepositEndView {
+  holdId: string;
+  leaseId: string;
+  propertyTitle: string | null;
+  unitName: string | null;
+  tenantName: string | null;
+  amount: number;
+  heldBySureground: boolean;
+  /** Received through Sureground: only this can be claimed or refunded. */
+  funded: number;
+  endStage: DepositEndStage;
+  moveOutAt: string | null;
+  claimBy: string | null;
+  claim: DepositClaim | null;
+  settlement: {
+    landlordAmount: number;
+    refundAmount: number;
+    refundStatus: DepositRefundStatus | null;
+    settledHow: 'NO_CLAIM' | 'TENANT_ACCEPTED' | 'NO_RESPONSE' | 'MEDIATION' | null;
+    settledAt: string | null;
+  } | null;
+}
+
+export interface DepositClaimItemInput {
+  reason: string;
+  amount: number;
+  evidenceKeys?: string[];
+  inspectionId?: string;
+}
+
+export const SETTLED_HOW_TEXT: Record<
+  NonNullable<NonNullable<DepositEndView['settlement']>['settledHow']>,
+  string
+> = {
+  NO_CLAIM: 'No deductions were claimed within 14 days of move-out.',
+  TENANT_ACCEPTED: 'The tenant accepted the claim.',
+  NO_RESPONSE: 'The tenant did not respond within 7 days, so the claim counts as accepted.',
+  MEDIATION: 'Sureground decided the dispute.',
 };
