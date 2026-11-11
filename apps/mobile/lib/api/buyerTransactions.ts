@@ -40,8 +40,16 @@ export interface BuyerTransaction {
   /** What the buyer pays in for this sale: the agreed deposit, else the price. */
   depositAmount?: number;
   escrowStatus: BuyerEscrowStatus;
-  milestones?: { label: string; completed: boolean }[];
+  /** The sale's steps (tracking only); not shown here yet. */
+  milestones?: { id: string; key: string; label: string; status: string }[];
+  /** `actor` is a display name; staff show as "Sureground". */
   activityLog?: { id: string; actor: string; action: string; timestamp: string }[];
+  /** Set on a release: under two-person approval the deposit may still be waiting. */
+  release?: {
+    state: 'RELEASED' | 'WAITING_FOR_CO_APPROVAL';
+    waitingFor?: 'REPRESENTATIVE' | 'BUYER';
+    message?: string;
+  };
   disputeReason?: string;
   createdAt: string;
   releasedAt?: string;

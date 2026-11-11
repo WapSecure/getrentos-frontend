@@ -54,6 +54,13 @@ export const InstallmentStatusBadge = ({ status }: { status: LandInstallmentStat
   <Badge variant={INSTALLMENT_VARIANT[status]}>{LAND_INSTALLMENT_STATUS_LABELS[status]}</Badge>
 );
 
-export const MilestoneStatusBadge = ({ status }: { status: LandMilestoneStatus }) => (
-  <Badge variant={MILESTONE_VARIANT[status]}>{LAND_MILESTONE_STATUS_LABELS[status]}</Badge>
+/** `label` replaces the buyer's wording, e.g. for a seller or representative looking on. */
+export const MilestoneStatusBadge = ({
+  status,
+  label,
+}: {
+  status: LandMilestoneStatus;
+  label?: string;
+}) => (
+  <Badge variant={MILESTONE_VARIANT[status]}>{label ?? LAND_MILESTONE_STATUS_LABELS[status]}</Badge>
 );

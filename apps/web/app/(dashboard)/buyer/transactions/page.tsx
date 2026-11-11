@@ -13,7 +13,9 @@ import {
   useToast,
 } from '@sureground/ui';
 import { BuyerEscrowTransactionCard } from '@/components/buyer/transactions/BuyerEscrowTransactionCard';
-import { BuyerEscrowTransactionDetailModal } from '@/components/buyer/transactions/BuyerEscrowTransactionDetailModal';
+import { PayDialog } from '@/components/shared/payments/PayDialog';
+import { formatCurrency } from '@/lib/format';
+import { SALE_DEPOSIT_PROTECTION } from '@/lib/paymentCopy';
 import { buyerService } from '@/services/buyerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { buyerKeys } from '@/lib/queryKeys';
@@ -28,7 +30,8 @@ export default function BuyerTransactionsPage() {
   const toast = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<StatusFilter>('all');
-  const [activeTransactionId, setActiveTransactionId] = useState<string | null>(null);
+  // The deposit is paid from the list; everything else lives on the purchase's workspace page.
+  const [payingId, setPayingId] = useState<string | null>(null);
   const PAGE_SIZE = 9;
   const [page, setPage] = useState(1);
 
@@ -74,24 +77,14 @@ export default function BuyerTransactionsPage() {
       else toast.show(reason.message, 'error');
     },
   });
-  const releaseMutation = useMutation({
-    mutationFn: (id: string) => unwrap(buyerService.releaseTransaction(id)),
-    onSuccess: invalidate,
-  });
-
-  const handleMakePayment = (transactionId: string, stage: 'deposit' | 'release') => {
-    if (stage === 'deposit')
-      depositMutation.mutate({ id: transactionId, provider: providers.provider });
-    else releaseMutation.mutate(transactionId);
-  };
-
-  const activeTransaction = transactions.find((t) => t.id === activeTransactionId) || null;
+  const paying = transactions.find((t) => t.id === payingId) ?? null;
+  const payingDeposit = paying ? (paying.depositAmount ?? paying.purchasePrice) : 0;
 
   const filterOptions: { value: StatusFilter; label: string }[] = [
     { value: 'all', label: 'All' },
     { value: 'deposit_pending', label: 'Deposit pending' },
-    { value: 'funds_held', label: 'Funds held' },
-    { value: 'released', label: 'Completed' },
+    { value: 'funds_held', label: 'Deposit held' },
+    { value: 'released', label: 'Deposit released' },
     { value: 'frozen', label: 'Frozen' },
     { value: 'refunded', label: 'Refunded' },
   ];
@@ -104,7 +97,7 @@ export default function BuyerTransactionsPage() {
           isLoading ? (
             <Skeleton className="inline-block h-4 w-56 align-middle" />
           ) : (
-            `${total} purchase${total === 1 ? '' : 's'} protected by Sureground`
+            `${total} purchase${total === 1 ? '' : 's'}. Open one to follow its steps, approvals and legal transfer.`
           )
         }
       />
@@ -163,7 +156,7 @@ export default function BuyerTransactionsPage() {
               key={transaction.id}
               transaction={transaction}
               delay={index * 0.05}
-              onClick={() => setActiveTransactionId(transaction.id)}
+              onPayDeposit={() => setPayingId(transaction.id)}
             />
           ))}
         </div>
@@ -179,17 +172,26 @@ export default function BuyerTransactionsPage() {
         />
       )}
 
-      <BuyerEscrowTransactionDetailModal
-        transaction={activeTransaction}
-        onClose={() => {
-          setActiveTransactionId(null);
-          setProviderError(null);
-        }}
-        onMakePayment={handleMakePayment}
-        isPaying={depositMutation.isPending || releaseMutation.isPending}
-        providers={providers}
-        providerError={providerError}
-      />
+      {paying && (
+        <PayDialog
+          open={paying.escrowStatus === 'deposit_pending'}
+          onClose={() => {
+            setPayingId(null);
+            setProviderError(null);
+          }}
+          title="Pay deposit"
+          context={`${paying.propertyTitle} · ${paying.ownerName}`}
+          owed={payingDeposit}
+          owedLabel="deposit"
+          itemLabel="Deposit"
+          receiverLine={`The fee goes to the payment company, so the full ${formatCurrency(payingDeposit)} is held for this purchase.`}
+          protection={SALE_DEPOSIT_PROTECTION}
+          providers={providers}
+          providerError={providerError}
+          busy={depositMutation.isPending}
+          onPay={() => depositMutation.mutate({ id: paying.id, provider: providers.provider })}
+        />
+      )}
     </>
   );
 }

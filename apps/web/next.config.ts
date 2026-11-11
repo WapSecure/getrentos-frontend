@@ -45,6 +45,18 @@ const nextConfig: NextConfig = {
   async redirects() {
     // Old renter URLs redirect to the tab of the hub they were merged into.
     return [
+      // Representatives cover every purchase now, not only land, so they left /land (which LAND_MODE can switch off).
+      {
+        source: '/buyer/land/representatives',
+        destination: '/buyer/representatives',
+        permanent: false,
+      },
+      { source: '/land/representing', destination: '/representing', permanent: false },
+      {
+        source: '/land/representing/transactions/:txId',
+        destination: '/representing/transactions/:txId',
+        permanent: false,
+      },
       { source: '/renter/lease', destination: '/renter/home?tab=lease', permanent: true },
       { source: '/renter/documents', destination: '/renter/home?tab=documents', permanent: true },
       {

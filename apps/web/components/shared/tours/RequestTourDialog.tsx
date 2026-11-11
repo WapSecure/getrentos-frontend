@@ -16,10 +16,7 @@ import {
 } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { VISIT_ROUTES } from '@/lib/constants/visitRoutes';
-import {
-  landRepresentativeKeys,
-  landRepresentativeService,
-} from '@/services/landRepresentativeService';
+import { representativeKeys, representativeService } from '@/services/representativeService';
 import { siteTourKeys, siteTourService } from '@/services/siteTourService';
 import { TOUR_DISCLAIMER, type TourPlace } from '@/types/siteTour';
 import { browserTimeZone, TimeZoneSelect } from '@/components/shared/forms/TimeZoneSelect';
@@ -54,8 +51,8 @@ export const RequestTourDialog = ({
 
   // Representatives are a land feature for now.
   const reps = useQuery({
-    queryKey: landRepresentativeKeys.mine,
-    queryFn: () => unwrap(landRepresentativeService.mine()),
+    queryKey: representativeKeys.mine,
+    queryFn: () => unwrap(representativeService.mine()),
     enabled: open && place === 'land',
     retry: false,
   });

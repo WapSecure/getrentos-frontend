@@ -18,10 +18,7 @@ import {
 import { UserPlus } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
-import {
-  landRepresentativeKeys,
-  landRepresentativeService,
-} from '@/services/landRepresentativeService';
+import { representativeKeys, representativeService } from '@/services/representativeService';
 import {
   REPRESENTATIVE_RELATIONSHIP_LABELS,
   REPRESENTATIVE_SCOPE_LABELS,
@@ -126,13 +123,13 @@ export const RepresentativesManager = () => {
   );
 
   const list = useQuery({
-    queryKey: landRepresentativeKeys.mine,
-    queryFn: () => unwrap(landRepresentativeService.mine()),
+    queryKey: representativeKeys.mine,
+    queryFn: () => unwrap(representativeService.mine()),
   });
   const appoint = useMutation({
     mutationFn: () =>
       unwrap(
-        landRepresentativeService.appoint({
+        representativeService.appoint({
           email,
           relationship: relationship as RepresentativeRelationship,
           scopes,
@@ -140,7 +137,7 @@ export const RepresentativesManager = () => {
         })
       ),
     onSuccess: (next) => {
-      queryClient.setQueryData(landRepresentativeKeys.mine, next);
+      queryClient.setQueryData(representativeKeys.mine, next);
       setEmail('');
       setRelationship('');
       setScopes(['VIEW']);
@@ -151,9 +148,9 @@ export const RepresentativesManager = () => {
   });
   const revoke = useMutation({
     mutationFn: (v: { id: string; reason: string }) =>
-      unwrap(landRepresentativeService.revoke(v.id, v.reason)),
+      unwrap(representativeService.revoke(v.id, v.reason)),
     onSuccess: (next) => {
-      queryClient.setQueryData(landRepresentativeKeys.mine, next);
+      queryClient.setQueryData(representativeKeys.mine, next);
       setToast({ message: 'Appointment ended.', variant: 'success' });
     },
     onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),

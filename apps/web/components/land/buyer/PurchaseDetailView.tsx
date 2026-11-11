@@ -42,9 +42,9 @@ import {
 import { ReportLandProblemDialog } from '../disputes/ReportLandProblemDialog';
 import { ConditionsPanel } from '../closing/ConditionsPanel';
 import { PerfectionPanel } from '../closing/PerfectionPanel';
-import { CoApprovalCard } from '../representatives/CoApprovalCard';
+import { CoApprovalCard } from '@/components/shared/representatives/CoApprovalCard';
 import { BuyerEstateInfrastructure } from '../estate-infrastructure/BuyerEstateInfrastructure';
-import { landRepresentativeKeys } from '@/services/landRepresentativeService';
+import { representativeKeys } from '@/services/representativeService';
 
 const Line = ({ label, value, strong }: { label: string; value: string; strong?: boolean }) => (
   <div className={`flex justify-between gap-3 py-1.5 ${strong ? 'font-semibold' : ''}`}>
@@ -134,7 +134,7 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
         'success'
       );
       queryClient.invalidateQueries({
-        queryKey: landRepresentativeKeys.coApproval({ purchaseId }),
+        queryKey: representativeKeys.coApproval({ purchaseId }),
       });
     },
     onError: (reason: Error) => notify(reason.message, 'error'),

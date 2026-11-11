@@ -163,6 +163,12 @@ export interface LandMilestone {
   note?: string;
   confirmedAt?: string;
   disputeReason?: string;
+  /** Expected by (built homes). */
+  dueDate?: string;
+  /** When an accredited professional checked the reported step. */
+  verifiedAt?: string;
+  /** 0 on time, 1 late, 2 more than 30 days late. */
+  escalationLevel?: number;
 }
 
 export interface LandInstallment {
