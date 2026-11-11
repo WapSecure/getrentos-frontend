@@ -1,6 +1,6 @@
 # Sureground Diaspora Invest: assessment, requirements and plan
 
-Status: **M0 done; M1 in progress** · Started 2026-11-11
+Status: **M0–M2 done; M3 next** · Started 2026-11-11
 
 This is the working document for the Diaspora Invest programme. It records what the code already
 does (checked in the code, not taken from older docs), what is missing, the decisions only the
@@ -348,7 +348,12 @@ timeliness, repeat investment. None is optimised at the expense of investor prot
 
 ## 12. Progress log
 
-| Date       | Milestone | What changed                                                                                        | Evidence                 |
-| ---------- | --------- | --------------------------------------------------------------------------------------------------- | ------------------------ |
-| 2026-11-11 | M0        | Assessment, requirements, architecture and decision list written                                    | This document            |
-| 2026-11-11 | M0        | Owner decided D1 (indicative currency only), D2 (both time zones), D10 (umbrella name); M1 approved | Owner answers in session |
+| Date       | Milestone | What changed                                                                                                                                                                                                                                                | Evidence                                                                               |
+| ---------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| 2026-11-11 | M0        | Assessment, requirements, architecture and decision list written                                                                                                                                                                                            | This document                                                                          |
+| 2026-11-11 | M0        | Owner decided D1 (indicative currency only), D2 (both time zones), D10 (umbrella name); M1 approved                                                                                                                                                         | Owner answers in session                                                               |
+| 2026-11-11 | M1        | Investor profile, risk acknowledgement and overview API (backend #149); public /diaspora page, onboarding and investor workspace (web #117); indicative FX service and component, inactive until an Open Exchange Rates key is set (backend #150, web #118) | Merged; reviewed in the VS Code browser; flag `DIASPORA_INVEST_ENABLED` off by default |
+| 2026-11-11 | M1        | Shared Disclosure (FAQ), MarketingIconTile, CTA props (web #120); shared CheckboxGroup replacing 8 hand-built groups (web #121)                                                                                                                             | Merged after browser review                                                            |
+| 2026-11-11 | M2        | Smile ID passport + liveness (sandbox), staff review of foreign address proof and bank statements, investor tier 3 rule (backend #153); web/backoffice screens (web #125); deadlines end on the due day (backend #157)                                      | Merged; staff screen type-checked only (test admin 2FA refused)                        |
+| 2026-11-11 | M2        | Verification summary derived from diligence + publication gate, built-home diligence on the land case model, neutral professional routes (backend #161); summary card and shared diligence badge (web #129)                                                 | Merged; migration 20261111210000 applied after pg_dump                                 |
+| 2026-11-11 | M2        | Video tours and pre-purchase inspections for homes, consent-gated recording (off by default), geotagged agent photos, one haversine and one on-site radius policy (backend #162); shared tour and inspection screens, shared TimeZoneSelect (web #130)      | Merged; migration 20261111220000 applied after pg_dump                                 |
