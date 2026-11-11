@@ -6,6 +6,7 @@ import {
   rentalQuery,
   saleQuery,
   saleToCard,
+  similarPath,
   toQueryString,
   type PublicListingCard,
   type PublicMarket,
@@ -69,5 +70,15 @@ export const publicMarketService = {
 
   list(market: PublicMarket, filters: PublicMarketFilters = {}) {
     return market === 'rent' ? this.rentals(filters) : this.sales(filters);
+  },
+
+  /** Ranked on the server: same market, nearby, a comparable price and about the same bedrooms. */
+  similar(market: PublicMarket, id: string, limit = 3): Promise<ApiResponse<PublicListingCard[]>> {
+    return safeCall(async () => {
+      const items = await authFetch<Array<RentApiItem & SaleApiItem>>(
+        similarPath(market, id, limit)
+      );
+      return items.map(market === 'rent' ? rentToCard : saleToCard);
+    });
   },
 };

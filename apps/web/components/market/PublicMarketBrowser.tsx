@@ -29,9 +29,18 @@ import { SaveListingButton } from './SaveListingButton';
 import { ListingComparisonDialog } from './ListingComparisonDialog';
 import { TrustChainBadge } from '@/components/shared/trust/TrustChainBadge';
 import { track } from '@/lib/analytics';
+import {
+  DiscoveryViewToggle,
+  MapAreaNotice,
+  MapDiscoveryView,
+} from '@/components/discovery/MapDiscoveryView';
+import { formatAreaParam, parseAreaParam, parseView, type MapArea } from '@/lib/mapArea';
+import { urlParam, useSyncUrlState } from '@/hooks/useUrlState';
 
 // Shared with the server component that pre-renders the first page, so both ask for the same page size.
 const PAGE_SIZE = PUBLIC_MARKET_PAGE_SIZE;
+/** More pins per page on the map; still a page, so a slow phone is never asked for everything. */
+const MAP_PAGE_SIZE = 24;
 
 const SORTS: Record<PublicMarket, { value: string; label: string }[]> = {
   rent: [
@@ -65,6 +74,8 @@ const MarketListingCard = ({
   compared,
   compareDisabled,
   onCompare,
+  onMap = false,
+  selected = false,
 }: {
   listing: PublicListingCard;
   market: PublicMarket;
@@ -73,11 +84,20 @@ const MarketListingCard = ({
   compared: boolean;
   compareDisabled: boolean;
   onCompare: (listing: PublicListingCard) => void;
+  onMap?: boolean;
+  selected?: boolean;
 }) => {
   const href = detailHref(market, listing.id);
-  const event = { listingId: listing.id, market, surface: `${market}_list`, props: { position } };
+  const event = {
+    listingId: listing.id,
+    market,
+    surface: `${market}_${onMap ? 'map' : 'list'}`,
+    props: { position, variant: onMap ? 'map' : 'grid' },
+  };
   return (
     <ListingCard
+      variant={onMap ? 'map' : 'grid'}
+      selected={selected}
       href={href}
       onVisible={() => track({ name: 'property_impression', ...event })}
       onOpen={() => track({ name: 'property_card_click', ...event })}
@@ -100,18 +120,20 @@ const MarketListingCard = ({
       }}
       actions={<SaveListingButton listingId={listing.id} returnPath={href} appearance="card" />}
       footer={
-        <Button
-          variant="outline"
-          rounded="md"
-          size="sm"
-          disabled={compareDisabled}
-          aria-pressed={compared}
-          aria-label={`${compared ? 'Remove from compare' : 'Add to compare'}: ${listing.title}`}
-          icon={<Columns3 className="h-4 w-4" aria-hidden="true" />}
-          onClick={() => onCompare(listing)}
-        >
-          {compared ? 'Remove from compare' : 'Add to compare'}
-        </Button>
+        onMap ? undefined : (
+          <Button
+            variant="outline"
+            rounded="md"
+            size="sm"
+            disabled={compareDisabled}
+            aria-pressed={compared}
+            aria-label={`${compared ? 'Remove from compare' : 'Add to compare'}: ${listing.title}`}
+            icon={<Columns3 className="h-4 w-4" aria-hidden="true" />}
+            onClick={() => onCompare(listing)}
+          >
+            {compared ? 'Remove from compare' : 'Add to compare'}
+          </Button>
+        )
       }
     />
   );
@@ -140,6 +162,18 @@ const NO_REFINEMENTS: Refinements = {
   petsAllowed: false,
   monthlyPayment: false,
 };
+
+const refinementsFromUrl = (params: URLSearchParams): Refinements => ({
+  minPrice: urlParam.text(params, 'minPrice'),
+  maxPrice: urlParam.text(params, 'maxPrice'),
+  bedrooms: urlParam.text(params, 'beds'),
+  bathrooms: urlParam.text(params, 'baths'),
+  propertyType: urlParam.text(params, 'type'),
+  verifiedOnly: urlParam.flag(params, 'verified'),
+  furnished: urlParam.flag(params, 'furnished'),
+  petsAllowed: urlParam.flag(params, 'pets'),
+  monthlyPayment: urlParam.flag(params, 'monthly'),
+});
 
 const countRefinements = (r: Refinements) =>
   Object.values(r).filter((v) => (typeof v === 'boolean' ? v : v !== '')).length;
@@ -182,14 +216,50 @@ export const PublicMarketBrowser = ({
   const searchParams = useSearchParams();
   const estateFromUrl = searchParams.get('estate')?.trim() ?? '';
 
-  const [search, setSearch] = useState('');
+  // The first render reads the link; after that React owns the state and mirrors it back to the URL.
+  const [search, setSearch] = useState(() => urlParam.text(searchParams, 'q'));
   const debouncedSearch = useDebouncedValue(search.trim(), 350);
-  const [refine, setRefine] = useState<Refinements>(NO_REFINEMENTS);
+  const [refine, setRefine] = useState<Refinements>(() => refinementsFromUrl(searchParams));
   const [showFilters, setShowFilters] = useState(false);
-  const [sort, setSort] = useState(SORTS[market][0].value);
-  const [page, setPage] = useState(1);
+  const [sort, setSort] = useState(() =>
+    urlParam.oneOf(
+      searchParams,
+      'sort',
+      SORTS[market].map((s) => s.value),
+      SORTS[market][0].value
+    )
+  );
+  const [page, setPage] = useState(() => urlParam.page(searchParams));
+  const [view, setView] = useState(() => parseView(searchParams.get('view')));
+  const [area, setArea] = useState<MapArea | undefined>(() =>
+    parseAreaParam(searchParams.get('area'))
+  );
+  const [selectedId, setSelectedId] = useState<string | undefined>(
+    () => searchParams.get('selected') || undefined
+  );
   const [compared, setCompared] = useState<PublicListingCard[]>([]);
   const [comparisonOpen, setComparisonOpen] = useState(false);
+
+  useSyncUrlState(
+    {
+      q: debouncedSearch,
+      minPrice: refine.minPrice,
+      maxPrice: refine.maxPrice,
+      beds: refine.bedrooms,
+      baths: refine.bathrooms,
+      type: refine.propertyType,
+      verified: refine.verifiedOnly,
+      furnished: market === 'rent' && refine.furnished,
+      pets: market === 'rent' && refine.petsAllowed,
+      monthly: market === 'rent' && refine.monthlyPayment,
+      sort,
+      page,
+      view,
+      area: area ? formatAreaParam(area) : undefined,
+      selected: view === 'map' ? selectedId : undefined,
+    },
+    { sort: SORTS[market][0].value, page: 1, view: 'grid' }
+  );
 
   const activeCount = countRefinements(refine);
   const priceRangeInvalid =
@@ -201,7 +271,10 @@ export const PublicMarketBrowser = ({
     !estateFromUrl &&
     page === 1 &&
     sort === SORTS[market][0].value &&
-    activeCount === 0;
+    activeCount === 0 &&
+    view === 'grid' &&
+    !area;
+  const pageSize = view === 'map' ? MAP_PAGE_SIZE : PAGE_SIZE;
 
   const filters = {
     search: debouncedSearch || undefined,
@@ -221,7 +294,8 @@ export const PublicMarketBrowser = ({
       : {}),
     sort,
     page,
-    pageSize: PAGE_SIZE,
+    pageSize,
+    area,
   };
 
   const update = <K extends keyof Refinements>(key: K, value: Refinements[K]) => {
@@ -241,6 +315,26 @@ export const PublicMarketBrowser = ({
   const listings = data?.items ?? [];
   const total = data?.total ?? 0;
   const noun = NOUNS[market];
+
+  const changeView = (next: typeof view) => {
+    setView(next);
+    setPage(1);
+    if (next === 'grid') setSelectedId(undefined);
+  };
+  const searchArea = (next: MapArea) => {
+    setArea(next);
+    setPage(1);
+    setSelectedId(undefined);
+  };
+  const clearArea = () => {
+    setArea(undefined);
+    setPage(1);
+  };
+  const pagination = (
+    <div className="mt-8">
+      <Pagination page={page} pageSize={pageSize} total={total} onPageChange={setPage} />
+    </div>
+  );
   const toggleCompare = (listing: PublicListingCard) => {
     setCompared((current) =>
       current.some((item) => item.id === listing.id)
@@ -319,7 +413,17 @@ export const PublicMarketBrowser = ({
             </span>
           )}
         </Button>
+        <DiscoveryViewToggle
+          view={view}
+          onChange={changeView}
+          className="self-start sm:ml-auto sm:self-center"
+        />
       </div>
+      {area && (
+        <div className="mt-3">
+          <MapAreaNotice onClear={clearArea} />
+        </div>
+      )}
 
       {showFilters && (
         <div
@@ -442,6 +546,47 @@ export const PublicMarketBrowser = ({
             description="Something went wrong on our side. Please try again in a moment."
           />
         </div>
+      ) : view === 'map' ? (
+        <div className="mt-6">
+          <p className="mb-3 text-sm text-muted-foreground" aria-live="polite">
+            {total} {total === 1 ? noun.one : noun.many}
+            {area ? ' in this area' : ''}
+          </p>
+          <MapDiscoveryView
+            items={listings}
+            title={(l) => l.title}
+            price={(l) => l.price}
+            area={area}
+            onSearchArea={searchArea}
+            selectedId={selectedId}
+            onSelect={setSelectedId}
+            empty={
+              <EmptyState
+                icon={Home}
+                title={area ? 'Nothing listed in this area' : 'No listings match that'}
+                description={
+                  area
+                    ? 'Move the map and search again, or clear the map area.'
+                    : 'Try a different area, widen the price range, or clear a filter.'
+                }
+              />
+            }
+            renderCard={(listing, { selected, position }) => (
+              <MarketListingCard
+                listing={listing}
+                market={market}
+                eager={position < 3}
+                position={position}
+                onMap
+                selected={selected}
+                compared={false}
+                compareDisabled
+                onCompare={toggleCompare}
+              />
+            )}
+            footer={total > pageSize ? pagination : null}
+          />
+        </div>
       ) : listings.length === 0 ? (
         <div className="mt-10">
           <EmptyState
@@ -480,9 +625,7 @@ export const PublicMarketBrowser = ({
               />
             ))}
           </div>
-          <div className="mt-8">
-            <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPageChange={setPage} />
-          </div>
+          {pagination}
         </>
       )}
       {compared.length > 0 && (

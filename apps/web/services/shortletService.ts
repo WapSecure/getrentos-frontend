@@ -40,6 +40,7 @@ import type {
 } from '@/types/shortlet';
 import { providerQuery } from '@/services/paymentStatusService';
 import type { PaymentProvider } from '@/types/payments';
+import { areaQuery, type MapArea } from '@/lib/mapArea';
 
 export interface ShortletListParams {
   amenities?: string[];
@@ -66,6 +67,8 @@ export interface ShortletListParams {
   /** Only `true` is sent; unticked means "don't filter". */
   instantBooking?: boolean;
   verifiedOnly?: boolean;
+  /** Only stays shown inside this map area. */
+  area?: MapArea;
 }
 
 const listQuery = (params: ShortletListParams): string =>
@@ -90,6 +93,7 @@ const listQuery = (params: ShortletListParams): string =>
     checkIn: params.checkIn,
     checkOut: params.checkOut,
     estate: params.estate,
+    ...areaQuery(params.area),
   });
 
 /** Whole naira. */

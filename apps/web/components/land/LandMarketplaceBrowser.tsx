@@ -1,6 +1,14 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import {
+  DiscoveryViewToggle,
+  MapAreaNotice,
+  MapDiscoveryView,
+} from '@/components/discovery/MapDiscoveryView';
+import { formatAreaParam, parseAreaParam, parseView, type MapArea } from '@/lib/mapArea';
+import { urlParam, useSyncUrlState } from '@/hooks/useUrlState';
 import { track } from '@/lib/analytics';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -70,6 +78,8 @@ interface LandMarketplaceBrowserProps {
 }
 
 const PAGE_SIZE = 9;
+const MAP_PAGE_SIZE = 24;
+const LAND_SORTS = ['newest', 'price_asc', 'price_desc'] as const;
 
 const stateFilterOptions = [
   { value: '', label: 'All states' },
@@ -117,22 +127,56 @@ const AREA_OPTIONS = [
 
 export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) => {
   const queryClient = useQueryClient();
-  const [search, setSearch] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const searchParams = useSearchParams();
+  // The first render reads the link; after that React owns the state and mirrors it back to the URL.
+  const [search, setSearch] = useState(() => urlParam.text(searchParams, 'q'));
+  const [debouncedSearch, setDebouncedSearch] = useState(() => urlParam.text(searchParams, 'q'));
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search.trim()), 350);
     return () => clearTimeout(t);
   }, [search]);
-  const [titleType, setTitleType] = useState('');
-  const [minArea, setMinArea] = useState('');
-  const [roadAccess, setRoadAccess] = useState(false);
-  const [minAssuranceTier, setMinAssuranceTier] = useState('');
-  const [city, setCity] = useState('');
-  const [state, setState] = useState('');
-  const [minPrice, setMinPrice] = useState('');
-  const [maxPrice, setMaxPrice] = useState('');
-  const [sort, setSort] = useState<Sort>('newest');
-  const [page, setPage] = useState(1);
+  const [titleType, setTitleType] = useState(() => urlParam.text(searchParams, 'title'));
+  const [minArea, setMinArea] = useState(() => urlParam.text(searchParams, 'minArea'));
+  const [roadAccess, setRoadAccess] = useState(() => urlParam.flag(searchParams, 'road'));
+  const [minAssuranceTier, setMinAssuranceTier] = useState(() =>
+    urlParam.text(searchParams, 'assurance')
+  );
+  const [city, setCity] = useState(() => urlParam.text(searchParams, 'city'));
+  const [state, setState] = useState(() => urlParam.text(searchParams, 'state'));
+  const [minPrice, setMinPrice] = useState(() => urlParam.text(searchParams, 'minPrice'));
+  const [maxPrice, setMaxPrice] = useState(() => urlParam.text(searchParams, 'maxPrice'));
+  const [sort, setSort] = useState<Sort>(() =>
+    urlParam.oneOf(searchParams, 'sort', LAND_SORTS, 'newest')
+  );
+  const [page, setPage] = useState(() => urlParam.page(searchParams));
+  const [view, setView] = useState(() => parseView(searchParams.get('view')));
+  const [area, setArea] = useState<MapArea | undefined>(() =>
+    parseAreaParam(searchParams.get('area'))
+  );
+  const [selectedId, setSelectedId] = useState<string | undefined>(
+    () => searchParams.get('selected') || undefined
+  );
+  const pageSize = view === 'map' ? MAP_PAGE_SIZE : PAGE_SIZE;
+
+  useSyncUrlState(
+    {
+      q: debouncedSearch,
+      state,
+      city,
+      minPrice,
+      maxPrice,
+      title: titleType,
+      minArea,
+      assurance: minAssuranceTier,
+      road: roadAccess,
+      sort,
+      page,
+      view,
+      area: area ? formatAreaParam(area) : undefined,
+      selected: view === 'map' ? selectedId : undefined,
+    },
+    { sort: 'newest', page: 1, view: 'grid' }
+  );
   const [chosenListing, setActiveListing] = useState<PublicLandListing | null>(null);
   const [savedListingIds, setSavedListingIds] = useState<string[]>([]);
   const toast = useToast();
@@ -150,9 +194,12 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
       maxPrice: maxPrice ? Number(maxPrice) : undefined,
       sort,
       page,
-      pageSize: PAGE_SIZE,
+      pageSize,
+      area,
     }),
     [
+      pageSize,
+      area,
       city,
       maxPrice,
       minPrice,
@@ -232,6 +279,72 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
 
   const buyerRoute = (path: string) =>
     canOffer ? path : needsSignIn ? ROUTES.LOGIN : ROUTES.BUYER_LAND;
+
+  const landCard = (
+    listing: PublicLandListing,
+    index: number,
+    { onMap = false, selected = false }: { onMap?: boolean; selected?: boolean } = {}
+  ) => {
+    const isSaved = savedListingIds.includes(listing.id);
+    return (
+      <ListingCard
+        key={listing.id}
+        variant={onMap ? 'map' : 'grid'}
+        selected={selected}
+        headingLevel="h2"
+        onVisible={() =>
+          track({
+            name: 'property_impression',
+            listingId: listing.id,
+            market: 'land',
+            surface: onMap ? `land_${mode}_map` : `land_${mode}`,
+            props: { position: index, variant: onMap ? 'map' : 'grid' },
+          })
+        }
+        onOpen={() => {
+          track({
+            name: 'property_card_click',
+            listingId: listing.id,
+            market: 'land',
+            surface: onMap ? `land_${mode}_map` : `land_${mode}`,
+            props: { position: index, variant: onMap ? 'map' : 'grid' },
+          });
+          setActiveListing(listing);
+        }}
+        title={listing.title}
+        location={`${listing.city}, ${listing.state}`}
+        price={listing.askingPrice}
+        priceCompact
+        image={listing.coverImageUrl}
+        imageAlt={listing.title}
+        eager={index < 3}
+        status="Land"
+        badges={
+          <>
+            <Badge variant="success" icon={<ShieldCheck className="h-3.5 w-3.5" />}>
+              Diligence verified
+            </Badge>
+            <AssuranceTierBadge tier={listing.diligence?.assuranceTier} />
+          </>
+        }
+        facts={{
+          size: areaLabel(listing),
+          extra: [listing.parcel.zoning, listing.parcel.roadAccess ? 'Road access' : null],
+        }}
+        meta={parcelTitle(listing) || undefined}
+        actions={
+          mode === 'buyer' ? (
+            <ListingCardAction
+              label={isSaved ? 'Remove from saved listings' : 'Save land listing'}
+              aria-pressed={isSaved}
+              icon={<Heart fill={isSaved ? 'currentColor' : 'none'} />}
+              onClick={() => toggleSaved(listing.id)}
+            />
+          ) : undefined
+        }
+      />
+    );
+  };
 
   return (
     <>
@@ -371,14 +484,34 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
             {isLoading ? (
               <Skeleton className="inline-block h-4 w-44 align-middle" />
             ) : (
-              `${total} verified land ${total === 1 ? 'listing' : 'listings'}`
+              `${total} verified land ${total === 1 ? 'listing' : 'listings'}${area ? ' in this area' : ''}`
             )}
           </p>
-          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-            <ArrowUpDown className="h-3.5 w-3.5" />
-            Payment protection starts once an offer is accepted
-          </span>
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+              <ArrowUpDown className="h-3.5 w-3.5" />
+              Payment protection starts once an offer is accepted
+            </span>
+            <DiscoveryViewToggle
+              view={view}
+              onChange={(next) => {
+                setView(next);
+                setPage(1);
+                if (next === 'grid') setSelectedId(undefined);
+              }}
+            />
+          </div>
         </div>
+        {area && (
+          <div className="mb-4">
+            <MapAreaNotice
+              onClear={() => {
+                setArea(undefined);
+                setPage(1);
+              }}
+            />
+          </div>
+        )}
 
         {isError && !data ? (
           <PageErrorState
@@ -395,6 +528,36 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
               <Skeleton key={index} className="h-[23rem] rounded-2xl" />
             ))}
           </div>
+        ) : view === 'map' ? (
+          <MapDiscoveryView
+            items={listings}
+            title={(l) => l.title}
+            price={(l) => l.askingPrice}
+            area={area}
+            onSearchArea={(next) => {
+              setArea(next);
+              setPage(1);
+              setSelectedId(undefined);
+            }}
+            selectedId={selectedId}
+            onSelect={setSelectedId}
+            empty={
+              <EmptyState
+                icon={Trees}
+                title={
+                  area ? 'No verified land in this area' : 'No verified land matches these filters'
+                }
+                description={
+                  area
+                    ? 'Move the map and search again, or clear the map area.'
+                    : 'Try another city or a wider price range.'
+                }
+              />
+            }
+            renderCard={(listing, { selected, position }) =>
+              landCard(listing, position, { onMap: true, selected })
+            }
+          />
         ) : listings.length === 0 ? (
           <EmptyState
             icon={Trees}
@@ -403,68 +566,7 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
           />
         ) : (
           <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
-            {listings.map((listing, index) => {
-              const isSaved = savedListingIds.includes(listing.id);
-              return (
-                <ListingCard
-                  key={listing.id}
-                  headingLevel="h2"
-                  onVisible={() =>
-                    track({
-                      name: 'property_impression',
-                      listingId: listing.id,
-                      market: 'land',
-                      surface: `land_${mode}`,
-                      props: { position: index },
-                    })
-                  }
-                  onOpen={() => {
-                    track({
-                      name: 'property_card_click',
-                      listingId: listing.id,
-                      market: 'land',
-                      surface: `land_${mode}`,
-                      props: { position: index },
-                    });
-                    setActiveListing(listing);
-                  }}
-                  title={listing.title}
-                  location={`${listing.city}, ${listing.state}`}
-                  price={listing.askingPrice}
-                  priceCompact
-                  image={listing.coverImageUrl}
-                  imageAlt={listing.title}
-                  eager={index < 3}
-                  status="Land"
-                  badges={
-                    <>
-                      <Badge variant="success" icon={<ShieldCheck className="h-3.5 w-3.5" />}>
-                        Diligence verified
-                      </Badge>
-                      <AssuranceTierBadge tier={listing.diligence?.assuranceTier} />
-                    </>
-                  }
-                  facts={{
-                    size: areaLabel(listing),
-                    extra: [
-                      listing.parcel.zoning,
-                      listing.parcel.roadAccess ? 'Road access' : null,
-                    ],
-                  }}
-                  meta={parcelTitle(listing) || undefined}
-                  actions={
-                    mode === 'buyer' ? (
-                      <ListingCardAction
-                        label={isSaved ? 'Remove from saved listings' : 'Save land listing'}
-                        aria-pressed={isSaved}
-                        icon={<Heart fill={isSaved ? 'currentColor' : 'none'} />}
-                        onClick={() => toggleSaved(listing.id)}
-                      />
-                    ) : undefined
-                  }
-                />
-              );
-            })}
+            {listings.map((listing, index) => landCard(listing, index))}
           </div>
         )}
 
@@ -472,7 +574,7 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
           <Pagination
             className="mt-8"
             page={page}
-            pageSize={PAGE_SIZE}
+            pageSize={pageSize}
             total={total}
             onPageChange={setPage}
           />

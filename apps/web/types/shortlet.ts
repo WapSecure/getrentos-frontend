@@ -47,6 +47,10 @@ export interface ShortletListing {
   city: string;
   state: string;
   address: string;
+  /** Always the approximate area for a stay; the exact spot comes with a paid booking. */
+  latitude?: number;
+  longitude?: number;
+  locationPrecision?: 'exact' | 'approximate';
   coverImageUrl?: string;
   imageKeys: string[];
   images: string[];

@@ -173,15 +173,7 @@ export async function ShowroomPage({
           <ShowroomAside listing={listing} returnPath={path} />
         </div>
 
-        {market !== 'land' ? (
-          <SimilarListings
-            listingId={listing.id}
-            market={market}
-            location={listing.location}
-            price={listing.price}
-            bedrooms={listing.bedrooms}
-          />
-        ) : null}
+        <SimilarListings listingId={listing.id} market={market} />
         {extra}
         {!listing.underOffer && (
           <>

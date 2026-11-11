@@ -3,6 +3,7 @@ import { srcSetOf, type ImageVariant } from '@sureground/shared/showroom';
 
 // Type-only import, so the module stays server-safe.
 import type { PropertyTrustChain } from '@/types/renter';
+import { areaQuery, type MapArea } from '@/lib/mapArea';
 
 export const PUBLIC_MARKET_PAGE_SIZE = 12;
 
@@ -20,6 +21,10 @@ export interface PublicListingCard {
   verified: boolean;
   image?: string;
   imageSrcSet?: string;
+  /** Only where the API makes the location public; approximate until the property is verified. */
+  latitude?: number;
+  longitude?: number;
+  locationPrecision?: 'exact' | 'approximate';
 }
 
 export type PublicMarket = 'rent' | 'sale';
@@ -40,6 +45,8 @@ export interface PublicMarketFilters {
   sort?: string;
   page?: number;
   pageSize?: number;
+  /** Only listings shown inside this map area. */
+  area?: MapArea;
 }
 
 // An unticked filter means "don't filter", not "only false".
@@ -59,6 +66,9 @@ export interface RentApiItem {
   verified: boolean;
   image?: string;
   imageVariants?: ImageVariant[];
+  latitude?: number;
+  longitude?: number;
+  locationPrecision?: 'exact' | 'approximate';
 }
 
 export interface SaleApiItem {
@@ -73,6 +83,9 @@ export interface SaleApiItem {
   isVerified?: boolean;
   coverImageUrl?: string;
   imageVariants?: ImageVariant[];
+  latitude?: number;
+  longitude?: number;
+  locationPrecision?: 'exact' | 'approximate';
 }
 
 // Must match the browser's default, or the server-rendered first page describes a different query.
@@ -85,6 +98,20 @@ const money = (value: unknown): number => {
   const n = typeof value === 'string' ? Number(value) : (value as number);
   return Number.isFinite(n) ? n : 0;
 };
+
+// Without a stated precision the point is treated as approximate, the safer reading.
+const pointOf = (item: {
+  latitude?: number;
+  longitude?: number;
+  locationPrecision?: 'exact' | 'approximate';
+}): Pick<PublicListingCard, 'latitude' | 'longitude' | 'locationPrecision'> =>
+  typeof item.latitude === 'number' && typeof item.longitude === 'number'
+    ? {
+        latitude: item.latitude,
+        longitude: item.longitude,
+        locationPrecision: item.locationPrecision ?? 'approximate',
+      }
+    : {};
 
 export const rentToCard = (item: RentApiItem): PublicListingCard => ({
   id: item.id,
@@ -100,6 +127,7 @@ export const rentToCard = (item: RentApiItem): PublicListingCard => ({
   trustChain: item.trustChain,
   image: item.image || undefined,
   imageSrcSet: srcSetOf(item.imageVariants),
+  ...pointOf(item),
 });
 
 export const saleToCard = (item: SaleApiItem): PublicListingCard => ({
@@ -113,6 +141,7 @@ export const saleToCard = (item: SaleApiItem): PublicListingCard => ({
   verified: Boolean(item.isVerified),
   image: item.coverImageUrl || undefined,
   imageSrcSet: srcSetOf(item.imageVariants),
+  ...pointOf(item),
 });
 
 // Only the parameters each endpoint declares: the global whitelist rejects extras.
@@ -132,6 +161,7 @@ export const rentalQuery = (filters: PublicMarketFilters) => ({
   sortBy: filters.sort,
   page: filters.page,
   pageSize: filters.pageSize,
+  ...areaQuery(filters.area),
 });
 
 export const saleQuery = (filters: PublicMarketFilters) => ({
@@ -147,6 +177,7 @@ export const saleQuery = (filters: PublicMarketFilters) => ({
   sort: filters.sort,
   page: filters.page,
   pageSize: filters.pageSize,
+  ...areaQuery(filters.area),
 });
 
 export const toQueryString = (params: Record<string, unknown>): string => {
@@ -165,3 +196,7 @@ export const firstPagePath = (market: PublicMarket): string => {
     ? `/rentals${toQueryString(rentalQuery(filters))}`
     : `/marketplace/listings${toQueryString(saleQuery(filters))}`;
 };
+
+/** The server's similar-listings route for a market. */
+export const similarPath = (market: PublicMarket, id: string, limit: number): string =>
+  `${market === 'rent' ? '/rentals' : '/marketplace/listings'}/${encodeURIComponent(id)}/similar?limit=${limit}`;

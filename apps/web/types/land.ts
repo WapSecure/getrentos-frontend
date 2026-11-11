@@ -190,6 +190,10 @@ export interface PublicLandListing {
   state: string;
   country?: string;
   listedDate?: string;
+  /** Only where public; approximate until the property is verified. */
+  latitude?: number;
+  longitude?: number;
+  locationPrecision?: 'exact' | 'approximate';
   coverImageUrl?: string | null;
   ownerVerified?: boolean;
   parcel: PublicLandParcel;
@@ -232,6 +236,7 @@ export interface PublicLandListingApi {
   addressHidden?: boolean;
   latitude?: number;
   longitude?: number;
+  locationPrecision?: 'exact' | 'approximate';
   coverImageUrl?: string;
   galleryImageUrls?: string[];
   description: string;
