@@ -39,6 +39,8 @@ const ALL_PERMISSIONS: AdminPermission[] = [
   'managed.view',
   'managed.operate',
   'ai.observe',
+  // Curating showroom collections across owners, and marking one sponsored.
+  'collections.manage',
 ];
 
 export const ADMIN_ROLE_DETAILS: Record<
