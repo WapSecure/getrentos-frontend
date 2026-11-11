@@ -1,5 +1,10 @@
 // Pure imports only: server components pre-render `/rent` and `/buy` with it, and the api helpers reach for localStorage.
-import { srcSetOf, type ImageVariant } from '@sureground/shared/showroom';
+import {
+  imagePreviewOf,
+  srcSetOf,
+  type ImagePreview,
+  type ImageVariant,
+} from '@sureground/shared/showroom';
 
 // Type-only import, so the module stays server-safe.
 import type { PropertyTrustChain } from '@/types/renter';
@@ -21,6 +26,7 @@ export interface PublicListingCard {
   verified: boolean;
   image?: string;
   imageSrcSet?: string;
+  imagePreview?: ImagePreview;
   /** Only where the API makes the location public; approximate until the property is verified. */
   latitude?: number;
   longitude?: number;
@@ -66,6 +72,7 @@ export interface RentApiItem {
   verified: boolean;
   image?: string;
   imageVariants?: ImageVariant[];
+  imagePreview?: ImagePreview;
   latitude?: number;
   longitude?: number;
   locationPrecision?: 'exact' | 'approximate';
@@ -83,6 +90,7 @@ export interface SaleApiItem {
   isVerified?: boolean;
   coverImageUrl?: string;
   imageVariants?: ImageVariant[];
+  imagePreview?: ImagePreview;
   latitude?: number;
   longitude?: number;
   locationPrecision?: 'exact' | 'approximate';
@@ -127,6 +135,7 @@ export const rentToCard = (item: RentApiItem): PublicListingCard => ({
   trustChain: item.trustChain,
   image: item.image || undefined,
   imageSrcSet: srcSetOf(item.imageVariants),
+  imagePreview: imagePreviewOf(item.imagePreview),
   ...pointOf(item),
 });
 
@@ -141,6 +150,7 @@ export const saleToCard = (item: SaleApiItem): PublicListingCard => ({
   verified: Boolean(item.isVerified),
   image: item.coverImageUrl || undefined,
   imageSrcSet: srcSetOf(item.imageVariants),
+  imagePreview: imagePreviewOf(item.imagePreview),
   ...pointOf(item),
 });
 

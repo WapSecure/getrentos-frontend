@@ -5,7 +5,7 @@ import type {
   LandTitleType,
   LandTrustLabel,
 } from '@sureground/shared';
-import type { CrsCode, LandBoundaryStatus } from '@sureground/shared';
+import type { CrsCode, ImagePreview, ImageVariant, LandBoundaryStatus } from '@sureground/shared';
 export type LandAreaUnit = 'SQUARE_METERS' | 'ACRE' | 'HECTARE';
 
 export interface LandDiligenceCondition {
@@ -195,6 +195,9 @@ export interface PublicLandListing {
   longitude?: number;
   locationPrecision?: 'exact' | 'approximate';
   coverImageUrl?: string | null;
+  /** List only: resized copies and the cover's size and blurred placeholder. */
+  imageVariants?: ImageVariant[];
+  imagePreview?: ImagePreview;
   ownerVerified?: boolean;
   parcel: PublicLandParcel;
   diligence?: PublicLandDiligence | null;
@@ -238,6 +241,8 @@ export interface PublicLandListingApi {
   longitude?: number;
   locationPrecision?: 'exact' | 'approximate';
   coverImageUrl?: string;
+  imageVariants?: ImageVariant[];
+  imagePreview?: ImagePreview;
   galleryImageUrls?: string[];
   description: string;
   amenities?: string[];

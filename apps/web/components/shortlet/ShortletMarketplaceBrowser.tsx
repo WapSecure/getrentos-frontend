@@ -23,6 +23,7 @@ import {
   ToggleChip,
 } from '@sureground/ui';
 import { BedDouble, ClipboardCheck, Heart, Star, Zap } from '@sureground/icons';
+import { imagePreviewOf, srcSetOf } from '@sureground/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { SHORTLET_AMENITIES } from '@/lib/shortlet/essentials';
 import { shortletService } from '@/services/shortletService';
@@ -223,6 +224,8 @@ export const ShortletMarketplaceBrowser = ({
         price={quote ? quote.total : listing.nightlyRate}
         priceUnit={quote ? 'total' : listing.pricingMode === 'PER_NIGHT' ? 'night' : undefined}
         image={listing.coverImageUrl}
+        imageSrcSet={srcSetOf(listing.imageVariants)}
+        imagePreview={imagePreviewOf(listing.imagePreview)}
         imageAlt={listing.title}
         eager={index < 3}
         status="Shortlet"

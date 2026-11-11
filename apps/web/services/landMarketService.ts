@@ -29,6 +29,8 @@ const mapPublicLand = (listing: PublicLandListingApi): PublicLandListing => ({
   country: listing.country,
   listedDate: listing.publishedAt,
   coverImageUrl: listing.coverImageUrl,
+  imageVariants: listing.imageVariants,
+  imagePreview: listing.imagePreview,
   ownerVerified: listing.isVerified,
   ...(typeof listing.latitude === 'number' && typeof listing.longitude === 'number'
     ? {

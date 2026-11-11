@@ -41,6 +41,7 @@ export function MarketListingCard({
       priceCompact={market === 'land'}
       image={listing.image}
       imageSrcSet={listing.imageSrcSet}
+      imagePreview={listing.imagePreview}
       imageAlt={listing.title}
       eager={eager}
       status={MARKET_STATUS[market]}
