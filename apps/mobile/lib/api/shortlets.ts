@@ -10,6 +10,7 @@ import type {
   ShortletSeason,
 } from './hostShortlets';
 import type { VideoStream } from '@sureground/shared';
+import type { MediaItem } from '@sureground/shared/showroom';
 import { providerQuery, type PaymentProvider } from './paymentStatus';
 
 export type { DisputeMessage, ShortletDispute, ShortletSeason };
@@ -106,6 +107,8 @@ export interface ShortletListing {
   addressHidden?: boolean;
   coverImageUrl?: string;
   images?: string[];
+  /** Photos, video and 360 tour in display order; older responses send only the fields below. */
+  media?: MediaItem[];
   videoUrl?: string;
   /** The uploaded video as an adaptive stream, once encoded. */
   videoStream?: VideoStream;

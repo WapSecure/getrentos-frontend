@@ -332,3 +332,67 @@ describe('public marketplace normalisation', () => {
     ).toBe(true);
   });
 });
+
+describe('listing detail uses the shared showroom mappers', () => {
+  it('rent: media with resized copies, stated fees and the move-in total', async () => {
+    fetchMock.mockResolvedValueOnce({
+      id: 'r1',
+      title: 'Two-bed flat',
+      location: 'Lekki, Lagos',
+      price: 3000000,
+      period: 'year',
+      bedrooms: 2,
+      bathrooms: 2,
+      size: 0,
+      rating: 0,
+      verified: false,
+      image: 'https://cdn.test/old.jpg',
+      serviceCharge: 500000,
+      securityDeposit: 0,
+      furnished: true,
+      media: [
+        {
+          id: 'b',
+          kind: 'image',
+          url: 'https://cdn.test/b.jpg',
+          order: 1,
+          room: 'kitchen',
+          variants: [{ width: 320, url: 'https://cdn.test/b-320.webp' }],
+        },
+        { id: 'a', kind: 'image', url: 'https://cdn.test/a.jpg', order: 0, caption: 'Living' },
+      ],
+    });
+    const d = await publicMarketApi.detail('rent', 'r1');
+    expect(d.media.map((m) => m.id)).toEqual(['a', 'b']);
+    expect(d.media[1]!.variants?.[0]!.width).toBe(320);
+    expect(d.images).toEqual(['https://cdn.test/a.jpg', 'https://cdn.test/b.jpg']);
+    expect(d.costs?.lines.map((l) => l.label)).toEqual([
+      'Rent for the first year',
+      'Service charge',
+    ]);
+    expect(d.costs?.total?.amount).toBe(3500000);
+    // A stated zero deposit is not "missing"; unsent fees are.
+    expect(d.costs?.notStated).toEqual(['Agency fee', 'Legal fee']);
+    expect(d.facts.find((f) => f.label === 'Furnished')?.value).toBe('Yes');
+  });
+
+  it('shortlet: photos, then the video, then an allowed 360 tour; never a made-up one', async () => {
+    fetchMock.mockResolvedValueOnce({
+      id: 's1',
+      listingId: 's1',
+      title: 'Studio',
+      city: 'Lagos',
+      state: 'Lagos',
+      images: ['https://cdn.test/1.jpg'],
+      videoUrl: 'https://cdn.test/v.mp4',
+      tourUrl: 'https://example.com/not-a-tour',
+      nightlyRate: 50000,
+      minNights: 1,
+      maxGuests: 2,
+      hostName: 'Ada',
+    });
+    const d = await publicMarketApi.detail('shortlet', 's1');
+    expect(d.media.map((m) => m.kind)).toEqual(['image', 'video']);
+    expect(d.costs).toBeUndefined();
+  });
+});

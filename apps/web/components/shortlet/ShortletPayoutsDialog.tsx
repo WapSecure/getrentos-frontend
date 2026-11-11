@@ -333,6 +333,7 @@ export function ShortletPayoutsDialog({
                         }
                         paidAt={p.paidAt}
                         transferRef={p.transferRef}
+                        failureReason={p.failureReason}
                         sentTo={p.sentTo}
                       />
                     </div>

@@ -192,11 +192,15 @@ export const SellerPayoutSettings = ({ description }: SellerPayoutSettingsProps)
                         {payoutSentToLabel(sale.sentTo)}
                       </p>
                     )}
-                    {/* The API sends no reason for a failed sale payout, so say what happens next. */}
                     {sale.payoutStatus === 'FAILED' && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {PAYOUT_FAILED_NEXT_STEP}
-                      </p>
+                      <>
+                        {sale.failureReason && (
+                          <p className="text-xs text-destructive mt-1">{sale.failureReason}</p>
+                        )}
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {PAYOUT_FAILED_NEXT_STEP}
+                        </p>
+                      </>
                     )}
                   </div>
                   <div className="flex items-center gap-2 shrink-0">

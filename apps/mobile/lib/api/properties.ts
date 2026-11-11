@@ -1,6 +1,7 @@
 import { apiFetch } from './client';
 import { toQuery } from './query';
 import type { VideoStream } from '@sureground/shared';
+import type { MediaItem } from '@sureground/shared/showroom';
 
 export interface RenterProperty {
   /** The id the save/apply endpoints use. */
@@ -43,6 +44,19 @@ export interface RenterProperty {
   landlordReviews?: number;
   landlordVerified?: boolean;
   availableFrom?: string;
+  availableUntil?: string;
+  allowsMonthlyPayment?: boolean;
+  /** Naira, as the landlord stated them; absent means not stated. */
+  securityDeposit?: number;
+  serviceCharge?: number;
+  agencyFee?: number;
+  legalFee?: number;
+  minimumLeaseMonths?: number;
+  furnished?: boolean;
+  petsAllowed?: boolean;
+  propertyType?: string;
+  /** Photos (with rooms, captions and resized copies), video and 360 tour, in display order. */
+  media?: MediaItem[];
   /** False once the unit is let or has an approved applicant; Apply is closed. */
   acceptingApplications?: boolean;
   reviews?: {
