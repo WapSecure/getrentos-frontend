@@ -60,3 +60,21 @@ This is groundwork for showroom milestone M8 (see [PLAN.md](PLAN.md)). It was wr
    - Will Sureground hold off-plan purchase money and release it against construction milestones (the same model as land milestones), or only list developments and leave payment to the developer?
    - Which developer verification is required before a development can go live?
 5. **3D tours:** still only from real scan data (Matterport or similar embeds), never generated from photos.
+
+## Decided (product owner, 2026-11-11, on the recommendations)
+
+1. **Order:**
+   - M8a: a floor-plans tab from photos already tagged, right after M7.
+   - M8c: commercial listings.
+   - M8b: structured floor plans.
+   - M8d: off-plan, last.
+2. **Floor-plan sizes:** listers' measurements are shown labelled "Estimated". After a staff check, the label reads "Measured, checked by Sureground". Sizes are never shown without one of the two labels.
+3. **Commercial:** the field list above stands. Commercial lets use the residential fee lines (service charge, agency, legal) plus a VAT line. The VAT line shows only what the landlord states and is never computed by Sureground.
+4. **Off-plan:**
+   - First step: list developments only. Payment stays with the developer, and the page says so plainly, along with what was and was not checked.
+   - Later step: Sureground holds the money and releases it against construction milestones, as with land. This needs the legal opinion and the client-money trustee question (D-1) answered first.
+   - A development goes live only after staff check:
+     - the developer's CAC registration, through the existing business verification
+     - the directors' identities
+     - the title to the site (C of O or Governor's consent, the same checks as a land listing)
+     - the building plan approval (in Lagos, the LASPPPA permit)
