@@ -17,6 +17,7 @@ import {
   type TenantDeduction,
   type TenantDeposit,
 } from '@/services/renterDepositService';
+import { DepositEndOfTenancy } from './DepositEndOfTenancy';
 
 const DEDUCTION: Record<
   TenantDeduction['status'],
@@ -261,6 +262,11 @@ const DepositCard = ({
               ))}
             </ul>
           )}
+          <DepositEndOfTenancy
+            holdId={hold.id}
+            leaseStatus={deposit.leaseStatus}
+            leaseEnd={deposit.leaseEnd}
+          />
         </>
       )}
       {plan && <DepositPlanPanel plan={plan} disclaimer={disclaimer} />}

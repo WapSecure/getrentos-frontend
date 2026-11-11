@@ -3,6 +3,7 @@
 import { Badge, type BadgeVariant } from '@sureground/ui';
 import { PiggyBank, ShieldCheck } from '@sureground/icons';
 import {
+  DEPOSIT_END_STAGE_LABELS,
   DEPOSIT_STATUS_LABELS,
   type DepositHoldListItem,
   type DepositStatus,
@@ -56,6 +57,22 @@ export const DepositCard = ({ deposit, onOpen }: DepositCardProps) => (
         <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
         Held by Sureground
       </div>
+    )}
+
+    {deposit.endStage && deposit.endStage !== 'TENANCY' && deposit.endStage !== 'SETTLED' && (
+      <p className="text-xs font-medium text-foreground">
+        {DEPOSIT_END_STAGE_LABELS[deposit.endStage]}
+        {deposit.endStage === 'AWAITING_CLAIM' && deposit.claimBy && (
+          <>
+            {' '}
+            until{' '}
+            {new Date(deposit.claimBy).toLocaleDateString('en-NG', {
+              day: 'numeric',
+              month: 'short',
+            })}
+          </>
+        )}
+      </p>
     )}
   </button>
 );

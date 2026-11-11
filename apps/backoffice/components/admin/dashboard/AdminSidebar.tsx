@@ -17,6 +17,7 @@ import {
   Fingerprint,
   Construction,
   Gavel,
+  PiggyBank,
   BadgeCheck,
   AlertTriangle,
   Landmark,
@@ -361,6 +362,12 @@ const navItems: NavItem[] = [
     permission: 'disputes.review',
   },
   {
+    label: 'Caution deposits',
+    href: '/admin/deposits',
+    icon: PiggyBank,
+    permission: 'disputes.review',
+  },
+  {
     label: 'Fraud & risk',
     href: ROUTES.ADMIN_FRAUD,
     icon: AlertTriangle,
@@ -524,7 +531,7 @@ const groupItems: [group: string, items: string[]][] = [
       'Land fraud signals',
     ],
   ],
-  ['Risk and disputes', ['Disputes', 'Fraud & risk', 'Audit logs']],
+  ['Risk and disputes', ['Disputes', 'Caution deposits', 'Fraud & risk', 'Audit logs']],
   ['Communications', ['Messages', 'Text messaging', 'Documents']],
   ['Platform', ['Settings', 'Access & roles']],
 ];

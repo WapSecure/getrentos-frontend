@@ -31,6 +31,7 @@ export const landlordKeys = {
   deposits: (params?: { propertyId?: string; status?: string }) =>
     ['landlord', 'deposits', params?.propertyId ?? 'all', params?.status ?? 'all'] as const,
   deposit: (id: string) => ['landlord', 'deposits', 'detail', id] as const,
+  depositEnd: (id: string) => ['landlord', 'deposits', 'end', id] as const,
   tenants: ['landlord', 'tenants'] as const,
   payments: (status?: string) => ['landlord', 'payments', status ?? 'all'] as const,
   rentCollectionStats: ['landlord', 'rentCollectionStats'] as const,
@@ -91,6 +92,7 @@ export const renterKeys = {
   deposits: ['renter', 'deposits'] as const,
   // Under deposits, so a dispute refreshes the plan too.
   depositPlan: ['renter', 'deposits', 'plan'] as const,
+  depositEnd: (holdId: string) => ['renter', 'deposits', 'end', holdId] as const,
   dashboardStats: ['renter', 'dashboardStats'] as const,
   listings: (filters?: RenterListingsFilters) =>
     [

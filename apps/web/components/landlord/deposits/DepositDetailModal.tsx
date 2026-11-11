@@ -26,6 +26,7 @@ import {
 } from '@/services/depositService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
+import { EndOfTenancyPanel } from './EndOfTenancyPanel';
 
 const DEDUCTION_VARIANT: Record<DeductionStatus, BadgeVariant> = {
   PROPOSED: 'warning',
@@ -227,6 +228,14 @@ export const DepositDetailModal = ({ depositId, onClose }: DepositDetailModalPro
     enabled: Boolean(depositId),
   });
 
+  // A deposit Sureground received is settled only through the end-of-tenancy flow (D-6).
+  const { data: endView } = useQuery({
+    queryKey: depositId ? landlordKeys.depositEnd(depositId) : ['deposit', 'end', 'none'],
+    queryFn: () => unwrap(depositService.endOfTenancy(depositId!)),
+    enabled: Boolean(depositId),
+  });
+  const heldBySureground = (endView?.funded ?? 0) > 0;
+
   const afterChange = () => {
     if (depositId) queryClient.invalidateQueries({ queryKey: landlordKeys.deposit(depositId) });
     queryClient.invalidateQueries({ queryKey: ['landlord', 'deposits'] });
@@ -248,7 +257,7 @@ export const DepositDetailModal = ({ depositId, onClose }: DepositDetailModalPro
   });
 
   const isOpen = Boolean(depositId);
-  const canReturn = deposit && deposit.status !== 'RETURNED';
+  const canReturn = deposit && deposit.status !== 'RETURNED' && !heldBySureground;
   const hasProposed = deposit?.deductions.some((d) => d.status === 'PROPOSED') ?? false;
   const hasOpenDispute =
     deposit?.deductions.some((d) => d.tenantDisputedAt && !d.disputeAnsweredAt) ?? false;
@@ -313,6 +322,8 @@ export const DepositDetailModal = ({ depositId, onClose }: DepositDetailModalPro
                 </Alert>
               )}
 
+              <EndOfTenancyPanel depositId={deposit.id} onChanged={afterChange} />
+
               <div className="space-y-3">
                 <p className="text-sm font-medium text-foreground">Deductions</p>
                 {deposit.deductions.length === 0 ? (
@@ -330,7 +341,7 @@ export const DepositDetailModal = ({ depositId, onClose }: DepositDetailModalPro
                 )}
               </div>
 
-              {deposit.status !== 'RETURNED' && (
+              {deposit.status !== 'RETURNED' && !heldBySureground && (
                 <div className="space-y-3 rounded-xl border border-dashed border-border p-4">
                   <p className="text-sm font-medium text-foreground">Record a deduction</p>
                   <Field label="Amount">
