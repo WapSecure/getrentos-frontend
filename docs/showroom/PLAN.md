@@ -530,4 +530,4 @@ M7 is built: resized copies (earlier, backend #136), the CDN, blurred placeholde
 - Video tour uploads still show only a spinner.
 - Photos closed without saving after uploading are left to the backend's clean-up of unattached uploads, as before.
 
-**Checks:** backend: media specs (121 pass) and the four card services' specs pass except two shortlet availability tests that already fail on `dev` (their dates are now in the past); `tsc -p tsconfig.build.json` and eslint on changed files clean. Web: `tsc` clean in web and mobile, eslint clean on changed files, shared tests 25 pass, `audit:ui-controls` and `tokens:check` pass. Not yet checked in a browser.
+**Checks:** backend: the media specs and the rent, sale, land and shortlet service specs pass (227 tests) after merging `dev`; `tsc -p tsconfig.build.json` and eslint on changed files clean. Web: `tsc` clean in web and mobile, eslint clean on changed files, shared tests 25 pass, `audit:ui-controls` and `tokens:check` pass. Not yet checked in a browser.
