@@ -6,6 +6,7 @@ import { LayoutGrid, Gavel, ScanSearch, UsersRound, Video } from '@sureground/ic
 import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';
 import { PurchasesList } from './PurchasesList';
 import { ReservationsList } from './ReservationsList';
+import { PURCHASE_ROUTES } from '@/lib/constants/purchaseRoutes';
 
 type HubTab = 'purchases' | 'reservations';
 
@@ -32,7 +33,7 @@ export const BuyerLandHub = () => {
               Inspections
             </Button>
             <Button
-              href="/buyer/land/representatives"
+              href={PURCHASE_ROUTES.BUYER_REPRESENTATIVES}
               variant="ghost"
               icon={<UsersRound className="h-4 w-4" />}
             >

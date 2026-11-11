@@ -15,21 +15,19 @@ import {
 import { LandPlot, UsersRound } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency } from '@/lib/format';
-import {
-  landRepresentativeKeys,
-  landRepresentativeService,
-} from '@/services/landRepresentativeService';
+import { representativeKeys, representativeService } from '@/services/representativeService';
 import { siteTourKeys, siteTourService } from '@/services/siteTourService';
 import { TourCard } from '@/components/shared/tours/TourCard';
 import {
   REPRESENTATIVE_SCOPE_LABELS,
   type LandRepresentativeAppointment,
 } from '@/types/landRepresentative';
+import { PURCHASE_ROUTES } from '@/lib/constants/purchaseRoutes';
 
 const PrincipalDeals = ({ appointment }: { appointment: LandRepresentativeAppointment }) => {
   const deals = useQuery({
-    queryKey: landRepresentativeKeys.deals(appointment.principalId),
-    queryFn: () => unwrap(landRepresentativeService.deals(appointment.principalId)),
+    queryKey: representativeKeys.deals(appointment.principalId),
+    queryFn: () => unwrap(representativeService.deals(appointment.principalId)),
     enabled: appointment.scopes.includes('VIEW'),
   });
   if (!appointment.scopes.includes('VIEW')) {
@@ -45,8 +43,8 @@ const PrincipalDeals = ({ appointment }: { appointment: LandRepresentativeAppoin
     return (
       <EmptyState
         icon={LandPlot}
-        title="No land deals yet"
-        description="Purchases and resales this buyer starts will appear here."
+        title="No purchases yet"
+        description="Purchases this buyer starts, land or built homes, will appear here."
         size="compact"
         bare
       />
@@ -73,7 +71,7 @@ const PrincipalDeals = ({ appointment }: { appointment: LandRepresentativeAppoin
       {data.resales.map((t) => (
         <li key={t.transactionId}>
           <Link
-            href={`/land/representing/transactions/${encodeURIComponent(t.transactionId)}`}
+            href={PURCHASE_ROUTES.representingWorkspace(t.transactionId)}
             className="flex flex-wrap items-center justify-between gap-2 py-2.5 hover:underline"
           >
             <span className="text-sm text-foreground">
@@ -126,14 +124,14 @@ export const RepresentingDesk = () => {
     null
   );
   const list = useQuery({
-    queryKey: landRepresentativeKeys.representing,
-    queryFn: () => unwrap(landRepresentativeService.representing()),
+    queryKey: representativeKeys.representing,
+    queryFn: () => unwrap(representativeService.representing()),
   });
   const respond = useMutation({
     mutationFn: (v: { id: string; response: 'ACCEPT' | 'DECLINE' }) =>
-      unwrap(landRepresentativeService.respond(v.id, v.response)),
+      unwrap(representativeService.respond(v.id, v.response)),
     onSuccess: (next, v) => {
-      queryClient.setQueryData(landRepresentativeKeys.representing, next);
+      queryClient.setQueryData(representativeKeys.representing, next);
       setToast({
         message: v.response === 'ACCEPT' ? 'You now represent this buyer.' : 'Invitation declined.',
         variant: 'success',
@@ -158,7 +156,7 @@ export const RepresentingDesk = () => {
       <EmptyState
         icon={UsersRound}
         title="No one has appointed you"
-        description="When a buyer appoints you as their representative on land, it appears here."
+        description="When a buyer appoints you as their representative, it appears here."
       />
     );
   }

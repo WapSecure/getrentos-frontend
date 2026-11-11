@@ -312,8 +312,11 @@ export const buyerService = {
         { method: 'POST' }
       )
     ),
+  /** Under two-person approval the result's `release` may say the deposit is still waiting. */
   releaseTransaction: (id: string) =>
-    safeCall(() => authFetch(`/buyer/transactions/${id}/release`, { method: 'POST' })),
+    safeCall(() =>
+      authFetch<BuyerEscrowTransaction>(`/buyer/transactions/${id}/release`, { method: 'POST' })
+    ),
   refundTransaction: (id: string) =>
     safeCall(() => authFetch(`/buyer/transactions/${id}/refund`, { method: 'POST' })),
 
