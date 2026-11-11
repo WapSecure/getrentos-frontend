@@ -112,4 +112,8 @@ Built on the web and in the mobile app from photos already tagged "Floor plan". 
 
 **Demo data:** no seed listing has a photo tagged `floor_plan`, and none was added to the shared database. A browser check needs one listing with one or two floor-plan photos (for example captioned "Ground floor" and "First floor"), tagged in the landlord or owner photo editor.
 
-**Follow-up:** list cards use the API's cover photo, which the lister chooses. If a lister makes a plan the cover, cards still show it; the photo editor could warn, or the backend could skip plans when picking a cover.
+**Card covers (backend #167, merged):** rent, sale, land, shortlet and microsite cards skip a cover tagged `floor_plan` while the listing has another photo, so collections and similar listings do too. A plan is the cover only when every photo is a plan.
+
+**Browser check (2026-11-11):** passed. Two test plans ("Ground floor", "First floor") were put on the seed Ikoyi house for the check and then removed; Ikoyi is back as it was. No seed listing keeps a floor plan.
+
+**Follow-up (web viewer):** the level chips sit over the top edge of the plan and partly cover the drawing's own title. Add top padding to the stage when a plan has level chips.
