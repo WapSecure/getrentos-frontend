@@ -426,9 +426,11 @@ export interface FeeAmendmentOverview {
   currentFee: FeeTerms | null;
   canPropose: boolean;
   proposeBlockedReason: string | null;
-  /** The first day of next month, YYYY-MM-DD: the earliest a new fee may start. */
+  /** The first of a month at least 14 days away, YYYY-MM-DD: the earliest a new fee may start. */
   earliestEffectiveFrom: string;
   maxPercentage: number;
+  /** Managed only: the published tier rates. Null on a firm's agreement. */
+  allowedPercentages: number[] | null;
   pending: FeeAmendment | null;
   history: FeeAmendment[];
   versions: MandateVersion[];

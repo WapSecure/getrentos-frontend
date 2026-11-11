@@ -376,7 +376,8 @@ function ProposeForm({
     >
       <p className="text-sm text-muted-foreground">
         The other side must accept before anything changes. The new fee applies from a rent period
-        you choose, never to a past statement. If nobody answers in 14 days, the proposal lapses.
+        you choose, at least 14 days away, and never to a past statement. If nobody answers in 14
+        days, the proposal lapses.
       </p>
       <SegmentedControl
         aria-label="Kind of fee"
@@ -401,7 +402,11 @@ function ProposeForm({
           inputMode={type === 'FLAT' ? 'numeric' : 'decimal'}
         />
       </Field>
-      <Field label="Starts on" hint="The first day of a rent period, from next month on." required>
+      <Field
+        label="Starts on"
+        hint="The first of a month, at least 14 days from today, so the other side has the full 14 days to answer."
+        required
+      >
         <Select
           value={effectiveFrom}
           onValueChange={setEffectiveFrom}
