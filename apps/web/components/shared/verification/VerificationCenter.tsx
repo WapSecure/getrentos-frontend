@@ -3,6 +3,7 @@
 import { ChangePhoneButton } from '@/components/shared/security/ChangePhoneButton';
 import { trustKeys } from '@/lib/queryKeys';
 import { IdentityDocumentFallback } from './IdentityDocumentFallback';
+import { TrustConsentPrompt } from './TrustConsentPrompt';
 import { useEffect, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { NIGERIAN_BANKS } from '@/lib/banks';
@@ -146,84 +147,6 @@ export const VerificationCenter = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subjectId, kyc?.verificationStatus, kyc?.identityVerified]);
-
-  const grantIdMutation = useMutation({
-    mutationFn: () =>
-      unwrap(
-        trustService.grantConsent({
-          consentType: 'ID_CHECK',
-          purpose: 'Identity verification',
-          expiresInDays: 365,
-        })
-      ),
-    onSuccess: () => {
-      setError(null);
-      queryClient.invalidateQueries({ queryKey: ['trust-consents'] });
-    },
-    onError: (reason) =>
-      setError(reason instanceof Error ? reason.message : 'Unable to record consent.'),
-  });
-
-  const grantBioMutation = useMutation({
-    mutationFn: () =>
-      unwrap(
-        trustService.grantConsent({
-          consentType: 'BIOMETRIC',
-          purpose: 'Biometric verification',
-          expiresInDays: 365,
-        })
-      ),
-    onSuccess: () => {
-      setError(null);
-      queryClient.invalidateQueries({ queryKey: ['trust-consents'] });
-    },
-    onError: (reason) =>
-      setError(reason instanceof Error ? reason.message : 'Unable to record consent.'),
-  });
-
-  const grantBankMutation = useMutation({
-    mutationFn: () =>
-      unwrap(
-        trustService.grantConsent({
-          consentType: 'BANK_ACCOUNT_CHECK',
-          purpose: 'Financial verification',
-          expiresInDays: 365,
-        })
-      ),
-    onSuccess: () => {
-      setError(null);
-      queryClient.invalidateQueries({ queryKey: ['trust-consents'] });
-    },
-    onError: (reason) =>
-      setError(reason instanceof Error ? reason.message : 'Unable to record consent.'),
-  });
-
-  const grantDocumentMutation = useMutation({
-    mutationFn: () =>
-      unwrap(
-        trustService.grantConsent({
-          consentType: 'DOCUMENT_PROCESSING',
-          purpose: 'Document verification',
-          expiresInDays: 365,
-        })
-      ),
-    onSuccess: () => {
-      setError(null);
-      queryClient.invalidateQueries({ queryKey: ['trust-consents'] });
-    },
-    onError: (reason) =>
-      setError(reason instanceof Error ? reason.message : 'Unable to record consent.'),
-  });
-
-  const revokeConsentMutation = useMutation({
-    mutationFn: (consentId: string) => unwrap(trustService.revokeConsent(consentId)),
-    onSuccess: () => {
-      setError(null);
-      queryClient.invalidateQueries({ queryKey: ['trust-consents'] });
-    },
-    onError: (reason) =>
-      setError(reason instanceof Error ? reason.message : 'Unable to revoke consent.'),
-  });
 
   const identityMutation = useMutation({
     mutationFn: () =>
@@ -423,33 +346,6 @@ export const VerificationCenter = ({
   };
   const consentActive = (c?: { revokedAt?: string }) => Boolean(c && !c.revokedAt);
 
-  const consentBlock = (opts: {
-    consent?: { id: string; revokedAt?: string; grantedAt: string };
-    text: string;
-    onGrant: () => void;
-    granting: boolean;
-  }) =>
-    consentActive(opts.consent) ? (
-      <p className="text-xs text-muted-foreground">
-        Consent given {new Date(opts.consent!.grantedAt).toLocaleDateString()} ·{' '}
-        <button
-          type="button"
-          className="underline hover:no-underline"
-          onClick={() => revokeConsentMutation.mutate(opts.consent!.id)}
-          disabled={revokeConsentMutation.isPending}
-        >
-          withdraw
-        </button>
-      </p>
-    ) : (
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-muted/40 p-3">
-        <p className="min-w-0 flex-1 text-xs text-muted-foreground">{opts.text}</p>
-        <Button size="sm" isLoading={opts.granting} loadingText="Recording…" onClick={opts.onGrant}>
-          Agree and continue
-        </Button>
-      </div>
-    );
-
   const stages: {
     key: string;
     title: string;
@@ -517,12 +413,13 @@ export const VerificationCenter = ({
       needsConsent: !consentActive(idCheckConsent),
       body: (
         <>
-          {consentBlock({
-            consent: idCheckConsent,
-            text: 'We check the number you enter against NIMC/BVN records to confirm it is yours. Nothing is shared with other users.',
-            onGrant: () => grantIdMutation.mutate(),
-            granting: grantIdMutation.isPending,
-          })}
+          <TrustConsentPrompt
+            type="ID_CHECK"
+            text={
+              'We check the number you enter against NIMC/BVN records to confirm it is yours. Nothing is shared with other users.'
+            }
+            onError={setError}
+          />
           {consentActive(idCheckConsent) && (
             <>
               <div className="grid gap-3 sm:grid-cols-2">
@@ -588,12 +485,13 @@ export const VerificationCenter = ({
       needsConsent: !consentActive(bioConsent),
       body: (
         <>
-          {consentBlock({
-            consent: bioConsent,
-            text: 'We use the selfie for a liveness check and to match it to your ID, then keep it only for this verification.',
-            onGrant: () => grantBioMutation.mutate(),
-            granting: grantBioMutation.isPending,
-          })}
+          <TrustConsentPrompt
+            type="BIOMETRIC"
+            text={
+              'We use the selfie for a liveness check and to match it to your ID, then keep it only for this verification.'
+            }
+            onError={setError}
+          />
           {consentActive(bioConsent) &&
             (liveUnavailable ? (
               <Alert variant="neutral" title="Live selfie temporarily unavailable">
@@ -639,12 +537,13 @@ export const VerificationCenter = ({
             needsConsent: !consentActive(bankConsent),
             body: (
               <>
-                {consentBlock({
-                  consent: bankConsent,
-                  text: 'We run a name enquiry with the bank to confirm the account is yours. No money moves.',
-                  onGrant: () => grantBankMutation.mutate(),
-                  granting: grantBankMutation.isPending,
-                })}
+                <TrustConsentPrompt
+                  type="BANK_ACCOUNT_CHECK"
+                  text={
+                    'We run a name enquiry with the bank to confirm the account is yours. No money moves.'
+                  }
+                  onError={setError}
+                />
                 {consentActive(bankConsent) && (
                   <>
                     <div className="grid gap-3 sm:grid-cols-2">
@@ -705,12 +604,13 @@ export const VerificationCenter = ({
             needsConsent: !consentActive(docConsent),
             body: (
               <>
-                {consentBlock({
-                  consent: docConsent,
-                  text: 'We verify the document number with its issuer. Required to finish agent onboarding.',
-                  onGrant: () => grantDocumentMutation.mutate(),
-                  granting: grantDocumentMutation.isPending,
-                })}
+                <TrustConsentPrompt
+                  type="DOCUMENT_PROCESSING"
+                  text={
+                    'We verify the document number with its issuer. Required to finish agent onboarding.'
+                  }
+                  onError={setError}
+                />
                 {consentActive(docConsent) && (
                   <>
                     <div className="grid gap-3 sm:grid-cols-2">

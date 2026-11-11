@@ -8,7 +8,12 @@ import type {
   TrustReviewCaseStatus,
   TrustReviewCaseSummary,
 } from '@/types/trust';
-import { REVIEW_CASE_PRIORITY_META, REVIEW_CASE_STATUS_META } from './trustMeta';
+import {
+  FOREIGN_PURPOSE_LABEL,
+  isForeignPurpose,
+  REVIEW_CASE_PRIORITY_META,
+  REVIEW_CASE_STATUS_META,
+} from './trustMeta';
 
 export const REVIEW_CASE_STATUS_VARIANT: Record<TrustReviewCaseStatus, BadgeVariant> = {
   OPEN: 'warning',
@@ -35,6 +40,7 @@ export const ReviewCaseCard = ({ caseItem, delay, onReview }: ReviewCaseCardProp
   const statusMeta = REVIEW_CASE_STATUS_META[caseItem.status];
   const priorityMeta = REVIEW_CASE_PRIORITY_META[caseItem.priority];
   const verification = caseItem.verification;
+  const purpose = verification?.purpose;
   const subjectLabel = verification
     ? verification.subjectType === 'PERSON'
       ? 'Person'
@@ -53,18 +59,31 @@ export const ReviewCaseCard = ({ caseItem, delay, onReview }: ReviewCaseCardProp
 
       <div>
         <h3 className="text-base font-semibold text-foreground leading-snug">
-          {verification?.purpose
-            ? verification.purpose
-                .toLowerCase()
-                .replace(/_/g, ' ')
-                .replace(/\b\w/g, (c) => c.toUpperCase())
-            : 'Manual verification'}
+          {isForeignPurpose(purpose)
+            ? FOREIGN_PURPOSE_LABEL[purpose]
+            : purpose
+              ? purpose
+                  .toLowerCase()
+                  .replace(/_/g, ' ')
+                  .replace(/\b\w/g, (c) => c.toUpperCase())
+              : 'Manual verification'}
         </h3>
         <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
           <UserRoundSearch className="h-3.5 w-3.5" />
           {subjectLabel} · {verification?.subjectId ? verification.subjectId.slice(0, 8) : '—'}
           {verification?.status ? ` · ${verification.status}` : ''}
         </p>
+        {caseItem.dueAt && (
+          <p
+            className={
+              caseItem.overdue
+                ? 'mt-1 text-xs font-medium text-destructive'
+                : 'mt-1 text-xs text-muted-foreground'
+            }
+          >
+            {caseItem.overdue ? 'Overdue: was due' : 'Due'} {formatDate(caseItem.dueAt)}
+          </p>
+        )}
       </div>
 
       {caseItem.reasonCodes.length > 0 && (

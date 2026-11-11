@@ -16,6 +16,10 @@ export interface SmileLivenessSession {
   /** Smile's v3 API for this environment. */
   apiUrl: string;
   callbackUrl?: string;
+  /** The Smile product the token was minted for; the capture must use the same one. */
+  product?: 'smart_selfie_registration' | 'smart_selfie_authentication' | 'document_verification';
+  /** Document jobs: bound into the token, so the capture never asks for or sends them. */
+  idInfo?: { country: string; idType: string };
 }
 
 /** Client types mirroring the backend trust API. */

@@ -17,6 +17,8 @@ import { unwrap } from '@sureground/shared';
 import { trustService } from '@/services/trustService';
 import { adminKeys } from '@/lib/queryKeys';
 import type {
+  ForeignReviewCaseSummary,
+  Paginated,
   TrustReviewCasePriority,
   TrustReviewCaseStatus,
   TrustReviewCaseSummary,
@@ -24,6 +26,7 @@ import type {
 
 type StatusFilter = 'all' | TrustReviewCaseStatus;
 type PriorityFilter = 'all' | TrustReviewCasePriority;
+type PurposeFilter = 'all' | 'foreign';
 
 const PAGE_SIZE = 12;
 
@@ -44,28 +47,74 @@ const PRIORITY_OPTIONS: { value: PriorityFilter; label: string }[] = [
   { value: 'CRITICAL', label: 'Critical' },
 ];
 
+const PURPOSE_OPTIONS: { value: PurposeFilter; label: string }[] = [
+  { value: 'all', label: 'All purposes' },
+  { value: 'foreign', label: 'Diaspora identity' },
+];
+
+// The diaspora queue has its own list (soonest due first); the card and modal take the shared shape.
+const fromForeign = (
+  page: Paginated<ForeignReviewCaseSummary>
+): Paginated<TrustReviewCaseSummary> => ({
+  ...page,
+  items: page.items.map((row) => ({
+    id: row.id,
+    verificationId: '',
+    status: row.status,
+    priority: row.priority,
+    assigneeId: row.assigneeId,
+    reasonCodes: row.reasonCodes,
+    createdAt: row.createdAt,
+    updatedAt: row.createdAt,
+    dueAt: row.dueAt,
+    overdue: row.overdue,
+    verification: {
+      id: '',
+      subjectType: 'PERSON',
+      subjectId: row.subjectId,
+      purpose: row.purpose,
+      decision: '',
+      status: '',
+      createdAt: row.createdAt,
+    },
+  })),
+});
+
 export default function TrustReviewCasesPage() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [priorityFilter, setPriorityFilter] = useState<PriorityFilter>('all');
+  const [purposeFilter, setPurposeFilter] = useState<PurposeFilter>('all');
+  const foreign = purposeFilter === 'foreign';
   const [page, setPage] = useState(1);
   const [activeCase, setActiveCase] = useState<TrustReviewCaseSummary | null>(null);
 
   const { data, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: adminKeys.reviewCases({
       status: statusFilter === 'all' ? undefined : statusFilter,
-      priority: priorityFilter === 'all' ? undefined : priorityFilter,
+      priority: foreign || priorityFilter === 'all' ? undefined : priorityFilter,
+      purpose: purposeFilter,
       page,
       pageSize: PAGE_SIZE,
     }),
-    queryFn: () =>
-      unwrap(
-        trustService.listReviewCases({
-          status: statusFilter === 'all' ? undefined : statusFilter,
-          priority: priorityFilter === 'all' ? undefined : priorityFilter,
-          page,
-          pageSize: PAGE_SIZE,
-        })
-      ),
+    queryFn: async () =>
+      foreign
+        ? fromForeign(
+            await unwrap(
+              trustService.listForeignReviewCases({
+                status: statusFilter === 'all' ? undefined : statusFilter,
+                page,
+                pageSize: PAGE_SIZE,
+              })
+            )
+          )
+        : unwrap(
+            trustService.listReviewCases({
+              status: statusFilter === 'all' ? undefined : statusFilter,
+              priority: priorityFilter === 'all' ? undefined : priorityFilter,
+              page,
+              pageSize: PAGE_SIZE,
+            })
+          ),
     placeholderData: keepPreviousData,
   });
   const cases = data?.items ?? [];
@@ -99,7 +148,19 @@ export default function TrustReviewCasesPage() {
           options={PRIORITY_OPTIONS}
           ariaLabel="Filter by priority"
           searchable={false}
+          disabled={foreign}
           className="w-full sm:w-44"
+        />
+        <Select
+          value={purposeFilter}
+          onValueChange={(value) => {
+            setPurposeFilter(value as PurposeFilter);
+            setPage(1);
+          }}
+          options={PURPOSE_OPTIONS}
+          ariaLabel="Filter by purpose"
+          searchable={false}
+          className="w-full sm:w-48"
         />
       </div>
 
@@ -117,7 +178,15 @@ export default function TrustReviewCasesPage() {
           isRetrying={isFetching}
         />
       ) : cases.length === 0 ? (
-        <EmptyState icon={Fingerprint} title="No review cases match your filters" />
+        <EmptyState
+          icon={Fingerprint}
+          title="No review cases match your filters"
+          description={
+            foreign && statusFilter === 'all'
+              ? 'Shows open, assigned and escalated diaspora cases. Choose a status to see others.'
+              : undefined
+          }
+        />
       ) : (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {cases.map((caseItem, index) => (

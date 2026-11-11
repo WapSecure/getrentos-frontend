@@ -26,6 +26,9 @@ export interface TrustReviewCaseSummary {
   updatedAt: string;
   resolvedAt?: string | null;
   verification?: TrustReviewCaseVerificationRef;
+  /** Diaspora identity cases only: staff answer by the end of the 2nd Lagos working day. */
+  dueAt?: string | null;
+  overdue?: boolean;
 }
 
 export interface TrustEvidenceItem {
@@ -75,6 +78,8 @@ export interface TrustReviewCaseDetail {
   updatedAt: string;
   resolvedAt?: string | null;
   subject?: { id: string; legalName?: string; email?: string };
+  /** Diaspora identity cases only. */
+  dueAt?: string | null;
   verification: {
     id: string;
     subjectType: string;
@@ -140,4 +145,40 @@ export interface TrustAppeal {
   originalDeciderName?: string | null;
   targetReference?: string | null;
   targetLabel?: string | null;
+}
+
+/** Diaspora identity (decision D3): a passport, proof of address abroad and a bank statement from abroad. */
+export type ForeignPurpose = 'FOREIGN_IDENTITY' | 'FOREIGN_ADDRESS' | 'FOREIGN_BANK_STATEMENT';
+
+/** GET /admin/trust/foreign-identity/review-cases, soonest due first. */
+export interface ForeignReviewCaseSummary {
+  id: string;
+  status: TrustReviewCaseStatus;
+  priority: TrustReviewCasePriority;
+  purpose: ForeignPurpose;
+  subjectId: string;
+  assigneeId: string | null;
+  reasonCodes: string[];
+  dueAt: string | null;
+  overdue: boolean;
+  createdAt: string;
+}
+
+/** One upload or Smile ID result on a diaspora case. `url` is null for Smile results and files removed by retention. */
+export interface ForeignCaseDocument {
+  id: string;
+  category: string;
+  source: string;
+  summary: Record<string, unknown> | null;
+  capturedAt: string;
+  url: string | null;
+  urlExpiresInSeconds: number | null;
+}
+
+/** GET :id/documents: links last 15 minutes, every opening is audited, never your own account. */
+export interface ForeignCaseDocuments {
+  caseId: string;
+  purpose: ForeignPurpose;
+  dueAt: string | null;
+  items: ForeignCaseDocument[];
 }

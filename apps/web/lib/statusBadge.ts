@@ -30,6 +30,7 @@ import type { MaintenancePriority, MaintenanceRequestStatus } from '@/types/main
 import type { OfferStatus } from '@/types/owner';
 import type { TaskStatus } from '@/types/agent';
 import type { LegalCaseStatus } from '@/types/legal-case';
+import type { ForeignCheckState } from '@/types/foreignIdentity';
 
 export interface StatusBadgeEntry {
   label: string;
@@ -127,6 +128,15 @@ export const verificationBadges: Record<VerificationStatus, StatusBadgeEntry> = 
   pending: { label: 'Pending review', variant: 'warning', icon: ShieldAlert },
   unverified: { label: 'Unverified', variant: 'neutral', icon: ShieldAlert },
   rejected: { label: 'Rejected', variant: 'danger', icon: ShieldX },
+};
+
+// Diaspora passport, proof of address and bank statement. "Approved" by staff or Smile ID, never "verified property".
+export const foreignCheckBadges: Record<ForeignCheckState, StatusBadgeEntry> = {
+  NOT_STARTED: { label: 'Not started', variant: 'neutral' },
+  CHECKING: { label: 'Checking', variant: 'info', icon: RefreshCcw },
+  IN_REVIEW: { label: 'With our team', variant: 'warning', icon: Clock },
+  APPROVED: { label: 'Approved', variant: 'success', icon: ShieldCheck },
+  REJECTED: { label: 'Not approved', variant: 'danger', icon: ShieldX },
 };
 
 export const listingStatusBadges: Record<ListingStatus, StatusBadgeEntry> = {

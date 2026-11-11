@@ -29,8 +29,18 @@ import { trustService } from '@/services/trustService';
 import { adminService } from '@/services/adminService';
 import { adminKeys } from '@/lib/queryKeys';
 import { useAdminUser } from '@/app/(dashboard)/admin/layout';
-import type { TrustEvidenceItem, TrustReviewCaseSummary, TrustReviewDecision } from '@/types/trust';
+import type {
+  ForeignCaseDocument,
+  ForeignPurpose,
+  TrustEvidenceItem,
+  TrustReviewCaseSummary,
+  TrustReviewDecision,
+} from '@/types/trust';
+import type { EvidenceItem } from '@/types/admin';
+import { EvidencePanel } from '@/components/shared/EvidencePanel';
 import {
+  FOREIGN_PURPOSE_LABEL,
+  isForeignPurpose,
   REVIEW_CASE_PRIORITY_META,
   REVIEW_CASE_STATUS_META,
   TRUST_STEP_STATUS_META,
@@ -96,7 +106,54 @@ const STEP_TYPE_LABEL: Record<string, string> = {
   PROPERTY_DOCUMENT_CHECK: 'Property document',
   OWNERSHIP_CHECK: 'Ownership check',
   BANK_ACCOUNT_CHECK: 'Bank account',
+  PASSPORT_CHECK: 'Passport check',
+  FOREIGN_ADDRESS_CHECK: 'Proof of address abroad',
+  FOREIGN_BANK_STATEMENT_CHECK: 'Bank statement from abroad',
 };
+
+// ---- Diaspora identity cases: uploads through GET :id/documents, decision through POST :id/decision.
+
+const FOREIGN_DOCUMENT_LABEL: Record<ForeignPurpose, string> = {
+  FOREIGN_IDENTITY: 'Passport photo page',
+  FOREIGN_ADDRESS: 'Proof of address',
+  FOREIGN_BANK_STATEMENT: 'Bank statement',
+};
+
+const foreignItemLabel = (item: ForeignCaseDocument, purpose: ForeignPurpose) => {
+  if (item.category === 'SELFIE') return 'Selfie';
+  if (item.category === 'ADDRESS') return 'Proof of address';
+  if (item.category === 'BIOMETRIC') return 'Liveness and face match';
+  return FOREIGN_DOCUMENT_LABEL[purpose];
+};
+
+const humanKey = (key: string) =>
+  key.replace(/([A-Z])/g, ' $1').replace(/^./, (c) => c.toUpperCase());
+
+/** Smile ID results carry no file (Smile keeps the images): show what we kept. */
+const SMILE_SUMMARY_SKIP = new Set(['source', 'product', 'sandbox', 'mimeType', 'sizeBytes']);
+
+const summaryRows = (summary: Record<string, unknown> | null): [string, string][] =>
+  Object.entries(summary ?? {}).flatMap(([key, value]): [string, string][] => {
+    if (SMILE_SUMMARY_SKIP.has(key) || value === null || value === undefined) return [];
+    if (Array.isArray(value)) return value.length > 0 ? [[key, value.join(', ')]] : [];
+    return typeof value === 'object' ? [] : [[key, String(value)]];
+  });
+
+const toEvidence = (item: ForeignCaseDocument, purpose: ForeignPurpose): EvidenceItem => ({
+  id: item.id,
+  kind: 'STORED',
+  name: foreignItemLabel(item, purpose),
+  mimeType: typeof item.summary?.mimeType === 'string' ? item.summary.mimeType : null,
+  url: item.url ?? '',
+  sizeBytes: typeof item.summary?.sizeBytes === 'number' ? item.summary.sizeBytes : null,
+  source: 'PARTY',
+  note: typeof item.summary?.note === 'string' ? item.summary.note : null,
+  uploadedAt: item.capturedAt,
+  urlExpiresInSeconds: item.urlExpiresInSeconds,
+});
+
+const hasSandboxFlag = (value: unknown) =>
+  Boolean(value && typeof value === 'object' && (value as { sandbox?: unknown }).sandbox === true);
 
 const DECISION_META: Record<string, { label: string; variant: BadgeVariant }> = {
   PASS: { label: 'Pass', variant: 'success' },
@@ -142,6 +199,8 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
   const [note, setNote] = useState('');
   const [ticked, setTicked] = useState<string[]>([]);
   const [actionError, setActionError] = useState<string | null>(null);
+  // Opening uploads is audited, so it is a deliberate click rather than on load.
+  const [showDocuments, setShowDocuments] = useState(false);
 
   const id = caseItem?.id;
 
@@ -191,15 +250,22 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
       setActionError(reason instanceof Error ? reason.message : 'Unable to escalate case.'),
   });
 
+  const purpose = detail?.verification.purpose ?? caseItem?.verification?.purpose;
+  const foreign = isForeignPurpose(purpose) ? purpose : null;
+
   const resolveMutation = useMutation({
-    mutationFn: () =>
-      unwrap(
-        trustService.resolveReviewCase(id!, {
-          decision: decision as TrustReviewDecision,
-          note: note.trim() || undefined,
-          ...(decision === 'PASS' ? { confirmedEvidence: ticked } : { failedEvidence: ticked }),
-        })
-      ),
+    mutationFn: () => {
+      const input = {
+        decision: decision as TrustReviewDecision,
+        note: note.trim() || undefined,
+        ...(decision === 'PASS' ? { confirmedEvidence: ticked } : { failedEvidence: ticked }),
+      };
+      return unwrap(
+        foreign
+          ? trustService.decideForeignCase(id!, input)
+          : trustService.resolveReviewCase(id!, input)
+      );
+    },
     onSuccess: () => {
       setActionError(null);
       setNote('');
@@ -226,6 +292,33 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
   const unassigned = Boolean(detail && !detail.assigneeId);
   const canDecide = !assignedToMe && !aboutMe && !unassigned;
   const isResolved = detail?.status === 'RESOLVED' || detail?.status === 'CLOSED';
+
+  const documents = useQuery({
+    queryKey: adminKeys.foreignCaseDocuments(id ?? ''),
+    queryFn: () => unwrap(trustService.getForeignCaseDocuments(id!)),
+    enabled: Boolean(id && foreign && showDocuments && !aboutMe),
+    // Links last 15 minutes; Preview asks again for a fresh one.
+    staleTime: 10 * 60 * 1000,
+    retry: false,
+  });
+  const documentItems = documents.data?.items ?? [];
+  const files = foreign
+    ? documentItems.filter((item) => item.url).map((item) => toEvidence(item, foreign))
+    : [];
+  const providerResults = documentItems.filter(
+    (item) => !item.url && item.source !== 'user_upload'
+  );
+  const removedFiles = documentItems.filter((item) => !item.url && item.source === 'user_upload');
+  const freshUrl = async (evidenceId: string) => {
+    const next = await documents.refetch();
+    return next.data?.items.find((item) => item.id === evidenceId)?.url ?? null;
+  };
+  const dueAt = documents.data?.dueAt ?? detail?.dueAt ?? caseItem?.dueAt ?? null;
+  // Staff only: the automatic check ran against Smile ID's sandbox.
+  const testMode =
+    Boolean(foreign) &&
+    (documentItems.some((item) => hasSandboxFlag(item.summary)) ||
+      Boolean(detail?.verification.steps.some((step) => hasSandboxFlag(step.result))));
   const busy = assignMutation.isPending || escalateMutation.isPending || resolveMutation.isPending;
 
   const handleClose = () => {
@@ -234,6 +327,7 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
     setNote('');
     setDecision('');
     setTicked([]);
+    setShowDocuments(false);
     onClose();
   };
 
@@ -254,6 +348,16 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
                 <Badge variant={REVIEW_CASE_PRIORITY_VARIANT[detail.priority]}>
                   {REVIEW_CASE_PRIORITY_META[detail.priority].label} priority
                 </Badge>
+                {foreign && dueAt && (
+                  <span className="text-xs text-muted-foreground">
+                    Due {formatDate(dueAt)} (2 working days)
+                  </span>
+                )}
+                {testMode && (
+                  <Badge variant="neutral" title="Smile ID sandbox: not a real passport check">
+                    Test mode
+                  </Badge>
+                )}
                 {officerName && (
                   <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
                     <UserRoundCheck className="h-3.5 w-3.5" />
@@ -310,7 +414,7 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
                     <div>
                       <span className="text-muted-foreground">Purpose · </span>
                       <span className="font-medium text-foreground">
-                        {detail.verification.purpose}
+                        {foreign ? FOREIGN_PURPOSE_LABEL[foreign] : detail.verification.purpose}
                       </span>
                     </div>
                     <div>
@@ -321,6 +425,79 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
                     </div>
                   </div>
                 </div>
+
+                {foreign && (
+                  <div className="rounded-xl border border-border p-4">
+                    {aboutMe ? (
+                      <p className="text-sm text-muted-foreground">
+                        These uploads are about your own account, so another officer opens them.
+                      </p>
+                    ) : !showDocuments ? (
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <p className="min-w-0 flex-1 text-sm text-muted-foreground">
+                          The person&apos;s uploads and the Smile ID result. Opening them is logged,
+                          and the links last 15 minutes.
+                        </p>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          icon={<Eye className="h-4 w-4" />}
+                          onClick={() => setShowDocuments(true)}
+                        >
+                          Open uploads
+                        </Button>
+                      </div>
+                    ) : documents.isLoading ? (
+                      <CardSkeleton lines={3} />
+                    ) : documents.isError ? (
+                      <Alert variant="danger" icon={ShieldAlert}>
+                        {documents.error instanceof Error
+                          ? documents.error.message
+                          : 'Could not load the uploads.'}
+                      </Alert>
+                    ) : (
+                      <div className="space-y-3">
+                        <EvidencePanel
+                          evidence={files}
+                          heading="Uploads"
+                          emptyHint="No files on this case."
+                          onResolveUrl={freshUrl}
+                        />
+                        {removedFiles.length > 0 && (
+                          <p className="text-xs text-muted-foreground">
+                            {removedFiles.length} file
+                            {removedFiles.length === 1 ? ' was' : 's were'} removed under our
+                            retention policy.
+                          </p>
+                        )}
+                        {providerResults.map((item) => (
+                          <div key={item.id} className="rounded-lg border border-border px-3 py-2">
+                            <p className="text-sm font-medium text-foreground">
+                              {foreignItemLabel(item, foreign)}
+                              <span className="ml-1.5 text-2xs font-normal text-muted-foreground">
+                                Smile ID result · {formatDate(item.capturedAt)}
+                              </span>
+                            </p>
+                            <dl className="mt-1 grid gap-x-3 gap-y-0.5 text-2xs sm:grid-cols-2">
+                              {summaryRows(item.summary).map(([key, value]) => (
+                                <div key={key} className="flex gap-1">
+                                  <dt className="text-muted-foreground">{humanKey(key)}:</dt>
+                                  <dd className="break-all font-mono text-foreground">{value}</dd>
+                                </div>
+                              ))}
+                            </dl>
+                          </div>
+                        ))}
+                        {testMode && (
+                          <p className="text-2xs text-muted-foreground">
+                            Test mode: the automatic check ran against Smile ID&apos;s sandbox,
+                            which decides by test names, not by the real passport.
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 <div className="rounded-xl border border-border p-4">
                   <p className="flex items-center gap-1.5 text-2xs font-semibold uppercase tracking-wide text-muted-foreground">

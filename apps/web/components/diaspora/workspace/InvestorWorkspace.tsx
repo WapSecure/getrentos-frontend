@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { FolderOpen, Globe, MessageCircle, Settings2 } from '@sureground/icons';
+import { FolderOpen, Globe, MessageCircle, Settings2, ShieldCheck } from '@sureground/icons';
 import {
   Alert,
   Button,
@@ -28,6 +28,10 @@ import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';
 import { formatCurrency, formatDualTime, formatLagosDate } from '@/lib/format';
 import { investorKeys } from '@/lib/queryKeys';
 import { investorService } from '@/services/investorService';
+import {
+  FOREIGN_IDENTITY_TAB_ID,
+  useForeignIdentityEligible,
+} from '@/components/diaspora/ForeignIdentityPanel';
 import type { InvestorOverview, InvestorProfile, InvestorStatusCounts } from '@/types/investor';
 import {
   BUDGET_BAND_LABELS,
@@ -81,6 +85,7 @@ const usePortalLinks = (portal: InvestorPortal) => {
     managed: owner ? ROUTES.OWNER_MANAGED : undefined,
     approvals: owner ? ROUTES.OWNER_APPROVALS : undefined,
     documents: portal === 'buyer' ? ROUTES.BUYER_DOCUMENTS : ROUTES.OWNER_DOCUMENTS,
+    identityAbroad: `${portal === 'buyer' ? ROUTES.BUYER_TRUST_PROFILE : ROUTES.OWNER_TRUST_PROFILE}?tab=${FOREIGN_IDENTITY_TAB_ID}`,
     messages: portal === 'buyer' ? ROUTES.BUYER_MESSAGES : ROUTES.OWNER_MESSAGES,
   };
 };
@@ -163,6 +168,7 @@ const ProfileCard = ({
 
 export const InvestorWorkspace = ({ portal }: { portal: InvestorPortal }) => {
   const links = usePortalLinks(portal);
+  const identityAbroad = useForeignIdentityEligible();
   const overview = useQuery({
     queryKey: investorKeys.overview,
     queryFn: () => unwrap(investorService.getOverview()),
@@ -306,6 +312,15 @@ export const InvestorWorkspace = ({ portal }: { portal: InvestorPortal }) => {
               >
                 Messages
               </Button>
+              {identityAbroad && (
+                <Button
+                  href={links.identityAbroad}
+                  variant="secondary"
+                  icon={<ShieldCheck className="h-4 w-4" aria-hidden="true" />}
+                >
+                  Passport and address abroad
+                </Button>
+              )}
             </CardContent>
           </Card>
         </div>
