@@ -3,6 +3,7 @@ import { PublicListingPage, publicListingMetadata } from '@/components/market/Pu
 import { ShowroomPage } from '@/components/showroom/ShowroomPage';
 import { showroomEnabled } from '@/lib/showroom';
 import { ListingMarketSection } from '@/components/land/market/ListingMarketSection';
+import { listingIdFromSegment } from '@/lib/listingSlug';
 
 // Must be a literal for Next to read it; matches PUBLIC_REVALIDATE.
 export const revalidate = 60;
@@ -18,5 +19,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function LandListingPage({ params }: Props) {
   const { id } = await params;
   const Page = showroomEnabled() ? ShowroomPage : PublicListingPage;
-  return <Page market="land" id={id} extra={<ListingMarketSection listingId={id} />} />;
+  return (
+    <Page
+      market="land"
+      id={id}
+      extra={<ListingMarketSection listingId={listingIdFromSegment(id)} />}
+    />
+  );
 }

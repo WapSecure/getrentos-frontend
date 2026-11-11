@@ -718,7 +718,7 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
                   </p>
                 )}
                 <Link
-                  href={LAND_BUYER_ROUTES.listing(activeListing.id)}
+                  href={LAND_BUYER_ROUTES.listing(activeListing.id, activeListing.title)}
                   className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
                 >
                   Full listing and price comparison

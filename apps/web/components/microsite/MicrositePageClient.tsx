@@ -13,6 +13,7 @@ import { getInitials } from '@/lib/format';
 import { ROUTES } from '@/lib/constants/auth';
 import type { MicrositeProfile } from '@/types/microsite';
 import { TrustChainBadge } from '@/components/shared/trust/TrustChainBadge';
+import { listingPath } from '@/lib/listingSlug';
 
 const PAGE_SIZE = 12;
 
@@ -150,7 +151,7 @@ export const MicrositePageClient = ({ slug, initialProfile }: MicrositePageClien
             {listings.map((listing) => (
               <ListingCard
                 key={listing.id}
-                href={`/rent/${listing.id}`}
+                href={listingPath('rent', listing.id, listing.title)}
                 title={listing.title}
                 location={listing.location}
                 price={listing.price}

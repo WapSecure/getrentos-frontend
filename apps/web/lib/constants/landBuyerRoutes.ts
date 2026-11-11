@@ -1,9 +1,11 @@
+import { listingPath } from '@/lib/listingSlug';
+
 export const LAND_BUYER_ROUTES = {
   LAYOUTS: '/land/layouts',
   layout: (layoutId: string, plotId?: string) =>
     `/land/layouts/${layoutId}${plotId ? `?plot=${encodeURIComponent(plotId)}` : ''}`,
   MARKET_INSIGHTS: '/land/market',
-  listing: (listingId: string) => `/land/${listingId}`,
+  listing: (listingId: string, title?: string | null) => listingPath('land', listingId, title),
 
   HUB: '/buyer/land/purchases',
   HUB_RESERVATIONS: '/buyer/land/purchases?tab=reservations',
