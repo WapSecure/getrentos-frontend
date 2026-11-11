@@ -10,7 +10,11 @@ import type {
   ShowroomFact,
   ShowroomListing,
 } from './types';
-import { LAND_DILIGENCE_LABELS, LAND_TITLE_TYPE_LABELS } from '../utils/landTrust';
+import {
+  LAND_DILIGENCE_LABELS,
+  LAND_TITLE_TYPE_LABELS,
+  verificationSummaryOf,
+} from '../utils/landTrust';
 import { tidyPlace } from '../utils/address';
 import { tourSource } from '../utils/videoSource';
 
@@ -236,6 +240,7 @@ export function fromSale(s: PublicSaleDto): ShowroomListing {
     bathrooms: positive(s.bathrooms),
     verified: !!s.isVerified,
     underOffer: !!s.underOffer,
+    verificationSummary: verificationSummaryOf(s.verificationSummary),
     media,
     images: imageUrls(media),
     amenities: s.amenities ?? [],
@@ -262,6 +267,7 @@ export function fromLand(l: PublicLandDto): ShowroomListing {
     address: l.address,
     price,
     verified: !!l.isVerified,
+    verificationSummary: verificationSummaryOf(l.verificationSummary),
     media,
     images: imageUrls(media),
     description: l.description,

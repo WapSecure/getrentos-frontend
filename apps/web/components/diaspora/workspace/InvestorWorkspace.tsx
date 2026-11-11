@@ -25,9 +25,17 @@ import { getStoredUser } from '@/lib/authStorage';
 import { countryName } from '@/lib/constants/countries';
 import { DIASPORA_ROUTES, type InvestorPortal } from '@/lib/constants/diasporaRoutes';
 import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';
+import { VISIT_ROUTES } from '@/lib/constants/visitRoutes';
 import { formatCurrency, formatDualTime, formatLagosDate } from '@/lib/format';
 import { investorKeys } from '@/lib/queryKeys';
 import { investorService } from '@/services/investorService';
+import { siteTourKeys, siteTourService } from '@/services/siteTourService';
+import {
+  prePurchaseInspectionKeys,
+  prePurchaseInspectionService,
+} from '@/services/prePurchaseInspectionService';
+import { SITE_TOUR_STATUS_LABELS } from '@/types/siteTour';
+import { LAND_INSPECTION_STATUS_LABELS } from '@sureground/shared';
 import {
   FOREIGN_IDENTITY_TAB_ID,
   useForeignIdentityEligible,
@@ -57,6 +65,15 @@ const breakdown = (counts: InvestorStatusCounts, labels: Record<string, string>)
 
 const lagosDay = (iso: string) => formatLagosDate(iso, 'short');
 
+/** A list's statuses tallied, in the overview's shape. */
+const countByStatus = (items: { status: string }[]): InvestorStatusCounts => ({
+  total: items.length,
+  byStatus: items.reduce<Record<string, number>>((acc, { status }) => {
+    acc[status] = (acc[status] ?? 0) + 1;
+    return acc;
+  }, {}),
+});
+
 /** Re-reads the clock every 30 seconds, so the times stay current while the page is open. */
 const useNow = () => {
   const [now, setNow] = useState(() => new Date());
@@ -82,6 +99,8 @@ const usePortalLinks = (portal: InvestorPortal) => {
     offers: buyer ? ROUTES.BUYER_OFFERS : undefined,
     transactions: buyer ? ROUTES.BUYER_TRANSACTIONS : undefined,
     landPurchases: buyer ? LAND_BUYER_ROUTES.HUB : undefined,
+    tours: buyer ? VISIT_ROUTES.BUYER_TOURS : undefined,
+    inspections: buyer ? VISIT_ROUTES.BUYER_INSPECTIONS : undefined,
     managed: owner ? ROUTES.OWNER_MANAGED : undefined,
     approvals: owner ? ROUTES.OWNER_APPROVALS : undefined,
     documents: portal === 'buyer' ? ROUTES.BUYER_DOCUMENTS : ROUTES.OWNER_DOCUMENTS,
@@ -173,6 +192,19 @@ export const InvestorWorkspace = ({ portal }: { portal: InvestorPortal }) => {
     queryKey: investorKeys.overview,
     queryFn: () => unwrap(investorService.getOverview()),
   });
+  // Tours and inspections are buyer-portal lists; only asked for when the viewer can open them.
+  const tours = useQuery({
+    queryKey: siteTourKeys.buyer('all'),
+    queryFn: () => unwrap(siteTourService.mine('all')),
+    enabled: Boolean(links.tours),
+    retry: false,
+  });
+  const inspections = useQuery({
+    queryKey: prePurchaseInspectionKeys.mine('all'),
+    queryFn: () => unwrap(prePurchaseInspectionService.mine('all')),
+    enabled: Boolean(links.inspections),
+    retry: false,
+  });
   const data = overview.data;
   const profile = data?.profile ?? null;
   // Complete profile; the risk statement may still be owed, which the alert below asks for.
@@ -202,6 +234,25 @@ export const InvestorWorkspace = ({ portal }: { portal: InvestorPortal }) => {
       value: data.landPurchases.total,
       subtitle: breakdown(data.landPurchases, LAND_PURCHASE_STATUS_LABELS),
       href: links.landPurchases,
+    });
+  }
+
+  if (tours.data) {
+    const counts = countByStatus(tours.data);
+    purchases.push({
+      label: 'Video tours',
+      value: counts.total,
+      subtitle: breakdown(counts, SITE_TOUR_STATUS_LABELS),
+      href: links.tours,
+    });
+  }
+  if (inspections.data) {
+    const counts = countByStatus(inspections.data);
+    purchases.push({
+      label: 'Inspections',
+      value: counts.total,
+      subtitle: breakdown(counts, LAND_INSPECTION_STATUS_LABELS),
+      href: links.inspections,
     });
   }
 

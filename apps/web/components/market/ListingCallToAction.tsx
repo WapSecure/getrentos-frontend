@@ -1,8 +1,12 @@
 'use client';
 
-import { useSyncExternalStore } from 'react';
+import { useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
-import { viewerIsSignedIn } from '@/lib/viewer';
+import { Button } from '@sureground/ui';
+import { ScanSearch, Video } from '@sureground/icons';
+import { RequestTourDialog } from '@/components/shared/tours/RequestTourDialog';
+import { RequestInspectionDialog } from '@/components/shared/inspections/RequestInspectionDialog';
+import { viewerHasRole, viewerIsSignedIn } from '@/lib/viewer';
 import { track } from '@/lib/analytics';
 import type { PublicDetailMarket } from '@/lib/publicListingDetail';
 
@@ -24,6 +28,47 @@ const signedInHref = (market: PublicDetailMarket, id: string) =>
     : `/buyer/offers?property=${encodeURIComponent(id)}`;
 
 const subscribeToNothing = () => () => {};
+// Tours and inspections are booked through the buyer portal's API; other roles would only meet an error.
+const viewerIsBuyer = () => viewerHasRole('buyer');
+
+/** For a home for sale: see it on a video call, or send an inspector, before making an offer. */
+function SaleVisitActions({ id, title }: { id: string; title: string }) {
+  const [open, setOpen] = useState<'tour' | 'inspection' | null>(null);
+  return (
+    <>
+      <div className="grid gap-2 sm:grid-cols-2">
+        <Button
+          variant="outline"
+          icon={<Video className="h-4 w-4" />}
+          onClick={() => setOpen('tour')}
+        >
+          Book a video tour
+        </Button>
+        <Button
+          variant="outline"
+          icon={<ScanSearch className="h-4 w-4" />}
+          onClick={() => setOpen('inspection')}
+        >
+          Commission an inspection
+        </Button>
+      </div>
+      <RequestTourDialog
+        open={open === 'tour'}
+        onClose={() => setOpen(null)}
+        target={{ listingId: id }}
+        placeName={title}
+        place="home"
+      />
+      <RequestInspectionDialog
+        open={open === 'inspection'}
+        onClose={() => setOpen(null)}
+        target={{ listingId: id }}
+        placeName={title}
+        place="home"
+      />
+    </>
+  );
+}
 
 const PRIMARY =
   'flex h-12 w-full items-center justify-center rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition hover:-translate-y-0.5 hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2';
@@ -35,14 +80,18 @@ export function ListingCallToAction({
   returnPath,
   underOffer,
   compact = false,
+  title,
 }: {
   market: PublicDetailMarket;
   id: string;
   returnPath: string;
   underOffer?: boolean;
   compact?: boolean;
+  /** The listing's name, for the tour and inspection dialogs. */
+  title?: string;
 }) {
   const signedIn = useSyncExternalStore(subscribeToNothing, viewerIsSignedIn, () => false);
+  const isBuyer = useSyncExternalStore(subscribeToNothing, viewerIsBuyer, () => false);
   const recordStart = () =>
     track({
       name: market === 'rent' ? 'inquiry_start' : 'offer_start',
@@ -66,9 +115,14 @@ export function ListingCallToAction({
 
   if (signedIn) {
     return (
-      <Link href={signedInHref(market, id)} className={PRIMARY} onClick={recordStart}>
-        {SIGNED_IN[market]}
-      </Link>
+      <>
+        <Link href={signedInHref(market, id)} className={PRIMARY} onClick={recordStart}>
+          {SIGNED_IN[market]}
+        </Link>
+        {market === 'sale' && !compact && title && isBuyer && (
+          <SaleVisitActions id={id} title={title} />
+        )}
+      </>
     );
   }
 

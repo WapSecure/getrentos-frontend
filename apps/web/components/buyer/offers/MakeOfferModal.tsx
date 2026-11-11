@@ -25,7 +25,7 @@ import { buyerService } from '@/services/buyerService';
 import { isLandPropertyType } from '@/lib/propertyTypes';
 import { landKeys } from '@/lib/queryKeys';
 import { landService } from '@/services/landService';
-import { TrustLabelsList } from '@/components/land/market/TrustLabelsList';
+import { TrustLabelsList } from '@/components/shared/trust/TrustLabelsList';
 import { formatCurrency } from '@/lib/format';
 
 interface MakeOfferModalProps {

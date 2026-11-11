@@ -19,8 +19,8 @@ import {
   landRepresentativeKeys,
   landRepresentativeService,
 } from '@/services/landRepresentativeService';
-import { landSiteTourKeys, landSiteTourService } from '@/services/landSiteTourService';
-import { TourCard } from '../tours/TourCard';
+import { siteTourKeys, siteTourService } from '@/services/siteTourService';
+import { TourCard } from '@/components/shared/tours/TourCard';
 import {
   REPRESENTATIVE_SCOPE_LABELS,
   type LandRepresentativeAppointment,
@@ -95,8 +95,8 @@ const PrincipalDeals = ({ appointment }: { appointment: LandRepresentativeAppoin
 
 const AttendingTours = () => {
   const tours = useQuery({
-    queryKey: landSiteTourKeys.attending,
-    queryFn: () => unwrap(landSiteTourService.attending()),
+    queryKey: siteTourKeys.attending,
+    queryFn: () => unwrap(siteTourService.attending()),
     retry: false,
   });
   const items = tours.data ?? [];
@@ -108,7 +108,12 @@ const AttendingTours = () => {
       </h2>
       <ul className="space-y-3">
         {items.map((tour) => (
-          <TourCard key={tour.id} tour={tour} who={`For ${tour.buyerName}`} />
+          <TourCard
+            key={tour.id}
+            tour={tour}
+            who={`For ${tour.buyerName}`}
+            join={() => siteTourService.joinAttending(tour.id)}
+          />
         ))}
       </ul>
     </section>

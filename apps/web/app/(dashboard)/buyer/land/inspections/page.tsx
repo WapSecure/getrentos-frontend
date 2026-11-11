@@ -1,4 +1,4 @@
-import { BuyerInspections } from '@/components/land/inspections/BuyerInspections';
+import { BuyerInspections } from '@/components/shared/inspections/BuyerInspections';
 import { PageHeader } from '@sureground/ui';
 
 export default function BuyerLandInspectionsPage() {
@@ -8,7 +8,7 @@ export default function BuyerLandInspectionsPage() {
         title="Independent inspections"
         description="An accredited inspector visits land you are considering and reports with geotagged, timestamped photos. Sureground checks each report before you see it."
       />
-      <BuyerInspections />
+      <BuyerInspections scope="land" />
     </div>
   );
 }

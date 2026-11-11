@@ -1,4 +1,4 @@
-import { HostTours } from '@/components/land/tours/HostTours';
+import { HostTours } from '@/components/shared/tours/HostTours';
 import { PageHeader } from '@sureground/ui';
 
 export default function OwnerLandToursPage() {
@@ -8,7 +8,7 @@ export default function OwnerLandToursPage() {
         title="Video tour requests"
         description="Buyers who cannot visit ask you to walk them round the land on a video call. Offer times in daylight, join on time, and record what you showed."
       />
-      <HostTours />
+      <HostTours scope="land" />
     </div>
   );
 }

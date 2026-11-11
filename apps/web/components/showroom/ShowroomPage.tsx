@@ -21,6 +21,7 @@ import { ShowroomAside } from './ShowroomAside';
 import { ShowroomNeighbourhood } from './ShowroomNeighbourhood';
 import { ShowroomShareButton } from './ShowroomShareButton';
 import { ShowroomTrust } from './ShowroomTrust';
+import { VerificationSummaryBadge } from '@/components/shared/trust/VerificationSummaryCard';
 import {
   FloorPlansShortcut,
   ShowroomGallery,
@@ -92,11 +93,23 @@ export async function ShowroomPage({
           <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_380px] xl:gap-14">
             <div className="min-w-0 space-y-10">
               <header className="space-y-3">
-                {listing.verified && (
-                  <Badge variant="success" icon={<BadgeCheck className="h-3.5 w-3.5" />}>
-                    {market === 'land' ? 'Ownership verified' : 'Verified'}
-                  </Badge>
-                )}
+                {/* With a summary, its status replaces the old "Verified" tick so the two never disagree. */}
+                {listing.verificationSummary
+                  ? listing.verificationSummary.status !== 'NOT_STARTED' && (
+                      // The badge never stands alone: it leads to what was checked and what it does not cover.
+                      <a
+                        href="#trust"
+                        className="inline-flex rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        aria-label="See what was checked and what it does not cover"
+                      >
+                        <VerificationSummaryBadge summary={listing.verificationSummary} />
+                      </a>
+                    )
+                  : listing.verified && (
+                      <Badge variant="success" icon={<BadgeCheck className="h-3.5 w-3.5" />}>
+                        {market === 'land' ? 'Ownership verified' : 'Verified'}
+                      </Badge>
+                    )}
                 <div className="flex items-start justify-between gap-4">
                   <h1 className="text-3xl font-semibold tracking-[-0.035em] text-foreground text-balance sm:text-4xl">
                     {listing.title}

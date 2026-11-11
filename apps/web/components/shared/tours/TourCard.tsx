@@ -3,19 +3,26 @@
 import type { ReactNode } from 'react';
 import { Badge, Card } from '@sureground/ui';
 import { CalendarClock, Video } from '@sureground/icons';
-import {
-  LAND_SITE_TOUR_STATUS_LABELS,
-  LAND_SITE_TOUR_STATUS_VARIANT,
-  type LandSiteTour,
-} from '@/types/landSiteTour';
+import type { ApiResponse } from '@/lib/apiHelpers';
+import { formatDualTime, formatLagosDate } from '@/lib/format';
+import type { TourJoin } from '@/services/siteTourService';
+import { SITE_TOUR_STATUS_LABELS, SITE_TOUR_STATUS_VARIANT, type SiteTour } from '@/types/siteTour';
+import { VideoCallButton } from '@/components/shared/VideoCallButton';
+
+/** "12 Nov 2026 · 10:00 Lagos · 09:00 London": Lagos time next to the buyer's own. */
+export const tourTime = (at: string, buyerTimeZone: string) =>
+  `${formatLagosDate(at)} · ${formatDualTime(at, buyerTimeZone)}`;
 
 export const TourCard = ({
   tour,
   who,
+  join,
   children,
 }: {
-  tour: LandSiteTour;
+  tour: SiteTour;
   who: string;
+  /** Opens the built-in call; tours on a pasted link show the link instead. */
+  join?: () => Promise<ApiResponse<TourJoin>>;
   children?: ReactNode;
 }) => (
   <li>
@@ -28,15 +35,28 @@ export const TourCard = ({
             {tour.attendeeName ? ` · with ${tour.attendeeName}` : ''}
           </p>
         </div>
-        <Badge variant={LAND_SITE_TOUR_STATUS_VARIANT[tour.status]}>
-          {LAND_SITE_TOUR_STATUS_LABELS[tour.status]}
+        <Badge variant={SITE_TOUR_STATUS_VARIANT[tour.status]}>
+          {SITE_TOUR_STATUS_LABELS[tour.status]}
         </Badge>
       </div>
-      {tour.scheduledLocal && tour.status === 'SCHEDULED' && (
+      {tour.scheduledAt && tour.status === 'SCHEDULED' && (
         <p className="mt-3 flex items-center gap-2 text-sm font-medium text-foreground">
-          <CalendarClock className="h-4 w-4 text-primary" aria-hidden /> {tour.scheduledLocal} ·{' '}
-          {tour.durationMinutes} minutes
+          <CalendarClock className="h-4 w-4 text-primary" aria-hidden />{' '}
+          {tourTime(tour.scheduledAt, tour.buyerTimeZone)} · {tour.durationMinutes} minutes
         </p>
+      )}
+      {tour.videoCall === 'BUILT_IN' && join && tour.scheduledAt && (
+        <div className="mt-2">
+          <VideoCallButton
+            viewing={{
+              mode: 'video',
+              status: tour.status === 'SCHEDULED' ? 'confirmed' : tour.status,
+              scheduledAt: tour.scheduledAt,
+            }}
+            join={join}
+            label="Join the video tour"
+          />
+        </div>
       )}
       {tour.meetingUrl && tour.status === 'SCHEDULED' && (
         <a

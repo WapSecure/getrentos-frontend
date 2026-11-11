@@ -1,4 +1,4 @@
-import type { LandDiligenceStatus, LandTitleType } from '../utils/landTrust';
+import type { LandDiligenceStatus, LandTitleType, VerificationSummary } from '../utils/landTrust';
 
 export type ShowroomMarket = 'rent' | 'sale' | 'land';
 
@@ -95,6 +95,8 @@ export interface ShowroomListing {
   host?: ShowroomHost;
   underOffer?: boolean;
   availableFrom?: string;
+  /** Sale and land detail routes only; undefined from an older API. */
+  verificationSummary?: VerificationSummary;
 }
 
 export interface PublicRentalDto {
@@ -148,6 +150,8 @@ export interface PublicSaleDto {
   amenities?: string[];
   isVerified?: boolean;
   underOffer?: boolean;
+  /** Detail route only (DIA-11). Read through `verificationSummaryOf`, never trusted as is. */
+  verificationSummary?: unknown;
 }
 
 export interface PublicLandDto {
@@ -181,4 +185,6 @@ export interface PublicLandDto {
     tenure?: string;
   };
   diligence?: { status: LandDiligenceStatus };
+  /** Detail route only (DIA-11). Read through `verificationSummaryOf`, never trusted as is. */
+  verificationSummary?: unknown;
 }

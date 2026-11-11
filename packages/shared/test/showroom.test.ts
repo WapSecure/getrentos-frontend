@@ -301,3 +301,44 @@ test('floor plans never become the cover, unless they are all there is', () => {
   assert.equal(l.images[0], 'https://cdn.test/front.jpg', 'share image is a photo, not a plan');
   assert.equal(l.media[0]!.id, 'plan', 'the viewer keeps the lister order');
 });
+
+test('verification summary: sale and land carry it through, checked', () => {
+  const summary = {
+    status: 'INVESTMENT_ELIGIBLE',
+    scope: ['Title documents match the registry'],
+    checkedAt: '2026-10-01T00:00:00.000Z',
+    checkedBy: ['Sureground verification team', 'Accredited surveyor'],
+    documentsReviewed: [
+      { kind: 'CERTIFICATE_OF_OCCUPANCY', label: 'Certificate of occupancy' },
+      { kind: 'X' },
+    ],
+    openIssues: [],
+    limits: ['It is not a guarantee of title.'],
+    recheckBy: '2027-04-01T00:00:00.000Z',
+  };
+  const sale = fromSale({ id: 's', title: 'x', price: 1, verificationSummary: summary });
+  assert.equal(sale.verificationSummary?.status, 'INVESTMENT_ELIGIBLE');
+  assert.deepEqual(sale.verificationSummary?.documentsReviewed, [
+    { kind: 'CERTIFICATE_OF_OCCUPANCY', label: 'Certificate of occupancy' },
+  ]);
+  const land = fromLand({ id: 'l', title: 'x', price: 1, verificationSummary: summary });
+  assert.equal(land.verificationSummary?.recheckBy, '2027-04-01T00:00:00.000Z');
+});
+
+test('verification summary: missing or unknown status is left out; limits are never empty', () => {
+  assert.equal(fromSale({ id: 's', title: 'x', price: 1 }).verificationSummary, undefined);
+  assert.equal(
+    fromSale({ id: 's', title: 'x', price: 1, verificationSummary: { status: 'VERIFIED' } })
+      .verificationSummary,
+    undefined
+  );
+  const s = fromLand({
+    id: 'l',
+    title: 'x',
+    price: 1,
+    verificationSummary: { status: 'NOT_STARTED', checkedAt: 'not a date', limits: [] },
+  }).verificationSummary;
+  assert.equal(s?.checkedAt, null);
+  assert.ok(s && s.limits.length > 0);
+  assert.ok(s?.limits.some((l) => l.includes('not a guarantee of title')));
+});

@@ -20,11 +20,11 @@ import {
 } from '@/types/land';
 import { LAND_ASSURANCE_TIER_DESCRIPTIONS } from '@/types/landMarket';
 import { AssuranceTierBadge } from './AssuranceTierBadge';
-import { TrustLabelsList } from './TrustLabelsList';
+import { TrustLabelsList } from '@/components/shared/trust/TrustLabelsList';
 import { PricePositionBar } from './PricePositionBar';
 import { ReportLandProblemDialog } from '../disputes/ReportLandProblemDialog';
-import { RequestTourDialog } from '../tours/RequestTourDialog';
-import { RequestInspectionDialog } from '../inspections/RequestInspectionDialog';
+import { RequestTourDialog } from '@/components/shared/tours/RequestTourDialog';
+import { RequestInspectionDialog } from '@/components/shared/inspections/RequestInspectionDialog';
 
 export const ListingMarketSection = ({ listingId }: { listingId: string }) => {
   const [reporting, setReporting] = useState(false);
@@ -112,7 +112,7 @@ export const ListingMarketSection = ({ listingId }: { listingId: string }) => {
           open={inspecting}
           onClose={() => setInspecting(false)}
           target={{ listingId }}
-          landName={listing.data.title}
+          placeName={listing.data.title}
         />
       )}
       {listing.data && (
@@ -120,7 +120,7 @@ export const ListingMarketSection = ({ listingId }: { listingId: string }) => {
           open={touring}
           onClose={() => setTouring(false)}
           target={{ listingId }}
-          landName={listing.data.title}
+          placeName={listing.data.title}
         />
       )}
       {listing.data && (

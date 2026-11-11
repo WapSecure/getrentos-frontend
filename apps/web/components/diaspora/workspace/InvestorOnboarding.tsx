@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react';
+import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ShieldCheck } from '@sureground/icons';
@@ -29,6 +29,7 @@ import { DIASPORA_ROUTES, type InvestorPortal } from '@/lib/constants/diasporaRo
 import { formatLagosDate, isValidTimeZone } from '@/lib/format';
 import { investorKeys } from '@/lib/queryKeys';
 import { investorService } from '@/services/investorService';
+import { browserTimeZone, TimeZoneSelect } from '@/components/shared/forms/TimeZoneSelect';
 import {
   BUDGET_BANDS,
   DISPLAY_CURRENCIES,
@@ -69,25 +70,6 @@ const COUNTRY_OPTIONS: SelectOption[] = COUNTRIES.map((country) => ({
   value: country.code,
   label: country.name,
 }));
-
-const browserTimeZone = () => {
-  try {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone || '';
-  } catch {
-    return '';
-  }
-};
-
-const timeZoneOptions = (current: string): SelectOption[] => {
-  let zones: string[] = [];
-  try {
-    zones = Intl.supportedValuesOf('timeZone');
-  } catch {
-    zones = [];
-  }
-  if (current && !zones.includes(current)) zones = [current, ...zones];
-  return zones.map((zone) => ({ value: zone, label: zone.replace(/_/g, ' '), searchText: zone }));
-};
 
 interface Draft {
   countryOfResidence: string;
@@ -190,7 +172,6 @@ const ProfileForm = ({
   const queryClient = useQueryClient();
   const [draft, setDraft] = useState<Draft>(() => draftFrom(initial));
   const [errors, setErrors] = useState<Errors>({});
-  const zones = useMemo(() => timeZoneOptions(draft.timeZone), [draft.timeZone]);
   const set = <K extends keyof Draft>(key: K, value: Draft[K]) => {
     setDraft((current) => ({ ...current, [key]: value }));
     setErrors((current) => ({ ...current, [key]: undefined }));
@@ -260,12 +241,9 @@ const ProfileForm = ({
               error={errors.timeZone}
               hint="Set from this device. Times are shown in this zone next to Lagos time."
             >
-              <Select
+              <TimeZoneSelect
                 value={draft.timeZone}
                 onValueChange={(value) => set('timeZone', value)}
-                options={zones}
-                placeholder="Choose a time zone"
-                searchPlaceholder="Search, e.g. London"
               />
             </Field>
             <Field

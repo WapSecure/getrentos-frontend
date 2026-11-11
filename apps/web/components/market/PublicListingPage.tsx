@@ -213,6 +213,7 @@ export async function PublicListingPage({
                   id={listing.id}
                   returnPath={`${back}/${id}`}
                   underOffer={listing.underOffer}
+                  title={listing.title}
                 />
               </div>
 
