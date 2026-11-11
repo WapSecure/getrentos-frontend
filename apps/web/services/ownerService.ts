@@ -1,5 +1,12 @@
 import type { ReplyLanguage } from '@/lib/replyLanguage';
-import { authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
+import {
+  authFetch,
+  authUpload,
+  safeCall,
+  toQuery,
+  type Paginated,
+  type UploadOptions,
+} from '@/lib/apiHelpers';
 import type {
   OwnerProperty,
   SaleListing,
@@ -218,15 +225,16 @@ export const ownerService = {
    * Two steps on purpose: the key only joins the property when sent back through `updateProperty`
    * as `coverImageKey`.
    */
-  uploadPropertyMedia: (file: File, kind: 'image' | 'video' = 'image') =>
+  uploadPropertyMedia: (file: File, kind: 'image' | 'video' = 'image', upload?: UploadOptions) =>
     safeCall(async () => {
       const form = new FormData();
       form.append('kind', kind);
       form.append('file', file);
-      return authFetch<{ key: string; kind: 'image' | 'video' }>('/owner/properties/media/upload', {
-        method: 'POST',
-        body: form,
-      });
+      const path = '/owner/properties/media/upload';
+      // With `upload` options it goes over XHR so it can report progress and be cancelled.
+      return upload
+        ? authUpload<{ key: string; kind: 'image' | 'video' }>(path, form, upload)
+        : authFetch<{ key: string; kind: 'image' | 'video' }>(path, { method: 'POST', body: form });
     }),
 
   removePropertyMedia: (key: string) =>

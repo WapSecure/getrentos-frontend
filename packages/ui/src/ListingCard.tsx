@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { BadgeCheck, ImageOff } from '@sureground/icons';
 import { cn, formatCurrency, tidyPlace } from '@sureground/shared';
 import { Badge, type BadgeVariant } from './Badge';
+import { ProgressiveImg } from './ProgressiveImg';
 import { IconButton, type IconButtonProps } from './IconButton';
 
 export type ListingCardVariant = 'grid' | 'compact' | 'map';
@@ -35,6 +36,8 @@ export interface ListingCardProps {
   image?: string | null;
   /** `srcset` of resized copies; the browser picks one for the card's width. */
   imageSrcSet?: string;
+  /** The cover's real size and blurred placeholder, when the API sends them. */
+  imagePreview?: { width: number; height: number; placeholder?: string };
   imageAlt?: string;
   /** For the first row above the fold. */
   eager?: boolean;
@@ -108,12 +111,14 @@ export const listingFactsLine = (facts?: ListingCardFacts): string[] => {
 const ListingImage = ({
   src,
   srcSet,
+  preview,
   alt,
   eager,
   compact,
 }: {
   src?: string | null;
   srcSet?: string;
+  preview?: ListingCardProps['imagePreview'];
   alt: string;
   eager?: boolean;
   compact?: boolean;
@@ -128,14 +133,15 @@ const ListingImage = ({
     );
   }
   return (
-    // eslint-disable-next-line @next/next/no-img-element -- signed storage URLs
-    <img
+    <ProgressiveImg
       src={src}
       srcSet={srcSet}
       sizes={compact ? '160px' : '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw'}
       alt={alt}
-      width={800}
-      height={600}
+      placeholder={preview?.placeholder}
+      // The box is a fixed 4:3, so the real size only tells the browser the photo's shape.
+      width={preview?.width ?? 800}
+      height={preview?.height ?? 600}
       loading={eager ? 'eager' : 'lazy'}
       fetchPriority={eager ? 'high' : 'auto'}
       decoding="async"
@@ -181,6 +187,7 @@ export const ListingCard = ({
   priceNote,
   image,
   imageSrcSet,
+  imagePreview,
   imageAlt,
   eager = false,
   status,
@@ -316,6 +323,7 @@ export const ListingCard = ({
             key={image ?? ''}
             src={image}
             srcSet={imageSrcSet}
+            preview={imagePreview}
             alt={imageAlt ?? ''}
             eager={eager}
           />
@@ -360,6 +368,7 @@ export const ListingCard = ({
           key={image ?? ''}
           src={image}
           srcSet={imageSrcSet}
+          preview={imagePreview}
           alt={imageAlt ?? ''}
           eager={eager}
           compact

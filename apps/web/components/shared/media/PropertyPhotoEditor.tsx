@@ -1,9 +1,11 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronRight, ImagePlus, Star, X } from '@sureground/icons';
-import { Input, Select } from '@sureground/ui';
+import { AlertCircle, ChevronLeft, ChevronRight, ImagePlus, Star, X } from '@sureground/icons';
+import { Button, Input, Progress, Select } from '@sureground/ui';
 import { MEDIA_ROOM_NAME, type MediaRoom } from '@sureground/shared';
+import type { UploadOptions } from '@/lib/apiHelpers';
+import { useUploadQueue, type UploadState } from '@/hooks/useUploadQueue';
 import type { PropertyMediaDetails } from '@/types/landlord';
 
 export type EditablePhoto = {
@@ -55,6 +57,9 @@ export const mediaDetailsFor = (
   return entries.length ? Object.fromEntries(entries) : null;
 };
 
+/** True while any new photo is still uploading or has failed: its key is not known yet. */
+export const photosPending = (photos: EditablePhoto[]) => photos.some((p) => p.file && !p.key);
+
 /** Room and caption inputs for one photo; also used where photos save one by one. */
 export function PhotoDetailFields({
   index,
@@ -93,6 +98,11 @@ interface PropertyPhotoEditorProps {
   max?: number;
   /** Shown when there are no photos. */
   emptyHint?: string;
+  /**
+   * Uploads one photo and returns its storage key. When given, new photos upload as soon as they are added, each with
+   * progress, cancel and retry, and get their `key` when done; until then `photosPending` is true.
+   */
+  upload?: (file: File, options: UploadOptions) => Promise<string>;
 }
 
 const overlayButton =
@@ -103,7 +113,23 @@ export function PropertyPhotoEditor({
   onChange,
   max = 12,
   emptyHint = 'Without a photo your listing card shows a placeholder instead of the property.',
+  upload,
 }: PropertyPhotoEditorProps) {
+  // Uploads finish after the render that started them, so they patch the newest list, never a stale one.
+  const latest = useRef(photos);
+  useEffect(() => {
+    latest.current = photos;
+  }, [photos]);
+  const commit = (next: EditablePhoto[]) => {
+    latest.current = next;
+    onChange(next);
+  };
+  const uploads = useUploadQueue<string>({
+    upload: (file, options) =>
+      upload ? upload(file, options) : Promise.reject(new Error('Uploads are off')),
+    onSuccess: (id, key) => commit(latest.current.map((p) => (p.id === id ? { ...p, key } : p))),
+  });
+
   const objectUrls = useRef<string[]>([]);
   useEffect(
     () => () => {
@@ -122,18 +148,24 @@ export function PropertyPhotoEditor({
         objectUrls.current.push(url);
         return { id: `${file.name}-${file.lastModified}-${url}`, url, file };
       });
-    if (additions.length) onChange([...photos, ...additions]);
+    if (!additions.length) return;
+    commit([...photos, ...additions]);
+    if (upload) uploads.add(additions.map((p) => ({ id: p.id, file: p.file! })));
   };
   const update = (id: string, patch: Partial<Pick<EditablePhoto, 'room' | 'caption'>>) =>
-    onChange(photos.map((p) => (p.id === id ? { ...p, ...patch } : p)));
+    commit(photos.map((p) => (p.id === id ? { ...p, ...patch } : p)));
   const move = (from: number, to: number) => {
     if (to < 0 || to >= photos.length) return;
     const next = [...photos];
     [next[from], next[to]] = [next[to]!, next[from]!];
-    onChange(next);
+    commit(next);
   };
   const makeCover = (index: number) =>
-    onChange([photos[index]!, ...photos.filter((_, i) => i !== index)]);
+    commit([photos[index]!, ...photos.filter((_, i) => i !== index)]);
+  const remove = (id: string) => {
+    uploads.cancel(id);
+    commit(photos.filter((p) => p.id !== id));
+  };
 
   return (
     <div className="space-y-2">
@@ -143,6 +175,14 @@ export function PropertyPhotoEditor({
             <div className="relative aspect-video overflow-hidden rounded-lg border border-border bg-muted">
               {/* eslint-disable-next-line @next/next/no-img-element -- signed storage URL or a local blob */}
               <img src={photo.url} alt="" className="h-full w-full object-cover" />
+              {uploads.states[photo.id] && (
+                <UploadOverlay
+                  index={index}
+                  state={uploads.states[photo.id]!}
+                  onCancel={() => remove(photo.id)}
+                  onRetry={() => uploads.retry(photo.id)}
+                />
+              )}
               {index === 0 && (
                 <span className="absolute left-1 top-1 rounded bg-black/70 px-1.5 py-0.5 text-2xs font-medium text-white">
                   Cover
@@ -162,13 +202,16 @@ export function PropertyPhotoEditor({
                 <button
                   type="button"
                   aria-label={`Remove photo ${index + 1}`}
-                  onClick={() => onChange(photos.filter((p) => p.id !== photo.id))}
+                  onClick={() => remove(photo.id)}
                   className={`${overlayButton} hover:bg-destructive`}
                 >
                   <X className="h-3 w-3" />
                 </button>
               </div>
-              <div className="absolute bottom-1 right-1 flex gap-1">
+              {/* The upload bar sits where these are until the photo is in. */}
+              <div
+                className={`absolute bottom-1 right-1 flex gap-1 ${uploads.states[photo.id] ? 'hidden' : ''}`}
+              >
                 <button
                   type="button"
                   aria-label={`Move photo ${index + 1} earlier`}
@@ -217,6 +260,71 @@ export function PropertyPhotoEditor({
       </div>
 
       {photos.length === 0 && <p className="text-xs text-warning">{emptyHint}</p>}
+      {uploads.failed > 0 && (
+        <p role="alert" className="text-xs text-destructive">
+          {uploads.failed === 1
+            ? '1 photo did not upload. Retry it or remove it to save.'
+            : `${uploads.failed} photos did not upload. Retry them or remove them to save.`}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/** Over a photo while it uploads: progress with cancel, or the failure with retry. */
+function UploadOverlay({
+  index,
+  state,
+  onCancel,
+  onRetry,
+}: {
+  index: number;
+  state: UploadState;
+  onCancel: () => void;
+  onRetry: () => void;
+}) {
+  if (state.status === 'failed') {
+    return (
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-background/90 p-3 text-center">
+        <p className="flex items-center gap-1.5 text-xs font-medium text-destructive">
+          <AlertCircle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+          Upload failed
+        </p>
+        <p className="line-clamp-2 text-2xs text-muted-foreground">{state.error}</p>
+        <div className="flex gap-2">
+          <Button size="xs" variant="primary" onClick={onRetry}>
+            Retry
+          </Button>
+          <Button size="xs" variant="outline" onClick={onCancel}>
+            Remove
+          </Button>
+        </div>
+      </div>
+    );
+  }
+  const label =
+    state.status === 'queued'
+      ? 'Waiting to upload'
+      : state.progress >= 100
+        ? 'Processing'
+        : 'Uploading';
+  return (
+    <div className="absolute inset-x-1 bottom-1 flex items-end gap-2 rounded-md bg-card/95 p-2 shadow-sm">
+      <Progress
+        value={state.progress}
+        label={label}
+        showValue="percent"
+        size="sm"
+        className="min-w-0 flex-1"
+      />
+      <Button
+        size="xs"
+        variant="ghost"
+        onClick={onCancel}
+        aria-label={`Cancel upload of photo ${index + 1}`}
+      >
+        Cancel
+      </Button>
     </div>
   );
 }

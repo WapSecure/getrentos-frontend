@@ -1,4 +1,4 @@
-import type { MediaItem } from '@sureground/shared/showroom';
+import type { ImagePreview, ImageVariant, MediaItem } from '@sureground/shared/showroom';
 import type { PayoutSentTo } from '@sureground/shared';
 export type ShortletPricingMode = 'PER_NIGHT' | 'FLAT_STAY';
 export type ShortletDiscountType = 'WEEKLY' | 'TWO_WEEK' | 'MONTHLY' | 'LAST_MINUTE';
@@ -52,6 +52,9 @@ export interface ShortletListing {
   longitude?: number;
   locationPrecision?: 'exact' | 'approximate';
   coverImageUrl?: string;
+  /** List only: resized copies and the cover's size and blurred placeholder. */
+  imageVariants?: ImageVariant[];
+  imagePreview?: ImagePreview;
   imageKeys: string[];
   images: string[];
   videoKey?: string;

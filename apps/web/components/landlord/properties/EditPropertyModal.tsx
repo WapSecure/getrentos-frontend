@@ -8,6 +8,7 @@ import { tourSource } from '@sureground/shared';
 import {
   mediaDetailsFor,
   photosFromKeys,
+  photosPending,
   PropertyPhotoEditor,
   type EditablePhoto,
 } from '@/components/shared/media/PropertyPhotoEditor';
@@ -131,6 +132,8 @@ const EditPropertyForm = ({
     setVideoKey(undefined);
     setVideoCleared(true);
   };
+
+  const uploadsPending = photosPending(photos);
 
   const handleSave = async () => {
     setSaving(true);
@@ -258,7 +261,13 @@ const EditPropertyForm = ({
             </p>
           </div>
 
-          <PropertyPhotoEditor photos={photos} onChange={setPhotos} />
+          <PropertyPhotoEditor
+            photos={photos}
+            onChange={setPhotos}
+            upload={async (file, options) =>
+              (await unwrap(landlordService.uploadPropertyMedia('image', file, options))).key
+            }
+          />
 
           <div className="flex items-center justify-between gap-2 rounded-lg border border-border p-2">
             <div className="flex min-w-0 items-center gap-2">
@@ -332,12 +341,17 @@ const EditPropertyForm = ({
           variant="primary"
           fullWidth
           onClick={handleSave}
-          disabled={!name.trim() || !address.trim() || tourInvalid}
+          disabled={!name.trim() || !address.trim() || tourInvalid || uploadsPending}
           isLoading={saving}
           loadingText="Saving…"
         >
           Save changes
         </Button>
+        {uploadsPending && (
+          <p className="text-center text-xs text-muted-foreground">
+            You can save once every photo has uploaded.
+          </p>
+        )}
       </div>
     </>
   );

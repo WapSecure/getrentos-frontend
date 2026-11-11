@@ -37,6 +37,7 @@ export const SimilarProperties = ({ currentId }: SimilarPropertiesProps) => {
             priceCompact
             image={property.image}
             imageSrcSet={property.imageSrcSet}
+            imagePreview={property.imagePreview}
             imageAlt={property.title}
             facts={{ beds: property.bedrooms, baths: property.bathrooms }}
           />

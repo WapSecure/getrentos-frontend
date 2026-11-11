@@ -19,6 +19,14 @@ export interface ImageVariant {
   url: string;
 }
 
+/** A list card's cover: its shape and a tiny blurred stand-in to show while it loads. */
+export interface ImagePreview {
+  width: number;
+  height: number;
+  /** `data:image/webp;base64,...`, under 1 KB; missing for photos not yet backfilled. */
+  placeholder?: string;
+}
+
 export interface MediaItem {
   id: string;
   kind: 'image' | 'video' | 'tour';
@@ -26,6 +34,8 @@ export interface MediaItem {
   posterUrl?: string;
   width?: number;
   height?: number;
+  /** Images only: a tiny blurred `data:` URI shown while the photo loads. */
+  placeholder?: string;
   variants?: ImageVariant[];
   durationSeconds?: number;
   alt?: string;

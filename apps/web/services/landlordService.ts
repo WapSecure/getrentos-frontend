@@ -1,5 +1,13 @@
 import type { ReplyLanguage } from '@/lib/replyLanguage';
-import { authDownload, authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
+import {
+  authDownload,
+  authFetch,
+  authUpload,
+  safeCall,
+  toQuery,
+  type Paginated,
+  type UploadOptions,
+} from '@/lib/apiHelpers';
 import type { AssistantReply, AssistantTurn } from '@/types/assistant';
 import type { ApiResponse } from '@/lib/apiHelpers';
 import type { SpendApproval } from './spendApprovalService';
@@ -399,18 +407,20 @@ export const landlordService = {
     );
   },
 
+  /** With `upload` options it goes over XHR so it can report progress and be cancelled. */
   async uploadPropertyMedia(
     kind: 'image' | 'video',
-    file: File
+    file: File,
+    upload?: UploadOptions
   ): Promise<ApiResponse<{ key: string; kind: 'image' | 'video' }>> {
     const form = new FormData();
     form.append('kind', kind);
     form.append('file', file);
+    const path = '/landlord/properties/media/upload';
     return safeCall(() =>
-      authFetch<{ key: string; kind: 'image' | 'video' }>('/landlord/properties/media/upload', {
-        method: 'POST',
-        body: form,
-      })
+      upload
+        ? authUpload<{ key: string; kind: 'image' | 'video' }>(path, form, upload)
+        : authFetch<{ key: string; kind: 'image' | 'video' }>(path, { method: 'POST', body: form })
     );
   },
 

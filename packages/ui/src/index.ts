@@ -74,6 +74,7 @@ export * from './ToggleChip';
 export * from './photoQuality';
 export * from './ListingCard';
 export * from './MediaMosaic';
+export * from './ProgressiveImg';
 export * from './MediaViewer';
 export * from './TourEmbed';
 export * from './VideoPlayer';
