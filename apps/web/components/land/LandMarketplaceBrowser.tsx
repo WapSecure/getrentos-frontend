@@ -68,6 +68,7 @@ import { AssuranceTierBadge } from '@/components/land/market/AssuranceTierBadge'
 import { TrustLabelsList } from '@/components/land/market/TrustLabelsList';
 import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';
 import type { LandAssuranceTier } from '@/types/land';
+import { CollectionsStrip } from '@/components/collections/CollectionsStrip';
 
 type MarketplaceMode = 'public' | 'buyer';
 type Sort = 'newest' | 'price_asc' | 'price_desc';
@@ -383,6 +384,8 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
             </Link>
           </div>
         </div>
+
+        {mode === 'public' && <CollectionsStrip market="land" className="mb-8" />}
 
         <div className="mb-3">
           <SearchInput
