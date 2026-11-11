@@ -37,6 +37,8 @@ import {
   type HomeManagementWorkOrder,
   type HomeManagementWorkOrderQuote,
 } from '@/services/homeManagementService';
+import { AWAITING_OWNER_MESSAGE, isAwaitingOwnerApproval } from '@/lib/managedSpend';
+import type { AwaitingOwnerApproval } from '@/types/managed';
 
 type QuoteForm = {
   vendorId: string;
@@ -172,13 +174,21 @@ export function HomeManagementWorkOrderQuotes({
     },
   });
 
-  const approveQuote = useMutation<HomeManagementWorkOrderQuote, Error, { quoteId: string }>({
+  const approveQuote = useMutation<
+    HomeManagementWorkOrderQuote | AwaitingOwnerApproval,
+    Error,
+    { quoteId: string }
+  >({
     mutationFn: ({ quoteId }) =>
       unwrap(homeManagementService.approveWorkOrderQuote(workOrder.id, quoteId)),
-    onSuccess: async () => {
+    onSuccess: async (result) => {
       await invalidateQuoteViews();
       setPage(1);
       setActionDialog(null);
+      if (isAwaitingOwnerApproval(result)) {
+        toast.info(AWAITING_OWNER_MESSAGE[result.band] ?? AWAITING_OWNER_MESSAGE.OWNER);
+        return;
+      }
       toast.success('Quote selected, budget approved, and vendor assignment recorded.');
     },
     onError: (error) => {

@@ -1,0 +1,334 @@
+'use client';
+
+import { useState } from 'react';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { KeyRound, ReceiptText } from '@sureground/icons';
+import {
+  Badge,
+  Button,
+  Card,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardSkeleton,
+  CardTitle,
+  DescriptionList,
+  EmptyState,
+  PageHeader,
+  QueryState,
+  SegmentedControl,
+  Select,
+  type DescriptionItem,
+} from '@sureground/ui';
+import { unwrap } from '@/lib/apiHelpers';
+import { ROUTES } from '@/lib/constants/auth';
+import { DIASPORA_ROUTES } from '@/lib/constants/diasporaRoutes';
+import { formatCurrency, formatDate, formatLagosDate } from '@/lib/format';
+import { homeManagementKeys, investorKeys } from '@/lib/queryKeys';
+import { investorService } from '@/services/investorService';
+import { homeManagementService } from '@/services/homeManagementService';
+import { ApprovalsView } from '@/components/landlord/approvals/ApprovalsView';
+import { HomeManagementWorkOrderQueue } from '@/components/home-management/HomeManagementWorkOrderQueue';
+import {
+  INTAKE_STAGE,
+  MANDATE_STATUS_BADGE,
+} from '@/components/landlord/managed/SuregroundManagedView';
+import type { InvestorManagedProperty } from '@/types/managed';
+import { STATEMENT_PAYOUT_LABELS, humaniseStatus } from '../labels';
+
+const JOB_PAGE_SIZE = 10;
+/** Past this many properties a segmented control stops fitting a phone. */
+const SEGMENTED_MAX = 3;
+
+const limit = (value: number | null | undefined) =>
+  value === null || value === undefined ? 'No limit' : formatCurrency(value);
+
+/**
+ * Sureground Managed for an investor (DIA-20): one property at a time, with its agreement, the
+ * spending waiting for them, its repairs and the latest statement. Actions on the agreement stay
+ * on the management page; this page links there.
+ */
+export function InvestorManaged() {
+  const managed = useQuery({
+    queryKey: investorKeys.managed,
+    queryFn: () => unwrap(investorService.getManaged()),
+  });
+  const properties = managed.data?.properties ?? [];
+  const [chosenId, setChosenId] = useState<string | null>(null);
+  const property = properties.find((p) => p.propertyId === chosenId) ?? properties[0] ?? null;
+
+  return (
+    <div className="space-y-6 pb-10">
+      <PageHeader
+        title="Managed"
+        description="Your homes under Sureground Managed: the agreement, spending waiting for you, repairs and the latest statement."
+        breadcrumbs={[
+          { label: 'Invest', href: DIASPORA_ROUTES.OWNER_WORKSPACE },
+          { label: 'Managed' },
+        ]}
+      />
+
+      <QueryState
+        isLoading={managed.isLoading}
+        isError={managed.isError}
+        onRetry={() => void managed.refetch()}
+        isRetrying={managed.isFetching}
+        errorTitle="Your managed properties could not be loaded"
+        isEmpty={properties.length === 0}
+        empty={{
+          icon: KeyRound,
+          title: 'No property under Sureground Managed yet',
+          description:
+            'We find tenants, collect rent, arrange repairs and send you a monthly statement. Spending above your limit waits for your approval.',
+          action: <Button href={ROUTES.OWNER_MANAGEMENT}>Set up Sureground Managed</Button>,
+        }}
+        loading={
+          <div className="grid gap-6 lg:grid-cols-2">
+            <CardSkeleton lines={5} />
+            <CardSkeleton lines={4} />
+          </div>
+        }
+      >
+        {property && (
+          <>
+            {properties.length > 1 && (
+              <PropertyPicker
+                properties={properties}
+                value={property.propertyId}
+                onChange={setChosenId}
+              />
+            )}
+
+            <div className="grid gap-6 lg:grid-cols-2">
+              <AgreementCard property={property} />
+              <StatementCard property={property} />
+            </div>
+
+            <section aria-labelledby="managed-approvals" className="space-y-3">
+              <h2 id="managed-approvals" className="text-base font-semibold text-foreground">
+                Waiting for your approval
+              </h2>
+              <ApprovalsView key={property.propertyId} propertyId={property.propertyId} />
+            </section>
+
+            <section aria-labelledby="managed-jobs" className="space-y-3">
+              <h2 id="managed-jobs" className="text-base font-semibold text-foreground">
+                Repairs and jobs
+              </h2>
+              <PropertyJobs
+                key={property.propertyId}
+                propertyId={property.propertyId}
+                title={property.title}
+              />
+            </section>
+          </>
+        )}
+      </QueryState>
+    </div>
+  );
+}
+
+function PropertyPicker({
+  properties,
+  value,
+  onChange,
+}: {
+  properties: InvestorManagedProperty[];
+  value: string;
+  onChange: (id: string) => void;
+}) {
+  if (properties.length <= SEGMENTED_MAX) {
+    return (
+      <SegmentedControl
+        aria-label="Property"
+        value={value}
+        onValueChange={onChange}
+        className="max-w-full overflow-x-auto"
+        segments={properties.map((p) => ({
+          value: p.propertyId,
+          label: p.title,
+          count: p.pendingApprovals || undefined,
+          countTone: 'warning' as const,
+        }))}
+      />
+    );
+  }
+  return (
+    <div className="max-w-sm">
+      <Select
+        ariaLabel="Property"
+        value={value}
+        onValueChange={onChange}
+        searchable
+        options={properties.map((p) => ({
+          value: p.propertyId,
+          label: p.pendingApprovals ? `${p.title} (${p.pendingApprovals} waiting)` : p.title,
+          searchText: p.title,
+        }))}
+      />
+    </div>
+  );
+}
+
+function AgreementCard({ property }: { property: InvestorManagedProperty }) {
+  const { mandate, intake } = property;
+  const status = mandate
+    ? (MANDATE_STATUS_BADGE[mandate.status] ?? {
+        variant: 'neutral' as const,
+        label: humaniseStatus(mandate.status),
+      })
+    : null;
+
+  const rows: DescriptionItem[] = mandate
+    ? [
+        {
+          label: 'Status',
+          value: status && <Badge variant={status.variant}>{status.label}</Badge>,
+        },
+        {
+          label: 'Management fee',
+          value:
+            mandate.feePercent !== null && mandate.feePercent !== undefined
+              ? `${mandate.feePercent}%`
+              : null,
+        },
+        { label: 'Started', value: mandate.startedAt ? formatDate(mandate.startedAt) : null },
+        {
+          label: 'Routine spending',
+          value: limit(mandate.bands.routineCap),
+          hint: 'Your manager spends up to this without asking.',
+        },
+        {
+          label: 'Emergency spending',
+          value: limit(mandate.bands.emergencyCap),
+          hint: 'Urgent repairs up to this go ahead first.',
+        },
+        {
+          label: 'Explicit authorisation',
+          value:
+            mandate.bands.explicitAbove === null
+              ? 'Not set'
+              : `Above ${limit(mandate.bands.explicitAbove)}`,
+          hint: 'You confirm it is you before approving.',
+        },
+      ]
+    : intake
+      ? [
+          {
+            label: 'Setting up',
+            value: (
+              <Badge variant="info">
+                {INTAKE_STAGE[intake.status] ?? humaniseStatus(intake.status)}
+              </Badge>
+            ),
+          },
+        ]
+      : [];
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle as="h2">Agreement</CardTitle>
+        <CardDescription>{property.title}</CardDescription>
+      </CardHeader>
+      <div className="px-5 pb-2">
+        {rows.length > 0 ? (
+          <DescriptionList layout="rows" items={rows} />
+        ) : (
+          <p className="py-3 text-sm text-muted-foreground">No agreement yet.</p>
+        )}
+      </div>
+      <CardFooter className="flex-wrap justify-start">
+        <Button href={ROUTES.OWNER_MANAGEMENT} variant="outline" size="sm">
+          {mandate ? 'Manage agreement' : 'Continue setting up'}
+        </Button>
+        {mandate?.status === 'ACTIVE' && (
+          <Button href={ROUTES.OWNER_APPROVALS} variant="ghost" size="sm">
+            Change limits
+          </Button>
+        )}
+      </CardFooter>
+    </Card>
+  );
+}
+
+function StatementCard({ property }: { property: InvestorManagedProperty }) {
+  const statement = property.lastStatement;
+  const net = statement ? Number(statement.net) : NaN;
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle as="h2">Latest statement</CardTitle>
+        <CardDescription>Rent collected, less fees and repairs.</CardDescription>
+      </CardHeader>
+      {statement ? (
+        <>
+          <div className="px-5 pb-2">
+            <DescriptionList
+              layout="rows"
+              items={[
+                {
+                  label: 'Period',
+                  value: `${formatLagosDate(statement.periodStart)} to ${formatLagosDate(statement.periodEnd)}`,
+                },
+                {
+                  label: 'Net to you',
+                  value: Number.isFinite(net) ? formatCurrency(net) : null,
+                },
+                {
+                  label: 'Payout',
+                  value:
+                    STATEMENT_PAYOUT_LABELS[statement.status] ?? humaniseStatus(statement.status),
+                },
+              ]}
+            />
+          </div>
+          <CardFooter className="justify-start">
+            <Button href={ROUTES.OWNER_MANAGEMENT} variant="outline" size="sm">
+              All statements
+            </Button>
+          </CardFooter>
+        </>
+      ) : (
+        <EmptyState
+          size="compact"
+          bare
+          icon={ReceiptText}
+          title="No statement yet"
+          description="Statements are monthly once the property is managed."
+        />
+      )}
+    </Card>
+  );
+}
+
+function PropertyJobs({ propertyId, title }: { propertyId: string; title: string }) {
+  const [page, setPage] = useState(1);
+  const workOrders = useQuery({
+    queryKey: [...homeManagementKeys.workOrders, { page, pageSize: JOB_PAGE_SIZE, propertyId }],
+    queryFn: () =>
+      unwrap(homeManagementService.listWorkOrders({ page, pageSize: JOB_PAGE_SIZE, propertyId })),
+    placeholderData: keepPreviousData,
+  });
+  const vendors = useQuery({
+    queryKey: [...homeManagementKeys.vendors, 'assignable', propertyId],
+    queryFn: () => unwrap(homeManagementService.listAssignableVendors(propertyId)),
+  });
+
+  return (
+    <HomeManagementWorkOrderQueue
+      compact
+      viewerRole="owner"
+      workOrders={workOrders.data?.items ?? []}
+      properties={[{ id: propertyId, title }]}
+      vendors={vendors.data ?? []}
+      isLoading={workOrders.isLoading}
+      error={workOrders.error as Error | null}
+      page={page}
+      pageSize={JOB_PAGE_SIZE}
+      total={workOrders.data?.total ?? 0}
+      onPageChange={setPage}
+    />
+  );
+}

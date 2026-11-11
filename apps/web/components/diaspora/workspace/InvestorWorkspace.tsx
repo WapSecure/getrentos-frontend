@@ -103,6 +103,8 @@ const usePortalLinks = (portal: InvestorPortal) => {
     inspections: buyer ? VISIT_ROUTES.BUYER_INSPECTIONS : undefined,
     // The owner's own agreements with Sureground Managed (OWNER_MANAGED is the reverse).
     managed: owner ? ROUTES.OWNER_MANAGEMENT : undefined,
+    // Agreement, approvals, repairs and the latest statement on one page.
+    managedArea: owner ? DIASPORA_ROUTES.OWNER_MANAGED : undefined,
     approvals: owner ? ROUTES.OWNER_APPROVALS : undefined,
     documents: portal === 'buyer' ? ROUTES.BUYER_DOCUMENTS : ROUTES.OWNER_DOCUMENTS,
     identityAbroad: `${portal === 'buyer' ? ROUTES.BUYER_TRUST_PROFILE : ROUTES.OWNER_TRUST_PROFILE}?tab=${FOREIGN_IDENTITY_TAB_ID}`,
@@ -211,9 +213,13 @@ const PropertyCareCard = ({ data, links }: { data: InvestorOverview; links: Port
       <div className="px-5 pb-2">
         <DescriptionList layout="rows" items={rows} />
       </div>
-      {(links.managed || (links.approvals && spend?.count)) && (
+      {(links.managed || links.managedArea || (links.approvals && spend?.count)) && (
         <CardFooter className="justify-start">
-          {links.approvals && spend?.count ? (
+          {links.managedArea ? (
+            <Button href={links.managedArea}>
+              {spend?.count ? 'Review spending' : 'Open property care'}
+            </Button>
+          ) : links.approvals && spend?.count ? (
             <Button href={links.approvals}>Review spending</Button>
           ) : null}
           {links.managed && (

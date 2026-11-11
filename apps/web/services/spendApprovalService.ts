@@ -1,4 +1,5 @@
 import { authFetch, safeCall, toQuery, type ApiResponse, type Paginated } from '@/lib/apiHelpers';
+import type { SpendBand, SpendBands } from '@/types/managed';
 
 export const SPEND_APPROVAL_STATUSES = ['PENDING', 'APPROVED', 'REJECTED', 'CANCELLED'] as const;
 export type SpendApprovalStatus = (typeof SPEND_APPROVAL_STATUSES)[number];
@@ -27,6 +28,9 @@ export interface SpendApproval {
   decidedAt: string | null;
   expenseId: string | null;
   createdAt: string;
+  /** Optional while older rows and deploys catch up. */
+  band?: SpendBand | null;
+  maintenanceRequestId?: string | null;
 }
 
 export interface ListSpendApprovalsParams {
@@ -65,6 +69,16 @@ export const spendApprovalService = {
       authFetch<void>(`/landlord/spend-approvals/mandate/${mandateId}/cap`, {
         method: 'PUT',
         body: JSON.stringify({ cap }),
+      })
+    );
+  },
+
+  /** Owner only; a careful money setting, so the API asks for step-up (handled by authFetch). */
+  setMandateBands(mandateId: string, bands: SpendBands): Promise<ApiResponse<void>> {
+    return safeCall(() =>
+      authFetch<void>(`/landlord/spend-approvals/mandate/${mandateId}/bands`, {
+        method: 'PUT',
+        body: JSON.stringify(bands),
       })
     );
   },

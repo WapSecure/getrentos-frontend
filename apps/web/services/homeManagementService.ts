@@ -2,6 +2,13 @@ import type { InvoiceCheck } from '@/types/invoiceCheck';
 import { authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
 import { providerQuery } from '@/services/paymentStatusService';
 import type { PaymentProvider } from '@/types/payments';
+import type {
+  AwaitingOwnerApproval,
+  DuplicateAcknowledgement,
+  WorkOrderEvidence,
+  WorkOrderFeedbackInput,
+  WorkOrderPhotoStage,
+} from '@/types/managed';
 
 export type HomeManagementDashboard = {
   assets: number;
@@ -652,12 +659,16 @@ export const homeManagementService = {
       )
     );
   },
+  /** Above the routine limit the API parks the spend for the owner instead of refusing it. */
   approveWorkOrder: (id: string, approvedCost: number) =>
     safeCall(() =>
-      authFetch<HomeManagementWorkOrder>(`/home-management/work-orders/${id}/approve`, {
-        method: 'POST',
-        body: JSON.stringify({ approvedCost }),
-      })
+      authFetch<HomeManagementWorkOrder | AwaitingOwnerApproval>(
+        `/home-management/work-orders/${id}/approve`,
+        {
+          method: 'POST',
+          body: JSON.stringify({ approvedCost }),
+        }
+      )
     ),
   listSlaPolicies: (propertyId: string, params: HomeManagementSlaPoliciesParams = {}) =>
     safeCall(() =>
@@ -715,7 +726,7 @@ export const homeManagementService = {
     ),
   approveWorkOrderQuote: (workOrderId: string, quoteId: string) =>
     safeCall(() =>
-      authFetch<HomeManagementWorkOrderQuote>(
+      authFetch<HomeManagementWorkOrderQuote | AwaitingOwnerApproval>(
         `/home-management/work-orders/${workOrderId}/quotes/${quoteId}/approve`,
         { method: 'POST' }
       )
@@ -759,10 +770,12 @@ export const homeManagementService = {
   /** Read-only. */
   checkWorkOrderInvoice: (invoiceId: string) =>
     safeCall(() => authFetch<InvoiceCheck>(`/home-management/invoices/${invoiceId}/check`)),
-  approveWorkOrderInvoice: (invoiceId: string) =>
+  /** Refused as a likely duplicate unless `acknowledge` carries the reason it is not one. */
+  approveWorkOrderInvoice: (invoiceId: string, acknowledge?: DuplicateAcknowledgement) =>
     safeCall(() =>
       authFetch<HomeManagementWorkOrderInvoice>(`/home-management/invoices/${invoiceId}/approve`, {
         method: 'POST',
+        ...(acknowledge ? { body: JSON.stringify(acknowledge) } : {}),
       })
     ),
   rejectWorkOrderInvoice: (invoiceId: string, data: RejectHomeManagementWorkOrderInvoiceInput) =>
@@ -787,7 +800,11 @@ export const homeManagementService = {
       )
     ),
   /** `provider` takes any top-up (Paystack or Monnify); omitted, the default one. */
-  payWorkOrderInvoice: (invoiceId: string, provider?: PaymentProvider) =>
+  payWorkOrderInvoice: (
+    invoiceId: string,
+    provider?: PaymentProvider,
+    acknowledge?: DuplicateAcknowledgement
+  ) =>
     safeCall(() =>
       authFetch<{
         invoiceId: string;
@@ -796,7 +813,39 @@ export const homeManagementService = {
         paidOutAt?: string;
         /** Set when the owner's held rent doesn't cover it: pay the shortfall on Paystack first. */
         topUp?: { amount: number; authorizationUrl: string; reference: string };
-      }>(`/home-management/invoices/${invoiceId}/pay${providerQuery(provider)}`, { method: 'POST' })
+      }>(`/home-management/invoices/${invoiceId}/pay${providerQuery(provider)}`, {
+        method: 'POST',
+        ...(acknowledge ? { body: JSON.stringify(acknowledge) } : {}),
+      })
+    ),
+
+  /** Each stage of the job, from the problem reported to the owner's feedback. */
+  getWorkOrderEvidence: (workOrderId: string) =>
+    safeCall(() =>
+      authFetch<WorkOrderEvidence>(`/home-management/work-orders/${workOrderId}/evidence`)
+    ),
+  uploadWorkOrderPhoto: (
+    workOrderId: string,
+    input: { file: File; stage: WorkOrderPhotoStage; takenAt?: string }
+  ) => {
+    const form = new FormData();
+    form.append('file', input.file);
+    form.append('stage', input.stage);
+    if (input.takenAt) form.append('takenAt', input.takenAt);
+    return safeCall(() =>
+      authFetch<unknown>(`/home-management/work-orders/${workOrderId}/photos`, {
+        method: 'POST',
+        body: form,
+      })
+    );
+  },
+  /** The owner's rating once the job is completed. */
+  submitWorkOrderFeedback: (workOrderId: string, input: WorkOrderFeedbackInput) =>
+    safeCall(() =>
+      authFetch<unknown>(`/home-management/work-orders/${workOrderId}/feedback`, {
+        method: 'POST',
+        body: JSON.stringify(input),
+      })
     ),
 
   getVendorPayoutAccount: (vendorId: string) =>

@@ -42,6 +42,8 @@ import {
   type HomeManagementVendor,
   type HomeManagementWorkOrder,
 } from '@/services/homeManagementService';
+import { AWAITING_OWNER_MESSAGE, isAwaitingOwnerApproval } from '@/lib/managedSpend';
+import type { AwaitingOwnerApproval } from '@/types/managed';
 
 const panelFallback = () => <Skeleton className="h-40 w-full rounded-lg" />;
 const HomeManagementWorkOrderQuotes = dynamic(
@@ -56,6 +58,10 @@ const HomeManagementWorkOrderInvoices = dynamic(
     import('@/components/home-management/HomeManagementWorkOrderInvoices').then(
       (m) => m.HomeManagementWorkOrderInvoices
     ),
+  { loading: panelFallback }
+);
+const WorkOrderEvidence = dynamic(
+  () => import('@/components/home-management/WorkOrderEvidence').then((m) => m.WorkOrderEvidence),
   { loading: panelFallback }
 );
 
@@ -213,6 +219,10 @@ interface HomeManagementWorkOrderQueueProps {
   pageSize: number;
   total: number;
   onPageChange: (page: number) => void;
+  /** Who is looking: the owner can rate a finished job. */
+  viewerRole?: 'owner' | 'landlord' | 'manager';
+  /** Inside a page that already titles the section: drops the heading and the page counts. */
+  compact?: boolean;
 }
 
 export function HomeManagementWorkOrderQueue({
@@ -226,6 +236,8 @@ export function HomeManagementWorkOrderQueue({
   pageSize,
   total,
   onPageChange,
+  viewerRole,
+  compact = false,
 }: HomeManagementWorkOrderQueueProps) {
   const queryClient = useQueryClient();
   const [costs, setCosts] = useState<Record<string, string>>({});
@@ -302,19 +314,25 @@ export function HomeManagementWorkOrderQueue({
     ]);
   };
 
-  const approve = useMutation<HomeManagementWorkOrder, Error, { id: string; approvedCost: number }>(
-    {
-      mutationFn: ({ id, approvedCost }: { id: string; approvedCost: number }) =>
-        unwrap(homeManagementService.approveWorkOrder(id, approvedCost)),
-      onSuccess: async () => {
-        await invalidateWorkOrderViews();
-        toast.success('Work order budget approved and recorded.');
-      },
-      onError: (mutationError: Error) => {
-        toast.error(mutationError.message || 'Unable to approve this work order.');
-      },
-    }
-  );
+  const approve = useMutation<
+    HomeManagementWorkOrder | AwaitingOwnerApproval,
+    Error,
+    { id: string; approvedCost: number }
+  >({
+    mutationFn: ({ id, approvedCost }: { id: string; approvedCost: number }) =>
+      unwrap(homeManagementService.approveWorkOrder(id, approvedCost)),
+    onSuccess: async (result) => {
+      await invalidateWorkOrderViews();
+      if (isAwaitingOwnerApproval(result)) {
+        toast.info(AWAITING_OWNER_MESSAGE[result.band] ?? AWAITING_OWNER_MESSAGE.OWNER);
+        return;
+      }
+      toast.success('Work order budget approved and recorded.');
+    },
+    onError: (mutationError: Error) => {
+      toast.error(mutationError.message || 'Unable to approve this work order.');
+    },
+  });
 
   const createWorkOrder = useMutation({
     mutationFn: (input: CreateHomeManagementWorkOrderInput) =>
@@ -524,21 +542,33 @@ export function HomeManagementWorkOrderQueue({
   const canSubmitLifecycleAction = !lifecycleCostNeeded || lifecycleCostValid;
 
   return (
-    <section aria-labelledby="work-order-queue-heading" className="mt-10">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p className="text-sm font-medium text-primary">Work order control</p>
-          <h2
-            id="work-order-queue-heading"
-            className="mt-1 text-2xl font-semibold tracking-[-0.02em] text-foreground"
-          >
-            Keep spend and service delivery under control.
-          </h2>
-          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Review operational work, approve planned spend, and spot care requests that are at risk
-            of missing their due date.
-          </p>
-        </div>
+    <section
+      aria-labelledby={compact ? undefined : 'work-order-queue-heading'}
+      aria-label={compact ? 'Work orders' : undefined}
+      className={compact ? undefined : 'mt-10'}
+    >
+      <div
+        className={
+          compact
+            ? 'flex justify-end'
+            : 'flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between'
+        }
+      >
+        {!compact && (
+          <div>
+            <p className="text-sm font-medium text-primary">Work order control</p>
+            <h2
+              id="work-order-queue-heading"
+              className="mt-1 text-2xl font-semibold tracking-[-0.02em] text-foreground"
+            >
+              Keep spend and service delivery under control.
+            </h2>
+            <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+              Review operational work, approve planned spend, and spot care requests that are at
+              risk of missing their due date.
+            </p>
+          </div>
+        )}
         <div className="flex flex-wrap items-center gap-2">
           <Button
             icon={<ClipboardPlus className="h-4 w-4" />}
@@ -555,23 +585,27 @@ export function HomeManagementWorkOrderQueue({
           >
             Create work order
           </Button>
-          <QueueStat
-            icon={<NairaSign className="h-4 w-4" />}
-            label="Needs approval on page"
-            value={pendingApprovals.length}
-            urgent={pendingApprovals.length > 0}
-          />
-          <QueueStat
-            icon={<Clock3 className="h-4 w-4" />}
-            label="Open on page"
-            value={activeWorkOrders.length}
-          />
-          <QueueStat
-            icon={<CircleAlert className="h-4 w-4" />}
-            label="Overdue on page"
-            value={overdueWorkOrders.length}
-            urgent={overdueWorkOrders.length > 0}
-          />
+          {!compact && (
+            <>
+              <QueueStat
+                icon={<NairaSign className="h-4 w-4" />}
+                label="Needs approval on page"
+                value={pendingApprovals.length}
+                urgent={pendingApprovals.length > 0}
+              />
+              <QueueStat
+                icon={<Clock3 className="h-4 w-4" />}
+                label="Open on page"
+                value={activeWorkOrders.length}
+              />
+              <QueueStat
+                icon={<CircleAlert className="h-4 w-4" />}
+                label="Overdue on page"
+                value={overdueWorkOrders.length}
+                urgent={overdueWorkOrders.length > 0}
+              />
+            </>
+          )}
         </div>
       </div>
 
@@ -955,6 +989,7 @@ export function HomeManagementWorkOrderQueue({
                       <HomeManagementWorkOrderQuotes workOrder={workOrder} vendors={vendors} />
                       <HomeManagementWorkOrderInvoices workOrder={workOrder} />
                     </div>
+                    <WorkOrderEvidence workOrder={workOrder} viewerRole={viewerRole} />
                   </article>
                 );
               })}

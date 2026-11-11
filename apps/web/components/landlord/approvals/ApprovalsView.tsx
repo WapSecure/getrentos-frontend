@@ -21,11 +21,20 @@ import {
 import {
   spendApprovalService,
   SPEND_APPROVAL_STATUS_LABELS,
+  type SpendApproval,
   type SpendApprovalStatus,
 } from '@/services/spendApprovalService';
 import { SpendCapSettings } from './SpendCapSettings';
 import { MandateCountersignSection } from '@/components/shared/authority/MandateCountersignSection';
+import { withStepUpSummary } from '@sureground/shared';
 import { unwrap } from '@/lib/apiHelpers';
+import { formatCurrency, formatDate } from '@/lib/format';
+import { investorKeys } from '@/lib/queryKeys';
+import {
+  SPEND_BAND_LABELS,
+  SPEND_BAND_VARIANT,
+  needsExplicitAuthorisation,
+} from '@/lib/managedSpend';
 
 const STATUS_VARIANT: Record<SpendApprovalStatus, BadgeVariant> = {
   PENDING: 'warning',
@@ -34,43 +43,66 @@ const STATUS_VARIANT: Record<SpendApprovalStatus, BadgeVariant> = {
   CANCELLED: 'neutral',
 };
 
-const formatNaira = (amount: number) =>
-  `₦${amount.toLocaleString('en-NG', { maximumFractionDigits: 0 })}`;
 const titleCase = (s: string) =>
   s
     .toLowerCase()
     .replace(/_/g, ' ')
     .replace(/^\w/, (c) => c.toUpperCase());
-const formatDate = (iso: string) =>
-  new Date(iso).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
-
 const PAGE_SIZE = 12;
+/** Scoped to one property, every pending request is read in one page and filtered here. */
+const SCOPED_PAGE_SIZE = 100;
 const tabs: { value: 'owner' | 'requester'; label: string }[] = [
   { value: 'owner', label: 'To review' },
   { value: 'requester', label: 'My requests' },
 ];
 
-export function ApprovalsView() {
+interface ApprovalsViewProps {
+  /**
+   * Narrows the view to one property's requests waiting for the owner, without the page header,
+   * limits and tabs: the Managed page shows it as one of its sections.
+   */
+  propertyId?: string;
+}
+
+export function ApprovalsView({ propertyId }: ApprovalsViewProps = {}) {
+  const scoped = Boolean(propertyId);
   const queryClient = useQueryClient();
-  const [role, setRole] = useState<'owner' | 'requester'>('owner');
+  const [chosenRole, setRole] = useState<'owner' | 'requester'>('owner');
+  const role = scoped ? 'owner' : chosenRole;
   const [page, setPage] = useState(1);
   const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState('');
   const toast = useToast();
 
   const { data, isLoading } = useQuery({
-    queryKey: ['landlord', 'spend-approvals', role, page],
-    queryFn: () => unwrap(spendApprovalService.list({ role, page, pageSize: PAGE_SIZE })),
+    queryKey: ['landlord', 'spend-approvals', role, scoped ? 'pending' : page],
+    queryFn: () =>
+      unwrap(
+        spendApprovalService.list(
+          scoped
+            ? { role, status: 'PENDING', page: 1, pageSize: SCOPED_PAGE_SIZE }
+            : { role, page, pageSize: PAGE_SIZE }
+        )
+      ),
     placeholderData: keepPreviousData,
   });
-  const approvals = data?.items ?? [];
-  const total = data?.total ?? 0;
+  // The list endpoint has no property filter.
+  const approvals = (data?.items ?? []).filter((a) => !scoped || a.propertyId === propertyId);
+  const total = scoped ? 0 : (data?.total ?? 0);
 
   const invalidate = () =>
-    queryClient.invalidateQueries({ queryKey: ['landlord', 'spend-approvals'] });
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['landlord', 'spend-approvals'] }),
+      queryClient.invalidateQueries({ queryKey: investorKeys.managed }),
+    ]);
 
+  // Approval is behind step-up; an EXPLICIT request says so in the confirmation.
   const approveMutation = useMutation({
-    mutationFn: (id: string) => unwrap(spendApprovalService.approve(id)),
+    mutationFn: (a: SpendApproval) =>
+      withStepUpSummary(
+        `${needsExplicitAuthorisation(a.band) ? 'Explicitly authorise' : 'Approve'} ${formatCurrency(a.amount)} for ${a.propertyTitle ?? 'this property'}`,
+        () => unwrap(spendApprovalService.approve(a.id))
+      ),
     onSuccess: () => {
       invalidate();
       toast.success('Approved. The expense has been recorded.');
@@ -92,34 +124,49 @@ export function ApprovalsView() {
 
   return (
     <>
-      <PageHeader
-        title="Approvals"
-        description="Spend your manager wants to make above your approval limit."
-      />
+      {!scoped && (
+        <>
+          <PageHeader
+            title="Approvals"
+            description="Spend your manager wants to make above your approval limit."
+          />
 
-      <MandateCountersignSection />
+          <MandateCountersignSection />
 
-      <SpendCapSettings />
+          <SpendCapSettings />
+        </>
+      )}
 
-      <Tabs
-        value={role}
-        onValueChange={(value) => {
-          setRole(value as 'owner' | 'requester');
-          setPage(1);
-        }}
-        className="mb-6"
-      >
-        <TabsList>
-          {tabs.map((tab) => (
-            <TabsTrigger key={tab.value} value={tab.value}>
-              {tab.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
+      {!scoped && (
+        <Tabs
+          value={role}
+          onValueChange={(value) => {
+            setRole(value as 'owner' | 'requester');
+            setPage(1);
+          }}
+          className="mb-6"
+        >
+          <TabsList>
+            {tabs.map((tab) => (
+              <TabsTrigger key={tab.value} value={tab.value}>
+                {tab.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
+      )}
 
       {isLoading ? (
         <ListSkeleton variant="cards" rows={3} />
+      ) : approvals.length === 0 && scoped ? (
+        <Card>
+          <EmptyState
+            size="compact"
+            icon={ShieldCheck}
+            title="Nothing waiting for you"
+            description="Spend above your routine limit on this property will appear here."
+          />
+        </Card>
       ) : approvals.length === 0 ? (
         <Card className="p-12">
           <EmptyState
@@ -141,7 +188,7 @@ export function ApprovalsView() {
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="font-semibold text-foreground">
-                      {formatNaira(a.amount)} · {titleCase(a.category)}
+                      {formatCurrency(a.amount)} · {titleCase(a.category)}
                     </p>
                     <p className="mt-0.5 text-sm text-muted-foreground">
                       {a.propertyTitle ?? 'Property'}
@@ -150,9 +197,16 @@ export function ApprovalsView() {
                         : ''} · {formatDate(a.createdAt)}
                     </p>
                   </div>
-                  <Badge variant={STATUS_VARIANT[a.status]}>
-                    {SPEND_APPROVAL_STATUS_LABELS[a.status]}
-                  </Badge>
+                  <div className="flex shrink-0 flex-wrap justify-end gap-1.5">
+                    {a.band && (
+                      <Badge variant={SPEND_BAND_VARIANT[a.band]}>
+                        {SPEND_BAND_LABELS[a.band]}
+                      </Badge>
+                    )}
+                    <Badge variant={STATUS_VARIANT[a.status]}>
+                      {SPEND_APPROVAL_STATUS_LABELS[a.status]}
+                    </Badge>
+                  </div>
                 </div>
 
                 {a.note && <p className="mt-2 text-sm text-muted-foreground">{a.note}</p>}
@@ -199,12 +253,16 @@ export function ApprovalsView() {
                         variant="primary"
                         size="sm"
                         className="gap-1.5"
-                        disabled={approveMutation.isPending && approveMutation.variables !== a.id}
-                        isLoading={approveMutation.isPending && approveMutation.variables === a.id}
-                        onClick={() => approveMutation.mutate(a.id)}
+                        disabled={
+                          approveMutation.isPending && approveMutation.variables?.id !== a.id
+                        }
+                        isLoading={
+                          approveMutation.isPending && approveMutation.variables?.id === a.id
+                        }
+                        onClick={() => approveMutation.mutate(a)}
                       >
                         <Check className="h-4 w-4" />
-                        Approve
+                        {needsExplicitAuthorisation(a.band) ? 'Authorise' : 'Approve'}
                       </Button>
                       <Button
                         variant="ghost"

@@ -7,6 +7,8 @@ export const DIASPORA_ROUTES = {
   BUYER_ONBOARDING: '/buyer/invest/onboarding',
   OWNER_WORKSPACE: '/owner/invest',
   OWNER_ONBOARDING: '/owner/invest/onboarding',
+  /** Sureground Managed in one place (owner portal only: managed property belongs to owners). */
+  OWNER_MANAGED: '/owner/invest/managed',
   workspace: (portal: InvestorPortal) => `/${portal}/invest`,
   onboarding: (portal: InvestorPortal) => `/${portal}/invest/onboarding`,
 } as const;
