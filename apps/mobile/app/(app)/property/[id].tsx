@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, Share, StyleSheet, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -9,9 +9,6 @@ import {
   Heart,
   MapPin,
   Navigation,
-  BedDouble,
-  Bath,
-  Maximize,
   MessageCircle,
   PlayCircle,
   Share2,
@@ -48,7 +45,15 @@ import { marketWebPath } from '@/lib/api/publicMarket';
 import { ViewingRequestSheet } from '@/components/property/ViewingRequestSheet';
 import { PropertyMapView } from '@/components/property/PropertyMapView';
 import { openDirections } from '@/lib/directions';
-import { PropertyGallery, toGallery } from '@/components/property/PropertyGallery';
+import { ShowroomMedia, useTrackDetailView } from '@/components/showroom/ShowroomMedia';
+import {
+  KeyFactsRow,
+  ShowroomCostsCard,
+  ShowroomFacts,
+  ShowroomPriceBar,
+} from '@/components/showroom/ShowroomParts';
+import { trackShowroom } from '@/lib/showroomAnalytics';
+import { fromRental } from '@sureground/shared/showroom';
 import { GeoInsightsPanel } from '@/components/property/GeoInsightsPanel';
 import { ListingCheckCard } from '@/components/property/ListingCheckCard';
 import { AffordabilityCard } from '@/components/property/AffordabilityCard';
@@ -101,6 +106,9 @@ export default function PropertyDetail() {
 
   const saved = savedIds.has(id);
   const p = query.data;
+  // The same facts, fees and media as the web showroom.
+  const showroom = useMemo(() => (p ? fromRental(p) : undefined), [p]);
+  useTrackDetailView(p?.id, 'rent');
   // Only asked when the home is let: it might be the one this renter lives in.
   const lease = useQuery({
     queryKey: qk.renter.lease,
@@ -109,7 +117,11 @@ export default function PropertyDetail() {
     enabled: p?.acceptingApplications === false,
   });
   const isMyHome = !!p && !!lease.data && lease.data.propertyId === p.propertyId;
-  const actionStyle = { width: 52, height: 52, borderRadius: 14, backgroundColor: 'transparent' };
+  const accepting = p?.acceptingApplications !== false;
+  const apply = () => {
+    trackShowroom({ name: 'inquiry_start', listingId: id, market: 'rent' });
+    router.push(`/(app)/property/${id}/apply`);
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -124,12 +136,18 @@ export default function PropertyDetail() {
         }}
         contentContainerStyle={{ paddingBottom: insets.bottom + 120 }}
       >
-        {query.data === null ? null : (
-          <PropertyGallery
-            images={toGallery(p?.image, p?.images)}
+        {query.data === null ? null : p && showroom ? (
+          <ShowroomMedia
+            listingId={p.id}
+            market="rent"
+            items={showroom.media}
+            title={p.title}
             height={300}
-            area={p ? listingArea({ title: p.title, location: p.location ?? '' }) : null}
+            area={listingArea({ title: p.title, location: p.location ?? '' })}
+            onVideoExpired={() => void query.refetch()}
           />
+        ) : (
+          <View style={{ height: 300, backgroundColor: colors.muted }} />
         )}
 
         <View style={{ padding: spacing.xl, gap: spacing.lg }}>
@@ -186,27 +204,21 @@ export default function PropertyDetail() {
                   ) : null}
                 </View>
 
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xl }}>
-                  {/* Falsy on purpose: "0 bed" reads as a claim, not missing data. */}
-                  {p.bedrooms ? (
-                    <Spec
-                      icon={<BedDouble size={16} color={colors.foreground} />}
-                      label={`${p.bedrooms} bed${p.bedrooms === 1 ? '' : 's'}`}
-                    />
-                  ) : null}
-                  {p.bathrooms ? (
-                    <Spec
-                      icon={<Bath size={16} color={colors.foreground} />}
-                      label={`${p.bathrooms} bath${p.bathrooms === 1 ? '' : 's'}`}
-                    />
-                  ) : null}
-                  {p.size ? (
-                    <Spec
-                      icon={<Maximize size={16} color={colors.foreground} />}
-                      label={`${p.size} m²`}
-                    />
-                  ) : null}
-                </View>
+                <KeyFactsRow bedrooms={p.bedrooms} bathrooms={p.bathrooms} size={p.size} />
+
+                {showroom ? (
+                  <ShowroomCostsCard
+                    market="rent"
+                    costs={showroom.costs}
+                    price={showroom.price}
+                    priceUnit={showroom.priceUnit}
+                    footer={
+                      accepting ? (
+                        <Button label="Apply to rent" variant="secondary" onPress={apply} />
+                      ) : null
+                    }
+                  />
+                ) : null}
 
                 {p.description ? (
                   <View style={{ gap: spacing.xs }}>
@@ -228,6 +240,8 @@ export default function PropertyDetail() {
                     ) : null}
                   </View>
                 ) : null}
+
+                {showroom ? <ShowroomFacts facts={showroom.facts} /> : null}
 
                 {p.amenities?.length ? (
                   <View style={{ gap: spacing.sm }}>
@@ -417,83 +431,91 @@ export default function PropertyDetail() {
           icon={<ChevronLeft size={22} color={colors.foreground} />}
         />
         {p ? (
-          <IconButton
-            onPress={() =>
-              Share.share({
-                message: `${p.title} · ${p.location}\n${env.webUrl}${marketWebPath('rent', p.id)}`,
-              }).catch(() => undefined)
-            }
-            accessibilityLabel="Share this home"
-            icon={<Share2 size={19} color={colors.foreground} />}
-          />
+          <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+            {p.landlordId ? (
+              <IconButton
+                onPress={() => messageMutation.mutate()}
+                disabled={messageMutation.isPending}
+                accessibilityLabel={`Message ${p.landlordName ?? 'the landlord'}`}
+                style={{ opacity: messageMutation.isPending ? 0.6 : 1 }}
+                icon={<MessageCircle size={19} color={colors.foreground} />}
+              />
+            ) : null}
+            <IconButton
+              onPress={() => {
+                trackShowroom({ name: 'property_share', listingId: p.id, market: 'rent' });
+                Share.share({
+                  message: `${p.title} · ${p.location}\n${env.webUrl}${marketWebPath('rent', p.id)}`,
+                }).catch(() => undefined);
+              }}
+              accessibilityLabel="Share this home"
+              icon={<Share2 size={19} color={colors.foreground} />}
+            />
+          </View>
         ) : null}
       </View>
 
       {p ? (
-        <View
-          style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            bottom: 0,
-            flexDirection: 'row',
-            gap: spacing.md,
-            paddingHorizontal: spacing.xl,
-            paddingTop: spacing.md,
-            paddingBottom: insets.bottom + spacing.md,
-            backgroundColor: colors.background,
-            borderTopWidth: StyleSheet.hairlineWidth,
-            borderTopColor: colors.border,
-          }}
-        >
-          <IconButton
-            onPress={() => toggle(id)}
-            accessibilityLabel={saved ? 'Remove from saved' : 'Save this home'}
-            selected={saved}
-            style={actionStyle}
-            icon={
-              <Heart
-                size={20}
-                color={saved ? colors.destructive : colors.foreground}
-                fill={saved ? colors.destructive : 'transparent'}
-              />
-            }
-          />
-          {p.landlordId ? (
+        <ShowroomPriceBar
+          price={p.price}
+          period={p.period}
+          leading={
             <IconButton
-              onPress={() => messageMutation.mutate()}
-              disabled={messageMutation.isPending}
-              accessibilityLabel={`Message ${p.landlordName ?? 'the landlord'}`}
-              style={[actionStyle, { opacity: messageMutation.isPending ? 0.6 : 1 }]}
-              icon={<MessageCircle size={20} color={colors.foreground} />}
+              onPress={() => {
+                if (!saved) trackShowroom({ name: 'property_save', listingId: id, market: 'rent' });
+                toggle(id);
+              }}
+              accessibilityLabel={saved ? 'Remove from saved' : 'Save this home'}
+              selected={saved}
+              icon={
+                <Heart
+                  size={20}
+                  color={saved ? colors.destructive : colors.foreground}
+                  fill={saved ? colors.destructive : 'transparent'}
+                />
+              }
             />
-          ) : null}
-          {p.acceptingApplications !== false ? (
-            // A let unit is no longer available, so don't invite a viewing of it.
-            <IconButton
-              onPress={() => setViewingSheetOpen(true)}
-              accessibilityLabel="Book a viewing"
-              style={actionStyle}
-              icon={<Calendar size={20} color={colors.foreground} />}
-            />
-          ) : null}
-          <View style={{ flex: 1 }}>
-            {p.acceptingApplications !== false ? (
+          }
+          action={
+            accepting ? (
+              // A let unit is no longer available, so don't invite a viewing of it.
               <Button
-                label="Apply to rent"
-                onPress={() => router.push(`/(app)/property/${id}/apply`)}
+                label="Request viewing"
+                fullWidth={false}
+                icon={<Calendar size={16} color={colors.primaryForeground} />}
+                onPress={() => {
+                  trackShowroom({
+                    name: 'inspection_request_start',
+                    listingId: id,
+                    market: 'rent',
+                    surface: 'app_sticky_bar',
+                  });
+                  setViewingSheetOpen(true);
+                }}
               />
             ) : isMyHome ? (
-              <Button label="View my lease" onPress={() => router.push('/(app)/lease')} />
+              <Button
+                label="View my lease"
+                fullWidth={false}
+                onPress={() => router.push('/(app)/lease')}
+              />
             ) : (
               <Button
-                label="Already let · find similar homes"
+                label="Find similar homes"
                 variant="secondary"
+                fullWidth={false}
                 onPress={() => router.push('/(app)/(renter)/discover')}
               />
-            )}
-          </View>
-        </View>
+            )
+          }
+          caption={
+            accepting || isMyHome ? null : (
+              <Text variant="caption" color="mutedForeground">
+                Already let
+              </Text>
+            )
+          }
+        />
       ) : null}
 
       {p ? (
@@ -515,15 +537,6 @@ export default function PropertyDetail() {
           onExpired={() => void query.refetch()}
         />
       ) : null}
-    </View>
-  );
-}
-
-function Spec({ icon, label }: { icon: React.ReactNode; label: string }) {
-  return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-      {icon}
-      <Text variant="callout">{label}</Text>
     </View>
   );
 }

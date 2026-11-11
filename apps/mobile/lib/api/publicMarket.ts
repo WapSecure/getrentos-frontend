@@ -4,6 +4,16 @@ import type { Paginated } from './properties';
 import type { ShortletAvailability, ShortletListing } from './shortlets';
 import { formatLandArea, LAND_TITLE_TYPE_LABEL, type LandListing } from './land';
 import { trustChainLabel, type TrustChainLike, type TrustLabelTone } from '@sureground/shared';
+import {
+  fromLand,
+  fromRental,
+  fromSale,
+  shortletMedia,
+  type MediaItem,
+  type PublicRentalDto,
+  type PublicSaleDto,
+  type ShowroomCosts,
+} from '@sureground/shared/showroom';
 
 /** Every call is `anonymous`: these routes are public, and a token would make a stale session 401 on a page that needs none. */
 
@@ -47,6 +57,12 @@ export interface MarketFact {
 
 export interface MarketDetail extends MarketCard {
   images: string[];
+  /** Photos, video and 360 tour from the shared showroom mappers, as on the web page. */
+  media: MediaItem[];
+  /** Rent, buy and land: price lines, stated total and fees not stated. Stays itemise their own. */
+  costs?: ShowroomCosts;
+  /** Sale: the seller has accepted an offer. */
+  underOffer?: boolean;
   /** Left out until the property is verified (a stay: until booked); see addressHidden. */
   address?: string;
   addressHidden?: boolean;
@@ -137,58 +153,23 @@ export const MARKET_SORT_LABEL: Record<MarketSort, string> = {
   price_desc: 'Highest price',
 };
 
-interface RentalDto {
+/** The shared public shape plus the location and trust fields this app also reads. */
+interface RentalDto extends PublicRentalDto {
   trustChain?: TrustChainLike;
-  id: string;
-  title: string;
-  location: string;
-  /** Left out until the property is verified (a stay: until booked); see addressHidden. */
-  address?: string;
   addressHidden?: boolean;
   latitude?: number;
   longitude?: number;
   /** `approximate` until the property is verified, and always for a stay: draw an area. */
   locationPrecision?: 'exact' | 'approximate';
-  price: number;
-  period: 'month' | 'year';
-  allowsMonthlyPayment?: boolean;
-  bedrooms: number;
-  bathrooms: number;
-  size: number;
-  rating: number;
-  verified: boolean;
-  image: string;
-  images?: string[];
-  landlordName?: string;
-  landlordVerified?: boolean;
-  landlordRating?: number;
-  landlordReviews?: number;
-  description?: string;
-  amenities?: string[];
-  availableFrom?: string;
 }
 
-interface SaleDto {
+interface SaleDto extends PublicSaleDto {
   trustChain?: TrustChainLike;
-  id: string;
-  title: string;
-  price: number;
-  city: string;
-  state: string;
-  /** Left out until the property is verified (a stay: until booked); see addressHidden. */
-  address?: string;
   addressHidden?: boolean;
   latitude?: number;
   longitude?: number;
   /** `approximate` until the property is verified, and always for a stay: draw an area. */
   locationPrecision?: 'exact' | 'approximate';
-  bedrooms?: number;
-  bathrooms?: number;
-  propertyType?: string;
-  coverImageUrl?: string;
-  images?: string[];
-  amenities?: string[];
-  isVerified?: boolean;
   description?: string;
 }
 
@@ -310,9 +291,6 @@ const landToCard = (l: LandListing): MarketCard => ({
 
 const fact = (label: string, value: string | number | undefined | null): MarketFact[] =>
   value === undefined || value === null || value === '' ? [] : [{ label, value: String(value) }];
-
-const gallery = (cover?: string, images?: string[]) =>
-  Array.from(new Set([cover, ...(images ?? [])].filter((x): x is string => !!x)));
 
 // Each module names its sorts differently; the whitelist rejects unknown params.
 const RENT_SORT: Record<MarketSort, string> = {
@@ -503,65 +481,62 @@ export const publicMarketApi = {
     }
   },
 
+  /** Rent, buy and land go through the shared showroom mappers, so the app and the web agree on facts and costs. */
   async detail(kind: MarketKind, id: string): Promise<MarketDetail> {
     switch (kind) {
       case 'rent': {
         const r = await apiFetch<RentalDto>(`/rentals/${id}`, anon);
+        const l = fromRental(r);
         return {
           ...rentToCard(r),
-          images: gallery(r.image, r.images),
+          images: l.images,
+          media: l.media,
+          costs: l.costs,
           address: r.address,
-          description: r.description,
-          amenities: r.amenities ?? [],
+          addressHidden: r.addressHidden,
+          description: l.description,
+          amenities: l.amenities,
           latitude: r.latitude,
           longitude: r.longitude,
-          host: r.landlordName
-            ? {
-                label: 'Landlord',
-                name: r.landlordName,
-                verified: r.landlordVerified,
-                rating: r.landlordRating || undefined,
-                reviews: r.landlordReviews || undefined,
-              }
-            : undefined,
-          facts: [
-            ...fact('Rent paid', r.period === 'year' ? 'Yearly' : 'Monthly'),
-            ...fact('Monthly payments', r.allowsMonthlyPayment ? 'Available' : undefined),
-            ...fact('Available from', r.availableFrom?.slice(0, 10)),
-            ...fact('Rating', r.rating ? `${r.rating.toFixed(1)} / 5` : undefined),
-          ],
+          locationPrecision: r.locationPrecision,
+          host: l.host,
+          facts: l.facts,
         };
       }
       case 'sale': {
         const s = await apiFetch<SaleDto>(`/marketplace/listings/${id}`, anon);
+        const l = fromSale(s);
         return {
           ...saleToCard(s),
-          images: gallery(s.coverImageUrl, s.images),
+          images: l.images,
+          media: l.media,
+          costs: l.costs,
+          underOffer: l.underOffer,
           address: s.address,
+          addressHidden: s.addressHidden,
           description: s.description,
-          amenities: s.amenities ?? [],
+          amenities: l.amenities,
           latitude: s.latitude,
           longitude: s.longitude,
-          facts: [
-            ...fact('Property type', humanise(s.propertyType)),
-            ...fact(
-              'Payment',
-              'Protected: Sureground holds your deposit until you confirm receipt'
-            ),
-          ],
+          locationPrecision: s.locationPrecision,
+          facts: l.facts,
         };
       }
       case 'shortlet': {
         const s = await apiFetch<ShortletListing>(`/shortlets/${id}`, anon);
+        const media = shortletMedia(s);
         return {
           ...shortletToCard(s),
           stay: s,
-          images: gallery(s.coverImageUrl, s.images),
+          images: media.filter((m) => m.kind === 'image').map((m) => m.url),
+          media,
           address: s.address,
+          addressHidden: s.addressHidden,
           description: s.description,
           amenities: s.amenities ?? [],
           latitude: s.latitude,
           longitude: s.longitude,
+          locationPrecision: 'approximate',
           host: {
             label: 'Host',
             name: s.hostName,
@@ -576,7 +551,7 @@ export const publicMarketApi = {
             ...fact('Check-out', s.checkOutTime),
             ...fact(
               'Cleaning fee',
-              s.cleaningFee ? `₦${s.cleaningFee.toLocaleString()}` : undefined
+              s.cleaningFee ? `₦${s.cleaningFee.toLocaleString('en-NG')}` : undefined
             ),
             ...fact(
               'Booking',
@@ -587,30 +562,21 @@ export const publicMarketApi = {
         };
       }
       case 'land': {
-        const l = await apiFetch<LandListing>(`/land/listings/${id}`, anon);
-        const p = l.parcel;
+        const raw = await apiFetch<LandListing>(`/land/listings/${id}`, anon);
+        const l = fromLand(raw);
         return {
-          ...landToCard(l),
-          images: gallery(l.coverImageUrl, l.galleryImageUrls),
-          address: l.address,
+          ...landToCard(raw),
+          images: l.images,
+          media: l.media,
+          costs: l.costs,
+          address: raw.address,
+          addressHidden: raw.addressHidden,
           description: l.description,
-          amenities: l.amenities ?? [],
-          latitude: l.latitude,
-          longitude: l.longitude,
-          facts: [
-            ...fact('Area', p ? formatLandArea(p.areaValue, p.areaUnit) : undefined),
-            ...fact('Title', p?.titleType ? LAND_TITLE_TYPE_LABEL[p.titleType] : undefined),
-            ...fact('Estate', p?.estateName),
-            ...fact('Zoning', p?.zoning),
-            ...fact('Permitted use', p?.permittedUse),
-            ...fact('Terrain', p?.terrain),
-            ...fact(
-              'Road access',
-              p?.roadAccess === undefined ? undefined : p.roadAccess ? 'Yes' : 'No'
-            ),
-            ...fact('Utilities', p?.utilities?.length ? p.utilities.join(', ') : undefined),
-            ...fact('Due diligence', humanise(l.diligence?.status)),
-          ],
+          amenities: l.amenities,
+          latitude: raw.latitude,
+          longitude: raw.longitude,
+          locationPrecision: raw.locationPrecision,
+          facts: l.facts,
         };
       }
     }

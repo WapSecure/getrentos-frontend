@@ -124,11 +124,17 @@ test('land: parcel facts with units; missing parcel gives no area', () => {
       areaUnit: 'SQUARE_METERS',
       roadAccess: false,
       titleType: 'CERTIFICATE_OF_OCCUPANCY',
+      block: 'C',
+      frontage: 18,
+      depth: 0,
     },
     diligence: { status: 'CONDITIONAL' },
   });
   const get = (label: string) => l.facts.find((f) => f.label === label)?.value;
   assert.equal(get('Area'), '648 sqm');
+  assert.equal(get('Block'), 'C');
+  assert.equal(get('Frontage'), '18 m');
+  assert.equal(get('Depth'), undefined);
   assert.equal(get('Road access'), 'No');
   assert.equal(get('Title'), 'Certificate of Occupancy');
   assert.equal(get('Due diligence'), 'Verified with conditions');

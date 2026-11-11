@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -31,11 +31,17 @@ import {
   LAND_DILIGENCE_TONE,
   LAND_ENCUMBRANCE_LABEL,
   LAND_ENCUMBRANCE_TONE,
-  LAND_TITLE_TYPE_LABEL,
 } from '@/lib/api/land';
 import { PropertyMapView } from '@/components/property/PropertyMapView';
 import { boundaryCorners } from '@sureground/shared';
-import { PropertyGallery, toGallery } from '@/components/property/PropertyGallery';
+import { ShowroomMedia, useTrackDetailView } from '@/components/showroom/ShowroomMedia';
+import {
+  ShowroomCostsCard,
+  ShowroomFacts,
+  ShowroomPriceBar,
+} from '@/components/showroom/ShowroomParts';
+import { trackShowroom } from '@/lib/showroomAnalytics';
+import { fromLand } from '@sureground/shared/showroom';
 import { formatDate } from '@/lib/format';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { accountRolesApi } from '@/lib/api/accountRoles';
@@ -48,28 +54,6 @@ import { useAskSeller } from '@/hooks/useAskSeller';
 import { MakeOfferSheet } from '@/components/buyer/MakeOfferSheet';
 import { RequestViewingSheet } from '@/components/buyer/RequestViewingSheet';
 
-function Fact({ label, value }: { label: string; value?: string | null }) {
-  const { spacing } = useTheme();
-  if (!value) return null;
-  return (
-    <View
-      style={{
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        gap: spacing.md,
-        paddingVertical: 6,
-      }}
-    >
-      <Text variant="callout" color="mutedForeground">
-        {label}
-      </Text>
-      <Text variant="callout" style={{ flex: 1, textAlign: 'right' }}>
-        {value}
-      </Text>
-    </View>
-  );
-}
-
 export default function LandListingDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, spacing } = useTheme();
@@ -77,6 +61,9 @@ export default function LandListingDetail() {
 
   const query = useQuery({ queryKey: qk.land.detail(id), queryFn: () => landApi.get(id) });
   const listing = query.data;
+  // Shared with the web showroom, so both show the same parcel facts, costs and photos.
+  const showroom = useMemo(() => (listing ? fromLand(listing) : undefined), [listing]);
+  useTrackDetailView(listing?.id, 'land');
   const outline = boundaryCorners(listing?.parcel.boundaryGeometry);
   const toast = useToast();
   const { workspaces, refreshProfile } = useAuth();
@@ -135,11 +122,17 @@ export default function LandListingDetail() {
               style={{ flex: 1 }}
               contentContainerStyle={{ paddingBottom: insets.bottom + 140, gap: spacing.lg }}
             >
-              <PropertyGallery
-                images={toGallery(listing.coverImageUrl, listing.galleryImageUrls)}
-                height={220}
-                emptyLabel="No photos for this parcel yet"
-              />
+              {showroom ? (
+                <ShowroomMedia
+                  listingId={listing.id}
+                  market="land"
+                  items={showroom.media}
+                  title={listing.title}
+                  height={260}
+                  emptyLabel="No photos for this parcel yet"
+                  onVideoExpired={() => void query.refetch()}
+                />
+              ) : null}
 
               <View style={{ paddingHorizontal: spacing.xl, gap: spacing.lg }}>
                 <View style={{ gap: 4 }}>
@@ -210,52 +203,78 @@ export default function LandListingDetail() {
                   </Text>
                 </View>
 
+                {showroom ? (
+                  <ShowroomCostsCard
+                    market="land"
+                    costs={showroom.costs}
+                    price={showroom.price}
+                    footer={
+                      isBuyer ? (
+                        <Button
+                          label="Make an offer"
+                          variant="secondary"
+                          icon={<FileSignature size={16} color={colors.foreground} />}
+                          onPress={() => {
+                            trackShowroom({
+                              name: 'offer_start',
+                              listingId: listing.id,
+                              market: 'land',
+                            });
+                            setOfferOpen(true);
+                          }}
+                        />
+                      ) : null
+                    }
+                  />
+                ) : null}
+
                 <View style={{ gap: spacing.sm }}>
-                  <Text variant="heading">Parcel facts</Text>
-                  <Card elevated>
-                    <Fact label="Plot" value={listing.parcel.plotNumber} />
-                    <Fact label="Block" value={listing.parcel.block} />
-                    <Fact label="Estate" value={listing.parcel.estateName} />
-                    <Fact
-                      label="Area"
-                      value={formatLandArea(listing.parcel.areaValue, listing.parcel.areaUnit)}
-                    />
-                    <Fact
-                      label="Frontage"
-                      value={listing.parcel.frontage ? `${listing.parcel.frontage} m` : undefined}
-                    />
-                    <Fact
-                      label="Depth"
-                      value={listing.parcel.depth ? `${listing.parcel.depth} m` : undefined}
-                    />
-                    <Fact label="Zoning" value={listing.parcel.zoning} />
-                    <Fact label="Permitted use" value={listing.parcel.permittedUse} />
-                    <Fact label="Terrain" value={listing.parcel.terrain} />
-                    <Fact
-                      label="Road access"
-                      value={
-                        listing.parcel.roadAccess == null
-                          ? undefined
-                          : listing.parcel.roadAccess
-                            ? 'Yes'
-                            : 'No'
-                      }
-                    />
-                    <Fact
-                      label="Title type"
-                      value={
-                        listing.parcel.titleType
-                          ? LAND_TITLE_TYPE_LABEL[listing.parcel.titleType]
-                          : undefined
-                      }
-                    />
-                    <Fact label="Tenure" value={listing.parcel.tenure} />
-                  </Card>
+                  {showroom ? <ShowroomFacts facts={showroom.facts} title="Parcel facts" /> : null}
                   <Text variant="caption" color="mutedForeground">
                     Title and survey numbers are shared with serious buyers after an enquiry, not
                     published publicly.
                   </Text>
                 </View>
+
+                {isBuyer ? (
+                  <View style={{ gap: spacing.sm }}>
+                    <Text variant="heading">More ways to check this land</Text>
+                    <Button
+                      label="Ask for a live video tour"
+                      variant="outline"
+                      onPress={() => setRequest('tour')}
+                    />
+                    <Button
+                      label="Commission an independent inspection"
+                      variant="outline"
+                      onPress={() => {
+                        trackShowroom({
+                          name: 'inspection_request_start',
+                          listingId: listing.id,
+                          market: 'land',
+                          props: { variant: 'independent' },
+                        });
+                        setRequest('inspection');
+                      }}
+                    />
+                    <Button
+                      label="Ask the seller a question"
+                      loadingLabel="Opening chat…"
+                      variant="ghost"
+                      icon={<MessageCircle size={16} color={colors.foreground} />}
+                      loading={ask.isPending}
+                      onPress={() => ask.mutate(listing.id)}
+                    />
+                  </View>
+                ) : (
+                  <Card style={{ gap: spacing.xs }}>
+                    <Text variant="bodyStrong">Buying land needs a buyer account</Text>
+                    <Text variant="caption" color="mutedForeground">
+                      Questions, inspections and offers on land come from a buyer account. Add one
+                      to this account to go ahead.
+                    </Text>
+                  </Card>
+                )}
 
                 {listing.diligence.assuranceTier ||
                 listing.diligence.labels?.length ||
@@ -284,17 +303,6 @@ export default function LandListingDetail() {
                     })
                   }
                 />
-
-                {listing.parcel.utilities?.length ? (
-                  <View style={{ gap: spacing.sm }}>
-                    <Text variant="heading">Utilities</Text>
-                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }}>
-                      {listing.parcel.utilities.map((u) => (
-                        <Badge key={u} label={u} tone="neutral" />
-                      ))}
-                    </View>
-                  </View>
-                ) : null}
 
                 {listing.parcel.boundaryNotes ? (
                   <View style={{ gap: spacing.sm }}>
@@ -335,81 +343,40 @@ export default function LandListingDetail() {
               </View>
             </ScrollView>
 
-            <View
-              style={{
-                position: 'absolute',
-                left: 0,
-                right: 0,
-                bottom: 0,
-                backgroundColor: colors.background,
-              }}
-            >
-              <Divider />
-              <View
-                style={{
-                  gap: spacing.sm,
-                  padding: spacing.xl,
-                  paddingBottom: insets.bottom + spacing.sm,
-                }}
-              >
-                {isBuyer ? (
-                  <>
-                    <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-                      <Button
-                        label="Request viewing"
-                        variant="outline"
-                        icon={<Calendar size={16} color={colors.foreground} />}
-                        style={{ flex: 1 }}
-                        onPress={() => setViewingOpen(true)}
-                      />
-                      <Button
-                        label="Make offer"
-                        icon={<FileSignature size={16} color={colors.primaryForeground} />}
-                        style={{ flex: 1 }}
-                        onPress={() => setOfferOpen(true)}
-                      />
-                    </View>
-                    <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-                      <Button
-                        label="Live video tour"
-                        size="sm"
-                        variant="ghost"
-                        style={{ flex: 1 }}
-                        onPress={() => setRequest('tour')}
-                      />
-                      <Button
-                        label="Independent inspection"
-                        size="sm"
-                        variant="ghost"
-                        style={{ flex: 1 }}
-                        onPress={() => setRequest('inspection')}
-                      />
-                    </View>
-                    <Button
-                      label="Ask the seller a question"
-                      loadingLabel="Opening chat…"
-                      variant="ghost"
-                      icon={<MessageCircle size={16} color={colors.foreground} />}
-                      loading={ask.isPending}
-                      onPress={() => ask.mutate(listing.id)}
-                    />
-                  </>
+            <ShowroomPriceBar
+              price={listing.price}
+              caption={
+                <Text variant="caption" color="mutedForeground" numberOfLines={1}>
+                  {formatLandArea(listing.parcel.areaValue, listing.parcel.areaUnit)}
+                </Text>
+              }
+              action={
+                isBuyer ? (
+                  <Button
+                    label="Request inspection"
+                    fullWidth={false}
+                    icon={<Calendar size={16} color={colors.primaryForeground} />}
+                    onPress={() => {
+                      trackShowroom({
+                        name: 'inspection_request_start',
+                        listingId: listing.id,
+                        market: 'land',
+                        surface: 'app_sticky_bar',
+                      });
+                      setViewingOpen(true);
+                    }}
+                  />
                 ) : (
-                  <>
-                    <Text variant="caption" color="mutedForeground">
-                      Questions, viewings and offers on land come from a buyer account. Add one to
-                      this account to go ahead.
-                    </Text>
-                    <Button
-                      label="Add a buyer account"
-                      loadingLabel="Adding…"
-                      loading={addBuyer.isPending}
-                      onPress={() => addBuyer.mutate()}
-                    />
-                  </>
-                )}
-              </View>
-            </View>
+                  <Button
+                    label="Add a buyer account"
+                    loadingLabel="Adding…"
+                    fullWidth={false}
+                    loading={addBuyer.isPending}
+                    onPress={() => addBuyer.mutate()}
+                  />
+                )
+              }
+            />
 
             <Sheet
               open={!!request}

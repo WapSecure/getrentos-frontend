@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
@@ -31,7 +31,9 @@ import { CANCELLATION_POLICIES } from '@/lib/api/hostShortlets';
 import { nightsLabel, seasonRange } from '@/lib/stays';
 import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
-import { PropertyGallery, toGallery } from '@/components/property/PropertyGallery';
+import { ShowroomMedia, useTrackDetailView } from '@/components/showroom/ShowroomMedia';
+import { trackShowroom } from '@/lib/showroomAnalytics';
+import { shortletMedia } from '@sureground/shared/showroom';
 import { PropertyMapView } from '@/components/property/PropertyMapView';
 import { BookStaySheet } from '@/components/shortlet/BookStaySheet';
 import { StayDatesSheet, type StayDates } from '@/components/shortlet/StayDatesSheet';
@@ -106,6 +108,9 @@ export default function ShortletDetail() {
 
   const listing = query.data;
   const saved = (wishlistQuery.data ?? []).includes(id);
+  // The same media list as the web stay page: photos, then the video tour, then the 360 tour.
+  const media = useMemo(() => (listing ? shortletMedia(listing) : []), [listing]);
+  useTrackDetailView(listing ? id : undefined, 'shortlet');
 
   useEffect(() => {
     shortletsApi.recordView(id).catch(() => {
@@ -181,10 +186,14 @@ export default function ShortletDetail() {
                 setSolidHeader(e.nativeEvent.contentOffset.y > galleryHeight - insets.top - 64)
               }
             >
-              <PropertyGallery
-                images={toGallery(listing.coverImageUrl, listing.images)}
+              <ShowroomMedia
+                listingId={id}
+                market="shortlet"
+                items={media}
+                title={listing.title}
                 height={galleryHeight}
                 emptyLabel="No photos for this stay yet"
+                onVideoExpired={() => void query.refetch()}
               />
 
               <View
@@ -401,6 +410,8 @@ export default function ShortletDetail() {
               <Pressable
                 onPress={() => {
                   void haptics.tap();
+                  if (!saved)
+                    trackShowroom({ name: 'property_save', listingId: id, market: 'shortlet' });
                   wishlist.mutate(!saved);
                 }}
                 accessibilityRole="button"
@@ -487,7 +498,16 @@ export default function ShortletDetail() {
                 }
                 fullWidth={false}
                 size="lg"
-                onPress={() => (dates && q?.available ? setSheet('book') : openDates(true))}
+                onPress={() => {
+                  trackShowroom({
+                    name: 'booking_start',
+                    listingId: id,
+                    market: 'shortlet',
+                    surface: 'app_sticky_bar',
+                  });
+                  if (dates && q?.available) setSheet('book');
+                  else openDates(true);
+                }}
               />
             </View>
 

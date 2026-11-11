@@ -1,18 +1,15 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
-  Bath,
-  Bed,
   Calendar,
   ChevronLeft,
   FileSignature,
   Heart,
   MessageCircle,
   PlayCircle,
-  Ruler,
   ShieldCheck,
 } from '@sureground/icons/native';
 import {
@@ -30,7 +27,16 @@ import { qk } from '@/lib/query/keys';
 import { buyerApi } from '@/lib/api/buyer';
 import { useBuyerSaved } from '@/hooks/useBuyerSaved';
 import { PropertyMapView } from '@/components/property/PropertyMapView';
-import { PropertyGallery, toGallery } from '@/components/property/PropertyGallery';
+import { ShowroomMedia, useTrackDetailView } from '@/components/showroom/ShowroomMedia';
+import {
+  KeyFactsRow,
+  ShowroomCostsCard,
+  ShowroomFacts,
+  ShowroomPriceBar,
+} from '@/components/showroom/ShowroomParts';
+import { trackShowroom } from '@/lib/showroomAnalytics';
+import { publicMarketApi } from '@/lib/api/publicMarket';
+import { fromSale } from '@sureground/shared/showroom';
 import { RequestViewingSheet } from '@/components/buyer/RequestViewingSheet';
 import { MakeOfferSheet } from '@/components/buyer/MakeOfferSheet';
 import { buyerOffersApi } from '@/lib/api/buyerOffers';
@@ -64,8 +70,47 @@ export default function BuyerListingDetail() {
     (o) => o.listingId === id && (o.status === 'submitted' || o.status === 'countered')
   );
   const isSaved = listing ? savedIds.has(listing.id) : false;
-  // The cover key is usually repeated in the gallery, and a repeated URI would collide as a list key.
-  const gallery = listing ? toGallery(listing.image, listing.images) : [];
+  // The buyer route has no media list, verified flag or offer status; the public listing has them.
+  const pub = useQuery({
+    queryKey: qk.market.detail('sale', id),
+    queryFn: () => publicMarketApi.detail('sale', id),
+    enabled: !!id,
+    retry: false,
+  });
+  // Shared with the web showroom, so both show the same facts, costs and media.
+  const showroom = useMemo(
+    () =>
+      listing
+        ? fromSale({
+            id: listing.id,
+            title: listing.title,
+            price: listing.askingPrice,
+            city: listing.city,
+            state: listing.state,
+            address: listing.address,
+            bedrooms: listing.bedrooms,
+            bathrooms: listing.bathrooms,
+            propertyType: listing.propertyType,
+            coverImageUrl: listing.image,
+            images: listing.images,
+            amenities: listing.features,
+            media: pub.data?.media,
+            isVerified: pub.data?.verified,
+            underOffer: pub.data?.underOffer,
+          })
+        : undefined,
+    [listing, pub.data]
+  );
+  useTrackDetailView(listing?.id, 'sale');
+  const startOffer = () => {
+    if (!listing) return;
+    if (openOffer) {
+      router.push({ pathname: '/(app)/buyer-offer/[id]', params: { id: openOffer.id } });
+      return;
+    }
+    trackShowroom({ name: 'offer_start', listingId: listing.id, market: 'sale' });
+    setOfferOpen(true);
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -102,7 +147,12 @@ export default function BuyerListingDetail() {
               <MessageCircle size={21} color={colors.mutedForeground} />
             </Pressable>
             <Pressable
-              onPress={() => toggle(listing.id)}
+              onPress={() => {
+                if (!isSaved) {
+                  trackShowroom({ name: 'property_save', listingId: listing.id, market: 'sale' });
+                }
+                toggle(listing.id);
+              }}
               accessibilityRole="button"
               accessibilityLabel={isSaved ? 'Remove from saved' : 'Save listing'}
               accessibilityState={{ selected: isSaved }}
@@ -129,7 +179,16 @@ export default function BuyerListingDetail() {
               style={{ flex: 1 }}
               contentContainerStyle={{ paddingBottom: insets.bottom + 100, gap: spacing.lg }}
             >
-              <PropertyGallery images={gallery} />
+              {showroom ? (
+                <ShowroomMedia
+                  listingId={listing.id}
+                  market="sale"
+                  items={showroom.media}
+                  title={listing.title}
+                  height={280}
+                  onVideoExpired={() => void pub.refetch()}
+                />
+              ) : null}
 
               <View style={{ paddingHorizontal: spacing.xl, gap: spacing.lg }}>
                 <View style={{ gap: 4 }}>
@@ -144,32 +203,34 @@ export default function BuyerListingDetail() {
                   ) : null}
                 </View>
 
-                <View style={{ flexDirection: 'row', gap: spacing.lg, flexWrap: 'wrap' }}>
-                  {listing.bedrooms != null ? (
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                      <Bed size={15} color={colors.mutedForeground} />
-                      <Text variant="callout" color="mutedForeground">
-                        {listing.bedrooms} bed
-                      </Text>
-                    </View>
-                  ) : null}
-                  {listing.bathrooms != null ? (
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                      <Bath size={15} color={colors.mutedForeground} />
-                      <Text variant="callout" color="mutedForeground">
-                        {listing.bathrooms} bath
-                      </Text>
-                    </View>
-                  ) : null}
-                  {listing.propertySize != null ? (
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                      <Ruler size={15} color={colors.mutedForeground} />
-                      <Text variant="callout" color="mutedForeground">
-                        {listing.propertySize} m²
-                      </Text>
-                    </View>
-                  ) : null}
-                </View>
+                <KeyFactsRow
+                  bedrooms={listing.bedrooms}
+                  bathrooms={listing.bathrooms}
+                  size={listing.propertySize}
+                />
+
+                {showroom ? (
+                  <ShowroomCostsCard
+                    market="sale"
+                    costs={showroom.costs}
+                    price={showroom.price}
+                    footer={
+                      showroom.underOffer && !openOffer ? (
+                        <Text variant="caption" color="mutedForeground">
+                          Under offer: the seller has accepted an offer, so it is not taking new
+                          offers right now.
+                        </Text>
+                      ) : (
+                        <Button
+                          label={openOffer ? 'View your offer' : 'Make an offer'}
+                          variant="secondary"
+                          icon={<FileSignature size={16} color={colors.foreground} />}
+                          onPress={startOffer}
+                        />
+                      )
+                    }
+                  />
+                ) : null}
 
                 <Divider />
 
@@ -179,6 +240,8 @@ export default function BuyerListingDetail() {
                     {listing.description}
                   </Text>
                 </View>
+
+                {showroom ? <ShowroomFacts facts={showroom.facts} /> : null}
 
                 {listing.features?.length ? (
                   <View style={{ gap: spacing.sm }}>
@@ -273,57 +336,34 @@ export default function BuyerListingDetail() {
               </View>
             </ScrollView>
 
-            <View
-              style={{
-                position: 'absolute',
-                left: 0,
-                right: 0,
-                bottom: 0,
-                backgroundColor: colors.background,
-              }}
-            >
-              <Divider />
-              {openOffer ? (
-                <Text
-                  variant="caption"
-                  color="mutedForeground"
-                  style={{ paddingHorizontal: spacing.xl, paddingTop: spacing.md }}
-                >
-                  {openOffer.status === 'countered'
-                    ? `Your offer of ${formatNaira(openOffer.offerAmount)} has a counter waiting.`
-                    : `You offered ${formatNaira(openOffer.offerAmount)}. Waiting for the seller.`}
-                </Text>
-              ) : null}
-              <View
-                style={{
-                  flexDirection: 'row',
-                  gap: spacing.sm,
-                  padding: spacing.xl,
-                  paddingBottom: insets.bottom + spacing.sm,
-                }}
-              >
+            <ShowroomPriceBar
+              price={listing.askingPrice}
+              caption={
+                openOffer ? (
+                  <Text variant="caption" color="mutedForeground" numberOfLines={2}>
+                    {openOffer.status === 'countered'
+                      ? `Your offer of ${formatNaira(openOffer.offerAmount)} has a counter waiting.`
+                      : `You offered ${formatNaira(openOffer.offerAmount)}. Waiting for the seller.`}
+                  </Text>
+                ) : null
+              }
+              action={
                 <Button
-                  label="Request viewing"
-                  variant="outline"
-                  icon={<Calendar size={16} color={colors.foreground} />}
-                  style={{ flex: 1 }}
-                  onPress={() => setViewingOpen(true)}
+                  label="Request inspection"
+                  fullWidth={false}
+                  icon={<Calendar size={16} color={colors.primaryForeground} />}
+                  onPress={() => {
+                    trackShowroom({
+                      name: 'inspection_request_start',
+                      listingId: listing.id,
+                      market: 'sale',
+                      surface: 'app_sticky_bar',
+                    });
+                    setViewingOpen(true);
+                  }}
                 />
-                <Button
-                  label={openOffer ? 'View your offer' : 'Make offer'}
-                  icon={<FileSignature size={16} color={colors.primaryForeground} />}
-                  style={{ flex: 1 }}
-                  onPress={() =>
-                    openOffer
-                      ? router.push({
-                          pathname: '/(app)/buyer-offer/[id]',
-                          params: { id: openOffer.id },
-                        })
-                      : setOfferOpen(true)
-                  }
-                />
-              </View>
-            </View>
+              }
+            />
 
             <RequestViewingSheet
               open={viewingOpen}

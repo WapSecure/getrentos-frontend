@@ -1,4 +1,5 @@
 import type { LandAssuranceTier, LandNotVerifiedItem, LandTrustLabel } from '@sureground/shared';
+import type { MediaItem } from '@sureground/shared/showroom';
 import { apiFetch } from './client';
 import { toQuery } from './query';
 import type { Paginated } from './buyer';
@@ -127,6 +128,8 @@ export interface LandListing {
   locationPrecision?: 'exact' | 'approximate';
   coverImageUrl?: string;
   galleryImageUrls?: string[];
+  /** Photos (with rooms, captions and resized copies), in display order. */
+  media?: MediaItem[];
   description: string;
   amenities?: string[];
   isVerified: boolean;
