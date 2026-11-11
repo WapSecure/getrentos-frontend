@@ -1,6 +1,6 @@
 'use client';
 
-import { Megaphone, Pause, Play, XCircle } from '@sureground/icons';
+import { Building2, Megaphone, Pause, Play, XCircle } from '@sureground/icons';
 import {
   Button,
   DescriptionList,
@@ -11,17 +11,21 @@ import {
 } from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 import type { SaleListing, SaleListingStatus } from '@/types/owner';
+import { isCommercialType } from '@/types/landlord';
 
 interface ManageListingModalProps {
   listing: SaleListing | null;
   onClose: () => void;
   onChangeStatus: (listingId: string, status: SaleListingStatus) => void;
+  /** Commercial properties only: opens the commercial details editor. */
+  onEditCommercial?: (listing: SaleListing) => void;
 }
 
 export const ManageListingModal = ({
   listing,
   onClose,
   onChangeStatus,
+  onEditCommercial,
 }: ManageListingModalProps) => {
   if (!listing) return null;
 
@@ -51,6 +55,16 @@ export const ManageListingModal = ({
           />
 
           <div className="space-y-2">
+            {onEditCommercial && isCommercialType(listing.propertyType) && (
+              <Button
+                variant="outline"
+                fullWidth
+                onClick={() => onEditCommercial(listing)}
+                icon={<Building2 className="h-4 w-4" />}
+              >
+                {listing.commercial ? 'Edit commercial details' : 'Add commercial details'}
+              </Button>
+            )}
             {listing.status === 'draft' && (
               <Button
                 variant="primary"

@@ -1,4 +1,5 @@
 import type { PayoutSentTo } from '@sureground/shared';
+import type { CommercialDetails } from '@sureground/shared/showroom';
 export type ClientRole = 'owner' | 'landlord';
 export type ClientStatus = 'active' | 'pending' | 'inactive';
 export type ListingCategory = 'sale' | 'rental';
@@ -53,6 +54,8 @@ export interface RealtorListing {
   state: string;
   bedrooms?: number;
   bathrooms?: number;
+  /** Commercial properties only: what was stated on the listing. */
+  commercial?: CommercialDetails;
   status: RealtorListingStatus;
   createdAt: string;
 }

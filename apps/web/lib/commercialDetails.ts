@@ -53,6 +53,14 @@ export const COMMERCIAL_LIMITS = {
   maxParking: 10_000,
 } as const;
 
+export type CommercialDeal = 'rent' | 'sale';
+
+/** Who reads the stated details, and what the VAT question is about: the rent on a let, the price on a sale. */
+export const commercialDealCopy = (deal: CommercialDeal = 'rent') =>
+  deal === 'sale'
+    ? { audience: 'Buyers', amount: 'Price' }
+    : { audience: 'Renters', amount: 'Rent' };
+
 /** Lease lengths offered as chips, in years. */
 export const LEASE_TERM_CHOICES = [1, 2, 3, 5, 7, 10, 15, 20, 25];
 

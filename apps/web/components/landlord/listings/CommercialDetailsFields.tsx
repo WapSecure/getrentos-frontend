@@ -22,6 +22,8 @@ import {
   LEASE_TERM_CHOICES,
   LEASE_TERM_LIMITS,
   addLeaseTerm,
+  commercialDealCopy,
+  type CommercialDeal,
   type CommercialValues,
 } from '@/lib/commercialDetails';
 
@@ -50,10 +52,17 @@ const fitOutOptions = (
 interface CommercialDetailsFieldsProps {
   value: CommercialValues;
   onChange: (next: CommercialValues) => void;
+  /** A sale talks about the price and buyers; a let about the rent and renters. */
+  deal?: CommercialDeal;
 }
 
-/** Everything here is the lister's own statement and is shown to renters as stated. */
-export function CommercialDetailsFields({ value, onChange }: CommercialDetailsFieldsProps) {
+/** Everything here is the lister's own statement and is shown to renters or buyers as stated. */
+export function CommercialDetailsFields({
+  value,
+  onChange,
+  deal = 'rent',
+}: CommercialDetailsFieldsProps) {
+  const { audience, amount } = commercialDealCopy(deal);
   const set = <K extends keyof CommercialValues>(key: K, next: CommercialValues[K]) =>
     onChange({ ...value, [key]: next });
   const [otherTerm, setOtherTerm] = useState('');
@@ -93,7 +102,7 @@ export function CommercialDetailsFields({ value, onChange }: CommercialDetailsFi
     <fieldset className="space-y-3">
       <legend className="text-sm font-medium text-foreground">Commercial details</legend>
       <p className="text-xs text-muted-foreground">
-        All optional. Renters see these exactly as you state them; leave anything you haven’t
+        All optional. {audience} see these exactly as you state them; leave anything you haven’t
         decided blank.
       </p>
 
@@ -154,7 +163,7 @@ export function CommercialDetailsFields({ value, onChange }: CommercialDetailsFi
 
       <Field
         label="Public power supply (hours a day, as stated by you)"
-        hint="Your own estimate. Renters see it labelled as stated by you."
+        hint={`Your own estimate. ${audience} see it labelled as stated by you.`}
       >
         <NumberInput
           value={value.publicSupplyHoursStated}
@@ -292,7 +301,7 @@ export function CommercialDetailsFields({ value, onChange }: CommercialDetailsFi
 
       <Field
         label="VAT, as stated by you (optional)"
-        hint="Renters see the rate exactly as you state it. Sureground never calculates or adds VAT."
+        hint={`${audience} see the rate exactly as you state it. Sureground never calculates or adds VAT.`}
       >
         <NumberInput
           integer={false}
@@ -303,9 +312,9 @@ export function CommercialDetailsFields({ value, onChange }: CommercialDetailsFi
           trailingIcon={<span className="text-xs text-muted-foreground">%</span>}
         />
       </Field>
-      <Field label="Rent includes VAT">
+      <Field label={`${amount} includes VAT`}>
         <SegmentedControl
-          aria-label="Rent includes VAT"
+          aria-label={`${amount} includes VAT`}
           size="sm"
           value={value.vatIncluded}
           onValueChange={(v) => set('vatIncluded', v)}

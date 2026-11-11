@@ -1,3 +1,4 @@
+import type { CommercialDetails } from '@sureground/shared/showroom';
 import type { PropertyMediaDetails } from '@/types/landlord';
 export type OwnershipVerificationStatus =
   | 'pending_review'
@@ -89,6 +90,8 @@ export interface SaleListing {
   bedrooms?: number;
   bathrooms?: number;
   features: string[];
+  /** Commercial properties only: what the seller stated. */
+  commercial?: CommercialDetails;
   status: SaleListingStatus;
   createdAt: string;
 }
