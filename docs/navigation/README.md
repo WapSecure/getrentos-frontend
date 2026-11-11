@@ -136,6 +136,29 @@ before the redesign started), run from a separate worktree against the same API 
 
 Also in `screenshots/`: the after version with every group opened (before had nothing folded, so its screenshot is the same as above).
 
+### Phone, tablet and landscape (2026-11-11)
+
+Landlord (`qa-audit-a005b`), Applications page. "Before" is `994aa79c^` on its own port (3010), "after"
+is `dev` on 3000, same API and data. The theme is stored per origin, so the before shots are light and
+the after shots dark; only the navigation differs.
+
+| Width (measured `innerWidth`) | Before                                                                                             | After                                                                                            |
+| ----------------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Phone, 390                    | ![](screenshots/before-landlord-phone.png) ![](screenshots/before-landlord-phone-menu.png)         | ![](screenshots/after-landlord-phone.png) ![](screenshots/after-landlord-phone-menu.png)         |
+| Tablet, 685                   | ![](screenshots/before-landlord-tablet.png) ![](screenshots/before-landlord-tablet-menu.png)       | ![](screenshots/after-landlord-tablet.png) ![](screenshots/after-landlord-tablet-menu.png)       |
+| Phone landscape, 844 × 390    | ![](screenshots/before-landlord-landscape.png) ![](screenshots/before-landlord-landscape-menu.png) | ![](screenshots/after-landlord-landscape.png) ![](screenshots/after-landlord-landscape-menu.png) |
+
+| Measure (390, 685 and 844 wide) | Before                   | After                                                                |
+| ------------------------------- | ------------------------ | -------------------------------------------------------------------- |
+| Page scrolls sideways           | 10px at 390, 75px at 844 | 0 at all three                                                       |
+| Bottom bar                      | None                     | Dashboard, Properties, Tenants, Payments, Messages; no label cut off |
+| Menu links visible when opened  | 34 of 34                 | 13 of 34 (6 primary + the open group)                                |
+| Menu list height                | 1,852px                  | 935px                                                                |
+| Escape closes the menu          | No                       | Yes                                                                  |
+
+The VS Code browser pane is 685px wide at most, so 820px tablets could not be reproduced this time;
+685 sits in the same layout band (bar and menu, no sidebar) as 820.
+
 ## 5. What changed and why
 
 | Commit             | Change                                                                                                                                                                                                                                                                                                                                                  | Why it helps                                                                                                     |
@@ -158,8 +181,9 @@ Also in `screenshots/`: the after version with every group opened (before had no
 
 ## 6. Responsive validation
 
-The VS Code browser renders at 0.8 zoom, so a 390px screen needs a 312px viewport. Earlier
-"stuck at 1,025px" readings were this scaling. Widths below are measured `innerWidth`.
+The VS Code browser scales the viewport, and the factor changes between sessions (0.8 on 2026-11-09,
+about 1.04 and 0.8 on 2026-11-11). Size from a measured `innerWidth`, not a fixed factor. Widths below
+are measured `innerWidth`.
 
 | Role                                    | 390 (phone)                                  | 820 (tablet)                        | 1024        | How                                       |
 | --------------------------------------- | -------------------------------------------- | ----------------------------------- | ----------- | ----------------------------------------- |
@@ -170,25 +194,27 @@ The VS Code browser renders at 0.8 zoom, so a 390px screen needs a 312px viewpor
 Phone and tablet screenshots: `screenshots/after-agent-phone.png`, `screenshots/after-agent-tablet.png`.
 Bottom-bar labels cut off at 390px for long names ("Inspectio…", "Verificati…"); readable via the
 accessible name, but shorter labels would help. Browser back with the drawer open (landlord, 390px): returns to the previous page with the drawer
-closed. Not tested on a real device: rotation and safe-area insets. Rotation changes only the width,
-which the table above covers.
+closed. Orientation (2026-11-11): landlord in phone landscape, 844 × 390: no sideways scroll, the bar
+stays at the bottom, and the open menu scrolls inside its own panel (before: 75px sideways scroll).
+Rotation itself only changes the width and height, so this covers it in the browser; a real device
+check of rotation and safe-area insets is still open.
 
 ## 7. Accessibility results (target WCAG 2.2 AA)
 
-| Check                     | Result                                                                                                                     |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| Landmarks and names       | Sidebar, phone bar, drawer and pipeline tabs are `nav` elements with labels                                                |
-| `aria-current`            | Exactly one current link on all 150 matrix pages                                                                           |
-| `aria-expanded`           | On every group heading; Enter and Space toggle it (keyboard test)                                                          |
-| Skip link                 | First Tab stop; visible when focused; moves focus to `<main>`                                                              |
-| Keyboard order (landlord) | 13 sidebar stops: 6 primary, 6 group headings, Collapse. Links in folded groups are skipped                                |
-| Focus visible             | Every stop has a ring, except the Next.js dev overlay                                                                      |
-| Escape and focus return   | Escape closes the drawer (tested). Focus return is implemented but was not confirmed in the bridge                         |
-| Headings                  | Fixed on three pages; one h1 on all 150 matrix pages                                                                       |
-| Reduced motion            | CSS animations already respected it; Framer animations now do (`MotionConfig`). Not observed in the browser                |
-| Touch targets             | Rows 44px on touch screens; bar items 56px tall                                                                            |
-| Contrast                  | Token pairs measured AA in an earlier audit (2026-11-05); text colours changed since (`1bc27cbd`) and were not re-measured |
-| Screen reader             | **Not tested** with VoiceOver or NVDA                                                                                      |
+| Check                     | Result                                                                                                                                                                                                                                  |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Landmarks and names       | Sidebar, phone bar, drawer and pipeline tabs are `nav` elements with labels                                                                                                                                                             |
+| `aria-current`            | Exactly one current link on all 150 matrix pages                                                                                                                                                                                        |
+| `aria-expanded`           | On every group heading; Enter and Space toggle it (keyboard test)                                                                                                                                                                       |
+| Skip link                 | First Tab stop; visible when focused; moves focus to `<main>`                                                                                                                                                                           |
+| Keyboard order (landlord) | 13 sidebar stops: 6 primary, 6 group headings, Collapse. Links in folded groups are skipped                                                                                                                                             |
+| Focus visible             | Every stop has a ring, except the Next.js dev overlay                                                                                                                                                                                   |
+| Escape and focus return   | Keyboard only, landlord, 390px (2026-11-11): Enter on "Open menu" opens the drawer with focus on "Close menu"; Tab moves into it; Escape closes it and focus returns to "Open menu"                                                     |
+| Headings                  | Fixed on three pages; one h1 on all 150 matrix pages                                                                                                                                                                                    |
+| Reduced motion            | Observed 2026-11-11 by sampling the drawer every 40ms: without the setting it slides in (translateY −20px → 0) and fades; with `prefers-reduced-motion: reduce` it only fades, with no transform. A fade is not motion under WCAG 2.3.3 |
+| Touch targets             | Rows 44px on touch screens; bar items 56px tall                                                                                                                                                                                         |
+| Contrast                  | Re-measured 2026-11-11 with axe-core 4.14 (wcag2a, 2aa, 21aa, 22aa): landlord Dashboard, Applications and Properties, light and dark, 1180px: 0 violations, contrast included                                                           |
+| Screen reader             | **Not tested** with VoiceOver or NVDA. Needs a person: NVDA is Windows-only, and VoiceOver speaks aloud and takes over the Mac. The accessible names, landmarks and states it would read are covered by the rows above                  |
 
 ## 8. Functional and security regression results
 
@@ -290,12 +316,17 @@ Drawer gating for owner, realtor and buyer is covered by the config equivalence 
    - Done: groups fixed in code (89c728bb), and the test admin `qa-audit-staff-backoffice-admin` now has two-factor.
    - Done in the browser: sign-in with two-factor, rail, keyboard and resilience (see the second pass above).
    - Done: labels in sentence case (8dc931a4), with the group lists renamed in step; brand names and acronyms keep their capitals.
-2. **More screenshots:** phone and tablet before-and-after (desktop is in section 4).
+2. **Screenshots:** done 2026-11-11, phone, tablet and landscape before and after (section 4).
 3. **Not tested yet:**
-   - orientation change
-   - workspace switching with two estates
-   - screen readers (VoiceOver on Safari, NVDA on Chrome)
-4. **Top bars:** five of eight top bars now share `WorkspaceNavbar` (39b895cd). Renter (form search, inline links, language toggle), estate (switcher, no search) and resident keep their own layouts on purpose. Checked in the browser as a realtor: search with Enter goes to `/realtor/listings?q=test`, as before.
-5. **Navigation config:** done for the web app (2adad1a4, df5b52ec). The backoffice keeps its own renderer, because its items are permission-gated with live badge queries.
-6. **Pipeline tabs:** add them elsewhere only where a real sequence exists, such as landlord tenancies (Leases → Inspections → Deposits → Notices).
-7. **CI:** none of this has been through CI; run the browser tests once GitHub billing is fixed.
+   - workspace switching with two estates: blocked. The estate test account is on the Free plan, which
+     allows one estate (`PLAN_LIMIT_REACHED` when adding a second). Needs a Pro estate test account.
+   - screen readers (VoiceOver on Safari, NVDA on Chrome): needs a person (see section 7).
+   - agent bottom-bar labels at 360 and 390: not re-measured. The browser pane was hidden, and pages
+     there do not finish rendering until it is visible. The 2026-11-09 result ("Inspectio…") stands.
+   - rotation and safe-area insets on a real device.
+4. **Test data:** `seed-landlord`'s password no longer matches `ProbeP@ss123` (changed 2026-11-10
+   22:51; sign-in returns 401). These checks used `qa-audit-a005b` instead.
+5. **Top bars:** five of eight top bars now share `WorkspaceNavbar` (39b895cd). Renter (form search, inline links, language toggle), estate (switcher, no search) and resident keep their own layouts on purpose. Checked in the browser as a realtor: search with Enter goes to `/realtor/listings?q=test`, as before.
+6. **Navigation config:** done for the web app (2adad1a4, df5b52ec). The backoffice keeps its own renderer, because its items are permission-gated with live badge queries.
+7. **Pipeline tabs:** add them elsewhere only where a real sequence exists, such as landlord tenancies (Leases → Inspections → Deposits → Notices).
+8. **CI:** none of this has been through CI; run the browser tests once GitHub billing is fixed.
