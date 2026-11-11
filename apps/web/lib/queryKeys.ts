@@ -526,3 +526,7 @@ export const paymentKeys = {
   accountName: (bankCode: string, accountNumber: string) =>
     ['payments', 'account-name', bankCode, accountNumber] as const,
 };
+
+export const fxKeys = {
+  indicative: ['fx', 'indicative'] as const,
+};
