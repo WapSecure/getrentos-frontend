@@ -1,5 +1,4 @@
 import {
-  BadgeCheck,
   BedDouble,
   CalendarClock,
   FolderOpen,
@@ -78,18 +77,12 @@ export const buyerNavigation = defineRoleNavigation({
     },
     { id: 'reviews', labelKey: 'sidebar.reviews', href: ROUTES.BUYER_REVIEWS, icon: Star },
     {
-      id: 'trustProfile',
-      labelKey: 'sidebar.trust_profile',
+      id: 'trust',
+      label: 'Trust & verification',
       href: ROUTES.BUYER_TRUST_PROFILE,
-      icon: BadgeCheck,
+      icon: ShieldCheck,
     },
     { id: 'settings', labelKey: 'sidebar.settings', href: ROUTES.BUYER_SETTINGS, icon: Settings },
-    {
-      id: 'verification',
-      label: 'Verification',
-      href: ROUTES.BUYER_VERIFICATION,
-      icon: BadgeCheck,
-    },
   ],
   groups: [
     { label: 'Overview', items: ['dashboard'] },
@@ -98,9 +91,9 @@ export const buyerNavigation = defineRoleNavigation({
     { label: 'Messages and documents', items: ['messages', 'documents'] },
     {
       label: 'Trust and account',
-      items: ['trustProfile', 'reviews', 'settings', 'verification', 'bookings'],
+      items: ['trust', 'reviews', 'settings', 'bookings'],
     },
   ],
   primary: ['dashboard', 'discover', 'saved', 'offers', 'transactions', 'messages'],
-  utility: ['settings', 'verification', 'bookings'],
+  utility: ['settings', 'trust', 'bookings'],
 });

@@ -12,7 +12,7 @@ import {
 
 // Report-Only by default (violations logged, nothing blocked); build with NEXT_PUBLIC_CSP_ENFORCE=true to enforce. Inlined at build time.
 const ENFORCE_CSP = process.env.NEXT_PUBLIC_CSP_ENFORCE === 'true';
-const LIVE_CAPTURE_PATH = /\/(verification|trust-score)(\/|$)/;
+const LIVE_CAPTURE_PATH = /\/(verification|trust-score|trust-profile)(\/|$)/;
 const DEV = process.env.NODE_ENV !== 'production';
 
 // The nonce is set on the response and the forwarded request (Next reads it from there); `x-nonce` carries it to the root layout.

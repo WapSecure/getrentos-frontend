@@ -7,14 +7,12 @@ import {
   CircleHelp,
   FileSignature,
   FileStack,
-  Gauge,
   Handshake,
   KeyRound,
   KeySquare,
   LogOut,
   CalendarCheck,
   Search,
-  ShieldCheck,
   Sparkles,
   Star,
   UserRound,
@@ -36,6 +34,7 @@ import {
 } from '@sureground/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useIdentityVerification } from '@/hooks/useIdentityVerification';
+import { useTrustItems } from '@/components/account/useTrustItems';
 import { useProSettings } from '@/hooks/useProSettings';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
@@ -45,7 +44,8 @@ const go = (href: Href) => () => router.push(href);
 export default function RealtorAccount() {
   const { profile, signOut } = useAuth();
   const { colors, spacing } = useTheme();
-  const { verified, known: identityKnown, label: identityLabel } = useIdentityVerification();
+  const { verified } = useIdentityVerification();
+  const trustItems = useTrustItems('realtor', { audience: 'clients' });
   const { licenseLabel, inAgency } = useProSettings();
 
   const business: SettingsItem[] = [
@@ -108,22 +108,7 @@ export default function RealtorAccount() {
   ];
 
   const trust: SettingsItem[] = [
-    {
-      key: 'trust',
-      label: 'Trust profile',
-      description: 'Your score and what clients see',
-      icon: Gauge,
-      value: profile ? String(profile.trustScore) : undefined,
-      onPress: go('/(app)/realtor-trust-profile'),
-    },
-    {
-      key: 'identity',
-      label: 'Identity verification',
-      icon: ShieldCheck,
-      value: identityLabel,
-      tone: verified ? 'success' : identityKnown ? 'warning' : undefined,
-      onPress: go('/(app)/verify-identity'),
-    },
+    ...trustItems,
     {
       key: 'license',
       label: 'Licence',

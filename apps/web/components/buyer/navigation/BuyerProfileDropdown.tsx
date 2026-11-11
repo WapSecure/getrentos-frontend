@@ -10,7 +10,7 @@ interface BuyerProfileDropdownProps {
 
 const LINKS = [
   { href: ROUTES.BUYER_SETTINGS, label: 'Settings', icon: Settings },
-  { href: ROUTES.BUYER_TRUST_PROFILE, label: 'Trust profile', icon: Shield },
+  { href: ROUTES.BUYER_TRUST_PROFILE, label: 'Trust & verification', icon: Shield },
   { href: ROUTES.BUYER_HELP, label: 'Help centre', icon: HelpCircle },
 ];
 

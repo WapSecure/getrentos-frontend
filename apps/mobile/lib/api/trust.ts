@@ -19,6 +19,7 @@ export function purposeFor(portal: Portal | null | undefined): TrustPurpose {
     case 'realtor':
       return 'AGENT_ONBOARDING';
     case 'manager':
+    case 'estate':
       return 'PROPERTY_MANAGER_ONBOARDING';
     default:
       return 'RENTER_ONBOARDING';
@@ -222,7 +223,8 @@ export type TrustPortal =
   | 'owner'
   | 'agent'
   | 'realtor'
-  | 'manager';
+  | 'manager'
+  | 'estate';
 
 export interface TrustOverview {
   portal: TrustPortal;

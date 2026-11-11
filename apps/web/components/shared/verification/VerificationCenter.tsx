@@ -1,10 +1,10 @@
 'use client';
 
+import { ChangePhoneButton } from '@/components/shared/security/ChangePhoneButton';
 import { trustKeys } from '@/lib/queryKeys';
 import { IdentityDocumentFallback } from './IdentityDocumentFallback';
 import { useEffect, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { usePathname } from 'next/navigation';
 import { NIGERIAN_BANKS } from '@/lib/banks';
 import {
   BadgeCheck,
@@ -31,7 +31,6 @@ import {
   Field,
   Input,
   NumberInput,
-  PageHeader,
   Progress,
   Select,
   Skeleton,
@@ -59,18 +58,15 @@ const HOST_ONBOARD_PURPOSES: TrustPurpose[] = [
 interface VerificationCenterProps {
   subjectId: string;
   purpose: TrustPurpose;
-  description?: string;
   trustScoreHref?: string;
 }
 
 export const VerificationCenter = ({
   subjectId,
   purpose,
-  description,
   trustScoreHref,
 }: VerificationCenterProps) => {
   const queryClient = useQueryClient();
-  const portal = usePathname().split('/')[1] || 'renter';
   const [verificationId, setVerificationId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [chosenIdType, setIdType] = useState<TrustIdType>('NIN');
@@ -799,12 +795,6 @@ export const VerificationCenter = ({
 
   return (
     <div className="space-y-5">
-      <PageHeader
-        title="Verification"
-        description={
-          description ?? 'Verify your identity to unlock renting, payments and higher trust limits.'
-        }
-      />
       <div className="rounded-2xl border border-border bg-card p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -864,9 +854,7 @@ export const VerificationCenter = ({
           icon={ShieldAlert}
           action={
             /phone number/i.test(error) ? (
-              <Button size="sm" variant="outline" href={`/${portal}/settings?tab=profile`}>
-                Add your phone number
-              </Button>
+              <ChangePhoneButton adding onChanged={() => setError(null)} />
             ) : undefined
           }
         >

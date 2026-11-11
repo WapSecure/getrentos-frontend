@@ -1,18 +1,25 @@
 'use client';
 
-import { TrustProfileView } from '@/components/shared/trust/TrustProfileView';
+import { ROUTES } from '@/lib/constants/auth';
+import { TrustHub } from '@/components/shared/trust/TrustHub';
+import { TrustProfileDetails } from '@/components/shared/trust/TrustProfileDetails';
 import { realtorService } from '@/services/realtorService';
 import { realtorKeys } from '@/lib/queryKeys';
 
-export default function RealtorTrustProfilePage() {
+export default function RealtorTrustPage() {
   return (
-    <TrustProfileView
+    <TrustHub
       portal="realtor"
-      audience="clients and leads"
-      queryKey={realtorKeys.trustProfile}
-      queryFn={() => realtorService.getTrustProfile()}
-      title="Trust & Verification Profile"
-      subtitle="Your identity, what you need here, and your trust score."
+      purpose="AGENT_ONBOARDING"
+      verificationDescription="Verify your identity to list and manage properties on behalf of clients."
+      trustHref={ROUTES.REALTOR_TRUST_PROFILE}
+      moreDetails={
+        <TrustProfileDetails
+          audience="clients and leads"
+          queryKey={realtorKeys.trustProfile}
+          queryFn={() => realtorService.getTrustProfile()}
+        />
+      }
     />
   );
 }

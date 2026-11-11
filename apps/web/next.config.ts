@@ -57,6 +57,12 @@ const nextConfig: NextConfig = {
         destination: '/renter/trust-score?tab=verification',
         permanent: true,
       },
+      // Every role's verification now lives in a tab of its trust page.
+      ...(['buyer', 'owner', 'realtor', 'agent', 'landlord', 'estate'] as const).map((role) => ({
+        source: `/${role}/verification`,
+        destination: `/${role}/trust-profile?tab=verification`,
+        permanent: true,
+      })),
       {
         source: '/renter/credit-report',
         destination: '/renter/trust-score?tab=credit',

@@ -29,7 +29,6 @@ import {
   LogOut,
   Megaphone,
   Search,
-  ShieldCheck,
   SlidersHorizontal,
   Star,
   Users,
@@ -47,6 +46,7 @@ import {
 } from '@sureground/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useIdentityVerification } from '@/hooks/useIdentityVerification';
+import { useTrustItems } from '@/components/account/useTrustItems';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
 import { managementItems } from '@/components/account/managementItems';
@@ -56,7 +56,11 @@ const go = (href: Href) => () => router.push(href);
 export default function LandlordAccount() {
   const { profile, signOut } = useAuth();
   const { colors, spacing } = useTheme();
-  const { verified, known: identityKnown, label: identityLabel } = useIdentityVerification();
+  const { verified } = useIdentityVerification();
+  const trustItems = useTrustItems('landlord', {
+    audience: 'tenants',
+    identityHint: 'Required to publish listings',
+  });
 
   const renting: SettingsItem[] = [
     {
@@ -240,15 +244,7 @@ export default function LandlordAccount() {
   ];
 
   const trust: SettingsItem[] = [
-    {
-      key: 'identity',
-      label: 'Identity verification',
-      description: verified ? undefined : 'Required to publish listings',
-      icon: ShieldCheck,
-      value: identityLabel,
-      tone: verified ? 'success' : identityKnown ? 'warning' : undefined,
-      onPress: go('/(app)/verify-identity'),
-    },
+    ...trustItems,
     {
       key: 'reviews',
       label: 'Reviews',

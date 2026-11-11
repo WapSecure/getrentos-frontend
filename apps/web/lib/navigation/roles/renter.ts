@@ -1,4 +1,5 @@
 import {
+  ShieldCheck,
   BedDouble,
   Calendar,
   CalendarCheck,
@@ -12,7 +13,6 @@ import {
   MessageCircle,
   Search,
   Settings,
-  Star,
   Users,
   Wrench,
 } from '@sureground/icons';
@@ -71,7 +71,12 @@ export const renterNavigation = defineRoleNavigation({
       icon: MessageCircle,
     },
     { id: 'calendar', labelKey: 'sidebar.calendar', href: ROUTES.RENTER_CALENDAR, icon: Calendar },
-    { id: 'trustScore', label: 'Trust & Credit', href: ROUTES.RENTER_TRUST_SCORE, icon: Star },
+    {
+      id: 'trust',
+      label: 'Trust & verification',
+      href: ROUTES.RENTER_TRUST_SCORE,
+      icon: ShieldCheck,
+    },
     { id: 'referrals', labelKey: 'sidebar.referrals', href: ROUTES.RENTER_REFERRALS, icon: Gift },
     { id: 'settings', labelKey: 'sidebar.settings', href: ROUTES.RENTER_SETTINGS, icon: Settings },
     { id: 'help', labelKey: 'sidebar.help', href: ROUTES.RENTER_HELP, icon: HelpCircle },
@@ -81,7 +86,7 @@ export const renterNavigation = defineRoleNavigation({
     { label: 'Find a home', items: ['discover', 'saved', 'bookings', 'applications', 'viewings'] },
     { label: 'Your tenancy', items: ['home', 'payments', 'maintenance', 'roommates'] },
     { label: 'Communication', items: ['messages', 'calendar'] },
-    { label: 'Trust and support', items: ['trustScore', 'referrals', 'settings', 'help'] },
+    { label: 'Trust and support', items: ['trust', 'referrals', 'settings', 'help'] },
   ],
   primary: ['dashboard', 'discover', 'home', 'payments', 'maintenance', 'messages'],
   utility: ['settings', 'help'],

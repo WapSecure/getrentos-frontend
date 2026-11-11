@@ -8,7 +8,6 @@ import {
   KeyRound,
   LogOut,
   Megaphone,
-  ShieldCheck,
   SlidersHorizontal,
   BookOpen,
   Landmark,
@@ -36,7 +35,7 @@ import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
 import { EstateSwitcherSheet } from '@/components/estate/EstateUI';
 import { useEstate } from '@/hooks/useEstate';
 import { useAuth } from '@/lib/auth/AuthProvider';
-import { useIdentityVerification } from '@/hooks/useIdentityVerification';
+import { useTrustItems } from '@/components/account/useTrustItems';
 
 const go = (href: Href) => () => router.push(href);
 
@@ -45,7 +44,10 @@ export default function EstateAccount() {
   const { colors, spacing } = useTheme();
   const { estate, estates, estateId, select } = useEstate();
   const [switching, setSwitching] = useState(false);
-  const { verified, known: identityKnown, label: identityLabel } = useIdentityVerification();
+  const trustItems = useTrustItems('estate', {
+    audience: 'residents',
+    identityHint: 'Required to publish listings',
+  });
 
   const office: SettingsItem[] = [
     {
@@ -146,15 +148,9 @@ export default function EstateAccount() {
     },
   ];
 
+  const trust: SettingsItem[] = trustItems;
+
   const settings: SettingsItem[] = [
-    {
-      key: 'identity',
-      label: 'Identity verification',
-      icon: ShieldCheck,
-      value: identityLabel,
-      tone: verified ? 'success' : identityKnown ? 'warning' : undefined,
-      onPress: go('/(app)/verify-identity'),
-    },
     {
       key: 'billing',
       label: 'Plan & billing',
@@ -211,6 +207,7 @@ export default function EstateAccount() {
       <WorkspaceSwitcher />
 
       <SettingsGroup title="The office" items={office} />
+      <SettingsGroup title="Trust & reputation" items={trust} />
       <SettingsGroup
         title="Settings"
         items={settings}

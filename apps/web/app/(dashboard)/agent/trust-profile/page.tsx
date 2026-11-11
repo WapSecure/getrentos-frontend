@@ -1,18 +1,25 @@
 'use client';
 
-import { TrustProfileView } from '@/components/shared/trust/TrustProfileView';
+import { ROUTES } from '@/lib/constants/auth';
+import { TrustHub } from '@/components/shared/trust/TrustHub';
+import { TrustProfileDetails } from '@/components/shared/trust/TrustProfileDetails';
 import { agentService } from '@/services/agentService';
 import { agentKeys } from '@/lib/queryKeys';
 
-export default function AgentTrustProfilePage() {
+export default function AgentTrustPage() {
   return (
-    <TrustProfileView
+    <TrustHub
       portal="agent"
-      audience="clients and admins"
-      queryKey={agentKeys.trustProfile}
-      queryFn={() => agentService.getTrustProfile()}
-      title="Trust & Verification Profile"
-      subtitle="Your identity, what you need here, and your trust score."
+      purpose="AGENT_ONBOARDING"
+      verificationDescription="Verify your identity to manage clients and run verification visits."
+      trustHref={ROUTES.AGENT_TRUST_PROFILE}
+      moreDetails={
+        <TrustProfileDetails
+          audience="clients and admins"
+          queryKey={agentKeys.trustProfile}
+          queryFn={() => agentService.getTrustProfile()}
+        />
+      }
     />
   );
 }

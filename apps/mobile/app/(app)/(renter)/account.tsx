@@ -22,7 +22,6 @@ import {
   ShieldAlert,
   ShieldCheck,
   ShieldEllipsis,
-  BadgeCheck,
   Star,
   UserRound,
   Users,
@@ -45,6 +44,7 @@ import {
 } from '@sureground/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useIdentityVerification } from '@/hooks/useIdentityVerification';
+import { useTrustItems } from '@/components/account/useTrustItems';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
 import { financingApi } from '@/lib/api/financing';
@@ -55,7 +55,8 @@ const go = (href: Href) => () => router.push(href);
 export default function Account() {
   const { profile, signOut } = useAuth();
   const { colors, spacing } = useTheme();
-  const { verified, known: identityKnown, label: identityLabel } = useIdentityVerification();
+  const { verified, known: identityKnown } = useIdentityVerification();
+  const trustItems = useTrustItems('renter', { audience: 'landlords' });
   const flex = useQuery({ queryKey: qk.renter.financing, queryFn: financingApi.getOverview });
   const flexDescription = flex.data?.plan
     ? 'Your plan and instalments'
@@ -160,22 +161,7 @@ export default function Account() {
   ];
 
   const trust: SettingsItem[] = [
-    {
-      key: 'identity',
-      label: 'Identity verification',
-      icon: ShieldCheck,
-      value: identityLabel,
-      tone: verified ? 'success' : identityKnown ? 'warning' : undefined,
-      onPress: go('/(app)/verify-identity'),
-    },
-    {
-      key: 'trust',
-      label: 'Trust score',
-      description: 'How landlords see you',
-      icon: BadgeCheck,
-      value: profile?.trustScore != null ? `${profile.trustScore} / 100` : undefined,
-      onPress: go('/(app)/trust-score'),
-    },
+    ...trustItems,
     {
       key: 'reviews',
       label: 'Reviews',

@@ -7,13 +7,11 @@ import {
   CircleHelp,
   CreditCard,
   FileStack,
-  Gauge,
   Heart,
   KeyRound,
   LandPlot,
   Users,
   Search,
-  ShieldCheck,
   Star,
   UserRound,
   Wallet,
@@ -22,8 +20,7 @@ import {
   ClipboardList,
 } from '@sureground/icons/native';
 import { Screen } from '@sureground/ui-native';
-import { useAuth } from '@/lib/auth/AuthProvider';
-import { useIdentityVerification } from '@/hooks/useIdentityVerification';
+import { useTrustItems } from '@/components/account/useTrustItems';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
 import { AccountFooter, AccountHeader, AppearanceFooter } from '@/components/account/AccountParts';
@@ -31,8 +28,7 @@ import { AccountFooter, AccountHeader, AppearanceFooter } from '@/components/acc
 const go = (href: Href) => () => router.push(href);
 
 export default function BuyerAccount() {
-  const { profile } = useAuth();
-  const { verified, known: identityKnown, label: identityLabel } = useIdentityVerification();
+  const trustItems = useTrustItems('buyer', { audience: 'sellers' });
 
   const buying: SettingsItem[] = [
     {
@@ -125,23 +121,7 @@ export default function BuyerAccount() {
   ];
 
   const trust: SettingsItem[] = [
-    {
-      key: 'trust',
-      label: 'Trust profile',
-      description: 'Your score and what sellers see',
-      icon: Gauge,
-      value: profile ? String(profile.trustScore) : undefined,
-      onPress: go('/(app)/buyer-trust-profile'),
-    },
-    {
-      key: 'identity',
-      label: 'Identity verification',
-      description: verified ? undefined : 'Verify your ID to make offers',
-      icon: ShieldCheck,
-      value: identityLabel,
-      tone: verified ? 'success' : identityKnown ? 'warning' : undefined,
-      onPress: go('/(app)/verify-identity'),
-    },
+    ...trustItems,
     {
       key: 'reviews',
       label: 'Reviews',

@@ -1,15 +1,17 @@
 import { buyerTrustProfileApi } from '@/lib/api/buyerTrustProfile';
 import { qk } from '@/lib/query/keys';
-import { TrustProfileView } from '@/components/trust/TrustProfileView';
+import { TrustScreen } from '@/components/trust/TrustScreen';
 
 export default function BuyerTrustProfile() {
   return (
-    <TrustProfileView
+    <TrustScreen
       portal="buyer"
-      audience="owners and realtors"
-      queryKey={qk.buyer.trustProfile}
-      queryFn={buyerTrustProfileApi.get}
       eyebrow="Buyer reputation"
+      profile={{
+        audience: 'owners and realtors',
+        queryKey: qk.buyer.trustProfile,
+        queryFn: buyerTrustProfileApi.get,
+      }}
     />
   );
 }
