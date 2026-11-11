@@ -1,25 +1,21 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { FolderOpen, Globe, MessageCircle, Settings2, ShieldCheck } from '@sureground/icons';
 import {
   Alert,
-  Badge,
   Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  DataTable,
   DescriptionList,
   PageHeader,
   QueryState,
   StatGroup,
   StatGroupSkeleton,
-  type Column,
   type DescriptionItem,
   type StatGroupItem,
 } from '@sureground/ui';
@@ -44,10 +40,7 @@ import {
   FOREIGN_IDENTITY_TAB_ID,
   useForeignIdentityEligible,
 } from '@/components/diaspora/ForeignIdentityPanel';
-import { AcquisitionStatusBadges } from '@/components/shared/purchases/AcquisitionStatusBadges';
-import { purchaseWorkspaceHref } from '@/lib/transactionWorkspace';
 import type { InvestorOverview, InvestorProfile, InvestorStatusCounts } from '@/types/investor';
-import type { PurchaseSummary } from '@/types/transactionWorkspace';
 import {
   BUDGET_BAND_LABELS,
   HORIZON_LABELS,
@@ -115,88 +108,6 @@ const usePortalLinks = (portal: InvestorPortal) => {
     messages: portal === 'buyer' ? ROUTES.BUYER_MESSAGES : ROUTES.OWNER_MESSAGES,
   };
 };
-
-const PURCHASE_COLUMNS: Column<PurchaseSummary>[] = [
-  {
-    key: 'property',
-    header: 'Property',
-    render: (p) => (
-      <div className="min-w-0">
-        <Link
-          href={purchaseWorkspaceHref(p)}
-          className="font-medium text-foreground hover:text-primary hover:underline"
-        >
-          {p.title}
-        </Link>
-        <p className="text-xs text-muted-foreground">
-          {p.role === 'REPRESENTATIVE'
-            ? `For ${p.representing?.principalName ?? 'the buyer you represent'}`
-            : 'Your purchase'}
-        </p>
-      </div>
-    ),
-  },
-  {
-    key: 'status',
-    header: 'Status',
-    render: (p) => (
-      <AcquisitionStatusBadges
-        statuses={{
-          operationalStage: p.operationalStage,
-          moneyStatus: p.moneyStatus,
-          legalStatus: p.legalStatus,
-        }}
-      />
-    ),
-  },
-  {
-    key: 'next',
-    header: 'Next step',
-    render: (p) =>
-      p.nextAction ? (
-        <span className={p.waitingForYou ? 'font-medium text-foreground' : 'text-muted-foreground'}>
-          {p.nextAction}
-        </span>
-      ) : (
-        <span className="text-muted-foreground">Nothing due</span>
-      ),
-  },
-  {
-    key: 'approvals',
-    header: 'Approvals',
-    render: (p) =>
-      p.pendingApprovals > 0 ? (
-        <Badge variant="warning" dot>
-          {`${p.pendingApprovals} waiting for you`}
-        </Badge>
-      ) : (
-        <span className="text-muted-foreground">None</span>
-      ),
-  },
-];
-
-/** Each purchase with its three statuses, linking to the buyer's or the representative's workspace. */
-const PurchasesCard = ({ purchases }: { purchases: PurchaseSummary[] }) => (
-  <Card>
-    <CardHeader>
-      <CardTitle as="h2">Your purchases</CardTitle>
-      <CardDescription>
-        Progress, deposit and legal transfer are tracked separately. Payment Protection covers the
-        deposit only; a released deposit does not mean the property is legally yours.
-      </CardDescription>
-    </CardHeader>
-    <CardContent>
-      <DataTable
-        variant="bare"
-        caption="Your purchases"
-        columns={PURCHASE_COLUMNS}
-        data={purchases}
-        getRowKey={(p) => `${p.role}-${p.transactionId}`}
-        minWidth="44rem"
-      />
-    </CardContent>
-  </Card>
-);
 
 const ProfileCard = ({
   summary,
@@ -427,9 +338,6 @@ export const InvestorWorkspace = ({ portal }: { portal: InvestorPortal }) => {
           {profile && <ProfileCard summary={profile} risk={risk} portal={portal} />}
 
           {purchases.length > 0 && <StatGroup title="Purchases" items={purchases} />}
-          {(data?.purchases ?? []).length > 0 && (
-            <PurchasesCard purchases={data?.purchases ?? []} />
-          )}
           {care.length > 0 && <StatGroup title="Property care" items={care} />}
 
           <Card>

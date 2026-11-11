@@ -8,9 +8,11 @@ import {
   humaniseCode,
   legalVariant,
   moneyVariant,
+  nextActionTarget,
   purchaseWorkspaceHref,
   releaseOutcome,
   stageVariant,
+  workspaceProgress,
 } from './transactionWorkspace';
 
 const statuses = (money: string) =>
@@ -118,4 +120,48 @@ test('documents are named by the step they belong to', () => {
     'Governors consent'
   );
   assert.equal(humaniseCode('TITLE_DEED'), 'Title deed');
+});
+
+test('progress counts required steps and settled legal steps', () => {
+  const progress = workspaceProgress({
+    milestones: [
+      { required: true, status: 'CONFIRMED' },
+      { required: true, status: 'DELIVERED' },
+      { required: false, status: 'CONFIRMED' },
+      { required: true, status: 'WAIVED' },
+    ],
+    legalSteps: [{ status: 'APPROVED' }, { status: 'SUBMITTED' }, { status: 'NOT_APPLICABLE' }],
+  } as never);
+  assert.deepEqual(progress, { steps: { done: 2, total: 3 }, legal: { done: 2, total: 3 } });
+});
+
+test('the call to action goes to what is waiting for the viewer', () => {
+  const base = {
+    viewer: { role: 'BUYER' },
+    statuses: statuses('PROTECTED'),
+    nextAction: { label: 'x', waitingForYou: true },
+    milestones: [],
+    coApproval: { binding: false },
+  };
+  assert.equal(
+    nextActionTarget({ ...base, nextAction: { label: 'x', waitingForYou: false } } as never),
+    null
+  );
+  assert.equal(nextActionTarget({ ...base, nextAction: null } as never), null);
+  assert.equal(nextActionTarget(base as never), 'deposit');
+  assert.equal(
+    nextActionTarget({ ...base, milestones: [{ status: 'DELIVERED' }] } as never),
+    'steps'
+  );
+  assert.equal(
+    nextActionTarget({
+      ...base,
+      viewer: { role: 'REPRESENTATIVE' },
+      coApproval: {
+        binding: true,
+        pending: [{ milestoneKey: 'K', buyerApproved: true, representativeApproved: false }],
+      },
+    } as never),
+    'approvals'
+  );
 });

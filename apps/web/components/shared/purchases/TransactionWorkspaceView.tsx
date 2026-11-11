@@ -3,10 +3,21 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { withStepUpSummary } from '@sureground/shared';
-import { AlertTriangle, Clock, FileText, Lock, ShieldCheck, UsersRound } from '@sureground/icons';
+import {
+  ArrowRight,
+  Building2,
+  Clock,
+  FileText,
+  ListChecks,
+  Lock,
+  MessageCircle,
+  ShieldCheck,
+  UsersRound,
+} from '@sureground/icons';
 import {
   Alert,
   Badge,
+  Breadcrumbs,
   Button,
   Card,
   CardContent,
@@ -14,16 +25,13 @@ import {
   CardHeader,
   CardTitle,
   ConfirmDialog,
-  DataTable,
-  DescriptionList,
   EmptyState,
   PageErrorState,
-  PageHeader,
+  Progress,
   StatGroupSkeleton,
   useToast,
-  type Column,
-  type DescriptionItem,
 } from '@sureground/ui';
+import { AcquisitionStatusBadges } from './AcquisitionStatusBadges';
 import { MilestoneTimeline } from '@/components/land/buyer/MilestoneTimeline';
 import { ConditionsPanel } from '@/components/land/closing/ConditionsPanel';
 import { PerfectionPanel } from '@/components/land/closing/PerfectionPanel';
@@ -39,10 +47,11 @@ import {
   canReleaseDeposit,
   documentLinkLabel,
   humaniseCode,
-  legalVariant,
   moneyVariant,
+  nextActionTarget,
   releaseOutcome,
-  stageVariant,
+  workspaceProgress,
+  type WorkspaceSection,
 } from '@/lib/transactionWorkspace';
 import { buyerService } from '@/services/buyerService';
 import { landBuyerService } from '@/services/landBuyerService';
@@ -57,9 +66,7 @@ import {
 import type {
   TransactionWorkspace,
   WorkspaceCondition,
-  WorkspaceDocument,
   WorkspaceProfessional,
-  WorkspaceRepresentative,
   WorkspaceViewerRole,
 } from '@/types/transactionWorkspace';
 
@@ -106,24 +113,62 @@ const BREADCRUMBS: Record<WorkspaceViewerRole, { label: string; href: string } |
   SELLER: null,
 };
 
+const SECTION_ID: Record<WorkspaceSection, string> = {
+  approvals: 'workspace-approvals',
+  deposit: 'workspace-deposit',
+  steps: 'workspace-steps',
+};
+
+const CTA_LABEL: Record<WorkspaceSection, string> = {
+  approvals: 'Give your approval',
+  deposit: 'Review the deposit',
+  steps: 'Review the steps',
+};
+
 const SectionCard = ({
+  id,
   title,
   description,
   action,
   children,
 }: {
+  id?: string;
   title: string;
   description?: string;
   action?: React.ReactNode;
   children: React.ReactNode;
 }) => (
-  <Card>
-    <CardHeader action={action}>
-      <CardTitle as="h2">{title}</CardTitle>
-      {description && <CardDescription>{description}</CardDescription>}
-    </CardHeader>
-    <CardContent>{children}</CardContent>
-  </Card>
+  <section id={id} aria-label={title} className="scroll-mt-24">
+    <Card>
+      <CardHeader action={action}>
+        <CardTitle as="h2">{title}</CardTitle>
+        {description && <CardDescription>{description}</CardDescription>}
+      </CardHeader>
+      <CardContent>{children}</CardContent>
+    </Card>
+  </section>
+);
+
+/** A compact row for the summary rail: a name, a line under it and a badge on the right. */
+const RailList = ({
+  items,
+}: {
+  items: { id: string; title: string; detail?: string; badge?: React.ReactNode }[];
+}) => (
+  <ul className="divide-y divide-border">
+    {items.map((item) => (
+      <li
+        key={item.id}
+        className="flex items-start justify-between gap-3 py-3 first:pt-0 last:pb-0"
+      >
+        <div className="min-w-0">
+          <p className="truncate text-sm font-medium text-foreground">{item.title}</p>
+          {item.detail && <p className="text-xs text-muted-foreground">{item.detail}</p>}
+        </div>
+        {item.badge && <div className="shrink-0">{item.badge}</div>}
+      </li>
+    ))}
+  </ul>
 );
 
 /**
@@ -231,140 +276,108 @@ export const TransactionWorkspaceView = ({
 
   const isBuyer = data.viewer.role === 'BUYER';
   const isRepresentative = data.viewer.role === 'REPRESENTATIVE';
+  const isSeller = data.viewer.role === 'SELLER';
   const isLandResale = data.plan === 'LAND_RESALE';
-  const { operationalStage, moneyStatus, legalStatus } = data.statuses;
+  const { moneyStatus, legalStatus } = data.statuses;
   const breadcrumb = BREADCRUMBS[data.viewer.role];
   const overdue = data.delays.overdueMilestones + data.delays.overdueLegalSteps;
-
-  const statusItems: DescriptionItem[] = [
-    {
-      label: 'Progress',
-      value: (
-        <Badge dot variant={stageVariant(operationalStage.code)}>
-          {operationalStage.label}
-        </Badge>
-      ),
-    },
-    {
-      label: 'Deposit',
-      value: (
-        <Badge dot variant={moneyVariant(moneyStatus.code)}>
-          {moneyStatus.label}
-        </Badge>
-      ),
-      hint: moneyStatus.note,
-    },
-    {
-      label: 'Legal transfer',
-      value: (
-        <Badge dot variant={legalVariant(legalStatus.code)}>
-          {legalStatus.label}
-        </Badge>
-      ),
-    },
-  ];
-  if (data.viewer.role === 'SELLER') {
-    statusItems.push({
-      label: 'Two-person approval',
-      value: data.coApproval.binding ? 'On: the buyer’s representative approves too' : 'Off',
-    });
-  }
-
-  const representativeColumns: Column<WorkspaceRepresentative>[] = [
-    {
-      key: 'name',
-      header: 'Name',
-      render: (r) => <span className="font-medium text-foreground">{r.name ?? 'Invited'}</span>,
-    },
-    {
-      key: 'relationship',
-      header: 'Relationship',
-      render: (r) =>
-        REPRESENTATIVE_RELATIONSHIP_LABELS[r.relationship as RepresentativeRelationship] ??
-        humaniseCode(r.relationship),
-    },
-    {
-      key: 'scopes',
-      header: 'May',
-      render: (r) =>
-        r.scopes
-          .map(
-            (scope) =>
-              REPRESENTATIVE_SCOPE_SHORT_LABELS[scope as RepresentativeScope] ?? humaniseCode(scope)
-          )
-          .join(', '),
-    },
-    {
-      key: 'status',
-      header: 'Status',
-      render: (r) => (
-        <span className="flex flex-wrap gap-1.5">
-          <Badge variant={r.status === 'ACTIVE' ? 'success' : 'warning'}>
-            {r.status === 'ACTIVE' ? 'Active' : 'Invited'}
-          </Badge>
-          {r.approvesPayments && <Badge variant="info">Approves the release</Badge>}
-        </span>
-      ),
-    },
-  ];
-  const professionalColumns: Column<WorkspaceProfessional>[] = [
-    {
-      key: 'role',
-      header: 'Role',
-      render: (p) => PROFESSIONAL_LABEL[p.role] ?? humaniseCode(p.role),
-    },
-    {
-      key: 'name',
-      header: 'Name',
-      render: (p) => <span className="font-medium text-foreground">{p.name}</span>,
-    },
-    {
-      key: 'status',
-      header: 'Status',
-      render: (p) =>
-        p.status === 'COMPLETED' ? (
-          <Badge variant="success">
-            {p.completedAt ? `Finished ${formatDate(p.completedAt)}` : 'Finished'}
-          </Badge>
-        ) : (
-          <Badge variant="info">Working on it</Badge>
-        ),
-    },
-  ];
-  const documentColumns: Column<WorkspaceDocument>[] = [
-    {
-      key: 'type',
-      header: 'Document',
-      render: (d) => (
-        <span className="font-medium text-foreground">{humaniseCode(d.documentType)}</span>
-      ),
-    },
-    { key: 'for', header: 'For', render: (d) => documentLinkLabel(d, data) },
-    { key: 'uploaded', header: 'Added', render: (d) => formatDate(d.uploadedAt) },
-  ];
+  const progress = workspaceProgress(data);
+  const target = nextActionTarget(data);
+  const releasable = canReleaseDeposit(data);
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        breadcrumbs={breadcrumb ? [breadcrumb, { label: data.propertyTitle }] : undefined}
-        eyebrow={PLAN_LABEL[data.plan] ?? humaniseCode(data.plan)}
-        title={data.propertyTitle}
-        description={
-          isRepresentative
-            ? 'You are seeing this purchase for the buyer who appointed you.'
-            : 'Each status below is tracked separately: a released deposit does not mean the property is legally yours.'
-        }
-      />
-
-      {data.nextAction && (
-        <Alert
-          variant={data.nextAction.waitingForYou ? 'warning' : 'info'}
-          icon={data.nextAction.waitingForYou ? AlertTriangle : Clock}
-          title={data.nextAction.waitingForYou ? 'Waiting for you' : 'Next step'}
-        >
-          {data.nextAction.label}
-        </Alert>
+      {breadcrumb && (
+        <Breadcrumbs className="mb-0" items={[breadcrumb, { label: data.propertyTitle }]} />
       )}
+
+      {/* Header: the property, its three statuses and what happens next. */}
+      <Card>
+        <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-start sm:p-6">
+          {/* The workspace carries no property image, so the tile shows the kind of property. */}
+          <div
+            className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-accent text-primary"
+            aria-hidden
+          >
+            <Building2 className="h-7 w-7" />
+          </div>
+          <div className="min-w-0 flex-1 space-y-3">
+            <div>
+              <p className="text-2xs font-semibold uppercase tracking-wide text-muted-foreground">
+                {PLAN_LABEL[data.plan] ?? humaniseCode(data.plan)}
+                {isRepresentative ? ' · You represent the buyer' : isSeller ? ' · Your sale' : ''}
+              </p>
+              <h1 className="mt-1 text-2xl font-semibold tracking-tight text-foreground">
+                {data.propertyTitle}
+              </h1>
+            </div>
+            <AcquisitionStatusBadges statuses={data.statuses} />
+            {data.nextAction && (
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <p
+                  className={
+                    data.nextAction.waitingForYou
+                      ? 'text-sm font-medium text-foreground'
+                      : 'text-sm text-muted-foreground'
+                  }
+                >
+                  <span className="text-muted-foreground">
+                    {data.nextAction.waitingForYou ? 'Waiting for you: ' : 'Next: '}
+                  </span>
+                  {data.nextAction.label}
+                </p>
+                {target ? (
+                  <Button
+                    href={`#${SECTION_ID[target]}`}
+                    icon={<ArrowRight className="h-4 w-4" aria-hidden />}
+                  >
+                    {CTA_LABEL[target]}
+                  </Button>
+                ) : (
+                  <Button href={`#${SECTION_ID.steps}`} variant="secondary" size="sm">
+                    See the steps
+                  </Button>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+        {/* Progress at a glance: steps and legal transfer as bars, the deposit as its own status. */}
+        <div className="grid gap-5 border-t border-border bg-secondary/40 p-5 sm:grid-cols-3 sm:p-6">
+          {progress.steps.total > 0 ? (
+            <Progress
+              label="Purchase steps"
+              value={progress.steps.done}
+              max={progress.steps.total}
+              showValue="fraction"
+              tone={progress.steps.done === progress.steps.total ? 'success' : 'primary'}
+            />
+          ) : (
+            <div>
+              <p className="text-sm font-medium text-foreground">Purchase steps</p>
+              <p className="text-xs text-muted-foreground">Not set up yet</p>
+            </div>
+          )}
+          {progress.legal.total > 0 ? (
+            <Progress
+              label="Legal transfer"
+              value={progress.legal.done}
+              max={progress.legal.total}
+              showValue="fraction"
+              tone={legalStatus.code === 'PERFECTED' ? 'success' : 'primary'}
+            />
+          ) : (
+            <div>
+              <p className="text-sm font-medium text-foreground">Legal transfer</p>
+              <p className="text-xs text-muted-foreground">{legalStatus.label}</p>
+            </div>
+          )}
+          <div>
+            <p className="text-sm font-medium text-foreground">Deposit</p>
+            <p className="text-xs text-muted-foreground">{moneyStatus.note}</p>
+          </div>
+        </div>
+      </Card>
 
       {releaseNotice && (
         <Alert
@@ -396,213 +409,279 @@ export const TransactionWorkspaceView = ({
         </Alert>
       )}
 
-      <SectionCard title="Where things stand">
-        <DescriptionList items={statusItems} columns={3} />
-      </SectionCard>
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Main column: what is happening. */}
+        <div className="space-y-6 lg:col-span-2">
+          <SectionCard
+            id={SECTION_ID.steps}
+            title="Purchase steps"
+            description={
+              !isBuyer
+                ? 'The steps of this purchase and who has confirmed them.'
+                : isLandResale
+                  ? 'Confirm each step only when it has actually happened; dispute it if something is wrong.'
+                  : 'Confirm each step only when it has actually happened; dispute it if something is wrong. These steps track the purchase: confirming one does not move any money.'
+            }
+          >
+            <MilestoneTimeline
+              milestones={data.milestones}
+              contractOpen={isBuyer}
+              requiredOnly
+              pendingKey={pendingKey}
+              ariaLabel="Purchase steps"
+              empty={{
+                title: 'No steps yet',
+                description: isSeller
+                  ? 'The steps appear here once the sale is set up. You then mark each one done for the buyer to confirm.'
+                  : 'The steps appear here once the sale is set up. The seller marks each one done, then you confirm it.',
+              }}
+              disputeDescription="Tell the seller what is wrong with this step. It stays open while it is disputed, and they will deliver it again."
+              awaitingLabel={isBuyer ? undefined : 'Awaiting the buyer'}
+              onConfirm={isBuyer ? (milestoneKey) => confirm.mutateAsync(milestoneKey) : undefined}
+              onDispute={
+                isBuyer
+                  ? (milestoneKey, reason) => dispute.mutateAsync({ milestoneKey, reason })
+                  : undefined
+              }
+            />
+          </SectionCard>
 
-      {canReleaseDeposit(data) && (
-        <SectionCard
-          title="Your deposit"
-          description="Sureground holds your deposit under Payment Protection. The rest of the price is paid outside Sureground, so it is not held here."
-          action={
-            <Button
-              size="sm"
-              icon={<ShieldCheck className="h-4 w-4" aria-hidden />}
-              onClick={() => setReleasing(true)}
+          {data.conditions.length > 0 && (
+            <SectionCard
+              title="Conditions of the sale"
+              description="What must be true before the sale can complete."
             >
-              Release the deposit
-            </Button>
-          }
-        >
-          <p className="text-sm text-muted-foreground">
-            Release it only once you have received the property and the documents you agreed. If
-            two-person approval is on, your representative must approve too before anything moves.
-          </p>
-        </SectionCard>
-      )}
+              <ConditionsPanel
+                conditions={data.conditions.map(toClosingCondition)}
+                role="buyer"
+                sellerLabel="Seller"
+                busyKey={settle.isPending ? pendingKey : null}
+                onConfirm={
+                  isBuyer && isLandResale
+                    ? (conditionKey) => settle.mutate({ conditionKey, how: 'confirm' })
+                    : undefined
+                }
+                onWaive={
+                  isBuyer && isLandResale
+                    ? (conditionKey) => settle.mutate({ conditionKey, how: 'waive' })
+                    : undefined
+                }
+              />
+            </SectionCard>
+          )}
 
-      <SectionCard
-        title="Steps"
-        description={
-          !isBuyer
-            ? 'The steps of this purchase and who has confirmed them.'
-            : isLandResale
-              ? 'Confirm each step only when it has actually happened; dispute it if something is wrong.'
-              : 'Confirm each step only when it has actually happened; dispute it if something is wrong. These steps track the purchase: confirming one does not move any money.'
-        }
-      >
-        <MilestoneTimeline
-          milestones={data.milestones}
-          contractOpen={isBuyer}
-          requiredOnly
-          pendingKey={pendingKey}
-          ariaLabel="Purchase steps"
-          empty={{
-            title: 'No steps yet',
-            description:
-              'The steps of this purchase, and their progress, will appear here once set up.',
-          }}
-          disputeDescription="Tell the seller what is wrong with this step. It stays open while it is disputed, and they will deliver it again."
-          awaitingLabel={isBuyer ? undefined : 'Awaiting the buyer'}
-          onConfirm={isBuyer ? (milestoneKey) => confirm.mutateAsync(milestoneKey) : undefined}
-          onDispute={
-            isBuyer
-              ? (milestoneKey, reason) => dispute.mutateAsync({ milestoneKey, reason })
-              : undefined
-          }
-        />
-      </SectionCard>
-
-      {(isBuyer || isRepresentative) && (
-        <CoApprovalCard
-          deal={{ transactionId: data.transactionId }}
-          viewer={isBuyer ? 'buyer' : 'representative'}
-          moneyScope={isLandResale ? 'steps' : 'deposit'}
-          labelFor={labelFor}
-          onApproved={refresh}
-          onChanged={(message, variant) => {
-            toast.show(message, variant);
-            if (variant === 'success') refresh();
-          }}
-        />
-      )}
-
-      {data.conditions.length > 0 && (
-        <SectionCard title="Conditions of the sale">
-          <ConditionsPanel
-            conditions={data.conditions.map(toClosingCondition)}
-            role="buyer"
-            sellerLabel="Seller"
-            busyKey={settle.isPending ? pendingKey : null}
-            onConfirm={
-              isBuyer && isLandResale
-                ? (conditionKey) => settle.mutate({ conditionKey, how: 'confirm' })
-                : undefined
-            }
-            onWaive={
-              isBuyer && isLandResale
-                ? (conditionKey) => settle.mutate({ conditionKey, how: 'waive' })
-                : undefined
-            }
-          />
-        </SectionCard>
-      )}
-
-      <SectionCard
-        title="Legal transfer"
-        description="Consent and registration with the state, tracked step by step with who is responsible."
-      >
-        {data.legalCase ? (
-          <PerfectionPanel
-            perfection={{ ...data.legalCase, steps: data.legalSteps }}
-            role="buyer"
-          />
-        ) : (
-          <EmptyState
-            icon={FileText}
-            title="Not started yet"
-            description="The legal transfer steps appear here once Sureground opens them for this purchase."
-            size="compact"
-            bare
-          />
-        )}
-      </SectionCard>
-
-      {data.viewer.role !== 'SELLER' && (
-        <SectionCard
-          title="Representatives"
-          description={
-            isRepresentative
-              ? 'Your appointment for this buyer.'
-              : 'People you trust in Nigeria who can follow this purchase for you.'
-          }
-          action={
-            isBuyer ? (
-              <Button href={PURCHASE_ROUTES.BUYER_REPRESENTATIVES} size="sm" variant="secondary">
-                Manage
-              </Button>
-            ) : undefined
-          }
-        >
-          <DataTable
-            variant="bare"
-            caption="Representatives"
-            columns={representativeColumns}
-            data={data.representatives}
-            getRowKey={(r) => r.appointmentId}
-            emptyState={
+          <SectionCard
+            title="Legal transfer"
+            description="Consent and registration with the state, step by step, with who is responsible for each."
+          >
+            {data.legalCase ? (
+              <PerfectionPanel
+                perfection={{ ...data.legalCase, steps: data.legalSteps }}
+                role="buyer"
+              />
+            ) : (
               <EmptyState
-                icon={UsersRound}
-                title="No representatives"
-                description="Appoint someone you trust to follow your purchases, attend visits and approve the release with you."
+                icon={ListChecks}
+                title="Not started yet"
+                description="Sureground opens the legal transfer for this purchase. Its steps then appear here with who is responsible and when each is due."
                 size="compact"
                 bare
               />
-            }
-          />
-        </SectionCard>
-      )}
+            )}
+          </SectionCard>
 
-      <SectionCard
-        title="Professionals"
-        description="The accredited professionals checking this property, named so you know who is accountable."
-      >
-        <DataTable
-          variant="bare"
-          caption="Professionals"
-          columns={professionalColumns}
-          data={data.professionals}
-          getRowKey={(p, index) => `${p.role}-${index}`}
-          emptyState={
-            <EmptyState
-              icon={ShieldCheck}
-              title="No professionals yet"
-              description="Professionals appear here once they are assigned to check this property."
-              size="compact"
-              bare
-            />
-          }
-        />
-      </SectionCard>
+          <SectionCard
+            title="History"
+            description="Everything recorded on this purchase. Times show Lagos time next to yours."
+          >
+            {data.history.length === 0 ? (
+              <EmptyState
+                icon={Clock}
+                title="Nothing recorded yet"
+                description="Each step, approval and payment on this purchase is recorded here as it happens."
+                size="compact"
+                bare
+              />
+            ) : (
+              <ActivityFeed
+                items={data.history}
+                viewerTimeZone={viewerTimeZone}
+                headingLevel="h3"
+              />
+            )}
+          </SectionCard>
+        </div>
 
-      <SectionCard
-        title="Documents"
-        description="Evidence attached to the steps, conditions and legal steps."
-      >
-        <DataTable
-          variant="bare"
-          caption="Documents"
-          columns={documentColumns}
-          data={data.documents}
-          getRowKey={(d) => `${d.linkedTo}-${d.key}-${d.id}`}
-          emptyState={
-            <EmptyState
-              icon={FileText}
-              title="No documents yet"
-              description="Documents added as evidence for a step appear here."
-              size="compact"
-              bare
-            />
-          }
-        />
-      </SectionCard>
+        {/* Summary rail: money, approvals, people and documents. */}
+        <aside className="space-y-6" aria-label="Summary">
+          <SectionCard
+            id={SECTION_ID.deposit}
+            title="Deposit"
+            description="Payment Protection covers the deposit only. The rest of the price is paid outside Sureground."
+          >
+            <div className="space-y-3">
+              <Badge dot variant={moneyVariant(moneyStatus.code)}>
+                {moneyStatus.label}
+              </Badge>
+              {releasable ? (
+                <>
+                  <p className="text-sm text-muted-foreground">
+                    Release it only once you have received the property and the documents you
+                    agreed.
+                  </p>
+                  <Button
+                    className="w-full"
+                    icon={<ShieldCheck className="h-4 w-4" aria-hidden />}
+                    onClick={() => setReleasing(true)}
+                  >
+                    Release the deposit
+                  </Button>
+                </>
+              ) : (
+                isSeller && (
+                  <p className="text-sm text-muted-foreground">
+                    {data.coApproval.binding
+                      ? 'Two-person approval is on: the buyer’s representative approves the release too.'
+                      : 'The buyer releases the deposit once they confirm the handover.'}
+                  </p>
+                )
+              )}
+            </div>
+          </SectionCard>
 
-      <SectionCard
-        title="History"
-        description="What has happened on this purchase. Times show Lagos time next to yours."
-      >
-        {data.history.length === 0 ? (
-          <EmptyState
-            icon={Clock}
-            title="Nothing yet"
-            description="Each change to this purchase is recorded here."
-            size="compact"
-            bare
-          />
-        ) : (
-          <ActivityFeed items={data.history} viewerTimeZone={viewerTimeZone} headingLevel="h3" />
-        )}
-      </SectionCard>
+          {(isBuyer || isRepresentative) && (
+            <div id={SECTION_ID.approvals} className="scroll-mt-24">
+              <CoApprovalCard
+                deal={{ transactionId: data.transactionId }}
+                viewer={isBuyer ? 'buyer' : 'representative'}
+                moneyScope={isLandResale ? 'steps' : 'deposit'}
+                labelFor={labelFor}
+                onApproved={refresh}
+                onChanged={(message, variant) => {
+                  toast.show(message, variant);
+                  if (variant === 'success') refresh();
+                }}
+              />
+            </div>
+          )}
+
+          {!isSeller && (
+            <SectionCard
+              title={isRepresentative ? 'Your appointment' : 'Representatives'}
+              action={
+                isBuyer && data.representatives.length > 0 ? (
+                  <Button href={PURCHASE_ROUTES.BUYER_REPRESENTATIVES} size="sm" variant="ghost">
+                    Manage
+                  </Button>
+                ) : undefined
+              }
+            >
+              {data.representatives.length > 0 ? (
+                <RailList
+                  items={data.representatives.map((r) => ({
+                    id: r.appointmentId,
+                    title: r.name ?? 'Invitation sent',
+                    detail: [
+                      REPRESENTATIVE_RELATIONSHIP_LABELS[
+                        r.relationship as RepresentativeRelationship
+                      ] ?? humaniseCode(r.relationship),
+                      r.scopes
+                        .map(
+                          (scope) =>
+                            REPRESENTATIVE_SCOPE_SHORT_LABELS[scope as RepresentativeScope] ??
+                            humaniseCode(scope)
+                        )
+                        .join(', '),
+                    ].join(' · '),
+                    badge: r.approvesPayments ? (
+                      <Badge variant="info">Approves</Badge>
+                    ) : (
+                      <Badge variant={r.status === 'ACTIVE' ? 'success' : 'warning'}>
+                        {r.status === 'ACTIVE' ? 'Active' : 'Invited'}
+                      </Badge>
+                    ),
+                  }))}
+                />
+              ) : (
+                <EmptyState
+                  icon={UsersRound}
+                  title="No one appointed"
+                  description="Buying from abroad? Someone you trust in Nigeria can follow this purchase, attend visits and approve the release with you."
+                  action={
+                    isBuyer ? (
+                      <Button href={PURCHASE_ROUTES.BUYER_REPRESENTATIVES} size="sm">
+                        Appoint a representative
+                      </Button>
+                    ) : undefined
+                  }
+                  size="compact"
+                  bare
+                />
+              )}
+            </SectionCard>
+          )}
+
+          <SectionCard title="Professionals">
+            {data.professionals.length > 0 ? (
+              <RailList
+                items={data.professionals.map((p, index) => ({
+                  id: `${p.role}-${index}`,
+                  title: p.name,
+                  detail: PROFESSIONAL_LABEL[p.role] ?? humaniseCode(p.role),
+                  badge:
+                    p.status === 'COMPLETED' ? (
+                      <Badge variant="success">
+                        {p.completedAt ? `Done ${formatDate(p.completedAt)}` : 'Done'}
+                      </Badge>
+                    ) : (
+                      <Badge variant="info">Checking</Badge>
+                    ),
+                }))}
+              />
+            ) : (
+              <EmptyState
+                icon={ShieldCheck}
+                title="No professionals assigned"
+                description="The accredited surveyor, lawyer or inspector checking this property is named here once assigned."
+                action={
+                  isBuyer ? (
+                    <Button
+                      href={ROUTES.BUYER_MESSAGES}
+                      size="sm"
+                      variant="secondary"
+                      icon={<MessageCircle className="h-4 w-4" aria-hidden />}
+                    >
+                      Ask Sureground
+                    </Button>
+                  ) : undefined
+                }
+                size="compact"
+                bare
+              />
+            )}
+          </SectionCard>
+
+          <SectionCard title="Documents">
+            {data.documents.length > 0 ? (
+              <RailList
+                items={data.documents.map((d) => ({
+                  id: `${d.linkedTo}-${d.key}-${d.id}`,
+                  title: humaniseCode(d.documentType),
+                  detail: `${documentLinkLabel(d, data)} · added ${formatDate(d.uploadedAt)}`,
+                }))}
+              />
+            ) : (
+              <EmptyState
+                icon={FileText}
+                title="No documents yet"
+                description="Evidence appears here as the seller delivers each step and the legal transfer moves on."
+                size="compact"
+                bare
+              />
+            )}
+          </SectionCard>
+        </aside>
+      </div>
 
       <ConfirmDialog
         open={releasing}

@@ -120,3 +120,48 @@ export const documentLinkLabel = (
         : workspace.legalSteps;
   return list.find((item) => item.key === document.key)?.label ?? humaniseCode(document.key);
 };
+
+/** Required steps confirmed or waived, and legal steps approved or not applicable, for the progress bars. */
+export const workspaceProgress = (
+  workspace: Pick<TransactionWorkspace, 'milestones' | 'legalSteps'>
+): { steps: { done: number; total: number }; legal: { done: number; total: number } } => {
+  const required = workspace.milestones.filter((m) => m.required);
+  return {
+    steps: {
+      done: required.filter((m) => m.status === 'CONFIRMED' || m.status === 'WAIVED').length,
+      total: required.length,
+    },
+    legal: {
+      done: workspace.legalSteps.filter(
+        (s) => s.status === 'APPROVED' || s.status === 'NOT_APPLICABLE'
+      ).length,
+      total: workspace.legalSteps.length,
+    },
+  };
+};
+
+export type WorkspaceSection = 'approvals' | 'deposit' | 'steps';
+
+/**
+ * Where the header's call to action takes the viewer when something waits for them: an approval
+ * first, then a step to confirm, then the deposit to release. Null when nothing is theirs to do.
+ */
+export const nextActionTarget = (
+  workspace: Pick<
+    TransactionWorkspace,
+    'viewer' | 'statuses' | 'nextAction' | 'milestones' | 'coApproval'
+  >
+): WorkspaceSection | null => {
+  if (!workspace.nextAction?.waitingForYou) return null;
+  const role = workspace.viewer.role;
+  if (role === 'SELLER') return 'steps';
+  if (
+    workspace.coApproval.binding &&
+    approvalsWaitingFor(role, workspace.coApproval.pending).length
+  )
+    return 'approvals';
+  if (role === 'BUYER' && workspace.milestones.some((m) => m.status === 'DELIVERED'))
+    return 'steps';
+  if (canReleaseDeposit(workspace)) return 'deposit';
+  return 'steps';
+};
