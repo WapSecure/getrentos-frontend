@@ -6,7 +6,7 @@ import { Alert, Badge, Button, EmptyState, PageHeader } from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { LAND_TITLE_TYPE_LABELS, type LandTitleType } from '@/types/land';
 import type { AcquisitionCostItem, LandDossier } from '@/types/landDossier';
-import { TrustLabelsList } from '../market/TrustLabelsList';
+import { TrustLabelsList } from '@/components/shared/trust/TrustLabelsList';
 
 const words = (value: string) => {
   const text = value.replace(/_/g, ' ').toLowerCase();

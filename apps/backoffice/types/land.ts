@@ -1,14 +1,8 @@
+import type { LandDiligenceStatus } from '@sureground/shared';
 import type { EvidenceItem } from '@/types/admin';
 
-export type LandDiligenceStatus =
-  | 'NOT_STARTED'
-  | 'IN_REVIEW'
-  | 'ACTION_REQUIRED'
-  | 'VERIFIED'
-  | 'REJECTED'
-  | 'EXPIRED'
-  | 'CONDITIONAL'
-  | 'SUSPENDED';
+// One definition, shared with web and the status badge map.
+export type { LandDiligenceStatus };
 
 export interface AdminLandDiligenceCondition {
   id: string;

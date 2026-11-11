@@ -20,7 +20,7 @@ import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';
 import { buyerLandKeys, landLayoutKeys } from '@/lib/landSalesQueryKeys';
 import { landBuyerService, landLayoutService } from '@/services/landBuyerService';
 import type { LandReservation } from '@/types/landBuyer';
-import { TrustLabelsList } from '../market/TrustLabelsList';
+import { TrustLabelsList } from '@/components/shared/trust/TrustLabelsList';
 import { PaymentPlanCard } from './PaymentPlanCard';
 import { countdownTo, plotLabel, quotePlot } from './landSaleLogic';
 

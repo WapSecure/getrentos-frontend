@@ -65,7 +65,7 @@ import { ParcelBoundaryMap } from '@/components/maps/ParcelBoundaryMap';
 import { useAddRole } from '@/hooks/useAddRole';
 import Link from 'next/link';
 import { AssuranceTierBadge } from '@/components/land/market/AssuranceTierBadge';
-import { TrustLabelsList } from '@/components/land/market/TrustLabelsList';
+import { TrustLabelsList } from '@/components/shared/trust/TrustLabelsList';
 import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';
 import type { LandAssuranceTier } from '@/types/land';
 import { CollectionsStrip } from '@/components/collections/CollectionsStrip';

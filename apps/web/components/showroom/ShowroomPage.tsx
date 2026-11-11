@@ -20,6 +20,7 @@ import { ShowroomAside } from './ShowroomAside';
 import { ShowroomNeighbourhood } from './ShowroomNeighbourhood';
 import { ShowroomShareButton } from './ShowroomShareButton';
 import { ShowroomTrust } from './ShowroomTrust';
+import { VerificationSummaryBadge } from '@/components/shared/trust/VerificationSummaryCard';
 import { ShowroomMedia, TrackDetailView } from './ShowroomTracking';
 
 const MARKET_NOUN: Record<PublicDetailMarket, string> = {
@@ -84,11 +85,16 @@ export async function ShowroomPage({
         <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_380px] xl:gap-14">
           <div className="min-w-0 space-y-10">
             <header className="space-y-3">
-              {listing.verified && (
-                <Badge variant="success" icon={<BadgeCheck className="h-3.5 w-3.5" />}>
-                  {market === 'land' ? 'Ownership verified' : 'Verified'}
-                </Badge>
-              )}
+              {/* With a summary, its status replaces the old "Verified" tick so the two never disagree. */}
+              {listing.verificationSummary
+                ? listing.verificationSummary.status !== 'NOT_STARTED' && (
+                    <VerificationSummaryBadge summary={listing.verificationSummary} />
+                  )
+                : listing.verified && (
+                    <Badge variant="success" icon={<BadgeCheck className="h-3.5 w-3.5" />}>
+                      {market === 'land' ? 'Ownership verified' : 'Verified'}
+                    </Badge>
+                  )}
               <div className="flex items-start justify-between gap-4">
                 <h1 className="text-3xl font-semibold tracking-[-0.035em] text-foreground text-balance sm:text-4xl">
                   {listing.title}
