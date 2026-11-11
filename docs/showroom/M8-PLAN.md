@@ -108,7 +108,7 @@ Built on the web and in the mobile app from photos already tagged "Floor plan". 
 
 **Analytics:** no new event names. Opening floor plans (shortcut, rail, chip, header button or hero pill) sends `media_category_select` with room `floor_plan`, and `gallery_open` when it opens the viewer. Moving between levels sends nothing.
 
-**Checks:** `tsc --noEmit` clean in apps/web, apps/mobile, packages/ui and packages/shared; eslint clean on changed files; shared tests 28 pass (3 new: levels and captions as written, fallback names, the cover never a plan); `audit:ui-controls` and `tokens:check` pass. Not checked in a browser or on a device.
+**Checks:** `tsc --noEmit` clean in apps/web, apps/mobile, packages/ui and packages/shared; eslint clean on changed files; shared tests 32 pass after merging `dev` (3 new: levels and captions as written, fallback names, the cover never a plan); `audit:ui-controls` and `tokens:check` pass. Not checked in a browser or on a device.
 
 **Demo data:** no seed listing has a photo tagged `floor_plan`, and none was added to the shared database. A browser check needs one listing with one or two floor-plan photos (for example captioned "Ground floor" and "First floor"), tagged in the landlord or owner photo editor.
 
