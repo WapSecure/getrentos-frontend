@@ -12,12 +12,12 @@ export function slugify(text: string | null | undefined): string {
     .toLowerCase()
     .replace(/&/g, ' and ')
     .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
+    .replace(/^-|-$/g, ''); // runs of non-word characters are already a single dash
   if (words.length <= MAX_SLUG) return words;
   // Cut at a word boundary so the slug never ends mid-word.
   const cut = words.slice(0, MAX_SLUG + 1);
   const lastDash = cut.lastIndexOf('-');
-  return (lastDash > 0 ? cut.slice(0, lastDash) : words.slice(0, MAX_SLUG)).replace(/-+$/, '');
+  return (lastDash > 0 ? cut.slice(0, lastDash) : words.slice(0, MAX_SLUG)).replace(/-$/, '');
 }
 
 /** The path segment for a listing: `<slug>-<id>`, or the bare id when the title has no usable words. */
