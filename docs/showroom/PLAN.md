@@ -292,3 +292,66 @@ The product owner added reference images. We take their structure; the palette a
   - Proposed fix:
     - sign public listing photos for longer (for example 2 hours);
     - cap how stale a cached page may be (Next `expireTime`) below that, so an older copy is rebuilt rather than served.
+
+## M6 status (2026-11-11)
+
+**Map-area search (backend, additive, no migration):**
+
+- `GET /rentals`, `/marketplace/listings`, `/shortlets` and `/land` take an optional map area: `minLat`, `minLng`, `maxLat`, `maxLng`.
+  - All four bounds or none. Out-of-range values are clamped to the world; a box whose minimum isn't below its maximum gets a 400.
+  - Listings without coordinates are left out of area results.
+  - **Privacy:** an area matches on the point the map shows, not the stored one. Unverified rentals, sales and land show a point blurred by 250 to 500 m, and shortlets are always blurred. Matching on the real point would let someone shrink the box until a listing drops out and so find its door.
+  - Plain range filters on the existing `Float` columns, padded by the 500 m blur, then checked in code against the shown point. At most 500 candidates per request; zooming in shows the rest.
+- The public list responses already carried `latitude`, `longitude` and `locationPrecision` wherever the location is public. Nothing new is exposed.
+
+**Similar listings (backend):**
+
+- `GET /rentals/:id/similar`, `/marketplace/listings/:id/similar`, `/shortlets/:id/similar` and `/land/listings/:id/similar`, with `limit` from 1 to 12 (default 6).
+- **Rules:**
+  - Same market, in the same city or within 15 km.
+  - Price within 1.6 times either way: rent per year, sale and land on the asking price, shortlets on the nightly rate.
+  - At most one bedroom apart.
+  - Land matches land.
+- Best match first: distance rounded to the kilometre, then price, then bedrooms.
+- They replace the browser-side guesses: `SimilarListings` asked the list endpoint with a ±30% price filter, and the renter `SimilarProperties` fetched 100 listings.
+
+**Web:**
+
+- `/rent`, `/buy`, `/shortlets` and `/land` have a Grid / Map switch.
+  - **Map view:**
+    - map-variant `ListingCard`s beside the map (below it on phones), with price pins;
+    - pins for approximate locations are dashed, and selecting one draws the 600 m area;
+    - after the map is moved, a "Search this area" button appears; the searched box is drawn and can be cleared.
+  - Hovering or focusing a card highlights its pin. Choosing a pin selects and scrolls to its card.
+- **URL state:** filters, sort, page, view, map area and the selected pin live in the URL (`?view=map&area=…&selected=…`), so a search can be shared or reloaded.
+- **Loading:** Leaflet loads only when the map view opens (`next/dynamic`). The list renders first and stays usable if the map is slow or fails.
+- **Similar listings:** detail pages for rent, sale, land and shortlets (new on land and shortlets) and the signed-in renter page all use the new endpoints.
+- **Analytics:** `property_impression` and `property_card_click` fire with surfaces `{market}_map` and `{market}_similar`. No new event names.
+
+**Checks:**
+
+- Backend: 77 specs across `map-area`, `similar-listings`, `map-area-browse` and the existing browse specs, plus the touched service specs. `tsc -p tsconfig.build.json` is clean.
+  - 2 failures in `shortlet.service.spec` (availability) also fail on `origin/dev` without this change.
+- Web: `tsc` and eslint are clean on the changed files; `audit:ui-controls` and `tokens:check` pass. Not yet checked in the browser.
+
+**Not done:**
+
+- **Freehand drawn areas:** the reference design draws a shape, but that needs a drawing library (for example leaflet-draw), which the "no new map library" rule rules out. The searched box is drawn instead.
+- **Mobile:** belongs to M5.
+
+### Collections: a product decision, not built
+
+There is no data source for curated collections; the only related field is `Listing.isFeatured`, an admin flag on rentals with no title or grouping. So nothing was invented. Building collections needs these decisions:
+
+1. **Who curates:**
+   - Sureground staff in the backoffice (needs a permission such as `collections.manage`), or
+   - estates, agencies and realtors for their own stock, or both.
+   - Staff curation across owners needs a rule on consent and fair placement.
+2. **Data model, a proposal:**
+   - `Collection` (id, slug, title, description, cover media, market, curator type and id, status draft/published/archived, `publishedAt`, optional `startsAt` and `endsAt`)
+   - `CollectionItem` (collectionId, listingId, position, note, addedBy, addedAt)
+   - Items show only while the listing is still public. A rule-based collection (for example "verified 2-beds in Yaba under ₦3M") could store a saved filter instead of items.
+3. **Honesty rules:**
+   - a collection never implies verification or a ranking the backend didn't make;
+   - sponsored placement, if ever allowed, is labelled.
+4. **Where they show:** the market landing pages, estate storefronts, and a `/collections/[slug]` page with its own metadata.

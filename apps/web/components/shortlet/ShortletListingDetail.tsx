@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { SimilarListings } from '@/components/market/SimilarListings';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { isAuthenticated } from '@sureground/shared';
@@ -619,6 +620,8 @@ export function ShortletListingDetail({
           </Card>
         </div>
       </div>
+
+      <SimilarListings listingId={listing.id} market="shortlet" />
 
       {bookingOpen && (
         <ShortletBookingDialog

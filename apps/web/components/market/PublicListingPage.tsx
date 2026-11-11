@@ -273,15 +273,7 @@ export async function PublicListingPage({
             </div>
           </aside>
         </div>
-        {market !== 'land' ? (
-          <SimilarListings
-            listingId={listing.id}
-            market={market}
-            location={listing.location}
-            price={listing.price}
-            bedrooms={listing.bedrooms}
-          />
-        ) : null}
+        <SimilarListings listingId={listing.id} market={market} />
         {extra}
         {!listing.underOffer && (
           <>

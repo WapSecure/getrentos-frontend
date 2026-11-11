@@ -1,27 +1,23 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { ListingCard } from '@sureground/ui';
-import type { Property } from '@/types/renter';
 import { buildRoute } from '@/lib/constants/auth';
-import { renterService } from '@/services/renterService';
+import { unwrap } from '@/lib/apiHelpers';
+import { publicMarketService } from '@/services/publicMarketService';
 
 interface SimilarPropertiesProps {
+  /** The listing id (renter "property" ids are listing ids). */
   currentId: string;
 }
 
+/** Ranked on the server: nearby, a comparable yearly rent and about the same bedrooms. */
 export const SimilarProperties = ({ currentId }: SimilarPropertiesProps) => {
-  const [similar, setSimilar] = useState<Property[]>([]);
-
-  useEffect(() => {
-    const load = async () => {
-      const res = await renterService.listListings({ pageSize: 100 });
-      if (res.success && res.data) {
-        setSimilar(res.data.items.filter((p) => p.id !== currentId).slice(0, 3));
-      }
-    };
-    load();
-  }, [currentId]);
+  const { data: similar = [] } = useQuery({
+    queryKey: ['public-market', 'rent', 'similar', currentId],
+    queryFn: () => unwrap(publicMarketService.similar('rent', currentId, 3)),
+    staleTime: 5 * 60_000,
+  });
 
   if (similar.length === 0) return null;
 
@@ -37,9 +33,10 @@ export const SimilarProperties = ({ currentId }: SimilarPropertiesProps) => {
             title={property.title}
             location={property.location}
             price={property.price}
-            priceUnit={property.period}
+            priceUnit={property.priceUnit}
             priceCompact
             image={property.image}
+            imageSrcSet={property.imageSrcSet}
             imageAlt={property.title}
             facts={{ beds: property.bedrooms, baths: property.bathrooms }}
           />

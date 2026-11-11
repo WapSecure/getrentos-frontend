@@ -1,6 +1,7 @@
 import { authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
 import type { PublicLandListParams } from '@/services/landService';
 import type { LandAssuranceTier, PublicLandListing, PublicLandListingApi } from '@/types/land';
+import { areaQuery, type MapArea } from '@/lib/mapArea';
 import type {
   LandComparables,
   LandMarketInsights,
@@ -10,6 +11,8 @@ import type {
 export interface AssuredLandListParams extends PublicLandListParams {
   /** Only parcels verified to at least this assurance tier. */
   minAssuranceTier?: LandAssuranceTier;
+  /** Only parcels shown inside this map area. */
+  area?: MapArea;
 }
 
 /** Same adaptation as landService's public mapper, kept here so that file stays untouched. */
@@ -27,6 +30,13 @@ const mapPublicLand = (listing: PublicLandListingApi): PublicLandListing => ({
   listedDate: listing.publishedAt,
   coverImageUrl: listing.coverImageUrl,
   ownerVerified: listing.isVerified,
+  ...(typeof listing.latitude === 'number' && typeof listing.longitude === 'number'
+    ? {
+        latitude: listing.latitude,
+        longitude: listing.longitude,
+        locationPrecision: listing.locationPrecision ?? 'approximate',
+      }
+    : {}),
   parcel: listing.parcel,
   diligence: listing.diligence,
 });
@@ -52,6 +62,7 @@ export const landMarketService = {
           roadAccess: params.roadAccess ? 'true' : undefined,
           minAssuranceTier: params.minAssuranceTier,
           sort: params.sort,
+          ...areaQuery(params.area),
         })}`
       );
       return { ...response, items: response.items.map(mapPublicLand) };
