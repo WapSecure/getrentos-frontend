@@ -125,6 +125,15 @@ function ViewerBody({
   // Big enough for the screen's real pixels; the API's largest copy is 1600px.
   const pixelWidth = PixelRatio.getPixelSizeForLayoutSize(width);
 
+  // Fetch the photos either side of the current one at the size the pager will ask for, so a
+  // swipe shows the next photo at once instead of a blank stage while it downloads.
+  useEffect(() => {
+    const near = [items[index - 1], items[index + 1], items[index + 2]]
+      .filter((m): m is MediaItem => !!m && m.kind === 'image')
+      .map((m) => variantAtLeast(m.url, m.variants, pixelWidth));
+    if (near.length) void Image.prefetch(near, 'memory-disk').catch(() => undefined);
+  }, [index, items, pixelWidth]);
+
   const rooms = useMemo(() => {
     const seen = new Map<MediaRoom, number>();
     items.forEach((m, i) => {
