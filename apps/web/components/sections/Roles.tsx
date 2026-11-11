@@ -1,5 +1,5 @@
 import { Home, Building2, TrendingUp, Search, Users, UserCheck } from '@sureground/icons';
-import { MarketingCard, SectionHeading } from './primitives';
+import { MarketingCard, MarketingIconTile, SectionHeading } from './primitives';
 
 const roles = [
   {
@@ -55,9 +55,7 @@ export const Roles = () => {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {roles.map((role) => (
             <MarketingCard key={role.id} className="p-6">
-              <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center mb-4">
-                <role.icon className="w-6 h-6 text-primary" />
-              </div>
+              <MarketingIconTile icon={role.icon} size="lg" className="mb-4" />
               <h3 className="text-xl font-semibold text-foreground mb-2">{role.name}</h3>
               <p className="text-muted-foreground text-sm">{role.description}</p>
             </MarketingCard>

@@ -1,8 +1,12 @@
-'use client';
-
-import { useState } from 'react';
-import { HelpCircle, ChevronDown, ChevronUp } from '@sureground/icons';
-import { Card, EmptyState } from '@sureground/ui';
+import { HelpCircle } from '@sureground/icons';
+import {
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  DisclosureList,
+  EmptyState,
+} from '@sureground/ui';
 
 interface FAQ {
   id: string;
@@ -75,15 +79,9 @@ interface HelpFAQsProps {
 }
 
 export const HelpFAQs = ({ selectedCategory }: HelpFAQsProps) => {
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-
   const filteredFAQs = helpFAQs.filter(
     (faq) => selectedCategory === 'all' || faq.category === selectedCategory
   );
-
-  const toggleExpanded = (id: string) => {
-    setExpandedId((prev) => (prev === id ? null : id));
-  };
 
   if (filteredFAQs.length === 0) {
     return <EmptyState icon={HelpCircle} title="No FAQs found for this category" size="compact" />;
@@ -91,39 +89,18 @@ export const HelpFAQs = ({ selectedCategory }: HelpFAQsProps) => {
 
   return (
     <Card>
-      <div className="p-4 border-b border-border">
-        <h3 className="font-semibold text-foreground">Frequently asked questions</h3>
-        <p className="text-xs text-muted-foreground mt-0.5">Quick answers to common questions</p>
-      </div>
-
-      <div className="divide-y divide-border">
-        {filteredFAQs.map((faq) => {
-          const isExpanded = expandedId === faq.id;
-          return (
-            <div key={faq.id}>
-              <button
-                type="button"
-                onClick={() => toggleExpanded(faq.id)}
-                aria-expanded={isExpanded}
-                className="w-full flex items-center justify-between gap-4 p-4 text-left hover:bg-secondary transition-colors"
-              >
-                <span className="text-sm font-medium text-foreground">{faq.question}</span>
-                {isExpanded ? (
-                  <ChevronUp className="w-4 h-4 text-muted-foreground shrink-0" />
-                ) : (
-                  <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />
-                )}
-              </button>
-
-              {isExpanded && (
-                <div className="px-4 pb-4">
-                  <p className="text-sm text-muted-foreground leading-relaxed">{faq.answer}</p>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+      <CardHeader className="border-b border-border pb-4">
+        <CardTitle>Frequently asked questions</CardTitle>
+        <CardDescription>Quick answers to common questions</CardDescription>
+      </CardHeader>
+      <DisclosureList
+        name="help-faqs"
+        items={filteredFAQs.map((faq) => ({
+          id: faq.id,
+          summary: faq.question,
+          content: faq.answer,
+        }))}
+      />
     </Card>
   );
 };

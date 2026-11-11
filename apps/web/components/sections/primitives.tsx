@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
+import type { SgIcon } from '@sureground/icons';
 
 // Plain markup and CSS: the shared SectionHeader and Card fade in with JavaScript, leaving server-rendered text invisible until scripts run.
 
@@ -40,6 +41,28 @@ export const MarketingCard = ({
     className={`overflow-hidden rounded-2xl border border-border/90 bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${className}`}
   >
     {children}
+  </div>
+);
+
+const iconTileSizes = {
+  md: { tile: 'h-10 w-10 rounded-lg', icon: 'h-5 w-5' },
+  lg: { tile: 'h-12 w-12 rounded-xl', icon: 'h-6 w-6' },
+};
+
+/** The tinted square that holds a card's icon. Spacing (mb-*, mx-auto) comes from the caller. */
+export const MarketingIconTile = ({
+  icon: Icon,
+  size = 'md',
+  className = '',
+}: {
+  icon: SgIcon;
+  size?: keyof typeof iconTileSizes;
+  className?: string;
+}) => (
+  <div
+    className={`flex items-center justify-center bg-secondary ${iconTileSizes[size].tile} ${className}`}
+  >
+    <Icon className={`${iconTileSizes[size].icon} text-primary`} aria-hidden="true" />
   </div>
 );
 

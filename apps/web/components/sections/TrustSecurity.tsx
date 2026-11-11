@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Shield, Lock, CreditCard, FileCheck, Eye, Users } from '@sureground/icons';
-import { MarketingCard, SectionHeading } from './primitives';
+import { MarketingCard, MarketingIconTile, SectionHeading } from './primitives';
 
 // No grade or licence claims ("bank-grade", "regulated", "AI-powered", "24/7"): they can't be shown.
 const trustFeatures = [
@@ -54,9 +54,7 @@ export const TrustSecurity = () => (
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {trustFeatures.map((feature) => (
           <MarketingCard key={feature.title} className="p-6 text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-secondary">
-              <feature.icon className="h-6 w-6 text-primary" />
-            </div>
+            <MarketingIconTile icon={feature.icon} size="lg" className="mx-auto mb-4" />
             <h3 className="mb-2 text-lg font-semibold text-foreground">{feature.title}</h3>
             <p className="text-sm text-muted-foreground">{feature.description}</p>
           </MarketingCard>

@@ -1,5 +1,5 @@
 import { Banknote, Layers, Lock, BadgeCheck } from '@sureground/icons';
-import { MarketingCard, SectionHeading } from './primitives';
+import { MarketingCard, MarketingIconTile, SectionHeading } from './primitives';
 
 const reasons = [
   {
@@ -39,9 +39,7 @@ export const WhySureground = () => (
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {reasons.map((reason) => (
           <MarketingCard key={reason.title} className="p-6">
-            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10">
-              <reason.icon className="h-5 w-5 text-primary" />
-            </div>
+            <MarketingIconTile icon={reason.icon} className="mb-4" />
             <h3 className="mb-2 text-lg font-semibold text-foreground">{reason.title}</h3>
             <p className="text-sm text-muted-foreground">{reason.description}</p>
           </MarketingCard>
