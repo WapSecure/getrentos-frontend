@@ -147,6 +147,13 @@ export const ownerNavigation = defineRoleNavigation({
       href: ROUTES.OWNER_TRUST_PROFILE,
       icon: ShieldCheck,
     },
+    // The owner's own agreements with a manager: view, sign, end, and answer a fee change.
+    {
+      id: 'management',
+      label: 'Management agreements',
+      href: ROUTES.OWNER_MANAGEMENT,
+      icon: Handshake,
+    },
     // Literal label: a mandate holder is not necessarily the owner.
     { id: 'managed', label: 'Managed properties', href: ROUTES.OWNER_MANAGED, icon: KeyRound },
     {
@@ -187,7 +194,7 @@ export const ownerNavigation = defineRoleNavigation({
     },
     {
       label: 'Managers and partners',
-      items: ['messages', 'managed', 'queries', 'estateRequests', 'reviews'],
+      items: ['messages', 'management', 'managed', 'queries', 'estateRequests', 'reviews'],
     },
     {
       label: 'Account',

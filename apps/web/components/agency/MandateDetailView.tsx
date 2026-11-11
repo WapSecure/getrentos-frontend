@@ -30,6 +30,7 @@ import { MandateActionButtons } from './MandateActionButtons';
 import { CapabilityChip, formatMoment, MandateStatusBadge } from './mandatePresentation';
 import { useMandateActions } from './useMandateActions';
 import { describeAgencyError } from './agencyAccess';
+import { FeeAmendmentPanel } from '@/components/shared/fee-amendments/FeeAmendmentPanel';
 
 export function MandateDetailView() {
   const params = useParams<{ id: string }>();
@@ -154,6 +155,10 @@ export function MandateDetailView() {
           onSimple={runSimple}
           onReason={askReason}
         />
+      </Card>
+
+      <Card static className="p-4">
+        <FeeAmendmentPanel mandateId={mandate.id} />
       </Card>
 
       <Card static className="p-4">

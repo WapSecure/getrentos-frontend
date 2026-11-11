@@ -363,6 +363,128 @@ export function cancelTermination(
   );
 }
 
+/* ── Fee changes (BD-2) ───────────────────────────────────────────────────────────────────────── */
+
+export type ManagementFeeType = 'PERCENTAGE' | 'FLAT';
+export type FeeAmendmentSide = 'OWNER' | 'MANAGER' | 'SUREGROUND';
+export type FeeAmendmentStatus = 'PENDING' | 'ACCEPTED' | 'DECLINED' | 'WITHDRAWN' | 'EXPIRED';
+
+export const FEE_AMENDMENT_STATUS_LABELS: Record<FeeAmendmentStatus, string> = {
+  PENDING: 'Waiting for an answer',
+  ACCEPTED: 'Agreed',
+  DECLINED: 'Declined',
+  WITHDRAWN: 'Withdrawn',
+  EXPIRED: 'Lapsed',
+};
+
+export interface FeeTerms {
+  type: ManagementFeeType;
+  value: number;
+  /** "8%" or "₦50,000", worded by the API. */
+  label: string;
+}
+
+/** Permissions are the API's, from the same rules it enforces; never derive them here. */
+export interface FeeAmendment {
+  id: string;
+  mandateId: string;
+  propertyId: string;
+  propertyTitle: string | null;
+  ownerName: string | null;
+  managerName: string | null;
+  managerIsSureground: boolean;
+  proposedById: string;
+  proposedByName: string | null;
+  proposerSide: FeeAmendmentSide;
+  from: FeeTerms;
+  to: FeeTerms;
+  reason: string;
+  /** A Lagos date, YYYY-MM-DD. */
+  effectiveFrom: string;
+  expiresAt: string;
+  status: FeeAmendmentStatus;
+  decidedById: string | null;
+  decidedByName: string | null;
+  decidedAt: string | null;
+  decisionNote: string | null;
+  createdAt: string;
+  quorum: { ownersRequired: number; ownersAccepted: number; managerAccepted: boolean };
+  permissions: { canAccept: boolean; canDecline: boolean; canWithdraw: boolean };
+}
+
+export interface MandateVersion {
+  version: number;
+  fee: FeeTerms | null;
+  effectiveFrom: string;
+  amendmentId: string | null;
+  createdAt: string;
+}
+
+export interface FeeAmendmentOverview {
+  mandateId: string;
+  managerIsSureground: boolean;
+  currentFee: FeeTerms | null;
+  canPropose: boolean;
+  proposeBlockedReason: string | null;
+  /** The first of a month at least 14 days away, YYYY-MM-DD: the earliest a new fee may start. */
+  earliestEffectiveFrom: string;
+  maxPercentage: number;
+  /** Managed only: the published tier rates. Null on a firm's agreement. */
+  allowedPercentages: number[] | null;
+  pending: FeeAmendment | null;
+  history: FeeAmendment[];
+  versions: MandateVersion[];
+}
+
+export interface ProposeFeeAmendmentInput {
+  type: ManagementFeeType;
+  value: number;
+  reason: string;
+  effectiveFrom: string;
+}
+
+export function feeAmendments(mandateId: string): Promise<ApiResponse<FeeAmendmentOverview>> {
+  return safeCall(() =>
+    authFetch<FeeAmendmentOverview>(`/management-mandates/${mandateId}/fee-amendments`)
+  );
+}
+
+export function proposeFeeAmendment(
+  mandateId: string,
+  input: ProposeFeeAmendmentInput
+): Promise<ApiResponse<FeeAmendment>> {
+  return safeCall(() =>
+    authFetch<FeeAmendment>(`/management-mandates/${mandateId}/fee-amendments`, {
+      method: 'POST',
+      body: JSON.stringify(input),
+    })
+  );
+}
+
+/** Step-up is asked for by the API and handled by `authFetch`: accepting changes future money. */
+export function acceptFeeAmendment(id: string): Promise<ApiResponse<FeeAmendment>> {
+  return safeCall(() =>
+    authFetch<FeeAmendment>(`/management-mandates/fee-amendments/${id}/accept`, { method: 'POST' })
+  );
+}
+
+export function declineFeeAmendment(id: string, note?: string): Promise<ApiResponse<FeeAmendment>> {
+  return safeCall(() =>
+    authFetch<FeeAmendment>(`/management-mandates/fee-amendments/${id}/decline`, {
+      method: 'POST',
+      body: JSON.stringify({ note: note || undefined }),
+    })
+  );
+}
+
+export function withdrawFeeAmendment(id: string): Promise<ApiResponse<FeeAmendment>> {
+  return safeCall(() =>
+    authFetch<FeeAmendment>(`/management-mandates/fee-amendments/${id}/withdraw`, {
+      method: 'POST',
+    })
+  );
+}
+
 /**
  * A past `endAt` means the engagement is over whatever the stored status says, as the backend reads
  * it.

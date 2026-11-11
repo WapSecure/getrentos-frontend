@@ -40,6 +40,7 @@ import {
   managedBreakFee,
   noticeEndsAt,
   recordHandover,
+  sign as signMandate,
   submit as submitMandate,
   terminate as terminateMandate,
   vettedFirms,
@@ -57,6 +58,7 @@ import {
 import { unwrap } from '@/lib/apiHelpers';
 import { ManagedIntakeDialog } from './ManagedIntakeDialog';
 import { ManagedIntakePanel } from './ManagedIntakePanel';
+import { FeeAmendmentPanel } from '@/components/shared/fee-amendments/FeeAmendmentPanel';
 import { formatCurrency } from '@/lib/format';
 import { formatMoment } from '@/components/agency/mandatePresentation';
 
@@ -173,7 +175,14 @@ function distinctLabels(
   return labels;
 }
 
-export const SuregroundManagedView = () => {
+/**
+ * The owner's side of every management agreement on their own properties: Sureground Managed and a firm.
+ * Shared by landlords (`/landlord/managed`) and property owners (`/owner/management`), so both can view, sign and
+ * answer a fee change in one place. `changeManagerHref` is null where that flow does not exist.
+ */
+export const SuregroundManagedView = ({
+  changeManagerHref = '/landlord/change-manager',
+}: { changeManagerHref?: string | null } = {}) => {
   const queryClient = useQueryClient();
   const [intakeFor, setIntakeFor] = useState<{ id: string; name: string } | null>(null);
   const [firmPropertyByFirm, setFirmPropertyByFirm] = useState<Record<string, string>>({});
@@ -222,6 +231,16 @@ export const SuregroundManagedView = () => {
       void queryClient.invalidateQueries({ queryKey: ['managed', 'mandates'] });
     },
     onError: (err: Error) => setError(err.message || 'Could not appoint the firm.'),
+  });
+
+  // The owner's signature on a firm's agreement; the API infers the side from who is calling.
+  const signAgreement = useMutation({
+    mutationFn: (id: string) => unwrap(signMandate(id)),
+    onSuccess: () => {
+      setError(null);
+      void queryClient.invalidateQueries({ queryKey: ['managed', 'mandates'] });
+    },
+    onError: (err: Error) => setError(err.message || 'Could not sign the agreement.'),
   });
 
   const endEngagement = useMutation({
@@ -286,12 +305,11 @@ export const SuregroundManagedView = () => {
           </>
         }
         meta={
-          <Link
-            href="/landlord/change-manager"
-            className="font-medium text-primary hover:underline"
-          >
-            Already managed and want to move to someone else? Change manager →
-          </Link>
+          changeManagerHref ? (
+            <Link href={changeManagerHref} className="font-medium text-primary hover:underline">
+              Already managed and want to move to someone else? Change manager →
+            </Link>
+          ) : undefined
         }
       />
 
@@ -496,12 +514,25 @@ export const SuregroundManagedView = () => {
                             : 'warning'
                         }
                       >
-                        {firmMandate.status !== 'ACTIVE'
-                          ? 'Firm pending'
-                          : firmMandate.noticeServedAt
-                            ? 'Under notice'
-                            : 'Managed by firm'}
+                        {firmMandate.permissions.canSign
+                          ? 'Waiting for your signature'
+                          : firmMandate.status !== 'ACTIVE'
+                            ? 'Firm pending'
+                            : firmMandate.noticeServedAt
+                              ? 'Under notice'
+                              : 'Managed by firm'}
                       </Badge>
+                      {firmMandate.permissions.canSign && (
+                        <Button
+                          size="sm"
+                          isLoading={
+                            signAgreement.isPending && signAgreement.variables === firmMandate.id
+                          }
+                          onClick={() => signAgreement.mutate(firmMandate.id)}
+                        >
+                          Sign agreement
+                        </Button>
+                      )}
                       {firmMandate.status === 'ACTIVE' && !openIntake && (
                         <Button
                           variant="ghost"
@@ -554,6 +585,12 @@ export const SuregroundManagedView = () => {
                     </div>
                   )}
                 </div>
+
+                {activeMandate && ['ACTIVE', 'SUSPENDED'].includes(activeMandate.status) && (
+                  <div className="mt-3 border-t border-border pt-3">
+                    <FeeAmendmentPanel mandateId={activeMandate.id} />
+                  </div>
+                )}
 
                 {(openIntake ?? settingUp) && (
                   <ManagedIntakePanel
