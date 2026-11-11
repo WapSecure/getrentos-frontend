@@ -13,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
   Checkbox,
+  CheckboxGroup,
   Field,
   PageHeader,
   Progress,
@@ -157,50 +158,6 @@ const validatePlans = (draft: Draft): Errors => {
   return errors;
 };
 
-const toggle = <T extends string>(list: T[], value: T, on: boolean): T[] =>
-  on ? (list.includes(value) ? list : [...list, value]) : list.filter((item) => item !== value);
-
-const CheckboxGroup = <T extends string>({
-  legend,
-  values,
-  options,
-  labels,
-  onChange,
-  error,
-}: {
-  legend: string;
-  values: T[];
-  options: readonly T[];
-  labels: Record<T, string>;
-  onChange: (next: T[]) => void;
-  error?: string;
-}) => (
-  <fieldset className="space-y-3" aria-invalid={error ? true : undefined}>
-    <legend className="mb-1 text-sm font-medium text-foreground">
-      {legend}
-      <span className="ml-0.5 text-destructive" aria-hidden="true">
-        *
-      </span>
-    </legend>
-    <div className="grid gap-3 sm:grid-cols-2">
-      {options.map((option) => (
-        <Checkbox
-          key={option}
-          checked={values.includes(option)}
-          onCheckedChange={(on) => onChange(toggle(values, option, on))}
-          label={labels[option]}
-          invalid={Boolean(error)}
-        />
-      ))}
-    </div>
-    {error && (
-      <p role="alert" className="text-xs leading-5 text-destructive">
-        {error}
-      </p>
-    )}
-  </fieldset>
-);
-
 const StepCard = ({
   title,
   description,
@@ -338,18 +295,26 @@ const ProfileForm = ({
           <div className="space-y-7">
             <CheckboxGroup
               legend="What is the property for?"
-              values={draft.intendedUses}
-              options={INTENDED_USES}
-              labels={INTENDED_USE_LABELS}
-              onChange={(next) => set('intendedUses', next)}
+              required
+              columns={2}
+              value={draft.intendedUses}
+              options={INTENDED_USES.map((option) => ({
+                value: option,
+                label: INTENDED_USE_LABELS[option],
+              }))}
+              onValueChange={(next) => set('intendedUses', next)}
               error={errors.intendedUses}
             />
             <CheckboxGroup
               legend="Which types of property?"
-              values={draft.propertyTypes}
-              options={INVESTOR_PROPERTY_TYPES}
-              labels={PROPERTY_TYPE_LABELS}
-              onChange={(next) => set('propertyTypes', next)}
+              required
+              columns={2}
+              value={draft.propertyTypes}
+              options={INVESTOR_PROPERTY_TYPES.map((option) => ({
+                value: option,
+                label: PROPERTY_TYPE_LABELS[option],
+              }))}
+              onValueChange={(next) => set('propertyTypes', next)}
               error={errors.propertyTypes}
             />
             <Field label="Budget" required error={errors.budgetBand}>
