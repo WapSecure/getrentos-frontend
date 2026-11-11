@@ -4,6 +4,7 @@ import type { Paginated } from './properties';
 import type { ShortletBookingStatus, ShortletCancellationPolicy } from './shortlets';
 import type { VideoOnSiteReport } from '../filmedOnSite';
 import type { PayoutSentTo } from '@sureground/shared';
+import { uploadVideoDirect } from './videoUpload';
 
 export type PricingMode = 'PER_NIGHT' | 'FLAT_STAY';
 export type HostListingStatus = 'PUBLISHED' | 'PAUSED' | 'CLOSED' | 'PENDING_VERIFICATION' | string;
@@ -424,15 +425,8 @@ export const hostShortletsApi = {
     );
   },
 
-  uploadVideo: (file: PickedFile) => {
-    const form = new FormData();
-    form.append('kind', 'video');
-    appendFile(form, 'file', file);
-    return apiUpload<{ key: string; kind: 'image' | 'video' }>(
-      '/host/shortlets/media/upload',
-      form
-    );
-  },
+  // Straight to storage, so a large video never passes through the API.
+  uploadVideo: (file: PickedFile) => uploadVideoDirect('/host/shortlets', file),
 
   bookings: (view: BookingView, p = 1, size = 20) =>
     apiFetch<Paginated<HostBooking>>(

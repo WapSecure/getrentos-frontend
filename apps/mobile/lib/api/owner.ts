@@ -4,6 +4,7 @@ import type { Paginated } from './properties';
 import type { TrustProfile } from './buyerTrustProfile';
 import type { VideoCallJoin } from '@sureground/shared';
 import type { VideoOnSiteReport } from '../filmedOnSite';
+import { uploadVideoDirect } from './videoUpload';
 
 /** Statuses arrive lowercase, as the API maps them. */
 
@@ -453,6 +454,8 @@ export const ownerApi = {
     }),
   /** Stages a photo or video; it becomes the property's once attached. */
   uploadMedia: (file: PickedFile, kind: 'image' | 'video') => {
+    // Videos go straight to storage, so a large tour never passes through the API.
+    if (kind === 'video') return uploadVideoDirect('/owner/properties', file);
     const form = new FormData();
     appendFile(form, 'file', file);
     form.append('kind', kind);
