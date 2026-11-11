@@ -342,3 +342,27 @@ test('verification summary: missing or unknown status is left out; limits are ne
   assert.ok(s && s.limits.length > 0);
   assert.ok(s?.limits.some((l) => l.includes('not a guarantee of title')));
 });
+
+test('rent and sale carry the trust chain the cards show; malformed steps are dropped', () => {
+  const chain = {
+    steps: [
+      { id: 'owner', label: 'Verified owner', met: false, detail: 'Owner ID pending' },
+      { id: 'authority', label: 'Ownership confirmed', met: false, detail: '' },
+      { id: 'property', label: 'Property verified', met: true, detail: '' },
+      { id: 'payment', label: 'Payment protected', met: true, detail: '' },
+      { id: 'made-up', label: 'Nonsense', met: true },
+      { id: 'owner', label: 'No met flag' },
+    ],
+    metCount: 9,
+    totalCount: 9,
+  };
+  const rent = fromRental({ ...rental, verified: true, trustChain: chain }).trustChain;
+  assert.equal(rent?.steps.length, 4);
+  assert.equal(rent?.metCount, 2);
+  assert.equal(rent?.totalCount, 4);
+  const sale = fromSale({ id: 's', title: 'House', price: 1, trustChain: chain }).trustChain;
+  assert.deepEqual(sale, rent);
+  assert.equal(fromRental({ ...rental, verified: true }).trustChain, undefined);
+  assert.equal(fromRental({ ...rental, trustChain: { steps: [] } }).trustChain, undefined);
+  assert.equal(fromRental({ ...rental, trustChain: 'yes' }).trustChain, undefined);
+});

@@ -9,6 +9,8 @@ import type {
   PublicSaleDto,
   ShowroomFact,
   ShowroomListing,
+  ShowroomTrustChain,
+  ShowroomTrustStepId,
 } from './types';
 import {
   LAND_DILIGENCE_LABELS,
@@ -160,6 +162,38 @@ export function showroomMedia(
 // The first URL is the page's share and search image, so a floor plan never leads.
 const imageUrls = (media: MediaItem[]) => heroPhotos(media).map((m) => m.url);
 
+const TRUST_STEP_IDS: readonly ShowroomTrustStepId[] = [
+  'owner',
+  'authority',
+  'property',
+  'payment',
+];
+
+/** The API's trust chain, or undefined when it is missing or malformed (the page then falls back to `verified`). */
+export function trustChainOf(raw: unknown): ShowroomTrustChain | undefined {
+  const steps = (raw as { steps?: unknown } | null | undefined)?.steps;
+  if (!Array.isArray(steps)) return undefined;
+  const valid = steps.flatMap((step) => {
+    const s = step as Record<string, unknown> | null;
+    if (!s || typeof s.label !== 'string' || typeof s.met !== 'boolean') return [];
+    if (!TRUST_STEP_IDS.includes(s.id as ShowroomTrustStepId)) return [];
+    return [
+      {
+        id: s.id as ShowroomTrustStepId,
+        label: s.label,
+        met: s.met,
+        detail: typeof s.detail === 'string' ? s.detail : '',
+      },
+    ];
+  });
+  if (valid.length === 0) return undefined;
+  return {
+    steps: valid,
+    metCount: valid.filter((s) => s.met).length,
+    totalCount: valid.length,
+  };
+}
+
 export function fromRental(r: PublicRentalDto): ShowroomListing {
   const price = money(r.price);
   const media = showroomMedia(r.title, r.media, [r.image, ...(r.images ?? [])]);
@@ -193,6 +227,7 @@ export function fromRental(r: PublicRentalDto): ShowroomListing {
     bathrooms: positive(r.bathrooms),
     size: positive(r.size),
     verified: !!r.verified,
+    trustChain: trustChainOf(r.trustChain),
     media,
     images: imageUrls(media),
     description: r.description,
@@ -239,6 +274,7 @@ export function fromSale(s: PublicSaleDto): ShowroomListing {
     bedrooms: positive(s.bedrooms),
     bathrooms: positive(s.bathrooms),
     verified: !!s.isVerified,
+    trustChain: trustChainOf(s.trustChain),
     underOffer: !!s.underOffer,
     verificationSummary: verificationSummaryOf(s.verificationSummary),
     media,
