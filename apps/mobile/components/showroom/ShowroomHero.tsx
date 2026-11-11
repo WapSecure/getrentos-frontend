@@ -10,13 +10,24 @@ import {
 } from 'react-native';
 import { Image } from 'expo-image';
 import { Compass, Play } from '@sureground/icons/native';
-import { ListingPlaceholder, Text, useTheme } from '@sureground/ui-native';
-import { MEDIA_ROOM_NAME, variantAtLeast, type MediaItem } from '@sureground/shared/showroom';
+import { ListingPlaceholder, Text, useReducedMotion, useTheme } from '@sureground/ui-native';
+import {
+  MEDIA_ROOM_NAME,
+  placeholderOf,
+  variantAtLeast,
+  type MediaItem,
+} from '@sureground/shared/showroom';
 
 // Over a photo the pills keep a fixed dark backing, so they read on any image in either theme.
 const PILL = { bg: 'rgba(0,0,0,0.6)', fg: '#fff' };
 // A phone-width hero; the 1600px copy is for the full-screen viewer.
 const HERO_PX = 960;
+
+/** The API's tiny blurred stand-in, shown until the photo loads; none for photos not yet backfilled. */
+const blurSource = (m: MediaItem) => {
+  const uri = m.kind === 'image' ? placeholderOf(m.placeholder) : undefined;
+  return uri ? { uri } : undefined;
+};
 
 /**
  * The phone hero: swipe through the photos with a "3 / 8" counter; a tap opens the viewer there.
@@ -38,6 +49,7 @@ export function ShowroomHero({
   onOpen: (index: number) => void;
 }) {
   const { spacing } = useTheme();
+  const reduced = useReducedMotion();
   const window = useWindowDimensions();
   const [page, setPage] = useState(0);
   // Each photo is exactly the hero's width: the launch window width is wrong on the web, in split screen and after a rotation.
@@ -123,7 +135,9 @@ export function ShowroomHero({
               contentFit="cover"
               cachePolicy="memory-disk"
               recyclingKey={m.id}
-              transition={200}
+              placeholder={blurSource(m)}
+              placeholderContentFit="cover"
+              transition={reduced ? 0 : 200}
               accessible={false}
               alt={m.alt ?? `Photo ${i + 1} of ${photos.length}`}
               // Only the first photo loads at once; the rest wait until they are near.

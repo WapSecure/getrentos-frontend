@@ -21,6 +21,7 @@ import { Button, Chip, Text, useReducedMotion } from '@sureground/ui-native';
 import {
   MEDIA_ROOM_LABEL,
   MEDIA_ROOM_NAME,
+  placeholderOf,
   variantAtLeast,
   type MediaItem,
   type MediaRoom,
@@ -292,6 +293,7 @@ function ViewerBody({
                 {m.kind === 'image' ? (
                   <ZoomableImage
                     uri={variantAtLeast(m.url, m.variants, pixelWidth)}
+                    placeholder={placeholderOf(m.placeholder)}
                     alt={m.alt ?? `Photo ${i + 1}`}
                     reduced={reduced}
                     current={i === index}
@@ -394,6 +396,8 @@ function ViewerBody({
                     contentFit="cover"
                     cachePolicy="memory-disk"
                     recyclingKey={m.id}
+                    placeholder={thumbPlaceholder(m)}
+                    placeholderContentFit="cover"
                     accessible={false}
                     style={{ width: '100%', height: '100%' }}
                   />
@@ -462,8 +466,14 @@ function StartCard({
 }
 
 /** Pinch or double-tap to zoom; drag to look around once zoomed. The pager stops swiping while zoomed. */
+const thumbPlaceholder = (m: MediaItem) => {
+  const uri = m.kind === 'image' ? placeholderOf(m.placeholder) : undefined;
+  return uri ? { uri } : undefined;
+};
+
 function ZoomableImage({
   uri,
+  placeholder,
   alt,
   reduced,
   current,
@@ -471,6 +481,8 @@ function ZoomableImage({
   onZoomChange,
 }: {
   uri: string;
+  /** A tiny blurred `data:` URI shown until the photo loads. */
+  placeholder?: string;
   alt: string;
   reduced: boolean;
   current: boolean;
@@ -562,6 +574,8 @@ function ZoomableImage({
           contentFit="contain"
           cachePolicy="memory-disk"
           recyclingKey={uri}
+          placeholder={placeholder ? { uri: placeholder } : undefined}
+          placeholderContentFit="contain"
           transition={reduced ? 0 : 150}
           onError={() => setFailed(true)}
           alt={alt}
