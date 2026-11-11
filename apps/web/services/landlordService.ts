@@ -64,6 +64,7 @@ import type {
 import type { Conversation } from '@/components/landlord/messages/ConversationList';
 import type { ThreadMessage } from '@/components/landlord/messages/MessageThread';
 import type { VideoCallJoin } from '@sureground/shared';
+import type { CommercialDetails } from '@sureground/shared/showroom';
 import type { ListingDraft, ListingSelfCheck, ListingSelfCheckInput } from '@/types/listingDraft';
 import type { StatementExplanation } from '@/types/statementExplanation';
 import type { CollectionPlan } from '@/types/collectionPlan';
@@ -516,10 +517,24 @@ export const landlordService = {
       | 'allowPets'
       | 'furnished'
       | 'shortLetEnabled'
+      | 'commercial'
     >
   ): Promise<ApiResponse<Listing>> {
     return safeCall(() =>
       authFetch('/landlord/listings', { method: 'POST', body: JSON.stringify(data) })
+    );
+  },
+
+  /** Commercial properties only. `null` clears a field; an omitted field is left as it is. */
+  async updateListingCommercial(
+    id: string,
+    details: { [K in keyof CommercialDetails]?: CommercialDetails[K] | null }
+  ): Promise<ApiResponse<Listing>> {
+    return safeCall(() =>
+      authFetch(`/landlord/listings/${id}/commercial`, {
+        method: 'PATCH',
+        body: JSON.stringify(details),
+      })
     );
   },
 

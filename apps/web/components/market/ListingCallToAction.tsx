@@ -22,6 +22,12 @@ const SIGNED_IN: Record<PublicDetailMarket, string> = {
   land: 'Make an offer',
 };
 
+// A business viewing a commercial let wants to see the space first; the enquiry flow is the same.
+const COMMERCIAL_RENT = {
+  signedOut: 'Sign in to request an inspection',
+  signedIn: 'Request an inspection',
+} as const;
+
 const signedInHref = (market: PublicDetailMarket, id: string) =>
   market === 'rent'
     ? `/renter/properties/${id}`
@@ -81,6 +87,7 @@ export function ListingCallToAction({
   underOffer,
   compact = false,
   title,
+  commercial = false,
 }: {
   market: PublicDetailMarket;
   id: string;
@@ -89,7 +96,10 @@ export function ListingCallToAction({
   compact?: boolean;
   /** The listing's name, for the tour and inspection dialogs. */
   title?: string;
+  /** A commercial property: a rental leads with an inspection request. */
+  commercial?: boolean;
 }) {
+  const commercialRent = commercial && market === 'rent';
   const signedIn = useSyncExternalStore(subscribeToNothing, viewerIsSignedIn, () => false);
   const isBuyer = useSyncExternalStore(subscribeToNothing, viewerIsBuyer, () => false);
   const recordStart = () =>
@@ -117,7 +127,7 @@ export function ListingCallToAction({
     return (
       <>
         <Link href={signedInHref(market, id)} className={PRIMARY} onClick={recordStart}>
-          {SIGNED_IN[market]}
+          {commercialRent ? COMMERCIAL_RENT.signedIn : SIGNED_IN[market]}
         </Link>
         {market === 'sale' && !compact && title && isBuyer && (
           <SaleVisitActions id={id} title={title} />
@@ -130,7 +140,7 @@ export function ListingCallToAction({
   return (
     <>
       <Link href={`/login?next=${next}`} className={PRIMARY} onClick={recordStart}>
-        {SIGNED_OUT[market]}
+        {commercialRent ? COMMERCIAL_RENT.signedOut : SIGNED_OUT[market]}
       </Link>
       {!compact && (
         <Link

@@ -10,6 +10,7 @@ import {
 } from '@/components/landlord/listings/CreateListingModal';
 import { ListingPreviewModal } from '@/components/landlord/listings/ListingPreviewModal';
 import { EditListingFeesDialog } from '@/components/landlord/listings/EditListingFeesDialog';
+import { EditCommercialDetailsDialog } from '@/components/landlord/listings/EditCommercialDetailsDialog';
 import {
   Button,
   EmptyState,
@@ -45,6 +46,7 @@ export default function LandlordListingsPage() {
   );
   const [previewListing, setPreviewListing] = useState<Listing | null>(null);
   const [feesListing, setFeesListing] = useState<Listing | null>(null);
+  const [commercialListing, setCommercialListing] = useState<Listing | null>(null);
   const toast = useToast();
 
   const {
@@ -79,6 +81,7 @@ export default function LandlordListingsPage() {
         allowPets,
         furnished,
         shortLetEnabled,
+        commercial,
       } = data;
       return unwrap(
         landlordService.publishListing({
@@ -96,6 +99,7 @@ export default function LandlordListingsPage() {
           allowPets,
           furnished,
           shortLetEnabled,
+          ...(commercial ? { commercial } : {}),
         })
       );
     },
@@ -234,6 +238,7 @@ export default function LandlordListingsPage() {
               onTogglePause={handleTogglePause}
               onPreview={setPreviewListing}
               onEditFees={setFeesListing}
+              onEditCommercial={setCommercialListing}
             />
           ))}
         </div>
@@ -250,6 +255,10 @@ export default function LandlordListingsPage() {
 
       <ListingPreviewModal listing={previewListing} onClose={() => setPreviewListing(null)} />
       <EditListingFeesDialog listing={feesListing} onClose={() => setFeesListing(null)} />
+      <EditCommercialDetailsDialog
+        listing={commercialListing}
+        onClose={() => setCommercialListing(null)}
+      />
     </>
   );
 }

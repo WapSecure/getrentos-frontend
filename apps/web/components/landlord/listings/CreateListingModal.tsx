@@ -19,7 +19,7 @@ import {
   ToggleChip,
   useSessionExpiryDraft,
 } from '@sureground/ui';
-import type { Listing, RentPeriod, Unit } from '@/types/landlord';
+import { isCommercialType, type Listing, type RentPeriod, type Unit } from '@/types/landlord';
 import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
 import { ROUTES } from '@/lib/constants/auth';
 import { DraftAssist, SelfCheckPanel } from './ListingAssist';
@@ -30,6 +30,13 @@ import {
   ListingFeeFields,
   type ListingFeeValues,
 } from './ListingFeeFields';
+import {
+  CommercialDetailsFields,
+  EMPTY_COMMERCIAL,
+  commercialError,
+  commercialToCreatePayload,
+  type CommercialValues,
+} from './CommercialDetailsFields';
 
 interface CreateListingModalProps {
   isOpen: boolean;
@@ -50,6 +57,7 @@ interface ListingDraft {
   allowsMonthlyPayment: boolean;
   securityDeposit: string;
   fees?: ListingFeeValues;
+  commercial?: CommercialValues;
   availabilityDate: string;
   amenities: string[];
   allowPets: boolean;
@@ -75,6 +83,7 @@ export const CreateListingModal = ({
   const { newPlansOpen: flexOpen } = useFlexAvailability();
   const [securityDeposit, setSecurityDeposit] = useState('');
   const [fees, setFees] = useState<ListingFeeValues>(EMPTY_FEES);
+  const [commercial, setCommercial] = useState<CommercialValues>(EMPTY_COMMERCIAL);
   const [availabilityDate, setAvailabilityDate] = useState('');
   const [amenities, setAmenities] = useState<string[]>([]);
   const [allowPets, setAllowPets] = useState(false);
@@ -93,6 +102,7 @@ export const CreateListingModal = ({
             allowsMonthlyPayment,
             securityDeposit,
             fees,
+            commercial,
             availabilityDate,
             amenities,
             allowPets,
@@ -108,6 +118,7 @@ export const CreateListingModal = ({
       setAllowsMonthlyPayment(draft.allowsMonthlyPayment);
       setSecurityDeposit(draft.securityDeposit);
       setFees(draft.fees ?? EMPTY_FEES);
+      setCommercial(draft.commercial ?? EMPTY_COMMERCIAL);
       setAvailabilityDate(draft.availabilityDate);
       setAmenities(draft.amenities ?? []);
       setAllowPets(draft.allowPets);
@@ -140,6 +151,7 @@ export const CreateListingModal = ({
     setAllowsMonthlyPayment(false);
     setSecurityDeposit('');
     setFees(EMPTY_FEES);
+    setCommercial(EMPTY_COMMERCIAL);
     setAvailabilityDate('');
     setAmenities([]);
     setAllowPets(false);
@@ -159,7 +171,14 @@ export const CreateListingModal = ({
     );
   };
 
-  const isValid = selectedUnit && listingTitle.trim() && Number(askingRent) > 0 && availabilityDate;
+  const isCommercial = isCommercialType(selectedUnit?.propertyType);
+  const commercialProblem = isCommercial ? commercialError(commercial) : null;
+  const isValid =
+    selectedUnit &&
+    listingTitle.trim() &&
+    Number(askingRent) > 0 &&
+    availabilityDate &&
+    !commercialProblem;
 
   const handlePublish = () => {
     if (!selectedUnit || !isValid) return;
@@ -174,6 +193,8 @@ export const CreateListingModal = ({
       allowsMonthlyPayment: rentPeriod === 'year' ? allowsMonthlyPayment : false,
       securityDeposit: securityDeposit ? Number(securityDeposit) : undefined,
       ...feesToPayload(fees),
+      // Sent only for a commercial unit: the API refuses the block on any other type.
+      commercial: isCommercial ? commercialToCreatePayload(commercial) : undefined,
       amenities,
       availabilityDate,
       allowPets,
@@ -285,6 +306,17 @@ export const CreateListingModal = ({
                     : undefined
                 }
               />
+
+              {isCommercial && (
+                <>
+                  <CommercialDetailsFields value={commercial} onChange={setCommercial} />
+                  {commercialProblem && (
+                    <p role="alert" className="text-xs text-destructive">
+                      {commercialProblem}
+                    </p>
+                  )}
+                </>
+              )}
 
               {rentPeriod === 'year' && (
                 <div className="p-3 rounded-lg bg-accent border border-primary/20">

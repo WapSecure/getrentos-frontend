@@ -1,6 +1,7 @@
 import { Lock, ShieldCheck, Star } from '@sureground/icons';
 import type { ShowroomListing } from '@sureground/shared/showroom';
 import { ListingCallToAction } from '@/components/market/ListingCallToAction';
+import { COMMERCIAL_VAT_ANCHOR, vatStated } from '@/lib/commercialShowroom';
 import { formatCurrency } from '@/lib/format';
 
 const PROTECTION_LINE = {
@@ -49,6 +50,7 @@ export function ShowroomAside({
             returnPath={returnPath}
             underOffer={listing.underOffer}
             title={listing.title}
+            commercial={!!listing.commercial}
           />
         </div>
 
@@ -77,6 +79,19 @@ export function ShowroomAside({
               </div>
             )}
           </dl>
+          {vatStated(listing.commercial) && (
+            // VAT is never added to these amounts; the landlord's own statement is shown once, up the page.
+            <p className="mt-3 border-t border-border/70 pt-3 text-xs leading-5 text-muted-foreground">
+              Sureground does not add VAT to these amounts.{' '}
+              <a
+                href={`#${COMMERCIAL_VAT_ANCHOR}`}
+                className="font-medium text-primary hover:underline"
+              >
+                See the VAT the landlord states
+              </a>
+              .
+            </p>
+          )}
           {costs.notStated.length > 0 && (
             <p className="mt-3 border-t border-border/70 pt-3 text-xs leading-5 text-muted-foreground">
               Not stated in this listing: {list(costs.notStated).toLowerCase()}. Ask for the full
