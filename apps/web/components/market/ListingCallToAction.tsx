@@ -6,7 +6,7 @@ import { Button } from '@sureground/ui';
 import { ScanSearch, Video } from '@sureground/icons';
 import { RequestTourDialog } from '@/components/shared/tours/RequestTourDialog';
 import { RequestInspectionDialog } from '@/components/shared/inspections/RequestInspectionDialog';
-import { viewerIsSignedIn } from '@/lib/viewer';
+import { viewerHasRole, viewerIsSignedIn } from '@/lib/viewer';
 import { track } from '@/lib/analytics';
 import type { PublicDetailMarket } from '@/lib/publicListingDetail';
 
@@ -28,6 +28,8 @@ const signedInHref = (market: PublicDetailMarket, id: string) =>
     : `/buyer/offers?property=${encodeURIComponent(id)}`;
 
 const subscribeToNothing = () => () => {};
+// Tours and inspections are booked through the buyer portal's API; other roles would only meet an error.
+const viewerIsBuyer = () => viewerHasRole('buyer');
 
 /** For a home for sale: see it on a video call, or send an inspector, before making an offer. */
 function SaleVisitActions({ id, title }: { id: string; title: string }) {
@@ -89,6 +91,7 @@ export function ListingCallToAction({
   title?: string;
 }) {
   const signedIn = useSyncExternalStore(subscribeToNothing, viewerIsSignedIn, () => false);
+  const isBuyer = useSyncExternalStore(subscribeToNothing, viewerIsBuyer, () => false);
   const recordStart = () =>
     track({
       name: market === 'rent' ? 'inquiry_start' : 'offer_start',
@@ -116,7 +119,9 @@ export function ListingCallToAction({
         <Link href={signedInHref(market, id)} className={PRIMARY} onClick={recordStart}>
           {SIGNED_IN[market]}
         </Link>
-        {market === 'sale' && !compact && title && <SaleVisitActions id={id} title={title} />}
+        {market === 'sale' && !compact && title && isBuyer && (
+          <SaleVisitActions id={id} title={title} />
+        )}
       </>
     );
   }
