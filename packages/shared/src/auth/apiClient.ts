@@ -388,6 +388,79 @@ export async function apiFetch<T>(
   return body as T;
 }
 
+export interface UploadOptions {
+  /** Whole percent of the request body sent, 0 to 100. 100 means sent; the server may still be working. */
+  onProgress?: (percent: number) => void;
+  signal?: AbortSignal;
+}
+
+const abortError = () => new DOMException('The upload was cancelled.', 'AbortError');
+
+/**
+ * A multipart POST like `apiFetch`, over XHR so the upload can report progress (fetch cannot).
+ * Errors become the same `ApiError`s, with the same friendly messages; a cancel rejects with an `AbortError`.
+ * No refresh retry here: `authUpload` owns that, as `authFetch` does for `apiFetch`.
+ */
+export function apiUpload<T>(
+  path: string,
+  body: FormData,
+  headers: Record<string, string> = {},
+  { onProgress, signal }: UploadOptions = {}
+): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    if (signal?.aborted) return reject(abortError());
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `${API_BASE_URL}${path}`);
+    xhr.withCredentials = true;
+    // The browser sets the multipart Content-Type itself, including the boundary.
+    Object.entries({ ...installIdHeader(), ...headers }).forEach(([name, value]) =>
+      xhr.setRequestHeader(name, value)
+    );
+
+    let last = -1;
+    xhr.upload.onprogress = (event) => {
+      if (!event.lengthComputable || !onProgress) return;
+      const percent = Math.min(100, Math.floor((event.loaded / event.total) * 100));
+      if (percent !== last) onProgress((last = percent));
+    };
+    const onAbort = () => xhr.abort();
+    signal?.addEventListener('abort', onAbort, { once: true });
+    const done = () => signal?.removeEventListener('abort', onAbort);
+
+    xhr.onabort = () => {
+      done();
+      reject(abortError());
+    };
+    xhr.onerror = () => {
+      done();
+      reject(new ApiError(0, 'Unable to reach the server. Please check your connection.'));
+    };
+    xhr.onload = () => {
+      done();
+      // A Response lets the shared body and error handling read it exactly as they read fetch results.
+      const nullBody = xhr.status === 204 || xhr.status === 205;
+      const response = new Response(nullBody ? null : xhr.responseText, {
+        status: xhr.status,
+        headers: {
+          'content-type': xhr.getResponseHeader('content-type') ?? '',
+          'x-request-id': xhr.getResponseHeader('x-request-id') ?? '',
+        },
+      });
+      void readResponseBody<T>(response).then((parsed) => {
+        if (response.ok) return resolve(parsed as T);
+        const errorBody = parsed as BackendErrorBody | undefined;
+        reject(
+          new ApiError(response.status, resolveFriendlyMessage(response.status, errorBody), {
+            ...errorBody,
+            requestId: errorBody?.requestId ?? (response.headers.get('x-request-id') || undefined),
+          })
+        );
+      }, reject);
+    };
+    xhr.send(body);
+  });
+}
+
 export async function currentAccessToken(): Promise<string | null> {
   const token = getAuthToken();
   if (token || !hasStoredSession()) return token;

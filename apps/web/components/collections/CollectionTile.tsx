@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { ImageOff } from '@sureground/icons';
 import { cn } from '@sureground/shared';
+import { ProgressiveImg } from '@sureground/ui';
 import { toMarketCard } from '@/lib/marketCards';
 import { collectionPath, curatorLine, type PublicCollectionSummary } from '@/lib/collections';
 import { SponsoredBadge } from './SponsoredBadge';
@@ -27,10 +28,10 @@ export function CollectionTile({
     >
       <div className="relative aspect-[16/10] overflow-hidden bg-muted">
         {cover?.image ? (
-          // eslint-disable-next-line @next/next/no-img-element -- signed storage links, sized by srcset
-          <img
+          <ProgressiveImg
             src={cover.image}
             srcSet={cover.imageSrcSet}
+            placeholder={cover.imagePreview?.placeholder}
             sizes="(min-width: 1024px) 22rem, 80vw"
             alt=""
             loading="lazy"

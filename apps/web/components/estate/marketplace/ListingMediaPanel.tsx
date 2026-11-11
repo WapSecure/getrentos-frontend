@@ -3,8 +3,9 @@
 import { useRef, useState } from 'react';
 import type { MediaRoom } from '@sureground/shared/showroom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ImagePlus, Trash2 } from '@sureground/icons';
-import { Button, IconButton } from '@sureground/ui';
+import { AlertCircle, ImagePlus, Trash2 } from '@sureground/icons';
+import { Button, IconButton, Progress } from '@sureground/ui';
+import { useUploadQueue } from '@/hooks/useUploadQueue';
 import { estateMarketplaceService } from '@/services/estateMarketplaceService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -38,16 +39,16 @@ export const ListingMediaPanel = ({
     void queryClient.invalidateQueries({ queryKey: estateKeys.inventory(estateId) });
   };
 
-  const upload = useMutation({
-    mutationFn: (files: File[]) =>
-      unwrap(estateMarketplaceService.addListingMedia(estateId, listing.id, files)),
-    onSuccess: () => {
-      refresh();
-      setStatus({ text: 'Photos added.', failed: false });
-    },
-    onError: (error: Error) =>
-      setStatus({ text: error.message || 'Could not add those photos.', failed: true }),
+  // One request per photo, one at a time: the server checks the photo limit before it appends, so parallel sends
+  // could overshoot it. Each success returns the listing with that photo in it.
+  const [names, setNames] = useState<Record<string, string>>({});
+  const uploads = useUploadQueue({
+    concurrency: 1,
+    upload: (file, options) =>
+      unwrap(estateMarketplaceService.addListingMedia(estateId, listing.id, [file], options)),
+    onSuccess: () => refresh(),
   });
+  const uploadIds = Object.keys(uploads.states);
 
   const remove = useMutation({
     mutationFn: (key: string) =>
@@ -91,13 +92,21 @@ export const ListingMediaPanel = ({
   });
 
   const media = listing.media ?? [];
-  const busy = upload.isPending || remove.isPending || saveDetails.isPending;
-  const atCap = media.length >= MAX_PHOTOS;
+  const busy = remove.isPending || saveDetails.isPending;
+  const atCap = media.length + uploadIds.length >= MAX_PHOTOS;
 
   const pick = (files: FileList | null) => {
     if (!files?.length) return;
     setStatus(null);
-    upload.mutate(Array.from(files));
+    const room = Math.max(0, MAX_PHOTOS - media.length - uploadIds.length);
+    const items = Array.from(files)
+      .slice(0, room)
+      .map((file, i) => ({ id: `${Date.now()}-${i}-${file.name}`, file }));
+    setNames((current) => ({
+      ...current,
+      ...Object.fromEntries(items.map(({ id, file }) => [id, file.name])),
+    }));
+    uploads.add(items);
     // Reset so choosing the same file twice still fires a change event.
     if (inputRef.current) inputRef.current.value = '';
   };
@@ -131,12 +140,65 @@ export const ListingMediaPanel = ({
             icon={<ImagePlus className="w-4 h-4" />}
             onClick={() => inputRef.current?.click()}
             disabled={busy || atCap}
-            isLoading={upload.isPending}
           >
             {atCap ? 'Limit reached' : 'Add photos'}
           </Button>
         </div>
       </div>
+
+      {uploadIds.length > 0 && (
+        <ul className="mt-3 space-y-2" aria-label="Photo uploads">
+          {uploadIds.map((id) => {
+            const state = uploads.states[id]!;
+            const name = names[id] ?? 'Photo';
+            return (
+              <li
+                key={id}
+                className="flex items-center gap-3 rounded-lg border border-border bg-card p-2"
+              >
+                {state.status === 'failed' ? (
+                  <div className="min-w-0 flex-1">
+                    <p className="flex items-center gap-1.5 text-xs font-medium text-destructive">
+                      <AlertCircle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                      <span className="truncate">{name} did not upload</span>
+                    </p>
+                    <p className="line-clamp-2 text-2xs text-muted-foreground">{state.error}</p>
+                  </div>
+                ) : (
+                  <Progress
+                    className="min-w-0 flex-1"
+                    size="sm"
+                    value={state.progress}
+                    label={
+                      state.status === 'queued'
+                        ? `${name}: waiting`
+                        : state.progress >= 100
+                          ? `${name}: processing`
+                          : name
+                    }
+                    showValue="percent"
+                  />
+                )}
+                <div className="flex shrink-0 gap-1">
+                  {state.status === 'failed' && (
+                    <Button size="xs" variant="primary" onClick={() => uploads.retry(id)}>
+                      Retry
+                    </Button>
+                  )}
+                  <Button
+                    size="xs"
+                    variant="ghost"
+                    onClick={() => uploads.cancel(id)}
+                    aria-label={`${state.status === 'failed' ? 'Remove' : 'Cancel upload of'} ${name}`}
+                  >
+                    {state.status === 'failed' ? 'Remove' : 'Cancel'}
+                  </Button>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
 
       {media.length === 0 ? (
         <p className="mt-3 text-xs text-muted-foreground">

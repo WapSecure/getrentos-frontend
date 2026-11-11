@@ -60,7 +60,7 @@ import {
   LAND_TITLE_TYPE_LABELS,
   type PublicLandListing,
 } from '@/types/land';
-import { boundaryCorners } from '@sureground/shared';
+import { boundaryCorners, imagePreviewOf, srcSetOf } from '@sureground/shared';
 import { ParcelBoundaryMap } from '@/components/maps/ParcelBoundaryMap';
 import { useAddRole } from '@/hooks/useAddRole';
 import Link from 'next/link';
@@ -321,6 +321,8 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
         price={listing.askingPrice}
         priceCompact
         image={listing.coverImageUrl}
+        imageSrcSet={srcSetOf(listing.imageVariants)}
+        imagePreview={imagePreviewOf(listing.imagePreview)}
         imageAlt={listing.title}
         eager={index < 3}
         status="Land"

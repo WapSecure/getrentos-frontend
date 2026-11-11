@@ -8,6 +8,7 @@ import { tourSource } from '@sureground/shared';
 import {
   mediaDetailsFor,
   photosFromKeys,
+  photosPending,
   PropertyPhotoEditor,
   type EditablePhoto,
 } from '@/components/shared/media/PropertyPhotoEditor';
@@ -143,6 +144,8 @@ const EditOwnerPropertyForm = ({
     }
   };
 
+  const uploadsPending = photosPending(photos);
+
   const handleSave = async () => {
     setIsSaving(true);
     setError(null);
@@ -262,6 +265,9 @@ const EditOwnerPropertyForm = ({
               setPhotos(next);
               setPhotosTouched(true);
             }}
+            upload={async (file, options) =>
+              (await unwrap(ownerService.uploadPropertyMedia(file, 'image', options))).key
+            }
           />
         </div>
 
@@ -340,12 +346,19 @@ const EditOwnerPropertyForm = ({
           variant="primary"
           fullWidth
           onClick={handleSave}
-          disabled={!name.trim() || !address.trim() || isUploadingVideo || tourInvalid}
+          disabled={
+            !name.trim() || !address.trim() || isUploadingVideo || tourInvalid || uploadsPending
+          }
           isLoading={isSaving}
           loadingText="Saving…"
         >
           Save changes
         </Button>
+        {uploadsPending && (
+          <p className="text-center text-xs text-muted-foreground">
+            You can save once every photo has uploaded.
+          </p>
+        )}
 
         {error && <Alert variant="danger">{error}</Alert>}
       </div>

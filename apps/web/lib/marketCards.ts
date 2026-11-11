@@ -1,6 +1,12 @@
+import type { PropertyTrustChain } from '@/types/renter';
 // Pure: maps each market's public card from the API into one shape for ListingCard. Server-safe.
 import type { ListingPriceUnit } from '@sureground/ui';
-import { srcSetOf, type ImageVariant } from '@sureground/shared/showroom';
+import {
+  imagePreviewOf,
+  srcSetOf,
+  type ImagePreview,
+  type ImageVariant,
+} from '@sureground/shared/showroom';
 import {
   rentToCard,
   saleToCard,
@@ -19,8 +25,11 @@ export interface MarketCard {
   priceUnit?: ListingPriceUnit;
   image?: string;
   imageSrcSet?: string;
+  imagePreview?: ImagePreview;
   /** The backend's flag only. */
   verified?: boolean;
+  /** The owner, ownership and property checks: cards show these, not a bare tick, like the browse grid. */
+  trustChain?: PropertyTrustChain;
   beds?: number;
   baths?: number;
   size?: number | string;
@@ -52,6 +61,7 @@ export interface LandCardApi {
   isVerified?: boolean;
   coverImageUrl?: string;
   imageVariants?: ImageVariant[];
+  imagePreview?: ImagePreview;
   parcel?: { areaValue?: number; areaUnit?: string };
 }
 
@@ -64,6 +74,7 @@ export interface ShortletCardApi {
   pricingMode?: 'PER_NIGHT' | 'FLAT_STAY';
   coverImageUrl?: string;
   imageVariants?: ImageVariant[];
+  imagePreview?: ImagePreview;
   bedrooms?: number;
   bathrooms?: number;
 }
@@ -77,7 +88,9 @@ export const fromPublicCard = (c: PublicListingCard): MarketCard => ({
   priceUnit: c.priceUnit,
   image: c.image,
   imageSrcSet: c.imageSrcSet,
+  imagePreview: c.imagePreview,
   verified: c.verified,
+  trustChain: c.trustChain,
   beds: c.bedrooms,
   baths: c.bathrooms,
   size: c.size,
@@ -91,6 +104,7 @@ export const fromLandCard = (l: LandCardApi): MarketCard => ({
   price: Number(l.price),
   image: l.coverImageUrl,
   imageSrcSet: srcSetOf(l.imageVariants),
+  imagePreview: imagePreviewOf(l.imagePreview),
   verified: l.isVerified,
   size:
     l.parcel?.areaValue != null
@@ -106,6 +120,7 @@ export const fromShortletCard = (s: ShortletCardApi): MarketCard => ({
   priceUnit: s.pricingMode === 'PER_NIGHT' ? 'night' : undefined,
   image: s.coverImageUrl,
   imageSrcSet: srcSetOf(s.imageVariants),
+  imagePreview: imagePreviewOf(s.imagePreview),
   beds: s.bedrooms,
   baths: s.bathrooms,
 });

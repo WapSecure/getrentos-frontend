@@ -108,6 +108,7 @@ const MarketListingCard = ({
       priceUnit={listing.priceUnit}
       image={listing.image}
       imageSrcSet={listing.imageSrcSet}
+      imagePreview={listing.imagePreview}
       imageAlt={listing.title}
       eager={eager}
       status={market === 'rent' ? 'For rent' : 'For sale'}

@@ -19,12 +19,14 @@ import {
   cn,
   MEDIA_ROOM_LABEL,
   MEDIA_ROOM_NAME,
+  placeholderOf,
   srcSetOf,
   variantAtLeast,
   type MediaItem,
   type MediaRoom,
 } from '@sureground/shared';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from './Dialog';
+import { ProgressiveImg } from './ProgressiveImg';
 import { TourEmbed } from './TourEmbed';
 import { VideoPlayer } from './VideoPlayer';
 
@@ -330,6 +332,8 @@ function ViewerBody({
                     )}
                     style={{
                       transform: `translate(${zoom.x}px, ${zoom.y}px) scale(${zoom.scale})`,
+                      // Drawn where the photo will be (same shape, centred) and covered once it loads.
+                      ...placeholderBackdrop(item.placeholder),
                     }}
                   />
                 )}
@@ -510,6 +514,18 @@ function ViewerBody({
   );
 }
 
+const placeholderBackdrop = (placeholder?: string) => {
+  const blur = placeholderOf(placeholder);
+  return blur
+    ? {
+        backgroundImage: `url("${blur}")`,
+        backgroundSize: 'contain',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      }
+    : {};
+};
+
 function Thumb({ item, load = true }: { item: MediaItem; load?: boolean }) {
   const [broken, setBroken] = useState(false);
   const src = load
@@ -517,13 +533,23 @@ function Thumb({ item, load = true }: { item: MediaItem; load?: boolean }) {
       ? variantAtLeast(item.url, item.variants, 320)
       : item.posterUrl
     : undefined;
+  const blur = item.kind === 'image' ? placeholderOf(item.placeholder) : undefined;
+  if (!load && blur) {
+    return (
+      <span
+        className="block h-full w-full bg-cover bg-center"
+        style={{ backgroundImage: `url("${blur}")` }}
+        aria-hidden="true"
+      />
+    );
+  }
   return (
     <>
       {src && !broken ? (
-        // eslint-disable-next-line @next/next/no-img-element -- signed storage URL
-        <img
+        <ProgressiveImg
           src={src}
           alt=""
+          placeholder={blur}
           loading="lazy"
           decoding="async"
           onError={() => setBroken(true)}

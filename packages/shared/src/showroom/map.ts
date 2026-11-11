@@ -1,5 +1,6 @@
 import type {
   CostLine,
+  ImagePreview,
   ImageVariant,
   MediaItem,
   MediaRoom,
@@ -41,6 +42,22 @@ const day = (iso?: string) => {
 /** `srcset` for an image's resized copies; undefined when there are none, so the original is used. */
 export const srcSetOf = (variants?: ImageVariant[]) =>
   variants?.length ? variants.map((v) => `${v.url} ${v.width}w`).join(', ') : undefined;
+
+// Inline base64 images only, so a bad value can never fetch anything or break out of a CSS `url()`.
+const PLACEHOLDER_PATTERN = /^data:image\/(?:webp|png|jpeg);base64,[A-Za-z0-9+/]+={0,2}$/;
+
+/** The API's blurred placeholder when it is a small inline image; undefined otherwise, so pages behave as before. */
+export const placeholderOf = (value?: string | null) =>
+  value && value.length <= 2048 && PLACEHOLDER_PATTERN.test(value) ? value : undefined;
+
+/** A list card's cover size and placeholder, checked; undefined when missing or malformed (an older API). */
+export const imagePreviewOf = (value?: Partial<ImagePreview> | null): ImagePreview | undefined => {
+  const { width, height } = value ?? {};
+  if (!(typeof width === 'number' && width > 0 && typeof height === 'number' && height > 0))
+    return undefined;
+  const placeholder = placeholderOf(value?.placeholder);
+  return { width, height, ...(placeholder ? { placeholder } : {}) };
+};
 
 /** The smallest copy at least `min` px wide, or the largest there is, or the original. */
 export const variantAtLeast = (url: string, variants: ImageVariant[] | undefined, min: number) => {

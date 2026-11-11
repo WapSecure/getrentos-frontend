@@ -1,5 +1,11 @@
 import type { PropertyMediaDetails } from '@/types/landlord';
-import { authFetch, safeCall, type ApiResponse } from '@/lib/apiHelpers';
+import {
+  authFetch,
+  authUpload,
+  safeCall,
+  type ApiResponse,
+  type UploadOptions,
+} from '@/lib/apiHelpers';
 import type { Paginated } from '@/lib/apiHelpers';
 import type {
   BulkPublishResult,
@@ -133,18 +139,20 @@ export const estateMarketplaceService = {
    * Photos belong to the listing, not the property; the server takes what fits if the batch exceeds
    * the cap.
    */
+  /** With `upload` options it goes over XHR so it can report progress and be cancelled. */
   addListingMedia(
     estateId: string,
     listingId: string,
-    files: File[]
+    files: File[],
+    upload?: UploadOptions
   ): Promise<ApiResponse<EstateListing>> {
     const formData = new FormData();
     files.forEach((file) => formData.append('files', file));
+    const path = `/estates/${estateId}/listings/${listingId}/media`;
     return safeCall(() =>
-      authFetch(`/estates/${estateId}/listings/${listingId}/media`, {
-        method: 'POST',
-        body: formData,
-      })
+      upload
+        ? authUpload<EstateListing>(path, formData, upload)
+        : authFetch(path, { method: 'POST', body: formData })
     );
   },
 
