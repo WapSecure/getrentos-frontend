@@ -1,6 +1,8 @@
 import { authFetch, safeCall, toQuery } from '@sureground/shared';
 import type { ApiResponse } from '@sureground/shared';
 import type {
+  ForeignCaseDocuments,
+  ForeignReviewCaseSummary,
   Paginated,
   TierGrant,
   TierGrantState,
@@ -70,6 +72,56 @@ export const trustService = {
   ): Promise<ApiResponse<TrustReviewCaseSummary & { decision: string }>> {
     return safeCall(() =>
       authFetch(`/admin/trust/review-cases/${id}/resolve`, {
+        method: 'POST',
+        body: JSON.stringify({
+          decision: input.decision,
+          reasonCodes: input.reasonCodes ?? [],
+          note: input.note ?? '',
+          confirmedEvidence: input.confirmedEvidence ?? [],
+          failedEvidence: input.failedEvidence ?? [],
+        }),
+      })
+    );
+  },
+
+  /** Diaspora identity cases only (passport, address abroad, bank statement abroad). */
+  async listForeignReviewCases(params: {
+    status?: string;
+    page: number;
+    pageSize: number;
+  }): Promise<ApiResponse<Paginated<ForeignReviewCaseSummary>>> {
+    return safeCall(async () => {
+      const query = toQuery({
+        status: params.status,
+        page: String(params.page),
+        pageSize: String(params.pageSize),
+      });
+      return authFetch<Paginated<ForeignReviewCaseSummary>>(
+        `/admin/trust/foreign-identity/review-cases${query}`
+      );
+    });
+  },
+
+  /** 15-minute signed links; each call is audited and refused for a case about your own account. */
+  async getForeignCaseDocuments(id: string): Promise<ApiResponse<ForeignCaseDocuments>> {
+    return safeCall(() =>
+      authFetch<ForeignCaseDocuments>(`/admin/trust/foreign-identity/review-cases/${id}/documents`)
+    );
+  },
+
+  /** Same four-eyes rules as resolveReviewCase, limited to diaspora cases and audited. */
+  async decideForeignCase(
+    id: string,
+    input: {
+      decision: TrustReviewDecision;
+      reasonCodes?: string[];
+      note?: string;
+      confirmedEvidence?: string[];
+      failedEvidence?: string[];
+    }
+  ): Promise<ApiResponse<TrustReviewCaseSummary & { decision: string }>> {
+    return safeCall(() =>
+      authFetch(`/admin/trust/foreign-identity/review-cases/${id}/decision`, {
         method: 'POST',
         body: JSON.stringify({
           decision: input.decision,

@@ -515,6 +515,11 @@ export const trustKeys = {
   explanation: ['trust', 'explanation'] as const,
 };
 
+/** Under trustKeys.all, so a trust-wide refresh picks it up. */
+export const foreignIdentityKeys = {
+  status: ['trust', 'foreign-identity'] as const,
+};
+
 export const paymentKeys = {
   status: (reference: string) => ['payments', 'status', reference] as const,
   checkoutFee: (amount: number) => ['payments', 'checkout-fee', amount] as const,

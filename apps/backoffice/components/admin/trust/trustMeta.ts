@@ -1,4 +1,4 @@
-import type { TrustReviewCasePriority, TrustReviewCaseStatus } from '@/types/trust';
+import type { ForeignPurpose, TrustReviewCasePriority, TrustReviewCaseStatus } from '@/types/trust';
 
 export const REVIEW_CASE_STATUS_META: Record<
   TrustReviewCaseStatus,
@@ -127,3 +127,13 @@ export const VERIFICATION_STATUS_META: Record<string, { label: string; text: str
     CANCELLED: { label: 'Cancelled', text: 'text-slate-500', bg: 'bg-slate-100 dark:bg-slate-800' },
     EXPIRED: { label: 'Expired', text: 'text-slate-500', bg: 'bg-slate-100 dark:bg-slate-800' },
   };
+
+/** Diaspora identity cases: decided through their own endpoint, with their uploads shown to staff. */
+export const FOREIGN_PURPOSE_LABEL: Record<ForeignPurpose, string> = {
+  FOREIGN_IDENTITY: 'Passport (diaspora)',
+  FOREIGN_ADDRESS: 'Proof of address abroad',
+  FOREIGN_BANK_STATEMENT: 'Bank statement from abroad',
+};
+
+export const isForeignPurpose = (purpose?: string | null): purpose is ForeignPurpose =>
+  Boolean(purpose && purpose in FOREIGN_PURPOSE_LABEL);

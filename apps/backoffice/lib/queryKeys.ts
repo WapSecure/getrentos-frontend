@@ -255,6 +255,8 @@ export const adminKeys = {
   reviewCases: (params?: {
     status?: string;
     priority?: string;
+    /** 'foreign' lists only diaspora identity cases. */
+    purpose?: string;
     page?: number;
     pageSize?: number;
   }) =>
@@ -264,9 +266,12 @@ export const adminKeys = {
       'review-cases',
       params?.status ?? 'all',
       params?.priority ?? 'all',
+      params?.purpose ?? 'all',
       params?.page ?? 1,
       params?.pageSize ?? 20,
     ] as const,
+  foreignCaseDocuments: (id: string) =>
+    ['admin', 'trust', 'review-cases', id, 'foreign-documents'] as const,
   reviewCaseDetail: (id: string) => ['admin', 'trust', 'review-cases', id] as const,
   trustAppeals: ['admin', 'trust', 'appeals'] as const,
   tierGrants: (params?: { userId?: string; state?: string; page?: number; pageSize?: number }) =>
