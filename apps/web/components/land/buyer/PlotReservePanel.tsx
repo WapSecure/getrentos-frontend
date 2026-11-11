@@ -25,7 +25,7 @@ import { landBuyerService } from '@/services/landBuyerService';
 import {
   prePurchaseInspectionKeys,
   prePurchaseInspectionService,
-} from '@/services/landPrePurchaseInspectionService';
+} from '@/services/prePurchaseInspectionService';
 import {
   LAND_PLOT_STATUS_LABELS,
   type LandPlot,
@@ -33,8 +33,8 @@ import {
   type PublicLandLayoutDetail,
 } from '@/types/landBuyer';
 import { StartPurchaseDialog } from './StartPurchaseDialog';
-import { RequestTourDialog } from '../tours/RequestTourDialog';
-import { RequestInspectionDialog } from '../inspections/RequestInspectionDialog';
+import { RequestTourDialog } from '@/components/shared/tours/RequestTourDialog';
+import { RequestInspectionDialog } from '@/components/shared/inspections/RequestInspectionDialog';
 import { plotLabel } from './landSaleLogic';
 
 type Viewer = 'buyer' | 'member' | 'anonymous';
@@ -71,8 +71,8 @@ export const PlotReservePanel = ({
   const [byInspection, setByInspection] = useState(false);
   // A buyer with an open inspection of this plot may hold it while the inspection runs.
   const inspections = useQuery({
-    queryKey: prePurchaseInspectionKeys.mine,
-    queryFn: () => unwrap(prePurchaseInspectionService.mine()),
+    queryKey: prePurchaseInspectionKeys.mine('land'),
+    queryFn: () => unwrap(prePurchaseInspectionService.mine('land')),
     enabled: viewer === 'buyer' && Boolean(terms?.subjectToInspection),
   });
   const openInspection = plot
@@ -295,13 +295,13 @@ export const PlotReservePanel = ({
         open={touring}
         onClose={() => setTouring(false)}
         target={{ plotId: plot.id }}
-        landName={`${plotLabel(plot)}, ${layout.name}`}
+        placeName={`${plotLabel(plot)}, ${layout.name}`}
       />
       <RequestInspectionDialog
         open={inspecting}
         onClose={() => setInspecting(false)}
         target={{ plotId: plot.id }}
-        landName={`${plotLabel(plot)}, ${layout.name}`}
+        placeName={`${plotLabel(plot)}, ${layout.name}`}
       />
     </section>
   );
