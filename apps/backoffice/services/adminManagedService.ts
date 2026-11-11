@@ -556,6 +556,8 @@ export interface FeeAmendmentOverview {
   proposeBlockedReason: string | null;
   earliestEffectiveFrom: string;
   maxPercentage: number;
+  /** Managed only: the published tier rates, the only fees staff may propose. Null on a firm's agreement. */
+  allowedPercentages: number[] | null;
   pending: FeeAmendment | null;
 }
 

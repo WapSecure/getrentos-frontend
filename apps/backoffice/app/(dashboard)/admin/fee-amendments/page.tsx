@@ -11,7 +11,6 @@ import {
   EmptyState,
   Field,
   ListSkeleton,
-  NumberInput,
   PageErrorState,
   PageHeader,
   SegmentedControl,
@@ -27,7 +26,6 @@ import {
   adminManagedService,
   type FeeAmendment,
   type FeeAmendmentStatus,
-  type ManagementFeeType,
 } from '@/services/adminManagedService';
 import { hasAdminPermission } from '@/lib/adminAccess';
 import { useAdminUser } from '../layout';
@@ -58,11 +56,6 @@ const STATUS_META: Record<FeeAmendmentStatus, { label: string; variant: BadgeVar
 };
 
 const SIDE_LABEL = { OWNER: 'Owner', MANAGER: 'Manager', SUREGROUND: 'Sureground' } as const;
-
-const FEE_TYPES = [
-  { value: 'PERCENTAGE' as const, label: 'Percentage of rent' },
-  { value: 'FLAT' as const, label: 'Flat amount' },
-];
 
 function lagosDay(value: string | null | undefined): string {
   if (!value) return '';
@@ -198,7 +191,6 @@ function ProposeManagedFee() {
   const queryClient = useQueryClient();
   const toast = useToast();
   const [mandateId, setMandateId] = useState('');
-  const [type, setType] = useState<ManagementFeeType>('PERCENTAGE');
   const [value, setValue] = useState('');
   const [effectiveFrom, setEffectiveFrom] = useState('');
   const [reason, setReason] = useState('');
@@ -225,20 +217,16 @@ function ProposeManagedFee() {
   );
 
   const data = overview.data;
+  // Rule 5: only the published tier rates, as the API sends them (read from the fee card).
+  const rates = data?.allowedPercentages ?? [];
+  const rateOptions = rates
+    .filter((rate) => !(data?.currentFee?.type === 'PERCENTAGE' && data.currentFee.value === rate))
+    .map((rate) => ({ value: String(rate), label: `${rate}% of rent collected` }));
   const numeric = Number(value);
-  const valueError =
-    value === ''
-      ? null
-      : !Number.isFinite(numeric) || numeric < 0
-        ? 'Enter a fee of zero or more.'
-        : type === 'PERCENTAGE' && numeric > (data?.maxPercentage ?? 100)
-          ? 'A percentage fee cannot be more than 100%.'
-          : null;
   const start = effectiveFrom || data?.earliestEffectiveFrom || '';
   const ready =
     Boolean(data?.canPropose) &&
-    value !== '' &&
-    !valueError &&
+    rates.includes(numeric) &&
     reason.trim().length >= REASON_MIN &&
     Boolean(start);
 
@@ -246,7 +234,7 @@ function ProposeManagedFee() {
     mutationFn: () =>
       unwrap(
         adminFeeAmendmentService.propose(mandateId, {
-          type,
+          type: 'PERCENTAGE',
           value: numeric,
           reason: reason.trim(),
           effectiveFrom: start,
@@ -294,27 +282,26 @@ function ProposeManagedFee() {
             if (ready) propose.mutate();
           }}
         >
-          <SegmentedControl
-            aria-label="Kind of fee"
-            value={type}
-            onValueChange={(next) => {
-              setType(next);
-              setValue('');
-            }}
-            segments={FEE_TYPES}
-            size="sm"
-          />
           <Field
-            label={type === 'PERCENTAGE' ? 'New fee (% of rent)' : 'New fee (₦ per period)'}
-            hint={data.currentFee ? `Agreed now: ${data.currentFee.label}` : undefined}
-            error={valueError}
+            label="New fee"
+            hint={
+              data.currentFee
+                ? `Agreed now: ${data.currentFee.label}. A Managed fee is one of the published tier rates.`
+                : 'A Managed fee is one of the published tier rates.'
+            }
             required
           >
-            <NumberInput value={value} onValueChange={setValue} integer={type === 'FLAT'} />
+            <Select
+              value={value}
+              onValueChange={setValue}
+              options={rateOptions}
+              placeholder="Choose a published rate"
+              searchable={false}
+            />
           </Field>
           <Field
             label="Starts on"
-            hint="The first day of a rent period, from next month on."
+            hint="The first of a month, at least 14 days from today, so the owner has the full 14 days to answer."
             required
           >
             <Select
