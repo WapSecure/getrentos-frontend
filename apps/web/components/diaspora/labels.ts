@@ -44,9 +44,9 @@ export const OWNERSHIP_LABELS: Record<OwnershipStructure, string> = {
 export const CURRENCY_LABELS: Record<DisplayCurrency, string> = {
   NGN: 'Naira (₦)',
   GBP: 'Pounds sterling (£)',
-  USD: 'US dollars ($)',
+  USD: 'US dollars (US$)',
   EUR: 'Euros (€)',
-  CAD: 'Canadian dollars (C$)',
+  CAD: 'Canadian dollars (CA$)',
 };
 
 export const OFFER_STATUS_LABELS: Record<string, string> = {
