@@ -3,12 +3,20 @@
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Settings, ChevronDown, ChevronUp } from '@sureground/icons';
-import { Card, Checkbox, Switch } from '@sureground/ui';
+import { Card, CheckboxGroup, Switch } from '@sureground/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import type { NotificationPreference as FetchedPreference } from '@/services/renterService';
 import { categorySendsEmail } from '@sureground/shared';
+
+type Channel = 'email' | 'push' | 'inApp';
+
+const CHANNEL_OPTIONS: { value: Channel; label: string }[] = [
+  { value: 'email', label: 'Email' },
+  { value: 'push', label: 'Push' },
+  { value: 'inApp', label: 'In-app' },
+];
 
 interface Preference {
   id: string;
@@ -195,7 +203,7 @@ const NotificationPreferencesForm = ({
     },
   });
 
-  const toggleChannel = (prefId: string, channel: 'email' | 'push' | 'inApp') => {
+  const toggleChannel = (prefId: string, channel: Channel) => {
     const pref = preferences.find((p) => p.id === prefId);
     if (!pref) return;
     toggleChannelMutation.mutate({
@@ -240,25 +248,24 @@ const NotificationPreferencesForm = ({
               />
 
               {pref.enabled && (
-                <div className="mt-3 pt-3 border-t border-border flex flex-wrap gap-4">
-                  {categorySendsEmail(pref.category) && (
-                    <Checkbox
-                      label="Email"
-                      checked={pref.channels.email}
-                      onCheckedChange={() => toggleChannel(pref.id, 'email')}
-                    />
+                <CheckboxGroup
+                  legend={`${pref.label} channels`}
+                  hideLegend
+                  orientation="horizontal"
+                  options={CHANNEL_OPTIONS.filter(
+                    (option) => option.value !== 'email' || categorySendsEmail(pref.category)
                   )}
-                  <Checkbox
-                    label="Push"
-                    checked={pref.channels.push}
-                    onCheckedChange={() => toggleChannel(pref.id, 'push')}
-                  />
-                  <Checkbox
-                    label="In-app"
-                    checked={pref.channels.inApp}
-                    onCheckedChange={() => toggleChannel(pref.id, 'inApp')}
-                  />
-                </div>
+                  value={CHANNEL_OPTIONS.filter((option) => pref.channels[option.value]).map(
+                    (option) => option.value
+                  )}
+                  onValueChange={(next) => {
+                    const changed = CHANNEL_OPTIONS.find(
+                      (option) => next.includes(option.value) !== pref.channels[option.value]
+                    );
+                    if (changed) toggleChannel(pref.id, changed.value);
+                  }}
+                  className="mt-3 border-t border-border pt-3"
+                />
               )}
             </div>
           ))}

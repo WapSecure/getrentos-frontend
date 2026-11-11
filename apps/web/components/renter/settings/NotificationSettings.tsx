@@ -5,12 +5,20 @@ import { TextMessageConsentCard } from '@/components/shared/settings/TextMessage
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Bell, MessageCircle, FileText, CreditCard, Wrench, Home } from '@sureground/icons';
-import { Checkbox, SaveButton, Switch, useToast } from '@sureground/ui';
+import { CheckboxGroup, SaveButton, Switch, useToast } from '@sureground/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import type { NotificationPreference as FetchedPreference } from '@/services/renterService';
 import { categorySendsEmail } from '@sureground/shared';
+
+type Channel = 'email' | 'push' | 'inApp';
+
+const CHANNEL_OPTIONS: { value: Channel; label: string }[] = [
+  { value: 'email', label: 'Email' },
+  { value: 'push', label: 'Push' },
+  { value: 'inApp', label: 'In-app' },
+];
 
 interface NotificationPreference {
   id: string;
@@ -158,7 +166,7 @@ const NotificationSettingsForm = ({ initial }: { initial: NotificationPreference
     },
   });
 
-  const toggleChannel = (prefId: string, channel: 'email' | 'push' | 'inApp') => {
+  const toggleChannel = (prefId: string, channel: Channel) => {
     const pref = preferences.find((p) => p.id === prefId);
     if (!pref) return;
     toggleChannelMutation.mutate({
@@ -196,25 +204,24 @@ const NotificationSettingsForm = ({ initial }: { initial: NotificationPreference
               </div>
 
               {pref.enabled && (
-                <div className="mt-3 pt-3 border-t border-border flex flex-wrap gap-4">
-                  {categorySendsEmail(pref.category) && (
-                    <Checkbox
-                      checked={pref.channels.email}
-                      onCheckedChange={() => toggleChannel(pref.id, 'email')}
-                      label="Email"
-                    />
+                <CheckboxGroup
+                  legend={`${pref.label} channels`}
+                  hideLegend
+                  orientation="horizontal"
+                  options={CHANNEL_OPTIONS.filter(
+                    (option) => option.value !== 'email' || categorySendsEmail(pref.category)
                   )}
-                  <Checkbox
-                    checked={pref.channels.push}
-                    onCheckedChange={() => toggleChannel(pref.id, 'push')}
-                    label="Push"
-                  />
-                  <Checkbox
-                    checked={pref.channels.inApp}
-                    onCheckedChange={() => toggleChannel(pref.id, 'inApp')}
-                    label="In-app"
-                  />
-                </div>
+                  value={CHANNEL_OPTIONS.filter((option) => pref.channels[option.value]).map(
+                    (option) => option.value
+                  )}
+                  onValueChange={(next) => {
+                    const changed = CHANNEL_OPTIONS.find(
+                      (option) => next.includes(option.value) !== pref.channels[option.value]
+                    );
+                    if (changed) toggleChannel(pref.id, changed.value);
+                  }}
+                  className="mt-3 border-t border-border pt-3"
+                />
               )}
             </div>
           );

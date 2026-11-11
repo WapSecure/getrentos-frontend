@@ -6,7 +6,7 @@ import {
   Badge,
   Button,
   Card,
-  Checkbox,
+  CheckboxGroup,
   Field,
   Input,
   ListSkeleton,
@@ -31,7 +31,9 @@ import {
   type RepresentativeScope,
 } from '@/types/landRepresentative';
 
-const SCOPES = Object.keys(REPRESENTATIVE_SCOPE_LABELS) as RepresentativeScope[];
+const SCOPE_OPTIONS = (Object.keys(REPRESENTATIVE_SCOPE_LABELS) as RepresentativeScope[]).map(
+  (scope) => ({ value: scope, label: REPRESENTATIVE_SCOPE_LABELS[scope] })
+);
 
 const AppointmentRow = ({
   appointment,
@@ -157,8 +159,6 @@ export const RepresentativesManager = () => {
     onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
   });
 
-  const toggle = (scope: RepresentativeScope, on: boolean) =>
-    setScopes((current) => (on ? [...current, scope] : current.filter((s) => s !== scope)));
   const canSubmit =
     /\S+@\S+\.\S+/.test(email.trim()) &&
     relationship !== '' &&
@@ -208,19 +208,13 @@ export const RepresentativesManager = () => {
                 )}
               />
             </Field>
-            <fieldset className="space-y-2 sm:col-span-2">
-              <legend className="text-sm font-medium text-foreground">They may</legend>
-              {SCOPES.map((scope) => (
-                <label key={scope} className="flex items-center gap-2 text-sm text-foreground">
-                  <Checkbox
-                    checked={scopes.includes(scope)}
-                    onCheckedChange={(on) => toggle(scope, on)}
-                    aria-label={REPRESENTATIVE_SCOPE_LABELS[scope]}
-                  />
-                  {REPRESENTATIVE_SCOPE_LABELS[scope]}
-                </label>
-              ))}
-            </fieldset>
+            <CheckboxGroup
+              legend="They may"
+              value={scopes}
+              onValueChange={setScopes}
+              options={SCOPE_OPTIONS}
+              className="sm:col-span-2"
+            />
             <Field label="Note to them (optional)" htmlFor="rep-note" className="sm:col-span-2">
               <Textarea
                 id="rep-note"

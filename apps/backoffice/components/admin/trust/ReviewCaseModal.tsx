@@ -17,7 +17,7 @@ import {
   Badge,
   Button,
   CardSkeleton,
-  Checkbox,
+  CheckboxGroup,
   EmptyState,
   PageErrorState,
   Select,
@@ -531,27 +531,21 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
                         />
                       )}
                       {canDecide && decision && checklist.length > 0 && (
-                        <fieldset className="space-y-2 rounded-lg border border-border p-3">
-                          <legend className="px-1 text-sm font-medium text-foreground">
-                            {decision === 'PASS'
-                              ? 'Confirm each item before approving'
-                              : 'Tick what did not pass'}
-                          </legend>
-                          {checklist.map((item) => (
-                            <Checkbox
-                              key={item.code}
-                              label={item.label}
-                              checked={ticked.includes(item.code)}
-                              onCheckedChange={(on) =>
-                                setTicked((current) =>
-                                  on
-                                    ? [...current, item.code]
-                                    : current.filter((code) => code !== item.code)
-                                )
-                              }
-                            />
-                          ))}
-                        </fieldset>
+                        <div className="rounded-lg border border-border p-3">
+                          <CheckboxGroup
+                            legend={
+                              decision === 'PASS'
+                                ? 'Confirm each item before approving'
+                                : 'Tick what did not pass'
+                            }
+                            value={ticked}
+                            onValueChange={setTicked}
+                            options={checklist.map((item) => ({
+                              value: item.code,
+                              label: item.label,
+                            }))}
+                          />
+                        </div>
                       )}
                       <Textarea
                         value={note}
