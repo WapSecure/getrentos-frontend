@@ -49,6 +49,7 @@ const PORTAL_NOUN: Record<TrustPortal, string> = {
   agent: 'working as an agent',
   realtor: 'working as a realtor',
   manager: 'managing properties',
+  estate: 'managing your estate',
 };
 
 interface TrustOverviewViewProps {

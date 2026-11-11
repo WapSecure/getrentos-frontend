@@ -1,5 +1,6 @@
 'use client';
 
+import { ROUTES } from '@/lib/constants/auth';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -48,7 +49,12 @@ import type { ApiError } from '@sureground/shared';
 // Publishing needs a verified identity; point the manager at the page that gives one.
 const identityAction = (err: Error, router: { push: (href: string) => void }) =>
   (err as Partial<ApiError>).code === 'IDENTITY_REQUIRED' || /approved identity/i.test(err.message)
-    ? { action: { label: 'Verify identity', onClick: () => router.push('/estate/verification') } }
+    ? {
+        action: {
+          label: 'Verify identity',
+          onClick: () => router.push(ROUTES.ESTATE_VERIFICATION),
+        },
+      }
     : undefined;
 
 const statusBadge = (status: EstateAgreement['status']) => {

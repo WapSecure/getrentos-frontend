@@ -1,5 +1,4 @@
 import {
-  IdCard,
   BadgeCheck,
   BookOpen,
   Building2,
@@ -115,7 +114,12 @@ export const estateNavigation = defineRoleNavigation({
     },
     { id: 'staff', label: 'Staff', href: ROUTES.ESTATE_STAFF, icon: ShieldCheck },
     { id: 'billing', label: 'Billing', href: ROUTES.ESTATE_BILLING, icon: BadgeCheck },
-    { id: 'verification', label: 'Verification', href: '/estate/verification', icon: IdCard },
+    {
+      id: 'trust',
+      label: 'Trust & verification',
+      href: ROUTES.ESTATE_TRUST_PROFILE,
+      icon: ShieldCheck,
+    },
   ],
   groups: [
     { label: 'Overview', items: ['dashboard'] },
@@ -137,9 +141,9 @@ export const estateNavigation = defineRoleNavigation({
     { label: 'Community', items: ['maintenance', 'polls', 'amenities', 'governance'] },
     {
       label: 'Administration',
-      items: ['committee', 'microsite', 'financials', 'staff', 'billing', 'verification'],
+      items: ['committee', 'microsite', 'financials', 'staff', 'billing', 'trust'],
     },
   ],
   primary: ['dashboard', 'households', 'visitorPasses', 'expected', 'incidents', 'emergency'],
-  utility: ['billing', 'verification'],
+  utility: ['billing', 'trust'],
 });

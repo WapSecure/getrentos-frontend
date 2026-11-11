@@ -10,7 +10,7 @@ interface RealtorProfileDropdownProps {
 
 const LINKS = [
   { href: ROUTES.REALTOR_SETTINGS, label: 'Settings', icon: Settings },
-  { href: ROUTES.REALTOR_TRUST_PROFILE, label: 'Trust profile', icon: Shield },
+  { href: ROUTES.REALTOR_TRUST_PROFILE, label: 'Trust & verification', icon: Shield },
   { href: ROUTES.REALTOR_HELP, label: 'Help centre', icon: HelpCircle },
 ];
 

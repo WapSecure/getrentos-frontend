@@ -117,7 +117,8 @@ export type TrustPortal =
   | 'owner'
   | 'agent'
   | 'realtor'
-  | 'manager';
+  | 'manager'
+  | 'estate';
 
 /** From stored records only. */
 export interface TrustOverview {

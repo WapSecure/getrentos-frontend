@@ -1,9 +1,8 @@
 import {
-  BadgeCheck,
+  ShieldCheck,
   ClipboardCheck,
   ClipboardList,
   FolderOpen,
-  IdCard,
   KeyRound,
   LayoutDashboard,
   Luggage,
@@ -57,15 +56,14 @@ export const agentNavigation = defineRoleNavigation({
     },
     { id: 'reviews', labelKey: 'sidebar.reviews', href: ROUTES.AGENT_REVIEWS, icon: Star },
     {
-      id: 'trustProfile',
-      labelKey: 'sidebar.trust_profile',
+      id: 'trust',
+      label: 'Trust & verification',
       href: ROUTES.AGENT_TRUST_PROFILE,
-      icon: BadgeCheck,
+      icon: ShieldCheck,
     },
     { id: 'managed', label: 'Managed properties', href: ROUTES.AGENT_MANAGED, icon: KeyRound },
     { id: 'bookings', label: 'My stays', href: ROUTES.AGENT_BOOKINGS, icon: Luggage },
     { id: 'settings', labelKey: 'sidebar.settings', href: ROUTES.AGENT_SETTINGS, icon: Settings },
-    { id: 'verification', label: 'Verification', href: '/agent/verification', icon: IdCard },
   ],
   groups: [
     { label: 'Overview', items: ['dashboard'] },
@@ -76,9 +74,9 @@ export const agentNavigation = defineRoleNavigation({
     { label: 'Messages and documents', items: ['documents', 'messages'] },
     {
       label: 'Trust and account',
-      items: ['reviews', 'trustProfile', 'managed', 'bookings', 'settings', 'verification'],
+      items: ['reviews', 'trust', 'managed', 'bookings', 'settings'],
     },
   ],
   primary: ['dashboard', 'tasks', 'inspections', 'verifications', 'workOrders', 'messages'],
-  utility: ['settings', 'verification'],
+  utility: ['settings', 'trust'],
 });

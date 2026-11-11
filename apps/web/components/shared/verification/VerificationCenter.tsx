@@ -31,7 +31,6 @@ import {
   Field,
   Input,
   NumberInput,
-  PageHeader,
   Progress,
   Select,
   Skeleton,
@@ -59,14 +58,12 @@ const HOST_ONBOARD_PURPOSES: TrustPurpose[] = [
 interface VerificationCenterProps {
   subjectId: string;
   purpose: TrustPurpose;
-  description?: string;
   trustScoreHref?: string;
 }
 
 export const VerificationCenter = ({
   subjectId,
   purpose,
-  description,
   trustScoreHref,
 }: VerificationCenterProps) => {
   const queryClient = useQueryClient();
@@ -798,12 +795,6 @@ export const VerificationCenter = ({
 
   return (
     <div className="space-y-5">
-      <PageHeader
-        title="Verification"
-        description={
-          description ?? 'Verify your identity to unlock renting, payments and higher trust limits.'
-        }
-      />
       <div className="rounded-2xl border border-border bg-card p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex items-center gap-3">

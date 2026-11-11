@@ -1,5 +1,6 @@
 'use client';
 
+import { ROUTES } from '@/lib/constants/auth';
 import { useBuyerUser } from '../layout';
 import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -54,7 +55,7 @@ export default function BuyerSettingsPage() {
         return (
           <IdentityVerificationSettings
             description="Verify your identity to unlock making offers on for-sale listings."
-            verificationHref="/buyer/verification"
+            verificationHref={ROUTES.BUYER_VERIFICATION}
           />
         );
       case 'notifications':

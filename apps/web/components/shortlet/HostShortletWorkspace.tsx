@@ -606,7 +606,9 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
           verificationHref={
             role === 'owner' ? ROUTES.OWNER_VERIFICATION : ROUTES.LANDLORD_VERIFICATION
           }
-          trustProfileHref={role === 'owner' ? ROUTES.OWNER_TRUST_PROFILE : undefined}
+          trustProfileHref={
+            role === 'owner' ? ROUTES.OWNER_TRUST_PROFILE : ROUTES.LANDLORD_TRUST_PROFILE
+          }
         />
       )}
       <Dialog open={disputesOpen} onOpenChange={(o) => !o && setDisputesOpen(false)}>
@@ -919,7 +921,9 @@ function CreateListingDialog({
               verificationHref={
                 role === 'owner' ? ROUTES.OWNER_VERIFICATION : ROUTES.LANDLORD_VERIFICATION
               }
-              scoreHref={role === 'owner' ? ROUTES.OWNER_TRUST_PROFILE : undefined}
+              scoreHref={
+                role === 'owner' ? ROUTES.OWNER_TRUST_PROFILE : ROUTES.LANDLORD_TRUST_PROFILE
+              }
             />
           ) : null}
           <Button

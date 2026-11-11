@@ -10,7 +10,7 @@ interface RenterProfileDropdownProps {
 
 const LINKS = [
   { href: ROUTES.RENTER_SETTINGS, label: 'Settings', icon: Settings },
-  { href: ROUTES.RENTER_TRUST_SCORE, label: 'Trust score details', icon: Star },
+  { href: ROUTES.RENTER_TRUST_SCORE, label: 'Trust & verification', icon: Star },
   { href: ROUTES.RENTER_HELP, label: 'Help centre', icon: HelpCircle },
 ];
 

@@ -189,9 +189,9 @@ export const landlordNavigation = defineRoleNavigation({
     },
     { id: 'billing', labelKey: 'sidebar.billing', href: ROUTES.LANDLORD_BILLING, icon: BadgeCheck },
     {
-      id: 'verification',
-      labelKey: 'sidebar.verification',
-      href: ROUTES.LANDLORD_VERIFICATION,
+      id: 'trust',
+      label: 'Trust & verification',
+      href: ROUTES.LANDLORD_TRUST_PROFILE,
       icon: ShieldCheck,
     },
     // Stays the landlord booked as a guest: their own account, not the portfolio.
@@ -237,8 +237,8 @@ export const landlordNavigation = defineRoleNavigation({
       items: ['messages', 'vendors', 'realtors', 'managed', 'queries', 'approvals'],
     },
     { label: 'Grow', items: ['automations', 'reviews', 'referrals'] },
-    { label: 'Account', items: ['settings', 'billing', 'verification', 'bookings'] },
+    { label: 'Account', items: ['settings', 'billing', 'trust', 'bookings'] },
   ],
   primary: ['dashboard', 'properties', 'tenants', 'payments', 'maintenance', 'messages'],
-  utility: ['settings', 'billing', 'verification', 'bookings'],
+  utility: ['settings', 'billing', 'trust', 'bookings'],
 });

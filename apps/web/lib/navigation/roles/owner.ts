@@ -1,5 +1,4 @@
 import {
-  BadgeCheck,
   BedDouble,
   Building2,
   CalendarClock,
@@ -8,7 +7,6 @@ import {
   Handshake,
   HardHat,
   History,
-  IdCard,
   KeyRound,
   Landmark,
   LayoutDashboard,
@@ -139,10 +137,10 @@ export const ownerNavigation = defineRoleNavigation({
     },
     { id: 'reviews', labelKey: 'sidebar.reviews', href: ROUTES.OWNER_REVIEWS, icon: Star },
     {
-      id: 'trustProfile',
-      labelKey: 'sidebar.trust_profile',
+      id: 'trust',
+      label: 'Trust & verification',
       href: ROUTES.OWNER_TRUST_PROFILE,
-      icon: BadgeCheck,
+      icon: ShieldCheck,
     },
     // Literal label: a mandate holder is not necessarily the owner.
     { id: 'managed', label: 'Managed properties', href: ROUTES.OWNER_MANAGED, icon: KeyRound },
@@ -161,7 +159,6 @@ export const ownerNavigation = defineRoleNavigation({
     },
     { id: 'settings', labelKey: 'sidebar.settings', href: ROUTES.OWNER_SETTINGS, icon: Settings },
     { id: 'billing', label: 'Billing', href: ROUTES.OWNER_BILLING, icon: Wallet },
-    { id: 'verification', label: 'Verification', href: '/owner/verification', icon: IdCard },
   ],
   groups: [
     { label: 'Overview', items: ['dashboard', 'properties'] },
@@ -179,9 +176,9 @@ export const ownerNavigation = defineRoleNavigation({
     },
     {
       label: 'Account',
-      items: ['settings', 'billing', 'verification', 'trustProfile', 'bookings'],
+      items: ['settings', 'billing', 'trust', 'bookings'],
     },
   ],
   primary: ['dashboard', 'properties', 'listings', 'offers', 'transactions', 'messages'],
-  utility: ['settings', 'billing', 'verification', 'trustProfile', 'bookings'],
+  utility: ['settings', 'billing', 'trust', 'bookings'],
 });

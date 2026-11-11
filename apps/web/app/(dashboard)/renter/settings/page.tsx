@@ -1,5 +1,6 @@
 'use client';
 
+import { ROUTES } from '@/lib/constants/auth';
 import { useRenterUser } from '../layout';
 import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -76,7 +77,7 @@ export default function SettingsPage() {
         return (
           <IdentityVerificationSettings
             description="Verify your identity to unlock submitting rental applications."
-            verificationHref="/renter/trust-score?tab=verification"
+            verificationHref={ROUTES.RENTER_VERIFICATION}
           />
         );
       case 'notifications':
