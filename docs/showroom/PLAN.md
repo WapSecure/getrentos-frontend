@@ -285,10 +285,52 @@ The product owner added reference images. We take their structure; the palette a
 - **Shortlets:** on the showroom media. Backend #137 sends their `media` list, using the shared `shortletMedia()`.
 - **Estate photo panel:** checked live on Journey Gardens Estate. Rooms and captions load back and save (200).
   - The estate listing itself can't be published until the estate manager's identity is verified (`IDENTITY_REQUIRED`).
-- **Found, not yet fixed: expired photo links on cached pages.**
+- **Fixed: expired photo links on cached pages** (frontend 933e5ae1, backend PR #138 merged).
   - Listing pages are cached for 60 seconds, and Next serves a stale copy once while it refreshes.
   - Photo URLs are signed for 15 minutes.
   - So the first visitor after more than 15 minutes without traffic gets dead photo links until they reload.
-  - Proposed fix:
-    - sign public listing photos for longer (for example 2 hours);
-    - cap how stale a cached page may be (Next `expireTime`) below that, so an older copy is rebuilt rather than served.
+  - The fix:
+    - public listing photos are signed for longer (backend #138);
+    - cached pages can no longer outlive their photo links (frontend 933e5ae1).
+
+## M5 status (2026-11-11)
+
+Shortlets were already on the showroom parts on the web. This milestone brings the showroom to the mobile app.
+
+**Done:**
+
+- **Shared mappers on mobile.** The signed-out listing screen, signed-in rent, sale, land and shortlet screens now build their facts, fees, move-in total, media, rooms and captions with `fromRental`, `fromSale`, `fromLand` and `shortletMedia`. The app and the web now show the same facts and costs.
+  - Sale: `/buyer/listings/:id` sends no media list, verified flag or offer status, so the screen also reads the public `/marketplace/listings/:id`.
+  - Land facts gained block, frontage and depth in the shared mapper, so the web shows them too.
+- **Mobile media viewer** (`apps/mobile/components/showroom/MediaViewer.tsx`):
+  - full screen, swipe between items
+  - a counter of photos only ("3 / 7"), matching the hero; a video or tour page shows "Video tour" or "360 tour" instead
+  - arrow keys page through on Expo web
+  - pinch and double-tap zoom (gesture handler and Reanimated, already in the app)
+  - room chips once photos are tagged, room name and caption under the photo, thumbnail strip
+  - video and 360 tour pages only when the listing has them; nothing loads until the viewer taps play or start
+  - reduced motion respected
+- **Phone hero** (`ShowroomHero`): swipeable, with a counter, the room name on the photo, and Video and 360 tour pills only for real media.
+- **Place names:** repeated ones collapse ("Lagos, Lagos" shows as "Lagos") with the shared `tidyPlace`, as on the web.
+- **Key facts** in one divided row; **costs card** with stated fees, the move-in total and the fees not stated.
+- **Sticky price bar with one primary action:** rent: request viewing; sale: request inspection; land: request inspection (or add a buyer account); shortlet: check dates or book. Apply (rent) and make an offer (sale, land) sit with the costs.
+- **Resized copies:** 960px in the hero, a copy matching the screen's pixel width (up to 1600px) in the viewer, 320px for thumbnails. The original is used when there are none.
+- **Analytics:** `lib/showroomAnalytics.ts` sends the same anonymous events to `POST /analytics/events` (session id per app launch, no token, flushed when the app goes to the background): detail view, gallery open, room select, video start and complete, tour start, save, share, viewing or inspection start, apply (`inquiry_start`), offer start, booking start. The surface is `app_listing` or `app_sticky_bar`.
+
+**Checked how:**
+
+- `tsc --noEmit` in apps/mobile and packages/shared; eslint on every changed file.
+- Shared tests: 13 pass (`pnpm --filter @sureground/shared test`). Mobile: `public-market.test.ts` (new detail-mapping cases) and `routing.test.tsx`, 2 suites pass.
+- Expo web on :8082 against the local API: the bundle builds; `POST /analytics/events` with a mobile-shaped event returns 202 from that origin.
+- **Not checked visually by the agent** (no browser allowed). To check in the VS Code browser: `http://localhost:8082/listing/rent/40ae2516-1a25-4383-add2-c48186b90b5d` (Ikoyi house: rooms, captions, resized copies, fees, a 360 tour).
+
+**Not done:**
+
+- On a device: pinch zoom, swipe, the video player and the tour in the viewer have not been tried on iOS or Android.
+- `property_impression` and `property_card_click` on the mobile Discover, market and shortlet lists.
+- The viewer lives in the app, not `ui-native`, because it needs the gesture handler, expo-video and WebView, which `ui-native` does not depend on. It can move once `ui-native` takes those as peers.
+- Owner and host listing previews still use the old `PropertyGallery`.
+
+**For a product decision:**
+
+- Rent's one primary action is now "Request viewing"; "Apply to rent" moved from the bar to the costs card. Sale and land put "Request inspection" in the bar and "Make an offer" with the costs. Signed-out buttons now read "Request viewing" / "Request inspection" (both sign in first), where the web says "Sign in to enquire" / "Sign in to make an offer".

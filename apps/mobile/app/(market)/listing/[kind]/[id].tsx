@@ -1,17 +1,15 @@
 import { useState } from 'react';
+import { tidyPlace } from '@sureground/shared';
 import { ScrollView, Share, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
 import {
-  Bath,
-  BedDouble,
   Check,
   ChevronLeft,
   Heart,
   Lock,
   MapPin,
-  Maximize,
   Share2,
   ShieldCheck,
   Star,
@@ -20,8 +18,6 @@ import {
   Badge,
   Button,
   Card,
-  Chip,
-  Divider,
   EmptyState,
   IconButton,
   LinkButton,
@@ -46,7 +42,14 @@ import { env } from '@/lib/env';
 import { track } from '@/lib/analytics';
 import { rememberListing } from '@/lib/pendingListing';
 import { PriceComparison } from '@/components/land/PriceComparison';
-import { PropertyGallery } from '@/components/property/PropertyGallery';
+import { ShowroomMedia, useTrackDetailView } from '@/components/showroom/ShowroomMedia';
+import {
+  KeyFactsRow,
+  ShowroomCostsCard,
+  ShowroomFacts,
+  ShowroomPriceBar,
+} from '@/components/showroom/ShowroomParts';
+import { trackShowroom } from '@/lib/showroomAnalytics';
 import { PropertyMapView } from '@/components/property/PropertyMapView';
 import { useMarketSaved } from '@/hooks/useMarketSaved';
 import type { ShortletListing } from '@/lib/api/shortlets';
@@ -60,12 +63,20 @@ import {
   RulesBlock,
 } from '@/components/shortlet/StaySections';
 
-const CTA: Record<MarketKind, string> = {
-  rent: 'Sign in to enquire',
-  sale: 'Sign in to make an offer',
-  shortlet: 'Sign in to book',
-  land: 'Sign in to make an offer',
+// One primary action per market; each signs in first and comes back to this listing.
+const CTA: Record<MarketKind, { label: string; a11y: string }> = {
+  rent: { label: 'Request viewing', a11y: 'Sign in to request a viewing' },
+  sale: { label: 'Request inspection', a11y: 'Sign in to request an inspection' },
+  land: { label: 'Request inspection', a11y: 'Sign in to request an inspection' },
+  shortlet: { label: 'Sign in to book', a11y: 'Sign in to book' },
 };
+
+const START_EVENT = {
+  rent: 'inspection_request_start',
+  sale: 'inspection_request_start',
+  land: 'inspection_request_start',
+  shortlet: 'booking_start',
+} as const;
 
 export default function PublicListing() {
   const { kind, id } = useLocalSearchParams<{ kind: string; id: string }>();
@@ -80,12 +91,14 @@ export default function PublicListing() {
     enabled: valid,
   });
   const p = query.data;
+  useTrackDetailView(p?.id, isMarketKind(kind) ? kind : 'rent');
 
   const back = () => (router.canGoBack() ? router.back() : router.replace('/(market)'));
 
   const share = async () => {
     if (!p || !valid) return;
     track('market_listing_shared', { kind });
+    trackShowroom({ name: 'property_share', listingId: p.id, market: kind as MarketKind });
     await Share.share({
       message: `${p.title} · ${p.location}\n${env.webUrl}${marketWebPath(kind as MarketKind, p.id)}`,
     }).catch(() => undefined);
@@ -97,7 +110,18 @@ export default function PublicListing() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: insets.bottom + 140 }}
       >
-        <PropertyGallery images={p?.images ?? []} height={320} />
+        {p && valid ? (
+          <ShowroomMedia
+            listingId={p.id}
+            market={kind as MarketKind}
+            items={p.media}
+            title={p.title}
+            height={320}
+            onVideoExpired={() => void query.refetch()}
+          />
+        ) : (
+          <View style={{ height: 320, backgroundColor: colors.muted }} />
+        )}
 
         <View style={{ padding: spacing.xl, gap: spacing['2xl'] }}>
           {!valid ? (
@@ -145,7 +169,12 @@ export default function PublicListing() {
         {p ? (
           <View style={{ flexDirection: 'row', gap: spacing.sm }}>
             <IconButton
-              onPress={() => saved.toggle(p.id)}
+              onPress={() => {
+                if (!saved.savedIds.has(p.id)) {
+                  trackShowroom({ name: 'property_save', listingId: p.id, market: p.kind });
+                }
+                saved.toggle(p.id);
+              }}
               accessibilityLabel={
                 saved.savedIds.has(p.id) ? 'Remove listing from saved' : 'Save listing'
               }
@@ -167,7 +196,7 @@ export default function PublicListing() {
         ) : null}
       </View>
 
-      {p && valid ? <Footer listing={p} kind={kind as MarketKind} /> : null}
+      {p && valid && !p.underOffer ? <Footer listing={p} kind={kind as MarketKind} /> : null}
     </View>
   );
 }
@@ -204,7 +233,7 @@ function Body({ listing: p }: { listing: MarketDetail }) {
         <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 6 }}>
           <MapPin size={15} color={colors.mutedForeground} style={{ marginTop: 2 }} />
           <Text variant="callout" color="mutedForeground" style={{ flex: 1 }}>
-            {p.address ? `${p.address}, ${p.location}` : p.location}
+            {tidyPlace(p.address ? `${p.address}, ${p.location}` : p.location)}
           </Text>
         </View>
         <Card
@@ -223,32 +252,34 @@ function Body({ listing: p }: { listing: MarketDetail }) {
         {p.stay ? <TrustChips listing={p.stay} /> : null}
       </View>
 
-      {p.bedrooms || p.bathrooms || p.size || p.highlight ? (
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
-          {p.bedrooms ? (
-            <Chip
-              label={`${p.bedrooms} bed${p.bedrooms === 1 ? '' : 's'}`}
-              leadingIcon={<BedDouble size={15} color={colors.foreground} />}
-            />
-          ) : null}
-          {p.bathrooms ? (
-            <Chip
-              label={`${p.bathrooms} bath${p.bathrooms === 1 ? '' : 's'}`}
-              leadingIcon={<Bath size={15} color={colors.foreground} />}
-            />
-          ) : null}
-          {p.size ? (
-            <Chip
-              label={`${p.size} m²`}
-              leadingIcon={<Maximize size={15} color={colors.foreground} />}
-            />
-          ) : null}
-          {p.highlight ? <Chip label={p.highlight} /> : null}
-        </View>
+      <View style={{ gap: spacing.sm }}>
+        <KeyFactsRow bedrooms={p.bedrooms} bathrooms={p.bathrooms} size={p.size} />
+        {p.highlight ? (
+          <Text variant="callout" color="mutedForeground">
+            {p.highlight}
+          </Text>
+        ) : null}
+      </View>
+
+      {p.underOffer ? (
+        <Card style={{ gap: 2, backgroundColor: colors.warningSubtle }}>
+          <Text variant="bodyStrong">Under offer</Text>
+          <Text variant="caption" color="mutedForeground">
+            The seller has accepted an offer on this property, so it is not taking new offers right
+            now.
+          </Text>
+        </Card>
       ) : null}
 
       {/* A stay's own Prices section itemises everything, so the generic note would only contradict it. */}
-      {p.stay ? null : <CostContext listing={p} />}
+      {p.costs ? (
+        <ShowroomCostsCard
+          market={p.kind === 'shortlet' ? 'rent' : p.kind}
+          costs={p.costs}
+          price={p.price}
+          priceUnit={p.period === 'month' || p.period === 'year' ? p.period : undefined}
+        />
+      ) : null}
 
       {p.host ? (
         <Card
@@ -321,39 +352,7 @@ function Body({ listing: p }: { listing: MarketDetail }) {
         </View>
       ) : null}
 
-      {p.facts.length ? (
-        <View style={{ gap: spacing.sm }}>
-          <SectionHeader title="Details" />
-          <Card padding="none">
-            {p.facts.map((f, i) => (
-              <View
-                key={f.label}
-                accessible
-                accessibilityLabel={`${f.label}: ${f.value}`}
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  gap: spacing.lg,
-                  paddingHorizontal: spacing.lg,
-                  paddingVertical: spacing.md,
-                  borderTopWidth: i ? 1 : 0,
-                  borderTopColor: colors.border,
-                }}
-              >
-                <Text variant="callout" color="mutedForeground">
-                  {f.label}
-                </Text>
-                <Text
-                  variant="callout"
-                  style={{ fontWeight: '600', flexShrink: 1, textAlign: 'right' }}
-                >
-                  {f.value}
-                </Text>
-              </View>
-            ))}
-          </Card>
-        </View>
-      ) : null}
+      <ShowroomFacts facts={p.facts} />
 
       {p.stay ? (
         <>
@@ -455,71 +454,6 @@ function Body({ listing: p }: { listing: MarketDetail }) {
   );
 }
 
-function CostContext({ listing }: { listing: MarketDetail }) {
-  const { spacing } = useTheme();
-  const monthlyEquivalent =
-    listing.kind === 'rent' && listing.period === 'year' ? listing.price / 12 : undefined;
-  const annualEquivalent =
-    listing.kind === 'rent' && listing.period === 'month' ? listing.price * 12 : undefined;
-
-  return (
-    <View style={{ gap: spacing.sm }}>
-      <SectionHeader title="Cost overview" description="Know what the displayed price includes" />
-      <Card padding="none">
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            gap: spacing.lg,
-            paddingHorizontal: spacing.lg,
-            paddingVertical: spacing.md,
-          }}
-        >
-          <Text variant="callout" color="mutedForeground">
-            Listed price
-          </Text>
-          <Price amount={listing.price} period={listing.period} variant="bodyStrong" />
-        </View>
-        {monthlyEquivalent || annualEquivalent ? (
-          <>
-            <Divider />
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                gap: spacing.lg,
-                paddingHorizontal: spacing.lg,
-                paddingVertical: spacing.md,
-              }}
-            >
-              <Text variant="callout" color="mutedForeground">
-                {monthlyEquivalent ? 'Monthly equivalent' : 'Annual equivalent'}
-              </Text>
-              <Price
-                amount={monthlyEquivalent ?? annualEquivalent ?? 0}
-                period={monthlyEquivalent ? 'month' : 'year'}
-                variant="bodyStrong"
-              />
-            </View>
-          </>
-        ) : null}
-        <Divider />
-        <View
-          style={{
-            paddingHorizontal: spacing.lg,
-            paddingVertical: spacing.md,
-          }}
-        >
-          <Text variant="caption" color="mutedForeground">
-            Legal, agency, service, inspection or transaction fees are not included unless the
-            listing details explicitly say otherwise. Confirm the full breakdown before paying.
-          </Text>
-        </View>
-      </Card>
-    </View>
-  );
-}
-
 function SimilarListings({ listing }: { listing: MarketDetail }) {
   const { spacing } = useTheme();
   const saved = useMarketSaved(listing.kind);
@@ -588,29 +522,12 @@ const PROTECTION_LINE: Record<MarketKind, string> = {
 };
 
 function Footer({ listing, kind }: { listing: MarketDetail; kind: MarketKind }) {
-  const { colors, spacing, shadows } = useTheme();
-  const insets = useSafeAreaInsets();
+  const cta = CTA[kind];
   return (
-    <View
-      style={{
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        bottom: 0,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.md,
-        paddingHorizontal: spacing.xl,
-        paddingTop: spacing.md,
-        paddingBottom: insets.bottom + spacing.md,
-        backgroundColor: colors.card,
-        borderTopWidth: 1,
-        borderTopColor: colors.border,
-        ...shadows.lg,
-      }}
-    >
-      <View style={{ flex: 1 }}>
-        <Price amount={listing.price} period={listing.period} variant="subheading" />
+    <ShowroomPriceBar
+      price={listing.price}
+      period={listing.period}
+      caption={
         <LinkButton
           label="Create a free account"
           onPress={() => {
@@ -618,18 +535,28 @@ function Footer({ listing, kind }: { listing: MarketDetail; kind: MarketKind }) 
             router.push('/(auth)/sign-up');
           }}
         />
-      </View>
-      <Button
-        label={CTA[kind]}
-        fullWidth={false}
-        onPress={() => {
-          track('market_signin_cta', { kind });
-          // Come back to this listing once signed in.
-          rememberListing(kind, listing.id);
-          router.push('/(auth)/sign-in');
-        }}
-      />
-    </View>
+      }
+      action={
+        <Button
+          label={cta.label}
+          accessibilityLabel={cta.a11y}
+          fullWidth={false}
+          onPress={() => {
+            track('market_signin_cta', { kind });
+            trackShowroom({
+              name: START_EVENT[kind],
+              listingId: listing.id,
+              market: kind,
+              surface: 'app_sticky_bar',
+              props: { variant: 'signed_out' },
+            });
+            // Come back to this listing once signed in.
+            rememberListing(kind, listing.id);
+            router.push('/(auth)/sign-in');
+          }}
+        />
+      }
+    />
   );
 }
 

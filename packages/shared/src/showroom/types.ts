@@ -156,8 +156,12 @@ export interface PublicLandDto {
   parcel?: {
     estateName?: string;
     plotNumber?: string;
+    block?: string;
     areaValue: number;
     areaUnit: 'SQUARE_METERS' | 'ACRE' | 'HECTARE';
+    /** Metres. */
+    frontage?: number;
+    depth?: number;
     zoning?: string;
     permittedUse?: string;
     terrain?: string;

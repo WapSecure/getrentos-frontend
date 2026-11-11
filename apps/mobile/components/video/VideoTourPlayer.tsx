@@ -13,11 +13,14 @@ export function VideoTourPlayer({
   stream,
   title,
   onExpired,
+  onEnded,
 }: {
   url: string;
   stream?: VideoStream | null;
   title: string;
   onExpired?: () => void;
+  /** Once per play-through, for measurement. */
+  onEnded?: () => void;
 }) {
   // A stream that fails falls back to the original upload for this viewing.
   const [streamFailed, setStreamFailed] = useState(false);
@@ -33,6 +36,7 @@ export function VideoTourPlayer({
         posterUrl={stream.posterUrl}
         title={title}
         onExpired={() => setStreamFailed(true)}
+        onEnded={onEnded}
       />
     ) : (
       <FilePlayer
@@ -41,6 +45,7 @@ export function VideoTourPlayer({
         posterUrl={stream?.posterUrl}
         title={title}
         onExpired={onExpired}
+        onEnded={onEnded}
       />
     );
   }
@@ -52,11 +57,13 @@ function FilePlayer({
   posterUrl,
   title,
   onExpired,
+  onEnded,
 }: {
   url: string;
   posterUrl?: string;
   title: string;
   onExpired?: () => void;
+  onEnded?: () => void;
 }) {
   const player = useVideoPlayer(url, (p) => {
     p.loop = false;
@@ -64,6 +71,12 @@ function FilePlayer({
   });
   const { status } = useEvent(player, 'statusChange', { status: player.status });
   const asked = useRef(false);
+
+  useEffect(() => {
+    if (!onEnded) return;
+    const sub = player.addListener('playToEnd', onEnded);
+    return () => sub.remove();
+  }, [player, onEnded]);
 
   useEffect(() => {
     if (status === 'error' && !asked.current) {
