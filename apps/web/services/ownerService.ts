@@ -1,3 +1,4 @@
+import { uploadVideoDirect } from '@/lib/videoUpload';
 import type { ReplyLanguage } from '@/lib/replyLanguage';
 import {
   authFetch,
@@ -227,6 +228,8 @@ export const ownerService = {
    */
   uploadPropertyMedia: (file: File, kind: 'image' | 'video' = 'image', upload?: UploadOptions) =>
     safeCall(async () => {
+      // Videos go straight to storage, so a large tour never passes through the API.
+      if (kind === 'video') return uploadVideoDirect('/owner/properties', file, upload);
       const form = new FormData();
       form.append('kind', kind);
       form.append('file', file);

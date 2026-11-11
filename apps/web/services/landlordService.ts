@@ -1,3 +1,4 @@
+import { uploadVideoDirect } from '@/lib/videoUpload';
 import type { ReplyLanguage } from '@/lib/replyLanguage';
 import {
   authDownload,
@@ -413,6 +414,9 @@ export const landlordService = {
     file: File,
     upload?: UploadOptions
   ): Promise<ApiResponse<{ key: string; kind: 'image' | 'video' }>> {
+    // Videos go straight to storage, so a large tour never passes through the API.
+    if (kind === 'video')
+      return safeCall(() => uploadVideoDirect('/landlord/properties', file, upload));
     const form = new FormData();
     form.append('kind', kind);
     form.append('file', file);
