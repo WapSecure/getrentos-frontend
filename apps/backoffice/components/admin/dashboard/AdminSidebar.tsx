@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useSyncExternalStore } from 'react';
 import { adminManagedService } from '@/services/adminManagedService';
 import {
+  Percent,
   LayoutDashboard,
   LayoutGrid,
   Webhook,
@@ -119,6 +120,12 @@ const navItems: NavItem[] = [
     label: 'Sureground Managed',
     href: '/admin/managed-mandates',
     icon: Sparkles,
+    permission: 'managed.view',
+  },
+  {
+    label: 'Fee changes',
+    href: '/admin/fee-amendments',
+    icon: Percent,
     permission: 'managed.view',
   },
   {
