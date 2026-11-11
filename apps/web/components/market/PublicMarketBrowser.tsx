@@ -558,6 +558,7 @@ export const PublicMarketBrowser = ({
             price={(l) => l.price}
             area={area}
             onSearchArea={searchArea}
+            onClearArea={clearArea}
             selectedId={selectedId}
             onSelect={setSelectedId}
             empty={

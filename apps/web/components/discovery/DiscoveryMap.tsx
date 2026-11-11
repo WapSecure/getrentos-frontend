@@ -3,12 +3,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- Leaflet is loaded at runtime */
 // Only ever loaded through next/dynamic from MapDiscoveryView, so Leaflet and its CSS stay out of the first bundle.
 import 'leaflet/dist/leaflet.css';
+import 'leaflet-draw/dist/leaflet.draw.css';
 import { useEffect, useRef, useState } from 'react';
 import { Button, Skeleton } from '@sureground/ui';
-import { MapPin, Search } from '@sureground/icons';
+import { MapPin, Pencil, Search, Square, X } from '@sureground/icons';
 import { cn, formatCurrency } from '@sureground/shared';
 import { addBaseTiles } from '@/lib/mapTiles';
-import type { MapArea } from '@/lib/mapArea';
+import { areaKey as keyOfArea, polygonArea, type MapArea } from '@/lib/mapArea';
 
 export interface DiscoveryPin {
   id: string;
@@ -28,8 +29,12 @@ interface DiscoveryMapProps {
   highlightedId?: string;
   onSelect: (id: string) => void;
   onSearchArea: (area: MapArea) => void;
+  /** Shows a "Clear area" control on the map while an area is searched. */
+  onClearArea?: () => void;
   className?: string;
 }
+
+type DrawMode = 'polygon' | 'rectangle';
 
 const LAGOS: [number, number] = [6.5244, 3.3792];
 /** The API moves an approximate point up to 500 m, so this circle always holds the real spot. */
@@ -69,6 +74,7 @@ export function DiscoveryMap({
   highlightedId,
   onSelect,
   onSearchArea,
+  onClearArea,
   className,
 }: DiscoveryMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -86,6 +92,12 @@ export function DiscoveryMap({
   const [ready, setReady] = useState(false);
   const [error, setError] = useState(false);
   const [moved, setMoved] = useState(false);
+  const [drawing, setDrawing] = useState<DrawMode | null>(null);
+  const drawHandlerRef = useRef<any>(null);
+  const onSearchAreaRef = useRef(onSearchArea);
+  useEffect(() => {
+    onSearchAreaRef.current = onSearchArea;
+  }, [onSearchArea]);
 
   // Leaflet touches `window`, so it is loaded on the client, once.
   useEffect(() => {
@@ -93,7 +105,11 @@ export function DiscoveryMap({
     const markers = markersRef.current;
     (async () => {
       try {
-        const L = await import('leaflet');
+        const leaflet: any = await import('leaflet');
+        const L = leaflet.default ?? leaflet;
+        // leaflet-draw extends the global L, so it is set before the plugin loads; both arrive with the map only.
+        (window as any).L = L;
+        await import('leaflet-draw');
         if (cancelled || !containerRef.current) return;
         leafletRef.current = L;
         const map = L.map(containerRef.current, { zoomControl: true, attributionControl: true });
@@ -103,6 +119,29 @@ export function DiscoveryMap({
         map.on('movestart', () => {
           if (!programmaticMove.current) setMoved(true);
         });
+        // A finished drawing becomes the searched area: a box stays a box, a shape is sent as a polygon.
+        map.on(L.Draw.Event.CREATED, (event: any) => {
+          drawHandlerRef.current = null;
+          setDrawing(null);
+          setMoved(false);
+          if (event.layerType === 'rectangle') {
+            const b = event.layer.getBounds();
+            onSearchAreaRef.current({
+              minLat: Math.max(b.getSouth(), -90),
+              minLng: Math.max(b.getWest(), -180),
+              maxLat: Math.min(b.getNorth(), 90),
+              maxLng: Math.min(b.getEast(), 180),
+            });
+            return;
+          }
+          const ring = event.layer.getLatLngs()[0] as Array<{ lat: number; lng: number }>;
+          const next = polygonArea(ring.map((p) => ({ lat: p.lat, lng: p.lng })));
+          if (next) onSearchAreaRef.current(next);
+        });
+        map.on(L.Draw.Event.DRAWSTOP, () => {
+          drawHandlerRef.current = null;
+          setDrawing(null);
+        });
         mapRef.current = map;
         setReady(true);
       } catch {
@@ -111,6 +150,8 @@ export function DiscoveryMap({
     })();
     return () => {
       cancelled = true;
+      drawHandlerRef.current?.disable();
+      drawHandlerRef.current = null;
       mapRef.current?.remove();
       mapRef.current = null;
       markers.clear();
@@ -131,7 +172,7 @@ export function DiscoveryMap({
 
   // Frame the searched area, or else the results; refit only when the set changes, never on hover.
   const pinKey = pins.map((p) => p.id).join('|');
-  const areaKey = area ? boundsOf(area).flat().join(',') : '';
+  const areaKey = keyOfArea(area);
   useEffect(() => {
     const map = mapRef.current;
     const L = leafletRef.current;
@@ -199,14 +240,21 @@ export function DiscoveryMap({
     overlaysRef.current.forEach((o) => o.remove());
     overlaysRef.current = [];
     if (area) {
+      const style = {
+        className: 'stroke-primary fill-primary',
+        weight: 2,
+        dashArray: '6 4',
+        fillOpacity: 0.04,
+        interactive: false,
+      };
       overlaysRef.current.push(
-        L.rectangle(boundsOf(area), {
-          className: 'stroke-primary fill-primary',
-          weight: 2,
-          dashArray: '6 4',
-          fillOpacity: 0.04,
-          interactive: false,
-        }).addTo(map)
+        (area.polygon
+          ? L.polygon(
+              area.polygon.map((p) => [p.lat, p.lng]),
+              style
+            )
+          : L.rectangle(boundsOf(area), style)
+        ).addTo(map)
       );
     }
     const selected = pins.find((p) => p.id === selectedId);
@@ -248,6 +296,35 @@ export function DiscoveryMap({
     });
   };
 
+  // leaflet-draw's own toolbar is replaced by these buttons, so the controls match the rest of the page.
+  const startDrawing = (mode: DrawMode) => {
+    const map = mapRef.current;
+    const L = leafletRef.current;
+    if (!map || !L) return;
+    drawHandlerRef.current?.disable();
+    const shapeOptions = { color: 'currentColor', weight: 2, dashArray: '6 4', fillOpacity: 0.06 };
+    // showArea stays off: leaflet-draw 1.0.4 throws while measuring area on Leaflet 1.9.
+    const handler =
+      mode === 'polygon'
+        ? new L.Draw.Polygon(map, {
+            allowIntersection: true,
+            showArea: false,
+            showLength: false,
+            maxPoints: 50,
+            shapeOptions,
+          })
+        : new L.Draw.Rectangle(map, { showArea: false, metric: true, shapeOptions });
+    handler.enable();
+    drawHandlerRef.current = handler;
+    setDrawing(mode);
+  };
+
+  const stopDrawing = () => {
+    drawHandlerRef.current?.disable();
+    drawHandlerRef.current = null;
+    setDrawing(null);
+  };
+
   if (error) {
     return (
       <div
@@ -280,7 +357,68 @@ export function DiscoveryMap({
           <Skeleton className="h-full w-full rounded-none" />
         </div>
       )}
-      {ready && moved && (
+      {ready && (
+        <div className="absolute right-3 top-3 z-[1000] flex flex-col items-end gap-2 text-primary">
+          {drawing ? (
+            <>
+              <p
+                role="status"
+                className="max-w-56 rounded-lg border border-border bg-card px-3 py-2 text-xs text-foreground shadow-md"
+              >
+                {drawing === 'polygon'
+                  ? 'Tap the map to add corners. Tap the first corner to finish.'
+                  : 'Press and drag across the map to draw a box.'}
+              </p>
+              <Button
+                size="sm"
+                variant="outline"
+                rounded="full"
+                className="bg-card shadow-md"
+                icon={<X className="h-4 w-4" aria-hidden="true" />}
+                onClick={stopDrawing}
+              >
+                Cancel drawing
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                size="sm"
+                variant="outline"
+                rounded="full"
+                className="bg-card shadow-md"
+                icon={<Pencil className="h-4 w-4" aria-hidden="true" />}
+                onClick={() => startDrawing('polygon')}
+              >
+                Draw area
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                rounded="full"
+                className="bg-card shadow-md"
+                icon={<Square className="h-4 w-4" aria-hidden="true" />}
+                onClick={() => startDrawing('rectangle')}
+              >
+                Draw box
+              </Button>
+              {area && onClearArea && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  rounded="full"
+                  className="bg-card shadow-md"
+                  icon={<X className="h-4 w-4" aria-hidden="true" />}
+                  onClick={onClearArea}
+                >
+                  Clear area
+                </Button>
+              )}
+            </>
+          )}
+        </div>
+      )}
+      {ready && moved && !drawing && (
         <div className="pointer-events-none absolute inset-x-0 top-3 z-[1000] flex justify-center">
           <Button
             size="sm"

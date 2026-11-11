@@ -520,6 +520,7 @@ export const ShortletMarketplaceBrowser = ({
             setPage(1);
             setSelectedId(undefined);
           }}
+          onClearArea={clearArea}
           selectedId={selectedId}
           onSelect={setSelectedId}
           empty={

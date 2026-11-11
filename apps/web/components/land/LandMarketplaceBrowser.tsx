@@ -153,6 +153,10 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
   const [area, setArea] = useState<MapArea | undefined>(() =>
     parseAreaParam(searchParams.get('area'))
   );
+  const clearArea = () => {
+    setArea(undefined);
+    setPage(1);
+  };
   const [selectedId, setSelectedId] = useState<string | undefined>(
     () => searchParams.get('selected') || undefined
   );
@@ -504,12 +508,7 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
         </div>
         {area && (
           <div className="mb-4">
-            <MapAreaNotice
-              onClear={() => {
-                setArea(undefined);
-                setPage(1);
-              }}
-            />
+            <MapAreaNotice onClear={clearArea} />
           </div>
         )}
 
@@ -539,6 +538,7 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
               setPage(1);
               setSelectedId(undefined);
             }}
+            onClearArea={clearArea}
             selectedId={selectedId}
             onSelect={setSelectedId}
             empty={
