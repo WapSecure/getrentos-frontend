@@ -338,6 +338,8 @@ export const ROUTES = {
   OWNER_REVIEWS: '/owner/reviews',
   OWNER_TRUST_PROFILE: '/owner/trust-profile',
   OWNER_MANAGED: '/owner/managed',
+  /** The owner's own agreements with a manager (Sureground Managed or a firm); OWNER_MANAGED is the reverse. */
+  OWNER_MANAGEMENT: '/owner/management',
   OWNER_ACTIVITY: '/owner/activity',
   OWNER_QUERIES: '/owner/queries',
   OWNER_SETTINGS: '/owner/settings',
