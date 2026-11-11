@@ -183,7 +183,7 @@ export const ListingMarketSection = ({ listingId }: { listingId: string }) => {
               {items.map((c) => (
                 <li key={c.id} className="py-3">
                   <Link
-                    href={LAND_BUYER_ROUTES.listing(c.id)}
+                    href={LAND_BUYER_ROUTES.listing(c.id, c.title)}
                     className="flex items-start justify-between gap-3 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                   >
                     <span className="min-w-0">

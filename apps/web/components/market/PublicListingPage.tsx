@@ -2,7 +2,6 @@ import { Badge } from '@sureground/ui';
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
 import {
   ArrowLeft,
   BadgeCheck,
@@ -25,8 +24,10 @@ import { SimilarListings } from '@/components/market/SimilarListings';
 import { formatCurrency } from '@/lib/format';
 import { SITE_URL } from '@/lib/site';
 import {
-  fetchPublicListing,
+  fetchPublicListingBySegment,
   MARKET_PATH,
+  publicListingPath,
+  resolvePublicListing,
   type PublicDetailMarket,
   type PublicListingDetail,
 } from '@/lib/publicListingDetail';
@@ -45,11 +46,11 @@ const PROTECTION_LINE: Record<PublicDetailMarket, string> = {
 
 export async function publicListingMetadata(
   market: PublicDetailMarket,
-  id: string
+  segment: string
 ): Promise<Metadata> {
-  const listing = await fetchPublicListing(market, id);
+  const listing = await fetchPublicListingBySegment(market, segment);
   if (!listing) return { title: 'Listing not found', robots: { index: false } };
-  const path = `${MARKET_PATH[market]}/${id}`;
+  const path = publicListingPath(listing);
   const description =
     listing.description?.slice(0, 160) ||
     `${listing.title} in ${listing.location}: verified listing on Sureground with payment protection.`;
@@ -76,10 +77,10 @@ export async function PublicListingPage({
   id: string;
   extra?: ReactNode;
 }) {
-  const listing = await fetchPublicListing(market, id);
-  if (!listing) notFound();
+  const listing = await resolvePublicListing(market, id);
 
   const back = MARKET_PATH[market];
+  const path = publicListingPath(listing);
 
   return (
     <main className="min-h-screen bg-background pt-16">
@@ -112,7 +113,7 @@ export async function PublicListingPage({
                 </h1>
                 <SaveListingButton
                   listingId={listing.id}
-                  returnPath={`${back}/${id}`}
+                  returnPath={path}
                   className="shrink-0 border-border bg-card text-foreground hover:bg-muted focus-visible:ring-primary"
                 />
               </div>
@@ -211,7 +212,7 @@ export async function PublicListingPage({
                 <ListingCallToAction
                   market={market}
                   id={listing.id}
-                  returnPath={`${back}/${id}`}
+                  returnPath={path}
                   underOffer={listing.underOffer}
                   title={listing.title}
                 />
@@ -286,7 +287,7 @@ export async function PublicListingPage({
               priceUnit={listing.priceUnit}
               market={market}
               id={listing.id}
-              returnPath={`${back}/${id}`}
+              returnPath={path}
             />
           </>
         )}
@@ -338,7 +339,7 @@ export function offerJsonLd(listing: PublicListingDetail) {
     description: listing.description,
     price: listing.price,
     priceCurrency: 'NGN',
-    url: `${SITE_URL}${MARKET_PATH[listing.market]}/${listing.id}`,
+    url: `${SITE_URL}${publicListingPath(listing)}`,
     image: listing.images[0],
     availableAtOrFrom: { '@type': 'Place', address: listing.address || listing.location },
   };

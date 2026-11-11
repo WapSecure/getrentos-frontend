@@ -40,6 +40,7 @@ import {
 import { formatAreaParam, parseAreaParam, parseView, type MapArea } from '@/lib/mapArea';
 import { urlParam, useSyncUrlState } from '@/hooks/useUrlState';
 import { CollectionsStrip } from '@/components/collections/CollectionsStrip';
+import { listingPath } from '@/lib/listingSlug';
 
 const PAGE_SIZE = 9;
 const MAP_PAGE_SIZE = 24;
@@ -200,7 +201,7 @@ export const ShortletMarketplaceBrowser = ({
         key={listing.id}
         variant={onMap ? 'map' : 'grid'}
         selected={selected}
-        href={`/shortlets/${listing.id}`}
+        href={listingPath('shortlet', listing.id, listing.title)}
         onVisible={() =>
           track({
             name: 'property_impression',

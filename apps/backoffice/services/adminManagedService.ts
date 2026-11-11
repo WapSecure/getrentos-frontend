@@ -509,3 +509,86 @@ export const adminPmKpiService = {
     return safeCall(() => authFetch<{ id: string; name: string }[]>('/admin/pm-kpis/firms'));
   },
 };
+
+/* ── Fee changes (BD-2) ───────────────────────────────────────────────────────────────────────── */
+
+export type ManagementFeeType = 'PERCENTAGE' | 'FLAT';
+export type FeeAmendmentSide = 'OWNER' | 'MANAGER' | 'SUREGROUND';
+export type FeeAmendmentStatus = 'PENDING' | 'ACCEPTED' | 'DECLINED' | 'WITHDRAWN' | 'EXPIRED';
+
+export interface FeeTerms {
+  type: ManagementFeeType;
+  value: number;
+  label: string;
+}
+
+export interface FeeAmendment {
+  id: string;
+  mandateId: string;
+  propertyId: string;
+  propertyTitle: string | null;
+  ownerName: string | null;
+  managerName: string | null;
+  managerIsSureground: boolean;
+  proposedById: string;
+  proposedByName: string | null;
+  proposerSide: FeeAmendmentSide;
+  from: FeeTerms;
+  to: FeeTerms;
+  reason: string;
+  effectiveFrom: string;
+  expiresAt: string;
+  status: FeeAmendmentStatus;
+  decidedById: string | null;
+  decidedByName: string | null;
+  decidedAt: string | null;
+  decisionNote: string | null;
+  createdAt: string;
+  quorum: { ownersRequired: number; ownersAccepted: number; managerAccepted: boolean };
+  permissions: { canAccept: boolean; canDecline: boolean; canWithdraw: boolean };
+}
+
+export interface FeeAmendmentOverview {
+  mandateId: string;
+  managerIsSureground: boolean;
+  currentFee: FeeTerms | null;
+  canPropose: boolean;
+  proposeBlockedReason: string | null;
+  earliestEffectiveFrom: string;
+  maxPercentage: number;
+  /** Managed only: the published tier rates, the only fees staff may propose. Null on a firm's agreement. */
+  allowedPercentages: number[] | null;
+  pending: FeeAmendment | null;
+}
+
+export interface ProposeFeeAmendmentInput {
+  type: ManagementFeeType;
+  value: number;
+  reason: string;
+  effectiveFrom: string;
+}
+
+export const adminFeeAmendmentService = {
+  list(status?: FeeAmendmentStatus): Promise<ApiResponse<FeeAmendment[]>> {
+    return safeCall(() =>
+      authFetch<FeeAmendment[]>(
+        `/admin/management-mandates/fee-amendments${status ? `?status=${status}` : ''}`
+      )
+    );
+  },
+
+  overview(mandateId: string): Promise<ApiResponse<FeeAmendmentOverview>> {
+    return safeCall(() =>
+      authFetch<FeeAmendmentOverview>(`/admin/management-mandates/${mandateId}/fee-amendments`)
+    );
+  },
+
+  /** Managed agreements only; the API asks for step-up and `authFetch` handles it. */
+  propose(mandateId: string, input: ProposeFeeAmendmentInput): Promise<ApiResponse<FeeAmendment>> {
+    return post<FeeAmendment>(`/admin/management-mandates/${mandateId}/fee-amendments`, input);
+  },
+
+  withdraw(id: string): Promise<ApiResponse<FeeAmendment>> {
+    return post<FeeAmendment>(`/admin/management-mandates/fee-amendments/${id}/withdraw`);
+  },
+};

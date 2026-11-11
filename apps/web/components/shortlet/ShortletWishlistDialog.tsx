@@ -20,6 +20,7 @@ import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';
 import { formatCurrency } from '@/lib/format';
 import type { ShortletListing } from '@/types/shortlet';
+import { listingPath } from '@/lib/listingSlug';
 
 export function ShortletWishlistDialog({ onClose }: { onClose: () => void }) {
   const router = useRouter();
@@ -77,7 +78,7 @@ export function ShortletWishlistDialog({ onClose }: { onClose: () => void }) {
                   onRemove={() => unsave.mutate(l.id)}
                   onOpen={() => {
                     onClose();
-                    router.push(`/shortlets/${l.id}`);
+                    router.push(listingPath('shortlet', l.id, l.title));
                   }}
                 />
               ))}

@@ -10,7 +10,9 @@ import {
   type ShowroomListing,
   type ShowroomMarket,
 } from '@sureground/shared/showroom';
+import { notFound, permanentRedirect } from 'next/navigation';
 import { publicFetchInit } from '@/lib/publicFetch';
+import { LISTING_BASE, listingIdFromSegment, listingPath, listingSegment } from '@/lib/listingSlug';
 
 export type PublicDetailMarket = ShowroomMarket;
 export type PublicListingFact = ShowroomFact;
@@ -51,7 +53,40 @@ export async function fetchPublicListing(
 }
 
 export const MARKET_PATH: Record<PublicDetailMarket, string> = {
-  rent: '/rent',
-  sale: '/buy',
-  land: '/land',
+  rent: LISTING_BASE.rent,
+  sale: LISTING_BASE.sale,
+  land: LISTING_BASE.land,
 };
+
+/** Canonical public path for a listing detail page. */
+export const publicListingPath = (listing: Pick<PublicListingDetail, 'market' | 'id' | 'title'>) =>
+  listingPath(listing.market, listing.id, listing.title);
+
+/**
+ * Load the listing a URL segment points at (`<slug>-<uuid>` or a bare id) and send any
+ * non-canonical address (old bare-id links, a renamed title) to the canonical one with a 308,
+ * so search engines index a single URL per listing.
+ */
+export async function resolvePublicListing(
+  market: PublicDetailMarket,
+  segment: string
+): Promise<PublicListingDetail> {
+  const listing = await fetchPublicListing(market, listingIdFromSegment(segment));
+  if (!listing) notFound();
+  if (safeDecode(segment) !== listingSegment(listing.id, listing.title)) {
+    permanentRedirect(publicListingPath(listing));
+  }
+  return listing;
+}
+
+/** Metadata-only variant: never redirects, so generateMetadata stays side-effect free. */
+export const fetchPublicListingBySegment = (market: PublicDetailMarket, segment: string) =>
+  fetchPublicListing(market, listingIdFromSegment(segment));
+
+function safeDecode(segment: string): string {
+  try {
+    return decodeURIComponent(segment);
+  } catch {
+    return segment;
+  }
+}
