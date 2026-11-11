@@ -25,12 +25,14 @@ import {
   Star,
   UserRoundCheck,
   Users,
+  Video,
   Wallet,
   Wrench,
 } from '@sureground/icons';
 import { ESTATE_MARKETPLACE_ROUTES, ROUTES } from '@/lib/constants/auth';
 import { DIASPORA_ROUTES } from '@/lib/constants/diasporaRoutes';
 import { OWNER_LAND_SALES_ROUTE } from '@/lib/constants/landDeveloperRoutes';
+import { VISIT_ROUTES } from '@/lib/constants/visitRoutes';
 import { defineRoleNavigation } from '../resolve';
 
 export const ownerNavigation = defineRoleNavigation({
@@ -84,6 +86,7 @@ export const ownerNavigation = defineRoleNavigation({
       href: ROUTES.OWNER_VIEWINGS,
       icon: CalendarClock,
     },
+    { id: 'tours', label: 'Video tours', href: VISIT_ROUTES.OWNER_TOURS, icon: Video },
     { id: 'offers', labelKey: 'sidebar.offers', href: ROUTES.OWNER_OFFERS, icon: Handshake },
     {
       id: 'transactions',
@@ -173,7 +176,7 @@ export const ownerNavigation = defineRoleNavigation({
     { label: 'Overview', items: ['dashboard', 'properties'] },
     {
       label: 'Selling',
-      items: ['listings', 'leads', 'viewings', 'offers', 'transactions', 'realtors'],
+      items: ['listings', 'leads', 'viewings', 'tours', 'offers', 'transactions', 'realtors'],
     },
     { label: 'Land', items: ['land', 'landSales'] },
     { label: 'Short stays', items: ['shortlets'] },

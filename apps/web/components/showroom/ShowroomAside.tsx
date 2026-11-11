@@ -48,6 +48,7 @@ export function ShowroomAside({
             id={listing.id}
             returnPath={returnPath}
             underOffer={listing.underOffer}
+            title={listing.title}
           />
         </div>
 

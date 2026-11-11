@@ -9,9 +9,11 @@ import {
   ShieldCheck,
   Users,
   UsersRound,
+  Video,
 } from '@sureground/icons';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { ROUTES } from '@/lib/constants/auth';
+import { VISIT_ROUTES } from '@/lib/constants/visitRoutes';
 import { SectionNav } from './SectionNav';
 
 export function LandlordLettingsNav() {
@@ -43,6 +45,7 @@ export function OwnerSellingNav() {
         { label: t('sidebar.sale_listings'), href: ROUTES.OWNER_LISTINGS, icon: Megaphone },
         { label: t('sidebar.buyer_leads'), href: ROUTES.OWNER_LEADS, icon: Users },
         { label: t('sidebar.viewings'), href: ROUTES.OWNER_VIEWINGS, icon: CalendarClock },
+        { label: 'Video tours', href: VISIT_ROUTES.OWNER_TOURS, icon: Video },
         { label: t('sidebar.offers'), href: ROUTES.OWNER_OFFERS, icon: Handshake },
         { label: t('sidebar.transactions'), href: ROUTES.OWNER_TRANSACTIONS, icon: ShieldCheck },
       ]}

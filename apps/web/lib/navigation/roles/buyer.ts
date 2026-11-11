@@ -9,14 +9,17 @@ import {
   LayoutDashboard,
   MapPinned,
   MessageCircle,
+  ScanSearch,
   Search,
   Settings,
   ShieldCheck,
   Star,
+  Video,
 } from '@sureground/icons';
 import { ROUTES } from '@/lib/constants/auth';
 import { DIASPORA_ROUTES } from '@/lib/constants/diasporaRoutes';
 import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';
+import { VISIT_ROUTES } from '@/lib/constants/visitRoutes';
 import { defineRoleNavigation } from '../resolve';
 
 export const buyerNavigation = defineRoleNavigation({
@@ -50,6 +53,13 @@ export const buyerNavigation = defineRoleNavigation({
       labelKey: 'sidebar.viewing_requests',
       href: ROUTES.BUYER_VIEWINGS,
       icon: CalendarClock,
+    },
+    { id: 'tours', label: 'Video tours', href: VISIT_ROUTES.BUYER_TOURS, icon: Video },
+    {
+      id: 'inspections',
+      label: 'Inspections',
+      href: VISIT_ROUTES.BUYER_INSPECTIONS,
+      icon: ScanSearch,
     },
     { id: 'offers', labelKey: 'sidebar.offers', href: ROUTES.BUYER_OFFERS, icon: Handshake },
     {
@@ -96,7 +106,18 @@ export const buyerNavigation = defineRoleNavigation({
   groups: [
     { label: 'Overview', items: ['dashboard'] },
     { label: 'Find property', items: ['discover', 'saved', 'land'] },
-    { label: 'Buying', items: ['viewings', 'offers', 'transactions', 'landPurchases', 'invest'] },
+    {
+      label: 'Buying',
+      items: [
+        'viewings',
+        'tours',
+        'inspections',
+        'offers',
+        'transactions',
+        'landPurchases',
+        'invest',
+      ],
+    },
     { label: 'Messages and documents', items: ['messages', 'documents'] },
     {
       label: 'Trust and account',

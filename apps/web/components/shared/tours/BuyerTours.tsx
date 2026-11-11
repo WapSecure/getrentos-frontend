@@ -13,52 +13,65 @@ import {
 } from '@sureground/ui';
 import { Video } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
-import { landSiteTourKeys, landSiteTourService } from '@/services/landSiteTourService';
-import type { LandSiteTour } from '@/types/landSiteTour';
+import { siteTourKeys, siteTourService } from '@/services/siteTourService';
+import type { SiteTour, TourScope } from '@/types/siteTour';
 import { StarRating } from '@/components/landlord/vendors/StarRating';
 import { TourCard } from './TourCard';
+import { TourRecordingConsent } from './TourRecordingConsent';
 
 type Notify = (message: string, variant?: 'success' | 'error') => void;
 
-const BuyerActions = ({ tour, notify }: { tour: LandSiteTour; notify: Notify }) => {
+const BuyerActions = ({
+  tour,
+  scope,
+  notify,
+}: {
+  tour: SiteTour;
+  scope: TourScope;
+  notify: Notify;
+}) => {
   const queryClient = useQueryClient();
   // Captured once at mount: render must not read the clock.
   const [now] = useState(() => Date.now());
   const [mode, setMode] = useState<'none' | 'other' | 'cancel' | 'rate'>('none');
   const [text, setText] = useState('');
   const [rating, setRating] = useState(0);
-  const done = (message: string) => (updated: LandSiteTour) => {
-    queryClient.setQueryData<LandSiteTour[]>(landSiteTourKeys.buyer, (list) =>
+  const key = siteTourKeys.buyer(scope);
+  const update = (updated: SiteTour, message: string) => {
+    queryClient.setQueryData<SiteTour[]>(key, (list) =>
       list?.map((t) => (t.id === updated.id ? updated : t))
     );
-    void queryClient.invalidateQueries({ queryKey: landSiteTourKeys.buyer });
+    void queryClient.invalidateQueries({ queryKey: key });
+    notify(message);
+  };
+  const done = (message: string) => (updated: SiteTour) => {
+    update(updated, message);
     setMode('none');
     setText('');
-    notify(message);
   };
   const fail = (reason: Error) => notify(reason.message, 'error');
   const choose = useMutation({
-    mutationFn: (slot: string) => unwrap(landSiteTourService.choose(tour.id, slot)),
+    mutationFn: (slot: string) => unwrap(siteTourService.choose(scope, tour.id, slot)),
     onSuccess: done('Booked. You will be reminded a day and an hour before.'),
     onError: fail,
   });
   const other = useMutation({
-    mutationFn: () => unwrap(landSiteTourService.otherTimes(tour.id, text)),
+    mutationFn: () => unwrap(siteTourService.otherTimes(scope, tour.id, text)),
     onSuccess: done('Asked the seller for other times.'),
     onError: fail,
   });
   const cancel = useMutation({
-    mutationFn: () => unwrap(landSiteTourService.cancel('buyer', tour.id, text)),
+    mutationFn: () => unwrap(siteTourService.cancel(scope, 'buyer', tour.id, text)),
     onSuccess: done('Tour cancelled.'),
     onError: fail,
   });
   const noShow = useMutation({
-    mutationFn: () => unwrap(landSiteTourService.reportNoShow(tour.id)),
+    mutationFn: () => unwrap(siteTourService.reportNoShow(scope, tour.id)),
     onSuccess: done('Reported. You can ask for another tour.'),
     onError: fail,
   });
   const rate = useMutation({
-    mutationFn: () => unwrap(landSiteTourService.feedback(tour.id, rating, text)),
+    mutationFn: () => unwrap(siteTourService.feedback(scope, tour.id, rating, text)),
     onSuccess: done('Thanks for your feedback.'),
     onError: fail,
   });
@@ -169,6 +182,13 @@ const BuyerActions = ({ tour, notify }: { tour: LandSiteTour; notify: Notify }) 
           )}
         </div>
       )}
+      <TourRecordingConsent
+        tour={tour}
+        scope={scope}
+        side="buyer"
+        onUpdated={update}
+        onError={fail}
+      />
       {['SCHEDULED', 'COMPLETED'].includes(tour.status) && (
         <p className="text-xs text-muted-foreground">{tour.disclaimer}</p>
       )}
@@ -176,13 +196,14 @@ const BuyerActions = ({ tour, notify }: { tour: LandSiteTour; notify: Notify }) 
   );
 };
 
-export const BuyerTours = () => {
+/** `land`: land tours only (land routes). `all`: every tour, homes and land. */
+export const BuyerTours = ({ scope }: { scope: TourScope }) => {
   const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(
     null
   );
   const list = useQuery({
-    queryKey: landSiteTourKeys.buyer,
-    queryFn: () => unwrap(landSiteTourService.mine()),
+    queryKey: siteTourKeys.buyer(scope),
+    queryFn: () => unwrap(siteTourService.mine(scope)),
   });
   const notify: Notify = (message, variant = 'success') => setToast({ message, variant });
 
@@ -203,13 +224,22 @@ export const BuyerTours = () => {
         <EmptyState
           icon={Video}
           title="No video tours yet"
-          description="Ask for one from a land listing or an estate plot."
+          description={
+            scope === 'land'
+              ? 'Ask for one from a land listing or an estate plot.'
+              : 'Ask for one from a home for sale, a land listing or an estate plot.'
+          }
         />
       ) : (
         <ul className="space-y-4">
           {tours.map((tour) => (
-            <TourCard key={tour.id} tour={tour} who={`Host: ${tour.hostName}`}>
-              <BuyerActions tour={tour} notify={notify} />
+            <TourCard
+              key={tour.id}
+              tour={tour}
+              who={`Host: ${tour.hostName}`}
+              join={() => siteTourService.join(scope, 'buyer', tour.id)}
+            >
+              <BuyerActions tour={tour} scope={scope} notify={notify} />
             </TourCard>
           ))}
         </ul>

@@ -15,66 +15,48 @@ import {
   Textarea,
 } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
+import { VISIT_ROUTES } from '@/lib/constants/visitRoutes';
 import {
   landRepresentativeKeys,
   landRepresentativeService,
 } from '@/services/landRepresentativeService';
-import { landSiteTourKeys, landSiteTourService } from '@/services/landSiteTourService';
-import { LAND_TOUR_DISCLAIMER } from '@/types/landSiteTour';
+import { siteTourKeys, siteTourService } from '@/services/siteTourService';
+import { TOUR_DISCLAIMER, type TourPlace } from '@/types/siteTour';
+import { browserTimeZone, TimeZoneSelect } from '@/components/shared/forms/TimeZoneSelect';
 
-export const BUYER_TOURS_ROUTE = '/buyer/land/tours';
-
-const TIME_ZONE_OPTIONS = (() => {
-  try {
-    const zones = (
-      Intl as unknown as { supportedValuesOf?: (key: string) => string[] }
-    ).supportedValuesOf?.('timeZone');
-    if (zones?.length)
-      return zones.map((zone) => ({ value: zone, label: zone.replace(/_/g, ' ') }));
-  } catch {
-    // Older browsers: fall back to a short list.
-  }
-  return [
-    'Africa/Lagos',
-    'Europe/London',
-    'America/New_York',
-    'America/Toronto',
-    'America/Chicago',
-    'Asia/Dubai',
-  ].map((zone) => ({ value: zone, label: zone.replace(/_/g, ' ') }));
-})();
-
-const browserZone = () => {
-  try {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'Africa/Lagos';
-  } catch {
-    return 'Africa/Lagos';
-  }
+const COPY: Record<TourPlace, { where: string; route: string }> = {
+  land: { where: 'at the land', route: VISIT_ROUTES.BUYER_LAND_TOURS },
+  home: { where: 'at the property', route: VISIT_ROUTES.BUYER_TOURS },
 };
 
+/** Ask for a live video tour of land (land routes) or a built home for sale (general routes). */
 export const RequestTourDialog = ({
   open,
   onClose,
   target,
-  landName,
+  placeName,
+  place = 'land',
 }: {
   open: boolean;
   onClose: () => void;
   target: { listingId: string } | { plotId: string };
-  landName: string;
+  placeName: string;
+  place?: TourPlace;
 }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [timeZone, setTimeZone] = useState(browserZone);
+  const scope = place === 'land' ? 'land' : 'all';
+  const [timeZone, setTimeZone] = useState(() => browserTimeZone('Africa/Lagos'));
   const [preferredTimes, setPreferredTimes] = useState('');
   const [attendee, setAttendee] = useState('');
   const [accepted, setAccepted] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Representatives are a land feature for now.
   const reps = useQuery({
     queryKey: landRepresentativeKeys.mine,
     queryFn: () => unwrap(landRepresentativeService.mine()),
-    enabled: open,
+    enabled: open && place === 'land',
     retry: false,
   });
   const attendees = (reps.data ?? []).filter(
@@ -84,7 +66,7 @@ export const RequestTourDialog = ({
   const submit = useMutation({
     mutationFn: () =>
       unwrap(
-        landSiteTourService.request({
+        siteTourService.request(scope, {
           ...target,
           timeZone: timeZone.trim(),
           preferredTimes,
@@ -92,8 +74,8 @@ export const RequestTourDialog = ({
         })
       ),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: landSiteTourKeys.buyer });
-      router.push(BUYER_TOURS_ROUTE);
+      void queryClient.invalidateQueries({ queryKey: siteTourKeys.buyer(scope) });
+      router.push(COPY[place].route);
     },
     onError: (reason: Error) => setError(reason.message),
   });
@@ -111,21 +93,15 @@ export const RequestTourDialog = ({
             Ask for a live video tour
           </DialogTitle>
           <DialogDescription className="mt-1 text-sm text-muted-foreground">
-            {landName}. The seller offers up to three times in daylight at the land; you see them in
-            your own time zone and pick one.
+            {placeName}. The seller offers up to three times in daylight {COPY[place].where}; you
+            see them in your own time zone and pick one.
           </DialogDescription>
         </div>
         <Field
           label="Your time zone"
           hint="Detected from your browser. Change it if you are booking for another place."
         >
-          <Select
-            value={timeZone}
-            onValueChange={setTimeZone}
-            ariaLabel="Your time zone"
-            searchPlaceholder="Search a city or region"
-            options={TIME_ZONE_OPTIONS}
-          />
+          <TimeZoneSelect value={timeZone} onValueChange={setTimeZone} ariaLabel="Your time zone" />
         </Field>
         <Field label="When suits you (optional)" htmlFor="tour-times">
           <Textarea
@@ -154,7 +130,7 @@ export const RequestTourDialog = ({
             onCheckedChange={setAccepted}
             aria-label="I understand a video tour is not a search"
           />
-          <span>{LAND_TOUR_DISCLAIMER}</span>
+          <span>{TOUR_DISCLAIMER[place]}</span>
         </label>
         {error && (
           <p className="text-sm text-destructive" role="alert">

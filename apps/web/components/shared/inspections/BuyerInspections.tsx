@@ -17,41 +17,46 @@ import { formatDate } from '@/lib/format';
 import {
   prePurchaseInspectionKeys,
   prePurchaseInspectionService,
-} from '@/services/landPrePurchaseInspectionService';
-import type { PrePurchaseInspection } from '@/types/landPrePurchaseInspection';
-import { InspectionReportCard } from '../watch/InspectionReportCard';
+} from '@/services/prePurchaseInspectionService';
+import type { PrePurchaseInspection } from '@/types/prePurchaseInspection';
+import type { TourScope } from '@/types/siteTour';
+import { InspectionReportCard } from '@/components/land/watch/InspectionReportCard';
 
 type Notify = (message: string, variant?: 'success' | 'error') => void;
 
 const BuyerInspectionActions = ({
   inspection,
+  scope,
   notify,
 }: {
   inspection: PrePurchaseInspection;
+  scope: TourScope;
   notify: Notify;
 }) => {
   const queryClient = useQueryClient();
   const [mode, setMode] = useState<'none' | 'ask' | 'reinspect'>('none');
   const [text, setText] = useState('');
   const done = (message: string) => (updated: PrePurchaseInspection) => {
-    queryClient.setQueryData<PrePurchaseInspection[]>(prePurchaseInspectionKeys.mine, (list) =>
-      list?.some((x) => x.id === updated.id)
-        ? list.map((x) => (x.id === updated.id ? updated : x))
-        : [updated, ...(list ?? [])]
+    queryClient.setQueryData<PrePurchaseInspection[]>(
+      prePurchaseInspectionKeys.mine(scope),
+      (list) =>
+        list?.some((x) => x.id === updated.id)
+          ? list.map((x) => (x.id === updated.id ? updated : x))
+          : [updated, ...(list ?? [])]
     );
-    void queryClient.invalidateQueries({ queryKey: prePurchaseInspectionKeys.mine });
+    void queryClient.invalidateQueries({ queryKey: prePurchaseInspectionKeys.mine(scope) });
     setMode('none');
     setText('');
     notify(message);
   };
   const fail = (reason: Error) => notify(reason.message, 'error');
   const ask = useMutation({
-    mutationFn: () => unwrap(prePurchaseInspectionService.ask(inspection.id, text)),
+    mutationFn: () => unwrap(prePurchaseInspectionService.ask(scope, inspection.id, text)),
     onSuccess: done('Question sent. Sureground will answer here.'),
     onError: fail,
   });
   const reinspect = useMutation({
-    mutationFn: () => unwrap(prePurchaseInspectionService.reinspect(inspection.id, text)),
+    mutationFn: () => unwrap(prePurchaseInspectionService.reinspect(scope, inspection.id, text)),
     onSuccess: done('Reinspection requested.'),
     onError: fail,
   });
@@ -117,13 +122,14 @@ const BuyerInspectionActions = ({
   );
 };
 
-export const BuyerInspections = () => {
+/** `land`: land inspections only (land routes). `all`: every inspection, homes and land. */
+export const BuyerInspections = ({ scope }: { scope: TourScope }) => {
   const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(
     null
   );
   const list = useQuery({
-    queryKey: prePurchaseInspectionKeys.mine,
-    queryFn: () => unwrap(prePurchaseInspectionService.mine()),
+    queryKey: prePurchaseInspectionKeys.mine(scope),
+    queryFn: () => unwrap(prePurchaseInspectionService.mine(scope)),
   });
   const notify: Notify = (message, variant = 'success') => setToast({ message, variant });
 
@@ -146,7 +152,11 @@ export const BuyerInspections = () => {
         <EmptyState
           icon={ScanSearch}
           title="No inspections yet"
-          description="Commission one from a land listing or an estate plot."
+          description={
+            scope === 'land'
+              ? 'Commission one from a land listing or an estate plot.'
+              : 'Commission one from a home for sale, a land listing or an estate plot.'
+          }
         />
       ) : (
         <ul className="space-y-4">
@@ -162,7 +172,9 @@ export const BuyerInspections = () => {
               </p>
               <InspectionReportCard
                 inspection={inspection}
-                actions={<BuyerInspectionActions inspection={inspection} notify={notify} />}
+                actions={
+                  <BuyerInspectionActions inspection={inspection} scope={scope} notify={notify} />
+                }
               />
             </li>
           ))}
