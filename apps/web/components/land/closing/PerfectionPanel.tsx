@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { AlertTriangle, CheckCircle2, CircleDashed, Send } from '@sureground/icons';
-import { Alert, Badge, Button, Input } from '@sureground/ui';
+import { AlertTriangle, CheckCircle2, Send } from '@sureground/icons';
+import { Alert, Badge, Button, Input, Timeline, type TimelineState } from '@sureground/ui';
 import { formatDate } from '@/lib/format';
 import type { LandPerfection, LandPerfectionStep } from '@/types/landClosing';
 
@@ -15,6 +15,13 @@ const STEP_BADGE: Record<
   APPROVED: { label: 'Approved', variant: 'success' },
   REJECTED: { label: 'Rejected', variant: 'danger' },
   NOT_APPLICABLE: { label: 'Not applicable', variant: 'neutral' },
+};
+const STEP_STATE: Record<LandPerfectionStep['status'], TimelineState> = {
+  NOT_STARTED: 'pending',
+  SUBMITTED: 'current',
+  APPROVED: 'done',
+  REJECTED: 'blocked',
+  NOT_APPLICABLE: 'skipped',
 };
 const OWNER: Record<LandPerfectionStep['owner'], string> = {
   DEVELOPER: 'Developer',
@@ -71,96 +78,89 @@ export const PerfectionPanel = ({
         </Alert>
       )}
 
-      <ul className="space-y-2">
-        {perfection.steps.map((step) => {
+      <Timeline
+        aria-label="Title perfection steps"
+        items={perfection.steps.map((step) => {
           const badge = STEP_BADGE[step.status];
           const done = step.status === 'APPROVED' || step.status === 'NOT_APPLICABLE';
-          return (
-            <li key={step.key} className="rounded-xl border border-border p-3">
-              <div className="flex flex-wrap items-start justify-between gap-2">
-                <p className="flex items-center gap-2 font-medium text-foreground">
-                  {done ? (
-                    <CheckCircle2 className="h-4 w-4 text-success" aria-hidden />
-                  ) : step.escalationLevel > 0 ? (
-                    <AlertTriangle className="h-4 w-4 text-warning" aria-hidden />
-                  ) : (
-                    <CircleDashed className="h-4 w-4 text-muted-foreground" aria-hidden />
-                  )}
-                  {step.label}
+          const late = step.escalationLevel > 0 && !done;
+          const canRecord =
+            role === 'developer' && onUpdate && perfection.status !== 'PERFECTED' && !done;
+          return {
+            id: step.key,
+            title: step.label,
+            state: STEP_STATE[step.status],
+            icon: late ? <AlertTriangle className="h-3.5 w-3.5 text-warning" /> : undefined,
+            badge: <Badge variant={badge.variant}>{badge.label}</Badge>,
+            description: (
+              <>
+                <p>
+                  {OWNER[step.owner]}
+                  {!done && step.dueDate ? ` · due ${formatDate(step.dueDate)}` : ''}
+                  {late ? ' · late' : ''}
+                  {step.submittedAt
+                    ? ` · submitted ${formatDate(step.submittedAt)}${step.submissionReference ? ` (${step.submissionReference})` : ''}`
+                    : ''}
+                  {step.approvedAt
+                    ? ` · approved ${formatDate(step.approvedAt)}${step.approvalReference ? ` (${step.approvalReference})` : ''}`
+                    : ''}
                 </p>
-                <Badge variant={badge.variant}>{badge.label}</Badge>
+                {step.note && <p className="mt-1 text-foreground">{step.note}</p>}
+              </>
+            ),
+            actions: !canRecord ? undefined : editing?.key === step.key ? (
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <Input
+                  value={reference}
+                  onChange={(event) => setReference(event.target.value)}
+                  maxLength={200}
+                  placeholder={
+                    editing.status === 'SUBMITTED'
+                      ? 'File or application number'
+                      : 'Approval, instrument or receipt number'
+                  }
+                />
+                <Button
+                  size="sm"
+                  disabled={editing.status === 'APPROVED' && !reference.trim()}
+                  isLoading={busyKey === step.key}
+                  onClick={() => {
+                    onUpdate?.(step.key, editing.status, reference.trim());
+                    setEditing(null);
+                    setReference('');
+                  }}
+                >
+                  Save
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setEditing(null)}>
+                  Cancel
+                </Button>
               </div>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {OWNER[step.owner]}
-                {!done && step.dueDate ? ` · due ${formatDate(step.dueDate)}` : ''}
-                {step.escalationLevel > 0 && !done ? ' · late' : ''}
-                {step.submittedAt
-                  ? ` · submitted ${formatDate(step.submittedAt)}${step.submissionReference ? ` (${step.submissionReference})` : ''}`
-                  : ''}
-                {step.approvedAt
-                  ? ` · approved ${formatDate(step.approvedAt)}${step.approvalReference ? ` (${step.approvalReference})` : ''}`
-                  : ''}
-              </p>
-              {step.note && <p className="mt-1 text-xs text-foreground">{step.note}</p>}
-
-              {role === 'developer' &&
-                onUpdate &&
-                perfection.status !== 'PERFECTED' &&
-                !done &&
-                (editing?.key === step.key ? (
-                  <div className="mt-2 flex flex-col gap-2 sm:flex-row">
-                    <Input
-                      value={reference}
-                      onChange={(event) => setReference(event.target.value)}
-                      maxLength={200}
-                      placeholder={
-                        editing.status === 'SUBMITTED'
-                          ? 'File or application number'
-                          : 'Approval, instrument or receipt number'
-                      }
-                    />
-                    <Button
-                      size="sm"
-                      disabled={editing.status === 'APPROVED' && !reference.trim()}
-                      isLoading={busyKey === step.key}
-                      onClick={() => {
-                        onUpdate(step.key, editing.status, reference.trim());
-                        setEditing(null);
-                        setReference('');
-                      }}
-                    >
-                      Save
-                    </Button>
-                    <Button size="sm" variant="ghost" onClick={() => setEditing(null)}>
-                      Cancel
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {step.status !== 'SUBMITTED' && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        icon={<Send className="h-4 w-4" />}
-                        onClick={() => setEditing({ key: step.key, status: 'SUBMITTED' })}
-                      >
-                        Record submission
-                      </Button>
-                    )}
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      icon={<CheckCircle2 className="h-4 w-4" />}
-                      onClick={() => setEditing({ key: step.key, status: 'APPROVED' })}
-                    >
-                      Record approval
-                    </Button>
-                  </div>
-                ))}
-            </li>
-          );
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {step.status !== 'SUBMITTED' && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    icon={<Send className="h-4 w-4" />}
+                    onClick={() => setEditing({ key: step.key, status: 'SUBMITTED' })}
+                  >
+                    Record submission
+                  </Button>
+                )}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  icon={<CheckCircle2 className="h-4 w-4" />}
+                  onClick={() => setEditing({ key: step.key, status: 'APPROVED' })}
+                >
+                  Record approval
+                </Button>
+              </div>
+            ),
+          };
         })}
-      </ul>
+      />
 
       {perfection.status !== 'PERFECTED' && perfection.blockers.length > 0 && (
         <div>

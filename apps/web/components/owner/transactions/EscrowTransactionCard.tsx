@@ -2,8 +2,9 @@
 
 import { motion } from 'framer-motion';
 import { ShieldCheck, ShieldAlert } from '@sureground/icons';
-import { Badge, Card } from '@sureground/ui';
+import { Badge, Card, Timeline } from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
+import { stepStates } from '@/lib/stepStates';
 import type { EscrowSaleTransaction, SaleEscrowStatus } from '@/types/owner';
 
 // Only the states the backend drives a sale through: deposit → held → released.
@@ -32,10 +33,13 @@ export const EscrowTransactionCard = ({
   onClick,
   delay = 0,
 }: EscrowTransactionCardProps) => {
-  const stepIndex = escrowSteps.findIndex((s) => s.key === transaction.escrowStatus);
   const isFrozen = transaction.escrowStatus === 'frozen';
   const isRefunded = transaction.escrowStatus === 'refunded';
-  const progressPct = isFrozen || isRefunded ? 0 : ((stepIndex + 1) / escrowSteps.length) * 100;
+  const states = stepStates(
+    escrowSteps.map((s) => s.key),
+    transaction.escrowStatus,
+    isFrozen ? 'blocked' : isRefunded ? 'skipped' : null
+  );
 
   return (
     <motion.div
@@ -83,14 +87,15 @@ export const EscrowTransactionCard = ({
         </p>
 
         <div className="mt-3">
-          <div className="h-1.5 overflow-hidden rounded-full bg-secondary">
-            <div
-              className={`h-full rounded-full transition-all duration-500 ${
-                isFrozen ? 'bg-destructive' : isRefunded ? 'bg-muted-foreground' : 'bg-primary'
-              }`}
-              style={{ width: `${progressPct}%` }}
-            />
-          </div>
+          <Timeline
+            orientation="horizontal"
+            aria-label="Payment progress"
+            items={escrowSteps.map((step, index) => ({
+              id: step.key,
+              title: step.label,
+              state: states[index],
+            }))}
+          />
           <p className="mt-1.5 text-xs text-muted-foreground">
             Opened {formatDate(transaction.createdAt)}
           </p>

@@ -1,6 +1,6 @@
 'use client';
 
-import { Card } from '@sureground/ui';
+import { Card, Timeline } from '@sureground/ui';
 import { motion } from 'framer-motion';
 import { CheckCircle, Calendar } from '@sureground/icons';
 
@@ -37,35 +37,19 @@ export const LeaseTimeline = ({ lease }: LeaseTimelineProps) => {
         </div>
 
         <div className="p-4">
-          <div className="relative">
-            <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-muted" />
-
-            <div className="space-y-6">
-              {lease.timeline.map((event, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="relative pl-10"
-                >
-                  <div className="absolute left-0 w-8 h-8 rounded-full bg-success-subtle flex items-center justify-center">
-                    <CheckCircle className="w-4 h-4 text-success" />
-                  </div>
-
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h4 className="text-sm font-medium text-foreground">{event.event}</h4>
-                      <span className="text-xs text-muted-foreground">
-                        {formatDate(event.date)}
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-0.5">{event.description}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
+          <Timeline
+            variant="feed"
+            titleAs="h4"
+            aria-label="Lease timeline"
+            items={lease.timeline.map((event, index) => ({
+              id: `${index}`,
+              title: event.event,
+              date: formatDate(event.date),
+              description: event.description,
+              state: 'done',
+              icon: <CheckCircle className="w-4 h-4 text-success" />,
+            }))}
+          />
         </div>
       </Card>
     </motion.div>

@@ -4,21 +4,12 @@ import { useState } from 'react';
 import {
   Button,
   ConfirmDialog,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
   EmptyState,
-  Textarea,
+  ReasonDialog,
+  Timeline,
+  type TimelineState,
 } from '@sureground/ui';
-import {
-  CheckCircle2,
-  Circle,
-  CircleAlert,
-  CircleDot,
-  ListChecks,
-  MinusCircle,
-} from '@sureground/icons';
+import { ListChecks } from '@sureground/icons';
 import { formatDate } from '@/lib/format';
 import type { LandMilestone } from '@/types/landBuyer';
 import { MilestoneStatusBadge } from './LandSaleBadges';
@@ -27,97 +18,12 @@ import { bpsToPercent, milestoneAction } from './landSaleLogic';
 const REASON_MIN = 5;
 const REASON_MAX = 2000;
 
-const ICONS = {
-  PENDING: Circle,
-  DELIVERED: CircleDot,
-  CONFIRMED: CheckCircle2,
-  DISPUTED: CircleAlert,
-  WAIVED: MinusCircle,
-} as const;
-
-const ICON_TONE = {
-  PENDING: 'text-muted-foreground',
-  DELIVERED: 'text-warning',
-  CONFIRMED: 'text-success',
-  DISPUTED: 'text-destructive',
-  WAIVED: 'text-info',
-} as const;
-
-const DisputeDialog = ({
-  milestone,
-  onClose,
-  onSubmit,
-  isLoading,
-}: {
-  milestone: LandMilestone | null;
-  onClose: () => void;
-  onSubmit: (reason: string) => Promise<unknown>;
-  isLoading: boolean;
-}) => {
-  const [reason, setReason] = useState('');
-  const trimmed = reason.trim();
-  const close = () => {
-    setReason('');
-    onClose();
-  };
-  return (
-    <Dialog open={Boolean(milestone)} onOpenChange={(open) => !open && close()}>
-      <DialogContent>
-        <form
-          className="space-y-4 p-5"
-          onSubmit={async (e) => {
-            e.preventDefault();
-            if (trimmed.length < REASON_MIN) return;
-            try {
-              await onSubmit(trimmed);
-              close();
-            } catch {
-              // The caller reports the API's message.
-            }
-          }}
-        >
-          <DialogTitle className="text-lg font-semibold text-foreground">
-            Dispute “{milestone?.label}”
-          </DialogTitle>
-          <DialogDescription className="text-sm text-muted-foreground">
-            Tell the seller what is wrong with this step. No money is released for it while it is
-            disputed; they will deliver it again.
-          </DialogDescription>
-          <div className="space-y-1.5">
-            <label htmlFor="milestone-dispute" className="text-sm font-medium text-foreground">
-              What is wrong?
-            </label>
-            <Textarea
-              id="milestone-dispute"
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              rows={4}
-              maxLength={REASON_MAX}
-              required
-              minLength={REASON_MIN}
-              placeholder="e.g. The deed names the wrong plot number."
-            />
-            <p className="text-xs text-muted-foreground">
-              At least {REASON_MIN} characters. {trimmed.length}/{REASON_MAX}
-            </p>
-          </div>
-          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            <Button type="button" variant="ghost" onClick={close} disabled={isLoading}>
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              variant="danger"
-              isLoading={isLoading}
-              disabled={trimmed.length < REASON_MIN || isLoading}
-            >
-              Dispute step
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
+const STATE: Record<LandMilestone['status'], TimelineState> = {
+  PENDING: 'pending',
+  DELIVERED: 'current',
+  CONFIRMED: 'done',
+  DISPUTED: 'blocked',
+  WAIVED: 'skipped',
 };
 
 // Developer purchases release a share of escrow per confirmation; resales release once every required step is confirmed.
@@ -157,44 +63,49 @@ export const MilestoneTimeline = ({
 
   return (
     <>
-      <ol className="relative space-y-5 border-l border-border pl-6">
-        {ordered.map((m) => {
-          const Icon = ICONS[m.status];
+      <Timeline
+        titleAs="h3"
+        aria-label="Conveyance steps"
+        items={ordered.map((m) => {
           const action = milestoneAction(ordered, m, { requiredOnly, contractOpen });
-          return (
-            <li key={m.key} className="relative">
-              <Icon
-                className={`absolute -left-[33px] top-0.5 h-5 w-5 bg-background ${ICON_TONE[m.status]}`}
-                aria-hidden
-              />
-              <div className="flex flex-wrap items-center gap-2">
-                <h3 className="font-medium text-foreground">{m.label}</h3>
+          return {
+            id: m.key,
+            title: m.label,
+            state: STATE[m.status],
+            badge: (
+              <>
                 <MilestoneStatusBadge status={m.status} />
                 {!m.required && <span className="text-xs text-muted-foreground">Optional</span>}
-              </div>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {[
-                  showRelease && m.releaseBps > 0
-                    ? `Releases ${bpsToPercent(m.releaseBps)} of the price to the developer`
-                    : null,
-                  m.deliveredAt ? `Delivered ${formatDate(m.deliveredAt)}` : null,
-                  m.confirmedAt ? `Confirmed ${formatDate(m.confirmedAt)}` : null,
-                ]
-                  .filter(Boolean)
-                  .join(' · ')}
-              </p>
-              {m.note && (
-                <p className="mt-1.5 rounded-lg bg-secondary/60 px-3 py-2 text-sm text-foreground">
-                  Seller&apos;s note: {m.note}
+              </>
+            ),
+            description: (
+              <>
+                <p>
+                  {[
+                    showRelease && m.releaseBps > 0
+                      ? `Releases ${bpsToPercent(m.releaseBps)} of the price to the developer`
+                      : null,
+                    m.deliveredAt ? `Delivered ${formatDate(m.deliveredAt)}` : null,
+                    m.confirmedAt ? `Confirmed ${formatDate(m.confirmedAt)}` : null,
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')}
                 </p>
-              )}
-              {m.status === 'DISPUTED' && m.disputeReason && (
-                <p className="mt-1.5 rounded-lg bg-destructive/5 px-3 py-2 text-sm text-destructive">
-                  You disputed this: {m.disputeReason}
-                </p>
-              )}
-              {m.status === 'DELIVERED' && contractOpen && (
-                <div className="mt-3 space-y-2">
+                {m.note && (
+                  <p className="mt-1.5 rounded-lg bg-secondary/60 px-3 py-2 text-sm text-foreground">
+                    Seller&apos;s note: {m.note}
+                  </p>
+                )}
+                {m.status === 'DISPUTED' && m.disputeReason && (
+                  <p className="mt-1.5 rounded-lg bg-destructive/5 px-3 py-2 text-sm text-destructive">
+                    You disputed this: {m.disputeReason}
+                  </p>
+                )}
+              </>
+            ),
+            actions:
+              m.status === 'DELIVERED' && contractOpen ? (
+                <div className="space-y-2">
                   {action.blockedBy.length > 0 && (
                     <p className="text-xs text-muted-foreground">
                       Confirm earlier steps first: {action.blockedBy.join('; ')}.
@@ -219,11 +130,10 @@ export const MilestoneTimeline = ({
                     </Button>
                   </div>
                 </div>
-              )}
-            </li>
-          );
+              ) : undefined,
+          };
         })}
-      </ol>
+      />
 
       <ConfirmDialog
         open={Boolean(confirming)}
@@ -238,11 +148,20 @@ export const MilestoneTimeline = ({
         isLoading={Boolean(confirming) && pendingKey === confirming?.key}
         onConfirm={() => (confirming ? onConfirm(confirming.key).catch(() => undefined) : null)}
       />
-      <DisputeDialog
-        milestone={disputing}
-        onClose={() => setDisputing(null)}
-        isLoading={Boolean(disputing) && pendingKey === disputing?.key}
-        onSubmit={(reason) => onDispute(disputing!.key, reason)}
+      <ReasonDialog
+        open={Boolean(disputing)}
+        onOpenChange={(open) => !open && setDisputing(null)}
+        title={`Dispute “${disputing?.label ?? ''}”`}
+        description="Tell the seller what is wrong with this step. No money is released for it while it is disputed; they will deliver it again."
+        reasonLabel="What is wrong?"
+        reasonPlaceholder="e.g. The deed names the wrong plot number."
+        reasonHint={(length) => `At least ${REASON_MIN} characters. ${length}/${REASON_MAX}`}
+        minLength={REASON_MIN}
+        maxLength={REASON_MAX}
+        tone="danger"
+        confirmLabel="Dispute step"
+        // The caller reports the API's message.
+        onSubmit={({ reason }) => onDispute(disputing!.key, reason)}
       />
     </>
   );

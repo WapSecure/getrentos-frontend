@@ -1,15 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-import {
-  Button,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-  Field,
-  Textarea,
-} from '@sureground/ui';
+import { ReasonDialog } from '@sureground/ui';
 
 interface DisputePaymentDialogProps {
   open: boolean;
@@ -20,82 +11,25 @@ interface DisputePaymentDialogProps {
 const MIN_REASON = 10;
 const MAX_REASON = 1000;
 
+// The parent displays the server error; a failed send keeps the reason for a retry.
 export const DisputePaymentDialog = ({
   open,
   onOpenChange,
   onSubmit,
-}: DisputePaymentDialogProps) => {
-  const [reason, setReason] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleClose = (next: boolean) => {
-    if (isSubmitting) return;
-    if (!next) {
-      setReason('');
-      setAttempted(false);
-    }
-    onOpenChange(next);
-  };
-
-  const trimmed = reason.trim();
-  const tooShort = trimmed.length < MIN_REASON;
-  const [attempted, setAttempted] = useState(false);
-  const reasonError =
-    attempted && tooShort ? `Say what is wrong in at least ${MIN_REASON} characters.` : undefined;
-
-  const handleSubmit = async () => {
-    setAttempted(true);
-    if (tooShort || isSubmitting) return;
-    setIsSubmitting(true);
-    try {
-      await onSubmit(reason.trim());
-      setReason('');
-      onOpenChange(false);
-    } catch {
-      // The parent displays the server error; keep the reason available for retry.
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="p-0 sm:p-0">
-        <div className="p-4 pr-12 border-b border-border">
-          <DialogTitle className="font-semibold text-foreground">Report a problem</DialogTitle>
-          <DialogDescription className="text-xs text-muted-foreground mt-0.5">
-            Tell us what&apos;s wrong with this charge: our support team will review it within 2
-            business days.
-          </DialogDescription>
-        </div>
-
-        <div className="p-4 space-y-3">
-          <Field
-            label="Reason for dispute"
-            required
-            error={reasonError}
-            hint={`${trimmed.length}/${MAX_REASON} characters`}
-          >
-            <Textarea
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              maxLength={MAX_REASON}
-              rows={4}
-              placeholder="e.g. I was charged twice for the same month's rent"
-            />
-          </Field>
-
-          <Button
-            variant="primary"
-            fullWidth
-            onClick={() => void handleSubmit()}
-            disabled={isSubmitting}
-            isLoading={isSubmitting}
-          >
-            Send report
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-};
+}: DisputePaymentDialogProps) => (
+  <ReasonDialog
+    open={open}
+    onOpenChange={onOpenChange}
+    title="Report a problem"
+    description="Tell us what's wrong with this charge: our support team will review it within 2 business days."
+    reasonLabel="Reason for dispute"
+    reasonPlaceholder="e.g. I was charged twice for the same month's rent"
+    reasonHint={(length) => `${length}/${MAX_REASON} characters`}
+    minLength={MIN_REASON}
+    maxLength={MAX_REASON}
+    validateOn="submit"
+    tooShortMessage={`Say what is wrong in at least ${MIN_REASON} characters.`}
+    confirmLabel="Send report"
+    onSubmit={({ reason }) => onSubmit(reason)}
+  />
+);
