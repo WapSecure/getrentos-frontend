@@ -489,6 +489,7 @@ export const mandateKeys = {
   one: (id: string) => ['management-mandates', id] as const,
   forProperty: (propertyId: string) => ['management-mandates', 'property', propertyId] as const,
   terminationRequests: (id: string) => ['management-mandates', id, 'termination-requests'] as const,
+  feeAmendments: (id: string) => ['management-mandates', id, 'fee-amendments'] as const,
 };
 
 export const attentionKeys = {
