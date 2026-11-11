@@ -3,6 +3,7 @@ import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
 import type { VideoCallJoin } from '@sureground/shared';
 import type { VideoOnSiteReport } from '../filmedOnSite';
+import { uploadVideoDirect } from './videoUpload';
 
 export interface LandlordDashboardStats {
   totalProperties: number;
@@ -1237,6 +1238,8 @@ export const landlordApi = {
 
   /** Returns the storage key to attach to a property; the file is not committed yet. */
   uploadPropertyMedia: (file: PickedFile, kind: 'image' | 'video') => {
+    // Videos go straight to storage, so a large tour never passes through the API.
+    if (kind === 'video') return uploadVideoDirect('/landlord/properties', file);
     const form = new FormData();
     appendFile(form, 'file', file);
     form.append('kind', kind);
