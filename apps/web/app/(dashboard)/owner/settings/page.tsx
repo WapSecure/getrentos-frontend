@@ -7,6 +7,7 @@ import { User, Bell, Landmark, SlidersHorizontal, Lock, Download } from '@suregr
 import { ProfileSettings } from '@/components/owner/settings/ProfileSettings';
 import { NotificationSettings } from '@/components/owner/settings/NotificationSettings';
 import { SellerPayoutSettings } from '@/components/shared/payouts/SellerPayoutSettings';
+import { PayoutDestinationSettings } from '@/components/shared/payouts/PayoutDestinationSettings';
 import { PreferencesSettings } from '@/components/owner/settings/PreferencesSettings';
 import { DataExport } from '@/components/shared/settings/DataExport';
 import { SecuritySettings } from '@/components/shared/security/SecuritySettings';
@@ -38,7 +39,10 @@ export default function OwnerSettingsPage() {
         return <NotificationSettings />;
       case 'payouts':
         return (
-          <SellerPayoutSettings description="Where your marketplace sale money is sent once Sureground pays it out to you: transfers run through Paystack." />
+          <>
+            <SellerPayoutSettings description="Where your marketplace sale money is sent once Sureground pays it out to you: transfers run through Paystack." />
+            <PayoutDestinationSettings />
+          </>
         );
       case 'preferences':
         return <PreferencesSettings />;

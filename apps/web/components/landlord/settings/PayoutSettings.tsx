@@ -14,6 +14,7 @@ import {
   PayoutHoldNotice,
 } from '@/components/shared/payouts/PayoutHoldNotice';
 import { BankAccountFields } from '@/components/shared/payouts/BankAccountFields';
+import { PayoutDestinationSettings } from '@/components/shared/payouts/PayoutDestinationSettings';
 import {
   INCOMPLETE_ACCOUNT_LOOKUP,
   lookupAllowsSave,
@@ -164,6 +165,8 @@ export const PayoutSettings = () => {
           disabled={!canSave}
         />
       </div>
+
+      <PayoutDestinationSettings />
     </div>
   );
 };
