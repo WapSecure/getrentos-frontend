@@ -13,7 +13,7 @@ import {
   Wrench,
   type SgIcon,
 } from '@sureground/icons';
-import { Badge, type BadgeVariant } from '@sureground/ui';
+import { Badge, Timeline, type BadgeVariant } from '@sureground/ui';
 import { EmptyState } from '@sureground/ui';
 import { ListSkeleton } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
@@ -34,7 +34,7 @@ type TimelineEventMeta = {
 
 const defaultEventMeta: TimelineEventMeta = {
   icon: Activity,
-  iconClassName: 'bg-secondary text-muted-foreground',
+  iconClassName: 'text-muted-foreground',
 };
 
 const getEventMeta = (type: string): TimelineEventMeta => {
@@ -46,7 +46,7 @@ const getEventMeta = (type: string): TimelineEventMeta => {
     normalizedType.includes('SERVICE') ||
     normalizedType.includes('VENDOR')
   ) {
-    return { icon: Wrench, iconClassName: 'bg-warning-subtle text-warning' };
+    return { icon: Wrench, iconClassName: 'text-warning' };
   }
 
   if (
@@ -54,22 +54,22 @@ const getEventMeta = (type: string): TimelineEventMeta => {
     normalizedType.includes('SCHEDULE') ||
     normalizedType.includes('CARE')
   ) {
-    return { icon: CalendarClock, iconClassName: 'bg-primary/10 text-primary' };
+    return { icon: CalendarClock, iconClassName: 'text-primary' };
   }
 
   if (normalizedType.includes('INSPECTION') || normalizedType.includes('FIELD')) {
     return {
       icon: ClipboardCheck,
-      iconClassName: 'bg-success-subtle text-success',
+      iconClassName: 'text-success',
     };
   }
 
   if (normalizedType.includes('ASSET') || normalizedType.includes('WARRANTY')) {
-    return { icon: Boxes, iconClassName: 'bg-secondary text-foreground' };
+    return { icon: Boxes, iconClassName: 'text-foreground' };
   }
 
   if (normalizedType.includes('DOCUMENT') || normalizedType.includes('RECORD')) {
-    return { icon: FileText, iconClassName: 'bg-info-subtle text-info' };
+    return { icon: FileText, iconClassName: 'text-info' };
   }
 
   return defaultEventMeta;
@@ -216,64 +216,52 @@ export function HomeManagementTimeline({
             description="Asset updates, scheduled care, work orders, inspections, and approvals will be recorded here as your homes are operated."
           />
         ) : (
-          <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-xs">
-            <div className="divide-y divide-border">
-              {timelineEvents.map((event) => {
+          <div className="rounded-2xl border border-border bg-card p-5 shadow-xs">
+            <Timeline
+              variant="feed"
+              titleAs="h3"
+              aria-labelledby="home-management-timeline-heading"
+              items={timelineEvents.map((event) => {
                 const eventMeta = getEventMeta(event.type);
                 const Icon = eventMeta.icon;
-                const isValidTimestamp = eventTimestamp(event) > 0;
-
-                return (
-                  <article
-                    key={event.id}
-                    className="grid gap-4 px-5 py-4 md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-start"
-                  >
-                    <div
-                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${eventMeta.iconClassName}`}
-                    >
-                      <Icon className="h-5 w-5" aria-hidden="true" />
-                    </div>
-
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="font-semibold text-foreground">{event.title}</h3>
-                        {event.status && (
-                          <Badge variant={statusVariant(event.status)}>
-                            {toLabel(event.status)}
-                          </Badge>
-                        )}
-                      </div>
-                      {event.description && (
-                        <p className="mt-1 max-w-3xl text-sm leading-6 text-muted-foreground">
-                          {event.description}
-                        </p>
-                      )}
-                      <p className="mt-2 inline-flex max-w-full items-center gap-1.5 truncate text-xs text-muted-foreground">
-                        <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                        <span className="truncate">{locationLabel(event)}</span>
-                      </p>
-                    </div>
-
-                    <div className="text-left md:min-w-28 md:text-right">
-                      <p className="text-xs text-muted-foreground">Recorded</p>
-                      {isValidTimestamp ? (
+                return {
+                  id: event.id,
+                  title: event.title,
+                  state: 'done' as const,
+                  icon: (
+                    <Icon className={`h-4 w-4 ${eventMeta.iconClassName}`} aria-hidden="true" />
+                  ),
+                  badge: event.status ? (
+                    <Badge variant={statusVariant(event.status)}>{toLabel(event.status)}</Badge>
+                  ) : undefined,
+                  date:
+                    eventTimestamp(event) > 0 ? (
+                      <>
+                        Recorded{' '}
                         <time
                           dateTime={event.occurredAt}
                           title={formatDate(event.occurredAt, 'full')}
-                          className="mt-1 block text-sm font-medium text-foreground"
                         >
                           {timestampLabel(event.occurredAt)}
                         </time>
-                      ) : (
-                        <p className="mt-1 text-sm font-medium text-muted-foreground">
-                          Recorded activity
-                        </p>
+                      </>
+                    ) : (
+                      'Recorded activity'
+                    ),
+                  description: (
+                    <>
+                      {event.description && (
+                        <p className="max-w-3xl text-sm leading-6">{event.description}</p>
                       )}
-                    </div>
-                  </article>
-                );
+                      <p className="mt-1 flex max-w-full items-center gap-1.5 text-xs">
+                        <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                        <span className="truncate">{locationLabel(event)}</span>
+                      </p>
+                    </>
+                  ),
+                };
               })}
-            </div>
+            />
           </div>
         )}
       </div>
