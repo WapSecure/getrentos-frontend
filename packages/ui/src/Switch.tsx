@@ -44,10 +44,10 @@ export function Switch({
       disabled={disabled}
       onClick={() => onCheckedChange(!checked)}
       className={cn(
-        'relative shrink-0 rounded-full p-0.5 transition-colors duration-200',
-        'focus:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 disabled:cursor-not-allowed disabled:opacity-50',
+        'relative shrink-0 rounded-full p-0.5 transition-colors duration-150',
+        'focus:outline-none focus-visible:ring-4 focus-visible:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-50',
         size === 'sm' ? 'h-5 w-9' : 'h-7 w-12',
-        checked ? 'bg-success' : 'bg-border',
+        checked ? 'bg-primary hover:bg-primary-hover' : 'bg-border hover:bg-foreground/20',
         !label && className
       )}
       {...props}

@@ -23,6 +23,8 @@ interface DataTableProps<T> {
   getRowClassName?: (row: T, index: number) => string | undefined;
   /** Extra attributes for a row, such as aria-current on the next instalment. */
   getRowProps?: (row: T, index: number) => HTMLAttributes<HTMLTableRowElement>;
+  /** Tints the row in brand blue and marks it `data-state="selected"`; pair with a checkbox that says so. */
+  isRowSelected?: (row: T, index: number) => boolean;
   /** A full-width panel under the row (payment history, line items); return null to show none. */
   renderExpanded?: (row: T, index: number) => ReactNode;
   /** A totals row aligned under its columns, keyed by column key. */
@@ -53,6 +55,7 @@ export function DataTable<T>({
   onRowClick,
   getRowClassName,
   getRowProps,
+  isRowSelected,
   renderExpanded,
   totals,
   isLoading = false,
@@ -104,10 +107,12 @@ export function DataTable<T>({
           <tbody className="divide-y divide-border/60">
             {data.map((row, index) => {
               const expanded = renderExpanded?.(row, index);
+              const selected = isRowSelected?.(row, index) ?? false;
               return (
                 <Fragment key={getRowKey(row, index)}>
                   <tr
                     {...getRowProps?.(row, index)}
+                    {...(selected ? { 'data-state': 'selected' } : {})}
                     onClick={onRowClick ? () => onRowClick(row) : undefined}
                     tabIndex={onRowClick ? 0 : undefined}
                     onKeyDown={
@@ -124,6 +129,7 @@ export function DataTable<T>({
                     }
                     className={cn(
                       'transition-colors duration-150 hover:bg-secondary/40',
+                      'data-[state=selected]:bg-primary/[0.06] data-[state=selected]:hover:bg-primary/10 data-[state=selected]:[&>td:first-child]:shadow-[inset_2px_0_0_var(--primary)]',
                       onRowClick &&
                         'cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring',
                       getRowClassName?.(row, index)

@@ -54,7 +54,7 @@ export function Checkbox({
       onClick={() => onCheckedChange(mixed ? true : !checked)}
       className={cn(
         'flex h-5 w-5 shrink-0 items-center justify-center rounded-[5px] border transition-[background-color,border-color,box-shadow] duration-150',
-        'focus:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 disabled:cursor-not-allowed disabled:opacity-50',
+        'focus:outline-none focus-visible:ring-4 focus-visible:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-50',
         on
           ? 'border-primary bg-primary text-primary-foreground'
           : invalid

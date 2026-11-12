@@ -57,14 +57,14 @@ export const TabsTrigger = ({ className, ...props }: RadixTabs.TabsTriggerProps)
       className={cn(
         variant === 'pill'
           ? cn(
-              'rounded-lg px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors outline-none focus:ring-4 focus:ring-primary/12',
+              'rounded-lg px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-[background-color,color,box-shadow] duration-150 outline-none focus-visible:ring-2 focus-visible:ring-ring',
               'text-muted-foreground hover:text-foreground',
-              'data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm'
+              'data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-primary/15'
             )
           : cn(
-              '-mb-px border-b-2 border-transparent px-0.5 pb-2.5 pt-1 text-sm font-medium whitespace-nowrap transition-colors outline-none',
-              'rounded-t-sm text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring',
-              'data-[state=active]:border-primary data-[state=active]:text-foreground'
+              '-mb-px border-b-2 border-transparent px-0.5 pb-2.5 pt-1 text-sm font-medium whitespace-nowrap transition-[border-color,color] duration-150 outline-none',
+              'rounded-t-sm text-muted-foreground hover:border-foreground/20 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring',
+              'data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:hover:border-primary'
             ),
         className
       )}

@@ -212,7 +212,7 @@ export function Select({
                 }}
                 placeholder={searchPlaceholder}
                 aria-label={`Search ${ariaLabel ?? 'options'}`}
-                className="min-h-9 w-full rounded-lg border border-border bg-background py-1.5 pl-9 pr-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/15"
+                className="min-h-9 w-full rounded-lg border border-border bg-background py-1.5 pl-9 pr-3 text-sm text-foreground outline-none placeholder:text-muted-foreground transition-[border-color,box-shadow] duration-150 focus:border-primary focus:ring-4 focus:ring-primary/12"
               />
             </div>
           )}
@@ -238,7 +238,7 @@ export function Select({
                 }}
                 className={cn(
                   'relative flex w-full cursor-pointer select-none items-center rounded-md py-2 pl-3 pr-9 text-left text-sm text-foreground outline-none transition-colors hover:bg-secondary focus:bg-secondary disabled:pointer-events-none disabled:opacity-45',
-                  option.value === value && 'font-medium'
+                  option.value === value && 'font-semibold text-primary'
                 )}
               >
                 {option.label}
