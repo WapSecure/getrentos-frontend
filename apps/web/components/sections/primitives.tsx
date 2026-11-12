@@ -14,12 +14,8 @@ export const SectionHeading = ({
   description?: string;
 }) => (
   <div className="mb-12 text-center">
-    {badge && (
-      <div className="mb-5 inline-flex items-center gap-1.5 rounded-full border border-primary/15 bg-accent/70 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-accent-foreground">
-        {badge}
-      </div>
-    )}
-    <h2 className="mx-auto max-w-3xl text-3xl font-bold tracking-[-0.02em] text-foreground md:text-4xl lg:text-5xl">
+    {badge && <p className="label-caps mb-5 text-muted-foreground">{badge}</p>}
+    <h2 className="font-display mx-auto max-w-3xl text-[2rem] leading-[1.1] font-normal tracking-[-0.01em] text-balance text-foreground md:text-[2.75rem]">
       {title}
     </h2>
     {description && (
@@ -38,15 +34,15 @@ export const MarketingCard = ({
   className?: string;
 }) => (
   <div
-    className={`overflow-hidden rounded-2xl border border-border/90 bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${className}`}
+    className={`overflow-hidden rounded-lg border border-border bg-card transition-colors duration-200 hover:border-foreground/30 ${className}`}
   >
     {children}
   </div>
 );
 
 const iconTileSizes = {
-  md: { tile: 'h-10 w-10 rounded-lg', icon: 'h-5 w-5' },
-  lg: { tile: 'h-12 w-12 rounded-xl', icon: 'h-6 w-6' },
+  md: { tile: 'h-10 w-10 rounded-md', icon: 'h-5 w-5' },
+  lg: { tile: 'h-12 w-12 rounded-md', icon: 'h-6 w-6' },
 };
 
 /** The tinted square that holds a card's icon. Spacing (mb-*, mx-auto) comes from the caller. */
@@ -62,7 +58,7 @@ export const MarketingIconTile = ({
   <div
     className={`flex items-center justify-center bg-secondary ${iconTileSizes[size].tile} ${className}`}
   >
-    <Icon className={`${iconTileSizes[size].icon} text-primary`} aria-hidden="true" />
+    <Icon className={`${iconTileSizes[size].icon} text-foreground`} aria-hidden="true" />
   </div>
 );
 
@@ -74,13 +70,13 @@ export const TrustStrip = ({
   items: readonly { icon: SgIcon; text: string }[];
   className?: string;
 }) => (
-  <ul className={`flex flex-wrap items-center justify-center gap-2.5 ${className}`}>
+  <ul className={`flex flex-wrap items-center justify-center gap-x-6 gap-y-3 ${className}`}>
     {items.map((item) => (
       <li
         key={item.text}
-        className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-card/70 px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm backdrop-blur"
+        className="label-caps inline-flex items-center gap-2 text-muted-foreground"
       >
-        <item.icon className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+        <item.icon className="h-3.5 w-3.5 text-foreground" aria-hidden="true" />
         {item.text}
       </li>
     ))}
@@ -88,14 +84,13 @@ export const TrustStrip = ({
 );
 
 const buttonBase =
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-medium tracking-[-0.01em] transition-all duration-200 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.98]';
+  'label-caps inline-flex min-h-12 items-center justify-center gap-3 whitespace-nowrap rounded-md transition-colors duration-200 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background';
 const buttonVariants = {
-  primary:
-    'bg-primary text-primary-foreground shadow-sm hover:bg-primary-hover hover:shadow-md active:shadow-sm',
+  primary: 'bg-primary text-primary-foreground hover:bg-primary-hover',
   secondary:
-    'bg-secondary text-secondary-foreground border border-border/70 shadow-xs hover:bg-foreground/[0.05] hover:border-border',
+    'border border-foreground/70 text-foreground hover:bg-foreground hover:text-background',
 };
-const buttonSizes = { md: 'px-4 py-2.5 text-sm', lg: 'px-6 py-3 text-base' };
+const buttonSizes = { md: 'px-5', lg: 'px-7' };
 
 /** Not the shared Button, which would load framer-motion on every landing page for a hover effect. */
 export const LinkButton = ({
