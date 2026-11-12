@@ -18,12 +18,15 @@ const COLUMNS: { title: string; links: { label: string; href: string }[] }[] = [
       { label: 'Land', href: ROUTES.LAND_MARKETPLACE },
       { label: 'Estates', href: ESTATE_MARKETPLACE_ROUTES.ESTATES_DIRECTORY },
       { label: 'Detty December', href: '/detty-december' },
+      { label: 'Renting a home', href: '/renters' },
+      { label: 'Buying property', href: '/buyers' },
     ],
   },
   {
     title: 'Own and manage',
     links: [
       { label: 'Sell a property', href: '/sell' },
+      { label: 'Let a property', href: '/landlords' },
       { label: 'Property management', href: ROUTES.HOME_MANAGEMENT },
       { label: 'Realtors and agencies', href: '/agents' },
       { label: 'Pricing', href: ROUTES.PRICING },
