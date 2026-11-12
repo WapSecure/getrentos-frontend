@@ -49,6 +49,7 @@ export function ShowroomAside({
             id={listing.id}
             returnPath={returnPath}
             underOffer={listing.underOffer}
+            notAcceptingApplications={listing.notAcceptingApplications}
             title={listing.title}
             commercial={!!listing.commercial}
           />
