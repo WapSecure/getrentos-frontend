@@ -4,7 +4,8 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { ArrowRight, Building2, MapPin } from '@sureground/icons';
-import { Badge, EmptyState, Pagination, SearchInput, Select, Skeleton } from '@sureground/ui';
+import { EmptyState, Pagination, SearchInput, Select, Skeleton } from '@sureground/ui';
+import { Container } from '@/components/marketing/Container';
 import { estateStorefrontService } from '@/services/estateMarketplaceService';
 import { unwrap, type Paginated } from '@/lib/apiHelpers';
 import { ALL_NIGERIAN_CITIES } from '@/lib/constants/locations';
@@ -14,44 +15,51 @@ const PAGE_SIZE = 12;
 
 const EstateCard = ({ estate }: { estate: EstateDirectoryEntry }) => {
   const href = estate.slug ? `/e/${estate.slug}` : undefined;
+  const counts = [
+    estate.rentCount > 0 ? `${estate.rentCount} to rent` : null,
+    estate.saleCount > 0 ? `${estate.saleCount} for sale` : null,
+    estate.shortletCount > 0
+      ? `${estate.shortletCount} short ${estate.shortletCount === 1 ? 'stay' : 'stays'}`
+      : null,
+  ].filter(Boolean);
 
   const body = (
     <>
       <div
-        className="flex h-32 items-center justify-center rounded-t-2xl bg-muted bg-cover bg-center"
+        className="flex aspect-[16/9] items-center justify-center overflow-hidden bg-muted bg-cover bg-center"
         style={estate.bannerUrl ? { backgroundImage: `url(${estate.bannerUrl})` } : undefined}
       >
-        {!estate.bannerUrl && <Building2 className="h-8 w-8 text-primary/50" />}
+        {!estate.bannerUrl && (
+          <Building2 className="h-8 w-8 text-muted-foreground" aria-hidden="true" />
+        )}
       </div>
 
-      <div className="flex flex-1 flex-col p-5">
-        <h3 className="text-lg font-semibold text-foreground">{estate.name}</h3>
+      <div className="flex flex-1 flex-col gap-2">
+        <h2 className="font-display text-[1.375rem] leading-tight font-normal tracking-[-0.005em]">
+          {estate.name}
+        </h2>
 
-        <p className="mt-1 flex items-start gap-1 text-sm text-muted-foreground">
-          <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+        <p className="flex items-start gap-1.5 text-sm text-muted-foreground">
+          <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
           <span>
             {estate.address}, {estate.city}, {estate.state}
           </span>
         </p>
 
-        {estate.bio && (
-          <p className="mt-3 line-clamp-2 text-sm text-muted-foreground">{estate.bio}</p>
-        )}
+        {estate.bio && <p className="line-clamp-2 text-sm text-muted-foreground">{estate.bio}</p>}
 
-        <div className="mt-4 flex flex-wrap gap-2">
-          {estate.rentCount > 0 && <Badge variant="info">{estate.rentCount} to rent</Badge>}
-          {estate.saleCount > 0 && <Badge variant="success">{estate.saleCount} for sale</Badge>}
-          {estate.shortletCount > 0 && (
-            <Badge variant="warning">{estate.shortletCount} shortlets</Badge>
-          )}
-          {estate.listingCount === 0 && <Badge variant="neutral">No live listings</Badge>}
-        </div>
+        <p className="label-caps text-muted-foreground tabular-nums">
+          {counts.length > 0 ? counts.join(' · ') : 'No live listings'}
+        </p>
 
-        <div className="mt-auto pt-4">
+        <div className="mt-auto pt-2">
           {href ? (
-            <span className="flex items-center gap-1 text-sm font-medium text-primary">
+            <span className="label-caps inline-flex items-center gap-3 border-b border-foreground/40 pb-1.5 text-foreground transition-colors group-hover:border-foreground">
               View {estate.listingCount === 1 ? 'the property' : 'properties'}
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight
+                className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1 motion-reduce:transition-none"
+                aria-hidden="true"
+              />
             </span>
           ) : (
             // No public page yet: shown as not clickable rather than as a card that links nowhere.
@@ -64,11 +72,13 @@ const EstateCard = ({ estate }: { estate: EstateDirectoryEntry }) => {
     </>
   );
 
-  const className =
-    'flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-shadow';
+  const className = 'group flex min-w-0 flex-col gap-4 border-t border-border pt-5';
 
   return href ? (
-    <Link href={href} className={`${className} hover:shadow-lg`}>
+    <Link
+      href={href}
+      className={`${className} focus-visible:outline-2 focus-visible:outline-offset-4`}
+    >
       {body}
     </Link>
   ) : (
@@ -106,18 +116,8 @@ export const EstatesDirectoryBrowser = ({
   const total = data?.total ?? 0;
 
   return (
-    <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-      <header className="max-w-2xl">
-        <h1 className="text-3xl font-bold tracking-[-0.02em] text-foreground sm:text-4xl">
-          Estates on Sureground
-        </h1>
-        <p className="mt-3 text-muted-foreground">
-          Browse the properties marketed by an estate: the ones its own team lists, and the ones its
-          residents&apos; owners list. Every home shows who is marketing it and whose it is.
-        </p>
-      </header>
-
-      <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+    <Container className="pb-20 md:pb-28">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="sm:max-w-md sm:flex-1">
           <SearchInput
             id="estate-directory-search"
@@ -147,9 +147,9 @@ export const EstatesDirectoryBrowser = ({
       </div>
 
       {isLoading ? (
-        <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-8 grid grid-cols-1 gap-x-8 gap-y-12 md:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-72 w-full rounded-2xl" />
+            <Skeleton key={i} className="h-72 w-full rounded-none" />
           ))}
         </div>
       ) : isError && !data ? (
@@ -174,10 +174,10 @@ export const EstatesDirectoryBrowser = ({
         </div>
       ) : (
         <>
-          <p className="mt-6 text-sm text-muted-foreground">
+          <p className="label-caps mt-10 text-muted-foreground tabular-nums">
             {total} estate{total === 1 ? '' : 's'}
           </p>
-          <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-6 grid grid-cols-1 gap-x-8 gap-y-12 md:grid-cols-2 lg:grid-cols-3">
             {estates.map((estate) => (
               <EstateCard key={estate.estateId} estate={estate} />
             ))}
@@ -187,6 +187,6 @@ export const EstatesDirectoryBrowser = ({
           </div>
         </>
       )}
-    </section>
+    </Container>
   );
 };

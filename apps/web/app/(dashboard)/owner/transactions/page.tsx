@@ -81,7 +81,7 @@ export default function OwnerTransactionsPage() {
           isLoading ? (
             <Skeleton className="h-5 w-48" />
           ) : (
-            `${total} sale${total === 1 ? '' : 's'} protected by Sureground`
+            `${total} sale${total === 1 ? '' : 's'}, from deposit to payout`
           )
         }
       />

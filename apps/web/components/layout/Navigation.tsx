@@ -66,6 +66,10 @@ const isCurrent = (pathname: string, href: string) => pathname === href;
 
 const FOCUSABLE = 'a[href], button:not([disabled])';
 
+// Availability is read in the browser, so with land off the "Land" link shows until the call
+// returns (except under /land, whose layout seeds the cache from the server). Seeding it for every
+// page would mean the root layout awaiting two API calls on every route, signed-in ones included,
+// since the ~45 pages rendering this have no shared public layout to do it in.
 export const Navigation = () => {
   const land = useLandAvailability();
   const diaspora = useDiasporaAvailability();

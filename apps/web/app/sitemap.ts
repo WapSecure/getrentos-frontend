@@ -72,6 +72,7 @@ const publicRoutes: Array<{
   { path: '/buy', priority: 0.9, changeFrequency: 'daily' },
   { path: '/shortlets', priority: 0.9, changeFrequency: 'daily' },
   { path: '/estates', priority: 0.8, changeFrequency: 'daily' },
+  { path: '/detty-december', priority: 0.6, changeFrequency: 'weekly' },
   { path: '/land', priority: 0.9, changeFrequency: 'daily' },
   { path: '/home-management', priority: 0.7, changeFrequency: 'weekly' },
   { path: '/sell', priority: 0.8, changeFrequency: 'monthly' },

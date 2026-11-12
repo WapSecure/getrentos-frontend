@@ -7,6 +7,9 @@ export const marketingWebRoutes = [
   '/home-management',
   '/pricing',
   '/resources',
+  '/detty-december',
+  '/estates',
+  '/terms',
   '/login',
   '/signup',
 ] as const;

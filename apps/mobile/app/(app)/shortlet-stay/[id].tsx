@@ -384,7 +384,7 @@ export default function StayDetail() {
             </View>
             <Text variant="caption" color={paid ? 'success' : 'mutedForeground'}>
               {b.paymentStatus === 'PAID'
-                ? `Paid${b.paidAt ? ` ${formatDate(b.paidAt, 'short')}` : ''} · held by Sureground until you check in`
+                ? `Paid${b.paidAt ? ` ${formatDate(b.paidAt, 'short')}` : ''} · held by Sureground until after check-in`
                 : b.paymentStatus === 'REFUNDED'
                   ? 'Refunded'
                   : b.paymentStatus === 'PROCESSING'
