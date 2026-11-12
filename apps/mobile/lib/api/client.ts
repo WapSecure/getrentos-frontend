@@ -244,24 +244,28 @@ export interface UploadProgressOptions {
   signal?: AbortSignal;
 }
 
-function abortError(): Error {
+export function abortError(): Error {
   const error = new Error('The upload was cancelled.');
   error.name = 'AbortError';
   return error;
 }
 
-/** A multipart POST over XHR, which (unlike fetch) reports upload progress. Resolves with a `Response` so `readJson` reads it as it reads fetch results. */
-function sendWithProgress(
-  path: string,
-  form: FormData,
+/**
+ * An upload over XHR, which (unlike fetch) reports upload progress: a multipart POST to the API, or a
+ * PUT of a file to a signed storage link. Resolves with a `Response` so `readJson` reads it as it reads fetch results.
+ */
+export function sendWithProgress(
+  method: 'POST' | 'PUT',
+  url: string,
+  body: FormData | Blob,
   headers: Record<string, string>,
   { onProgress, signal }: UploadProgressOptions
 ): Promise<Response> {
   return new Promise((resolve, reject) => {
     if (signal?.aborted) return reject(abortError());
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', `${env.apiUrl}${path}`);
-    // Never set Content-Type: the multipart boundary is set with the body.
+    xhr.open(method, url);
+    // For a FormData body never set Content-Type: the multipart boundary is set with the body.
     Object.entries(headers).forEach(([name, value]) => xhr.setRequestHeader(name, value));
 
     // Times out only when nothing moves for a while, so a slow but steady upload is never cut off.
@@ -313,7 +317,7 @@ function sendWithProgress(
       );
     };
     touch();
-    xhr.send(form);
+    xhr.send(body);
   });
 }
 
@@ -332,7 +336,8 @@ export async function apiUploadWithProgress<T>(
   const deviceId = await getInstallId();
 
   const res = await sendWithProgress(
-    path,
+    'POST',
+    `${env.apiUrl}${path}`,
     form,
     {
       Accept: 'application/json',

@@ -36,7 +36,8 @@ import {
 import { useOptimisticMutation } from '@/lib/query/optimistic';
 import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
-import { PropertyGallery } from '@/components/property/PropertyGallery';
+import { shortletMedia } from '@sureground/shared/showroom';
+import { ShowroomPreview } from '@/components/showroom/ShowroomMedia';
 import { StatusPill, listingStatus } from '@/components/host/HostUI';
 import { goBack } from '@/lib/goBack';
 
@@ -129,7 +130,18 @@ export default function HostListingDetail() {
       >
         {l ? (
           <View style={{ gap: spacing.lg }}>
-            <PropertyGallery images={l.images} height={240} emptyLabel="Add photos to go live" />
+            <ShowroomPreview
+              items={shortletMedia({
+                title: l.title,
+                images: l.images,
+                videoUrl: l.videoUrl,
+                tourUrl: l.tourUrl,
+              })}
+              title={l.title}
+              height={240}
+              emptyLabel="Add photos to go live"
+              onVideoExpired={() => void listings.refetch()}
+            />
             <View style={{ paddingHorizontal: spacing.xl, gap: spacing.lg }}>
               <LiveCard l={l} busy={setStatus.isPending} onChange={(s) => setStatus.mutate(s)} />
               <PriceCard l={l} upcoming={stays.data?.items.length} />

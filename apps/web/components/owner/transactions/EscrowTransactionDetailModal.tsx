@@ -27,6 +27,7 @@ import {
   Timeline,
 } from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
+import { cancelledBeforePayment } from '@/lib/saleCancellation';
 import { stepStates } from '@/lib/stepStates';
 import type {
   EscrowSaleTransaction,
@@ -113,6 +114,7 @@ export const EscrowTransactionDetailModal = ({
 
   const isFrozen = transaction.escrowStatus === 'frozen';
   const isRefunded = transaction.escrowStatus === 'refunded';
+  const neverPaid = cancelledBeforePayment(transaction);
   const states = stepStates(
     escrowSteps.map((s) => s.key),
     transaction.escrowStatus
@@ -145,6 +147,11 @@ export const EscrowTransactionDetailModal = ({
             <Alert variant="danger" icon={ShieldAlert} title="Payment on hold: dispute open">
               {transaction.disputeReason ||
                 'A dispute has been raised on this transaction. Funds are held until resolution.'}
+            </Alert>
+          ) : neverPaid ? (
+            <Alert variant="neutral" icon={ShieldAlert} title="Sale cancelled">
+              This sale was cancelled before the buyer paid a deposit, so no money was taken or
+              refunded.
             </Alert>
           ) : isRefunded ? (
             <Alert variant="neutral" icon={ShieldAlert} title="Payment refunded">

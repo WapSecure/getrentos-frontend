@@ -5,7 +5,8 @@
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import { useEffect, useRef, useState } from 'react';
-import { Button, Skeleton } from '@sureground/ui';
+import { Button } from '@sureground/ui/Button';
+import { Skeleton } from '@sureground/ui/Skeleton';
 import { MapPin, Pencil, Search, Square, X } from '@sureground/icons';
 import { cn, formatCurrency } from '@sureground/shared';
 import { addBaseTiles } from '@/lib/mapTiles';

@@ -1,6 +1,7 @@
 'use client';
 
-import { Field, RadioGroup, type RadioOption } from '@sureground/ui';
+import { Field } from '@sureground/ui/Field';
+import { RadioGroup, type RadioOption } from '@sureground/ui/RadioGroup';
 import type { PaymentProviderChoice } from '@/hooks/usePaymentProviders';
 import type { PaymentProvider } from '@/types/payments';
 

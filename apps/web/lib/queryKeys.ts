@@ -295,6 +295,7 @@ export const transactionWorkspaceKeys = {
   all: ['transaction-workspace'] as const,
   detail: (role: 'BUYER' | 'SELLER' | 'REPRESENTATIVE', txId: string) =>
     ['transaction-workspace', role, txId] as const,
+  saleDisputes: ['transaction-workspace', 'sale-disputes'] as const,
 };
 
 export const landKeys = {

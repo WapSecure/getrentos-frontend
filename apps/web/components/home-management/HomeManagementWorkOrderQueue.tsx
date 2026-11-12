@@ -223,6 +223,8 @@ interface HomeManagementWorkOrderQueueProps {
   viewerRole?: 'owner' | 'landlord' | 'manager';
   /** Inside a page that already titles the section: drops the heading and the page counts. */
   compact?: boolean;
+  /** An owner looking at a property someone else manages: the jobs and their evidence, no actions. */
+  readOnly?: boolean;
 }
 
 export function HomeManagementWorkOrderQueue({
@@ -238,6 +240,7 @@ export function HomeManagementWorkOrderQueue({
   onPageChange,
   viewerRole,
   compact = false,
+  readOnly = false,
 }: HomeManagementWorkOrderQueueProps) {
   const queryClient = useQueryClient();
   const [costs, setCosts] = useState<Record<string, string>>({});
@@ -570,21 +573,23 @@ export function HomeManagementWorkOrderQueue({
           </div>
         )}
         <div className="flex flex-wrap items-center gap-2">
-          <Button
-            icon={<ClipboardPlus className="h-4 w-4" />}
-            rounded="md"
-            disabled={isPropertiesLoading || properties.length === 0}
-            title={
-              isPropertiesLoading
-                ? 'Loading your property portfolio'
-                : properties.length === 0
-                  ? 'Add a property and unit before creating a work order'
-                  : undefined
-            }
-            onClick={openCreateDialog}
-          >
-            Create work order
-          </Button>
+          {!readOnly && (
+            <Button
+              icon={<ClipboardPlus className="h-4 w-4" />}
+              rounded="md"
+              disabled={isPropertiesLoading || properties.length === 0}
+              title={
+                isPropertiesLoading
+                  ? 'Loading your property portfolio'
+                  : properties.length === 0
+                    ? 'Add a property and unit before creating a work order'
+                    : undefined
+              }
+              onClick={openCreateDialog}
+            >
+              Create work order
+            </Button>
+          )}
           {!compact && (
             <>
               <QueueStat
@@ -622,9 +627,13 @@ export function HomeManagementWorkOrderQueue({
           <EmptyState
             icon={ClipboardCheck}
             title="No work orders yet"
-            description="Maintenance requests and scheduled work will appear here with their approval and due-date status."
+            description={
+              readOnly
+                ? 'Jobs your manager raises appear here with their photos and progress.'
+                : 'Maintenance requests and scheduled work will appear here with their approval and due-date status.'
+            }
             action={
-              properties.length > 0 ? (
+              !readOnly && properties.length > 0 ? (
                 <Button size="sm" rounded="md" onClick={openCreateDialog}>
                   Create the first work order
                 </Button>
@@ -678,12 +687,13 @@ export function HomeManagementWorkOrderQueue({
                   (startWorkOrder.isPending && startWorkOrder.variables?.id === workOrder.id) ||
                   (resolveWorkOrder.isPending && resolveWorkOrder.variables?.id === workOrder.id) ||
                   (cancelWorkOrder.isPending && cancelWorkOrder.variables?.id === workOrder.id);
-                const showControlPanel =
-                  isOpen(workOrder) ||
-                  approvalPending ||
-                  (!approvalPending &&
-                    workOrder.approvedCost !== null &&
-                    workOrder.approvedCost !== undefined);
+                const hasApprovedCost =
+                  !approvalPending &&
+                  workOrder.approvedCost !== null &&
+                  workOrder.approvedCost !== undefined;
+                const showControlPanel = readOnly
+                  ? hasApprovedCost
+                  : isOpen(workOrder) || approvalPending || hasApprovedCost;
 
                 return (
                   <article key={workOrder.id} className="p-5">
@@ -699,6 +709,9 @@ export function HomeManagementWorkOrderQueue({
                             <Badge variant="success">Acknowledged</Badge>
                           )}
                           {isOverdue(workOrder) && <Badge variant="danger">Overdue</Badge>}
+                          {readOnly && approvalPending && (
+                            <Badge variant="warning">Approval pending</Badge>
+                          )}
                         </div>
                         <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
                           {workOrder.description}
@@ -847,7 +860,7 @@ export function HomeManagementWorkOrderQueue({
                             </div>
                           ) : null}
 
-                          {vendorAssignmentAvailable && (
+                          {!readOnly && vendorAssignmentAvailable && (
                             <div className="rounded-2xl border border-border bg-secondary/30 p-4">
                               <p className="text-sm font-semibold text-foreground">
                                 {currentVendorId ? 'Reassign vendor' : 'Assign vendor'}
@@ -901,7 +914,7 @@ export function HomeManagementWorkOrderQueue({
                             </div>
                           )}
 
-                          {isOpen(workOrder) && (
+                          {!readOnly && isOpen(workOrder) && (
                             <div className="rounded-2xl border border-border bg-card p-4">
                               <div className="flex items-start justify-between gap-3">
                                 <div>
@@ -985,10 +998,12 @@ export function HomeManagementWorkOrderQueue({
                       )}
                     </div>
 
-                    <div className="mt-4 grid gap-4 2xl:grid-cols-2">
-                      <HomeManagementWorkOrderQuotes workOrder={workOrder} vendors={vendors} />
-                      <HomeManagementWorkOrderInvoices workOrder={workOrder} />
-                    </div>
+                    {!readOnly && (
+                      <div className="mt-4 grid gap-4 2xl:grid-cols-2">
+                        <HomeManagementWorkOrderQuotes workOrder={workOrder} vendors={vendors} />
+                        <HomeManagementWorkOrderInvoices workOrder={workOrder} />
+                      </div>
+                    )}
                     <WorkOrderEvidence workOrder={workOrder} viewerRole={viewerRole} />
                   </article>
                 );

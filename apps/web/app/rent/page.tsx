@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { Footer } from '@/components/layout/Footer';
-import { publicFetchInit } from '@/lib/publicFetch';
+import { OPTIONAL_FETCH_TIMEOUT_MS, publicFetchInit } from '@/lib/publicFetch';
 import { Navigation } from '@/components/layout/Navigation';
 import { PublicMarketBrowser } from '@/components/market/PublicMarketBrowser';
 import {
@@ -40,7 +40,11 @@ export async function generateMetadata({
 async function fetchFirstPage(): Promise<Paginated<PublicListingCard> | null> {
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-    const res = await fetch(`${apiUrl}${firstPagePath('rent')}`, publicFetchInit());
+    // A slow API leaves the list to the browser's own fetch rather than holding back the page.
+    const res = await fetch(
+      `${apiUrl}${firstPagePath('rent')}`,
+      publicFetchInit({ timeoutMs: OPTIONAL_FETCH_TIMEOUT_MS })
+    );
     if (!res.ok) return null;
     const data = (await res.json()) as Paginated<RentApiItem>;
     return { ...data, items: data.items.map(rentToCard) };

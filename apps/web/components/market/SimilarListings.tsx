@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { Skeleton } from '@sureground/ui';
+import { Skeleton } from '@sureground/ui/Skeleton';
 import { authFetch, unwrap, safeCall } from '@/lib/apiHelpers';
 import {
   fromLandCard,

@@ -41,6 +41,7 @@ const FIND_LINKS: NavLink[] = [
 
 const MORE_LINKS: NavLink[] = [
   { label: 'Sell', href: '/sell', hint: 'List a home or land for sale' },
+  { label: 'Let', href: '/landlords', hint: 'For landlords and property managers' },
   {
     label: 'Estates',
     href: ESTATE_MARKETPLACE_ROUTES.ESTATES_DIRECTORY,

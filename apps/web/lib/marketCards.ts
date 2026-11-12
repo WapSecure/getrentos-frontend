@@ -1,6 +1,6 @@
 import type { PropertyTrustChain } from '@/types/renter';
 // Pure: maps each market's public card from the API into one shape for ListingCard. Server-safe.
-import type { ListingPriceUnit } from '@sureground/ui';
+import type { ListingPriceUnit } from '@sureground/ui/ListingCard';
 import {
   imagePreviewOf,
   srcSetOf,

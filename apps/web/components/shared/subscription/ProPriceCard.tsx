@@ -2,7 +2,11 @@
 
 import { useState } from 'react';
 import { Check, BadgeCheck } from '@sureground/icons';
-import { Badge, Button, Card, CardSkeleton, SegmentedControl, type Segment } from '@sureground/ui';
+import { Badge } from '@sureground/ui/Badge';
+import { Button } from '@sureground/ui/Button';
+import { Card } from '@sureground/ui/Card';
+import { CardSkeleton } from '@sureground/ui/Skeleton';
+import { SegmentedControl, type Segment } from '@sureground/ui/SegmentedControl';
 import { formatCurrency } from '@sureground/shared';
 import type { BillingCycle, PlanPricing } from '@/services/subscriptionService';
 

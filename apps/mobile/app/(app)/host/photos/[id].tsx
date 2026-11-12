@@ -17,10 +17,11 @@ import {
 } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { hostShortletsApi, type HostListing } from '@/lib/api/hostShortlets';
-import { errorMessage } from '@/lib/api/client';
+import { abortError, errorMessage } from '@/lib/api/client';
 import { pickPhotos, type PickedVideo } from '@/lib/filePicker';
 import { VideoTourField } from '@/components/video/VideoTourField';
 import type { VideoOnSiteReport } from '@/lib/filmedOnSite';
+import type { UploadTaskOptions } from '@/lib/uploadQueue';
 import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 
@@ -120,8 +121,14 @@ function Gallery({ listing: l }: { listing: HostListing }) {
   });
 
   const refresh = () => qc.invalidateQueries({ queryKey: qk.host.listings });
-  const attachVideo = async (file: PickedVideo, onSite: VideoOnSiteReport | null) => {
-    const { key } = await hostShortletsApi.uploadVideo(file);
+  const attachVideo = async (
+    file: PickedVideo,
+    onSite: VideoOnSiteReport | null,
+    options: UploadTaskOptions
+  ) => {
+    const { key } = await hostShortletsApi.uploadVideo(file, options);
+    // Cancelled while storage was checking it: don't attach.
+    if (options.signal.aborted) throw abortError();
     // An uploaded video replaces a pasted link; the server deletes the old file.
     await hostShortletsApi.update(l.id, {
       videoKey: key,

@@ -38,7 +38,7 @@ const SLIDES = [
     key: 'discover',
     eyebrow: 'Discover',
     title: 'Find properties without the guesswork',
-    body: 'Search real listings with real prices. Every home you see has been through our checks before it reaches you.',
+    body: 'Search real listings with real prices. Homes and landlords that have passed our checks are clearly marked, so you can see what has been confirmed.',
     Scene: FindPropertiesScene,
   },
   {

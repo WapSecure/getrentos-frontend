@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { Check, Copy, Facebook, Mail, MessageCircle, Twitter } from '@sureground/icons';
-import { Button, Dialog, DialogContent, DialogDescription, DialogTitle } from '@sureground/ui';
+import { Button } from '@sureground/ui/Button';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@sureground/ui/Dialog';
 
 interface ShareDialogProps {
   open: boolean;

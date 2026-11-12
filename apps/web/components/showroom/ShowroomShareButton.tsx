@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Share2 } from '@sureground/icons';
-import { IconButton } from '@sureground/ui';
+import { IconButton } from '@sureground/ui/IconButton';
 import { ShareDialog } from '@/components/shared/share/ShareDialog';
 import { track } from '@/lib/analytics';
 

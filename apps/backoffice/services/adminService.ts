@@ -2,6 +2,7 @@ import type { ShowroomFunnelReport } from '@/types/showroomFunnel';
 import { authDownload, authFetch, safeCall, toQuery } from '@sureground/shared';
 import type { ApiResponse } from '@sureground/shared';
 import type {
+  AdminMediaHealth,
   AdminMediaItem,
   PlatformUser,
   PlanTier,
@@ -628,6 +629,10 @@ export const adminService = {
       pageSize: params.pageSize?.toString(),
     });
     return safeCall(() => authFetch(`/admin/media${query}`));
+  },
+
+  async getMediaHealth(): Promise<ApiResponse<AdminMediaHealth>> {
+    return safeCall(() => authFetch('/admin/media/health'));
   },
 
   /** Step-up is asked for by the API and handled by the StepUpDialog. */

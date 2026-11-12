@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ReasonDialog } from '@sureground/ui';
+import { ReasonDialog } from '@sureground/ui/ReasonDialog';
 import { unwrap } from '@/lib/apiHelpers';
 import { landDisputeKeys, landDisputeService } from '@/services/landDisputeService';
 import { LAND_DISPUTE_KINDS, type LandDisputeKind } from '@/types/landDispute';
