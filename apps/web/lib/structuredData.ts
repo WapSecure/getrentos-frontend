@@ -19,6 +19,23 @@ export function breadcrumbJsonLd(crumbs: Crumb[]) {
   };
 }
 
+/**
+ * The listings a market page shows, each pointing at its own listing page (Google's summary-page
+ * list format). Only for the unfiltered first page: filtered views are noindex.
+ */
+export function itemListJsonLd(items: Crumb[]) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    itemListElement: items.map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: item.name,
+      url: `${SITE_URL}${item.path}`,
+    })),
+  };
+}
+
 const PRICE_UNIT: Record<string, string> = { month: 'MON', year: 'ANN' };
 
 /**
