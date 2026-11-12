@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Send } from '@sureground/icons';
+import { Send, ShieldAlert } from '@sureground/icons';
 import {
   Alert,
   Button,
@@ -30,6 +30,9 @@ import { TrustLabelsList } from '@/components/shared/trust/TrustLabelsList';
 import { formatCurrency } from '@/lib/format';
 import { foreignIdentityService } from '@/services/foreignIdentityService';
 import { DIASPORA_ROUTES } from '@/lib/constants/diasporaRoutes';
+import { ROUTES } from '@/lib/constants/auth';
+import { identityGate } from '@/lib/identityGate';
+import { kycService } from '@/services/kycService';
 
 interface MakeOfferModalProps {
   isOpen: boolean;
@@ -116,6 +119,16 @@ export const MakeOfferModal = ({
     queryFn: () => unwrap(buyerService.getListing(defaultPropertyId as string)),
     enabled: isOpen && !!defaultPropertyId,
   });
+  // The server refuses offers from buyers whose identity is not verified: say so before they fill
+  // the form. An unloaded or failed status never blocks; the server still has the final say.
+  const { data: kycStatus } = useQuery({
+    queryKey: ['kyc-status'],
+    queryFn: () => unwrap(kycService.getStatus()),
+    enabled: isOpen,
+    staleTime: 60_000,
+  });
+  const identity = identityGate(kycStatus);
+  const identityBlocked = identity === 'unverified' || identity === 'in_review';
   const listings = listingsPage?.items ?? [];
   const selectedListing =
     (selectedListingState?.id === propertyId ? selectedListingState : null) ??
@@ -215,6 +228,23 @@ export const MakeOfferModal = ({
         </div>
 
         <div className="p-4 space-y-4 overflow-y-auto flex-1 min-h-0">
+          {identityBlocked && (
+            <Alert variant="warning" icon={ShieldAlert}>
+              <p>
+                {identity === 'in_review'
+                  ? 'Your identity check is being reviewed. You can send offers once it clears.'
+                  : 'Verify your identity before you make an offer. It takes a few minutes.'}
+              </p>
+              {identity === 'unverified' && (
+                <Link
+                  href={ROUTES.BUYER_VERIFICATION}
+                  className="inline-block mt-1 font-medium text-foreground underline hover:no-underline"
+                >
+                  Verify identity
+                </Link>
+              )}
+            </Alert>
+          )}
           <Field
             label="Property"
             required
@@ -373,6 +403,7 @@ export const MakeOfferModal = ({
               !!amountError ||
               !!depositError ||
               needsAcceptance ||
+              identityBlocked ||
               isSubmitting ||
               selectedListing?.acceptingOffers === false
             }

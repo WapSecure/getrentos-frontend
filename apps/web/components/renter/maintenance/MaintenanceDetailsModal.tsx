@@ -23,6 +23,7 @@ import {
   type BadgeVariant,
 } from '@sureground/ui';
 import type { MaintenanceRequest } from '@/types/maintenance';
+import { maintenanceCategoryLabel } from '@/lib/maintenanceCategory';
 
 interface MaintenanceDetailsModalProps {
   isOpen: boolean;
@@ -159,7 +160,9 @@ export const MaintenanceDetailsModal = ({
                 <MapPin className="w-3 h-3 text-muted-foreground" />
                 <span className="text-xs text-muted-foreground">Category</span>
               </div>
-              <p className="text-sm font-medium text-foreground capitalize">{request.category}</p>
+              <p className="text-sm font-medium text-foreground">
+                {maintenanceCategoryLabel(request.category)}
+              </p>
             </div>
           </div>
 

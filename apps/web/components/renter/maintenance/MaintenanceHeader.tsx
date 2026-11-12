@@ -34,9 +34,10 @@ export const MaintenanceHeader = ({ onReport, extraAction }: MaintenanceHeaderPr
               <Clock className="w-5 h-5 text-info" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-foreground">SLA response promise</p>
+              <p className="text-sm font-semibold text-foreground">Response times</p>
               <p className="text-xs text-muted-foreground">
-                Urgent issues responded within 2 hours • Standard issues within 24 hours
+                Your landlord or property manager handles each request. Where they have set a
+                response target, it shows on the request.
               </p>
             </div>
           </div>
