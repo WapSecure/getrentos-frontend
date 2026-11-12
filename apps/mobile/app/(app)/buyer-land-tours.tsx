@@ -1,12 +1,15 @@
 import { useState } from 'react';
-import { Linking, RefreshControl, ScrollView, View } from 'react-native';
+import { RefreshControl, ScrollView, View } from 'react-native';
+import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { CalendarClock, Star, Video } from '@sureground/icons/native';
+import { CalendarClock, Plus, Star, Video } from '@sureground/icons/native';
 import {
   Badge,
   Button,
   Card,
+  IconButton,
+  LinkButton,
   ListSkeleton,
   PressableScale,
   QueryState,
@@ -15,6 +18,7 @@ import {
   useTheme,
   useToast,
 } from '@sureground/ui-native';
+import { tourNextStep } from '@sureground/shared';
 import { qk } from '@/lib/query/keys';
 import {
   BUYER_TOUR_STATUS,
@@ -25,6 +29,9 @@ import {
 } from '@/lib/api/landBuyerExtras';
 import { errorMessage } from '@/lib/api/client';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { TourList } from '@/components/tours/TourList';
+import { TourJoin } from '@/components/tours/TourJoin';
+import { TourRecordingConsent } from '@/components/tours/TourRecordingConsent';
 import { goBack } from '@/lib/goBack';
 
 export default function BuyerLandTours() {
@@ -38,6 +45,13 @@ export default function BuyerLandTours() {
         title="Video tours"
         subtitle="See land without travelling"
         onBack={() => goBack()}
+        accessory={
+          <IconButton
+            onPress={() => router.push('/(app)/land')}
+            accessibilityLabel="Book a video tour"
+            icon={<Plus size={20} color={colors.primary} />}
+          />
+        }
       />
       <ScrollView
         contentContainerStyle={{
@@ -64,12 +78,10 @@ export default function BuyerLandTours() {
           empty={{
             icon: <Video size={32} color={colors.mutedForeground} />,
             title: 'No video tours yet',
-            description: 'Ask for one from a land listing or an estate plot.',
+            description: 'Book one from any land listing or estate plot.',
           }}
         >
-          {(q.data ?? []).map((t) => (
-            <TourCard key={t.id} tour={t} />
-          ))}
+          <TourList tours={q.data ?? []} viewer="buyer" renderTour={(t) => <TourCard tour={t} />} />
         </QueryState>
       </ScrollView>
     </View>
@@ -86,7 +98,7 @@ function TourCard({ tour: t }: { tour: BuyerTour }) {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
   const status = BUYER_TOUR_STATUS[t.status];
-  const settle = (message: string) => (updated: BuyerTour) => {
+  const update = (updated: BuyerTour, message: string) => {
     qc.setQueryData<BuyerTour[]>(qk.buyerLand.tours, (old) =>
       old?.map((x) => (x.id === updated.id ? updated : x))
     );
@@ -95,6 +107,8 @@ function TourCard({ tour: t }: { tour: BuyerTour }) {
     setReason('');
     toast.show(message, 'success');
   };
+  const settle = (message: string) => (updated: BuyerTour) => update(updated, message);
+  const started = !!t.scheduledAt && now >= Date.parse(t.scheduledAt);
   const fail = (e: unknown) => toast.show(errorMessage(e, 'That did not go through.'), 'error');
   const choose = useMutation({
     mutationFn: (slot: string) => landBuyerExtrasApi.chooseSlot(t.id, slot),
@@ -133,6 +147,9 @@ function TourCard({ tour: t }: { tour: BuyerTour }) {
         </View>
         <Badge label={status.label} tone={status.tone} />
       </View>
+      <Text variant="callout" style={{ fontWeight: '600' }}>
+        {tourNextStep(t, 'buyer', started)}
+      </Text>
       {t.status === 'SCHEDULED' && t.scheduledLocal ? (
         <View style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'center' }}>
           <CalendarClock size={14} color={colors.primary} />
@@ -141,14 +158,13 @@ function TourCard({ tour: t }: { tour: BuyerTour }) {
           </Text>
         </View>
       ) : null}
-      {t.status === 'SCHEDULED' && t.meetingUrl ? (
-        <Button
-          label="Join the video call"
-          size="sm"
-          onPress={() => Linking.openURL(t.meetingUrl!)}
-          style={{ alignSelf: 'flex-start' }}
-        />
-      ) : null}
+      <TourJoin tour={t} join={() => landBuyerExtrasApi.joinTour(t.id)} />
+      <TourRecordingConsent
+        tour={t}
+        side="buyer"
+        setConsent={(consent) => landBuyerExtrasApi.tourRecordingConsent(t.id, consent)}
+        onUpdated={update}
+      />
       {t.hostNotes ? (
         <Text variant="callout" color="mutedForeground">
           {t.hostNotes}
@@ -160,11 +176,6 @@ function TourCard({ tour: t }: { tour: BuyerTour }) {
         </Text>
       ) : null}
 
-      {t.status === 'REQUESTED' ? (
-        <Text variant="caption" color="mutedForeground">
-          Waiting for the seller to offer times.
-        </Text>
-      ) : null}
       {t.status === 'PROPOSED' ? (
         <View style={{ gap: spacing.sm }}>
           <Text variant="callout">Pick a time (your time zone):</Text>
@@ -203,7 +214,9 @@ function TourCard({ tour: t }: { tour: BuyerTour }) {
           </View>
         </View>
       ) : (
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+        <View
+          style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: spacing.md }}
+        >
           {t.status === 'PROPOSED' ? (
             <Button
               label="None of these work"
@@ -213,7 +226,12 @@ function TourCard({ tour: t }: { tour: BuyerTour }) {
             />
           ) : null}
           {['REQUESTED', 'PROPOSED', 'SCHEDULED'].includes(t.status) ? (
-            <Button label="Cancel" size="sm" variant="ghost" onPress={() => setAsking('cancel')} />
+            <LinkButton
+              label="Cancel"
+              tone="destructive"
+              accessibilityLabel={`Cancel the tour of ${t.land}`}
+              onPress={() => setAsking('cancel')}
+            />
           ) : null}
           {canReportNoShow(t, now) ? (
             <Button

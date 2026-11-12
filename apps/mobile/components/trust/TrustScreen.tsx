@@ -19,6 +19,7 @@ import type { TrustBadge, TrustProfile, VerificationItem } from '@/lib/api/buyer
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 import { TrustOverview } from '@/components/trust/TrustOverview';
+import { IdentityAbroadEntry } from '@/components/trust/IdentityAbroadEntry';
 import type { TrustPortal, TrustRequirementKey } from '@/lib/api/trust';
 
 type ScreenPortal = Exclude<TrustPortal, 'manager'>;
@@ -139,6 +140,7 @@ export function TrustScreen({
         portal={portal}
         onAction={(key) => router.push(routeFor(portal, key))}
         moreDetails={profile ? <ProfileDetails {...profile} /> : moreDetails}
+        identityExtra={<IdentityAbroadEntry />}
       />
     </View>
   );

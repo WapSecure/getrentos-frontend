@@ -92,3 +92,21 @@ export function indicativeRateLabel(source: string, asOf: string | Date): string
   if (!source.trim() || Number.isNaN(when.getTime())) return null;
   return `Indicative, ${source.trim()} rate at ${lagosTime.format(when)} Lagos, ${lagosDay.format(when)}. You pay in naira.`;
 }
+
+/**
+ * `GET /fx/indicative` (public). `rates` is 1 NGN in each currency. `available: false` means the
+ * rate source is not set up, is down, or its rate is over 24 hours old: show naira only.
+ */
+export interface IndicativeRates {
+  available: boolean;
+  source: string | null;
+  asOf: string | null;
+  rates: Partial<Record<IndicativeCurrency, number>>;
+}
+
+export const UNAVAILABLE_RATES: IndicativeRates = {
+  available: false,
+  source: null,
+  asOf: null,
+  rates: {},
+};

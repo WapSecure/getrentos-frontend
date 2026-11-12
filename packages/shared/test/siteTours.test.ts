@@ -1,15 +1,24 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import type { SiteTour } from '../types/siteTour';
+import type { SiteTourStatus } from '../src/utils/siteTours.ts';
 import {
   firstGroupWithTours,
   groupTours,
   nextBookedTour,
   tourGroup,
   tourNextStep,
-} from './siteTours';
+} from '../src/utils/siteTours.ts';
 
-const tour = (over: Partial<SiteTour>): SiteTour => ({
+interface Tour {
+  id: string;
+  status: SiteTourStatus;
+  scheduledAt?: string;
+  createdAt: string;
+  buyerRating?: number;
+  [field: string]: unknown;
+}
+
+const tour = (over: Partial<Tour>): Tour => ({
   id: 't',
   status: 'REQUESTED',
   land: 'Plot 4',

@@ -25,3 +25,4 @@ export * from './foreignBankAccount';
 export * from './rentRelease';
 export * from './legacyStorage';
 export * from './dualTime';
+export * from './siteTours';

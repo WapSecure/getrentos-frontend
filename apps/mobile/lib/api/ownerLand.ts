@@ -1,4 +1,9 @@
-import type { LandBoundaryStatus } from '@sureground/shared';
+import type {
+  LandBoundaryStatus,
+  SiteTourRecording,
+  SiteTourStatus,
+  VideoCallJoin,
+} from '@sureground/shared';
 import { apiFetch, apiUpload } from './client';
 import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
@@ -218,13 +223,7 @@ export const RISK_BAND: Record<
   HIGH: { label: 'High risk', tone: 'danger' },
 };
 
-export type TourStatus =
-  | 'REQUESTED'
-  | 'PROPOSED'
-  | 'SCHEDULED'
-  | 'COMPLETED'
-  | 'CANCELLED'
-  | 'HOST_NO_SHOW';
+export type TourStatus = SiteTourStatus;
 
 export const TOUR_STATUS: Record<
   TourStatus,
@@ -258,7 +257,13 @@ export interface LandTour {
   cancelReason?: string;
   buyerRating?: number;
   buyerFeedback?: string;
+  createdAt?: string;
+  videoCall?: 'BUILT_IN' | 'LINK' | null;
+  recording?: SiteTourRecording;
 }
+
+/** Joining the built-in call; `recordingEnabled` says whether this call may be recorded. */
+export type TourJoin = VideoCallJoin & { recordingEnabled: boolean };
 
 /** Tours start between 08:00 and 16:30 Lagos time, so there is daylight at the land. */
 export const TOUR_FIRST_HOUR = 8;
@@ -312,5 +317,14 @@ export const ownerLandApi = {
     apiFetch<LandTour>(`/owner/land/tours/${tourId}/cancel`, {
       method: 'POST',
       body: { reason: reason.trim() },
+    }),
+  tourRecordingConsent: (tourId: string, consent: boolean) =>
+    apiFetch<LandTour>(`/owner/land/tours/${encodeURIComponent(tourId)}/recording-consent`, {
+      method: 'POST',
+      body: { consent },
+    }),
+  joinTour: (tourId: string) =>
+    apiFetch<TourJoin>(`/owner/land/tours/${encodeURIComponent(tourId)}/join`, {
+      method: 'POST',
     }),
 };

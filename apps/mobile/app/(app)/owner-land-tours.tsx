@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Linking, RefreshControl, ScrollView, View } from 'react-native';
+import { RefreshControl, ScrollView, View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CalendarClock, Video } from '@sureground/icons/native';
@@ -8,6 +8,7 @@ import {
   Button,
   Card,
   DateField,
+  LinkButton,
   ListSkeleton,
   QueryState,
   Text,
@@ -17,6 +18,7 @@ import {
   useTheme,
   useToast,
 } from '@sureground/ui-native';
+import { tourNextStep } from '@sureground/shared';
 import { qk } from '@/lib/query/keys';
 import {
   lagosToIso,
@@ -29,6 +31,9 @@ import {
 } from '@/lib/api/ownerLand';
 import { errorMessage } from '@/lib/api/client';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { TourList } from '@/components/tours/TourList';
+import { TourJoin } from '@/components/tours/TourJoin';
+import { TourRecordingConsent } from '@/components/tours/TourRecordingConsent';
 import { goBack } from '@/lib/goBack';
 
 const OPEN = ['REQUESTED', 'PROPOSED', 'SCHEDULED'];
@@ -72,9 +77,7 @@ export default function OwnerLandTours() {
             description: 'When a buyer asks for a live video tour of your land, it appears here.',
           }}
         >
-          {tours.map((t) => (
-            <TourCard key={t.id} tour={t} />
-          ))}
+          <TourList tours={tours} viewer="host" renderTour={(t) => <TourCard tour={t} />} />
         </QueryState>
       </ScrollView>
     </View>
@@ -83,7 +86,19 @@ export default function OwnerLandTours() {
 
 function TourCard({ tour: t }: { tour: LandTour }) {
   const { colors, spacing } = useTheme();
+  const qc = useQueryClient();
+  const toast = useToast();
+  // Captured once: render must not read the clock.
+  const [now] = useState(() => Date.now());
+  const started = t.scheduledAt ? now >= Date.parse(t.scheduledAt) : false;
   const status = TOUR_STATUS[t.status];
+  const update = (updated: LandTour, message: string) => {
+    qc.setQueryData<LandTour[]>(qk.owner.landTours, (old) =>
+      old?.map((x) => (x.id === updated.id ? updated : x))
+    );
+    qc.invalidateQueries({ queryKey: qk.owner.landTours });
+    toast.show(message, 'success');
+  };
   return (
     <Card style={{ gap: spacing.sm }}>
       <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm }}>
@@ -96,6 +111,9 @@ function TourCard({ tour: t }: { tour: LandTour }) {
         </View>
         <Badge label={status.label} tone={status.tone} />
       </View>
+      <Text variant="callout" style={{ fontWeight: '600' }}>
+        {tourNextStep(t, 'host', started)}
+      </Text>
       {t.status === 'SCHEDULED' && t.scheduledLocal ? (
         <View style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'center' }}>
           <CalendarClock size={14} color={colors.primary} />
@@ -104,14 +122,13 @@ function TourCard({ tour: t }: { tour: LandTour }) {
           </Text>
         </View>
       ) : null}
-      {t.status === 'SCHEDULED' && t.meetingUrl ? (
-        <Button
-          label="Join the call"
-          size="sm"
-          variant="secondary"
-          onPress={() => Linking.openURL(t.meetingUrl!)}
-        />
-      ) : null}
+      <TourJoin tour={t} join={() => ownerLandApi.joinTour(t.id)} />
+      <TourRecordingConsent
+        tour={t}
+        side="host"
+        setConsent={(consent) => ownerLandApi.tourRecordingConsent(t.id, consent)}
+        onUpdated={update}
+      />
       {t.preferredTimes && (t.status === 'REQUESTED' || t.status === 'PROPOSED') ? (
         <Text variant="callout" color="mutedForeground">
           Buyer’s note: “{t.preferredTimes}”
@@ -303,10 +320,10 @@ function HostActions({ tour: t }: { tour: LandTour }) {
             </View>
           </View>
         ) : (
-          <Button
+          <LinkButton
             label="Cancel"
-            size="sm"
-            variant="ghost"
+            tone="destructive"
+            accessibilityLabel={`Cancel the tour of ${t.land}`}
             onPress={() => setCancelling(true)}
             style={{ alignSelf: 'flex-start' }}
           />

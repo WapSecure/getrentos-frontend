@@ -1,8 +1,14 @@
 import type { BadgeTone } from '@sureground/ui-native';
-import type { CoApprovalPendingStep, DepositReleaseApprovalOutcome } from '@sureground/shared';
+import type {
+  CoApprovalPendingStep,
+  DepositReleaseApprovalOutcome,
+  SiteTourRecording,
+  SiteTourStatus,
+} from '@sureground/shared';
 import { apiFetch } from './client';
 import type { BuyerPurchaseDetail } from './landBuyer';
 import type { Milestone } from './landSales';
+import type { TourJoin } from './ownerLand';
 
 const post = <T>(path: string, body?: unknown) =>
   apiFetch<T>(path, { method: 'POST', ...(body !== undefined ? { body } : {}) });
@@ -10,13 +16,7 @@ const post = <T>(path: string, body?: unknown) =>
 export const LAND_TOUR_DISCLAIMER =
   'A video tour shows the land as it looks today. It is not a registry search, a survey or an inspection, and it does not confirm who owns the land or where its boundaries are.';
 
-export type BuyerTourStatus =
-  | 'REQUESTED'
-  | 'PROPOSED'
-  | 'SCHEDULED'
-  | 'COMPLETED'
-  | 'CANCELLED'
-  | 'HOST_NO_SHOW';
+export type BuyerTourStatus = SiteTourStatus;
 
 export const BUYER_TOUR_STATUS: Record<BuyerTourStatus, { label: string; tone: BadgeTone }> = {
   REQUESTED: { label: 'Waiting for times', tone: 'warning' },
@@ -45,6 +45,9 @@ export interface BuyerTour {
   proposedSlots: { at: string; local: string }[];
   buyerRating?: number | null;
   disclaimer?: string | null;
+  createdAt?: string;
+  videoCall?: 'BUILT_IN' | 'LINK' | null;
+  recording?: SiteTourRecording;
 }
 
 /** Reasons for cancelling or asking for other times: 3–500 characters. */
@@ -206,6 +209,9 @@ export const landBuyerExtrasApi = {
   cancelTour: (id: string, reason: string) =>
     post<BuyerTour>(`/buyer/land/tours/${id}/cancel`, { reason: reason.trim() }),
   hostNoShow: (id: string) => post<BuyerTour>(`/buyer/land/tours/${id}/host-no-show`),
+  tourRecordingConsent: (id: string, consent: boolean) =>
+    post<BuyerTour>(`/buyer/land/tours/${encodeURIComponent(id)}/recording-consent`, { consent }),
+  joinTour: (id: string) => post<TourJoin>(`/buyer/land/tours/${encodeURIComponent(id)}/join`),
   rateTour: (id: string, rating: number, comment?: string) =>
     post<BuyerTour>(`/buyer/land/tours/${id}/feedback`, {
       rating,
