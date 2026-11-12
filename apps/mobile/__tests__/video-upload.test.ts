@@ -5,7 +5,7 @@ const mockUpload = jest.fn();
 jest.mock('expo-file-system', () => ({
   File: jest.fn().mockImplementation((uri: string) => ({
     uri,
-    size: 52_428_800,
+    size: 5_242_880,
     upload: (...args: unknown[]) => mockUpload(...args),
   })),
 }));
@@ -63,7 +63,7 @@ describe('uploadVideoDirect', () => {
 
     expect(mockApiFetch).toHaveBeenNthCalledWith(1, '/landlord/properties/media/video-upload', {
       method: 'POST',
-      body: { filename: 'tour.MOV', contentType: 'video/quicktime', sizeBytes: 52_428_800 },
+      body: { filename: 'tour.MOV', contentType: 'video/quicktime', sizeBytes: 5_242_880 },
     });
     expect(mockUpload).toHaveBeenCalledWith(
       session.uploadUrl,
@@ -110,5 +110,13 @@ describe('uploadVideoDirect', () => {
     mockApiFetch.mockRejectedValueOnce(new ApiError('Videos must be 150 MB or smaller', 400));
     await expect(uploadVideoDirect('/landlord/properties', file)).rejects.toThrow('150 MB');
     expect(mockApiUpload).not.toHaveBeenCalled();
+  });
+});
+
+describe('resumable helpers', () => {
+  const { missingParts, retryDelayMs } = jest.requireActual('../lib/api/videoUpload');
+  it('lists missing parts and backs off', () => {
+    expect(missingParts(4, [2])).toEqual([1, 3, 4]);
+    expect([1, 2, 3, 4, 5].map(retryDelayMs)).toEqual([1000, 2000, 4000, 8000, 8000]);
   });
 });
