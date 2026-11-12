@@ -42,7 +42,7 @@ const propertyTypes: { value: PropertyType; label: string }[] = [
 export const EditPropertyModal = ({ property, onClose, onSave }: EditPropertyModalProps) => {
   return (
     <Dialog open={!!property} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent padded={false}>
+      <DialogContent padded={false} size="xl">
         {property && (
           <EditPropertyForm
             key={property.id}

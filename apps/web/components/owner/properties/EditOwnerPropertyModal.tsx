@@ -54,7 +54,7 @@ export const EditOwnerPropertyModal = ({
 }: EditOwnerPropertyModalProps) => {
   return (
     <Dialog open={!!property} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="p-0">
+      <DialogContent className="p-0" size="xl">
         {property && (
           <EditOwnerPropertyForm
             key={property.id}
