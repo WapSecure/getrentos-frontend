@@ -50,7 +50,9 @@ export default function LandlordMicrositePage() {
   }, [isPlanLoading, isPro]);
 
   const publicUrl =
-    typeof window !== 'undefined' ? `${window.location.origin}/l/${slug}` : `/l/${slug}`;
+    typeof window !== 'undefined'
+      ? `${window.location.origin}/l/${encodeURIComponent(slug)}`
+      : `/l/${encodeURIComponent(slug)}`;
   const slugIsValid = SLUG_PATTERN.test(slug);
 
   const handleSave = async () => {

@@ -2,16 +2,22 @@ import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { LEGACY_PREFIX, NEW_PREFIX } from './legacyStorage';
 
-// Web (dev preview only) falls back to localStorage, which is NOT secure.
+// Web (dev preview only) falls back to localStorage, which is NOT secure, so only in development builds.
 const SECURE_OPTIONS: SecureStore.SecureStoreOptions = {
   keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
 };
 
 const isWeb = Platform.OS === 'web';
 
+// Outside a development build, the web fallback keeps values (sign-in tokens) in memory only: a
+// page reload signs the user out, but nothing sensitive is left in clear text in localStorage.
+const webPersists = isWeb && typeof __DEV__ !== 'undefined' && __DEV__;
+const webMemory = new Map<string, string>();
+
 export const secureStorage = {
   async get(key: string): Promise<string | null> {
     if (isWeb) {
+      if (!webPersists) return webMemory.get(key) ?? null;
       try {
         return globalThis.localStorage?.getItem(key) ?? null;
       } catch {
@@ -31,6 +37,10 @@ export const secureStorage = {
   },
   async set(key: string, value: string): Promise<void> {
     if (isWeb) {
+      if (!webPersists) {
+        webMemory.set(key, value);
+        return;
+      }
       try {
         globalThis.localStorage?.setItem(key, value);
       } catch {
@@ -42,6 +52,7 @@ export const secureStorage = {
   },
   async remove(key: string): Promise<void> {
     if (isWeb) {
+      webMemory.delete(key);
       try {
         globalThis.localStorage?.removeItem(key);
       } catch {

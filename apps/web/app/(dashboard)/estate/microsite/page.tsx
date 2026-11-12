@@ -72,7 +72,9 @@ function MicrositeForm({ estateId, estateName, settings }: MicrositeFormProps) {
   });
 
   const publicUrl =
-    typeof window !== 'undefined' ? `${window.location.origin}/e/${slug}` : `/e/${slug}`;
+    typeof window !== 'undefined'
+      ? `${window.location.origin}/e/${encodeURIComponent(slug)}`
+      : `/e/${encodeURIComponent(slug)}`;
   const slugIsValid = SLUG_PATTERN.test(slug);
 
   const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
