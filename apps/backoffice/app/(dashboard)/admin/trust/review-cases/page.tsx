@@ -49,7 +49,7 @@ const PRIORITY_OPTIONS: { value: PriorityFilter; label: string }[] = [
 
 const PURPOSE_OPTIONS: { value: PurposeFilter; label: string }[] = [
   { value: 'all', label: 'All purposes' },
-  { value: 'foreign', label: 'Diaspora identity' },
+  { value: 'foreign', label: 'Diaspora identity and funds' },
 ];
 
 // The diaspora queue has its own list (soonest due first); the card and modal take the shared shape.

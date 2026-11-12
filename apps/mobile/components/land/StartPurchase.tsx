@@ -25,6 +25,7 @@ import {
 } from '@/lib/api/landBuyer';
 import { formatBps } from '@/lib/api/landSales';
 import { errorMessage } from '@/lib/api/client';
+import { foreignIdentityApi } from '@/lib/api/foreignIdentity';
 import { formatNaira } from '@/lib/format';
 
 // Anything the developer's land was not verified for must be acknowledged first.
@@ -53,15 +54,23 @@ export function StartPurchase({
   const notVerified = e?.notVerified ?? [];
   const plan = plans.find((p) => p.id === planId);
   const ready = !!plan && (notVerified.length === 0 || acknowledged);
+  // DIA-07: asked before starting, so a large purchase is not refused with a 403.
+  const [fundsHold, setFundsHold] = useState<string | null>(null);
 
   const start = useMutation({
-    mutationFn: () =>
-      landBuyerApi.startPurchase(
+    mutationFn: async () => {
+      const total = e && plan ? quotePlot(r.price, e.fees.total, plan).totalPrice : r.price;
+      const hold = await foreignIdentityApi.sourceOfFundsHold(total);
+      setFundsHold(hold);
+      if (hold) return null;
+      return landBuyerApi.startPurchase(
         r.id,
         planId!,
         notVerified.map((i) => i.key)
-      ),
+      );
+    },
     onSuccess: (detail) => {
+      if (!detail) return;
       qc.invalidateQueries({ queryKey: qk.buyerLand.all });
       toast.show('Purchase started. Pay your deposit to secure the plot.', 'success');
       onDone();
@@ -120,6 +129,21 @@ export function StartPurchase({
             checked={acknowledged}
             onChange={setAcknowledged}
             label="I have read what was not verified and accept it. I understand I can have my own lawyer check these before I pay."
+          />
+        </View>
+      ) : null}
+      {fundsHold ? (
+        <View style={{ gap: spacing.sm }}>
+          <FormAlert tone="warning" title="Confirm your source of funds" message={fundsHold} />
+          <Button
+            label="Go to Identity abroad"
+            variant="outline"
+            size="sm"
+            onPress={() => {
+              onLeave();
+              router.push('/(app)/invest-identity');
+            }}
+            style={{ alignSelf: 'flex-start' }}
           />
         </View>
       ) : null}

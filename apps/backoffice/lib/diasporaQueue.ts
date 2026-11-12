@@ -9,6 +9,7 @@ export const DIASPORA_QUEUE_KIND_LABEL: Record<DiasporaQueueKind, string> = {
   CO_APPROVAL_PENDING: 'Representative approval',
   DISPUTE_RESPONSE_DUE: 'Dispute',
   MANAGED_INTAKE_REVIEW: 'Managed intake',
+  SOURCE_OF_FUNDS_REVIEW: 'Source of funds',
 };
 
 export const DIASPORA_QUEUE_KINDS = Object.keys(DIASPORA_QUEUE_KIND_LABEL) as DiasporaQueueKind[];

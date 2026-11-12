@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Send } from '@sureground/icons';
 import {
@@ -27,6 +28,8 @@ import { landKeys } from '@/lib/queryKeys';
 import { landService } from '@/services/landService';
 import { TrustLabelsList } from '@/components/shared/trust/TrustLabelsList';
 import { formatCurrency } from '@/lib/format';
+import { foreignIdentityService } from '@/services/foreignIdentityService';
+import { DIASPORA_ROUTES } from '@/lib/constants/diasporaRoutes';
 
 interface MakeOfferModalProps {
   isOpen: boolean;
@@ -72,6 +75,8 @@ export const MakeOfferModal = ({
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  // DIA-07: asked before sending, so a large offer is not refused with a 403.
+  const [fundsHold, setFundsHold] = useState<string | null>(null);
   const [acceptedRisks, setAcceptedRisks] = useState(false);
 
   const draftRestored = useSessionExpiryDraft<OfferDraft>(
@@ -160,6 +165,7 @@ export const MakeOfferModal = ({
 
   const handleClose = () => {
     setAcceptedRisks(false);
+    setFundsHold(null);
     setPropertyId(defaultPropertyId || '');
     setListingSearch('');
     setListingPage(1);
@@ -175,6 +181,12 @@ export const MakeOfferModal = ({
     if (!selectedListing) return;
     setIsSubmitting(true);
     setSubmitError(null);
+    const hold = await foreignIdentityService.sourceOfFundsHold(Number(offerAmount) || 0);
+    setFundsHold(hold);
+    if (hold) {
+      setIsSubmitting(false);
+      return;
+    }
     const submitted = await onSubmit({
       propertyId: selectedListing.id,
       propertyTitle: selectedListing.title,
@@ -312,6 +324,18 @@ export const MakeOfferModal = ({
               onCheckedChange={setAcceptedRisks}
               label="I have read what was not verified and accept it before offering."
             />
+          </Alert>
+        )}
+
+        {fundsHold && (
+          <Alert variant="warning" title="Confirm your source of funds" className="mx-4 mb-3">
+            {fundsHold}{' '}
+            <Link
+              href={DIASPORA_ROUTES.BUYER_IDENTITY_ABROAD}
+              className="font-medium text-primary hover:underline"
+            >
+              Go to Identity abroad
+            </Link>
           </Alert>
         )}
 

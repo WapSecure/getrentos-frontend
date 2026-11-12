@@ -18,9 +18,14 @@ import {
 import {
   COUNTRIES,
   FOREIGN_CHECK_STATUS,
+  formatCurrency,
   formatDualTime,
+  SOURCE_OF_FUNDS_SUPPORTING_LABELS,
+  SOURCE_OF_FUNDS_WHY,
   type ForeignDocumentStatus,
   type ForeignIdentityStatus,
+  type SourceOfFundsStatus,
+  type SourceOfFundsSupportingKind,
 } from '@sureground/shared';
 import { ApiError, errorMessage } from '@/lib/api/client';
 import type { PickedFile } from '@/lib/api/documents';
@@ -40,7 +45,8 @@ import { ConsentGate } from '@/components/trust/ConsentGate';
 import { LiveSelfieCheck } from '@/components/trust/LiveSelfieCheck';
 
 // Identity abroad for Diaspora Invest (decision D3), as on web: a passport checked by Smile ID with
-// a live selfie, and a proof of address and a bank statement our team reviews.
+// a live selfie, and a proof of address and a bank statement our team reviews. Source of funds
+// (DIA-07) sits here too.
 
 const REVIEW_TIMESCALE = 'Our team reviews it within 2 working days.';
 const MAX_NOTE = 500;
@@ -104,6 +110,7 @@ export default function InvestIdentity() {
               <PassportCard status={data.passport} />
               <DocumentCard kind="address-proof" status={data.address} />
               <DocumentCard kind="bank-statement" status={data.bankStatement} />
+              {data.sourceOfFunds ? <SourceOfFundsCard status={data.sourceOfFunds} /> : null}
             </>
           ) : null}
         </QueryState>
@@ -453,6 +460,118 @@ function DocumentCard({
               loading={submit.isPending}
               loadingLabel="Sending…"
               disabled={!file}
+              onPress={() => submit.mutate()}
+            />
+          </View>
+        </ConsentGate>
+      ) : null}
+    </Card>
+  );
+}
+
+const SUPPORTING_OPTIONS = (
+  Object.keys(SOURCE_OF_FUNDS_SUPPORTING_LABELS) as SourceOfFundsSupportingKind[]
+).map((value) => ({ value, label: SOURCE_OF_FUNDS_SUPPORTING_LABELS[value] }));
+
+/** DIA-07: asked above the D4 thresholds before an offer or deposit; reviewed like the documents above. */
+function SourceOfFundsCard({ status }: { status: SourceOfFundsStatus }) {
+  const { spacing } = useTheme();
+  const qc = useQueryClient();
+  const toast = useToast();
+  const [statement, setStatement] = useState<PickedFile | null>(null);
+  const [kind, setKind] = useState<SourceOfFundsSupportingKind>('PAYSLIPS');
+  const [supporting, setSupporting] = useState<PickedFile | null>(null);
+  const [donor, setDonor] = useState<PickedFile | null>(null);
+  const [note, setNote] = useState('');
+  const needsDonor = kind === 'INHERITANCE_OR_GIFT_LETTER';
+  const submit = useMutation({
+    mutationFn: () =>
+      foreignIdentityApi.submitSourceOfFunds({
+        bankStatement: statement!,
+        supportingKind: kind,
+        supporting: supporting!,
+        donorIdentity: needsDonor ? donor : null,
+        note: note.trim() || undefined,
+      }),
+    onSuccess: () => {
+      setStatement(null);
+      setSupporting(null);
+      setDonor(null);
+      setNote('');
+      void qc.invalidateQueries({ queryKey: qk.investor.identity });
+      toast.show('Sent to our team.', 'success');
+    },
+  });
+  const open = status.state !== 'APPROVED' && status.state !== 'IN_REVIEW';
+  const { singlePurchaseNaira, totalCommittedNaira } = status.thresholds;
+
+  return (
+    <Card style={{ gap: spacing.md }}>
+      <CardHead title="Source of funds" status={status} note={status.why || SOURCE_OF_FUNDS_WHY} />
+      <StatusNote status={status} what="source of funds check" />
+      {open ? (
+        <Text variant="callout" color="mutedForeground">
+          {status.required
+            ? 'Needed before your next offer or deposit.'
+            : `We ask for this when one purchase is ${formatCurrency(singlePurchaseNaira, { compact: true })} or more, or your purchases pass ${formatCurrency(totalCommittedNaira, { compact: true })} in total. You can send it now.`}
+        </Text>
+      ) : null}
+      {submit.isError ? (
+        <FormAlert
+          message={errorMessage(submit.error, 'Your source of funds documents could not be sent.')}
+        />
+      ) : null}
+      {open ? (
+        <ConsentGate
+          types={['DOCUMENT_PROCESSING']}
+          text={{
+            DOCUMENT_PROCESSING:
+              'We store these documents and our team checks where the money comes from. We do not use them to move money.',
+          }}
+        >
+          <View style={{ gap: spacing.md }}>
+            <FilePickRow
+              label={`Bank statements for the last ${status.bankStatementMonths} months`}
+              file={statement}
+              emptyText="One PDF from the account the money will come from"
+              onPick={async () => setStatement(await pickDocument())}
+              onClear={() => setStatement(null)}
+            />
+            <SelectField
+              label="Supporting document"
+              value={kind}
+              options={SUPPORTING_OPTIONS}
+              onChange={(value) => setKind(value as SourceOfFundsSupportingKind)}
+            />
+            <FilePickRow
+              label={SOURCE_OF_FUNDS_SUPPORTING_LABELS[kind]}
+              file={supporting}
+              emptyText="PDF or photo"
+              onPick={async () => setSupporting(await pickDocument())}
+              onClear={() => setSupporting(null)}
+            />
+            {needsDonor ? (
+              <FilePickRow
+                label="Donor’s identity document"
+                file={donor}
+                emptyText="Passport or national ID of the person who gave or left you the money"
+                onPick={async () => setDonor(await pickDocument())}
+                onClear={() => setDonor(null)}
+              />
+            ) : null}
+            <TextField
+              label="Note for our team (optional)"
+              value={note}
+              onChangeText={setNote}
+              maxLength={MAX_NOTE}
+              multiline
+              placeholder="Anything that helps, such as how the money was saved"
+            />
+            <Button
+              label="Send to our team"
+              loading={submit.isPending}
+              loadingLabel="Sending…"
+              disabled={!statement || !supporting || (needsDonor && !donor)}
               onPress={() => submit.mutate()}
             />
           </View>

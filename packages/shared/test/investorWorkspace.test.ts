@@ -131,6 +131,40 @@ test('identity checks: a rejected one is urgent, one in review is information wi
   assert.equal(items[1].dueAt, '2026-11-13T17:00:00Z');
 });
 
+test('source of funds: a row when required and not started, or rejected; none while with our team', () => {
+  const sof = (state: string, required: boolean) =>
+    buildAttentionQueue({
+      identity: {
+        eligible: true,
+        passport: doc('APPROVED'),
+        address: doc('APPROVED'),
+        bankStatement: doc('APPROVED'),
+        sourceOfFunds: { ...doc(state), required },
+      } as never,
+      links,
+    }).map((i) => [i.key, i.severity, i.title]);
+  assert.deepEqual(sof('NOT_STARTED', true), [
+    ['identity-source-of-funds', 'urgent', 'Confirm your source of funds'],
+  ]);
+  assert.deepEqual(sof('REJECTED', true), [
+    ['identity-source-of-funds', 'urgent', 'Send your source of funds documents again'],
+  ]);
+  assert.deepEqual(sof('NOT_STARTED', false), []);
+  const renewed = buildAttentionQueue({
+    identity: {
+      eligible: true,
+      passport: doc('APPROVED'),
+      address: doc('APPROVED'),
+      bankStatement: doc('APPROVED'),
+      sourceOfFunds: { ...doc('NOT_STARTED'), required: true, renewal: 'EXPIRED' },
+    } as never,
+    links,
+  });
+  assert.equal(renewed[0].title, 'Confirm your source of funds again');
+  assert.deepEqual(sof('IN_REVIEW', true), []);
+  assert.deepEqual(sof('APPROVED', true), []);
+});
+
 test('identity checks are skipped for someone not eligible', () => {
   const items = buildAttentionQueue({
     identity: {
@@ -277,4 +311,24 @@ test('the greeting follows the investor’s own clock', () => {
   assert.equal(greetingFor(new Date('2026-11-11T19:30:00Z'), 'Europe/London'), 'Good evening');
   assert.equal(greetingFor(now, 'Not/AZone'), 'Good morning');
   assert.equal(greetingFor(now, null), 'Good morning');
+});
+
+test('source of funds hold: nothing when cleared, a reason otherwise', async () => {
+  const { sourceOfFundsHoldMessage } = await import('../src/diaspora/labels.ts');
+  const check = (over: Record<string, unknown>) =>
+    ({
+      applies: true,
+      required: true,
+      reason: 'SINGLE_PURCHASE',
+      state: 'NOT_STARTED',
+      renewal: null,
+      cleared: false,
+      ...over,
+    }) as never;
+  assert.equal(sourceOfFundsHoldMessage(check({ cleared: true })), null);
+  assert.equal(sourceOfFundsHoldMessage(null), null);
+  assert.match(sourceOfFundsHoldMessage(check({}))!, /anti-money-laundering rules/);
+  assert.match(sourceOfFundsHoldMessage(check({ state: 'IN_REVIEW' }))!, /with our team/);
+  assert.match(sourceOfFundsHoldMessage(check({ renewal: 'EXPIRED' }))!, /expired/);
+  assert.match(sourceOfFundsHoldMessage(check({ renewal: 'COVERAGE_EXCEEDED' }))!, /beyond what/);
 });
