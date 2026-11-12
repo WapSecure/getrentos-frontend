@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { motion, animate } from 'framer-motion';
+import { motion } from 'framer-motion';
+import { hasTrustScore, trustScoreDisplay } from '@sureground/shared';
 
 interface TrustScoreRingProps {
   score: number;
@@ -10,18 +10,12 @@ interface TrustScoreRingProps {
 }
 
 export const TrustScoreRing = ({ score, size = 120, strokeWidth = 8 }: TrustScoreRingProps) => {
-  const [displayScore, setDisplayScore] = useState(0);
+  // Only the ring animates. The number is the real score from the first frame: a count-up showed
+  // passing values like "2" that read as the person's score.
+  const scored = hasTrustScore(score);
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
-  const offset = circumference - (displayScore / 100) * circumference;
-
-  useEffect(() => {
-    const controls = animate(0, score, {
-      duration: 1,
-      onUpdate: (value) => setDisplayScore(Math.floor(value)),
-    });
-    return controls.stop;
-  }, [score]);
+  const offset = circumference - ((scored ? Math.min(score, 100) : 0) / 100) * circumference;
 
   const getScoreColor = () => {
     if (score >= 80) return 'stroke-success';
@@ -30,7 +24,14 @@ export const TrustScoreRing = ({ score, size = 120, strokeWidth = 8 }: TrustScor
   };
 
   return (
-    <div className="relative" style={{ width: size, height: size }}>
+    <div
+      className="relative"
+      style={{ width: size, height: size }}
+      role="img"
+      aria-label={
+        scored ? `Trust score ${trustScoreDisplay(score)} out of 100` : 'No trust score yet'
+      }
+    >
       <svg width={size} height={size} className="transform -rotate-90" aria-hidden="true">
         <circle
           cx={size / 2}
@@ -56,15 +57,23 @@ export const TrustScoreRing = ({ score, size = 120, strokeWidth = 8 }: TrustScor
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <motion.span
-          initial={{ opacity: 0, scale: 0.5 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.5, duration: 0.3 }}
-          className="text-2xl font-bold text-foreground"
-        >
-          {displayScore}
-        </motion.span>
-        <span className="text-xs text-muted-foreground">Trust score</span>
+        {scored ? (
+          <>
+            <span className="text-2xl font-bold text-foreground" aria-hidden="true">
+              {trustScoreDisplay(score)}
+            </span>
+            <span className="text-xs text-muted-foreground" aria-hidden="true">
+              Trust score
+            </span>
+          </>
+        ) : (
+          <span
+            className="px-3 text-center text-xs font-medium text-muted-foreground"
+            aria-hidden="true"
+          >
+            No score yet
+          </span>
+        )}
       </div>
     </div>
   );

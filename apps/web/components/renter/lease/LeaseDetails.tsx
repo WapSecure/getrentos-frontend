@@ -4,7 +4,7 @@ import { Card } from '@sureground/ui';
 import { motion } from 'framer-motion';
 import { Calendar, FileText, Mail, Phone, MapPin } from '@sureground/icons';
 import { NairaSign } from '@sureground/ui/NairaSign';
-import { leaseRentLabel } from '@/lib/leaseTerm';
+import { countRentCharges, leaseRentLabel } from '@/lib/leaseTerm';
 import type { Lease } from '@/services/renterService';
 
 interface LeaseDetailsProps {
@@ -62,7 +62,12 @@ export const LeaseDetails = ({ lease }: LeaseDetailsProps) => {
               <div className="flex items-center gap-2 mb-1">
                 <NairaSign className="w-4 h-4 text-primary" />
                 <span className="text-xs text-muted-foreground">
-                  {leaseRentLabel(lease.rentPeriod, lease.startDate, lease.endDate)}
+                  {leaseRentLabel(
+                    lease.rentPeriod,
+                    lease.startDate,
+                    lease.endDate,
+                    countRentCharges(lease.rentAmount, lease.paymentHistory ?? [])
+                  )}
                 </span>
               </div>
               <p className="text-sm font-medium text-foreground">

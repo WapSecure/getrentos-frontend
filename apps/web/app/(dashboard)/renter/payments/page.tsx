@@ -19,6 +19,7 @@ import { renterService, type Payment } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { formatCurrency, formatLagosDate } from '@/lib/format';
+import { moveInReleasedMessage } from '@/lib/moveInRelease';
 import {
   ConfirmDialog,
   PageErrorState,
@@ -257,16 +258,13 @@ export default function PaymentsPage() {
   };
 
   const confirmMoveInMutation = useMutation({
-    mutationFn: ({ paymentId }: { paymentId: string; early: boolean }) =>
+    mutationFn: ({ paymentId }: { paymentId: string; early: boolean; heldNaira?: number }) =>
       unwrap(renterService.confirmMoveIn(paymentId)),
-    onSuccess: (updated, { early }) => {
+    onSuccess: (updated, { heldNaira }) => {
       queryClient.invalidateQueries({ queryKey: renterKeys.payments });
       queryClient.invalidateQueries({ queryKey: ['renter', 'rent-accounts'] });
-      pushNotification({
-        type: 'success',
-        title: early ? 'Rent released' : 'Move-in confirmed',
-        message: `Your rent for ${updated.propertyName} has been released to your landlord.`,
-      });
+      // The held figure is captured before release: the updated payment no longer carries it.
+      toast.success(moveInReleasedMessage(heldNaira, updated?.propertyName));
     },
     onError: (error: Error) => {
       pushNotification({
@@ -460,12 +458,16 @@ export default function PaymentsPage() {
                     ? `, instead of on ${formatLagosDate(confirmingMoveInPayment.releaseDate)}`
                     : ''
                 }. It can't be undone.`
-              : `This releases the ${heldFigure}rent Sureground is holding for ${confirmingMoveInPayment.propertyName} to your landlord now. Only confirm once you've moved in — it can't be undone.`
+              : `This releases the ${heldFigure}rent Sureground is holding for ${confirmingMoveInPayment.propertyName} to your landlord now. Only confirm once you've moved in. It can't be undone.`
         }
         confirmLabel="Yes, release to landlord"
         onConfirm={() => {
           if (confirmingMoveInId)
-            confirmMoveInMutation.mutate({ paymentId: confirmingMoveInId, early: releasingEarly });
+            confirmMoveInMutation.mutate({
+              paymentId: confirmingMoveInId,
+              early: releasingEarly,
+              heldNaira: confirmingMoveInPayment?.heldAmountNaira,
+            });
           setConfirmingMoveInId(null);
         }}
       />

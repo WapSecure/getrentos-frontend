@@ -40,6 +40,9 @@ export const CreateLeaseModal = ({
   const [leaseStart, setLeaseStart] = useState('');
   const [leaseEnd, setLeaseEnd] = useState('');
   const [rentAmount, setRentAmount] = useState('');
+  // Stated on the form: the lease used to take the unit's asking period or silently fall back to
+  // yearly, so a monthly figure could be saved, and shown to the tenant, as annual rent.
+  const [rentPeriod, setRentPeriod] = useState<'month' | 'year'>('year');
   const [securityDeposit, setSecurityDeposit] = useState('');
   const [submitting, setSubmitting] = useState<'draft' | 'send' | null>(null);
   const isSubmitting = submitting !== null;
@@ -54,6 +57,7 @@ export const CreateLeaseModal = ({
     setUnitId(id);
     const unit = vacantUnits.find((u) => u.id === id);
     if (unit && !rentAmount) setRentAmount(String(unit.askingRent ?? ''));
+    if (unit?.askingRentPeriod) setRentPeriod(unit.askingRentPeriod);
     if (unit?.approvedApplicant) {
       setTenantName(unit.approvedApplicant.name);
       const today = new Date();
@@ -68,6 +72,7 @@ export const CreateLeaseModal = ({
     setLeaseStart('');
     setLeaseEnd('');
     setRentAmount('');
+    setRentPeriod('year');
     setSecurityDeposit('');
     setErrorMessage(null);
   };
@@ -95,8 +100,7 @@ export const CreateLeaseModal = ({
       leaseStart,
       leaseEnd,
       rentAmount: Number(rentAmount),
-      // Default to yearly: Nigerian rent is let by the year, and with no period a short term would read as monthly rent.
-      rentPeriod: selectedUnit.askingRentPeriod ?? 'year',
+      rentPeriod,
       securityDeposit: securityDeposit ? Number(securityDeposit) : undefined,
     };
   };
@@ -193,7 +197,17 @@ export const CreateLeaseModal = ({
               </div>
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <Field label="Rent amount" required>
+                <Field label="Rent period" required>
+                  <Select
+                    value={rentPeriod}
+                    onValueChange={(v) => setRentPeriod(v === 'month' ? 'month' : 'year')}
+                    options={[
+                      { value: 'year', label: 'Per year' },
+                      { value: 'month', label: 'Per month' },
+                    ]}
+                  />
+                </Field>
+                <Field label={rentPeriod === 'month' ? 'Rent per month' : 'Rent per year'} required>
                   <CurrencyInput
                     prefix="₦"
                     value={rentAmount}
