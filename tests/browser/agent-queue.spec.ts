@@ -1,13 +1,32 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect, type BrowserContext, type Page, type Route } from '@playwright/test';
 
 test.setTimeout(90_000);
 const textQueueKey = 'sureground.agent.offline-queue';
 
+// The web access token lives in memory only (AU-16): every page load restores it through
+// POST /auth/refresh with the httpOnly cookie. The mock plays that cookie for the signed-in agent.
+const session = { userId: 'agent-queue-test', refreshes: 0 };
+
+function accessToken(sub: string) {
+  const payload = { sub, exp: Math.floor(Date.now() / 1000) + 3600 };
+  return `test.${Buffer.from(JSON.stringify(payload)).toString('base64')}.test`;
+}
+
+async function mockApi(target: Page | BrowserContext, handler: (route: Route) => unknown) {
+  await target.route('**/__qa_api/**', (route) => {
+    if (new URL(route.request().url()).pathname.endsWith('/auth/refresh')) {
+      session.refreshes++;
+      return route.fulfill({ json: { accessToken: accessToken(session.userId) } });
+    }
+    return handler(route);
+  });
+}
+
 test.beforeEach(async ({ page }) => {
+  session.userId = 'agent-queue-test';
+  session.refreshes = 0;
   await page.addInitScript(() => {
-    if (localStorage.getItem('sureground_auth_token')) return;
-    const token = `test.${btoa(JSON.stringify({ exp: Math.floor(Date.now() / 1000) + 3600 }))}.test`;
-    localStorage.setItem('sureground_auth_token', token);
+    if (localStorage.getItem('sureground_user')) return;
     localStorage.setItem(
       'sureground_user',
       JSON.stringify({
@@ -109,7 +128,7 @@ for (const { type, binary } of [
     let saved = 0;
     let attempts = 0;
     let lastBody = '';
-    await page.route('**/__qa_api/**', async (route) => {
+    await mockApi(page, async (route) => {
       if (route.request().method() === 'POST') {
         attempts++;
         lastBody = route.request().postDataBuffer()?.toString() || '';
@@ -136,7 +155,7 @@ for (const { type, binary } of [
     expect(await queuedCount(page, binary)).toBe(1);
 
     allowSave = true;
-    await page.getByRole('button', { name: 'Sync All', exact: true }).click();
+    await page.getByRole('button', { name: 'Sync all', exact: true }).click();
     await expect(page.getByText('1 record saved to Sureground.')).toBeVisible();
     await expect.poll(() => queuedCount(page, binary)).toBe(0);
     expect(saved).toBe(1);
@@ -153,7 +172,7 @@ for (const { type, binary } of [
 test('draft and unverified server records are shown as saved, without fake sync buttons', async ({
   page,
 }) => {
-  await page.route('**/__qa_api/**', (route) =>
+  await mockApi(page, (route) =>
     route.fulfill({
       json: route.request().url().endsWith('/agent/sync')
         ? [
@@ -177,7 +196,7 @@ test('draft and unverified server records are shown as saved, without fake sync 
   );
   await page.goto('/agent/sync');
   await expect(page.getByText('Saved on server', { exact: true })).toHaveCount(2);
-  await expect(page.getByRole('button', { name: 'Sync All', exact: true })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Sync all', exact: true })).toBeDisabled();
   await expect(page.getByRole('button', { name: /^(Sync|Retry)$/ })).toHaveCount(0);
 });
 
@@ -185,7 +204,7 @@ test('reconnect and manual retry share one upload', async ({ page }) => {
   let allowSave = false;
   let saved = 0;
   let completeUpload: (() => void) | undefined;
-  await page.route('**/__qa_api/**', async (route) => {
+  await mockApi(page, async (route) => {
     if (route.request().method() !== 'POST') return route.fulfill({ json: [] });
     if (!allowSave)
       return route.fulfill({ status: 500, json: { message: 'Temporarily unavailable' } });
@@ -199,7 +218,7 @@ test('reconnect and manual retry share one upload', async ({ page }) => {
   await page.goto('/agent/sync');
   await expect(page.getByText('Waiting to upload', { exact: true })).toBeVisible();
   allowSave = true;
-  await page.getByRole('button', { name: 'Sync All', exact: true }).click();
+  await page.getByRole('button', { name: 'Sync all', exact: true }).click();
   await expect.poll(() => saved).toBe(1);
   await page.evaluate(() => window.dispatchEvent(new Event('online')));
   completeUpload!();
@@ -208,14 +227,12 @@ test('reconnect and manual retry share one upload', async ({ page }) => {
   expect(saved).toBe(1);
 });
 
+// Another agent signs in on this device: a new profile, and the refresh cookie is now theirs.
 async function switchAccount(page: Page, id: string) {
+  session.userId = id;
   await page.evaluate((id) => {
     const user = JSON.parse(localStorage.getItem('sureground_user')!);
     localStorage.setItem('sureground_user', JSON.stringify({ ...user, id }));
-    localStorage.setItem(
-      'sureground_auth_token',
-      `test.${btoa(JSON.stringify({ sub: id, exp: Math.floor(Date.now() / 1000) + 3600 }))}.test`
-    );
     window.dispatchEvent(new Event('storage'));
   }, id);
 }
@@ -253,7 +270,7 @@ for (const binary of [false, true]) {
     page,
   }) => {
     let attempts = 0;
-    await page.route('**/__qa_api/**', async (route) => {
+    await mockApi(page, async (route) => {
       if (route.request().method() === 'POST') {
         attempts++;
         return route.fulfill({ status: 201, json: { id: 'saved-1' } });
@@ -276,7 +293,7 @@ for (const binary of [false, true]) {
     page,
   }) => {
     let writes = 0;
-    await page.route('**/__qa_api/**', (route) => {
+    await mockApi(page, (route) => {
       if (route.request().method() === 'POST') writes++;
       return route.fulfill({ json: [] });
     });
@@ -284,7 +301,7 @@ for (const binary of [false, true]) {
     await changeSeedOwner(page, binary, null);
     await page.goto('/agent/sync');
     await expect(page.getByText('Older uploads need account review')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Sync All', exact: true })).toBeDisabled();
+    await expect(page.getByRole('button', { name: 'Sync all', exact: true })).toBeDisabled();
     expect(await queuedCount(page, binary)).toBe(1);
     expect(writes).toBe(0);
   });
@@ -295,12 +312,7 @@ test('account switch during a refused upload stops refresh and retains the origi
 }) => {
   let release: (() => void) | undefined;
   let writes = 0;
-  let refreshes = 0;
-  await page.route('**/__qa_api/**', async (route) => {
-    if (route.request().url().includes('/auth/refresh')) {
-      refreshes++;
-      return route.fulfill({ status: 401, json: {} });
-    }
+  await mockApi(page, async (route) => {
     if (route.request().method() === 'POST') {
       writes++;
       await new Promise<void>((resolve) => {
@@ -314,19 +326,22 @@ test('account switch during a refused upload stops refresh and retains the origi
   await page.goto('/agent/sync');
   await expect.poll(() => writes).toBe(1);
   await switchAccount(page, 'different-agent');
+  const refreshesAtSwitch = session.refreshes;
   release!();
+  // The upload holds this lock until it settles, including any refresh-and-retry after the 401.
+  await page.evaluate(() => navigator.locks.request('sureground-agent-upload', () => undefined));
+  expect(session.refreshes).toBe(refreshesAtSwitch);
   await page.reload();
   await expect(page.getByText('No uploads waiting')).toBeVisible();
   expect(await queuedCount(page, false)).toBe(1);
   expect(writes).toBe(1);
-  expect(refreshes).toBe(0);
 });
 
 test('two tabs serialize replay of a shared device record', async ({ page, context }) => {
   let allowSave = false;
   let writes = 0;
   let release: (() => void) | undefined;
-  await context.route('**/__qa_api/**', async (route) => {
+  await mockApi(context, async (route) => {
     if (route.request().method() !== 'POST') return route.fulfill({ json: [] });
     if (!allowSave) return route.fulfill({ status: 403, json: { message: 'Not yet available' } });
     writes++;
@@ -339,7 +354,7 @@ test('two tabs serialize replay of a shared device record', async ({ page, conte
   await page.goto('/agent/sync');
   await expect(page.getByText('Waiting to upload', { exact: true })).toBeVisible();
   allowSave = true;
-  await page.getByRole('button', { name: 'Sync All', exact: true }).click();
+  await page.getByRole('button', { name: 'Sync all', exact: true }).click();
   await expect.poll(() => writes).toBe(1);
   const second = await context.newPage();
   await second.goto('/agent/sync');
@@ -353,15 +368,11 @@ test('two tabs serialize replay of a shared device record', async ({ page, conte
 
 test('the original agent can refresh an expired token and finish the upload', async ({ page }) => {
   let writes = 0;
-  let refreshes = 0;
-  const token = `test.${Buffer.from(JSON.stringify({ sub: 'agent-queue-test', exp: Math.floor(Date.now() / 1000) + 3600 })).toString('base64')}.test`;
-  await page.route('**/__qa_api/**', (route) => {
-    if (route.request().url().endsWith('/auth/refresh')) {
-      refreshes++;
-      return route.fulfill({ json: { accessToken: token } });
-    }
+  let refreshesAtRejection = 0;
+  await mockApi(page, (route) => {
     if (route.request().method() === 'POST') {
       writes++;
+      if (writes === 1) refreshesAtRejection = session.refreshes;
       return route.fulfill({
         status: writes === 1 ? 401 : 201,
         json: writes === 1 ? { message: 'Expired token' } : { id: 'saved-1' },
@@ -373,7 +384,8 @@ test('the original agent can refresh an expired token and finish the upload', as
   await page.goto('/agent/sync');
   await expect.poll(() => queuedCount(page, false)).toBe(0);
   await expect(page.getByText('No uploads waiting')).toBeVisible();
-  expect(refreshes).toBe(1);
+  // Exactly one refresh after the rejected write (earlier ones restored the session on load).
+  expect(session.refreshes - refreshesAtRejection).toBe(1);
   expect(writes).toBe(2);
 });
 
@@ -383,7 +395,7 @@ for (const type of ['inspection', 'verification', 'document', 'message']) {
       page,
     }) => {
       let writes = 0;
-      await page.route('**/__qa_api/**', async (route) => {
+      await mockApi(page, async (route) => {
         const request = route.request();
         const path = new URL(request.url()).pathname.replace('/__qa_api', '');
         if (request.method() === 'POST') {
@@ -451,7 +463,7 @@ for (const type of ['inspection', 'verification', 'document', 'message']) {
         `/agent/${route}${type === 'inspection' || type === 'verification' ? '?task=task-1' : ''}`
       );
       if (type === 'document') {
-        await page.getByRole('button', { name: 'Upload Document', exact: true }).click();
+        await page.getByRole('button', { name: 'Upload document', exact: true }).click();
         await page.locator('input[type=file]').setInputFiles({
           name: 'field-evidence.txt',
           mimeType: 'text/plain',
@@ -469,10 +481,10 @@ for (const type of ['inspection', 'verification', 'document', 'message']) {
         await page.getByRole('button', { name: 'Send message', exact: true }).click();
       } else if (type === 'inspection') {
         await page.getByPlaceholder('e.g. Living Room').fill('Field room');
-        await page.getByRole('button', { name: 'Save Inspection', exact: true }).click();
+        await page.getByRole('button', { name: 'Save inspection', exact: true }).click();
       } else {
-        await page.getByRole('textbox', { name: /Subject Name/ }).fill('Field subject');
-        await page.getByRole('button', { name: 'Save Verification', exact: true }).click();
+        await page.getByRole('textbox', { name: /Subject name/ }).fill('Field subject');
+        await page.getByRole('button', { name: 'Save verification', exact: true }).click();
       }
       await expect.poll(() => writes).toBe(1);
       if (failure === 'refused') {
@@ -490,7 +502,7 @@ for (const type of ['inspection', 'verification', 'document', 'message']) {
           if (type === 'inspection')
             await expect(page.getByPlaceholder('e.g. Living Room')).toHaveValue('Field room');
           if (type === 'verification')
-            await expect(page.getByRole('textbox', { name: /Subject Name/ })).toHaveValue(
+            await expect(page.getByRole('textbox', { name: /Subject name/ })).toHaveValue(
               'Field subject'
             );
         }
@@ -521,7 +533,7 @@ for (const type of ['inspection', 'verification', 'document', 'message']) {
 }
 
 test('a refused photo deletion leaves the inspection evidence visible', async ({ page }) => {
-  await page.route('**/__qa_api/**', async (route) => {
+  await mockApi(page, async (route) => {
     const request = route.request();
     const path = new URL(request.url()).pathname.replace('/__qa_api', '');
     if (request.method() === 'DELETE')
