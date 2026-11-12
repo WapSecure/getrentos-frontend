@@ -342,7 +342,14 @@ export const DiasporaInvestLanding = () => (
         ))}
       </dl>
       <p className="mt-8 text-[0.9375rem] text-muted-foreground">
-        Read the{' '}
+        The{' '}
+        <Link
+          href={DIASPORA_ROUTES.TRANSPARENCY}
+          className="text-foreground underline underline-offset-4"
+        >
+          transparency centre
+        </Link>{' '}
+        sets out fees, refunds, complaints and what is not yet decided. Read the{' '}
         <Link href="/terms" className="text-foreground underline underline-offset-4">
           Terms of service
         </Link>{' '}

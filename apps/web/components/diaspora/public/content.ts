@@ -10,6 +10,8 @@ import {
   Video,
   type SgIcon,
 } from '@sureground/icons';
+import { DIASPORA_ROUTES } from '@/lib/constants/diasporaRoutes';
+import { LAND_PROTECTION } from '@/lib/paymentCopy';
 
 // Public copy for Sureground Diaspora Invest. Every claim here describes something the product does
 // today (docs/diaspora/README.md §2); anything still being built is said to be so. No figures, no
@@ -179,6 +181,8 @@ export const TRANSPARENCY: TransparencyItem[] = [
 export interface Faq {
   question: string;
   answer: string;
+  /** A page that answers it in full, linked under the answer. */
+  link?: { label: string; href: string };
 }
 
 export const FAQS: Faq[] = [
@@ -218,8 +222,123 @@ export const FAQS: Faq[] = [
       'Not easily yet. Most foreign identity documents need a manual review, and extra legal rules can apply to non-citizens owning land. Please contact us and take legal advice before you start.',
   },
   {
+    question: 'Who is responsible for what?',
+    answer:
+      'The transparency centre sets out Sureground’s role, who else is involved in a purchase, fees, refunds, complaints, the limits of each check and what is not yet decided.',
+    link: { label: 'Read the transparency centre', href: DIASPORA_ROUTES.TRANSPARENCY },
+  },
+  {
     question: 'Will Sureground tell me what to buy?',
     answer:
       'No. Sureground does not give investment advice or promise returns. It shows you what has been checked, by whom and when, so you can decide with your own advisers.',
   },
 ];
+
+// Transparency centre (DIA-02). Draft copy for legal review. Each line restates what the product
+// does today, with its source in the code or a recorded decision (docs/diaspora/README.md §9);
+// anything not yet decided is listed as such rather than filled in.
+
+export interface TransparencySection {
+  id: string;
+  title: string;
+  description?: string;
+}
+
+export const ROLE_POINTS: string[] = [
+  TRANSPARENCY[0].body,
+  'Sureground is a property services platform. It does not recommend what to buy and does not promise returns, rent, resale prices or capital growth.',
+  'Sureground is not a bank, and Payment Protection is not insurance.',
+];
+
+/** Who else is involved in a purchase, and what each is responsible for. */
+export const THIRD_PARTIES: TransparencyItem[] = [
+  {
+    title: 'The seller',
+    body: 'Owns the property and is responsible for what they say about it and for delivering each step of the sale. Their identity is checked, and their ownership proof approved by a Sureground reviewer, before the listing is published.',
+  },
+  {
+    title: 'The seller’s lawyer',
+    body: 'Acts for the seller, not for you. For a house or flat, the balance of the price is paid under your sale contract, outside Sureground. We recommend you instruct your own lawyer.',
+  },
+  {
+    title: 'Accredited professionals',
+    body: 'Lawyers, surveyors, valuers and inspectors carry out checks within their stated scope and are responsible for their own work. Each check shows who carried it out, what they were asked to check and when.',
+  },
+  {
+    title: 'Payment providers',
+    body: 'Paystack and Monnify process card and bank payments. Payment Protection holds your money with them instead of passing it straight to the seller.',
+  },
+  {
+    title: 'Identity checks',
+    body: 'Passports are checked with Smile ID, an identity verification provider, using a live selfie. If the automated check cannot confirm you, our team reviews your documents.',
+  },
+];
+
+export const FEE_POINTS: string[] = [
+  'There is no separate charge for Payment Protection. When you pay by card or bank transfer, the card or bank fee is added and shown before you pay, so the seller receives the full amount.',
+  'Sureground’s own fee for checking and coordinating a home purchase has not been set yet. Any Sureground fee on a purchase is set out before you pay.',
+  'Sureground Managed charges a percentage of the rent it collects, with a commission when it finds a new tenant or renews a lease, from one published fee card. You see the fee card in your account, and the fee is written into the management agreement before you sign.',
+  'Fees charged by professionals you instruct, and government charges such as stamp duty and consent fees, are listed separately.',
+  'No referral fees between Sureground and sellers or professionals are set up for Diaspora Invest. If that changes, you will be told before you commit.',
+];
+
+export const MONEY_POINTS: string[] = [
+  'For a house or flat, Sureground never holds the purchase price. Payment Protection covers the deposit only; the rest of the price is paid outside Sureground under your sale contract. Sureground records each step and your approvals.',
+  `For land: ${LAND_PROTECTION}`,
+  'Raising a dispute keeps the money held until it is decided.',
+  'Prices and payments are in naira. The rate you get when sending money from abroad is set by your bank or transfer provider.',
+  'Payouts go to Nigerian bank accounts only for now. You can add an account abroad in your verified name, but payouts to it wait until Sureground works with a licensed partner to send money abroad. Until then you can choose to have them paid to your Nigerian account.',
+];
+
+export const REFUND_POINTS: string[] = [
+  'Before you pay the deposit, you can cancel and nothing is taken.',
+  'While the deposit is held and the seller has not started handing over the property, you can cancel and the deposit is refunded.',
+  'Once the seller has started handing over the property, the deposit can only be refunded through a dispute, which Sureground decides.',
+  'For land bought from a developer, a refund goes back to the card or account each payment came from. Money already paid to the developer for a completed step cannot be returned automatically; our finance team handles that part.',
+  'Refunds of ₦5 million or more need a second member of our team to approve them.',
+  'The rest of a home’s price is paid outside Sureground, so any refund of it is a matter for your sale contract.',
+];
+
+export const CONFLICT_POINTS: string[] = [
+  TRANSPARENCY[2].body,
+  'A seller cannot verify their own title, and the member of our team who asks for a payment cannot approve its release.',
+  'Professionals are named on each check, so you can see who checked your property and ask your own lawyer to review their work.',
+];
+
+export const UNDECIDED_POINTS: string[] = [
+  'Sureground’s fee card for checking and coordinating home purchases.',
+  'The licensed partner for payouts to accounts abroad and payments in other currencies.',
+  'An independent holder for home purchase payments beyond the deposit.',
+  'Rules for buyers who are not Nigerian citizens. Diaspora Invest is open to Nigerians abroad first.',
+  'The wording on this page, which is being reviewed by our lawyers.',
+];
+
+export const TRANSPARENCY_SECTIONS = {
+  role: { id: 'role', title: 'Sureground’s role' },
+  parties: {
+    id: 'who-is-responsible',
+    title: 'Who is responsible for what',
+    description: 'The other people and companies involved in a purchase.',
+  },
+  fees: { id: 'fees', title: 'Fees and referral arrangements' },
+  checks: {
+    id: 'checks',
+    title: 'What a check covers, and its limits',
+    description:
+      'A check is evidence about a property on a date. Every summary carries these limits.',
+  },
+  money: { id: 'money', title: 'Your money' },
+  refunds: {
+    id: 'refunds',
+    title: 'Refunds',
+    description: 'How a deposit or payment comes back to you.',
+  },
+  complaints: { id: 'complaints', title: 'Complaints and disputes' },
+  privacy: { id: 'privacy', title: 'Your information' },
+  conflicts: { id: 'conflicts', title: 'Conflicts of interest' },
+  undecided: {
+    id: 'not-yet-decided',
+    title: 'Not yet decided',
+    description: 'Where something is still open, we say so rather than fill the gap.',
+  },
+} satisfies Record<string, TransparencySection>;

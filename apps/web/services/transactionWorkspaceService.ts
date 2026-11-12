@@ -1,7 +1,11 @@
 import { withStepUpSummary } from '@sureground/shared';
-import { authFetch, safeCall } from '@/lib/apiHelpers';
+import { authFetch, safeCall, type Paginated } from '@/lib/apiHelpers';
 import type { LandMilestone } from '@/types/landBuyer';
-import type { TransactionWorkspace, WorkspaceViewerRole } from '@/types/transactionWorkspace';
+import type {
+  SaleDispute,
+  TransactionWorkspace,
+  WorkspaceViewerRole,
+} from '@/types/transactionWorkspace';
 
 // Neutral routes for any sale (built home or land resale); they work wherever land is switched off.
 const WORKSPACE_BASE: Record<WorkspaceViewerRole, string> = {
@@ -38,4 +42,18 @@ export const transactionWorkspaceService = {
 
   disputeMilestone: (txId: string, key: string, reason: string) =>
     safeCall(() => post<LandMilestone>(`${step(txId, key)}/dispute`, { reason: reason.trim() })),
+
+  /** Deposit disputes I raised or am the subject of (buyer or seller only; newest first). */
+  saleDisputes: () =>
+    safeCall(() => authFetch<Paginated<SaleDispute>>('/marketplace/disputes?pageSize=100')),
+
+  /** Puts the held deposit on hold until Sureground decides; the buyer or the seller may raise it. */
+  disputeDeposit: (txId: string, input: { title: string; description: string }) =>
+    safeCall(() =>
+      post<SaleDispute>(`/marketplace/transactions/${encodeURIComponent(txId)}/dispute`, {
+        title: input.title.trim(),
+        category: 'ESCROW',
+        description: input.description.trim(),
+      })
+    ),
 };

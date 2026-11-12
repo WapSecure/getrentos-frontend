@@ -1,5 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { ROUTES } from '@sureground/shared';
+import { DIASPORA_ROUTES } from '@/lib/constants/diasporaRoutes';
+import { diasporaInvestEnabled } from '@/lib/diasporaAvailability';
 import { SITE_URL } from '@/lib/site';
 import { listingPath, type PublicListingKind } from '@/lib/listingSlug';
 
@@ -82,7 +84,16 @@ const publicRoutes: Array<{
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
 
-  const staticEntries = publicRoutes.map((route) => ({
+  // Diaspora Invest pages 404 while the service is switched off, so they are listed only when it is on.
+  const routes = (await diasporaInvestEnabled())
+    ? [
+        ...publicRoutes,
+        { path: DIASPORA_ROUTES.PUBLIC, priority: 0.7, changeFrequency: 'monthly' as const },
+        { path: DIASPORA_ROUTES.TRANSPARENCY, priority: 0.4, changeFrequency: 'monthly' as const },
+      ]
+    : publicRoutes;
+
+  const staticEntries = routes.map((route) => ({
     url: `${SITE_URL}${route.path}`,
     lastModified: now,
     changeFrequency: route.changeFrequency ?? 'weekly',
