@@ -134,7 +134,7 @@ export function ShortletMessagesInbox({ role }: { role: 'guest' | 'host' }) {
                         <p
                           className={cn(
                             'mt-1 flex items-center gap-1 text-2xs italic',
-                            mine ? 'text-primary-foreground/80' : 'text-muted-foreground'
+                            mine ? 'text-primary-foreground/90' : 'text-muted-foreground'
                           )}
                         >
                           <ShieldCheck className="h-3 w-3 shrink-0" />
@@ -144,7 +144,7 @@ export function ShortletMessagesInbox({ role }: { role: 'guest' | 'host' }) {
                       <p
                         className={cn(
                           'mt-0.5 text-2xs',
-                          mine ? 'text-primary-foreground/70' : 'text-muted-foreground'
+                          mine ? 'text-primary-foreground/90' : 'text-muted-foreground'
                         )}
                       >
                         {m.senderName} · {formatDate(m.timestamp, 'short')}
