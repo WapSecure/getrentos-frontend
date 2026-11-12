@@ -3,7 +3,12 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { Layers } from '@sureground/icons';
 import { Button, MediaMosaic, type MediaEvent } from '@sureground/ui';
-import type { MediaItem, ShowroomEventMarket, ShowroomMarket } from '@sureground/shared/showroom';
+import type {
+  MediaItem,
+  ShowroomEventMarket,
+  ShowroomFloorPlan,
+  ShowroomMarket,
+} from '@sureground/shared/showroom';
 import { track } from '@/lib/analytics';
 
 export function TrackDetailView({
@@ -77,12 +82,14 @@ export function ShowroomMedia({
   items,
   title,
   className,
+  floorPlans,
 }: {
   listingId: string;
   market: ShowroomEventMarket;
   items: MediaItem[];
   title: string;
   className?: string;
+  floorPlans?: ShowroomFloorPlan[];
 }) {
   const gallery = useContext(GalleryContext);
   const onMediaEvent = ({ type, mediaIndex, room }: MediaEvent) =>
@@ -99,6 +106,7 @@ export function ShowroomMedia({
       title={title}
       className={className}
       onMediaEvent={onMediaEvent}
+      floorPlans={floorPlans}
       {...(gallery
         ? { openIndex: gallery.openIndex, onOpenIndexChange: gallery.setOpenIndex }
         : {})}

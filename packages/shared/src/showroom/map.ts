@@ -17,6 +17,7 @@ import {
 } from '../utils/landTrust';
 import { tidyPlace } from '../utils/address';
 import { tourSource } from '../utils/videoSource';
+import { floorPlansOf } from './floorPlans';
 
 const money = (v: unknown) => {
   const n = typeof v === 'string' ? Number(v) : (v as number);
@@ -160,6 +161,12 @@ export function showroomMedia(
 // The first URL is the page's share and search image, so a floor plan never leads.
 const imageUrls = (media: MediaItem[]) => heroPhotos(media).map((m) => m.url);
 
+// Only when there is at least one level, so a listing without structured plans keeps the M8a shape.
+const withFloorPlans = (raw: unknown, media: MediaItem[]) => {
+  const floorPlans = floorPlansOf(raw, media);
+  return floorPlans.length ? { floorPlans } : {};
+};
+
 export function fromRental(r: PublicRentalDto): ShowroomListing {
   const price = money(r.price);
   const media = showroomMedia(r.title, r.media, [r.image, ...(r.images ?? [])]);
@@ -195,6 +202,7 @@ export function fromRental(r: PublicRentalDto): ShowroomListing {
     verified: !!r.verified,
     media,
     images: imageUrls(media),
+    ...withFloorPlans(r.floorPlans, media),
     description: r.description,
     amenities: r.amenities ?? [],
     availableFrom: r.availableFrom,
@@ -243,6 +251,7 @@ export function fromSale(s: PublicSaleDto): ShowroomListing {
     verificationSummary: verificationSummaryOf(s.verificationSummary),
     media,
     images: imageUrls(media),
+    ...withFloorPlans(s.floorPlans, media),
     amenities: s.amenities ?? [],
     facts: [
       ...fact('Property type', humanise(s.propertyType)),

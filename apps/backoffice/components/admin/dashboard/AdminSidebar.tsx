@@ -58,6 +58,7 @@ import {
   FileCheck2,
   MessageCircleQuestion,
   DisclosureCaret,
+  Ruler,
 } from '@sureground/icons';
 import { ROUTES, unwrap } from '@sureground/shared';
 import { SidebarRailToggle, useSidebarRail } from '@sureground/ui';
@@ -443,6 +444,12 @@ const navItems: NavItem[] = [
     permission: 'collections.manage',
   },
   {
+    label: 'Floor plan checks',
+    href: '/admin/floor-plans',
+    icon: Ruler,
+    permission: 'verifications.review',
+  },
+  {
     label: 'Automation usage',
     href: '/admin/ai-usage',
     icon: Cpu,
@@ -489,6 +496,7 @@ const groupItems: [group: string, items: string[]][] = [
       'Shortlets',
       'Estates',
       'Maintenance',
+      'Floor plan checks',
     ],
   ],
   [

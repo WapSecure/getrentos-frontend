@@ -1,4 +1,5 @@
 import type { LandDiligenceStatus, LandTitleType, VerificationSummary } from '../utils/landTrust';
+import type { ShowroomFloorPlan } from './floorPlans';
 
 export type ShowroomMarket = 'rent' | 'sale' | 'land';
 
@@ -97,6 +98,8 @@ export interface ShowroomListing {
   availableFrom?: string;
   /** Sale and land detail routes only; undefined from an older API. */
   verificationSummary?: VerificationSummary;
+  /** Structured floor plans (rooms and sizes); absent when the lister added none. */
+  floorPlans?: ShowroomFloorPlan[];
 }
 
 export interface PublicRentalDto {
@@ -132,6 +135,8 @@ export interface PublicRentalDto {
   petsAllowed?: boolean;
   propertyType?: string;
   videoTourFilmedOnSite?: boolean;
+  /** Detail route only. Read through `floorPlansOf`, never trusted as is. */
+  floorPlans?: unknown;
 }
 
 export interface PublicSaleDto {
@@ -152,6 +157,8 @@ export interface PublicSaleDto {
   underOffer?: boolean;
   /** Detail route only (DIA-11). Read through `verificationSummaryOf`, never trusted as is. */
   verificationSummary?: unknown;
+  /** Detail route only. Read through `floorPlansOf`, never trusted as is. */
+  floorPlans?: unknown;
 }
 
 export interface PublicLandDto {

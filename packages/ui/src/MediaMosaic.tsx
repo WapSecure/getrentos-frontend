@@ -11,6 +11,7 @@ import {
   srcSetOf,
   type MediaItem,
   type MediaRoom,
+  type ShowroomFloorPlan,
 } from '@sureground/shared';
 import { Button } from './Button';
 import { MediaViewer, type MediaEvent } from './MediaViewer';
@@ -28,6 +29,8 @@ interface MediaMosaicProps {
    */
   openIndex?: number | null;
   onOpenIndexChange?: (index: number | null) => void;
+  /** Structured floor plans for the viewer's Floor plans tab; see `MediaViewer`. */
+  floorPlans?: ShowroomFloorPlan[];
 }
 
 // Fills the 4×2 grid whatever the photo count, so no empty slot shows.
@@ -52,6 +55,7 @@ export function MediaMosaic({
   onMediaEvent,
   openIndex,
   onOpenIndexChange,
+  floorPlans,
 }: MediaMosaicProps) {
   const [ownOpenAt, setOwnOpenAt] = useState<number | null>(null);
   const controlled = openIndex !== undefined;
@@ -209,6 +213,7 @@ export function MediaMosaic({
         onOpenChange={(open) => !open && setOpenAt(null)}
         title={title}
         onMediaEvent={onMediaEvent}
+        floorPlans={floorPlans}
       />
     </>
   );
