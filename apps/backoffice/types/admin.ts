@@ -61,7 +61,8 @@ export type AdminPermission =
   | 'managed.view'
   | 'managed.operate'
   | 'ai.observe'
-  | 'collections.manage';
+  | 'collections.manage'
+  | 'diaspora.ops';
 
 export type AdminStaffStatus = 'active' | 'pending' | 'suspended' | 'banned';
 
