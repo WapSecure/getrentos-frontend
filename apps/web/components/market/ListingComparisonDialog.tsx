@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { BadgeCheck, Check, Minus, X } from '@sureground/icons';
-import { Dialog, DialogContent, DialogDescription, DialogTitle, IconButton } from '@sureground/ui';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@sureground/ui/Dialog';
+import { IconButton } from '@sureground/ui/IconButton';
 import { formatCurrency } from '@/lib/format';
 import type { PublicListingCard, PublicMarket } from '@/services/publicMarketService';
 import { listingPath } from '@/lib/listingSlug';

@@ -12,20 +12,18 @@ import {
   Briefcase,
   ClipboardCheck,
 } from '@sureground/icons';
-import {
-  Alert,
-  Button,
-  Card,
-  CurrencyInput,
-  DatePicker,
-  DescriptionList,
-  Field,
-  IconButton,
-  Input,
-  Select,
-  Textarea,
-  useSessionExpiryDraft,
-} from '@sureground/ui';
+import { Alert } from '@sureground/ui/Alert';
+import { Button } from '@sureground/ui/Button';
+import { Card } from '@sureground/ui/Card';
+import { CurrencyInput } from '@sureground/ui/CurrencyInput';
+import { DatePicker } from '@sureground/ui/DatePicker';
+import { DescriptionList } from '@sureground/ui/DescriptionList';
+import { Field } from '@sureground/ui/Field';
+import { IconButton } from '@sureground/ui/IconButton';
+import { Input } from '@sureground/ui/Input';
+import { Select } from '@sureground/ui/Select';
+import { Textarea } from '@sureground/ui/Textarea';
+import { useSessionExpiryDraft } from '@sureground/ui';
 import { EMPLOYMENT_STATUSES, type AddressValue } from '@sureground/shared';
 import type { Property, Document as ApplicationDocument } from '@/types/renter';
 import { nameOnly } from '@/lib/validations/input';

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { ImageOff } from '@sureground/icons';
 import { cn } from '@sureground/shared';
-import { ProgressiveImg } from '@sureground/ui';
+import { ProgressiveImg } from '@sureground/ui/ProgressiveImg';
 import { toMarketCard } from '@/lib/marketCards';
 import { collectionPath, curatorLine, type PublicCollectionSummary } from '@/lib/collections';
 import { SponsoredBadge } from './SponsoredBadge';

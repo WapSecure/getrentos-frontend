@@ -13,6 +13,7 @@ import { CtaLink } from '@/components/marketing/CtaLink';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { ROUTES } from '@/lib/constants/auth';
 import { diasporaInvestEnabled } from '@/lib/diasporaAvailability';
+import { OPTIONAL_FETCH_TIMEOUT_MS } from '@/lib/publicFetch';
 import { SITE_NAME, SITE_URL } from '@/lib/site';
 
 export const metadata: Metadata = {
@@ -55,8 +56,13 @@ const websiteJsonLd = {
   },
 };
 
-export default async function Home() {
-  const diaspora = await diasporaInvestEnabled();
+// Its own async component, so the check runs alongside the listings fetch instead of before it.
+async function DiasporaSection() {
+  const on = await diasporaInvestEnabled({ timeoutMs: OPTIONAL_FETCH_TIMEOUT_MS });
+  return on ? <DiasporaFeature /> : null;
+}
+
+export default function Home() {
   return (
     <>
       <JsonLd data={organizationJsonLd} />
@@ -68,7 +74,7 @@ export default async function Home() {
         <Journeys />
         <AreaIndex />
         <TrustFacts />
-        {diaspora ? <DiasporaFeature /> : null}
+        <DiasporaSection />
         <HomeFaq />
         <ClosingBand
           title="List, rent or buy with fewer surprises"

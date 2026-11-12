@@ -2,7 +2,9 @@
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { Layers } from '@sureground/icons';
-import { Button, MediaMosaic, type MediaEvent } from '@sureground/ui';
+import { Button } from '@sureground/ui/Button';
+import { MediaMosaic } from '@sureground/ui/MediaMosaic';
+import { type MediaEvent } from '@sureground/ui/MediaViewer';
 import type {
   MediaItem,
   ShowroomEventMarket,

@@ -111,6 +111,7 @@ export const adminKeys = {
       params?.page ?? 1,
       params?.pageSize ?? 20,
     ] as const,
+  mediaHealth: () => ['admin', 'media', 'health'] as const,
   media: (params: { search: string; classification: string; held: boolean; page: number }) =>
     ['admin', 'media', params.search, params.classification, params.held, params.page] as const,
   documents: (params?: { search?: string; category?: string; page?: number; pageSize?: number }) =>
