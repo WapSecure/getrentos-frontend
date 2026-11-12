@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { ROUTES } from '@sureground/shared';
 import { SITE_URL } from '@/lib/site';
+import { publishedAreas } from '@/lib/areaInventory';
 import { listingPath, type PublicListingKind } from '@/lib/listingSlug';
 
 // Rebuilt at most hourly; listings are published and withdrawn through the day.
@@ -89,8 +90,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: route.priority ?? 0.5,
   }));
 
-  const listings = await Promise.all(
-    LISTING_SOURCES.map(({ kind, path }) => listingEntries(kind, path))
-  );
-  return [...staticEntries, ...listings.flat()];
+  const [listings, areas] = await Promise.all([
+    Promise.all(LISTING_SOURCES.map(({ kind, path }) => listingEntries(kind, path))),
+    // Only areas with enough live listings have a page; the rest 404.
+    publishedAreas(),
+  ]);
+  const areaEntries = areas.map((area) => ({
+    url: `${SITE_URL}/areas/${area.slug}`,
+    lastModified: now,
+    changeFrequency: 'daily' as const,
+    priority: 0.7,
+  }));
+  return [...staticEntries, ...areaEntries, ...listings.flat()];
 }
