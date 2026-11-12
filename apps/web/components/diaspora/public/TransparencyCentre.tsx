@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
+import { CheckCircle2, Info, XCircle } from '@sureground/icons';
 import { VERIFICATION_LIMITS_FALLBACK } from '@sureground/shared';
 import {
   Badge,
@@ -14,7 +15,6 @@ import { ROUTES } from '@/lib/constants/auth';
 import { DIASPORA_ROUTES } from '@/lib/constants/diasporaRoutes';
 import { signInThen } from '@/lib/constants/landBuyerRoutes';
 import { SUPPORT } from '@/lib/support';
-import { PointList } from './DiasporaInvestLanding';
 import {
   CHECKED,
   CONFLICT_POINTS,
@@ -30,6 +30,23 @@ import {
   UNDECIDED_POINTS,
   type TransparencySection,
 } from './content';
+
+/** A ticked, crossed or noted list of short statements. */
+const PointList = ({ points, tone }: { points: string[]; tone: 'yes' | 'no' | 'info' }) => {
+  const Icon = tone === 'yes' ? CheckCircle2 : tone === 'no' ? XCircle : Info;
+  const colour =
+    tone === 'yes' ? 'text-success' : tone === 'no' ? 'text-muted-foreground' : 'text-primary';
+  return (
+    <ul className="space-y-3">
+      {points.map((point) => (
+        <li key={point} className="flex gap-3 text-sm leading-relaxed text-muted-foreground">
+          <Icon className={`mt-0.5 h-4 w-4 shrink-0 ${colour}`} aria-hidden="true" />
+          <span>{point}</span>
+        </li>
+      ))}
+    </ul>
+  );
+};
 
 // Server-rendered like the Diaspora Invest page: plain markup that reads without JavaScript.
 

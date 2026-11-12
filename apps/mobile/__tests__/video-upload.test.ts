@@ -17,7 +17,7 @@ jest.mock('../lib/api/client', () => {
   return {
     ...actual,
     apiFetch: (...args: unknown[]) => mockApiFetch(...args),
-    apiUpload: (...args: unknown[]) => mockApiUpload(...args),
+    apiUploadWithProgress: (...args: unknown[]) => mockApiUpload(...args),
   };
 });
 
@@ -59,7 +59,9 @@ describe('uploadVideoDirect', () => {
     });
     const progress: number[] = [];
 
-    const result = await uploadVideoDirect('/landlord/properties', file, (p) => progress.push(p));
+    const result = await uploadVideoDirect('/landlord/properties', file, {
+      onProgress: (p) => progress.push(p),
+    });
 
     expect(mockApiFetch).toHaveBeenNthCalledWith(1, '/landlord/properties/media/video-upload', {
       method: 'POST',
@@ -77,7 +79,7 @@ describe('uploadVideoDirect', () => {
         body: { key: session.key },
       }
     );
-    expect(progress).toEqual([0.5]);
+    expect(progress).toEqual([50]);
     expect(result).toEqual({ key: session.key, kind: 'video' });
     expect(mockApiUpload).not.toHaveBeenCalled();
   });
@@ -96,13 +98,40 @@ describe('uploadVideoDirect', () => {
     mockApiFetch.mockRejectedValueOnce(new ApiError('Not found', 404));
     mockApiUpload.mockResolvedValue({ key: 'owner/u1/property-media/abc-tour.MOV', kind: 'video' });
 
-    const result = await uploadVideoDirect('/owner/properties', file);
+    const onProgress = jest.fn();
+    const result = await uploadVideoDirect('/owner/properties', file, { onProgress });
 
     expect(mockApiUpload).toHaveBeenCalledWith(
       '/owner/properties/media/upload',
-      expect.any(FormData)
+      expect.any(FormData),
+      expect.objectContaining({ onProgress })
     );
     expect(result).toEqual({ key: 'owner/u1/property-media/abc-tour.MOV', kind: 'video' });
+    expect(mockUpload).not.toHaveBeenCalled();
+  });
+
+  it('hands the cancel signal to storage and stops before the API check once cancelled', async () => {
+    const controller = new AbortController();
+    mockApiFetch.mockResolvedValueOnce(session);
+    mockUpload.mockImplementation(async (_url, opts: { signal?: AbortSignal }) => {
+      expect(opts.signal).toBe(controller.signal);
+      controller.abort();
+      return { status: 200, body: '', headers: {} };
+    });
+
+    await expect(
+      uploadVideoDirect('/landlord/properties', file, { signal: controller.signal })
+    ).rejects.toMatchObject({ name: 'AbortError' });
+    expect(mockApiFetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('sends nothing when already cancelled', async () => {
+    const controller = new AbortController();
+    controller.abort();
+    await expect(
+      uploadVideoDirect('/owner/properties', file, { signal: controller.signal })
+    ).rejects.toMatchObject({ name: 'AbortError' });
+    expect(mockApiFetch).not.toHaveBeenCalled();
     expect(mockUpload).not.toHaveBeenCalled();
   });
 

@@ -18,7 +18,7 @@
     "android": {
       "package": "io.getsureground.app",
       "adaptiveIcon": {
-        "backgroundColor": "#0057D9",
+        "backgroundColor": "#20232B",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -73,7 +73,7 @@
       [
         "expo-notifications",
         {
-          "color": "#0057D9",
+          "color": "#20232B",
           "defaultChannel": "default"
         }
       ],

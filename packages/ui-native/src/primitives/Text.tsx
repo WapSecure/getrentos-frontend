@@ -33,6 +33,8 @@ export function Text({
 }: TextProps) {
   const theme = useTheme();
   const t = theme.typography[variant];
+  // Titles use the serif, set light like the web's page titles.
+  const serif = (variant === 'display' || variant === 'title') && theme.displayFont;
 
   return (
     <RNText
@@ -44,11 +46,12 @@ export function Text({
           fontSize: t.fontSize,
           lineHeight: t.lineHeight,
           fontWeight: t.fontWeight as TextStyle['fontWeight'],
-          letterSpacing: uppercase ? 0.6 : t.letterSpacing,
+          letterSpacing: uppercase ? 0.6 : serif ? -0.2 : t.letterSpacing,
           color: theme.colors[color],
           textAlign: center ? 'center' : undefined,
           textTransform: uppercase ? 'uppercase' : undefined,
         },
+        serif ? { fontFamily: theme.displayFont, fontWeight: 'normal' as const } : null,
         style,
       ])}
       {...rest}

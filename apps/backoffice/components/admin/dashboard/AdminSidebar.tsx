@@ -462,6 +462,12 @@ const navItems: NavItem[] = [
     permission: 'verifications.review',
   },
   {
+    label: 'Development checks',
+    href: '/admin/developments',
+    icon: Building2,
+    permission: 'verifications.review',
+  },
+  {
     label: 'Automation usage',
     href: '/admin/ai-usage',
     icon: Cpu,
@@ -509,6 +515,7 @@ const groupItems: [group: string, items: string[]][] = [
       'Estates',
       'Maintenance',
       'Floor plan checks',
+      'Development checks',
     ],
   ],
   [

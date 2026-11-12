@@ -21,10 +21,12 @@ export const metadata: Metadata = {
 export default async function DiasporaInvestPage() {
   if (!(await diasporaInvestEnabled())) notFound();
   return (
-    <main className="min-h-screen bg-background">
+    <>
       <Navigation />
-      <DiasporaInvestLanding />
+      <main id="main" className="bg-background">
+        <DiasporaInvestLanding />
+      </main>
       <Footer />
-    </main>
+    </>
   );
 }

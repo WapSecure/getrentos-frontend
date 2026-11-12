@@ -327,9 +327,9 @@ Shortlets were already on the showroom parts on the web. This milestone brings t
 **Not done:**
 
 - On a device: pinch zoom, swipe, the video player and the tour in the viewer have not been tried on iOS or Android.
-- `property_impression` and `property_card_click` on the mobile Discover, market and shortlet lists.
+- ~~`property_impression` and `property_card_click` on the mobile Discover, market and shortlet lists.~~ Done (`useCardAnalytics`, `lib/cardImpressions.ts`): half the card on screen for 250ms, once per card per screen visit, with the web's names and payload.
 - The viewer lives in the app, not `ui-native`, because it needs the gesture handler, expo-video and WebView, which `ui-native` does not depend on. It can move once `ui-native` takes those as peers.
-- Owner and host listing previews still use the old `PropertyGallery`.
+- ~~Owner and host listing previews still use the old `PropertyGallery`.~~ Done: they use the showroom hero and viewer (`ShowroomPreview`, no events sent); `PropertyGallery` is removed.
 
 **For a product decision:**
 
@@ -527,7 +527,7 @@ M7 is built: resized copies (earlier, backend #136), the CDN, blurred placeholde
 **Follow-ups:**
 
 - ~~Mobile listing photo upload sends one photo at a time over fetch, with no progress.~~ Done: the landlord property screen and the owner photos field upload over XHR (`apiUploadWithProgress` in the mobile client), up to 3 at a time, with progress, Cancel, Retry and Remove per photo. Photos are attached in one save once nothing is left sending.
-- Video tour uploads still show only a spinner.
+- ~~Video tour uploads still show only a spinner.~~ Done: the landlord, owner and host video tour field uses the photo upload row (progress, Cancel, Processing, Retry and Remove). `uploadVideoDirect` takes `{ onProgress, signal }`; the browser build sends its PUT over XHR for progress.
 - Photos closed without saving after uploading are left to the backend's clean-up of unattached uploads, as before.
 
 **Checks:** backend: the media specs and the rent, sale, land and shortlet service specs pass (227 tests) after merging `dev`; `tsc -p tsconfig.build.json` and eslint on changed files clean. Web: `tsc` clean in web and mobile, eslint clean on changed files, shared tests 25 pass, `audit:ui-controls` and `tokens:check` pass. Not yet checked in a browser.
