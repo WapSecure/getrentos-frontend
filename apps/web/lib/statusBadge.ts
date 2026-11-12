@@ -20,7 +20,7 @@ import {
   FileCheck,
 } from '@sureground/icons';
 import { LAND_DILIGENCE_STATUS, VERIFICATION_SUMMARY_STATUS } from '@sureground/shared';
-import type { BadgeVariant } from '@sureground/ui';
+import type { BadgeVariant } from '@sureground/ui/Badge';
 import type {
   RentPaymentStatus,
   RentPayoutStatus,

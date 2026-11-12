@@ -1,4 +1,4 @@
-import { Badge } from '@sureground/ui';
+import { Badge } from '@sureground/ui/Badge';
 import { ShieldCheck } from '@sureground/icons';
 import { LAND_ASSURANCE_TIER_LABELS, type LandAssuranceTier } from '@/types/land';
 import { LAND_ASSURANCE_TIER_DESCRIPTIONS } from '@/types/landMarket';

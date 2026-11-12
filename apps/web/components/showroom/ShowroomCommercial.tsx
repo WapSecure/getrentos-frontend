@@ -1,5 +1,5 @@
 import type { CommercialDetails, ShowroomMarket } from '@sureground/shared/showroom';
-import { DescriptionList } from '@sureground/ui';
+import { DescriptionList } from '@sureground/ui/DescriptionList';
 import {
   COMMERCIAL_VAT_ANCHOR,
   commercialSections,

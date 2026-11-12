@@ -1,6 +1,6 @@
 'use client';
 
-import { ListingCard } from '@sureground/ui';
+import { ListingCard } from '@sureground/ui/ListingCard';
 import type { ShowroomEventMarket } from '@sureground/shared/showroom';
 import { track } from '@/lib/analytics';
 import { MARKET_STATUS, type CardMarket, type MarketCard } from '@/lib/marketCards';

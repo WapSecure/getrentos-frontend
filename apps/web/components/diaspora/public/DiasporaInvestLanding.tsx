@@ -1,16 +1,16 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { BadgeCheck, Clock, Lock } from '@sureground/icons';
+import { Badge } from '@sureground/ui/Badge';
 import {
-  Badge,
   Card,
   CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
-  Timeline,
-} from '@sureground/ui';
+} from '@sureground/ui/Card';
+import { Timeline } from '@sureground/ui/Timeline';
 import { ClosingBand } from '@/components/marketing/ClosingBand';
 import { Container } from '@/components/marketing/Container';
 import { CtaLink } from '@/components/marketing/CtaLink';

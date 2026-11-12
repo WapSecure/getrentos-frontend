@@ -2,15 +2,9 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { CheckCircle2, Info, XCircle } from '@sureground/icons';
 import { VERIFICATION_LIMITS_FALLBACK } from '@sureground/shared';
-import {
-  Badge,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  DisclosureList,
-} from '@sureground/ui';
+import { Badge } from '@sureground/ui/Badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@sureground/ui/Card';
+import { DisclosureList } from '@sureground/ui/Disclosure';
 import { ROUTES } from '@/lib/constants/auth';
 import { DIASPORA_ROUTES } from '@/lib/constants/diasporaRoutes';
 import { signInThen } from '@/lib/constants/landBuyerRoutes';

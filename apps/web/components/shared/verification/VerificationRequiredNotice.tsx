@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { ShieldAlert } from '@sureground/icons';
-import { Alert } from '@sureground/ui';
+import { Alert } from '@sureground/ui/Alert';
 import {
   VERIFICATION_REASONS,
   TRUST_WITHHELD_REASONS,

@@ -2,16 +2,11 @@
 
 import type { ReactNode } from 'react';
 import { Lock, ShieldCheck } from '@sureground/icons';
-import {
-  Alert,
-  Badge,
-  Button,
-  DescriptionList,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-} from '@sureground/ui';
+import { Alert } from '@sureground/ui/Alert';
+import { Badge } from '@sureground/ui/Badge';
+import { Button } from '@sureground/ui/Button';
+import { DescriptionList } from '@sureground/ui/DescriptionList';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@sureground/ui/Dialog';
 import { PaymentProviderPicker } from '@/components/shared/payments/PaymentProviderPicker';
 import { useCheckoutFee } from '@/hooks/useCheckoutFee';
 import type { PaymentProviderChoice } from '@/hooks/usePaymentProviders';
