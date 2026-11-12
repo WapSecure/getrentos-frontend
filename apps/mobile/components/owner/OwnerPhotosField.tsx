@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, View } from 'react-native';
 import { Image } from 'expo-image';
 import { ImagePlus, Star, X } from '@sureground/icons/native';
@@ -6,6 +6,8 @@ import { Text, useTheme, useToast } from '@sureground/ui-native';
 import { errorMessage } from '@/lib/api/client';
 import { ownerApi, type OwnerProperty } from '@/lib/api/owner';
 import { pickPhotos } from '@/lib/filePicker';
+import { usePhotoUploads } from '@/lib/usePhotoUploads';
+import { PhotoUploadList } from '@/components/media/PhotoUploadList';
 
 const MAX_PHOTOS = 12;
 
@@ -18,48 +20,49 @@ export function OwnerPhotosField({
 }) {
   const { colors, spacing, radius } = useTheme();
   const toast = useToast();
-  const [busy, setBusy] = useState(false);
+  const [saving, setSaving] = useState(false);
   // The API lists the cover first among the keys, with signed links in step.
   const keys = property.galleryImageKeys ?? [];
   const urls = property.galleryImageUrls ?? [];
+  // Attaching replaces the whole list, so it builds on the newest one: a refetch may not have landed yet.
+  const savedKeys = useRef(keys);
+  useEffect(() => {
+    savedKeys.current = property.galleryImageKeys ?? [];
+  }, [property.galleryImageKeys]);
+
+  const uploads = usePhotoUploads({
+    upload: (file, options) => ownerApi.uploadPhoto(file, options),
+    attach: async (added) => {
+      const updated = await ownerApi.setPhotos(property.id, [...savedKeys.current, ...added]);
+      savedKeys.current = updated.galleryImageKeys ?? [...savedKeys.current, ...added];
+      onChanged();
+      toast.show(added.length === 1 ? 'Photo added.' : `${added.length} photos added.`, 'success');
+    },
+  });
+  // Cover and remove save the whole list too, so they wait until every new photo is in.
+  const busy = saving || uploads.busy;
 
   const save = async (next: string[], success: string) => {
-    setBusy(true);
+    setSaving(true);
     try {
-      await ownerApi.setPhotos(property.id, next);
+      const updated = await ownerApi.setPhotos(property.id, next);
+      savedKeys.current = updated.galleryImageKeys ?? next;
       onChanged();
       toast.show(success, 'success');
     } catch (e) {
       toast.show(errorMessage(e, 'Could not update the photos.'), 'error');
     } finally {
-      setBusy(false);
+      setSaving(false);
     }
   };
 
   const add = async () => {
-    const room = MAX_PHOTOS - keys.length;
+    const room = MAX_PHOTOS - keys.length - uploads.pending.length;
     if (room <= 0) {
       toast.show(`Up to ${MAX_PHOTOS} photos. Remove one to add another.`, 'info');
       return;
     }
-    const picked = await pickPhotos(room);
-    if (!picked.length) return;
-    setBusy(true);
-    try {
-      const uploaded = await Promise.all(
-        picked.map((file) => ownerApi.uploadMedia(file, 'image').then((r) => r.key))
-      );
-      await ownerApi.setPhotos(property.id, [...keys, ...uploaded]);
-      onChanged();
-      toast.show(
-        uploaded.length === 1 ? 'Photo added.' : `${uploaded.length} photos added.`,
-        'success'
-      );
-    } catch (e) {
-      toast.show(errorMessage(e, 'Could not add those photos.'), 'error');
-    } finally {
-      setBusy(false);
-    }
+    uploads.add(await pickPhotos(room));
   };
 
   const remove = (i: number) => {
@@ -163,7 +166,7 @@ export function OwnerPhotosField({
           ))}
           <Pressable
             onPress={() => void add()}
-            disabled={busy}
+            disabled={saving}
             accessibilityRole="button"
             accessibilityLabel="Add photos"
             style={[
@@ -178,7 +181,7 @@ export function OwnerPhotosField({
               },
             ]}
           >
-            {busy ? (
+            {saving ? (
               <ActivityIndicator color={colors.primary} />
             ) : (
               <>
@@ -191,6 +194,13 @@ export function OwnerPhotosField({
           </Pressable>
         </View>
       </ScrollView>
+      <PhotoUploadList
+        pending={uploads.pending}
+        states={uploads.states}
+        failed={uploads.failed}
+        onRemove={uploads.remove}
+        onRetry={uploads.retry}
+      />
       <Text variant="caption" color="mutedForeground">
         {keys.length > 1 ? 'Tap a photo to make it the cover. ' : ''}Bright, landscape photos work
         best. Up to {MAX_PHOTOS}.

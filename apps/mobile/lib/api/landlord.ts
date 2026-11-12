@@ -1,4 +1,10 @@
-import { apiDownload, apiFetch, apiUpload } from './client';
+import {
+  apiDownload,
+  apiFetch,
+  apiUpload,
+  apiUploadWithProgress,
+  type UploadProgressOptions,
+} from './client';
 import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
 import type { VideoCallJoin } from '@sureground/shared';
@@ -1247,6 +1253,18 @@ export const landlordApi = {
       '/landlord/properties/media/upload',
       form
     );
+  },
+
+  /** A photo for `uploadPropertyMedia`'s staging, with progress and cancel. Returns the storage key. */
+  uploadPropertyPhoto: (file: PickedFile, options: UploadProgressOptions = {}) => {
+    const form = new FormData();
+    appendFile(form, 'file', file);
+    form.append('kind', 'image');
+    return apiUploadWithProgress<{ key: string }>(
+      '/landlord/properties/media/upload',
+      form,
+      options
+    ).then((r) => r.key);
   },
 
   removePropertyMedia: (key: string) =>

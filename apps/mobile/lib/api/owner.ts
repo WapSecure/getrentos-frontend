@@ -1,4 +1,4 @@
-import { apiFetch, apiUpload } from './client';
+import { apiFetch, apiUpload, apiUploadWithProgress, type UploadProgressOptions } from './client';
 import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
 import type { TrustProfile } from './buyerTrustProfile';
@@ -463,6 +463,17 @@ export const ownerApi = {
       '/owner/properties/media/upload',
       form
     );
+  },
+  /** Stages a photo with progress and cancel. Returns the storage key. */
+  uploadPhoto: (file: PickedFile, options: UploadProgressOptions = {}) => {
+    const form = new FormData();
+    appendFile(form, 'file', file);
+    form.append('kind', 'image');
+    return apiUploadWithProgress<{ key: string }>(
+      '/owner/properties/media/upload',
+      form,
+      options
+    ).then((r) => r.key);
   },
   removeMedia: (key: string) =>
     apiFetch<{ deleted: boolean }>('/owner/properties/media/upload', {
