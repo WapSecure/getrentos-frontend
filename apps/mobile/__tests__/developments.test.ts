@@ -13,15 +13,17 @@ import {
 import { DEVELOPMENT_NOT_CHECKED, DEVELOPMENT_PAYMENT_COPY } from '@sureground/shared/showroom';
 
 jest.mock('@/lib/api/client', () => {
-  class MockApiError extends Error {
-    constructor(
-      message: string,
-      public status: number
-    ) {
-      super(message);
-    }
+  // Built without class syntax: babel's class helpers would be out-of-scope variables here.
+  function mockApiError(
+    this: { message: string; status: number },
+    message: string,
+    status: number
+  ) {
+    this.message = message;
+    this.status = status;
   }
-  return { apiFetch: jest.fn(), ApiError: MockApiError };
+  mockApiError.prototype = Object.create(Error.prototype);
+  return { apiFetch: jest.fn(), ApiError: mockApiError };
 });
 
 const fetchMock = apiFetch as jest.MockedFunction<typeof apiFetch>;
