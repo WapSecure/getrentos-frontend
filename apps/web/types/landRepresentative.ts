@@ -31,6 +31,8 @@ export interface CoApprovalView {
   disableEffectiveAt?: string;
   representative?: { appointmentId: string; name?: string };
   pending?: CoApprovalPendingStep[];
+  /** Both approved the deposit release; the buyer still has to press Release. */
+  releaseApproved?: boolean;
 }
 
 /** A representative's second approval to a deposit release; never moves money itself. */

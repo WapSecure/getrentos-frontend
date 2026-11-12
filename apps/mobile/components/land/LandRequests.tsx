@@ -13,7 +13,11 @@ import {
   useTheme,
   useToast,
 } from '@sureground/ui-native';
-import { approvalOutcomeMessage, type CoApprovalPendingStep } from '@sureground/shared';
+import {
+  approvalOutcomeMessage,
+  coApprovalConfirmDescription,
+  type CoApprovalPendingStep,
+} from '@sureground/shared';
 import { qk } from '@/lib/query/keys';
 import {
   deviceTimeZone,
@@ -283,14 +287,17 @@ export function CoApprovalCard({
   );
   const stepLabel = (step: CoApprovalPendingStep) =>
     step.releasesDeposit
-      ? `${labelFor(step.milestoneKey)} (releases the deposit)`
+      ? `${labelFor(step.milestoneKey)} (approves the deposit release)`
       : labelFor(step.milestoneKey);
   const confirmApprove = (step: CoApprovalPendingStep) =>
     Alert.alert(
       'Give your approval?',
-      step.releasesDeposit
-        ? `“${stepLabel(step)}”. Once the buyer has approved too, the deposit held under Payment Protection is released to the seller. Approve only what you have seen yourself.`
-        : `“${stepLabel(step)}”. Once the buyer has approved too, the step is confirmed. Approve only what you have seen yourself.`,
+      coApprovalConfirmDescription({
+        viewer: isBuyer ? 'buyer' : 'representative',
+        stepLabel: stepLabel(step),
+        releasesDeposit: step.releasesDeposit,
+        representativeName: c.representative?.name,
+      }),
       [
         { text: 'Not yet', style: 'cancel' },
         { text: 'Approve', onPress: () => approve.mutate(step) },

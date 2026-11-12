@@ -3,13 +3,17 @@ import assert from 'node:assert/strict';
 import {
   approvalOutcomeMessage,
   approvalsWaitingFor,
+  coApprovalConfirmDescription,
   canReleaseDeposit,
+  depositReleaseStage,
   documentLinkLabel,
   humaniseCode,
   legalVariant,
   moneyVariant,
   nextActionTarget,
+  releaseDialogDescription,
   releaseOutcome,
+  releaseStageNote,
   stageVariant,
   workspaceProgress,
 } from '../src/diaspora/transactionWorkspace.ts';
@@ -46,31 +50,95 @@ test('only the buyer may release, and only a held deposit', () => {
   );
 });
 
-test('a release waiting for the representative says nothing moved', () => {
-  const waiting = releaseOutcome({
-    state: 'WAITING_FOR_CO_APPROVAL',
-    waitingFor: 'REPRESENTATIVE',
-    message:
-      'Your approval is recorded. The deposit is released once your representative approves too.',
-  });
+test('a release waiting for the representative says nothing moved and the buyer releases again', () => {
+  const waiting = releaseOutcome(
+    {
+      state: 'WAITING_FOR_CO_APPROVAL',
+      waitingFor: 'REPRESENTATIVE',
+      // An older API message implying an automatic release is not shown.
+      message:
+        'Your approval is recorded. The deposit is released once your representative approves too.',
+    },
+    'Amaka Obi'
+  );
   assert.equal(waiting.waiting, true);
-  assert.match(waiting.message, /once your representative approves/);
+  assert.match(waiting.message, /Nothing has been released yet/);
+  assert.match(waiting.message, /Once Amaka Obi approves, come back and press Release the deposit/);
+  assert.doesNotMatch(waiting.message, /released once/);
   assert.deepEqual(releaseOutcome({ state: 'RELEASED' }), {
     waiting: false,
     message: 'Deposit released to the seller.',
   });
   // Older responses carry no outcome: the release went through.
   assert.equal(releaseOutcome(undefined).waiting, false);
-  // Without the API's message, the fallback still names who is awaited.
+  // Without a name, it still says who is awaited.
   assert.match(
-    releaseOutcome({ state: 'WAITING_FOR_CO_APPROVAL', waitingFor: 'BUYER' }).message,
-    /once you approve/
+    releaseOutcome({ state: 'WAITING_FOR_CO_APPROVAL', waitingFor: 'REPRESENTATIVE' }).message,
+    /Once your representative approves/
+  );
+  assert.match(
+    releaseOutcome({ state: 'WAITING_FOR_CO_APPROVAL', waitingFor: 'BUYER' }, 'Amaka Obi').message,
+    /^Amaka Obi has approved\. Nothing has been released yet/
   );
 });
 
 test('a representative approval never claims money moved', () => {
-  assert.match(approvalOutcomeMessage('WAITING_FOR_BUYER'), /Nothing moves/);
+  assert.match(approvalOutcomeMessage('WAITING_FOR_BUYER'), /Nothing has been released/);
   assert.match(approvalOutcomeMessage('APPROVED'), /buyer can now release/);
+});
+
+const stageOf = (
+  money: string,
+  coApproval: Parameters<typeof depositReleaseStage>[0]['coApproval']
+) => depositReleaseStage({ statuses: statuses(money), coApproval });
+
+test('deposit release stage follows the two approvals', () => {
+  assert.equal(stageOf('PROTECTED', { binding: false }), 'SINGLE');
+  assert.equal(stageOf('PROTECTED', { binding: true, pending: [] }), 'NEEDS_APPROVALS');
+  assert.equal(
+    stageOf('RELEASE_REQUESTED', {
+      binding: true,
+      pending: [
+        {
+          milestoneKey: 'KEYS_HANDED_OVER',
+          releasesDeposit: true,
+          buyerApproved: true,
+          representativeApproved: false,
+        },
+      ],
+    }),
+    'WAITING_FOR_REPRESENTATIVE'
+  );
+  assert.equal(
+    stageOf('PROTECTED', { binding: true, releaseApproved: true, pending: [] }),
+    'BOTH_APPROVED'
+  );
+  // Released already: nothing left to approve.
+  assert.equal(stageOf('RELEASED', { binding: true, releaseApproved: true }), 'NEEDS_APPROVALS');
+});
+
+test('release copy names the representative and never hedges with "If"', () => {
+  const both = releaseDialogDescription('BOTH_APPROVED', 'Amaka Obi');
+  assert.match(both, /You and Amaka Obi have both approved/);
+  const first = releaseDialogDescription('NEEDS_APPROVALS', 'Amaka Obi');
+  assert.match(
+    first,
+    /^Two-person approval is on, so this records your approval and nothing is released yet/
+  );
+  assert.match(first, /press Release the deposit again/);
+  for (const text of [both, first, releaseDialogDescription('SINGLE')]) {
+    assert.doesNotMatch(text, /\bIf two-person/);
+    assert.doesNotMatch(text, /\u2014/);
+  }
+  assert.equal(
+    releaseStageNote('BOTH_APPROVED'),
+    'Both approvals are in. Release the deposit to send it to the seller.'
+  );
+  assert.match(
+    releaseStageNote('WAITING_FOR_REPRESENTATIVE', 'Amaka Obi') ?? '',
+    /Once Amaka Obi approves/
+  );
+  assert.equal(releaseStageNote('SINGLE'), null);
 });
 
 test('approvals waiting for the viewer', () => {
@@ -152,4 +220,25 @@ test('the call to action goes to what is waiting for the viewer', () => {
     } as never),
     'approvals'
   );
+});
+
+test('approving the deposit release never promises an automatic release', () => {
+  const rep = coApprovalConfirmDescription({
+    viewer: 'representative',
+    stepLabel: 'Keys handed over',
+    releasesDeposit: true,
+  });
+  assert.match(rep, /does not move any money/);
+  assert.match(rep, /the buyer releases the deposit/);
+  const buyer = coApprovalConfirmDescription({
+    viewer: 'buyer',
+    stepLabel: 'Keys handed over',
+    releasesDeposit: true,
+    representativeName: 'Amaka Obi',
+  });
+  assert.match(
+    buyer,
+    /nothing is released\. Once Amaka Obi has approved too, press Release the deposit/
+  );
+  assert.doesNotMatch(rep + buyer, /is released to the seller/);
 });

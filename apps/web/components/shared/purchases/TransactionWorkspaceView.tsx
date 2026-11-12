@@ -5,12 +5,15 @@ import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   canReleaseDeposit,
+  depositReleaseStage,
   documentLinkLabel,
   formatDualTime,
   humaniseCode,
   moneyVariant,
   nextActionTarget,
+  releaseDialogDescription,
   releaseOutcome,
+  releaseStageNote,
   withStepUpSummary,
   workspaceProgress,
   type WorkspaceSection,
@@ -54,6 +57,7 @@ import { PerfectionPanel } from '@/components/land/closing/PerfectionPanel';
 import { ActivityFeed } from '@/components/shared/activity/ActivityFeed';
 import { browserTimeZone } from '@/components/shared/forms/TimeZoneSelect';
 import { CoApprovalCard } from '@/components/shared/representatives/CoApprovalCard';
+import { purchaseHistoryItems } from '@/lib/purchaseHistory';
 import { unwrap } from '@/lib/apiHelpers';
 import { ROUTES } from '@/lib/constants/auth';
 import { PURCHASE_ROUTES } from '@/lib/constants/purchaseRoutes';
@@ -210,6 +214,11 @@ const RailList = ({
   </ul>
 );
 
+/** The representative who gives the second approval, by name where the workspace knows it. */
+const approvingRepresentativeName = (data: TransactionWorkspace): string | undefined =>
+  data.coApproval.representative?.name ??
+  data.representatives.find((r) => r.approvesPayments)?.name;
+
 /**
  * One purchase as its buyer, its seller or the buyer's representative sees it (DIA-15): three
  * separate statuses, the next action, the steps, the legal transfer, approvals, people, documents
@@ -306,7 +315,10 @@ export const TransactionWorkspaceView = ({
       ),
     onSuccess: (result) => {
       setReleasing(false);
-      const outcome = releaseOutcome(result.release);
+      const outcome = releaseOutcome(
+        result.release,
+        data ? approvingRepresentativeName(data) : undefined
+      );
       // Waiting for the second approval: nothing moved, so the message stays on the page.
       setReleaseNotice(outcome.waiting ? outcome.message : null);
       refresh();
@@ -337,6 +349,9 @@ export const TransactionWorkspaceView = ({
   const progress = workspaceProgress(data);
   const target = nextActionTarget(data);
   const releasable = canReleaseDeposit(data);
+  const representativeName = approvingRepresentativeName(data);
+  const releaseStage = depositReleaseStage(data);
+  const releaseNote = isBuyer ? releaseStageNote(releaseStage, representativeName) : null;
   const hasDisputes =
     disputes.milestones.length + disputes.sale.length + disputes.land.length > 0 ||
     disputes.canDisputeDeposit ||
@@ -561,7 +576,7 @@ export const TransactionWorkspaceView = ({
               />
             ) : (
               <ActivityFeed
-                items={data.history}
+                items={purchaseHistoryItems(data.history, data.representatives)}
                 viewerTimeZone={viewerTimeZone}
                 headingLevel="h3"
               />
@@ -582,10 +597,17 @@ export const TransactionWorkspaceView = ({
               </Badge>
               {releasable ? (
                 <>
-                  <p className="text-sm text-muted-foreground">
-                    Release it only once you have received the property and the documents you
-                    agreed.
-                  </p>
+                  {releaseStage === 'BOTH_APPROVED' ? (
+                    <p className="text-sm font-medium text-foreground" role="status">
+                      {releaseNote}
+                    </p>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      Release it only once you have received the property and the documents you
+                      agreed.
+                      {releaseNote ? ` ${releaseNote}` : ''}
+                    </p>
+                  )}
                   <Button
                     className="w-full"
                     icon={<ShieldCheck className="h-4 w-4" aria-hidden />}
@@ -594,6 +616,10 @@ export const TransactionWorkspaceView = ({
                     Release the deposit
                   </Button>
                 </>
+              ) : isBuyer && releaseStage === 'WAITING_FOR_REPRESENTATIVE' ? (
+                <p className="text-sm text-muted-foreground" role="status">
+                  {releaseNote}
+                </p>
               ) : (
                 isSeller && (
                   <p className="text-sm text-muted-foreground">
@@ -858,8 +884,12 @@ export const TransactionWorkspaceView = ({
         open={releasing}
         onOpenChange={(open) => !open && setReleasing(false)}
         title="Release the deposit to the seller?"
-        description="Release only once you have received the property and the documents you agreed; it cannot be undone. If two-person approval is on, nothing moves until your representative approves too. This does not complete the legal transfer."
-        confirmLabel="Release the deposit"
+        description={releaseDialogDescription(releaseStage, representativeName)}
+        confirmLabel={
+          releaseStage === 'SINGLE' || releaseStage === 'BOTH_APPROVED'
+            ? 'Release the deposit'
+            : 'Record my approval'
+        }
         isLoading={release.isPending}
         onConfirm={() => release.mutateAsync().catch(() => undefined)}
       />

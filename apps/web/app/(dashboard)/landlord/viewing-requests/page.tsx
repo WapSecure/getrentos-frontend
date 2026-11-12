@@ -6,6 +6,7 @@ import { CalendarCheck } from '@sureground/icons';
 import {
   Badge,
   Button,
+  ConfirmDialog,
   Dialog,
   DialogContent,
   DialogTitle,
@@ -28,6 +29,7 @@ import type { ViewingRequestStatus } from '@/types/landlord';
 import { DateTimeField, isCompleteDateTime } from '@/components/shared/forms/DateTimeField';
 import { LandlordLettingsNav } from '@/components/shared/navigation/WorkflowNavs';
 import { preferredSlotValue } from '@/lib/viewingPrefill';
+import { viewingCancelCopy, type ViewingCancelTarget } from '@/lib/viewingCancel';
 
 const FILTERS = [
   { value: 'all', label: 'All' },
@@ -52,6 +54,10 @@ export default function LandlordViewingRequestsPage() {
     preferredAt?: string;
   } | null>(null);
   const [scheduledAt, setScheduledAt] = useState('');
+  const [cancelTarget, setCancelTarget] = useState<(ViewingCancelTarget & { id: string }) | null>(
+    null
+  );
+  const cancelCopy = cancelTarget ? viewingCancelCopy(cancelTarget) : null;
 
   const query = useQuery({
     queryKey: [...landlordKeys.viewingRequests(status), { page, pageSize: PAGE_SIZE }],
@@ -79,9 +85,13 @@ export default function LandlordViewingRequestsPage() {
   });
 
   const cancelMutation = useMutation({
-    mutationFn: (id: string) => unwrap(landlordService.cancelViewingRequest(id)),
-    onSuccess: () =>
-      void queryClient.invalidateQueries({ queryKey: landlordKeys.viewingRequests() }),
+    mutationFn: (target: ViewingCancelTarget & { id: string }) =>
+      unwrap(landlordService.cancelViewingRequest(target.id)),
+    onSuccess: (_data, target) => {
+      setCancelTarget(null);
+      toast.success(viewingCancelCopy(target).success);
+      void queryClient.invalidateQueries({ queryKey: landlordKeys.viewingRequests() });
+    },
     onError: (error: Error) => toast.error(error.message || 'Could not cancel this viewing.'),
   });
 
@@ -195,10 +205,7 @@ export default function LandlordViewingRequestsPage() {
                       <Button
                         variant="ghost"
                         disabled={cancelMutation.isPending}
-                        isLoading={
-                          cancelMutation.isPending && cancelMutation.variables === viewing.id
-                        }
-                        onClick={() => cancelMutation.mutate(viewing.id)}
+                        onClick={() => setCancelTarget(viewing)}
                       >
                         Decline
                       </Button>
@@ -226,10 +233,7 @@ export default function LandlordViewingRequestsPage() {
                         <Button
                           variant="ghost"
                           disabled={cancelMutation.isPending}
-                          isLoading={
-                            cancelMutation.isPending && cancelMutation.variables === viewing.id
-                          }
-                          onClick={() => cancelMutation.mutate(viewing.id)}
+                          onClick={() => setCancelTarget(viewing)}
                         >
                           Cancel viewing
                         </Button>
@@ -251,6 +255,18 @@ export default function LandlordViewingRequestsPage() {
           <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPageChange={setPage} />
         </>
       )}
+
+      <ConfirmDialog
+        open={cancelTarget !== null}
+        onOpenChange={(open) => {
+          if (!open && !cancelMutation.isPending) setCancelTarget(null);
+        }}
+        title={cancelCopy?.title ?? ''}
+        description={cancelCopy?.description ?? ''}
+        confirmLabel={cancelCopy?.confirmLabel}
+        onConfirm={() => cancelTarget && cancelMutation.mutateAsync(cancelTarget)}
+        isLoading={cancelMutation.isPending}
+      />
 
       <Dialog open={!!confirmTarget} onOpenChange={(open) => !open && setConfirmTarget(null)}>
         <DialogContent className="max-w-md p-0">

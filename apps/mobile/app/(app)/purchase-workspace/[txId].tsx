@@ -27,11 +27,13 @@ import {
 } from '@sureground/ui-native';
 import {
   canReleaseDeposit,
+  depositReleaseStage,
   documentLinkLabel,
   formatDualTime,
   humaniseCode,
   moneyVariant,
   nextActionTarget,
+  releaseDialogDescription,
   releaseOutcome,
   workspaceProgress,
   type WorkspaceSection,
@@ -184,7 +186,11 @@ export default function PurchaseWorkspace() {
     mutationFn: () =>
       purchaseWorkspaceApi.releaseDeposit(txId, data?.propertyTitle ?? 'this purchase'),
     onSuccess: (result) => {
-      const outcome = releaseOutcome(result.release);
+      const outcome = releaseOutcome(
+        result.release,
+        data?.coApproval.representative?.name ??
+          data?.representatives.find((r) => r.approvesPayments)?.name
+      );
       // Waiting for the second approval: nothing moved, so the message stays on the screen.
       setReleaseNotice(outcome.waiting ? outcome.message : null);
       refresh();
@@ -201,10 +207,22 @@ export default function PurchaseWorkspace() {
   const confirmRelease = () =>
     Alert.alert(
       'Release the deposit to the seller?',
-      'Release only once you have received the property and the documents you agreed; it cannot be undone. If two-person approval is on, nothing moves until your representative approves too. This does not complete the legal transfer.',
+      data
+        ? releaseDialogDescription(
+            depositReleaseStage(data),
+            data.coApproval.representative?.name ??
+              data.representatives.find((r) => r.approvesPayments)?.name
+          )
+        : releaseDialogDescription('SINGLE'),
       [
         { text: 'Not yet', style: 'cancel' },
-        { text: 'Release the deposit', onPress: () => release.mutate() },
+        {
+          text:
+            !data || ['SINGLE', 'BOTH_APPROVED'].includes(depositReleaseStage(data))
+              ? 'Release the deposit'
+              : 'Record my approval',
+          onPress: () => release.mutate(),
+        },
       ]
     );
 
