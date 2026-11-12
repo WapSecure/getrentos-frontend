@@ -6,6 +6,7 @@ import { Badge, Button, type BadgeVariant } from '@sureground/ui';
 import { cn, formatRelativeTime } from '@sureground/shared';
 import type { FraudAlert, FraudAlertSeverity, FraudAlertStatus } from '@/types/admin';
 import { roleLabel } from '@/lib/roleLabels';
+import { fraudAlertSummary } from '@/lib/fraudAlertText';
 
 const severityConfig: Record<FraudAlertSeverity, { label: string; variant: BadgeVariant }> = {
   low: { label: 'Low', variant: 'neutral' },
@@ -88,7 +89,7 @@ export const FraudAlertCard = ({
         <Badge variant={severity.variant}>{severity.label}</Badge>
       </div>
 
-      <p className="text-sm text-muted-foreground mt-3">{alert.reason}</p>
+      <p className="text-sm text-muted-foreground mt-3">{fraudAlertSummary(alert)}</p>
 
       <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
         <span className={`inline-flex items-center gap-1 text-xs font-medium ${status.className}`}>
