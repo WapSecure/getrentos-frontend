@@ -112,8 +112,8 @@ export default function AdminAccessPage() {
     setStaffPage(1);
     notify(
       approvalStatus === 'PENDING'
-        ? 'Staff created. It is pending approval by a senior admin.'
-        : 'Staff created and active.',
+        ? 'Staff created. Once a senior admin approves it, they get an email link to set their password.'
+        : 'Staff created. We emailed them a link to set their password.',
       approvalStatus === 'PENDING' ? 'warning' : 'success'
     );
   };
@@ -310,7 +310,10 @@ export default function AdminAccessPage() {
         staff={resetTarget}
         onReset={() => {
           queryClient.invalidateQueries({ queryKey: adminKeys.staff });
-          notify('Password reset: all previous sessions were revoked.', 'success');
+          notify(
+            'Password reset. They were signed out everywhere and emailed a link to choose a new one.',
+            'success'
+          );
         }}
       />
 
