@@ -9,6 +9,9 @@ export const DIASPORA_ROUTES = {
   OWNER_ONBOARDING: '/owner/invest/onboarding',
   /** Sureground Managed in one place (owner portal only: managed property belongs to owners). */
   OWNER_MANAGED: '/owner/invest/managed',
+  /** Property care opened on the property this statement covers, with its breakdown open. */
+  managedStatement: (statementId: string) =>
+    `/owner/invest/managed?statement=${encodeURIComponent(statementId)}`,
   workspace: (portal: InvestorPortal) => `/${portal}/invest`,
   onboarding: (portal: InvestorPortal) => `/${portal}/invest/onboarding`,
 } as const;
