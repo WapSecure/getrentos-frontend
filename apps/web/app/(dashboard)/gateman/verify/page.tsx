@@ -2,23 +2,13 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CheckCircle2, CloudOff, LogOut, Mic, QrCode, UserPlus, XCircle } from '@sureground/icons';
+import { CheckCircle2, CloudOff, Mic, QrCode, UserPlus, XCircle } from '@sureground/icons';
 import { NotAssignedToEstate } from '@/components/gateman/NotAssignedToEstate';
-import {
-  Alert,
-  Button,
-  Card,
-  CardSkeleton,
-  ListSkeleton,
-  NumberInput,
-  PageHeader,
-  Pagination,
-  SearchInput,
-  Switch,
-} from '@sureground/ui';
+import { Alert, Button, Card, CardSkeleton, NumberInput, PageHeader, Switch } from '@sureground/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { WalkInDialog } from '@/components/gateman/WalkInDialog';
+import { InsideNowPanel } from '@/components/gateman/InsideNowPanel';
 import { useGateVoice } from '@/components/gateman/useGateVoice';
 import { digitsFromSpeech } from '@sureground/shared';
 import { useVoiceInput } from '@/lib/voice';
@@ -683,71 +673,25 @@ export default function GatemanVerifyPage() {
           </div>
         )}
 
-        <div>
-          <h2 className="text-sm font-semibold text-foreground mb-3">
-            Inside now
-            {insideQuery ? ` · ${insideTotal} found` : insideTotal > 0 ? ` (${insideTotal})` : ''}
-          </h2>
-          {(insideTotal > 0 || insideSearch) && (
-            <SearchInput
-              value={insideSearch}
-              onValueChange={setInsideSearch}
-              placeholder="Visitor, phone, unit or resident"
-              label="Search visitors inside"
-              className="mb-3"
-            />
-          )}
-          {isInsideLoading ? (
-            <ListSkeleton rows={2} />
-          ) : inside.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              {insideQuery
-                ? `No one inside matches "${insideQuery}".`
-                : 'No visitors are on the estate right now.'}
-            </p>
-          ) : (
-            <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
-              {inside.map((pass) => (
-                <div key={pass.id} className="p-3 flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">
-                      {pass.visitorName}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {pass.unitLabel}
-                      {pass.checkedInAt ? ` · in since ${formatTime(pass.checkedInAt)}` : ''}
-                    </p>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="shrink-0"
-                    icon={<LogOut className="w-3.5 h-3.5" />}
-                    disabled={checkOut.isPending}
-                    isLoading={checkOut.isPending && checkOut.variables?.id === pass.id}
-                    aria-label={`Check out ${pass.visitorName}`}
-                    onClick={() => {
-                      setResult(null);
-                      checkOut.mutate(pass);
-                    }}
-                  >
-                    Check out
-                  </Button>
-                </div>
-              ))}
-            </div>
-          )}
-          {(checkInsData?.total ?? 0) > INSIDE_PAGE_SIZE && (
-            <Pagination
-              page={insidePage}
-              pageSize={INSIDE_PAGE_SIZE}
-              total={checkInsData?.total ?? 0}
-              onPageChange={setInsidePage}
-              isLoading={isInsideFetching}
-              className="mt-4"
-            />
-          )}
-        </div>
+        <InsideNowPanel
+          visitors={inside}
+          total={insideTotal}
+          pagedTotal={checkInsData?.total ?? 0}
+          page={insidePage}
+          pageSize={INSIDE_PAGE_SIZE}
+          onPageChange={setInsidePage}
+          search={insideSearch}
+          query={insideQuery}
+          onSearchChange={setInsideSearch}
+          isLoading={isInsideLoading}
+          isFetching={isInsideFetching}
+          checkingOutId={checkOut.variables?.id}
+          isCheckingOut={checkOut.isPending}
+          onCheckOut={(pass) => {
+            setResult(null);
+            checkOut.mutate(pass);
+          }}
+        />
       </div>
 
       <WalkInDialog
