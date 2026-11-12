@@ -84,7 +84,8 @@ export function cspReportUri(
   apiUrl: string | null | undefined
 ): string | null {
   if (configured && configured.trim()) return configured.trim();
-  const api = apiUrl?.trim().replace(/\/+$/, '');
+  let api = apiUrl?.trim();
+  while (api?.endsWith('/')) api = api.slice(0, -1);
   return api && httpOrigin(api) ? `${api}/security/csp-report` : null;
 }
 

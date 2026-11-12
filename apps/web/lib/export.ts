@@ -1,5 +1,8 @@
 const escapeCsvValue = (value: unknown): string => {
-  const str = value === null || value === undefined ? '' : String(value);
+  let str = value === null || value === undefined ? '' : String(value);
+  // A cell starting with = + - @ (or a tab/CR) runs as a formula in Excel and Sheets: prefix it
+  // so exported user text is always read as text (CSV/formula injection).
+  if (/^[=+\-@\t\r]/.test(str)) str = `'${str}`;
   if (/[",\n]/.test(str)) {
     return `"${str.replace(/"/g, '""')}"`;
   }
@@ -32,7 +35,7 @@ export const printHtml = (title: string, bodyHtml: string): void => {
 <html>
 <head>
 <meta charset="utf-8" />
-<title>${escapeCsvValue(title)}</title>
+<title>${escapeHtml(title)}</title>
 <style>
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #111; padding: 32px; }
   h1 { font-size: 20px; margin: 0 0 4px; }

@@ -18,7 +18,8 @@ interface HouseholdModalProps {
   errorMessage?: string | null;
 }
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Unambiguous (dots split the domain), so it cannot backtrack badly on long input.
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/;
 // At least seven digits, with the usual separators.
 const PHONE_PATTERN = /^\+?[\d\s()-]{7,20}$/;
 
