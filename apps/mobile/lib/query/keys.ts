@@ -80,6 +80,8 @@ export const qk = {
     mandates: ['managed', 'mandates'] as const,
     intakes: ['managed', 'intakes'] as const,
     breakFee: (mandateId: string) => ['managed', 'break-fee', mandateId] as const,
+    // Under managed, so refreshing the agreements refreshes their fees too.
+    feeAmendments: (mandateId: string) => ['managed', 'fee-amendments', mandateId] as const,
   },
   automations: {
     rules: ['automations', 'rules'] as const,
@@ -106,6 +108,7 @@ export const qk = {
     countersign: ['management', 'awaiting-countersign'] as const,
     deposits: (status: string) => ['management', 'deposits', 'list', status] as const,
     deposit: (id: string) => ['management', 'deposits', 'one', id] as const,
+    depositEnd: (id: string) => ['management', 'deposits', 'end', id] as const,
     inspections: (status: string) => ['management', 'inspections', 'list', status] as const,
     inspection: (id: string) => ['management', 'inspections', 'one', id] as const,
   },
@@ -207,6 +210,7 @@ export const qk = {
     deposits: ['renter', 'deposits'] as const,
     // Under deposits, so a dispute refreshes the plan too.
     depositPlan: ['renter', 'deposits', 'plan'] as const,
+    depositEnd: (holdId: string) => ['renter', 'deposits', 'end', holdId] as const,
     homeTeam: ['renter', 'home-team'] as const,
     dashboardStats: ['renter', 'dashboard', 'stats'] as const,
     moveInChecklist: ['renter', 'dashboard', 'move-in-checklist'] as const,

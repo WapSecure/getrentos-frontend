@@ -42,6 +42,8 @@ const WEB_PATH_TO_ROUTE: Record<string, string> = {
   '/land/watch': '/(app)/land-watch',
   '/land/inspections': '/(app)/land-inspections',
   '/owner/managed': '/(app)/managed-properties',
+  '/owner/management': '/(app)/get-managed',
+  '/landlord/managed': '/(app)/get-managed',
   '/owner/estate-agreements': '/(app)/estate-agreements',
   '/owner/shortlets': '/(app)/host',
   '/owner/home-management': '/(app)/home-care',

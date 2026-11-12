@@ -10,6 +10,7 @@ import {
   UserRound,
   CircleHelp,
   FileStack,
+  FileSignature,
   Handshake,
   KeySquare,
   LandPlot,
@@ -150,6 +151,13 @@ export default function OwnerAccount() {
       description: 'Estates asking to market your property',
       icon: Trees,
       onPress: go('/(app)/estate-agreements'),
+    },
+    {
+      key: 'management',
+      label: 'Management agreements',
+      description: 'Your managers, signatures and fee changes',
+      icon: FileSignature,
+      onPress: go('/(app)/get-managed'),
     },
     {
       key: 'managed',

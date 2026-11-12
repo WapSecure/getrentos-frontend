@@ -32,6 +32,7 @@ import {
 import { errorMessage } from '@/lib/api/client';
 import { formatDate, formatNaira } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { EndOfTenancyCard } from '@/components/deposits/EndOfTenancyCard';
 import { goBack } from '@/lib/goBack';
 
 export default function DepositDetail() {
@@ -111,7 +112,10 @@ export default function DepositDetail() {
             refreshControl={
               <RefreshControl
                 refreshing={query.isRefetching}
-                onRefresh={() => void query.refetch()}
+                onRefresh={() => {
+                  void query.refetch();
+                  void qc.invalidateQueries({ queryKey: qk.management.depositEnd(id) });
+                }}
                 tintColor={colors.mutedForeground}
               />
             }
@@ -151,6 +155,8 @@ export default function DepositDetail() {
                 message={`${formatNaira(d.returnedAmount)} returned to the tenant on ${formatDate(d.returnedAt)}.`}
               />
             ) : null}
+
+            <EndOfTenancyCard depositId={d.id} />
 
             <Text variant="bodyStrong" accessibilityRole="header">
               Deductions
