@@ -17,16 +17,24 @@ import {
   useToast,
 } from '@sureground/ui-native';
 import { Sheet } from '@/components/Sheet';
+import { CollectDeliverySheet } from '@/components/estate/gate/CollectDeliverySheet';
 import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
-import { gatemanApi, type DeliveryCodeScreen, type Household } from '@/lib/api/gateman';
+import {
+  gatemanApi,
+  type DeliveryCodeScreen,
+  type DeliveryLog,
+  type Household,
+} from '@/lib/api/gateman';
 import type { PickedFile } from '@/lib/api/documents';
 import { qk } from '@/lib/query/keys';
 import { formatTime } from '@/lib/format';
 import { capturePhoto, pickPhoto } from '@/lib/filePicker';
+import { collectionSummary } from '@sureground/shared';
 import { haptics } from '@/lib/haptics';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 
 const HOUSEHOLD_PAGE_SIZE = 100;
+const RECENTLY_COLLECTED = 10;
 
 export default function GatemanDeliveries() {
   const { colors, spacing } = useTheme();
@@ -50,6 +58,14 @@ export default function GatemanDeliveries() {
     enabled: !!estate,
   });
   const awaiting = awaitingQuery.data?.items ?? [];
+
+  const collectedQuery = useQuery({
+    queryKey: [...qk.gateman.deliveries(estate?.id ?? ''), 'collected'],
+    queryFn: () => gatemanApi.listDeliveries(estate!.id, 'collected', 1, RECENTLY_COLLECTED),
+    enabled: !!estate,
+  });
+  const recentlyCollected = collectedQuery.data?.items ?? [];
+  const [handingOver, setHandingOver] = useState<DeliveryLog | null>(null);
 
   const householdsQuery = useQuery({
     queryKey: qk.gateman.households(estate?.id ?? ''),
@@ -82,8 +98,13 @@ export default function GatemanDeliveries() {
   });
 
   const markCollected = useMutation({
-    mutationFn: (logId: string) => gatemanApi.markDeliveryCollected(estate!.id, logId),
-    onSuccess: () => invalidateDeliveries(),
+    mutationFn: (v: { logId: string; collectedBy?: string }) =>
+      gatemanApi.markDeliveryCollected(estate!.id, v.logId, v.collectedBy),
+    onSuccess: () => {
+      void haptics.success();
+      invalidateDeliveries();
+      setHandingOver(null);
+    },
     onError: () => toast.show("Couldn't mark that as collected. Try again.", 'error'),
   });
 
@@ -158,18 +179,49 @@ export default function GatemanDeliveries() {
                   </Text>
                 </View>
                 <Button
-                  label="Collected"
+                  label="Hand over"
                   variant="outline"
                   size="sm"
                   fullWidth={false}
-                  loading={markCollected.isPending && markCollected.variables === log.id}
-                  onPress={() => markCollected.mutate(log.id)}
+                  accessibilityLabel={`Hand over the parcel for ${log.unitLabel}`}
+                  onPress={() => setHandingOver(log)}
                 />
               </View>
             </Card>
           ))
         )}
       </View>
+
+      {recentlyCollected.length > 0 ? (
+        <View style={{ gap: spacing.md }}>
+          <SectionHeader title="Recently collected" description="Who took each parcel, and when" />
+          {recentlyCollected.map((log) => (
+            <Card key={log.id}>
+              <View style={{ gap: 2 }}>
+                <Text variant="bodyStrong">{log.unitLabel}</Text>
+                <Text variant="caption" color="mutedForeground">
+                  {log.residentName}
+                  {log.courier ? ` · ${log.courier}` : ''}
+                </Text>
+                {collectionSummary(log) ? (
+                  <Text variant="caption" color="mutedForeground">
+                    {collectionSummary(log)}
+                  </Text>
+                ) : null}
+              </View>
+            </Card>
+          ))}
+        </View>
+      ) : null}
+
+      <CollectDeliverySheet
+        log={handingOver}
+        busy={markCollected.isPending}
+        onClose={() => setHandingOver(null)}
+        onConfirm={(collectedBy) =>
+          handingOver && markCollected.mutate({ logId: handingOver.id, collectedBy })
+        }
+      />
 
       <LogDeliverySheet
         open={logOpen}

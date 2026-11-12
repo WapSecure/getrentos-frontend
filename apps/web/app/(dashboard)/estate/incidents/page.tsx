@@ -84,6 +84,15 @@ export default function EstateIncidentsPage() {
     onError: (error: Error) => toast.error(error.message || 'Could not post the update.'),
   });
 
+  const startMutation = useMutation({
+    meta: { showGlobalError: true },
+    mutationFn: (id: string) => unwrap(estateService.startIncident(estate!.id, id)),
+    onSuccess: () => {
+      invalidate();
+      toast.success('Incident marked in progress.');
+    },
+  });
+
   const closeMutation = useMutation({
     meta: { showGlobalError: true },
     mutationFn: ({
@@ -170,9 +179,10 @@ export default function EstateIncidentsPage() {
             <IncidentCard
               key={incident.id}
               incident={incident}
+              onStart={() => startMutation.mutate(incident.id)}
               onResolve={() => setCloseTarget({ id: incident.id, action: 'resolve' })}
               onDismiss={() => setCloseTarget({ id: incident.id, action: 'dismiss' })}
-              isUpdating={closeMutation.isPending}
+              isUpdating={closeMutation.isPending || startMutation.isPending}
             />
           ))}
         </div>

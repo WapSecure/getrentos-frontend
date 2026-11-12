@@ -11,8 +11,11 @@ import { estateKeys } from '@/lib/queryKeys';
 import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
 import { LogDeliveryModal } from '@/components/estate/deliveries/LogDeliveryModal';
 import { DeliveryLogRow } from '@/components/estate/deliveries/DeliveryLogRow';
+import { CollectDeliveryDialog } from '@/components/estate/deliveries/CollectDeliveryDialog';
+import type { DeliveryLog } from '@/types/estate';
 
 const HOUSEHOLD_OPTIONS_PAGE_SIZE = 20;
+const RECENTLY_COLLECTED = 10;
 
 export default function GatemanDeliveriesPage() {
   const queryClient = useQueryClient();
@@ -61,6 +64,23 @@ export default function GatemanDeliveriesPage() {
   });
   const awaiting = awaitingData?.items ?? [];
 
+  const { data: collectedData } = useQuery({
+    queryKey: [
+      ...estateKeys.deliveries(estate?.id ?? '', 'collected'),
+      { pageSize: RECENTLY_COLLECTED },
+    ],
+    queryFn: () =>
+      unwrap(
+        estateService.listDeliveries(estate!.id, {
+          status: 'collected',
+          page: 1,
+          pageSize: RECENTLY_COLLECTED,
+        })
+      ),
+    enabled: !!estate,
+  });
+  const recentlyCollected = collectedData?.items ?? [];
+
   const invalidateLogs = () => {
     if (!estate) return;
     queryClient.invalidateQueries({ queryKey: ['estate', estate.id, 'deliveries'] });
@@ -75,9 +95,16 @@ export default function GatemanDeliveriesPage() {
     },
   });
 
+  const [collectTarget, setCollectTarget] = useState<DeliveryLog | null>(null);
+
   const markCollected = useMutation({
-    mutationFn: (logId: string) => unwrap(estateService.markDeliveryCollected(estate!.id, logId)),
-    onSuccess: () => invalidateLogs(),
+    meta: { showGlobalError: true },
+    mutationFn: ({ logId, collectedBy }: { logId: string; collectedBy?: string }) =>
+      unwrap(estateService.markDeliveryCollected(estate!.id, logId, collectedBy)),
+    onSuccess: () => {
+      invalidateLogs();
+      setCollectTarget(null);
+    },
   });
 
   if (isEstateLoading) {
@@ -125,13 +152,24 @@ export default function GatemanDeliveriesPage() {
               <DeliveryLogRow
                 key={log.id}
                 log={log}
-                onMarkCollected={() => markCollected.mutate(log.id)}
+                onMarkCollected={() => setCollectTarget(log)}
                 isMarkingCollected={markCollected.isPending}
               />
             ))}
           </div>
         )}
       </div>
+
+      {recentlyCollected.length > 0 && (
+        <div>
+          <h2 className="text-sm font-semibold text-foreground mb-3">Recently collected</h2>
+          <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
+            {recentlyCollected.map((log) => (
+              <DeliveryLogRow key={log.id} log={log} />
+            ))}
+          </div>
+        </div>
+      )}
 
       <LogDeliveryModal
         isOpen={isModalOpen}
@@ -146,6 +184,15 @@ export default function GatemanDeliveriesPage() {
         onClose={() => setIsModalOpen(false)}
         onSubmit={(data) => logDelivery.mutate(data)}
         isSubmitting={logDelivery.isPending}
+      />
+
+      <CollectDeliveryDialog
+        log={collectTarget}
+        onClose={() => setCollectTarget(null)}
+        onConfirm={(collectedBy) =>
+          collectTarget && markCollected.mutate({ logId: collectTarget.id, collectedBy })
+        }
+        isSubmitting={markCollected.isPending}
       />
     </div>
   );

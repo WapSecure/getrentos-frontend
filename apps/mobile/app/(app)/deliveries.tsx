@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { View } from 'react-native';
 
+import { collectionSummary } from '@sureground/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Package, Plus } from '@sureground/icons/native';
 import {
@@ -203,7 +204,7 @@ export default function ResidentDeliveries() {
                   ) : null}
                   <Text variant="caption" color="mutedForeground">
                     Received {formatDate(d.receivedAt, 'short')}
-                    {d.collectedAt ? ` · Collected ${formatDate(d.collectedAt, 'short')}` : ''}
+                    {collectionSummary(d) ? ` · ${collectionSummary(d)}` : ''}
                   </Text>
                 </View>
               </View>

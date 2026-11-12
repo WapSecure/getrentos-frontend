@@ -5,6 +5,7 @@ import { Package } from '@sureground/icons';
 import { Badge, EmptyState, ListSkeleton, PageHeader } from '@sureground/ui';
 import { estateResidentService } from '@/services/estateResidentService';
 import { unwrap } from '@/lib/apiHelpers';
+import { collectionSummary } from '@sureground/shared';
 import { estateResidentKeys } from '@/lib/queryKeys';
 import { ExpectedDeliveriesPanel } from '@/components/estate/deliveries/ExpectedDeliveriesPanel';
 import type { DeliveryLog } from '@/types/estate';
@@ -65,7 +66,7 @@ export default function ResidentDeliveriesPage() {
                 </p>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   Received {formatDateTime(log.receivedAt)}
-                  {log.collectedAt ? ` · Collected ${formatDateTime(log.collectedAt)}` : ''}
+                  {collectionSummary(log) ? ` · ${collectionSummary(log)}` : ''}
                 </p>
               </div>
               <Badge variant={statusVariant[log.status]}>{statusLabels[log.status]}</Badge>
