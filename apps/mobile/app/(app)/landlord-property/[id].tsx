@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -46,7 +46,9 @@ import { EditPropertySheet } from '@/components/landlord/EditPropertySheet';
 import { RecordOccupierSheet } from '@/components/landlord/RecordOccupierSheet';
 import { AddUnitSheet } from '@/components/landlord/AddUnitSheet';
 import { ManagementFeeSheet } from '@/components/landlord/SmallFormSheets';
-import { pickImage, type PickedVideo } from '@/lib/filePicker';
+import { pickPhotos, type PickedVideo } from '@/lib/filePicker';
+import { usePhotoUploads } from '@/lib/usePhotoUploads';
+import { PhotoUploadList } from '@/components/media/PhotoUploadList';
 import { VideoTourField } from '@/components/video/VideoTourField';
 import type { VideoOnSiteReport } from '@/lib/filmedOnSite';
 import { BulkPriceSheet } from '@/components/landlord/BulkPriceSheet';
@@ -106,22 +108,28 @@ export default function LandlordPropertyDetail() {
     onError: (e) => fail(e, 'Could not delete that property.'),
   });
 
-  const addPhoto = useMutation({
-    mutationFn: async () => {
-      const file = await pickImage();
-      if (!file || !p) return null;
-      const { key } = await landlordApi.uploadPropertyMedia(file, 'image');
-      return landlordApi.updateProperty(id, {
-        galleryImageKeys: [...(p.galleryImageKeys ?? []), key],
-      });
-    },
-    onSuccess: (result) => {
-      if (!result) return;
+  // Attaching replaces the gallery, so it builds on the newest list: a refetch may not have landed yet.
+  const galleryKeys = useRef<string[]>([]);
+  useEffect(() => {
+    galleryKeys.current = p?.galleryImageKeys ?? [];
+  }, [p?.galleryImageKeys]);
+  const photoUploads = usePhotoUploads({
+    upload: (file, options) => landlordApi.uploadPropertyPhoto(file, options),
+    attach: async (added) => {
+      const next = [...galleryKeys.current, ...added];
+      const updated = await landlordApi.updateProperty(id, { galleryImageKeys: next });
+      galleryKeys.current = updated?.galleryImageKeys ?? next;
       invalidate();
-      toast.show('Photo added.', 'success');
+      toast.show(added.length === 1 ? 'Photo added.' : `${added.length} photos added.`, 'success');
     },
-    onError: (e) => fail(e, 'Could not add that photo.'),
   });
+  const addPhotos = async () => {
+    try {
+      photoUploads.add(await pickPhotos());
+    } catch (e) {
+      fail(e, 'Could not open your photos.');
+    }
+  };
 
   const attachVideo = async (file: PickedVideo, onSite: VideoOnSiteReport | null) => {
     const previous = p?.videoTourKey;
@@ -394,8 +402,7 @@ export default function LandlordPropertyDetail() {
           {p && !p.archived ? (
             <Card padding="none">
               <Pressable
-                onPress={() => addPhoto.mutate()}
-                disabled={addPhoto.isPending}
+                onPress={() => void addPhotos()}
                 accessibilityRole="button"
                 style={{
                   flexDirection: 'row',
@@ -406,14 +413,25 @@ export default function LandlordPropertyDetail() {
               >
                 <Camera size={18} color={colors.primary} />
                 <View style={{ flex: 1 }}>
-                  <Text variant="bodyStrong">
-                    {addPhoto.isPending ? 'Uploading…' : 'Add a photo'}
-                  </Text>
+                  <Text variant="bodyStrong">Add photos</Text>
                   <Text variant="caption" color="mutedForeground">
-                    {(p.galleryImageKeys ?? []).length} in the gallery
+                    {photoUploads.busy
+                      ? 'Uploading. You can keep adding photos.'
+                      : `${(p.galleryImageKeys ?? []).length} in the gallery`}
                   </Text>
                 </View>
               </Pressable>
+              {photoUploads.pending.length ? (
+                <View style={{ paddingHorizontal: spacing.lg, paddingBottom: spacing.lg }}>
+                  <PhotoUploadList
+                    pending={photoUploads.pending}
+                    states={photoUploads.states}
+                    failed={photoUploads.failed}
+                    onRemove={photoUploads.remove}
+                    onRetry={photoUploads.retry}
+                  />
+                </View>
+              ) : null}
               {/* PRO-gated server-side; offering it to a FREE plan would only earn a refusal. */}
               {isPro && unitItems.length > 1 ? (
                 <>
