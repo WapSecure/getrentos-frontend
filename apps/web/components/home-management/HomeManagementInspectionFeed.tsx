@@ -101,7 +101,7 @@ export function HomeManagementInspectionFeed({ propertyId }: { propertyId?: stri
                         </span>
                         <span className="inline-flex items-center gap-1.5">
                           <UserRound className="h-3.5 w-3.5" />
-                          {inspection.agent.legalName ?? 'Assigned Agent'}
+                          {inspection.agent.legalName ?? 'Assigned agent'}
                         </span>
                       </div>
                     </div>

@@ -63,7 +63,7 @@ const helpGuides: Guide[] = [
     category: 'maintenance',
     duration: '3 min',
     steps: [
-      'Go to Maintenance and click "Report Issue"',
+      'Go to Maintenance and click "Report issue"',
       'Choose a category and describe the problem in detail',
       'Attach photos to help the landlord assess the issue',
       'Track status as it moves from Submitted to Resolved',
@@ -77,7 +77,7 @@ const helpGuides: Guide[] = [
     category: 'account',
     duration: '5 min',
     steps: [
-      'Open the Roommates tab and click "Invite Roommate"',
+      'Open the Roommates tab and click "Invite roommate"',
       'Enter their email address and send the invite',
       'Once accepted, configure an equal or custom rent split',
       'Each roommate connects their own payment method',

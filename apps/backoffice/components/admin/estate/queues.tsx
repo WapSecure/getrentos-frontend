@@ -393,7 +393,7 @@ export function DuesQueue() {
   const [adjusting, setAdjusting] = useState<AdminEstateDueQueue | null>(null);
   const config: EstateQueueConfig<AdminEstateDueQueue> = {
     resource: 'dues',
-    eyebrow: 'Dues & Levies',
+    eyebrow: 'Dues & levies',
     title: 'Household due ledger',
     description: 'Platform-wide per-household levies across estates: arrears = Overdue filter.',
     icon: Wallet,
@@ -855,7 +855,7 @@ export function StaffQueue() {
   const actions = useEstateActions();
   const config: EstateQueueConfig<AdminEstateStaffMember> = {
     resource: 'staff',
-    eyebrow: 'Staff & Access',
+    eyebrow: 'Staff & access',
     title: 'Estate staff & access',
     description: 'Managers, gatemen and residents across estate organizations.',
     icon: Users,

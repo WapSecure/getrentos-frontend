@@ -258,7 +258,7 @@ export const ReviewVerificationModal = ({
                   disabled={isSubmitting || detailUnavailable}
                 >
                   <HelpCircle className="w-3.5 h-3.5" />
-                  Need Info
+                  Need info
                 </Button>
                 {canDecide && (
                   <>

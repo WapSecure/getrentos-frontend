@@ -17,10 +17,10 @@ const statusVariant: Record<VisitorPass['status'], 'success' | 'warning' | 'neut
 
 const statusLabels: Record<VisitorPass['status'], string> = {
   pending: 'Pending',
-  awaiting_approval: 'Awaiting Approval',
+  awaiting_approval: 'Awaiting approval',
   approved: 'Approved',
-  checked_in: 'Checked In',
-  checked_out: 'Checked Out',
+  checked_in: 'Checked in',
+  checked_out: 'Checked out',
   expired: 'Expired',
   revoked: 'Revoked',
   denied: 'Refused',

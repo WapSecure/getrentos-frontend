@@ -6,10 +6,10 @@ import { LEGAL_RESOURCES, type LegalResourceCategory } from '@/lib/content/legal
 import { LegalResourceCard } from './LegalResourceCard';
 
 const categoryLabels: Record<LegalResourceCategory, string> = {
-  rights: 'Tenant Rights',
-  notice_periods: 'Notice Periods',
+  rights: 'Tenant rights',
+  notice_periods: 'Notice periods',
   deposits: 'Deposits',
-  eviction_process: 'Eviction Process',
+  eviction_process: 'Eviction process',
 };
 
 const categories = Object.keys(categoryLabels) as LegalResourceCategory[];

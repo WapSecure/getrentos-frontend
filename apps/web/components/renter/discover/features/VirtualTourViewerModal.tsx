@@ -118,7 +118,7 @@ export const VirtualTourViewerModal = ({
               icon={<Video className="w-4 h-4" />}
               onClick={() => setMode('booking')}
             >
-              {live ? 'Book a Live Video Viewing' : 'Request a Viewing'}
+              {live ? 'Book a live video viewing' : 'Request a viewing'}
             </Button>
           </div>
         )}
@@ -180,7 +180,7 @@ export const VirtualTourViewerModal = ({
             </div>
 
             <Button variant="ghost" fullWidth onClick={() => setMode('tour')}>
-              Back to Video Tour
+              Back to video tour
             </Button>
           </div>
         )}

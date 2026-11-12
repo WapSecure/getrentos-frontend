@@ -24,6 +24,14 @@ import { clientName, clientRole, realtorApi, type AssignedProperty } from '@/lib
 import { ApiError } from '@/lib/api/client';
 import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { CommercialDetailsFields } from '@/components/listing/CommercialDetailsFields';
+import {
+  EMPTY_COMMERCIAL,
+  commercialError,
+  commercialToCreatePayload,
+  isCommercialPropertyType,
+  type CommercialValues,
+} from '@sureground/shared/showroom';
 
 export default function RealtorNewListing() {
   const params = useLocalSearchParams<{ relationshipId?: string; propertyId?: string }>();
@@ -38,6 +46,7 @@ export default function RealtorNewListing() {
   const [title, setTitle] = useState('');
   const [price, setPrice] = useState('');
   const [availableFrom, setAvailableFrom] = useState('');
+  const [commercial, setCommercial] = useState<CommercialValues>(EMPTY_COMMERCIAL);
 
   const clients = useQuery({ queryKey: qk.realtor.clients, queryFn: () => realtorApi.clients() });
   const active = clients.data?.items.filter((c) => c.status === 'ACTIVE') ?? [];
@@ -52,6 +61,8 @@ export default function RealtorNewListing() {
       ? properties.data?.items.find((p) => p.id === params.propertyId)
       : undefined;
   const chosen = property ?? preset ?? null;
+  const isCommercial = isCommercialPropertyType(chosen?.propertyType);
+  const commercialProblem = isCommercial ? commercialError(commercial) : null;
 
   const n = Number(price.replace(/\D/g, ''));
   const create = useMutation({
@@ -64,6 +75,8 @@ export default function RealtorNewListing() {
         availableFrom: availableFrom
           ? new Date(`${availableFrom}T00:00:00`).toISOString()
           : undefined,
+        // Sent only for a commercial property: the API refuses the block on any other type.
+        commercial: isCommercial ? commercialToCreatePayload(commercial) : undefined,
       }),
     onSuccess: () => {
       void haptics.success();
@@ -219,6 +232,14 @@ export default function RealtorNewListing() {
               onChange={setAvailableFrom}
               min={toISODate(new Date())}
             />
+            {isCommercial ? (
+              <CommercialDetailsFields
+                value={commercial}
+                onChange={setCommercial}
+                deal={type === 'SALE' ? 'sale' : 'rent'}
+                error={commercialProblem}
+              />
+            ) : null}
             <FormAlert
               tone="info"
               message="It’s saved as a draft. Your client reviews and publishes it from their account."
@@ -234,7 +255,7 @@ export default function RealtorNewListing() {
             ) : null}
             <Button
               label="Save draft listing"
-              disabled={n < 1}
+              disabled={n < 1 || !!commercialProblem}
               loading={create.isPending}
               onPress={() => create.mutate()}
             />

@@ -157,7 +157,7 @@ export default function AdminFraudPage() {
   ];
 
   const severityOptions: { value: SeverityFilter; label: string }[] = [
-    { value: 'all', label: 'All Severities' },
+    { value: 'all', label: 'All severities' },
     { value: 'critical', label: 'Critical' },
     { value: 'high', label: 'High' },
     { value: 'medium', label: 'Medium' },

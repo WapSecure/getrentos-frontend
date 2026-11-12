@@ -54,7 +54,7 @@ export const ApplyFinancingModal = ({
       <DialogContent className="p-0">
         <div className="p-4 border-b border-border">
           <DialogTitle className="font-semibold text-foreground">
-            {step === 'select' ? 'Choose Your Plan' : 'Review & Confirm'}
+            {step === 'select' ? 'Choose your plan' : 'Review & confirm'}
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground mt-0.5">
             {step === 'select'

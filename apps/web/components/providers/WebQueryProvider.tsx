@@ -1,9 +1,9 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { isPublicWebPath } from '@sureground/shared';
 import { QueryProvider } from '@sureground/ui/providers/QueryProvider';
 import { useAuthStore } from '@/lib/store/authStore';
+import { isPublicWebPath } from '@/lib/sessionRoutes';
 
 const showSignedOut = () => useAuthStore.getState().setAuthenticated(false);
 

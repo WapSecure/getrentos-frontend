@@ -37,7 +37,8 @@ import {
 } from '@/components/showroom/ShowroomParts';
 import { trackShowroom } from '@/lib/showroomAnalytics';
 import { publicMarketApi } from '@/lib/api/publicMarket';
-import { fromSale } from '@sureground/shared/showroom';
+import { fromSale, vatStated } from '@sureground/shared/showroom';
+import { ShowroomCommercial } from '@/components/showroom/ShowroomCommercial';
 import { RequestViewingSheet } from '@/components/buyer/RequestViewingSheet';
 import { MakeOfferSheet } from '@/components/buyer/MakeOfferSheet';
 import { buyerOffersApi } from '@/lib/api/buyerOffers';
@@ -98,6 +99,8 @@ export default function BuyerListingDetail() {
             media: pub.data?.media,
             isVerified: pub.data?.verified,
             underOffer: pub.data?.underOffer,
+            // The buyer route has no commercial block; the public listing has it, already checked.
+            commercial: pub.data?.commercial,
           })
         : undefined,
     [listing, pub.data]
@@ -218,6 +221,7 @@ export default function BuyerListingDetail() {
                     market="sale"
                     costs={showroom.costs}
                     price={showroom.price}
+                    vatStated={vatStated(showroom.commercial)}
                     footer={
                       showroom.underOffer && !openOffer ? (
                         <Text variant="caption" color="mutedForeground">
@@ -234,6 +238,11 @@ export default function BuyerListingDetail() {
                       )
                     }
                   />
+                ) : null}
+
+                {/* Commercial: the lease and the space come before the description, as on the web. */}
+                {showroom?.commercial ? (
+                  <ShowroomCommercial commercial={showroom.commercial} market="sale" />
                 ) : null}
 
                 <Divider />

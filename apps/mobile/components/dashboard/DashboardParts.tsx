@@ -100,6 +100,8 @@ export function PortfolioCard({
 }) {
   const { spacing } = useTheme();
   const name = spokenLabel ?? label;
+  // The toggle sits beside the grouped figure, not inside it: screen readers read an `accessible`
+  // view as one element, so a button inside it could never be focused.
   return (
     <Card elevated style={{ gap: spacing.xs }}>
       <View
@@ -114,11 +116,10 @@ export function PortfolioCard({
         accessibilityState={{ busy: loading }}
         style={{ gap: spacing.xs }}
       >
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
+        <View style={{ minHeight: 44, justifyContent: 'center', paddingRight: 48 }}>
+          <Text variant="caption" color="mutedForeground">
             {label}
           </Text>
-          <BalanceVisibilityButton visible={visible} onToggle={onToggle} />
         </View>
         {loading ? (
           <Skeleton height={30} width="60%" />
@@ -130,6 +131,9 @@ export function PortfolioCard({
         <Text variant="caption" color="mutedForeground">
           {hint}
         </Text>
+      </View>
+      <View style={{ position: 'absolute', top: spacing.xl, right: spacing.xl }}>
+        <BalanceVisibilityButton visible={visible} onToggle={onToggle} />
       </View>
       {children && visible && !loading ? (
         <View style={{ marginTop: spacing.sm }}>{children}</View>

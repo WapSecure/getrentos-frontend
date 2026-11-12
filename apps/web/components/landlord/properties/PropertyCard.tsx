@@ -29,7 +29,7 @@ const propertyTypeLabels: Record<Property['type'], string> = {
   duplex: 'Duplex',
   condo: 'Condo',
   commercial: 'Commercial',
-  shared_apartment: 'Shared Apartment',
+  shared_apartment: 'Shared apartment',
 };
 
 const verificationConfig = verificationBadges;
@@ -117,7 +117,7 @@ export const PropertyCard = ({
               ) : (
                 <Archive className="w-4 h-4" />
               )}
-              {property.archived ? 'Unarchive Property' : 'Archive Property'}
+              {property.archived ? 'Unarchive property' : 'Archive property'}
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => onDelete?.()} className="text-destructive">
               <Trash2 className="w-4 h-4" />

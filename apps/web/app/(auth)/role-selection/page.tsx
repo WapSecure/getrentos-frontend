@@ -119,7 +119,7 @@ export default function RoleSelectionPage() {
             iconPosition="right"
             className="w-full px-8 text-sm sm:w-auto"
           >
-            Create Account
+            Create account
           </Button>
         </div>
       </motion.div>

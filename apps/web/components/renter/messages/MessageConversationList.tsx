@@ -60,7 +60,7 @@ export const MessageConversationList = ({
     <div className="bg-card rounded-xl border border-border overflow-y-auto max-h-[400px]">
       <div className="p-2">
         {renderConversations(pinned, 'Pinned')}
-        {renderConversations(active, 'All Conversations')}
+        {renderConversations(active, 'All conversations')}
         {renderConversations(archived, 'Archived')}
       </div>
     </div>

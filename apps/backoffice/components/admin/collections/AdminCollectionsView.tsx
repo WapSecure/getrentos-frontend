@@ -25,8 +25,8 @@ import {
   ListSkeleton,
   PageHeader,
   SearchInput,
+  SegmentedControl,
   Select,
-  Switch,
   Textarea,
   useToast,
 } from '@sureground/ui';
@@ -42,15 +42,31 @@ import {
   cardSummary as toMarketCard,
   collectionPath,
   type CardMarket,
+  type CollectionKind,
   type ManagedCollection,
   type MarketCard,
 } from '@/types/collections';
 import type { CollectionsManager } from '@/services/adminCollectionsService';
+import { RuleEditor } from './RuleEditor';
+import { SponsorshipPanel } from './SponsorshipPanel';
 
-/** Paid placement is always labelled, wherever a collection shows. */
-function SponsoredBadge() {
-  return <Badge variant="warning">Sponsored</Badge>;
+/**
+ * Paid placement is labelled wherever it shows, but only with a record of who paid, and only from the
+ * record's start day to its end day (Lagos dates).
+ */
+function SponsoredBadge({ collection }: { collection: ManagedCollection }) {
+  const record = collection.sponsorship;
+  if (record?.state === 'running') return <Badge variant="warning">Sponsored</Badge>;
+  if (record?.state === 'scheduled') return <Badge variant="info">Sponsorship scheduled</Badge>;
+  if (record?.state === 'ended') return <Badge variant="neutral">Sponsorship ended</Badge>;
+  if (collection.sponsorshipMissing) return <Badge variant="warning">Sponsored, no record</Badge>;
+  return null;
 }
+
+const KIND_SEGMENTS = [
+  { value: 'hand_picked', label: 'Hand-picked' },
+  { value: 'rule', label: 'Rule' },
+] as const satisfies ReadonlyArray<{ value: CollectionKind; label: string }>;
 
 const MARKET_OPTIONS = (Object.keys(COLLECTION_MARKET_LABEL) as CardMarket[]).map((value) => ({
   value,
@@ -77,7 +93,7 @@ export function AdminCollectionsView({
   manager,
   queryKey,
   title = 'Showroom collections',
-  description = 'Curate sets of live listings across owners, and review what estates, agencies and realtors publish. Only Sureground collections can be sponsored.',
+  description = 'Curate sets of live listings across owners, and review what estates, agencies and realtors publish. Listers are told when their listing is added and can take it out. Only Sureground collections can be sponsored, with a record of who paid.',
 }: {
   manager: CollectionsManager;
   queryKey: readonly unknown[];
@@ -87,6 +103,7 @@ export function AdminCollectionsView({
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const list = useQuery({ queryKey: [...queryKey, 'list'], queryFn: () => unwrap(manager.list()) });
+  const missingRecords = (list.data ?? []).filter((c) => c.sponsorshipMissing);
 
   return (
     <div className="space-y-6">
@@ -116,6 +133,31 @@ export function AdminCollectionsView({
             void list.refetch();
           }}
         />
+      )}
+
+      {missingRecords.length > 0 && (
+        <Alert variant="warning" title="Sponsored with no record of who paid">
+          <p>
+            The Sponsored label is hidden on these until a sponsor record is added, or the flag is
+            cleared:
+          </p>
+          <ul className="mt-2 flex flex-wrap gap-2">
+            {missingRecords.map((c) => (
+              <li key={c.id}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSelectedId(c.id);
+                    setCreating(false);
+                  }}
+                >
+                  {c.title}
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </Alert>
       )}
 
       {list.isLoading ? (
@@ -158,9 +200,11 @@ export function AdminCollectionsView({
                       <Badge variant={STATUS_VARIANT[c.status]}>
                         {COLLECTION_STATUS_LABEL[c.status]}
                       </Badge>
-                      {c.sponsored && <SponsoredBadge />}
-                      {COLLECTION_MARKET_LABEL[c.market]} · {c.itemCount}{' '}
-                      {c.itemCount === 1 ? 'listing' : 'listings'}
+                      <SponsoredBadge collection={c} />
+                      {COLLECTION_MARKET_LABEL[c.market]} ·{' '}
+                      {c.kind === 'rule'
+                        ? 'Rule'
+                        : `${c.itemCount} ${c.itemCount === 1 ? 'listing' : 'listings'}`}
                     </span>
                     <span className="text-xs text-muted-foreground">
                       {CURATOR_LABEL[c.curatorType]}
@@ -205,7 +249,7 @@ function CreateCollectionForm({
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [market, setMarket] = useState<CardMarket>('rent');
-  const [sponsored, setSponsored] = useState(false);
+  const [kind, setKind] = useState<CollectionKind>('hand_picked');
   const create = useMutation({
     mutationFn: () =>
       unwrap(
@@ -213,7 +257,7 @@ function CreateCollectionForm({
           title: title.trim(),
           description: description.trim() || undefined,
           market,
-          sponsored,
+          ...(kind === 'rule' ? { kind, rule: {} } : {}),
         })
       ),
     onSuccess: (created) => {
@@ -252,12 +296,22 @@ function CreateCollectionForm({
           searchable={false}
         />
       </Field>
-      <Switch
-        checked={sponsored}
-        onCheckedChange={setSponsored}
-        label="Sponsored"
-        description="A paid placement. It is labelled “Sponsored” everywhere it shows."
-      />
+      <Field
+        label="How listings are chosen"
+        hint={
+          kind === 'rule'
+            ? 'A saved search: you set the filters next, and the public page shows what matches each time it loads.'
+            : 'You pick each listing and its order.'
+        }
+      >
+        <SegmentedControl
+          aria-label="How listings are chosen"
+          value={kind}
+          onValueChange={setKind}
+          segments={KIND_SEGMENTS}
+          size="sm"
+        />
+      </Field>
       {create.isError && <Alert variant="danger">{errorMessage(create.error)}</Alert>}
       <div className="flex flex-wrap gap-2">
         <Button
@@ -296,7 +350,6 @@ function CollectionEditor({
   const [description, setDescription] = useState('');
   const [startsAt, setStartsAt] = useState('');
   const [endsAt, setEndsAt] = useState('');
-  const [sponsored, setSponsored] = useState(false);
   const [items, setItems] = useState<DraftItem[]>([]);
   const [itemsDirty, setItemsDirty] = useState(false);
 
@@ -305,7 +358,6 @@ function CollectionEditor({
   if (collection && syncedVersion !== collection.updatedAt + (collection.items?.length ?? '')) {
     setSyncedVersion(collection.updatedAt + (collection.items?.length ?? ''));
     setTitle(collection.title);
-    setSponsored(collection.sponsored);
     setDescription(collection.description ?? '');
     setStartsAt(collection.startsAt?.slice(0, 10) ?? '');
     setEndsAt(collection.endsAt?.slice(0, 10) ?? '');
@@ -333,7 +385,6 @@ function CollectionEditor({
           description: description.trim() || null,
           startsAt: startsAt ? new Date(`${startsAt}T00:00:00`).toISOString() : null,
           endsAt: endsAt ? new Date(`${endsAt}T23:59:59`).toISOString() : null,
-          ...(collection && sponsored !== collection.sponsored ? { sponsored } : {}),
         })
       ),
     onSuccess: (next) => {
@@ -368,6 +419,17 @@ function CollectionEditor({
       refresh(next);
     },
   });
+  const switchKind = useMutation({
+    mutationFn: (kind: CollectionKind) =>
+      unwrap(
+        manager.update(id, kind === 'rule' ? { kind, rule: collection?.rule ?? {} } : { kind })
+      ),
+    onSuccess: (next) => {
+      toast.success(next.kind === 'rule' ? 'Now chosen by a rule' : 'Now hand-picked');
+      void detail.refetch();
+      onChanged();
+    },
+  });
   const setCover = useMutation({
     mutationFn: (listingId: string | null) =>
       unwrap(manager.update(id, { coverListingId: listingId })),
@@ -389,7 +451,7 @@ function CollectionEditor({
     return <Alert variant="danger">{errorMessage(detail.error)}</Alert>;
   }
 
-  const actionError = [saveDetails, saveItems, publish, archive, setCover].find(
+  const actionError = [saveDetails, saveItems, publish, archive, setCover, switchKind].find(
     (m) => m.isError
   )?.error;
   const inCollection = new Set(items.map((i) => i.listingId));
@@ -401,9 +463,10 @@ function CollectionEditor({
           <Badge variant={STATUS_VARIANT[collection.status]}>
             {COLLECTION_STATUS_LABEL[collection.status]}
           </Badge>
-          {collection.sponsored && <SponsoredBadge />}
+          <SponsoredBadge collection={collection} />
           <span className="text-sm text-muted-foreground">
             {COLLECTION_MARKET_LABEL[collection.market]}
+            {collection.kind === 'rule' ? ' · Chosen by a rule' : ''}
           </span>
           {collection.status === 'PUBLISHED' && (
             <Button
@@ -440,18 +503,23 @@ function CollectionEditor({
             <Input type="date" value={endsAt} onChange={(e) => setEndsAt(e.target.value)} />
           </Field>
         </div>
-        {(collection.curatorType === 'STAFF' || collection.sponsored) && (
-          <Switch
-            checked={sponsored}
-            onCheckedChange={setSponsored}
-            disabled={collection.curatorType !== 'STAFF' && !collection.sponsored}
-            label="Sponsored"
-            description={
-              collection.curatorType === 'STAFF'
-                ? 'A paid placement. It is labelled “Sponsored” everywhere it shows.'
-                : 'Only Sureground collections can be sponsored; this flag can only be cleared here.'
+        {collection.curatorType === 'STAFF' && (
+          <Field
+            label="How listings are chosen"
+            hint={
+              collection.kind === 'rule'
+                ? 'A saved search, run each time the page loads.'
+                : 'You pick each listing and its order. Listers are told and can take theirs out.'
             }
-          />
+          >
+            <SegmentedControl
+              aria-label="How listings are chosen"
+              value={collection.kind}
+              onValueChange={(kind) => switchKind.mutate(kind)}
+              segments={KIND_SEGMENTS}
+              size="sm"
+            />
+          </Field>
         )}
         <p className="text-xs text-muted-foreground">
           Describe what the listings share. Words that suggest a check or a ranking, such as
@@ -470,7 +538,7 @@ function CollectionEditor({
               icon={<Send className="h-4 w-4" aria-hidden="true" />}
               onClick={() => publish.mutate()}
               isLoading={publish.isPending}
-              disabled={itemsDirty}
+              disabled={itemsDirty && collection.kind !== 'rule'}
             >
               Publish
             </Button>
@@ -486,135 +554,176 @@ function CollectionEditor({
             </Button>
           )}
         </div>
-        {itemsDirty && collection.status !== 'PUBLISHED' && (
+        {itemsDirty && collection.kind !== 'rule' && collection.status !== 'PUBLISHED' && (
           <p className="text-xs text-muted-foreground">Save the listings before publishing.</p>
         )}
       </Card>
 
       {actionError ? <Alert variant="danger">{errorMessage(actionError)}</Alert> : null}
 
-      <Card className="space-y-4 p-5">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-lg font-semibold">
-            Listings ({items.length}/{COLLECTION_MAX_ITEMS})
-          </h2>
-          <Button
-            onClick={() => saveItems.mutate()}
-            isLoading={saveItems.isPending}
-            disabled={!itemsDirty}
-          >
-            Save listings
-          </Button>
-        </div>
-        {!items.length ? (
-          <p className="text-sm text-muted-foreground">Add listings from the search below.</p>
-        ) : (
-          <ol className="space-y-3">
-            {items.map((item, index) => (
-              <li key={item.listingId} className="rounded-xl border border-border p-3">
-                <div className="flex flex-wrap items-start gap-3">
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium text-foreground">
-                      {index + 1}. {item.card?.title ?? 'Listing no longer live'}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {item.card
-                        ? [
-                            item.card.location,
-                            typeof item.card.price === 'number'
-                              ? formatCurrency(item.card.price)
-                              : null,
-                          ]
-                            .filter(Boolean)
-                            .join(' · ')
-                        : 'Hidden from the public page until it is live again.'}
-                    </p>
-                    {!item.visible && (
-                      <Badge variant="warning" className="mt-1">
-                        Not shown
-                      </Badge>
-                    )}
-                    {collection.coverListingId === item.listingId && (
-                      <Badge variant="info" className="mt-1">
-                        Cover
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <IconButton
-                      label={`Move ${item.card?.title ?? 'listing'} up`}
-                      icon={<ArrowUp className="h-4 w-4" />}
-                      size="sm"
-                      variant="ghost"
-                      disabled={index === 0}
-                      onClick={() => move(index, -1)}
-                    />
-                    <IconButton
-                      label={`Move ${item.card?.title ?? 'listing'} down`}
-                      icon={<ArrowDown className="h-4 w-4" />}
-                      size="sm"
-                      variant="ghost"
-                      disabled={index === items.length - 1}
-                      onClick={() => move(index, 1)}
-                    />
-                    <IconButton
-                      label={`Remove ${item.card?.title ?? 'listing'}`}
-                      icon={<Trash2 className="h-4 w-4" />}
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => {
-                        setItems((c) => c.filter((x) => x.listingId !== item.listingId));
-                        setItemsDirty(true);
-                      }}
-                    />
-                  </div>
-                </div>
-                <div className="mt-3 grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
-                  <Field
-                    label="Note"
-                    optionalLabel="Optional"
-                    hint="Shown on the card, e.g. “Quiet street, close to the school”."
-                  >
-                    <Input
-                      value={item.note}
-                      maxLength={COLLECTION_NOTE_MAX}
-                      onChange={(e) => {
-                        const note = e.target.value;
-                        setItems((c) =>
-                          c.map((x) => (x.listingId === item.listingId ? { ...x, note } : x))
-                        );
-                        setItemsDirty(true);
-                      }}
-                    />
-                  </Field>
-                  {collection.coverListingId !== item.listingId && item.card && !itemsDirty && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setCover.mutate(item.listingId)}
-                      isLoading={setCover.isPending && setCover.variables === item.listingId}
-                    >
-                      Use as cover
-                    </Button>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ol>
-        )}
-      </Card>
-
-      <CandidatePicker
+      <SponsorshipPanel
         manager={manager}
-        market={collection.market}
-        queryKey={queryKey}
-        exclude={inCollection}
-        full={items.length >= COLLECTION_MAX_ITEMS}
-        onAdd={(card) => {
-          setItems((c) => [...c, { listingId: card.id, note: '', card, visible: true }]);
-          setItemsDirty(true);
+        collection={collection}
+        onSaved={(next) => {
+          queryClient.setQueryData(detailKey, next);
+          onChanged();
         }}
       />
+
+      {collection.kind === 'rule' ? (
+        <RuleEditor
+          key={collection.updatedAt}
+          manager={manager}
+          collection={collection}
+          onSaved={(next) => {
+            void detail.refetch();
+            refresh({ ...next, items: collection.items });
+          }}
+        />
+      ) : (
+        <>
+          <Card className="space-y-4 p-5">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-lg font-semibold">
+                Listings ({items.length}/{COLLECTION_MAX_ITEMS})
+              </h2>
+              <Button
+                onClick={() => saveItems.mutate()}
+                isLoading={saveItems.isPending}
+                disabled={!itemsDirty}
+              >
+                Save listings
+              </Button>
+            </div>
+            {!items.length ? (
+              <p className="text-sm text-muted-foreground">Add listings from the search below.</p>
+            ) : (
+              <ol className="space-y-3">
+                {items.map((item, index) => (
+                  <li key={item.listingId} className="rounded-xl border border-border p-3">
+                    <div className="flex flex-wrap items-start gap-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-foreground">
+                          {index + 1}. {item.card?.title ?? 'Listing no longer live'}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {item.card
+                            ? [
+                                item.card.location,
+                                typeof item.card.price === 'number'
+                                  ? formatCurrency(item.card.price)
+                                  : null,
+                              ]
+                                .filter(Boolean)
+                                .join(' · ')
+                            : 'Hidden from the public page until it is live again.'}
+                        </p>
+                        {!item.visible && (
+                          <Badge variant="warning" className="mt-1">
+                            Not shown
+                          </Badge>
+                        )}
+                        {collection.coverListingId === item.listingId && (
+                          <Badge variant="info" className="mt-1">
+                            Cover
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <IconButton
+                          label={`Move ${item.card?.title ?? 'listing'} up`}
+                          icon={<ArrowUp className="h-4 w-4" />}
+                          size="sm"
+                          variant="ghost"
+                          disabled={index === 0}
+                          onClick={() => move(index, -1)}
+                        />
+                        <IconButton
+                          label={`Move ${item.card?.title ?? 'listing'} down`}
+                          icon={<ArrowDown className="h-4 w-4" />}
+                          size="sm"
+                          variant="ghost"
+                          disabled={index === items.length - 1}
+                          onClick={() => move(index, 1)}
+                        />
+                        <IconButton
+                          label={`Remove ${item.card?.title ?? 'listing'}`}
+                          icon={<Trash2 className="h-4 w-4" />}
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            setItems((c) => c.filter((x) => x.listingId !== item.listingId));
+                            setItemsDirty(true);
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <div className="mt-3 grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+                      <Field
+                        label="Note"
+                        optionalLabel="Optional"
+                        hint="Shown on the card, e.g. “Quiet street, close to the school”."
+                      >
+                        <Input
+                          value={item.note}
+                          maxLength={COLLECTION_NOTE_MAX}
+                          onChange={(e) => {
+                            const note = e.target.value;
+                            setItems((c) =>
+                              c.map((x) => (x.listingId === item.listingId ? { ...x, note } : x))
+                            );
+                            setItemsDirty(true);
+                          }}
+                        />
+                      </Field>
+                      {collection.coverListingId !== item.listingId && item.card && !itemsDirty && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCover.mutate(item.listingId)}
+                          isLoading={setCover.isPending && setCover.variables === item.listingId}
+                        >
+                          Use as cover
+                        </Button>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </Card>
+
+          {collection.optOuts && collection.optOuts.length > 0 && (
+            <Card className="space-y-3 p-5">
+              <h2 className="text-lg font-semibold">Taken out by their listers</h2>
+              <p className="text-sm text-muted-foreground">
+                These listings can’t be added back to this collection.
+              </p>
+              <ul className="divide-y divide-border">
+                {collection.optOuts.map((o) => (
+                  <li key={o.listingId} className="py-2 text-sm">
+                    <span className="font-medium text-foreground">{o.title}</span>
+                    <span className="block text-xs text-muted-foreground">{o.reason}</span>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          )}
+
+          <CandidatePicker
+            manager={manager}
+            market={collection.market}
+            collectionId={collection.id}
+            queryKey={queryKey}
+            exclude={inCollection}
+            full={items.length >= COLLECTION_MAX_ITEMS}
+            onAdd={(card) => {
+              setItems((c) => [...c, { listingId: card.id, note: '', card, visible: true }]);
+              setItemsDirty(true);
+            }}
+          />
+        </>
+      )}
     </div>
   );
 }
@@ -622,6 +731,7 @@ function CollectionEditor({
 function CandidatePicker({
   manager,
   market,
+  collectionId,
   queryKey,
   exclude,
   full,
@@ -629,6 +739,7 @@ function CandidatePicker({
 }: {
   manager: CollectionsManager;
   market: CardMarket;
+  collectionId: string;
   queryKey: readonly unknown[];
   exclude: Set<string>;
   full: boolean;
@@ -641,8 +752,8 @@ function CandidatePicker({
     return () => clearTimeout(t);
   }, [search]);
   const candidates = useQuery({
-    queryKey: [...queryKey, 'candidates', market, submitted],
-    queryFn: () => unwrap(manager.candidates(market, submitted || undefined)),
+    queryKey: [...queryKey, 'candidates', market, collectionId, submitted],
+    queryFn: () => unwrap(manager.candidates(market, submitted || undefined, collectionId)),
   });
   const cards = useMemo(
     () =>
@@ -686,16 +797,26 @@ function CandidatePicker({
                     .filter(Boolean)
                     .join(' · ')}
                 </p>
+                {card.unavailableReason && (
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    <Badge variant="neutral" className="mr-1.5">
+                      Unavailable
+                    </Badge>
+                    {card.unavailableReason}
+                  </p>
+                )}
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                icon={<Plus className="h-4 w-4" aria-hidden="true" />}
-                disabled={full}
-                onClick={() => onAdd(card)}
-              >
-                Add
-              </Button>
+              {!card.unavailableReason && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  icon={<Plus className="h-4 w-4" aria-hidden="true" />}
+                  disabled={full}
+                  onClick={() => onAdd(card)}
+                >
+                  Add
+                </Button>
+              )}
             </li>
           ))}
         </ul>

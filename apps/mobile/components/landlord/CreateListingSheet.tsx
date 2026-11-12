@@ -18,6 +18,14 @@ import { landlordApi } from '@/lib/api/landlord';
 import { errorMessage } from '@/lib/api/client';
 import { readGate } from '@/lib/verificationGate';
 import { VerificationGateNotice } from '@/components/VerificationGateNotice';
+import { CommercialDetailsFields } from '@/components/listing/CommercialDetailsFields';
+import {
+  EMPTY_COMMERCIAL,
+  commercialError,
+  commercialToCreatePayload,
+  isCommercialPropertyType,
+  type CommercialValues,
+} from '@sureground/shared/showroom';
 
 interface Props {
   open: boolean;
@@ -62,6 +70,9 @@ function CreateListingForm({
   const [availabilityDate, setAvailabilityDate] = useState(toISODate(new Date()));
   const [furnished, setFurnished] = useState(false);
   const [allowPets, setAllowPets] = useState(false);
+  const [commercial, setCommercial] = useState<CommercialValues>(EMPTY_COMMERCIAL);
+  const isCommercial = isCommercialPropertyType(units.find((u) => u.id === unitId)?.propertyType);
+  const commercialProblem = isCommercial ? commercialError(commercial) : null;
 
   const chooseUnit = (id: string) => {
     setUnitId(id);
@@ -85,6 +96,8 @@ function CreateListingForm({
         allowPets,
         furnished,
         shortLetEnabled: false,
+        // Sent only for a commercial unit: the API refuses the block on any other type.
+        commercial: isCommercial ? commercialToCreatePayload(commercial) : undefined,
       }),
     onMutate: () => onSubmittingChange(true),
     onSuccess: (listing) => {
@@ -104,7 +117,8 @@ function CreateListingForm({
     onSettled: () => onSubmittingChange(false),
   });
 
-  const valid = unitId && title.trim() && Number(rent) > 0 && availabilityDate;
+  const valid =
+    unitId && title.trim() && Number(rent) > 0 && availabilityDate && !commercialProblem;
 
   return (
     <View style={{ gap: spacing.lg }}>
@@ -168,6 +182,14 @@ function CreateListingForm({
         onValueChange={setAllowPets}
         disabled={create.isPending}
       />
+
+      {isCommercial ? (
+        <CommercialDetailsFields
+          value={commercial}
+          onChange={setCommercial}
+          error={commercialProblem}
+        />
+      ) : null}
 
       <VerificationGateNotice error={create.error} onNavigate={onClose} />
 

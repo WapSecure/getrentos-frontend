@@ -294,7 +294,7 @@ export function ListingsQueue() {
   };
   const config: RentalQueueConfig<AdminRentalListing> = {
     resource: 'listings',
-    eyebrow: 'Rental Listings',
+    eyebrow: 'Rental listings',
     title: 'Long-term listings',
     description: 'Platform-wide RENT/SALE listings with moderation controls.',
     icon: Building2,
@@ -433,7 +433,7 @@ export function ApplicationsQueue() {
   };
   const config: RentalQueueConfig<AdminRentalApplication> = {
     resource: 'applications',
-    eyebrow: 'Rental Applications',
+    eyebrow: 'Rental applications',
     title: 'Rental application triage',
     description: 'Platform-wide rental applications with status corrections.',
     icon: ClipboardList,
@@ -536,7 +536,7 @@ export function ViewingsQueue() {
   };
   const config: RentalQueueConfig<AdminRentalViewing> = {
     resource: 'viewings',
-    eyebrow: 'Viewing Requests',
+    eyebrow: 'Viewing requests',
     title: 'Property viewings',
     description: 'Platform-wide rental viewing requests.',
     icon: CalendarClock,
@@ -704,7 +704,7 @@ export function RenewalsQueue() {
     });
   const config: RentalQueueConfig<AdminRentalRenewal> = {
     resource: 'renewals',
-    eyebrow: 'Renewal Offers',
+    eyebrow: 'Renewal offers',
     title: 'Lease renewals',
     description: 'Platform-wide renewal offers with accept/decline controls.',
     icon: RefreshCw,
@@ -786,7 +786,7 @@ export function TerminationsQueue() {
     });
   const config: RentalQueueConfig<AdminRentalTermination> = {
     resource: 'terminations',
-    eyebrow: 'Termination Requests',
+    eyebrow: 'Termination requests',
     title: 'Lease terminations',
     description: 'Platform-wide lease termination requests.',
     icon: FileX2,
@@ -860,7 +860,7 @@ export function EvictionsQueue() {
   const actions = useQueueActions();
   const config: RentalQueueConfig<AdminRentalEviction> = {
     resource: 'evictions',
-    eyebrow: 'Eviction Cases',
+    eyebrow: 'Eviction cases',
     title: 'Eviction cases',
     description: 'Platform-wide eviction cases with audited status corrections.',
     icon: Gavel,

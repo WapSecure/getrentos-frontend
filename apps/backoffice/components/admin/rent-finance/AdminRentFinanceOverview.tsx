@@ -101,7 +101,7 @@ export const AdminRentFinanceOverview = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Rent Finance"
+        eyebrow="Rent finance"
         title="Rent payments, escrow & reconciliation"
         description="Platform-wide rent collections, escrow holds, settlement readiness and landlord payouts."
       />

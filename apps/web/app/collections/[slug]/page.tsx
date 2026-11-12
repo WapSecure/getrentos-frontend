@@ -12,6 +12,7 @@ import {
   COLLECTION_MARKET_LABEL,
   collectionPath,
   curatorLine,
+  orderLine,
   type PublicCollection,
 } from '@/lib/collections';
 
@@ -38,9 +39,7 @@ async function fetchCollection(slug: string): Promise<Result> {
 
 const describe = (c: PublicCollection) =>
   c.description?.trim() ||
-  `${c.items.length} ${c.items.length === 1 ? 'listing' : 'listings'} picked by ${
-    c.curator.type === 'sureground' ? 'the Sureground team' : c.curator.name
-  }.`;
+  `${c.items.length} ${c.items.length === 1 ? 'listing' : 'listings'}. ${curatorLine(c.curator, c.kind)}.`;
 
 export async function generateMetadata({ params }: CollectionPageProps): Promise<Metadata> {
   const { slug } = await params;
@@ -93,7 +92,9 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
             <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
               {collection.sponsored && <SponsoredBadge />}
               <span>
-                {collection.curator.type === 'estate' && collection.curator.estateSlug ? (
+                {collection.kind !== 'rule' &&
+                collection.curator.type === 'estate' &&
+                collection.curator.estateSlug ? (
                   <>
                     Picked by{' '}
                     <Link
@@ -104,7 +105,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
                     </Link>
                   </>
                 ) : (
-                  curatorLine(collection.curator)
+                  curatorLine(collection.curator, collection.kind)
                 )}
               </span>
               <span aria-hidden="true">·</span>
@@ -116,9 +117,8 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
         />
         <p className="mt-4 max-w-3xl text-sm text-muted-foreground">
           {collection.sponsored ? 'This is a paid placement. ' : ''}
-          Listings appear in the order the curator chose. Being in a collection is not a ranking or
-          a check: each listing shows its own verification. Listings that are no longer available
-          drop out automatically.
+          {orderLine(collection)} Being in a collection is not a ranking or a check: each listing
+          shows its own verification. Listings that are no longer available drop out automatically.
         </p>
         <div className="mt-8">
           <CollectionListings collection={collection} />
