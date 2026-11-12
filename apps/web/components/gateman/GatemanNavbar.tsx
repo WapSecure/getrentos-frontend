@@ -55,9 +55,13 @@ export const GatemanNavbar = ({ user }: GatemanNavbarProps) => {
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center gap-2 h-16">
           <div className="flex min-w-0 shrink-0 items-center gap-3">
-            <Logo size="md" className="shrink-0 [&>span]:sr-only sm:[&>span]:not-sr-only" />
-            <TopBarDivider className="hidden xl:block" />
-            <WorkspacePill label="Gate console" className="hidden xl:inline-flex" />
+            {/* At lg the links take the room, so the wordmark steps aside for the console pill until xl. */}
+            <Logo
+              size="md"
+              className="shrink-0 [&>span]:sr-only sm:[&>span]:not-sr-only lg:[&>span]:sr-only xl:[&>span]:not-sr-only"
+            />
+            <TopBarDivider className="hidden lg:block" />
+            <WorkspacePill label="Gate console" className="hidden lg:inline-flex" />
           </div>
           <div className="flex min-w-0 items-center gap-1 lg:gap-2">
             <div className="hidden items-center gap-1 rounded-xl border border-border bg-secondary/60 p-1 lg:flex">

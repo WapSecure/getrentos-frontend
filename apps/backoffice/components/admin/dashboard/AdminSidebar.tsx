@@ -728,7 +728,9 @@ function AdminNavigationGroup({
             className="sidebar-item"
           >
             <item.icon className="h-4.5 w-4.5 shrink-0" aria-hidden="true" />
-            <span className="sidebar-item-label min-w-0 truncate">{item.label}</span>
+            <span className="sidebar-item-label min-w-0 truncate" title={item.label}>
+              {item.label}
+            </span>
             {item.href === MANAGED_HREF && managedWaiting > 0 && (
               <span
                 className="sidebar-item-extra sidebar-count ml-auto"

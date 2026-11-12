@@ -71,15 +71,15 @@ export const AdminNavbar = ({ user }: AdminNavbarProps) => {
                 size="md"
                 className="shrink-0 [&>span]:sr-only sm:[&>span]:not-sr-only"
               />
-              <span aria-hidden="true" className="hidden h-6 w-px bg-border xl:block" />
-              <span className="hidden items-center gap-2 rounded-full border border-border bg-card px-2.5 py-1 text-xs font-medium text-foreground shadow-xs xl:inline-flex">
+              <span aria-hidden="true" className="hidden h-6 w-px bg-border lg:block" />
+              <span className="hidden items-center gap-2 rounded-full border border-border bg-card px-2.5 py-1 text-xs font-medium text-foreground shadow-xs lg:inline-flex">
                 <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-primary" />
                 Back office
               </span>
             </div>
 
             {/* Below lg the compact search row takes over; showing both squeezes the header past the viewport on tablets. */}
-            <div className="group relative mx-4 hidden max-w-md flex-1 lg:flex">
+            <div className="shell-search group relative mx-4 hidden max-w-md flex-1 lg:flex">
               <AdminRecordSearch />
               <kbd
                 aria-hidden="true"

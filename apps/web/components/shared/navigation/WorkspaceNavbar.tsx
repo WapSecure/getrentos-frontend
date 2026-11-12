@@ -79,11 +79,11 @@ export const WorkspaceNavbar = ({
           <div className="flex h-16 items-center justify-between gap-3">
             <div className="flex min-w-0 shrink-0 items-center gap-3">
               <Logo size="md" className="shrink-0 [&>span]:sr-only sm:[&>span]:not-sr-only" />
-              <TopBarDivider className="hidden xl:block" />
-              <WorkspacePill label={navigation.workspaceLabel} className="hidden xl:inline-flex" />
+              <TopBarDivider className="hidden lg:block" />
+              <WorkspacePill label={navigation.workspaceLabel} className="hidden lg:inline-flex" />
             </div>
 
-            <div className="group relative mx-4 hidden max-w-md flex-1 md:flex">
+            <div className="shell-search group relative mx-4 hidden max-w-md flex-1 md:flex">
               {searchBox}
               <SearchShortcutHint />
             </div>

@@ -153,7 +153,7 @@ function SidebarLink({
       className="sidebar-item"
     >
       <Icon className="h-4.5 w-4.5 shrink-0" aria-hidden="true" />
-      <span className="sidebar-item-label min-w-0 flex-1 line-clamp-2 leading-snug break-words">
+      <span className="sidebar-item-label min-w-0 flex-1 truncate" title={item.label}>
         {item.label}
       </span>
       {item.locked && (
@@ -162,7 +162,6 @@ function SidebarLink({
           title={`${PLAN_TIER_LABELS[item.lockedPlan ?? 'PRO']} plan feature`}
         >
           <Lock className="h-3 w-3" aria-hidden="true" />
-          <span aria-hidden="true">{PLAN_TIER_LABELS[item.lockedPlan ?? 'PRO']}</span>
           <span className="sr-only">{`${PLAN_TIER_LABELS[item.lockedPlan ?? 'PRO']} plan feature`}</span>
         </span>
       )}
