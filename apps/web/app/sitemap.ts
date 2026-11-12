@@ -3,6 +3,7 @@ import { ROUTES } from '@sureground/shared';
 import { DIASPORA_ROUTES } from '@/lib/constants/diasporaRoutes';
 import { diasporaInvestEnabled } from '@/lib/diasporaAvailability';
 import { SITE_URL } from '@/lib/site';
+import { availableGuides } from '@/components/resources/availableGuides';
 import { publishedAreas } from '@/lib/areaInventory';
 import { listingPath, type PublicListingKind } from '@/lib/listingSlug';
 
@@ -79,6 +80,7 @@ const publicRoutes: Array<{
   { path: '/buyers', priority: 0.7, changeFrequency: 'monthly' },
   { path: '/agents', priority: 0.6, changeFrequency: 'monthly' },
   { path: '/about', priority: 0.5, changeFrequency: 'yearly' },
+  { path: '/resources', priority: 0.6, changeFrequency: 'monthly' },
   { path: ROUTES.PRICING, priority: 0.8, changeFrequency: 'monthly' },
   { path: '/privacy', priority: 0.3, changeFrequency: 'yearly' },
   { path: '/terms', priority: 0.3, changeFrequency: 'yearly' },
@@ -104,10 +106,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: route.priority ?? 0.5,
   }));
 
-  const [listings, areas] = await Promise.all([
+  const [listings, areas, guides] = await Promise.all([
     Promise.all(LISTING_SOURCES.map(({ kind, path }) => listingEntries(kind, path))),
     // Only areas with enough live listings have a page; the rest 404.
     publishedAreas(),
+    availableGuides(),
   ]);
   const areaEntries = areas.map((area) => ({
     url: `${SITE_URL}/areas/${area.slug}`,
@@ -115,5 +118,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: 'daily' as const,
     priority: 0.7,
   }));
-  return [...staticEntries, ...areaEntries, ...listings.flat()];
+  const guideEntries = guides.map((guide) => ({
+    url: `${SITE_URL}/resources/${guide.slug}`,
+    lastModified: now,
+    changeFrequency: 'monthly' as const,
+    priority: 0.5,
+  }));
+  return [...staticEntries, ...guideEntries, ...areaEntries, ...listings.flat()];
 }
