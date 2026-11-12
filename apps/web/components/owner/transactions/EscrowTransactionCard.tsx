@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { ShieldCheck, ShieldAlert } from '@sureground/icons';
 import { Badge, Card, Timeline } from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
+import { cancelledBeforePayment } from '@/lib/saleCancellation';
 import { stepStates } from '@/lib/stepStates';
 import type { EscrowSaleTransaction, SaleEscrowStatus } from '@/types/owner';
 
@@ -35,6 +36,7 @@ export const EscrowTransactionCard = ({
 }: EscrowTransactionCardProps) => {
   const isFrozen = transaction.escrowStatus === 'frozen';
   const isRefunded = transaction.escrowStatus === 'refunded';
+  const neverPaid = cancelledBeforePayment(transaction);
   const states = stepStates(
     escrowSteps.map((s) => s.key),
     transaction.escrowStatus,
@@ -78,13 +80,16 @@ export const EscrowTransactionCard = ({
             }
             className="whitespace-nowrap"
           >
-            {statusLabels[transaction.escrowStatus]}
+            {neverPaid ? 'Cancelled' : statusLabels[transaction.escrowStatus]}
           </Badge>
         </div>
 
         <p className="mt-3 text-lg font-bold text-primary">
           {formatCurrency(transaction.salePrice, { compact: true })}
         </p>
+        {neverPaid && (
+          <p className="text-xs text-muted-foreground">Cancelled before a deposit was paid</p>
+        )}
 
         <div className="mt-3">
           <Timeline
