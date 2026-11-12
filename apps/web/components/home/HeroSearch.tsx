@@ -136,7 +136,7 @@ export function HeroSearch({ className }: { className?: string }) {
           size="lg"
           icon={<Search className="h-4 w-4" aria-hidden="true" />}
           iconPosition="right"
-          className="label-caps h-12 px-8"
+          className="h-12 px-8 text-[0.6875rem] tracking-[0.22em] uppercase"
         >
           Search
         </Button>

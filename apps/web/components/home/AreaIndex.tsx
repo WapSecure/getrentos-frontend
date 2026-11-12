@@ -26,7 +26,9 @@ export const AreaIndex = () => (
           {CITIES.map((city) => (
             <div key={city} className="min-w-0 border-t border-border pt-5">
               <h3 className="font-display mb-4 text-2xl font-normal">{city}</h3>
-              <ul className="flex flex-col gap-2.5 text-[0.9375rem]">
+              <ul
+                className={`text-[0.9375rem] [&>li]:mb-2.5 ${city === 'Lagos' ? 'columns-2 gap-6' : ''}`}
+              >
                 {AREAS.filter((area) => area.city === city).map((area) => (
                   <li key={area.name}>
                     <Link

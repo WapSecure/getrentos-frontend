@@ -14,8 +14,10 @@ interface CtaLinkProps {
 const VARIANTS = {
   ink: 'bg-primary text-primary-foreground hover:bg-primary-hover',
   outline: 'border border-foreground/70 text-foreground hover:bg-foreground hover:text-background',
-  light: 'bg-white text-[#15161a] hover:bg-white/90',
-  'outline-light': 'border border-white/70 text-white hover:bg-white hover:text-[#15161a]',
+  // For use on a `bg-primary` band: they invert with it in either theme.
+  light: 'bg-primary-foreground text-primary hover:bg-primary-foreground/90',
+  'outline-light':
+    'border border-primary-foreground/70 text-primary-foreground hover:bg-primary-foreground hover:text-primary',
 } as const;
 
 /** A link styled as a Brik button: sharp, 48px tall, tracked capitals. Server-rendered, no JS. */

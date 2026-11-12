@@ -20,6 +20,10 @@ export const ListingTile = ({ listing, market, eager = false }: ListingTileProps
     listing.bathrooms ? `${listing.bathrooms} ${listing.bathrooms === 1 ? 'bath' : 'baths'}` : null,
     listing.size ? `${listing.size} m²` : null,
   ].filter(Boolean);
+  // "Lagos, Lagos" (city and state with the same name) reads as a mistake.
+  const location = [...new Set((listing.location ?? '').split(',').map((part) => part.trim()))]
+    .filter(Boolean)
+    .join(', ');
   const basis =
     market === 'sale' ? 'asking' : listing.priceUnit ? PRICE_BASIS[listing.priceUnit] : null;
 
@@ -50,21 +54,14 @@ export const ListingTile = ({ listing, market, eager = false }: ListingTileProps
         <h3 className="font-display truncate text-[1.375rem] leading-tight font-normal tracking-[-0.005em]">
           {listing.title}
         </h3>
-        {listing.location ? (
-          <p className="truncate text-sm text-muted-foreground">{listing.location}</p>
-        ) : null}
-        <p className="label-caps flex flex-wrap items-center gap-x-2 gap-y-1 tabular-nums">
+        {location ? <p className="truncate text-sm text-muted-foreground">{location}</p> : null}
+        <p className="label-caps flex flex-wrap items-baseline gap-x-2 tabular-nums">
           <span>{formatCurrency(listing.price)}</span>
           {basis ? <span className="text-muted-foreground">{basis}</span> : null}
-          {facts.map((fact) => (
-            <span key={fact} className="flex items-center gap-2">
-              <span aria-hidden="true" className="text-muted-foreground/60">
-                /
-              </span>
-              {fact}
-            </span>
-          ))}
         </p>
+        {facts.length > 0 ? (
+          <p className="label-caps text-muted-foreground">{facts.join(' · ')}</p>
+        ) : null}
         {listing.verified ? (
           <p className="label-caps flex items-center gap-1.5 text-success">
             <BadgeCheck className="h-3.5 w-3.5" aria-hidden="true" />
