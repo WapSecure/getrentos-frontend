@@ -168,7 +168,7 @@ export function PayoutDestinationSettings() {
             label: 'Nigerian account',
             description: ng
               ? `${payoutAccountLabel(ng)} · ${ng.accountName}`
-              : 'No Nigerian payout account for statements yet.',
+              : 'Add your payout account above first.',
             disabled: !ng,
           },
           {
