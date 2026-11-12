@@ -16,6 +16,7 @@ import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useOverTheAirUpdates } from '@/hooks/useOverTheAirUpdates';
 import { portalHref, samePortalScreenHref } from '@/lib/roles';
 import { LISTING_AUDIENCE, portalForPendingListing, takeListingIntent } from '@/lib/pendingListing';
+import { takeAskIntent } from '@/lib/askDeveloper';
 import { HydrateThemePreference, persistThemePreference } from '@/lib/theme/preference';
 import { BRAND_FONT_SOURCES, BRAND_FONTS, DISPLAY_FONT } from '@/lib/theme/fonts';
 import { useOnboardingSeen } from '@/lib/onboarding';
@@ -86,8 +87,11 @@ function useProtectedRoute(onboardingSeen: boolean | null) {
       // Signed in from a public listing: land on it, with the portal home
       // underneath so Back goes somewhere sensible.
       if (status === 'authenticated' && portalReady && !inApp) {
+        // Or back on the development they wanted to ask about: any signed-in user may ask.
+        const askHref = takeAskIntent();
         const { href, blockedKind } = takeListingIntent(usablePortal);
-        if (href) router.push(href);
+        if (askHref) router.push(askHref as never);
+        else if (href) router.push(href);
         else if (blockedKind && LISTING_AUDIENCE[blockedKind]) {
           const who = LISTING_AUDIENCE[blockedKind];
           Alert.alert(

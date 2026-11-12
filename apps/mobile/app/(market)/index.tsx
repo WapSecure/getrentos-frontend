@@ -54,7 +54,10 @@ import { seasonRange } from '@/lib/stays';
 import { useMarketSaved } from '@/hooks/useMarketSaved';
 import { useCardAnalytics } from '@/hooks/useCardAnalytics';
 import { MarketComparisonSheet } from '@/components/market/MarketComparisonSheet';
-import { DevelopmentsDirectory } from '@/components/market/DevelopmentsDirectory';
+import {
+  DEVELOPMENTS_INTRO,
+  DevelopmentsDirectory,
+} from '@/components/market/DevelopmentsDirectory';
 
 type Tab = MarketKind | 'estates' | 'developments';
 const OTHER_TABS: readonly string[] = ['estates', 'developments'];
@@ -94,11 +97,7 @@ const INTRO: Record<Tab, { title: string; body: string; search: string }> = {
     body: 'Browse what is available inside an estate, and who is marketing it.',
     search: 'Search estate name or area',
   },
-  developments: {
-    title: 'Off-plan developments',
-    body: "Each one went live only after a Sureground staff member checked the developer's CAC registration, the directors' identities, the title to the site and the building plan approval.",
-    search: 'Search developments',
-  },
+  developments: { ...DEVELOPMENTS_INTRO, search: 'Search developments' },
 };
 
 const SORTS: MarketSort[] = ['newest', 'price_asc', 'price_desc'];

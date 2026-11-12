@@ -4,8 +4,9 @@ import { router } from 'expo-router';
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { Image } from 'expo-image';
-import { Heart, ImageOff, Search } from '@sureground/icons/native';
+import { HardHat, Heart, ImageOff, Search } from '@sureground/icons/native';
 import {
+  Button,
   Card,
   Chip,
   ListSkeleton,
@@ -186,6 +187,14 @@ export default function BuyerDiscover() {
           autoCorrect={false}
           value={searchText}
           onChangeText={setSearchText}
+        />
+        <Button
+          label="Off-plan developments"
+          variant="secondary"
+          size="sm"
+          icon={<HardHat size={16} color={colors.foreground} />}
+          style={{ alignSelf: 'flex-start' }}
+          onPress={() => router.push('/(app)/developments')}
         />
         <ScrollView
           horizontal

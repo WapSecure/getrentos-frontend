@@ -29,6 +29,11 @@ import { DevelopmentPaymentNotice } from '@/components/showroom/DevelopmentAssur
 
 const PAGE_SIZE = 12;
 
+export const DEVELOPMENTS_INTRO = {
+  title: 'Off-plan developments',
+  body: "Each one went live only after a Sureground staff member checked the developer's CAC registration, the directors' identities, the title to the site and the building plan approval.",
+} as const;
+
 /** The public off-plan developments, as on the web's /developments: listed only, paid to the developer. */
 export function DevelopmentsDirectory({ intro }: { intro: { title: string; body: string } }) {
   const { colors, spacing, radius } = useTheme();
@@ -142,7 +147,7 @@ function DevelopmentCard({ development: d }: { development: ShowroomDevelopmentS
 
   return (
     <Pressable
-      onPress={() => router.push({ pathname: '/(market)/development/[id]', params: { id: d.id } })}
+      onPress={() => router.push({ pathname: '/(public)/development/[id]', params: { id: d.id } })}
       accessibilityRole="button"
       accessibilityLabel={[
         d.name,
