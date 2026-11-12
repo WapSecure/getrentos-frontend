@@ -8,6 +8,7 @@ import { FraudAlertDetailModal } from '@/components/admin/fraud/FraudAlertDetail
 import { NewFraudAlertModal } from '@/components/admin/fraud/NewFraudAlertModal';
 import {
   CardSkeleton,
+  ConfirmDialog,
   EmptyState,
   PageErrorState,
   PageHeader,
@@ -15,6 +16,7 @@ import {
   Tabs,
   TabsList,
   TabsTrigger,
+  useToast,
 } from '@sureground/ui';
 import { Button } from '@sureground/ui';
 import { Pagination } from '@sureground/ui';
@@ -28,11 +30,45 @@ import type { FraudAlertSeverity, FraudAlertStatus } from '@/types/admin';
 
 type StatusFilter = 'all' | FraudAlertStatus;
 type SeverityFilter = 'all' | FraudAlertSeverity;
+type PendingDecision = { id: string; subjectName: string; status: 'cleared' | 'confirmed' };
 
 const PAGE_SIZE = 12;
 
+const STATUS_TOASTS: Record<FraudAlertStatus, (subject: string) => string> = {
+  flagged: (subject) => `Alert on ${subject} flagged.`,
+  investigating: (subject) => `Alert on ${subject} moved to investigating.`,
+  cleared: (subject) => `Alert on ${subject} cleared.`,
+  confirmed: (subject) => `Alert on ${subject} confirmed as fraud.`,
+};
+
+const DECISION_COPY: Record<
+  PendingDecision['status'],
+  {
+    title: (subject: string) => string;
+    description: string;
+    label: string;
+    tone: 'danger' | 'primary';
+  }
+> = {
+  confirmed: {
+    title: (subject) => `Confirm fraud by ${subject}?`,
+    description:
+      'This records the alert as confirmed fraud against this account and closes it. It stays in the audit log; reopen it from the alert if this was a mistake.',
+    label: 'Confirm fraud',
+    tone: 'danger',
+  },
+  cleared: {
+    title: (subject) => `Clear the alert on ${subject}?`,
+    description:
+      'This records that no fraud was found and closes the alert. It stays in the audit log; reopen it from the alert if this was a mistake.',
+    label: 'Clear alert',
+    tone: 'primary',
+  },
+};
+
 export default function AdminFraudPage() {
   const queryClient = useQueryClient();
+  const toast = useToast();
   const adminUser = useAdminUser();
   const canAttachEvidence = hasAdminPermission(adminUser?.roles, 'fraud.review');
   const [searchQuery, setSearchQuery] = useState('');
@@ -76,14 +112,26 @@ export default function AdminFraudPage() {
 
   const updateStatusMutation = useMutation({
     meta: { showGlobalError: true },
-    mutationFn: ({ id, status }: { id: string; status: FraudAlertStatus }) =>
+    mutationFn: ({ id, status }: { id: string; status: FraudAlertStatus; subjectName: string }) =>
       unwrap(adminService.updateFraudAlertStatus(id, status)),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'fraudAlerts'] }),
+    onSuccess: (_updated, { status, subjectName }) => {
+      toast.success(STATUS_TOASTS[status](subjectName));
+      return queryClient.invalidateQueries({ queryKey: ['admin', 'fraudAlerts'] });
+    },
   });
 
-  const updateStatus = (id: string, status: FraudAlertStatus) => {
-    if (status === 'flagged') return;
-    updateStatusMutation.mutate({ id, status });
+  // Clearing or confirming is a decision about a named person, so it is never a single click.
+  const [pendingDecision, setPendingDecision] = useState<PendingDecision | null>(null);
+
+  const updateStatus = (
+    alert: { id: string; subjectName: string },
+    status: Exclude<FraudAlertStatus, 'flagged'>
+  ) => {
+    if (status === 'investigating') {
+      updateStatusMutation.mutate({ id: alert.id, status, subjectName: alert.subjectName });
+      return;
+    }
+    setPendingDecision({ id: alert.id, subjectName: alert.subjectName, status });
   };
 
   const invalidateFraudAlerts = () =>
@@ -249,9 +297,9 @@ export default function AdminFraudPage() {
               alert={alert}
               delay={index * 0.05}
               onOpen={() => setActiveAlertId(alert.id)}
-              onInvestigate={() => updateStatus(alert.id, 'investigating')}
-              onClear={() => updateStatus(alert.id, 'cleared')}
-              onConfirm={() => updateStatus(alert.id, 'confirmed')}
+              onInvestigate={() => updateStatus(alert, 'investigating')}
+              onClear={() => updateStatus(alert, 'cleared')}
+              onConfirm={() => updateStatus(alert, 'confirmed')}
             />
           ))}
         </div>
@@ -286,7 +334,12 @@ export default function AdminFraudPage() {
         loading={activeAlertDetailLoading}
         onClose={() => setActiveAlertId(null)}
         onSeverityChange={(id, severity) => severityMutation.mutate({ id, severity })}
-        onStatusChange={(id, status) => updateStatus(id, status)}
+        onStatusChange={(id, status) =>
+          updateStatus(
+            { id, subjectName: activeAlertDetail?.subject.legalName ?? 'this account' },
+            status
+          )
+        }
         onReopen={(id) => reopenMutation.mutate(id)}
         isUpdating={
           updateStatusMutation.isPending || severityMutation.isPending || reopenMutation.isPending
@@ -298,6 +351,28 @@ export default function AdminFraudPage() {
         isAttachingEvidence={attachEvidenceMutation.isPending}
         onResolveEvidenceUrl={resolveEvidenceUrl}
       />
+
+      {pendingDecision ? (
+        <ConfirmDialog
+          open
+          onOpenChange={(open) => {
+            if (!open) setPendingDecision(null);
+          }}
+          title={DECISION_COPY[pendingDecision.status].title(pendingDecision.subjectName)}
+          description={DECISION_COPY[pendingDecision.status].description}
+          confirmLabel={DECISION_COPY[pendingDecision.status].label}
+          tone={DECISION_COPY[pendingDecision.status].tone}
+          isLoading={updateStatusMutation.isPending}
+          onConfirm={async () => {
+            try {
+              await updateStatusMutation.mutateAsync(pendingDecision);
+            } catch {
+              // The global mutation error handler already tells the reviewer it failed.
+            }
+            setPendingDecision(null);
+          }}
+        />
+      ) : null}
     </div>
   );
 }
