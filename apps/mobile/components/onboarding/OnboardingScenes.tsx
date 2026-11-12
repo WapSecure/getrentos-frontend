@@ -19,7 +19,6 @@ import {
   MapPin,
   Search,
   ShieldCheck,
-  Star,
 } from '@sureground/icons/native';
 import { Card, Text, useTheme } from '@sureground/ui-native';
 
@@ -374,9 +373,9 @@ export function VerifiedPeopleScene() {
           <View style={{ flex: 1, gap: 3 }}>
             <Text variant="bodyStrong">Ngozi Adeyemi</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-              <Star size={12} color={colors.warning} fill={colors.warning} />
+              <MapPin size={12} color={colors.mutedForeground} />
               <Text variant="caption" color="mutedForeground">
-                Trust score 92 · 14 reviews
+                Landlord · Lekki, Lagos
               </Text>
             </View>
           </View>
@@ -424,10 +423,10 @@ export function VerifiedPeopleScene() {
         >
           <ShieldCheck size={18} color={colors.success} />
           <Text variant="caption" style={{ color: colors.success, fontWeight: '700' }}>
-            Checked before a listing goes live
+            Verified status shown on every listing
           </Text>
           <Text variant="caption" color="mutedForeground" center>
-            Anyone who fails a check never reaches the marketplace
+            Listings still being checked are marked “Verifying”
           </Text>
         </View>
       </Layer>

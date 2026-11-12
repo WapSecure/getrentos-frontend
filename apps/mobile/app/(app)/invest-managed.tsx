@@ -30,9 +30,7 @@ import {
 import { qk } from '@/lib/query/keys';
 import { investorApi } from '@/lib/api/investor';
 import { managementApi } from '@/lib/api/management';
-import { homeCareApi } from '@/lib/api/homeCare';
 import { landlordApi } from '@/lib/api/landlord';
-import { planRefusal, retryUnlessPlanGate } from '@/lib/api/estateGate';
 import { MANDATE_STATUS, type MandateStatus } from '@/lib/api/managedService';
 import { formatDate, formatNaira } from '@/lib/format';
 import { goBack } from '@/lib/goBack';
@@ -116,11 +114,7 @@ export default function InvestManaged() {
               <AgreementCard property={property} />
               <StatementCard property={property} />
               <Approvals key={`a-${property.propertyId}`} propertyId={property.propertyId} />
-              <Jobs
-                key={`j-${property.propertyId}`}
-                propertyId={property.propertyId}
-                openJobs={property.openJobs}
-              />
+              <Jobs key={`j-${property.propertyId}`} propertyId={property.propertyId} />
             </View>
           ) : null}
         </QueryState>
@@ -381,54 +375,42 @@ function Approvals({ propertyId }: { propertyId: string }) {
   );
 }
 
-/**
- * The job list is a Pro route (`GET home-management/work-orders`), so an owner without Pro is
- * refused. Until an owner-scoped list exists, they see the open count instead of an error.
- */
-function Jobs({ propertyId, openJobs }: { propertyId: string; openJobs: number }) {
+/** Read through the owner route, so it needs no Pro plan; each job opens read-only. */
+function Jobs({ propertyId }: { propertyId: string }) {
   const { colors, spacing } = useTheme();
   const jobs = useQuery({
-    queryKey: qk.homeCare.workOrders(`property:${propertyId}`),
-    queryFn: () => homeCareApi.workOrders(undefined, 1, JOB_PAGE_SIZE, propertyId),
-    retry: retryUnlessPlanGate,
+    queryKey: qk.homeCare.workOrders(`managed:${propertyId}`),
+    queryFn: () => investorApi.managedWorkOrders(propertyId, 1, JOB_PAGE_SIZE),
   });
   const items = jobs.data?.items ?? [];
-  const refused = !jobs.data && planRefusal(jobs.error) !== null;
+  const total = jobs.data?.total ?? 0;
   return (
     <View style={{ gap: spacing.sm }}>
       <Text variant="heading" headingLevel={2}>
         Repairs and jobs
       </Text>
-      {refused ? (
-        <Card style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'flex-start' }}>
-          <Wrench size={18} color={colors.mutedForeground} />
-          <Text variant="callout" color="mutedForeground" style={{ flex: 1 }}>
-            {openJobs === 0
-              ? 'No open jobs on this property. '
-              : `${openJobs} open ${openJobs === 1 ? 'job' : 'jobs'} on this property. `}
-            The full list of jobs is not available on your account yet.
-          </Text>
-        </Card>
-      ) : (
-        <QueryState
-          query={jobs}
-          skeleton={<ListSkeleton rows={2} variant="card" height={96} />}
-          errorTitle="Repairs could not be loaded"
-          isEmpty={items.length === 0}
-          empty={{
-            icon: <Wrench size={28} color={colors.mutedForeground} />,
-            title: 'No repairs on this property',
-            description:
-              'Jobs your manager raises appear here with their photos, quotes and invoices.',
-          }}
-        >
-          <View style={{ gap: spacing.sm }}>
-            {items.map((w) => (
-              <WorkOrderCard key={w.id} w={w} />
-            ))}
-          </View>
-        </QueryState>
-      )}
+      <QueryState
+        query={jobs}
+        skeleton={<ListSkeleton rows={2} variant="card" height={96} />}
+        errorTitle="Repairs could not be loaded"
+        isEmpty={items.length === 0}
+        empty={{
+          icon: <Wrench size={28} color={colors.mutedForeground} />,
+          title: 'No repairs on this property',
+          description: 'Jobs your manager raises appear here with their photos and progress.',
+        }}
+      >
+        <View style={{ gap: spacing.sm }}>
+          {items.map((w) => (
+            <WorkOrderCard key={w.id} w={w} from="managed" />
+          ))}
+          {total > items.length ? (
+            <Text variant="caption" color="mutedForeground">
+              Showing {items.length} of {total}. The full list is on the web.
+            </Text>
+          ) : null}
+        </View>
+      </QueryState>
     </View>
   );
 }

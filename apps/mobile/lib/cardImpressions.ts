@@ -1,8 +1,12 @@
-// Listing-card impressions, the app's side of the web's ListingCard `onVisible` (apps/web, threshold 0.5).
+import { CARD_IMPRESSION_RULE } from '@sureground/shared';
+// Listing-card impressions, the app's side of the web's ListingCard `onVisible`, on the shared CARD_IMPRESSION_RULE.
 // Pure, so the de-duplication and visibility rules can be unit tested without a list on screen.
 
-/** Half the card on screen, as on the web. 250ms is FlashList's default and stops a fling counting every card. */
-export const CARD_VIEWABILITY = { itemVisiblePercentThreshold: 50, minimumViewTime: 250 } as const;
+/** Half the card on screen for one continuous second, once per screen visit, as on the web. */
+export const CARD_VIEWABILITY = {
+  itemVisiblePercentThreshold: CARD_IMPRESSION_RULE.visiblePercent,
+  minimumViewTime: CARD_IMPRESSION_RULE.minimumMs,
+} as const;
 
 export interface VisibleCard {
   listingId: string;

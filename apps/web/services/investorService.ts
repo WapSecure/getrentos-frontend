@@ -1,4 +1,15 @@
-import { authFetch, safeCall, unwrapOptional, type ApiResponse } from '@/lib/apiHelpers';
+import {
+  authFetch,
+  safeCall,
+  toQuery,
+  unwrapOptional,
+  type ApiResponse,
+  type Paginated,
+} from '@/lib/apiHelpers';
+import type {
+  HomeManagementWorkOrder,
+  HomeManagementWorkOrdersParams,
+} from '@/services/homeManagementService';
 import type {
   InvestorAvailability,
   InvestorOverview,
@@ -53,6 +64,18 @@ export const investorService = {
   /** Every property under Sureground Managed, with what waits on the owner. */
   getManaged(): Promise<ApiResponse<InvestorManaged>> {
     return safeCall(() => authFetch<InvestorManaged>('/investor/managed'));
+  },
+
+  /** The jobs on one of my managed properties: read-only, no Pro plan needed, same shape as home management. */
+  getManagedWorkOrders(
+    propertyId: string,
+    params: Omit<HomeManagementWorkOrdersParams, 'propertyId'> = {}
+  ): Promise<ApiResponse<Paginated<HomeManagementWorkOrder>>> {
+    return safeCall(() =>
+      authFetch<Paginated<HomeManagementWorkOrder>>(
+        `/investor/managed/${encodeURIComponent(propertyId)}/work-orders${toQuery(params)}`
+      )
+    );
   },
 
   /** Public. 404 unless the listing is investment eligible. Only the figures given replace the defaults. */
