@@ -1,13 +1,16 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, BadgeCheck } from '@sureground/icons';
-import { Button, SegmentedControl, TableSkeleton, type Segment } from '@sureground/ui';
+import { SegmentedControl, TableSkeleton, type Segment } from '@sureground/ui';
+import { ClosingBand } from '@/components/marketing/ClosingBand';
+import { Container } from '@/components/marketing/Container';
+import { CtaLink } from '@/components/marketing/CtaLink';
+import { SectionIntro } from '@/components/marketing/SectionIntro';
 import { usePlanPricing } from '@/hooks/usePlanPricing';
 import { PlanComparisonTable } from '@/components/shared/subscription/PlanComparisonTable';
 import { ProPriceCard } from '@/components/shared/subscription/ProPriceCard';
+import { ROUTES } from '@/lib/constants/auth';
 import type { PlanPersona } from '@/services/subscriptionService';
 
 const PERSONAS: Segment<PlanPersona>[] = [
@@ -22,77 +25,97 @@ export default function PricingPage() {
   const { pricing, entitlementsFor, isLoading } = usePlanPricing();
   const [persona, setPersona] = useState<PlanPersona>('landlord');
 
+  // Each fact follows the pricing the API returns, so the page never promises a term we don't offer.
+  const facts = [
+    {
+      title: 'Cancel anytime',
+      body: 'No lock-in. Move back to Free from your account whenever you like.',
+    },
+    pricing
+      ? pricing.vatInclusive
+        ? { title: 'VAT included', body: 'The price shown is the price you pay at checkout.' }
+        : { title: 'VAT at checkout', body: 'VAT is added at checkout and shown before you pay.' }
+      : null,
+    {
+      title: 'Payments by Paystack',
+      body: 'Your Pro charge starts only when the free trial ends.',
+    },
+  ].filter((fact): fact is { title: string; body: string } => fact !== null);
+
   return (
-    <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-4xl px-4 py-12">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4" /> Back
-        </Link>
-
-        <div className="mt-8 text-center">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/15 bg-accent/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-accent-foreground">
-            <BadgeCheck className="h-3 w-3" /> Pricing
-          </span>
-          <h1 className="mt-4 text-4xl font-bold tracking-tight text-foreground">
-            Simple pricing that scales with you
-          </h1>
-          <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
-            Start free. Upgrade to Pro when you need unlimited scale, automation and analytics: with
-            a {pricing?.trialDays ?? 14}-day free trial.
-          </p>
-        </div>
-
-        <div className="mx-auto mt-10 max-w-md">
-          <ProPriceCard pricing={pricing} onUpgrade={() => router.push('/signup')} />
-        </div>
-
-        <div className="mt-12">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-lg font-semibold text-foreground">Compare Free and Pro</h2>
-            <SegmentedControl
-              aria-label="Plan audience"
-              value={persona}
-              onValueChange={setPersona}
-              segments={PERSONAS}
-              className="flex flex-wrap"
-            />
+    <>
+      <section aria-labelledby="page-title" className="pt-24 pb-16 md:pt-32 md:pb-24">
+        <Container className="grid items-start gap-12 md:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] md:gap-16">
+          <div className="hero-rise">
+            <p className="label-caps mb-5 text-muted-foreground">Pricing</p>
+            <h1
+              id="page-title"
+              className="text-[2.5rem] leading-[1.04] font-light tracking-[-0.02em] text-balance sm:text-[3.25rem] lg:text-[4rem]"
+            >
+              Start free. Upgrade when the work grows.
+            </h1>
+            <p className="mt-6 max-w-[48ch] text-base leading-relaxed text-muted-foreground md:text-[1.0625rem]">
+              Free covers the essentials. Pro adds unlimited scale, automation and analytics
+              {pricing ? `, with a ${pricing.trialDays}-day free trial` : ''}.
+            </p>
+            <ul className="mt-10 flex flex-col border-t border-border">
+              {facts.map((fact) => (
+                <li
+                  key={fact.title}
+                  className="grid gap-1 border-b border-border py-4 sm:grid-cols-[12rem_minmax(0,1fr)] sm:gap-6"
+                >
+                  <span className="font-medium text-foreground">{fact.title}</span>
+                  <span className="text-[0.9375rem] text-muted-foreground">{fact.body}</span>
+                </li>
+              ))}
+            </ul>
           </div>
+          <ProPriceCard pricing={pricing} onUpgrade={() => router.push(ROUTES.SIGNUP)} />
+        </Container>
+      </section>
 
+      <section
+        aria-labelledby="pricing-compare"
+        className="border-y border-border bg-card py-20 md:py-28"
+      >
+        <Container>
+          <SectionIntro
+            id="pricing-compare"
+            eyebrow="Compare plans"
+            title="What Free and Pro include"
+            lead="Plans differ by role. Choose yours to see the limits that apply to you."
+            action={
+              <SegmentedControl
+                aria-label="Plan audience"
+                value={persona}
+                onValueChange={setPersona}
+                segments={PERSONAS}
+                className="flex flex-wrap"
+              />
+            }
+          />
           {isLoading ? (
             <TableSkeleton rows={6} columns={3} />
           ) : (
             <PlanComparisonTable rows={entitlementsFor(persona)} />
           )}
-        </div>
+        </Container>
+      </section>
 
-        <div className="mt-10 grid gap-4 sm:grid-cols-3">
-          {[
-            { title: 'Cancel anytime', body: 'No lock-in. Downgrade to Free whenever you like.' },
-            {
-              title: 'VAT included',
-              body: 'The price you see is exactly what you pay: no surprises at checkout.',
-            },
-            {
-              title: 'Secure payments',
-              body: 'Powered by Paystack. Your card is only charged after the trial ends.',
-            },
-          ].map((f) => (
-            <div key={f.title} className="rounded-2xl border border-border bg-card p-5">
-              <p className="font-medium text-foreground">{f.title}</p>
-              <p className="mt-1 text-sm text-muted-foreground">{f.body}</p>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-10 text-center">
-          <Button href="/signup" size="lg">
-            Get started free
-          </Button>
-        </div>
-      </div>
-    </div>
+      <ClosingBand
+        title="Set up your account in a few minutes"
+        lead="Every account starts on Free. You choose if and when to start the Pro trial."
+        actions={
+          <>
+            <CtaLink href={ROUTES.SIGNUP} variant="light" arrow>
+              Get started free
+            </CtaLink>
+            <CtaLink href={ROUTES.LOGIN} variant="outline-light">
+              Sign in
+            </CtaLink>
+          </>
+        }
+      />
+    </>
   );
 }
