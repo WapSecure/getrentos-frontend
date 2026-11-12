@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { Gavel, Clock, Search, CheckCircle2, ArrowUpCircle } from '@sureground/icons';
 import { Badge, type BadgeVariant } from '@sureground/ui';
-import { formatCurrency, formatDate } from '@sureground/shared';
+import { codeLabel, formatCurrency, formatDate } from '@sureground/shared';
 import type { Dispute, DisputeStatus } from '@/types/admin';
 
 const statusConfig: Record<
@@ -61,8 +61,8 @@ export const DisputeCard = ({ dispute, onClick, delay = 0 }: DisputeCardProps) =
       <div className="grid grid-cols-2 gap-3 mt-4">
         <div>
           <p className="text-xs text-muted-foreground">Priority</p>
-          <p className={`text-sm font-medium capitalize ${priorityConfig[dispute.priority]}`}>
-            {dispute.priority}
+          <p className={`text-sm font-medium ${priorityConfig[dispute.priority]}`}>
+            {codeLabel(dispute.priority)}
           </p>
         </div>
         {dispute.amount !== undefined && (

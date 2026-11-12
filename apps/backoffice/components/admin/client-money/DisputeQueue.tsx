@@ -16,7 +16,7 @@ import {
   Select,
   Textarea,
 } from '@sureground/ui';
-import { unwrap } from '@sureground/shared';
+import { formatDate, unwrap } from '@sureground/shared';
 import { Gavel, Inbox } from '@sureground/icons';
 import { adminKeys } from '@/lib/queryKeys';
 import { hasAdminPermission } from '@/lib/adminAccess';
@@ -128,8 +128,7 @@ export function DisputeQueue({
                         &ldquo;{row.reason}&rdquo;
                       </p>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        Raised by {row.raisedByName ?? 'the owner'} on{' '}
-                        {new Date(row.createdAt).toLocaleDateString('en-GB')}
+                        Raised by {row.raisedByName ?? 'the owner'} on {formatDate(row.createdAt)}
                       </p>
                       {row.firmResponse && (
                         <p className="mt-1 text-xs text-muted-foreground">

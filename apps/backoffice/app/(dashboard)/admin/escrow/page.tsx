@@ -39,6 +39,17 @@ const statusConfig: Record<PlatformEscrowStatus, { label: string; variant: Badge
 // Only these statuses hold money (mirrors HOLDABLE_ESCROW_STATUSES on the API); offering release or refund on others only earns a rejection.
 const SETTLEABLE_STATUSES: PlatformEscrowStatus[] = ['funds_held', 'verification', 'final_payment'];
 
+// Money sits with us only from the deposit until it is released or refunded; the price is never held.
+const HOLDING_STATUSES: PlatformEscrowStatus[] = [...SETTLEABLE_STATUSES, 'frozen', 'disputed'];
+
+function heldCell(t: PlatformEscrowTransaction): { text: string; muted: boolean } {
+  const held = formatCurrency(t.heldAmount, { compact: true });
+  if (HOLDING_STATUSES.includes(t.status)) return { text: held, muted: false };
+  if (t.status === 'released') return { text: `None (${held} released)`, muted: true };
+  if (t.status === 'refunded') return { text: `None (${held} refunded)`, muted: true };
+  return { text: 'None yet', muted: true };
+}
+
 type StatusFilter = 'all' | PlatformEscrowStatus;
 
 const PAGE_SIZE = 10;
@@ -126,9 +137,19 @@ export default function AdminEscrowPage() {
       className: 'text-muted-foreground whitespace-nowrap',
     },
     {
-      key: 'amount',
-      header: 'Amount',
-      render: (t) => formatCurrency(t.amount, { compact: true }),
+      key: 'held',
+      header: 'Held',
+      render: (t) => {
+        const held = heldCell(t);
+        return (
+          <div>
+            <div className={held.muted ? 'text-muted-foreground' : undefined}>{held.text}</div>
+            <div className="text-xs text-muted-foreground">
+              Sale price {formatCurrency(t.amount, { compact: true })}
+            </div>
+          </div>
+        );
+      },
       className: 'text-foreground whitespace-nowrap',
     },
     {
@@ -167,7 +188,8 @@ export default function AdminEscrowPage() {
                     actions.request({
                       key: `release:${t.id}`,
                       title: 'Release these funds to the seller?',
-                      description: `${held} held for ${t.propertyTitle} (sale price ${amount}) will be released to ${t.sellerName}. This settles the escrow and cannot be reversed from here.`,
+                      // A buyer's confirmation of receipt releases the deposit itself, so anything still held here has not been confirmed.
+                      description: `${t.buyerName} has not confirmed receipt. Release only if you have checked the handover yourself. ${held} held for ${t.propertyTitle} (sale price ${amount}) will be released to ${t.sellerName}. This settles the escrow and cannot be reversed from here.`,
                       confirmLabel: 'Release funds',
                       successMessage: `${held} released to ${t.sellerName}.`,
                       run: () => adminService.releaseEscrow(t.id),

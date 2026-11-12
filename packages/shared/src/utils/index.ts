@@ -26,3 +26,4 @@ export * from './rentRelease';
 export * from './legacyStorage';
 export * from './dualTime';
 export * from './siteTours';
+export * from './codeLabels';
