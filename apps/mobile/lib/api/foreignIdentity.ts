@@ -1,4 +1,4 @@
-import type { ForeignSubmission } from '@sureground/shared';
+import type { ForeignSubmission, SourceOfFundsSupportingKind } from '@sureground/shared';
 import { apiFetch, apiUpload } from './client';
 import { appendFile, type PickedFile } from './documents';
 import type { SmileLivenessSession } from './trust';
@@ -31,6 +31,22 @@ export const foreignIdentityApi = {
     appendFile(form, 'passport', passport);
     appendFile(form, 'selfie', selfie);
     return apiUpload<ForeignSubmission>('/trust/foreign-identity/passport/review', form);
+  },
+  /** DIA-07: bank statements, a supporting document, and the donor's ID with a gift or inheritance letter. */
+  submitSourceOfFunds: (input: {
+    bankStatement: PickedFile;
+    supportingKind: SourceOfFundsSupportingKind;
+    supporting: PickedFile;
+    donorIdentity?: PickedFile | null;
+    note?: string;
+  }) => {
+    const form = new FormData();
+    appendFile(form, 'bankStatements', input.bankStatement);
+    appendFile(form, 'supporting', input.supporting);
+    if (input.donorIdentity) appendFile(form, 'donorIdentity', input.donorIdentity);
+    form.append('supportingKind', input.supportingKind);
+    if (input.note) form.append('note', input.note);
+    return apiUpload<ForeignSubmission>('/trust/foreign-identity/source-of-funds', form);
   },
   submitDocument: (kind: ForeignDocumentKind, document: PickedFile, note?: string) => {
     const form = new FormData();

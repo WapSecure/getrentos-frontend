@@ -298,6 +298,31 @@ export interface ForeignIdentityStatus {
   };
   address: ForeignDocumentStatus;
   bankStatement: ForeignDocumentStatus;
+  /** DIA-07; absent from older API versions. */
+  sourceOfFunds?: SourceOfFundsStatus;
+}
+
+// ── Source of funds (DIA-07, decision D4) ────────────────────────────────────
+
+export type SourceOfFundsSupportingKind =
+  | 'PAYSLIPS'
+  | 'TAX_RETURN'
+  | 'ASSET_SALE_CONTRACT'
+  | 'INHERITANCE_OR_GIFT_LETTER'
+  | 'BUSINESS_ACCOUNTS';
+
+export interface SourceOfFundsStatus extends ForeignDocumentStatus {
+  /** True once an existing commitment, or the running total, crosses a threshold. */
+  required: boolean;
+  reason: 'SINGLE_PURCHASE' | 'TOTAL_COMMITTED' | null;
+  /** Whole naira already committed to purchases. */
+  committedNaira: number;
+  /** Whole naira: asked at or above `singlePurchaseNaira` for one purchase, or past `totalCommittedNaira` in total. */
+  thresholds: { singlePurchaseNaira: number; totalCommittedNaira: number };
+  /** The one line that says why we ask. */
+  why: string;
+  bankStatementMonths: number;
+  supportingKinds: SourceOfFundsSupportingKind[];
 }
 
 export interface ForeignSubmission {

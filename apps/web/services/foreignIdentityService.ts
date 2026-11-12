@@ -3,6 +3,7 @@ import type {
   ForeignIdentityStatus,
   ForeignSubmission,
   PassportSession,
+  SourceOfFundsSupportingKind,
 } from '@/types/foreignIdentity';
 
 /** Diaspora investors only; every route acts on the signed-in user. */
@@ -54,6 +55,28 @@ export const foreignIdentityService = {
 
   submitBankStatement(document: File, note?: string): Promise<ApiResponse<ForeignSubmission>> {
     return foreignIdentityService.submitDocument('bank-statement', document, note);
+  },
+
+  /** DIA-07: six months of statements, one or more supporting documents, and the donor's ID with a gift letter. */
+  submitSourceOfFunds(params: {
+    bankStatements: File[];
+    supportingKind: SourceOfFundsSupportingKind;
+    supporting: File[];
+    donorIdentity?: File | null;
+    note?: string;
+  }): Promise<ApiResponse<ForeignSubmission>> {
+    return safeCall(() => {
+      const form = new FormData();
+      params.bankStatements.forEach((file) => form.append('bankStatements', file));
+      params.supporting.forEach((file) => form.append('supporting', file));
+      if (params.donorIdentity) form.append('donorIdentity', params.donorIdentity);
+      form.append('supportingKind', params.supportingKind);
+      if (params.note) form.append('note', params.note);
+      return authFetch<ForeignSubmission>('/trust/foreign-identity/source-of-funds', {
+        method: 'POST',
+        body: form,
+      });
+    });
   },
 
   submitDocument(

@@ -6,6 +6,7 @@ import type {
   InvestmentHorizon,
   InvestorPropertyType,
   OwnershipStructure,
+  SourceOfFundsSupportingKind,
 } from './types';
 import type { StatusTone } from '../utils/landTrust';
 
@@ -113,3 +114,16 @@ export const FOREIGN_CHECK_STATUS: Record<ForeignCheckState, { label: string; to
     APPROVED: { label: 'Approved', tone: 'success' },
     REJECTED: { label: 'Not approved', tone: 'danger' },
   };
+
+/** DIA-07: what can go with the bank statements. A gift or inheritance letter also needs the donor's ID. */
+export const SOURCE_OF_FUNDS_SUPPORTING_LABELS: Record<SourceOfFundsSupportingKind, string> = {
+  PAYSLIPS: 'Payslips',
+  TAX_RETURN: 'Tax return',
+  ASSET_SALE_CONTRACT: 'Sale contract for an asset',
+  INHERITANCE_OR_GIFT_LETTER: 'Inheritance or gift letter',
+  BUSINESS_ACCOUNTS: 'Business accounts',
+};
+
+/** Fallback when the API sends no reason line. */
+export const SOURCE_OF_FUNDS_WHY =
+  'Nigerian and international anti-money-laundering rules require us to confirm where larger sums come from.';

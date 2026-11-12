@@ -25,8 +25,13 @@ import {
   type PendingUpload,
 } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
-import { COUNTRIES } from '@sureground/shared';
-import { formatLagosDate } from '@/lib/format';
+import {
+  COUNTRIES,
+  SOURCE_OF_FUNDS_SUPPORTING_LABELS,
+  SOURCE_OF_FUNDS_WHY,
+  type SourceOfFundsSupportingKind,
+} from '@sureground/shared';
+import { formatCurrency, formatLagosDate } from '@/lib/format';
 import { foreignIdentityKeys } from '@/lib/queryKeys';
 import { foreignCheckBadges } from '@/lib/statusBadge';
 import { foreignIdentityService } from '@/services/foreignIdentityService';
@@ -40,7 +45,11 @@ import {
   TrustConsentPrompt,
   useTrustConsents,
 } from '@/components/shared/verification/TrustConsentPrompt';
-import type { ForeignDocumentStatus, ForeignIdentityStatus } from '@/types/foreignIdentity';
+import type {
+  ForeignDocumentStatus,
+  ForeignIdentityStatus,
+  SourceOfFundsStatus,
+} from '@/types/foreignIdentity';
 
 export const FOREIGN_IDENTITY_TAB_ID = 'abroad';
 
@@ -122,6 +131,9 @@ const StatusNote = ({ status, what }: { status: ForeignDocumentStatus; what: str
 };
 
 const fileOf = (items: PendingUpload[]) => items[0]?.file ?? null;
+const filesOf = (items: PendingUpload[]) => items.map((item) => item.file);
+const asManyUploads = (files: File[], prefix: string): PendingUpload[] =>
+  files.map((file, index) => ({ id: `${prefix}-${index}`, file }));
 const asUploads = (file: File | null, id: string): PendingUpload[] => (file ? [{ id, file }] : []);
 
 // ------------------------------------------------------------------ passport
@@ -480,6 +492,148 @@ const ForeignDocumentCard = ({
   );
 };
 
+// --------------------------------------------------------- source of funds (DIA-07)
+
+const SUPPORTING_OPTIONS = (
+  Object.keys(SOURCE_OF_FUNDS_SUPPORTING_LABELS) as SourceOfFundsSupportingKind[]
+).map((value) => ({ value, label: SOURCE_OF_FUNDS_SUPPORTING_LABELS[value] }));
+
+const SourceOfFundsCard = ({ status }: { status: SourceOfFundsStatus }) => {
+  const queryClient = useQueryClient();
+  const { isActive } = useTrustConsents();
+  const [statements, setStatements] = useState<File[]>([]);
+  const [kind, setKind] = useState<SourceOfFundsSupportingKind>('PAYSLIPS');
+  const [supporting, setSupporting] = useState<File[]>([]);
+  const [donor, setDonor] = useState<File | null>(null);
+  const [note, setNote] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const needsDonor = kind === 'INHERITANCE_OR_GIFT_LETTER';
+
+  const submit = useMutation({
+    mutationFn: () =>
+      unwrap(
+        foreignIdentityService.submitSourceOfFunds({
+          bankStatements: statements,
+          supportingKind: kind,
+          supporting,
+          donorIdentity: needsDonor ? donor : null,
+          note: note.trim() || undefined,
+        })
+      ),
+    onSuccess: () => {
+      setStatements([]);
+      setSupporting([]);
+      setDonor(null);
+      setNote('');
+      setError(null);
+      queryClient.invalidateQueries({ queryKey: foreignIdentityKeys.status });
+    },
+    onError: (reason) =>
+      setError(errorText(reason, 'Your source of funds documents could not be sent.')),
+  });
+
+  const open = status.state !== 'APPROVED' && status.state !== 'IN_REVIEW';
+  const { singlePurchaseNaira, totalCommittedNaira } = status.thresholds;
+  const months = status.bankStatementMonths;
+
+  return (
+    <Card>
+      <CardHeader action={<StatusBadge status={status} />}>
+        <CardTitle as="h2">Source of funds</CardTitle>
+        <CardDescription>{status.why || SOURCE_OF_FUNDS_WHY}</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <StatusNote status={status} what="source of funds check" />
+        {open && (
+          <p className="text-sm text-muted-foreground">
+            {status.required
+              ? 'Needed before your next offer or deposit.'
+              : `We ask for this when one purchase is ${formatCurrency(singlePurchaseNaira, { compact: true })} or more, or your purchases pass ${formatCurrency(totalCommittedNaira, { compact: true })} in total. You can send it now.`}
+          </p>
+        )}
+        {error && (
+          <Alert variant="danger" icon={ShieldAlert}>
+            {error}
+          </Alert>
+        )}
+        {open && (
+          <>
+            <TrustConsentPrompt
+              type="DOCUMENT_PROCESSING"
+              text="We store these documents and our team checks where the money comes from. We do not use them to move money."
+              onError={setError}
+            />
+            {isActive('DOCUMENT_PROCESSING') && (
+              <>
+                <Field label={`Bank statements for the last ${months} months`}>
+                  <DocumentUpload
+                    multiple
+                    value={asManyUploads(statements, 'statement')}
+                    onChange={(items) => setStatements(filesOf(items).slice(0, 6))}
+                    accept={DOCUMENT_ACCEPT}
+                    label=""
+                    hint="From the account the money will come from. PDF or photo, up to 10MB each."
+                  />
+                </Field>
+                <Field
+                  label="Supporting document"
+                  hint="At least one, to show where the money comes from."
+                >
+                  <Select
+                    value={kind}
+                    onValueChange={(value) => setKind(value as SourceOfFundsSupportingKind)}
+                    options={SUPPORTING_OPTIONS}
+                    ariaLabel="Kind of supporting document"
+                  />
+                </Field>
+                <Field label={SOURCE_OF_FUNDS_SUPPORTING_LABELS[kind]}>
+                  <DocumentUpload
+                    multiple
+                    value={asManyUploads(supporting, 'supporting')}
+                    onChange={(items) => setSupporting(filesOf(items).slice(0, 5))}
+                    accept={DOCUMENT_ACCEPT}
+                    label=""
+                    hint="PDF or photo, up to 10MB each."
+                  />
+                </Field>
+                {needsDonor && (
+                  <Field label="Donor’s identity document">
+                    <DocumentUpload
+                      value={asUploads(donor, 'donor')}
+                      onChange={(items) => setDonor(fileOf(items))}
+                      accept={DOCUMENT_ACCEPT}
+                      label=""
+                      hint="The passport or national ID of the person who gave or left you the money."
+                    />
+                  </Field>
+                )}
+                <Field label="Note for our team" optionalLabel="Optional">
+                  <Textarea
+                    value={note}
+                    onChange={(event) => setNote(event.target.value.slice(0, MAX_NOTE))}
+                    rows={2}
+                    maxLength={MAX_NOTE}
+                    placeholder="Anything that helps, such as how the money was saved"
+                  />
+                </Field>
+                <Button
+                  size="sm"
+                  disabled={!statements.length || !supporting.length || (needsDonor && !donor)}
+                  isLoading={submit.isPending}
+                  loadingText="Sending…"
+                  onClick={() => submit.mutate()}
+                >
+                  Send to our team
+                </Button>
+              </>
+            )}
+          </>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
 // ----------------------------------------------------------------------- panel
 
 /** Diaspora investors: a passport checked by Smile ID, and two documents our team reviews. */
@@ -523,6 +677,7 @@ export function ForeignIdentityPanel() {
           <PassportCard status={data.passport} />
           <ForeignDocumentCard kind="address" status={data.address} />
           <ForeignDocumentCard kind="bankStatement" status={data.bankStatement} />
+          {data.sourceOfFunds && <SourceOfFundsCard status={data.sourceOfFunds} />}
         </div>
       )}
     </QueryState>

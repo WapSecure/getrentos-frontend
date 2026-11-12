@@ -24,7 +24,7 @@ import {
   Textarea,
   type BadgeVariant,
 } from '@sureground/ui';
-import { formatDate, unwrap } from '@sureground/shared';
+import { formatDate, SOURCE_OF_FUNDS_SUPPORTING_LABELS, unwrap } from '@sureground/shared';
 import { trustService } from '@/services/trustService';
 import { adminService } from '@/services/adminService';
 import { adminKeys } from '@/lib/queryKeys';
@@ -109,17 +109,30 @@ const STEP_TYPE_LABEL: Record<string, string> = {
   PASSPORT_CHECK: 'Passport check',
   FOREIGN_ADDRESS_CHECK: 'Proof of address abroad',
   FOREIGN_BANK_STATEMENT_CHECK: 'Bank statement from abroad',
+  SOURCE_OF_FUNDS_CHECK: 'Source of funds',
 };
 
-// ---- Diaspora identity cases: uploads through GET :id/documents, decision through POST :id/decision.
+// ---- Diaspora identity and source-of-funds cases: uploads through GET :id/documents, decision through POST :id/decision.
 
 const FOREIGN_DOCUMENT_LABEL: Record<ForeignPurpose, string> = {
   FOREIGN_IDENTITY: 'Passport photo page',
   FOREIGN_ADDRESS: 'Proof of address',
   FOREIGN_BANK_STATEMENT: 'Bank statement',
+  SOURCE_OF_FUNDS: 'Source of funds document',
+};
+
+/** Source-of-funds uploads say which document each file is. */
+const SOURCE_OF_FUNDS_DOCUMENT_LABEL: Record<string, string> = {
+  ...SOURCE_OF_FUNDS_SUPPORTING_LABELS,
+  BANK_STATEMENTS: 'Bank statement',
+  DONOR_IDENTITY: 'Donor’s identity document',
 };
 
 const foreignItemLabel = (item: ForeignCaseDocument, purpose: ForeignPurpose) => {
+  const document = item.summary?.document;
+  if (typeof document === 'string' && SOURCE_OF_FUNDS_DOCUMENT_LABEL[document]) {
+    return SOURCE_OF_FUNDS_DOCUMENT_LABEL[document];
+  }
   if (item.category === 'SELFIE') return 'Selfie';
   if (item.category === 'ADDRESS') return 'Proof of address';
   if (item.category === 'BIOMETRIC') return 'Liveness and face match';
@@ -130,7 +143,14 @@ const humanKey = (key: string) =>
   key.replace(/([A-Z])/g, ' $1').replace(/^./, (c) => c.toUpperCase());
 
 /** Smile ID results carry no file (Smile keeps the images): show what we kept. */
-const SMILE_SUMMARY_SKIP = new Set(['source', 'product', 'sandbox', 'mimeType', 'sizeBytes']);
+const SMILE_SUMMARY_SKIP = new Set([
+  'source',
+  'product',
+  'sandbox',
+  'mimeType',
+  'sizeBytes',
+  'document',
+]);
 
 const summaryRows = (summary: Record<string, unknown> | null): [string, string][] =>
   Object.entries(summary ?? {}).flatMap(([key, value]): [string, string][] => {
@@ -435,8 +455,10 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
                     ) : !showDocuments ? (
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <p className="min-w-0 flex-1 text-sm text-muted-foreground">
-                          The person&apos;s uploads and the Smile ID result. Opening them is logged,
-                          and the links last 15 minutes.
+                          {foreign === 'SOURCE_OF_FUNDS'
+                            ? 'The person’s bank statements and supporting documents.'
+                            : 'The person’s uploads and the Smile ID result.'}{' '}
+                          Opening them is logged, and the links last 15 minutes.
                         </p>
                         <Button
                           variant="outline"

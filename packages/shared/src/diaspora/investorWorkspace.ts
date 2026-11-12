@@ -128,6 +128,40 @@ const identityItems = (identity: ForeignIdentityStatus, href: string): InvestorA
   return items;
 };
 
+/** DIA-07: asked for once a purchase crosses the threshold; a row only while it is needed and not with our team. */
+const sourceOfFundsItems = (
+  identity: ForeignIdentityStatus,
+  href: string
+): InvestorAttentionItem[] => {
+  const status = identity.sourceOfFunds;
+  if (!status) return [];
+  if (status.state === 'REJECTED') {
+    return [
+      {
+        key: 'identity-source-of-funds',
+        kind: 'identity',
+        severity: 'urgent',
+        title: 'Send your source of funds documents again',
+        detail: 'Our team could not approve the last ones. The reason is on the check.',
+        link: { path: href, label: 'See why' },
+      },
+    ];
+  }
+  if (status.required && status.state === 'NOT_STARTED') {
+    return [
+      {
+        key: 'identity-source-of-funds',
+        kind: 'identity',
+        severity: 'urgent',
+        title: 'Confirm your source of funds',
+        detail: 'Needed before your next offer or deposit.',
+        link: { path: href, label: 'Start' },
+      },
+    ];
+  }
+  return [];
+};
+
 /**
  * "What needs me now": one row per thing waiting for the investor, most pressing first. A purchase
  * appears once, preferring the deposit row because it carries the amount.
@@ -226,6 +260,7 @@ export const buildAttentionQueue = (input: AttentionInput): InvestorAttentionIte
   }
 
   if (input.identity?.eligible) items.push(...identityItems(input.identity, links.identity));
+  if (input.identity?.eligible) items.push(...sourceOfFundsItems(input.identity, links.identity));
 
   return items
     .map((item, index) => ({ item, index }))
