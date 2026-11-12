@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { View } from 'react-native';
 import { Image } from 'expo-image';
 import { AlertCircle } from '@sureground/icons/native';
@@ -53,13 +54,50 @@ function PhotoUploadRow({
 }: {
   index: number;
   photo: PendingPhoto;
-  /** None once the photo is up and waiting to be added with the others. */
   state?: UploadState;
   onRemove: () => void;
   onRetry: () => void;
 }) {
-  const { colors, spacing, radius } = useTheme();
-  const name = `new photo ${index + 1}`;
+  const { colors, radius } = useTheme();
+  return (
+    <UploadRow
+      name={`new photo ${index + 1}`}
+      state={state}
+      onRemove={onRemove}
+      onRetry={onRetry}
+      preview={
+        <Image
+          source={{ uri: photo.file.uri }}
+          style={{ width: 56, height: 56, borderRadius: radius.md, backgroundColor: colors.secondary }}
+          contentFit="cover"
+          accessible={false}
+        />
+      }
+    />
+  );
+}
+
+/**
+ * One file's upload: progress with Cancel, then Processing; or the failure with its reason, Retry and Remove.
+ * Shared by photos and the video tour.
+ */
+export function UploadRow({
+  name,
+  preview,
+  state,
+  onRemove,
+  onRetry,
+}: {
+  /** Read out with the buttons, e.g. "new photo 2". */
+  name: string;
+  /** A 56pt square: the photo, or an icon for a video. */
+  preview: ReactNode;
+  /** None once the file is up and waiting to be added with the others. */
+  state?: UploadState;
+  onRemove: () => void;
+  onRetry: () => void;
+}) {
+  const { colors, spacing } = useTheme();
   const failed = state?.status === 'failed';
   const progress = state ? state.progress : 100;
   const label = !state
@@ -74,18 +112,7 @@ function PhotoUploadRow({
 
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-      <Image
-        source={{ uri: photo.file.uri }}
-        style={{
-          width: 56,
-          height: 56,
-          borderRadius: radius.md,
-          backgroundColor: colors.secondary,
-          opacity: failed ? 0.5 : 1,
-        }}
-        contentFit="cover"
-        accessible={false}
-      />
+      <View style={{ opacity: failed ? 0.5 : 1 }}>{preview}</View>
       <View style={{ flex: 1, gap: 4 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
           {failed ? <AlertCircle size={14} color={colors.destructive} /> : null}

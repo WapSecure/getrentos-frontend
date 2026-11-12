@@ -41,7 +41,7 @@ import {
   VERIFICATION_TONE,
   type LandlordUnit,
 } from '@/lib/api/landlord';
-import { errorMessage } from '@/lib/api/client';
+import { abortError, errorMessage } from '@/lib/api/client';
 import { EditPropertySheet } from '@/components/landlord/EditPropertySheet';
 import { RecordOccupierSheet } from '@/components/landlord/RecordOccupierSheet';
 import { AddUnitSheet } from '@/components/landlord/AddUnitSheet';
@@ -51,6 +51,7 @@ import { usePhotoUploads } from '@/lib/usePhotoUploads';
 import { PhotoUploadList } from '@/components/media/PhotoUploadList';
 import { VideoTourField } from '@/components/video/VideoTourField';
 import type { VideoOnSiteReport } from '@/lib/filmedOnSite';
+import type { UploadTaskOptions } from '@/lib/uploadQueue';
 import { BulkPriceSheet } from '@/components/landlord/BulkPriceSheet';
 import { usePlanTier } from '@/lib/api/subscription';
 
@@ -131,10 +132,16 @@ export default function LandlordPropertyDetail() {
     }
   };
 
-  const attachVideo = async (file: PickedVideo, onSite: VideoOnSiteReport | null) => {
+  const attachVideo = async (
+    file: PickedVideo,
+    onSite: VideoOnSiteReport | null,
+    options: UploadTaskOptions
+  ) => {
     const previous = p?.videoTourKey;
-    const { key } = await landlordApi.uploadPropertyMedia(file, 'video');
+    const key = await landlordApi.uploadPropertyVideo(file, options);
     try {
+      // Cancelled while storage was checking it: don't attach.
+      if (options.signal.aborted) throw abortError();
       await landlordApi.updateProperty(id, {
         videoTourKey: key,
         videoTourOnSite: onSite ?? undefined,

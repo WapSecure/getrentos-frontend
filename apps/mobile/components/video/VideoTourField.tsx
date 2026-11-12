@@ -1,13 +1,18 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Platform, Pressable, View } from 'react-native';
 import { Play, Trash2, Video } from '@sureground/icons/native';
 import { Card, Divider, Text, useTheme, useToast } from '@sureground/ui-native';
 import { ApiError } from '@/lib/api/client';
 import { videoProblem } from '@sureground/shared';
 import { pickVideo, recordVideo, type PickedVideo } from '@/lib/filePicker';
+import type { UploadState, UploadTaskOptions } from '@/lib/uploadQueue';
+import { UploadRow } from '@/components/media/PhotoUploadList';
 import { VideoTourSheet } from './VideoTourSheet';
 import { FilmedOnSite } from './FilmedOnSite';
 import { locateRecording, type VideoOnSiteReport } from '@/lib/filmedOnSite';
+
+const VIDEO_UPLOAD_FALLBACK = 'This video did not upload. Check your connection and try again.';
+const isAbort = (e: unknown) => e instanceof Error && e.name === 'AbortError';
 
 export function VideoTourField({
   title,
@@ -22,19 +27,70 @@ export function VideoTourField({
   videoUrl?: string | null;
   hasVideo: boolean;
   filmedOnSite?: boolean;
-  onUpload: (file: PickedVideo, onSite: VideoOnSiteReport | null) => Promise<unknown>;
+  /** Uploads and attaches the video; reports whole-percent progress and stops when `signal` aborts. */
+  onUpload: (
+    file: PickedVideo,
+    onSite: VideoOnSiteReport | null,
+    options: UploadTaskOptions
+  ) => Promise<unknown>;
   onRemove: () => Promise<unknown>;
   onExpired?: () => void;
 }) {
-  const { colors, spacing } = useTheme();
+  const { colors, spacing, radius } = useTheme();
   const toast = useToast();
-  const [busy, setBusy] = useState<'uploading' | 'removing' | null>(null);
+  const [removing, setRemoving] = useState(false);
   const [watching, setWatching] = useState(false);
+  // The upload in flight or the one that failed, kept for Retry; null when there is none.
+  const [upload, setUpload] = useState<UploadState | null>(null);
+  const pending = useRef<{ file: PickedVideo; onSite: VideoOnSiteReport | null } | null>(null);
+  const controller = useRef<AbortController | null>(null);
+  const busy = removing || upload != null;
+
+  // Leaving the screen stops the upload.
+  useEffect(() => () => controller.current?.abort(), []);
 
   const fail = (e: unknown, fallback: string) =>
     toast.show(e instanceof ApiError ? e.message : fallback, 'error');
 
-  const upload = async (pick: () => Promise<PickedVideo | null>, filmed = false) => {
+  const send = async () => {
+    const job = pending.current;
+    if (!job) return;
+    const ctrl = new AbortController();
+    controller.current = ctrl;
+    setUpload({ status: 'uploading', progress: 0 });
+    try {
+      await onUpload(job.file, job.onSite, {
+        signal: ctrl.signal,
+        onProgress: (progress) => {
+          if (!ctrl.signal.aborted) setUpload({ status: 'uploading', progress });
+        },
+      });
+      if (ctrl.signal.aborted) return;
+      pending.current = null;
+      setUpload(null);
+      toast.show(hasVideo ? 'Video tour replaced.' : 'Video tour added.', 'success');
+    } catch (e) {
+      // A cancel has already cleared the row.
+      if (ctrl.signal.aborted || isAbort(e)) return;
+      setUpload({
+        status: 'failed',
+        progress: 0,
+        error: e instanceof ApiError && e.message ? e.message : VIDEO_UPLOAD_FALLBACK,
+      });
+    } finally {
+      if (controller.current === ctrl) controller.current = null;
+    }
+  };
+
+  /** Cancel while sending, or Remove after a failure: either way the picked video is dropped. */
+  const discard = () => {
+    controller.current?.abort();
+    controller.current = null;
+    pending.current = null;
+    setUpload(null);
+  };
+
+  const start = async (pick: () => Promise<PickedVideo | null>, filmed = false) => {
     let file: PickedVideo | null;
     try {
       file = await pick();
@@ -51,28 +107,25 @@ export function VideoTourField({
       toast.show(problem, 'error');
       return;
     }
-    setBusy('uploading');
-    try {
-      // Right after the camera closes: the phone is still where it filmed.
-      const onSite = filmed ? await locateRecording() : null;
-      await onUpload(file, onSite);
-      toast.show(hasVideo ? 'Video tour replaced.' : 'Video tour added.', 'success');
-    } catch (e) {
-      fail(e, 'Could not upload that video.');
-    } finally {
-      setBusy(null);
-    }
+    const job = { file, onSite: null as VideoOnSiteReport | null };
+    pending.current = job;
+    setUpload({ status: 'uploading', progress: 0 });
+    // Right after the camera closes: the phone is still where it filmed.
+    if (filmed) job.onSite = await locateRecording().catch(() => null);
+    // Cancelled while finding the location.
+    if (pending.current !== job) return;
+    await send();
   };
 
   const choose = () => {
     // The browser build has no camera flow worth offering; it picks a file.
     if (Platform.OS === 'web') {
-      void upload(pickVideo);
+      void start(pickVideo);
       return;
     }
     Alert.alert(hasVideo ? 'Replace the video tour' : 'Add a video tour', undefined, [
-      { text: 'Film a walkthrough', onPress: () => void upload(recordVideo, true) },
-      { text: 'Choose from library', onPress: () => void upload(pickVideo) },
+      { text: 'Film a walkthrough', onPress: () => void start(recordVideo, true) },
+      { text: 'Choose from library', onPress: () => void start(pickVideo) },
       { text: 'Cancel', style: 'cancel' },
     ]);
   };
@@ -84,14 +137,14 @@ export function VideoTourField({
         text: 'Remove',
         style: 'destructive',
         onPress: async () => {
-          setBusy('removing');
+          setRemoving(true);
           try {
             await onRemove();
             toast.show('Video tour removed.', 'success');
           } catch (e) {
             fail(e, 'Could not remove the video.');
           } finally {
-            setBusy(null);
+            setRemoving(false);
           }
         },
       },
@@ -107,34 +160,54 @@ export function VideoTourField({
   return (
     <>
       <Card padding="none">
-        <Pressable
-          onPress={choose}
-          disabled={busy != null}
-          accessibilityRole="button"
-          accessibilityLabel={hasVideo ? 'Replace the video tour' : 'Add a video tour'}
-          accessibilityState={{ disabled: busy != null, busy: busy === 'uploading' }}
-          style={row}
-        >
-          {busy === 'uploading' ? (
-            <ActivityIndicator size="small" color={colors.primary} />
-          ) : (
-            <Video size={18} color={colors.primary} />
-          )}
-          <View style={{ flex: 1 }}>
-            <Text variant="bodyStrong">
-              {busy === 'uploading'
-                ? 'Uploading the video…'
-                : hasVideo
-                  ? 'Replace the video tour'
-                  : 'Add a video tour'}
-            </Text>
-            <Text variant="caption" color="mutedForeground">
-              {busy === 'uploading'
-                ? 'Keep the app open until it finishes.'
-                : 'Film at the property for a “Filmed on site” badge, or pick a clip. Up to 5 minutes.'}
-            </Text>
+        {upload ? (
+          <View style={{ padding: spacing.lg, gap: spacing.sm }}>
+            <UploadRow
+              name="the video tour"
+              state={upload}
+              onRemove={discard}
+              onRetry={() => void send()}
+              preview={
+                <View
+                  style={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: radius.md,
+                    backgroundColor: colors.secondary,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Video size={20} color={colors.primary} />
+                </View>
+              }
+            />
+            {upload.status === 'uploading' ? (
+              <Text variant="caption" color="mutedForeground">
+                Keep the app open until it finishes.
+              </Text>
+            ) : null}
           </View>
-        </Pressable>
+        ) : (
+          <Pressable
+            onPress={choose}
+            disabled={busy}
+            accessibilityRole="button"
+            accessibilityLabel={hasVideo ? 'Replace the video tour' : 'Add a video tour'}
+            accessibilityState={{ disabled: busy }}
+            style={row}
+          >
+            <Video size={18} color={colors.primary} />
+            <View style={{ flex: 1 }}>
+              <Text variant="bodyStrong">
+                {hasVideo ? 'Replace the video tour' : 'Add a video tour'}
+              </Text>
+              <Text variant="caption" color="mutedForeground">
+                Film at the property for a “Filmed on site” badge, or pick a clip. Up to 5 minutes.
+              </Text>
+            </View>
+          </Pressable>
+        )}
         {hasVideo ? (
           <>
             <Divider />
@@ -154,13 +227,13 @@ export function VideoTourField({
               </Pressable>
               <Pressable
                 onPress={remove}
-                disabled={busy != null}
+                disabled={busy}
                 accessibilityRole="button"
                 accessibilityLabel="Remove the video tour"
-                accessibilityState={{ disabled: busy != null, busy: busy === 'removing' }}
+                accessibilityState={{ disabled: busy, busy: removing }}
                 hitSlop={10}
               >
-                {busy === 'removing' ? (
+                {removing ? (
                   <ActivityIndicator size="small" color={colors.mutedForeground} />
                 ) : (
                   <Trash2 size={18} color={colors.mutedForeground} />
