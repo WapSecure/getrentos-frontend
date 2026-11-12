@@ -25,7 +25,7 @@ export default function OpengraphImage() {
             width: 56,
             height: 56,
             borderRadius: 16,
-            background: '#0057d9',
+            background: '#20232b',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -82,7 +82,7 @@ export default function OpengraphImage() {
           gap: 12,
           fontSize: 18,
           fontWeight: 700,
-          color: '#0057d9',
+          color: '#20232b',
         }}
       >
         <span>VERIFIED IDENTITIES</span>

@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { headers } from 'next/headers';
-import { Manrope } from 'next/font/google';
+import { Manrope, Newsreader } from 'next/font/google';
 import { ThemeProvider } from '@sureground/ui/providers/ThemeProvider';
 import { WebQueryProvider } from '@/components/providers/WebQueryProvider';
 import { LanguageProvider } from '@/lib/i18n/LanguageContext';
@@ -14,8 +14,15 @@ import {
 } from '@/lib/site';
 import './globals.css';
 
-// @sureground/ui reads --font-manrope into --font-ui.
+// @sureground/ui reads --font-manrope into --font-ui and --font-newsreader into --font-serif.
 const manrope = Manrope({ subsets: ['latin'], display: 'swap', variable: '--font-manrope' });
+const newsreader = Newsreader({
+  subsets: ['latin'],
+  display: 'swap',
+  weight: ['300', '400', '500'],
+  style: ['normal', 'italic'],
+  variable: '--font-newsreader',
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -59,8 +66,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#000000' },
+    { media: '(prefers-color-scheme: light)', color: '#f8f7f5' },
+    { media: '(prefers-color-scheme: dark)', color: '#111216' },
   ],
   width: 'device-width',
   initialScale: 1,
@@ -70,7 +77,7 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const nonce = (await headers()).get('x-nonce') ?? undefined;
   return (
-    <html lang="en" className={manrope.variable} suppressHydrationWarning>
+    <html lang="en" className={`${manrope.variable} ${newsreader.variable}`} suppressHydrationWarning>
       <body className="bg-background antialiased">
         <ThemeProvider nonce={nonce}>
           <WebQueryProvider>
