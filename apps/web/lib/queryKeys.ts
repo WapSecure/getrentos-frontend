@@ -286,6 +286,8 @@ export const investorKeys = {
   riskDeclaration: ['investor', 'declarations', 'risk'] as const,
   overview: ['investor', 'overview'] as const,
   managed: ['investor', 'managed'] as const,
+  analysis: (listingId: string, input: object = {}) =>
+    ['investor', 'analysis', listingId, input] as const,
 };
 
 /** One purchase's workspace, as its buyer, seller or the buyer's representative sees it. */

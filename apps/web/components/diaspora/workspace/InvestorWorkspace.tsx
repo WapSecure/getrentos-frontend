@@ -4,14 +4,17 @@ import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   AlertCircle,
+  Banknote,
   Building2,
   CalendarClock,
   Clock,
   Globe,
   Handshake,
   KeyRound,
+  Landmark,
   Search,
   ShieldCheck,
+  TrendingUp,
   Video,
   Wallet,
   type SgIcon,
@@ -330,6 +333,40 @@ export const InvestorWorkspace = ({ portal }: { portal: InvestorPortal }) => {
       href: links.managed,
     });
   }
+  // DIA-30: only figures with a record behind them; no valuation.
+  if (figures.acquisitionCost !== null) {
+    portfolio.push({
+      icon: Landmark,
+      label: 'Acquisition cost',
+      value: formatCurrency(figures.acquisitionCost),
+      subtitle: 'Recorded prices of completed purchases',
+    });
+  }
+  if (figures.rentReceived12m !== null) {
+    portfolio.push({
+      icon: Banknote,
+      label: 'Rent received',
+      value: formatCurrency(figures.rentReceived12m),
+      subtitle: 'Last 12 months, from your statements',
+    });
+  }
+  if (figures.net12m !== null) {
+    portfolio.push({
+      icon: TrendingUp,
+      label: 'Net to you',
+      value: formatCurrency(figures.net12m),
+      subtitle: 'Last 12 months, after costs and fees',
+    });
+  }
+  if (figures.occupancyRate !== null) {
+    portfolio.push({
+      icon: Building2,
+      label: 'Occupancy',
+      value: `${figures.occupancyRate}%`,
+      subtitle: 'Managed units with a running lease',
+      href: links.managedArea,
+    });
+  }
   if (data && 'latestStatement' in data) {
     const statement = data.latestStatement;
     const net = figures.latestStatementNet;
@@ -343,7 +380,9 @@ export const InvestorWorkspace = ({ portal }: { portal: InvestorPortal }) => {
       supplement: net ? (
         <IndicativeAmount naira={net} currency={currency} labelDisplay="popover" />
       ) : undefined,
-      href: statement ? links.managed : undefined,
+      // The statement itself, with its breakdown, in property care.
+      href:
+        statement && links.managedArea ? DIASPORA_ROUTES.managedStatement(statement.id) : undefined,
     });
   }
 
