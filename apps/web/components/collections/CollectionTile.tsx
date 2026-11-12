@@ -52,7 +52,7 @@ export function CollectionTile({
           <p className="line-clamp-2 text-sm text-muted-foreground">{collection.description}</p>
         )}
         <p className="mt-auto pt-2 text-xs text-muted-foreground">
-          {curatorLine(collection.curator)} · {count}
+          {curatorLine(collection.curator, collection.kind)} · {count}
         </p>
       </div>
     </Link>
