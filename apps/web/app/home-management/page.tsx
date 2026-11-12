@@ -1,87 +1,82 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
-  ArrowRight,
-  BadgeCheck,
   Building2,
   CalendarClock,
-  CheckCircle2,
   ClipboardCheck,
   FileText,
   House,
   Layers3,
-  Network,
-  ShieldCheck,
-  Wrench,
 } from '@sureground/icons';
 import { Footer } from '@/components/layout/Footer';
 import { Navigation } from '@/components/layout/Navigation';
-import { Badge, Button, type BadgeVariant } from '@sureground/ui';
+import { ArrowLink } from '@/components/marketing/ArrowLink';
+import { ClosingBand } from '@/components/marketing/ClosingBand';
+import { Container } from '@/components/marketing/Container';
+import { CtaLink } from '@/components/marketing/CtaLink';
+import { FeatureRow } from '@/components/marketing/FeatureRow';
+import { LandingHero } from '@/components/marketing/LandingHero';
+import { SectionIntro } from '@/components/marketing/SectionIntro';
+import { photos } from '@/components/marketing/photos';
 import { ROUTES } from '@/lib/constants/auth';
 
-const workflows = [
+export const metadata: Metadata = {
+  title: 'Property Management: assets, care, vendors',
+  description:
+    'Track assets, schedule preventive care and control work orders for your property with Sureground property management.',
+  alternates: { canonical: '/home-management' },
+};
+
+const WORKFLOWS = [
   {
     icon: House,
     title: 'A complete asset record',
-    description:
-      'Track equipment, warranties, model details, service history, and the home or unit where each asset belongs.',
+    body: 'Equipment, warranties, model details and service history, tied to the home or unit each asset belongs to.',
   },
   {
     icon: CalendarClock,
-    title: 'Preventive care that stays ahead',
-    description:
-      'Schedule recurring care, connect the right vendor, and surface due work before an expensive failure occurs.',
+    title: 'Preventive care ahead of failures',
+    body: 'Schedule recurring care, connect the right vendor and see due work before it becomes an expensive repair.',
   },
   {
     icon: ClipboardCheck,
     title: 'Controlled work orders',
-    description:
-      'Bring tenant requests and planned work into one queue with ownership, due dates, vendor context, and spend approvals.',
+    body: 'Tenant requests and planned work in one queue, with an owner, due dates, vendor context and spend approvals.',
   },
   {
     icon: FileText,
-    title: 'A durable operating record',
-    description:
-      'Keep lease records, home documents, receipts, and service conversations tied to the property instead of scattering them across tools.',
+    title: 'One operating record',
+    body: 'Lease records, home documents, receipts and service conversations stay with the property, not scattered across tools.',
   },
 ];
 
-const audiences = [
+const AUDIENCES = [
   {
     title: 'Owners',
-    description: 'Protect the long-term condition and value of each property in your portfolio.',
-    action: 'Open owner workspace',
+    body: 'Protect the long-term condition and value of each property in your portfolio.',
+    action: 'Owner workspace',
     href: ROUTES.OWNER_HOME_MANAGEMENT,
   },
   {
-    title: 'Landlords & operators',
-    description:
-      'Coordinate tenants, vendors, maintenance, and budgets across every occupied unit.',
-    action: 'Open landlord workspace',
+    title: 'Landlords and operators',
+    body: 'Coordinate tenants, vendors, maintenance and budgets across every occupied unit.',
+    action: 'Landlord workspace',
     href: ROUTES.LANDLORD_HOME_MANAGEMENT,
   },
   {
     title: 'Residents',
-    description:
-      'See one trusted place for your lease, home-care requests, records, payments, and support.',
-    action: 'Open my home',
+    body: 'Your lease, home-care requests, records, payments and support in one place.',
+    action: 'My home',
     href: ROUTES.RENTER_HOME,
   },
 ];
 
-const governancePoints = [
-  'Role-specific workspaces for owners, landlords, and residents.',
-  'Property-scoped data access and audited work-order approvals.',
-  'A single operational trail from reported issue to approved, completed work.',
-];
-
-const operatingPlans = [
+const PLANS = [
   {
     icon: House,
     name: 'Home Care',
     audience: 'Independent owners',
-    description:
-      'The essential operating layer for a small portfolio or a single investment property.',
+    body: 'The essential operating layer for a small portfolio or a single investment property.',
     includes: [
       'Asset and home records',
       'Resident requests and work orders',
@@ -92,312 +87,185 @@ const operatingPlans = [
     icon: Building2,
     name: 'Operations',
     audience: 'Landlords and property teams',
-    description:
-      'Coordinate vendors, recurring care, approvals, and service accountability across a growing portfolio.',
+    body: 'Vendors, recurring care, approvals and service accountability across a growing portfolio.',
     includes: [
       'Preventive maintenance plans',
       'Vendor quotes and spend controls',
-      'SLA, escalation, and operational reporting',
+      'Service levels, escalation and reporting',
     ],
-    featured: true,
   },
   {
     icon: Layers3,
     name: 'Enterprise',
     audience: 'Agencies and communities',
-    description:
-      'A governed operating system for multi-property teams, service partners, and residential communities.',
+    body: 'Governed operations for multi-property teams, service partners and residential communities.',
     includes: [
       'Portfolio workspaces and policy controls',
       'Role-aware approvals and audit exports',
-      'Tailored implementation and integration planning',
+      'Implementation planning with our team',
     ],
   },
 ];
 
-export const metadata: Metadata = {
-  title: 'Home Management: assets, care, vendors',
-  description:
-    'Track assets, schedule preventive care, and control work orders for your property with Sureground home management.',
-  alternates: { canonical: '/home-management' },
-};
+const GOVERNANCE = [
+  'Role-specific workspaces for owners, landlords and residents.',
+  'Property-scoped access and audited work-order approvals.',
+  'One trail from a reported issue to approved, completed work.',
+];
 
 export default function HomeManagementProductPage() {
   return (
-    <main className="min-h-screen bg-background text-foreground">
+    <>
       <Navigation />
+      <main id="main" className="bg-background">
+        <LandingHero
+          eyebrow="Property management"
+          title="Run every home after move-in from one place"
+          lead="Assets, preventive care, work orders, vendors, approvals and home records in one workspace, built into Sureground."
+          photo={photos.livingRoomWhite}
+          actions={
+            <>
+              <CtaLink href={ROUTES.SIGNUP} arrow>
+                Set up property management
+              </CtaLink>
+              <CtaLink href="#workflows" variant="outline">
+                How it works
+              </CtaLink>
+            </>
+          }
+        />
 
-      <section className="relative overflow-hidden px-4 pb-20 pt-32 sm:px-6 lg:px-8">
-        <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/5 px-3 py-1.5 text-sm font-medium text-primary">
-              <Wrench className="h-4 w-4" />
-              Sureground Home Management
-            </div>
-            <h1 className="mt-6 max-w-3xl text-4xl font-semibold tracking-[-0.045em] sm:text-5xl lg:text-6xl">
-              Operate every home with the care of a world-class property team.
-            </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-muted-foreground">
-              A dedicated operational workspace for the work that begins after move-in: assets,
-              preventive care, work orders, vendor coordination, approvals, and home records.
-            </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Button href={ROUTES.SIGNUP} size="lg" rounded="lg">
-                Set up Home Management
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-              <Button href="#workflows" variant="outline" size="lg" rounded="lg">
-                Explore the workflow
-              </Button>
-            </div>
-            <p className="mt-5 text-sm text-muted-foreground">
-              Built into Sureground, with no separate spreadsheets, inboxes, or guest accounts.
-            </p>
-          </div>
+        <section
+          id="workflows"
+          aria-labelledby="pm-workflows"
+          className="border-y border-border bg-card py-20 md:py-28"
+        >
+          <Container>
+            <SectionIntro
+              id="pm-workflows"
+              eyebrow="One operating model"
+              title="From the first asset to the last service record"
+              lead="Each decision is made with the right context, authority and history, because every part of the property's operations is connected."
+            />
+            <ul className="grid gap-x-10 gap-y-12 sm:grid-cols-2">
+              {WORKFLOWS.map(({ icon: Icon, title, body }) => (
+                <li key={title} className="border-t border-border pt-6">
+                  <Icon className="mb-5 h-6 w-6 text-foreground" aria-hidden="true" />
+                  <h3 className="font-display mb-2 text-[1.5rem] font-normal">{title}</h3>
+                  <p className="max-w-[52ch] leading-relaxed text-muted-foreground">{body}</p>
+                </li>
+              ))}
+            </ul>
+          </Container>
+        </section>
 
-          <div className="rounded-[2rem] border border-border bg-card p-5 shadow-[0_24px_80px_rgba(15,23,42,0.11)] sm:p-7">
-            <div className="flex items-center justify-between border-b border-border pb-5">
-              <div>
-                <p className="text-sm font-medium text-primary">Portfolio health</p>
-                <h2 className="mt-1 text-xl font-semibold tracking-[-0.025em]">
-                  Today&apos;s operating view
-                </h2>
-              </div>
-              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
-                <ShieldCheck className="h-5 w-5" />
-              </span>
-            </div>
-            <div className="mt-5 grid grid-cols-2 gap-3">
-              <Metric label="Asset register" value="Ready" tone="blue" />
-              <Metric label="Care plans" value="On track" tone="green" />
-              <Metric label="Work orders" value="In control" tone="amber" />
-              <Metric label="Approvals" value="Audited" tone="violet" />
-            </div>
-            <div className="mt-5 rounded-2xl border border-border bg-secondary/55 p-4">
-              <div className="flex items-start gap-3">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <CalendarClock className="h-4 w-4" />
-                </span>
-                <div>
-                  <p className="text-sm font-medium">Preventive care stays visible</p>
-                  <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                    Planned service, warranty context, vendor assignment, and approval decisions
-                    remain connected to the home.
+        <section aria-labelledby="pm-roles" className="py-20 md:py-28">
+          <Container>
+            <SectionIntro
+              id="pm-roles"
+              eyebrow="Built for every participant"
+              title="Different roles, one home record"
+            />
+            <ul className="grid gap-x-10 gap-y-12 md:grid-cols-3">
+              {AUDIENCES.map((audience) => (
+                <li key={audience.title} className="flex flex-col border-t border-border pt-6">
+                  <h3 className="font-display mb-3 text-[1.5rem] font-normal">{audience.title}</h3>
+                  <p className="mb-6 flex-1 leading-relaxed text-muted-foreground">
+                    {audience.body}
                   </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+                  <ArrowLink href={audience.href} className="self-start">
+                    {audience.action}
+                  </ArrowLink>
+                </li>
+              ))}
+            </ul>
+          </Container>
+        </section>
 
-      <section id="workflows" className="border-y border-border bg-card px-4 py-20 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <div className="max-w-2xl">
-            <p className="text-sm font-medium text-primary">One operating model</p>
-            <h2 className="mt-2 text-3xl font-semibold tracking-[-0.035em] sm:text-4xl">
-              From the first asset to the final service record.
-            </h2>
-            <p className="mt-4 text-base leading-7 text-muted-foreground">
-              Home Management connects the operational layers of a property so decisions happen with
-              the right context, authority, and history.
+        <section
+          aria-labelledby="pm-plans"
+          className="border-y border-border bg-card py-20 md:py-28"
+        >
+          <Container>
+            <SectionIntro
+              id="pm-plans"
+              eyebrow="Grows with your operations"
+              title="Start with the homes you run today"
+              lead="Property management is paid for by the operator, not the resident, and grows from everyday care into governed portfolio operations."
+            />
+            <ul className="grid gap-x-10 gap-y-12 lg:grid-cols-3">
+              {PLANS.map(({ icon: Icon, ...plan }) => (
+                <li key={plan.name} className="flex flex-col border-t border-foreground/80 pt-6">
+                  <Icon className="mb-5 h-6 w-6 text-foreground" aria-hidden="true" />
+                  <p className="label-caps mb-2 text-muted-foreground">{plan.audience}</p>
+                  <h3 className="font-display mb-3 text-[1.75rem] font-normal">{plan.name}</h3>
+                  <p className="mb-6 leading-relaxed text-muted-foreground">{plan.body}</p>
+                  <ul className="mt-auto flex flex-col gap-2.5 border-t border-border pt-5 text-[0.9375rem]">
+                    {plan.includes.map((item) => (
+                      <li key={item} className="flex gap-3">
+                        <span aria-hidden="true" className="text-muted-foreground">
+                          —
+                        </span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-12 max-w-[72ch] text-[0.9375rem] leading-relaxed text-muted-foreground">
+              Pricing can combine a property or unit subscription with optional managed
+              coordination, verification, inspection and payment services as your operations grow.
+              See{' '}
+              <Link href={ROUTES.PRICING} className="text-foreground underline underline-offset-4">
+                Pricing
+              </Link>{' '}
+              for current plans.
             </p>
-          </div>
-          <div className="mt-10 grid gap-4 md:grid-cols-2">
-            {workflows.map((workflow) => (
-              <article
-                key={workflow.title}
-                className="rounded-2xl border border-border bg-background p-6"
-              >
-                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <workflow.icon className="h-5 w-5" />
-                </span>
-                <h3 className="mt-5 text-lg font-semibold tracking-[-0.02em]">{workflow.title}</h3>
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                  {workflow.description}
-                </p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
+          </Container>
+        </section>
 
-      <section className="px-4 py-20 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div className="max-w-2xl">
-              <p className="text-sm font-medium text-primary">Built for every participant</p>
-              <h2 className="mt-2 text-3xl font-semibold tracking-[-0.035em]">
-                Different roles. One trusted home record.
-              </h2>
-            </div>
-            <Link
-              href={ROUTES.SIGNUP}
-              className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
+        <section aria-label="Control and approvals" className="py-20 md:py-28">
+          <Container>
+            <FeatureRow
+              eyebrow="Control"
+              title="Control without slowing the work down"
+              photo={photos.houseWhiteCubic}
+              reverse
             >
-              Create your account <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-          <div className="mt-10 grid gap-4 lg:grid-cols-3">
-            {audiences.map((audience) => (
-              <article
-                key={audience.title}
-                className="flex flex-col rounded-2xl border border-border bg-card p-6"
-              >
-                <h3 className="text-xl font-semibold tracking-[-0.025em]">{audience.title}</h3>
-                <p className="mt-3 flex-1 text-sm leading-6 text-muted-foreground">
-                  {audience.description}
-                </p>
-                <Button
-                  href={audience.href}
-                  variant="outline"
-                  size="sm"
-                  rounded="lg"
-                  className="mt-6 self-start"
-                >
-                  {audience.action}
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
+              <p>
+                People close to a home can act quickly, while owners keep clear visibility and
+                approval control.
+              </p>
+              <ul className="mt-5 flex flex-col gap-3 border-t border-border pt-5 text-foreground">
+                {GOVERNANCE.map((point) => (
+                  <li key={point} className="flex gap-3">
+                    <span aria-hidden="true" className="text-muted-foreground">
+                      —
+                    </span>
+                    {point}
+                  </li>
+                ))}
+              </ul>
+            </FeatureRow>
+          </Container>
+        </section>
 
-      <section className="border-y border-border bg-card px-4 py-20 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <div className="mx-auto max-w-2xl text-center">
-            <p className="text-sm font-medium text-primary">
-              A product line that grows with your operations
-            </p>
-            <h2 className="mt-2 text-3xl font-semibold tracking-[-0.035em] sm:text-4xl">
-              Start with the homes you operate today.
-            </h2>
-            <p className="mt-4 text-base leading-7 text-muted-foreground">
-              Home Management is designed to be funded by the operator, not the resident, and to
-              expand from everyday care into governed portfolio operations.
-            </p>
-          </div>
-          <div className="mt-10 grid gap-4 lg:grid-cols-3">
-            {operatingPlans.map((plan) => (
-              <article
-                key={plan.name}
-                className={`relative flex flex-col rounded-2xl border p-6 ${
-                  plan.featured
-                    ? 'border-primary/35 bg-primary/[0.035] shadow-[0_18px_50px_rgba(15,23,42,0.08)]'
-                    : 'border-border bg-background'
-                }`}
-              >
-                {plan.featured && (
-                  <Badge variant="primary" className="absolute right-5 top-5">
-                    Built for operators
-                  </Badge>
-                )}
-                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <plan.icon className="h-5 w-5" />
-                </span>
-                <p className="mt-5 text-sm font-medium text-primary">{plan.audience}</p>
-                <h3 className="mt-1 text-2xl font-semibold tracking-[-0.025em]">{plan.name}</h3>
-                <p className="mt-3 min-h-14 text-sm leading-6 text-muted-foreground">
-                  {plan.description}
-                </p>
-                <ul className="mt-6 space-y-3 border-t border-border pt-5">
-                  {plan.includes.map((item) => (
-                    <li key={item} className="flex gap-2.5 text-sm leading-6 text-foreground">
-                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-                <Button
-                  href={ROUTES.SIGNUP}
-                  variant={plan.featured ? 'primary' : 'outline'}
-                  size="sm"
-                  rounded="lg"
-                  className="mt-7 self-start"
-                >
-                  Explore {plan.name}
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </article>
-            ))}
-          </div>
-          <div className="mx-auto mt-8 flex max-w-3xl items-start gap-3 rounded-2xl border border-border bg-background p-4 text-sm leading-6 text-muted-foreground">
-            <Network className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-            The commercial model can combine a property or unit subscription with optional managed
-            coordination, verification, inspection, and payment services as your operations mature.
-          </div>
-        </div>
-      </section>
-
-      <section className="px-4 pb-20 sm:px-6 lg:px-8">
-        <div className="mx-auto grid max-w-7xl gap-8 rounded-2xl border border-border bg-secondary/55 p-7 sm:p-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
-          <div>
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-foreground text-background">
-              <BadgeCheck className="h-6 w-6" />
-            </span>
-            <h2 className="mt-5 text-3xl font-semibold tracking-[-0.035em]">
-              Control without slowing the work down.
-            </h2>
-            <p className="mt-4 text-base leading-7 text-muted-foreground">
-              The operational workspace is deliberately role-aware: those close to a home can act
-              quickly, while owners retain clear visibility and approval control.
-            </p>
-          </div>
-          <ul className="space-y-4">
-            {governancePoints.map((point) => (
-              <li
-                key={point}
-                className="flex gap-3 rounded-2xl border border-border bg-card p-4 text-sm leading-6 text-foreground"
-              >
-                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                {point}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-
-      <section className="border-t border-border bg-card px-4 py-20 text-center sm:px-6 lg:px-8">
-        <p className="text-sm font-medium text-primary">Ready to operate with confidence?</p>
-        <h2 className="mx-auto mt-3 max-w-3xl text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">
-          Make every home easier to care for, govern, and grow.
-        </h2>
-        <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
-          <Button href={ROUTES.SIGNUP} size="lg" rounded="lg">
-            Get started
-          </Button>
-          <Button href={ROUTES.LOGIN} variant="outline" size="lg" rounded="lg">
-            Sign in to your workspace
-          </Button>
-        </div>
-      </section>
-
+        <ClosingBand
+          title="Make every home easier to care for and govern"
+          actions={
+            <>
+              <CtaLink href={ROUTES.SIGNUP} variant="light" arrow>
+                Get started
+              </CtaLink>
+              <CtaLink href={ROUTES.LOGIN} variant="outline-light">
+                Sign in
+              </CtaLink>
+            </>
+          }
+        />
+      </main>
       <Footer />
-    </main>
-  );
-}
-
-function Metric({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: string;
-  tone: 'blue' | 'green' | 'amber' | 'violet';
-}) {
-  const variants: Record<typeof tone, BadgeVariant> = {
-    blue: 'primary',
-    green: 'success',
-    amber: 'warning',
-    violet: 'info',
-  };
-
-  return (
-    <div className="rounded-2xl border border-border bg-background p-4">
-      <Badge variant={variants[tone]}>{value}</Badge>
-      <p className="mt-3 text-sm font-medium text-foreground">{label}</p>
-    </div>
+    </>
   );
 }
