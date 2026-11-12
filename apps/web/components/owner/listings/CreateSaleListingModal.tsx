@@ -19,6 +19,14 @@ import {
   Textarea,
 } from '@sureground/ui';
 import { MarketPriceInsights } from '@/components/owner/listings/MarketPriceInsights';
+import {
+  CommercialDetailsFields,
+  EMPTY_COMMERCIAL,
+  commercialError,
+  commercialToCreatePayload,
+  type CommercialValues,
+} from '@/components/landlord/listings/CommercialDetailsFields';
+import { isCommercialType } from '@/types/landlord';
 import type { OwnerProperty, SaleListing } from '@/types/owner';
 import { PaginatedSelect } from '@/components/ui/PaginatedSelect';
 import { unwrap } from '@/lib/apiHelpers';
@@ -108,6 +116,7 @@ export const CreateSaleListingModal = ({
   const [mediaError, setMediaError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
+  const [commercial, setCommercial] = useState<CommercialValues>(EMPTY_COMMERCIAL);
   const queryClient = useQueryClient();
 
   const { data: propertiesPage, isLoading: isPropertiesLoading } = useQuery({
@@ -206,12 +215,16 @@ export const CreateSaleListingModal = ({
     setMedia(NO_MEDIA);
     setMediaError(null);
     setCreateError(null);
+    setCommercial(EMPTY_COMMERCIAL);
     onClose();
   };
 
   const canProceedFromStep1 =
     form.propertyId && form.listingTitle.trim() && Number(form.askingPrice) > 0;
   const canProceedFromStep2 = (!!media.cover || !!existingCover) && uploading === null;
+  const isCommercial = isCommercialType(propertyForForm?.propertyType);
+  const commercialProblem = isCommercial ? commercialError(commercial) : null;
+  const commercialPayload = isCommercial ? commercialToCreatePayload(commercial) : undefined;
 
   const buildListing = (status: SaleListing['status']): Omit<SaleListing, 'id' | 'createdAt'> => ({
     propertyId: form.propertyId,
@@ -224,6 +237,8 @@ export const CreateSaleListingModal = ({
     bedrooms: form.bedrooms ? Number(form.bedrooms) : undefined,
     bathrooms: form.bathrooms ? Number(form.bathrooms) : undefined,
     features: form.features,
+    // Sent only for a commercial property: the API refuses the block on any other type.
+    commercial: commercialPayload,
     status,
   });
 
@@ -490,6 +505,16 @@ export const CreateSaleListingModal = ({
                   </div>
                 ))}
               </div>
+              {isCommercial && (
+                <div className="mt-5 space-y-3 border-t border-border pt-4">
+                  <CommercialDetailsFields
+                    value={commercial}
+                    onChange={setCommercial}
+                    deal="sale"
+                  />
+                  {commercialProblem && <Alert variant="warning">{commercialProblem}</Alert>}
+                </div>
+              )}
             </div>
           )}
 
@@ -517,6 +542,16 @@ export const CreateSaleListingModal = ({
                   label="Features"
                   value={form.features.length ? `${form.features.length} selected` : 'None'}
                 />
+                {isCommercial && (
+                  <SummaryRow
+                    label="Commercial details"
+                    value={
+                      commercialPayload
+                        ? `${Object.keys(commercialPayload).length} stated`
+                        : 'None stated'
+                    }
+                  />
+                )}
               </div>
               {createError && <Alert variant="danger">{createError}</Alert>}
               <p className="text-xs text-muted-foreground">
@@ -542,7 +577,8 @@ export const CreateSaleListingModal = ({
               disabled={
                 verifiedProperties.length === 0 ||
                 (step === 0 && !canProceedFromStep1) ||
-                (step === 1 && !canProceedFromStep2)
+                (step === 1 && !canProceedFromStep2) ||
+                (step === 2 && !!commercialProblem)
               }
             >
               Continue

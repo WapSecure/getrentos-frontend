@@ -278,6 +278,72 @@ export const formatDistance = (metres: number): string => {
 export const describeDistance = (metres: number | null): string =>
   metres == null ? 'no location' : metres === 0 ? 'on the land' : `${formatDistance(metres)} away`;
 
+/** Mirrors the API: a capture further than this from the place is flagged for Sureground's review. */
+export const INSPECTION_ON_SITE_TOLERANCE_M = 100;
+
+export type PhotoLocationLevel = 'all' | 'most' | 'some' | 'none' | 'empty';
+
+export interface PhotoLocationSummary {
+  level: PhotoLocationLevel;
+  /** Captures with a location within the tolerance. */
+  onSite: number;
+  /** Captures in all. */
+  total: number;
+  /** Captures that carried no location. */
+  unlocated: number;
+  tone: LandWatchTone;
+  /** A short label, e.g. "All 12 photos on site". */
+  label: string;
+}
+
+/**
+ * How many of a report's photos were taken where the place is, from each capture's distance. It
+ * describes where the photos were taken; it does not judge the property.
+ */
+export const photoLocationSummary = (
+  evidence: readonly Pick<LandInspectionEvidence, 'distanceM' | 'mimeType'>[]
+): PhotoLocationSummary => {
+  const photos = evidence.filter((e) => e.mimeType.startsWith('image/'));
+  const total = photos.length;
+  const onSite = photos.filter(
+    (e) => e.distanceM != null && e.distanceM <= INSPECTION_ON_SITE_TOLERANCE_M
+  ).length;
+  const unlocated = photos.filter((e) => e.distanceM == null).length;
+  const noun = (n: number) => (n === 1 ? 'photo' : 'photos');
+  if (total === 0) {
+    return { level: 'empty', onSite, total, unlocated, tone: 'neutral', label: 'No photos yet' };
+  }
+  if (onSite === total) {
+    return {
+      level: 'all',
+      onSite,
+      total,
+      unlocated,
+      tone: 'success',
+      label: total === 1 ? 'The photo was taken on site' : `All ${total} photos taken on site`,
+    };
+  }
+  if (onSite === 0) {
+    return {
+      level: 'none',
+      onSite,
+      total,
+      unlocated,
+      tone: 'warning',
+      label: `None of the ${total} ${noun(total)} placed on site`,
+    };
+  }
+  const level = onSite / total >= 0.8 ? 'most' : 'some';
+  return {
+    level,
+    onSite,
+    total,
+    unlocated,
+    tone: level === 'most' ? 'info' : 'warning',
+    label: `${onSite} of ${total} photos taken on site`,
+  };
+};
+
 export type LandWatchJobKind =
   | 'FENCING'
   | 'CLEARING'

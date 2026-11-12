@@ -82,6 +82,36 @@ export interface ShowroomTrustChain {
   totalCount: number;
 }
 
+export type CommercialPermittedUse = 'SHOP' | 'OFFICE' | 'WAREHOUSE' | 'MIXED' | 'OTHER';
+export type CommercialFitOutCondition = 'SHELL' | 'SEMI_FITTED' | 'FITTED';
+
+/**
+ * What the lister states about a commercial property. An absent field was not stated. Sureground
+ * never computes VAT, a rent review or an escalation from these, and never measures the power hours.
+ */
+export interface CommercialDetails {
+  permittedUse?: CommercialPermittedUse;
+  permittedUseNote?: string;
+  lettableAreaSqm?: number;
+  fitOutCondition?: CommercialFitOutCondition;
+  parkingSpaces?: number;
+  /** Hours a day of public power, as the lister states it. */
+  publicSupplyHoursStated?: number;
+  generator?: boolean;
+  generatorNote?: string;
+  solar?: boolean;
+  loadingAccess?: boolean;
+  loadingAccessNote?: string;
+  /** Whole years, ascending. */
+  leaseTermOptionsYears?: number[];
+  /** As written in the lease. */
+  rentReviewNote?: string;
+  escalationNote?: string;
+  /** The rate the landlord states, e.g. 7.5. Show as stated; never apply it to an amount. */
+  vatStatedPct?: number;
+  vatIncluded?: boolean;
+}
+
 export interface ShowroomListing {
   id: string;
   market: ShowroomMarket;
@@ -108,6 +138,8 @@ export interface ShowroomListing {
   verificationSummary?: VerificationSummary;
   /** Rent and sale only; undefined where the API sends no chain. */
   trustChain?: ShowroomTrustChain;
+  /** Commercial properties only, and only what the lister stated. */
+  commercial?: CommercialDetails;
 }
 
 export interface PublicRentalDto {
@@ -145,6 +177,8 @@ export interface PublicRentalDto {
   petsAllowed?: boolean;
   propertyType?: string;
   videoTourFilmedOnSite?: boolean;
+  /** Commercial properties only. Read through `commercialDetailsOf`, never trusted as is. */
+  commercial?: unknown;
 }
 
 export interface PublicSaleDto {
@@ -167,6 +201,8 @@ export interface PublicSaleDto {
   underOffer?: boolean;
   /** Detail route only (DIA-11). Read through `verificationSummaryOf`, never trusted as is. */
   verificationSummary?: unknown;
+  /** Commercial properties only. Read through `commercialDetailsOf`, never trusted as is. */
+  commercial?: unknown;
 }
 
 export interface PublicLandDto {

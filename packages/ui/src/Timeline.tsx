@@ -81,7 +81,7 @@ function Glyph({
   if (item.state === 'skipped') return <Minus className={size} />;
   if (variant === 'feed') return <span className="h-2 w-2 rounded-full bg-current" />;
   return (
-    <span className={cn('font-semibold tabular-nums', small ? 'text-[10px]' : 'text-xs')}>
+    <span className={cn('font-semibold tabular-nums', small ? 'text-2xs' : 'text-xs')}>
       {index + 1}
     </span>
   );

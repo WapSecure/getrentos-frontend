@@ -53,6 +53,8 @@ export interface SiteTour {
   durationMinutes: number;
   meetingUrl?: string;
   propertyType?: string;
+  /** The listing's cover photo, once the API sends it; until then the list shows the place icon. */
+  coverImageUrl?: string | null;
   videoCall?: 'BUILT_IN' | 'LINK' | null;
   recording?: SiteTourRecording;
   hostNotes?: string;

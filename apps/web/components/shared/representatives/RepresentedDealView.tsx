@@ -16,10 +16,11 @@ import {
 import { unwrap } from '@/lib/apiHelpers';
 import { LAND_MILESTONE_STATUS_LABELS, type LandMilestone } from '@/types/landBuyer';
 import {
-  landRepresentativeKeys,
-  landRepresentativeService,
+  representativeKeys,
+  representativeService,
   type LandDealRef,
-} from '@/services/landRepresentativeService';
+} from '@/services/representativeService';
+import { PURCHASE_ROUTES } from '@/lib/constants/purchaseRoutes';
 
 export const RepresentedDealView = ({ deal }: { deal: LandDealRef }) => {
   const queryClient = useQueryClient();
@@ -29,31 +30,31 @@ export const RepresentedDealView = ({ deal }: { deal: LandDealRef }) => {
   );
   const isPurchase = 'purchaseId' in deal;
   const dealKey = isPurchase
-    ? landRepresentativeKeys.purchase(deal.purchaseId)
-    : landRepresentativeKeys.resale(deal.transactionId);
+    ? representativeKeys.purchase(deal.purchaseId)
+    : representativeKeys.resale(deal.transactionId);
 
   const detail = useQuery({
     queryKey: dealKey,
     queryFn: async () => {
       if ('purchaseId' in deal) {
-        const purchase = await unwrap(landRepresentativeService.purchase(deal.purchaseId));
+        const purchase = await unwrap(representativeService.purchase(deal.purchaseId));
         return {
           title: `${purchase.layoutName}, plot ${purchase.plotNumber}`,
           reference: purchase.reference,
           milestones: purchase.milestones,
         };
       }
-      const milestones = await unwrap(landRepresentativeService.resale(deal.transactionId));
+      const milestones = await unwrap(representativeService.resale(deal.transactionId));
       return { title: 'Land resale', reference: undefined, milestones };
     },
   });
   const rule = useQuery({
-    queryKey: [...landRepresentativeKeys.coApproval(deal), 'representative'],
-    queryFn: () => unwrap(landRepresentativeService.representativeCoApproval(deal)),
+    queryKey: [...representativeKeys.coApproval(deal), 'representative'],
+    queryFn: () => unwrap(representativeService.representativeCoApproval(deal)),
     retry: false,
   });
   const approve = useMutation({
-    mutationFn: (key: string) => unwrap(landRepresentativeService.approveStep(deal, key)),
+    mutationFn: (key: string) => unwrap(representativeService.approveStep(deal, key)),
     onSuccess: () => {
       setApproving(null);
       void queryClient.invalidateQueries({ queryKey: dealKey });
@@ -88,7 +89,7 @@ export const RepresentedDealView = ({ deal }: { deal: LandDealRef }) => {
     <div className="space-y-6">
       <PageHeader
         breadcrumbs={[
-          { label: 'Buyers I represent', href: '/land/representing' },
+          { label: 'Buyers I represent', href: PURCHASE_ROUTES.REPRESENTING },
           { label: detail.data.title },
         ]}
         title={detail.data.title}

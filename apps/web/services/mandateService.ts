@@ -1,4 +1,5 @@
 import { authFetch, safeCall, type ApiResponse } from '@/lib/apiHelpers';
+import type { SpendBands } from '@/types/managed';
 
 /**
  * `managing()` is the client switcher: every mandate the caller manages, including ones not yet
@@ -104,6 +105,8 @@ export interface ManagementMandateDto {
   managerName?: string | null;
   /** The most a manager may spend without owner sign-off (whole naira); null = no cap. */
   maintenanceApprovalCap: number | null;
+  /** Spending bands (M4). Absent until the API sends them; fall back to `maintenanceApprovalCap`. */
+  bands?: SpendBands | null;
   scope: MandateScope[];
   capabilities: MandateCapabilities;
   permissions: MandateViewerPermissions;

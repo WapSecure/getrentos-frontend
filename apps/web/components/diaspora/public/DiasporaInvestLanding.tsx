@@ -1,13 +1,25 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { ArrowRight, CheckCircle2, Info, XCircle } from '@sureground/icons';
 import {
+  ArrowRight,
+  BadgeCheck,
+  CheckCircle2,
+  Clock,
+  Info,
+  Lock,
+  XCircle,
+} from '@sureground/icons';
+import {
+  Badge,
   Card,
   CardContent,
+  CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
   DescriptionList,
   DisclosureList,
+  Timeline,
 } from '@sureground/ui';
 import { CTA } from '@/components/sections/CTA';
 import {
@@ -15,6 +27,7 @@ import {
   MarketingCard,
   MarketingIconTile,
   SectionHeading,
+  TrustStrip,
 } from '@/components/sections/primitives';
 import { ROUTES } from '@/lib/constants/auth';
 import { signInThen } from '@/lib/constants/landBuyerRoutes';
@@ -22,13 +35,13 @@ import { DIASPORA_ROUTES } from '@/lib/constants/diasporaRoutes';
 import {
   CHECKED,
   FAQS,
+  JOURNEY,
   LIMITS,
   OFFERINGS,
   PROTECTION_DOES,
   PROTECTION_DOES_NOT,
   QUESTIONS,
   RISKS,
-  STEPS,
   TRANSPARENCY,
   type IconCopy,
 } from './content';
@@ -75,34 +88,94 @@ const Section = ({
   </section>
 );
 
+const PROOF = [
+  { icon: BadgeCheck, text: 'Ownership proof reviewed before listing' },
+  { icon: Lock, text: 'Sureground Payment Protection' },
+  { icon: Clock, text: 'Your time next to Lagos time' },
+];
+
+// Built from the same Card and Timeline the workspace uses, and labelled as an example.
+const PREVIEW_STEPS = [
+  {
+    id: 'proof',
+    title: 'Ownership proof reviewed',
+    description: 'By a Sureground reviewer',
+    state: 'done',
+  },
+  {
+    id: 'tour',
+    title: 'Video tour with the seller',
+    description: '10:00 Lagos · 09:00 London',
+    state: 'done',
+  },
+  {
+    id: 'inspection',
+    title: 'Independent inspection',
+    description: 'Photos taken on site, checked by Sureground',
+    state: 'done',
+  },
+  {
+    id: 'deposit',
+    title: 'Deposit held by Payment Protection',
+    description: 'Released when you confirm',
+    state: 'current',
+  },
+  {
+    id: 'managed',
+    title: 'Sureground Managed',
+    description: 'Optional, after completion',
+    state: 'pending',
+  },
+] as const;
+
+const ProductPreview = () => (
+  <Card className="shadow-sm">
+    <CardHeader action={<Badge variant="neutral">Example</Badge>}>
+      <p className="text-xs font-medium text-primary">Investor workspace</p>
+      <CardTitle as="p">A home purchase, step by step</CardTitle>
+      <CardDescription>Every step dated, with who checked it.</CardDescription>
+    </CardHeader>
+    <CardContent>
+      <Timeline items={PREVIEW_STEPS} aria-label="Example purchase steps" />
+    </CardContent>
+    <CardFooter className="justify-start text-xs text-muted-foreground">
+      An illustration of the workspace, not a real property.
+    </CardFooter>
+  </Card>
+);
+
 const Hero = () => (
   <section className="px-4 pb-12 pt-32 md:pt-40">
-    <div className="mx-auto max-w-4xl text-center">
-      <p className="mb-5 text-sm font-semibold text-primary">Sureground Diaspora Invest</p>
-      <h1 className="text-4xl font-bold tracking-[-0.03em] text-foreground sm:text-5xl lg:text-6xl">
-        Invest back home, with evidence
-      </h1>
-      <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-        Find, buy, own and manage property in Nigeria from wherever you live. Checks are carried out
-        by named professionals, your payments are protected, and every step is recorded where you
-        can see it.
-      </p>
-      <div className="mt-9 flex flex-col items-center justify-center gap-4 sm:flex-row">
-        <LinkButton href={ROUTES.SIGNUP} className="group">
-          Create your account
-          <ArrowRight
-            className="h-4 w-4 transition-transform group-hover:translate-x-1"
-            aria-hidden="true"
-          />
-        </LinkButton>
-        <LinkButton href={WORKSPACE_SIGN_IN} variant="secondary">
-          Sign in to your workspace
-        </LinkButton>
+    <div className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
+      <div className="text-center lg:text-left">
+        <p className="mb-5 text-sm font-semibold text-primary">Sureground Diaspora Invest</p>
+        <h1 className="text-4xl font-bold tracking-[-0.03em] text-foreground sm:text-5xl lg:text-6xl">
+          Invest back home, with evidence
+        </h1>
+        <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground lg:mx-0">
+          Find, buy, own and manage property in Nigeria from wherever you live. Named professionals
+          carry out the checks, your payments are protected, and every step is recorded where you
+          can see it.
+        </p>
+        <div className="mt-9 flex flex-col items-center gap-4 sm:flex-row sm:justify-center lg:justify-start">
+          <LinkButton href={ROUTES.SIGNUP} className="group">
+            Create your account
+            <ArrowRight
+              className="h-4 w-4 transition-transform group-hover:translate-x-1"
+              aria-hidden="true"
+            />
+          </LinkButton>
+          <LinkButton href={WORKSPACE_SIGN_IN} variant="secondary">
+            Sign in to your workspace
+          </LinkButton>
+        </div>
+        <TrustStrip items={PROOF} className="mt-8 lg:justify-start" />
+        <p className="mt-6 text-sm text-muted-foreground">
+          Sureground provides property services. It does not give investment advice or promise
+          returns.
+        </p>
       </div>
-      <p className="mx-auto mt-8 max-w-xl text-sm text-muted-foreground">
-        Sureground provides property services. It does not give investment advice or promise
-        returns.
-      </p>
+      <ProductPreview />
     </div>
   </section>
 );
@@ -138,16 +211,23 @@ export const DiasporaInvestLanding = () => (
     <Section id="how-it-works">
       <SectionHeading
         title="How it works"
-        description="From your first sign-in to managing the property."
+        description="Four stages, from your first sign-in to looking after the property."
       />
       <ol className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {STEPS.map((step, index) => (
+        {JOURNEY.map((step, index) => (
           <li key={step.title}>
-            <MarketingCard className="h-full p-6">
-              <p className="mb-3 text-sm font-semibold text-muted-foreground">Step {index + 1}</p>
-              <MarketingIconTile icon={step.icon} className="mb-3" />
-              <h3 className="mb-2 text-lg font-semibold text-foreground">{step.title}</h3>
-              <p className="text-sm leading-relaxed text-muted-foreground">{step.body}</p>
+            <MarketingCard className="flex h-full flex-col p-6">
+              <div className="mb-5 flex items-center justify-between">
+                <MarketingIconTile icon={step.icon} />
+                <span className="text-sm font-semibold tabular-nums text-muted-foreground">
+                  {String(index + 1).padStart(2, '0')}
+                </span>
+              </div>
+              <h3 className="text-lg font-semibold text-foreground">{step.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{step.body}</p>
+              <div className="mt-5 border-t border-border pt-4">
+                <PointList points={step.points} tone="yes" />
+              </div>
             </MarketingCard>
           </li>
         ))}

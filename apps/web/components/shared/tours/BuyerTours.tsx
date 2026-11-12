@@ -4,24 +4,26 @@ import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Button,
-  EmptyState,
+  Field,
   Input,
   ListSkeleton,
   PageErrorState,
   Textarea,
   Toast,
 } from '@sureground/ui';
-import { Video } from '@sureground/icons';
+import { CalendarClock } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
+import { tourNextStep } from '@/lib/siteTours';
 import { siteTourKeys, siteTourService } from '@/services/siteTourService';
 import type { SiteTour, TourScope } from '@/types/siteTour';
 import { StarRating } from '@/components/landlord/vendors/StarRating';
 import { TourCard } from './TourCard';
+import { TourList } from './TourList';
 import { TourRecordingConsent } from './TourRecordingConsent';
 
 type Notify = (message: string, variant?: 'success' | 'error') => void;
 
-const BuyerActions = ({
+const BuyerTourRow = ({
   tour,
   scope,
   notify,
@@ -79,120 +81,143 @@ const BuyerActions = ({
   const started = tour.scheduledAt
     ? now > new Date(tour.scheduledAt).getTime() + 15 * 60_000
     : false;
+  const back = () => {
+    setMode('none');
+    setText('');
+  };
+  const fieldId = `tour-${tour.id}-${mode}`;
 
-  return (
-    <div className="mt-3 space-y-3">
-      {tour.status === 'REQUESTED' && (
-        <p className="text-sm text-muted-foreground">Waiting for the seller to offer times.</p>
-      )}
-      {tour.status === 'PROPOSED' && (
-        <div className="space-y-2">
-          <p className="text-sm font-medium text-foreground">Pick a time (your time zone):</p>
-          <div className="flex flex-wrap gap-2">
-            {tour.proposedSlots.map((slot) => (
-              <Button
-                key={slot.at}
-                size="sm"
-                variant="outline"
-                isLoading={choose.isPending && choose.variables === slot.at}
-                disabled={choose.isPending}
-                onClick={() => choose.mutate(slot.at)}
-              >
-                {slot.local}
-              </Button>
-            ))}
-          </div>
-        </div>
-      )}
-      {mode === 'other' || mode === 'cancel' ? (
-        <div className="space-y-2">
-          <Input
-            value={text}
-            maxLength={500}
-            onChange={(e) => setText(e.target.value)}
-            aria-label={mode === 'other' ? 'Times that would suit you' : 'Why you are cancelling'}
-            placeholder={mode === 'other' ? 'Times that would suit you' : 'Why you are cancelling'}
-          />
-          <div className="flex gap-2">
-            <Button
-              size="sm"
-              variant={mode === 'cancel' ? 'danger' : 'primary'}
-              disabled={text.trim().length < 3}
-              isLoading={other.isPending || cancel.isPending}
-              onClick={() => (mode === 'other' ? other.mutate() : cancel.mutate())}
-            >
-              {mode === 'other' ? 'Ask for other times' : 'Cancel tour'}
-            </Button>
-            <Button size="sm" variant="ghost" onClick={() => setMode('none')}>
-              Back
-            </Button>
-          </div>
-        </div>
-      ) : mode === 'rate' ? (
-        <div className="space-y-2">
-          <StarRating value={rating} onRate={setRating} size="md" label="Your rating" />
+  const body =
+    mode === 'other' || mode === 'cancel' ? (
+      <Field
+        label={mode === 'other' ? 'Times that would suit you' : 'Why you are cancelling'}
+        htmlFor={fieldId}
+      >
+        <Input
+          id={fieldId}
+          value={text}
+          maxLength={500}
+          onChange={(e) => setText(e.target.value)}
+          placeholder={
+            mode === 'other' ? 'For example, weekday mornings Lagos time' : 'A short reason'
+          }
+        />
+      </Field>
+    ) : mode === 'rate' ? (
+      <div className="space-y-3">
+        <StarRating value={rating} onRate={setRating} size="md" label="Your rating" />
+        <Field label="Comment (optional)" htmlFor={fieldId}>
           <Textarea
+            id={fieldId}
             rows={2}
             maxLength={2000}
             value={text}
             onChange={(e) => setText(e.target.value)}
-            aria-label="Comment"
-            placeholder="Anything others should know (optional)"
+            placeholder="Anything others should know"
           />
-          <Button
-            size="sm"
-            disabled={rating === 0}
-            isLoading={rate.isPending}
-            onClick={() => rate.mutate()}
-          >
-            Send rating
-          </Button>
-        </div>
-      ) : (
+        </Field>
+      </div>
+    ) : tour.status === 'PROPOSED' ? (
+      <fieldset className="space-y-2">
+        <legend className="text-sm font-medium text-foreground">
+          Pick a time (shown in your time zone)
+        </legend>
         <div className="flex flex-wrap gap-2">
-          {tour.status === 'PROPOSED' && (
-            <Button size="sm" variant="ghost" onClick={() => setMode('other')}>
-              None of these work
-            </Button>
-          )}
-          {tour.status === 'SCHEDULED' && started && (
+          {tour.proposedSlots.map((slot) => (
             <Button
-              size="sm"
-              variant="ghost"
-              isLoading={noShow.isPending}
-              onClick={() => noShow.mutate()}
+              key={slot.at}
+              variant="outline"
+              icon={<CalendarClock className="h-4 w-4" aria-hidden="true" />}
+              isLoading={choose.isPending && choose.variables === slot.at}
+              disabled={choose.isPending}
+              onClick={() => choose.mutate(slot.at)}
+              aria-label={`Book ${slot.local}`}
             >
-              The seller did not join
+              {slot.local}
             </Button>
-          )}
-          {tour.status === 'COMPLETED' && tour.buyerRating && (
-            <span className="inline-flex items-center gap-2 text-sm text-muted-foreground">
-              You rated it <StarRating value={tour.buyerRating} label="Your rating" />
-            </span>
-          )}
-          {tour.status === 'COMPLETED' && !tour.buyerRating && (
-            <Button size="sm" variant="outline" onClick={() => setMode('rate')}>
-              Rate this tour
-            </Button>
-          )}
-          {open && (
-            <Button size="sm" variant="ghost" onClick={() => setMode('cancel')}>
-              Cancel
-            </Button>
-          )}
+          ))}
         </div>
-      )}
-      <TourRecordingConsent
-        tour={tour}
-        scope={scope}
-        side="buyer"
-        onUpdated={update}
-        onError={fail}
-      />
+      </fieldset>
+    ) : null;
+
+  const actions =
+    mode === 'other' || mode === 'cancel' ? (
+      <>
+        <Button variant="ghost" onClick={back}>
+          Back
+        </Button>
+        <Button
+          variant={mode === 'cancel' ? 'danger' : 'primary'}
+          disabled={text.trim().length < 3}
+          isLoading={other.isPending || cancel.isPending}
+          onClick={() => (mode === 'other' ? other.mutate() : cancel.mutate())}
+        >
+          {mode === 'other' ? 'Ask for other times' : 'Cancel tour'}
+        </Button>
+      </>
+    ) : mode === 'rate' ? (
+      <>
+        <Button variant="ghost" onClick={back}>
+          Back
+        </Button>
+        <Button disabled={rating === 0} isLoading={rate.isPending} onClick={() => rate.mutate()}>
+          Send rating
+        </Button>
+      </>
+    ) : (
+      <>
+        {open && (
+          <Button
+            variant="danger-ghost"
+            onClick={() => setMode('cancel')}
+            aria-label={`Cancel the tour of ${tour.land}`}
+          >
+            Cancel
+          </Button>
+        )}
+        {tour.status === 'PROPOSED' && (
+          <Button variant="outline" onClick={() => setMode('other')}>
+            None of these work
+          </Button>
+        )}
+        {tour.status === 'SCHEDULED' && started && (
+          <Button variant="outline" isLoading={noShow.isPending} onClick={() => noShow.mutate()}>
+            The seller did not join
+          </Button>
+        )}
+        {tour.status === 'COMPLETED' && tour.buyerRating && (
+          <span className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+            You rated it <StarRating value={tour.buyerRating} label="Your rating" />
+          </span>
+        )}
+        {tour.status === 'COMPLETED' && !tour.buyerRating && (
+          <Button onClick={() => setMode('rate')}>Rate this tour</Button>
+        )}
+      </>
+    );
+
+  return (
+    <TourCard
+      tour={tour}
+      who={`Host: ${tour.hostName}`}
+      join={() => siteTourService.join(scope, 'buyer', tour.id)}
+      nextStep={tourNextStep(tour, 'buyer', started)}
+      aside={
+        <TourRecordingConsent
+          tour={tour}
+          scope={scope}
+          side="buyer"
+          onUpdated={update}
+          onError={fail}
+        />
+      }
+      actions={actions}
+    >
+      {body}
       {['SCHEDULED', 'COMPLETED'].includes(tour.status) && (
-        <p className="text-xs text-muted-foreground">{tour.disclaimer}</p>
+        <p className="text-xs leading-5 text-muted-foreground">{tour.disclaimer}</p>
       )}
-    </div>
+    </TourCard>
   );
 };
 
@@ -217,33 +242,19 @@ export const BuyerTours = ({ scope }: { scope: TourScope }) => {
       />
     );
   }
-  const tours = list.data ?? [];
   return (
     <>
-      {tours.length === 0 ? (
-        <EmptyState
-          icon={Video}
-          title="No video tours yet"
-          description={
-            scope === 'land'
-              ? 'Ask for one from a land listing or an estate plot.'
-              : 'Ask for one from a home for sale, a land listing or an estate plot.'
-          }
-        />
-      ) : (
-        <ul className="space-y-4">
-          {tours.map((tour) => (
-            <TourCard
-              key={tour.id}
-              tour={tour}
-              who={`Host: ${tour.hostName}`}
-              join={() => siteTourService.join(scope, 'buyer', tour.id)}
-            >
-              <BuyerActions tour={tour} scope={scope} notify={notify} />
-            </TourCard>
-          ))}
-        </ul>
-      )}
+      <TourList
+        tours={list.data ?? []}
+        viewer="buyer"
+        empty={{
+          title: 'No video tours yet',
+          description: 'Book one from any listing. The seller offers times in your time zone.',
+        }}
+        renderTour={(tour) => (
+          <BuyerTourRow key={tour.id} tour={tour} scope={scope} notify={notify} />
+        )}
+      />
       {toast && (
         <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}

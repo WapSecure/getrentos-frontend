@@ -11,6 +11,7 @@ export function StickyListingCta({
   market,
   id,
   returnPath,
+  commercial,
 }: {
   watchId: string;
   price: string;
@@ -18,6 +19,7 @@ export function StickyListingCta({
   market: PublicDetailMarket;
   id: string;
   returnPath: string;
+  commercial?: boolean;
 }) {
   const [show, setShow] = useState(false);
 
@@ -44,7 +46,13 @@ export function StickyListingCta({
           )}
         </p>
         <div className="w-auto shrink-0 sm:w-64 [&>a]:px-5">
-          <ListingCallToAction market={market} id={id} returnPath={returnPath} compact />
+          <ListingCallToAction
+            market={market}
+            id={id}
+            returnPath={returnPath}
+            commercial={commercial}
+            compact
+          />
         </div>
       </div>
     </div>

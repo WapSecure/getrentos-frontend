@@ -1,4 +1,4 @@
-import type { MediaRoom } from '@sureground/shared/showroom';
+import type { CommercialDetails, MediaRoom } from '@sureground/shared/showroom';
 import type { ChargeCategory } from '@/lib/chargeCategory';
 import type { SharedCreditCheck } from '@/types/credit-check';
 import type {
@@ -6,6 +6,9 @@ import type {
   MaintenancePriority,
   MaintenanceRequestStatus,
 } from './maintenance';
+
+/** Commercial details are accepted only on these; the API refuses them elsewhere. */
+export const isCommercialType = (type?: string) => type?.toUpperCase() === 'COMMERCIAL';
 
 export type PropertyType = 'apartment' | 'duplex' | 'condo' | 'commercial' | 'shared_apartment';
 export type VerificationStatus = 'unverified' | 'pending' | 'verified' | 'rejected';
@@ -108,6 +111,8 @@ export interface Unit {
   id: string;
   propertyId: string;
   propertyName: string;
+  /** The API enum (e.g. 'COMMERCIAL'); read through `isCommercialType`. */
+  propertyType?: string;
   unitName: string;
   bedrooms: number;
   bathrooms: number;
@@ -144,6 +149,10 @@ export interface Listing {
   serviceCharge?: number;
   agencyFee?: number;
   legalFee?: number;
+  /** The API enum (e.g. 'COMMERCIAL'); read through `isCommercialType`. */
+  propertyType?: string;
+  /** Commercial properties only: what the landlord stated. */
+  commercial?: CommercialDetails;
   amenities: string[];
   availabilityDate: string;
   allowPets: boolean;

@@ -5,13 +5,22 @@ import {
   MapPin,
   BedDouble,
   Bath,
+  Building2,
   User,
   FileEdit,
   ShieldAlert,
   Pause,
   XCircle,
 } from '@sureground/icons';
-import { Badge, Dialog, DialogContent, DialogTitle, type BadgeVariant } from '@sureground/ui';
+import {
+  Badge,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  type BadgeVariant,
+} from '@sureground/ui';
+import { isCommercialType } from '@/types/landlord';
 import { formatCurrency } from '@/lib/format';
 import type { RealtorListing, RealtorListingStatus } from '@/types/realtor';
 
@@ -29,11 +38,14 @@ const statusConfig: Record<
 interface RealtorListingPreviewModalProps {
   listing: RealtorListing | null;
   onClose: () => void;
+  /** Commercial properties only: opens the commercial details editor. */
+  onEditCommercial?: (listing: RealtorListing) => void;
 }
 
 export const RealtorListingPreviewModal = ({
   listing,
   onClose,
+  onEditCommercial,
 }: RealtorListingPreviewModalProps) => {
   return (
     <Dialog open={!!listing} onOpenChange={(open) => !open && onClose()}>
@@ -97,6 +109,17 @@ export const RealtorListingPreviewModal = ({
                 <p className="mt-3 text-xs text-muted-foreground">
                   Waiting for your client to publish it from their Listings page.
                 </p>
+              )}
+              {onEditCommercial && isCommercialType(listing.propertyType) && (
+                <Button
+                  variant="outline"
+                  fullWidth
+                  className="mt-4"
+                  onClick={() => onEditCommercial(listing)}
+                  icon={<Building2 className="h-4 w-4" />}
+                >
+                  {listing.commercial ? 'Edit commercial details' : 'Add commercial details'}
+                </Button>
               )}
             </div>
           </>

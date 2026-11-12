@@ -6,6 +6,7 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 import { Plus, Megaphone } from '@sureground/icons';
 import { RealtorListingCard } from '@/components/realtor/listings/RealtorListingCard';
 import { RealtorListingPreviewModal } from '@/components/realtor/listings/RealtorListingPreviewModal';
+import { CommercialDetailsDialog } from '@/components/landlord/listings/EditCommercialDetailsDialog';
 import {
   CreateListingModal,
   REALTOR_CREATE_LISTING_DRAFT_KEY,
@@ -45,6 +46,7 @@ export default function RealtorListingsPage() {
     hasSessionDraft(REALTOR_CREATE_LISTING_DRAFT_KEY)
   );
   const [previewListing, setPreviewListing] = useState<RealtorListing | null>(null);
+  const [commercialListing, setCommercialListing] = useState<RealtorListing | null>(null);
   const queryClient = useQueryClient();
   const listingStatus =
     filter === 'all'
@@ -82,6 +84,7 @@ export default function RealtorListingsPage() {
           listingTitle: listing.title,
           listingType: listing.category === 'sale' ? 'SALE' : 'RENT',
           price: listing.price,
+          commercial: listing.commercial,
         })
       ),
     onSuccess: () => {
@@ -252,6 +255,26 @@ export default function RealtorListingsPage() {
       <RealtorListingPreviewModal
         listing={previewListing}
         onClose={() => setPreviewListing(null)}
+        onEditCommercial={(listing) => {
+          setPreviewListing(null);
+          setCommercialListing(listing);
+        }}
+      />
+
+      <CommercialDetailsDialog
+        target={
+          commercialListing
+            ? {
+                id: commercialListing.id,
+                title: commercialListing.title,
+                commercial: commercialListing.commercial,
+              }
+            : null
+        }
+        onClose={() => setCommercialListing(null)}
+        save={(id, details) => realtorService.updateListingCommercial(id, details)}
+        invalidate={realtorKeys.listings}
+        deal={commercialListing?.category === 'sale' ? 'sale' : 'rent'}
       />
     </>
   );

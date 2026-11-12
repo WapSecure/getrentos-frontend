@@ -2,9 +2,8 @@
 
 import { useState } from 'react';
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
-import { Bot, Building2, ShieldCheck, UserRound, Wrench } from '@sureground/icons';
+import { Building2 } from '@sureground/icons';
 import {
-  Badge,
   Button,
   EmptyState,
   ListSkeleton,
@@ -17,38 +16,8 @@ import {
 } from '@sureground/ui';
 
 import { unwrap } from '@/lib/apiHelpers';
-import {
-  ownerActivity,
-  type ActivityActorKind,
-  type ActivityItem,
-} from '@/services/ownerActivityService';
-
-const KIND: Record<
-  ActivityActorKind,
-  { label: string; icon: typeof Wrench; variant: 'info' | 'neutral' | 'success' | 'warning' }
-> = {
-  MANAGER: { label: 'Manager', icon: Wrench, variant: 'info' },
-  SUREGROUND: { label: 'Sureground', icon: ShieldCheck, variant: 'success' },
-  TENANT: { label: 'Tenant', icon: UserRound, variant: 'neutral' },
-  SYSTEM: { label: 'Automatic', icon: Bot, variant: 'neutral' },
-  OTHER: { label: 'Other', icon: UserRound, variant: 'neutral' },
-};
-
-const dayOf = (iso: string) =>
-  new Date(iso).toLocaleDateString('en-NG', {
-    timeZone: 'Africa/Lagos',
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
-
-const timeOf = (iso: string) =>
-  new Date(iso).toLocaleTimeString('en-NG', {
-    timeZone: 'Africa/Lagos',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+import { ownerActivity } from '@/services/ownerActivityService';
+import { ActivityFeed } from './ActivityFeed';
 
 // Leaves out the owner's own actions, and shows nothing beyond who, what, where and when.
 export const PropertyActivityLog = () => {
@@ -66,12 +35,6 @@ export const PropertyActivityLog = () => {
 
   const items = feed.data?.pages.flatMap((p) => p.items) ?? [];
   const properties = feed.data?.pages[0]?.properties ?? [];
-  const days = new Map<string, ActivityItem[]>();
-  for (const item of items) {
-    const day = dayOf(item.at);
-    days.set(day, [...(days.get(day) ?? []), item]);
-  }
-
   return (
     <>
       <PageHeader
@@ -118,36 +81,7 @@ export const PropertyActivityLog = () => {
         />
       ) : (
         <div className="space-y-6">
-          {[...days.entries()].map(([day, list]) => (
-            <section key={day}>
-              <h2 className="mb-2 text-sm font-semibold text-foreground">{day}</h2>
-              <ol className="divide-y divide-border rounded-2xl border border-border bg-card">
-                {list.map((item) => {
-                  const kind = KIND[item.actorKind];
-                  const Icon = kind.icon;
-                  return (
-                    <li key={item.id} className="flex items-start gap-3 p-4">
-                      <div className="shrink-0 rounded-xl bg-muted p-2">
-                        <Icon className="h-4 w-4 text-muted-foreground" aria-hidden />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm text-foreground">
-                          <span className="font-medium">{item.actor}</span> · {item.label}
-                        </p>
-                        <p className="mt-0.5 text-xs text-muted-foreground">
-                          {item.propertyTitle} · {timeOf(item.at)}
-                        </p>
-                      </div>
-                      <div className="flex shrink-0 flex-col items-end gap-1">
-                        <Badge variant={kind.variant}>{kind.label}</Badge>
-                        {item.important && <Badge variant="warning">Important</Badge>}
-                      </div>
-                    </li>
-                  );
-                })}
-              </ol>
-            </section>
-          ))}
+          <ActivityFeed items={items} />
           {feed.hasNextPage && (
             <Button
               variant="outline"

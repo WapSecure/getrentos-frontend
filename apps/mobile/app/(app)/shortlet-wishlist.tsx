@@ -11,10 +11,12 @@ import { useOptimisticMutation } from '@/lib/query/optimistic';
 import { shortletsApi, type ShortletListing } from '@/lib/api/shortlets';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
+import { useCardAnalytics } from '@/hooks/useCardAnalytics';
 
 export default function ShortletWishlist() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
+  const cards = useCardAnalytics('shortlet', 'shortlet_saved');
 
   const query = useQuery({
     queryKey: qk.shortlets.wishlist,
@@ -64,10 +66,14 @@ export default function ShortletWishlist() {
         <FlashList
           data={items}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }: { item: ShortletListing }) => (
+          {...cards.listProps}
+          renderItem={({ item, index }: { item: ShortletListing; index: number }) => (
             <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
               <Pressable
-                onPress={() => router.push(`/(app)/shortlet/${item.id}`)}
+                onPress={() => {
+                  cards.click(item.id, index);
+                  router.push(`/(app)/shortlet/${item.id}`);
+                }}
                 accessibilityRole="button"
                 accessibilityLabel={`View ${item.title}`}
               >

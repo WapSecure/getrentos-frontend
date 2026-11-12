@@ -1,6 +1,8 @@
 import type { ReplyLanguage } from '@/lib/replyLanguage';
 import { authFetch, safeCall, toQuery } from '@/lib/apiHelpers';
 import type { ApiResponse, Paginated } from '@/lib/apiHelpers';
+import type { CommercialDetails } from '@sureground/shared/showroom';
+import type { CommercialUpdatePayload } from '@/lib/commercialDetails';
 import type { AssistantReply, AssistantTurn } from '@/types/assistant';
 import type {
   RealtorClient,
@@ -48,6 +50,8 @@ export interface RealtorAssignedPropertyApi {
   title: string;
   city: string;
   state: string;
+  /** The API enum (e.g. 'COMMERCIAL'); read through `isCommercialType`. */
+  propertyType?: string;
 }
 
 export interface RealtorClientInvitationApi {
@@ -90,6 +94,8 @@ export interface RealtorListingApi {
     bathrooms: number | null;
     owner: { legalName: string | null };
   };
+  /** Commercial properties only: what was stated. */
+  commercial?: CommercialDetails;
 }
 
 export interface RealtorLeadApi {
@@ -261,6 +267,7 @@ export function mapRealtorListing(listing: RealtorListingApi): RealtorListing {
     state: listing.property.state,
     bedrooms: listing.property.bedrooms ?? undefined,
     bathrooms: listing.property.bathrooms ?? undefined,
+    ...(listing.commercial ? { commercial: listing.commercial } : {}),
     status: statuses[listing.status],
     createdAt: listing.createdAt,
   };
@@ -413,8 +420,18 @@ export const realtorService = {
     listingTitle: string;
     listingType: 'RENT' | 'SALE';
     price: number;
+    /** Commercial properties only; the API refuses it on any other type. */
+    commercial?: CommercialDetails;
   }) =>
     safeCall(() => authFetch('/realtor/listings', { method: 'POST', body: JSON.stringify(data) })),
+  /** Only on a listing this realtor drafted, while the property is still assigned. Null clears a field. */
+  updateListingCommercial: (id: string, details: CommercialUpdatePayload) =>
+    safeCall(() =>
+      authFetch<RealtorListingApi>(`/realtor/listings/${id}/commercial`, {
+        method: 'PATCH',
+        body: JSON.stringify(details),
+      })
+    ),
   listLeads: (params: RealtorLeadsParams = {}) =>
     safeCall(() => authFetch<Paginated<RealtorLeadApi>>(`/realtor/leads${toQuery({ ...params })}`)),
   getLead: (id: string) => safeCall(() => authFetch<RealtorLeadApi>(`/realtor/leads/${id}`)),

@@ -269,6 +269,7 @@ export function HomeManagementWorkspace({ role, scopePropertyId }: HomeManagemen
         pageSize={WORK_ORDER_PAGE_SIZE}
         total={workOrdersQuery.data?.total ?? 0}
         onPageChange={setWorkOrderPage}
+        viewerRole={role}
       />
 
       <HomeManagementTimeline propertyId={scopePropertyId} />

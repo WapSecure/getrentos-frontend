@@ -62,6 +62,9 @@ jobs:
       - run: pnpm --filter backoffice lint --max-warnings=0
       - run: pnpm --filter mobile lint --max-warnings=0
       - run: pnpm --filter mobile test:ci
+      # The shared and web unit tests (node --test) were never run anywhere.
+      - run: pnpm --filter @sureground/shared test
+      - run: pnpm --filter web test:unit
       - run: pnpm --filter web build
       - run: pnpm --filter backoffice build
       - run: pnpm --filter mobile exec expo export --platform web --output-dir /tmp/sureground-mobile-web

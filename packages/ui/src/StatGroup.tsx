@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { ChevronRight } from '@sureground/icons';
+import { ChevronRight, type SgIcon } from '@sureground/icons';
 import { cn } from '@sureground/shared';
 
 export interface StatGroupItem {
@@ -13,6 +13,10 @@ export interface StatGroupItem {
   href?: string;
   /** Draws attention to a figure that needs action (overdue rent), without colouring the value. */
   attention?: boolean;
+  /** A small glyph beside the label, as on StatCard, so a row of figures scans at a glance. */
+  icon?: SgIcon;
+  /** Block content under the figure, such as an indicative amount in another currency. */
+  supplement?: ReactNode;
 }
 
 interface StatGroupProps {
@@ -36,20 +40,28 @@ const COLUMNS: Record<number, string> = {
 };
 
 function Figure({ item }: { item: StatGroupItem }) {
+  const Icon = item.icon;
   const body = (
     <>
-      <p className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
-        {item.attention && (
-          <span aria-hidden="true" className="h-1.5 w-1.5 shrink-0 rounded-full bg-destructive" />
+      <div className="flex items-center justify-between gap-3">
+        <p className="flex min-w-0 items-center gap-1.5 text-sm font-medium text-muted-foreground">
+          {item.attention && (
+            <span aria-hidden="true" className="h-1.5 w-1.5 shrink-0 rounded-full bg-destructive" />
+          )}
+          {item.label}
+          {item.href && (
+            <ChevronRight
+              aria-hidden="true"
+              className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60 transition-transform group-hover:translate-x-0.5"
+            />
+          )}
+        </p>
+        {Icon && (
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-secondary">
+            <Icon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+          </span>
         )}
-        {item.label}
-        {item.href && (
-          <ChevronRight
-            aria-hidden="true"
-            className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60 transition-transform group-hover:translate-x-0.5"
-          />
-        )}
-      </p>
+      </div>
       <p className="mt-2 text-[1.625rem] font-semibold leading-tight tracking-[-0.02em] text-foreground tabular-nums">
         {item.value}
       </p>
@@ -70,6 +82,7 @@ function Figure({ item }: { item: StatGroupItem }) {
           {item.subtitle && <span>{item.subtitle}</span>}
         </p>
       )}
+      {item.supplement && <div className="mt-1.5">{item.supplement}</div>}
     </>
   );
   const cell = 'block min-w-0 px-5 py-4';

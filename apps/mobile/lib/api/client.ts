@@ -237,3 +237,119 @@ export async function apiUpload<T>(path: string, form: FormData, _retry = false)
 
   return readJson<T>(res);
 }
+
+export interface UploadProgressOptions {
+  /** Whole percent of the body sent, 0 to 100. At 100 the server may still be working. */
+  onProgress?: (percent: number) => void;
+  signal?: AbortSignal;
+}
+
+function abortError(): Error {
+  const error = new Error('The upload was cancelled.');
+  error.name = 'AbortError';
+  return error;
+}
+
+/** A multipart POST over XHR, which (unlike fetch) reports upload progress. Resolves with a `Response` so `readJson` reads it as it reads fetch results. */
+function sendWithProgress(
+  path: string,
+  form: FormData,
+  headers: Record<string, string>,
+  { onProgress, signal }: UploadProgressOptions
+): Promise<Response> {
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) return reject(abortError());
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `${env.apiUrl}${path}`);
+    // Never set Content-Type: the multipart boundary is set with the body.
+    Object.entries(headers).forEach(([name, value]) => xhr.setRequestHeader(name, value));
+
+    // Times out only when nothing moves for a while, so a slow but steady upload is never cut off.
+    let timedOut = false;
+    let idle: ReturnType<typeof setTimeout> | undefined;
+    const touch = () => {
+      if (idle) clearTimeout(idle);
+      idle = setTimeout(() => {
+        timedOut = true;
+        xhr.abort();
+      }, UPLOAD_TIMEOUT_MS);
+    };
+    const onAbort = () => xhr.abort();
+    signal?.addEventListener('abort', onAbort);
+    const done = () => {
+      if (idle) clearTimeout(idle);
+      signal?.removeEventListener('abort', onAbort);
+    };
+
+    let last = -1;
+    xhr.upload.onprogress = (event) => {
+      touch();
+      if (!event.lengthComputable || !event.total || !onProgress) return;
+      const percent = Math.min(100, Math.floor((event.loaded / event.total) * 100));
+      if (percent !== last) onProgress((last = percent));
+    };
+    xhr.onabort = () => {
+      done();
+      reject(
+        timedOut ? new ApiError('The upload timed out. Check your connection.', 0) : abortError()
+      );
+    };
+    xhr.onerror = () => {
+      done();
+      reject(new ApiError('Network request failed.', 0));
+    };
+    xhr.onload = () => {
+      done();
+      if (xhr.status < 200 || xhr.status > 599) {
+        reject(new ApiError('Network request failed.', 0));
+        return;
+      }
+      const nullBody = xhr.status === 204 || xhr.status === 205;
+      resolve(
+        new Response(nullBody ? null : xhr.responseText, {
+          status: xhr.status,
+          headers: { 'content-type': xhr.getResponseHeader('content-type') ?? '' },
+        })
+      );
+    };
+    touch();
+    xhr.send(form);
+  });
+}
+
+/**
+ * `apiUpload` with progress and cancel. Same headers, errors and one refresh-and-retry on a 401
+ * (progress restarts from 0). A cancel rejects with an `AbortError`.
+ */
+export async function apiUploadWithProgress<T>(
+  path: string,
+  form: FormData,
+  options: UploadProgressOptions = {},
+  _retry = false
+): Promise<T> {
+  await attachQueuedWebFiles(form);
+  const token = hooks.getAccessToken();
+  const deviceId = await getInstallId();
+
+  const res = await sendWithProgress(
+    path,
+    form,
+    {
+      Accept: 'application/json',
+      'x-client-app': env.clientApp,
+      ...(deviceId ? { 'x-device-id': deviceId } : {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    options
+  );
+
+  if (res.status === 401 && !_retry) {
+    const fresh = await hooks.refresh();
+    if (fresh) {
+      options.onProgress?.(0);
+      return apiUploadWithProgress<T>(path, form, options, true);
+    }
+  }
+
+  return readJson<T>(res);
+}
