@@ -117,3 +117,14 @@ Built on the web and in the mobile app from photos already tagged "Floor plan". 
 **Browser check (2026-11-11):** passed. Two test plans ("Ground floor", "First floor") were put on the seed Ikoyi house for the check and then removed; Ikoyi is back as it was. No seed listing keeps a floor plan.
 
 **Follow-up (web viewer):** the level chips sit over the top edge of the plan and partly cover the drawing's own title. Add top padding to the stage when a plan has level chips.
+
+## M8d decisions (product owner, 2026-11-12, on the recommendations)
+
+Step one ("list developments only") is built: backend #200, web and backoffice #169. Checked in the browser with a labelled test development, "Palm Court Residences (test)", by "QA Fixture Agency Ltd (test)": four staff checks passed with step-up, put live, public page shown.
+
+1. **No separate developer business type for now.** A developer signs up through the existing firm onboarding, because the CAC business check is the same. Revisit when developer-only features arrive (milestone-held payments), and then add a "Property developer" type to the firm profile rather than a new onboarding.
+2. **Directors' identities stay a staff check** (each director's ID against the person named and the CAC record), with no automated check per director in this step. Add an automated NIN check per director once the identity provider is wired for third parties; until then the public page says only that staff checked them.
+3. **Title and permit numbers stay off the public page.** The page says what was checked and when; the documents and numbers stay private, because published numbers help forgers and do not help buyers without a registry search of their own.
+4. **The developer's own sales contact stays for step one**, since Sureground is not a party to the sale. Follow-up: a signed-in "Ask the developer" enquiry (the same sign-in rule as other enquiries, decided 2026-11-10), so enquiries are recorded and a developer who never answers can be followed up.
+
+Follow-ups: mobile pages, developments in search, sitemap and main navigation, linking units to real listings, development photos on the CDN, the enquiry above, and the automated director check above.

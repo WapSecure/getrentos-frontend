@@ -187,6 +187,16 @@ export function CustodyBar() {
       </Button>
 
       <Button
+        href="/agency/developments"
+        variant="outline"
+        size="xs"
+        rounded="sm"
+        icon={<Building2 className="h-4 w-4" aria-hidden />}
+      >
+        Developments
+      </Button>
+
+      <Button
         href="/agency/realtors"
         variant="outline"
         size="xs"
