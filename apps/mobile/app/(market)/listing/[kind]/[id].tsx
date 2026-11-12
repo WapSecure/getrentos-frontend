@@ -115,6 +115,7 @@ export default function PublicListing() {
             listingId={p.id}
             market={kind as MarketKind}
             items={p.media}
+            floorPlans={p.floorPlans}
             title={p.title}
             height={320}
             onVideoExpired={() => void query.refetch()}

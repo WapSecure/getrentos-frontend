@@ -141,6 +141,7 @@ export default function PropertyDetail() {
             listingId={p.id}
             market="rent"
             items={showroom.media}
+            floorPlans={showroom.floorPlans}
             title={p.title}
             height={300}
             area={listingArea({ title: p.title, location: p.location ?? '' })}
