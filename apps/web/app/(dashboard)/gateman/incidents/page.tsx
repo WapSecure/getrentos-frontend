@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { PanicHoldButton } from '@/components/gateman/PanicHoldButton';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ShieldCheck, Siren, TriangleAlert } from '@sureground/icons';
 import { NotAssignedToEstate } from '@/components/gateman/NotAssignedToEstate';
@@ -124,26 +125,7 @@ export default function GatemanIncidentsPage() {
           </div>
         </header>
         <div className="p-5">
-          <button
-            type="button"
-            onClick={() => panicAlert.mutate()}
-            disabled={panicAlert.isPending}
-            aria-busy={panicAlert.isPending || undefined}
-            className="group flex w-full flex-col items-center gap-2 rounded-2xl bg-destructive px-4 py-7 text-destructive-foreground shadow-md shadow-destructive/25 transition hover:brightness-95 active:translate-y-px active:brightness-90 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-destructive/40 focus-visible:ring-offset-2 focus-visible:ring-offset-card"
-          >
-            <span
-              aria-hidden="true"
-              className="flex h-12 w-12 items-center justify-center rounded-full bg-destructive-foreground/15 ring-1 ring-destructive-foreground/30"
-            >
-              <TriangleAlert className="h-6 w-6" />
-            </span>
-            <span className="text-lg font-bold tracking-[0.18em]">
-              {panicAlert.isPending ? 'Sending…' : 'PANIC ALERT'}
-            </span>
-            <span className="text-xs text-destructive-foreground/85">
-              Tap to immediately notify the estate manager
-            </span>
-          </button>
+          <PanicHoldButton onConfirm={() => panicAlert.mutate()} isPending={panicAlert.isPending} />
           {panicSent && (
             <Alert variant="success" className="mt-4">
               Alert sent: the estate manager has been notified.
