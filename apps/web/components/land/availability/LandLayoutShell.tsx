@@ -1,0 +1,36 @@
+'use client';
+
+import type { ReactNode } from 'react';
+import { usePathname } from 'next/navigation';
+import { Footer } from '@/components/layout/Footer';
+import { Navigation } from '@/components/layout/Navigation';
+import { LandAvailabilityGate } from '@/components/land/availability/LandAvailabilityGate';
+import type { LandAvailability } from '@/hooks/useLandAvailability';
+
+export function LandLayoutShell({
+  children,
+  initial,
+}: {
+  children: ReactNode;
+  initial: LandAvailability | null;
+}) {
+  const pathname = usePathname();
+  // A party to a land dispute must always reach the case, whatever LAND_MODE says.
+  if (pathname?.startsWith('/land/disputes')) return <>{children}</>;
+  const audience = pathname?.startsWith('/land/reviews') ? 'owners' : 'marketplace';
+  return (
+    <LandAvailabilityGate
+      audience={audience}
+      initial={initial}
+      shell={(notice) => (
+        <>
+          <Navigation />
+          <main className="min-h-[60vh] pt-20">{notice}</main>
+          <Footer />
+        </>
+      )}
+    >
+      {children}
+    </LandAvailabilityGate>
+  );
+}

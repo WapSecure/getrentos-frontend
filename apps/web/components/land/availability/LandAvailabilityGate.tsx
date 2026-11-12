@@ -2,18 +2,21 @@
 
 import type { ReactNode } from 'react';
 import { MapPinned } from '@sureground/icons';
-import { useLandAvailability } from '@/hooks/useLandAvailability';
+import { useLandAvailability, type LandAvailability } from '@/hooks/useLandAvailability';
 
 export const LandAvailabilityGate = ({
   audience,
   children,
   shell,
+  initial,
 }: {
   audience: 'marketplace' | 'owners';
+  /** Fetched on the server, so the first HTML already holds the page instead of nothing. */
+  initial?: LandAvailability | null;
   children: ReactNode;
   shell?: (notice: ReactNode) => ReactNode;
 }) => {
-  const availability = useLandAvailability();
+  const availability = useLandAvailability(initial ?? undefined);
   // Nothing until the answer is in: the page's land requests 404 while closed.
   if (availability.isLoading) return null;
   if (availability[audience]) return <>{children}</>;
