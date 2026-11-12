@@ -16,3 +16,29 @@ export function identityGate(
   const review = status.identity?.status;
   return review === 'PENDING' || review === 'PENDING_REVIEW' ? 'in_review' : 'unverified';
 }
+
+export interface DepositIdentityNotice {
+  message: string;
+  /** Offer the verification link; not while a check is already in review. */
+  verifyLink: boolean;
+}
+
+/**
+ * What the pay deposit dialog says to a buyer the server will refuse (403 IDENTITY_REQUIRED).
+ * `null` when they can pay, or while the status is unknown: the server stays the source of truth.
+ */
+export function depositIdentityNotice(gate: IdentityGate): DepositIdentityNotice | null {
+  if (gate === 'unverified') {
+    return {
+      message: 'Verify your identity before you pay a deposit. It takes a few minutes.',
+      verifyLink: true,
+    };
+  }
+  if (gate === 'in_review') {
+    return {
+      message: 'Your identity check is being reviewed. You can pay the deposit once it clears.',
+      verifyLink: false,
+    };
+  }
+  return null;
+}

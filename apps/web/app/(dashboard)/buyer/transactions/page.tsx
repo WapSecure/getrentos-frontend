@@ -14,6 +14,7 @@ import {
 } from '@sureground/ui';
 import { BuyerEscrowTransactionCard } from '@/components/buyer/transactions/BuyerEscrowTransactionCard';
 import { PayDialog } from '@/components/shared/payments/PayDialog';
+import { useDepositIdentityNotice } from '@/components/shared/payments/DepositIdentityNotice';
 import { formatCurrency } from '@/lib/format';
 import { SALE_DEPOSIT_PROTECTION } from '@/lib/paymentCopy';
 import { buyerService } from '@/services/buyerService';
@@ -78,6 +79,7 @@ export default function BuyerTransactionsPage() {
     },
   });
   const paying = transactions.find((t) => t.id === payingId) ?? null;
+  const identityNotice = useDepositIdentityNotice(paying?.escrowStatus === 'deposit_pending');
   const payingDeposit = paying ? (paying.depositAmount ?? paying.purchasePrice) : 0;
 
   const filterOptions: { value: StatusFilter; label: string }[] = [
@@ -189,6 +191,7 @@ export default function BuyerTransactionsPage() {
           providers={providers}
           providerError={providerError}
           busy={depositMutation.isPending}
+          blocked={identityNotice}
           onPay={() => depositMutation.mutate({ id: paying.id, provider: providers.provider })}
         />
       )}
