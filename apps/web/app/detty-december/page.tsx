@@ -60,7 +60,7 @@ export default function DettyDecemberPage() {
         <LandingHero
           eyebrow="Detty December · 20 Dec to 3 Jan"
           title="Detty December, sorted."
-          lead="Flying home or hosting the whole family? Book a short stay where your payment is held until after you check in, and see the total before you pay. Popular places go early, and some hosts set a minimum stay over the peak."
+          lead="Flying home or hosting the whole family? Book a short stay where your payment is held until at least 24 hours after check-in, and see the total before you pay. Popular places go early, and some hosts set a minimum stay over the peak."
           photo={photos.livingRoomEvening}
           actions={
             <CtaLink href="#stays" arrow>

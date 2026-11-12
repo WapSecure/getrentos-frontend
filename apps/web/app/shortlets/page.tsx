@@ -9,7 +9,7 @@ import type { ShortletListing } from '@/types/shortlet';
 const baseMetadata: Metadata = {
   title: 'Shortlets: Furnished Short-Stay Apartments',
   description:
-    'Book verified, furnished short-stay apartments and homes. Your payment is held by Sureground until you arrive, verified hosts, and instant confirmation on Sureground.',
+    'Book furnished short-stay apartments and homes in Nigeria. See the total before you pay; Sureground holds your payment until at least 24 hours after check-in.',
   alternates: { canonical: '/shortlets' },
   openGraph: {
     title: 'Shortlets: Furnished Short-Stay Apartments',

@@ -294,7 +294,7 @@ function DettyBanner() {
           Book a stay you can trust
         </Text>
         <Text variant="caption" style={{ color: NIGHT.soft }}>
-          20 Dec – 3 Jan · money held until you arrive
+          20 Dec – 3 Jan · money held past check-in
         </Text>
       </View>
       <ArrowRight size={18} color={NIGHT.text} />

@@ -190,7 +190,7 @@ function BookForm({
         />
         <Text variant="caption" color="mutedForeground" center>
           {listing.instantBooking
-            ? 'Confirmed straight away. You pay next: held by Sureground until you check in.'
+            ? 'Confirmed straight away. You pay next: held by Sureground until after check-in.'
             : "The host confirms first. You won't pay anything until they accept."}
         </Text>
       </View>
