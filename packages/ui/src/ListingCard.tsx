@@ -1,6 +1,7 @@
 'use client';
 
 import { forwardRef, useEffect, useRef, useState, type ReactNode } from 'react';
+import { CARD_IMPRESSION_RULE } from '@sureground/shared';
 import Link from 'next/link';
 import { BadgeCheck, ImageOff } from '@sureground/icons';
 import { cn, formatCurrency, tidyPlace } from '@sureground/shared';
@@ -160,17 +161,27 @@ function useVisibleOnce(onVisible?: () => void) {
   });
   useEffect(() => {
     if (!element || !wanted || typeof IntersectionObserver === 'undefined') return;
+    // Counts only after the card stays at least half on screen for the shared minimum time.
+    let timer: ReturnType<typeof setTimeout> | undefined;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry?.isIntersecting) {
-          handler.current?.();
-          observer.disconnect();
+          timer ??= setTimeout(() => {
+            handler.current?.();
+            observer.disconnect();
+          }, CARD_IMPRESSION_RULE.minimumMs);
+        } else if (timer) {
+          clearTimeout(timer);
+          timer = undefined;
         }
       },
-      { threshold: 0.5 }
+      { threshold: CARD_IMPRESSION_RULE.visiblePercent / 100 }
     );
     observer.observe(element);
-    return () => observer.disconnect();
+    return () => {
+      if (timer) clearTimeout(timer);
+      observer.disconnect();
+    };
   }, [element, wanted]);
   return setElement;
 }
