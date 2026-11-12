@@ -43,8 +43,8 @@ const JOB_PAGE_SIZE = 10;
 /** Past this many properties a segmented control stops fitting a phone. */
 const SEGMENTED_MAX = 3;
 
-const limit = (value: number | null | undefined) =>
-  value === null || value === undefined ? 'No limit' : formatCurrency(value);
+const isSet = (value: number | null | undefined): value is number =>
+  value !== null && value !== undefined;
 
 /**
  * Sureground Managed for an investor (DIA-20): one property at a time, with its agreement, the
@@ -198,20 +198,27 @@ function AgreementCard({ property }: { property: InvestorManagedProperty }) {
         { label: 'Started', value: mandate.startedAt ? formatDate(mandate.startedAt) : null },
         {
           label: 'Routine spending',
-          value: limit(mandate.bands.routineCap),
-          hint: 'Your manager spends up to this without asking.',
+          value: isSet(mandate.bands.routineCap)
+            ? formatCurrency(mandate.bands.routineCap)
+            : 'Not set',
+          hint: isSet(mandate.bands.routineCap)
+            ? 'Your manager spends up to this without asking.'
+            : 'Until you set one, your manager can approve repairs of any amount.',
         },
         {
           label: 'Emergency spending',
-          value: limit(mandate.bands.emergencyCap),
-          hint: 'Urgent repairs up to this go ahead first.',
+          value: isSet(mandate.bands.emergencyCap)
+            ? formatCurrency(mandate.bands.emergencyCap)
+            : 'Not set',
+          hint: isSet(mandate.bands.emergencyCap)
+            ? 'Urgent repairs up to this go ahead first; you are told at once.'
+            : 'Urgent repairs follow your routine limit.',
         },
         {
           label: 'Explicit authorisation',
-          value:
-            mandate.bands.explicitAbove === null
-              ? 'Not set'
-              : `Above ${limit(mandate.bands.explicitAbove)}`,
+          value: isSet(mandate.bands.explicitAbove)
+            ? `Above ${formatCurrency(mandate.bands.explicitAbove)}`
+            : 'Not set',
           hint: 'You confirm it is you before approving.',
         },
       ]
@@ -298,7 +305,11 @@ function StatementCard({ property }: { property: InvestorManagedProperty }) {
           bare
           icon={ReceiptText}
           title="No statement yet"
-          description="Statements are monthly once the property is managed."
+          description={
+            property.mandate?.status === 'ACTIVE'
+              ? 'Your first statement arrives at the end of the month.'
+              : 'Statements start once Sureground manages this property.'
+          }
         />
       )}
     </Card>
