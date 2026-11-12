@@ -26,15 +26,15 @@ import {
 } from '@/services/spendApprovalService';
 import { SpendCapSettings } from './SpendCapSettings';
 import { MandateCountersignSection } from '@/components/shared/authority/MandateCountersignSection';
-import { withStepUpSummary } from '@sureground/shared';
+import {
+  needsExplicitAuthorisation,
+  SPEND_BAND_LABELS,
+  SPEND_BAND_VARIANT,
+  withStepUpSummary,
+} from '@sureground/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { investorKeys } from '@/lib/queryKeys';
-import {
-  SPEND_BAND_LABELS,
-  SPEND_BAND_VARIANT,
-  needsExplicitAuthorisation,
-} from '@/lib/managedSpend';
 
 const STATUS_VARIANT: Record<SpendApprovalStatus, BadgeVariant> = {
   PENDING: 'warning',

@@ -37,7 +37,7 @@ import {
   MANDATE_STATUS_BADGE,
 } from '@/components/landlord/managed/SuregroundManagedView';
 import type { InvestorManagedProperty } from '@/types/managed';
-import { STATEMENT_PAYOUT_LABELS, humaniseStatus } from '../labels';
+import { STATEMENT_PAYOUT_LABELS, humaniseStatus } from '@sureground/shared';
 
 const JOB_PAGE_SIZE = 10;
 /** Past this many properties a segmented control stops fitting a phone. */

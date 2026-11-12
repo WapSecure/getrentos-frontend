@@ -1,4 +1,7 @@
+import type { CoApprovalPendingStep, DepositReleaseApprovalOutcome } from '@sureground/shared';
 import type { LandMilestone } from './landBuyer';
+
+export type { CoApprovalPendingStep } from '@sureground/shared';
 
 /** Mirrors the backend's `land-representative.service.ts`. */
 
@@ -22,14 +25,6 @@ export interface LandRepresentativeAppointment {
   createdAt: string;
 }
 
-export interface CoApprovalPendingStep {
-  milestoneKey: string;
-  /** This approval also releases the held deposit (a built home's handover). */
-  releasesDeposit?: boolean;
-  buyerApproved: boolean;
-  representativeApproved: boolean;
-}
-
 export interface CoApprovalView {
   binding: boolean;
   status?: 'ACTIVE' | 'DISABLE_PENDING' | 'DISABLED';
@@ -39,9 +34,7 @@ export interface CoApprovalView {
 }
 
 /** A representative's second approval to a deposit release; never moves money itself. */
-export type DepositReleaseApproval = CoApprovalView & {
-  outcome: 'APPROVED' | 'WAITING_FOR_BUYER' | 'WAITING_FOR_REPRESENTATIVE';
-};
+export type DepositReleaseApproval = CoApprovalView & { outcome: DepositReleaseApprovalOutcome };
 
 export interface PrincipalDeals {
   purchases: {

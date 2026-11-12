@@ -1,11 +1,15 @@
 import type {
   BudgetBand,
   DisplayCurrency,
+  ForeignCheckState,
   IntendedUse,
   InvestmentHorizon,
   InvestorPropertyType,
   OwnershipStructure,
-} from '@/types/investor';
+} from './types';
+import type { StatusTone } from '../utils/landTrust';
+
+// Investor labels for web and mobile. Users never see "escrow".
 
 export const INTENDED_USE_LABELS: Record<IntendedUse, string> = {
   HOME: 'A home for me or my family',
@@ -99,3 +103,13 @@ export const listLabels = <K extends string>(
   values: readonly K[] | undefined,
   labels: Record<K, string>
 ): string => (values ?? []).map((value) => labels[value] ?? value).join(', ');
+
+/** Passport, address and bank statement checks. "Approved" by staff or Smile ID, never "verified property". */
+export const FOREIGN_CHECK_STATUS: Record<ForeignCheckState, { label: string; tone: StatusTone }> =
+  {
+    NOT_STARTED: { label: 'Not started', tone: 'neutral' },
+    CHECKING: { label: 'Checking', tone: 'info' },
+    IN_REVIEW: { label: 'With our team', tone: 'warning' },
+    APPROVED: { label: 'Approved', tone: 'success' },
+    REJECTED: { label: 'Not approved', tone: 'danger' },
+  };

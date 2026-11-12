@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { ArrowRight, Building2, Home, LandPlot, type SgIcon } from '@sureground/icons';
 import { Badge, Button, Progress } from '@sureground/ui';
-import { stageProgress } from '@/lib/investorWorkspace';
+import { stageProgress } from '@sureground/shared';
 import { purchaseWorkspaceHref } from '@/lib/transactionWorkspace';
 import type { PurchaseSummary } from '@/types/transactionWorkspace';
 import { AcquisitionStatusBadges } from './AcquisitionStatusBadges';
