@@ -105,6 +105,12 @@ const navItems: NavItem[] = [
     permission: 'verifications.review',
   },
   {
+    label: 'Diaspora operations',
+    href: '/admin/diaspora',
+    icon: ClipboardList,
+    permission: 'diaspora.ops',
+  },
+  {
     label: 'Property authorities',
     href: '/admin/property-authorities',
     icon: Building2,

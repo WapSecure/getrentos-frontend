@@ -41,6 +41,8 @@ const ALL_PERMISSIONS: AdminPermission[] = [
   'ai.observe',
   // Curating showroom collections across owners, and marking one sponsored.
   'collections.manage',
+  // The Diaspora operations queue (DIA-41).
+  'diaspora.ops',
 ];
 
 export const ADMIN_ROLE_DETAILS: Record<
@@ -69,6 +71,7 @@ export const ADMIN_ROLE_DETAILS: Record<
       'documents.manage',
       'rentals.view',
       'rentals.moderate',
+      'diaspora.ops',
     ],
   },
   fraud_analyst: {
@@ -103,6 +106,7 @@ export const ADMIN_ROLE_DETAILS: Record<
       'rentals.view',
       'sales.view',
       'estate.view',
+      'diaspora.ops',
     ],
   },
   escrow_officer: {
@@ -170,6 +174,7 @@ export const ADMIN_ROLE_DETAILS: Record<
       'estate.moderate',
       'subscriptions.view',
       'managed.view',
+      'diaspora.ops',
     ],
   },
   support_agent: {
