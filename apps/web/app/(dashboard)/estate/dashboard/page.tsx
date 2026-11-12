@@ -10,7 +10,6 @@ import {
   Building2,
   Car,
   Clock,
-  DoorOpen,
   KeyRound,
   Megaphone,
   Package,
@@ -174,91 +173,72 @@ export default function EstateDashboardPage() {
         </Alert>
       )}
 
-      <DashboardSection
-        id="key-figures"
-        title="Key figures"
-        description={
-          isPro
-            ? 'Dues for this month and what is still open across the estate.'
-            : 'The size of the estate as it stands today.'
-        }
-      >
-        {!isPro ? (
-          <StatGroup
-            title="Estate"
-            items={[
-              {
-                label: 'Households',
-                value: estate.householdCount,
-                icon: Users,
-                href: ROUTES.ESTATE_HOUSEHOLDS,
-              },
-              {
-                label: 'Active gates',
-                value: estate.gateCount ?? 0,
-                icon: DoorOpen,
-              },
-            ]}
-          />
-        ) : isStatsLoading ? (
-          <StatGroupSkeleton groups={[2, 4]} />
-        ) : (
-          <div className="space-y-4">
-            <StatGroup
-              title="Dues"
-              items={[
-                {
-                  label: 'Collected this month',
-                  value: stats
-                    ? formatCurrency(stats.duesCollectedThisMonth, { compact: true })
-                    : dash,
-                  icon: ReceiptText,
-                  href: ROUTES.ESTATE_DUES,
-                },
-                {
-                  label: 'Outstanding',
-                  value: stats ? formatCurrency(stats.duesOutstanding, { compact: true }) : dash,
-                  icon: Clock,
-                  attention: (stats?.duesOutstanding ?? 0) > 0,
-                  href: ROUTES.ESTATE_DUES,
-                },
-              ]}
-            />
-            <StatGroup
-              title="Estate"
-              items={[
-                {
-                  label: 'Households',
-                  value: stats?.totalHouseholds ?? dash,
-                  icon: Users,
-                  href: ROUTES.ESTATE_HOUSEHOLDS,
-                },
-                {
-                  label: 'Open incidents',
-                  value: stats?.openIncidents ?? dash,
-                  icon: Siren,
-                  attention: (stats?.openIncidents ?? 0) > 0,
-                  href: ROUTES.ESTATE_INCIDENTS,
-                },
-                {
-                  label: 'Open maintenance',
-                  value: stats?.openMaintenanceTickets ?? dash,
-                  icon: Wrench,
-                  attention: (stats?.openMaintenanceTickets ?? 0) > 0,
-                  href: ROUTES.ESTATE_MAINTENANCE,
-                },
-                {
-                  label: 'Pending violations',
-                  value: stats?.pendingViolations ?? dash,
-                  icon: TriangleAlert,
-                  attention: (stats?.pendingViolations ?? 0) > 0,
-                  href: ROUTES.ESTATE_VIOLATIONS,
-                },
-              ]}
-            />
-          </div>
-        )}
-      </DashboardSection>
+      {isPro && (
+        <DashboardSection
+          id="key-figures"
+          title="Key figures"
+          description="Dues for this month and what is still open across the estate."
+        >
+          {isStatsLoading ? (
+            <StatGroupSkeleton groups={[2, 4]} />
+          ) : (
+            <div className="space-y-4">
+              <StatGroup
+                title="Dues"
+                items={[
+                  {
+                    label: 'Collected this month',
+                    value: stats
+                      ? formatCurrency(stats.duesCollectedThisMonth, { compact: true })
+                      : dash,
+                    icon: ReceiptText,
+                    href: ROUTES.ESTATE_DUES,
+                  },
+                  {
+                    label: 'Outstanding',
+                    value: stats ? formatCurrency(stats.duesOutstanding, { compact: true }) : dash,
+                    icon: Clock,
+                    attention: (stats?.duesOutstanding ?? 0) > 0,
+                    href: ROUTES.ESTATE_DUES,
+                  },
+                ]}
+              />
+              <StatGroup
+                title="Estate"
+                items={[
+                  {
+                    label: 'Households',
+                    value: stats?.totalHouseholds ?? dash,
+                    icon: Users,
+                    href: ROUTES.ESTATE_HOUSEHOLDS,
+                  },
+                  {
+                    label: 'Open incidents',
+                    value: stats?.openIncidents ?? dash,
+                    icon: Siren,
+                    attention: (stats?.openIncidents ?? 0) > 0,
+                    href: ROUTES.ESTATE_INCIDENTS,
+                  },
+                  {
+                    label: 'Open maintenance',
+                    value: stats?.openMaintenanceTickets ?? dash,
+                    icon: Wrench,
+                    attention: (stats?.openMaintenanceTickets ?? 0) > 0,
+                    href: ROUTES.ESTATE_MAINTENANCE,
+                  },
+                  {
+                    label: 'Pending violations',
+                    value: stats?.pendingViolations ?? dash,
+                    icon: TriangleAlert,
+                    attention: (stats?.pendingViolations ?? 0) > 0,
+                    href: ROUTES.ESTATE_VIOLATIONS,
+                  },
+                ]}
+              />
+            </div>
+          )}
+        </DashboardSection>
+      )}
 
       {!attention.isError && (
         <DashboardSection
