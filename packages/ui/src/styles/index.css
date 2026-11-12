@@ -23,9 +23,9 @@
   /* Three levels: xs/sm resting cards, md/lg raised menus and popovers, xl dialogs. */
   --shadow-xs: 0 1px 2px rgb(29 29 31 / 0.04);
   --shadow-sm: 0 1px 2px rgb(29 29 31 / 0.04), 0 1px 3px rgb(29 29 31 / 0.03);
-  --shadow-md: 0 2px 4px -2px rgb(29 29 31 / 0.05), 0 8px 20px -6px rgb(29 29 31 / 0.10);
+  --shadow-md: 0 2px 4px -2px rgb(29 29 31 / 0.05), 0 8px 20px -6px rgb(29 29 31 / 0.1);
   --shadow-lg: 0 2px 4px -2px rgb(29 29 31 / 0.05), 0 12px 28px -8px rgb(29 29 31 / 0.12);
-  --shadow-xl: 0 8px 16px -8px rgb(29 29 31 / 0.08), 0 24px 56px -12px rgb(29 29 31 / 0.20);
+  --shadow-xl: 0 8px 16px -8px rgb(29 29 31 / 0.08), 0 24px 56px -12px rgb(29 29 31 / 0.2);
 }
 
 .dark {
@@ -379,18 +379,32 @@
     scrollbar-width: thin;
   }
 
+  /* Account avatar in the top bars: a soft blue halo so the brand colour carries into the corner. */
+  .shell-account :where(button) > :where(.bg-primary) {
+    box-shadow:
+      0 0 0 2px var(--card),
+      0 0 0 3.5px color-mix(in srgb, var(--primary) 30%, transparent);
+    transition: box-shadow 150ms ease;
+  }
+
+  .shell-account :where(button:hover, button[data-state='open']) > :where(.bg-primary) {
+    box-shadow:
+      0 0 0 2px var(--card),
+      0 0 0 3.5px color-mix(in srgb, var(--primary) 60%, transparent);
+  }
+
   .sidebar-label {
     margin-bottom: 0.25rem;
     padding-inline: 0.75rem;
     color: var(--muted-foreground);
     font-size: 0.75rem;
-    font-weight: 500;
-    letter-spacing: 0;
+    font-weight: 600;
+    letter-spacing: 0.01em;
   }
 
   .sidebar-group-toggle {
     display: flex;
-    min-height: 2rem;
+    min-height: 1.875rem;
     width: calc(100% + 1.5rem);
     margin-inline: -0.75rem;
     align-items: center;
@@ -403,8 +417,20 @@
     transition: color 150ms ease;
   }
 
+  .sidebar-group-toggle > svg {
+    opacity: 0.55;
+    transition:
+      opacity 150ms ease,
+      transform 180ms ease;
+  }
+
   .sidebar-group-toggle:hover {
     color: var(--foreground);
+  }
+
+  .sidebar-group-toggle:hover > svg,
+  .sidebar-group-toggle:focus-visible > svg {
+    opacity: 1;
   }
 
   .sidebar-group-toggle:focus-visible,
@@ -414,10 +440,11 @@
   }
 
   .sidebar-item {
+    position: relative;
     display: flex;
     min-height: 2.25rem;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.625rem;
     border-radius: var(--radius-md);
     padding: 0.4375rem 0.75rem;
     color: var(--muted-foreground);
@@ -426,6 +453,10 @@
     transition:
       background-color 150ms ease,
       color 150ms ease;
+  }
+
+  .sidebar-item > svg:first-child {
+    transition: color 150ms ease;
   }
 
   @media (pointer: coarse) {
@@ -440,11 +471,69 @@
     background-color: var(--secondary);
   }
 
+  /* The current page: a blue tint, blue icon and text, and a short blue bar on the leading edge. */
   .sidebar-item[aria-current='page'] {
-    background-color: var(--accent);
-    color: var(--accent-foreground);
+    background-color: color-mix(in srgb, var(--primary) 10%, transparent);
+    color: var(--primary);
     font-weight: 600;
-    box-shadow: inset 2px 0 0 var(--primary);
+  }
+
+  .sidebar-item[aria-current='page']:hover {
+    background-color: color-mix(in srgb, var(--primary) 14%, transparent);
+  }
+
+  .sidebar-item[aria-current='page'] > svg:first-child {
+    color: var(--primary);
+  }
+
+  .sidebar-item[aria-current='page']::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 3px;
+    height: 1.125rem;
+    transform: translateY(-50%);
+    border-radius: 0 9999px 9999px 0;
+    background-color: var(--primary);
+  }
+
+  .sidebar-rail-toggle {
+    font-size: 0.8125rem;
+  }
+
+  /* Plan lock: a quiet tag naming the plan, so a locked page reads as an upgrade, not an error. */
+  .sidebar-lock {
+    display: inline-flex;
+    height: 1.25rem;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 0.25rem;
+    border: 1px solid var(--border);
+    border-radius: 9999px;
+    background-color: var(--card);
+    padding-inline: 0.4375rem;
+    color: var(--muted-foreground);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    line-height: 1;
+  }
+
+  .sidebar-count {
+    display: inline-flex;
+    height: 1.25rem;
+    min-width: 1.25rem;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    background-color: var(--primary);
+    padding-inline: 0.375rem;
+    color: var(--primary-foreground);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
   }
 
   /* The name stays in the link (only faded) so the accessible name is unchanged;
@@ -456,7 +545,6 @@
   }
 
   [data-rail] .sidebar-item {
-    position: relative;
     justify-content: center;
     padding-inline: 0;
   }
@@ -469,7 +557,7 @@
     width: max-content;
     max-width: 16rem;
     flex: none;
-    transform: translateY(-50%);
+    transform: translate(-0.25rem, -50%);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     background-color: var(--card);
@@ -480,11 +568,15 @@
     box-shadow: 0 8px 24px rgb(0 0 0 / 0.12);
     pointer-events: none;
     opacity: 0;
+    transition:
+      opacity 150ms ease,
+      transform 150ms ease;
   }
 
   [data-rail] .sidebar-item:hover .sidebar-item-label,
   [data-rail] .sidebar-item:focus-visible .sidebar-item-label {
     opacity: 1;
+    transform: translate(0, -50%);
   }
 
   [data-rail] .sidebar-item-extra {
@@ -514,11 +606,24 @@
     font-size: 0.75rem;
     font-weight: 500;
     line-height: 1;
+    transition: color 150ms ease;
+  }
+
+  /* The icon sits in a pill that fills blue for the current page. */
+  .mobile-primary-nav-item > svg {
+    box-sizing: content-box;
+    border-radius: 9999px;
+    padding: 0.25rem 1rem;
+    transition: background-color 150ms ease;
   }
 
   .mobile-primary-nav-item[aria-current='page'] {
     color: var(--primary);
     font-weight: 600;
+  }
+
+  .mobile-primary-nav-item[aria-current='page'] > svg {
+    background-color: color-mix(in srgb, var(--primary) 12%, transparent);
   }
 
   .mobile-primary-nav-item:focus-visible {
@@ -568,15 +673,17 @@
 
 @supports (backdrop-filter: blur(20px)) {
   @media (prefers-reduced-transparency: no-preference) {
-    .workspace-navbar {
-      background-color: color-mix(in srgb, var(--card) 88%, transparent);
-      backdrop-filter: saturate(140%) blur(20px);
+    .workspace-navbar,
+    .mobile-primary-nav {
+      background-color: color-mix(in srgb, var(--card) 82%, transparent);
+      backdrop-filter: saturate(160%) blur(16px);
     }
   }
 }
 
 @media (prefers-contrast: more) {
-  .workspace-navbar {
+  .workspace-navbar,
+  .mobile-primary-nav {
     background-color: var(--card);
     backdrop-filter: none;
   }
