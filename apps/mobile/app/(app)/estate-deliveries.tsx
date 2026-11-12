@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Alert, RefreshControl, View } from 'react-native';
+import { RefreshControl, View } from 'react-native';
 import { Image } from 'expo-image';
 
 import {
@@ -11,6 +11,7 @@ import {
 } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { collectionSummary } from '@sureground/shared';
 import { CheckCircle2, Package, Plus, Settings2 } from '@sureground/icons/native';
 import {
   Button,
@@ -33,6 +34,7 @@ import { GatesSheet } from '@/components/estate/gate/GatesSheet';
 import { HouseholdPicker } from '@/components/estate/HouseholdPicker';
 import { StatusPill } from '@/components/host/HostUI';
 import { Sheet } from '@/components/Sheet';
+import { CollectDeliverySheet } from '@/components/estate/gate/CollectDeliverySheet';
 import { useEstate } from '@/hooks/useEstate';
 import type { PickedFile } from '@/lib/api/documents';
 import {
@@ -67,6 +69,7 @@ export default function EstateDeliveries() {
   const [filter, setFilter] = useState<Filter>('received');
   const [logging, setLogging] = useState(false);
   const [managingGates, setManagingGates] = useState(false);
+  const [handingOver, setHandingOver] = useState<DeliveryLog | null>(null);
 
   const query = useInfiniteQuery({
     queryKey: gateKeys.deliveries(estateId, filter),
@@ -87,11 +90,13 @@ export default function EstateDeliveries() {
   const total = query.data?.pages[0]?.total ?? 0;
 
   const collect = useMutation({
-    mutationFn: (log: DeliveryLog) => estateGateApi.markDeliveryCollected(estateId, log.id),
-    onSuccess: (_l, log) => {
+    mutationFn: (v: { log: DeliveryLog; collectedBy?: string }) =>
+      estateGateApi.markDeliveryCollected(estateId, v.log.id, v.collectedBy),
+    onSuccess: (_l, { log }) => {
       void haptics.success();
       qc.invalidateQueries({ queryKey: ['estate-manager', estateId, 'gate', 'deliveries'] });
       toast.show(`Parcel for ${log.unitLabel} marked as collected.`, 'success');
+      setHandingOver(null);
     },
     onError: (e) => {
       qc.invalidateQueries({ queryKey: ['estate-manager', estateId, 'gate', 'deliveries'] });
@@ -192,7 +197,7 @@ export default function EstateDeliveries() {
               <Card elevated style={{ gap: spacing.sm }}>
                 <View
                   accessible
-                  accessibilityLabel={`Parcel for ${item.unitLabel}, ${item.residentName}. ${s.label}. ${from ? `${from}. ` : ''}Received ${when(item.receivedAt)}${item.gateName ? ` at ${item.gateName}` : ''}.`}
+                  accessibilityLabel={`Parcel for ${item.unitLabel}, ${item.residentName}. ${s.label}. ${from ? `${from}. ` : ''}Received ${when(item.receivedAt)}${item.gateName ? ` at ${item.gateName}` : ''}.${collectionSummary(item) ? ` ${collectionSummary(item)}.` : ''}`}
                   style={{ flexDirection: 'row', gap: spacing.md }}
                 >
                   {item.photoUrl ? (
@@ -230,8 +235,12 @@ export default function EstateDeliveries() {
                     <Text variant="caption" color="mutedForeground">
                       In {when(item.receivedAt)}
                       {item.gateName ? ` · ${item.gateName}` : ''}
-                      {item.collectedAt ? ` · collected ${when(item.collectedAt)}` : ''}
                     </Text>
+                    {collectionSummary(item) ? (
+                      <Text variant="caption" color="mutedForeground">
+                        {collectionSummary(item)}
+                      </Text>
+                    ) : null}
                   </View>
                 </View>
                 {item.status === 'received' ? (
@@ -239,18 +248,8 @@ export default function EstateDeliveries() {
                     label="Mark collected"
                     size="sm"
                     variant="ghost"
-                    loading={collect.isPending && collect.variables?.id === item.id}
                     accessibilityLabel={`Mark the parcel for ${item.unitLabel} as collected`}
-                    onPress={() =>
-                      Alert.alert(
-                        `Collected by ${item.unitLabel}?`,
-                        'Only once the household has the parcel. This can’t be undone.',
-                        [
-                          { text: 'Cancel', style: 'cancel' },
-                          { text: 'Mark collected', onPress: () => collect.mutate(item) },
-                        ]
-                      )
-                    }
+                    onPress={() => setHandingOver(item)}
                   />
                 ) : null}
               </Card>
@@ -276,6 +275,14 @@ export default function EstateDeliveries() {
       <Sheet open={logging} onClose={() => setLogging(false)} title="Log a delivery">
         {logging ? <LogDeliveryForm estateId={estateId} onDone={() => setLogging(false)} /> : null}
       </Sheet>
+      <CollectDeliverySheet
+        log={handingOver}
+        busy={collect.isPending}
+        onClose={() => setHandingOver(null)}
+        onConfirm={(collectedBy) =>
+          handingOver && collect.mutate({ log: handingOver, collectedBy })
+        }
+      />
       <GatesSheet
         open={managingGates}
         estateId={estateId}

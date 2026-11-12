@@ -64,6 +64,8 @@ export interface DeliveryLog {
   gateName?: string;
   receivedAt: string;
   collectedAt?: string;
+  /** Name of whoever took the parcel, if the gate recorded one. */
+  collectedBy?: string;
   createdAt: string;
 }
 
@@ -359,8 +361,13 @@ export const gatemanApi = {
     return apiUpload<DeliveryLog>(`/estate/${estateId}/deliveries`, form);
   },
 
-  markDeliveryCollected: (estateId: string, logId: string) =>
-    apiFetch<DeliveryLog>(`/estate/${estateId}/deliveries/${logId}/collect`, { method: 'PATCH' }),
+  markDeliveryCollected: (estateId: string, logId: string, collectedBy?: string) => {
+    const name = collectedBy?.trim();
+    return apiFetch<DeliveryLog>(`/estate/${estateId}/deliveries/${logId}/collect`, {
+      method: 'PATCH',
+      body: name ? { collectedBy: name } : {},
+    });
+  },
 
   /** `open` returns only vehicles that have not exited yet. */
   listVehicleLogs: (estateId: string, open = true, page = 1, pageSize = 50) =>

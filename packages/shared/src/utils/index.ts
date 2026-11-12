@@ -29,3 +29,4 @@ export * from './dualTime';
 export * from './siteTours';
 export * from './codeLabels';
 export * from './visitorPassTimeline';
+export * from './deliveryCollection';

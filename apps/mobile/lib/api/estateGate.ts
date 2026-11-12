@@ -280,8 +280,8 @@ export const estateGateApi = {
       photo?: PickedFile;
     }
   ) => gatemanApi.logDelivery(estateId, data),
-  markDeliveryCollected: (estateId: string, logId: string) =>
-    gatemanApi.markDeliveryCollected(estateId, logId),
+  markDeliveryCollected: (estateId: string, logId: string, collectedBy?: string) =>
+    gatemanApi.markDeliveryCollected(estateId, logId, collectedBy),
 
   /* Creating a regular visitor is Enterprise; listing and withdrawing stay open. */
   contractorPasses: (
