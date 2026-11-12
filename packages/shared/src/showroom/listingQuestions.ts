@@ -1,7 +1,6 @@
 import type { ShowroomFact, ShowroomListing } from './types';
 import { roomSizeLabel, type ShowroomFloorPlanRoom } from './floorPlans';
 import { VERIFICATION_SUMMARY_STATUS } from '../utils/landTrust';
-import { formatCurrency } from '../utils/format';
 
 /**
  * Questions about a listing, answered only from what the listing itself states. Nothing here
@@ -444,7 +443,8 @@ export function topicsToAnswer(question: string): ListingQuestionTopic[] {
 // Answering from the listing's data
 // ---------------------------------------------------------------------------------------------
 
-const naira = (n: number) => formatCurrency(n);
+// The amount as stated, never rounded.
+const naira = (n: number) => `₦${n.toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
 
 const day = (iso?: string | null) => {
   if (!iso) return undefined;
@@ -531,11 +531,16 @@ class Builder {
   facts: ShowroomFact[] = [];
   gaps: string[] = [];
 
-  constructor(
-    readonly listing: ShowroomListing,
-    readonly topic: ListingQuestionTopic,
-    readonly question?: string
-  ) {}
+  readonly listing: ShowroomListing;
+  readonly topic: ListingQuestionTopic;
+  readonly question?: string;
+
+  // Plain fields, not parameter properties: the tests run under Node's type stripping.
+  constructor(listing: ShowroomListing, topic: ListingQuestionTopic, question?: string) {
+    this.listing = listing;
+    this.topic = topic;
+    this.question = question;
+  }
 
   state(sentence: string, ...facts: ShowroomFact[]) {
     this.stated.push(sentence);
