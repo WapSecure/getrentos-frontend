@@ -19,7 +19,7 @@ jobs:
     env:
       CI: 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v4
         with:
           version: 10.34.1
@@ -46,7 +46,7 @@ jobs:
     env:
       CI: 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v4
         with:
           version: 10.34.1
@@ -76,7 +76,7 @@ jobs:
       NEXT_PUBLIC_API_URL: http://127.0.0.1:9
       NEXT_PUBLIC_APP_URL: http://localhost:3000
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v4
         with:
           version: 10.34.1
@@ -103,7 +103,7 @@ jobs:
       NEXT_PUBLIC_APP_URL: https://app.invalid.example
       CI: 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v4
         with:
           version: 10.34.1
