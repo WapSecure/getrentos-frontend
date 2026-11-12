@@ -15,6 +15,7 @@ import {
 } from '@sureground/ui-native';
 import type { BuyerListing } from '@/lib/api/buyer';
 import { useBuyerSaved } from '@/hooks/useBuyerSaved';
+import { useCardAnalytics } from '@/hooks/useCardAnalytics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
 
@@ -22,12 +23,16 @@ export default function BuyerSaved() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const { toggle, items, isLoading, isError, isRefetching, refetch } = useBuyerSaved();
+  const cards = useCardAnalytics('sale', 'sale_saved');
 
   const renderItem = useCallback(
-    ({ item }: { item: BuyerListing }) => (
+    ({ item, index }: { item: BuyerListing; index: number }) => (
       <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
         <Pressable
-          onPress={() => router.push(`/(app)/buyer-listing/${item.id}`)}
+          onPress={() => {
+            cards.click(item.id, index);
+            router.push(`/(app)/buyer-listing/${item.id}`);
+          }}
           accessibilityRole="button"
           accessibilityLabel={`${[item.title, item.address, item.city].filter(Boolean).join(', ')}, ${Math.round(item.askingPrice).toLocaleString('en-NG')} naira`}
           accessibilityHint="Opens property details"
@@ -72,7 +77,7 @@ export default function BuyerSaved() {
         </Pressable>
       </View>
     ),
-    [colors.destructive, spacing.md, spacing.sm, spacing.xl, toggle]
+    [cards, colors.destructive, spacing.md, spacing.sm, spacing.xl, toggle]
   );
 
   return (
@@ -115,6 +120,7 @@ export default function BuyerSaved() {
           data={items}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
+          {...cards.listProps}
           contentContainerStyle={{
             paddingTop: spacing.sm,
             paddingBottom: insets.bottom + spacing['3xl'],

@@ -51,6 +51,7 @@ import { MarketFilterSheet, type MarketRefinements } from '@/components/market/M
 import { StayDatesSheet, type StayDates } from '@/components/shortlet/StayDatesSheet';
 import { seasonRange } from '@/lib/stays';
 import { useMarketSaved } from '@/hooks/useMarketSaved';
+import { useCardAnalytics } from '@/hooks/useCardAnalytics';
 import { MarketComparisonSheet } from '@/components/market/MarketComparisonSheet';
 
 type Tab = MarketKind | 'estates';
@@ -281,6 +282,8 @@ function Listings({
 }) {
   const { colors, spacing } = useTheme();
   const saved = useMarketSaved(kind);
+  // Same surfaces as the web's /rent, /buy, /shortlets and public /land browsers.
+  const cards = useCardAnalytics(kind, kind === 'land' ? 'land_public' : `${kind}_list`);
   const [refine, setRefine] = useState<MarketRefinements>({});
   const [sheetOpen, setSheetOpen] = useState(false);
   const [dates, setDates] = useState<StayDates | null>(null);
@@ -345,11 +348,14 @@ function Listings({
   }, []);
 
   const renderItem = useCallback(
-    ({ item }: { item: MarketCard }) => (
+    ({ item, index }: { item: MarketCard; index: number }) => (
       <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
         <PropertyCard
           property={{ ...item, tag: item.highlight }}
-          onPress={open}
+          onPress={(id) => {
+            cards.click(id, index);
+            open(id);
+          }}
           onToggleSave={saved.toggle}
           saved={saved.savedIds.has(item.id)}
           onToggleCompare={() => toggleCompare(item)}
@@ -360,7 +366,7 @@ function Listings({
         />
       </View>
     ),
-    [compared, open, saved.savedIds, saved.toggle, spacing.xl, spacing.md, toggleCompare]
+    [cards, compared, open, saved.savedIds, saved.toggle, spacing.xl, spacing.md, toggleCompare]
   );
 
   const header = (
@@ -531,6 +537,7 @@ function Listings({
           data={items}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
+          {...cards.listProps}
           onEndReached={onEndReached}
           onEndReachedThreshold={0.6}
           keyboardDismissMode="on-drag"

@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type ComponentRef } from 'react';
 import { tidyPlace } from '@sureground/shared';
-import { ScrollView, Share, View } from 'react-native';
+import { Dimensions, FlatList, ScrollView, Share, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
@@ -52,6 +52,8 @@ import {
 import { trackShowroom } from '@/lib/showroomAnalytics';
 import { PropertyMapView } from '@/components/property/PropertyMapView';
 import { useMarketSaved } from '@/hooks/useMarketSaved';
+import { useCardAnalytics } from '@/hooks/useCardAnalytics';
+import { visibleFraction } from '@/lib/cardImpressions';
 import type { ShortletListing } from '@/lib/api/shortlets';
 import { nightsLabel, seasonRange } from '@/lib/stays';
 import { GuestPromiseCard, SupportContact, TrustChips } from '@/components/shortlet/StayUI';
@@ -94,6 +96,8 @@ export default function PublicListing() {
   useTrackDetailView(p?.id, isMarketKind(kind) ? kind : 'rent');
 
   const back = () => (router.canGoBack() ? router.back() : router.replace('/(market)'));
+  // Sections that count impressions re-measure themselves when the page scrolls.
+  const [scrollListeners] = useState(() => new Set<() => void>());
 
   const share = async () => {
     if (!p || !valid) return;
@@ -109,6 +113,8 @@ export default function PublicListing() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: insets.bottom + 140 }}
+        onScroll={() => scrollListeners.forEach((listener) => listener())}
+        scrollEventThrottle={200}
       >
         {p && valid ? (
           <ShowroomMedia
@@ -144,7 +150,7 @@ export default function PublicListing() {
                 </View>
               }
             >
-              {p ? <Body listing={p} /> : null}
+              {p ? <Body listing={p} scrollListeners={scrollListeners} /> : null}
             </QueryState>
           )}
         </View>
@@ -202,7 +208,13 @@ export default function PublicListing() {
   );
 }
 
-function Body({ listing: p }: { listing: MarketDetail }) {
+function Body({
+  listing: p,
+  scrollListeners,
+}: {
+  listing: MarketDetail;
+  scrollListeners: Set<() => void>;
+}) {
   const { colors, spacing, radius } = useTheme();
   const [expanded, setExpanded] = useState(false);
   const longDescription = (p.description?.length ?? 0) > 280;
@@ -450,14 +462,37 @@ function Body({ listing: p }: { listing: MarketDetail }) {
       </Card>
 
       {p.kind === 'land' ? <PriceComparison listingId={p.id} /> : null}
-      <SimilarListings listing={p} />
+      <SimilarListings listing={p} scrollListeners={scrollListeners} />
     </>
   );
 }
 
-function SimilarListings({ listing }: { listing: MarketDetail }) {
+function SimilarListings({
+  listing,
+  scrollListeners,
+}: {
+  listing: MarketDetail;
+  scrollListeners: Set<() => void>;
+}) {
   const { spacing } = useTheme();
   const saved = useMarketSaved(listing.kind);
+  // The web's similar strip counts under `${market}_similar`. The row scrolls sideways (the list
+  // reports which cards are half in view) inside a page that scrolls down (we measure the row), so
+  // a card counts only when both say it is on screen.
+  const cards = useCardAnalytics(listing.kind, `${listing.kind}_similar`, { inView: false });
+  const row = useRef<ComponentRef<typeof View>>(null);
+  const { setInView } = cards;
+  const measure = useCallback(() => {
+    row.current?.measureInWindow((_x, y, _width, height) =>
+      setInView(visibleFraction(y, height, Dimensions.get('window').height) >= 0.5)
+    );
+  }, [setInView]);
+  useEffect(() => {
+    scrollListeners.add(measure);
+    return () => {
+      scrollListeners.delete(measure);
+    };
+  }, [scrollListeners, measure]);
   const query = useQuery({
     queryKey: [
       ...qk.market.list(listing.kind, {}),
@@ -489,28 +524,33 @@ function SimilarListings({ listing }: { listing: MarketDetail }) {
         title="Similar listings"
         description="Comparable options in the same market and price range"
       />
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={{ marginHorizontal: -spacing.xl }}
-        contentContainerStyle={{ paddingHorizontal: spacing.xl, gap: spacing.md }}
-      >
-        {similar.map((item) => (
-          <View key={item.id} style={{ width: 286 }}>
-            <PropertyCard
-              property={{ ...item, tag: item.highlight }}
-              saved={saved.savedIds.has(item.id)}
-              onToggleSave={saved.toggle}
-              onPress={(id) =>
-                router.push({
-                  pathname: '/(market)/listing/[kind]/[id]',
-                  params: { kind: listing.kind, id },
-                })
-              }
-            />
-          </View>
-        ))}
-      </ScrollView>
+      <View ref={row} onLayout={measure}>
+        <FlatList
+          horizontal
+          data={similar}
+          keyExtractor={(item) => item.id}
+          showsHorizontalScrollIndicator={false}
+          style={{ marginHorizontal: -spacing.xl }}
+          contentContainerStyle={{ paddingHorizontal: spacing.xl, gap: spacing.md }}
+          {...cards.listProps}
+          renderItem={({ item, index }) => (
+            <View style={{ width: 286 }}>
+              <PropertyCard
+                property={{ ...item, tag: item.highlight }}
+                saved={saved.savedIds.has(item.id)}
+                onToggleSave={saved.toggle}
+                onPress={(id) => {
+                  cards.click(id, index);
+                  router.push({
+                    pathname: '/(market)/listing/[kind]/[id]',
+                    params: { kind: listing.kind, id },
+                  });
+                }}
+              />
+            </View>
+          )}
+        />
+      </View>
     </View>
   );
 }

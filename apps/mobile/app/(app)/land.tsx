@@ -27,6 +27,7 @@ import {
   type LandFilters,
   type LandListing,
 } from '@/lib/api/land';
+import { useCardAnalytics } from '@/hooks/useCardAnalytics';
 
 const PAGE_SIZE = 20;
 const SORTS: { value: LandFilters['sort']; label: string }[] = [
@@ -40,6 +41,8 @@ export default function LandMarketplace() {
   const insets = useSafeAreaInsets();
   const [searchText, setSearchText] = useState('');
   const [filters, setFilters] = useState<LandFilters>({ sort: 'newest' });
+  // The web's signed-in land browser counts under `land_buyer`.
+  const cards = useCardAnalytics('land', 'land_buyer');
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -131,10 +134,14 @@ export default function LandMarketplace() {
           maintainVisibleContentPosition={{ disabled: true }}
           data={items}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }: { item: LandListing }) => (
+          {...cards.listProps}
+          renderItem={({ item, index }: { item: LandListing; index: number }) => (
             <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
               <Pressable
-                onPress={() => router.push(`/(app)/land-listing/${item.id}`)}
+                onPress={() => {
+                  cards.click(item.id, index);
+                  router.push(`/(app)/land-listing/${item.id}`);
+                }}
                 accessibilityRole="button"
                 accessibilityLabel={`${[item.title, item.address, item.city].filter(Boolean).join(', ')}, ${Math.round(item.price).toLocaleString('en-NG')} naira`}
                 accessibilityHint="Opens land details"

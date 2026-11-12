@@ -20,6 +20,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { qk } from '@/lib/query/keys';
 import { buyerApi, type BuyerListing, type ListingFilters } from '@/lib/api/buyer';
 import { useBuyerSaved } from '@/hooks/useBuyerSaved';
+import { useCardAnalytics } from '@/hooks/useCardAnalytics';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 
 const PAGE_SIZE = 20;
@@ -43,6 +44,8 @@ export default function BuyerDiscover() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const { savedIds, toggle } = useBuyerSaved();
+  // The signed-in browse, as the renter's: `discover`, told apart by market.
+  const cards = useCardAnalytics('sale', 'discover');
   const [searchText, setSearchText] = useState('');
   const [filters, setFilters] = useState<ListingFilters>({});
 
@@ -75,12 +78,15 @@ export default function BuyerDiscover() {
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const renderItem = useCallback(
-    ({ item }: { item: BuyerListing }) => {
+    ({ item, index }: { item: BuyerListing; index: number }) => {
       const saved = savedIds.has(item.id);
       return (
         <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
           <Pressable
-            onPress={() => router.push(`/(app)/buyer-listing/${item.id}`)}
+            onPress={() => {
+              cards.click(item.id, index);
+              router.push(`/(app)/buyer-listing/${item.id}`);
+            }}
             accessibilityRole="button"
             accessibilityLabel={`${[item.title, item.address, item.city].filter(Boolean).join(', ')}, ${Math.round(item.askingPrice).toLocaleString('en-NG')} naira`}
             accessibilityHint="Opens property details"
@@ -156,7 +162,7 @@ export default function BuyerDiscover() {
         </View>
       );
     },
-    [colors.destructive, colors.mutedForeground, colors.secondary, savedIds, spacing, toggle]
+    [cards, colors.destructive, colors.mutedForeground, colors.secondary, savedIds, spacing, toggle]
   );
 
   return (
@@ -248,6 +254,7 @@ export default function BuyerDiscover() {
           data={items}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
+          {...cards.listProps}
           onEndReached={onEndReached}
           onEndReachedThreshold={0.6}
           ListHeaderComponent={
