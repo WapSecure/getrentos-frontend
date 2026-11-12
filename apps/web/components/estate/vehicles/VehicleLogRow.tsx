@@ -1,6 +1,8 @@
 'use client';
 
+import { Car } from '@sureground/icons';
 import { Badge, Button } from '@sureground/ui';
+import { EstateRow, RowAvatar } from '@/components/estate/shared/EstateListSection';
 import type { VehicleLog } from '@/types/estate';
 
 const purposeLabels: Record<VehicleLog['purpose'], string> = {
@@ -27,27 +29,41 @@ interface VehicleLogRowProps {
 
 export const VehicleLogRow = ({ log, onMarkExited, isMarkingExited }: VehicleLogRowProps) => {
   const isInside = !log.exitedAt;
+  const who = [log.vehicleDescription, log.driverName, purposeLabels[log.purpose]]
+    .filter(Boolean)
+    .join(' · ');
+  const when = [
+    `Entered ${formatDateTime(log.enteredAt)}`,
+    log.gateName,
+    log.exitedAt ? `Exited ${formatDateTime(log.exitedAt)}` : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
 
   return (
-    <div className="p-4 flex items-center justify-between gap-4">
-      <div className="min-w-0">
-        <p className="text-sm font-medium text-foreground truncate">{log.plateNumber}</p>
-        <p className="text-xs text-muted-foreground mt-0.5">
-          {log.vehicleDescription ? `${log.vehicleDescription} · ` : ''}
-          {log.driverName ? `${log.driverName} · ` : ''}
-          {purposeLabels[log.purpose]} · Entered {formatDateTime(log.enteredAt)}
-          {log.gateName ? ` · ${log.gateName}` : ''}
-          {log.exitedAt ? ` · Exited ${formatDateTime(log.exitedAt)}` : ''}
-        </p>
-      </div>
-      <div className="flex items-center gap-3 shrink-0">
-        <Badge variant={isInside ? 'success' : 'neutral'}>{isInside ? 'Inside' : 'Exited'}</Badge>
-        {isInside && (
+    <EstateRow
+      leading={<RowAvatar icon={Car} tone={isInside ? 'primary' : 'neutral'} />}
+      title={
+        <>
+          <p className="truncate text-sm font-semibold uppercase tracking-wide text-foreground tabular-nums">
+            {log.plateNumber}
+          </p>
+          <Badge variant={isInside ? 'success' : 'neutral'}>{isInside ? 'Inside' : 'Exited'}</Badge>
+        </>
+      }
+      meta={
+        <>
+          <p className="truncate">{who}</p>
+          <p className="tabular-nums">{when}</p>
+        </>
+      }
+      actions={
+        isInside ? (
           <Button variant="outline" size="sm" disabled={isMarkingExited} onClick={onMarkExited}>
             Mark exited
           </Button>
-        )}
-      </div>
-    </div>
+        ) : undefined
+      }
+    />
   );
 };

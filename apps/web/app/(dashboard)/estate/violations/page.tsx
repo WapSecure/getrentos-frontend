@@ -4,14 +4,7 @@ import { RedirectToEstateSetup } from '@/components/estate/shared/RedirectToEsta
 import { useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { TriangleAlert, Plus } from '@sureground/icons';
-import {
-  Button,
-  CardSkeleton,
-  EmptyState,
-  ListSkeleton,
-  ToggleChip,
-  PageHeader,
-} from '@sureground/ui';
+import { Button, CardSkeleton, EmptyState, ToggleChip, PageHeader } from '@sureground/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -20,6 +13,12 @@ import { ReportViolationModal } from '@/components/estate/violations/ReportViola
 import { CloseViolationModal } from '@/components/estate/violations/CloseViolationModal';
 import { ViolationCard } from '@/components/estate/violations/ViolationCard';
 import type { ViolationStatus } from '@/types/estate';
+import {
+  EstateFilterChips,
+  EstateListSection,
+  EstateListSkeleton,
+  EstateRowList,
+} from '@/components/estate/shared/EstateListSection';
 
 const statusFilters: { value: ViolationStatus | 'all'; label: string }[] = [
   { value: 'all', label: 'All' },
@@ -108,70 +107,85 @@ export default function EstateViolationsPage() {
 
   if (!estate) return <RedirectToEstateSetup />;
 
+  const activeFilter = statusFilters.find((filter) => filter.value === statusFilter)!;
+
   return (
     <>
       <PageHeader
         title="Violations"
-        description={
-          <>
-            {isViolationsLoading ? (
-              'Loading…'
-            ) : (
-              <>
-                {violations.length} violation{violations.length === 1 ? '' : 's'}
-              </>
-            )}{' '}
-            in {estate.name}
-          </>
-        }
+        description={`Estate rule breaches reported against households in ${estate.name}.`}
         actions={
-          <Button variant="primary" className="gap-2" onClick={() => setIsReportOpen(true)}>
-            <Plus className="w-4 h-4" />
+          <Button
+            variant="primary"
+            icon={<Plus className="h-4 w-4" />}
+            onClick={() => setIsReportOpen(true)}
+          >
             Report violation
           </Button>
         }
       />
 
-      <div
-        className="flex flex-wrap gap-2 mb-6"
-        role="group"
-        aria-label="Filter violations by status"
+      <EstateListSection
+        id="violations"
+        title={statusFilter === 'all' ? 'All violations' : activeFilter.label}
+        count={isViolationsLoading ? undefined : violations.length}
+        countLabel={`${violations.length} violation${violations.length === 1 ? '' : 's'}`}
+        description="Issue a warning, then resolve or dismiss each one with an optional note."
+        toolbar={
+          <EstateFilterChips label="Filter violations by status">
+            {statusFilters.map((filter) => (
+              <ToggleChip
+                key={filter.value}
+                size="sm"
+                pressed={statusFilter === filter.value}
+                onPressedChange={() => setStatusFilter(filter.value)}
+              >
+                {filter.label}
+              </ToggleChip>
+            ))}
+          </EstateFilterChips>
+        }
       >
-        {statusFilters.map((filter) => (
-          <ToggleChip
-            key={filter.value}
-            pressed={statusFilter === filter.value}
-            onPressedChange={() => setStatusFilter(filter.value)}
-          >
-            {filter.label}
-          </ToggleChip>
-        ))}
-      </div>
-
-      {isViolationsLoading ? (
-        <ListSkeleton rows={3} />
-      ) : violations.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12">
-          <EmptyState
-            icon={TriangleAlert}
-            title="No violations reported"
-            description="Report a household rule violation to start tracking it here."
-          />
-        </div>
-      ) : (
-        <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
-          {violations.map((violation) => (
-            <ViolationCard
-              key={violation.id}
-              violation={violation}
-              onWarn={() => warnMutation.mutate(violation.id)}
-              onResolve={() => setCloseTarget({ id: violation.id, action: 'resolve' })}
-              onDismiss={() => setCloseTarget({ id: violation.id, action: 'dismiss' })}
-              isUpdating={warnMutation.isPending || closeMutation.isPending}
+        {isViolationsLoading ? (
+          <EstateListSkeleton />
+        ) : violations.length === 0 ? (
+          statusFilter === 'all' ? (
+            <EmptyState
+              bare
+              icon={TriangleAlert}
+              title="No violations reported"
+              description="Report a household rule violation to start tracking it here."
             />
-          ))}
-        </div>
-      )}
+          ) : (
+            <EmptyState
+              bare
+              size="compact"
+              icon={TriangleAlert}
+              title={`No violations marked ${activeFilter.label.toLowerCase()}`}
+              description="Try another status, or show every violation."
+              action={
+                <Button variant="outline" size="sm" onClick={() => setStatusFilter('all')}>
+                  Show all violations
+                </Button>
+              }
+            />
+          )
+        ) : (
+          <EstateRowList>
+            {violations.map((violation) => (
+              <li key={violation.id}>
+                <ViolationCard
+                  violation={violation}
+                  onWarn={() => warnMutation.mutate(violation.id)}
+                  onResolve={() => setCloseTarget({ id: violation.id, action: 'resolve' })}
+                  onDismiss={() => setCloseTarget({ id: violation.id, action: 'dismiss' })}
+                  isUpdating={warnMutation.isPending || closeMutation.isPending}
+                />
+              </li>
+            ))}
+          </EstateRowList>
+        )}
+      </EstateListSection>
 
       <ReportViolationModal
         isOpen={isReportOpen}

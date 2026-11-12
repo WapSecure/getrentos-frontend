@@ -9,7 +9,6 @@ import {
   CardSkeleton,
   ConfirmDialog,
   EmptyState,
-  ListSkeleton,
   Pagination,
   useToast,
   PageHeader,
@@ -22,6 +21,11 @@ import { HouseholdCard } from '@/components/estate/households/HouseholdCard';
 import { HouseholdModal } from '@/components/estate/households/HouseholdModal';
 import { LinkResidentModal } from '@/components/estate/households/LinkResidentModal';
 import { ImportHouseholdsModal } from '@/components/estate/households/ImportHouseholdsModal';
+import {
+  EstateListSection,
+  EstateListSkeleton,
+  EstateRowList,
+} from '@/components/estate/shared/EstateListSection';
 import type { Household, ImportHouseholdsResult } from '@/types/estate';
 import { usePlanGateModal } from '@/hooks/usePlanGateModal';
 import { UpgradeToProModal } from '@/components/shared/subscription/UpgradeToProModal';
@@ -167,86 +171,86 @@ export default function EstateHouseholdsPage() {
     }
   };
 
+  const openAdd = () => {
+    setEditingHousehold(null);
+    setIsModalOpen(true);
+  };
+
   return (
     <>
       <PageHeader
         title="Households"
-        description={
-          <>
-            {isHouseholdsLoading ? (
-              'Loading…'
-            ) : (
-              <>
-                {total} household{total === 1 ? '' : 's'}
-              </>
-            )}{' '}
-            in {estate.name}
-          </>
-        }
+        description={`The homes in ${estate.name} and who lives in each.`}
         actions={
           <>
-            <Button variant="outline" className="gap-2" onClick={() => setIsImportOpen(true)}>
-              <Upload className="w-4 h-4" />
+            <Button
+              variant="outline"
+              icon={<Upload className="h-4 w-4" />}
+              onClick={() => setIsImportOpen(true)}
+            >
               Import CSV
               {!isPro && (
-                <Lock
-                  className="h-3.5 w-3.5 text-muted-foreground/70"
-                  aria-label="Pro plan feature"
-                />
+                <span
+                  className="ml-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-secondary text-muted-foreground"
+                  title="Pro plan feature"
+                >
+                  <Lock className="h-3 w-3" aria-hidden="true" />
+                  <span className="sr-only">Pro plan feature</span>
+                </span>
               )}
             </Button>
-            <Button
-              variant="primary"
-              className="gap-2"
-              onClick={() => {
-                setEditingHousehold(null);
-                setIsModalOpen(true);
-              }}
-            >
-              <Plus className="w-4 h-4" />
+            <Button variant="primary" icon={<Plus className="h-4 w-4" />} onClick={openAdd}>
               Add household
             </Button>
           </>
         }
       />
 
-      {isHouseholdsLoading ? (
-        <ListSkeleton rows={3} />
-      ) : households.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12">
+      <EstateListSection
+        id="households"
+        title="All households"
+        count={isHouseholdsLoading ? undefined : total}
+        countLabel={`${total} household${total === 1 ? '' : 's'}`}
+        description="Linking a resident's Sureground account gives them their own dashboard for that household."
+        footer={
+          total > PAGE_SIZE ? (
+            <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPageChange={setPage} />
+          ) : undefined
+        }
+      >
+        {isHouseholdsLoading ? (
+          <EstateListSkeleton />
+        ) : households.length === 0 ? (
           <EmptyState
+            bare
             icon={Users}
             title="No households yet"
-            description="Add the first household to start managing this estate's residents."
+            description="Add the first household by hand, or import a CSV of units and residents."
+            action={
+              <Button variant="outline" size="sm" onClick={openAdd}>
+                Add the first household
+              </Button>
+            }
           />
-        </div>
-      ) : (
-        <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
-          {households.map((household) => (
-            <HouseholdCard
-              key={household.id}
-              household={household}
-              onEdit={() => {
-                setEditingHousehold(household);
-                setIsModalOpen(true);
-              }}
-              onRemove={() => setConfirming({ kind: 'remove', household })}
-              onLinkResident={() => setLinkingHousehold(household)}
-              onUnlinkResident={() => setConfirming({ kind: 'unlink', household })}
-            />
-          ))}
-        </div>
-      )}
-
-      {total > 0 && (
-        <Pagination
-          page={page}
-          pageSize={PAGE_SIZE}
-          total={total}
-          onPageChange={setPage}
-          className="mt-6"
-        />
-      )}
+        ) : (
+          <EstateRowList>
+            {households.map((household) => (
+              <li key={household.id}>
+                <HouseholdCard
+                  household={household}
+                  onEdit={() => {
+                    setEditingHousehold(household);
+                    setIsModalOpen(true);
+                  }}
+                  onRemove={() => setConfirming({ kind: 'remove', household })}
+                  onLinkResident={() => setLinkingHousehold(household)}
+                  onUnlinkResident={() => setConfirming({ kind: 'unlink', household })}
+                />
+              </li>
+            ))}
+          </EstateRowList>
+        )}
+      </EstateListSection>
 
       <HouseholdModal
         key={editingHousehold?.id ?? 'new'}

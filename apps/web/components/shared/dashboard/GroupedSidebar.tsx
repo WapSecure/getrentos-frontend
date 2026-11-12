@@ -131,10 +131,13 @@ function SidebarLink({
         {item.label}
       </span>
       {item.locked && (
-        <Lock
-          className="sidebar-item-extra h-3.5 w-3.5 shrink-0 text-muted-foreground/70"
-          aria-label={`${PLAN_TIER_LABELS[item.lockedPlan ?? 'PRO']} plan feature`}
-        />
+        <span
+          className="sidebar-item-extra inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-border bg-card text-muted-foreground"
+          title={`${PLAN_TIER_LABELS[item.lockedPlan ?? 'PRO']} plan feature`}
+        >
+          <Lock className="h-3 w-3" aria-hidden="true" />
+          <span className="sr-only">{`${PLAN_TIER_LABELS[item.lockedPlan ?? 'PRO']} plan feature`}</span>
+        </span>
       )}
       {item.badge && <span className="sidebar-item-extra contents">{item.badge}</span>}
     </Link>
