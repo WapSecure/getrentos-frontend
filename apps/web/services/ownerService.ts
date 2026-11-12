@@ -21,6 +21,8 @@ import type { TrustProfile } from '@/types/trust-score';
 import type { AssistantReply, AssistantTurn } from '@/types/assistant';
 import type { VideoCallJoin } from '@sureground/shared';
 import { toApiPropertyType, toDisplayPropertyType } from '@/lib/propertyTypes';
+import type { CommercialDetails } from '@sureground/shared/showroom';
+import type { CommercialUpdatePayload } from '@/lib/commercialDetails';
 
 export interface OwnerDashboard {
   totalProperties: number;
@@ -279,8 +281,18 @@ export const ownerService = {
     amenities?: string[];
     /** Left out, the listing waits for review. */
     intent?: 'draft' | 'publish';
+    /** Commercial properties only; the API refuses it on any other type. */
+    commercial?: CommercialDetails;
   }) =>
     safeCall(() => authFetch('/owner/listings', { method: 'POST', body: JSON.stringify(data) })),
+  /** Every field is sent; null clears one. */
+  updateListingCommercial: (id: string, details: CommercialUpdatePayload) =>
+    safeCall(() =>
+      authFetch<OwnerSaleListingApi>(`/owner/listings/${id}/commercial`, {
+        method: 'PATCH',
+        body: JSON.stringify(details),
+      })
+    ),
   setListingStatus: (id: string, status: 'PUBLISHED' | 'PAUSED' | 'CLOSED') =>
     safeCall(() =>
       authFetch(`/owner/listings/${id}/status`, {

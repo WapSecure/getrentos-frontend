@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   EMPTY_COMMERCIAL,
   addLeaseTerm,
+  commercialDealCopy,
   commercialError,
   commercialFromDetails,
   commercialToCreatePayload,
@@ -89,4 +90,10 @@ test('form errors catch lease terms the API would refuse', () => {
   assert.match(terms([100]) ?? '', /1 to 99/);
   assert.match(terms([3, 3]) ?? '', /once/);
   assert.match(terms([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]) ?? '', /at most 10/);
+});
+
+test('a sale asks about the price and buyers; a let about the rent and renters', () => {
+  assert.deepEqual(commercialDealCopy('sale'), { audience: 'Buyers', amount: 'Price' });
+  assert.deepEqual(commercialDealCopy('rent'), { audience: 'Renters', amount: 'Rent' });
+  assert.deepEqual(commercialDealCopy(), { audience: 'Renters', amount: 'Rent' });
 });
