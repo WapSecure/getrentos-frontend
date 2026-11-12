@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { ROUTES } from '@sureground/shared';
 import { SITE_URL } from '@/lib/site';
+import { availableGuides } from '@/components/resources/availableGuides';
 import { listingPath, type PublicListingKind } from '@/lib/listingSlug';
 
 // Rebuilt at most hourly; listings are published and withdrawn through the day.
@@ -73,6 +74,7 @@ const publicRoutes: Array<{
   { path: '/sell', priority: 0.8, changeFrequency: 'monthly' },
   { path: '/agents', priority: 0.6, changeFrequency: 'monthly' },
   { path: '/about', priority: 0.5, changeFrequency: 'yearly' },
+  { path: '/resources', priority: 0.6, changeFrequency: 'monthly' },
   { path: ROUTES.PRICING, priority: 0.8, changeFrequency: 'monthly' },
   { path: '/privacy', priority: 0.3, changeFrequency: 'yearly' },
   { path: '/terms', priority: 0.3, changeFrequency: 'yearly' },
@@ -89,8 +91,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: route.priority ?? 0.5,
   }));
 
-  const listings = await Promise.all(
-    LISTING_SOURCES.map(({ kind, path }) => listingEntries(kind, path))
-  );
-  return [...staticEntries, ...listings.flat()];
+  const [listings, guides] = await Promise.all([
+    Promise.all(LISTING_SOURCES.map(({ kind, path }) => listingEntries(kind, path))),
+    availableGuides(),
+  ]);
+  const guideEntries = guides.map((guide) => ({
+    url: `${SITE_URL}/resources/${guide.slug}`,
+    lastModified: now,
+    changeFrequency: 'monthly' as const,
+    priority: 0.5,
+  }));
+  return [...staticEntries, ...guideEntries, ...listings.flat()];
 }

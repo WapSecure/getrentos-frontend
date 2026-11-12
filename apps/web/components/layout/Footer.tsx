@@ -28,6 +28,7 @@ const COLUMNS: { title: string; links: { label: string; href: string }[] }[] = [
       { label: 'Realtors and agencies', href: '/agents' },
       { label: 'Pricing', href: ROUTES.PRICING },
       { label: 'How it works', href: '/#how-it-works' },
+      { label: 'Guides', href: '/resources' },
       { label: 'Create an account', href: ROUTES.SIGNUP },
       { label: 'Sign in', href: ROUTES.LOGIN },
     ],
