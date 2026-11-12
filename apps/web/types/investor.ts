@@ -7,6 +7,8 @@ export {
   INVESTMENT_HORIZONS,
   INVESTOR_PROPERTY_TYPES,
   OWNERSHIP_STRUCTURES,
+  SUMMARY_CHANNELS,
+  SUMMARY_FREQUENCIES,
   type BudgetBand,
   type DisplayCurrency,
   type IntendedUse,
@@ -22,6 +24,8 @@ export {
   type InvestorStatusCounts,
   type OwnershipStructure,
   type RiskDeclaration,
+  type SummaryChannel,
+  type SummaryFrequency,
 } from '@sureground/shared';
 
 // Investment analysis of an eligible listing (DIA-19), naira only.
