@@ -1,25 +1,20 @@
 import { test, expect, type BrowserContext, type Page, type Route } from '@playwright/test';
+import { fulfillSessionRefresh, isSessionRefresh } from './helpers/session';
 
 test.setTimeout(90_000);
 const textQueueKey = 'sureground.agent.offline-queue';
 
-// The web access token lives in memory only (AU-16): every page load restores it through
-// POST /auth/refresh with the httpOnly cookie. The mock plays that cookie for the signed-in agent.
+// Plays the refresh cookie (see helpers/session): whose session /auth/refresh restores.
 const session = { userId: 'agent-queue-test', refreshes: 0 };
-
-function accessToken(sub: string) {
-  const payload = { sub, exp: Math.floor(Date.now() / 1000) + 3600 };
-  return `test.${Buffer.from(JSON.stringify(payload)).toString('base64')}.test`;
-}
 
 async function mockApi(target: Page | BrowserContext, handler: (route: Route) => unknown) {
   // The realtime socket would otherwise hang in its handshake against the dev server; Chrome lets
   // only one WebSocket per host connect at a time, so a second tab's HMR socket (and hydration) waits.
   await target.routeWebSocket(/\/socket\.io\//, (ws) => ws.close());
   await target.route('**/__qa_api/**', (route) => {
-    if (new URL(route.request().url()).pathname.endsWith('/auth/refresh')) {
+    if (isSessionRefresh(route)) {
       session.refreshes++;
-      return route.fulfill({ json: { accessToken: accessToken(session.userId) } });
+      return fulfillSessionRefresh(route, session.userId);
     }
     return handler(route);
   });

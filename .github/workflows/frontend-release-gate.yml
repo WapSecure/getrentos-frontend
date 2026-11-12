@@ -56,6 +56,12 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:e2e:design
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: design-e2e-results
+          path: test-results/design-system
+          retention-days: 7
 
   verify:
     runs-on: ubuntu-latest

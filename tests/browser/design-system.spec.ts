@@ -1,5 +1,6 @@
 import { test, expect, type Page, type TestInfo } from '@playwright/test';
 import { auditVisualPage } from './helpers/visualQa';
+import { fulfillSessionRefresh, isSessionRefresh } from './helpers/session';
 
 // Browser-only fixtures: never contact a payment provider or a live backend.
 const webURL = 'http://localhost:43130';
@@ -74,16 +75,14 @@ test.beforeEach(async ({ page }, testInfo) => {
   await page.addInitScript(
     ({ user, theme }) => {
       localStorage.setItem('theme', theme);
-      localStorage.setItem(
-        'sureground_auth_token',
-        `test.${btoa(JSON.stringify({ exp: Math.floor(Date.now() / 1000) + 3600 }))}.test`
-      );
       localStorage.setItem('sureground_user', JSON.stringify(user));
     },
     { user, theme: testInfo.project.name.endsWith('dark') ? 'dark' : 'light' }
   );
   await page.route('**/__qa_api/**', async (route) => {
     const path = new URL(route.request().url()).pathname.replace('/__qa_api', '');
+    // Restoring the session on load is not a save.
+    if (isSessionRefresh(route)) return fulfillSessionRefresh(route, user.id);
     // Unexpected writes must fail; visual review must never simulate a save.
     if (route.request().method() !== 'GET')
       return route.fulfill({ status: 405, json: { message: 'Read-only visual fixture' } });
