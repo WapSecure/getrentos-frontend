@@ -1,11 +1,9 @@
 'use client';
 
-import dynamic from 'next/dynamic';
-
 import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { Download, RefreshCcw, BarChart3, Check } from '@sureground/icons';
+import { Download, RefreshCcw, BarChart3, Building2, Check } from '@sureground/icons';
 import { InvestmentStatsCards } from '@/components/owner/analytics/InvestmentStatsCards';
 import {
   Button,
@@ -15,7 +13,7 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
-  Skeleton,
+  EmptyState,
   TableSkeleton,
   PageHeader,
   type Column,
@@ -30,13 +28,10 @@ import type { InvestmentMetrics } from '@/types/owner';
 import { usePlanTier } from '@/hooks/usePlanTier';
 import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
 
-const ROIComparisonChart = dynamic(
-  () => import('@/components/owner/analytics/ROIComparisonChart').then((m) => m.ROIComparisonChart),
-  {
-    ssr: false,
-    loading: () => <Skeleton className="h-64 rounded-xl" />,
-  }
-);
+const money = (amount: number | null | undefined) =>
+  typeof amount === 'number' ? formatCurrency(amount, { compact: true }) : null;
+const percent = (value: number | null | undefined) =>
+  typeof value === 'number' ? `${value.toFixed(1)}%` : '—';
 
 export default function OwnerAnalyticsPage() {
   const { isPro } = usePlanTier();
@@ -70,15 +65,6 @@ export default function OwnerAnalyticsPage() {
     );
   };
 
-  const totalInvested = metrics.reduce((sum, m) => sum + m.purchasePrice, 0);
-  const totalCurrentValue = metrics.reduce((sum, m) => sum + m.currentValue, 0);
-  const avgAppreciationRate = metrics.length
-    ? metrics.reduce((sum, m) => sum + m.appreciationRate, 0) / metrics.length
-    : 0;
-  const avgRoiPercentage = metrics.length
-    ? metrics.reduce((sum, m) => sum + m.roiPercentage, 0) / metrics.length
-    : 0;
-
   const compareMetrics = metrics.filter((m) => compareIds.includes(m.propertyId));
 
   const columns: Column<InvestmentMetrics>[] = [
@@ -110,40 +96,21 @@ export default function OwnerAnalyticsPage() {
       header: 'Purchase price',
       numeric: true,
       className: 'text-muted-foreground whitespace-nowrap',
-      render: (m) => formatCurrency(m.purchasePrice, { compact: true }),
+      render: (m) => money(m.purchasePrice) ?? 'No price recorded',
     },
     {
-      key: 'currentValue',
-      header: 'Current value',
+      key: 'askingPrice',
+      header: 'Asking price',
       numeric: true,
       className: 'text-muted-foreground whitespace-nowrap',
-      render: (m) => formatCurrency(m.currentValue, { compact: true }),
-    },
-    {
-      key: 'appreciation',
-      header: 'Appreciation',
-      numeric: true,
-      className: 'font-medium whitespace-nowrap',
-      render: (m) => (
-        <span className={m.appreciationRate >= 0 ? 'text-success' : 'text-destructive'}>
-          {m.appreciationRate >= 0 ? '+' : ''}
-          {m.appreciationRate.toFixed(1)}%
-        </span>
-      ),
+      render: (m) => money(m.askingPrice) ?? 'Not listed',
     },
     {
       key: 'rentalYield',
-      header: 'Rental yield',
+      header: 'Net yield (12 months)',
       numeric: true,
-      className: 'text-muted-foreground whitespace-nowrap',
-      render: (m) => (m.rentalYield !== undefined ? `${m.rentalYield.toFixed(1)}%` : '—'),
-    },
-    {
-      key: 'roi',
-      header: 'ROI',
-      numeric: true,
-      className: 'font-bold text-primary whitespace-nowrap',
-      render: (m) => `${m.roiPercentage.toFixed(1)}%`,
+      className: 'font-medium text-foreground whitespace-nowrap',
+      render: (m) => percent(m.rentalYield),
     },
     {
       key: 'actions',
@@ -168,7 +135,7 @@ export default function OwnerAnalyticsPage() {
     <>
       <PageHeader
         title="Investment analytics"
-        description="Performance and ROI across your property portfolio"
+        description="Figures from your records. We don't estimate property value yet."
         actions={
           isPro ? (
             <div className="flex gap-2">
@@ -203,18 +170,9 @@ export default function OwnerAnalyticsPage() {
 
       <ProFeatureGate
         title="Investment analytics is a Pro feature"
-        description="Upgrade to Pro to see ROI, appreciation, and rental yield across your portfolio, plus market comparables."
+        description="Upgrade to Pro to see purchase prices, asking prices and rental yield across your portfolio, plus market comparables."
       >
-        <InvestmentStatsCards
-          totalInvested={totalInvested}
-          totalCurrentValue={totalCurrentValue}
-          avgAppreciationRate={avgAppreciationRate}
-          avgRoiPercentage={avgRoiPercentage}
-        />
-
-        <div className="mb-6">
-          <ROIComparisonChart metrics={metrics} />
-        </div>
+        <InvestmentStatsCards metrics={metrics} />
 
         {isComparing && compareMetrics.length > 0 && (
           <div className="mb-6 bg-accent border border-primary/30 rounded-2xl p-4">
@@ -232,13 +190,13 @@ export default function OwnerAnalyticsPage() {
                 <div key={m.propertyId} className="bg-card rounded-xl p-3 border border-border">
                   <p className="text-sm font-medium text-foreground truncate">{m.propertyName}</p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Purchase: {formatCurrency(m.purchasePrice, { compact: true })}
+                    Purchase: {money(m.purchasePrice) ?? 'No price recorded'}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Current: {formatCurrency(m.currentValue, { compact: true })}
+                    Asking: {money(m.askingPrice) ?? 'Not listed'}
                   </p>
-                  <p className="text-sm font-bold text-primary mt-1">
-                    {m.roiPercentage.toFixed(1)}% ROI
+                  <p className="text-sm font-semibold text-foreground mt-1">
+                    Net rental yield {percent(m.rentalYield)}
                   </p>
                 </div>
               ))}
@@ -247,13 +205,20 @@ export default function OwnerAnalyticsPage() {
         )}
 
         {isLoadingMetrics ? (
-          <TableSkeleton rows={4} columns={6} />
+          <TableSkeleton rows={4} columns={4} />
         ) : (
           <DataTable
             caption="Investment performance by property"
             columns={columns}
             data={metrics}
             getRowKey={(m) => m.propertyId}
+            emptyState={
+              <EmptyState
+                icon={Building2}
+                title="No properties yet"
+                description="Add a property and its purchase price to see it here."
+              />
+            }
           />
         )}
 
