@@ -56,24 +56,12 @@ export const FraudAlertCard = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
+      // A click anywhere opens the alert for pointer users; keyboard and screen-reader users get the
+      // Details button below, because a role="button" card cannot contain the decision buttons.
       onClick={onOpen}
-      role={onOpen ? 'button' : undefined}
-      tabIndex={onOpen ? 0 : undefined}
-      onKeyDown={
-        onOpen
-          ? (event) => {
-              if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault();
-                onOpen();
-              }
-            }
-          : undefined
-      }
       className={cn(
         'rounded-2xl border border-border/90 bg-card p-4 shadow-sm transition-shadow duration-300',
-        onOpen
-          ? 'cursor-pointer hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring'
-          : ''
+        onOpen ? 'cursor-pointer hover:shadow-md' : ''
       )}
     >
       <div className="flex items-start justify-between gap-3">
@@ -100,6 +88,21 @@ export const FraudAlertCard = ({
           {formatRelativeTime(alert.detectedAt)}
         </span>
       </div>
+
+      {onOpen ? (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="mt-3 w-full"
+          aria-label={`Details of the alert on ${alert.subjectName}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpen();
+          }}
+        >
+          Details
+        </Button>
+      ) : null}
 
       {!isDecided && (
         <div className="flex gap-2 mt-3">
