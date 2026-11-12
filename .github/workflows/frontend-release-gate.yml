@@ -29,7 +29,26 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm test:e2e:agent-sync
+      # Stop early so a broken suite reports a failure instead of timing out as "cancelled".
+      - run: pnpm test:e2e:agent-sync --max-failures=3
+
+  design-e2e:
+    # Its own job, so a failing agent-sync suite can no longer stop it from running.
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CI: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.34.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.1
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:e2e:design
 
   marketing-a11y:
