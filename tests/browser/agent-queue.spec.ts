@@ -469,7 +469,7 @@ for (const type of ['inspection', 'verification', 'document', 'message']) {
         });
         await page
           .getByRole('dialog')
-          .getByRole('button', { name: 'Upload Document', exact: true })
+          .getByRole('button', { name: 'Upload document', exact: true })
           .click();
       } else if (type === 'message') {
         await page.getByRole('button', { name: /Capture contact/ }).click();
