@@ -5,7 +5,14 @@ import { useRouter } from 'next/navigation';
 import { ROUTES } from '@/lib/constants/auth';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FileText } from '@sureground/icons';
-import { Pagination, EmptyState, ToggleChip, useToast, PageHeader } from '@sureground/ui';
+import {
+  ConfirmDialog,
+  Pagination,
+  EmptyState,
+  ToggleChip,
+  useToast,
+  PageHeader,
+} from '@sureground/ui';
 import { ApplicationCard } from '@/components/landlord/applications/ApplicationCard';
 import { ApplicationDetailsModal } from '@/components/landlord/applications/ApplicationDetailsModal';
 import { RequestInfoDialog } from '@/components/landlord/applications/RequestInfoDialog';
@@ -32,6 +39,10 @@ export default function LandlordApplicationsPage() {
   const [filter, setFilter] = useState<'all' | ApplicationStatus>('all');
   const [selectedApplication, setSelectedApplication] = useState<RentalApplication | null>(null);
   const [requestingInfo, setRequestingInfo] = useState<RentalApplication | null>(null);
+  const [deciding, setDeciding] = useState<{
+    status: 'approved' | 'rejected';
+    application: RentalApplication;
+  } | null>(null);
   const toast = useToast();
   const router = useRouter();
 
@@ -84,8 +95,15 @@ export default function LandlordApplicationsPage() {
     onError: (error: Error) => toast.error(error.message || 'That change was not saved.'),
   });
 
-  const handleApprove = (id: string) => updateStatusMutation.mutate({ id, status: 'approved' });
-  const handleReject = (id: string) => updateStatusMutation.mutate({ id, status: 'rejected' });
+  const findApplication = (id: string) =>
+    applications.find((a) => a.id === id) ??
+    (selectedApplication?.id === id ? selectedApplication : null);
+  const askToDecide = (status: 'approved' | 'rejected') => (id: string) => {
+    const application = findApplication(id);
+    if (application) setDeciding({ status, application });
+  };
+  const handleApprove = askToDecide('approved');
+  const handleReject = askToDecide('rejected');
   const handleRequestInfo = (id: string) => {
     setRequestingInfo(
       applications.find((a) => a.id === id) ??
@@ -181,6 +199,33 @@ export default function LandlordApplicationsPage() {
         key={requestingInfo?.id ?? 'none'}
         application={requestingInfo}
         onClose={() => setRequestingInfo(null)}
+      />
+
+      <ConfirmDialog
+        open={deciding !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeciding(null);
+        }}
+        tone={deciding?.status === 'approved' ? 'primary' : 'danger'}
+        title={
+          deciding?.status === 'approved' ? 'Approve this application?' : 'Reject this application?'
+        }
+        description={
+          !deciding
+            ? ''
+            : deciding.status === 'approved'
+              ? `${deciding.application.applicantName}'s application for ${deciding.application.propertyName} • ${deciding.application.unitName} is approved and we draft their lease. This can't be undone from here.`
+              : `${deciding.application.applicantName}'s application for ${deciding.application.propertyName} • ${deciding.application.unitName} is rejected. This can't be undone from here.`
+        }
+        confirmLabel={deciding?.status === 'approved' ? 'Approve' : 'Reject'}
+        onConfirm={() =>
+          deciding &&
+          updateStatusMutation.mutateAsync({
+            id: deciding.application.id,
+            status: deciding.status,
+          })
+        }
+        isLoading={updateStatusMutation.isPending}
       />
     </>
   );

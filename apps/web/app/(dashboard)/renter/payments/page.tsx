@@ -291,7 +291,10 @@ export default function PaymentsPage() {
 
   const removePaymentMethodMutation = useMutation({
     mutationFn: (id: string) => unwrap(renterService.removePaymentMethod(id)),
-    onSuccess: invalidatePaymentMethods,
+    onSuccess: () => {
+      void invalidatePaymentMethods();
+      toast.success('Payment method removed.');
+    },
     onError: (error: Error) =>
       pushNotification({
         type: 'error',
@@ -301,7 +304,7 @@ export default function PaymentsPage() {
   });
 
   const handleRemovePaymentMethod = async (id: string) => {
-    removePaymentMethodMutation.mutate(id);
+    await removePaymentMethodMutation.mutateAsync(id);
   };
 
   const tabNav = <HubTabs tabs={TABS} activeTab={activeTab} onChange={setTab} />;

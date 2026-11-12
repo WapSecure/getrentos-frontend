@@ -7,10 +7,12 @@ import { Megaphone, Plus } from '@sureground/icons';
 import {
   Button,
   CardSkeleton,
+  ConfirmDialog,
   EmptyState,
   ListSkeleton,
   Pagination,
   PageHeader,
+  useToast,
 } from '@sureground/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -27,6 +29,8 @@ export default function EstateAnnouncementsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
   const [page, setPage] = useState(1);
+  const [removing, setRemoving] = useState<Announcement | null>(null);
+  const toast = useToast();
 
   const { estate, isLoading: isEstateLoading } = useSelectedEstate();
 
@@ -75,7 +79,9 @@ export default function EstateAnnouncementsPage() {
     onSuccess: () => {
       invalidate();
       setPage((current) => (current > 1 && announcements.length === 1 ? current - 1 : current));
+      if (removing) toast.success(`"${removing.title}" deleted.`);
     },
+    onError: (error: Error) => toast.error(error.message || 'Unable to delete this announcement.'),
   });
 
   if (isEstateLoading) {
@@ -148,7 +154,7 @@ export default function EstateAnnouncementsPage() {
                 setEditingAnnouncement(announcement);
                 setIsModalOpen(true);
               }}
-              onRemove={() => removeAnnouncement.mutate(announcement.id)}
+              onRemove={() => setRemoving(announcement)}
             />
           ))}
         </div>
@@ -175,6 +181,22 @@ export default function EstateAnnouncementsPage() {
         }}
         onSubmit={handleSubmit}
         isSubmitting={createAnnouncement.isPending || updateAnnouncement.isPending}
+      />
+
+      <ConfirmDialog
+        open={removing !== null}
+        onOpenChange={(open) => {
+          if (!open) setRemoving(null);
+        }}
+        title="Delete this announcement?"
+        description={
+          removing
+            ? `"${removing.title}" is deleted and households in ${estate.name} will no longer see it. This can't be undone.`
+            : ''
+        }
+        confirmLabel="Delete"
+        onConfirm={() => removing && removeAnnouncement.mutateAsync(removing.id)}
+        isLoading={removeAnnouncement.isPending}
       />
     </>
   );

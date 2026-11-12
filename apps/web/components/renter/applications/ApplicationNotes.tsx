@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Edit2, Trash2, Clock, StickyNote } from '@sureground/icons';
-import { Alert, Button, EmptyState, IconButton, Textarea } from '@sureground/ui';
+import { Alert, Button, ConfirmDialog, EmptyState, IconButton, Textarea } from '@sureground/ui';
 
 interface Note {
   id: string;
@@ -20,6 +20,8 @@ interface ApplicationNotesProps {
   onEditNote: (id: string, content: string) => Promise<boolean>;
 }
 
+const previewText = (text: string) => (text.length > 80 ? `${text.slice(0, 80).trimEnd()}…` : text);
+
 export const ApplicationNotes = ({
   notes,
   onAddNote,
@@ -32,6 +34,7 @@ export const ApplicationNotes = ({
   const [editContent, setEditContent] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [confirmingDelete, setConfirmingDelete] = useState<Note | null>(null);
 
   const handleAddNote = async () => {
     if (!content.trim() || isSaving) return;
@@ -182,7 +185,7 @@ export const ApplicationNotes = ({
                       icon={<Trash2 />}
                       size="sm"
                       variant="danger"
-                      onClick={() => onDeleteNote(note.id)}
+                      onClick={() => setConfirmingDelete(note)}
                     />
                   </div>
                 </div>
@@ -191,6 +194,22 @@ export const ApplicationNotes = ({
           </motion.div>
         ))}
       </div>
+
+      <ConfirmDialog
+        open={confirmingDelete !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirmingDelete(null);
+        }}
+        title="Delete this note?"
+        description={
+          confirmingDelete
+            ? `"${previewText(confirmingDelete.content)}" will be deleted from this application. This can't be undone.`
+            : ''
+        }
+        confirmLabel="Delete"
+        tone="danger"
+        onConfirm={() => confirmingDelete && onDeleteNote(confirmingDelete.id)}
+      />
     </div>
   );
 };

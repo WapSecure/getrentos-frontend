@@ -18,6 +18,7 @@ import {
   Badge,
   Button,
   Card,
+  ConfirmDialog,
   EmptyState,
   IconButton,
   ListSkeleton,
@@ -31,6 +32,8 @@ export const SavedSearchesList = () => {
   const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [confirmingDelete, setConfirmingDelete] = useState<SavedSearch | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const toast = useToast();
 
   useEffect(() => {
@@ -59,10 +62,18 @@ export const SavedSearchesList = () => {
     }
   };
 
-  const deleteSearch = async (id: string) => {
-    const res = await renterService.deleteSavedSearch(id);
-    if (res.success) {
-      setSavedSearches((prev) => prev.filter((s) => s.id !== id));
+  const deleteSearch = async (search: SavedSearch) => {
+    setIsDeleting(true);
+    try {
+      const res = await renterService.deleteSavedSearch(search.id);
+      if (!res.success) {
+        toast.error('The saved search could not be deleted. Please try again.');
+        throw new Error('delete failed');
+      }
+      setSavedSearches((prev) => prev.filter((s) => s.id !== search.id));
+      toast.success(`"${search.name}" deleted.`);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -193,7 +204,11 @@ export const SavedSearchesList = () => {
                       <div className="flex shrink-0 gap-1">
                         <IconButton
                           size="sm"
-                          label={search.alertsEnabled ? 'Disable alerts' : 'Enable alerts'}
+                          label={
+                            search.alertsEnabled
+                              ? `Turn off alerts for ${search.name}`
+                              : `Turn on alerts for ${search.name}`
+                          }
                           aria-pressed={search.alertsEnabled}
                           onClick={() => toggleAlerts(search.id)}
                           className={search.alertsEnabled ? 'text-success' : undefined}
@@ -203,7 +218,7 @@ export const SavedSearchesList = () => {
                           size="sm"
                           variant="danger"
                           label={`Delete saved search ${search.name}`}
-                          onClick={() => deleteSearch(search.id)}
+                          onClick={() => setConfirmingDelete(search)}
                           icon={<Trash2 />}
                         />
                       </div>
@@ -224,6 +239,23 @@ export const SavedSearchesList = () => {
           </div>
         ))}
       </div>
+
+      <ConfirmDialog
+        open={confirmingDelete !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirmingDelete(null);
+        }}
+        title="Delete this saved search?"
+        description={
+          confirmingDelete
+            ? `"${confirmingDelete.name}" will be deleted and you will stop getting alerts for it. This can't be undone.`
+            : ''
+        }
+        confirmLabel="Delete"
+        tone="danger"
+        isLoading={isDeleting}
+        onConfirm={() => confirmingDelete && deleteSearch(confirmingDelete)}
+      />
     </Card>
   );
 };

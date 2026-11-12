@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Trash2 } from '@sureground/icons';
 import {
@@ -13,6 +14,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  ConfirmDialog,
   DescriptionList,
   IconButton,
   QueryState,
@@ -28,6 +30,7 @@ const isCancelled = (err: unknown) =>
 export function PasskeySettings() {
   const queryClient = useQueryClient();
   const toast = useToast();
+  const [pendingRemoval, setPendingRemoval] = useState<{ id: string; name: string } | null>(null);
 
   const list = useQuery({
     queryKey: adminKeys.passkeys,
@@ -103,7 +106,12 @@ export function PasskeySettings() {
                       label="Remove passkey"
                       icon={<Trash2 />}
                       disabled={remove.isPending}
-                      onClick={() => remove.mutate(passkey.id)}
+                      onClick={() =>
+                        setPendingRemoval({
+                          id: passkey.id,
+                          name: passkey.deviceName || 'Passkey',
+                        })
+                      }
                     />
                   </span>
                 ),
@@ -112,6 +120,22 @@ export function PasskeySettings() {
           )}
         </QueryState>
       </CardContent>
+      <ConfirmDialog
+        open={!!pendingRemoval}
+        onOpenChange={(open) => !open && setPendingRemoval(null)}
+        title="Remove this passkey?"
+        description={
+          pendingRemoval
+            ? `You will no longer be able to sign in or confirm actions with "${pendingRemoval.name}". This cannot be undone, but you can add a passkey again later.`
+            : ''
+        }
+        confirmLabel="Remove"
+        tone="danger"
+        isLoading={remove.isPending}
+        onConfirm={async () => {
+          if (pendingRemoval) await remove.mutateAsync(pendingRemoval.id);
+        }}
+      />
     </Card>
   );
 }

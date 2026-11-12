@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View } from 'react-native';
+import { Alert, View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Pencil, Plus, Trash2 } from '@sureground/icons/native';
 import {
@@ -93,7 +93,20 @@ function WishlistManageBody() {
                 setEditingId(null);
               }}
               onCancelEdit={() => setEditingId(null)}
-              onDelete={() => removeMutation.mutate(w.id)}
+              onDelete={() =>
+                Alert.alert(
+                  'Delete this wishlist?',
+                  `"${w.name}" will be deleted and the ${w.count} ${w.count === 1 ? 'home' : 'homes'} in it will no longer be saved there. This cannot be undone.`,
+                  [
+                    { text: 'Cancel', style: 'cancel' },
+                    {
+                      text: 'Delete',
+                      style: 'destructive',
+                      onPress: () => removeMutation.mutate(w.id),
+                    },
+                  ]
+                )
+              }
               busy={renameMutation.isPending || removeMutation.isPending}
             />
             <Divider style={{ marginTop: spacing.sm }} />

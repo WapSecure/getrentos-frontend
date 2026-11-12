@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { DoorOpen, Trash2 } from '@sureground/icons';
 import {
   Button,
+  ConfirmDialog,
   Dialog,
   DialogContent,
   DialogTitle,
@@ -29,6 +30,7 @@ export const ManageGatesModal = ({ isOpen, estateId, onClose }: ManageGatesModal
   const queryClient = useQueryClient();
   const [name, setName] = useState('');
   const [location, setLocation] = useState('');
+  const [deleting, setDeleting] = useState<{ id: string; name: string } | null>(null);
 
   const { data: gates, isLoading } = useQuery({
     queryKey: estateKeys.gates(estateId),
@@ -65,76 +67,94 @@ export const ManageGatesModal = ({ isOpen, estateId, onClose }: ManageGatesModal
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(next) => !next && handleClose()}>
-      <DialogContent size="sm">
-        <DialogTitle className="text-lg font-semibold text-foreground">Manage gates</DialogTitle>
+    <>
+      <Dialog open={isOpen} onOpenChange={(next) => !next && handleClose()}>
+        <DialogContent size="sm">
+          <DialogTitle className="text-lg font-semibold text-foreground">Manage gates</DialogTitle>
 
-        <div className="mt-4">
-          {isLoading ? (
-            <ListSkeleton rows={2} label="Loading gates" />
-          ) : !gates || gates.length === 0 ? (
-            <EmptyState
-              icon={DoorOpen}
-              size="compact"
-              title="No gates configured yet"
-              description="Add one below if this estate has more than one entrance."
-            />
-          ) : (
-            <div className="divide-y divide-border rounded-lg border border-border">
-              {gates.map((gate) => (
-                <div key={gate.id} className="p-3 flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{gate.name}</p>
-                    {gate.location && (
-                      <p className="text-xs text-muted-foreground truncate">{gate.location}</p>
-                    )}
+          <div className="mt-4">
+            {isLoading ? (
+              <ListSkeleton rows={2} label="Loading gates" />
+            ) : !gates || gates.length === 0 ? (
+              <EmptyState
+                icon={DoorOpen}
+                size="compact"
+                title="No gates configured yet"
+                description="Add one below if this estate has more than one entrance."
+              />
+            ) : (
+              <div className="divide-y divide-border rounded-lg border border-border">
+                {gates.map((gate) => (
+                  <div key={gate.id} className="p-3 flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{gate.name}</p>
+                      {gate.location && (
+                        <p className="text-xs text-muted-foreground truncate">{gate.location}</p>
+                      )}
+                    </div>
+                    <IconButton
+                      label={`Delete ${gate.name}`}
+                      icon={<Trash2 />}
+                      variant="danger"
+                      size="sm"
+                      onClick={() => setDeleting({ id: gate.id, name: gate.name })}
+                      disabled={deleteGate.isPending}
+                    />
                   </div>
-                  <IconButton
-                    label={`Delete ${gate.name}`}
-                    icon={<Trash2 />}
-                    variant="danger"
-                    size="sm"
-                    onClick={() => deleteGate.mutate(gate.id)}
-                    disabled={deleteGate.isPending}
-                  />
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className="mt-6 space-y-3">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <Field label="Gate name" required>
-              <Input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Main gate"
-              />
-            </Field>
-            <Field label="Location" optionalLabel="(optional)">
-              <AddressInput
-                kind="any"
-                allowManual
-                value={location ? { text: location } : null}
-                onChange={(next) => setLocation(next?.text ?? '')}
-                placeholder="e.g. Admiralty Way"
-              />
-            </Field>
+                ))}
+              </div>
+            )}
           </div>
-          <Button
-            variant="primary"
-            fullWidth
-            disabled={!name.trim()}
-            isLoading={createGate.isPending}
-            loadingText="Adding…"
-            onClick={() => createGate.mutate()}
-          >
-            Add gate
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+
+          <div className="mt-6 space-y-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <Field label="Gate name" required>
+                <Input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g. Main gate"
+                />
+              </Field>
+              <Field label="Location" optionalLabel="(optional)">
+                <AddressInput
+                  kind="any"
+                  allowManual
+                  value={location ? { text: location } : null}
+                  onChange={(next) => setLocation(next?.text ?? '')}
+                  placeholder="e.g. Admiralty Way"
+                />
+              </Field>
+            </div>
+            <Button
+              variant="primary"
+              fullWidth
+              disabled={!name.trim()}
+              isLoading={createGate.isPending}
+              loadingText="Adding…"
+              onClick={() => createGate.mutate()}
+            >
+              Add gate
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <ConfirmDialog
+        open={deleting !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeleting(null);
+        }}
+        title="Delete this gate?"
+        description={
+          deleting
+            ? `"${deleting.name}" is removed from this estate's gates. This can't be undone.`
+            : ''
+        }
+        confirmLabel="Delete"
+        onConfirm={() => deleting && deleteGate.mutateAsync(deleting.id)}
+        isLoading={deleteGate.isPending}
+      />
+    </>
   );
 };

@@ -130,6 +130,7 @@ export const SecuritySettings = () => {
     queryFn: () => unwrap(accountSecurityService.listPasskeys()),
   });
   const passkeys = passkeyData?.passkeys ?? [];
+  const [removingPasskey, setRemovingPasskey] = useState<{ id: string; name: string } | null>(null);
 
   const addPasskeyMutation = useMutation({
     mutationFn: async () => {
@@ -291,14 +292,33 @@ export const SecuritySettings = () => {
                   </div>
                   <IconButton
                     size="sm"
-                    label="Remove passkey"
+                    label={`Remove ${pk.deviceName || 'passkey'}`}
                     icon={<Trash2 />}
-                    onClick={() => removePasskeyMutation.mutate(pk.id)}
+                    onClick={() =>
+                      setRemovingPasskey({ id: pk.id, name: pk.deviceName || 'Passkey' })
+                    }
                   />
                 </li>
               ))}
             </ul>
           )}
+          <ConfirmDialog
+            open={removingPasskey !== null}
+            onOpenChange={(open) => {
+              if (!open) setRemovingPasskey(null);
+            }}
+            title="Remove this passkey?"
+            description={
+              removingPasskey
+                ? `"${removingPasskey.name}" is removed from your account and you will no longer be able to sign in with it. To use it again you would need to add it as a new passkey.`
+                : ''
+            }
+            confirmLabel="Remove"
+            onConfirm={() =>
+              removingPasskey && removePasskeyMutation.mutateAsync(removingPasskey.id)
+            }
+            isLoading={removePasskeyMutation.isPending}
+          />
         </div>
 
         <div className="p-4 rounded-lg border border-border">

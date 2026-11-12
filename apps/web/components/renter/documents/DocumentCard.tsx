@@ -110,7 +110,11 @@ export const DocumentCard = ({
 
   const favoriteButton = (
     <IconButton
-      label={document.isFavorite ? 'Remove favorite' : 'Add favorite'}
+      label={
+        document.isFavorite
+          ? `Remove ${document.name} from favorites`
+          : `Add ${document.name} to favorites`
+      }
       size="sm"
       aria-pressed={document.isFavorite}
       onClick={handleFavoriteClick}

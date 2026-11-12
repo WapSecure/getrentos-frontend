@@ -8,6 +8,7 @@ import {
 } from 'react';
 import Link from 'next/link';
 import { cn } from '@sureground/shared';
+import { Tooltip } from './Tooltip';
 
 export interface IconButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
   /** Required: an icon alone has no name for a screen reader. Also shown as the tooltip. */
@@ -51,34 +52,35 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
     },
     ref
   ) => (
-    <button
-      {...rest}
-      ref={ref}
-      type={type ?? 'button'}
-      aria-label={rest['aria-label'] ?? label}
-      title={title ?? label}
-      aria-busy={isLoading || undefined}
-      disabled={disabled || isLoading}
-      className={cn(
-        'inline-flex shrink-0 items-center justify-center rounded-lg transition-[background-color,border-color,color] duration-150',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
-        'disabled:pointer-events-none disabled:opacity-50',
-        VARIANTS[variant],
-        SIZES[size],
-        className
-      )}
-    >
-      {isLoading ? (
-        <span
-          aria-hidden="true"
-          className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent motion-reduce:animate-none"
-        />
-      ) : (
-        <span aria-hidden="true" className="inline-flex">
-          {icon}
-        </span>
-      )}
-    </button>
+    <Tooltip content={title ?? label}>
+      <button
+        {...rest}
+        ref={ref}
+        type={type ?? 'button'}
+        aria-label={rest['aria-label'] ?? label}
+        aria-busy={isLoading || undefined}
+        disabled={disabled || isLoading}
+        className={cn(
+          'inline-flex shrink-0 items-center justify-center rounded-lg transition-[background-color,border-color,color] duration-150',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+          'disabled:pointer-events-none disabled:opacity-50',
+          VARIANTS[variant],
+          SIZES[size],
+          className
+        )}
+      >
+        {isLoading ? (
+          <span
+            aria-hidden="true"
+            className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent motion-reduce:animate-none"
+          />
+        ) : (
+          <span aria-hidden="true" className="inline-flex">
+            {icon}
+          </span>
+        )}
+      </button>
+    </Tooltip>
   )
 );
 
@@ -129,28 +131,31 @@ export const IconLink = forwardRef<HTMLAnchorElement, IconLinkProps>(
       ...rest,
       ref,
       'aria-label': rest['aria-label'] ?? label,
-      title: title ?? label,
       className: classes,
     };
     const external =
       /^[a-z][a-z\d+.-]*:/i.test(href) || target === '_blank' || download !== undefined;
     if (!external) {
       return (
-        <Link href={href} {...shared}>
-          {content}
-        </Link>
+        <Tooltip content={title ?? label}>
+          <Link href={href} {...shared}>
+            {content}
+          </Link>
+        </Tooltip>
       );
     }
     return (
-      <a
-        href={href}
-        target={target}
-        rel={rel ?? (target === '_blank' ? 'noopener noreferrer' : undefined)}
-        download={download}
-        {...shared}
-      >
-        {content}
-      </a>
+      <Tooltip content={title ?? label}>
+        <a
+          href={href}
+          target={target}
+          rel={rel ?? (target === '_blank' ? 'noopener noreferrer' : undefined)}
+          download={download}
+          {...shared}
+        >
+          {content}
+        </a>
+      </Tooltip>
     );
   }
 );

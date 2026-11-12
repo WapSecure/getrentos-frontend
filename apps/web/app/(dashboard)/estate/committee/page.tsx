@@ -8,11 +8,13 @@ import {
   Badge,
   Button,
   CardSkeleton,
+  ConfirmDialog,
   EmptyState,
   IconButton,
   ListSkeleton,
   Select,
   PageHeader,
+  useToast,
 } from '@sureground/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -48,6 +50,12 @@ export default function EstateCommitteePage() {
   const queryClient = useQueryClient();
   const [householdId, setHouseholdId] = useState('');
   const [title, setTitle] = useState<CommitteeTitle>('member');
+  const [removing, setRemoving] = useState<{
+    id: string;
+    residentName: string;
+    title: CommitteeTitle;
+  } | null>(null);
+  const toast = useToast();
 
   const { estate, isLoading: isEstateLoading } = useSelectedEstate();
 
@@ -85,7 +93,11 @@ export default function EstateCommitteePage() {
   const removeMember = useMutation({
     mutationFn: (memberId: string) =>
       unwrap(estateService.removeCommitteeMember(estate!.id, memberId)),
-    onSuccess: invalidateCommittee,
+    onSuccess: () => {
+      invalidateCommittee();
+      if (removing) toast.success(`${removing.residentName} removed from the committee.`);
+    },
+    onError: (error: Error) => toast.error(error.message || 'Unable to remove this member.'),
   });
 
   if (isEstateLoading) {
@@ -161,7 +173,13 @@ export default function EstateCommitteePage() {
                   icon={<Trash2 />}
                   variant="danger"
                   size="sm"
-                  onClick={() => removeMember.mutate(member.id)}
+                  onClick={() =>
+                    setRemoving({
+                      id: member.id,
+                      residentName: member.residentName,
+                      title: member.title,
+                    })
+                  }
                   disabled={removeMember.isPending}
                 />
               </div>
@@ -169,6 +187,22 @@ export default function EstateCommitteePage() {
           ))}
         </div>
       )}
+
+      <ConfirmDialog
+        open={removing !== null}
+        onOpenChange={(open) => {
+          if (!open) setRemoving(null);
+        }}
+        title="Remove this committee member?"
+        description={
+          removing
+            ? `${removing.residentName} loses their ${titleLabel[removing.title].toLowerCase()} seat on the committee. You can appoint their household again later.`
+            : ''
+        }
+        confirmLabel="Remove"
+        onConfirm={() => removing && removeMember.mutateAsync(removing.id)}
+        isLoading={removeMember.isPending}
+      />
     </>
   );
 }

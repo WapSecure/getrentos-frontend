@@ -757,9 +757,22 @@ function PasskeySection() {
             {pk.deviceName || 'Passkey'}
           </Text>
           <Pressable
-            onPress={() => removeMutation.mutate(pk.id)}
+            onPress={() =>
+              Alert.alert(
+                'Remove this passkey?',
+                `You will no longer be able to sign in or confirm actions with ${pk.deviceName || 'this passkey'}. This cannot be undone, but you can add a passkey again later.`,
+                [
+                  { text: 'Cancel', style: 'cancel' },
+                  {
+                    text: 'Remove',
+                    style: 'destructive',
+                    onPress: () => removeMutation.mutate(pk.id),
+                  },
+                ]
+              )
+            }
             accessibilityRole="button"
-            accessibilityLabel="Remove passkey"
+            accessibilityLabel={`Remove passkey ${pk.deviceName || ''}`.trim()}
             hitSlop={8}
           >
             <Trash2 size={16} color={colors.destructive} />

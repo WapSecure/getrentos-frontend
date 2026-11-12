@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Bell, X, Save } from '@sureground/icons';
 import {
   Button,
+  ConfirmDialog,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -39,6 +40,7 @@ export const SavedSearchAlert = ({ currentFilters, onApplyFilters }: SavedSearch
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
   const [searchName, setSearchName] = useState('');
+  const [confirmingDelete, setConfirmingDelete] = useState<SavedSearch | null>(null);
   const toast = useToast();
 
   const { data: savedSearches = [] } = useQuery({
@@ -81,15 +83,12 @@ export const SavedSearchAlert = ({ currentFilters, onApplyFilters }: SavedSearch
     ],
     invalidate: [renterKeys.savedSearches],
     errorMessage: 'That saved search could not be deleted. Please try again.',
+    successMessage: 'Saved search deleted.',
   });
 
   const handleSave = () => {
     if (!searchName.trim()) return;
     saveMutation.mutate({ name: searchName.trim(), filters: currentFilters });
-  };
-
-  const handleDelete = (id: string) => {
-    deleteMutation.mutate(id);
   };
 
   const handleApplySearch = (search: SavedSearch) => {
@@ -176,7 +175,7 @@ export const SavedSearchAlert = ({ currentFilters, onApplyFilters }: SavedSearch
                       icon={<X />}
                       size="sm"
                       variant="danger"
-                      onClick={() => handleDelete(search.id)}
+                      onClick={() => setConfirmingDelete(search)}
                     />
                   </div>
                 ))}
@@ -185,6 +184,23 @@ export const SavedSearchAlert = ({ currentFilters, onApplyFilters }: SavedSearch
           )}
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={confirmingDelete !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirmingDelete(null);
+        }}
+        title="Delete this saved search?"
+        description={
+          confirmingDelete
+            ? `"${confirmingDelete.name}" will be deleted and you will stop getting alerts for it. This can't be undone.`
+            : ''
+        }
+        confirmLabel="Delete"
+        tone="danger"
+        isLoading={deleteMutation.isPending}
+        onConfirm={() => confirmingDelete && deleteMutation.mutateAsync(confirmingDelete.id)}
+      />
     </>
   );
 };
