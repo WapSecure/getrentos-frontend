@@ -1,6 +1,6 @@
 # Sureground Diaspora Invest: assessment, requirements and plan
 
-Status: **M0–M4 done; payout groundwork in; M6 in review** · Started 2026-11-11
+Status: **M0–M4 and M6 done; payout groundwork in; M5 next (partly blocked by D1)** · Started 2026-11-11
 
 This is the working document for the Diaspora Invest programme. It records what the code already
 does (checked in the code, not taken from older docs), what is missing, the decisions only the
