@@ -45,8 +45,8 @@ export const lightColors: Palette = {
   mutedForeground: '#5c5e66',
   accent: '#efede8',
   accentForeground: '#20232b',
-  primary: '#20232b',
-  primaryHover: '#363a46',
+  primary: '#0057d9',
+  primaryHover: '#0049b8',
   primaryForeground: '#ffffff',
   destructive: '#c81e1e',
   destructiveForeground: '#ffffff',
@@ -59,7 +59,7 @@ export const lightColors: Palette = {
   warningSubtle: '#fbf0e2',
   purpleSubtle: '#f3eefb',
   destructiveSubtle: '#fdecec',
-  ring: 'rgba(32, 35, 43, 0.55)',
+  ring: 'rgba(0, 87, 217, 0.6)',
   scrim: 'rgba(20, 21, 26, 0.45)',
 };
 
@@ -75,9 +75,9 @@ export const darkColors: Palette = {
   mutedForeground: '#a9aab0',
   accent: '#26272d',
   accentForeground: '#f1efe9',
-  primary: '#f1efe9',
-  primaryHover: '#ffffff',
-  primaryForeground: '#15161a',
+  primary: '#7aa9ff',
+  primaryHover: '#94baff',
+  primaryForeground: '#111216',
   destructive: '#f05656',
   destructiveForeground: '#111113',
   info: '#7aa9ff',
@@ -89,7 +89,7 @@ export const darkColors: Palette = {
   warningSubtle: '#2e1f0a',
   purpleSubtle: '#251a3f',
   destructiveSubtle: '#3a1517',
-  ring: 'rgba(241, 239, 233, 0.6)',
+  ring: 'rgba(122, 169, 255, 0.65)',
   scrim: 'rgba(0, 0, 0, 0.6)',
 };
 

@@ -15,7 +15,7 @@ export const ClosingBand = ({ title, lead, actions }: ClosingBandProps) => (
         <h2 className="font-display text-[2.125rem] leading-[1.08] font-light tracking-[-0.01em] text-balance text-primary-foreground md:text-[3.25rem]">
           {title}
         </h2>
-        {lead ? <p className="mt-5 max-w-[52ch] text-primary-foreground/70">{lead}</p> : null}
+        {lead ? <p className="mt-5 max-w-[52ch] text-primary-foreground/90">{lead}</p> : null}
       </div>
       <div className="flex flex-wrap gap-3">{actions}</div>
     </Container>
