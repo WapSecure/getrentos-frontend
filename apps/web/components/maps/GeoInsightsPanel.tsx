@@ -20,10 +20,10 @@ import {
   Wallet,
 } from '@sureground/icons';
 import { PropertyMap, type MapMarker } from '@/components/maps/PropertyMap';
-import { Badge } from '@sureground/ui';
-import { Button } from '@sureground/ui';
-import { Field } from '@sureground/ui';
-import { Skeleton } from '@sureground/ui';
+import { Badge } from '@sureground/ui/Badge';
+import { Button } from '@sureground/ui/Button';
+import { Field } from '@sureground/ui/Field';
+import { Skeleton } from '@sureground/ui/Skeleton';
 import { renterService } from '@/services/renterService';
 import { publicMarketService } from '@/services/publicMarketService';
 import { AddressInput } from '@/components/shared/location/AddressInput';

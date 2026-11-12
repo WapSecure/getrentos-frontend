@@ -36,6 +36,10 @@ import {
   OWNERSHIP_LABELS,
   OWNERSHIP_STRUCTURES,
   PROPERTY_TYPE_LABELS,
+  SUMMARY_CHANNEL_LABELS,
+  SUMMARY_CHANNELS,
+  SUMMARY_FREQUENCIES,
+  SUMMARY_FREQUENCY_LABELS,
   isValidTimeZone,
   type BudgetBand,
   type DisplayCurrency,
@@ -46,6 +50,8 @@ import {
   type InvestorProfileInput,
   type InvestorPropertyType,
   type OwnershipStructure,
+  type SummaryChannel,
+  type SummaryFrequency,
 } from '@sureground/shared';
 import { investorApi } from '@/lib/api/investor';
 import { ApiError, errorMessage } from '@/lib/api/client';
@@ -127,6 +133,8 @@ interface Draft {
   budgetBand: BudgetBand | '';
   horizon: InvestmentHorizon | '';
   ownershipStructure: OwnershipStructure | '';
+  summaryFrequency: SummaryFrequency;
+  summaryChannels: SummaryChannel[];
 }
 
 const draftFrom = (p: InvestorProfile | null | undefined): Draft => ({
@@ -139,6 +147,8 @@ const draftFrom = (p: InvestorProfile | null | undefined): Draft => ({
   budgetBand: p?.budgetBand ?? '',
   horizon: p?.horizon ?? '',
   ownershipStructure: p?.ownershipStructure ?? '',
+  summaryFrequency: p?.summaryFrequency ?? 'NONE',
+  summaryChannels: p?.summaryChannels ?? ['EMAIL'],
 });
 
 type Errors = Partial<Record<keyof Draft, string>>;
@@ -264,6 +274,8 @@ function ProfileStep({
             nationality: draft.nationality.toUpperCase(),
             timeZone: draft.timeZone,
             displayCurrency: draft.displayCurrency,
+            summaryFrequency: draft.summaryFrequency,
+            summaryChannels: draft.summaryChannels,
           }
         : {
             intendedUses: draft.intendedUses,
@@ -321,6 +333,31 @@ function ProfileStep({
             <Text variant="caption" color="mutedForeground">
               Prices and payments stay in naira. Amounts in this currency are a guide only.
             </Text>
+            <RadioGroup
+              label="Summary of your purchases and properties"
+              variant="card"
+              value={draft.summaryFrequency}
+              onChange={(v) => set('summaryFrequency', v as SummaryFrequency)}
+              options={SUMMARY_FREQUENCIES.map((f) => ({
+                value: f,
+                label: SUMMARY_FREQUENCY_LABELS[f],
+              }))}
+            />
+            <Text variant="caption" color="mutedForeground">
+              Sent at 08:00 your time: what needs you, deposits under Payment Protection, jobs,
+              approvals and your latest statement.
+            </Text>
+            {draft.summaryFrequency !== 'NONE' ? (
+              <CheckList
+                label="Also send it by"
+                values={draft.summaryChannels}
+                options={SUMMARY_CHANNELS.map((c) => ({
+                  value: c,
+                  label: SUMMARY_CHANNEL_LABELS[c],
+                }))}
+                onToggle={(v) => set('summaryChannels', toggle(draft.summaryChannels, v))}
+              />
+            ) : null}
           </>
         ) : (
           <>

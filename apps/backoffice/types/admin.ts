@@ -387,6 +387,22 @@ export interface AdminMediaItem {
   deletedAt: string | null;
 }
 
+export interface AdminMediaHealth {
+  checkedAt: string;
+  stats: {
+    processingOverAnHour: number;
+    uploadingOverTwoDays: number;
+    rejectedLast24h: number;
+    rejectedDailyAverage7d: number;
+    storedFiles: number;
+    storedGb: number;
+    uploadedThisMonthGb: number;
+    legalHolds: number;
+  };
+  limits: { storageBudgetGb: number; monthlyUploadBudgetGb: number; processingBacklog: number };
+  alerts: { code: string; severity: 'warning' | 'critical'; message: string }[];
+}
+
 export interface AdminDocument {
   id: string;
   name: string;

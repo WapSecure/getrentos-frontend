@@ -4,7 +4,7 @@ import { Footer } from '@/components/layout/Footer';
 import { Navigation } from '@/components/layout/Navigation';
 
 export const metadata: Metadata = {
-  title: 'Pricing',
+  title: 'Pricing: Free and Pro plans for landlords, owners and realtors',
   description:
     'Free and Pro plans for landlords, estate managers, property owners and realtors on Sureground.',
   alternates: { canonical: '/pricing' },

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { trackShowroom } from '@/lib/showroomAnalytics';
 import { useMutation } from '@tanstack/react-query';
 import { useToast } from '@sureground/ui-native';
 import { buyerTransactionsApi, type BuyerTransaction } from '@/lib/api/buyerTransactions';
@@ -41,6 +42,12 @@ export function DepositPaySheet({
     onMutate: () => setProviderError(null),
     onSuccess: async (paid) => {
       close();
+      trackShowroom({
+        name: 'payment_started',
+        market: 'sale',
+        surface: 'app_purchase',
+        props: { kind: 'deposit' },
+      });
       if (paid.authorizationUrl) await checkout(paid.authorizationUrl, paid.reference);
       else if (paid.escrowStatus === 'funds_held')
         toast.show(`Paid.${paid.reference ? ` Reference ${paid.reference}.` : ''}`, 'success');

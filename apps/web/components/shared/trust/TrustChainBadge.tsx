@@ -1,5 +1,5 @@
 import { Clock, Shield, ShieldCheck } from '@sureground/icons';
-import { Badge, type BadgeVariant } from '@sureground/ui';
+import { Badge, type BadgeVariant } from '@sureground/ui/Badge';
 import { trustChainLabel, type TrustLabelTone } from '@sureground/shared';
 import type { PropertyTrustChain } from '@/types/renter';
 

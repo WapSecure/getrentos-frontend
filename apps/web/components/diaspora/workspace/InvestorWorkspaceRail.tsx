@@ -32,6 +32,8 @@ import {
   listLabels,
   OWNERSHIP_LABELS,
   PROPERTY_TYPE_LABELS,
+  SUMMARY_CHANNEL_LABELS,
+  SUMMARY_FREQUENCY_LABELS,
 } from '@sureground/shared';
 import { investorKeys } from '@/lib/queryKeys';
 import { foreignCheckBadges } from '@/lib/statusBadge';
@@ -80,6 +82,14 @@ export const ProfileSummaryCard = ({
       value: profile.ownershipStructure ? OWNERSHIP_LABELS[profile.ownershipStructure] : null,
     },
     { label: 'Property types', value: listLabels(profile.propertyTypes, PROPERTY_TYPE_LABELS) },
+    {
+      label: 'Summary',
+      value: SUMMARY_FREQUENCY_LABELS[profile.summaryFrequency ?? 'NONE'],
+      hint:
+        profile.summaryFrequency && profile.summaryFrequency !== 'NONE'
+          ? listLabels(profile.summaryChannels, SUMMARY_CHANNEL_LABELS) || 'Notifications only'
+          : undefined,
+    },
   ];
   if (risk) {
     details.push({

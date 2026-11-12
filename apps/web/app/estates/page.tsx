@@ -2,19 +2,19 @@ import type { Metadata } from 'next';
 import { Footer } from '@/components/layout/Footer';
 import { publicFetchInit } from '@/lib/publicFetch';
 import { Navigation } from '@/components/layout/Navigation';
+import { PageHero } from '@/components/marketing/PageHero';
 import { EstatesDirectoryBrowser } from '@/components/estate/EstatesDirectoryBrowser';
 import type { EstateDirectoryEntry } from '@/types/estate-marketplace';
 import type { Paginated } from '@/lib/apiHelpers';
 
 export const metadata: Metadata = {
-  title: 'Estates: Browse Properties by Estate',
+  title: 'Estates: browse homes by estate',
   description:
-    'Browse homes marketed by estates across Nigeria. See every property inside an estate: those its own team lists and those its residents own: and who is marketing each one.',
+    'Browse homes marketed by estates across Nigeria. See the live listings inside each estate, and whether the estate or the owner listed each one.',
   alternates: { canonical: '/estates' },
   openGraph: {
     title: 'Estates on Sureground',
-    description:
-      'Browse homes marketed by estates across Nigeria, and see who is marketing each one.',
+    description: 'Browse homes inside estates across Nigeria, and see who listed each one.',
     url: '/estates',
     type: 'website',
   },
@@ -40,10 +40,17 @@ export default async function EstatesDirectoryPage() {
   const initialData = await fetchFirstPage();
 
   return (
-    <main className="min-h-screen bg-background pt-16">
+    <>
       <Navigation />
-      <EstatesDirectoryBrowser initialData={initialData ?? undefined} />
+      <main id="main" className="bg-background">
+        <PageHero
+          eyebrow="Estates"
+          title="Estates on Sureground"
+          lead="Browse the properties marketed inside an estate: the ones its own team lists, and the ones owners in the estate list. Every home shows whether the estate is marketing it or its owner listed it."
+        />
+        <EstatesDirectoryBrowser initialData={initialData ?? undefined} />
+      </main>
       <Footer />
-    </main>
+    </>
   );
 }

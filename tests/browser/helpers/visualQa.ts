@@ -3,6 +3,13 @@ import { expect, type Page, type TestInfo } from '@playwright/test';
 
 type Finding = { kind: 'console' | 'page-error' | 'request' | 'response'; message: string };
 const ignoredRequestFailure = /ERR_ABORTED|NS_BINDING_ABORTED|cancelled/i;
+// E2E_API_OFFLINE=1 audits pages with no backend running: calls to the API origin are expected to fail.
+const offlineApiOrigin =
+  process.env.E2E_API_OFFLINE === '1' && process.env.NEXT_PUBLIC_API_URL
+    ? new URL(process.env.NEXT_PUBLIC_API_URL).origin
+    : null;
+const isOfflineApiCall = (url: string) =>
+  offlineApiOrigin !== null && url.startsWith(offlineApiOrigin);
 const slug = (path: string) =>
   path === '/'
     ? 'home'
@@ -14,7 +21,14 @@ const slug = (path: string) =>
 export async function auditVisualPage(page: Page, path: string, testInfo: TestInfo): Promise<void> {
   const findings: Finding[] = [];
   const onConsole = (message: { type: () => string; text: () => string }) => {
-    if (message.type() === 'error') findings.push({ kind: 'console', message: message.text() });
+    if (message.type() !== 'error') return;
+    // The browser logs each refused API call as a console error, and the app logs its own offline error.
+    if (
+      offlineApiOrigin &&
+      /Failed to load resource|ERR_CONNECTION_REFUSED|Unable to reach the server/.test(message.text())
+    )
+      return;
+    findings.push({ kind: 'console', message: message.text() });
   };
   const onPageError = (error: Error) =>
     findings.push({ kind: 'page-error', message: error.message });
@@ -23,6 +37,7 @@ export async function auditVisualPage(page: Page, path: string, testInfo: TestIn
     failure: () => { errorText: string } | null;
   }) => {
     const reason = request.failure()?.errorText ?? 'unknown failure';
+    if (isOfflineApiCall(request.url())) return;
     if (!ignoredRequestFailure.test(reason))
       findings.push({ kind: 'request', message: `${reason} ${request.url()}` });
   };
@@ -69,7 +84,7 @@ export async function auditVisualPage(page: Page, path: string, testInfo: TestIn
       };
     });
     const accessibility = await new AxeBuilder({ page })
-      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
       .analyze();
     const blockingViolations = accessibility.violations.filter(
       (violation) => violation.impact === 'critical' || violation.impact === 'serious'

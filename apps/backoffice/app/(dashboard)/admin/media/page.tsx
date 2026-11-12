@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { FolderOpen, ShieldCheck } from '@sureground/icons';
+import { Clock, Database, FolderOpen, Lock, ShieldCheck, Upload } from '@sureground/icons';
 import {
+  Alert,
   Badge,
   Button,
   ConfirmDialog,
@@ -13,6 +14,7 @@ import {
   PageHeader,
   Pagination,
   SearchInput,
+  StatCard,
   Switch,
   Tabs,
   TabsList,
@@ -23,7 +25,7 @@ import {
 import { formatDate, unwrap } from '@sureground/shared';
 import { adminService } from '@/services/adminService';
 import { adminKeys } from '@/lib/queryKeys';
-import type { AdminMediaItem } from '@/types/admin';
+import type { AdminMediaHealth, AdminMediaItem } from '@/types/admin';
 
 const PAGE_SIZE = 20;
 
@@ -57,6 +59,65 @@ function displayName(key: string): string {
   const name = key.slice(key.lastIndexOf('/') + 1);
   return (
     name.replace(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}-/i, '') || name
+  );
+}
+
+function formatGb(gb: number): string {
+  if (gb < 1) return `${Math.round(gb * 1024)} MB`;
+  return `${gb.toFixed(gb < 10 ? 2 : 1)} GB`;
+}
+
+function budgetNote(used: number, budget: number): string | undefined {
+  return budget > 0
+    ? `${Math.round((used / budget) * 100)}% of ${formatGb(budget)} budget`
+    : undefined;
+}
+
+/** Storage, uploads, backlog and holds from the hourly media health check, with any alerts on top. */
+function MediaHealthStrip({ health }: { health: AdminMediaHealth }) {
+  const { stats, limits, alerts } = health;
+  return (
+    <div className="mb-6 space-y-4">
+      {alerts.map((alert) => (
+        <Alert
+          key={alert.code}
+          variant={alert.severity === 'critical' ? 'danger' : 'warning'}
+          title={alert.severity === 'critical' ? 'Needs action' : 'Worth a look'}
+        >
+          {alert.message}
+        </Alert>
+      ))}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          icon={Database}
+          label="Stored"
+          value={formatGb(stats.storedGb)}
+          subtitle={
+            budgetNote(stats.storedGb, limits.storageBudgetGb) ??
+            `${stats.storedFiles} file${stats.storedFiles === 1 ? '' : 's'}`
+          }
+        />
+        <StatCard
+          icon={Upload}
+          label="Uploaded this month"
+          value={formatGb(stats.uploadedThisMonthGb)}
+          subtitle={budgetNote(stats.uploadedThisMonthGb, limits.monthlyUploadBudgetGb)}
+        />
+        <StatCard
+          icon={Clock}
+          label="Waiting over an hour"
+          value={stats.processingOverAnHour}
+          subtitle={`${stats.rejectedLast24h} rejected in the last 24 hours`}
+          accent={stats.processingOverAnHour > limits.processingBacklog ? 'orange' : 'emerald'}
+        />
+        <StatCard
+          icon={Lock}
+          label="Under legal hold"
+          value={stats.legalHolds}
+          subtitle={`Checked ${formatDate(health.checkedAt)}`}
+        />
+      </div>
+    </div>
   );
 }
 
@@ -94,6 +155,13 @@ export default function AdminMediaPage() {
     placeholderData: keepPreviousData,
   });
 
+  // Best-effort: the list works without it.
+  const health = useQuery({
+    queryKey: adminKeys.mediaHealth(),
+    queryFn: () => unwrap(adminService.getMediaHealth()),
+    staleTime: 60_000,
+  });
+
   const toggle = useMutation({
     mutationFn: (item: AdminMediaItem) =>
       unwrap(adminService.setMediaHold(item.objectKey, !item.legalHold, reason.trim())),
@@ -122,6 +190,8 @@ export default function AdminMediaPage() {
             : `Stored files, their access level and legal holds · ${total} file${total === 1 ? '' : 's'}`
         }
       />
+
+      {health.data && <MediaHealthStrip health={health.data} />}
 
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
         <SearchInput

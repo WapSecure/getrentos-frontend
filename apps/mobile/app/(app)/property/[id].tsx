@@ -52,6 +52,7 @@ import {
   ShowroomFacts,
   ShowroomPriceBar,
 } from '@/components/showroom/ShowroomParts';
+import { ShowroomQuestions } from '@/components/showroom/ShowroomQuestions';
 import { trackShowroom } from '@/lib/showroomAnalytics';
 import { fromRental, vatStated } from '@sureground/shared/showroom';
 import { ShowroomCommercial } from '@/components/showroom/ShowroomCommercial';
@@ -262,6 +263,14 @@ export default function PropertyDetail() {
                       ))}
                     </View>
                   </View>
+                ) : null}
+
+                {showroom ? (
+                  <ShowroomQuestions
+                    listing={showroom}
+                    // The same conversation as the message button up top.
+                    onAskLister={p.landlordId ? () => messageMutation.mutate() : undefined}
+                  />
                 ) : null}
 
                 <ListingCheckCard listingId={p.id} />

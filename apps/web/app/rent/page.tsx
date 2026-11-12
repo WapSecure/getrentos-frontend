@@ -1,15 +1,10 @@
 import type { Metadata } from 'next';
 import { Footer } from '@/components/layout/Footer';
-import { publicFetchInit } from '@/lib/publicFetch';
 import { Navigation } from '@/components/layout/Navigation';
 import { PublicMarketBrowser } from '@/components/market/PublicMarketBrowser';
-import {
-  firstPagePath,
-  rentToCard,
-  type PublicListingCard,
-  type RentApiItem,
-} from '@/lib/publicListingMap';
-import type { Paginated } from '@/lib/apiHelpers';
+import { firstPagePath, rentToCard } from '@/lib/publicListingMap';
+import { ListingItemListJsonLd } from '@/components/seo/ListingItemListJsonLd';
+import { fetchFirstPage, isFilteredView } from '@/lib/marketFirstPage';
 
 const baseMetadata: Metadata = {
   title: 'Homes to Rent in Nigeria',
@@ -37,23 +32,22 @@ export async function generateMetadata({
   return filtered ? { ...baseMetadata, robots: { index: false, follow: true } } : baseMetadata;
 }
 
-async function fetchFirstPage(): Promise<Paginated<PublicListingCard> | null> {
-  try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-    const res = await fetch(`${apiUrl}${firstPagePath('rent')}`, publicFetchInit());
-    if (!res.ok) return null;
-    const data = (await res.json()) as Paginated<RentApiItem>;
-    return { ...data, items: data.items.map(rentToCard) };
-  } catch {
-    return null;
-  }
-}
-
-export default async function RentMarketplacePage() {
-  const initialData = await fetchFirstPage();
+export default async function RentMarketplacePage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  // The browser only uses it for the unfiltered view; the item list is only for the indexable page.
+  const [filtered, initialData] = await Promise.all([
+    searchParams.then(isFilteredView),
+    fetchFirstPage(firstPagePath('rent'), rentToCard),
+  ]);
 
   return (
     <main className="min-h-screen bg-background pt-16">
+      {!filtered && initialData && (
+        <ListingItemListJsonLd kind="rent" listings={initialData.items} />
+      )}
       <Navigation />
       <PublicMarketBrowser market="rent" initialData={initialData ?? undefined} />
       <Footer />

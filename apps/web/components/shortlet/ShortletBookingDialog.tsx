@@ -4,18 +4,13 @@ import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { SafeImage } from '@/components/shared/media/SafeImage';
 import { useQuery } from '@tanstack/react-query';
-import {
-  Alert,
-  Badge,
-  Button,
-  DatePicker,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-  Field,
-  NumberInput,
-} from '@sureground/ui';
+import { Alert } from '@sureground/ui/Alert';
+import { Badge } from '@sureground/ui/Badge';
+import { Button } from '@sureground/ui/Button';
+import { DatePicker } from '@sureground/ui/DatePicker';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@sureground/ui/Dialog';
+import { Field } from '@sureground/ui/Field';
+import { NumberInput } from '@sureground/ui/NumberInput';
 import { CreditCard, MapPin } from '@sureground/icons';
 import { unwrap, VerificationRequiredError } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';

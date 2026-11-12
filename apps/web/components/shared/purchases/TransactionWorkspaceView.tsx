@@ -1,10 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   canReleaseDeposit,
   documentLinkLabel,
+  formatDualTime,
   humaniseCode,
   moneyVariant,
   nextActionTarget,
@@ -21,6 +23,7 @@ import {
   ListChecks,
   Lock,
   MessageCircle,
+  Scale,
   ShieldCheck,
   UsersRound,
 } from '@sureground/icons';
@@ -38,11 +41,14 @@ import {
   EmptyState,
   PageErrorState,
   Progress,
+  ReasonDialog,
   StatGroupSkeleton,
   useToast,
 } from '@sureground/ui';
 import { AcquisitionStatusBadges } from './AcquisitionStatusBadges';
+import { usePurchaseDisputes } from './usePurchaseDisputes';
 import { MilestoneTimeline } from '@/components/land/buyer/MilestoneTimeline';
+import { ReportLandProblemDialog } from '@/components/land/disputes/ReportLandProblemDialog';
 import { ConditionsPanel } from '@/components/land/closing/ConditionsPanel';
 import { PerfectionPanel } from '@/components/land/closing/PerfectionPanel';
 import { ActivityFeed } from '@/components/shared/activity/ActivityFeed';
@@ -57,6 +63,7 @@ import { buyerService } from '@/services/buyerService';
 import { landBuyerService } from '@/services/landBuyerService';
 import { transactionWorkspaceService } from '@/services/transactionWorkspaceService';
 import type { LandClosingCondition } from '@/types/landClosing';
+import type { LandDispute } from '@/types/landDispute';
 import {
   REPRESENTATIVE_RELATIONSHIP_LABELS,
   REPRESENTATIVE_SCOPE_SHORT_LABELS,
@@ -64,6 +71,7 @@ import {
   type RepresentativeScope,
 } from '@/types/landRepresentative';
 import type {
+  SaleDispute,
   TransactionWorkspace,
   WorkspaceCondition,
   WorkspaceProfessional,
@@ -125,6 +133,21 @@ const CTA_LABEL: Record<WorkspaceSection, string> = {
   steps: 'Review the steps',
 };
 
+const SALE_DISPUTE_STATUS: Record<SaleDispute['status'], string> = {
+  OPEN: 'Open',
+  UNDER_REVIEW: 'Under review',
+  ESCALATED: 'Escalated',
+  RESOLVED: 'Decided',
+};
+
+const LAND_DISPUTE_STATUS: Record<LandDispute['status'], string> = {
+  OPEN: 'Open',
+  UNDER_INVESTIGATION: 'Under investigation',
+  RESOLVED: 'Decided',
+  APPEALED: 'Appealed',
+  CLOSED: 'Closed',
+};
+
 const SectionCard = ({
   id,
   title,
@@ -153,7 +176,14 @@ const SectionCard = ({
 const RailList = ({
   items,
 }: {
-  items: { id: string; title: string; detail?: string; badge?: React.ReactNode }[];
+  items: {
+    id: string;
+    title: string;
+    detail?: string;
+    badge?: React.ReactNode;
+    /** Makes the name a link, e.g. to the case it summarises. */
+    href?: string;
+  }[];
 }) => (
   <ul className="divide-y divide-border">
     {items.map((item) => (
@@ -162,7 +192,16 @@ const RailList = ({
         className="flex items-start justify-between gap-3 py-3 first:pt-0 last:pb-0"
       >
         <div className="min-w-0">
-          <p className="truncate text-sm font-medium text-foreground">{item.title}</p>
+          {item.href ? (
+            <Link
+              href={item.href}
+              className="block truncate text-sm font-medium text-primary hover:underline"
+            >
+              {item.title}
+            </Link>
+          ) : (
+            <p className="truncate text-sm font-medium text-foreground">{item.title}</p>
+          )}
           {item.detail && <p className="text-xs text-muted-foreground">{item.detail}</p>}
         </div>
         {item.badge && <div className="shrink-0">{item.badge}</div>}
@@ -190,6 +229,8 @@ export const TransactionWorkspaceView = ({
   const [releasing, setReleasing] = useState(false);
   const [releaseNotice, setReleaseNotice] = useState<string | null>(null);
   const [viewerTimeZone] = useState(() => browserTimeZone());
+  const [disputingDeposit, setDisputingDeposit] = useState(false);
+  const [reportingLand, setReportingLand] = useState(false);
   const key = transactionWorkspaceKeys.detail(role, txId);
 
   const workspace = useQuery({
@@ -198,6 +239,7 @@ export const TransactionWorkspaceView = ({
     enabled: Boolean(txId),
   });
   const data = workspace.data;
+  const disputes = usePurchaseDisputes(data);
 
   const refresh = () => {
     void queryClient.invalidateQueries({ queryKey: key });
@@ -234,6 +276,17 @@ export const TransactionWorkspaceView = ({
     },
     onError: (reason: Error) => toast.error(reason.message),
     onSettled: () => setPendingKey(null),
+  });
+  const disputeDeposit = useMutation({
+    mutationFn: (input: { title: string; description: string }) =>
+      unwrap(transactionWorkspaceService.disputeDeposit(txId, input)),
+    onSuccess: () => {
+      setDisputingDeposit(false);
+      refresh();
+      void queryClient.invalidateQueries({ queryKey: transactionWorkspaceKeys.saleDisputes });
+      toast.success('Dispute raised. The deposit is on hold while Sureground reviews it.');
+    },
+    onError: (reason: Error) => toast.error(reason.message),
   });
   const settle = useMutation({
     mutationFn: ({ conditionKey, how }: { conditionKey: string; how: 'confirm' | 'waive' }) =>
@@ -284,6 +337,10 @@ export const TransactionWorkspaceView = ({
   const progress = workspaceProgress(data);
   const target = nextActionTarget(data);
   const releasable = canReleaseDeposit(data);
+  const hasDisputes =
+    disputes.milestones.length + disputes.sale.length + disputes.land.length > 0 ||
+    disputes.canDisputeDeposit ||
+    disputes.canReportLand;
 
   return (
     <div className="space-y-6">
@@ -549,6 +606,84 @@ export const TransactionWorkspaceView = ({
             </div>
           </SectionCard>
 
+          {hasDisputes && (
+            <SectionCard
+              title="Disputes"
+              description="A deposit dispute keeps the deposit held until Sureground decides it."
+            >
+              <div className="space-y-4">
+                {disputes.milestones.length + disputes.sale.length + disputes.land.length > 0 ? (
+                  <RailList
+                    items={[
+                      ...disputes.sale.map((d) => ({
+                        id: `sale-${d.id}`,
+                        title: d.title,
+                        detail: `Deposit · opened ${formatDate(d.createdAt)} · Sureground decides`,
+                        badge: (
+                          <Badge variant={d.status === 'RESOLVED' ? 'neutral' : 'warning'}>
+                            {SALE_DISPUTE_STATUS[d.status] ?? humaniseCode(d.status)}
+                          </Badge>
+                        ),
+                      })),
+                      ...disputes.land.map((d) => ({
+                        id: `land-${d.id}`,
+                        title: `Land case ${d.reference}`,
+                        href: `/land/disputes/${encodeURIComponent(d.id)}`,
+                        detail:
+                          d.canAppeal && d.appealDeadline
+                            ? `Appeal by ${formatDate(d.appealDeadline)}, ${formatDualTime(d.appealDeadline, viewerTimeZone)}`
+                            : `Opened ${formatDate(d.createdAt)}`,
+                        badge: (
+                          <Badge variant={d.canAppeal ? 'info' : 'neutral'}>
+                            {d.canAppeal
+                              ? 'Can appeal'
+                              : (LAND_DISPUTE_STATUS[d.status] ?? humaniseCode(d.status))}
+                          </Badge>
+                        ),
+                      })),
+                      ...disputes.milestones.map((m) => ({
+                        id: `step-${m.key}`,
+                        title: m.label,
+                        href: `#${SECTION_ID.steps}`,
+                        detail: m.disputeReason ?? 'Step disputed',
+                        badge: <Badge variant="warning">With the seller</Badge>,
+                      })),
+                    ]}
+                  />
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    Nothing is in dispute on this purchase.
+                  </p>
+                )}
+                {(disputes.canDisputeDeposit || disputes.canReportLand) && (
+                  <div className="flex flex-col gap-2">
+                    {disputes.canDisputeDeposit && (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="w-full"
+                        icon={<Scale className="h-4 w-4" aria-hidden />}
+                        onClick={() => setDisputingDeposit(true)}
+                      >
+                        Dispute the deposit
+                      </Button>
+                    )}
+                    {disputes.canReportLand && (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="w-full"
+                        onClick={() => setReportingLand(true)}
+                      >
+                        Report a problem with the land
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </div>
+            </SectionCard>
+          )}
+
           {(isBuyer || isRepresentative) && (
             <div id={SECTION_ID.approvals} className="scroll-mt-24">
               <CoApprovalCard
@@ -682,6 +817,42 @@ export const TransactionWorkspaceView = ({
           </SectionCard>
         </aside>
       </div>
+
+      {disputingDeposit && (
+        <ReasonDialog
+          open
+          onOpenChange={(open) => !open && setDisputingDeposit(false)}
+          title="Dispute the deposit"
+          description="The deposit goes on hold straight away. Sureground reviews the dispute and decides whether the deposit is released or refunded."
+          subject={{
+            label: 'What is wrong?',
+            placeholder: 'For example, what was agreed has not happened',
+            minLength: 3,
+            maxLength: 120,
+          }}
+          reasonLabel="Details"
+          reasonPlaceholder="What happened and when, and what you agreed with the other side."
+          rows={5}
+          minLength={20}
+          maxLength={2000}
+          showCount
+          confirmLabel="Raise the dispute"
+          confirmIcon={<Scale className="h-4 w-4" aria-hidden />}
+          loadingText="Raising…"
+          onSubmit={({ subject = '', reason }) =>
+            disputeDeposit.mutateAsync({ title: subject, description: reason })
+          }
+        />
+      )}
+
+      {disputes.canReportLand && (
+        <ReportLandProblemDialog
+          open={reportingLand}
+          onClose={() => setReportingLand(false)}
+          propertyId={data.propertyId}
+          landTitle={data.propertyTitle}
+        />
+      )}
 
       <ConfirmDialog
         open={releasing}

@@ -114,3 +114,16 @@ export interface TransactionWorkspace {
   delays: WorkspaceDelays;
   history: WorkspaceHistoryItem[];
 }
+
+/** Mirrors `MarketplaceDisputeDto`: a dispute on a sale's held deposit, from `GET /marketplace/disputes`. */
+export interface SaleDispute {
+  id: string;
+  transactionId: string;
+  propertyTitle?: string;
+  title: string;
+  category: string;
+  status: 'OPEN' | 'UNDER_REVIEW' | 'ESCALATED' | 'RESOLVED';
+  raisedBy: { id: string; legalName: string };
+  against: { id: string; legalName: string };
+  createdAt: string;
+}
