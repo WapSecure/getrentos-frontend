@@ -136,7 +136,7 @@ const AddPropertyPanel = ({ estateId, onDone }: { estateId: string; onDone: () =
         <Input
           value={search}
           onChange={(event) => setSearch(event.target.value)}
-          placeholder="Search by street, area or title: e.g. Alexander Avenue"
+          placeholder="Search this estate’s properties, or enter a reference code"
           leadingIcon={<Search className="w-4 h-4" />}
         />
       </Field>
@@ -147,7 +147,8 @@ const AddPropertyPanel = ({ estateId, onDone }: { estateId: string; onDone: () =
             <ListSkeleton rows={2} label="Searching" />
           ) : (candidates.data ?? []).length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              No matching property. The owner needs to register it on Sureground first.
+              No matching property. For a home not yet in this estate, ask its owner for the
+              reference code shown on their property card.
             </p>
           ) : (
             candidates.data!.map((candidate) => (
@@ -158,7 +159,8 @@ const AddPropertyPanel = ({ estateId, onDone }: { estateId: string; onDone: () =
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">{candidate.title}</p>
                   <p className="text-xs text-muted-foreground truncate">
-                    {candidate.address}, {candidate.city} · owner {candidate.ownerName}
+                    {[candidate.address, candidate.city].filter(Boolean).join(', ')}
+                    {candidate.ownerName ? ` · owner ${candidate.ownerName}` : ''}
                   </p>
                 </div>
                 {candidate.agreementStatus === 'ACTIVE' ? (
