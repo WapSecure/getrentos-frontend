@@ -49,8 +49,6 @@ const titleCase = (s: string) =>
     .replace(/_/g, ' ')
     .replace(/^\w/, (c) => c.toUpperCase());
 const PAGE_SIZE = 12;
-/** Scoped to one property, every pending request is read in one page and filtered here. */
-const SCOPED_PAGE_SIZE = 100;
 const tabs: { value: 'owner' | 'requester'; label: string }[] = [
   { value: 'owner', label: 'To review' },
   { value: 'requester', label: 'My requests' },
@@ -75,20 +73,19 @@ export function ApprovalsView({ propertyId }: ApprovalsViewProps = {}) {
   const toast = useToast();
 
   const { data, isLoading } = useQuery({
-    queryKey: ['landlord', 'spend-approvals', role, scoped ? 'pending' : page],
+    queryKey: ['landlord', 'spend-approvals', role, propertyId ?? 'all', page],
     queryFn: () =>
       unwrap(
         spendApprovalService.list(
           scoped
-            ? { role, status: 'PENDING', page: 1, pageSize: SCOPED_PAGE_SIZE }
+            ? { role, status: 'PENDING', propertyId, page, pageSize: PAGE_SIZE }
             : { role, page, pageSize: PAGE_SIZE }
         )
       ),
     placeholderData: keepPreviousData,
   });
-  // The list endpoint has no property filter.
-  const approvals = (data?.items ?? []).filter((a) => !scoped || a.propertyId === propertyId);
-  const total = scoped ? 0 : (data?.total ?? 0);
+  const approvals = data?.items ?? [];
+  const total = data?.total ?? 0;
 
   const invalidate = () =>
     Promise.all([
@@ -281,7 +278,7 @@ export function ApprovalsView({ propertyId }: ApprovalsViewProps = {}) {
         </div>
       )}
 
-      {total > 0 && (
+      {total > (scoped ? PAGE_SIZE : 0) && (
         <Pagination
           page={page}
           pageSize={PAGE_SIZE}

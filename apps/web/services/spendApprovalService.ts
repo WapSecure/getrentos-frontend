@@ -1,5 +1,5 @@
 import { authFetch, safeCall, toQuery, type ApiResponse, type Paginated } from '@/lib/apiHelpers';
-import type { SpendBand, SpendBands } from '@/types/managed';
+import type { SpendApprovalKind, SpendBand, SpendBands } from '@/types/managed';
 
 export const SPEND_APPROVAL_STATUSES = ['PENDING', 'APPROVED', 'REJECTED', 'CANCELLED'] as const;
 export type SpendApprovalStatus = (typeof SPEND_APPROVAL_STATUSES)[number];
@@ -30,12 +30,17 @@ export interface SpendApproval {
   createdAt: string;
   /** Optional while older rows and deploys catch up. */
   band?: SpendBand | null;
+  kind?: SpendApprovalKind;
   maintenanceRequestId?: string | null;
+  quoteId?: string | null;
+  /** When the manager repeated the approved work-order call. */
+  usedAt?: string | null;
 }
 
 export interface ListSpendApprovalsParams {
   role?: 'owner' | 'requester';
   status?: SpendApprovalStatus;
+  propertyId?: string;
   page?: number;
   pageSize?: number;
 }

@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   bandsFromInputs,
+  duplicateFlagsOf,
   evidenceStates,
   isAwaitingOwnerApproval,
   isDuplicateInvoiceRefusal,
@@ -40,7 +41,7 @@ test('spots spend parked for the owner', () => {
 });
 
 test('spots a duplicate-invoice refusal by its code or detail code', () => {
-  assert.equal(isDuplicateInvoiceRefusal({ code: 'INVOICE_DUPLICATE_SUSPECTED' }), true);
+  assert.equal(isDuplicateInvoiceRefusal({ code: 'INVOICE_POSSIBLE_DUPLICATE' }), true);
   assert.equal(isDuplicateInvoiceRefusal({ details: { code: 'DUPLICATE_INVOICE' } }), true);
   assert.equal(isDuplicateInvoiceRefusal({ code: 'STEP_UP_REQUIRED' }), false);
   assert.equal(isDuplicateInvoiceRefusal(new Error('nope')), false);
@@ -69,4 +70,11 @@ test('neither emergency nor explicit may sit below routine', () => {
     'emergency'
   );
   assert.equal(bandsFromInputs({ routine: 0, emergency: 10, explicit: 5 }).error, null);
+});
+
+test('reads the duplicate flags off the refusal, ignoring anything malformed', () => {
+  const flag = { code: 'SAME_NUMBER', message: 'Same invoice number as INV-12' };
+  assert.deepEqual(duplicateFlagsOf({ details: { flags: [flag, { code: 1 }, null] } }), [flag]);
+  assert.deepEqual(duplicateFlagsOf({ details: {} }), []);
+  assert.deepEqual(duplicateFlagsOf(null), []);
 });

@@ -1,6 +1,7 @@
 import type { BadgeVariant, TimelineState } from '@sureground/ui';
 import type {
   AwaitingOwnerApproval,
+  DuplicateFlag,
   EvidenceStageStatus,
   SpendBand,
   SpendBands,
@@ -57,7 +58,10 @@ export const AWAITING_OWNER_MESSAGE: Record<SpendBand, string> = {
   EMERGENCY: 'Sent to the owner as emergency spend. Approve it again here once they have.',
 };
 
-/** The invoice looks like one already approved or paid: the caller must acknowledge it with a reason. */
+/**
+ * The invoice looks like one already approved or paid (409 `INVOICE_POSSIBLE_DUPLICATE`): the
+ * caller must acknowledge it with a reason.
+ */
 export function isDuplicateInvoiceRefusal(err: unknown): boolean {
   if (typeof err !== 'object' || err === null) return false;
   const { code, details } = err as { code?: unknown; details?: unknown };
@@ -97,4 +101,17 @@ export function bandsFromInputs(input: { routine: number; emergency: number; exp
     };
   }
   return { bands, error: null };
+}
+
+/** The duplicate flags carried by the refusal, when the response kept them. */
+export function duplicateFlagsOf(err: unknown): DuplicateFlag[] {
+  const flags = (err as { details?: { flags?: unknown } } | null)?.details?.flags;
+  if (!Array.isArray(flags)) return [];
+  return flags.filter(
+    (f): f is DuplicateFlag =>
+      typeof f === 'object' &&
+      f !== null &&
+      typeof (f as DuplicateFlag).code === 'string' &&
+      typeof (f as DuplicateFlag).message === 'string'
+  );
 }

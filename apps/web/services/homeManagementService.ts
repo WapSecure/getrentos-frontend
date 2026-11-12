@@ -5,7 +5,10 @@ import type { PaymentProvider } from '@/types/payments';
 import type {
   AwaitingOwnerApproval,
   DuplicateAcknowledgement,
+  EvidenceDocument,
+  MaintenancePhoto,
   WorkOrderEvidence,
+  WorkOrderFeedback,
   WorkOrderFeedbackInput,
   WorkOrderPhotoStage,
 } from '@/types/managed';
@@ -824,25 +827,55 @@ export const homeManagementService = {
     safeCall(() =>
       authFetch<WorkOrderEvidence>(`/home-management/work-orders/${workOrderId}/evidence`)
     ),
+  /** `latitude` and `longitude` go together or not at all. */
   uploadWorkOrderPhoto: (
     workOrderId: string,
-    input: { file: File; stage: WorkOrderPhotoStage; takenAt?: string }
+    input: {
+      file: File;
+      stage: WorkOrderPhotoStage;
+      takenAt?: string;
+      position?: { latitude: number; longitude: number };
+    }
   ) => {
     const form = new FormData();
     form.append('file', input.file);
     form.append('stage', input.stage);
     if (input.takenAt) form.append('takenAt', input.takenAt);
+    if (input.position) {
+      form.append('latitude', String(input.position.latitude));
+      form.append('longitude', String(input.position.longitude));
+    }
     return safeCall(() =>
-      authFetch<unknown>(`/home-management/work-orders/${workOrderId}/photos`, {
+      authFetch<MaintenancePhoto>(`/home-management/work-orders/${workOrderId}/photos`, {
         method: 'POST',
         body: form,
       })
     );
   },
-  /** The owner's rating once the job is completed. */
+  /** Owner or manager attaches the paperwork behind a quote or an invoice on the job. */
+  uploadWorkOrderDocument: (
+    workOrderId: string,
+    target: { quoteId: string } | { invoiceId: string },
+    input: { file: File; note?: string }
+  ) => {
+    const form = new FormData();
+    form.append('file', input.file);
+    if (input.note) form.append('note', input.note);
+    const path =
+      'quoteId' in target
+        ? `quotes/${target.quoteId}/documents`
+        : `invoices/${target.invoiceId}/documents`;
+    return safeCall(() =>
+      authFetch<EvidenceDocument>(`/home-management/work-orders/${workOrderId}/${path}`, {
+        method: 'POST',
+        body: form,
+      })
+    );
+  },
+  /** The owner's rating, once, after the job is RESOLVED. */
   submitWorkOrderFeedback: (workOrderId: string, input: WorkOrderFeedbackInput) =>
     safeCall(() =>
-      authFetch<unknown>(`/home-management/work-orders/${workOrderId}/feedback`, {
+      authFetch<WorkOrderFeedback>(`/home-management/work-orders/${workOrderId}/feedback`, {
         method: 'POST',
         body: JSON.stringify(input),
       })

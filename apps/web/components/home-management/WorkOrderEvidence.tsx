@@ -22,15 +22,25 @@ import {
 } from '@sureground/ui';
 import { ClipboardCheck } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
-import { formatDualTime, formatLagosDate } from '@/lib/format';
-import { evidenceStates } from '@/lib/managedSpend';
+import { formatCurrency, formatDualTime, formatLagosDate } from '@/lib/format';
+import { SPEND_BAND_LABELS, SPEND_BAND_VARIANT, evidenceStates } from '@/lib/managedSpend';
 import { homeManagementKeys } from '@/lib/queryKeys';
 import { StarRating } from '@/components/landlord/vendors/StarRating';
 import {
   homeManagementService,
   type HomeManagementWorkOrder,
 } from '@/services/homeManagementService';
-import { PHOTO_STAGES, type EvidenceStage, type WorkOrderPhotoStage } from '@/types/managed';
+import {
+  PHOTO_STAGES,
+  type EvidenceActorRole,
+  type EvidenceApproval,
+  type EvidenceDocument,
+  type EvidenceInvoice,
+  type EvidenceQuote,
+  type EvidenceStage,
+  type MaintenancePhoto,
+  type WorkOrderPhotoStage,
+} from '@/types/managed';
 
 const PHOTO_STAGE_LABELS: Record<WorkOrderPhotoStage, string> = {
   REPORTED: 'The problem as reported',
@@ -54,8 +64,15 @@ const viewerTimeZone = () => {
   }
 };
 
-const humanRole = (role: string) =>
-  role
+const ROLE_LABELS: Record<EvidenceActorRole, string> = {
+  OWNER: 'Owner',
+  MANAGER: 'Manager',
+  FIELD_AGENT: 'Field agent',
+  TENANT: 'Tenant',
+};
+
+const humanise = (value: string) =>
+  value
     .toLowerCase()
     .replace(/_/g, ' ')
     .replace(/^\w/, (c) => c.toUpperCase());
@@ -116,8 +133,15 @@ function EvidenceBody({ workOrder, viewerRole }: WorkOrderEvidenceProps) {
       ) : undefined,
       badge: stage.status === 'FLAGGED' ? <Badge variant="warning">Check this</Badge> : undefined,
       description: <StageDetail stage={stage} />,
+      actions: documentTargets(stage) ? (
+        <AttachDocumentForm
+          workOrderId={workOrder.id}
+          stageKey={stage.key as 'QUOTE' | 'INVOICE'}
+          targets={documentTargets(stage)!}
+        />
+      ) : undefined,
     }));
-  }, [stages, zone]);
+  }, [stages, zone, workOrder.id]);
 
   return (
     <QueryState
@@ -152,33 +176,207 @@ function EvidenceBody({ workOrder, viewerRole }: WorkOrderEvidenceProps) {
   );
 }
 
-function StageDetail({ stage }: { stage: EvidenceStage }) {
-  const photos = stage.items ?? [];
-  if (!stage.detail && !stage.by && photos.length === 0) return null;
+/** Quotes and invoices on the job that a document can be attached to. */
+function documentTargets(stage: EvidenceStage): { id: string; label: string }[] | null {
+  if (stage.key === 'QUOTE') {
+    const quotes = (stage.items ?? []) as EvidenceQuote[];
+    return quotes.length
+      ? quotes.map((q) => ({
+          id: q.id,
+          label: `${q.vendor ?? 'Vendor'} · ${formatCurrency(q.amount)}`,
+        }))
+      : null;
+  }
+  if (stage.key === 'INVOICE') {
+    const invoices = (stage.items ?? []) as EvidenceInvoice[];
+    return invoices.length
+      ? invoices.map((i) => ({
+          id: i.id,
+          label: `${i.vendor} · ${i.invoiceNumber ?? formatCurrency(i.amount)}`,
+        }))
+      : null;
+  }
+  return null;
+}
+
+function Documents({ documents }: { documents: EvidenceDocument[] }) {
+  if (documents.length === 0) return null;
   return (
-    <span className="block space-y-1">
-      {stage.detail && <span className="block">{stage.detail}</span>}
-      {stage.by && (
-        <span className="block text-xs">
-          {stage.by.name} · {humanRole(stage.by.role)}
-        </span>
-      )}
-      {photos.length > 0 && (
+    <span className="flex flex-wrap gap-1">
+      {documents.map((doc) => (
+        <DocumentPreviewButton
+          key={doc.id}
+          file={{ url: doc.url, name: doc.name, mimeType: doc.mimeType }}
+          label={doc.name}
+        />
+      ))}
+    </span>
+  );
+}
+
+function StageItems({ stage }: { stage: EvidenceStage }) {
+  const items = stage.items ?? [];
+  if (items.length === 0) return null;
+
+  switch (stage.key) {
+    case 'PHOTOS':
+      return (
         <span className="flex flex-wrap gap-1">
-          {photos.map((photo, index) => (
+          {(items as MaintenancePhoto[]).map((photo, index) => (
             <DocumentPreviewButton
-              key={photo.id ?? photo.url}
-              file={{ url: photo.url, name: photo.label ?? `Photo ${index + 1}` }}
+              key={photo.id}
+              file={{ url: photo.url, name: `Photo ${index + 1}` }}
               label={
-                photo.takenAt
-                  ? `${photo.label ?? `Photo ${index + 1}`} · ${formatLagosDate(photo.takenAt)}`
-                  : (photo.label ?? `Photo ${index + 1}`)
+                photo.legacy
+                  ? `Photo ${index + 1}`
+                  : `${PHOTO_STAGE_LABELS[photo.stage] ?? 'Photo'} · ${formatLagosDate(photo.takenAt)}`
               }
             />
           ))}
         </span>
+      );
+    case 'QUOTE':
+      return (
+        <ul className="space-y-1">
+          {(items as EvidenceQuote[]).map((quote) => (
+            <li key={quote.id} className="space-y-1">
+              <span className="block text-foreground">
+                {quote.vendor ?? 'Vendor'} · {formatCurrency(quote.amount)} ·{' '}
+                {humanise(quote.status)}
+              </span>
+              <Documents documents={quote.documents} />
+            </li>
+          ))}
+        </ul>
+      );
+    case 'APPROVAL':
+      return (
+        <ul className="space-y-1">
+          {(items as EvidenceApproval[]).map((approval) => (
+            <li key={approval.id} className="flex flex-wrap items-center gap-1.5">
+              <span className="text-foreground">{formatCurrency(approval.amount)}</span>
+              <Badge variant={SPEND_BAND_VARIANT[approval.band]}>
+                {SPEND_BAND_LABELS[approval.band]}
+              </Badge>
+              <span>
+                {humanise(approval.status)}
+                {approval.decidedBy ? ` by ${approval.decidedBy.name}` : ''}
+              </span>
+            </li>
+          ))}
+        </ul>
+      );
+    case 'INVOICE':
+      return (
+        <ul className="space-y-2">
+          {(items as EvidenceInvoice[]).map((invoice) => (
+            <li key={invoice.id} className="space-y-1">
+              <span className="flex flex-wrap items-center gap-1.5">
+                <span className="text-foreground">
+                  {invoice.vendor}
+                  {invoice.invoiceNumber ? ` · ${invoice.invoiceNumber}` : ''} ·{' '}
+                  {formatCurrency(invoice.amount)} · {humanise(invoice.status)}
+                </span>
+                {invoice.duplicateFlags.length > 0 && (
+                  <Badge variant="warning">Possible duplicate</Badge>
+                )}
+              </span>
+              {invoice.duplicateFlags.map((flag) => (
+                <span key={flag.code} className="block">
+                  {flag.message}
+                </span>
+              ))}
+              <Documents documents={invoice.documents} />
+            </li>
+          ))}
+        </ul>
+      );
+    default:
+      return null;
+  }
+}
+
+function StageDetail({ stage }: { stage: EvidenceStage }) {
+  if (!stage.detail && !stage.by && !stage.items?.length) return null;
+  return (
+    <span className="block space-y-1">
+      {stage.detail && <span className="block">{stage.detail}</span>}
+      {stage.by && (
+        <span className="block">
+          {stage.by.name} · {ROLE_LABELS[stage.by.role] ?? humanise(stage.by.role)}
+        </span>
       )}
+      <StageItems stage={stage} />
     </span>
+  );
+}
+
+/** Owner or manager adds the paper behind a quote or an invoice. */
+function AttachDocumentForm({
+  workOrderId,
+  stageKey,
+  targets,
+}: {
+  workOrderId: string;
+  stageKey: 'QUOTE' | 'INVOICE';
+  targets: { id: string; label: string }[];
+}) {
+  const toast = useToast();
+  const queryClient = useQueryClient();
+  const [targetId, setTargetId] = useState(targets[0].id);
+  const [files, setFiles] = useState<PendingUpload[]>([]);
+  const noun = stageKey === 'QUOTE' ? 'quote' : 'invoice';
+
+  const attach = useMutation({
+    mutationFn: () =>
+      unwrap(
+        homeManagementService.uploadWorkOrderDocument(
+          workOrderId,
+          stageKey === 'QUOTE' ? { quoteId: targetId } : { invoiceId: targetId },
+          { file: files[0].file }
+        )
+      ),
+    onSuccess: async () => {
+      setFiles([]);
+      await queryClient.invalidateQueries({
+        queryKey: homeManagementKeys.workOrderEvidence(workOrderId),
+      });
+      toast.success(`Document added to the ${noun}.`);
+    },
+    onError: (error: Error) => toast.error(error.message || 'Could not add the document.'),
+  });
+
+  return (
+    <form
+      className="space-y-2"
+      onSubmit={(event) => {
+        event.preventDefault();
+        if (files.length > 0) attach.mutate();
+      }}
+    >
+      {targets.length > 1 && (
+        <Select
+          ariaLabel={`Which ${noun}`}
+          value={targetId}
+          onValueChange={setTargetId}
+          options={targets.map((t) => ({ value: t.id, label: t.label }))}
+          controlSize="sm"
+        />
+      )}
+      <DocumentUpload
+        value={files}
+        onChange={setFiles}
+        accept="application/pdf,image/jpeg,image/png,image/webp"
+        maxSizeMB={10}
+        label={`Add the ${noun} document`}
+        disabled={attach.isPending}
+      />
+      {files.length > 0 && (
+        <Button type="submit" size="sm" variant="secondary" isLoading={attach.isPending}>
+          Attach
+        </Button>
+      )}
+    </form>
   );
 }
 
@@ -292,7 +490,7 @@ function FeedbackForm({ workOrderId }: { workOrderId: string }) {
           id={`feedback-${workOrderId}`}
           value={comment}
           onChange={(event) => setComment(event.target.value)}
-          maxLength={1000}
+          maxLength={2000}
           rows={3}
           placeholder="Anything we should know about the work or the contractor"
         />

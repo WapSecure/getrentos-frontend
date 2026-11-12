@@ -43,8 +43,8 @@ import {
 import { InvoiceCheckPanel } from './InvoiceCheckPanel';
 import { PayDialog } from '@/components/shared/payments/PayDialog';
 import { ReasonDialog } from '@sureground/ui';
-import { isDuplicateInvoiceRefusal } from '@/lib/managedSpend';
-import type { DuplicateAcknowledgement } from '@/types/managed';
+import { duplicateFlagsOf, isDuplicateInvoiceRefusal } from '@/lib/managedSpend';
+import type { DuplicateAcknowledgement, DuplicateFlag, EvidenceInvoice } from '@/types/managed';
 import { usePaymentProviders } from '@/hooks/usePaymentProviders';
 import type { PaymentProvider } from '@/types/payments';
 
@@ -372,10 +372,29 @@ export function HomeManagementWorkOrderInvoices({
 
   // A likely duplicate is refused until someone says why it is not one; that reason is kept.
   const [duplicate, setDuplicate] = useState<
-    | { action: 'approve'; invoiceId: string; message: string }
-    | { action: 'pay'; invoiceId: string; provider?: PaymentProvider; message: string }
+    | { action: 'approve'; invoiceId: string; message: string; flags: DuplicateFlag[] }
+    | {
+        action: 'pay';
+        invoiceId: string;
+        provider?: PaymentProvider;
+        message: string;
+        flags: DuplicateFlag[];
+      }
     | null
   >(null);
+  // The refusal's own flags can be dropped on the way; the job record lists them per invoice too.
+  const duplicateEvidence = useQuery({
+    queryKey: homeManagementKeys.workOrderEvidence(workOrder.id),
+    queryFn: () => unwrap(homeManagementService.getWorkOrderEvidence(workOrder.id)),
+    enabled: Boolean(duplicate) && duplicate?.flags.length === 0,
+  });
+  const duplicateFlags: DuplicateFlag[] = duplicate?.flags.length
+    ? duplicate.flags
+    : ((
+        duplicateEvidence.data?.stages.find((stage) => stage.key === 'INVOICE')?.items as
+          | EvidenceInvoice[]
+          | undefined
+      )?.find((invoice) => invoice.id === duplicate?.invoiceId)?.duplicateFlags ?? []);
 
   const approveInvoice = useMutation<
     HomeManagementWorkOrderInvoice,
@@ -395,7 +414,12 @@ export function HomeManagementWorkOrderInvoices({
     onError: (error, { invoiceId, acknowledge }) => {
       if (!acknowledge && isDuplicateInvoiceRefusal(error)) {
         setActionDialog(null);
-        setDuplicate({ action: 'approve', invoiceId, message: error.message });
+        setDuplicate({
+          action: 'approve',
+          invoiceId,
+          message: error.message,
+          flags: duplicateFlagsOf(error),
+        });
         return;
       }
       toast.error(error.message || 'Unable to approve this invoice.');
@@ -489,7 +513,13 @@ export function HomeManagementWorkOrderInvoices({
     onError: (error, { invoiceId, provider, acknowledge }) => {
       if (!acknowledge && isDuplicateInvoiceRefusal(error)) {
         setPayTarget(null);
-        setDuplicate({ action: 'pay', invoiceId, provider, message: error.message });
+        setDuplicate({
+          action: 'pay',
+          invoiceId,
+          provider,
+          message: error.message,
+          flags: duplicateFlagsOf(error),
+        });
         return;
       }
       const unavailable = providers.recover(error, provider);
@@ -1299,13 +1329,22 @@ export function HomeManagementWorkOrderInvoices({
         onOpenChange={(open) => !open && setDuplicate(null)}
         title="This invoice may be a duplicate"
         description={
-          duplicate?.message ||
-          'It looks like an invoice already approved or paid for this work. Say why it is not a duplicate to continue.'
+          <>
+            <span className="block">
+              {duplicate?.message ||
+                'It looks like an invoice already approved or paid for this work. Say why it is not a duplicate to continue.'}
+            </span>
+            {duplicateFlags.map((flag) => (
+              <span key={flag.code} className="mt-1 block text-foreground">
+                {flag.message}
+              </span>
+            ))}
+          </>
         }
         reasonLabel="Why this is not a duplicate"
         reasonPlaceholder="e.g. A second visit to replace the pump, agreed separately."
         minLength={10}
-        maxLength={500}
+        maxLength={1000}
         confirmLabel={duplicate?.action === 'pay' ? 'Continue to pay' : 'Approve anyway'}
         onSubmit={async ({ reason }) => {
           if (!duplicate) return;

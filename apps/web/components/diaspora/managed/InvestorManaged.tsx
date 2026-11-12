@@ -13,6 +13,7 @@ import {
   CardSkeleton,
   CardTitle,
   DescriptionList,
+  Disclosure,
   EmptyState,
   PageHeader,
   QueryState,
@@ -24,7 +25,9 @@ import { unwrap } from '@/lib/apiHelpers';
 import { ROUTES } from '@/lib/constants/auth';
 import { DIASPORA_ROUTES } from '@/lib/constants/diasporaRoutes';
 import { formatCurrency, formatDate, formatLagosDate } from '@/lib/format';
-import { homeManagementKeys, investorKeys } from '@/lib/queryKeys';
+import { homeManagementKeys, investorKeys, landlordKeys } from '@/lib/queryKeys';
+import { landlordService } from '@/services/landlordService';
+import { StatementBreakdown } from '@/components/shared/financials/StatementBreakdown';
 import { investorService } from '@/services/investorService';
 import { homeManagementService } from '@/services/homeManagementService';
 import { ApprovalsView } from '@/components/landlord/approvals/ApprovalsView';
@@ -252,6 +255,8 @@ function AgreementCard({ property }: { property: InvestorManagedProperty }) {
   );
 }
 
+const STATEMENT_STATUS_LABELS: Record<string, string> = { DRAFT: 'Draft', ISSUED: 'Issued' };
+
 function StatementCard({ property }: { property: InvestorManagedProperty }) {
   const statement = property.lastStatement;
   const net = statement ? Number(statement.net) : NaN;
@@ -273,22 +278,19 @@ function StatementCard({ property }: { property: InvestorManagedProperty }) {
                   value: `${formatLagosDate(statement.periodStart)} to ${formatLagosDate(statement.periodEnd)}`,
                 },
                 {
-                  label: 'Net to you',
+                  label: 'Statement net',
                   value: Number.isFinite(net) ? formatCurrency(net) : null,
+                  hint: 'For the whole statement, which can cover more than one property.',
                 },
                 {
-                  label: 'Payout',
+                  label: 'Status',
                   value:
-                    STATEMENT_PAYOUT_LABELS[statement.status] ?? humaniseStatus(statement.status),
+                    STATEMENT_STATUS_LABELS[statement.status] ?? humaniseStatus(statement.status),
                 },
               ]}
             />
           </div>
-          <CardFooter className="justify-start">
-            <Button href={ROUTES.OWNER_MANAGEMENT} variant="outline" size="sm">
-              All statements
-            </Button>
-          </CardFooter>
+          <StatementDetail statementId={statement.id} />
         </>
       ) : (
         <EmptyState
@@ -300,6 +302,43 @@ function StatementCard({ property }: { property: InvestorManagedProperty }) {
         />
       )}
     </Card>
+  );
+}
+
+/** The ledger lines behind the statement, read when opened. */
+function StatementDetail({ statementId }: { statementId: string }) {
+  const [open, setOpen] = useState(false);
+  const detail = useQuery({
+    queryKey: landlordKeys.ownerStatement(statementId),
+    queryFn: () => unwrap(landlordService.getOwnerStatement(statementId)),
+    enabled: open,
+  });
+
+  return (
+    <Disclosure
+      className="border-t border-border"
+      summary="See the breakdown"
+      onToggle={(event) => setOpen(event.currentTarget.open)}
+    >
+      <QueryState
+        isLoading={detail.isLoading}
+        isError={detail.isError}
+        onRetry={() => void detail.refetch()}
+        isRetrying={detail.isFetching}
+        errorTitle="The statement could not be loaded"
+        loading={<CardSkeleton lines={4} />}
+      >
+        {detail.data && (
+          <>
+            <StatementBreakdown lineItems={detail.data.lineItems ?? []} totals={detail.data} />
+            <p className="mt-3 text-xs">
+              {STATEMENT_PAYOUT_LABELS[detail.data.payoutStatus] ??
+                humaniseStatus(detail.data.payoutStatus)}
+            </p>
+          </>
+        )}
+      </QueryState>
+    </Disclosure>
   );
 }
 
