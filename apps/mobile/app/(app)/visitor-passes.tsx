@@ -27,6 +27,7 @@ import {
 } from '@/lib/api/resident';
 import { qk } from '@/lib/query/keys';
 import { formatDateTime, formatTime } from '@/lib/format';
+import { passTimeline } from '@sureground/shared';
 import { haptics } from '@/lib/haptics';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
@@ -230,8 +231,9 @@ export default function ResidentVisitorPasses() {
                 <View style={{ flex: 1, gap: 2 }}>
                   <Text variant="bodyStrong">{pass.visitorName}</Text>
                   <Text variant="caption" color="mutedForeground">
-                    {pass.purpose ? `${pass.purpose} · ` : ''}Expires{' '}
-                    {formatDateTime(pass.expiresAt)}
+                    {[pass.purpose, passTimeline(pass, formatDateTime, formatTime)]
+                      .filter(Boolean)
+                      .join(' · ')}
                   </Text>
                 </View>
                 <Badge label={STATUS_LABEL[pass.status]} tone={STATUS_TONE[pass.status]} />

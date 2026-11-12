@@ -3,6 +3,7 @@
 import { Badge, Button } from '@sureground/ui';
 import { IdCheckDialog } from '@/components/estate/visitor-passes/IdCheckDialog';
 import type { VisitorPass } from '@/types/estate';
+import { passTimeline } from '@sureground/shared';
 
 const statusVariant: Record<VisitorPass['status'], 'success' | 'warning' | 'neutral' | 'danger'> = {
   pending: 'warning',
@@ -34,6 +35,9 @@ const formatDate = (value: string) =>
     minute: '2-digit',
   }).format(new Date(value));
 
+const formatTime = (value: string) =>
+  new Intl.DateTimeFormat('en-NG', { hour: 'numeric', minute: '2-digit' }).format(new Date(value));
+
 interface VisitorPassRowProps {
   pass: VisitorPass;
   estateId: string;
@@ -42,6 +46,7 @@ interface VisitorPassRowProps {
 }
 
 export const VisitorPassRow = ({ pass, estateId, onRevoke, isRevoking }: VisitorPassRowProps) => {
+  const timeline = passTimeline(pass, formatDate, formatTime);
   return (
     <div className="p-4 flex items-center justify-between gap-4">
       <div className="min-w-0">
@@ -50,7 +55,8 @@ export const VisitorPassRow = ({ pass, estateId, onRevoke, isRevoking }: Visitor
         </p>
         <p className="text-xs text-muted-foreground mt-0.5">
           {pass.residentName}
-          {pass.purpose ? ` · ${pass.purpose}` : ''} · Expires {formatDate(pass.expiresAt)}
+          {pass.purpose ? ` · ${pass.purpose}` : ''}
+          {timeline ? ` · ${timeline}` : ''}
         </p>
       </div>
       <div className="flex items-center gap-3 shrink-0">

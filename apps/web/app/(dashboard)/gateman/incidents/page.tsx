@@ -15,6 +15,7 @@ import {
   ListSkeleton,
   Select,
   Textarea,
+  useToast,
 } from '@sureground/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -40,6 +41,7 @@ const PANIC_DESCRIPTION = 'Panic button activated';
 
 export default function GatemanIncidentsPage() {
   const queryClient = useQueryClient();
+  const toast = useToast();
   const [category, setCategory] = useState('OTHER');
   const [priority, setPriority] = useState('MEDIUM');
   const [description, setDescription] = useState('');
@@ -69,7 +71,10 @@ export default function GatemanIncidentsPage() {
       setDescription('');
       setPhoto(null);
       invalidate();
+      toast.success('Incident reported. The estate manager can see it now.');
     },
+    onError: (error: Error) =>
+      toast.error(error.message || 'The incident was not reported. Try again.'),
   });
 
   const panicAlert = useMutation({

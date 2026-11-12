@@ -320,7 +320,7 @@ export default function RenterHome() {
       <View style={{ gap: spacing.md }}>
         <SectionHeader
           title="Featured for you"
-          description="Verified homes matched to your activity"
+          description="Homes matched to your activity"
           actionLabel="See all"
           onAction={() => router.push('/(app)/(renter)/discover')}
         />
