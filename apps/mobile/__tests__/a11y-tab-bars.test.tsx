@@ -1,6 +1,7 @@
 import type { ComponentType, ReactNode } from 'react';
 import { screen } from '@testing-library/react-native';
 import { getPalette } from '@sureground/tokens';
+import { withAlpha } from '@sureground/ui-native';
 import { premiumTabBarOptions } from '@/lib/navigationStyles';
 import AgentTabs from '@/app/(app)/(agent)/_layout';
 import BuyerTabs from '@/app/(app)/(buyer)/_layout';
@@ -91,5 +92,23 @@ describe('tab bar size', () => {
     const { tabBarStyle } = premiumTabBarOptions(getPalette('light'), inset);
     const item = tabBarStyle.height - tabBarStyle.paddingTop - tabBarStyle.paddingBottom;
     expect(item).toBeGreaterThanOrEqual(MIN_TOUCH_TARGET);
+  });
+});
+
+describe('tab bar brand colour', () => {
+  it.each(['light', 'dark'] as const)(
+    'marks the active tab in Sureground blue, never ink, in %s mode',
+    (scheme) => {
+      const colors = getPalette(scheme);
+      const options = premiumTabBarOptions(colors, 0);
+      expect(options.tabBarActiveTintColor).toBe(colors.primary);
+      expect(options.tabBarActiveTintColor).not.toBe(colors.foreground);
+    }
+  );
+
+  it('derives the active pill tint from the primary token', () => {
+    expect(withAlpha('#0057d9', 0.12)).toBe('rgba(0, 87, 217, 0.12)');
+    expect(withAlpha('#7af', 0.2)).toBe('rgba(119, 170, 255, 0.2)');
+    expect(withAlpha('rgba(0, 0, 0, 0.5)', 0.2)).toBe('rgba(0, 0, 0, 0.5)');
   });
 });

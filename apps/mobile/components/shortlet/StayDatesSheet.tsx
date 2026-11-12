@@ -101,7 +101,7 @@ function Picker({
         paddingHorizontal: spacing.md,
         borderRadius: radius.md,
         borderWidth: 1.5,
-        borderColor: active ? colors.foreground : colors.border,
+        borderColor: active ? colors.primary : colors.border,
         backgroundColor: colors.card,
       }}
     >

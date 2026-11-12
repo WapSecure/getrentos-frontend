@@ -294,7 +294,7 @@ export function DurationChoice({
               numberOfLines={1}
               style={{
                 fontWeight: selected ? '700' : '500',
-                color: selected ? colors.foreground : colors.mutedForeground,
+                color: selected ? colors.primary : colors.mutedForeground,
               }}
             >
               {option.label}

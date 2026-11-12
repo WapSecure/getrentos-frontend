@@ -63,7 +63,7 @@ export function ThemeToggle({ variant = 'pill', compact = false }: ThemeTogglePr
               <Text
                 variant="callout"
                 style={{
-                  color: active ? colors.foreground : colors.mutedForeground,
+                  color: active ? colors.primary : colors.mutedForeground,
                   fontWeight: active ? '700' : '500',
                 }}
               >
