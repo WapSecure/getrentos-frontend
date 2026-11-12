@@ -19,8 +19,8 @@ import { buyerKeys } from '@/lib/queryKeys';
 import { landBuyerService } from '@/services/landBuyerService';
 import { MilestoneTimeline } from './MilestoneTimeline';
 import { ConditionsPanel } from '../closing/ConditionsPanel';
-import { CoApprovalCard } from '../representatives/CoApprovalCard';
-import { landRepresentativeKeys } from '@/services/landRepresentativeService';
+import { CoApprovalCard } from '@/components/shared/representatives/CoApprovalCard';
+import { representativeKeys } from '@/services/representativeService';
 
 // Escrow is released to the seller only once the buyer confirms every required step.
 export const ResaleConveyanceView = ({ txId }: { txId: string }) => {
@@ -44,7 +44,7 @@ export const ResaleConveyanceView = ({ txId }: { txId: string }) => {
     onSuccess: (updated) => {
       refresh();
       queryClient.invalidateQueries({
-        queryKey: landRepresentativeKeys.coApproval({ transactionId: txId }),
+        queryKey: representativeKeys.coApproval({ transactionId: txId }),
       });
       // Under two-person approval the step stays delivered until the representative approves too.
       toast.success(

@@ -10,6 +10,8 @@ export interface PrePurchaseInspection extends LandWatchInspection {
   /** Set for a built home. */
   propertyId?: string | null;
   place?: 'land' | 'property';
+  /** The listing's cover photo, once the API sends it; until then the list shows the place icon. */
+  coverImageUrl?: string | null;
   instructions?: string | null;
   reinspectionOfId?: string;
   /** Can back a reservation held subject to it. */

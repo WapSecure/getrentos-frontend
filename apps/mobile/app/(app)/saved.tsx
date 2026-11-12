@@ -16,6 +16,7 @@ import {
   useTheme,
 } from '@sureground/ui-native';
 import { useSavedListings } from '@/hooks/useSavedListings';
+import { useCardAnalytics } from '@/hooks/useCardAnalytics';
 import { qk } from '@/lib/query/keys';
 import { savedListingsApi, type SavedProperty } from '@/lib/api/properties';
 import { wishlistsApi } from '@/lib/api/wishlists';
@@ -31,6 +32,7 @@ export default function Saved() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const { toggle } = useSavedListings();
+  const cards = useCardAnalytics('rent', 'rent_saved');
   const qc = useQueryClient();
 
   const [activeWishlistId, setActiveWishlistId] = useState<string | undefined>(undefined);
@@ -55,14 +57,17 @@ export default function Saved() {
   }, [refetchList, refetchWishlists, qc]);
 
   const renderItem = useCallback(
-    ({ item }: { item: SavedProperty }) => (
+    ({ item, index }: { item: SavedProperty; index: number }) => (
       <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md, gap: spacing.xs }}>
         <PropertyCard
           property={withTrustLabel(item)}
           layout="row"
           saved
           onToggleSave={toggle}
-          onPress={(id) => router.push(`/(app)/property/${id}`)}
+          onPress={(id) => {
+            cards.click(id, index);
+            router.push(`/(app)/property/${id}`);
+          }}
         />
         <Pressable
           onPress={() => setMovingItem(item)}
@@ -85,7 +90,7 @@ export default function Saved() {
         </Pressable>
       </View>
     ),
-    [colors.mutedForeground, spacing.md, spacing.sm, spacing.xl, spacing.xs, toggle]
+    [cards, colors.mutedForeground, spacing.md, spacing.sm, spacing.xl, spacing.xs, toggle]
   );
 
   return (
@@ -171,6 +176,7 @@ export default function Saved() {
           data={items}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
+          {...cards.listProps}
           ListHeaderComponent={
             <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
               <ShortlistCompareCard listingIds={items.map((i) => i.id)} />

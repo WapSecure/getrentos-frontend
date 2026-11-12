@@ -184,6 +184,7 @@ export default function DettyDecember() {
         header={header}
         emptyTitle="Nothing free for these dates yet"
         emptyDescription="Try the other week, or check back: hosts add December dates all autumn."
+        surface="shortlet_detty_december"
       />
     </View>
   );

@@ -54,7 +54,8 @@ const STAGES: { key: BuyerEscrowStatus; label: string; description: string }[] =
   {
     key: 'released',
     label: 'Completed',
-    description: 'Funds released and ownership transfer completed.',
+    description:
+      'Deposit released to the seller. The legal transfer is tracked separately and may still be in progress.',
   },
 ];
 
@@ -134,9 +135,16 @@ export default function BuyerTransactions() {
 
   const releaseMutation = useMutation({
     mutationFn: (id: string) => buyerTransactionsApi.release(id),
-    onSuccess: () => {
+    onSuccess: (tx) => {
       invalidate();
-      toast.show('Funds released to the seller.', 'success');
+      // Under two-person approval the buyer's approval is recorded but nothing moves until the representative approves.
+      toast.show(
+        tx.release?.state === 'WAITING_FOR_CO_APPROVAL'
+          ? (tx.release.message ??
+              'Your approval is recorded. The deposit is released once your representative approves too.')
+          : 'Deposit released to the seller.',
+        'success'
+      );
     },
     onError: fail('Could not release these funds.'),
   });

@@ -19,14 +19,18 @@ import { scheduleOnRN } from 'react-native-worklets';
 import { ChevronLeft, ChevronRight, Compass, ImageOff, Play, X } from '@sureground/icons/native';
 import { Button, Chip, Text, useReducedMotion } from '@sureground/ui-native';
 import {
+  FLOOR_PLAN_MEASUREMENT_LABEL,
+  floorPlanFor,
   floorPlanLevels,
   isFloorPlan,
   MEDIA_ROOM_LABEL,
   MEDIA_ROOM_NAME,
   placeholderOf,
+  roomSizeLabel,
   variantAtLeast,
   type MediaItem,
   type MediaRoom,
+  type ShowroomFloorPlan,
 } from '@sureground/shared/showroom';
 import { EmbedFrame } from '@/components/video/EmbedFrame';
 import { VideoTourPlayer } from '@/components/video/VideoTourPlayer';
@@ -65,6 +69,7 @@ export function MediaViewer({
   onClose,
   onMediaEvent,
   onVideoExpired,
+  floorPlans,
 }: {
   items: MediaItem[];
   open: boolean;
@@ -75,6 +80,8 @@ export function MediaViewer({
   onMediaEvent?: (event: MediaEvent) => void;
   /** A signed video link has lapsed: the caller fetches the listing again. */
   onVideoExpired?: () => void;
+  /** Structured floor plans from `floorPlansOf`: a plan page then lists its rooms and sizes. */
+  floorPlans?: ShowroomFloorPlan[];
 }) {
   return (
     <Modal
@@ -93,6 +100,7 @@ export function MediaViewer({
           onClose={onClose}
           onMediaEvent={onMediaEvent}
           onVideoExpired={onVideoExpired}
+          floorPlans={floorPlans}
         />
       ) : null}
     </Modal>
@@ -106,6 +114,7 @@ function ViewerBody({
   onClose,
   onMediaEvent,
   onVideoExpired,
+  floorPlans,
 }: {
   items: MediaItem[];
   startIndex: number;
@@ -113,6 +122,7 @@ function ViewerBody({
   onClose: () => void;
   onMediaEvent?: (event: MediaEvent) => void;
   onVideoExpired?: () => void;
+  floorPlans?: ShowroomFloorPlan[];
 }) {
   const insets = useSafeAreaInsets();
   const screen = useWindowDimensions();
@@ -151,6 +161,8 @@ function ViewerBody({
   const levels = useMemo(() => floorPlanLevels(items), [items]);
   const levelAt = levels.findIndex((l) => l.index === index);
   const onPlan = levelAt >= 0;
+  // The lister's rooms and sizes for this level, when they added them; every size keeps its label.
+  const plan = onPlan ? floorPlanFor(floorPlans, item.id) : undefined;
 
   // Photos are counted on their own, as on the hero; a video or tour page is named instead.
   const photoCount = items.filter((m) => m.kind === 'image').length;
@@ -409,6 +421,51 @@ function ViewerBody({
               </Text>
             ) : null}
           </View>
+        ) : null}
+
+        {plan && plan.rooms.length > 0 ? (
+          <ScrollView
+            style={{ maxHeight: 168, flexGrow: 0 }}
+            contentContainerStyle={{ paddingHorizontal: 16, gap: 4 }}
+            accessibilityLabel={`Rooms on ${plan.levelName}`}
+          >
+            {plan.rooms.some((r) => r.widthM !== undefined) ? (
+              <Text variant="caption" style={{ color: INK.dim }}>
+                {FLOOR_PLAN_MEASUREMENT_LABEL[plan.measurement]}
+              </Text>
+            ) : null}
+            {plan.rooms.map((room) => {
+              const size = roomSizeLabel(room, plan.measurement);
+              const at = room.photoMediaId
+                ? items.findIndex((m) => m.id === room.photoMediaId)
+                : -1;
+              const body = (
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 44 }}>
+                  <View style={{ flex: 1 }}>
+                    <Text variant="bodyStrong" style={{ color: INK.fg }} numberOfLines={1}>
+                      {room.name}
+                    </Text>
+                    <Text variant="caption" style={{ color: INK.dim }}>
+                      {size ?? 'No size given'}
+                    </Text>
+                  </View>
+                  {at >= 0 ? <ChevronRight size={18} color={INK.dim} /> : null}
+                </View>
+              );
+              return at >= 0 ? (
+                <Pressable
+                  key={room.id}
+                  onPress={() => go(at)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${room.name}${size ? `, ${size}` : ''}, open its photo`}
+                >
+                  {body}
+                </Pressable>
+              ) : (
+                <View key={room.id}>{body}</View>
+              );
+            })}
+          </ScrollView>
         ) : null}
 
         {items.length > 1 ? (

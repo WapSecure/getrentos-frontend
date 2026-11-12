@@ -24,6 +24,8 @@ export interface LandRepresentativeAppointment {
 
 export interface CoApprovalPendingStep {
   milestoneKey: string;
+  /** This approval also releases the held deposit (a built home's handover). */
+  releasesDeposit?: boolean;
   buyerApproved: boolean;
   representativeApproved: boolean;
 }
@@ -35,6 +37,11 @@ export interface CoApprovalView {
   representative?: { appointmentId: string; name?: string };
   pending?: CoApprovalPendingStep[];
 }
+
+/** A representative's second approval to a deposit release; never moves money itself. */
+export type DepositReleaseApproval = CoApprovalView & {
+  outcome: 'APPROVED' | 'WAITING_FOR_BUYER' | 'WAITING_FOR_REPRESENTATIVE';
+};
 
 export interface PrincipalDeals {
   purchases: {
@@ -56,9 +63,16 @@ export interface PrincipalDeals {
 export type ResaleSteps = LandMilestone[];
 
 export const REPRESENTATIVE_SCOPE_LABELS: Record<RepresentativeScope, string> = {
-  VIEW: 'See my land purchases, their steps and documents',
+  VIEW: 'See my purchases, their steps and documents',
   CO_APPROVE: 'Give the second approval before money is released to a seller',
   ATTEND: 'Attend site visits and tours for me',
+};
+
+/** For tables, where the full sentences do not fit. */
+export const REPRESENTATIVE_SCOPE_SHORT_LABELS: Record<RepresentativeScope, string> = {
+  VIEW: 'See purchases',
+  CO_APPROVE: 'Approve the release',
+  ATTEND: 'Attend visits',
 };
 
 export const REPRESENTATIVE_RELATIONSHIP_LABELS: Record<RepresentativeRelationship, string> = {

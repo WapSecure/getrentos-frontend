@@ -2,6 +2,7 @@ import type { ShowroomFunnelReport } from '@/types/showroomFunnel';
 import { authDownload, authFetch, safeCall, toQuery } from '@sureground/shared';
 import type { ApiResponse } from '@sureground/shared';
 import type {
+  AdminMediaItem,
   PlatformUser,
   PlanTier,
   UserAccountStatus,
@@ -617,6 +618,37 @@ export const adminService = {
       pageSize: params.pageSize?.toString(),
     });
     return safeCall(() => authFetch(`/admin/audit-logs${query}`));
+  },
+
+  async listMedia(params: {
+    search?: string;
+    classification?: string;
+    held?: boolean;
+    page?: number;
+    pageSize?: number;
+  }): Promise<ApiResponse<Paginated<AdminMediaItem>>> {
+    const query = toQuery({
+      search: params.search,
+      classification: params.classification,
+      held: params.held ? 'true' : undefined,
+      page: params.page?.toString(),
+      pageSize: params.pageSize?.toString(),
+    });
+    return safeCall(() => authFetch(`/admin/media${query}`));
+  },
+
+  /** Step-up is asked for by the API and handled by the StepUpDialog. */
+  async setMediaHold(
+    objectKey: string,
+    held: boolean,
+    reason: string
+  ): Promise<ApiResponse<{ legalHold: boolean }>> {
+    return safeCall(() =>
+      authFetch(`/admin/media/${held ? 'hold' : 'release'}`, {
+        method: 'POST',
+        body: JSON.stringify({ objectKey, reason }),
+      })
+    );
   },
 
   async listDocuments(

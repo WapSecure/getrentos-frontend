@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { headers } from 'next/headers';
 import { Manrope } from 'next/font/google';
 import { ThemeProvider } from '@sureground/ui/providers/ThemeProvider';
-import { QueryProvider } from '@sureground/ui/providers/QueryProvider';
+import { WebQueryProvider } from '@/components/providers/WebQueryProvider';
 import { LanguageProvider } from '@/lib/i18n/LanguageContext';
 import { StepUpDialog } from '@/components/shared/security/StepUpDialog';
 import {
@@ -80,12 +80,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="en" className={manrope.variable} suppressHydrationWarning>
       <body className="bg-background antialiased">
         <ThemeProvider nonce={nonce}>
-          <QueryProvider>
+          <WebQueryProvider>
             <LanguageProvider>
               {children}
               <StepUpDialog />
             </LanguageProvider>
-          </QueryProvider>
+          </WebQueryProvider>
         </ThemeProvider>
       </body>
     </html>

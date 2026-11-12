@@ -66,6 +66,27 @@ export const MarketingIconTile = ({
   </div>
 );
 
+/** A row of short proof points under a hero: facts the product does today, never figures. */
+export const TrustStrip = ({
+  items,
+  className = '',
+}: {
+  items: readonly { icon: SgIcon; text: string }[];
+  className?: string;
+}) => (
+  <ul className={`flex flex-wrap items-center justify-center gap-2.5 ${className}`}>
+    {items.map((item) => (
+      <li
+        key={item.text}
+        className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-card/70 px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm backdrop-blur"
+      >
+        <item.icon className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+        {item.text}
+      </li>
+    ))}
+  </ul>
+);
+
 const buttonBase =
   'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-medium tracking-[-0.01em] transition-all duration-200 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.98]';
 const buttonVariants = {

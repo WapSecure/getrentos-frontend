@@ -1,5 +1,9 @@
 import { useEffect, useState } from 'react';
-import type { MediaItem, ShowroomEventMarket } from '@sureground/shared/showroom';
+import type {
+  MediaItem,
+  ShowroomEventMarket,
+  ShowroomFloorPlan,
+} from '@sureground/shared/showroom';
 import { trackShowroom } from '@/lib/showroomAnalytics';
 import { MediaViewer, type MediaEvent } from './MediaViewer';
 import { ShowroomHero } from './ShowroomHero';
@@ -14,6 +18,7 @@ export function ShowroomMedia({
   area,
   emptyLabel,
   onVideoExpired,
+  floorPlans,
 }: {
   listingId: string;
   market: ShowroomEventMarket;
@@ -23,6 +28,7 @@ export function ShowroomMedia({
   area?: string | null;
   emptyLabel?: string;
   onVideoExpired?: () => void;
+  floorPlans?: ShowroomFloorPlan[];
 }) {
   const [openAt, setOpenAt] = useState<number | null>(null);
   const onMediaEvent = ({ type, mediaIndex, room }: MediaEvent) =>
@@ -54,6 +60,7 @@ export function ShowroomMedia({
         onClose={() => setOpenAt(null)}
         onMediaEvent={onMediaEvent}
         onVideoExpired={onVideoExpired}
+        floorPlans={floorPlans}
       />
     </>
   );

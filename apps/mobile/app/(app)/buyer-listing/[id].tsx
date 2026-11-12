@@ -185,6 +185,7 @@ export default function BuyerListingDetail() {
                   listingId={listing.id}
                   market="sale"
                   items={showroom.media}
+                  floorPlans={pub.data?.floorPlans}
                   title={listing.title}
                   height={280}
                   onVideoExpired={() => void pub.refetch()}

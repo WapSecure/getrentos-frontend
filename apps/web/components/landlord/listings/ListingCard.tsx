@@ -12,11 +12,12 @@ import {
   Eye,
   Zap,
   Banknote,
+  Building2,
 } from '@sureground/icons';
 import { Badge, Button } from '@sureground/ui';
 import { listingStatusBadges } from '@/lib/statusBadge';
 import { formatCurrency, formatDate } from '@/lib/format';
-import type { Listing } from '@/types/landlord';
+import { isCommercialType, type Listing } from '@/types/landlord';
 
 const statusConfig = listingStatusBadges;
 
@@ -25,6 +26,8 @@ interface ListingCardProps {
   onTogglePause: (id: string) => void;
   onPreview: (listing: Listing) => void;
   onEditFees?: (listing: Listing) => void;
+  /** Shown on commercial listings only. */
+  onEditCommercial?: (listing: Listing) => void;
   isUpdating?: boolean;
 }
 
@@ -33,6 +36,7 @@ export const ListingCard = ({
   onTogglePause,
   onPreview,
   onEditFees,
+  onEditCommercial,
   isUpdating = false,
 }: ListingCardProps) => {
   const status = statusConfig[listing.status];
@@ -132,6 +136,18 @@ export const ListingCard = ({
             >
               <Banknote className="w-3.5 h-3.5" />
               Fees
+            </Button>
+          )}
+          {onEditCommercial && isCommercialType(listing.propertyType) && (
+            <Button
+              variant="outline"
+              size="sm"
+              fullWidth
+              className="gap-1.5"
+              onClick={() => onEditCommercial(listing)}
+            >
+              <Building2 className="w-3.5 h-3.5" />
+              Commercial
             </Button>
           )}
           {(listing.status === 'published' || listing.status === 'paused') && (

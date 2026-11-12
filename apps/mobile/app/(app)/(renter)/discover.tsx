@@ -30,6 +30,7 @@ import { PropertyFilterSheet } from '@/components/property/PropertyFilterSheet';
 import { SaveSearchSheet } from '@/components/property/SaveSearchSheet';
 import { PropertyMapView, type PropertyMapMarker } from '@/components/property/PropertyMapView';
 import { useSavedListings } from '@/hooks/useSavedListings';
+import { useCardAnalytics } from '@/hooks/useCardAnalytics';
 import { qk } from '@/lib/query/keys';
 import {
   propertiesApi,
@@ -76,6 +77,8 @@ export default function Discover() {
     },
   });
   const { savedIds, toggle } = useSavedListings();
+  // The web's renter Discover grid counts under the same surface.
+  const cards = useCardAnalytics('rent', 'discover');
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -126,17 +129,20 @@ export default function Discover() {
   }, [query]);
 
   const renderItem = useCallback(
-    ({ item }: { item: RenterProperty }) => (
+    ({ item, index }: { item: RenterProperty; index: number }) => (
       <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
         <PropertyCard
           property={withTrustLabel(item)}
           saved={savedIds.has(item.id)}
           onToggleSave={toggle}
-          onPress={(id) => router.push(`/(app)/property/${id}`)}
+          onPress={(id) => {
+            cards.click(id, index);
+            router.push(`/(app)/property/${id}`);
+          }}
         />
       </View>
     ),
-    [savedIds, toggle, spacing.xl, spacing.md]
+    [cards, savedIds, toggle, spacing.xl, spacing.md]
   );
 
   return (
@@ -363,6 +369,7 @@ export default function Discover() {
             data={items}
             keyExtractor={(item) => item.id}
             renderItem={renderItem}
+            {...cards.listProps}
             onEndReached={onEndReached}
             onEndReachedThreshold={0.6}
             keyboardDismissMode="on-drag"

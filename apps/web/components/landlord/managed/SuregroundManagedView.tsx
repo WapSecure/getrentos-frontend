@@ -64,7 +64,7 @@ import { formatMoment } from '@/components/agency/mandatePresentation';
 
 // Sureground Managed is an ordinary mandate; starting one is an intake, and the owner's acceptance of the proposal signs it.
 
-const MANDATE_STATUS_BADGE: Record<
+export const MANDATE_STATUS_BADGE: Record<
   string,
   { variant: 'success' | 'warning' | 'info' | 'neutral' | 'danger'; label: string }
 > = {
@@ -86,7 +86,7 @@ const TIER_LABEL: Record<ServicingTier, string> = {
 
 const ENDED_STATUSES = ['TERMINATED', 'EXPIRED', 'REJECTED'];
 
-const INTAKE_STAGE: Record<string, string> = {
+export const INTAKE_STAGE: Record<string, string> = {
   SUBMITTED: 'Requested',
   ASSESSMENT_SCHEDULED: 'Visit booked',
   ASSESSED: 'Assessed',

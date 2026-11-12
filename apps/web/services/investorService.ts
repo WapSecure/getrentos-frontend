@@ -6,6 +6,7 @@ import type {
   InvestorProfileInput,
   RiskDeclaration,
 } from '@/types/investor';
+import type { InvestorManaged } from '@/types/managed';
 
 export const investorService = {
   availability(): Promise<ApiResponse<InvestorAvailability>> {
@@ -45,5 +46,10 @@ export const investorService = {
 
   getOverview(): Promise<ApiResponse<InvestorOverview>> {
     return safeCall(() => authFetch<InvestorOverview>('/investor/overview'));
+  },
+
+  /** Every property under Sureground Managed, with what waits on the owner. */
+  getManaged(): Promise<ApiResponse<InvestorManaged>> {
+    return safeCall(() => authFetch<InvestorManaged>('/investor/managed'));
   },
 };

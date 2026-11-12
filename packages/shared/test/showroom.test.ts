@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  commercialDetailsOf,
   fromLand,
   fromRental,
   fromSale,
@@ -341,4 +342,108 @@ test('verification summary: missing or unknown status is left out; limits are ne
   assert.equal(s?.checkedAt, null);
   assert.ok(s && s.limits.length > 0);
   assert.ok(s?.limits.some((l) => l.includes('not a guarantee of title')));
+});
+
+test('rent and sale carry the trust chain the cards show; malformed steps are dropped', () => {
+  const chain = {
+    steps: [
+      { id: 'owner', label: 'Verified owner', met: false, detail: 'Owner ID pending' },
+      { id: 'authority', label: 'Ownership confirmed', met: false, detail: '' },
+      { id: 'property', label: 'Property verified', met: true, detail: '' },
+      { id: 'payment', label: 'Payment protected', met: true, detail: '' },
+      { id: 'made-up', label: 'Nonsense', met: true },
+      { id: 'owner', label: 'No met flag' },
+    ],
+    metCount: 9,
+    totalCount: 9,
+  };
+  const rent = fromRental({ ...rental, verified: true, trustChain: chain }).trustChain;
+  assert.equal(rent?.steps.length, 4);
+  assert.equal(rent?.metCount, 2);
+  assert.equal(rent?.totalCount, 4);
+  const sale = fromSale({ id: 's', title: 'House', price: 1, trustChain: chain }).trustChain;
+  assert.deepEqual(sale, rent);
+  assert.equal(fromRental({ ...rental, verified: true }).trustChain, undefined);
+  assert.equal(fromRental({ ...rental, trustChain: { steps: [] } }).trustChain, undefined);
+  assert.equal(fromRental({ ...rental, trustChain: 'yes' }).trustChain, undefined);
+});
+
+test('commercial: a commercial rental carries only the stated details', () => {
+  const l = fromRental({
+    ...rental,
+    propertyType: 'COMMERCIAL',
+    commercial: {
+      permittedUse: 'OFFICE',
+      lettableAreaSqm: 250,
+      parkingSpaces: 0,
+      generator: false,
+      leaseTermOptionsYears: [5, 3],
+      rentReviewNote: '  Every two years  ',
+      vatStatedPct: 7.5,
+    },
+  });
+  assert.deepEqual(l.commercial, {
+    permittedUse: 'OFFICE',
+    lettableAreaSqm: 250,
+    parkingSpaces: 0,
+    generator: false,
+    leaseTermOptionsYears: [3, 5],
+    rentReviewNote: 'Every two years',
+    vatStatedPct: 7.5,
+  });
+});
+
+test('commercial: VAT is never added to the stated costs', () => {
+  const l = fromRental({
+    ...rental,
+    propertyType: 'COMMERCIAL',
+    serviceCharge: 400000,
+    commercial: { vatStatedPct: 7.5, vatIncluded: false },
+  });
+  assert.deepEqual(
+    l.costs.lines.map((c) => c.label),
+    ['Rent for the first year', 'Service charge']
+  );
+  assert.equal(l.costs.total?.amount, 3900000);
+});
+
+test('commercial: ignored on a residential listing, and absent when nothing is stated', () => {
+  assert.equal(fromRental({ ...rental, commercial: { solar: true } }).commercial, undefined);
+  assert.equal(
+    fromRental({ ...rental, propertyType: 'COMMERCIAL', commercial: {} }).commercial,
+    undefined
+  );
+  assert.equal(fromRental({ ...rental, propertyType: 'COMMERCIAL' }).commercial, undefined);
+});
+
+test('commercial: a commercial sale carries the block too', () => {
+  const l = fromSale({
+    id: 's1',
+    title: 'Warehouse, Apapa',
+    price: 900000000,
+    propertyType: 'COMMERCIAL',
+    commercial: { permittedUse: 'WAREHOUSE', loadingAccess: true },
+  });
+  assert.deepEqual(l.commercial, { permittedUse: 'WAREHOUSE', loadingAccess: true });
+});
+
+test('commercial: malformed or out-of-range values are dropped, not shown', () => {
+  assert.deepEqual(
+    commercialDetailsOf({
+      permittedUse: 'FACTORY',
+      fitOutCondition: 'FITTED',
+      lettableAreaSqm: -4,
+      parkingSpaces: 2.5,
+      publicSupplyHoursStated: 30,
+      generator: 'yes',
+      solar: true,
+      leaseTermOptionsYears: [2, 2, 0, 'x', 120],
+      vatStatedPct: 250,
+      escalationNote: '',
+    }),
+    { fitOutCondition: 'FITTED', solar: true, leaseTermOptionsYears: [2] }
+  );
+  assert.equal(commercialDetailsOf(null), undefined);
+  assert.equal(commercialDetailsOf([]), undefined);
+  assert.equal(commercialDetailsOf('OFFICE'), undefined);
 });

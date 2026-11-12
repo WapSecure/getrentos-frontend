@@ -1,4 +1,7 @@
 import type {
+  CommercialDetails,
+  CommercialFitOutCondition,
+  CommercialPermittedUse,
   CostLine,
   ImagePreview,
   ImageVariant,
@@ -9,6 +12,8 @@ import type {
   PublicSaleDto,
   ShowroomFact,
   ShowroomListing,
+  ShowroomTrustChain,
+  ShowroomTrustStepId,
 } from './types';
 import {
   LAND_DILIGENCE_LABELS,
@@ -17,6 +22,7 @@ import {
 } from '../utils/landTrust';
 import { tidyPlace } from '../utils/address';
 import { tourSource } from '../utils/videoSource';
+import { floorPlansOf } from './floorPlans';
 
 const money = (v: unknown) => {
   const n = typeof v === 'string' ? Number(v) : (v as number);
@@ -126,6 +132,75 @@ export function heroPhotos(items: MediaItem[]): MediaItem[] {
   return [...photos.filter((m) => !isFloorPlan(m)), ...photos.filter(isFloorPlan)];
 }
 
+export const COMMERCIAL_PERMITTED_USE_LABEL: Record<CommercialPermittedUse, string> = {
+  SHOP: 'Shop',
+  OFFICE: 'Office',
+  WAREHOUSE: 'Warehouse',
+  MIXED: 'Mixed use',
+  OTHER: 'Other',
+};
+
+export const COMMERCIAL_FIT_OUT_LABEL: Record<CommercialFitOutCondition, string> = {
+  SHELL: 'Shell',
+  SEMI_FITTED: 'Semi-fitted',
+  FITTED: 'Fitted',
+};
+
+const inRange = (v: unknown, min: number, max: number, whole = false): v is number =>
+  typeof v === 'number' &&
+  Number.isFinite(v) &&
+  v >= min &&
+  v <= max &&
+  (!whole || Number.isInteger(v));
+const text = (v: unknown, max: number) =>
+  typeof v === 'string' && v.trim() && v.length <= max ? v.trim() : undefined;
+const bool = (v: unknown) => (typeof v === 'boolean' ? v : undefined);
+const oneOf = <T extends string>(labels: Record<T, string>, v: unknown) =>
+  typeof v === 'string' && Object.prototype.hasOwnProperty.call(labels, v) ? (v as T) : undefined;
+
+/**
+ * The API's commercial block, checked field by field: anything malformed or out of range is
+ * dropped, so the page never shows a value the lister did not state. Undefined when nothing is left.
+ */
+export function commercialDetailsOf(value: unknown): CommercialDetails | undefined {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
+  const v = value as Record<string, unknown>;
+  const years = Array.isArray(v.leaseTermOptionsYears)
+    ? [...new Set(v.leaseTermOptionsYears.filter((y) => inRange(y, 1, 99, true)))].sort(
+        (a, b) => a - b
+      )
+    : [];
+  const out: CommercialDetails = {
+    permittedUse: oneOf(COMMERCIAL_PERMITTED_USE_LABEL, v.permittedUse),
+    permittedUseNote: text(v.permittedUseNote, 200),
+    lettableAreaSqm: inRange(v.lettableAreaSqm, 1, 1_000_000) ? v.lettableAreaSqm : undefined,
+    fitOutCondition: oneOf(COMMERCIAL_FIT_OUT_LABEL, v.fitOutCondition),
+    parkingSpaces: inRange(v.parkingSpaces, 0, 10_000, true) ? v.parkingSpaces : undefined,
+    publicSupplyHoursStated: inRange(v.publicSupplyHoursStated, 0, 24, true)
+      ? v.publicSupplyHoursStated
+      : undefined,
+    generator: bool(v.generator),
+    generatorNote: text(v.generatorNote, 200),
+    solar: bool(v.solar),
+    loadingAccess: bool(v.loadingAccess),
+    loadingAccessNote: text(v.loadingAccessNote, 200),
+    leaseTermOptionsYears: years.length ? years : undefined,
+    rentReviewNote: text(v.rentReviewNote, 500),
+    escalationNote: text(v.escalationNote, 500),
+    vatStatedPct: inRange(v.vatStatedPct, 0, 100) ? v.vatStatedPct : undefined,
+    vatIncluded: bool(v.vatIncluded),
+  };
+  const stated = Object.fromEntries(
+    Object.entries(out).filter(([, x]) => x !== undefined)
+  ) as CommercialDetails;
+  return Object.keys(stated).length ? stated : undefined;
+}
+
+const commercialFor = (propertyType: string | undefined, value: unknown) => {
+  const commercial = propertyType === 'COMMERCIAL' ? commercialDetailsOf(value) : undefined;
+  return commercial ? { commercial } : {};
+};
+
 const AREA_UNIT = { SQUARE_METERS: 'sqm', ACRE: 'acres', HECTARE: 'hectares' } as const;
 
 /** Uses the API's media list when it sends one; otherwise builds images from the older URL fields. */
@@ -160,6 +235,44 @@ export function showroomMedia(
 // The first URL is the page's share and search image, so a floor plan never leads.
 const imageUrls = (media: MediaItem[]) => heroPhotos(media).map((m) => m.url);
 
+// Only when there is at least one level, so a listing without structured plans keeps the M8a shape.
+const withFloorPlans = (raw: unknown, media: MediaItem[]) => {
+  const floorPlans = floorPlansOf(raw, media);
+  return floorPlans.length ? { floorPlans } : {};
+};
+
+const TRUST_STEP_IDS: readonly ShowroomTrustStepId[] = [
+  'owner',
+  'authority',
+  'property',
+  'payment',
+];
+
+/** The API's trust chain, or undefined when it is missing or malformed (the page then falls back to `verified`). */
+export function trustChainOf(raw: unknown): ShowroomTrustChain | undefined {
+  const steps = (raw as { steps?: unknown } | null | undefined)?.steps;
+  if (!Array.isArray(steps)) return undefined;
+  const valid = steps.flatMap((step) => {
+    const s = step as Record<string, unknown> | null;
+    if (!s || typeof s.label !== 'string' || typeof s.met !== 'boolean') return [];
+    if (!TRUST_STEP_IDS.includes(s.id as ShowroomTrustStepId)) return [];
+    return [
+      {
+        id: s.id as ShowroomTrustStepId,
+        label: s.label,
+        met: s.met,
+        detail: typeof s.detail === 'string' ? s.detail : '',
+      },
+    ];
+  });
+  if (valid.length === 0) return undefined;
+  return {
+    steps: valid,
+    metCount: valid.filter((s) => s.met).length,
+    totalCount: valid.length,
+  };
+}
+
 export function fromRental(r: PublicRentalDto): ShowroomListing {
   const price = money(r.price);
   const media = showroomMedia(r.title, r.media, [r.image, ...(r.images ?? [])]);
@@ -193,8 +306,10 @@ export function fromRental(r: PublicRentalDto): ShowroomListing {
     bathrooms: positive(r.bathrooms),
     size: positive(r.size),
     verified: !!r.verified,
+    trustChain: trustChainOf(r.trustChain),
     media,
     images: imageUrls(media),
+    ...withFloorPlans(r.floorPlans, media),
     description: r.description,
     amenities: r.amenities ?? [],
     availableFrom: r.availableFrom,
@@ -223,6 +338,7 @@ export function fromRental(r: PublicRentalDto): ShowroomListing {
       total: { label: 'Stated costs to move in', amount: lines.reduce((s, l) => s + l.amount, 0) },
       notStated,
     },
+    ...commercialFor(r.propertyType, r.commercial),
   };
 }
 
@@ -239,10 +355,12 @@ export function fromSale(s: PublicSaleDto): ShowroomListing {
     bedrooms: positive(s.bedrooms),
     bathrooms: positive(s.bathrooms),
     verified: !!s.isVerified,
+    trustChain: trustChainOf(s.trustChain),
     underOffer: !!s.underOffer,
     verificationSummary: verificationSummaryOf(s.verificationSummary),
     media,
     images: imageUrls(media),
+    ...withFloorPlans(s.floorPlans, media),
     amenities: s.amenities ?? [],
     facts: [
       ...fact('Property type', humanise(s.propertyType)),
@@ -252,6 +370,7 @@ export function fromSale(s: PublicSaleDto): ShowroomListing {
       lines: [{ label: 'Asking price', amount: price }],
       notStated: ['Legal fee', 'Agency fee', 'Survey and registration costs'],
     },
+    ...commercialFor(s.propertyType, s.commercial),
   };
 }
 

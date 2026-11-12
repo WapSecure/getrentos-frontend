@@ -371,6 +371,21 @@ export interface AuditLogEntry {
   newValues?: unknown;
 }
 
+/** A stored file in the media registry (GET /admin/media). */
+export interface AdminMediaItem {
+  objectKey: string;
+  folder: string;
+  classification: 'PUBLIC' | 'RESTRICTED' | 'CONFIDENTIAL';
+  status: string;
+  contentType: string | null;
+  sizeBytes: number | null;
+  ownerType: string | null;
+  ownerId: string | null;
+  legalHold: boolean;
+  createdAt: string;
+  deletedAt: string | null;
+}
+
 export interface AdminDocument {
   id: string;
   name: string;

@@ -10,6 +10,7 @@ import { qk } from '@/lib/query/keys';
 import { useOptimisticMutation } from '@/lib/query/optimistic';
 import { shortletsApi, type ShortletFilters, type ShortletListing } from '@/lib/api/shortlets';
 import { haptics } from '@/lib/haptics';
+import { useCardAnalytics } from '@/hooks/useCardAnalytics';
 import { StayCard } from './StayCard';
 
 const PAGE_SIZE = 20;
@@ -35,14 +36,18 @@ export function StayResults({
   header,
   emptyTitle = 'No stays match',
   emptyDescription = 'Try other dates, or loosen a filter.',
+  surface = 'shortlet_list',
 }: {
   filters: ShortletFilters;
   header?: ReactElement;
   emptyTitle?: string;
   emptyDescription?: string;
+  /** Impression and click surface; `shortlet_list` as on the web's shortlet browser. */
+  surface?: string;
 }) {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
+  const cards = useCardAnalytics('shortlet', surface);
 
   const query = useInfiniteQuery({
     queryKey: qk.shortlets.list({ ...filters }),
@@ -96,12 +101,16 @@ export function StayResults({
       maintainVisibleContentPosition={{ disabled: true }}
       data={items}
       keyExtractor={(item) => item.id}
-      renderItem={({ item }: { item: ShortletListing }) => (
+      {...cards.listProps}
+      renderItem={({ item, index }: { item: ShortletListing; index: number }) => (
         <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.lg }}>
           <StayCard
             item={item}
             saved={wishlisted.has(item.id)}
-            onPress={() => openStay(item.id, filters)}
+            onPress={() => {
+              cards.click(item.id, index);
+              openStay(item.id, filters);
+            }}
             onToggleSave={() => {
               void haptics.tap();
               wishlist.mutate({ id: item.id, next: !wishlisted.has(item.id) });

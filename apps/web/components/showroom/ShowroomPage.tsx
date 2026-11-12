@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { ArrowLeft, BadgeCheck, Bath, BedDouble, Check, MapPin, Ruler } from '@sureground/icons';
+import { trustChainLabel } from '@sureground/shared';
 import { floorPlanLevels } from '@sureground/shared/showroom';
 import { Badge, DescriptionList } from '@sureground/ui';
 import { Footer } from '@/components/layout/Footer';
@@ -18,10 +19,13 @@ import {
   type PublicDetailMarket,
 } from '@/lib/publicListingDetail';
 import { ShowroomAside } from './ShowroomAside';
+import { ShowroomCommercial } from './ShowroomCommercial';
+import { ShowroomSection as Section } from './ShowroomSection';
 import { ShowroomNeighbourhood } from './ShowroomNeighbourhood';
 import { ShowroomShareButton } from './ShowroomShareButton';
 import { ShowroomTrust } from './ShowroomTrust';
 import { VerificationSummaryBadge } from '@/components/shared/trust/VerificationSummaryCard';
+import { TrustChainBadge } from '@/components/shared/trust/TrustChainBadge';
 import {
   FloorPlansShortcut,
   ShowroomGallery,
@@ -34,17 +38,6 @@ const MARKET_NOUN: Record<PublicDetailMarket, string> = {
   sale: 'Homes for sale',
   land: 'Land',
 };
-
-function Section({ id, title, children }: { id: string; title: string; children: ReactNode }) {
-  return (
-    <section aria-labelledby={id} className="border-t border-border/70 pt-8">
-      <h2 id={id} className="text-xl font-semibold tracking-tight text-foreground">
-        {title}
-      </h2>
-      <div className="mt-4">{children}</div>
-    </section>
-  );
-}
 
 export async function ShowroomPage({
   market,
@@ -85,6 +78,7 @@ export async function ShowroomPage({
             listingId={listing.id}
             market={market}
             items={listing.media}
+            floorPlans={listing.floorPlans}
             title={listing.title}
             className="-mx-4 mt-3 rounded-none shadow-none sm:mx-0 sm:rounded-2xl sm:shadow-sm"
           />
@@ -92,23 +86,34 @@ export async function ShowroomPage({
           <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_380px] xl:gap-14">
             <div className="min-w-0 space-y-10">
               <header className="space-y-3">
-                {/* With a summary, its status replaces the old "Verified" tick so the two never disagree. */}
-                {listing.verificationSummary
-                  ? listing.verificationSummary.status !== 'NOT_STARTED' && (
-                      // The badge never stands alone: it leads to what was checked and what it does not cover.
-                      <a
-                        href="#trust"
-                        className="inline-flex rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                        aria-label="See what was checked and what it does not cover"
-                      >
-                        <VerificationSummaryBadge summary={listing.verificationSummary} />
-                      </a>
-                    )
-                  : listing.verified && (
-                      <Badge variant="success" icon={<BadgeCheck className="h-3.5 w-3.5" />}>
-                        {market === 'land' ? 'Ownership verified' : 'Verified'}
-                      </Badge>
-                    )}
+                {/* The trust chain is what the browse card shows, so the page reads the same. Without
+                    one, the summary's status replaces the old "Verified" tick so the two never disagree. */}
+                {listing.trustChain ? (
+                  <a
+                    href="#trust"
+                    className="inline-flex rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    aria-label={`${trustChainLabel(listing.trustChain).label}. See what has been checked`}
+                  >
+                    <TrustChainBadge chain={listing.trustChain} />
+                  </a>
+                ) : listing.verificationSummary ? (
+                  listing.verificationSummary.status !== 'NOT_STARTED' && (
+                    // The badge never stands alone: it leads to what was checked and what it does not cover.
+                    <a
+                      href="#trust"
+                      className="inline-flex rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      aria-label="See what was checked and what it does not cover"
+                    >
+                      <VerificationSummaryBadge summary={listing.verificationSummary} />
+                    </a>
+                  )
+                ) : (
+                  listing.verified && (
+                    <Badge variant="success" icon={<BadgeCheck className="h-3.5 w-3.5" />}>
+                      {market === 'land' ? 'Ownership verified' : 'Verified'}
+                    </Badge>
+                  )
+                )}
                 <div className="flex items-start justify-between gap-4">
                   <h1 className="text-3xl font-semibold tracking-[-0.035em] text-foreground text-balance sm:text-4xl">
                     {listing.title}
@@ -164,6 +169,11 @@ export async function ShowroomPage({
                 )}
               </header>
 
+              {/* Commercial: the lease and the space come before the description. */}
+              {listing.commercial && (
+                <ShowroomCommercial commercial={listing.commercial} market={market} />
+              )}
+
               {listing.description && (
                 <Section id="about" title={`About this ${market === 'land' ? 'parcel' : 'place'}`}>
                   <p className="max-w-3xl whitespace-pre-line leading-7 text-muted-foreground">
@@ -218,6 +228,7 @@ export async function ShowroomPage({
                 market={market}
                 id={listing.id}
                 returnPath={path}
+                commercial={!!listing.commercial}
               />
             </>
           )}

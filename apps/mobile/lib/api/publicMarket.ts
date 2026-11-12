@@ -18,6 +18,7 @@ import {
   type PublicRentalDto,
   type PublicSaleDto,
   type ShowroomCosts,
+  type ShowroomFloorPlan,
 } from '@sureground/shared/showroom';
 
 /** Every call is `anonymous`: these routes are public, and a token would make a stale session 401 on a page that needs none. */
@@ -81,6 +82,8 @@ export interface MarketDetail extends MarketCard {
   facts: MarketFact[];
   /** Shortlets: the full listing, for the essentials, rules, prices and trust sections. */
   stay?: ShortletListing;
+  /** Rent and sale: structured floor plans (rooms and labelled sizes), when the lister added them. */
+  floorPlans?: ShowroomFloorPlan[];
 }
 
 export interface MarketFilters {
@@ -507,6 +510,7 @@ export const publicMarketApi = {
           locationPrecision: r.locationPrecision,
           host: l.host,
           facts: l.facts,
+          ...(l.floorPlans ? { floorPlans: l.floorPlans } : {}),
         };
       }
       case 'sale': {
@@ -526,6 +530,7 @@ export const publicMarketApi = {
           longitude: s.longitude,
           locationPrecision: s.locationPrecision,
           facts: l.facts,
+          ...(l.floorPlans ? { floorPlans: l.floorPlans } : {}),
         };
       }
       case 'shortlet': {

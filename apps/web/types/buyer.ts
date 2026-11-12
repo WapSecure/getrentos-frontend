@@ -1,4 +1,10 @@
 import type { DisplayPropertyType } from '@/lib/propertyTypes';
+import type { LandMilestone } from './landBuyer';
+import type {
+  AcquisitionStatuses,
+  DepositReleaseOutcome,
+  NextAction,
+} from './transactionWorkspace';
 
 export type ListingPropertyType = DisplayPropertyType;
 export type ViewingRequestStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
@@ -89,14 +95,10 @@ export interface BuyerOfferMessage {
   timestamp: string;
 }
 
-export interface EscrowMilestone {
-  label: string;
-  completed: boolean;
-}
-
+/** Recorded history; `actor` is a display name, and staff show as "Sureground". */
 export interface EscrowActivityLogEntry {
   id: string;
-  actor: 'buyer' | 'owner' | 'system' | 'compliance';
+  actor: string;
   action: string;
   timestamp: string;
 }
@@ -113,8 +115,14 @@ export interface BuyerEscrowTransaction {
   /** The agreed deposit, else the price. */
   depositAmount?: number;
   escrowStatus: BuyerEscrowStatus;
-  milestones: EscrowMilestone[];
-  activityLog: EscrowActivityLogEntry[];
+  /** Operational stage, deposit status and legal status, kept separate. */
+  statuses?: AcquisitionStatuses;
+  nextAction?: NextAction | null;
+  /** The sale's steps (tracking only: no step moves money). */
+  milestones?: LandMilestone[];
+  activityLog?: EscrowActivityLogEntry[];
+  /** Set on a release: under two-person approval the deposit may still be waiting. */
+  release?: DepositReleaseOutcome;
   disputeReason?: string;
   createdAt: string;
   releasedAt?: string;
