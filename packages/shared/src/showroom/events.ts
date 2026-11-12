@@ -1,5 +1,12 @@
 import type { MediaRoom } from './types';
 
+/**
+ * When a listing card counts as seen (`property_impression`), the same on web and mobile so the two
+ * funnels compare: at least half the card on screen for one continuous second, once per page or
+ * screen visit. A card scrolled past quickly is not counted.
+ */
+export const CARD_IMPRESSION_RULE = { visiblePercent: 50, minimumMs: 1000 } as const;
+
 /** Must match the backend allow-list on POST /analytics/events. */
 export const SHOWROOM_EVENT_NAMES = [
   'property_impression',
