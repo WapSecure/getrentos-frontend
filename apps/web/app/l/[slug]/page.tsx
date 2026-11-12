@@ -44,6 +44,7 @@ export async function generateMetadata({ params }: MicrositePageProps): Promise<
   return {
     title: profile.displayName,
     description,
+    alternates: { canonical: `/l/${slug}` },
     openGraph: {
       title: profile.displayName,
       description,

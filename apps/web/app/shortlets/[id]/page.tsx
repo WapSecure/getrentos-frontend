@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: ShortletDetailPageProps): Pro
   const listing = await fetchListing(listingIdFromSegment(segment));
 
   if (!listing) {
-    return { title: 'Shortlet not found' };
+    return { title: 'Shortlet not found', robots: { index: false, follow: false } };
   }
 
   const description =
