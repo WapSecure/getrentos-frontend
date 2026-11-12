@@ -111,6 +111,19 @@ export type DepositReleaseApprovalOutcome =
   | 'WAITING_FOR_BUYER'
   | 'WAITING_FOR_REPRESENTATIVE';
 
+/**
+ * The active dispute on a purchase (`PurchaseDisputeSummaryDto`): the deposit dispute, else a live
+ * land case on the plot. `respondBy` is the deadline staff work to, null while staff are already
+ * on it; the only turn the model records is Sureground's.
+ */
+export interface PurchaseDispute {
+  id: string;
+  kind: 'DEPOSIT' | 'LAND';
+  status: string;
+  respondBy: string | null;
+  respondByParty: 'SUREGROUND' | null;
+}
+
 /** One purchase on the investor overview, from the same functions as the workspace. */
 export interface PurchaseSummary {
   transactionId: string;
@@ -127,6 +140,8 @@ export interface PurchaseSummary {
   waitingForYou: boolean;
   /** Two-person approvals waiting for me on this purchase. */
   pendingApprovals: number;
+  /** The active dispute; not set for purchases seen as a representative. */
+  dispute?: PurchaseDispute | null;
 }
 
 // ── Investor profile and overview ────────────────────────────────────────────

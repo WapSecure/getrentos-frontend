@@ -47,6 +47,11 @@ import {
 } from '@sureground/ui';
 import { AcquisitionStatusBadges } from './AcquisitionStatusBadges';
 import { usePurchaseDisputes } from './usePurchaseDisputes';
+import {
+  LAND_DISPUTE_STATUS,
+  respondByText,
+  SALE_DISPUTE_STATUS,
+} from '@/components/shared/disputes/DisputeParts';
 import { MilestoneTimeline } from '@/components/land/buyer/MilestoneTimeline';
 import { ReportLandProblemDialog } from '@/components/land/disputes/ReportLandProblemDialog';
 import { ConditionsPanel } from '@/components/land/closing/ConditionsPanel';
@@ -63,7 +68,6 @@ import { buyerService } from '@/services/buyerService';
 import { landBuyerService } from '@/services/landBuyerService';
 import { transactionWorkspaceService } from '@/services/transactionWorkspaceService';
 import type { LandClosingCondition } from '@/types/landClosing';
-import type { LandDispute } from '@/types/landDispute';
 import {
   REPRESENTATIVE_RELATIONSHIP_LABELS,
   REPRESENTATIVE_SCOPE_SHORT_LABELS,
@@ -71,7 +75,6 @@ import {
   type RepresentativeScope,
 } from '@/types/landRepresentative';
 import type {
-  SaleDispute,
   TransactionWorkspace,
   WorkspaceCondition,
   WorkspaceProfessional,
@@ -131,21 +134,6 @@ const CTA_LABEL: Record<WorkspaceSection, string> = {
   approvals: 'Give your approval',
   deposit: 'Review the deposit',
   steps: 'Review the steps',
-};
-
-const SALE_DISPUTE_STATUS: Record<SaleDispute['status'], string> = {
-  OPEN: 'Open',
-  UNDER_REVIEW: 'Under review',
-  ESCALATED: 'Escalated',
-  RESOLVED: 'Decided',
-};
-
-const LAND_DISPUTE_STATUS: Record<LandDispute['status'], string> = {
-  OPEN: 'Open',
-  UNDER_INVESTIGATION: 'Under investigation',
-  RESOLVED: 'Decided',
-  APPEALED: 'Appealed',
-  CLOSED: 'Closed',
 };
 
 const SectionCard = ({
@@ -227,6 +215,7 @@ export const TransactionWorkspaceView = ({
   const toast = useToast();
   const [pendingKey, setPendingKey] = useState<string | null>(null);
   const [releasing, setReleasing] = useState(false);
+  const [refunding, setRefunding] = useState(false);
   const [releaseNotice, setReleaseNotice] = useState<string | null>(null);
   const [viewerTimeZone] = useState(() => browserTimeZone());
   const [disputingDeposit, setDisputingDeposit] = useState(false);
@@ -311,6 +300,20 @@ export const TransactionWorkspaceView = ({
       setReleaseNotice(outcome.waiting ? outcome.message : null);
       refresh();
       toast.success(outcome.message);
+    },
+    onError: (reason: Error) => toast.error(reason.message),
+  });
+
+  // The route re-authenticates; the backend checks again that the handover has not started.
+  const refund = useMutation({
+    mutationFn: () =>
+      withStepUpSummary(`Take back the deposit for ${data?.propertyTitle ?? 'this purchase'}`, () =>
+        unwrap(buyerService.refundTransaction(txId))
+      ),
+    onSuccess: () => {
+      setRefunding(false);
+      refresh();
+      toast.success('The purchase is cancelled and your deposit is being refunded.');
     },
     onError: (reason: Error) => toast.error(reason.message),
   });
@@ -593,6 +596,11 @@ export const TransactionWorkspaceView = ({
                   >
                     Release the deposit
                   </Button>
+                  {data.deposit?.refundable && (
+                    <Button variant="outline" className="w-full" onClick={() => setRefunding(true)}>
+                      Take my deposit back
+                    </Button>
+                  )}
                 </>
               ) : (
                 isSeller && (
@@ -618,7 +626,11 @@ export const TransactionWorkspaceView = ({
                       ...disputes.sale.map((d) => ({
                         id: `sale-${d.id}`,
                         title: d.title,
-                        detail: `Deposit · opened ${formatDate(d.createdAt)} · Sureground decides`,
+                        // Its thread is in the buyer portal; the seller has no web workspace yet.
+                        href: isBuyer ? PURCHASE_ROUTES.buyerDepositDispute(d.id) : undefined,
+                        detail: d.respondBy
+                          ? respondByText(d.respondBy, viewerTimeZone)
+                          : `Deposit · opened ${formatDate(d.createdAt)} · Sureground decides`,
                         badge: (
                           <Badge variant={d.status === 'RESOLVED' ? 'neutral' : 'warning'}>
                             {SALE_DISPUTE_STATUS[d.status] ?? humaniseCode(d.status)}
@@ -628,11 +640,13 @@ export const TransactionWorkspaceView = ({
                       ...disputes.land.map((d) => ({
                         id: `land-${d.id}`,
                         title: `Land case ${d.reference}`,
-                        href: `/land/disputes/${encodeURIComponent(d.id)}`,
+                        href: PURCHASE_ROUTES.landDispute(d.id),
                         detail:
                           d.canAppeal && d.appealDeadline
                             ? `Appeal by ${formatDate(d.appealDeadline)}, ${formatDualTime(d.appealDeadline, viewerTimeZone)}`
-                            : `Opened ${formatDate(d.createdAt)}`,
+                            : d.respondBy
+                              ? respondByText(d.respondBy, viewerTimeZone)
+                              : `Opened ${formatDate(d.createdAt)}`,
                         badge: (
                           <Badge variant={d.canAppeal ? 'info' : 'neutral'}>
                             {d.canAppeal
@@ -862,6 +876,16 @@ export const TransactionWorkspaceView = ({
         confirmLabel="Release the deposit"
         isLoading={release.isPending}
         onConfirm={() => release.mutateAsync().catch(() => undefined)}
+      />
+
+      <ConfirmDialog
+        open={refunding}
+        onOpenChange={(open) => !open && setRefunding(false)}
+        title="Take your deposit back?"
+        description="This cancels the purchase and refunds the deposit Payment Protection holds. It cannot be undone. You can only do this before the seller starts the handover; after that, raise a dispute instead."
+        confirmLabel="Take my deposit back"
+        isLoading={refund.isPending}
+        onConfirm={() => refund.mutateAsync().catch(() => undefined)}
       />
     </div>
   );

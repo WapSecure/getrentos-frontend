@@ -3,6 +3,7 @@ import { authFetch, safeCall, type Paginated } from '@/lib/apiHelpers';
 import type { LandMilestone } from '@/types/landBuyer';
 import type {
   SaleDispute,
+  SaleDisputeMessage,
   TransactionWorkspace,
   WorkspaceViewerRole,
 } from '@/types/transactionWorkspace';
@@ -46,6 +47,22 @@ export const transactionWorkspaceService = {
   /** Deposit disputes I raised or am the subject of (buyer or seller only; newest first). */
   saleDisputes: () =>
     safeCall(() => authFetch<Paginated<SaleDispute>>('/marketplace/disputes?pageSize=100')),
+
+  /** One deposit dispute, for its thread (its two parties only). */
+  saleDispute: (id: string) =>
+    safeCall(() => authFetch<SaleDispute>(`/marketplace/disputes/${encodeURIComponent(id)}`)),
+
+  saleDisputeMessages: (id: string) =>
+    safeCall(() =>
+      authFetch<SaleDisputeMessage[]>(`/marketplace/disputes/${encodeURIComponent(id)}/messages`)
+    ),
+
+  sendSaleDisputeMessage: (id: string, text: string) =>
+    safeCall(() =>
+      post<SaleDisputeMessage>(`/marketplace/disputes/${encodeURIComponent(id)}/messages`, {
+        text: text.trim(),
+      })
+    ),
 
   /** Puts the held deposit on hold until Sureground decides; the buyer or the seller may raise it. */
   disputeDeposit: (txId: string, input: { title: string; description: string }) =>
