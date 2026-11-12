@@ -36,6 +36,7 @@ import {
   type WorkOrder,
 } from '@/lib/api/homeCare';
 import { ApiError } from '@/lib/api/client';
+import { investorApi } from '@/lib/api/investor';
 import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
@@ -62,7 +63,9 @@ const dt = (iso?: string | null) =>
     : '—';
 
 export default function WorkOrderDetail() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, from } = useLocalSearchParams<{ id: string; from?: string }>();
+  // Opened from Managed: the owner reads it through the owner route (no Pro plan) and the manager acts on it.
+  const managed = from === 'managed';
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();
@@ -70,10 +73,10 @@ export default function WorkOrderDetail() {
   const [panel, setPanel] = useState<Panel>(null);
   // Only the owner rates the job; the API refuses anyone else.
   const { usablePortal } = useAuth();
-  const isOwner = usablePortal === 'owner' || usablePortal === 'landlord';
+  const isOwner = managed || usablePortal === 'owner' || usablePortal === 'landlord';
   const query = useQuery({
-    queryKey: qk.homeCare.workOrder(id),
-    queryFn: () => homeCareApi.workOrder(id),
+    queryKey: managed ? [...qk.homeCare.workOrder(id), 'managed'] : qk.homeCare.workOrder(id),
+    queryFn: () => (managed ? investorApi.managedWorkOrder(id) : homeCareApi.workOrder(id)),
   });
   const w = query.data;
 
@@ -216,37 +219,41 @@ export default function WorkOrderDetail() {
                       <Row k="Escalates at" v={dt(w.escalationDueAt)} />
                     ) : null}
                   </View>
-                  <Text variant="caption" color="mutedForeground">
-                    {nextStep(w)}
-                  </Text>
-                  <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-                    {!w.acknowledgedAt ? (
-                      <Button
-                        label="Acknowledge"
-                        style={{ flex: 1 }}
-                        loading={act.isPending && act.variables === 'acknowledge'}
-                        onPress={() => act.mutate('acknowledge')}
-                      />
-                    ) : null}
-                    {!w.escalatedAt ? (
-                      <Button
-                        label="Escalate"
-                        variant="secondary"
-                        style={{ flex: 1 }}
-                        loading={act.isPending && act.variables === 'escalate'}
-                        onPress={() =>
-                          Alert.alert(
-                            'Escalate this job?',
-                            'It’s flagged as needing senior attention and notifications go out.',
-                            [
-                              { text: 'Not now', style: 'cancel' },
-                              { text: 'Escalate', onPress: () => act.mutate('escalate') },
-                            ]
-                          )
-                        }
-                      />
-                    ) : null}
-                  </View>
+                  {managed ? null : (
+                    <>
+                      <Text variant="caption" color="mutedForeground">
+                        {nextStep(w)}
+                      </Text>
+                      <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+                        {!w.acknowledgedAt ? (
+                          <Button
+                            label="Acknowledge"
+                            style={{ flex: 1 }}
+                            loading={act.isPending && act.variables === 'acknowledge'}
+                            onPress={() => act.mutate('acknowledge')}
+                          />
+                        ) : null}
+                        {!w.escalatedAt ? (
+                          <Button
+                            label="Escalate"
+                            variant="secondary"
+                            style={{ flex: 1 }}
+                            loading={act.isPending && act.variables === 'escalate'}
+                            onPress={() =>
+                              Alert.alert(
+                                'Escalate this job?',
+                                'It’s flagged as needing senior attention and notifications go out.',
+                                [
+                                  { text: 'Not now', style: 'cancel' },
+                                  { text: 'Escalate', onPress: () => act.mutate('escalate') },
+                                ]
+                              )
+                            }
+                          />
+                        ) : null}
+                      </View>
+                    </>
+                  )}
                 </Card>
               ) : null}
 
@@ -296,12 +303,17 @@ export default function WorkOrderDetail() {
                     <Text variant="callout">—</Text>
                   )}
                 </View>
-                {needsApproval ? (
+                {needsApproval && managed ? (
+                  <Text variant="caption" color="mutedForeground">
+                    Awaiting approval. Spend above your limit appears under Waiting for your
+                    approval.
+                  </Text>
+                ) : needsApproval ? (
                   <Button label="Approve spend" onPress={() => setPanel('approve')} />
                 ) : null}
               </Card>
 
-              {open ? (
+              {open && !managed ? (
                 <View style={{ gap: spacing.sm }}>
                   {w.status === 'SUBMITTED' || w.status === 'ASSIGNED' ? (
                     <Button
@@ -334,8 +346,12 @@ export default function WorkOrderDetail() {
                 </View>
               ) : null}
 
-              <QuotesSection w={w} />
-              <InvoicesSection w={w} />
+              {managed ? null : (
+                <>
+                  <QuotesSection w={w} />
+                  <InvoicesSection w={w} />
+                </>
+              )}
               <WorkOrderEvidence w={w} canRate={isOwner} />
             </>
           ) : null}

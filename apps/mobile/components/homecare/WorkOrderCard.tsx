@@ -27,7 +27,8 @@ export function PriorityTag({ p }: { p: Priority }) {
   return <Badge label={humaniseEnum(p)} tone={tone} />;
 }
 
-export function WorkOrderCard({ w }: { w: WorkOrder }) {
+/** `from="managed"`: the owner opened it from Managed, so the detail reads through the owner route. */
+export function WorkOrderCard({ w, from }: { w: WorkOrder; from?: 'managed' }) {
   const { colors, spacing } = useTheme();
   const sla = slaState(w);
   const where = [w.unit.property?.title, w.unit.unitName].filter(Boolean).join(' · ');
@@ -35,7 +36,10 @@ export function WorkOrderCard({ w }: { w: WorkOrder }) {
     <Pressable
       onPress={() => {
         void haptics.tap();
-        router.push({ pathname: '/(app)/home-care/work-order/[id]', params: { id: w.id } });
+        router.push({
+          pathname: '/(app)/home-care/work-order/[id]',
+          params: { id: w.id, ...(from ? { from } : {}) },
+        });
       }}
       accessibilityRole="button"
       accessibilityLabel={`${w.isEmergency ? 'Emergency. ' : ''}${w.issueTitle}, ${humaniseEnum(w.priority)} priority, ${STATUS_LABEL[w.status]}, ${where}${sla ? `. ${sla.label}` : ''}`}
