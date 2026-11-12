@@ -153,8 +153,15 @@ const sourceOfFundsItems = (
         key: 'identity-source-of-funds',
         kind: 'identity',
         severity: 'urgent',
-        title: 'Confirm your source of funds',
-        detail: 'Needed before your next offer or deposit.',
+        title: status.renewal
+          ? 'Confirm your source of funds again'
+          : 'Confirm your source of funds',
+        detail:
+          status.renewal === 'EXPIRED'
+            ? 'Your approval has expired. Needed before your next offer or deposit.'
+            : status.renewal === 'COVERAGE_EXCEEDED'
+              ? 'Your purchases now go beyond what your approval covered.'
+              : 'Needed before your next offer or deposit.',
         link: { path: href, label: 'Start' },
       },
     ];

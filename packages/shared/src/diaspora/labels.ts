@@ -6,6 +6,7 @@ import type {
   InvestmentHorizon,
   InvestorPropertyType,
   OwnershipStructure,
+  SourceOfFundsCheck,
   SourceOfFundsSupportingKind,
   SummaryChannel,
   SummaryFrequency,
@@ -140,3 +141,23 @@ export const SOURCE_OF_FUNDS_SUPPORTING_LABELS: Record<SourceOfFundsSupportingKi
 /** Fallback when the API sends no reason line. */
 export const SOURCE_OF_FUNDS_WHY =
   'Nigerian and international anti-money-laundering rules require us to confirm where larger sums come from.';
+
+/** What to show before an offer or estate deposit that needs source of funds first; null when nothing stops it. */
+export const sourceOfFundsHoldMessage = (
+  check: SourceOfFundsCheck | null | undefined
+): string | null => {
+  if (!check || check.cleared) return null;
+  if (check.state === 'IN_REVIEW') {
+    return 'Your source of funds documents are with our team. You can continue once they are approved.';
+  }
+  if (check.renewal === 'EXPIRED') {
+    return 'Your source of funds approval has expired. Send current documents in Identity abroad first.';
+  }
+  if (check.renewal === 'COVERAGE_EXCEEDED') {
+    return 'This purchase goes beyond what your last source of funds approval covered. Send current documents in Identity abroad first.';
+  }
+  if (check.state === 'REJECTED') {
+    return 'Your last source of funds documents were not approved. Send new ones in Identity abroad first.';
+  }
+  return `Confirm your source of funds in Identity abroad before this purchase. ${SOURCE_OF_FUNDS_WHY}`;
+};

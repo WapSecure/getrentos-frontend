@@ -14,6 +14,8 @@ export const DIASPORA_ROUTES = {
   /** Property care opened on the property this statement covers, with its breakdown open. */
   managedStatement: (statementId: string) =>
     `/owner/invest/managed?statement=${encodeURIComponent(statementId)}`,
+  /** Identity abroad in the buyer portal (the trust profile's "abroad" tab), where source of funds is sent. */
+  BUYER_IDENTITY_ABROAD: '/buyer/trust-profile?tab=abroad',
   workspace: (portal: InvestorPortal) => `/${portal}/invest`,
   onboarding: (portal: InvestorPortal) => `/${portal}/invest/onboarding`,
 } as const;

@@ -337,6 +337,24 @@ export interface SourceOfFundsStatus extends ForeignDocumentStatus {
   why: string;
   bankStatementMonths: number;
   supportingKinds: SourceOfFundsSupportingKind[];
+  /** Why an earlier approval no longer counts: it ran out (12 months) or purchases outgrew it. */
+  renewal?: SourceOfFundsRenewal | null;
+  /** While an approval counts. */
+  approvedAt?: string | null;
+  validUntil?: string | null;
+}
+
+export type SourceOfFundsRenewal = 'EXPIRED' | 'COVERAGE_EXCEEDED';
+
+/** `GET /trust/foreign-identity/source-of-funds/check?amount=`: asked before an offer or estate deposit. */
+export interface SourceOfFundsCheck {
+  applies: boolean;
+  required: boolean;
+  reason: SourceOfFundsStatus['reason'];
+  state: ForeignCheckState;
+  renewal: SourceOfFundsRenewal | null;
+  /** False when the offer or deposit would be refused until source of funds is approved. */
+  cleared: boolean;
 }
 
 export interface ForeignSubmission {

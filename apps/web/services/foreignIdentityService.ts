@@ -1,3 +1,4 @@
+import { sourceOfFundsHoldMessage, type SourceOfFundsCheck } from '@sureground/shared';
 import { authFetch, safeCall, type ApiResponse } from '@/lib/apiHelpers';
 import type {
   ForeignIdentityStatus,
@@ -55,6 +56,22 @@ export const foreignIdentityService = {
 
   submitBankStatement(document: File, note?: string): Promise<ApiResponse<ForeignSubmission>> {
     return foreignIdentityService.submitDocument('bank-statement', document, note);
+  },
+
+  /** DIA-07: would a purchase at this price need source of funds approved first? */
+  checkSourceOfFunds(amount: number): Promise<ApiResponse<SourceOfFundsCheck>> {
+    return safeCall(() =>
+      authFetch<SourceOfFundsCheck>(
+        `/trust/foreign-identity/source-of-funds/check?amount=${Math.round(amount)}`
+      )
+    );
+  },
+
+  /** The line to show instead of sending an offer or deposit that would be refused. Fails open: the API still enforces it. */
+  async sourceOfFundsHold(amount: number): Promise<string | null> {
+    if (!(amount > 0)) return null;
+    const res = await foreignIdentityService.checkSourceOfFunds(amount);
+    return res.success ? sourceOfFundsHoldMessage(res.data) : null;
   },
 
   /** DIA-07: six months of statements, one or more supporting documents, and the donor's ID with a gift letter. */
