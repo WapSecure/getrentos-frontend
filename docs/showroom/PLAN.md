@@ -497,12 +497,13 @@ Built on `feat/collections-consent-sponsored-rules` in both repos. Migration `pr
 
 **1. Consent for Sureground (staff) collections: notify and allow opt-out.**
 
-- When staff add a listing to a Sureground collection, the property owner and whoever created the listing (not the staff member) get `COLLECTION_LISTING_ADDED`: in the app, and by email (it is on the email list). It names the listing and the collection and links to `/listing-collections`.
+- When staff add a listing to a Sureground collection, its listers (not the staff member) get `COLLECTION_LISTING_ADDED`: in the app, and by email (it is on the email list). It names the listing and the collection and links to `/listing-collections`.
+- Listers are the property owner, whoever created the listing, and whoever manages the property: the manager on an accepted, unexpired management mandate (including Sureground Managed and its delivery partner) and the editing seats (owner, staff, portfolio manager) of an agency that holds or manages it, at most 25 firm members per listing (follow-up, 2026-11-12).
 - `/listing-collections` (web, any signed-in account) lists the Sureground collections showing the lister's listings, including published rule-based ones they match, with **Remove my listing** (one tap, that collection) and **Keep out of all** (every Sureground collection). Each choice is a `CollectionOptOut` row (per listing and collection, or per listing for all), audit-logged as `COLLECTION_LISTING_OPTED_OUT`. **Allow again** removes the row (`COLLECTION_OPT_OUT_WITHDRAWN`) but puts nothing back.
 - While an opt-out exists, staff cannot add the listing back (400 with the reason), rule-based results leave it out, and the public page drops it even if a stored item remains.
 - Backoffice: the candidate list shows opted-out listings as **Unavailable** with the reason, and the editor lists listings "taken out by their listers".
 - Estate, agency and realtor collections hold only the curator's own stock, so none of this applies to them.
-- API: `GET /me/listing-collections`, `POST /me/listing-collections/opt-outs` (`listingId`, `scope` `collection` or `all`, `collectionId`), `DELETE /me/listing-collections/opt-outs/:id`. Only the property owner or the listing's creator can act.
+- API: `GET /me/listing-collections`, `POST /me/listing-collections/opt-outs` (`listingId`, `scope` `collection` or `all`, `collectionId`), `DELETE /me/listing-collections/opt-outs/:id`. Any lister as above can act: the owner, the creator, or a manager of the property.
 
 **2. Sponsored needs a sponsor record.**
 
@@ -511,7 +512,7 @@ Built on `feat/collections-consent-sponsored-rules` in both repos. Migration `pr
 - `sponsored: true` is refused on create and update; `sponsored: false` only clears a flag that has no record.
 - Public responses carry only `sponsored`, true only when the flag **and** a record exist. The amount and sponsor never leave the backoffice.
 - Collections flagged sponsored before this (no record) keep the flag but lose the public label. The backoffice lists them in a banner ("Sponsored with no record of who paid"), with **Add the record** or **Clear the sponsored flag** in the editor.
-- The label shows while the record exists; the sponsorship dates are kept as facts and do not switch the label on or off.
+- The label shows only while today (the Lagos date) is between the record's start and end days, both included. Before the start or after the end the label is off and the record is kept. The backoffice shows **Scheduled**, **Running** or **Ended** on the Sponsorship panel and in the list (follow-up, 2026-11-12). Dates are sent as Lagos days (YYYY-MM-DD).
 
 **3. Rule-based collections (staff only).**
 
@@ -522,7 +523,7 @@ Built on `feat/collections-consent-sponsored-rules` in both repos. Migration `pr
 - The public page and tiles say "A saved search by the Sureground team" and how it is ordered, instead of "Picked by".
 - Backoffice: **How listings are chosen** (Hand-picked or Rule) when creating or editing a Sureground collection; the **Rule** panel has a live preview ("N listings would show now (M match the filters, limit L)") through `POST /admin/collections/rule-preview`.
 - Publishing needs at least one live match.
-- Rule-based matches do not send the lister a notice (they change as listings come and go); the lister sees them on `/listing-collections` and can opt out there.
+- When a listing first shows in a published Sureground rule collection, its listers get the same notice, worded "matches a saved search" (follow-up, 2026-11-12). Checked when the rule is saved or the collection published, and hourly by a leased job (`collection-rule-notices`, at most 200 listings a run). `CollectionListingNotice` keeps one row per (collection, listing), claimed before sending, so nobody is told twice, for hand-picked adds too. Opted-out listings are never told; estate, agency and realtor collections never notify. Migration `20261112200000_collection_listing_notices` (one table, additive).
 
 ## M7 status (2026-11-11)
 

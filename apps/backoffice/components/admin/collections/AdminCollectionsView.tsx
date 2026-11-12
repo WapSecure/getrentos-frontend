@@ -50,9 +50,15 @@ import type { CollectionsManager } from '@/services/adminCollectionsService';
 import { RuleEditor } from './RuleEditor';
 import { SponsorshipPanel } from './SponsorshipPanel';
 
-/** Paid placement is labelled wherever it shows, but only once there is a record of who paid. */
+/**
+ * Paid placement is labelled wherever it shows, but only with a record of who paid, and only from the
+ * record's start day to its end day (Lagos dates).
+ */
 function SponsoredBadge({ collection }: { collection: ManagedCollection }) {
-  if (collection.sponsorship) return <Badge variant="warning">Sponsored</Badge>;
+  const record = collection.sponsorship;
+  if (record?.state === 'running') return <Badge variant="warning">Sponsored</Badge>;
+  if (record?.state === 'scheduled') return <Badge variant="info">Sponsorship scheduled</Badge>;
+  if (record?.state === 'ended') return <Badge variant="neutral">Sponsorship ended</Badge>;
   if (collection.sponsorshipMissing) return <Badge variant="warning">Sponsored, no record</Badge>;
   return null;
 }

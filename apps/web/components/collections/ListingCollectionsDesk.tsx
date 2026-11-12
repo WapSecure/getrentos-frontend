@@ -35,8 +35,9 @@ type Pending =
   | { kind: 'allow'; optOut: ListingCollectionOptOut };
 
 /**
- * Consent for Sureground collections (decided 2026-11-12): the lister is told when staff add their
- * listing, can remove it in one tap, and can keep it out of every Sureground collection.
+ * Consent for Sureground collections (decided 2026-11-12): the lister (owner, creator, or whoever
+ * manages the property) is told once when staff add their listing or it first matches a published
+ * saved search, can remove it in one tap, and can keep it out of every Sureground collection.
  */
 export function ListingCollectionsDesk() {
   const toast = useToast();
@@ -109,7 +110,7 @@ export function ListingCollectionsDesk() {
             icon={LayoutGrid}
             size="compact"
             title="None of your listings are in a Sureground collection"
-            description="If the Sureground team adds one, you will get a notice with a way to remove it."
+            description="If the Sureground team adds one, or one matches a saved search behind a Sureground collection, you will get a notice with a way to remove it."
           />
         ) : (
           <ul className="divide-y divide-border">

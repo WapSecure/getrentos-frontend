@@ -19,10 +19,36 @@ import {
 } from '@sureground/ui';
 import { formatCurrency, formatDate, unwrap } from '@sureground/shared';
 import type { CollectionsManager } from '@/services/adminCollectionsService';
-import type { CollectionSponsorship, ManagedCollection } from '@/types/collections';
+import {
+  SPONSORSHIP_STATE_LABEL,
+  type CollectionSponsorship,
+  type ManagedCollection,
+  type SponsorshipState,
+} from '@/types/collections';
 
 const errorMessage = (e: unknown) =>
   e instanceof Error ? e.message : 'Something went wrong. Try again.';
+
+const STATE_VARIANT: Record<SponsorshipState, 'warning' | 'info' | 'neutral'> = {
+  scheduled: 'info',
+  running: 'warning',
+  ended: 'neutral',
+};
+
+/** A Lagos day (YYYY-MM-DD) for reading; noon UTC keeps it on the same calendar day in any time zone. */
+const formatDay = (day: string) => formatDate(`${day}T12:00:00Z`);
+
+function stateLine(record: CollectionSponsorship): string {
+  const start = formatDay(record.startDay);
+  const end = formatDay(record.endDay);
+  if (record.state === 'scheduled') {
+    return `Scheduled: the Sponsored label shows from ${start} to ${end}, Lagos time.`;
+  }
+  if (record.state === 'ended') {
+    return `Ended: the Sponsored label stopped showing after ${end}. The record is kept.`;
+  }
+  return `Running: the Sponsored label shows until the end of ${end}, Lagos time.`;
+}
 
 const SPONSOR_KINDS = [
   { value: 'organisation', label: 'Organisation' },
@@ -71,7 +97,9 @@ export function SponsorshipPanel({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-lg font-semibold">Sponsorship</h2>
         {record ? (
-          <Badge variant="warning">Sponsored</Badge>
+          <Badge variant={STATE_VARIANT[record.state]}>
+            {SPONSORSHIP_STATE_LABEL[record.state]}
+          </Badge>
         ) : collection.sponsorshipMissing ? (
           <Badge variant="warning">No sponsor record</Badge>
         ) : (
@@ -90,6 +118,7 @@ export function SponsorshipPanel({
 
       {record && !editing ? (
         <>
+          <p className="text-sm">{stateLine(record)}</p>
           <DescriptionList
             items={[
               {
@@ -99,7 +128,7 @@ export function SponsorshipPanel({
               { label: 'Amount paid', value: formatCurrency(record.amount) },
               {
                 label: 'Runs',
-                value: `${formatDate(record.startDate)} to ${formatDate(record.endDate)}`,
+                value: `${formatDay(record.startDay)} to ${formatDay(record.endDay)}, both included`,
               },
               ...(record.reference ? [{ label: 'Reference', value: record.reference }] : []),
               ...(record.note ? [{ label: 'Note', value: record.note }] : []),
@@ -174,8 +203,8 @@ function SponsorshipForm({
   );
   const [sponsorName, setSponsorName] = useState(initial?.sponsorName ?? '');
   const [amount, setAmount] = useState<number>(initial?.amount ?? 0);
-  const [startDate, setStartDate] = useState(initial?.startDate.slice(0, 10) ?? '');
-  const [endDate, setEndDate] = useState(initial?.endDate.slice(0, 10) ?? '');
+  const [startDate, setStartDate] = useState(initial?.startDay ?? '');
+  const [endDate, setEndDate] = useState(initial?.endDay ?? '');
   const [reference, setReference] = useState(initial?.reference ?? '');
   const [note, setNote] = useState(initial?.note ?? '');
 
@@ -186,8 +215,9 @@ function SponsorshipForm({
           sponsorKind,
           sponsorName: sponsorName.trim(),
           amount,
-          startDate: new Date(`${startDate}T00:00:00`).toISOString(),
-          endDate: new Date(`${endDate}T23:59:59`).toISOString(),
+          // Lagos calendar days, both included; the label switches on and off at Lagos midnight.
+          startDate,
+          endDate,
           reference: reference.trim() || undefined,
           note: note.trim() || undefined,
         })
@@ -205,7 +235,8 @@ function SponsorshipForm({
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        A collection is labelled Sponsored only while this record exists. You will be asked to
+        The Sponsored label shows from the start date to the end date, both included, by the Lagos
+        calendar. Before and after, the label is off and the record is kept. You will be asked to
         confirm it’s you before it is saved.
       </p>
       <Field label="Paid by">
@@ -237,7 +268,7 @@ function SponsorshipForm({
         <Field
           label="Ends"
           required
-          error={datesBackwards ? 'The end date must be after the start date.' : undefined}
+          error={datesBackwards ? 'The end date must not be before the start date.' : undefined}
         >
           <DatePicker value={endDate} onChange={setEndDate} min={startDate || undefined} />
         </Field>

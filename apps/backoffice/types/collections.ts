@@ -43,11 +43,24 @@ export interface CollectionSponsorship {
   note: string | null;
   recordedById: string;
   updatedAt: string;
+  /** By Lagos date: scheduled before the start day, running from start to end day inclusive, then ended. */
+  state: SponsorshipState;
+  /** Lagos days, YYYY-MM-DD, both included. */
+  startDay: string;
+  endDay: string;
 }
+
+export type SponsorshipState = 'scheduled' | 'running' | 'ended';
+
+export const SPONSORSHIP_STATE_LABEL: Record<SponsorshipState, string> = {
+  scheduled: 'Scheduled',
+  running: 'Running',
+  ended: 'Ended',
+};
 
 export type SponsorshipInput = Omit<
   CollectionSponsorship,
-  'recordedById' | 'updatedAt' | 'reference' | 'note'
+  'recordedById' | 'updatedAt' | 'reference' | 'note' | 'state' | 'startDay' | 'endDay'
 > & {
   reference?: string;
   note?: string;
@@ -86,6 +99,8 @@ export interface ManagedCollection {
   sponsorship: CollectionSponsorship | null;
   /** Flagged sponsored with no record: the public label is hidden until one is added. */
   sponsorshipMissing: boolean;
+  /** Whether the public sees the Sponsored label today: a record, and today within its dates. */
+  sponsoredLabelShowing: boolean;
   kind: CollectionKind;
   rule: CollectionRule | null;
   coverListingId: string | null;
