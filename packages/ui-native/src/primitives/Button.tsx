@@ -35,6 +35,7 @@ export function Button({
   iconRight,
   disabled,
   accessibilityLabel,
+  accessibilityState,
   style,
   ...rest
 }: ButtonProps) {
@@ -125,7 +126,7 @@ export function Button({
     <PressableScale
       accessibilityRole="button"
       accessibilityLabel={loading && loadingLabel ? loadingLabel : (accessibilityLabel ?? label)}
-      accessibilityState={{ disabled: isDisabled, busy: loading }}
+      accessibilityState={{ ...accessibilityState, disabled: isDisabled, busy: loading }}
       disabled={isDisabled}
       dimWhenDisabled={!flatDisabled}
       hitSlop={6}

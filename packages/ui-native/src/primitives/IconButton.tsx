@@ -21,6 +21,7 @@ export function IconButton({
   variant = 'outline',
   loading = false,
   disabled,
+  accessibilityState,
   style,
   ...rest
 }: IconButtonProps) {
@@ -32,7 +33,13 @@ export function IconButton({
     <PressableScale
       accessibilityRole="button"
       accessibilityLabel={spokenLabel}
-      accessibilityState={{ selected, disabled: disabled || loading, busy: loading }}
+      // A caller's state (e.g. expanded) adds to these instead of replacing them.
+      accessibilityState={{
+        ...accessibilityState,
+        selected,
+        disabled: !!disabled || loading,
+        busy: loading,
+      }}
       disabled={disabled || loading}
       hitSlop={4}
       style={[
