@@ -49,6 +49,15 @@ Status of the marketing redesign and launch-readiness brief, by milestone. PR nu
 - Waiting: backend #211 (analytics event allow-list) — backend CI blocked by a GitHub billing failure; local specs queued behind the memory gate.
 - Open, needs an admin: branch protection on `dev`, hosting/deploy automation, legal sign-off on Diaspora, guide and Privacy Policy copy before Diaspora goes live in production.
 
+## Follow-ups from the live demo (12 Nov 2026)
+
+- Public pages no longer force a sign-in when a session expires; only signed-in areas redirect (#211).
+- Short-stay payout wording matches the payout rules across web and app (#207).
+- Sentence case across web and back office, old pill eyebrows removed, realtor "Commission YTD" shows a lock on Free (#212); help text matches button labels (#214).
+- Back-office fraud alerts read as plain sentences, technical details collapsed (frontend #213, backend #218 — migration `20261112190000_fraud_alert_metadata` must be applied).
+- Mobile app accessibility tests in CI; three real gaps fixed (#215).
+- Backend: funnel analytics allow-list merged (backend #211); tolerant notification-type reader ready (backend #220, awaiting approval).
+
 ## Product fixes made along the way
 
 - Icon-only actions that changed data without label or confirmation, app-wide (#164).
