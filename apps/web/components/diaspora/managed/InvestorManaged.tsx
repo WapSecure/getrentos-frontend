@@ -30,7 +30,6 @@ import { homeManagementKeys, investorKeys, landlordKeys } from '@/lib/queryKeys'
 import { landlordService } from '@/services/landlordService';
 import { StatementBreakdown } from '@/components/shared/financials/StatementBreakdown';
 import { investorService } from '@/services/investorService';
-import { homeManagementService } from '@/services/homeManagementService';
 import { ApprovalsView } from '@/components/landlord/approvals/ApprovalsView';
 import { HomeManagementWorkOrderQueue } from '@/components/home-management/HomeManagementWorkOrderQueue';
 import {
@@ -384,26 +383,27 @@ function StatementDetail({
   );
 }
 
+/** Read through the owner route, so it works without the Pro plan; changes stay with the manager. */
 function PropertyJobs({ propertyId, title }: { propertyId: string; title: string }) {
   const [page, setPage] = useState(1);
   const workOrders = useQuery({
-    queryKey: [...homeManagementKeys.workOrders, { page, pageSize: JOB_PAGE_SIZE, propertyId }],
+    queryKey: [
+      ...homeManagementKeys.workOrders,
+      'managed',
+      { page, pageSize: JOB_PAGE_SIZE, propertyId },
+    ],
     queryFn: () =>
-      unwrap(homeManagementService.listWorkOrders({ page, pageSize: JOB_PAGE_SIZE, propertyId })),
+      unwrap(investorService.getManagedWorkOrders(propertyId, { page, pageSize: JOB_PAGE_SIZE })),
     placeholderData: keepPreviousData,
-  });
-  const vendors = useQuery({
-    queryKey: [...homeManagementKeys.vendors, 'assignable', propertyId],
-    queryFn: () => unwrap(homeManagementService.listAssignableVendors(propertyId)),
   });
 
   return (
     <HomeManagementWorkOrderQueue
       compact
+      readOnly
       viewerRole="owner"
       workOrders={workOrders.data?.items ?? []}
       properties={[{ id: propertyId, title }]}
-      vendors={vendors.data ?? []}
       isLoading={workOrders.isLoading}
       error={workOrders.error as Error | null}
       page={page}
