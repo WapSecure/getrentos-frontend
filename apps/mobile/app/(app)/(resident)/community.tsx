@@ -14,6 +14,7 @@ import {
   Wrench,
 } from '@sureground/icons/native';
 import { Card, Divider, Screen, Text, useTheme } from '@sureground/ui-native';
+import { GroupLabel } from '@/components/resident/VisitorParts';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 
 const ROWS = [
@@ -74,8 +75,18 @@ const ROWS = [
   },
 ] as const;
 
+type Row = (typeof ROWS)[number];
+
+/** Grouped the way residents think about them; every row in ROWS appears in exactly one group. */
+const GROUPS: { title: string; hrefs: Row['href'][] }[] = [
+  { title: 'Your home', hrefs: ['/(app)/dues', '/(app)/maintenance', '/(app)/violations'] },
+  { title: 'At the gate', hrefs: ['/(app)/visitor-passes', '/(app)/deliveries'] },
+  { title: 'Community life', hrefs: ['/(app)/amenities', '/(app)/directory', '/(app)/polls'] },
+  { title: 'Running the estate', hrefs: ['/(app)/committee', '/(app)/governance'] },
+];
+
 export default function ResidentCommunity() {
-  const { colors, spacing } = useTheme();
+  const { colors, spacing, radius } = useTheme();
 
   return (
     <Screen>
@@ -85,46 +96,60 @@ export default function ResidentCommunity() {
         subtitle="Everything your household needs around the estate"
       />
 
-      <Card padding="none">
-        {ROWS.map((row, i) => (
-          <View key={row.href}>
-            <Pressable
-              onPress={() => router.push(row.href)}
-              accessibilityRole="button"
-              accessibilityLabel={row.label}
-              accessibilityHint={row.description}
-              style={({ pressed }) => ({
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: spacing.md,
-                padding: spacing.lg,
-                backgroundColor: pressed ? colors.secondary : colors.card,
-              })}
-            >
-              <View
-                style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: 10,
-                  backgroundColor: colors.accent,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <row.icon size={18} color={colors.primary} />
-              </View>
-              <View style={{ flex: 1, gap: 2 }}>
-                <Text variant="bodyStrong">{row.label}</Text>
-                <Text variant="caption" color="mutedForeground">
-                  {row.description}
-                </Text>
-              </View>
-              <ChevronRight size={18} color={colors.mutedForeground} />
-            </Pressable>
-            {i < ROWS.length - 1 ? <Divider /> : null}
+      {GROUPS.map((group) => {
+        const rows = group.hrefs
+          .map((href) => ROWS.find((row) => row.href === href))
+          .filter((row): row is Row => !!row);
+        return (
+          <View key={group.title} style={{ gap: spacing.sm }}>
+            <GroupLabel label={group.title} />
+            <Card elevated padding="none">
+              {rows.map((row, i) => (
+                <View key={row.href}>
+                  <Pressable
+                    onPress={() => router.push(row.href)}
+                    accessibilityRole="button"
+                    accessibilityLabel={row.label}
+                    accessibilityHint={row.description}
+                    style={({ pressed }) => ({
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: spacing.md,
+                      minHeight: 64,
+                      paddingVertical: spacing.md,
+                      paddingHorizontal: spacing.lg,
+                      backgroundColor: pressed ? colors.secondary : colors.card,
+                    })}
+                  >
+                    <View
+                      style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: radius.lg,
+                        backgroundColor: colors.accent,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <row.icon size={19} color={colors.primary} />
+                    </View>
+                    <View style={{ flex: 1, gap: 2 }}>
+                      <Text variant="bodyStrong">{row.label}</Text>
+                      <Text variant="caption" color="mutedForeground">
+                        {row.description}
+                      </Text>
+                    </View>
+                    <ChevronRight size={18} color={colors.mutedForeground} />
+                  </Pressable>
+                  {i < rows.length - 1 ? (
+                    <Divider style={{ marginLeft: spacing.lg + 40 + spacing.md }} />
+                  ) : null}
+                </View>
+              ))}
+            </Card>
           </View>
-        ))}
-      </Card>
+        );
+      })}
     </Screen>
   );
 }

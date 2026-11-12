@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Alert, RefreshControl, ScrollView, Share, View } from 'react-native';
+import { Alert, RefreshControl, ScrollView, Share, StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
 
 import {
@@ -11,7 +11,7 @@ import {
 } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Plus, Share2, Ticket } from '@sureground/icons/native';
+import { Clock, IdCard, LogIn, LogOut, Plus, Share2, Ticket, X } from '@sureground/icons/native';
 import {
   Button,
   Card,
@@ -44,6 +44,12 @@ import { haptics } from '@/lib/haptics';
 import { qk } from '@/lib/query/keys';
 import { goBack } from '@/lib/goBack';
 import { errorMessage } from '@/lib/api/client';
+import {
+  DurationChoice,
+  PassTicket,
+  VisitorInitials,
+  type VisitorTone,
+} from '@/components/resident/VisitorParts';
 
 type View_ =
   | 'CHECKED_IN'
@@ -83,6 +89,12 @@ const STATUS: Record<string, { label: string; tone: Tone }> = {
   expired: { label: 'Expired', tone: 'neutral' },
   revoked: { label: 'Revoked', tone: 'neutral' },
   denied: { label: 'Refused', tone: 'danger' },
+};
+const TONE_FOR_STATUS: Record<string, VisitorTone> = {
+  pending: 'active',
+  approved: 'active',
+  checked_in: 'active',
+  awaiting_approval: 'waiting',
 };
 const SOURCE: Record<string, string> = {
   resident: 'Invited by the resident',
@@ -214,68 +226,107 @@ export default function EstateVisitors() {
           ItemSeparatorComponent={() => <View style={{ height: spacing.md }} />}
           renderItem={({ item }: { item: VisitorPass }) => {
             const s = STATUS[item.status] ?? { label: item.status, tone: 'neutral' as const };
+            const tone = TONE_FOR_STATUS[item.status] ?? 'finished';
+            const finished = tone === 'finished';
+            const MetaIcon = item.checkedOutAt ? LogOut : item.checkedInAt ? LogIn : Clock;
+            const canViewId = !!item.checkedInAt;
+            const canRevoke = item.status === 'pending';
             return (
-              <Card elevated style={{ gap: spacing.sm }}>
+              <Card
+                elevated={!finished}
+                padding={spacing.lg}
+                style={[{ gap: spacing.md }, finished && { backgroundColor: colors.muted }]}
+              >
                 <View
                   accessible
                   accessibilityLabel={`${item.visitorName}, visiting ${item.unitLabel}, ${s.label}. ${SOURCE[item.source] ?? ''}`}
-                  style={{ gap: spacing.xs }}
+                  style={{ gap: spacing.md }}
                 >
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-                    <Text variant="bodyStrong" numberOfLines={1} style={{ flex: 1 }}>
-                      {item.visitorName}
-                    </Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+                    <VisitorInitials name={item.visitorName} tone={tone} />
+                    <View style={{ flex: 1, gap: 2 }}>
+                      <Text variant="bodyStrong" numberOfLines={1}>
+                        {item.visitorName}
+                      </Text>
+                      <Text variant="caption" color="mutedForeground" numberOfLines={1}>
+                        {item.unitLabel} · {item.residentName}
+                        {item.purpose ? ` · ${item.purpose}` : ''}
+                      </Text>
+                    </View>
                     <StatusPill label={s.label} tone={s.tone} />
                   </View>
-                  <Text variant="caption" color="mutedForeground" numberOfLines={1}>
-                    {item.unitLabel} · {item.residentName}
-                    {item.purpose ? ` · ${item.purpose}` : ''}
-                  </Text>
-                  <Text variant="caption" color="mutedForeground">
-                    {SOURCE[item.source] ?? 'Visitor pass'} ·{' '}
-                    {item.checkedOutAt
-                      ? `left ${relativeTime(item.checkedOutAt)}`
-                      : item.checkedInAt
-                        ? `in since ${formatTime(item.checkedInAt)}, ${formatDate(item.checkedInAt, 'short')}`
-                        : `valid until ${formatDate(item.expiresAt, 'short')} ${formatTime(item.expiresAt)}`}
-                  </Text>
-                  {item.denialReason ? (
-                    <Text variant="caption" color="mutedForeground">
-                      Refused: {item.denialReason}
-                    </Text>
-                  ) : null}
+                  <View
+                    style={{
+                      paddingTop: spacing.md,
+                      borderTopWidth: StyleSheet.hairlineWidth,
+                      borderTopColor: colors.border,
+                      gap: spacing.xs,
+                    }}
+                  >
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
+                      <MetaIcon size={14} color={colors.mutedForeground} />
+                      <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
+                        {SOURCE[item.source] ?? 'Visitor pass'} ·{' '}
+                        {item.checkedOutAt
+                          ? `left ${relativeTime(item.checkedOutAt)}`
+                          : item.checkedInAt
+                            ? `in since ${formatTime(item.checkedInAt)}, ${formatDate(item.checkedInAt, 'short')}`
+                            : `valid until ${formatDate(item.expiresAt, 'short')} ${formatTime(item.expiresAt)}`}
+                      </Text>
+                    </View>
+                    {item.denialReason ? (
+                      <Text variant="caption" color="mutedForeground">
+                        Refused: {item.denialReason}
+                      </Text>
+                    ) : null}
+                  </View>
                 </View>
-                {item.checkedInAt ? (
-                  <Button
-                    label="View ID"
-                    size="sm"
-                    variant="ghost"
-                    accessibilityLabel={`View the ID recorded for ${item.visitorName}`}
-                    onPress={() => setIdFor(item)}
-                  />
-                ) : null}
-                {item.status === 'pending' ? (
-                  <Button
-                    label="Revoke pass"
-                    size="sm"
-                    variant="ghost"
-                    loading={revoke.isPending && revoke.variables?.id === item.id}
-                    accessibilityLabel={`Revoke ${item.visitorName}’s pass`}
-                    onPress={() =>
-                      Alert.alert(
-                        `Revoke ${item.visitorName}’s pass?`,
-                        'The code stops working at the gate.',
-                        [
-                          { text: 'Cancel', style: 'cancel' },
-                          {
-                            text: 'Revoke',
-                            style: 'destructive',
-                            onPress: () => revoke.mutate(item),
-                          },
-                        ]
-                      )
-                    }
-                  />
+                {canViewId || canRevoke ? (
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      flexWrap: 'wrap',
+                      justifyContent: 'flex-end',
+                      gap: spacing.sm,
+                    }}
+                  >
+                    {canViewId ? (
+                      <Button
+                        label="View ID"
+                        size="sm"
+                        variant="outline"
+                        fullWidth={false}
+                        icon={<IdCard size={16} color={colors.foreground} />}
+                        accessibilityLabel={`View the ID recorded for ${item.visitorName}`}
+                        onPress={() => setIdFor(item)}
+                      />
+                    ) : null}
+                    {canRevoke ? (
+                      <Button
+                        label="Revoke pass"
+                        size="sm"
+                        variant="outline"
+                        fullWidth={false}
+                        icon={<X size={16} color={colors.foreground} />}
+                        loading={revoke.isPending && revoke.variables?.id === item.id}
+                        accessibilityLabel={`Revoke ${item.visitorName}’s pass`}
+                        onPress={() =>
+                          Alert.alert(
+                            `Revoke ${item.visitorName}’s pass?`,
+                            'The code stops working at the gate.',
+                            [
+                              { text: 'Cancel', style: 'cancel' },
+                              {
+                                text: 'Revoke',
+                                style: 'destructive',
+                                onPress: () => revoke.mutate(item),
+                              },
+                            ]
+                          )
+                        }
+                      />
+                    ) : null}
+                  </View>
                 ) : null}
               </Card>
             );
@@ -321,7 +372,7 @@ export default function EstateVisitors() {
 }
 
 function IssueForm({ estateId, onDone }: { estateId: string; onDone: () => void }) {
-  const { colors, spacing, radius } = useTheme();
+  const { colors, spacing } = useTheme();
   const qc = useQueryClient();
   const [household, setHousehold] = useState<Household | null>(null);
   const [name, setName] = useState('');
@@ -351,25 +402,11 @@ function IssueForm({ estateId, onDone }: { estateId: string; onDone: () => void 
 
   if (issued) {
     return (
-      <View style={{ gap: spacing.md, alignItems: 'center' }}>
-        <Text variant="callout" color="mutedForeground" center>
-          {issued.visitorName} shows this at the gate for {issued.unitLabel}.
-        </Text>
-        <Image
-          source={{ uri: issued.qrDataUrl }}
-          accessibilityLabel="QR code for this visitor pass"
-          contentFit="contain"
-          // Always on white: a QR code needs the contrast in dark mode too.
-          style={{ width: 200, height: 200, borderRadius: radius.md, backgroundColor: '#fff' }}
-        />
-        <View accessible accessibilityLabel={`Pass code ${issued.pin.split('').join(' ')}`}>
-          <Text variant="display" style={{ letterSpacing: 6 }} selectable>
-            {issued.pin}
-          </Text>
-        </View>
+      <View style={{ gap: spacing.md }}>
+        <PassTicket pass={issued} />
         <Text variant="caption" color="mutedForeground" center>
-          Valid until {formatDate(issued.expiresAt, 'medium')} at {formatTime(issued.expiresAt)}.
-          The code is shown only now.
+          {issued.visitorName} shows this at the gate for {issued.unitLabel}. The code is shown only
+          now.
         </Text>
         <Button
           label="Share the code"
@@ -377,56 +414,60 @@ function IssueForm({ estateId, onDone }: { estateId: string; onDone: () => void 
           onPress={() =>
             Share.share({
               message: `Your visitor code for ${issued.unitLabel} is ${issued.pin}. Show it at the gate. Valid until ${formatDate(issued.expiresAt, 'medium')} ${formatTime(issued.expiresAt)}.`,
-            })
+            }).catch(() => undefined)
           }
         />
-        <Button label="Done" variant="secondary" onPress={onDone} />
+        <Button label="Done" variant="outline" onPress={onDone} />
       </View>
     );
   }
 
   return (
-    <View style={{ gap: spacing.md }}>
-      <HouseholdPicker
-        estateId={estateId}
-        value={household}
-        onChange={setHousehold}
-        label="Who are they visiting"
-      />
-      <TextField
-        label="Visitor’s name"
-        required
-        value={name}
-        onChangeText={setName}
-        maxLength={120}
-      />
-      <TextField
-        label="Visitor’s phone (optional)"
-        value={phone}
-        onChangeText={(v) => setPhone(v.replace(/(?!^\+)\D/g, ''))}
-        keyboardType="phone-pad"
-        maxLength={30}
-      />
-      <TextField
-        label="Purpose (optional)"
-        value={purpose}
-        onChangeText={setPurpose}
-        maxLength={200}
-        placeholder="e.g. Plumber, family visit"
-      />
-      <View style={{ gap: spacing.xs }}>
-        <Text variant="label">Valid for</Text>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
-          {VALIDITY.map((v) => (
-            <Chip
-              key={v.hours}
-              label={v.label}
-              selected={validHours === v.hours}
-              onPress={() => setValidHours(v.hours)}
-            />
-          ))}
+    <View style={{ gap: spacing['2xl'] }}>
+      <FormGroup title="Household">
+        <HouseholdPicker
+          estateId={estateId}
+          value={household}
+          onChange={setHousehold}
+          label="Who are they visiting"
+        />
+      </FormGroup>
+      <FormGroup title="Visitor">
+        <TextField
+          label="Visitor’s name"
+          required
+          value={name}
+          onChangeText={setName}
+          maxLength={120}
+        />
+        <TextField
+          label="Visitor’s phone (optional)"
+          value={phone}
+          onChangeText={(v) => setPhone(v.replace(/(?!^\+)\D/g, ''))}
+          keyboardType="phone-pad"
+          maxLength={30}
+        />
+      </FormGroup>
+      <FormGroup title="Visit">
+        <TextField
+          label="Purpose (optional)"
+          value={purpose}
+          onChangeText={setPurpose}
+          maxLength={200}
+          placeholder="e.g. Plumber, family visit"
+        />
+        <View style={{ gap: spacing.sm }}>
+          <Text variant="callout" color="mutedForeground" style={{ fontWeight: '600' }}>
+            Valid for
+          </Text>
+          <DurationChoice
+            label="Valid for"
+            options={VALIDITY}
+            value={validHours}
+            onChange={setValidHours}
+          />
         </View>
-      </View>
+      </FormGroup>
       {issue.error ? (
         <FormAlert message={errorMessage(issue.error, 'Could not issue the pass.')} />
       ) : null}
@@ -436,6 +477,18 @@ function IssueForm({ estateId, onDone }: { estateId: string; onDone: () => void 
         loading={issue.isPending}
         onPress={() => issue.mutate()}
       />
+    </View>
+  );
+}
+
+function FormGroup({ title, children }: { title: string; children: React.ReactNode }) {
+  const { spacing } = useTheme();
+  return (
+    <View style={{ gap: spacing.md }}>
+      <Text variant="label" color="mutedForeground" uppercase accessibilityRole="header">
+        {title}
+      </Text>
+      {children}
     </View>
   );
 }

@@ -1,15 +1,14 @@
 import { useEffect, useState } from 'react';
-import { Image, View } from 'react-native';
+import { Share, StyleSheet, View } from 'react-native';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Clock, KeyRound, Plus, UserPlus } from '@sureground/icons/native';
+import { Check, Clock, DoorOpen, KeyRound, Plus, Share2, X } from '@sureground/icons/native';
 import {
   Badge,
   type BadgeTone,
   Button,
   Card,
-  Chip,
-  EmptyState,
+  ErrorState,
   IconButton,
   Screen,
   Skeleton,
@@ -31,6 +30,12 @@ import { passTimeline } from '@sureground/shared';
 import { haptics } from '@/lib/haptics';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
+import {
+  DurationChoice,
+  GroupLabel,
+  PassTicket,
+  VisitorInitials,
+} from '@/components/resident/VisitorParts';
 
 const STATUS_LABEL: Record<VisitorPassStatus, string> = {
   pending: 'Pending',
@@ -60,9 +65,13 @@ const EXPIRY_PRESETS = [
   { label: '24 hours', hours: 24 },
   { label: '3 days', hours: 72 },
 ] as const;
+const DEFAULT_EXPIRY_HOURS = 24;
+
+/** Passes that can still be used at the gate. */
+const ACTIVE_STATUSES = new Set<VisitorPassStatus>(['pending', 'approved', 'checked_in']);
 
 export default function ResidentVisitorPasses() {
-  const { colors, spacing } = useTheme();
+  const { colors, spacing, radius } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
 
@@ -151,6 +160,9 @@ export default function ResidentVisitorPasses() {
   // Walk-ins get their own section at the top: a real person is waiting at the barrier.
   const awaiting = passes.filter((pass) => pass.status === 'awaiting_approval');
   const others = passes.filter((pass) => pass.status !== 'awaiting_approval');
+  // Passes that can still be used come first; the rest are a record of past visits.
+  const active = others.filter((pass) => ACTIVE_STATUSES.has(pass.status));
+  const finished = others.filter((pass) => !ACTIVE_STATUSES.has(pass.status));
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -170,95 +182,64 @@ export default function ResidentVisitorPasses() {
       <Screen refreshing={query.isRefetching} onRefresh={() => void query.refetch()}>
         {awaiting.length > 0 ? (
           <View style={{ gap: spacing.md }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
-              <Clock size={16} color={colors.destructive} />
-              <Text variant="bodyStrong">Waiting at the gate</Text>
-            </View>
+            <GroupLabel
+              label="Waiting at the gate"
+              count={awaiting.length}
+              tone="urgent"
+              icon={<DoorOpen size={14} color={colors.warning} />}
+            />
             {awaiting.map((pass) => (
-              <Card key={pass.id} elevated>
-                <View style={{ gap: spacing.sm }}>
-                  <View style={{ flexDirection: 'row', gap: spacing.md }}>
-                    <UserPlus size={20} color={colors.primary} />
-                    <View style={{ flex: 1, gap: 2 }}>
-                      <Text variant="bodyStrong">{pass.visitorName}</Text>
-                      <Text variant="caption" color="mutedForeground">
-                        {pass.purpose ? `${pass.purpose} · ` : ''}for {pass.unitLabel}
-                      </Text>
-                      <Text variant="caption" color="mutedForeground">
-                        Asked at {formatTime(pass.createdAt)}. If nobody answers by{' '}
-                        {formatTime(pass.expiresAt)}, they are turned away.
-                      </Text>
-                    </View>
-                  </View>
-                  <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-                    <Button
-                      label="Let them in"
-                      fullWidth
-                      style={{ flex: 1 }}
-                      loading={approve.isPending && approve.variables === pass.id}
-                      onPress={() => approve.mutate(pass.id)}
-                    />
-                    <Button
-                      label="Refuse"
-                      variant="outline"
-                      fullWidth
-                      style={{ flex: 1 }}
-                      disabled={approve.isPending || deny.isPending}
-                      onPress={() => setDenying(pass)}
-                    />
-                  </View>
-                </View>
-              </Card>
+              <GateArrivalCard
+                key={pass.id}
+                pass={pass}
+                approving={approve.isPending && approve.variables === pass.id}
+                busy={approve.isPending || deny.isPending}
+                onApprove={() => approve.mutate(pass.id)}
+                onRefuse={() => setDenying(pass)}
+              />
             ))}
           </View>
         ) : null}
 
         {query.isLoading ? (
           <View style={{ gap: spacing.md }}>
-            <Skeleton height={76} radius={16} />
-            <Skeleton height={76} radius={16} />
+            <Skeleton height={12} width="35%" />
+            <Skeleton height={112} radius={radius.lg} />
+            <Skeleton height={112} radius={radius.lg} />
           </View>
-        ) : others.length > 0 ? (
-          others.map((pass) => (
-            <Card key={pass.id} elevated>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'flex-start',
-                  justifyContent: 'space-between',
-                }}
-              >
-                <View style={{ flex: 1, gap: 2 }}>
-                  <Text variant="bodyStrong">{pass.visitorName}</Text>
-                  <Text variant="caption" color="mutedForeground">
-                    {[pass.purpose, passTimeline(pass, formatDateTime, formatTime)]
-                      .filter(Boolean)
-                      .join(' · ')}
-                  </Text>
-                </View>
-                <Badge label={STATUS_LABEL[pass.status]} tone={STATUS_TONE[pass.status]} />
-              </View>
-              {pass.status === 'pending' ? (
-                <Button
-                  label="Revoke"
-                  variant="outline"
-                  size="sm"
-                  fullWidth={false}
-                  loading={revoke.isPending && revoke.variables === pass.id}
-                  onPress={() => revoke.mutate(pass.id)}
-                  style={{ marginTop: spacing.md, alignSelf: 'flex-start' }}
-                />
-              ) : null}
-            </Card>
-          ))
-        ) : (
-          <EmptyState
-            icon={<KeyRound size={34} color={colors.mutedForeground} />}
-            title="No visitor passes yet"
-            description="Issue a pass so your visitor can check in at the gate."
-            action={<Button label="Issue pass" onPress={() => setIssueOpen(true)} />}
+        ) : query.isError && !query.data ? (
+          <ErrorState
+            title="We couldn't load your passes"
+            description="Check your connection, then try again."
+            onRetry={() => void query.refetch()}
           />
-        )}
+        ) : others.length > 0 ? (
+          <>
+            {active.length > 0 ? (
+              <View style={{ gap: spacing.md }}>
+                <GroupLabel label="Active passes" count={active.length} />
+                {active.map((pass) => (
+                  <PassCard
+                    key={pass.id}
+                    pass={pass}
+                    revoking={revoke.isPending && revoke.variables === pass.id}
+                    onRevoke={() => revoke.mutate(pass.id)}
+                  />
+                ))}
+              </View>
+            ) : null}
+            {finished.length > 0 ? (
+              <View style={{ gap: spacing.sm }}>
+                <GroupLabel label="Past visitors" count={finished.length} />
+                {finished.map((pass) => (
+                  <PassCard key={pass.id} pass={pass} />
+                ))}
+              </View>
+            ) : null}
+          </>
+        ) : awaiting.length === 0 ? (
+          <PassesEmptyState onIssue={() => setIssueOpen(true)} />
+        ) : null}
       </Screen>
 
       <IssuePassSheet
@@ -286,6 +267,230 @@ export default function ResidentVisitorPasses() {
   );
 }
 
+/** A real person is standing at the barrier: the two answers are large, stacked and labelled with their name. */
+function GateArrivalCard({
+  pass,
+  approving,
+  busy,
+  onApprove,
+  onRefuse,
+}: {
+  pass: VisitorPass;
+  approving: boolean;
+  busy: boolean;
+  onApprove: () => void;
+  onRefuse: () => void;
+}) {
+  const { colors, spacing } = useTheme();
+  return (
+    <Card elevated padding="none" style={{ borderColor: colors.warning }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: spacing.sm,
+          paddingHorizontal: spacing.xl,
+          paddingVertical: spacing.sm,
+          backgroundColor: colors.warningSubtle,
+        }}
+      >
+        <Clock size={14} color={colors.warning} />
+        <Text variant="caption" style={{ flex: 1, color: colors.warning, fontWeight: '600' }}>
+          Answer by {formatTime(pass.expiresAt)} or they are turned away
+        </Text>
+      </View>
+      <View style={{ padding: spacing.xl, gap: spacing.lg }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+          <VisitorInitials name={pass.visitorName} tone="waiting" size={48} />
+          <View style={{ flex: 1, gap: 2 }}>
+            <Text variant="subheading" numberOfLines={2}>
+              {pass.visitorName}
+            </Text>
+            <Text variant="caption" color="mutedForeground">
+              {pass.purpose ? `${pass.purpose} · ` : ''}for {pass.unitLabel}
+            </Text>
+            <Text variant="caption" color="mutedForeground">
+              Asked at {formatTime(pass.createdAt)}
+            </Text>
+          </View>
+        </View>
+        <View style={{ gap: spacing.sm }}>
+          <Button
+            label="Let them in"
+            size="lg"
+            fullWidth
+            accessibilityLabel={`Let ${pass.visitorName} in`}
+            icon={<Check size={18} color={colors.primaryForeground} />}
+            loading={approving}
+            onPress={onApprove}
+          />
+          <Button
+            label="Refuse"
+            variant="outline"
+            fullWidth
+            accessibilityLabel={`Refuse ${pass.visitorName}`}
+            icon={<X size={18} color={colors.foreground} />}
+            disabled={busy}
+            onPress={onRefuse}
+          />
+        </View>
+      </View>
+    </Card>
+  );
+}
+
+/** Active passes are raised cards; finished ones sit flat and quiet so the live ones stand out. */
+function PassCard({
+  pass,
+  revoking = false,
+  onRevoke,
+}: {
+  pass: VisitorPass;
+  revoking?: boolean;
+  onRevoke?: () => void;
+}) {
+  const { colors, spacing } = useTheme();
+  const isActive = ACTIVE_STATUSES.has(pass.status);
+  const timeline = passTimeline(pass, formatDateTime, formatTime);
+
+  return (
+    <Card
+      elevated={isActive}
+      padding={isActive ? spacing.lg : spacing.md}
+      style={isActive ? undefined : { backgroundColor: colors.muted }}
+    >
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+        <VisitorInitials
+          name={pass.visitorName}
+          tone={isActive ? 'active' : 'finished'}
+          size={isActive ? 44 : 36}
+        />
+        <View style={{ flex: 1, gap: 2 }}>
+          <Text
+            variant={isActive ? 'bodyStrong' : 'callout'}
+            numberOfLines={1}
+            style={isActive ? undefined : { fontWeight: '600' }}
+          >
+            {pass.visitorName}
+          </Text>
+          {pass.purpose ? (
+            <Text variant="caption" color="mutedForeground" numberOfLines={1}>
+              {pass.purpose}
+            </Text>
+          ) : null}
+        </View>
+        <Badge label={STATUS_LABEL[pass.status]} tone={STATUS_TONE[pass.status]} />
+      </View>
+
+      {timeline || (isActive && pass.status === 'pending') ? (
+        <View
+          style={{
+            marginTop: isActive ? spacing.md : spacing.sm,
+            paddingTop: isActive ? spacing.md : 0,
+            borderTopWidth: isActive ? StyleSheet.hairlineWidth : 0,
+            borderTopColor: colors.border,
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: spacing.sm,
+            // Lines the text up under the name rather than under the initials.
+            paddingLeft: isActive ? 0 : 36 + spacing.md,
+          }}
+        >
+          {timeline ? (
+            <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
+              {isActive ? <Clock size={14} color={colors.mutedForeground} /> : null}
+              <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
+                {timeline}
+              </Text>
+            </View>
+          ) : (
+            <View style={{ flex: 1 }} />
+          )}
+          {pass.status === 'pending' && onRevoke ? (
+            <Button
+              label="Revoke"
+              variant="outline"
+              size="sm"
+              fullWidth={false}
+              accessibilityLabel={`Revoke ${pass.visitorName}'s pass`}
+              loading={revoking}
+              onPress={onRevoke}
+            />
+          ) : null}
+        </View>
+      ) : null}
+    </Card>
+  );
+}
+
+const HOW_IT_WORKS = [
+  'Add your visitor’s name and how long the pass should last.',
+  'Send them the PIN or QR code.',
+  'The gate checks it when they arrive.',
+] as const;
+
+function PassesEmptyState({ onIssue }: { onIssue: () => void }) {
+  const { colors, spacing, radius } = useTheme();
+  return (
+    <Card elevated padding={spacing['2xl']} style={{ gap: spacing.xl }}>
+      <View style={{ gap: spacing.md }}>
+        <View
+          style={{
+            width: 52,
+            height: 52,
+            borderRadius: radius.lg,
+            backgroundColor: colors.accent,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <KeyRound size={24} color={colors.primary} />
+        </View>
+        <View style={{ gap: spacing.xs }} accessibilityLiveRegion="polite">
+          <Text variant="heading" headingLevel={2}>
+            No visitor passes yet
+          </Text>
+          <Text variant="callout" color="mutedForeground">
+            Issue a pass so your visitor can check in at the gate.
+          </Text>
+        </View>
+      </View>
+      <View style={{ gap: spacing.md }}>
+        {HOW_IT_WORKS.map((step, i) => (
+          <View
+            key={step}
+            style={{ flexDirection: 'row', alignItems: 'flex-start', gap: spacing.md }}
+          >
+            <View
+              style={{
+                width: 24,
+                height: 24,
+                borderRadius: 12,
+                borderWidth: 1,
+                borderColor: colors.border,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Text variant="label" color="mutedForeground">
+                {i + 1}
+              </Text>
+            </View>
+            <Text variant="callout" style={{ flex: 1 }}>
+              {step}
+            </Text>
+          </View>
+        ))}
+      </View>
+      <Button
+        label="Issue pass"
+        icon={<Plus size={18} color={colors.primaryForeground} />}
+        onPress={onIssue}
+      />
+    </Card>
+  );
+}
+
 /** Optional, but the guard reads it aloud, so it is framed as something to say to the visitor. */
 function DenyWalkInSheet({
   pass,
@@ -310,6 +515,7 @@ function DenyWalkInSheet({
         <View style={{ gap: spacing.xs }}>
           <Button
             label="Refuse entry"
+            variant="destructive"
             fullWidth
             loading={submitting}
             disabled={submitting}
@@ -393,43 +599,44 @@ function IssuePassForm({
   const canSubmit = visitorName.trim().length > 0;
 
   return (
-    <View style={{ gap: spacing.lg }}>
-      <TextField
-        label="Visitor name"
-        required
-        placeholder="e.g. Tunde Adekunle"
-        value={visitorName}
-        onChangeText={setVisitorName}
-        editable={!submitting}
-      />
-      <TextField
-        label="Phone (optional)"
-        placeholder="e.g. 08012345678"
-        keyboardType="phone-pad"
-        value={visitorPhone}
-        onChangeText={(v) => setVisitorPhone(v.replace(/(?!^\+)\D/g, ''))}
-        editable={!submitting}
-      />
-      <TextField
-        label="Purpose (optional)"
-        placeholder="e.g. Family visit"
-        value={purpose}
-        onChangeText={setPurpose}
-        editable={!submitting}
-      />
-      <Field label="Expires (defaults to 24 hours)">
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
-          {EXPIRY_PRESETS.map((p) => (
-            <Chip
-              key={p.hours}
-              label={p.label}
-              selected={expiryHours === p.hours}
-              onPress={() => setExpiryHours(p.hours)}
-              disabled={submitting}
-            />
-          ))}
-        </View>
-      </Field>
+    <View style={{ gap: spacing['2xl'] }}>
+      <FormGroup title="Visitor">
+        <TextField
+          label="Visitor name"
+          required
+          placeholder="e.g. Tunde Adekunle"
+          value={visitorName}
+          onChangeText={setVisitorName}
+          editable={!submitting}
+        />
+        <TextField
+          label="Phone (optional)"
+          placeholder="e.g. 08012345678"
+          keyboardType="phone-pad"
+          value={visitorPhone}
+          onChangeText={(v) => setVisitorPhone(v.replace(/(?!^\+)\D/g, ''))}
+          editable={!submitting}
+        />
+      </FormGroup>
+      <FormGroup title="Visit">
+        <TextField
+          label="Purpose (optional)"
+          placeholder="e.g. Family visit"
+          value={purpose}
+          onChangeText={setPurpose}
+          editable={!submitting}
+        />
+        <Field label="Pass lasts for">
+          <DurationChoice
+            label="Pass lasts for"
+            options={EXPIRY_PRESETS}
+            // Nothing chosen means the server's 24-hour default, so that option shows as selected.
+            value={expiryHours ?? DEFAULT_EXPIRY_HOURS}
+            onChange={setExpiryHours}
+            disabled={submitting}
+          />
+        </Field>
+      </FormGroup>
       <Button
         label="Issue pass"
         loadingLabel="Issuing…"
@@ -458,37 +665,52 @@ function PassIssuedSheet({
   pass: IssuedVisitorPass | null;
   onClose: () => void;
 }) {
-  const { colors, spacing, radius } = useTheme();
+  const { colors, spacing } = useTheme();
+  const share = (p: IssuedVisitorPass) =>
+    Share.share({
+      message: `Your visitor PIN for ${p.unitLabel} is ${p.pin}. Show it at the gate. It expires ${formatDateTime(p.expiresAt, 'medium')}.`,
+    }).catch(() => undefined);
+
   return (
-    <Sheet open={!!pass} onClose={onClose} title="Visitor pass issued">
+    <Sheet
+      open={!!pass}
+      onClose={onClose}
+      title="Visitor pass issued"
+      footer={
+        pass ? (
+          <View style={{ gap: spacing.sm }}>
+            <Button
+              label="Share PIN"
+              icon={<Share2 size={18} color={colors.primaryForeground} />}
+              accessibilityLabel={`Share the PIN with ${pass.visitorName}`}
+              onPress={() => void share(pass)}
+            />
+            <Button label="Done" variant="outline" fullWidth onPress={onClose} />
+          </View>
+        ) : null
+      }
+    >
       {pass ? (
-        <View style={{ alignItems: 'center', gap: spacing.md }}>
-          <Text variant="body" color="mutedForeground" center>
-            For {pass.visitorName}: {pass.unitLabel}
-          </Text>
-          <Image
-            source={{ uri: pass.qrDataUrl }}
-            style={{
-              width: 180,
-              height: 180,
-              borderRadius: radius.lg,
-              borderWidth: 1,
-              borderColor: colors.border,
-              // Always on white: a QR code needs the contrast in dark mode too.
-              backgroundColor: '#fff',
-            }}
-          />
-          <Text variant="title" style={{ letterSpacing: 6 }}>
-            {pass.pin}
-          </Text>
+        <View style={{ gap: spacing.md }}>
+          <PassTicket pass={pass} />
           <Text variant="caption" color="mutedForeground" center>
-            Show this QR code at the gate, or share the PIN. It expires{' '}
-            {formatDateTime(pass.expiresAt, 'medium')} and won&apos;t be shown again.
+            Show this QR code at the gate, or share the PIN. The PIN won&apos;t be shown again.
           </Text>
-          <Button label="Done" fullWidth onPress={onClose} />
         </View>
       ) : null}
     </Sheet>
+  );
+}
+
+function FormGroup({ title, children }: { title: string; children: React.ReactNode }) {
+  const { spacing } = useTheme();
+  return (
+    <View style={{ gap: spacing.md }}>
+      <Text variant="label" color="mutedForeground" uppercase accessibilityRole="header">
+        {title}
+      </Text>
+      {children}
+    </View>
   );
 }
 
