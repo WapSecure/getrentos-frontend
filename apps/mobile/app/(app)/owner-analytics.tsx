@@ -2,7 +2,7 @@ import { RefreshControl, ScrollView, View } from 'react-native';
 
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { BarChart3, TrendingDown, TrendingUp } from '@sureground/icons/native';
+import { BarChart3 } from '@sureground/icons/native';
 import {
   Card,
   EmptyState,
@@ -18,17 +18,16 @@ import { ApiError } from '@/lib/api/client';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
 
-const pct = (n: number) => `${n > 0 ? '+' : ''}${n.toFixed(1)}%`;
+const pct = (n: number) => `${n.toFixed(1)}%`;
 
 export default function OwnerAnalytics() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
   const query = useQuery({ queryKey: qk.owner.metrics, queryFn: ownerApi.metrics });
   const items = query.data ?? [];
-  const totals = items.reduce(
-    (acc, m) => ({ bought: acc.bought + m.purchasePrice, now: acc.now + m.currentValue }),
-    { bought: 0, now: 0 }
-  );
+  // Recorded purchase prices only: no value is estimated, so there is no "worth now".
+  const priced = items.filter((m) => m.purchasePrice != null);
+  const invested = priced.reduce((sum, m) => sum + (m.purchasePrice ?? 0), 0);
   // Analytics may be a paid feature; say so rather than showing a generic error.
   const upgrade =
     query.error instanceof ApiError &&
@@ -54,7 +53,7 @@ export default function OwnerAnalytics() {
       <DetailHeader
         eyebrow="Portfolio"
         title="Analytics"
-        subtitle="Value, growth and return"
+        subtitle="Figures from your records"
         onBack={() => goBack()}
       />
 
@@ -62,7 +61,7 @@ export default function OwnerAnalytics() {
         <EmptyState
           icon={<BarChart3 size={34} color={colors.mutedForeground} />}
           title="Analytics are on the Pro plan"
-          description="Upgrade from the web dashboard to see growth and returns per property."
+          description="Upgrade from the web dashboard to see prices and rental yield per property."
         />
       ) : (
         <QueryState
@@ -72,27 +71,26 @@ export default function OwnerAnalytics() {
           empty={{
             icon: <BarChart3 size={34} color={colors.mutedForeground} />,
             title: 'Nothing to measure yet',
-            description: 'Add a property with its purchase price to see how its value changes.',
+            description: 'Add a property and its purchase price to see it here.',
           }}
         >
-          <Card
-            elevated
-            accessible
-            accessibilityLabel={`Portfolio today, ${Math.round(totals.now).toLocaleString('en-NG')} naira${totals.bought ? `, ${pct(((totals.now - totals.bought) / totals.bought) * 100)} since purchase` : ''}`}
-            style={{ gap: spacing.sm }}
-          >
+          <Card elevated style={{ gap: spacing.sm }}>
             <Text variant="caption" color="mutedForeground">
-              Portfolio today
+              Total invested
             </Text>
-            <Price amount={totals.now} variant="title" />
-            {totals.bought ? (
-              <Text
-                variant="callout"
-                color={totals.now >= totals.bought ? 'success' : 'destructive'}
-              >
-                {pct(((totals.now - totals.bought) / totals.bought) * 100)} since purchase
+            {priced.length ? (
+              <>
+                <Price amount={invested} variant="title" />
+                <Text variant="caption" color="mutedForeground">
+                  Purchase prices on {priced.length} of {items.length}{' '}
+                  {items.length === 1 ? 'property' : 'properties'}. We don’t estimate value yet.
+                </Text>
+              </>
+            ) : (
+              <Text variant="callout" color="mutedForeground">
+                No purchase prices recorded. We don’t estimate value yet.
               </Text>
-            ) : null}
+            )}
           </Card>
           {items.map((m) => (
             <MetricCard key={m.propertyId} m={m} />
@@ -104,56 +102,43 @@ export default function OwnerAnalytics() {
 }
 
 function MetricCard({ m }: { m: OwnerInvestmentMetric }) {
-  const { colors, spacing } = useTheme();
-  const up = m.appreciationRate >= 0;
+  const { spacing } = useTheme();
   return (
-    <Card
-      elevated
-      accessible
-      accessibilityLabel={`${m.propertyName}: worth ${Math.round(m.currentValue).toLocaleString('en-NG')} naira, ${pct(m.appreciationRate)} growth, ${pct(m.roiPercentage)} return`}
-      style={{ gap: spacing.sm }}
-    >
+    <Card elevated style={{ gap: spacing.sm }}>
       <Text variant="bodyStrong" numberOfLines={1}>
         {m.propertyName}
       </Text>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
         <View>
           <Text variant="caption" color="mutedForeground">
-            Worth now
+            Bought for
           </Text>
-          <Price amount={m.currentValue} variant="callout" />
+          {m.purchasePrice != null ? (
+            <Price amount={m.purchasePrice} variant="callout" />
+          ) : (
+            <Text variant="callout" color="mutedForeground">
+              No price recorded
+            </Text>
+          )}
         </View>
         <View style={{ alignItems: 'flex-end' }}>
           <Text variant="caption" color="mutedForeground">
-            Bought for
+            Asking price
           </Text>
-          <Price amount={m.purchasePrice} variant="callout" />
-        </View>
-      </View>
-      <View style={{ flexDirection: 'row', gap: spacing.lg }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-          {up ? (
-            <TrendingUp size={14} color={colors.success} />
+          {m.askingPrice != null ? (
+            <Price amount={m.askingPrice} variant="callout" />
           ) : (
-            <TrendingDown size={14} color={colors.destructive} />
+            <Text variant="callout" color="mutedForeground">
+              Not listed
+            </Text>
           )}
-          <Text
-            variant="caption"
-            color={up ? 'success' : 'destructive'}
-            style={{ fontWeight: '700' }}
-          >
-            {pct(m.appreciationRate)} growth
-          </Text>
         </View>
-        <Text variant="caption" color="mutedForeground">
-          ROI {pct(m.roiPercentage)}
-        </Text>
-        {m.rentalYield != null ? (
-          <Text variant="caption" color="mutedForeground">
-            Yield {pct(m.rentalYield)}
-          </Text>
-        ) : null}
       </View>
+      {m.rentalYield != null ? (
+        <Text variant="caption" color="mutedForeground">
+          Net yield, last 12 months: {pct(m.rentalYield)}
+        </Text>
+      ) : null}
     </Card>
   );
 }

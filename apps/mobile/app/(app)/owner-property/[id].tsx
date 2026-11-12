@@ -417,6 +417,11 @@ function ListForm({ property, onDone }: { property: OwnerProperty; onDone: () =>
     staleTime: 30 * 60_000,
   });
   const m = insights.data;
+  // The API sends nulls, not zeros, when there are no sales.
+  const sales =
+    m && m.comparables.length >= 3 && m.lowEstimate != null && m.highEstimate != null && m.suggested
+      ? { low: m.lowEstimate, high: m.highEstimate, average: m.suggested }
+      : null;
 
   const create = useMutation({
     mutationFn: () =>
@@ -451,19 +456,19 @@ function ListForm({ property, onDone }: { property: OwnerProperty; onDone: () =>
         onValueChange={setPrice}
         hint="Buyers can offer above or below this."
       />
-      {m && m.comparables.length >= 3 && m.suggested > 0 ? (
+      {sales ? (
         <View
           accessible
-          accessibilityLabel={`Recent sales in ${property.city} ranged from ${formatNaira(m.lowEstimate)} to ${formatNaira(m.highEstimate)}. Average ${formatNaira(m.suggested)}.`}
+          accessibilityLabel={`Recent sales in ${property.city} ranged from ${formatNaira(sales.low)} to ${formatNaira(sales.high)}. Average ${formatNaira(sales.average)}.`}
           style={{ gap: spacing.xs }}
         >
           <Text variant="caption" color="mutedForeground">
-            Recent sales in {property.city}: {formatNaira(m.lowEstimate, { compact: true })} –{' '}
-            {formatNaira(m.highEstimate, { compact: true })}
+            Recent sales in {property.city}: {formatNaira(sales.low, { compact: true })} –{' '}
+            {formatNaira(sales.high, { compact: true })}
           </Text>
           <LinkButton
-            label={`Use their average, ${formatNaira(m.suggested, { compact: true })}`}
-            onPress={() => setPrice(String(Math.round(m.suggested)))}
+            label={`Use their average, ${formatNaira(sales.average, { compact: true })}`}
+            onPress={() => setPrice(String(Math.round(sales.average)))}
           />
         </View>
       ) : null}
