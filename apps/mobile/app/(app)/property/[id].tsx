@@ -53,7 +53,8 @@ import {
   ShowroomPriceBar,
 } from '@/components/showroom/ShowroomParts';
 import { trackShowroom } from '@/lib/showroomAnalytics';
-import { fromRental } from '@sureground/shared/showroom';
+import { fromRental, vatStated } from '@sureground/shared/showroom';
+import { ShowroomCommercial } from '@/components/showroom/ShowroomCommercial';
 import { GeoInsightsPanel } from '@/components/property/GeoInsightsPanel';
 import { ListingCheckCard } from '@/components/property/ListingCheckCard';
 import { AffordabilityCard } from '@/components/property/AffordabilityCard';
@@ -213,12 +214,18 @@ export default function PropertyDetail() {
                     costs={showroom.costs}
                     price={showroom.price}
                     priceUnit={showroom.priceUnit}
+                    vatStated={vatStated(showroom.commercial)}
                     footer={
                       accepting ? (
                         <Button label="Apply to rent" variant="secondary" onPress={apply} />
                       ) : null
                     }
                   />
+                ) : null}
+
+                {/* Commercial: the lease and the space come before the description, as on the web. */}
+                {showroom?.commercial ? (
+                  <ShowroomCommercial commercial={showroom.commercial} market="rent" />
                 ) : null}
 
                 {p.description ? (

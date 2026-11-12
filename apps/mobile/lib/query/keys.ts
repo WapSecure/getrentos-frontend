@@ -300,6 +300,8 @@ export const qk = {
       ['market', 'list', kind, filters] as const,
     detail: (kind: string, id: string) => ['market', 'detail', kind, id] as const,
     estates: (search?: string) => ['market', 'estates', search ?? null] as const,
+    developments: ['market', 'developments'] as const,
+    development: (id: string) => ['market', 'developments', id] as const,
     saved: ['market', 'saved'] as const,
     microsite: (slug: string) => ['market', 'microsite', slug] as const,
     micrositeListings: (slug: string) => ['market', 'microsite', slug, 'listings'] as const,

@@ -32,7 +32,16 @@ import { abortError, errorMessage } from '@/lib/api/client';
 import { readGate } from '@/lib/verificationGate';
 import { formatDate, formatNaira } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
-import { shortletMedia } from '@sureground/shared/showroom';
+import {
+  EMPTY_COMMERCIAL,
+  commercialError,
+  commercialToCreatePayload,
+  isCommercialPropertyType,
+  shortletMedia,
+  type CommercialValues,
+} from '@sureground/shared/showroom';
+import { CommercialDetailsFields } from '@/components/listing/CommercialDetailsFields';
+import { CommercialDetailsSheet } from '@/components/listing/CommercialDetailsSheet';
 import { ShowroomPreview } from '@/components/showroom/ShowroomMedia';
 import { VerificationGateNotice } from '@/components/VerificationGateNotice';
 import { Sheet } from '@/components/Sheet';
@@ -54,6 +63,7 @@ export default function OwnerPropertyDetail() {
   const qc = useQueryClient();
   const toast = useToast();
   const [listOpen, setListOpen] = useState(false);
+  const [commercialOpen, setCommercialOpen] = useState(false);
   const [proofOpen, setProofOpen] = useState(false);
   const { refreshProfile, switchWorkspace } = useAuth();
 
@@ -320,6 +330,18 @@ export default function OwnerPropertyDetail() {
                             }
                           />
                         </View>
+                        {isCommercialPropertyType(listing.propertyType) ? (
+                          <Button
+                            label={
+                              listing.commercial
+                                ? 'Edit commercial details'
+                                : 'Add commercial details'
+                            }
+                            variant="outline"
+                            size="sm"
+                            onPress={() => setCommercialOpen(true)}
+                          />
+                        ) : null}
                       </Card>
                     ) : (
                       <Card style={{ gap: spacing.sm }}>
@@ -375,6 +397,17 @@ export default function OwnerPropertyDetail() {
           />
         ) : null}
       </Sheet>
+      <CommercialDetailsSheet
+        target={
+          commercialOpen && listing
+            ? { id: listing.id, title: listing.listingTitle, commercial: listing.commercial }
+            : null
+        }
+        onClose={() => setCommercialOpen(false)}
+        save={(listingId, details) => ownerApi.updateListingCommercial(listingId, details)}
+        onSaved={refresh}
+        deal="sale"
+      />
     </View>
   );
 }
@@ -424,6 +457,9 @@ function ListForm({ property, onDone }: { property: OwnerProperty; onDone: () =>
     property.estimatedValue ? String(property.estimatedValue) : ''
   );
   const value = Number(price.replace(/\D/g, ''));
+  const [commercial, setCommercial] = useState<CommercialValues>(EMPTY_COMMERCIAL);
+  const isCommercial = isCommercialPropertyType(property.propertyType);
+  const commercialProblem = isCommercial ? commercialError(commercial) : null;
   // The API doesn't match on property type, so comparables are context, suggested only when there are a few.
   const insights = useQuery({
     queryKey: qk.owner.marketInsights(property.city),
@@ -444,6 +480,8 @@ function ListForm({ property, onDone }: { property: OwnerProperty; onDone: () =>
         price: value,
         listingTitle: title.trim() || undefined,
         intent: 'publish',
+        // Sent only for a commercial property: the API refuses the block on any other type.
+        commercial: isCommercial ? commercialToCreatePayload(commercial) : undefined,
       }),
     onSuccess: (listing) => {
       toast.show(
@@ -486,6 +524,14 @@ function ListForm({ property, onDone }: { property: OwnerProperty; onDone: () =>
           />
         </View>
       ) : null}
+      {isCommercial ? (
+        <CommercialDetailsFields
+          value={commercial}
+          onChange={setCommercial}
+          deal="sale"
+          error={commercialProblem}
+        />
+      ) : null}
       <View style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'flex-start' }}>
         <AlertTriangle size={16} color={colors.warning} style={{ marginTop: 2 }} />
         <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
@@ -497,7 +543,7 @@ function ListForm({ property, onDone }: { property: OwnerProperty; onDone: () =>
       <Button
         label="Create listing"
         loading={create.isPending}
-        disabled={!value}
+        disabled={!value || !!commercialProblem}
         onPress={() => create.mutate()}
       />
     </View>
