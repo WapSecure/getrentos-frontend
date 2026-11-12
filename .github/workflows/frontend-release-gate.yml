@@ -31,6 +31,12 @@ jobs:
       - run: pnpm exec playwright install --with-deps chromium
       # Stop early so a broken suite reports a failure instead of timing out as "cancelled".
       - run: pnpm test:e2e:agent-sync --max-failures=3
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: agent-sync-results
+          path: test-results/agent-sync
+          retention-days: 7
 
   design-e2e:
     # Its own job, so a failing agent-sync suite can no longer stop it from running.

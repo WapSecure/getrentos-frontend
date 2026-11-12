@@ -13,6 +13,9 @@ function accessToken(sub: string) {
 }
 
 async function mockApi(target: Page | BrowserContext, handler: (route: Route) => unknown) {
+  // The realtime socket would otherwise hang in its handshake against the dev server; Chrome lets
+  // only one WebSocket per host connect at a time, so a second tab's HMR socket (and hydration) waits.
+  await target.routeWebSocket(/\/socket\.io\//, (ws) => ws.close());
   await target.route('**/__qa_api/**', (route) => {
     if (new URL(route.request().url()).pathname.endsWith('/auth/refresh')) {
       session.refreshes++;
