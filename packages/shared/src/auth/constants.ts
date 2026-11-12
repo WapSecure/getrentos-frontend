@@ -412,6 +412,7 @@ export const ROUTES = {
   ADMIN_SHORTLETS: '/admin/shortlets',
   ADMIN_AUDIT_LOGS: '/admin/audit-logs',
   ADMIN_DOCUMENTS: '/admin/documents',
+  ADMIN_MEDIA: '/admin/media',
   ADMIN_MESSAGES: '/admin/messages',
   ADMIN_REPORTS: '/admin/reports',
   ADMIN_SETTINGS: '/admin/settings',
