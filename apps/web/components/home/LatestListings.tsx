@@ -16,8 +16,7 @@ const Row = ({
   cta,
   market,
   items,
-  eager,
-}: (typeof ROWS)[number] & { items: PublicListingCard[]; eager: boolean }) => (
+}: (typeof ROWS)[number] & { items: PublicListingCard[] }) => (
   <div className="border-t border-border pt-8">
     <div className="mb-8 flex flex-wrap items-baseline justify-between gap-4">
       <h3 className="label-caps">{title}</h3>
@@ -25,7 +24,8 @@ const Row = ({
     </div>
     <div className="grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
       {items.map((listing) => (
-        <ListingTile key={listing.id} listing={listing} market={market} eager={eager} />
+        // Below the hero on every screen size, so lazy: eager photos here compete with the hero's LCP image.
+        <ListingTile key={listing.id} listing={listing} market={market} />
       ))}
     </div>
   </div>
@@ -49,8 +49,8 @@ export async function LatestListings() {
           lead="The newest homes from landlords, owners and agents. A verified mark means our team has checked the property's documents."
         />
         <div className="flex flex-col gap-16">
-          {rows.map((row, index) => (
-            <Row key={row.market} {...row} eager={index === 0} />
+          {rows.map((row) => (
+            <Row key={row.market} {...row} />
           ))}
         </div>
       </Container>

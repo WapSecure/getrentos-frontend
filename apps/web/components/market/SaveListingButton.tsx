@@ -1,6 +1,7 @@
 'use client';
 
-import { IconButton, ListingCardAction } from '@sureground/ui';
+import { IconButton } from '@sureground/ui/IconButton';
+import { ListingCardAction } from '@sureground/ui/ListingCard';
 import { Heart } from '@sureground/icons';
 import { useRouter } from 'next/navigation';
 import { useMarketSaved } from '@/hooks/useMarketSaved';

@@ -5,6 +5,7 @@ import { ThemeProvider } from '@sureground/ui/providers/ThemeProvider';
 import { WebQueryProvider } from '@/components/providers/WebQueryProvider';
 import { LanguageProvider } from '@/lib/i18n/LanguageContext';
 import { StepUpDialog } from '@/components/shared/security/StepUpDialog';
+import { SiteMeasurement } from '@/components/analytics/SiteMeasurement';
 import {
   SITE_NAME,
   SITE_DESCRIPTION,
@@ -20,7 +21,8 @@ const newsreader = Newsreader({
   subsets: ['latin'],
   display: 'swap',
   weight: ['300', '400', '500'],
-  style: ['normal', 'italic'],
+  // No italic: nothing sets the serif in italics, and every style is another preloaded file on every page.
+  style: ['normal'],
   variable: '--font-newsreader',
 });
 
@@ -77,13 +79,18 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const nonce = (await headers()).get('x-nonce') ?? undefined;
   return (
-    <html lang="en" className={`${manrope.variable} ${newsreader.variable}`} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${manrope.variable} ${newsreader.variable}`}
+      suppressHydrationWarning
+    >
       <body className="bg-background antialiased">
         <ThemeProvider nonce={nonce}>
           <WebQueryProvider>
             <LanguageProvider>
               {children}
               <StepUpDialog />
+              <SiteMeasurement />
             </LanguageProvider>
           </WebQueryProvider>
         </ThemeProvider>

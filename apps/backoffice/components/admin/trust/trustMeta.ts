@@ -6,28 +6,28 @@ export const REVIEW_CASE_STATUS_META: Record<
 > = {
   OPEN: {
     label: 'Open',
-    text: 'text-yellow-700 dark:text-yellow-400',
-    bg: 'bg-yellow-100 dark:bg-yellow-900/30',
+    text: 'text-warning',
+    bg: 'bg-warning-subtle',
   },
   ASSIGNED: {
     label: 'Assigned',
-    text: 'text-blue-700 dark:text-blue-400',
-    bg: 'bg-blue-100 dark:bg-blue-900/30',
+    text: 'text-info',
+    bg: 'bg-info-subtle',
   },
   ESCALATED: {
     label: 'Escalated',
-    text: 'text-orange-700 dark:text-orange-400',
-    bg: 'bg-orange-100 dark:bg-orange-900/30',
+    text: 'text-warning',
+    bg: 'bg-warning-subtle',
   },
   RESOLVED: {
     label: 'Resolved',
-    text: 'text-green-700 dark:text-green-400',
-    bg: 'bg-green-100 dark:bg-green-900/30',
+    text: 'text-success',
+    bg: 'bg-success-subtle',
   },
   CLOSED: {
     label: 'Closed',
-    text: 'text-slate-600 dark:text-slate-400',
-    bg: 'bg-slate-100 dark:bg-slate-800',
+    text: 'text-muted-foreground',
+    bg: 'bg-muted',
   },
 };
 
@@ -37,67 +37,67 @@ export const REVIEW_CASE_PRIORITY_META: Record<
 > = {
   LOW: {
     label: 'Low',
-    text: 'text-slate-600 dark:text-slate-400',
-    bg: 'bg-slate-100 dark:bg-slate-800',
-    dot: 'bg-slate-400',
+    text: 'text-muted-foreground',
+    bg: 'bg-muted',
+    dot: 'bg-muted-foreground',
   },
   MEDIUM: {
     label: 'Medium',
-    text: 'text-blue-700 dark:text-blue-400',
-    bg: 'bg-blue-100 dark:bg-blue-900/30',
-    dot: 'bg-blue-500',
+    text: 'text-info',
+    bg: 'bg-info-subtle',
+    dot: 'bg-info',
   },
   HIGH: {
     label: 'High',
-    text: 'text-orange-700 dark:text-orange-400',
-    bg: 'bg-orange-100 dark:bg-orange-900/30',
-    dot: 'bg-orange-500',
+    text: 'text-warning',
+    bg: 'bg-warning-subtle',
+    dot: 'bg-warning',
   },
   CRITICAL: {
     label: 'Critical',
-    text: 'text-red-700 dark:text-red-400',
-    bg: 'bg-red-100 dark:bg-red-900/30',
-    dot: 'bg-red-500',
+    text: 'text-destructive',
+    bg: 'bg-destructive-subtle',
+    dot: 'bg-destructive',
   },
 };
 
 export const TRUST_STEP_STATUS_META: Record<string, { label: string; text: string; bg: string }> = {
   PASSED: {
     label: 'Passed',
-    text: 'text-green-700 dark:text-green-400',
-    bg: 'bg-green-100 dark:bg-green-900/30',
+    text: 'text-success',
+    bg: 'bg-success-subtle',
   },
   FAILED: {
     label: 'Failed',
-    text: 'text-red-700 dark:text-red-400',
-    bg: 'bg-red-100 dark:bg-red-900/30',
+    text: 'text-destructive',
+    bg: 'bg-destructive-subtle',
   },
   REVIEW_REQUIRED: {
     label: 'Needs review',
-    text: 'text-orange-700 dark:text-orange-400',
-    bg: 'bg-orange-100 dark:bg-orange-900/30',
+    text: 'text-warning',
+    bg: 'bg-warning-subtle',
   },
   NOT_STARTED: {
     label: 'Not started',
-    text: 'text-slate-500',
-    bg: 'bg-slate-100 dark:bg-slate-800',
+    text: 'text-muted-foreground',
+    bg: 'bg-muted',
   },
   IN_PROGRESS: {
     label: 'In progress',
-    text: 'text-blue-700 dark:text-blue-400',
-    bg: 'bg-blue-100 dark:bg-blue-900/30',
+    text: 'text-info',
+    bg: 'bg-info-subtle',
   },
-  SKIPPED: { label: 'Skipped', text: 'text-slate-500', bg: 'bg-slate-100 dark:bg-slate-800' },
-  EXPIRED: { label: 'Expired', text: 'text-slate-500', bg: 'bg-slate-100 dark:bg-slate-800' },
+  SKIPPED: { label: 'Skipped', text: 'text-muted-foreground', bg: 'bg-muted' },
+  EXPIRED: { label: 'Expired', text: 'text-muted-foreground', bg: 'bg-muted' },
   WAITING_FOR_USER: {
     label: 'Waiting on user',
-    text: 'text-yellow-700 dark:text-yellow-400',
-    bg: 'bg-yellow-100 dark:bg-yellow-900/30',
+    text: 'text-warning',
+    bg: 'bg-warning-subtle',
   },
   WAITING_FOR_PROVIDER: {
     label: 'Waiting on provider',
-    text: 'text-purple-700 dark:text-purple-400',
-    bg: 'bg-purple-100 dark:bg-purple-900/30',
+    text: 'text-info',
+    bg: 'bg-info-subtle',
   },
 };
 
@@ -105,27 +105,27 @@ export const VERIFICATION_STATUS_META: Record<string, { label: string; text: str
   {
     COMPLETED: {
       label: 'Completed',
-      text: 'text-green-700 dark:text-green-400',
-      bg: 'bg-green-100 dark:bg-green-900/30',
+      text: 'text-success',
+      bg: 'bg-success-subtle',
     },
     WAITING_FOR_REVIEW: {
       label: 'Waiting for review',
-      text: 'text-orange-700 dark:text-orange-400',
-      bg: 'bg-orange-100 dark:bg-orange-900/30',
+      text: 'text-warning',
+      bg: 'bg-warning-subtle',
     },
     PROCESSING: {
       label: 'Processing',
-      text: 'text-blue-700 dark:text-blue-400',
-      bg: 'bg-blue-100 dark:bg-blue-900/30',
+      text: 'text-info',
+      bg: 'bg-info-subtle',
     },
-    QUEUED: { label: 'Queued', text: 'text-slate-500', bg: 'bg-slate-100 dark:bg-slate-800' },
+    QUEUED: { label: 'Queued', text: 'text-muted-foreground', bg: 'bg-muted' },
     FAILED: {
       label: 'Failed',
-      text: 'text-red-700 dark:text-red-400',
-      bg: 'bg-red-100 dark:bg-red-900/30',
+      text: 'text-destructive',
+      bg: 'bg-destructive-subtle',
     },
-    CANCELLED: { label: 'Cancelled', text: 'text-slate-500', bg: 'bg-slate-100 dark:bg-slate-800' },
-    EXPIRED: { label: 'Expired', text: 'text-slate-500', bg: 'bg-slate-100 dark:bg-slate-800' },
+    CANCELLED: { label: 'Cancelled', text: 'text-muted-foreground', bg: 'bg-muted' },
+    EXPIRED: { label: 'Expired', text: 'text-muted-foreground', bg: 'bg-muted' },
   };
 
 /** Diaspora identity cases: decided through their own endpoint, with their uploads shown to staff. */

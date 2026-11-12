@@ -15,6 +15,8 @@ test('listing and marketing pages are public', () => {
     '/land/market',
     '/land/layouts/42',
     '/rent/',
+    '/developments',
+    '/developments/0b6c7a52-6d1b-4f0e-9a51-3f1f7e0d9c11',
   ]) {
     assert.equal(isPublicWebPath(path), true, path);
   }

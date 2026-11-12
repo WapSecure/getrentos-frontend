@@ -2,7 +2,8 @@ import type { ReactNode } from 'react';
 import { BadgeCheck, Bath, BedDouble, Check, MapPin, Ruler } from '@sureground/icons';
 import { trustChainLabel } from '@sureground/shared';
 import { floorPlanLevels } from '@sureground/shared/showroom';
-import { Badge, DescriptionList } from '@sureground/ui';
+import { Badge } from '@sureground/ui/Badge';
+import { DescriptionList } from '@sureground/ui/DescriptionList';
 import { Breadcrumbs } from '@sureground/ui/Breadcrumbs';
 import { Footer } from '@/components/layout/Footer';
 import { Navigation } from '@/components/layout/Navigation';
@@ -22,6 +23,7 @@ import { ShowroomAside } from './ShowroomAside';
 import { ShowroomCommercial } from './ShowroomCommercial';
 import { ShowroomSection as Section } from './ShowroomSection';
 import { ShowroomNeighbourhood } from './ShowroomNeighbourhood';
+import { ShowroomQuestions } from './ShowroomQuestions';
 import { ShowroomShareButton } from './ShowroomShareButton';
 import { ShowroomTrust } from './ShowroomTrust';
 import { VerificationSummaryBadge } from '@/components/shared/trust/VerificationSummaryCard';
@@ -209,6 +211,8 @@ export async function ShowroomPage({
                   </ul>
                 </Section>
               )}
+
+              <ShowroomQuestions listing={listing} returnPath={path} />
 
               {market !== 'land' && (
                 <ShowroomNeighbourhood listingId={listing.id} title={listing.title} />

@@ -24,11 +24,13 @@ import { formatDate } from '@/lib/format';
 import { DevelopmentPaymentNotice } from '@/components/showroom/DevelopmentAssurance';
 import {
   DEVELOPMENT_STATUS_LABEL,
+  developmentEnquiriesService,
   developmentsService,
   type DevelopmentStatus,
 } from '@/services/developmentsService';
 
 export const DEVELOPMENTS_KEY = ['agency', 'developments'] as const;
+export const ENQUIRY_COUNTS_KEY = [...DEVELOPMENTS_KEY, 'enquiry-counts'] as const;
 
 export const STATUS_VARIANT: Record<
   DevelopmentStatus,
@@ -54,6 +56,15 @@ export function DevelopmentsListView() {
       const res = await developmentsService.list();
       if (!res.success) throw new Error(res.error || 'Could not load your developments.');
       return res.data ?? [];
+    },
+  });
+
+  // Best effort: the list still works when the counts do not load.
+  const counts = useQuery({
+    queryKey: ENQUIRY_COUNTS_KEY,
+    queryFn: async () => {
+      const res = await developmentEnquiriesService.newCounts();
+      return res.success && res.data ? res.data : {};
     },
   });
 
@@ -175,9 +186,23 @@ export function DevelopmentsListView() {
                       ].join(' · ')}
                     </p>
                   </div>
-                  <Badge variant={STATUS_VARIANT[d.status]}>
-                    {DEVELOPMENT_STATUS_LABEL[d.status]}
-                  </Badge>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {(counts.data?.[d.id] ?? 0) > 0 && (
+                      <Link
+                        href={`/agency/developments/${d.id}#enquiries`}
+                        className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        <Badge variant="warning">
+                          {counts.data![d.id] === 1
+                            ? '1 new question'
+                            : `${counts.data![d.id]} new questions`}
+                        </Badge>
+                      </Link>
+                    )}
+                    <Badge variant={STATUS_VARIANT[d.status]}>
+                      {DEVELOPMENT_STATUS_LABEL[d.status]}
+                    </Badge>
+                  </div>
                 </div>
               </Card>
             </li>

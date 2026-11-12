@@ -11,7 +11,7 @@ import { SUPPORT } from '@/lib/support';
 import { ROUTES } from '@/lib/constants/auth';
 
 export const metadata: Metadata = {
-  title: 'About Sureground',
+  title: 'About us: property in Nigeria you can check',
   description:
     'Sureground is a Lagos-based property platform for renting, buying, selling and managing property in Nigeria, built around verification and protected payments.',
   alternates: { canonical: '/about' },

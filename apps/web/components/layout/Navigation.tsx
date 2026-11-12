@@ -36,10 +36,12 @@ const FIND_LINKS: NavLink[] = [
     hint: 'Serviced apartments by the night',
   },
   { label: 'Land', href: ROUTES.LAND_MARKETPLACE, hint: 'Plots with title checks' },
+  { label: 'Off-plan', href: '/developments', hint: 'New developments checked by our staff' },
 ];
 
 const MORE_LINKS: NavLink[] = [
   { label: 'Sell', href: '/sell', hint: 'List a home or land for sale' },
+  { label: 'Let', href: '/landlords', hint: 'For landlords and property managers' },
   {
     label: 'Estates',
     href: ESTATE_MARKETPLACE_ROUTES.ESTATES_DIRECTORY,
@@ -65,6 +67,10 @@ const isCurrent = (pathname: string, href: string) => pathname === href;
 
 const FOCUSABLE = 'a[href], button:not([disabled])';
 
+// Availability is read in the browser, so with land off the "Land" link shows until the call
+// returns (except under /land, whose layout seeds the cache from the server). Seeding it for every
+// page would mean the root layout awaiting two API calls on every route, signed-in ones included,
+// since the ~45 pages rendering this have no shared public layout to do it in.
 export const Navigation = () => {
   const land = useLandAvailability();
   const diaspora = useDiasporaAvailability();

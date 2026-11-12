@@ -1,6 +1,6 @@
 'use client';
 
-import { Skeleton } from '@sureground/ui';
+import { Skeleton } from '@sureground/ui/Skeleton';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useEffect, useRef, useState } from 'react';

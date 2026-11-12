@@ -5,7 +5,8 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: '*',
-      allow: '/',
+      // Robots rules match by prefix: '/agent' would also block '/agents', and '/estate' '/estates'. The longer allow wins.
+      allow: ['/', '/agents', '/estates', '/landlords', '/renters', '/buyers'],
       disallow: [
         // Authenticated / admin surfaces must never be crawled or indexed.
         '/dashboard',

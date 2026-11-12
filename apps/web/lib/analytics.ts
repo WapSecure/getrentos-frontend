@@ -1,5 +1,4 @@
-'use client';
-
+// No 'use client': services call `track` after an API success, and on the server it does nothing.
 import type { ShowroomEvent, ShowroomEventInput } from '@sureground/shared/showroom';
 
 const ENDPOINT = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/analytics/events`;
@@ -75,6 +74,24 @@ export function track(event: ShowroomEventInput) {
       if (document.visibilityState === 'hidden') flush(true);
     });
   }
-  if (queue.length >= MAX_BATCH) flush();
+  // Web vitals arrive as the tab is hidden, after the hidden-tab flush may already have run.
+  if (document.visibilityState === 'hidden') flush(true);
+  else if (queue.length >= MAX_BATCH) flush();
   else if (!timer) timer = setTimeout(() => flush(), FLUSH_MS);
+}
+
+/**
+ * Records a funnel event only when the API call it describes succeeded, and hands the response back.
+ * The API drops event names it does not know yet, so this never affects the call.
+ */
+export function trackOnSuccess<T extends { success: boolean }>(
+  response: T,
+  event: ShowroomEventInput
+): T {
+  try {
+    if (response.success) track(event);
+  } catch {
+    // Measurement must never break the action.
+  }
+  return response;
 }

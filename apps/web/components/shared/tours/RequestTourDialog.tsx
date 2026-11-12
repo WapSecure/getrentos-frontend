@@ -3,17 +3,12 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  Button,
-  Checkbox,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-  Field,
-  Select,
-  Textarea,
-} from '@sureground/ui';
+import { Button } from '@sureground/ui/Button';
+import { Checkbox } from '@sureground/ui/Checkbox';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@sureground/ui/Dialog';
+import { Field } from '@sureground/ui/Field';
+import { Select } from '@sureground/ui/Select';
+import { Textarea } from '@sureground/ui/Textarea';
 import { unwrap } from '@/lib/apiHelpers';
 import { VISIT_ROUTES } from '@/lib/constants/visitRoutes';
 import { representativeKeys, representativeService } from '@/services/representativeService';

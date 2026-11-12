@@ -77,7 +77,7 @@ const INTRO: Record<Tab, { title: string; body: string; search: string }> = {
   },
   shortlet: {
     title: 'Shortlets',
-    body: 'Furnished short stays from verified hosts: Sureground holds your payment until you arrive.',
+    body: 'Furnished short stays: Sureground holds your payment until at least 24 hours after check-in.',
     search: 'Search area or city',
   },
   land: {
