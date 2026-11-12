@@ -41,19 +41,22 @@ import {
 import { unwrap } from '@/lib/apiHelpers';
 import { BACKEND_ROLE_TO_ID, ROUTES } from '@/lib/constants/auth';
 import { getStoredUser } from '@/lib/authStorage';
-import { countryName } from '@/lib/constants/countries';
 import { DIASPORA_ROUTES, type InvestorPortal } from '@/lib/constants/diasporaRoutes';
 import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';
 import { VISIT_ROUTES } from '@/lib/constants/visitRoutes';
 import { formatCurrency, formatDualTime, formatLagosDate, timeZoneCity } from '@/lib/format';
 import {
   buildAttentionQueue,
+  countryName,
   greetingFor,
+  humaniseStatus,
   identityProgress,
-  portfolioFigures,
   type InvestorAttentionKind,
-} from '@/lib/investorWorkspace';
+  portfolioFigures,
+  STATEMENT_PAYOUT_LABELS,
+} from '@sureground/shared';
 import { buyerKeys, investorKeys } from '@/lib/queryKeys';
+import { purchaseWorkspaceHref } from '@/lib/transactionWorkspace';
 import { buyerService } from '@/services/buyerService';
 import { investorService } from '@/services/investorService';
 import { siteTourKeys, siteTourService } from '@/services/siteTourService';
@@ -66,7 +69,6 @@ import { IndicativeAmount } from '@/components/shared/money/IndicativeAmount';
 import { PurchaseSummaryList } from '@/components/shared/purchases/PurchaseSummaryList';
 import type { ForeignIdentityStatus } from '@/types/foreignIdentity';
 import type { InvestorOverview } from '@/types/investor';
-import { STATEMENT_PAYOUT_LABELS, humaniseStatus } from '../labels';
 import { IdentityProgressCard, ProfileSummaryCard, dualMoment } from './InvestorWorkspaceRail';
 
 const lagosDay = (iso: string) => formatLagosDate(iso, 'short');
@@ -278,6 +280,7 @@ export const InvestorWorkspace = ({ portal }: { portal: InvestorPortal }) => {
     spendApprovals: data?.pendingSpendApprovals,
     identity: identity.data,
     links: {
+      purchase: purchaseWorkspaceHref,
       risk: `${DIASPORA_ROUTES.onboarding(portal)}?step=risk`,
       tours: links.tours,
       approvals: links.approvals,

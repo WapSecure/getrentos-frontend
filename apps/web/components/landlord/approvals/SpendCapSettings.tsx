@@ -4,11 +4,10 @@ import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { SlidersHorizontal } from '@sureground/icons';
 import { Card, CurrencyInput, Field, SaveButton, useToast } from '@sureground/ui';
-import { withStepUpSummary } from '@sureground/shared';
+import { bandsFromInputs, withStepUpSummary } from '@sureground/shared';
 import { mine, type ManagementMandateDto } from '@/services/mandateService';
 import { spendApprovalService } from '@/services/spendApprovalService';
 import { unwrap } from '@/lib/apiHelpers';
-import { bandsFromInputs } from '@/lib/managedSpend';
 import { investorKeys } from '@/lib/queryKeys';
 
 const BAND_FIELDS = [

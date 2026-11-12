@@ -12,13 +12,16 @@ export function LiveSelfieCheck({
   mode = 'enrol',
 }: {
   session: SmileLivenessSession;
-  onClose: (outcome: LiveSelfieOutcome | null) => void;
-  mode?: 'enrol' | 'match';
+  /** `jobId` is set when Smile received the capture, so the caller can ask the server for the result. */
+  onClose: (outcome: LiveSelfieOutcome | null, jobId?: string) => void;
+  /** `document`: a selfie, then the passport photo page, sent as one document verification job. */
+  mode?: 'enrol' | 'match' | 'document';
 }) {
   const sdk = useMemo(() => loadSmileSdk(), []);
   const analyzer = useMemo(() => loadFaceAnalyzer(), []);
   if (!sdk || !analyzer) return null;
-  const { UseSmileIDBuilder, JobType, CaptureType } = sdk;
+  const { UseSmileIDBuilder, JobType, CaptureType, DocumentType } = sdk;
+  const document = mode === 'document';
 
   return (
     <Modal
@@ -32,8 +35,9 @@ export function LiveSelfieCheck({
         builder={(b) => {
           b.network((n) =>
             n.config((c) => {
-              c.jobType =
-                mode === 'match'
+              c.jobType = document
+                ? JobType.documentVerification
+                : mode === 'match'
                   ? JobType.smartSelfieAuthentication
                   : JobType.smartSelfieEnrollment;
               c.token = session.token;
@@ -49,6 +53,12 @@ export function LiveSelfieCheck({
           // The person already agreed in our own consent step; the same record is bound into the token.
           b.consentInformation = session.consent;
           b.userDetails = session.userDetails;
+          if (document) {
+            b.documentVerificationParams = {
+              country: session.idInfo?.country ?? 'NG',
+              idType: session.idInfo?.idType ?? 'PASSPORT',
+            };
+          }
           // A match names the enrolment it is checked against (server-issued).
           if (mode === 'match') b.userId = session.userId;
           b.theme((t) => {
@@ -67,9 +77,21 @@ export function LiveSelfieCheck({
                 selfie.enableEnhancedLiveness = true;
               });
             });
+            if (document) {
+              s.capture((cap) => {
+                cap.captureType = CaptureType.document;
+                cap.document((d) => {
+                  d.documentType = DocumentType.Passport;
+                });
+              });
+            }
             s.processing();
           });
-          b.onResult = (result) => onClose(liveSelfieOutcome(result));
+          b.onResult = (result) =>
+            onClose(
+              liveSelfieOutcome(result),
+              result.status === 'success' ? result.value.jobId : undefined
+            );
         }}
       />
     </Modal>

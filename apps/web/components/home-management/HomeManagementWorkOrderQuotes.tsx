@@ -37,7 +37,7 @@ import {
   type HomeManagementWorkOrder,
   type HomeManagementWorkOrderQuote,
 } from '@/services/homeManagementService';
-import { AWAITING_OWNER_MESSAGE, isAwaitingOwnerApproval } from '@/lib/managedSpend';
+import { AWAITING_OWNER_MESSAGE, isAwaitingOwnerApproval } from '@sureground/shared';
 import type { AwaitingOwnerApproval } from '@/types/managed';
 
 type QuoteForm = {

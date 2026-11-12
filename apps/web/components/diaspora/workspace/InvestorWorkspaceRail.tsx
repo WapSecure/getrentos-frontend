@@ -19,24 +19,25 @@ import {
   type TimelineItem,
   type TimelineState,
 } from '@sureground/ui';
-import { countryName } from '@/lib/constants/countries';
 import { DIASPORA_ROUTES, type InvestorPortal } from '@/lib/constants/diasporaRoutes';
 import { formatDualTime, formatLagosDate, getInitials } from '@/lib/format';
-import { identityProgress, type IdentityStep } from '@/lib/investorWorkspace';
+import {
+  BUDGET_BAND_LABELS,
+  countryName,
+  CURRENCY_LABELS,
+  HORIZON_LABELS,
+  identityProgress,
+  type IdentityStep,
+  INTENDED_USE_LABELS,
+  listLabels,
+  OWNERSHIP_LABELS,
+  PROPERTY_TYPE_LABELS,
+} from '@sureground/shared';
 import { investorKeys } from '@/lib/queryKeys';
 import { foreignCheckBadges } from '@/lib/statusBadge';
 import { investorService } from '@/services/investorService';
 import type { ForeignIdentityStatus } from '@/types/foreignIdentity';
 import type { InvestorOverview, InvestorProfile } from '@/types/investor';
-import {
-  BUDGET_BAND_LABELS,
-  CURRENCY_LABELS,
-  HORIZON_LABELS,
-  INTENDED_USE_LABELS,
-  OWNERSHIP_LABELS,
-  PROPERTY_TYPE_LABELS,
-  listLabels,
-} from '../labels';
 
 /** "12 Nov 2026 · 10:00 Lagos · 09:00 London": business dates stay Lagos (D2). */
 export const dualMoment = (iso: string, timeZone?: string | null) =>

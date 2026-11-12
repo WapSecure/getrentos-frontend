@@ -10,6 +10,7 @@ export function ReasonSheet({
   action,
   min = 3,
   busy,
+  tone = 'destructive',
   onClose,
   onConfirm,
 }: {
@@ -19,13 +20,15 @@ export function ReasonSheet({
   action: string;
   min?: number;
   busy?: boolean;
+  /** `primary` when the reason lets something go ahead rather than refusing it. */
+  tone?: 'destructive' | 'primary';
   onClose: () => void;
   onConfirm: (reason: string) => void;
 }) {
   return (
     <Sheet open={open} onClose={onClose} title={title}>
       {open ? (
-        <Form hint={hint} action={action} min={min} busy={busy} onConfirm={onConfirm} />
+        <Form hint={hint} action={action} min={min} busy={busy} tone={tone} onConfirm={onConfirm} />
       ) : null}
     </Sheet>
   );
@@ -36,12 +39,14 @@ function Form({
   action,
   min,
   busy,
+  tone,
   onConfirm,
 }: {
   hint: string;
   action: string;
   min: number;
   busy?: boolean;
+  tone: 'destructive' | 'primary';
   onConfirm: (reason: string) => void;
 }) {
   const { spacing } = useTheme();
@@ -63,7 +68,7 @@ function Form({
         />
         <Button
           label={action}
-          variant="destructive"
+          variant={tone}
           disabled={reason.trim().length < min}
           loading={busy}
           onPress={() => onConfirm(reason.trim())}

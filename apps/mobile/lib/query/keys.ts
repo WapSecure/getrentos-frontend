@@ -31,6 +31,22 @@ export const qk = {
     firms: ['management-transfers', 'firms'] as const,
     handover: (id: string) => ['management-transfers', 'handover', id] as const,
   },
+  // Sureground Diaspora Invest: the investor workspace, onboarding, identity abroad and Managed.
+  investor: {
+    all: ['investor'] as const,
+    availability: ['investor', 'availability'] as const,
+    overview: ['investor', 'overview'] as const,
+    profile: ['investor', 'profile'] as const,
+    risk: ['investor', 'risk'] as const,
+    managed: ['investor', 'managed'] as const,
+    identity: ['investor', 'identity-abroad'] as const,
+    transactions: ['investor', 'buyer-transactions'] as const,
+  },
+  // One purchase as its buyer or the buyer's representative sees it.
+  purchaseWorkspace: {
+    all: ['purchase-workspace'] as const,
+    detail: (role: string, txId: string) => ['purchase-workspace', role, txId] as const,
+  },
   buyerLand: {
     all: ['buyer-land'] as const,
     purchases: (status: string) => ['buyer-land', 'purchases', status] as const,
@@ -154,6 +170,7 @@ export const qk = {
     workOrder: (id: string) => ['home-care', 'work-order', id] as const,
     quotes: (id: string) => ['home-care', 'work-order', id, 'quotes'] as const,
     invoices: (id: string) => ['home-care', 'work-order', id, 'invoices'] as const,
+    evidence: (id: string) => ['home-care', 'work-order', id, 'evidence'] as const,
     vendors: ['home-care', 'vendors'] as const,
     units: (propertyId: string) => ['home-care', 'units', propertyId] as const,
     assets: (propertyId: string) => ['home-care', 'assets', propertyId] as const,
@@ -411,6 +428,8 @@ export const qk = {
   seller: {
     payoutAccount: ['seller', 'payout-account'] as const,
     payouts: ['seller', 'payouts'] as const,
+    payoutPreference: ['seller', 'payout-preference'] as const,
+    foreignAccounts: ['seller', 'foreign-bank-accounts'] as const,
   },
   buyer: {
     dashboard: ['buyer', 'dashboard'] as const,

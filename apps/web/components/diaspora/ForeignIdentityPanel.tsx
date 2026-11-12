@@ -25,7 +25,7 @@ import {
   type PendingUpload,
 } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
-import { COUNTRIES } from '@/lib/constants/countries';
+import { COUNTRIES } from '@sureground/shared';
 import { formatLagosDate } from '@/lib/format';
 import { foreignIdentityKeys } from '@/lib/queryKeys';
 import { foreignCheckBadges } from '@/lib/statusBadge';

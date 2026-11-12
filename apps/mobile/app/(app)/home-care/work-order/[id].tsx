@@ -45,6 +45,8 @@ import { PriorityTag, STATUS_TONE } from '@/components/homecare/WorkOrderCard';
 import { VendorPicker } from '@/components/homecare/VendorPicker';
 import { InvoicesSection, QuotesSection } from '@/components/homecare/WorkOrderMoney';
 import { ReasonSheet } from '@/components/homecare/ReasonSheet';
+import { WorkOrderEvidence } from '@/components/homecare/WorkOrderEvidence';
+import { useAuth } from '@/lib/auth/AuthProvider';
 import { goBack } from '@/lib/goBack';
 
 type Panel = 'assign' | 'approve' | 'resolve' | 'cancel' | null;
@@ -66,6 +68,9 @@ export default function WorkOrderDetail() {
   const qc = useQueryClient();
   const toast = useToast();
   const [panel, setPanel] = useState<Panel>(null);
+  // Only the owner rates the job; the API refuses anyone else.
+  const { usablePortal } = useAuth();
+  const isOwner = usablePortal === 'owner' || usablePortal === 'landlord';
   const query = useQuery({
     queryKey: qk.homeCare.workOrder(id),
     queryFn: () => homeCareApi.workOrder(id),
@@ -331,6 +336,7 @@ export default function WorkOrderDetail() {
 
               <QuotesSection w={w} />
               <InvoicesSection w={w} />
+              <WorkOrderEvidence w={w} canRate={isOwner} />
             </>
           ) : null}
         </QueryState>
