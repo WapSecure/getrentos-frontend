@@ -11,7 +11,7 @@ const statusConfig: Record<
   { label: string; icon: React.ElementType; variant: BadgeVariant }
 > = {
   open: { label: 'Open', icon: Clock, variant: 'warning' },
-  under_review: { label: 'Under Review', icon: Search, variant: 'info' },
+  under_review: { label: 'Under review', icon: Search, variant: 'info' },
   resolved: { label: 'Resolved', icon: CheckCircle2, variant: 'success' },
   escalated: { label: 'Escalated', icon: ArrowUpCircle, variant: 'danger' },
 };

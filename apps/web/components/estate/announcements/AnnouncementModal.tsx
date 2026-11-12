@@ -84,7 +84,7 @@ export const AnnouncementModal = ({
     <Dialog open={isOpen} onOpenChange={(next) => !next && handleClose()}>
       <DialogContent size="md">
         <DialogTitle className="text-lg font-semibold text-foreground">
-          {announcement ? 'Edit Announcement' : 'New Announcement'}
+          {announcement ? 'Edit announcement' : 'New announcement'}
         </DialogTitle>
 
         <div className="mt-4 space-y-4">
@@ -190,7 +190,7 @@ export const AnnouncementModal = ({
               });
             }}
           >
-            {announcement ? 'Save Changes' : 'Post Announcement'}
+            {announcement ? 'Save changes' : 'Post announcement'}
           </Button>
         </div>
       </DialogContent>

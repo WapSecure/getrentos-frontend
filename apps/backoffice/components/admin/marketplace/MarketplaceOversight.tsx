@@ -879,7 +879,7 @@ function OfferCase360({
                   href="/admin/escrow"
                   className="flex items-center gap-1 text-xs font-medium text-primary hover:underline"
                 >
-                  Escrow Oversight <ExternalLink className="h-3 w-3" />
+                  Escrow oversight <ExternalLink className="h-3 w-3" />
                 </Link>
               </div>
             </div>

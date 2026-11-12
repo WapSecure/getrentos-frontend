@@ -20,7 +20,7 @@ import type { PlatformConfig, PlatformConfigRole, RoleRequirement } from '@/type
 
 const ROLE_LABELS: Record<PlatformConfigRole, string> = {
   landlord: 'Landlord',
-  owner: 'Property Owner',
+  owner: 'Property owner',
   realtor: 'Realtor',
   agent: 'Agent',
   renter: 'Renter',
@@ -124,7 +124,7 @@ const PlatformConfigSettingsForm = ({
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-foreground mb-4">Platform Configuration</h2>
+      <h2 className="text-xl font-semibold text-foreground mb-4">Platform configuration</h2>
       <p className="text-sm text-muted-foreground mb-6">
         Default thresholds and role verification rules applied platform-wide
       </p>
@@ -174,7 +174,7 @@ const PlatformConfigSettingsForm = ({
 
         <div>
           <p className="text-sm font-medium text-foreground mb-2">
-            Roles Requiring Manual Verification
+            Roles requiring manual verification
           </p>
           <div className="space-y-2">
             {roleRequirements.map((r) => (
@@ -202,7 +202,7 @@ const PlatformConfigSettingsForm = ({
         disabled={!isDirty || !isValid || saveMutation.isPending}
         isLoading={saveMutation.isPending}
       >
-        Save Configuration
+        Save configuration
       </Button>
       <ConfirmDialog
         open={confirmOpen}

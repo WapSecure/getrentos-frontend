@@ -13,7 +13,7 @@ const statusVariant: Record<Incident['status'], 'warning' | 'info' | 'success' |
 
 const statusLabels: Record<Incident['status'], string> = {
   open: 'Open',
-  in_progress: 'In Progress',
+  in_progress: 'In progress',
   resolved: 'Resolved',
   dismissed: 'Dismissed',
 };

@@ -657,7 +657,7 @@ export const ShortletOversight = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Shortlet Oversight"
+        title="Shortlet oversight"
         description="Platform-wide view of shortlet listings and bookings."
       />
 

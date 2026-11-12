@@ -20,15 +20,15 @@ interface Category {
 }
 
 const categories: Category[] = [
-  { id: 'all', name: 'All Topics', icon: Home, count: 0 },
-  { id: 'getting-started', name: 'Getting Started', icon: Users, count: 12 },
+  { id: 'all', name: 'All topics', icon: Home, count: 0 },
+  { id: 'getting-started', name: 'Getting started', icon: Users, count: 12 },
   { id: 'renting', name: 'Renting', icon: Home, count: 8 },
-  { id: 'payments', name: 'Payments & Protection', icon: CreditCard, count: 10 },
+  { id: 'payments', name: 'Payments & protection', icon: CreditCard, count: 10 },
   { id: 'maintenance', name: 'Maintenance', icon: Wrench, count: 6 },
   { id: 'documents', name: 'Documents', icon: FileText, count: 7 },
   { id: 'messages', name: 'Messages', icon: MessageCircle, count: 5 },
-  { id: 'account', name: 'Account Settings', icon: Settings, count: 9 },
-  { id: 'security', name: 'Security & Trust', icon: Shield, count: 4 },
+  { id: 'account', name: 'Account settings', icon: Settings, count: 9 },
+  { id: 'security', name: 'Security & trust', icon: Shield, count: 4 },
 ];
 
 interface HelpCategoriesProps {

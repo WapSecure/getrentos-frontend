@@ -16,7 +16,7 @@ const statusVariant: Record<
 
 const statusLabels: Record<MaintenanceTicket['status'], string> = {
   open: 'Open',
-  in_progress: 'In Progress',
+  in_progress: 'In progress',
   resolved: 'Resolved',
   dismissed: 'Dismissed',
 };
@@ -25,7 +25,7 @@ const categoryLabels: Record<MaintenanceTicket['category'], string> = {
   plumbing: 'Plumbing',
   electrical: 'Electrical',
   structural: 'Structural',
-  common_area: 'Common Area',
+  common_area: 'Common area',
   other: 'Other',
 };
 

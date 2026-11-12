@@ -22,7 +22,7 @@ const statusVariant: Record<Due['status'], 'success' | 'warning' | 'danger'> = {
 
 const categoryLabels: Record<Due['category'], string> = {
   rent: 'Rent',
-  service_charge: 'Service Charge',
+  service_charge: 'Service charge',
   deposit: 'Deposit',
   levy: 'Levy',
 };
@@ -141,7 +141,7 @@ export default function ResidentDuesPage() {
                             setPayingDueId(due.id);
                           }}
                         >
-                          {due.status === 'processing' ? 'Finish paying' : 'Pay Now'}
+                          {due.status === 'processing' ? 'Finish paying' : 'Pay now'}
                         </Button>
                       )}
                     </div>

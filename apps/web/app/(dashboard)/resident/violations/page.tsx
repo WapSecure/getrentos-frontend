@@ -17,16 +17,16 @@ const statusVariant: Record<Violation['status'], 'warning' | 'danger' | 'success
 
 const statusLabels: Record<Violation['status'], string> = {
   reported: 'Reported',
-  warning_issued: 'Warning Issued',
+  warning_issued: 'Warning issued',
   resolved: 'Resolved',
   dismissed: 'Dismissed',
 };
 
 const categoryLabels: Record<Violation['category'], string> = {
   noise: 'Noise',
-  unauthorized_parking: 'Unauthorized Parking',
-  pet_violation: 'Pet Violation',
-  property_maintenance: 'Property Maintenance',
+  unauthorized_parking: 'Unauthorized parking',
+  pet_violation: 'Pet violation',
+  property_maintenance: 'Property maintenance',
   other: 'Other',
 };
 

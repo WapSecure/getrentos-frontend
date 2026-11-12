@@ -213,17 +213,17 @@ export default function AdminDisputesPage() {
   const statusOptions: { value: StatusFilter; label: string }[] = [
     { value: 'all', label: 'All' },
     { value: 'open', label: 'Open' },
-    { value: 'under_review', label: 'Under Review' },
+    { value: 'under_review', label: 'Under review' },
     { value: 'escalated', label: 'Escalated' },
     { value: 'resolved', label: 'Resolved' },
   ];
 
   const categoryOptions: { value: CategoryFilter; label: string }[] = [
-    { value: 'all', label: 'All Categories' },
+    { value: 'all', label: 'All categories' },
     { value: 'escrow', label: 'Escrow' },
     { value: 'lease', label: 'Lease' },
     { value: 'sale', label: 'Sale' },
-    { value: 'service_quality', label: 'Service Quality' },
+    { value: 'service_quality', label: 'Service quality' },
     { value: 'payment', label: 'Payment' },
     { value: 'damage', label: 'Damage' },
     { value: 'cancellation', label: 'Cancellation' },

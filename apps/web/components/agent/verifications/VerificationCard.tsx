@@ -53,7 +53,7 @@ export const VerificationCard = ({ visit }: VerificationCardProps) => {
           ) : (
             <XCircle className="w-4 h-4 text-muted-foreground/50" />
           )}
-          <span className="text-xs text-muted-foreground">ID Verified</span>
+          <span className="text-xs text-muted-foreground">ID verified</span>
         </div>
         <div className="flex items-center gap-1.5">
           {visit.addressConfirmed ? (

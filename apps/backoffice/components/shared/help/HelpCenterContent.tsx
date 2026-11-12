@@ -43,13 +43,13 @@ export const HelpCenterContent = ({ messagesHref = '/admin/messages' }: HelpCent
   return (
     <>
       <PageHeader
-        title="Staff Help Center"
+        title="Staff help center"
         description="Operating guidance and escalation paths for Sureground backoffice staff"
       />
 
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-3">
-          <h2 className="text-sm font-semibold text-foreground mb-1">Frequently Asked Questions</h2>
+          <h2 className="text-sm font-semibold text-foreground mb-1">Frequently asked questions</h2>
           {faqs.map((faq, index) => {
             const isOpen = openIndex === index;
             return (
@@ -79,7 +79,7 @@ export const HelpCenterContent = ({ messagesHref = '/admin/messages' }: HelpCent
 
         <div className="space-y-4">
           <Card static className="p-4">
-            <h3 className="text-sm font-semibold text-foreground mb-3">Internal Escalation</h3>
+            <h3 className="text-sm font-semibold text-foreground mb-3">Internal escalation</h3>
             <div className="space-y-3">
               <a
                 href={`mailto:${OPS_CONTACT.email}`}
@@ -87,7 +87,7 @@ export const HelpCenterContent = ({ messagesHref = '/admin/messages' }: HelpCent
               >
                 <Mail className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
                 <span>
-                  <span className="block text-foreground font-medium">Platform Ops</span>
+                  <span className="block text-foreground font-medium">Platform ops</span>
                   <span className="text-muted-foreground">{OPS_CONTACT.email}</span>
                 </span>
               </a>

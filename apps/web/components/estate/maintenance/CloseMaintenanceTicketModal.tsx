@@ -26,7 +26,7 @@ export const CloseMaintenanceTicketModal = ({
     onClose();
   };
 
-  const title = action === 'dismiss' ? 'Dismiss Ticket' : 'Resolve Ticket';
+  const title = action === 'dismiss' ? 'Dismiss ticket' : 'Resolve ticket';
 
   return (
     <Dialog open={isOpen} onOpenChange={(next) => !next && handleClose()}>

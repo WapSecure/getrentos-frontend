@@ -28,10 +28,10 @@ type DocumentCategory =
   | 'inspection_reports';
 
 const categoryLabels: Record<DocumentCategory, string> = {
-  lease_agreements: 'Lease Agreements',
-  ownership_docs: 'Ownership Documents',
+  lease_agreements: 'Lease agreements',
+  ownership_docs: 'Ownership documents',
   escrow_contracts: 'Payment protection contracts',
-  inspection_reports: 'Inspection Reports',
+  inspection_reports: 'Inspection reports',
 };
 
 const categoryFilters: { value: 'all' | DocumentCategory; label: string }[] = [

@@ -123,13 +123,13 @@ export default function AdminVerificationsPage() {
   const statusOptions: { value: StatusFilter; label: string }[] = [
     { value: 'all', label: 'All' },
     { value: 'pending_review', label: 'Pending' },
-    { value: 'needs_clarification', label: 'Needs Info' },
+    { value: 'needs_clarification', label: 'Needs info' },
     { value: 'approved', label: 'Approved' },
     { value: 'rejected', label: 'Rejected' },
   ];
 
   const typeOptions: { value: TypeFilter; label: string }[] = [
-    { value: 'all', label: 'All Types' },
+    { value: 'all', label: 'All types' },
     { value: 'identity', label: 'Identity' },
     { value: 'property', label: 'Property' },
     { value: 'license', label: 'License' },
