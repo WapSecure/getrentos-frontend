@@ -5,4 +5,6 @@ export * from './funnelEvents';
 export * from './floorPlans';
 export * from './listingQuestions';
 export * from './developments';
+export * from './commercialForm';
+export * from './commercialRows';
 export * from './developmentEnquiries';

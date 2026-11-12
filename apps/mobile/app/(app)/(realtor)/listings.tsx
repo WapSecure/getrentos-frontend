@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   BedDouble,
+  Building2,
   CalendarClock,
   ChevronRight,
   FileSignature,
@@ -39,6 +40,8 @@ import { haptics } from '@/lib/haptics';
 import { Sheet } from '@/components/Sheet';
 import { StatusPill } from '@/components/host/HostUI';
 import { AddLeadSheet, ScheduleViewingSheet } from '@/components/realtor/RealtorUI';
+import { CommercialDetailsSheet } from '@/components/listing/CommercialDetailsSheet';
+import { isCommercialPropertyType } from '@sureground/shared/showroom';
 
 type Filter = 'ALL' | RealtorListingStatus;
 
@@ -58,7 +61,8 @@ export default function RealtorListings() {
   const insets = useSafeAreaInsets();
   const [filter, setFilter] = useState<Filter>('ALL');
   const [selected, setSelected] = useState<RealtorListing | null>(null);
-  const [sheet, setSheet] = useState<'actions' | 'lead' | 'viewing' | null>(null);
+  const [sheet, setSheet] = useState<'actions' | 'lead' | 'viewing' | 'commercial' | null>(null);
+  const qc = useQueryClient();
   const query = useQuery({ queryKey: qk.realtor.listings, queryFn: () => realtorApi.listings() });
 
   const all = useMemo(() => query.data?.items ?? [], [query.data]);
@@ -183,6 +187,7 @@ export default function RealtorListings() {
             l={selected}
             onLead={() => setSheet('lead')}
             onViewing={() => setSheet('viewing')}
+            onCommercial={() => setSheet('commercial')}
             onOffers={() => {
               close();
               router.push('/(app)/realtor-offers');
@@ -192,6 +197,17 @@ export default function RealtorListings() {
       </Sheet>
       <AddLeadSheet open={sheet === 'lead'} onClose={close} listingId={selected?.id} />
       <ScheduleViewingSheet open={sheet === 'viewing'} onClose={close} listingId={selected?.id} />
+      <CommercialDetailsSheet
+        target={
+          sheet === 'commercial' && selected
+            ? { id: selected.id, title: listingTitle(selected), commercial: selected.commercial }
+            : null
+        }
+        onClose={close}
+        save={(id, details) => realtorApi.updateListingCommercial(id, details)}
+        onSaved={() => qc.invalidateQueries({ queryKey: qk.realtor.listings })}
+        deal={selected?.listingType === 'SALE' ? 'sale' : 'rent'}
+      />
     </View>
   );
 }
@@ -259,11 +275,13 @@ function ListingActions({
   l,
   onLead,
   onViewing,
+  onCommercial,
   onOffers,
 }: {
   l: RealtorListing;
   onLead: () => void;
   onViewing: () => void;
+  onCommercial: () => void;
   onOffers: () => void;
 }) {
   const { colors, spacing } = useTheme();
@@ -305,6 +323,14 @@ function ListingActions({
             onPress={onViewing}
           />
         </>
+      ) : null}
+      {isCommercialPropertyType(l.property.propertyType) ? (
+        <Button
+          label={l.commercial ? 'Edit commercial details' : 'Add commercial details'}
+          variant="secondary"
+          icon={<Building2 size={16} color={colors.foreground} />}
+          onPress={onCommercial}
+        />
       ) : null}
       <Button
         label="See offers"
