@@ -2,6 +2,9 @@ import type { Metadata } from 'next';
 import { Footer } from '@/components/layout/Footer';
 import { Navigation } from '@/components/layout/Navigation';
 import { LandMarketplaceBrowser } from '@/components/land/LandMarketplaceBrowser';
+import { ListingItemListJsonLd } from '@/components/seo/ListingItemListJsonLd';
+import { fetchFirstPage, isFilteredView, landFirstPagePath } from '@/lib/marketFirstPage';
+import { mapPublicLand } from '@/lib/publicLandMap';
 
 const baseMetadata: Metadata = {
   title: 'Land: Reviewed Land Listings',
@@ -28,11 +31,25 @@ export async function generateMetadata({
   return filtered ? { ...baseMetadata, robots: { index: false, follow: true } } : baseMetadata;
 }
 
-export default function LandMarketplacePage() {
+export default async function LandMarketplacePage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  // The browser only uses it for the unfiltered view; the item list is only for the indexable page.
+  // When land is off the layout's gate shows its notice in place of this page.
+  const [filtered, initialData] = await Promise.all([
+    searchParams.then(isFilteredView),
+    fetchFirstPage(landFirstPagePath(), mapPublicLand),
+  ]);
+
   return (
     <main className="min-h-screen bg-background pt-16">
+      {!filtered && initialData && (
+        <ListingItemListJsonLd kind="land" listings={initialData.items} />
+      )}
       <Navigation />
-      <LandMarketplaceBrowser mode="public" />
+      <LandMarketplaceBrowser mode="public" initialData={initialData ?? undefined} />
       <Footer />
     </main>
   );
