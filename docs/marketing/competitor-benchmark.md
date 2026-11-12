@@ -1,0 +1,157 @@
+# Competitor benchmark
+
+Snapshot taken **12 Nov 2026**. Public pages only: homepage, a results page, one listing, an area page where one exists, a trust or about page and `robots.txt`. Observations come from the HTML each server returned (desktop browser user agent), so content that a site draws only with JavaScript is under-observed, especially for Airbnb and Rightmove. "Not observed" means we did not see it, not that it does not exist. Quotes are short and attributed; figures appear only where the site itself printed them on that day.
+
+Sureground's side is read from `dev` (after #217) and the decision log (`decisions.md`).
+
+## 1. Who we compared
+
+| Platform                 | Type                                    | Why it matters                                           | Pages checked                                                                                                                            |
+| ------------------------ | --------------------------------------- | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Brik                     | Design reference (owner-supplied)       | Source of the visual language (D1)                       | Screenshots in `docs/brand/references/brik` (local folder, not committed)                                                                |
+| TapReady                 | Design reference (owner-supplied)       | Tone and layout reference for an emerging-market fintech | Screenshots in `docs/brand/references/tapready`                                                                                          |
+| Other concepts           | Design references (owner-supplied)      | Hero-search compositions                                 | Screenshots in `docs/brand/references/other`                                                                                             |
+| PropertyPro.ng           | Nigerian listings portal                | Large national portal; buy, rent, short let, land        | `propertypro.ng/`, `/property-for-rent/in/lagos`, one Ikoyi listing, `/guide/states/lagos/`, `/about`, `verify.propertypro.ng`           |
+| Nigeria Property Centre  | Nigerian listings portal                | Strongest Nigerian trust and SEO patterns seen           | `nigeriapropertycentre.com/`, `/for-rent/lagos`, one Lekki listing, `/lagos/lekki`, `/about-us`, `/verified-photos`                      |
+| Private Property Nigeria | Nigerian listings portal                | Same group of sites in Ghana and Kenya                   | `privateproperty.com.ng` now redirects to `privateproperty.ng`; homepage, Lagos rentals, one Ikoyi listing, `/short-let/lekki`, `/about` |
+| Spleet                   | Nigerian managed rentals and short lets | Closest Nigerian model to "managed, pay monthly"         | `spleet.africa/`, `/shortlet`, one Lekki apartment, `/about`, `/faq`                                                                     |
+| Rightmove                | UK portal                               | Benchmark for safety content and search tools            | Homepage, London rentals, one listing, `/house-prices/london.html`, `/guides/safety-and-security/`                                       |
+| Zillow                   | US portal                               | Benchmark for listing depth and structured data          | Homepage, Austin rentals, one apartment building                                                                                         |
+| Airbnb                   | Short stays                             | Benchmark for payment protection on short stays          | Homepage, Lagos search, one Lekki listing, AirCover help article (`/help/article/3218`)                                                  |
+
+Not analysed: Rentsmallsmall (returned a bot challenge), Fibre (not attempted).
+
+## 2. Design references (Brik, TapReady)
+
+| Reference           | What we took                                                                                                                                                                      | What we did not take                                                                                                                             |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Brik                | White and paper surfaces, a serif display face for page titles, tracked uppercase labels, thin ruled lines, a flat ink primary button, a Buy/Rent toggle beside one search field. | Nothing structural was copied; Brik's layouts were reinterpreted on our own components (D2).                                                     |
+| "Real Nest" concept | Search panel with labelled fields over a hero photo (our `HeroSearch` floats over the photo on wide screens).                                                                     | Its "No.1 real estate website" pill and headline counts of properties and customers: we have no figures to back such claims (D9).                |
+| "Lunvera" concept   | Very large display type; a region / type / budget search strip.                                                                                                                   | Decorative copy with no product meaning.                                                                                                         |
+| TapReady            | Black-and-white confidence, short benefit headings, real people in photos, a plain two-button hero.                                                                               | Pill-shaped photo masks and heavy rounded buttons (we chose sharp corners), and broad promises such as offline payments that do not apply to us. |
+
+## 3. Comparison
+
+### Positioning
+
+| Platform                | Headline seen                                                                 | Angle                                                 |
+| ----------------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------- |
+| Sureground              | "Property you can check before you commit" (homepage `h1`)                    | Verification and protected payments across every role |
+| PropertyPro.ng          | "Find your Next Home" (homepage `h1`)                                         | Scale and search                                      |
+| Nigeria Property Centre | "Find the right property"; "A smarter, safer way to find property" (homepage) | Scale plus safety and market data                     |
+| Private Property NG     | "Nigeria Property Search" (homepage `h1`)                                     | Search, "trusted landlords and agents"                |
+| Spleet                  | "Renting is easier" (homepage)                                                | Managed homes, rent paid monthly                      |
+| Rightmove               | "the UK's largest choice of homes" (homepage)                                 | Choice and tools                                      |
+| Zillow                  | "Rentals. Homes. Agents. Loans." (homepage `h1`)                              | One marketplace for the whole journey                 |
+| Airbnb                  | Title: "Vacation Rentals, Cabins, Beach Houses, Unique Homes & Experiences"   | Choice and guest confidence                           |
+
+### Trust and verification
+
+| Platform                | Signals observed                                                                                                                                                                                                                                                                                           |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sureground              | Verification status on every listing card ("Verified", "Verifying"); documents reviewed before a property is marked verified; identity checks before high-stakes actions; check limits stated on `/buyers` and `/resources/property-checks`; staff-checked off-plan developments; trust profiles per role. |
+| PropertyPro.ng          | Listing badge saying the property "is verified as real" and will be investigated if reported; "Report property"; listing "Safety Tips" against paying inspection fees early; verified-agent directory; a paid document check with the Lagos State ministry on a separate site.                             |
+| Nigeria Property Centre | "Verified Agent" badges; a Verified Photos programme (photos "captured live at the property with the in-app camera", location-checked); results sortable by verification status; a structured "Report this listing" flow ("We review every report").                                                       |
+| Private Property NG     | Listing "Safety Tips"; "verified as real" wording; "Report listing" form with reasons including fraud and marketing without consent. No verified-agent badge observed.                                                                                                                                     |
+| Spleet                  | "Vetted" homes and homeowners; free inspection before payment; a tenant-verification product; listings labelled "Managed by Spleet".                                                                                                                                                                       |
+| Rightmove               | A dedicated Safety and Security Centre; a fraud-awareness block on results and listing pages. No verified badges observed.                                                                                                                                                                                 |
+| Zillow                  | "Verified Information" label on a building listing; fair-housing notices in the footer.                                                                                                                                                                                                                    |
+| Airbnb                  | "Guest favorite" labels; Superhost and reviews; safety help links in the footer.                                                                                                                                                                                                                           |
+
+### Payment protection
+
+| Platform                | Observed                                                                                                                                                                                                                                                                                                                 |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Sureground              | Sureground Payment Protection: a renter's first rent is held until they have the keys; a buyer's deposit is protected; short-stay payments are held until after arrival, with 24 hours to report "not as described". What it does not cover is stated next to what it does (`/buyers`, `/resources/payment-protection`). |
+| PropertyPro.ng          | None. The listing page says the agent "does not represent PropertyPro" and that PropertyPro "is not liable for any monetary transaction".                                                                                                                                                                                |
+| Nigeria Property Centre | None observed; free for seekers.                                                                                                                                                                                                                                                                                         |
+| Private Property NG     | None observed.                                                                                                                                                                                                                                                                                                           |
+| Spleet                  | No escrow observed; monthly, quarterly or biannual rent plans and rent loans.                                                                                                                                                                                                                                            |
+| Rightmove, Zillow       | None observed (Zillow shows an application fee and an Apply flow).                                                                                                                                                                                                                                                       |
+| Airbnb                  | AirCover for guests: "Every home booking comes with AirCover for guests" (help article 3218). Covers host cancellation, an unreachable host, and a listing that is significantly different from its advert, with rebooking or a refund.                                                                                  |
+
+### Search UX
+
+| Platform                | Observed                                                                                                                                                                                         |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Sureground              | Hero search with area suggestions routing to `/rent`, `/buy`, `/shortlets`, `/land`; market filters; saved searches with alerts for signed-in renters. No map search on the public market pages. |
+| PropertyPro.ng          | Buy / Rent / Short let / Land tabs; type, bedrooms, price range, location box; filter landing pages (furnished, serviced); email alerts. Map search not observed.                                |
+| Nigeria Property Centre | Location, type, price, plot size, keyword box, reference search, amenity filters (generator, solar, borehole); currency switcher; theme and text-size controls; email alerts.                    |
+| Private Property NG     | Buy / Rent / Short let / Land tabs; PID or address search; email alerts. Map tab on listings only.                                                                                               |
+| Spleet                  | Location, price, rent duration; entire or shared, furnishing, rooms; a request form when nothing fits.                                                                                           |
+| Rightmove               | Classic and AI search modes (with a stated caveat that the AI "can make mistakes"); map view; save search and alerts.                                                                            |
+| Zillow                  | Price, beds and baths, type, filters, save search; total monthly price on cards.                                                                                                                 |
+| Airbnb                  | Location, dates, guests; map; "Prices include all fees" toggle.                                                                                                                                  |
+
+### Listing pages
+
+| Platform                | Notable content                                                                                                                                                                                                                                                 |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sureground              | Gallery, price with period, verification status, facts and amenities, floor plan with numbered rooms, questions answered from the listing's own data (#184), viewing and application or offer actions; short stays show the area, not the street, until booked. |
+| PropertyPro.ng          | Gallery, price per year, PID, agent contact (masked phone, WhatsApp), area price history, similar listings, report link, safety tips.                                                                                                                           |
+| Nigeria Property Centre | Photos, phone and WhatsApp, share options, map and location section, inline area guide, similar listings, report flow, disclaimer.                                                                                                                              |
+| Private Property NG     | Price, PID, call, WhatsApp, callback and message forms, map tab, price trends, similar listings, report form.                                                                                                                                                   |
+| Spleet                  | Photos, power hours, amenities, house rules, rent-duration selector, "Login to Book Now".                                                                                                                                                                       |
+| Rightmove               | Letting details (deposit, availability, furnishing), map, Street View, stations and schools, travel time, an "Ask Rightmove" beta assistant.                                                                                                                    |
+| Zillow                  | 3D tours, floor plans and units, fees, neighbourhood map, walk/transit scores, school ratings.                                                                                                                                                                  |
+| Airbnb                  | Map ("Where you'll be"), house rules, safety and property section, reviews.                                                                                                                                                                                     |
+
+### SEO patterns
+
+| Platform                | Area pages and URLs                                                                                                                       | Structured data seen in page source                                                                                                                                                                            |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sureground              | `/areas/[slug]` only with at least 3 live listings; listing slugs such as `/buy/3-bedroom-duplex-in-lekki-<id>`; filtered views `noindex` | `Organization`, `WebSite` + `SearchAction`; `ItemList` on market pages; `RealEstateListing` / `Accommodation` + `BreadcrumbList` on listings; `FAQPage` on three segment pages                                 |
+| PropertyPro.ng          | `/property-for-rent/in/{state}`, `/properties/in/{state}/{area}/{estate}`, `/guide/states/{state}/`                                       | `Organization`, `WebSite` + `SearchAction`; `FAQPage` and `RealEstateListing` on results; `RealEstateListing` + `Offer` on listings. No `BreadcrumbList` despite visible breadcrumbs; none on the state guide. |
+| Nigeria Property Centre | `/{state}/{area}`, `/for-rent/{state}`, area guides, quarterly market reports; live counts in titles                                      | `BreadcrumbList`, `FAQPage`, `ItemList`, `Offer` on results and area pages; `RealEstateListing` + `BreadcrumbList` on listings. `robots.txt` explicitly allows AI crawlers.                                    |
+| Private Property NG     | `/property-for-rent/{state}`, `/short-let/{area}`; neighbourhood guides on the blog; counts in titles                                     | `Organization`, `WebSite` + `SearchAction`; `FAQPage`, `ItemList`, `BreadcrumbList` on results; `RealEstateListing` on listings                                                                                |
+| Spleet                  | `/apartment/{id}-{area}-{state}-{name}`                                                                                                   | `WebSite` / `WebPage` only; no listing schema                                                                                                                                                                  |
+| Rightmove               | `/property-to-rent/{Place}.html`, `/house-prices/{place}.html`                                                                            | None in the static HTML of homepage, results or listing (may be added by script); `Article` + `BreadcrumbList` on the safety guide. `robots.txt` blocks GPTBot and CCBot.                                      |
+| Zillow                  | `/{city-st}/rentals/`                                                                                                                     | `ItemList`, `RealEstateListing`, `AggregateOffer`, `FAQPage` on results; `BreadcrumbList` on listings                                                                                                          |
+| Airbnb                  | `/s/{City}--{Country}/homes`                                                                                                              | `WebSite` + `SearchAction`; `VacationRental`, `AggregateRating` on listings                                                                                                                                    |
+
+### App presence
+
+| Platform                                                     | Observed                                                                     |
+| ------------------------------------------------------------ | ---------------------------------------------------------------------------- |
+| Sureground                                                   | Expo app for every role (`apps/mobile`); no store badges on the website yet. |
+| PropertyPro.ng, Nigeria Property Centre, Private Property NG | iOS and Android links on the site                                            |
+| Rightmove, Zillow                                            | iOS and Android links in the footer                                          |
+| Spleet, Airbnb                                               | No store links in the static HTML                                            |
+
+### Accessibility red flags (HTML only, not a full audit)
+
+| Platform                | Observed                                                                                                                                                    |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sureground              | axe gate in CI on 12 marketing routes; see `accessibility-audit.md`.                                                                                        |
+| PropertyPro.ng          | Some images without `alt`; an icon-only menu toggle and a close button without labels; no skip link observed.                                               |
+| Nigeria Property Centre | `lang="en-NG"`; user text-size and theme controls (a plus); buttons filled in by script, so unlabelled-button counts are unreliable; no skip link observed. |
+| Private Property NG     | `lang="en-NG"`, labelled search controls, a skip link; the cleanest markup of the Nigerian portals.                                                         |
+| Spleet                  | Icon-only buttons without labels; about and FAQ pages without an `h1`; no skip link observed.                                                               |
+| Rightmove               | `lang` varies by page (`en-GB`, `en`, `en-US`); skip link present; cookie consent banner.                                                                   |
+| Zillow, Airbnb          | Skip links present; few missing `alt` attributes; cookie consent on Airbnb.                                                                                 |
+
+## 4. What Sureground does differently
+
+- **Money is protected, not disclaimed.** No Nigerian portal we checked holds payments; one explicitly disclaims liability for transactions. Sureground holds first rent, deposits and short-stay payments until set conditions are met, and says what is not covered. Only Airbnb's AirCover comes close, and only for short stays.
+- **One account across the whole tenancy or sale.** Competitors stop at the lead (call, WhatsApp, form). Sureground carries the user into application, lease, payment, maintenance, offers, land purchase stages and estate life, for every role.
+- **Verification is a state, not a slogan.** "Verified" and "Verifying" are shown per listing, and pages state the limits of a check. Competitors use broad "verified as real" wording.
+- **Honest copy and data (D9).** No headline counts, rankings or "number one" claims, no price indices until the data supports them. This makes pages plainer but defensible.
+- **Area pages only where inventory exists (D6)**, rather than templated pages for every place.
+- **Accessibility is gated in CI** on web and app.
+
+## 5. Gaps to watch
+
+| Gap                                                                    | Seen at                                                                          | Suggested response                                                                                           |
+| ---------------------------------------------------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| No "report this listing" flow on public listings                       | Nigeria Property Centre, PropertyPro.ng, Private Property NG                     | Add a structured report action on listing pages; it is a cheap, visible trust signal.                        |
+| No public safety guidance against inspection-fee and advance-fee scams | All three Nigerian portals, Rightmove's safety centre                            | A short safety block on listings linking to a `/resources` guide, from reviewed copy.                        |
+| No map search                                                          | Rightmove, Zillow, Airbnb                                                        | Consider a map view on `/rent` and `/shortlets`; short stays already show area-level location.               |
+| No email alerts for signed-out visitors (alerts need an account)       | All Nigerian portals                                                             | Decide whether a sign-up for alerts is the intended trade-off.                                               |
+| Area pages are sparse and have no area facts or price ranges           | Nigeria Property Centre (counts and price ranges in titles), Private Property NG | Add live counts to area titles and meta when inventory grows; keep D6's rule against unbacked claims.        |
+| `FAQPage` and `ItemList` only on some pages                            | Nigeria Property Centre and Private Property NG on results and area pages        | Consider `ItemList` on area pages and `FAQPage` where FAQs are already shown (`/sell`, `/agents`, homepage). |
+| No app store links on the website                                      | All three Nigerian portals, Rightmove, Zillow                                    | Add store badges once the app is in the stores.                                                              |
+| Market data (price indices, quarterly reports)                         | Nigeria Property Centre                                                          | Not planned until listing volume is statistically honest (`content-strategy.md`).                            |
+| AI-crawler policy                                                      | Nigeria Property Centre allows them; Rightmove blocks some                       | Decide a policy; `robots.ts` currently has one rule set for all agents.                                      |
+| User text-size and currency controls                                   | Nigeria Property Centre                                                          | Currency display matters for diaspora buyers; text size is covered by browser zoom and reflow.               |
+
+Revisit this benchmark every six months; competitor pages change without notice.
