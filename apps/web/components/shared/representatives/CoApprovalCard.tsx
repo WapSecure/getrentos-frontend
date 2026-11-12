@@ -8,7 +8,13 @@ import { UsersRound } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { PURCHASE_ROUTES } from '@/lib/constants/purchaseRoutes';
 import { formatDate } from '@/lib/format';
-import { approvalOutcomeMessage, coApprovalConfirmDescription } from '@sureground/shared';
+import {
+  approvalOutcomeMessage,
+  coApprovalConfirmDescription,
+  HANDOVER_NOT_DELIVERED_NOTE,
+  pendingApprovalStatus,
+  stepAwaitingDelivery,
+} from '@sureground/shared';
 import type { CoApprovalPendingStep } from '@/types/landRepresentative';
 import {
   representativeKeys,
@@ -169,30 +175,38 @@ export const CoApprovalCard = ({
             )}
             {(data.pending ?? []).length > 0 && (
               <ul className="space-y-1.5">
-                {(data.pending ?? []).map((step) => (
-                  <li
-                    key={step.milestoneKey}
-                    className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-secondary/50 px-3 py-2"
-                  >
-                    <span className="text-foreground">{stepLabel(step)}</span>
-                    <span className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                      {isBuyer
-                        ? `${step.buyerApproved ? 'You approved' : 'Waiting for you'} · ${
-                            step.representativeApproved
-                              ? 'representative approved'
-                              : 'waiting for your representative'
-                          }`
-                        : `${step.buyerApproved ? 'The buyer approved' : 'Waiting for the buyer'} · ${
-                            step.representativeApproved ? 'you approved' : 'waiting for you'
-                          }`}
-                      {!isBuyer && !step.representativeApproved && (
-                        <Button size="sm" onClick={() => setApproving(step)}>
-                          Approve
-                        </Button>
+                {(data.pending ?? []).map((step) => {
+                  const awaitingDelivery = stepAwaitingDelivery(step);
+                  const noteId = `co-approval-note-${step.milestoneKey}`;
+                  return (
+                    <li
+                      key={step.milestoneKey}
+                      className="space-y-1 rounded-xl bg-secondary/50 px-3 py-2"
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <span className="text-foreground">{stepLabel(step)}</span>
+                        <span className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                          {pendingApprovalStatus(step, viewer)}
+                          {!isBuyer && !step.representativeApproved && (
+                            <Button
+                              size="sm"
+                              disabled={awaitingDelivery}
+                              aria-describedby={awaitingDelivery ? noteId : undefined}
+                              onClick={() => setApproving(step)}
+                            >
+                              Approve
+                            </Button>
+                          )}
+                        </span>
+                      </div>
+                      {awaitingDelivery && (
+                        <p id={noteId} className="text-xs text-muted-foreground">
+                          {HANDOVER_NOT_DELIVERED_NOTE}
+                        </p>
                       )}
-                    </span>
-                  </li>
-                ))}
+                    </li>
+                  );
+                })}
               </ul>
             )}
             {!isBuyer ? null : data.status === 'DISABLE_PENDING' ? (
