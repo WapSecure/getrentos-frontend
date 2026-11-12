@@ -92,6 +92,8 @@ export function ListingInvestmentAnalysis({ listingId }: { listingId: string }) 
     queryKey: investorKeys.analysis(listingId, input),
     queryFn: () => unwrap(investorService.getListingAnalysis(listingId, input)),
     enabled,
+    // An optional section: if the analysis can't load, leave it out rather than failing the listing page.
+    throwOnError: false,
     retry: false,
     placeholderData: keepPreviousData,
   });
