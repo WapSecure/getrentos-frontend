@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { Download, RefreshCcw, BarChart3, Building2, Check } from '@sureground/icons';
+import { Download, RefreshCcw, BarChart3, Building2 } from '@sureground/icons';
 import { InvestmentStatsCards } from '@/components/owner/analytics/InvestmentStatsCards';
 import {
   Button,
@@ -24,6 +24,7 @@ import { updateStoredUser } from '@/lib/authStorage';
 import { getDashboardRoute } from '@/lib/constants/auth';
 import { ownerKeys } from '@/lib/queryKeys';
 import { formatCurrency } from '@/lib/format';
+import { downloadCsv } from '@/lib/export';
 import type { InvestmentMetrics } from '@/types/owner';
 import { usePlanTier } from '@/hooks/usePlanTier';
 import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
@@ -57,7 +58,14 @@ export default function OwnerAnalyticsPage() {
     updateStoredUser({ role: 'landlord' });
     router.push(getDashboardRoute('landlord'));
   };
-  const [exported, setExported] = useState(false);
+
+  // The rows the table shows, as recorded; blank where nothing is on record.
+  const exportCsv = () =>
+    downloadCsv(
+      `investment-analytics-${new Date().toISOString().slice(0, 10)}.csv`,
+      ['Property', 'Purchase price (NGN)', 'Asking price (NGN)', 'Net yield, 12 months (%)'],
+      metrics.map((m) => [m.propertyName, m.purchasePrice, m.askingPrice, m.rentalYield])
+    );
 
   const toggleCompare = (propertyId: string) => {
     setCompareIds((prev) =>
@@ -149,19 +157,11 @@ export default function OwnerAnalyticsPage() {
               </Button>
               <Button
                 variant="outline"
-                onClick={() => {
-                  setExported(true);
-                  window.setTimeout(() => setExported(false), 2500);
-                }}
-                icon={
-                  exported ? (
-                    <Check className="w-4 h-4 text-success" />
-                  ) : (
-                    <Download className="w-4 h-4" />
-                  )
-                }
+                onClick={exportCsv}
+                disabled={metrics.length === 0}
+                icon={<Download className="w-4 h-4" />}
               >
-                {exported ? 'Exported' : 'Export'}
+                Export CSV
               </Button>
             </div>
           ) : undefined
