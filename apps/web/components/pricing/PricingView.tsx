@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { SegmentedControl, type Segment } from '@sureground/ui/SegmentedControl';
 import { TableSkeleton } from '@sureground/ui/Skeleton';
@@ -11,7 +11,9 @@ import { SectionIntro } from '@/components/marketing/SectionIntro';
 import { usePlanPricing } from '@/hooks/usePlanPricing';
 import { PlanComparisonTable } from '@/components/shared/subscription/PlanComparisonTable';
 import { ProPriceCard } from '@/components/shared/subscription/ProPriceCard';
-import { ROUTES } from '@/lib/constants/auth';
+import { ROUTES, getUserRole } from '@/lib/constants/auth';
+import { signedInPricingLinks } from '@/lib/pricingCta';
+import { useAuthStore } from '@/lib/store/authStore';
 import type { PlanPersona, PlanPricing } from '@/services/subscriptionService';
 
 const PERSONAS: Segment<PlanPersona>[] = [
@@ -26,6 +28,16 @@ export function PricingView({ initialPricing }: { initialPricing?: PlanPricing }
   const router = useRouter();
   const { pricing, entitlementsFor, isLoading } = usePlanPricing(initialPricing);
   const [persona, setPersona] = useState<PlanPersona>('landlord');
+  // Signed-in visitors go to their own workspace, not sign-up. The signed-in flag is set after
+  // mount, so the server HTML and the first client render both show the signed-out actions.
+  const isSignedIn = useAuthStore((s) => s.isAuthenticated);
+  const [accountLinks] = useState(() =>
+    typeof window === 'undefined' ? null : signedInPricingLinks(getUserRole())
+  );
+  useEffect(() => {
+    useAuthStore.getState().init();
+  }, []);
+  const signedInLinks = isSignedIn ? accountLinks : null;
 
   // Each fact follows the pricing the API returns, so the page never promises a term we don't offer.
   const facts = [
@@ -72,7 +84,14 @@ export function PricingView({ initialPricing }: { initialPricing?: PlanPricing }
               ))}
             </ul>
           </div>
-          <ProPriceCard pricing={pricing} onUpgrade={() => router.push(ROUTES.SIGNUP)} />
+          <ProPriceCard
+            pricing={pricing}
+            onUpgrade={() =>
+              router.push(
+                signedInLinks ? (signedInLinks.billing ?? signedInLinks.dashboard) : ROUTES.SIGNUP
+              )
+            }
+          />
         </Container>
       </section>
 
@@ -104,20 +123,47 @@ export function PricingView({ initialPricing }: { initialPricing?: PlanPricing }
         </Container>
       </section>
 
-      <ClosingBand
-        title="Set up your account in a few minutes"
-        lead="Every account starts on Free. You choose if and when to start the Pro trial."
-        actions={
-          <>
-            <CtaLink href={ROUTES.SIGNUP} variant="light" arrow>
-              Get started free
-            </CtaLink>
-            <CtaLink href={ROUTES.LOGIN} variant="outline-light">
-              Sign in
-            </CtaLink>
-          </>
-        }
-      />
+      {signedInLinks ? (
+        <ClosingBand
+          title="Manage your plan from your account"
+          lead={
+            signedInLinks.billing
+              ? 'Start the Pro trial or change your plan from billing in your workspace.'
+              : 'Your plan and account settings are in your workspace.'
+          }
+          actions={
+            <>
+              {signedInLinks.billing && (
+                <CtaLink href={signedInLinks.billing} variant="light" arrow>
+                  Go to billing
+                </CtaLink>
+              )}
+              <CtaLink
+                href={signedInLinks.dashboard}
+                variant={signedInLinks.billing ? 'outline-light' : 'light'}
+                arrow={!signedInLinks.billing}
+              >
+                Go to your dashboard
+              </CtaLink>
+            </>
+          }
+        />
+      ) : (
+        <ClosingBand
+          title="Set up your account in a few minutes"
+          lead="Every account starts on Free. You choose if and when to start the Pro trial."
+          actions={
+            <>
+              <CtaLink href={ROUTES.SIGNUP} variant="light" arrow>
+                Get started free
+              </CtaLink>
+              <CtaLink href={ROUTES.LOGIN} variant="outline-light">
+                Sign in
+              </CtaLink>
+            </>
+          }
+        />
+      )}
     </>
   );
 }

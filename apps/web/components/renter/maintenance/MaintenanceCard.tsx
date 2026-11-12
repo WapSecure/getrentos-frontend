@@ -15,6 +15,8 @@ import {
 } from '@sureground/icons';
 import { Badge, Button, type BadgeVariant } from '@sureground/ui';
 import type { MaintenanceRequest } from '@/types/maintenance';
+import { maintenanceCategoryLabel } from '@/lib/maintenanceCategory';
+import { MaintenanceCategoryIcon } from './MaintenanceCategoryIcon';
 
 interface MaintenanceCardProps {
   request: MaintenanceRequest;
@@ -76,15 +78,6 @@ const statusConfig: Record<MaintenanceRequest['status'], BadgeConfig> = {
   },
 };
 
-const categoryIcons = {
-  plumbing: '💧',
-  electrical: '⚡',
-  internet: '🌐',
-  security: '🔒',
-  appliances: '🔧',
-  other: '📌',
-};
-
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   const now = new Date();
@@ -118,7 +111,6 @@ export const MaintenanceCard = ({
 }: MaintenanceCardProps) => {
   const PriorityIcon = priorityConfig[request.priority].icon;
   const StatusIcon = statusConfig[request.status].icon;
-  const categoryIcon = categoryIcons[request.category as keyof typeof categoryIcons] || '📌';
   const acknowledgementTarget = request.acknowledgedAt
     ? request.resolutionDueAt
     : request.responseDueAt;
@@ -170,8 +162,9 @@ export const MaintenanceCard = ({
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-sm text-muted-foreground">
             <span>{request.propertyName}</span>
             <span>•</span>
-            <span>
-              {categoryIcon} {request.category}
+            <span className="inline-flex items-center gap-1">
+              <MaintenanceCategoryIcon category={request.category} className="h-3.5 w-3.5" />
+              {maintenanceCategoryLabel(request.category)}
             </span>
           </div>
 

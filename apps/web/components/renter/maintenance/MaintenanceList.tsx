@@ -7,6 +7,7 @@ import { MaintenanceCard } from './MaintenanceCard';
 import { MaintenanceDetailsModal } from './MaintenanceDetailsModal';
 import { VendorRatingModal } from './VendorRatingModal';
 import type { MaintenanceRequest } from '@/types/maintenance';
+import { pluralize } from '@/lib/format';
 
 interface MaintenanceListProps {
   requests: MaintenanceRequest[];
@@ -82,7 +83,7 @@ export const MaintenanceList = ({
             <div>
               <h2 className="font-semibold text-foreground">Maintenance requests</h2>
               <p className="text-xs text-muted-foreground mt-0.5">
-                {filteredRequests.length} requests found
+                {pluralize(filteredRequests.length, 'request')} found
               </p>
             </div>
 

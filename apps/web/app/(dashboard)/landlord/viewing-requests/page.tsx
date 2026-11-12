@@ -27,6 +27,7 @@ import { viewingRequestStatusBadges } from '@/lib/statusBadge';
 import type { ViewingRequestStatus } from '@/types/landlord';
 import { DateTimeField, isCompleteDateTime } from '@/components/shared/forms/DateTimeField';
 import { LandlordLettingsNav } from '@/components/shared/navigation/WorkflowNavs';
+import { preferredSlotValue } from '@/lib/viewingPrefill';
 
 const FILTERS = [
   { value: 'all', label: 'All' },
@@ -185,7 +186,8 @@ export default function LandlordViewingRequestsPage() {
                             renterName: viewing.renterName,
                             preferredAt: viewing.preferredAt,
                           });
-                          setScheduledAt('');
+                          // Start from the renter's requested slot; the landlord can still change it.
+                          setScheduledAt(preferredSlotValue(viewing.preferredAt));
                         }}
                       >
                         Confirm time

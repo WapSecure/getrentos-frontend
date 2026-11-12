@@ -25,6 +25,7 @@ import type {
   MaintenanceCategory,
   MaintenancePriority,
 } from '@/types/maintenance';
+import { maintenanceCategoryLabel } from '@/lib/maintenanceCategory';
 
 type ReportFormData = Omit<CreateMaintenanceRequestInput, 'category' | 'priority'> & {
   category: MaintenanceCategory | '';
@@ -43,14 +44,9 @@ interface ReportMaintenanceModalProps {
   onSubmit: (data: CreateMaintenanceRequestInput, photos: File[]) => Promise<boolean>;
 }
 
-const categories: { value: MaintenanceCategory; label: string; icon: string }[] = [
-  { value: 'plumbing', label: 'Plumbing', icon: '💧' },
-  { value: 'electrical', label: 'Electrical', icon: '⚡' },
-  { value: 'internet', label: 'Internet', icon: '🌐' },
-  { value: 'security', label: 'Security', icon: '🔒' },
-  { value: 'appliances', label: 'Appliances', icon: '🔧' },
-  { value: 'other', label: 'Other', icon: '📌' },
-];
+const categories: { value: MaintenanceCategory; label: string }[] = (
+  ['plumbing', 'electrical', 'internet', 'security', 'appliances', 'other'] as const
+).map((value) => ({ value, label: maintenanceCategoryLabel(value) }));
 
 const priorities: { value: MaintenancePriority; label: string; description: string }[] = [
   { value: 'low', label: 'Low', description: 'Non-urgent, cosmetic issues' },
@@ -314,7 +310,7 @@ export const ReportMaintenanceModal = ({
                 placeholder="Select category"
                 options={categories.map((category) => ({
                   value: category.value,
-                  label: `${category.icon} ${category.label}`,
+                  label: category.label,
                 }))}
               />
             </Field>
