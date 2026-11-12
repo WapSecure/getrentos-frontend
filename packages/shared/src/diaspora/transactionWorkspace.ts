@@ -72,31 +72,107 @@ export const canReleaseDeposit = (
 ): boolean =>
   workspace.viewer.role === 'BUYER' && workspace.statuses.moneyStatus.code === 'PROTECTED';
 
+/** "Amaka Obi" when the workspace knows the representative's name, else "your representative". */
+export const representativeLabel = (name?: string | null): string =>
+  name?.trim() || 'your representative';
+
+const capitalise = (text: string): string => text.charAt(0).toUpperCase() + text.slice(1);
+
 /**
- * What the buyer's release did. Under two-person approval the buyer's approval is recorded but
- * nothing moves until the representative approves too.
+ * What the buyer's release did. A representative's approval never moves money: under two-person
+ * approval the buyer's first press only records their approval, and the buyer presses Release again
+ * once both approvals are in. The API's own message is not used, so this copy stays accurate.
  */
 export const releaseOutcome = (
-  release: DepositReleaseOutcome | undefined
-): { waiting: boolean; message: string } =>
-  release?.state === 'WAITING_FOR_CO_APPROVAL'
-    ? {
-        waiting: true,
-        message:
-          release.message ??
-          (release.waitingFor === 'BUYER'
-            ? 'Your representative’s approval is recorded. The deposit is released once you approve too.'
-            : 'Your approval is recorded. The deposit is released once your representative approves too.'),
-      }
-    : { waiting: false, message: 'Deposit released to the seller.' };
+  release: DepositReleaseOutcome | undefined,
+  representativeName?: string | null
+): { waiting: boolean; message: string } => {
+  if (release?.state !== 'WAITING_FOR_CO_APPROVAL') {
+    return { waiting: false, message: 'Deposit released to the seller.' };
+  }
+  const rep = representativeLabel(representativeName);
+  return {
+    waiting: true,
+    message:
+      release.waitingFor === 'BUYER'
+        ? `${capitalise(rep)} has approved. Nothing has been released yet: press Release the deposit to send it to the seller.`
+        : `Your approval is recorded. Nothing has been released yet. Once ${rep} approves, come back and press Release the deposit to send it to the seller.`,
+  };
+};
 
 /** What a representative's approval did. It never moves money itself. */
 export const approvalOutcomeMessage = (
   outcome: DepositReleaseApprovalOutcome | undefined
 ): string =>
   outcome === 'WAITING_FOR_BUYER'
-    ? 'Your approval is recorded. Nothing moves until the buyer approves too.'
-    : 'Your approval is recorded. The buyer can now release the deposit.';
+    ? 'Your approval is recorded. Nothing has been released: the buyer approves too and then releases the deposit.'
+    : 'Your approval is recorded. Nothing has been released: the buyer can now release the deposit.';
+
+export type DepositReleaseStage =
+  /** No two-person rule: the buyer's release sends the deposit straight away. */
+  | 'SINGLE'
+  /** Two-person approval is on and neither approval is in yet. */
+  | 'NEEDS_APPROVALS'
+  /** The buyer approved; the representative has not. Nothing has moved. */
+  | 'WAITING_FOR_REPRESENTATIVE'
+  /** Both approved; the buyer still has to press Release. */
+  | 'BOTH_APPROVED';
+
+interface ReleaseStageShape {
+  statuses: { moneyStatus: { code: MoneyStatusCode | string } };
+  coApproval: {
+    binding: boolean;
+    releaseApproved?: boolean;
+    pending?: readonly CoApprovalPendingStep[];
+  };
+}
+
+/** Where the deposit release stands for the buyer under two-person approval. */
+export const depositReleaseStage = (workspace: ReleaseStageShape): DepositReleaseStage => {
+  const { coApproval } = workspace;
+  if (!coApproval.binding) return 'SINGLE';
+  const releaseStep = coApproval.pending?.find((step) => step.releasesDeposit);
+  if (releaseStep?.buyerApproved && releaseStep.representativeApproved) return 'BOTH_APPROVED';
+  if (
+    workspace.statuses.moneyStatus.code === 'RELEASE_REQUESTED' ||
+    (releaseStep?.buyerApproved && !releaseStep.representativeApproved)
+  )
+    return 'WAITING_FOR_REPRESENTATIVE';
+  if (coApproval.releaseApproved && workspace.statuses.moneyStatus.code === 'PROTECTED')
+    return 'BOTH_APPROVED';
+  return 'NEEDS_APPROVALS';
+};
+
+/** The buyer's release confirmation, worded for where the two approvals stand. */
+export const releaseDialogDescription = (
+  stage: DepositReleaseStage,
+  representativeName?: string | null
+): string => {
+  const rep = representativeLabel(representativeName);
+  const tail = 'This does not complete the legal transfer.';
+  if (stage === 'BOTH_APPROVED') {
+    return `You and ${rep} have both approved. Releasing sends the deposit to the seller now and cannot be undone. ${tail}`;
+  }
+  if (stage === 'SINGLE') {
+    return `Release only once you have received the property and the documents you agreed; it cannot be undone. ${tail}`;
+  }
+  return `Two-person approval is on, so this records your approval and nothing is released yet. Once ${rep} approves, press Release the deposit again to send it to the seller. Approve only once you have received the property and the documents you agreed. ${tail}`;
+};
+
+/** A short line for the buyer's deposit card, or null when there is nothing extra to say. */
+export const releaseStageNote = (
+  stage: DepositReleaseStage,
+  representativeName?: string | null
+): string | null => {
+  const rep = representativeLabel(representativeName);
+  if (stage === 'BOTH_APPROVED')
+    return 'Both approvals are in. Release the deposit to send it to the seller.';
+  if (stage === 'WAITING_FOR_REPRESENTATIVE')
+    return `You have approved. Nothing has been released yet. Once ${rep} approves, come back and press Release the deposit.`;
+  if (stage === 'NEEDS_APPROVALS')
+    return `Two-person approval is on: you and ${rep} both approve, then you release the deposit.`;
+  return null;
+};
 
 /** Two-person approvals on this purchase still waiting for the viewer. */
 export const approvalsWaitingFor = (
@@ -170,4 +246,25 @@ export const nextActionTarget = (
     return 'steps';
   if (canReleaseDeposit(workspace)) return 'deposit';
   return 'steps';
+};
+
+/**
+ * The confirmation before a two-person approval. Approving the deposit release never moves money:
+ * the buyer presses Release once both approvals are in.
+ */
+export const coApprovalConfirmDescription = (input: {
+  viewer: 'buyer' | 'representative';
+  stepLabel: string;
+  releasesDeposit?: boolean;
+  representativeName?: string | null;
+}): string => {
+  const step = `"${input.stepLabel}".`;
+  if (!input.releasesDeposit) {
+    return input.viewer === 'buyer'
+      ? `${step} Once ${representativeLabel(input.representativeName)} has approved too, the step is confirmed. Approve only what you have seen yourself.`
+      : `${step} Once the buyer has approved too, the step is confirmed. Approve only what you have seen yourself.`;
+  }
+  return input.viewer === 'buyer'
+    ? `${step} This records your approval; nothing is released. Once ${representativeLabel(input.representativeName)} has approved too, press Release the deposit to send it to the seller.`
+    : `${step} Your approval does not move any money. Once you have both approved, the buyer releases the deposit to the seller. Approve only what you have seen yourself.`;
 };

@@ -8,7 +8,7 @@ import { UsersRound } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { PURCHASE_ROUTES } from '@/lib/constants/purchaseRoutes';
 import { formatDate } from '@/lib/format';
-import { approvalOutcomeMessage } from '@sureground/shared';
+import { approvalOutcomeMessage, coApprovalConfirmDescription } from '@sureground/shared';
 import type { CoApprovalPendingStep } from '@/types/landRepresentative';
 import {
   representativeKeys,
@@ -131,7 +131,7 @@ export const CoApprovalCard = ({
   if (!isBuyer && !data.binding) return null;
   const stepLabel = (step: CoApprovalPendingStep) =>
     step.releasesDeposit
-      ? `${labelFor(step.milestoneKey)} (releases the deposit)`
+      ? `${labelFor(step.milestoneKey)} (approves the deposit release)`
       : labelFor(step.milestoneKey);
   const approvers = (reps.data ?? []).filter(
     (a) => a.status === 'ACTIVE' && a.scopes.includes('CO_APPROVE')
@@ -263,9 +263,14 @@ export const CoApprovalCard = ({
         onOpenChange={(open) => !open && setApproving(null)}
         title="Give your approval?"
         description={
-          approving?.releasesDeposit
-            ? `"${approving ? stepLabel(approving) : ''}". Once the buyer has approved too, the deposit held under Payment Protection is released to the seller. Approve only what you have seen yourself.`
-            : `"${approving ? stepLabel(approving) : ''}". Once the buyer has approved too, the step is confirmed. Approve only what you have seen yourself.`
+          approving
+            ? coApprovalConfirmDescription({
+                viewer,
+                stepLabel: stepLabel(approving),
+                releasesDeposit: approving.releasesDeposit,
+                representativeName: data.representative?.name,
+              })
+            : ''
         }
         confirmLabel="Approve"
         isLoading={approve.isPending}

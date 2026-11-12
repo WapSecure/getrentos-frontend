@@ -74,7 +74,16 @@ export interface WorkspaceProfessional {
   completedAt?: string;
 }
 
-export type WorkspaceActorKind = 'MANAGER' | 'SUREGROUND' | 'TENANT' | 'SYSTEM' | 'OTHER' | 'YOU';
+export type WorkspaceActorKind =
+  | 'MANAGER'
+  | 'SUREGROUND'
+  | 'TENANT'
+  | 'SYSTEM'
+  | 'OTHER'
+  | 'YOU'
+  | 'BUYER'
+  | 'SELLER'
+  | 'REPRESENTATIVE';
 
 export interface WorkspaceHistoryItem {
   id: string;

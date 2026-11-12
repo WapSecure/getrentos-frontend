@@ -9,7 +9,11 @@ export type ActivityFeedActorKind =
   | 'TENANT'
   | 'SYSTEM'
   | 'OTHER'
-  | 'YOU';
+  | 'YOU'
+  // On a purchase, the actor's role in that sale.
+  | 'BUYER'
+  | 'SELLER'
+  | 'REPRESENTATIVE';
 
 export interface ActivityFeedItem {
   id: string;
@@ -32,6 +36,9 @@ const KIND: Record<
   SYSTEM: { label: 'Automatic', icon: Bot, variant: 'neutral' },
   OTHER: { label: 'Other', icon: UserRound, variant: 'neutral' },
   YOU: { label: 'You', icon: UserRound, variant: 'primary' },
+  BUYER: { label: 'Buyer', icon: UserRound, variant: 'neutral' },
+  SELLER: { label: 'Seller', icon: UserRound, variant: 'neutral' },
+  REPRESENTATIVE: { label: 'Representative', icon: UserRound, variant: 'info' },
 };
 
 const dayOf = (iso: string) =>

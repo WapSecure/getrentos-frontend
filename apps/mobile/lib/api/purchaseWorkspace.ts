@@ -58,7 +58,16 @@ export interface WorkspaceHistoryItem {
   id: string;
   at: string;
   label: string;
-  actorKind: 'MANAGER' | 'SUREGROUND' | 'TENANT' | 'SYSTEM' | 'OTHER' | 'YOU';
+  actorKind:
+    | 'MANAGER'
+    | 'SUREGROUND'
+    | 'TENANT'
+    | 'SYSTEM'
+    | 'OTHER'
+    | 'YOU'
+    | 'BUYER'
+    | 'SELLER'
+    | 'REPRESENTATIVE';
   /** Staff always show as "Sureground". */
   actor: string;
   important: boolean;
@@ -132,7 +141,7 @@ export const purchaseWorkspaceApi = {
       body: { reason: reason.trim() },
     }),
 
-  /** Under two-person approval nothing moves until the representative approves too. */
+  /** Under two-person approval this records the buyer's approval; they release again once both are in. */
   releaseDeposit: (txId: string, title: string) =>
     withStepUpSummary(`Release the deposit for ${title}`, () =>
       apiFetch<BuyerTransaction>(`/buyer/transactions/${encodeURIComponent(txId)}/release`, {
