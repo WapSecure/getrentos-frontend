@@ -10,7 +10,7 @@ import type { CommitteeTitle } from '@/types/estate';
 
 const titleLabel: Record<CommitteeTitle, string> = {
   president: 'President',
-  vice_president: 'Vice President',
+  vice_president: 'Vice president',
   secretary: 'Secretary',
   treasurer: 'Treasurer',
   member: 'Member',

@@ -5,7 +5,7 @@ export default function LandlordReferralsPage() {
   return (
     <div className="max-w-2xl">
       <PageHeader
-        title="Refer & Earn"
+        title="Refer & earn"
         description="Share your code with other landlords: you both earn a reward when they sign up."
       />
       <ReferralSummaryCard />

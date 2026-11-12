@@ -66,7 +66,7 @@ export const SavedPropertiesGrid = ({
           {filterStatus !== 'all' && (
             <span className="flex items-center gap-1">
               <span className="w-2 h-2 rounded-full bg-primary" />
-              Filtered by: {filterStatus === 'applied' ? 'Applied' : 'Recently Viewed'}
+              Filtered by: {filterStatus === 'applied' ? 'Applied' : 'Recently viewed'}
             </span>
           )}
         </div>
@@ -79,8 +79,8 @@ export const SavedPropertiesGrid = ({
               : sortBy === 'price-high'
                 ? 'Price (High to Low)'
                 : sortBy === 'trust-score'
-                  ? 'Highest Landlord Trust'
-                  : 'Recently Saved'}
+                  ? 'Highest landlord trust'
+                  : 'Recently saved'}
           </span>
         </div>
       </div>

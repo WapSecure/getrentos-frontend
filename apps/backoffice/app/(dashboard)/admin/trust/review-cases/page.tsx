@@ -123,7 +123,7 @@ export default function TrustReviewCasesPage() {
   return (
     <>
       <PageHeader
-        title="Trust Review Cases"
+        title="Trust review cases"
         description="Verifications flagged for a human decision. Every decision needs a second officer, who works through the case's evidence checklist."
       />
 

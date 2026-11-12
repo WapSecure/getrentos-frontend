@@ -129,6 +129,17 @@ Step one ("list developments only") is built: backend #200, web and backoffice #
 
 Follow-ups: mobile pages, developments in search, sitemap and main navigation, linking units to real listings, development photos on the CDN, the enquiry above, and the automated director check above.
 
+## Mobile parity for M8c and M8d step one (2026-11-12)
+
+**Commercial (M8c):** the form model (`commercialForm.ts`) and the page rows (`commercialRows.ts`) moved from apps/web/lib into `@sureground/shared/showroom`, so the web and the app use the same fields, limits, payloads and messages; the web's `lib/commercialDetails.ts` and `lib/commercialShowroom.ts` now re-export them.
+
+- Listing forms: the landlord "List a unit" sheet, the owner "List for sale" sheet and the realtor new-listing screen add the optional commercial block when the property type is COMMERCIAL. Landlord listings, the owner's property page and the realtor listing actions add "Add commercial details" or "Edit commercial details" on commercial listings (PATCH `/…/listings/:id/commercial`, null clears a field).
+- Listing screens: the public market listing, the renter listing and the buyer listing show "Lease and terms", "The space" and "Running the business" before the description. VAT is shown only as stated; the costs card says Sureground does not add VAT to these amounts.
+
+**Developments (M8d step one):** a "Developments" tab on the signed-out market home lists live developments, and `/(market)/development/[id]` shows one, with the shared mapper and copy from `developments.ts`: hero and viewer, "Four staff checks passed", stage and expected completion as the developer states them, unit types, "How payment works", instalments as stated, dated progress photos, approvals "Checked by Sureground on <date>", "What we checked" and "What we did not check", and the developer's sales phone and email (tap to call or email). No enquiry button yet ("Ask the developer" is a separate branch).
+
+**Not done:** `/developments` links are not claimed as app links, so a shared link opens the website; signed-in users do not reach the market tab (as for the other public markets).
+
 ## M8d follow-ups: discovery and "Ask the developer" (2026-11-12)
 
 Built on top of step one (backend #200, web #169). Backend: `feat/m8d-discovery-enquiries`, with the additive migration `20261112180000_development_enquiries`. Mobile is not done yet.

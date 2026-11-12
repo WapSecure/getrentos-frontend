@@ -26,10 +26,10 @@ import { useAdminAction } from '@/hooks/useAdminAction';
 import type { PlatformEscrowStatus, PlatformEscrowTransaction } from '@/types/admin';
 
 const statusConfig: Record<PlatformEscrowStatus, { label: string; variant: BadgeVariant }> = {
-  deposit_pending: { label: 'Deposit Pending', variant: 'neutral' },
-  funds_held: { label: 'Funds Held', variant: 'info' },
+  deposit_pending: { label: 'Deposit pending', variant: 'neutral' },
+  funds_held: { label: 'Funds held', variant: 'info' },
   verification: { label: 'Verification', variant: 'warning' },
-  final_payment: { label: 'Final Payment', variant: 'info' },
+  final_payment: { label: 'Final payment', variant: 'info' },
   released: { label: 'Released', variant: 'success' },
   frozen: { label: 'Frozen', variant: 'danger' },
   disputed: { label: 'Disputed', variant: 'danger' },
@@ -90,8 +90,8 @@ export default function AdminEscrowPage() {
 
   const statusOptions: { value: StatusFilter; label: string }[] = [
     { value: 'all', label: 'All' },
-    { value: 'deposit_pending', label: 'Deposit Pending' },
-    { value: 'funds_held', label: 'Funds Held' },
+    { value: 'deposit_pending', label: 'Deposit pending' },
+    { value: 'funds_held', label: 'Funds held' },
     { value: 'released', label: 'Released' },
     { value: 'frozen', label: 'Frozen' },
     { value: 'refunded', label: 'Refunded' },
@@ -238,7 +238,7 @@ export default function AdminEscrowPage() {
   return (
     <>
       <PageHeader
-        title="Escrow Oversight"
+        title="Escrow oversight"
         description={
           <>
             Platform-wide monitoring of escrow transactions ·{' '}

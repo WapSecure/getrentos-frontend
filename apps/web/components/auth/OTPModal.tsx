@@ -138,7 +138,7 @@ export const OTPModal = ({
           fullWidth
           isLoading={isVerifying}
         >
-          Verify & Continue
+          Verify & continue
           <ArrowRight className="w-4 h-4" />
         </Button>
       </DialogContent>

@@ -29,9 +29,9 @@ import { isAgentConnectionFailure, requireAgentQueueOwner } from '@/lib/agentQue
 import { useAgentUser } from '../layout';
 
 const categoryLabels: Record<AgentDocument['category'], string> = {
-  inspection_report: 'Inspection Report',
-  verification_form: 'Verification Form',
-  id_scan: 'ID Scan',
+  inspection_report: 'Inspection report',
+  verification_form: 'Verification form',
+  id_scan: 'ID scan',
   agreement: 'Agreement',
   other: 'Other',
 };
@@ -100,7 +100,7 @@ export default function AgentDocumentsPage() {
     { value: 'all', label: 'All' },
     { value: 'inspection_report', label: 'Inspections' },
     { value: 'verification_form', label: 'Verifications' },
-    { value: 'id_scan', label: 'ID Scans' },
+    { value: 'id_scan', label: 'ID scans' },
     { value: 'agreement', label: 'Agreements' },
     { value: 'other', label: 'Other' },
   ];

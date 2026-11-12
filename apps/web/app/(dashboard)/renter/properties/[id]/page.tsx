@@ -139,7 +139,7 @@ export default function PropertyDetailPage() {
         description="This listing may have been removed or the link is incorrect."
         action={
           <Button variant="primary" onClick={() => router.push(ROUTES.RENTER_DISCOVER)}>
-            Back to Discover
+            Back to discover
           </Button>
         }
       />

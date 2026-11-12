@@ -20,7 +20,7 @@ const helpFAQs: FAQ[] = [
     id: '1',
     question: 'How do I reset my password?',
     answer:
-      'Go to the login page and click "Forgot Password". Enter your email address and follow the instructions sent to your inbox. The reset link expires after 30 minutes for security.',
+      'Go to the login page and click "Forgot password?". Enter your email address and follow the instructions sent to your inbox. The reset link expires after 30 minutes for security.',
     category: 'account',
   },
   {
@@ -41,14 +41,14 @@ const helpFAQs: FAQ[] = [
     id: '4',
     question: 'How do I report a maintenance issue?',
     answer:
-      'Navigate to the Maintenance tab on your dashboard, click "Report Issue", select a category (plumbing, electrical, appliances, etc.), describe the problem, and attach photos if possible. Your landlord will be notified immediately and you can track the status in real time.',
+      'Navigate to the Maintenance tab on your dashboard, click "Report issue", select a category (plumbing, electrical, appliances, etc.), describe the problem, and attach photos if possible. Your landlord will be notified immediately and you can track the status in real time.',
     category: 'maintenance',
   },
   {
     id: '5',
     question: 'Can I cancel my rental application after submitting it?',
     answer:
-      'Yes, you can withdraw an application at any time before it is approved by going to the Applications tab and selecting "Withdraw Application". Once approved and a lease is signed, cancellation is subject to the lease terms.',
+      'Yes, you can withdraw an application at any time before it is approved by going to the Applications tab and selecting "Withdraw application". Once approved and a lease is signed, cancellation is subject to the lease terms.',
     category: 'renting',
   },
   {

@@ -62,7 +62,7 @@ export default function AgentReviewsPage() {
   return (
     <>
       <PageHeader
-        title="Reviews & Reputation"
+        title="Reviews & reputation"
         description="See how clients and admins rate your fieldwork"
       />
 

@@ -3,6 +3,7 @@ import {
   AccessibilityInfo,
   Platform,
   Pressable,
+  StyleSheet,
   View,
   type AccessibilityRole,
   type StyleProp,
@@ -163,6 +164,11 @@ export function LinkButton({
   accessibilityHint,
   style,
 }: LinkButtonProps) {
+  // Inline links may be drawn shorter than 44pt (e.g. legal links in a sentence); the hit area
+  // still grows to 44pt so they stay easy to tap.
+  const flat = StyleSheet.flatten(style) ?? {};
+  const drawn = typeof flat.height === 'number' ? flat.height : flat.minHeight;
+  const vertical = typeof drawn === 'number' && drawn < 44 ? Math.ceil((44 - drawn) / 2) : 0;
   return (
     <Pressable
       onPress={onPress}
@@ -171,7 +177,7 @@ export function LinkButton({
       accessibilityLabel={accessibilityLabel ?? label}
       accessibilityHint={accessibilityHint}
       accessibilityState={{ disabled }}
-      hitSlop={{ left: 8, right: 8 }}
+      hitSlop={{ left: 8, right: 8, top: vertical, bottom: vertical }}
       style={({ pressed }) => [
         {
           minHeight: 44,

@@ -109,7 +109,7 @@ export const NotificationSettings = () => {
         ))}
       </div>
 
-      <SaveButton label="Save Preferences" className="mt-6" onClick={handleSave} />
+      <SaveButton label="Save preferences" className="mt-6" onClick={handleSave} />
     </div>
   );
 };

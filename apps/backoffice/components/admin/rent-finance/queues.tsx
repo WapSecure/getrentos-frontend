@@ -233,7 +233,7 @@ export function PaymentsQueue() {
   ];
   const config: RentFinanceQueueConfig<AdminRentPayment> = {
     resource: 'payments',
-    eyebrow: 'Rent Payments',
+    eyebrow: 'Rent payments',
     title: 'Rent payment ledger',
     description: 'Platform-wide rent collections with escrow review and settlement actions.',
     icon: Wallet,
@@ -460,7 +460,7 @@ export function StatementsQueue() {
 
   const config: RentFinanceQueueConfig<AdminOwnerStatement> = {
     resource: 'statements',
-    eyebrow: 'Owner Statements',
+    eyebrow: 'Owner statements',
     title: 'Owner statement register',
     description: 'Landlord owner statements with net payouts across managed properties.',
     icon: ReceiptText,
@@ -698,7 +698,7 @@ export function PayoutAccountsQueue() {
 
   const config: RentFinanceQueueConfig<AdminPayoutAccount> = {
     resource: 'payout-accounts',
-    eyebrow: 'Payout Accounts',
+    eyebrow: 'Payout accounts',
     title: 'Landlord payout accounts',
     description: 'Disbursement readiness: who can actually be paid out.',
     icon: Landmark,

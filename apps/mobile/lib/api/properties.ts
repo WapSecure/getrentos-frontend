@@ -55,6 +55,8 @@ export interface RenterProperty {
   furnished?: boolean;
   petsAllowed?: boolean;
   propertyType?: string;
+  /** Commercial properties only. Read through `commercialDetailsOf` (via `fromRental`), never trusted as is. */
+  commercial?: unknown;
   /** Photos (with rooms, captions and resized copies), video and 360 tour, in display order. */
   media?: MediaItem[];
   /** False once the unit is let or has an approved applicant; Apply is closed. */

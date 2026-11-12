@@ -63,7 +63,7 @@ export default function RealtorReviewsPage() {
   return (
     <>
       <PageHeader
-        title="Reviews & Reputation"
+        title="Reviews & reputation"
         description="See how clients and leads rate their experience with you"
       />
 

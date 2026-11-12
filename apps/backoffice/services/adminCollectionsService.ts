@@ -1,5 +1,12 @@
 import { authFetch, safeCall, type ApiResponse } from '@sureground/shared';
-import type { CardMarket, CollectionInput, ManagedCollection } from '@/types/collections';
+import type {
+  CardMarket,
+  CollectionInput,
+  CollectionRule,
+  CollectionRulePreview,
+  ManagedCollection,
+  SponsorshipInput,
+} from '@/types/collections';
 
 const BASE = '/admin/collections';
 
@@ -52,8 +59,40 @@ export const adminCollectionsService = {
       authFetch<ManagedCollection>(`${BASE}/${id}/archive`, { method: 'POST' })
     );
   },
-  candidates(market: CardMarket, search?: string): Promise<ApiResponse<unknown[]>> {
-    return safeCall(() => authFetch<unknown[]>(`${BASE}/candidates${qs({ market, search })}`));
+  candidates(
+    market: CardMarket,
+    search?: string,
+    collectionId?: string
+  ): Promise<ApiResponse<unknown[]>> {
+    return safeCall(() =>
+      authFetch<unknown[]>(`${BASE}/candidates${qs({ market, search, collectionId })}`)
+    );
+  },
+  previewRule(
+    market: CardMarket,
+    rule: CollectionRule,
+    collectionId?: string
+  ): Promise<ApiResponse<CollectionRulePreview>> {
+    return safeCall(() =>
+      authFetch<CollectionRulePreview>(`${BASE}/rule-preview`, {
+        method: 'POST',
+        body: JSON.stringify({ market, rule, collectionId }),
+      })
+    );
+  },
+  /** Step-up is asked for by the API and handled by the StepUpDialog. */
+  setSponsorship(id: string, input: SponsorshipInput): Promise<ApiResponse<ManagedCollection>> {
+    return safeCall(() =>
+      authFetch<ManagedCollection>(`${BASE}/${id}/sponsorship`, {
+        method: 'PUT',
+        body: JSON.stringify(input),
+      })
+    );
+  },
+  removeSponsorship(id: string): Promise<ApiResponse<ManagedCollection>> {
+    return safeCall(() =>
+      authFetch<ManagedCollection>(`${BASE}/${id}/sponsorship`, { method: 'DELETE' })
+    );
   },
 };
 

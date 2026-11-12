@@ -17,6 +17,7 @@ import {
   type MediaItem,
   type PublicRentalDto,
   type PublicSaleDto,
+  type CommercialDetails,
   type ShowroomCosts,
   type ShowroomFloorPlan,
 } from '@sureground/shared/showroom';
@@ -84,6 +85,8 @@ export interface MarketDetail extends MarketCard {
   stay?: ShortletListing;
   /** Rent and sale: structured floor plans (rooms and labelled sizes), when the lister added them. */
   floorPlans?: ShowroomFloorPlan[];
+  /** Rent and sale, commercial properties only: what the lister stated, from `commercialDetailsOf`. */
+  commercial?: CommercialDetails;
 }
 
 export interface MarketFilters {
@@ -511,6 +514,7 @@ export const publicMarketApi = {
           host: l.host,
           facts: l.facts,
           ...(l.floorPlans ? { floorPlans: l.floorPlans } : {}),
+          ...(l.commercial ? { commercial: l.commercial } : {}),
         };
       }
       case 'sale': {
@@ -531,6 +535,7 @@ export const publicMarketApi = {
           locationPrecision: s.locationPrecision,
           facts: l.facts,
           ...(l.floorPlans ? { floorPlans: l.floorPlans } : {}),
+          ...(l.commercial ? { commercial: l.commercial } : {}),
         };
       }
       case 'shortlet': {
