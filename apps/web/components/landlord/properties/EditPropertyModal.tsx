@@ -189,7 +189,7 @@ const EditPropertyForm = ({
 
   return (
     <>
-      <div className="p-4 pr-12 border-b border-border">
+      <div className="p-4 pr-12 sm:px-8 sm:py-5 sm:pr-14 border-b border-border">
         <DialogTitle className="text-xl font-semibold tracking-[-0.02em] text-foreground">
           Edit property
         </DialogTitle>
@@ -198,7 +198,7 @@ const EditPropertyForm = ({
         </DialogDescription>
       </div>
 
-      <div className="p-4 space-y-3">
+      <div className="p-4 sm:px-8 sm:py-6 space-y-3">
         <Field label="Property name" required>
           <Input type="text" value={name} onChange={(e) => setName(e.target.value)} />
         </Field>
