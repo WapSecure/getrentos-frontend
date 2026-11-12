@@ -7,6 +7,8 @@ import { User, Bell, Landmark, SlidersHorizontal, Lock, Download } from '@suregr
 import { ProfileSettings } from '@/components/owner/settings/ProfileSettings';
 import { NotificationSettings } from '@/components/owner/settings/NotificationSettings';
 import { SellerPayoutSettings } from '@/components/shared/payouts/SellerPayoutSettings';
+import { PayoutSettings } from '@/components/landlord/settings/PayoutSettings';
+import { ROUTES } from '@/lib/constants/auth';
 import { PreferencesSettings } from '@/components/owner/settings/PreferencesSettings';
 import { DataExport } from '@/components/shared/settings/DataExport';
 import { SecuritySettings } from '@/components/shared/security/SecuritySettings';
@@ -38,7 +40,17 @@ export default function OwnerSettingsPage() {
         return <NotificationSettings />;
       case 'payouts':
         return (
-          <SellerPayoutSettings description="Where your marketplace sale money is sent once Sureground pays it out to you: transfers run through Paystack." />
+          <>
+            <SellerPayoutSettings description="Where your marketplace sale money is sent once Sureground pays it out to you: transfers run through Paystack." />
+            <div className="mt-10 border-t border-border pt-6">
+              <PayoutSettings
+                title="Statement payout account"
+                description="Where rent and statement payouts are sent, including from homes Sureground manages for you: transfers run through Paystack."
+                settingsHref={`${ROUTES.OWNER_SETTINGS}?tab=payouts`}
+                verificationHref={ROUTES.OWNER_VERIFICATION}
+              />
+            </div>
+          </>
         );
       case 'preferences':
         return <PreferencesSettings />;

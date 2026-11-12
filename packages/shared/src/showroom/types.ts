@@ -74,6 +74,15 @@ export interface ShowroomHost {
   reviews?: number;
 }
 
+export type ShowroomTrustStepId = 'owner' | 'authority' | 'property' | 'payment';
+
+/** The same chain the browse cards show: owner ID, ownership, property check, payment protection. */
+export interface ShowroomTrustChain {
+  steps: { id: ShowroomTrustStepId; label: string; met: boolean; detail: string }[];
+  metCount: number;
+  totalCount: number;
+}
+
 export type CommercialPermittedUse = 'SHOP' | 'OFFICE' | 'WAREHOUSE' | 'MIXED' | 'OTHER';
 export type CommercialFitOutCondition = 'SHELL' | 'SEMI_FITTED' | 'FITTED';
 
@@ -130,6 +139,8 @@ export interface ShowroomListing {
   verificationSummary?: VerificationSummary;
   /** Structured floor plans (rooms and sizes); absent when the lister added none. */
   floorPlans?: ShowroomFloorPlan[];
+  /** Rent and sale only; undefined where the API sends no chain. */
+  trustChain?: ShowroomTrustChain;
   /** Commercial properties only, and only what the lister stated. */
   commercial?: CommercialDetails;
 }
@@ -147,6 +158,8 @@ export interface PublicRentalDto {
   size?: number;
   rating?: number;
   verified?: boolean;
+  /** Read through `trustChainOf`, never trusted as is. */
+  trustChain?: unknown;
   image?: string;
   images?: string[];
   media?: MediaItem[];
@@ -188,6 +201,8 @@ export interface PublicSaleDto {
   media?: MediaItem[];
   amenities?: string[];
   isVerified?: boolean;
+  /** Read through `trustChainOf`, never trusted as is. */
+  trustChain?: unknown;
   underOffer?: boolean;
   /** Detail route only (DIA-11). Read through `verificationSummaryOf`, never trusted as is. */
   verificationSummary?: unknown;

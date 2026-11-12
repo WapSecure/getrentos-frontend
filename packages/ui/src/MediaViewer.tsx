@@ -357,7 +357,9 @@ function ViewerBody({
               <div
                 className={cn(
                   'flex h-full w-full items-center justify-center',
-                  isImage && 'touch-none select-none'
+                  isImage && 'touch-none select-none',
+                  // Room for the level chips (top-3 plus a 52px bar), so they never cover the plan.
+                  onPlan && levels.length > 1 && 'pt-18'
                 )}
                 onPointerDown={onPointerDown}
                 onPointerMove={onPointerMove}

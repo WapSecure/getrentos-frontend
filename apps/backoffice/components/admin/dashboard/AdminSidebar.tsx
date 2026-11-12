@@ -414,6 +414,12 @@ const navItems: NavItem[] = [
     permission: 'documents.manage',
   },
   {
+    label: 'Media',
+    href: ROUTES.ADMIN_MEDIA,
+    icon: ShieldCheck,
+    permission: 'documents.manage',
+  },
+  {
     label: 'Messages',
     href: ROUTES.ADMIN_MESSAGES,
     icon: MessageCircle,

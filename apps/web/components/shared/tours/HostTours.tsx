@@ -15,7 +15,6 @@ import {
 } from '@sureground/ui';
 import { CalendarClock } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
-import { ROUTES } from '@/lib/constants/auth';
 import { tourNextStep } from '@/lib/siteTours';
 import { lagosLocalToIso, siteTourKeys, siteTourService } from '@/services/siteTourService';
 import { videoCallAvailabilityQuery, videoCallService } from '@/services/videoCallService';
@@ -343,14 +342,6 @@ export const HostTours = ({ scope }: { scope: TourScope }) => {
           title: 'No tour requests yet',
           description:
             'When a buyer asks for a video tour, it appears here for you to offer times.',
-          action: (
-            <Button
-              href={scope === 'land' ? ROUTES.OWNER_LAND : ROUTES.OWNER_LISTINGS}
-              variant="outline"
-            >
-              {scope === 'land' ? 'Go to your land' : 'Go to your listings'}
-            </Button>
-          ),
         }}
         renderTour={(tour) => (
           <HostTourRow

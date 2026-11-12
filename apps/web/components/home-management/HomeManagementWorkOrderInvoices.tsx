@@ -42,6 +42,9 @@ import {
 } from '@/services/homeManagementService';
 import { InvoiceCheckPanel } from './InvoiceCheckPanel';
 import { PayDialog } from '@/components/shared/payments/PayDialog';
+import { ReasonDialog } from '@sureground/ui';
+import { duplicateFlagsOf, isDuplicateInvoiceRefusal } from '@/lib/managedSpend';
+import type { DuplicateAcknowledgement, DuplicateFlag, EvidenceInvoice } from '@/types/managed';
 import { usePaymentProviders } from '@/hooks/usePaymentProviders';
 import type { PaymentProvider } from '@/types/payments';
 
@@ -367,8 +370,39 @@ export function HomeManagementWorkOrderInvoices({
     },
   });
 
-  const approveInvoice = useMutation<HomeManagementWorkOrderInvoice, Error, { invoiceId: string }>({
-    mutationFn: ({ invoiceId }) => unwrap(homeManagementService.approveWorkOrderInvoice(invoiceId)),
+  // A likely duplicate is refused until someone says why it is not one; that reason is kept.
+  const [duplicate, setDuplicate] = useState<
+    | { action: 'approve'; invoiceId: string; message: string; flags: DuplicateFlag[] }
+    | {
+        action: 'pay';
+        invoiceId: string;
+        provider?: PaymentProvider;
+        message: string;
+        flags: DuplicateFlag[];
+      }
+    | null
+  >(null);
+  // The refusal's own flags can be dropped on the way; the job record lists them per invoice too.
+  const duplicateEvidence = useQuery({
+    queryKey: homeManagementKeys.workOrderEvidence(workOrder.id),
+    queryFn: () => unwrap(homeManagementService.getWorkOrderEvidence(workOrder.id)),
+    enabled: Boolean(duplicate) && duplicate?.flags.length === 0,
+  });
+  const duplicateFlags: DuplicateFlag[] = duplicate?.flags.length
+    ? duplicate.flags
+    : ((
+        duplicateEvidence.data?.stages.find((stage) => stage.key === 'INVOICE')?.items as
+          | EvidenceInvoice[]
+          | undefined
+      )?.find((invoice) => invoice.id === duplicate?.invoiceId)?.duplicateFlags ?? []);
+
+  const approveInvoice = useMutation<
+    HomeManagementWorkOrderInvoice,
+    Error,
+    { invoiceId: string; acknowledge?: DuplicateAcknowledgement }
+  >({
+    mutationFn: ({ invoiceId, acknowledge }) =>
+      unwrap(homeManagementService.approveWorkOrderInvoice(invoiceId, acknowledge)),
     onSuccess: async () => {
       await invalidateInvoiceViews();
       setPage(1);
@@ -377,7 +411,17 @@ export function HomeManagementWorkOrderInvoices({
         'Invoice approved and ready for finance review. No vendor payment has been initiated.'
       );
     },
-    onError: (error) => {
+    onError: (error, { invoiceId, acknowledge }) => {
+      if (!acknowledge && isDuplicateInvoiceRefusal(error)) {
+        setActionDialog(null);
+        setDuplicate({
+          action: 'approve',
+          invoiceId,
+          message: error.message,
+          flags: duplicateFlagsOf(error),
+        });
+        return;
+      }
       toast.error(error.message || 'Unable to approve this invoice.');
     },
   });
@@ -443,10 +487,10 @@ export function HomeManagementWorkOrderInvoices({
   const payInvoice = useMutation<
     { invoiceId: string; payoutStatus: string; topUp?: { authorizationUrl: string } },
     Error,
-    { invoiceId: string; provider?: PaymentProvider }
+    { invoiceId: string; provider?: PaymentProvider; acknowledge?: DuplicateAcknowledgement }
   >({
-    mutationFn: ({ invoiceId, provider }) =>
-      unwrap(homeManagementService.payWorkOrderInvoice(invoiceId, provider)),
+    mutationFn: ({ invoiceId, provider, acknowledge }) =>
+      unwrap(homeManagementService.payWorkOrderInvoice(invoiceId, provider, acknowledge)),
     onMutate: () => setProviderError(null),
     onSuccess: async (result) => {
       // Held rent doesn't cover it: the shortfall is paid on Paystack, and the vendor is paid once it lands.
@@ -466,7 +510,18 @@ export function HomeManagementWorkOrderInvoices({
         );
       }
     },
-    onError: (error, { provider }) => {
+    onError: (error, { invoiceId, provider, acknowledge }) => {
+      if (!acknowledge && isDuplicateInvoiceRefusal(error)) {
+        setPayTarget(null);
+        setDuplicate({
+          action: 'pay',
+          invoiceId,
+          provider,
+          message: error.message,
+          flags: duplicateFlagsOf(error),
+        });
+        return;
+      }
       const unavailable = providers.recover(error, provider);
       if (unavailable) setProviderError(unavailable);
       else toast.error(error.message || 'Unable to pay this invoice.');
@@ -1268,6 +1323,44 @@ export function HomeManagementWorkOrderInvoices({
           )}
         </DialogContent>
       </Dialog>
+
+      <ReasonDialog
+        open={Boolean(duplicate)}
+        onOpenChange={(open) => !open && setDuplicate(null)}
+        title="This invoice may be a duplicate"
+        description={
+          <>
+            <span className="block">
+              {duplicate?.message ||
+                'It looks like an invoice already approved or paid for this work. Say why it is not a duplicate to continue.'}
+            </span>
+            {duplicateFlags.map((flag) => (
+              <span key={flag.code} className="mt-1 block text-foreground">
+                {flag.message}
+              </span>
+            ))}
+          </>
+        }
+        reasonLabel="Why this is not a duplicate"
+        reasonPlaceholder="e.g. A second visit to replace the pump, agreed separately."
+        minLength={10}
+        maxLength={1000}
+        confirmLabel={duplicate?.action === 'pay' ? 'Continue to pay' : 'Approve anyway'}
+        onSubmit={async ({ reason }) => {
+          if (!duplicate) return;
+          const acknowledge: DuplicateAcknowledgement = { acknowledgeDuplicate: true, reason };
+          if (duplicate.action === 'approve') {
+            await approveInvoice.mutateAsync({ invoiceId: duplicate.invoiceId, acknowledge });
+          } else {
+            await payInvoice.mutateAsync({
+              invoiceId: duplicate.invoiceId,
+              provider: duplicate.provider,
+              acknowledge,
+            });
+          }
+          setDuplicate(null);
+        }}
+      />
 
       <PayDialog
         open={!!payTarget}

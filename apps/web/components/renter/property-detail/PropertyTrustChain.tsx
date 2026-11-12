@@ -13,7 +13,7 @@ const STEP_ICON: Record<PropertyTrustStepId, SgIcon> = {
   payment: ShieldCheck,
 };
 
-export const PropertyTrustChain = ({ property }: { property: Property }) => {
+export const PropertyTrustChain = ({ property }: { property: Pick<Property, 'trustChain'> }) => {
   const chain = property.trustChain;
   if (!chain || chain.steps.length === 0) return null;
 

@@ -14,6 +14,7 @@ import {
   PayoutHoldNotice,
 } from '@/components/shared/payouts/PayoutHoldNotice';
 import { BankAccountFields } from '@/components/shared/payouts/BankAccountFields';
+import { PayoutDestinationSettings } from '@/components/shared/payouts/PayoutDestinationSettings';
 import {
   INCOMPLETE_ACCOUNT_LOOKUP,
   lookupAllowsSave,
@@ -24,7 +25,20 @@ import {
   type AccountLookup,
 } from '@sureground/shared';
 
-export const PayoutSettings = () => {
+interface PayoutSettingsProps {
+  title?: string;
+  description?: string;
+  settingsHref?: string;
+  verificationHref?: string;
+}
+
+/** Owners use it too (the route accepts every property-controller role), with their own links. */
+export const PayoutSettings = ({
+  title = 'Payout account',
+  description = 'Where rent released by Sureground Payment Protection is sent: transfers run through Paystack.',
+  settingsHref = ROUTES.LANDLORD_SETTINGS,
+  verificationHref = ROUTES.LANDLORD_VERIFICATION,
+}: PayoutSettingsProps = {}) => {
   const [bankCode, setBankCode] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
   const [lookup, setLookup] = useState<AccountLookup>(INCOMPLETE_ACCOUNT_LOOKUP);
@@ -90,11 +104,8 @@ export const PayoutSettings = () => {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-foreground mb-4">Payout account</h2>
-      <p className="text-sm text-muted-foreground mb-6">
-        Where rent released by Sureground Payment Protection is sent: transfers run through
-        Paystack.
-      </p>
+      <h2 className="text-xl font-semibold text-foreground mb-4">{title}</h2>
+      <p className="text-sm text-muted-foreground mb-6">{description}</p>
 
       {loadFailed && (
         <Alert
@@ -151,8 +162,8 @@ export const PayoutSettings = () => {
       <div className="mt-6 space-y-3">
         <VerificationRequiredNotice
           error={submitError}
-          href={ROUTES.LANDLORD_SETTINGS}
-          verificationHref={ROUTES.LANDLORD_VERIFICATION}
+          href={settingsHref}
+          verificationHref={verificationHref}
         />
         {saveFailedMessage && <Alert variant="danger">{saveFailedMessage}</Alert>}
         <SaveButton
@@ -164,6 +175,8 @@ export const PayoutSettings = () => {
           disabled={!canSave}
         />
       </div>
+
+      <PayoutDestinationSettings />
     </div>
   );
 };

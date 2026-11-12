@@ -526,7 +526,7 @@ M7 is built: resized copies (earlier, backend #136), the CDN, blurred placeholde
 
 **Follow-ups:**
 
-- Mobile listing photo upload (landlord property screen) sends one photo at a time over fetch, with no progress. Adding it needs an XHR upload in the mobile client.
+- ~~Mobile listing photo upload sends one photo at a time over fetch, with no progress.~~ Done: the landlord property screen and the owner photos field upload over XHR (`apiUploadWithProgress` in the mobile client), up to 3 at a time, with progress, Cancel, Retry and Remove per photo. Photos are attached in one save once nothing is left sending.
 - Video tour uploads still show only a spinner.
 - Photos closed without saving after uploading are left to the backend's clean-up of unattached uploads, as before.
 

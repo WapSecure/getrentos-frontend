@@ -11,9 +11,8 @@ import {
   Textarea,
   Toast,
 } from '@sureground/ui';
-import { ArrowRight, CalendarClock } from '@sureground/icons';
+import { CalendarClock } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
-import { findPropertyHref } from '@/lib/constants/visitRoutes';
 import { tourNextStep } from '@/lib/siteTours';
 import { siteTourKeys, siteTourService } from '@/services/siteTourService';
 import type { SiteTour, TourScope } from '@/types/siteTour';
@@ -251,15 +250,6 @@ export const BuyerTours = ({ scope }: { scope: TourScope }) => {
         empty={{
           title: 'No video tours yet',
           description: 'Book one from any listing. The seller offers times in your time zone.',
-          action: (
-            <Button
-              href={findPropertyHref(scope)}
-              icon={<ArrowRight className="h-4 w-4" aria-hidden="true" />}
-              iconPosition="right"
-            >
-              Find a property to tour
-            </Button>
-          ),
         }}
         renderTour={(tour) => (
           <BuyerTourRow key={tour.id} tour={tour} scope={scope} notify={notify} />
