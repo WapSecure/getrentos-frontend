@@ -75,7 +75,7 @@ export function HeroSearch({ className }: { className?: string }) {
         value={kind}
         onValueChange={setKind}
         segments={kinds}
-        className="mb-4 w-full sm:w-auto [&>button]:flex-1 sm:[&>button]:flex-none"
+        className="mb-4 w-full sm:w-auto [&>button]:flex-1 [&>button]:px-2 [&>button]:whitespace-nowrap sm:[&>button]:flex-none sm:[&>button]:px-4"
       />
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
         <div className="relative min-w-0 flex-1">
