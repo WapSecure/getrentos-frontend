@@ -191,9 +191,16 @@ export interface OwnershipTransferDocument {
 export interface InvestmentMetrics {
   propertyId: string;
   propertyName: string;
-  purchasePrice: number;
-  currentValue: number;
-  appreciationRate: number;
-  rentalYield?: number;
-  roiPercentage: number;
+  /** Purchase price on the property record; null when none was entered. */
+  purchasePrice: number | null;
+  /** Asking price on the latest sale listing; null when not listed. */
+  askingPrice?: number | null;
+  /** Net rent over the last 12 months as a share of purchase price; null without both. */
+  rentalYield?: number | null;
+  /** Always null: no valuation method is agreed. Kept for older API responses. */
+  currentValue: number | null;
+  /** Always null: needs a valuation. */
+  appreciationRate: number | null;
+  /** Always null: needs a valuation. */
+  roiPercentage: number | null;
 }

@@ -1,8 +1,16 @@
 'use client';
 
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { CreditCard, Building2, Wallet, Trash2 } from '@sureground/icons';
-import { Alert, IconButton, ListSkeleton, PageErrorState, useToast } from '@sureground/ui';
+import {
+  Alert,
+  ConfirmDialog,
+  IconButton,
+  ListSkeleton,
+  PageErrorState,
+  useToast,
+} from '@sureground/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
@@ -15,17 +23,19 @@ export const PaymentSettings = () => {
     queryFn: () => unwrap(renterService.listPaymentMethods()),
   });
   const methods = methodsQuery.data ?? [];
+  const [confirming, setConfirming] = useState<(typeof methods)[number] | null>(null);
 
   const invalidateMethods = () =>
     queryClient.invalidateQueries({ queryKey: renterKeys.paymentMethods });
 
   const removeMutation = useMutation({
     mutationFn: (id: string) => unwrap(renterService.removePaymentMethod(id)),
-    onSuccess: invalidateMethods,
+    onSuccess: () => {
+      void invalidateMethods();
+      toast.success('Payment method removed.');
+    },
     onError: () => toast.error('The payment method could not be removed.'),
   });
-
-  const handleRemove = (id: string) => removeMutation.mutate(id);
 
   if (methodsQuery.isLoading) return <ListSkeleton rows={3} />;
   if (methodsQuery.isError && !methodsQuery.data) {
@@ -74,9 +84,8 @@ export const PaymentSettings = () => {
                   variant="danger"
                   size="sm"
                   label={`Remove ${method.name}`}
-                  onClick={() => handleRemove(method.id)}
-                  isLoading={removeMutation.isPending && removeMutation.variables === method.id}
-                  disabled={removeMutation.isPending && removeMutation.variables !== method.id}
+                  onClick={() => setConfirming(method)}
+                  disabled={removeMutation.isPending}
                   icon={<Trash2 />}
                 />
               </div>
@@ -84,6 +93,23 @@ export const PaymentSettings = () => {
           );
         })}
       </div>
+
+      <ConfirmDialog
+        open={confirming !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirming(null);
+        }}
+        title="Remove this payment method?"
+        description={
+          confirming
+            ? `"${confirming.name}" will be removed from your saved details. This can't be undone.`
+            : ''
+        }
+        confirmLabel="Remove"
+        tone="danger"
+        isLoading={removeMutation.isPending}
+        onConfirm={() => confirming && removeMutation.mutateAsync(confirming.id)}
+      />
     </div>
   );
 };

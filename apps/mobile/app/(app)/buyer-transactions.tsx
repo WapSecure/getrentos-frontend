@@ -1,4 +1,3 @@
-import { usePaystackCheckout } from '@/hooks/usePaystackCheckout';
 import { useMemo, useState } from 'react';
 import { Alert, Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
@@ -29,14 +28,11 @@ import {
   type BuyerEscrowStatus,
   type BuyerTransaction,
 } from '@/lib/api/buyerTransactions';
-import { formatDate, formatNaira } from '@/lib/format';
-import { SALE_DEPOSIT_PROTECTION } from '@/lib/paymentCopy';
+import { formatDate } from '@/lib/format';
 import { errorMessage } from '@/lib/api/client';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
-import { PaySheet } from '@/components/payments/PaySheet';
-import { usePaymentProviders } from '@/hooks/usePaymentProviders';
-import type { PaymentProvider } from '@/lib/api/paymentStatus';
+import { DepositPaySheet } from '@/components/purchases/DepositPaySheet';
 
 // Only the stages the backend drives (VERIFICATION_PENDING and SETTLEMENT_PENDING are never set); mirrors the web stepper.
 const STAGES: { key: BuyerEscrowStatus; label: string; description: string }[] = [
@@ -87,7 +83,6 @@ export default function BuyerTransactions() {
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();
   const toast = useToast();
-  const checkout = usePaystackCheckout();
   const [filter, setFilter] = useState<Filter>('all');
 
   const query = useQuery({
@@ -102,36 +97,8 @@ export default function BuyerTransactions() {
   const fail = (fallback: string) => (err: unknown) =>
     toast.show(errorMessage(err, fallback), 'error');
 
-  const providers = usePaymentProviders();
   const [payTx, setPayTx] = useState<BuyerTransaction | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [providerError, setProviderError] = useState<string | null>(null);
-  const closeSheet = () => {
-    setSheetOpen(false);
-    setProviderError(null);
-  };
-  const depositMutation = useMutation({
-    mutationFn: ({ id, provider }: { id: string; provider?: PaymentProvider }) =>
-      buyerTransactionsApi.deposit(id, provider),
-    onMutate: () => setProviderError(null),
-    onSuccess: async (tx) => {
-      closeSheet();
-      if (tx.authorizationUrl) await checkout(tx.authorizationUrl, tx.reference);
-      else if (tx.escrowStatus === 'funds_held')
-        toast.show(`Paid.${tx.reference ? ` Reference ${tx.reference}.` : ''}`, 'success');
-      else toast.show('We’re confirming your deposit. This purchase shows when it’s paid.', 'info');
-      invalidate();
-    },
-    onError: (err, { provider }) => {
-      const unavailable = providers.recover(err, provider);
-      if (unavailable) {
-        setProviderError(unavailable);
-        return;
-      }
-      closeSheet();
-      toast.show(errorMessage(err, 'Could not start this deposit.'), 'error');
-    },
-  });
 
   const releaseMutation = useMutation({
     mutationFn: (id: string) => buyerTransactionsApi.release(id),
@@ -241,14 +208,11 @@ export default function BuyerTransactions() {
               <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
                 <TransactionCard
                   tx={item}
-                  depositing={
-                    depositMutation.isPending && depositMutation.variables?.id === item.id
-                  }
+                  depositing={sheetOpen && payTx?.id === item.id}
                   releasing={busy(releaseMutation, item.id)}
                   refunding={busy(refundMutation, item.id)}
                   onDeposit={() => {
                     setPayTx(item);
-                    setProviderError(null);
                     setSheetOpen(true);
                   }}
                   onRelease={() => confirmRelease(item)}
@@ -280,23 +244,11 @@ export default function BuyerTransactions() {
           />
         </QueryState>
       </View>
-      <PaySheet
-        open={sheetOpen && !!payTx}
-        onClose={closeSheet}
-        title="Pay deposit"
-        context={payTx ? `${payTx.propertyTitle} · Seller: ${payTx.ownerName}` : null}
-        owed={payTx ? (payTx.depositAmount ?? payTx.purchasePrice) : 0}
-        owedLabel="to pay"
-        amount={payTx ? (payTx.depositAmount ?? payTx.purchasePrice) : 0}
-        itemLabel="Deposit"
-        receiverLine={`The fee goes to the payment company, so the full ${formatNaira(payTx ? (payTx.depositAmount ?? payTx.purchasePrice) : 0)} is held for the seller.`}
-        protection={SALE_DEPOSIT_PROTECTION}
-        providers={providers}
-        providerError={providerError}
-        busy={depositMutation.isPending}
-        onPay={() =>
-          payTx && depositMutation.mutate({ id: payTx.id, provider: providers.provider })
-        }
+      <DepositPaySheet
+        tx={payTx}
+        open={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        onSettled={invalidate}
       />
     </View>
   );
@@ -398,6 +350,11 @@ function TransactionCard({
           ) : null}
         </View>
       ) : null}
+
+      <LinkButton
+        label="Open the purchase: steps, documents and approvals"
+        onPress={() => router.push(`/(app)/purchase-workspace/${encodeURIComponent(tx.id)}`)}
+      />
 
       {tx.propertyType === 'LAND' ? (
         <LinkButton

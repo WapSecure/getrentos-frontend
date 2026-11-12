@@ -49,7 +49,7 @@ export const BulkActions = ({
         <IconButton
           size="sm"
           variant="danger"
-          label="Delete selected"
+          label="Remove selected from saved"
           onClick={onDeleteSelected}
           icon={<Trash2 />}
         />

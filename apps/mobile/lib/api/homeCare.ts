@@ -1,4 +1,13 @@
-import { apiFetch } from './client';
+import type {
+  DuplicateAcknowledgement,
+  MaintenancePhoto,
+  WorkOrderEvidence,
+  WorkOrderFeedback,
+  WorkOrderFeedbackInput,
+  WorkOrderPhotoStage,
+} from '@sureground/shared';
+import { apiFetch, apiUpload } from './client';
+import { appendFile, type PickedFile } from './documents';
 import { toQuery } from './query';
 import type { Paginated } from './properties';
 import { providerQuery, type PaymentProvider } from './paymentStatus';
@@ -274,8 +283,12 @@ export const homeCareApi = {
     apiFetch<Invoice>(`/home-management/invoices/${invoiceId}/submit`, { method: 'POST' }),
   checkInvoice: (invoiceId: string) =>
     apiFetch<InvoiceCheck>(`/home-management/invoices/${invoiceId}/check`),
-  approveInvoice: (invoiceId: string) =>
-    apiFetch<Invoice>(`/home-management/invoices/${invoiceId}/approve`, { method: 'POST' }),
+  /** Refused as a likely duplicate (409) unless `acknowledge` carries the reason it is not one. */
+  approveInvoice: (invoiceId: string, acknowledge?: DuplicateAcknowledgement) =>
+    apiFetch<Invoice>(`/home-management/invoices/${invoiceId}/approve`, {
+      method: 'POST',
+      ...(acknowledge ? { body: acknowledge } : {}),
+    }),
   rejectInvoice: (invoiceId: string, reason: string) =>
     apiFetch<Invoice>(`/home-management/invoices/${invoiceId}/reject`, {
       method: 'POST',
@@ -292,11 +305,35 @@ export const homeCareApi = {
       `/home-management/invoices/${invoiceId}/payment-preview${providerQuery(provider)}`
     ),
   /** When held rent doesn't cover it, nothing is sent yet: `topUp` is a checkout for the shortfall, and the vendor is paid once it lands. */
-  payInvoice: (invoiceId: string, provider?: PaymentProvider) =>
+  payInvoice: (
+    invoiceId: string,
+    provider?: PaymentProvider,
+    acknowledge?: DuplicateAcknowledgement
+  ) =>
     apiFetch<{
       payoutStatus: string;
       topUp?: { amount: number; authorizationUrl: string; reference: string };
-    }>(`/home-management/invoices/${invoiceId}/pay${providerQuery(provider)}`, { method: 'POST' }),
+    }>(`/home-management/invoices/${invoiceId}/pay${providerQuery(provider)}`, {
+      method: 'POST',
+      ...(acknowledge ? { body: acknowledge } : {}),
+    }),
+
+  /** Each stage of the job, from the problem reported to the owner's feedback. */
+  evidence: (workOrderId: string) =>
+    apiFetch<WorkOrderEvidence>(`/home-management/work-orders/${workOrderId}/evidence`),
+  /** Stamped with the time it is added; the stage says what the photo shows. */
+  addPhoto: (workOrderId: string, file: PickedFile, stage: WorkOrderPhotoStage) => {
+    const form = new FormData();
+    appendFile(form, 'file', file);
+    form.append('stage', stage);
+    return apiUpload<MaintenancePhoto>(`/home-management/work-orders/${workOrderId}/photos`, form);
+  },
+  /** The owner's rating, once, after the job is RESOLVED. */
+  feedback: (workOrderId: string, input: WorkOrderFeedbackInput) =>
+    apiFetch<WorkOrderFeedback>(`/home-management/work-orders/${workOrderId}/feedback`, {
+      method: 'POST',
+      body: input,
+    }),
 
   vendors: () =>
     apiFetch<Paginated<Vendor>>('/landlord/vendors?page=1&pageSize=100&activeOnly=true'),

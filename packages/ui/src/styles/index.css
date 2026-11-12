@@ -17,7 +17,9 @@
     Arial,
     sans-serif
   );
-  --radius: 0.75rem;
+  /* --font-newsreader is set by next/font; the serif for page titles, places and property names. */
+  --font-serif: var(--font-newsreader, 'Iowan Old Style', 'Palatino Linotype', Georgia, serif);
+  --radius: 0.25rem;
   /* Three levels: xs/sm resting cards, md/lg raised menus and popovers, xl dialogs. */
   --shadow-xs: 0 1px 2px rgb(29 29 31 / 0.04);
   --shadow-sm: 0 1px 2px rgb(29 29 31 / 0.04), 0 1px 3px rgb(29 29 31 / 0.03);
@@ -36,6 +38,7 @@
 
 @theme inline {
   --font-sans: var(--font-ui);
+  --font-display: var(--font-serif);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -184,6 +187,12 @@
     letter-spacing: -0.025em;
   }
 
+  h1 {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+
   ::selection {
     background: color-mix(in srgb, var(--primary) 20%, transparent);
     color: var(--color-foreground);
@@ -222,10 +231,20 @@
 
 @layer components {
   .type-display {
-    font-size: clamp(2rem, 4vw, 3rem);
-    font-weight: 700;
-    line-height: 1.08;
-    letter-spacing: -0.04em;
+    font-family: var(--font-serif);
+    font-size: clamp(2.25rem, 4.6vw, 3.5rem);
+    font-weight: 300;
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+  }
+
+  /* Brik-style metadata label: price basis, beds, status, counts. Never full sentences. */
+  .label-caps {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    line-height: 1.4;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
   }
 
   .type-title {
@@ -508,10 +527,11 @@
   }
 
   .page-title {
-    font-size: clamp(1.75rem, 2.3vw, 2.125rem);
-    font-weight: 600;
-    line-height: 1.2;
-    letter-spacing: -0.035em;
+    font-family: var(--font-serif);
+    font-size: clamp(1.875rem, 2.6vw, 2.375rem);
+    font-weight: 400;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
   }
 
   .page-description {
@@ -590,4 +610,13 @@ html {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Unlayered on purpose, so it outranks utilities: the serif is set light, and bold or tight-tracked
+   classes on an h1 are leftovers from the sans era. */
+h1:where(.font-bold, .font-semibold, .font-extrabold, .font-black) {
+  font-weight: 400;
+}
+h1:where(.tracking-tight, .tracking-tighter) {
+  letter-spacing: -0.01em;
 }

@@ -21,7 +21,9 @@ export const MarketPriceInsights = ({ city, onUseSuggestedPrice }: MarketPriceIn
   });
 
   const comparables = insights?.comparables ?? [];
-  const { lowEstimate = 0, highEstimate = 0, suggested = 0 } = insights ?? {};
+  const lowEstimate = insights?.lowEstimate ?? null;
+  const highEstimate = insights?.highEstimate ?? null;
+  const suggested = insights?.suggested ?? null;
 
   if (city.trim() && isLoading) {
     return (
@@ -37,7 +39,7 @@ export const MarketPriceInsights = ({ city, onUseSuggestedPrice }: MarketPriceIn
     );
   }
 
-  if (!city.trim() || comparables.length === 0) {
+  if (!city.trim() || comparables.length === 0 || lowEstimate === null || highEstimate === null) {
     return (
       <div className="rounded-lg border border-border bg-secondary/40 p-3">
         <div className="flex items-center gap-1.5 mb-1">
@@ -66,8 +68,10 @@ export const MarketPriceInsights = ({ city, onUseSuggestedPrice }: MarketPriceIn
         {comparables.map((c, i) => (
           <div key={i} className="flex items-center justify-between text-xs text-muted-foreground">
             <span>
-              {c.propertyType} · {c.size ? `${c.size} sqm · ` : ''}sold {c.soldMonthsAgo} mo
-              {c.soldMonthsAgo === 1 ? '' : 's'} ago
+              {c.propertyType} · {c.size ? `${c.size} sqm · ` : ''}
+              {c.soldMonthsAgo === null
+                ? 'sold'
+                : `sold ${c.soldMonthsAgo} mo${c.soldMonthsAgo === 1 ? '' : 's'} ago`}
             </span>
             <span className="font-medium text-foreground">
               {formatCurrency(c.soldPrice, { compact: true })}
@@ -78,20 +82,22 @@ export const MarketPriceInsights = ({ city, onUseSuggestedPrice }: MarketPriceIn
 
       <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-primary/20">
         <p className="text-xs text-muted-foreground">
-          Suggested range{' '}
+          Sold for{' '}
           <span className="font-semibold text-foreground">
             {formatCurrency(lowEstimate, { compact: true })} –{' '}
             {formatCurrency(highEstimate, { compact: true })}
           </span>
         </p>
-        <Button
-          variant="outline"
-          size="xs"
-          onClick={() => onUseSuggestedPrice(suggested)}
-          icon={<BadgeCheck className="w-3 h-3" />}
-        >
-          Use {formatCurrency(suggested, { compact: true })}
-        </Button>
+        {suggested !== null && (
+          <Button
+            variant="outline"
+            size="xs"
+            onClick={() => onUseSuggestedPrice(suggested)}
+            icon={<BadgeCheck className="w-3 h-3" />}
+          >
+            Use {formatCurrency(suggested, { compact: true })}
+          </Button>
+        )}
       </div>
     </div>
   );

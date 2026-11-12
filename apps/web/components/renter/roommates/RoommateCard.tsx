@@ -17,6 +17,7 @@ import {
 } from '@sureground/icons';
 import {
   Badge,
+  ConfirmDialog,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -62,6 +63,7 @@ const formatDate = (dateString: string) => {
 export const RoommateCard = ({ roommate, onRemove, onUpdateShare }: RoommateCardProps) => {
   const [isEditingShare, setIsEditingShare] = useState(false);
   const [sharePercentage, setSharePercentage] = useState(roommate.sharePercentage);
+  const [confirmingRemove, setConfirmingRemove] = useState(false);
 
   const StatusIcon = statusConfig[roommate.status].icon;
 
@@ -151,13 +153,13 @@ export const RoommateCard = ({ roommate, onRemove, onUpdateShare }: RoommateCard
                 <span className="text-sm text-muted-foreground">%</span>
                 <IconButton
                   size="sm"
-                  label="Save share"
+                  label={`Save rent share for ${roommate.name}`}
                   onClick={handleUpdateShare}
                   icon={<Check className="text-success" />}
                 />
                 <IconButton
                   size="sm"
-                  label="Cancel editing share"
+                  label={`Cancel editing rent share for ${roommate.name}`}
                   onClick={() => setIsEditingShare(false)}
                   icon={<X className="text-destructive" />}
                 />
@@ -187,7 +189,10 @@ export const RoommateCard = ({ roommate, onRemove, onUpdateShare }: RoommateCard
               />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem onSelect={() => onRemove(roommate.id)} className="text-destructive">
+              <DropdownMenuItem
+                onSelect={() => setConfirmingRemove(true)}
+                className="text-destructive"
+              >
                 <Trash2 className="w-3 h-3" aria-hidden="true" />
                 Remove roommate
               </DropdownMenuItem>
@@ -195,6 +200,16 @@ export const RoommateCard = ({ roommate, onRemove, onUpdateShare }: RoommateCard
           </DropdownMenu>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={confirmingRemove}
+        onOpenChange={setConfirmingRemove}
+        title="Remove this roommate?"
+        description={`${roommate.name} will be removed from your household, along with their ${roommate.sharePercentage}% rent share. You would need to invite them again to add them back.`}
+        confirmLabel="Remove"
+        tone="danger"
+        onConfirm={() => onRemove(roommate.id)}
+      />
     </div>
   );
 };

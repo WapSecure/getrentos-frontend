@@ -9,6 +9,7 @@ import {
   Trash2,
   Copy,
   Check,
+  Send,
   ChevronDown,
   ChevronUp,
 } from '@sureground/icons';
@@ -16,6 +17,7 @@ import {
   Badge,
   Button,
   Card,
+  ConfirmDialog,
   Field,
   IconButton,
   Input,
@@ -28,7 +30,9 @@ import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 
 interface MessageTemplatesProps {
-  onSelectTemplate: (content: string) => void;
+  /** Who the template goes to; null when no conversation is open, which disables sending. */
+  recipientName: string | null;
+  onSelectTemplate: (content: string) => Promise<boolean>;
 }
 
 interface NewTemplateData {
@@ -56,7 +60,7 @@ const categoryOptions = ['application', 'viewing', 'followup', 'general'].map((c
   label: categoryLabels[cat],
 }));
 
-export const MessageTemplates = ({ onSelectTemplate }: MessageTemplatesProps) => {
+export const MessageTemplates = ({ recipientName, onSelectTemplate }: MessageTemplatesProps) => {
   const queryClient = useQueryClient();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
@@ -68,6 +72,9 @@ export const MessageTemplates = ({ onSelectTemplate }: MessageTemplatesProps) =>
   });
   const [editTemplate, setEditTemplate] = useState<MessageTemplate | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [confirmingDelete, setConfirmingDelete] = useState<MessageTemplate | null>(null);
+  const [confirmingSend, setConfirmingSend] = useState<MessageTemplate | null>(null);
+  const [isSending, setIsSending] = useState(false);
 
   const { data: templates = [] } = useQuery({
     queryKey: renterKeys.messageTemplates,
@@ -130,18 +137,19 @@ export const MessageTemplates = ({ onSelectTemplate }: MessageTemplatesProps) =>
     });
   };
 
-  const handleDeleteTemplate = (id: string) => {
-    deleteMutation.mutate(id);
-  };
-
   const handleCopyTemplate = (content: string, id: string) => {
     navigator.clipboard.writeText(content);
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const handleUseTemplate = (template: MessageTemplate) => {
-    onSelectTemplate(template.content);
+  const handleUseTemplate = async (template: MessageTemplate) => {
+    setIsSending(true);
+    try {
+      if (!(await onSelectTemplate(template.content))) throw new Error('send failed');
+    } finally {
+      setIsSending(false);
+    }
     updateMutation.mutate({
       id: template.id,
       data: {
@@ -288,17 +296,18 @@ export const MessageTemplates = ({ onSelectTemplate }: MessageTemplatesProps) =>
                       </div>
                     </div>
                     <div className="flex shrink-0 gap-1">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        icon={<Send className="w-3 h-3" />}
+                        disabled={!recipientName}
+                        onClick={() => setConfirmingSend(template)}
+                      >
+                        Send
+                      </Button>
                       <IconButton
                         size="sm"
-                        label="Use template"
-                        title="Use template"
-                        icon={<Check className="text-success" />}
-                        onClick={() => handleUseTemplate(template)}
-                      />
-                      <IconButton
-                        size="sm"
-                        label="Copy template"
-                        title="Copy template"
+                        label={copiedId === template.id ? 'Copied' : `Copy ${template.title}`}
                         icon={
                           copiedId === template.id ? <Check className="text-success" /> : <Copy />
                         }
@@ -306,21 +315,16 @@ export const MessageTemplates = ({ onSelectTemplate }: MessageTemplatesProps) =>
                       />
                       <IconButton
                         size="sm"
-                        label="Edit template"
-                        title="Edit template"
+                        label={`Edit ${template.title}`}
                         icon={<Edit2 />}
                         onClick={() => handleEditTemplate(template.id)}
                       />
                       <IconButton
                         size="sm"
                         variant="danger"
-                        label="Delete template"
-                        title="Delete template"
+                        label={`Delete ${template.title}`}
                         icon={<Trash2 />}
-                        isLoading={
-                          deleteMutation.isPending && deleteMutation.variables === template.id
-                        }
-                        onClick={() => handleDeleteTemplate(template.id)}
+                        onClick={() => setConfirmingDelete(template)}
                       />
                     </div>
                   </div>
@@ -330,6 +334,40 @@ export const MessageTemplates = ({ onSelectTemplate }: MessageTemplatesProps) =>
           ))}
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirmingSend !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirmingSend(null);
+        }}
+        title={recipientName ? `Send this message to ${recipientName}?` : 'Send this message?'}
+        description={
+          confirmingSend
+            ? `"${confirmingSend.content.length > 200 ? `${confirmingSend.content.slice(0, 200).trimEnd()}…` : confirmingSend.content}" will be sent in this conversation straight away.`
+            : ''
+        }
+        confirmLabel="Send"
+        tone="primary"
+        isLoading={isSending}
+        onConfirm={() => confirmingSend && handleUseTemplate(confirmingSend)}
+      />
+
+      <ConfirmDialog
+        open={confirmingDelete !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirmingDelete(null);
+        }}
+        title="Delete this template?"
+        description={
+          confirmingDelete
+            ? `"${confirmingDelete.title}" will be deleted from your message templates. This can't be undone.`
+            : ''
+        }
+        confirmLabel="Delete"
+        tone="danger"
+        isLoading={deleteMutation.isPending}
+        onConfirm={() => confirmingDelete && deleteMutation.mutateAsync(confirmingDelete.id)}
+      />
     </Card>
   );
 };

@@ -1,3 +1,9 @@
+import type {
+  AcquisitionStatuses,
+  NextAction,
+  WorkspaceDocument,
+  WorkspaceViewerRole,
+} from '@sureground/shared';
 import type { LandMilestone } from './landBuyer';
 import type { LandPerfectionStep } from './landClosing';
 import type { CoApprovalView } from './landRepresentative';
@@ -8,72 +14,23 @@ import type { CoApprovalView } from './landRepresentative';
  * under Payment Protection, never the rest of the price (D11).
  */
 
-export const OPERATIONAL_STAGES = [
-  'INTERESTED',
-  'OFFER_ACCEPTED',
-  'RESERVED',
-  'DILIGENCE_IN_PROGRESS',
-  'FINDINGS_SHARED',
-  'CONTRACT_PREPARED',
-  'COMPLETING',
-  'HANDED_OVER',
-  'PAUSED',
-  'CANCELLED',
-] as const;
-export type OperationalStageCode = (typeof OPERATIONAL_STAGES)[number];
-
-export const MONEY_STATUSES = [
-  'NOT_DUE',
-  'REQUESTED',
-  'PROTECTED',
-  'RELEASE_REQUESTED',
-  'RELEASED',
-  'PAID_OUT',
-  'REFUNDED',
-  'FROZEN',
-] as const;
-export type MoneyStatusCode = (typeof MONEY_STATUSES)[number];
-
-export const LEGAL_STATUSES = [
-  'NOT_STARTED',
-  'CONTRACT_SIGNED',
-  'CONSENT_APPLIED',
-  'CONSENT_GRANTED',
-  'REGISTERED',
-  'PERFECTED',
-] as const;
-export type LegalStatusCode = (typeof LEGAL_STATUSES)[number];
-
-export interface OperationalStage {
-  code: OperationalStageCode;
-  label: string;
-}
-
-export interface MoneyStatus {
-  code: MoneyStatusCode;
-  label: string;
-  /** Only the deposit held under Payment Protection is covered. */
-  covers: 'DEPOSIT';
-  note: string;
-}
-
-export interface LegalStatus {
-  code: LegalStatusCode;
-  label: string;
-}
-
-/** Kept separate: a released deposit never reads as legal completion. */
-export interface AcquisitionStatuses {
-  operationalStage: OperationalStage;
-  moneyStatus: MoneyStatus;
-  legalStatus: LegalStatus;
-}
-
-export interface NextAction {
-  label: string;
-  waitingForYou: boolean;
-}
-
+export {
+  LEGAL_STATUSES,
+  MONEY_STATUSES,
+  OPERATIONAL_STAGES,
+  type AcquisitionStatuses,
+  type DepositReleaseOutcome,
+  type LegalStatus,
+  type LegalStatusCode,
+  type MoneyStatus,
+  type MoneyStatusCode,
+  type NextAction,
+  type OperationalStage,
+  type OperationalStageCode,
+  type PurchaseSummary,
+  type WorkspaceDocument,
+  type WorkspaceViewerRole,
+} from '@sureground/shared';
 export interface WorkspaceMilestone extends LandMilestone {
   /** The professional who checked it. */
   verifiedBy?: { name: string; role?: string };
@@ -117,15 +74,6 @@ export interface WorkspaceProfessional {
   completedAt?: string;
 }
 
-export interface WorkspaceDocument {
-  id: string;
-  documentType: string;
-  linkedTo: 'MILESTONE' | 'CONDITION' | 'LEGAL_STEP';
-  /** The milestone, condition or legal step key. */
-  key: string;
-  uploadedAt: string;
-}
-
 export type WorkspaceActorKind = 'MANAGER' | 'SUREGROUND' | 'TENANT' | 'SYSTEM' | 'OTHER' | 'YOU';
 
 export interface WorkspaceHistoryItem {
@@ -144,8 +92,6 @@ export interface WorkspaceDelays {
   /** A step is more than 30 days late. */
   escalated: boolean;
 }
-
-export type WorkspaceViewerRole = 'BUYER' | 'SELLER' | 'REPRESENTATIVE';
 
 export interface TransactionWorkspace {
   transactionId: string;
@@ -167,29 +113,4 @@ export interface TransactionWorkspace {
   documents: WorkspaceDocument[];
   delays: WorkspaceDelays;
   history: WorkspaceHistoryItem[];
-}
-
-/** The outcome of the buyer's deposit release (`POST buyer/transactions/:id/release`). */
-export interface DepositReleaseOutcome {
-  state: 'RELEASED' | 'WAITING_FOR_CO_APPROVAL';
-  waitingFor?: 'REPRESENTATIVE' | 'BUYER';
-  message?: string;
-}
-
-/** One purchase on the investor overview, from the same functions as the workspace. */
-export interface PurchaseSummary {
-  transactionId: string;
-  title: string;
-  propertyType: string;
-  role: 'BUYER' | 'REPRESENTATIVE';
-  /** Set when I see this purchase as someone's representative. */
-  representing?: { principalId: string; principalName: string };
-  operationalStage: OperationalStage;
-  moneyStatus: MoneyStatus;
-  legalStatus: LegalStatus;
-  nextAction: string | null;
-  /** Something is waiting for me, including a two-person approval. */
-  waitingForYou: boolean;
-  /** Two-person approvals waiting for me on this purchase. */
-  pendingApprovals: number;
 }

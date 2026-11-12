@@ -100,6 +100,20 @@ export const authService = {
     );
   },
 
+  /** Staff set their own password from a single-use emailed link; no session exists yet. */
+  async acceptStaffInvite(
+    token: string,
+    password: string
+  ): Promise<ApiResponse<{ message: string }>> {
+    return safeCall(() =>
+      apiFetch<{ message: string }>(
+        '/auth/staff-invite/accept',
+        { method: 'POST', body: JSON.stringify({ token, password }) },
+        false
+      )
+    );
+  },
+
   async completeTwoFactorLogin(
     challengeToken: string,
     token: string,

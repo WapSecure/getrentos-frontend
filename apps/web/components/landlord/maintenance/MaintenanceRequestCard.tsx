@@ -161,43 +161,40 @@ export const MaintenanceRequestCard = ({
             <UserCog className="w-3.5 h-3.5" />
             {request.assignedVendorName ? 'Reassign' : 'Assign vendor'}
           </Button>
-          <div className="ml-auto flex shrink-0 items-center gap-2">
+          <div className="ml-auto flex shrink-0 flex-wrap items-center gap-2">
             {request.assignedVendorName && (
               <Button
                 variant="outline"
                 size="sm"
-                className="shrink-0 px-2.5"
-                title={request.scheduledFor ? 'Move visit' : 'Book visit'}
-                aria-label={request.scheduledFor ? 'Move visit' : 'Book visit'}
+                className="gap-1.5"
                 onClick={() => onScheduleVisit(request)}
                 disabled={isBusy}
               >
-                <CalendarClock className="w-3.5 h-3.5" />
+                <CalendarClock className="w-3.5 h-3.5" aria-hidden="true" />
+                {request.scheduledFor ? 'Move visit' : 'Book visit'}
               </Button>
             )}
             <Button
               variant="ghost"
               size="sm"
-              className="shrink-0 px-2.5 text-warning hover:text-warning/80"
-              title="Escalate"
-              aria-label="Escalate"
+              className="gap-1.5 text-warning hover:text-warning/80"
               onClick={() => onEscalate(request.id)}
               isLoading={isEscalating}
               disabled={isBusy}
             >
-              <ArrowUpCircle className="w-4 h-4" />
+              <ArrowUpCircle className="w-4 h-4" aria-hidden="true" />
+              Escalate
             </Button>
             <Button
               variant="primary"
               size="sm"
-              className="shrink-0 px-2.5"
-              title="Mark resolved"
-              aria-label="Mark resolved"
+              className="gap-1.5"
               onClick={() => onMarkResolved(request.id)}
               isLoading={isMarkingResolved}
               disabled={isBusy}
             >
-              <CheckCircle2 className="w-4 h-4" />
+              <CheckCircle2 className="w-4 h-4" aria-hidden="true" />
+              Mark resolved
             </Button>
           </div>
         </div>

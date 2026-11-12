@@ -4,7 +4,7 @@ import { useRef, useState } from 'react';
 import type { MediaRoom } from '@sureground/shared/showroom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AlertCircle, ImagePlus, Trash2 } from '@sureground/icons';
-import { Button, IconButton, Progress } from '@sureground/ui';
+import { Button, ConfirmDialog, IconButton, Progress } from '@sureground/ui';
 import { useUploadQueue } from '@/hooks/useUploadQueue';
 import { estateMarketplaceService } from '@/services/estateMarketplaceService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -50,6 +50,7 @@ export const ListingMediaPanel = ({
   });
   const uploadIds = Object.keys(uploads.states);
 
+  const [removing, setRemoving] = useState<{ key: string; index: number } | null>(null);
   const remove = useMutation({
     mutationFn: (key: string) =>
       unwrap(estateMarketplaceService.removeListingMedia(estateId, listing.id, key)),
@@ -229,7 +230,7 @@ export const ListingMediaPanel = ({
                 isLoading={remove.isPending && remove.variables === photo.key}
                 onClick={() => {
                   setStatus(null);
-                  remove.mutate(photo.key);
+                  setRemoving({ key: photo.key, index });
                 }}
                 className="absolute -right-1.5 -top-1.5 h-6 w-6 rounded-full bg-background text-foreground shadow ring-1 ring-border hover:text-destructive [&_svg]:h-3.5 [&_svg]:w-3.5"
               />
@@ -281,6 +282,24 @@ export const ListingMediaPanel = ({
           {status.text}
         </p>
       )}
+
+      <ConfirmDialog
+        open={removing !== null}
+        onOpenChange={(open) => {
+          if (!open) setRemoving(null);
+        }}
+        title="Remove this photo?"
+        description={
+          removing
+            ? `Photo ${removing.index + 1} is deleted from this listing, along with its room and caption${
+                removing.index === 0 ? ', and the next photo becomes the cover' : ''
+              }. This can't be undone.`
+            : ''
+        }
+        confirmLabel="Remove"
+        onConfirm={() => removing && remove.mutateAsync(removing.key)}
+        isLoading={remove.isPending}
+      />
     </div>
   );
 };

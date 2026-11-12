@@ -3,10 +3,12 @@
 import {
   Pagination,
   Button,
+  ConfirmDialog,
   EmptyState,
   Alert,
   SearchInput,
   useOptimisticMutation,
+  useToast,
   PageHeader,
 } from '@sureground/ui';
 import { useMemo, useState } from 'react';
@@ -31,6 +33,11 @@ export default function LandlordVendorsPage() {
   const [editing, setEditing] = useState<Vendor | null>(null);
   const [viewing, setViewing] = useState<Vendor | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [confirming, setConfirming] = useState<{
+    kind: 'remove' | 'deactivate';
+    vendor: Vendor;
+  } | null>(null);
+  const toast = useToast();
 
   // The endpoint takes no search param, so search is client-side.
   const vendorsKey = [...landlordKeys.vendors, { page, pageSize: PAGE_SIZE }];
@@ -112,12 +119,24 @@ export default function LandlordVendorsPage() {
 
   const handleToggleActive = (vendor: Vendor) => {
     setNotice(null);
-    toggleActiveMutation.mutate(vendor);
+    if (vendor.isActive) setConfirming({ kind: 'deactivate', vendor });
+    else toggleActiveMutation.mutate(vendor);
   };
 
   const handleRemoveVendor = (id: string) => {
     setNotice(null);
-    removeVendorMutation.mutate(id);
+    const vendor = vendors.find((v) => v.id === id);
+    if (vendor) setConfirming({ kind: 'remove', vendor });
+  };
+
+  const confirmAction = async () => {
+    if (!confirming) return;
+    const { kind, vendor } = confirming;
+    if (kind === 'remove') await removeVendorMutation.mutateAsync(vendor.id);
+    else await toggleActiveMutation.mutateAsync(vendor);
+    toast.success(
+      kind === 'remove' ? `"${vendor.name}" removed.` : `"${vendor.name}" deactivated.`
+    );
   };
 
   const filteredVendors = useMemo(
@@ -198,6 +217,26 @@ export default function LandlordVendorsPage() {
       />
 
       <VendorDetailModal vendor={viewing} onClose={() => setViewing(null)} />
+
+      <ConfirmDialog
+        open={confirming !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirming(null);
+        }}
+        title={
+          confirming?.kind === 'deactivate' ? 'Deactivate this vendor?' : 'Remove this vendor?'
+        }
+        description={
+          !confirming
+            ? ''
+            : confirming.kind === 'deactivate'
+              ? `"${confirming.vendor.name}" is marked inactive. You can reactivate them from their card at any time.`
+              : `"${confirming.vendor.name}" is removed from your vendor directory. This can't be undone.`
+        }
+        confirmLabel={confirming?.kind === 'deactivate' ? 'Deactivate' : 'Remove'}
+        onConfirm={confirmAction}
+        isLoading={removeVendorMutation.isPending || toggleActiveMutation.isPending}
+      />
     </>
   );
 }

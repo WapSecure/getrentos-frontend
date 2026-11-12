@@ -23,7 +23,7 @@ import {
 import { ClipboardCheck } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDualTime, formatLagosDate } from '@/lib/format';
-import { SPEND_BAND_LABELS, SPEND_BAND_VARIANT, evidenceStates } from '@/lib/managedSpend';
+import { SPEND_BAND_LABELS, SPEND_BAND_VARIANT, evidenceStates } from '@sureground/shared';
 import { homeManagementKeys } from '@/lib/queryKeys';
 import { StarRating } from '@/components/landlord/vendors/StarRating';
 import {

@@ -1,7 +1,8 @@
 'use client';
 
 import { CreditCard, Building2, Wallet, Trash2 } from '@sureground/icons';
-import { Alert, Card, IconButton } from '@sureground/ui';
+import { useState } from 'react';
+import { Alert, Card, ConfirmDialog, IconButton } from '@sureground/ui';
 
 interface PaymentMethod {
   id: string;
@@ -19,6 +20,9 @@ interface PaymentMethodsProps {
 
 // Sureground never takes or keeps card details; details saved before are listed only so they can be removed.
 export const PaymentMethods = ({ methods, onRemove }: PaymentMethodsProps) => {
+  const [confirming, setConfirming] = useState<PaymentMethod | null>(null);
+  const [isRemoving, setIsRemoving] = useState(false);
+
   const getIcon = (type: string) => {
     switch (type) {
       case 'bank':
@@ -62,7 +66,7 @@ export const PaymentMethods = ({ methods, onRemove }: PaymentMethodsProps) => {
                     size="sm"
                     label={`Remove ${method.name}`}
                     icon={<Trash2 aria-hidden="true" />}
-                    onClick={() => onRemove(method.id)}
+                    onClick={() => setConfirming(method)}
                   />
                 </div>
               );
@@ -70,6 +74,31 @@ export const PaymentMethods = ({ methods, onRemove }: PaymentMethodsProps) => {
           </div>
         </>
       )}
+
+      <ConfirmDialog
+        open={confirming !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirming(null);
+        }}
+        title="Remove this payment method?"
+        description={
+          confirming
+            ? `"${confirming.name}" will be removed from your saved details. This can't be undone.`
+            : ''
+        }
+        confirmLabel="Remove"
+        tone="danger"
+        isLoading={isRemoving}
+        onConfirm={async () => {
+          if (!confirming) return;
+          setIsRemoving(true);
+          try {
+            await onRemove(confirming.id);
+          } finally {
+            setIsRemoving(false);
+          }
+        }}
+      />
     </Card>
   );
 };

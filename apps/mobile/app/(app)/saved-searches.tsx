@@ -1,4 +1,4 @@
-import { Pressable, RefreshControl, View } from 'react-native';
+import { Alert, Pressable, RefreshControl, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
@@ -148,7 +148,20 @@ export default function SavedSearches() {
                     <IconButton
                       accessibilityLabel={`Delete ${item.name}`}
                       icon={<Trash2 size={16} color={colors.destructive} />}
-                      onPress={() => removeMutation.mutate(item.id)}
+                      onPress={() =>
+                        Alert.alert(
+                          'Delete this saved search?',
+                          `"${item.name}" and its alerts will be deleted. This cannot be undone.`,
+                          [
+                            { text: 'Cancel', style: 'cancel' },
+                            {
+                              text: 'Delete',
+                              style: 'destructive',
+                              onPress: () => removeMutation.mutate(item.id),
+                            },
+                          ]
+                        )
+                      }
                     />
                   </View>
                 </Card>

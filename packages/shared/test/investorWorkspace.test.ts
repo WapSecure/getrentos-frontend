@@ -6,9 +6,13 @@ import {
   identityProgress,
   portfolioFigures,
   stageProgress,
-} from './investorWorkspace';
+} from '../src/diaspora/investorWorkspace.ts';
 
 const links = {
+  purchase: ({ role, transactionId }: { role: string; transactionId: string }) =>
+    role === 'REPRESENTATIVE'
+      ? `/representing/transactions/${transactionId}`
+      : `/buyer/transactions/${transactionId}`,
   risk: '/buyer/invest/onboarding?step=risk',
   tours: '/buyer/tours',
   approvals: '/owner/approvals',

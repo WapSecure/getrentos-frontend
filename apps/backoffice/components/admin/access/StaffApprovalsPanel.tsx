@@ -47,7 +47,7 @@ export const StaffApprovalsPanel = ({ notify }: StaffApprovalsPanelProps) => {
     onSuccess: () => {
       invalidate();
       setPage(1);
-      notify('Staff member approved: they can now sign in.', 'success');
+      notify('Staff member approved. We emailed them a link to set their password.', 'success');
       setApproveTarget(null);
     },
     onError: (err) => {

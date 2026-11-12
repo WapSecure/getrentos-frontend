@@ -209,7 +209,8 @@ export function BuyerConditions({
   checklist?: ChecklistItem[];
   seller?: string;
   busyKey: string | null;
-  onSettle: (key: string, how: 'confirm' | 'waive') => void;
+  /** Without it the conditions are read only (a representative, or a built home). */
+  onSettle?: (key: string, how: 'confirm' | 'waive') => void;
 }) {
   const { colors, spacing } = useTheme();
   return (
@@ -244,7 +245,7 @@ export function BuyerConditions({
                 {c.note}
               </Text>
             ) : null}
-            {open && !c.failed ? (
+            {open && !c.failed && onSettle ? (
               <View style={{ flexDirection: 'row', gap: spacing.sm }}>
                 {c.status === 'DELIVERED' ? (
                   <Button

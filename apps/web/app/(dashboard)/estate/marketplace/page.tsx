@@ -23,6 +23,7 @@ import {
   Badge,
   Button,
   Card,
+  ConfirmDialog,
   CurrencyInput,
   DatePicker,
   EmptyState,
@@ -439,6 +440,7 @@ export default function EstateMarketplacePage() {
   const router = useRouter();
   const [mediaListingId, setMediaListingId] = useState<string | null>(null);
   const [editListingId, setEditListingId] = useState<string | null>(null);
+  const [detaching, setDetaching] = useState<{ propertyId: string; title: string } | null>(null);
 
   const inventory = useQuery({
     queryKey: estateKeys.inventory(estateId),
@@ -627,7 +629,12 @@ export default function EstateMarketplacePage() {
                         label={`Remove ${agreement.propertyTitle} from this estate`}
                         title="Remove from this estate"
                         icon={<Unlink />}
-                        onClick={() => detach.mutate(agreement.propertyId)}
+                        onClick={() =>
+                          setDetaching({
+                            propertyId: agreement.propertyId,
+                            title: agreement.propertyTitle,
+                          })
+                        }
                         disabled={detach.isPending}
                         isLoading={detach.isPending && detach.variables === agreement.propertyId}
                       />
@@ -772,6 +779,22 @@ export default function EstateMarketplacePage() {
           </div>
         </div>
       </Card>
+
+      <ConfirmDialog
+        open={detaching !== null}
+        onOpenChange={(open) => {
+          if (!open) setDetaching(null);
+        }}
+        title="Remove this property from the estate?"
+        description={
+          detaching
+            ? `"${detaching.title}" is removed from this estate and can no longer be advertised here. To bring it back you would need to add it and get the owner's approval again.`
+            : ''
+        }
+        confirmLabel="Remove"
+        onConfirm={() => detaching && detach.mutateAsync(detaching.propertyId)}
+        isLoading={detach.isPending}
+      />
     </div>
   );
 }

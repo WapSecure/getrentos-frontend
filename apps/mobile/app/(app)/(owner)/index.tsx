@@ -177,9 +177,9 @@ export default function OwnerHome() {
         skeleton={
           <View style={{ gap: spacing.lg }}>
             <PortfolioCard
-              label="Portfolio value"
+              label="Listed for sale"
               amount={0}
-              hint="Estimated from your properties’ recorded values"
+              hint="Asking prices on your sale listings"
               loading
               visible={showMoney}
               onToggle={toggleMoney}
@@ -203,9 +203,9 @@ export default function OwnerHome() {
         ) : null}
 
         <PortfolioCard
-          label="Portfolio value"
+          label="Listed for sale"
           amount={d?.portfolioValue ?? 0}
-          hint="Estimated from your properties’ recorded values"
+          hint="Asking prices on your sale listings"
           loading={false}
           visible={showMoney}
           onToggle={toggleMoney}

@@ -13,6 +13,7 @@ import { DocumentBulkActions } from '@/components/renter/documents/DocumentBulkA
 import { DocumentUploadModal } from '@/components/renter/documents/DocumentUploadModal';
 import { DocumentShareModal } from '@/components/renter/documents/DocumentShareModal';
 import {
+  ConfirmDialog,
   ListSkeleton,
   PageErrorState,
   Pagination,
@@ -153,8 +154,28 @@ export const DocumentsView = () => {
       return false;
     }
   };
-  const handleDelete = (id: string) => deleteMutation.mutate(id);
-  const handleBulkDelete = () => bulkDeleteMutation.mutate(selectedDocuments);
+  const [confirmingDelete, setConfirmingDelete] = useState<
+    { kind: 'one'; id: string; name: string } | { kind: 'bulk'; ids: string[] } | null
+  >(null);
+  const handleDelete = (id: string) =>
+    setConfirmingDelete({
+      kind: 'one',
+      id,
+      name: documents.find((document) => document.id === id)?.name ?? 'This document',
+    });
+  const handleBulkDelete = () => setConfirmingDelete({ kind: 'bulk', ids: selectedDocuments });
+  const confirmDelete = async () => {
+    if (!confirmingDelete) return;
+    if (confirmingDelete.kind === 'one') {
+      await deleteMutation.mutateAsync(confirmingDelete.id);
+      toast.success(`"${confirmingDelete.name}" deleted.`);
+    } else {
+      const count = confirmingDelete.ids.length;
+      await bulkDeleteMutation.mutateAsync(confirmingDelete.ids);
+      toast.success(`${count} document${count === 1 ? '' : 's'} deleted.`);
+    }
+  };
+  const deleteCount = confirmingDelete?.kind === 'bulk' ? confirmingDelete.ids.length : 1;
   const handleToggleFavorite = (id: string) => toggleFavoriteMutation.mutate(id);
 
   const handleShare = (id: string) => {
@@ -305,6 +326,29 @@ export const DocumentsView = () => {
           onClearSelection={() => setSelectedDocuments([])}
         />
       )}
+
+      <ConfirmDialog
+        open={confirmingDelete !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirmingDelete(null);
+        }}
+        title={
+          confirmingDelete?.kind === 'bulk'
+            ? `Delete ${deleteCount} document${deleteCount === 1 ? '' : 's'}?`
+            : 'Delete this document?'
+        }
+        description={
+          !confirmingDelete
+            ? ''
+            : confirmingDelete.kind === 'one'
+              ? `"${confirmingDelete.name}" will be deleted from your documents. This can't be undone.`
+              : `The ${deleteCount} selected document${deleteCount === 1 ? '' : 's'} will be deleted from your documents. This can't be undone.`
+        }
+        confirmLabel="Delete"
+        tone="danger"
+        isLoading={deleteMutation.isPending || bulkDeleteMutation.isPending}
+        onConfirm={confirmDelete}
+      />
 
       <DocumentUploadModal
         isOpen={showUploadModal}

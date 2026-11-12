@@ -1,6 +1,5 @@
 import { Badge } from '@sureground/ui';
-import { cn } from '@sureground/shared';
-import { legalVariant, moneyVariant, stageVariant } from '@/lib/transactionWorkspace';
+import { cn, legalVariant, moneyVariant, stageVariant } from '@sureground/shared';
 import type { AcquisitionStatuses } from '@/types/transactionWorkspace';
 
 /**

@@ -110,8 +110,12 @@ export const ConversationItem = ({
       <div className="absolute right-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity flex gap-1">
         <IconButton
           size="sm"
-          label={conversation.isPinned ? 'Unpin' : 'Pin'}
-          title={conversation.isPinned ? 'Unpin' : 'Pin'}
+          label={
+            conversation.isPinned
+              ? `Unpin conversation with ${conversation.participantName}`
+              : `Pin conversation with ${conversation.participantName}`
+          }
+          aria-pressed={conversation.isPinned}
           icon={conversation.isPinned ? <Pin className="text-primary" /> : <PinOff />}
           onClick={(e) => {
             e.stopPropagation();
@@ -120,8 +124,11 @@ export const ConversationItem = ({
         />
         <IconButton
           size="sm"
-          label={conversation.isArchived ? 'Unarchive' : 'Archive'}
-          title={conversation.isArchived ? 'Unarchive' : 'Archive'}
+          label={
+            conversation.isArchived
+              ? `Move conversation with ${conversation.participantName} back to inbox`
+              : `Archive conversation with ${conversation.participantName}`
+          }
           icon={conversation.isArchived ? <ArchiveRestore className="text-info" /> : <Archive />}
           onClick={(e) => {
             e.stopPropagation();

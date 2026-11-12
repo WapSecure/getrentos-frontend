@@ -34,19 +34,19 @@ export interface Palette {
 }
 
 export const lightColors: Palette = {
-  background: '#f7f7f8',
-  foreground: '#1d1d1f',
+  background: '#f8f7f5',
+  foreground: '#20232b',
   card: '#ffffff',
-  cardForeground: '#1d1d1f',
-  border: '#e5e5e9',
-  secondary: '#f1f1f3',
-  secondaryForeground: '#1d1d1f',
-  muted: '#f3f3f5',
-  mutedForeground: '#4f4f55',
-  accent: '#eaf3ff',
-  accentForeground: '#0049b8',
-  primary: '#0057d9',
-  primaryHover: '#0049b8',
+  cardForeground: '#20232b',
+  border: '#e4e1db',
+  secondary: '#f1efea',
+  secondaryForeground: '#20232b',
+  muted: '#f3f1ec',
+  mutedForeground: '#5c5e66',
+  accent: '#efede8',
+  accentForeground: '#20232b',
+  primary: '#20232b',
+  primaryHover: '#363a46',
   primaryForeground: '#ffffff',
   destructive: '#c81e1e',
   destructiveForeground: '#ffffff',
@@ -55,29 +55,29 @@ export const lightColors: Palette = {
   warning: '#99500a',
   purple: '#6840c2',
   infoSubtle: '#eaf3ff',
-  successSubtle: '#e7f7ef',
-  warningSubtle: '#fdf1e3',
+  successSubtle: '#e7f5ec',
+  warningSubtle: '#fbf0e2',
   purpleSubtle: '#f3eefb',
   destructiveSubtle: '#fdecec',
-  ring: 'rgba(0, 87, 217, 0.65)',
-  scrim: 'rgba(29, 29, 31, 0.4)',
+  ring: 'rgba(32, 35, 43, 0.55)',
+  scrim: 'rgba(20, 21, 26, 0.45)',
 };
 
 export const darkColors: Palette = {
-  background: '#000000',
-  foreground: '#f5f5f7',
-  card: '#1c1c1e',
-  cardForeground: '#f5f5f7',
-  border: '#343437',
-  secondary: '#2c2c2e',
-  secondaryForeground: '#f5f5f7',
-  muted: '#222225',
-  mutedForeground: '#b4b4bc',
-  accent: '#142b47',
-  accentForeground: '#a6caff',
-  primary: '#7aa9ff',
-  primaryHover: '#94baff',
-  primaryForeground: '#111113',
+  background: '#111216',
+  foreground: '#ecebe6',
+  card: '#1a1b20',
+  cardForeground: '#ecebe6',
+  border: '#2d2e35',
+  secondary: '#24252b',
+  secondaryForeground: '#ecebe6',
+  muted: '#1f2025',
+  mutedForeground: '#a9aab0',
+  accent: '#26272d',
+  accentForeground: '#f1efe9',
+  primary: '#f1efe9',
+  primaryHover: '#ffffff',
+  primaryForeground: '#15161a',
   destructive: '#f05656',
   destructiveForeground: '#111113',
   info: '#7aa9ff',
@@ -89,7 +89,7 @@ export const darkColors: Palette = {
   warningSubtle: '#2e1f0a',
   purpleSubtle: '#251a3f',
   destructiveSubtle: '#3a1517',
-  ring: 'rgba(122, 169, 255, 0.75)',
+  ring: 'rgba(241, 239, 233, 0.6)',
   scrim: 'rgba(0, 0, 0, 0.6)',
 };
 
@@ -118,18 +118,24 @@ export const spacing = {
 
 export type SpacingKey = keyof typeof spacing;
 
-// Three visible shapes: 8 for controls, 12 for cards and panels, 16 for dialogs and sheets.
+// Brik-sharp shapes: 2 for controls, 4 for cards and panels, 6 for dialogs and sheets.
 export const radius = {
   none: 0,
-  sm: 6,
-  md: 8,
-  lg: 12,
-  xl: 12,
-  '2xl': 16,
+  sm: 2,
+  md: 2,
+  lg: 4,
+  xl: 4,
+  '2xl': 6,
   full: 9999,
 } as const;
 
 export type RadiusKey = keyof typeof radius;
+
+/** Serif for places and page titles, sans for everything people operate. */
+export const fontFamilies = {
+  display: 'Newsreader',
+  sans: 'Manrope',
+} as const;
 
 // On native the ramp sets weight only; the brand face reaches ui-native's ThemeProvider as `fonts`.
 export const typography = {
@@ -183,5 +189,5 @@ export type ShadowKey = keyof typeof shadows;
 
 export const duration = { fast: 120, base: 200, slow: 320 } as const;
 
-export const tokens = { colors, spacing, radius, typography, shadows, duration };
+export const tokens = { colors, spacing, radius, typography, shadows, duration, fontFamilies };
 export default tokens;

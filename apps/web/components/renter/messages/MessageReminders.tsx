@@ -2,7 +2,16 @@
 
 import { useState } from 'react';
 import { Bell, BellOff, Plus, X, ChevronDown, ChevronUp } from '@sureground/icons';
-import { Button, Card, DatePicker, Field, IconButton, Input, TimePicker } from '@sureground/ui';
+import {
+  Button,
+  Card,
+  ConfirmDialog,
+  DatePicker,
+  Field,
+  IconButton,
+  Input,
+  TimePicker,
+} from '@sureground/ui';
 
 interface Reminder {
   id: string;
@@ -34,6 +43,7 @@ export const MessageReminders = ({
   const [isExpanded, setIsExpanded] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
   const [newReminder, setNewReminder] = useState<ReminderData>({ message: '', date: '', time: '' });
+  const [confirmingDelete, setConfirmingDelete] = useState<Reminder | null>(null);
 
   const handleAddReminder = () => {
     if (!newReminder.message || !newReminder.date || !newReminder.time) return;
@@ -151,8 +161,12 @@ export const MessageReminders = ({
                 <div className="flex gap-1">
                   <IconButton
                     size="sm"
-                    label={reminder.active ? 'Disable reminder' : 'Enable reminder'}
-                    title={reminder.active ? 'Disable' : 'Enable'}
+                    label={
+                      reminder.active
+                        ? 'Reminder on. Turn off reminder'
+                        : 'Reminder off. Turn on reminder'
+                    }
+                    aria-pressed={reminder.active}
                     icon={reminder.active ? <Bell className="text-primary" /> : <BellOff />}
                     onClick={() => onToggleReminder(reminder.id)}
                   />
@@ -161,7 +175,7 @@ export const MessageReminders = ({
                     variant="danger"
                     label="Delete reminder"
                     icon={<X />}
-                    onClick={() => onDeleteReminder(reminder.id)}
+                    onClick={() => setConfirmingDelete(reminder)}
                   />
                 </div>
               </div>
@@ -169,6 +183,22 @@ export const MessageReminders = ({
           )}
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirmingDelete !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirmingDelete(null);
+        }}
+        title="Delete this reminder?"
+        description={
+          confirmingDelete
+            ? `"${confirmingDelete.message}" on ${formatDate(confirmingDelete.date)} at ${confirmingDelete.time} will be deleted and you won't be reminded. This can't be undone.`
+            : ''
+        }
+        confirmLabel="Delete"
+        tone="danger"
+        onConfirm={() => confirmingDelete && onDeleteReminder(confirmingDelete.id)}
+      />
     </Card>
   );
 };

@@ -24,3 +24,4 @@ export * from './payoutAccount';
 export * from './foreignBankAccount';
 export * from './rentRelease';
 export * from './legacyStorage';
+export * from './dualTime';

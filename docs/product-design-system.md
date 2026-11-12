@@ -1,29 +1,43 @@
 # Sureground interface direction
 
-Apple's [typography](https://developer.apple.com/design/human-interface-guidelines/typography),
-[layout](https://developer.apple.com/design/human-interface-guidelines/layout), and
-[materials](https://developer.apple.com/design/human-interface-guidelines/materials)
-guidance inform this system. Sureground retains its name, mark, and property workflows.
-Use platform conventions where they help people complete a task; the website does
-not need to imitate an operating system.
+The visual language follows Brik (references in `docs/brand/references/brik`):
+white space, a light serif for places and titles, a clean sans for everything
+people operate, one ink colour for action, and sharp corners. Apple's
+[typography](https://developer.apple.com/design/human-interface-guidelines/typography)
+and [layout](https://developer.apple.com/design/human-interface-guidelines/layout)
+guidance still informs sizing and accessibility. Approved 2026-11-12.
 
 ## Foundations
 
-- Neutral canvas, opaque working surfaces, one blue action color. Status colors
-  communicate a state, rather than distinguishing arbitrary dashboard categories.
-- System fonts: the platform's installed UI font, without bundling Apple's fonts.
-  Native body text starts at 17 with platform text scaling. Browser body text is
-  16; dense controls and tables use 13–14 with adequate line height.
+- Paper canvas (`background`), white working surfaces (`card`), and one ink
+  action colour (`primary`). Blue is kept for `info` only. Status colours
+  communicate a state, never decoration; verified uses `success`.
+- Type: Newsreader (serif) for page titles (`.page-title`, `h1`), display text
+  (`.type-display`, `font-display`), property and place names. Manrope (sans) for
+  body, controls, tables and numbers. Both load through `next/font`; mobile still
+  uses Manrope only until the serif ships there.
+- Labels: `.label-caps` (11px, 600, 22% tracking, uppercase) for short metadata
+  such as price basis, beds, status and counts. Never for sentences, and never as
+  coloured pills on working screens.
+- Browser body text is 16; dense controls and tables use 13–14 with adequate
+  line height. Native body text starts at 17 with platform text scaling.
 - A page has one clear title, a short useful description, and one primary action.
-  Use `PageHeader`, including on dashboards; avoid boxed promotional banners and
-  all-caps category pills on working screens.
-- Cards use 20px corners, controls 12px, dialogs 28px. Use the shared components
-  and spacing scale instead of introducing competing treatments.
+  Use `PageHeader`, including on dashboards; avoid boxed promotional banners.
+- Corners are sharp: controls 2px (`rounded-md`), cards and panels 4px
+  (`rounded-lg`/`rounded-xl`), dialogs and sheets 6px (`rounded-2xl`). Photos on
+  marketing pages are square-cornered. Avatars and status dots stay round.
+- Buttons: `primary` is solid ink, `outline` is a hairline ink border, `secondary`
+  is stone. Marketing pages may set button labels in `.label-caps`.
 - Shadows explain elevation. Cards stay subtle; menus and dialogs sit above them.
   Translucency belongs to navigation, with opaque fallbacks for reduced
   transparency, increased contrast, and browsers without backdrop filtering.
 - Default browser buttons and inputs have at least 44px height. Compact sizes
   remain available for dense contexts; native buttons retain 44–56px targets.
+- Icon-only controls are for reversible or navigational actions only, and always use
+  `IconButton`/`IconLink` (they show a real `Tooltip` from `label`). An action that
+  deletes, approves, rejects, cancels, sends or otherwise changes data for good gets a
+  visible text label and, when it can't be undone, a `ConfirmDialog` (mobile:
+  `Alert.alert`) that names the item and the consequence.
 - Every control needs a keyboard path, visible focus, and a useful accessible
   name. Reduced motion must also cover JavaScript animations, not only CSS.
 

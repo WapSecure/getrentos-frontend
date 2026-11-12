@@ -125,12 +125,13 @@ export interface OwnerMarketInsights {
     propertyType: string;
     city: string;
     soldPrice: number;
-    size: number;
-    soldMonthsAgo: number;
+    size: number | null;
+    soldMonthsAgo: number | null;
   }[];
-  lowEstimate: number;
-  highEstimate: number;
-  suggested: number;
+  /** Null when there are no comparable sales. */
+  lowEstimate: number | null;
+  highEstimate: number | null;
+  suggested: number | null;
 }
 
 export type OwnerPropertyApi = OwnerProperty;

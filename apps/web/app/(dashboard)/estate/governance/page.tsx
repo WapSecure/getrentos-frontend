@@ -7,6 +7,7 @@ import { BookOpen, Plus } from '@sureground/icons';
 import {
   Button,
   CardSkeleton,
+  ConfirmDialog,
   EmptyState,
   ListSkeleton,
   ToggleChip,
@@ -39,6 +40,7 @@ export default function EstateGovernancePage() {
   const [historyRecordId, setHistoryRecordId] = useState<string | null>(null);
   const [signaturesRecordId, setSignaturesRecordId] = useState<string | null>(null);
   const [typeFilter, setTypeFilter] = useState<GovernanceRecordType | 'all'>('all');
+  const [removing, setRemoving] = useState<GovernanceRecord | null>(null);
   const toast = useToast();
   const planGate = usePlanGateModal();
 
@@ -86,7 +88,10 @@ export default function EstateGovernancePage() {
   const removeRecord = useMutation({
     mutationFn: (recordId: string) =>
       unwrap(estateService.removeGovernanceRecord(estate!.id, recordId)),
-    onSuccess: invalidate,
+    onSuccess: () => {
+      invalidate();
+      if (removing) toast.success(`"${removing.title}" deleted.`);
+    },
     onError: (error: Error) => {
       toast.error(error.message || 'We could not remove this record. Please try again.');
     },
@@ -162,7 +167,7 @@ export default function EstateGovernancePage() {
             <GovernanceRecordRow
               key={record.id}
               record={record}
-              onRemove={() => removeRecord.mutate(record.id)}
+              onRemove={() => setRemoving(record)}
               onUploadNewVersion={() => {
                 setNewVersionOf(record);
                 setIsUploadOpen(true);
@@ -207,6 +212,22 @@ export default function EstateGovernancePage() {
         isOpen={planGate.isOpen}
         onClose={planGate.close}
         reason={planGate.reason}
+      />
+
+      <ConfirmDialog
+        open={removing !== null}
+        onOpenChange={(open) => {
+          if (!open) setRemoving(null);
+        }}
+        title="Delete this record?"
+        description={
+          removing
+            ? `"${removing.title}" is deleted from ${estate.name}'s governance records. This can't be undone.`
+            : ''
+        }
+        confirmLabel="Delete"
+        onConfirm={() => removing && removeRecord.mutateAsync(removing.id)}
+        isLoading={removeRecord.isPending}
       />
     </>
   );

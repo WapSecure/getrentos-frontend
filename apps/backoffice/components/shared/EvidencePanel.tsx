@@ -2,7 +2,14 @@
 
 import { useRef, useState } from 'react';
 import { ExternalLink, FileText, ImageIcon, Paperclip, Trash2, Upload } from '@sureground/icons';
-import { Badge, Button, DocumentPreviewButton, IconButton, Input } from '@sureground/ui';
+import {
+  Badge,
+  Button,
+  ConfirmDialog,
+  DocumentPreviewButton,
+  IconButton,
+  Input,
+} from '@sureground/ui';
 import { cn, formatDate } from '@sureground/shared';
 import type { EvidenceItem } from '@/types/admin';
 
@@ -54,6 +61,7 @@ export const EvidencePanel = ({
   const [file, setFile] = useState<File | null>(null);
   const [note, setNote] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [pendingRemoval, setPendingRemoval] = useState<EvidenceItem | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const resetForm = () => {
@@ -255,7 +263,7 @@ export const EvidencePanel = ({
                       size="sm"
                       icon={<Trash2 />}
                       label={removeTitle}
-                      onClick={() => onRemove(item.id)}
+                      onClick={() => setPendingRemoval(item)}
                       isLoading={removingId === item.id}
                     />
                   )}
@@ -264,6 +272,24 @@ export const EvidencePanel = ({
             );
           })}
         </ul>
+      )}
+      {onRemove && (
+        <ConfirmDialog
+          open={!!pendingRemoval}
+          onOpenChange={(open) => !open && setPendingRemoval(null)}
+          title="Remove this file?"
+          description={
+            pendingRemoval
+              ? `"${pendingRemoval.name}" will be removed from this record. This cannot be undone.`
+              : ''
+          }
+          confirmLabel="Remove"
+          tone="danger"
+          onConfirm={() => {
+            if (pendingRemoval) onRemove(pendingRemoval.id);
+            setPendingRemoval(null);
+          }}
+        />
       )}
     </div>
   );

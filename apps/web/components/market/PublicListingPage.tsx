@@ -17,6 +17,7 @@ import {
 import { Footer } from '@/components/layout/Footer';
 import { Navigation } from '@/components/layout/Navigation';
 import { JsonLd } from '@/components/seo/JsonLd';
+import { listingJsonLd } from '@/lib/structuredData';
 import { ListingCallToAction } from '@/components/market/ListingCallToAction';
 import { SaveListingButton } from '@/components/market/SaveListingButton';
 import { StickyListingCta } from '@/components/market/StickyListingCta';
@@ -85,7 +86,7 @@ export async function PublicListingPage({
 
   return (
     <main className="min-h-screen bg-background pt-16">
-      <JsonLd data={offerJsonLd(listing)} />
+      <JsonLd data={listingJsonLd(listing, path)} />
       <Navigation />
       <article className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <Link
@@ -335,18 +336,4 @@ function Gallery({ listing }: { listing: PublicListingDetail }) {
       </span>
     </div>
   );
-}
-
-export function offerJsonLd(listing: PublicListingDetail) {
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'Offer',
-    name: listing.title,
-    description: listing.description,
-    price: listing.price,
-    priceCurrency: 'NGN',
-    url: `${SITE_URL}${publicListingPath(listing)}`,
-    image: listing.images[0],
-    availableAtOrFrom: { '@type': 'Place', address: listing.address || listing.location },
-  };
 }

@@ -1,5 +1,6 @@
 export * from './estate-id-documents';
 export * from './notification-email';
+export * from './countries';
 
 export const USER_ROLES = {
   RENTER: 'renter',

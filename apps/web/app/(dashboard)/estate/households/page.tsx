@@ -7,6 +7,7 @@ import { Users, Plus, Upload, Lock } from '@sureground/icons';
 import {
   Button,
   CardSkeleton,
+  ConfirmDialog,
   EmptyState,
   ListSkeleton,
   Pagination,
@@ -36,6 +37,10 @@ export default function EstateHouseholdsPage() {
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [importResult, setImportResult] = useState<ImportHouseholdsResult | null>(null);
   const [page, setPage] = useState(1);
+  const [confirming, setConfirming] = useState<{
+    kind: 'remove' | 'unlink';
+    household: Household;
+  } | null>(null);
 
   const { estate, isLoading: isEstateLoading } = useSelectedEstate();
   const planGate = usePlanGateModal();
@@ -100,7 +105,9 @@ export default function EstateHouseholdsPage() {
     onSuccess: () => {
       invalidate();
       setPage((current) => (current > 1 && households.length === 1 ? current - 1 : current));
+      if (confirming) toast.success(`${confirming.household.unitLabel} removed.`);
     },
+    onError: (error: Error) => toast.error(error.message || 'Unable to remove this household.'),
   });
 
   const linkResident = useMutation({
@@ -114,7 +121,13 @@ export default function EstateHouseholdsPage() {
 
   const unlinkResident = useMutation({
     mutationFn: (id: string) => unwrap(estateService.unlinkResident(estate!.id, id)),
-    onSuccess: invalidate,
+    onSuccess: () => {
+      invalidate();
+      if (confirming)
+        toast.success(`Resident account unlinked from ${confirming.household.unitLabel}.`);
+    },
+    onError: (error: Error) =>
+      toast.error(error.message || 'Unable to unlink this resident account.'),
   });
 
   const importHouseholds = useMutation({
@@ -217,9 +230,9 @@ export default function EstateHouseholdsPage() {
                 setEditingHousehold(household);
                 setIsModalOpen(true);
               }}
-              onRemove={() => removeHousehold.mutate(household.id)}
+              onRemove={() => setConfirming({ kind: 'remove', household })}
               onLinkResident={() => setLinkingHousehold(household)}
-              onUnlinkResident={() => unlinkResident.mutate(household.id)}
+              onUnlinkResident={() => setConfirming({ kind: 'unlink', household })}
             />
           ))}
         </div>
@@ -275,6 +288,31 @@ export default function EstateHouseholdsPage() {
         isOpen={planGate.isOpen}
         onClose={planGate.close}
         reason={planGate.reason}
+      />
+
+      <ConfirmDialog
+        open={confirming !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirming(null);
+        }}
+        title={
+          confirming?.kind === 'unlink' ? 'Unlink this resident account?' : 'Remove this household?'
+        }
+        description={
+          !confirming
+            ? ''
+            : confirming.kind === 'unlink'
+              ? `${confirming.household.residentName}'s account is unlinked from ${confirming.household.unitLabel}. The household stays, and you can link an account again later.`
+              : `${confirming.household.unitLabel} (${confirming.household.residentName}) is removed from ${estate.name}. This can't be undone.`
+        }
+        confirmLabel={confirming?.kind === 'unlink' ? 'Unlink' : 'Remove'}
+        onConfirm={() =>
+          confirming &&
+          (confirming.kind === 'unlink' ? unlinkResident : removeHousehold).mutateAsync(
+            confirming.household.id
+          )
+        }
+        isLoading={removeHousehold.isPending || unlinkResident.isPending}
       />
     </>
   );

@@ -1,13 +1,13 @@
-import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { ArrowLeft, BadgeCheck, Bath, BedDouble, Check, MapPin, Ruler } from '@sureground/icons';
+import { BadgeCheck, Bath, BedDouble, Check, MapPin, Ruler } from '@sureground/icons';
 import { trustChainLabel } from '@sureground/shared';
 import { floorPlanLevels } from '@sureground/shared/showroom';
 import { Badge, DescriptionList } from '@sureground/ui';
+import { Breadcrumbs } from '@sureground/ui/Breadcrumbs';
 import { Footer } from '@/components/layout/Footer';
 import { Navigation } from '@/components/layout/Navigation';
 import { JsonLd } from '@/components/seo/JsonLd';
-import { offerJsonLd } from '@/components/market/PublicListingPage';
+import { breadcrumbJsonLd, listingJsonLd } from '@/lib/structuredData';
 import { SaveListingButton } from '@/components/market/SaveListingButton';
 import { SimilarListings } from '@/components/market/SimilarListings';
 import { StickyListingCta } from '@/components/market/StickyListingCta';
@@ -59,20 +59,23 @@ export async function ShowroomPage({
     listing.size ? { icon: Ruler, label: `${listing.size} m²` } : null,
   ].filter((f): f is NonNullable<typeof f> => !!f);
   const floorPlans = floorPlanLevels(listing.media);
+  const crumbs = [
+    { name: 'Home', path: '/' },
+    { name: MARKET_NOUN[market], path: back },
+    { name: listing.title, path },
+  ];
 
   return (
     <main className="min-h-screen bg-background pt-16">
-      <JsonLd data={offerJsonLd(listing)} />
+      <JsonLd data={listingJsonLd(listing, path)} />
+      <JsonLd data={breadcrumbJsonLd(crumbs)} />
       <Navigation />
       <article className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         <ShowroomGallery>
-          <Link
-            href={back}
-            className="inline-flex min-h-10 items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            {MARKET_NOUN[market]}
-          </Link>
+          <Breadcrumbs
+            items={crumbs.map((crumb) => ({ label: crumb.name, href: crumb.path }))}
+            className="mb-0 min-h-10 py-2"
+          />
 
           <TrackDetailView listingId={listing.id} market={market} />
           <ShowroomMedia
