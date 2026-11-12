@@ -86,7 +86,8 @@ export default function Discover() {
       setFilters((f) =>
         f.search === (next || undefined) ? f : { ...f, search: next || undefined }
       );
-      if (next) track('search_performed', { q: next });
+      // Free text can hold an address or a name: record that a search happened, never what was typed.
+      if (next) track('search_performed', { length: next.length });
     }, 350);
     return () => clearTimeout(t);
   }, [searchText]);
