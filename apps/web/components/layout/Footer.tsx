@@ -16,6 +16,7 @@ const COLUMNS: { title: string; links: { label: string; href: string }[] }[] = [
       { label: 'Homes to rent', href: '/rent' },
       { label: 'Short stays', href: ROUTES.SHORTLET_MARKETPLACE },
       { label: 'Land', href: ROUTES.LAND_MARKETPLACE },
+      { label: 'Off-plan developments', href: '/developments' },
       { label: 'Estates', href: ESTATE_MARKETPLACE_ROUTES.ESTATES_DIRECTORY },
       { label: 'Detty December', href: '/detty-december' },
     ],

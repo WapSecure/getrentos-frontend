@@ -3,3 +3,4 @@ export * from './map';
 export * from './events';
 export * from './floorPlans';
 export * from './developments';
+export * from './developmentEnquiries';

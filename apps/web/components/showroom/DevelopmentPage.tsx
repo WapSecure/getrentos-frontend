@@ -23,6 +23,7 @@ import { Footer } from '@/components/layout/Footer';
 import { Navigation } from '@/components/layout/Navigation';
 import { formatCurrency } from '@/lib/format';
 import { DEVELOPMENTS_PATH } from '@/lib/publicDevelopments';
+import { AskTheDeveloper, AskTheDeveloperLink } from './AskTheDeveloper';
 import { DevelopmentChecks, DevelopmentPaymentNotice } from './DevelopmentAssurance';
 import { ShowroomSection as Section } from './ShowroomSection';
 
@@ -264,6 +265,14 @@ export function DevelopmentPage({ development: d }: { development: ShowroomDevel
             </Section>
 
             <DevelopmentChecks development={d} />
+
+            <Section id="ask" title="Ask the developer">
+              <AskTheDeveloper
+                developmentId={d.id}
+                developerName={d.developerName}
+                unitTypes={d.unitTypes}
+              />
+            </Section>
           </div>
 
           <aside className="lg:sticky lg:top-24 lg:self-start" aria-label="Price and contact">
@@ -277,9 +286,10 @@ export function DevelopmentPage({ development: d }: { development: ShowroomDevel
                   <p className="mt-1 text-xs text-muted-foreground">As the developer states it</p>
                 </div>
               )}
+              <AskTheDeveloperLink developmentId={d.id} />
               {(d.salesPhone || d.salesEmail) && (
                 <div className="space-y-2 text-sm">
-                  <p className="font-medium text-foreground">Contact the developer</p>
+                  <p className="font-medium text-foreground">Or contact their sales team</p>
                   {d.salesPhone && (
                     <a
                       href={`tel:${d.salesPhone.replace(/\s/g, '')}`}

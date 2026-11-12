@@ -24,6 +24,7 @@ import {
 } from '@/services/publicMarketService';
 import { unwrap, type Paginated } from '@/lib/apiHelpers';
 import { PUBLIC_MARKET_PAGE_SIZE } from '@/lib/publicListingMap';
+import { BuyMarketTabs } from '@/components/showroom/BuyMarketTabs';
 import { PROPERTY_TYPE_OPTIONS } from '@/lib/propertyTypes';
 import { SaveListingButton } from './SaveListingButton';
 import { ListingComparisonDialog } from './ListingComparisonDialog';
@@ -350,6 +351,7 @@ export const PublicMarketBrowser = ({
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      {market === 'sale' && !estateFromUrl && <BuyMarketTabs current="homes" />}
       <header className="max-w-3xl py-6 sm:py-10">
         <h1 className="text-4xl font-semibold tracking-[-0.04em] text-foreground sm:text-5xl">
           {market === 'rent' ? 'Homes to rent' : 'Homes for sale'}
