@@ -289,7 +289,22 @@ export interface PortfolioFigures {
   managedProperties: number | null;
   /** Net to the owner on the latest issued statement, whole naira. */
   latestStatementNet: number | null;
+  /** Recorded prices of completed purchases, whole naira. Never a valuation. */
+  acquisitionCost: number | null;
+  /** Statement income over the last 12 months, whole naira. */
+  rentReceived12m: number | null;
+  /** Net paid on those statements, whole naira. */
+  net12m: number | null;
+  /** Occupied out of managed units, percent. */
+  occupancyRate: number | null;
 }
+
+/** A whole-naira string from the API as a number; null when absent or unreadable. */
+const nairaOrNull = (value: string | null | undefined): number | null => {
+  if (value === null || value === undefined || value === '') return null;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+};
 
 /** Buyer transactions as listed by `GET buyer/transactions` (lower-case statuses). */
 export interface HeldDepositSource {
@@ -331,6 +346,7 @@ export const portfolioFigures = (
   }
 
   const net = overview?.latestStatement ? Number(overview.latestStatement.netAmount) : NaN;
+  const portfolio = overview?.portfolio;
 
   return {
     activePurchases,
@@ -342,6 +358,13 @@ export const portfolioFigures = (
         ? overview.activeManagedProperties
         : null,
     latestStatementNet: Number.isFinite(net) ? net : null,
+    acquisitionCost: nairaOrNull(portfolio?.acquisitionCost),
+    rentReceived12m: nairaOrNull(portfolio?.rentReceived12m),
+    net12m: nairaOrNull(portfolio?.net12m),
+    occupancyRate:
+      typeof portfolio?.occupancyRate === 'number' && Number.isFinite(portfolio.occupancyRate)
+        ? portfolio.occupancyRate
+        : null,
   };
 };
 

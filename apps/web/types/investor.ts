@@ -13,6 +13,7 @@ export {
   type InvestmentHorizon,
   type InvestorAvailability,
   type InvestorOverview,
+  type InvestorPortfolio,
   type InvestorProfile,
   type InvestorProfileField,
   type InvestorProfileInput,
@@ -22,3 +23,82 @@ export {
   type OwnershipStructure,
   type RiskDeclaration,
 } from '@sureground/shared';
+
+// Investment analysis of an eligible listing (DIA-19), naira only.
+
+export type FigureSource = 'VERIFIED' | 'THIRD_PARTY_ESTIMATE' | 'YOUR_ASSUMPTION';
+
+export interface AnalysisFigure {
+  /** Whole naira, or a percentage; null when it cannot be worked out. */
+  value: number | null;
+  source: FigureSource;
+  basis: string;
+  asOf: string;
+  methodologyVersion: string;
+}
+
+export interface AnalysisCostLine {
+  key: 'PURCHASE_PRICE' | 'LEGAL_FEES' | 'AGENCY_FEE' | 'CONSENT_AND_REGISTRATION';
+  label: string;
+  ratePct: AnalysisFigure | null;
+  amount: AnalysisFigure;
+  range: { low: number; high: number } | null;
+}
+
+export interface AnalysisScenario {
+  key: 'CAUTIOUS' | 'CENTRAL' | 'OPTIMISTIC';
+  label: string;
+  acquisitionCost: AnalysisFigure;
+  annualRent: AnalysisFigure;
+  netIncome: AnalysisFigure;
+  grossYieldPct: AnalysisFigure;
+  netYieldPct: AnalysisFigure;
+  cashFlowNet: AnalysisFigure;
+}
+
+export interface ListingAnalysis {
+  listingId: string;
+  currency: 'NGN';
+  methodologyVersion: string;
+  asOf: string;
+  costs: AnalysisCostLine[];
+  acquisitionCost: AnalysisFigure;
+  assumptions: Record<
+    'annualRent' | 'vacancyPct' | 'rentGrowthPct' | 'maintenancePct' | 'managementFeePct',
+    AnalysisFigure
+  >;
+  income: Record<
+    'grossRent' | 'vacancy' | 'managementFee' | 'maintenance' | 'netIncome',
+    AnalysisFigure
+  >;
+  grossYieldPct: AnalysisFigure;
+  netYieldPct: AnalysisFigure;
+  cashFlow: {
+    years: number;
+    rows: {
+      year: number;
+      grossRent: number;
+      vacancy: number;
+      managementFee: number;
+      maintenance: number;
+      net: number;
+    }[];
+    total: AnalysisFigure;
+  };
+  scenarios: AnalysisScenario[];
+  methodology: string[];
+  notIncluded: string[];
+  disclaimer: string;
+}
+
+/** The investor's own figures; anything left out takes the default. Percentages are 0 to 100. */
+export interface ListingAnalysisInput {
+  annualRent?: number;
+  vacancyPct?: number;
+  rentGrowthPct?: number;
+  maintenancePct?: number;
+  managementFeePct?: number;
+  legalFeesPct?: number;
+  agencyFeePct?: number;
+  consentPct?: number;
+}

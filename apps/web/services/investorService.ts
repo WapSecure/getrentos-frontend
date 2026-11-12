@@ -4,6 +4,8 @@ import type {
   InvestorOverview,
   InvestorProfile,
   InvestorProfileInput,
+  ListingAnalysis,
+  ListingAnalysisInput,
   RiskDeclaration,
 } from '@/types/investor';
 import type { InvestorManaged } from '@/types/managed';
@@ -51,5 +53,22 @@ export const investorService = {
   /** Every property under Sureground Managed, with what waits on the owner. */
   getManaged(): Promise<ApiResponse<InvestorManaged>> {
     return safeCall(() => authFetch<InvestorManaged>('/investor/managed'));
+  },
+
+  /** Public. 404 unless the listing is investment eligible. Only the figures given replace the defaults. */
+  getListingAnalysis(
+    listingId: string,
+    input: ListingAnalysisInput = {}
+  ): Promise<ApiResponse<ListingAnalysis>> {
+    const query = new URLSearchParams();
+    for (const [key, value] of Object.entries(input)) {
+      if (typeof value === 'number' && Number.isFinite(value)) query.set(key, String(value));
+    }
+    const qs = query.toString();
+    return safeCall(() =>
+      authFetch<ListingAnalysis>(
+        `/marketplace/listings/${encodeURIComponent(listingId)}/analysis${qs ? `?${qs}` : ''}`
+      )
+    );
   },
 };

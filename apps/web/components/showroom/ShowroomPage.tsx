@@ -26,6 +26,7 @@ import { ShowroomShareButton } from './ShowroomShareButton';
 import { ShowroomTrust } from './ShowroomTrust';
 import { VerificationSummaryBadge } from '@/components/shared/trust/VerificationSummaryCard';
 import { TrustChainBadge } from '@/components/shared/trust/TrustChainBadge';
+import { ListingInvestmentAnalysis } from '@/components/diaspora/analysis/ListingInvestmentAnalysis';
 import {
   FloorPlansShortcut,
   ShowroomGallery,
@@ -211,6 +212,12 @@ export async function ShowroomPage({
               )}
 
               <ShowroomTrust listing={listing} />
+
+              {/* DIA-19: only where the checks make the listing investment eligible. */}
+              {market !== 'rent' &&
+                listing.verificationSummary?.status === 'INVESTMENT_ELIGIBLE' && (
+                  <ListingInvestmentAnalysis listingId={listing.id} />
+                )}
             </div>
 
             <ShowroomAside listing={listing} returnPath={path} />

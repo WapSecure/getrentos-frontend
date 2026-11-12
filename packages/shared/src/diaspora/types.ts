@@ -253,6 +253,24 @@ export interface InvestorOverview {
   latestStatement?: InvestorStatementSummary | null;
   /** My purchases with their three statuses, then those I see as a representative. */
   purchases?: PurchaseSummary[];
+  portfolio?: InvestorPortfolio;
+}
+
+/**
+ * Portfolio figures from records Sureground holds; each is null when there is no record behind it.
+ * There is no valuation: no method has been agreed.
+ */
+export interface InvestorPortfolio {
+  properties: number | null;
+  /** Whole naira, as a string: recorded prices of completed purchases. */
+  acquisitionCost: string | null;
+  /** Whole naira, as a string: income on issued statements over the last 12 months. */
+  rentReceived12m: string | null;
+  expenses12m: string | null;
+  net12m: string | null;
+  /** Percent, one decimal place: occupied units out of managed units. */
+  occupancyRate: number | null;
+  asOf: string;
 }
 
 // ── Identity abroad (decision D3) ────────────────────────────────────────────
