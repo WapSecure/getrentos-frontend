@@ -4,3 +4,4 @@ export * from './events';
 export * from './funnelEvents';
 export * from './floorPlans';
 export * from './developments';
+export * from './developmentEnquiries';

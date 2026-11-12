@@ -36,6 +36,7 @@ const FIND_LINKS: NavLink[] = [
     hint: 'Serviced apartments by the night',
   },
   { label: 'Land', href: ROUTES.LAND_MARKETPLACE, hint: 'Plots with title checks' },
+  { label: 'Off-plan', href: '/developments', hint: 'New developments checked by our staff' },
 ];
 
 const MORE_LINKS: NavLink[] = [

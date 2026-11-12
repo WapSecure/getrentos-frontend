@@ -1,5 +1,16 @@
 import { authFetch, safeCall, type ApiResponse } from '@/lib/apiHelpers';
-import type { DevelopmentCheckKind, DevelopmentStage } from '@sureground/shared/showroom';
+import {
+  buyerDevelopmentEnquiriesOf,
+  buyerDevelopmentEnquiryOf,
+  developerDevelopmentEnquiriesOf,
+  developerDevelopmentEnquiryOf,
+  developmentEnquiryCountsOf,
+  type BuyerDevelopmentEnquiry,
+  type DeveloperDevelopmentEnquiry,
+  type DevelopmentCheckKind,
+  type DevelopmentEnquiryStatus,
+  type DevelopmentStage,
+} from '@sureground/shared/showroom';
 
 export type DevelopmentStatus = 'DRAFT' | 'IN_REVIEW' | 'CHANGES_REQUESTED' | 'LIVE' | 'WITHDRAWN';
 export type DevelopmentTitleType = 'CERTIFICATE_OF_OCCUPANCY' | 'GOVERNOR_CONSENT';
@@ -211,5 +222,82 @@ export const developmentsService = {
   },
   withdraw(id: string) {
     return safeCall(() => authFetch<DeveloperDevelopment>(at(id, '/withdraw'), { method: 'POST' }));
+  },
+};
+
+/** A response the mapper refused is a failure, never an empty success. */
+async function mapped<T>(
+  call: Promise<ApiResponse<unknown>>,
+  map: (raw: unknown) => T | undefined
+): Promise<ApiResponse<T>> {
+  const res = await call;
+  if (!res.success) return res as ApiResponse<T>;
+  const data = map(res.data);
+  return data === undefined
+    ? {
+        success: false,
+        error: 'Something went wrong',
+        message: 'Something went wrong. Please try again.',
+      }
+    : { success: true, data };
+}
+
+/** "Ask the developer": the buyer's side (any signed-in user) and the firm's inbox. */
+export const developmentEnquiriesService = {
+  ask(developmentId: string, message: string, unitTypeId?: string) {
+    return mapped(
+      safeCall(() =>
+        authFetch<unknown>(
+          `/developments/${encodeURIComponent(developmentId)}/enquiries`,
+          json('POST', { message, ...(unitTypeId ? { unitTypeId } : {}) })
+        )
+      ),
+      buyerDevelopmentEnquiryOf
+    );
+  },
+  mine(developmentId?: string): Promise<ApiResponse<BuyerDevelopmentEnquiry[]>> {
+    const query = developmentId ? `?developmentId=${encodeURIComponent(developmentId)}` : '';
+    return mapped(
+      safeCall(() => authFetch<unknown>(`/development-enquiries${query}`)),
+      buyerDevelopmentEnquiriesOf
+    );
+  },
+  inbox(
+    developmentId: string,
+    status?: DevelopmentEnquiryStatus
+  ): Promise<ApiResponse<DeveloperDevelopmentEnquiry[]>> {
+    return mapped(
+      safeCall(() =>
+        authFetch<unknown>(at(developmentId, `/enquiries${status ? `?status=${status}` : ''}`))
+      ),
+      developerDevelopmentEnquiriesOf
+    );
+  },
+  answer(developmentId: string, enquiryId: string, answer: string) {
+    return mapped(
+      safeCall(() =>
+        authFetch<unknown>(
+          at(developmentId, `/enquiries/${encodeURIComponent(enquiryId)}/answer`),
+          json('POST', { answer })
+        )
+      ),
+      developerDevelopmentEnquiryOf
+    );
+  },
+  close(developmentId: string, enquiryId: string) {
+    return mapped(
+      safeCall(() =>
+        authFetch<unknown>(at(developmentId, `/enquiries/${encodeURIComponent(enquiryId)}/close`), {
+          method: 'POST',
+        })
+      ),
+      developerDevelopmentEnquiryOf
+    );
+  },
+  newCounts(): Promise<ApiResponse<Record<string, number>>> {
+    return mapped(
+      safeCall(() => authFetch<unknown>('/agency/development-enquiries/new-counts')),
+      developmentEnquiryCountsOf
+    );
   },
 };
