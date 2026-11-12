@@ -1,4 +1,6 @@
 import type { Portal } from './roles';
+import { developmentRoute, developmentRouteForPath } from './askDeveloper';
+import { isDevelopmentId } from './developments';
 
 // Never return a route that does not exist: unmapped paths fall back by type, then to the inbox.
 const WEB_PATH_TO_ROUTE: Record<string, string> = {
@@ -189,7 +191,7 @@ export function routeForActionUrl(url?: string | null): string | null {
     .replace(/\/$/, '');
   if (WEB_PATH_TO_ROUTE[path]) return WEB_PATH_TO_ROUTE[path];
   if (path.startsWith('/owner/land/')) return '/(app)/owner-land';
-  return null;
+  return developmentRouteForPath(path);
 }
 
 const CONVERSATION_ROUTE: Partial<Record<Portal, string>> = {
@@ -207,11 +209,13 @@ export function routeForNotification(
     type,
     bookingId,
     conversationId,
+    developmentId,
   }: {
     actionUrl?: string | null;
     type?: string | null;
     bookingId?: string | null;
     conversationId?: string | null;
+    developmentId?: string | null;
   },
   portal: Portal | null
 ): string {
@@ -234,6 +238,10 @@ export function routeForNotification(
   }
   const direct = routeForActionUrl(actionUrl);
   if (direct) return direct;
+  // The developer answered: their answer shows under "Your questions" on the development screen.
+  if (type === 'DEVELOPMENT_ENQUIRY_ANSWERED' && isDevelopmentId(developmentId)) {
+    return developmentRoute(developmentId);
+  }
   if (portal && HOST_PORTALS.has(portal) && type && HOST_ONLY_TYPES.has(type)) {
     return bookingId && type === 'SHORTLET_BOOKING_REQUEST'
       ? `/(app)/host/booking/${bookingId}`
