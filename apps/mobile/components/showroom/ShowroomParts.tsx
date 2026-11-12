@@ -132,11 +132,14 @@ export function ShowroomCostsCard({
   price,
   priceUnit,
   footer,
+  vatStated = false,
 }: {
   market: ShowroomListing['market'];
   costs: ShowroomCosts;
   price: number;
   priceUnit?: ShowroomListing['priceUnit'];
+  /** The landlord states a VAT rate or whether VAT is included: say it is never added here. */
+  vatStated?: boolean;
   /** A next step that belongs with the price, such as Apply or Make an offer. */
   footer?: ReactNode;
 }) {
@@ -166,6 +169,21 @@ export function ShowroomCostsCard({
         {market === 'rent' && priceUnit === 'year' ? (
           <Text variant="caption" color="mutedForeground">
             Rent is about ₦{Math.round(price / 12).toLocaleString('en-NG')} a month.
+          </Text>
+        ) : null}
+        {vatStated ? (
+          // VAT is never added to these amounts; the landlord's own statement is shown once, under the lease.
+          <Text
+            variant="caption"
+            color="mutedForeground"
+            style={{
+              borderTopWidth: StyleSheet.hairlineWidth,
+              borderTopColor: colors.border,
+              paddingTop: spacing.sm,
+            }}
+          >
+            Sureground does not add VAT to these amounts. The VAT the landlord states is under Lease
+            and terms.
           </Text>
         ) : null}
         {costs.notStated.length ? (

@@ -50,6 +50,8 @@ import {
   ShowroomPriceBar,
 } from '@/components/showroom/ShowroomParts';
 import { trackShowroom } from '@/lib/showroomAnalytics';
+import { ShowroomCommercial } from '@/components/showroom/ShowroomCommercial';
+import { vatStated } from '@sureground/shared/showroom';
 import { PropertyMapView } from '@/components/property/PropertyMapView';
 import { useMarketSaved } from '@/hooks/useMarketSaved';
 import { useCardAnalytics } from '@/hooks/useCardAnalytics';
@@ -291,6 +293,7 @@ function Body({
           costs={p.costs}
           price={p.price}
           priceUnit={p.period === 'month' || p.period === 'year' ? p.period : undefined}
+          vatStated={vatStated(p.commercial)}
         />
       ) : null}
 
@@ -348,6 +351,11 @@ function Body({
             </View>
           ) : null}
         </Card>
+      ) : null}
+
+      {/* Commercial: the lease and the space come before the description, as on the web. */}
+      {p.commercial && (p.kind === 'rent' || p.kind === 'sale') ? (
+        <ShowroomCommercial commercial={p.commercial} market={p.kind} />
       ) : null}
 
       {p.description ? (
