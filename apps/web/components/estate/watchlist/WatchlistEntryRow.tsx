@@ -1,7 +1,8 @@
 'use client';
 
-import { ImageIcon, ShieldAlert, ShieldCheck, Undo2 } from '@sureground/icons';
+import { Car, ImageIcon, ShieldAlert, ShieldCheck, Undo2, User } from '@sureground/icons';
 import { Badge, Button, IconLink } from '@sureground/ui';
+import { EstateRow, RowAvatar } from '@/components/estate/shared/EstateListSection';
 import type { WatchlistEntry } from '@/types/estate';
 
 const formatDate = (value: string) =>
@@ -21,6 +22,7 @@ export const WatchlistEntryRow = ({ entry, onLift }: WatchlistEntryRowProps) => 
   const isExpired = !isLifted && !!entry.expiresAt && new Date(entry.expiresAt) <= new Date();
   const isBlock = entry.severity === 'BLOCK';
   const inForce = !isLifted && !isExpired;
+  const isVehicle = entry.subjectType === 'VEHICLE';
 
   const contacts = [
     entry.phone ? `Phone ${entry.phone}` : null,
@@ -28,73 +30,84 @@ export const WatchlistEntryRow = ({ entry, onLift }: WatchlistEntryRowProps) => 
   ].filter(Boolean);
 
   return (
-    <div className="p-4 flex items-start justify-between gap-4">
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2 flex-wrap">
-          <p className="text-sm font-medium text-foreground truncate">{entry.label}</p>
+    <EstateRow
+      align="start"
+      leading={
+        <RowAvatar
+          icon={isVehicle ? Car : User}
+          tone={!inForce ? 'neutral' : isBlock ? 'danger' : 'warning'}
+        />
+      }
+      title={
+        <>
+          <p className="truncate text-sm font-medium text-foreground">{entry.label}</p>
           {isBlock ? (
-            <Badge variant="danger" icon={<ShieldAlert className="w-3 h-3" />}>
+            <Badge variant="danger" icon={<ShieldAlert className="h-3 w-3" />}>
               Do not admit
             </Badge>
           ) : (
-            <Badge variant="warning" icon={<ShieldCheck className="w-3 h-3" />}>
+            <Badge variant="warning" icon={<ShieldCheck className="h-3 w-3" />}>
               Watch only
             </Badge>
           )}
-          <span className="text-xs text-muted-foreground">
-            {entry.subjectType === 'VEHICLE' ? 'Vehicle' : 'Person'}
-          </span>
-        </div>
-
-        <p className="text-xs text-muted-foreground mt-1">{entry.reason}</p>
-
-        <p className="text-xs text-muted-foreground mt-1">
-          {contacts.length > 0
-            ? contacts.join(' · ')
-            : entry.subjectType === 'VEHICLE'
-              ? 'Matched on plate'
-              : 'Matched on name'}
-        </p>
-
-        <p className="text-xs text-muted-foreground mt-1">
-          Added {formatDate(entry.createdAt)}
-          {inForce && entry.expiresAt ? ` · lapses ${formatDate(entry.expiresAt)}` : ''}
-        </p>
-
-        {isLifted && (
-          <p className="text-xs text-muted-foreground mt-1">
-            Lifted {entry.liftedAt ? formatDate(entry.liftedAt) : ''}
-            {entry.liftReason ? `: ${entry.liftReason}` : ''}. Not enforced.
+          <span className="text-xs text-muted-foreground">{isVehicle ? 'Vehicle' : 'Person'}</span>
+        </>
+      }
+      meta={
+        <>
+          <p className="text-foreground/80">{entry.reason}</p>
+          <p>
+            {contacts.length > 0
+              ? contacts.join(' · ')
+              : isVehicle
+                ? 'Matched on plate'
+                : 'Matched on name'}
           </p>
-        )}
-
-        {isExpired && (
-          <p className="text-xs text-warning mt-1">
-            Lapsed on {formatDate(entry.expiresAt!)}. Not enforced: extend it or add it again if the
-            estate still needs it.
+          <p className="tabular-nums">
+            Added {formatDate(entry.createdAt)}
+            {inForce && entry.expiresAt ? ` · lapses ${formatDate(entry.expiresAt)}` : ''}
           </p>
-        )}
-      </div>
-
-      <div className="flex items-center gap-2 shrink-0">
-        {entry.photoUrl && (
-          <IconLink
-            href={entry.photoUrl}
-            target="_blank"
-            rel="noreferrer"
-            label={`Photo on file for ${entry.label}`}
-            title="Photo on file"
-            icon={<ImageIcon />}
-            size="sm"
-          />
-        )}
-        {inForce ? (
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={onLift}>
-            <Undo2 className="w-3.5 h-3.5" />
-            Lift
-          </Button>
-        ) : null}
-      </div>
-    </div>
+          {isLifted && (
+            <p>
+              Lifted {entry.liftedAt ? formatDate(entry.liftedAt) : ''}
+              {entry.liftReason ? `: ${entry.liftReason}` : ''}. Not enforced.
+            </p>
+          )}
+          {isExpired && (
+            <p className="text-warning">
+              Lapsed on {formatDate(entry.expiresAt!)}. Not enforced: extend it or add it again if
+              the estate still needs it.
+            </p>
+          )}
+        </>
+      }
+      actions={
+        entry.photoUrl || inForce ? (
+          <>
+            {entry.photoUrl && (
+              <IconLink
+                href={entry.photoUrl}
+                target="_blank"
+                rel="noreferrer"
+                label={`Photo on file for ${entry.label}`}
+                title="Photo on file"
+                icon={<ImageIcon />}
+                size="sm"
+              />
+            )}
+            {inForce ? (
+              <Button
+                variant="outline"
+                size="sm"
+                icon={<Undo2 className="h-3.5 w-3.5" />}
+                onClick={onLift}
+              >
+                Lift
+              </Button>
+            ) : null}
+          </>
+        ) : undefined
+      }
+    />
   );
 };

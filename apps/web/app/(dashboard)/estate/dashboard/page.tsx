@@ -1,5 +1,6 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
@@ -8,13 +9,16 @@ import {
   BookOpen,
   Building2,
   Car,
+  Clock,
   KeyRound,
   Megaphone,
   Package,
   ReceiptText,
   ShieldCheck,
+  Siren,
   TriangleAlert,
   Users,
+  Wrench,
 } from '@sureground/icons';
 import {
   Alert,
@@ -30,10 +34,11 @@ import { ROUTES } from '@/lib/constants/auth';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
-import { estateKeys } from '@/lib/queryKeys';
 import { formatCurrency, pluralize } from '@/lib/format';
 import { useEstatePlan } from '@/hooks/useEstatePlan';
-import { AttentionFeed } from '@/components/shared/attention/AttentionFeed';
+import { attentionKeys, estateKeys } from '@/lib/queryKeys';
+import { attentionService } from '@/services/attentionService';
+import { AttentionList } from '@/components/shared/attention/AttentionList';
 import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
 
 const EstateDuesTrendChart = dynamic(
@@ -43,7 +48,7 @@ const EstateDuesTrendChart = dynamic(
     ),
   {
     ssr: false,
-    loading: () => <Skeleton className="h-72 rounded-xl" />,
+    loading: () => <Skeleton className="h-72 rounded-2xl" />,
   }
 );
 
@@ -109,6 +114,14 @@ export default function EstateDashboardPage() {
     enabled: !!estate && isPro,
   });
 
+  // Same query the shared attention feed makes, so it is fetched once.
+  const attention = useQuery({
+    queryKey: attentionKeys.feed('estate', estate?.id),
+    queryFn: () => unwrap(attentionService.get('estate', estate!.id)),
+    enabled: !!estate,
+    staleTime: 60_000,
+  });
+
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -122,11 +135,9 @@ export default function EstateDashboardPage() {
     return (
       <div className="mx-auto max-w-xl py-16 text-center">
         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-accent text-primary">
-          <Building2 className="h-8 w-8" />
+          <Building2 className="h-8 w-8" aria-hidden="true" />
         </div>
-        <h1 className="mt-6 text-3xl font-semibold tracking-[-0.03em] text-foreground">
-          No estate yet
-        </h1>
+        <h1 className="page-title mt-6 text-foreground">No estate yet</h1>
         <p className="mt-3 text-base leading-7 text-muted-foreground">
           Set up your estate to start managing households.
         </p>
@@ -138,9 +149,12 @@ export default function EstateDashboardPage() {
     );
   }
 
+  const dash = '–';
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-10">
       <PageHeader
+        eyebrow="Overview"
         title={estate.name}
         description={`${estate.address}, ${estate.city}, ${estate.state}`}
         meta={`${pluralize(estate.householdCount, 'household')} · ${pluralize(estate.gateCount ?? 0, 'active gate')}`}
@@ -159,82 +173,125 @@ export default function EstateDashboardPage() {
         </Alert>
       )}
 
-      <AttentionFeed persona="estate" estateId={estate.id} />
+      {isPro && (
+        <DashboardSection
+          id="key-figures"
+          title="Key figures"
+          description="Dues for this month and what is still open across the estate."
+        >
+          {isStatsLoading ? (
+            <StatGroupSkeleton groups={[2, 4]} />
+          ) : (
+            <div className="space-y-4">
+              <StatGroup
+                title="Dues"
+                items={[
+                  {
+                    label: 'Collected this month',
+                    value: stats
+                      ? formatCurrency(stats.duesCollectedThisMonth, { compact: true })
+                      : dash,
+                    icon: ReceiptText,
+                    href: ROUTES.ESTATE_DUES,
+                  },
+                  {
+                    label: 'Outstanding',
+                    value: stats ? formatCurrency(stats.duesOutstanding, { compact: true }) : dash,
+                    icon: Clock,
+                    attention: (stats?.duesOutstanding ?? 0) > 0,
+                    href: ROUTES.ESTATE_DUES,
+                  },
+                ]}
+              />
+              <StatGroup
+                title="Estate"
+                items={[
+                  {
+                    label: 'Households',
+                    value: stats?.totalHouseholds ?? dash,
+                    icon: Users,
+                    href: ROUTES.ESTATE_HOUSEHOLDS,
+                  },
+                  {
+                    label: 'Open incidents',
+                    value: stats?.openIncidents ?? dash,
+                    icon: Siren,
+                    attention: (stats?.openIncidents ?? 0) > 0,
+                    href: ROUTES.ESTATE_INCIDENTS,
+                  },
+                  {
+                    label: 'Open maintenance',
+                    value: stats?.openMaintenanceTickets ?? dash,
+                    icon: Wrench,
+                    attention: (stats?.openMaintenanceTickets ?? 0) > 0,
+                    href: ROUTES.ESTATE_MAINTENANCE,
+                  },
+                  {
+                    label: 'Pending violations',
+                    value: stats?.pendingViolations ?? dash,
+                    icon: TriangleAlert,
+                    attention: (stats?.pendingViolations ?? 0) > 0,
+                    href: ROUTES.ESTATE_VIOLATIONS,
+                  },
+                ]}
+              />
+            </div>
+          )}
+        </DashboardSection>
+      )}
 
-      <ProFeatureGate
-        entitled={isPro}
-        title="Analytics is a Pro feature"
-        description="Upgrade to Pro to see collection stats and a 6-month dues trend for this estate."
+      {!attention.isError && (
+        <DashboardSection
+          id="today"
+          title="Today"
+          description="Anything waiting on you now, with a link to deal with it."
+        >
+          {attention.isLoading ? (
+            <Card className="space-y-2 p-5">
+              <Skeleton className="h-4 w-40" />
+              <Skeleton className="h-10 w-full" />
+            </Card>
+          ) : (
+            <AttentionList
+              items={attention.data?.items ?? []}
+              empty={{
+                title: 'Nothing needs you right now',
+                description:
+                  'When something is waiting on a decision or a follow-up, it shows here.',
+              }}
+            />
+          )}
+        </DashboardSection>
+      )}
+
+      <DashboardSection
+        id="dues-trend"
+        title="Dues over time"
+        description="How much the estate has collected each month."
       >
-        {isStatsLoading ? (
-          <StatGroupSkeleton groups={[2, 4]} />
-        ) : (
-          <div className="space-y-4">
-            <StatGroup
-              title="Dues"
-              items={[
-                {
-                  label: 'Collected this month',
-                  value: stats
-                    ? formatCurrency(stats.duesCollectedThisMonth, { compact: true })
-                    : '—',
-                  href: ROUTES.ESTATE_DUES,
-                },
-                {
-                  label: 'Outstanding',
-                  value: stats ? formatCurrency(stats.duesOutstanding, { compact: true }) : '—',
-                  attention: (stats?.duesOutstanding ?? 0) > 0,
-                  href: ROUTES.ESTATE_DUES,
-                },
-              ]}
-            />
-            <StatGroup
-              title="Estate"
-              items={[
-                {
-                  label: 'Households',
-                  value: stats?.totalHouseholds ?? '—',
-                  href: ROUTES.ESTATE_HOUSEHOLDS,
-                },
-                {
-                  label: 'Open incidents',
-                  value: stats?.openIncidents ?? '—',
-                  attention: (stats?.openIncidents ?? 0) > 0,
-                  href: ROUTES.ESTATE_INCIDENTS,
-                },
-                {
-                  label: 'Open maintenance',
-                  value: stats?.openMaintenanceTickets ?? '—',
-                  attention: (stats?.openMaintenanceTickets ?? 0) > 0,
-                  href: ROUTES.ESTATE_MAINTENANCE,
-                },
-                {
-                  label: 'Pending violations',
-                  value: stats?.pendingViolations ?? '—',
-                  attention: (stats?.pendingViolations ?? 0) > 0,
-                  href: ROUTES.ESTATE_VIOLATIONS,
-                },
-              ]}
-            />
-          </div>
-        )}
+        <ProFeatureGate
+          entitled={isPro}
+          title="Analytics is a Pro feature"
+          description="Upgrade to Pro to see collection stats and a 6-month dues trend for this estate."
+        >
+          <EstateDuesTrendChart estateId={estate.id} />
+        </ProFeatureGate>
+      </DashboardSection>
 
-        <EstateDuesTrendChart estateId={estate.id} />
-      </ProFeatureGate>
-
-      <section className="space-y-4">
-        <div>
-          <h2 className="type-heading">Manage your estate</h2>
-          <p className="mt-0.5 text-sm text-muted-foreground">
-            Households, access control, and community operations in one place.
-          </p>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <DashboardSection
+        id="shortcuts"
+        title="Manage your estate"
+        description="Households, access control and community operations in one place."
+      >
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {modules.map((module) => (
-            <Card key={module.href} interactive>
-              <Link href={module.href} className="group flex items-center gap-3 p-4">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary text-muted-foreground">
-                  <module.icon className="h-4 w-4" />
+            <Card key={module.href} interactive className="rounded-2xl">
+              <Link
+                href={module.href}
+                className="group flex items-center gap-3 rounded-2xl p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+              >
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary text-foreground/80">
+                  <module.icon className="h-4 w-4" aria-hidden="true" />
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-sm font-medium text-foreground">
@@ -244,12 +301,42 @@ export default function EstateDashboardPage() {
                     {module.description}
                   </span>
                 </span>
-                <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-150 group-hover:translate-x-0.5" />
+                <ArrowRight
+                  className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-150 group-hover:translate-x-0.5"
+                  aria-hidden="true"
+                />
               </Link>
             </Card>
           ))}
         </div>
-      </section>
+      </DashboardSection>
     </div>
+  );
+}
+
+function DashboardSection({
+  id,
+  title,
+  description,
+  children,
+}: {
+  id: string;
+  title: string;
+  description: string;
+  children: ReactNode;
+}) {
+  return (
+    <section aria-labelledby={`${id}-title`} className="space-y-4">
+      <div>
+        <h2
+          id={`${id}-title`}
+          className="font-display text-[1.375rem] font-normal leading-tight tracking-[-0.005em]"
+        >
+          {title}
+        </h2>
+        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+      </div>
+      {children}
+    </section>
   );
 }

@@ -4,13 +4,18 @@ import { RedirectToEstateSetup } from '@/components/estate/shared/RedirectToEsta
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Vote, Plus } from '@sureground/icons';
-import { Button, CardSkeleton, EmptyState, ListSkeleton, PageHeader } from '@sureground/ui';
+import { Button, CardSkeleton, EmptyState, PageHeader } from '@sureground/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { CreatePollModal } from '@/components/estate/polls/CreatePollModal';
 import { PollCard } from '@/components/estate/polls/PollCard';
+import {
+  EstateListSection,
+  EstateListSkeleton,
+  EstateRowList,
+} from '@/components/estate/shared/EstateListSection';
 
 export default function EstatePollsPage() {
   const queryClient = useQueryClient();
@@ -49,52 +54,63 @@ export default function EstatePollsPage() {
 
   if (!estate) return <RedirectToEstateSetup />;
 
+  const openCount = polls.filter((poll) => poll.status === 'open').length;
+
   return (
     <>
       <PageHeader
         title="Polls"
-        description={
-          <>
-            {isPollsLoading ? (
-              'Loading…'
-            ) : (
-              <>
-                {polls.length} poll{polls.length === 1 ? '' : 's'}
-              </>
-            )}{' '}
-            in {estate.name}
-          </>
-        }
+        description={`Ask the households in ${estate.name} to vote on a question.`}
         actions={
-          <Button variant="primary" className="gap-2" onClick={() => setIsCreateOpen(true)}>
-            <Plus className="w-4 h-4" />
+          <Button
+            variant="primary"
+            icon={<Plus className="h-4 w-4" />}
+            onClick={() => setIsCreateOpen(true)}
+          >
             New poll
           </Button>
         }
       />
 
-      {isPollsLoading ? (
-        <ListSkeleton rows={3} />
-      ) : polls.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12">
+      <EstateListSection
+        id="polls"
+        title="All polls"
+        count={isPollsLoading ? undefined : polls.length}
+        countLabel={`${polls.length} poll${polls.length === 1 ? '' : 's'}`}
+        description={
+          isPollsLoading || polls.length === 0
+            ? 'Results update as residents vote. Close a poll to stop voting.'
+            : `${openCount} open. Results update as residents vote. Close a poll to stop voting.`
+        }
+      >
+        {isPollsLoading ? (
+          <EstateListSkeleton />
+        ) : polls.length === 0 ? (
           <EmptyState
+            bare
             icon={Vote}
             title="No polls yet"
-            description="Ask residents for their opinion on estate decisions."
+            description="Ask residents for their opinion on estate decisions. Residents with a linked account vote from their own dashboard."
+            action={
+              <Button variant="outline" size="sm" onClick={() => setIsCreateOpen(true)}>
+                Ask the first question
+              </Button>
+            }
           />
-        </div>
-      ) : (
-        <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
-          {polls.map((poll) => (
-            <PollCard
-              key={poll.id}
-              poll={poll}
-              onClose={() => closePoll.mutate(poll.id)}
-              isUpdating={closePoll.isPending}
-            />
-          ))}
-        </div>
-      )}
+        ) : (
+          <EstateRowList>
+            {polls.map((poll) => (
+              <li key={poll.id}>
+                <PollCard
+                  poll={poll}
+                  onClose={() => closePoll.mutate(poll.id)}
+                  isUpdating={closePoll.isPending}
+                />
+              </li>
+            ))}
+          </EstateRowList>
+        )}
+      </EstateListSection>
 
       <CreatePollModal
         estateId={estate?.id}

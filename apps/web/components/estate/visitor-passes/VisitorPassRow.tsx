@@ -1,9 +1,10 @@
 'use client';
 
+import { passTimeline } from '@sureground/shared';
 import { Badge, Button } from '@sureground/ui';
 import { IdCheckDialog } from '@/components/estate/visitor-passes/IdCheckDialog';
+import { EstateRow, RowAvatar } from '@/components/estate/shared/EstateListSection';
 import type { VisitorPass } from '@/types/estate';
-import { passTimeline } from '@sureground/shared';
 
 const statusVariant: Record<VisitorPass['status'], 'success' | 'warning' | 'neutral' | 'danger'> = {
   pending: 'warning',
@@ -46,28 +47,36 @@ interface VisitorPassRowProps {
 }
 
 export const VisitorPassRow = ({ pass, estateId, onRevoke, isRevoking }: VisitorPassRowProps) => {
-  const timeline = passTimeline(pass, formatDate, formatTime);
+  const when = [pass.purpose, passTimeline(pass, formatDate, formatTime)]
+    .filter(Boolean)
+    .join(' · ');
   return (
-    <div className="p-4 flex items-center justify-between gap-4">
-      <div className="min-w-0">
-        <p className="text-sm font-medium text-foreground truncate">
-          {pass.visitorName}: {pass.unitLabel}
-        </p>
-        <p className="text-xs text-muted-foreground mt-0.5">
-          {pass.residentName}
-          {pass.purpose ? ` · ${pass.purpose}` : ''}
-          {timeline ? ` · ${timeline}` : ''}
-        </p>
-      </div>
-      <div className="flex items-center gap-3 shrink-0">
-        <IdCheckDialog estateId={estateId} passId={pass.id} visitorName={pass.visitorName} />
-        <Badge variant={statusVariant[pass.status]}>{statusLabels[pass.status]}</Badge>
-        {pass.status === 'pending' && (
-          <Button variant="outline" size="sm" disabled={isRevoking} onClick={onRevoke}>
-            Revoke
-          </Button>
-        )}
-      </div>
-    </div>
+    <EstateRow
+      leading={<RowAvatar name={pass.visitorName} />}
+      title={
+        <>
+          <p className="truncate text-sm font-medium text-foreground">{pass.visitorName}</p>
+          <Badge variant={statusVariant[pass.status]}>{statusLabels[pass.status]}</Badge>
+        </>
+      }
+      meta={
+        <>
+          <p className="truncate">
+            {pass.unitLabel} · {pass.residentName}
+          </p>
+          {when && <p className="tabular-nums">{when}</p>}
+        </>
+      }
+      actions={
+        <>
+          <IdCheckDialog estateId={estateId} passId={pass.id} visitorName={pass.visitorName} />
+          {pass.status === 'pending' && (
+            <Button variant="outline" size="sm" disabled={isRevoking} onClick={onRevoke}>
+              Revoke
+            </Button>
+          )}
+        </>
+      }
+    />
   );
 };

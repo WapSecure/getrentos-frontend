@@ -1,6 +1,8 @@
 'use client';
 
+import { Vote } from '@sureground/icons';
 import { Badge, Button } from '@sureground/ui';
+import { EstateRow, RowAvatar } from '@/components/estate/shared/EstateListSection';
 import type { Poll } from '@/types/estate';
 
 const formatDate = (value: string) =>
@@ -17,21 +19,33 @@ interface PollCardProps {
 
 export const PollCard = ({ poll, onClose, onVote, isUpdating }: PollCardProps) => {
   const canVote = !!onVote && poll.status === 'open' && !poll.myVote;
+  const isOpen = poll.status === 'open';
 
   return (
-    <div className="p-4">
-      <div className="flex items-start justify-between gap-4">
-        <p className="text-sm font-semibold text-foreground">{poll.question}</p>
-        <Badge variant={poll.status === 'open' ? 'success' : 'neutral'}>
-          {poll.status === 'open' ? 'Open' : 'Closed'}
-        </Badge>
-      </div>
-      <p className="text-xs text-muted-foreground mt-1">
-        {poll.totalVotes} vote{poll.totalVotes === 1 ? '' : 's'} · Opened{' '}
-        {formatDate(poll.createdAt)}
-      </p>
-
-      <div className="mt-3 space-y-2">
+    <EstateRow
+      align="start"
+      leading={<RowAvatar icon={Vote} tone={isOpen ? 'primary' : 'neutral'} />}
+      title={
+        <>
+          <p className="text-sm font-semibold text-foreground">{poll.question}</p>
+          <Badge variant={isOpen ? 'success' : 'neutral'}>{isOpen ? 'Open' : 'Closed'}</Badge>
+        </>
+      }
+      meta={
+        <p className="tabular-nums">
+          {poll.totalVotes} vote{poll.totalVotes === 1 ? '' : 's'} · Opened{' '}
+          {formatDate(poll.createdAt)}
+        </p>
+      }
+      actions={
+        onClose && isOpen ? (
+          <Button variant="outline" size="sm" disabled={isUpdating} onClick={onClose}>
+            Close poll
+          </Button>
+        ) : undefined
+      }
+    >
+      <div className="mt-3 max-w-xl space-y-3">
         {poll.options.map((option) => {
           const pct =
             poll.totalVotes > 0 ? Math.round((option.voteCount / poll.totalVotes) * 100) : 0;
@@ -43,7 +57,7 @@ export const PollCard = ({ poll, onClose, onVote, isUpdating }: PollCardProps) =
                   {option.label}
                   {isMine ? ' (your vote)' : ''}
                 </span>
-                <span className="text-xs text-muted-foreground shrink-0">
+                <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
                   {option.voteCount} · {pct}%
                 </span>
               </div>
@@ -59,20 +73,14 @@ export const PollCard = ({ poll, onClose, onVote, isUpdating }: PollCardProps) =
                   Vote
                 </Button>
               ) : (
-                <div className="h-1.5 rounded-full bg-secondary overflow-hidden mt-1">
-                  <div className="h-full bg-primary rounded-full" style={{ width: `${pct}%` }} />
+                <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-secondary">
+                  <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
                 </div>
               )}
             </div>
           );
         })}
       </div>
-
-      {onClose && poll.status === 'open' && (
-        <Button variant="ghost" size="sm" className="mt-3" disabled={isUpdating} onClick={onClose}>
-          Close poll
-        </Button>
-      )}
-    </div>
+    </EstateRow>
   );
 };

@@ -1,6 +1,8 @@
 'use client';
 
+import { TriangleAlert } from '@sureground/icons';
 import { Badge, Button } from '@sureground/ui';
+import { EstateRow, RowAvatar } from '@/components/estate/shared/EstateListSection';
 import type { Violation } from '@/types/estate';
 
 const statusVariant: Record<Violation['status'], 'warning' | 'danger' | 'success' | 'neutral'> = {
@@ -19,7 +21,7 @@ const statusLabels: Record<Violation['status'], string> = {
 
 const categoryLabels: Record<Violation['category'], string> = {
   noise: 'Noise',
-  unauthorized_parking: 'Unauthorized parking',
+  unauthorized_parking: 'Unauthorised parking',
   pet_violation: 'Pet violation',
   property_maintenance: 'Property maintenance',
   other: 'Other',
@@ -48,23 +50,36 @@ export const ViolationCard = ({
   const isOpen = violation.status === 'reported' || violation.status === 'warning_issued';
 
   return (
-    <div className="p-4">
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <p className="text-sm font-semibold text-foreground truncate">
-              {violation.unitLabel}: {violation.residentName}
-            </p>
-            <Badge variant={statusVariant[violation.status]}>
-              {statusLabels[violation.status]}
-            </Badge>
-          </div>
-          <p className="text-xs text-muted-foreground mt-1">
-            {categoryLabels[violation.category]} · Reported {formatDate(violation.createdAt)}
+    <EstateRow
+      align="start"
+      leading={
+        <RowAvatar
+          icon={TriangleAlert}
+          tone={
+            violation.status === 'warning_issued'
+              ? 'danger'
+              : violation.status === 'reported'
+                ? 'warning'
+                : 'neutral'
+          }
+        />
+      }
+      title={
+        <>
+          <p className="truncate text-sm font-semibold text-foreground">
+            {violation.unitLabel}: {violation.residentName}
           </p>
-        </div>
-        {isOpen && (
-          <div className="flex items-center gap-2 shrink-0">
+          <Badge variant={statusVariant[violation.status]}>{statusLabels[violation.status]}</Badge>
+        </>
+      }
+      meta={
+        <p className="tabular-nums">
+          {categoryLabels[violation.category]} · Reported {formatDate(violation.createdAt)}
+        </p>
+      }
+      actions={
+        isOpen ? (
+          <>
             {violation.status === 'reported' && (
               <Button variant="outline" size="sm" disabled={isUpdating} onClick={onWarn}>
                 Issue warning
@@ -76,15 +91,18 @@ export const ViolationCard = ({
             <Button variant="ghost" size="sm" disabled={isUpdating} onClick={onDismiss}>
               Dismiss
             </Button>
-          </div>
-        )}
-      </div>
-      <p className="text-sm text-foreground mt-2">{violation.description}</p>
+          </>
+        ) : undefined
+      }
+    >
+      <p className="mt-2 max-w-prose text-sm leading-6 text-foreground/90">
+        {violation.description}
+      </p>
       {violation.resolutionNotes && (
-        <p className="text-xs text-muted-foreground mt-2 border-t border-border pt-2">
+        <p className="mt-2 border-t border-border pt-2 text-xs text-muted-foreground">
           {statusLabels[violation.status]}: {violation.resolutionNotes}
         </p>
       )}
-    </div>
+    </EstateRow>
   );
 };
