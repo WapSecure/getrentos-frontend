@@ -47,12 +47,12 @@ export const EscrowTransactionCard = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
     >
-      <Card interactive className="rounded-2xl p-4">
+      <Card interactive className="p-4">
         <button
           type="button"
           onClick={onClick}
           aria-label={`Open ${transaction.propertyName}`}
-          className="absolute inset-0 z-10 rounded-2xl focus:outline-none"
+          className="absolute inset-0 z-10 rounded-lg focus:outline-none"
         />
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">

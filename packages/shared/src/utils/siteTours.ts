@@ -1,4 +1,34 @@
-import type { SiteTour, SiteTourStatus } from '@/types/siteTour';
+/**
+ * Video tours (land and built homes): which list a tour sits in, and what happens next. Used by
+ * the web and mobile tours screens. Works on any tour shape that carries the fields it reads.
+ */
+
+export type SiteTourStatus =
+  | 'REQUESTED'
+  | 'PROPOSED'
+  | 'SCHEDULED'
+  | 'COMPLETED'
+  | 'CANCELLED'
+  | 'HOST_NO_SHOW';
+
+/** Each party's say on recording the call. Recording needs both, and either may withdraw. */
+export interface SiteTourRecording {
+  requesterConsentedAt: string | null;
+  hostConsentedAt: string | null;
+  bothConsented: boolean;
+  /** True only when the call will actually let the host record. */
+  recordingEnabled: boolean;
+  /** Recording is switched on for this tour's call at all. */
+  recordingAvailable: boolean;
+  hasRecording: boolean;
+}
+
+/** The fields the grouping reads. */
+export interface GroupableTour {
+  status: SiteTourStatus;
+  scheduledAt?: string | null;
+  createdAt?: string | null;
+}
 
 /** Which list a tour sits in on the tours screens. */
 export type TourGroup = 'upcoming' | 'waiting' | 'past';
@@ -24,16 +54,18 @@ export const TOUR_GROUP_LABELS: Record<TourViewer, Record<TourGroup, string>> = 
   host: { upcoming: 'Upcoming', waiting: 'Needs your times', past: 'Past' },
 };
 
-const time = (value?: string) => (value ? new Date(value).getTime() : Number.NaN);
+const time = (value?: string | null) => (value ? new Date(value).getTime() : Number.NaN);
 
 /**
  * Splits tours into the three lists. Upcoming puts booked tours first, soonest first, then tours
  * with times offered; the other lists show the newest request first.
  */
-export const groupTours = (tours: readonly SiteTour[]): Record<TourGroup, SiteTour[]> => {
-  const groups: Record<TourGroup, SiteTour[]> = { upcoming: [], waiting: [], past: [] };
+export const groupTours = <T extends GroupableTour>(
+  tours: readonly T[]
+): Record<TourGroup, T[]> => {
+  const groups: Record<TourGroup, T[]> = { upcoming: [], waiting: [], past: [] };
   for (const tour of tours) groups[tourGroup(tour.status)].push(tour);
-  const newest = (a: SiteTour, b: SiteTour) => time(b.createdAt) - time(a.createdAt);
+  const newest = (a: T, b: T) => time(b.createdAt) - time(a.createdAt);
   groups.upcoming.sort((a, b) => {
     const booked = Number(b.status === 'SCHEDULED') - Number(a.status === 'SCHEDULED');
     if (booked !== 0) return booked;
@@ -49,11 +81,14 @@ export const groupTours = (tours: readonly SiteTour[]): Record<TourGroup, SiteTo
 };
 
 /** The list to open on: the first one with something in it. */
-export const firstGroupWithTours = (groups: Record<TourGroup, SiteTour[]>): TourGroup =>
+export const firstGroupWithTours = (groups: Record<TourGroup, readonly unknown[]>): TourGroup =>
   TOUR_GROUPS.find((group) => groups[group].length > 0) ?? 'upcoming';
 
 /** The booked tour that starts soonest, from now on. */
-export const nextBookedTour = (tours: readonly SiteTour[], now: number): SiteTour | undefined =>
+export const nextBookedTour = <T extends GroupableTour>(
+  tours: readonly T[],
+  now: number
+): T | undefined =>
   tours
     .filter((t) => t.status === 'SCHEDULED' && time(t.scheduledAt) >= now)
     .sort((a, b) => time(a.scheduledAt) - time(b.scheduledAt))[0];
@@ -62,7 +97,11 @@ export const nextBookedTour = (tours: readonly SiteTour[], now: number): SiteTou
  * What happens next, in one plain sentence, for the person looking at the tour. `started` is true
  * once a booked tour's start time has passed.
  */
-export const tourNextStep = (tour: SiteTour, viewer: TourViewer, started = false): string => {
+export const tourNextStep = (
+  tour: { status: SiteTourStatus; buyerRating?: number | null },
+  viewer: TourViewer,
+  started = false
+): string => {
   const other = viewer === 'buyer' ? 'the seller' : 'the buyer';
   switch (tour.status) {
     case 'REQUESTED':

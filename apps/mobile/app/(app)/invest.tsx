@@ -62,6 +62,7 @@ import { buyerTransactionsApi } from '@/lib/api/buyerTransactions';
 import { deviceTimeZone, landBuyerExtrasApi } from '@/lib/api/landBuyerExtras';
 import { formatDate, formatNaira } from '@/lib/format';
 import { goBack } from '@/lib/goBack';
+import { IndicativeAmount } from '@/components/money/IndicativeAmount';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useForeignIdentityStatus } from '@/hooks/useForeignIdentityStatus';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
@@ -148,6 +149,7 @@ export default function InvestorWorkspace() {
   const firstName = account?.legalName?.trim().split(/\s+/)[0];
   const livesIn = countryName(profile?.countryOfResidence) ?? profile?.countryOfResidence;
   const chip = identityHeadline(identity.data);
+  const currency = profile?.displayCurrency ?? 'NGN';
 
   const txList = transactions.data;
   const attention: AttentionListItem[] = buildAttentionQueue({
@@ -198,6 +200,9 @@ export default function InvestorWorkspace() {
         amount !== null
           ? `${figures.depositsHeldCount} under Payment Protection`
           : 'Under Payment Protection',
+      supplement: amount ? (
+        <IndicativeAmount naira={amount} currency={currency} labelDisplay="popover" />
+      ) : undefined,
       onPress: buyer ? go(ROUTES.transactions) : undefined,
     });
   }
@@ -218,6 +223,9 @@ export default function InvestorWorkspace() {
       subtitle: statement
         ? `Net to you, ${formatDate(statement.periodStart, 'short')} to ${formatDate(statement.periodEnd, 'short')}`
         : 'Monthly, once a property is managed',
+      supplement: net ? (
+        <IndicativeAmount naira={net} currency={currency} labelDisplay="popover" />
+      ) : undefined,
       onPress: statement && owner ? go(ROUTES.managedArea) : undefined,
     });
   }

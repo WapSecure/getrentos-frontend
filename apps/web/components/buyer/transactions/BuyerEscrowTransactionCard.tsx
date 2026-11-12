@@ -44,6 +44,15 @@ export const BuyerEscrowTransactionCard = ({
   const isRefunded = transaction.escrowStatus === 'refunded';
   const canPay = transaction.escrowStatus === 'deposit_pending' && onPayDeposit;
   const deposit = transaction.depositAmount ?? transaction.purchasePrice;
+  // Cancelled before any deposit arrived: nothing was refunded because nothing was paid.
+  const neverPaid = isRefunded && transaction.statuses?.moneyStatus.code === 'NOT_DUE';
+  const statuses =
+    neverPaid && transaction.statuses
+      ? {
+          ...transaction.statuses,
+          moneyStatus: { ...transaction.statuses.moneyStatus, label: 'Deposit: never paid' },
+        }
+      : transaction.statuses;
 
   return (
     <motion.div
@@ -51,11 +60,11 @@ export const BuyerEscrowTransactionCard = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
     >
-      <Card interactive className="rounded-2xl p-4">
+      <Card interactive className="p-4">
         <Link
           href={PURCHASE_ROUTES.buyerWorkspace(transaction.id)}
           aria-label={`Open ${transaction.propertyTitle}`}
-          className="absolute inset-0 z-10 rounded-2xl focus:outline-none"
+          className="absolute inset-0 z-10 rounded-lg focus:outline-none"
         />
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
@@ -83,7 +92,7 @@ export const BuyerEscrowTransactionCard = ({
             }
             className="whitespace-nowrap"
           >
-            {statusLabels[transaction.escrowStatus]}
+            {neverPaid ? 'Cancelled' : statusLabels[transaction.escrowStatus]}
           </Badge>
         </div>
 
@@ -91,12 +100,12 @@ export const BuyerEscrowTransactionCard = ({
           {formatCurrency(transaction.purchasePrice, { compact: true })}
         </p>
         <p className="text-xs text-muted-foreground">
-          {depositLabels[transaction.escrowStatus]}: {formatCurrency(deposit, { compact: true })}
+          {neverPaid
+            ? 'Cancelled before a deposit was paid'
+            : `${depositLabels[transaction.escrowStatus]}: ${formatCurrency(deposit, { compact: true })}`}
         </p>
 
-        {transaction.statuses && (
-          <AcquisitionStatusBadges statuses={transaction.statuses} className="mt-3" />
-        )}
+        {statuses && <AcquisitionStatusBadges statuses={statuses} className="mt-3" />}
         {transaction.nextAction && (
           <p
             className={

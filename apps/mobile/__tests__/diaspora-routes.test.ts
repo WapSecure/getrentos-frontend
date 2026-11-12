@@ -1,11 +1,15 @@
-import { apiFetch } from '@/lib/api/client';
+import { apiFetch, apiUpload } from '@/lib/api/client';
+import { fxApi } from '@/lib/api/fx';
+import { homeCareApi } from '@/lib/api/homeCare';
 import { landBuyerExtrasApi } from '@/lib/api/landBuyerExtras';
+import { ownerLandApi } from '@/lib/api/ownerLand';
 import { purchaseWorkspaceApi } from '@/lib/api/purchaseWorkspace';
 import { purchaseWorkspaceHref } from '@/components/purchases/purchaseHref';
 
-jest.mock('@/lib/api/client', () => ({ apiFetch: jest.fn() }));
+jest.mock('@/lib/api/client', () => ({ apiFetch: jest.fn(), apiUpload: jest.fn() }));
 
 const fetchMock = apiFetch as jest.MockedFunction<typeof apiFetch>;
+const uploadMock = apiUpload as jest.MockedFunction<typeof apiUpload>;
 const lastPath = () => fetchMock.mock.calls.at(-1)?.[0];
 
 describe('Diaspora Invest routes', () => {
@@ -50,5 +54,36 @@ describe('Diaspora Invest routes', () => {
     expect(lastPath()).toBe('/land/representing/purchases/p1/milestones/DEED/approve');
     await landBuyerExtrasApi.approveDepositRelease('tx1');
     expect(lastPath()).toBe('/representing/transactions/tx1/deposit-release/approve');
+  });
+
+  it('records consent to recording and joins tours on the land routes', async () => {
+    await landBuyerExtrasApi.tourRecordingConsent('t 1', true);
+    expect(lastPath()).toBe('/buyer/land/tours/t%201/recording-consent');
+    expect(fetchMock.mock.calls.at(-1)?.[1]).toEqual({ method: 'POST', body: { consent: true } });
+    await landBuyerExtrasApi.joinTour('t1');
+    expect(lastPath()).toBe('/buyer/land/tours/t1/join');
+    await ownerLandApi.tourRecordingConsent('t1', false);
+    expect(lastPath()).toBe('/owner/land/tours/t1/recording-consent');
+    expect(fetchMock.mock.calls.at(-1)?.[1]).toEqual({ method: 'POST', body: { consent: false } });
+    await ownerLandApi.joinTour('t1');
+    expect(lastPath()).toBe('/owner/land/tours/t1/join');
+  });
+
+  it('attaches a document to a quote or an invoice on the job', async () => {
+    uploadMock.mockReset().mockResolvedValue({} as never);
+    const file = { uri: 'file:///q.pdf', name: 'q.pdf', mimeType: 'application/pdf' };
+    await homeCareApi.addDocument('w1', { quoteId: 'q1' }, file);
+    expect(uploadMock.mock.calls.at(-1)?.[0]).toBe(
+      '/home-management/work-orders/w1/quotes/q1/documents'
+    );
+    await homeCareApi.addDocument('w1', { invoiceId: 'i1' }, file, ' Signed copy ');
+    expect(uploadMock.mock.calls.at(-1)?.[0]).toBe(
+      '/home-management/work-orders/w1/invoices/i1/documents'
+    );
+  });
+
+  it('reads the indicative rates', async () => {
+    await fxApi.indicative();
+    expect(lastPath()).toBe('/fx/indicative');
   });
 });

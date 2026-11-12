@@ -3,10 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
 import { Sun, Moon } from '@sureground/icons';
-import { IconButton } from '@sureground/ui';
+import { IconButton } from '@sureground/ui/IconButton';
 
-const className =
-  'h-10 w-10 rounded-full border border-border bg-secondary text-foreground backdrop-blur-sm hover:bg-foreground/[0.08] hover:text-foreground';
+const className = 'h-10 w-10 rounded-md text-foreground hover:bg-secondary hover:text-foreground';
 
 // Not the shared ThemeToggle: that renders nothing until mounted, so the buttons beside it jumped.
 export const ThemeSwitch = () => {

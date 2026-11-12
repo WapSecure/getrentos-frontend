@@ -11,7 +11,7 @@ import {
   TOUR_GROUPS,
   type TourGroup,
   type TourViewer,
-} from '@/lib/siteTours';
+} from '@sureground/shared';
 import type { SiteTour } from '@/types/siteTour';
 import { tourTime } from './TourCard';
 

@@ -15,7 +15,7 @@ import {
 } from '@sureground/ui';
 import { CalendarClock } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
-import { tourNextStep } from '@/lib/siteTours';
+import { tourNextStep } from '@sureground/shared';
 import { lagosLocalToIso, siteTourKeys, siteTourService } from '@/services/siteTourService';
 import { videoCallAvailabilityQuery, videoCallService } from '@/services/videoCallService';
 import { formatDualTime, formatLagosDate } from '@/lib/format';

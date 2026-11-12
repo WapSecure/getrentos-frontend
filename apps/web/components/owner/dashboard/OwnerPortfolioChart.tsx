@@ -94,7 +94,7 @@ export const OwnerPortfolioChart = () => {
                 className="text-muted-foreground"
                 tickFormatter={(value) => formatCurrency(value, { compact: true })}
                 width={64}
-                domain={['dataMin - 5000000', 'dataMax + 5000000']}
+                domain={[0, 'auto']}
               />
               <Tooltip
                 content={<CustomTooltip />}

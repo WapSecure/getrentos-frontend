@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { ThemeToggle } from '@sureground/ui';
-import { ForgotPasswordLeftContent } from '@/components/auth/ForgotPassword/ForgotPasswordLeftContent';
+import { AuthAside } from '@/components/auth/AuthAside';
 import { ForgotPasswordForm } from '@/components/auth/ForgotPassword/ForgotPasswordForm';
 import { useToast, type ToastVariant } from '@sureground/ui';
 import { ROUTES } from '@/lib/constants/auth';
@@ -25,7 +25,7 @@ export default function ForgotPasswordPage() {
       <div className="fixed top-6 right-6 z-20">
         <ThemeToggle />
       </div>
-      <ForgotPasswordLeftContent />
+      <AuthAside variant="reset" />
       <ForgotPasswordForm onSuccess={handleSuccess} showToast={showToast} />
     </div>
   );

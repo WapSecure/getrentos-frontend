@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
@@ -9,10 +9,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@sureground/ui/DropdownMenu';
+import { cn } from '@sureground/shared';
+import { ChevronDown, Search, X } from '@sureground/icons';
 import { ThemeSwitch } from '@/components/layout/ThemeSwitch';
 import { Logo } from '@/components/ui/Logo';
-import { Button, IconButton } from '@sureground/ui';
-import { ChevronDown, Menu, X } from '@sureground/icons';
+import { CtaLink } from '@/components/marketing/CtaLink';
 import { ROUTES, getDashboardRoute, getUserRole } from '@/lib/constants/auth';
 import { ESTATE_MARKETPLACE_ROUTES } from '@/lib/constants/auth';
 import { useAuthStore } from '@/lib/store/authStore';
@@ -26,105 +27,168 @@ interface NavLink {
   hint?: string;
 }
 
-const MARKETPLACE_LINKS: NavLink[] = [
-  { label: 'Rent', href: '/rent', hint: 'Homes to rent' },
+const FIND_LINKS: NavLink[] = [
   { label: 'Buy', href: '/buy', hint: 'Homes for sale' },
-  { label: 'Land', href: ROUTES.LAND_MARKETPLACE, hint: 'Verified land listings' },
-  { label: 'Shortlets', href: ROUTES.SHORTLET_MARKETPLACE, hint: 'Short stays' },
-  { label: 'Detty December', href: '/detty-december', hint: 'Peak-season stays, Dec 20 – Jan 3' },
+  { label: 'Rent', href: '/rent', hint: 'Homes to rent' },
+  {
+    label: 'Short stays',
+    href: ROUTES.SHORTLET_MARKETPLACE,
+    hint: 'Serviced apartments by the night',
+  },
+  { label: 'Land', href: ROUTES.LAND_MARKETPLACE, hint: 'Plots with title checks' },
+];
+
+const MORE_LINKS: NavLink[] = [
+  { label: 'Sell', href: '/sell', hint: 'List a home or land for sale' },
   {
     label: 'Estates',
     href: ESTATE_MARKETPLACE_ROUTES.ESTATES_DIRECTORY,
     hint: 'Gated communities',
   },
+  { label: 'Detty December', href: '/detty-december', hint: 'Peak-season stays, Dec 20 – Jan 3' },
+  { label: 'Property management', href: ROUTES.HOME_MANAGEMENT, hint: 'For landlords and owners' },
+  { label: 'Realtors and agencies', href: '/agents', hint: 'Listings, leads and commissions' },
+  { label: 'Pricing', href: ROUTES.PRICING, hint: 'Free and Pro plans' },
+  { label: 'About', href: '/about', hint: 'Who we are and how to reach us' },
 ];
 
-// Written as `/#…` so the anchors work from every page showing this bar.
-const PAGE_LINKS: NavLink[] = [
-  { label: 'Home management', href: ROUTES.HOME_MANAGEMENT },
-  { label: 'Roles', href: '/#roles' },
-  { label: 'How it works', href: '/#how-it-works' },
-  { label: 'Pricing', href: ROUTES.PRICING },
-];
+const DIASPORA_LINK: NavLink = {
+  label: 'Diaspora Invest',
+  href: DIASPORA_ROUTES.PUBLIC,
+  hint: 'Buy and manage from abroad',
+};
 
-const linkBase =
-  'inline-flex shrink-0 items-center whitespace-nowrap rounded-lg px-1 py-1 text-sm font-medium transition-colors';
-const linkIdle = 'text-muted-foreground hover:text-foreground';
-const linkActive = 'text-primary';
+const navLink =
+  'label-caps inline-flex h-10 items-center whitespace-nowrap px-1 text-foreground/80 transition-colors hover:text-foreground aria-[current=page]:text-foreground aria-[current=page]:underline aria-[current=page]:underline-offset-8';
 
-const isCurrent = (pathname: string, href: string) => !href.includes('#') && pathname === href;
+const isCurrent = (pathname: string, href: string) => pathname === href;
+
+const FOCUSABLE = 'a[href], button:not([disabled])';
 
 export const Navigation = () => {
   const land = useLandAvailability();
-  const marketplaceLinks = land.marketplace
-    ? MARKETPLACE_LINKS
-    : MARKETPLACE_LINKS.filter((link) => link.href !== ROUTES.LAND_MARKETPLACE);
   const diaspora = useDiasporaAvailability();
-  const pageLinks = diaspora.enabled
-    ? [
-        PAGE_LINKS[0],
-        { label: 'Diaspora Invest', href: DIASPORA_ROUTES.PUBLIC },
-        ...PAGE_LINKS.slice(1),
-      ]
-    : PAGE_LINKS;
+  const findLinks = land.marketplace
+    ? FIND_LINKS
+    : FIND_LINKS.filter((link) => link.href !== ROUTES.LAND_MARKETPLACE);
+  const moreLinks = diaspora.enabled ? [DIASPORA_LINK, ...MORE_LINKS] : MORE_LINKS;
+
   const router = useRouter();
   const pathname = usePathname();
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  // The menu belongs to the page it was opened on, so navigating closes it without an effect.
+  const [menuPath, setMenuPath] = useState<string | null>(null);
+  const menuOpen = menuPath === pathname;
+  const menuButton = useRef<HTMLButtonElement>(null);
+  const panel = useRef<HTMLDivElement>(null);
   const isSignedIn = useAuthStore((s) => s.isAuthenticated);
-  // The Dashboard link renders only once the auth store flips to signed-in after hydration, so SSR and client agree.
   const [dashboardHref] = useState<string>(() =>
     typeof window === 'undefined' ? ROUTES.DASHBOARD : getDashboardRoute(getUserRole() || 'renter')
   );
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
-    window.addEventListener('scroll', handleScroll);
-
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
     useAuthStore.getState().init();
-
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const { overflow } = document.body.style;
+    document.body.style.overflow = 'hidden';
+    panel.current?.querySelector<HTMLElement>(FOCUSABLE)?.focus();
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setMenuPath(null);
+        menuButton.current?.focus();
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = overflow;
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [menuOpen]);
+
+  // Keeps Tab inside the open menu and its toggle.
+  const trapFocus = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== 'Tab' || !panel.current) return;
+    const items = [
+      menuButton.current,
+      ...panel.current.querySelectorAll<HTMLElement>(FOCUSABLE),
+    ].filter(Boolean) as HTMLElement[];
+    const first = items[0];
+    const last = items[items.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  };
 
   const signOut = async () => {
     await useAuthStore.getState().logout();
     router.push(ROUTES.HOME);
   };
 
-  const marketplaceActive = marketplaceLinks.some((link) => isCurrent(pathname, link.href));
-  const closeMenu = () => setIsMobileMenuOpen(false);
+  const moreActive = moreLinks.some((link) => isCurrent(pathname, link.href));
 
   return (
     <>
       <nav
         aria-label="Main"
-        className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
-          isScrolled
-            ? 'border-b border-border/60 bg-background/80 shadow-sm backdrop-blur-xl supports-backdrop-filter:bg-background/70'
-            : 'bg-transparent'
-        }`}
+        className={cn(
+          'fixed inset-x-0 top-0 z-50 border-b bg-background/95 transition-[border-color] duration-200 supports-backdrop-filter:bg-background/85 supports-backdrop-filter:backdrop-blur-xl',
+          scrolled || menuOpen ? 'border-border' : 'border-transparent'
+        )}
       >
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between gap-6">
-            <div className="shrink-0">
-              <Logo />
-            </div>
-
-            <div className="hidden min-w-0 flex-1 items-center justify-center gap-5 lg:flex xl:gap-7">
+        <div className="mx-auto grid h-16 max-w-[1240px] grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 sm:px-6 lg:px-10">
+          <div className="flex items-center gap-5 xl:gap-7">
+            <button
+              ref={menuButton}
+              type="button"
+              onClick={() => setMenuPath(menuOpen ? null : pathname)}
+              aria-expanded={menuOpen}
+              aria-controls="site-menu"
+              className="label-caps -ml-2 inline-flex h-10 items-center gap-2.5 px-2 lg:hidden"
+            >
+              {menuOpen ? (
+                <X className="h-5 w-5" aria-hidden="true" />
+              ) : (
+                <span aria-hidden="true" className="flex w-5 flex-col gap-[5px]">
+                  <span className="h-px w-full bg-current" />
+                  <span className="h-px w-full bg-current" />
+                </span>
+              )}
+              {menuOpen ? 'Close' : 'Menu'}
+            </button>
+            <div className="hidden items-center gap-5 lg:flex xl:gap-7">
+              {findLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  aria-current={isCurrent(pathname, link.href) ? 'page' : undefined}
+                  className={navLink}
+                >
+                  {link.label}
+                </Link>
+              ))}
               <DropdownMenu>
                 <DropdownMenuTrigger
-                  className={`${linkBase} gap-1 group ${marketplaceActive ? linkActive : linkIdle}`}
+                  className={cn(navLink, 'group gap-1.5', moreActive && 'text-foreground')}
                 >
-                  Marketplaces
+                  More
                   <ChevronDown
-                    className="h-4 w-4 transition-transform group-data-[state=open]:rotate-180"
+                    className="h-3.5 w-3.5 transition-transform group-data-[state=open]:rotate-180"
                     aria-hidden="true"
                   />
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-60">
-                  {marketplaceLinks.map((link) => (
+                <DropdownMenuContent align="start" className="w-64">
+                  {moreLinks.map((link) => (
                     <DropdownMenuItem key={link.href} asChild>
                       <Link
                         href={link.href}
@@ -132,138 +196,131 @@ export const Navigation = () => {
                       >
                         <span className="flex flex-col">
                           <span className="font-medium">{link.label}</span>
-                          {link.hint && (
+                          {link.hint ? (
                             <span className="text-xs text-muted-foreground">{link.hint}</span>
-                          )}
+                          ) : null}
                         </span>
                       </Link>
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
-
-              {pageLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  aria-current={isCurrent(pathname, link.href) ? 'page' : undefined}
-                  className={`${linkBase} ${isCurrent(pathname, link.href) ? linkActive : linkIdle}`}
-                >
-                  {link.label}
-                </Link>
-              ))}
             </div>
+          </div>
 
-            <div className="hidden shrink-0 items-center gap-3 lg:flex">
+          <Logo size="sm" />
+
+          <div className="flex items-center justify-end gap-2 lg:gap-4">
+            <div className="hidden items-center gap-4 lg:flex">
               {!isSignedIn ? (
                 <>
-                  <Link href={ROUTES.LOGIN} className={`${linkBase} ${linkIdle}`}>
+                  <Link href={ROUTES.LOGIN} className={navLink}>
                     Sign in
                   </Link>
                   <ThemeSwitch />
-                  <Button href={ROUTES.SIGNUP} size="sm" rounded="full" className="shrink-0 px-5">
-                    Get early access
-                  </Button>
+                  <CtaLink href={ROUTES.SIGNUP} className="min-h-10 px-5">
+                    Get started
+                  </CtaLink>
                 </>
               ) : (
                 <>
-                  <Link href={dashboardHref} className={`${linkBase} ${linkIdle}`}>
+                  <Link href={dashboardHref} className={navLink}>
                     Dashboard
                   </Link>
                   <ThemeSwitch />
                   <button
                     type="button"
                     onClick={signOut}
-                    className={`${linkBase} text-destructive hover:text-destructive/80`}
+                    className={cn(navLink, 'text-destructive hover:text-destructive')}
                   >
                     Sign out
                   </button>
                 </>
               )}
             </div>
-
-            <div className="flex shrink-0 items-center gap-3 lg:hidden">
-              <ThemeSwitch />
-              <IconButton
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
-                aria-expanded={isMobileMenuOpen}
-                className="text-foreground"
-                icon={isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-              />
-            </div>
+            <Link
+              href="/rent"
+              aria-label="Search homes"
+              className="-mr-2 inline-flex h-10 w-10 items-center justify-center lg:hidden"
+            >
+              <Search className="h-5 w-5" aria-hidden="true" />
+            </Link>
           </div>
         </div>
       </nav>
 
-      {isMobileMenuOpen && (
-        <div className="nav-drop fixed inset-x-0 top-16 z-40 max-h-[calc(100vh-4rem)] overflow-y-auto border-b border-border/60 bg-background/95 backdrop-blur-xl lg:hidden">
-          <div className="flex flex-col gap-1 p-4">
-            <p className="px-4 pt-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Marketplaces
-            </p>
-            {marketplaceLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={closeMenu}
-                className="rounded-lg px-4 py-2 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-              >
-                {link.label}
-              </Link>
-            ))}
-
-            <div className="my-2 h-px bg-border" />
-            {pageLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={closeMenu}
-                className="rounded-lg px-4 py-2 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-              >
-                {link.label}
-              </Link>
-            ))}
-
-            <div className="my-2 h-px bg-border" />
-            {!isSignedIn ? (
-              <>
-                <Link
-                  href={ROUTES.LOGIN}
-                  onClick={closeMenu}
-                  className="rounded-lg px-4 py-2 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-                >
-                  Sign in
-                </Link>
-                <Link
-                  href={ROUTES.SIGNUP}
-                  onClick={closeMenu}
-                  className="mt-1 rounded-full bg-primary px-4 py-2.5 text-center text-sm font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary-hover"
-                >
-                  Get early access
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link
-                  href={dashboardHref}
-                  onClick={closeMenu}
-                  className="rounded-lg px-4 py-2 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-                >
-                  Dashboard
-                </Link>
-                <button
-                  type="button"
-                  onClick={signOut}
-                  className="rounded-lg px-4 py-2 text-left text-destructive transition-colors hover:bg-destructive-subtle"
-                >
-                  Sign out
-                </button>
-              </>
-            )}
+      {menuOpen ? (
+        <div
+          id="site-menu"
+          ref={panel}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Site menu"
+          onKeyDown={trapFocus}
+          className="sheet-in fixed inset-x-0 top-16 bottom-0 z-40 overflow-y-auto bg-background lg:hidden"
+        >
+          <div className="mx-auto flex min-h-full max-w-[1240px] flex-col px-4 pt-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] sm:px-6">
+            <p className="label-caps mb-2 text-muted-foreground">Find</p>
+            <ul className="mb-8 border-t border-border">
+              {findLinks.map((link) => (
+                <li key={link.href} className="border-b border-border">
+                  <Link
+                    href={link.href}
+                    aria-current={isCurrent(pathname, link.href) ? 'page' : undefined}
+                    className="font-display flex min-h-14 items-center justify-between text-[1.625rem] font-normal"
+                  >
+                    {link.label}
+                    <span className="hidden font-sans text-sm text-muted-foreground sm:inline">
+                      {link.hint}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <p className="label-caps mb-2 text-muted-foreground">More</p>
+            <ul className="mb-8 border-t border-border">
+              {moreLinks.map((link) => (
+                <li key={link.href} className="border-b border-border">
+                  <Link
+                    href={link.href}
+                    aria-current={isCurrent(pathname, link.href) ? 'page' : undefined}
+                    className="flex min-h-12 items-center text-base"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-auto flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <span className="label-caps text-muted-foreground">Appearance</span>
+                <ThemeSwitch />
+              </div>
+              {!isSignedIn ? (
+                <div className="grid grid-cols-2 gap-3">
+                  <CtaLink href={ROUTES.LOGIN} variant="outline">
+                    Sign in
+                  </CtaLink>
+                  <CtaLink href={ROUTES.SIGNUP}>Get started</CtaLink>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-3">
+                  <CtaLink href={dashboardHref} variant="outline">
+                    Dashboard
+                  </CtaLink>
+                  <button
+                    type="button"
+                    onClick={signOut}
+                    className="label-caps min-h-12 rounded-md border border-destructive/60 text-destructive"
+                  >
+                    Sign out
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      )}
+      ) : null}
     </>
   );
 };
