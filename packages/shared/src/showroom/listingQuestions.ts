@@ -606,8 +606,11 @@ function rentFeeLine(listing: ShowroomListing, label: string) {
 // The rental mapper lists these fees as lines when stated, as "not stated" when missing, and
 // leaves them out of both when the landlord entered zero: a stated "none".
 const RENT_FEES = ['Service charge', 'Agency fee', 'Legal fee', 'Security deposit'];
+// Only when the costs came from that mapper (it always sets a total): a listing with no cost data
+// says nothing about fees.
 const statedNone = (listing: ShowroomListing, label: string) =>
   listing.market === 'rent' &&
+  listing.costs.total !== undefined &&
   RENT_FEES.includes(label) &&
   !rentFeeLine(listing, label) &&
   !listing.costs.notStated.includes(label);
