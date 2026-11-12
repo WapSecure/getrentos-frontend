@@ -17,7 +17,7 @@ import { useOverTheAirUpdates } from '@/hooks/useOverTheAirUpdates';
 import { portalHref, samePortalScreenHref } from '@/lib/roles';
 import { LISTING_AUDIENCE, portalForPendingListing, takeListingIntent } from '@/lib/pendingListing';
 import { HydrateThemePreference, persistThemePreference } from '@/lib/theme/preference';
-import { BRAND_FONT_SOURCES, BRAND_FONTS } from '@/lib/theme/fonts';
+import { BRAND_FONT_SOURCES, BRAND_FONTS, DISPLAY_FONT } from '@/lib/theme/fonts';
 import { useOnboardingSeen } from '@/lib/onboarding';
 import { SplashReveal } from '@/components/SplashReveal';
 import { AppLockGate } from '@/components/AppLockGate';
@@ -159,6 +159,7 @@ function RootLayout() {
           <ThemeProvider
             onPreferenceChange={persistThemePreference}
             fonts={fontsLoaded ? BRAND_FONTS : undefined}
+            displayFont={fontsLoaded ? DISPLAY_FONT : undefined}
           >
             <HydrateThemePreference />
             <ToastProvider>

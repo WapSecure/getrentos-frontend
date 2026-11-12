@@ -23,6 +23,8 @@ export interface Theme {
   typography: typeof typography;
   shadows: typeof shadows;
   fonts: FontFamilies;
+  /** The serif for page titles and display text; absent until it loads, then the UI face is used. */
+  displayFont?: string;
   /** With a loaded static face the weight resets to normal, or platforms embolden it a second time. */
   font: (weight: TextStyle['fontWeight']) => Pick<TextStyle, 'fontFamily' | 'fontWeight'>;
 }
@@ -80,7 +82,7 @@ export function withFont(
   return [style, theme.font(flat.fontWeight)];
 }
 
-function buildTheme(scheme: ColorScheme, fonts: FontFamilies): Theme {
+function buildTheme(scheme: ColorScheme, fonts: FontFamilies, displayFont?: string): Theme {
   return {
     scheme,
     colors: getPalette(scheme),
@@ -89,6 +91,7 @@ function buildTheme(scheme: ColorScheme, fonts: FontFamilies): Theme {
     typography,
     shadows,
     fonts,
+    displayFont,
     font: (weight) => {
       const fontFamily = resolveFontFamily(fonts, weight);
       return fontFamily ? { fontFamily, fontWeight: 'normal' } : { fontWeight: weight };
@@ -102,11 +105,13 @@ export function ThemeProvider({
   initialPreference = 'system',
   onPreferenceChange,
   fonts,
+  displayFont,
 }: {
   children: ReactNode;
   initialPreference?: ThemePreference;
   onPreferenceChange?: (preference: ThemePreference) => void;
   fonts?: FontFamilies;
+  displayFont?: string;
 }) {
   const rawScheme = useColorScheme();
   const system: ColorScheme = rawScheme === 'dark' ? 'dark' : 'light';
@@ -122,8 +127,8 @@ export function ThemeProvider({
   );
 
   const value = useMemo<ThemeContextValue>(
-    () => ({ ...buildTheme(scheme, fonts ?? NO_FONTS), preference, setPreference }),
-    [scheme, fonts, preference, setPreference]
+    () => ({ ...buildTheme(scheme, fonts ?? NO_FONTS, displayFont), preference, setPreference }),
+    [scheme, fonts, displayFont, preference, setPreference]
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
