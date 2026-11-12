@@ -23,6 +23,7 @@ import {
 import { tidyPlace } from '../utils/address';
 import { tourSource } from '../utils/videoSource';
 import { floorPlansOf } from './floorPlans';
+import { valuationOf } from '../diaspora/valuation';
 
 const money = (v: unknown) => {
   const n = typeof v === 'string' ? Number(v) : (v as number);
@@ -358,6 +359,7 @@ export function fromSale(s: PublicSaleDto): ShowroomListing {
     trustChain: trustChainOf(s.trustChain),
     underOffer: !!s.underOffer,
     verificationSummary: verificationSummaryOf(s.verificationSummary),
+    valuation: valuationOf(s.valuation),
     media,
     images: imageUrls(media),
     ...withFloorPlans(s.floorPlans, media),

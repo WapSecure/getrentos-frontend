@@ -1,5 +1,6 @@
 import { BadgeCheck, Camera, Info, Video } from '@sureground/icons';
 import type { ShowroomListing } from '@sureground/shared/showroom';
+import { valuationNote, valuationSentence } from '@sureground/shared';
 import { VerificationSummaryCard } from '@/components/shared/trust/VerificationSummaryCard';
 import { PropertyTrustChain } from '@/components/renter/property-detail/PropertyTrustChain';
 
@@ -11,6 +12,7 @@ export function ShowroomTrust({ listing }: { listing: ShowroomListing }) {
   const photoCount = listing.media.filter((m) => m.kind === 'image').length;
   const summary = listing.verificationSummary;
   const chain = listing.trustChain;
+  const valuation = listing.valuation;
 
   return (
     <section aria-labelledby="trust" className="border-t border-border/70 pt-8">
@@ -50,6 +52,27 @@ export function ShowroomTrust({ listing }: { listing: ShowroomListing }) {
                 {listing.verified
                   ? 'We reviewed the ownership records for this listing. That is not a guarantee that a sale or tenancy is legally sound, so complete your own checks before you pay.'
                   : 'We have not reviewed the ownership records for this listing yet. Take extra care, and only pay through Sureground.'}
+              </p>
+            </div>
+          </li>
+        )}
+        {/* DIA-30: a value only from an accredited valuer's dated report, never an estimate. */}
+        {valuation && (
+          <li className="flex items-start gap-3 rounded-xl border border-border bg-card p-4">
+            {valuation.outOfDate ? (
+              <Info className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" aria-hidden="true" />
+            ) : (
+              <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-success" aria-hidden="true" />
+            )}
+            <div>
+              <p className="font-medium text-foreground">
+                {valuation.outOfDate ? 'Out of date: ' : ''}
+                {valuationSentence(valuation)}
+              </p>
+              <p className="mt-1 text-muted-foreground">
+                {valuation.outOfDate
+                  ? 'The report is over 12 months old. Ask for a new valuation before you rely on it.'
+                  : valuationNote(valuation)}
               </p>
             </div>
           </li>

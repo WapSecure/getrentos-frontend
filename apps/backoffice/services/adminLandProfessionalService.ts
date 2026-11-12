@@ -1,5 +1,5 @@
 import { authFetch, safeCall, toQuery } from '@sureground/shared';
-import type { ApiResponse } from '@sureground/shared';
+import type { ApiResponse, PropertyValuation, ValuationMethod } from '@sureground/shared';
 import type {
   AdminLandProfessional,
   AdminLandProfessionalRow,
@@ -33,6 +33,32 @@ export const adminLandProfessionalService = {
   reject: (id: string, note: string) => decision(`${base(id)}/reject`, note),
   suspend: (id: string, note: string) => decision(`${base(id)}/suspend`, note),
   reinstate: (id: string, note: string) => decision(`${base(id)}/reinstate`, note),
+  /** DIA-30: a valuer's signed report, recorded by staff on their behalf (neutral route; not land-only). */
+  recordValuation: (
+    id: string,
+    input: {
+      propertyId: string;
+      amount: number;
+      method: ValuationMethod;
+      inspectedAt: string;
+      reportDate: string;
+      file: File;
+    }
+  ) => {
+    const form = new FormData();
+    form.append('file', input.file);
+    form.append('propertyId', input.propertyId);
+    form.append('amount', String(Math.round(input.amount)));
+    form.append('method', input.method);
+    form.append('inspectedAt', input.inspectedAt);
+    form.append('reportDate', input.reportDate);
+    return safeCall(() =>
+      authFetch<PropertyValuation>(`/admin/professionals/${encodeURIComponent(id)}/valuations`, {
+        method: 'POST',
+        body: form,
+      })
+    );
+  },
   audits: () => safeCall(() => authFetch<PendingReviewAudit[]>('/admin/land/professionals/audits')),
   recordAudit: (seatId: string, outcome: LandReviewAuditOutcome, note: string) =>
     safeCall(() =>

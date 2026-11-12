@@ -35,6 +35,34 @@ export interface PropertyValuation {
   propertyTitle?: string;
 }
 
+const METHODS = new Set<string>(Object.keys(VALUATION_METHOD_LABELS));
+
+/** An API valuation, checked field by field; undefined when absent or malformed. */
+export const valuationOf = (raw: unknown): PropertyValuation | undefined => {
+  if (!raw || typeof raw !== 'object') return undefined;
+  const v = raw as Record<string, unknown>;
+  const text = (key: string) =>
+    typeof v[key] === 'string' && v[key] !== '' ? (v[key] as string) : null;
+  const amount = text('amount');
+  const valuerName = text('valuerName');
+  const reportDate = text('reportDate');
+  const method = text('method');
+  if (!amount || !Number.isFinite(Number(amount)) || !valuerName || !reportDate) return undefined;
+  if (!method || !METHODS.has(method) || typeof v.outOfDate !== 'boolean') return undefined;
+  return {
+    id: text('id') ?? '',
+    propertyId: text('propertyId') ?? '',
+    amount,
+    method: method as ValuationMethod,
+    methodLabel: text('methodLabel') ?? VALUATION_METHOD_LABELS[method as ValuationMethod],
+    valuerName,
+    inspectedAt: text('inspectedAt') ?? reportDate,
+    reportDate,
+    validUntil: text('validUntil') ?? '',
+    outOfDate: v.outOfDate,
+  };
+};
+
 /** "1 June 2026", in Lagos, as the report is dated. */
 export const valuationDate = (iso: string): string =>
   new Date(iso).toLocaleDateString('en-GB', {

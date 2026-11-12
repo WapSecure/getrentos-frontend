@@ -65,3 +65,12 @@ test('one valuer is named; several are counted; unvalued properties are counted 
   })!;
   assert.equal(portfolioValuationSubtitle(two), '2 reports under 12 months old');
 });
+
+test('an API valuation is read field by field; anything malformed is dropped', async () => {
+  const { valuationOf } = await import('../src/diaspora/valuation.ts');
+  assert.deepEqual(valuationOf(valuation()), valuation());
+  assert.equal(valuationOf(null), undefined);
+  assert.equal(valuationOf({ ...valuation(), amount: 'lots' }), undefined);
+  assert.equal(valuationOf({ ...valuation(), method: 'GUESS' }), undefined);
+  assert.equal(valuationOf({ ...valuation(), outOfDate: undefined }), undefined);
+});
