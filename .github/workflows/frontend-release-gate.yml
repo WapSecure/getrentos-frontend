@@ -41,7 +41,8 @@ jobs:
   design-e2e:
     # Its own job, so a failing agent-sync suite can no longer stop it from running.
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # 104 screenshots across four projects take about 12 minutes on a runner.
+    timeout-minutes: 25
     env:
       CI: 'true'
     steps:

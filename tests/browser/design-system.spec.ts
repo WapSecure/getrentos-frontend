@@ -464,6 +464,14 @@ test.beforeEach(async ({ page }, testInfo) => {
       },
       '/admin/rentals/listings': empty,
       '/admin/land/diligence': empty,
+      // Staff without two-factor see the set-up screen instead of admin pages.
+      '/users/me/security/2fa': { enrolled: true, enabled: true, requiredForAdminTools: true },
+      '/agent/route': {
+        date: new Date().toISOString().slice(0, 10),
+        stops: [],
+        unplaced: [],
+        totalKm: 0,
+      },
     };
     const response = Object.prototype.hasOwnProperty.call(data, path)
       ? data[path]
@@ -572,10 +580,10 @@ test('property card, menu and add-property sheet', async ({ page }, testInfo) =>
   await propertyButton.focus();
   await expect(propertyButton).toBeFocused();
   await page.getByRole('button', { name: `More actions for ${property.name}` }).click();
-  await expect(page.getByRole('menuitem', { name: 'Edit Property', exact: true })).toBeVisible();
+  await expect(page.getByRole('menuitem', { name: 'Edit property', exact: true })).toBeVisible();
   await page.screenshot({ path: testInfo.outputPath('property-menu.png'), animations: 'disabled' });
   await page.keyboard.press('Escape');
-  await page.getByRole('button', { name: 'Add Property', exact: true }).click();
+  await page.getByRole('button', { name: 'Add property', exact: true }).click();
   await expect(page.getByRole('dialog')).toBeVisible();
   await page.screenshot({
     path: testInfo.outputPath('property-sheet.png'),
@@ -733,7 +741,7 @@ test('owner portfolio workspace', async ({ page }, testInfo) => {
     page.getByRole('heading', { name: /Good (morning|afternoon|evening), Joseph/ })
   ).toBeVisible();
   await expect(page.getByText('Portfolio value', { exact: true }).first()).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Add property', exact: true })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Add property', exact: true }).first()).toBeVisible();
   await expect(page.getByText('Owner dashboard', { exact: true })).toHaveCount(0);
 });
 
@@ -744,7 +752,9 @@ test('buyer purchase workspace', async ({ page }, testInfo) => {
     page.getByRole('heading', { name: /Good (morning|afternoon|evening), Joseph/ })
   ).toBeVisible();
   await expect(page.getByText('Active purchases', { exact: true })).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Discover properties', exact: true })).toBeVisible();
+  await expect(
+    page.getByRole('link', { name: 'Discover properties', exact: true }).first()
+  ).toBeVisible();
   await expect(page.getByText('Buyer dashboard', { exact: true })).toHaveCount(0);
 });
 
