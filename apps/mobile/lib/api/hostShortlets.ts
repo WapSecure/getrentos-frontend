@@ -1,4 +1,4 @@
-import { apiFetch, apiFetchOrNull, apiUpload } from './client';
+import { apiFetch, apiFetchOrNull, apiUpload, type UploadProgressOptions } from './client';
 import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
 import type { ShortletBookingStatus, ShortletCancellationPolicy } from './shortlets';
@@ -426,7 +426,8 @@ export const hostShortletsApi = {
   },
 
   // Straight to storage, so a large video never passes through the API.
-  uploadVideo: (file: PickedFile) => uploadVideoDirect('/host/shortlets', file),
+  uploadVideo: (file: PickedFile, options: UploadProgressOptions = {}) =>
+    uploadVideoDirect('/host/shortlets', file, options),
 
   bookings: (view: BookingView, p = 1, size = 20) =>
     apiFetch<Paginated<HostBooking>>(

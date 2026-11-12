@@ -1255,6 +1255,10 @@ export const landlordApi = {
     );
   },
 
+  /** A video tour, straight to storage, with progress and cancel. Returns the storage key. */
+  uploadPropertyVideo: (file: PickedFile, options: UploadProgressOptions = {}) =>
+    uploadVideoDirect('/landlord/properties', file, options).then((r) => r.key),
+
   /** A photo for `uploadPropertyMedia`'s staging, with progress and cancel. Returns the storage key. */
   uploadPropertyPhoto: (file: PickedFile, options: UploadProgressOptions = {}) => {
     const form = new FormData();

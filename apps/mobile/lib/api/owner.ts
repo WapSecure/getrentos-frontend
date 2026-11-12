@@ -472,6 +472,9 @@ export const ownerApi = {
       form
     );
   },
+  /** Stages a video tour, straight to storage, with progress and cancel. Returns the storage key. */
+  uploadVideo: (file: PickedFile, options: UploadProgressOptions = {}) =>
+    uploadVideoDirect('/owner/properties', file, options).then((r) => r.key),
   /** Stages a photo with progress and cancel. Returns the storage key. */
   uploadPhoto: (file: PickedFile, options: UploadProgressOptions = {}) => {
     const form = new FormData();

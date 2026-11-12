@@ -28,17 +28,19 @@ import {
   OWNER_VERIFICATION_TONE,
   type OwnerProperty,
 } from '@/lib/api/owner';
-import { errorMessage } from '@/lib/api/client';
+import { abortError, errorMessage } from '@/lib/api/client';
 import { readGate } from '@/lib/verificationGate';
 import { formatDate, formatNaira } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
-import { PropertyGallery } from '@/components/property/PropertyGallery';
+import { shortletMedia } from '@sureground/shared/showroom';
+import { ShowroomPreview } from '@/components/showroom/ShowroomMedia';
 import { VerificationGateNotice } from '@/components/VerificationGateNotice';
 import { Sheet } from '@/components/Sheet';
 import { OwnershipProofSheet } from '@/components/owner/OwnershipProofSheet';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { VideoTourField } from '@/components/video/VideoTourField';
 import type { VideoOnSiteReport } from '@/lib/filmedOnSite';
+import type { UploadTaskOptions } from '@/lib/uploadQueue';
 import { OwnerPhotosField } from '@/components/owner/OwnerPhotosField';
 import type { PickedVideo } from '@/lib/filePicker';
 import { goBack } from '@/lib/goBack';
@@ -97,10 +99,16 @@ export default function OwnerPropertyDetail() {
     qc.invalidateQueries({ queryKey: qk.owner.dashboard });
   };
 
-  const attachVideo = async (file: PickedVideo, onSite: VideoOnSiteReport | null) => {
+  const attachVideo = async (
+    file: PickedVideo,
+    onSite: VideoOnSiteReport | null,
+    options: UploadTaskOptions
+  ) => {
     const previous = property.data?.videoTourKey;
-    const { key } = await ownerApi.uploadMedia(file, 'video');
+    const key = await ownerApi.uploadVideo(file, options);
     try {
+      // Cancelled while storage was checking it: don't attach.
+      if (options.signal.aborted) throw abortError();
       await ownerApi.setVideoTour(id, key, onSite);
     } catch (e) {
       ownerApi.removeMedia(key).catch(() => undefined);
@@ -141,12 +149,18 @@ export default function OwnerPropertyDetail() {
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + spacing['3xl'] }}>
         {p ? (
-          <PropertyGallery
-            images={[p.coverImageUrl, ...(p.galleryImageUrls ?? [])].filter(
-              (x): x is string => !!x
-            )}
+          <ShowroomPreview
+            // Not a shortlet: shortletMedia is simply the shared builder for cover, photos and a video tour.
+            items={shortletMedia({
+              title: p.name,
+              coverImageUrl: p.coverImageUrl,
+              images: p.galleryImageUrls,
+              videoUrl: p.videoTourUrl,
+            })}
+            title={p.name}
             height={240}
             emptyLabel="No photos added yet"
+            onVideoExpired={() => void property.refetch()}
           />
         ) : property.isPending ? (
           <Skeleton height={240} radius={0} />
