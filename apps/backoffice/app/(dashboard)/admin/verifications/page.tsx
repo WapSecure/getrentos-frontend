@@ -33,6 +33,14 @@ type TypeFilter = 'all' | VerificationRequestType;
 
 const PAGE_SIZE = 12;
 
+/** Approving over a failed cross-check must be a deliberate choice, so the issues are spelled out. */
+function approveDescription(request: VerificationRequest, crossCheckIssues: string[]): string {
+  const base = `${request.applicantName}'s ${request.subjectLabel} verification will be approved and may unlock trusted platform actions.`;
+  if (crossCheckIssues.length === 0) return base;
+  const count = crossCheckIssues.length;
+  return `The document cross-check raised ${count} issue${count === 1 ? '' : 's'}: ${crossCheckIssues.join(' ')} Approve only if you have reviewed ${count === 1 ? 'it' : 'them'}. ${base}`;
+}
+
 export default function AdminVerificationsPage() {
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
@@ -42,6 +50,7 @@ export default function AdminVerificationsPage() {
   const [page, setPage] = useState(1);
   const [activeRequest, setActiveRequest] = useState<VerificationRequest | null>(null);
   const [showApproveConfirm, setShowApproveConfirm] = useState(false);
+  const [approveIssues, setApproveIssues] = useState<string[]>([]);
   const toast = useToast();
 
   useEffect(() => {
@@ -108,7 +117,10 @@ export default function AdminVerificationsPage() {
       reportActionError(error, 'Could not request clarification for this verification.'),
   });
 
-  const handleApprove = () => setShowApproveConfirm(true);
+  const handleApprove = (_id: string, crossCheckIssues: string[]) => {
+    setApproveIssues(crossCheckIssues);
+    setShowApproveConfirm(true);
+  };
   const handleReject = (id: string, reason: string) => rejectMutation.mutate({ id, reason });
   const handleRequestClarification = (id: string, reason: string) =>
     requestClarificationMutation.mutate({ id, reason });
@@ -244,12 +256,9 @@ export default function AdminVerificationsPage() {
         open={showApproveConfirm && activeRequest !== null}
         onOpenChange={setShowApproveConfirm}
         title="Approve verification?"
-        description={
-          activeRequest
-            ? `${activeRequest.applicantName}'s ${activeRequest.subjectLabel} verification will be approved and may unlock trusted platform actions.`
-            : ''
-        }
-        confirmLabel="Approve verification"
+        description={activeRequest ? approveDescription(activeRequest, approveIssues) : ''}
+        tone={approveIssues.length > 0 ? 'danger' : 'primary'}
+        confirmLabel={approveIssues.length > 0 ? 'Approve anyway' : 'Approve verification'}
         isLoading={approveMutation.isPending}
         onConfirm={() => activeRequest && approveMutation.mutate(activeRequest.id)}
       />

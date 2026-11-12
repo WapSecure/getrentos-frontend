@@ -7,7 +7,7 @@ import { Alert, Field, Skeleton, Textarea } from '@sureground/ui';
 import { Dialog, DialogContent, DialogTitle } from '@sureground/ui';
 import { Button, IconLink } from '@sureground/ui';
 import { DocumentPreviewButton } from '@sureground/ui';
-import { formatDate, unwrap } from '@sureground/shared';
+import { formatDate, humaniseCodesInText, unwrap } from '@sureground/shared';
 import { adminService } from '@/services/adminService';
 import { OwnershipDocCheckPanel } from '@/components/admin/verifications/OwnershipDocCheckPanel';
 import type { VerificationRequest } from '@/types/admin';
@@ -17,7 +17,8 @@ import { roleLabel } from '@/lib/roleLabels';
 interface ReviewVerificationModalProps {
   request: VerificationRequest | null;
   onClose: () => void;
-  onApprove: (id: string) => void;
+  /** crossCheckIssues lists problems the document cross-check raised in this session, if it was run. */
+  onApprove: (id: string, crossCheckIssues: string[]) => void;
   onReject: (id: string, reason: string) => void;
   onRequestClarification: (id: string, reason: string) => void;
   isApproving?: boolean;
@@ -39,6 +40,7 @@ export const ReviewVerificationModal = ({
   const canDecide = useAdminCan('verifications.approve');
   const [mode, setMode] = useState<'view' | 'reject' | 'clarify'>('view');
   const [reason, setReason] = useState('');
+  const [crossCheckIssues, setCrossCheckIssues] = useState<string[]>([]);
   const isSubmitting = isApproving || isRejecting || isRequestingClarification;
   const decided = request?.status === 'approved' || request?.status === 'rejected';
 
@@ -67,7 +69,7 @@ export const ReviewVerificationModal = ({
   // The mutations close the modal only on success, so a failed request keeps the entered reason.
   const handleApprove = () => {
     if (!request) return;
-    onApprove(request.id);
+    onApprove(request.id, crossCheckIssues);
   };
 
   const handleSubmitReason = () => {
@@ -151,14 +153,14 @@ export const ReviewVerificationModal = ({
                         >
                           <FileText className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                           <span className="min-w-0 flex-1 truncate text-sm text-foreground">
-                            {doc.name}
+                            {humaniseCodesInText(doc.name)}
                           </span>
                           <DocumentPreviewButton file={doc} title="View document" />
                           <IconLink
                             href={doc.url}
                             target="_blank"
                             rel="noreferrer"
-                            label={`Download ${doc.name}`}
+                            label={`Download ${humaniseCodesInText(doc.name)}`}
                             title="Download"
                             icon={<Download />}
                             size="sm"
@@ -213,7 +215,10 @@ export const ReviewVerificationModal = ({
                   </Alert>
                 ) : null}
                 {request.type === 'property' && detail?.ownershipProofs?.length ? (
-                  <OwnershipDocCheckPanel proofs={detail.ownershipProofs} />
+                  <OwnershipDocCheckPanel
+                    proofs={detail.ownershipProofs}
+                    onIssuesChange={setCrossCheckIssues}
+                  />
                 ) : null}
               </>
             ) : (

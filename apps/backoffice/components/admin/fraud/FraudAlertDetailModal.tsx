@@ -1,6 +1,6 @@
 'use client';
 
-import { humaniseEnum } from '@sureground/shared';
+import { codeLabel, formatDateTime, humaniseEnum } from '@sureground/shared';
 import { AlertTriangle, RotateCcw, Search, ShieldCheck, ShieldAlert } from '@sureground/icons';
 import {
   Dialog,
@@ -97,7 +97,7 @@ export const FraudAlertDetailModal = ({
               </p>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              <Badge variant={severity.variant}>{alert.severity}</Badge>
+              <Badge variant={severity.variant}>{codeLabel(alert.severity)}</Badge>
               <Badge variant="neutral" icon={<StatusIcon className="w-3.5 h-3.5" />}>
                 {status.label}
               </Badge>
@@ -141,19 +141,19 @@ export const FraudAlertDetailModal = ({
                 {showRelated && (
                   <p className="truncate">
                     <span className="font-medium text-foreground">Related:</span>{' '}
-                    {alert.relatedEntityType}
+                    {codeLabel(alert.relatedEntityType)}
                     {alert.relatedEntityId ? ` #${alert.relatedEntityId.slice(0, 8)}` : ''}
                   </p>
                 )}
                 <p className="truncate">
                   <span className="font-medium text-foreground">Detected:</span>{' '}
-                  {new Date(alert.detectedAt).toLocaleString()}
+                  {formatDateTime(alert.detectedAt)}
                 </p>
                 {alert.resolvedBy && (
                   <p className="truncate col-span-2">
                     <span className="font-medium text-foreground">Resolved by:</span>{' '}
                     {alert.resolvedBy.legalName}
-                    {alert.resolvedAt ? ` · ${new Date(alert.resolvedAt).toLocaleString()}` : ''}
+                    {alert.resolvedAt ? ` · ${formatDateTime(alert.resolvedAt)}` : ''}
                   </p>
                 )}
               </div>
@@ -357,10 +357,11 @@ function AiScanPanel({ signal }: { signal: FraudAlertAiSignal }) {
         <ul className="space-y-1.5">
           {signal.reasons.map((r) => (
             <li key={r.code} className="text-sm">
-              <span className="font-medium text-foreground">
-                {r.code.replace(/_/g, ' ').toLowerCase()}
+              <span className="font-medium text-foreground">{codeLabel(r.code)}</span>
+              <span className="text-muted-foreground">
+                {' '}
+                ({codeLabel(r.severity).toLowerCase()}):{' '}
               </span>
-              <span className="text-muted-foreground"> ({r.severity.toLowerCase()}): </span>
               <span className="text-foreground">{r.detail}</span>
             </li>
           ))}

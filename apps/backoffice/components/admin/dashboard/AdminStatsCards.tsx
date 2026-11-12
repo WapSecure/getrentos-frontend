@@ -72,7 +72,7 @@ export const AdminStatsCards = ({
           {
             label: 'Fraud alerts',
             value: fraudAlerts,
-            subtitle: 'Flagged for review',
+            subtitle: 'Open: flagged or under investigation',
             attention: fraudAlerts > 0,
             href: canReviewFraud ? ROUTES.ADMIN_FRAUD : undefined,
           },

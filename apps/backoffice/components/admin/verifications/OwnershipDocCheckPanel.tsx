@@ -4,7 +4,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 import { ShieldCheck, Sparkles, AlertTriangle, CheckCircle2 } from '@sureground/icons';
 import { Alert, Badge, Button, type BadgeVariant } from '@sureground/ui';
-import { unwrap } from '@sureground/shared';
+import { codeLabel, unwrap } from '@sureground/shared';
 import { adminService } from '@/services/adminService';
 import type { OwnershipDocCheck, OwnershipProofRef } from '@/types/admin';
 
@@ -18,11 +18,45 @@ const NAME_MATCH_STYLE: Record<
   UNREADABLE: { label: 'Name unreadable', variant: 'neutral' },
 };
 
-export const OwnershipDocCheckPanel = ({ proofs }: { proofs: OwnershipProofRef[] }) => {
+/** What a reviewer must weigh before approving: every problem the cross-check raised, in words. */
+export function docCheckIssues(result: OwnershipDocCheck, documentLabel: string): string[] {
+  if (!result.coverage.documentRead) {
+    return [`${documentLabel}: the document could not be read automatically.`];
+  }
+  const issues: string[] = [];
+  if (result.nameMatch === 'MISMATCH')
+    issues.push(`${documentLabel}: the owner name does not match.`);
+  if (result.nameMatch === 'PARTIAL')
+    issues.push(`${documentLabel}: the owner name only partly matches.`);
+  if (result.nameMatch === 'UNREADABLE')
+    issues.push(`${documentLabel}: the owner name could not be read.`);
+  if (result.addressConsistent === false)
+    issues.push(`${documentLabel}: the address is inconsistent.`);
+  for (const reason of result.reasons) {
+    if (reason.severity !== 'info') issues.push(`${documentLabel}: ${reason.detail}`);
+  }
+  return issues;
+}
+
+export const OwnershipDocCheckPanel = ({
+  proofs,
+  onIssuesChange,
+}: {
+  proofs: OwnershipProofRef[];
+  onIssuesChange?: (issues: string[]) => void;
+}) => {
   const [results, setResults] = useState<Record<string, OwnershipDocCheck>>({});
   const mutation = useMutation({
     mutationFn: (proofId: string) => unwrap(adminService.crossCheckOwnershipDoc(proofId)),
-    onSuccess: (data) => setResults((r) => ({ ...r, [data.proofId]: data })),
+    onSuccess: (data) => {
+      const next = { ...results, [data.proofId]: data };
+      setResults(next);
+      onIssuesChange?.(
+        proofs.flatMap((proof) =>
+          next[proof.id] ? docCheckIssues(next[proof.id], codeLabel(proof.documentType)) : []
+        )
+      );
+    },
   });
 
   if (proofs.length === 0) return null;
@@ -42,7 +76,7 @@ export const OwnershipDocCheckPanel = ({ proofs }: { proofs: OwnershipProofRef[]
               <div className="flex items-center gap-2">
                 <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                 <span className="min-w-0 flex-1 truncate text-sm text-foreground">
-                  {proof.documentType}
+                  {codeLabel(proof.documentType)}
                 </span>
                 <Button
                   type="button"
@@ -113,7 +147,9 @@ const DocCheckResult = ({ result }: { result: OwnershipDocCheck }) => {
             </div>
             <div className="flex gap-2">
               <dt className="w-28 shrink-0 text-muted-foreground">Document type</dt>
-              <dd className="text-foreground">{result.extraction?.documentKind ?? '—'}</dd>
+              <dd className="text-foreground">
+                {result.extraction?.documentKind ? codeLabel(result.extraction.documentKind) : '—'}
+              </dd>
             </div>
           </dl>
 

@@ -194,7 +194,15 @@ export default function AdminFraudPage() {
     queryFn: () =>
       unwrap(adminService.listFraudAlerts({ status: 'flagged', page: 1, pageSize: 1 })),
   });
+  // Same definition as the dashboard tile: every open alert, flagged or under investigation.
+  const { data: investigatingData, isError: investigatingCountError } = useQuery({
+    queryKey: ['admin', 'fraudAlerts', 'count', 'investigating'],
+    queryFn: () =>
+      unwrap(adminService.listFraudAlerts({ status: 'investigating', page: 1, pageSize: 1 })),
+  });
   const flaggedCount = flaggedData?.total ?? 0;
+  const investigatingCount = investigatingData?.total ?? 0;
+  const openCount = flaggedCount + investigatingCount;
 
   const statusOptions: { value: StatusFilter; label: string }[] = [
     { value: 'all', label: 'All' },
@@ -217,9 +225,9 @@ export default function AdminFraudPage() {
       <PageHeader
         title="Fraud and risk review"
         description={
-          flaggedCountError
-            ? 'Flagged-alert count temporarily unavailable'
-            : `${flaggedCount} alert${flaggedCount === 1 ? '' : 's'} awaiting triage`
+          flaggedCountError || investigatingCountError
+            ? 'Open-alert count temporarily unavailable'
+            : `${openCount} open alert${openCount === 1 ? '' : 's'}: ${flaggedCount} awaiting triage, ${investigatingCount} under investigation`
         }
         actions={
           <div className="flex flex-wrap gap-2">
