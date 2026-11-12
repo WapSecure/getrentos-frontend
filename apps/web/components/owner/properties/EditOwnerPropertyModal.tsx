@@ -12,6 +12,7 @@ import {
   PropertyPhotoEditor,
   type EditablePhoto,
 } from '@/components/shared/media/PropertyPhotoEditor';
+import { FloorPlanDetailsEditor } from '@/components/shared/media/FloorPlanDetailsEditor';
 import type { OwnerProperty } from '@/types/owner';
 import { AddressFields, type AddressFieldsValue } from '@/components/shared/location/AddressFields';
 import { LocationPicker } from '@/components/maps/LocationPicker';
@@ -270,6 +271,8 @@ const EditOwnerPropertyForm = ({
             }
           />
         </div>
+
+        <FloorPlanDetailsEditor propertyId={property.id} photos={photos} />
 
         <div>
           <p className="mb-1 text-sm font-medium text-foreground">Video tour</p>

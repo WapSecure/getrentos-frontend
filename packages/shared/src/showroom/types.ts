@@ -1,4 +1,5 @@
 import type { LandDiligenceStatus, LandTitleType, VerificationSummary } from '../utils/landTrust';
+import type { ShowroomFloorPlan } from './floorPlans';
 
 export type ShowroomMarket = 'rent' | 'sale' | 'land';
 
@@ -136,6 +137,8 @@ export interface ShowroomListing {
   availableFrom?: string;
   /** Sale and land detail routes only; undefined from an older API. */
   verificationSummary?: VerificationSummary;
+  /** Structured floor plans (rooms and sizes); absent when the lister added none. */
+  floorPlans?: ShowroomFloorPlan[];
   /** Rent and sale only; undefined where the API sends no chain. */
   trustChain?: ShowroomTrustChain;
   /** Commercial properties only, and only what the lister stated. */
@@ -177,6 +180,8 @@ export interface PublicRentalDto {
   petsAllowed?: boolean;
   propertyType?: string;
   videoTourFilmedOnSite?: boolean;
+  /** Detail route only. Read through `floorPlansOf`, never trusted as is. */
+  floorPlans?: unknown;
   /** Commercial properties only. Read through `commercialDetailsOf`, never trusted as is. */
   commercial?: unknown;
 }
@@ -201,6 +206,8 @@ export interface PublicSaleDto {
   underOffer?: boolean;
   /** Detail route only (DIA-11). Read through `verificationSummaryOf`, never trusted as is. */
   verificationSummary?: unknown;
+  /** Detail route only. Read through `floorPlansOf`, never trusted as is. */
+  floorPlans?: unknown;
   /** Commercial properties only. Read through `commercialDetailsOf`, never trusted as is. */
   commercial?: unknown;
 }

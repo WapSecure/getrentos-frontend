@@ -12,6 +12,7 @@ import {
   PropertyPhotoEditor,
   type EditablePhoto,
 } from '@/components/shared/media/PropertyPhotoEditor';
+import { FloorPlanDetailsEditor } from '@/components/shared/media/FloorPlanDetailsEditor';
 import { AddressFields, type AddressFieldsValue } from '@/components/shared/location/AddressFields';
 import { LocationPicker } from '@/components/maps/LocationPicker';
 import type { MapPoint } from '@/services/geocodeService';
@@ -268,6 +269,8 @@ const EditPropertyForm = ({
               (await unwrap(landlordService.uploadPropertyMedia('image', file, options))).key
             }
           />
+
+          <FloorPlanDetailsEditor propertyId={property.id} photos={photos} />
 
           <div className="flex items-center justify-between gap-2 rounded-lg border border-border p-2">
             <div className="flex min-w-0 items-center gap-2">

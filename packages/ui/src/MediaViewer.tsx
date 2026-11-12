@@ -18,15 +18,20 @@ import {
 } from '@sureground/icons';
 import {
   cn,
+  FLOOR_PLAN_MEASUREMENT_LABEL,
+  floorPlanFor,
   floorPlanLevels,
   isFloorPlan,
   MEDIA_ROOM_LABEL,
   MEDIA_ROOM_NAME,
   placeholderOf,
+  roomSizeLabel,
   srcSetOf,
   variantAtLeast,
   type MediaItem,
   type MediaRoom,
+  type ShowroomFloorPlan,
+  type ShowroomFloorPlanRoom,
 } from '@sureground/shared';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from './Dialog';
 import { ProgressiveImg } from './ProgressiveImg';
@@ -48,6 +53,11 @@ interface MediaViewerProps {
   title: string;
   /** For measurement; the viewer itself never sends anything. */
   onMediaEvent?: (event: MediaEvent) => void;
+  /**
+   * Structured floor plans, from `floorPlansOf`. A plan photo with one shows its rooms, sizes and
+   * tap targets; without, the Floor plans tab shows the image alone, as before.
+   */
+  floorPlans?: ShowroomFloorPlan[];
 }
 
 const MAX_ZOOM = 4;
@@ -71,6 +81,7 @@ export function MediaViewer({
   startIndex = 0,
   title,
   onMediaEvent,
+  floorPlans,
 }: MediaViewerProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -81,6 +92,7 @@ export function MediaViewer({
             startIndex={clamp(startIndex, 0, items.length - 1)}
             title={title}
             onMediaEvent={onMediaEvent}
+            floorPlans={floorPlans}
           />
         </DialogContent>
       )}
@@ -93,11 +105,13 @@ function ViewerBody({
   startIndex,
   title,
   onMediaEvent,
+  floorPlans,
 }: {
   items: MediaItem[];
   startIndex: number;
   title: string;
   onMediaEvent?: (event: MediaEvent) => void;
+  floorPlans?: ShowroomFloorPlan[];
 }) {
   const [index, setIndex] = useState(startIndex);
   const [grid, setGrid] = useState(false);
@@ -134,11 +148,32 @@ function ViewerBody({
   const levels = useMemo(() => floorPlanLevels(items), [items]);
   const levelAt = levels.findIndex((l) => l.index === index);
   const onPlan = levelAt >= 0;
+  // The lister's rooms and sizes for this level, when they added them.
+  const plan = onPlan ? floorPlanFor(floorPlans, item.id) : undefined;
+  const [activeRoom, setActiveRoom] = useState<string | null>(null);
+  const indexById = useMemo(() => new Map(items.map((m, i) => [m.id, i])), [items]);
 
   const go = (next: number) => {
     setIndex(((next % items.length) + items.length) % items.length);
     setZoom({ scale: 1, x: 0, y: 0 });
     setGrid(false);
+    setActiveRoom(null);
+  };
+
+  // A room with a photo opens it; one without is highlighted on the plan and in the list.
+  const openRoom = (room: ShowroomFloorPlanRoom) => {
+    const at = room.photoMediaId ? indexById.get(room.photoMediaId) : undefined;
+    if (at === undefined) {
+      setActiveRoom(room.id);
+      return;
+    }
+    go(at);
+    const photoRoom = items[at]?.room;
+    onMediaEvent?.({
+      type: 'media_category_select',
+      mediaIndex: at,
+      ...(photoRoom ? { room: photoRoom } : {}),
+    });
   };
 
   useEffect(() => {
@@ -286,7 +321,12 @@ function ViewerBody({
         </DialogClose>
       </header>
 
-      <div className="relative flex min-h-0 flex-1 gap-4 px-[max(1rem,env(safe-area-inset-left))]">
+      <div
+        className={cn(
+          'relative flex min-h-0 flex-1 gap-4 px-[max(1rem,env(safe-area-inset-left))]',
+          plan && !grid && 'flex-col gap-3 lg:flex-row lg:gap-4'
+        )}
+      >
         <div
           className={cn(
             'relative min-h-0 min-w-0 flex-1 overflow-hidden rounded-2xl',
@@ -352,6 +392,17 @@ function ViewerBody({
                     <ImageOff className="h-8 w-8" aria-hidden="true" />
                     This photo couldn’t load.
                   </div>
+                ) : plan ? (
+                  <PlanStage
+                    key={item.id}
+                    item={item}
+                    plan={plan}
+                    zoom={zoom}
+                    animate={!dragging}
+                    activeRoom={activeRoom}
+                    onRoom={openRoom}
+                    onError={() => setFailed((s) => new Set(s).add(item.id))}
+                  />
                 ) : (
                   // eslint-disable-next-line @next/next/no-img-element -- signed storage URL
                   <img
@@ -456,7 +507,16 @@ function ViewerBody({
           )}
         </div>
 
-        {(rooms.length > 1 || levels.length > 0) && (
+        {plan && !grid && (
+          <PlanRooms
+            plan={plan}
+            activeRoom={activeRoom}
+            onRoom={openRoom}
+            className="max-h-[34%] shrink-0 lg:max-h-none lg:w-72"
+          />
+        )}
+
+        {(rooms.length > 1 || levels.length > 0) && !(plan && !grid) && (
           <nav
             aria-label="Rooms"
             className="hidden w-44 shrink-0 flex-col gap-2 overflow-y-auto pb-2 lg:flex"
@@ -658,5 +718,205 @@ function Thumb({ item, load = true }: { item: MediaItem; load?: boolean }) {
         </span>
       )}
     </>
+  );
+}
+
+const PLAN_NOTE = {
+  estimated: 'Sizes are the lister’s estimates. Check them at your viewing.',
+  checked: 'Sizes measured, checked by Sureground.',
+} as const;
+
+/**
+ * A plan image with its rooms' tap targets. The box is sized to the drawing itself (not the
+ * stage), so a target at 30% across sits 30% across the plan whatever the screen.
+ */
+function PlanStage({
+  item,
+  plan,
+  zoom,
+  animate,
+  activeRoom,
+  onRoom,
+  onError,
+}: {
+  item: MediaItem;
+  plan: ShowroomFloorPlan;
+  zoom: { scale: number; x: number; y: number };
+  animate: boolean;
+  activeRoom: string | null;
+  onRoom: (room: ShowroomFloorPlanRoom) => void;
+  onError: () => void;
+}) {
+  const areaRef = useRef<HTMLDivElement>(null);
+  const [area, setArea] = useState<{ w: number; h: number } | null>(null);
+  const [natural, setNatural] = useState<{ w: number; h: number } | null>(
+    item.width && item.height ? { w: item.width, h: item.height } : null
+  );
+
+  useEffect(() => {
+    const el = areaRef.current;
+    if (!el) return;
+    const measure = () => setArea({ w: el.clientWidth, h: el.clientHeight });
+    measure();
+    if (typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const fit =
+    natural && area && area.w > 0 && area.h > 0
+      ? Math.min(area.w / natural.w, area.h / natural.h)
+      : null;
+  const targets = plan.rooms
+    .map((room, i) => ({ room, number: i + 1 }))
+    .filter(({ room }) => room.x !== undefined && room.y !== undefined);
+
+  return (
+    <div ref={areaRef} className="flex h-full w-full items-center justify-center">
+      <div
+        className={cn(
+          'relative',
+          !fit && 'max-h-full max-w-full',
+          animate && 'transition-transform duration-200 motion-reduce:transition-none'
+        )}
+        style={{
+          ...(fit && natural ? { width: natural.w * fit, height: natural.h * fit } : {}),
+          transform: `translate(${zoom.x}px, ${zoom.y}px) scale(${zoom.scale})`,
+        }}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element -- signed storage URL */}
+        <img
+          src={item.url}
+          srcSet={srcSetOf(item.variants)}
+          sizes="100vw"
+          alt={item.alt ?? ''}
+          width={item.width}
+          height={item.height}
+          draggable={false}
+          onLoad={(event) => {
+            const { naturalWidth: w, naturalHeight: h } = event.currentTarget;
+            if (w > 0 && h > 0 && !natural) setNatural({ w, h });
+          }}
+          onError={onError}
+          className={cn('block object-contain', fit ? 'h-full w-full' : 'max-h-full max-w-full')}
+          style={placeholderBackdrop(item.placeholder)}
+        />
+        {fit &&
+          targets.map(({ room, number }) => (
+            <button
+              key={room.id}
+              type="button"
+              // The stage swipes and zooms on pointer events; a tap here is a room, not a swipe.
+              onPointerDown={(event) => event.stopPropagation()}
+              onClick={() => onRoom(room)}
+              aria-label={`${number}. ${room.name}${room.photoMediaId ? ', open its photo' : ''}`}
+              className="absolute flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              style={{ left: `${room.x}%`, top: `${room.y}%` }}
+            >
+              <span
+                aria-hidden="true"
+                className={cn(
+                  'flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold shadow ring-2 ring-white',
+                  activeRoom === room.id
+                    ? 'bg-black text-white'
+                    : 'bg-primary text-primary-foreground'
+                )}
+              >
+                {number}
+              </span>
+            </button>
+          ))}
+      </div>
+    </div>
+  );
+}
+
+/** The level's rooms. Every size carries its label; there is no total area. */
+function PlanRooms({
+  plan,
+  activeRoom,
+  onRoom,
+  className,
+}: {
+  plan: ShowroomFloorPlan;
+  activeRoom: string | null;
+  onRoom: (room: ShowroomFloorPlanRoom) => void;
+  className?: string;
+}) {
+  const sized = plan.rooms.some((r) => r.widthM !== undefined && r.lengthM !== undefined);
+  return (
+    <section
+      aria-label={`Rooms on ${plan.levelName}`}
+      className={cn(
+        'flex min-h-0 flex-col gap-2 overflow-y-auto rounded-2xl bg-white/10 p-3 text-white',
+        className
+      )}
+    >
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h3 className="text-sm font-semibold">Rooms</h3>
+        {sized && (
+          <span
+            className={cn(
+              'rounded-full px-2.5 py-0.5 text-xs font-semibold',
+              plan.measurement === 'checked' ? 'bg-white text-black' : 'bg-white/15 text-white'
+            )}
+          >
+            {FLOOR_PLAN_MEASUREMENT_LABEL[plan.measurement]}
+          </span>
+        )}
+      </div>
+      {sized && <p className="text-xs text-white/70">{PLAN_NOTE[plan.measurement]}</p>}
+      {plan.rooms.length === 0 ? (
+        <p className="text-sm text-white/70">The lister has not named the rooms on this level.</p>
+      ) : (
+        <ol className="flex flex-col gap-1">
+          {plan.rooms.map((room, i) => {
+            const size = roomSizeLabel(room, plan.measurement);
+            const actionable =
+              !!room.photoMediaId || (room.x !== undefined && room.y !== undefined);
+            const body = (
+              <>
+                <span
+                  aria-hidden="true"
+                  className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/15 text-xs font-semibold"
+                >
+                  {i + 1}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-medium">{room.name}</span>
+                  <span className="block text-xs text-white/70">{size ?? 'No size given'}</span>
+                </span>
+                {room.photoMediaId && (
+                  <span className="flex shrink-0 items-center gap-0.5 self-center text-xs font-semibold text-white/80">
+                    Photo <ChevronRight className="h-4 w-4" aria-hidden="true" />
+                  </span>
+                )}
+              </>
+            );
+            return (
+              <li key={room.id}>
+                {actionable ? (
+                  <button
+                    type="button"
+                    onClick={() => onRoom(room)}
+                    aria-current={activeRoom === room.id ? 'true' : undefined}
+                    aria-label={`${i + 1}. ${room.name}${size ? `, ${size}` : ''}${room.photoMediaId ? ', open its photo' : ''}`}
+                    className={cn(
+                      'flex min-h-11 w-full items-start gap-2 rounded-xl px-2 py-1.5 text-left transition-colors hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white',
+                      activeRoom === room.id && 'bg-white/15'
+                    )}
+                  >
+                    {body}
+                  </button>
+                ) : (
+                  <div className="flex min-h-11 items-start gap-2 px-2 py-1.5">{body}</div>
+                )}
+              </li>
+            );
+          })}
+        </ol>
+      )}
+    </section>
   );
 }

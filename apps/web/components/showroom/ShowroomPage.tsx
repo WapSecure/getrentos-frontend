@@ -78,6 +78,7 @@ export async function ShowroomPage({
             listingId={listing.id}
             market={market}
             items={listing.media}
+            floorPlans={listing.floorPlans}
             title={listing.title}
             className="-mx-4 mt-3 rounded-none shadow-none sm:mx-0 sm:rounded-2xl sm:shadow-sm"
           />
