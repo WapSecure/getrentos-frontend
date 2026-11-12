@@ -5,7 +5,13 @@ import { SimilarListings } from '@/components/market/SimilarListings';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { isAuthenticated } from '@sureground/shared';
-import { Badge, Breadcrumbs, Button, Card, EmptyState, Skeleton, useToast } from '@sureground/ui';
+import { Badge } from '@sureground/ui/Badge';
+import { Breadcrumbs } from '@sureground/ui/Breadcrumbs';
+import { Button } from '@sureground/ui/Button';
+import { Card } from '@sureground/ui/Card';
+import { EmptyState } from '@sureground/ui/EmptyState';
+import { Skeleton } from '@sureground/ui/Skeleton';
+import { useToast } from '@sureground/ui/ToastProvider';
 import {
   Armchair,
   BedDouble,

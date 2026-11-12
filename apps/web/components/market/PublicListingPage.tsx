@@ -1,4 +1,4 @@
-import { Badge } from '@sureground/ui';
+import { Badge } from '@sureground/ui/Badge';
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import Link from 'next/link';

@@ -2,7 +2,7 @@
 
 import { useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
-import { Button } from '@sureground/ui';
+import { Button } from '@sureground/ui/Button';
 import { ScanSearch, Video } from '@sureground/icons';
 import { RequestTourDialog } from '@/components/shared/tours/RequestTourDialog';
 import { RequestInspectionDialog } from '@/components/shared/inspections/RequestInspectionDialog';

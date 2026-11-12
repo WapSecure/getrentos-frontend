@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import dynamic from 'next/dynamic';
-import { Button, SegmentedControl, Skeleton } from '@sureground/ui';
+import { Button } from '@sureground/ui/Button';
+import { SegmentedControl } from '@sureground/ui/SegmentedControl';
+import { Skeleton } from '@sureground/ui/Skeleton';
 import { LayoutGrid, Map as MapIcon, X } from '@sureground/icons';
 import { cn } from '@sureground/shared';
 import { hasMapPoint, type DiscoveryView, type MapArea, type MapPoint } from '@/lib/mapArea';

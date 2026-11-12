@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { PageErrorState } from '@sureground/ui';
+import { PageErrorState } from '@sureground/ui/PageState';
 
 export default function ShortletError({
   error,

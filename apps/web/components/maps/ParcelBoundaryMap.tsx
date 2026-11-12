@@ -3,7 +3,7 @@
 import 'leaflet/dist/leaflet.css';
 import { useEffect, useRef, useState } from 'react';
 import { Eraser, Undo2 } from '@sureground/icons';
-import { Button } from '@sureground/ui';
+import { Button } from '@sureground/ui/Button';
 import { boundaryAreaSqm, type BoundaryCorner } from '@sureground/shared';
 import { LAGOS_POINT } from '@/services/geocodeService';
 import { addBaseTiles } from '@/lib/mapTiles';

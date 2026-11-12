@@ -3,23 +3,16 @@
 import { useMemo, useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Calculator, Landmark, Percent, TrendingUp } from '@sureground/icons';
-import {
-  Badge,
-  Button,
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  CurrencyInput,
-  DataTable,
-  Disclosure,
-  Field,
-  NumberInput,
-  StatGroup,
-  StatGroupSkeleton,
-  type BadgeVariant,
-  type Column,
-} from '@sureground/ui';
+import { Badge, type BadgeVariant } from '@sureground/ui/Badge';
+import { Button } from '@sureground/ui/Button';
+import { Card, CardDescription, CardHeader, CardTitle } from '@sureground/ui/Card';
+import { CurrencyInput } from '@sureground/ui/CurrencyInput';
+import { DataTable, type Column } from '@sureground/ui/Table';
+import { Disclosure } from '@sureground/ui/Disclosure';
+import { Field } from '@sureground/ui/Field';
+import { NumberInput } from '@sureground/ui/NumberInput';
+import { StatGroup } from '@sureground/ui/StatGroup';
+import { StatGroupSkeleton } from '@sureground/ui/Skeleton';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
 import {
