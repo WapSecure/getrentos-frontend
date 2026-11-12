@@ -158,20 +158,20 @@ const ProfileSettingsForm = ({
           disabled={uploadAvatarMutation.isPending}
           isLoading={uploadAvatarMutation.isPending}
         >
-          Change Photo
+          Change photo
         </Button>
       </div>
 
       <div className="space-y-4">
         <Field
-          label="Full Name"
+          label="Full name"
           error={fullName.trim().length < 2 ? 'Enter at least 2 characters.' : undefined}
         >
           <Input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} />
         </Field>
         <div>
           <Field
-            label="Email Address"
+            label="Email address"
             hint="Your sign-in email. Changing it sends a code to the new address."
           >
             <Input type="email" value={email} readOnly />
@@ -185,7 +185,7 @@ const ProfileSettingsForm = ({
         </div>
         <div>
           <Field
-            label="Phone Number"
+            label="Phone number"
             hint={hasPhone ? 'Changing it sends a code to the new number.' : undefined}
           >
             <Input

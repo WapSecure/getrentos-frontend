@@ -28,7 +28,6 @@ import { Skeleton } from '@sureground/ui/Skeleton';
 import { useToast } from '@sureground/ui/ToastProvider';
 import {
   ArrowUpDown,
-  BadgeCheck,
   BarChart3,
   ExternalLink,
   Heart,
@@ -104,7 +103,7 @@ const TITLE_TYPE_OPTIONS = [
   { value: 'CERTIFICATE_OF_OCCUPANCY', label: 'Certificate of Occupancy' },
   { value: 'GOVERNOR_CONSENT', label: "Governor's Consent" },
   { value: 'DEED_OF_ASSIGNMENT', label: 'Deed of Assignment' },
-  { value: 'REGISTERED_CONVEYANCE', label: 'Registered Conveyance' },
+  { value: 'REGISTERED_CONVEYANCE', label: 'Registered conveyance' },
   { value: 'EXCISION_GAZETTE', label: 'Excision / Gazette' },
   { value: 'ALLOCATION_LETTER', label: 'Allocation letter' },
   { value: 'SURVEY_PLAN', label: 'Survey plan' },
@@ -375,10 +374,7 @@ export const LandMarketplaceBrowser = ({ mode, initialData }: LandMarketplaceBro
     <>
       <div className={mode === 'public' ? 'mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8' : ''}>
         <div className="mb-8 max-w-3xl">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/8 px-3 py-1.5 text-xs font-semibold text-primary">
-            <BadgeCheck className="h-3.5 w-3.5" />
-            Reviewed land marketplace
-          </div>
+          <p className="label-caps text-muted-foreground">Reviewed land marketplace</p>
           <h1 className="mt-4 text-3xl font-bold tracking-[-0.04em] text-foreground sm:text-4xl">
             Buy land with the parcel record in view.
           </h1>

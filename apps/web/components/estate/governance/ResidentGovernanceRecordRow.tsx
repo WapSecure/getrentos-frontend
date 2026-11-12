@@ -12,7 +12,7 @@ const typeVariant: Record<GovernanceRecord['type'], 'info' | 'neutral'> = {
 
 const typeLabels: Record<GovernanceRecord['type'], string> = {
   bylaws: 'Bylaws',
-  meeting_minutes: 'Meeting Minutes',
+  meeting_minutes: 'Meeting minutes',
   other: 'Other',
 };
 

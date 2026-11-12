@@ -149,7 +149,7 @@ export const AdminSignInForm = () => {
     <div className="w-full max-w-md">
       <div className="mb-8 text-center">
         <Logo href={ROUTES.ADMIN_LOGIN} size="lg" className="mx-auto mb-4 w-fit" />
-        <h1 className="text-2xl font-bold text-foreground">Administrator Sign In</h1>
+        <h1 className="text-2xl font-bold text-foreground">Administrator sign in</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Restricted access: for Sureground staff only
         </p>

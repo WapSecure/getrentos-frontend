@@ -87,8 +87,8 @@ export const RoleCard = ({ role, isSelected, onSelect, onDeselect, disabled }: R
             key={req}
             className="text-xs px-2 py-0.5 bg-secondary rounded-full text-muted-foreground"
           >
-            {req === 'identity' && 'ID Verified'}
-            {req === 'property' && 'Property Docs'}
+            {req === 'identity' && 'ID verified'}
+            {req === 'property' && 'Property docs'}
             {req === 'license' && 'License'}
           </span>
         ))}

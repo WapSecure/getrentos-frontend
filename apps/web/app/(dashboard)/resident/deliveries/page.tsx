@@ -15,7 +15,7 @@ const statusVariant: Record<DeliveryLog['status'], 'warning' | 'success'> = {
 };
 
 const statusLabels: Record<DeliveryLog['status'], string> = {
-  received: 'Awaiting Pickup',
+  received: 'Awaiting pickup',
   collected: 'Collected',
 };
 

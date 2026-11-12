@@ -44,11 +44,11 @@ export default function Error({
         <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
           <Button variant="primary" className="gap-2 w-full sm:w-auto" onClick={reset}>
             <RefreshCcw className="w-4 h-4" />
-            Try Again
+            Try again
           </Button>
           <Button href={ROUTES.HOME} variant="outline" className="gap-2 w-full sm:w-auto">
             <Home className="w-4 h-4" />
-            Back to Home
+            Back to home
           </Button>
         </div>
       </div>

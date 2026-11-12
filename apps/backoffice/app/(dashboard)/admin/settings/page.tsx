@@ -16,7 +16,7 @@ const tabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
   { id: 'profile', label: 'Profile', icon: User },
   { id: 'security', label: 'Security', icon: ShieldCheck },
   { id: 'notifications', label: 'Notifications', icon: Bell },
-  { id: 'platform', label: 'Platform Configuration', icon: SlidersHorizontal },
+  { id: 'platform', label: 'Platform configuration', icon: SlidersHorizontal },
 ];
 
 const tabFromUrl = (value: string | null): SettingsTab =>

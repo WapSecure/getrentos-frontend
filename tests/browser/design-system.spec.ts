@@ -570,7 +570,7 @@ test('backoffice navigation keeps operations focused and permissions intact', as
   const marketplace = navigation.getByRole('button', { name: 'Properties and listings' });
   await expect(marketplace).toHaveAttribute('aria-expanded', 'false');
   await marketplace.click();
-  await expect(navigation.getByRole('link', { name: 'Property Authorities' })).toBeVisible();
+  await expect(navigation.getByRole('link', { name: 'Property authorities' })).toBeVisible();
 });
 
 test('property card, menu and add-property sheet', async ({ page }, testInfo) => {

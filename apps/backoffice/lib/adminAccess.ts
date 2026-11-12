@@ -50,17 +50,17 @@ export const ADMIN_ROLE_DETAILS: Record<
   { label: string; description: string; permissions: AdminPermission[] }
 > = {
   super_admin: {
-    label: 'Super Admin',
+    label: 'Super admin',
     description: 'Platform governance and emergency access.',
     permissions: ALL_PERMISSIONS,
   },
   backoffice_admin: {
-    label: 'Backoffice Admin',
+    label: 'Backoffice admin',
     description: 'General operations across the platform.',
     permissions: ALL_PERMISSIONS.filter((p) => p !== 'staff.manage'),
   },
   verification_officer: {
-    label: 'Verification Officer',
+    label: 'Verification officer',
     description: 'Reviews identity, property, and licence evidence.',
     permissions: [
       'dashboard.view',
@@ -75,7 +75,7 @@ export const ADMIN_ROLE_DETAILS: Record<
     ],
   },
   fraud_analyst: {
-    label: 'Fraud Analyst',
+    label: 'Fraud analyst',
     description: 'Investigates risk signals and recommends protective actions.',
     permissions: [
       'dashboard.view',
@@ -93,7 +93,7 @@ export const ADMIN_ROLE_DETAILS: Record<
     ],
   },
   dispute_officer: {
-    label: 'Dispute Officer',
+    label: 'Dispute officer',
     description: 'Owns dispute investigation and resolution workflows.',
     permissions: [
       'dashboard.view',
@@ -110,7 +110,7 @@ export const ADMIN_ROLE_DETAILS: Record<
     ],
   },
   escrow_officer: {
-    label: 'Escrow Officer',
+    label: 'Escrow officer',
     description: 'Reviews escrow milestones and exceptions.',
     permissions: [
       'dashboard.view',
@@ -128,7 +128,7 @@ export const ADMIN_ROLE_DETAILS: Record<
     ],
   },
   finance_approver: {
-    label: 'Finance Approver',
+    label: 'Finance approver',
     description: 'Approves financial decisions within policy thresholds.',
     permissions: [
       'dashboard.view',
@@ -149,7 +149,7 @@ export const ADMIN_ROLE_DETAILS: Record<
     ],
   },
   compliance_manager: {
-    label: 'Compliance Manager',
+    label: 'Compliance manager',
     description: 'Oversees policy, risk, and regulatory controls.',
     permissions: [
       'dashboard.view',
@@ -178,7 +178,7 @@ export const ADMIN_ROLE_DETAILS: Record<
     ],
   },
   support_agent: {
-    label: 'Support Agent',
+    label: 'Support agent',
     description: 'Assists users without approving or moving money.',
     permissions: [
       'dashboard.view',

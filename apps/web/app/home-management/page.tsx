@@ -74,7 +74,7 @@ const AUDIENCES = [
 const PLANS = [
   {
     icon: House,
-    name: 'Home Care',
+    name: 'Home care',
     audience: 'Independent owners',
     body: 'The essential operating layer for a small portfolio or a single investment property.',
     includes: [

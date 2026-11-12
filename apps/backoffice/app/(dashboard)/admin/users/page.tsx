@@ -132,15 +132,15 @@ export default function AdminUsersPage() {
   ];
 
   const roleOptions: { value: RoleFilter; label: string }[] = [
-    { value: 'all', label: 'All Roles' },
+    { value: 'all', label: 'All roles' },
     { value: 'renter', label: 'Renter' },
     { value: 'landlord', label: 'Landlord' },
     { value: 'owner', label: 'Owner' },
     { value: 'buyer', label: 'Buyer' },
     { value: 'realtor', label: 'Realtor' },
     { value: 'agent', label: 'Agent' },
-    { value: 'estate', label: 'Estate Manager' },
-    { value: 'property_manager', label: 'Property Manager' },
+    { value: 'estate', label: 'Estate manager' },
+    { value: 'property_manager', label: 'Property manager' },
     { value: 'gateman', label: 'Gateman' },
     { value: 'resident', label: 'Resident' },
   ];
@@ -178,7 +178,7 @@ export default function AdminUsersPage() {
     },
     {
       key: 'trustScore',
-      header: 'Trust Score',
+      header: 'Trust score',
       render: (u) => <span className="font-medium text-primary">{u.trustScore}</span>,
       className: 'whitespace-nowrap',
     },

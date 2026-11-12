@@ -201,7 +201,7 @@ export function WorkOrdersQueue() {
   const [assignment, setAssignment] = useState<AdminWorkOrder | null>(null);
   const config: MaintenanceQueueConfig<AdminWorkOrder> = {
     resource: 'work-orders',
-    eyebrow: 'Work Orders',
+    eyebrow: 'Work orders',
     title: 'Maintenance work orders',
     description: 'Platform-wide maintenance requests with SLA health indicators.',
     icon: Wrench,
@@ -367,7 +367,7 @@ export function SlaPoliciesQueue() {
   const [creating, setCreating] = useState(false);
   const config: MaintenanceQueueConfig<AdminSlaPolicy> = {
     resource: 'sla-policies',
-    eyebrow: 'SLA Policies',
+    eyebrow: 'SLA policies',
     title: 'Service-level agreements',
     description: 'Property-scoped response / resolution / escalation targets by priority.',
     icon: Clock3,
@@ -476,7 +476,7 @@ export function PreventivePlansQueue() {
   const [creating, setCreating] = useState(false);
   const config: MaintenanceQueueConfig<AdminPreventivePlan> = {
     resource: 'preventive-plans',
-    eyebrow: 'Preventive Plans',
+    eyebrow: 'Preventive plans',
     title: 'Preventive maintenance plans',
     description: 'Scheduled maintenance across assets and units, with due detection.',
     icon: CalendarClock,
@@ -797,7 +797,7 @@ export function QuotesQueue() {
 
   const config: MaintenanceQueueConfig<AdminVendorQuote> = {
     resource: 'quotes',
-    eyebrow: 'Vendor Quotes',
+    eyebrow: 'Vendor quotes',
     title: 'Work-order quotes',
     description: 'Platform-wide vendor quotes on maintenance work orders.',
     icon: Scroll,
@@ -904,7 +904,7 @@ export function InvoicesQueue() {
   const documents = useRecordDocuments();
   const config: MaintenanceQueueConfig<AdminVendorInvoice> = {
     resource: 'invoices',
-    eyebrow: 'Vendor Invoices',
+    eyebrow: 'Vendor invoices',
     title: 'Vendor invoice register',
     description: 'Platform-wide vendor invoices across the finance-ready lifecycle.',
     icon: ReceiptText,

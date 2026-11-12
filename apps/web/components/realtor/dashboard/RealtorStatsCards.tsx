@@ -1,5 +1,6 @@
 'use client';
 
+import { Lock } from '@sureground/icons';
 import { StatGroup } from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
 import { ROUTES } from '@/lib/constants/auth';
@@ -28,8 +29,16 @@ export const RealtorStatsCards = ({
       items={[
         {
           label: 'Commission YTD',
-          value: commissionYtd === null ? 'Pro' : formatCurrency(commissionYtd, { compact: true }),
-          subtitle: commissionYtd === null ? 'Upgrade to unlock' : 'Year to date',
+          value:
+            commissionYtd === null ? (
+              <span className="inline-flex items-center text-muted-foreground">
+                <Lock className="h-5 w-5" aria-hidden="true" />
+                <span className="sr-only">Locked on Free</span>
+              </span>
+            ) : (
+              formatCurrency(commissionYtd, { compact: true })
+            ),
+          subtitle: commissionYtd === null ? 'Upgrade to Pro to see it' : 'Year to date',
           href: commissionYtd === null ? ROUTES.REALTOR_BILLING : ROUTES.REALTOR_COMMISSIONS,
         },
         {

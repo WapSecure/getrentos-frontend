@@ -19,11 +19,11 @@ interface NotificationPreference {
 
 const PREFERENCE_META: { id: NotificationPreferenceId; label: string; icon: React.ElementType }[] =
   [
-    { id: 'fraud', label: 'Fraud Alerts', icon: ShieldAlert },
-    { id: 'disputes', label: 'New & Escalated Disputes', icon: Gavel },
-    { id: 'verifications', label: 'Verification Requests', icon: ShieldCheck },
-    { id: 'escrow', label: 'Flagged Escrow Transactions', icon: AlertTriangle },
-    { id: 'messages', label: 'New Support Messages', icon: MessageCircle },
+    { id: 'fraud', label: 'Fraud alerts', icon: ShieldAlert },
+    { id: 'disputes', label: 'New & escalated disputes', icon: Gavel },
+    { id: 'verifications', label: 'Verification requests', icon: ShieldCheck },
+    { id: 'escrow', label: 'Flagged escrow transactions', icon: AlertTriangle },
+    { id: 'messages', label: 'New support messages', icon: MessageCircle },
   ];
 
 const buildPreferences = (
