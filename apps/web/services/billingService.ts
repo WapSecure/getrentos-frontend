@@ -1,6 +1,7 @@
 import { authFetch, safeCall } from '@/lib/apiHelpers';
 import type { ApiResponse, Paginated } from '@/lib/apiHelpers';
 import type { BillingCycle, PlanTier } from './subscriptionService';
+import { trackOnSuccess } from '@/lib/analytics';
 
 export type BillingStatus = 'NONE' | 'TRIALING' | 'ACTIVE' | 'PAST_DUE' | 'CANCELLED';
 
@@ -69,6 +70,11 @@ export const billingService = {
       authFetch<CheckoutSession>('/billing/checkout', {
         method: 'POST',
         body: JSON.stringify({ cycle }),
+      })
+    ).then((res) =>
+      trackOnSuccess(res, {
+        name: 'pro_checkout_start',
+        props: { plan: 'pro', interval: cycle === 'ANNUAL' ? 'annual' : 'monthly' },
       })
     );
   },

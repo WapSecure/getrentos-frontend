@@ -6,7 +6,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 export type UrlValue = string | number | boolean | null | undefined;
 
 /** How a value is written: empty, false and the default are left out, so links stay short and stable. */
-const serialise = (value: UrlValue): string | undefined => {
+export const serialise = (value: UrlValue): string | undefined => {
   if (value === undefined || value === null || value === false || value === '') return undefined;
   return value === true ? '1' : String(value);
 };

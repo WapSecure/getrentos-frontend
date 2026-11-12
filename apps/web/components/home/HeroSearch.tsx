@@ -10,6 +10,9 @@ import { cn } from '@sureground/shared';
 import { useLandAvailability } from '@/hooks/useLandAvailability';
 import { matchAreas, type Area } from './areas';
 import { searchHref, type SearchKind } from './searchRoutes';
+import { trackSearchSubmit } from '@/hooks/useTrackSearch';
+
+const MARKET_OF = { buy: 'sale', rent: 'rent', stays: 'shortlet', land: 'land' } as const;
 
 const KINDS: Segment<SearchKind>[] = [
   { value: 'buy', label: 'Buy' },
@@ -33,6 +36,8 @@ export function HeroSearch({ className }: { className?: string }) {
 
   const go = (value: string) => {
     setOpen(false);
+    // Whether text was typed, never the text itself.
+    trackSearchSubmit(MARKET_OF[kind], 'home_hero', value.trim() ? ['query'] : []);
     router.push(searchHref(kind, value));
   };
 

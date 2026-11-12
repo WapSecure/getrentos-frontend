@@ -1,4 +1,5 @@
 import { usePaystackCheckout } from '@/hooks/usePaystackCheckout';
+import { trackShowroom } from '@/lib/showroomAnalytics';
 import { useState } from 'react';
 import { Alert, RefreshControl, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -90,6 +91,12 @@ export default function StayDetail() {
     onMutate: () => setProviderError(null),
     onSuccess: async (res) => {
       closePay();
+      trackShowroom({
+        name: 'payment_started',
+        market: 'shortlet',
+        surface: 'app_stay',
+        props: { kind: 'booking' },
+      });
       if (res.authorizationUrl) {
         await checkout(res.authorizationUrl, res.reference);
       } else if (res.paymentStatus === 'PAID') {

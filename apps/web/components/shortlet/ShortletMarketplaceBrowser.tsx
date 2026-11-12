@@ -36,6 +36,7 @@ import {
 } from '@/components/discovery/MapDiscoveryView';
 import { formatAreaParam, parseAreaParam, parseView, type MapArea } from '@/lib/mapArea';
 import { urlParam, useSyncUrlState } from '@/hooks/useUrlState';
+import { useTrackSearch } from '@/hooks/useTrackSearch';
 import { CollectionsStrip } from '@/components/collections/CollectionsStrip';
 import { listingPath } from '@/lib/listingSlug';
 
@@ -97,29 +98,35 @@ export const ShortletMarketplaceBrowser = ({
   const estateFromUrl = searchParams.get('estate')?.trim() ?? '';
   const pageSize = view === 'map' ? MAP_PAGE_SIZE : PAGE_SIZE;
 
-  useSyncUrlState(
-    {
-      q: debouncedSearch,
-      city,
-      guests,
-      minPrice,
-      maxPrice,
-      checkIn,
-      checkOut,
-      beds: bedrooms,
-      instant: instantOnly,
-      verified: verifiedOnly,
-      power: power24h,
-      pets: petsOnly,
-      amenities: amenities.join(','),
-      sort,
-      page,
-      view,
-      area: area ? formatAreaParam(area) : undefined,
-      selected: view === 'map' ? selectedId : undefined,
-    },
-    { sort: 'newest', page: 1, view: 'grid', checkIn: initialCheckIn, checkOut: initialCheckOut }
-  );
+  const urlState = {
+    q: debouncedSearch,
+    city,
+    guests,
+    minPrice,
+    maxPrice,
+    checkIn,
+    checkOut,
+    beds: bedrooms,
+    instant: instantOnly,
+    verified: verifiedOnly,
+    power: power24h,
+    pets: petsOnly,
+    amenities: amenities.join(','),
+    sort,
+    page,
+    view,
+    area: area ? formatAreaParam(area) : undefined,
+    selected: view === 'map' ? selectedId : undefined,
+  };
+  const urlDefaults = {
+    sort: 'newest',
+    page: 1,
+    view: 'grid',
+    checkIn: initialCheckIn,
+    checkOut: initialCheckOut,
+  };
+  useSyncUrlState(urlState, urlDefaults);
+  useTrackSearch('shortlet', 'shortlet_search', urlState, urlDefaults);
 
   const queryParams = useMemo(
     () => ({
