@@ -2,12 +2,12 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Phone, MessageCircle, CheckCircle, ArrowLeft, RefreshCw } from '@sureground/icons';
+import { Mail, Phone, MessageCircle, ArrowLeft, RefreshCw } from '@sureground/icons';
 import { EmailSignup } from '@/components/auth/SignupForm/EmailSignup';
 import { PhoneSignup } from '@/components/auth/SignupForm/PhoneSignup';
 import { OtpVerification } from '@/components/auth/SignupForm/OtpVerification';
 import { ReferralCodeField } from '@/components/auth/SignupForm/ReferralCodeField';
-import { SignupLeftContent } from '@/components/auth/SignupLeftContent';
+import { AuthAside } from '@/components/auth/AuthAside';
 import { AuthMethodTabs } from '@/components/auth/AuthMethodTabs';
 import { Logo } from '@/components/ui/Logo';
 import { Alert, Button, ThemeToggle } from '@sureground/ui';
@@ -85,10 +85,10 @@ export default function SignupPage() {
         <ThemeToggle />
       </div>
 
-      <SignupLeftContent />
+      <AuthAside variant="signup" />
 
       <section className="relative z-10 flex w-full items-center justify-center px-4 py-20 sm:px-8 lg:w-1/2 lg:px-12 lg:py-16">
-        <div className="w-full max-w-[32rem] rounded-[2rem] border border-border/70 bg-card/95 p-6 shadow-[0_24px_80px_-32px_rgba(15,23,42,0.28)] backdrop-blur-xl sm:p-9 dark:shadow-[0_24px_80px_-32px_rgba(0,0,0,0.7)]">
+        <div className="w-full max-w-[32rem] rounded-lg border border-border bg-card p-6 shadow-[0_24px_80px_-32px_rgba(15,23,42,0.28)] backdrop-blur-xl sm:p-9 dark:shadow-[0_24px_80px_-32px_rgba(0,0,0,0.7)]">
           <div className="mb-8">
             <div className="mb-6 flex justify-center lg:hidden">
               <Logo size="md" />
@@ -204,23 +204,6 @@ export default function SignupPage() {
               </a>
             </p>
           )}
-
-          <div className="mt-8 border-t border-border pt-6 lg:hidden">
-            <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <CheckCircle className="w-3 h-3 text-primary" />
-                Secure by design
-              </span>
-              <span className="flex items-center gap-1">
-                <CheckCircle className="w-3 h-3 text-primary" />
-                Identity verification
-              </span>
-              <span className="flex items-center gap-1">
-                <CheckCircle className="w-3 h-3 text-primary" />
-                24/7 Support
-              </span>
-            </div>
-          </div>
         </div>
       </section>
     </main>
