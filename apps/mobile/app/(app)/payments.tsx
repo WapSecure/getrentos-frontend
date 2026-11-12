@@ -1,4 +1,6 @@
 import { usePaystackCheckout } from '@/hooks/usePaystackCheckout';
+import { track } from '@/lib/analytics';
+import { trackShowroom } from '@/lib/showroomAnalytics';
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, Linking, Pressable, RefreshControl, View } from 'react-native';
 import { router } from 'expo-router';
@@ -96,6 +98,13 @@ export default function Payments() {
       // The sheet stayed open while the payment started; the checkout or result takes over.
       setPayPayment(null);
       setProviderError(null);
+      track('rent_payment_started');
+      trackShowroom({
+        name: 'payment_started',
+        market: 'rent',
+        surface: 'app_payments',
+        props: { kind: 'rent' },
+      });
       if (payment.authorizationUrl) {
         await checkout(payment.authorizationUrl, payment.reference);
       } else {

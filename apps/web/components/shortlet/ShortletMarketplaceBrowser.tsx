@@ -21,7 +21,8 @@ import { Skeleton } from '@sureground/ui/Skeleton';
 import { ToggleChip } from '@sureground/ui/ToggleChip';
 import { BedDouble, ClipboardCheck, Heart, Star, Zap } from '@sureground/icons';
 import { imagePreviewOf, srcSetOf } from '@sureground/shared';
-import { unwrap } from '@/lib/apiHelpers';
+import { unwrap, type Paginated } from '@/lib/apiHelpers';
+import { SHORTLET_PAGE_SIZE } from '@/lib/marketFirstPage';
 import { SHORTLET_AMENITIES } from '@/lib/shortlet/essentials';
 import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';
@@ -36,10 +37,12 @@ import {
 } from '@/components/discovery/MapDiscoveryView';
 import { formatAreaParam, parseAreaParam, parseView, type MapArea } from '@/lib/mapArea';
 import { urlParam, useSyncUrlState } from '@/hooks/useUrlState';
+import { useTrackSearch } from '@/hooks/useTrackSearch';
 import { CollectionsStrip } from '@/components/collections/CollectionsStrip';
 import { listingPath } from '@/lib/listingSlug';
 
-const PAGE_SIZE = 9;
+// Shared with the server page that pre-renders the first page, so both ask for the same page size.
+const PAGE_SIZE = SHORTLET_PAGE_SIZE;
 const MAP_PAGE_SIZE = 24;
 const SORTS = ['newest', 'price_asc', 'price_desc'] as const;
 type Sort = 'newest' | 'price_asc' | 'price_desc';
@@ -49,10 +52,13 @@ export const ShortletMarketplaceBrowser = ({
   initialCheckIn = '',
   initialCheckOut = '',
   hideHeader = false,
+  initialData,
 }: {
   initialCheckIn?: string;
   initialCheckOut?: string;
   hideHeader?: boolean;
+  /** The server-rendered unfiltered first page. */
+  initialData?: Paginated<ShortletListing>;
 } = {}) => {
   const router = useRouter();
   const wishlist = useShortletWishlist();
@@ -97,29 +103,35 @@ export const ShortletMarketplaceBrowser = ({
   const estateFromUrl = searchParams.get('estate')?.trim() ?? '';
   const pageSize = view === 'map' ? MAP_PAGE_SIZE : PAGE_SIZE;
 
-  useSyncUrlState(
-    {
-      q: debouncedSearch,
-      city,
-      guests,
-      minPrice,
-      maxPrice,
-      checkIn,
-      checkOut,
-      beds: bedrooms,
-      instant: instantOnly,
-      verified: verifiedOnly,
-      power: power24h,
-      pets: petsOnly,
-      amenities: amenities.join(','),
-      sort,
-      page,
-      view,
-      area: area ? formatAreaParam(area) : undefined,
-      selected: view === 'map' ? selectedId : undefined,
-    },
-    { sort: 'newest', page: 1, view: 'grid', checkIn: initialCheckIn, checkOut: initialCheckOut }
-  );
+  const urlState = {
+    q: debouncedSearch,
+    city,
+    guests,
+    minPrice,
+    maxPrice,
+    checkIn,
+    checkOut,
+    beds: bedrooms,
+    instant: instantOnly,
+    verified: verifiedOnly,
+    power: power24h,
+    pets: petsOnly,
+    amenities: amenities.join(','),
+    sort,
+    page,
+    view,
+    area: area ? formatAreaParam(area) : undefined,
+    selected: view === 'map' ? selectedId : undefined,
+  };
+  const urlDefaults = {
+    sort: 'newest',
+    page: 1,
+    view: 'grid',
+    checkIn: initialCheckIn,
+    checkOut: initialCheckOut,
+  };
+  useSyncUrlState(urlState, urlDefaults);
+  useTrackSearch('shortlet', 'shortlet_search', urlState, urlDefaults);
 
   const queryParams = useMemo(
     () => ({
@@ -164,9 +176,31 @@ export const ShortletMarketplaceBrowser = ({
     ]
   );
 
+  const isDefaultView =
+    !debouncedSearch &&
+    !bedrooms &&
+    !instantOnly &&
+    !verifiedOnly &&
+    !power24h &&
+    !petsOnly &&
+    amenities.length === 0 &&
+    !city.trim() &&
+    !guests &&
+    !minPrice &&
+    !maxPrice &&
+    !checkIn &&
+    !checkOut &&
+    sort === 'newest' &&
+    !estateFromUrl &&
+    page === 1 &&
+    view === 'grid' &&
+    !area;
+
   const { data, isLoading, isPending, isError, isFetching, refetch } = useQuery({
     queryKey: [...shortletKeys.public, queryParams],
     queryFn: () => unwrap(shortletService.listPublic(queryParams)),
+    // Only the default view may start from the server payload: a filtered query seeded with page 1 of everything shows the wrong listings.
+    initialData: isDefaultView ? initialData : undefined,
     placeholderData: keepPreviousData,
   });
   const listings = data?.items ?? [];

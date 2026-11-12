@@ -44,8 +44,8 @@ export const Journeys = () => (
           action={<ArrowLink href="/shortlets">Browse short stays</ArrowLink>}
         >
           <p>
-            Book serviced apartments by the night. The price you see includes fees before you pay,
-            and the host is paid after you check in.
+            Book serviced apartments by the night. You see the total before you pay, and Sureground
+            pays the host no sooner than 24 hours after check-in.
           </p>
         </FeatureRow>
         <FeatureRow

@@ -17,6 +17,7 @@ const PUBLIC_WEB_SECTIONS = [
   '/home-management',
   '/land/market',
   '/land/layouts',
+  '/developments',
 ];
 
 // `/land/<id>` is a public listing, but these `/land/*` pages are signed-in workspaces.

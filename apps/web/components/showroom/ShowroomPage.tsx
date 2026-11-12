@@ -23,6 +23,7 @@ import { ShowroomAside } from './ShowroomAside';
 import { ShowroomCommercial } from './ShowroomCommercial';
 import { ShowroomSection as Section } from './ShowroomSection';
 import { ShowroomNeighbourhood } from './ShowroomNeighbourhood';
+import { ShowroomQuestions } from './ShowroomQuestions';
 import { ShowroomShareButton } from './ShowroomShareButton';
 import { ShowroomTrust } from './ShowroomTrust';
 import { VerificationSummaryBadge } from '@/components/shared/trust/VerificationSummaryCard';
@@ -210,6 +211,8 @@ export async function ShowroomPage({
                   </ul>
                 </Section>
               )}
+
+              <ShowroomQuestions listing={listing} returnPath={path} />
 
               {market !== 'land' && (
                 <ShowroomNeighbourhood listingId={listing.id} title={listing.title} />

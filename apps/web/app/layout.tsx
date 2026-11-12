@@ -5,6 +5,7 @@ import { ThemeProvider } from '@sureground/ui/providers/ThemeProvider';
 import { WebQueryProvider } from '@/components/providers/WebQueryProvider';
 import { LanguageProvider } from '@/lib/i18n/LanguageContext';
 import { StepUpDialog } from '@/components/shared/security/StepUpDialog';
+import { SiteMeasurement } from '@/components/analytics/SiteMeasurement';
 import {
   SITE_NAME,
   SITE_DESCRIPTION,
@@ -89,6 +90,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <LanguageProvider>
               {children}
               <StepUpDialog />
+              <SiteMeasurement />
             </LanguageProvider>
           </WebQueryProvider>
         </ThemeProvider>

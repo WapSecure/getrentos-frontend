@@ -53,6 +53,7 @@ const EVENT_LABEL: Record<string, string> = {
   inspection_request_start: 'Viewing request started',
   booking_start: 'Booking started',
   offer_start: 'Offer started',
+  listing_question: 'Question asked',
 };
 
 const OUTCOME_LABEL: Record<string, string> = {

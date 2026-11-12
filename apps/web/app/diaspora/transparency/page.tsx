@@ -22,10 +22,12 @@ export const metadata: Metadata = {
 export default async function DiasporaTransparencyPage() {
   if (!(await diasporaInvestEnabled())) notFound();
   return (
-    <main className="min-h-screen bg-background">
+    <>
       <Navigation />
-      <TransparencyCentre />
+      <main id="main" className="bg-background">
+        <TransparencyCentre />
+      </main>
       <Footer />
-    </main>
+    </>
   );
 }
