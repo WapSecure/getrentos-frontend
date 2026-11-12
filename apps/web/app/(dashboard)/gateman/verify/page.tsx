@@ -2,13 +2,24 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CheckCircle2, CloudOff, Mic, QrCode, UserPlus, XCircle } from '@sureground/icons';
+import {
+  Ban,
+  CheckCircle2,
+  CloudOff,
+  Hourglass,
+  MapPin,
+  Mic,
+  QrCode,
+  UserPlus,
+  XCircle,
+} from '@sureground/icons';
 import { NotAssignedToEstate } from '@/components/gateman/NotAssignedToEstate';
-import { Alert, Button, Card, CardSkeleton, NumberInput, PageHeader, Switch } from '@sureground/ui';
+import { Alert, Button, CardSkeleton, NumberInput, PageHeader, Switch } from '@sureground/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { WalkInDialog } from '@/components/gateman/WalkInDialog';
 import { InsideNowPanel } from '@/components/gateman/InsideNowPanel';
+import { GateRowIcon, GateSection, gateRowEdge } from '@/components/gateman/GateSection';
 import { useGateVoice } from '@/components/gateman/useGateVoice';
 import { digitsFromSpeech } from '@sureground/shared';
 import { useVoiceInput } from '@/lib/voice';
@@ -179,6 +190,7 @@ export default function GatemanVerifyPage() {
           asOf - new Date(pass.respondedAt ?? pass.expiresAt).getTime() < DECISION_VISIBLE_MS
       )
     : [];
+  const atTheGate = awaiting.length + readyToAdmit.length + decided.length;
 
   const verify = useMutation({
     mutationFn: ({ code, overrideReason }: { code: string; overrideReason?: string }) =>
@@ -370,12 +382,12 @@ export default function GatemanVerifyPage() {
   const standingPassNote = result?.pass ? describeStandingPass(result.pass) : null;
 
   return (
-    <div className="space-y-8 lg:grid lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)] lg:items-start lg:gap-8 lg:space-y-0">
+    <div className="space-y-8 lg:grid lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)] lg:items-start lg:gap-10 lg:space-y-0">
       <div className="space-y-6 lg:sticky lg:top-24">
         <PageHeader
           title={estate.name}
-          description="Scan a visitor QR code or enter their six-digit PIN."
-          meta={gate ? `Current post · ${gate.name}` : 'No gate selected'}
+          description="Enter the visitor's six-digit PIN or scan their QR code."
+          meta={<PostChip gateName={gate?.name} needsChoice={needsGateChoice} />}
         />
 
         {/* Warn when no barrier is chosen, but never block: a real person is waiting. */}
@@ -387,7 +399,10 @@ export default function GatemanVerifyPage() {
           </Alert>
         )}
 
-        <Card className="p-6 space-y-4">
+        <section
+          aria-label="Check a visitor in"
+          className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm"
+        >
           <input
             ref={scanInputRef}
             type="file"
@@ -400,169 +415,204 @@ export default function GatemanVerifyPage() {
               if (file) handleScanFile(file);
             }}
           />
-          <Button
-            variant="outline"
-            fullWidth
-            size="lg"
-            icon={<QrCode className="w-4 h-4" />}
-            disabled={verify.isPending}
-            isLoading={isScanning}
-            loadingText="Reading photo…"
-            onClick={() => scanInputRef.current?.click()}
-          >
-            Scan QR
-          </Button>
 
-          <div className="flex items-center gap-3 text-xs text-muted-foreground">
-            <div className="flex-1 h-px bg-border" />
-            or enter the PIN
-            <div className="flex-1 h-px bg-border" />
-          </div>
-
-          <form
-            className="space-y-4"
-            onSubmit={(event) => {
-              event.preventDefault();
-              if (pin.length !== 6 || verify.isPending) return;
-              setResult(null);
-              setBlocked(null);
-              verify.mutate({ code: pin }, { onSettled: () => pinInputRef.current?.focus() });
-            }}
-          >
-            <NumberInput
-              ref={pinInputRef}
-              value={pin}
-              onValueChange={(value) => setPin(value.slice(0, 6))}
-              maxLength={6}
-              placeholder="000000"
-              aria-label="Visitor PIN"
-              inputClassName="text-center text-3xl tracking-[0.3em] font-bold"
-            />
-            {voicePin.available && (
-              <Button
-                type="button"
-                variant="ghost"
-                fullWidth
-                className="gap-2"
-                onClick={() => (voicePin.listening ? voicePin.stop() : voicePin.start())}
-              >
-                <Mic className={`w-4 h-4 ${voicePin.listening ? 'text-destructive' : ''}`} />
-                {voicePin.listening ? 'Listening… say the PIN' : 'Say the PIN'}
-              </Button>
-            )}
-            {voicePin.error && <p className="text-xs text-muted-foreground">{voicePin.error}</p>}
-            <Button
-              type="submit"
-              variant="primary"
-              fullWidth
-              size="lg"
-              disabled={pin.length !== 6}
-              isLoading={verify.isPending}
-              loadingText="Verifying…"
-            >
-              Check in
-            </Button>
-          </form>
-
-          <Switch
-            checked={gateVoice.enabled}
-            onCheckedChange={gateVoice.toggle}
-            label="Speak results"
-            description="Hear who is checked in, or why not, while you watch the visitor."
-          />
-
-          <Button
-            variant="outline"
-            fullWidth
-            size="lg"
-            className="gap-2"
-            disabled={verify.isPending}
-            onClick={() => {
-              setResult(null);
-              setBlocked(null);
-              setWalkInOpen(true);
-            }}
-          >
-            <UserPlus className="w-4 h-4" />
-            Visitor with no pass
-          </Button>
-
-          {blocked && (
-            <WatchlistBlockedNotice
-              message={blocked.refusal.message}
-              matches={blocked.refusal.matches}
-              onOverride={overrideWatchlist}
-              onDefer={() => {
+          <div className="space-y-5 p-5 sm:p-6">
+            <form
+              className="space-y-4"
+              onSubmit={(event) => {
+                event.preventDefault();
+                if (pin.length !== 6 || verify.isPending) return;
+                setResult(null);
                 setBlocked(null);
-                setOverrideError(null);
-                setPin('');
+                verify.mutate({ code: pin }, { onSettled: () => pinInputRef.current?.focus() });
               }}
-              isOverriding={verify.isPending || admit.isPending}
-              error={overrideError}
-            />
-          )}
+            >
+              <div className="space-y-2">
+                <div className="flex items-baseline justify-between gap-3">
+                  <label htmlFor="visitor-pin" className="text-sm font-medium text-foreground">
+                    Visitor PIN
+                  </label>
+                  <span className="text-xs tabular-nums text-muted-foreground" aria-hidden="true">
+                    {pin.length}/6
+                  </span>
+                </div>
+                <NumberInput
+                  ref={pinInputRef}
+                  id="visitor-pin"
+                  value={pin}
+                  onValueChange={(value) => setPin(value.slice(0, 6))}
+                  maxLength={6}
+                  placeholder="000000"
+                  aria-label="Visitor PIN"
+                  inputClassName="h-16 pl-[0.4em] text-center font-mono text-4xl font-semibold tracking-[0.4em] placeholder:text-muted-foreground/35 sm:h-[4.5rem]"
+                />
+                <div aria-hidden="true" className="grid grid-cols-6 gap-1.5 px-1">
+                  {Array.from({ length: 6 }, (_, index) => (
+                    <span
+                      key={index}
+                      className={`h-1 rounded-full transition-colors duration-150 ${
+                        index < pin.length ? 'bg-primary' : 'bg-border'
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
 
-          <div role="status" aria-live="polite" className="contents">
-            {result?.pass && (
-              <Alert
-                variant="success"
-                icon={CheckCircle2}
-                title={`${result.pass.visitorName} checked in for ${result.pass.unitLabel}`}
+              <Button
+                type="submit"
+                variant="primary"
+                fullWidth
+                size="xl"
+                disabled={pin.length !== 6}
+                isLoading={verify.isPending}
+                loadingText="Verifying…"
               >
-                <p className="text-xs">{result.pass.residentName}</p>
-                {standingPassNote && <p className="text-xs mt-0.5">{standingPassNote}</p>}
-              </Alert>
+                Check in
+              </Button>
+
+              {voicePin.available && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  fullWidth
+                  className="gap-2"
+                  onClick={() => (voicePin.listening ? voicePin.stop() : voicePin.start())}
+                >
+                  <Mic className={`w-4 h-4 ${voicePin.listening ? 'text-destructive' : ''}`} />
+                  {voicePin.listening ? 'Listening… say the PIN' : 'Say the PIN'}
+                </Button>
+              )}
+              {voicePin.error && <p className="text-xs text-muted-foreground">{voicePin.error}</p>}
+            </form>
+
+            <div className="flex items-center gap-3 text-xs text-muted-foreground">
+              <div className="h-px flex-1 bg-border" />
+              or
+              <div className="h-px flex-1 bg-border" />
+            </div>
+
+            <div className="grid gap-2.5">
+              <Button
+                variant="outline"
+                fullWidth
+                size="lg"
+                icon={<QrCode className="w-4 h-4" />}
+                disabled={verify.isPending}
+                isLoading={isScanning}
+                loadingText="Reading photo…"
+                onClick={() => scanInputRef.current?.click()}
+              >
+                Scan QR
+              </Button>
+              <Button
+                variant="outline"
+                fullWidth
+                size="lg"
+                className="gap-2"
+                disabled={verify.isPending}
+                onClick={() => {
+                  setResult(null);
+                  setBlocked(null);
+                  setWalkInOpen(true);
+                }}
+              >
+                <UserPlus className="w-4 h-4" />
+                Visitor with no pass
+              </Button>
+            </div>
+
+            {blocked && (
+              <WatchlistBlockedNotice
+                message={blocked.refusal.message}
+                matches={blocked.refusal.matches}
+                onOverride={overrideWatchlist}
+                onDefer={() => {
+                  setBlocked(null);
+                  setOverrideError(null);
+                  setPin('');
+                }}
+                isOverriding={verify.isPending || admit.isPending}
+                error={overrideError}
+              />
             )}
-            {result?.queued && (
-              <Alert variant="warning" icon={CloudOff} title="Saved on this device">
-                <p className="text-xs">
-                  {result.queued} could not reach the estate, so it is stored here and will be sent
-                  automatically once there is a connection. The visitor can go through.
-                </p>
-              </Alert>
-            )}
-            {result?.requested && (
-              <Alert variant="info" icon={UserPlus} title="Asked the household">
-                <p className="text-xs">{result.requested}</p>
-              </Alert>
-            )}
-            {result?.warning && <WatchlistWarning warning={result.warning} />}
-            {result?.error && <Alert variant="danger" icon={XCircle} title={result.error} />}
+
+            <div role="status" aria-live="polite" className="contents">
+              {result?.pass && (
+                <Alert
+                  variant="success"
+                  icon={CheckCircle2}
+                  title={`${result.pass.visitorName} checked in for ${result.pass.unitLabel}`}
+                >
+                  <p className="text-xs">{result.pass.residentName}</p>
+                  {standingPassNote && <p className="text-xs mt-0.5">{standingPassNote}</p>}
+                </Alert>
+              )}
+              {result?.queued && (
+                <Alert variant="warning" icon={CloudOff} title="Saved on this device">
+                  <p className="text-xs">
+                    {result.queued} could not reach the estate, so it is stored here and will be
+                    sent automatically once there is a connection. The visitor can go through.
+                  </p>
+                </Alert>
+              )}
+              {result?.requested && (
+                <Alert variant="info" icon={UserPlus} title="Asked the household">
+                  <p className="text-xs">{result.requested}</p>
+                </Alert>
+              )}
+              {result?.warning && <WatchlistWarning warning={result.warning} />}
+              {result?.error && <Alert variant="danger" icon={XCircle} title={result.error} />}
+            </div>
           </div>
-        </Card>
+
+          <div className="border-t border-border bg-secondary/40 px-5 py-4 sm:px-6">
+            <Switch
+              checked={gateVoice.enabled}
+              onCheckedChange={gateVoice.toggle}
+              label="Speak results"
+              description="Hear who is checked in, or why not, while you watch the visitor."
+            />
+          </div>
+        </section>
 
         {queue.length > 0 && (
-          <Card className="p-4">
-            <div className="flex items-start gap-3">
-              <CloudOff className="w-5 h-5 shrink-0 mt-0.5 text-muted-foreground" />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-foreground">
-                  Waiting to send ({queue.length})
-                </p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Saved in this browser. They go to the estate as soon as there is a connection.
-                </p>
-                <ul className="mt-2 space-y-1">
-                  {queue.map((write) => (
-                    <li key={write.id} className="text-xs text-muted-foreground">
-                      {write.type === 'check-in' ? 'Arrival' : 'Departure'} · {write.payload.label}{' '}
-                      · {formatTime(write.createdAt)}
-                    </li>
-                  ))}
-                </ul>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="mt-3"
-                  isLoading={isSending}
-                  loadingText="Sending…"
-                  onClick={() => void sendNow()}
-                >
-                  Send now
-                </Button>
-              </div>
+          <GateSection
+            id="waiting-to-send"
+            title="Waiting to send"
+            count={queue.length}
+            countLabel={`${queue.length} waiting to send`}
+            description="Saved in this browser. They go to the estate as soon as there is a connection."
+          >
+            <ul className="divide-y divide-border">
+              {queue.map((write) => (
+                <li key={write.id} className="flex items-center gap-3 px-5 py-3">
+                  <GateRowIcon tone="warning">
+                    <CloudOff />
+                  </GateRowIcon>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-foreground">
+                      {write.payload.label}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {write.type === 'check-in' ? 'Arrival' : 'Departure'} ·{' '}
+                      {formatTime(write.createdAt)}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <div className="border-t border-border px-5 py-3">
+              <Button
+                variant="outline"
+                size="lg"
+                isLoading={isSending}
+                loadingText="Sending…"
+                onClick={() => void sendNow()}
+              >
+                Send now
+              </Button>
             </div>
-          </Card>
+          </GateSection>
         )}
 
         {replaySummary &&
@@ -587,90 +637,113 @@ export default function GatemanVerifyPage() {
       </div>
 
       <div className="space-y-8">
-        {(awaiting.length > 0 || readyToAdmit.length > 0 || decided.length > 0) && (
-          <div className="space-y-3">
-            <h2 className="text-sm font-semibold text-foreground">At the gate</h2>
-
-            {decided.map((pass) => (
-              <Card key={pass.id} className="border-destructive/30 p-4">
-                <div className="flex items-start gap-3">
-                  <XCircle className="w-5 h-5 shrink-0 mt-0.5 text-destructive" />
+        {atTheGate > 0 && (
+          <GateSection
+            id="at-the-gate"
+            title="At the gate"
+            count={atTheGate}
+            countLabel={`${atTheGate} at the gate`}
+            description="Visitors with no pass, and what the household said."
+          >
+            <ul className="divide-y divide-border">
+              {decided.map((pass) => (
+                <li key={pass.id} className={`flex gap-3 px-5 py-4 ${gateRowEdge('danger')}`}>
+                  <GateRowIcon tone="danger">
+                    <Ban />
+                  </GateRowIcon>
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-foreground">{pass.visitorName}</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="truncate text-sm font-medium text-foreground">
+                      {pass.visitorName}
+                    </p>
+                    <p className="truncate text-xs text-muted-foreground">
                       {pass.unitLabel} · {pass.residentName}
                     </p>
-                    <p className="text-xs text-destructive mt-0.5">
+                    <p className="mt-1 text-xs font-medium text-destructive">
                       {pass.status === 'denied'
                         ? 'Refused: do not admit them.'
                         : 'No answer: do not admit them.'}
                     </p>
                     {pass.status === 'denied' && pass.denialReason && (
-                      <p className="text-xs text-muted-foreground mt-0.5">
+                      <p className="mt-0.5 text-xs text-muted-foreground">
                         Reason: {pass.denialReason}
                       </p>
                     )}
                   </div>
-                </div>
-              </Card>
-            ))}
+                </li>
+              ))}
 
-            {readyToAdmit.map((pass) => (
-              <Card key={pass.id} className="border-success/30 p-4 space-y-3">
-                <div className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5 text-success" />
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-foreground">{pass.visitorName}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {pass.unitLabel} · {pass.residentName}
-                    </p>
-                    <p className="text-xs text-success mt-0.5">
-                      Approved
-                      {pass.respondedAt ? ` at ${formatTime(pass.respondedAt)}` : ''}: let them in
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  variant="primary"
-                  fullWidth
-                  size="lg"
-                  disabled={admit.isPending}
-                  isLoading={admit.isPending && admit.variables?.pass.id === pass.id}
-                  loadingText="Admitting…"
-                  onClick={() => admit.mutate({ pass })}
+              {readyToAdmit.map((pass) => (
+                <li
+                  key={pass.id}
+                  className={`flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between ${gateRowEdge('success')}`}
                 >
-                  Admit
-                </Button>
-              </Card>
-            ))}
+                  <div className="flex min-w-0 items-center gap-3">
+                    <GateRowIcon tone="success">
+                      <CheckCircle2 />
+                    </GateRowIcon>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-foreground">
+                        {pass.visitorName}
+                      </p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {pass.unitLabel} · {pass.residentName}
+                      </p>
+                      <p className="mt-1 text-xs font-medium text-success">
+                        Approved
+                        {pass.respondedAt ? ` at ${formatTime(pass.respondedAt)}` : ''}: let them in
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    className="w-full shrink-0 sm:w-auto sm:min-w-28"
+                    disabled={admit.isPending}
+                    isLoading={admit.isPending && admit.variables?.pass.id === pass.id}
+                    loadingText="Admitting…"
+                    onClick={() => admit.mutate({ pass })}
+                  >
+                    Admit
+                  </Button>
+                </li>
+              ))}
 
-            {awaiting.map((pass) => (
-              <Card key={pass.id} className="p-4 space-y-3">
-                <div className="flex items-start gap-3">
-                  <CloudOff className="w-5 h-5 shrink-0 mt-0.5 text-muted-foreground" />
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-foreground">{pass.visitorName}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {pass.unitLabel} · asked {formatTime(pass.createdAt)}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Waiting for {pass.residentName} to answer. If nobody does by{' '}
-                      {formatTime(pass.expiresAt)}, they cannot be admitted.
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  disabled={cancelWalkIn.isPending}
-                  isLoading={cancelWalkIn.isPending && cancelWalkIn.variables?.id === pass.id}
-                  onClick={() => cancelWalkIn.mutate(pass)}
+              {awaiting.map((pass) => (
+                <li
+                  key={pass.id}
+                  className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
                 >
-                  Cancel request
-                </Button>
-              </Card>
-            ))}
-          </div>
+                  <div className="flex min-w-0 items-center gap-3">
+                    <GateRowIcon>
+                      <Hourglass />
+                    </GateRowIcon>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-foreground">
+                        {pass.visitorName}
+                      </p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {pass.unitLabel} · asked {formatTime(pass.createdAt)}
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Waiting for {pass.residentName} to answer. If nobody does by{' '}
+                        {formatTime(pass.expiresAt)}, they cannot be admitted.
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="w-full shrink-0 sm:w-auto"
+                    disabled={cancelWalkIn.isPending}
+                    isLoading={cancelWalkIn.isPending && cancelWalkIn.variables?.id === pass.id}
+                    onClick={() => cancelWalkIn.mutate(pass)}
+                  >
+                    Cancel request
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          </GateSection>
         )}
 
         <InsideNowPanel
@@ -708,5 +781,30 @@ export default function GatemanVerifyPage() {
         }
       />
     </div>
+  );
+}
+
+/** The guard's post as a chip, so it reads as state rather than a sentence. */
+function PostChip({ gateName, needsChoice }: { gateName?: string; needsChoice: boolean }) {
+  if (gateName) {
+    return (
+      <span className="inline-flex max-w-full items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs">
+        <span aria-hidden="true" className="h-1.5 w-1.5 shrink-0 rounded-full bg-success" />
+        <span className="text-muted-foreground">Current post</span>
+        <span className="truncate font-medium text-foreground">{gateName}</span>
+      </span>
+    );
+  }
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium ${
+        needsChoice
+          ? 'border-warning/40 bg-warning-subtle text-warning'
+          : 'border-border bg-secondary text-muted-foreground'
+      }`}
+    >
+      <MapPin aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
+      <span>No gate selected</span>
+    </span>
   );
 }
