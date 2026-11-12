@@ -5,7 +5,7 @@ import { SimilarListings } from '@/components/market/SimilarListings';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { isAuthenticated } from '@sureground/shared';
-import { Badge, Button, Card, EmptyState, Skeleton, useToast } from '@sureground/ui';
+import { Badge, Breadcrumbs, Button, Card, EmptyState, Skeleton, useToast } from '@sureground/ui';
 import {
   Armchair,
   BedDouble,
@@ -211,9 +211,13 @@ export function ShortletListingDetail({
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
-      <Button variant="ghost" size="sm" onClick={() => router.back()} className="mb-4">
-        ← Back
-      </Button>
+      <Breadcrumbs
+        items={[
+          { label: 'Home', href: '/' },
+          { label: 'Short stays', href: '/shortlets' },
+          { label: listing.title },
+        ]}
+      />
 
       <ShowroomMedia
         listingId={listingId}
