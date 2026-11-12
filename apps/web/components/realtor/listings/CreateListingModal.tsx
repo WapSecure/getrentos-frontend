@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Check } from '@sureground/icons';
 import {
+  Alert,
   Button,
   CurrencyInput,
   Dialog,
@@ -14,7 +15,16 @@ import {
   RadioGroup,
   useSessionExpiryDraft,
 } from '@sureground/ui';
+import type { CommercialDetails } from '@sureground/shared/showroom';
 import type { ListingCategory } from '@/types/realtor';
+import { isCommercialType } from '@/types/landlord';
+import {
+  CommercialDetailsFields,
+  EMPTY_COMMERCIAL,
+  commercialError,
+  commercialToCreatePayload,
+  type CommercialValues,
+} from '@/components/landlord/listings/CommercialDetailsFields';
 import { PaginatedSelect } from '@/components/ui/PaginatedSelect';
 import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
 import { unwrap } from '@/lib/apiHelpers';
@@ -36,6 +46,7 @@ interface RealtorListingDraft {
   title: string;
   category: ListingCategory;
   price: string;
+  commercial?: CommercialValues;
 }
 
 export interface CreateRealtorListingInput {
@@ -43,6 +54,8 @@ export interface CreateRealtorListingInput {
   title: string;
   category: ListingCategory;
   price: number;
+  /** Commercial properties only; the API refuses it on any other type. */
+  commercial?: CommercialDetails;
 }
 
 interface CreateListingModalProps {
@@ -74,6 +87,7 @@ export const CreateListingModal = ({
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState<ListingCategory>('sale');
   const [price, setPrice] = useState('');
+  const [commercial, setCommercial] = useState<CommercialValues>(EMPTY_COMMERCIAL);
 
   const { data: clientsPage, isLoading: isClientsLoading } = useQuery({
     queryKey: [
@@ -140,6 +154,7 @@ export const CreateListingModal = ({
             title,
             category,
             price,
+            commercial,
           }
         : null,
     (draft) => {
@@ -150,6 +165,7 @@ export const CreateListingModal = ({
       setTitle(draft.title);
       setCategory(draft.category);
       setPrice(draft.price);
+      setCommercial(draft.commercial ?? EMPTY_COMMERCIAL);
     },
     isOpen
   );
@@ -173,8 +189,12 @@ export const CreateListingModal = ({
     setTitle('');
     setCategory('sale');
     setPrice('');
+    setCommercial(EMPTY_COMMERCIAL);
     onClose();
   };
+
+  const isCommercial = isCommercialType(selectedProperty?.propertyType);
+  const commercialProblem = isCommercial ? commercialError(commercial) : null;
 
   const handleSubmit = () => {
     if (!selectedClient || !selectedProperty) return;
@@ -184,6 +204,8 @@ export const CreateListingModal = ({
       title,
       category,
       price: Number(price) || 0,
+      // Sent only for a commercial property: the API refuses the block on any other type.
+      commercial: isCommercial ? commercialToCreatePayload(commercial) : undefined,
     });
   };
 
@@ -288,6 +310,17 @@ export const CreateListingModal = ({
               onValueChange={(v) => setPrice(v === 0 ? '' : String(v))}
             />
           </Field>
+
+          {isCommercial && (
+            <div className="space-y-3 border-t border-border pt-4">
+              <CommercialDetailsFields
+                value={commercial}
+                onChange={setCommercial}
+                deal={category === 'sale' ? 'sale' : 'rent'}
+              />
+              {commercialProblem && <Alert variant="warning">{commercialProblem}</Alert>}
+            </div>
+          )}
         </div>
 
         {((clientsPage?.total ?? 0) > 0 || isClientsLoading || !!error) && (
@@ -315,7 +348,13 @@ export const CreateListingModal = ({
                 onClick={handleSubmit}
                 isLoading={isSubmitting}
                 loadingText="Creating…"
-                disabled={!selectedClient || !selectedProperty || !title || !(Number(price) >= 1)}
+                disabled={
+                  !selectedClient ||
+                  !selectedProperty ||
+                  !title ||
+                  !(Number(price) >= 1) ||
+                  !!commercialProblem
+                }
               >
                 Create draft
               </Button>

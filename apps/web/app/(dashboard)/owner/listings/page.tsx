@@ -17,6 +17,7 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 import { Plus, Megaphone } from '@sureground/icons';
 import { SaleListingCard } from '@/components/owner/listings/SaleListingCard';
 import { CreateSaleListingModal } from '@/components/owner/listings/CreateSaleListingModal';
+import { CommercialDetailsDialog } from '@/components/landlord/listings/EditCommercialDetailsDialog';
 import { ManageListingModal } from '@/components/owner/listings/ManageListingModal';
 import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -39,6 +40,7 @@ export default function OwnerListingsPage() {
   const [filter, setFilter] = useState<StatusFilter>('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [manageListing, setManageListing] = useState<SaleListing | null>(null);
+  const [commercialListing, setCommercialListing] = useState<SaleListing | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -84,6 +86,7 @@ export default function OwnerListingsPage() {
       listingTitle?: string;
       amenities?: string[];
       intent: 'draft' | 'publish';
+      commercial?: SaleListing['commercial'];
     }) => unwrap(ownerService.createListing(data)),
     onSuccess: invalidate,
   });
@@ -109,6 +112,7 @@ export default function OwnerListingsPage() {
       listingTitle: data.listingTitle,
       amenities: data.features,
       intent: publishNow ? 'publish' : 'draft',
+      commercial: data.commercial,
     });
 
   const handleChangeStatus = (listingId: string, status: SaleListingStatus) => {
@@ -254,6 +258,26 @@ export default function OwnerListingsPage() {
         listing={manageListing}
         onClose={() => setManageListing(null)}
         onChangeStatus={handleChangeStatus}
+        onEditCommercial={(listing) => {
+          setManageListing(null);
+          setCommercialListing(listing);
+        }}
+      />
+
+      <CommercialDetailsDialog
+        target={
+          commercialListing
+            ? {
+                id: commercialListing.id,
+                title: commercialListing.listingTitle,
+                commercial: commercialListing.commercial,
+              }
+            : null
+        }
+        onClose={() => setCommercialListing(null)}
+        save={(id, details) => ownerService.updateListingCommercial(id, details)}
+        invalidate={ownerKeys.listings}
+        deal="sale"
       />
     </>
   );
