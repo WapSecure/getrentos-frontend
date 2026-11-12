@@ -1,5 +1,6 @@
 import type { FunnelEventName, FunnelEventProps } from './funnelEvents';
 import type { MediaRoom } from './types';
+import type { ListingAnswerSource, ListingQuestionTopic } from './listingQuestions';
 
 /**
  * When a listing card counts as seen (`property_impression`), the same on web and mobile so the two
@@ -26,6 +27,7 @@ export const SHOWROOM_EVENT_NAMES = [
   'inspection_request_start',
   'booking_start',
   'offer_start',
+  'listing_question',
 ] as const;
 
 export type ShowroomEventName = (typeof SHOWROOM_EVENT_NAMES)[number] | FunnelEventName;
@@ -39,6 +41,9 @@ export interface ShowroomEventProps extends FunnelEventProps {
   percent?: number;
   durationSeconds?: number;
   variant?: string;
+  /** listing_question only: the topic answered, never the question's text. */
+  topic?: ListingQuestionTopic | 'unmatched';
+  source?: ListingAnswerSource;
 }
 
 /** What callers pass; the transport adds session, time, device and connection. */
