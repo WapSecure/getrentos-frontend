@@ -1,4 +1,5 @@
 import type { MediaRoom } from './types';
+import type { ListingAnswerSource, ListingQuestionTopic } from './listingQuestions';
 
 /** Must match the backend allow-list on POST /analytics/events. */
 export const SHOWROOM_EVENT_NAMES = [
@@ -18,6 +19,7 @@ export const SHOWROOM_EVENT_NAMES = [
   'inspection_request_start',
   'booking_start',
   'offer_start',
+  'listing_question',
 ] as const;
 
 export type ShowroomEventName = (typeof SHOWROOM_EVENT_NAMES)[number];
@@ -31,6 +33,9 @@ export interface ShowroomEventProps {
   percent?: number;
   durationSeconds?: number;
   variant?: string;
+  /** listing_question only: the topic answered, never the question's text. */
+  topic?: ListingQuestionTopic | 'unmatched';
+  source?: ListingAnswerSource;
 }
 
 /** What callers pass; the transport adds session, time, device and connection. */
