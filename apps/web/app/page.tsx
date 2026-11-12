@@ -48,7 +48,7 @@ const websiteJsonLd = {
   url: SITE_URL,
   potentialAction: {
     '@type': 'SearchAction',
-    target: `${SITE_URL}/shortlets?q={search_term_string}`,
+    target: `${SITE_URL}/rent?q={search_term_string}`,
     'query-input': 'required name=search_term_string',
   },
 };
