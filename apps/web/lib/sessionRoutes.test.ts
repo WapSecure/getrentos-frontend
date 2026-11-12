@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { sessionExpiredRedirect } from '../../../packages/shared/src/auth/sessionRoutes.ts';
+import { sessionExpiredRedirect } from '@sureground/shared';
 import { isPublicWebPath } from './sessionRoutes';
 
 test('marketing and listing pages are public', () => {
