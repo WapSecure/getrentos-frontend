@@ -10,14 +10,20 @@ export interface CollectionCurator {
   estateSlug: string | null;
 }
 
+export type CollectionKind = 'hand_picked' | 'rule';
+export type CollectionOrder = 'curator' | 'newest' | 'price_asc' | 'price_desc';
+
 export interface PublicCollectionSummary {
   id: string;
   slug: string;
   title: string;
   description: string | null;
   market: CardMarket;
-  /** Paid placement: always labelled "Sponsored". */
+  /** Paid placement with a sponsor record on file: always labelled "Sponsored". */
   sponsored: boolean;
+  /** hand_picked: the curator's order and notes. rule: a saved search. Older APIs omit both. */
+  kind?: CollectionKind;
+  order?: CollectionOrder;
   curator: CollectionCurator;
   itemCount: number;
   /** The market's raw public card for the cover listing. */
@@ -75,9 +81,51 @@ export const COLLECTION_STATUS_LABEL: Record<CollectionStatus, string> = {
 
 export const collectionPath = (slug: string) => `/collections/${encodeURIComponent(slug)}`;
 
+const curatorName = (curator: CollectionCurator) =>
+  curator.type === 'sureground' ? 'the Sureground team' : curator.name || 'the lister';
+
 /** "Picked by Palm Grove Estate": who chose these, never a claim about the homes themselves. */
-export const curatorLine = (curator: CollectionCurator) =>
-  `Picked by ${curator.type === 'sureground' ? 'the Sureground team' : curator.name || 'the lister'}`;
+export const curatorLine = (curator: CollectionCurator, kind?: CollectionKind) =>
+  kind === 'rule'
+    ? `A saved search by ${curatorName(curator)}`
+    : `Picked by ${curatorName(curator)}`;
+
+/** How the listings on a collection page are ordered, in words. */
+export function orderLine(c: Pick<PublicCollectionSummary, 'kind' | 'order'>): string {
+  if (c.kind !== 'rule') return 'Listings appear in the order the curator chose.';
+  if (c.order === 'price_asc')
+    return 'Listings match a saved search and are shown by price, lowest first.';
+  if (c.order === 'price_desc')
+    return 'Listings match a saved search and are shown by price, highest first.';
+  return 'Listings match a saved search and are shown newest first.';
+}
+
+/** A lister's view of the Sureground collections showing their listings (decided 2026-11-12). */
+export interface ListingCollectionFeature {
+  collectionId: string;
+  collectionTitle: string;
+  collectionSlug: string;
+  published: boolean;
+  kind: CollectionKind;
+  listingId: string;
+  listingTitle: string;
+  addedAt: string | null;
+}
+
+export interface ListingCollectionOptOut {
+  id: string;
+  listingId: string;
+  listingTitle: string;
+  /** Null: kept out of every Sureground collection. */
+  collectionId: string | null;
+  collectionTitle: string | null;
+  createdAt: string;
+}
+
+export interface ListingCollectionFeatures {
+  features: ListingCollectionFeature[];
+  optOuts: ListingCollectionOptOut[];
+}
 
 export const COLLECTION_TITLE_MAX = 80;
 export const COLLECTION_DESCRIPTION_MAX = 600;

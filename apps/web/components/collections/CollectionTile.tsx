@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { ImageOff } from '@sureground/icons';
 import { cn } from '@sureground/shared';
-import { ProgressiveImg } from '@sureground/ui';
+import { ProgressiveImg } from '@sureground/ui/ProgressiveImg';
 import { toMarketCard } from '@/lib/marketCards';
 import { collectionPath, curatorLine, type PublicCollectionSummary } from '@/lib/collections';
 import { SponsoredBadge } from './SponsoredBadge';
@@ -52,7 +52,7 @@ export function CollectionTile({
           <p className="line-clamp-2 text-sm text-muted-foreground">{collection.description}</p>
         )}
         <p className="mt-auto pt-2 text-xs text-muted-foreground">
-          {curatorLine(collection.curator)} · {count}
+          {curatorLine(collection.curator, collection.kind)} · {count}
         </p>
       </div>
     </Link>

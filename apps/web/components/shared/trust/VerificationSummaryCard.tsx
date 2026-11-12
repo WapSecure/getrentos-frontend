@@ -1,16 +1,8 @@
 import { VERIFICATION_SUMMARY_STATUS, type VerificationSummary } from '@sureground/shared';
-import {
-  Alert,
-  type AlertVariant,
-  Badge,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  DescriptionList,
-  type DescriptionItem,
-} from '@sureground/ui';
+import { Alert, type AlertVariant } from '@sureground/ui/Alert';
+import { Badge } from '@sureground/ui/Badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@sureground/ui/Card';
+import { DescriptionList, type DescriptionItem } from '@sureground/ui/DescriptionList';
 import { formatDate } from '@/lib/format';
 import { verificationSummaryBadges } from '@/lib/statusBadge';
 import { TrustLabelsList } from './TrustLabelsList';

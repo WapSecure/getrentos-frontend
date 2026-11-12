@@ -7,10 +7,12 @@ import {
 import { unwrap } from '@/lib/apiHelpers';
 import { subscriptionKeys } from '@/lib/queryKeys';
 
-// Read from the backend so the price shown is always the price charged.
-export function usePlanPricing() {
+// Read from the backend so the price shown is always the price charged. A server-rendered page
+// passes what it fetched as `initialData`, which counts as fresh for the stale time.
+export function usePlanPricing(initialData?: PlanPricing) {
   const { data, isLoading, isError } = useQuery({
     queryKey: subscriptionKeys.pricing,
+    initialData,
     queryFn: () => unwrap(subscriptionService.getPricing()),
     staleTime: 30 * 60_000,
   });

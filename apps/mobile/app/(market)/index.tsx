@@ -9,6 +9,7 @@ import {
   Building2,
   CalendarDays,
   ChevronLeft,
+  HardHat,
   Home,
   KeyRound,
   LandPlot,
@@ -53,8 +54,10 @@ import { seasonRange } from '@/lib/stays';
 import { useMarketSaved } from '@/hooks/useMarketSaved';
 import { useCardAnalytics } from '@/hooks/useCardAnalytics';
 import { MarketComparisonSheet } from '@/components/market/MarketComparisonSheet';
+import { DevelopmentsDirectory } from '@/components/market/DevelopmentsDirectory';
 
-type Tab = MarketKind | 'estates';
+type Tab = MarketKind | 'estates' | 'developments';
+const OTHER_TABS: readonly string[] = ['estates', 'developments'];
 
 const TABS: { value: Tab; label: string; Icon: SgIcon }[] = [
   { value: 'rent', label: MARKET_LABEL.rent, Icon: KeyRound },
@@ -62,6 +65,7 @@ const TABS: { value: Tab; label: string; Icon: SgIcon }[] = [
   { value: 'shortlet', label: MARKET_LABEL.shortlet, Icon: BedDouble },
   { value: 'land', label: MARKET_LABEL.land, Icon: LandPlot },
   { value: 'estates', label: 'Estates', Icon: Building2 },
+  { value: 'developments', label: 'Developments', Icon: HardHat },
 ];
 
 const INTRO: Record<Tab, { title: string; body: string; search: string }> = {
@@ -77,7 +81,7 @@ const INTRO: Record<Tab, { title: string; body: string; search: string }> = {
   },
   shortlet: {
     title: 'Shortlets',
-    body: 'Furnished short stays from verified hosts: Sureground holds your payment until you arrive.',
+    body: 'Furnished short stays: Sureground holds your payment until at least 24 hours after check-in.',
     search: 'Search area or city',
   },
   land: {
@@ -90,6 +94,11 @@ const INTRO: Record<Tab, { title: string; body: string; search: string }> = {
     body: 'Browse what is available inside an estate, and who is marketing it.',
     search: 'Search estate name or area',
   },
+  developments: {
+    title: 'Off-plan developments',
+    body: "Each one went live only after a Sureground staff member checked the developer's CAC registration, the directors' identities, the title to the site and the building plan approval.",
+    search: 'Search developments',
+  },
 };
 
 const SORTS: MarketSort[] = ['newest', 'price_asc', 'price_desc'];
@@ -100,7 +109,9 @@ export default function Marketplace() {
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ kind?: string }>();
   const [tab, setTab] = useState<Tab>(() =>
-    params.kind === 'estates' || isMarketKind(params.kind) ? (params.kind as Tab) : 'rent'
+    OTHER_TABS.includes(params.kind ?? '') || isMarketKind(params.kind)
+      ? (params.kind as Tab)
+      : 'rent'
   );
   const [searchText, setSearchText] = useState('');
   const [search, setSearch] = useState('');
@@ -166,28 +177,31 @@ export default function Marketplace() {
           />
         </View>
 
-        <TextField
-          placeholder={intro.search}
-          accessibilityLabel={intro.search}
-          leftIcon={<Search size={18} color={colors.mutedForeground} />}
-          autoCapitalize="none"
-          autoCorrect={false}
-          returnKeyType="search"
-          value={searchText}
-          onChangeText={setSearchText}
-          rightAccessory={
-            searchText ? (
-              <Pressable
-                onPress={() => setSearchText('')}
-                accessibilityRole="button"
-                accessibilityLabel="Clear search"
-                hitSlop={12}
-              >
-                <X size={18} color={colors.mutedForeground} />
-              </Pressable>
-            ) : null
-          }
-        />
+        {/* Developments are few and have no search on the API yet. */}
+        {tab === 'developments' ? null : (
+          <TextField
+            placeholder={intro.search}
+            accessibilityLabel={intro.search}
+            leftIcon={<Search size={18} color={colors.mutedForeground} />}
+            autoCapitalize="none"
+            autoCorrect={false}
+            returnKeyType="search"
+            value={searchText}
+            onChangeText={setSearchText}
+            rightAccessory={
+              searchText ? (
+                <Pressable
+                  onPress={() => setSearchText('')}
+                  accessibilityRole="button"
+                  accessibilityLabel="Clear search"
+                  hitSlop={12}
+                >
+                  <X size={18} color={colors.mutedForeground} />
+                </Pressable>
+              ) : null
+            }
+          />
+        )}
 
         <ScrollView
           horizontal
@@ -233,7 +247,9 @@ export default function Marketplace() {
         </ScrollView>
       </View>
 
-      {tab === 'estates' ? (
+      {tab === 'developments' ? (
+        <DevelopmentsDirectory intro={intro} />
+      ) : tab === 'estates' ? (
         <EstatesDirectory
           search={search}
           intro={intro}

@@ -26,7 +26,7 @@ export const CloseIncidentModal = ({
     onClose();
   };
 
-  const title = action === 'dismiss' ? 'Dismiss Incident' : 'Resolve Incident';
+  const title = action === 'dismiss' ? 'Dismiss incident' : 'Resolve incident';
 
   return (
     <Dialog open={isOpen} onOpenChange={(next) => !next && handleClose()}>

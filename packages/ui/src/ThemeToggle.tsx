@@ -31,7 +31,7 @@ export const ThemeToggle = () => {
         const newTheme = isDark ? 'light' : 'dark';
         setTheme(newTheme);
       }}
-      className="relative w-10 h-10 rounded-full bg-gray-200 dark:bg-white/10 backdrop-blur-sm border border-gray-300 dark:border-white/20 hover:bg-gray-300 dark:hover:bg-white/20 transition-all duration-200 flex items-center justify-center"
+      className="relative flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-foreground transition-colors duration-200 hover:bg-secondary"
       aria-label="Toggle theme"
     >
       <motion.div
@@ -40,9 +40,9 @@ export const ThemeToggle = () => {
         transition={{ duration: 0.3 }}
       >
         {isDark ? (
-          <Moon className="w-4 h-4 text-gray-900 dark:text-white" />
+          <Moon className="h-4 w-4 text-foreground" />
         ) : (
-          <Sun className="w-4 h-4 text-gray-900 dark:text-white" />
+          <Sun className="h-4 w-4 text-foreground" />
         )}
       </motion.div>
     </motion.button>

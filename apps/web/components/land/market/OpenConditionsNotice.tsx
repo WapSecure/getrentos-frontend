@@ -1,6 +1,6 @@
 'use client';
 
-import { Alert } from '@sureground/ui';
+import { Alert } from '@sureground/ui/Alert';
 import { CircleDashed } from '@sureground/icons';
 import { formatDate } from '@/lib/format';
 import type { LandOpenCondition } from '@/types/land';

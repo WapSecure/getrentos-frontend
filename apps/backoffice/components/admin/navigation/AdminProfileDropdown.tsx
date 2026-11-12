@@ -51,7 +51,7 @@ export const AdminProfileDropdown = ({ user }: AdminProfileDropdownProps) => {
         <DropdownMenuItem asChild>
           <Link href={ROUTES.ADMIN_SETTINGS}>
             <User className="w-4 h-4" />
-            My Profile
+            My profile
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
@@ -63,7 +63,7 @@ export const AdminProfileDropdown = ({ user }: AdminProfileDropdownProps) => {
         <DropdownMenuItem asChild>
           <Link href={ROUTES.ADMIN_USERS}>
             <Users className="w-4 h-4" />
-            User Management
+            User management
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
@@ -75,7 +75,7 @@ export const AdminProfileDropdown = ({ user }: AdminProfileDropdownProps) => {
         <DropdownMenuItem asChild>
           <Link href={ROUTES.ADMIN_HELP}>
             <HelpCircle className="w-4 h-4" />
-            Help Center
+            Help center
           </Link>
         </DropdownMenuItem>
 

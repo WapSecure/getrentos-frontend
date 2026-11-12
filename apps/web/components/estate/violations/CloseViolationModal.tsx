@@ -26,7 +26,7 @@ export const CloseViolationModal = ({
     onClose();
   };
 
-  const title = action === 'dismiss' ? 'Dismiss Violation' : 'Resolve Violation';
+  const title = action === 'dismiss' ? 'Dismiss violation' : 'Resolve violation';
 
   return (
     <Dialog open={isOpen} onOpenChange={(next) => !next && handleClose()}>

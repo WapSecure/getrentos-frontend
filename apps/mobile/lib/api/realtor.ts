@@ -2,6 +2,7 @@ import { apiFetch, apiFetchOrNull, apiUpload } from './client';
 import { toQuery } from './query';
 import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
+import type { CommercialDetails, CommercialUpdatePayload } from '@sureground/shared/showroom';
 import type { TrustProfile } from './agentTrustProfile';
 import type { PayoutSentTo } from '@sureground/shared';
 
@@ -70,6 +71,8 @@ export interface AssignedProperty {
   title: string;
   city: string;
   state: string;
+  /** The API enum (e.g. 'COMMERCIAL'): a commercial property's listing form adds the commercial block. */
+  propertyType?: string;
 }
 
 export interface ClientEligibility {
@@ -97,6 +100,8 @@ export interface RealtorListing {
     bathrooms: number | null;
     owner: { legalName: string | null };
   };
+  /** Commercial properties only. Read through `commercialDetailsOf`, never trusted as is. */
+  commercial?: unknown;
 }
 
 export interface RealtorLead {
@@ -332,7 +337,15 @@ export const realtorApi = {
     listingType: 'RENT' | 'SALE';
     price: number;
     availableFrom?: string;
+    /** Commercial properties only; the API refuses it on any other type. */
+    commercial?: CommercialDetails;
   }) => apiFetch<RealtorListing>('/realtor/listings', { method: 'POST', body }),
+  /** Only on a listing this realtor drafted, while the property is still assigned. Null clears a field. */
+  updateListingCommercial: (id: string, details: CommercialUpdatePayload) =>
+    apiFetch<RealtorListing>(`/realtor/listings/${id}/commercial`, {
+      method: 'PATCH',
+      body: details,
+    }),
 
   leads: (opts: { status?: LeadStatus; search?: string; page?: number } = {}) =>
     apiFetch<Paginated<RealtorLead>>(

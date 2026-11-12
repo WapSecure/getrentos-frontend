@@ -32,7 +32,12 @@ export const AdminNavbar = ({ user }: AdminNavbarProps) => {
       >
         <div className="px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between gap-3">
-            <Logo href={ROUTES.ADMIN_DASHBOARD} size="md" />
+            {/* As in the web navbars: the wordmark is too wide for a phone top bar and pushed the profile menu over the menu button. */}
+            <Logo
+              href={ROUTES.ADMIN_DASHBOARD}
+              size="md"
+              className="shrink-0 [&>span]:sr-only sm:[&>span]:not-sr-only"
+            />
 
             {/* Below lg the compact search row takes over; showing both squeezes the header past the viewport on tablets. */}
             <div className="hidden lg:flex flex-1 max-w-md mx-4">

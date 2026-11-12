@@ -140,7 +140,7 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
         </Field>
       </div>
 
-      <SaveButton label="Save Changes" className="mt-6" onClick={handleSave} />
+      <SaveButton label="Save changes" className="mt-6" onClick={handleSave} />
     </div>
   );
 };

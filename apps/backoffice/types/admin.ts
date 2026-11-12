@@ -288,7 +288,10 @@ export interface FraudAlert {
   id: string;
   subjectName: string;
   subjectRole: PlatformRole;
+  /** Stored reason; may be machine text. Show `fraudAlertSummary()` instead. */
   reason: string;
+  /** Plain-language sentence; absent from older API responses. */
+  summary?: string;
   severity: FraudAlertSeverity;
   status: FraudAlertStatus;
   detectedAt: string;
@@ -304,10 +307,26 @@ export interface FraudAlertSubject {
   isVerified: boolean;
 }
 
+export interface FraudAlertMediaReuse {
+  matchType: 'EXACT' | 'NEAR' | null;
+  /** Perceptual-hash bit distance; 0 means identical. */
+  distance: number | null;
+  matchCount: number | null;
+  room: string | null;
+  matchedListing: { id: string; title: string; type: string; status: string } | null;
+  matchedProperty: { id: string; title: string } | null;
+  matchedOwner: { id: string; name: string } | null;
+  storageKey: string | null;
+  matchedStorageKey: string | null;
+}
+
 export interface FraudAlertDetail {
   id: string;
   subject: FraudAlertSubject;
   reason: string;
+  summary?: string;
+  /** Reused-photo alerts only. Technical fields belong in the detail view, never lists. */
+  mediaReuse?: FraudAlertMediaReuse;
   severity: FraudAlertSeverity;
   status: FraudAlertStatus;
   detectedAt: string;
@@ -385,6 +404,22 @@ export interface AdminMediaItem {
   legalHold: boolean;
   createdAt: string;
   deletedAt: string | null;
+}
+
+export interface AdminMediaHealth {
+  checkedAt: string;
+  stats: {
+    processingOverAnHour: number;
+    uploadingOverTwoDays: number;
+    rejectedLast24h: number;
+    rejectedDailyAverage7d: number;
+    storedFiles: number;
+    storedGb: number;
+    uploadedThisMonthGb: number;
+    legalHolds: number;
+  };
+  limits: { storageBudgetGb: number; monthlyUploadBudgetGb: number; processingBacklog: number };
+  alerts: { code: string; severity: 'warning' | 'critical'; message: string }[];
 }
 
 export interface AdminDocument {

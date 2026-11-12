@@ -103,6 +103,7 @@
     ],
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/$1",
+      "^@sureground/shared/address$": "<rootDir>/../../packages/shared/src/utils/address.ts",
       "^@sureground/shared$": "<rootDir>/../../packages/shared/src/index.ts",
       "^@sureground/tokens$": "<rootDir>/../../packages/tokens/src/index.ts",
       "^@sureground/ui-native$": "<rootDir>/../../packages/ui-native/src/index.ts",
@@ -113,6 +114,10 @@
     ],
     "setupFilesAfterEnv": [
       "<rootDir>/jest.setup-globals.js"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/__tests__/helpers/"
     ]
   },
   "devDependencies": {

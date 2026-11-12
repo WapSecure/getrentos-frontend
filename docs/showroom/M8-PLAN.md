@@ -128,3 +128,38 @@ Step one ("list developments only") is built: backend #200, web and backoffice #
 4. **The developer's own sales contact stays for step one**, since Sureground is not a party to the sale. Follow-up: a signed-in "Ask the developer" enquiry (the same sign-in rule as other enquiries, decided 2026-11-10), so enquiries are recorded and a developer who never answers can be followed up.
 
 Follow-ups: mobile pages, developments in search, sitemap and main navigation, linking units to real listings, development photos on the CDN, the enquiry above, and the automated director check above.
+
+## Mobile parity for M8c and M8d step one (2026-11-12)
+
+**Commercial (M8c):** the form model (`commercialForm.ts`) and the page rows (`commercialRows.ts`) moved from apps/web/lib into `@sureground/shared/showroom`, so the web and the app use the same fields, limits, payloads and messages; the web's `lib/commercialDetails.ts` and `lib/commercialShowroom.ts` now re-export them.
+
+- Listing forms: the landlord "List a unit" sheet, the owner "List for sale" sheet and the realtor new-listing screen add the optional commercial block when the property type is COMMERCIAL. Landlord listings, the owner's property page and the realtor listing actions add "Add commercial details" or "Edit commercial details" on commercial listings (PATCH `/…/listings/:id/commercial`, null clears a field).
+- Listing screens: the public market listing, the renter listing and the buyer listing show "Lease and terms", "The space" and "Running the business" before the description. VAT is shown only as stated; the costs card says Sureground does not add VAT to these amounts.
+
+**Developments (M8d step one):** a "Developments" tab on the signed-out market home lists live developments, and `/(market)/development/[id]` shows one, with the shared mapper and copy from `developments.ts`: hero and viewer, "Four staff checks passed", stage and expected completion as the developer states them, unit types, "How payment works", instalments as stated, dated progress photos, approvals "Checked by Sureground on <date>", "What we checked" and "What we did not check", and the developer's sales phone and email (tap to call or email). No enquiry button yet ("Ask the developer" is a separate branch).
+
+**Not done:** `/developments` links are not claimed as app links, so a shared link opens the website; signed-in users do not reach the market tab (as for the other public markets).
+
+## M8d follow-ups: discovery and "Ask the developer" (2026-11-12)
+
+Built on top of step one (backend #200, web #169). Backend: `feat/m8d-discovery-enquiries`, with the additive migration `20261112180000_development_enquiries`. Mobile is not done yet.
+
+**Discovery (web):**
+
+- "Off-plan" in the main navigation next to Buy, Rent, Short stays and Land, and "Off-plan developments" in the footer.
+- Buying has two tabs, "Homes for sale" (`/buy`) and "Off-plan developments" (`/developments`). The developments page gained a state filter; filtered and later pages are kept out of the index.
+- The sitemap lists `/developments` and every live development, from the public `GET /developments` endpoint only.
+- Cards use the shared `ListingCard` (there is no development variant), wrapped as `DevelopmentCard`.
+- `/developments` is now a public web section, so an ended session there is dropped quietly instead of sending the visitor to sign in.
+
+**Ask the developer:**
+
+- Signed in only (decision of 2026-11-10). Signed out, the page shows "Sign in to ask the developer".
+- The buyer picks a unit type (optional) and writes a question. Their earlier questions and the answers are shown on the same page ("Your questions"). There is no separate buyer enquiries area, so there is no list across developments yet.
+- Limits: 5 sends a minute per user, 3 unanswered questions per development, 10 questions a day.
+- The developer's inbox is in the agency developments editor; the developments list shows "n new questions". Members with an editing seat (owner, staff, portfolio manager) can answer, change an answer, or close a question. Each step is audit-logged.
+- The firm's editors are told in the app and by email (`DEVELOPMENT_ENQUIRY_RECEIVED`); the buyer is told when the developer answers (`DEVELOPMENT_ENQUIRY_ANSWERED`).
+- The developer sees the buyer's name only, never their email or phone.
+- The developer's own sales contact stays on the page. Both the page and the inbox say that Sureground does not take payment for developments.
+
+**Shared:** `@sureground/shared/showroom` `developmentEnquiries`: types, validating mappers, the form check and the copy, with `node --test` tests.

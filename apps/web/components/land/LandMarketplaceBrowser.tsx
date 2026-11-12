@@ -9,31 +9,25 @@ import {
 } from '@/components/discovery/MapDiscoveryView';
 import { formatAreaParam, parseAreaParam, parseView, type MapArea } from '@/lib/mapArea';
 import { urlParam, useSyncUrlState } from '@/hooks/useUrlState';
+import { useTrackSearch } from '@/hooks/useTrackSearch';
 import { track } from '@/lib/analytics';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  Alert,
-  Badge,
-  Button,
-  Checkbox,
-  CurrencyInput,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-  EmptyState,
-  ListingCard,
-  ListingCardAction,
-  PageErrorState,
-  Pagination,
-  SearchInput,
-  Select,
-  Skeleton,
-  useToast,
-} from '@sureground/ui';
+import { Alert } from '@sureground/ui/Alert';
+import { Badge } from '@sureground/ui/Badge';
+import { Button } from '@sureground/ui/Button';
+import { Checkbox } from '@sureground/ui/Checkbox';
+import { CurrencyInput } from '@sureground/ui/CurrencyInput';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@sureground/ui/Dialog';
+import { EmptyState } from '@sureground/ui/EmptyState';
+import { ListingCard, ListingCardAction } from '@sureground/ui/ListingCard';
+import { PageErrorState } from '@sureground/ui/PageState';
+import { Pagination } from '@sureground/ui/Pagination';
+import { SearchInput } from '@sureground/ui/SearchInput';
+import { Select } from '@sureground/ui/Select';
+import { Skeleton } from '@sureground/ui/Skeleton';
+import { useToast } from '@sureground/ui/ToastProvider';
 import {
   ArrowUpDown,
-  BadgeCheck,
   BarChart3,
   ExternalLink,
   Heart,
@@ -45,7 +39,8 @@ import {
 } from '@sureground/icons';
 import { landMarketService } from '@/services/landMarketService';
 import { buyerService } from '@/services/buyerService';
-import { unwrap } from '@/lib/apiHelpers';
+import { unwrap, type Paginated } from '@/lib/apiHelpers';
+import { LAND_PAGE_SIZE } from '@/lib/marketFirstPage';
 import { landKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
 import { viewerHasRole, viewerIsSignedIn } from '@/lib/viewer';
@@ -76,9 +71,12 @@ type LandViewer = 'buyer' | 'member' | 'anonymous';
 
 interface LandMarketplaceBrowserProps {
   mode: MarketplaceMode;
+  /** The server-rendered unfiltered first page (public mode). */
+  initialData?: Paginated<PublicLandListing>;
 }
 
-const PAGE_SIZE = 9;
+// Shared with the server page that pre-renders the first page, so both ask for the same page size.
+const PAGE_SIZE = LAND_PAGE_SIZE;
 const MAP_PAGE_SIZE = 24;
 const LAND_SORTS = ['newest', 'price_asc', 'price_desc'] as const;
 
@@ -93,7 +91,7 @@ const cityFilterOptionsFor = (state: string) => {
 };
 
 const areaLabel = (listing: PublicLandListing) =>
-  `${listing.parcel.areaValue.toLocaleString()} ${LAND_AREA_UNIT_LABELS[listing.parcel.areaUnit]}`;
+  `${listing.parcel.areaValue.toLocaleString('en-NG')} ${LAND_AREA_UNIT_LABELS[listing.parcel.areaUnit]}`;
 
 const parcelTitle = (listing: PublicLandListing) =>
   [listing.parcel.plotNumber && `Plot ${listing.parcel.plotNumber}`, listing.parcel.estateName]
@@ -105,7 +103,7 @@ const TITLE_TYPE_OPTIONS = [
   { value: 'CERTIFICATE_OF_OCCUPANCY', label: 'Certificate of Occupancy' },
   { value: 'GOVERNOR_CONSENT', label: "Governor's Consent" },
   { value: 'DEED_OF_ASSIGNMENT', label: 'Deed of Assignment' },
-  { value: 'REGISTERED_CONVEYANCE', label: 'Registered Conveyance' },
+  { value: 'REGISTERED_CONVEYANCE', label: 'Registered conveyance' },
   { value: 'EXCISION_GAZETTE', label: 'Excision / Gazette' },
   { value: 'ALLOCATION_LETTER', label: 'Allocation letter' },
   { value: 'SURVEY_PLAN', label: 'Survey plan' },
@@ -126,7 +124,7 @@ const AREA_OPTIONS = [
   { value: '10000', label: '1 hectare+' },
 ];
 
-export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) => {
+export const LandMarketplaceBrowser = ({ mode, initialData }: LandMarketplaceBrowserProps) => {
   const queryClient = useQueryClient();
   const searchParams = useSearchParams();
   // The first render reads the link; after that React owns the state and mirrors it back to the URL.
@@ -163,25 +161,25 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
   );
   const pageSize = view === 'map' ? MAP_PAGE_SIZE : PAGE_SIZE;
 
-  useSyncUrlState(
-    {
-      q: debouncedSearch,
-      state,
-      city,
-      minPrice,
-      maxPrice,
-      title: titleType,
-      minArea,
-      assurance: minAssuranceTier,
-      road: roadAccess,
-      sort,
-      page,
-      view,
-      area: area ? formatAreaParam(area) : undefined,
-      selected: view === 'map' ? selectedId : undefined,
-    },
-    { sort: 'newest', page: 1, view: 'grid' }
-  );
+  const urlState = {
+    q: debouncedSearch,
+    state,
+    city,
+    minPrice,
+    maxPrice,
+    title: titleType,
+    minArea,
+    assurance: minAssuranceTier,
+    road: roadAccess,
+    sort,
+    page,
+    view,
+    area: area ? formatAreaParam(area) : undefined,
+    selected: view === 'map' ? selectedId : undefined,
+  };
+  const urlDefaults = { sort: 'newest', page: 1, view: 'grid' };
+  useSyncUrlState(urlState, urlDefaults);
+  useTrackSearch('land', 'land_search', urlState, urlDefaults);
   const [chosenListing, setActiveListing] = useState<PublicLandListing | null>(null);
   const [savedListingIds, setSavedListingIds] = useState<string[]>([]);
   const toast = useToast();
@@ -219,9 +217,28 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
     ]
   );
 
+  // `?property=` opens a listing's dialog from the browser's own URL read, so that link keeps the client fetch.
+  const isDefaultView =
+    !debouncedSearch &&
+    !titleType &&
+    !minArea &&
+    !roadAccess &&
+    !minAssuranceTier &&
+    !city.trim() &&
+    !state.trim() &&
+    !minPrice &&
+    !maxPrice &&
+    sort === 'newest' &&
+    page === 1 &&
+    view === 'grid' &&
+    !area &&
+    !searchParams.get('property');
+
   const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
     queryKey: [...landKeys.public, queryParams],
     queryFn: () => unwrap(landMarketService.listPublic(queryParams)),
+    // Only the default view may start from the server payload: a filtered query seeded with page 1 of everything shows the wrong listings.
+    initialData: isDefaultView ? initialData : undefined,
     placeholderData: keepPreviousData,
   });
   const listings = data?.items ?? [];
@@ -357,10 +374,7 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
     <>
       <div className={mode === 'public' ? 'mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8' : ''}>
         <div className="mb-8 max-w-3xl">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/8 px-3 py-1.5 text-xs font-semibold text-primary">
-            <BadgeCheck className="h-3.5 w-3.5" />
-            Reviewed land marketplace
-          </div>
+          <p className="label-caps text-muted-foreground">Reviewed land marketplace</p>
           <h1 className="mt-4 text-3xl font-bold tracking-[-0.04em] text-foreground sm:text-4xl">
             Buy land with the parcel record in view.
           </h1>

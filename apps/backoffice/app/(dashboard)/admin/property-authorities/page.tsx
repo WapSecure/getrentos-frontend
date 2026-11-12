@@ -147,7 +147,7 @@ export default function PropertyAuthoritiesPage() {
   return (
     <div className="p-6 space-y-6">
       <PageHeader
-        title="Property Authorities"
+        title="Property authorities"
         description="People acting for a property they do not own: managers, agents, co-owners, POA holders."
         actions={
           <Field label="Status" className="w-full sm:w-56">

@@ -18,10 +18,11 @@ export const TrustScoreRing = ({ score, size = 160, strokeWidth = 12 }: TrustSco
   const bandLabel = trustBand(score).label;
 
   const getScoreColor = () => {
-    if (score >= 85) return '#10b981';
-    if (score >= 50) return '#3b82f6';
-    if (score >= 25) return '#eab308';
-    return '#9ca3af';
+    // Same bands as trustBand(): green from Trusted, ink for Established, amber while building.
+    if (score >= 70) return 'var(--success)';
+    if (score >= 50) return 'var(--foreground)';
+    if (score >= 25) return 'var(--warning)';
+    return 'var(--muted-foreground)';
   };
 
   return (
@@ -33,9 +34,8 @@ export const TrustScoreRing = ({ score, size = 160, strokeWidth = 12 }: TrustSco
             cy={size / 2}
             r={radius}
             fill="none"
-            stroke="#e5e7eb"
+            stroke="var(--border)"
             strokeWidth={strokeWidth}
-            className="dark:stroke-gray-700"
           />
           <motion.circle
             cx={size / 2}

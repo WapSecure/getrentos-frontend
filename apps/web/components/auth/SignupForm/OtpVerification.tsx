@@ -109,7 +109,7 @@ export const OtpVerification = ({
         icon={<ArrowRight className="w-4 h-4" />}
         iconPosition="right"
       >
-        Verify & Continue
+        Verify & continue
       </Button>
     </div>
   );

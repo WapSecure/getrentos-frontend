@@ -36,6 +36,8 @@ import {
   INVESTMENT_HORIZONS,
   INVESTOR_PROPERTY_TYPES,
   OWNERSHIP_STRUCTURES,
+  SUMMARY_CHANNELS,
+  SUMMARY_FREQUENCIES,
   type BudgetBand,
   type DisplayCurrency,
   type IntendedUse,
@@ -45,6 +47,8 @@ import {
   type InvestorProfileInput,
   type InvestorPropertyType,
   type OwnershipStructure,
+  type SummaryChannel,
+  type SummaryFrequency,
 } from '@/types/investor';
 import {
   BUDGET_BAND_LABELS,
@@ -54,6 +58,8 @@ import {
   INTENDED_USE_LABELS,
   OWNERSHIP_LABELS,
   PROPERTY_TYPE_LABELS,
+  SUMMARY_CHANNEL_LABELS,
+  SUMMARY_FREQUENCY_LABELS,
 } from '@sureground/shared';
 
 type Step = 'about' | 'plans' | 'risk';
@@ -73,7 +79,7 @@ const WHY_WE_ASK: { icon: SgIcon; title: string; body: string }[] = [
   {
     icon: Clock,
     title: 'Your time zone',
-    body: 'Tours and deadlines show Lagos time next to yours. Payment and contract dates stay Lagos dates.',
+    body: 'Tours, deadlines and alerts show Lagos time next to yours, and texts wait for your morning. Payment and contract dates stay Lagos dates.',
   },
   {
     icon: ShieldCheck,
@@ -105,6 +111,8 @@ interface Draft {
   budgetBand: BudgetBand | '';
   horizon: InvestmentHorizon | '';
   ownershipStructure: OwnershipStructure | '';
+  summaryFrequency: SummaryFrequency;
+  summaryChannels: SummaryChannel[];
 }
 
 const ABOUT_FIELDS: readonly InvestorProfileField[] = [
@@ -140,6 +148,8 @@ const draftFrom = (profile: InvestorProfile | null | undefined): Draft => ({
   budgetBand: profile?.budgetBand ?? '',
   horizon: profile?.horizon ?? '',
   ownershipStructure: profile?.ownershipStructure ?? '',
+  summaryFrequency: profile?.summaryFrequency ?? 'NONE',
+  summaryChannels: profile?.summaryChannels ?? ['EMAIL'],
 });
 
 type Errors = Partial<Record<keyof Draft, string>>;
@@ -221,6 +231,8 @@ const ProfileForm = ({
         nationality: draft.nationality.toUpperCase(),
         timeZone: draft.timeZone,
         displayCurrency: draft.displayCurrency as DisplayCurrency,
+        summaryFrequency: draft.summaryFrequency,
+        summaryChannels: draft.summaryChannels,
       });
       return;
     }
@@ -287,6 +299,36 @@ const ProfileForm = ({
                 searchable={false}
               />
             </Field>
+          </div>
+          <div className="mt-6 space-y-5 border-t border-border pt-6">
+            <Field
+              label="Summary of your purchases and properties"
+              hint="Sent at 08:00 your time: what needs you, deposits under Payment Protection, jobs, approvals and your latest statement."
+            >
+              <RadioGroup
+                value={draft.summaryFrequency}
+                onValueChange={(value) => set('summaryFrequency', value as SummaryFrequency)}
+                options={SUMMARY_FREQUENCIES.map((frequency) => ({
+                  value: frequency,
+                  label: SUMMARY_FREQUENCY_LABELS[frequency],
+                }))}
+                variant="card"
+                columns={3}
+              />
+            </Field>
+            {draft.summaryFrequency !== 'NONE' && (
+              <CheckboxGroup
+                legend="Also send it by"
+                hint="It is always in your notifications."
+                columns={2}
+                value={draft.summaryChannels}
+                options={SUMMARY_CHANNELS.map((channel) => ({
+                  value: channel,
+                  label: SUMMARY_CHANNEL_LABELS[channel],
+                }))}
+                onValueChange={(next) => set('summaryChannels', next)}
+              />
+            )}
           </div>
         </StepCard>
       ) : (

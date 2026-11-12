@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { Select, type SelectOption } from '@sureground/ui';
+import { Select, type SelectOption } from '@sureground/ui/Select';
 
 /** Used when the browser cannot list its zones. */
 const FALLBACK_ZONES = [

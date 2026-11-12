@@ -1,6 +1,7 @@
 import { authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
 import type { PublicLandListParams } from '@/services/landService';
-import type { LandAssuranceTier, PublicLandListing, PublicLandListingApi } from '@/types/land';
+import type { LandAssuranceTier, PublicLandListingApi } from '@/types/land';
+import { mapPublicLand } from '@/lib/publicLandMap';
 import { areaQuery, type MapArea } from '@/lib/mapArea';
 import type {
   LandComparables,
@@ -14,34 +15,6 @@ export interface AssuredLandListParams extends PublicLandListParams {
   /** Only parcels shown inside this map area. */
   area?: MapArea;
 }
-
-/** Same adaptation as landService's public mapper, kept here so that file stays untouched. */
-const mapPublicLand = (listing: PublicLandListingApi): PublicLandListing => ({
-  id: listing.id,
-  propertyId: listing.propertyId,
-  title: listing.title,
-  askingPrice: listing.price,
-  description: listing.description,
-  address: listing.address,
-  addressHidden: listing.addressHidden,
-  city: listing.city,
-  state: listing.state,
-  country: listing.country,
-  listedDate: listing.publishedAt,
-  coverImageUrl: listing.coverImageUrl,
-  imageVariants: listing.imageVariants,
-  imagePreview: listing.imagePreview,
-  ownerVerified: listing.isVerified,
-  ...(typeof listing.latitude === 'number' && typeof listing.longitude === 'number'
-    ? {
-        latitude: listing.latitude,
-        longitude: listing.longitude,
-        locationPrecision: listing.locationPrecision ?? 'approximate',
-      }
-    : {}),
-  parcel: listing.parcel,
-  diligence: listing.diligence,
-});
 
 /** Every figure covers verified, in-date land only. */
 export const landMarketService = {

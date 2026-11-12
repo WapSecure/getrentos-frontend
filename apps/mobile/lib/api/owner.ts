@@ -1,6 +1,7 @@
 import { apiFetch, apiUpload, apiUploadWithProgress, type UploadProgressOptions } from './client';
 import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
+import type { CommercialDetails, CommercialUpdatePayload } from '@sureground/shared/showroom';
 import type { TrustProfile } from './buyerTrustProfile';
 import type { VideoCallJoin } from '@sureground/shared';
 import type { VideoOnSiteReport } from '../filmedOnSite';
@@ -129,6 +130,8 @@ export interface OwnerListing {
   features?: string[];
   status: OwnerListingStatus;
   createdAt: string;
+  /** Commercial properties only. Read through `commercialDetailsOf`, never trusted as is. */
+  commercial?: unknown;
 }
 
 export type OwnerOfferStatus =
@@ -511,7 +514,15 @@ export const ownerApi = {
     listingTitle?: string;
     /** 'publish' goes live, or into review when a person must check first. */
     intent?: 'draft' | 'publish';
+    /** Commercial properties only; the API refuses it on any other type. */
+    commercial?: CommercialDetails;
   }) => apiFetch<OwnerListing>('/owner/listings', { method: 'POST', body: input }),
+  /** Commercial properties only. Every field is sent; null clears one. */
+  updateListingCommercial: (id: string, details: CommercialUpdatePayload) =>
+    apiFetch<OwnerListing>(`/owner/listings/${id}/commercial`, {
+      method: 'PATCH',
+      body: details,
+    }),
   setListingStatus: (id: string, status: 'PUBLISHED' | 'PAUSED' | 'CLOSED') =>
     apiFetch<OwnerListing>(`/owner/listings/${id}/status`, { method: 'PATCH', body: { status } }),
 

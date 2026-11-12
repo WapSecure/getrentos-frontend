@@ -64,7 +64,7 @@ export const RenterRecommendedProperties = () => {
     >
       <div className="flex items-center justify-between border-b border-border/70 p-5">
         <div>
-          <h2 className="text-lg font-semibold text-foreground">Recommended for You</h2>
+          <h2 className="text-lg font-semibold text-foreground">Recommended for you</h2>
           <p className="text-sm text-muted-foreground">
             Based on your search history and preferences
           </p>

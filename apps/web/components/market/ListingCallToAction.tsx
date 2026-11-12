@@ -2,7 +2,7 @@
 
 import { useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
-import { Button } from '@sureground/ui';
+import { Button } from '@sureground/ui/Button';
 import { ScanSearch, Video } from '@sureground/icons';
 import { RequestTourDialog } from '@/components/shared/tours/RequestTourDialog';
 import { RequestInspectionDialog } from '@/components/shared/inspections/RequestInspectionDialog';
@@ -151,5 +151,43 @@ export function ListingCallToAction({
         </Link>
       )}
     </>
+  );
+}
+
+/**
+ * "Ask the lister" for a question the listing does not answer. The same enquiry flow and sign-in
+ * rule as the main button: signed in, it opens the enquiry; signed out, sign in first.
+ */
+export function AskListerLink({
+  market,
+  id,
+  returnPath,
+  className,
+}: {
+  market: PublicDetailMarket;
+  id: string;
+  returnPath: string;
+  className?: string;
+}) {
+  const signedIn = useSyncExternalStore(subscribeToNothing, viewerIsSignedIn, () => false);
+  const href = signedIn
+    ? signedInHref(market, id)
+    : `/login?next=${encodeURIComponent(returnPath)}`;
+  return (
+    <Link
+      href={href}
+      className={className}
+      onClick={() =>
+        track({
+          name: market === 'rent' ? 'inquiry_start' : 'offer_start',
+          listingId: id,
+          market,
+          surface: 'listing_questions',
+          props: { variant: signedIn ? 'signed_in' : 'signed_out' },
+        })
+      }
+    >
+      {signedIn ? 'Ask the lister' : 'Sign in to ask the lister'}
+    </Link>
   );
 }

@@ -1,4 +1,4 @@
-import { publicFetchInit } from '@/lib/publicFetch';
+import { OPTIONAL_FETCH_TIMEOUT_MS, publicFetchInit } from '@/lib/publicFetch';
 import {
   firstPagePath,
   rentToCard,
@@ -10,14 +10,17 @@ import {
 } from '@/lib/publicListingMap';
 import type { Paginated } from '@/lib/apiHelpers';
 
-/** The newest public listings for a market, server-side; an empty list when the API is unreachable. */
+/** The newest public listings for a market, server-side; an empty list when the API is unreachable or slow. */
 export async function latestListings(
   market: PublicMarket,
   limit: number
 ): Promise<PublicListingCard[]> {
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-    const res = await fetch(`${apiUrl}${firstPagePath(market)}`, publicFetchInit());
+    const res = await fetch(
+      `${apiUrl}${firstPagePath(market)}`,
+      publicFetchInit({ timeoutMs: OPTIONAL_FETCH_TIMEOUT_MS })
+    );
     if (!res.ok) return [];
     if (market === 'rent') {
       const data = (await res.json()) as Paginated<RentApiItem>;

@@ -66,7 +66,7 @@ export default function AdminReportsPage() {
         },
         {
           icon: Users,
-          label: 'Active Users',
+          label: 'Active users',
           value: statsQuery.data.activeUsers.toLocaleString(),
           accent: 'blue',
         },

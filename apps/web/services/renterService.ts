@@ -2,6 +2,7 @@ import type { RepairDraft } from '@/types/repairDraft';
 import type { ReplyLanguage } from '@/lib/replyLanguage';
 import type { ChargeCategory } from '@/lib/chargeCategory';
 import { authDownload, authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
+import { trackOnSuccess } from '@/lib/analytics';
 import type { ApiResponse } from '@/lib/apiHelpers';
 import type { VideoCallJoin } from '@sureground/shared';
 import type {
@@ -751,7 +752,7 @@ export const renterService = {
     data: ApplicationFormData
   ): Promise<ApiResponse<Application>> {
     return safeCall(() =>
-      authFetch('/renter/applications', {
+      authFetch<Application>('/renter/applications', {
         method: 'POST',
         body: JSON.stringify({
           listingId,
@@ -788,7 +789,7 @@ export const renterService = {
           })),
         }),
       })
-    );
+    ).then((res) => trackOnSuccess(res, { name: 'application_submitted', market: 'rent' }));
   },
 
   async listRoommates(): Promise<ApiResponse<Roommate[]>> {
@@ -998,10 +999,13 @@ export const renterService = {
     propertyId?: string
   ): Promise<ApiResponse<Conversation>> {
     return safeCall(() =>
-      authFetch('/renter/messages', {
+      authFetch<Conversation>('/renter/messages', {
         method: 'POST',
         body: JSON.stringify({ participantId, propertyId: propertyId ?? undefined }),
       })
+    ).then((res) =>
+      // Only a conversation about a home counts as an enquiry.
+      propertyId ? trackOnSuccess(res, { name: 'inquiry_submitted', market: 'rent' }) : res
     );
   },
 
@@ -1013,11 +1017,11 @@ export const renterService = {
     mode: 'IN_PERSON' | 'VIDEO' = 'IN_PERSON'
   ): Promise<ApiResponse<ViewingRequest>> {
     return safeCall(() =>
-      authFetch('/renter/viewing-requests', {
+      authFetch<ViewingRequest>('/renter/viewing-requests', {
         method: 'POST',
         body: JSON.stringify({ propertyId, unitId, preferredAt, notes, mode }),
       })
-    );
+    ).then((res) => trackOnSuccess(res, { name: 'inspection_request_submitted', market: 'rent' }));
   },
 
   /** Available from 15 minutes before the viewing. */

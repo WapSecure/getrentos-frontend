@@ -2,15 +2,10 @@
 
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import {
-  Button,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-  Textarea,
-  useToast,
-} from '@sureground/ui';
+import { Button } from '@sureground/ui/Button';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@sureground/ui/Dialog';
+import { Textarea } from '@sureground/ui/Textarea';
+import { useToast } from '@sureground/ui/ToastProvider';
 import { Send } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';

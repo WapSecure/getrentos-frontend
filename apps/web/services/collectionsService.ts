@@ -1,6 +1,10 @@
 import { authFetch, safeCall, type ApiResponse } from '@/lib/apiHelpers';
 import type { CardMarket } from '@/lib/marketCards';
-import type { ManagedCollection, PublicCollectionSummary } from '@/lib/collections';
+import type {
+  ListingCollectionFeatures,
+  ManagedCollection,
+  PublicCollectionSummary,
+} from '@/lib/collections';
 
 export interface CollectionInput {
   title: string;
@@ -27,6 +31,33 @@ const qs = (params: Record<string, string | number | undefined>) => {
 export const collectionsService = {
   listPublic(params: { market?: CardMarket; estate?: string; limit?: number }) {
     return safeCall(() => authFetch<PublicCollectionSummary[]>(`/collections${qs(params)}`));
+  },
+};
+
+/** For listers: the Sureground collections their listings are in, and a way out of them. */
+export const listingCollectionsService = {
+  list(): Promise<ApiResponse<ListingCollectionFeatures>> {
+    return safeCall(() => authFetch<ListingCollectionFeatures>('/me/listing-collections'));
+  },
+  optOut(input: {
+    listingId: string;
+    collectionId?: string;
+    scope: 'collection' | 'all';
+  }): Promise<ApiResponse<ListingCollectionFeatures>> {
+    return safeCall(() =>
+      authFetch<ListingCollectionFeatures>('/me/listing-collections/opt-outs', {
+        method: 'POST',
+        body: JSON.stringify(input),
+      })
+    );
+  },
+  allowAgain(optOutId: string): Promise<ApiResponse<ListingCollectionFeatures>> {
+    return safeCall(() =>
+      authFetch<ListingCollectionFeatures>(
+        `/me/listing-collections/opt-outs/${encodeURIComponent(optOutId)}`,
+        { method: 'DELETE' }
+      )
+    );
   },
 };
 

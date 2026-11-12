@@ -26,8 +26,8 @@ import type { AdminDocument } from '@/types/admin';
 
 const categoryLabels: Record<AdminDocument['category'], string> = {
   policy: 'Policy',
-  compliance_filing: 'Compliance Filing',
-  legal_agreement: 'Legal Agreement',
+  compliance_filing: 'Compliance filing',
+  legal_agreement: 'Legal agreement',
   report: 'Report',
 };
 
@@ -133,7 +133,7 @@ export default function AdminDocumentsPage() {
             icon={<Upload className="w-4 h-4" />}
             onClick={() => setUploadOpen(true)}
           >
-            Upload Document
+            Upload document
           </Button>
         }
       />

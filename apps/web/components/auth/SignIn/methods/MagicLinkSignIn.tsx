@@ -95,7 +95,7 @@ export const MagicLinkSignIn = ({ isLoading, setIsLoading, showToast }: MagicLin
         isLoading={isLoading}
       >
         <Fingerprint className="w-4 h-4" />
-        {magicLinkSent ? 'Link Sent' : 'Send Magic Link'}
+        {magicLinkSent ? 'Link sent' : 'Send magic link'}
       </Button>
     </form>
   );

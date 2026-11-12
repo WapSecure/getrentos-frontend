@@ -14,7 +14,7 @@ export default function PrivacyPage() {
   return (
     <LegalPage
       title="Privacy Policy"
-      updated="21 September 2026"
+      updated="12 November 2026"
       intro="Sureground helps people rent, buy and manage property. This page explains what personal information we collect, why we collect it, who sees it, and the choices you have."
     >
       <h2 id="what-we-collect">What we collect</h2>
@@ -51,6 +51,25 @@ export default function PrivacyPage() {
         <li>To keep the platform secure and to keep a record of sensitive actions.</li>
         <li>To contact you about your account, payments and support requests.</li>
       </ul>
+
+      <h2 id="usage-measurement">How we measure use of the site and app</h2>
+      <p>
+        To understand which pages and features help people, our website and app send us anonymous
+        usage records, which we store ourselves. A record says what happened (for example, a listing
+        was viewed, a search was run with certain filters, a sign-up or booking was completed, or
+        how quickly a page loaded), with the public listing involved if there is one, the kind of
+        page it happened on, the type of device (phone, tablet or computer), the connection speed
+        and the time. The first record of a visit can also say which website sent you there (the
+        site name only, not the full address) and the campaign tags in the link you followed.
+      </p>
+      <p>
+        These records do not contain your name, email address, phone number, account, IP address,
+        what you typed into a search, or any exact address. Each one carries a random code that
+        lasts for one browser tab or one use of the app, so records from the same visit can be
+        counted together but not linked to you. We do not use advertising trackers or third-party
+        analytics services, and we set no cookie for this. The website sends nothing if your browser
+        asks sites not to track you. We delete these records after 400 days.
+      </p>
 
       <h2 id="what-you-control">What you choose to share</h2>
       <ul>

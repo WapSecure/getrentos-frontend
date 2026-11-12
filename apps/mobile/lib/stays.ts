@@ -13,7 +13,7 @@ export const GUEST_PROMISE_TEXT =
   "If the place isn't as described, you can't get in, or it's unsafe, tell us within 24 hours of check-in. We hold the host's payment while we check, and refund you if we uphold it.";
 
 export const PAYMENT_PROTECTION_TEXT =
-  'You pay Sureground, not the host. We only pay the host after you check in.';
+  'You pay Sureground, not the host. We pay the host no sooner than 24 hours after check-in.';
 
 export const PROBLEM_OPTIONS: { value: GuestPromiseProblem; label: string; hint: string }[] = [
   {
@@ -331,7 +331,7 @@ export function stayHeadline(b: ShortletBooking, today: string, now = new Date()
           pill: 'Awaiting payment',
           tone: 'warning',
           title: 'Confirmed: pay to secure it',
-          detail: 'Your money is held by Sureground and only paid to the host after you check in.',
+          detail: 'Your money is held by Sureground and paid to the host no sooner than 24 hours after check-in.',
           action: 'pay',
         };
       if (b.paymentStatus === 'PROCESSING')
@@ -366,7 +366,7 @@ export function stayHeadline(b: ShortletBooking, today: string, now = new Date()
                 : 'Enjoy your stay',
         detail:
           days > 0
-            ? 'Paid and held by Sureground until you check in.'
+            ? 'Paid and held by Sureground until after check-in.'
             : 'Sureground releases your payment to the host after check-in.',
       };
     }

@@ -20,7 +20,7 @@ import {
   FileCheck,
 } from '@sureground/icons';
 import { LAND_DILIGENCE_STATUS, VERIFICATION_SUMMARY_STATUS } from '@sureground/shared';
-import type { BadgeVariant } from '@sureground/ui';
+import type { BadgeVariant } from '@sureground/ui/Badge';
 import type {
   RentPaymentStatus,
   RentPayoutStatus,
@@ -96,12 +96,12 @@ export const legalCaseStatusBadges: Record<LegalCaseStatus, StatusBadgeEntry> = 
 
 export const leadStageBadges: Record<LeadStage, StatusBadgeEntry> = {
   inquiry: { label: 'Inquiry', variant: 'info' },
-  requested: { label: 'Viewing Requested', variant: 'warning', icon: Clock },
-  confirmed: { label: 'Viewing Confirmed', variant: 'info', icon: CheckCircle2 },
-  completed: { label: 'Viewing Completed', variant: 'success', icon: CheckCircle2 },
+  requested: { label: 'Viewing requested', variant: 'warning', icon: Clock },
+  confirmed: { label: 'Viewing confirmed', variant: 'info', icon: CheckCircle2 },
+  completed: { label: 'Viewing completed', variant: 'success', icon: CheckCircle2 },
   cancelled: { label: 'Cancelled', variant: 'neutral', icon: XCircle },
   pending: { label: 'Applied', variant: 'info' },
-  under_review: { label: 'Under Review', variant: 'warning' },
+  under_review: { label: 'Under review', variant: 'warning' },
   approved: { label: 'Approved', variant: 'success', icon: CheckCircle2 },
   rejected: { label: 'Rejected', variant: 'danger', icon: XCircle },
 };
@@ -116,14 +116,14 @@ export const maintenancePriorityBadges: Record<MaintenancePriority, StatusBadgeE
 export const maintenanceStatusBadges: Record<MaintenanceRequestStatus, StatusBadgeEntry> = {
   submitted: { label: 'Submitted', variant: 'warning' },
   assigned: { label: 'Assigned', variant: 'info' },
-  in_progress: { label: 'In Progress', variant: 'info' },
+  in_progress: { label: 'In progress', variant: 'info' },
   resolved: { label: 'Resolved', variant: 'success', icon: CheckCircle2 },
   cancelled: { label: 'Cancelled', variant: 'neutral', icon: XCircle },
 };
 
 export const applicationStatusBadges: Record<ApplicationStatus, StatusBadgeEntry> = {
   pending: { label: 'Pending', variant: 'warning', icon: Clock },
-  under_review: { label: 'Under Review', variant: 'info' },
+  under_review: { label: 'Under review', variant: 'info' },
   approved: { label: 'Approved', variant: 'success', icon: CheckCircle2 },
   rejected: { label: 'Rejected', variant: 'danger', icon: XCircle },
   withdrawn: { label: 'Withdrawn', variant: 'neutral' },
@@ -165,7 +165,7 @@ export const offerStatusBadges: Record<OfferStatus, StatusBadgeEntry> = {
 
 export const taskStatusBadges: Record<TaskStatus, StatusBadgeEntry> = {
   assigned: { label: 'Assigned', variant: 'info' },
-  in_progress: { label: 'In Progress', variant: 'warning', icon: PlayCircle },
+  in_progress: { label: 'In progress', variant: 'warning', icon: PlayCircle },
   completed: { label: 'Completed', variant: 'success', icon: CheckCircle2 },
   overdue: { label: 'Overdue', variant: 'danger' },
   cancelled: { label: 'Cancelled', variant: 'neutral' },

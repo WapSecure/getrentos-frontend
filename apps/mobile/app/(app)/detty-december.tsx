@@ -29,8 +29,8 @@ const NIGHT = {
 const PROMISES: { icon: SgIcon; title: string; body: string }[] = [
   {
     icon: Lock,
-    title: 'Your money waits until you arrive',
-    body: 'You pay Sureground, not the host. The host is only paid after you check in.',
+    title: 'Your money waits past check-in',
+    body: 'You pay Sureground, not the host. The host is paid no sooner than 24 hours after check-in.',
   },
   {
     icon: ShieldCheck,
@@ -40,12 +40,12 @@ const PROMISES: { icon: SgIcon; title: string; body: string }[] = [
   {
     icon: ClipboardCheck,
     title: 'Look for “Inspected”',
-    body: 'A licensed agent has been inside those stays in the last year and rated every room.',
+    body: 'A licensed agent has inspected those stays in the last year, rated their rooms and rated none of them poor.',
   },
   {
     icon: ReceiptText,
     title: 'The total, not a teaser',
-    body: 'Every stay shows what you’ll actually pay for your dates: nights, cleaning and VAT.',
+    body: 'Pick your dates to see the total: nights, any cleaning fee and any tax that applies.',
   },
 ];
 
@@ -116,9 +116,9 @@ export default function DettyDecember() {
           Detty December, sorted.
         </Text>
         <Text variant="body" style={{ color: NIGHT.soft }}>
-          Flying home or hosting the whole family? Book a stay you can trust: your money is held
-          until you walk in, and the price you see is the price you pay. Popular places go early,
-          and many hosts ask for a minimum stay over the peak.
+          Flying home or hosting the whole family? Your money is held until at least 24 hours after
+          check-in, and you see the total before you pay. Popular places go early, and some hosts
+          set a minimum stay over the peak.
         </Text>
       </View>
 

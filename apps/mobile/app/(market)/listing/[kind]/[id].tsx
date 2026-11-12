@@ -50,6 +50,8 @@ import {
   ShowroomPriceBar,
 } from '@/components/showroom/ShowroomParts';
 import { trackShowroom } from '@/lib/showroomAnalytics';
+import { ShowroomCommercial } from '@/components/showroom/ShowroomCommercial';
+import { vatStated } from '@sureground/shared/showroom';
 import { PropertyMapView } from '@/components/property/PropertyMapView';
 import { useMarketSaved } from '@/hooks/useMarketSaved';
 import { useCardAnalytics } from '@/hooks/useCardAnalytics';
@@ -291,6 +293,7 @@ function Body({
           costs={p.costs}
           price={p.price}
           priceUnit={p.period === 'month' || p.period === 'year' ? p.period : undefined}
+          vatStated={vatStated(p.commercial)}
         />
       ) : null}
 
@@ -348,6 +351,11 @@ function Body({
             </View>
           ) : null}
         </Card>
+      ) : null}
+
+      {/* Commercial: the lease and the space come before the description, as on the web. */}
+      {p.commercial && (p.kind === 'rent' || p.kind === 'sale') ? (
+        <ShowroomCommercial commercial={p.commercial} market={p.kind} />
       ) : null}
 
       {p.description ? (
@@ -559,7 +567,7 @@ const PROTECTION_LINE: Record<MarketKind, string> = {
   rent: 'We hold your rent and release it to the landlord on schedule, unless you raise a dispute.',
   sale: 'We hold your deposit and only release it to the seller once you confirm receipt.',
   land: 'We hold your money and only release it to the seller once the conveyance steps are confirmed.',
-  shortlet: 'We hold your payment and only pay the host after you check in.',
+  shortlet: 'We hold your payment and pay the host no sooner than 24 hours after check-in.',
 };
 
 function Footer({ listing, kind }: { listing: MarketDetail; kind: MarketKind }) {

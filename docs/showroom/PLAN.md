@@ -478,19 +478,52 @@ Three decisions from the product owner, built on `feat/showroom-collections` in 
 - Backoffice: `/admin/showroom-collections` (sidebar, `collections.manage`), the same editor plus the Sponsored switch and the curator of each collection.
 - **Analytics:** `property_impression` and `property_card_click` with surface `{market}_collection`. No new event names.
 
-**Product decisions still open:**
+**Product decisions (open on 2026-11-11; three decided and built 2026-11-12, see below):**
 
-- **Consent for staff curation across owners:** staff can feature any public listing. The plan asked for a rule on consent and fair placement; none is enforced beyond the listing being public.
-- **Realtor display name:** a realtor's collections show their company name, or their legal name when they have none.
-- **The honesty word list** is deliberately strict ("best" and "inspected" are refused); loosen it if curators find it in the way.
-- **Rule-based collections** (a saved filter instead of items) are not built.
-- **Sponsored:** there is no billing or contract record behind the flag; it is a label only.
+- **Consent for staff curation across owners:** decided and built 2026-11-12 (notify and allow opt-out).
+- **Realtor display name:** still open. A realtor's collections show their company name, or their legal name when they have none.
+- **The honesty word list:** kept strict and unchanged on 2026-11-12 ("best" and "inspected" are still refused), including for rule-based collections.
+- **Rule-based collections:** decided and built 2026-11-12 (staff only).
+- **Sponsored:** decided and built 2026-11-12 (a sponsor record is required).
 
 **Checks:**
 
 - Backend: see the PR for spec counts; `tsc -p tsconfig.build.json` and eslint on changed files are clean. The app wiring spec resolves every provider (run with `PAYMENTS_SIMULATED=true`, as there is no `.env` in a worktree).
 - Web and backoffice: `tsc` and eslint clean on changed files; `audit:ui-controls` and `tokens:check` pass. Not yet checked in a browser, including drawing on a touch screen.
 
+### Collections: consent, sponsor records and rules (decided and built 2026-11-12)
+
+Built on `feat/collections-consent-sponsored-rules` in both repos. Migration `prisma/migrations/20261112180000_collections_consent_sponsored_rules/migration.sql`: hand-written, additive, **not run** (two tables, two enums, one notification type, two columns with defaults on `Collection`).
+
+**1. Consent for Sureground (staff) collections: notify and allow opt-out.**
+
+- When staff add a listing to a Sureground collection, its listers (not the staff member) get `COLLECTION_LISTING_ADDED`: in the app, and by email (it is on the email list). It names the listing and the collection and links to `/listing-collections`.
+- Listers are the property owner, whoever created the listing, and whoever manages the property: the manager on an accepted, unexpired management mandate (including Sureground Managed and its delivery partner) and the editing seats (owner, staff, portfolio manager) of an agency that holds or manages it, at most 25 firm members per listing (follow-up, 2026-11-12).
+- `/listing-collections` (web, any signed-in account) lists the Sureground collections showing the lister's listings, including published rule-based ones they match, with **Remove my listing** (one tap, that collection) and **Keep out of all** (every Sureground collection). Each choice is a `CollectionOptOut` row (per listing and collection, or per listing for all), audit-logged as `COLLECTION_LISTING_OPTED_OUT`. **Allow again** removes the row (`COLLECTION_OPT_OUT_WITHDRAWN`) but puts nothing back.
+- While an opt-out exists, staff cannot add the listing back (400 with the reason), rule-based results leave it out, and the public page drops it even if a stored item remains.
+- Backoffice: the candidate list shows opted-out listings as **Unavailable** with the reason, and the editor lists listings "taken out by their listers".
+- Estate, agency and realtor collections hold only the curator's own stock, so none of this applies to them.
+- API: `GET /me/listing-collections`, `POST /me/listing-collections/opt-outs` (`listingId`, `scope` `collection` or `all`, `collectionId`), `DELETE /me/listing-collections/opt-outs/:id`. Any lister as above can act: the owner, the creator, or a manager of the property.
+
+**2. Sponsored needs a sponsor record.**
+
+- `CollectionSponsorship`: organisation or person, name, amount in whole naira (like the other money columns), start and end dates, optional reference and note, who recorded it.
+- `PUT` and `DELETE /admin/collections/:id/sponsorship`: `collections.manage` plus step-up, audit-logged at warning level (`COLLECTION_SPONSORSHIP_SET`, `_REMOVED`, with the old values).
+- `sponsored: true` is refused on create and update; `sponsored: false` only clears a flag that has no record.
+- Public responses carry only `sponsored`, true only when the flag **and** a record exist. The amount and sponsor never leave the backoffice.
+- Collections flagged sponsored before this (no record) keep the flag but lose the public label. The backoffice lists them in a banner ("Sponsored with no record of who paid"), with **Add the record** or **Clear the sponsored flag** in the editor.
+- The label shows only while today (the Lagos date) is between the record's start and end days, both included. Before the start or after the end the label is off and the record is kept. The backoffice shows **Scheduled**, **Running** or **Ended** on the Sponsorship panel and in the list (follow-up, 2026-11-12). Dates are sent as Lagos days (YYYY-MM-DD).
+
+**3. Rule-based collections (staff only).**
+
+- `Collection.kind` (`HAND_PICKED`, `RULE`) and `Collection.rule` (a saved search). Filters: city or area, state, map box or drawn area (the web `area=` value), keywords, price range in naira, minimum bedrooms and bathrooms, property type, furnished (rent only), verified only, order (newest, price low to high, price high to low) and a cap of 1 to 24 (12 by default).
+- A filter the market does not have is refused with a reason (for example furnished on sales, bedrooms on land). The rule is also validated through the market's own query DTO when saved.
+- Resolved at request time through the market's public browse service (`listPublic`, `listListings`, `list`, `listPublicLand`), then the market predicate (so land never shows in a sale collection), then opt-outs, then the cap. Only public listings can appear.
+- Honesty checks on title and description are unchanged; rule-based items carry no notes.
+- The public page and tiles say "A saved search by the Sureground team" and how it is ordered, instead of "Picked by".
+- Backoffice: **How listings are chosen** (Hand-picked or Rule) when creating or editing a Sureground collection; the **Rule** panel has a live preview ("N listings would show now (M match the filters, limit L)") through `POST /admin/collections/rule-preview`.
+- Publishing needs at least one live match.
+- When a listing first shows in a published Sureground rule collection, its listers get the same notice, worded "matches a saved search" (follow-up, 2026-11-12). Checked when the rule is saved or the collection published, and hourly by a leased job (`collection-rule-notices`, at most 200 listings a run). `CollectionListingNotice` keeps one row per (collection, listing), claimed before sending, so nobody is told twice, for hand-picked adds too. Opted-out listings are never told; estate, agency and realtor collections never notify. Migration `20261112200000_collection_listing_notices` (one table, additive).
 
 ## M7 status (2026-11-11)
 

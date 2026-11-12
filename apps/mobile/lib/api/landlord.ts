@@ -7,6 +7,7 @@ import {
 } from './client';
 import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
+import type { CommercialDetails, CommercialUpdatePayload } from '@sureground/shared/showroom';
 import type { VideoCallJoin } from '@sureground/shared';
 import type { VideoOnSiteReport } from '../filmedOnSite';
 import { uploadVideoDirect } from './videoUpload';
@@ -148,6 +149,8 @@ export interface LandlordUnit {
   occupancyStatus: OccupancyStatus;
   /** Who lives there, when the portfolio list knows. */
   tenantName?: string;
+  /** The API enum (e.g. 'COMMERCIAL'), on vacant units: a commercial unit's listing form adds the commercial block. */
+  propertyType?: string;
 }
 
 export const OCCUPANCY_LABEL: Record<OccupancyStatus, string> = {
@@ -531,6 +534,10 @@ export interface LandlordListing {
   coverImage?: string;
   galleryImages?: string[];
   videoTourUrl?: string;
+  /** The API enum (e.g. 'COMMERCIAL'). */
+  propertyType?: string;
+  /** Commercial properties only. Read through `commercialDetailsOf`, never trusted as is. */
+  commercial?: unknown;
 }
 
 export const LISTING_STATUS_TONE: Record<
@@ -855,6 +862,8 @@ export interface CreateListingInput {
   allowPets: boolean;
   furnished: boolean;
   shortLetEnabled: boolean;
+  /** Commercial units only; the API refuses it on any other type. */
+  commercial?: CommercialDetails;
 }
 
 export interface CreateLeaseInput {
@@ -1220,6 +1229,13 @@ export const landlordApi = {
 
   createListing: (input: CreateListingInput) =>
     apiFetch<LandlordListing>('/landlord/listings', { method: 'POST', body: input }),
+
+  /** Commercial properties only. Every field is sent; null clears one. */
+  updateListingCommercial: (id: string, details: CommercialUpdatePayload) =>
+    apiFetch<LandlordListing>(`/landlord/listings/${id}/commercial`, {
+      method: 'PATCH',
+      body: details,
+    }),
 
   createLease: (input: CreateLeaseInput) =>
     apiFetch<LandlordLease>('/landlord/leases', { method: 'POST', body: input }),

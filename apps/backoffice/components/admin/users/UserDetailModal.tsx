@@ -80,7 +80,7 @@ export const UserDetailModal = ({
                 </div>
               </div>
               <div className="flex items-center justify-between px-3 py-2 text-sm">
-                <span className="text-muted-foreground">Trust Score</span>
+                <span className="text-muted-foreground">Trust score</span>
                 <span className="text-foreground font-medium">{user.trustScore}</span>
               </div>
               <div className="flex items-center justify-between px-3 py-2 text-sm">
@@ -88,7 +88,7 @@ export const UserDetailModal = ({
                 <span className="text-foreground font-medium">{formatDate(user.joinedDate)}</span>
               </div>
               <div className="flex items-center justify-between px-3 py-2 text-sm">
-                <span className="text-muted-foreground">Last Active</span>
+                <span className="text-muted-foreground">Last active</span>
                 <span className="text-foreground font-medium">
                   {formatRelativeTime(user.lastActiveAt)}
                 </span>

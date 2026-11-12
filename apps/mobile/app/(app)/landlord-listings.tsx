@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
-import { Pause, Play, Tag, Video, Plus } from '@sureground/icons/native';
+import { Building2, Pause, Play, Tag, Video, Plus } from '@sureground/icons/native';
 import {
   Badge,
   Card,
@@ -30,6 +30,8 @@ import { formatDate } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { IdentityNudge } from '@/components/trust/IdentityNudge';
 import { goBack } from '@/lib/goBack';
+import { CommercialDetailsSheet } from '@/components/listing/CommercialDetailsSheet';
+import { isCommercialPropertyType } from '@sureground/shared/showroom';
 
 export default function LandlordListings() {
   const { colors, spacing, radius } = useTheme();
@@ -39,6 +41,7 @@ export default function LandlordListings() {
   const toast = useToast();
   const [busyId, setBusyId] = useState<string | null>(null);
   const [gateBlocked, setGateBlocked] = useState(false);
+  const [commercialListing, setCommercialListing] = useState<LandlordListing | null>(null);
 
   const query = useQuery({
     queryKey: qk.landlord.listings,
@@ -117,6 +120,7 @@ export default function LandlordListings() {
               listing={item}
               busy={busyId === item.id}
               onTogglePause={() => togglePause.mutate(item.id)}
+              onEditCommercial={() => setCommercialListing(item)}
             />
           )}
           contentContainerStyle={{
@@ -141,6 +145,20 @@ export default function LandlordListings() {
       </QueryState>
 
       <CreateListingSheet open={creating} onClose={() => setCreating(false)} />
+      <CommercialDetailsSheet
+        target={
+          commercialListing
+            ? {
+                id: commercialListing.id,
+                title: commercialListing.listingTitle,
+                commercial: commercialListing.commercial,
+              }
+            : null
+        }
+        onClose={() => setCommercialListing(null)}
+        save={(id, details) => landlordApi.updateListingCommercial(id, details)}
+        onSaved={() => qc.invalidateQueries({ queryKey: qk.landlord.listings })}
+      />
     </View>
   );
 }
@@ -149,10 +167,12 @@ function ListingRow({
   listing: l,
   busy,
   onTogglePause,
+  onEditCommercial,
 }: {
   listing: LandlordListing;
   busy: boolean;
   onTogglePause: () => void;
+  onEditCommercial: () => void;
 }) {
   const { colors, spacing, radius } = useTheme();
   const paused = l.status === 'paused';
@@ -236,6 +256,20 @@ function ListingRow({
                 }}
               >
                 {paused ? 'Make live again' : 'Pause listing'}
+              </Text>
+            </Pressable>
+          ) : null}
+
+          {isCommercialPropertyType(l.propertyType) ? (
+            <Pressable
+              onPress={onEditCommercial}
+              accessibilityRole="button"
+              accessibilityLabel={`Commercial details for ${l.listingTitle}`}
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 2 }}
+            >
+              <Building2 size={13} color={colors.primary} />
+              <Text variant="caption" style={{ fontWeight: '600', color: colors.primary }}>
+                {l.commercial ? 'Edit commercial details' : 'Add commercial details'}
               </Text>
             </Pressable>
           ) : null}

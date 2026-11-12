@@ -56,7 +56,7 @@ export const VerificationRequestCard = ({
         )}
         {request.status === 'needs_clarification' && (
           <Badge variant="warning" icon={<HelpCircle className="h-3 w-3" />}>
-            Needs Info
+            Needs info
           </Badge>
         )}
         {request.status === 'approved' && (

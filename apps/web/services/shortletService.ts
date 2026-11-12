@@ -40,6 +40,7 @@ import type {
   UpsertPayoutAccountInput,
 } from '@/types/shortlet';
 import { providerQuery } from '@/services/paymentStatusService';
+import { trackOnSuccess } from '@/lib/analytics';
 import type { PaymentProvider } from '@/types/payments';
 import { areaQuery, type MapArea } from '@/lib/mapArea';
 
@@ -145,7 +146,7 @@ export const shortletService = {
         method: 'POST',
         body: JSON.stringify(input),
       })
-    ),
+    ).then((res) => trackOnSuccess(res, { name: 'booking_submitted', market: 'shortlet' })),
 
   myBookings: (params: ShortletListParams = {}) =>
     safeCall(() =>
@@ -219,7 +220,7 @@ export const shortletService = {
         method: 'POST',
         body: JSON.stringify({ text }),
       })
-    ),
+    ).then((res) => trackOnSuccess(res, { name: 'inquiry_submitted', market: 'shortlet' })),
 
   myMessages: (params: ShortletListParams = {}) =>
     safeCall(() =>

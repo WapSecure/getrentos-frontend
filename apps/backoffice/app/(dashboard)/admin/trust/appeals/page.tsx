@@ -23,7 +23,7 @@ export default function TrustAppealsPage() {
   return (
     <>
       <PageHeader
-        title="Trust Appeals"
+        title="Trust appeals"
         description="Subjects contesting a rejected property-authority claim or a failed verification. An appeal must be resolved by someone other than the officer who made the original decision; overturning it reopens the decision for re-review."
       />
 

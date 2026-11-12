@@ -32,14 +32,14 @@ export default function GlobalError({
 
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Button onClick={reset} rounded="full" className="px-6">
-              Try Again
+              Try again
             </Button>
             {/* global-error replaces the root layout, so next/link's router context can't be relied on here */}
             <a
               href={ROUTES.HOME}
               className="px-6 py-2.5 rounded-full border-2 border-border text-foreground font-medium text-sm hover:bg-secondary transition-colors"
             >
-              Back to Home
+              Back to home
             </a>
           </div>
         </div>
