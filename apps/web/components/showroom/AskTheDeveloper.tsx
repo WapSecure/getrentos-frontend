@@ -16,14 +16,16 @@ import {
 import { Alert, Badge, Button, Field, Select, Textarea, useToast } from '@sureground/ui';
 import { formatDate } from '@/lib/format';
 import { track } from '@/lib/analytics';
-import { viewerIsSignedIn } from '@/lib/viewer';
+import { ROUTES } from '@/lib/constants/auth';
+import { viewerHasRole, viewerIsSignedIn } from '@/lib/viewer';
 import { developmentEnquiriesService } from '@/services/developmentsService';
 import { developmentPath } from '@/lib/publicDevelopments';
 
 const subscribeToNothing = () => () => {};
+const viewerIsBuyer = () => viewerHasRole('buyer');
 const ANY_UNIT = '__any__';
 
-const STATUS_VARIANT = {
+export const ENQUIRY_STATUS_VARIANT = {
   NEW: 'warning',
   ANSWERED: 'success',
   CLOSED: 'neutral',
@@ -117,6 +119,7 @@ function SignedIn({
 }) {
   const toast = useToast();
   const queryClient = useQueryClient();
+  const isBuyer = useSyncExternalStore(subscribeToNothing, viewerIsBuyer, () => false);
   const [message, setMessage] = useState('');
   const [unitTypeId, setUnitTypeId] = useState(ANY_UNIT);
   const [touched, setTouched] = useState(false);
@@ -236,7 +239,17 @@ function SignedIn({
         )}
         {enquiries.length > 0 && (
           <>
-            <h3 className="text-base font-semibold text-foreground">{COPY.yours}</h3>
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <h3 className="text-base font-semibold text-foreground">{COPY.yours}</h3>
+              {isBuyer && (
+                <Link
+                  href={ROUTES.BUYER_DEVELOPER_QUESTIONS}
+                  className="text-sm font-medium text-primary hover:underline"
+                >
+                  {COPY.allYours}
+                </Link>
+              )}
+            </div>
             <ul className="space-y-3">
               {enquiries.map((e) => (
                 <li key={e.id} className="rounded-xl border border-border bg-card p-4 text-sm">
@@ -245,7 +258,7 @@ function SignedIn({
                       Sent {formatDate(e.createdAt)}
                       {e.unitTypeName ? ` · ${e.unitTypeName}` : ''}
                     </p>
-                    <Badge variant={STATUS_VARIANT[e.status]}>
+                    <Badge variant={ENQUIRY_STATUS_VARIANT[e.status]}>
                       {DEVELOPMENT_ENQUIRY_STATUS_LABEL[e.status].buyer}
                     </Badge>
                   </div>

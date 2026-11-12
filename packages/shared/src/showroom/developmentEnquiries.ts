@@ -39,6 +39,14 @@ export const DEVELOPMENT_ENQUIRY_COPY = {
   signedOut: 'Sign in to ask the developer',
   sent: 'Your question was sent. We will let you know when the developer answers.',
   yours: 'Your questions',
+  allYours: 'All your questions to developers',
+  historyTitle: 'Questions to developers',
+  historyLead:
+    'Every question you have asked a developer through Sureground, newest first, with their answer. Sureground does not take payment for developments.',
+  historyEmpty: 'You have not asked a developer anything yet',
+  historyEmptyHint:
+    'Open an off-plan development and use "Ask the developer". Your questions and the answers are kept here.',
+  noLongerListed: 'No longer listed on Sureground',
   developerInbox: 'Questions from buyers',
   developerLead:
     'Buyers ask these through the public page. Answer here: the buyer is told in the app and by email. Sureground does not take payment for developments, so never ask a buyer to pay through a reply.',
@@ -199,4 +207,30 @@ export function canAskAgain(enquiries: Pick<BuyerDevelopmentEnquiry, 'status'>[]
     enquiries.filter((e) => e.status === 'NEW').length <
     DEVELOPMENT_ENQUIRY_LIMITS.openPerDevelopment
   );
+}
+
+/** One page of the buyer's questions across all developments. */
+export interface BuyerDevelopmentEnquiryPage {
+  items: BuyerDevelopmentEnquiry[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+const positiveInt = (v: unknown, fallback: number) =>
+  typeof v === 'number' && Number.isInteger(v) && v > 0 ? v : fallback;
+
+export function buyerDevelopmentEnquiryPageOf(
+  raw: unknown
+): BuyerDevelopmentEnquiryPage | undefined {
+  if (!isRecord(raw) || !Array.isArray(raw.items)) return undefined;
+  const items = buyerDevelopmentEnquiriesOf(raw.items);
+  const total =
+    typeof raw.total === 'number' && raw.total >= 0 ? Math.floor(raw.total) : items.length;
+  return {
+    items,
+    total,
+    page: positiveInt(raw.page, 1),
+    pageSize: positiveInt(raw.pageSize, 20),
+  };
 }
