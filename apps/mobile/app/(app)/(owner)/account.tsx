@@ -41,6 +41,7 @@ import {
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useIdentityVerification } from '@/hooks/useIdentityVerification';
 import { useTrustItems } from '@/components/account/useTrustItems';
+import { useInvestItems } from '@/components/account/useInvestItems';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
 import { managementItems } from '@/components/account/managementItems';
@@ -52,8 +53,10 @@ export default function OwnerAccount() {
   const { colors, spacing } = useTheme();
   const { verified } = useIdentityVerification();
   const trustItems = useTrustItems('owner', { audience: 'buyers' });
+  const investItems = useInvestItems();
 
   const selling: SettingsItem[] = [
+    ...investItems,
     {
       key: 'sales',
       label: 'Sales in progress',

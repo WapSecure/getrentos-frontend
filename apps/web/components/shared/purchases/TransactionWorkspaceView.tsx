@@ -2,7 +2,17 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { withStepUpSummary } from '@sureground/shared';
+import {
+  canReleaseDeposit,
+  documentLinkLabel,
+  humaniseCode,
+  moneyVariant,
+  nextActionTarget,
+  releaseOutcome,
+  withStepUpSummary,
+  workspaceProgress,
+  type WorkspaceSection,
+} from '@sureground/shared';
 import {
   ArrowRight,
   Building2,
@@ -43,16 +53,6 @@ import { ROUTES } from '@/lib/constants/auth';
 import { PURCHASE_ROUTES } from '@/lib/constants/purchaseRoutes';
 import { formatDate } from '@/lib/format';
 import { buyerKeys, transactionWorkspaceKeys } from '@/lib/queryKeys';
-import {
-  canReleaseDeposit,
-  documentLinkLabel,
-  humaniseCode,
-  moneyVariant,
-  nextActionTarget,
-  releaseOutcome,
-  workspaceProgress,
-  type WorkspaceSection,
-} from '@/lib/transactionWorkspace';
 import { buyerService } from '@/services/buyerService';
 import { landBuyerService } from '@/services/landBuyerService';
 import { transactionWorkspaceService } from '@/services/transactionWorkspaceService';

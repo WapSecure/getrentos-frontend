@@ -277,12 +277,13 @@ export interface OwnerMarketInsights {
     propertyType: string;
     city: string;
     soldPrice: number;
-    size: number;
-    soldMonthsAgo: number;
+    size: number | null;
+    soldMonthsAgo: number | null;
   }[];
-  lowEstimate: number;
-  highEstimate: number;
-  suggested: number;
+  /** Null when there are no comparable sales. */
+  lowEstimate: number | null;
+  highEstimate: number | null;
+  suggested: number | null;
 }
 
 export interface OwnerProfile {
@@ -344,11 +345,18 @@ export interface OwnerRatingSummary {
 export interface OwnerInvestmentMetric {
   propertyId: string;
   propertyName: string;
-  purchasePrice: number;
-  currentValue: number;
-  appreciationRate: number;
-  rentalYield?: number;
-  roiPercentage: number;
+  /** Purchase price on the property record; null when none was entered. */
+  purchasePrice: number | null;
+  /** Asking price on the latest sale listing; null when not listed. */
+  askingPrice?: number | null;
+  /** Net rent over the last 12 months as a share of purchase price; null without both. */
+  rentalYield?: number | null;
+  /** Always null: no valuation method is agreed. Kept for older API responses. */
+  currentValue: number | null;
+  /** Always null: needs a valuation. */
+  appreciationRate: number | null;
+  /** Always null: needs a valuation. */
+  roiPercentage: number | null;
 }
 
 export interface OwnerPreferences {

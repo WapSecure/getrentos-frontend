@@ -8,7 +8,7 @@ import { UsersRound } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
 import { PURCHASE_ROUTES } from '@/lib/constants/purchaseRoutes';
 import { formatDate } from '@/lib/format';
-import { approvalOutcomeMessage } from '@/lib/transactionWorkspace';
+import { approvalOutcomeMessage } from '@sureground/shared';
 import type { CoApprovalPendingStep } from '@/types/landRepresentative';
 import {
   representativeKeys,

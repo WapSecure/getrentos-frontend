@@ -43,7 +43,7 @@ import {
 import { InvoiceCheckPanel } from './InvoiceCheckPanel';
 import { PayDialog } from '@/components/shared/payments/PayDialog';
 import { ReasonDialog } from '@sureground/ui';
-import { duplicateFlagsOf, isDuplicateInvoiceRefusal } from '@/lib/managedSpend';
+import { duplicateFlagsOf, isDuplicateInvoiceRefusal } from '@sureground/shared';
 import type { DuplicateAcknowledgement, DuplicateFlag, EvidenceInvoice } from '@/types/managed';
 import { usePaymentProviders } from '@/hooks/usePaymentProviders';
 import type { PaymentProvider } from '@/types/payments';

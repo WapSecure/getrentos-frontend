@@ -42,13 +42,6 @@ export const metadata: Metadata = {
     'protected payments',
     'property verification',
   ],
-  alternates: {
-    canonical: '/',
-    languages: {
-      'x-default': '/',
-      en: '/',
-    },
-  },
   openGraph: {
     type: 'website',
     siteName: SITE_NAME,

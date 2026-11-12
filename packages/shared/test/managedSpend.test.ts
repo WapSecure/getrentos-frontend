@@ -7,7 +7,7 @@ import {
   isAwaitingOwnerApproval,
   isDuplicateInvoiceRefusal,
   needsExplicitAuthorisation,
-} from './managedSpend';
+} from '../src/diaspora/managedSpend.ts';
 
 test('only the earliest waiting stage is current', () => {
   assert.deepEqual(evidenceStates(['DONE', 'DONE', 'PENDING', 'PENDING']), [

@@ -5,6 +5,7 @@ import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tansta
 import { Wrench } from '@sureground/icons';
 import {
   CardSkeleton,
+  ConfirmDialog,
   EmptyState,
   Pagination,
   PageErrorState,
@@ -136,9 +137,31 @@ export function MaintenanceRequestsView() {
   const handleAssignVendor = (requestId: string, vendorId: string, scheduledFor?: string) =>
     assignVendorMutation.mutate({ requestId, vendorId, scheduledFor });
 
-  const handleMarkResolved = (id: string) => markResolvedMutation.mutate(id);
-
-  const handleEscalate = (id: string) => escalateMutation.mutate(id);
+  // Both change the request for good (no reopen, no lowering priority), so each asks first.
+  const [confirming, setConfirming] = useState<{
+    kind: 'resolve' | 'escalate';
+    request: LandlordMaintenanceRequest;
+  } | null>(null);
+  const askFirst = (kind: 'resolve' | 'escalate') => (id: string) => {
+    const request = requests.find((item) => item.id === id);
+    if (request) setConfirming({ kind, request });
+  };
+  const handleMarkResolved = askFirst('resolve');
+  const handleEscalate = askFirst('escalate');
+  const confirmAction = () => {
+    if (!confirming) return;
+    const mutation = confirming.kind === 'resolve' ? markResolvedMutation : escalateMutation;
+    mutation.mutate(confirming.request.id, {
+      onSuccess: () => {
+        toast.success(
+          confirming.kind === 'resolve'
+            ? `"${confirming.request.issueTitle}" marked resolved.`
+            : `"${confirming.request.issueTitle}" is now urgent.`
+        );
+        setConfirming(null);
+      },
+    });
+  };
 
   return (
     <>
@@ -259,6 +282,31 @@ export function MaintenanceRequestsView() {
         error={
           scheduleVisitMutation.error instanceof Error ? scheduleVisitMutation.error.message : null
         }
+      />
+
+      <ConfirmDialog
+        open={confirming !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirming(null);
+        }}
+        tone="primary"
+        title={
+          confirming?.kind === 'escalate' ? 'Escalate to urgent?' : 'Mark this repair resolved?'
+        }
+        description={
+          !confirming
+            ? ''
+            : confirming.kind === 'escalate'
+              ? `"${confirming.request.issueTitle}" becomes urgent priority. Its priority can't be lowered again from here.`
+              : `"${confirming.request.issueTitle}" moves to Resolved and leaves your open tickets. It can't be reopened from here${
+                  confirming.request.assignedVendorName
+                    ? `, and it counts as a completed job for ${confirming.request.assignedVendorName}`
+                    : ''
+                }.`
+        }
+        confirmLabel={confirming?.kind === 'escalate' ? 'Escalate' : 'Mark resolved'}
+        onConfirm={confirmAction}
+        isLoading={markResolvedMutation.isPending || escalateMutation.isPending}
       />
 
       <TriageResultModal

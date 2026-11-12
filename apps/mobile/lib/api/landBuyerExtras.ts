@@ -1,4 +1,5 @@
 import type { BadgeTone } from '@sureground/ui-native';
+import type { CoApprovalPendingStep, DepositReleaseApprovalOutcome } from '@sureground/shared';
 import { apiFetch } from './client';
 import type { BuyerPurchaseDetail } from './landBuyer';
 import type { Milestone } from './landSales';
@@ -154,12 +155,23 @@ export interface CoApproval {
   status?: 'ACTIVE' | 'DISABLE_PENDING' | 'DISABLED';
   disableEffectiveAt?: string | null;
   representative?: { appointmentId: string; name: string } | null;
-  pending?: { milestoneKey: string; buyerApproved: boolean; representativeApproved: boolean }[];
+  pending?: CoApprovalPendingStep[];
 }
 
-export type Deal = { kind: 'purchase'; id: string } | { kind: 'transaction'; id: string };
+/**
+ * A plot purchase, a land resale under the land routes, or any sale (built home or land resale)
+ * under the neutral routes, which work wherever land is switched off.
+ */
+export type Deal =
+  | { kind: 'purchase'; id: string }
+  | { kind: 'transaction'; id: string }
+  | { kind: 'sale'; id: string };
 const dealPath = (d: Deal) =>
   `${d.kind === 'purchase' ? 'purchases' : 'transactions'}/${encodeURIComponent(d.id)}`;
+const buyerDeal = (d: Deal) =>
+  d.kind === 'sale' ? `/buyer/${dealPath(d)}` : `/buyer/land/${dealPath(d)}`;
+const representingDeal = (d: Deal) =>
+  d.kind === 'sale' ? `/representing/${dealPath(d)}` : `/land/representing/${dealPath(d)}`;
 
 export interface PrincipalDeals {
   purchases: {
@@ -224,12 +236,11 @@ export const landBuyerExtrasApi = {
   endAppointment: (id: string, reason: string) =>
     post<Appointment[]>(`/buyer/land/representatives/${id}/revoke`, { reason: reason.trim() }),
 
-  coApproval: (d: Deal) => apiFetch<CoApproval>(`/buyer/land/${dealPath(d)}/co-approval`),
+  coApproval: (d: Deal) => apiFetch<CoApproval>(`${buyerDeal(d)}/co-approval`),
   turnOnCoApproval: (d: Deal, representativeId: string) =>
-    post<CoApproval>(`/buyer/land/${dealPath(d)}/co-approval`, { representativeId }),
-  disableCoApproval: (d: Deal) =>
-    post<CoApproval>(`/buyer/land/${dealPath(d)}/co-approval/disable`),
-  keepCoApproval: (d: Deal) => post<CoApproval>(`/buyer/land/${dealPath(d)}/co-approval/keep`),
+    post<CoApproval>(`${buyerDeal(d)}/co-approval`, { representativeId }),
+  disableCoApproval: (d: Deal) => post<CoApproval>(`${buyerDeal(d)}/co-approval/disable`),
+  keepCoApproval: (d: Deal) => post<CoApproval>(`${buyerDeal(d)}/co-approval/keep`),
 
   /** `name` and `email` are the buyer's. */
   representing: () => apiFetch<Appointment[]>('/land/representing'),
@@ -245,10 +256,12 @@ export const landBuyerExtrasApi = {
     apiFetch<BuyerPurchaseDetail>(`/land/representing/purchases/${encodeURIComponent(id)}`),
   representedTransaction: (txId: string) =>
     apiFetch<Milestone[]>(`/land/representing/transactions/${encodeURIComponent(txId)}`),
-  representedCoApproval: (d: Deal) =>
-    apiFetch<CoApproval>(`/land/representing/${dealPath(d)}/co-approval`),
+  representedCoApproval: (d: Deal) => apiFetch<CoApproval>(`${representingDeal(d)}/co-approval`),
   representativeApprove: (d: Deal, key: string) =>
-    post<unknown>(
-      `/land/representing/${dealPath(d)}/milestones/${encodeURIComponent(key)}/approve`
+    post<unknown>(`${representingDeal(d)}/milestones/${encodeURIComponent(key)}/approve`),
+  /** My second approval to releasing a built home's held deposit. It never moves money itself. */
+  approveDepositRelease: (txId: string) =>
+    post<CoApproval & { outcome: DepositReleaseApprovalOutcome }>(
+      `/representing/transactions/${encodeURIComponent(txId)}/deposit-release/approve`
     ),
 };

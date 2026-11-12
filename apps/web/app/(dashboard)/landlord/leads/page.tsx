@@ -6,6 +6,7 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 import { UsersRound, Flame, X } from '@sureground/icons';
 import {
   Button,
+  ConfirmDialog,
   EmptyState,
   IconButton,
   ListSkeleton,
@@ -56,6 +57,7 @@ export default function LandlordLeadsPage() {
   const [staleOnly, setStaleOnly] = useState(false);
   const [confirmingLead, setConfirmingLead] = useState<LandlordLead | null>(null);
   const [nudgingLead, setNudgingLead] = useState<LandlordLead | null>(null);
+  const [cancellingLead, setCancellingLead] = useState<LandlordLead | null>(null);
   const [selectedLeadIds, setSelectedLeadIds] = useState<string[]>([]);
   const [showBulkNudge, setShowBulkNudge] = useState(false);
   const toast = useToast();
@@ -115,7 +117,11 @@ export default function LandlordLeadsPage() {
 
   const cancelMutation = useMutation({
     mutationFn: (id: string) => unwrap(landlordService.cancelViewingRequest(id)),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: landlordKeys.leads }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: landlordKeys.leads });
+      if (cancellingLead) toast.success(`Viewing with ${cancellingLead.leadName} cancelled.`);
+    },
+    onError: (error: Error) => toast.error(error.message || 'Unable to cancel this viewing.'),
   });
 
   const nudgeMutation = useMutation({
@@ -292,7 +298,7 @@ export default function LandlordLeadsPage() {
               onMessage={() => messageMutation.mutate(lead)}
               onViewApplication={() => router.push(ROUTES.LANDLORD_APPLICATIONS)}
               onConfirmViewing={() => setConfirmingLead(lead)}
-              onCancelViewing={() => cancelMutation.mutate(lead.viewingRequestId!)}
+              onCancelViewing={() => setCancellingLead(lead)}
               onNudge={() => setNudgingLead(lead)}
               isUpdatingViewing={
                 cancelMutation.isPending && cancelMutation.variables === lead.viewingRequestId
@@ -321,6 +327,25 @@ export default function LandlordLeadsPage() {
         onConfirm={(scheduledAt) => confirmMutation.mutate(scheduledAt)}
         isSubmitting={confirmMutation.isPending}
         isError={confirmMutation.isError}
+      />
+
+      <ConfirmDialog
+        open={cancellingLead !== null}
+        onOpenChange={(open) => {
+          if (!open) setCancellingLead(null);
+        }}
+        title="Cancel this viewing request?"
+        description={
+          cancellingLead
+            ? `${cancellingLead.leadName}'s viewing request for ${cancellingLead.propertyName} is cancelled. This can't be undone; they would need to request a new viewing.`
+            : ''
+        }
+        confirmLabel="Cancel viewing"
+        onConfirm={() =>
+          cancellingLead?.viewingRequestId &&
+          cancelMutation.mutateAsync(cancellingLead.viewingRequestId)
+        }
+        isLoading={cancelMutation.isPending}
       />
 
       <NudgeModal

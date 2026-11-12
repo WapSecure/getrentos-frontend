@@ -24,7 +24,6 @@ import {
   type SelectOption,
 } from '@sureground/ui';
 import { ApiError, unwrap } from '@/lib/apiHelpers';
-import { COUNTRIES } from '@/lib/constants/countries';
 import { DIASPORA_ROUTES, type InvestorPortal } from '@/lib/constants/diasporaRoutes';
 import { formatLagosDate, isValidTimeZone } from '@/lib/format';
 import { investorKeys } from '@/lib/queryKeys';
@@ -49,12 +48,13 @@ import {
 } from '@/types/investor';
 import {
   BUDGET_BAND_LABELS,
+  COUNTRIES,
   CURRENCY_LABELS,
   HORIZON_LABELS,
   INTENDED_USE_LABELS,
   OWNERSHIP_LABELS,
   PROPERTY_TYPE_LABELS,
-} from '../labels';
+} from '@sureground/shared';
 
 type Step = 'about' | 'plans' | 'risk';
 const STEPS: { id: Step; title: string }[] = [

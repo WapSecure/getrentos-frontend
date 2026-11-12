@@ -52,10 +52,10 @@ export const OwnerPortfolioChart = () => {
       <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
         <div>
           <h2 className="text-base font-semibold tracking-[-0.015em] text-foreground">
-            Portfolio value
+            Listed for sale
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Estimated market value, last 6 months
+            Asking prices on your sale listings, last 6 months
           </p>
         </div>
         {trend && (
@@ -73,7 +73,7 @@ export const OwnerPortfolioChart = () => {
         <Skeleton className="h-64 w-full" />
       ) : !hasData ? (
         <div className="flex h-64 items-center justify-center">
-          <EmptyState icon={TrendingUp} title="No portfolio value data yet" size="compact" bare />
+          <EmptyState icon={TrendingUp} title="No sale listings yet" size="compact" bare />
         </div>
       ) : (
         <div className="h-64">

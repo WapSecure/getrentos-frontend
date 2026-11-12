@@ -1,7 +1,7 @@
 'use client';
 
 import { Mail, CalendarClock, CheckCircle2, XCircle } from '@sureground/icons';
-import { Badge, Card, IconButton, type BadgeVariant } from '@sureground/ui';
+import { Badge, Button, Card, IconButton, type BadgeVariant } from '@sureground/ui';
 import { getInitials, formatDate } from '@/lib/format';
 import type { RealtorLead, LeadStage } from '@/types/realtor';
 
@@ -84,22 +84,26 @@ export const LeadCard = ({
               size="sm"
               onClick={onScheduleViewing}
             />
-            <IconButton
-              label="Mark closed lost"
-              icon={<XCircle />}
+            <Button
+              variant="danger-ghost"
               size="sm"
-              variant="danger"
+              className="ml-auto gap-1.5"
               onClick={onCloseLost}
               disabled={isUpdating}
-            />
-            <IconButton
-              label="Mark closed won"
-              icon={<CheckCircle2 />}
+            >
+              <XCircle className="w-3.5 h-3.5" />
+              Mark lost
+            </Button>
+            <Button
+              variant="outline"
               size="sm"
-              className="text-success"
+              className="gap-1.5"
               onClick={onCloseWon}
               disabled={isUpdating}
-            />
+            >
+              <CheckCircle2 className="w-3.5 h-3.5 text-success" />
+              Mark won
+            </Button>
           </>
         )}
       </div>

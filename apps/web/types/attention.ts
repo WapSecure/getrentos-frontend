@@ -10,10 +10,4 @@ export type AttentionPersona =
   | 'resident'
   | 'estate';
 
-export interface AttentionItem {
-  key: string;
-  severity: 'urgent' | 'soon' | 'info';
-  title: string;
-  detail?: string;
-  link: { path: string; label: string };
-}
+export type { AttentionItem } from '@sureground/shared';

@@ -12,6 +12,7 @@ import { SavedRecommendations } from '@/components/renter/saved/SavedRecommendat
 import { BulkActions } from '@/components/renter/saved/BulkActions';
 import { ExportSavedProperties } from '@/components/renter/saved/ExportSavedProperties';
 import {
+  ConfirmDialog,
   PageErrorState,
   PageLoadingState,
   Pagination,
@@ -34,6 +35,7 @@ export default function SavedPage() {
   const [filterStatus, setFilterStatus] = useState<'all' | 'applied' | 'viewed'>('all');
   const [selectedSavedListings, setSelectedSavedListings] = useState<Record<string, string>>({});
   const [showExportModal, setShowExportModal] = useState(false);
+  const [confirmingBulkRemove, setConfirmingBulkRemove] = useState<string[] | null>(null);
   const toast = useToast();
 
   const savedListingParams = {
@@ -161,7 +163,14 @@ export default function SavedPage() {
     onError: () => toast.error('The selected properties could not be removed.'),
   });
 
-  const handleDeleteSelected = () => bulkUnsaveMutation.mutate(selectedProperties);
+  const handleDeleteSelected = () => setConfirmingBulkRemove(selectedProperties);
+  const removeCount = confirmingBulkRemove?.length ?? 0;
+  const removeNoun = `saved propert${removeCount === 1 ? 'y' : 'ies'}`;
+  const confirmBulkRemove = async () => {
+    if (!confirmingBulkRemove) return;
+    await bulkUnsaveMutation.mutateAsync(confirmingBulkRemove);
+    toast.success(`${removeCount} ${removeNoun} removed.`);
+  };
 
   const handleBulkMoveToWishlist = (wishlistId: string) => {
     Object.entries(selectedSavedListings).forEach(([propertyId, savedListingId]) =>
@@ -256,6 +265,19 @@ export default function SavedPage() {
         onClearSelection={handleClearSelection}
         onDeleteSelected={handleDeleteSelected}
         onMoveToWishlist={handleBulkMoveToWishlist}
+      />
+
+      <ConfirmDialog
+        open={confirmingBulkRemove !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirmingBulkRemove(null);
+        }}
+        title={`Remove ${removeCount} ${removeNoun}?`}
+        description={`The ${removeCount === 1 ? 'selected property leaves' : `${removeCount} selected properties leave`} your saved list and any wishlists. You can save ${removeCount === 1 ? 'it' : 'them'} again from the listing.`}
+        confirmLabel="Remove"
+        tone="danger"
+        isLoading={bulkUnsaveMutation.isPending}
+        onConfirm={confirmBulkRemove}
       />
 
       <ExportSavedProperties

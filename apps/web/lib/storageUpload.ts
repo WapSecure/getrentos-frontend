@@ -45,7 +45,7 @@ const abortError = () => new DOMException('The upload was cancelled.', 'AbortErr
 
 /** A PUT to the signed storage link, over XHR for progress and cancel. No cookies or extra headers: only what was signed. */
 export function putToStorage(
-  session: StorageUploadSession,
+  session: { uploadUrl: string; headers?: Record<string, string> },
   file: Blob,
   { onProgress, signal }: StorageUploadOptions = {}
 ): Promise<void> {
@@ -53,7 +53,9 @@ export function putToStorage(
     if (signal?.aborted) return reject(abortError());
     const xhr = new XMLHttpRequest();
     xhr.open('PUT', session.uploadUrl);
-    Object.entries(session.headers).forEach(([name, value]) => xhr.setRequestHeader(name, value));
+    Object.entries(session.headers ?? {}).forEach(([name, value]) =>
+      xhr.setRequestHeader(name, value)
+    );
     let last = -1;
     xhr.upload.onprogress = (event) => {
       if (!event.lengthComputable || !onProgress) return;
@@ -87,3 +89,22 @@ export function putToStorage(
     xhr.send(file);
   });
 }
+
+/** Byte range [start, end) of part `n` (1-based) of a file split into `partSize` parts. */
+export function partRange(
+  size: number,
+  partSize: number,
+  n: number
+): { start: number; end: number } {
+  const start = (n - 1) * partSize;
+  return { start, end: Math.min(start + partSize, size) };
+}
+
+/** Part numbers 1..count that storage does not hold yet. */
+export function missingParts(count: number, uploaded: readonly number[]): number[] {
+  const have = new Set(uploaded);
+  return Array.from({ length: count }, (_, i) => i + 1).filter((n) => !have.has(n));
+}
+
+/** Wait before retry `attempt` (1-based): 1 s, 2 s, 4 s… capped at 8 s, so a weak network gets breathing room. */
+export const retryDelayMs = (attempt: number) => Math.min(8000, 1000 * 2 ** (attempt - 1));

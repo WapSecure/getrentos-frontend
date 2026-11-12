@@ -25,6 +25,7 @@ import {
 import { errorMessage } from '@/lib/api/client';
 import { BankAccountFields } from '@/components/forms/BankAccountFields';
 import { PayoutCooldownHint, PayoutHoldNotice } from '@/components/payouts/PayoutHoldNotice';
+import { PayoutDestination } from '@/components/payouts/PayoutDestination';
 import { withStepUpSummary } from '@/lib/stepUp';
 import {
   INCOMPLETE_ACCOUNT_LOOKUP,
@@ -121,6 +122,8 @@ export default function SellerPayout() {
           )}
           {a ? <AccountForm hasAccount={!!a.accountNumber} /> : null}
         </QueryState>
+
+        <PayoutDestination />
 
         <View style={{ gap: spacing.sm }}>
           <Text variant="heading" headingLevel={2}>

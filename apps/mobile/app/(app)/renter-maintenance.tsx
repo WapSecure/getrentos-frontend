@@ -34,6 +34,7 @@ export default function Maintenance() {
   const qc = useQueryClient();
   const toast = useToast();
   const [ratingFor, setRatingFor] = useState<MaintenanceRequest | null>(null);
+  const [pendingRating, setPendingRating] = useState<number | null>(null);
 
   const query = useQuery({
     queryKey: qk.renter.maintenance,
@@ -53,6 +54,7 @@ export default function Maintenance() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: qk.renter.maintenance });
       setRatingFor(null);
+      setPendingRating(null);
       toast.show('Thanks for the feedback.', 'success');
     },
     onError: (err) => toast.show(errorMessage(err, 'Could not submit your rating.'), 'error'),
@@ -66,6 +68,19 @@ export default function Maintenance() {
         { text: 'Keep it', style: 'cancel' },
         { text: 'Cancel request', style: 'destructive', onPress: () => cancelMutation.mutate(id) },
       ]
+    );
+  };
+
+  const confirmRating = (id: string, rating: number) => {
+    setPendingRating(rating);
+    Alert.alert(
+      `Rate this repair ${rating} star${rating === 1 ? '' : 's'}?`,
+      'This rates the vendor who did the repair. You cannot change it after submitting.',
+      [
+        { text: 'Cancel', style: 'cancel', onPress: () => setPendingRating(null) },
+        { text: 'Submit', onPress: () => rateMutation.mutate({ id, rating }) },
+      ],
+      { cancelable: true, onDismiss: () => setPendingRating(null) }
     );
   };
 
@@ -165,7 +180,10 @@ export default function Maintenance() {
                   ) : null}
                   {item.status === 'resolved' && !item.vendorRating ? (
                     <Pressable
-                      onPress={() => setRatingFor(item)}
+                      onPress={() => {
+                        setPendingRating(null);
+                        setRatingFor(item);
+                      }}
                       accessibilityRole="button"
                       accessibilityLabel={`Rate the vendor for ${item.title}`}
                       hitSlop={8}
@@ -196,9 +214,10 @@ export default function Maintenance() {
                     {[1, 2, 3, 4, 5].map((n) => (
                       <Pressable
                         key={n}
-                        onPress={() => rateMutation.mutate({ id: item.id, rating: n })}
+                        onPress={() => confirmRating(item.id, n)}
                         disabled={rateMutation.isPending}
                         accessibilityRole="radio"
+                        accessibilityState={{ checked: pendingRating === n }}
                         accessibilityLabel={`${n} star${n === 1 ? '' : 's'}`}
                         style={{
                           width: 44,
@@ -207,7 +226,15 @@ export default function Maintenance() {
                           justifyContent: 'center',
                         }}
                       >
-                        <Star size={24} color={colors.warning} fill="transparent" />
+                        <Star
+                          size={24}
+                          color={colors.warning}
+                          fill={
+                            pendingRating !== null && n <= pendingRating
+                              ? colors.warning
+                              : 'transparent'
+                          }
+                        />
                       </Pressable>
                     ))}
                   </View>

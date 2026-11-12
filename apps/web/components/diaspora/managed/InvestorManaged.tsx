@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { KeyRound, ReceiptText } from '@sureground/icons';
 import {
@@ -37,7 +38,7 @@ import {
   MANDATE_STATUS_BADGE,
 } from '@/components/landlord/managed/SuregroundManagedView';
 import type { InvestorManagedProperty } from '@/types/managed';
-import { STATEMENT_PAYOUT_LABELS, humaniseStatus } from '../labels';
+import { STATEMENT_PAYOUT_LABELS, humaniseStatus } from '@sureground/shared';
 
 const JOB_PAGE_SIZE = 10;
 /** Past this many properties a segmented control stops fitting a phone. */
@@ -57,8 +58,16 @@ export function InvestorManaged() {
     queryFn: () => unwrap(investorService.getManaged()),
   });
   const properties = managed.data?.properties ?? [];
+  // From the workspace: open on the property whose latest statement was linked.
+  const linkedStatement = useSearchParams().get('statement');
   const [chosenId, setChosenId] = useState<string | null>(null);
-  const property = properties.find((p) => p.propertyId === chosenId) ?? properties[0] ?? null;
+  const property =
+    properties.find((p) => p.propertyId === chosenId) ??
+    (chosenId === null
+      ? properties.find((p) => linkedStatement && p.lastStatement?.id === linkedStatement)
+      : undefined) ??
+    properties[0] ??
+    null;
 
   return (
     <div className="space-y-6 pb-10">
@@ -104,7 +113,12 @@ export function InvestorManaged() {
 
             <div className="grid gap-6 lg:grid-cols-2">
               <AgreementCard property={property} />
-              <StatementCard property={property} />
+              <StatementCard
+                property={property}
+                openBreakdown={
+                  Boolean(linkedStatement) && property.lastStatement?.id === linkedStatement
+                }
+              />
             </div>
 
             <section aria-labelledby="managed-approvals" className="space-y-3">
@@ -264,7 +278,13 @@ function AgreementCard({ property }: { property: InvestorManagedProperty }) {
 
 const STATEMENT_STATUS_LABELS: Record<string, string> = { DRAFT: 'Draft', ISSUED: 'Issued' };
 
-function StatementCard({ property }: { property: InvestorManagedProperty }) {
+function StatementCard({
+  property,
+  openBreakdown = false,
+}: {
+  property: InvestorManagedProperty;
+  openBreakdown?: boolean;
+}) {
   const statement = property.lastStatement;
   const net = statement ? Number(statement.net) : NaN;
 
@@ -297,7 +317,11 @@ function StatementCard({ property }: { property: InvestorManagedProperty }) {
               ]}
             />
           </div>
-          <StatementDetail statementId={statement.id} />
+          <StatementDetail
+            key={statement.id}
+            statementId={statement.id}
+            defaultOpen={openBreakdown}
+          />
         </>
       ) : (
         <EmptyState
@@ -317,8 +341,14 @@ function StatementCard({ property }: { property: InvestorManagedProperty }) {
 }
 
 /** The ledger lines behind the statement, read when opened. */
-function StatementDetail({ statementId }: { statementId: string }) {
-  const [open, setOpen] = useState(false);
+function StatementDetail({
+  statementId,
+  defaultOpen = false,
+}: {
+  statementId: string;
+  defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
   const detail = useQuery({
     queryKey: landlordKeys.ownerStatement(statementId),
     queryFn: () => unwrap(landlordService.getOwnerStatement(statementId)),
@@ -329,6 +359,7 @@ function StatementDetail({ statementId }: { statementId: string }) {
     <Disclosure
       className="border-t border-border"
       summary="See the breakdown"
+      defaultOpen={defaultOpen}
       onToggle={(event) => setOpen(event.currentTarget.open)}
     >
       <QueryState

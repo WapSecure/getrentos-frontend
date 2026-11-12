@@ -14,7 +14,7 @@ import {
   ChevronRight,
 } from '@sureground/icons';
 import { format } from 'date-fns';
-import { Button, IconButton } from '@sureground/ui';
+import { Button, ConfirmDialog, IconButton } from '@sureground/ui';
 import { notificationHref } from '@/lib/notificationHref';
 
 interface NotificationMetadata {
@@ -104,6 +104,7 @@ export const NotificationCard = ({
 }: NotificationCardProps) => {
   const router = useRouter();
   const [isHovered, setIsHovered] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
   const config = typeConfig[notification.type] || typeConfig.system;
   const Icon = config.icon;
 
@@ -115,12 +116,15 @@ export const NotificationCard = ({
     if (href) router.push(href);
   };
 
-  const handleMarkAsReadClick = () => {
+  // Row buttons sit inside the clickable card, so keep their clicks from also opening the notification.
+  const handleMarkAsReadClick = (event: React.MouseEvent) => {
+    event.stopPropagation();
     onMarkAsRead(notification.id);
   };
 
-  const handleDeleteClick = () => {
-    onDelete(notification.id);
+  const handleDeleteClick = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    setConfirmingDelete(true);
   };
 
   const handleActionClick = () => {
@@ -128,78 +132,90 @@ export const NotificationCard = ({
   };
 
   return (
-    <div
-      className={`group p-4 rounded-xl transition-all cursor-pointer ${
-        notification.read ? 'hover:bg-secondary' : 'bg-info-subtle/50 hover:bg-info-subtle'
-      } ${isHovered ? 'shadow-sm' : ''}`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onClick={handleClick}
-    >
-      <div className="flex items-start gap-4">
-        <div className={`p-2 rounded-lg ${config.bg} shrink-0`}>
-          <Icon className={`w-5 h-5 ${config.color}`} />
-        </div>
+    <>
+      <div
+        className={`group p-4 rounded-xl transition-all cursor-pointer ${
+          notification.read ? 'hover:bg-secondary' : 'bg-info-subtle/50 hover:bg-info-subtle'
+        } ${isHovered ? 'shadow-sm' : ''}`}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        onClick={handleClick}
+      >
+        <div className="flex items-start gap-4">
+          <div className={`p-2 rounded-lg ${config.bg} shrink-0`}>
+            <Icon className={`w-5 h-5 ${config.color}`} />
+          </div>
 
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-2">
-            <div>
-              <div className="flex items-center gap-2">
-                <h4
-                  className={`text-sm font-semibold ${
-                    notification.read ? 'text-foreground' : 'text-foreground'
-                  }`}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h4
+                    className={`text-sm font-semibold ${
+                      notification.read ? 'text-foreground' : 'text-foreground'
+                    }`}
+                  >
+                    {notification.title}
+                  </h4>
+                  {!notification.read && <span className="w-2 h-2 bg-info rounded-full shrink-0" />}
+                </div>
+                <p
+                  className={`text-sm ${
+                    notification.read ? 'text-muted-foreground' : 'text-foreground'
+                  } mt-0.5`}
                 >
-                  {notification.title}
-                </h4>
-                {!notification.read && <span className="w-2 h-2 bg-info rounded-full shrink-0" />}
+                  {notification.message}
+                </p>
+                <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                  <span>{formatTimeAgo(notification.createdAt)}</span>
+                  <span className="capitalize">{notification.type}</span>
+                </div>
               </div>
-              <p
-                className={`text-sm ${
-                  notification.read ? 'text-muted-foreground' : 'text-foreground'
-                } mt-0.5`}
-              >
-                {notification.message}
-              </p>
-              <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                <span>{formatTimeAgo(notification.createdAt)}</span>
-                <span className="capitalize">{notification.type}</span>
-              </div>
-            </div>
 
-            <div className="flex items-center gap-1 shrink-0">
-              {notification.action && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="gap-0 text-primary"
-                  onClick={handleActionClick}
-                >
-                  {notification.action.label}
-                  <ChevronRight className="w-3 h-3" />
-                </Button>
-              )}
-              {!notification.read && (
+              <div className="flex items-center gap-1 shrink-0">
+                {notification.action && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="gap-0 text-primary"
+                    onClick={handleActionClick}
+                  >
+                    {notification.action.label}
+                    <ChevronRight className="w-3 h-3" />
+                  </Button>
+                )}
+                {!notification.read && (
+                  <IconButton
+                    label={`Mark "${notification.title}" as read`}
+                    icon={<CheckCircle />}
+                    size="sm"
+                    className="text-info hover:text-info"
+                    onClick={handleMarkAsReadClick}
+                  />
+                )}
                 <IconButton
-                  label="Mark as read"
-                  icon={<CheckCircle />}
+                  label={`Delete "${notification.title}"`}
+                  icon={<Trash2 />}
                   size="sm"
-                  className="text-info hover:text-info"
-                  onClick={handleMarkAsReadClick}
+                  variant="danger"
+                  className="sm:opacity-0 sm:group-hover:opacity-100 focus-visible:opacity-100"
+                  onClick={handleDeleteClick}
                 />
-              )}
-              <IconButton
-                label="Delete notification"
-                icon={<Trash2 />}
-                size="sm"
-                variant="danger"
-                className="sm:opacity-0 sm:group-hover:opacity-100 focus-visible:opacity-100"
-                onClick={handleDeleteClick}
-              />
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+
+      <ConfirmDialog
+        open={confirmingDelete}
+        onOpenChange={setConfirmingDelete}
+        title="Delete this notification?"
+        description={`"${notification.title}" will be removed from your notifications. This can't be undone.`}
+        confirmLabel="Delete"
+        tone="danger"
+        onConfirm={() => onDelete(notification.id)}
+      />
+    </>
   );
 };

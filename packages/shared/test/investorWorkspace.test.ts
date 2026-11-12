@@ -6,9 +6,13 @@ import {
   identityProgress,
   portfolioFigures,
   stageProgress,
-} from './investorWorkspace';
+} from '../src/diaspora/investorWorkspace.ts';
 
 const links = {
+  purchase: ({ role, transactionId }: { role: string; transactionId: string }) =>
+    role === 'REPRESENTATIVE'
+      ? `/representing/transactions/${transactionId}`
+      : `/buyer/transactions/${transactionId}`,
   risk: '/buyer/invest/onboarding?step=risk',
   tours: '/buyer/tours',
   approvals: '/owner/approvals',
@@ -155,6 +159,10 @@ test('portfolio figures use only what the API returns', () => {
     depositsHeldAmount: null,
     managedProperties: null,
     latestStatementNet: null,
+    acquisitionCost: null,
+    rentReceived12m: null,
+    net12m: null,
+    occupancyRate: null,
   });
 
   const figures = portfolioFigures(
@@ -185,6 +193,42 @@ test('portfolio figures use only what the API returns', () => {
   assert.equal(figures.depositsHeldAmount, 3_000_000);
   assert.equal(figures.managedProperties, 2);
   assert.equal(figures.latestStatementNet, 420_000);
+});
+
+test('portfolio figures come through only where the API has a record', () => {
+  const figures = portfolioFigures({
+    portfolio: {
+      properties: 2,
+      acquisitionCost: '150000000',
+      rentReceived12m: '2500000',
+      expenses12m: '465433',
+      net12m: '2034567',
+      occupancyRate: 66.7,
+      asOf: '2026-11-12T10:00:00.000Z',
+    },
+  });
+  assert.equal(figures.acquisitionCost, 150_000_000);
+  assert.equal(figures.rentReceived12m, 2_500_000);
+  assert.equal(figures.net12m, 2_034_567);
+  assert.equal(figures.occupancyRate, 66.7);
+
+  const none = portfolioFigures({
+    portfolio: {
+      properties: null,
+      acquisitionCost: null,
+      rentReceived12m: null,
+      expenses12m: null,
+      net12m: null,
+      occupancyRate: null,
+      asOf: '2026-11-12T10:00:00.000Z',
+    },
+  });
+  assert.equal(none.acquisitionCost, null);
+  assert.equal(none.rentReceived12m, null);
+  assert.equal(none.net12m, null);
+  assert.equal(none.occupancyRate, null);
+  // An older API without the block reads as no figures, not zero.
+  assert.equal(portfolioFigures({}).acquisitionCost, null);
 });
 
 test('the deposit total is withheld when the list is partial or an amount is missing', () => {

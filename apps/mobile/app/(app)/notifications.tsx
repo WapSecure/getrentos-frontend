@@ -208,7 +208,20 @@ export default function Notifications() {
           </Card>
         </Pressable>
         <Pressable
-          onPress={() => removeOne.mutate(item.id)}
+          onPress={() =>
+            Alert.alert(
+              'Remove this notification?',
+              `"${item.title}" will be removed from your notifications. This cannot be undone.`,
+              [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                  text: 'Remove',
+                  style: 'destructive',
+                  onPress: () => removeOne.mutate(item.id),
+                },
+              ]
+            )
+          }
           accessibilityRole="button"
           accessibilityLabel={`Remove ${item.title}`}
           hitSlop={10}

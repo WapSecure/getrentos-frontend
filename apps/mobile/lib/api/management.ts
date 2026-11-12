@@ -2,6 +2,7 @@ import { apiFetch, apiUpload } from './client';
 import { toQuery } from './query';
 import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
+import type { SpendApprovalKind, SpendBand, SpendBands } from '@sureground/shared';
 import type { BadgeTone } from '@sureground/ui-native';
 
 /** Every route here is role-agnostic on the API, so the landlord and owner portals share one client. */
@@ -132,6 +133,8 @@ export interface OwnerMandate {
   managerOrganizationName?: string | null;
   /** The most a manager may spend without owner sign-off (whole naira); null = no cap. */
   maintenanceApprovalCap: number | null;
+  /** Spending bands (routine, emergency, explicit); optional while older deploys catch up. */
+  bands?: SpendBands | null;
   status: MandateStatus;
 }
 
@@ -166,6 +169,12 @@ export interface SpendApproval {
   decisionNote: string | null;
   decidedAt: string | null;
   createdAt: string;
+  /** Optional while older rows and deploys catch up. */
+  band?: SpendBand | null;
+  kind?: SpendApprovalKind;
+  maintenanceRequestId?: string | null;
+  /** When the manager repeated the approved work-order call. */
+  usedAt?: string | null;
 }
 
 export interface AwaitingCountersign {
@@ -379,9 +388,14 @@ export const managementApi = {
 
   myMandates: () => apiFetch<OwnerMandate[]>('/management-mandates/mine'),
 
-  spendApprovals: (role: SpendApprovalRole, page = 1, pageSize = 20) =>
+  spendApprovals: (
+    role: SpendApprovalRole,
+    page = 1,
+    pageSize = 20,
+    filter: { status?: SpendApprovalStatus; propertyId?: string } = {}
+  ) =>
     apiFetch<Paginated<SpendApproval>>(
-      `/landlord/spend-approvals${toQuery({ role, page, pageSize })}`
+      `/landlord/spend-approvals${toQuery({ role, page, pageSize, ...filter })}`
     ),
   approveSpend: (id: string) =>
     apiFetch<SpendApproval>(`/landlord/spend-approvals/${id}/approve`, { method: 'POST' }),
@@ -394,6 +408,12 @@ export const managementApi = {
     apiFetch<void>(`/landlord/spend-approvals/mandate/${mandateId}/cap`, {
       method: 'PUT',
       body: { cap },
+    }),
+  /** Owner only; a careful money setting, so the API asks for step-up (the client replays it). */
+  setMandateBands: (mandateId: string, bands: SpendBands) =>
+    apiFetch<void>(`/landlord/spend-approvals/mandate/${mandateId}/bands`, {
+      method: 'PUT',
+      body: bands,
     }),
 
   awaitingCountersign: () =>

@@ -33,6 +33,11 @@ guidance still informs sizing and accessibility. Approved 2026-11-12.
   transparency, increased contrast, and browsers without backdrop filtering.
 - Default browser buttons and inputs have at least 44px height. Compact sizes
   remain available for dense contexts; native buttons retain 44–56px targets.
+- Icon-only controls are for reversible or navigational actions only, and always use
+  `IconButton`/`IconLink` (they show a real `Tooltip` from `label`). An action that
+  deletes, approves, rejects, cancels, sends or otherwise changes data for good gets a
+  visible text label and, when it can't be undone, a `ConfirmDialog` (mobile:
+  `Alert.alert`) that names the item and the consequence.
 - Every control needs a keyboard path, visible focus, and a useful accessible
   name. Reduced motion must also cover JavaScript animations, not only CSS.
 

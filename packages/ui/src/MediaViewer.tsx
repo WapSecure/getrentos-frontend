@@ -854,7 +854,7 @@ function PlanRooms({
       )}
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="text-sm font-semibold">Rooms</h3>
+        <h3 className="text-sm font-semibold text-white">Rooms</h3>
         {sized && (
           <span
             className={cn(

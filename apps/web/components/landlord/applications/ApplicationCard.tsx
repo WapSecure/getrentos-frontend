@@ -92,16 +92,13 @@ export const ApplicationCard = ({
               icon={<MessageSquareText />}
               onClick={onRequestInfo}
             />
-            <IconButton label="Reject" variant="danger" size="sm" icon={<X />} onClick={onReject} />
-            <Button
-              variant="primary"
-              size="sm"
-              className="px-2.5"
-              title="Approve"
-              aria-label="Approve"
-              onClick={onApprove}
-            >
-              <Check className="w-4 h-4" />
+            <Button variant="danger-ghost" size="sm" className="gap-1.5" onClick={onReject}>
+              <X className="w-3.5 h-3.5" />
+              Reject
+            </Button>
+            <Button variant="primary" size="sm" className="gap-1.5" onClick={onApprove}>
+              <Check className="w-3.5 h-3.5" />
+              Approve
             </Button>
           </>
         )}

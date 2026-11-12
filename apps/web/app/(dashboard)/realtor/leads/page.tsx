@@ -6,10 +6,11 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 import { Plus, UserPlus, User, Mail, Phone } from '@sureground/icons';
 import { LeadCard } from '@/components/realtor/leads/LeadCard';
 import { FollowUpsPanel } from '@/components/realtor/leads/FollowUpsPanel';
-import type { LeadStage } from '@/types/realtor';
+import type { LeadStage, RealtorLead } from '@/types/realtor';
 import { ROUTES } from '@/lib/constants/auth';
 import {
   Button,
+  ConfirmDialog,
   Dialog,
   DialogContent,
   DialogTitle,
@@ -51,6 +52,10 @@ export default function RealtorLeadsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<StageFilter>('all');
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [closingLead, setClosingLead] = useState<{
+    status: 'CLOSED' | 'LOST';
+    lead: RealtorLead;
+  } | null>(null);
   const [newLead, setNewLead] = useState({ fullName: '', email: '', phone: '', listingId: '' });
   const [listingSearch, setListingSearch] = useState('');
   const [listingPage, setListingPage] = useState(1);
@@ -88,7 +93,13 @@ export default function RealtorLeadsPage() {
   const updateLead = useMutation({
     mutationFn: ({ id, status }: { id: string; status: 'CLOSED' | 'LOST' }) =>
       unwrap(realtorService.updateLeadStatus(id, status)),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: realtorKeys.leads }),
+    onSuccess: (_data, { status }) => {
+      queryClient.invalidateQueries({ queryKey: realtorKeys.leads });
+      if (closingLead)
+        toast.success(
+          `${closingLead.lead.leadName} marked ${status === 'CLOSED' ? 'closed won' : 'closed lost'}.`
+        );
+    },
     onError: (error) =>
       toast.error(error.message || 'Unable to update this lead. Please try again.'),
   });
@@ -254,8 +265,8 @@ export default function RealtorLeadsPage() {
               key={lead.id}
               lead={lead}
               onScheduleViewing={() => router.push(`${ROUTES.REALTOR_VIEWINGS}?lead=${lead.id}`)}
-              onCloseWon={() => updateLead.mutate({ id: lead.id, status: 'CLOSED' })}
-              onCloseLost={() => updateLead.mutate({ id: lead.id, status: 'LOST' })}
+              onCloseWon={() => setClosingLead({ status: 'CLOSED', lead })}
+              onCloseLost={() => setClosingLead({ status: 'LOST', lead })}
               isUpdating={updateLead.isPending && updateLead.variables?.id === lead.id}
             />
           ))}
@@ -363,6 +374,27 @@ export default function RealtorLeadsPage() {
           </div>
         </DialogContent>
       </Dialog>
+      <ConfirmDialog
+        open={closingLead !== null}
+        onOpenChange={(open) => {
+          if (!open) setClosingLead(null);
+        }}
+        tone={closingLead?.status === 'CLOSED' ? 'primary' : 'danger'}
+        title={closingLead?.status === 'CLOSED' ? 'Mark this lead won?' : 'Mark this lead lost?'}
+        description={
+          closingLead
+            ? `${closingLead.lead.leadName} (${closingLead.lead.listingTitle}) is closed as ${
+                closingLead.status === 'CLOSED' ? 'won' : 'lost'
+              } and leaves your open pipeline. It can't be reopened from here.`
+            : ''
+        }
+        confirmLabel={closingLead?.status === 'CLOSED' ? 'Mark won' : 'Mark lost'}
+        onConfirm={() =>
+          closingLead &&
+          updateLead.mutateAsync({ id: closingLead.lead.id, status: closingLead.status })
+        }
+        isLoading={updateLead.isPending}
+      />
     </>
   );
 }

@@ -1,6 +1,13 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { StorageUploadError, putToStorage, videoContentType } from './storageUpload';
+import {
+  StorageUploadError,
+  missingParts,
+  partRange,
+  putToStorage,
+  retryDelayMs,
+  videoContentType,
+} from './storageUpload';
 
 /** Just enough XMLHttpRequest to drive putToStorage: records the request and lets each test finish it. */
 class FakeXhr {
@@ -88,4 +95,19 @@ test('a cancel aborts the request', async () => {
   const sent = putToStorage(session, file, { signal: controller.signal });
   controller.abort();
   await assert.rejects(sent, { name: 'AbortError' });
+});
+
+test('partRange splits a file into parts with the remainder last', () => {
+  const size = 8 * 2 + 3;
+  assert.deepEqual(partRange(size, 8, 1), { start: 0, end: 8 });
+  assert.deepEqual(partRange(size, 8, 3), { start: 16, end: 19 });
+});
+
+test('missingParts lists only the parts storage does not hold', () => {
+  assert.deepEqual(missingParts(5, [1, 3]), [2, 4, 5]);
+  assert.deepEqual(missingParts(2, [1, 2]), []);
+});
+
+test('retryDelayMs backs off and caps', () => {
+  assert.deepEqual([1, 2, 3, 4, 5].map(retryDelayMs), [1000, 2000, 4000, 8000, 8000]);
 });

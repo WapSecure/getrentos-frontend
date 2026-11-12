@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Badge,
   Button,
+  ConfirmDialog,
   CurrencyInput,
   DatePicker,
   Dialog,
@@ -63,6 +64,7 @@ export function ShortletPeakPricingDialog({
   const [seasonEnd, setSeasonEnd] = useState('');
   const [seasonRate, setSeasonRate] = useState('');
   const [seasonMin, setSeasonMin] = useState('');
+  const [deletingSeason, setDeletingSeason] = useState<ShortletSeason | null>(null);
 
   const { data: seasons, isLoading: seasonsLoading } = useQuery({
     queryKey: shortletKeys.hostSeasons(listing.id),
@@ -153,200 +155,221 @@ export function ShortletPeakPricingDialog({
   };
 
   return (
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-xl p-0">
-        <div className="p-5">
-          <DialogTitle>Pricing &amp; seasons · {listing.title}</DialogTitle>
-          <DialogDescription>
-            Charge more for peak dates, reward longer stays, and keep time to turn the place around.
-            Stays already booked keep the price they were booked at.
-          </DialogDescription>
-        </div>
+    <>
+      <Dialog open onOpenChange={(o) => !o && onClose()}>
+        <DialogContent className="sm:max-w-xl p-0">
+          <div className="p-5">
+            <DialogTitle>Pricing &amp; seasons · {listing.title}</DialogTitle>
+            <DialogDescription>
+              Charge more for peak dates, reward longer stays, and keep time to turn the place
+              around. Stays already booked keep the price they were booked at.
+            </DialogDescription>
+          </div>
 
-        <div className="max-h-[70vh] space-y-6 overflow-y-auto border-t border-border p-5">
-          <section className="space-y-3">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <h3 className="text-sm font-semibold">Seasons</h3>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={fillDettyDecember}
-                icon={<PartyPopper className="h-4 w-4" />}
-              >
-                Detty December preset
-              </Button>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {perNight
-                ? 'Nights inside a season use its rate. Any stay that includes a season night must meet its minimum stay.'
-                : 'This listing has one flat price per stay, so a season can only set a minimum stay.'}
-            </p>
-
-            {seasonsLoading ? (
-              <div role="status" aria-label="Loading seasons" className="space-y-2">
-                <Skeleton className="h-12 w-full rounded-lg" />
-                <Skeleton className="h-12 w-full rounded-lg" />
+          <div className="max-h-[70vh] space-y-6 overflow-y-auto border-t border-border p-5">
+            <section className="space-y-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h3 className="text-sm font-semibold">Seasons</h3>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={fillDettyDecember}
+                  icon={<PartyPopper className="h-4 w-4" />}
+                >
+                  Detty December preset
+                </Button>
               </div>
-            ) : (seasons ?? []).length > 0 ? (
-              <div className="space-y-2">
-                {(seasons ?? []).map((s: ShortletSeason) => {
-                  const past = s.endDate < TODAY;
-                  return (
-                    <div
-                      key={s.id}
-                      className="flex items-center justify-between gap-3 rounded-lg border border-border px-3 py-2 text-sm"
-                    >
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">{s.name}</span>
-                          {past && <Badge variant="neutral">Ended</Badge>}
+              <p className="text-xs text-muted-foreground">
+                {perNight
+                  ? 'Nights inside a season use its rate. Any stay that includes a season night must meet its minimum stay.'
+                  : 'This listing has one flat price per stay, so a season can only set a minimum stay.'}
+              </p>
+
+              {seasonsLoading ? (
+                <div role="status" aria-label="Loading seasons" className="space-y-2">
+                  <Skeleton className="h-12 w-full rounded-lg" />
+                  <Skeleton className="h-12 w-full rounded-lg" />
+                </div>
+              ) : (seasons ?? []).length > 0 ? (
+                <div className="space-y-2">
+                  {(seasons ?? []).map((s: ShortletSeason) => {
+                    const past = s.endDate < TODAY;
+                    return (
+                      <div
+                        key={s.id}
+                        className="flex items-center justify-between gap-3 rounded-lg border border-border px-3 py-2 text-sm"
+                      >
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{s.name}</span>
+                            {past && <Badge variant="neutral">Ended</Badge>}
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            Nights of {formatDate(s.startDate, 'short')} to{' '}
+                            {formatDate(s.endDate, 'short')}
+                            {s.nightlyRate != null
+                              ? ` · ${formatCurrency(s.nightlyRate)}/night`
+                              : ''}
+                            {s.minNights != null ? ` · min ${s.minNights} nights` : ''}
+                          </p>
                         </div>
-                        <p className="text-xs text-muted-foreground">
-                          Nights of {formatDate(s.startDate, 'short')} to{' '}
-                          {formatDate(s.endDate, 'short')}
-                          {s.nightlyRate != null ? ` · ${formatCurrency(s.nightlyRate)}/night` : ''}
-                          {s.minNights != null ? ` · min ${s.minNights} nights` : ''}
-                        </p>
+                        <IconButton
+                          size="sm"
+                          label={`Delete ${s.name}`}
+                          variant="danger"
+                          icon={<Trash2 />}
+                          onClick={() => setDeletingSeason(s)}
+                          isLoading={removeSeason.isPending && removeSeason.variables === s.id}
+                          disabled={removeSeason.isPending}
+                        />
                       </div>
-                      <IconButton
-                        size="sm"
-                        label={`Delete ${s.name}`}
-                        icon={<Trash2 />}
-                        onClick={() => removeSeason.mutate(s.id)}
-                        isLoading={removeSeason.isPending && removeSeason.variables === s.id}
-                        disabled={removeSeason.isPending}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <EmptyState
-                icon={CalendarRange}
-                title="No seasons yet"
-                description="Add a season below to set different terms for busy dates."
-                size="compact"
-              />
-            )}
-
-            <div className="space-y-3 rounded-lg border border-dashed border-border p-3">
-              <Field label="Season name">
-                <Input
-                  value={seasonName}
-                  onChange={(e) => setSeasonName(e.target.value)}
-                  placeholder="e.g. Detty December"
-                  maxLength={60}
+                    );
+                  })}
+                </div>
+              ) : (
+                <EmptyState
+                  icon={CalendarRange}
+                  title="No seasons yet"
+                  description="Add a season below to set different terms for busy dates."
+                  size="compact"
                 />
-              </Field>
-              <div className="grid grid-cols-2 gap-3">
-                <Field label="First night">
-                  <DatePicker
-                    value={seasonStart}
-                    onChange={setSeasonStart}
-                    min={TODAY}
-                    placeholder="Select date"
+              )}
+
+              <div className="space-y-3 rounded-lg border border-dashed border-border p-3">
+                <Field label="Season name">
+                  <Input
+                    value={seasonName}
+                    onChange={(e) => setSeasonName(e.target.value)}
+                    placeholder="e.g. Detty December"
+                    maxLength={60}
                   />
                 </Field>
-                <Field label="Last night">
-                  <DatePicker
-                    value={seasonEnd}
-                    onChange={setSeasonEnd}
-                    min={seasonStart || TODAY}
-                    placeholder="Select date"
-                  />
-                </Field>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                {perNight && (
-                  <Field label="Nightly rate" hint="Blank = normal rate">
-                    <CurrencyInput
-                      prefix="₦"
-                      value={seasonRate}
-                      onValueChange={(v) => setSeasonRate(v === 0 ? '' : String(v))}
+                <div className="grid grid-cols-2 gap-3">
+                  <Field label="First night">
+                    <DatePicker
+                      value={seasonStart}
+                      onChange={setSeasonStart}
+                      min={TODAY}
+                      placeholder="Select date"
                     />
                   </Field>
-                )}
-                <Field label="Minimum stay (nights)" hint="Blank = listing minimum">
-                  <NumberInput min={1} max={90} value={seasonMin} onValueChange={setSeasonMin} />
+                  <Field label="Last night">
+                    <DatePicker
+                      value={seasonEnd}
+                      onChange={setSeasonEnd}
+                      min={seasonStart || TODAY}
+                      placeholder="Select date"
+                    />
+                  </Field>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  {perNight && (
+                    <Field label="Nightly rate" hint="Blank = normal rate">
+                      <CurrencyInput
+                        prefix="₦"
+                        value={seasonRate}
+                        onValueChange={(v) => setSeasonRate(v === 0 ? '' : String(v))}
+                      />
+                    </Field>
+                  )}
+                  <Field label="Minimum stay (nights)" hint="Blank = listing minimum">
+                    <NumberInput min={1} max={90} value={seasonMin} onValueChange={setSeasonMin} />
+                  </Field>
+                </div>
+                <Button
+                  className="w-full"
+                  onClick={submitSeason}
+                  isLoading={addSeason.isPending}
+                  loadingText="Adding…"
+                >
+                  Add season
+                </Button>
+              </div>
+            </section>
+
+            <section className="space-y-3 border-t border-border pt-5">
+              <h3 className="text-sm font-semibold">Discounts</h3>
+              <p className="text-xs text-muted-foreground">
+                {perNight
+                  ? 'Taken off the nights, never the cleaning fee. Discounts don’t stack: a guest gets only the biggest one they qualify for.'
+                  : 'Discounts only apply to per-night pricing. Switch this listing to per night to use them.'}
+              </p>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                <Field label="Weekly (7+ nights) %">
+                  <NumberInput min={0} max={90} value={weekly} onValueChange={setWeekly} />
                 </Field>
+                <Field label="Two weeks (14+ nights) %">
+                  <NumberInput min={0} max={90} value={twoWeek} onValueChange={setTwoWeek} />
+                </Field>
+                <Field label="Monthly (28+ nights) %">
+                  <NumberInput min={0} max={90} value={monthly} onValueChange={setMonthly} />
+                </Field>
+                <Field label="Last-minute %">
+                  <NumberInput min={0} max={90} value={lastMinute} onValueChange={setLastMinute} />
+                </Field>
+                <Field label="Last-minute means within (days)">
+                  <NumberInput
+                    min={1}
+                    max={30}
+                    value={lastMinuteDays}
+                    onValueChange={setLastMinuteDays}
+                  />
+                </Field>
+              </div>
+            </section>
+
+            <section className="space-y-3 border-t border-border pt-5">
+              <h3 className="text-sm font-semibold">Availability</h3>
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="Notice before check-in (days)" hint="0 = same-day bookings">
+                  <NumberInput min={0} max={30} value={notice} onValueChange={setNotice} />
+                </Field>
+                <Field label="Prep time (days)" hint="Kept free before and after each stay">
+                  <NumberInput min={0} max={7} value={prep} onValueChange={setPrep} />
+                </Field>
+                {listing.deposit ? (
+                  <Field
+                    label="Deposit claim window (hours)"
+                    hint="After check-out, how long you have to claim the security deposit for damage. Blank uses the Sureground default."
+                  >
+                    <NumberInput
+                      min={1}
+                      max={720}
+                      value={claimWindow}
+                      onValueChange={setClaimWindow}
+                      placeholder="Sureground default"
+                    />
+                  </Field>
+                ) : null}
               </div>
               <Button
                 className="w-full"
-                onClick={submitSeason}
-                isLoading={addSeason.isPending}
-                loadingText="Adding…"
+                onClick={() => saveRules.mutate()}
+                isLoading={saveRules.isPending}
+                loadingText="Saving…"
               >
-                Add season
+                Save discounts &amp; availability
               </Button>
-            </div>
-          </section>
+            </section>
+          </div>
+        </DialogContent>
+      </Dialog>
 
-          <section className="space-y-3 border-t border-border pt-5">
-            <h3 className="text-sm font-semibold">Discounts</h3>
-            <p className="text-xs text-muted-foreground">
-              {perNight
-                ? 'Taken off the nights, never the cleaning fee. Discounts don’t stack: a guest gets only the biggest one they qualify for.'
-                : 'Discounts only apply to per-night pricing. Switch this listing to per night to use them.'}
-            </p>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              <Field label="Weekly (7+ nights) %">
-                <NumberInput min={0} max={90} value={weekly} onValueChange={setWeekly} />
-              </Field>
-              <Field label="Two weeks (14+ nights) %">
-                <NumberInput min={0} max={90} value={twoWeek} onValueChange={setTwoWeek} />
-              </Field>
-              <Field label="Monthly (28+ nights) %">
-                <NumberInput min={0} max={90} value={monthly} onValueChange={setMonthly} />
-              </Field>
-              <Field label="Last-minute %">
-                <NumberInput min={0} max={90} value={lastMinute} onValueChange={setLastMinute} />
-              </Field>
-              <Field label="Last-minute means within (days)">
-                <NumberInput
-                  min={1}
-                  max={30}
-                  value={lastMinuteDays}
-                  onValueChange={setLastMinuteDays}
-                />
-              </Field>
-            </div>
-          </section>
-
-          <section className="space-y-3 border-t border-border pt-5">
-            <h3 className="text-sm font-semibold">Availability</h3>
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="Notice before check-in (days)" hint="0 = same-day bookings">
-                <NumberInput min={0} max={30} value={notice} onValueChange={setNotice} />
-              </Field>
-              <Field label="Prep time (days)" hint="Kept free before and after each stay">
-                <NumberInput min={0} max={7} value={prep} onValueChange={setPrep} />
-              </Field>
-              {listing.deposit ? (
-                <Field
-                  label="Deposit claim window (hours)"
-                  hint="After check-out, how long you have to claim the security deposit for damage. Blank uses the Sureground default."
-                >
-                  <NumberInput
-                    min={1}
-                    max={720}
-                    value={claimWindow}
-                    onValueChange={setClaimWindow}
-                    placeholder="Sureground default"
-                  />
-                </Field>
-              ) : null}
-            </div>
-            <Button
-              className="w-full"
-              onClick={() => saveRules.mutate()}
-              isLoading={saveRules.isPending}
-              loadingText="Saving…"
-            >
-              Save discounts &amp; availability
-            </Button>
-          </section>
-        </div>
-      </DialogContent>
-    </Dialog>
+      <ConfirmDialog
+        open={deletingSeason !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeletingSeason(null);
+        }}
+        title="Delete this season?"
+        description={
+          deletingSeason
+            ? `"${deletingSeason.name}" (nights of ${formatDate(deletingSeason.startDate, 'short')} to ${formatDate(deletingSeason.endDate, 'short')}) is deleted, and new bookings on those nights use your normal price and minimum stay. Stays already booked keep their price. This can't be undone.`
+            : ''
+        }
+        confirmLabel="Delete"
+        onConfirm={() => deletingSeason && removeSeason.mutateAsync(deletingSeason.id)}
+        isLoading={removeSeason.isPending}
+      />
+    </>
   );
 }

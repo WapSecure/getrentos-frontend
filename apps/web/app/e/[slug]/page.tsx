@@ -43,6 +43,7 @@ export async function generateMetadata({ params }: EstateMicrositePageProps): Pr
   return {
     title: profile.name,
     description,
+    alternates: { canonical: `/e/${slug}` },
     openGraph: {
       title: profile.name,
       description,

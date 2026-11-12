@@ -1,6 +1,6 @@
 import { apiFetch } from './client';
 import type { Paginated } from './properties';
-import type { PayoutSentTo } from '@sureground/shared';
+import type { NormalisedForeignBankAccount, PayoutSentTo } from '@sureground/shared';
 
 export interface SellerPayoutAccount {
   bankCode: string;
@@ -41,4 +41,55 @@ export const sellerPayoutApi = {
     apiFetch<Paginated<SellerSalePayout>>(
       `/marketplace/seller/payouts?page=${page}&pageSize=${pageSize}`
     ),
+};
+
+// Where statement payouts go: the Nigerian account, or an account abroad once a licensed partner is
+// live (web's ownerPayoutService). Every change goes through step-up.
+
+export type PayoutMethod = 'NG_ACCOUNT' | 'FOREIGN_ACCOUNT';
+
+/** Account numbers and IBANs come back masked. */
+export interface ForeignBankAccount {
+  id: string;
+  accountHolderName: string;
+  country: string;
+  currency: string;
+  bankName: string | null;
+  iban: string | null;
+  accountNumber: string | null;
+  sortCode: string | null;
+  routingNumber: string | null;
+  transitNumber: string | null;
+  institutionNumber: string | null;
+  swiftBic: string | null;
+  verifiedAt: string | null;
+  createdAt: string;
+}
+
+export interface PayoutPreference {
+  method: PayoutMethod;
+  fallbackToNgAccount: boolean;
+  ngAccount: { bankName: string; accountNumber: string; accountName: string } | null;
+  foreignAccount: ForeignBankAccount | null;
+  /** False until a licensed foreign payout partner is live. */
+  foreignPayoutsAvailable: boolean;
+  nextPayout: {
+    state: 'NG_ACCOUNT' | 'FOREIGN_ACCOUNT' | 'FOREIGN_PAYOUT_PENDING_PARTNER';
+    fellBackFromForeign: boolean;
+  };
+  updatedAt: string | null;
+}
+
+export const ownerPayoutApi = {
+  preference: () => apiFetch<PayoutPreference>('/owner/payout-preference'),
+  updatePreference: (input: {
+    method: PayoutMethod;
+    foreignAccountId?: string;
+    fallbackToNgAccount?: boolean;
+  }) => apiFetch<PayoutPreference>('/owner/payout-preference', { method: 'PUT', body: input }),
+  foreignAccounts: () => apiFetch<ForeignBankAccount[]>('/owner/foreign-bank-accounts'),
+  addForeignAccount: (input: NormalisedForeignBankAccount) =>
+    apiFetch<ForeignBankAccount>('/owner/foreign-bank-accounts', { method: 'POST', body: input }),
+  removeForeignAccount: (id: string) =>
+    apiFetch<void>(`/owner/foreign-bank-accounts/${encodeURIComponent(id)}`, { method: 'DELETE' }),
 };

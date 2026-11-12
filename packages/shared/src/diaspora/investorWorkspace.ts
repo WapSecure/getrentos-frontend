@@ -1,12 +1,16 @@
-import type { AttentionItem } from '@/types/attention';
-import type { ForeignDocumentStatus, ForeignIdentityStatus } from '@/types/foreignIdentity';
-import type { InvestorOverview, InvestorStatusCounts } from '@/types/investor';
-import type { PurchaseSummary } from '@/types/transactionWorkspace';
-import { formatCurrency } from './format';
-import { purchaseWorkspaceHref } from './transactionWorkspace';
+import { formatCurrency } from '../utils/format';
+import type {
+  AttentionItem,
+  ForeignDocumentStatus,
+  ForeignIdentityStatus,
+  InvestorOverview,
+  InvestorStatusCounts,
+  PurchaseSummary,
+} from './types';
 
-// Pure helpers for the investor workspace (Diaspora Invest, DIA-30/31). Everything here is built
-// from figures the API already returns: nothing is estimated, and Sureground holds only deposits (D11).
+// Pure helpers for the investor workspace (Diaspora Invest, DIA-30/31), for web and mobile.
+// Everything here is built from figures the API already returns: nothing is estimated, and
+// Sureground holds only deposits (D11).
 
 export type InvestorAttentionKind =
   | 'risk'
@@ -38,7 +42,7 @@ export interface TourLike {
   status: string;
   land: string;
   proposedSlots?: { at: string }[];
-  scheduledAt?: string;
+  scheduledAt?: string | null;
 }
 
 /** A pre-purchase inspection, as far as the agenda needs it. */
@@ -50,6 +54,8 @@ export interface InspectionLike {
 }
 
 export interface AttentionLinks {
+  /** Where a purchase opens: the buyer's own workspace or the one a representative sees. */
+  purchase: (purchase: Pick<PurchaseSummary, 'role' | 'transactionId'>) => string;
   risk: string;
   tours?: string;
   approvals?: string;
@@ -154,7 +160,7 @@ export const buildAttentionQueue = (input: AttentionInput): InvestorAttentionIte
           ? `${formatCurrency(deposit.depositAmount)}, protected by Payment Protection until you release it`
           : 'Protected by Payment Protection until you release it',
       link: {
-        path: purchaseWorkspaceHref({ role: 'BUYER', transactionId: deposit.id }),
+        path: links.purchase({ role: 'BUYER', transactionId: deposit.id }),
         label: 'Pay deposit',
       },
     });
@@ -166,7 +172,7 @@ export const buildAttentionQueue = (input: AttentionInput): InvestorAttentionIte
       purchase.role === 'REPRESENTATIVE' && purchase.representing
         ? ` for ${purchase.representing.principalName}`
         : '';
-    const path = purchaseWorkspaceHref(purchase);
+    const path = links.purchase(purchase);
     if (purchase.pendingApprovals > 0) {
       items.push({
         key: `approval-${purchase.role}-${purchase.transactionId}`,
@@ -283,7 +289,22 @@ export interface PortfolioFigures {
   managedProperties: number | null;
   /** Net to the owner on the latest issued statement, whole naira. */
   latestStatementNet: number | null;
+  /** Recorded prices of completed purchases, whole naira. Never a valuation. */
+  acquisitionCost: number | null;
+  /** Statement income over the last 12 months, whole naira. */
+  rentReceived12m: number | null;
+  /** Net paid on those statements, whole naira. */
+  net12m: number | null;
+  /** Occupied out of managed units, percent. */
+  occupancyRate: number | null;
 }
+
+/** A whole-naira string from the API as a number; null when absent or unreadable. */
+const nairaOrNull = (value: string | null | undefined): number | null => {
+  if (value === null || value === undefined || value === '') return null;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+};
 
 /** Buyer transactions as listed by `GET buyer/transactions` (lower-case statuses). */
 export interface HeldDepositSource {
@@ -325,6 +346,7 @@ export const portfolioFigures = (
   }
 
   const net = overview?.latestStatement ? Number(overview.latestStatement.netAmount) : NaN;
+  const portfolio = overview?.portfolio;
 
   return {
     activePurchases,
@@ -336,6 +358,13 @@ export const portfolioFigures = (
         ? overview.activeManagedProperties
         : null,
     latestStatementNet: Number.isFinite(net) ? net : null,
+    acquisitionCost: nairaOrNull(portfolio?.acquisitionCost),
+    rentReceived12m: nairaOrNull(portfolio?.rentReceived12m),
+    net12m: nairaOrNull(portfolio?.net12m),
+    occupancyRate:
+      typeof portfolio?.occupancyRate === 'number' && Number.isFinite(portfolio.occupancyRate)
+        ? portfolio.occupancyRate
+        : null,
   };
 };
 
@@ -379,4 +408,19 @@ export const greetingFor = (now: Date, timeZone?: string | null): string => {
   if (hour < 12) return 'Good morning';
   if (hour < 18) return 'Good afternoon';
   return 'Good evening';
+};
+
+/** The trust chip by the greeting: how far the checks abroad have got. Null when not eligible. */
+export const identityHeadline = (
+  status: ForeignIdentityStatus | null | undefined
+): { label: string; tone: 'success' | 'danger' | 'info' | 'warning' | 'neutral' } | null => {
+  if (!status?.eligible) return null;
+  const { steps, approved } = identityProgress(status);
+  if (approved === steps.length) return { label: 'Identity verified', tone: 'success' };
+  if (steps.some((s) => s.state === 'REJECTED'))
+    return { label: 'Identity check needs you', tone: 'danger' };
+  if (status.passport.state === 'APPROVED') return { label: 'Passport verified', tone: 'info' };
+  if (steps.some((s) => s.state === 'IN_REVIEW' || s.state === 'CHECKING'))
+    return { label: 'Identity checks in review', tone: 'warning' };
+  return { label: 'Identity not verified yet', tone: 'neutral' };
 };

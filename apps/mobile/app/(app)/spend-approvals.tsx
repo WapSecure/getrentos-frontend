@@ -2,13 +2,14 @@ import { useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Check, ShieldCheck, SlidersHorizontal, X } from '@sureground/icons/native';
+import { Check, ShieldCheck, SlidersHorizontal } from '@sureground/icons/native';
+import { bandsFromInputs } from '@sureground/shared';
 import {
   Badge,
   Button,
   Card,
+  CurrencyField,
   ListSkeleton,
-  NumberField,
   QueryState,
   SegmentedControl,
   Text,
@@ -19,29 +20,21 @@ import {
 import { qk } from '@/lib/query/keys';
 import {
   managementApi,
-  SPEND_APPROVAL_LABEL,
-  SPEND_APPROVAL_TONE,
   type AwaitingCountersign,
   type OwnerMandate,
-  type SpendApproval,
   type SpendApprovalRole,
 } from '@/lib/api/management';
 import { relationshipLabel } from '@/lib/api/propertyAuthority';
 import { errorMessage } from '@/lib/api/client';
-import { formatDate, formatNaira } from '@/lib/format';
+import { withStepUpSummary } from '@/lib/stepUp';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
+import { SpendApprovalCard } from '@/components/management/SpendApprovalCard';
 
 const ROLES: { value: SpendApprovalRole; label: string }[] = [
   { value: 'owner', label: 'To review' },
   { value: 'requester', label: 'My requests' },
 ];
-
-const titleCase = (s: string) =>
-  s
-    .toLowerCase()
-    .replace(/_/g, ' ')
-    .replace(/^\w/, (c) => c.toUpperCase());
 
 export default function SpendApprovals() {
   const { colors, spacing } = useTheme();
@@ -101,121 +94,11 @@ export default function SpendApprovals() {
           }}
         >
           {items.map((a) => (
-            <ApprovalCard key={a.id} approval={a} role={role} />
+            <SpendApprovalCard key={a.id} approval={a} role={role} />
           ))}
         </QueryState>
       </ScrollView>
     </View>
-  );
-}
-
-function ApprovalCard({ approval: a, role }: { approval: SpendApproval; role: SpendApprovalRole }) {
-  const { colors, spacing } = useTheme();
-  const qc = useQueryClient();
-  const toast = useToast();
-  const [declining, setDeclining] = useState(false);
-  const [reason, setReason] = useState('');
-  const canDecide = role === 'owner' && a.status === 'PENDING';
-  const invalidate = () => qc.invalidateQueries({ queryKey: ['management', 'spend-approvals'] });
-
-  const approve = useMutation({
-    mutationFn: () => managementApi.approveSpend(a.id),
-    onSuccess: () => {
-      invalidate();
-      toast.show('Approved. The expense has been recorded.', 'success');
-    },
-    onError: (e) => toast.show(errorMessage(e, 'Could not approve.'), 'error'),
-  });
-  const reject = useMutation({
-    mutationFn: () => managementApi.rejectSpend(a.id, reason.trim()),
-    onSuccess: () => {
-      invalidate();
-      toast.show('Request declined.', 'success');
-    },
-    onError: (e) => toast.show(errorMessage(e, 'Could not decline.'), 'error'),
-  });
-  const busy = approve.isPending || reject.isPending;
-
-  return (
-    <Card padding={spacing.lg} style={{ gap: spacing.sm }}>
-      <View style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'flex-start' }}>
-        <View style={{ flex: 1, gap: 2 }}>
-          <Text variant="bodyStrong">
-            {formatNaira(a.amount)} · {titleCase(a.category)}
-          </Text>
-          <Text variant="caption" color="mutedForeground">
-            {a.propertyTitle ?? 'Property'}
-            {role === 'owner' && a.requestedByName ? ` · ${a.requestedByName}` : ''} ·{' '}
-            {formatDate(a.createdAt, 'short')}
-          </Text>
-        </View>
-        <Badge label={SPEND_APPROVAL_LABEL[a.status]} tone={SPEND_APPROVAL_TONE[a.status]} />
-      </View>
-      {a.note ? (
-        <Text variant="callout" color="mutedForeground">
-          {a.note}
-        </Text>
-      ) : null}
-      {a.status === 'REJECTED' && a.decisionNote ? (
-        <Text variant="callout" color="mutedForeground">
-          Declined: {a.decisionNote}
-        </Text>
-      ) : null}
-
-      {canDecide ? (
-        declining ? (
-          <View style={{ gap: spacing.sm }}>
-            <TextField
-              label="Reason for declining"
-              value={reason}
-              onChangeText={setReason}
-              editable={!busy}
-            />
-            <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-              <Button
-                label="Confirm decline"
-                variant="destructive"
-                size="sm"
-                loading={reject.isPending}
-                disabled={!reason.trim() || busy}
-                onPress={() => reject.mutate()}
-                style={{ flex: 1 }}
-              />
-              <Button
-                label="Cancel"
-                variant="ghost"
-                size="sm"
-                disabled={busy}
-                onPress={() => {
-                  setDeclining(false);
-                  setReason('');
-                }}
-              />
-            </View>
-          </View>
-        ) : (
-          <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-            <Button
-              label="Approve"
-              size="sm"
-              icon={<Check size={14} color={colors.primaryForeground} />}
-              loading={approve.isPending}
-              disabled={busy}
-              onPress={() => approve.mutate()}
-              style={{ flex: 1 }}
-            />
-            <Button
-              label="Decline"
-              variant="ghost"
-              size="sm"
-              icon={<X size={14} color={colors.foreground} />}
-              disabled={busy}
-              onPress={() => setDeclining(true)}
-            />
-          </View>
-        )
-      ) : null}
-    </Card>
   );
 }
 
@@ -233,52 +116,87 @@ function ApprovalLimits() {
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
         <SlidersHorizontal size={16} color={colors.mutedForeground} />
         <Text variant="bodyStrong" accessibilityRole="header">
-          Approval limits
+          Spending limits
         </Text>
       </View>
       <Text variant="caption" color="mutedForeground">
-        Spend above the limit you set needs your approval. Leave it blank for no limit.
+        Spend above the routine limit waits for your approval. Leave a limit blank for none. Saving
+        asks you to confirm it is you.
       </Text>
       {active.map((m) => (
-        <CapRow key={m.id} mandate={m} />
+        <BandsRow key={m.id} mandate={m} />
       ))}
     </Card>
   );
 }
 
-function CapRow({ mandate }: { mandate: OwnerMandate }) {
+const BAND_FIELDS = [
+  { key: 'routine', label: 'Routine', hint: 'Your manager spends up to this without asking you.' },
+  {
+    key: 'emergency',
+    label: 'Emergency',
+    hint: 'Urgent repairs up to this go ahead first, and you are told straight away.',
+  },
+  {
+    key: 'explicit',
+    label: 'Explicit authorisation',
+    hint: 'Above this, you confirm it is you before approving.',
+  },
+] as const;
+
+type BandKey = (typeof BAND_FIELDS)[number]['key'];
+
+function BandsRow({ mandate }: { mandate: OwnerMandate }) {
   const { spacing } = useTheme();
   const toast = useToast();
   const qc = useQueryClient();
-  const [cap, setCap] = useState(
-    mandate.maintenanceApprovalCap ? String(mandate.maintenanceApprovalCap) : ''
-  );
+  const title = mandate.propertyTitle ?? 'this property';
+  const [values, setValues] = useState<Record<BandKey, number | null>>({
+    routine: mandate.bands?.routineCap ?? mandate.maintenanceApprovalCap ?? null,
+    emergency: mandate.bands?.emergencyCap ?? null,
+    explicit: mandate.bands?.explicitAbove ?? null,
+  });
+  const { bands, error } = bandsFromInputs({
+    routine: values.routine ?? 0,
+    emergency: values.emergency ?? 0,
+    explicit: values.explicit ?? 0,
+  });
   const save = useMutation({
-    mutationFn: () => managementApi.setMandateCap(mandate.id, Number(cap) > 0 ? Number(cap) : null),
+    mutationFn: () =>
+      withStepUpSummary(`Change the spending limits for ${title}`, () =>
+        managementApi.setMandateBands(mandate.id, bands)
+      ),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: qk.management.mandates });
-      toast.show('Approval limit saved.', 'success');
+      qc.invalidateQueries({ queryKey: qk.investor.managed });
+      toast.show('Spending limits saved.', 'success');
     },
-    onError: (e) => toast.show(errorMessage(e, 'Could not save the limit.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not save the limits.'), 'error'),
   });
 
   return (
     <View style={{ gap: spacing.sm }}>
-      <NumberField
-        currency
-        label={mandate.propertyTitle ?? 'Property'}
-        placeholder="No limit"
-        value={cap}
-        onValueChange={setCap}
-        editable={!save.isPending}
-      />
+      <Text variant="bodyStrong">{mandate.propertyTitle ?? 'Property'}</Text>
+      {BAND_FIELDS.map((field) => (
+        <CurrencyField
+          key={field.key}
+          label={field.label}
+          placeholder="No limit"
+          hint={field.hint}
+          value={values[field.key]}
+          onValueChange={(next) => setValues((old) => ({ ...old, [field.key]: next }))}
+          error={error?.field === field.key ? error.message : null}
+          editable={!save.isPending}
+        />
+      ))}
       <Button
-        label="Save limit"
+        label="Save limits"
         variant="secondary"
         size="sm"
         loading={save.isPending}
-        disabled={save.isPending}
+        disabled={save.isPending || !!error}
         onPress={() => save.mutate()}
+        accessibilityLabel={`Save spending limits for ${title}`}
       />
     </View>
   );

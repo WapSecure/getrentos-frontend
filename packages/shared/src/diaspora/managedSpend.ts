@@ -1,11 +1,14 @@
-import type { BadgeVariant, TimelineState } from '@sureground/ui';
+import type { StatusTone } from '../utils/landTrust';
 import type {
   AwaitingOwnerApproval,
   DuplicateFlag,
   EvidenceStageStatus,
+  EvidenceTimelineState,
   SpendBand,
   SpendBands,
-} from '@/types/managed';
+} from './types';
+
+// Pure helpers for Sureground Managed spending and job evidence (DIA-21, DIA-22), for web and mobile.
 
 export const SPEND_BAND_LABELS: Record<SpendBand, string> = {
   ROUTINE: 'Routine',
@@ -14,7 +17,7 @@ export const SPEND_BAND_LABELS: Record<SpendBand, string> = {
   EMERGENCY: 'Emergency',
 };
 
-export const SPEND_BAND_VARIANT: Record<SpendBand, BadgeVariant> = {
+export const SPEND_BAND_VARIANT: Record<SpendBand, StatusTone> = {
   ROUTINE: 'neutral',
   OWNER: 'info',
   EXPLICIT: 'warning',
@@ -29,7 +32,7 @@ export const needsExplicitAuthorisation = (band: SpendBand | null | undefined) =
  * Evidence stages in their fixed order. Done, flagged and not-applicable stages say so; of the
  * stages still waiting, only the earliest is current.
  */
-export function evidenceStates(statuses: readonly EvidenceStageStatus[]): TimelineState[] {
+export function evidenceStates(statuses: readonly EvidenceStageStatus[]): EvidenceTimelineState[] {
   const current = statuses.indexOf('PENDING');
   return statuses.map((status, index) => {
     if (status === 'DONE') return 'done';

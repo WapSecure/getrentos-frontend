@@ -7,6 +7,7 @@ import {
   Badge,
   Button,
   CardSkeleton,
+  ConfirmDialog,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -55,6 +56,7 @@ export function ShortletCalendarSyncDialog({
   const [customName, setCustomName] = useState('');
   const [url, setUrl] = useState('');
   const [confirmReset, setConfirmReset] = useState(false);
+  const [disconnecting, setDisconnecting] = useState<ShortletCalendarFeed | null>(null);
 
   const key = shortletKeys.hostCalendarSync(listing.id);
   const { data, isLoading, error } = useQuery({
@@ -138,194 +140,213 @@ export function ShortletCalendarSyncDialog({
   const feeds: ShortletCalendarFeed[] = data?.feeds ?? [];
 
   return (
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-xl p-0">
-        <div className="p-5">
-          <DialogTitle>Calendar sync · {listing.title}</DialogTitle>
-          <DialogDescription>
-            Listed on Airbnb or Booking.com too? Connect the calendars both ways so the same night
-            can&rsquo;t be booked twice.
-          </DialogDescription>
-        </div>
+    <>
+      <Dialog open onOpenChange={(o) => !o && onClose()}>
+        <DialogContent className="sm:max-w-xl p-0">
+          <div className="p-5">
+            <DialogTitle>Calendar sync · {listing.title}</DialogTitle>
+            <DialogDescription>
+              Listed on Airbnb or Booking.com too? Connect the calendars both ways so the same night
+              can&rsquo;t be booked twice.
+            </DialogDescription>
+          </div>
 
-        <div className="max-h-[70vh] space-y-6 overflow-y-auto border-t border-border p-5">
-          {isLoading ? (
-            <CardSkeleton lines={4} />
-          ) : error && !data ? (
-            <Alert variant="danger">{(error as Error).message}</Alert>
-          ) : (
-            <>
-              <section className="space-y-2">
-                <h3 className="text-sm font-semibold">1. Send your Sureground bookings out</h3>
-                <p className="text-xs text-muted-foreground">
-                  Paste this link into the other site&rsquo;s &ldquo;Import calendar&rdquo; setting.
-                  It shows your Sureground bookings and the dates you block by hand, without guest
-                  names. Other sites usually re-read it every few hours.
-                </p>
-                <div className="flex gap-2">
-                  <Input
-                    readOnly
-                    value={data?.exportUrl ?? ''}
-                    onFocus={(e) => e.currentTarget.select()}
-                    className="font-mono text-xs"
-                    aria-label="Sureground calendar link"
-                  />
-                  <IconButton
-                    variant="outline"
-                    label="Copy link"
-                    icon={<Copy />}
-                    onClick={copyLink}
-                  />
-                </div>
-                {confirmReset ? (
-                  <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border p-3 text-xs">
-                    <span className="flex-1">
-                      Sites using the old link will stop getting your bookings until you paste the
-                      new one.
-                    </span>
-                    <Button
-                      size="sm"
+          <div className="max-h-[70vh] space-y-6 overflow-y-auto border-t border-border p-5">
+            {isLoading ? (
+              <CardSkeleton lines={4} />
+            ) : error && !data ? (
+              <Alert variant="danger">{(error as Error).message}</Alert>
+            ) : (
+              <>
+                <section className="space-y-2">
+                  <h3 className="text-sm font-semibold">1. Send your Sureground bookings out</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Paste this link into the other site&rsquo;s &ldquo;Import calendar&rdquo;
+                    setting. It shows your Sureground bookings and the dates you block by hand,
+                    without guest names. Other sites usually re-read it every few hours.
+                  </p>
+                  <div className="flex gap-2">
+                    <Input
+                      readOnly
+                      value={data?.exportUrl ?? ''}
+                      onFocus={(e) => e.currentTarget.select()}
+                      className="font-mono text-xs"
+                      aria-label="Sureground calendar link"
+                    />
+                    <IconButton
                       variant="outline"
-                      onClick={() => setConfirmReset(false)}
-                      disabled={resetExport.isPending}
-                    >
-                      Keep link
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={() => resetExport.mutate()}
-                      isLoading={resetExport.isPending}
-                      loadingText="Resetting…"
-                    >
-                      Reset link
-                    </Button>
+                      label="Copy link"
+                      icon={<Copy />}
+                      onClick={copyLink}
+                    />
                   </div>
-                ) : (
-                  <Button
-                    variant="link"
-                    className="whitespace-normal text-left text-xs font-normal text-muted-foreground underline"
-                    onClick={() => setConfirmReset(true)}
-                  >
-                    Shared this link by mistake? Reset it
-                  </Button>
-                )}
-              </section>
-
-              <section className="space-y-3 border-t border-border pt-5">
-                <h3 className="text-sm font-semibold">2. Bring other bookings in</h3>
-                <p className="text-xs text-muted-foreground">
-                  Stays on connected calendars block those nights here. We check each calendar every
-                  30 minutes.
-                </p>
-
-                {feeds.length > 0 && (
-                  <div className="space-y-2">
-                    {feeds.map((feed) => (
-                      <div
-                        key={feed.id}
-                        className="rounded-lg border border-border px-3 py-2 text-sm"
+                  {confirmReset ? (
+                    <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border p-3 text-xs">
+                      <span className="flex-1">
+                        Sites using the old link will stop getting your bookings until you paste the
+                        new one.
+                      </span>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setConfirmReset(false)}
+                        disabled={resetExport.isPending}
                       >
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="min-w-0">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <span className="font-medium">{feed.name}</span>
-                              <span className="truncate text-xs text-muted-foreground">
-                                {hostOf(feed.url)}
-                              </span>
-                              {feed.lastError ? (
-                                <Badge variant="danger">Not syncing</Badge>
-                              ) : (
-                                <Badge variant="success">Connected</Badge>
-                              )}
-                            </div>
-                            <p className="text-xs text-muted-foreground">
-                              {feed.eventCount} upcoming stay{feed.eventCount === 1 ? '' : 's'}{' '}
-                              blocked
-                              {feed.lastSyncedAt
-                                ? ` · checked ${formatRelativeTime(feed.lastSyncedAt)}`
-                                : ''}
-                            </p>
-                          </div>
-                          <div className="flex shrink-0 gap-1">
-                            <IconButton
-                              size="sm"
-                              label={`Sync ${feed.name} now`}
-                              icon={<RefreshCw />}
-                              onClick={() => syncFeed.mutate(feed.id)}
-                              isLoading={syncFeed.isPending && syncFeed.variables === feed.id}
-                              disabled={syncFeed.isPending}
-                            />
-                            <IconButton
-                              size="sm"
-                              label={`Disconnect ${feed.name}`}
-                              icon={<Trash2 />}
-                              onClick={() => removeFeed.mutate(feed.id)}
-                              isLoading={removeFeed.isPending && removeFeed.variables === feed.id}
-                              disabled={removeFeed.isPending}
-                            />
-                          </div>
-                        </div>
-                        {feed.lastError && (
-                          <p className="mt-1 text-xs text-destructive">
-                            {feed.lastError} Dates it blocked before stay blocked until it syncs
-                            again.
-                          </p>
-                        )}
-                        {feed.conflictCount > 0 && (
-                          <p className="mt-1 flex items-start gap-1.5 text-xs text-warning">
-                            <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                            {feed.conflictCount} stay{feed.conflictCount === 1 ? '' : 's'} on{' '}
-                            {feed.name} overlap{feed.conflictCount === 1 ? 's' : ''} a Sureground
-                            booking. Check your bookings and cancel one of each pair.
-                          </p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
+                        Keep link
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => resetExport.mutate()}
+                        isLoading={resetExport.isPending}
+                        loadingText="Resetting…"
+                      >
+                        Reset link
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      variant="link"
+                      className="whitespace-normal text-left text-xs font-normal text-muted-foreground underline"
+                      onClick={() => setConfirmReset(true)}
+                    >
+                      Shared this link by mistake? Reset it
+                    </Button>
+                  )}
+                </section>
 
-                <div className="space-y-3 rounded-lg border border-dashed border-border p-3">
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <Field label="Calendar from">
-                      <Select
-                        value={source}
-                        onValueChange={setSource}
-                        options={SOURCES.map((s) => ({ value: s, label: s }))}
-                      />
-                    </Field>
-                    {source === 'Other' && (
-                      <Field label="Name">
-                        <Input
-                          value={customName}
-                          onChange={(e) => setCustomName(e.target.value)}
-                          placeholder="e.g. Hotels.ng"
-                          maxLength={40}
+                <section className="space-y-3 border-t border-border pt-5">
+                  <h3 className="text-sm font-semibold">2. Bring other bookings in</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Stays on connected calendars block those nights here. We check each calendar
+                    every 30 minutes.
+                  </p>
+
+                  {feeds.length > 0 && (
+                    <div className="space-y-2">
+                      {feeds.map((feed) => (
+                        <div
+                          key={feed.id}
+                          className="rounded-lg border border-border px-3 py-2 text-sm"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="min-w-0">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span className="font-medium">{feed.name}</span>
+                                <span className="truncate text-xs text-muted-foreground">
+                                  {hostOf(feed.url)}
+                                </span>
+                                {feed.lastError ? (
+                                  <Badge variant="danger">Not syncing</Badge>
+                                ) : (
+                                  <Badge variant="success">Connected</Badge>
+                                )}
+                              </div>
+                              <p className="text-xs text-muted-foreground">
+                                {feed.eventCount} upcoming stay{feed.eventCount === 1 ? '' : 's'}{' '}
+                                blocked
+                                {feed.lastSyncedAt
+                                  ? ` · checked ${formatRelativeTime(feed.lastSyncedAt)}`
+                                  : ''}
+                              </p>
+                            </div>
+                            <div className="flex shrink-0 gap-1">
+                              <IconButton
+                                size="sm"
+                                label={`Sync ${feed.name} now`}
+                                icon={<RefreshCw />}
+                                onClick={() => syncFeed.mutate(feed.id)}
+                                isLoading={syncFeed.isPending && syncFeed.variables === feed.id}
+                                disabled={syncFeed.isPending}
+                              />
+                              <IconButton
+                                size="sm"
+                                label={`Disconnect ${feed.name}`}
+                                variant="danger"
+                                icon={<Trash2 />}
+                                onClick={() => setDisconnecting(feed)}
+                                isLoading={removeFeed.isPending && removeFeed.variables === feed.id}
+                                disabled={removeFeed.isPending}
+                              />
+                            </div>
+                          </div>
+                          {feed.lastError && (
+                            <p className="mt-1 text-xs text-destructive">
+                              {feed.lastError} Dates it blocked before stay blocked until it syncs
+                              again.
+                            </p>
+                          )}
+                          {feed.conflictCount > 0 && (
+                            <p className="mt-1 flex items-start gap-1.5 text-xs text-warning">
+                              <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                              {feed.conflictCount} stay{feed.conflictCount === 1 ? '' : 's'} on{' '}
+                              {feed.name} overlap{feed.conflictCount === 1 ? 's' : ''} a Sureground
+                              booking. Check your bookings and cancel one of each pair.
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="space-y-3 rounded-lg border border-dashed border-border p-3">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <Field label="Calendar from">
+                        <Select
+                          value={source}
+                          onValueChange={setSource}
+                          options={SOURCES.map((s) => ({ value: s, label: s }))}
                         />
                       </Field>
-                    )}
+                      {source === 'Other' && (
+                        <Field label="Name">
+                          <Input
+                            value={customName}
+                            onChange={(e) => setCustomName(e.target.value)}
+                            placeholder="e.g. Hotels.ng"
+                            maxLength={40}
+                          />
+                        </Field>
+                      )}
+                    </div>
+                    <Field label="Calendar link (.ics)" hint={WHERE_TO_FIND[source]}>
+                      <Input
+                        value={url}
+                        onChange={(e) => setUrl(e.target.value)}
+                        placeholder="https://…"
+                        inputMode="url"
+                      />
+                    </Field>
+                    <Button
+                      className="w-full"
+                      onClick={submit}
+                      isLoading={addFeed.isPending}
+                      loadingText="Checking the calendar…"
+                    >
+                      Connect calendar
+                    </Button>
                   </div>
-                  <Field label="Calendar link (.ics)" hint={WHERE_TO_FIND[source]}>
-                    <Input
-                      value={url}
-                      onChange={(e) => setUrl(e.target.value)}
-                      placeholder="https://…"
-                      inputMode="url"
-                    />
-                  </Field>
-                  <Button
-                    className="w-full"
-                    onClick={submit}
-                    isLoading={addFeed.isPending}
-                    loadingText="Checking the calendar…"
-                  >
-                    Connect calendar
-                  </Button>
-                </div>
-              </section>
-            </>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
+                </section>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <ConfirmDialog
+        open={disconnecting !== null}
+        onOpenChange={(open) => {
+          if (!open) setDisconnecting(null);
+        }}
+        title="Disconnect this calendar?"
+        description={
+          disconnecting
+            ? `${disconnecting.name} (${hostOf(disconnecting.url)}) stops syncing and the ${disconnecting.eventCount} stay${disconnecting.eventCount === 1 ? '' : 's'} it blocked become bookable on Sureground again. You can reconnect it later by pasting the link again.`
+            : ''
+        }
+        confirmLabel="Disconnect"
+        onConfirm={() => disconnecting && removeFeed.mutateAsync(disconnecting.id)}
+        isLoading={removeFeed.isPending}
+      />
+    </>
   );
 }

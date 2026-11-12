@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View } from 'react-native';
+import { Alert, View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Pencil, Plus, Trash2 } from '@sureground/icons/native';
 import {
@@ -186,7 +186,20 @@ export function ApplicationNotesSection({ applicationId }: Props) {
                           <IconButton
                             accessibilityLabel="Delete note"
                             icon={<Trash2 size={14} color={colors.destructive} />}
-                            onPress={() => removeMutation.mutate(note.id)}
+                            onPress={() =>
+                              Alert.alert(
+                                'Delete this note?',
+                                `The note from ${formatDate(note.updatedAt, 'short')} will be deleted. This cannot be undone.`,
+                                [
+                                  { text: 'Cancel', style: 'cancel' },
+                                  {
+                                    text: 'Delete',
+                                    style: 'destructive',
+                                    onPress: () => removeMutation.mutate(note.id),
+                                  },
+                                ]
+                              )
+                            }
                           />
                         </View>
                       </View>
