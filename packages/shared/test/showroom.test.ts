@@ -14,6 +14,7 @@ import {
   showroomMedia,
 } from '../src/showroom/map.ts';
 import type { MediaItem } from '../src/showroom/types.ts';
+import { trustChainLabel } from '../src/utils/trustLabel.ts';
 
 const rental = {
   id: 'r1',
@@ -362,10 +363,114 @@ test('rent and sale carry the trust chain the cards show; malformed steps are dr
   assert.equal(rent?.metCount, 2);
   assert.equal(rent?.totalCount, 4);
   const sale = fromSale({ id: 's', title: 'House', price: 1, trustChain: chain }).trustChain;
-  assert.deepEqual(sale, rent);
+  assert.deepEqual(
+    sale?.steps.map((step) => [step.id, step.met]),
+    rent?.steps.map((step) => [step.id, step.met])
+  );
+  assert.equal(sale?.metCount, 2);
   assert.equal(fromRental({ ...rental, verified: true }).trustChain, undefined);
   assert.equal(fromRental({ ...rental, trustChain: { steps: [] } }).trustChain, undefined);
   assert.equal(fromRental({ ...rental, trustChain: 'yes' }).trustChain, undefined);
+});
+
+const fullChain = {
+  steps: [
+    { id: 'owner', label: 'Verified owner', met: true, detail: '' },
+    {
+      id: 'authority',
+      label: 'Ownership confirmed',
+      met: true,
+      detail: 'Ownership documents were reviewed and approved by Sureground.',
+    },
+    { id: 'property', label: 'Property verified', met: true, detail: '' },
+    {
+      id: 'payment',
+      label: 'Payment protected',
+      met: true,
+      detail: 'Your rent is held by Sureground and only released once you confirm move-in.',
+    },
+  ],
+};
+const summaryOf = (status: string) => ({ status, limits: ['x'] });
+
+test('sale: the trust chain never claims more than the verification summary on the same page', () => {
+  // The reported case: an approved ownership proof, but the checks have not started.
+  const sale = fromSale({
+    id: 's',
+    title: 'House',
+    price: 1,
+    trustChain: fullChain,
+    verificationSummary: summaryOf('SUBMITTED'),
+  });
+  const chain = sale.trustChain!;
+  assert.deepEqual(
+    chain.steps.filter((step) => step.met).map((step) => step.id),
+    ['owner', 'payment']
+  );
+  assert.equal(chain.metCount, 2);
+  assert.equal(trustChainLabel(chain).label, 'Verification in progress');
+  assert.ok(!JSON.stringify(chain).includes('reviewed and approved'));
+
+  for (const status of [
+    'NOT_STARTED',
+    'UNDER_REVIEW',
+    'CONDITIONALLY_APPROVED',
+    'REJECTED',
+    'VERIFICATION_EXPIRED',
+  ]) {
+    const capped = fromSale({
+      id: 's',
+      title: 'x',
+      price: 1,
+      trustChain: fullChain,
+      verificationSummary: summaryOf(status),
+    }).trustChain;
+    assert.equal(capped?.metCount, 2, status);
+  }
+  for (const status of ['EVIDENCE_VERIFIED', 'INVESTMENT_ELIGIBLE']) {
+    const cleared = fromSale({
+      id: 's',
+      title: 'x',
+      price: 1,
+      trustChain: fullChain,
+      verificationSummary: summaryOf(status),
+    }).trustChain;
+    assert.equal(cleared?.metCount, 4, status);
+  }
+  // A list card has no summary: the API's chain stands.
+  assert.equal(
+    fromSale({ id: 's', title: 'x', price: 1, trustChain: fullChain }).trustChain?.metCount,
+    4
+  );
+});
+
+test('sale: payment protection speaks of the deposit and receipt, never rent and move-in', () => {
+  const payment = fromSale({
+    id: 's',
+    title: 'x',
+    price: 1,
+    trustChain: fullChain,
+  }).trustChain?.steps.find((step) => step.id === 'payment');
+  assert.equal(
+    payment?.detail,
+    'Your deposit is held by Sureground and only released to the seller once you confirm receipt.'
+  );
+  const rent = fromRental({ ...rental, trustChain: fullChain }).trustChain?.steps.find(
+    (step) => step.id === 'payment'
+  );
+  assert.match(rent!.detail, /move-in/);
+});
+
+test('rental: a let home is marked, and only on an explicit false', () => {
+  assert.equal(
+    fromRental({ ...rental, acceptingApplications: false }).notAcceptingApplications,
+    true
+  );
+  assert.equal(
+    fromRental({ ...rental, acceptingApplications: true }).notAcceptingApplications,
+    undefined
+  );
+  assert.equal(fromRental(rental).notAcceptingApplications, undefined);
 });
 
 test('commercial: a commercial rental carries only the stated details', () => {

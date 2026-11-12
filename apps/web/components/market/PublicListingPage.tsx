@@ -221,6 +221,7 @@ export async function PublicListingPage({
                   id={listing.id}
                   returnPath={path}
                   underOffer={listing.underOffer}
+                  notAcceptingApplications={listing.notAcceptingApplications}
                   title={listing.title}
                 />
               </div>
@@ -284,7 +285,7 @@ export async function PublicListingPage({
         </div>
         <SimilarListings listingId={listing.id} market={market} />
         {extra}
-        {!listing.underOffer && (
+        {!listing.underOffer && !listing.notAcceptingApplications && (
           <>
             {/* Room for the pinned bar, so it never covers the end of the page. */}
             <div className="h-20" aria-hidden="true" />

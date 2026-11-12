@@ -232,7 +232,7 @@ export async function ShowroomPage({
 
           <SimilarListings listingId={listing.id} market={market} />
           {extra}
-          {!listing.underOffer && (
+          {!listing.underOffer && !listing.notAcceptingApplications && (
             <>
               <div className="h-20" aria-hidden="true" />
               <StickyListingCta
