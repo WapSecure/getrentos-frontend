@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View } from 'react-native';
+import { Alert, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -13,6 +13,7 @@ import {
   useTheme,
   useToast,
 } from '@sureground/ui-native';
+import { approvalOutcomeMessage, type CoApprovalPendingStep } from '@sureground/shared';
 import { qk } from '@/lib/query/keys';
 import {
   deviceTimeZone,
@@ -169,21 +170,70 @@ export function RequestInspection({
   );
 }
 
-// Once on, money is released to the seller only when the buyer and their representative have both approved each step.
-export function CoApprovalCard({ deal }: { deal: Deal }) {
+const CO_APPROVAL_COPY = {
+  // Plot purchases and land resales: each step can release money held for the deal.
+  steps: {
+    on: (name: string) =>
+      `Money is only released to the seller once you and ${name} have both approved each step.`,
+    off: 'Buying from abroad? Require someone you trust in Nigeria to approve each step too, before any money is released to the seller.',
+    representative:
+      'The buyer asked that money is only released with your approval too. Approve a step only once you have seen the document or been on site yourself.',
+  },
+  // Built homes (D11): Sureground holds only the deposit, never the rest of the price.
+  deposit: {
+    on: (name: string) =>
+      `The deposit held under Payment Protection is only released to the seller once you and ${name} have both approved the handover. Sureground does not hold the rest of the price.`,
+    off: 'Buying from abroad? Require someone you trust in Nigeria to approve the handover too, before the deposit held under Payment Protection is released to the seller.',
+    representative:
+      'The buyer asked that the deposit is only released with your approval too. Approve only once you have seen the keys handed over or the document yourself.',
+  },
+} as const;
+
+const humaniseKey = (key: string) => {
+  const words = key.toLowerCase().replace(/_/g, ' ').trim();
+  return words.charAt(0).toUpperCase() + words.slice(1);
+};
+
+/**
+ * Two-person approval on a deal. The buyer turns it on or off (switching off takes 48 hours); the
+ * representative it names gives the second approval here. Once on, money is released to the
+ * seller only when both have approved.
+ */
+export function CoApprovalCard({
+  deal,
+  viewer = 'buyer',
+  moneyScope = 'steps',
+  labelFor = humaniseKey,
+  onApproved,
+}: {
+  deal: Deal;
+  viewer?: 'buyer' | 'representative';
+  /** `deposit` for a built home, where only the held deposit is released. */
+  moneyScope?: 'steps' | 'deposit';
+  labelFor?: (milestoneKey: string) => string;
+  /** After the representative approves, so the caller can refresh what depends on it. */
+  onApproved?: () => void;
+}) {
   const { spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
-  const key = qk.buyerLand.coApproval(deal.kind, deal.id);
+  const isBuyer = viewer === 'buyer';
+  const copy = CO_APPROVAL_COPY[moneyScope];
+  const key = isBuyer
+    ? qk.buyerLand.coApproval(deal.kind, deal.id)
+    : qk.buyerLand.represented(deal.kind, `${deal.id}:co-approval`);
   const q = useQuery({
     queryKey: key,
-    queryFn: () => landBuyerExtrasApi.coApproval(deal),
+    queryFn: () =>
+      isBuyer
+        ? landBuyerExtrasApi.coApproval(deal)
+        : landBuyerExtrasApi.representedCoApproval(deal),
     retry: false,
   });
   const reps = useQuery({
     queryKey: qk.buyerLand.representatives,
     queryFn: landBuyerExtrasApi.representatives,
-    enabled: q.data?.binding === false,
+    enabled: isBuyer && q.data?.binding === false,
   });
   const [rep, setRep] = useState<string | undefined>();
   const done = (message: string) => () => {
@@ -206,12 +256,46 @@ export function CoApprovalCard({ deal }: { deal: Deal }) {
     onSuccess: done('Two-person approval stays on.'),
     onError: fail,
   });
+  const approve = useMutation({
+    mutationFn: async (step: CoApprovalPendingStep): Promise<string> => {
+      // A built home's handover approval also stands for the deposit release, which has its own route.
+      if (step.releasesDeposit && deal.kind === 'sale') {
+        const result = await landBuyerExtrasApi.approveDepositRelease(deal.id);
+        return approvalOutcomeMessage(result.outcome);
+      }
+      await landBuyerExtrasApi.representativeApprove(deal, step.milestoneKey);
+      return 'Your approval is recorded.';
+    },
+    onSuccess: (message) => {
+      qc.invalidateQueries({ queryKey: key });
+      onApproved?.();
+      toast.show(message, 'success');
+    },
+    onError: fail,
+  });
 
   const c = q.data;
   if (!c) return null;
+  // A representative who does not hold the rule has nothing to approve here.
+  if (!isBuyer && !c.binding) return null;
   const approvers = (reps.data ?? []).filter(
     (r) => r.status === 'ACTIVE' && r.scopes.includes('CO_APPROVE')
   );
+  const stepLabel = (step: CoApprovalPendingStep) =>
+    step.releasesDeposit
+      ? `${labelFor(step.milestoneKey)} (releases the deposit)`
+      : labelFor(step.milestoneKey);
+  const confirmApprove = (step: CoApprovalPendingStep) =>
+    Alert.alert(
+      'Give your approval?',
+      step.releasesDeposit
+        ? `“${stepLabel(step)}”. Once the buyer has approved too, the deposit held under Payment Protection is released to the seller. Approve only what you have seen yourself.`
+        : `“${stepLabel(step)}”. Once the buyer has approved too, the step is confirmed. Approve only what you have seen yourself.`,
+      [
+        { text: 'Not yet', style: 'cancel' },
+        { text: 'Approve', onPress: () => approve.mutate(step) },
+      ]
+    );
 
   return (
     <Card style={{ gap: spacing.sm }}>
@@ -219,24 +303,45 @@ export function CoApprovalCard({ deal }: { deal: Deal }) {
         <Text variant="bodyStrong" style={{ flex: 1 }}>
           Two-person approval
         </Text>
-        <Badge label={c.binding ? 'On' : 'Off'} tone={c.binding ? 'success' : 'neutral'} />
+        <Badge
+          label={c.binding ? (c.status === 'DISABLE_PENDING' ? 'Switching off' : 'On') : 'Off'}
+          tone={c.binding ? (c.status === 'DISABLE_PENDING' ? 'warning' : 'success') : 'neutral'}
+        />
       </View>
       {c.binding ? (
         <>
           <Text variant="callout" color="mutedForeground">
-            Money is only released to the seller once you and{' '}
-            {c.representative?.name ?? 'your representative'} have both approved each step.
+            {isBuyer
+              ? copy.on(c.representative?.name ?? 'your representative')
+              : copy.representative}
           </Text>
           {(c.pending ?? []).map((p) => (
-            <Text key={p.milestoneKey} variant="caption" color="mutedForeground">
-              {p.milestoneKey.replace(/_/g, ' ').toLowerCase()}:{' '}
-              {p.buyerApproved ? 'you approved' : 'waiting for you'} ·{' '}
-              {p.representativeApproved
-                ? 'representative approved'
-                : 'waiting for your representative'}
-            </Text>
+            <View key={p.milestoneKey} style={{ gap: spacing.xs }}>
+              <Text variant="callout">{stepLabel(p)}</Text>
+              <Text variant="caption" color="mutedForeground">
+                {isBuyer
+                  ? `${p.buyerApproved ? 'You approved' : 'Waiting for you'} · ${
+                      p.representativeApproved
+                        ? 'representative approved'
+                        : 'waiting for your representative'
+                    }`
+                  : `${p.buyerApproved ? 'The buyer approved' : 'Waiting for the buyer'} · ${
+                      p.representativeApproved ? 'you approved' : 'waiting for you'
+                    }`}
+              </Text>
+              {!isBuyer && !p.representativeApproved ? (
+                <Button
+                  label="Approve"
+                  size="sm"
+                  loading={approve.isPending && approve.variables?.milestoneKey === p.milestoneKey}
+                  disabled={approve.isPending}
+                  onPress={() => confirmApprove(p)}
+                  style={{ alignSelf: 'flex-start' }}
+                />
+              ) : null}
+            </View>
           ))}
-          {c.status === 'DISABLE_PENDING' ? (
+          {!isBuyer ? null : c.status === 'DISABLE_PENDING' ? (
             <>
               <FormAlert
                 tone="warning"
@@ -263,7 +368,7 @@ export function CoApprovalCard({ deal }: { deal: Deal }) {
       ) : approvers.length === 0 ? (
         <>
           <Text variant="callout" color="mutedForeground">
-            First appoint a representative who may approve payments.
+            {copy.off} First appoint a representative who may approve payments.
           </Text>
           <Button
             label="Representatives"
@@ -276,7 +381,7 @@ export function CoApprovalCard({ deal }: { deal: Deal }) {
       ) : (
         <>
           <Text variant="callout" color="mutedForeground">
-            Have someone you trust give the second approval before money is released to the seller.
+            {copy.off}
           </Text>
           <ChipSelect
             options={approvers.map((a) => ({ value: a.id, label: a.name ?? a.email }))}

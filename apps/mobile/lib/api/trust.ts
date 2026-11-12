@@ -191,6 +191,8 @@ export interface SmileLivenessSession {
   /** Smile's v3 API for this environment. */
   apiUrl: string;
   callbackUrl?: string;
+  /** A passport check: the issuing country and document type are bound into the token. */
+  idInfo?: { country: string; idType: string };
 }
 
 export type TrustStatus =

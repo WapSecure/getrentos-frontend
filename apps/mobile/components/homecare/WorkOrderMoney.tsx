@@ -35,6 +35,8 @@ import { BankAccountFields } from '@/components/forms/BankAccountFields';
 import { withStepUpSummary } from '@/lib/stepUp';
 import {
   INCOMPLETE_ACCOUNT_LOOKUP,
+  duplicateFlagsOf,
+  isDuplicateInvoiceRefusal,
   lookupAllowsSave,
   payoutAccountStepUpSummary,
   saveAccountLabel,
@@ -338,6 +340,13 @@ export function InvoicesSection({ w }: { w: WorkOrder }) {
   const [adding, setAdding] = useState(false);
   const [payoutFor, setPayoutFor] = useState<string | null>(null);
   const [reasonFor, setReasonFor] = useState<{ kind: 'reject' | 'void'; id: string } | null>(null);
+  // The API thinks the invoice may already have been approved or paid: it goes ahead only with a reason.
+  const [duplicate, setDuplicate] = useState<{
+    kind: 'approve' | 'pay';
+    id: string;
+    provider?: PaymentProvider;
+    flags: string[];
+  } | null>(null);
   const providers = usePaymentProviders();
   // Kept while the sheet slides away.
   const [payInv, setPayInv] = useState<Invoice | null>(null);
@@ -372,17 +381,23 @@ export function InvoicesSection({ w }: { w: WorkOrder }) {
       id,
       reason,
       provider,
+      acknowledge,
     }: {
       kind: 'submit' | 'approve' | 'reject' | 'void' | 'pay';
       id: string;
       reason?: string;
       provider?: PaymentProvider;
+      /** The reason this is not a duplicate, after the API flagged it. */
+      acknowledge?: string;
     }) => {
+      const ack = acknowledge
+        ? { acknowledgeDuplicate: true as const, reason: acknowledge }
+        : undefined;
       if (kind === 'submit') return homeCareApi.submitInvoice(id);
-      if (kind === 'approve') return homeCareApi.approveInvoice(id);
+      if (kind === 'approve') return homeCareApi.approveInvoice(id, ack);
       if (kind === 'reject') return homeCareApi.rejectInvoice(id, reason!);
       if (kind === 'void') return homeCareApi.voidInvoice(id, reason!);
-      return homeCareApi.payInvoice(id, provider);
+      return homeCareApi.payInvoice(id, provider, ack);
     },
     onMutate: (v) => {
       if (v.kind === 'pay') setProviderError(null);
@@ -404,6 +419,7 @@ export function InvoicesSection({ w }: { w: WorkOrder }) {
       void haptics.success();
       refresh();
       setReasonFor(null);
+      setDuplicate(null);
       toast.show(
         {
           submit: 'Invoice submitted.',
@@ -424,6 +440,19 @@ export function InvoicesSection({ w }: { w: WorkOrder }) {
         return;
       }
       if (v.kind === 'pay') closeSheet();
+      if (
+        (v.kind === 'approve' || v.kind === 'pay') &&
+        !v.acknowledge &&
+        isDuplicateInvoiceRefusal(e)
+      ) {
+        setDuplicate({
+          kind: v.kind,
+          id: v.id,
+          provider: v.provider,
+          flags: duplicateFlagsOf(e).map((f) => f.message),
+        });
+        return;
+      }
       const message = errorMessage(e, 'That didn’t go through.');
       if (v.kind === 'pay' && /payout account/i.test(message)) {
         const inv = invoices.data?.items.find((i) => i.id === v.id);
@@ -575,6 +604,29 @@ export function InvoicesSection({ w }: { w: WorkOrder }) {
         busy={act.isPending}
         onClose={() => setReasonFor(null)}
         onConfirm={(reason) => act.mutate({ kind: reasonFor!.kind, id: reasonFor!.id, reason })}
+      />
+      <ReasonSheet
+        open={!!duplicate}
+        title="This may be a duplicate invoice"
+        hint={[
+          ...(duplicate?.flags.length
+            ? duplicate.flags
+            : ['It looks like an invoice already approved or paid.']),
+          'If you are sure it is not, say why. Your reason is kept on the job record.',
+        ].join('\n')}
+        action={duplicate?.kind === 'pay' ? 'Pay anyway' : 'Approve anyway'}
+        tone="primary"
+        busy={act.isPending}
+        onClose={() => setDuplicate(null)}
+        onConfirm={(reason) =>
+          duplicate &&
+          act.mutate({
+            kind: duplicate.kind,
+            id: duplicate.id,
+            provider: duplicate.provider,
+            acknowledge: reason,
+          })
+        }
       />
       <Sheet open={adding} onClose={() => setAdding(false)} title="Add an invoice">
         {adding ? (

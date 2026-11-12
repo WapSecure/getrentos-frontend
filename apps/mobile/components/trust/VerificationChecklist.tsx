@@ -37,6 +37,7 @@ import {
   type SmileLivenessSession,
 } from '@/lib/api/trust';
 import { liveSelfieSupported } from '@/lib/smileid/liveSelfie';
+import { ConsentGate } from './ConsentGate';
 import { LiveSelfieCheck } from './LiveSelfieCheck';
 import { ApiError, errorMessage } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
@@ -138,7 +139,6 @@ export function VerificationChecklist({
             <CheckRunner
               kind={kind}
               verificationId={v.id}
-              consents={consents.data}
               onDone={() => {
                 setOpened(undefined);
                 refresh();
@@ -248,41 +248,16 @@ const RUNNER_TITLE: Record<CheckKind, string> = {
 function CheckRunner({
   kind,
   verificationId,
-  consents,
   onDone,
 }: {
   kind: CheckKind;
   verificationId: string;
-  consents: TrustConsent[] | undefined;
   onDone: () => void;
 }) {
-  const { spacing } = useTheme();
-  const qc = useQueryClient();
-  const toast = useToast();
-  const [now] = useState(() => Date.now());
   const consentType = CONSENT_FOR[kind];
-  const consented = consentType ? !!activeConsent(consents, consentType, now) : true;
-  const grant = useMutation({
-    mutationFn: (type: ConsentType) => trustApi.grantConsent(type),
-    onSuccess: () => qc.invalidateQueries({ queryKey: qk.trust.consents }),
-    onError: (e) => toast.show(errorMessage(e, 'Could not record your consent.'), 'error'),
-  });
   return (
-    <View style={{ gap: spacing.md }}>
-      {consentType && !consented ? (
-        <View style={{ gap: spacing.sm }}>
-          <Text variant="callout" color="mutedForeground">
-            {CONSENT_COPY[consentType].body}
-          </Text>
-          <Button
-            label="I agree, continue"
-            size="sm"
-            loading={grant.isPending}
-            onPress={() => grant.mutate(consentType)}
-            style={{ alignSelf: 'flex-start' }}
-          />
-        </View>
-      ) : kind === 'identity' ? (
+    <ConsentGate types={consentType ? [consentType] : []}>
+      {kind === 'identity' ? (
         <IdentityForm verificationId={verificationId} onDone={onDone} />
       ) : kind === 'phone' ? (
         <PhoneForm verificationId={verificationId} onDone={onDone} />
@@ -293,7 +268,7 @@ function CheckRunner({
       ) : (
         <DocumentForm verificationId={verificationId} onDone={onDone} />
       )}
-    </View>
+    </ConsentGate>
   );
 }
 

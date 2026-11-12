@@ -21,6 +21,7 @@ import {
 } from '@sureground/icons/native';
 import { Screen } from '@sureground/ui-native';
 import { useTrustItems } from '@/components/account/useTrustItems';
+import { useInvestItems } from '@/components/account/useInvestItems';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
 import { AccountFooter, AccountHeader, AppearanceFooter } from '@/components/account/AccountParts';
@@ -29,8 +30,10 @@ const go = (href: Href) => () => router.push(href);
 
 export default function BuyerAccount() {
   const trustItems = useTrustItems('buyer', { audience: 'sellers' });
+  const investItems = useInvestItems();
 
   const buying: SettingsItem[] = [
+    ...investItems,
     {
       key: 'saved',
       label: 'Saved listings',
