@@ -54,6 +54,7 @@ import {
   type InstalmentInput,
   type UnitTypeInput,
 } from '@/services/developmentsService';
+import { DevelopmentEnquiriesInbox } from './DevelopmentEnquiriesInbox';
 import { DEVELOPMENTS_KEY, STATUS_VARIANT } from './DevelopmentsListView';
 
 const STATE_OPTIONS = NIGERIA_STATES.map((s) => ({ value: s, label: s }));
@@ -153,6 +154,7 @@ export function DevelopmentEditorView({ id }: { id: string }) {
         }
       />
       <StatusCard d={d} run={run} />
+      <DevelopmentEnquiriesInbox developmentId={d.id} />
       <DetailsCard key={`details-${d.updatedAt}`} d={d} run={run} />
       <EvidenceCard key={`evidence-${d.updatedAt}`} d={d} run={run} />
       <DocumentsCard d={d} run={run} />

@@ -22,6 +22,7 @@ import {
 } from '@/services/publicMarketService';
 import { unwrap, type Paginated } from '@/lib/apiHelpers';
 import { PUBLIC_MARKET_PAGE_SIZE } from '@/lib/publicListingMap';
+import { BuyMarketTabs } from '@/components/showroom/BuyMarketTabs';
 import { PROPERTY_TYPE_OPTIONS } from '@/lib/propertyTypes';
 import { SaveListingButton } from './SaveListingButton';
 import { ListingComparisonDialog } from './ListingComparisonDialog';
@@ -34,6 +35,7 @@ import {
 } from '@/components/discovery/MapDiscoveryView';
 import { formatAreaParam, parseAreaParam, parseView, type MapArea } from '@/lib/mapArea';
 import { urlParam, useSyncUrlState } from '@/hooks/useUrlState';
+import { useTrackSearch } from '@/hooks/useTrackSearch';
 import { CollectionsStrip } from '@/components/collections/CollectionsStrip';
 import { listingPath } from '@/lib/listingSlug';
 
@@ -241,26 +243,26 @@ export const PublicMarketBrowser = ({
   const [compared, setCompared] = useState<PublicListingCard[]>([]);
   const [comparisonOpen, setComparisonOpen] = useState(false);
 
-  useSyncUrlState(
-    {
-      q: debouncedSearch,
-      minPrice: refine.minPrice,
-      maxPrice: refine.maxPrice,
-      beds: refine.bedrooms,
-      baths: refine.bathrooms,
-      type: refine.propertyType,
-      verified: refine.verifiedOnly,
-      furnished: market === 'rent' && refine.furnished,
-      pets: market === 'rent' && refine.petsAllowed,
-      monthly: market === 'rent' && refine.monthlyPayment,
-      sort,
-      page,
-      view,
-      area: area ? formatAreaParam(area) : undefined,
-      selected: view === 'map' ? selectedId : undefined,
-    },
-    { sort: SORTS[market][0].value, page: 1, view: 'grid' }
-  );
+  const urlState = {
+    q: debouncedSearch,
+    minPrice: refine.minPrice,
+    maxPrice: refine.maxPrice,
+    beds: refine.bedrooms,
+    baths: refine.bathrooms,
+    type: refine.propertyType,
+    verified: refine.verifiedOnly,
+    furnished: market === 'rent' && refine.furnished,
+    pets: market === 'rent' && refine.petsAllowed,
+    monthly: market === 'rent' && refine.monthlyPayment,
+    sort,
+    page,
+    view,
+    area: area ? formatAreaParam(area) : undefined,
+    selected: view === 'map' ? selectedId : undefined,
+  };
+  const urlDefaults = { sort: SORTS[market][0].value, page: 1, view: 'grid' };
+  useSyncUrlState(urlState, urlDefaults);
+  useTrackSearch(market, `${market}_search`, urlState, urlDefaults);
 
   const activeCount = countRefinements(refine);
   const priceRangeInvalid =
@@ -348,6 +350,7 @@ export const PublicMarketBrowser = ({
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      {market === 'sale' && !estateFromUrl && <BuyMarketTabs current="homes" />}
       <header className="max-w-3xl py-6 sm:py-10">
         <h1 className="text-4xl font-semibold tracking-[-0.04em] text-foreground sm:text-5xl">
           {market === 'rent' ? 'Homes to rent' : 'Homes for sale'}

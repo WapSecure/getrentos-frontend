@@ -2,6 +2,8 @@ import { createContext, useCallback, useContext, useMemo, useState, type ReactNo
 import { authApi, type OtpMethod } from '../api/auth';
 import type { SignupRoleId } from '../roles';
 import { useAuth } from './AuthProvider';
+import { track } from '../analytics';
+import { trackShowroom } from '../showroomAnalytics';
 
 type Method = 'email' | 'phone';
 
@@ -51,6 +53,12 @@ export function SignupProvider({ children }: { children: ReactNode }) {
     setDraft(next);
     setOtpReference(reference);
     setSelectedRoles(['renter']);
+    track('sign_up_started', { method: next.otpMethod });
+    trackShowroom({
+      name: 'signup_start',
+      surface: 'app_signup',
+      props: { method: next.otpMethod },
+    });
   }, []);
 
   const verify = useCallback(
@@ -97,6 +105,9 @@ export function SignupProvider({ children }: { children: ReactNode }) {
       reference: otpReference,
       referralCode: draft.referralCode || undefined,
     });
+    const props = { method: draft.method, role: selectedRoles[0] ?? 'renter' } as const;
+    track('sign_up_completed', props);
+    trackShowroom({ name: 'signup_complete', surface: 'app_signup', props });
     applyExternalSession(session);
   }, [draft, otpReference, selectedRoles, applyExternalSession]);
 

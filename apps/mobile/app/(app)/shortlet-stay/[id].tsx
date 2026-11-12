@@ -1,4 +1,5 @@
 import { usePaystackCheckout } from '@/hooks/usePaystackCheckout';
+import { trackShowroom } from '@/lib/showroomAnalytics';
 import { useState } from 'react';
 import { Alert, RefreshControl, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -90,6 +91,12 @@ export default function StayDetail() {
     onMutate: () => setProviderError(null),
     onSuccess: async (res) => {
       closePay();
+      trackShowroom({
+        name: 'payment_started',
+        market: 'shortlet',
+        surface: 'app_stay',
+        props: { kind: 'booking' },
+      });
       if (res.authorizationUrl) {
         await checkout(res.authorizationUrl, res.reference);
       } else if (res.paymentStatus === 'PAID') {
@@ -377,7 +384,7 @@ export default function StayDetail() {
             </View>
             <Text variant="caption" color={paid ? 'success' : 'mutedForeground'}>
               {b.paymentStatus === 'PAID'
-                ? `Paid${b.paidAt ? ` ${formatDate(b.paidAt, 'short')}` : ''} · held by Sureground until you check in`
+                ? `Paid${b.paidAt ? ` ${formatDate(b.paidAt, 'short')}` : ''} · held by Sureground until after check-in`
                 : b.paymentStatus === 'REFUNDED'
                   ? 'Refunded'
                   : b.paymentStatus === 'PROCESSING'

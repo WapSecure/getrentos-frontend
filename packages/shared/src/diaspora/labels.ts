@@ -6,6 +6,8 @@ import type {
   InvestmentHorizon,
   InvestorPropertyType,
   OwnershipStructure,
+  SummaryChannel,
+  SummaryFrequency,
 } from './types';
 import type { StatusTone } from '../utils/landTrust';
 
@@ -43,6 +45,17 @@ export const OWNERSHIP_LABELS: Record<OwnershipStructure, string> = {
   INDIVIDUAL: 'In my own name',
   JOINT: 'Jointly with someone else',
   COMPANY: 'Through a company',
+};
+
+export const SUMMARY_FREQUENCY_LABELS: Record<SummaryFrequency, string> = {
+  NONE: 'No summary',
+  WEEKLY: 'Weekly, on Monday',
+  MONTHLY: 'Monthly, on the 1st',
+};
+
+export const SUMMARY_CHANNEL_LABELS: Record<SummaryChannel, string> = {
+  EMAIL: 'Email',
+  PUSH: 'Push notification',
 };
 
 export const CURRENCY_LABELS: Record<DisplayCurrency, string> = {

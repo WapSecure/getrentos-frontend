@@ -161,6 +161,14 @@ export type InvestmentHorizon = (typeof INVESTMENT_HORIZONS)[number];
 export const OWNERSHIP_STRUCTURES = ['INDIVIDUAL', 'JOINT', 'COMPANY'] as const;
 export type OwnershipStructure = (typeof OWNERSHIP_STRUCTURES)[number];
 
+/** DIA-32: a summary at 08:00 in the investor's own zone, Monday (weekly) or the 1st (monthly). */
+export const SUMMARY_FREQUENCIES = ['NONE', 'WEEKLY', 'MONTHLY'] as const;
+export type SummaryFrequency = (typeof SUMMARY_FREQUENCIES)[number];
+
+/** Where the summary goes besides the notifications list, which always has it. */
+export const SUMMARY_CHANNELS = ['EMAIL', 'PUSH'] as const;
+export type SummaryChannel = (typeof SUMMARY_CHANNELS)[number];
+
 /** PUT merges: send only the fields being saved. Country codes are upper-case alpha-2. */
 export interface InvestorProfileInput {
   /** ISO 3166-1 alpha-2, e.g. GB. */
@@ -177,6 +185,9 @@ export interface InvestorProfileInput {
   budgetBand?: BudgetBand;
   horizon?: InvestmentHorizon;
   ownershipStructure?: OwnershipStructure;
+  summaryFrequency?: SummaryFrequency;
+  /** May be empty: the summary then shows only in notifications. */
+  summaryChannels?: SummaryChannel[];
 }
 
 export type InvestorProfileField =
@@ -200,6 +211,9 @@ export interface InvestorProfile {
   budgetBand: BudgetBand | null;
   horizon: InvestmentHorizon | null;
   ownershipStructure: OwnershipStructure | null;
+  /** Older API builds leave these out: read as NONE and EMAIL. */
+  summaryFrequency?: SummaryFrequency;
+  summaryChannels?: SummaryChannel[];
   /** Required fields still empty. */
   missingFields: string[];
   /** Set once the profile is complete and the current risk statement is accepted. */
