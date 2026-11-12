@@ -320,130 +320,153 @@ function LevelEditor({
         />
       </div>
 
-      {image && (
-        <div>
-          {/* Sized to the drawing itself, so a click at 30% across is 30% across the plan. */}
-          <button
-            type="button"
-            onClick={place}
-            disabled={!placing}
-            aria-label={
-              placing
-                ? 'Click the plan where this room is'
-                : `Floor plan for ${draft.levelName.trim() || 'this level'}`
-            }
-            className={`relative inline-block max-w-full rounded border border-border bg-white align-top focus:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-default ${placing ? 'cursor-crosshair ring-2 ring-primary' : ''}`}
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element -- signed storage URL */}
-            <img
-              src={image.url}
-              alt=""
-              draggable={false}
-              className="block h-auto max-h-80 w-auto max-w-full"
-            />
-            <PlanMarkers rooms={draft.rooms} />
-          </button>
-          <p className="mt-1 text-xs text-muted-foreground" aria-live="polite">
-            {placing
-              ? `Click the plan where ${draft.rooms.find((r) => r.key === placing)?.name.trim() || 'this room'} is.`
-              : 'Use “Place on plan” on a room, then click the plan.'}
-          </p>
-        </div>
-      )}
+      {/* On wide screens the room list sits beside the plan, so both stay in view while placing rooms. */}
+      <div
+        className={
+          image
+            ? 'space-y-3 lg:grid lg:grid-cols-2 lg:items-start lg:gap-4 lg:space-y-0'
+            : 'space-y-3'
+        }
+      >
+        {image && (
+          <div className="lg:sticky lg:top-0">
+            {/* Sized to the drawing itself, so a click at 30% across is 30% across the plan. */}
+            <button
+              type="button"
+              onClick={place}
+              disabled={!placing}
+              aria-label={
+                placing
+                  ? 'Click the plan where this room is'
+                  : `Floor plan for ${draft.levelName.trim() || 'this level'}`
+              }
+              className={`relative inline-block max-w-full rounded border border-border bg-white align-top focus:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-default ${placing ? 'cursor-crosshair ring-2 ring-primary' : ''}`}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element -- signed storage URL */}
+              <img
+                src={image.url}
+                alt=""
+                draggable={false}
+                className="block h-auto max-h-80 w-auto max-w-full"
+              />
+              <PlanMarkers rooms={draft.rooms} />
+            </button>
+            <p className="mt-1 text-xs text-muted-foreground" aria-live="polite">
+              {placing
+                ? `Click the plan where ${draft.rooms.find((r) => r.key === placing)?.name.trim() || 'this room'} is.`
+                : 'Use “Place on plan” on a room, then click the plan.'}
+            </p>
+          </div>
+        )}
 
-      <ol className="space-y-2">
-        {draft.rooms.map((room, i) => (
-          <li key={room.key} className="space-y-2 rounded border border-border bg-background p-2">
-            <div className="flex items-center gap-2">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
-                {i + 1}
-              </span>
-              <Input
-                type="text"
-                value={room.name}
-                maxLength={NAME_MAX}
-                onChange={(e) => patchRoom(room.key, { name: e.target.value })}
-                placeholder="Room name, e.g. Bedroom 1"
-                aria-label={`Name of room ${i + 1}`}
-              />
-              <Button
-                size="sm"
-                variant="ghost"
-                aria-label={`Remove room ${i + 1}`}
-                onClick={() =>
-                  setDraft((d) => ({ ...d, rooms: d.rooms.filter((r) => r.key !== room.key) }))
-                }
+        <div className="space-y-2">
+          <ol className="space-y-2">
+            {draft.rooms.map((room, i) => (
+              <li
+                key={room.key}
+                className="space-y-2 rounded border border-border bg-background p-2"
               >
-                <Trash2 className="h-4 w-4" aria-hidden="true" />
-              </Button>
-            </div>
-            <div className="grid gap-2 sm:grid-cols-[1fr_1fr_2fr]">
-              <Input
-                type="text"
-                inputMode="decimal"
-                value={room.width}
-                onChange={(e) => patchRoom(room.key, { width: e.target.value })}
-                placeholder="Width (m)"
-                aria-label={`Width of room ${i + 1} in metres`}
-              />
-              <Input
-                type="text"
-                inputMode="decimal"
-                value={room.length}
-                onChange={(e) => patchRoom(room.key, { length: e.target.value })}
-                placeholder="Length (m)"
-                aria-label={`Length of room ${i + 1} in metres`}
-              />
-              <Select
-                value={room.photoKey}
-                onValueChange={(value) => patchRoom(room.key, { photoKey: value })}
-                options={photoOptions}
-                ariaLabel={`Photo of room ${i + 1}`}
-              />
-            </div>
-            {image && (
-              <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                <Button
-                  size="sm"
-                  variant={placing === room.key ? 'primary' : 'outline'}
-                  aria-pressed={placing === room.key}
-                  onClick={() => setPlacing(placing === room.key ? null : room.key)}
-                >
-                  <MapPin className="mr-1 h-4 w-4" aria-hidden="true" />
-                  {room.x !== undefined ? 'Move on plan' : 'Place on plan'}
-                </Button>
-                {room.x !== undefined && (
+                <div className="flex items-center gap-2">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+                    {i + 1}
+                  </span>
+                  <Input
+                    type="text"
+                    value={room.name}
+                    maxLength={NAME_MAX}
+                    onChange={(e) => patchRoom(room.key, { name: e.target.value })}
+                    placeholder="Room name, e.g. Bedroom 1"
+                    aria-label={`Name of room ${i + 1}`}
+                  />
                   <Button
                     size="sm"
                     variant="ghost"
-                    onClick={() => patchRoom(room.key, { x: undefined, y: undefined })}
+                    aria-label={`Remove room ${i + 1}`}
+                    onClick={() =>
+                      setDraft((d) => ({ ...d, rooms: d.rooms.filter((r) => r.key !== room.key) }))
+                    }
                   >
-                    Remove from plan
+                    <Trash2 className="h-4 w-4" aria-hidden="true" />
                   </Button>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <label className="space-y-1">
+                    <span className="block text-xs text-muted-foreground">Width (m)</span>
+                    <Input
+                      type="text"
+                      inputMode="decimal"
+                      value={room.width}
+                      onChange={(e) => patchRoom(room.key, { width: e.target.value })}
+                      placeholder="e.g. 4.2"
+                      aria-label={`Width of room ${i + 1} in metres`}
+                    />
+                  </label>
+                  <label className="space-y-1">
+                    <span className="block text-xs text-muted-foreground">Length (m)</span>
+                    <Input
+                      type="text"
+                      inputMode="decimal"
+                      value={room.length}
+                      onChange={(e) => patchRoom(room.key, { length: e.target.value })}
+                      placeholder="e.g. 3.8"
+                      aria-label={`Length of room ${i + 1} in metres`}
+                    />
+                  </label>
+                  <div className="col-span-2 space-y-1">
+                    <span className="block text-xs text-muted-foreground">Photo of this room</span>
+                    <Select
+                      value={room.photoKey}
+                      onValueChange={(value) => patchRoom(room.key, { photoKey: value })}
+                      options={photoOptions}
+                      ariaLabel={`Photo of room ${i + 1}`}
+                    />
+                  </div>
+                </div>
+                {image && (
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                    <Button
+                      size="sm"
+                      variant={placing === room.key ? 'primary' : 'outline'}
+                      aria-pressed={placing === room.key}
+                      onClick={() => setPlacing(placing === room.key ? null : room.key)}
+                    >
+                      <MapPin className="mr-1 h-4 w-4" aria-hidden="true" />
+                      {room.x !== undefined ? 'Move on plan' : 'Place on plan'}
+                    </Button>
+                    {room.x !== undefined && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => patchRoom(room.key, { x: undefined, y: undefined })}
+                      >
+                        Remove from plan
+                      </Button>
+                    )}
+                  </div>
                 )}
-              </div>
-            )}
-          </li>
-        ))}
-      </ol>
+              </li>
+            ))}
+          </ol>
 
-      {draft.rooms.length < MAX_ROOMS && (
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={() =>
-            setDraft((d) => ({
-              ...d,
-              rooms: [
-                ...d.rooms,
-                { key: nextKey(), name: '', width: '', length: '', photoKey: '' },
-              ],
-            }))
-          }
-        >
-          <Plus className="mr-1 h-4 w-4" aria-hidden="true" /> Add room
-        </Button>
-      )}
+          {draft.rooms.length < MAX_ROOMS && (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() =>
+                setDraft((d) => ({
+                  ...d,
+                  rooms: [
+                    ...d.rooms,
+                    { key: nextKey(), name: '', width: '', length: '', photoKey: '' },
+                  ],
+                }))
+              }
+            >
+              <Plus className="mr-1 h-4 w-4" aria-hidden="true" /> Add room
+            </Button>
+          )}
+        </div>
+      </div>
 
       {losesCheck && (
         <p className="text-xs text-warning">
