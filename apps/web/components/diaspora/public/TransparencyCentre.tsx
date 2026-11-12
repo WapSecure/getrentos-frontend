@@ -3,8 +3,9 @@ import type { ReactNode } from 'react';
 import { CheckCircle2, Info, XCircle } from '@sureground/icons';
 import { VERIFICATION_LIMITS_FALLBACK } from '@sureground/shared';
 import { Badge } from '@sureground/ui/Badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@sureground/ui/Card';
 import { DisclosureList } from '@sureground/ui/Disclosure';
+import { Container } from '@/components/marketing/Container';
+import { PageHero } from '@/components/marketing/PageHero';
 import { ROUTES } from '@/lib/constants/auth';
 import { DIASPORA_ROUTES } from '@/lib/constants/diasporaRoutes';
 import { signInThen } from '@/lib/constants/landBuyerRoutes';
@@ -29,11 +30,14 @@ import {
 const PointList = ({ points, tone }: { points: string[]; tone: 'yes' | 'no' | 'info' }) => {
   const Icon = tone === 'yes' ? CheckCircle2 : tone === 'no' ? XCircle : Info;
   const colour =
-    tone === 'yes' ? 'text-success' : tone === 'no' ? 'text-muted-foreground' : 'text-primary';
+    tone === 'yes' ? 'text-success' : tone === 'no' ? 'text-muted-foreground' : 'text-foreground';
   return (
     <ul className="space-y-3">
       {points.map((point) => (
-        <li key={point} className="flex gap-3 text-sm leading-relaxed text-muted-foreground">
+        <li
+          key={point}
+          className="flex gap-3 text-[0.9375rem] leading-relaxed text-muted-foreground"
+        >
           <Icon className={`mt-0.5 h-4 w-4 shrink-0 ${colour}`} aria-hidden="true" />
           <span>{point}</span>
         </li>
@@ -44,35 +48,38 @@ const PointList = ({ points, tone }: { points: string[]; tone: 'yes' | 'no' | 'i
 
 // Server-rendered like the Diaspora Invest page: plain markup that reads without JavaScript.
 
-const linkClass = 'font-medium text-primary hover:underline';
+const linkClass = 'font-medium text-foreground underline underline-offset-4';
 
-/** One section; `flush` sits a list straight under the header, edge to edge, as the FAQ does. */
+/** One ruled section: the title on the left, its content on the right on wide screens. */
 const SectionCard = ({
   section,
-  flush = false,
   children,
 }: {
   section: TransparencySection;
-  flush?: boolean;
   children: ReactNode;
 }) => (
-  <section id={section.id} aria-label={section.title} className="scroll-mt-24">
-    <Card>
-      <CardHeader>
-        <CardTitle as="h2">{section.title}</CardTitle>
-        {section.description && <CardDescription>{section.description}</CardDescription>}
-      </CardHeader>
-      {flush ? (
-        <div className="mt-4 border-t border-border">{children}</div>
-      ) : (
-        <CardContent>{children}</CardContent>
+  <section
+    id={section.id}
+    aria-labelledby={`${section.id}-title`}
+    className="grid scroll-mt-24 gap-6 border-t border-border py-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] md:gap-16"
+  >
+    <div className="min-w-0">
+      <h2
+        id={`${section.id}-title`}
+        className="font-display text-[1.75rem] leading-tight font-normal text-balance"
+      >
+        {section.title}
+      </h2>
+      {section.description && (
+        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{section.description}</p>
       )}
-    </Card>
+    </div>
+    <div className="min-w-0">{children}</div>
   </section>
 );
 
 const Subheading = ({ children }: { children: ReactNode }) => (
-  <h3 className="mb-3 text-sm font-semibold text-foreground">{children}</h3>
+  <h3 className="label-caps mb-4 text-foreground">{children}</h3>
 );
 
 const ORDER: TransparencySection[] = [
@@ -90,18 +97,16 @@ const ORDER: TransparencySection[] = [
 
 /** DIA-02: how Sureground works, who is responsible for what, and what is still open. */
 export const TransparencyCentre = () => (
-  <div className="px-4 pb-20 pt-28 md:pt-32">
-    <div className="mx-auto max-w-3xl">
-      <header>
-        <p className="mb-3 text-sm font-semibold text-primary">
-          <Link href={DIASPORA_ROUTES.PUBLIC} className="hover:underline">
-            Sureground Diaspora Invest
-          </Link>
-        </p>
-        <h1 className="text-3xl font-bold tracking-[-0.02em] text-foreground sm:text-4xl">
-          Transparency centre
-        </h1>
-        <p className="mt-4 text-base leading-relaxed text-muted-foreground md:text-lg">
+  <>
+    <PageHero
+      eyebrow={
+        <Link href={DIASPORA_ROUTES.PUBLIC} className="hover:text-foreground">
+          Sureground Diaspora Invest
+        </Link>
+      }
+      title="Transparency centre"
+      lead={
+        <>
           How Sureground works, who is responsible for what, what you pay, how refunds and
           complaints work, and what is not yet decided. It does not replace our{' '}
           <Link href="/terms" className={linkClass}>
@@ -112,35 +117,38 @@ export const TransparencyCentre = () => (
             Privacy policy
           </Link>
           .
-        </p>
-        <div className="mt-5 flex flex-wrap items-center gap-2">
-          <Badge variant="warning">Draft: under legal review</Badge>
-          <span className="text-xs text-muted-foreground">
-            The wording may change before Diaspora Invest launches.
-          </span>
-        </div>
-        <nav aria-label="On this page" className="mt-8">
-          <ul className="flex flex-wrap gap-2">
-            {ORDER.map((section) => (
-              <li key={section.id}>
-                <a
-                  href={`#${section.id}`}
-                  className="inline-flex min-h-9 items-center rounded-md border border-border px-3 text-xs font-medium text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground"
-                >
-                  {section.title}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      </header>
+        </>
+      }
+    >
+      <div className="mt-6 flex flex-wrap items-center gap-3">
+        <Badge variant="warning">Draft: under legal review</Badge>
+        <span className="text-sm text-muted-foreground">
+          The wording may change before Diaspora Invest launches.
+        </span>
+      </div>
+      <nav aria-label="On this page" className="mt-10">
+        <ul className="flex flex-wrap gap-x-6 gap-y-3">
+          {ORDER.map((section) => (
+            <li key={section.id}>
+              <a
+                href={`#${section.id}`}
+                className="label-caps border-b border-foreground/30 pb-1 text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
+              >
+                {section.title}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </PageHero>
 
-      <div className="mt-10 space-y-6">
+    <Container className="pb-20 md:pb-28">
+      <div className="border-b border-border">
         <SectionCard section={S.role}>
           <PointList points={ROLE_POINTS} tone="info" />
         </SectionCard>
 
-        <SectionCard section={S.parties} flush>
+        <SectionCard section={S.parties}>
           <DisclosureList
             items={THIRD_PARTIES.map((party) => ({
               id: party.title,
@@ -182,7 +190,7 @@ export const TransparencyCentre = () => (
         </SectionCard>
 
         <SectionCard section={S.complaints}>
-          <div className="space-y-3 text-sm leading-relaxed text-muted-foreground">
+          <div className="space-y-3 text-[0.9375rem] leading-relaxed text-muted-foreground">
             <p>
               Tell us from your account, through{' '}
               <Link href={signInThen(ROUTES.BUYER_HELP)} className={linkClass}>
@@ -216,7 +224,7 @@ export const TransparencyCentre = () => (
         </SectionCard>
 
         <SectionCard section={S.privacy}>
-          <div className="space-y-3 text-sm leading-relaxed text-muted-foreground">
+          <div className="space-y-3 text-[0.9375rem] leading-relaxed text-muted-foreground">
             <p>
               {TRANSPARENCY[4].body} Identity documents and selfies are sent to Smile ID for
               checking.
@@ -238,6 +246,6 @@ export const TransparencyCentre = () => (
           <PointList points={UNDECIDED_POINTS} tone="info" />
         </SectionCard>
       </div>
-    </div>
-  </div>
+    </Container>
+  </>
 );
