@@ -9,10 +9,8 @@ import {
   Badge,
   Button,
   Card,
-  Divider,
   EmptyState,
   IconButton,
-  Price,
   QueryState,
   Skeleton,
   Text,
@@ -28,6 +26,7 @@ import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 import { planRefusal, retryUnlessPlanGate } from '@/lib/api/estateGate';
 import { StatementExplainer } from '@/components/landlord/StatementExplainer';
+import { OwnerStatementTotals } from '@/components/landlord/OwnerStatementTotals';
 import { ProUpsell } from '@/components/estate/governance/ProUpsell';
 
 export default function LandlordOwnerStatements() {
@@ -191,20 +190,7 @@ function StatementCard({
           <Badge label={s.payoutStatus} tone={PAYOUT_TONE[s.payoutStatus]} />
         </View>
 
-        <View style={{ gap: 4 }}>
-          <Line label="Gross income" amount={s.grossIncome} />
-          <Line label="Expenses" amount={-s.totalExpenses} />
-          <Line label="Management fee" amount={-s.managementFee} />
-          <Divider />
-          <View
-            style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
-          >
-            <Text variant="callout" style={{ fontWeight: '700' }}>
-              Net payout
-            </Text>
-            <Price amount={s.netPayout} variant="bodyStrong" />
-          </View>
-        </View>
+        <OwnerStatementTotals statement={s} />
 
         {s.paidAt ? (
           <Text variant="caption" color="mutedForeground">
@@ -244,16 +230,5 @@ function StatementCard({
         ) : null}
       </View>
     </Card>
-  );
-}
-
-function Line({ label, amount }: { label: string; amount: number }) {
-  return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-      <Text variant="caption" color="mutedForeground">
-        {label}
-      </Text>
-      <Price amount={amount} variant="caption" />
-    </View>
   );
 }

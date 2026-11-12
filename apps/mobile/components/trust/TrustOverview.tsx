@@ -52,10 +52,13 @@ export function TrustOverview({
   portal,
   onAction,
   moreDetails,
+  identityExtra,
 }: {
   portal: TrustPortal;
   onAction: (key: TrustRequirementKey) => void;
   moreDetails?: ReactNode;
+  /** A row under the identity summary, e.g. the identity checks for investing from abroad. */
+  identityExtra?: ReactNode;
 }) {
   const { colors, spacing } = useTheme();
   const [open, setOpen] = useState(false);
@@ -102,6 +105,7 @@ export function TrustOverview({
                 </Text>
               ) : null}
             </View>
+            {identityExtra}
             <Divider />
             <View style={{ padding: spacing.lg, gap: spacing.xs }}>
               <Text variant="caption" color="mutedForeground">

@@ -47,10 +47,11 @@ import {
 import { qk } from '@/lib/query/keys';
 import { homeCareApi, type WorkOrder } from '@/lib/api/homeCare';
 import { errorMessage } from '@/lib/api/client';
-import { capturePhoto, pickPhotos } from '@/lib/filePicker';
+import { capturePhoto, pickDocument, pickPhotos } from '@/lib/filePicker';
 import { formatDate, formatNaira } from '@/lib/format';
 import type { PickedFile } from '@/lib/api/documents';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
+import { FilePickRow } from '@/components/forms/FilePickRow';
 import { StarRating } from '@/components/reviews/StarRating';
 
 const PHOTO_STAGE_LABELS: Record<WorkOrderPhotoStage, string> = {
@@ -132,7 +133,13 @@ function EvidenceBody({ w, canRate }: { w: WorkOrder; canRate: boolean }) {
           />
         ) : null}
         {stages.map((stage, i) => (
-          <StageRow key={stage.key} stage={stage} state={states[i]} zone={zone} />
+          <StageRow
+            key={stage.key}
+            workOrderId={w.id}
+            stage={stage}
+            state={states[i]}
+            zone={zone}
+          />
         ))}
         {w.status !== 'CANCELLED' ? <PhotoForm workOrderId={w.id} /> : null}
         {canRate && w.status === 'RESOLVED' && !feedbackDone ? (
@@ -144,10 +151,12 @@ function EvidenceBody({ w, canRate }: { w: WorkOrder; canRate: boolean }) {
 }
 
 function StageRow({
+  workOrderId,
   stage,
   state,
   zone,
 }: {
+  workOrderId: string;
   stage: EvidenceStage;
   state: EvidenceTimelineState;
   zone: string | null;
@@ -192,7 +201,84 @@ function StageRow({
           </Text>
         ) : null}
         <StageItems stage={stage} />
+        <AttachDocumentForm key={stage.key} workOrderId={workOrderId} stage={stage} />
       </View>
+    </View>
+  );
+}
+
+/** What a document can be attached to on this stage: its quotes or its invoices. */
+function documentTargets(stage: EvidenceStage): { value: string; label: string }[] {
+  if (stage.key === 'QUOTE') {
+    return ((stage.items ?? []) as EvidenceQuote[]).map((q) => ({
+      value: q.id,
+      label: `${q.vendor ?? 'Vendor'} · ${formatNaira(q.amount)}`,
+    }));
+  }
+  if (stage.key === 'INVOICE') {
+    return ((stage.items ?? []) as EvidenceInvoice[]).map((i) => ({
+      value: i.id,
+      label: `${i.vendor} · ${i.invoiceNumber ?? formatNaira(i.amount)}`,
+    }));
+  }
+  return [];
+}
+
+/** Owner or manager adds the paper behind a quote or an invoice, as on web. */
+function AttachDocumentForm({ workOrderId, stage }: { workOrderId: string; stage: EvidenceStage }) {
+  const { spacing } = useTheme();
+  const qc = useQueryClient();
+  const toast = useToast();
+  const targets = documentTargets(stage);
+  const [targetId, setTargetId] = useState(targets[0]?.value ?? '');
+  const [file, setFile] = useState<PickedFile | null>(null);
+  const noun = stage.key === 'QUOTE' ? 'quote' : 'invoice';
+  const attach = useMutation({
+    mutationFn: (picked: PickedFile) =>
+      homeCareApi.addDocument(
+        workOrderId,
+        stage.key === 'QUOTE' ? { quoteId: targetId } : { invoiceId: targetId },
+        picked
+      ),
+    onSuccess: async () => {
+      setFile(null);
+      await qc.invalidateQueries({ queryKey: qk.homeCare.evidence(workOrderId) });
+      toast.show(`Document added to the ${noun}.`, 'success');
+    },
+    onError: (e) => toast.show(errorMessage(e, 'Could not add the document.'), 'error'),
+  });
+  if (!targets.length) return null;
+
+  return (
+    <View style={{ gap: spacing.xs, marginTop: spacing.xs }}>
+      {targets.length > 1 ? (
+        <ChipSelect
+          label={`Which ${noun}`}
+          options={targets}
+          value={targetId}
+          onChange={setTargetId}
+          disabled={attach.isPending}
+          scroll
+        />
+      ) : null}
+      <FilePickRow
+        label={`Add the ${noun} document`}
+        file={file}
+        emptyText="A PDF or a photo"
+        onPick={async () => setFile(await pickDocument())}
+        onClear={() => setFile(null)}
+      />
+      {file ? (
+        <Button
+          label="Attach"
+          variant="secondary"
+          size="sm"
+          fullWidth={false}
+          loading={attach.isPending}
+          disabled={attach.isPending}
+          onPress={() => attach.mutate(file)}
+        />
+      ) : null}
     </View>
   );
 }

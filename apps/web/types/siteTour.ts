@@ -1,12 +1,8 @@
 /** Mirrors `land-site-tour.service.ts`: one shape for video tours of land and of built homes. */
 
-export type SiteTourStatus =
-  | 'REQUESTED'
-  | 'PROPOSED'
-  | 'SCHEDULED'
-  | 'COMPLETED'
-  | 'CANCELLED'
-  | 'HOST_NO_SHOW';
+import type { SiteTourRecording, SiteTourStatus } from '@sureground/shared';
+
+export type { SiteTourRecording, SiteTourStatus } from '@sureground/shared';
 
 /** Which API a screen talks to: the land routes (behind the land rollout) or the general ones. */
 export type TourScope = 'land' | 'all';
@@ -18,17 +14,6 @@ export interface SiteTourSlot {
   at: string;
   /** In the viewer's zone (`timeZone`). */
   local: string;
-}
-
-export interface SiteTourRecording {
-  requesterConsentedAt: string | null;
-  hostConsentedAt: string | null;
-  bothConsented: boolean;
-  /** True only when the call will actually let the host record. */
-  recordingEnabled: boolean;
-  /** Recording is switched on for this tour's call at all. */
-  recordingAvailable: boolean;
-  hasRecording: boolean;
 }
 
 export interface SiteTour {

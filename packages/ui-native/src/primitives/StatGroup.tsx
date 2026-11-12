@@ -16,6 +16,8 @@ export interface StatGroupItem {
   onPress?: () => void;
   /** Draws attention to a figure that needs action (overdue rent), without colouring the value. */
   attention?: boolean;
+  /** Extra content under the subtitle, such as an indicative foreign-currency amount. */
+  supplement?: ReactNode;
 }
 
 export interface StatGroupProps {
@@ -85,6 +87,7 @@ function Figure({ item, index, count }: { item: StatGroupItem; index: number; co
           {item.subtitle}
         </Text>
       ) : null}
+      {item.supplement}
     </>
   );
 

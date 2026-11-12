@@ -6,6 +6,10 @@ export interface SegmentOption<T extends string> {
   value: T;
   label: string;
   icon?: React.ReactNode;
+  /** A count beside the label, such as how many items the segment holds. */
+  count?: number;
+  /** `warning` when something in the segment needs the viewer. */
+  countTone?: 'neutral' | 'warning';
 }
 
 export interface SegmentedControlProps<T extends string> {
@@ -35,7 +39,7 @@ export function SegmentedControl<T extends string>({
           <Pressable
             key={opt.value}
             accessibilityRole="tab"
-            accessibilityLabel={`${opt.label}, ${i + 1} of ${options.length}`}
+            accessibilityLabel={`${opt.label}${opt.count === undefined ? '' : `, ${opt.count}`}, ${i + 1} of ${options.length}`}
             accessibilityState={{ selected: active }}
             aria-selected={active}
             onPress={() => {
@@ -51,13 +55,27 @@ export function SegmentedControl<T extends string>({
             <Text
               variant="callout"
               style={{
+                flexShrink: 1,
+                textAlign: 'center',
                 color: active ? colors.primary : colors.mutedForeground,
                 fontWeight: active ? '700' : '500',
               }}
-              numberOfLines={1}
+              numberOfLines={opt.count === undefined ? 1 : 2}
             >
               {opt.label}
             </Text>
+            {opt.count === undefined ? null : (
+              <Text
+                variant="caption"
+                style={{
+                  color: opt.countTone === 'warning' ? colors.warning : colors.mutedForeground,
+                  fontWeight: '700',
+                  fontVariant: ['tabular-nums'],
+                }}
+              >
+                {opt.count}
+              </Text>
+            )}
           </Pressable>
         );
       })}
@@ -75,5 +93,6 @@ const styles = StyleSheet.create({
     gap: 6,
     minHeight: 44,
     paddingVertical: 8,
+    paddingHorizontal: 6,
   },
 });

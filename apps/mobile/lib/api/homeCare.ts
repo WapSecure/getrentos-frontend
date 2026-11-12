@@ -1,5 +1,6 @@
 import type {
   DuplicateAcknowledgement,
+  EvidenceDocument,
   MaintenancePhoto,
   WorkOrderEvidence,
   WorkOrderFeedback,
@@ -327,6 +328,22 @@ export const homeCareApi = {
     appendFile(form, 'file', file);
     form.append('stage', stage);
     return apiUpload<MaintenancePhoto>(`/home-management/work-orders/${workOrderId}/photos`, form);
+  },
+  /** Owner or manager attaches the paperwork behind a quote or an invoice on the job. */
+  addDocument: (
+    workOrderId: string,
+    target: { quoteId: string } | { invoiceId: string },
+    file: PickedFile,
+    note?: string
+  ) => {
+    const form = new FormData();
+    appendFile(form, 'file', file);
+    if (note?.trim()) form.append('note', note.trim());
+    const path =
+      'quoteId' in target
+        ? `quotes/${encodeURIComponent(target.quoteId)}/documents`
+        : `invoices/${encodeURIComponent(target.invoiceId)}/documents`;
+    return apiUpload<EvidenceDocument>(`/home-management/work-orders/${workOrderId}/${path}`, form);
   },
   /** The owner's rating, once, after the job is RESOLVED. */
   feedback: (workOrderId: string, input: WorkOrderFeedbackInput) =>

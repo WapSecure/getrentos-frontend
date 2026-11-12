@@ -13,7 +13,7 @@ import {
 } from '@sureground/ui';
 import { CalendarClock } from '@sureground/icons';
 import { unwrap } from '@/lib/apiHelpers';
-import { tourNextStep } from '@/lib/siteTours';
+import { tourNextStep } from '@sureground/shared';
 import { siteTourKeys, siteTourService } from '@/services/siteTourService';
 import type { SiteTour, TourScope } from '@/types/siteTour';
 import { StarRating } from '@/components/landlord/vendors/StarRating';

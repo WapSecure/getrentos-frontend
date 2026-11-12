@@ -1,9 +1,16 @@
 import { useState } from 'react';
-import { RefreshControl, ScrollView, View } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { KeyRound, ReceiptText, ShieldCheck, Wrench } from '@sureground/icons/native';
+import {
+  ChevronDown,
+  ChevronUp,
+  KeyRound,
+  ReceiptText,
+  ShieldCheck,
+  Wrench,
+} from '@sureground/icons/native';
 import {
   STATEMENT_PAYOUT_LABELS,
   humaniseStatus,
@@ -13,6 +20,7 @@ import {
   Badge,
   Button,
   Card,
+  Divider,
   ListSkeleton,
   QueryState,
   SegmentedControl,
@@ -23,6 +31,8 @@ import { qk } from '@/lib/query/keys';
 import { investorApi } from '@/lib/api/investor';
 import { managementApi } from '@/lib/api/management';
 import { homeCareApi } from '@/lib/api/homeCare';
+import { landlordApi } from '@/lib/api/landlord';
+import { planRefusal, retryUnlessPlanGate } from '@/lib/api/estateGate';
 import { MANDATE_STATUS, type MandateStatus } from '@/lib/api/managedService';
 import { formatDate, formatNaira } from '@/lib/format';
 import { goBack } from '@/lib/goBack';
@@ -31,6 +41,7 @@ import { FactList, type Fact } from '@/components/diaspora/FactList';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
 import { SpendApprovalCard } from '@/components/management/SpendApprovalCard';
 import { WorkOrderCard } from '@/components/homecare/WorkOrderCard';
+import { OwnerStatementTotals } from '@/components/landlord/OwnerStatementTotals';
 
 /** Past this many properties a segmented control stops fitting a phone. */
 const SEGMENTED_MAX = 3;
@@ -105,7 +116,11 @@ export default function InvestManaged() {
               <AgreementCard property={property} />
               <StatementCard property={property} />
               <Approvals key={`a-${property.propertyId}`} propertyId={property.propertyId} />
-              <Jobs key={`j-${property.propertyId}`} propertyId={property.propertyId} />
+              <Jobs
+                key={`j-${property.propertyId}`}
+                propertyId={property.propertyId}
+                openJobs={property.openJobs}
+              />
             </View>
           ) : null}
         </QueryState>
@@ -271,13 +286,7 @@ function StatementCard({ property }: { property: InvestorManagedProperty }) {
               },
             ]}
           />
-          <Button
-            label="See the breakdown"
-            variant="ghost"
-            size="sm"
-            fullWidth={false}
-            onPress={() => router.push('/(app)/landlord-owner-statements')}
-          />
+          <StatementBreakdown key={statement.id} statementId={statement.id} />
         </>
       ) : (
         <View style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'center' }}>
@@ -290,6 +299,53 @@ function StatementCard({ property }: { property: InvestorManagedProperty }) {
         </View>
       )}
     </Card>
+  );
+}
+
+/** The ledger lines behind the statement, read when opened, as on web. */
+function StatementBreakdown({ statementId }: { statementId: string }) {
+  const { colors, spacing } = useTheme();
+  const [open, setOpen] = useState(false);
+  const detail = useQuery({
+    queryKey: qk.landlord.ownerStatement(statementId),
+    queryFn: () => landlordApi.ownerStatement(statementId),
+    enabled: open,
+  });
+  const Chevron = open ? ChevronUp : ChevronDown;
+  const payout = detail.data?.payoutStatus.toUpperCase();
+  return (
+    <View style={{ gap: spacing.sm }}>
+      <Divider />
+      <Pressable
+        onPress={() => setOpen((o) => !o)}
+        accessibilityRole="button"
+        accessibilityState={{ expanded: open }}
+        style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm, minHeight: 44 }}
+      >
+        <Text variant="callout" style={{ flex: 1, fontWeight: '600' }}>
+          See the breakdown
+        </Text>
+        <Chevron size={18} color={colors.mutedForeground} />
+      </Pressable>
+      {open ? (
+        <QueryState
+          query={detail}
+          skeleton={<ListSkeleton rows={2} />}
+          errorTitle="The statement could not be loaded"
+        >
+          {detail.data ? (
+            <View style={{ gap: spacing.sm }}>
+              <OwnerStatementTotals statement={detail.data} withLines />
+              {payout ? (
+                <Text variant="caption" color="mutedForeground">
+                  {STATEMENT_PAYOUT_LABELS[payout] ?? humaniseStatus(payout)}
+                </Text>
+              ) : null}
+            </View>
+          ) : null}
+        </QueryState>
+      ) : null}
+    </View>
   );
 }
 
@@ -325,36 +381,54 @@ function Approvals({ propertyId }: { propertyId: string }) {
   );
 }
 
-function Jobs({ propertyId }: { propertyId: string }) {
+/**
+ * The job list is a Pro route (`GET home-management/work-orders`), so an owner without Pro is
+ * refused. Until an owner-scoped list exists, they see the open count instead of an error.
+ */
+function Jobs({ propertyId, openJobs }: { propertyId: string; openJobs: number }) {
   const { colors, spacing } = useTheme();
   const jobs = useQuery({
     queryKey: qk.homeCare.workOrders(`property:${propertyId}`),
     queryFn: () => homeCareApi.workOrders(undefined, 1, JOB_PAGE_SIZE, propertyId),
+    retry: retryUnlessPlanGate,
   });
   const items = jobs.data?.items ?? [];
+  const refused = !jobs.data && planRefusal(jobs.error) !== null;
   return (
     <View style={{ gap: spacing.sm }}>
       <Text variant="heading" headingLevel={2}>
         Repairs and jobs
       </Text>
-      <QueryState
-        query={jobs}
-        skeleton={<ListSkeleton rows={2} variant="card" height={96} />}
-        errorTitle="Repairs could not be loaded"
-        isEmpty={items.length === 0}
-        empty={{
-          icon: <Wrench size={28} color={colors.mutedForeground} />,
-          title: 'No repairs on this property',
-          description:
-            'Jobs your manager raises appear here with their photos, quotes and invoices.',
-        }}
-      >
-        <View style={{ gap: spacing.sm }}>
-          {items.map((w) => (
-            <WorkOrderCard key={w.id} w={w} />
-          ))}
-        </View>
-      </QueryState>
+      {refused ? (
+        <Card style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'flex-start' }}>
+          <Wrench size={18} color={colors.mutedForeground} />
+          <Text variant="callout" color="mutedForeground" style={{ flex: 1 }}>
+            {openJobs === 0
+              ? 'No open jobs on this property. '
+              : `${openJobs} open ${openJobs === 1 ? 'job' : 'jobs'} on this property. `}
+            The full list of jobs is not available on your account yet.
+          </Text>
+        </Card>
+      ) : (
+        <QueryState
+          query={jobs}
+          skeleton={<ListSkeleton rows={2} variant="card" height={96} />}
+          errorTitle="Repairs could not be loaded"
+          isEmpty={items.length === 0}
+          empty={{
+            icon: <Wrench size={28} color={colors.mutedForeground} />,
+            title: 'No repairs on this property',
+            description:
+              'Jobs your manager raises appear here with their photos, quotes and invoices.',
+          }}
+        >
+          <View style={{ gap: spacing.sm }}>
+            {items.map((w) => (
+              <WorkOrderCard key={w.id} w={w} />
+            ))}
+          </View>
+        </QueryState>
+      )}
     </View>
   );
 }

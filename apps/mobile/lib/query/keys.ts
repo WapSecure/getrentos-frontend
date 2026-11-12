@@ -32,6 +32,7 @@ export const qk = {
     handover: (id: string) => ['management-transfers', 'handover', id] as const,
   },
   // Sureground Diaspora Invest: the investor workspace, onboarding, identity abroad and Managed.
+  fx: { indicative: ['fx', 'indicative'] as const },
   investor: {
     all: ['investor'] as const,
     availability: ['investor', 'availability'] as const,
@@ -492,6 +493,7 @@ export const qk = {
     expenses: (page = 1, pageSize = 20) => ['landlord', 'expenses', { page, pageSize }] as const,
     ownerStatements: (page = 1, pageSize = 20) =>
       ['landlord', 'owner-statements', { page, pageSize }] as const,
+    ownerStatement: (id: string) => ['landlord', 'owner-statements', 'one', id] as const,
     listings: ['landlord', 'listings'] as const,
     leads: (page = 1, pageSize = 20) => ['landlord', 'leads', { page, pageSize }] as const,
     microsite: ['landlord', 'microsite'] as const,

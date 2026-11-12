@@ -34,7 +34,6 @@ import {
   QueryState,
   StatGroup,
   StatGroupSkeleton,
-  type BadgeVariant,
   type DescriptionItem,
   type StatGroupItem,
 } from '@sureground/ui';
@@ -50,7 +49,7 @@ import {
   countryName,
   greetingFor,
   humaniseStatus,
-  identityProgress,
+  identityHeadline,
   type InvestorAttentionKind,
   portfolioFigures,
   STATEMENT_PAYOUT_LABELS,
@@ -67,7 +66,6 @@ import {
 import { AttentionList, type AttentionListItem } from '@/components/shared/attention/AttentionList';
 import { IndicativeAmount } from '@/components/shared/money/IndicativeAmount';
 import { PurchaseSummaryList } from '@/components/shared/purchases/PurchaseSummaryList';
-import type { ForeignIdentityStatus } from '@/types/foreignIdentity';
 import type { InvestorOverview } from '@/types/investor';
 import { IdentityProgressCard, ProfileSummaryCard, dualMoment } from './InvestorWorkspaceRail';
 
@@ -127,21 +125,6 @@ const KIND_ICON: Record<InvestorAttentionKind, SgIcon> = {
   tour: Video,
   spending: Wallet,
   identity: Globe,
-};
-
-/** The trust chip in the header: how far the checks abroad have got. */
-const identityChip = (
-  status: ForeignIdentityStatus | undefined
-): { label: string; variant: BadgeVariant } | null => {
-  if (!status?.eligible) return null;
-  const { steps, approved } = identityProgress(status);
-  if (approved === steps.length) return { label: 'Identity verified', variant: 'success' };
-  if (steps.some((s) => s.state === 'REJECTED'))
-    return { label: 'Identity check needs you', variant: 'danger' };
-  if (status.passport.state === 'APPROVED') return { label: 'Passport verified', variant: 'info' };
-  if (steps.some((s) => s.state === 'IN_REVIEW' || s.state === 'CHECKING'))
-    return { label: 'Identity checks in review', variant: 'warning' };
-  return { label: 'Identity not verified yet', variant: 'neutral' };
 };
 
 /** Shaped like the loaded page: queue, figures and purchases on the left, the rail on the right. */
@@ -390,7 +373,7 @@ export const InvestorWorkspace = ({ portal }: { portal: InvestorPortal }) => {
   }
 
   const livesIn = countryName(profile?.countryOfResidence) ?? profile?.countryOfResidence;
-  const chip = identityChip(identity.data);
+  const chip = identityHeadline(identity.data);
   const purchases = data?.purchases;
 
   return (
@@ -417,7 +400,7 @@ export const InvestorWorkspace = ({ portal }: { portal: InvestorPortal }) => {
             </li>
             {chip && (
               <li>
-                <Badge variant={chip.variant} dot>
+                <Badge variant={chip.tone} dot>
                   {chip.label}
                 </Badge>
               </li>
