@@ -10,6 +10,7 @@ import {
   Card,
   CardSkeleton,
   DocumentUpload,
+  EmptyState,
   Field,
   Input,
   ListSkeleton,
@@ -22,6 +23,7 @@ import { WatchlistBlockedNotice } from '@/components/gateman/WatchlistBlockedNot
 import { WatchlistWarning } from '@/components/gateman/WatchlistWarning';
 import { estateKeys } from '@/lib/queryKeys';
 import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
+import { cn } from '@sureground/shared';
 
 const purposeOptions = [
   { value: 'VISITOR', label: 'Visitor' },
@@ -30,6 +32,9 @@ const purposeOptions = [
   { value: 'STAFF', label: 'Staff' },
   { value: 'OTHER', label: 'Other' },
 ];
+
+const purposeLabel = (purpose: string) =>
+  purposeOptions.find((option) => option.value === purpose.toUpperCase())?.label ?? 'Other';
 
 const formatTime = (value: string) =>
   new Intl.DateTimeFormat('en-NG', { hour: 'numeric', minute: '2-digit' }).format(new Date(value));
@@ -225,28 +230,81 @@ export default function GatemanVehiclesPage() {
         <WatchlistWarning warning={warning ?? undefined} />
       </Card>
 
-      <div>
-        <h2 className="text-sm font-semibold text-foreground mb-3">
-          Currently Inside ({inside.length})
-        </h2>
+      <section
+        aria-labelledby="vehicles-inside-title"
+        className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm"
+      >
+        <header className="border-b border-border px-5 py-4">
+          <div className="flex items-center gap-2">
+            <h2 id="vehicles-inside-title" className="text-base font-semibold text-foreground">
+              Currently inside
+            </h2>
+            {!isInsideLoading && (
+              <span
+                className={cn(
+                  'inline-flex min-w-6 items-center justify-center rounded-full px-2 py-0.5 text-xs font-semibold tabular-nums',
+                  inside.length > 0
+                    ? 'bg-primary/10 text-primary'
+                    : 'bg-secondary text-muted-foreground'
+                )}
+                aria-label={`${inside.length} inside`}
+              >
+                {inside.length}
+              </span>
+            )}
+          </div>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Vehicles logged in at this estate that have not been marked as exited.
+          </p>
+        </header>
         {isInsideLoading ? (
-          <ListSkeleton rows={2} />
+          <div className="p-5">
+            <ListSkeleton rows={2} />
+          </div>
         ) : inside.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No vehicles currently logged inside.</p>
+          <EmptyState
+            bare
+            icon={Car}
+            title="No vehicles inside"
+            description="Vehicles you log appear here with the time they came in. Mark them as exited when they leave."
+          />
         ) : (
-          <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
+          <ul className="divide-y divide-border">
             {inside.map((log) => (
-              <div key={log.id} className="p-3 flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{log.plateNumber}</p>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {log.vehicleDescription || log.purpose} · entered {formatTime(log.enteredAt)}
-                    {log.gateName ? ` · ${log.gateName}` : ''}
-                  </p>
+              <li
+                key={log.id}
+                className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div className="flex min-w-0 items-center gap-3">
+                  <span
+                    aria-hidden="true"
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary"
+                  >
+                    <Car className="h-4 w-4 text-muted-foreground" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium tracking-wide text-foreground">
+                      {log.plateNumber}
+                    </p>
+                    {(log.vehicleDescription || log.driverName) && (
+                      <p className="truncate text-xs text-muted-foreground">
+                        {[
+                          log.vehicleDescription,
+                          log.driverName ? `Driver: ${log.driverName}` : null,
+                        ]
+                          .filter(Boolean)
+                          .join(' · ')}
+                      </p>
+                    )}
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {purposeLabel(log.purpose)} · entered {formatTime(log.enteredAt)}
+                      {log.gateName ? ` · ${log.gateName}` : ''}
+                    </p>
+                  </div>
                 </div>
                 <Button
                   variant="outline"
-                  size="sm"
+                  size="lg"
                   className="shrink-0"
                   icon={<ExitIcon className="w-3.5 h-3.5" />}
                   disabled={markExited.isPending}
@@ -256,11 +314,11 @@ export default function GatemanVehiclesPage() {
                 >
                   Exit
                 </Button>
-              </div>
+              </li>
             ))}
-          </div>
+          </ul>
         )}
-      </div>
+      </section>
     </div>
   );
 }

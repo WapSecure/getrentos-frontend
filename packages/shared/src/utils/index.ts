@@ -28,3 +28,4 @@ export * from './legacyStorage';
 export * from './dualTime';
 export * from './siteTours';
 export * from './codeLabels';
+export * from './visitorPassTimeline';
