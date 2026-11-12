@@ -11,7 +11,7 @@ import {
 } from '@/lib/publicListingMap';
 import type { Paginated } from '@/lib/apiHelpers';
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   title: 'Properties for Sale in Nigeria',
   description:
     'Browse homes for sale across Nigeria. Verified properties, Sureground Payment Protection, and results you can scope to a single estate.',
@@ -23,6 +23,18 @@ export const metadata: Metadata = {
     type: 'website',
   },
 };
+
+// Filtered and searched views share the unfiltered page's canonical and stay out of the index,
+// so query strings can't multiply into thin duplicate pages; links on them are still followed.
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}): Promise<Metadata> {
+  const params = await searchParams;
+  const filtered = Object.values(params).some((value) => value !== undefined && value !== '');
+  return filtered ? { ...baseMetadata, robots: { index: false, follow: true } } : baseMetadata;
+}
 
 async function fetchFirstPage(): Promise<Paginated<PublicListingCard> | null> {
   try {

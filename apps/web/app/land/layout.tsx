@@ -1,28 +1,21 @@
-'use client';
-
 import type { ReactNode } from 'react';
-import { usePathname } from 'next/navigation';
-import { Footer } from '@/components/layout/Footer';
-import { Navigation } from '@/components/layout/Navigation';
-import { LandAvailabilityGate } from '@/components/land/availability/LandAvailabilityGate';
+import { LandLayoutShell } from '@/components/land/availability/LandLayoutShell';
+import type { LandAvailability } from '@/hooks/useLandAvailability';
+import { PUBLIC_REVALIDATE } from '@/lib/publicFetch';
 
-export default function LandLayout({ children }: { children: ReactNode }) {
-  const pathname = usePathname();
-  // A party to a land dispute must always reach the case, whatever LAND_MODE says.
-  if (pathname?.startsWith('/land/disputes')) return <>{children}</>;
-  const audience = pathname?.startsWith('/land/reviews') ? 'owners' : 'marketplace';
-  return (
-    <LandAvailabilityGate
-      audience={audience}
-      shell={(notice) => (
-        <>
-          <Navigation />
-          <main className="min-h-[60vh] pt-20">{notice}</main>
-          <Footer />
-        </>
-      )}
-    >
-      {children}
-    </LandAvailabilityGate>
-  );
+async function landAvailability(): Promise<LandAvailability | null> {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+  try {
+    const res = await fetch(`${apiUrl}/land/availability`, {
+      next: { revalidate: PUBLIC_REVALIDATE },
+    });
+    return res.ok ? ((await res.json()) as LandAvailability) : null;
+  } catch {
+    return null;
+  }
+}
+
+// Server layout: crawlers and first paint get the land pages, not an empty gate waiting on the browser.
+export default async function LandLayout({ children }: { children: ReactNode }) {
+  return <LandLayoutShell initial={await landAvailability()}>{children}</LandLayoutShell>;
 }
