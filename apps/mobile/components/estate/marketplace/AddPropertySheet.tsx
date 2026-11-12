@@ -71,7 +71,7 @@ function AddPropertyForm({ estateId, onDone }: { estateId: string; onDone: () =>
       </Text>
       <TextField
         label="Find the property"
-        placeholder="Street, area or title"
+        placeholder="Estate property, or a reference code"
         leftIcon={<Search size={16} color={colors.mutedForeground} />}
         value={search}
         onChangeText={setSearch}
@@ -88,7 +88,8 @@ function AddPropertyForm({ estateId, onDone }: { estateId: string; onDone: () =>
         </Text>
       ) : !candidates.data?.length ? (
         <Text variant="callout" color="mutedForeground">
-          No matching property. Its owner needs to add it to Sureground first.
+          No matching property. For a home not yet in this estate, ask its owner for the reference
+          code shown on their property card.
         </Text>
       ) : (
         <View style={{ gap: spacing.sm }}>
@@ -109,14 +110,22 @@ function AddPropertyForm({ estateId, onDone }: { estateId: string; onDone: () =>
               >
                 <View
                   accessible
-                  accessibilityLabel={`${c.title}, ${c.address}, ${c.city}. Owner ${c.ownerName}`}
+                  accessibilityLabel={[
+                    c.title,
+                    c.address,
+                    c.city,
+                    c.ownerName ? `Owner ${c.ownerName}` : '',
+                  ]
+                    .filter(Boolean)
+                    .join(', ')}
                   style={{ flex: 1, gap: 2 }}
                 >
                   <Text variant="callout" style={{ fontWeight: '700' }} numberOfLines={1}>
                     {c.title}
                   </Text>
                   <Text variant="caption" color="mutedForeground" numberOfLines={2}>
-                    {[c.address, c.city].filter(Boolean).join(', ')} · {c.ownerName}
+                    {[c.address, c.city].filter(Boolean).join(', ')}
+                    {c.ownerName ? ` · ${c.ownerName}` : ''}
                   </Text>
                 </View>
                 {state === 'can-market' ? (
