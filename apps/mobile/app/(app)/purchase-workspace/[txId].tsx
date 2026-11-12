@@ -27,6 +27,8 @@ import {
 } from '@sureground/ui-native';
 import {
   canReleaseDeposit,
+  handoverAwaitingDelivery,
+  RELEASE_BLOCKED_NOTE,
   depositReleaseStage,
   documentLinkLabel,
   formatDualTime,
@@ -238,6 +240,8 @@ export default function PurchaseWorkspace() {
   const progress = data ? workspaceProgress(data) : null;
   const target = data ? nextActionTarget(data) : null;
   const releasable = data ? canReleaseDeposit(data) : false;
+  // The deposit stands for the handover: it cannot be released before the seller delivers it.
+  const releaseBlocked = releasable && data ? handoverAwaitingDelivery(data) : false;
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -446,13 +450,16 @@ export default function PurchaseWorkspace() {
                 {releasable ? (
                   <>
                     <Text variant="callout" color="mutedForeground">
-                      Release it only once you have received the property and the documents you
-                      agreed.
+                      {releaseBlocked
+                        ? RELEASE_BLOCKED_NOTE
+                        : 'Release it only once you have received the property and the documents you agreed.'}
                     </Text>
                     <Button
                       label="Release the deposit"
                       icon={<Lock size={16} color={colors.primaryForeground} />}
                       loading={release.isPending}
+                      disabled={releaseBlocked}
+                      accessibilityHint={releaseBlocked ? RELEASE_BLOCKED_NOTE : undefined}
                       onPress={confirmRelease}
                     />
                   </>

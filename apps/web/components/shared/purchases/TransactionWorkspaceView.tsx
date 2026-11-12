@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   canReleaseDeposit,
+  handoverAwaitingDelivery,
+  RELEASE_BLOCKED_NOTE,
   depositReleaseStage,
   documentLinkLabel,
   formatDualTime,
@@ -349,6 +351,8 @@ export const TransactionWorkspaceView = ({
   const progress = workspaceProgress(data);
   const target = nextActionTarget(data);
   const releasable = canReleaseDeposit(data);
+  // The deposit stands for the handover: it cannot be released before the seller delivers it.
+  const releaseBlocked = releasable && handoverAwaitingDelivery(data);
   const representativeName = approvingRepresentativeName(data);
   const releaseStage = depositReleaseStage(data);
   const releaseNote = isBuyer ? releaseStageNote(releaseStage, representativeName) : null;
@@ -595,7 +599,21 @@ export const TransactionWorkspaceView = ({
               <Badge dot variant={moneyVariant(moneyStatus.code)}>
                 {moneyStatus.label}
               </Badge>
-              {releasable ? (
+              {releaseBlocked ? (
+                <>
+                  <p id="deposit-release-blocked" className="text-sm text-muted-foreground">
+                    {RELEASE_BLOCKED_NOTE}
+                  </p>
+                  <Button
+                    className="w-full"
+                    icon={<ShieldCheck className="h-4 w-4" aria-hidden />}
+                    disabled
+                    aria-describedby="deposit-release-blocked"
+                  >
+                    Release the deposit
+                  </Button>
+                </>
+              ) : releasable ? (
                 <>
                   {releaseStage === 'BOTH_APPROVED' ? (
                     <p className="text-sm font-medium text-foreground" role="status">

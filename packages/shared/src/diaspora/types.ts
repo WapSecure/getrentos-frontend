@@ -101,6 +101,11 @@ export interface CoApprovalPendingStep {
   milestoneKey: string;
   /** This approval also releases the held deposit (a built home's handover). */
   releasesDeposit?: boolean;
+  /**
+   * The seller has delivered the step. A handover cannot be approved before it is delivered; false
+   * means not yet. Missing on older responses.
+   */
+  stepDelivered?: boolean;
   buyerApproved: boolean;
   representativeApproved: boolean;
 }

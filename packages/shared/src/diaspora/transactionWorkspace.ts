@@ -19,6 +19,7 @@ interface WorkspaceShape {
   viewer: { role: WorkspaceViewerRole };
   statuses: { moneyStatus: { code: MoneyStatusCode | string } };
   nextAction: NextAction | null;
+  plan?: string;
   milestones: { key: string; label: string; status: string; required: boolean }[];
   conditions: { key: string; label: string }[];
   legalSteps: { key: string; label: string; status: string }[];
@@ -65,6 +66,37 @@ export const moneyVariant = (code: string): StatusTone =>
   MONEY_VARIANT[code as MoneyStatusCode] ?? 'neutral';
 export const legalVariant = (code: string): StatusTone =>
   LEGAL_VARIANT[code as LegalStatusCode] ?? 'neutral';
+
+/** Why the handover cannot be approved yet, shown beside the disabled action. */
+export const HANDOVER_NOT_DELIVERED_NOTE =
+  'The seller has not marked the keys as handed over yet. You can approve once they have.';
+
+/** Why the buyer cannot release the deposit yet, shown beside the disabled button. */
+export const RELEASE_BLOCKED_NOTE =
+  'The seller has not marked the keys as handed over yet. You can release the deposit once they have.';
+
+/** A milestone that has reached the buyer: delivered, confirmed or waived. */
+const DELIVERED_STATUSES: ReadonlySet<string> = new Set(['DELIVERED', 'CONFIRMED', 'WAIVED']);
+
+/** The built-home step that releases the held deposit. */
+export const HANDOVER_KEY = 'KEYS_HANDED_OVER';
+
+/** A two-person approval of the handover the seller has not delivered yet: it cannot be given. */
+export const stepAwaitingDelivery = (step: CoApprovalPendingStep): boolean =>
+  Boolean(step.releasesDeposit) && step.stepDelivered === false;
+
+/**
+ * A built home whose handover (keys and vacant possession) the seller has not delivered yet. The
+ * deposit cannot be released or approved until then. Land sales have their own release rules.
+ */
+export const handoverAwaitingDelivery = (workspace: {
+  plan?: string;
+  milestones: readonly { key: string; status: string }[];
+}): boolean => {
+  if (workspace.plan !== 'BUILT_HOME') return false;
+  const handover = workspace.milestones.find((m) => m.key === HANDOVER_KEY);
+  return !handover || !DELIVERED_STATUSES.has(handover.status);
+};
 
 /** Only the buyer releases, and only a deposit that is held. */
 export const canReleaseDeposit = (
@@ -174,13 +206,30 @@ export const releaseStageNote = (
   return null;
 };
 
-/** Two-person approvals on this purchase still waiting for the viewer. */
+/** Where a two-person approval stands, from the viewer's side, for the approvals card. */
+export const pendingApprovalStatus = (
+  step: CoApprovalPendingStep,
+  viewer: 'buyer' | 'representative'
+): string => {
+  if (stepAwaitingDelivery(step)) return 'Waiting for the seller to hand over the keys';
+  return viewer === 'buyer'
+    ? `${step.buyerApproved ? 'You approved' : 'Waiting for you'} · ${
+        step.representativeApproved ? 'representative approved' : 'waiting for your representative'
+      }`
+    : `${step.buyerApproved ? 'The buyer approved' : 'Waiting for the buyer'} · ${
+        step.representativeApproved ? 'you approved' : 'waiting for you'
+      }`;
+};
+
+/** Two-person approvals on this purchase still waiting for the viewer (not a handover the seller has not delivered). */
 export const approvalsWaitingFor = (
   viewer: 'BUYER' | 'REPRESENTATIVE',
   pending: readonly CoApprovalPendingStep[] | undefined
 ): CoApprovalPendingStep[] =>
-  (pending ?? []).filter((step) =>
-    viewer === 'BUYER' ? !step.buyerApproved : !step.representativeApproved
+  (pending ?? []).filter(
+    (step) =>
+      !stepAwaitingDelivery(step) &&
+      (viewer === 'BUYER' ? !step.buyerApproved : !step.representativeApproved)
   );
 
 /** "TITLE_DEED" → "Title deed". */
@@ -231,7 +280,7 @@ export type WorkspaceSection = 'approvals' | 'deposit' | 'steps';
 export const nextActionTarget = (
   workspace: Pick<
     WorkspaceShape,
-    'viewer' | 'statuses' | 'nextAction' | 'milestones' | 'coApproval'
+    'viewer' | 'statuses' | 'nextAction' | 'milestones' | 'coApproval' | 'plan'
   >
 ): WorkspaceSection | null => {
   if (!workspace.nextAction?.waitingForYou) return null;
@@ -244,7 +293,7 @@ export const nextActionTarget = (
     return 'approvals';
   if (role === 'BUYER' && workspace.milestones.some((m) => m.status === 'DELIVERED'))
     return 'steps';
-  if (canReleaseDeposit(workspace)) return 'deposit';
+  if (canReleaseDeposit(workspace) && !handoverAwaitingDelivery(workspace)) return 'deposit';
   return 'steps';
 };
 
