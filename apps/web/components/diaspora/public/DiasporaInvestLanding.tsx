@@ -58,7 +58,8 @@ const IconCard = ({ item }: { item: IconCopy }) => (
   </MarketingCard>
 );
 
-const PointList = ({ points, tone }: { points: string[]; tone: 'yes' | 'no' | 'info' }) => {
+/** A ticked, crossed or noted list of short statements; shared with the transparency centre. */
+export const PointList = ({ points, tone }: { points: string[]; tone: 'yes' | 'no' | 'info' }) => {
   const Icon = tone === 'yes' ? CheckCircle2 : tone === 'no' ? XCircle : Info;
   const colour =
     tone === 'yes' ? 'text-success' : tone === 'no' ? 'text-muted-foreground' : 'text-primary';
@@ -319,7 +320,14 @@ export const DiasporaInvestLanding = () => (
             items={TRANSPARENCY.map((item) => ({ label: item.title, value: item.body }))}
           />
           <p className="mt-6 text-sm text-muted-foreground">
-            Read the{' '}
+            The{' '}
+            <Link
+              href={DIASPORA_ROUTES.TRANSPARENCY}
+              className="font-medium text-primary hover:underline"
+            >
+              transparency centre
+            </Link>{' '}
+            sets out fees, refunds, complaints and what is not yet decided. Read the{' '}
             <Link href="/terms" className="font-medium text-primary hover:underline">
               Terms of service
             </Link>{' '}
@@ -340,7 +348,16 @@ export const DiasporaInvestLanding = () => (
           items={FAQS.map((faq) => ({
             id: faq.question,
             summary: faq.question,
-            content: faq.answer,
+            content: faq.link ? (
+              <>
+                {faq.answer}{' '}
+                <Link href={faq.link.href} className="font-medium text-primary hover:underline">
+                  {faq.link.label}
+                </Link>
+              </>
+            ) : (
+              faq.answer
+            ),
           }))}
         />
       </Card>
