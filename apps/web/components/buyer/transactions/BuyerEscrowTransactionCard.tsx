@@ -18,6 +18,15 @@ const statusLabels: Record<BuyerEscrowStatus, string> = {
   refunded: 'Refunded',
 };
 
+/** The deposit line says what happened to the deposit; only a held one is under Payment Protection. */
+const depositLabels: Record<BuyerEscrowStatus, string> = {
+  deposit_pending: 'Deposit due',
+  funds_held: 'Deposit under Payment Protection',
+  released: 'Deposit released',
+  frozen: 'Deposit on hold under Payment Protection',
+  refunded: 'Deposit refunded',
+};
+
 interface BuyerEscrowTransactionCardProps {
   transaction: BuyerEscrowTransaction;
   /** Shown while the deposit is owed; opens the payment dialog. */
@@ -82,7 +91,7 @@ export const BuyerEscrowTransactionCard = ({
           {formatCurrency(transaction.purchasePrice, { compact: true })}
         </p>
         <p className="text-xs text-muted-foreground">
-          Deposit under Payment Protection: {formatCurrency(deposit, { compact: true })}
+          {depositLabels[transaction.escrowStatus]}: {formatCurrency(deposit, { compact: true })}
         </p>
 
         {transaction.statuses && (

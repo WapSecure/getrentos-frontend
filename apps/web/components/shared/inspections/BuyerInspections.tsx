@@ -17,14 +17,7 @@ import {
   Toast,
   type BadgeVariant,
 } from '@sureground/ui';
-import {
-  ArrowRight,
-  CalendarClock,
-  LocateFixed,
-  MapPin,
-  ScanSearch,
-  UserRound,
-} from '@sureground/icons';
+import { CalendarClock, LocateFixed, MapPin, ScanSearch, UserRound } from '@sureground/icons';
 import {
   boundaryTone,
   INSPECTION_ON_SITE_TOLERANCE_M,
@@ -35,7 +28,6 @@ import {
 } from '@sureground/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
-import { findPropertyHref } from '@/lib/constants/visitRoutes';
 import {
   prePurchaseInspectionKeys,
   prePurchaseInspectionService,
@@ -288,15 +280,6 @@ export const BuyerInspections = ({ scope }: { scope: TourScope }) => {
           icon={ScanSearch}
           title="No inspections yet"
           description="Commission one from any listing. Reports arrive here once Sureground has checked them."
-          action={
-            <Button
-              href={findPropertyHref(scope)}
-              icon={<ArrowRight className="h-4 w-4" aria-hidden="true" />}
-              iconPosition="right"
-            >
-              Find a property to inspect
-            </Button>
-          }
         />
       ) : (
         <ul className="space-y-3">
