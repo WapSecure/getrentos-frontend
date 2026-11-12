@@ -35,6 +35,8 @@ export interface PayDialogProps {
   error?: string | null;
   onPay: () => void;
   busy?: boolean;
+  /** Why this payment can't start yet (e.g. identity not verified): shown first, and the pay button is disabled. */
+  blocked?: ReactNode;
   notReadyLabel?: string;
   /** The card is charged only for a shortfall (an invoice paid from held rent first): no fee or total row is added. */
   topUpOnly?: {
@@ -86,6 +88,7 @@ export const PayDialog = ({
   error,
   onPay,
   busy,
+  blocked,
   notReadyLabel = 'Enter an amount to pay',
   topUpOnly,
 }: PayDialogProps) => {
@@ -133,6 +136,8 @@ export const PayDialog = ({
         </div>
 
         <div className="space-y-5 p-5">
+          {blocked}
+
           {amountStep && (
             <div className="space-y-2.5">
               {steps && <Step n={1}>How much</Step>}
@@ -220,7 +225,7 @@ export const PayDialog = ({
               variant="primary"
               fullWidth
               size="lg"
-              disabled={!ready || feeLoading || !!topUpOnly?.disabled}
+              disabled={!ready || feeLoading || !!topUpOnly?.disabled || !!blocked}
               isLoading={busy || feeLoading}
               loadingText={!busy && feeLoading ? 'Working out the fee…' : undefined}
               onClick={onPay}

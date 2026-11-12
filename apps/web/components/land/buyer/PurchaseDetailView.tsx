@@ -25,6 +25,7 @@ import { buyerLandKeys, landLayoutKeys } from '@/lib/landSalesQueryKeys';
 import { landBuyerService } from '@/services/landBuyerService';
 import { usePaymentProviders } from '@/hooks/usePaymentProviders';
 import { PayDialog } from '@/components/shared/payments/PayDialog';
+import { useDepositIdentityNotice } from '@/components/shared/payments/DepositIdentityNotice';
 import type { PaymentProvider } from '@/types/payments';
 import type { LandPurchaseDetail } from '@/types/landBuyer';
 import { PurchaseStatusBadge } from './LandSaleBadges';
@@ -120,6 +121,9 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
       else notify(reason.message, 'error');
     },
   });
+
+  // Only the initial deposit is gated; installments on a plan already under way are not.
+  const identityNotice = useDepositIdentityNotice(payOpen && purchase?.status === 'PENDING_DEPOSIT');
 
   const [milestoneKey, setMilestoneKey] = useState<string | null>(null);
   const confirmStep = useMutation({
@@ -418,6 +422,7 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
         providers={providers}
         providerError={providerError}
         busy={pay.isPending}
+        blocked={identityNotice}
         onPay={() => pay.mutate(providers.provider)}
       />
     </div>
