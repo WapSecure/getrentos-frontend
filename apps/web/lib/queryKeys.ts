@@ -492,6 +492,11 @@ export const sellerPayoutKeys = {
   payouts: ['marketplace', 'seller', 'payouts'] as const,
 };
 
+export const ownerPayoutKeys = {
+  preference: ['owner', 'payout-preference'] as const,
+  foreignAccounts: ['owner', 'foreign-bank-accounts'] as const,
+};
+
 // Separate from `authorityKeys`: authority and mandate change for different reasons.
 export const mandateKeys = {
   managing: ['management-mandates', 'managing'] as const,
