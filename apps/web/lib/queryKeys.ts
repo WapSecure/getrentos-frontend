@@ -234,6 +234,8 @@ export const homeManagementKeys = {
     ['home-management', 'invoices', invoiceId, 'payment-preview', provider ?? 'default'] as const,
   workOrderInvoices: (workOrderId: string) =>
     ['home-management', 'work-orders', workOrderId, 'invoices'] as const,
+  workOrderEvidence: (workOrderId: string) =>
+    ['home-management', 'work-orders', workOrderId, 'evidence'] as const,
   inspections: ['home-management', 'inspections'] as const,
   timeline: (params?: { propertyId?: string; limit?: number }) =>
     [
@@ -283,6 +285,7 @@ export const investorKeys = {
   profile: ['investor', 'profile'] as const,
   riskDeclaration: ['investor', 'declarations', 'risk'] as const,
   overview: ['investor', 'overview'] as const,
+  managed: ['investor', 'managed'] as const,
 };
 
 /** One purchase's workspace, as its buyer, seller or the buyer's representative sees it. */
