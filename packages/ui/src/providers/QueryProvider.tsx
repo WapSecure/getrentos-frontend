@@ -3,7 +3,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { MutationCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MotionConfig } from 'framer-motion';
-import { ApiError, onSessionExpired } from '@sureground/shared';
+import {
+  ApiError,
+  consumeSessionExpiredFlag,
+  onSessionExpired,
+  sessionExpiredRedirect,
+} from '@sureground/shared';
 import { ToastProvider, useToast, type ToastApi } from '../ToastProvider';
 
 const GENERIC_MUTATION_ERROR = 'We could not complete that action. Please try again.';
@@ -18,6 +23,10 @@ const mutationErrorMessage = (error: unknown) => {
 interface QueryProviderProps {
   children: React.ReactNode;
   loginPath?: string;
+  /** Pages that work signed out: an ended session there is dropped without leaving the page. */
+  isPublicPath?: (pathname: string) => boolean;
+  /** Called when an ended session is dropped on a public page, so the app can show it signed out. */
+  onSignedOutInPlace?: () => void;
 }
 
 export function QueryProvider(props: QueryProviderProps) {
@@ -31,7 +40,12 @@ export function QueryProvider(props: QueryProviderProps) {
   );
 }
 
-function QueryClientHost({ children, loginPath = '/login' }: QueryProviderProps) {
+function QueryClientHost({
+  children,
+  loginPath = '/login',
+  isPublicPath,
+  onSignedOutInPlace,
+}: QueryProviderProps) {
   const toast = useToast();
   // The client is created once, so it reads the toast API through a ref.
   const toastRef = useRef<ToastApi>(toast);
@@ -41,14 +55,18 @@ function QueryClientHost({ children, loginPath = '/login' }: QueryProviderProps)
 
   useEffect(() => {
     return onSessionExpired(() => {
-      const from = `${window.location.pathname}${window.location.search}`;
+      const target = sessionExpiredRedirect(window.location, loginPath, isPublicPath);
+      if (target) {
+        // A full navigation drops every in-memory cache rather than re-rendering it as an empty state.
+        window.location.assign(target);
+        return;
+      }
       if (window.location.pathname.startsWith(loginPath)) return;
-      // A full navigation drops every in-memory cache rather than re-rendering it as an empty state.
-      window.location.assign(
-        `${loginPath}?reason=session_expired&next=${encodeURIComponent(from)}`
-      );
+      // A public page keeps working signed out, so a later sign-in should not say the session ended.
+      consumeSessionExpiredFlag();
+      onSignedOutInPlace?.();
     });
-  }, [loginPath]);
+  }, [loginPath, isPublicPath, onSignedOutInPlace]);
 
   const [queryClient] = useState(
     () =>

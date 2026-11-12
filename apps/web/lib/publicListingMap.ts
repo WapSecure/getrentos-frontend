@@ -88,6 +88,7 @@ export interface SaleApiItem {
   bedrooms?: number;
   bathrooms?: number;
   isVerified?: boolean;
+  trustChain?: PropertyTrustChain;
   coverImageUrl?: string;
   imageVariants?: ImageVariant[];
   imagePreview?: ImagePreview;
@@ -148,6 +149,7 @@ export const saleToCard = (item: SaleApiItem): PublicListingCard => ({
   bedrooms: item.bedrooms,
   bathrooms: item.bathrooms,
   verified: Boolean(item.isVerified),
+  trustChain: item.trustChain,
   image: item.coverImageUrl || undefined,
   imageSrcSet: srcSetOf(item.imageVariants),
   imagePreview: imagePreviewOf(item.imagePreview),

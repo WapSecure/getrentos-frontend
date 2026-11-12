@@ -1,6 +1,7 @@
 import { BadgeCheck, Camera, Info, Video } from '@sureground/icons';
 import type { ShowroomListing } from '@sureground/shared/showroom';
 import { VerificationSummaryCard } from '@/components/shared/trust/VerificationSummaryCard';
+import { PropertyTrustChain } from '@/components/renter/property-detail/PropertyTrustChain';
 
 const month = (iso: string) =>
   new Date(iso).toLocaleDateString('en-NG', { month: 'long', year: 'numeric' });
@@ -9,12 +10,19 @@ export function ShowroomTrust({ listing }: { listing: ShowroomListing }) {
   const filmed = listing.media.find((m) => m.kind === 'video' && m.filmedOnSite);
   const photoCount = listing.media.filter((m) => m.kind === 'image').length;
   const summary = listing.verificationSummary;
+  const chain = listing.trustChain;
 
   return (
     <section aria-labelledby="trust" className="border-t border-border/70 pt-8">
       <h2 id="trust" className="text-xl font-semibold tracking-tight text-foreground">
         What has been checked
       </h2>
+      {/* The chain is what the header badge and the browse card read from, step by step. */}
+      {chain && (
+        <div className="mt-4">
+          <PropertyTrustChain property={{ trustChain: chain }} />
+        </div>
+      )}
       {/* The summary replaces the single verified row: it says what was checked rather than "verified". */}
       {summary && (
         <div className="mt-4">
@@ -22,7 +30,8 @@ export function ShowroomTrust({ listing }: { listing: ShowroomListing }) {
         </div>
       )}
       <ul className="mt-4 space-y-3 text-sm">
-        {!summary && (
+        {/* The bare flag is only the fallback, where the API sends neither a chain nor a summary. */}
+        {!summary && !chain && (
           <li className="flex items-start gap-3 rounded-xl border border-border bg-card p-4">
             {listing.verified ? (
               <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-success" aria-hidden="true" />

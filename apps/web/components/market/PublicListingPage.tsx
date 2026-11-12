@@ -21,6 +21,7 @@ import { ListingCallToAction } from '@/components/market/ListingCallToAction';
 import { SaveListingButton } from '@/components/market/SaveListingButton';
 import { StickyListingCta } from '@/components/market/StickyListingCta';
 import { SimilarListings } from '@/components/market/SimilarListings';
+import { TrustChainBadge } from '@/components/shared/trust/TrustChainBadge';
 import { formatCurrency } from '@/lib/format';
 import { SITE_URL } from '@/lib/site';
 import {
@@ -101,10 +102,15 @@ export async function PublicListingPage({
           <div className="space-y-10">
             <header className="space-y-3">
               <div className="flex flex-wrap items-center gap-2">
-                {listing.verified && (
-                  <Badge variant="success" icon={<BadgeCheck className="h-3.5 w-3.5" />}>
-                    {market === 'land' ? 'Ownership verified' : 'Verified'}
-                  </Badge>
+                {/* Same trust chain as the browse card; the bare flag only where there is none. */}
+                {listing.trustChain ? (
+                  <TrustChainBadge chain={listing.trustChain} />
+                ) : (
+                  listing.verified && (
+                    <Badge variant="success" icon={<BadgeCheck className="h-3.5 w-3.5" />}>
+                      {market === 'land' ? 'Ownership verified' : 'Verified'}
+                    </Badge>
+                  )
                 )}
               </div>
               <div className="flex items-start justify-between gap-4">
