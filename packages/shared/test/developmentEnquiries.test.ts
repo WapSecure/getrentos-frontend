@@ -4,6 +4,7 @@ import {
   DEVELOPMENT_ENQUIRY_COPY,
   buyerDevelopmentEnquiriesOf,
   buyerDevelopmentEnquiryOf,
+  buyerDevelopmentEnquiryPageOf,
   canAskAgain,
   developerDevelopmentEnquiryOf,
   developmentEnquiryCountsOf,
@@ -124,5 +125,45 @@ test('copy says Sureground takes no payment, in plain words', () => {
   assert.match(DEVELOPMENT_ENQUIRY_COPY.developerLead, /does not take payment for developments/);
   for (const line of Object.values(DEVELOPMENT_ENQUIRY_COPY)) {
     assert.doesNotMatch(line, /escrow|\bAI\b|—|\$/i);
+  }
+});
+
+test("reads a page of the buyer's questions and drops malformed rows", () => {
+  const page = buyerDevelopmentEnquiryPageOf({
+    items: [
+      buyerApi(),
+      buyerApi({ id: 'enq-2', status: 'ANSWERED', answer: 'In March.', answeredAt: createdAt }),
+      buyerApi({ id: 'enq-3', status: 'ANSWERED' }),
+      { id: 'broken' },
+    ],
+    total: 23,
+    page: 2,
+    pageSize: 20,
+    totalPages: 2,
+  });
+  assert.ok(page);
+  assert.deepEqual(
+    page.items.map((e) => e.id),
+    ['enq-1', 'enq-2']
+  );
+  assert.equal(page.total, 23);
+  assert.equal(page.page, 2);
+  assert.equal(page.items[1].answer, 'In March.');
+});
+
+test('a page without items is refused, and bad numbers fall back', () => {
+  assert.equal(buyerDevelopmentEnquiryPageOf([buyerApi()]), undefined);
+  assert.equal(buyerDevelopmentEnquiryPageOf(null), undefined);
+  const page = buyerDevelopmentEnquiryPageOf({ items: [buyerApi()], page: -1, pageSize: 'x' });
+  assert.deepEqual(
+    { total: page?.total, page: page?.page, pageSize: page?.pageSize },
+    { total: 1, page: 1, pageSize: 20 }
+  );
+});
+
+test('history copy names no payment by Sureground', () => {
+  assert.match(DEVELOPMENT_ENQUIRY_COPY.historyLead, /does not take payment for developments/);
+  for (const value of Object.values(DEVELOPMENT_ENQUIRY_COPY)) {
+    assert.doesNotMatch(value, /\u2014|escrow|\bAI\b/);
   }
 });

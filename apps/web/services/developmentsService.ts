@@ -2,10 +2,12 @@ import { authFetch, safeCall, type ApiResponse } from '@/lib/apiHelpers';
 import {
   buyerDevelopmentEnquiriesOf,
   buyerDevelopmentEnquiryOf,
+  buyerDevelopmentEnquiryPageOf,
   developerDevelopmentEnquiriesOf,
   developerDevelopmentEnquiryOf,
   developmentEnquiryCountsOf,
   type BuyerDevelopmentEnquiry,
+  type BuyerDevelopmentEnquiryPage,
   type DeveloperDevelopmentEnquiry,
   type DevelopmentCheckKind,
   type DevelopmentEnquiryStatus,
@@ -253,6 +255,15 @@ export const developmentEnquiriesService = {
         )
       ),
       buyerDevelopmentEnquiryOf
+    );
+  },
+  /** The caller's questions across all developments, newest first. */
+  history(page: number, pageSize: number): Promise<ApiResponse<BuyerDevelopmentEnquiryPage>> {
+    return mapped(
+      safeCall(() =>
+        authFetch<unknown>(`/development-enquiries/history?page=${page}&pageSize=${pageSize}`)
+      ),
+      buyerDevelopmentEnquiryPageOf
     );
   },
   mine(developmentId?: string): Promise<ApiResponse<BuyerDevelopmentEnquiry[]>> {

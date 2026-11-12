@@ -155,7 +155,7 @@ Built on top of step one (backend #200, web #169). Backend: `feat/m8d-discovery-
 **Ask the developer:**
 
 - Signed in only (decision of 2026-11-10). Signed out, the page shows "Sign in to ask the developer".
-- The buyer picks a unit type (optional) and writes a question. Their earlier questions and the answers are shown on the same page ("Your questions"). There is no separate buyer enquiries area, so there is no list across developments yet.
+- The buyer picks a unit type (optional) and writes a question. Their earlier questions and the answers are shown on the same page ("Your questions"). A list across developments was added on 2026-11-12 (see "Silent developers and the buyer's questions" below).
 - Limits: 5 sends a minute per user, 3 unanswered questions per development, 10 questions a day.
 - The developer's inbox is in the agency developments editor; the developments list shows "n new questions". Members with an editing seat (owner, staff, portfolio manager) can answer, change an answer, or close a question. Each step is audit-logged.
 - The firm's editors are told in the app and by email (`DEVELOPMENT_ENQUIRY_RECEIVED`); the buyer is told when the developer answers (`DEVELOPMENT_ENQUIRY_ANSWERED`).
@@ -163,5 +163,25 @@ Built on top of step one (backend #200, web #169). Backend: `feat/m8d-discovery-
 - The developer's own sales contact stays on the page. Both the page and the inbox say that Sureground does not take payment for developments.
 
 **Shared:** `@sureground/shared/showroom` `developmentEnquiries`: types, validating mappers, the form check and the copy, with `node --test` tests.
+
+## M8d follow-ups: silent developers and the buyer's questions (built 2026-11-12)
+
+Approved by the product owner on 2026-11-12. Backend and web on `feat/developer-enquiry-followups`, with the additive migration `20261112210000_development_enquiry_reminders` (one notification type, `reminderCount` and `lastRemindedAt` on `DevelopmentEnquiry`, one index), not yet deployed. Mobile is not done.
+
+**Silent developers:**
+
+- A question is "unanswered" once it has been `NEW` for more than 3 days.
+- **Staff queue:** backoffice "Unanswered developer questions" (`/admin/development-questions`, sidebar, `verifications.review`), from `GET /admin/development-enquiries/unanswered`. Questions are grouped by development with the firm, the development's status, how many are waiting, the oldest, each question's age and reminder count, and the last reminder. The development's name links to its staff page. No buyer is named.
+- **Send a reminder now:** `POST /admin/development-enquiries/developments/:id/remind` (`verifications.approve`, audit-logged as `DEVELOPMENT_ENQUIRY_REMINDER_SENT`, confirm dialog, no step-up, the same as "Send back"). It covers every question there older than 3 days. A second reminder to the same development within an hour is refused, as is a firm with no editing seat.
+- **Daily reminder:** at 09:00 Lagos time, under the `DistributedJobService` lease (`development-enquiry-reminders`). It reminds the firm's editing seats (owner, staff, portfolio manager; the first 25) about `NEW` questions older than 3 days, at most once every 3 days per question, in the app and by email (`DEVELOPMENT_ENQUIRY_REMINDER`, on the email list). Firms that are suspended, offboarding or closed are skipped. Each run is audit-logged per development.
+- Reminders are never sent to the buyer.
+
+**The buyer's questions:**
+
+- `GET /development-enquiries/history?page=&pageSize=`: the signed-in user's own questions across all developments, newest first, paginated, with the development's name and whether its public page still opens, and the answer and its date.
+- Web: "Questions to developers" in the buyer area (`/buyer/developer-questions`, under Buying in the sidebar). Each question shows its status (Waiting for an answer, Answered, Closed), the answer, and a link to the development while it is still listed.
+- The "Your questions" block on the development page links to it for users with the buyer role. The answered notification links buyers to it; anyone else still goes to the development page.
+
+**Checks:** backend specs through the gate and `tsc -p tsconfig.build.json` clean; web, backoffice and shared `tsc` and eslint clean on changed files; `audit:ui-controls` and `tokens:check` pass. Not checked in a browser.
 
 **Mobile (feat/mobile-ask-developer):** the development screen moved from `(market)` to `(public)/development/[id]`, so signed-in people can open it (the market tab stays signed-out only). Signed-in buyers reach it from "Off-plan developments" on Discover, which opens `(app)/developments` (the same list as the market tab). The screen has "Ask the developer" with the shared copy, form check and mappers: signed out, "Sign in to ask the developer" signs in and returns to the development; signed in, an optional unit type, the question, "Send to the developer" (errors, including the rate limit message, shown under the form) and "Your questions" with status and answer. The sales contact sits under "Or contact their sales team". `DEVELOPMENT_ENQUIRY_ANSWERED` (and any `/developments/<id>` action link) opens the development screen.

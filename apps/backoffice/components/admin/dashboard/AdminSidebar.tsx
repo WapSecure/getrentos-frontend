@@ -468,6 +468,12 @@ const navItems: NavItem[] = [
     permission: 'verifications.review',
   },
   {
+    label: 'Unanswered developer questions',
+    href: '/admin/development-questions',
+    icon: MessageCircleQuestion,
+    permission: 'verifications.review',
+  },
+  {
     label: 'Automation usage',
     href: '/admin/ai-usage',
     icon: Cpu,
