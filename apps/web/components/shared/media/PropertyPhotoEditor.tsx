@@ -169,7 +169,7 @@ export function PropertyPhotoEditor({
 
   return (
     <div className="space-y-2">
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {photos.map((photo, index) => (
           <div key={photo.id} className="space-y-2">
             <div className="relative aspect-video overflow-hidden rounded-lg border border-border bg-muted">

@@ -54,7 +54,7 @@ export const EditOwnerPropertyModal = ({
 }: EditOwnerPropertyModalProps) => {
   return (
     <Dialog open={!!property} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="p-0">
+      <DialogContent className="p-0" size="xl">
         {property && (
           <EditOwnerPropertyForm
             key={property.id}
@@ -201,14 +201,14 @@ const EditOwnerPropertyForm = ({
 
   return (
     <>
-      <div className="p-4 border-b border-border">
+      <div className="p-4 sm:px-8 sm:py-5 border-b border-border">
         <DialogTitle className="font-semibold text-foreground">Edit property</DialogTitle>
         <DialogDescription className="text-xs text-muted-foreground mt-0.5">
           Update your property&apos;s core details
         </DialogDescription>
       </div>
 
-      <div className="p-4 space-y-3">
+      <div className="p-4 sm:px-8 sm:py-6 space-y-3">
         <Field label="Property name" required>
           <Input value={name} onChange={(e) => setName(e.target.value)} />
         </Field>
