@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { ShieldCheck, ShieldAlert, Eye, Check, X, MessageSquareText } from '@sureground/icons';
 import { Badge, Button, IconButton } from '@sureground/ui';
+import { trustScoreDisplay } from '@sureground/shared';
 import { applicationStatusBadges } from '@/lib/statusBadge';
 import { formatCurrency, formatDate, getInitials } from '@/lib/format';
 import type { RentalApplication } from '@/types/landlord';
@@ -76,7 +77,9 @@ export const ApplicationCard = ({
 
       <div className="flex items-center gap-1.5 mt-3">
         <span className="text-xs text-muted-foreground">Trust score</span>
-        <span className="text-xs font-bold text-primary">{application.trustScore}</span>
+        <span className="text-xs font-bold text-primary">
+          {trustScoreDisplay(application.trustScore)}
+        </span>
       </div>
 
       <div className="flex gap-2 mt-4 pt-4 border-t border-border">

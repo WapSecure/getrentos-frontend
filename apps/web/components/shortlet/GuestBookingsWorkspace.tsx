@@ -36,6 +36,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';
 import { formatCurrency, formatDate } from '@/lib/format';
+import { guestBookingTotals } from '@/lib/guestBookingTotals';
 import { ShortletMessagesInbox } from './ShortletMessagesInbox';
 import { ShortletReviewDialog } from './ShortletReviewDialog';
 import { ShortletWishlistDialog } from './ShortletWishlistDialog';
@@ -99,6 +100,20 @@ function cancelDescription(b: ShortletBooking): string {
   return 'This will cancel your booking.';
 }
 
+// Same split as the booking quote, so the card agrees with the "Pay" button.
+function BookingTotal({ b }: { b: ShortletBooking }) {
+  const totals = guestBookingTotals(b);
+  return (
+    <>
+      <p className="mt-1 font-semibold">{formatCurrency(totals.stayWithTax)}</p>
+      <p className="text-xs text-muted-foreground">
+        {totals.tax > 0 ? `Stay incl. ${formatCurrency(totals.tax)} VAT` : 'For the stay'}
+        {totals.deposit > 0 ? ` · plus ${formatCurrency(totals.deposit)} refundable deposit` : ''}
+      </p>
+    </>
+  );
+}
+
 function DepositClaimBadges({ b }: { b: ShortletBooking }) {
   if (b.deposit == null) return null;
   const decided =
@@ -139,9 +154,6 @@ function DepositClaimBadges({ b }: { b: ShortletBooking }) {
             Deposit refunded {formatCurrency(refunded)}
           </Badge>
         )}
-      {b.taxAmount != null && b.taxAmount > 0 && (
-        <Badge variant="neutral">Tax {formatCurrency(b.taxAmount)}</Badge>
-      )}
     </div>
   );
 }
@@ -220,9 +232,7 @@ export const GuestBookingsWorkspace = () => {
       else toast.error(reason.message);
     },
   });
-  const payAmount = payTarget
-    ? (payTarget.total ?? 0) + (payTarget.taxAmount ?? 0) + (payTarget.deposit ?? 0)
-    : 0;
+  const payAmount = payTarget ? guestBookingTotals(payTarget).dueNow : 0;
 
   return (
     <div className="mx-auto max-w-[90rem]">
@@ -325,7 +335,7 @@ export const GuestBookingsWorkspace = () => {
                   <Badge variant={STATUS_VARIANT[b.status]}>
                     {SHORTLET_BOOKING_STATUS_LABEL[b.status]}
                   </Badge>
-                  <p className="mt-1 font-semibold">{formatCurrency(b.total)}</p>
+                  <BookingTotal b={b} />
                   {b.paymentStatus && b.paymentStatus !== 'UNPAID' && (
                     <Badge
                       variant={b.paymentStatus === 'PAID' ? 'success' : 'info'}
@@ -398,7 +408,7 @@ export const GuestBookingsWorkspace = () => {
                       loadingText="Processing…"
                       disabled={pay.isPending}
                     >
-                      {`Pay ${formatCurrency((b.total ?? 0) + (b.taxAmount ?? 0) + (b.deposit ?? 0))}`}
+                      {`Pay ${formatCurrency(guestBookingTotals(b).dueNow)}`}
                     </Button>
                   )}
                   {(b.status === 'CONFIRMED' || b.status === 'COMPLETED') && (

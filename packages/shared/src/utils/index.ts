@@ -8,6 +8,7 @@ export * from './parcelBoundary';
 export * from './videoCall';
 export * from './videoLimits';
 export * from './trustLabel';
+export * from './trustScoreDisplay';
 export * from './landAuthority';
 export * from './landWatch';
 export * from './months';

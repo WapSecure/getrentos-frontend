@@ -7,6 +7,7 @@ import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency } from '@/lib/format';
 import { renterKeys } from '@/lib/queryKeys';
+import { rentPaidFigure } from '@/lib/rentPaidFigure';
 import { ROUTES } from '@/lib/constants/auth';
 
 export const RenterStatsCards = () => {
@@ -21,7 +22,7 @@ export const RenterStatsCards = () => {
   const unreadCount = dashboardStats?.unreadMessagesCount ?? 0;
   const viewingsCount = dashboardStats?.upcomingViewingsCount ?? 0;
 
-  const { data: lease } = useQuery({
+  const { data: lease, isLoading: leaseLoading } = useQuery({
     queryKey: renterKeys.lease,
     queryFn: () => unwrap(renterService.getLease()),
   });
@@ -30,20 +31,24 @@ export const RenterStatsCards = () => {
     ? `Ends ${new Date(lease.endDate).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}`
     : t('dashboard.stats.current_lease_subtitle');
 
-  const { data: paymentsData } = useQuery({
+  const {
+    data: paymentsData,
+    isLoading: paymentsLoading,
+    isError: paymentsError,
+  } = useQuery({
     queryKey: [...renterKeys.payments, { page: 1, pageSize: 100 }],
     queryFn: () => unwrap(renterService.listPayments({ page: 1, pageSize: 100 })),
   });
-  // The summary covers every charge; older APIs leave it out, so fall back to this page.
-  const totalRentPaid =
-    paymentsData?.summary?.totalPaidNaira ??
-    (paymentsData?.items ?? [])
-      .filter((p) => p.status === 'paid')
-      .reduce((sum, p) => sum + p.amount, 0);
+  const rentPaid = rentPaidFigure(paymentsData, {
+    isLoading: paymentsLoading,
+    isError: paymentsError,
+  });
 
+  // Each figure waits for its own query: rendering before then showed "₦0" and "—" as if real.
   if (statsLoading) {
     return <StatGroupSkeleton groups={[4, 2]} />;
   }
+  const homeLoading = leaseLoading || rentPaid.state === 'loading';
 
   return (
     <div className="space-y-4">
@@ -76,23 +81,33 @@ export const RenterStatsCards = () => {
           },
         ]}
       />
-      <StatGroup
-        title={t('dashboard.groups.your_home')}
-        items={[
-          {
-            label: t('dashboard.stats.current_lease'),
-            value: leaseStatus,
-            subtitle: leaseEndLabel,
-            href: ROUTES.RENTER_LEASE,
-          },
-          {
-            label: t('dashboard.stats.total_rent_paid'),
-            value: formatCurrency(totalRentPaid, { compact: true }),
-            subtitle: t('dashboard.stats.total_rent_paid_subtitle'),
-            href: ROUTES.RENTER_PAYMENTS,
-          },
-        ]}
-      />
+      {homeLoading ? (
+        <StatGroupSkeleton groups={[2]} />
+      ) : (
+        <StatGroup
+          title={t('dashboard.groups.your_home')}
+          items={[
+            {
+              label: t('dashboard.stats.current_lease'),
+              value: leaseStatus,
+              subtitle: leaseEndLabel,
+              href: ROUTES.RENTER_LEASE,
+            },
+            {
+              label: t('dashboard.stats.total_rent_paid'),
+              value:
+                rentPaid.state === 'ready'
+                  ? formatCurrency(rentPaid.naira, { compact: true })
+                  : 'Unavailable',
+              subtitle:
+                rentPaid.state === 'ready'
+                  ? t('dashboard.stats.total_rent_paid_subtitle')
+                  : 'Could not load your payments',
+              href: ROUTES.RENTER_PAYMENTS,
+            },
+          ]}
+        />
+      )}
     </div>
   );
 };

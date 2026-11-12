@@ -7,6 +7,7 @@ import { paymentStatusBadges } from '@/lib/statusBadge';
 import { formatDate, getInitials } from '@/lib/format';
 import type { Tenant, RentPaymentStatus } from '@/types/landlord';
 import { ROUTES } from '@/lib/constants/auth';
+import { trustScoreDisplay } from '@sureground/shared';
 
 const rentStatusConfig = paymentStatusBadges;
 
@@ -72,7 +73,9 @@ export const TenantCard = ({ tenant, delay = 0 }: TenantCardProps) => {
         </p>
         <div className="flex items-center gap-1">
           <span className="text-xs font-medium text-muted-foreground">Trust score</span>
-          <span className="text-xs font-bold text-primary">{tenant.trustScore}</span>
+          <span className="text-xs font-bold text-primary">
+            {trustScoreDisplay(tenant.trustScore)}
+          </span>
         </div>
       </div>
 

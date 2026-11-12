@@ -27,6 +27,7 @@ import { errorMessage } from '@/lib/api/client';
 import { relativeTime } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
+import { hasTrustScore } from '@sureground/shared';
 
 export default function LandlordLeads() {
   const { colors, spacing, radius } = useTheme();
@@ -181,7 +182,8 @@ function LeadRow({
 
           <Text variant="caption" color={l.stale ? 'destructive' : 'mutedForeground'}>
             Last activity {relativeTime(l.lastActivityAt)}
-            {l.stale ? ' · gone cold' : ''} · trust {l.trustScore}
+            {l.stale ? ' · gone cold' : ''} ·{' '}
+            {hasTrustScore(l.trustScore) ? `trust ${l.trustScore}` : 'new to Sureground'}
           </Text>
 
           <Pressable

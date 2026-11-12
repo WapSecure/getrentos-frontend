@@ -39,7 +39,7 @@ const statusConfig: Record<
     bg: 'bg-warning-subtle',
     color: 'text-warning',
     message:
-      'Our compliance team is reviewing your submitted documents. This typically takes 24–48 hours.',
+      'Our compliance team is reviewing your submitted documents. We’ll notify you when the review is done.',
   },
   unverified: {
     label: 'Unverified',

@@ -15,6 +15,7 @@ import { Badge, Button, Checkbox, IconButton } from '@sureground/ui';
 import { getInitials, formatDate, formatRelativeTime } from '@/lib/format';
 import { leadStageBadges } from '@/lib/statusBadge';
 import type { LandlordLead } from '@/types/landlord';
+import { trustScoreDisplay } from '@sureground/shared';
 
 const NUDGE_COOLDOWN_HOURS = 24;
 
@@ -93,7 +94,7 @@ export const LeadCard = ({
       <div className="grid grid-cols-2 gap-3 mt-4">
         <div>
           <p className="text-xs text-muted-foreground">Trust score</p>
-          <p className="text-sm font-bold text-primary">{lead.trustScore}</p>
+          <p className="text-sm font-bold text-primary">{trustScoreDisplay(lead.trustScore)}</p>
         </div>
         <div>
           <p className="text-xs text-muted-foreground">First contact</p>
