@@ -102,12 +102,12 @@ export function searchFilterProps(
 /** Lowercase, safe characters only, capped: a campaign tag, never free text. Null when nothing usable is left. */
 export function coarseUtmValue(raw: string | null | undefined): string | null {
   if (!raw) return null;
-  const value = raw
-    .trim()
+  // Capped before any pattern runs, so a crafted link cannot make the clean-up slow.
+  const parts = raw
+    .slice(0, 200)
     .toLowerCase()
-    .replace(/[^a-z0-9._-]+/g, '_')
-    .replace(/^_+|_+$/g, '')
-    .slice(0, 60);
+    .split(/[^a-z0-9._-]/);
+  const value = parts.filter(Boolean).join('_').slice(0, 60);
   // Something that looks like a phone or account number is dropped, not trimmed.
   return value && !/\d{7,}/.test(value) ? value : null;
 }
