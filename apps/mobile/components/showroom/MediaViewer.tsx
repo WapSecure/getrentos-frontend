@@ -14,10 +14,15 @@ import {
 import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+  type SharedValue,
+} from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
 import { ChevronLeft, ChevronRight, Compass, ImageOff, Play, X } from '@sureground/icons/native';
-import { Button, Chip, Text, useReducedMotion } from '@sureground/ui-native';
+import { Button, Chip, Text, useReducedMotion, useTheme } from '@sureground/ui-native';
 import {
   FLOOR_PLAN_MEASUREMENT_LABEL,
   floorPlanFor,
@@ -34,6 +39,13 @@ import {
 } from '@sureground/shared/showroom';
 import { EmbedFrame } from '@/components/video/EmbedFrame';
 import { VideoTourPlayer } from '@/components/video/VideoTourPlayer';
+import {
+  containedRect,
+  markerLabel,
+  numberedMarkers,
+  pointInRect,
+  type Size,
+} from '@/lib/floorPlanMarkers';
 
 /** The same events as the web viewer (packages/ui MediaViewer). */
 export interface MediaEvent {
@@ -52,6 +64,9 @@ const INK = {
   paper: '#fff',
 };
 const MAX_ZOOM = 4;
+/** A room marker: a 44pt hit area around a 28pt numbered dot. */
+const MARKER_HIT = 44;
+const MARKER_DOT = 28;
 const THUMB = 56;
 const THUMB_GAP = 6;
 const THUMB_PAD = 16;
@@ -210,6 +225,23 @@ function ViewerBody({
   const currentRoom =
     item.room ?? [...items.slice(0, index + 1)].reverse().find((m) => m.room)?.room;
 
+  // The plan's numbered rooms, as in the room list; one with a linked photo opens it, as its row does.
+  const planMarkers = (p: ShowroomFloorPlan | undefined): PlanMarker[] | undefined => {
+    if (!p) return undefined;
+    const marks = numberedMarkers(p.rooms).map(({ room, number }) => {
+      const at = room.photoMediaId ? items.findIndex((m) => m.id === room.photoMediaId) : -1;
+      return {
+        id: room.id,
+        number,
+        x: room.x,
+        y: room.y,
+        label: markerLabel(number, room.name, at >= 0),
+        onPress: at >= 0 ? () => go(at) : undefined,
+      };
+    });
+    return marks.length ? marks : undefined;
+  };
+
   return (
     <View style={{ flex: 1, backgroundColor: INK.bg }}>
       <View
@@ -363,6 +395,10 @@ function ViewerBody({
                     current={i === index}
                     zoomed={i === index && zoomed}
                     onZoomChange={setZoomed}
+                    natural={m.width && m.height ? { width: m.width, height: m.height } : undefined}
+                    markers={planMarkers(
+                      isFloorPlan(m) ? floorPlanFor(floorPlans, m.id) : undefined
+                    )}
                   />
                 ) : m.kind === 'video' ? (
                   active === m.id ? (
@@ -434,13 +470,28 @@ function ViewerBody({
                 {FLOOR_PLAN_MEASUREMENT_LABEL[plan.measurement]}
               </Text>
             ) : null}
-            {plan.rooms.map((room) => {
+            {plan.rooms.map((room, roomIndex) => {
               const size = roomSizeLabel(room, plan.measurement);
               const at = room.photoMediaId
                 ? items.findIndex((m) => m.id === room.photoMediaId)
                 : -1;
               const body = (
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 44 }}>
+                  <View
+                    importantForAccessibility="no"
+                    style={{
+                      width: 24,
+                      height: 24,
+                      borderRadius: 12,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: INK.tile,
+                    }}
+                  >
+                    <Text variant="label" style={{ color: INK.fg }}>
+                      {roomIndex + 1}
+                    </Text>
+                  </View>
                   <View style={{ flex: 1 }}>
                     <Text variant="bodyStrong" style={{ color: INK.fg }} numberOfLines={1}>
                       {room.name}
@@ -457,12 +508,18 @@ function ViewerBody({
                   key={room.id}
                   onPress={() => go(at)}
                   accessibilityRole="button"
-                  accessibilityLabel={`${room.name}${size ? `, ${size}` : ''}, open its photo`}
+                  accessibilityLabel={`${roomIndex + 1}. ${room.name}${size ? `, ${size}` : ''}, open its photo`}
                 >
                   {body}
                 </Pressable>
               ) : (
-                <View key={room.id}>{body}</View>
+                <View
+                  key={room.id}
+                  accessible
+                  accessibilityLabel={`${roomIndex + 1}. ${room.name}, ${size ?? 'No size given'}`}
+                >
+                  {body}
+                </View>
               );
             })}
           </ScrollView>
@@ -625,6 +682,8 @@ function ZoomableImage({
   current,
   zoomed,
   onZoomChange,
+  natural: knownNatural,
+  markers,
 }: {
   uri: string;
   /** A tiny blurred `data:` URI shown until the photo loads. */
@@ -635,8 +694,16 @@ function ZoomableImage({
   /** Owned by the viewer, which also locks the pager while it is true. */
   zoomed: boolean;
   onZoomChange: (zoomed: boolean) => void;
+  /** The image's own size, when the API sent it; otherwise read when it loads. */
+  natural?: Size;
+  /** A floor plan's numbered rooms, drawn on the image and zoomed with it. */
+  markers?: PlanMarker[];
 }) {
   const [failed, setFailed] = useState(false);
+  const [box, setBox] = useState<Size | null>(null);
+  const [loaded, setLoaded] = useState<Size | null>(null);
+  // The plan is drawn contained, so markers go on the drawn image, not on the (letterboxed) box.
+  const rect = markers ? containedRect(box, loaded ?? knownNatural ?? null) : null;
   const scale = useSharedValue(1);
   const startScale = useSharedValue(1);
   const x = useSharedValue(0);
@@ -710,25 +777,138 @@ function ZoomableImage({
     <GestureDetector gesture={Gesture.Simultaneous(pinch, pan, doubleTap)}>
       <Animated.View
         style={[{ flex: 1 }, style]}
-        accessible
-        accessibilityRole="image"
-        accessibilityLabel={alt}
-        accessibilityHint="Pinch or double tap to zoom"
+        onLayout={
+          markers
+            ? (e) => {
+                // The layout size is before the zoom transform, which the markers share.
+                const { width: w, height: h } = e.nativeEvent.layout;
+                if (w !== box?.width || h !== box?.height) setBox({ width: w, height: h });
+              }
+            : undefined
+        }
       >
-        <Image
-          source={{ uri }}
-          contentFit="contain"
-          cachePolicy="memory-disk"
-          recyclingKey={uri}
-          placeholder={placeholder ? { uri: placeholder } : undefined}
-          placeholderContentFit="contain"
-          transition={reduced ? 0 : 150}
-          onError={() => setFailed(true)}
-          alt={alt}
-          accessible={false}
-          style={{ width: '100%', height: '100%' }}
-        />
+        <View
+          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+          // The image, not this whole view, is the accessible element, so the markers can be reached.
+          accessible
+          accessibilityRole="image"
+          accessibilityLabel={alt}
+          accessibilityHint="Pinch or double tap to zoom"
+        >
+          <Image
+            source={{ uri }}
+            contentFit="contain"
+            cachePolicy="memory-disk"
+            recyclingKey={uri}
+            placeholder={placeholder ? { uri: placeholder } : undefined}
+            placeholderContentFit="contain"
+            transition={reduced ? 0 : 150}
+            onError={() => setFailed(true)}
+            onLoad={
+              markers
+                ? (e) => {
+                    const { width: w, height: h } = e.source;
+                    if (w > 0 && h > 0 && (w !== loaded?.width || h !== loaded?.height)) {
+                      setLoaded({ width: w, height: h });
+                    }
+                  }
+                : undefined
+            }
+            alt={alt}
+            accessible={false}
+            style={{ width: '100%', height: '100%' }}
+          />
+        </View>
+        {rect && markers
+          ? markers.map((m) => {
+              const at = pointInRect(rect, m.x, m.y);
+              return <PlanMarkerView key={m.id} marker={m} x={at.x} y={at.y} scale={scale} />;
+            })
+          : null}
       </Animated.View>
     </GestureDetector>
+  );
+}
+
+interface PlanMarker {
+  id: string;
+  number: number;
+  /** Percent of the plan image, from the top left. */
+  x: number;
+  y: number;
+  label: string;
+  /** Opens the room's photo; a room without one is shown but not tappable. */
+  onPress?: () => void;
+}
+
+/**
+ * One numbered room on the plan. It sits inside the zoomed view, so it moves with the plan, and is
+ * scaled back by the zoom so the dot and its 44pt hit area stay the same size on screen.
+ */
+function PlanMarkerView({
+  marker,
+  x,
+  y,
+  scale,
+}: {
+  marker: PlanMarker;
+  x: number;
+  y: number;
+  scale: SharedValue<number>;
+}) {
+  const { colors, shadows } = useTheme();
+  const steady = useAnimatedStyle(() => ({ transform: [{ scale: 1 / scale.get() }] }));
+  const frame = {
+    position: 'absolute' as const,
+    left: x - MARKER_HIT / 2,
+    top: y - MARKER_HIT / 2,
+    width: MARKER_HIT,
+    height: MARKER_HIT,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  };
+  const dot = (
+    <View
+      style={[
+        {
+          width: MARKER_DOT,
+          height: MARKER_DOT,
+          borderRadius: MARKER_DOT / 2,
+          borderWidth: 2,
+          borderColor: INK.fg,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: colors.primary,
+        },
+        shadows.sm,
+      ]}
+    >
+      <Text variant="label" style={{ color: colors.primaryForeground }} maxFontSizeMultiplier={1}>
+        {marker.number}
+      </Text>
+    </View>
+  );
+  return (
+    <Animated.View style={[frame, steady]} pointerEvents={marker.onPress ? 'box-none' : 'none'}>
+      {marker.onPress ? (
+        <Pressable
+          onPress={marker.onPress}
+          accessibilityRole="button"
+          accessibilityLabel={marker.label}
+          style={{
+            width: MARKER_HIT,
+            height: MARKER_HIT,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          {dot}
+        </Pressable>
+      ) : (
+        <View accessible accessibilityLabel={marker.label}>
+          {dot}
+        </View>
+      )}
+    </Animated.View>
   );
 }
