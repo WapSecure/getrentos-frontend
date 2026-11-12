@@ -60,6 +60,7 @@ export * from './Alert';
 export * from './DescriptionList';
 export * from './Disclosure';
 export * from './IconButton';
+export * from './Tooltip';
 export * from './QueryState';
 export * from './RadioGroup';
 export * from './SearchInput';
