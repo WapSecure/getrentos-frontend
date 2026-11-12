@@ -2,16 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  Badge,
-  Button,
-  ConfirmDialog,
-  PageErrorState,
-  PageHeader,
-  Skeleton,
-  Textarea,
-  useToast,
-} from '@sureground/ui';
+import { Badge, PageErrorState, PageHeader, Skeleton, Textarea, useToast } from '@sureground/ui';
 import { CalendarClock, MapPin } from '@sureground/icons';
 import { boundaryCorners } from '@sureground/shared';
 import { ApiError, unwrap } from '@/lib/apiHelpers';
@@ -34,12 +25,15 @@ import {
   type LandReviewCase,
   type LandReviewCiteInput,
   type LandReviewUploadInput,
+  type LandReviewValuationInput,
 } from '@/types/landReviewer';
 import type { ReviewEvidenceActions } from './ReviewCheckEvidence';
 import { ConflictDeclarationCard } from './ConflictDeclarationCard';
 import { ReviewCheckRow } from './ReviewCheckRow';
 import { ReviewDocuments } from './ReviewDocuments';
 import { pendingChecks } from './reviewRules';
+import { ReviewSubmissionSection } from './ReviewSubmissionSection';
+import { ReviewValuationSection } from './ReviewValuationSection';
 
 const Fact = ({ label, value }: { label: string; value?: string | number | null }) =>
   value === null || value === undefined || value === '' ? null : (
@@ -53,7 +47,6 @@ export const ReviewSeatDetail = ({ seatId }: { seatId: string }) => {
   const queryClient = useQueryClient();
   const [savingKey, setSavingKey] = useState<string | null>(null);
   const [report, setReport] = useState('');
-  const [confirmReport, setConfirmReport] = useState(false);
   const toast = useToast();
 
   const { data, isLoading, error, refetch, isRefetching } = useQuery({
@@ -150,6 +143,16 @@ export const ReviewSeatDetail = ({ seatId }: { seatId: string }) => {
     onError: (reason: Error) => toast.error(reason.message),
   });
 
+  const fileValuation = useMutation({
+    mutationFn: (input: LandReviewValuationInput) =>
+      unwrap(landReviewerService.submitValuation(seatId, input)),
+    onSuccess: (next) => {
+      store(next);
+      toast.success('Valuation filed.');
+    },
+    onError: (reason: Error) => toast.error(reason.message),
+  });
+
   if (isLoading) {
     return <Skeleton className="h-72 rounded-2xl" />;
   }
@@ -170,6 +173,7 @@ export const ReviewSeatDetail = ({ seatId }: { seatId: string }) => {
   const pending = pendingChecks(data.checks);
   const corners = boundaryCorners(data.parcel.boundaryGeometry);
   const reportLength = report.trim().length;
+  const submissionState = undeclared ? 'locked' : active ? 'open' : 'closed';
   const p = data.parcel;
 
   return (
@@ -272,56 +276,59 @@ export const ReviewSeatDetail = ({ seatId }: { seatId: string }) => {
             <ReviewDocuments documents={data.documents} checks={data.checks} />
           </section>
 
-          <section aria-labelledby="report-heading" className="space-y-3">
-            <h2 id="report-heading" className="text-lg font-semibold text-foreground">
-              Final report
-            </h2>
-            {undeclared ? (
-              <p className="text-sm text-muted-foreground">Opens after your declaration.</p>
-            ) : active ? (
-              <form
-                className="space-y-3"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  setConfirmReport(true);
-                }}
-              >
-                <label htmlFor="review-report" className="sr-only">
-                  Report
-                </label>
-                <Textarea
-                  id="review-report"
-                  rows={8}
-                  maxLength={LAND_REVIEW_REPORT_MAX}
-                  value={report}
-                  onChange={(e) => setReport(e.target.value)}
-                  placeholder="Your findings, the sources you relied on, and any reservations."
-                />
-                <p className="text-xs text-muted-foreground">
-                  {reportLength < LAND_REVIEW_REPORT_MIN
-                    ? `At least ${LAND_REVIEW_REPORT_MIN} characters.`
-                    : `${reportLength.toLocaleString()} characters.`}
-                  {pending.length > 0 &&
-                    ` Decide every check first (${pending.length} still pending).`}
+          {data.role === 'VALUER' && (
+            <ReviewValuationSection
+              state={submissionState}
+              valuation={data.valuation}
+              isSubmitting={fileValuation.isPending}
+              onSubmit={(input) => fileValuation.mutateAsync(input)}
+            />
+          )}
+
+          <ReviewSubmissionSection
+            id="report"
+            title="Final report"
+            state={submissionState}
+            hint={
+              <>
+                {reportLength < LAND_REVIEW_REPORT_MIN
+                  ? `At least ${LAND_REVIEW_REPORT_MIN} characters.`
+                  : `${reportLength.toLocaleString()} characters.`}
+                {pending.length > 0 &&
+                  ` Decide every check first (${pending.length} still pending).`}
+              </>
+            }
+            canSubmit={reportLength >= LAND_REVIEW_REPORT_MIN && pending.length === 0}
+            isSubmitting={submit.isPending}
+            submitLabel="File report"
+            confirm={{
+              title: 'File your report?',
+              description:
+                'Filing completes your engagement on this case. You will not be able to change your decisions or the report afterwards.',
+            }}
+            onSubmit={() => submit.mutateAsync()}
+            closed={
+              data.report ? (
+                <p className="whitespace-pre-line rounded-2xl border border-border bg-card p-4 text-sm text-foreground">
+                  {data.report}
                 </p>
-                <Button
-                  type="submit"
-                  disabled={
-                    reportLength < LAND_REVIEW_REPORT_MIN || pending.length > 0 || submit.isPending
-                  }
-                  isLoading={submit.isPending}
-                >
-                  File report
-                </Button>
-              </form>
-            ) : data.report ? (
-              <p className="whitespace-pre-line rounded-2xl border border-border bg-card p-4 text-sm text-foreground">
-                {data.report}
-              </p>
-            ) : (
-              <p className="text-sm text-muted-foreground">No report was filed.</p>
-            )}
-          </section>
+              ) : (
+                <p className="text-sm text-muted-foreground">No report was filed.</p>
+              )
+            }
+          >
+            <label htmlFor="review-report" className="sr-only">
+              Report
+            </label>
+            <Textarea
+              id="review-report"
+              rows={8}
+              maxLength={LAND_REVIEW_REPORT_MAX}
+              value={report}
+              onChange={(e) => setReport(e.target.value)}
+              placeholder="Your findings, the sources you relied on, and any reservations."
+            />
+          </ReviewSubmissionSection>
         </div>
 
         <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
@@ -387,16 +394,6 @@ export const ReviewSeatDetail = ({ seatId }: { seatId: string }) => {
           )}
         </aside>
       </div>
-
-      <ConfirmDialog
-        open={confirmReport}
-        onOpenChange={setConfirmReport}
-        title="File your report?"
-        description="Filing completes your engagement on this case. You will not be able to change your decisions or the report afterwards."
-        confirmLabel="File report"
-        isLoading={submit.isPending}
-        onConfirm={() => submit.mutateAsync().catch(() => undefined)}
-      />
     </div>
   );
 };

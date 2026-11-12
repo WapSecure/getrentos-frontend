@@ -26,6 +26,7 @@ import { ownerKeys } from '@/lib/queryKeys';
 import { formatCurrency } from '@/lib/format';
 import { downloadCsv } from '@/lib/export';
 import type { InvestmentMetrics } from '@/types/owner';
+import { valuationDate, valuerAndDate } from '@sureground/shared';
 import { usePlanTier } from '@/hooks/usePlanTier';
 import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
 
@@ -33,6 +34,30 @@ const money = (amount: number | null | undefined) =>
   typeof amount === 'number' ? formatCurrency(amount, { compact: true }) : null;
 const percent = (value: number | null | undefined) =>
   typeof value === 'number' ? `${value.toFixed(1)}%` : '—';
+
+/** DIA-30: the figure only with its valuer and date; an old report is named as out of date, never counted. */
+const ValuationCell = ({ metric: m }: { metric: InvestmentMetrics }) => {
+  const v = m.valuation;
+  if (!v) return <span className="text-muted-foreground">Not valued</span>;
+  const change = m.valuationChange;
+  return (
+    <span className="block">
+      <span className={v.outOfDate ? 'text-muted-foreground' : 'font-medium text-foreground'}>
+        {money(Number(v.amount))}
+      </span>
+      <span className="block text-xs text-muted-foreground">
+        {v.outOfDate ? `Out of date: ${valuerAndDate(v)}` : valuerAndDate(v)}
+      </span>
+      {change && (
+        <span className="block text-xs text-muted-foreground">
+          {change.changePercent > 0 ? '+' : ''}
+          {change.changePercent}% from {valuationDate(change.fromDate)} to{' '}
+          {valuationDate(change.toDate)}
+        </span>
+      )}
+    </span>
+  );
+};
 
 export default function OwnerAnalyticsPage() {
   const { isPro } = usePlanTier();
@@ -63,8 +88,25 @@ export default function OwnerAnalyticsPage() {
   const exportCsv = () =>
     downloadCsv(
       `investment-analytics-${new Date().toISOString().slice(0, 10)}.csv`,
-      ['Property', 'Purchase price (NGN)', 'Asking price (NGN)', 'Net yield, 12 months (%)'],
-      metrics.map((m) => [m.propertyName, m.purchasePrice, m.askingPrice, m.rentalYield])
+      [
+        'Property',
+        'Purchase price (NGN)',
+        'Asking price (NGN)',
+        'Valued at (NGN)',
+        'Valuer',
+        'Report date',
+        'Net yield, 12 months (%)',
+      ],
+      // The valued figure only while the report is in date, as the table shows it.
+      metrics.map((m) => [
+        m.propertyName,
+        m.purchasePrice,
+        m.askingPrice,
+        m.currentValue,
+        m.currentValue !== null ? m.valuation?.valuerName : null,
+        m.currentValue !== null && m.valuation ? valuationDate(m.valuation.reportDate) : null,
+        m.rentalYield,
+      ])
     );
 
   const toggleCompare = (propertyId: string) => {
@@ -114,6 +156,13 @@ export default function OwnerAnalyticsPage() {
       render: (m) => money(m.askingPrice) ?? 'Not listed',
     },
     {
+      key: 'valuation',
+      header: 'Valued at',
+      numeric: true,
+      className: 'whitespace-nowrap',
+      render: (m) => <ValuationCell metric={m} />,
+    },
+    {
       key: 'rentalYield',
       header: 'Net yield (12 months)',
       numeric: true,
@@ -143,7 +192,7 @@ export default function OwnerAnalyticsPage() {
     <>
       <PageHeader
         title="Investment analytics"
-        description="Figures from your records. We don't estimate property value yet."
+        description="Figures from your records. A value is shown only from an accredited valuer's report under 12 months old."
         actions={
           isPro ? (
             <div className="flex gap-2">
@@ -205,7 +254,7 @@ export default function OwnerAnalyticsPage() {
         )}
 
         {isLoadingMetrics ? (
-          <TableSkeleton rows={4} columns={4} />
+          <TableSkeleton rows={4} columns={5} />
         ) : (
           <DataTable
             caption="Investment performance by property"

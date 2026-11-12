@@ -17,6 +17,7 @@ import { ownerApi, type OwnerInvestmentMetric } from '@/lib/api/owner';
 import { ApiError } from '@/lib/api/client';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
+import { valuationDate, valuationNote, valuationSentence } from '@sureground/shared';
 
 const pct = (n: number) => `${n.toFixed(1)}%`;
 
@@ -25,7 +26,7 @@ export default function OwnerAnalytics() {
   const insets = useSafeAreaInsets();
   const query = useQuery({ queryKey: qk.owner.metrics, queryFn: ownerApi.metrics });
   const items = query.data ?? [];
-  // Recorded purchase prices only: no value is estimated, so there is no "worth now".
+  // Recorded purchase prices only; a value comes only from an accredited valuer's report (DIA-30).
   const priced = items.filter((m) => m.purchasePrice != null);
   const invested = priced.reduce((sum, m) => sum + (m.purchasePrice ?? 0), 0);
   // Analytics may be a paid feature; say so rather than showing a generic error.
@@ -83,12 +84,12 @@ export default function OwnerAnalytics() {
                 <Price amount={invested} variant="title" />
                 <Text variant="caption" color="mutedForeground">
                   Purchase prices on {priced.length} of {items.length}{' '}
-                  {items.length === 1 ? 'property' : 'properties'}. We don’t estimate value yet.
+                  {items.length === 1 ? 'property' : 'properties'}.
                 </Text>
               </>
             ) : (
               <Text variant="callout" color="mutedForeground">
-                No purchase prices recorded. We don’t estimate value yet.
+                No purchase prices recorded.
               </Text>
             )}
           </Card>
@@ -134,6 +135,27 @@ function MetricCard({ m }: { m: OwnerInvestmentMetric }) {
           )}
         </View>
       </View>
+      {m.valuation ? (
+        <View style={{ gap: 2 }}>
+          <Text variant="callout" color={m.valuation.outOfDate ? 'mutedForeground' : undefined}>
+            {valuationSentence(m.valuation)}
+          </Text>
+          <Text variant="caption" color="mutedForeground">
+            {valuationNote(m.valuation)}
+          </Text>
+          {m.valuationChange ? (
+            <Text variant="caption" color="mutedForeground">
+              {m.valuationChange.changePercent > 0 ? '+' : ''}
+              {m.valuationChange.changePercent}% from {valuationDate(m.valuationChange.fromDate)} to{' '}
+              {valuationDate(m.valuationChange.toDate)}
+            </Text>
+          ) : null}
+        </View>
+      ) : (
+        <Text variant="caption" color="mutedForeground">
+          Not valued
+        </Text>
+      )}
       {m.rentalYield != null ? (
         <Text variant="caption" color="mutedForeground">
           Net yield, last 12 months: {pct(m.rentalYield)}

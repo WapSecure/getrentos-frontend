@@ -50,7 +50,10 @@ import {
   identityProgress,
   listLabels,
   portfolioFigures,
+  portfolioValuationSubtitle,
+  portfolioValuationView,
   timeZoneCity,
+  valuationSentence,
   type ForeignIdentityStatus,
   type InvestorAttentionKind,
   type InvestorOverview,
@@ -214,6 +217,15 @@ export default function InvestorWorkspace() {
       onPress: owner ? go(ROUTES.managedArea) : undefined,
     });
   }
+  // DIA-30: only in-date reports by accredited valuers, always with the valuer and date.
+  const valued = portfolioValuationView(data?.portfolio);
+  if (valued && (valued.valuedCount > 0 || valued.notValuedCount > 0)) {
+    portfolio.push({
+      label: 'Valued (accredited valuer)',
+      value: valued.total !== null ? formatNaira(valued.total) : 'Not valued',
+      subtitle: portfolioValuationSubtitle(valued),
+    });
+  }
   if (data && 'latestStatement' in data) {
     const statement = data.latestStatement;
     const net = figures.latestStatementNet;
@@ -309,9 +321,17 @@ export default function InvestorWorkspace() {
                 title="Portfolio"
                 items={portfolio}
                 footer={
-                  <Text variant="caption" color="mutedForeground">
-                    Payment Protection covers deposits only.
-                  </Text>
+                  <View style={{ gap: spacing.xs }}>
+                    {valued?.valuations.map((v) => (
+                      <Text key={v.id} variant="caption" color="mutedForeground">
+                        {v.propertyTitle}: {valuationSentence(v)}
+                        {v.outOfDate ? ' (out of date, not counted)' : ''}
+                      </Text>
+                    ))}
+                    <Text variant="caption" color="mutedForeground">
+                      Payment Protection covers deposits only.
+                    </Text>
+                  </View>
                 }
               />
             ) : null}

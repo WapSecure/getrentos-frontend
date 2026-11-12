@@ -2,7 +2,7 @@ import { apiFetch, apiUpload, apiUploadWithProgress, type UploadProgressOptions 
 import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
 import type { TrustProfile } from './buyerTrustProfile';
-import type { VideoCallJoin } from '@sureground/shared';
+import type { PropertyValuation, VideoCallJoin } from '@sureground/shared';
 import type { VideoOnSiteReport } from '../filmedOnSite';
 import { uploadVideoDirect } from './videoUpload';
 
@@ -351,10 +351,20 @@ export interface OwnerInvestmentMetric {
   askingPrice?: number | null;
   /** Net rent over the last 12 months as a share of purchase price; null without both. */
   rentalYield?: number | null;
-  /** Always null: no valuation method is agreed. Kept for older API responses. */
+  /** Whole naira from the latest accredited valuer report while under 12 months old; null otherwise. */
   currentValue: number | null;
-  /** Always null: needs a valuation. */
+  /** The latest valuer report with valuer, method and date; outOfDate when over 12 months old. */
+  valuation?: PropertyValuation | null;
+  /** Percent between the two latest in-date valuer reports; null without two. Not annualised. */
   appreciationRate: number | null;
+  /** The two reports behind appreciationRate, with both dates. */
+  valuationChange?: {
+    fromAmount: number;
+    fromDate: string;
+    toAmount: number;
+    toDate: string;
+    changePercent: number;
+  } | null;
   /** Always null: needs a valuation. */
   roiPercentage: number | null;
 }

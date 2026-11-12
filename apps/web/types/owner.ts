@@ -1,3 +1,4 @@
+import type { PropertyValuation } from '@sureground/shared';
 import type { CommercialDetails } from '@sureground/shared/showroom';
 import type { PropertyMediaDetails } from '@/types/landlord';
 export type OwnershipVerificationStatus =
@@ -197,10 +198,20 @@ export interface InvestmentMetrics {
   askingPrice?: number | null;
   /** Net rent over the last 12 months as a share of purchase price; null without both. */
   rentalYield?: number | null;
-  /** Always null: no valuation method is agreed. Kept for older API responses. */
+  /** Whole naira from the latest accredited valuer report while under 12 months old; null otherwise. */
   currentValue: number | null;
-  /** Always null: needs a valuation. */
+  /** The latest valuer report with valuer, method and date; outOfDate when over 12 months old. */
+  valuation?: PropertyValuation | null;
+  /** Percent between the two latest in-date valuer reports; null without two. Not annualised. */
   appreciationRate: number | null;
+  /** The two reports behind appreciationRate, with both dates. */
+  valuationChange?: {
+    fromAmount: number;
+    fromDate: string;
+    toAmount: number;
+    toDate: string;
+    changePercent: number;
+  } | null;
   /** Always null: needs a valuation. */
   roiPercentage: number | null;
 }

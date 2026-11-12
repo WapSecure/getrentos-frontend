@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   AlertCircle,
+  BadgeCheck,
   Banknote,
   Building2,
   CalendarClock,
@@ -52,7 +53,10 @@ import {
   identityHeadline,
   type InvestorAttentionKind,
   portfolioFigures,
+  portfolioValuationSubtitle,
+  portfolioValuationView,
   STATEMENT_PAYOUT_LABELS,
+  valuationSentence,
 } from '@sureground/shared';
 import { buyerKeys, investorKeys } from '@/lib/queryKeys';
 import { purchaseWorkspaceHref } from '@/lib/transactionWorkspace';
@@ -319,13 +323,23 @@ export const InvestorWorkspace = ({ portal }: { portal: InvestorPortal }) => {
       href: links.managed,
     });
   }
-  // DIA-30: only figures with a record behind them; no valuation.
+  // DIA-30: only figures with a record behind them.
   if (figures.acquisitionCost !== null) {
     portfolio.push({
       icon: Landmark,
       label: 'Acquisition cost',
       value: formatCurrency(figures.acquisitionCost),
       subtitle: 'Recorded prices of completed purchases',
+    });
+  }
+  // DIA-30: only in-date reports by accredited valuers, always with the valuer and date.
+  const valued = portfolioValuationView(data?.portfolio);
+  if (valued && (valued.valuedCount > 0 || valued.notValuedCount > 0)) {
+    portfolio.push({
+      icon: BadgeCheck,
+      label: 'Valued (accredited valuer)',
+      value: valued.total !== null ? formatCurrency(valued.total) : 'Not valued',
+      subtitle: portfolioValuationSubtitle(valued),
     });
   }
   if (figures.rentReceived12m !== null) {
@@ -461,9 +475,22 @@ export const InvestorWorkspace = ({ portal }: { portal: InvestorPortal }) => {
                 title="Portfolio"
                 items={portfolio}
                 footer={
-                  <p className="text-xs text-muted-foreground">
-                    Payment Protection covers deposits only.
-                  </p>
+                  <div className="space-y-2">
+                    {valued && valued.valuations.length > 0 && (
+                      <ul className="space-y-1 text-xs text-muted-foreground">
+                        {valued.valuations.map((v) => (
+                          <li key={v.id}>
+                            <span className="font-medium text-foreground">{v.propertyTitle}</span>:{' '}
+                            {valuationSentence(v)}
+                            {v.outOfDate ? ' (out of date, not counted)' : ''}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      Payment Protection covers deposits only.
+                    </p>
+                  </div>
                 }
               />
             )}
