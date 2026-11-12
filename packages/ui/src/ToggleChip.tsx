@@ -28,7 +28,7 @@ export const ToggleChip = forwardRef<HTMLButtonElement, ToggleChipProps>(
       disabled={disabled}
       onClick={() => onPressedChange(!pressed)}
       className={cn(
-        'inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border font-medium transition-colors',
+        'inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md border font-medium transition-colors',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
         'disabled:cursor-not-allowed disabled:opacity-50',
         size === 'sm' ? 'min-h-8 px-3 text-xs' : 'min-h-9 px-3.5 text-sm',
@@ -48,7 +48,7 @@ export const ToggleChip = forwardRef<HTMLButtonElement, ToggleChipProps>(
       {count !== undefined && (
         <span
           className={cn(
-            'rounded-full px-1.5 text-xs tabular-nums',
+            'rounded-sm px-1.5 text-xs tabular-nums',
             pressed ? 'bg-primary/15' : 'bg-secondary text-muted-foreground'
           )}
         >
