@@ -7,6 +7,7 @@ import { formatRelativeTime } from '@sureground/shared';
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@sureground/shared';
 import { adminKeys } from '@/lib/queryKeys';
+import { readableActivityDescription } from '@/lib/fraudAlertText';
 import { Button, EmptyState, ListSkeleton, PageErrorState } from '@sureground/ui';
 
 type ActivityType = 'verification' | 'dispute' | 'fraud' | 'signup';
@@ -81,6 +82,7 @@ export const AdminActivityFeed = () => {
           activity.map((item) => {
             const config = typeConfig[typeFor(item.type)];
             const Icon = config.icon;
+            const description = readableActivityDescription(item.type, item.description);
             return (
               <div
                 key={item.id}
@@ -91,8 +93,8 @@ export const AdminActivityFeed = () => {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium text-foreground">{item.title}</p>
-                  <p className="truncate text-xs text-muted-foreground" title={item.description}>
-                    {item.description}
+                  <p className="truncate text-xs text-muted-foreground" title={description}>
+                    {description}
                   </p>
                 </div>
                 <time

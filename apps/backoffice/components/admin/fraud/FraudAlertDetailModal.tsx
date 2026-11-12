@@ -6,6 +6,7 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
+  Disclosure,
   Button,
   Select,
   Skeleton,
@@ -16,9 +17,11 @@ import { EvidencePanel } from '@/components/shared/EvidencePanel';
 import type {
   FraudAlertAiSignal,
   FraudAlertDetail,
+  FraudAlertMediaReuse,
   FraudAlertSeverity,
   FraudAlertStatus,
 } from '@/types/admin';
+import { fraudAlertSummary, isStorageKey, matchedListingUrl } from '@/lib/fraudAlertText';
 
 const SEVERITY_OPTIONS: { value: FraudAlertSeverity; label: string }[] = [
   { value: 'low', label: 'Low' },
@@ -75,6 +78,8 @@ export const FraudAlertDetailModal = ({
   const StatusIcon = status.icon;
   const isTerminal = alert.status === 'cleared' || alert.status === 'confirmed';
   const isActive = alert.status === 'flagged' || alert.status === 'investigating';
+  const summary = fraudAlertSummary(alert);
+  const showRelated = !!alert.relatedEntityType && !isStorageKey(alert.relatedEntityId ?? '');
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
@@ -114,8 +119,11 @@ export const FraudAlertDetailModal = ({
                 <p className="text-2xs font-semibold text-muted-foreground uppercase tracking-wide">
                   Reason
                 </p>
-                <p className="text-sm text-foreground mt-0.5">{alert.reason}</p>
+                <p className="text-sm text-foreground mt-0.5">{summary}</p>
+                {alert.mediaReuse && <MatchedPlace media={alert.mediaReuse} />}
               </div>
+
+              <TechnicalDetails alert={alert} summary={summary} />
 
               {alert.aiSignal && <AiScanPanel signal={alert.aiSignal} />}
 
@@ -130,7 +138,7 @@ export const FraudAlertDetailModal = ({
                   <span className="font-medium text-foreground">Role:</span>{' '}
                   <span>{humaniseEnum(alert.subject.role)}</span>
                 </p>
-                {alert.relatedEntityType && (
+                {showRelated && (
                   <p className="truncate">
                     <span className="font-medium text-foreground">Related:</span>{' '}
                     {alert.relatedEntityType}
@@ -235,6 +243,92 @@ export const FraudAlertDetailModal = ({
     </Dialog>
   );
 };
+
+function MatchedPlace({ media }: { media: FraudAlertMediaReuse }) {
+  const listingUrl = matchedListingUrl(media.matchedListing);
+  const place = media.matchedListing?.title ?? media.matchedProperty?.title;
+  if (!place && !media.matchedOwner) return null;
+  return (
+    <p className="text-xs text-muted-foreground mt-1.5">
+      {place && (
+        <>
+          Matched {media.matchedListing ? 'listing' : 'property'}:{' '}
+          {listingUrl ? (
+            <a
+              href={listingUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="font-medium text-primary underline underline-offset-2"
+            >
+              {place}
+            </a>
+          ) : (
+            <span className="font-medium text-foreground">{place}</span>
+          )}
+        </>
+      )}
+      {media.matchedOwner && (
+        <>
+          {place ? ' · ' : ''}Owner:{' '}
+          <span className="font-medium text-foreground">{media.matchedOwner.name}</span>
+        </>
+      )}
+    </p>
+  );
+}
+
+const MATCH_TYPE_LABELS: Record<string, string> = {
+  EXACT: 'Identical file or image',
+  NEAR: 'Near copy (resized or recompressed)',
+};
+
+/** Collapsed by default: staff rarely need these, and they must never appear in lists or feeds. */
+function TechnicalDetails({ alert, summary }: { alert: FraudAlertDetail; summary: string }) {
+  const media = alert.mediaReuse;
+  const rows: { label: string; value: string; mono?: boolean }[] = [];
+  if (media) {
+    if (media.matchType)
+      rows.push({
+        label: 'Match type',
+        value: MATCH_TYPE_LABELS[media.matchType] ?? media.matchType,
+      });
+    if (media.distance !== null)
+      rows.push({ label: 'Image difference', value: `${media.distance} of 64 bits` });
+    if (media.matchCount !== null)
+      rows.push({ label: 'Matches found', value: String(media.matchCount) });
+    if (media.matchedListing)
+      rows.push({ label: 'Matched listing ID', value: media.matchedListing.id, mono: true });
+    if (media.matchedProperty)
+      rows.push({ label: 'Matched property ID', value: media.matchedProperty.id, mono: true });
+    if (media.storageKey)
+      rows.push({ label: 'Uploaded file', value: media.storageKey, mono: true });
+    if (media.matchedStorageKey)
+      rows.push({ label: 'Matched file', value: media.matchedStorageKey, mono: true });
+  }
+  if (alert.relatedEntityId && isStorageKey(alert.relatedEntityId)) {
+    rows.push({ label: 'Related file', value: alert.relatedEntityId, mono: true });
+  }
+  if (alert.reason !== summary) rows.push({ label: 'Recorded reason', value: alert.reason });
+  if (rows.length === 0) return null;
+
+  return (
+    <Disclosure
+      summary="Technical details"
+      className="rounded-lg border border-border/70 [&>summary]:px-3 [&>summary]:py-2 [&>div]:px-3 [&>div]:pb-3"
+    >
+      <dl className="space-y-1.5 text-xs">
+        {rows.map((row) => (
+          <div key={row.label} className="grid grid-cols-[8.5rem_1fr] gap-2">
+            <dt className="text-muted-foreground">{row.label}</dt>
+            <dd className={`min-w-0 break-all text-foreground${row.mono ? ' font-mono' : ''}`}>
+              {row.value}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </Disclosure>
+  );
+}
 
 const COVERAGE_LABELS: Record<string, string> = {
   textAndMetadata: 'Text and details',
