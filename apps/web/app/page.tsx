@@ -1,27 +1,29 @@
 import type { Metadata } from 'next';
 import { Navigation } from '@/components/layout/Navigation';
 import { Footer } from '@/components/layout/Footer';
-import { Hero } from '@/components/sections/Hero';
-import { FeaturedProperty } from '@/components/sections/FeaturedProperty';
-import { Features } from '@/components/sections/Features';
-import { Roles } from '@/components/sections/Roles';
-import { HowItWorks } from '@/components/sections/HowItWorks';
-import { WhySureground } from '@/components/sections/WhySureground';
-import { TrustSecurity } from '@/components/sections/TrustSecurity';
-import { CTA } from '@/components/sections/CTA';
-import { DownloadApp } from '@/components/sections/DownloadApp';
+import { HomeHero } from '@/components/home/HomeHero';
+import { LatestListings } from '@/components/home/LatestListings';
+import { Journeys } from '@/components/home/Journeys';
+import { AreaIndex } from '@/components/home/AreaIndex';
+import { TrustFacts } from '@/components/home/TrustFacts';
+import { DiasporaFeature } from '@/components/home/DiasporaFeature';
+import { HomeFaq } from '@/components/home/HomeFaq';
+import { ClosingBand } from '@/components/marketing/ClosingBand';
+import { CtaLink } from '@/components/marketing/CtaLink';
 import { JsonLd } from '@/components/seo/JsonLd';
+import { ROUTES } from '@/lib/constants/auth';
+import { diasporaInvestEnabled } from '@/lib/diasporaAvailability';
 import { SITE_NAME, SITE_URL } from '@/lib/site';
 
 export const metadata: Metadata = {
-  title: 'Rent, Buy and Manage Property',
+  title: 'Homes to Rent and Buy, Short Stays and Land in Nigeria',
   description:
-    'One place for renters, landlords, owners, buyers, realtors and agents. Verified identities, verified properties and protected payments from first search to final signature.',
+    'Search homes to rent or buy, short stays and land across Lagos, Abuja and beyond. Verified listings, identity checks and Sureground Payment Protection.',
   alternates: { canonical: '/' },
   openGraph: {
-    title: `${SITE_NAME}: Rent, buy and manage property`,
+    title: `${SITE_NAME}: property you can check before you commit`,
     description:
-      'Rent shortlets, buy land and manage property with verified identities and protected payments.',
+      'Homes to rent and buy, short stays and land across Nigeria, with verified listings and protected payments.',
     url: SITE_URL,
     type: 'website',
   },
@@ -48,29 +50,42 @@ const websiteJsonLd = {
   url: SITE_URL,
   potentialAction: {
     '@type': 'SearchAction',
-    target: `${SITE_URL}/shortlets?q={search_term_string}`,
+    target: `${SITE_URL}/rent?q={search_term_string}`,
     'query-input': 'required name=search_term_string',
   },
 };
 
-export default function Home() {
+export default async function Home() {
+  const diaspora = await diasporaInvestEnabled();
   return (
     <>
       <JsonLd data={organizationJsonLd} />
       <JsonLd data={websiteJsonLd} />
-      <main className="min-h-screen bg-white dark:bg-background transition-colors duration-300">
-        <Navigation />
-        <Hero />
-        <WhySureground />
-        <FeaturedProperty />
-        <Features />
-        <Roles />
-        <HowItWorks />
-        <TrustSecurity />
-        <CTA />
-        <DownloadApp />
-        <Footer />
+      <Navigation />
+      <main id="main" className="bg-background">
+        <HomeHero />
+        <LatestListings />
+        <Journeys />
+        <AreaIndex />
+        <TrustFacts />
+        {diaspora ? <DiasporaFeature /> : null}
+        <HomeFaq />
+        <ClosingBand
+          title="List, rent or buy with fewer surprises"
+          lead="Create a free account to book viewings, make offers and pay through Sureground Payment Protection."
+          actions={
+            <>
+              <CtaLink href={ROUTES.SIGNUP} variant="light" arrow>
+                Get started
+              </CtaLink>
+              <CtaLink href="/rent" variant="outline-light">
+                Browse homes
+              </CtaLink>
+            </>
+          }
+        />
       </main>
+      <Footer />
     </>
   );
 }

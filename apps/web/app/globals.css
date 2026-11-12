@@ -1,19 +1,19 @@
 @import '@sureground/ui/styles';
 
-@keyframes hero-scroll-cue {
-  0%,
-  100% {
-    transform: translateY(0);
+/* Transform only: the hero text is visible from the first frame, so it never delays LCP. */
+@keyframes hero-rise {
+  from {
+    transform: translateY(14px);
   }
-  50% {
-    transform: translateY(10px);
+  to {
+    transform: translateY(0);
   }
 }
 
-@keyframes nav-drop {
+@keyframes sheet-in {
   from {
     opacity: 0;
-    transform: translateY(-12px);
+    transform: translateY(-8px);
   }
   to {
     opacity: 1;
@@ -21,10 +21,17 @@
   }
 }
 
-.hero-scroll-cue {
-  animation: hero-scroll-cue 1.5s ease-in-out infinite;
+.hero-rise {
+  animation: hero-rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
-.nav-drop {
-  animation: nav-drop 0.2s ease-out;
+.sheet-in {
+  animation: sheet-in 0.22s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-rise,
+  .sheet-in {
+    animation: none;
+  }
 }

@@ -1,155 +1,131 @@
 import Link from 'next/link';
-import { IconLink } from '@sureground/ui';
+import { IconLink } from '@sureground/ui/IconButton';
 import { Logo } from '@/components/ui/Logo';
-import { Mail, MapPin, MessageCircle, Phone, Twitter } from '@sureground/icons';
+import { Twitter } from '@sureground/icons';
 import { SUPPORT, whatsappLink } from '@/lib/support';
-import { ROUTES } from '@/lib/constants/auth';
+import { ROUTES, ESTATE_MARKETPLACE_ROUTES } from '@/lib/constants/auth';
 import { SITE_NAME, SITE_TWITTER_HANDLE } from '@/lib/site';
 
-const linkClass =
-  'text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground';
-const headingClass = 'mb-4 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground';
+const linkClass = 'text-[0.9375rem] text-muted-foreground transition-colors hover:text-foreground';
 
-const productLinks = [
-  { label: 'Rent', href: '/rent' },
-  { label: 'Buy', href: '/buy' },
-  { label: 'Shortlet stays', href: ROUTES.SHORTLET_MARKETPLACE },
-  { label: 'Buy land', href: ROUTES.LAND_MARKETPLACE },
-  { label: 'Home management', href: ROUTES.HOME_MANAGEMENT },
-  { label: 'Pricing', href: ROUTES.PRICING },
-  { label: 'How it works', href: '/#how-it-works' },
+const COLUMNS: { title: string; links: { label: string; href: string }[] }[] = [
+  {
+    title: 'Find',
+    links: [
+      { label: 'Homes for sale', href: '/buy' },
+      { label: 'Homes to rent', href: '/rent' },
+      { label: 'Short stays', href: ROUTES.SHORTLET_MARKETPLACE },
+      { label: 'Land', href: ROUTES.LAND_MARKETPLACE },
+      { label: 'Estates', href: ESTATE_MARKETPLACE_ROUTES.ESTATES_DIRECTORY },
+      { label: 'Detty December', href: '/detty-december' },
+    ],
+  },
+  {
+    title: 'Own and manage',
+    links: [
+      { label: 'Property management', href: ROUTES.HOME_MANAGEMENT },
+      { label: 'Pricing', href: ROUTES.PRICING },
+      { label: 'How it works', href: '/#how-it-works' },
+      { label: 'Create an account', href: ROUTES.SIGNUP },
+      { label: 'Sign in', href: ROUTES.LOGIN },
+    ],
+  },
 ];
 
-const legalLinks = [
-  { label: 'Privacy Policy', href: '/privacy' },
-  { label: 'Terms of Service', href: '/terms' },
-  { label: 'Cookie Policy', href: '/cookies' },
+const LEGAL = [
+  { label: 'Privacy', href: '/privacy' },
+  { label: 'Terms', href: '/terms' },
+  { label: 'Cookies', href: '/cookies' },
   { label: 'Data protection', href: '/privacy#your-rights' },
 ];
 
 export const Footer = () => (
   <footer className="border-t border-border bg-card">
-    <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-      <div className="mb-8 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
-        <div className="space-y-4">
-          <Logo size="md" />
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            Property services for renters, landlords, owners, buyers, realtors and agents.
+    <div className="mx-auto max-w-[1240px] px-4 pt-16 pb-10 sm:px-6 lg:px-10">
+      <div className="grid gap-12 lg:grid-cols-[minmax(0,1.3fr)_repeat(3,minmax(0,1fr))]">
+        <div className="max-w-sm">
+          <Logo size="sm" />
+          <p className="font-display mt-6 text-[1.625rem] leading-snug font-light">
+            Property in Nigeria, checked before you commit.
           </p>
-          <div className="flex items-center gap-3 pt-2">
-            <IconLink
-              href={`https://x.com/${SITE_TWITTER_HANDLE.replace('@', '')}`}
-              target="_blank"
-              label={`${SITE_NAME} on X`}
-              icon={<Twitter />}
-              variant="secondary"
-              size="sm"
-              className="rounded-full hover:bg-primary hover:text-primary-foreground"
-            />
-          </div>
+          <IconLink
+            href={`https://x.com/${SITE_TWITTER_HANDLE.replace('@', '')}`}
+            target="_blank"
+            label={`${SITE_NAME} on X`}
+            icon={<Twitter />}
+            variant="secondary"
+            size="sm"
+            className="mt-6"
+          />
         </div>
 
-        <div>
-          <h3 className={headingClass}>Product</h3>
-          <ul className="space-y-2.5">
-            {productLinks.map((item) => (
-              <li key={item.label}>
-                <Link href={item.href} className={linkClass}>
-                  {item.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
+        {COLUMNS.map((column) => (
+          <nav key={column.title} aria-label={column.title}>
+            <h2 className="label-caps mb-5 text-muted-foreground">{column.title}</h2>
+            <ul className="flex flex-col gap-3">
+              {column.links.map((link) => (
+                <li key={link.href}>
+                  <Link href={link.href} className={linkClass}>
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        ))}
 
         <div>
-          <h3 className={headingClass}>Get started</h3>
-          <ul className="space-y-2.5">
+          <h2 className="label-caps mb-5 text-muted-foreground">Contact</h2>
+          <ul className="flex flex-col gap-3 text-[0.9375rem] text-muted-foreground">
             <li>
-              <Link href={ROUTES.SIGNUP} className={linkClass}>
-                Create an account
-              </Link>
-            </li>
-            <li>
-              <Link href={ROUTES.LOGIN} className={linkClass}>
-                Sign in
-              </Link>
-            </li>
-            <li>
-              <Link href={ROUTES.ROLE_SELECTION} className={linkClass}>
-                Browse roles
-              </Link>
-            </li>
-          </ul>
-        </div>
-
-        <div>
-          <h3 className={headingClass}>Contact</h3>
-          <ul className="space-y-3">
-            <li className="flex items-center gap-3 text-sm text-muted-foreground">
-              <Mail className="h-4 w-4 shrink-0 text-primary" />
-              <a
-                href={`mailto:${SUPPORT.email}`}
-                className="transition-colors duration-200 hover:text-foreground"
-              >
+              <a href={`mailto:${SUPPORT.email}`} className="hover:text-foreground">
                 {SUPPORT.email}
               </a>
             </li>
-            {SUPPORT.phone && (
-              <li className="flex items-center gap-3 text-sm text-muted-foreground">
-                <Phone className="h-4 w-4 shrink-0 text-primary" />
+            {SUPPORT.phone ? (
+              <li>
                 <a
                   href={`tel:${SUPPORT.phone.replace(/\s/g, '')}`}
-                  className="transition-colors duration-200 hover:text-foreground"
+                  className="hover:text-foreground"
                 >
                   {SUPPORT.phone}
                 </a>
               </li>
-            )}
-            {SUPPORT.whatsapp && (
-              <li className="flex items-center gap-3 text-sm text-muted-foreground">
-                <MessageCircle className="h-4 w-4 shrink-0 text-primary" />
+            ) : null}
+            {SUPPORT.whatsapp ? (
+              <li>
                 <a
                   href={whatsappLink(SUPPORT.whatsapp)}
                   target="_blank"
                   rel="noreferrer"
-                  className="transition-colors duration-200 hover:text-foreground"
+                  className="hover:text-foreground"
                 >
                   WhatsApp support
                 </a>
               </li>
-            )}
-            {SUPPORT.hours && (SUPPORT.phone || SUPPORT.whatsapp) && (
-              <li className="pl-7 text-xs text-muted-foreground">{SUPPORT.hours}</li>
-            )}
-            <li className="flex items-center gap-3 text-sm text-muted-foreground">
-              <MapPin className="h-4 w-4 shrink-0 text-primary" />
-              <span>Lagos, Nigeria</span>
-            </li>
-            <li>
-              <a
-                href={`mailto:${SUPPORT.email}?subject=Help%20request`}
-                className="text-sm text-muted-foreground transition-colors duration-200 hover:text-primary"
-              >
-                Get support
-              </a>
-            </li>
+            ) : null}
+            {SUPPORT.hours && (SUPPORT.phone || SUPPORT.whatsapp) ? (
+              <li className="text-sm">{SUPPORT.hours}</li>
+            ) : null}
+            <li>Lagos, Nigeria</li>
           </ul>
         </div>
       </div>
 
-      <div className="my-8 border-t border-border" />
-
-      <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-        <nav aria-label="Legal" className="flex flex-wrap justify-center gap-6 text-sm">
-          {legalLinks.map((item) => (
-            <Link key={item.label} href={item.href} className={linkClass}>
+      <div className="mt-16 flex flex-col gap-4 border-t border-border pt-6 md:flex-row md:items-center md:justify-between">
+        <nav aria-label="Legal" className="flex flex-wrap gap-x-6 gap-y-2">
+          {LEGAL.map((item) => (
+            <Link
+              key={item.label}
+              href={item.href}
+              className="label-caps text-muted-foreground hover:text-foreground"
+            >
               {item.label}
             </Link>
           ))}
         </nav>
-        <p className="text-sm text-muted-foreground">
-          © {new Date().getFullYear()} {SITE_NAME}. All rights reserved.
+        <p className="label-caps text-muted-foreground">
+          © {new Date().getFullYear()} {SITE_NAME}
         </p>
       </div>
     </div>
