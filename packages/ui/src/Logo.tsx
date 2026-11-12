@@ -11,16 +11,16 @@ interface LogoProps {
 }
 
 const sizeClasses = {
-  sm: { mark: 'h-5', text: 'text-lg' },
-  md: { mark: 'h-6', text: 'text-xl' },
-  lg: { mark: 'h-9', text: 'text-2xl' },
+  sm: { mark: 'h-5', text: 'text-[0.8125rem]' },
+  md: { mark: 'h-6', text: 'text-[0.9375rem]' },
+  lg: { mark: 'h-8', text: 'text-lg' },
 } as const;
 
 export const Logo = ({ href = '/', className = '', size = 'md', showText = true }: LogoProps) => {
   const currentSize = sizeClasses[size];
 
   return (
-    <Link href={href} className={cn('group flex items-center gap-2', className)}>
+    <Link href={href} className={cn('group flex items-center gap-2.5', className)}>
       <svg
         viewBox="0 0 128 128"
         aria-hidden="true"
@@ -43,7 +43,7 @@ export const Logo = ({ href = '/', className = '', size = 'md', showText = true 
       {showText && (
         <span
           className={cn(
-            'font-extrabold tracking-[-0.025em] whitespace-nowrap text-foreground',
+            'font-semibold uppercase tracking-[0.32em] whitespace-nowrap text-foreground',
             currentSize.text
           )}
         >
