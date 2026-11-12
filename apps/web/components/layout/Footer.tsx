@@ -23,7 +23,9 @@ const COLUMNS: { title: string; links: { label: string; href: string }[] }[] = [
   {
     title: 'Own and manage',
     links: [
+      { label: 'Sell a property', href: '/sell' },
       { label: 'Property management', href: ROUTES.HOME_MANAGEMENT },
+      { label: 'Realtors and agencies', href: '/agents' },
       { label: 'Pricing', href: ROUTES.PRICING },
       { label: 'How it works', href: '/#how-it-works' },
       { label: 'Create an account', href: ROUTES.SIGNUP },
@@ -108,6 +110,11 @@ export const Footer = () => (
               <li className="text-sm">{SUPPORT.hours}</li>
             ) : null}
             <li>Lagos, Nigeria</li>
+            <li>
+              <Link href="/about" className="hover:text-foreground">
+                About Sureground
+              </Link>
+            </li>
           </ul>
         </div>
       </div>

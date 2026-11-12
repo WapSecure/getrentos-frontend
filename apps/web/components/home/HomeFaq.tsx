@@ -1,8 +1,6 @@
-import { Disclosure } from '@sureground/ui/Disclosure';
-import { Container } from '@/components/marketing/Container';
-import { SectionIntro } from '@/components/marketing/SectionIntro';
+import { FaqList, type Faq } from '@/components/marketing/FaqList';
 
-const QUESTIONS = [
+const QUESTIONS: Faq[] = [
   {
     q: 'Do I need an account to search?',
     a: 'No. Anyone can search and open listings. You need an account to book a viewing, make an offer, apply or pay.',
@@ -25,28 +23,4 @@ const QUESTIONS = [
   },
 ];
 
-export const HomeFaq = () => (
-  <section aria-labelledby="faq-title" className="py-20 md:py-28">
-    <Container className="grid gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] md:gap-16">
-      <SectionIntro
-        id="faq-title"
-        eyebrow="Questions"
-        title="Before you start"
-        layout="stacked"
-        className="mb-0"
-      />
-      <div className="border-t border-border">
-        {QUESTIONS.map(({ q, a }) => (
-          <Disclosure
-            key={q}
-            name="home-faq"
-            summary={<span className="font-display text-xl font-normal">{q}</span>}
-            className="border-b border-border"
-          >
-            <p className="max-w-[62ch] text-[0.9375rem]">{a}</p>
-          </Disclosure>
-        ))}
-      </div>
-    </Container>
-  </section>
-);
+export const HomeFaq = () => <FaqList items={QUESTIONS} name="home-faq" />;

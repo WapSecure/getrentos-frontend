@@ -39,6 +39,7 @@ const FIND_LINKS: NavLink[] = [
 ];
 
 const MORE_LINKS: NavLink[] = [
+  { label: 'Sell', href: '/sell', hint: 'List a home or land for sale' },
   {
     label: 'Estates',
     href: ESTATE_MARKETPLACE_ROUTES.ESTATES_DIRECTORY,
@@ -46,7 +47,9 @@ const MORE_LINKS: NavLink[] = [
   },
   { label: 'Detty December', href: '/detty-december', hint: 'Peak-season stays, Dec 20 – Jan 3' },
   { label: 'Property management', href: ROUTES.HOME_MANAGEMENT, hint: 'For landlords and owners' },
+  { label: 'Realtors and agencies', href: '/agents', hint: 'Listings, leads and commissions' },
   { label: 'Pricing', href: ROUTES.PRICING, hint: 'Free and Pro plans' },
+  { label: 'About', href: '/about', hint: 'Who we are and how to reach us' },
 ];
 
 const DIASPORA_LINK: NavLink = {
