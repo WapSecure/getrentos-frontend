@@ -113,7 +113,7 @@ export const SignInRightContent = ({ method, setMethod }: SignInRightContentProp
 
   return (
     <section className="relative z-10 flex w-full items-center justify-center px-4 py-20 sm:px-8 lg:w-1/2 lg:px-12 lg:py-16">
-      <div className="w-full max-w-[30rem] rounded-[2rem] border border-border/70 bg-card/95 p-6 shadow-[0_24px_80px_-32px_rgba(15,23,42,0.28)] backdrop-blur-xl sm:p-9 dark:shadow-[0_24px_80px_-32px_rgba(0,0,0,0.7)]">
+      <div className="w-full max-w-[30rem] rounded-lg border border-border bg-card p-6 shadow-[0_24px_80px_-32px_rgba(15,23,42,0.28)] backdrop-blur-xl sm:p-9 dark:shadow-[0_24px_80px_-32px_rgba(0,0,0,0.7)]">
         <Button
           variant="outline"
           rounded="lg"
