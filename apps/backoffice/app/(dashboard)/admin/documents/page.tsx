@@ -133,7 +133,7 @@ export default function AdminDocumentsPage() {
             icon={<Upload className="w-4 h-4" />}
             onClick={() => setUploadOpen(true)}
           >
-            Upload Document
+            Upload document
           </Button>
         }
       />

@@ -120,7 +120,7 @@ export const DocumentUploadDialog = ({
       <Dialog open={open} onOpenChange={handleClose}>
         <DialogContent>
           <div className="p-4 border-b border-border">
-            <DialogTitle className="font-semibold text-foreground">Upload Document</DialogTitle>
+            <DialogTitle className="font-semibold text-foreground">Upload document</DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground mt-0.5">
               Add a new document to this list
             </DialogDescription>
@@ -220,7 +220,7 @@ export const DocumentUploadDialog = ({
               isLoading={isUploading}
             >
               <UploadIcon className="w-4 h-4" />
-              {isUploading ? 'Uploading...' : 'Upload Document'}
+              {isUploading ? 'Uploading…' : 'Upload document'}
             </Button>
           </div>
         </DialogContent>
