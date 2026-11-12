@@ -11,7 +11,7 @@ import {
   Flame,
   Send,
 } from '@sureground/icons';
-import { Badge, Button, Checkbox } from '@sureground/ui';
+import { Badge, Button, Checkbox, IconButton } from '@sureground/ui';
 import { getInitials, formatDate, formatRelativeTime } from '@/lib/format';
 import { leadStageBadges } from '@/lib/statusBadge';
 import type { LandlordLead } from '@/types/landlord';
@@ -103,15 +103,12 @@ export const LeadCard = ({
 
       <div className="flex gap-2 mt-4 pt-4 border-t border-border flex-wrap items-center">
         {lead.leadUserId && (
-          <Button
-            variant="ghost"
+          <IconButton
+            label={`Message ${lead.leadName}`}
             size="sm"
-            className="px-2.5 text-muted-foreground"
-            title="Message"
+            icon={<MessageSquare />}
             onClick={onMessage}
-          >
-            <MessageSquare className="w-4 h-4" />
-          </Button>
+          />
         )}
         {lead.applicationId && (
           <Button variant="outline" size="sm" className="gap-1.5" onClick={onViewApplication}>
@@ -132,14 +129,14 @@ export const LeadCard = ({
               Confirm viewing
             </Button>
             <Button
-              variant="ghost"
+              variant="danger-ghost"
               size="sm"
-              className="px-2.5 text-muted-foreground"
-              title="Cancel viewing"
+              className="gap-1.5"
               disabled={isUpdatingViewing}
               onClick={onCancelViewing}
             >
-              <X className="w-4 h-4" />
+              <X className="w-3.5 h-3.5" />
+              Cancel viewing
             </Button>
           </>
         )}

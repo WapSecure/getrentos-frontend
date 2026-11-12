@@ -284,11 +284,10 @@ export default function MessagesPage() {
             onArchive={handleArchiveConversation}
           />
           <MessageTemplates
-            onSelectTemplate={(content) => {
-              if (selectedConversation) {
-                void handleSendMessage(selectedConversation.id, content);
-              }
-            }}
+            recipientName={selectedConversation?.participantName ?? null}
+            onSelectTemplate={async (content) =>
+              selectedConversation ? handleSendMessage(selectedConversation.id, content) : false
+            }
           />
           <QuickReplies
             onSelectReply={(reply) => {

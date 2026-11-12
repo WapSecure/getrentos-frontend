@@ -5,6 +5,7 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 import { Plus, ReceiptText, Trash2 } from '@sureground/icons';
 import {
   Button,
+  ConfirmDialog,
   CurrencyInput,
   Dialog,
   DialogContent,
@@ -66,6 +67,7 @@ export function ExpensesPanel({ properties }: ExpensesPanelProps) {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [form, setForm] = useState<ExpenseForm>(initialForm);
   const [page, setPage] = useState(1);
+  const [removing, setRemoving] = useState<Expense | null>(null);
   const toast = useToast();
 
   const { data: expensesData, isPending } = useQuery({
@@ -186,7 +188,7 @@ export function ExpensesPanel({ properties }: ExpensesPanelProps) {
                   variant="danger"
                   size="sm"
                   icon={<Trash2 />}
-                  onClick={() => deleteExpense.mutate(expense.id)}
+                  onClick={() => setRemoving(expense)}
                   isLoading={deleteExpense.isPending && deleteExpense.variables === expense.id}
                 />
               </div>
@@ -284,6 +286,22 @@ export function ExpensesPanel({ properties }: ExpensesPanelProps) {
           </form>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={removing !== null}
+        onOpenChange={(open) => {
+          if (!open) setRemoving(null);
+        }}
+        title="Remove this expense?"
+        description={
+          removing
+            ? `The ${formatCurrency(removing.amount)} ${categoryLabel(removing.category).toLowerCase()} expense for "${removing.propertyTitle}" on ${formatDate(removing.incurredAt)} is deleted and no longer counts toward your profitability. This can't be undone.`
+            : ''
+        }
+        confirmLabel="Remove"
+        onConfirm={() => removing && deleteExpense.mutateAsync(removing.id)}
+        isLoading={deleteExpense.isPending}
+      />
     </section>
   );
 }

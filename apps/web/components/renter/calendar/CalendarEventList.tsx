@@ -12,8 +12,7 @@ import {
   XCircle,
   Clock,
 } from '@sureground/icons';
-import { EmptyState } from '@sureground/ui';
-import { IconButton } from '@sureground/ui';
+import { ConfirmDialog, EmptyState, IconButton } from '@sureground/ui';
 import type { CalendarEvent } from '@/types/calendar';
 
 interface CalendarEventListProps {
@@ -49,6 +48,7 @@ export const CalendarEventList = ({
   onEditEvent,
 }: CalendarEventListProps) => {
   const [isExpanded, setIsExpanded] = useState(true);
+  const [confirmingDelete, setConfirmingDelete] = useState<CalendarEvent | null>(null);
 
   const sortedEvents = [...events].sort((a, b) => {
     return new Date(a.date).getTime() - new Date(b.date).getTime();
@@ -110,8 +110,11 @@ export const CalendarEventList = ({
                     <div className="flex shrink-0 gap-1">
                       <IconButton
                         label={
-                          event.status === 'completed' ? 'Mark as upcoming' : 'Mark as completed'
+                          event.status === 'completed'
+                            ? `${event.title} is completed. Mark as upcoming`
+                            : `Mark ${event.title} as completed`
                         }
+                        aria-pressed={event.status === 'completed'}
                         icon={<CheckCircle />}
                         size="sm"
                         className="text-info hover:text-primary"
@@ -122,17 +125,17 @@ export const CalendarEventList = ({
                         }
                       />
                       <IconButton
-                        label="Edit event"
+                        label={`Edit ${event.title}`}
                         icon={<Edit2 />}
                         size="sm"
                         onClick={() => onEditEvent(event)}
                       />
                       <IconButton
-                        label="Delete event"
+                        label={`Delete ${event.title}`}
                         icon={<Trash2 />}
                         size="sm"
                         variant="danger"
-                        onClick={() => onDeleteEvent(event.id)}
+                        onClick={() => setConfirmingDelete(event)}
                       />
                     </div>
                   </div>
@@ -142,6 +145,22 @@ export const CalendarEventList = ({
           )}
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirmingDelete !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirmingDelete(null);
+        }}
+        title="Delete this event?"
+        description={
+          confirmingDelete
+            ? `"${confirmingDelete.title}" on ${formatDate(confirmingDelete.date)} will be removed from your calendar. This can't be undone.`
+            : ''
+        }
+        confirmLabel="Delete"
+        tone="danger"
+        onConfirm={() => confirmingDelete && onDeleteEvent(confirmingDelete.id)}
+      />
     </div>
   );
 };

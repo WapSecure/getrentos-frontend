@@ -4,7 +4,15 @@ import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, X, FolderPlus, Trash2, Pencil, Check, Bookmark } from '@sureground/icons';
-import { Button, Card, IconButton, Input, useOptimisticMutation, useToast } from '@sureground/ui';
+import {
+  Button,
+  Card,
+  ConfirmDialog,
+  IconButton,
+  Input,
+  useOptimisticMutation,
+  useToast,
+} from '@sureground/ui';
 import { renterService, type Wishlist } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
@@ -25,6 +33,7 @@ export const WishlistManager = ({
   const [newWishlistName, setNewWishlistName] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
+  const [confirmingDelete, setConfirmingDelete] = useState<Wishlist | null>(null);
   const toast = useToast();
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: renterKeys.wishlists });
@@ -57,6 +66,7 @@ export const WishlistManager = ({
     onSuccess: () => {
       invalidate();
       if (selectedWishlist !== 'all') setSelectedWishlist('all');
+      toast.success('Wishlist deleted');
     },
     onError: (err: Error) => toast.error(err.message || 'Failed to delete wishlist'),
   });
@@ -67,7 +77,8 @@ export const WishlistManager = ({
   };
 
   const handleDeleteWishlist = (id: string) => {
-    deleteMutation.mutate(id);
+    const wishlist = wishlists.find((w) => w.id === id);
+    if (wishlist) setConfirmingDelete(wishlist);
   };
 
   const handleEditWishlist = (id: string) => {
@@ -177,7 +188,6 @@ export const WishlistManager = ({
                     variant="danger"
                     label={`Delete ${wishlist.name}`}
                     onClick={() => handleDeleteWishlist(wishlist.id)}
-                    isLoading={deleteMutation.isPending && deleteMutation.variables === wishlist.id}
                     icon={<Trash2 />}
                   />
                 </div>
@@ -219,6 +229,23 @@ export const WishlistManager = ({
           )}
         </AnimatePresence>
       </div>
+
+      <ConfirmDialog
+        open={confirmingDelete !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirmingDelete(null);
+        }}
+        title="Delete this wishlist?"
+        description={
+          confirmingDelete
+            ? `"${confirmingDelete.name}" will be deleted. This can't be undone.`
+            : ''
+        }
+        confirmLabel="Delete"
+        tone="danger"
+        isLoading={deleteMutation.isPending}
+        onConfirm={() => confirmingDelete && deleteMutation.mutateAsync(confirmingDelete.id)}
+      />
     </Card>
   );
 };

@@ -7,10 +7,12 @@ import { ShieldCheck, Plus } from '@sureground/icons';
 import {
   Button,
   CardSkeleton,
+  ConfirmDialog,
   EmptyState,
   ListSkeleton,
   Pagination,
   PageHeader,
+  useToast,
 } from '@sureground/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -18,6 +20,7 @@ import { estateKeys } from '@/lib/queryKeys';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { InviteGatemanModal } from '@/components/estate/staff/InviteGatemanModal';
 import { StaffMemberRow } from '@/components/estate/staff/StaffMemberRow';
+import type { StaffMember } from '@/types/estate';
 
 const PAGE_SIZE = 10;
 
@@ -25,6 +28,8 @@ export default function EstateStaffPage() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [page, setPage] = useState(1);
+  const [removing, setRemoving] = useState<StaffMember | null>(null);
+  const toast = useToast();
 
   const { estate, isLoading: isEstateLoading } = useSelectedEstate();
 
@@ -56,7 +61,9 @@ export default function EstateStaffPage() {
     onSuccess: () => {
       invalidateStaff();
       setPage((current) => (current > 1 && staff.length === 1 ? current - 1 : current));
+      if (removing) toast.success(`${removing.name} removed from staff.`);
     },
+    onError: (error: Error) => toast.error(error.message || 'Unable to remove this staff member.'),
   });
 
   if (isEstateLoading) {
@@ -105,7 +112,7 @@ export default function EstateStaffPage() {
             <StaffMemberRow
               key={member.userId}
               member={member}
-              onRemove={() => removeGateman.mutate(member.userId)}
+              onRemove={() => setRemoving(member)}
             />
           ))}
         </div>
@@ -127,6 +134,22 @@ export default function EstateStaffPage() {
         onSubmit={(email) => inviteGateman.mutate(email)}
         isSubmitting={inviteGateman.isPending}
         error={inviteGateman.error instanceof Error ? inviteGateman.error.message : null}
+      />
+
+      <ConfirmDialog
+        open={removing !== null}
+        onOpenChange={(open) => {
+          if (!open) setRemoving(null);
+        }}
+        title="Remove this staff member?"
+        description={
+          removing
+            ? `${removing.name} (${removing.email}) is removed as a gateman for ${estate.name}. You can invite them again later.`
+            : ''
+        }
+        confirmLabel="Remove"
+        onConfirm={() => removing && removeGateman.mutateAsync(removing.userId)}
+        isLoading={removeGateman.isPending}
       />
     </>
   );

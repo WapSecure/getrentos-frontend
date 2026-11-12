@@ -7,23 +7,29 @@ import { CalendarCheck, Dumbbell, Plus, Trash2 } from '@sureground/icons';
 import {
   Button,
   CardSkeleton,
+  ConfirmDialog,
   EmptyState,
   IconButton,
   Input,
   ListSkeleton,
   Skeleton,
   PageHeader,
+  useToast,
 } from '@sureground/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { AmenityBookingRow } from '@/components/estate/amenities/AmenityBookingRow';
+import type { AmenityBooking } from '@/types/estate';
 
 export default function EstateAmenitiesPage() {
   const queryClient = useQueryClient();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [deleting, setDeleting] = useState<{ id: string; name: string } | null>(null);
+  const [cancelling, setCancelling] = useState<AmenityBooking | null>(null);
+  const toast = useToast();
 
   const { estate, isLoading: isEstateLoading } = useSelectedEstate();
 
@@ -65,13 +71,21 @@ export default function EstateAmenitiesPage() {
 
   const deleteAmenity = useMutation({
     mutationFn: (amenityId: string) => unwrap(estateService.deleteAmenity(estate!.id, amenityId)),
-    onSuccess: invalidateAmenities,
+    onSuccess: () => {
+      invalidateAmenities();
+      if (deleting) toast.success(`"${deleting.name}" deleted.`);
+    },
+    onError: (error: Error) => toast.error(error.message || 'Unable to delete this amenity.'),
   });
 
   const cancelBooking = useMutation({
     mutationFn: (bookingId: string) =>
       unwrap(estateService.cancelAmenityBooking(estate!.id, bookingId)),
-    onSuccess: invalidateBookings,
+    onSuccess: () => {
+      invalidateBookings();
+      if (cancelling) toast.success(`${cancelling.amenityName} booking cancelled.`);
+    },
+    onError: (error: Error) => toast.error(error.message || 'Unable to cancel this booking.'),
   });
 
   if (isEstateLoading) {
@@ -115,7 +129,7 @@ export default function EstateAmenitiesPage() {
                   icon={<Trash2 />}
                   variant="danger"
                   size="sm"
-                  onClick={() => deleteAmenity.mutate(amenity.id)}
+                  onClick={() => setDeleting({ id: amenity.id, name: amenity.name })}
                   disabled={deleteAmenity.isPending}
                 />
               </div>
@@ -172,12 +186,44 @@ export default function EstateAmenitiesPage() {
               key={booking.id}
               booking={booking}
               showHousehold
-              onCancel={() => cancelBooking.mutate(booking.id)}
+              onCancel={() => setCancelling(booking)}
               isUpdating={cancelBooking.isPending}
             />
           ))}
         </div>
       )}
+
+      <ConfirmDialog
+        open={deleting !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeleting(null);
+        }}
+        title="Delete this amenity?"
+        description={
+          deleting
+            ? `"${deleting.name}" is deleted and residents can no longer book it. This can't be undone.`
+            : ''
+        }
+        confirmLabel="Delete"
+        onConfirm={() => deleting && deleteAmenity.mutateAsync(deleting.id)}
+        isLoading={deleteAmenity.isPending}
+      />
+
+      <ConfirmDialog
+        open={cancelling !== null}
+        onOpenChange={(open) => {
+          if (!open) setCancelling(null);
+        }}
+        title="Cancel this booking?"
+        description={
+          cancelling
+            ? `${cancelling.unitLabel} (${cancelling.residentName}) loses their ${cancelling.amenityName} booking and the slot opens up for others. This can't be undone.`
+            : ''
+        }
+        confirmLabel="Cancel booking"
+        onConfirm={() => cancelling && cancelBooking.mutateAsync(cancelling.id)}
+        isLoading={cancelBooking.isPending}
+      />
     </>
   );
 }
