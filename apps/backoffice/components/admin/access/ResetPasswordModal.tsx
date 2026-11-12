@@ -1,13 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { KeyRound, RefreshCw } from '@sureground/icons';
+import { KeyRound } from '@sureground/icons';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@sureground/ui';
-import { Alert, Button, IconButton } from '@sureground/ui';
-import { Field } from '@sureground/ui';
-import { Input } from '@sureground/ui';
+import { Alert, Button } from '@sureground/ui';
 import { adminService } from '@/services/adminService';
-import { AUTH_CONSTANTS, ERROR_MESSAGES, unwrap } from '@sureground/shared';
+import { unwrap } from '@sureground/shared';
 import type { AdminStaffMember } from '@/types/admin';
 
 interface ResetPasswordModalProps {
@@ -17,39 +15,27 @@ interface ResetPasswordModalProps {
   onReset: () => void;
 }
 
-const CHARSET = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%';
-
-function generatePassword(length = 14): string {
-  const bytes = new Uint32Array(length);
-  crypto.getRandomValues(bytes);
-  return Array.from(bytes, (_, i) => CHARSET[bytes[i] % CHARSET.length]).join('');
-}
-
+/** Nobody types a password for someone else: we lock theirs and email them a link to choose one. */
 export const ResetPasswordModal = ({
   open,
   onOpenChange,
   staff,
   onReset,
 }: ResetPasswordModalProps) => {
-  const [password, setPassword] = useState(() => generatePassword());
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!staff) return;
-    if (password.length < AUTH_CONSTANTS.PASSWORD_MIN_LENGTH) {
-      setError(ERROR_MESSAGES.PASSWORD_TOO_SHORT);
-      return;
-    }
-
+    setError(null);
     setSubmitting(true);
     try {
-      await unwrap(adminService.resetStaffPassword(staff.id, password));
+      await unwrap(adminService.resetStaffPassword(staff.id));
       onOpenChange(false);
       onReset();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to reset password.');
+      setError(err instanceof Error ? err.message : 'Could not send the reset link.');
     } finally {
       setSubmitting(false);
     }
@@ -64,29 +50,12 @@ export const ResetPasswordModal = ({
           </div>
           <DialogTitle className="font-semibold text-foreground">Reset password</DialogTitle>
           <DialogDescription className="mt-1 text-sm text-muted-foreground">
-            Set a new temporary password for{' '}
-            <span className="font-medium text-foreground">{staff?.legalName}</span>. All of their
-            existing sessions will be revoked and they will need to sign in again.
+            <span className="font-medium text-foreground">{staff?.legalName}</span>&rsquo;s current
+            password stops working straight away and they are signed out everywhere. We email them a
+            link to choose a new one; it works once and expires in 72 hours.
           </DialogDescription>
 
           <form onSubmit={handleSubmit} className="mt-5 space-y-4">
-            <Field label="New password" required hint="Use the generated one, or type your own.">
-              <Input
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoComplete="new-password"
-                trailingIcon={
-                  <IconButton
-                    size="sm"
-                    className="-mr-2"
-                    label="Generate a new password"
-                    icon={<RefreshCw />}
-                    onClick={() => setPassword(generatePassword())}
-                  />
-                }
-              />
-            </Field>
-
             {error && <Alert variant="danger">{error}</Alert>}
 
             <div className="flex gap-2 pt-2">
@@ -103,9 +72,9 @@ export const ResetPasswordModal = ({
                 variant="danger"
                 className="flex-1"
                 isLoading={submitting}
-                loadingText="Resetting…"
+                loadingText="Sending…"
               >
-                Reset password
+                Reset and email link
               </Button>
             </div>
           </form>

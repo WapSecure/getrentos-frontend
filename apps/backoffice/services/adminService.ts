@@ -177,7 +177,6 @@ export const adminService = {
   async createStaff(input: {
     email: string;
     legalName: string;
-    password: string;
     roles: AdminStaffRole[];
   }): Promise<ApiResponse<AdminStaffMember & { approval?: { id: string; status: string } }>> {
     return safeCall(() =>
@@ -186,7 +185,6 @@ export const adminService = {
         body: JSON.stringify({
           email: input.email,
           legalName: input.legalName,
-          password: input.password,
           roles: input.roles.map((role) => role.toUpperCase()),
         }),
       })
@@ -217,15 +215,10 @@ export const adminService = {
     );
   },
 
-  async resetStaffPassword(
-    id: string,
-    newPassword: string
-  ): Promise<ApiResponse<{ message: string }>> {
+  /** Locks their password, signs them out and emails them a link to choose a new one. */
+  async resetStaffPassword(id: string): Promise<ApiResponse<{ message: string }>> {
     return safeCall(() =>
-      authFetch(`/admin/access/staff/${id}/reset-password`, {
-        method: 'POST',
-        body: JSON.stringify({ newPassword }),
-      })
+      authFetch(`/admin/access/staff/${id}/reset-password`, { method: 'POST' })
     );
   },
 

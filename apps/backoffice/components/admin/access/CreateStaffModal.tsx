@@ -8,7 +8,7 @@ import { Field } from '@sureground/ui';
 import { Input } from '@sureground/ui';
 import { Select } from '@sureground/ui';
 import { adminService } from '@/services/adminService';
-import { AUTH_CONSTANTS, ERROR_MESSAGES, unwrap } from '@sureground/shared';
+import { unwrap } from '@sureground/shared';
 import { ADMIN_ROLE_DETAILS } from '@/lib/adminAccess';
 import type { AdminStaffRole } from '@/types/admin';
 
@@ -27,7 +27,6 @@ export const CreateStaffModal = ({
 }: CreateStaffModalProps) => {
   const [email, setEmail] = useState('');
   const [legalName, setLegalName] = useState('');
-  const [password, setPassword] = useState('');
   const [role, setRole] = useState<AdminStaffRole>(creatableRoles[0] ?? 'support_agent');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -36,16 +35,12 @@ export const CreateStaffModal = ({
     e.preventDefault();
     setError(null);
 
-    if (!email.trim() || !legalName.trim() || !password) {
+    if (!email.trim() || !legalName.trim()) {
       setError('Please fill in all fields.');
       return;
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
       setError('Please enter a valid email address.');
-      return;
-    }
-    if (password.length < AUTH_CONSTANTS.PASSWORD_MIN_LENGTH) {
-      setError(ERROR_MESSAGES.PASSWORD_TOO_SHORT);
       return;
     }
 
@@ -55,7 +50,6 @@ export const CreateStaffModal = ({
         adminService.createStaff({
           email: email.trim(),
           legalName: legalName.trim(),
-          password,
           roles: [role],
         })
       );
@@ -84,8 +78,9 @@ export const CreateStaffModal = ({
           </div>
           <DialogTitle className="font-semibold text-foreground">Add staff member</DialogTitle>
           <DialogDescription className="mt-1 text-sm text-muted-foreground">
-            Provision a new internal account. Creations made by a non-super-admin require approval
-            before the member can sign in.
+            Provision a new internal account. Once it is approved, they get an email link to choose
+            their own password, then they turn on two-factor authentication. Creations made by a
+            non-super-admin need approval first.
           </DialogDescription>
 
           <form method="post" onSubmit={handleSubmit} className="mt-5 space-y-4">
@@ -116,22 +111,6 @@ export const CreateStaffModal = ({
                 value={role}
                 onValueChange={(value) => setRole(value as AdminStaffRole)}
                 options={roleOptions}
-              />
-            </Field>
-
-            <Field
-              label="Temporary password"
-              htmlFor="staff-password"
-              required
-              hint={`At least ${AUTH_CONSTANTS.PASSWORD_MIN_LENGTH} characters. The member changes it after first sign-in.`}
-            >
-              <Input
-                id="staff-password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                autoComplete="new-password"
               />
             </Field>
 
