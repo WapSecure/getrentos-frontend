@@ -64,13 +64,13 @@ Search Console will report these as "Submitted URL blocked by robots.txt". **Pro
 
 ## 4. Core Web Vitals
 
-Nothing measures Core Web Vitals in production today (no `useReportWebVitals`, no RUM tool). Sources available:
+Our own field measurement: `components/analytics/SiteMeasurement.tsx` (mounted in the root layout) reports LCP, INP, CLS, FCP and TTFB through `useReportWebVitals` as `web_vital` events for half of tab sessions, with the route pattern only (see `analytics-plan.md`). There is no report page for them yet. Sources available:
 
-| Source                                 | What it gives                                                                                                             | Status                |
-| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | --------------------- |
-| Search Console, Core Web Vitals report | Field data (Chrome UX Report) by URL group, mobile and desktop. Needs enough traffic before it shows anything.            | Available after setup |
-| PageSpeed Insights                     | Field data where available, plus a lab run.                                                                               | Available             |
-| Own RUM                                | `useReportWebVitals` in the root layout sending a `web_vital` event through `lib/analytics.ts` (see `analytics-plan.md`). | **Proposed**          |
+| Source                                 | What it gives                                                                                                             | Status                                                         |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| Search Console, Core Web Vitals report | Field data (Chrome UX Report) by URL group, mobile and desktop. Needs enough traffic before it shows anything.            | Available after setup                                          |
+| PageSpeed Insights                     | Field data where available, plus a lab run.                                                                               | Available                                                      |
+| Own RUM                                | `useReportWebVitals` in the root layout sending a `web_vital` event through `lib/analytics.ts` (see `analytics-plan.md`). | Implemented; query the events table until a report page exists |
 
 Thresholds to watch (Google's "good" limits, 75th percentile): LCP ≤ 2.5 s, INP ≤ 200 ms, CLS ≤ 0.1. Pages to watch first: `/`, `/rent`, `/buy`, a listing page, `/land`. The homepage hero photo is the only priority image (#159), so it is the likely LCP element.
 

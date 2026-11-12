@@ -9,6 +9,7 @@ import {
 } from '@/components/discovery/MapDiscoveryView';
 import { formatAreaParam, parseAreaParam, parseView, type MapArea } from '@/lib/mapArea';
 import { urlParam, useSyncUrlState } from '@/hooks/useUrlState';
+import { useTrackSearch } from '@/hooks/useTrackSearch';
 import { track } from '@/lib/analytics';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert } from '@sureground/ui/Alert';
@@ -161,25 +162,25 @@ export const LandMarketplaceBrowser = ({ mode, initialData }: LandMarketplaceBro
   );
   const pageSize = view === 'map' ? MAP_PAGE_SIZE : PAGE_SIZE;
 
-  useSyncUrlState(
-    {
-      q: debouncedSearch,
-      state,
-      city,
-      minPrice,
-      maxPrice,
-      title: titleType,
-      minArea,
-      assurance: minAssuranceTier,
-      road: roadAccess,
-      sort,
-      page,
-      view,
-      area: area ? formatAreaParam(area) : undefined,
-      selected: view === 'map' ? selectedId : undefined,
-    },
-    { sort: 'newest', page: 1, view: 'grid' }
-  );
+  const urlState = {
+    q: debouncedSearch,
+    state,
+    city,
+    minPrice,
+    maxPrice,
+    title: titleType,
+    minArea,
+    assurance: minAssuranceTier,
+    road: roadAccess,
+    sort,
+    page,
+    view,
+    area: area ? formatAreaParam(area) : undefined,
+    selected: view === 'map' ? selectedId : undefined,
+  };
+  const urlDefaults = { sort: 'newest', page: 1, view: 'grid' };
+  useSyncUrlState(urlState, urlDefaults);
+  useTrackSearch('land', 'land_search', urlState, urlDefaults);
   const [chosenListing, setActiveListing] = useState<PublicLandListing | null>(null);
   const [savedListingIds, setSavedListingIds] = useState<string[]>([]);
   const toast = useToast();

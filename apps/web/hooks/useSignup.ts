@@ -6,6 +6,18 @@ import { authService } from '@/services/authService';
 import { saveAuthSession } from '@/lib/authStorage';
 import { ROUTES, STORAGE_KEYS, getDashboardRoute } from '@/lib/constants/auth';
 import { takeSignupNext } from '@/lib/nextPath';
+import { track } from '@/lib/analytics';
+import type { SignupEventRole } from '@sureground/shared/showroom';
+
+const SIGNUP_EVENT_ROLES: readonly string[] = [
+  'renter',
+  'landlord',
+  'owner',
+  'buyer',
+  'realtor',
+  'agent',
+  'estate',
+] satisfies SignupEventRole[];
 
 export const useSignup = () => {
   const router = useRouter();
@@ -64,6 +76,7 @@ export const useSignup = () => {
     if (response.success && response.data) {
       setOtpReference(response.data.reference);
       setStep('otp');
+      track({ name: 'signup_start', props: { method } });
     } else {
       setError(response.message || 'Failed to send OTP');
     }
@@ -129,6 +142,15 @@ export const useSignup = () => {
 
       // No verification at signup: identity, licence and ownership checks happen at the point of use.
       const primaryRole = data.selectedRoles[0];
+      track({
+        name: 'signup_complete',
+        props: {
+          method: data.method === 'phone' ? 'phone' : 'email',
+          ...(SIGNUP_EVENT_ROLES.includes(primaryRole)
+            ? { role: primaryRole as SignupEventRole }
+            : {}),
+        },
+      });
       router.push(takeSignupNext() ?? getDashboardRoute(primaryRole));
       reset();
     } else {

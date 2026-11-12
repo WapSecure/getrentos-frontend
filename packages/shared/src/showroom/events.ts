@@ -1,3 +1,4 @@
+import type { FunnelEventName, FunnelEventProps } from './funnelEvents';
 import type { MediaRoom } from './types';
 
 /**
@@ -27,11 +28,11 @@ export const SHOWROOM_EVENT_NAMES = [
   'offer_start',
 ] as const;
 
-export type ShowroomEventName = (typeof SHOWROOM_EVENT_NAMES)[number];
+export type ShowroomEventName = (typeof SHOWROOM_EVENT_NAMES)[number] | FunnelEventName;
 
 export type ShowroomEventMarket = 'rent' | 'sale' | 'land' | 'shortlet';
 
-export interface ShowroomEventProps {
+export interface ShowroomEventProps extends FunnelEventProps {
   position?: number;
   mediaIndex?: number;
   room?: MediaRoom;

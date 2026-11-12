@@ -34,6 +34,7 @@ import {
 } from '@/components/discovery/MapDiscoveryView';
 import { formatAreaParam, parseAreaParam, parseView, type MapArea } from '@/lib/mapArea';
 import { urlParam, useSyncUrlState } from '@/hooks/useUrlState';
+import { useTrackSearch } from '@/hooks/useTrackSearch';
 import { CollectionsStrip } from '@/components/collections/CollectionsStrip';
 import { listingPath } from '@/lib/listingSlug';
 
@@ -241,26 +242,26 @@ export const PublicMarketBrowser = ({
   const [compared, setCompared] = useState<PublicListingCard[]>([]);
   const [comparisonOpen, setComparisonOpen] = useState(false);
 
-  useSyncUrlState(
-    {
-      q: debouncedSearch,
-      minPrice: refine.minPrice,
-      maxPrice: refine.maxPrice,
-      beds: refine.bedrooms,
-      baths: refine.bathrooms,
-      type: refine.propertyType,
-      verified: refine.verifiedOnly,
-      furnished: market === 'rent' && refine.furnished,
-      pets: market === 'rent' && refine.petsAllowed,
-      monthly: market === 'rent' && refine.monthlyPayment,
-      sort,
-      page,
-      view,
-      area: area ? formatAreaParam(area) : undefined,
-      selected: view === 'map' ? selectedId : undefined,
-    },
-    { sort: SORTS[market][0].value, page: 1, view: 'grid' }
-  );
+  const urlState = {
+    q: debouncedSearch,
+    minPrice: refine.minPrice,
+    maxPrice: refine.maxPrice,
+    beds: refine.bedrooms,
+    baths: refine.bathrooms,
+    type: refine.propertyType,
+    verified: refine.verifiedOnly,
+    furnished: market === 'rent' && refine.furnished,
+    pets: market === 'rent' && refine.petsAllowed,
+    monthly: market === 'rent' && refine.monthlyPayment,
+    sort,
+    page,
+    view,
+    area: area ? formatAreaParam(area) : undefined,
+    selected: view === 'map' ? selectedId : undefined,
+  };
+  const urlDefaults = { sort: SORTS[market][0].value, page: 1, view: 'grid' };
+  useSyncUrlState(urlState, urlDefaults);
+  useTrackSearch(market, `${market}_search`, urlState, urlDefaults);
 
   const activeCount = countRefinements(refine);
   const priceRangeInvalid =

@@ -1,6 +1,7 @@
 import type { BuyerDiligence } from '@/types/buyerDiligence';
 import type { ReplyLanguage } from '@/lib/replyLanguage';
 import { authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
+import { trackOnSuccess } from '@/lib/analytics';
 import type {
   BuyerPropertyListing,
   ViewingRequest,
@@ -249,7 +250,9 @@ export const buyerService = {
     notes?: string;
     mode?: 'IN_PERSON' | 'VIDEO';
   }) =>
-    safeCall(() => authFetch('/buyer/viewings', { method: 'POST', body: JSON.stringify(data) })),
+    safeCall(() =>
+      authFetch('/buyer/viewings', { method: 'POST', body: JSON.stringify(data) })
+    ).then((res) => trackOnSuccess(res, { name: 'inspection_request_submitted' })),
   /** Available from 15 minutes before the viewing. */
   joinVideoCall: (id: string) =>
     safeCall(() =>
@@ -278,7 +281,10 @@ export const buyerService = {
     financingType?: string;
     message?: string;
     acknowledgedNotVerified?: string[];
-  }) => safeCall(() => authFetch('/buyer/offers', { method: 'POST', body: JSON.stringify(data) })),
+  }) =>
+    safeCall(() => authFetch('/buyer/offers', { method: 'POST', body: JSON.stringify(data) })).then(
+      (res) => trackOnSuccess(res, { name: 'offer_submitted' })
+    ),
   withdrawOffer: (id: string) =>
     safeCall(() => authFetch(`/buyer/offers/${id}/withdraw`, { method: 'POST' })),
   counterOffer: (id: string, amount: number, message?: string) =>
@@ -408,7 +414,7 @@ export const buyerService = {
         method: 'POST',
         body: JSON.stringify({ listingId }),
       })
-    ),
+    ).then((res) => trackOnSuccess(res, { name: 'inquiry_submitted' })),
   listConversations: (filters: BuyerConversationsFilters = {}) =>
     safeCall(() =>
       authFetch<Paginated<BuyerConversation>>(
