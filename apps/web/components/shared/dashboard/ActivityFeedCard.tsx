@@ -27,24 +27,29 @@ interface ActivityFeedCardProps {
   initialCount?: number;
 }
 
-const rowClass = 'flex items-center gap-3 px-5 py-2.5';
+const rowClass = 'flex items-center gap-3.5 px-5 py-3';
 
 function Row({ item }: { item: ActivityFeedItem }) {
   const Icon = item.icon;
   const body = (
     <>
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary text-muted-foreground">
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
         <Icon className="h-4 w-4" aria-hidden="true" />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-sm font-medium text-foreground">{item.title}</span>
+        <span className="block truncate text-sm font-medium text-foreground transition-colors group-hover:text-primary">
+          {item.title}
+        </span>
         {item.detail && (
-          <span className="block truncate text-xs text-muted-foreground" title={item.detail}>
+          <span className="mt-0.5 block truncate text-xs text-muted-foreground" title={item.detail}>
             {item.detail}
           </span>
         )}
       </span>
-      <time dateTime={item.at} className="shrink-0 text-xs text-muted-foreground tabular-nums">
+      <time
+        dateTime={item.at}
+        className="shrink-0 self-start pt-0.5 text-xs text-muted-foreground tabular-nums"
+      >
         {formatRelativeTime(item.at)}
       </time>
     </>
@@ -52,7 +57,7 @@ function Row({ item }: { item: ActivityFeedItem }) {
   return item.href ? (
     <Link
       href={item.href}
-      className={`${rowClass} transition-colors hover:bg-secondary/60 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15`}
+      className={`${rowClass} group transition-colors hover:bg-primary/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring`}
     >
       {body}
     </Link>
@@ -87,7 +92,7 @@ export function ActivityFeedCard({
         <div role="status" aria-label="Loading activity" className="divide-y divide-border">
           {[0, 1, 2].map((row) => (
             <div key={row} className={rowClass}>
-              <Skeleton className="h-8 w-8 shrink-0 rounded-full" />
+              <Skeleton className="h-9 w-9 shrink-0 rounded-lg" />
               <div className="min-w-0 flex-1 space-y-1.5">
                 <Skeleton className="h-3.5 w-2/5" />
                 <Skeleton className="h-3 w-3/5" />
@@ -96,7 +101,13 @@ export function ActivityFeedCard({
           ))}
         </div>
       ) : items.length === 0 ? (
-        <EmptyState icon={emptyIcon} title="No activity yet" size="compact" bare />
+        <EmptyState
+          icon={emptyIcon}
+          title="No activity yet"
+          description="Updates will appear here as things happen."
+          size="compact"
+          bare
+        />
       ) : (
         <ul className="divide-y divide-border">
           {shown.map((item) => (

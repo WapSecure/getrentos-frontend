@@ -189,7 +189,9 @@ export default function PropertyDetailPage() {
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h1 className="text-2xl font-bold text-foreground">{property.title}</h1>
+                  <h1 className="font-display text-[1.75rem] font-normal leading-tight tracking-[-0.01em] text-foreground sm:text-[2rem]">
+                    {property.title}
+                  </h1>
                   {property.trustChain?.steps.length
                     ? (() => {
                         const { label, tone } = trustChainLabel(property.trustChain);
@@ -211,13 +213,13 @@ export default function PropertyDetailPage() {
                         </Badge>
                       )}
                 </div>
-                <div className="flex items-center gap-1 text-muted-foreground mt-1">
-                  <MapPin className="w-4 h-4" />
+                <div className="mt-1.5 flex items-center gap-1 text-muted-foreground">
+                  <MapPin className="h-4 w-4 shrink-0" aria-hidden="true" />
                   <span className="text-sm">{property.location}</span>
                 </div>
               </div>
               <div className="text-right shrink-0">
-                <p className="text-2xl font-bold text-primary">
+                <p className="data-value text-2xl font-semibold text-primary sm:text-[1.75rem]">
                   {formatPrice(property.price, property.period)}
                 </p>
                 {monthlyEquivalent(property.price, property.period) && (
@@ -228,7 +230,7 @@ export default function PropertyDetailPage() {
                 <div className="flex items-center justify-end gap-1 mt-1">
                   {property.rating > 0 ? (
                     <>
-                      <Star className="w-4 h-4 fill-primary text-primary" />
+                      <Star className="h-4 w-4 fill-warning text-warning" aria-hidden="true" />
                       <span className="text-sm text-foreground">{property.rating}</span>
                     </>
                   ) : (
@@ -238,42 +240,48 @@ export default function PropertyDetailPage() {
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-4 text-sm text-muted-foreground">
-              <div className="flex items-center gap-1.5">
-                <Bed className="w-4 h-4" />
-                <span>
+            <ul className="mt-5 flex flex-wrap gap-px overflow-hidden rounded-xl border border-border bg-border [&>li]:min-w-[45%] [&>li]:flex-1 [&>li]:bg-card sm:[&>li]:min-w-0">
+              <li className="flex items-center gap-2.5 px-4 py-3">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <Bed className="h-4 w-4" aria-hidden="true" />
+                </span>
+                <span className="text-sm text-foreground">
                   {property.bedrooms} {property.bedrooms === 1 ? 'bed' : 'beds'}
                 </span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <Bath className="w-4 h-4" />
-                <span>
+              </li>
+              <li className="flex items-center gap-2.5 px-4 py-3">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <Bath className="h-4 w-4" aria-hidden="true" />
+                </span>
+                <span className="text-sm text-foreground">
                   {property.bathrooms} {property.bathrooms === 1 ? 'bath' : 'baths'}
                 </span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <Square className="w-4 h-4" />
-                <span>{property.size} sqm</span>
-              </div>
-              {property.acceptingApplications === false ? (
-                <div className="flex items-center gap-1.5 text-muted-foreground">
-                  <Calendar className="w-4 h-4" />
-                  <span>Let — not accepting applications</span>
-                </div>
-              ) : (
-                property.availableFrom && (
-                  <div className="flex items-center gap-1.5">
-                    <Calendar className="w-4 h-4" />
-                    <span>Available {property.availableFrom}</span>
-                  </div>
-                )
+              </li>
+              <li className="flex items-center gap-2.5 px-4 py-3">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <Square className="h-4 w-4" aria-hidden="true" />
+                </span>
+                <span className="text-sm text-foreground">{property.size} sqm</span>
+              </li>
+              {(property.acceptingApplications === false || property.availableFrom) && (
+                <li className="flex items-center gap-2.5 px-4 py-3">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <Calendar className="h-4 w-4" aria-hidden="true" />
+                  </span>
+                  <span className="text-sm text-foreground">
+                    {property.acceptingApplications === false
+                      ? 'Let, not accepting applications'
+                      : `Available ${property.availableFrom}`}
+                  </span>
+                </li>
               )}
-            </div>
+            </ul>
 
-            <div className="flex flex-wrap gap-2 mt-4">
+            <div className="mt-5 flex flex-wrap gap-2">
               <Button
                 variant="primary"
-                className="flex-1"
+                size="lg"
+                className="min-w-[10rem] flex-1"
                 disabled={property.acceptingApplications === false}
                 onClick={() => router.push(buildRoute.renterPropertyApply(property.id))}
               >
@@ -284,6 +292,7 @@ export default function PropertyDetailPage() {
               {property.acceptingApplications === false ? null : (
                 <Button
                   variant="outline"
+                  size="lg"
                   icon={<Calendar className="w-4 h-4" />}
                   onClick={() => openTour('booking')}
                 >
@@ -314,8 +323,10 @@ export default function PropertyDetailPage() {
 
           {property.description && (
             <div>
-              <h3 className="text-sm font-semibold text-foreground mb-2">About this property</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
+              <h2 className="mb-2 text-base font-semibold tracking-[-0.015em] text-foreground">
+                About this property
+              </h2>
+              <p className="text-sm leading-relaxed text-muted-foreground">
                 {property.description}
               </p>
             </div>
@@ -323,18 +334,20 @@ export default function PropertyDetailPage() {
 
           {property.amenities && property.amenities.length > 0 && (
             <div>
-              <h3 className="text-sm font-semibold text-foreground mb-3">Amenities</h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <h2 className="mb-3 text-base font-semibold tracking-[-0.015em] text-foreground">
+                Amenities
+              </h2>
+              <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {property.amenities.map((amenity) => (
-                  <div
+                  <li
                     key={amenity}
-                    className="flex items-center gap-2 text-sm text-muted-foreground"
+                    className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground"
                   >
-                    <Check className="w-4 h-4 text-primary shrink-0" />
+                    <Check className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
                     <span>{amenity}</span>
-                  </div>
+                  </li>
                 ))}
-              </div>
+              </ul>
             </div>
           )}
 
@@ -367,7 +380,7 @@ export default function PropertyDetailPage() {
 
           {property.additionalFees && property.additionalFees.length > 0 && (
             <Card className="p-4">
-              <h3 className="text-sm font-semibold text-foreground mb-3">Cost breakdown</h3>
+              <h2 className="mb-3 text-sm font-semibold text-foreground">Cost breakdown</h2>
               <div className="space-y-2 text-sm">
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Rent ({property.period}ly)</span>
@@ -396,7 +409,7 @@ export default function PropertyDetailPage() {
 
           {property.period === 'year' && (
             <Card className="p-4">
-              <h3 className="text-sm font-semibold text-foreground mb-3">Payment options</h3>
+              <h2 className="mb-3 text-sm font-semibold text-foreground">Payment options</h2>
               {property.allowsMonthlyPayment && !flexOpen ? (
                 <div className="flex items-start gap-2 text-sm">
                   <Zap className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />

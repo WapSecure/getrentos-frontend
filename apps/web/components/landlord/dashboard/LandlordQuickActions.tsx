@@ -1,8 +1,7 @@
 'use client';
 
-import Link from 'next/link';
-import { Building2, Megaphone, FileText, BellRing, ChevronRight } from '@sureground/icons';
-import { Card, CardHeader, CardTitle, CardDescription } from '@sureground/ui';
+import { Building2, Megaphone, FileText, BellRing } from '@sureground/icons';
+import { QuickActionsCard } from '@/components/shared/dashboard/QuickActionsCard';
 import { ROUTES } from '@/lib/constants/auth';
 
 const actions = [
@@ -32,34 +31,4 @@ const actions = [
   },
 ];
 
-export const LandlordQuickActions = () => {
-  return (
-    <Card>
-      <CardHeader className="pb-2">
-        {/* h2 to match the revenue chart and activity feed: at h3 a screen reader nests it under "Recent activity". */}
-        <CardTitle as="h2">Quick actions</CardTitle>
-        <CardDescription>Your everyday tasks, close at hand.</CardDescription>
-      </CardHeader>
-      <div className="space-y-1 p-3 pt-2">
-        {actions.map((action) => (
-          <Link
-            key={action.label}
-            href={action.href}
-            className="group flex min-h-[4.5rem] items-center gap-3 rounded-lg px-3 py-3 transition-colors hover:bg-secondary focus-visible:outline-2 focus-visible:outline-primary"
-          >
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary text-muted-foreground group-hover:text-primary">
-              <action.icon className="h-[18px] w-[18px]" aria-hidden="true" />
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-sm font-medium text-foreground">{action.label}</span>
-              <span className="mt-0.5 block text-xs leading-5 text-muted-foreground">
-                {action.description}
-              </span>
-            </span>
-            <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-          </Link>
-        ))}
-      </div>
-    </Card>
-  );
-};
+export const LandlordQuickActions = () => <QuickActionsCard actions={actions} />;

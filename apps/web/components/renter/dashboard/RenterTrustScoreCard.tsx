@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import {
@@ -66,27 +67,25 @@ export const RenterTrustScoreCard = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.25, duration: 0.4 }}
-      className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm"
+      className="overflow-hidden rounded-xl border border-border bg-card shadow-xs"
     >
-      <div className="flex items-start justify-between gap-4 border-b border-border/70 p-5">
+      <div className="flex items-start justify-between gap-4 border-b border-border p-5">
         <div>
-          <p className="mb-1 text-xs font-bold uppercase tracking-[0.14em] text-primary">
-            Profile strength
-          </p>
-          <h2 className="text-lg font-semibold text-foreground">
+          <p className="mb-1 text-sm font-semibold text-primary">Profile strength</p>
+          <h2 className="text-base font-semibold tracking-[-0.015em] text-foreground">
             {t('dashboard.trust_score.title')}
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
             {t('dashboard.trust_score.subtitle')}
           </p>
         </div>
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
           <Shield className="h-5 w-5" aria-hidden="true" />
         </div>
       </div>
 
       <div className="p-5">
-        <div className="mb-5 flex items-center gap-5 rounded-2xl border border-border/70 bg-secondary/40 p-4">
+        <div className="mb-5 flex items-center gap-5 rounded-xl border border-border bg-secondary/40 p-4">
           <TrustScoreRing score={trustScore} size={104} strokeWidth={8} />
           <div className="min-w-0">
             <p className="font-semibold text-foreground">
@@ -103,9 +102,7 @@ export const RenterTrustScoreCard = () => {
 
         {pendingItems.length > 0 ? (
           <div className="mb-5">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-              Recommended next steps
-            </p>
+            <p className="mb-3 text-sm font-medium text-foreground">Recommended next steps</p>
             <div className="space-y-2">
               {pendingItems.map((item, index) => (
                 <motion.div
@@ -113,15 +110,22 @@ export const RenterTrustScoreCard = () => {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.3 + index * 0.05, duration: 0.3 }}
-                  className="flex min-h-11 items-center justify-between rounded-xl border border-border/70 px-3"
                 >
-                  <div className="flex items-center gap-2">
-                    <div className="rounded-lg bg-secondary p-1.5">
-                      <item.icon className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
-                    </div>
-                    <span className="text-sm text-foreground">{item.label}</span>
-                  </div>
-                  <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
+                  <Link
+                    href={ROUTES.RENTER_TRUST_SCORE}
+                    className="group flex min-h-11 items-center justify-between gap-3 rounded-lg border border-border px-3 py-2 transition-colors hover:border-primary/40 hover:bg-primary/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <span className="flex min-w-0 items-center gap-2.5">
+                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+                        <item.icon className="h-3.5 w-3.5" aria-hidden="true" />
+                      </span>
+                      <span className="truncate text-sm text-foreground">{item.label}</span>
+                    </span>
+                    <ArrowRight
+                      className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-[color,transform] duration-150 group-hover:translate-x-0.5 group-hover:text-primary motion-reduce:transition-none"
+                      aria-hidden="true"
+                    />
+                  </Link>
                 </motion.div>
               ))}
             </div>
@@ -149,10 +153,13 @@ export const RenterTrustScoreCard = () => {
           </div>
         </div>
 
-        <Button href={ROUTES.RENTER_TRUST_SCORE} variant="outline" fullWidth className="gap-2">
-          <TrendingUp className="w-4 h-4" />
+        <Button
+          href={ROUTES.RENTER_TRUST_SCORE}
+          variant="outline"
+          fullWidth
+          icon={<TrendingUp className="h-4 w-4" />}
+        >
           {t('dashboard.trust_score.improve_button')}
-          <ArrowRight className="w-3 h-3" />
         </Button>
       </div>
     </motion.div>

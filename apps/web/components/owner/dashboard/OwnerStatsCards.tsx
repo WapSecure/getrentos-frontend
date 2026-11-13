@@ -1,6 +1,15 @@
 'use client';
 
-import { Eye, EyeOff } from '@sureground/icons';
+import {
+  Building2,
+  CheckCircle2,
+  Eye,
+  EyeOff,
+  Handshake,
+  Megaphone,
+  TrendingUp,
+  UserPlus,
+} from '@sureground/icons';
 import { IconButton, StatGroup } from '@sureground/ui';
 import { useMonetaryVisibility } from '@/hooks/useMonetaryVisibility';
 import { usePlanTier } from '@/hooks/usePlanTier';
@@ -43,6 +52,7 @@ export const OwnerStatsCards = ({
         items={[
           {
             label: 'Portfolio value',
+            icon: TrendingUp,
             value: visible ? formatCurrency(totalPortfolioValue, { compact: true }) : '••••••',
             subtitle: 'Current estimate',
             // Analytics is a Pro feature; on Free the figure would lead to an upgrade wall.
@@ -50,12 +60,14 @@ export const OwnerStatsCards = ({
           },
           {
             label: 'Properties',
+            icon: Building2,
             value: totalProperties,
             subtitle: 'Across your portfolio',
             href: ROUTES.OWNER_PROPERTIES,
           },
           {
             label: 'Completed sales',
+            icon: CheckCircle2,
             value: completedSales,
             subtitle: 'Lifetime',
             href: ROUTES.OWNER_TRANSACTIONS,
@@ -67,18 +79,21 @@ export const OwnerStatsCards = ({
         items={[
           {
             label: 'Active listings',
+            icon: Megaphone,
             value: activeSaleListings,
             subtitle: 'Published for sale',
             href: ROUTES.OWNER_LISTINGS,
           },
           {
             label: 'Buyer leads',
+            icon: UserPlus,
             value: buyerInquiries,
             subtitle: 'Viewings, offers and enquiries',
             href: ROUTES.OWNER_LEADS,
           },
           {
             label: 'Pending offers',
+            icon: Handshake,
             value: pendingOffers,
             subtitle: 'Awaiting a response',
             attention: pendingOffers > 0,

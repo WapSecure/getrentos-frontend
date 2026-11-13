@@ -134,16 +134,18 @@ export default function BuyerDiscoverPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Homes for sale"
         title="Discover properties"
         description={
           <>
-            {total} propert{total === 1 ? 'y' : 'ies'} for sale
+            <span className="data-value font-medium text-foreground">{total}</span> propert
+            {total === 1 ? 'y' : 'ies'} for sale
           </>
         }
       />
 
       {estateFromUrl && (
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-secondary/60 px-4 py-3">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/20 bg-primary/[0.04] px-4 py-3">
           <p className="text-sm text-muted-foreground">
             Showing only properties marketed inside{' '}
             <span className="font-medium text-foreground">
@@ -213,9 +215,13 @@ export default function BuyerDiscoverPage() {
           description: 'Try adjusting your search or filter.',
         }}
         loading={
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5" aria-busy="true">
+          <div className="grid gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true">
             {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="h-80 rounded-2xl" />
+              <div key={i} className="space-y-3">
+                <Skeleton className="aspect-[4/3] w-full rounded-xl" />
+                <Skeleton className="h-4 w-2/3" />
+                <Skeleton className="h-3 w-1/2" />
+              </div>
             ))}
           </div>
         }

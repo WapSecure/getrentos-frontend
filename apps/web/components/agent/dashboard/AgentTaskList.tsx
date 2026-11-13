@@ -1,7 +1,7 @@
 'use client';
 
 import { ClipboardCheck, UserCheck, Home, FileText, Clock, AlertTriangle } from '@sureground/icons';
-import { Card, CardDescription, CardHeader, CardTitle, EmptyState } from '@sureground/ui';
+import { Badge, Card, CardDescription, CardHeader, CardTitle, EmptyState } from '@sureground/ui';
 import { formatDate } from '@/lib/format';
 import type { AgentTask, TaskType } from '@/types/agent';
 
@@ -26,33 +26,39 @@ export const AgentTaskList = ({ tasks }: AgentTaskListProps) => {
 
       <div className="divide-y divide-border">
         {tasks.length === 0 ? (
-          <EmptyState icon={ClipboardCheck} title="No upcoming tasks" size="compact" bare />
+          <EmptyState
+            icon={ClipboardCheck}
+            title="No upcoming tasks"
+            description="New visits will appear here once they are assigned to you."
+            size="compact"
+            bare
+          />
         ) : (
           tasks.map((task) => {
             const config = typeConfig[task.type];
             const Icon = config.icon;
             const isOverdue = task.status === 'overdue';
             return (
-              <div
-                key={task.id}
-                className="flex items-start gap-3 p-4 transition-colors hover:bg-secondary/60"
-              >
-                <div
-                  className={`shrink-0 rounded-full p-2 ${isOverdue ? 'bg-destructive-subtle' : 'bg-secondary'}`}
+              <div key={task.id} className="flex items-center gap-3.5 px-5 py-3.5">
+                <span
+                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${isOverdue ? 'bg-destructive-subtle text-destructive' : 'bg-primary/10 text-primary'}`}
                 >
                   {isOverdue ? (
-                    <AlertTriangle className="w-4 h-4 text-destructive" />
+                    <AlertTriangle className="h-4 w-4" aria-hidden="true" />
                   ) : (
-                    <Icon className="w-4 h-4 text-primary" />
+                    <Icon className="h-4 w-4" aria-hidden="true" />
                   )}
-                </div>
+                </span>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-foreground">{task.title}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
+                  <p className="truncate text-sm font-medium text-foreground">{task.title}</p>
+                  <p className="mt-0.5 truncate text-xs text-muted-foreground">
                     {config.label} · {task.propertyAddress}
                   </p>
-                  <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
+                </div>
+                <div className="flex shrink-0 flex-col items-end gap-1 text-right">
+                  {isOverdue && <Badge variant="danger">Overdue</Badge>}
+                  <p className="flex items-center gap-1 text-xs text-muted-foreground tabular-nums">
+                    <Clock className="h-3 w-3" aria-hidden="true" />
                     Due {formatDate(task.dueDate)}
                   </p>
                 </div>

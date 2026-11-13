@@ -1,6 +1,14 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+import {
+  Banknote,
+  CalendarClock,
+  FileSignature,
+  FileText,
+  Heart,
+  MessageCircle,
+} from '@sureground/icons';
 import { StatGroup, StatGroupSkeleton } from '@sureground/ui';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { renterService } from '@/services/renterService';
@@ -57,24 +65,28 @@ export const RenterStatsCards = () => {
         items={[
           {
             label: t('dashboard.stats.saved_properties'),
+            icon: Heart,
             value: savedCount,
             subtitle: t('dashboard.stats.saved_properties_subtitle'),
             href: ROUTES.RENTER_SAVED,
           },
           {
             label: t('dashboard.stats.active_applications'),
+            icon: FileText,
             value: applicationsCount,
             subtitle: t('dashboard.stats.active_applications_subtitle'),
             href: ROUTES.RENTER_APPLICATIONS,
           },
           {
             label: t('dashboard.stats.viewings_scheduled'),
+            icon: CalendarClock,
             value: viewingsCount,
             subtitle: t('dashboard.stats.viewings_scheduled_subtitle'),
             href: ROUTES.RENTER_VIEWINGS,
           },
           {
             label: t('dashboard.stats.unread_messages'),
+            icon: MessageCircle,
             value: unreadCount,
             subtitle: t('dashboard.stats.unread_messages_subtitle'),
             href: ROUTES.RENTER_MESSAGES,
@@ -89,12 +101,14 @@ export const RenterStatsCards = () => {
           items={[
             {
               label: t('dashboard.stats.current_lease'),
+              icon: FileSignature,
               value: leaseStatus,
               subtitle: leaseEndLabel,
               href: ROUTES.RENTER_LEASE,
             },
             {
               label: t('dashboard.stats.total_rent_paid'),
+              icon: Banknote,
               value:
                 rentPaid.state === 'ready'
                   ? formatCurrency(rentPaid.naira, { compact: true })

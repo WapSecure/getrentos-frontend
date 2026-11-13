@@ -2,18 +2,8 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { useRouter } from 'next/navigation';
-import {
-  MapPin,
-  Bed,
-  Bath,
-  Square,
-  Clock,
-  Eye,
-  Home,
-  CalendarDays,
-  Building2,
-} from '@sureground/icons';
+import Link from 'next/link';
+import { MapPin, Clock, ChevronRight, Home, Building2 } from '@sureground/icons';
 import { Badge, type BadgeVariant } from '@sureground/ui';
 import { Button } from '@sureground/ui';
 import { ListSkeleton } from '@sureground/ui';
@@ -88,7 +78,6 @@ import { ROUTES } from '@/lib/constants/auth';
 
 export const RenterApplicationsList = () => {
   const { t } = useLanguage();
-  const router = useRouter();
   const { data, isLoading, isError, refetch, isRefetching } = useQuery({
     queryKey: [...renterKeys.applications, { page: 1, pageSize: 5 }],
     queryFn: () => unwrap(renterService.listMyApplications({ page: 1, pageSize: 5 })),
@@ -100,18 +89,17 @@ export const RenterApplicationsList = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2, duration: 0.4 }}
-      className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm"
+      className="overflow-hidden rounded-xl border border-border bg-card shadow-xs"
     >
-      <div className="flex items-center justify-between border-b border-border/70 p-5">
+      <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-4">
         <div>
-          <h2 className="text-lg font-semibold text-foreground">
+          <h2 className="text-base font-semibold tracking-[-0.015em] text-foreground">
             {t('dashboard.applications.title')}
           </h2>
           <p className="text-sm text-muted-foreground">{t('dashboard.applications.subtitle')}</p>
         </div>
-        <Button href={ROUTES.RENTER_APPLICATIONS} variant="ghost" size="sm" className="gap-1">
+        <Button href={ROUTES.RENTER_APPLICATIONS} variant="link" size="sm">
           {t('dashboard.applications.view_all')}
-          <Eye className="w-3 h-3" />
         </Button>
       </div>
 
@@ -124,6 +112,7 @@ export const RenterApplicationsList = () => {
         empty={{
           icon: Home,
           title: 'No applications yet',
+          description: 'Homes you apply for will appear here with their status.',
           action: (
             <Button href={ROUTES.RENTER_DISCOVER} variant="outline" size="sm">
               Find a home
@@ -132,95 +121,78 @@ export const RenterApplicationsList = () => {
         }}
         loading={<ListSkeleton rows={3} className="rounded-none border-0" />}
       >
-        <div className="divide-y divide-border">
+        <ul className="divide-y divide-border">
           {applications.map((app, index) => {
-            const StatusIcon = statusConfig[app.status].icon;
+            const status = statusConfig[app.status];
+            const StatusIcon = status.icon;
+            const facts = [
+              app.bedrooms ? `${app.bedrooms} ${app.bedrooms === 1 ? 'bed' : 'beds'}` : null,
+              app.bathrooms ? `${app.bathrooms} ${app.bathrooms === 1 ? 'bath' : 'baths'}` : null,
+              app.size ? `${app.size} m²` : null,
+              `Applied ${formatDate(app.date)}`,
+            ].filter(Boolean);
 
             return (
-              <motion.div
+              <motion.li
                 key={app.id}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.1 * index, duration: 0.3 }}
-                className="p-4 hover:bg-secondary transition-colors cursor-pointer group"
-                onClick={() => router.push(ROUTES.RENTER_APPLICATIONS)}
               >
-                <div className="flex flex-col md:flex-row md:items-start gap-4">
-                  <div className="flex h-16 w-full shrink-0 items-center justify-center rounded-xl bg-muted md:w-16">
-                    <div className="w-8 h-8 bg-primary/20 rounded-lg flex items-center justify-center">
-                      <Home className="w-4 h-4 text-primary" />
-                    </div>
-                  </div>
+                <Link
+                  href={ROUTES.RENTER_APPLICATIONS}
+                  className="group flex items-center gap-3.5 px-5 py-4 transition-colors hover:bg-primary/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+                >
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <Home className="h-5 w-5" aria-hidden="true" />
+                  </span>
 
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap justify-between items-start gap-2">
-                      <div>
-                        <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
-                          {app.title}
-                        </h3>
-                        <div className="flex items-center gap-1 text-sm text-muted-foreground mt-0.5">
-                          <MapPin className="w-3 h-3" />
-                          <span>{app.address}</span>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-lg font-bold text-primary">
-                          {formatPrice(app.price, app.period)}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <Bed className="w-3 h-3" />
-                        <span>
-                          {app.bedrooms} {app.bedrooms === 1 ? 'bed' : 'beds'}
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate font-medium text-foreground transition-colors group-hover:text-primary">
+                      {app.title}
+                    </span>
+                    <span className="mt-0.5 flex min-w-0 items-center gap-1 text-sm text-muted-foreground">
+                      <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                      <span className="truncate">{app.address}</span>
+                    </span>
+                    <span className="mt-1 flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground tabular-nums">
+                      {facts.map((fact, i) => (
+                        <span key={fact} className="whitespace-nowrap">
+                          {i > 0 && (
+                            <span aria-hidden="true" className="mr-1.5">
+                              ·
+                            </span>
+                          )}
+                          {fact}
                         </span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Bath className="w-3 h-3" />
-                        <span>
-                          {app.bathrooms} {app.bathrooms === 1 ? 'bath' : 'baths'}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Square className="w-3 h-3" />
-                        <span>{app.size} sqm</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <CalendarDays className="w-3 h-3" />
-                        <span>Applied {formatDate(app.date)}</span>
-                      </div>
-                    </div>
-                  </div>
+                      ))}
+                    </span>
+                    <span className="mt-2 block sm:hidden">
+                      <Badge variant={status.variant} icon={<StatusIcon className="h-3 w-3" />}>
+                        {status.label}
+                      </Badge>
+                    </span>
+                  </span>
 
-                  <div className="flex items-center justify-between md:justify-end gap-3">
-                    <Badge
-                      variant={statusConfig[app.status].variant}
-                      icon={<StatusIcon className="w-3 h-3" />}
-                    >
-                      {statusConfig[app.status].label}
-                    </Badge>
-                    <Button
-                      href={ROUTES.RENTER_APPLICATIONS}
-                      variant="outline"
-                      size="sm"
-                      className="hidden md:inline-flex"
-                    >
-                      View details
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="mt-3 md:hidden">
-                  <Button href={ROUTES.RENTER_APPLICATIONS} variant="outline" size="sm" fullWidth>
-                    View details
-                  </Button>
-                </div>
-              </motion.div>
+                  <span className="flex shrink-0 flex-col items-end gap-1.5 text-right">
+                    <span className="data-value whitespace-nowrap text-sm font-semibold text-foreground sm:text-base">
+                      {formatPrice(app.price, app.period)}
+                    </span>
+                    <span className="hidden sm:block">
+                      <Badge variant={status.variant} icon={<StatusIcon className="h-3 w-3" />}>
+                        {status.label}
+                      </Badge>
+                    </span>
+                  </span>
+                  <ChevronRight
+                    className="hidden h-4 w-4 shrink-0 text-muted-foreground/70 transition-[color,transform] duration-150 group-hover:translate-x-0.5 group-hover:text-primary motion-reduce:transition-none sm:block"
+                    aria-hidden="true"
+                  />
+                </Link>
+              </motion.li>
             );
           })}
-        </div>
+        </ul>
       </QueryState>
     </motion.div>
   );

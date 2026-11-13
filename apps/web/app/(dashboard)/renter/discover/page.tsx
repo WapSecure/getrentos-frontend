@@ -27,7 +27,7 @@ import { renterService, type SavedListingItem } from '@/services/renterService';
 import { unwrap, type Paginated } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
-import { LayoutGrid, Map, Search } from '@sureground/icons';
+import { LayoutGrid, Map } from '@sureground/icons';
 import { useRenterCompare } from '@/hooks/useRenterCompare';
 import { RenterPageHeader } from '@/components/renter/shared/RenterPageHeader';
 
@@ -139,7 +139,6 @@ export default function DiscoverPage() {
     <>
       <RenterPageHeader
         eyebrow="Property marketplace"
-        icon={Search}
         title="Discover properties"
         description="Search, compare, and shortlist verified homes that fit your location, lifestyle, and budget."
       />
@@ -184,7 +183,7 @@ export default function DiscoverPage() {
           </div>
 
           {estateFromUrl && (
-            <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-secondary/50 px-4 py-3">
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/20 bg-primary/[0.04] px-4 py-3">
               <p className="text-sm text-muted-foreground">
                 Showing only properties marketed inside{' '}
                 <span className="font-medium text-foreground">

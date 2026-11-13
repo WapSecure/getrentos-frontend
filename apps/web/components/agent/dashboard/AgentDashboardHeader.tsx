@@ -1,7 +1,8 @@
 'use client';
 
 import { ClipboardList } from '@sureground/icons';
-import { Button, PageHeader } from '@sureground/ui';
+import { Button } from '@sureground/ui';
+import { DashboardHeader } from '@/components/shared/dashboard/DashboardHeader';
 import { ROUTES } from '@/lib/constants/auth';
 
 interface AgentDashboardHeaderProps {
@@ -9,16 +10,14 @@ interface AgentDashboardHeaderProps {
   firstName: string;
 }
 
-export const AgentDashboardHeader = ({ greeting, firstName }: AgentDashboardHeaderProps) => {
-  return (
-    <PageHeader
-      title={`${greeting}, ${firstName}`}
-      description="Review today's assigned visits, inspections, and work in progress."
-      actions={
-        <Button href={ROUTES.AGENT_TASKS} variant="primary" size="lg" icon={<ClipboardList />}>
-          View tasks
-        </Button>
-      }
-    />
-  );
-};
+export const AgentDashboardHeader = ({ greeting, firstName }: AgentDashboardHeaderProps) => (
+  <DashboardHeader
+    title={`${greeting}, ${firstName}`}
+    description="Review today's assigned visits, inspections, and work in progress."
+    action={
+      <Button href={ROUTES.AGENT_TASKS} variant="primary" size="lg" icon={<ClipboardList />}>
+        View tasks
+      </Button>
+    }
+  />
+);
