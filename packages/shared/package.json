@@ -55,7 +55,7 @@
     "@sureground/eslint-config": "workspace:*",
     "@sureground/typescript-config": "workspace:*",
     "@types/node": "^22.19.20",
-    "date-fns": "^3.6.0",
+    "date-fns": "^4.4.0",
     "typescript": "^5.4.5",
     "eslint": "^9.39.4"
   }
