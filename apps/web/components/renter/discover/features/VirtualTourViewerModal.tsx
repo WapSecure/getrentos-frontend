@@ -72,6 +72,9 @@ export const VirtualTourViewerModal = ({
     onClose();
   };
 
+  // Only offer a way back to the tour when there was a video tour to come back to.
+  const fromVideoTour = initialMode === 'tour' && !!videoTourUrl;
+
   const formattedRequest = confirmedTime
     ? format(new Date(confirmedTime), 'd MMM yyyy, h:mm a')
     : '';
@@ -179,9 +182,15 @@ export const VirtualTourViewerModal = ({
               </div>
             </div>
 
-            <Button variant="ghost" fullWidth onClick={() => setMode('tour')}>
-              Back to video tour
-            </Button>
+            {fromVideoTour ? (
+              <Button variant="ghost" fullWidth onClick={() => setMode('tour')}>
+                Back to video tour
+              </Button>
+            ) : (
+              <Button variant="ghost" fullWidth onClick={handleClose}>
+                Done
+              </Button>
+            )}
           </div>
         )}
       </DialogContent>

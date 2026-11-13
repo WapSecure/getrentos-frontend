@@ -1,4 +1,5 @@
 import { ROUTES } from '@/lib/constants/auth';
+import { portalLink } from './portalLinks';
 
 export type NotificationPortal =
   | 'renter'
@@ -70,7 +71,7 @@ export function notificationHref(
       ? `${inbox}?conversation=${encodeURIComponent(n.conversationId)}`
       : inbox;
   }
-  if (url && url.startsWith('/') && !url.startsWith('//')) return url;
+  if (url && url.startsWith('/') && !url.startsWith('//')) return portalLink(portal, url);
   const type = n.type.toLowerCase();
   const byType = (BY_TYPE[portal] ?? [])
     .filter(([prefix]) => type.startsWith(prefix))

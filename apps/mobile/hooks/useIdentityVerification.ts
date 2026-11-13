@@ -8,5 +8,5 @@ export function useIdentityVerification() {
   const verified = !!data && (data.identityVerified ?? data.identity?.status === 'APPROVED');
   const inReview = !verified && data?.identity?.status === 'PENDING_REVIEW';
   const label = !data ? undefined : verified ? 'Verified' : inReview ? 'In review' : 'Not verified';
-  return { verified, known: !!data, label };
+  return { verified, inReview, known: !!data, label };
 }

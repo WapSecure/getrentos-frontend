@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Alert, RefreshControl, View } from 'react-native';
 
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CalendarClock, Video } from '@sureground/icons/native';
 import {
@@ -14,6 +15,7 @@ import {
   EmptyState,
   FormAlert,
   QueryState,
+  SegmentedControl,
   Skeleton,
   Text,
   TimeField,
@@ -23,6 +25,8 @@ import {
 } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { ownerApi, type OwnerViewing } from '@/lib/api/owner';
+import { landlordApi } from '@/lib/api/landlord';
+import { RentalViewingsScreen } from '@/components/viewings/RentalViewingsScreen';
 import { BUYER_VIEWING_STATUS_LABEL, BUYER_VIEWING_STATUS_TONE } from '@/lib/api/buyerViewings';
 import { localInstant } from '@/lib/api/realtor';
 import { ApiError, errorMessage } from '@/lib/api/client';
@@ -40,7 +44,56 @@ const FILTERS: { value: 'requested' | 'confirmed' | undefined; label: string }[]
 
 const when = (iso: string) => `${formatDate(iso, 'short')}, ${formatTime(iso)}`;
 
+type Tab = 'renters' | 'buyers';
+
+/** Renters asking to view a home the owner lets, and buyers asking to view one they sell. */
 export default function OwnerViewings() {
+  const { tab: param } = useLocalSearchParams<{ tab?: string }>();
+  const tab: Tab = param === 'renters' ? 'renters' : 'buyers';
+  // Requests still waiting on the owner, shown on each side of the switch.
+  const renters = useQuery({
+    queryKey: [...qk.landlord.viewings('requested'), 'count'],
+    queryFn: () => landlordApi.viewingRequests('requested', 1, 1),
+  });
+  const buyers = useQuery({
+    queryKey: [...qk.owner.viewings('requested'), 'count'],
+    queryFn: () => ownerApi.viewings('requested', 1, 1),
+  });
+  const toggle = (
+    <SegmentedControl<Tab>
+      accessibilityLabel="Who is asking"
+      value={tab}
+      onChange={(next) => router.setParams({ tab: next })}
+      options={[
+        {
+          value: 'renters',
+          label: 'Renters',
+          count: renters.data?.total || undefined,
+          countTone: 'warning',
+        },
+        {
+          value: 'buyers',
+          label: 'Buyers',
+          count: buyers.data?.total || undefined,
+          countTone: 'warning',
+        },
+      ]}
+    />
+  );
+
+  return tab === 'renters' ? (
+    <RentalViewingsScreen
+      eyebrow="Letting"
+      subtitle="Confirm renter visits and host video viewings"
+      emptyDescription="When renters ask to view a property you are letting, their requests show up here."
+      top={toggle}
+    />
+  ) : (
+    <BuyerViewings top={toggle} />
+  );
+}
+
+function BuyerViewings({ top }: { top: ReactNode }) {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();
@@ -100,6 +153,7 @@ export default function OwnerViewings() {
           subtitle="Confirm buyer visits and host video viewings"
           onBack={() => goBack()}
         />
+        {top}
         <View style={{ flexDirection: 'row', gap: spacing.sm }}>
           {FILTERS.map((f) => (
             <Chip

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CalendarCheck } from '@sureground/icons';
 import {
@@ -15,12 +16,18 @@ import {
   Pagination,
   Alert,
   ListSkeleton,
-  Skeleton,
   PageHeader,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
 } from '@sureground/ui';
 import { ownerService, type OwnerViewing } from '@/services/ownerService';
+import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
-import { ownerKeys } from '@/lib/queryKeys';
+import { landlordKeys, ownerKeys } from '@/lib/queryKeys';
+import { OWNER_VIEWING_TABS, ownerViewingTab, type OwnerViewingTab } from '@/lib/ownerViewingTabs';
+import { RentalViewingRequests } from '@/components/shared/viewings/RentalViewingRequests';
 import { viewingRequestStatusBadges } from '@/lib/statusBadge';
 import { DateTimeField, isCompleteDateTime } from '@/components/shared/forms/DateTimeField';
 import { VideoCallButton } from '@/components/shared/VideoCallButton';
@@ -40,7 +47,78 @@ const formatWhen = (iso: string) =>
 const badgeFor = (status: OwnerViewing['status']) =>
   viewingRequestStatusBadges[status === 'pending' ? 'requested' : status];
 
+const TAB_LABELS: Record<OwnerViewingTab, string> = { renters: 'Renters', buyers: 'Buyers' };
+
+/** Count of requests still waiting on the owner, shown on each tab. */
+function usePendingCounts() {
+  const renters = useQuery({
+    queryKey: [...landlordKeys.viewingRequests('requested'), { page: 1, pageSize: 1 }],
+    queryFn: () =>
+      unwrap(landlordService.listViewingRequests({ page: 1, pageSize: 1, status: 'requested' })),
+  });
+  const buyers = useQuery({
+    queryKey: [...ownerKeys.viewings, { filter: 'requested', page: 1, pageSize: 1 }],
+    queryFn: () => unwrap(ownerService.listViewings({ status: 'requested', page: 1, pageSize: 1 })),
+  });
+  return { renters: renters.data?.total ?? 0, buyers: buyers.data?.total ?? 0 };
+}
+
 export default function OwnerViewingsPage() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const tab = ownerViewingTab(useSearchParams().get('tab'));
+  const pending = usePendingCounts();
+
+  return (
+    <div className="space-y-6">
+      <PageHeader
+        title="Viewings"
+        description="People who want to see your properties, to rent or to buy. Confirm their time, offer another, or decline."
+      />
+
+      <Tabs
+        value={tab}
+        onValueChange={(value) =>
+          router.replace(`${pathname}?tab=${ownerViewingTab(value)}`, { scroll: false })
+        }
+      >
+        <TabsList className="mb-6 max-w-full">
+          {OWNER_VIEWING_TABS.map((value) => (
+            <TabsTrigger key={value} value={value}>
+              {TAB_LABELS[value]}
+              {pending[value] > 0 && (
+                <span className="ml-1.5 rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground">
+                  <span className="sr-only">, </span>
+                  {pending[value]}
+                  <span className="sr-only"> to confirm</span>
+                </span>
+              )}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+
+        <TabsContent value="renters" className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Renters who want to see a property you are letting before they apply.
+          </p>
+          <RentalViewingRequests
+            initialStatus="requested"
+            emptyDescription="When renters ask to view a property you are letting, their requests show up here."
+          />
+        </TabsContent>
+        <TabsContent value="buyers" className="space-y-4">
+          <OwnerSellingNav />
+          <p className="text-sm text-muted-foreground">
+            Buyers who want to see a property you are selling.
+          </p>
+          <BuyerViewings />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
+
+function BuyerViewings() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [filter, setFilter] = useState<(typeof FILTERS)[number]['value']>('requested');
@@ -81,15 +159,7 @@ export default function OwnerViewingsPage() {
   });
 
   if (query.isLoading) {
-    return (
-      <div className="space-y-6">
-        <div className="space-y-2">
-          <Skeleton className="h-8 w-40" />
-          <Skeleton className="h-4 w-80 max-w-full" />
-        </div>
-        <ListSkeleton rows={5} label="Loading viewings" />
-      </div>
-    );
+    return <ListSkeleton rows={5} label="Loading viewings" />;
   }
   if (query.isError && !query.data) {
     return (
@@ -107,18 +177,6 @@ export default function OwnerViewingsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        eyebrow="Selling"
-        title="Viewings"
-        description={
-          <>
-            Buyers who want to see a property you are selling. Confirm their time, offer another, or
-            decline.
-          </>
-        }
-      />
-      <OwnerSellingNav />
-
       <div className="flex flex-wrap gap-2">
         {FILTERS.map((f) => (
           <Button

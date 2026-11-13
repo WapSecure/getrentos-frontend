@@ -16,6 +16,12 @@ describe('notification routes', () => {
     expect(routeForActionUrl('/owner/viewings')).toBe('/(app)/owner-viewings');
   });
 
+  it("opens a renter's viewing request on an owner's own viewings screen", () => {
+    const n = { type: 'VIEWING_REQUESTED', actionUrl: '/landlord/viewing-requests' };
+    expect(routeForNotification(n, 'owner')).toBe('/(app)/owner-viewings?tab=renters');
+    expect(routeForNotification(n, 'landlord')).toBe('/(app)/landlord-viewings');
+  });
+
   it('falls back by type when the action has no native screen', () => {
     expect(routeForNotification({ type: 'ESCROW_RELEASED' }, 'buyer')).toBe(
       '/(app)/buyer-transactions'
