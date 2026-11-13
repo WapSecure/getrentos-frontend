@@ -1,6 +1,8 @@
 // Sureground Diaspora Invest: the shapes the investor, purchase and Managed endpoints return, shared
 // by web and mobile. Pure data: no framework, no service. Sureground holds only deposits (D11).
 
+import type { PropertyValuation } from './valuation';
+
 // ── Attention queue ──────────────────────────────────────────────────────────
 
 export interface AttentionItem {
@@ -292,7 +294,7 @@ export interface InvestorOverview {
 
 /**
  * Portfolio figures from records Sureground holds; each is null when there is no record behind it.
- * There is no valuation: no method has been agreed.
+ * The only value is the sum of in-date reports by accredited valuers (DIA-30).
  */
 export interface InvestorPortfolio {
   properties: number | null;
@@ -304,6 +306,13 @@ export interface InvestorPortfolio {
   net12m: string | null;
   /** Percent, one decimal place: occupied units out of managed units. */
   occupancyRate: number | null;
+  /** Whole naira, as a string: in-date valuer reports only; null when none. */
+  valuedTotal?: string | null;
+  valuedCount?: number;
+  /** Properties and plots with no in-date report; never estimated. */
+  notValuedCount?: number;
+  /** Latest report per valued property, out-of-date ones marked. */
+  valuations?: PropertyValuation[];
   asOf: string;
 }
 

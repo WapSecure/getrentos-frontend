@@ -30,6 +30,7 @@ import {
   type AdminLandProfessional,
 } from '@/types/landProfessional';
 import { Fact, LandCaseSection, PanelMessage } from '@/components/admin/land/case/shared';
+import { RecordValuationPanel } from '@/components/admin/land/RecordValuationPanel';
 
 type Action = 'accredit' | 'reject' | 'suspend' | 'reinstate';
 
@@ -297,6 +298,9 @@ export default function AdminLandProfessionalPage() {
                 ))}
             </div>
           </LandCaseSection>
+          {p.role === 'VALUER' && p.status === 'ACCREDITED' && canDecide && (
+            <RecordValuationPanel professionalId={p.id} />
+          )}
         </aside>
       </div>
       {toast && (

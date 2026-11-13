@@ -1,5 +1,6 @@
 import type { LandDiligenceStatus, LandTitleType, VerificationSummary } from '../utils/landTrust';
 import type { ShowroomFloorPlan } from './floorPlans';
+import type { PropertyValuation } from '../diaspora/valuation';
 
 export type ShowroomMarket = 'rent' | 'sale' | 'land';
 
@@ -139,6 +140,8 @@ export interface ShowroomListing {
   availableFrom?: string;
   /** Sale and land detail routes only; undefined from an older API. */
   verificationSummary?: VerificationSummary;
+  /** Sale detail only (DIA-30): the latest accredited valuer report; undefined when none. */
+  valuation?: PropertyValuation;
   /** Structured floor plans (rooms and sizes); absent when the lister added none. */
   floorPlans?: ShowroomFloorPlan[];
   /** Rent and sale only; undefined where the API sends no chain. */
@@ -212,6 +215,8 @@ export interface PublicSaleDto {
   verificationSummary?: unknown;
   /** Detail route only. Read through `floorPlansOf`, never trusted as is. */
   floorPlans?: unknown;
+  /** Detail route only (DIA-30). Read through `valuationOf`, never trusted as is. */
+  valuation?: unknown;
   /** Commercial properties only. Read through `commercialDetailsOf`, never trusted as is. */
   commercial?: unknown;
 }

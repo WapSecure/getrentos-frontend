@@ -26,6 +26,7 @@ import { tidyPlace } from '../utils/address';
 import { conditionsOutstanding, isListingVerified } from '../utils/trustLabel';
 import { tourSource } from '../utils/videoSource';
 import { floorPlansOf } from './floorPlans';
+import { valuationOf } from '../diaspora/valuation';
 
 const money = (v: unknown) => {
   const n = typeof v === 'string' ? Number(v) : (v as number);
@@ -399,6 +400,7 @@ export function fromSale(s: PublicSaleDto): ShowroomListing {
     trustChain: saleTrustChain(trustChainOf(s.trustChain), summary),
     underOffer: !!s.underOffer,
     verificationSummary: summary,
+    valuation: valuationOf(s.valuation),
     media,
     images: imageUrls(media),
     ...withFloorPlans(s.floorPlans, media),

@@ -4,6 +4,7 @@ import type {
   LandReviewCase,
   LandReviewCiteInput,
   LandReviewUploadInput,
+  LandReviewValuationInput,
   MyLandReviewSummary,
 } from '@/types/landReviewer';
 
@@ -69,6 +70,25 @@ export const landReviewerService = {
         body: JSON.stringify({ report: report.trim() }),
       })
     ),
+
+  /**
+   * DIA-30: a valuer seat files the signed report with the value, method and dates. Neutral path: valuations
+   * are not land-only.
+   */
+  submitValuation: (seatId: string, input: LandReviewValuationInput) => {
+    const form = new FormData();
+    form.append('file', input.file);
+    form.append('amount', String(Math.round(input.amount)));
+    form.append('method', input.method);
+    form.append('inspectedAt', input.inspectedAt);
+    form.append('reportDate', input.reportDate);
+    return safeCall(() =>
+      authFetch<LandReviewCase>(`/professionals/reviews/${encodeURIComponent(seatId)}/valuation`, {
+        method: 'POST',
+        body: form,
+      })
+    );
+  },
 
   /** The file lands on the property, cited on `checklistKey` when given. */
   uploadDocument: (seatId: string, input: LandReviewUploadInput) => {

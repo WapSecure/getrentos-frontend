@@ -1,3 +1,4 @@
+import type { PropertyValuation, ValuationMethod } from '@sureground/shared';
 import type { LandBoundaryVersion } from '@sureground/shared';
 import type { LandDiligenceCheckStatus, LandTitleType } from '@/types/land';
 import type { LandDocumentType } from '@/types/landDocument';
@@ -100,6 +101,18 @@ export interface LandReviewCase extends MyLandReviewSummary {
   ownerLegalName: string | null;
   documents: LandReviewDocument[];
   report: string | null;
+  /** Valuer seats only: the latest valuation I filed on this property (never another valuer's). */
+  valuation?: PropertyValuation | null;
+}
+
+export interface LandReviewValuationInput {
+  /** Whole naira. */
+  amount: number;
+  method: ValuationMethod;
+  /** YYYY-MM-DD. */
+  inspectedAt: string;
+  reportDate: string;
+  file: File;
 }
 
 export interface DecideLandReviewCheckInput {

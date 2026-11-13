@@ -12,11 +12,14 @@ import {
 
 interface LandDocumentUploadFieldsProps {
   id: string;
-  documentType: LandDocumentType | '';
-  onDocumentTypeChange: (value: LandDocumentType) => void;
+  /** Leave both out when the type is fixed (e.g. a valuation report): only the file is asked for. */
+  documentType?: LandDocumentType | '';
+  onDocumentTypeChange?: (value: LandDocumentType) => void;
   file: File | null;
   onFileChange: (file: File | null) => void;
   disabled?: boolean;
+  /** Label of the file field. */
+  fileLabel?: string;
 }
 
 export const LandDocumentUploadFields = ({
@@ -26,23 +29,26 @@ export const LandDocumentUploadFields = ({
   file,
   onFileChange,
   disabled,
+  fileLabel = 'File',
 }: LandDocumentUploadFieldsProps) => {
   const problem = file ? landDocumentFileProblem(file) : null;
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2">
-      <Field label="Document type" required>
-        <Select
-          value={documentType}
-          onValueChange={(value) => onDocumentTypeChange(value as LandDocumentType)}
-          options={LAND_DOCUMENT_TYPE_OPTIONS}
-          placeholder="Choose a type"
-          ariaLabel="Document type"
-          searchable
-          disabled={disabled}
-        />
-      </Field>
-      <Field label="File" required error={problem ?? undefined}>
+    <div className={onDocumentTypeChange ? 'grid gap-4 sm:grid-cols-2' : undefined}>
+      {onDocumentTypeChange && (
+        <Field label="Document type" required>
+          <Select
+            value={documentType ?? ''}
+            onValueChange={(value) => onDocumentTypeChange(value as LandDocumentType)}
+            options={LAND_DOCUMENT_TYPE_OPTIONS}
+            placeholder="Choose a type"
+            ariaLabel="Document type"
+            searchable
+            disabled={disabled}
+          />
+        </Field>
+      )}
+      <Field label={fileLabel} required error={problem ?? undefined}>
         <DocumentUpload
           checkPhotoQuality
           value={file ? [{ id: `${id}-file`, file }] : []}
@@ -58,5 +64,8 @@ export const LandDocumentUploadFields = ({
   );
 };
 
+export const isFileReady = (file: File | null): file is File =>
+  Boolean(file && !landDocumentFileProblem(file));
+
 export const isUploadReady = (documentType: LandDocumentType | '', file: File | null) =>
-  Boolean(documentType && file && !landDocumentFileProblem(file));
+  Boolean(documentType) && isFileReady(file);
