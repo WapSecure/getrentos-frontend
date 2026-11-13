@@ -5,6 +5,7 @@ import { PublicMarketBrowser } from '@/components/market/PublicMarketBrowser';
 import { firstPagePath, rentToCard } from '@/lib/publicListingMap';
 import { ListingItemListJsonLd } from '@/components/seo/ListingItemListJsonLd';
 import { fetchFirstPage, isFilteredView } from '@/lib/marketFirstPage';
+import { SITE_OG_IMAGES } from '@/lib/site';
 
 const baseMetadata: Metadata = {
   title: 'Homes to Rent in Nigeria',
@@ -12,6 +13,7 @@ const baseMetadata: Metadata = {
     'Browse rental homes across Nigeria. Verified properties and verified landlords are marked, and you can scope results to a single estate.',
   alternates: { canonical: '/rent' },
   openGraph: {
+    images: SITE_OG_IMAGES,
     title: 'Homes to Rent in Nigeria',
     description:
       'Browse rental homes across Nigeria, see what Sureground has checked on each one, and pay through Sureground Payment Protection.',

@@ -18,6 +18,7 @@ import { faqJsonLd, type PlainFaq } from '@/lib/faqJsonLd';
 import { landAvailability } from '@/lib/landAvailability';
 import { LAND_PROTECTION, SALE_DEPOSIT_PROTECTION } from '@/lib/paymentCopy';
 import { ROUTES } from '@/lib/constants/auth';
+import { SITE_OG_IMAGES } from '@/lib/site';
 
 export const metadata: Metadata = {
   title: 'For Buyers: Buy a Home or Land in Nigeria',
@@ -25,6 +26,7 @@ export const metadata: Metadata = {
     'Search homes and land for sale, see what has been checked and by whom, make offers and pay your deposit through Sureground Payment Protection.',
   alternates: { canonical: '/buyers' },
   openGraph: {
+    images: SITE_OG_IMAGES,
     title: 'Sureground for buyers',
     description: 'Checked listings, offers in one thread and a protected deposit.',
     url: '/buyers',

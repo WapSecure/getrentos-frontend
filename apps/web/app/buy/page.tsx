@@ -5,6 +5,7 @@ import { PublicMarketBrowser } from '@/components/market/PublicMarketBrowser';
 import { firstPagePath, saleToCard } from '@/lib/publicListingMap';
 import { ListingItemListJsonLd } from '@/components/seo/ListingItemListJsonLd';
 import { fetchFirstPage, isFilteredView } from '@/lib/marketFirstPage';
+import { SITE_OG_IMAGES } from '@/lib/site';
 
 const baseMetadata: Metadata = {
   title: 'Properties for Sale in Nigeria',
@@ -12,6 +13,7 @@ const baseMetadata: Metadata = {
     'Browse homes for sale across Nigeria. Verified properties are marked, deposits go through Sureground Payment Protection, and you can scope results to a single estate.',
   alternates: { canonical: '/buy' },
   openGraph: {
+    images: SITE_OG_IMAGES,
     title: 'Properties for Sale in Nigeria',
     description: 'Browse homes for sale across Nigeria with Sureground Payment Protection.',
     url: '/buy',

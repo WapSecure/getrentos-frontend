@@ -1,5 +1,5 @@
 import type { PublicListingDetail } from '@/lib/publicListingDetail';
-import { SITE_URL } from '@/lib/site';
+import { SITE_NAME, SITE_URL } from '@/lib/site';
 
 export interface Crumb {
   name: string;
@@ -107,5 +107,23 @@ export function listingJsonLd(listing: PublicListingDetail, path: string) {
         : {}),
       ...(listing.availableFrom ? { availabilityStarts: listing.availableFrom } : {}),
     },
+  };
+}
+
+/**
+ * A guide as an Article, published by Sureground. No dates: the guides do not record when they were
+ * written or last reviewed yet, and a made-up date would be worse than none.
+ */
+export function articleJsonLd(article: { title: string; summary: string; path: string }) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: article.title,
+    description: article.summary,
+    url: `${SITE_URL}${article.path}`,
+    mainEntityOfPage: `${SITE_URL}${article.path}`,
+    inLanguage: 'en-GB',
+    author: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },
+    publisher: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },
   };
 }

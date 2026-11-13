@@ -5,6 +5,7 @@ import { ShortletMarketplaceBrowser } from '@/components/shortlet/ShortletMarket
 import { ListingItemListJsonLd } from '@/components/seo/ListingItemListJsonLd';
 import { fetchFirstPage, isFilteredView, shortletFirstPagePath } from '@/lib/marketFirstPage';
 import type { ShortletListing } from '@/types/shortlet';
+import { SITE_OG_IMAGES } from '@/lib/site';
 
 const baseMetadata: Metadata = {
   title: 'Shortlets: Furnished Short-Stay Apartments',
@@ -12,6 +13,7 @@ const baseMetadata: Metadata = {
     'Book furnished short-stay apartments and homes in Nigeria. See the total before you pay; Sureground holds your payment until at least 24 hours after check-in.',
   alternates: { canonical: '/shortlets' },
   openGraph: {
+    images: SITE_OG_IMAGES,
     title: 'Shortlets: Furnished Short-Stay Apartments',
     description:
       'Book furnished short-stay apartments and homes in Nigeria. See the total before you pay, with your payment held until after check-in.',

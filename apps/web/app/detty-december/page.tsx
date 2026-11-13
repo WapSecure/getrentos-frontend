@@ -11,13 +11,15 @@ import { photos } from '@/components/marketing/photos';
 import { ShortletMarketplaceBrowser } from '@/components/shortlet/ShortletMarketplaceBrowser';
 import { SupportContact } from '@/components/shared/support/SupportContact';
 import { ROUTES } from '@/lib/constants/auth';
+import { SITE_OG_IMAGES } from '@/lib/site';
 
 export const metadata: Metadata = {
-  title: 'Detty December short stays in Lagos, Abuja and beyond',
+  title: 'Detty December short stays across Nigeria',
   description:
     'Short stays for Detty December. You pay Sureground, not the host, and the host is paid no sooner than 24 hours after your check-in time. Report a problem within 24 hours of check-in and we can refund you.',
   alternates: { canonical: '/detty-december' },
   openGraph: {
+    images: SITE_OG_IMAGES,
     title: 'Detty December short stays on Sureground',
     description:
       'Your payment is held until after check-in, the total is shown before you book, and problems reported within 24 hours of check-in are reviewed for a refund.',
