@@ -1,5 +1,7 @@
+import { ROUTES } from '@sureground/shared';
 import type { Portal } from './roles';
 import { developmentRoute, developmentRouteForPath } from './askDeveloper';
+import { DEVELOPER_QUESTIONS_ROUTE } from './developerQuestions';
 import { isDevelopmentId } from './developments';
 
 // Never return a route that does not exist: unmapped paths fall back by type, then to the inbox.
@@ -18,6 +20,8 @@ const WEB_PATH_TO_ROUTE: Record<string, string> = {
   '/buyer/transactions': '/(app)/buyer-transactions',
   '/buyer/viewings': '/(app)/buyer-viewings',
   '/buyer/messages': '/(app)/(buyer)/messages',
+  // The answered notification links buyers here; anyone else gets `/developments/<id>`.
+  [ROUTES.BUYER_DEVELOPER_QUESTIONS]: DEVELOPER_QUESTIONS_ROUTE,
   '/landlord/applications': '/(app)/landlord-applications',
   '/landlord/payments': '/(app)/landlord-payments',
   '/landlord/maintenance': '/(app)/landlord-maintenance',
@@ -240,6 +244,8 @@ export function routeForNotification(
   const direct = routeForActionUrl(actionUrl);
   if (direct) return direct;
   // The developer answered: their answer shows under "Your questions" on the development screen.
+  // DEVELOPMENT_ENQUIRY_REMINDER (to the developer's firm) is left to the notification list: the
+  // app has no developer inbox, and the public page cannot answer a question.
   if (type === 'DEVELOPMENT_ENQUIRY_ANSWERED' && isDevelopmentId(developmentId)) {
     return developmentRoute(developmentId);
   }

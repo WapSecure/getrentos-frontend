@@ -2,13 +2,14 @@ import { useState } from 'react';
 import { Linking, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { LogIn, Mail, Phone, Send } from '@sureground/icons/native';
+import { ArrowRight, LogIn, Mail, Phone, Send } from '@sureground/icons/native';
 import {
   Badge,
   Button,
   Card,
   Chip,
   FormAlert,
+  LinkButton,
   SectionHeader,
   Skeleton,
   Text,
@@ -35,6 +36,7 @@ import {
   sendProblem,
   unitTypeChoices,
 } from '@/lib/askDeveloper';
+import { DEVELOPER_QUESTIONS_ROUTE } from '@/lib/developerQuestions';
 import { mailLink, telLink } from '@/lib/developments';
 import { formatDate } from '@/lib/format';
 
@@ -74,6 +76,8 @@ export function AskTheDeveloper({ development: d }: { development: ShowroomDevel
 
 function SignedIn({ development: d }: { development: ShowroomDevelopment }) {
   const { colors, spacing, radius } = useTheme();
+  // As on the web: the list across developments lives in the buyer area.
+  const isBuyer = useAuth().workspaces.includes('buyer');
   const toast = useToast();
   const queryClient = useQueryClient();
   const [message, setMessage] = useState('');
@@ -92,6 +96,7 @@ function SignedIn({ development: d }: { development: ShowroomDevelopment }) {
     mutationFn: () => developmentsApi.ask(d.id, message, unitTypeId),
     onSuccess: (sent) => {
       queryClient.setQueryData<BuyerDevelopmentEnquiry[]>(key, (old) => [sent, ...(old ?? [])]);
+      void queryClient.invalidateQueries({ queryKey: qk.market.developmentEnquiryHistory });
       setMessage('');
       setUnitTypeId(undefined);
       setTouched(false);
@@ -182,9 +187,26 @@ function SignedIn({ development: d }: { development: ShowroomDevelopment }) {
 
       {enquiries.length > 0 ? (
         <View style={{ gap: spacing.sm }}>
-          <Text variant="bodyStrong" accessibilityRole="header">
-            {COPY.yours}
-          </Text>
+          <View
+            style={{
+              flexDirection: 'row',
+              flexWrap: 'wrap',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              gap: spacing.sm,
+            }}
+          >
+            <Text variant="bodyStrong" accessibilityRole="header">
+              {COPY.yours}
+            </Text>
+            {isBuyer ? (
+              <LinkButton
+                label={COPY.allYours}
+                icon={<ArrowRight size={16} color={colors.primary} />}
+                onPress={() => router.push(DEVELOPER_QUESTIONS_ROUTE as never)}
+              />
+            ) : null}
+          </View>
           {enquiries.map((e) => (
             <Card key={e.id} style={{ gap: spacing.sm }}>
               <View

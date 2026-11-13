@@ -1,8 +1,10 @@
 import {
   buyerDevelopmentEnquiriesOf,
   buyerDevelopmentEnquiryOf,
+  buyerDevelopmentEnquiryPageOf,
   developmentOf,
   type BuyerDevelopmentEnquiry,
+  type BuyerDevelopmentEnquiryPage,
   type ShowroomDevelopment,
 } from '@sureground/shared/showroom';
 import { ApiError, apiFetch } from './client';
@@ -38,6 +40,16 @@ export const developmentsApi = {
     if (!isDevelopmentId(developmentId)) return [];
     const raw = await apiFetch<unknown>(`/development-enquiries${toQuery({ developmentId })}`);
     return buyerDevelopmentEnquiriesOf(raw);
+  },
+
+  /** The signed-in user's questions across every development, newest first, one page at a time. */
+  async history(page: number, pageSize: number): Promise<BuyerDevelopmentEnquiryPage> {
+    const raw = await apiFetch<unknown>(
+      `/development-enquiries/history${toQuery({ page, pageSize })}`
+    );
+    const parsed = buyerDevelopmentEnquiryPageOf(raw);
+    if (!parsed) throw new Error('Your questions did not load. Try again.');
+    return parsed;
   },
 
   /** Signed in, live developments only; a 429 carries the API's own message. */

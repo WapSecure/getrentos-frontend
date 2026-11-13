@@ -304,6 +304,7 @@ export const qk = {
     development: (id: string) => ['market', 'developments', id] as const,
     // Not under 'market': the signed-in user's own, so never shared with a signed-out view.
     developmentEnquiries: (id: string) => ['development-enquiries', 'mine', id] as const,
+    developmentEnquiryHistory: ['development-enquiries', 'history'] as const,
     saved: ['market', 'saved'] as const,
     microsite: (slug: string) => ['market', 'microsite', slug] as const,
     micrositeListings: (slug: string) => ['market', 'microsite', slug, 'listings'] as const,

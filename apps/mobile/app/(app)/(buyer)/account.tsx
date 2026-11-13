@@ -10,6 +10,7 @@ import {
   Heart,
   KeyRound,
   LandPlot,
+  MessageCircleQuestion,
   Users,
   Search,
   Star,
@@ -20,6 +21,7 @@ import {
   ClipboardList,
 } from '@sureground/icons/native';
 import { Screen } from '@sureground/ui-native';
+import { DEVELOPMENT_ENQUIRY_COPY } from '@sureground/shared/showroom';
 import { useTrustItems } from '@/components/account/useTrustItems';
 import { useInvestItems } from '@/components/account/useInvestItems';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
@@ -54,6 +56,13 @@ export default function BuyerAccount() {
       description: 'Payment and closing progress',
       icon: Wallet,
       onPress: go('/(app)/buyer-transactions'),
+    },
+    {
+      key: 'developer-questions',
+      label: DEVELOPMENT_ENQUIRY_COPY.historyTitle,
+      description: 'What you asked about off-plan developments, and the answers',
+      icon: MessageCircleQuestion,
+      onPress: go('/(app)/developer-questions'),
     },
     {
       key: 'documents',
