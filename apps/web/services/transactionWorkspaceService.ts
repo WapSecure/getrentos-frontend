@@ -64,6 +64,19 @@ export const transactionWorkspaceService = {
       })
     ),
 
+  /** Either party, while the dispute is open. Files are kept permanently; returns the dispute with them. */
+  addSaleDisputeEvidence: (id: string, file: File, note?: string) => {
+    const form = new FormData();
+    form.append('file', file);
+    if (note?.trim()) form.append('note', note.trim());
+    return safeCall(() =>
+      authFetch<SaleDispute>(`/marketplace/disputes/${encodeURIComponent(id)}/evidence`, {
+        method: 'POST',
+        body: form,
+      })
+    );
+  },
+
   /** Puts the held deposit on hold until Sureground decides; the buyer or the seller may raise it. */
   disputeDeposit: (txId: string, input: { title: string; description: string }) =>
     safeCall(() =>

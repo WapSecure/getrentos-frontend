@@ -81,6 +81,7 @@ export default function AppLayout() {
         <Stack.Screen name="invest-identity" options={DETAIL_OPTIONS} />
         <Stack.Screen name="invest-managed" options={DETAIL_OPTIONS} />
         <Stack.Screen name="purchase-workspace/[txId]" options={DETAIL_OPTIONS} />
+        <Stack.Screen name="dispute/[id]" options={DETAIL_OPTIONS} />
         <Stack.Screen name="buyer-documents" options={DETAIL_OPTIONS} />
         <Stack.Screen name="buyer-reviews" options={DETAIL_OPTIONS} />
         <Stack.Screen name="buyer-trust-profile" options={DETAIL_OPTIONS} />

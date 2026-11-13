@@ -150,6 +150,8 @@ export interface SaleDispute {
   description?: string;
   /** Older disputes only: links typed in by a party. Untrusted, never previewed. */
   evidence?: string[];
+  /** Files either party uploaded, oldest first, with 15-minute links. Only on the single-dispute read. */
+  attachments?: SaleDisputeAttachment[];
   /** Sureground's decision, once resolved. */
   resolution?: string;
   resolvedAt?: string;
@@ -157,6 +159,18 @@ export interface SaleDispute {
   /** When Sureground will respond by (the staff response window); null once under review or decided. */
   respondBy?: string | null;
   respondByParty?: 'SUREGROUND' | null;
+}
+
+/** Mirrors the backend's `EvidenceItemDto` for a party's upload. Kept permanently: never changed or removed. */
+export interface SaleDisputeAttachment {
+  id: string;
+  name: string;
+  mimeType: string | null;
+  url: string;
+  sizeBytes?: number | null;
+  uploadedBy?: { id: string; legalName: string } | null;
+  note?: string | null;
+  uploadedAt: string;
 }
 
 /** Mirrors `MarketplaceDisputeMessageDto`: one message in a deposit dispute's thread. */

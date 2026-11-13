@@ -62,8 +62,8 @@ export interface AttentionLinks {
   tours?: string;
   approvals?: string;
   identity: string;
-  /** Where a dispute opens; without it, the purchase's own workspace. */
-  dispute?: (dispute: Pick<PurchaseDispute, 'id' | 'kind'>) => string;
+  /** Where a dispute opens; without it (or when it returns nothing), the purchase's own workspace. */
+  dispute?: (dispute: Pick<PurchaseDispute, 'id' | 'kind'>) => string | undefined;
 }
 
 export interface AttentionInput {
@@ -252,7 +252,7 @@ export const buildAttentionQueue = (input: AttentionInput): InvestorAttentionIte
             : 'A land case Sureground is looking into.',
         dueAt: dispute.respondBy ?? undefined,
         dueLabel: dispute.respondBy ? 'Sureground replies by' : undefined,
-        link: { path: links.dispute ? links.dispute(dispute) : path, label: 'View' },
+        link: { path: links.dispute?.(dispute) ?? path, label: 'View' },
       });
     }
   }

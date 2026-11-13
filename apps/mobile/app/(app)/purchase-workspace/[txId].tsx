@@ -48,6 +48,7 @@ import {
   type WorkspaceViewer,
 } from '@/lib/api/purchaseWorkspace';
 import { buyerTransactionsApi } from '@/lib/api/buyerTransactions';
+import { DEPOSIT_DISPUTE_STATUS, depositDisputesApi } from '@/lib/api/depositDisputes';
 import { landBuyerApi } from '@/lib/api/landBuyer';
 import { deviceTimeZone, REP_RELATIONSHIPS } from '@/lib/api/landBuyerExtras';
 import type { ClosingCondition } from '@/lib/api/landSales';
@@ -61,6 +62,7 @@ import { TitlePerfection } from '@/components/land/TitlePerfection';
 import { AcquisitionStatusBadges } from '@/components/purchases/AcquisitionStatusBadges';
 import { DepositPaySheet } from '@/components/purchases/DepositPaySheet';
 import { StepProgress } from '@/components/purchases/StepProgress';
+import { asHref, depositDisputeHref } from '@/components/purchases/purchaseHref';
 
 const PLAN_LABEL: Record<TransactionWorkspace['plan'], string> = {
   BUILT_HOME: 'Built home',
@@ -152,6 +154,13 @@ export default function PurchaseWorkspace() {
     enabled: isBuyer && data?.statuses.moneyStatus.code === 'REQUESTED',
   });
   const payTx = transactions.data?.items.find((t) => t.id === txId) ?? null;
+  // Deposit disputes are between the buyer and the seller; a representative is turned away.
+  const depositDisputes = useQuery({
+    queryKey: qk.depositDisputes.mine,
+    queryFn: depositDisputesApi.mine,
+    enabled: isBuyer,
+  });
+  const disputes = (depositDisputes.data?.items ?? []).filter((d) => d.transactionId === txId);
 
   const refresh = () => {
     void qc.invalidateQueries({ queryKey: key });
@@ -477,6 +486,31 @@ export default function PurchaseWorkspace() {
                 ) : null}
               </Section>
             </View>
+
+            {disputes.length > 0 ? (
+              <Section
+                title="Disputes"
+                description="Disputes on the deposit, decided by Sureground. The deposit stays held until then."
+              >
+                <Rows
+                  rows={disputes.map((d) => ({
+                    id: d.id,
+                    title: d.title,
+                    detail: `${DEPOSIT_DISPUTE_STATUS[d.status] ?? humaniseCode(d.status)} · opened ${formatDate(d.createdAt, 'short')}`,
+                    badge: (
+                      <Button
+                        label="Open"
+                        size="sm"
+                        variant="ghost"
+                        iconRight={<ArrowRight size={16} color={colors.foreground} />}
+                        onPress={() => router.push(asHref(depositDisputeHref(d.id)))}
+                        accessibilityLabel={`Open the dispute ${d.title}`}
+                      />
+                    ),
+                  }))}
+                />
+              </Section>
+            ) : null}
 
             <View
               onLayout={(e: LayoutChangeEvent) => {

@@ -9,4 +9,8 @@ export const purchaseWorkspaceHref = (
     purchase.role === 'REPRESENTATIVE' ? '?role=representative' : ''
   }`;
 
+/** A deposit dispute's thread, for its buyer or seller. */
+export const depositDisputeHref = (disputeId: string): string =>
+  `/(app)/dispute/${encodeURIComponent(disputeId)}`;
+
 export const asHref = (path: string) => path as Href;
