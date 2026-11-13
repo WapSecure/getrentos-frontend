@@ -13,10 +13,13 @@ import {
   Select,
   Textarea,
 } from '@sureground/ui';
-import { categoryIcons } from '@/components/landlord/maintenance/MaintenanceRequestCard';
+import { maintenanceCategoryLabel } from '@sureground/shared';
+import {
+  MaintenanceCategoryIcon,
+  maintenanceCategorySelectOptions,
+} from '@/components/renter/maintenance/MaintenanceCategoryIcon';
 import { maintenancePriorityBadges } from '@/lib/statusBadge';
 import type {
-  MaintenanceCategory,
   MaintenancePriority,
   MaintenanceTriage,
   MaintenanceTriageCategory,
@@ -24,14 +27,6 @@ import type {
   MaintenanceTriageUrgency,
 } from '@/types/maintenance';
 
-const CATEGORIES: MaintenanceTriageCategory[] = [
-  'PLUMBING',
-  'ELECTRICAL',
-  'INTERNET',
-  'SECURITY',
-  'APPLIANCES',
-  'OTHER',
-];
 const URGENCIES: MaintenanceTriageUrgency[] = ['LOW', 'MEDIUM', 'HIGH', 'URGENT'];
 
 interface TriageResultModalProps {
@@ -45,9 +40,6 @@ interface TriageResultModalProps {
   canAssignVendor?: boolean;
 }
 
-const categoryLabel = (category: MaintenanceCategory): string =>
-  category.charAt(0).toUpperCase() + category.slice(1);
-
 export const TriageResultModal = ({
   triage,
   open,
@@ -59,19 +51,19 @@ export const TriageResultModal = ({
   canAssignVendor = false,
 }: TriageResultModalProps) => (
   <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
-    <DialogContent className="p-0">
-      <div className="p-4 border-b border-border">
+    <DialogContent size="lg" padded={false} className="max-h-[88dvh]">
+      <div className="px-5 py-4 pr-12 border-b border-border sm:px-6">
         <DialogTitle className="flex items-center gap-2 text-xl font-semibold tracking-[-0.02em] text-foreground">
           <Sparkles className="w-4.5 h-4.5 text-primary" />
           Automated triage
         </DialogTitle>
-        <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+        <DialogDescription className="text-sm text-muted-foreground mt-0.5">
           A suggested category, urgency and work order for this request. Review before you act.
         </DialogDescription>
       </div>
 
       {!triage ? (
-        <div className="p-4">
+        <div className="p-5 sm:p-6">
           <p className="text-sm text-muted-foreground">Reading the request…</p>
         </div>
       ) : (
@@ -114,16 +106,17 @@ const TriageBody = ({
   const [reason, setReason] = useState('');
   const canDecide = Boolean(onDecide && triage.reviewId);
 
-  const category = triage.category.toLowerCase() as MaintenanceCategory;
   const urgency = triage.urgency.toLowerCase() as MaintenancePriority;
-  const CategoryIcon = categoryIcons[category] ?? categoryIcons.other;
   const priority = maintenancePriorityBadges[urgency] ?? maintenancePriorityBadges.low;
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="p-5 space-y-5 sm:p-6">
       <div className="flex flex-wrap items-center gap-2">
-        <Badge variant="neutral" icon={<CategoryIcon className="w-3 h-3" />}>
-          {categoryLabel(category)}
+        <Badge
+          variant="neutral"
+          icon={<MaintenanceCategoryIcon category={triage.category} className="w-3 h-3" />}
+        >
+          {maintenanceCategoryLabel(triage.category)}
         </Badge>
         <Badge variant={priority.variant}>{priority.label}</Badge>
         {triage.needsVendor && <Badge variant="info">Needs a vendor</Badge>}
@@ -154,10 +147,7 @@ const TriageBody = ({
                 id="triage-category"
                 value={editCategory}
                 onValueChange={(v) => setEditCategory(v as MaintenanceTriageCategory)}
-                options={CATEGORIES.map((c) => ({
-                  value: c,
-                  label: categoryLabel(c.toLowerCase() as MaintenanceCategory),
-                }))}
+                options={maintenanceCategorySelectOptions()}
               />
             </div>
             <div className="space-y-1">

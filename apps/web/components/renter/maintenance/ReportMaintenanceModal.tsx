@@ -25,7 +25,7 @@ import type {
   MaintenanceCategory,
   MaintenancePriority,
 } from '@/types/maintenance';
-import { maintenanceCategoryLabel } from '@/lib/maintenanceCategory';
+import { maintenanceCategorySelectOptions } from '@/components/renter/maintenance/MaintenanceCategoryIcon';
 
 type ReportFormData = Omit<CreateMaintenanceRequestInput, 'category' | 'priority'> & {
   category: MaintenanceCategory | '';
@@ -44,9 +44,7 @@ interface ReportMaintenanceModalProps {
   onSubmit: (data: CreateMaintenanceRequestInput, photos: File[]) => Promise<boolean>;
 }
 
-const categories: { value: MaintenanceCategory; label: string }[] = (
-  ['plumbing', 'electrical', 'internet', 'security', 'appliances', 'other'] as const
-).map((value) => ({ value, label: maintenanceCategoryLabel(value) }));
+const categoryOptions = maintenanceCategorySelectOptions({ lowercase: true });
 
 const priorities: { value: MaintenancePriority; label: string; description: string }[] = [
   { value: 'low', label: 'Low', description: 'Non-urgent, cosmetic issues' },
@@ -308,10 +306,7 @@ export const ReportMaintenanceModal = ({
                 }
                 disabled={isSubmitting}
                 placeholder="Select category"
-                options={categories.map((category) => ({
-                  value: category.value,
-                  label: category.label,
-                }))}
+                options={categoryOptions}
               />
             </Field>
 

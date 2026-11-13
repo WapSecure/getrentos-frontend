@@ -85,21 +85,21 @@ export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarE
   return (
     <Dialog open={isOpen} onOpenChange={(next) => !next && !isSaving && onClose()}>
       <DialogContent
-        size="md"
+        size="lg"
         padded={false}
         showClose={!isSaving}
-        className="flex flex-col overflow-hidden"
+        className="flex max-h-[88dvh] flex-col overflow-hidden"
       >
-        <div className="p-4 pr-12 border-b border-border shrink-0">
-          <DialogTitle className="font-semibold text-foreground">
+        <div className="px-5 py-4 pr-12 border-b border-border shrink-0 sm:px-6">
+          <DialogTitle className="text-lg font-semibold text-foreground">
             {event ? 'Edit event' : 'Add event'}
           </DialogTitle>
-          <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+          <DialogDescription className="text-sm text-muted-foreground mt-0.5">
             {event ? 'Update event details' : 'Create a new event'}
           </DialogDescription>
         </div>
 
-        <div className="min-h-0 flex-1 p-4 space-y-4 overflow-y-auto">
+        <div className="min-h-0 flex-1 p-5 space-y-4 overflow-y-auto overscroll-contain sm:p-6">
           <Field label="Title" required>
             <Input
               type="text"
@@ -118,14 +118,13 @@ export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarE
             />
           </Field>
 
-          <Field label="Date" required>
-            <DatePicker
-              value={formData.date}
-              onChange={(v) => setFormData({ ...formData, date: v })}
-            />
-          </Field>
-
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <Field label="Date" required className="col-span-2 sm:col-span-1">
+              <DatePicker
+                value={formData.date}
+                onChange={(v) => setFormData({ ...formData, date: v })}
+              />
+            </Field>
             <Field label="Start time">
               <TimePicker
                 value={formData.startTime}
@@ -140,25 +139,27 @@ export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarE
             </Field>
           </div>
 
-          <Field label="Event type">
-            <Select
-              value={formData.type}
-              onValueChange={(value) =>
-                setFormData({ ...formData, type: value as CalendarEventType })
-              }
-              options={eventTypes}
-            />
-          </Field>
+          <div className="grid gap-4 sm:grid-cols-2 sm:gap-3">
+            <Field label="Event type">
+              <Select
+                value={formData.type}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, type: value as CalendarEventType })
+                }
+                options={eventTypes}
+              />
+            </Field>
 
-          <Field label="Location">
-            <AddressInput
-              kind="any"
-              allowManual
-              value={formData.location ? { text: formData.location } : null}
-              onChange={(next) => setFormData({ ...formData, location: next?.text ?? '' })}
-              placeholder="Event location"
-            />
-          </Field>
+            <Field label="Location">
+              <AddressInput
+                kind="any"
+                allowManual
+                value={formData.location ? { text: formData.location } : null}
+                onChange={(next) => setFormData({ ...formData, location: next?.text ?? '' })}
+                placeholder="Event location"
+              />
+            </Field>
+          </div>
 
           <div role="group" aria-labelledby="calendar-event-color-label">
             <p
@@ -217,11 +218,11 @@ export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarE
         </div>
 
         {errorMessage && (
-          <Alert variant="danger" className="mx-4 mt-4">
+          <Alert variant="danger" className="mx-5 mt-4 sm:mx-6">
             {errorMessage}
           </Alert>
         )}
-        <div className="p-4 border-t border-border flex gap-3 shrink-0">
+        <div className="px-5 py-4 border-t border-border flex gap-3 shrink-0 sm:px-6">
           <Button
             variant="primary"
             fullWidth

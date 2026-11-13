@@ -41,7 +41,7 @@ export const UserDetailModal = ({
   return (
     <Dialog open={!!user} onOpenChange={(open) => !open && onClose()}>
       {user && (
-        <DialogContent className="p-0">
+        <DialogContent size="lg" padded={false} className="max-h-[88dvh] overscroll-contain">
           <div className="border-b border-border px-5 py-4 pr-12">
             <div className="flex items-center gap-3">
               <div
@@ -51,10 +51,10 @@ export const UserDetailModal = ({
                 {getInitials(user.fullName)}
               </div>
               <div className="min-w-0">
-                <DialogTitle className="font-semibold tracking-[-0.01em] text-foreground [overflow-wrap:anywhere]">
+                <DialogTitle className="text-lg font-semibold tracking-[-0.01em] text-foreground [overflow-wrap:anywhere]">
                   {user.fullName}
                 </DialogTitle>
-                <p className="truncate text-xs text-muted-foreground" title={user.email}>
+                <p className="truncate text-sm text-muted-foreground" title={user.email}>
                   {user.email}
                 </p>
               </div>

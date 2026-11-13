@@ -21,18 +21,13 @@ import {
   useToast,
 } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
-import {
-  CATEGORIES,
-  PRIORITIES,
-  homeCareApi,
-  type Category,
-  type Priority,
-} from '@/lib/api/homeCare';
+import { PRIORITIES, homeCareApi, type Category, type Priority } from '@/lib/api/homeCare';
 import { errorMessage } from '@/lib/api/client';
 import { haptics } from '@/lib/haptics';
 import { useMyHomes } from '@/hooks/useMyHomes';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { VendorPicker } from '@/components/homecare/VendorPicker';
+import { CategoryPicker } from '@/components/maintenance/CategoryPicker';
 import { goBack } from '@/lib/goBack';
 
 export default function NewWorkOrder() {
@@ -193,17 +188,7 @@ export default function NewWorkOrder() {
             onChangeText={setTitle}
             maxLength={120}
           />
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
-            {CATEGORIES.map((c) => (
-              <Chip
-                key={c.value}
-                label={c.label}
-                size="sm"
-                selected={category === c.value}
-                onPress={() => setCategory(c.value)}
-              />
-            ))}
-          </View>
+          <CategoryPicker<Category> value={category} onChange={setCategory} />
           <TextField
             label="Details"
             required

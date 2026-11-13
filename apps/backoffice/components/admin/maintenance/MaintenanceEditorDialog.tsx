@@ -125,7 +125,7 @@ export function MaintenanceEditorDialog({
   return (
     <>
       <Dialog open={Boolean(editor)} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent className="p-6">
+        <DialogContent size="lg" className="max-h-[88dvh] overscroll-contain">
           <DialogTitle className="font-semibold">{title}</DialogTitle>
           <DialogDescription className="mt-1 text-sm text-muted-foreground">
             Changes apply platform-wide and are written to the audit trail.
@@ -136,12 +136,14 @@ export function MaintenanceEditorDialog({
                 <Field label="Vendor name">
                   <Input value={name} onChange={(e) => setName(e.target.value)} />
                 </Field>
-                <Field label="Service type">
-                  <Input value={serviceType} onChange={(e) => setServiceType(e.target.value)} />
-                </Field>
-                <Field label="Phone">
-                  <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
-                </Field>
+                <div className="grid gap-4 sm:grid-cols-2 sm:gap-3">
+                  <Field label="Service type">
+                    <Input value={serviceType} onChange={(e) => setServiceType(e.target.value)} />
+                  </Field>
+                  <Field label="Phone">
+                    <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
+                  </Field>
+                </div>
               </>
             )}
             {editor?.kind === 'sla' && (

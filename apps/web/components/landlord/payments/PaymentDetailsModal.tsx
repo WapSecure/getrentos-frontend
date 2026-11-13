@@ -45,25 +45,27 @@ export const PaymentDetailsModal = ({ payment, onClose }: PaymentDetailsModalPro
 
   return (
     <Dialog open={!!payment} onOpenChange={(next) => !next && onClose()}>
-      <DialogContent padded={false}>
-        <div className="p-4 pr-12 border-b border-border flex justify-between items-center gap-3">
+      <DialogContent size="lg" padded={false} className="max-h-[88dvh]">
+        <div className="px-5 py-4 pr-12 border-b border-border flex justify-between items-center gap-3 sm:px-6">
           <div className="min-w-0">
-            <DialogTitle className="font-semibold text-foreground">Payment details</DialogTitle>
-            <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+            <DialogTitle className="text-lg font-semibold text-foreground">
+              Payment details
+            </DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground mt-0.5">
               {payment.tenantName}: {payment.unitName}
             </DialogDescription>
           </div>
         </div>
 
-        <div className="p-4 space-y-5">
+        <div className="p-5 space-y-6 sm:p-6">
           <div className="text-center py-3">
             <p className="text-3xl font-bold text-foreground">{formatCurrency(payment.amount)}</p>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-sm text-muted-foreground mt-1">
               Due {formatDate(payment.dueDate)}
               {payment.paidDate ? ` • Paid ${formatDate(payment.paidDate)}` : ''}
             </p>
             {payment.status !== 'paid' && (payment.amountPaid ?? 0) > 0 && (
-              <p className="text-xs text-success mt-1">
+              <p className="text-sm text-success mt-1">
                 {formatCurrency(payment.amountPaid ?? 0)} received ·{' '}
                 {formatCurrency(payment.amount - (payment.amountPaid ?? 0))} still owed. It is paid
                 out once the charge is paid in full.

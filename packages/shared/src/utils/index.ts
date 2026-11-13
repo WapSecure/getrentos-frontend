@@ -32,4 +32,6 @@ export * from './visitorPassTimeline';
 export * from './deliveryCollection';
 export * from './propertyRent';
 export * from './landLateFee';
+export * from './maintenance';
+export * from './careTemplates';
 export * from './personContact';

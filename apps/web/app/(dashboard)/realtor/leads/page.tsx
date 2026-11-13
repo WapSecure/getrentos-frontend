@@ -283,8 +283,8 @@ export default function RealtorLeadsPage() {
         />
       )}
       <Dialog open={isCreateOpen} onOpenChange={handleCreateOpenChange}>
-        <DialogContent className="p-0">
-          <div className="p-5 space-y-4">
+        <DialogContent size="lg">
+          <div className="space-y-4">
             <DialogTitle>Add lead</DialogTitle>
             <Field label="Full name" htmlFor="lead-full-name" required error={formErrors.fullName}>
               <Input
@@ -300,36 +300,38 @@ export default function RealtorLeadsPage() {
                 disabled={createLead.isPending}
               />
             </Field>
-            <Field label="Email" htmlFor="lead-email" error={formErrors.email}>
-              <Input
-                id="lead-email"
-                type="email"
-                inputMode="email"
-                autoComplete="email"
-                placeholder="lead@example.com"
-                leadingIcon={<Mail className="h-4 w-4" />}
-                value={newLead.email}
-                onChange={(event) =>
-                  setNewLead((value) => ({ ...value, email: event.target.value }))
-                }
-                disabled={createLead.isPending}
-              />
-            </Field>
-            <Field label="Phone" htmlFor="lead-phone" error={formErrors.phone}>
-              <Input
-                id="lead-phone"
-                type="tel"
-                inputMode="tel"
-                autoComplete="tel"
-                placeholder="0801 234 5678"
-                leadingIcon={<Phone className="h-4 w-4" />}
-                value={newLead.phone}
-                onChange={(event) =>
-                  setNewLead((value) => ({ ...value, phone: event.target.value }))
-                }
-                disabled={createLead.isPending}
-              />
-            </Field>
+            <div className="grid gap-4 sm:grid-cols-2 sm:gap-3">
+              <Field label="Email" htmlFor="lead-email" error={formErrors.email}>
+                <Input
+                  id="lead-email"
+                  type="email"
+                  inputMode="email"
+                  autoComplete="email"
+                  placeholder="lead@example.com"
+                  leadingIcon={<Mail className="h-4 w-4" />}
+                  value={newLead.email}
+                  onChange={(event) =>
+                    setNewLead((value) => ({ ...value, email: event.target.value }))
+                  }
+                  disabled={createLead.isPending}
+                />
+              </Field>
+              <Field label="Phone" htmlFor="lead-phone" error={formErrors.phone}>
+                <Input
+                  id="lead-phone"
+                  type="tel"
+                  inputMode="tel"
+                  autoComplete="tel"
+                  placeholder="0801 234 5678"
+                  leadingIcon={<Phone className="h-4 w-4" />}
+                  value={newLead.phone}
+                  onChange={(event) =>
+                    setNewLead((value) => ({ ...value, phone: event.target.value }))
+                  }
+                  disabled={createLead.isPending}
+                />
+              </Field>
+            </div>
             <Field label="Listing" htmlFor="lead-listing">
               <PaginatedSelect
                 value={newLead.listingId}

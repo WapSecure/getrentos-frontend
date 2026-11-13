@@ -49,7 +49,7 @@ export const LocationPicker = ({
       const L = await import('leaflet');
       if (cancelled || !containerRef.current) return;
       leafletRef.current = L;
-      const map = L.map(containerRef.current, { zoomControl: true });
+      const map = L.map(containerRef.current, { zoomControl: true, scrollWheelZoom: false });
       addBaseTiles(L, map);
       map.on('click', (e: { latlng: { lat: number; lng: number } }) => {
         pinRef.current?.setLatLng(e.latlng);
