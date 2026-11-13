@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
 import {
   Lock,
   ShieldAlert,
@@ -14,11 +15,13 @@ import {
   Clock,
   Banknote,
   XCircle,
+  Scale,
   type SgIcon,
 } from '@sureground/icons';
 import {
   Alert,
   type AlertVariant,
+  Badge,
   Button,
   Dialog,
   DialogContent,
@@ -27,6 +30,11 @@ import {
   Timeline,
 } from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
+import { unwrap } from '@/lib/apiHelpers';
+import { transactionWorkspaceKeys } from '@/lib/queryKeys';
+import { PURCHASE_ROUTES } from '@/lib/constants/purchaseRoutes';
+import { transactionWorkspaceService } from '@/services/transactionWorkspaceService';
+import { SALE_DISPUTE_STATUS } from '@/components/shared/disputes/DisputeParts';
 import { cancelledBeforePayment } from '@/lib/saleCancellation';
 import { stepStates } from '@/lib/stepStates';
 import type {
@@ -123,8 +131,18 @@ export const EscrowTransactionDetailModal = ({
 }: EscrowTransactionDetailModalProps) => {
   const router = useRouter();
   const [showActivityLog, setShowActivityLog] = useState(false);
+  // The seller's deposit disputes, from the same list the buyer's workspace reads.
+  const saleDisputes = useQuery({
+    queryKey: transactionWorkspaceKeys.saleDisputes,
+    queryFn: () => unwrap(transactionWorkspaceService.saleDisputes()),
+    enabled: Boolean(transaction),
+  });
 
   if (!transaction) return null;
+
+  const disputes = (saleDisputes.data?.items ?? []).filter(
+    (d) => d.transactionId === transaction.id
+  );
 
   const isFrozen = transaction.escrowStatus === 'frozen';
   const isRefunded = transaction.escrowStatus === 'refunded';
@@ -187,6 +205,36 @@ export const EscrowTransactionDetailModal = ({
                   state: states[index],
                 }))}
               />
+            </div>
+          )}
+
+          {disputes.length > 0 && (
+            <div className="overflow-hidden rounded-lg border border-border">
+              <h4 className="flex items-center gap-2 border-b border-border p-3 text-sm font-medium text-foreground">
+                <Scale className="h-4 w-4 text-muted-foreground" aria-hidden />
+                Deposit disputes
+              </h4>
+              <ul className="divide-y divide-border">
+                {disputes.map((d) => (
+                  <li key={d.id}>
+                    <button
+                      type="button"
+                      onClick={() => router.push(PURCHASE_ROUTES.ownerDepositDispute(d.id))}
+                      className="flex w-full items-center justify-between gap-3 p-3 text-left transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm text-foreground">{d.title}</span>
+                        <span className="text-xs text-muted-foreground">
+                          Opened {formatDate(d.createdAt)} · messages, files and the decision
+                        </span>
+                      </span>
+                      <Badge variant={d.status === 'RESOLVED' ? 'neutral' : 'warning'}>
+                        {SALE_DISPUTE_STATUS[d.status] ?? d.status}
+                      </Badge>
+                    </button>
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
 

@@ -4,16 +4,19 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { formatDualTime } from '@sureground/shared';
-import { FileText, MessageSquareText, Send } from '@sureground/icons';
+import { FileText, MessageSquareText, Send, Upload } from '@sureground/icons';
 import {
   Badge,
   Button,
+  DocumentUpload,
   EmptyState,
   Field,
+  Input,
   PageHeader,
   Skeleton,
   Textarea,
   useToast,
+  type PendingUpload,
 } from '@sureground/ui';
 import { browserTimeZone } from '@/components/shared/forms/TimeZoneSelect';
 import { unwrap } from '@/lib/apiHelpers';
@@ -31,13 +34,18 @@ import {
 } from './DisputeParts';
 
 const MAX_MESSAGE = 2000;
+const MAX_NOTE = 1000;
+/** The backend's evidence limit and the file types it accepts. */
+const EVIDENCE_MAX_MB = 25;
+const EVIDENCE_ACCEPT = '.pdf,.doc,.docx,.jpg,.jpeg,.png,.webp,.txt,.csv,.xls,.xlsx,.mp4,.webm';
 
 /** Only plain web links from older disputes are shown, and never previewed. */
 const isWebLink = (value: string) => /^https?:\/\//i.test(value);
 
 /**
  * A deposit dispute's thread for one of its two parties: what was raised, the messages with the
- * other side and Sureground, a reply box while it is open, and Sureground's response deadline.
+ * other side and Sureground, both parties' files, a reply box and evidence upload while it is open,
+ * and Sureground's response deadline. The buyer and the seller see the same page from their side.
  * The model has no appeal, so the page says decisions are final and points to the transparency centre.
  */
 export const DepositDisputeThread = ({
@@ -47,16 +55,21 @@ export const DepositDisputeThread = ({
 }: {
   disputeId: string;
   back: { label: string; href: string };
-  workspaceHref: (transactionId: string) => string;
+  /** The purchase workspace; the seller has none, so the sale is shown without a link. */
+  workspaceHref?: (transactionId: string) => string;
 }) => {
   const queryClient = useQueryClient();
   const toast = useToast();
   const [reply, setReply] = useState('');
+  const [uploads, setUploads] = useState<PendingUpload[]>([]);
+  const [fileNote, setFileNote] = useState('');
+  const file = uploads[0]?.file ?? null;
   const [viewerTimeZone] = useState(() => browserTimeZone());
   const [myId] = useState(() => getStoredUser<{ id?: string }>()?.id);
 
+  const disputeKey = transactionWorkspaceKeys.saleDispute(disputeId);
   const dispute = useQuery({
-    queryKey: transactionWorkspaceKeys.saleDispute(disputeId),
+    queryKey: disputeKey,
     queryFn: () => unwrap(transactionWorkspaceService.saleDispute(disputeId)),
     enabled: Boolean(disputeId),
   });
@@ -74,6 +87,17 @@ export const DepositDisputeThread = ({
     },
     onError: (reason: Error) => toast.error(reason.message),
   });
+  const upload = useMutation({
+    mutationFn: () =>
+      unwrap(transactionWorkspaceService.addSaleDisputeEvidence(disputeId, file as File, fileNote)),
+    onSuccess: (updated) => {
+      setUploads([]);
+      setFileNote('');
+      queryClient.setQueryData(disputeKey, updated);
+      toast.success('File added. It is kept with the dispute permanently.');
+    },
+    onError: (reason: Error) => toast.error(reason.message),
+  });
 
   if (dispute.isLoading) return <DisputeLoading />;
   const d = dispute.data;
@@ -83,6 +107,7 @@ export const DepositDisputeThread = ({
   const resolved = d.status === 'RESOLVED';
   const otherSide = d.raisedBy.id === myId ? d.against.legalName : d.raisedBy.legalName;
   const links = (d.evidence ?? []).filter(isWebLink);
+  const attachments = d.attachments ?? [];
   const at = (iso: string) => `${formatDate(iso)}, ${formatDualTime(iso, viewerTimeZone)}`;
   const author = (senderId: string, senderName: string) => {
     if (senderId === myId) return 'You';
@@ -97,7 +122,7 @@ export const DepositDisputeThread = ({
           back,
           {
             label: d.propertyTitle ?? 'Purchase',
-            href: workspaceHref(d.transactionId),
+            href: workspaceHref?.(d.transactionId),
           },
           { label: 'Deposit dispute' },
         ]}
@@ -135,6 +160,81 @@ export const DepositDisputeThread = ({
               </li>
             ))}
           </ul>
+        )}
+      </DisputeSection>
+
+      <DisputeSection
+        title="Evidence"
+        icon={FileText}
+        description={`Files from you and ${otherSide}. Files cannot be removed once added.`}
+      >
+        {attachments.length === 0 ? (
+          <EmptyState
+            icon={FileText}
+            title="No files yet"
+            description={
+              resolved
+                ? 'Nobody added a file to this dispute.'
+                : 'Photos, documents or receipts that support what you have said.'
+            }
+            size="compact"
+            bare
+          />
+        ) : (
+          <ul className="mt-3 space-y-2">
+            {attachments.map((item) => (
+              <li key={item.id} className="text-sm">
+                <a
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-primary hover:underline"
+                >
+                  {item.name}
+                </a>
+                <span className="text-muted-foreground">
+                  {' '}
+                  ·{' '}
+                  {item.uploadedBy?.id === myId
+                    ? 'you'
+                    : (item.uploadedBy?.legalName ?? otherSide)}{' '}
+                  · {formatDate(item.uploadedAt)}
+                </span>
+                {item.note && <p className="text-muted-foreground">“{item.note}”</p>}
+              </li>
+            ))}
+          </ul>
+        )}
+        {!resolved && (
+          <div className="mt-4 space-y-2 border-t border-border pt-4">
+            <DocumentUpload
+              value={uploads}
+              onChange={setUploads}
+              multiple={false}
+              accept={EVIDENCE_ACCEPT}
+              maxSizeMB={EVIDENCE_MAX_MB}
+              label="Evidence file"
+            />
+            <Input
+              value={fileNote}
+              onChange={(e) => setFileNote(e.target.value)}
+              placeholder="What this shows (optional)"
+              maxLength={MAX_NOTE}
+              aria-label="What this file shows"
+            />
+            <div className="flex justify-end">
+              <Button
+                size="sm"
+                variant="outline"
+                icon={<Upload className="h-4 w-4" aria-hidden />}
+                isLoading={upload.isPending}
+                disabled={!file || upload.isPending}
+                onClick={() => upload.mutate()}
+              >
+                Add file
+              </Button>
+            </div>
+          </div>
         )}
       </DisputeSection>
 

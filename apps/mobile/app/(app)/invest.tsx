@@ -74,7 +74,7 @@ import { AttentionList, type AttentionListItem } from '@/components/attention/At
 import { FactList, type Fact } from '@/components/diaspora/FactList';
 import { PurchaseSummaryList } from '@/components/purchases/PurchaseSummaryList';
 import { StepProgress } from '@/components/purchases/StepProgress';
-import { purchaseWorkspaceHref } from '@/components/purchases/purchaseHref';
+import { depositDisputeHref, purchaseWorkspaceHref } from '@/components/purchases/purchaseHref';
 
 /** Enough rows to total the deposits held; a longer history shows the count only. */
 const LIST_PAGE = 50;
@@ -171,7 +171,8 @@ export default function InvestorWorkspace() {
       risk: ROUTES.risk,
       tours: buyer ? ROUTES.tours : undefined,
       approvals: owner ? ROUTES.approvals : undefined,
-      // No dispute screens on mobile yet, so a dispute opens its purchase workspace (no `dispute` link).
+      // A deposit dispute opens its thread; mobile has no land case screen, so a land case opens the purchase.
+      dispute: (d) => (d.kind === 'DEPOSIT' ? depositDisputeHref(d.id) : undefined),
       identity: ROUTES.identity,
     },
   }).map((item) => ({

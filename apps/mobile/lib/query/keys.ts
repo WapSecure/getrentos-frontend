@@ -48,6 +48,12 @@ export const qk = {
     all: ['purchase-workspace'] as const,
     detail: (role: string, txId: string) => ['purchase-workspace', role, txId] as const,
   },
+  // Disputes on a sale's held deposit, for its buyer or seller.
+  depositDisputes: {
+    mine: ['deposit-disputes'] as const,
+    detail: (id: string) => ['deposit-disputes', id] as const,
+    messages: (id: string) => ['deposit-disputes', id, 'messages'] as const,
+  },
   buyerLand: {
     all: ['buyer-land'] as const,
     purchases: (status: string) => ['buyer-land', 'purchases', status] as const,

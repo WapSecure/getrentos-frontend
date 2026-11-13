@@ -53,15 +53,17 @@ export const foreignIdentityApi = {
   },
   /** DIA-07: bank statements, a supporting document, and the donor's ID with a gift or inheritance letter. */
   submitSourceOfFunds: (input: {
-    bankStatement: PickedFile;
+    /** Up to 6, as on web. */
+    bankStatements: PickedFile[];
     supportingKind: SourceOfFundsSupportingKind;
-    supporting: PickedFile;
+    /** Up to 5. */
+    supporting: PickedFile[];
     donorIdentity?: PickedFile | null;
     note?: string;
   }) => {
     const form = new FormData();
-    appendFile(form, 'bankStatements', input.bankStatement);
-    appendFile(form, 'supporting', input.supporting);
+    input.bankStatements.forEach((file) => appendFile(form, 'bankStatements', file));
+    input.supporting.forEach((file) => appendFile(form, 'supporting', file));
     if (input.donorIdentity) appendFile(form, 'donorIdentity', input.donorIdentity);
     form.append('supportingKind', input.supportingKind);
     if (input.note) form.append('note', input.note);

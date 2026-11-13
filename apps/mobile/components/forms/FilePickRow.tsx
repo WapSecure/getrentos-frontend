@@ -13,6 +13,7 @@ export function FilePickRow({
   icon: Icon = FileText,
   emptyText = 'Tap to add',
   checkPhotoQuality = false,
+  showLabel = true,
 }: {
   label: string;
   file: PickedFile | null;
@@ -21,6 +22,8 @@ export function FilePickRow({
   icon?: SgIcon;
   emptyText?: string;
   checkPhotoQuality?: boolean;
+  /** False inside a FilePickList, which shows the label once above its rows. */
+  showLabel?: boolean;
 }) {
   const { colors, spacing, radius } = useTheme();
   const [advice, setAdvice] = useState<{ uri: string; problems: string[] } | null>(null);
@@ -37,9 +40,11 @@ export function FilePickRow({
   const photoAdvice = file && advice?.uri === file.uri ? advice.problems : [];
   return (
     <View style={{ gap: spacing.sm }}>
-      <Text variant="callout" color="mutedForeground" style={{ fontWeight: '600' }}>
-        {label}
-      </Text>
+      {showLabel ? (
+        <Text variant="callout" color="mutedForeground" style={{ fontWeight: '600' }}>
+          {label}
+        </Text>
+      ) : null}
       <Pressable
         onPress={file && onClear ? undefined : onPick}
         accessibilityRole={file && onClear ? undefined : 'button'}
@@ -90,6 +95,63 @@ export function FilePickRow({
           </Text>
         </View>
       ))}
+    </View>
+  );
+}
+
+/**
+ * Several files for one field, picked one at a time (the pickers return a single file): a row per
+ * file with Remove, then an "add another" row until `max` is reached.
+ */
+export function FilePickList({
+  label,
+  files,
+  max,
+  onChange,
+  pick,
+  emptyText = 'Tap to add',
+  addText = 'Add another file',
+}: {
+  label: string;
+  files: PickedFile[];
+  max: number;
+  onChange: (next: PickedFile[]) => void;
+  pick: () => Promise<PickedFile | null>;
+  emptyText?: string;
+  addText?: string;
+}) {
+  const { spacing } = useTheme();
+  const add = async () => {
+    const picked = await pick();
+    if (picked) onChange([...files, picked].slice(0, max));
+  };
+  return (
+    <View style={{ gap: spacing.sm }}>
+      <Text variant="callout" color="mutedForeground" style={{ fontWeight: '600' }}>
+        {label}
+      </Text>
+      {files.map((file, index) => (
+        <FilePickRow
+          key={`${file.uri}-${index}`}
+          label={`${label}, file ${index + 1}`}
+          showLabel={false}
+          file={file}
+          onPick={add}
+          onClear={() => onChange(files.filter((_, i) => i !== index))}
+        />
+      ))}
+      {files.length < max ? (
+        <FilePickRow
+          label={label}
+          showLabel={false}
+          file={null}
+          emptyText={files.length === 0 ? emptyText : addText}
+          onPick={add}
+        />
+      ) : null}
+      <Text variant="caption" color="mutedForeground">
+        Up to {max} files{files.length > 0 ? `, ${files.length} added` : ''}.
+      </Text>
     </View>
   );
 }

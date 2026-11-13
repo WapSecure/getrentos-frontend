@@ -158,6 +158,40 @@ test('without a dispute route, a dispute opens its purchase', () => {
   assert.equal(items[0].link.path, '/buyer/transactions/tx1');
 });
 
+test('a dispute with no screen of its own (the route returns nothing) opens its purchase', () => {
+  const items = buildAttentionQueue({
+    purchases: [
+      purchase({
+        dispute: {
+          id: 'd1',
+          kind: 'DEPOSIT',
+          status: 'OPEN',
+          respondBy: null,
+          respondByParty: null,
+        },
+      }),
+      purchase({
+        transactionId: 'tx2',
+        dispute: {
+          id: 'ld1',
+          kind: 'LAND',
+          status: 'OPEN',
+          respondBy: null,
+          respondByParty: null,
+        },
+      }),
+    ],
+    links: {
+      ...links,
+      dispute: ({ id, kind }) => (kind === 'DEPOSIT' ? `/(app)/dispute/${id}` : undefined),
+    },
+  });
+  assert.deepEqual(
+    items.map((i) => i.link.path),
+    ['/(app)/dispute/d1', '/buyer/transactions/tx2']
+  );
+});
+
 test('a tour with times offered is due at its earliest slot; other tours are not listed', () => {
   const items = buildAttentionQueue({
     tours: [
