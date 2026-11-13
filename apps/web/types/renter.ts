@@ -1,3 +1,5 @@
+import type { TravelTimesSource, WalkabilityInsight } from '@sureground/shared';
+
 export type PeriodType = 'month' | 'year' | 'week';
 export type ApplicationStatus = 'pending' | 'under_review' | 'approved' | 'rejected' | 'withdrawn';
 export type PaymentStatus = 'upcoming' | 'overdue' | 'paid';
@@ -93,6 +95,8 @@ export interface TravelModeResult {
 }
 
 export interface TravelTimes {
+  /** Who estimated the times; absent from older API responses. */
+  source?: TravelTimesSource;
   destination: string;
   destinationCoords: { latitude: number; longitude: number };
   modes: Partial<Record<'driving' | 'transit' | 'walking', TravelModeResult | null>>;
@@ -124,7 +128,7 @@ export interface GeoInsights {
     bedrooms: number | null;
     bathrooms: number | null;
   };
-  walkability: { score: number; label: string; summary: string } | null;
+  walkability: WalkabilityInsight | null;
   aiSummary: string | null;
   generatedAt: string;
   cacheTtlSeconds: number;

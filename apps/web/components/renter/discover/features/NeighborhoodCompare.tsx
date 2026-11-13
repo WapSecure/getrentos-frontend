@@ -4,6 +4,12 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { GitCompare, MapPin } from '@sureground/icons';
 import {
+  commuteSourceNote,
+  NEARBY_PLACES_UNAVAILABLE,
+  shownTravelMode,
+  walkabilityView,
+} from '@sureground/shared';
+import {
   Button,
   Dialog,
   DialogContent,
@@ -49,6 +55,8 @@ export const NeighborhoodCompare = ({ listingId, propertyLocation }: Neighborhoo
   const categories = Object.entries(insights?.neighborhood ?? {}).filter(
     ([, places]) => places.length > 0
   );
+
+  const walking = walkabilityView(insights?.walkability);
 
   const placesByCategory = (category: string): NearbyPlace[] =>
     (insights?.neighborhood ?? {})[category] ?? [];
@@ -107,7 +115,7 @@ export const NeighborhoodCompare = ({ listingId, propertyLocation }: Neighborhoo
                     </h4>
                     <div className="grid grid-cols-3 gap-3">
                       {(['driving', 'transit', 'walking'] as const).map((mode) => {
-                        const result = insights.travelTimes?.modes?.[mode];
+                        const result = shownTravelMode(mode, insights.travelTimes?.modes?.[mode]);
                         if (!result) return null;
                         return (
                           <div key={mode} className="p-3 rounded-lg bg-secondary">
@@ -120,22 +128,20 @@ export const NeighborhoodCompare = ({ listingId, propertyLocation }: Neighborhoo
                         );
                       })}
                     </div>
-                  </div>
-                )}
-
-                {insights.walkability && (
-                  <div className="mb-6 p-3 rounded-lg bg-secondary">
-                    <div className="flex flex-wrap items-center justify-between gap-x-3">
-                      <p className="text-sm font-medium text-foreground">Walkability</p>
-                      <span className="text-sm font-semibold text-primary">
-                        {insights.walkability.score}/100 · {insights.walkability.label}
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {insights.walkability.summary}
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      {commuteSourceNote(insights.travelTimes.source)}
                     </p>
                   </div>
                 )}
+
+                <div className="mb-6 p-3 rounded-lg bg-secondary">
+                  <p className="text-sm font-medium text-foreground">
+                    {walking?.heading ?? 'Within walking distance'}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {walking?.summary ?? NEARBY_PLACES_UNAVAILABLE}
+                  </p>
+                </div>
 
                 {categories.length > 0 ? (
                   <div className="space-y-6">

@@ -1,3 +1,4 @@
+import type { TravelTimesSource, WalkabilityInsight } from '@sureground/shared';
 import { apiFetch } from './client';
 
 export interface NearbyPlace {
@@ -28,16 +29,14 @@ export interface TravelModeResult {
 }
 
 export interface TravelTimes {
+  /** Who estimated the times; absent from older API responses. */
+  source?: TravelTimesSource;
   destination: string;
   destinationCoords: { latitude: number; longitude: number };
   modes: Partial<Record<'driving' | 'transit' | 'walking', TravelModeResult | null>>;
 }
 
-export interface Walkability {
-  score: number;
-  label: 'Very walkable' | 'Walkable' | 'Somewhat walkable' | 'Car-dependent';
-  summary: string;
-}
+export type Walkability = WalkabilityInsight;
 
 export interface GeoInsights {
   listingId: string;

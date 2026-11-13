@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Car, Bus, Train, Clock, Navigation } from '@sureground/icons';
+import { shownTravelMode } from '@sureground/shared';
 import {
   Alert,
   Button,
@@ -47,7 +48,7 @@ export const CommuteCalculator = ({ listingId, propertyLocation }: CommuteCalcul
     const response = await renterService.getGeoInsights(listingId, destination);
     const insights = response.data;
 
-    const travel = insights?.travelTimes?.modes?.[mode];
+    const travel = shownTravelMode(mode, insights?.travelTimes?.modes?.[mode]);
     if (travel && travel.durationSeconds > 0) {
       setCommuteTime(Math.round(travel.durationSeconds / 60));
     } else {

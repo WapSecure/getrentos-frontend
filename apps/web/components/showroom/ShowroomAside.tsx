@@ -3,9 +3,10 @@ import type { ShowroomListing } from '@sureground/shared/showroom';
 import { ListingCallToAction } from '@/components/market/ListingCallToAction';
 import { COMMERCIAL_VAT_ANCHOR, vatStated } from '@/lib/commercialShowroom';
 import { formatCurrency } from '@/lib/format';
+import { RENT_PROTECTION_RULE } from '@sureground/shared';
 
 const PROTECTION_LINE = {
-  rent: 'Pay through Sureground: we hold your rent and release it to the landlord on schedule, unless you raise a dispute.',
+  rent: RENT_PROTECTION_RULE,
   sale: 'Pay through Sureground: we hold your deposit until the seller hands over the keys and you confirm.',
   land: 'Pay through Sureground: we hold your money and only release it to the seller once the conveyance steps are confirmed.',
 } as const;
