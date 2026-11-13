@@ -1,4 +1,5 @@
 import type { ReplyLanguage } from '@/lib/replyLanguage';
+import { contactRequestBody } from '@sureground/shared';
 import { authFetch, safeCall, toQuery } from '@/lib/apiHelpers';
 import type { ApiResponse, Paginated } from '@/lib/apiHelpers';
 import type { CommercialDetails } from '@sureground/shared/showroom';
@@ -398,18 +399,26 @@ export const realtorService = {
         `/realtor/clients/${relationshipId}/assigned-properties${toQuery({ ...params })}`
       )
     ),
-  inviteClient: (email: string) =>
+  /** By the client's phone number or email; an email goes as `email`, which older servers accept. */
+  inviteClient: (contact: string) =>
     safeCall(() =>
-      authFetch('/realtor/clients', { method: 'POST', body: JSON.stringify({ email }) })
+      authFetch('/realtor/clients', {
+        method: 'POST',
+        body: JSON.stringify(contactRequestBody(contact) ?? { contact }),
+      })
     ),
-  checkClientEmail: (email: string) =>
+  /** Whether a phone number or email belongs to an owner or landlord account. */
+  checkClientEmail: (contact: string) =>
     safeCall(() =>
       authFetch<{
         exists: boolean;
         isEligible: boolean;
         name: string | null;
         role: 'OWNER_OR_LANDLORD' | 'OTHER' | null;
-      }>('/realtor/clients/check', { method: 'POST', body: JSON.stringify({ email }) })
+      }>('/realtor/clients/check', {
+        method: 'POST',
+        body: JSON.stringify(contactRequestBody(contact) ?? { contact }),
+      })
     ),
   listListings: (params: RealtorListingsParams = {}) =>
     safeCall(() =>

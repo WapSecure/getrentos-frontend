@@ -2,6 +2,7 @@
 
 import { Trash2 } from '@sureground/icons';
 import { IconButton } from '@sureground/ui';
+import { personContactLabel } from '@sureground/shared';
 import type { StaffMember } from '@/types/estate';
 
 interface StaffMemberRowProps {
@@ -15,12 +16,13 @@ const formatDate = (value: string) =>
   );
 
 export const StaffMemberRow = ({ member, onRemove }: StaffMemberRowProps) => {
+  const contact = personContactLabel(member);
   return (
     <div className="p-4 flex items-center justify-between gap-4">
       <div className="min-w-0">
         <p className="text-sm font-medium text-foreground truncate">{member.name}</p>
         <p className="text-xs text-muted-foreground mt-0.5">
-          {member.email} · Gateman since {formatDate(member.addedAt)}
+          {contact ? `${contact} · ` : ''}Gateman since {formatDate(member.addedAt)}
         </p>
       </div>
       <IconButton

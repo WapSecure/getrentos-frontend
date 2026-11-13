@@ -1,4 +1,5 @@
 import { apiFetch, apiFetchOrNull, apiUpload } from './client';
+import { contactBody } from '@/lib/contact';
 import { toQuery } from './query';
 import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
@@ -318,10 +319,15 @@ export const realtorApi = {
     apiFetch<Paginated<RealtorClient>>(
       `/realtor/clients${toQuery({ page: opts.page ?? 1, pageSize: 100, status: opts.status, search: opts.search })}`
     ),
-  checkClient: (email: string) =>
-    apiFetch<ClientEligibility>('/realtor/clients/check', { method: 'POST', body: { email } }),
-  inviteClient: (email: string) =>
-    apiFetch<RealtorClient>('/realtor/clients', { method: 'POST', body: { email } }),
+  /** Whether a phone number or email belongs to an owner or landlord account. */
+  checkClient: (contact: string) =>
+    apiFetch<ClientEligibility>('/realtor/clients/check', {
+      method: 'POST',
+      body: contactBody(contact),
+    }),
+  /** By the client's phone number or email; they hear in their app. */
+  inviteClient: (contact: string) =>
+    apiFetch<RealtorClient>('/realtor/clients', { method: 'POST', body: contactBody(contact) }),
   assignedProperties: (relationshipId: string) =>
     apiFetch<Paginated<AssignedProperty>>(
       `/realtor/clients/${relationshipId}/assigned-properties${toQuery({ page: 1, pageSize: 100 })}`

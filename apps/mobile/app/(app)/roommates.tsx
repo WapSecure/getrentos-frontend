@@ -244,9 +244,11 @@ export default function Roommates() {
                     <Avatar name={r.name} size={40} />
                     <View style={{ flex: 1 }}>
                       <Text variant="bodyStrong">{r.name}</Text>
-                      <Text variant="caption" color="mutedForeground">
-                        {r.email}
-                      </Text>
+                      {r.email || r.phone ? (
+                        <Text variant="caption" color="mutedForeground">
+                          {r.email || r.phone}
+                        </Text>
+                      ) : null}
                     </View>
                     <View style={{ alignItems: 'flex-end', gap: 4 }}>
                       <Badge

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Send } from '@sureground/icons';
+import { isNoAccountMessage, readContactInput } from '@sureground/shared';
 import {
   Alert,
   Button,
@@ -10,56 +11,81 @@ import {
   DialogDescription,
   DialogTitle,
   Field,
-  Input,
   Textarea,
 } from '@sureground/ui';
+import { ContactField, contactIsReady } from '@/components/shared/contact/ContactField';
+import { InviteToSignUp } from '@/components/shared/representatives/InviteToSignUp';
 
 interface InviteRoommateModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onInvite: (data: { email: string; message: string }) => Promise<void>;
+  /** `contact` is their phone number or email, as typed. Rejects with the server's message. */
+  onInvite: (data: { contact: string; message: string }) => Promise<void>;
 }
 
 export const InviteRoommateModal = ({ isOpen, onClose, onInvite }: InviteRoommateModalProps) => {
-  const [email, setEmail] = useState('');
+  const [contact, setContact] = useState('');
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const [error, setError] = useState<string | null>(null);
+  const [noAccount, setNoAccount] = useState(false);
+  const isPhone = readContactInput(contact).kind === 'phone';
+
+  const reset = () => {
+    setContact('');
+    setMessage('');
+    setError(null);
+    setNoAccount(false);
+  };
+
+  const handleClose = () => {
+    reset();
+    onClose();
+  };
 
   const handleSubmit = async () => {
-    if (!email.trim()) return;
+    if (!contactIsReady(contact)) return;
     setIsSubmitting(true);
     setError(null);
+    setNoAccount(false);
     try {
-      await onInvite({ email: email.trim(), message: message.trim() });
+      await onInvite({ contact: contact.trim(), message: message.trim() });
       setIsSubmitting(false);
-      onClose();
-      setEmail('');
-      setMessage('');
-    } catch {
-      setError('We could not send the invitation. Check the email and try again.');
+      handleClose();
+    } catch (reason) {
+      const text = reason instanceof Error ? reason.message : '';
+      if (isNoAccountMessage(text)) setNoAccount(true);
+      else setError(text || 'We could not send the invitation. Check the details and try again.');
       setIsSubmitting(false);
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+      <DialogContent size="lg">
         <DialogTitle className="pr-8 font-semibold text-foreground">Invite roommate</DialogTitle>
         <DialogDescription className="text-xs text-muted-foreground mt-0.5">
           Send an invitation to join your household
         </DialogDescription>
 
-        <div className="mt-4 space-y-4">
-          <Field label="Email address" required>
-            <Input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="roommate@example.com"
-            />
-          </Field>
+        <form
+          className="mt-4 space-y-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void handleSubmit();
+          }}
+        >
+          <ContactField
+            id="roommate-contact"
+            label="Their phone number or email"
+            hint="If they are already on Sureground, use the one on their account."
+            required
+            value={contact}
+            onChange={(next) => {
+              setContact(next);
+              setNoAccount(false);
+            }}
+          />
 
           <Field label="Personal message" optionalLabel="(Optional)">
             <Textarea
@@ -72,22 +98,31 @@ export const InviteRoommateModal = ({ isOpen, onClose, onInvite }: InviteRoommat
 
           {error && <Alert variant="danger">{error}</Alert>}
 
-          <Alert variant="info">
-            Your roommate will receive an email invitation to join your household. They&apos;ll need
-            to create an account if they don&apos;t have one.
-          </Alert>
+          {noAccount ? (
+            <InviteToSignUp
+              message="Nobody on Sureground uses that phone number yet, and we cannot text an invite. Send them the signup link instead."
+              reason="share rent and household costs with you"
+              footnote="Once they have signed up, invite them here with the same phone number."
+            />
+          ) : (
+            <Alert variant="info">
+              {isPhone
+                ? 'If they are on Sureground, they get the invitation in their app. If not, we will help you share a signup link.'
+                : 'If they are on Sureground, they get the invitation in their app. If not, we email them an invitation to sign up.'}
+            </Alert>
+          )}
 
           <Button
+            type="submit"
             variant="primary"
             fullWidth
-            onClick={handleSubmit}
-            disabled={!email.trim()}
+            disabled={!contactIsReady(contact)}
             isLoading={isSubmitting}
             icon={<Send className="w-4 h-4" />}
           >
             Send invitation
           </Button>
-        </div>
+        </form>
       </DialogContent>
     </Dialog>
   );

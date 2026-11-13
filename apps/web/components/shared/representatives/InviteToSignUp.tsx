@@ -9,11 +9,20 @@ import { ROUTES, signupInviteMessage, whatsappShareUrl } from '@sureground/share
  * Shown when nobody on Sureground has the phone number or email typed. The link is the plain
  * signup page: no tracking parameters and nothing about either person.
  */
-export function InviteToSignUp({ message }: { message: string }) {
+export function InviteToSignUp({
+  message,
+  reason,
+  footnote = 'Once they have signed up, appoint them here with the same phone number or email.',
+}: {
+  message: string;
+  /** Finishes "Join me on Sureground so I can …" in the shared message. */
+  reason?: string;
+  footnote?: string;
+}) {
   const [copied, setCopied] = useState(false);
   const signupUrl =
     typeof window !== 'undefined' ? `${window.location.origin}${ROUTES.SIGNUP}` : ROUTES.SIGNUP;
-  const text = signupInviteMessage(signupUrl);
+  const text = signupInviteMessage(signupUrl, reason);
   const canShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
 
   const copy = async () => {
@@ -83,9 +92,7 @@ export function InviteToSignUp({ message }: { message: string }) {
           </Button>
         )}
       </div>
-      <p className="mt-2 text-xs text-muted-foreground">
-        Once they have signed up, appoint them here with the same phone number or email.
-      </p>
+      <p className="mt-2 text-xs text-muted-foreground">{footnote}</p>
     </Alert>
   );
 }

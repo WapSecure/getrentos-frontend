@@ -195,6 +195,10 @@ export function routeForActionUrl(url?: string | null): string | null {
     .replace(/^\/dashboard/, '')
     .replace(/\/$/, '');
   if (WEB_PATH_TO_ROUTE[path]) return WEB_PATH_TO_ROUTE[path];
+  // Invitations carry their token: a phone-only invitee accepts from the notification itself.
+  const token = url.match(/[?&]token=([^&#\s]+)/)?.[1];
+  if (token && path === '/agency/join') return `/(app)/agency-join?token=${token}`;
+  if (token && path === '/agency-invite/claim') return `/(app)/agency-invite-claim?token=${token}`;
   if (path.startsWith('/owner/land/')) return '/(app)/owner-land';
   return developmentRouteForPath(path);
 }

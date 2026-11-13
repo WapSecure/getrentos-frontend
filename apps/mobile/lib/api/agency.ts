@@ -1,4 +1,5 @@
 import type { BadgeTone } from '@sureground/ui-native';
+import { contactBody } from '@/lib/contact';
 import { apiFetch } from './client';
 
 /** What a manager may do is decided by the API (`permissions`, `capabilities`), never worked out here. */
@@ -268,12 +269,27 @@ export interface AttentionItem {
 
 export interface OwnerInvite {
   id: string;
+  /** Empty when the invite went by phone number to an account with no email. */
   email: string;
+  /** The owner's number, masked ("+234 803 *** 4567"), when the invite has no email. */
+  phoneMasked?: string | null;
+  /** Only on a new invite: how it reached them (IN_APP is a notification in their app). */
+  deliveredBy?: ('EMAIL' | 'IN_APP')[];
   name: string | null;
   status: 'PENDING' | 'CLAIMED' | 'REVOKED' | 'EXPIRED';
   hasAccount: boolean;
   expiresAt: string;
   createdAt: string;
+}
+
+export interface OwnerInviteClaimInfo {
+  organizationName: string;
+  /** Empty for an invite sent by phone number. */
+  email: string;
+  /** Set instead of email for a phone invite: the invited number, masked. */
+  phoneMasked?: string | null;
+  status: OwnerInvite['status'];
+  expired: boolean;
 }
 
 export const INVITE_STATUS: Record<OwnerInvite['status'], { label: string; tone: BadgeTone }> = {
@@ -381,8 +397,21 @@ export const agencyApi = {
   attention: () => apiFetch<{ items: AttentionItem[] }>('/agency/assistant/attention'),
   managedProperties: () => apiFetch<ManagedProperty[]>('/property-authorities/managed'),
   ownerInvites: () => apiFetch<OwnerInvite[]>('/agency/owner-invites'),
-  inviteOwner: (input: { email: string; name?: string; note?: string }) =>
-    apiFetch<OwnerInvite>('/agency/owner-invites', { method: 'POST', body: input }),
+  /** `contact` is the owner's phone number or email; an owner on Sureground hears in their app. */
+  inviteOwner: ({ contact, ...input }: { contact: string; name?: string; note?: string }) =>
+    apiFetch<OwnerInvite>('/agency/owner-invites', {
+      method: 'POST',
+      body: { ...contactBody(contact), ...input },
+    }),
+  /** What an owner sees before accepting: the firm, and who it was sent to (email, or masked phone). */
+  ownerInviteClaimInfo: (token: string) =>
+    apiFetch<OwnerInviteClaimInfo>(`/agency/owner-invites/claim/${encodeURIComponent(token)}`),
+  /** Accept as the signed-in owner; a phone-only owner accepts as the account the invite names. */
+  claimOwnerInvite: (token: string) =>
+    apiFetch<{ organizationName: string }>(
+      `/agency/owner-invites/claim/${encodeURIComponent(token)}`,
+      { method: 'POST' }
+    ),
   revokeOwnerInvite: (id: string) =>
     apiFetch<OwnerInvite>(`/agency/owner-invites/${id}/revoke`, { method: 'POST' }),
   client: (ownerId: string) => apiFetch<AgencyClient>(`/agency/clients/${ownerId}`),

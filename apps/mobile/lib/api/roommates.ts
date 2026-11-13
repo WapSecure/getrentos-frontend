@@ -1,4 +1,5 @@
 import { apiFetch } from './client';
+import { contactBody } from '@/lib/contact';
 
 export type RoommateStatus = 'pending' | 'active';
 
@@ -37,8 +38,12 @@ export interface RoommateExpense {
 export const roommatesApi = {
   list: () => apiFetch<Roommate[]>('/renter/roommates'),
 
-  invite: (email: string, message?: string) =>
-    apiFetch<Roommate>('/renter/roommates/invite', { method: 'POST', body: { email, message } }),
+  /** By their phone number or email. */
+  invite: (contact: string, message?: string) =>
+    apiFetch<Roommate>('/renter/roommates/invite', {
+      method: 'POST',
+      body: { ...contactBody(contact), message },
+    }),
 
   listMyInvites: () => apiFetch<Roommate[]>('/renter/roommates/invites'),
 

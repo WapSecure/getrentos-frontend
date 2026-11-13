@@ -48,7 +48,7 @@ export default function EstateStaffPage() {
   };
 
   const inviteGateman = useMutation({
-    mutationFn: (email: string) => unwrap(estateService.inviteGateman(estate!.id, email)),
+    mutationFn: (contact: string) => unwrap(estateService.inviteGateman(estate!.id, contact)),
     onSuccess: () => {
       invalidateStaff();
       setPage(1);
@@ -103,7 +103,7 @@ export default function EstateStaffPage() {
           <EmptyState
             icon={ShieldCheck}
             title="No gatemen yet"
-            description="Add an existing platform account as a gateman so they can verify visitor passes."
+            description="Add a gateman by the phone number or email on their Sureground account so they can verify visitor passes."
           />
         </div>
       ) : (
@@ -131,7 +131,7 @@ export default function EstateStaffPage() {
       <InviteGatemanModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onSubmit={(email) => inviteGateman.mutate(email)}
+        onSubmit={(contact) => inviteGateman.mutate(contact)}
         isSubmitting={inviteGateman.isPending}
         error={inviteGateman.error instanceof Error ? inviteGateman.error.message : null}
       />

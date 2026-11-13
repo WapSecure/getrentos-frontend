@@ -32,6 +32,9 @@ import {
 import { errorMessage } from '@/lib/api/client';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { Sheet } from '@/components/Sheet';
+import { isNoAccountMessage, personContactLabel } from '@sureground/shared';
+import { contactProblem, contactReady } from '@/lib/contact';
+import { InviteToSignUp } from '@/components/contact/InviteToSignUp';
 
 export default function AgencyClients() {
   const { colors, spacing } = useTheme();
@@ -163,16 +166,17 @@ function InviteRow({ invite: i }: { invite: OwnerInvite }) {
     onError: (e) => toast.show(errorMessage(e, 'Could not withdraw the invite.'), 'error'),
   });
   const status = INVITE_STATUS[i.status];
+  const contact = personContactLabel(i) ?? 'Invited by phone';
   return (
     <Card padding={spacing.md} style={{ gap: 4 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
         <View style={{ flex: 1 }}>
           <Text variant="callout" style={{ fontWeight: '600' }} numberOfLines={1}>
-            {i.name ?? i.email}
+            {i.name ?? contact}
           </Text>
           {i.name ? (
             <Text variant="caption" color="mutedForeground" numberOfLines={1}>
-              {i.email}
+              {contact}
             </Text>
           ) : null}
         </View>
@@ -190,7 +194,7 @@ function InviteRow({ invite: i }: { invite: OwnerInvite }) {
           variant="ghost"
           loading={revoke.isPending}
           onPress={() =>
-            Alert.alert('Withdraw this invitation?', i.email, [
+            Alert.alert('Withdraw this invitation?', i.name ?? contact, [
               { text: 'Keep it', style: 'cancel' },
               { text: 'Withdraw', style: 'destructive', onPress: () => revoke.mutate() },
             ])
@@ -206,43 +210,67 @@ function InviteForm({ onDone }: { onDone: () => void }) {
   const { spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
-  const [email, setEmail] = useState('');
+  const [contact, setContact] = useState('');
+  const [touched, setTouched] = useState(false);
+  const [noAccount, setNoAccount] = useState(false);
   const [name, setName] = useState('');
   const [note, setNote] = useState('');
   const send = useMutation({
     mutationFn: () =>
       agencyApi.inviteOwner({
-        email: email.trim(),
+        contact,
         ...(name.trim() ? { name: name.trim() } : {}),
         ...(note.trim() ? { note: note.trim() } : {}),
       }),
-    onSuccess: () => {
+    onSuccess: (sent) => {
       qc.invalidateQueries({ queryKey: qk.agency.ownerInvites });
-      toast.show('Invitation sent.', 'success');
+      toast.show(
+        sent?.deliveredBy?.includes('EMAIL')
+          ? 'Invitation sent.'
+          : 'Invitation sent to their Sureground app.',
+        'success'
+      );
       onDone();
     },
-    onError: (e) => toast.show(errorMessage(e, 'Could not send the invite.'), 'error'),
+    onError: (e) => {
+      const text = errorMessage(e, 'Could not send the invite.');
+      if (isNoAccountMessage(text)) setNoAccount(true);
+      else toast.show(text, 'error');
+    },
   });
   return (
     <View style={{ gap: spacing.lg }}>
       <Text variant="callout" color="mutedForeground">
-        They get an email to bring their property to your firm. Nothing is agreed until they sign an
-        engagement.
+        An owner on Sureground gets the invitation in their app; an email address also gets it by
+        email. Nothing is agreed until they sign an engagement.
       </Text>
       <TextField
-        label="Owner email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
+        label="Owner's phone number or email"
+        value={contact}
+        onChangeText={(v) => {
+          setContact(v);
+          setNoAccount(false);
+        }}
+        onBlur={() => setTouched(true)}
+        error={touched ? contactProblem(contact) : undefined}
+        placeholder="0803 123 4567"
         autoCapitalize="none"
+        autoCorrect={false}
         required
       />
+      {noAccount ? (
+        <InviteToSignUp
+          message="Nobody on Sureground uses that phone number yet, and we cannot text an invite. Send them the signup link, or invite them by email instead."
+          reason="manage your property with you"
+          footnote="Once they have signed up, invite them here with the same phone number."
+        />
+      ) : null}
       <TextField label="Name (optional)" value={name} onChangeText={setName} />
       <TextField label="Note (optional)" value={note} onChangeText={setNote} multiline />
       <Button
         label="Send invitation"
         loading={send.isPending}
-        disabled={!email.trim() || send.isPending}
+        disabled={!contactReady(contact) || send.isPending}
         onPress={() => send.mutate()}
       />
     </View>

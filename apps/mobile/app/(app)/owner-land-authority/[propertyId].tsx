@@ -345,14 +345,14 @@ function Signatories({
         ...(email.trim() ? { email: email.trim() } : {}),
       }),
     onSuccess: (updated) => {
-      const hadEmail = !!email.trim();
+      const reachable = !!(email.trim() || phone.trim());
       setFullName('');
       setPhone('');
       setEmail('');
       onSaved(
         updated,
-        hadEmail
-          ? 'Added. If they have a Sureground account with that email, we have asked them to answer.'
+        reachable
+          ? 'Added. If they have a Sureground account with that phone number or email, we have asked them to answer.'
           : 'Added.'
       );
     },
@@ -406,6 +406,7 @@ function Signatories({
           />
           <TextField
             label="Phone (optional)"
+            hint="If their Sureground account uses this number, they answer from it."
             value={phone}
             onChangeText={setPhone}
             keyboardType="phone-pad"
@@ -413,7 +414,7 @@ function Signatories({
           />
           <TextField
             label="Sureground email (optional)"
-            hint="So they can answer from their own account."
+            hint="Only if their account has one."
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"

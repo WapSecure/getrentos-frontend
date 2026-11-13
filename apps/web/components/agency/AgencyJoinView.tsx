@@ -57,7 +57,7 @@ export function AgencyJoinView() {
         </h1>
         {!token ? (
           <p className="mt-3 text-sm text-muted-foreground">
-            Open the link from your invitation email.
+            Open the link from your invitation email or from your notifications.
           </p>
         ) : preview.isLoading ? (
           <div role="status" aria-label="Checking your invitation" className="mt-3 space-y-2">
@@ -85,7 +85,14 @@ export function AgencyJoinView() {
             ) : !p.emailMatches ? (
               <>
                 <p className="mt-3 text-sm text-muted-foreground">
-                  It was sent to <strong>{p.email}</strong>. Sign in with that email to accept it.
+                  {p.email ? (
+                    <>
+                      It was sent to <strong>{p.email}</strong>. Sign in with that email to accept
+                      it.
+                    </>
+                  ) : (
+                    'It was sent to another account. Sign in with the phone number it was sent to.'
+                  )}
                 </p>
                 <Button className="mt-4" variant="outline" onClick={() => void switchAccount()}>
                   Sign out and switch account

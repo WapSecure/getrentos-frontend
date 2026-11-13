@@ -1,4 +1,5 @@
 import type { BadgeTone } from '@sureground/ui-native';
+import { contactBody } from '@/lib/contact';
 import { apiFetch, apiUpload } from './client';
 import { appendFile, type PickedFile } from './documents';
 import type { PayoutSentTo } from '@sureground/shared';
@@ -57,11 +58,16 @@ export const MEMBER_STATE: Record<TeamMember['state'], { label: string; tone: Ba
 
 export interface TeamInvitation {
   id: string;
+  /** Empty when the invite went by phone number to an account with no email. */
   email: string;
+  /** Their number, masked ("+234 803 *** 4567"), when the invite has no email. */
+  phoneMasked?: string | null;
   roleLabel: string;
   membershipExpiresAt: string | null;
   expiresAt: string;
   status: 'PENDING' | 'EXPIRED';
+  /** Only on a new invite: how it reached them (IN_APP is a notification in their app). */
+  deliveredBy?: ('EMAIL' | 'IN_APP')[];
 }
 
 /** The principal is the member with the OWNER role; only they manage the team. */
@@ -369,7 +375,10 @@ export const setupEditable = (o: Onboarding | null) =>
 export interface JoinPreview {
   firmName: string;
   roleLabel: string;
+  /** Empty for an invite sent by phone number. */
   email: string;
+  /** The invitee's own number, masked; only shown to them. */
+  phoneMasked?: string | null;
   status: 'PENDING' | 'EXPIRED' | 'ACCEPTED' | 'REVOKED';
   membershipExpiresAt: string | null;
   emailMatches: boolean;
@@ -387,8 +396,15 @@ const post = <T>(path: string, body?: unknown) =>
 export const agencyFirmApi = {
   members: () => apiFetch<TeamMember[]>('/agency/team/members'),
   invitations: () => apiFetch<TeamInvitation[]>('/agency/team/invitations'),
-  invite: (input: { email: string; role: string; membershipExpiresAt: string | null }) =>
-    post<TeamInvitation>('/agency/team/invitations', input),
+  /** `contact` is their phone number or email; someone on Sureground hears in their app. */
+  invite: ({
+    contact,
+    ...input
+  }: {
+    contact: string;
+    role: string;
+    membershipExpiresAt: string | null;
+  }) => post<TeamInvitation>('/agency/team/invitations', { ...contactBody(contact), ...input }),
   revokeInvitation: (id: string) => post<unknown>(`/agency/team/invitations/${id}/revoke`),
   updateMember: (userId: string, input: { role?: string; expiresAt?: string | null }) =>
     apiFetch<TeamMember>(`/agency/team/members/${userId}`, { method: 'PATCH', body: input }),

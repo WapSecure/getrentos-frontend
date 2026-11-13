@@ -115,8 +115,8 @@ export default function EstateHouseholdsPage() {
   });
 
   const linkResident = useMutation({
-    mutationFn: (email: string) =>
-      unwrap(estateService.linkResident(estate!.id, linkingHousehold!.id, email)),
+    mutationFn: (contact: string) =>
+      unwrap(estateService.linkResident(estate!.id, linkingHousehold!.id, contact)),
     onSuccess: () => {
       invalidate();
       setLinkingHousehold(null);
@@ -272,7 +272,7 @@ export default function EstateHouseholdsPage() {
       <LinkResidentModal
         household={linkingHousehold}
         onClose={() => setLinkingHousehold(null)}
-        onSubmit={(email) => linkResident.mutate(email)}
+        onSubmit={(contact) => linkResident.mutate(contact)}
         isSubmitting={linkResident.isPending}
         error={linkResident.isError ? linkResident.error.message : null}
       />

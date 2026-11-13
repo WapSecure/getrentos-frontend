@@ -78,5 +78,10 @@ test('recognises the no-account answer and builds a plain invite', () => {
   assert.equal(isNoAccountMessage('You cannot appoint yourself'), false);
   const text = signupInviteMessage('https://getsureground.io/signup');
   assert.ok(text.endsWith('https://getsureground.io/signup'));
+  assert.ok(
+    signupInviteMessage('https://x.test/signup', 'add you to my estate staff').startsWith(
+      'Join me on Sureground so I can add you to my estate staff.'
+    )
+  );
   assert.equal(whatsappShareUrl('a b'), 'https://wa.me/?text=a%20b');
 });

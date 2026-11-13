@@ -357,13 +357,14 @@ const SignatoriesCard = ({ propertyId, view, onSaved, onFailed }: CardProps) => 
         })
       ),
     onSuccess: (updated) => {
+      const reachable = Boolean(email.trim() || phone.trim());
       setFullName('');
       setPhone('');
       setEmail('');
       onSaved(
         updated,
-        email.trim()
-          ? 'Added. If they have a Sureground account with that email, we have asked them to answer.'
+        reachable
+          ? 'Added. If they have a Sureground account with that phone number or email, we have asked them to answer.'
           : 'Added.'
       );
     },
@@ -432,15 +433,23 @@ const SignatoriesCard = ({ propertyId, view, onSaved, onFailed }: CardProps) => 
                 maxLength={200}
               />
             </Field>
-            <Field label="Phone">
+            <Field
+              label="Phone"
+              hint="If their Sureground account uses this number, they answer from it."
+            >
               <Input
                 type="tel"
+                inputMode="tel"
                 value={phone}
                 onChange={(event) => setPhone(event.target.value)}
                 maxLength={40}
               />
             </Field>
-            <Field label="Sureground email" hint="So they can answer from their own account.">
+            <Field
+              label="Sureground email"
+              optionalLabel="(optional)"
+              hint="Only if their account has one."
+            >
               <Input
                 type="email"
                 value={email}
