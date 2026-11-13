@@ -12,7 +12,7 @@ const FACTS = [
   {
     icon: Lock,
     title: 'Payment Protection',
-    body: 'Rent is released to the landlord on schedule; a sale deposit only once the buyer confirms.',
+    body: 'Rent is released to the landlord on schedule; a sale deposit only after the handover is done and the buyer confirms.',
   },
   {
     icon: FileCheck,

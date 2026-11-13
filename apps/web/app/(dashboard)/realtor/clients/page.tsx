@@ -117,7 +117,7 @@ export default function RealtorClientsPage() {
 
       <IdentityNudge
         verificationHref={ROUTES.REALTOR_VERIFICATION}
-        unlocks="add clients and represent them"
+        unlocks="invite clients and publish listings"
         className="mb-6"
       />
 

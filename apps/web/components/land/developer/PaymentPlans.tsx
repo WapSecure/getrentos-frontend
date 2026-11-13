@@ -1,5 +1,6 @@
 'use client';
 
+import { lateFeeValue } from '@sureground/shared';
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Badge, Button, Card, ConfirmDialog, EmptyState } from '@sureground/ui';
@@ -125,7 +126,7 @@ export const PaymentPlans = ({ layout, notify }: PaymentPlansProps) => {
                 <dl className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
                   <Term label="Premium" value={formatBps(plan.priceUpliftBps)} />
                   <Term label="Grace" value={`${plan.gracePeriodDays} days`} />
-                  <Term label="Late fee" value={formatBps(plan.lateFeeBps)} />
+                  <Term label="Late fee" value={lateFeeValue(plan.lateFeeBps)} />
                   <Term label="Default after" value={`${plan.defaultAfterDays} days`} />
                   <Term label="Forfeiture" value={formatBps(plan.revocationChargeBps)} />
                 </dl>

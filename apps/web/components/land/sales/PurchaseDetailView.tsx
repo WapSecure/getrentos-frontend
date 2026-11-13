@@ -1,5 +1,6 @@
 'use client';
 
+import { lateFeeAfterGrace } from '@sureground/shared';
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -296,8 +297,8 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
           <p className="mt-2 text-xs text-muted-foreground">
             Terms frozen at purchase:{' '}
             {data.terms.durationMonths === 0 ? 'outright' : `${data.terms.durationMonths} months`},{' '}
-            {formatBps(data.terms.initialDepositBps)} deposit, {formatBps(data.terms.lateFeeBps)}{' '}
-            late fee after {data.terms.gracePeriodDays} days&apos; grace, default after{' '}
+            {formatBps(data.terms.initialDepositBps)} deposit,{' '}
+            {lateFeeAfterGrace(data.terms.lateFeeBps, data.terms.gracePeriodDays)}, default after{' '}
             {data.terms.defaultAfterDays} days.
           </p>
         </Section>

@@ -1,3 +1,4 @@
+import { chargesLateFee } from '@sureground/shared';
 import { useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
@@ -215,8 +216,10 @@ export function PlanCard({
       </PressableScale>
       {lateOpen ? (
         <Text variant="caption" color="mutedForeground">
-          {plan.gracePeriodDays} days’ grace, then a {formatBps(plan.lateFeeBps)} late fee. Default
-          after {plan.defaultAfterDays} days overdue, when the developer may revoke and keep{' '}
+          {chargesLateFee(plan.lateFeeBps)
+            ? `${plan.gracePeriodDays} days’ grace, then a ${formatBps(plan.lateFeeBps)} late fee.`
+            : 'No late fee.'}{' '}
+          Default after {plan.defaultAfterDays} days overdue, when the developer may revoke and keep{' '}
           {formatBps(plan.revocationChargeBps)} of what you paid.
         </Text>
       ) : null}

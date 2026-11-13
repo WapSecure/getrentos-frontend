@@ -63,7 +63,7 @@ const escrowSteps: { key: SaleEscrowStatus; label: string; description: string }
     key: 'funds_held',
     label: 'Funds held',
     description:
-      'Deposit received and held safely by Sureground. It is released to you when the buyer confirms receipt.',
+      'Deposit received and held safely by Sureground. It is released to you once you have handed over and the buyer confirms.',
   },
   {
     key: 'released',
@@ -176,9 +176,10 @@ export const EscrowTransactionDetailModal = ({
           <LandConveyanceEntry transaction={transaction} />
 
           <Alert variant="info" icon={Lock}>
-            Sureground holds the buyer’s money and releases it to you once the buyer confirms
-            receipt (for land, once the conveyance steps are confirmed). It is never released on a
-            timer, and a dispute keeps it held until it is resolved.
+            Sureground holds the buyer’s money and releases it to you once you have handed over and
+            the buyer confirms (for a home, the keys and vacant possession; for land, the conveyance
+            steps). It is never released on a timer, and a dispute keeps it held until it is
+            resolved.
           </Alert>
 
           {transaction.releasedAt && (

@@ -11,7 +11,7 @@ const QUESTIONS: Faq[] = [
   },
   {
     q: 'How does Sureground Payment Protection work?',
-    a: 'You pay Sureground, not the other party. Rent is released to the landlord on schedule, a sale deposit only once the buyer confirms, and a short-stay host after check-in. If you raise a dispute, the money stays held while it is resolved.',
+    a: 'You pay Sureground, not the other party. Rent is released to the landlord on schedule, a sale deposit only after the handover is done and the buyer confirms, and a short-stay host after check-in. If you raise a dispute, the money stays held while it is resolved.',
   },
   {
     q: 'What is a C of O?',

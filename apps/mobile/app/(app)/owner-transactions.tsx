@@ -31,7 +31,7 @@ const STAGES: { key: OwnerEscrowStatus; label: string; now: string }[] = [
   {
     key: 'funds_held',
     label: 'Funds held',
-    now: 'The deposit is held safely by Sureground. It is released to you when the buyer confirms receipt.',
+    now: 'The deposit is held safely by Sureground. It is released to you once you have handed over and the buyer confirms.',
   },
   { key: 'released', label: 'Completed', now: 'The sale is complete.' },
 ];

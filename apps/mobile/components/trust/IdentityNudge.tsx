@@ -13,12 +13,6 @@ export function useIdentityVerified(): boolean | null {
   return kyc.data.identityVerified ?? kyc.data.identity?.status === 'APPROVED';
 }
 
-/** ISO; the account keeps listing and payout capability until then. */
-export function useIdentityGraceEndsAt(): string | undefined {
-  const kyc = useQuery({ queryKey: ['kyc-status'], queryFn: kycApi.getStatus });
-  return kyc.data?.identityGraceEndsAt;
-}
-
 export function useLicenceVerified(): boolean | null {
   const kyc = useQuery({ queryKey: ['kyc-status'], queryFn: kycApi.getStatus });
   if (!kyc.data) return null;
@@ -36,14 +30,9 @@ export function IdentityNudge({
 }) {
   const identity = useIdentityVerified();
   const licence = useLicenceVerified();
-  const graceEndsAt = useIdentityGraceEndsAt();
   const verified = requirement === 'licence' ? licence : identity;
   if (!force && verified !== false) return null;
-  const copy = identityNudgeCopy({
-    unlocks,
-    requirement,
-    graceEndsAt: identity === true ? undefined : graceEndsAt,
-  });
+  const copy = identityNudgeCopy({ unlocks, requirement });
   return (
     <AttentionCard
       Icon={ShieldAlert}

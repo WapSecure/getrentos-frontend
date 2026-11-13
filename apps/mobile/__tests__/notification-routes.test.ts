@@ -64,6 +64,23 @@ describe('notification routes', () => {
     );
   });
 
+  it('opens a resident’s deliveries and visitor passes for gate events, never Messages', () => {
+    for (const portal of ['renter', 'resident'] as const) {
+      expect(routeForNotification({ type: 'ESTATE_DELIVERY_RECEIVED' }, portal)).toBe(
+        '/(app)/deliveries'
+      );
+      expect(routeForNotification({ type: 'ESTATE_VISITOR_DEPARTED' }, portal)).toBe(
+        '/(app)/visitor-passes'
+      );
+      expect(
+        routeForNotification(
+          { type: 'ESTATE_DELIVERY_RECEIVED', actionUrl: '/resident/deliveries' },
+          portal
+        )
+      ).toBe('/(app)/deliveries');
+    }
+  });
+
   it('takes a committee member to the document waiting for their signature', () => {
     expect(
       routeForNotification(

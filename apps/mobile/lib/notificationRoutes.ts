@@ -120,6 +120,7 @@ const TYPE_FALLBACK: [prefix: string, route: string][] = [
   ['SHORTLET_BOOKING_', '/(app)/shortlet-bookings'],
   ['ESTATE_WALK_IN_', '/(app)/visitor-passes'],
   ['ESTATE_VISITOR_', '/(app)/visitor-passes'],
+  ['ESTATE_DELIVERY_', '/(app)/deliveries'],
   ['ESTATE_DUE_', '/(app)/dues'],
   ['ESTATE_ANNOUNCEMENT_', '/(app)/(resident)/announcements'],
 ];

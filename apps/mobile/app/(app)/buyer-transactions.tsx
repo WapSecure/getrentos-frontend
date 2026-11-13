@@ -40,13 +40,14 @@ const STAGES: { key: BuyerEscrowStatus; label: string; description: string }[] =
   {
     key: 'deposit_pending',
     label: 'Deposit',
-    description: 'Pay your deposit to Sureground, which holds it safely until you confirm receipt.',
+    description:
+      'Pay your deposit to Sureground, which holds it until the handover is done and you confirm.',
   },
   {
     key: 'funds_held',
     label: 'Funds held',
     description:
-      'Your payment is held safely by Sureground. Once you have received the property and its documents, confirm receipt to release the funds to the seller.',
+      'Your payment is held by Sureground. Once the seller has handed over and you have the property and its documents, confirm receipt to release the funds.',
   },
   {
     key: 'released',

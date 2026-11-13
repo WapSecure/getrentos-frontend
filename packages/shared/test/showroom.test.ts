@@ -460,7 +460,7 @@ test('sale: payment protection speaks of the deposit and receipt, never rent and
   }).trustChain?.steps.find((step) => step.id === 'payment');
   assert.equal(
     payment?.detail,
-    'Your deposit is held by Sureground and only released to the seller once you confirm receipt.'
+    'Your deposit is held by Sureground until the seller hands over the keys and you confirm.'
   );
   const rent = fromRental({ ...rental, trustChain: fullChain }).trustChain?.steps.find(
     (step) => step.id === 'payment'

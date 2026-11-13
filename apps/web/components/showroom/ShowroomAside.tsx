@@ -6,7 +6,7 @@ import { formatCurrency } from '@/lib/format';
 
 const PROTECTION_LINE = {
   rent: 'Pay through Sureground: we hold your rent and release it to the landlord on schedule, unless you raise a dispute.',
-  sale: 'Pay through Sureground: we hold your deposit and only release it to the seller once you confirm receipt.',
+  sale: 'Pay through Sureground: we hold your deposit until the seller hands over the keys and you confirm.',
   land: 'Pay through Sureground: we hold your money and only release it to the seller once the conveyance steps are confirmed.',
 } as const;
 

@@ -1,5 +1,6 @@
 'use client';
 
+import { lateFeeSentence } from '@sureground/shared';
 import { useState } from 'react';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -123,7 +124,9 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
   });
 
   // Only the initial deposit is gated; installments on a plan already under way are not.
-  const identityNotice = useDepositIdentityNotice(payOpen && purchase?.status === 'PENDING_DEPOSIT');
+  const identityNotice = useDepositIdentityNotice(
+    payOpen && purchase?.status === 'PENDING_DEPOSIT'
+  );
 
   const [milestoneKey, setMilestoneKey] = useState<string | null>(null);
   const confirmStep = useMutation({
@@ -336,9 +339,8 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
             <TabsContent value="schedule" className="mt-4">
               <PaymentSchedule installments={purchase.installments} summary={summary} />
               <p className="mt-3 text-xs text-muted-foreground">
-                {purchase.terms.gracePeriodDays} days&apos; grace on each instalment, then a{' '}
-                {bpsToPercent(purchase.terms.lateFeeBps)} late fee. Default after{' '}
-                {purchase.terms.defaultAfterDays} days overdue.
+                {lateFeeSentence(purchase.terms.lateFeeBps, purchase.terms.gracePeriodDays)} Default
+                after {purchase.terms.defaultAfterDays} days overdue.
               </p>
             </TabsContent>
             <TabsContent value="conditions" className="mt-4">

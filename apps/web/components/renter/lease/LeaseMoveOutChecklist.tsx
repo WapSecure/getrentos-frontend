@@ -13,7 +13,7 @@ import { printHtml, escapeHtml } from '@/lib/export';
 export const LeaseMoveOutChecklist = () => {
   const [isExpanded, setIsExpanded] = useState(true);
 
-  const { data: items = [] } = useQuery({
+  const { data: items = [], isSuccess } = useQuery({
     queryKey: renterKeys.moveOutChecklist,
     queryFn: () => unwrap(renterService.getMoveOutChecklist()),
   });
@@ -60,6 +60,20 @@ export const LeaseMoveOutChecklist = () => {
        <table><thead><tr><th>Item</th><th>Description</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>`
     );
   };
+
+  // The API sends no items until moving out is near: the last 90 days of the lease, or once notice is given.
+  if (totalCount === 0) {
+    if (!isSuccess) return null;
+    return (
+      <Card className="flex items-center gap-3 p-4">
+        <FileText className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden />
+        <div>
+          <h3 className="font-semibold text-foreground">Move-out checklist</h3>
+          <p className="text-xs text-muted-foreground">Available nearer your move-out date.</p>
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>

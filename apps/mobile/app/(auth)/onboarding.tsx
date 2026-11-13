@@ -45,7 +45,7 @@ const SLIDES = [
     key: 'escrow',
     eyebrow: 'Protection',
     title: 'Sureground holds your money safely',
-    body: 'Rent is held by Sureground and released to your landlord on schedule. A deposit on a home you’re buying is only released to the seller once you confirm receipt. A dispute keeps money held until it’s resolved.',
+    body: 'Rent is held by Sureground and released to your landlord on schedule. A deposit on a home you’re buying is only released to the seller once they hand over the keys and you confirm. A dispute keeps money held until it’s resolved.',
     Scene: EscrowScene,
   },
   {
