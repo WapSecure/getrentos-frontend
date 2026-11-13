@@ -13,6 +13,14 @@ export type TrustConsentType =
   | 'DOCUMENT_PROCESSING';
 
 // What each consent is recorded for (the purpose the API stores with it).
+/** What each consent covers, named on screen so two prompts on one card never read as the same question twice. */
+const CONSENT_LABEL: Record<TrustConsentType, string> = {
+  ID_CHECK: 'ID check',
+  BIOMETRIC: 'Selfie comparison',
+  BANK_ACCOUNT_CHECK: 'Bank account check',
+  DOCUMENT_PROCESSING: 'Document check',
+};
+
 const CONSENT_PURPOSE: Record<TrustConsentType, string> = {
   ID_CHECK: 'Identity verification',
   BIOMETRIC: 'Biometric verification',
@@ -79,7 +87,7 @@ export function TrustConsentPrompt({
 
   return isActive(type) && consent ? (
     <p className="text-xs text-muted-foreground">
-      Consent given {formatDate(consent.grantedAt)} ·{' '}
+      {CONSENT_LABEL[type]}: consent given {formatDate(consent.grantedAt)} ·{' '}
       <button
         type="button"
         className="underline hover:no-underline"
@@ -91,7 +99,9 @@ export function TrustConsentPrompt({
     </p>
   ) : (
     <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-muted/40 p-3">
-      <p className="min-w-0 flex-1 text-xs text-muted-foreground">{text}</p>
+      <p className="min-w-0 flex-1 text-xs text-muted-foreground">
+        <span className="font-medium text-foreground">{CONSENT_LABEL[type]}.</span> {text}
+      </p>
       <Button
         size="sm"
         isLoading={grant.isPending}
