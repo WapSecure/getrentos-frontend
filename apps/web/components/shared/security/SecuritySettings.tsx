@@ -258,7 +258,7 @@ export const SecuritySettings = () => {
               <div className="min-w-0">
                 <h3 className="font-medium text-foreground">Passkey</h3>
                 <p className="text-sm text-muted-foreground">
-                  The strongest way to confirm money actions — Face ID, fingerprint, or a security
+                  The strongest way to confirm money actions: Face ID, fingerprint or a security
                   key. Nothing to remember, and it can&apos;t be phished.
                 </p>
               </div>
@@ -523,8 +523,8 @@ export const SecuritySettings = () => {
                       ? 'We could not check whether you have a PIN.'
                       : 'Checking your PIN…'
                     : hasPin
-                      ? 'Required to release or refund money — a separate secret from your password'
-                      : 'Set a 6-digit PIN to confirm money actions, so your password alone isn’t enough'}
+                      ? 'Required to release or refund money. It is a separate secret from your password.'
+                      : 'Set a 6-digit PIN to confirm money actions, so your password alone isn’t enough.'}
                 </p>
               </div>
             </div>

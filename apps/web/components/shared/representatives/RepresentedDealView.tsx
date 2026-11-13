@@ -45,7 +45,7 @@ export const RepresentedDealView = ({ deal }: { deal: LandDealRef }) => {
         };
       }
       const milestones = await unwrap(representativeService.resale(deal.transactionId));
-      return { title: 'Land resale', reference: undefined, milestones };
+      return { title: 'Land sale', reference: undefined, milestones };
     },
   });
   const rule = useQuery({

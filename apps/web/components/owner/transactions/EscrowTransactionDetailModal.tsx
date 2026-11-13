@@ -52,23 +52,37 @@ const actorConfig: Record<
   system: { label: 'System', icon: Cog },
 };
 
-// Only the states the backend drives a sale through: deposit → held → released.
-const escrowSteps: { key: SaleEscrowStatus; label: string; description: string }[] = [
+// Only the states the backend drives a sale through: deposit → held → released. A finished step
+// reads in the past tense.
+const escrowSteps: {
+  key: SaleEscrowStatus;
+  label: string;
+  description: string;
+  doneLabel: string;
+  doneDescription: string;
+}[] = [
   {
     key: 'deposit_pending',
     label: 'Deposit pending',
     description: 'Waiting for the buyer to pay their deposit to Sureground.',
+    doneLabel: 'Deposit paid',
+    doneDescription: 'The buyer paid their deposit to Sureground.',
   },
   {
     key: 'funds_held',
     label: 'Funds held',
     description:
       'Deposit received and held safely by Sureground. It is released to you once you have handed over and the buyer confirms.',
+    doneLabel: 'Funds held',
+    doneDescription:
+      'Sureground held the deposit until you had handed over and the buyer confirmed.',
   },
   {
     key: 'released',
     label: 'Released',
     description: 'Funds released to you after all conditions were met.',
+    doneLabel: 'Released',
+    doneDescription: 'Funds released to you after all conditions were met.',
   },
 ];
 
@@ -168,8 +182,8 @@ export const EscrowTransactionDetailModal = ({
                 aria-label="Payment progress"
                 items={escrowSteps.map((step, index) => ({
                   id: step.key,
-                  title: step.label,
-                  description: step.description,
+                  title: states[index] === 'done' ? step.doneLabel : step.label,
+                  description: states[index] === 'done' ? step.doneDescription : step.description,
                   state: states[index],
                 }))}
               />

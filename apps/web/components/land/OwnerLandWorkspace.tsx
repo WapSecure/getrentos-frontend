@@ -356,7 +356,7 @@ export const OwnerLandWorkspace = () => {
                     className="mt-4"
                     action={
                       <Button
-                        href={ROUTES.OWNER_LISTINGS}
+                        href={`${ROUTES.OWNER_LISTINGS}?property=${encodeURIComponent(selected.property.id)}`}
                         variant="outline"
                         size="sm"
                         rounded="lg"

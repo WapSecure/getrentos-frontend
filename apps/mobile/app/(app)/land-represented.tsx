@@ -36,7 +36,7 @@ export default function LandRepresented() {
         return { title: `${p.layoutName} · ${p.reference}`, milestones: p.milestones };
       }
       return {
-        title: 'Land resale',
+        title: 'Land sale',
         milestones: await landBuyerExtrasApi.representedTransaction(id),
       };
     },

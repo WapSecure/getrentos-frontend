@@ -577,7 +577,7 @@ function TransactionPinSection({ overview }: { overview: SecurityOverview }) {
         >
           <Text variant="callout" color="mutedForeground" style={{ flex: 1 }}>
             {overview.hasTransactionPin
-              ? 'Required to release or refund money — a separate secret from your password.'
+              ? 'Required to release or refund money. It is a separate secret from your password.'
               : 'Set a 6-digit PIN to confirm money actions, so your password alone isn’t enough.'}
           </Text>
           <Button
@@ -733,7 +733,7 @@ function PasskeySection() {
         }}
       >
         <Text variant="callout" color="mutedForeground" style={{ flex: 1 }}>
-          The strongest way to confirm money actions — Face ID, fingerprint, or a security key. It
+          The strongest way to confirm money actions: Face ID, fingerprint or a security key. It
           can’t be phished.
         </Text>
         <Button

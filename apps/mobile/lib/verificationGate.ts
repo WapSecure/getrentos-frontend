@@ -50,7 +50,8 @@ export function readGate(error: unknown): GateCopy | null {
     return {
       code,
       scoreWithheld: false,
-      message: `You're on Trust Tier ${currentTier} (${TIER_LABELS[currentTier] ?? 'unverified'}). This needs ${target}.`,
+      // A tier of 2+ does not prove identity on its own (older approvals), so only name the lower tiers.
+      message: `You're on Trust Tier ${currentTier}${currentTier < 2 ? ` (${TIER_LABELS[currentTier] ?? 'unverified'})` : ''}. This needs ${target}.`,
       cta: 'Verify now',
     };
   }

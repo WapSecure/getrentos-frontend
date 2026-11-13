@@ -13,6 +13,7 @@ import {
   PageHeader,
 } from '@sureground/ui';
 import { useEffect, useState } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Megaphone } from '@sureground/icons';
 import { SaleListingCard } from '@/components/owner/listings/SaleListingCard';
@@ -38,7 +39,11 @@ export default function OwnerListingsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [filter, setFilter] = useState<StatusFilter>('all');
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
+  // ?property=<id> (e.g. from a land parcel's "Create sale listing") opens the new listing on it.
+  const presetPropertyId = useSearchParams().get('property') ?? undefined;
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(Boolean(presetPropertyId));
   const [manageListing, setManageListing] = useState<SaleListing | null>(null);
   const [commercialListing, setCommercialListing] = useState<SaleListing | null>(null);
 
@@ -250,8 +255,13 @@ export default function OwnerListingsPage() {
       )}
 
       <CreateSaleListingModal
+        key={presetPropertyId ?? 'new'}
         isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
+        initialPropertyId={presetPropertyId}
+        onClose={() => {
+          setIsCreateModalOpen(false);
+          if (presetPropertyId) router.replace(pathname);
+        }}
         onCreate={handleCreate}
       />
 

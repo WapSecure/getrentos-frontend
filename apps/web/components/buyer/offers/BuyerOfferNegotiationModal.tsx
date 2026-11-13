@@ -13,6 +13,7 @@ import {
   Input,
 } from '@sureground/ui';
 import { formatCurrency } from '@/lib/format';
+import { offerFigures } from '@sureground/shared';
 import type { BuyerOffer, BuyerOfferMessage } from '@/types/buyer';
 
 interface BuyerOfferNegotiationModalProps {
@@ -47,6 +48,7 @@ export const BuyerOfferNegotiationModal = ({
   // Only the owner's counter can be accepted; after the buyer's own counter they wait.
   const lastCounter = [...messages].reverse().find((msg) => msg.type === 'counter');
   const canAcceptCounter = isCountered && lastCounter?.senderId !== 'buyer';
+  const figures = offerFigures(messages, offer.offerAmount);
 
   const handleClose = () => {
     setIsCountering(false);
@@ -97,9 +99,20 @@ export const BuyerOfferNegotiationModal = ({
           <span className="text-muted-foreground">
             Asking {formatCurrency(offer.askingPrice, { compact: true })}
           </span>
-          <span className="font-semibold text-primary">
-            Current offer {formatCurrency(offer.offerAmount, { compact: true })}
-          </span>
+          {figures.sellerCounter !== undefined ? (
+            <>
+              <span className="text-muted-foreground">
+                Your offer {formatCurrency(figures.buyerAmount, { compact: true })}
+              </span>
+              <span className="font-semibold text-primary">
+                Seller&apos;s counter {formatCurrency(figures.sellerCounter, { compact: true })}
+              </span>
+            </>
+          ) : (
+            <span className="font-semibold text-primary">
+              Your offer {formatCurrency(figures.buyerAmount, { compact: true })}
+            </span>
+          )}
         </div>
 
         <div className="p-4 space-y-3 overflow-y-auto flex-1 min-h-0">

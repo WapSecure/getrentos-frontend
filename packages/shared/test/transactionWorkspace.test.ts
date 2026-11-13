@@ -15,6 +15,8 @@ import {
   nextActionTarget,
   pendingApprovalStatus,
   RELEASE_BLOCKED_NOTE,
+  releaseBlockedNote,
+  landReleaseOutstanding,
   releaseDialogDescription,
   releaseOutcome,
   releaseStageNote,
@@ -327,5 +329,30 @@ test('the call to action does not send the buyer to a release they cannot make y
       milestones: [{ key: 'KEYS_HANDED_OVER', status: 'CONFIRMED' }],
     } as never),
     'deposit'
+  );
+});
+
+test('a land sale cannot be released until every required step and condition is confirmed', () => {
+  const land = (stepStatus: string, conditionStatus: string) => ({
+    plan: 'LAND_RESALE',
+    milestones: [
+      { key: 'DEED', label: 'Deed of assignment executed', status: stepStatus, required: true },
+      { key: 'SURVEY', label: 'Survey plan', status: 'PENDING', required: false },
+    ],
+    conditions: [{ label: 'Governor’s consent applied for', status: conditionStatus }],
+  });
+  assert.deepEqual(landReleaseOutstanding(land('DELIVERED', 'PENDING')), [
+    'Deed of assignment executed',
+    'Governor’s consent applied for',
+  ]);
+  assert.equal(
+    releaseBlockedNote(land('DELIVERED', 'SATISFIED')),
+    'You can release the deposit once you have confirmed: Deed of assignment executed.'
+  );
+  assert.equal(releaseBlockedNote(land('CONFIRMED', 'WAIVED')), null);
+  // Built homes keep the handover rule.
+  assert.equal(
+    releaseBlockedNote({ plan: 'BUILT_HOME', milestones: [], conditions: [] }),
+    RELEASE_BLOCKED_NOTE
   );
 });

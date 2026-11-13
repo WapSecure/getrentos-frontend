@@ -35,3 +35,4 @@ export * from './landLateFee';
 export * from './personContact';
 export * from './maintenance';
 export * from './careTemplates';
+export * from './offerFigures';

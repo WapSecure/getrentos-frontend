@@ -218,7 +218,13 @@ export default function OwnerPropertyDetail() {
                 <Card elevated style={{ gap: spacing.sm }}>
                   <Fact
                     label="Estimated value"
-                    value={<Price amount={p.estimatedValue} variant="callout" />}
+                    value={
+                      p.estimatedValue ? (
+                        <Price amount={p.estimatedValue} variant="callout" />
+                      ) : (
+                        'No estimate yet'
+                      )
+                    }
                   />
                   {p.purchasePrice ? (
                     <Fact

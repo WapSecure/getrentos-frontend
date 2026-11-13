@@ -98,6 +98,42 @@ export const handoverAwaitingDelivery = (workspace: {
   return !handover || !DELIVERED_STATUSES.has(handover.status);
 };
 
+/** Land steps and conditions that no longer hold the deposit back (the server's release rule). */
+const SETTLED_STEP_STATUSES: ReadonlySet<string> = new Set(['CONFIRMED', 'WAIVED']);
+const SETTLED_CONDITION_STATUSES: ReadonlySet<string> = new Set(['SATISFIED', 'WAIVED']);
+
+/**
+ * The required land steps and conditions the buyer has not confirmed yet. The server refuses to
+ * release a land sale's deposit until this list is empty, so the button says so up front.
+ */
+export const landReleaseOutstanding = (workspace: {
+  plan?: string;
+  milestones: readonly { label: string; status: string; required: boolean }[];
+  conditions: readonly { label: string; status?: string }[];
+}): string[] => {
+  if (workspace.plan === 'BUILT_HOME') return [];
+  return [
+    ...workspace.milestones
+      .filter((m) => m.required && !SETTLED_STEP_STATUSES.has(m.status))
+      .map((m) => m.label),
+    ...workspace.conditions
+      .filter((c) => !SETTLED_CONDITION_STATUSES.has(c.status ?? 'PENDING'))
+      .map((c) => c.label),
+  ];
+};
+
+/** Why the buyer cannot release the deposit yet, or null when nothing holds it back. */
+export const releaseBlockedNote = (workspace: {
+  plan?: string;
+  milestones: readonly { key: string; label: string; status: string; required: boolean }[];
+  conditions: readonly { label: string; status?: string }[];
+}): string | null => {
+  if (handoverAwaitingDelivery(workspace)) return RELEASE_BLOCKED_NOTE;
+  const outstanding = landReleaseOutstanding(workspace);
+  if (outstanding.length === 0) return null;
+  return `You can release the deposit once you have confirmed: ${outstanding.join('; ')}.`;
+};
+
 /** Only the buyer releases, and only a deposit that is held. */
 export const canReleaseDeposit = (
   workspace: Pick<WorkspaceShape, 'viewer' | 'statuses'>

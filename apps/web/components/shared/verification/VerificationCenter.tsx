@@ -37,7 +37,7 @@ import {
   Skeleton,
   type BadgeVariant,
 } from '@sureground/ui';
-import { TIER_LABELS } from './trustTiers';
+import { trustTierLabel } from './trustTiers';
 import { LiveSelfieCapture, liveCaptureBlocker } from './LiveSelfieCapture';
 import type { SmileLivenessSession } from '@/services/trustService';
 import { cn, unwrap } from '@/lib/apiHelpers';
@@ -717,7 +717,7 @@ export const VerificationCenter = ({
             {kyc?.tier !== undefined && (
               <Badge
                 variant="primary"
-                title={`${TIER_LABELS[kyc.tier] ?? ''}${kyc.trustScore !== undefined ? ` · trust score ${kyc.trustScore}` : ''}`}
+                title={`${trustTierLabel(kyc.tier, isVerified)}${kyc.trustScore !== undefined ? ` · trust score ${kyc.trustScore}` : ''}`}
               >
                 Trust tier {kyc.tier}
               </Badge>

@@ -22,6 +22,10 @@ interface DocumentUploadDialogProps {
   onOpenChange: (open: boolean) => void;
   categories: { value: string; label: string }[];
   onUpload: (data: UploadedDocumentData) => void | Promise<void>;
+  /** Defaults to "Upload document". */
+  title?: string;
+  /** The label of the type picker. Defaults to "Category". */
+  categoryLabel?: string;
 }
 
 const ACCEPT = '.pdf,.doc,.docx,.jpg,.jpeg,.png,.webp,.txt';
@@ -34,6 +38,8 @@ export const DocumentUploadDialog = ({
   onOpenChange,
   categories,
   onUpload,
+  title = 'Upload document',
+  categoryLabel = 'Category',
 }: DocumentUploadDialogProps) => {
   const [file, setFile] = useState<File | null>(null);
   const [category, setCategory] = useState(categories[0]?.value ?? '');
@@ -120,7 +126,7 @@ export const DocumentUploadDialog = ({
       <Dialog open={open} onOpenChange={handleClose}>
         <DialogContent>
           <div className="p-4 border-b border-border">
-            <DialogTitle className="font-semibold text-foreground">Upload document</DialogTitle>
+            <DialogTitle className="font-semibold text-foreground">{title}</DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground mt-0.5">
               Add a new document to this list
             </DialogDescription>
@@ -208,7 +214,7 @@ export const DocumentUploadDialog = ({
               </p>
             )}
 
-            <Field label="Category">
+            <Field label={categoryLabel}>
               <Select value={category} onValueChange={setCategory} options={categories} />
             </Field>
 

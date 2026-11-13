@@ -14,6 +14,7 @@ import {
   Input,
 } from '@sureground/ui';
 import { formatCurrency, getInitials } from '@/lib/format';
+import { offerFigures } from '@sureground/shared';
 import type { SaleOffer, OfferMessage } from '@/types/owner';
 
 interface OfferNegotiationModalProps {
@@ -47,6 +48,8 @@ export const OfferNegotiationModal = ({
     offer.status === 'withdrawn' ||
     offer.status === 'expired' ||
     offer.status === 'closed';
+
+  const figures = offerFigures(messages, offer.offerAmount);
 
   const handleClose = () => {
     setIsCountering(false);
@@ -106,9 +109,20 @@ export const OfferNegotiationModal = ({
             <span className="text-muted-foreground">
               Asking {formatCurrency(offer.askingPrice, { compact: true })}
             </span>
-            <span className="font-semibold text-primary">
-              Current offer {formatCurrency(offer.offerAmount, { compact: true })}
-            </span>
+            {figures.sellerCounter !== undefined ? (
+              <>
+                <span className="text-muted-foreground">
+                  Buyer&apos;s offer {formatCurrency(figures.buyerAmount, { compact: true })}
+                </span>
+                <span className="font-semibold text-primary">
+                  Your counter {formatCurrency(figures.sellerCounter, { compact: true })}
+                </span>
+              </>
+            ) : (
+              <span className="font-semibold text-primary">
+                Buyer&apos;s offer {formatCurrency(figures.buyerAmount, { compact: true })}
+              </span>
+            )}
           </div>
 
           <div className="flex-1 space-y-3 overflow-y-auto p-4">

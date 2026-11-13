@@ -96,8 +96,13 @@ export const LandDocumentPicker = ({
     );
   }
 
+  // Not a Field: a Field names every control inside it with its label, and the type filter
+  // needs a name of its own.
   return (
-    <Field label={label} hint={hint ?? 'Optional. A document filed on this property.'}>
+    <div role="group" aria-labelledby={`${id}-label`} className="space-y-1.5">
+      <p id={`${id}-label`} className="text-sm font-medium tracking-[-0.01em] text-foreground">
+        {label}
+      </p>
       <div className="space-y-2">
         <div className="grid gap-2 sm:grid-cols-[minmax(0,11rem)_minmax(0,1fr)]">
           <Select
@@ -107,7 +112,7 @@ export const LandDocumentPicker = ({
               { value: ALL_TYPES, label: 'All types' },
               ...presentTypes.map((type) => ({ value: type, label: landDocumentTypeLabel(type) })),
             ]}
-            ariaLabel={`${label}: filter by document type`}
+            ariaLabel="Filter documents by type"
             searchable={false}
             disabled={disabled || documents.length === 0}
           />
@@ -203,7 +208,10 @@ export const LandDocumentPicker = ({
             </div>
           </div>
         )}
+        <p className="text-xs leading-5 text-muted-foreground">
+          {hint ?? 'Optional. A document filed on this property.'}
+        </p>
       </div>
-    </Field>
+    </div>
   );
 };

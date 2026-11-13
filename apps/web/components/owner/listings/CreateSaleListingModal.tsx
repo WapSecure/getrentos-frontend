@@ -27,6 +27,7 @@ import {
   type CommercialValues,
 } from '@/components/landlord/listings/CommercialDetailsFields';
 import { isCommercialType } from '@/types/landlord';
+import { isLandPropertyType } from '@/lib/propertyTypes';
 import type { OwnerProperty, SaleListing } from '@/types/owner';
 import { PaginatedSelect } from '@/components/ui/PaginatedSelect';
 import { unwrap } from '@/lib/apiHelpers';
@@ -43,6 +44,8 @@ interface CreateSaleListingModalProps {
     listing: Omit<SaleListing, 'id' | 'createdAt'>,
     publishNow: boolean
   ) => Promise<unknown>;
+  /** Opens with this property already chosen, e.g. from a land parcel's "Create sale listing". */
+  initialPropertyId?: string;
 }
 
 const steps = ['Listing info', 'Media', 'Features', 'Publish'];
@@ -61,6 +64,18 @@ const featureOptions = [
   'CCTV',
   'Boys Quarters',
   'Solar Power',
+];
+
+// A parcel has no rooms or building services, so it gets the features a land buyer checks.
+const landFeatureOptions = [
+  'Fenced',
+  'Dry land',
+  'Gated estate',
+  'Tarred road access',
+  'Electricity nearby',
+  'Survey beacons in place',
+  'Corner piece',
+  '24/7 Security',
 ];
 
 interface FormState {
@@ -105,9 +120,13 @@ export const CreateSaleListingModal = ({
   isOpen,
   onClose,
   onCreate,
+  initialPropertyId,
 }: CreateSaleListingModalProps) => {
   const [step, setStep] = useState(0);
-  const [form, setForm] = useState<FormState>(initialFormState);
+  const [form, setForm] = useState<FormState>(() => ({
+    ...initialFormState,
+    propertyId: initialPropertyId ?? '',
+  }));
   const [propertySearch, setPropertySearch] = useState('');
   const [propertyPage, setPropertyPage] = useState(1);
   const [selectedProperty, setSelectedProperty] = useState<OwnerProperty | null>(null);
@@ -145,10 +164,19 @@ export const CreateSaleListingModal = ({
   const propertyTotal = propertiesPage?.total ?? 0;
   const hasNoVerifiedProperties =
     !isPropertiesLoading && !propertySearch.trim() && propertiesPage != null && propertyTotal === 0;
-  const propertyForForm =
+  const listedProperty =
     selectedProperty?.id === form.propertyId
       ? selectedProperty
       : (verifiedProperties.find((property) => property.id === form.propertyId) ?? null);
+  // A preselected property may sit on a later page of the list, so it is fetched on its own.
+  const { data: presetProperty } = useQuery({
+    queryKey: [...ownerKeys.properties, 'one', form.propertyId],
+    queryFn: () => unwrap(ownerService.getProperty(form.propertyId)),
+    enabled: isOpen && !!form.propertyId && !listedProperty && !isPropertiesLoading,
+  });
+  const propertyForForm =
+    listedProperty ?? (presetProperty?.id === form.propertyId ? presetProperty : null);
+  const isLand = isLandPropertyType(propertyForForm?.propertyType);
 
   const existingCover = propertyForForm?.coverImageKey;
   // The API lists the cover first among the gallery keys; the gallery proper is the rest.
@@ -487,10 +515,10 @@ export const CreateSaleListingModal = ({
           {step === 2 && (
             <div>
               <p className="mb-3 text-sm font-medium text-foreground">
-                Select property features & amenities
+                {isLand ? 'Select what the land offers' : 'Select property features & amenities'}
               </p>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                {featureOptions.map((feature) => (
+                {(isLand ? landFeatureOptions : featureOptions).map((feature) => (
                   <div
                     key={feature}
                     className={`rounded-lg border px-3 py-2 transition-colors ${

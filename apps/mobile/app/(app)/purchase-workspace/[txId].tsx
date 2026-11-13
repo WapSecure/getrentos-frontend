@@ -27,8 +27,7 @@ import {
 } from '@sureground/ui-native';
 import {
   canReleaseDeposit,
-  handoverAwaitingDelivery,
-  RELEASE_BLOCKED_NOTE,
+  releaseBlockedNote,
   depositReleaseStage,
   documentLinkLabel,
   formatDualTime,
@@ -65,7 +64,7 @@ import { StepProgress } from '@/components/purchases/StepProgress';
 
 const PLAN_LABEL: Record<TransactionWorkspace['plan'], string> = {
   BUILT_HOME: 'Built home',
-  LAND_RESALE: 'Land resale',
+  LAND_RESALE: 'Land sale',
 };
 
 const PROFESSIONAL_LABEL: Record<WorkspaceProfessional['role'], string> = {
@@ -90,8 +89,16 @@ const CTA_LABEL: Record<WorkspaceSection, string> = {
 /** History shown before "Show all": the workspace is a glance, the record is on request. */
 const HISTORY_INITIAL = 5;
 
-/** The workspace's lean condition, in the shape the shared conditions list reads. */
-const toClosingCondition = (c: WorkspaceCondition): ClosingCondition => {
+/**
+ * The workspace's lean condition, in the shape the shared conditions list reads. The list shows
+ * the shared remedy once below it, so a condition repeats it only when its own differs, and never
+ * once it is met or waived.
+ */
+const toClosingCondition = (
+  c: WorkspaceCondition,
+  _index: number,
+  all: readonly WorkspaceCondition[]
+): ClosingCondition => {
   const known = ['PENDING', 'DELIVERED', 'SATISFIED', 'WAIVED'] as const;
   const status = (known as readonly string[]).includes(c.status)
     ? (c.status as ClosingCondition['status'])
@@ -103,7 +110,10 @@ const toClosingCondition = (c: WorkspaceCondition): ClosingCondition => {
     failed: c.status === 'FAILED',
     deadline: c.deadline,
     remedy: c.remedy,
-    note: c.remedy ? `If it is not met: ${c.remedy}` : undefined,
+    note:
+      c.remedy && c.remedy !== all[0]?.remedy && (status === 'PENDING' || status === 'DELIVERED')
+        ? `If it is not met: ${c.remedy}`
+        : undefined,
     deliveredByDeveloper: false,
   };
 };
@@ -240,8 +250,9 @@ export default function PurchaseWorkspace() {
   const progress = data ? workspaceProgress(data) : null;
   const target = data ? nextActionTarget(data) : null;
   const releasable = data ? canReleaseDeposit(data) : false;
-  // The deposit stands for the handover: it cannot be released before the seller delivers it.
-  const releaseBlocked = releasable && data ? handoverAwaitingDelivery(data) : false;
+  // The deposit waits for the handover (built home) or every required land step and condition.
+  const releaseBlockedReason = releasable && data ? releaseBlockedNote(data) : null;
+  const releaseBlocked = releaseBlockedReason !== null;
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -450,8 +461,8 @@ export default function PurchaseWorkspace() {
                 {releasable ? (
                   <>
                     <Text variant="callout" color="mutedForeground">
-                      {releaseBlocked
-                        ? RELEASE_BLOCKED_NOTE
+                      {releaseBlockedReason
+                        ? releaseBlockedReason
                         : 'Release it only once you have received the property and the documents you agreed.'}
                     </Text>
                     <Button
@@ -459,7 +470,7 @@ export default function PurchaseWorkspace() {
                       icon={<Lock size={16} color={colors.primaryForeground} />}
                       loading={release.isPending}
                       disabled={releaseBlocked}
-                      accessibilityHint={releaseBlocked ? RELEASE_BLOCKED_NOTE : undefined}
+                      accessibilityHint={releaseBlockedReason ?? undefined}
                       onPress={confirmRelease}
                     />
                   </>

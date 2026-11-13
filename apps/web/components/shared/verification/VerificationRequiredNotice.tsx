@@ -31,13 +31,15 @@ const BASE_COPY: Record<
 function tierCopy(tierRequired?: number, currentTier?: number): { message: string; cta: string } {
   const required = tierRequired ?? 2;
   const current = currentTier ?? 0;
-  const currentLabel = (TIER_LABELS[current] ?? `Tier ${current}`).toLowerCase();
+  // A tier of 2+ does not prove identity on its own (older approvals), so only name the lower tiers.
+  const currentLabel =
+    current < 2 ? ` (${(TIER_LABELS[current] ?? `Tier ${current}`).toLowerCase()})` : '';
   const target =
     required >= 3
       ? `financial verification (Trust Tier ${required})`
       : `an identity-verified account (Trust Tier ${required})`;
   return {
-    message: `You're on Trust Tier ${current} (${currentLabel}). This action needs ${target}. Complete verification to unlock it.`,
+    message: `You're on Trust Tier ${current}${currentLabel}. This action needs ${target}. Complete verification to unlock it.`,
     cta: 'Verify now',
   };
 }

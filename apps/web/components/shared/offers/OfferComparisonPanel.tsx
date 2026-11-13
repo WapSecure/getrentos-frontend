@@ -1,12 +1,35 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, type QueryClient } from '@tanstack/react-query';
 import { Scale } from '@sureground/icons';
 import { Alert, Badge, Card, Skeleton, type BadgeVariant } from '@sureground/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { sellerOfferKeys } from '@/lib/queryKeys';
 import { offerComparisonService } from '@/services/offerComparisonService';
-import type { ComparedOffer } from '@/types/offerComparison';
+import { formatCurrency } from '@/lib/format';
+import type { ComparedOffer, OfferComparison } from '@/types/offerComparison';
+
+/**
+ * After the seller counters, the offer is the buyer's turn straight away. The comparison is slow
+ * to rebuild (and rate limited), so the cached copy is updated before it refetches.
+ */
+export function markCounterSent(queryClient: QueryClient, offerId: string, amount: number): void {
+  queryClient.setQueryData<OfferComparison>(sellerOfferKeys.comparison, (current) =>
+    current
+      ? {
+          ...current,
+          listings: current.listings.map((listing) => ({
+            ...listing,
+            offers: listing.offers.map((offer) =>
+              offer.offerId === offerId
+                ? { ...offer, turn: 'buyer', yourCounter: formatCurrency(amount) }
+                : offer
+            ),
+          })),
+        }
+      : current
+  );
+}
 
 const TURN: Record<ComparedOffer['turn'], { label: string; variant: BadgeVariant }> = {
   new: { label: 'New: your reply', variant: 'info' },

@@ -15,7 +15,10 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 import { Handshake } from '@sureground/icons';
 import { OfferCard } from '@/components/owner/offers/OfferCard';
 import { OfferNegotiationModal } from '@/components/owner/offers/OfferNegotiationModal';
-import { OfferComparisonPanel } from '@/components/shared/offers/OfferComparisonPanel';
+import {
+  markCounterSent,
+  OfferComparisonPanel,
+} from '@/components/shared/offers/OfferComparisonPanel';
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys, sellerOfferKeys } from '@/lib/queryKeys';
@@ -92,7 +95,10 @@ export default function LandlordOffersPage() {
   const counterMutation = useMutation({
     mutationFn: ({ offerId, amount, note }: { offerId: string; amount: number; note?: string }) =>
       unwrap(landlordService.counterOffer(offerId, amount, note)),
-    onSuccess: (_result, { offerId }) => invalidate(offerId),
+    onSuccess: (_result, { offerId, amount }) => {
+      markCounterSent(queryClient, offerId, amount);
+      invalidate(offerId);
+    },
   });
 
   const handleAccept = async (offerId: string) => {
