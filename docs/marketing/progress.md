@@ -49,6 +49,12 @@ Status of the marketing redesign and launch-readiness brief, by milestone. PR nu
 - Waiting: backend #211 (analytics event allow-list) — backend CI blocked by a GitHub billing failure; local specs queued behind the memory gate.
 - Open, needs an admin: branch protection on `dev`, hosting/deploy automation, legal sign-off on Diaspora, guide and Privacy Policy copy before Diaspora goes live in production.
 
+## Brief re-check (13 Nov 2026)
+
+- Benchmark completed for the brief's named sites: Property Finder and Linear observed; Sotheby's returned empty responses, so nothing is claimed about it (`competitor-benchmark.md` §7).
+- One crawl rule for all four markets, private screens out of the index, honest share text (#274, decision D12).
+- Open: after-screenshots predate the brand-blue restore (#233) and the premium facelift, so they need retaking; location pages beyond Lagos depend on live inventory (D6); diaspora guides for UK, US and Canada readers need legal review before publishing.
+
 ## Follow-ups from the live demo (12 Nov 2026)
 
 - Public pages no longer force a sign-in when a session expires; only signed-in areas redirect (#211).
