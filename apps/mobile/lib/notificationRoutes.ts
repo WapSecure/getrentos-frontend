@@ -204,9 +204,7 @@ export function routeForActionUrl(url?: string | null): string | null {
   if (token && path === '/agency/join') return `/(app)/agency-join?token=${token}`;
   if (token && path === '/agency-invite/claim') return `/(app)/agency-invite-claim?token=${token}`;
   if (path.startsWith('/owner/land/')) return '/(app)/owner-land';
-  const represented = path.match(
-    /^(?:\/land)?\/representing\/(purchases|transactions)\/([^/]+)$/
-  );
+  const represented = path.match(/^(?:\/land)?\/representing\/(purchases|transactions)\/([^/]+)$/);
   if (represented) {
     const kind = represented[1] === 'purchases' ? 'purchase' : 'transaction';
     let id = represented[2];
