@@ -1,4 +1,4 @@
-import { formatLocation } from '@sureground/shared';
+import { formatLocation, formatPhoneForDisplay } from '@sureground/shared';
 import { View } from 'react-native';
 import { useState } from 'react';
 import { router } from 'expo-router';
@@ -37,7 +37,7 @@ export default function GatemanAccount() {
           <Avatar name={profile?.legalName} size={72} />
           <Text variant="heading">{profile?.legalName ?? 'Sureground user'}</Text>
           <Text variant="callout" color="mutedForeground">
-            {profile?.email ?? profile?.phone ?? ''}
+            {profile?.email ?? formatPhoneForDisplay(profile?.phone)}
           </Text>
           {verified ? (
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>

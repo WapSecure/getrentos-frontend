@@ -1,3 +1,4 @@
+import { formatPhoneForDisplay } from '@sureground/shared';
 import { useState } from 'react';
 import { Alert, View } from 'react-native';
 import { router, type Href } from 'expo-router';
@@ -194,7 +195,7 @@ export default function EstateAccount() {
           {profile?.legalName ?? 'Estate manager'}
         </Text>
         <Text variant="callout" color="mutedForeground">
-          {profile?.email ?? profile?.phone ?? ''}
+          {profile?.email ?? formatPhoneForDisplay(profile?.phone)}
         </Text>
         <Text
           variant="caption"
