@@ -20,6 +20,10 @@ const WEB_PATH_TO_ROUTE: Record<string, string> = {
   '/buyer/transactions': '/(app)/buyer-transactions',
   '/buyer/viewings': '/(app)/buyer-viewings',
   '/buyer/messages': '/(app)/(buyer)/messages',
+  '/buyer/representatives': '/(app)/buyer-land-representatives',
+  // Sent to someone a buyer appointed to act for them, whatever their own role.
+  '/representing': '/(app)/land-representing',
+  '/land/representing': '/(app)/land-representing',
   // The answered notification links buyers here; anyone else gets `/developments/<id>`.
   [ROUTES.BUYER_DEVELOPER_QUESTIONS]: DEVELOPER_QUESTIONS_ROUTE,
   '/landlord/applications': '/(app)/landlord-applications',
@@ -200,6 +204,19 @@ export function routeForActionUrl(url?: string | null): string | null {
   if (token && path === '/agency/join') return `/(app)/agency-join?token=${token}`;
   if (token && path === '/agency-invite/claim') return `/(app)/agency-invite-claim?token=${token}`;
   if (path.startsWith('/owner/land/')) return '/(app)/owner-land';
+  const represented = path.match(
+    /^(?:\/land)?\/representing\/(purchases|transactions)\/([^/]+)$/
+  );
+  if (represented) {
+    const kind = represented[1] === 'purchases' ? 'purchase' : 'transaction';
+    let id = represented[2];
+    try {
+      id = decodeURIComponent(id);
+    } catch {
+      // Keep the id as it came.
+    }
+    return `/(app)/land-represented?kind=${kind}&id=${encodeURIComponent(id)}`;
+  }
   return developmentRouteForPath(path);
 }
 
