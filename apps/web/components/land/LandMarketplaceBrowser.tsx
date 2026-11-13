@@ -611,9 +611,9 @@ export const LandMarketplaceBrowser = ({ mode, initialData }: LandMarketplaceBro
       >
         <DialogContent size="xl" padded={false} className="lg:max-w-6xl lg:overflow-hidden">
           {activeListing && (
-            <div className="grid lg:max-h-[88dvh] lg:grid-cols-[minmax(0,1fr)_380px]">
+            <div className="grid lg:grid-cols-[minmax(0,1fr)_380px]">
               {/* Parcel record */}
-              <div className="min-w-0 lg:overflow-y-auto">
+              <div className="min-w-0 lg:max-h-[88dvh] lg:overflow-y-auto lg:overscroll-contain">
                 <div className="relative h-56 bg-muted sm:h-72 lg:h-80">
                   {activeListing.coverImageUrl ? (
                     <img
@@ -758,7 +758,7 @@ export const LandMarketplaceBrowser = ({ mode, initialData }: LandMarketplaceBro
               </div>
 
               {/* Price, trust and actions */}
-              <aside className="flex flex-col gap-5 border-t border-border bg-secondary/40 p-6 sm:p-8 lg:overflow-y-auto lg:border-l lg:border-t-0">
+              <aside className="flex flex-col gap-5 border-t border-border bg-secondary/40 p-6 sm:p-8 lg:max-h-[88dvh] lg:overflow-y-auto lg:overscroll-contain lg:border-l lg:border-t-0">
                 <div>
                   <p className="text-sm text-muted-foreground">Asking price</p>
                   <p className="mt-1 text-3xl font-semibold tracking-tight text-foreground">
