@@ -3,7 +3,6 @@
 import { HomeManagementWorkspace } from '@/components/home-management/HomeManagementWorkspace';
 import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
 import { useCustody } from '@/components/agency/CustodyProvider';
-import { PageHeader } from '@sureground/ui';
 
 export default function AgencyHomeManagementPage() {
   const { selected } = useCustody();
@@ -14,19 +13,19 @@ export default function AgencyHomeManagementPage() {
 
   return (
     <div className="p-6">
-      <PageHeader
-        title="Home management"
-        description={
-          scope
-            ? `Assets, care plans, work orders and vendors for ${scope}. Choose another client above to see their home.`
-            : 'Assets, care plans, work orders and vendors across the properties you manage.'
-        }
-      />
       <ProFeatureGate
         title="Home Management is a Pro feature"
-        description="Upgrade to Pro to run SLA-backed maintenance, vendor work orders, quotes and invoicing for the properties you manage."
+        description="Upgrade to Pro to run maintenance with service targets, vendor work orders, quotes and invoicing for the properties you manage."
       >
-        <HomeManagementWorkspace role="manager" scopePropertyId={selected?.propertyId} />
+        <HomeManagementWorkspace
+          role="manager"
+          scopePropertyId={selected?.propertyId}
+          description={
+            scope
+              ? `Work orders, care plans, assets and records for ${scope}. Choose another client above to see their home.`
+              : undefined
+          }
+        />
       </ProFeatureGate>
     </div>
   );

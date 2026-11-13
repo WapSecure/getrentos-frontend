@@ -7,6 +7,7 @@ import { Badge } from '@sureground/ui';
 import { EmptyState } from '@sureground/ui';
 import { ListSkeleton } from '@sureground/ui';
 import { Pagination } from '@sureground/ui';
+import { HomeManagementSectionHeading } from '@/components/home-management/HomeManagementSectionHeading';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
 import { homeManagementKeys } from '@/lib/queryKeys';
@@ -31,28 +32,12 @@ export function HomeManagementInspectionFeed({ propertyId }: { propertyId?: stri
   const total = data?.total ?? 0;
 
   return (
-    <section aria-labelledby="inspection-feed-heading" className="mt-10">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-sm font-medium text-primary">Field evidence</p>
-          <h2
-            id="inspection-feed-heading"
-            className="mt-1 text-2xl font-semibold tracking-[-0.02em] text-foreground"
-          >
-            Inspection reports from your properties.
-          </h2>
-          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Review recent on-site findings, who completed them, and the operational task behind each
-            report.
-          </p>
-        </div>
-        {!isLoading && total > 0 && (
-          <p className="text-xs text-muted-foreground">
-            Showing {Math.min((page - 1) * INSPECTION_PAGE_SIZE + 1, total)}–
-            {Math.min(page * INSPECTION_PAGE_SIZE, total)} of {total} reports
-          </p>
-        )}
-      </div>
+    <section aria-labelledby="inspection-feed-heading">
+      <HomeManagementSectionHeading
+        id="inspection-feed-heading"
+        title="Inspection reports"
+        description="On-site findings from field agents, with who completed each one and when."
+      />
 
       <div className="mt-5">
         {isLoading ? (
@@ -66,8 +51,8 @@ export function HomeManagementInspectionFeed({ propertyId }: { propertyId?: stri
         ) : inspections.length === 0 ? (
           <EmptyState
             icon={FileSearch}
-            title="No field inspection reports yet"
-            description="Submitted inspection reports from your assigned field Agents will appear here."
+            title="No inspection reports yet"
+            description="Reports submitted by the field agents assigned to your properties will appear here."
           />
         ) : (
           <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-xs">

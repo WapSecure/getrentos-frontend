@@ -4,12 +4,10 @@ import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   CalendarCheck2,
-  CalendarClock,
   CheckCircle2,
   CircleAlert,
   ClipboardPlus,
   PauseCircle,
-  Repeat2,
   Wrench,
 } from '@sureground/icons';
 import { Badge, type BadgeVariant } from '@sureground/ui';
@@ -23,6 +21,10 @@ import { Input, NumberInput } from '@sureground/ui';
 import { Pagination } from '@sureground/ui';
 import { Select } from '@sureground/ui';
 import { useToast } from '@sureground/ui';
+import {
+  HomeManagementSectionHeading,
+  useCreateRequest,
+} from '@/components/home-management/HomeManagementSectionHeading';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
 import { homeManagementKeys } from '@/lib/queryKeys';
@@ -107,6 +109,9 @@ interface PreventiveMaintenancePlansProps {
   pageSize: number;
   total: number;
   onPageChange: (page: number) => void;
+  /** Set by the page header's Add menu; see useCreateRequest. */
+  createRequest?: number;
+  onCreateRequestHandled?: () => void;
 }
 
 export function PreventiveMaintenancePlans({
@@ -119,9 +124,12 @@ export function PreventiveMaintenancePlans({
   pageSize,
   total,
   onPageChange,
+  createRequest,
+  onCreateRequestHandled,
 }: PreventiveMaintenancePlansProps) {
   const queryClient = useQueryClient();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  useCreateRequest(createRequest, () => setIsCreateOpen(true), onCreateRequestHandled);
   const [form, setForm] = useState<PlanForm>(initialPlanForm);
   const toast = useToast();
 
@@ -214,57 +222,26 @@ export function PreventiveMaintenancePlans({
     });
   };
 
-  const duePlans = plans.filter(planIsDue).length;
-  const dueSoonPlans = plans.filter(planIsDueSoon).length;
-  const activePlans = plans.filter((plan) => plan.status === 'ACTIVE').length;
   const hasProperties = properties.length > 0;
 
   return (
-    <section aria-labelledby="preventive-plans-heading" className="mt-10 pb-10">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p className="text-sm font-medium text-primary">Preventive care</p>
-          <h2
-            id="preventive-plans-heading"
-            className="mt-1 text-2xl font-semibold tracking-[-0.02em] text-foreground"
+    <section aria-labelledby="preventive-plans-heading">
+      <HomeManagementSectionHeading
+        id="preventive-plans-heading"
+        title="Care plans"
+        description="Recurring care for each home. When a plan falls due, a work order is raised and assigned to its vendor, if one is set."
+        actions={
+          <Button
+            icon={<ClipboardPlus className="h-4 w-4" />}
+            rounded="md"
+            disabled={!hasProperties}
+            title={hasProperties ? undefined : 'Add a property before creating a care plan'}
+            onClick={() => setIsCreateOpen(true)}
           >
-            Plan work before it becomes an issue.
-          </h2>
-          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Schedule recurring care, keep the right vendor accountable, and preserve the service
-            history of every home. When a plan falls due, a work order is raised automatically and
-            assigned to its vendor, if one is set.
-          </p>
-        </div>
-        <Button
-          icon={<ClipboardPlus className="h-4 w-4" />}
-          rounded="md"
-          disabled={!hasProperties}
-          title={hasProperties ? undefined : 'Add a property before creating a care plan'}
-          onClick={() => setIsCreateOpen(true)}
-        >
-          Create care plan
-        </Button>
-      </div>
-
-      <div className="mt-5 grid gap-3 sm:grid-cols-3">
-        <PlanSummary
-          icon={<Repeat2 className="h-4 w-4" />}
-          label="Active on this page"
-          value={activePlans}
-        />
-        <PlanSummary
-          icon={<CircleAlert className="h-4 w-4" />}
-          label="Due on this page"
-          value={duePlans}
-          intent="urgent"
-        />
-        <PlanSummary
-          icon={<CalendarClock className="h-4 w-4" />}
-          label="Due soon on this page"
-          value={dueSoonPlans}
-        />
-      </div>
+            Create care plan
+          </Button>
+        }
+      />
 
       <div className="mt-5">
         {isLoading ? (
@@ -574,33 +551,5 @@ export function PreventiveMaintenancePlans({
         </DialogContent>
       </Dialog>
     </section>
-  );
-}
-
-function PlanSummary({
-  icon,
-  label,
-  value,
-  intent = 'default',
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: number;
-  intent?: 'default' | 'urgent';
-}) {
-  return (
-    <div className="rounded-2xl border border-border bg-card px-4 py-3">
-      <div
-        className={
-          intent === 'urgent'
-            ? 'flex items-center gap-2 text-destructive'
-            : 'flex items-center gap-2 text-muted-foreground'
-        }
-      >
-        {icon}
-        <span className="text-xs font-medium">{label}</span>
-      </div>
-      <p className="mt-2 text-2xl font-semibold text-foreground">{value}</p>
-    </div>
   );
 }

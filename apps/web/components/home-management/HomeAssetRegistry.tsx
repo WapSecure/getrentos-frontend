@@ -4,14 +4,11 @@ import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Archive,
-  Boxes,
-  CalendarClock,
   CircleAlert,
   CircleCheck,
   MoreHorizontal,
   PackagePlus,
   RotateCcw,
-  ShieldCheck,
   Wrench,
 } from '@sureground/icons';
 import { Badge, type BadgeVariant } from '@sureground/ui';
@@ -33,6 +30,10 @@ import { Input } from '@sureground/ui';
 import { Pagination } from '@sureground/ui';
 import { Select } from '@sureground/ui';
 import { useToast } from '@sureground/ui';
+import {
+  HomeManagementSectionHeading,
+  useCreateRequest,
+} from '@/components/home-management/HomeManagementSectionHeading';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
 import { homeManagementKeys } from '@/lib/queryKeys';
@@ -128,6 +129,9 @@ interface HomeAssetRegistryProps {
   selectedPropertyId: string;
   onPageChange: (page: number) => void;
   onSelectedPropertyChange: (propertyId: string) => void;
+  /** Set by the page header's Add menu; see useCreateRequest. */
+  createRequest?: number;
+  onCreateRequestHandled?: () => void;
 }
 
 export function HomeAssetRegistry({
@@ -141,11 +145,14 @@ export function HomeAssetRegistry({
   selectedPropertyId,
   onPageChange,
   onSelectedPropertyChange,
+  createRequest,
+  onCreateRequestHandled,
 }: HomeAssetRegistryProps) {
   const queryClient = useQueryClient();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [form, setForm] = useState<AssetForm>(initialAssetForm);
   const toast = useToast();
+  useCreateRequest(createRequest, () => setIsCreateOpen(true), onCreateRequestHandled);
 
   const unitsQuery = useQuery({
     enabled: isCreateOpen && Boolean(form.propertyId),
@@ -199,72 +206,41 @@ export function HomeAssetRegistry({
     });
   };
 
-  const activeAssets = assets.filter((asset) => asset.status === 'ACTIVE').length;
-  const plannedAssets = assets.filter((asset) => (asset.preventivePlans?.length ?? 0) > 0).length;
-  const expiringWarranties = assets.filter((asset) =>
-    isWarrantyExpiring(asset.warrantyExpiresAt)
-  ).length;
   const hasProperties = properties.length > 0;
 
   return (
-    <section aria-labelledby="asset-registry-heading" className="mt-10">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p className="text-sm font-medium text-primary">Asset register</p>
-          <h2
-            id="asset-registry-heading"
-            className="mt-1 text-2xl font-semibold tracking-[-0.02em] text-foreground"
-          >
-            Keep every system on record.
-          </h2>
-          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Record appliances, building systems, warranties, and the preventive care linked to each
-            home.
-          </p>
-        </div>
-        <div className="flex flex-col gap-2 sm:flex-row">
-          <Select
-            ariaLabel="Filter assets by property"
-            className="min-w-56"
-            value={selectedPropertyId}
-            onValueChange={onSelectedPropertyChange}
-            options={[
-              { value: '', label: 'All properties' },
-              ...properties.map((property) => ({
-                value: property.id,
-                label: propertyLabel(property),
-              })),
-            ]}
-          />
-          <Button
-            icon={<PackagePlus className="h-4 w-4" />}
-            rounded="md"
-            disabled={!hasProperties}
-            title={hasProperties ? undefined : 'Add a property before adding assets'}
-            onClick={() => setIsCreateOpen(true)}
-          >
-            Add asset
-          </Button>
-        </div>
-      </div>
-
-      <div className="mt-5 grid gap-3 sm:grid-cols-3">
-        <AssetSummary
-          icon={<Boxes className="h-4 w-4" />}
-          label="Active on this page"
-          value={activeAssets}
-        />
-        <AssetSummary
-          icon={<CalendarClock className="h-4 w-4" />}
-          label="Covered on this page"
-          value={plannedAssets}
-        />
-        <AssetSummary
-          icon={<ShieldCheck className="h-4 w-4" />}
-          label="Expiring on this page"
-          value={expiringWarranties}
-        />
-      </div>
+    <section aria-labelledby="asset-registry-heading">
+      <HomeManagementSectionHeading
+        id="asset-registry-heading"
+        title="Assets"
+        description="Appliances and building systems in each home, with warranties and the care plans linked to them."
+        actions={
+          <>
+            <Select
+              ariaLabel="Filter assets by property"
+              className="min-w-56"
+              value={selectedPropertyId}
+              onValueChange={onSelectedPropertyChange}
+              options={[
+                { value: '', label: 'All properties' },
+                ...properties.map((property) => ({
+                  value: property.id,
+                  label: propertyLabel(property),
+                })),
+              ]}
+            />
+            <Button
+              icon={<PackagePlus className="h-4 w-4" />}
+              rounded="md"
+              disabled={!hasProperties}
+              title={hasProperties ? undefined : 'Add a property before adding assets'}
+              onClick={() => setIsCreateOpen(true)}
+            >
+              Add asset
+            </Button>
+          </>
+        }
+      />
 
       <div className="mt-5">
         {isLoading ? (
@@ -572,26 +548,6 @@ export function HomeAssetRegistry({
         </DialogContent>
       </Dialog>
     </section>
-  );
-}
-
-function AssetSummary({
-  icon,
-  label,
-  value,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: number;
-}) {
-  return (
-    <div className="rounded-2xl border border-border bg-card px-4 py-3">
-      <div className="flex items-center gap-2 text-muted-foreground">
-        {icon}
-        <span className="text-xs font-medium">{label}</span>
-      </div>
-      <p className="mt-2 text-2xl font-semibold text-foreground">{value}</p>
-    </div>
   );
 }
 

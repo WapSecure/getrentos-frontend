@@ -2,6 +2,7 @@
 
 import { Star, Users } from '@sureground/icons';
 import { Badge, Card, EmptyState, Skeleton } from '@sureground/ui';
+import { HomeManagementSectionHeading } from '@/components/home-management/HomeManagementSectionHeading';
 import type { HomeManagementVendor } from '@/services/homeManagementService';
 
 interface HomeManagementVendorPerformanceProps {
@@ -47,29 +48,19 @@ export function HomeManagementVendorPerformance({
   const showLoadingState = isLoading && vendors.length === 0;
 
   return (
-    <section aria-labelledby="vendor-performance-heading" className="mt-8">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <div className="flex flex-wrap items-center gap-2">
-            <p className="text-sm font-medium text-primary">Vendor network</p>
-            {!showLoadingState && vendors.length > 0 && (
-              <Badge variant="neutral">
-                {vendors.length} vendor{vendors.length === 1 ? '' : 's'} shown
-              </Badge>
-            )}
-          </div>
-          <h2
-            id="vendor-performance-heading"
-            className="mt-1 text-2xl font-semibold tracking-[-0.02em] text-foreground"
-          >
-            Keep a reliable home-services directory.
-          </h2>
-          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Rating and delivery history come from each vendor&apos;s durable profile; use the
-            work-order queue for current assignments and controlled spend.
-          </p>
-        </div>
-      </div>
+    <section aria-labelledby="vendor-performance-heading">
+      <HomeManagementSectionHeading
+        id="vendor-performance-heading"
+        title="Vendors"
+        description="Rating and completed jobs from each vendor's profile. Current assignments are on the Work orders tab."
+        meta={
+          !showLoadingState && vendors.length > 0 ? (
+            <Badge variant="neutral">
+              {vendors.length} vendor{vendors.length === 1 ? '' : 's'}
+            </Badge>
+          ) : undefined
+        }
+      />
 
       {showLoadingState ? (
         <VendorLoadingState />

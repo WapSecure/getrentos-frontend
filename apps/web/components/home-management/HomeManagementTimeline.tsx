@@ -11,11 +11,14 @@ import {
   FileText,
   MapPin,
   Wrench,
+  ChevronRight,
   type SgIcon,
 } from '@sureground/icons';
+import Link from 'next/link';
 import { Badge, Timeline, type BadgeVariant } from '@sureground/ui';
 import { EmptyState } from '@sureground/ui';
 import { ListSkeleton } from '@sureground/ui';
+import { HomeManagementSectionHeading } from '@/components/home-management/HomeManagementSectionHeading';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate, formatRelativeTime } from '@/lib/format';
 import { homeManagementKeys } from '@/lib/queryKeys';
@@ -146,11 +149,19 @@ const locationLabel = (event: HomeManagementTimelineEvent) => {
 interface HomeManagementTimelineProps {
   propertyId?: string;
   limit?: number;
+  /**
+   * Shows only the newest few events from the same query, with a link to the full history, so the
+   * overview adds no request of its own.
+   */
+  preview?: number;
+  viewAllHref?: string;
 }
 
 export function HomeManagementTimeline({
   propertyId,
   limit = DEFAULT_TIMELINE_LIMIT,
+  preview,
+  viewAllHref,
 }: HomeManagementTimelineProps) {
   const effectiveLimit = Math.min(
     Math.max(Number.isFinite(limit) ? Math.trunc(limit) : DEFAULT_TIMELINE_LIMIT, 1),
@@ -173,54 +184,66 @@ export function HomeManagementTimeline({
     () =>
       [...events]
         .sort((first, second) => eventTimestamp(second) - eventTimestamp(first))
-        .slice(0, effectiveLimit),
-    [effectiveLimit, events]
+        .slice(0, preview ?? effectiveLimit),
+    [effectiveLimit, events, preview]
   );
+  const headingId = preview
+    ? 'home-management-recent-activity-heading'
+    : 'home-management-timeline-heading';
 
   return (
-    <section aria-labelledby="home-management-timeline-heading" className="mt-10">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-sm font-medium text-primary">Service history</p>
-          <h2
-            id="home-management-timeline-heading"
-            className="mt-1 text-2xl font-semibold tracking-[-0.02em] text-foreground"
-          >
-            A complete operational trail for every home.
-          </h2>
-          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Follow care, service, inspection, asset, and approval activity in one chronological
-            record.
-          </p>
-        </div>
-        {!isLoading && timelineEvents.length > 0 && (
-          <p className="text-xs text-muted-foreground">
-            Latest {timelineEvents.length} {timelineEvents.length === 1 ? 'event' : 'events'}
-          </p>
-        )}
-      </div>
+    <section aria-labelledby={headingId}>
+      <HomeManagementSectionHeading
+        id={headingId}
+        title={preview ? 'Recent activity' : 'Service history'}
+        description={
+          preview
+            ? undefined
+            : 'Care, repairs, inspections, asset changes and approvals, newest first.'
+        }
+        actions={
+          preview && viewAllHref && timelineEvents.length > 0 ? (
+            <Link
+              href={viewAllHref}
+              scroll={false}
+              className="inline-flex items-center gap-1 rounded-sm text-sm font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              View all
+              <ChevronRight className="h-4 w-4" aria-hidden="true" />
+            </Link>
+          ) : !preview && !isLoading && timelineEvents.length > 0 ? (
+            <p className="text-xs text-muted-foreground">
+              Latest {timelineEvents.length} {timelineEvents.length === 1 ? 'event' : 'events'}
+            </p>
+          ) : undefined
+        }
+      />
 
-      <div className="mt-5">
+      <div className={preview ? 'mt-3' : 'mt-5'}>
         {isLoading ? (
-          <ListSkeleton rows={4} className="rounded-2xl" />
+          <ListSkeleton rows={preview ?? 4} className="rounded-2xl" />
         ) : error && events.length === 0 ? (
           <EmptyState
             icon={CircleAlert}
             title="Service history could not be loaded"
-            description="Refresh the page to try again. Your operational records remain unchanged."
+            description="Refresh the page to try again. Your records have not changed."
           />
+        ) : timelineEvents.length === 0 && preview ? (
+          <p className="rounded-xl border border-border bg-card px-4 py-3 text-sm text-muted-foreground">
+            No service activity yet. Care, repairs and approvals will appear here as they happen.
+          </p>
         ) : timelineEvents.length === 0 ? (
           <EmptyState
             icon={Activity}
             title="No service activity yet"
-            description="Asset updates, scheduled care, work orders, inspections, and approvals will be recorded here as your homes are operated."
+            description="Asset updates, care plans, work orders, inspections and approvals will appear here as they happen."
           />
         ) : (
           <div className="rounded-2xl border border-border bg-card p-5 shadow-xs">
             <Timeline
               variant="feed"
               titleAs="h3"
-              aria-labelledby="home-management-timeline-heading"
+              aria-labelledby={headingId}
               items={timelineEvents.map((event) => {
                 const eventMeta = getEventMeta(event.type);
                 const Icon = eventMeta.icon;

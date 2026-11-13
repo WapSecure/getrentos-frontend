@@ -1,15 +1,8 @@
 'use client';
 
-import { useMemo, useState, type ReactNode } from 'react';
+import { useMemo, useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  AlertTriangle,
-  BellRing,
-  CheckCircle2,
-  CircleAlert,
-  Clock3,
-  ShieldAlert,
-} from '@sureground/icons';
+import { BellRing, CheckCircle2, CircleAlert, Clock3, ShieldAlert } from '@sureground/icons';
 import { Badge, type BadgeVariant } from '@sureground/ui';
 import { Button } from '@sureground/ui';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@sureground/ui';
@@ -18,6 +11,7 @@ import { Skeleton } from '@sureground/ui';
 import { Pagination } from '@sureground/ui';
 import { Select } from '@sureground/ui';
 import { useToast } from '@sureground/ui';
+import { HomeManagementSectionHeading } from '@/components/home-management/HomeManagementSectionHeading';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
 import { homeManagementKeys } from '@/lib/queryKeys';
@@ -94,7 +88,7 @@ interface HomeManagementEscalationQueueProps {
   isPropertiesLoading?: boolean;
 }
 
-// Deliberately PII-light: no resident details.
+// Shows no resident details, only the job, its property and its deadlines.
 export function HomeManagementEscalationQueue({
   properties,
   isPropertiesLoading = false,
@@ -174,61 +168,65 @@ export function HomeManagementEscalationQueue({
     },
   });
 
-  const emergencyCount = escalations.filter(isEmergency).length;
-  const unacknowledgedCount = escalations.filter((escalation) => !escalation.acknowledgedAt).length;
+  const propertySelect = (
+    <Select
+      ariaLabel="Filter escalations by property"
+      className="min-w-56"
+      disabled={isPropertiesLoading}
+      value={effectivePropertyId}
+      onValueChange={(propertyId) => {
+        setSelectedPropertyId(propertyId);
+        setPage(1);
+      }}
+      placeholder={isPropertiesLoading ? 'Loading properties…' : 'Select a property'}
+      options={properties.map((property) => ({
+        value: property.id,
+        label: propertyLabel(property),
+      }))}
+    />
+  );
 
-  return (
-    <section aria-labelledby="escalation-queue-heading" className="mt-10">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p className="text-sm font-medium text-primary">Live escalation queue</p>
-          <h2
-            id="escalation-queue-heading"
-            className="mt-1 text-2xl font-semibold tracking-[-0.02em] text-foreground"
-          >
-            Act before a service promise is missed.
-          </h2>
-          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Work orders that were escalated by hand, emergency-routed, or past a service target are
-            prioritized here for a clear operational response.
+  // Nothing to coordinate: a work order list should not sit under a full-height empty panel.
+  if (!isPropertiesLoading && properties.length === 0) return null;
+  const selectedProperty = properties.find((property) => property.id === effectivePropertyId);
+  if (
+    selectedProperty &&
+    !escalationsQuery.isLoading &&
+    !escalationsQuery.isError &&
+    totalEscalations === 0
+  ) {
+    return (
+      <section
+        aria-labelledby="escalation-queue-heading"
+        className="flex flex-col gap-3 rounded-xl border border-border bg-card px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+      >
+        <div className="flex min-w-0 items-start gap-2.5 text-sm">
+          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" aria-hidden="true" />
+          <p className="min-w-0 text-muted-foreground">
+            <span id="escalation-queue-heading" className="font-medium text-foreground">
+              No live escalations
+            </span>{' '}
+            at {propertyLabel(selectedProperty)}. Every open job there is within its service target.
           </p>
         </div>
-        <Select
-          ariaLabel="Filter escalations by property"
-          className="min-w-56"
-          disabled={isPropertiesLoading}
-          value={effectivePropertyId}
-          onValueChange={(propertyId) => {
-            setSelectedPropertyId(propertyId);
-            setPage(1);
-          }}
-          placeholder={isPropertiesLoading ? 'Loading properties…' : 'Select a property'}
-          options={properties.map((property) => ({
-            value: property.id,
-            label: propertyLabel(property),
-          }))}
-        />
-      </div>
+        {properties.length > 1 && propertySelect}
+      </section>
+    );
+  }
 
-      <div className="mt-5 grid gap-3 sm:grid-cols-3">
-        <EscalationStat
-          icon={<BellRing className="h-4 w-4" />}
-          label="Active escalations"
-          value={totalEscalations}
-        />
-        <EscalationStat
-          icon={<ShieldAlert className="h-4 w-4" />}
-          label="Emergency on this page"
-          value={emergencyCount}
-          urgent={emergencyCount > 0}
-        />
-        <EscalationStat
-          icon={<AlertTriangle className="h-4 w-4" />}
-          label="Awaiting acknowledgement on page"
-          value={unacknowledgedCount}
-          urgent={unacknowledgedCount > 0}
-        />
-      </div>
+  return (
+    <section aria-labelledby="escalation-queue-heading">
+      <HomeManagementSectionHeading
+        id="escalation-queue-heading"
+        title="Live escalations"
+        description="Jobs escalated by hand, routed as emergencies or past a service target, most urgent first."
+        meta={
+          totalEscalations > 0 ? (
+            <Badge variant="danger">{totalEscalations} active</Badge>
+          ) : undefined
+        }
+        actions={propertySelect}
+      />
 
       <div className="mt-5">
         {isPropertiesLoading || (Boolean(effectivePropertyId) && escalationsQuery.isLoading) ? (
@@ -237,19 +235,19 @@ export function HomeManagementEscalationQueue({
           <EmptyState
             icon={ShieldAlert}
             title="Add a property before reviewing service risk"
-            description="Escalations are scoped to a property so service activity never crosses portfolio boundaries."
+            description="Escalations belong to a property, so add one first."
           />
         ) : !effectivePropertyId ? (
           <EmptyState
             icon={ShieldAlert}
             title="Select a property to review escalations"
-            description="Choose a property to load its active SLA breach queue."
+            description="Choose a property to see its live escalations."
           />
         ) : escalationsQuery.isError && !escalationsQuery.data ? (
           <EmptyState
             icon={CircleAlert}
             title="Escalations could not be loaded"
-            description="Refresh the page to check the current service-risk queue."
+            description="Refresh the page to try again."
             action={
               <Button
                 size="sm"
@@ -264,7 +262,7 @@ export function HomeManagementEscalationQueue({
         ) : orderedEscalations.length === 0 ? (
           <EmptyState
             icon={CheckCircle2}
-            title="No active SLA escalations"
+            title="No live escalations"
             description={
               effectivePropertyId
                 ? 'This property has no work orders currently outside their service target.'
@@ -331,7 +329,7 @@ export function HomeManagementEscalationQueue({
                         <p className="text-xs leading-5 text-muted-foreground">
                           {escalation.acknowledgedAt
                             ? `Acknowledged ${formatDate(escalation.acknowledgedAt)}. The work order remains in the queue until it is resolved.`
-                            : 'Acknowledge to record that an authorised operator has seen and is coordinating this service risk.'}
+                            : 'Acknowledge to record that you have seen this and are coordinating it.'}
                         </p>
                         {!escalation.acknowledgedAt && (
                           <Button
@@ -390,12 +388,12 @@ export function HomeManagementEscalationQueue({
             Escalate this work order?
           </DialogTitle>
           <DialogDescription className="mt-2 text-sm leading-6 text-muted-foreground">
-            This records an operational escalation for{' '}
+            This records an escalation for{' '}
             <span className="font-medium text-foreground">
               {escalationConfirmation?.issueTitle}
             </span>{' '}
-            and keeps the service event visible in the audit trail. It does not resolve the work
-            order or change its approved spend.
+            and keeps it in the service history. It does not resolve the work order or change its
+            approved spend.
           </DialogDescription>
           <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <Button
@@ -423,42 +421,6 @@ export function HomeManagementEscalationQueue({
         </DialogContent>
       </Dialog>
     </section>
-  );
-}
-
-function EscalationStat({
-  icon,
-  label,
-  value,
-  urgent = false,
-}: {
-  icon: ReactNode;
-  label: string;
-  value: number;
-  urgent?: boolean;
-}) {
-  return (
-    <div
-      className={
-        urgent
-          ? 'flex items-center gap-3 rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-3'
-          : 'flex items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3'
-      }
-    >
-      <span
-        className={
-          urgent
-            ? 'flex h-9 w-9 items-center justify-center rounded-xl bg-destructive/10 text-destructive'
-            : 'flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary'
-        }
-      >
-        {icon}
-      </span>
-      <div>
-        <p className="text-lg font-semibold tracking-[-0.02em] text-foreground">{value}</p>
-        <p className="text-xs text-muted-foreground">{label}</p>
-      </div>
-    </div>
   );
 }
 

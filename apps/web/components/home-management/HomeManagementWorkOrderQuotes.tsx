@@ -92,7 +92,7 @@ const quoteVendorLabel = (quote: HomeManagementWorkOrderQuote) =>
   (quote.vendorId ? 'Vendor record unavailable' : 'Unlinked estimate');
 
 const quoteActorLabel = (quote: HomeManagementWorkOrderQuote) =>
-  quote.submittedBy?.legalName?.trim() || 'An authorised operator';
+  quote.submittedBy?.legalName?.trim() || 'A member of your team';
 
 const toValidUntilIso = (dateValue: string) => {
   if (!dateValue) return undefined;
@@ -526,8 +526,8 @@ export function HomeManagementWorkOrderQuotes({
               Record vendor quote
             </DialogTitle>
             <DialogDescription className="mt-1 text-sm leading-6 text-muted-foreground">
-              Capture the vendor&apos;s proposed cost and scope for “{workOrder.issueTitle}”. The
-              recorded operator and any final decision remain in the audit trail.
+              Capture the vendor&apos;s proposed cost and scope for “{workOrder.issueTitle}”. Who
+              recorded it, and any final decision, stay on record.
             </DialogDescription>
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2">

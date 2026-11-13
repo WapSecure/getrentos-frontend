@@ -7,7 +7,7 @@ export default function OwnerHomeManagementPage() {
   return (
     <ProFeatureGate
       title="Home Management is a Pro feature"
-      description="Upgrade to Pro to unlock SLA-backed maintenance timelines, vendor work orders, quotes, and invoicing."
+      description="Upgrade to Pro to unlock service targets for maintenance, vendor work orders, quotes and invoicing."
     >
       <HomeManagementWorkspace role="owner" />
     </ProFeatureGate>

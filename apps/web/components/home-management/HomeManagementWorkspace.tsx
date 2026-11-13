@@ -1,19 +1,51 @@
 'use client';
 
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
-import { CircleAlert } from '@sureground/icons';
+import { useCallback, useRef, useState, type ReactNode } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import {
+  CalendarClock,
+  ChevronDown,
+  CircleAlert,
+  ClipboardList,
+  ClipboardPlus,
+  PackagePlus,
+  Settings2,
+  ShieldCheck,
+  TriangleAlert,
+  Wrench,
+} from '@sureground/icons';
 import { HomeAssetRegistry } from '@/components/home-management/HomeAssetRegistry';
-import { HomeManagementDashboard } from '@/components/home-management/HomeManagementDashboard';
 import { HomeManagementInspectionFeed } from '@/components/home-management/HomeManagementInspectionFeed';
-import { HomeManagementOperationsCommandCenter } from '@/components/home-management/HomeManagementOperationsCommandCenter';
-import { HomeManagementPortfolioAnalytics } from '@/components/home-management/HomeManagementPortfolioAnalytics';
+import { HomeManagementOverview } from '@/components/home-management/HomeManagementOverview';
 import { HomeManagementRecordsPanel } from '@/components/home-management/HomeManagementRecordsPanel';
 import { HomeManagementTimeline } from '@/components/home-management/HomeManagementTimeline';
 import { HomeManagementVendorPerformance } from '@/components/home-management/HomeManagementVendorPerformance';
-import { EmptyState, Skeleton } from '@sureground/ui';
+import {
+  Alert,
+  Badge,
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  EmptyState,
+  PageHeader,
+  Skeleton,
+  StatGroup,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+  type StatGroupItem,
+} from '@sureground/ui';
 import dynamic from 'next/dynamic';
 import { unwrap } from '@/lib/apiHelpers';
+import {
+  homeManagementTabHref,
+  parseHomeManagementTab,
+  type HomeManagementTab,
+} from '@/lib/homeManagementTabs';
 import { homeManagementKeys } from '@/lib/queryKeys';
 import { landlordService } from '@/services/landlordService';
 import {
@@ -60,7 +92,30 @@ interface HomeManagementWorkspaceProps {
   role: HomeManagementWorkspaceRole;
   /** Narrows everything to the client's property, so pickers, lists and history can't reach another client's home. */
   scopePropertyId?: string;
+  eyebrow?: string;
+  /** One plain line of context under the title; each role has a default. */
+  description?: ReactNode;
+  /**
+   * The query parameter that holds the open tab. The landlord hub already uses `tab` for its own
+   * Requests / Home Management switch, so it passes another name.
+   */
+  tabParam?: string;
 }
+
+type CreateKind = 'work-order' | 'asset' | 'plan' | 'policy';
+
+const CREATE_TAB: Record<CreateKind, HomeManagementTab> = {
+  'work-order': 'work-orders',
+  asset: 'assets',
+  plan: 'preventive-care',
+  policy: 'service-standards',
+};
+
+const DEFAULT_DESCRIPTION: Record<HomeManagementWorkspaceRole, string> = {
+  owner: 'Work orders, care plans, assets and records for the homes you own.',
+  landlord: 'Work orders, care plans, assets and records for the homes you let.',
+  manager: 'Work orders, care plans, assets and records for the properties you manage.',
+};
 
 const ASSET_PAGE_SIZE = 12;
 const PLAN_PAGE_SIZE = 10;
@@ -75,7 +130,36 @@ const normalizeProperties = (properties: HomeManagementProperty[]): HomeManageme
     state: property.state,
   }));
 
-export function HomeManagementWorkspace({ role, scopePropertyId }: HomeManagementWorkspaceProps) {
+export function HomeManagementWorkspace({
+  role,
+  scopePropertyId,
+  eyebrow = 'Property care',
+  description,
+  tabParam = 'tab',
+}: HomeManagementWorkspaceProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const activeTab = parseHomeManagementTab(searchParams.get(tabParam));
+  const tabHref = useCallback(
+    (tab: HomeManagementTab) =>
+      homeManagementTabHref(pathname, searchParams.toString(), tab, tabParam),
+    [pathname, searchParams, tabParam]
+  );
+  // A push, not a replace, so the back button returns to the previous tab.
+  const setTab = (tab: HomeManagementTab) => router.push(tabHref(tab), { scroll: false });
+  const [createRequest, setCreateRequest] = useState<{ kind: CreateKind; id: number } | null>(null);
+  const clearCreateRequest = useCallback(() => setCreateRequest(null), []);
+  // Never reused, so a section that stays mounted still sees the next click as a new request.
+  const requestSequence = useRef(0);
+  const requestCreate = (kind: CreateKind) => {
+    if (activeTab !== CREATE_TAB[kind]) setTab(CREATE_TAB[kind]);
+    requestSequence.current += 1;
+    setCreateRequest({ kind, id: requestSequence.current });
+  };
+  const requestFor = (kind: CreateKind) =>
+    createRequest?.kind === kind ? createRequest.id : undefined;
+
   const [assetPage, setAssetPage] = useState(1);
   const [chosenAssetPropertyId, setAssetPropertyId] = useState('');
   const assetPropertyId = scopePropertyId ?? chosenAssetPropertyId;
@@ -187,97 +271,279 @@ export function HomeManagementWorkspace({ role, scopePropertyId }: HomeManagemen
   const workOrders = workOrdersQuery.data?.items ?? [];
   const vendors = vendorsQuery.data ?? [];
 
+  const summary = dashboardQuery.data;
+  const propertiesPending = propertiesQuery.isLoading;
+  const hasProperties = properties.length > 0;
+  const noPropertyTitle = propertiesPending
+    ? 'Loading your properties'
+    : hasProperties
+      ? undefined
+      : 'Add a property first';
+  const figure = (value: number | undefined) =>
+    dashboardQuery.isLoading ? <Skeleton className="h-8 w-12" /> : (value ?? 0);
+  const summaryItems: StatGroupItem[] = [
+    {
+      label: 'Open work orders',
+      value: figure(summary?.openWorkOrders),
+      icon: ClipboardList,
+      href: tabHref('work-orders'),
+    },
+    {
+      label: 'Awaiting approval',
+      value: figure(summary?.approvalQueue),
+      icon: ShieldCheck,
+      href: tabHref('work-orders'),
+      attention: (summary?.approvalQueue ?? 0) > 0,
+    },
+    {
+      label: 'Overdue',
+      value: figure(summary?.overdue),
+      icon: TriangleAlert,
+      href: tabHref('work-orders'),
+      attention: (summary?.overdue ?? 0) > 0,
+    },
+    {
+      label: 'Care plans due',
+      value: figure(summary?.plansDue),
+      icon: CalendarClock,
+      href: tabHref('preventive-care'),
+    },
+    {
+      label: 'Assets needing service',
+      value: figure(summary?.assetsNeedingService),
+      icon: Wrench,
+      href: tabHref('assets'),
+    },
+  ];
+  // Only server-calculated, portfolio-wide counts earn a badge; a paginated list's length would mislead.
+  const tabCounts: Partial<Record<HomeManagementTab, number>> = scopePropertyId
+    ? {}
+    : { 'work-orders': summary?.openWorkOrders, 'preventive-care': summary?.plansDue };
+  const tabs: { id: HomeManagementTab; label: string; countLabel?: string }[] = [
+    { id: 'overview', label: 'Overview' },
+    { id: 'work-orders', label: 'Work orders', countLabel: 'open' },
+    { id: 'preventive-care', label: 'Preventive care', countLabel: 'due' },
+    { id: 'assets', label: 'Assets' },
+    { id: 'service-standards', label: 'Service standards' },
+    { id: 'history', label: 'History & records' },
+  ];
+  const panelClass =
+    'rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background';
+
   return (
     <div className="pb-10">
-      <HomeManagementDashboard />
+      <PageHeader
+        eyebrow={eyebrow}
+        title="Home management"
+        description={description ?? DEFAULT_DESCRIPTION[role]}
+        actions={
+          <>
+            <Button
+              icon={<ClipboardPlus className="h-4 w-4" />}
+              rounded="md"
+              disabled={propertiesPending || !hasProperties}
+              title={
+                propertiesPending
+                  ? 'Loading your property portfolio'
+                  : hasProperties
+                    ? undefined
+                    : 'Add a property and unit before creating a work order'
+              }
+              onClick={() => requestCreate('work-order')}
+            >
+              Create work order
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  rounded="md"
+                  icon={<ChevronDown className="h-4 w-4" />}
+                  iconPosition="right"
+                >
+                  Add
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem
+                  disabled={!hasProperties}
+                  title={noPropertyTitle}
+                  onSelect={() => requestCreate('asset')}
+                >
+                  <PackagePlus className="h-4 w-4 text-primary" aria-hidden="true" />
+                  Add asset
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  disabled={!hasProperties}
+                  title={noPropertyTitle}
+                  onSelect={() => requestCreate('plan')}
+                >
+                  <CalendarClock className="h-4 w-4 text-primary" aria-hidden="true" />
+                  Create care plan
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  disabled={!hasProperties}
+                  title={noPropertyTitle}
+                  onSelect={() => requestCreate('policy')}
+                >
+                  <Settings2 className="h-4 w-4 text-primary" aria-hidden="true" />
+                  Add service policy
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </>
+        }
+      />
 
-      {!scopePropertyId && (
-        <>
-          <HomeManagementOperationsCommandCenter
-            role={role}
-            summary={dashboardQuery.data}
-            isLoading={dashboardQuery.isLoading}
+      {/* The totals count every property the caller holds, so they stay hidden while narrowed to one client. */}
+      {!scopePropertyId &&
+        (dashboardQuery.isError && !summary ? (
+          <Alert variant="danger" className="mb-6">
+            Your portfolio totals could not be loaded. Refresh the page to try again.
+          </Alert>
+        ) : (
+          <StatGroup
+            title="Across your portfolio"
+            items={summaryItems}
+            className="mb-6"
+            action={
+              summary && summary.propertiesTotal > 0 ? (
+                <span className="text-xs text-muted-foreground">
+                  {summary.propertiesTotal}{' '}
+                  {summary.propertiesTotal === 1 ? 'property' : 'properties'}
+                </span>
+              ) : undefined
+            }
           />
-
-          <HomeManagementPortfolioAnalytics
-            summary={dashboardQuery.data}
-            isLoading={dashboardQuery.isLoading}
-          />
-        </>
-      )}
-
-      {role === 'landlord' && (
-        <HomeManagementVendorPerformance vendors={vendors} isLoading={vendorsQuery.isLoading} />
-      )}
+        ))}
 
       {propertiesQuery.isError && !propertiesQuery.data && (
-        <div className="mt-8">
+        <div className="mb-6">
           <EmptyState
             icon={CircleAlert}
             title="Your properties could not be loaded"
-            description="Home Management needs your property portfolio before new assets or care plans can be created. Refresh the page to try again."
+            description="New assets, care plans and work orders need your properties. Refresh the page to try again."
           />
         </div>
       )}
 
-      <HomeAssetRegistry
-        assets={assets}
-        properties={properties}
-        isLoading={assetsQuery.isLoading || propertiesQuery.isLoading}
-        error={assetsQuery.error as Error | null}
-        page={assetPage}
-        pageSize={ASSET_PAGE_SIZE}
-        total={assetsQuery.data?.total ?? 0}
-        selectedPropertyId={assetPropertyId}
-        onPageChange={setAssetPage}
-        onSelectedPropertyChange={(propertyId) => {
-          setAssetPropertyId(propertyId);
-          setAssetPage(1);
-        }}
-      />
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) => setTab(parseHomeManagementTab(value))}
+        activationMode="manual"
+      >
+        <TabsList variant="underline" aria-label="Home management sections" className="mb-6">
+          {tabs.map((tab) => {
+            const count = tabCounts[tab.id];
+            return (
+              <TabsTrigger
+                key={tab.id}
+                value={tab.id}
+                className="flex min-h-11 shrink-0 items-center gap-2"
+              >
+                {tab.label}
+                {count !== undefined && count > 0 && (
+                  <Badge variant="primary" className="px-1.5 py-0">
+                    {count}
+                    <span className="sr-only"> {tab.countLabel}</span>
+                  </Badge>
+                )}
+              </TabsTrigger>
+            );
+          })}
+        </TabsList>
 
-      <PreventiveMaintenancePlans
-        plans={plans}
-        properties={properties}
-        vendors={vendors}
-        isLoading={plansQuery.isLoading || propertiesQuery.isLoading}
-        error={plansQuery.error as Error | null}
-        page={planPage}
-        pageSize={PLAN_PAGE_SIZE}
-        total={plansQuery.data?.total ?? 0}
-        onPageChange={setPlanPage}
-      />
+        <TabsContent value="overview" className={panelClass}>
+          <HomeManagementOverview
+            summary={summary}
+            isLoading={dashboardQuery.isLoading}
+            scopePropertyId={scopePropertyId}
+            tabHref={tabHref}
+          />
+        </TabsContent>
 
-      <HomeManagementSlaPolicies
-        properties={properties}
-        isPropertiesLoading={propertiesQuery.isLoading}
-      />
+        <TabsContent value="work-orders" className={`space-y-8 ${panelClass}`}>
+          <HomeManagementEscalationQueue
+            properties={properties}
+            isPropertiesLoading={propertiesQuery.isLoading}
+          />
 
-      <HomeManagementEscalationQueue
-        properties={properties}
-        isPropertiesLoading={propertiesQuery.isLoading}
-      />
+          <HomeManagementWorkOrderQueue
+            workOrders={workOrders}
+            properties={properties}
+            vendors={vendors}
+            isLoading={workOrdersQuery.isLoading}
+            isPropertiesLoading={propertiesQuery.isLoading}
+            error={workOrdersQuery.error as Error | null}
+            page={workOrderPage}
+            pageSize={WORK_ORDER_PAGE_SIZE}
+            total={workOrdersQuery.data?.total ?? 0}
+            onPageChange={setWorkOrderPage}
+            viewerRole={role}
+            showCreateAction={false}
+            createRequest={requestFor('work-order')}
+            onCreateRequestHandled={clearCreateRequest}
+          />
+        </TabsContent>
 
-      <HomeManagementWorkOrderQueue
-        workOrders={workOrders}
-        properties={properties}
-        vendors={vendors}
-        isLoading={workOrdersQuery.isLoading}
-        isPropertiesLoading={propertiesQuery.isLoading}
-        error={workOrdersQuery.error as Error | null}
-        page={workOrderPage}
-        pageSize={WORK_ORDER_PAGE_SIZE}
-        total={workOrdersQuery.data?.total ?? 0}
-        onPageChange={setWorkOrderPage}
-        viewerRole={role}
-      />
+        <TabsContent value="preventive-care" className={panelClass}>
+          <PreventiveMaintenancePlans
+            plans={plans}
+            properties={properties}
+            vendors={vendors}
+            isLoading={plansQuery.isLoading || propertiesQuery.isLoading}
+            error={plansQuery.error as Error | null}
+            page={planPage}
+            pageSize={PLAN_PAGE_SIZE}
+            total={plansQuery.data?.total ?? 0}
+            onPageChange={setPlanPage}
+            createRequest={requestFor('plan')}
+            onCreateRequestHandled={clearCreateRequest}
+          />
+        </TabsContent>
 
-      <HomeManagementTimeline propertyId={scopePropertyId} />
+        <TabsContent value="assets" className={panelClass}>
+          <HomeAssetRegistry
+            assets={assets}
+            properties={properties}
+            isLoading={assetsQuery.isLoading || propertiesQuery.isLoading}
+            error={assetsQuery.error as Error | null}
+            page={assetPage}
+            pageSize={ASSET_PAGE_SIZE}
+            total={assetsQuery.data?.total ?? 0}
+            selectedPropertyId={assetPropertyId}
+            onPageChange={setAssetPage}
+            onSelectedPropertyChange={(propertyId) => {
+              setAssetPropertyId(propertyId);
+              setAssetPage(1);
+            }}
+            createRequest={requestFor('asset')}
+            onCreateRequestHandled={clearCreateRequest}
+          />
+        </TabsContent>
 
-      <HomeManagementInspectionFeed propertyId={scopePropertyId} />
+        <TabsContent value="service-standards" className={panelClass}>
+          <HomeManagementSlaPolicies
+            properties={properties}
+            isPropertiesLoading={propertiesQuery.isLoading}
+            createRequest={requestFor('policy')}
+            onCreateRequestHandled={clearCreateRequest}
+          />
+        </TabsContent>
 
-      {/* The records panel links to owner/landlord routes the agency portal lacks, so managers don't get it. */}
-      {role !== 'manager' && <HomeManagementRecordsPanel role={role} />}
+        <TabsContent value="history" className={`space-y-10 ${panelClass}`}>
+          <HomeManagementTimeline propertyId={scopePropertyId} />
+
+          <HomeManagementInspectionFeed propertyId={scopePropertyId} />
+
+          {/* The records panel links to owner/landlord routes the agency portal lacks, so managers don't get it. */}
+          {role !== 'manager' && <HomeManagementRecordsPanel role={role} />}
+
+          {role === 'landlord' && (
+            <HomeManagementVendorPerformance vendors={vendors} isLoading={vendorsQuery.isLoading} />
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
