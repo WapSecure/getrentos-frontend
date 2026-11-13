@@ -29,7 +29,7 @@ export default function RenterDashboardPage() {
       <RenterStatsCards />
 
       <div className="grid items-start gap-6 xl:grid-cols-12">
-        <div className="space-y-6 xl:col-span-8">
+        <div className="min-w-0 space-y-6 xl:col-span-8">
           <RenterApplicationsList />
           <RenterRecentActivity />
         </div>
