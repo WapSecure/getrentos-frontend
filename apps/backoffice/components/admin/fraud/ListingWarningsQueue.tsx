@@ -57,10 +57,12 @@ export function ListingWarningsQueue({ onOpenAlert }: { onOpenAlert: (alertId: s
     queryKey: adminKeys.listingWarnings,
     queryFn: () => unwrap(adminService.listListingWarnings()),
   });
-  const items = data ?? [];
+  // A list, or nothing to show: never let an unexpected payload break the whole fraud page.
+  const items = Array.isArray(data) ? data : [];
 
   useEffect(() => {
-    if (!linkedId || !data?.some((item) => item.reviewId === linkedId)) return;
+    if (!linkedId || !Array.isArray(data) || !data.some((item) => item.reviewId === linkedId))
+      return;
     document
       .getElementById(`listing-warning-${linkedId}`)
       ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
