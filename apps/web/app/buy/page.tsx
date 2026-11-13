@@ -9,7 +9,7 @@ import { fetchFirstPage, isFilteredView } from '@/lib/marketFirstPage';
 const baseMetadata: Metadata = {
   title: 'Properties for Sale in Nigeria',
   description:
-    'Browse homes for sale across Nigeria. Verified properties, Sureground Payment Protection, and results you can scope to a single estate.',
+    'Browse homes for sale across Nigeria. Verified properties are marked, deposits go through Sureground Payment Protection, and you can scope results to a single estate.',
   alternates: { canonical: '/buy' },
   openGraph: {
     title: 'Properties for Sale in Nigeria',
