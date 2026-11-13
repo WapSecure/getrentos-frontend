@@ -664,6 +664,32 @@ const writeAdminNavPreference = (key: string, value: boolean) => {
   adminNavListeners.forEach((listener) => listener());
 };
 
+/** The Operations workspace as a small blue tile, as a workspace switcher shows it. */
+function WorkspaceMark({ size = 'md' }: { size?: 'sm' | 'md' }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={`flex shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary ring-1 ring-inset ring-primary/20 ${
+        size === 'sm' ? 'h-8 w-8' : 'h-9 w-9'
+      }`}
+    >
+      <ShieldCheck className="h-4.5 w-4.5" aria-hidden="true" />
+    </span>
+  );
+}
+
+function WorkspaceHeader({ caption }: { caption: string }) {
+  return (
+    <div className="flex items-center gap-3 rounded-xl border border-border bg-card px-2.5 py-2 shadow-xs">
+      <WorkspaceMark />
+      <div className="min-w-0">
+        <p className="text-2xs font-medium text-muted-foreground">{caption}</p>
+        <p className="truncate text-sm font-semibold leading-tight text-foreground">Operations</p>
+      </div>
+    </div>
+  );
+}
+
 function AdminNavigationGroup({
   label,
   kind,
@@ -690,7 +716,7 @@ function AdminNavigationGroup({
   const expanded = kind === 'primary' || containsCurrentPage || expandedPreference;
 
   const links = (
-    <div className="space-y-1">
+    <div className="space-y-0.5">
       {items.map((item) => {
         const isActive = item.href === activeHref;
         return (
@@ -701,11 +727,13 @@ function AdminNavigationGroup({
             onClick={onNavigate}
             className="sidebar-item"
           >
-            <item.icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-            <span className="sidebar-item-label min-w-0 truncate">{item.label}</span>
+            <item.icon className="h-4.5 w-4.5 shrink-0" aria-hidden="true" />
+            <span className="sidebar-item-label min-w-0 truncate" title={item.label}>
+              {item.label}
+            </span>
             {item.href === MANAGED_HREF && managedWaiting > 0 && (
               <span
-                className="sidebar-item-extra ml-auto inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground"
+                className="sidebar-item-extra sidebar-count ml-auto"
                 aria-label={`${managedWaiting} waiting`}
               >
                 {managedWaiting}
@@ -738,7 +766,7 @@ function AdminNavigationGroup({
         >
           <span className="min-w-0 flex-1 truncate">{label}</span>
           <DisclosureCaret
-            className={`h-3.5 w-3.5 shrink-0 transition-transform ${expanded ? '' : '-rotate-90'}`}
+            className={`h-3.5 w-3.5 shrink-0 ${expanded ? '' : '-rotate-90'}`}
             aria-hidden="true"
           />
         </button>
@@ -785,7 +813,10 @@ export const AdminSidebar = ({ roles }: { roles?: string[] }) => {
         className={`workspace-sidebar fixed bottom-0 left-0 top-16 z-30 hidden border-r border-border lg:block ${rail ? '' : 'overflow-y-auto'}`}
       >
         {rail ? (
-          <nav className="space-y-1 px-3 py-4" aria-label="Administration navigation">
+          <nav className="space-y-0.5 px-3 py-4" aria-label="Administration navigation">
+            <div className="flex justify-center pb-2">
+              <WorkspaceMark size="sm" />
+            </div>
             <AdminNavigationGroup
               label="Primary"
               kind="primary"
@@ -798,12 +829,7 @@ export const AdminSidebar = ({ roles }: { roles?: string[] }) => {
           </nav>
         ) : (
           <nav className="space-y-5 px-3 py-4" aria-label="Administration navigation">
-            <div className="px-3 pb-1">
-              <p className="text-2xs font-medium uppercase tracking-[0.08em] text-muted-foreground">
-                Workspace
-              </p>
-              <p className="mt-1 truncate text-sm font-semibold text-foreground">Operations</p>
-            </div>
+            <WorkspaceHeader caption="Workspace" />
             {navGroups.map((group) => {
               const visibleItems = group.items.filter((item) => hasAccess(roles, item));
               if (visibleItems.length === 0) return null;
@@ -840,7 +866,7 @@ export const AdminSidebar = ({ roles }: { roles?: string[] }) => {
                 className="mobile-primary-nav-item"
               >
                 <item.icon className="h-5 w-5" aria-hidden="true" />
-                <span className="max-w-full truncate">{item.mobileLabel ?? item.label}</span>
+                <span className="max-w-full truncate px-0.5">{item.mobileLabel ?? item.label}</span>
               </Link>
             );
           })}
@@ -860,10 +886,7 @@ export const AdminMobileNavigation = ({
   const pathname = usePathname();
   return (
     <nav className="space-y-5 p-4" aria-label="Administration mobile navigation">
-      <div className="border-b border-border px-3 pb-4">
-        <p className="text-xs font-medium text-muted-foreground">Current workspace</p>
-        <p className="mt-1 font-semibold text-foreground">Operations</p>
-      </div>
+      <WorkspaceHeader caption="Current workspace" />
       {navGroups.map((group) => {
         const visibleItems = group.items.filter((item) => hasAccess(roles, item));
         if (visibleItems.length === 0) return null;

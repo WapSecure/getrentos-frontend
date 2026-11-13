@@ -155,7 +155,7 @@ export function NotificationBell(props: NotificationBellProps) {
           {unreadCount > 0 && (
             <span
               aria-hidden="true"
-              className="pointer-events-none absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-destructive ring-2 ring-background"
+              className="pointer-events-none absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-primary ring-2 ring-card"
             />
           )}
         </div>

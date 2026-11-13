@@ -40,6 +40,32 @@ export const activeSidebarHref = (
     .filter((href) => isSidebarRouteActive(pathname, href, dashboardHref))
     .sort((a, b) => b.length - a.length)[0];
 
+/** The workspace's first letter in a small blue tile, as a workspace switcher shows it. */
+function WorkspaceMark({ label, size = 'md' }: { label: string; size?: 'sm' | 'md' }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={`flex shrink-0 items-center justify-center rounded-lg bg-primary/10 font-semibold text-primary ring-1 ring-inset ring-primary/20 ${
+        size === 'sm' ? 'h-8 w-8 text-sm' : 'h-9 w-9 text-base'
+      }`}
+    >
+      {label.trim().charAt(0).toUpperCase()}
+    </span>
+  );
+}
+
+function WorkspaceHeader({ label, caption }: { label: string; caption: string }) {
+  return (
+    <div className="flex items-center gap-3 rounded-xl border border-border bg-card px-2.5 py-2 shadow-xs">
+      <WorkspaceMark label={label} />
+      <div className="min-w-0">
+        <p className="text-2xs font-medium text-muted-foreground">{caption}</p>
+        <p className="truncate text-sm font-semibold leading-tight text-foreground">{label}</p>
+      </div>
+    </div>
+  );
+}
+
 const slug = (label: string) => label.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
 const storageKey = (scope: string) => `sureground.sidebar.collapsed-v2:${slug(scope)}`;
@@ -126,13 +152,16 @@ function SidebarLink({
       onClick={onNavigate}
       className="sidebar-item"
     >
-      <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-      <span className="sidebar-item-label min-w-0 flex-1 line-clamp-2 leading-snug break-words">
+      <Icon className="h-4.5 w-4.5 shrink-0" aria-hidden="true" />
+      <span
+        className="sidebar-item-label min-w-0 flex-1 truncate"
+        title={typeof item.label === 'string' ? item.label : undefined}
+      >
         {item.label}
       </span>
       {item.locked && (
         <span
-          className="sidebar-item-extra inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-border bg-card text-muted-foreground"
+          className="sidebar-item-extra sidebar-lock"
           title={`${PLAN_TIER_LABELS[item.lockedPlan ?? 'PRO']} plan feature`}
         >
           <Lock className="h-3 w-3" aria-hidden="true" />
@@ -168,7 +197,7 @@ function SidebarGroups({
         if (group.items.length === 0) return null;
         if (group.kind === 'primary') {
           return (
-            <div key={group.label} role="group" aria-label={group.label} className="space-y-1">
+            <div key={group.label} role="group" aria-label={group.label} className="space-y-0.5">
               {group.items.map((item) => (
                 <SidebarLink
                   key={item.href}
@@ -210,12 +239,12 @@ function SidebarGroups({
               >
                 <span className="min-w-0 flex-1 truncate">{group.label}</span>
                 <DisclosureCaret
-                  className={`h-3.5 w-3.5 shrink-0 transition-transform ${open ? '' : '-rotate-90'}`}
+                  className={`h-3.5 w-3.5 shrink-0 ${open ? '' : '-rotate-90'}`}
                   aria-hidden="true"
                 />
               </button>
             </h2>
-            <div id={`${id}-items`} className="space-y-1" hidden={!open}>
+            <div id={`${id}-items`} className="space-y-0.5" hidden={!open}>
               {group.items.map((item) => (
                 <SidebarLink
                   key={item.href}
@@ -237,18 +266,25 @@ function SidebarRail({
   groups,
   activeHref,
   onExpand,
+  workspaceLabel,
 }: {
   ariaLabel: string;
   groups: GroupedSidebarGroup[];
   activeHref?: string;
   onExpand: () => void;
+  workspaceLabel?: string;
 }) {
   const primary = groups.find((group) => group.kind === 'primary')?.items ?? groups[0]?.items ?? [];
   const current = primary.some((item) => item.href === activeHref)
     ? undefined
     : groups.flatMap((group) => group.items).find((item) => item.href === activeHref);
   return (
-    <nav className="space-y-1 px-3 py-4" aria-label={ariaLabel}>
+    <nav className="space-y-0.5 px-3 py-4" aria-label={ariaLabel}>
+      {workspaceLabel && (
+        <div className="flex justify-center pb-2">
+          <WorkspaceMark label={workspaceLabel} size="sm" />
+        </div>
+      )}
       {primary.map((item) => (
         <SidebarLink key={item.href} item={item} active={item.href === activeHref} />
       ))}
@@ -295,7 +331,7 @@ function MobilePrimaryNavigation({ ariaLabel, dashboardHref, groups }: GroupedSi
             className="mobile-primary-nav-item"
           >
             <Icon className="h-5 w-5" aria-hidden="true" />
-            <span className="max-w-full truncate">{item.label}</span>
+            <span className="max-w-full truncate px-0.5">{item.label}</span>
           </Link>
         );
       })}
@@ -325,19 +361,11 @@ export function GroupedSidebar({
             groups={groups}
             activeHref={activeHref}
             onExpand={() => setRail(false)}
+            workspaceLabel={workspaceLabel}
           />
         ) : (
           <nav className="space-y-5 px-3 py-4" aria-label={ariaLabel}>
-            {workspaceLabel && (
-              <div className="px-3 pb-1">
-                <p className="text-2xs font-medium uppercase tracking-[0.08em] text-muted-foreground">
-                  Workspace
-                </p>
-                <p className="mt-1 truncate text-sm font-semibold text-foreground">
-                  {workspaceLabel}
-                </p>
-              </div>
-            )}
+            {workspaceLabel && <WorkspaceHeader label={workspaceLabel} caption="Workspace" />}
             <SidebarGroups
               scope={ariaLabel}
               idPrefix="sidebar"
@@ -386,12 +414,7 @@ export function GroupedMobileNavigation({
   }, []);
   return (
     <nav className="space-y-4 p-4" aria-label={`${ariaLabel} mobile`}>
-      {workspaceLabel && (
-        <div className="border-b border-border px-3 pb-4">
-          <p className="text-xs font-medium text-muted-foreground">Current workspace</p>
-          <p className="mt-1 font-semibold text-foreground">{workspaceLabel}</p>
-        </div>
-      )}
+      {workspaceLabel && <WorkspaceHeader label={workspaceLabel} caption="Current workspace" />}
       <SidebarGroups
         scope={ariaLabel}
         idPrefix="mobile-nav"
