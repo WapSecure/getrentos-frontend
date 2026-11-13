@@ -5,6 +5,7 @@ import type {
   SiteTourRecording,
   SiteTourStatus,
 } from '@sureground/shared';
+import { contactRequestBody } from '@sureground/shared';
 import { apiFetch } from './client';
 import type { BuyerPurchaseDetail } from './landBuyer';
 import type { Milestone } from './landSales';
@@ -145,7 +146,9 @@ export interface Appointment {
   status: 'INVITED' | 'ACTIVE' | 'DECLINED' | 'REVOKED';
   note?: string | null;
   name?: string | null;
-  email: string;
+  email?: string | null;
+  /** e.g. "+234 803 *** 4567"; the other person's full number is never sent. */
+  phoneMasked?: string | null;
   acceptedAt?: string | null;
   endedAt?: string | null;
   endedReason?: string | null;
@@ -239,8 +242,20 @@ export const landBuyerExtrasApi = {
     }),
 
   representatives: () => apiFetch<Appointment[]>('/buyer/land/representatives'),
-  appoint: (input: { email: string; relationship: string; scopes: RepScope[]; note?: string }) =>
-    post<Appointment[]>('/buyer/land/representatives', input),
+  /** `contact` is their phone number or email: an email goes as `email` (older servers accept it), a phone as `contact`. */
+  appoint: ({
+    contact,
+    ...rest
+  }: {
+    contact: string;
+    relationship: string;
+    scopes: RepScope[];
+    note?: string;
+  }) =>
+    post<Appointment[]>('/buyer/land/representatives', {
+      ...(contactRequestBody(contact) ?? { contact: contact.trim() }),
+      ...rest,
+    }),
   endAppointment: (id: string, reason: string) =>
     post<Appointment[]>(`/buyer/land/representatives/${id}/revoke`, { reason: reason.trim() }),
 
@@ -250,7 +265,7 @@ export const landBuyerExtrasApi = {
   disableCoApproval: (d: Deal) => post<CoApproval>(`${buyerDeal(d)}/co-approval/disable`),
   keepCoApproval: (d: Deal) => post<CoApproval>(`${buyerDeal(d)}/co-approval/keep`),
 
-  /** `name` and `email` are the buyer's. */
+  /** `name`, `email` and `phoneMasked` are the buyer's. */
   representing: () => apiFetch<Appointment[]>('/land/representing'),
   respond: (id: string, response: 'ACCEPT' | 'DECLINE') =>
     post<unknown>(`/land/representing/${id}/respond`, { response }),

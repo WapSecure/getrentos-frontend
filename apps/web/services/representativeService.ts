@@ -1,3 +1,4 @@
+import { contactRequestBody } from '@sureground/shared';
 import { authFetch, safeCall } from '@/lib/apiHelpers';
 import type { LandPurchaseDetail, LandMilestone } from '@/types/landBuyer';
 import type {
@@ -41,15 +42,16 @@ export const representativeKeys = {
 export const representativeService = {
   mine: () => safeCall(() => authFetch<LandRepresentativeAppointment[]>('/buyer/representatives')),
 
+  /** `contact` is their phone number or email; see `contactRequestBody`. */
   appoint: (input: {
-    email: string;
+    contact: string;
     relationship: RepresentativeRelationship;
     scopes: RepresentativeScope[];
     note?: string;
   }) =>
     safeCall(() =>
       post<LandRepresentativeAppointment[]>('/buyer/representatives', {
-        email: input.email.trim(),
+        ...(contactRequestBody(input.contact) ?? { contact: input.contact.trim() }),
         relationship: input.relationship,
         scopes: input.scopes,
         ...(input.note?.trim() ? { note: input.note.trim() } : {}),

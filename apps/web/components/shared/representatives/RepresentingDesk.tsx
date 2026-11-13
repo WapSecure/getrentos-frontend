@@ -13,6 +13,7 @@ import {
   Toast,
 } from '@sureground/ui';
 import { LandPlot, UsersRound } from '@sureground/icons';
+import { personContactLabel } from '@sureground/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency } from '@/lib/format';
 import { representativeKeys, representativeService } from '@/services/representativeService';
@@ -170,7 +171,7 @@ export const RepresentingDesk = () => {
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div>
                   <p className="font-semibold text-foreground">{appointment.name}</p>
-                  <p className="text-xs text-muted-foreground">{appointment.email}</p>
+                  <p className="text-xs text-muted-foreground">{personContactLabel(appointment)}</p>
                 </div>
                 <Badge variant={appointment.status === 'ACTIVE' ? 'success' : 'warning'}>
                   {appointment.status === 'ACTIVE' ? 'You represent them' : 'Invitation'}

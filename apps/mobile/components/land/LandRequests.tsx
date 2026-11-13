@@ -18,6 +18,7 @@ import {
   coApprovalConfirmDescription,
   HANDOVER_NOT_DELIVERED_NOTE,
   pendingApprovalStatus,
+  personContactLabel,
   stepAwaitingDelivery,
   type CoApprovalPendingStep,
 } from '@sureground/shared';
@@ -92,7 +93,10 @@ export function RequestTour({
       {attendees.length ? (
         <ChipSelect
           label="Invite a representative (optional)"
-          options={attendees.map((a) => ({ value: a.id, label: a.name ?? a.email }))}
+          options={attendees.map((a) => ({
+            value: a.id,
+            label: a.name ?? personContactLabel(a) ?? a.id,
+          }))}
           value={attendee}
           onChange={(id) => setAttendee(id === attendee ? undefined : id)}
         />
@@ -394,7 +398,10 @@ export function CoApprovalCard({
             {copy.off}
           </Text>
           <ChipSelect
-            options={approvers.map((a) => ({ value: a.id, label: a.name ?? a.email }))}
+            options={approvers.map((a) => ({
+              value: a.id,
+              label: a.name ?? personContactLabel(a) ?? a.id,
+            }))}
             value={rep}
             onChange={setRep}
           />

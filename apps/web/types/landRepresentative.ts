@@ -9,7 +9,7 @@ export type RepresentativeScope = 'VIEW' | 'CO_APPROVE' | 'ATTEND';
 export type RepresentativeRelationship = 'FAMILY' | 'LAWYER' | 'FRIEND' | 'AGENT' | 'OTHER';
 export type RepresentativeStatus = 'INVITED' | 'ACTIVE' | 'DECLINED' | 'REVOKED';
 
-/** `name`/`email` are the other person. */
+/** `name`/`email`/`phoneMasked` are the other person. Their full phone number is never sent. */
 export interface LandRepresentativeAppointment {
   id: string;
   principalId: string;
@@ -18,7 +18,9 @@ export interface LandRepresentativeAppointment {
   status: RepresentativeStatus;
   note?: string;
   name?: string;
-  email?: string;
+  email?: string | null;
+  /** e.g. "+234 803 *** 4567"; older servers leave it out. */
+  phoneMasked?: string | null;
   acceptedAt?: string;
   endedAt?: string;
   endedReason?: string;
