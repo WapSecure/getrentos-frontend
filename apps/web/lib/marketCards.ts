@@ -1,3 +1,4 @@
+import { formatLocation, isListingVerified } from '@sureground/shared';
 import type { PropertyTrustChain } from '@/types/renter';
 // Pure: maps each market's public card from the API into one shape for ListingCard. Server-safe.
 import type { ListingPriceUnit } from '@sureground/ui/ListingCard';
@@ -55,6 +56,7 @@ export interface LandCardApi {
   city: string;
   state: string;
   isVerified?: boolean;
+  diligence?: { status?: string };
   coverImageUrl?: string;
   imageVariants?: ImageVariant[];
   imagePreview?: ImagePreview;
@@ -96,12 +98,13 @@ export const fromPublicCard = (c: PublicListingCard): MarketCard => ({
 export const fromLandCard = (l: LandCardApi): MarketCard => ({
   id: l.id,
   title: l.title,
-  location: `${l.city}, ${l.state}`,
+  location: formatLocation(l.city, l.state),
   price: Number(l.price),
   image: l.coverImageUrl,
   imageSrcSet: srcSetOf(l.imageVariants),
   imagePreview: imagePreviewOf(l.imagePreview),
-  verified: l.isVerified,
+  // Approved with conditions (CONDITIONAL) is never verified.
+  verified: isListingVerified(l),
   size:
     l.parcel?.areaValue != null
       ? `${l.parcel.areaValue.toLocaleString('en-NG')} ${AREA_UNIT[l.parcel.areaUnit ?? ''] ?? ''}`.trim()
@@ -111,7 +114,7 @@ export const fromLandCard = (l: LandCardApi): MarketCard => ({
 export const fromShortletCard = (s: ShortletCardApi): MarketCard => ({
   id: s.id,
   title: s.title,
-  location: `${s.city}, ${s.state}`,
+  location: formatLocation(s.city, s.state),
   price: s.nightlyRate,
   priceUnit: s.pricingMode === 'PER_NIGHT' ? 'night' : undefined,
   image: s.coverImageUrl,

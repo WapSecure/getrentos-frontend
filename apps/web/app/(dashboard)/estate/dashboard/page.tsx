@@ -1,5 +1,6 @@
 'use client';
 
+import { formatLocation } from '@sureground/shared';
 import type { ReactNode } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
@@ -156,7 +157,7 @@ export default function EstateDashboardPage() {
       <PageHeader
         eyebrow="Overview"
         title={estate.name}
-        description={`${estate.address}, ${estate.city}, ${estate.state}`}
+        description={formatLocation(estate.address, estate.city, estate.state)}
         meta={`${pluralize(estate.householdCount, 'household')} · ${pluralize(estate.gateCount ?? 0, 'active gate')}`}
       />
 

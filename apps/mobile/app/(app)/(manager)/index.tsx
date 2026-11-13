@@ -1,3 +1,4 @@
+import { formatLocation } from '@sureground/shared';
 import { View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
@@ -172,7 +173,7 @@ function Workspace() {
                   {p.title}
                 </Text>
                 <Text variant="caption" color="mutedForeground" numberOfLines={1}>
-                  {p.address}, {p.city}
+                  {formatLocation(p.address, p.city)}
                 </Text>
                 <Text variant="caption" color="primary" style={{ fontWeight: '600' }}>
                   Open the property

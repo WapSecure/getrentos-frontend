@@ -1,3 +1,4 @@
+import { formatLocation } from '@sureground/shared';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -271,7 +272,7 @@ export default function LandlordPropertyDetail() {
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
                 <MapPin size={14} color={colors.mutedForeground} />
                 <Text variant="callout" color="mutedForeground" style={{ flex: 1 }}>
-                  {p.address}, {p.city}, {p.state}
+                  {formatLocation(p.address, p.city, p.state)}
                 </Text>
               </View>
 

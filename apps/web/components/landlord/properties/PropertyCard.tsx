@@ -1,5 +1,6 @@
 'use client';
 
+import { formatLocation } from '@sureground/shared';
 import { useState } from 'react';
 import {
   MapPin,
@@ -153,7 +154,7 @@ export const PropertyCard = ({
         </div>
         <p className="mt-2 flex items-center gap-1 text-sm text-muted-foreground">
           <MapPin className="w-3.5 h-3.5 shrink-0 text-primary/70" aria-hidden="true" />
-          {property.city}, {property.state}
+          {formatLocation(property.city, property.state)}
         </p>
         {property.referenceCode && (
           <div className="relative z-10 mt-3 w-fit">

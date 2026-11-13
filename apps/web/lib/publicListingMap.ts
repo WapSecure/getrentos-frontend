@@ -5,6 +5,7 @@ import {
   type ImagePreview,
   type ImageVariant,
 } from '@sureground/shared/showroom';
+import { formatLocation, isListingVerified } from '@sureground/shared';
 
 // Type-only import, so the module stays server-safe.
 import type { PropertyTrustChain } from '@/types/renter';
@@ -127,12 +128,13 @@ export const rentToCard = (item: RentApiItem): PublicListingCard => ({
   title: item.title,
   price: money(item.price),
   priceUnit: item.period,
-  location: item.location,
+  location: formatLocation(item.location),
   propertyType: item.propertyType,
   bedrooms: item.bedrooms,
   bathrooms: item.bathrooms,
   size: item.size,
-  verified: Boolean(item.verified),
+  // The trust chain decides, as on mobile; the bare flag only where there is none.
+  verified: isListingVerified(item),
   trustChain: item.trustChain,
   image: item.image || undefined,
   imageSrcSet: srcSetOf(item.imageVariants),
@@ -144,11 +146,11 @@ export const saleToCard = (item: SaleApiItem): PublicListingCard => ({
   id: item.id,
   title: item.title,
   price: money(item.price),
-  location: [item.city, item.state].filter(Boolean).join(', '),
+  location: formatLocation(item.city, item.state),
   propertyType: item.propertyType,
   bedrooms: item.bedrooms,
   bathrooms: item.bathrooms,
-  verified: Boolean(item.isVerified),
+  verified: isListingVerified(item),
   trustChain: item.trustChain,
   image: item.coverImageUrl || undefined,
   imageSrcSet: srcSetOf(item.imageVariants),

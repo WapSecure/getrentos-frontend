@@ -1,3 +1,4 @@
+import { formatLocation } from '@sureground/shared';
 import { Pressable, RefreshControl, View } from 'react-native';
 import { router } from 'expo-router';
 import { Image } from 'expo-image';
@@ -130,7 +131,7 @@ export default function ShortletWishlist() {
                       {item.title}
                     </Text>
                     <Text variant="caption" color="mutedForeground" numberOfLines={1}>
-                      {[item.address, item.city].filter(Boolean).join(', ')}
+                      {formatLocation(item.address, item.city)}
                     </Text>
                     <View
                       style={{ flexDirection: 'row', alignItems: 'baseline', gap: 4, marginTop: 2 }}

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { tidyPlace } from '@sureground/shared';
+import { formatLocation } from '@sureground/shared';
 import { Pressable, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
@@ -199,9 +199,7 @@ export default function BuyerListingDetail() {
                 <View style={{ gap: 4 }}>
                   <Price amount={listing.askingPrice} variant="display" />
                   <Text variant="callout" color="mutedForeground">
-                    {tidyPlace(
-                      [listing.address, listing.city, listing.state].filter(Boolean).join(', ')
-                    )}
+                    {formatLocation(listing.address, listing.city, listing.state)}
                   </Text>
                   {listing.addressHidden ? (
                     <Text variant="caption" color="mutedForeground">

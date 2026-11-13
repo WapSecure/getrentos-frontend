@@ -1,5 +1,6 @@
 'use client';
 
+import { formatLocation } from '@sureground/shared';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -57,7 +58,7 @@ const EstateSummary = ({ layout }: { layout: OwnerLandLayoutSummary }) => {
           {layout.access === 'MANDATE' && <Badge variant="info">Selling under mandate</Badge>}
         </p>
         <p className="text-xs text-muted-foreground">
-          {layout.propertyTitle} · {layout.city}, {layout.state} · {plots.total} plots
+          {layout.propertyTitle} · {formatLocation(layout.city, layout.state)} · {plots.total} plots
         </p>
       </div>
       <dl className="grid grid-cols-3 gap-x-5 gap-y-2 text-sm sm:flex sm:gap-5">

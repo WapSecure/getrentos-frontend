@@ -1,3 +1,4 @@
+import { formatLocation } from '@sureground/shared';
 import type { Metadata } from 'next';
 import { permanentRedirect } from 'next/navigation';
 import type { ReactNode } from 'react';
@@ -40,14 +41,14 @@ export async function generateMetadata({ params }: ShortletDetailPageProps): Pro
 
   const description =
     listing.description ||
-    `Book ${listing.title} in ${listing.city}, ${listing.state} on Sureground. Verified host, payments protected by Sureground.`;
+    `Book ${listing.title} in ${formatLocation(listing.city, listing.state)} on Sureground. Verified host, payments protected by Sureground.`;
 
   return {
-    title: `${listing.title}: ${listing.city}, ${listing.state}`,
+    title: `${listing.title}: ${formatLocation(listing.city, listing.state)}`,
     description,
     alternates: { canonical: listingPath('shortlet', listing.id, listing.title) },
     openGraph: {
-      title: `${listing.title}: ${listing.city}, ${listing.state}`,
+      title: `${listing.title}: ${formatLocation(listing.city, listing.state)}`,
       description,
       url: `${SITE_URL}${listingPath('shortlet', listing.id, listing.title)}`,
       type: 'website',

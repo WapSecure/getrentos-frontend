@@ -1,3 +1,4 @@
+import { formatLocation } from '@sureground/shared';
 import { useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -154,7 +155,7 @@ function LandCard({ r, onPress }: { r: OwnerLandRecord; onPress: () => void }) {
           <View style={{ flex: 1, gap: 2 }}>
             <Text variant="bodyStrong">{r.title}</Text>
             <Text variant="caption" color="mutedForeground">
-              {r.address}, {r.city}
+              {formatLocation(r.address, r.city)}
               {area ? ` · ${area}` : ''}
             </Text>
           </View>

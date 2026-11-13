@@ -1,5 +1,6 @@
 'use client';
 
+import { formatLocation } from '@sureground/shared';
 import { useState } from 'react';
 import Link from 'next/link';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
@@ -74,7 +75,7 @@ export const ReviewSeatList = () => {
                   <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                     <span className="inline-flex items-center gap-1">
                       <MapPin className="h-3.5 w-3.5" aria-hidden />
-                      {seat.city}, {seat.state}
+                      {formatLocation(seat.city, seat.state)}
                     </span>
                     {seat.titleType && <span>{LAND_TITLE_TYPE_LABELS[seat.titleType]}</span>}
                     <span>Engaged {formatDate(seat.invitedAt)}</span>

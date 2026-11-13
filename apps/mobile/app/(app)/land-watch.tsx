@@ -13,7 +13,7 @@ import {
   Text,
   useTheme,
 } from '@sureground/ui-native';
-import { LAND_WATCH_TIER_LABELS } from '@sureground/shared';
+import { formatLocation, LAND_WATCH_TIER_LABELS } from '@sureground/shared';
 import { qk } from '@/lib/query/keys';
 import { landWatchApi } from '@/lib/api/landWatch';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
@@ -76,7 +76,7 @@ export default function LandWatch() {
                 <Pressable
                   key={w.id}
                   accessibilityRole="button"
-                  accessibilityLabel={`${w.land.label}, ${w.land.city}, ${w.land.state}`}
+                  accessibilityLabel={`${w.land.label}, ${formatLocation(w.land.city, w.land.state)}`}
                   onPress={() =>
                     router.push({ pathname: '/(app)/land-watch-detail/[id]', params: { id: w.id } })
                   }
@@ -88,7 +88,7 @@ export default function LandWatch() {
                       <View style={{ flex: 1, gap: 2 }}>
                         <Text variant="bodyStrong">{w.land.label}</Text>
                         <Text variant="caption" color="mutedForeground">
-                          {w.land.city}, {w.land.state}
+                          {formatLocation(w.land.city, w.land.state)}
                         </Text>
                       </View>
                       <Badge

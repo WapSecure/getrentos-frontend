@@ -20,7 +20,7 @@ import { Select } from '@sureground/ui/Select';
 import { Skeleton } from '@sureground/ui/Skeleton';
 import { ToggleChip } from '@sureground/ui/ToggleChip';
 import { BedDouble, ClipboardCheck, Heart, Star, Zap } from '@sureground/icons';
-import { imagePreviewOf, srcSetOf } from '@sureground/shared';
+import { formatLocation, imagePreviewOf, srcSetOf } from '@sureground/shared';
 import { Eyebrow } from '@/components/marketing/Eyebrow';
 import { unwrap, type Paginated } from '@/lib/apiHelpers';
 import { SHORTLET_PAGE_SIZE } from '@/lib/marketFirstPage';
@@ -253,7 +253,7 @@ export const ShortletMarketplaceBrowser = ({
           })
         }
         title={listing.title}
-        location={`${listing.city}, ${listing.state}`}
+        location={formatLocation(listing.city, listing.state)}
         price={quote ? quote.total : listing.nightlyRate}
         priceUnit={quote ? 'total' : listing.pricingMode === 'PER_NIGHT' ? 'night' : undefined}
         image={listing.coverImageUrl}

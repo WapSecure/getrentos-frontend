@@ -1,5 +1,6 @@
 'use client';
 
+import { formatLocation } from '@sureground/shared';
 import { useMemo, useState } from 'react';
 import { HostFeeNote } from './HostFeeNote';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -275,7 +276,7 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
                       )}
                     </div>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      {l.city}, {l.state} ·{' '}
+                      {formatLocation(l.city, l.state)} ·{' '}
                       {l.pricingMode === 'PER_NIGHT' ? 'per night' : 'flat stay'}
                     </p>
                     <p className="mt-1 text-sm">

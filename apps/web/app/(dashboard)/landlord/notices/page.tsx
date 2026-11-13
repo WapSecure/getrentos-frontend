@@ -1,5 +1,6 @@
 'use client';
 
+import { formatLocation } from '@sureground/shared';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -311,9 +312,7 @@ export default function LandlordNoticesPage() {
                 </DialogTitle>
                 <p className="mt-0.5 truncate text-sm text-muted-foreground">
                   {[
-                    [ladder.lease.property.address, ladder.lease.property.city]
-                      .filter(Boolean)
-                      .join(', '),
+                    formatLocation(ladder.lease.property.address, ladder.lease.property.city),
                     ladder.lease.tenantName ?? 'Tenant not named',
                     ladder.jurisdiction,
                   ].join(' · ')}

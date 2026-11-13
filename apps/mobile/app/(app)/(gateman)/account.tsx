@@ -1,3 +1,4 @@
+import { formatLocation } from '@sureground/shared';
 import { View } from 'react-native';
 import { useState } from 'react';
 import { router } from 'expo-router';
@@ -80,7 +81,7 @@ export default function GatemanAccount() {
                 <View style={{ flex: 1, gap: 2 }}>
                   <Text variant="body">{estate.name}</Text>
                   <Text variant="caption" color="mutedForeground">
-                    {estate.address}, {estate.city} {estate.state}
+                    {formatLocation(estate.address, estate.city, estate.state)}
                   </Text>
                   <Text variant="caption" color="mutedForeground">
                     {gate ? `At ${gate.name}` : 'No gate selected'}

@@ -36,6 +36,7 @@ import {
   type InspectorJob,
   type LandBoundaryCondition,
   describeDistance,
+  formatLocation,
 } from '@sureground/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
@@ -182,7 +183,7 @@ const JobDetail = ({
           description={
             <span className="flex items-center gap-1">
               <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
-              {j.land.address}, {j.land.city}, {j.land.state}
+              {formatLocation(j.land.address, j.land.city, j.land.state)}
             </span>
           }
           actions={

@@ -1,3 +1,4 @@
+import { formatLocation } from '@sureground/shared';
 import { Pressable, View } from 'react-native';
 import { router } from 'expo-router';
 import { Image } from 'expo-image';
@@ -230,7 +231,7 @@ export function ListingRow({ l, onPress }: { l: HostListing; onPress: () => void
               {l.title}
             </Text>
             <Text variant="caption" color="mutedForeground" numberOfLines={1}>
-              {l.city}, {l.state}
+              {formatLocation(l.city, l.state)}
               {l.reviewCount ? `  ·  ★ ${l.ratingAverage?.toFixed(1)} (${l.reviewCount})` : ''}
             </Text>
             <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 4 }}>

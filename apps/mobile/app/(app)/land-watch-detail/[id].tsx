@@ -26,6 +26,7 @@ import {
   LAND_INSPECTION_STATUS_LABELS,
   type LandWatchIncidentKind,
   describeDistance,
+  formatLocation,
 } from '@sureground/shared';
 import { qk } from '@/lib/query/keys';
 import { landWatchApi } from '@/lib/api/landWatch';
@@ -84,7 +85,7 @@ export default function LandWatchDetail() {
         <DetailHeader
           eyebrow="Land Watch"
           title={w?.land.label ?? 'Land Watch'}
-          subtitle={w ? `${w.land.city}, ${w.land.state}` : undefined}
+          subtitle={w ? formatLocation(w.land.city, w.land.state) : undefined}
           onBack={() => goBack()}
         />
         <QueryState query={query} skeleton={<Skeleton height={240} radius={radius.lg} />}>

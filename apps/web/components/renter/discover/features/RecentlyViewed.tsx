@@ -1,5 +1,6 @@
 'use client';
 
+import { formatLocation } from '@sureground/shared';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { History, Eye } from '@sureground/icons';
@@ -54,7 +55,9 @@ export const RecentlyViewed = () => {
               </div>
               <div className="flex-1 min-w-0">
                 <h4 className="text-sm font-medium text-foreground truncate">{property.title}</h4>
-                <p className="text-xs text-muted-foreground truncate">{property.location}</p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {formatLocation(property.location)}
+                </p>
                 <div className="flex items-center justify-between gap-2 mt-0.5">
                   <span className="text-xs font-semibold text-primary">
                     {formatPrice(property.price, property.period)}

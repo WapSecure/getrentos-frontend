@@ -1,5 +1,6 @@
 'use client';
 
+import { formatLocation } from '@sureground/shared';
 import { useState } from 'react';
 import Link from 'next/link';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
@@ -99,7 +100,7 @@ function QuestionCard({ enquiry: e }: { enquiry: BuyerDevelopmentEnquiry }) {
             <p className="font-medium text-foreground">{d.name}</p>
           )}
           <p className="mt-0.5 text-xs text-muted-foreground">
-            {[d.developerName, `${d.city}, ${d.state}`, d.live ? null : COPY.noLongerListed]
+            {[d.developerName, formatLocation(d.city, d.state), d.live ? null : COPY.noLongerListed]
               .filter(Boolean)
               .join(' · ')}
           </p>

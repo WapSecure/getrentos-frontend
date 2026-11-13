@@ -1,5 +1,6 @@
 'use client';
 
+import { formatLocation } from '@sureground/shared';
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { SafeImage } from '@/components/shared/media/SafeImage';
@@ -122,7 +123,7 @@ export function ShortletBookingDialog({
           <DialogTitle>{listing.title}</DialogTitle>
           <DialogDescription>
             <span className="flex items-center gap-1">
-              <MapPin className="h-3.5 w-3.5" /> {listing.city}, {listing.state} ·{' '}
+              <MapPin className="h-3.5 w-3.5" /> {formatLocation(listing.city, listing.state)} ·{' '}
               {listing.hostName}
             </span>
           </DialogDescription>

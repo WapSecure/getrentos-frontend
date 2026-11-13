@@ -41,7 +41,7 @@ const statusOptions: { value: StatusFilter; label: string }[] = [
   { value: 'VERIFIED', label: 'Verified' },
   { value: 'REJECTED', label: 'Rejected' },
   { value: 'EXPIRED', label: 'Expired' },
-  { value: 'CONDITIONAL', label: 'Verified with conditions' },
+  { value: 'CONDITIONAL', label: 'Approved with conditions' },
   { value: 'SUSPENDED', label: 'Suspended' },
 ];
 

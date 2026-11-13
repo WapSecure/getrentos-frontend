@@ -1,5 +1,6 @@
 'use client';
 
+import { formatLocation } from '@sureground/shared';
 import { useState } from 'react';
 import { Check, FileText, ShieldAlert, ShieldCheck, Clock, AlertTriangle } from '@sureground/icons';
 import {
@@ -382,7 +383,7 @@ export const AddOwnerPropertyModal = ({
                   value={
                     form.checked
                       ? form.checked.formatted
-                      : `${form.address}, ${form.city}, ${form.state}`
+                      : formatLocation(form.address, form.city, form.state)
                   }
                 />
                 <SummaryRow

@@ -1,3 +1,4 @@
+import { formatLocation } from '@sureground/shared';
 import { useState } from 'react';
 import { Alert, Pressable, View } from 'react-native';
 import { router } from 'expo-router';
@@ -253,7 +254,7 @@ export function EstateSwitcherSheet({
               <View style={{ flex: 1 }}>
                 <Text variant="bodyStrong">{e.name}</Text>
                 <Text variant="caption" color="mutedForeground">
-                  {[e.city, e.state].filter(Boolean).join(', ')} · {e.householdCount} households
+                  {formatLocation(e.city, e.state)} · {e.householdCount} households
                 </Text>
               </View>
               {current ? <Check size={18} color={colors.primary} /> : null}

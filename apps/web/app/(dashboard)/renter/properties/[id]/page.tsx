@@ -48,7 +48,7 @@ import { ROUTES, buildRoute } from '@/lib/constants/auth';
 import { renterService, type SavedListingItem } from '@/services/renterService';
 import { unwrap, ApiError, type Paginated } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
-import { trustChainLabel } from '@sureground/shared';
+import { trustChainLabel, formatLocation } from '@sureground/shared';
 import { useFlexAvailability } from '@/hooks/useFlexAvailability';
 import { RENTER_COMPARE_MAX, useRenterCompare } from '@/hooks/useRenterCompare';
 
@@ -215,7 +215,7 @@ export default function PropertyDetailPage() {
                 </div>
                 <div className="mt-1.5 flex items-center gap-1 text-muted-foreground">
                   <MapPin className="h-4 w-4 shrink-0" aria-hidden="true" />
-                  <span className="text-sm">{property.location}</span>
+                  <span className="text-sm">{formatLocation(property.location)}</span>
                 </div>
               </div>
               <div className="text-right shrink-0">

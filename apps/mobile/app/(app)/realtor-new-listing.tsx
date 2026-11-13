@@ -1,3 +1,4 @@
+import { formatLocation } from '@sureground/shared';
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -181,7 +182,7 @@ export default function RealtorNewListing() {
                       {p.title}
                     </Text>
                     <Text variant="caption" color="mutedForeground">
-                      {[p.city, p.state].filter(Boolean).join(', ')}
+                      {formatLocation(p.city, p.state)}
                     </Text>
                   </View>
                   <ChevronRight size={18} color={colors.mutedForeground} />

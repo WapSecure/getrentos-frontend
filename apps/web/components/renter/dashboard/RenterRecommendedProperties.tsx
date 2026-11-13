@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Heart, Star } from '@sureground/icons';
+import { isListingVerified } from '@sureground/shared';
 import { Button, ListingCard, ListingCardAction } from '@sureground/ui';
 import { ROUTES, buildRoute } from '@/lib/constants/auth';
 import { renterService } from '@/services/renterService';
@@ -88,7 +89,7 @@ export const RenterRecommendedProperties = () => {
               priceUnit={property.period}
               image={property.image}
               imageAlt={property.title}
-              verified={property.verified}
+              verified={isListingVerified(property)}
               facts={{ beds: property.bedrooms, baths: property.bathrooms, size: property.size }}
               meta={
                 property.rating > 0 ? (

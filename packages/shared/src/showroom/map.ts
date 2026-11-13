@@ -23,6 +23,7 @@ import {
   type VerificationSummaryStatus,
 } from '../utils/landTrust';
 import { tidyPlace } from '../utils/address';
+import { conditionsOutstanding, isListingVerified } from '../utils/trustLabel';
 import { tourSource } from '../utils/videoSource';
 import { floorPlansOf } from './floorPlans';
 
@@ -393,7 +394,8 @@ export function fromSale(s: PublicSaleDto): ShowroomListing {
     price,
     bedrooms: positive(s.bedrooms),
     bathrooms: positive(s.bathrooms),
-    verified: !!s.isVerified,
+    // Approved with conditions is never verified, whatever the flag says.
+    verified: !!s.isVerified && !conditionsOutstanding({ verificationSummary: summary }),
     trustChain: saleTrustChain(trustChainOf(s.trustChain), summary),
     underOffer: !!s.underOffer,
     verificationSummary: summary,
@@ -424,7 +426,8 @@ export function fromLand(l: PublicLandDto): ShowroomListing {
     location: place(l.city, l.state),
     address: l.address,
     price,
-    verified: !!l.isVerified,
+    // Land approved with conditions (CONDITIONAL) is public but never verified.
+    verified: isListingVerified(l),
     verificationSummary: verificationSummaryOf(l.verificationSummary),
     media,
     images: imageUrls(media),

@@ -1,5 +1,6 @@
 'use client';
 
+import { formatLocation } from '@sureground/shared';
 import {
   Alert,
   Dialog,
@@ -426,7 +427,7 @@ export const AddPropertyModal = ({
                   value={
                     form.checked
                       ? form.checked.formatted
-                      : `${form.address}, ${form.city}, ${form.state}`
+                      : formatLocation(form.address, form.city, form.state)
                   }
                 />
                 <SummaryRow label="Units" value={form.totalUnits} />

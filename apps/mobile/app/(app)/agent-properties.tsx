@@ -1,3 +1,4 @@
+import { formatLocation } from '@sureground/shared';
 import { RefreshControl, View } from 'react-native';
 
 import { useQuery } from '@tanstack/react-query';
@@ -76,7 +77,7 @@ export default function AgentProperties() {
                       {item.property.title}
                     </Text>
                     <Text variant="caption" color="mutedForeground" numberOfLines={1}>
-                      {item.property.address}, {item.property.city}
+                      {formatLocation(item.property.address, item.property.city)}
                     </Text>
                     <Text variant="caption" color="mutedForeground">
                       Client: {item.agentClient.client.legalName}

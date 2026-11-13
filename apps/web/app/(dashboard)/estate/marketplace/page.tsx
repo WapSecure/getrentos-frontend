@@ -1,5 +1,6 @@
 'use client';
 
+import { formatLocation } from '@sureground/shared';
 import { ROUTES } from '@/lib/constants/auth';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -160,7 +161,7 @@ const AddPropertyPanel = ({ estateId, onDone }: { estateId: string; onDone: () =
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">{candidate.title}</p>
                   <p className="text-xs text-muted-foreground truncate">
-                    {[candidate.address, candidate.city].filter(Boolean).join(', ')}
+                    {formatLocation(candidate.address, candidate.city)}
                     {candidate.ownerName ? ` · owner ${candidate.ownerName}` : ''}
                   </p>
                 </div>

@@ -7,6 +7,7 @@ import {
   LAND_BOUNDARY_LABELS,
   LAND_INSPECTION_STATUS_LABELS,
   boundaryTone,
+  formatLocation,
 } from '@sureground/shared';
 import {
   Badge,
@@ -116,7 +117,7 @@ function InspectionCard({ inspection: i }: { inspection: PrePurchaseInspection }
         <View style={{ flex: 1, gap: 2 }}>
           <Text variant="bodyStrong">{i.land}</Text>
           <Text variant="caption" color="mutedForeground">
-            {i.reference} · {i.city}, {i.state}
+            {i.reference} · {formatLocation(i.city, i.state)}
             {i.reinspectionOfId ? ' · reinspection' : ''}
             {i.inspector?.name ? ` · ${i.inspector.name}` : ''}
             {i.dueBy && i.status !== 'ACCEPTED' ? ` · due ${formatDate(i.dueBy, 'short')}` : ''}

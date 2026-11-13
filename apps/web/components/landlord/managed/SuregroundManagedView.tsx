@@ -1,5 +1,6 @@
 'use client';
 
+import { formatLocation } from '@sureground/shared';
 import Link from 'next/link';
 
 import { useState } from 'react';
@@ -153,7 +154,7 @@ function distinctLabels(
     return seen;
   };
   const withPlace = (p: (typeof list)[number]) =>
-    [p.name, [p.address, p.city].filter(Boolean).join(', ')].filter(Boolean).join(' · ');
+    [p.name, formatLocation(p.address, p.city)].filter(Boolean).join(' · ');
   const names = count((p) => p.name);
   const places = count(withPlace);
   const nth = new Map<string, number>();
@@ -450,7 +451,7 @@ export const SuregroundManagedView = ({
                       <p className="font-medium text-foreground">{property.name}</p>
                       <p className="mt-0.5 flex items-center gap-1 text-sm text-muted-foreground">
                         <MapPin className="h-3.5 w-3.5" aria-hidden />
-                        {property.address}, {property.city}
+                        {formatLocation(property.address, property.city)}
                       </p>
                       {managed?.managerName && (
                         <p className="mt-0.5 flex items-center gap-1 text-sm text-muted-foreground">

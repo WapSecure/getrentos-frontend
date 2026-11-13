@@ -1,3 +1,4 @@
+import { formatLocation } from '@sureground/shared';
 import { Badge } from '@sureground/ui/Badge';
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
@@ -55,13 +56,13 @@ export async function publicListingMetadata(
   const path = publicListingPath(listing);
   const description =
     listing.description?.slice(0, 160) ||
-    `${listing.title} in ${listing.location}: verified listing on Sureground with payment protection.`;
+    `${listing.title} in ${formatLocation(listing.location)}: verified listing on Sureground with payment protection.`;
   return {
-    title: `${listing.title}: ${listing.location}`,
+    title: `${listing.title}: ${formatLocation(listing.location)}`,
     description,
     alternates: { canonical: path },
     openGraph: {
-      title: `${listing.title}: ${listing.location}`,
+      title: `${listing.title}: ${formatLocation(listing.location)}`,
       description,
       url: `${SITE_URL}${path}`,
       type: 'website',
@@ -126,9 +127,7 @@ export async function PublicListingPage({
               </div>
               <p className="flex items-start gap-1.5 text-muted-foreground">
                 <MapPin className="mt-1 h-4 w-4 shrink-0" />
-                <span>
-                  {listing.address ? `${listing.address}, ${listing.location}` : listing.location}
-                </span>
+                <span>{formatLocation(listing.address, listing.location)}</span>
               </p>
               {(listing.bedrooms || listing.bathrooms || listing.size) && (
                 <ul className="flex flex-wrap gap-3 pt-2 text-sm text-foreground">

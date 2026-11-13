@@ -4,7 +4,7 @@ import { forwardRef, useEffect, useRef, useState, type ReactNode } from 'react';
 import { CARD_IMPRESSION_RULE } from '@sureground/shared';
 import Link from 'next/link';
 import { BadgeCheck, ImageOff, MapPin } from '@sureground/icons';
-import { cn, formatCurrency, tidyPlace } from '@sureground/shared';
+import { cn, formatCurrency, formatLocation } from '@sureground/shared';
 import { Badge, type BadgeVariant } from './Badge';
 import { ProgressiveImg } from './ProgressiveImg';
 import { IconButton, type IconButtonProps } from './IconButton';
@@ -292,10 +292,12 @@ export const ListingCard = ({
         (isGrid ? (
           <p className="mt-1 flex min-w-0 items-center gap-1.5 text-sm text-muted-foreground">
             <MapPin className="h-3.5 w-3.5 shrink-0 text-primary" aria-hidden="true" />
-            <span className="line-clamp-1">{tidyPlace(location)}</span>
+            <span className="line-clamp-1">{formatLocation(location)}</span>
           </p>
         ) : (
-          <p className="mt-0.5 line-clamp-1 text-sm text-muted-foreground">{tidyPlace(location)}</p>
+          <p className="mt-0.5 line-clamp-1 text-sm text-muted-foreground">
+            {formatLocation(location)}
+          </p>
         ))}
       {factsLine.length > 0 && (
         <p

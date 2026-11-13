@@ -1,5 +1,6 @@
 'use client';
 
+import { formatLocation } from '@sureground/shared';
 import { useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -279,7 +280,7 @@ export const OwnerLandWorkspace = () => {
                       <h2 className="truncate font-semibold text-foreground">{titleOf(record)}</h2>
                       <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
                         <MapPin className="h-3.5 w-3.5" />
-                        {record.property.city}, {record.property.state}
+                        {formatLocation(record.property.city, record.property.state)}
                       </p>
                     </div>
                     <LandDiligenceBadge

@@ -44,6 +44,7 @@ import {
   type LandWatchInspection,
   type LandWatchReminderKind,
   type LandWatchTier,
+  formatLocation,
 } from '@sureground/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
@@ -142,7 +143,7 @@ const WatchList = ({ onOpen, notify }: { onOpen: (id: string) => void; notify: N
                     </p>
                     <p className="mt-0.5 flex items-center gap-1 text-sm text-muted-foreground">
                       <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
-                      {[w.land.city, w.land.state].filter(Boolean).join(', ')}
+                      {formatLocation(w.land.city, w.land.state)}
                     </p>
                   </div>
                   <Badge variant={w.status === 'ACTIVE' ? 'success' : 'neutral'}>
@@ -340,7 +341,7 @@ const WatchDetail = ({
           description={
             <span className="flex items-center gap-1">
               <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
-              {[w.land.city, w.land.state].filter(Boolean).join(', ')}
+              {formatLocation(w.land.city, w.land.state)}
             </span>
           }
           actions={

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { BadgeCheck, Bath, BedDouble, ImageOff, MapPin, Ruler } from '@sureground/icons';
+import { formatLocation } from '@sureground/shared';
 import { formatCurrency } from '@/lib/format';
 import { listingPath } from '@/lib/listingSlug';
 import type { PublicListingCard, PublicMarket } from '@/lib/publicListingMap';
@@ -32,9 +33,7 @@ export const ListingTile = ({ listing, market, eager = false }: ListingTileProps
     listing.size ? { icon: Ruler, label: `${listing.size} m²` } : null,
   ].filter((fact): fact is NonNullable<typeof fact> => fact !== null);
   // "Lagos, Lagos" (city and state with the same name) reads as a mistake.
-  const location = [...new Set((listing.location ?? '').split(',').map((part) => part.trim()))]
-    .filter(Boolean)
-    .join(', ');
+  const location = formatLocation(listing.location);
   const basis =
     market === 'sale' ? 'asking' : listing.priceUnit ? PRICE_BASIS[listing.priceUnit] : null;
 
