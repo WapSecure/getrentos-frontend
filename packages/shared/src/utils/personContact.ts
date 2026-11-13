@@ -41,6 +41,17 @@ export function toE164Phone(raw: string | null | undefined): string | null {
   return national && NG_NATIONAL_RE.test(national) ? `+234${national}` : null;
 }
 
+/**
+ * A phone number laid out for reading: Nigerian numbers as "+234 803 555 0143". Shows the whole
+ * number, so use it only for the person's own number; anything else comes back as given.
+ */
+export function formatPhoneForDisplay(raw: string | null | undefined): string {
+  const value = raw?.trim() ?? '';
+  const e164 = toE164Phone(value);
+  const ng = e164?.match(/^\+234(\d{3})(\d{3})(\d{4})$/);
+  return ng ? `+234 ${ng[1]} ${ng[2]} ${ng[3]}` : value;
+}
+
 /** Anything with an @ is read as an email; anything else as a phone number. */
 export function readContactInput(raw: string | null | undefined): ContactInput {
   const value = raw?.trim() ?? '';

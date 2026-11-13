@@ -64,6 +64,12 @@ export function resolveIncomingLink(url: string, webUrl: string): LinkTarget | n
       return { route: `/(app)/land-represented?kind=transaction&id=${id(third)}` };
     return { route: '/(app)/land-representing' };
   }
+  // The representative's desk also lives at the top level on the website.
+  if (section === 'representing') {
+    if (first === 'transactions' && second)
+      return { route: `/(app)/land-represented?kind=transaction&id=${id(second)}` };
+    return { route: '/(app)/land-representing' };
+  }
 
   const kind = LISTING_SECTIONS[section];
   if (kind) {

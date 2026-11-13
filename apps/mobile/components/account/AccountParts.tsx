@@ -11,6 +11,7 @@ import {
   useTheme,
   withAlpha,
 } from '@sureground/ui-native';
+import { formatPhoneForDisplay } from '@sureground/shared';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useIdentityVerification } from '@/hooks/useIdentityVerification';
 
@@ -47,7 +48,7 @@ export function AccountHeader({
         {name}
       </Text>
       <Text variant="callout" color="mutedForeground">
-        {profile?.email ?? profile?.phone ?? ''}
+        {profile?.email ?? formatPhoneForDisplay(profile?.phone)}
       </Text>
       <Text variant="caption" color="primary" style={{ fontWeight: '700', marginTop: spacing.xs }}>
         {role}
@@ -80,7 +81,7 @@ export function ProfileCard({
   const { verified } = useIdentityVerification();
   const { colors, spacing, radius } = useTheme();
   const name = profile?.legalName ?? fallbackName;
-  const contact = profile?.email ?? profile?.phone ?? '';
+  const contact = profile?.email ?? formatPhoneForDisplay(profile?.phone);
   const chip = {
     flexDirection: 'row' as const,
     alignItems: 'center' as const,

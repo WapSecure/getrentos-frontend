@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   contactRequestBody,
+  formatPhoneForDisplay,
   isNoAccountMessage,
   personContactLabel,
   readContactInput,
@@ -84,4 +85,13 @@ test('recognises the no-account answer and builds a plain invite', () => {
     )
   );
   assert.equal(whatsappShareUrl('a b'), 'https://wa.me/?text=a%20b');
+});
+
+test('lays out a Nigerian number for reading and leaves anything else as given', () => {
+  assert.equal(formatPhoneForDisplay('+2348035550143'), '+234 803 555 0143');
+  assert.equal(formatPhoneForDisplay('08035550143'), '+234 803 555 0143');
+  assert.equal(formatPhoneForDisplay(' 234 803 555 0143 '), '+234 803 555 0143');
+  assert.equal(formatPhoneForDisplay('+447700900123'), '+447700900123');
+  assert.equal(formatPhoneForDisplay('not a number'), 'not a number');
+  assert.equal(formatPhoneForDisplay(null), '');
 });

@@ -117,10 +117,12 @@ export default function RenterHome() {
   const lease = useQuery({ queryKey: qk.renter.lease, queryFn: leaseApi.getLease, retry: false });
   const leaseStatus = lease.data
     ? lease.data.status.charAt(0).toUpperCase() + lease.data.status.slice(1)
-    : '—';
-  const leaseEndLabel = lease.data?.endDate
-    ? `Ends ${new Date(lease.data.endDate).toLocaleDateString('en-GB', { month: 'short', year: 'numeric', timeZone: APP_TIME_ZONE })}`
-    : 'Active lease';
+    : 'None yet';
+  const leaseEndLabel = !lease.data
+    ? 'Your lease appears here once you rent'
+    : lease.data.endDate
+      ? `Ends ${new Date(lease.data.endDate).toLocaleDateString('en-GB', { month: 'short', year: 'numeric', timeZone: APP_TIME_ZONE })}`
+      : 'Active lease';
 
   // Shares the payments screen's paged query; its summary is account-wide, the loaded page is the fallback for older APIs.
   const payments = useInfiniteQuery({

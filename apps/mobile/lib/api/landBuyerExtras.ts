@@ -194,6 +194,8 @@ export interface PrincipalDeals {
     escrowStatus: string;
     amount: number;
     title: string;
+    /** `LAND` for a land resale; anything else is a built home. Older servers leave it out. */
+    propertyType?: string | null;
     youApprovePayments: boolean;
   }[];
 }

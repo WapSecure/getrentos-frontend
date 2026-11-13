@@ -41,6 +41,7 @@ import { useTrustItems } from '@/components/account/useTrustItems';
 import { ProfileCard } from '@/components/account/AccountParts';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
+import { RepresentingGroup } from '@/components/account/RepresentingGroup';
 import { managementItems } from '@/components/account/managementItems';
 
 const go = (href: Href) => () => router.push(href);
@@ -288,6 +289,7 @@ export default function LandlordAccount() {
       <ProfileCard role="Landlord" fallbackName="Sureground landlord" />
 
       <WorkspaceSwitcher />
+      <RepresentingGroup />
 
       <SettingsGroup title="Renting" items={renting} />
       <SettingsGroup title="Portfolio & growth" items={business} />

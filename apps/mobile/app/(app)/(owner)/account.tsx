@@ -36,6 +36,7 @@ import { useInvestItems } from '@/components/account/useInvestItems';
 import { ProfileCard } from '@/components/account/AccountParts';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
+import { RepresentingGroup } from '@/components/account/RepresentingGroup';
 import { managementItems } from '@/components/account/managementItems';
 
 const go = (href: Href) => () => router.push(href);
@@ -244,6 +245,7 @@ export default function OwnerAccount() {
       <ProfileCard role="Property owner" fallbackName="Sureground owner" />
 
       <WorkspaceSwitcher />
+      <RepresentingGroup />
 
       <SettingsGroup title="Selling" items={selling} />
       <SettingsGroup title="Tenancy & oversight" items={managementItems()} />
