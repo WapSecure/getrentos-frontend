@@ -565,7 +565,7 @@ function SimilarListings({
 
 const PROTECTION_LINE: Record<MarketKind, string> = {
   rent: 'We hold your rent and release it to the landlord on schedule, unless you raise a dispute.',
-  sale: 'We hold your deposit and only release it to the seller once you confirm receipt.',
+  sale: 'We hold your deposit until the seller hands over the keys and you confirm.',
   land: 'We hold your money and only release it to the seller once the conveyance steps are confirmed.',
   shortlet: 'We hold your payment and pay the host no sooner than 24 hours after check-in.',
 };

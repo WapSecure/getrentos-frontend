@@ -19,6 +19,7 @@ import {
   DropdownMenuItem,
   IconButton,
 } from '@sureground/ui';
+import { propertyRentSummary, type PropertyRentSummary } from '@sureground/shared';
 import { verificationBadges } from '@/lib/statusBadge';
 import { formatCurrency } from '@/lib/format';
 import { ReferenceCodeChip } from '@/components/shared/property/ReferenceCodeChip';
@@ -33,6 +34,15 @@ const propertyTypeLabels: Record<Property['type'], string> = {
 };
 
 const verificationConfig = verificationBadges;
+
+/** "₦3M/yr" once let; the asking rent while vacant; never "₦0/yr", which read as zero rent. */
+function rentText(rent: PropertyRentSummary): string {
+  if (rent.kind === 'none') return rent.label;
+  const figure = `${formatCurrency(rent.amount, { compact: true })}/${rent.period === 'month' ? 'mo' : 'yr'}`;
+  if (rent.kind === 'let') return figure;
+  return rent.from ? `From ${figure}` : `Asking ${figure}`;
+}
+
 interface PropertyCardProps {
   property: Property;
   onClick?: () => void;
@@ -52,6 +62,7 @@ export const PropertyCard = ({
   onVerify,
 }: PropertyCardProps) => {
   const verification = verificationConfig[property.verificationStatus];
+  const rent = propertyRentSummary(property);
   const vacantUnits = property.totalUnits - property.occupiedUnits;
   const occupancyPct =
     property.totalUnits > 0 ? Math.round((property.occupiedUnits / property.totalUnits) * 100) : 0;
@@ -166,8 +177,14 @@ export const PropertyCard = ({
             <DoorOpen className="w-4 h-4 text-primary/70" aria-hidden="true" />
             {property.occupiedUnits}/{property.totalUnits} occupied
           </div>
-          <p className="data-value text-base font-semibold text-foreground">
-            {formatCurrency(property.annualRentRoll, { compact: true })}/yr
+          <p
+            className={
+              rent.kind === 'none'
+                ? 'text-sm text-muted-foreground'
+                : 'data-value text-base font-semibold text-foreground'
+            }
+          >
+            {rentText(rent)}
           </p>
         </div>
 

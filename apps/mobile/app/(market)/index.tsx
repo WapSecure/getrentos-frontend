@@ -79,7 +79,7 @@ const INTRO: Record<Tab, { title: string; body: string; search: string }> = {
   },
   sale: {
     title: 'Homes for sale',
-    body: 'Make an offer once you sign in: Sureground holds your deposit until you confirm receipt.',
+    body: 'Make an offer once you sign in: Sureground holds your deposit until the handover is done and you confirm.',
     search: 'Search area, estate or title',
   },
   shortlet: {

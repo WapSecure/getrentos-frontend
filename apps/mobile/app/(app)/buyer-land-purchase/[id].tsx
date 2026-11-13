@@ -1,3 +1,4 @@
+import { lateFeeSentence } from '@sureground/shared';
 import { useState } from 'react';
 import { Alert, RefreshControl, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -449,9 +450,8 @@ function Schedule({ p }: { p: BuyerPurchaseDetail }) {
         </Text>
       ) : null}
       <Text variant="caption" color="mutedForeground">
-        {p.terms.gracePeriodDays} days’ grace on each instalment, then a{' '}
-        {formatBps(p.terms.lateFeeBps)} late fee. Default after {p.terms.defaultAfterDays} days
-        overdue.
+        {lateFeeSentence(p.terms.lateFeeBps, p.terms.gracePeriodDays)} Default after{' '}
+        {p.terms.defaultAfterDays} days overdue.
       </Text>
     </Card>
   );

@@ -282,7 +282,7 @@ const SUMMARY_CLEARS_TRUST: readonly VerificationSummaryStatus[] = [
 ];
 
 const SALE_PAYMENT_DETAIL =
-  'Your deposit is held by Sureground and only released to the seller once you confirm receipt.';
+  'Your deposit is held by Sureground until the seller hands over the keys and you confirm.';
 
 const HELD_BY_SUMMARY: Partial<Record<ShowroomTrustStepId, string>> = {
   authority: "Ownership has not cleared Sureground's verification checks yet.",
@@ -403,7 +403,10 @@ export function fromSale(s: PublicSaleDto): ShowroomListing {
     amenities: s.amenities ?? [],
     facts: [
       ...fact('Property type', humanise(s.propertyType)),
-      ...fact('Payment', 'Protected: Sureground holds your deposit until you confirm receipt'),
+      ...fact(
+        'Payment',
+        'Protected: Sureground holds your deposit until the seller hands over the keys and you confirm'
+      ),
     ],
     costs: {
       lines: [{ label: 'Asking price', amount: price }],

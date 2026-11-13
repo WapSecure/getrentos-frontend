@@ -1,3 +1,4 @@
+import { chargesLateFee } from '@sureground/shared';
 import { useState } from 'react';
 import { Alert, RefreshControl, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -936,9 +937,12 @@ function Plans({
                   : `${plan.durationMonths} months, ${formatBps(plan.initialDepositBps)} deposit`}
               </Text>
               <Text variant="caption" color="mutedForeground">
-                Premium {formatBps(plan.priceUpliftBps)} · grace {plan.gracePeriodDays} days · late
-                fee {formatBps(plan.lateFeeBps)} · default after {plan.defaultAfterDays} days ·
-                forfeiture {formatBps(plan.revocationChargeBps)}
+                Premium {formatBps(plan.priceUpliftBps)} · grace {plan.gracePeriodDays} days ·{' '}
+                {chargesLateFee(plan.lateFeeBps)
+                  ? `late fee ${formatBps(plan.lateFeeBps)}`
+                  : 'no late fee'}{' '}
+                · default after {plan.defaultAfterDays} days · forfeiture{' '}
+                {formatBps(plan.revocationChargeBps)}
               </Text>
               {ex ? (
                 <Text variant="caption" color="mutedForeground">

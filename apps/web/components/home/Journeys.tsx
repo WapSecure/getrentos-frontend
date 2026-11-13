@@ -34,7 +34,7 @@ export const Journeys = () => (
         >
           <p>
             Ownership and title documents are reviewed by our team before a property is marked
-            verified. Your deposit is released only once you confirm.
+            verified. Your deposit is held until the seller hands over the keys and you confirm.
           </p>
         </FeatureRow>
         <FeatureRow

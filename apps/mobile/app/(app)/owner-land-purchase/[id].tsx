@@ -1,3 +1,4 @@
+import { lateFeeAfterGrace } from '@sureground/shared';
 import { useState } from 'react';
 import { Alert, RefreshControl, ScrollView, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
@@ -233,8 +234,8 @@ export default function OwnerLandPurchase() {
               <Text variant="caption" color="mutedForeground">
                 Terms fixed at purchase:{' '}
                 {d.terms.durationMonths === 0 ? 'outright' : `${d.terms.durationMonths} months`},{' '}
-                {formatBps(d.terms.initialDepositBps)} deposit, {formatBps(d.terms.lateFeeBps)} late
-                fee after {d.terms.gracePeriodDays} days’ grace, default after{' '}
+                {formatBps(d.terms.initialDepositBps)} deposit,{' '}
+                {lateFeeAfterGrace(d.terms.lateFeeBps, d.terms.gracePeriodDays)}, default after{' '}
                 {d.terms.defaultAfterDays} days.
               </Text>
             </Section>

@@ -35,7 +35,7 @@ const KIND_LABEL: Record<string, string> = {
   ESCROW: 'Sale escrow',
   SHORTLET: 'Short-let',
   LAND: 'Land',
-  FLEX: 'Flex installment',
+  FLEX: 'Flex instalment',
   DUE: 'Estate due',
   SUBSCRIPTION: 'Subscription',
   LAND_UNAPPLIED: 'Land (contract could not take it: refund)',

@@ -58,7 +58,7 @@ export default function RealtorDashboardPage() {
       <RealtorDashboardHeader greeting={greeting} firstName={firstName} />
       <IdentityNudge
         verificationHref={ROUTES.REALTOR_VERIFICATION}
-        unlocks="list for clients and receive commissions"
+        unlocks="invite clients and publish listings"
         className="mb-6"
       />
       <IdentityNudge

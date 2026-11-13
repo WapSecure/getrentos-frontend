@@ -15,7 +15,7 @@ export const RENT_NEXT = {
 };
 
 export const SALE_DEPOSIT_PROTECTION =
-  'Sureground holds your deposit and only releases it to the seller once you confirm you have received the property and its documents.';
+  'Sureground holds your deposit until the handover is done and you confirm.';
 
 export const SALE_DEPOSIT_NEXT = {
   title: 'Held by Sureground',

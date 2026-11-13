@@ -18,6 +18,7 @@ import {
   Text,
   useTheme,
 } from '@sureground/ui-native';
+import { propertyRentSummary } from '@sureground/shared';
 import { qk } from '@/lib/query/keys';
 import { CreatePropertySheet } from '@/components/landlord/CreatePropertySheet';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
@@ -174,11 +175,24 @@ function PropertyRow({ property: p }: { property: LandlordProperty }) {
           />
           <Badge label={occupancyLabel(p.occupiedUnits, p.totalUnits)} tone="neutral" />
         </View>
-        {p.annualRentRoll > 0 ? (
-          <Price amount={p.annualRentRoll} period="year" variant="callout" />
-        ) : null}
+        <PropertyRent property={p} />
       </View>
     </PressableScale>
+  );
+}
+
+/** The rent roll once let, else the asking rent; nothing rather than "₦0/yr" (the badge already says vacant). */
+function PropertyRent({ property }: { property: LandlordProperty }) {
+  const rent = propertyRentSummary(property);
+  if (rent.kind === 'none') return null;
+  if (rent.kind === 'let') return <Price amount={rent.amount} period="year" variant="callout" />;
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 4 }}>
+      <Text variant="caption" color="mutedForeground">
+        {rent.from ? 'From' : 'Asking'}
+      </Text>
+      <Price amount={rent.amount} period={rent.period} variant="callout" />
+    </View>
   );
 }
 

@@ -69,7 +69,7 @@ export default function OwnerOfferDetail() {
       haptics.success();
       refresh();
       toast.show(
-        'Offer accepted. The buyer can now pay the deposit to Sureground, which holds it until the buyer confirms receipt.',
+        'Offer accepted. The buyer can now pay the deposit to Sureground, which holds it until the handover is done and the buyer confirms.',
         'success'
       );
     },

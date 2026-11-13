@@ -291,7 +291,7 @@ export default function RealtorHome() {
         onToggle={toggleMoney}
       />
 
-      <IdentityNudge unlocks="listings, clients and commissions" />
+      <IdentityNudge unlocks="client invites and publishing listings" />
       <IdentityNudge requirement="licence" unlocks="listings and clients" />
 
       <QueryState

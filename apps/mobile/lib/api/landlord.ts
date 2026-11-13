@@ -77,6 +77,11 @@ export interface LandlordProperty {
   totalUnits: number;
   occupiedUnits: number;
   annualRentRoll: number;
+  /** Lowest asking rent among units with no current tenancy, in its own period. */
+  askingRent?: number;
+  askingRentPeriod?: 'month' | 'year';
+  /** The vacant units ask different rents, so `askingRent` is the lowest. */
+  askingRentVaries?: boolean;
   createdAt: string;
   archived: boolean;
 }

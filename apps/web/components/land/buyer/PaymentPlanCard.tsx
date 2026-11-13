@@ -1,3 +1,4 @@
+import { chargesLateFee } from '@sureground/shared';
 import { formatCurrency } from '@/lib/format';
 import type { LandPlanPriceExample, PublicLandPaymentPlan } from '@/types/landBuyer';
 import { bpsToPercent, type PlotQuote } from './landSaleLogic';
@@ -66,8 +67,14 @@ export const PaymentPlanCard = ({
         </summary>
         <ul className="mt-2 list-disc space-y-1 pl-4">
           <li>
-            {plan.gracePeriodDays} days&apos; grace, then a one-off late fee of{' '}
-            {bpsToPercent(plan.lateFeeBps)} of that instalment.
+            {chargesLateFee(plan.lateFeeBps) ? (
+              <>
+                {plan.gracePeriodDays} days&apos; grace, then a one-off late fee of{' '}
+                {bpsToPercent(plan.lateFeeBps)} of that instalment.
+              </>
+            ) : (
+              'No late fee.'
+            )}
           </li>
           <li>
             {plan.defaultAfterDays} days overdue puts the purchase in default and the developer may

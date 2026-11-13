@@ -9,22 +9,16 @@ describe('identity nudge copy', () => {
     });
   });
 
-  it('gives the grace deadline as a British date', () => {
-    const copy = identityNudgeCopy({
-      unlocks: 'publishing listings',
-      graceEndsAt: '2026-12-07T10:00:00.000Z',
-    });
-    expect(copy.title).toBe('Verify your identity by 7 Dec 2026');
-    expect(copy.accessibilityLabel).toBe(
-      'Verify your identity by 7 Dec 2026 to keep publishing listings and receiving payouts.'
-    );
+  it('never promises a deadline the identity gate does not honour', () => {
+    const copy = identityNudgeCopy({ unlocks: 'client invites and publishing listings' });
+    expect(copy.title).toBe('Verify your identity');
+    expect(copy.accessibilityLabel).not.toMatch(/ by /);
   });
 
   it('leaves the licence card alone', () => {
     const copy = identityNudgeCopy({
       unlocks: 'client work',
       requirement: 'licence',
-      graceEndsAt: '2026-12-07T10:00:00.000Z',
     });
     expect(copy.title).toBe('Verify your licence');
   });
