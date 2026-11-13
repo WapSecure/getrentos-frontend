@@ -10,6 +10,7 @@ import {
   type WorkOrderFeedback,
   type WorkOrderFeedbackInput,
   type WorkOrderPhotoStage,
+  type UtilityKind,
 } from '@sureground/shared';
 import { apiFetch, apiUpload } from './client';
 import { appendFile, type PickedFile } from './documents';
@@ -136,6 +137,8 @@ export interface Asset {
   installedAt?: string | null;
   warrantyExpiresAt?: string | null;
   status: AssetStatus;
+  /** Set for generators, inverters, solar, boreholes, pumps and tanks. */
+  utilityKind?: UtilityKind | null;
   property?: { title?: string | null; name?: string | null };
   unit?: { unitName?: string | null } | null;
   preventivePlans?: { id: string; nextDueAt: string }[];
@@ -373,9 +376,9 @@ export const homeCareApi = {
   addUnit: (propertyId: string, unitName: string) =>
     apiFetch<Unit>('/home-management/units', { method: 'POST', body: { propertyId, unitName } }),
 
-  assets: (propertyId?: string, status?: AssetStatus) =>
+  assets: (propertyId?: string, status?: AssetStatus, utilityKind?: UtilityKind) =>
     apiFetch<Paginated<Asset>>(
-      `/home-management/assets${toQuery({ propertyId, status, page: 1, pageSize: 100 })}`
+      `/home-management/assets${toQuery({ propertyId, status, utilityKind, page: 1, pageSize: 100 })}`
     ),
   addAsset: (input: {
     propertyId: string;
@@ -387,6 +390,7 @@ export const homeCareApi = {
     serialNumber?: string;
     installedAt?: string;
     warrantyExpiresAt?: string;
+    utilityKind?: UtilityKind;
   }) => apiFetch<Asset>('/home-management/assets', { method: 'POST', body: input }),
   setAssetStatus: (id: string, status: AssetStatus) =>
     apiFetch<Asset>(`/home-management/assets/${id}/status`, { method: 'PATCH', body: { status } }),

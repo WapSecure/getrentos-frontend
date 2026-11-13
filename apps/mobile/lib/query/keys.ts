@@ -178,6 +178,17 @@ export const qk = {
     plans: ['home-care', 'plans'] as const,
     sla: (propertyId: string) => ['home-care', 'sla', propertyId] as const,
     timeline: ['home-care', 'timeline'] as const,
+    /** Power and water; every key starts with `utilities` so one invalidation refreshes them all. */
+    utilities: ['home-care', 'utilities'] as const,
+    generators: (propertyId: string) =>
+      ['home-care', 'utilities', 'generators', propertyId] as const,
+    readings: (assetId: string) => ['home-care', 'utilities', 'readings', assetId] as const,
+    meters: (propertyId: string) => ['home-care', 'utilities', 'meters', propertyId] as const,
+    supplyHours: (meterId: string) => ['home-care', 'utilities', 'supply', meterId] as const,
+    purchases: (propertyId: string, kind: string) =>
+      ['home-care', 'utilities', 'purchases', propertyId, kind] as const,
+    waterTests: (propertyId: string) =>
+      ['home-care', 'utilities', 'water-tests', propertyId] as const,
   },
   billing: {
     mine: ['billing'] as const,

@@ -38,6 +38,10 @@
       "import": "./src/auth/index.ts",
       "types": "./src/auth/index.ts"
     },
+    "./homeUtilities": {
+      "import": "./src/homeUtilities/index.ts",
+      "types": "./src/homeUtilities/index.ts"
+    },
     "./constants/app-links.json": "./src/constants/app-links.json"
   },
   "scripts": {

@@ -1,6 +1,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { homeManagementTabHref, parseHomeManagementTab } from './homeManagementTabs';
+import {
+  HOME_MANAGEMENT_TABS,
+  homeManagementTabHref,
+  parseHomeManagementTab,
+  parseUtilitiesView,
+  utilitiesViewHref,
+} from './homeManagementTabs';
 
 test('a known tab is read from the URL', () => {
   assert.equal(parseHomeManagementTab('work-orders'), 'work-orders');
@@ -43,5 +49,26 @@ test('other query parameters survive, including a hub tab under a different name
       'section'
     ),
     '/landlord/maintenance?tab=home-management'
+  );
+});
+
+test('utilities sits between assets and service standards', () => {
+  assert.equal(parseHomeManagementTab('utilities'), 'utilities');
+  const tabs = [...HOME_MANAGEMENT_TABS];
+  assert.equal(tabs.indexOf('utilities'), tabs.indexOf('assets') + 1);
+  assert.equal(tabs.indexOf('service-standards'), tabs.indexOf('utilities') + 1);
+});
+
+test('the utilities view defaults to power and ignores unknown values', () => {
+  assert.equal(parseUtilitiesView('water'), 'water');
+  assert.equal(parseUtilitiesView(null), 'power');
+  assert.equal(parseUtilitiesView('service-charge'), 'power');
+  assert.equal(
+    utilitiesViewHref('/owner/home-management', 'tab=utilities', 'water'),
+    '/owner/home-management?tab=utilities&view=water'
+  );
+  assert.equal(
+    utilitiesViewHref('/owner/home-management', 'tab=utilities&view=water', 'power'),
+    '/owner/home-management?tab=utilities'
   );
 });
