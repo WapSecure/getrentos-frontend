@@ -28,7 +28,7 @@ Fixed top bar, `aria-label="Main"`.
 
 | Position | Content                                                                                                                                                                      |
 | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Left     | Find links: **Buy**, **Rent**, **Short stays**, **Land** (hidden when the land marketplace is off), **Off-plan** (`/developments`). Then the **More** dropdown.              |
+| Left     | Main links: **Buy**, **Rent**, **Sell**, **Manage** (`/home-management`), **Diaspora** (only while the service is on). Then the **More** dropdown (D13).                     |
 | Centre   | Logo (home).                                                                                                                                                                 |
 | Right    | Signed out: **Sign in**, theme switch, **Get started** (`/signup`). Signed in: role dashboard link and **Sign out**. A search icon (`aria-label="Search homes"`) to `/rent`. |
 
@@ -36,13 +36,13 @@ Current page links carry `aria-current="page"` and an underline.
 
 ### More menu
 
-In order, each with a one-line hint: **Diaspora Invest** (only when the service is on), **Sell**, **Let** (`/landlords`), **Estates**, **Detty December**, **Property management** (`/home-management`), **Realtors and agencies** (`/agents`), **Pricing**, **About**.
+In order, each with a one-line hint: **Short stays**, **Land** (hidden when the land marketplace is off), **Off-plan** (`/developments`), **Estates**, **Detty December**, **Let** (`/landlords`), **Realtors and agencies** (`/agents`), **Guides** (`/resources`), **Pricing**, **About**.
 
-Not linked from the main nav: `/renters`, `/buyers`, `/resources`, `/areas/*`. They are reached from the footer, the homepage and in-page links.
+Not linked from the main nav: `/renters`, `/buyers`, `/areas/*`. They are reached from the footer, the homepage and in-page links.
 
 ### Mobile menu (below `lg`)
 
-A **Menu** button (`aria-expanded`, `aria-controls="site-menu"`) opens a full-screen dialog (`aria-modal`, `aria-label="Site menu"`) with focus trap, Escape to close (focus returns to the button) and scroll lock. Contents: **Find** list, **More** list (same items as desktop), an **Appearance** switch, then **Sign in** and **Get started**, or dashboard and **Sign out** when signed in. The menu closes on navigation.
+A **Menu** button (`aria-expanded`, `aria-controls="site-menu"`) opens a full-screen dialog (`aria-modal`, `aria-label="Site menu"`) with focus trap, Escape to close (focus returns to the button) and scroll lock. Contents: **Main** list, **More** list (same items as desktop), an **Appearance** switch, then **Sign in** and **Get started**, or dashboard and **Sign out** when signed in. The menu closes on navigation.
 
 ### Footer
 
