@@ -19,6 +19,7 @@ import { useAuth } from '@/lib/auth/AuthProvider';
 import { useIdentityVerification } from '@/hooks/useIdentityVerification';
 import { SettingsGroup } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
+import { RepresentingGroup } from '@/components/account/RepresentingGroup';
 import { PostSwitcherSheet } from '@/components/gateman/PostSwitcherSheet';
 
 export default function GatemanAccount() {
@@ -49,6 +50,7 @@ export default function GatemanAccount() {
         </View>
 
         <WorkspaceSwitcher />
+        <RepresentingGroup />
 
         <SettingsGroup
           title="Operations"

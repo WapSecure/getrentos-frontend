@@ -32,6 +32,7 @@ import {
 } from '@sureground/ui-native';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
+import { RepresentingGroup } from '@/components/account/RepresentingGroup';
 import { EstateSwitcherSheet } from '@/components/estate/EstateUI';
 import { useEstate } from '@/hooks/useEstate';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -205,6 +206,7 @@ export default function EstateAccount() {
       </View>
 
       <WorkspaceSwitcher />
+      <RepresentingGroup />
 
       <SettingsGroup title="The office" items={office} />
       <SettingsGroup title="Trust & reputation" items={trust} />
