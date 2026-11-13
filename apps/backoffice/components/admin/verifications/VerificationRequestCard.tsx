@@ -11,6 +11,7 @@ import {
   XCircle,
 } from '@sureground/icons';
 import { Badge, Button, Card } from '@sureground/ui';
+import { FactGrid, IconTile } from '@/components/admin/ops/OpsParts';
 import { formatDate } from '@sureground/shared';
 import type { VerificationRequest, VerificationRequestType } from '@/types/admin';
 
@@ -36,12 +37,12 @@ export const VerificationRequestCard = ({
   const isPending = request.status === 'pending_review';
 
   return (
-    <Card hover delay={delay} className="p-4">
+    <Card hover delay={delay} className="flex flex-col p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="p-2.5 rounded-xl bg-accent shrink-0">
-            <TypeIcon className="w-4 h-4 text-primary" />
-          </div>
+          <IconTile>
+            <TypeIcon />
+          </IconTile>
           <div className="min-w-0">
             <h3 className="font-semibold text-foreground truncate">{request.applicantName}</h3>
             <p className="text-xs text-muted-foreground truncate">
@@ -71,13 +72,21 @@ export const VerificationRequestCard = ({
         )}
       </div>
 
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-4 text-xs text-muted-foreground">
-        <span className="flex items-center gap-1">
-          <FileText className="w-3.5 h-3.5" />
-          {request.documentCount} document{request.documentCount === 1 ? '' : 's'}
-        </span>
-        <span>Submitted {formatDate(request.submittedAt)}</span>
-      </div>
+      <FactGrid
+        className="mt-4 flex-1"
+        facts={[
+          {
+            label: 'Documents',
+            value: (
+              <span className="inline-flex items-center gap-1.5 tabular-nums">
+                <FileText className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
+                {request.documentCount} document{request.documentCount === 1 ? '' : 's'}
+              </span>
+            ),
+          },
+          { label: 'Submitted', value: formatDate(request.submittedAt) },
+        ]}
+      />
 
       <div className="mt-4 pt-4 border-t border-border">
         {isPending ? (

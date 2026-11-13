@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Gavel } from '@sureground/icons';
+import { ArrowUpCircle, Clock, Gavel, Search } from '@sureground/icons';
 import { DisputeCard } from '@/components/admin/disputes/DisputeCard';
 import { DisputeCaseModal } from '@/components/admin/disputes/DisputeCaseModal';
 import {
@@ -11,8 +11,9 @@ import {
   PageErrorState,
   PageHeader,
   SearchInput,
-  SegmentedControl,
+  StatGroup,
 } from '@sureground/ui';
+import { FilterChips, OpsToolbar } from '@/components/admin/ops/OpsParts';
 import { Pagination } from '@sureground/ui';
 import { Select } from '@sureground/ui';
 import { adminService } from '@/services/adminService';
@@ -209,11 +210,12 @@ export default function AdminDisputesPage() {
       unwrap(adminService.listDisputes({ status: 'under_review', page: 1, pageSize: 1 })),
   });
   const activeDisputeCount = (openDisputes?.total ?? 0) + (underReviewDisputes?.total ?? 0);
+  const countsUnavailable = openCountError || reviewCountError;
 
-  const statusOptions: { value: StatusFilter; label: string }[] = [
+  const statusOptions: { value: StatusFilter; label: string; count?: number }[] = [
     { value: 'all', label: 'All' },
-    { value: 'open', label: 'Open' },
-    { value: 'under_review', label: 'Under review' },
+    { value: 'open', label: 'Open', count: openDisputes?.total },
+    { value: 'under_review', label: 'Under review', count: underReviewDisputes?.total },
     { value: 'escalated', label: 'Escalated' },
     { value: 'resolved', label: 'Resolved' },
   ];
@@ -233,15 +235,41 @@ export default function AdminDisputesPage() {
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="Trust and safety"
         title="Disputes and arbitration"
         description={
-          openCountError || reviewCountError
+          countsUnavailable
             ? 'Active dispute count temporarily unavailable'
             : `${activeDisputeCount} active dispute${activeDisputeCount === 1 ? '' : 's'} requiring attention`
         }
       />
 
-      <div className="flex flex-col gap-3 sm:flex-row">
+      <StatGroup
+        title="Active cases"
+        items={[
+          {
+            label: 'Open',
+            value: openCountError ? '–' : (openDisputes?.total ?? '–'),
+            subtitle: openCountError ? 'Count unavailable' : 'Waiting for a reviewer',
+            icon: Clock,
+            attention: (openDisputes?.total ?? 0) > 0,
+          },
+          {
+            label: 'Under review',
+            value: reviewCountError ? '–' : (underReviewDisputes?.total ?? '–'),
+            subtitle: reviewCountError ? 'Count unavailable' : 'With a reviewer now',
+            icon: Search,
+          },
+          {
+            label: 'Active in total',
+            value: countsUnavailable ? '–' : activeDisputeCount,
+            subtitle: 'Open and under review',
+            icon: ArrowUpCircle,
+          },
+        ]}
+      />
+
+      <OpsToolbar>
         <SearchInput
           value={searchQuery}
           onValueChange={(value) => {
@@ -262,23 +290,20 @@ export default function AdminDisputesPage() {
           ariaLabel="Filter by category"
           className="w-full sm:w-48"
         />
-      </div>
+      </OpsToolbar>
 
-      <div className="max-w-full overflow-x-auto pb-1">
-        <SegmentedControl
-          value={statusFilter}
-          onValueChange={(value) => {
-            setStatusFilter(value);
-            setPage(1);
-          }}
-          segments={statusOptions}
-          aria-label="Filter disputes by status"
-          size="sm"
-        />
-      </div>
+      <FilterChips
+        label="Filter disputes by status"
+        value={statusFilter}
+        onChange={(value) => {
+          setStatusFilter(value);
+          setPage(1);
+        }}
+        options={statusOptions}
+      />
 
       {isLoading ? (
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, index) => (
             <CardSkeleton key={index} />
           ))}
@@ -291,9 +316,13 @@ export default function AdminDisputesPage() {
           isRetrying={isFetching}
         />
       ) : disputes.length === 0 ? (
-        <EmptyState icon={Gavel} title="No disputes match your filters" />
+        <EmptyState
+          icon={Gavel}
+          title="No disputes match your filters"
+          description="Try another title or party, or clear the category and status filters."
+        />
       ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {disputes.map((dispute, index) => (
             <DisputeCard
               key={dispute.id}

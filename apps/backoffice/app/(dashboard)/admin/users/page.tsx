@@ -2,18 +2,19 @@
 
 import { useEffect, useState } from 'react';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Users, CheckCircle2, Clock, ShieldAlert, Ban } from '@sureground/icons';
+import { Users, CheckCircle2, Clock, ShieldAlert, Ban, ChevronRight } from '@sureground/icons';
 import { UserDetailModal } from '@/components/admin/users/UserDetailModal';
 import {
   ConfirmDialog,
   DataTable,
+  IconButton,
   PageErrorState,
   PageHeader,
   SearchInput,
-  SegmentedControl,
   useToast,
   type Column,
 } from '@sureground/ui';
+import { FilterChips, OpsToolbar } from '@/components/admin/ops/OpsParts';
 import { Badge, type BadgeVariant } from '@sureground/ui';
 import { EmptyState } from '@sureground/ui';
 import { Pagination } from '@sureground/ui';
@@ -151,7 +152,10 @@ export default function AdminUsersPage() {
       header: 'User',
       render: (u) => (
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+          <div
+            aria-hidden="true"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary ring-1 ring-inset ring-primary/15"
+          >
             {getInitials(u.fullName)}
           </div>
           <div className="min-w-0 max-w-xs">
@@ -179,7 +183,8 @@ export default function AdminUsersPage() {
     {
       key: 'trustScore',
       header: 'Trust score',
-      render: (u) => <span className="font-medium text-primary">{u.trustScore}</span>,
+      render: (u) => <span className="font-semibold text-foreground">{u.trustScore}</span>,
+      numeric: true,
       className: 'whitespace-nowrap',
     },
     {
@@ -189,7 +194,7 @@ export default function AdminUsersPage() {
         const status = statusConfig[u.status];
         const StatusIcon = status.icon;
         return (
-          <Badge variant={status.variant} icon={<StatusIcon className="w-3 h-3" />}>
+          <Badge variant={status.variant} icon={<StatusIcon className="h-3 w-3" aria-hidden />}>
             {status.label}
           </Badge>
         );
@@ -210,23 +215,40 @@ export default function AdminUsersPage() {
       render: (u) => formatDate(u.joinedDate),
       className: 'text-muted-foreground whitespace-nowrap',
     },
+    {
+      key: 'actions',
+      header: '',
+      srHeader: 'Actions',
+      align: 'right',
+      render: (u) => (
+        <IconButton
+          size="sm"
+          icon={<ChevronRight />}
+          label={`Open ${u.fullName}'s account`}
+          onClick={(event) => {
+            event.stopPropagation();
+            setActiveUser(u);
+          }}
+        />
+      ),
+    },
   ];
 
   return (
     <>
       <PageHeader
         title="Users"
-        eyebrow="Administration"
+        eyebrow="Operations"
         description={
           data
-            ? `${total} user${total === 1 ? '' : 's'} across the platform`
+            ? `${total.toLocaleString('en-NG')} user${total === 1 ? '' : 's'} across the platform`
             : isError
               ? 'User count unavailable'
               : 'Loading users…'
         }
       />
 
-      <div className="flex flex-col sm:flex-row gap-3 mb-4">
+      <OpsToolbar className="mb-3">
         <SearchInput
           value={searchQuery}
           onValueChange={(value) => {
@@ -248,20 +270,18 @@ export default function AdminUsersPage() {
           searchable={false}
           className="w-full sm:w-44"
         />
-      </div>
+      </OpsToolbar>
 
-      <div className="mb-6 max-w-full overflow-x-auto pb-1">
-        <SegmentedControl
-          value={statusFilter}
-          onValueChange={(value) => {
-            setStatusFilter(value);
-            setPage(1);
-          }}
-          segments={statusOptions}
-          aria-label="Filter users by account status"
-          size="sm"
-        />
-      </div>
+      <FilterChips
+        label="Filter users by account status"
+        value={statusFilter}
+        onChange={(value) => {
+          setStatusFilter(value);
+          setPage(1);
+        }}
+        options={statusOptions}
+        className="mb-5"
+      />
 
       {isError && !data ? (
         <PageErrorState
@@ -277,7 +297,14 @@ export default function AdminUsersPage() {
           isLoading={isLoading}
           getRowKey={(u) => u.id}
           onRowClick={(u) => setActiveUser(u)}
-          emptyState={<EmptyState icon={Users} title="No users match your filters" />}
+          caption="Platform users"
+          emptyState={
+            <EmptyState
+              icon={Users}
+              title="No users match your filters"
+              description="Try another name or email, or clear the role and status filters."
+            />
+          }
           footer={
             total > 0 && (
               <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPageChange={setPage} />

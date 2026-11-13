@@ -20,6 +20,7 @@ import {
 import { Pagination } from '@sureground/ui';
 import { Select } from '@sureground/ui';
 import { adminService } from '@/services/adminService';
+import { OpsToolbar } from '@/components/admin/ops/OpsParts';
 import { unwrap } from '@sureground/shared';
 import { adminKeys } from '@/lib/queryKeys';
 import type {
@@ -150,6 +151,7 @@ export default function AdminVerificationsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="Trust and safety"
         title="Verification queue"
         description={
           pendingCountError
@@ -158,7 +160,7 @@ export default function AdminVerificationsPage() {
         }
       />
 
-      <div className="flex flex-col gap-3 sm:flex-row">
+      <OpsToolbar>
         <SearchInput
           value={searchQuery}
           onValueChange={(value) => {
@@ -180,7 +182,7 @@ export default function AdminVerificationsPage() {
           searchable={false}
           className="w-full sm:w-44"
         />
-      </div>
+      </OpsToolbar>
 
       <Tabs
         value={statusFilter}
@@ -200,7 +202,7 @@ export default function AdminVerificationsPage() {
       </Tabs>
 
       {isLoading ? (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, index) => (
             <CardSkeleton key={index} />
           ))}
@@ -214,9 +216,17 @@ export default function AdminVerificationsPage() {
           isRetrying={isFetching}
         />
       ) : requests.length === 0 ? (
-        <EmptyState icon={ShieldCheck} title="No requests match your filters" />
+        <EmptyState
+          icon={ShieldCheck}
+          title="No requests match your filters"
+          description={
+            statusFilter === 'pending_review'
+              ? 'The queue is clear. New identity, property and licence checks appear here.'
+              : 'Try another applicant or subject, or clear the type and status filters.'
+          }
+        />
       ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {requests.map((request, index) => (
             <VerificationRequestCard
               key={request.id}

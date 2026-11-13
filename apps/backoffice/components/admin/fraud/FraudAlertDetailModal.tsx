@@ -14,6 +14,7 @@ import {
   type BadgeVariant,
 } from '@sureground/ui';
 import { EvidencePanel } from '@/components/shared/EvidencePanel';
+import { FactGrid, IconTile } from '@/components/admin/ops/OpsParts';
 import type {
   FraudAlertAiSignal,
   FraudAlertDetail,
@@ -30,19 +31,27 @@ const SEVERITY_OPTIONS: { value: FraudAlertSeverity; label: string }[] = [
   { value: 'critical', label: 'Critical' },
 ];
 
-const SEVERITY_CONFIG: Record<FraudAlertSeverity, { variant: BadgeVariant }> = {
-  low: { variant: 'neutral' },
-  medium: { variant: 'warning' },
-  high: { variant: 'warning' },
-  critical: { variant: 'danger' },
+const SEVERITY_CONFIG: Record<
+  FraudAlertSeverity,
+  { variant: BadgeVariant; tone: 'neutral' | 'warning' | 'danger' }
+> = {
+  low: { variant: 'neutral', tone: 'neutral' },
+  medium: { variant: 'warning', tone: 'warning' },
+  high: { variant: 'warning', tone: 'warning' },
+  critical: { variant: 'danger', tone: 'danger' },
 };
 
-const STATUS_CONFIG: Record<FraudAlertStatus, { label: string; icon: React.ElementType }> = {
-  flagged: { label: 'Flagged', icon: AlertTriangle },
-  investigating: { label: 'Investigating', icon: Search },
-  cleared: { label: 'Cleared', icon: ShieldCheck },
-  confirmed: { label: 'Confirmed', icon: ShieldAlert },
+const STATUS_CONFIG: Record<
+  FraudAlertStatus,
+  { label: string; icon: React.ElementType; variant: BadgeVariant }
+> = {
+  flagged: { label: 'Flagged', icon: AlertTriangle, variant: 'danger' },
+  investigating: { label: 'Investigating', icon: Search, variant: 'info' },
+  cleared: { label: 'Cleared', icon: ShieldCheck, variant: 'success' },
+  confirmed: { label: 'Confirmed', icon: ShieldAlert, variant: 'danger' },
 };
+
+const sectionLabel = 'text-2xs font-semibold uppercase tracking-wide text-muted-foreground';
 
 interface FraudAlertDetailModalProps {
   alert: FraudAlertDetail | null;
@@ -84,28 +93,33 @@ export const FraudAlertDetailModal = ({
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-lg overflow-hidden flex flex-col p-0">
-        <div className="p-4 border-b border-border shrink-0 pr-12">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <DialogTitle className="font-semibold text-foreground truncate">
+        <div className="shrink-0 border-b border-border px-5 py-4 pr-12">
+          <div className="flex items-start gap-3">
+            <IconTile tone={isTerminal ? 'neutral' : severity.tone}>
+              <AlertTriangle />
+            </IconTile>
+            <div className="min-w-0 flex-1">
+              <DialogTitle className="truncate font-semibold tracking-[-0.01em] text-foreground">
                 {alert.subject.legalName}
               </DialogTitle>
-              <p className="text-xs text-muted-foreground mt-0.5 capitalize">
-                {humaniseEnum(alert.subject.role)}
+              <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                <span className="capitalize">{humaniseEnum(alert.subject.role)}</span>
                 {alert.subject.email ? ` · ${alert.subject.email}` : ''}
                 {alert.subject.isVerified ? ' · verified' : ' · unverified'}
               </p>
-            </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <Badge variant={severity.variant}>{codeLabel(alert.severity)}</Badge>
-              <Badge variant="neutral" icon={<StatusIcon className="w-3.5 h-3.5" />}>
-                {status.label}
-              </Badge>
+              <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                <Badge variant={severity.variant} dot>
+                  {codeLabel(alert.severity)}
+                </Badge>
+                <Badge variant={status.variant} icon={<StatusIcon className="h-3 w-3" />}>
+                  {status.label}
+                </Badge>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        <div className="flex-1 space-y-4 overflow-y-auto px-5 py-4">
           {loading ? (
             <div className="space-y-3" role="status" aria-label="Loading alert detail">
               <Skeleton className="h-3 w-1/4" />
@@ -116,10 +130,8 @@ export const FraudAlertDetailModal = ({
           ) : (
             <>
               <div>
-                <p className="text-2xs font-semibold text-muted-foreground uppercase tracking-wide">
-                  Reason
-                </p>
-                <p className="text-sm text-foreground mt-0.5">{summary}</p>
+                <p className={sectionLabel}>Reason</p>
+                <p className="mt-1 text-sm leading-6 text-foreground">{summary}</p>
                 {alert.mediaReuse && <MatchedPlace media={alert.mediaReuse} />}
               </div>
 
@@ -127,36 +139,27 @@ export const FraudAlertDetailModal = ({
 
               {alert.aiSignal && <AiScanPanel signal={alert.aiSignal} />}
 
-              <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs text-muted-foreground rounded-lg bg-secondary/40 p-3">
-                {alert.subject.phone && (
-                  <p className="truncate">
-                    <span className="font-medium text-foreground">Phone:</span>{' '}
-                    {alert.subject.phone}
-                  </p>
-                )}
-                <p className="truncate">
-                  <span className="font-medium text-foreground">Role:</span>{' '}
-                  <span>{humaniseEnum(alert.subject.role)}</span>
-                </p>
-                {showRelated && (
-                  <p className="truncate">
-                    <span className="font-medium text-foreground">Related:</span>{' '}
-                    {codeLabel(alert.relatedEntityType)}
-                    {alert.relatedEntityId ? ` #${alert.relatedEntityId.slice(0, 8)}` : ''}
-                  </p>
-                )}
-                <p className="truncate">
-                  <span className="font-medium text-foreground">Detected:</span>{' '}
-                  {formatDateTime(alert.detectedAt)}
-                </p>
-                {alert.resolvedBy && (
-                  <p className="truncate col-span-2">
-                    <span className="font-medium text-foreground">Resolved by:</span>{' '}
-                    {alert.resolvedBy.legalName}
-                    {alert.resolvedAt ? ` · ${formatDateTime(alert.resolvedAt)}` : ''}
-                  </p>
-                )}
-              </div>
+              <FactGrid
+                className="rounded-lg border border-border bg-secondary/30 p-3"
+                facts={[
+                  { label: 'Role', value: humaniseEnum(alert.subject.role) },
+                  !!alert.subject.phone && { label: 'Phone', value: alert.subject.phone },
+                  { label: 'Detected', value: formatDateTime(alert.detectedAt) },
+                  showRelated && {
+                    label: 'Related',
+                    value: `${codeLabel(alert.relatedEntityType)}${
+                      alert.relatedEntityId ? ` #${alert.relatedEntityId.slice(0, 8)}` : ''
+                    }`,
+                  },
+                  alert.resolvedBy && {
+                    label: 'Resolved by',
+                    value: `${alert.resolvedBy.legalName}${
+                      alert.resolvedAt ? ` · ${formatDateTime(alert.resolvedAt)}` : ''
+                    }`,
+                    wide: true,
+                  },
+                ]}
+              />
 
               <EvidencePanel
                 evidence={alert.evidence ?? []}
@@ -170,9 +173,9 @@ export const FraudAlertDetailModal = ({
           )}
         </div>
 
-        <div className="p-4 border-t border-border shrink-0 space-y-3">
+        <div className="shrink-0 space-y-3 border-t border-border bg-secondary/30 px-5 py-4">
           <div className="flex items-center justify-between gap-3">
-            <p className="text-xs font-semibold text-foreground uppercase tracking-wide">
+            <p className="text-xs font-semibold uppercase tracking-wide text-foreground">
               Severity
             </p>
             <div className="w-40">
@@ -180,6 +183,7 @@ export const FraudAlertDetailModal = ({
                 value={alert.severity}
                 onValueChange={(value) => onSeverityChange(alert.id, value as FraudAlertSeverity)}
                 options={SEVERITY_OPTIONS}
+                ariaLabel="Severity"
                 className="w-full"
               />
             </div>

@@ -13,7 +13,7 @@ import { Button, EmptyState, ListSkeleton, PageErrorState } from '@sureground/ui
 type ActivityType = 'verification' | 'dispute' | 'fraud' | 'signup';
 
 const typeConfig: Record<ActivityType, { icon: React.ElementType; bg: string; color: string }> = {
-  verification: { icon: ShieldCheck, bg: 'bg-accent', color: 'text-primary' },
+  verification: { icon: ShieldCheck, bg: 'bg-primary/10', color: 'text-primary' },
   dispute: { icon: Gavel, bg: 'bg-warning-subtle', color: 'text-warning' },
   fraud: { icon: AlertTriangle, bg: 'bg-destructive-subtle', color: 'text-destructive' },
   signup: { icon: UserPlus, bg: 'bg-info-subtle', color: 'text-info' },
@@ -57,10 +57,18 @@ export const AdminActivityFeed = () => {
   const canShowMore = (activity?.length ?? 0) >= limit && limit < MAX;
 
   return (
-    <div className="bg-card rounded-2xl border border-border overflow-hidden">
-      <div className="p-4 border-b border-border">
-        <h3 className="font-semibold text-foreground">Recent activity</h3>
-        <p className="text-xs text-muted-foreground mt-0.5">
+    <section
+      aria-labelledby="admin-activity-title"
+      className="overflow-hidden rounded-xl border border-border bg-card shadow-xs"
+    >
+      <div className="border-b border-border px-5 py-3">
+        <h3
+          id="admin-activity-title"
+          className="text-sm font-semibold tracking-[-0.01em] text-foreground"
+        >
+          Recent activity
+        </h3>
+        <p className="mt-0.5 text-xs text-muted-foreground">
           Verifications, disputes, fraud alerts, and signups
         </p>
       </div>
@@ -86,10 +94,12 @@ export const AdminActivityFeed = () => {
             return (
               <div
                 key={item.id}
-                className="flex items-center gap-3 px-4 py-2.5 hover:bg-secondary transition-colors"
+                className="flex items-center gap-3 px-5 py-3 transition-colors duration-150 hover:bg-secondary/40"
               >
-                <div className={`p-2 rounded-lg ${config.bg} shrink-0`}>
-                  <Icon className={`w-4 h-4 ${config.color}`} />
+                <div
+                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${config.bg}`}
+                >
+                  <Icon className={`h-4 w-4 ${config.color}`} aria-hidden="true" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium text-foreground">{item.title}</p>
@@ -120,6 +130,6 @@ export const AdminActivityFeed = () => {
           </Button>
         </div>
       )}
-    </div>
+    </section>
   );
 };
