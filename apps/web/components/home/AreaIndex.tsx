@@ -32,7 +32,7 @@ export const AreaIndex = async () => {
           />
           <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-2">
             {CITIES.map((city) => (
-              <div key={city} className="min-w-0 border-t border-border pt-5">
+              <div key={city} className="min-w-0 border-t-2 border-primary pt-5">
                 <h3 className="font-display mb-4 text-2xl font-normal">{city}</h3>
                 <ul
                   className={`text-[0.9375rem] [&>li]:mb-2.5 ${city === 'Lagos' ? 'columns-2 gap-6' : ''}`}
@@ -41,7 +41,7 @@ export const AreaIndex = async () => {
                     <li key={area.name}>
                       <Link
                         href={hrefFor(area.name)}
-                        className="text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
+                        className="rounded-xs text-muted-foreground underline-offset-4 transition-colors hover:text-primary hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                       >
                         {area.name}
                       </Link>

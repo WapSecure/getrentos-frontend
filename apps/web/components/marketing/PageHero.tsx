@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { cn } from '@sureground/shared';
 import { Container } from './Container';
+import { Eyebrow } from './Eyebrow';
 
 interface PageHeroProps {
   eyebrow: ReactNode;
@@ -26,7 +27,7 @@ export const PageHero = ({
 }: PageHeroProps) => (
   <section aria-labelledby={id} className={cn('pt-24 pb-12 md:pt-32 md:pb-16', className)}>
     <Container className={cn(narrow && 'max-w-[860px]')}>
-      <p className="label-caps mb-5 text-muted-foreground">{eyebrow}</p>
+      <Eyebrow className="mb-5">{eyebrow}</Eyebrow>
       <h1
         id={id}
         className="max-w-[18ch] text-[2.5rem] leading-[1.04] font-light tracking-[-0.02em] text-balance sm:text-[3.25rem] lg:text-[4rem]"

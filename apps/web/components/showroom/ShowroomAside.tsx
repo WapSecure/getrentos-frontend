@@ -25,13 +25,15 @@ export function ShowroomAside({
   const { costs } = listing;
   return (
     <aside className="lg:sticky lg:top-24 lg:self-start" aria-label="Price and next steps">
-      <div className="space-y-5 rounded-2xl border border-border bg-card p-6 shadow-sm">
+      <div className="space-y-5 overflow-hidden rounded-md border border-border bg-card p-6 shadow-lg shadow-foreground/5">
+        {/* A thin brand rule across the top of the card. */}
+        <div aria-hidden="true" className="-mx-6 -mt-6 mb-1 h-1 bg-primary" />
         <div>
-          <p className="text-sm font-medium text-muted-foreground">{PRICE_LABEL[listing.market]}</p>
-          <p className="data-value text-3xl font-semibold tracking-[-0.025em] text-foreground">
+          <p className="text-sm font-semibold text-primary">{PRICE_LABEL[listing.market]}</p>
+          <p className="font-display data-value mt-1 text-[2.25rem] leading-tight font-normal tracking-[-0.015em] text-foreground">
             {formatCurrency(listing.price)}
             {listing.priceUnit && (
-              <span className="text-base font-normal text-muted-foreground">
+              <span className="font-sans text-base font-normal text-muted-foreground">
                 /{listing.priceUnit}
               </span>
             )}
@@ -57,7 +59,7 @@ export function ShowroomAside({
 
         <section
           aria-labelledby="costs-heading"
-          className="rounded-xl border border-border bg-secondary/40 p-4 text-sm"
+          className="rounded-md border border-border bg-secondary/40 p-4 text-sm"
         >
           <h2 id="costs-heading" className="font-semibold text-foreground">
             {listing.market === 'rent' ? 'What you pay to move in' : 'What you pay'}
@@ -102,7 +104,7 @@ export function ShowroomAside({
         </section>
 
         {listing.host && (
-          <div className="flex items-center gap-3 rounded-xl border border-border bg-secondary/40 p-4">
+          <div className="flex items-center gap-3 rounded-md border border-border bg-secondary/40 p-4">
             <div className="min-w-0 flex-1">
               <p className="text-xs text-muted-foreground">{listing.host.label}</p>
               <p className="truncate font-semibold text-foreground">{listing.host.name}</p>
@@ -115,7 +117,7 @@ export function ShowroomAside({
               ) : null}
             </div>
             {listing.host.verified && (
-              <ShieldCheck className="h-5 w-5 text-success" aria-label="Verified" />
+              <ShieldCheck className="h-5 w-5 text-primary" aria-label="Verified" />
             )}
           </div>
         )}
@@ -126,7 +128,7 @@ export function ShowroomAside({
             {PROTECTION_LINE[listing.market]}
           </p>
           <p className="flex items-start gap-2">
-            <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-success" aria-hidden="true" />
+            <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" aria-hidden="true" />
             Never pay outside Sureground or share sensitive financial details.
           </p>
         </div>

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { CreditCard, Eye, FileCheck, Lock, Shield, Users } from '@sureground/icons';
 import { Container } from '@/components/marketing/Container';
+import { IconTile } from '@/components/marketing/IconTile';
 import { SectionIntro } from '@/components/marketing/SectionIntro';
 
 // Only what the platform demonstrably does: no grade, licence, "AI" or round-the-clock claims.
@@ -48,7 +49,10 @@ export const TrustFacts = () => (
           <>
             The checks behind every verified mark and protected payment. Read how we handle your
             data in our{' '}
-            <Link href="/privacy" className="text-foreground underline underline-offset-4">
+            <Link
+              href="/privacy"
+              className="text-primary underline underline-offset-4 hover:text-primary-hover"
+            >
               privacy policy
             </Link>
             .
@@ -56,9 +60,9 @@ export const TrustFacts = () => (
         }
       />
       <ul className="grid gap-x-10 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
-        {FACTS.map(({ icon: Icon, title, body }) => (
+        {FACTS.map(({ icon, title, body }) => (
           <li key={title} className="border-t border-border pt-6">
-            <Icon className="mb-5 h-6 w-6 text-foreground" aria-hidden="true" />
+            <IconTile icon={icon} className="mb-5" />
             <h3 className="font-display mb-2 text-[1.375rem] font-normal">{title}</h3>
             <p className="text-[0.9375rem] leading-relaxed text-muted-foreground">{body}</p>
           </li>

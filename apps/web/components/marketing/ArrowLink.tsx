@@ -6,19 +6,20 @@ import { cn } from '@sureground/shared';
 interface ArrowLinkProps {
   href: string;
   children: ReactNode;
-  tone?: 'ink' | 'light';
+  /** `brand` (default) is Sureground blue; `light` sits on a photo or a blue band. */
+  tone?: 'brand' | 'light';
   className?: string;
 }
 
 /** Brik's text action: tracked capitals, an underline and a trailing arrow. */
-export const ArrowLink = ({ href, children, tone = 'ink', className }: ArrowLinkProps) => (
+export const ArrowLink = ({ href, children, tone = 'brand', className }: ArrowLinkProps) => (
   <Link
     href={href}
     className={cn(
-      'label-caps group inline-flex items-center gap-3 border-b pb-1.5 transition-colors',
-      tone === 'ink'
-        ? 'border-foreground/40 text-foreground hover:border-foreground'
-        : 'border-white/50 text-white hover:border-white',
+      'label-caps group inline-flex items-center gap-3 rounded-xs border-b pb-1.5 transition-colors focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring',
+      tone === 'brand'
+        ? 'border-primary/40 text-primary hover:border-primary hover:text-primary-hover'
+        : 'border-primary-foreground/60 text-primary-foreground hover:border-primary-foreground',
       className
     )}
   >

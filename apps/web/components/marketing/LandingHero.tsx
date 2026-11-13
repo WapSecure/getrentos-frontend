@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Container } from './Container';
+import { Eyebrow } from './Eyebrow';
 import { PhotoFrame } from './PhotoFrame';
 import type { MarketingPhoto } from './photos';
 
@@ -24,7 +25,7 @@ export const LandingHero = ({
   <section aria-labelledby={id} className="pt-24 pb-16 md:pt-32 md:pb-24">
     <Container className="grid items-end gap-10 md:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] md:gap-16">
       <div className="hero-rise">
-        <p className="label-caps mb-5 text-muted-foreground">{eyebrow}</p>
+        <Eyebrow className="mb-5">{eyebrow}</Eyebrow>
         <h1
           id={id}
           className="text-[2.5rem] leading-[1.04] font-light tracking-[-0.02em] text-balance sm:text-[3.25rem] lg:text-[4rem]"
