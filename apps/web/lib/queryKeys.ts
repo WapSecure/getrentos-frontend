@@ -262,6 +262,8 @@ export const homeManagementKeys = {
       ['home-management', 'utilities', 'meters', propertyId ?? 'all'] as const,
     supplyHours: (meterId: string) =>
       ['home-management', 'utilities', 'supply-hours', meterId] as const,
+    summary: (propertyId?: string) =>
+      ['home-management', 'utilities', 'summary', propertyId ?? 'all'] as const,
     waterTests: (propertyId?: string, page = 1) =>
       ['home-management', 'utilities', 'water-tests', propertyId ?? 'all', page] as const,
   },

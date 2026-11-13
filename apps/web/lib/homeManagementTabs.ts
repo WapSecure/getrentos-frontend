@@ -35,7 +35,7 @@ export function homeManagementTabHref(
 }
 
 /** The Utilities tab's own sub-view, kept in `view`. Power is the default. */
-export const UTILITIES_VIEWS = ['power', 'water'] as const;
+export const UTILITIES_VIEWS = ['power', 'water', 'spend'] as const;
 
 export type UtilitiesView = (typeof UTILITIES_VIEWS)[number];
 

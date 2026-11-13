@@ -14,9 +14,12 @@ import type {
   UtilityHealthNote,
   UtilityPurchase,
   UtilityPurchaseKind,
+  UtilitiesAnalytics,
+  UtilitiesSummary,
   WaterQualityTest,
   EvidenceDocument,
 } from '@sureground/shared';
+import { monthsBackFrom } from '@sureground/shared';
 import { authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
 
 const BASE = '/home-management/utilities';
@@ -124,6 +127,17 @@ export const utilitiesService = {
       `${BASE}/meters/${meterId}/supply-hours`,
       input,
       'PUT'
+    ),
+
+  /** Overview figures; `hasUtilityData` decides whether the tiles show at all. */
+  summary: (propertyId?: string) =>
+    safeCall(() => authFetch<UtilitiesSummary>(`${BASE}/summary${toQuery({ propertyId })}`)),
+  /** Recorded spend for the last `months` Lagos months, ending this month (24 at most). */
+  analytics: ({ propertyId, months = 12 }: { propertyId?: string; months?: number }) =>
+    safeCall(() =>
+      authFetch<UtilitiesAnalytics>(
+        `${BASE}/analytics${toQuery({ propertyId, from: monthsBackFrom(Math.min(Math.max(months, 1), 24)) })}`
+      )
     ),
 
   listWaterTests: (params: { propertyId?: string; page?: number; pageSize?: number } = {}) =>

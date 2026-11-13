@@ -5,6 +5,8 @@ import {
   CalendarClock,
   CheckCircle2,
   ChevronRight,
+  ClipboardCheck,
+  Power,
   ShieldAlert,
   ShieldCheck,
   TriangleAlert,
@@ -13,6 +15,12 @@ import {
 } from '@sureground/icons';
 import { NairaSign } from '@sureground/ui/NairaSign';
 import { Badge, Card, Skeleton } from '@sureground/ui';
+import {
+  formatLitres,
+  formatSpendOrNoData,
+  shouldShowUtilityTiles,
+  type UtilitiesSummary,
+} from '@sureground/shared';
 import { HomeManagementTimeline } from '@/components/home-management/HomeManagementTimeline';
 import { formatCurrency } from '@/lib/format';
 import type { HomeManagementTab } from '@/lib/homeManagementTabs';
@@ -36,6 +44,8 @@ interface HomeManagementOverviewProps {
   /** Narrowed to one client's home: portfolio totals would describe other clients, so they are left out. */
   scopePropertyId?: string;
   tabHref: (tab: HomeManagementTab) => string;
+  /** Power and water figures; the tiles stay hidden until something has been recorded. */
+  utilities?: UtilitiesSummary;
 }
 
 export function HomeManagementOverview({
@@ -43,6 +53,7 @@ export function HomeManagementOverview({
   isLoading,
   scopePropertyId,
   tabHref,
+  utilities,
 }: HomeManagementOverviewProps) {
   const scoped = Boolean(scopePropertyId);
   const emergencies = summary?.unacknowledgedEmergencies ?? 0;
@@ -89,7 +100,31 @@ export function HomeManagementOverview({
       icon: Wrench,
       tab: 'assets',
     },
+    {
+      id: 'generators-due',
+      count: utilities?.generatorsDue ?? 0,
+      title: plural(
+        utilities?.generatorsDue ?? 0,
+        'generator is due a service',
+        'generators are due a service'
+      ),
+      icon: Power,
+      tab: 'utilities',
+    },
+    {
+      id: 'water-failed',
+      count: utilities?.waterTestsFailedRecently ?? 0,
+      title: plural(
+        utilities?.waterTestsFailedRecently ?? 0,
+        'water test failed in the last 90 days',
+        'water tests failed in the last 90 days'
+      ),
+      icon: ClipboardCheck,
+      tab: 'utilities',
+      urgent: true,
+    },
   ];
+  const showUtilities = shouldShowUtilityTiles(utilities);
   const items = candidates.filter((item) => item.count > 0);
   const hasProperties = (summary?.propertiesTotal ?? 0) > 0;
 
@@ -229,6 +264,52 @@ export function HomeManagementOverview({
               .
             </p>
           </Card>
+          {showUtilities && utilities && (
+            <Card static className="mt-6 p-5">
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="text-sm font-medium text-muted-foreground">Power and water</h2>
+                <Link
+                  href={tabHref('utilities')}
+                  scroll={false}
+                  className="rounded-sm text-sm font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  Open utilities
+                </Link>
+              </div>
+              <dl className="mt-3 space-y-3 text-sm">
+                <div className="flex items-baseline justify-between gap-3">
+                  <dt className="text-muted-foreground">
+                    Recorded utility spend ({utilities.monthLabel.split(' ')[0]})
+                  </dt>
+                  <dd className="font-semibold tabular-nums text-foreground">
+                    {formatSpendOrNoData(utilities.spendThisMonth)}
+                  </dd>
+                </div>
+                <div className="flex items-baseline justify-between gap-3">
+                  <dt className="text-muted-foreground">Diesel this month</dt>
+                  <dd className="font-semibold tabular-nums text-foreground">
+                    {utilities.dieselLitresThisMonth !== null
+                      ? formatLitres(utilities.dieselLitresThisMonth)
+                      : utilities.dieselSpendThisMonth !== null
+                        ? formatSpendOrNoData(utilities.dieselSpendThisMonth)
+                        : 'No data yet'}
+                  </dd>
+                </div>
+                <div className="flex items-baseline justify-between gap-3">
+                  <dt className="text-muted-foreground">Generators due a service</dt>
+                  <dd className="font-semibold tabular-nums text-foreground">
+                    {utilities.generatorsTotal === 0 ? 'None recorded' : utilities.generatorsDue}
+                  </dd>
+                </div>
+              </dl>
+              {utilities.entriesThisMonth > 0 && (
+                <p className="mt-3 text-xs text-muted-foreground">
+                  Based on {utilities.entriesThisMonth} recorded{' '}
+                  {plural(utilities.entriesThisMonth, 'entry', 'entries')} this month.
+                </p>
+              )}
+            </Card>
+          )}
         </aside>
       )}
     </div>
