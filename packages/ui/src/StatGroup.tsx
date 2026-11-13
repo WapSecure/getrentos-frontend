@@ -27,6 +27,11 @@ interface StatGroupProps {
   footer?: ReactNode;
   action?: ReactNode;
   className?: string;
+  /**
+   * Caps the columns, for groups in a narrow column (e.g. 8 of 12) where five or six figures in a row
+   * would squeeze long amounts. Figures wrap onto further rows instead.
+   */
+  maxColumns?: 2 | 3;
 }
 
 // Written out in full: Tailwind only generates classes it finds as literals.
@@ -37,6 +42,11 @@ const COLUMNS: Record<number, string> = {
   4: 'sm:grid-cols-2 lg:grid-cols-4',
   5: 'sm:grid-cols-3 lg:grid-cols-5',
   6: 'sm:grid-cols-3 lg:grid-cols-6',
+};
+
+const CAPPED_COLUMNS: Record<2 | 3, string> = {
+  2: 'sm:grid-cols-2',
+  3: 'sm:grid-cols-2 lg:grid-cols-3',
 };
 
 function Figure({ item }: { item: StatGroupItem }) {
@@ -102,7 +112,7 @@ function Figure({ item }: { item: StatGroupItem }) {
 }
 
 /** Related figures in one panel, divided by hairlines, instead of a box per number. */
-export function StatGroup({ title, items, footer, action, className }: StatGroupProps) {
+export function StatGroup({ title, items, footer, action, className, maxColumns }: StatGroupProps) {
   return (
     <section
       aria-label={title}
@@ -116,7 +126,9 @@ export function StatGroup({ title, items, footer, action, className }: StatGroup
       <div
         className={cn(
           'grid grid-cols-1 gap-px bg-border [&>*]:bg-card',
-          COLUMNS[Math.min(items.length, 6)]
+          maxColumns && items.length > maxColumns
+            ? CAPPED_COLUMNS[maxColumns]
+            : COLUMNS[Math.min(items.length, 6)]
         )}
       >
         {items.map((item) => (

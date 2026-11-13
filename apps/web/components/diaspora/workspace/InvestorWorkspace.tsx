@@ -477,6 +477,7 @@ export const InvestorWorkspace = ({ portal }: { portal: InvestorPortal }) => {
               <StatGroup
                 title="Portfolio"
                 items={portfolio}
+                maxColumns={3}
                 footer={
                   <div className="space-y-2">
                     {valued && valued.valuations.length > 0 && (
