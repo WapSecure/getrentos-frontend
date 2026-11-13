@@ -2,16 +2,14 @@ import {
   MAINTENANCE_CATEGORY_CODES,
   MAINTENANCE_CATEGORY_LABELS,
   maintenanceCategoryLabel,
+  type DuplicateAcknowledgement,
+  type EvidenceDocument,
   type MaintenanceCategoryCode,
-} from '@sureground/shared';
-import type {
-  DuplicateAcknowledgement,
-  EvidenceDocument,
-  MaintenancePhoto,
-  WorkOrderEvidence,
-  WorkOrderFeedback,
-  WorkOrderFeedbackInput,
-  WorkOrderPhotoStage,
+  type MaintenancePhoto,
+  type WorkOrderEvidence,
+  type WorkOrderFeedback,
+  type WorkOrderFeedbackInput,
+  type WorkOrderPhotoStage,
 } from '@sureground/shared';
 import { apiFetch, apiUpload } from './client';
 import { appendFile, type PickedFile } from './documents';
