@@ -123,6 +123,7 @@ export default function OwnerDocumentsPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Records"
         title="Documents"
         description={
           <>

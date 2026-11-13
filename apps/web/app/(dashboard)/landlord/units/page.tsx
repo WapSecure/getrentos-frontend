@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  Badge,
   Button,
   EmptyState,
   Pagination,
@@ -12,7 +13,7 @@ import {
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, ReceiptText, Tag, DoorClosed } from '@sureground/icons';
+import { Plus, ReceiptText, Tag, DoorClosed, Building2, MapPin } from '@sureground/icons';
 import { UnitsTable } from '@/components/landlord/units/UnitsTable';
 import {
   RecordOccupierModal,
@@ -26,8 +27,14 @@ import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import { ListState } from '@/components/shared/ListState';
 import { landlordKeys } from '@/lib/queryKeys';
-import type { Unit } from '@/types/landlord';
-import { pluralize } from '@/lib/format';
+import type { Property, Unit } from '@/types/landlord';
+import {
+  RecordFacts,
+  RecordIconTile,
+  RecordToolbar,
+} from '@/components/shared/records/RecordParts';
+import { verificationBadges } from '@/lib/statusBadge';
+import { formatCurrency, pluralize } from '@/lib/format';
 
 const PAGE_SIZE = 10;
 
@@ -71,6 +78,8 @@ function LandlordUnitsPageContent() {
   });
   const properties = propertiesData?.items ?? [];
   const totalProperties = propertiesData?.total ?? 0;
+  const selectedProperty =
+    propertyFilter !== 'all' ? properties.find((p) => p.id === propertyFilter) : undefined;
 
   // One row, only for the portfolio-wide count.
   const { data: unitsSummaryData } = useQuery({
@@ -200,6 +209,7 @@ function LandlordUnitsPageContent() {
   return (
     <>
       <PageHeader
+        eyebrow="Portfolio"
         title="Units"
         description={
           <>
@@ -237,13 +247,15 @@ function LandlordUnitsPageContent() {
         }
       />
 
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+      {selectedProperty && <PropertySummary property={selectedProperty} />}
+
+      <RecordToolbar>
         <SearchInput
           value={searchQuery}
           onValueChange={setSearchQuery}
           placeholder="Search units or tenants..."
           label="Search units"
-          className="flex-1 max-w-sm"
+          className="flex-1 sm:max-w-sm"
         />
         <Select
           value={propertyFilter}
@@ -257,9 +269,9 @@ function LandlordUnitsPageContent() {
           ]}
           searchable={properties.length > 8}
           ariaLabel="Filter by property"
-          className="sm:w-56"
+          className="sm:ml-auto sm:w-56"
         />
-      </div>
+      </RecordToolbar>
 
       <ListState
         items={units}
@@ -267,7 +279,17 @@ function LandlordUnitsPageContent() {
         errorTitle="We couldn't load your units"
         skeletonClassName="h-16"
         skeletonRows={4}
-        empty={<EmptyState icon={DoorClosed} title="No units found" />}
+        empty={
+          <EmptyState
+            icon={DoorClosed}
+            title="No units found"
+            description={
+              properties.length === 0
+                ? 'Add a property first, then add its units here.'
+                : 'Units you add appear here with their tenant and rent.'
+            }
+          />
+        }
       >
         <UnitsTable
           units={units}
@@ -330,5 +352,48 @@ function LandlordUnitsPageContent() {
         properties={properties}
       />
     </>
+  );
+}
+
+/** The chosen property's title block and key facts, from the list already loaded for the filter. */
+function PropertySummary({ property }: { property: Property }) {
+  const verification = verificationBadges[property.verificationStatus];
+  const vacant = Math.max(property.totalUnits - property.occupiedUnits, 0);
+  return (
+    <section
+      aria-label={`${property.name} summary`}
+      className="mb-5 rounded-2xl border border-border bg-card p-4 shadow-xs sm:p-5"
+    >
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <RecordIconTile icon={Building2} />
+          <div className="min-w-0">
+            <h2 className="truncate text-base font-semibold text-foreground">{property.name}</h2>
+            <p className="mt-0.5 flex items-center gap-1 truncate text-xs text-muted-foreground">
+              <MapPin className="h-3.5 w-3.5 shrink-0 text-primary/70" aria-hidden="true" />
+              {property.city}, {property.state}
+            </p>
+          </div>
+        </div>
+        <Badge
+          variant={verification.variant}
+          icon={verification.icon ? <verification.icon className="h-3 w-3" /> : undefined}
+        >
+          {verification.label}
+        </Badge>
+      </div>
+      <RecordFacts
+        columns={3}
+        facts={[
+          { label: 'Units', value: property.totalUnits },
+          { label: 'Occupied', value: `${property.occupiedUnits} (${vacant} vacant)` },
+          {
+            label: 'Rent roll',
+            value: `${formatCurrency(property.annualRentRoll, { compact: true })}/yr`,
+            tone: 'brand',
+          },
+        ]}
+      />
+    </section>
   );
 }

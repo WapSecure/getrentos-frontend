@@ -270,6 +270,7 @@ export default function LandlordLegalCasesPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Compliance"
         title="Legal cases"
         description={
           <>

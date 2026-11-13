@@ -145,6 +145,7 @@ export default function LandlordListingsPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Portfolio"
         title="Listings"
         description={
           <>

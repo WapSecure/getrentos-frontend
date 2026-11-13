@@ -53,6 +53,7 @@ export default function OwnerReviewsPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Reputation"
         title="Reviews & reputation"
         description="See how buyers rate their experience with you"
       />

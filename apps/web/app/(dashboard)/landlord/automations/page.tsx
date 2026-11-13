@@ -24,6 +24,7 @@ export default function LandlordAutomationsPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Workflow"
         title="Automations"
         description="Reach your tenants with a one-off broadcast, saved templates or a recurring schedule."
       />

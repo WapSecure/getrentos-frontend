@@ -142,6 +142,7 @@ export default function OwnerAnalyticsPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Insights"
         title="Investment analytics"
         description="Figures from your records. We don't estimate property value yet."
         actions={

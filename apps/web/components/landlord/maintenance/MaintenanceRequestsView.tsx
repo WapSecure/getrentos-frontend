@@ -167,6 +167,7 @@ export function MaintenanceRequestsView() {
     <>
       {/* Zero is a claim about the portfolio, so wait until it has loaded. */}
       <PageHeader
+        eyebrow="Property care"
         title="Maintenance"
         description={
           !isLoadingSummary && summary
@@ -216,6 +217,11 @@ export function MaintenanceRequestsView() {
             filter === 'all'
               ? 'No maintenance requests yet'
               : `No ${filter.replace('_', ' ')} requests`
+          }
+          description={
+            filter === 'all'
+              ? 'Repair requests from your tenants appear here, ready to assign to a vendor.'
+              : undefined
           }
         />
       ) : (

@@ -5,6 +5,7 @@ import { Badge, Button, DataTable, EmptyState, type Column } from '@sureground/u
 import { formatCurrency, formatDate } from '@/lib/format';
 import { escrowStatusBadges, paymentStatusBadges, rentPayoutStatusBadges } from '@/lib/statusBadge';
 import type { RentPayment } from '@/types/landlord';
+import { RecordAvatar } from '@/components/shared/records/RecordParts';
 
 interface PaymentsTableProps {
   payments: RentPayment[];
@@ -17,7 +18,12 @@ export const PaymentsTable = ({ payments, onViewDetails }: PaymentsTableProps) =
       key: 'tenant',
       header: 'Tenant',
       render: (payment) => (
-        <span className="whitespace-nowrap font-medium text-foreground">{payment.tenantName}</span>
+        <span className="flex items-center gap-2.5">
+          <RecordAvatar name={payment.tenantName} size="sm" />
+          <span className="whitespace-nowrap font-medium text-foreground">
+            {payment.tenantName}
+          </span>
+        </span>
       ),
     },
     {
@@ -89,7 +95,7 @@ export const PaymentsTable = ({ payments, onViewDetails }: PaymentsTableProps) =
             {payout.label}
           </Badge>
         ) : (
-          <span className="text-muted-foreground">—</span>
+          <span className="text-muted-foreground">None</span>
         );
       },
     },
@@ -118,7 +124,15 @@ export const PaymentsTable = ({ payments, onViewDetails }: PaymentsTableProps) =
       columns={columns}
       data={payments}
       getRowKey={(payment) => payment.id}
-      emptyState={<EmptyState icon={ReceiptText} title="No payments found" />}
+      emptyState={
+        <EmptyState
+          icon={ReceiptText}
+          title="No payments found"
+          description="Rent payments appear here as tenants pay through Sureground."
+          size="compact"
+          bare
+        />
+      }
     />
   );
 };

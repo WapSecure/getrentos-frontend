@@ -130,6 +130,7 @@ export default function LandlordViewingRequestsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="Lettings"
         title="Viewing requests"
         description="Renters who want to see a property before applying. Confirm a time or decline."
       />

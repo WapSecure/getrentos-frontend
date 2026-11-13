@@ -1,11 +1,12 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ShieldCheck, ShieldAlert } from '@sureground/icons';
+import { Home, ShieldCheck, ShieldAlert } from '@sureground/icons';
 import { Badge, Card, Timeline } from '@sureground/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { cancelledBeforePayment } from '@/lib/saleCancellation';
 import { stepStates } from '@/lib/stepStates';
+import { RecordIconTile } from '@/components/shared/records/RecordParts';
 import type { EscrowSaleTransaction, SaleEscrowStatus } from '@/types/owner';
 
 // Only the states the backend drives a sale through: deposit → held → released.
@@ -49,17 +50,22 @@ export const EscrowTransactionCard = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
     >
-      <Card interactive className="p-4">
+      <Card interactive className="rounded-2xl p-4 hover:border-primary/30 sm:p-5">
         <button
           type="button"
           onClick={onClick}
           aria-label={`Open ${transaction.propertyName}`}
-          className="absolute inset-0 z-10 rounded-lg focus:outline-none"
+          className="absolute inset-0 z-10 rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
         />
         <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <h3 className="truncate font-semibold text-foreground">{transaction.propertyName}</h3>
-            <p className="truncate text-xs text-muted-foreground">Buyer: {transaction.buyerName}</p>
+          <div className="flex min-w-0 items-center gap-3">
+            <RecordIconTile icon={Home} />
+            <div className="min-w-0">
+              <h3 className="truncate font-semibold text-foreground">{transaction.propertyName}</h3>
+              <p className="truncate text-xs text-muted-foreground">
+                Buyer: {transaction.buyerName}
+              </p>
+            </div>
           </div>
           <Badge
             variant={
@@ -84,14 +90,14 @@ export const EscrowTransactionCard = ({
           </Badge>
         </div>
 
-        <p className="mt-3 text-lg font-bold text-primary">
+        <p className="data-value mt-4 text-lg font-bold text-primary">
           {formatCurrency(transaction.salePrice, { compact: true })}
         </p>
         {neverPaid && (
           <p className="text-xs text-muted-foreground">Cancelled before a deposit was paid</p>
         )}
 
-        <div className="mt-3">
+        <div className="mt-4 rounded-xl bg-secondary/60 px-3.5 py-3">
           <Timeline
             orientation="horizontal"
             aria-label="Payment progress"
@@ -101,7 +107,7 @@ export const EscrowTransactionCard = ({
               state: states[index],
             }))}
           />
-          <p className="mt-1.5 text-xs text-muted-foreground">
+          <p className="mt-2 text-xs text-muted-foreground">
             Opened {formatDate(transaction.createdAt)}
           </p>
         </div>

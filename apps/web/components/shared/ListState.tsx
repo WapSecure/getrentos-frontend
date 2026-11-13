@@ -18,6 +18,8 @@ interface ListStateProps {
   children: ReactNode;
   skeletonRows?: number;
   skeletonClassName?: string;
+  /** Replaces the plain bars with placeholders shaped like the real rows or cards. */
+  skeleton?: ReactNode;
   errorTitle?: string;
   errorDescription?: string;
 }
@@ -30,9 +32,18 @@ export const ListState = ({
   children,
   skeletonRows = 3,
   skeletonClassName = 'h-24',
+  skeleton,
   errorTitle = "We couldn't load this",
   errorDescription = 'This was a connection problem: nothing was lost. Try again.',
 }: ListStateProps) => {
+  if (query.isPending && skeleton) {
+    return (
+      <div role="status" aria-busy="true" aria-label="Loading">
+        {skeleton}
+      </div>
+    );
+  }
+
   if (query.isPending) {
     return (
       <div className="space-y-3" role="status" aria-busy="true" aria-label="Loading">
