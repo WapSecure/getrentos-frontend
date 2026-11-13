@@ -134,3 +134,39 @@ test('common asset categories imply their utility type', () => {
   assert.equal(utilityKindForCategory('Water treatment unit'), 'WATER_TREATMENT');
   assert.equal(utilityKindForCategory('Air conditioner'), null);
 });
+
+test('utility tiles appear only once something has been recorded', async () => {
+  const { shouldShowUtilityTiles } = await import('../src/homeUtilities/index.ts');
+  assert.equal(shouldShowUtilityTiles(undefined), false);
+  assert.equal(shouldShowUtilityTiles(null), false);
+  const base = {
+    propertyId: null,
+    month: '2026-11',
+    monthLabel: 'November 2026',
+    spendThisMonth: null,
+    entriesThisMonth: 0,
+    dieselLitresThisMonth: null,
+    dieselSpendThisMonth: null,
+    generatorsTotal: 0,
+    generatorsDue: 0,
+    generatorsDueSoon: 0,
+    waterTestsFailedRecently: 0,
+  };
+  assert.equal(shouldShowUtilityTiles({ ...base, hasUtilityData: false }), false);
+  assert.equal(shouldShowUtilityTiles({ ...base, hasUtilityData: true }), true);
+});
+
+test('nothing recorded reads "No data yet", never ₦0', async () => {
+  const { formatSpendOrNoData } = await import('../src/homeUtilities/index.ts');
+  assert.equal(formatSpendOrNoData(null), 'No data yet');
+  assert.equal(formatSpendOrNoData(undefined, 'None'), 'None');
+  assert.match(formatSpendOrNoData(0), /0/);
+  assert.match(formatSpendOrNoData(180000), /180,000/);
+});
+
+test('months are Lagos months and windows count back from this month', async () => {
+  const { lagosMonthKey, monthsBackFrom } = await import('../src/homeUtilities/index.ts');
+  assert.equal(lagosMonthKey(new Date('2026-10-31T23:30:00Z')), '2026-11');
+  assert.equal(monthsBackFrom(12, new Date('2026-11-13T12:00:00Z')), '2025-12');
+  assert.equal(monthsBackFrom(1, new Date('2026-11-13T12:00:00Z')), '2026-11');
+});

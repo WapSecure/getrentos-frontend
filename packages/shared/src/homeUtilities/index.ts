@@ -501,3 +501,83 @@ export function parseWholeNaira(input: string): number | null {
   const value = Number(cleaned);
   return Number.isSafeInteger(value) && value > 0 ? value : null;
 }
+
+// Analytics and the overview (PR2).
+
+export const UTILITY_SPEND_CATEGORIES = ['fuel', 'electricity', 'water', 'repairs'] as const;
+export type UtilitySpendCategory = (typeof UTILITY_SPEND_CATEGORIES)[number];
+
+export const UTILITY_SPEND_CATEGORY_LABELS: Record<UtilitySpendCategory, string> = {
+  fuel: 'Fuel',
+  electricity: 'Electricity',
+  water: 'Water',
+  repairs: 'Utility repairs',
+};
+
+/** Null means nothing was recorded, which is not the same as spending nothing. */
+export type UtilitySpendBucket = {
+  amount: number;
+  quantity: number | null;
+  entries: number;
+} | null;
+
+export type UtilitiesAnalytics = {
+  propertyId: string | null;
+  from: string;
+  to: string;
+  months: ({
+    month: string;
+    label: string;
+    total: number | null;
+  } & Record<UtilitySpendCategory, UtilitySpendBucket>)[];
+  totals: Record<UtilitySpendCategory, UtilitySpendBucket> & { total: number | null };
+  entriesCount: number;
+  dieselPricePerLitre: number | null;
+  unitsCount: number;
+  costPerUnit: number | null;
+};
+
+export type UtilitiesSummary = {
+  propertyId: string | null;
+  month: string;
+  monthLabel: string;
+  hasUtilityData: boolean;
+  spendThisMonth: number | null;
+  entriesThisMonth: number;
+  dieselLitresThisMonth: number | null;
+  dieselSpendThisMonth: number | null;
+  generatorsTotal: number;
+  generatorsDue: number;
+  generatorsDueSoon: number;
+  waterTestsFailedRecently: number;
+};
+
+/** The overview shows utility tiles only once something has been recorded, so a new owner never sees a row of ₦0. */
+export function shouldShowUtilityTiles(summary: UtilitiesSummary | null | undefined): boolean {
+  return summary?.hasUtilityData === true;
+}
+
+/** Naira for a recorded figure; "No data yet" when nothing was logged, never ₦0. */
+export function formatSpendOrNoData(
+  value: number | null | undefined,
+  empty = 'No data yet'
+): string {
+  if (value === null || value === undefined) return empty;
+  return new Intl.NumberFormat('en-NG', {
+    style: 'currency',
+    currency: 'NGN',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
+/** `YYYY-MM` of the Lagos month an instant falls in. */
+export function lagosMonthKey(value: Date = new Date()): string {
+  return new Date(value.getTime() + 60 * 60_000).toISOString().slice(0, 7);
+}
+
+/** The first month of a window of `count` months ending with the current Lagos month. */
+export function monthsBackFrom(count: number, now: Date = new Date()): string {
+  const [year, month] = lagosMonthKey(now).split('-').map(Number);
+  return new Date(Date.UTC(year, month - 1 - (count - 1), 1)).toISOString().slice(0, 7);
+}

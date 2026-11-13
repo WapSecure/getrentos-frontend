@@ -59,6 +59,8 @@ import {
   type HomeManagementVendor,
 } from '@/services/homeManagementService';
 import { ownerService } from '@/services/ownerService';
+import { utilitiesService } from '@/services/utilitiesService';
+import { formatSpendOrNoData, shouldShowUtilityTiles } from '@sureground/shared';
 import { propertyAuthorityService } from '@/services/propertyAuthorityService';
 
 const sectionFallback = () => <Skeleton className="h-48 w-full rounded-xl" />;
@@ -276,6 +278,14 @@ export function HomeManagementWorkspace({
     queryFn: () => unwrap(homeManagementService.getDashboard()),
   });
 
+  // Utilities figures follow the same rule: hidden while narrowed to one client, and tiles only once something is recorded.
+  const utilitiesQuery = useQuery({
+    queryKey: homeManagementKeys.utilities.summary(),
+    enabled: !scopePropertyId,
+    queryFn: () => unwrap(utilitiesService.summary()),
+  });
+  const utilities = utilitiesQuery.data;
+
   // A manager's assignable vendors are the owners' directories for the properties they control; assignment is still validated against each owner at write time.
   const vendorsQuery = useQuery({
     queryKey: [...homeManagementKeys.vendors, role],
@@ -346,17 +356,38 @@ export function HomeManagementWorkspace({
       icon: Wrench,
       href: tabHref('assets'),
     },
+    ...(shouldShowUtilityTiles(utilities)
+      ? [
+          {
+            label: `Utility spend (${utilities!.monthLabel.split(' ')[0]})`,
+            value: formatSpendOrNoData(utilities!.spendThisMonth),
+            icon: Zap,
+            href: tabHref('utilities'),
+          },
+          {
+            label: 'Generators due a service',
+            value: utilities!.generatorsDue,
+            icon: Wrench,
+            href: tabHref('utilities'),
+            attention: utilities!.generatorsDue > 0,
+          },
+        ]
+      : []),
   ];
   // Only server-calculated, portfolio-wide counts earn a badge; a paginated list's length would mislead.
   const tabCounts: Partial<Record<HomeManagementTab, number>> = scopePropertyId
     ? {}
-    : { 'work-orders': summary?.openWorkOrders, 'preventive-care': summary?.plansDue };
+    : {
+        'work-orders': summary?.openWorkOrders,
+        'preventive-care': summary?.plansDue,
+        utilities: utilities?.generatorsDue,
+      };
   const tabs: { id: HomeManagementTab; label: string; countLabel?: string }[] = [
     { id: 'overview', label: 'Overview' },
     { id: 'work-orders', label: 'Work orders', countLabel: 'open' },
     { id: 'preventive-care', label: 'Preventive care', countLabel: 'due' },
     { id: 'assets', label: 'Assets' },
-    { id: 'utilities', label: 'Utilities' },
+    { id: 'utilities', label: 'Utilities', countLabel: 'generators due a service' },
     { id: 'service-standards', label: 'Service standards' },
     { id: 'history', label: 'History & records' },
   ];
@@ -518,6 +549,7 @@ export function HomeManagementWorkspace({
             isLoading={dashboardQuery.isLoading}
             scopePropertyId={scopePropertyId}
             tabHref={tabHref}
+            utilities={utilities}
           />
         </TabsContent>
 

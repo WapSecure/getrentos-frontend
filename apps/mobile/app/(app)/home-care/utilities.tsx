@@ -16,11 +16,22 @@ import {
   PURCHASE_KIND_LABELS,
   formatKwh,
   formatLitres,
+  formatSpendOrNoData,
   generatorServiceLabel,
+  shouldShowUtilityTiles,
   type GeneratorServiceState,
   type UtilityPurchaseKind,
 } from '@sureground/shared';
-import { Card, Chip, ListSkeleton, Price, QueryState, Text, useTheme } from '@sureground/ui-native';
+import {
+  Card,
+  Chip,
+  ListSkeleton,
+  Price,
+  QueryState,
+  StatGroup,
+  Text,
+  useTheme,
+} from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { homeUtilitiesApi } from '@/lib/api/homeUtilities';
 import { formatDate } from '@/lib/format';
@@ -47,6 +58,11 @@ export default function Utilities() {
     queryKey: qk.homeCare.generators(propertyId || 'all'),
     queryFn: () => homeUtilitiesApi.generators(propertyId || undefined),
   });
+  const summary = useQuery({
+    queryKey: qk.homeCare.utilitiesSummary(propertyId || 'all'),
+    queryFn: () => homeUtilitiesApi.summary(propertyId || undefined),
+  });
+  const s = summary.data;
   const recent = useQuery({
     queryKey: qk.homeCare.purchases(propertyId || 'all', 'all'),
     queryFn: () => homeUtilitiesApi.purchases({ propertyId: propertyId || undefined }),
@@ -66,6 +82,7 @@ export default function Utilities() {
           refreshing={generators.isRefetching}
           onRefresh={() => {
             void generators.refetch();
+            void summary.refetch();
             void recent.refetch();
           }}
           tintColor={colors.mutedForeground}
@@ -101,6 +118,23 @@ export default function Utilities() {
             />
           ))}
         </ScrollView>
+      ) : null}
+
+      {s && shouldShowUtilityTiles(s) ? (
+        <StatGroup
+          title={s.monthLabel}
+          items={[
+            { label: 'Recorded spend', value: formatSpendOrNoData(s.spendThisMonth) },
+            {
+              label: 'Diesel',
+              value:
+                s.dieselLitresThisMonth !== null
+                  ? formatLitres(s.dieselLitresThisMonth)
+                  : 'No data yet',
+            },
+            { label: 'Generators due', value: s.generatorsDue, attention: s.generatorsDue > 0 },
+          ]}
+        />
       ) : null}
 
       <View style={{ gap: spacing.sm }}>

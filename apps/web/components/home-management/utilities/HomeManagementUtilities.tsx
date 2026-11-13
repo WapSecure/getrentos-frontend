@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { Droplets, Zap } from '@sureground/icons';
+import { BarChart3, Droplets, Zap } from '@sureground/icons';
 import type { UtilityPurchaseKind } from '@sureground/shared';
 import { SegmentedControl, Select } from '@sureground/ui';
 import { useCreateRequest } from '@/components/home-management/HomeManagementSectionHeading';
@@ -15,6 +15,7 @@ import {
 } from '@/lib/homeManagementTabs';
 import type { HomeManagementProperty } from '@/services/homeManagementService';
 import { PowerPanel } from './PowerPanel';
+import { UtilitySpendPanel } from './UtilitySpendPanel';
 import { WaterPanel } from './WaterPanel';
 import { propertyName } from './utilityForm';
 
@@ -73,6 +74,7 @@ export function HomeManagementUtilities({
           segments={[
             { value: 'power', label: 'Power', icon: <Zap className="h-4 w-4" /> },
             { value: 'water', label: 'Water', icon: <Droplets className="h-4 w-4" /> },
+            { value: 'spend', label: 'Spend', icon: <BarChart3 className="h-4 w-4" /> },
           ]}
         />
         {!scopePropertyId && properties.length > 1 && (
@@ -92,7 +94,9 @@ export function HomeManagementUtilities({
         )}
       </div>
 
-      {view === 'power' ? (
+      {view === 'spend' ? (
+        <UtilitySpendPanel propertyId={propertyId} />
+      ) : view === 'power' ? (
         <PowerPanel
           propertyId={propertyId}
           properties={properties}

@@ -10,6 +10,7 @@ import type {
   UtilityGenerator,
   UtilityPurchase,
   UtilityPurchaseKind,
+  UtilitiesSummary,
   WaterQualityTest,
 } from '@sureground/shared';
 import { apiFetch, apiUpload } from './client';
@@ -32,6 +33,9 @@ export function dayToInstant(day: string, now: Date = new Date()): string {
 
 /** Power and water records, captured on site. Meter numbers arrive as the last 4 digits only. */
 export const homeUtilitiesApi = {
+  /** This month's recorded spend and generators due; `hasUtilityData` is false until something is logged. */
+  summary: (propertyId?: string) =>
+    apiFetch<UtilitiesSummary>(`${BASE}/summary${toQuery({ propertyId })}`),
   generators: (propertyId?: string) =>
     apiFetch<UtilityGenerator[]>(`${BASE}/generators${toQuery({ propertyId })}`),
   readings: (assetId: string) =>
