@@ -214,6 +214,24 @@ describe('public marketplace normalisation', () => {
     });
   });
 
+  it('never shows land approved with conditions as verified', async () => {
+    const plot = (id: string, status: string) => ({
+      id,
+      title: id,
+      city: 'Lekki',
+      state: 'Lagos',
+      price: 18000000,
+      isVerified: true,
+      diligence: { status },
+    });
+    fetchMock.mockResolvedValueOnce(page([plot('a', 'CONDITIONAL'), plot('b', 'VERIFIED')]));
+    const { items } = await publicMarketApi.list('land', {});
+    expect(items.map((i) => [i.id, i.verified])).toEqual([
+      ['a', false],
+      ['b', true],
+    ]);
+  });
+
   it('keeps the server’s shortlet order: sorting is the API’s job now', async () => {
     const stay = (id: string, nightlyRate: number) => ({
       id,

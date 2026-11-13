@@ -1,4 +1,4 @@
-import { formatLocation } from '@sureground/shared';
+import { formatLocation, isListingVerified } from '@sureground/shared';
 import type { PropertyTrustChain } from '@/types/renter';
 // Pure: maps each market's public card from the API into one shape for ListingCard. Server-safe.
 import type { ListingPriceUnit } from '@sureground/ui/ListingCard';
@@ -56,6 +56,7 @@ export interface LandCardApi {
   city: string;
   state: string;
   isVerified?: boolean;
+  diligence?: { status?: string };
   coverImageUrl?: string;
   imageVariants?: ImageVariant[];
   imagePreview?: ImagePreview;
@@ -102,7 +103,8 @@ export const fromLandCard = (l: LandCardApi): MarketCard => ({
   image: l.coverImageUrl,
   imageSrcSet: srcSetOf(l.imageVariants),
   imagePreview: imagePreviewOf(l.imagePreview),
-  verified: l.isVerified,
+  // Approved with conditions (CONDITIONAL) is never verified.
+  verified: isListingVerified(l),
   size:
     l.parcel?.areaValue != null
       ? `${l.parcel.areaValue.toLocaleString('en-NG')} ${AREA_UNIT[l.parcel.areaUnit ?? ''] ?? ''}`.trim()

@@ -293,7 +293,8 @@ const landToCard = (l: LandListing): MarketCard => ({
   location: place(l.city, l.state),
   price: money(l.price),
   image: l.coverImageUrl || l.galleryImageUrls?.[0] || undefined,
-  verified: !!l.isVerified,
+  // Approved with conditions (CONDITIONAL) is never verified.
+  verified: isListingVerified(l),
   highlight: [
     l.parcel ? formatLandArea(l.parcel.areaValue, l.parcel.areaUnit) : undefined,
     l.parcel?.titleType ? LAND_TITLE_TYPE_LABEL[l.parcel.titleType] : undefined,

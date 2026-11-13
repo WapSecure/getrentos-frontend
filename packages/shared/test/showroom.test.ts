@@ -144,11 +144,18 @@ test('land: parcel facts with units; missing parcel gives no area', () => {
   assert.equal(get('Depth'), undefined);
   assert.equal(get('Road access'), 'No');
   assert.equal(get('Title'), 'Certificate of Occupancy');
-  assert.equal(get('Due diligence'), 'Verified with conditions');
+  assert.equal(get('Due diligence'), 'Approved with conditions');
   assert.equal(
     fromLand({ id: 'l', title: 'x', price: 1 }).facts.find((f) => f.label === 'Area'),
     undefined
   );
+});
+
+test('land approved with conditions never shows as verified; unconditional land does', () => {
+  const land = (status: 'CONDITIONAL' | 'VERIFIED') =>
+    fromLand({ id: 'l', title: 'x', price: 1, isVerified: true, diligence: { status } });
+  assert.equal(land('CONDITIONAL').verified, false);
+  assert.equal(land('VERIFIED').verified, true);
 });
 
 test('rental: stated fees join the move-in total; a zero is stated, not missing', () => {
