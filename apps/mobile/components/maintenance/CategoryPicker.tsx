@@ -1,3 +1,4 @@
+import { createElement, type ComponentProps } from 'react';
 import { View } from 'react-native';
 import {
   Droplets,
@@ -41,8 +42,13 @@ const ICONS: Record<MaintenanceCategoryIconName, typeof Wrench> = {
   Zap,
 };
 
-export const maintenanceCategoryIcon = (category: string | null | undefined) =>
-  ICONS[maintenanceCategoryIconName(category)];
+/** Decorative category icon; the category name always sits next to it. */
+export function MaintenanceCategoryIcon({
+  category,
+  ...props
+}: { category: string | null | undefined } & ComponentProps<typeof Wrench>) {
+  return createElement(ICONS[maintenanceCategoryIconName(category)], props);
+}
 
 /**
  * Grouped category chips with icons. `lowercase` returns the renter routes' lowercase codes;
@@ -71,7 +77,6 @@ export function CategoryPicker<T extends string>({
             {group.categories.map((code) => {
               const key = (lowercase ? code.toLowerCase() : code) as T;
               const selected = value === key;
-              const Icon = ICONS[maintenanceCategoryIconName(code)];
               return (
                 <Chip
                   key={code}
@@ -79,7 +84,11 @@ export function CategoryPicker<T extends string>({
                   label={MAINTENANCE_CATEGORY_LABELS[code]}
                   selected={selected}
                   leadingIcon={
-                    <Icon size={14} color={selected ? colors.primary : colors.mutedForeground} />
+                    <MaintenanceCategoryIcon
+                      category={code}
+                      size={14}
+                      color={selected ? colors.primary : colors.mutedForeground}
+                    />
                   }
                   onPress={() => onChange(key)}
                 />

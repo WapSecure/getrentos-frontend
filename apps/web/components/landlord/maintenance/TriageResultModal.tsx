@@ -15,7 +15,7 @@ import {
 } from '@sureground/ui';
 import { maintenanceCategoryLabel } from '@sureground/shared';
 import {
-  maintenanceCategoryIcon,
+  MaintenanceCategoryIcon,
   maintenanceCategorySelectOptions,
 } from '@/components/renter/maintenance/MaintenanceCategoryIcon';
 import { maintenancePriorityBadges } from '@/lib/statusBadge';
@@ -107,13 +107,15 @@ const TriageBody = ({
   const canDecide = Boolean(onDecide && triage.reviewId);
 
   const urgency = triage.urgency.toLowerCase() as MaintenancePriority;
-  const CategoryIcon = maintenanceCategoryIcon(triage.category);
   const priority = maintenancePriorityBadges[urgency] ?? maintenancePriorityBadges.low;
 
   return (
     <div className="p-4 space-y-4">
       <div className="flex flex-wrap items-center gap-2">
-        <Badge variant="neutral" icon={<CategoryIcon className="w-3 h-3" />}>
+        <Badge
+          variant="neutral"
+          icon={<MaintenanceCategoryIcon category={triage.category} className="w-3 h-3" />}
+        >
           {maintenanceCategoryLabel(triage.category)}
         </Badge>
         <Badge variant={priority.variant}>{priority.label}</Badge>

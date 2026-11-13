@@ -1,3 +1,4 @@
+import { createElement } from 'react';
 import {
   Droplets,
   Gauge,
@@ -52,8 +53,10 @@ export const MaintenanceCategoryIcon = ({
   category: string | null | undefined;
   className?: string;
 }) => {
-  const Icon = maintenanceCategoryIcon(category);
-  return <Icon className={className} aria-hidden />;
+  return createElement(ICONS[maintenanceCategoryIconName(category)], {
+    className,
+    'aria-hidden': true,
+  });
 };
 
 /**
