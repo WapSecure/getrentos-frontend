@@ -27,3 +27,19 @@ export interface DiasporaQueueItem {
   assignedTo?: { id: string; name: string };
   link: { app: 'backoffice'; path: string };
 }
+
+/** Deadline windows in Lagos days; `today` and `week` leave out overdue items. */
+export type DiasporaQueueDue = 'overdue' | 'today' | 'week';
+
+/**
+ * The workload in the current scope (kind, investor, search). Each figure is what its filter would
+ * list with the other filters as they are.
+ */
+export interface DiasporaQueueSummary {
+  overdue: number;
+  dueToday: number;
+  /** Today and the six Lagos days after it, overdue items not included. */
+  dueThisWeek: number;
+  unassigned: number;
+  mine: number;
+}

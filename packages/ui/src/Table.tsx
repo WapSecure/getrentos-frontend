@@ -40,6 +40,11 @@ interface DataTableProps<T> {
   minWidth?: string;
   /** `bare` sits inside a Card that already draws the frame. */
   variant?: 'card' | 'bare';
+  /**
+   * Caps the table's height (any CSS length) and scrolls its body inside the frame, so the
+   * header row stays in view on a long list. Left out, the table grows with its rows.
+   */
+  maxHeight?: string;
 }
 
 const alignClass = (column: { align?: string; numeric?: boolean }) =>
@@ -66,6 +71,7 @@ export function DataTable<T>({
   density = 'comfortable',
   minWidth,
   variant = 'card',
+  maxHeight,
 }: DataTableProps<T>) {
   const cellY = density === 'compact' ? 'py-2.5' : 'py-3.5';
   if (isLoading) {
@@ -83,10 +89,15 @@ export function DataTable<T>({
         className
       )}
     >
-      <div className="overflow-x-auto" tabIndex={0}>
+      <div
+        className={maxHeight ? 'overflow-auto overscroll-contain' : 'overflow-x-auto'}
+        style={maxHeight ? { maxHeight } : undefined}
+        tabIndex={0}
+      >
         <table className="w-full text-sm" style={minWidth ? { minWidth } : undefined}>
           {caption && <caption className="sr-only">{caption}</caption>}
-          <thead className="sticky top-0 z-10">
+          {/* Opaque under the tinted row when the body scrolls beneath it. */}
+          <thead className={cn('sticky top-0 z-10', maxHeight && 'bg-card')}>
             <tr className="border-b border-border bg-secondary/40 text-left backdrop-blur-sm">
               {columns.map((column) => (
                 <th
