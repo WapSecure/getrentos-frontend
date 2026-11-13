@@ -78,7 +78,7 @@ export default function EstateStaffPage() {
         title="Staff"
         description={
           <>
-            {total} gateman{total === 1 ? '' : 'men'} at {estate.name}
+            {total} {total === 1 ? 'gateman' : 'gatemen'} at {estate.name}
           </>
         }
         actions={

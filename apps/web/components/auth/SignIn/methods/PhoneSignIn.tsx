@@ -224,7 +224,7 @@ export const PhoneSignIn = ({
                 touchedFields.identifier && !errors.identifier ? 'border-success' : undefined
               }
               inputClassName="py-3"
-              placeholder="+1 234 567 8900"
+              placeholder="0803 123 4567"
               trailingIcon={
                 touchedFields.identifier && !errors.identifier ? (
                   <CheckCircle className="w-5 h-5 text-success" aria-hidden="true" />

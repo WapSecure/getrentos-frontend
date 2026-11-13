@@ -13,7 +13,12 @@ import {
   Toast,
 } from '@sureground/ui';
 import { LandPlot, UsersRound } from '@sureground/icons';
-import { personContactLabel } from '@sureground/shared';
+import {
+  humaniseStatus,
+  LAND_PURCHASE_STATUS_LABELS,
+  personContactLabel,
+  PROTECTED_PAYMENT_STATUS_LABELS,
+} from '@sureground/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency } from '@/lib/format';
 import { representativeKeys, representativeService } from '@/services/representativeService';
@@ -64,7 +69,9 @@ const PrincipalDeals = ({ appointment }: { appointment: LandRepresentativeAppoin
             </span>
             <span className="flex gap-1.5">
               {p.youApprovePayments && <Badge variant="info">You approve payments</Badge>}
-              <Badge variant="neutral">{p.status.toLowerCase().replace(/_/g, ' ')}</Badge>
+              <Badge variant="neutral">
+                {LAND_PURCHASE_STATUS_LABELS[p.status] ?? humaniseStatus(p.status)}
+              </Badge>
             </span>
           </Link>
         </li>
@@ -83,7 +90,9 @@ const PrincipalDeals = ({ appointment }: { appointment: LandRepresentativeAppoin
             </span>
             <span className="flex gap-1.5">
               {t.youApprovePayments && <Badge variant="info">You approve payments</Badge>}
-              <Badge variant="neutral">{t.escrowStatus.toLowerCase().replace(/_/g, ' ')}</Badge>
+              <Badge variant="neutral">
+                {PROTECTED_PAYMENT_STATUS_LABELS[t.escrowStatus] ?? humaniseStatus(t.escrowStatus)}
+              </Badge>
             </span>
           </Link>
         </li>

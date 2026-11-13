@@ -147,7 +147,9 @@ export const ConditionsPanel = ({
           );
         })}
       </ul>
-      <p className="text-xs text-muted-foreground">{conditions[0].remedy}</p>
+      {conditions.some((c) => c.status !== 'SATISFIED' && c.status !== 'WAIVED') && (
+        <p className="text-xs text-muted-foreground">{conditions[0].remedy}</p>
+      )}
 
       {checklist && checklist.length > 0 && (
         <div>

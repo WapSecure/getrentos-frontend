@@ -34,10 +34,14 @@ export const RenterStatsCards = () => {
     queryKey: renterKeys.lease,
     queryFn: () => unwrap(renterService.getLease()),
   });
-  const leaseStatus = lease ? lease.status.charAt(0).toUpperCase() + lease.status.slice(1) : '—';
-  const leaseEndLabel = lease?.endDate
-    ? `Ends ${new Date(lease.endDate).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}`
-    : t('dashboard.stats.current_lease_subtitle');
+  const leaseStatus = lease
+    ? lease.status.charAt(0).toUpperCase() + lease.status.slice(1)
+    : t('dashboard.stats.no_lease');
+  const leaseEndLabel = !lease
+    ? t('dashboard.stats.no_lease_subtitle')
+    : lease.endDate
+      ? `Ends ${new Date(lease.endDate).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}`
+      : t('dashboard.stats.current_lease_subtitle');
 
   const {
     data: paymentsData,
