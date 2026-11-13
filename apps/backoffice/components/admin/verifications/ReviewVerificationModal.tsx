@@ -10,6 +10,7 @@ import { DocumentPreviewButton } from '@sureground/ui';
 import { formatDate, humaniseCodesInText, unwrap } from '@sureground/shared';
 import { adminService } from '@/services/adminService';
 import { OwnershipDocCheckPanel } from '@/components/admin/verifications/OwnershipDocCheckPanel';
+import { ListingWarningsPanel } from '@/components/admin/verifications/ListingWarningsPanel';
 import type { VerificationRequest } from '@/types/admin';
 import { useAdminCan } from '@/hooks/useAdminCan';
 import { roleLabel } from '@/lib/roleLabels';
@@ -58,6 +59,7 @@ export const ReviewVerificationModal = ({
   const documents = detail?.documents ?? [];
   const media = detail?.media ?? [];
   const detailUnavailable = detailLoading || detailError;
+  const listingWarnings = request?.type === 'property' ? (detail?.listingWarnings ?? []) : [];
 
   const handleClose = () => {
     if (isSubmitting) return;
@@ -226,6 +228,7 @@ export const ReviewVerificationModal = ({
                       </ul>
                     </Alert>
                   ) : null}
+                  <ListingWarningsPanel warnings={listingWarnings} />
                   {request.type === 'property' && detail?.ownershipProofs?.length ? (
                     <OwnershipDocCheckPanel
                       proofs={detail.ownershipProofs}
@@ -294,7 +297,13 @@ export const ReviewVerificationModal = ({
                       className="flex-1 gap-1.5"
                       onClick={handleApprove}
                       isLoading={isApproving}
-                      disabled={isSubmitting || detailUnavailable}
+                      // The server refuses it too; the panel above says what to resolve first.
+                      disabled={isSubmitting || detailUnavailable || listingWarnings.length > 0}
+                      title={
+                        listingWarnings.length > 0
+                          ? 'Resolve the automated listing warning first'
+                          : undefined
+                      }
                     >
                       <Check className="w-3.5 h-3.5" />
                       Approve

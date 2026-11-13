@@ -436,6 +436,7 @@ test.beforeEach(async ({ page }, testInfo) => {
       '/admin/verifications': empty,
       '/admin/disputes': empty,
       '/admin/fraud-alerts': empty,
+      '/admin/ai/reviews/listing-warnings': [],
       '/admin/client-money/reconciliation': {
         rows: [],
         attestation: null,

@@ -168,7 +168,44 @@ export interface VerificationRequest {
   media?: VerificationDocument[];
   ownershipProofs?: OwnershipProofRef[];
   approvalRisk?: { reasons: string[]; secondOfficerRequired: boolean };
+  /** Properties only: automated listing warnings nobody has decided yet. Approving is refused while any remain. */
+  listingWarnings?: ListingWarning[];
 }
+
+export interface ListingWarningReason {
+  code: string;
+  /** Worded as the renter sees it. */
+  text: string;
+}
+
+/** An automated listing check scoring 40 or more that no person has cleared or upheld yet. */
+export interface ListingWarning {
+  reviewId: string;
+  listingId: string;
+  propertyId: string;
+  score: number;
+  reasons: ListingWarningReason[];
+  scannedAt: string;
+  fraudAlertId: string | null;
+}
+
+export interface ListingWarningQueueItem {
+  reviewId: string;
+  listingId: string;
+  listingTitle: string;
+  propertyId: string | null;
+  propertyTitle: string | null;
+  propertyVerifiedAt: string | null;
+  /** Arrived after the property was verified, so "verified" is showing beside it. */
+  arrivedAfterVerification: boolean;
+  score: number;
+  reasons: ListingWarningReason[];
+  scannedAt: string;
+  /** An open fraud alert carries it: decide the alert and the warning follows. */
+  openFraudAlertId: string | null;
+}
+
+export type ListingWarningDecision = 'clear' | 'uphold';
 
 export interface OwnershipProofRef {
   id: string;
