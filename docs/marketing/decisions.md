@@ -176,3 +176,13 @@ PR links: `https://github.com/WapSecure/getrentos-frontend/pull/<n>`.
 - Private return and invitation screens (`/payments`, `/billing`, `/agency-invite`, `/auth`, `/representing`) are blocked in robots.txt and carry `noindex, nofollow`.
 - Benchmark support: Property Finder blocks filter-parameter combinations but leaves listing and community URLs crawlable (see `competitor-benchmark.md` §7).
 - Revisit if server-rendered pagination is added: then `?page=N` can become indexable with a self canonical.
+
+## D13. Audience-led main navigation
+
+**Date:** 13 Nov 2026 · **Status:** Accepted
+
+- **Before:** the top bar held five discovery links (Buy, Rent, Short stays, Land, Off-plan) and hid Sell, Property management and Diaspora in More, so sellers, landlords, owners and Nigerians abroad (the supply side and the highest-value audience) had no visible entry.
+- **Now:** Buy, Rent, Sell, Manage (`/home-management`), Diaspora (only while the service is on, D10), then More: Short stays, Land, Off-plan, Estates, Detty December, Let, Realtors and agencies, Guides, Pricing, About. The mobile menu uses the same two lists ("Main" and "More").
+- **Why:** the brief's navigation names the audiences (buy, rent, sell, manage, invest from abroad); Property Finder's top level also carries "Sell your property" and "Find agents" (benchmark §7). Short stays and Land remain one tap away and are also tabs in the homepage hero search, so discovery of those markets is kept.
+- **Fit:** the bar uses fewer characters than before (25 against 30 in tracked capitals). Measured at a real 1,025 px viewport: More ends at 483 px and the centred logo starts at 499 px.
+- **Revisit** when analytics (analytics-plan.md) has 28+ days of nav click data per item.
