@@ -1,25 +1,21 @@
+import {
+  MAINTENANCE_CATEGORY_CODES,
+  MAINTENANCE_CATEGORY_LABELS,
+  type MaintenanceCategoryKey,
+} from '@sureground/shared';
 import { apiFetch, apiUpload } from './client';
 import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
 
-export const MAINTENANCE_CATEGORIES = [
-  'plumbing',
-  'electrical',
-  'internet',
-  'security',
-  'appliances',
-  'other',
-] as const;
-export type MaintenanceCategory = (typeof MAINTENANCE_CATEGORIES)[number];
+/** Lowercase codes, as the renter routes take them, in the shared grouped order. */
+export const MAINTENANCE_CATEGORIES = MAINTENANCE_CATEGORY_CODES.map(
+  (code) => code.toLowerCase() as MaintenanceCategoryKey
+);
+export type MaintenanceCategory = MaintenanceCategoryKey;
 
-export const MAINTENANCE_CATEGORY_LABEL: Record<MaintenanceCategory, string> = {
-  plumbing: 'Plumbing',
-  electrical: 'Electrical',
-  internet: 'Internet',
-  security: 'Security',
-  appliances: 'Appliances',
-  other: 'Other',
-};
+export const MAINTENANCE_CATEGORY_LABEL = Object.fromEntries(
+  MAINTENANCE_CATEGORY_CODES.map((code) => [code.toLowerCase(), MAINTENANCE_CATEGORY_LABELS[code]])
+) as Record<MaintenanceCategory, string>;
 
 export const MAINTENANCE_PRIORITIES = ['low', 'medium', 'high', 'urgent'] as const;
 export type MaintenancePriority = (typeof MAINTENANCE_PRIORITIES)[number];

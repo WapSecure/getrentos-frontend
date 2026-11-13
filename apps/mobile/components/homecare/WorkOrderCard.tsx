@@ -1,7 +1,7 @@
 import { Pressable, View } from 'react-native';
 import { humaniseEnum } from '@sureground/shared';
 import { router } from 'expo-router';
-import { AlertTriangle, ChevronRight, Clock, Siren, Wrench } from '@sureground/icons/native';
+import { AlertTriangle, ChevronRight, Clock, Siren } from '@sureground/icons/native';
 import { Badge, Card, Text, useTheme } from '@sureground/ui-native';
 import {
   STATUS_LABEL,
@@ -11,6 +11,7 @@ import {
   type WorkOrder,
   type WorkOrderStatus,
 } from '@/lib/api/homeCare';
+import { maintenanceCategoryIcon } from '@/components/maintenance/CategoryPicker';
 import { haptics } from '@/lib/haptics';
 import { StatusPill, type Tone } from '@/components/host/HostUI';
 
@@ -30,6 +31,7 @@ export function PriorityTag({ p }: { p: Priority }) {
 /** `from="managed"`: the owner opened it from Managed, so the detail reads through the owner route. */
 export function WorkOrderCard({ w, from }: { w: WorkOrder; from?: 'managed' }) {
   const { colors, spacing } = useTheme();
+  const CategoryIcon = maintenanceCategoryIcon(w.category);
   const sla = slaState(w);
   const where = [w.unit.property?.title, w.unit.unitName].filter(Boolean).join(' · ');
   return (
@@ -50,7 +52,7 @@ export function WorkOrderCard({ w, from }: { w: WorkOrder; from?: 'managed' }) {
             {w.isEmergency ? (
               <Siren size={18} color={colors.destructive} style={{ marginTop: 2 }} />
             ) : (
-              <Wrench size={18} color={colors.mutedForeground} style={{ marginTop: 2 }} />
+              <CategoryIcon size={18} color={colors.mutedForeground} style={{ marginTop: 2 }} />
             )}
             <View style={{ flex: 1, gap: 2 }}>
               <Text variant="bodyStrong" numberOfLines={2}>

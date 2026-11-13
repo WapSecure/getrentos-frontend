@@ -11,6 +11,7 @@ import { Skeleton } from '@sureground/ui';
 import { Pagination } from '@sureground/ui';
 import { Select } from '@sureground/ui';
 import { useToast } from '@sureground/ui';
+import { maintenanceCategoryLabel } from '@sureground/shared';
 import { HomeManagementSectionHeading } from '@/components/home-management/HomeManagementSectionHeading';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
@@ -311,7 +312,7 @@ export function HomeManagementEscalationQueue({
                           </span>
                           <span className="inline-flex items-center gap-1.5">
                             <BellRing className="h-3.5 w-3.5" />
-                            {escalation.category.replace(/_/g, ' ')}
+                            {maintenanceCategoryLabel(escalation.category)}
                           </span>
                           {escalation.escalatedAt && (
                             <span className="inline-flex items-center gap-1.5">

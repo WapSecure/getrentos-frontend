@@ -20,7 +20,19 @@ import { Field } from '@sureground/ui';
 import { Input, NumberInput } from '@sureground/ui';
 import { Pagination } from '@sureground/ui';
 import { Select } from '@sureground/ui';
+import { Textarea } from '@sureground/ui';
 import { useToast } from '@sureground/ui';
+import {
+  CARE_TEMPLATES,
+  careTemplateFirstDueDate,
+  careTemplateNotes,
+  findCareTemplate,
+  maintenanceCategoryLabel,
+} from '@sureground/shared';
+import {
+  MaintenanceCategoryIcon,
+  maintenanceCategorySelectOptions,
+} from '@/components/renter/maintenance/MaintenanceCategoryIcon';
 import {
   HomeManagementSectionHeading,
   useCreateRequest,
@@ -38,34 +50,49 @@ import {
 } from '@/services/homeManagementService';
 
 type PlanForm = {
+  templateId: string;
   propertyId: string;
   unitId: string;
   assetId: string;
   title: string;
   category: HomeManagementMaintenanceCategory;
+  notes: string;
   frequencyDays: string;
   nextDueAt: string;
   assignedVendorId: string;
 };
 
 const initialPlanForm: PlanForm = {
+  templateId: '',
   propertyId: '',
   unitId: '',
   assetId: '',
   title: '',
   category: 'OTHER',
+  notes: '',
   frequencyDays: '90',
   nextDueAt: '',
   assignedVendorId: '',
 };
 
-const categories: Array<{ value: HomeManagementMaintenanceCategory; label: string }> = [
-  { value: 'PLUMBING', label: 'Plumbing' },
-  { value: 'ELECTRICAL', label: 'Electrical' },
-  { value: 'INTERNET', label: 'Internet' },
-  { value: 'SECURITY', label: 'Security' },
-  { value: 'APPLIANCES', label: 'Appliances' },
-  { value: 'OTHER', label: 'Other' },
+const categories = maintenanceCategorySelectOptions();
+
+const templateOptions = [
+  { value: '', label: 'Start from scratch' },
+  ...CARE_TEMPLATES.map((template) => ({
+    value: template.id,
+    label: (
+      <span className="inline-flex items-center gap-2">
+        <MaintenanceCategoryIcon
+          category={template.category}
+          className="h-4 w-4 text-muted-foreground"
+        />
+        {template.title}
+        <span className="text-xs text-muted-foreground">{template.frequencyLabel}</span>
+      </span>
+    ),
+    searchText: template.title,
+  })),
 ];
 
 const planStatus: Record<
@@ -197,6 +224,24 @@ export function PreventiveMaintenancePlans({
     },
   });
 
+  const selectedTemplate = findCareTemplate(form.templateId);
+  const applyTemplate = (templateId: string) => {
+    const template = findCareTemplate(templateId);
+    setForm((current) =>
+      template
+        ? {
+            ...current,
+            templateId,
+            title: template.title,
+            category: template.category,
+            frequencyDays: String(template.frequencyDays),
+            nextDueAt: careTemplateFirstDueDate(template),
+            notes: careTemplateNotes(template),
+          }
+        : { ...current, templateId: '' }
+    );
+  };
+
   const submitPlan = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const frequencyDays = Number(form.frequencyDays);
@@ -216,6 +261,7 @@ export function PreventiveMaintenancePlans({
       assetId: form.assetId || undefined,
       title: form.title.trim(),
       category: form.category,
+      notes: form.notes.trim() || undefined,
       frequencyDays,
       nextDueAt: form.nextDueAt,
       assignedVendorId: form.assignedVendorId || undefined,
@@ -299,9 +345,12 @@ export function PreventiveMaintenancePlans({
                         {plan.assignedVendor?.name ? ` · ${plan.assignedVendor.name}` : ''}
                       </p>
                       <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
-                        <span className="rounded-full bg-secondary px-2.5 py-1">
-                          {categories.find((category) => category.value === plan.category)?.label ??
-                            plan.category}
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-2.5 py-1">
+                          <MaintenanceCategoryIcon
+                            category={plan.category}
+                            className="h-3.5 w-3.5"
+                          />
+                          {maintenanceCategoryLabel(plan.category)}
                         </span>
                         <span className="rounded-full bg-secondary px-2.5 py-1">
                           Every {plan.frequencyDays} days
@@ -383,7 +432,26 @@ export function PreventiveMaintenancePlans({
               emergency.
             </DialogDescription>
 
-            <div className="mt-6 grid gap-4 sm:grid-cols-2">
+            <div className="mt-6 rounded-xl border border-border bg-secondary/40 p-4">
+              <Field
+                label="Start from a template"
+                hint={
+                  selectedTemplate
+                    ? `${selectedTemplate.summary} These are typical intervals, so change anything to suit your home.`
+                    : 'Common routines for Nigerian homes. Everything stays editable before you save.'
+                }
+              >
+                <Select
+                  ariaLabel="Care plan template"
+                  value={form.templateId}
+                  placeholder="Start from scratch"
+                  onValueChange={applyTemplate}
+                  options={templateOptions}
+                />
+              </Field>
+            </div>
+
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <Field label="Property" required>
                 <Select
                   ariaLabel="Care plan property"
@@ -502,6 +570,24 @@ export function PreventiveMaintenancePlans({
                   onChange={(value) => setForm((current) => ({ ...current, nextDueAt: value }))}
                 />
               </Field>
+              <div className="sm:col-span-2">
+                <Field
+                  label="Checklist or instructions"
+                  htmlFor="care-plan-notes"
+                  hint="Optional. Copied into each work order this plan raises, so the vendor knows what to do."
+                >
+                  <Textarea
+                    id="care-plan-notes"
+                    rows={4}
+                    maxLength={2000}
+                    value={form.notes}
+                    onChange={(event) =>
+                      setForm((current) => ({ ...current, notes: event.target.value }))
+                    }
+                    placeholder="e.g. Change the oil and filter, check the battery terminals"
+                  />
+                </Field>
+              </div>
               {createVendors.length > 0 && (
                 <Field label="Preferred vendor" hint="Optional">
                   <Select

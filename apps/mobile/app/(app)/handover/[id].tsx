@@ -19,6 +19,7 @@ import {
   useTheme,
   useToast,
 } from '@sureground/ui-native';
+import { maintenanceCategoryLabel, maintenanceStatusLabel } from '@sureground/shared';
 import { qk } from '@/lib/query/keys';
 import {
   DEPOSIT_TREATMENT_LABEL,
@@ -285,8 +286,8 @@ export default function HandoverScreen() {
             ) : (
               snap.openWork.map((w) => (
                 <Text key={w.id} variant="caption" color="mutedForeground">
-                  {w.category.toLowerCase().replace(/_/g, ' ')}: {w.description.slice(0, 80)} (
-                  {w.status.toLowerCase()})
+                  {maintenanceCategoryLabel(w.category)}: {w.description.slice(0, 80)} (
+                  {maintenanceStatusLabel(w.status).toLowerCase()})
                 </Text>
               ))
             )}

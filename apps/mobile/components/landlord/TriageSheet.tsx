@@ -10,6 +10,7 @@ import {
   useTheme,
   useToast,
 } from '@sureground/ui-native';
+import { maintenanceCategoryLabel } from '@sureground/shared';
 import { Sheet } from '@/components/Sheet';
 import { ApiError, errorMessage } from '@/lib/api/client';
 import { landlordApi, type LandlordMaintenance } from '@/lib/api/landlord';
@@ -110,7 +111,7 @@ function TriageBody({ request, onClose, onApplied }: Props & { request: Landlord
   return (
     <View style={{ gap: spacing.md, paddingBottom: spacing.lg }}>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }}>
-        <Badge label={words(t.category)} tone="neutral" />
+        <Badge label={maintenanceCategoryLabel(t.category)} tone="neutral" />
         <Badge label={words(t.urgency)} tone={URGENCY_TONE[t.urgency]} />
         {t.needsVendor ? <Badge label="Needs a vendor" tone="info" /> : null}
       </View>

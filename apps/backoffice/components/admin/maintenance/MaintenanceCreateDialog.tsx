@@ -16,7 +16,11 @@ import {
   Select,
   useToast,
 } from '@sureground/ui';
-import { unwrap } from '@sureground/shared';
+import {
+  MAINTENANCE_CATEGORY_GROUPS,
+  MAINTENANCE_CATEGORY_LABELS,
+  unwrap,
+} from '@sureground/shared';
 import { adminMaintenanceService } from '@/services/adminMaintenanceService';
 
 export type CreateKind = 'vendor' | 'sla' | 'plan';
@@ -207,14 +211,13 @@ export function MaintenanceCreateDialog({
                     <Select
                       value={form.category}
                       onValueChange={set('category')}
-                      options={[
-                        'PLUMBING',
-                        'ELECTRICAL',
-                        'INTERNET',
-                        'SECURITY',
-                        'APPLIANCES',
-                        'OTHER',
-                      ].map((value) => ({ value, label: value }))}
+                      options={MAINTENANCE_CATEGORY_GROUPS.flatMap((group) =>
+                        group.categories.map((value) => ({
+                          value,
+                          label: MAINTENANCE_CATEGORY_LABELS[value],
+                          group: group.label,
+                        }))
+                      )}
                       ariaLabel="Category"
                     />
                   </Field>

@@ -1,10 +1,6 @@
-export type MaintenanceCategory =
-  | 'plumbing'
-  | 'electrical'
-  | 'internet'
-  | 'security'
-  | 'appliances'
-  | 'other';
+import type { MaintenanceCategoryCode, MaintenanceCategoryKey } from '@sureground/shared';
+
+export type MaintenanceCategory = MaintenanceCategoryKey;
 export type MaintenancePriority = 'low' | 'medium' | 'high' | 'urgent';
 export type MaintenanceRequestStatus =
   | 'submitted'
@@ -14,13 +10,7 @@ export type MaintenanceRequestStatus =
   | 'cancelled';
 
 /** The backend sends UPPERCASE enums; keep the raw shape and lowercase-map at the point of use. */
-export type MaintenanceTriageCategory =
-  | 'PLUMBING'
-  | 'ELECTRICAL'
-  | 'INTERNET'
-  | 'SECURITY'
-  | 'APPLIANCES'
-  | 'OTHER';
+export type MaintenanceTriageCategory = MaintenanceCategoryCode;
 
 export type MaintenanceTriageUrgency = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
 

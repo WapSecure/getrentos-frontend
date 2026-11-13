@@ -18,14 +18,13 @@ import {
 import { qk } from '@/lib/query/keys';
 import {
   maintenanceApi,
-  MAINTENANCE_CATEGORIES,
-  MAINTENANCE_CATEGORY_LABEL,
   MAINTENANCE_PRIORITIES,
   MAINTENANCE_PRIORITY_LABEL,
   type MaintenanceCategory,
   type MaintenancePriority,
   type RepairDraft,
 } from '@/lib/api/maintenance';
+import { CategoryPicker } from '@/components/maintenance/CategoryPicker';
 import { pickPhoto } from '@/lib/filePicker';
 import type { PickedFile } from '@/lib/api/documents';
 import { errorMessage } from '@/lib/api/client';
@@ -146,16 +145,12 @@ export default function ReportMaintenance() {
 
         <View style={{ gap: spacing.sm }}>
           <Text variant="bodyStrong">Category</Text>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
-            {MAINTENANCE_CATEGORIES.map((c) => (
-              <Chip
-                key={c}
-                label={MAINTENANCE_CATEGORY_LABEL[c]}
-                selected={category === c}
-                onPress={() => setCategory(c)}
-              />
-            ))}
-          </View>
+          <CategoryPicker<MaintenanceCategory>
+            lowercase
+            size="md"
+            value={category}
+            onChange={setCategory}
+          />
         </View>
 
         <View style={{ gap: spacing.sm }}>

@@ -8,8 +8,13 @@ test('names known categories in sentence case', () => {
   assert.equal(maintenanceCategoryLabel('electrical'), 'Electrical');
 });
 
+test('names the Nigerian service categories in either case', () => {
+  assert.equal(maintenanceCategoryLabel('pest_control'), 'Pest control and fumigation');
+  assert.equal(maintenanceCategoryLabel('GENERATOR_POWER'), 'Generator and power');
+  assert.equal(maintenanceCategoryLabel('PLUMBING'), 'Plumbing');
+});
+
 test('turns unknown categories into readable sentence case', () => {
-  assert.equal(maintenanceCategoryLabel('pest_control'), 'Pest control');
   assert.equal(maintenanceCategoryLabel('ROOF-LEAK'), 'Roof leak');
 });
 

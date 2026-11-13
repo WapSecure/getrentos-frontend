@@ -4,6 +4,7 @@ import { RefreshControl, SectionList, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { History } from '@sureground/icons/native';
+import { humaniseMaintenanceStatusLine } from '@sureground/shared';
 import { EmptyState, ListSkeleton, QueryState, Text, useTheme } from '@sureground/ui-native';
 import { qk } from '@/lib/query/keys';
 import { homeCareApi, type TimelineEvent } from '@/lib/api/homeCare';
@@ -107,7 +108,7 @@ export default function Activity() {
                 <Text variant="bodyStrong">{item.title}</Text>
                 {item.description ? (
                   <Text variant="callout" color="mutedForeground">
-                    {item.description}
+                    {humaniseMaintenanceStatusLine(item.description)}
                   </Text>
                 ) : null}
                 <Text variant="caption" color="mutedForeground">

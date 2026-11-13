@@ -1,34 +1,14 @@
 'use client';
 
-import {
-  UserCog,
-  CheckCircle2,
-  ArrowUpCircle,
-  Wrench,
-  Zap,
-  Wifi,
-  ShieldAlert,
-  Droplets,
-  CalendarClock,
-  Sparkles,
-} from '@sureground/icons';
+import { UserCog, CheckCircle2, ArrowUpCircle, CalendarClock, Sparkles } from '@sureground/icons';
 import { Badge, Button } from '@sureground/ui';
 import { formatRelativeTime } from '@/lib/format';
 import { maintenancePriorityBadges, maintenanceStatusBadges } from '@/lib/statusBadge';
 import { StarRating } from '@/components/landlord/vendors/StarRating';
 import { formatVisit } from '@/components/landlord/vendors/VendorCard';
 import type { LandlordMaintenanceRequest } from '@/types/landlord';
-import type { MaintenanceCategory } from '@/types/maintenance';
+import { maintenanceCategoryIcon } from '@/components/renter/maintenance/MaintenanceCategoryIcon';
 import { RecordIconTile, recordCardClass } from '@/components/shared/records/RecordParts';
-
-export const categoryIcons: Record<MaintenanceCategory, React.ElementType> = {
-  plumbing: Droplets,
-  electrical: Zap,
-  internet: Wifi,
-  security: ShieldAlert,
-  appliances: Wrench,
-  other: Wrench,
-};
 
 interface MaintenanceRequestCardProps {
   request: LandlordMaintenanceRequest;
@@ -57,7 +37,7 @@ export const MaintenanceRequestCard = ({
   isEscalating = false,
   isTriaging = false,
 }: MaintenanceRequestCardProps) => {
-  const CategoryIcon = categoryIcons[request.category];
+  const CategoryIcon = maintenanceCategoryIcon(request.category);
   const priority = maintenancePriorityBadges[request.priority];
   const status = maintenanceStatusBadges[request.status];
   const isResolved = request.status === 'resolved';

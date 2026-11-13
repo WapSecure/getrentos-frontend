@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import { humaniseMaintenanceStatusLine } from '@sureground/shared';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import {
   Activity,
@@ -274,7 +275,9 @@ export function HomeManagementTimeline({
                   description: (
                     <>
                       {event.description && (
-                        <p className="max-w-3xl text-sm leading-6">{event.description}</p>
+                        <p className="max-w-3xl text-sm leading-6">
+                          {humaniseMaintenanceStatusLine(event.description)}
+                        </p>
                       )}
                       <p className="mt-1 flex max-w-full items-center gap-1.5 text-xs">
                         <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
