@@ -8,8 +8,10 @@ import {
   ChevronRight,
   FileSignature,
   Handshake,
+  Megaphone,
   MessageCircleQuestion,
   Plus,
+  Target,
   UserPlus,
   Users,
   Wallet,
@@ -18,6 +20,7 @@ import {
 import {
   Card,
   IconButton,
+  IconTile,
   LinkButton,
   Price,
   PressableScale,
@@ -33,6 +36,7 @@ import {
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import {
   ActivityFeed,
+  AttentionCard,
   QuickActions,
   dashboardGreeting,
 } from '@/components/dashboard/DashboardParts';
@@ -143,12 +147,14 @@ export default function RealtorHome() {
             label: 'Active clients',
             value: d.activeClients,
             subtitle: 'Owners and landlords',
+            Icon: Users,
             onPress: () => router.push('/(app)/realtor-clients'),
           },
           {
             label: 'Live listings',
             value: d.publishedListings,
             subtitle: 'Published on your behalf',
+            Icon: Megaphone,
             onPress: () => router.push('/(app)/(realtor)/listings'),
           },
         ]}
@@ -160,12 +166,14 @@ export default function RealtorHome() {
             label: 'Open leads',
             value: d.activeLeads,
             subtitle: 'In your pipeline',
+            Icon: Target,
             onPress: () => router.push('/(app)/(realtor)/pipeline'),
           },
           {
             label: 'Upcoming viewings',
             value: d.upcomingViewings,
             subtitle: 'Scheduled tours',
+            Icon: CalendarClock,
             onPress: () =>
               router.push({ pathname: '/(app)/(realtor)/pipeline', params: { tab: 'viewings' } }),
           },
@@ -174,6 +182,7 @@ export default function RealtorHome() {
             value: d.offerCount,
             subtitle: 'Awaiting a response',
             attention: d.offerCount > 0,
+            Icon: FileSignature,
             onPress: () => router.push('/(app)/realtor-offers'),
           },
         ]}
@@ -181,7 +190,14 @@ export default function RealtorHome() {
     </>
   ) : null;
 
-  type Nudge = { key: string; Icon: SgIcon; title: string; body: string; go: () => void };
+  type Nudge = {
+    key: string;
+    Icon: SgIcon;
+    title: string;
+    body: string;
+    action: string;
+    go: () => void;
+  };
   const nudges = (
     [
       newOffers
@@ -190,6 +206,7 @@ export default function RealtorHome() {
             Icon: FileSignature,
             title: `${newOffers} new ${newOffers === 1 ? 'offer' : 'offers'}`,
             body: 'Review and counter for your client',
+            action: 'Review offers',
             go: () => router.push('/(app)/realtor-offers'),
           }
         : null,
@@ -199,6 +216,7 @@ export default function RealtorHome() {
             Icon: Users,
             title: `${newLeads} new ${newLeads === 1 ? 'lead' : 'leads'} to contact`,
             body: 'The first reply wins the client',
+            action: 'Contact leads',
             go: () => router.push('/(app)/(realtor)/pipeline'),
           }
         : null,
@@ -208,6 +226,7 @@ export default function RealtorHome() {
             Icon: Handshake,
             title: `${pendingClients} ${pendingClients === 1 ? 'invite' : 'invites'} awaiting approval`,
             body: 'Your client approves it from their account',
+            action: 'See clients',
             go: () => router.push('/(app)/realtor-clients'),
           }
         : null,
@@ -218,32 +237,17 @@ export default function RealtorHome() {
     <Screen refreshing={dashboard.isRefetching} onRefresh={refresh}>
       {header}
 
-      {nudges.map((n) => (
-        <PressableScale
+      {/* The first nudge leads with a blue button; the rest stay as compact cards. */}
+      {nudges.map((n, i) => (
+        <AttentionCard
           key={n.key}
-          onPress={n.go}
-          accessibilityRole="button"
+          Icon={n.Icon}
+          title={n.title}
+          detail={n.body}
           accessibilityLabel={`${n.title}. ${n.body}`}
-        >
-          <Card
-            elevated
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: spacing.md,
-              backgroundColor: colors.accent,
-            }}
-          >
-            <n.Icon size={20} color={colors.primary} />
-            <View style={{ flex: 1 }}>
-              <Text variant="bodyStrong">{n.title}</Text>
-              <Text variant="caption" color="mutedForeground">
-                {n.body}
-              </Text>
-            </View>
-            <ChevronRight size={18} color={colors.primary} />
-          </Card>
-        </PressableScale>
+          actionLabel={i === 0 ? n.action : undefined}
+          onPress={n.go}
+        />
       ))}
 
       <View style={{ gap: spacing.md }}>
@@ -269,7 +273,7 @@ export default function RealtorHome() {
           ))
         ) : (
           <Card style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-            <CalendarClock size={20} color={colors.mutedForeground} />
+            <IconTile Icon={CalendarClock} tone="neutral" />
             <Text variant="callout" color="mutedForeground" style={{ flex: 1 }}>
               No viewings today.
             </Text>
@@ -357,7 +361,7 @@ function Earnings({
         accessibilityLabel="Commission tracking and payouts are part of Pro. See what’s included."
       >
         <Card elevated style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-          <Wallet size={20} color={colors.primary} />
+          <IconTile Icon={Wallet} />
           <View style={{ flex: 1 }}>
             <Text variant="bodyStrong">Get paid your commission here</Text>
             <Text variant="caption" color="mutedForeground">
@@ -383,7 +387,8 @@ function Earnings({
         accessibilityLabel={accessibilityLabel}
         style={{ flex: 1, gap: spacing.xs }}
       >
-        <View>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+          <IconTile Icon={Wallet} size="sm" />
           <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
             Commission ready to withdraw
           </Text>

@@ -4,8 +4,12 @@ import { View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import {
   BarChart3,
+  BadgeCheck,
   Bell,
+  Building2,
+  CheckCircle2,
   DoorOpen,
+  Megaphone,
   FileSignature,
   MessageCircleQuestion,
   Plus,
@@ -96,17 +100,20 @@ export default function OwnerHome() {
             label: 'Properties',
             value: d.totalProperties,
             subtitle: 'Across your portfolio',
+            Icon: Building2,
             onPress: () => router.push('/(app)/(owner)/properties'),
           },
           {
             label: 'Verified',
             value: d.verifiedProperties,
+            Icon: BadgeCheck,
             onPress: () => router.push('/(app)/(owner)/properties'),
           },
           {
             label: 'Completed sales',
             value: d.completedSales,
             subtitle: 'Lifetime',
+            Icon: CheckCircle2,
             onPress: () => router.push('/(app)/owner-transactions'),
           },
         ]}
@@ -118,6 +125,7 @@ export default function OwnerHome() {
             label: 'Live listings',
             value: d.activeListings,
             subtitle: 'Published for sale',
+            Icon: Megaphone,
             onPress: () => router.push('/(app)/(owner)/properties'),
           },
           {
@@ -125,12 +133,14 @@ export default function OwnerHome() {
             value: d.pendingOffers,
             subtitle: 'Awaiting a response',
             attention: d.pendingOffers > 0,
+            Icon: FileSignature,
             onPress: () => router.push('/(app)/(owner)/offers'),
           },
           {
             label: 'Buyer leads',
             value: leads.data?.total ?? '—',
             subtitle: 'Viewings, offers and enquiries',
+            Icon: Users,
             onPress: () => router.push('/(app)/owner-leads'),
           },
         ]}
@@ -180,6 +190,7 @@ export default function OwnerHome() {
               label="Listed for sale"
               amount={0}
               hint="Asking prices on your sale listings"
+              Icon={Wallet}
               loading
               visible={showMoney}
               onToggle={toggleMoney}
@@ -198,6 +209,8 @@ export default function OwnerHome() {
             title={`${d.pendingOffers} ${d.pendingOffers === 1 ? 'offer' : 'offers'} waiting for you`}
             detail="Accept, counter or decline"
             accessibilityLabel={`${d.pendingOffers} ${d.pendingOffers === 1 ? 'offer is' : 'offers are'} waiting for your answer`}
+            eyebrow="Offers"
+            actionLabel="Review offers"
             onPress={() => router.push('/(app)/(owner)/offers')}
           />
         ) : null}
@@ -206,6 +219,7 @@ export default function OwnerHome() {
           label="Listed for sale"
           amount={d?.portfolioValue ?? 0}
           hint="Asking prices on your sale listings"
+          Icon={Wallet}
           loading={false}
           visible={showMoney}
           onToggle={toggleMoney}

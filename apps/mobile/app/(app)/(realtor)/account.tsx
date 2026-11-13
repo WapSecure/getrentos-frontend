@@ -23,28 +23,19 @@ import {
   Landmark,
   MessageCircle,
 } from '@sureground/icons/native';
-import {
-  Avatar,
-  Button,
-  Divider,
-  Screen,
-  Text,
-  ThemeToggle,
-  useTheme,
-} from '@sureground/ui-native';
+import { Button, Divider, Screen, Text, ThemeToggle, useTheme } from '@sureground/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
-import { useIdentityVerification } from '@/hooks/useIdentityVerification';
 import { useTrustItems } from '@/components/account/useTrustItems';
 import { useProSettings } from '@/hooks/useProSettings';
+import { ProfileCard } from '@/components/account/AccountParts';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
 
 const go = (href: Href) => () => router.push(href);
 
 export default function RealtorAccount() {
-  const { profile, signOut } = useAuth();
+  const { signOut } = useAuth();
   const { colors, spacing } = useTheme();
-  const { verified } = useIdentityVerification();
   const trustItems = useTrustItems('realtor', { audience: 'clients' });
   const { licenseLabel, inAgency } = useProSettings();
 
@@ -204,33 +195,7 @@ export default function RealtorAccount() {
 
   return (
     <Screen>
-      <View
-        accessible
-        accessibilityRole="header"
-        accessibilityLabel={[
-          profile?.legalName ?? 'Sureground realtor',
-          profile?.email,
-          verified ? 'verified' : 'not verified',
-        ]
-          .filter(Boolean)
-          .join(', ')}
-        style={{ alignItems: 'center', gap: spacing.xs, marginTop: spacing.lg }}
-      >
-        <Avatar name={profile?.legalName} size={76} />
-        <Text variant="heading" style={{ marginTop: spacing.sm }}>
-          {profile?.legalName ?? 'Sureground realtor'}
-        </Text>
-        <Text variant="callout" color="mutedForeground">
-          {profile?.email ?? profile?.phone ?? ''}
-        </Text>
-        <Text
-          variant="caption"
-          color="primary"
-          style={{ fontWeight: '700', marginTop: spacing.xs }}
-        >
-          Realtor
-        </Text>
-      </View>
+      <ProfileCard role="Realtor" fallbackName="Sureground realtor" />
 
       <WorkspaceSwitcher />
 

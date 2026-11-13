@@ -1,9 +1,11 @@
 import { useState, type ReactNode } from 'react';
 import { View } from 'react-native';
-import { ChevronRight, type SgIcon } from '@sureground/icons/native';
+import { ArrowRight, ChevronRight, History, type SgIcon } from '@sureground/icons/native';
 import {
+  Button,
   Card,
   ErrorState,
+  IconTile,
   LinkButton,
   PressableScale,
   Price,
@@ -24,6 +26,13 @@ export function dashboardGreeting(now = new Date()): string {
 
 type AttentionTone = 'info' | 'warning' | 'danger';
 
+const ATTENTION_TILE = { info: 'primary', warning: 'warning', danger: 'danger' } as const;
+
+/**
+ * A notice that needs the user. Plain, the whole card opens the screen. Given an `actionLabel`, it is
+ * the page's lead item: a larger card with one blue button, and the card itself is not pressable,
+ * since a button inside a button breaks web and screen readers.
+ */
 export function AttentionCard({
   Icon,
   title,
@@ -31,6 +40,8 @@ export function AttentionCard({
   tone = 'info',
   onPress,
   accessibilityLabel,
+  actionLabel,
+  eyebrow,
 }: {
   Icon: SgIcon;
   title: string;
@@ -38,14 +49,58 @@ export function AttentionCard({
   tone?: AttentionTone;
   onPress: () => void;
   accessibilityLabel?: string;
+  /** Makes this the lead card, with a primary button of this label. */
+  actionLabel?: string;
+  /** A short kicker above the title on the lead card, such as "Overdue". */
+  eyebrow?: string;
 }) {
   const { colors, spacing } = useTheme();
-  const map: Record<AttentionTone, { fg: string; bg: string }> = {
-    info: { fg: colors.primary, bg: colors.accent },
-    warning: { fg: colors.warning, bg: colors.warningSubtle },
-    danger: { fg: colors.destructive, bg: colors.destructiveSubtle },
-  };
-  const c = map[tone];
+  const accent = {
+    info: colors.primary,
+    warning: colors.warning,
+    danger: colors.destructive,
+  }[tone];
+  const detailNode =
+    typeof detail === 'string' ? (
+      <Text variant="caption" color="mutedForeground" numberOfLines={3}>
+        {detail}
+      </Text>
+    ) : (
+      detail
+    );
+  const frame = { borderLeftWidth: 3, borderLeftColor: accent };
+
+  if (actionLabel) {
+    return (
+      <Card elevated style={[frame, { gap: spacing.md }]}>
+        <View style={{ flexDirection: 'row', gap: spacing.md }}>
+          <IconTile Icon={Icon} tone={ATTENTION_TILE[tone]} size="lg" />
+          <View style={{ flex: 1, gap: 3 }}>
+            {eyebrow ? (
+              <Text
+                variant="caption"
+                style={{ color: accent, fontWeight: '700', letterSpacing: 0.6 }}
+              >
+                {eyebrow.toUpperCase()}
+              </Text>
+            ) : null}
+            <Text variant="bodyStrong" numberOfLines={2}>
+              {title}
+            </Text>
+            {detailNode}
+          </View>
+        </View>
+        <Button
+          label={actionLabel}
+          size="sm"
+          onPress={onPress}
+          accessibilityLabel={`${actionLabel}: ${title}`}
+          iconRight={<ArrowRight size={16} color={colors.primaryForeground} />}
+        />
+      </Card>
+    );
+  }
+
   return (
     <PressableScale
       onPress={onPress}
@@ -54,25 +109,15 @@ export function AttentionCard({
     >
       <Card
         elevated
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.md,
-          backgroundColor: c.bg,
-        }}
+        padding={spacing.lg}
+        style={[frame, { flexDirection: 'row', alignItems: 'center', gap: spacing.md }]}
       >
-        <Icon size={20} color={c.fg} />
-        <View style={{ flex: 1 }}>
+        <IconTile Icon={Icon} tone={ATTENTION_TILE[tone]} />
+        <View style={{ flex: 1, gap: 2 }}>
           <Text variant="bodyStrong">{title}</Text>
-          {typeof detail === 'string' ? (
-            <Text variant="caption" color="mutedForeground">
-              {detail}
-            </Text>
-          ) : (
-            detail
-          )}
+          {detailNode}
         </View>
-        <ChevronRight size={18} color={c.fg} />
+        <ChevronRight size={18} color={accent} />
       </Card>
     </PressableScale>
   );
@@ -87,6 +132,7 @@ export function PortfolioCard({
   visible,
   onToggle,
   spokenLabel,
+  Icon,
   children,
 }: {
   label: string;
@@ -96,6 +142,8 @@ export function PortfolioCard({
   visible: boolean;
   onToggle: () => void;
   spokenLabel?: string;
+  /** A glyph on a blue tile beside the label. */
+  Icon?: SgIcon;
   children?: ReactNode;
 }) {
   const { spacing } = useTheme();
@@ -116,8 +164,17 @@ export function PortfolioCard({
         accessibilityState={{ busy: loading }}
         style={{ gap: spacing.xs }}
       >
-        <View style={{ minHeight: 44, justifyContent: 'center', paddingRight: 48 }}>
-          <Text variant="caption" color="mutedForeground">
+        <View
+          style={{
+            minHeight: 44,
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: spacing.sm,
+            paddingRight: 48,
+          }}
+        >
+          {Icon ? <IconTile Icon={Icon} size="sm" /> : null}
+          <Text variant="caption" color="mutedForeground" style={{ flexShrink: 1 }}>
             {label}
           </Text>
         </View>
@@ -176,14 +233,30 @@ export function QuickActions({ actions }: { actions: QuickActionItem[] }) {
               backgroundColor: colors.card,
             }}
           >
-            <Icon size={18} color={colors.primary} />
+            <IconTile Icon={Icon} size="sm" />
             <Text variant="callout" style={{ flex: 1, fontWeight: '600' }}>
               {label}
             </Text>
             {badge ? (
-              <Text variant="caption" color="primary" style={{ fontWeight: '800' }}>
-                {badge}
-              </Text>
+              <View
+                style={{
+                  minWidth: 22,
+                  height: 22,
+                  paddingHorizontal: 6,
+                  borderRadius: radius.full,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: colors.primary,
+                }}
+              >
+                <Text
+                  variant="caption"
+                  maxFontSizeMultiplier={1.4}
+                  style={{ color: colors.primaryForeground, fontWeight: '800', fontSize: 12 }}
+                >
+                  {badge}
+                </Text>
+              </View>
             ) : null}
           </PressableScale>
         ))}
@@ -238,9 +311,12 @@ export function ActivityFeed({
           ))}
         </View>
       ) : items.length === 0 ? (
-        <Text variant="callout" color="mutedForeground">
-          {emptyText}
-        </Text>
+        <Card style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+          <IconTile Icon={History} tone="neutral" />
+          <Text variant="callout" color="mutedForeground" style={{ flex: 1 }}>
+            {emptyText}
+          </Text>
+        </Card>
       ) : (
         <Card elevated padding="none">
           {shown.map((a, i) => (
@@ -252,24 +328,14 @@ export function ActivityFeed({
                 flexDirection: 'row',
                 alignItems: 'center',
                 gap: spacing.md,
+                minHeight: 56,
                 paddingHorizontal: spacing.lg,
                 paddingVertical: spacing.sm,
                 borderTopWidth: i ? 1 : 0,
                 borderTopColor: colors.border,
               }}
             >
-              <View
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: radius.sm,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: colors.secondary,
-                }}
-              >
-                <a.Icon size={15} color={colors.foreground} />
-              </View>
+              <IconTile Icon={a.Icon} size="sm" />
               <View style={{ flex: 1, gap: 2 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm }}>
                   <Text variant="callout" numberOfLines={1} style={{ flex: 1, fontWeight: '600' }}>

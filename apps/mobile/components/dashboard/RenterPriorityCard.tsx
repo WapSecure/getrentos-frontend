@@ -1,4 +1,3 @@
-import { View } from 'react-native';
 import { router } from 'expo-router';
 import {
   AlertCircle,
@@ -9,7 +8,7 @@ import {
   Wallet,
   type SgIcon,
 } from '@sureground/icons/native';
-import { Button, Card, Text, useTheme } from '@sureground/ui-native';
+import { AttentionCard } from './DashboardParts';
 import { formatDate, formatNaira } from '@/lib/format';
 import type { Payment, PaymentsSummary } from '@/lib/api/payments';
 import type { RenterApplication } from '@/lib/api/applications';
@@ -136,48 +135,16 @@ export function pickRenterPriority(i: RenterPriorityInput): RenterPriority | nul
 }
 
 export function RenterPriorityCard({ priority }: { priority: RenterPriority }) {
-  const { colors, spacing, radius } = useTheme();
-  const accent = priority.tone === 'urgent' ? colors.destructive : colors.primary;
-  const { Icon } = priority;
-  const go = () => router.push(priority.href as never);
-
-  // One action button, not a pressable card around it: a button inside a button breaks web and screen readers.
+  // The lead card: one blue button for every priority, red only in the accent when it is overdue.
   return (
-    <Card elevated>
-      <View style={{ flexDirection: 'row', gap: spacing.md }}>
-        <View
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: radius.md,
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: accent + '1f',
-          }}
-        >
-          <Icon size={20} color={accent} />
-        </View>
-        <View style={{ flex: 1, gap: 3 }}>
-          <Text variant="caption" style={{ color: accent, fontWeight: '700', letterSpacing: 0.6 }}>
-            {priority.eyebrow.toUpperCase()}
-          </Text>
-          <Text variant="bodyStrong" numberOfLines={2}>
-            {priority.title}
-          </Text>
-          <Text variant="caption" color="mutedForeground" numberOfLines={3}>
-            {priority.detail}
-          </Text>
-        </View>
-      </View>
-      <View style={{ marginTop: spacing.md }}>
-        <Button
-          label={priority.action}
-          size="sm"
-          variant={priority.tone === 'urgent' ? 'primary' : 'secondary'}
-          onPress={go}
-          accessibilityLabel={`${priority.action}: ${priority.title}`}
-        />
-      </View>
-    </Card>
+    <AttentionCard
+      Icon={priority.Icon}
+      tone={priority.tone === 'urgent' ? 'danger' : 'info'}
+      eyebrow={priority.eyebrow}
+      title={priority.title}
+      detail={priority.detail}
+      actionLabel={priority.action}
+      onPress={() => router.push(priority.href as never)}
+    />
   );
 }

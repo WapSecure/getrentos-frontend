@@ -20,7 +20,6 @@ import {
   LogOut,
   MessageCircle,
   ShieldAlert,
-  ShieldCheck,
   ShieldEllipsis,
   Star,
   UserRound,
@@ -33,10 +32,10 @@ import {
   UserCheck,
 } from '@sureground/icons/native';
 import {
-  Avatar,
   Button,
   Card,
   Divider,
+  IconTile,
   Screen,
   Text,
   ThemeToggle,
@@ -45,6 +44,7 @@ import {
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useIdentityVerification } from '@/hooks/useIdentityVerification';
 import { useTrustItems } from '@/components/account/useTrustItems';
+import { ProfileCard } from '@/components/account/AccountParts';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
 import { financingApi } from '@/lib/api/financing';
@@ -53,7 +53,7 @@ import { qk } from '@/lib/query/keys';
 const go = (href: Href) => () => router.push(href);
 
 export default function Account() {
-  const { profile, signOut } = useAuth();
+  const { signOut } = useAuth();
   const { colors, spacing } = useTheme();
   const { verified, known: identityKnown } = useIdentityVerification();
   const trustItems = useTrustItems('renter', { audience: 'landlords' });
@@ -259,36 +259,7 @@ export default function Account() {
 
   return (
     <Screen>
-      <View
-        accessible
-        accessibilityRole="header"
-        accessibilityLabel={[
-          profile?.legalName ?? 'Sureground user',
-          profile?.email ?? profile?.phone,
-          verified ? 'verified account' : 'not verified',
-        ]
-          .filter(Boolean)
-          .join(', ')}
-        style={{ alignItems: 'center', gap: spacing.xs, marginTop: spacing.lg }}
-      >
-        <Avatar name={profile?.legalName} size={76} />
-        <Text variant="heading" style={{ marginTop: spacing.sm }}>
-          {profile?.legalName ?? 'Sureground user'}
-        </Text>
-        <Text variant="callout" color="mutedForeground">
-          {profile?.email ?? profile?.phone ?? ''}
-        </Text>
-        {verified ? (
-          <View
-            style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: spacing.xs }}
-          >
-            <ShieldCheck size={14} color={colors.success} />
-            <Text variant="caption" style={{ color: colors.success, fontWeight: '700' }}>
-              Verified renter
-            </Text>
-          </View>
-        ) : null}
-      </View>
+      <ProfileCard role="Renter" fallbackName="Sureground user" verifiedLabel="Verified renter" />
 
       {identityKnown && !verified ? (
         <Pressable
@@ -305,7 +276,7 @@ export default function Account() {
               borderColor: colors.warning,
             }}
           >
-            <ShieldAlert size={22} color={colors.warning} />
+            <IconTile Icon={ShieldAlert} tone="warning" />
             <View style={{ flex: 1 }}>
               <Text variant="bodyStrong">Verify your identity</Text>
               <Text variant="caption" color="mutedForeground">

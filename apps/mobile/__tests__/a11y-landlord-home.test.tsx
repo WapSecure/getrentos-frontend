@@ -91,4 +91,27 @@ describe('landlord home', () => {
     expect(screen.getByLabelText('Annual rent roll hidden')).toBeTruthy();
     expectAccessiblePressables(root());
   });
+
+  it('the lead attention card offers one named blue button, not a button inside a button', async () => {
+    const onPress = jest.fn();
+    await renderWithTheme(
+      <AttentionCard
+        Icon={AlertTriangle}
+        tone="danger"
+        eyebrow="Rent to collect"
+        title="2 rent payments outstanding"
+        detail="Follow up with your tenants"
+        actionLabel="See rent payments"
+        onPress={onPress}
+      />
+    );
+    const pressables = expectAccessiblePressables(root());
+    expect(pressables).toHaveLength(1);
+    const button = screen.getByRole('button', {
+      name: 'See rent payments: 2 rent payments outstanding',
+    });
+    expect(touchTarget(button).height).toBeGreaterThanOrEqual(MIN_TOUCH_TARGET);
+    await fireEvent.press(button);
+    expect(onPress).toHaveBeenCalledTimes(1);
+  });
 });
